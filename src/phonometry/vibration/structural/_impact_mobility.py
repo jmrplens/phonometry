@@ -90,7 +90,8 @@ import math
 import warnings
 from collections.abc import Iterable
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -110,7 +111,7 @@ from ...io._resolve import SignalInput, resolve_fs, resolve_pair_fs, resolve_sam
 from .mechanical_mobility import MobilityResult, convert_frf, random_error_percent
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
@@ -517,6 +518,11 @@ class DoubleHitCheck(OwnsArrays):
     :ivar threshold_ratio: The fraction of the largest peak an excursion had
         to exceed to count as an impact.
     """
+
+    #: The impact indices are sample positions, not levels.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"impact_indices": ""}
+    )
 
     force: np.ndarray
     fs: float

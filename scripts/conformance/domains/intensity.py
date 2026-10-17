@@ -1565,7 +1565,7 @@ def _chk_iso8297_point_source() -> Outcome:
     )
     return numeric(
         expected,
-        float(res.sound_power_level_db[0]) - source_lw,
+        float(res.sound_power_level[0]) - source_lw,
         1e-5,
         unit="dB",
         places=6,
@@ -1629,7 +1629,7 @@ def _chk_workstation_level() -> Outcome:
     readings = np.array([77.5, 76.0, 77.2, 77.7, 75.9])
     mean = float(10.0 * np.log10(np.mean(np.power(10.0, readings / 10.0))))
     level = ph.emission.emission_sound_pressure_level(
-        mean, local_correction_db=_annex_b_example_2_k3()
+        mean, local_correction=_annex_b_example_2_k3()
     )
     return numeric(73.2, float(level), 0.05, unit="dB", places=3)
 

@@ -452,7 +452,7 @@ Every limit is read from a published, read-only table (`LEVEL_ACCEPTANCE_LIMITS_
 maxima beside them). Classes LS and 2 are specified from 160 Hz to 1.25 kHz only,
 and at any other nominal frequency the verifier refuses the class (5.1.2). A
 class LS/M or 1/M pistonphone takes the manufacturer's static-pressure correction
-as `static_pressure_correction_db`, added to the measured level (5.3.2, B.4.3.2),
+as `static_pressure_correction`, added to the measured level (5.3.2, B.4.3.2),
 and every other calibrator is refused one (5.1.7).
 `environmental_test="abbreviated"` applies the reduced limits of A.6.4.7, where
 a failure calls for the full environmental tests rather than a non-conformance.
@@ -1713,7 +1713,7 @@ phi = np.arange(0, 360, 10)
 levels = 94.0 + np.vstack((pattern_db(phi, 0.785),    # X-Y plane (h), 8 kHz
                            pattern_db(phi, 0.98)))    # X-Z plane (v), the case narrows it
 d = metrology.directivity_factor(levels)
-print(round(d.gamma, 3), round(d.directivity_index_db, 2))   # 1.845 2.66
+print(round(d.gamma, 3), round(d.directivity_index, 2))   # 1.845 2.66
 d.plot()                  # the polar response, one curve per plane
 d.plot(view="weights")    # K(phi) of each reading
 ```
@@ -1726,14 +1726,14 @@ each, every reading weighing the same (Formula (A.5)):
 
 ```python
 a = metrology.axisymmetric_directivity_factor(levels[0])
-print(round(a.directivity_index_db, 2))   # 2.45
+print(round(a.directivity_index, 2))   # 2.45
 
 horizontal, vertical = metrology.equal_area_incidence_angles()
 print(horizontal[:6].round(1))   # [ 0.  32.6 50.8 65.1 77.8 90. ]
 e = metrology.equal_area_directivity_factor(
     94.0 + pattern_db(horizontal, 0.785), 94.0 + pattern_db(vertical, 0.98)
 )
-print(round(e.directivity_index_db, 2))   # 2.66
+print(round(e.directivity_index, 2))   # 2.66
 ```
 
 The X-Y plane alone has the 2,45 dB Table B.1 prints for the microphone at
@@ -1755,17 +1755,17 @@ bands = sorted(metrology.IEC61183_TABLE_B1)   # the 30 preferred frequencies, 25
 def meter(frequency_hz):
     """The synthetic meter at one band: the X-Y plane has the 10 lg gamma Table B.1
     prints for the microphone, and the case narrows the X-Z plane."""
-    target = metrology.IEC61183_TABLE_B1[frequency_hz].directivity_index_db
+    target = metrology.IEC61183_TABLE_B1[frequency_hz].directivity_index
     n = 0.98 / (10 ** (-target / 10) - 0.02) - 1   # the exponent with that index
     return metrology.directivity_factor(
         94.0 + np.vstack((pattern_db(phi, n), pattern_db(phi, 1.25 * n))))
 
-index = [meter(f).directivity_index_db for f in bands]
+index = [meter(f).directivity_index for f in bands]
 g_f = -10 * np.log10(1 + (np.array(bands) / 25000) ** 4)   # L_rd - L_o at each band
 r = metrology.random_incidence_sensitivity(bands, g_f, index)
 shown = np.isin(r.frequencies, [1000, 4000, 8000, 16000])
-print(r.correction_db[shown].round(2))              # [-0.06 -0.95 -2.66 -5.62]
-print(r.random_incidence_level_db[shown].round(2))  # [-0.06 -0.95 -2.71 -6.29]
+print(r.correction[shown].round(2))              # [-0.06 -0.95 -2.66 -5.62]
+print(r.random_incidence_level[shown].round(2))  # [-0.06 -0.95 -2.71 -6.29]
 r.plot()
 r.plot(view="correction")
 ```
@@ -1799,18 +1799,18 @@ level is 0 dB the field plus its `Delta_DP`:
 
 ```python
 print(metrology.IEC61183_TABLE_B1[8000.0])
-# ReferenceMicrophoneRow(directivity_index_db=2.45, diffuse_pressure_difference_db=1.2)
+# ReferenceMicrophoneRow(directivity_index=2.45, diffuse_pressure_difference_db=1.2)
 
 delta_dp = np.array([metrology.IEC61183_TABLE_B1[f].diffuse_pressure_difference_db
                      for f in bands])
 dd = metrology.diffuse_field_sensitivity(
     bands,
-    80.0 + r.random_incidence_level_db,  # L_D, the meter under test
+    80.0 + r.random_incidence_level,  # L_D, the meter under test
     80.0 + delta_dp,                     # L_D,ref, a pressure-calibrated LS2aP
-    reference_pressure_level_db=0.0,     # G_P,ref; Delta_DP from Table B.1
+    reference_pressure_level=0.0,     # G_P,ref; Delta_DP from Table B.1
 )
-print(dd.reference_correction_db[shown])            # [0.   0.25 1.2  3.05]
-print(dd.diffuse_field_level_db[shown].round(2))    # [-0.06 -0.95 -2.71 -6.29]
+print(dd.reference_correction[shown])            # [0.   0.25 1.2  3.05]
+print(dd.diffuse_field_level[shown].round(2))    # [-0.06 -0.95 -2.71 -6.29]
 dd.plot()
 ```
 
@@ -1896,9 +1896,9 @@ tolerance = np.minimum(upper, -lower)[band]                # the narrower side a
 x3 = f3 / 1000
 response = 0.4 + 0.12 * np.cos(3 * np.log(x3)) - 0.3 * (x3 / 8) ** 2   # indication less field, dB
 a = metrology.adjustment_value(
-    f3, 94.0 + response, 94.35, calibrator_level_db=94.0, tolerance_db=tolerance
+    f3, 94.0 + response, 94.35, calibrator_level=94.0, tolerance_db=tolerance
 )
-print(round(a.sensitivity_adjustment_db, 2), round(a.adjustment_db, 2))  # -0.37 0.02
+print(round(a.sensitivity_adjustment, 2), round(a.adjustment, 2))  # -0.37 0.02
 print(round(a.check_frequency_offset_db, 2))                           # 0.15
 ```
 
@@ -1940,9 +1940,9 @@ c = metrology.sound_calibrator_correction(
     94.0 + c_ff_rm,                # L_ind2: the reference in its place
     94.0 + pressure + spread / 2,  # L_ind3: the calibrator on the meter
     94.0,                          # L_ind4: the calibrator on the reference
-    reference_free_field_correction_db=c_ff_rm,
+    reference_free_field_correction=c_ff_rm,
 )
-print(c.correction_db.round(2))  # [-0.04 -0.09 -0.1  -0.05  0.05  0.23  0.63  1.72  4.95]
+print(c.correction.round(2))  # [-0.04 -0.09 -0.1  -0.05  0.05  0.23  0.63  1.72  4.95]
 print(c.clause, c.formula)       # 12 D.7
 ```
 
@@ -1953,8 +1953,8 @@ the range clause 12 judges, is taken over the three microphones' mean
 corrections and not over the calibrators as well.
 
 `metrology.comparison_coupler_correction` names its two readings in the
-coupler by what each is of, `slm_coupler_level_db` and
-`reference_coupler_level_db`, because Formulas (E.4) to (E.6) exchange the two
+coupler by what each is of, `slm_coupler_level` and
+`reference_coupler_level`, because Formulas (E.4) to (E.6) exchange the two
 labels Figure E.1 defines (an [erratum](https://docs.jmrp.io/phonometry/reference/errata/)).
 `metrology.electrostatic_actuator_correction` returns the correction of
 Formula (F.13), normalised to the calibration check frequency, where it is
@@ -2002,7 +2002,7 @@ clause 15 n) and o) as a one-page fiche:
 
 ```python
 v = metrology.verify_correction_uncertainty(
-    f, 0.12 + 0.02 * x**0.8, clause=c.clause, correction_db=c.correction_db,
+    f, 0.12 + 0.02 * x**0.8, clause=c.clause, correction=c.correction,
     correction_range_db=c.range_db,
 )
 print(v.passes)   # True
@@ -2164,7 +2164,7 @@ record = metrology.SoundLevelMeterPeriodicMeasurements(
     # indicated overload and under-range.
     linear_operating_range_db=[40.0, 120.0],
     linearity_starting_point_db=94.0,
-    linearity_levels_db=[
+    linearity_levels=[
         94.0, 99.0, 104.0, 109.0, 114.0, 119.0, 120.0, 121.0, 122.0,
         89.0, 84.0, 79.0, 74.0, 69.0, 64.0, 59.0, 54.0, 49.0, 44.0,
         43.0, 42.0, 41.0, 40.0, 39.0, 38.0,
@@ -2175,8 +2175,8 @@ record = metrology.SoundLevelMeterPeriodicMeasurements(
         0.2, 0.3, 0.3, 0.4, 0.5, 0.6,
     ],
     linearity_uncertainties_db=[0.18] * 25,
-    linearity_overload_level_db=123.0,
-    linearity_under_range_level_db=37.0,
+    linearity_overload_level=123.0,
+    linearity_under_range_level=37.0,
     # Clause 17 at 1 kHz: 5 dB above the first under-range indication on
     # both level ranges, the reference one first (17.4), and the reference
     # level held on the other one (17.3).
@@ -2194,11 +2194,11 @@ record = metrology.SoundLevelMeterPeriodicMeasurements(
         "E": [0.2, 0.2, 0.25],
     },
     # Clause 19: one cycle at 8 kHz, then the two half cycles at 500 Hz.
-    c_peak_differences_db=[3.9, 2.5, 2.2],
+    c_peak_differences=[3.9, 2.5, 2.2],
     c_peak_uncertainties_db=[0.3, 0.3, 0.3],
     c_peak_overload_indicated=False,
     # Clauses 20 and 21.
-    overload_difference_db=0.4,
+    overload_difference=0.4,
     overload_uncertainty_db=0.2,
     overload_latched=True,
     high_level_stability_db=0.03,
@@ -2279,7 +2279,7 @@ basic = dataclasses.replace(
     record,
     range_linearity_deviations_db=None,
     range_linearity_uncertainties_db=None,
-    c_peak_differences_db=None,
+    c_peak_differences=None,
     c_peak_uncertainties_db=None,
     c_peak_overload_indicated=None,
 )
@@ -2306,7 +2306,7 @@ print(short.passes, short.incomplete[0][0])  # False 18
 
 one_step = dataclasses.replace(
     record,
-    linearity_levels_db=[94.0],
+    linearity_levels=[94.0],
     linearity_deviations_db=[0.0],
     linearity_uncertainties_db=[0.18],
 )

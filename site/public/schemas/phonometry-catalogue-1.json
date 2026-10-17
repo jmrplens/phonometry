@@ -2716,28 +2716,28 @@
             }
           ]
         },
-        "transmission_loss_63_db": {
+        "transmission_loss_63": {
           "$ref": "#/$defs/number"
         },
-        "transmission_loss_125_db": {
+        "transmission_loss_125": {
           "$ref": "#/$defs/number"
         },
-        "transmission_loss_250_db": {
+        "transmission_loss_250": {
           "$ref": "#/$defs/number"
         },
-        "transmission_loss_500_db": {
+        "transmission_loss_500": {
           "$ref": "#/$defs/number"
         },
-        "transmission_loss_1000_db": {
+        "transmission_loss_1000": {
           "$ref": "#/$defs/number"
         },
-        "transmission_loss_2000_db": {
+        "transmission_loss_2000": {
           "$ref": "#/$defs/number"
         },
-        "transmission_loss_4000_db": {
+        "transmission_loss_4000": {
           "$ref": "#/$defs/number"
         },
-        "transmission_loss_8000_db": {
+        "transmission_loss_8000": {
           "$ref": "#/$defs/number"
         },
         "direction": {
@@ -2841,14 +2841,14 @@
         "second_side_mm",
         "shape",
         "sheet_metal_gauge",
-        "transmission_loss_1000_db",
-        "transmission_loss_125_db",
-        "transmission_loss_2000_db",
-        "transmission_loss_250_db",
-        "transmission_loss_4000_db",
-        "transmission_loss_500_db",
-        "transmission_loss_63_db",
-        "transmission_loss_8000_db",
+        "transmission_loss_1000",
+        "transmission_loss_125",
+        "transmission_loss_2000",
+        "transmission_loss_250",
+        "transmission_loss_4000",
+        "transmission_loss_500",
+        "transmission_loss_63",
+        "transmission_loss_8000",
         "variant",
         "diameter_cm",
         "diameter_m",
@@ -2871,14 +2871,14 @@
         "duct_length_m",
         "first_side_mm",
         "second_side_mm",
-        "transmission_loss_1000_db",
-        "transmission_loss_125_db",
-        "transmission_loss_2000_db",
-        "transmission_loss_250_db",
-        "transmission_loss_4000_db",
-        "transmission_loss_500_db",
-        "transmission_loss_63_db",
-        "transmission_loss_8000_db",
+        "transmission_loss_1000",
+        "transmission_loss_125",
+        "transmission_loss_2000",
+        "transmission_loss_250",
+        "transmission_loss_4000",
+        "transmission_loss_500",
+        "transmission_loss_63",
+        "transmission_loss_8000",
         "diameter_cm",
         "diameter_m",
         "diameter_um",
@@ -3421,76 +3421,76 @@
             }
           ]
         },
-        "impact_improvement_50_db": {
+        "impact_improvement_50": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_63_db": {
+        "impact_improvement_63": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_80_db": {
+        "impact_improvement_80": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_100_db": {
+        "impact_improvement_100": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_125_db": {
+        "impact_improvement_125": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_160_db": {
+        "impact_improvement_160": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_200_db": {
+        "impact_improvement_200": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_250_db": {
+        "impact_improvement_250": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_315_db": {
+        "impact_improvement_315": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_400_db": {
+        "impact_improvement_400": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_500_db": {
+        "impact_improvement_500": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_630_db": {
+        "impact_improvement_630": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_800_db": {
+        "impact_improvement_800": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_1000_db": {
+        "impact_improvement_1000": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_1250_db": {
+        "impact_improvement_1250": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_1600_db": {
+        "impact_improvement_1600": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_2000_db": {
+        "impact_improvement_2000": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_2500_db": {
+        "impact_improvement_2500": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_3150_db": {
+        "impact_improvement_3150": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_4000_db": {
+        "impact_improvement_4000": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_5000_db": {
+        "impact_improvement_5000": {
           "$ref": "#/$defs/number"
         },
-        "weighted_impact_improvement_db": {
+        "weighted_impact_improvement": {
           "$ref": "#/$defs/number"
         },
-        "reference_floor_adaptation_term_db": {
+        "reference_floor_adaptation_term": {
           "$ref": "#/$defs/number"
         },
-        "impact_improvement_adaptation_term_db": {
+        "impact_improvement_adaptation_term": {
           "$ref": "#/$defs/number"
         }
       },
@@ -3512,62 +3512,62 @@
     "ImpactImprovementSpectrum.cells": {
       "enum": [
         "group",
-        "impact_improvement_1000_db",
-        "impact_improvement_100_db",
-        "impact_improvement_1250_db",
-        "impact_improvement_125_db",
-        "impact_improvement_1600_db",
-        "impact_improvement_160_db",
-        "impact_improvement_2000_db",
-        "impact_improvement_200_db",
-        "impact_improvement_2500_db",
-        "impact_improvement_250_db",
-        "impact_improvement_3150_db",
-        "impact_improvement_315_db",
-        "impact_improvement_4000_db",
-        "impact_improvement_400_db",
-        "impact_improvement_5000_db",
-        "impact_improvement_500_db",
-        "impact_improvement_50_db",
-        "impact_improvement_630_db",
-        "impact_improvement_63_db",
-        "impact_improvement_800_db",
-        "impact_improvement_80_db",
-        "impact_improvement_adaptation_term_db",
+        "impact_improvement_100",
+        "impact_improvement_1000",
+        "impact_improvement_125",
+        "impact_improvement_1250",
+        "impact_improvement_160",
+        "impact_improvement_1600",
+        "impact_improvement_200",
+        "impact_improvement_2000",
+        "impact_improvement_250",
+        "impact_improvement_2500",
+        "impact_improvement_315",
+        "impact_improvement_3150",
+        "impact_improvement_400",
+        "impact_improvement_4000",
+        "impact_improvement_50",
+        "impact_improvement_500",
+        "impact_improvement_5000",
+        "impact_improvement_63",
+        "impact_improvement_630",
+        "impact_improvement_80",
+        "impact_improvement_800",
+        "impact_improvement_adaptation_term",
         "name",
         "note",
-        "reference_floor_adaptation_term_db",
+        "reference_floor_adaptation_term",
         "variant",
-        "weighted_impact_improvement_db"
+        "weighted_impact_improvement"
       ],
       "description": "A field of ImpactImprovementSpectrum that holds a cell of the page."
     },
     "ImpactImprovementSpectrum.fields": {
       "enum": [
-        "impact_improvement_1000_db",
-        "impact_improvement_100_db",
-        "impact_improvement_1250_db",
-        "impact_improvement_125_db",
-        "impact_improvement_1600_db",
-        "impact_improvement_160_db",
-        "impact_improvement_2000_db",
-        "impact_improvement_200_db",
-        "impact_improvement_2500_db",
-        "impact_improvement_250_db",
-        "impact_improvement_3150_db",
-        "impact_improvement_315_db",
-        "impact_improvement_4000_db",
-        "impact_improvement_400_db",
-        "impact_improvement_5000_db",
-        "impact_improvement_500_db",
-        "impact_improvement_50_db",
-        "impact_improvement_630_db",
-        "impact_improvement_63_db",
-        "impact_improvement_800_db",
-        "impact_improvement_80_db",
-        "impact_improvement_adaptation_term_db",
-        "reference_floor_adaptation_term_db",
-        "weighted_impact_improvement_db"
+        "impact_improvement_100",
+        "impact_improvement_1000",
+        "impact_improvement_125",
+        "impact_improvement_1250",
+        "impact_improvement_160",
+        "impact_improvement_1600",
+        "impact_improvement_200",
+        "impact_improvement_2000",
+        "impact_improvement_250",
+        "impact_improvement_2500",
+        "impact_improvement_315",
+        "impact_improvement_3150",
+        "impact_improvement_400",
+        "impact_improvement_4000",
+        "impact_improvement_50",
+        "impact_improvement_500",
+        "impact_improvement_5000",
+        "impact_improvement_63",
+        "impact_improvement_630",
+        "impact_improvement_80",
+        "impact_improvement_800",
+        "impact_improvement_adaptation_term",
+        "reference_floor_adaptation_term",
+        "weighted_impact_improvement"
       ],
       "description": "A numeric field of ImpactImprovementSpectrum, or another unit of one."
     },
@@ -3716,7 +3716,7 @@
         "impact_insulation_class_improvement": {
           "$ref": "#/$defs/number"
         },
-        "impact_sound_improvement_db": {
+        "impact_sound_improvement": {
           "$ref": "#/$defs/number"
         },
         "added_load_pa": {
@@ -3773,7 +3773,7 @@
         "group",
         "impact_insulation_class",
         "impact_insulation_class_improvement",
-        "impact_sound_improvement_db",
+        "impact_sound_improvement",
         "layer_density_kg_m3",
         "name",
         "note",
@@ -3792,7 +3792,7 @@
         "added_load_pa",
         "impact_insulation_class",
         "impact_insulation_class_improvement",
-        "impact_sound_improvement_db",
+        "impact_sound_improvement",
         "layer_density_kg_m3",
         "added_load_gpa",
         "added_load_kpa",
@@ -7291,94 +7291,94 @@
             }
           ]
         },
-        "sound_reduction_index_50_db": {
+        "sound_reduction_index_50": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_63_db": {
+        "sound_reduction_index_63": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_80_db": {
+        "sound_reduction_index_80": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_100_db": {
+        "sound_reduction_index_100": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_125_db": {
+        "sound_reduction_index_125": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_160_db": {
+        "sound_reduction_index_160": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_200_db": {
+        "sound_reduction_index_200": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_250_db": {
+        "sound_reduction_index_250": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_315_db": {
+        "sound_reduction_index_315": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_400_db": {
+        "sound_reduction_index_400": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_500_db": {
+        "sound_reduction_index_500": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_630_db": {
+        "sound_reduction_index_630": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_800_db": {
+        "sound_reduction_index_800": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_1000_db": {
+        "sound_reduction_index_1000": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_1250_db": {
+        "sound_reduction_index_1250": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_1600_db": {
+        "sound_reduction_index_1600": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_2000_db": {
+        "sound_reduction_index_2000": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_2500_db": {
+        "sound_reduction_index_2500": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_3150_db": {
+        "sound_reduction_index_3150": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_4000_db": {
+        "sound_reduction_index_4000": {
           "$ref": "#/$defs/number"
         },
-        "sound_reduction_index_5000_db": {
+        "sound_reduction_index_5000": {
           "$ref": "#/$defs/number"
         },
-        "weighted_sound_reduction_index_db": {
+        "weighted_sound_reduction_index": {
           "$ref": "#/$defs/number"
         },
-        "spectrum_adaptation_term_db": {
+        "spectrum_adaptation_term": {
           "$ref": "#/$defs/number"
         },
-        "traffic_spectrum_adaptation_term_db": {
+        "traffic_spectrum_adaptation_term": {
           "$ref": "#/$defs/number"
         },
-        "spectrum_adaptation_term_50_3150_db": {
+        "spectrum_adaptation_term_50_3150": {
           "$ref": "#/$defs/number"
         },
-        "spectrum_adaptation_term_50_5000_db": {
+        "spectrum_adaptation_term_50_5000": {
           "$ref": "#/$defs/number"
         },
-        "spectrum_adaptation_term_100_5000_db": {
+        "spectrum_adaptation_term_100_5000": {
           "$ref": "#/$defs/number"
         },
-        "traffic_spectrum_adaptation_term_50_3150_db": {
+        "traffic_spectrum_adaptation_term_50_3150": {
           "$ref": "#/$defs/number"
         },
-        "traffic_spectrum_adaptation_term_50_5000_db": {
+        "traffic_spectrum_adaptation_term_50_5000": {
           "$ref": "#/$defs/number"
         },
-        "traffic_spectrum_adaptation_term_100_5000_db": {
+        "traffic_spectrum_adaptation_term_100_5000": {
           "$ref": "#/$defs/number"
         },
         "surface_density_kg_m2": {
@@ -7428,39 +7428,39 @@
         "group",
         "name",
         "note",
-        "sound_reduction_index_1000_db",
-        "sound_reduction_index_100_db",
-        "sound_reduction_index_1250_db",
-        "sound_reduction_index_125_db",
-        "sound_reduction_index_1600_db",
-        "sound_reduction_index_160_db",
-        "sound_reduction_index_2000_db",
-        "sound_reduction_index_200_db",
-        "sound_reduction_index_2500_db",
-        "sound_reduction_index_250_db",
-        "sound_reduction_index_3150_db",
-        "sound_reduction_index_315_db",
-        "sound_reduction_index_4000_db",
-        "sound_reduction_index_400_db",
-        "sound_reduction_index_5000_db",
-        "sound_reduction_index_500_db",
-        "sound_reduction_index_50_db",
-        "sound_reduction_index_630_db",
-        "sound_reduction_index_63_db",
-        "sound_reduction_index_800_db",
-        "sound_reduction_index_80_db",
-        "spectrum_adaptation_term_100_5000_db",
-        "spectrum_adaptation_term_50_3150_db",
-        "spectrum_adaptation_term_50_5000_db",
-        "spectrum_adaptation_term_db",
+        "sound_reduction_index_100",
+        "sound_reduction_index_1000",
+        "sound_reduction_index_125",
+        "sound_reduction_index_1250",
+        "sound_reduction_index_160",
+        "sound_reduction_index_1600",
+        "sound_reduction_index_200",
+        "sound_reduction_index_2000",
+        "sound_reduction_index_250",
+        "sound_reduction_index_2500",
+        "sound_reduction_index_315",
+        "sound_reduction_index_3150",
+        "sound_reduction_index_400",
+        "sound_reduction_index_4000",
+        "sound_reduction_index_50",
+        "sound_reduction_index_500",
+        "sound_reduction_index_5000",
+        "sound_reduction_index_63",
+        "sound_reduction_index_630",
+        "sound_reduction_index_80",
+        "sound_reduction_index_800",
+        "spectrum_adaptation_term",
+        "spectrum_adaptation_term_100_5000",
+        "spectrum_adaptation_term_50_3150",
+        "spectrum_adaptation_term_50_5000",
         "surface_density_kg_m2",
         "thickness_mm",
-        "traffic_spectrum_adaptation_term_100_5000_db",
-        "traffic_spectrum_adaptation_term_50_3150_db",
-        "traffic_spectrum_adaptation_term_50_5000_db",
-        "traffic_spectrum_adaptation_term_db",
+        "traffic_spectrum_adaptation_term",
+        "traffic_spectrum_adaptation_term_100_5000",
+        "traffic_spectrum_adaptation_term_50_3150",
+        "traffic_spectrum_adaptation_term_50_5000",
         "variant",
-        "weighted_sound_reduction_index_db",
+        "weighted_sound_reduction_index",
         "surface_density_g_m2",
         "thickness_cm",
         "thickness_m",
@@ -7470,38 +7470,38 @@
     },
     "SoundReductionSpectrum.fields": {
       "enum": [
-        "sound_reduction_index_1000_db",
-        "sound_reduction_index_100_db",
-        "sound_reduction_index_1250_db",
-        "sound_reduction_index_125_db",
-        "sound_reduction_index_1600_db",
-        "sound_reduction_index_160_db",
-        "sound_reduction_index_2000_db",
-        "sound_reduction_index_200_db",
-        "sound_reduction_index_2500_db",
-        "sound_reduction_index_250_db",
-        "sound_reduction_index_3150_db",
-        "sound_reduction_index_315_db",
-        "sound_reduction_index_4000_db",
-        "sound_reduction_index_400_db",
-        "sound_reduction_index_5000_db",
-        "sound_reduction_index_500_db",
-        "sound_reduction_index_50_db",
-        "sound_reduction_index_630_db",
-        "sound_reduction_index_63_db",
-        "sound_reduction_index_800_db",
-        "sound_reduction_index_80_db",
-        "spectrum_adaptation_term_100_5000_db",
-        "spectrum_adaptation_term_50_3150_db",
-        "spectrum_adaptation_term_50_5000_db",
-        "spectrum_adaptation_term_db",
+        "sound_reduction_index_100",
+        "sound_reduction_index_1000",
+        "sound_reduction_index_125",
+        "sound_reduction_index_1250",
+        "sound_reduction_index_160",
+        "sound_reduction_index_1600",
+        "sound_reduction_index_200",
+        "sound_reduction_index_2000",
+        "sound_reduction_index_250",
+        "sound_reduction_index_2500",
+        "sound_reduction_index_315",
+        "sound_reduction_index_3150",
+        "sound_reduction_index_400",
+        "sound_reduction_index_4000",
+        "sound_reduction_index_50",
+        "sound_reduction_index_500",
+        "sound_reduction_index_5000",
+        "sound_reduction_index_63",
+        "sound_reduction_index_630",
+        "sound_reduction_index_80",
+        "sound_reduction_index_800",
+        "spectrum_adaptation_term",
+        "spectrum_adaptation_term_100_5000",
+        "spectrum_adaptation_term_50_3150",
+        "spectrum_adaptation_term_50_5000",
         "surface_density_kg_m2",
         "thickness_mm",
-        "traffic_spectrum_adaptation_term_100_5000_db",
-        "traffic_spectrum_adaptation_term_50_3150_db",
-        "traffic_spectrum_adaptation_term_50_5000_db",
-        "traffic_spectrum_adaptation_term_db",
-        "weighted_sound_reduction_index_db",
+        "traffic_spectrum_adaptation_term",
+        "traffic_spectrum_adaptation_term_100_5000",
+        "traffic_spectrum_adaptation_term_50_3150",
+        "traffic_spectrum_adaptation_term_50_5000",
+        "weighted_sound_reduction_index",
         "surface_density_g_m2",
         "thickness_cm",
         "thickness_m",
@@ -8005,28 +8005,28 @@
             }
           ]
         },
-        "transmission_loss_63_db": {
+        "transmission_loss_63": {
           "$ref": "#/$defs/number"
         },
-        "transmission_loss_125_db": {
+        "transmission_loss_125": {
           "$ref": "#/$defs/number"
         },
-        "transmission_loss_250_db": {
+        "transmission_loss_250": {
           "$ref": "#/$defs/number"
         },
-        "transmission_loss_500_db": {
+        "transmission_loss_500": {
           "$ref": "#/$defs/number"
         },
-        "transmission_loss_1000_db": {
+        "transmission_loss_1000": {
           "$ref": "#/$defs/number"
         },
-        "transmission_loss_2000_db": {
+        "transmission_loss_2000": {
           "$ref": "#/$defs/number"
         },
-        "transmission_loss_4000_db": {
+        "transmission_loss_4000": {
           "$ref": "#/$defs/number"
         },
-        "transmission_loss_8000_db": {
+        "transmission_loss_8000": {
           "$ref": "#/$defs/number"
         },
         "thickness_mm": {
@@ -8086,14 +8086,14 @@
         "sound_transmission_class",
         "surface_density_kg_m2",
         "thickness_mm",
-        "transmission_loss_1000_db",
-        "transmission_loss_125_db",
-        "transmission_loss_2000_db",
-        "transmission_loss_250_db",
-        "transmission_loss_4000_db",
-        "transmission_loss_500_db",
-        "transmission_loss_63_db",
-        "transmission_loss_8000_db",
+        "transmission_loss_1000",
+        "transmission_loss_125",
+        "transmission_loss_2000",
+        "transmission_loss_250",
+        "transmission_loss_4000",
+        "transmission_loss_500",
+        "transmission_loss_63",
+        "transmission_loss_8000",
         "variant",
         "surface_density_g_m2",
         "thickness_cm",
@@ -8108,14 +8108,14 @@
         "sound_transmission_class",
         "surface_density_kg_m2",
         "thickness_mm",
-        "transmission_loss_1000_db",
-        "transmission_loss_125_db",
-        "transmission_loss_2000_db",
-        "transmission_loss_250_db",
-        "transmission_loss_4000_db",
-        "transmission_loss_500_db",
-        "transmission_loss_63_db",
-        "transmission_loss_8000_db",
+        "transmission_loss_1000",
+        "transmission_loss_125",
+        "transmission_loss_2000",
+        "transmission_loss_250",
+        "transmission_loss_4000",
+        "transmission_loss_500",
+        "transmission_loss_63",
+        "transmission_loss_8000",
         "surface_density_g_m2",
         "thickness_cm",
         "thickness_m",

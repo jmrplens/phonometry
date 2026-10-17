@@ -750,17 +750,17 @@ _BANDWIDTH_INTEGRALS: Mapping[str, tuple[Any, Any]] = MappingProxyType(
 )
 
 
-def _summation_deviation(relative_attenuations_db: np.ndarray) -> np.ndarray:
+def _summation_deviation(relative_attenuations: np.ndarray) -> np.ndarray:
     r"""IEC 61260-2:2016 Formula (3) and IEC 61260:1995 equation (19), point by point.
 
     :math:`\Delta P_j = 10\lg\left[\sum 10^{-0.1\,\Delta A}\right]` over the
     filters :math:`j-1`, :math:`j`, :math:`j+1` at one frequency.
 
-    :param relative_attenuations_db: Shape ``(n_filters, n)``: the relative
+    :param relative_attenuations: Shape ``(n_filters, n)``: the relative
         attenuation of each filter summed at the same ``n`` frequencies.
     :return: :math:`\Delta P_j` at each frequency, dB.
     """
-    power = 10.0 ** (-0.1 * np.asarray(relative_attenuations_db, dtype=np.float64))
+    power = 10.0 ** (-0.1 * np.asarray(relative_attenuations, dtype=np.float64))
     return np.asarray(10.0 * np.log10(np.sum(power, axis=0)))
 
 

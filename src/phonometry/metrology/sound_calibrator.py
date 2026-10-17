@@ -53,7 +53,7 @@ follows the ambient static pressure, and its manual gives the correction to
 the reference 101,325 kPa (5.1.5, 6.3 i). That correction depends on the
 barometer reading and on data only the manufacturer has, so this module does
 not compute it: the caller supplies it as
-:attr:`SoundCalibratorMeasurements.static_pressure_correction_db` and it is
+:attr:`SoundCalibratorMeasurements.static_pressure_correction` and it is
 added to the measured level before the level is graded (5.3.2, A.5.1.2,
 B.4.3.2). Every other calibrator shall not need any environmental correction
 (5.1.7), and is refused one.
@@ -99,7 +99,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "ABBREVIATED_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT",
-    "ABBREVIATED_LEVEL_REDUCTIONS_DB",
+    "ABBREVIATED_LEVEL_REDUCTIONS",
     "CALIBRATOR_CLASSES",
     "CALIBRATOR_REQUIREMENTS",
     "DISTORTION_ACCEPTANCE_LIMITS_PERCENT",
@@ -367,7 +367,7 @@ FIELD_IMMUNITY_MAX_UNCERTAINTY_DB: Mapping[str, float] = MappingProxyType(
 #: IEC 60942:2017 A.6.4.7 (folio 34): how much the abbreviated combined
 #: temperature and humidity test reduces the Table 5 level limits, in
 #: decibels, by class.
-ABBREVIATED_LEVEL_REDUCTIONS_DB: Mapping[str, float] = MappingProxyType(
+ABBREVIATED_LEVEL_REDUCTIONS: Mapping[str, float] = MappingProxyType(
     {"LS": 0.05, "1": 0.05, "2": 0.10}
 )
 
@@ -513,7 +513,7 @@ class SoundCalibratorMeasurements(RichDisplay):
         For an /M pistonphone, as measured: the correction below is added to
         it.
     :ivar level_uncertainty_db: Its expanded uncertainty, in decibels.
-    :ivar static_pressure_correction_db: The manufacturer's correction to the
+    :ivar static_pressure_correction: The manufacturer's correction to the
         reference static pressure for a class LS/M or 1/M pistonphone
         (5.1.5, B.4.3.2), in decibels, added to ``level_deviation_db``.
         Required for those designations whenever the level is given (``0.0``
@@ -567,7 +567,7 @@ class SoundCalibratorMeasurements(RichDisplay):
 
     level_deviation_db: float | Sequence[float] | None = None
     level_uncertainty_db: float | Sequence[float] | None = None
-    static_pressure_correction_db: float | Sequence[float] | None = None
+    static_pressure_correction: float | Sequence[float] | None = None
     fluctuation_db: float | Sequence[float] | None = None
     fluctuation_uncertainty_db: float | Sequence[float] | None = None
     frequency_deviation_percent: float | Sequence[float] | None = None
@@ -600,16 +600,16 @@ class SoundCalibratorMeasurements(RichDisplay):
                 object.__setattr__(self, field.name, _values(value, field.name))
         for requirement, (deviation, uncertainty) in _FIELDS.items():
             self._check_pair(requirement, deviation, uncertainty)
-        correction = _frozen(self, "static_pressure_correction_db")
+        correction = _frozen(self, "static_pressure_correction")
         if correction is not None:
             level = _frozen(self, "level_deviation_db")
             if level is None:
                 msg = (
-                    "'static_pressure_correction_db' corrects the measured level "
+                    "'static_pressure_correction' corrects the measured level "
                     "and needs 'level_deviation_db'."
                 )
                 raise ValueError(msg)
-            _broadcast(level, correction, "static_pressure_correction_db")
+            _broadcast(level, correction, "static_pressure_correction")
 
     def _check_pair(self, requirement: str, deviation: str, uncertainty: str) -> None:
         """Validate one requirement's deviation and uncertainty fields."""
@@ -882,7 +882,7 @@ def _limits(
     elif requirement == "environmental_level":
         limit = _banded(ENVIRONMENTAL_LEVEL_ACCEPTANCE_LIMITS_DB, base, f)
         if limit is not None and abbreviated:
-            limit -= ABBREVIATED_LEVEL_REDUCTIONS_DB[base]
+            limit -= ABBREVIATED_LEVEL_REDUCTIONS[base]
         maximum = _banded(ENVIRONMENTAL_LEVEL_MAX_UNCERTAINTY_DB, base, f)
     else:
         by_class: dict[str, tuple[Mapping[str, float], Mapping[str, float]]] = {
@@ -1019,13 +1019,13 @@ def _corrections(
         pistonphone, or none on one that is.
     """
     level = measurements.pairs("level")
-    given = _frozen(measurements, "static_pressure_correction_db")
+    given = _frozen(measurements, "static_pressure_correction")
     pistonphone = designation.endswith("/M")
     if given is not None and not pistonphone:
         msg = (
             f"a class {designation} calibrator shall need no environmental "
             f"correction to meet its class (IEC 60942:2017 5.1.7); "
-            f"'static_pressure_correction_db' is for LS/M and 1/M only."
+            f"'static_pressure_correction' is for LS/M and 1/M only."
         )
         raise ValueError(msg)
     if not level:
@@ -1035,11 +1035,9 @@ def _corrections(
             msg = (
                 f"a class {designation} pistonphone's level is graded after the "
                 f"manufacturer's static-pressure correction (5.3.2, B.4.3.2): "
-                f"give 'static_pressure_correction_db', 0.0 at the reference "
+                f"give 'static_pressure_correction', 0.0 at the reference "
                 f"101.325 kPa."
             )
             raise ValueError(msg)
         return (0.0,) * len(level)
-    return _broadcast(
-        tuple(d for d, _ in level), given, "static_pressure_correction_db"
-    )
+    return _broadcast(tuple(d for d, _ in level), given, "static_pressure_correction")

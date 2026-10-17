@@ -923,12 +923,12 @@ def test_suitability_keeps_both_spectra_as_copies() -> None:
     measured[0] = 0.0
     calibrated[0] = 0.0
     freqs[0] = 63.0
-    np.testing.assert_allclose(check.measured_power_level_db[0], LW_RSS[0] + 1.0)
-    np.testing.assert_allclose(check.calibrated_power_level_db, LW_RSS)
+    np.testing.assert_allclose(check.measured_power_level[0], LW_RSS[0] + 1.0)
+    np.testing.assert_allclose(check.calibrated_power_level, LW_RSS)
     np.testing.assert_array_equal(check.frequencies, FREQS)
     np.testing.assert_allclose(
-        check.difference_db,
-        check.measured_power_level_db - check.calibrated_power_level_db,
+        check.difference,
+        check.measured_power_level - check.calibrated_power_level,
         rtol=0,
         atol=0,
     )
@@ -1037,7 +1037,7 @@ def test_suitability_plot_draws_the_signed_difference() -> None:
     check = emission.check_special_room_suitability(measured, LW_RSS, FREQS)
     ax = check.plot()
     heights = [p.get_height() for p in ax.patches[: FREQS.size]]
-    np.testing.assert_allclose(heights, check.difference_db)
+    np.testing.assert_allclose(heights, check.difference)
     (marks,) = [c for c in ax.collections if c.get_label() == "Table 1 limits"]
     ys = sorted({round(float(seg[0][1]), 9) for seg in marks.get_segments()})
     assert ys == sorted({*(-check.limit_db), *check.limit_db})

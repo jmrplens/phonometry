@@ -39,10 +39,10 @@ FS = 32000.0  # the Annex B/C sampling rate; keeps reference tones on FFT bins
 MgTone = Callable[..., psychoacoustics.MooreGlasbergTimeVaryingLoudness]
 
 
-def _tone(frequency: float, level_db: float, duration: float = 1.3) -> np.ndarray:
-    """Calibrated pure tone: sound pressure in pascals at ``level_db`` dB SPL."""
+def _tone(frequency: float, level: float, duration: float = 1.3) -> np.ndarray:
+    """Calibrated pure tone: sound pressure in pascals at ``level`` dB SPL."""
     t = np.arange(round(duration * FS)) / FS
-    p_rms = 2e-5 * 10.0 ** (level_db / 20.0)
+    p_rms = 2e-5 * 10.0 ** (level / 20.0)
     return np.sqrt(2.0) * p_rms * np.sin(2.0 * np.pi * frequency * t)
 
 
@@ -64,15 +64,15 @@ def mg_tone() -> MgTone:
 
     def get(
         frequency: float,
-        level_db: float,
+        level: float,
         *,
         field: str = "free",
         presentation: str = "binaural",
     ) -> psychoacoustics.MooreGlasbergTimeVaryingLoudness:
-        key = (frequency, level_db, field, presentation)
+        key = (frequency, level, field, presentation)
         if key not in cache:
             cache[key] = psychoacoustics.loudness_moore_glasberg_time(
-                _tone(frequency, level_db), FS, field=field, presentation=presentation
+                _tone(frequency, level), FS, field=field, presentation=presentation
             )
         return cache[key]
 
@@ -129,12 +129,12 @@ _C1_1KHZ = [
 ]
 
 
-@pytest.mark.parametrize(("level_db", "sone", "phon"), _C1_1KHZ)
+@pytest.mark.parametrize(("level", "sone", "phon"), _C1_1KHZ)
 def test_annex_c1_1khz_tone(
-    mg_tone: MgTone, level_db: float, sone: float, phon: float
+    mg_tone: MgTone, level: float, sone: float, phon: float
 ) -> None:
     """1 kHz tone 10-80 dB reaches the Annex C.1 peak long-term loudness."""
-    res = mg_tone(1000.0, level_db)
+    res = mg_tone(1000.0, level)
     # Loudness level (phon) is the linear-in-perception comparison; within the
     # standard's expanded uncertainty (2.8 phon, clause 8).
     assert res.loudness_level_max == pytest.approx(phon, abs=1.0)
@@ -159,18 +159,18 @@ _C1_OTHER = [
 
 
 @pytest.mark.parametrize(
-    ("frequency", "level_db", "field", "presentation", "phon"), _C1_OTHER
+    ("frequency", "level", "field", "presentation", "phon"), _C1_OTHER
 )
 def test_annex_c1_other_tones(
     mg_tone: MgTone,
     frequency: float,
-    level_db: float,
+    level: float,
     field: str,
     presentation: str,
     phon: float,
 ) -> None:
     """3 kHz / 100 Hz / 4 kHz and monaural earphone tones match Annex C.1."""
-    res = mg_tone(frequency, level_db, field=field, presentation=presentation)
+    res = mg_tone(frequency, level, field=field, presentation=presentation)
     assert res.loudness_level_max == pytest.approx(phon, abs=1.2)
 
 
@@ -189,14 +189,14 @@ _C1_SONE = [
 
 
 @pytest.mark.parametrize(
-    ("frequency", "field", "presentation", "level_db", "sone"), _C1_SONE
+    ("frequency", "field", "presentation", "level", "sone"), _C1_SONE
 )
 def test_annex_c1_sone_values(
     mg_tone: MgTone,
     frequency: float,
     field: str,
     presentation: str,
-    level_db: float,
+    level: float,
     sone: float,
 ) -> None:
     """Annex C.1.2/C.1.3 peak long-term loudness in sone.
@@ -204,7 +204,7 @@ def test_annex_c1_sone_values(
     Values print to two decimals; the absolute floor covers their rounding
     half-width at the quiet end.
     """
-    res = mg_tone(frequency, level_db, field=field, presentation=presentation)
+    res = mg_tone(frequency, level, field=field, presentation=presentation)
     assert res.n_max == pytest.approx(sone, rel=0.02, abs=0.005)
 
 
@@ -220,9 +220,9 @@ _C3_CASES = [
 ]
 
 
-@pytest.mark.parametrize(("freqs", "level_db", "sone", "phon"), _C3_CASES)
+@pytest.mark.parametrize(("freqs", "level", "sone", "phon"), _C3_CASES)
 def test_annex_c3_multi_tone(
-    freqs: list, level_db: float, sone: float, phon: float
+    freqs: list, level: float, sone: float, phon: float
 ) -> None:
     """Annex C.3 multi-tone complexes reproduce the printed peak LTL.
 
@@ -231,7 +231,7 @@ def test_annex_c3_multi_tone(
     margins with a little headroom, well inside the 2.8 phon expanded
     uncertainty.
     """
-    x = np.sum([_tone(f, level_db) for f in freqs], axis=0)
+    x = np.sum([_tone(f, level) for f in freqs], axis=0)
     res = psychoacoustics.loudness_moore_glasberg_time(x, FS)
     assert res.n_max == pytest.approx(sone, rel=0.04)
     assert res.loudness_level_max == pytest.approx(phon, abs=0.5)

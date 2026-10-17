@@ -119,7 +119,7 @@ of 8.3.
 check_turbine_test_environment(
     correction: TurbineEnvironmentalCorrection | None = None,
     *,
-    environmental_correction_db: float | None = None,
+    environmental_correction: float | None = None,
     wind_speed_m_s: float | None = None,
 ) -> TurbineTestEnvironmentCheck
 ```
@@ -138,8 +138,8 @@ above 1 m/s (4.3).
 
 | Name | Description |
 | :--- | :--- |
-| `correction` | The environmental correction, from [`turbine_environmental_correction`](/phonometry/reference/api/power/turbine-noise/#turbine_environmental_correction) or [`turbine_reference_source_correction`](/phonometry/reference/api/power/turbine-noise/#turbine_reference_source_correction); or give `environmental_correction_db` instead. |
-| `environmental_correction_db` | $K$ in dB, when it was found some other way, `0.0` outdoors (A.4). |
+| `correction` | The environmental correction, from [`turbine_environmental_correction`](/phonometry/reference/api/power/turbine-noise/#turbine_environmental_correction) or [`turbine_reference_source_correction`](/phonometry/reference/api/power/turbine-noise/#turbine_reference_source_correction); or give `environmental_correction` instead. |
+| `environmental_correction` | $K$ in dB, when it was found some other way, `0.0` outdoors (A.4). |
 | `wind_speed_m_s` | The wind speed for a measurement outdoors, in metres per second; `None` indoors. |
 
 **Returns:** The conditions and the verdict.
@@ -148,13 +148,13 @@ above 1 m/s (4.3).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | unless exactly one of `correction` and `environmental_correction_db` is given, for a non-finite correction or for a negative wind speed. |
+| ValueError | unless exactly one of `correction` and `environmental_correction` is given, for a non-finite correction or for a negative wind speed. |
 
 ## turbine_background_correction
 
 ```python
 turbine_background_correction(
-    level_difference_db: ArrayLike,
+    level_difference: ArrayLike,
 ) -> float | np.ndarray
 ```
 
@@ -190,7 +190,7 @@ than to the surface-averaged level.
 
 | Name | Description |
 | :--- | :--- |
-| `level_difference_db` | The level with the source operating less the background level, at each position, in dB (scalar or 1-D array). |
+| `level_difference` | The level with the source operating less the background level, at each position, in dB (scalar or 1-D array). |
 
 **Returns:** The correction to subtract, in dB: a `float` for a scalar, an array for an array.
 
@@ -394,9 +394,9 @@ $K$ above 7 dB) cannot carry the statement, and is refused.
 
 ```python
 turbine_reference_source_correction(
-    sound_power_levels_db: ArrayLike,
+    sound_power_levels: ArrayLike,
     *,
-    calibrated_level_db: float,
+    calibrated_level: float,
     machine_length_m: float,
 ) -> TurbineEnvironmentalCorrection
 ```
@@ -418,8 +418,8 @@ of the determinations.
 
 | Name | Description |
 | :--- | :--- |
-| `sound_power_levels_db` | The determinations of $L_W$, in dB: two for a machine up to 10 m long, four above. |
-| `calibrated_level_db` | $L_{W\mathrm{r}}$, in dB re 1 pW. |
+| `sound_power_levels` | The determinations of $L_W$, in dB: two for a machine up to 10 m long, four above. |
+| `calibrated_level` | $L_{W\mathrm{r}}$, in dB re 1 pW. |
 | `machine_length_m` | Length of the machine under test, in metres, which sets how many determinations are needed. |
 
 **Returns:** The correction and the determinations it came from.
@@ -438,7 +438,7 @@ turbine_sound_power(
     *,
     surface_area: float,
     background_levels: ArrayLike | None,
-    environmental_correction_db: float,
+    environmental_correction: float,
     overhead_mask: ArrayLike | None = None,
 ) -> TurbineSoundPowerResult
 ```
@@ -468,7 +468,7 @@ and leave [`TurbineSoundPowerResult.conforms`](/phonometry/reference/api/power/t
 | `pressure_levels` | $L_{p\mathrm{A}i}$ with the turbine set operating, one per position, in dB re 20 µPa: at least the four key positions that remain once the overhead one is deleted. |
 | `surface_area` | $S$, from [`turbine_measurement_surface`](/phonometry/reference/api/power/turbine-noise/#turbine_measurement_surface), in square metres. |
 | `background_levels` | The A-weighted background level at each position, in dB. It is often impossible to measure with the turbine stopped, and NOTE 1 of 8.1 allows it to be evaluated by computation instead. `None` states that no background was determined, and no correction is applied. |
-| `environmental_correction_db` | $K$, in dB: from [`turbine_environmental_correction`](/phonometry/reference/api/power/turbine-noise/#turbine_environmental_correction) or [`turbine_reference_source_correction`](/phonometry/reference/api/power/turbine-noise/#turbine_reference_source_correction), or `0.0` outdoors (A.4). |
+| `environmental_correction` | $K$, in dB: from [`turbine_environmental_correction`](/phonometry/reference/api/power/turbine-noise/#turbine_environmental_correction) or [`turbine_reference_source_correction`](/phonometry/reference/api/power/turbine-noise/#turbine_reference_source_correction), or `0.0` outdoors (A.4). |
 | `overhead_mask` | Which positions are overhead ([`TurbineMicrophoneArray.overhead_mask`](/phonometry/reference/api/power/turbine-noise/#turbinemicrophonearray)), for the effect of deleting them (NOTE of 7.2.2); `None` if not needed. |
 
 **Returns:** The per-position levels, the surface level and the sound power level.
@@ -483,12 +483,12 @@ and leave [`TurbineSoundPowerResult.conforms`](/phonometry/reference/api/power/t
 
 ```python
 TurbineEnvironmentalCorrection(
-    environmental_correction_db: float,
+    environmental_correction: float,
     method: Literal['absorption', 'reference source'],
     surface_area: float | None = None,
     absorption_area: float | None = None,
-    reference_levels_db: np.ndarray | None = None,
-    calibrated_level_db: float | None = None,
+    reference_levels: np.ndarray | None = None,
+    calibrated_level: float | None = None,
 )
 ```
 
@@ -501,12 +501,12 @@ by [`turbine_reference_source_correction`](/phonometry/reference/api/power/turbi
 
 | Name | Description |
 | :--- | :--- |
-| `environmental_correction_db` | $K$, in dB. |
+| `environmental_correction` | $K$, in dB. |
 | `method` | `"absorption"` (A.3.1) or `"reference source"` (A.3.2). |
 | `surface_area` | $S$ (A.3.1), in square metres, or `None`. |
 | `absorption_area` | $A$ (A.3.1), in square metres, or `None`. |
-| `reference_levels_db` | The determinations of the reference source's sound power level $L_W$ (A.3.2), in dB, or `None`. |
-| `calibrated_level_db` | $L_{W\mathrm{r}}$ (A.3.2), in dB, or `None`. |
+| `reference_levels` | The determinations of the reference source's sound power level $L_W$ (A.3.2), in dB, or `None`. |
+| `calibrated_level` | $L_{W\mathrm{r}}$ (A.3.2), in dB, or `None`. |
 
 ### TurbineEnvironmentalCorrection.plot()
 
@@ -732,9 +732,9 @@ TurbineNoiseDeclaration(
     measured_at: str,
     tonal: bool,
     operating_conditions: tuple[str, ...],
-    position_levels_db: tuple[np.ndarray, ...],
-    surface_pressure_levels_db: tuple[float, ...],
-    sound_power_levels_db: tuple[float, ...],
+    position_levels: tuple[np.ndarray, ...],
+    surface_pressure_levels: tuple[float, ...],
+    sound_power_levels: tuple[float, ...],
 )
 ```
 
@@ -751,9 +751,9 @@ Built by [`turbine_noise_declaration`](/phonometry/reference/api/power/turbine-n
 | `measured_at` | Date and time of the measurements, clause 10 f). |
 | `tonal` | Whether the sound contains prominent discrete tones, which selects the row of Table 1. |
 | `operating_conditions` | The operating conditions, clause 10 b). |
-| `position_levels_db` | The A-weighted levels at each position, corrected for the background, per condition, clause 10 c). |
-| `surface_pressure_levels_db` | The A-weighted surface sound pressure level per condition, clause 10 d), in dB re 20 µPa. |
-| `sound_power_levels_db` | The A-weighted sound power level per condition as determined by Equation (3), in dB re 1 pW; clause 10 e) reports it as `reported_sound_power_levels_db`. |
+| `position_levels` | The A-weighted levels at each position, corrected for the background, per condition, clause 10 c). |
+| `surface_pressure_levels` | The A-weighted surface sound pressure level per condition, clause 10 d), in dB re 20 µPa. |
+| `sound_power_levels` | The A-weighted sound power level per condition as determined by Equation (3), in dB re 1 pW; clause 10 e) reports it as `reported_sound_power_levels`. |
 
 ### TurbineNoiseDeclaration.loudest_condition
 
@@ -788,7 +788,7 @@ Draw the sound power level of each operating condition.
 
 **Returns:** The axes.
 
-### TurbineNoiseDeclaration.reported_sound_power_levels_db
+### TurbineNoiseDeclaration.reported_sound_power_levels
 
 *property*
 
@@ -856,12 +856,12 @@ width across from where the drawing puts them.
 TurbineSoundPowerResult(
     pressure_levels: np.ndarray,
     background_levels: np.ndarray | None,
-    background_corrections_db: np.ndarray,
-    corrected_levels_db: np.ndarray,
-    environmental_correction_db: float,
+    background_corrections: np.ndarray,
+    corrected_levels: np.ndarray,
+    environmental_correction: float,
     surface_area: float,
-    surface_pressure_level_db: float,
-    sound_power_level_db: float,
+    surface_pressure_level: float,
+    sound_power_level: float,
     overhead_mask: np.ndarray | None = None,
 )
 ```
@@ -876,12 +876,12 @@ Built by [`turbine_sound_power`](/phonometry/reference/api/power/turbine-noise/#
 | :--- | :--- |
 | `pressure_levels` | $L_{p\mathrm{A}i}$ measured with the turbine set operating, one per position, in dB re 20 µPa. |
 | `background_levels` | The background level at each position, in dB, or `None` when it was not determined. |
-| `background_corrections_db` | The correction of Table 2 at each position, in dB (zero where no background was given). |
-| `corrected_levels_db` | The levels after 8.1, in dB. |
-| `environmental_correction_db` | $K$, in dB. |
+| `background_corrections` | The correction of Table 2 at each position, in dB (zero where no background was given). |
+| `corrected_levels` | The levels after 8.1, in dB. |
+| `environmental_correction` | $K$, in dB. |
 | `surface_area` | $S$, in square metres. |
-| `surface_pressure_level_db` | $\overline{L_{p\mathrm{A}}}$ of Equation (2), $K$ subtracted, in dB re 20 µPa. |
-| `sound_power_level_db` | $L_{W\mathrm{A}}$ of Equation (3), in dB re 1 pW. |
+| `surface_pressure_level` | $\overline{L_{p\mathrm{A}}}$ of Equation (2), $K$ subtracted, in dB re 20 µPa. |
+| `sound_power_level` | $L_{W\mathrm{A}}$ of Equation (3), in dB re 1 pW. |
 | `overhead_mask` | Which positions are overhead, or `None`. |
 
 ### TurbineSoundPowerResult.arithmetic_mean_allowed
@@ -912,7 +912,7 @@ Whether the determination is in full conformity with the standard.
 Every background at least 3 dB below (4.2) and $K$ within 7 dB
 (8.3). Only such a determination can carry the statement of clause 10.
 
-### TurbineSoundPowerResult.level_differences_db
+### TurbineSoundPowerResult.level_differences
 
 *property*
 
@@ -985,7 +985,7 @@ without them it counts the bars from 1.
 | :--- | :--- |
 | ValueError | if `position_labels` does not have one entry per position. |
 
-### TurbineSoundPowerResult.reported_sound_power_level_db
+### TurbineSoundPowerResult.reported_sound_power_level
 
 *property*
 
@@ -1004,7 +1004,7 @@ indication of the upper limit of the sound power level.
 
 ```python
 TurbineTestEnvironmentCheck(
-    environmental_correction_db: float,
+    environmental_correction: float,
     ratio: float | None,
     *,
     wind_speed_m_s: float | None = None,
@@ -1021,7 +1021,7 @@ from the correction and the wind speed against the 7 dB, 6 m/s and
 
 | Name | Description |
 | :--- | :--- |
-| `environmental_correction_db` | $K$, in dB. |
+| `environmental_correction` | $K$, in dB. |
 | `ratio` | $A/S$, when the correction came from the room absorption, else `None`. |
 | `wind_speed_m_s` | The wind speed outdoors, in m/s, or `None`. |
 

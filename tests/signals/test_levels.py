@@ -352,10 +352,10 @@ def test_sel_a_weighted() -> None:
 
 
 def _tone_at_level(
-    level_db: float, seconds: float = 2.0, f0: float = 1000.0
+    level: float, seconds: float = 2.0, f0: float = 1000.0
 ) -> np.ndarray:
-    """1 kHz tone whose A-weighted level equals level_db (A(1 kHz) = 0 dB)."""
-    rms = 2e-5 * 10 ** (level_db / 20)
+    """1 kHz tone whose A-weighted level equals level (A(1 kHz) = 0 dB)."""
+    rms = 2e-5 * 10 ** (level / 20)
     t = np.arange(int(FS * seconds)) / FS
     return np.sqrt(2) * rms * np.sin(2 * np.pi * f0 * t)
 

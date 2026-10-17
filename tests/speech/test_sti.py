@@ -337,7 +337,7 @@ def test_stipa_signal_properties() -> None:
     crest_db = 20.0 * np.log10(np.max(np.abs(x)) / np.sqrt(np.mean(x**2)))
     assert 9.0 < crest_db < 16.0
     # Calibrated output: overall level in dB re 20 uPa.
-    x_cal = speech.stipa_signal(FS, duration_s=6.0, level_db=74.0, seed=0)
+    x_cal = speech.stipa_signal(FS, duration_s=6.0, level=74.0, seed=0)
     level = 20.0 * np.log10(np.sqrt(np.mean(x_cal**2)) / 2e-5)
     assert level == pytest.approx(74.0, abs=1e-9)
     # Reproducible for a fixed seed.

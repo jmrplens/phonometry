@@ -222,7 +222,7 @@ def _chk_table_a1() -> Outcome:
     jig = metrology.jig_diameter_correction(list(printed))
     matching = sum(
         1
-        for value, computed in zip(printed.values(), jig.correction_db, strict=True)
+        for value, computed in zip(printed.values(), jig.correction, strict=True)
         if math.isclose(float(computed), value, abs_tol=1e-12)
     )
     return count(matching, len(printed), subject="corrections of Table A.1")
@@ -291,7 +291,7 @@ def _chk_diameter_model_table_a1() -> Outcome:
     result = _ws3_model(list(printed), gas=gas)
     matching = sum(
         1
-        for value, computed in zip(printed.values(), result.correction_db, strict=True)
+        for value, computed in zip(printed.values(), result.correction, strict=True)
         if abs(float(computed) - value) <= 0.0005
     )
     return count(matching, len(printed), subject="corrections of Table A.1")
@@ -311,9 +311,7 @@ def _chk_diameter_model_reference_air() -> Outcome:
     printed = {1000.0 * khz: value for khz, value in ref.IEC61094_5_TABLE_A1_DB.items()}
     result = _ws3_model(list(printed))
     worst = float(
-        np.max(
-            np.abs(np.asarray(result.correction_db) - np.array(list(printed.values())))
-        )
+        np.max(np.abs(np.asarray(result.correction) - np.array(list(printed.values()))))
     )
     limit = 0.1 * ref.IEC61094_5_TABLE_A1_RELATIVE_EXPANDED * 1.443
     return numeric(
@@ -358,12 +356,12 @@ def _chk_diameter_doubling() -> Outcome:
     worst = float(
         np.max(
             np.abs(
-                np.asarray(result.doubled_separation_correction_db)
-                - np.asarray(doubled.correction_db)
+                np.asarray(result.doubled_separation_correction)
+                - np.asarray(doubled.correction)
             )
         )
     )
-    share = np.asarray(result.separation_change_db) / np.abs(result.correction_db)
+    share = np.asarray(result.separation_change_db) / np.abs(result.correction)
     observed = 100.0 * ref.IEC61094_5_TABLE_A1_RELATIVE_EXPANDED
     return numeric(
         0.0,
@@ -396,7 +394,7 @@ def _chk_annex_c() -> Outcome:
     first = (_L_REF + gain_1 + level_1 + at_a) - (_L_TEST + gain_2 + level_1 + at_b)
     second = (_L_TEST + gain_1 + level_2 + at_a) - (_L_REF + gain_2 + level_2 + at_b)
     result = metrology.simultaneous_comparison(_F, _L_REF, first, second)
-    worst = float(np.max(np.abs(result.sensitivity_level_db - _L_TEST)))
+    worst = float(np.max(np.abs(result.sensitivity_level - _L_TEST)))
     return numeric(
         0.0,
         worst,
@@ -425,7 +423,7 @@ def _chk_d2() -> Outcome:
         _L_REF,
         np.zeros(_F.size),
         2.0 * 20.0 * np.log10(r_v),
-        pressure_level_difference_db=20.0 * np.log10(r_p),
+        pressure_level_difference=20.0 * np.log10(r_p),
     )
     expected = 1000.0 * m_ref * r_v / r_p
     worst = float(np.max(np.abs(result.sensitivity_mv_per_pa / expected - 1.0)))
@@ -457,12 +455,12 @@ def _chk_monitor() -> Outcome:
         _L_REF + field_ref,
         _L_TEST + field_test,
         monitor=metrology.MonitorReadings(
-            reference_level_db=field_ref - 12.5,
-            test_level_db=field_test - 12.5,
+            reference_level=field_ref - 12.5,
+            test_level=field_test - 12.5,
         ),
         field="free_field",
     )
-    worst = float(np.max(np.abs(result.sensitivity_level_db - _L_TEST)))
+    worst = float(np.max(np.abs(result.sensitivity_level - _L_TEST)))
     return numeric(
         0.0,
         worst,
@@ -611,8 +609,8 @@ def _chk_monitor_phase() -> Outcome:
         _L_REF + 94.0,
         _L_TEST + 94.0,
         monitor=metrology.MonitorReadings(
-            reference_level_db=94.0 - 12.5,
-            test_level_db=94.0 - 12.5,
+            reference_level=94.0 - 12.5,
+            test_level=94.0 - 12.5,
             reference_phase_deg=50.0 + field_1,
             test_phase_deg=50.0 + field_2,
         ),
@@ -1022,7 +1020,7 @@ def _chk_validation() -> Outcome:
         ),
         field="pressure",
         method="three_microphones",
-        corrections_db={},
+        corrections={},
         expanded_uncertainty_db=np.where(shared, 0.06, 0.5),
     )
     result = metrology.verify_jig_or_coupler(jig, reciprocity, microphone=1)
@@ -1058,9 +1056,9 @@ def _chk_validation_correlation() -> Outcome:
         expanded = 2.0 * scale * math.hypot(comparison, standard)
         result = cc.JigCouplerVerification(
             frequencies=np.array([1000.0]),
-            calibration_level_db=np.array([-26.3]),
+            calibration_level=np.array([-26.3]),
             calibration_uncertainty_db=np.array([expanded]),
-            validation_level_db=np.array([-26.3]),
+            validation_level=np.array([-26.3]),
             validation_uncertainty_db=np.array([expanded]),
             validation="comparison",
             unvalidated_frequencies_hz=np.array([]),

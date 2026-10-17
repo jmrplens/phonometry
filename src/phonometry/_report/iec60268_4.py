@@ -97,7 +97,7 @@ def _noise_rows(
 ) -> list[tuple[str, str]]:
     """The equivalent-noise and signal-to-noise table rows, when known."""
     rows: list[tuple[str, str]] = []
-    noise = result.equivalent_noise_level_db
+    noise = result.equivalent_noise_level
     snr = result.signal_to_noise_ratio_db
     if noise is not None:
         rows.append(
@@ -129,7 +129,7 @@ def _rated_rows(
         ),
         (
             t("Level re 1 V/Pa [dB]", language),
-            _db_1(result.sensitivity_level_db, language),
+            _db_1(result.sensitivity_level, language),
         ),
         (
             t("Effective frequency range", language),
@@ -151,22 +151,22 @@ def _rated_rows(
             )
         )
     rows.extend(_noise_rows(result, language))
-    if result.max_spl_db is not None:
+    if result.max_spl is not None:
         rows.append(
             (
                 t("Max. SPL ({thd} % THD)", language).format(
                     thd=fmt_num(result.max_spl_thd_percent, language)
                 ),
-                f"{_db_1(result.max_spl_db, language)} dB",
+                f"{_db_1(result.max_spl, language)} dB",
             )
         )
-    if result.directivity_index_db is not None:
+    if result.directivity_index is not None:
         label = t("Directivity index", language)
         if result.polar_frequency is not None:
             label = t("Directivity index at {freq} Hz", language).format(
                 freq=_freq(result.polar_frequency, language)
             )
-        rows.append((label, f"{_db_1(result.directivity_index_db, language)} dB"))
+        rows.append((label, f"{_db_1(result.directivity_index, language)} dB"))
     if result.powering is not None:
         rows.append((t("Powering", language), html.escape(result.powering)))
     if result.supply_current_ma is not None:
@@ -230,11 +230,10 @@ def _secondary_drawing(
 
     has_polar = result.polar_angles_deg is not None
     has_noise = (
-        result.noise_frequencies is not None and result.noise_band_levels_db is not None
+        result.noise_frequencies is not None and result.noise_band_levels is not None
     )
     has_thd = (
-        result.distortion_spl_db is not None
-        and result.distortion_thd_percent is not None
+        result.distortion_spl is not None and result.distortion_thd_percent is not None
     )
     panels = int(has_polar) + int(has_noise) + int(has_thd)
     if panels == 0:
@@ -275,7 +274,7 @@ def _statement(result: MicrophoneCharacteristics, language: str = "en") -> str:
         language,
     ).format(
         mv=_db_1(result.sensitivity_mv_per_pa, language),
-        level=_db_1(result.sensitivity_level_db, language),
+        level=_db_1(result.sensitivity_level, language),
         freq=_freq(result.reference_frequency_hz, language),
         range=_range_text(*result.effective_range, language=language),
         tol=fmt_num(result.tolerance_db, language),
@@ -286,7 +285,7 @@ def _verdict(
     result: MicrophoneCharacteristics, requirement: float, language: str = "en"
 ) -> tuple[str, bool] | None:
     """Noise verdict: the equivalent noise level must not exceed the requirement."""
-    level = result.equivalent_noise_level_db
+    level = result.equivalent_noise_level
     if level is None:
         return None
     passed = level <= requirement

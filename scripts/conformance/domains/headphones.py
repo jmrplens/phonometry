@@ -89,7 +89,7 @@ def _chk_table_ii() -> Outcome:
     matching = sum(
         1
         for f, level, tol in ref.IEC60268_1_TABLE_II
-        if published[f].relative_level_db == level
+        if published[f].relative_level == level
         and published[f].tolerance_plus_db == tol
         and published[f].tolerance_minus_db == tol
     )
@@ -103,7 +103,7 @@ def _chk_table_ii() -> Outcome:
 )
 def _chk_full_range() -> Outcome:
     levels = np.array(
-        [band.relative_level_db for band in ea.SIMULATED_PROGRAM_SPECTRUM.values()]
+        [band.relative_level for band in ea.SIMULATED_PROGRAM_SPECTRUM.values()]
     )
     excess = 10.0 * math.log10(float(np.sum(10.0 ** (levels / 10.0))))
     return numeric(
@@ -625,9 +625,9 @@ def _chk_annex_b() -> Outcome:
         canal_section_area_mm2=limits["canal_area_ratio"]
         * limits["adult_canal_area_mm2"],
         volume_mm3=limits["volume_mm3"],
-        pink_noise_band_levels_db=[60.0, 60.0 + limits["neighbor_difference_db"]],
-        open_levels_db=[60.0],
-        sealed_levels_db=[60.0 - limits["sealed_attenuation_db"]],
+        pink_noise_band_levels=[60.0, 60.0 + limits["neighbor_difference"]],
+        open_levels=[60.0],
+        sealed_levels=[60.0 - limits["sealed_attenuation"]],
     )
     computed = {key: _flag(value) for key, value in verdict.requirements.items()}
     # a), d) and e) include their limit ("or less", "not more", "at least");

@@ -45,7 +45,7 @@ averaged over ``N`` periods has residual variance :math:`\sigma^2/N`:
 the residual standard deviation falls as :math:`1/\sqrt{N}` and the
 amplitude signal-to-noise ratio improves by :math:`\sqrt{N}` (a power
 reduction of :math:`10 \log_{10} N` dB, reported as
-:attr:`noise_reduction_db`).
+:attr:`noise_reduction`).
 
 **Choosing N (McFadden's revised-model correction).** Because a discrete
 interfering tone at a *non-harmonic* order :math:`q = f T` is only
@@ -188,7 +188,7 @@ class SynchronousAverageResult(OwnsArrays):
         alignment.
     :ivar period_s: Repetition period ``T``, in seconds.
     :ivar fs: Sample rate, in Hz.
-    :ivar noise_reduction_db: Power reduction of asynchronous noise,
+    :ivar noise_reduction: Power reduction of asynchronous noise,
         :math:`10 \log_{10} N` dB (amplitude SNR gain :math:`\sqrt{N}`).
     :ivar residual_rms: Root-mean-square of :attr:`residual`.
     :ivar comb_frequencies: Frequency axis of the comb-filter response, in
@@ -209,7 +209,7 @@ class SynchronousAverageResult(OwnsArrays):
     period_s: float
     fs: float
     _: KW_ONLY
-    noise_reduction_db: float
+    noise_reduction: float
     residual_rms: float
     comb_frequencies: NDArray[np.float64]
     comb_response: NDArray[np.float64]
@@ -440,7 +440,7 @@ def time_synchronous_average(
     period_waveform = np.asarray(blocks.mean(axis=0), dtype=np.float64)
     residual = np.asarray((blocks - period_waveform).ravel(), dtype=np.float64)
     residual_rms = float(np.sqrt(np.mean(residual * residual)))
-    noise_reduction_db = 10.0 * float(np.log10(n_avg))
+    noise_reduction = 10.0 * float(np.log10(n_avg))
 
     comb_freqs, comb_response = _comb_grid(period_v, n_avg, n_harmonics_v)
     # The averaged samples sit on the 1/fs sampling grid (each block is
@@ -455,7 +455,7 @@ def time_synchronous_average(
         samples_per_period=m_int,
         period_s=period_v,
         fs=fs_v,
-        noise_reduction_db=noise_reduction_db,
+        noise_reduction=noise_reduction,
         residual_rms=residual_rms,
         comb_frequencies=comb_freqs,
         comb_response=comb_response,

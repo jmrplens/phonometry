@@ -66,7 +66,7 @@ def test_calibration_refuses_sensitivities_of_the_wrong_shape() -> None:
             products_v2_per_pa2=np.ones((3, 3), dtype=complex),
             field="pressure",
             method="three_microphones",
-            corrections_db={},
+            corrections={},
         )
 
 
@@ -80,12 +80,12 @@ def test_calibration_levels_phases_and_read_only_columns() -> None:
         products_v2_per_pa2=np.ones((3, 3), dtype=complex),
         field="free_field",
         method="three_microphones",
-        corrections_db={"c": [0.1, 0.0, -0.1]},
+        corrections={"c": [0.1, 0.0, -0.1]},
         expanded_uncertainty_db=0.1,
     )
     np.testing.assert_allclose(calibration.phase_deg[0], [90.0, 180.0, 0.0])
     np.testing.assert_allclose(
-        calibration.sensitivity_level_db[1],
+        calibration.sensitivity_level[1],
         20.0 * np.log10(0.04) + np.array([0.1, 0.0, -0.1]),
     )
     np.testing.assert_allclose(calibration.expanded_uncertainty_db, [0.1, 0.1, 0.1])
@@ -175,7 +175,7 @@ def _calibration_fields() -> dict[str, object]:
         "products_v2_per_pa2": np.ones((3, 3), dtype=complex),
         "field": "pressure",
         "method": "three_microphones",
-        "corrections_db": {},
+        "corrections": {},
     }
 
 

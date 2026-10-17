@@ -79,7 +79,7 @@ Clause, formula and table numbers refer to ISO 4869-1:2018(E).
 ## allowable_field_variation
 
 ```python
-allowable_field_variation(free_field_rejection_db: float) -> float
+allowable_field_variation(free_field_rejection: float) -> float
 ```
 
 How much a rotated directional microphone may see vary (Table 1).
@@ -88,7 +88,7 @@ How much a rotated directional microphone may see vary (Table 1).
 
 | Name | Description |
 | :--- | :--- |
-| `free_field_rejection_db` | The free-field rejection of the directional microphone at the test signal, in dB: front to side for a cosine microphone, front to back for a cardioid one (4.2.2 b)). |
+| `free_field_rejection` | The free-field rejection of the directional microphone at the test signal, in dB: front to side for a cosine microphone, front to back for a cardioid one (4.2.2 b)). |
 
 **Returns:** The allowable variation of the sound-field level, in dB.
 
@@ -190,7 +190,7 @@ $\sqrt{U_{95,1}^2 + U_{95,2}^2}$ per band, in dB.
 
 A difference larger than this is significant at the 5 % level.
 
-### AttenuationDifferenceResult.difference_db
+### AttenuationDifferenceResult.difference
 
 *property*
 
@@ -237,11 +237,11 @@ The test signals at which the two measurements differ, in hertz.
 
 ```python
 check_reat_sound_field(
-    position_levels_db: Mapping[str, ArrayLike],
-    reference_levels_db: ArrayLike,
+    position_levels: Mapping[str, ArrayLike],
+    reference_levels: ArrayLike,
     *,
-    rotation_levels_db: ArrayLike | None = None,
-    free_field_rejection_db: float | None = None,
+    rotation_levels: ArrayLike | None = None,
+    free_field_rejection: float | None = None,
     frequencies: ArrayLike | None = None,
 ) -> REATSoundFieldCheck
 ```
@@ -266,10 +266,10 @@ separate requirements of the test site and are not judged here.
 
 | Name | Description |
 | :--- | :--- |
-| `position_levels_db` | The level at each position per test signal, in dB, keyed `"front"`, `"back"`, `"left"`, `"right"`, `"up"` and `"down"`. |
-| `reference_levels_db` | The level at the reference point per test signal, in dB. |
-| `rotation_levels_db` | The levels the directional microphone saw while rotated, a `(readings, bands)` grid in dB, on the same band axis; bands below 500 Hz are not read and may be `nan`. `None` leaves b) unjudged, and the verdict then does not pass. |
-| `free_field_rejection_db` | The free-field rejection of that microphone, in dB, required with `rotation_levels_db`. |
+| `position_levels` | The level at each position per test signal, in dB, keyed `"front"`, `"back"`, `"left"`, `"right"`, `"up"` and `"down"`. |
+| `reference_levels` | The level at the reference point per test signal, in dB. |
+| `rotation_levels` | The levels the directional microphone saw while rotated, a `(readings, bands)` grid in dB, on the same band axis; bands below 500 Hz are not read and may be `nan`. `None` leaves b) unjudged, and the verdict then does not pass. |
+| `free_field_rejection` | The free-field rejection of that microphone, in dB, required with `rotation_levels`. |
 | `frequencies` | The centre frequencies, in hertz, or `None` for the test signals of 4.1 as [`real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation) assumes them. |
 
 **Returns:** [`REATSoundFieldCheck`](/phonometry/reference/api/hearing/real-ear-attenuation/#reatsoundfieldcheck).
@@ -363,7 +363,7 @@ $U_{95} = 2u$, in dB.
 
 ```python
 real_ear_attenuation(
-    attenuation_db: ArrayLike | None = None,
+    attenuation: ArrayLike | None = None,
     *,
     open_threshold_db: ArrayLike | None = None,
     occluded_threshold_db: ArrayLike | None = None,
@@ -397,8 +397,8 @@ hearing level give the same difference.
 
 | Name | Description |
 | :--- | :--- |
-| `attenuation_db` | A `(subjects, bands)` grid of individual attenuations, in dB. |
-| `open_threshold_db` | The thresholds of hearing with open ears, a `(subjects, bands)` grid in dB, given together with `occluded_threshold_db` instead of `attenuation_db`. |
+| `attenuation` | A `(subjects, bands)` grid of individual attenuations, in dB. |
+| `open_threshold_db` | The thresholds of hearing with open ears, a `(subjects, bands)` grid in dB, given together with `occluded_threshold_db` instead of `attenuation`. |
 | `occluded_threshold_db` | The thresholds with the protector in place, in dB, on the same grid. |
 | `frequencies` | The centre frequencies of the test signals, in hertz, or `None` for the seven of 4.1 (125 Hz to 8 kHz) when the grid has seven columns, or those eight with the optional 63 Hz when it has eight. |
 
@@ -414,7 +414,7 @@ hearing level give the same difference.
 
 ```python
 RealEarAttenuationResult(
-    attenuation_db: np.ndarray,
+    attenuation: np.ndarray,
     mean_db: np.ndarray,
     standard_deviation_db: np.ndarray,
     standard_uncertainty_db: np.ndarray,
@@ -430,7 +430,7 @@ The attenuation of a hearing protector on a panel of subjects (4.6).
 
 | Name | Description |
 | :--- | :--- |
-| `attenuation_db` | The individual attenuations $A_{j,f}$, one row per subject and one column per test signal, in dB. This is the grid [`phonometry.hearing.assumed_protection_value`](/phonometry/reference/api/hearing/hearing-protectors/#assumed_protection_value), [`phonometry.hearing.hml_rating`](/phonometry/reference/api/hearing/hearing-protectors/#hml_rating) and [`phonometry.hearing.snr_rating`](/phonometry/reference/api/hearing/hearing-protectors/#snr_rating) take, unchanged. |
+| `attenuation` | The individual attenuations $A_{j,f}$, one row per subject and one column per test signal, in dB. This is the grid [`phonometry.hearing.assumed_protection_value`](/phonometry/reference/api/hearing/hearing-protectors/#assumed_protection_value), [`phonometry.hearing.hml_rating`](/phonometry/reference/api/hearing/hearing-protectors/#hml_rating) and [`phonometry.hearing.snr_rating`](/phonometry/reference/api/hearing/hearing-protectors/#snr_rating) take, unchanged. |
 | `mean_db` | The mean attenuation $m$ per test signal, in dB. |
 | `standard_deviation_db` | The standard deviation $s$ per test signal over the subjects, the sample one over $N - 1$, in dB. |
 | `standard_uncertainty_db` | $u = s/\sqrt{N}$, the standard deviation of the mean (A.2), in dB. |
@@ -541,9 +541,9 @@ REAT_WITHIN_LABORATORY_UNCERTAINTY = {'earplug': {'below 250 Hz': ProtectorUncer
 REATSoundFieldCheck(
     frequencies: np.ndarray,
     position_deviation_db: np.ndarray,
-    left_right_difference_db: np.ndarray,
+    left_right_difference: np.ndarray,
     rotation_variation_db: np.ndarray,
-    free_field_rejection_db: float | None,
+    free_field_rejection: float | None,
     positions: tuple[str, ...] = ('front', 'back', 'left', 'right', 'up', 'down'),
 )
 ```
@@ -556,9 +556,9 @@ Whether the test site's sound field qualifies for ISO 4869-1 (4.2.2).
 | :--- | :--- |
 | `frequencies` | The centre frequencies of the test signals, in hertz. |
 | `position_deviation_db` | The level at each of the six positions 15 cm from the reference point less the level at it, one row per position in the order of `positions`, in dB. |
-| `left_right_difference_db` | The difference between the right and left positions per band, as an absolute value, in dB. |
+| `left_right_difference` | The difference between the right and left positions per band, as an absolute value, in dB. |
 | `rotation_variation_db` | The spread of the levels a rotated directional microphone saw per band, in dB, or `nan` where 4.2.2 b) does not apply (below 500 Hz) or no rotation was given. |
-| `free_field_rejection_db` | The free-field rejection of the rotated directional microphone, in dB, or `None` when no rotation was given. What Table 1 allows the spread (`allowable_variation_db`) is read from it, not stored, so a check cannot be built against another allowance. |
+| `free_field_rejection` | The free-field rejection of the rotated directional microphone, in dB, or `None` when no rotation was given. What Table 1 allows the spread (`allowable_variation_db`) is read from it, not stored, so a check cannot be built against another allowance. |
 | `positions` | The position names, in row order. |
 
 4.2.2 b) is a requirement of the clause, not an option: a check made
@@ -573,7 +573,7 @@ verdict of a) on its own.
 
 What Table 1 allows the rotation spread, in dB.
 
-**Returns:** The allowance for `free_field_rejection_db`, or `None` when no rotation was given.
+**Returns:** The allowance for `free_field_rejection`, or `None` when no rotation was given.
 
 ### REATSoundFieldCheck.balanced
 

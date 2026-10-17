@@ -102,18 +102,18 @@ the one Clause 14 k) or l) prescribes for the case at hand.
 
 ```python
 FilterPeriodicMeasurements(
-    midband_attenuations_db: Sequence[float] | None = None,
+    midband_attenuations: Sequence[float] | None = None,
     midband_uncertainties_db: Sequence[float] | None = None,
     bandwidth_deviations_db: Sequence[float] | None = None,
     bandwidth_uncertainties_db: Sequence[float] | None = None,
     set_midband_frequencies_hz: Sequence[float] | None = None,
     linearity_deviations_db: Sequence[float] | None = None,
-    linearity_levels_below_upper_db: Sequence[float] | None = None,
+    linearity_levels_below_upper: Sequence[float] | None = None,
     linearity_uncertainties_db: Sequence[float] | None = None,
     linearity_midband_frequencies_hz: Sequence[float] | None = None,
     range_linearity_deviations_db: Sequence[float] | None = None,
     range_linearity_uncertainties_db: Sequence[float] | None = None,
-    relative_attenuations_db: Sequence[Sequence[float]] | None = None,
+    relative_attenuations: Sequence[Sequence[float]] | None = None,
     relative_attenuation_uncertainties_db: Sequence[Sequence[float]] | None = None,
     tested_midband_frequencies_hz: Sequence[float] | None = None,
 )
@@ -130,18 +130,18 @@ not measured. Everything is in decibels.
 
 | Name | Description |
 | :--- | :--- |
-| `midband_attenuations_db` | 10.2: the relative attenuation at the exact mid-band frequency of every filter of the set. |
+| `midband_attenuations` | 10.2: the relative attenuation at the exact mid-band frequency of every filter of the set. |
 | `midband_uncertainties_db` | Their uncertainties. |
 | `bandwidth_deviations_db` | 10.3: for a time-invariant filter, the deviation of every filter's time-averaged output of an exponential sweep from $L_\mathrm{c}$ of IEC 61260-1 Formula (17). |
 | `bandwidth_uncertainties_db` | Their uncertainties. |
 | `set_midband_frequencies_hz` | Optional labels for the 10.2 and 10.3 results: the exact mid-band frequency of each filter of the set, in order. Its lowest and highest bound the test frequencies 13.4 requires. |
 | `linearity_deviations_db` | 11.7: the level linearity deviations of the three selected filters on the reference level range, at every level measured. |
-| `linearity_levels_below_upper_db` | For each of them, how far below the upper boundary of the linear operating range the input level was ($L_\mathrm{u} - L$, negative above it), which decides between the limits of 5.13.3 and 5.13.4 and the maxima of Annex B. |
+| `linearity_levels_below_upper` | For each of them, how far below the upper boundary of the linear operating range the input level was ($L_\mathrm{u} - L$, negative above it), which decides between the limits of 5.13.3 and 5.13.4 and the maxima of Annex B. |
 | `linearity_uncertainties_db` | Their uncertainties. |
 | `linearity_midband_frequencies_hz` | Optional: the exact mid-band frequency of the filter each 11.7 result was measured on, in the same order, which lets the verdict count the three filters 11.3 requires and names the filter in each result's label. |
 | `range_linearity_deviations_db` | 11.9: the level linearity deviation 30 dB below the upper boundary of every other level range. |
 | `range_linearity_uncertainties_db` | Their uncertainties. |
-| `relative_attenuations_db` | 13: for each of the three selected filters, a row of 15 relative attenuations at the test frequencies of [`periodic_test_frequencies`](/phonometry/reference/api/filters/periodic-tests/#periodic_test_frequencies), `k = -7 .. 7`, NaN where 13.4 drops the frequency. |
+| `relative_attenuations` | 13: for each of the three selected filters, a row of 15 relative attenuations at the test frequencies of [`periodic_test_frequencies`](/phonometry/reference/api/filters/periodic-tests/#periodic_test_frequencies), `k = -7 .. 7`, NaN where 13.4 drops the frequency. |
 | `relative_attenuation_uncertainties_db` | The same shape, NaN in the same places. |
 | `tested_midband_frequencies_hz` | Optional labels for the 13 results: the exact mid-band frequency of each selected filter, one per row, which places its test frequencies for 13.4. |
 

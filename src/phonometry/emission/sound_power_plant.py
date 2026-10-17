@@ -164,7 +164,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "PLANT_AIR_ABSORPTION_DB_PER_M",
-    "PLANT_BACKGROUND_CORRECTION_DB",
+    "PLANT_BACKGROUND_CORRECTION",
     "PLANT_METHOD_UNCERTAINTY_DB",
     "PartialPlantContributions",
     "PlantMeasurementCheck",
@@ -225,7 +225,7 @@ PLANT_METHOD_UNCERTAINTY_DB: Mapping[float, tuple[float, float]] = MappingProxyT
 #: with the plant operating, keyed by the difference in whole decibels between
 #: that level and the background alone (PDF page 14, printed p. 6). Below
 #: 6 dB the table says "Measurement invalid", above 10 dB the correction is 0.
-PLANT_BACKGROUND_CORRECTION_DB: Mapping[int, float] = MappingProxyType(
+PLANT_BACKGROUND_CORRECTION: Mapping[int, float] = MappingProxyType(
     {6: 1.0, 7: 1.0, 8: 1.0, 9: 0.5, 10: 0.5}
 )
 
@@ -503,7 +503,7 @@ def plant_mean_distance_limits_m(plant_area_m2: float) -> tuple[float, float]:
 
 
 def plant_background_correction(
-    level_difference_db: ArrayLike,
+    level_difference: ArrayLike,
 ) -> float | NDArray[np.float64]:
     r"""The background correction of Table 2, to subtract from the level measured.
 
@@ -515,16 +515,16 @@ def plant_background_correction(
     settled to nine decimals, so 20,4 - 14,4 dB, 5,999 999 999 999 998 in
     binary, is the 6 dB it is, and 64,1 - 55,6 dB the 8,5 dB that rounds up.
 
-    :param level_difference_db: The level with the plant operating less the
+    :param level_difference: The level with the plant operating less the
         background level alone, in decibels: one value or an array.
     :return: The correction, in decibels, a ``float`` for one difference and an
         array of the same shape otherwise.
     :raises ValueError: for a non-finite difference or one below 6 dB, which
         the table calls an invalid measurement.
     """
-    raw = np.asarray(level_difference_db, dtype=np.float64)
+    raw = np.asarray(level_difference, dtype=np.float64)
     if not np.all(np.isfinite(raw)):
-        msg = "'level_difference_db' must be finite."
+        msg = "'level_difference' must be finite."
         raise ValueError(msg)
     diff = settled(raw)
     invalid = diff < _MIN_BACKGROUND_MARGIN_DB
@@ -536,7 +536,7 @@ def plant_background_correction(
         )
         raise ValueError(msg)
     rows = np.floor(np.minimum(diff, _PREFERRED_BACKGROUND_MARGIN_DB) + 0.5).astype(int)
-    table = np.vectorize(PLANT_BACKGROUND_CORRECTION_DB.__getitem__, otypes=[float])
+    table = np.vectorize(PLANT_BACKGROUND_CORRECTION.__getitem__, otypes=[float])
     correction = np.where(diff > _PREFERRED_BACKGROUND_MARGIN_DB, 0.0, table(rows))
     if correction.ndim == 0:
         return float(correction)
@@ -631,7 +631,7 @@ def plant_method_uncertainty(distance_ratio: float) -> tuple[float, float]:
     return PLANT_METHOD_UNCERTAINTY_DB[below[-1]]
 
 
-def plant_steady_reading(max_level_db: float, min_level_db: float) -> float:
+def plant_steady_reading(max_level: float, min_level: float) -> float:
     r"""The level read on a sound level meter from a steady noise, 9.5.2.
 
     With time weighting S, a needle that swings over less than 5 dB marks
@@ -642,17 +642,17 @@ def plant_steady_reading(max_level_db: float, min_level_db: float) -> float:
     the level used; ``leq_range_db`` of :func:`check_plant_measurement`
     judges that one.
 
-    :param max_level_db: The highest level read, in decibels.
-    :param min_level_db: The lowest level read, in decibels.
+    :param max_level: The highest level read, in decibels.
+    :param min_level: The lowest level read, in decibels.
     :return: The level, in decibels.
     :raises ValueError: for a minimum above the maximum, or a swing of 5 dB or
         more, the swing settled to nine decimals first, so 64,1 - 59,1 dB,
         4,999 999 999 999 993 in binary, is the 5 dB it is.
     """
-    top = require_finite(max_level_db, "max_level_db")
-    bottom = require_finite(min_level_db, "min_level_db")
+    top = require_finite(max_level, "max_level")
+    bottom = require_finite(min_level, "min_level")
     if bottom > top:
-        msg = "'min_level_db' must not exceed 'max_level_db'."
+        msg = "'min_level' must not exceed 'max_level'."
         raise ValueError(msg)
     swing = float(settled(top - bottom))
     if swing >= _STEADY_RANGE_DB:
@@ -1523,7 +1523,7 @@ class PlantSoundPowerResult(OwnsArrays):
         )
 
     @property
-    def background_correction_db(self) -> NDArray[np.float64] | None:
+    def background_correction(self) -> NDArray[np.float64] | None:
         """The Table 2 correction subtracted at each position and band, in
         decibels; ``None`` with no background.
         """
@@ -1537,13 +1537,13 @@ class PlantSoundPowerResult(OwnsArrays):
         """:math:`L_{pi}`, the levels corrected for the background (9.5.4),
         ``(N, bands)``, in decibels.
         """
-        correction = self.background_correction_db
+        correction = self.background_correction
         if correction is None:
             return np.array(self.measured_levels, dtype=np.float64)
         return np.asarray(self.measured_levels - correction, dtype=np.float64)
 
     @property
-    def mean_level_db(self) -> NDArray[np.float64]:
+    def mean_level(self) -> NDArray[np.float64]:
         r""":math:`\overline{L_p}`, the energy average round the contour, per band
         (10.1), in decibels.
         """
@@ -1559,7 +1559,7 @@ class PlantSoundPowerResult(OwnsArrays):
         place of the levels either side of 5, which side depending on the
         machine, and is not replaced.
         """
-        excess = settled(self.levels - self.mean_level_db)
+        excess = settled(self.levels - self.mean_level)
         return np.asarray(excess > _EXCESS_LIMIT_DB, dtype=bool)
 
     @property
@@ -1570,12 +1570,12 @@ class PlantSoundPowerResult(OwnsArrays):
         return bool(np.any(self.capped))
 
     @property
-    def corrected_mean_level_db(self) -> NDArray[np.float64]:
+    def corrected_mean_level(self) -> NDArray[np.float64]:
         r""":math:`\overline{L_p^*}` of 10.3, the average after replacing each
         capped level by :math:`\overline{L_p} + 5` dB; equal to
         :math:`\overline{L_p}` in a band with nothing capped.
         """
-        cap = self.mean_level_db + _EXCESS_LIMIT_DB
+        cap = self.mean_level + _EXCESS_LIMIT_DB
         return energy_mean(np.where(self.capped, cap, self.levels), axis=0)
 
     @property
@@ -1639,10 +1639,10 @@ class PlantSoundPowerResult(OwnsArrays):
         )
 
     @property
-    def sound_power_level_db(self) -> NDArray[np.float64]:
+    def sound_power_level(self) -> NDArray[np.float64]:
         """:math:`L_W` per octave band, in dB re 1 pW (10.8)."""
         return np.asarray(
-            self.corrected_mean_level_db
+            self.corrected_mean_level
             + self.area_term_db
             + self.near_field_term_db
             + self.microphone_term_db
@@ -1660,14 +1660,14 @@ class PlantSoundPowerResult(OwnsArrays):
         return np.array(self.frequencies[keep], dtype=np.float64)
 
     @property
-    def a_weighted_sound_power_level_db(self) -> float:
+    def a_weighted_sound_power_level(self) -> float:
         r""":math:`L_{W\mathrm{A}} = 10 \lg \sum_j 10^{0{,}1(L_{Wj} + C_j)}`, in
         dB re 1 pW (10.9).
         """
         keep = np.isin(self.frequencies, _A_WEIGHTED_BANDS_HZ)
         bands = self.frequencies[keep]
         return energy_sum(
-            self.sound_power_level_db[keep] + _a_weighting_corrections(bands)
+            self.sound_power_level[keep] + _a_weighting_corrections(bands)
         )
 
     @property
@@ -2052,7 +2052,7 @@ def _reading_rows(result: PlantSoundPowerResult) -> list[PlantRequirement]:
         _row("octave_bands", "9.5.1 a)", "octave bands from 63 Hz to 4 kHz measured",
              present, ">=", len(_REQUIRED_BANDS_HZ), "")
     )  # fmt: skip
-    excess = float(settled(np.max(result.levels - result.mean_level_db)))
+    excess = float(settled(np.max(result.levels - result.mean_level)))
     rows.append(
         _row("level_excess", "10.2", "largest level above the contour average",
              excess, "<=", _EXCESS_LIMIT_DB, "dB", advisory=True)
@@ -2205,13 +2205,13 @@ class PartialPlantContributions(OwnsArrays):
 
     :ivar names: A name per part.
     :ivar frequencies: Nominal octave-band centres, in Hz.
-    :ivar part_levels_db: :math:`L_W` of each part, ``(parts, bands)``, in
+    :ivar part_levels: :math:`L_W` of each part, ``(parts, bands)``, in
         dB re 1 pW.
     """
 
     names: tuple[str, ...]
     frequencies: NDArray[np.float64]
-    part_levels_db: NDArray[np.float64]
+    part_levels: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject parts whose spectra do not run over the same bands.
@@ -2222,12 +2222,12 @@ class PartialPlantContributions(OwnsArrays):
         bands = read_only(_octave_bands(self.frequencies))
         object.__setattr__(self, "frequencies", bands)
         levels = read_only(
-            np.asarray(require_finite_matrix(self.part_levels_db, "part_levels_db"))
+            np.asarray(require_finite_matrix(self.part_levels, "part_levels"))
         )
-        object.__setattr__(self, "part_levels_db", levels)
+        object.__setattr__(self, "part_levels", levels)
         object.__setattr__(self, "names", tuple(str(n) for n in self.names))
-        require_ranks(self, frequencies=1, part_levels_db=2)
-        require_same_length(self, "frequencies", ("part_levels_db", 1))
+        require_ranks(self, frequencies=1, part_levels=2)
+        require_same_length(self, "frequencies", ("part_levels", 1))
         if len(self.names) != levels.shape[0]:
             msg = (
                 f"PartialPlantContributions: {len(self.names)} names for "
@@ -2236,32 +2236,32 @@ class PartialPlantContributions(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def total_level_db(self) -> NDArray[np.float64]:
+    def total_level(self) -> NDArray[np.float64]:
         """:math:`L_W` of the parts together, per band, in dB re 1 pW."""
-        return energy_sum(self.part_levels_db, axis=0)
+        return energy_sum(self.part_levels, axis=0)
 
     @property
     def contribution_db(self) -> NDArray[np.float64]:
         """Each part's :math:`L_W` less the total, per band, in decibels (at most 0)."""
-        return np.asarray(self.part_levels_db - self.total_level_db, dtype=np.float64)
+        return np.asarray(self.part_levels - self.total_level, dtype=np.float64)
 
     @property
-    def a_weighted_part_levels_db(self) -> NDArray[np.float64]:
+    def a_weighted_part_levels(self) -> NDArray[np.float64]:
         r""":math:`L_{W\mathrm{A}}` of each part over the bands of 10.9, in dB re 1 pW."""
         keep = np.isin(self.frequencies, _A_WEIGHTED_BANDS_HZ)
         ck = _a_weighting_corrections(self.frequencies[keep])
-        return energy_sum(self.part_levels_db[:, keep] + ck, axis=1)
+        return energy_sum(self.part_levels[:, keep] + ck, axis=1)
 
     @property
     def a_weighted_total_db(self) -> float:
         r""":math:`L_{W\mathrm{A}}` of the parts together, in dB re 1 pW."""
-        return energy_sum(self.a_weighted_part_levels_db)
+        return energy_sum(self.a_weighted_part_levels)
 
     @property
     def a_weighted_contribution_db(self) -> NDArray[np.float64]:
         r"""Each part's :math:`L_{W\mathrm{A}}` less the total, in decibels."""
         return np.asarray(
-            self.a_weighted_part_levels_db - self.a_weighted_total_db, dtype=np.float64
+            self.a_weighted_part_levels - self.a_weighted_total_db, dtype=np.float64
         )
 
     def plot(
@@ -2323,5 +2323,5 @@ def partial_plant_contributions(
     return PartialPlantContributions(
         names=labels,
         frequencies=np.asarray(bands, dtype=np.float64),
-        part_levels_db=np.stack([p.sound_power_level_db for p in parts]),
+        part_levels=np.stack([p.sound_power_level for p in parts]),
     )

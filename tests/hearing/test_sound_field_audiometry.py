@@ -34,7 +34,7 @@ def test_the_tables_are_the_printed_ones() -> None:
     assert hearing.DIFFUSE_FIELD_VARIATION_LIMITS == ISO8253_2_TABLE_1
     assert hearing.INCIDENCE_CORRECTION_FREQUENCIES_HZ == ISO8253_2_TABLE_B1_HZ
     for angle, column in ISO8253_2_TABLE_B1.items():
-        np.testing.assert_array_equal(hearing.INCIDENCE_CORRECTIONS_DB[angle], column)
+        np.testing.assert_array_equal(hearing.INCIDENCE_CORRECTIONS[angle], column)
 
 
 def test_the_sound_field_limits_are_the_bone_limits_less_three_decibels() -> None:
@@ -83,8 +83,8 @@ def test_a_diffuse_field_passes_when_both_conditions_hold() -> None:
     check = hearing.check_diffuse_sound_field(
         _diffuse(),
         [0.0] * _ELEVEN,
-        directional_levels_db=directional,
-        front_to_random_index_db=5.0,
+        directional_levels=directional,
+        front_to_random_index=5.0,
     )
     assert check.passes
     assert check.directionality_judged
@@ -100,8 +100,8 @@ def test_table_1_limits_the_variation_by_the_index() -> None:
         check = hearing.check_diffuse_sound_field(
             _diffuse(),
             [0.0] * _ELEVEN,
-            directional_levels_db=directional,
-            front_to_random_index_db=index,
+            directional_levels=directional,
+            front_to_random_index=index,
         )
         assert not check.passes
         np.testing.assert_array_equal(check.allowable_variation_db[2:], 4.5)
@@ -112,16 +112,16 @@ def test_the_six_positions_and_the_ear_sides_are_judged() -> None:
     loose = hearing.check_diffuse_sound_field(
         _diffuse(2.6),
         [0.0] * _ELEVEN,
-        directional_levels_db=directional,
-        front_to_random_index_db=5.0,
+        directional_levels=directional,
+        front_to_random_index=5.0,
     )
     assert not np.any(loose.uniform)
     assert not loose.passes
     lopsided = hearing.check_diffuse_sound_field(
         _diffuse(-1.5, right=1.6),
         [0.0] * _ELEVEN,
-        directional_levels_db=directional,
-        front_to_random_index_db=5.0,
+        directional_levels=directional,
+        front_to_random_index=5.0,
     )
     assert np.all(lopsided.uniform)
     assert not np.any(lopsided.balanced)
@@ -143,8 +143,8 @@ def test_a_band_where_the_microphone_is_unsuitable_is_not_judged() -> None:
     check = hearing.check_diffuse_sound_field(
         _diffuse(),
         [0.0] * _ELEVEN,
-        directional_levels_db=[[0.0] * _ELEVEN, [1.0] * _ELEVEN],
-        front_to_random_index_db=index,
+        directional_levels=[[0.0] * _ELEVEN, [1.0] * _ELEVEN],
+        front_to_random_index=index,
     )
     assert not check.directional_judged[5]
     assert not check.directional_judged[6]
@@ -155,20 +155,20 @@ def test_a_band_where_the_microphone_is_unsuitable_is_not_judged() -> None:
     ("positions", "kwargs", "match"),
     [
         ({name: [0.0] * _ELEVEN for name in _FOUR}, {}, "front, back"),
-        (None, {"directional_levels_db": [[0.0] * _ELEVEN] * 2}, "together"),
+        (None, {"directional_levels": [[0.0] * _ELEVEN] * 2}, "together"),
         (
             None,
             {
-                "directional_levels_db": [[0.0] * _ELEVEN] * 2,
-                "front_to_random_index_db": 3.9,
+                "directional_levels": [[0.0] * _ELEVEN] * 2,
+                "front_to_random_index": 3.9,
             },
             "not suitable",
         ),
         (
             None,
             {
-                "directional_levels_db": [[0.0] * _ELEVEN],
-                "front_to_random_index_db": 5.0,
+                "directional_levels": [[0.0] * _ELEVEN],
+                "front_to_random_index": 5.0,
             },
             "at least two finite readings",
         ),
@@ -208,11 +208,11 @@ def test_the_axial_pair_is_judged_against_the_inverse_distance_law() -> None:
     check = hearing.check_free_sound_field(
         lateral,
         reference,
-        front_levels_db=front,
-        back_levels_db=back,
+        front_levels=front,
+        back_levels=back,
         loudspeaker_distance_m=1.5,
     )
-    assert check.inverse_distance_difference_db == pytest.approx(
+    assert check.inverse_distance_difference == pytest.approx(
         20.0 * math.log10(1.65 / 1.35)
     )
     np.testing.assert_allclose(check.inverse_distance_deviation_db, 0.0, atol=1e-12)
@@ -230,16 +230,16 @@ def test_the_axial_offset_and_the_law_are_read_from_the_field() -> None:
     check = hearing.check_free_sound_field(
         lateral,
         reference,
-        front_levels_db=front,
-        back_levels_db=back,
+        front_levels=front,
+        back_levels=back,
         loudspeaker_distance_m=1.5,
     )
     names = {f.name for f in dataclasses.fields(check)}
-    assert not names & {"axis_offset_m", "inverse_distance_difference_db"}
+    assert not names & {"axis_offset_m", "inverse_distance_difference"}
     assert check.axis_offset_m == pytest.approx(0.15)
     quasi = dataclasses.replace(check, field="quasi-free")
     assert quasi.axis_offset_m == pytest.approx(0.10)
-    assert quasi.inverse_distance_difference_db == pytest.approx(
+    assert quasi.inverse_distance_difference == pytest.approx(
         20.0 * math.log10(1.6 / 1.4)
     )
 
@@ -249,8 +249,8 @@ def test_a_field_the_clause_does_not_name_is_refused() -> None:
     check = hearing.check_free_sound_field(
         lateral,
         reference,
-        front_levels_db=front,
-        back_levels_db=back,
+        front_levels=front,
+        back_levels=back,
         loudspeaker_distance_m=1.5,
     )
     with pytest.raises(ValueError, match="'field' must be one of"):
@@ -263,8 +263,8 @@ def test_the_free_field_tolerance_widens_above_4_khz() -> None:
     check = hearing.check_free_sound_field(
         lateral,
         reference,
-        front_levels_db=front,
-        back_levels_db=back,
+        front_levels=front,
+        back_levels=back,
         loudspeaker_distance_m=2.0,
     )
     np.testing.assert_array_equal(check.usable_frequencies, [6000.0, 8000.0])
@@ -280,8 +280,8 @@ def test_the_ear_sides_of_a_free_field_are_limited_above_4_khz_only() -> None:
     check = hearing.check_free_sound_field(
         lateral,
         reference,
-        front_levels_db=front,
-        back_levels_db=back,
+        front_levels=front,
+        back_levels=back,
         loudspeaker_distance_m=2.0,
     )
     assert np.all(check.balanced[:9])
@@ -293,8 +293,8 @@ def test_a_loudspeaker_nearer_than_one_metre_fails_the_field() -> None:
     check = hearing.check_free_sound_field(
         lateral,
         reference,
-        front_levels_db=front,
-        back_levels_db=back,
+        front_levels=front,
+        back_levels=back,
         loudspeaker_distance_m=0.8,
     )
     assert np.all(check.compliant)
@@ -307,8 +307,8 @@ def test_the_quasi_free_field_uses_its_own_offsets_and_tolerance() -> None:
     check = hearing.check_quasi_free_sound_field(
         lateral,
         reference,
-        front_levels_db=front,
-        back_levels_db=back,
+        front_levels=front,
+        back_levels=back,
         loudspeaker_distance_m=1.2,
     )
     assert check.field == "quasi-free"
@@ -324,8 +324,8 @@ def test_a_quasi_free_field_off_the_law_narrows_its_usable_range() -> None:
     check = hearing.check_quasi_free_sound_field(
         lateral,
         reference,
-        front_levels_db=off,
-        back_levels_db=back,
+        front_levels=off,
+        back_levels=back,
         loudspeaker_distance_m=1.2,
     )
     assert check.usable_frequencies[0] == 750.0
@@ -343,8 +343,8 @@ def test_the_free_check_refuses_an_impossible_distance(
         hearing.check_free_sound_field(
             lateral,
             reference,
-            front_levels_db=front,
-            back_levels_db=back,
+            front_levels=front,
+            back_levels=back,
             loudspeaker_distance_m=distance,
         )
 
@@ -355,8 +355,8 @@ def test_the_free_check_needs_the_frequencies_of_other_bands() -> None:
         hearing.check_free_sound_field(
             lateral,
             [0.0] * 3,
-            front_levels_db=[1.0] * 3,
-            back_levels_db=[0.0] * 3,
+            front_levels=[1.0] * 3,
+            back_levels=[0.0] * 3,
             loudspeaker_distance_m=2.0,
         )
 
@@ -366,8 +366,8 @@ def test_the_free_check_has_no_truth_value() -> None:
     check = hearing.check_free_sound_field(
         lateral,
         reference,
-        front_levels_db=front,
-        back_levels_db=back,
+        front_levels=front,
+        back_levels=back,
         loudspeaker_distance_m=2.0,
     )
     with pytest.raises(TypeError, match="passes"):

@@ -205,7 +205,7 @@ def _default_bands(count: int, owner: str) -> np.ndarray:
 class ActiveInsertionLossResult(OwnsArrays):
     r"""The active insertion loss of an ANR earmuff on a panel of subjects.
 
-    :ivar insertion_loss_db: :math:`\alpha` per subject and band, the ear with
+    :ivar insertion_loss: :math:`\alpha` per subject and band, the ear with
         the lower value in each band (5.5 b)), in dB.
     :ivar per_ear_db: The value of each ear, a ``(subjects, 2, bands)`` grid
         with the left ear first, in dB, or ``None`` when only the lower-ear
@@ -218,7 +218,7 @@ class ActiveInsertionLossResult(OwnsArrays):
     :ivar n_subjects: The number of test subjects :math:`N`.
     """
 
-    insertion_loss_db: np.ndarray
+    insertion_loss: np.ndarray
     per_ear_db: np.ndarray | None
     mean_db: np.ndarray
     standard_deviation_db: np.ndarray
@@ -271,40 +271,40 @@ def _levels(values: ArrayLike, name: str) -> np.ndarray:
 
 
 def _lower_ear_from_insertion_loss(
-    insertion_loss_db: ArrayLike,
+    insertion_loss: ArrayLike,
 ) -> tuple[np.ndarray | None, np.ndarray]:
     """The per-ear grid, if one was given, and the lower ear of each subject."""
-    grid = np.asarray(insertion_loss_db, dtype=np.float64)
+    grid = np.asarray(insertion_loss, dtype=np.float64)
     if grid.ndim == _PER_EAR_RANK:
-        per_ear = _levels(grid, "insertion_loss_db")
+        per_ear = _levels(grid, "insertion_loss")
         return per_ear, per_ear.min(axis=1)
     if grid.ndim != _GRID_RANK:
         msg = (
-            "'insertion_loss_db' must be a (subjects, 2, bands) grid per "
+            "'insertion_loss' must be a (subjects, 2, bands) grid per "
             "ear or a (subjects, bands) grid of the lower ear."
         )
         raise ValueError(msg)
     if grid.shape[0] < _MINIMUM_SUBJECTS or grid.shape[1] == 0:
         msg = (
-            "'insertion_loss_db' needs at least two subjects and one "
+            "'insertion_loss' needs at least two subjects and one "
             "band; 5.4.1 asks for sixteen subjects."
         )
         raise ValueError(msg)
     if not np.all(np.isfinite(grid)):
-        msg = "'insertion_loss_db' must contain only finite values, in dB."
+        msg = "'insertion_loss' must contain only finite values, in dB."
         raise ValueError(msg)
     return None, np.array(grid, dtype=np.float64)
 
 
 def _insertion_loss_from_levels(
-    passive_levels_db: ArrayLike, active_levels_db: ArrayLike
+    passive_levels: ArrayLike, active_levels: ArrayLike
 ) -> np.ndarray:
     """The insertion loss of each ear, passive minus active level (5.4.1)."""
-    passive = _levels(passive_levels_db, "passive_levels_db")
-    active = _levels(active_levels_db, "active_levels_db")
+    passive = _levels(passive_levels, "passive_levels")
+    active = _levels(active_levels, "active_levels")
     if passive.shape != active.shape:
         msg = (
-            "'passive_levels_db' and 'active_levels_db' must cover the same "
+            "'passive_levels' and 'active_levels' must cover the same "
             f"subjects, ears and bands; got {passive.shape} and {active.shape}."
         )
         raise ValueError(msg)
@@ -326,10 +326,10 @@ def _band_frequencies(frequencies: ArrayLike | None, count: int) -> np.ndarray:
 
 
 def active_insertion_loss(
-    insertion_loss_db: ArrayLike | None = None,
+    insertion_loss: ArrayLike | None = None,
     *,
-    passive_levels_db: ArrayLike | None = None,
-    active_levels_db: ArrayLike | None = None,
+    passive_levels: ArrayLike | None = None,
+    active_levels: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
 ) -> ActiveInsertionLossResult:
     r"""The active insertion loss, its lower ear and its uncertainty (5.4, 5.5 b), A.2).
@@ -354,13 +354,13 @@ def active_insertion_loss(
     A negative value is a band in which the circuit adds sound, which ANR
     earmuffs commonly do above 1 kHz; it is kept as it is.
 
-    :param insertion_loss_db: The active insertion loss in dB, a
+    :param insertion_loss: The active insertion loss in dB, a
         ``(subjects, 2, bands)`` grid per ear or a ``(subjects, bands)`` grid
         of the lower ear.
-    :param passive_levels_db: The MIRE levels in the passive mode, a
+    :param passive_levels: The MIRE levels in the passive mode, a
         ``(subjects, 2, bands)`` grid in dB, given together with
-        ``active_levels_db`` instead of ``insertion_loss_db``.
-    :param active_levels_db: The MIRE levels in the active mode, on the same
+        ``active_levels`` instead of ``insertion_loss``.
+    :param active_levels: The MIRE levels in the active mode, on the same
         grid.
     :param frequencies: The centre frequencies in hertz, or ``None`` for the
         one-third-octave bands 50 Hz to 10 kHz (24 bands) or 100 Hz to 10 kHz
@@ -372,21 +372,21 @@ def active_insertion_loss(
         the two level grids differ in shape, or if ``frequencies`` does not
         match.
     """
-    levels_given = passive_levels_db is not None or active_levels_db is not None
+    levels_given = passive_levels is not None or active_levels is not None
     per_ear: np.ndarray | None
-    if insertion_loss_db is not None and not levels_given:
-        per_ear, lower = _lower_ear_from_insertion_loss(insertion_loss_db)
+    if insertion_loss is not None and not levels_given:
+        per_ear, lower = _lower_ear_from_insertion_loss(insertion_loss)
     elif (
-        insertion_loss_db is None
-        and passive_levels_db is not None
-        and active_levels_db is not None
+        insertion_loss is None
+        and passive_levels is not None
+        and active_levels is not None
     ):
-        per_ear = _insertion_loss_from_levels(passive_levels_db, active_levels_db)
+        per_ear = _insertion_loss_from_levels(passive_levels, active_levels)
         lower = per_ear.min(axis=1)
     else:
         msg = (
-            "give either 'insertion_loss_db', or both 'passive_levels_db' and "
-            "'active_levels_db' (5.4.1), and not both forms."
+            "give either 'insertion_loss', or both 'passive_levels' and "
+            "'active_levels' (5.4.1), and not both forms."
         )
         raise ValueError(msg)
     freqs = _band_frequencies(frequencies, lower.shape[1])
@@ -395,7 +395,7 @@ def active_insertion_loss(
     spread = np.asarray(lower.std(axis=0, ddof=1), dtype=np.float64)
     standard = spread / math.sqrt(n_subjects)
     return ActiveInsertionLossResult(
-        insertion_loss_db=lower,
+        insertion_loss=lower,
         per_ear_db=per_ear,
         mean_db=mean,
         standard_deviation_db=spread,
@@ -416,7 +416,7 @@ class ANRTotalAttenuationResult(OwnsArrays):
         and one-third-octave band, 5.5 c), in dB.
     :ivar reat_third_octave_db: The passive attenuation interpolated and
         extrapolated into the one-third-octave bands, 5.5 a), in dB.
-    :ivar insertion_loss_db: The lower-ear active insertion loss in the same
+    :ivar insertion_loss: The lower-ear active insertion loss in the same
         bands, 5.5 b), in dB.
     :ivar frequencies: The octave bands, in hertz.
     :ivar third_octave_frequencies: The one-third-octave bands, in hertz.
@@ -428,7 +428,7 @@ class ANRTotalAttenuationResult(OwnsArrays):
     total_octave_db: np.ndarray
     total_third_octave_db: np.ndarray
     reat_third_octave_db: np.ndarray
-    insertion_loss_db: np.ndarray
+    insertion_loss: np.ndarray
     frequencies: np.ndarray
     third_octave_frequencies: np.ndarray
     assumed_protection: AssumedProtectionResult
@@ -462,7 +462,7 @@ def _passive_octaves(
     """
     octaves = np.asarray(_OCTAVE_BANDS_HZ, dtype=np.float64)
     if isinstance(reat, RealEarAttenuationResult):
-        grid = np.asarray(reat.attenuation_db, dtype=np.float64)
+        grid = np.asarray(reat.attenuation, dtype=np.float64)
         freqs = np.asarray(reat.frequencies, dtype=np.float64)
     else:
         grid = np.asarray(reat, dtype=np.float64)
@@ -545,12 +545,12 @@ def _lower_ear_thirds(
             )
             raise ValueError(msg)
         columns.append(int(matches[0]))
-    return np.asarray(result.insertion_loss_db, dtype=np.float64)[:, columns]
+    return np.asarray(result.insertion_loss, dtype=np.float64)[:, columns]
 
 
 def anr_total_attenuation(
     reat: ArrayLike | RealEarAttenuationResult,
-    insertion_loss_db: ArrayLike | ActiveInsertionLossResult,
+    insertion_loss: ArrayLike | ActiveInsertionLossResult,
 ) -> ANRTotalAttenuationResult:
     r"""The total attenuation of an ANR earmuff, subject by subject (5.5).
 
@@ -578,7 +578,7 @@ def anr_total_attenuation(
         :class:`~phonometry.hearing.RealEarAttenuationResult` or its
         ``(subjects, octaves)`` grid in dB on the octave bands 63 Hz or 125 Hz
         to 8 kHz.
-    :param insertion_loss_db: The active insertion loss, an
+    :param insertion_loss: The active insertion loss, an
         :class:`ActiveInsertionLossResult` or a grid
         :func:`active_insertion_loss` accepts, on the one-third-octave bands of
         5.3.1.
@@ -589,9 +589,9 @@ def anr_total_attenuation(
     """
     passive, octaves = _passive_octaves(reat)
     result = (
-        insertion_loss_db
-        if isinstance(insertion_loss_db, ActiveInsertionLossResult)
-        else active_insertion_loss(insertion_loss_db)
+        insertion_loss
+        if isinstance(insertion_loss, ActiveInsertionLossResult)
+        else active_insertion_loss(insertion_loss)
     )
     thirds_all = np.asarray(_THIRD_OCTAVE_BANDS_HZ, dtype=np.float64)
     start = _THIRD_OCTAVE_BANDS_HZ.index(float(octaves[0])) - 1
@@ -620,7 +620,7 @@ def anr_total_attenuation(
         total_octave_db=total_octaves,
         total_third_octave_db=total_thirds,
         reat_third_octave_db=interpolated,
-        insertion_loss_db=active,
+        insertion_loss=active,
         frequencies=np.asarray(kept, dtype=np.float64),
         third_octave_frequencies=np.asarray(thirds, dtype=np.float64),
         assumed_protection=assumed_protection_value(
@@ -635,15 +635,15 @@ def anr_total_attenuation(
 class ANRLinearityResult(OwnsArrays):
     r"""How far up an ANR earmuff stays linear (5.4.4).
 
-    :ivar external_levels_db: The external A-weighted levels applied, in dB,
+    :ivar external_levels: The external A-weighted levels applied, in dB,
         in 5 dB steps.
-    :ivar ear_levels_db: The 125 Hz octave-band level at the ear, one row per
+    :ivar ear_levels: The 125 Hz octave-band level at the ear, one row per
         sample, subject and ear, one column per external level, in dB.
     :ivar increments_db: The step at the ear for each step outside, in dB.
     """
 
-    external_levels_db: np.ndarray
-    ear_levels_db: np.ndarray
+    external_levels: np.ndarray
+    ear_levels: np.ndarray
     increments_db: np.ndarray
 
     @property
@@ -652,12 +652,12 @@ class ANRLinearityResult(OwnsArrays):
 
         :return: A ``(ears, steps)`` boolean grid.
         """
-        external = np.diff(self.external_levels_db)
+        external = np.diff(self.external_levels)
         deviation = np.abs(self.increments_db - external[None, :])
         return np.asarray(settled(deviation) <= _LINEARITY_TOLERANCE_DB, dtype=bool)
 
     @property
-    def max_linear_level_db(self) -> float:
+    def max_linear_level(self) -> float:
         """The highest external level up to which every ear stayed linear, in dB.
 
         Read from :attr:`linear`, the same judgement :attr:`passes` makes: the
@@ -669,8 +669,8 @@ class ANRLinearityResult(OwnsArrays):
         """
         step_ok = np.all(self.linear, axis=0)
         failing = np.flatnonzero(~step_ok)
-        last = int(failing[0]) if failing.size else self.external_levels_db.size - 1
-        return float(self.external_levels_db[last])
+        last = int(failing[0]) if failing.size else self.external_levels.size - 1
+        return float(self.external_levels[last])
 
     @property
     def passes(self) -> bool:
@@ -688,18 +688,18 @@ class ANRLinearityResult(OwnsArrays):
         :return: ``True`` when every step is linear and the last external
             level is 110 dB.
         """
-        top = float(self.external_levels_db[-1])
+        top = float(self.external_levels[-1])
         return self.passes and abs(top - _MAXIMUM_EXTERNAL_LEVEL_DB) <= _STEP_READING_DB
 
     def __bool__(self) -> bool:
         """Refuse to stand in for the verdict it carries.
 
         :raises TypeError: Always; the verdict is :attr:`passes`, and the
-            rating is :attr:`max_linear_level_db`.
+            rating is :attr:`max_linear_level`.
         """
         msg = (
             "an ANRLinearityResult has no truth value; read '.passes' or "
-            "'.max_linear_level_db'"
+            "'.max_linear_level'"
         )
         raise TypeError(msg)
 
@@ -719,10 +719,10 @@ class ANRLinearityResult(OwnsArrays):
 
 
 def assess_anr_linearity(
-    external_levels_db: ArrayLike,
-    ear_levels_db: ArrayLike | None = None,
+    external_levels: ArrayLike,
+    ear_levels: ArrayLike | None = None,
     *,
-    ear_third_octave_levels_db: ArrayLike | None = None,
+    ear_third_octave_levels: ArrayLike | None = None,
 ) -> ANRLinearityResult:
     r"""Up to what external level does the earmuff stay linear? (5.4.4).
 
@@ -734,12 +734,12 @@ def assess_anr_linearity(
     to which that holds for every sample and subject is what 5.6 i) reports,
     and if it holds up to 110 dB, that is stated.
 
-    :param external_levels_db: The external A-weighted levels applied, in dB,
+    :param external_levels: The external A-weighted levels applied, in dB,
         in increasing 5 dB steps up to 110 dB.
-    :param ear_levels_db: The 125 Hz octave-band level at the ear, in dB, with
+    :param ear_levels: The 125 Hz octave-band level at the ear, in dB, with
         the external levels on the last axis and any number of leading axes
         (sample, subject, ear).
-    :param ear_third_octave_levels_db: Instead, the 100 Hz, 125 Hz and 160 Hz
+    :param ear_third_octave_levels: Instead, the 100 Hz, 125 Hz and 160 Hz
         one-third-octave levels at the ear, with those three on the last axis
         and the external levels on the one before.
     :return: :class:`ANRLinearityResult`.
@@ -747,20 +747,20 @@ def assess_anr_linearity(
         110 dB, if neither or both of the ear-level forms are given, or if the
         shapes do not match.
     """
-    external = np.asarray(external_levels_db, dtype=np.float64)
+    external = np.asarray(external_levels, dtype=np.float64)
     if (
         external.ndim != 1
         or external.size < _GRID_RANK
         or not np.all(np.isfinite(external))
     ):
-        msg = "'external_levels_db' must hold at least two finite levels, in dB."
+        msg = "'external_levels' must hold at least two finite levels, in dB."
         raise ValueError(msg)
     steps = np.diff(external)
     # Settled: 60,02 - 54,97 dB is a 5,05 dB step, on the reading tolerance
     # in decimal and a last bit past it in binary.
     if np.any(settled(np.abs(steps - _LINEARITY_STEP_DB)) > _STEP_READING_DB):
         msg = (
-            "'external_levels_db' must rise in the 5 dB steps of 5.4.4; got "
+            "'external_levels' must rise in the 5 dB steps of 5.4.4; got "
             f"steps of {steps.tolist()} dB."
         )
         raise ValueError(msg)
@@ -770,20 +770,20 @@ def assess_anr_linearity(
             f"{external[-1]:g} dB."
         )
         raise ValueError(msg)
-    if (ear_levels_db is None) == (ear_third_octave_levels_db is None):
+    if (ear_levels is None) == (ear_third_octave_levels is None):
         msg = (
-            "give either 'ear_levels_db' (the 125 Hz octave band) or "
-            "'ear_third_octave_levels_db' (its three one-third-octave bands), "
+            "give either 'ear_levels' (the 125 Hz octave band) or "
+            "'ear_third_octave_levels' (its three one-third-octave bands), "
             "not both."
         )
         raise ValueError(msg)
-    if ear_levels_db is not None:
-        levels = np.asarray(ear_levels_db, dtype=np.float64)
+    if ear_levels is not None:
+        levels = np.asarray(ear_levels, dtype=np.float64)
     else:
-        thirds = np.asarray(ear_third_octave_levels_db, dtype=np.float64)
+        thirds = np.asarray(ear_third_octave_levels, dtype=np.float64)
         if thirds.ndim < _GRID_RANK or thirds.shape[-1] != _LINEARITY_THIRDS:
             msg = (
-                "'ear_third_octave_levels_db' must carry the 100 Hz, 125 Hz "
+                "'ear_third_octave_levels' must carry the 100 Hz, 125 Hz "
                 "and 160 Hz bands on its last axis."
             )
             raise ValueError(msg)
@@ -799,7 +799,7 @@ def assess_anr_linearity(
         raise ValueError(msg)
     grid = levels.reshape(-1, external.size)
     return ANRLinearityResult(
-        external_levels_db=np.asarray(external, dtype=np.float64),
-        ear_levels_db=np.asarray(grid, dtype=np.float64),
+        external_levels=np.asarray(external, dtype=np.float64),
+        ear_levels=np.asarray(grid, dtype=np.float64),
         increments_db=np.diff(grid, axis=1),
     )

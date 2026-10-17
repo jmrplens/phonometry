@@ -108,7 +108,7 @@ def _chk_table_2() -> Outcome:
 def _chk_table_3() -> Outcome:
     """72 printed cells and the three dashes of the HDA 200 below 63 Hz."""
     return _table(
-        dict(hearing.EARPHONE_ATTENUATION_DB), ref.ISO8253_1_TABLE_3, "cells of Table 3"
+        dict(hearing.EARPHONE_ATTENUATION), ref.ISO8253_1_TABLE_3, "cells of Table 3"
     )
 
 
@@ -146,9 +146,7 @@ def _chk_adjustments() -> Outcome:
         "supra-aural": hearing.ambient_noise_limits()[k],
         "ER-3A": hearing.ambient_noise_limits(earphone="ER-3A")[k],
         "shift +5 dB": hearing.ambient_noise_limits(allowed_threshold_shift_db=5.0)[k],
-        "lowest HL 10 dB": hearing.ambient_noise_limits(lowest_hearing_level_db=10.0)[
-            k
-        ],
+        "lowest HL 10 dB": hearing.ambient_noise_limits(lowest_hearing_level=10.0)[k],
     }
     return record(expected, computed, unit="dB")
 
@@ -357,7 +355,7 @@ def _chk_vibrotactile() -> Outcome:
     for placement, lower in (("mastoid", 0.0), ("forehead", offset)):
         levels = hearing.audiogram_cautions(
             freqs, bone_conduction_db=[0.0] * len(freqs), vibrator_placement=placement
-        ).vibrotactile_levels_db
+        ).vibrotactile_levels
         for f, level in zip(freqs, levels, strict=True):
             expected[f"{f:g} Hz {placement}"] = printed[f] - lower
             computed[f"{f:g} Hz {placement}"] = float(level)
@@ -442,8 +440,8 @@ def _chk_diffuse_table_1() -> Outcome:
             hearing.check_diffuse_sound_field(
                 six,
                 [0.0],
-                directional_levels_db=[[0.0], [1.0]],
-                front_to_random_index_db=index,
+                directional_levels=[[0.0], [1.0]],
+                front_to_random_index=index,
                 frequencies=[1000.0],
             ).allowable_variation_db[0]
         )
@@ -466,8 +464,8 @@ def _chk_inverse_distance() -> Outcome:
     """
     four = dict.fromkeys(("left", "right", "up", "down"), [0.0])
     common = {
-        "front_levels_db": [0.0],
-        "back_levels_db": [0.0],
+        "front_levels": [0.0],
+        "back_levels": [0.0],
         "frequencies": [1000.0],
     }
     free = hearing.check_free_sound_field(
@@ -479,8 +477,8 @@ def _chk_inverse_distance() -> Outcome:
     return record(
         {"free": 2.626, "quasi-free": 1.743},
         {
-            "free": round(free.inverse_distance_difference_db, 3),
-            "quasi-free": round(quasi.inverse_distance_difference_db, 3),
+            "free": round(free.inverse_distance_difference, 3),
+            "quasi-free": round(quasi.inverse_distance_difference, 3),
         },
         unit="dB",
     )
@@ -514,8 +512,8 @@ def _chk_4869_3_table_1() -> Outcome:
             hearing.check_random_incidence_field(
                 six,
                 [0.0],
-                directional_levels_db=[[0.0], [1.0]],
-                front_to_random_index_db=index,
+                directional_levels=[[0.0], [1.0]],
+                front_to_random_index=index,
                 frequencies=[1000.0],
             ).allowable_variation_db[0]
         )
@@ -535,7 +533,7 @@ def _chk_4869_3_table_1() -> Outcome:
 )
 def _chk_4869_3_table_a1() -> Outcome:
     """13 cells; at least 4 dB at 1,25 kHz to 3,15 kHz, 6,3 kHz and 8 kHz."""
-    library = hearing.ATF_FRONT_TO_RANDOM_INDEX_DB
+    library = hearing.ATF_FRONT_TO_RANDOM_INDEX
     matching = sum(
         1
         for f, index in ref.ISO4869_3_TABLE_A1.items()

@@ -254,7 +254,7 @@ def test_noise_reduction_sqrt_n_law() -> None:
 def test_noise_reduction_db_matches_n() -> None:
     one = _periodic(PERIOD, M, (1.0,))
     result = ph.signals.time_synchronous_average(_repeat(one, 100), FS, period_s=PERIOD)
-    assert result.noise_reduction_db == pytest.approx(20.0, abs=1e-9)
+    assert result.noise_reduction == pytest.approx(20.0, abs=1e-9)
     assert result.amplitude_snr_gain == pytest.approx(10.0, abs=1e-9)
 
 

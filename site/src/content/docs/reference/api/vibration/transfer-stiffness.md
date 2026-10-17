@@ -302,8 +302,8 @@ blocked transfer stiffness alone.
 ```python
 check_blocked_output(
     frequencies: ArrayLike,
-    input_acceleration_level_db: ArrayLike,
-    output_acceleration_level_db: ArrayLike,
+    input_acceleration_level: ArrayLike,
+    output_acceleration_level: ArrayLike,
 ) -> LevelDifferenceCheck
 ```
 
@@ -327,8 +327,8 @@ For the indirect method the same 20 dB is the $|T| \le 0.1$ of
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz (narrow-band lines or band centres). |
-| `input_acceleration_level_db` | Input acceleration level $L_{a1}$, in dB, one per frequency. |
-| `output_acceleration_level_db` | Output acceleration level $L_{a2}$, in dB re the same reference, one per frequency; `-inf` for an output that does not move. |
+| `input_acceleration_level` | Input acceleration level $L_{a1}$, in dB, one per frequency. |
+| `output_acceleration_level` | Output acceleration level $L_{a2}$, in dB re the same reference, one per frequency; `-inf` for an output that does not move. |
 
 **Returns:** The [`LevelDifferenceCheck`](/phonometry/reference/api/vibration/transfer-stiffness/#leveldifferencecheck) (`condition="blocked_output"`).
 
@@ -350,8 +350,8 @@ For the indirect method the same 20 dB is the $|T| \le 0.1$ of
 check_output_mass(
     frequencies: ArrayLike,
     output_mass_kg: float,
-    output_force_level_db: ArrayLike,
-    output_acceleration_level_db: ArrayLike,
+    output_force_level: ArrayLike,
+    output_acceleration_level: ArrayLike,
 ) -> OutputMassCheck
 ```
 
@@ -376,8 +376,8 @@ lighter `m0`, or stiffer (more, or larger) force transducers. See
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz. |
 | `output_mass_kg` | The mass `m0` between the element and the output force transducers: the output flange, the force distribution plate and half the mass of the transducers (ISO 10846-4), or the plate and half the transducers for a resilient support (ISO 10846-2), in kg. |
-| `output_force_level_db` | Measured output force level $L_{F2}$, in dB re 1 µN, one per frequency. |
-| `output_acceleration_level_db` | Output acceleration level $L_{a2}$, in dB re 1 µm/s², one per frequency. |
+| `output_force_level` | Measured output force level $L_{F2}$, in dB re 1 µN, one per frequency. |
+| `output_acceleration_level` | Output acceleration level $L_{a2}$, in dB re 1 µm/s², one per frequency. |
 
 **Returns:** The [`OutputMassCheck`](/phonometry/reference/api/vibration/transfer-stiffness/#outputmasscheck).
 
@@ -398,8 +398,8 @@ lighter `m0`, or stiffer (more, or larger) force transducers. See
 ```python
 check_unwanted_input(
     frequencies: ArrayLike,
-    excitation_level_db: ArrayLike,
-    unwanted_level_db: ArrayLike,
+    excitation_level: ArrayLike,
+    unwanted_level: ArrayLike,
 ) -> LevelDifferenceCheck
 ```
 
@@ -428,8 +428,8 @@ errata register.)
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz. |
-| `excitation_level_db` | Acceleration level in the excitation direction, in dB, one per frequency. |
-| `unwanted_level_db` | Acceleration level in a perpendicular direction, in dB re the same reference, one per frequency; or one row per direction, shape `(directions, frequencies)`. |
+| `excitation_level` | Acceleration level in the excitation direction, in dB, one per frequency. |
+| `unwanted_level` | Acceleration level in a perpendicular direction, in dB re the same reference, one per frequency; or one row per direction, shape `(directions, frequencies)`. |
 
 **Returns:** The [`LevelDifferenceCheck`](/phonometry/reference/api/vibration/transfer-stiffness/#leveldifferencecheck) (`condition="unwanted_input"`).
 
@@ -498,7 +498,7 @@ valid lines into bands (Formulas (6), (7)).
 
 ```python
 driving_point_uncertainty(
-    band_level_db: float,
+    band_level: float,
     *,
     repeatability_range_db: float,
     signal_uncertainty_db: float = 0.3,
@@ -542,7 +542,7 @@ encourages, and the note to (B.3) allows doing so band by band.
 
 | Name | Description |
 | :--- | :--- |
-| `band_level_db` | The measured band level $\hat{L}_{k,\mathrm{av}}$, in dB re 1 N/m. |
+| `band_level` | The measured band level $\hat{L}_{k,\mathrm{av}}$, in dB re 1 N/m. |
 | `repeatability_range_db` | The difference $2p$ between the highest and lowest band level of repeated installations, in dB (0 for none observed). |
 | `signal_uncertainty_db` | Standard uncertainty of $\hat{L}_{k,\mathrm{av}}$, in dB (Default: 0,3). |
 | `instrumentation_uncertainty_db` | Standard uncertainty $u_\mathrm{ins}$, in dB (Default: 0,5). |
@@ -564,8 +564,8 @@ encourages, and the note to (B.3) allows doing so band by band.
 DrivingPointStiffnessResult(
     frequencies: np.ndarray,
     driving_point_stiffness: np.ndarray,
-    blocked_output_difference_db: np.ndarray | None = None,
-    unwanted_input_difference_db: np.ndarray | None = None,
+    blocked_output_difference: np.ndarray | None = None,
+    unwanted_input_difference: np.ndarray | None = None,
 )
 ```
 
@@ -605,8 +605,8 @@ evaluation altogether, as 7.6.1 requires, and so are lines below the
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz, strictly increasing. |
 | `driving_point_stiffness` | Complex $k_{1,1}$ at each frequency, in N/m. |
-| `blocked_output_difference_db` | $\Delta L_{1,2} = L_{a1} - L_{a2}$ per frequency, in dB, or `None` when Inequality (1) was not checked. |
-| `unwanted_input_difference_db` | The input acceleration level less the loudest unwanted one per frequency, in dB, or `None` when Inequality (2) was not checked. |
+| `blocked_output_difference` | $\Delta L_{1,2} = L_{a1} - L_{a2}$ per frequency, in dB, or `None` when Inequality (1) was not checked. |
+| `unwanted_input_difference` | The input acceleration level less the loudest unwanted one per frequency, in dB, or `None` when Inequality (2) was not checked. |
 
 ### DrivingPointStiffnessResult.adequate
 
@@ -658,7 +658,7 @@ Driving-point stiffness level re 1 N/m at each frequency, in dB.
 
 Loss factor $\eta = \operatorname{Im}(k_{1,1})/\operatorname{Re}(k_{1,1})$ (Formula (4)).
 
-### DrivingPointStiffnessResult.low_frequency_level_db
+### DrivingPointStiffnessResult.low_frequency_level
 
 *property*
 
@@ -697,7 +697,7 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 **Returns:** The axes.
 
-### DrivingPointStiffnessResult.threshold_level_db
+### DrivingPointStiffnessResult.threshold_level
 
 *property*
 
@@ -753,7 +753,7 @@ the six inputs being "assumed to result in a normal distribution".
 | :--- | :--- |
 | `budget` | The GUM budget, one row per input quantity of Table B.1. |
 
-### DrivingPointUncertainty.band_level_db
+### DrivingPointUncertainty.band_level
 
 *property*
 
@@ -986,7 +986,7 @@ not [`valid`](/phonometry/reference/api/vibration/transfer-stiffness/#transferst
 ```python
 LevelDifferenceCheck(
     frequencies: np.ndarray,
-    difference_db: np.ndarray,
+    difference: np.ndarray,
     condition: Literal['blocked_output', 'unwanted_input'],
 )
 ```
@@ -1012,7 +1012,7 @@ The least difference is the series', read from the condition
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies judged, in hertz. |
-| `difference_db` | The level difference at each frequency, in dB (`+inf` where the second level is that of a zero signal). |
+| `difference` | The level difference at each frequency, in dB (`+inf` where the second level is that of a zero signal). |
 | `condition` | `"blocked_output"` or `"unwanted_input"`. |
 
 ### LevelDifferenceCheck.holds

@@ -118,7 +118,7 @@ __all__ = [
     "ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB",
     "ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB",
     "ISO14257_REFERENCE_DISTANCE_M",
-    "MAX_DIRECTIVITY_INDEX_DB",
+    "MAX_DIRECTIVITY_INDEX",
     "MIN_SOURCE_TO_WALL_M",
     "NEAR_REGION_START_M",
     "NORMALIZED_OFFSET_DB",
@@ -234,7 +234,7 @@ ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB: float = 6.0
 
 #: A.1: the largest absolute directivity index the source may show in any
 #: one-third-octave band from 100 Hz to 5 kHz, in decibels.
-MAX_DIRECTIVITY_INDEX_DB: float = 8.0
+MAX_DIRECTIVITY_INDEX: float = 8.0
 
 #: A.1: the band of uniform omnidirectional radiation, in decibels, at the two
 #: ends of the ramp, and the one-third-octave centres the ramp runs between,
@@ -416,11 +416,11 @@ class SpatialDecayResult(OwnsArrays):
     :param distribution_values_db: :math:`D` at each position, in decibels.
     :param reference_values_db: :math:`D_\mathrm{ref}` at each position, in
         decibels.
-    :param level_excess_db: :math:`\mathrm{DL}_\mathrm{f}` at each position,
+    :param level_excess: :math:`\mathrm{DL}_\mathrm{f}` at each position,
         in decibels.
     :param decay_rate_db: :math:`\mathrm{DL}_2` over the range, in decibels
         per distance doubling.
-    :param mean_excess_db: :math:`\mathrm{DL}_\mathrm{f}(r_n, r_m)` over the
+    :param mean_level_excess: :math:`\mathrm{DL}_\mathrm{f}(r_n, r_m)` over the
         range, in decibels.
     :param region: ``"near"``, ``"middle"``, ``"far"`` or ``"whole"``.
     :param band: The nominal octave centre the curve belongs to, in hertz,
@@ -430,9 +430,9 @@ class SpatialDecayResult(OwnsArrays):
     distances: NDArray[np.float64]
     distribution_values_db: NDArray[np.float64]
     reference_values_db: NDArray[np.float64]
-    level_excess_db: NDArray[np.float64]
+    level_excess: NDArray[np.float64]
     decay_rate_db: float
-    mean_excess_db: float
+    mean_level_excess: float
     region: str
     band: float | None = None
 
@@ -451,7 +451,7 @@ class SpatialDecayResult(OwnsArrays):
 
 
 def sound_distribution_value(
-    levels: ArrayLike, sound_power_levels_db: ArrayLike
+    levels: ArrayLike, sound_power_levels: ArrayLike
 ) -> NDArray[np.float64]:
     r"""The sound distribution value of a measured point, Equation (1).
 
@@ -464,16 +464,16 @@ def sound_distribution_value(
     back the same.
 
     :param levels: :math:`L_{pj}(r)` at each position, in decibels.
-    :param sound_power_levels_db: :math:`L_{Wj}` of the source, in decibels,
+    :param sound_power_levels: :math:`L_{Wj}` of the source, in decibels,
         as a scalar or one value per position.
     :return: :math:`D_j(r)`, in decibels.
     :raises ValueError: For inputs that are not finite or do not broadcast.
     """
     levels = require_finite_array(levels, "levels")
-    power = require_finite_array(sound_power_levels_db, "sound_power_levels_db")
+    power = require_finite_array(sound_power_levels, "sound_power_levels")
     if power.size not in (1, levels.size):
         msg = (
-            "'sound_power_levels_db' must be a scalar or match 'levels' "
+            "'sound_power_levels' must be a scalar or match 'levels' "
             "position for position."
         )
         raise ValueError(msg)
@@ -608,7 +608,7 @@ def corrected_distribution_value(
 
 
 def spectrum_distribution_value(
-    distribution_values_db: ArrayLike, machine_power_levels_db: ArrayLike
+    distribution_values_db: ArrayLike, machine_power_levels: ArrayLike
 ) -> float:
     r"""The curve collapsed onto one machine's spectrum, Equation (3).
 
@@ -622,16 +622,16 @@ def spectrum_distribution_value(
     decision is made on.
 
     :param distribution_values_db: :math:`D_j(r)` in each band, in decibels.
-    :param machine_power_levels_db: :math:`L_{W\mathrm{mach}\,j}` of the
+    :param machine_power_levels: :math:`L_{W\mathrm{mach}\,j}` of the
         machine in the same bands, in decibels.
     :return: :math:`D_S(r)`, in decibels.
     :raises ValueError: For inputs that do not match band for band.
     """
     values = require_finite_array(distribution_values_db, "distribution_values_db")
-    power = require_finite_array(machine_power_levels_db, "machine_power_levels_db")
+    power = require_finite_array(machine_power_levels, "machine_power_levels")
     if values.shape != power.shape:
         msg = (
-            "'distribution_values_db' and 'machine_power_levels_db' must "
+            "'distribution_values_db' and 'machine_power_levels' must "
             "match band for band."
         )
         raise ValueError(msg)
@@ -1076,9 +1076,9 @@ def spatial_decay_curve(
         distances=chosen_radii,
         distribution_values_db=chosen,
         reference_values_db=reference_distribution_value(chosen_radii),
-        level_excess_db=level_excess(chosen, chosen_radii),
+        level_excess=level_excess(chosen, chosen_radii),
         decay_rate_db=spatial_decay_rate(chosen, chosen_radii),
-        mean_excess_db=mean_level_excess(chosen, chosen_radii),
+        mean_level_excess=mean_level_excess(chosen, chosen_radii),
         region=region,
         band=None if band is None else require_positive(band, "band"),
     )

@@ -163,7 +163,7 @@ resample_signal(
     fs: float | None = None,
     *,
     fs_new: float,
-    stopband_attenuation_db: float = 120.0,
+    stopband_attenuation: float = 120.0,
     transition_width: float = 0.05,
     max_denominator: int = 1000,
 ) -> ResampledSignalResult
@@ -174,7 +174,7 @@ Resample a record with a stated anti-alias specification.
 Polyphase rational resampling (`scipy.signal.resample_poly`)
 behind a lowpass FIR designed *here* by the Kaiser window method: the
 stopband starts at the smaller of the two Nyquist frequencies and
-provides `stopband_attenuation_db` of alias rejection, the passband
+provides `stopband_attenuation` of alias rejection, the passband
 ends `transition_width` below it and is flat within the same ripple
 bound $\delta = 10^{-A/20}$. The designed taps travel with the
 result, so
@@ -188,7 +188,7 @@ default.
 | `x` | Input record, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the resampled record comes out in Pa and comes back as a Signal at the new rate. |
 | `fs` | Sample rate of `x`, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `fs_new` | Target sample rate, in Hz. The ratio `fs_new/fs` must be a rational number with denominator at most `max_denominator` (e.g. 48000/44100 = 160/147). |
-| `stopband_attenuation_db` | Anti-alias stopband attenuation, in dB (at least 30). |
+| `stopband_attenuation` | Anti-alias stopband attenuation, in dB (at least 30). |
 | `transition_width` | Transition-band width as a fraction of the smaller Nyquist frequency, in (0, 0.5]. |
 | `max_denominator` | Largest denominator accepted for the rational rate ratio. |
 
@@ -212,7 +212,7 @@ ResampledSignalResult(
     filter_taps: NDArray[np.float64],
     passband_edge_hz: float,
     stopband_edge_hz: float,
-    stopband_attenuation_db: float,
+    stopband_attenuation: float,
     transition_width: float,
 )
 ```
@@ -236,7 +236,7 @@ can be verified against the filter itself.
 | `filter_taps` | Anti-alias FIR taps (unit passband gain; the polyphase engine applies the `up` interpolation gain), designed at the intermediate rate `original_fs * up`. A single `1.0` tap when the ratio is 1 (no filtering). |
 | `passband_edge_hz` | Passband edge of the design, in Hz. |
 | `stopband_edge_hz` | Stopband edge of the design (the smaller of the two Nyquist frequencies), in Hz. |
-| `stopband_attenuation_db` | Designed stopband attenuation, in dB (also the passband ripple bound: the Kaiser window method holds the ripple of both bands within the same $\delta = 10^{-A/20}$, though -- unlike a true equiripple design -- its ripple decays away from the band edges rather than staying at the bound). |
+| `stopband_attenuation` | Designed stopband attenuation, in dB (also the passband ripple bound: the Kaiser window method holds the ripple of both bands within the same $\delta = 10^{-A/20}$, though -- unlike a true equiripple design -- its ripple decays away from the band edges rather than staying at the bound). |
 | `transition_width` | Transition-band width as a fraction of the smaller Nyquist frequency. |
 
 ### ResampledSignalResult.n_taps

@@ -114,7 +114,7 @@ db = aircraft.load_anp_database()
 increment = aircraft.npd_atmosphere_increment(
     db.spectral_class(103), temperature_c=10.0, relative_humidity_percent=80.0
 )
-print(round(increment.reference_attenuation_db[13, 3], 3))   # 1.798 dB, 1 kHz over 1000 ft
+print(round(increment.reference_attenuation[13, 3], 3))   # 1.798 dB, 1 kHz over 1000 ft
 print(round(increment.source_spectrum_db[13], 1))            # 71.8 dB, Eq. D-1
 print(np.round(increment.increment_db, 1))
 # [0.1 0.3 0.4 0.7 1.2 1.8 2.1 2.4 2.9 3.6] dB, 200 ft to 25000 ft

@@ -433,8 +433,8 @@ _DIN45692_TABLE_A2: tuple[tuple[float, float, float, float], ...] = (
 )
 
 
-def _critical_band_noise(f_low: float, f_high: float, level_db: float) -> np.ndarray:
-    """One critical band of noise at ``level_db``, in pascals at 48 kHz."""
+def _critical_band_noise(f_low: float, f_high: float, level: float) -> np.ndarray:
+    """One critical band of noise at ``level``, in pascals at 48 kHz."""
     from scipy import signal as sp_signal
 
     rng = np.random.default_rng(7)
@@ -442,7 +442,7 @@ def _critical_band_noise(f_low: float, f_high: float, level_db: float) -> np.nda
     sos = sp_signal.butter(8, [f_low, f_high], btype="band", fs=48000, output="sos")
     band = sp_signal.sosfilt(sos, white)
     band = band / np.sqrt(np.mean(band**2))
-    return np.asarray(band * 2e-5 * 10 ** (level_db / 20))
+    return np.asarray(band * 2e-5 * 10 ** (level / 20))
 
 
 def _level_for_four_sone(f_low: float, f_high: float) -> float:
@@ -1211,10 +1211,10 @@ _P_REF = 2e-5  # reference sound pressure [Pa]
 _FS_PSY = 48000  # ECMA-418-2 / ISO 532 operate at 48 kHz
 
 
-def _pure_tone(freq: float, spl_db: float, dur: float, fs: int = _FS_PSY) -> np.ndarray:
-    """Calibrated sinusoid: sound pressure in pascals at *spl_db* dB SPL."""
+def _pure_tone(freq: float, spl: float, dur: float, fs: int = _FS_PSY) -> np.ndarray:
+    """Calibrated sinusoid: sound pressure in pascals at *spl* dB SPL."""
     t = np.arange(round(dur * fs)) / fs
-    amp = _P_REF * 10.0 ** (spl_db / 20.0) * np.sqrt(2.0)
+    amp = _P_REF * 10.0 ** (spl / 20.0) * np.sqrt(2.0)
     return np.asarray(amp * np.sin(2.0 * np.pi * freq * t))
 
 
@@ -4158,7 +4158,7 @@ def generate_hearing_protector_reat(output_dir: str) -> None:
 
     # Left: the distribution the whole ISO 4869 family starts from, with
     # increasing attenuation downwards.
-    for index, row in enumerate(reat.attenuation_db):
+    for index, row in enumerate(reat.attenuation):
         ax_reat.plot(
             freqs,
             row,
@@ -4206,7 +4206,7 @@ def generate_hearing_protector_reat(output_dir: str) -> None:
     x = np.arange(freqs.size)
     bars = ax_diff.bar(
         x,
-        comparison.difference_db,
+        comparison.difference,
         width=0.6,
         color=COLOR_PRIMARY,
         zorder=3,
@@ -4327,7 +4327,7 @@ def generate_hearing_protector_anr(output_dir: str) -> None:
     )
     ax_chain.plot(
         thirds,
-        total.insertion_loss_db.mean(axis=0),
+        total.insertion_loss.mean(axis=0),
         ":",
         color=COLOR_SECONDARY,
         linewidth=2.4,
@@ -4375,7 +4375,7 @@ def generate_hearing_protector_anr(output_dir: str) -> None:
 
     # Right: the active insertion loss of every subject, the Annex A example.
     # From 1 kHz up the circuit adds sound rather than removing it.
-    for index, row in enumerate(active.insertion_loss_db):
+    for index, row in enumerate(active.insertion_loss):
         ax_ail.plot(
             active.frequencies,
             row,
@@ -4521,9 +4521,9 @@ def generate_audiometry_threshold_rules(output_dir: str) -> None:
     from phonometry import hearing
 
     ascending = hearing.ascending_method_threshold(
-        presentation_levels_db=[30, 20, 25, 15, 20, 25, 15, 20, 10, 15, 20, 25],
+        presentation_levels=[30, 20, 25, 15, 20, 25, 15, 20, 10, 15, 20, 25],
         responses=[1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1],
-        familiarization_level_db=40.0,
+        familiarization_level=40.0,
     )
     tracing = hearing.automatic_audiometry_threshold(
         [38, 22, 31, 21, 32, 20, 30, 29, 31, 19, 30, 20, 31, 21]
@@ -4554,8 +4554,8 @@ def generate_audiometry_sound_field(output_dir: str) -> None:
     quasi = hearing.check_quasi_free_sound_field(
         lateral,
         np.zeros(11),
-        front_levels_db=front,
-        back_levels_db=np.zeros(11),
+        front_levels=front,
+        back_levels=np.zeros(11),
         loudspeaker_distance_m=1.2,
     )
     # Four loudspeakers fed with uncorrelated narrow bands of noise.
@@ -4572,8 +4572,8 @@ def generate_audiometry_sound_field(output_dir: str) -> None:
     diffuse = hearing.check_diffuse_sound_field(
         six,
         np.zeros(11),
-        directional_levels_db=readings,
-        front_to_random_index_db=5.0,
+        directional_levels=readings,
+        front_to_random_index=5.0,
     )
     fig, (ax_quasi, ax_diffuse) = plt.subplots(1, 2, figsize=(13.5, 5.6))
     quasi.plot(ax_quasi, language=_LANG)
@@ -4597,7 +4597,7 @@ def generate_hearing_protector_insertion_loss(output_dir: str) -> None:
     open_levels = np.full(bands.size, 88.0)
     fittings = open_levels - loss + spread
     insertion = hearing.earmuff_insertion_loss(
-        open_levels, fittings, isolation_cup_levels_db=open_levels - 70.0
+        open_levels, fittings, isolation_cup_levels=open_levels - 70.0
     )
     isolation = hearing.verify_fixture_isolation(
         np.full(bands.size, 120.0),

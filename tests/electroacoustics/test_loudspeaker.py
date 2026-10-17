@@ -65,7 +65,7 @@ def test_characteristic_sensitivity_is_band_mean_at_1w_1m() -> None:
     result = electroacoustics.loudspeaker_characteristics(
         f, spl, _R, sensitivity_band=(200.0, 4000.0)
     )
-    assert result.sensitivity_level_db == pytest.approx(_L0, abs=1e-9)
+    assert result.sensitivity_level == pytest.approx(_L0, abs=1e-9)
     # Default drive is sqrt(R): 1 W into R (the 2,83 V @ 8 ohm convention).
     assert result.input_voltage_v == pytest.approx(math.sqrt(_R))
 
@@ -80,7 +80,7 @@ def test_sensitivity_drive_voltage_correction() -> None:
         input_voltage_v=2.0 * math.sqrt(_R),
         sensitivity_band=(200.0, 4000.0),
     )
-    assert result.sensitivity_level_db == pytest.approx(
+    assert result.sensitivity_level == pytest.approx(
         _L0 - 20.0 * math.log10(2.0), abs=1e-9
     )
 
@@ -96,7 +96,7 @@ def test_sensitivity_distance_correction_cancels() -> None:
         distance=2.0,
         sensitivity_band=(200.0, 4000.0),
     )
-    assert result.sensitivity_level_db == pytest.approx(_L0, abs=1e-9)
+    assert result.sensitivity_level == pytest.approx(_L0, abs=1e-9)
 
 
 def test_characteristic_sensitivity_pressure() -> None:
@@ -119,7 +119,7 @@ def test_effective_range_crosses_threshold_at_known_points() -> None:
     result = electroacoustics.loudspeaker_characteristics(
         f, spl, _R, sensitivity_band=(200.0, 4000.0)
     )
-    assert result.reference_level_db == pytest.approx(_L0, abs=1e-9)
+    assert result.reference_level == pytest.approx(_L0, abs=1e-9)
     lo, hi = result.effective_range
     assert lo == pytest.approx(50.0, rel=1e-6)
     assert hi == pytest.approx(18000.0, rel=1e-6)
@@ -492,7 +492,7 @@ def test_a_narrow_curve_is_still_fine_where_no_panel_scales_by_it() -> None:
     [
         ("frequencies", float("nan")),
         ("frequencies", float("inf")),
-        ("spl_db", float("nan")),
+        ("spl", float("nan")),
         ("impedance_modulus_ohm", float("nan")),
         ("thd_percent", float("nan")),
         ("polar_db", float("nan")),
@@ -550,8 +550,8 @@ def test_a_non_finite_response_axis_no_longer_reaches_the_fiche(
 @pytest.mark.parametrize(
     "field",
     [
-        "sensitivity_level_db",
-        "reference_level_db",
+        "sensitivity_level",
+        "reference_level",
         "rated_impedance_ohm",
         "resonance_frequency",
         "polar_frequency",
@@ -586,8 +586,8 @@ def test_a_non_finite_sensitivity_level_no_longer_reaches_the_verdict(
     """
     result = _example_result()
     out = tmp_path / "non_finite_sensitivity_level.pdf"
-    with pytest.raises(ValueError, match=r"'sensitivity_level_db' must be finite"):
-        dataclasses.replace(result, sensitivity_level_db=float("nan"))
+    with pytest.raises(ValueError, match=r"'sensitivity_level' must be finite"):
+        dataclasses.replace(result, sensitivity_level=float("nan"))
     assert not out.exists()
 
 

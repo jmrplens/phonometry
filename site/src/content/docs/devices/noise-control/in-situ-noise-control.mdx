@@ -95,7 +95,7 @@ res = noise_control.in_situ_transmission_loss(
     receiver_area_m2=10.8,   # a quarter of the room absorption at 500 Hz
     frequencies=bands, case=2,
 )
-print(res.loss_db.round(1))        # [15.2 20.2 26.2 30.2 31.2 28.2] dB
+print(res.loss.round(1))        # [15.2 20.2 26.2 30.2 31.2 28.2] dB
 print(res.area_term_db.round(1))   # [-10.8 -10.8 -10.8 -10.8 -10.8 -10.8] dB
 ```
 
@@ -154,7 +154,7 @@ res = noise_control.in_situ_transmission_loss(
     frequencies=bands, case=2,
 )
 print(res.area_term_db.round(1))   # [ -9.6 -10.1 -10.8 -11.2 -11.6 -12.1] dB
-print(res.loss_db.round(1))        # [16.4 20.9 26.2 29.8 30.4 26.9] dB
+print(res.loss.round(1))        # [16.4 20.9 26.2 29.8 30.4 26.9] dB
 ```
 
 At 500 Hz nothing moves. Below it the room is more reverberant, its area smaller
@@ -211,17 +211,17 @@ res = noise_control.screen_attenuation(
     [78.0, 80.0, 81.0, 79.0, 76.0, 72.0],   # dB, screen away
     [74.0, 74.0, 72.0, 68.0, 63.0, 58.0],   # dB, screen in place
     frequencies=bands,
-    a_weighted_unscreened_level_db=84.1,
-    a_weighted_screened_level_db=74.6,
+    a_weighted_unscreened_level=84.1,
+    a_weighted_screened_level=74.6,
 )
-print(res.attenuation_db)                   # [ 4.  6.  9. 11. 13. 14.] dB
-print(res.a_weighted_attenuation_db)        # 9.5 dB
+print(res.attenuation)                   # [ 4.  6.  9. 11. 13. 14.] dB
+print(res.a_weighted_attenuation)        # 9.5 dB
 print(res.rounded())                        # [ 4  6  9 11 13 14] dB
 print(res.rounded_a_weighted())             # 10 dB
 ```
 
 7.4 c) reports both to the nearest whole decibel. `rounded()` and
-`rounded_a_weighted()` give them that way, as integers, while `attenuation_db`
+`rounded_a_weighted()` give them that way, as integers, while `attenuation`
 keeps the unrounded difference to compute with. An exact half goes to the even
 decibel, as in the other in-situ results of the library, so the 9,5 dB above is
 reported as 10 dB.
@@ -293,7 +293,7 @@ res = environment.measured_insertion_loss_direct(
     [58.0, 53.0, 47.0, 41.0, 35.0, 29.0],   # receiver, after
     frequencies=bands,
 )
-print(res.insertion_loss_db)   # [ 7. 10. 13. 15. 16. 16.] dB
+print(res.insertion_loss)   # [ 7. 10. 13. 15. 16. 16.] dB
 ```
 
 The source was 2 dB louder on the second day in every band, and the answer does

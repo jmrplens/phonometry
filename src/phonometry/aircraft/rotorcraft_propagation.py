@@ -53,7 +53,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
@@ -68,6 +69,8 @@ from .._internal.validation import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
@@ -617,6 +620,11 @@ class TerrainScreeningResult(OwnsArrays):
     Whether the terrain blocks the line of sight (:attr:`screened`) is read
     from the section, the source and the receiver, so it is not a field.
     """
+
+    #: The path difference is a length, in metres, not a level difference.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"path_difference": "m"}
+    )
 
     frequencies: NDArray[np.float64]
     adjustment: NDArray[np.float64]

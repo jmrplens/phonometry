@@ -192,8 +192,9 @@ rescaled to full scale, so keep calibrator and measurement in the same format;
 
 Jupyter, JupyterLab, VS Code and Colab display the value of the last line of a
 cell, and a result displays as a table of its fields: each with its unit when
-its name carries one (`_db`, `_hz`, `_m`...) or is an axis the API names by the
-bare concept (`frequencies` in hertz, `levels` in decibels, `times` in
+its name carries one (`_db`, `_hz`, `_m`...), names a level or a level
+difference (`insertion_loss` and `band_levels` are in decibels) or is an axis
+the API names by the bare concept (`frequencies` in hertz, `levels` in decibels, `times` in
 seconds), each array as one line with its shape and the range of its values,
 never the values themselves, so the frames of a simulation take a single row. A verdict shows its outcome, PASS or FAIL,
 in the title. Showing the table reads the fields and, on a verdict, `passes`,

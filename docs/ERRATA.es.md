@@ -2176,8 +2176,8 @@ dos ediciones con las mismas entradas y en el mismo orden.
   BS EN 62585:2012, el texto inglés de EN 62585:2012, que es IEC 62585:2012
   sin cambios.
 - **Comportamiento de la biblioteca:** `metrology.comparison_coupler_correction`
-  nombra sus entradas por lo que mide cada lectura, `slm_coupler_level_db` y
-  `reference_coupler_level_db`, así que ninguna de las dos rotulaciones le
+  nombra sus entradas por lo que mide cada lectura, `slm_coupler_level` y
+  `reference_coupler_level`, así que ninguna de las dos rotulaciones le
   afecta; la fila de conformidad del Anexo E construye las lecturas con las
   etiquetas de la Figura E.1 y los tests fijan el tamaño de la discrepancia
   ([`tests/metrology/test_free_field_corrections.py`](../tests/metrology/test_free_field_corrections.py)).
@@ -2513,7 +2513,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   es IEC 62489-1:2010 con su Modificación 1:2014 sin cambios.
 - **Comportamiento de la biblioteca:**
   `electroacoustics.QuadraturePhaseError` da la subida y la caída por
-  separado, como `level_increase_db` y `level_decrease_db`; las filas de
+  separado, como `level_increase` y `level_decrease`; las filas de
   conformidad de 5.4.14.1 fijan la subida en el 0,72 dB impreso y la caída en
   $20\lg(1 - \cos 85°) = -0{,}792$ dB, y nombran el impreso como la errata.
 - **Estado:** sin notificar.
@@ -8469,7 +8469,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   transmisión es una entrada.
 - **Comportamiento de la biblioteca:** las filas de conformidad de la tabla
   C.1 toman la columna impresa como entrada de la fórmula (1) y fijan la suma;
-  [`foundation_to_floor_transfer`](../src/phonometry/vibration/immission/railway_prediction.py)
+  [`foundation_to_floor_level_difference`](../src/phonometry/vibration/immission/railway_prediction.py)
   lee la tabla A.5 tal como está impresa.
 - **Estado:** sin comunicar; el documento es un borrador en consulta.
 
@@ -8496,7 +8496,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   hacia abajo como el lado seguro de la transmisión de un forjado de madera
   está por encima de la media en esos cocientes.
 - **Comportamiento de la biblioteca:**
-  [`FOUNDATION_TO_FLOOR_DB`](../src/phonometry/vibration/immission/railway_prediction.py)
+  [`FOUNDATION_TO_FLOOR_LEVEL_DIFFERENCES`](../src/phonometry/vibration/immission/railway_prediction.py)
   lleva la tabla tal como está impresa, su docstring dice dónde falla el orden,
   y no se impone orden alguno entre los tres estadísticos.
 - **Estado:** sin comunicar; el documento es un borrador en consulta.
@@ -9054,7 +9054,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   [`measured_insertion_loss_indirect`](../src/phonometry/environment/propagation/barrier_in_situ.py)
   toma `receiver_type_before` y `receiver_type_after`, cada uno
   'hemi_free_field' o 'reflecting_surface' y ambos con el primero por defecto,
-  y saca su corrección de `RECEIVER_CORRECTIONS_DB`, que lleva los 0 dB y 6 dB
+  y saca su corrección de `RECEIVER_CORRECTIONS`, que lleva los 0 dB y 6 dB
   impresos. El resultado arrastra las dos correcciones para que un informe
   muestre cuál se aplicó a cada campaña.
 - **Estado:** no reportada.
@@ -10720,7 +10720,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   de la BS EN ISO 8253-1:2010.
 - **Comportamiento de la biblioteca:** no hace falta ninguno. Los valores de
   atenuación de
-  [`EARPHONE_ATTENUATION_DB`](../src/phonometry/hearing/audiometry.py) son las
+  [`EARPHONE_ATTENUATION`](../src/phonometry/hearing/audiometry.py) son las
   celdas de la tabla y no dependen de las marcas de las notas.
 - **Estado:** no reportada (editorial, sin consecuencia numérica).
 
@@ -10758,7 +10758,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Evidencia:** la frase leída frente a las filas que presenta. Verificado en
   la página 21 del PDF (p. 15 impresa) de la ISO 8253-2:2009.
 - **Comportamiento de la biblioteca:**
-  [`INCIDENCE_CORRECTIONS_DB`](../src/phonometry/hearing/sound_field_audiometry.py)
+  [`INCIDENCE_CORRECTIONS`](../src/phonometry/hearing/sound_field_audiometry.py)
   lleva todas las filas impresas, de 125 Hz a 12 500 Hz, e
   [`incidence_correction`](../src/phonometry/hearing/sound_field_audiometry.py)
   las lee. La comprobación de conformidad «ISO 8253-2:2009 Table B.1» cuenta
@@ -11666,7 +11666,7 @@ concordancia con las fuentes publicadas:
   página 19 del PDF (p. impresa 12) de la ISO 11546-1:1995 tal como se publica
   en la BS EN ISO 11546-1:2009. No se registra como errata porque la propia
   norma declara la diferencia; se registra aquí para que
-  [`ARTIFICIAL_SOURCE_EXAMPLE_LWA_DB`](../src/phonometry/noise_control/enclosure_insulation.py)
+  [`ARTIFICIAL_SOURCE_EXAMPLE_LWA`](../src/phonometry/noise_control/enclosure_insulation.py)
   no se lea como una propiedad de una fuente del anexo A.
 
 - **ISO 7235:2003, Ecuaciones (10), (21) y (22):** la ley de los gases

@@ -573,7 +573,7 @@ def _chk_iso3743_2_suitability_calibration() -> Outcome:
     )
     return numeric(
         _UNEQUAL_OCTAVE_AS_CALIBRATED - _C2_UNKNOWN,
-        float(check.calibrated_power_level_db[3]),
+        float(check.calibrated_power_level[3]),
         1e-9,
         unit="dB",
         places=4,

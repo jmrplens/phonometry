@@ -133,7 +133,7 @@ for category, (n, mean_kmh, spread, a, b, scatter) in site.items():
 result = environment.statistical_pass_by(
     categories, speeds, levels, road_speed_category="medium"
 )
-print(dict(result.reported_vehicle_sound_levels_db))
+print(dict(result.reported_vehicle_sound_levels))
 # {'1': 78.9, '2a': 81.0, '2b': 83.7}   dB, at 80, 70 and 70 km/h
 cars = result.regressions["1"]
 print(round(cars.slope_db_per_decade, 2), round(cars.correlation, 2))
@@ -204,7 +204,7 @@ but is not an equivalent level of any real traffic (9.5 NOTE); it compares
 surfaces under a standard mix and does not predict what a street will measure.
 
 ```python
-print(round(result.index_db, 3), result.reported_index_db)
+print(round(result.index, 3), result.reported_index)
 # 80.14 80.1   dB
 ```
 
@@ -212,10 +212,10 @@ The index adds the vehicle sound levels as 9.2 reports them, to one decimal:
 9.5 defines $L_1$, $L_{2a}$ and $L_{2b}$ as the vehicle sound levels "according
 to 9.2", and 9.2 has every level "calculated to two decimal places and rounded
 to one decimal place". The regressions are carried at full precision and each
-level is rounded once, half up (`reported_vehicle_sound_levels_db`, 78,9, 81,0
-and 83,7 dB here); `index_db` is the index of those three levels, rounded once
+level is rounded once, half up (`reported_vehicle_sound_levels`, 78,9, 81,0
+and 83,7 dB here); `index` is the index of those three levels, rounded once
 more when it is reported. The index of the unrounded levels stays on the result
-as `full_precision_index_db`, 80,153 dB for this site.
+as `full_precision_index`, 80,153 dB for this site.
 
 Table 1 is the standard mix. 9.5 recognises that national mixes differ and
 allows other factors, provided they are stated; `weighting_factors` takes them
@@ -252,7 +252,7 @@ result = environment.statistical_pass_by(
     road_speed_category="medium",
     reference_db=environment.SPB_NORMALIZED_REFERENCE_DB,
 )
-print(round(result.reference_index_db, 2), round(result.difference_db, 2))
+print(round(result.reference_index, 2), round(result.difference, 2))
 # 78.92 1.22   dB: this surface is 1.2 dB louder than the Annex D reference
 ```
 
@@ -267,13 +267,13 @@ Tyre-road noise depends on temperature, and 9.4 asks for the vehicle sound
 levels to be corrected to 20 °C air, but says in the same clause that "a
 suitable method is at present under consideration" and makes only the
 uncorrected levels mandatory. No correction is invented here. Levels corrected
-by a method of your choosing go in as `corrected_vehicle_sound_levels_db`, and
+by a method of your choosing go in as `corrected_vehicle_sound_levels`, and
 the index is computed for them too, from the levels rounded to one decimal
-(`reported_corrected_vehicle_sound_levels_db`, `corrected_index_db`). Clause 13
+(`reported_corrected_vehicle_sound_levels`, `corrected_index`). Clause 13
 lists the corrected levels and index as optional report items (26 and 28)
 beside the mandatory uncorrected ones (25 and 27). Where the air
 temperature was taken at every pass-by, 9.4 prefers to correct each measured
-level instead; correct `max_levels_db` and call the method again.
+level instead; correct `max_levels` and call the method again.
 
 ## 6. How precise it is
 
@@ -343,7 +343,7 @@ print(round(environment.statistical_pass_by_index(unrounded, road_speed_category
 
 Carried unrounded from the printed lines, the levels are 78,546, 81,114 and
 83,838 dB and their index 79,985 dB, which would print **80,0**; the result
-keeps that chain as `full_precision_index_db`. The lines alone cannot tell the
+keeps that chain as `full_precision_index`. The lines alone cannot tell the
 two chains apart, because their intercepts are printed to one decimal and their
 slopes to two: over every line that agrees with the intercept, slope, mean
 level, mean speed and vehicle sound level Annex E prints, to their last digit,
@@ -352,7 +352,7 @@ is that the index is rounded once: 79,946 dB taken first to two decimals,
 79,95, and then to one would print 80,0 as well. The two chains never differ by
 more than 0,05 dB, the most a level moves when it is rounded, which is below any
 precision the method claims but can move the last printed digit. The
-conformance row that pins 79,9 dB reads `index_db` of the run from pass-bys.
+conformance row that pins 79,9 dB reads `index` of the run from pass-bys.
 
 Two more things about Annex E are worth knowing before it is used as a check.
 Its reference index of 77,3 dB is described as a normalized reference case of

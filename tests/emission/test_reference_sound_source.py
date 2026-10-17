@@ -185,12 +185,12 @@ def test_formula_2_on_a_uniform_hemisphere() -> None:
     a0 = 1.0
     c3 = a0 * (1.0053 - 0.0012 * a0) ** 1.6
     np.testing.assert_allclose(
-        cal.sound_power_level_db, 80.0 + _AREA_TERM + c1 + c2 + c3, rtol=0, atol=1e-12
+        cal.sound_power_level, 80.0 + _AREA_TERM + c1 + c2 + c3, rtol=0, atol=1e-12
     )
-    np.testing.assert_allclose(cal.c3_db, c3, rtol=0, atol=1e-12)
-    assert cal.c1_db == pytest.approx(c1, abs=1e-12)
-    np.testing.assert_allclose(cal.directivity_index_db, 0.0, rtol=0, atol=1e-12)
-    np.testing.assert_allclose(cal.surface_pressure_level_db, 80.0, rtol=0, atol=1e-12)
+    np.testing.assert_allclose(cal.c3, c3, rtol=0, atol=1e-12)
+    assert cal.c1 == pytest.approx(c1, abs=1e-12)
+    np.testing.assert_allclose(cal.directivity_index, 0.0, rtol=0, atol=1e-12)
+    np.testing.assert_allclose(cal.surface_pressure_level, 80.0, rtol=0, atol=1e-12)
 
 
 def test_formula_2_at_95_kpa_and_30_degc() -> None:
@@ -207,16 +207,16 @@ def test_formula_2_at_95_kpa_and_30_degc() -> None:
     pressure = -10.0 * math.log10(95.0 / 101.325)
     c1 = pressure + 5.0 * math.log10(303.15 / 314.0)
     c2 = pressure + 7.5 * math.log10(303.15 / 296.0)
-    assert cal.c1_db == pytest.approx(c1, abs=1e-12)
-    np.testing.assert_allclose(cal.c2_db, c2, rtol=0, atol=1e-12)
+    assert cal.c1 == pytest.approx(c1, abs=1e-12)
+    np.testing.assert_allclose(cal.c2, c2, rtol=0, atol=1e-12)
     np.testing.assert_allclose(
-        cal.sound_power_level_db, 80.0 + _AREA_TERM + c1 + c2, rtol=0, atol=1e-12
+        cal.sound_power_level, 80.0 + _AREA_TERM + c1 + c2, rtol=0, atol=1e-12
     )
 
 
 def test_the_manufacturers_c2_overrides_annex_a() -> None:
-    cal = _calibration(c2_db=0.3)
-    np.testing.assert_allclose(cal.c2_db, 0.3)
+    cal = _calibration(c2=0.3)
+    np.testing.assert_allclose(cal.c2, 0.3)
     assert cal.radiation is None
 
 
@@ -232,12 +232,12 @@ def test_a_calibration_is_read_at_the_conditions_of_a_test() -> None:
     c2_test = pressure + np.where(_THIRDS >= 1000.0, 5.0, 15.0) * ratio
     np.testing.assert_allclose(
         cal.sound_power_level_at(_THIRDS, temperature_c=20.0, static_pressure_kpa=90.0),
-        cal.sound_power_level_db - c2_test,
+        cal.sound_power_level - c2_test,
         rtol=0,
         atol=1e-12,
     )
     np.testing.assert_allclose(
-        cal.sound_power_level_at(_THIRDS), cal.sound_power_level_db, rtol=0, atol=1e-12
+        cal.sound_power_level_at(_THIRDS), cal.sound_power_level, rtol=0, atol=1e-12
     )
 
 
@@ -248,7 +248,7 @@ def test_one_condition_alone_is_refused() -> None:
 
 
 def test_the_manufacturers_c2_cannot_be_read_at_a_test() -> None:
-    cal = _calibration(c2_db=0.3)
+    cal = _calibration(c2=0.3)
     with pytest.raises(ValueError, match="manufacturer"):
         cal.sound_power_level_at([1000.0], temperature_c=20.0, static_pressure_kpa=90.0)
 
@@ -268,14 +268,14 @@ def test_the_directivity_index_of_3_9() -> None:
     cal = _calibration(levels)
     mean = 10.0 * math.log10((19 + 10.0**0.6) / 20.0) + 80.0
     np.testing.assert_allclose(
-        cal.max_directivity_index_db, 86.0 - mean, rtol=0, atol=1e-12
+        cal.max_directivity_index, 86.0 - mean, rtol=0, atol=1e-12
     )
 
 
 def test_traverse_maxima_give_the_directivity_index() -> None:
     maxima = np.full((20, _THIRDS.size), 83.0)
-    cal = _calibration(max_levels_db=maxima)
-    np.testing.assert_allclose(cal.max_directivity_index_db, 3.0, rtol=0, atol=1e-12)
+    cal = _calibration(max_levels=maxima)
+    np.testing.assert_allclose(cal.max_directivity_index, 3.0, rtol=0, atol=1e-12)
 
 
 #: Unequal one-third octaves in the 125 Hz octave (100, 125 and 160 Hz), dB:
@@ -296,7 +296,7 @@ def _energy_sum_of_the_unequal_thirds() -> float:
 
 def test_octave_bands_are_the_energy_sum_of_their_thirds() -> None:
     cal = _calibration()
-    one_third = cal.sound_power_level_db[_THIRDS == 1000.0][0]
+    one_third = cal.sound_power_level[_THIRDS == 1000.0][0]
     got = cal.sound_power_level_at([1000.0], bandwidth="octave")[0]
     assert got == pytest.approx(one_third + 10.0 * math.log10(3.0), abs=1e-12)
     with pytest.raises(ValueError, match="does not cover"):
@@ -342,10 +342,8 @@ def test_the_a_weighted_level_names_its_range() -> None:
         [-19.1, -16.1, -13.4, -10.9, -8.6, -6.6, -4.8, -3.2, -1.9, -0.8, 0.0,
          0.6, 1.0, 1.2, 1.3, 1.2, 1.0, 0.5, -0.1, -1.1, -2.5]
     )  # fmt: skip
-    expected = 10.0 * math.log10(
-        np.sum(10.0 ** ((cal.sound_power_level_db + ck) / 10.0))
-    )
-    assert cal.sound_power_level_a_db == pytest.approx(expected, abs=1e-12)
+    expected = 10.0 * math.log10(np.sum(10.0 ** ((cal.sound_power_level + ck) / 10.0)))
+    assert cal.sound_power_level_a == pytest.approx(expected, abs=1e-12)
 
 
 def test_annex_b_replaces_the_lowest_bands_when_they_agree() -> None:
@@ -353,7 +351,7 @@ def test_annex_b_replaces_the_lowest_bands_when_they_agree() -> None:
     levels = np.full((20, freqs.size), 80.0)
     pressure = emission.reference_source_calibration(
         levels, frequencies=freqs, arrangement="fixed"
-    ).sound_power_level_db
+    ).sound_power_level
     intensity = np.full(freqs.size, np.nan)
     low = freqs <= 315.0
     intensity[low] = pressure[low] + np.where(freqs[low] <= 80.0, 3.5, 0.8)
@@ -361,18 +359,18 @@ def test_annex_b_replaces_the_lowest_bands_when_they_agree() -> None:
         levels,
         frequencies=freqs,
         arrangement="fixed",
-        intensity_sound_power_level_db=intensity,
+        intensity_sound_power_level=intensity,
     )
     assert cal.intensity_agreement is True
     np.testing.assert_array_equal(cal.intensity_bands, freqs <= 80.0)
-    np.testing.assert_allclose(cal.sound_power_level_db[:3], pressure[:3] + 3.5)
-    np.testing.assert_allclose(cal.sound_power_level_db[3:], pressure[3:])
+    np.testing.assert_allclose(cal.sound_power_level[:3], pressure[:3] + 3.5)
+    np.testing.assert_allclose(cal.sound_power_level[3:], pressure[3:])
     intensity[freqs == 200.0] = pressure[freqs == 200.0][0] + 1.2
     refused = emission.reference_source_calibration(
         levels,
         frequencies=freqs,
         arrangement="fixed",
-        intensity_sound_power_level_db=intensity,
+        intensity_sound_power_level=intensity,
     )
     assert refused.intensity_agreement is False
     assert not np.any(refused.intensity_bands)
@@ -406,7 +404,7 @@ def test_a_calibration_needs_finite_levels(bad: object) -> None:
         _calibration(levels)
 
 
-@pytest.mark.parametrize("name", ["background_levels", "max_levels_db"])
+@pytest.mark.parametrize("name", ["background_levels", "max_levels"])
 def test_the_background_and_the_maxima_must_be_finite(name: str) -> None:
     extra = np.full((20, _THIRDS.size), 60.0)
     extra[4, 3] = np.nan
@@ -415,8 +413,8 @@ def test_the_background_and_the_maxima_must_be_finite(name: str) -> None:
 
 
 def test_the_manufacturers_c2_must_be_finite() -> None:
-    with pytest.raises(ValueError, match="'c2_db' must be finite"):
-        _calibration(c2_db=np.nan)
+    with pytest.raises(ValueError, match="'c2' must be finite"):
+        _calibration(c2=np.nan)
 
 
 @pytest.mark.parametrize(
@@ -452,7 +450,7 @@ def test_the_calibration_conditions_hold_their_own_air_absorption() -> None:
         )
     )
     np.testing.assert_array_equal(
-        default.sound_power_level_db, reference.sound_power_level_db
+        default.sound_power_level, reference.sound_power_level
     )
 
 
@@ -511,14 +509,14 @@ def test_the_annex_b_bands_need_no_qualified_room() -> None:
     levels = np.full((20, freqs.size), 80.0)
     pressure = emission.reference_source_calibration(
         levels, frequencies=freqs, arrangement="fixed"
-    ).sound_power_level_db
+    ).sound_power_level
     intensity = np.where(freqs <= 315.0, pressure + 0.5, np.nan)
     check = _hemi_check(3.0)  # qualified from 100 Hz to 10 kHz only
     cal = emission.reference_source_calibration(
         levels,
         frequencies=freqs,
         arrangement="fixed",
-        intensity_sound_power_level_db=intensity,
+        intensity_sound_power_level=intensity,
         room_qualification=check,
     )
     assert cal.room_qualified is True
@@ -533,13 +531,13 @@ def test_the_annex_b_bands_need_no_qualified_room() -> None:
 
 
 def _steady(cal: emission.ReferenceSourceCalibration) -> np.ndarray:
-    return cal.sound_power_level_db[None, :] + np.array([[0.1], [-0.1], [0.05]])
+    return cal.sound_power_level[None, :] + np.array([[0.1], [-0.1], [0.05]])
 
 
 def test_a_steady_flat_omnidirectional_source_complies() -> None:
     cal = _calibration()
     verdict = emission.verify_reference_sound_source(
-        cal, repeated_levels_db=_steady(cal), supply_variation_db=0.2
+        cal, repeated_levels=_steady(cal), supply_variation_db=0.2
     )
     assert verdict.passes
     assert verdict.stability_met
@@ -553,12 +551,12 @@ def test_5_2_holds_the_supply_variation_to_0_3_db() -> None:
     cal = _calibration()
     variation = np.full(_THIRDS.size, 0.3)
     at_limit = emission.verify_reference_sound_source(
-        cal, repeated_levels_db=_steady(cal), supply_variation_db=variation
+        cal, repeated_levels=_steady(cal), supply_variation_db=variation
     )
     assert at_limit.supply_met is True
     variation[4] = -0.35
     beyond = emission.verify_reference_sound_source(
-        cal, repeated_levels_db=_steady(cal), supply_variation_db=variation
+        cal, repeated_levels=_steady(cal), supply_variation_db=variation
     )
     assert beyond.supply_met is False
     assert not beyond.passes
@@ -575,7 +573,7 @@ def test_table_1_limits_the_repeatability() -> None:
     cal = _calibration()
     repeated = _steady(cal)
     repeated[0, _THIRDS == 1000.0] += 0.6
-    verdict = emission.verify_reference_sound_source(cal, repeated_levels_db=repeated)
+    verdict = emission.verify_reference_sound_source(cal, repeated_levels=repeated)
     assert verdict.stability_met is False
     assert not verdict.passes
     np.testing.assert_array_equal(
@@ -587,15 +585,15 @@ def test_table_1_limits_the_repeatability() -> None:
 def test_the_repetitions_are_three_or_five() -> None:
     cal = _calibration()
     four = np.vstack([_steady(cal), _steady(cal)[:1]])
-    with pytest.raises(ValueError, match="'repeated_levels_db'"):
-        emission.verify_reference_sound_source(cal, repeated_levels_db=four)
+    with pytest.raises(ValueError, match="'repeated_levels'"):
+        emission.verify_reference_sound_source(cal, repeated_levels=four)
 
 
 def test_a_spectrum_wider_than_12_db_fails_5_4() -> None:
     lw = np.linspace(80.0, 92.5, _THIRDS.size)  # 0,625 dB steps, 12,5 dB range
     verdict = emission.verify_reference_sound_source(
-        lw, frequencies=_THIRDS, directivity_index_db=np.zeros(_THIRDS.size),
-        repeated_levels_db=np.vstack([lw, lw, lw]),
+        lw, frequencies=_THIRDS, directivity_index=np.zeros(_THIRDS.size),
+        repeated_levels=np.vstack([lw, lw, lw]),
     )  # fmt: skip
     assert verdict.core_range_db == pytest.approx(12.5)
     assert not verdict.spectrum_met
@@ -605,8 +603,8 @@ def test_a_step_of_more_than_3_db_fails_5_4() -> None:
     lw = np.full(_THIRDS.size, 90.0)
     lw[10] = 93.1
     verdict = emission.verify_reference_sound_source(
-        lw, frequencies=_THIRDS, directivity_index_db=np.zeros(_THIRDS.size),
-        repeated_levels_db=np.vstack([lw, lw, lw]),
+        lw, frequencies=_THIRDS, directivity_index=np.zeros(_THIRDS.size),
+        repeated_levels=np.vstack([lw, lw, lw]),
     )  # fmt: skip
     assert verdict.adjacent_step_db[10] == pytest.approx(3.1)
     assert not verdict.spectrum_met
@@ -616,16 +614,16 @@ def test_an_extended_range_is_held_to_16_db_and_4_db() -> None:
     freqs = np.concatenate([[50.0, 63.0, 80.0], _THIRDS])
     lw = np.concatenate([[80.5, 84.0, 87.8], np.full(_THIRDS.size, 91.5)])
     verdict = emission.verify_reference_sound_source(
-        lw, frequencies=freqs, directivity_index_db=np.zeros(freqs.size),
-        repeated_levels_db=np.vstack([lw, lw, lw]),
+        lw, frequencies=freqs, directivity_index=np.zeros(freqs.size),
+        repeated_levels=np.vstack([lw, lw, lw]),
     )  # fmt: skip
     assert verdict.extended_range_db == pytest.approx(11.0)
     assert verdict.adjacent_limit_db[0] == 4.0
     assert verdict.spectrum_met
     lw[0] = 75.0  # 16,5 dB range, 9 dB step
     assert not emission.verify_reference_sound_source(
-        lw, frequencies=freqs, directivity_index_db=np.zeros(freqs.size),
-        repeated_levels_db=np.vstack([lw, lw, lw]),
+        lw, frequencies=freqs, directivity_index=np.zeros(freqs.size),
+        repeated_levels=np.vstack([lw, lw, lw]),
     ).spectrum_met  # fmt: skip
 
 
@@ -651,8 +649,8 @@ def test_the_16_db_range_is_judged_on_its_own(*, lowest: float, met: bool) -> No
 def test_a_missing_core_band_fails_5_4() -> None:
     lw = np.full(_THIRDS.size - 1, 90.0)
     verdict = emission.verify_reference_sound_source(
-        lw, frequencies=_THIRDS[:-1], directivity_index_db=np.zeros(lw.size),
-        repeated_levels_db=np.vstack([lw, lw, lw]),
+        lw, frequencies=_THIRDS[:-1], directivity_index=np.zeros(lw.size),
+        repeated_levels=np.vstack([lw, lw, lw]),
     )  # fmt: skip
     assert not verdict.frequency_range_met
     assert not verdict.passes
@@ -663,12 +661,12 @@ def test_a_directivity_index_above_6_db_fails_5_5() -> None:
     directivity = np.zeros(_THIRDS.size)
     directivity[5] = 6.2
     verdict = emission.verify_reference_sound_source(
-        lw, frequencies=_THIRDS, directivity_index_db=directivity,
-        repeated_levels_db=np.vstack([lw, lw, lw]),
+        lw, frequencies=_THIRDS, directivity_index=directivity,
+        repeated_levels=np.vstack([lw, lw, lw]),
     )  # fmt: skip
     assert verdict.directivity_met is False
     labelled = emission.verify_reference_sound_source(
-        lw, frequencies=_THIRDS, repeated_levels_db=np.vstack([lw, lw, lw]),
+        lw, frequencies=_THIRDS, repeated_levels=np.vstack([lw, lw, lw]),
         supply_variation_db=0.1, reverberation_rooms_only=True,
     )  # fmt: skip
     assert labelled.directivity_met is True
@@ -960,11 +958,9 @@ def test_iso_3743_2_suitability_reads_the_calibration_at_the_test() -> None:
     check = emission.check_special_room_suitability(
         measured, cal, _SUITABILITY_FREQS, temperature_c=20.0, static_pressure_kpa=90.0
     )
-    np.testing.assert_allclose(
-        check.calibrated_power_level_db, octave, rtol=0, atol=1e-12
-    )
-    np.testing.assert_allclose(check.measured_power_level_db, measured, rtol=0, atol=0)
-    np.testing.assert_allclose(check.difference_db, -_TABLE_1_DB, rtol=0, atol=1e-9)
+    np.testing.assert_allclose(check.calibrated_power_level, octave, rtol=0, atol=1e-12)
+    np.testing.assert_allclose(check.measured_power_level, measured, rtol=0, atol=0)
+    np.testing.assert_allclose(check.difference, -_TABLE_1_DB, rtol=0, atol=1e-9)
     assert check.passes
 
 
@@ -992,10 +988,8 @@ def test_iso_3743_2_suitability_sums_unequal_thirds_at_the_test() -> None:
         temperature_c=20.0,
         static_pressure_kpa=90.0,
     )
-    np.testing.assert_allclose(
-        check.calibrated_power_level_db, octave, rtol=0, atol=1e-12
-    )
-    np.testing.assert_allclose(check.difference_db, 1.0, rtol=0, atol=1e-9)
+    np.testing.assert_allclose(check.calibrated_power_level, octave, rtol=0, atol=1e-12)
+    np.testing.assert_allclose(check.difference, 1.0, rtol=0, atol=1e-9)
     assert check.passes
 
 
@@ -1015,7 +1009,7 @@ def test_iso_3743_2_suitability_fails_against_the_calibration_left_at_23_degc() 
     )
     shift = _c2_at_20_degc_and_90_kpa(7.5) - 7.5 * math.log10(296.15 / 296.0)
     np.testing.assert_allclose(
-        check.difference_db, -_TABLE_1_DB - shift, rtol=0, atol=1e-9
+        check.difference, -_TABLE_1_DB - shift, rtol=0, atol=1e-9
     )
     assert not bool(np.any(check.band_within))
     assert not check.passes
@@ -1048,9 +1042,9 @@ def test_iso_3743_2_suitability_from_the_levels_read_at_the_test() -> None:
     )
     for other in (from_levels, at_default):
         np.testing.assert_array_equal(
-            other.calibrated_power_level_db, from_object.calibrated_power_level_db
+            other.calibrated_power_level, from_object.calibrated_power_level
         )
-        np.testing.assert_array_equal(other.difference_db, from_object.difference_db)
+        np.testing.assert_array_equal(other.difference, from_object.difference)
 
 
 def test_iso_3743_2_suitability_refuses_a_calibration_it_cannot_read() -> None:
@@ -1060,7 +1054,7 @@ def test_iso_3743_2_suitability_refuses_a_calibration_it_cannot_read() -> None:
     above_200 = emission.reference_source_calibration(
         np.full((20, 16), 80.0), frequencies=_THIRDS[3:19], arrangement="fixed"
     )
-    manufacturers = _calibration(c2_db=0.3)
+    manufacturers = _calibration(c2=0.3)
     measured = np.full(_SUITABILITY_FREQS.size, 92.0)
     with pytest.raises(ValueError, match="does not cover the 100 Hz"):
         emission.check_special_room_suitability(measured, above_200, _SUITABILITY_FREQS)
@@ -1078,7 +1072,7 @@ def test_iso_3743_refuses_a_calibration_it_cannot_read() -> None:
     rss = np.full((6, 2), 71.0)
     background = np.full(2, 40.0)
     calibration = _calibration()
-    manufacturers = _calibration(c2_db=0.3)
+    manufacturers = _calibration(c2=0.3)
     with pytest.raises(ValueError, match="does not cover the 50 Hz"):
         emission.sound_power_hard_walled(
             st, rss, calibration, [63.0, 125.0], background_levels=background
@@ -1137,7 +1131,7 @@ def test_the_calibration_plot_draws_one_bar_per_band() -> None:
 def test_the_verdict_plot_shares_each_limit() -> None:
     cal = _calibration()
     ax = emission.verify_reference_sound_source(
-        cal, repeated_levels_db=_steady(cal), supply_variation_db=0.15
+        cal, repeated_levels=_steady(cal), supply_variation_db=0.15
     ).plot()
     labels = ax.get_legend_handles_labels()[1]
     assert "Directivity index / 6 dB" in labels
@@ -1151,8 +1145,8 @@ def test_the_verdict_plot_draws_the_range_requirement() -> None:
     """A source that fails on the 12 dB range alone shows it above the limit."""
     lw = 80.0 + 1.2 * np.arange(_THIRDS.size)  # 24 dB over 100 Hz to 10 kHz
     verdict = emission.verify_reference_sound_source(
-        lw, frequencies=_THIRDS, repeated_levels_db=np.vstack([lw, lw, lw]),
-        directivity_index_db=np.full(_THIRDS.size, 2.0), supply_variation_db=0.1,
+        lw, frequencies=_THIRDS, repeated_levels=np.vstack([lw, lw, lw]),
+        directivity_index=np.full(_THIRDS.size, 2.0), supply_variation_db=0.1,
     )  # fmt: skip
     ax = verdict.plot()
     segments = ax.collections[0].get_segments()

@@ -119,7 +119,7 @@ __all__ = [
     "ISO7235_SPREAD_LIMITS",
     "MIN_FLOW_RATES",
     "MIN_PRESSURE_DIFFERENCE_PA",
-    "MODAL_FILTER_ATTENUATION_DB",
+    "MODAL_FILTER_ATTENUATION",
     "OperatingLine",
     "RADIATION_SOLID_ANGLES",
     "RECTANGULAR_CUT_ON_COEFFICIENT",
@@ -261,7 +261,7 @@ RADIATION_SOLID_ANGLES: Mapping[str, float] = MappingProxyType(
 #: mode the modal filter has to provide, in dB: at least the first at the
 #: low-frequency end, and at least the second above the cut-on frequency of
 #: the higher-order modes in the connected ducts.
-MODAL_FILTER_ATTENUATION_DB: tuple[float, float] = (3.0, 5.0)
+MODAL_FILTER_ATTENUATION: tuple[float, float] = (3.0, 5.0)
 
 #: ISO 7235:2003, Equation (4). The coefficient of the cut-on frequency of the
 #: first higher-order mode of a circular duct, ``f = 0,59 c / d``. The exact

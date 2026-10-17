@@ -24,7 +24,7 @@ to a standard and rated to another, and that are held here in a class each:
 
 A book's transmission loss is not a laboratory's :math:`R`, and a covering's
 :math:`\Delta L_\mathrm{w}` is not the averaged improvement some handbooks
-print (:attr:`~phonometry.building.ImpactInsulation.impact_sound_improvement_db`
+print (:attr:`~phonometry.building.ImpactInsulation.impact_sound_improvement`
 is one): each quantity has its own class and its own field names, so the
 mistake of taking one for the other shows at the call.
 
@@ -114,44 +114,44 @@ class SoundReductionSpectrum(BandedRow):
     numbers of ISO 717-1 printed beside them. :meth:`rating` rates the bands
     again; the printed numbers stay as printed.
 
-    :ivar sound_reduction_index_50_db: :math:`R` in the 50 Hz one-third
+    :ivar sound_reduction_index_50: :math:`R` in the 50 Hz one-third
         octave band, in decibels, as printed.
-    :ivar sound_reduction_index_63_db: The same in the 63 Hz band.
-    :ivar sound_reduction_index_80_db: The same in the 80 Hz band.
-    :ivar sound_reduction_index_100_db: The same in the 100 Hz band.
-    :ivar sound_reduction_index_125_db: The same in the 125 Hz band.
-    :ivar sound_reduction_index_160_db: The same in the 160 Hz band.
-    :ivar sound_reduction_index_200_db: The same in the 200 Hz band.
-    :ivar sound_reduction_index_250_db: The same in the 250 Hz band.
-    :ivar sound_reduction_index_315_db: The same in the 315 Hz band.
-    :ivar sound_reduction_index_400_db: The same in the 400 Hz band.
-    :ivar sound_reduction_index_500_db: The same in the 500 Hz band.
-    :ivar sound_reduction_index_630_db: The same in the 630 Hz band.
-    :ivar sound_reduction_index_800_db: The same in the 800 Hz band.
-    :ivar sound_reduction_index_1000_db: The same in the 1 kHz band.
-    :ivar sound_reduction_index_1250_db: The same in the 1.25 kHz band.
-    :ivar sound_reduction_index_1600_db: The same in the 1.6 kHz band.
-    :ivar sound_reduction_index_2000_db: The same in the 2 kHz band.
-    :ivar sound_reduction_index_2500_db: The same in the 2.5 kHz band.
-    :ivar sound_reduction_index_3150_db: The same in the 3.15 kHz band.
-    :ivar sound_reduction_index_4000_db: The same in the 4 kHz band.
-    :ivar sound_reduction_index_5000_db: The same in the 5 kHz band.
-    :ivar weighted_sound_reduction_index_db: The weighted sound reduction
+    :ivar sound_reduction_index_63: The same in the 63 Hz band.
+    :ivar sound_reduction_index_80: The same in the 80 Hz band.
+    :ivar sound_reduction_index_100: The same in the 100 Hz band.
+    :ivar sound_reduction_index_125: The same in the 125 Hz band.
+    :ivar sound_reduction_index_160: The same in the 160 Hz band.
+    :ivar sound_reduction_index_200: The same in the 200 Hz band.
+    :ivar sound_reduction_index_250: The same in the 250 Hz band.
+    :ivar sound_reduction_index_315: The same in the 315 Hz band.
+    :ivar sound_reduction_index_400: The same in the 400 Hz band.
+    :ivar sound_reduction_index_500: The same in the 500 Hz band.
+    :ivar sound_reduction_index_630: The same in the 630 Hz band.
+    :ivar sound_reduction_index_800: The same in the 800 Hz band.
+    :ivar sound_reduction_index_1000: The same in the 1 kHz band.
+    :ivar sound_reduction_index_1250: The same in the 1.25 kHz band.
+    :ivar sound_reduction_index_1600: The same in the 1.6 kHz band.
+    :ivar sound_reduction_index_2000: The same in the 2 kHz band.
+    :ivar sound_reduction_index_2500: The same in the 2.5 kHz band.
+    :ivar sound_reduction_index_3150: The same in the 3.15 kHz band.
+    :ivar sound_reduction_index_4000: The same in the 4 kHz band.
+    :ivar sound_reduction_index_5000: The same in the 5 kHz band.
+    :ivar weighted_sound_reduction_index: The weighted sound reduction
         index :math:`R_\mathrm{w}` the report prints, in decibels
         (ISO 717-1 Clause 4.4).
-    :ivar spectrum_adaptation_term_db: :math:`C`, the adaptation term for
+    :ivar spectrum_adaptation_term: :math:`C`, the adaptation term for
         spectrum No. 1 (pink noise), in decibels (Clause 4.5).
-    :ivar traffic_spectrum_adaptation_term_db: :math:`C_\mathrm{tr}`, the
+    :ivar traffic_spectrum_adaptation_term: :math:`C_\mathrm{tr}`, the
         adaptation term for spectrum No. 2 (urban traffic), in decibels.
-    :ivar spectrum_adaptation_term_50_3150_db: :math:`C_{50-3150}` of
+    :ivar spectrum_adaptation_term_50_3150: :math:`C_{50-3150}` of
         ISO 717-1 Annex B, in decibels.
-    :ivar spectrum_adaptation_term_50_5000_db: :math:`C_{50-5000}`.
-    :ivar spectrum_adaptation_term_100_5000_db: :math:`C_{100-5000}`.
-    :ivar traffic_spectrum_adaptation_term_50_3150_db:
+    :ivar spectrum_adaptation_term_50_5000: :math:`C_{50-5000}`.
+    :ivar spectrum_adaptation_term_100_5000: :math:`C_{100-5000}`.
+    :ivar traffic_spectrum_adaptation_term_50_3150:
         :math:`C_{\mathrm{tr},50-3150}`.
-    :ivar traffic_spectrum_adaptation_term_50_5000_db:
+    :ivar traffic_spectrum_adaptation_term_50_5000:
         :math:`C_{\mathrm{tr},50-5000}`.
-    :ivar traffic_spectrum_adaptation_term_100_5000_db:
+    :ivar traffic_spectrum_adaptation_term_100_5000:
         :math:`C_{\mathrm{tr},100-5000}`.
     :ivar surface_density_kg_m2: The mass per unit area of the element, in
         kilograms per square metre, as the report prints it.
@@ -161,36 +161,36 @@ class SoundReductionSpectrum(BandedRow):
         it: the leaves, the studs, the cavity and what fills it.
     """
 
-    sound_reduction_index_50_db: float | None = None
-    sound_reduction_index_63_db: float | None = None
-    sound_reduction_index_80_db: float | None = None
-    sound_reduction_index_100_db: float | None = None
-    sound_reduction_index_125_db: float | None = None
-    sound_reduction_index_160_db: float | None = None
-    sound_reduction_index_200_db: float | None = None
-    sound_reduction_index_250_db: float | None = None
-    sound_reduction_index_315_db: float | None = None
-    sound_reduction_index_400_db: float | None = None
-    sound_reduction_index_500_db: float | None = None
-    sound_reduction_index_630_db: float | None = None
-    sound_reduction_index_800_db: float | None = None
-    sound_reduction_index_1000_db: float | None = None
-    sound_reduction_index_1250_db: float | None = None
-    sound_reduction_index_1600_db: float | None = None
-    sound_reduction_index_2000_db: float | None = None
-    sound_reduction_index_2500_db: float | None = None
-    sound_reduction_index_3150_db: float | None = None
-    sound_reduction_index_4000_db: float | None = None
-    sound_reduction_index_5000_db: float | None = None
-    weighted_sound_reduction_index_db: float | None = None
-    spectrum_adaptation_term_db: float | None = None
-    traffic_spectrum_adaptation_term_db: float | None = None
-    spectrum_adaptation_term_50_3150_db: float | None = None
-    spectrum_adaptation_term_50_5000_db: float | None = None
-    spectrum_adaptation_term_100_5000_db: float | None = None
-    traffic_spectrum_adaptation_term_50_3150_db: float | None = None
-    traffic_spectrum_adaptation_term_50_5000_db: float | None = None
-    traffic_spectrum_adaptation_term_100_5000_db: float | None = None
+    sound_reduction_index_50: float | None = None
+    sound_reduction_index_63: float | None = None
+    sound_reduction_index_80: float | None = None
+    sound_reduction_index_100: float | None = None
+    sound_reduction_index_125: float | None = None
+    sound_reduction_index_160: float | None = None
+    sound_reduction_index_200: float | None = None
+    sound_reduction_index_250: float | None = None
+    sound_reduction_index_315: float | None = None
+    sound_reduction_index_400: float | None = None
+    sound_reduction_index_500: float | None = None
+    sound_reduction_index_630: float | None = None
+    sound_reduction_index_800: float | None = None
+    sound_reduction_index_1000: float | None = None
+    sound_reduction_index_1250: float | None = None
+    sound_reduction_index_1600: float | None = None
+    sound_reduction_index_2000: float | None = None
+    sound_reduction_index_2500: float | None = None
+    sound_reduction_index_3150: float | None = None
+    sound_reduction_index_4000: float | None = None
+    sound_reduction_index_5000: float | None = None
+    weighted_sound_reduction_index: float | None = None
+    spectrum_adaptation_term: float | None = None
+    traffic_spectrum_adaptation_term: float | None = None
+    spectrum_adaptation_term_50_3150: float | None = None
+    spectrum_adaptation_term_50_5000: float | None = None
+    spectrum_adaptation_term_100_5000: float | None = None
+    traffic_spectrum_adaptation_term_50_3150: float | None = None
+    traffic_spectrum_adaptation_term_50_5000: float | None = None
+    traffic_spectrum_adaptation_term_100_5000: float | None = None
     surface_density_kg_m2: float | None = None
     thickness_mm: float | None = None
     construction: str = ""
@@ -198,7 +198,6 @@ class SoundReductionSpectrum(BandedRow):
     _bands_hz: ClassVar[tuple[int, ...]] = _BANDS_HZ
     _bands_per_octave: ClassVar[int] = 3
     _band_prefix: ClassVar[str] = "sound_reduction_index_"
-    _band_suffix: ClassVar[str] = "_db"
     _band_kind: ClassVar[str] = "a one-third octave"
     _table_kind: ClassVar[str] = "sound reduction index"
 
@@ -206,33 +205,33 @@ class SoundReductionSpectrum(BandedRow):
     #: the attribute of :class:`~phonometry.building.ExtendedWeightedRatingResult`
     #: each is worked out as and the clause that defines it.
     _RATINGS: ClassVar[tuple[tuple[str, str, str, str], ...]] = (
-        ("weighted_sound_reduction_index_db", "rating", "Rw", "ISO 717-1 Clause 4.4"),
-        ("spectrum_adaptation_term_db", "c", "C", "ISO 717-1 Clause 4.5"),
-        ("traffic_spectrum_adaptation_term_db", "ctr", "Ctr", "ISO 717-1 Clause 4.5"),
-        ("spectrum_adaptation_term_50_3150_db", "c_50_3150", "C50-3150", _ANNEX_B),
-        ("spectrum_adaptation_term_50_5000_db", "c_50_5000", "C50-5000", _ANNEX_B),
-        ("spectrum_adaptation_term_100_5000_db", "c_100_5000", "C100-5000", _ANNEX_B),
+        ("weighted_sound_reduction_index", "rating", "Rw", "ISO 717-1 Clause 4.4"),
+        ("spectrum_adaptation_term", "c", "C", "ISO 717-1 Clause 4.5"),
+        ("traffic_spectrum_adaptation_term", "ctr", "Ctr", "ISO 717-1 Clause 4.5"),
+        ("spectrum_adaptation_term_50_3150", "c_50_3150", "C50-3150", _ANNEX_B),
+        ("spectrum_adaptation_term_50_5000", "c_50_5000", "C50-5000", _ANNEX_B),
+        ("spectrum_adaptation_term_100_5000", "c_100_5000", "C100-5000", _ANNEX_B),
         (
-            "traffic_spectrum_adaptation_term_50_3150_db",
+            "traffic_spectrum_adaptation_term_50_3150",
             "ctr_50_3150",
             "Ctr,50-3150",
             _ANNEX_B,
         ),
         (
-            "traffic_spectrum_adaptation_term_50_5000_db",
+            "traffic_spectrum_adaptation_term_50_5000",
             "ctr_50_5000",
             "Ctr,50-5000",
             _ANNEX_B,
         ),
         (
-            "traffic_spectrum_adaptation_term_100_5000_db",
+            "traffic_spectrum_adaptation_term_100_5000",
             "ctr_100_5000",
             "Ctr,100-5000",
             _ANNEX_B,
         ),
     )
 
-    def sound_reduction_index_db(self, band_hz: int) -> float:
+    def sound_reduction_index(self, band_hz: int) -> float:
         """The sound reduction index in one band, or a refusal.
 
         :param band_hz: A one-third-octave centre frequency from 50 Hz to
@@ -307,72 +306,71 @@ class ImpactImprovementSpectrum(BandedRow):
     frequency: a handbook's averaged improvement is another quantity, and
     this class never reads it.
 
-    :ivar impact_improvement_50_db: :math:`\Delta L` in the 50 Hz one-third
+    :ivar impact_improvement_50: :math:`\Delta L` in the 50 Hz one-third
         octave band, in decibels, as printed.
-    :ivar impact_improvement_63_db: The same in the 63 Hz band.
-    :ivar impact_improvement_80_db: The same in the 80 Hz band.
-    :ivar impact_improvement_100_db: The same in the 100 Hz band.
-    :ivar impact_improvement_125_db: The same in the 125 Hz band.
-    :ivar impact_improvement_160_db: The same in the 160 Hz band.
-    :ivar impact_improvement_200_db: The same in the 200 Hz band.
-    :ivar impact_improvement_250_db: The same in the 250 Hz band.
-    :ivar impact_improvement_315_db: The same in the 315 Hz band.
-    :ivar impact_improvement_400_db: The same in the 400 Hz band.
-    :ivar impact_improvement_500_db: The same in the 500 Hz band.
-    :ivar impact_improvement_630_db: The same in the 630 Hz band.
-    :ivar impact_improvement_800_db: The same in the 800 Hz band.
-    :ivar impact_improvement_1000_db: The same in the 1 kHz band.
-    :ivar impact_improvement_1250_db: The same in the 1.25 kHz band.
-    :ivar impact_improvement_1600_db: The same in the 1.6 kHz band.
-    :ivar impact_improvement_2000_db: The same in the 2 kHz band.
-    :ivar impact_improvement_2500_db: The same in the 2.5 kHz band.
-    :ivar impact_improvement_3150_db: The same in the 3.15 kHz band.
-    :ivar impact_improvement_4000_db: The same in the 4 kHz band.
-    :ivar impact_improvement_5000_db: The same in the 5 kHz band.
-    :ivar weighted_impact_improvement_db: The weighted reduction of impact
+    :ivar impact_improvement_63: The same in the 63 Hz band.
+    :ivar impact_improvement_80: The same in the 80 Hz band.
+    :ivar impact_improvement_100: The same in the 100 Hz band.
+    :ivar impact_improvement_125: The same in the 125 Hz band.
+    :ivar impact_improvement_160: The same in the 160 Hz band.
+    :ivar impact_improvement_200: The same in the 200 Hz band.
+    :ivar impact_improvement_250: The same in the 250 Hz band.
+    :ivar impact_improvement_315: The same in the 315 Hz band.
+    :ivar impact_improvement_400: The same in the 400 Hz band.
+    :ivar impact_improvement_500: The same in the 500 Hz band.
+    :ivar impact_improvement_630: The same in the 630 Hz band.
+    :ivar impact_improvement_800: The same in the 800 Hz band.
+    :ivar impact_improvement_1000: The same in the 1 kHz band.
+    :ivar impact_improvement_1250: The same in the 1.25 kHz band.
+    :ivar impact_improvement_1600: The same in the 1.6 kHz band.
+    :ivar impact_improvement_2000: The same in the 2 kHz band.
+    :ivar impact_improvement_2500: The same in the 2.5 kHz band.
+    :ivar impact_improvement_3150: The same in the 3.15 kHz band.
+    :ivar impact_improvement_4000: The same in the 4 kHz band.
+    :ivar impact_improvement_5000: The same in the 5 kHz band.
+    :ivar weighted_impact_improvement: The weighted reduction of impact
         sound pressure level :math:`\Delta L_\mathrm{w}` the report prints,
         in decibels (ISO 717-2 Formulae (1) and (2)). It is what
         :func:`~phonometry.building.predicted_impact_insulation` takes as
         ``delta_l_w``, through
         :meth:`~phonometry.io.CatalogueRow.printed`.
-    :ivar reference_floor_adaptation_term_db: :math:`C_\mathrm{I,r}`, the
+    :ivar reference_floor_adaptation_term: :math:`C_\mathrm{I,r}`, the
         spectrum adaptation term of the reference floor with the covering
         (ISO 717-2 Clause A.2.2), in decibels, which data sheets of floating
         floor layers print beside :math:`\Delta L_\mathrm{w}`.
-    :ivar impact_improvement_adaptation_term_db:
+    :ivar impact_improvement_adaptation_term:
         :math:`C_{\mathrm{I},\Delta}`, the spectrum adaptation term of the
         covering (Clause A.2.2, Formula (A.4)), in decibels.
     """
 
-    impact_improvement_50_db: float | None = None
-    impact_improvement_63_db: float | None = None
-    impact_improvement_80_db: float | None = None
-    impact_improvement_100_db: float | None = None
-    impact_improvement_125_db: float | None = None
-    impact_improvement_160_db: float | None = None
-    impact_improvement_200_db: float | None = None
-    impact_improvement_250_db: float | None = None
-    impact_improvement_315_db: float | None = None
-    impact_improvement_400_db: float | None = None
-    impact_improvement_500_db: float | None = None
-    impact_improvement_630_db: float | None = None
-    impact_improvement_800_db: float | None = None
-    impact_improvement_1000_db: float | None = None
-    impact_improvement_1250_db: float | None = None
-    impact_improvement_1600_db: float | None = None
-    impact_improvement_2000_db: float | None = None
-    impact_improvement_2500_db: float | None = None
-    impact_improvement_3150_db: float | None = None
-    impact_improvement_4000_db: float | None = None
-    impact_improvement_5000_db: float | None = None
-    weighted_impact_improvement_db: float | None = None
-    reference_floor_adaptation_term_db: float | None = None
-    impact_improvement_adaptation_term_db: float | None = None
+    impact_improvement_50: float | None = None
+    impact_improvement_63: float | None = None
+    impact_improvement_80: float | None = None
+    impact_improvement_100: float | None = None
+    impact_improvement_125: float | None = None
+    impact_improvement_160: float | None = None
+    impact_improvement_200: float | None = None
+    impact_improvement_250: float | None = None
+    impact_improvement_315: float | None = None
+    impact_improvement_400: float | None = None
+    impact_improvement_500: float | None = None
+    impact_improvement_630: float | None = None
+    impact_improvement_800: float | None = None
+    impact_improvement_1000: float | None = None
+    impact_improvement_1250: float | None = None
+    impact_improvement_1600: float | None = None
+    impact_improvement_2000: float | None = None
+    impact_improvement_2500: float | None = None
+    impact_improvement_3150: float | None = None
+    impact_improvement_4000: float | None = None
+    impact_improvement_5000: float | None = None
+    weighted_impact_improvement: float | None = None
+    reference_floor_adaptation_term: float | None = None
+    impact_improvement_adaptation_term: float | None = None
 
     _bands_hz: ClassVar[tuple[int, ...]] = _BANDS_HZ
     _bands_per_octave: ClassVar[int] = 3
     _band_prefix: ClassVar[str] = "impact_improvement_"
-    _band_suffix: ClassVar[str] = "_db"
     _band_kind: ClassVar[str] = "a one-third octave"
     _table_kind: ClassVar[str] = "impact improvement"
 
@@ -382,26 +380,26 @@ class ImpactImprovementSpectrum(BandedRow):
     #: worked out as.
     _RATINGS: ClassVar[tuple[tuple[str, str, str, str], ...]] = (
         (
-            "weighted_impact_improvement_db",
+            "weighted_impact_improvement",
             "delta_lw",
             "ΔLw",
             "ISO 717-2 Formula (2)",
         ),
         (
-            "impact_improvement_adaptation_term_db",
+            "impact_improvement_adaptation_term",
             "ci_delta",
             "CI,Δ",
             "ISO 717-2 Formula (A.4)",
         ),
         (
-            "reference_floor_adaptation_term_db",
+            "reference_floor_adaptation_term",
             "ci_r",
             "CI,r",
             "ISO 717-2 Clause A.2.2",
         ),
     )
 
-    def impact_improvement_db(self, band_hz: int) -> float:
+    def impact_improvement(self, band_hz: int) -> float:
         r"""The reduction of impact level in one band, or a refusal.
 
         :param band_hz: A one-third-octave centre frequency from 50 Hz to

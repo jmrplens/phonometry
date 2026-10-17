@@ -81,7 +81,7 @@ account for.
 
 ```python
 frequency_weighted_sel(
-    band_levels_db: ArrayLike,
+    band_levels: ArrayLike,
     weighting_db: ArrayLike,
 ) -> float | NDArray[np.float64]
 ```
@@ -102,8 +102,8 @@ range from 1 Hz to 10 kHz always meets the requirement.
 
 | Name | Description |
 | :--- | :--- |
-| `band_levels_db` | Band sound exposure levels $L_E(j)$, in dB, along the last axis. Leading axes are kept, so an array of shape `(N_atm, N_exc, n_bands)` of the replica atmospheres returns their `(N_atm, N_exc)` weighted levels at once. |
-| `weighting_db` | The frequency weighting $\mathrm{w}(j)$ of each band, in dB (A-weighting, C-weighting or any other), broadcast against `band_levels_db`. |
+| `band_levels` | Band sound exposure levels $L_E(j)$, in dB, along the last axis. Leading axes are kept, so an array of shape `(N_atm, N_exc, n_bands)` of the replica atmospheres returns their `(N_atm, N_exc)` weighted levels at once. |
+| `weighting_db` | The frequency weighting $\mathrm{w}(j)$ of each band, in dB (A-weighting, C-weighting or any other), broadcast against `band_levels`. |
 
 **Returns:** $L_{E,\mathrm{w}}$ in dB, a float for a single spectrum.
 
@@ -120,7 +120,7 @@ long_term_sel(
     levels: ArrayLike,
     probabilities: ArrayLike,
     *,
-    rating_adjustment_db: float = 0.0,
+    rating_adjustment: float = 0.0,
 ) -> float
 ```
 
@@ -147,7 +147,7 @@ atmospheric-absorption class of probability 1.
 | :--- | :--- |
 | `levels` | $L_{E,\mathrm{w},k,l}$ of each replica atmosphere, in dB, any shape (`(N_atm, N_exc)` or already flattened). |
 | `probabilities` | The probability of each replica, the same shape as `levels` (see [`replica_probabilities`](/phonometry/reference/api/environment/exposure-distribution/#replica_probabilities)). |
-| `rating_adjustment_db` | `K`, in dB; 0 dB (the default) gives Equation (7). |
+| `rating_adjustment` | `K`, in dB; 0 dB (the default) gives Equation (7). |
 
 **Returns:** The long-term average level, in dB.
 
@@ -249,10 +249,10 @@ SELDistribution(
     class_densities_per_db: NDArray[np.float64],
     subclass_centers_db: NDArray[np.float64],
     sigma_db: float,
-    level_shift_db: float,
+    level_shift: float,
     n_subclasses: int,
-    long_term_level_db: float,
-    distribution_long_term_level_db: float,
+    long_term_level: float,
+    distribution_long_term_level: float,
     replicas: tuple[tuple[int, ...], ...],
 )
 ```
@@ -264,7 +264,7 @@ The replica atmospheres, sorted by level, are the `M` classes of
 Equations (10) to (16); each class is split into `n_subclasses` equal
 subclasses (Equations (17) to (20)) and each subclass is replaced by a
 normal distribution of standard deviation `sigma_db` centred
-`level_shift_db` below the subclass centre (Equations (21) to (23)).
+`level_shift` below the subclass centre (Equations (21) to (23)).
 
 **Attributes**
 
@@ -277,10 +277,10 @@ normal distribution of standard deviation `sigma_db` centred
 | `class_densities_per_db` | $\rho_m$, the constant density of each class, in 1/dB (Equation (15)). |
 | `subclass_centers_db` | $\mu_{m,j}$, shape `(M, subclasses)`, in dB (Equation (18)). |
 | `sigma_db` | $\sigma$ of the turbulent spread, in dB. |
-| `level_shift_db` | $\Delta\mu$, in dB (Equation (22)). |
+| `level_shift` | $\Delta\mu$, in dB (Equation (22)). |
 | `n_subclasses` | $N_\mathrm{sub}$, the subclasses per class. |
-| `long_term_level_db` | $\langle L_{E,\mathrm{w}}\rangle_\mathrm{LT}$ from the classes, Equation (7); Annex A's `LT1`. |
-| `distribution_long_term_level_db` | the same average taken over the continuous distribution, Equation (A.4); Annex A's `LT2`. It differs from `long_term_level_db` only by the spreading of each class over its width, since $\Delta\mu$ preserves the energy of each subclass. |
+| `long_term_level` | $\langle L_{E,\mathrm{w}}\rangle_\mathrm{LT}$ from the classes, Equation (7); Annex A's `LT1`. |
+| `distribution_long_term_level` | the same average taken over the continuous distribution, Equation (A.4); Annex A's `LT2`. It differs from `long_term_level` only by the spreading of each class over its width, since $\Delta\mu$ preserves the energy of each subclass. |
 | `replicas` | For each class, the flat indices of the replica atmospheres it holds, in the row-major order the input was given in; a class holds more than one only where equal levels were combined. |
 
 ### SELDistribution.class_density()

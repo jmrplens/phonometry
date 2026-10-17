@@ -619,7 +619,7 @@ from phonometry import signals
 
 m = signals.window_metrics("hann", 2048)
 print(m.enbw_bins)              # 1.5, exactly
-print(m.scalloping_loss_db)     # 1.42 dB
+print(m.scalloping_loss)     # 1.42 dB
 print(m.highest_sidelobe_db)    # -31.5 dB
 m.plot()                        # window + spectrum with metrics marked
 ```

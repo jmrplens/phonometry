@@ -185,8 +185,8 @@ passage spread over the same hour: $v_{\mathrm{E\,ges}} = \sqrt{\sum v_{\mathrm{
 
 ```python
 elastic_insertion_loss(
-    levels_before_db: ArrayLike,
-    levels_after_db: ArrayLike,
+    levels_before: ArrayLike,
+    levels_after: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -202,8 +202,8 @@ two spectra.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_before_db` | The third-octave levels before, in decibels. |
-| `levels_after_db` | The levels after, at the same point, in decibels. |
+| `levels_before` | The third-octave levels before, in decibels. |
+| `levels_after` | The levels after, at the same point, in decibels. |
 
 **Returns:** $L_1 - L_2$ per band, positive where the element reduces the level.
 
@@ -681,10 +681,10 @@ TrainPassage(
     interval_rms_mm_s: tuple[float, float, float],
     intervals_s: tuple[tuple[float, float], ...],
     event_velocity_mm_s: float,
-    event_level_db: float,
+    event_level: float,
     frequencies: NDArray[np.float64],
-    band_interval_levels_db: NDArray[np.float64],
-    band_max_levels_db: NDArray[np.float64],
+    band_interval_levels: NDArray[np.float64],
+    band_max_levels: NDArray[np.float64],
     fs: float,
 )
 ```
@@ -703,10 +703,10 @@ One passage reduced the way Clauses 5 to 7 reduce it.
 | `interval_rms_mm_s` | $\tilde v_1$, $\tilde v_2$ and $\tilde v_3$ of Formula (4), in that order. |
 | `intervals_s` | The three stretches `(start, end)`, in seconds. |
 | `event_velocity_mm_s` | $v_\mathrm{E}$ of Formula (8), from $T_3$. |
-| `event_level_db` | $L_{v\mathrm{E}}$ of Formula (9). |
+| `event_level` | $L_{v\mathrm{E}}$ of Formula (9). |
 | `frequencies` | The nominal third-octave centres analysed. |
-| `band_interval_levels_db` | $L_{v\mathrm{F}j}(f_{\mathrm{T}n})$ of Formula (6), one row per stretch, $T_1$ to $T_3$. |
-| `band_max_levels_db` | $L_{v\mathrm{Fmax}}(f_{\mathrm{T}n})$ of Formula (7), over $T_3$. |
+| `band_interval_levels` | $L_{v\mathrm{F}j}(f_{\mathrm{T}n})$ of Formula (6), one row per stretch, $T_1$ to $T_3$. |
+| `band_max_levels` | $L_{v\mathrm{Fmax}}(f_{\mathrm{T}n})$ of Formula (7), over $T_3$. |
 | `fs` | The sampling frequency of the record. |
 
 ### TrainPassage.plot()

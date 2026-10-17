@@ -457,11 +457,11 @@ class QuasiPeakResult(OwnsArrays):
 
     :ivar reading: The quasi-peak reading: the largest value :attr:`trace`
         reaches, on the scale clause 2.6 fixes, in the record's own unit.
-    :ivar level_db: ``20 lg(reading / reference)``. This is **dBqps**
+    :ivar level: ``20 lg(reading / reference)``. This is **dBqps**
         (clause 3) when :attr:`reference` is the 0.775 V clause 2.6 names,
         and a level against whatever else the caller referred it to
         otherwise; :attr:`level_unit` is the one place that says which.
-    :ivar reference: The reference :attr:`level_db` is taken against, in the
+    :ivar reference: The reference :attr:`level` is taken against, in the
         record's own unit.
     :ivar trace: The reading device's output over the record, sample for
         sample with it, in the record's own unit. This is the needle, and the
@@ -473,7 +473,7 @@ class QuasiPeakResult(OwnsArrays):
     """
 
     reading: float
-    level_db: float
+    level: float
     reference: float
     trace: np.ndarray
     fs: float
@@ -510,7 +510,7 @@ class QuasiPeakResult(OwnsArrays):
 
     @property
     def level_unit(self) -> str:
-        """The name of the scale :attr:`level_db` is on.
+        """The name of the scale :attr:`level` is on.
 
         The one place that answers whether the level may be called
         **dBqps**, which clause 3 defines only against the 0.775 V of
@@ -612,7 +612,7 @@ def quasi_peak_meter(
     unit cancels. Only the *level* needs a unit, and clause 2.6 gives
     BS.468-4 exactly one, the volt. A bare array or an uncalibrated
     :class:`~phonometry.io.Signal` is therefore read against 0.775 V and its
-    ``level_db`` is dBqps. A **calibrated** Signal is analysed in pascals,
+    ``level`` is dBqps. A **calibrated** Signal is analysed in pascals,
     as everywhere else in this library, and then has to be given a
     *reference* of its own: 0.775 V is not a pressure, and BS.468-4 offers
     no pressure to put in its place. ``result.level_unit`` names whichever
@@ -628,7 +628,7 @@ def quasi_peak_meter(
         weighting network first (default ``True``, which is what clause 2's
         preamble requires of every test but the clause 2.4 reversibility
         check).
-    :param reference: The reference of ``level_db``, in the record's own
+    :param reference: The reference of ``level``, in the record's own
         unit. ``None`` (the default) is the 0.775 V of clause 2.6, and is
         refused for a calibrated Signal, whose samples are pascals.
     :return: A :class:`QuasiPeakResult`.
@@ -645,10 +645,10 @@ def quasi_peak_meter(
 
     trace = _detector_trace(samples, fs, weighted=weighted) * _calibration_factor(fs)
     reading = float(trace.max())
-    level_db = 20.0 * math.log10(reading / reference) if reading > 0.0 else -math.inf
+    level = 20.0 * math.log10(reading / reference) if reading > 0.0 else -math.inf
     return QuasiPeakResult(
         reading=reading,
-        level_db=level_db,
+        level=level,
         reference=float(reference),
         trace=trace,
         fs=float(fs),

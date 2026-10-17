@@ -30,7 +30,7 @@ to a standard and rated to another, and that are held here in a class each:
 
 A book's transmission loss is not a laboratory's $R$, and a covering's
 $\Delta L_\mathrm{w}$ is not the averaged improvement some handbooks
-print (`impact_sound_improvement_db`
+print (`impact_sound_improvement`
 is one): each quantity has its own class and its own field names, so the
 mistake of taking one for the other shows at the call.
 
@@ -74,30 +74,30 @@ ImpactImprovementSpectrum(
     group: str = '',
     note: str = '',
     provenance: Provenance | None = None,
-    impact_improvement_50_db: float | None = None,
-    impact_improvement_63_db: float | None = None,
-    impact_improvement_80_db: float | None = None,
-    impact_improvement_100_db: float | None = None,
-    impact_improvement_125_db: float | None = None,
-    impact_improvement_160_db: float | None = None,
-    impact_improvement_200_db: float | None = None,
-    impact_improvement_250_db: float | None = None,
-    impact_improvement_315_db: float | None = None,
-    impact_improvement_400_db: float | None = None,
-    impact_improvement_500_db: float | None = None,
-    impact_improvement_630_db: float | None = None,
-    impact_improvement_800_db: float | None = None,
-    impact_improvement_1000_db: float | None = None,
-    impact_improvement_1250_db: float | None = None,
-    impact_improvement_1600_db: float | None = None,
-    impact_improvement_2000_db: float | None = None,
-    impact_improvement_2500_db: float | None = None,
-    impact_improvement_3150_db: float | None = None,
-    impact_improvement_4000_db: float | None = None,
-    impact_improvement_5000_db: float | None = None,
-    weighted_impact_improvement_db: float | None = None,
-    reference_floor_adaptation_term_db: float | None = None,
-    impact_improvement_adaptation_term_db: float | None = None,
+    impact_improvement_50: float | None = None,
+    impact_improvement_63: float | None = None,
+    impact_improvement_80: float | None = None,
+    impact_improvement_100: float | None = None,
+    impact_improvement_125: float | None = None,
+    impact_improvement_160: float | None = None,
+    impact_improvement_200: float | None = None,
+    impact_improvement_250: float | None = None,
+    impact_improvement_315: float | None = None,
+    impact_improvement_400: float | None = None,
+    impact_improvement_500: float | None = None,
+    impact_improvement_630: float | None = None,
+    impact_improvement_800: float | None = None,
+    impact_improvement_1000: float | None = None,
+    impact_improvement_1250: float | None = None,
+    impact_improvement_1600: float | None = None,
+    impact_improvement_2000: float | None = None,
+    impact_improvement_2500: float | None = None,
+    impact_improvement_3150: float | None = None,
+    impact_improvement_4000: float | None = None,
+    impact_improvement_5000: float | None = None,
+    weighted_impact_improvement: float | None = None,
+    reference_floor_adaptation_term: float | None = None,
+    impact_improvement_adaptation_term: float | None = None,
 )
 ```
 
@@ -122,30 +122,30 @@ this class never reads it.
 
 | Name | Description |
 | :--- | :--- |
-| `impact_improvement_50_db` | $\Delta L$ in the 50 Hz one-third octave band, in decibels, as printed. |
-| `impact_improvement_63_db` | The same in the 63 Hz band. |
-| `impact_improvement_80_db` | The same in the 80 Hz band. |
-| `impact_improvement_100_db` | The same in the 100 Hz band. |
-| `impact_improvement_125_db` | The same in the 125 Hz band. |
-| `impact_improvement_160_db` | The same in the 160 Hz band. |
-| `impact_improvement_200_db` | The same in the 200 Hz band. |
-| `impact_improvement_250_db` | The same in the 250 Hz band. |
-| `impact_improvement_315_db` | The same in the 315 Hz band. |
-| `impact_improvement_400_db` | The same in the 400 Hz band. |
-| `impact_improvement_500_db` | The same in the 500 Hz band. |
-| `impact_improvement_630_db` | The same in the 630 Hz band. |
-| `impact_improvement_800_db` | The same in the 800 Hz band. |
-| `impact_improvement_1000_db` | The same in the 1 kHz band. |
-| `impact_improvement_1250_db` | The same in the 1.25 kHz band. |
-| `impact_improvement_1600_db` | The same in the 1.6 kHz band. |
-| `impact_improvement_2000_db` | The same in the 2 kHz band. |
-| `impact_improvement_2500_db` | The same in the 2.5 kHz band. |
-| `impact_improvement_3150_db` | The same in the 3.15 kHz band. |
-| `impact_improvement_4000_db` | The same in the 4 kHz band. |
-| `impact_improvement_5000_db` | The same in the 5 kHz band. |
-| `weighted_impact_improvement_db` | The weighted reduction of impact sound pressure level $\Delta L_\mathrm{w}$ the report prints, in decibels (ISO 717-2 Formulae (1) and (2)). It is what [`predicted_impact_insulation`](/phonometry/reference/api/building/simplified-model/#predicted_impact_insulation) takes as `delta_l_w`, through [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted). |
-| `reference_floor_adaptation_term_db` | $C_\mathrm{I,r}$, the spectrum adaptation term of the reference floor with the covering (ISO 717-2 Clause A.2.2), in decibels, which data sheets of floating floor layers print beside $\Delta L_\mathrm{w}$. |
-| `impact_improvement_adaptation_term_db` | $C_{\mathrm{I},\Delta}$, the spectrum adaptation term of the covering (Clause A.2.2, Formula (A.4)), in decibels. |
+| `impact_improvement_50` | $\Delta L$ in the 50 Hz one-third octave band, in decibels, as printed. |
+| `impact_improvement_63` | The same in the 63 Hz band. |
+| `impact_improvement_80` | The same in the 80 Hz band. |
+| `impact_improvement_100` | The same in the 100 Hz band. |
+| `impact_improvement_125` | The same in the 125 Hz band. |
+| `impact_improvement_160` | The same in the 160 Hz band. |
+| `impact_improvement_200` | The same in the 200 Hz band. |
+| `impact_improvement_250` | The same in the 250 Hz band. |
+| `impact_improvement_315` | The same in the 315 Hz band. |
+| `impact_improvement_400` | The same in the 400 Hz band. |
+| `impact_improvement_500` | The same in the 500 Hz band. |
+| `impact_improvement_630` | The same in the 630 Hz band. |
+| `impact_improvement_800` | The same in the 800 Hz band. |
+| `impact_improvement_1000` | The same in the 1 kHz band. |
+| `impact_improvement_1250` | The same in the 1.25 kHz band. |
+| `impact_improvement_1600` | The same in the 1.6 kHz band. |
+| `impact_improvement_2000` | The same in the 2 kHz band. |
+| `impact_improvement_2500` | The same in the 2.5 kHz band. |
+| `impact_improvement_3150` | The same in the 3.15 kHz band. |
+| `impact_improvement_4000` | The same in the 4 kHz band. |
+| `impact_improvement_5000` | The same in the 5 kHz band. |
+| `weighted_impact_improvement` | The weighted reduction of impact sound pressure level $\Delta L_\mathrm{w}$ the report prints, in decibels (ISO 717-2 Formulae (1) and (2)). It is what [`predicted_impact_insulation`](/phonometry/reference/api/building/simplified-model/#predicted_impact_insulation) takes as `delta_l_w`, through [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted). |
+| `reference_floor_adaptation_term` | $C_\mathrm{I,r}$, the spectrum adaptation term of the reference floor with the covering (ISO 717-2 Clause A.2.2), in decibels, which data sheets of floating floor layers print beside $\Delta L_\mathrm{w}$. |
+| `impact_improvement_adaptation_term` | $C_{\mathrm{I},\Delta}$, the spectrum adaptation term of the covering (Clause A.2.2, Formula (A.4)), in decibels. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
@@ -259,10 +259,10 @@ row = type(row).from_printed(**cells)
 | CatalogueError | for a cell the contract refuses; for a `derived` among the cells, which is this method's to write; for a figure under a unit alias that is not a finite number, or that names a cell given under its own name or under another alias as well; for the numbers of one cell written in two units, a name two fields of one kind could both take, or a figure whose text field saying what it is of is empty; and for printed cells a value that follows from them cannot be worked out of, naming the value and the cells. |
 | TypeError | for a name that is neither a field of the class nor a unit alias of one. |
 
-### ImpactImprovementSpectrum.impact_improvement_db()
+### ImpactImprovementSpectrum.impact_improvement()
 
 ```python
-ImpactImprovementSpectrum.impact_improvement_db(band_hz: int) -> float
+ImpactImprovementSpectrum.impact_improvement(band_hz: int) -> float
 ```
 
 The reduction of impact level in one band, or a refusal.
@@ -511,36 +511,36 @@ SoundReductionSpectrum(
     group: str = '',
     note: str = '',
     provenance: Provenance | None = None,
-    sound_reduction_index_50_db: float | None = None,
-    sound_reduction_index_63_db: float | None = None,
-    sound_reduction_index_80_db: float | None = None,
-    sound_reduction_index_100_db: float | None = None,
-    sound_reduction_index_125_db: float | None = None,
-    sound_reduction_index_160_db: float | None = None,
-    sound_reduction_index_200_db: float | None = None,
-    sound_reduction_index_250_db: float | None = None,
-    sound_reduction_index_315_db: float | None = None,
-    sound_reduction_index_400_db: float | None = None,
-    sound_reduction_index_500_db: float | None = None,
-    sound_reduction_index_630_db: float | None = None,
-    sound_reduction_index_800_db: float | None = None,
-    sound_reduction_index_1000_db: float | None = None,
-    sound_reduction_index_1250_db: float | None = None,
-    sound_reduction_index_1600_db: float | None = None,
-    sound_reduction_index_2000_db: float | None = None,
-    sound_reduction_index_2500_db: float | None = None,
-    sound_reduction_index_3150_db: float | None = None,
-    sound_reduction_index_4000_db: float | None = None,
-    sound_reduction_index_5000_db: float | None = None,
-    weighted_sound_reduction_index_db: float | None = None,
-    spectrum_adaptation_term_db: float | None = None,
-    traffic_spectrum_adaptation_term_db: float | None = None,
-    spectrum_adaptation_term_50_3150_db: float | None = None,
-    spectrum_adaptation_term_50_5000_db: float | None = None,
-    spectrum_adaptation_term_100_5000_db: float | None = None,
-    traffic_spectrum_adaptation_term_50_3150_db: float | None = None,
-    traffic_spectrum_adaptation_term_50_5000_db: float | None = None,
-    traffic_spectrum_adaptation_term_100_5000_db: float | None = None,
+    sound_reduction_index_50: float | None = None,
+    sound_reduction_index_63: float | None = None,
+    sound_reduction_index_80: float | None = None,
+    sound_reduction_index_100: float | None = None,
+    sound_reduction_index_125: float | None = None,
+    sound_reduction_index_160: float | None = None,
+    sound_reduction_index_200: float | None = None,
+    sound_reduction_index_250: float | None = None,
+    sound_reduction_index_315: float | None = None,
+    sound_reduction_index_400: float | None = None,
+    sound_reduction_index_500: float | None = None,
+    sound_reduction_index_630: float | None = None,
+    sound_reduction_index_800: float | None = None,
+    sound_reduction_index_1000: float | None = None,
+    sound_reduction_index_1250: float | None = None,
+    sound_reduction_index_1600: float | None = None,
+    sound_reduction_index_2000: float | None = None,
+    sound_reduction_index_2500: float | None = None,
+    sound_reduction_index_3150: float | None = None,
+    sound_reduction_index_4000: float | None = None,
+    sound_reduction_index_5000: float | None = None,
+    weighted_sound_reduction_index: float | None = None,
+    spectrum_adaptation_term: float | None = None,
+    traffic_spectrum_adaptation_term: float | None = None,
+    spectrum_adaptation_term_50_3150: float | None = None,
+    spectrum_adaptation_term_50_5000: float | None = None,
+    spectrum_adaptation_term_100_5000: float | None = None,
+    traffic_spectrum_adaptation_term_50_3150: float | None = None,
+    traffic_spectrum_adaptation_term_50_5000: float | None = None,
+    traffic_spectrum_adaptation_term_100_5000: float | None = None,
     surface_density_kg_m2: float | None = None,
     thickness_mm: float | None = None,
     construction: str = '',
@@ -559,36 +559,36 @@ again; the printed numbers stay as printed.
 
 | Name | Description |
 | :--- | :--- |
-| `sound_reduction_index_50_db` | $R$ in the 50 Hz one-third octave band, in decibels, as printed. |
-| `sound_reduction_index_63_db` | The same in the 63 Hz band. |
-| `sound_reduction_index_80_db` | The same in the 80 Hz band. |
-| `sound_reduction_index_100_db` | The same in the 100 Hz band. |
-| `sound_reduction_index_125_db` | The same in the 125 Hz band. |
-| `sound_reduction_index_160_db` | The same in the 160 Hz band. |
-| `sound_reduction_index_200_db` | The same in the 200 Hz band. |
-| `sound_reduction_index_250_db` | The same in the 250 Hz band. |
-| `sound_reduction_index_315_db` | The same in the 315 Hz band. |
-| `sound_reduction_index_400_db` | The same in the 400 Hz band. |
-| `sound_reduction_index_500_db` | The same in the 500 Hz band. |
-| `sound_reduction_index_630_db` | The same in the 630 Hz band. |
-| `sound_reduction_index_800_db` | The same in the 800 Hz band. |
-| `sound_reduction_index_1000_db` | The same in the 1 kHz band. |
-| `sound_reduction_index_1250_db` | The same in the 1.25 kHz band. |
-| `sound_reduction_index_1600_db` | The same in the 1.6 kHz band. |
-| `sound_reduction_index_2000_db` | The same in the 2 kHz band. |
-| `sound_reduction_index_2500_db` | The same in the 2.5 kHz band. |
-| `sound_reduction_index_3150_db` | The same in the 3.15 kHz band. |
-| `sound_reduction_index_4000_db` | The same in the 4 kHz band. |
-| `sound_reduction_index_5000_db` | The same in the 5 kHz band. |
-| `weighted_sound_reduction_index_db` | The weighted sound reduction index $R_\mathrm{w}$ the report prints, in decibels (ISO 717-1 Clause 4.4). |
-| `spectrum_adaptation_term_db` | $C$, the adaptation term for spectrum No. 1 (pink noise), in decibels (Clause 4.5). |
-| `traffic_spectrum_adaptation_term_db` | $C_\mathrm{tr}$, the adaptation term for spectrum No. 2 (urban traffic), in decibels. |
-| `spectrum_adaptation_term_50_3150_db` | $C_{50-3150}$ of ISO 717-1 Annex B, in decibels. |
-| `spectrum_adaptation_term_50_5000_db` | $C_{50-5000}$. |
-| `spectrum_adaptation_term_100_5000_db` | $C_{100-5000}$. |
-| `traffic_spectrum_adaptation_term_50_3150_db` | $C_{\mathrm{tr},50-3150}$. |
-| `traffic_spectrum_adaptation_term_50_5000_db` | $C_{\mathrm{tr},50-5000}$. |
-| `traffic_spectrum_adaptation_term_100_5000_db` | $C_{\mathrm{tr},100-5000}$. |
+| `sound_reduction_index_50` | $R$ in the 50 Hz one-third octave band, in decibels, as printed. |
+| `sound_reduction_index_63` | The same in the 63 Hz band. |
+| `sound_reduction_index_80` | The same in the 80 Hz band. |
+| `sound_reduction_index_100` | The same in the 100 Hz band. |
+| `sound_reduction_index_125` | The same in the 125 Hz band. |
+| `sound_reduction_index_160` | The same in the 160 Hz band. |
+| `sound_reduction_index_200` | The same in the 200 Hz band. |
+| `sound_reduction_index_250` | The same in the 250 Hz band. |
+| `sound_reduction_index_315` | The same in the 315 Hz band. |
+| `sound_reduction_index_400` | The same in the 400 Hz band. |
+| `sound_reduction_index_500` | The same in the 500 Hz band. |
+| `sound_reduction_index_630` | The same in the 630 Hz band. |
+| `sound_reduction_index_800` | The same in the 800 Hz band. |
+| `sound_reduction_index_1000` | The same in the 1 kHz band. |
+| `sound_reduction_index_1250` | The same in the 1.25 kHz band. |
+| `sound_reduction_index_1600` | The same in the 1.6 kHz band. |
+| `sound_reduction_index_2000` | The same in the 2 kHz band. |
+| `sound_reduction_index_2500` | The same in the 2.5 kHz band. |
+| `sound_reduction_index_3150` | The same in the 3.15 kHz band. |
+| `sound_reduction_index_4000` | The same in the 4 kHz band. |
+| `sound_reduction_index_5000` | The same in the 5 kHz band. |
+| `weighted_sound_reduction_index` | The weighted sound reduction index $R_\mathrm{w}$ the report prints, in decibels (ISO 717-1 Clause 4.4). |
+| `spectrum_adaptation_term` | $C$, the adaptation term for spectrum No. 1 (pink noise), in decibels (Clause 4.5). |
+| `traffic_spectrum_adaptation_term` | $C_\mathrm{tr}$, the adaptation term for spectrum No. 2 (urban traffic), in decibels. |
+| `spectrum_adaptation_term_50_3150` | $C_{50-3150}$ of ISO 717-1 Annex B, in decibels. |
+| `spectrum_adaptation_term_50_5000` | $C_{50-5000}$. |
+| `spectrum_adaptation_term_100_5000` | $C_{100-5000}$. |
+| `traffic_spectrum_adaptation_term_50_3150` | $C_{\mathrm{tr},50-3150}$. |
+| `traffic_spectrum_adaptation_term_50_5000` | $C_{\mathrm{tr},50-5000}$. |
+| `traffic_spectrum_adaptation_term_100_5000` | $C_{\mathrm{tr},100-5000}$. |
 | `surface_density_kg_m2` | The mass per unit area of the element, in kilograms per square metre, as the report prints it. |
 | `thickness_mm` | The overall thickness of the element, in millimetres. |
 | `construction` | The build-up the report describes, as it describes it: the leaves, the studs, the cavity and what fills it. |
@@ -825,10 +825,10 @@ print is `None`: nothing is filled in to reach it.
 | :--- | :--- |
 | ValueError | for a band from 100 Hz to 3150 Hz the row does not print, naming the row, the band and what the report had there. |
 
-### SoundReductionSpectrum.sound_reduction_index_db()
+### SoundReductionSpectrum.sound_reduction_index()
 
 ```python
-SoundReductionSpectrum.sound_reduction_index_db(band_hz: int) -> float
+SoundReductionSpectrum.sound_reduction_index(band_hz: int) -> float
 ```
 
 The sound reduction index in one band, or a refusal.

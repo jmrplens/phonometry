@@ -403,7 +403,7 @@ def min_analyzer_bandwidth(
     return np.asarray(2.0 * f * v / c, dtype=np.float64)
 
 
-def tone_level_from_sidebands(sideband_levels_db: ArrayLike) -> float:
+def tone_level_from_sidebands(sideband_levels: ArrayLike) -> float:
     r"""Total level of a tone from its sideband levels (ISO 9295 Formula (3)).
 
     :math:`L_\mathrm{tot} = 10 \lg \sum_{i=1}^{N_\mathrm{sb}} 10^{0{,}1 L_i}`,
@@ -411,12 +411,12 @@ def tone_level_from_sidebands(sideband_levels_db: ArrayLike) -> float:
     its energy when the analyser is narrower than
     :func:`min_analyzer_bandwidth`.
 
-    :param sideband_levels_db: The :math:`N_\mathrm{sb}` sideband levels
+    :param sideband_levels: The :math:`N_\mathrm{sb}` sideband levels
         :math:`L_i`, in decibels re 20 µPa.
     :return: :math:`L_\mathrm{tot}`, in decibels re 20 µPa.
     :raises ValueError: for an empty or non-finite input.
     """
-    levels = require_finite_array(sideband_levels_db, "sideband_levels_db")
+    levels = require_finite_array(sideband_levels, "sideband_levels")
     return energy_sum(levels)
 
 

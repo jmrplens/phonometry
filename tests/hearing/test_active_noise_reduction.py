@@ -40,8 +40,8 @@ def _half_up(values: np.ndarray) -> np.ndarray:
 
 def _workbook_insertion_loss() -> hearing.ActiveInsertionLossResult:
     return hearing.active_insertion_loss(
-        passive_levels_db=ref.ISO4869_6_WORKBOOK_PASSIVE_LEVELS,
-        active_levels_db=ref.ISO4869_6_WORKBOOK_ACTIVE_LEVELS,
+        passive_levels=ref.ISO4869_6_WORKBOOK_PASSIVE_LEVELS,
+        active_levels=ref.ISO4869_6_WORKBOOK_ACTIVE_LEVELS,
     )
 
 
@@ -102,7 +102,7 @@ def test_table_a3_negative_values_are_kept_with_their_sign() -> None:
     """Above 500 Hz the circuit adds sound: the means are negative and stay so."""
     result = hearing.active_insertion_loss(_A3)
     assert (result.mean_db[4:] < 0.0).all()
-    np.testing.assert_allclose(result.insertion_loss_db, _A3)
+    np.testing.assert_allclose(result.insertion_loss, _A3)
 
 
 def test_table_a2_budget() -> None:
@@ -127,7 +127,7 @@ def test_lower_ear_matches_the_workbook() -> None:
     """All 384 lower-ear cells of the workbook (rows 134-149)."""
     result = _workbook_insertion_loss()
     np.testing.assert_allclose(
-        result.insertion_loss_db, ref.ISO4869_6_WORKBOOK_LOWER_EAR, atol=1e-9
+        result.insertion_loss, ref.ISO4869_6_WORKBOOK_LOWER_EAR, atol=1e-9
     )
     assert result.frequencies.tolist() == ref.ISO4869_6_THIRD_OCTAVES
     assert result.per_ear_db is not None
@@ -144,7 +144,7 @@ def test_the_result_holds_its_own_copy_of_the_grid() -> None:
     per_ear[0, 0, 0] = 99.0
     assert result.per_ear_db is not None
     assert result.per_ear_db[0, 0, 0] == pytest.approx(left)
-    assert result.insertion_loss_db[0, 0] == pytest.approx(
+    assert result.insertion_loss[0, 0] == pytest.approx(
         ref.ISO4869_6_WORKBOOK_LOWER_EAR[0][0]
     )
 
@@ -153,7 +153,7 @@ def test_the_workbook_lower_ear_at_the_octaves_is_table_a3() -> None:
     """The standard's Table A.3 is the workbook's lower-ear rows at 63 Hz to 8 kHz."""
     result = _workbook_insertion_loss()
     columns = [ref.ISO4869_6_THIRD_OCTAVES.index(f) for f in _OCTAVES]
-    np.testing.assert_allclose(result.insertion_loss_db[:, columns], _A3, atol=1e-9)
+    np.testing.assert_allclose(result.insertion_loss[:, columns], _A3, atol=1e-9)
 
 
 def test_insertion_loss_per_ear_equals_levels() -> None:
@@ -161,7 +161,7 @@ def test_insertion_loss_per_ear_equals_levels() -> None:
     active = np.asarray(ref.ISO4869_6_WORKBOOK_ACTIVE_LEVELS)
     direct = hearing.active_insertion_loss(passive - active)
     np.testing.assert_allclose(
-        direct.insertion_loss_db, _workbook_insertion_loss().insertion_loss_db
+        direct.insertion_loss, _workbook_insertion_loss().insertion_loss
     )
 
 
@@ -174,23 +174,19 @@ def test_the_lower_ear_is_chosen_band_by_band() -> None:
         ]
     )
     result = hearing.active_insertion_loss(per_ear, frequencies=[100, 125, 160])
-    np.testing.assert_allclose(result.insertion_loss_db, [[8, 2, 7], [1, 4, -2]])
+    np.testing.assert_allclose(result.insertion_loss, [[8, 2, 7], [1, 4, -2]])
 
 
 def test_both_input_forms_at_once_is_refused() -> None:
     levels = ref.ISO4869_6_WORKBOOK_PASSIVE_LEVELS
     with pytest.raises(ValueError, match="not both forms"):
-        hearing.active_insertion_loss(
-            _A3, passive_levels_db=levels, active_levels_db=levels
-        )
+        hearing.active_insertion_loss(_A3, passive_levels=levels, active_levels=levels)
 
 
 def test_one_ear_per_subject_is_refused_for_levels() -> None:
     one_ear = np.asarray(ref.ISO4869_6_WORKBOOK_PASSIVE_LEVELS)[:, :1, :]
     with pytest.raises(ValueError, match="both ears"):
-        hearing.active_insertion_loss(
-            passive_levels_db=one_ear, active_levels_db=one_ear
-        )
+        hearing.active_insertion_loss(passive_levels=one_ear, active_levels=one_ear)
 
 
 def test_an_unknown_band_count_needs_frequencies() -> None:
@@ -361,7 +357,7 @@ def test_linear_to_110_db() -> None:
     result = hearing.assess_anr_linearity(_EXTERNAL, _ears([5.0, 5.0, 5.0, 5.0]))
     assert result.passes
     assert result.linear_to_110_db
-    assert result.max_linear_level_db == 110.0
+    assert result.max_linear_level == 110.0
 
 
 def test_the_tolerance_is_one_decibel_either_way_inclusive() -> None:
@@ -369,7 +365,7 @@ def test_the_tolerance_is_one_decibel_either_way_inclusive() -> None:
     result = hearing.assess_anr_linearity(_EXTERNAL, _ears([4.0, 6.0, 4.0, 6.0]))
     assert result.passes
     assert result.linear_to_110_db
-    assert result.max_linear_level_db == 110.0
+    assert result.max_linear_level == 110.0
 
 
 def test_linear_throughout_but_stopping_below_110_db() -> None:
@@ -378,7 +374,7 @@ def test_linear_throughout_but_stopping_below_110_db() -> None:
         [90.0, 95.0, 100.0, 105.0], _ears([5.0, 5.0, 5.0])
     )
     assert result.passes
-    assert result.max_linear_level_db == 105.0
+    assert result.max_linear_level == 105.0
     assert not result.linear_to_110_db
 
 
@@ -389,20 +385,20 @@ def test_a_short_step_caps_the_linear_level_below_it() -> None:
     result = hearing.assess_anr_linearity(_EXTERNAL, levels)
     assert not result.passes
     assert not result.linear_to_110_db
-    assert result.max_linear_level_db == 100.0
+    assert result.max_linear_level == 100.0
     assert result.linear[2].tolist() == [True, True, False, True]
 
 
 def test_the_first_step_failing_leaves_the_starting_level() -> None:
     result = hearing.assess_anr_linearity(_EXTERNAL, _ears([7.0, 5.0, 5.0, 5.0]))
-    assert result.max_linear_level_db == 90.0
+    assert result.max_linear_level == 90.0
 
 
 def test_any_leading_axes_are_ears() -> None:
     """Samples, subjects and ears can be separate axes; each row is one ear."""
     levels = _ears([5.0] * 4, ears=4 * 16 * 2).reshape(4, 16, 2, 5)
     result = hearing.assess_anr_linearity(_EXTERNAL, levels)
-    assert result.ear_levels_db.shape == (128, 5)
+    assert result.ear_levels.shape == (128, 5)
     assert result.passes
 
 
@@ -410,9 +406,9 @@ def test_third_octaves_are_summed_into_the_125_hz_octave() -> None:
     octave = _ears([5.0, 5.0, 5.0, 5.0], ears=2)
     thirds = np.stack([octave - 10.0 * np.log10(3.0)] * 3, axis=-1)
     from_thirds = hearing.assess_anr_linearity(
-        _EXTERNAL, ear_third_octave_levels_db=thirds
+        _EXTERNAL, ear_third_octave_levels=thirds
     )
-    np.testing.assert_allclose(from_thirds.ear_levels_db, octave)
+    np.testing.assert_allclose(from_thirds.ear_levels, octave)
 
 
 def test_steps_other_than_5_db_are_refused() -> None:
@@ -433,9 +429,7 @@ def test_both_ear_forms_are_refused() -> None:
     octave = _ears([5.0] * 4)
     thirds = np.stack([octave] * 3, axis=-1)
     with pytest.raises(ValueError, match="not both"):
-        hearing.assess_anr_linearity(
-            _EXTERNAL, octave, ear_third_octave_levels_db=thirds
-        )
+        hearing.assess_anr_linearity(_EXTERNAL, octave, ear_third_octave_levels=thirds)
 
 
 def test_the_linearity_verdict_has_no_truth_value() -> None:

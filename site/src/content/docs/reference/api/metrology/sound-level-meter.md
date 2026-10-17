@@ -182,7 +182,7 @@ ELECTRICAL_TEST_FREQUENCIES_HZ = {1: (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0,
 *Constant* (`tuple`).
 
 ```python
-IEC61672_TABLE_5 = (PeakReference(signal='one cycle', nominal_frequency_hz=31.5, reference_difference_db=2.5, class_1_limits_db=(-2.0, 2.0), class_2_limits_db=(-3.0, 3.0)), PeakReference(signal='one cycle', nominal_frequency_hz=500.0, reference_difference_db=3.5, class_1_limits_db=(-1.0, 1.0), class_2_limits_db=(-2.0, 2.0)), PeakReference(signal='one cycle', nominal_frequency_hz=8000.0, reference_difference_db=3.4, class_1_limits_db=(-2.0, 2.0), class_2_limits_db=(-3.0, 3.0)), PeakReference(signal='positive half cycle', nominal_frequency_hz=500.0, reference_difference_db=2.4, class_1_limits_db=(-1.0, 1.0), class_2_limits_db=(-2.0, 2.0)), PeakReference(signal='negative half cycle', nominal_frequency_hz=500.0, reference_difference_db=2.4, class_1_limits_db=(-1.0, 1.0), class_2_limits_db=(-2.0, 2.0)))
+IEC61672_TABLE_5 = (PeakReference(signal='one cycle', nominal_frequency_hz=31.5, reference_difference=2.5, class_1_limits_db=(-2.0, 2.0), class_2_limits_db=(-3.0, 3.0)), PeakReference(signal='one cycle', nominal_frequency_hz=500.0, reference_difference=3.5, class_1_limits_db=(-1.0, 1.0), class_2_limits_db=(-2.0, 2.0)), PeakReference(signal='one cycle', nominal_frequency_hz=8000.0, reference_difference=3.4, class_1_limits_db=(-2.0, 2.0), class_2_limits_db=(-3.0, 3.0)), PeakReference(signal='positive half cycle', nominal_frequency_hz=500.0, reference_difference=2.4, class_1_limits_db=(-1.0, 1.0), class_2_limits_db=(-2.0, 2.0)), PeakReference(signal='negative half cycle', nominal_frequency_hz=500.0, reference_difference=2.4, class_1_limits_db=(-1.0, 1.0), class_2_limits_db=(-2.0, 2.0)))
 ```
 
 ## IEC61672_TABLE_B1
@@ -241,7 +241,7 @@ A row that is not banded by frequency contains every frequency.
 PeakReference(
     signal: str,
     nominal_frequency_hz: float,
-    reference_difference_db: float,
+    reference_difference: float,
     class_1_limits_db: tuple[float, float],
     class_2_limits_db: tuple[float, float],
 )
@@ -255,7 +255,7 @@ One row of IEC 61672-1:2013 Table 5, the C-weighted peak reference difference.
 | :--- | :--- |
 | `signal` | The test signal: `"one cycle"`, `"positive half cycle"` or `"negative half cycle"`. |
 | `nominal_frequency_hz` | The nominal frequency of the steady signal it is extracted from, in hertz (the test uses the exact frequency of Annex D, NOTE to Table 5). |
-| `reference_difference_db` | The reference difference $L_\mathrm{Cpeak} - L_\mathrm{C}$, in decibels. |
+| `reference_difference` | The reference difference $L_\mathrm{Cpeak} - L_\mathrm{C}$, in decibels. |
 | `class_1_limits_db` | The class 1 acceptance limits on the deviation from it, `(lower, upper)`, in decibels. |
 | `class_2_limits_db` | The class 2 acceptance limits, in decibels. |
 
@@ -377,19 +377,19 @@ SoundLevelMeterPeriodicMeasurements(
     long_term_stability_uncertainty_db: float | None = None,
     linearity_deviations_db: Sequence[float] | None = None,
     linearity_uncertainties_db: Sequence[float] | None = None,
-    linearity_levels_db: Sequence[float] | None = None,
+    linearity_levels: Sequence[float] | None = None,
     linear_operating_range_db: Sequence[float] | None = None,
     linearity_starting_point_db: float | None = None,
-    linearity_overload_level_db: float | None = None,
-    linearity_under_range_level_db: float | None = None,
+    linearity_overload_level: float | None = None,
+    linearity_under_range_level: float | None = None,
     range_linearity_deviations_db: Mapping[str, Sequence[float]] | None = None,
     range_linearity_uncertainties_db: Mapping[str, Sequence[float]] | None = None,
     toneburst_responses_db: Mapping[str, Sequence[float]] | None = None,
     toneburst_uncertainties_db: Mapping[str, Sequence[float]] | None = None,
-    c_peak_differences_db: Sequence[float] | None = None,
+    c_peak_differences: Sequence[float] | None = None,
     c_peak_uncertainties_db: Sequence[float] | None = None,
     c_peak_overload_indicated: bool | None = None,
-    overload_difference_db: float | None = None,
+    overload_difference: float | None = None,
     overload_uncertainty_db: float | None = None,
     overload_latched: bool | None = None,
     high_level_stability_db: float | None = None,
@@ -430,19 +430,19 @@ keyword-only, so the unit in its name is written at the call site.
 | `long_term_stability_uncertainty_db` | Its uncertainty. |
 | `linearity_deviations_db` | 16: the level linearity deviations at 8 kHz on the reference level range, indicated less anticipated level, one per step of 16.3, in any order. |
 | `linearity_uncertainties_db` | Their uncertainties. |
-| `linearity_levels_db` | The anticipated level of each 16 result, which labels it and shows which steps of 16.3 the record holds. |
+| `linearity_levels` | The anticipated level of each 16 result, which labels it and shows which steps of 16.3 the record holds. |
 | `linear_operating_range_db` | The lower and the upper boundary of the linear operating range at 8 kHz on the reference level range, as the instruction manual states them (IEC 61672-1 5.6.10): the extent the steps of 16.3 cover and 16.4 holds to the limits. |
 | `linearity_starting_point_db` | The starting point the instruction manual gives for the tests of level linearity at 8 kHz on the reference level range (16.2; IEC 61672-1 5.6.11). |
-| `linearity_overload_level_db` | The anticipated level of the step that first caused an indication of overload, which the rising steps of 16.3 stop short of. |
-| `linearity_under_range_level_db` | The anticipated level of the step that first caused an indication of under-range, which the falling steps of 16.3 stop short of. |
+| `linearity_overload_level` | The anticipated level of the step that first caused an indication of overload, which the rising steps of 16.3 stop short of. |
+| `linearity_under_range_level` | The anticipated level of the step that first caused an indication of under-range, which the falling steps of 16.3 stop short of. |
 | `range_linearity_deviations_db` | 17.5: the level linearity deviations including the level range control, at 1 kHz, keyed `"17.3"` (the reference sound level of 17.2 held on each level range besides the reference one, NaN where it is not displayed) and `"17.4"` (5 dB above the first indication of under-range on each level range, NaN where not measured). `"17.4"` starts with the reference level range, which 17.4 tests "for each level range" as well, and then takes the other ranges in the order of `"17.3"`, so it holds one value more; 17.3 has no reading on the reference range, where the reference sound level of 17.2 deviates by zero by construction (IEC 61672-1 5.6.3). |
 | `range_linearity_uncertainties_db` | The same keys, shape and gaps. |
 | `toneburst_responses_db` | 18: the toneburst responses relative to the steady level, keyed `"F"` ($L_\mathrm{AFmax} - L_\mathrm{A}$), `"S"` ($L_\mathrm{ASmax} - L_\mathrm{A}$) and `"E"` ($L_\mathrm{AE} - L_\mathrm{A}$), each at [`TONEBURST_TEST_DURATIONS_MS`](/phonometry/reference/api/metrology/sound-level-meter/#toneburst_test_durations_ms) in order, NaN where not measured. The deviation from Table 4 is taken by the verdict. |
 | `toneburst_uncertainties_db` | The same keys and shape. |
-| `c_peak_differences_db` | 19.6: $L_\mathrm{Cpeak} - L_\mathrm{C}$ for one cycle at 8 kHz, a positive half cycle at 500 Hz and a negative half cycle at 500 Hz, in that order, NaN where not measured. The deviation from Table 5 is taken by the verdict. |
+| `c_peak_differences` | 19.6: $L_\mathrm{Cpeak} - L_\mathrm{C}$ for one cycle at 8 kHz, a positive half cycle at 500 Hz and a negative half cycle at 500 Hz, in that order, NaN where not measured. The deviation from Table 5 is taken by the verdict. |
 | `c_peak_uncertainties_db` | Their uncertainties. |
 | `c_peak_overload_indicated` | Whether any of those signals caused an overload indication, which 19.3 and 19.5 forbid. |
-| `overload_difference_db` | 20.4: the level of the positive one-half-cycle input signal that first caused an overload indication less that of the negative one. |
+| `overload_difference` | 20.4: the level of the positive one-half-cycle input signal that first caused an overload indication less that of the negative one. |
 | `overload_uncertainty_db` | Its uncertainty. |
 | `overload_latched` | 20.5: whether the overload indicator latched on as IEC 61672-1 5.11.5 specifies. |
 | `high_level_stability_db` | 21.3: the final less the initial A-weighted indication over 5 min of exposure near the upper boundary of the least-sensitive level range. |

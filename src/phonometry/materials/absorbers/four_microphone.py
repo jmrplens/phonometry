@@ -29,7 +29,8 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -47,6 +48,8 @@ from .impedance_tube import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
 
     from ..._internal.types import Real
@@ -381,6 +384,13 @@ class TransferMatrix(OwnsArrays):
     hand-built matrix (for example :func:`air_layer_transfer_matrix`) is
     unchanged.
     """
+
+    #: The tube geometry of ASTM E2611-19 is written with its own symbols,
+    #: :math:`\ell_1`, :math:`s_1`, :math:`\ell_2` and :math:`s_2`, and is in
+    #: metres (Section 3).
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"l1": "m", "s1": "m", "l2": "m", "s2": "m"}
+    )
 
     t11: Complex
     t12: Complex

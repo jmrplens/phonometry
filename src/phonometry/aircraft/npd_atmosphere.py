@@ -183,10 +183,10 @@ class NPDAtmosphereIncrement(OwnsArrays):
         at 1 000 ft in the AIR-1845 atmosphere, in dB.
     :ivar source_spectrum_db: :math:`L_n(d_\mathrm{ref})`, the same spectrum
         with the AIR-1845 attenuation added back (Eq. D-1), in dB.
-    :ivar reference_attenuation_db:
+    :ivar reference_attenuation:
         :math:`\alpha_{n,\mathrm{ref}} \, d_i / (100\,\mathrm{m})`, the
         AIR-1845 attenuation at each distance (Table D-3a), in dB.
-    :ivar specified_attenuation_db:
+    :ivar specified_attenuation:
         :math:`\delta_n(d_i) \, d_i / (100\,\mathrm{m})`, the attenuation of
         the specified atmosphere (Tables D-3b and D-3c), in dB.
     :ivar reference_levels_dba: :math:`L_{A,\mathrm{ref}}(d_i)`, in dB.
@@ -205,8 +205,8 @@ class NPDAtmosphereIncrement(OwnsArrays):
     distances_m: NDArray[np.float64]
     spectrum_db: NDArray[np.float64]
     source_spectrum_db: NDArray[np.float64]
-    reference_attenuation_db: NDArray[np.float64]
-    specified_attenuation_db: NDArray[np.float64]
+    reference_attenuation: NDArray[np.float64]
+    specified_attenuation: NDArray[np.float64]
     reference_levels_dba: NDArray[np.float64]
     specified_levels_dba: NDArray[np.float64]
     increment_db: NDArray[np.float64]
@@ -232,8 +232,8 @@ class NPDAtmosphereIncrement(OwnsArrays):
             distances_m=1,
             spectrum_db=1,
             source_spectrum_db=1,
-            reference_attenuation_db=2,
-            specified_attenuation_db=2,
+            reference_attenuation=2,
+            specified_attenuation=2,
             reference_levels_dba=1,
             specified_levels_dba=1,
             increment_db=1,
@@ -243,14 +243,14 @@ class NPDAtmosphereIncrement(OwnsArrays):
             "frequencies",
             "spectrum_db",
             "source_spectrum_db",
-            "reference_attenuation_db",
-            "specified_attenuation_db",
+            "reference_attenuation",
+            "specified_attenuation",
         )
         require_same_length(
             self,
             "distances_m",
-            ("reference_attenuation_db", 1),
-            ("specified_attenuation_db", 1),
+            ("reference_attenuation", 1),
+            ("specified_attenuation", 1),
             "reference_levels_dba",
             "specified_levels_dba",
             "increment_db",
@@ -420,8 +420,8 @@ def npd_atmosphere_increment(
         distances_m=d,
         spectrum_db=levels,
         source_spectrum_db=source,
-        reference_attenuation_db=reference_attenuation,
-        specified_attenuation_db=np.asarray(specified_attenuation, dtype=np.float64),
+        reference_attenuation=reference_attenuation,
+        specified_attenuation=np.asarray(specified_attenuation, dtype=np.float64),
         reference_levels_dba=reference_levels,
         specified_levels_dba=specified_levels,
         increment_db=specified_levels - reference_levels,

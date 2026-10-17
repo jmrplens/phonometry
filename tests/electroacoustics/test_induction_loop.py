@@ -55,7 +55,7 @@ def test_field_strength_level_refuses_a_non_positive_field() -> None:
 
 
 def test_field_strength_refuses_a_nan_level() -> None:
-    with pytest.raises(ValueError, match="level_db"):
+    with pytest.raises(ValueError, match="'level' must be finite"):
         ea.field_strength(math.nan)
 
 
@@ -67,18 +67,18 @@ def test_field_strength_refuses_a_nan_level() -> None:
             "field_strength_a_per_m",
         ),
         (lambda: ea.field_strength_level("a"), "field_strength_a_per_m"),
-        (lambda: ea.field_strength(np.array([1.0j])), "level_db"),
+        (lambda: ea.field_strength(np.array([1.0j])), "level"),
         (lambda: ea.magnetic_flux_density(np.array([1.0j])), "field_strength_a_per_m"),
         (lambda: ea.telecoil_response(np.array([45.0 + 1.0j])), "angle_deg"),
         (
             lambda: ea.verify_induction_loop_system(np.array([5.0j, 0.0j])),
-            "field_strength_levels_db",
+            "field_strength_levels",
         ),
         (
             lambda: ea.verify_small_volume_system(
                 np.full((3, 3), 9.0j), layout="counter"
             ),
-            "field_strength_levels_db",
+            "field_strength_levels",
         ),
         (
             lambda: ea.verify_small_volume_system(
@@ -92,9 +92,9 @@ def test_field_strength_refuses_a_nan_level() -> None:
             lambda: ea.verify_small_volume_system(
                 np.zeros((3, 3)),
                 layout="counter",
-                standing_area_levels_db=np.array([9.0j]),
+                standing_area_levels=np.array([9.0j]),
             ),
-            "standing_area_levels_db",
+            "standing_area_levels",
         ),
         (
             lambda: ea.verify_induction_loop_system(
@@ -153,15 +153,15 @@ def test_telecoil_nulls_at_right_angles() -> None:
 # ---------------------------------------------------------------------------
 
 
-def _sine(level_db: float, frequency_hz: float, seconds: float = 2.0) -> np.ndarray:
+def _sine(level: float, frequency_hz: float, seconds: float = 2.0) -> np.ndarray:
     t = np.arange(round(seconds * FS)) / FS
-    amplitude = float(ea.field_strength(level_db)) * math.sqrt(2.0)
+    amplitude = float(ea.field_strength(level)) * math.sqrt(2.0)
     return amplitude * np.sin(2.0 * np.pi * frequency_hz * t)
 
 
 def test_meter_reads_a_sine_at_its_level() -> None:
     reading = ea.field_strength_meter(_sine(-6.0, 1000.0), FS)
-    assert reading.max_level_db == pytest.approx(-6.0, abs=0.01)
+    assert reading.max_level == pytest.approx(-6.0, abs=0.01)
     assert reading.equivalent_db == pytest.approx(-6.0, abs=1e-6)
     assert reading.weighting == "Z"
     assert reading.levels.shape == reading.times.shape
@@ -170,7 +170,7 @@ def test_meter_reads_a_sine_at_its_level() -> None:
 def test_meter_a_weighting_is_transparent_at_1_khz_and_19_db_down_at_100_hz() -> None:
     at_1k = ea.field_strength_meter(_sine(0.0, 1000.0), FS, weighting="A")
     at_100 = ea.field_strength_meter(_sine(0.0, 100.0), FS, weighting="A")
-    assert at_1k.max_level_db == pytest.approx(0.0, abs=0.02)
+    assert at_1k.max_level == pytest.approx(0.0, abs=0.02)
     assert at_100.equivalent_db == pytest.approx(-19.1, abs=0.1)
 
 
@@ -447,7 +447,7 @@ def test_field_strength_outside_3_db_fails() -> None:
 def test_specified_level_moves_the_window() -> None:
     # Pink noise on the RMS meter reads -6 dB for 400 mA/m (Table 3).
     specified = ref.IEC60118_4_TABLE3["pink_noise"][0]
-    result = ea.verify_induction_loop_system([-8.0, -4.0], specified_level_db=specified)
+    result = ea.verify_induction_loop_system([-8.0, -4.0], specified_level=specified)
     assert result.passes
     assert result.requirement("field_strength_reached").lower_db == (specified,)
 
@@ -475,7 +475,7 @@ def test_a_spread_wholly_below_400_ma_per_m_fails_8_2_7() -> None:
 
 
 def test_specified_level_moves_the_8_2_7_maximum_too() -> None:
-    result = ea.verify_induction_loop_system([-8.5, -6.5], specified_level_db=-6.0)
+    result = ea.verify_induction_loop_system([-8.5, -6.5], specified_level=-6.0)
     assert result.failed == ("field_strength_reached",)
 
 
@@ -535,8 +535,8 @@ def test_frequencies_and_response_go_together() -> None:
 def test_system_noise_on_a_quiet_site_is_held_to_minus_47_db() -> None:
     result = ea.verify_induction_loop_system(
         [0.0],
-        background_noise_levels_db=[-55.0, -50.0],
-        system_noise_levels_db=[-47.0, -48.0],
+        background_noise_levels=[-55.0, -50.0],
+        system_noise_levels=[-47.0, -48.0],
     )
     req = result.requirement("system_noise")
     assert req.upper_db == (-47.0, -47.0)
@@ -548,8 +548,8 @@ def test_system_noise_on_a_quiet_site_is_held_to_minus_47_db() -> None:
 def test_system_noise_on_a_noisier_site_may_rise_by_1_db() -> None:
     result = ea.verify_induction_loop_system(
         [0.0],
-        background_noise_levels_db=[-40.0, -45.0],
-        system_noise_levels_db=[-39.0, -43.9],
+        background_noise_levels=[-40.0, -45.0],
+        system_noise_levels=[-39.0, -43.9],
     )
     req = result.requirement("system_noise")
     assert req.upper_db == pytest.approx((-39.0, -44.0))
@@ -560,8 +560,8 @@ def test_system_noise_on_a_noisier_site_may_rise_by_1_db() -> None:
 def test_system_noise_at_exactly_47_db_uses_the_1_db_rule() -> None:
     result = ea.verify_induction_loop_system(
         [0.0],
-        background_noise_levels_db=[-47.0],
-        system_noise_levels_db=[-46.0],
+        background_noise_levels=[-47.0],
+        system_noise_levels=[-46.0],
     )
     assert result.requirement("system_noise").upper_db == pytest.approx((-46.0,))
     assert result.passes
@@ -590,7 +590,7 @@ def test_response_exactly_3_db_from_1_khz_is_on_the_edge() -> None:
 def test_field_strength_3_db_from_a_specified_level_is_on_the_edge() -> None:
     # A meter that reads 400 mA/m as -5,9 dB: -5,9 + 3 is
     # -2,900 000 000 000 000 4 in binary, below the reading of -2,9 dB.
-    result = ea.verify_induction_loop_system([-8.9, -2.9], specified_level_db=-5.9)
+    result = ea.verify_induction_loop_system([-8.9, -2.9], specified_level=-5.9)
     assert result.requirement("field_strength").worst_margin_db == 0.0
     assert result.passes
 
@@ -599,7 +599,7 @@ def test_system_noise_exactly_1_db_up_is_on_the_edge() -> None:
     # A site at a reference signal-to-noise ratio of 32,7 dB: -32,7 + 1 is
     # -31,700 000 000 000 003 in binary, below the reading of -31,7 dB.
     result = ea.verify_induction_loop_system(
-        [0.0], background_noise_levels_db=[-32.7], system_noise_levels_db=[-31.7]
+        [0.0], background_noise_levels=[-32.7], system_noise_levels=[-31.7]
     )
     assert result.requirement("system_noise").worst_margin_db == 0.0
     assert result.passes
@@ -625,25 +625,25 @@ def test_requirement_plot_marks_no_failure_on_the_edge() -> None:
 
 
 def test_system_noise_needs_the_background() -> None:
-    with pytest.raises(ValueError, match="background_noise_levels_db"):
-        ea.verify_induction_loop_system([0.0], system_noise_levels_db=[-50.0])
+    with pytest.raises(ValueError, match="background_noise_levels"):
+        ea.verify_induction_loop_system([0.0], system_noise_levels=[-50.0])
 
 
 def test_system_noise_pairs_point_by_point() -> None:
     with pytest.raises(ValueError, match="point by point"):
         ea.verify_induction_loop_system(
             [0.0],
-            background_noise_levels_db=[-50.0, -50.0],
-            system_noise_levels_db=[-50.0],
+            background_noise_levels=[-50.0, -50.0],
+            system_noise_levels=[-50.0],
         )
 
 
 def test_tonal_background_noise_is_forwarded_to_the_7_2_class() -> None:
     plain = ea.verify_induction_loop_system(
-        [0.0], background_noise_levels_db=[-25.0, -27.0]
+        [0.0], background_noise_levels=[-25.0, -27.0]
     )
     tonal = ea.verify_induction_loop_system(
-        [0.0], background_noise_levels_db=[-25.0, -27.0], noise_is_tonal=True
+        [0.0], background_noise_levels=[-25.0, -27.0], noise_is_tonal=True
     )
     assert plain.background_noise is not None
     assert tonal.background_noise is not None
@@ -653,7 +653,7 @@ def test_tonal_background_noise_is_forwarded_to_the_7_2_class() -> None:
 
 
 def test_background_noise_does_not_decide_the_verdict() -> None:
-    result = ea.verify_induction_loop_system([0.0], background_noise_levels_db=[-20.0])
+    result = ea.verify_induction_loop_system([0.0], background_noise_levels=[-20.0])
     assert result.passes
     assert result.background_noise is not None
     assert result.background_noise.category == "below_tolerable"
@@ -678,7 +678,7 @@ def test_unknown_requirement_raises_key_error() -> None:
 
 
 def test_nan_level_is_refused() -> None:
-    with pytest.raises(ValueError, match="field_strength_levels_db"):
+    with pytest.raises(ValueError, match="field_strength_levels"):
         ea.verify_induction_loop_system([0.0, math.nan])
 
 
@@ -714,7 +714,7 @@ def test_small_volume_above_6_db_fails_the_range() -> None:
 
 def test_standing_area_survey_above_8_db_fails() -> None:
     result = ea.verify_small_volume_system(
-        np.zeros((3, 3)), layout="counter", standing_area_levels_db=[7.5, 8.0, 8.2]
+        np.zeros((3, 3)), layout="counter", standing_area_levels=[7.5, 8.0, 8.2]
     )
     assert result.failed == ("standing_area",)
     assert result.requirement("standing_area").worst_margin_db == pytest.approx(-0.2)
@@ -1039,8 +1039,8 @@ def test_every_result_plots(language: str) -> None:
         [0.0, 1.0],
         frequencies=_F,
         response_db=[0.0, 0.0, -1.0],
-        background_noise_levels_db=[-50.0, -48.0],
-        system_noise_levels_db=[-48.0, -47.5],
+        background_noise_levels=[-50.0, -48.0],
+        system_noise_levels=[-48.0, -47.5],
     )
     results = (
         ea.field_strength_meter(_sine(-3.0, 1000.0, seconds=0.5), FS),
@@ -1138,7 +1138,7 @@ def test_meter_plot_marks_the_maximum_where_it_occurs() -> None:
     reading = ea.field_strength_meter(_sine(-3.0, 1000.0, seconds=0.5), FS)
     ax = reading.plot()
     marker = ax.lines[-1]
-    assert tuple(marker.get_ydata()) == (reading.max_level_db,)
+    assert tuple(marker.get_ydata()) == (reading.max_level,)
     peak = int(np.argmax(reading.levels))
     assert tuple(marker.get_xdata()) == (reading.times[peak],)
     plt.close("all")

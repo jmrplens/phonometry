@@ -64,11 +64,11 @@ def test_iso_data_present_in_repo() -> None:
 
 
 def _tone(
-    freq: float, level_db: float, seconds: float = 1.0, pad_ms: float = 100.0
+    freq: float, level: float, seconds: float = 1.0, pad_ms: float = 100.0
 ) -> np.ndarray:
     """Pure tone at an SPL (dB re 20 uPa) with leading/trailing silence."""
     t = np.arange(int(FS * seconds)) / FS
-    amp = np.sqrt(2.0) * 2e-5 * 10 ** (level_db / 20)
+    amp = np.sqrt(2.0) * 2e-5 * 10 ** (level / 20)
     x = amp * np.sin(2 * np.pi * freq * t)
     pad = np.zeros(int(FS * pad_ms / 1000))
     return np.concatenate([pad, x, pad])
@@ -132,7 +132,7 @@ def test_annex_b3_stationary_tones(case: str, freq: float, level: float) -> None
     )
 
 
-def _pink_noise(seconds: float, level_db: float, seed: int = 5321) -> np.ndarray:
+def _pink_noise(seconds: float, level: float, seed: int = 5321) -> np.ndarray:
     """Deterministic pink noise at an overall SPL (dB re 20 uPa)."""
     rng = np.random.default_rng(seed)
     n = int(FS * seconds)
@@ -141,7 +141,7 @@ def _pink_noise(seconds: float, level_db: float, seed: int = 5321) -> np.ndarray
     spec[1:] /= np.sqrt(freqs[1:])  # 1/f power shape
     spec[0] = 0.0
     x = np.fft.irfft(spec, n=n)
-    return np.asarray(x / np.sqrt(np.mean(x**2)) * 2e-5 * 10 ** (level_db / 20))
+    return np.asarray(x / np.sqrt(np.mean(x**2)) * 2e-5 * 10 ** (level / 20))
 
 
 @requires_iso_data

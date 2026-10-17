@@ -98,7 +98,7 @@ def _phase_calibration(
 def test_interchange_cancels_channel_phase_shifts_and_field_asymmetry() -> None:
     result = _phase_calibration()
     np.testing.assert_allclose(result.sensitivity_phase_deg, _PHI_TEST, atol=1e-9)
-    np.testing.assert_allclose(result.sensitivity_level_db, _L_TEST, atol=1e-9)
+    np.testing.assert_allclose(result.sensitivity_level, _L_TEST, atol=1e-9)
 
 
 def test_phases_either_side_of_half_a_turn_are_taken_into_one_turn() -> None:
@@ -237,7 +237,7 @@ def test_an_interchanged_phase_without_the_interchanged_level_is_refused() -> No
         channel_phase_difference_deg=phi_1,
         interchanged_channel_phase_difference_deg=phi_2,
     )
-    with pytest.raises(ValueError, match="interchanged_channel_difference_db"):
+    with pytest.raises(ValueError, match="interchanged_channel_difference"):
         metrology.simultaneous_comparison(
             _F,
             _L_REF,
@@ -279,8 +279,8 @@ def test_monitor_phases_cancel_a_source_that_drifts_in_phase() -> None:
         _L_REF + 94.0,
         _L_TEST + 94.0,
         monitor=metrology.MonitorReadings(
-            reference_level_db=81.5,
-            test_level_db=81.5,
+            reference_level=81.5,
+            test_level=81.5,
             reference_phase_deg=monitor + field_1,
             test_phase_deg=monitor + field_2,
         ),
@@ -292,7 +292,7 @@ def test_monitor_phases_cancel_a_source_that_drifts_in_phase() -> None:
         ),
     )
     np.testing.assert_allclose(result.sensitivity_phase_deg, _PHI_TEST, atol=1e-9)
-    np.testing.assert_allclose(result.sensitivity_level_db, _L_TEST, atol=1e-9)
+    np.testing.assert_allclose(result.sensitivity_level, _L_TEST, atol=1e-9)
 
 
 def test_without_a_monitor_the_output_phases_are_differenced() -> None:
@@ -316,7 +316,7 @@ def test_a_monitor_read_in_level_alone_leaves_the_output_phases_as_read() -> Non
         _L_REF,
         _L_REF + 94.0,
         _L_TEST + 94.0,
-        monitor=metrology.MonitorReadings(reference_level_db=80.0, test_level_db=80.0),
+        monitor=metrology.MonitorReadings(reference_level=80.0, test_level=80.0),
         phase=metrology.SequentialComparisonPhase(
             reference_sensitivity_phase_deg=_PHI_REF,
             reference_output_phase_deg=_PHI_REF + 33.0,
@@ -329,14 +329,14 @@ def test_a_monitor_read_in_level_alone_leaves_the_output_phases_as_read() -> Non
 def test_one_monitor_phase_without_the_other_is_refused() -> None:
     with pytest.raises(ValueError, match="test_phase_deg"):
         metrology.MonitorReadings(
-            reference_level_db=80.0, test_level_db=80.0, reference_phase_deg=0.0
+            reference_level=80.0, test_level=80.0, reference_phase_deg=0.0
         )
 
 
 def test_monitor_phases_without_output_phases_are_refused() -> None:
     monitor = metrology.MonitorReadings(
-        reference_level_db=80.0,
-        test_level_db=80.0,
+        reference_level=80.0,
+        test_level=80.0,
         reference_phase_deg=0.0,
         test_phase_deg=0.0,
     )
@@ -352,8 +352,8 @@ def test_monitor_phases_without_output_phases_are_refused() -> None:
 
 def test_monitor_phase_determinations_must_be_those_of_the_outputs() -> None:
     monitor = metrology.MonitorReadings(
-        reference_level_db=80.0,
-        test_level_db=80.0,
+        reference_level=80.0,
+        test_level=80.0,
         reference_phase_deg=np.zeros((2, _F.size)),
         test_phase_deg=np.zeros((2, _F.size)),
     )
@@ -379,10 +379,10 @@ def test_calibration_built_directly_refuses_a_lone_pressure_phase() -> None:
     with pytest.raises(ValueError, match="pressure_phase_difference_deg"):
         metrology.ComparisonCalibration(
             frequencies=_F,
-            reference_sensitivity_level_db=_L_REF,
-            output_level_differences_db=levels,
-            pressure_level_difference_db=zeros,
-            corrections_db={},
+            reference_sensitivity_level=_L_REF,
+            output_level_differences=levels,
+            pressure_level_difference=zeros,
+            corrections={},
             field="pressure",
             excitation="sequential",
             pressure_phase_difference_deg=zeros,
@@ -398,10 +398,10 @@ def test_calibration_built_directly_refuses_phase_rows_of_other_determinations()
     with pytest.raises(ValueError, match="one row per determination"):
         metrology.ComparisonCalibration(
             frequencies=_F,
-            reference_sensitivity_level_db=_L_REF,
-            output_level_differences_db=levels,
-            pressure_level_difference_db=zeros,
-            corrections_db={},
+            reference_sensitivity_level=_L_REF,
+            output_level_differences=levels,
+            pressure_level_difference=zeros,
+            corrections={},
             field="pressure",
             excitation="sequential",
             reference_sensitivity_phase_deg=_PHI_REF,
@@ -567,7 +567,7 @@ def test_microphones_of_the_same_impedance_see_the_same_pressure() -> None:
         test_equivalent_volume_m3=volume,
         coupling_equivalent_volume_m3=500e-9,
     )
-    np.testing.assert_allclose(result.level_difference_db, 0.0, atol=1e-12)
+    np.testing.assert_allclose(result.level_difference, 0.0, atol=1e-12)
     np.testing.assert_allclose(result.standard_uncertainty_db, 0.0, atol=1e-12)
 
 
@@ -582,7 +582,7 @@ def test_uncertainty_is_the_level_over_root_three_as_table_d1_takes_it() -> None
         coupling="series",
         coupling_equivalent_volume_m3=np.array([1e-6]),
     )
-    assert result.level_difference_db[0] == pytest.approx(0.005, rel=1e-9)
+    assert result.level_difference[0] == pytest.approx(0.005, rel=1e-9)
     assert round(float(result.standard_uncertainty_db[0]), 3) == pytest.approx(0.003)
 
 
@@ -600,8 +600,8 @@ def test_ratio_corrects_a_calibration_in_level_and_phase() -> None:
         _F,
         _L_REF,
         _L_REF + 94.0,
-        _L_TEST + 94.0 + ratio.level_difference_db,
-        pressure_level_difference_db=ratio.level_difference_db,
+        _L_TEST + 94.0 + ratio.level_difference,
+        pressure_level_difference=ratio.level_difference,
         phase=metrology.SequentialComparisonPhase(
             reference_sensitivity_phase_deg=_PHI_REF,
             reference_output_phase_deg=_PHI_REF,
@@ -609,7 +609,7 @@ def test_ratio_corrects_a_calibration_in_level_and_phase() -> None:
             pressure_phase_difference_deg=ratio.phase_difference_deg,
         ),
     )
-    np.testing.assert_allclose(result.sensitivity_level_db, _L_TEST, atol=1e-9)
+    np.testing.assert_allclose(result.sensitivity_level, _L_TEST, atol=1e-9)
     np.testing.assert_allclose(result.sensitivity_phase_deg, _PHI_TEST, atol=1e-9)
 
 
@@ -699,7 +699,7 @@ def test_impedance_plot_draws_the_level_and_its_uncertainty_or_the_phase() -> No
     fig, ax = plt.subplots()
     result.plot(ax)
     lines = ax.get_lines()
-    np.testing.assert_allclose(lines[1].get_ydata(), result.level_difference_db)
+    np.testing.assert_allclose(lines[1].get_ydata(), result.level_difference)
     np.testing.assert_allclose(lines[2].get_ydata(), result.standard_uncertainty_db)
     assert "Formula (3)" in ax.get_title()
     plt.close(fig)
@@ -742,7 +742,7 @@ def test_an_order_of_magnitude_above_20_khz_is_a_few_microseconds() -> None:
     assert duration == pytest.approx(5e-6)
     pulse = metrology.rectangular_pulse(duration)
     assert pulse.half_duration_s == pytest.approx(2.5e-6)
-    droop = float(pulse.level_db_at([20000.0])[0])
+    droop = float(pulse.level_at([20000.0])[0])
     assert droop == pytest.approx(
         20.0 * math.log10(math.sin(0.1 * math.pi) / (0.1 * math.pi))
     )
@@ -817,7 +817,7 @@ def test_window_keeps_the_direct_sound_and_drops_the_reflection() -> None:
     expected = np.exp(-2j * np.pi * _FT * delay)
     np.testing.assert_allclose(with_reflection.response_at(_FT), expected, atol=1e-12)
     np.testing.assert_allclose(without.response_at(_FT), expected, atol=1e-12)
-    np.testing.assert_allclose(with_reflection.level_db_at(_FT), 0.0, atol=1e-10)
+    np.testing.assert_allclose(with_reflection.level_at(_FT), 0.0, atol=1e-10)
     record = np.abs(with_reflection.record_response_at(_FT))
     assert np.max(np.abs(20.0 * np.log10(record))) > 1.0
 

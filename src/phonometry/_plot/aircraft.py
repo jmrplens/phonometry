@@ -1073,7 +1073,7 @@ def plot_npd_atmosphere_attenuation(
     if reference:
         ax.plot(
             f,
-            np.asarray(result.reference_attenuation_db)[:, column],
+            np.asarray(result.reference_attenuation)[:, column],
             color=_C_MUTED,
             lw=1.4,
             ls="--",
@@ -1084,7 +1084,7 @@ def plot_npd_atmosphere_attenuation(
     air = _air_label(result.temperature_c, result.relative_humidity_percent, language)
     ax.plot(
         f,
-        np.asarray(result.specified_attenuation_db)[:, column],
+        np.asarray(result.specified_attenuation)[:, column],
         **styled(
             kwargs,
             color=_ROUTE_COLORS[result.absorption],

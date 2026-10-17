@@ -291,7 +291,7 @@ def generate_resampling_antialias(output_dir: str) -> None:
         label="Stopband edge (alias fold)",
     )
     ax.axhline(
-        -res.stopband_attenuation_db,
+        -res.stopband_attenuation,
         color=COLOR_FG,
         linestyle=":",
         linewidth=1.2,

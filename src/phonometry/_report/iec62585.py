@@ -151,7 +151,7 @@ def _rows(result: CorrectionUncertaintyVerification, language: str) -> list[list
         )
         row = [
             format_number(float(frequency), language, decimals=1),
-            _cell(_column(result.correction_db, index), language, 2),
+            _cell(_column(result.correction, index), language, 2),
             format_number(
                 float(result.expanded_uncertainty_db[index]), language, decimals=3
             ),

@@ -349,7 +349,7 @@ def test_formula_1_removes_the_source_drift() -> None:
         (1, 0, 0),
         d,
         _L1M - 20.0 * np.log10(d) + drift,
-        monitor_levels_db=monitor,
+        monitor_levels=monitor,
     )
     fit = emission.inverse_square_law_deviations(
         [traverse], frequencies=[1000.0], room="anechoic"
@@ -867,24 +867,22 @@ def test_a_monitor_reading_is_needed_wherever_a_level_is() -> None:
     levels = np.repeat((_L1M - 20.0 * np.log10(d))[:, None], 2, axis=1)
     monitor = np.full(levels.shape, 70.0)
     monitor[5, 0] = np.nan
-    with pytest.raises(ValueError, match="'monitor_levels_db' must be finite"):
-        emission.MicrophoneTraverse.along(
-            (1, 0, 0), d, levels, monitor_levels_db=monitor
-        )
+    with pytest.raises(ValueError, match="'monitor_levels' must be finite"):
+        emission.MicrophoneTraverse.along((1, 0, 0), d, levels, monitor_levels=monitor)
     first = np.full(levels.shape, 70.0)
     first[0, 1] = np.nan
     unmeasured = levels.copy()
     unmeasured[0, 1] = np.nan
     with pytest.raises(ValueError, match="in its first row"):
         emission.MicrophoneTraverse.along(
-            (1, 0, 0), d, unmeasured, monitor_levels_db=first
+            (1, 0, 0), d, unmeasured, monitor_levels=first
         )
     skipped = levels.copy()
     skipped[5, 0] = np.nan
     traverse = emission.MicrophoneTraverse.along(
-        (1, 0, 0), d, skipped, monitor_levels_db=monitor
+        (1, 0, 0), d, skipped, monitor_levels=monitor
     )
-    assert np.isnan(traverse.monitor_levels_db[5, 0])
+    assert np.isnan(traverse.monitor_levels[5, 0])
 
 
 def test_a_background_is_needed_wherever_a_level_is() -> None:

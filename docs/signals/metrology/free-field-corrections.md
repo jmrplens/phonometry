@@ -37,9 +37,9 @@ tolerance = np.minimum(upper, -lower)[band]                # the narrower side a
 x3 = f3 / 1000
 response = 0.4 + 0.12 * np.cos(3 * np.log(x3)) - 0.3 * (x3 / 8) ** 2   # indication less field, dB
 a = metrology.adjustment_value(
-    f3, 94.0 + response, 94.35, calibrator_level_db=94.0, tolerance_db=tolerance
+    f3, 94.0 + response, 94.35, calibrator_level=94.0, tolerance_db=tolerance
 )
-print(round(a.sensitivity_adjustment_db, 2), round(a.adjustment_db, 2))  # -0.37 0.02
+print(round(a.sensitivity_adjustment, 2), round(a.adjustment, 2))  # -0.37 0.02
 print(round(a.check_frequency_offset_db, 2))                           # 0.15
 ```
 
@@ -81,9 +81,9 @@ c = metrology.sound_calibrator_correction(
     94.0 + c_ff_rm,                # L_ind2: the reference in its place
     94.0 + pressure + spread / 2,  # L_ind3: the calibrator on the meter
     94.0,                          # L_ind4: the calibrator on the reference
-    reference_free_field_correction_db=c_ff_rm,
+    reference_free_field_correction=c_ff_rm,
 )
-print(c.correction_db.round(2))  # [-0.04 -0.09 -0.1  -0.05  0.05  0.23  0.63  1.72  4.95]
+print(c.correction.round(2))  # [-0.04 -0.09 -0.1  -0.05  0.05  0.23  0.63  1.72  4.95]
 print(c.clause, c.formula)       # 12 D.7
 ```
 
@@ -94,8 +94,8 @@ the range clause 12 judges, is taken over the three microphones' mean
 corrections and not over the calibrators as well.
 
 `metrology.comparison_coupler_correction` names its two readings in the
-coupler by what each is of, `slm_coupler_level_db` and
-`reference_coupler_level_db`, because Formulas (E.4) to (E.6) exchange the two
+coupler by what each is of, `slm_coupler_level` and
+`reference_coupler_level`, because Formulas (E.4) to (E.6) exchange the two
 labels Figure E.1 defines (an [erratum](../../ERRATA.md)).
 `metrology.electrostatic_actuator_correction` returns the correction of
 Formula (F.13), normalised to the calibration check frequency, where it is
@@ -143,7 +143,7 @@ clause 15 n) and o) as a one-page fiche:
 
 ```python
 v = metrology.verify_correction_uncertainty(
-    f, 0.12 + 0.02 * x**0.8, clause=c.clause, correction_db=c.correction_db,
+    f, 0.12 + 0.02 * x**0.8, clause=c.clause, correction=c.correction,
     correction_range_db=c.range_db,
 )
 print(v.passes)   # True

@@ -507,7 +507,7 @@ class ResampledSignalResult(OwnsArrays):
     :ivar passband_edge_hz: Passband edge of the design, in Hz.
     :ivar stopband_edge_hz: Stopband edge of the design (the smaller of
         the two Nyquist frequencies), in Hz.
-    :ivar stopband_attenuation_db: Designed stopband attenuation, in dB
+    :ivar stopband_attenuation: Designed stopband attenuation, in dB
         (also the passband ripple bound: the Kaiser window method holds
         the ripple of both bands within the same
         :math:`\delta = 10^{-A/20}`,
@@ -525,7 +525,7 @@ class ResampledSignalResult(OwnsArrays):
     filter_taps: NDArray[np.float64]
     passband_edge_hz: float
     stopband_edge_hz: float
-    stopband_attenuation_db: float
+    stopband_attenuation: float
     transition_width: float
 
     def __post_init__(self) -> None:
@@ -588,7 +588,7 @@ def resample_signal(
     fs: float | None = None,
     *,
     fs_new: float,
-    stopband_attenuation_db: float = 120.0,
+    stopband_attenuation: float = 120.0,
     transition_width: float = 0.05,
     max_denominator: int = 1000,
 ) -> ResampledSignalResult:
@@ -597,7 +597,7 @@ def resample_signal(
     Polyphase rational resampling (:func:`scipy.signal.resample_poly`)
     behind a lowpass FIR designed *here* by the Kaiser window method: the
     stopband starts at the smaller of the two Nyquist frequencies and
-    provides ``stopband_attenuation_db`` of alias rejection, the passband
+    provides ``stopband_attenuation`` of alias rejection, the passband
     ends ``transition_width`` below it and is flat within the same ripple
     bound :math:`\delta = 10^{-A/20}`. The designed taps travel with the
     result, so
@@ -613,7 +613,7 @@ def resample_signal(
     :param fs_new: Target sample rate, in Hz. The ratio ``fs_new/fs``
         must be a rational number with denominator at most
         ``max_denominator`` (e.g. 48000/44100 = 160/147).
-    :param stopband_attenuation_db: Anti-alias stopband attenuation, in
+    :param stopband_attenuation: Anti-alias stopband attenuation, in
         dB (at least 30).
     :param transition_width: Transition-band width as a fraction of the
         smaller Nyquist frequency, in (0, 0.5].
@@ -630,10 +630,10 @@ def resample_signal(
     xa = _validate_1d_finite(x, "x")
     fs_v = _positive(resolve_fs(x, fs), "fs")
     fs_new_v = _positive(fs_new, "fs_new")
-    require_scalar(stopband_attenuation_db, "stopband_attenuation_db")
-    atten = float(stopband_attenuation_db)
+    require_scalar(stopband_attenuation, "stopband_attenuation")
+    atten = float(stopband_attenuation)
     if not np.isfinite(atten) or atten < _MIN_STOPBAND_ATTENUATION_DB:
-        msg = "'stopband_attenuation_db' must be at least 30 dB."
+        msg = "'stopband_attenuation' must be at least 30 dB."
         raise ValueError(msg)
     require_scalar(transition_width, "transition_width")
     tw = float(transition_width)
@@ -672,7 +672,7 @@ def resample_signal(
             filter_taps=np.ones(1, dtype=np.float64),
             passband_edge_hz=(1.0 - tw) * fs_v / 2.0,
             stopband_edge_hz=fs_v / 2.0,
-            stopband_attenuation_db=atten,
+            stopband_attenuation=atten,
             transition_width=tw,
         )
 
@@ -708,7 +708,7 @@ def resample_signal(
         filter_taps=taps,
         passband_edge_hz=f_pass,
         stopband_edge_hz=f_stop,
-        stopband_attenuation_db=atten,
+        stopband_attenuation=atten,
         transition_width=tw,
     )
 

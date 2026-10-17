@@ -101,7 +101,7 @@ record = metrology.SoundLevelMeterPeriodicMeasurements(
     # indicated overload and under-range.
     linear_operating_range_db=[40.0, 120.0],
     linearity_starting_point_db=94.0,
-    linearity_levels_db=[
+    linearity_levels=[
         94.0, 99.0, 104.0, 109.0, 114.0, 119.0, 120.0, 121.0, 122.0,
         89.0, 84.0, 79.0, 74.0, 69.0, 64.0, 59.0, 54.0, 49.0, 44.0,
         43.0, 42.0, 41.0, 40.0, 39.0, 38.0,
@@ -112,8 +112,8 @@ record = metrology.SoundLevelMeterPeriodicMeasurements(
         0.2, 0.3, 0.3, 0.4, 0.5, 0.6,
     ],
     linearity_uncertainties_db=[0.18] * 25,
-    linearity_overload_level_db=123.0,
-    linearity_under_range_level_db=37.0,
+    linearity_overload_level=123.0,
+    linearity_under_range_level=37.0,
     # Clause 17 at 1 kHz: 5 dB above the first under-range indication on
     # both level ranges, the reference one first (17.4), and the reference
     # level held on the other one (17.3).
@@ -131,11 +131,11 @@ record = metrology.SoundLevelMeterPeriodicMeasurements(
         "E": [0.2, 0.2, 0.25],
     },
     # Clause 19: one cycle at 8 kHz, then the two half cycles at 500 Hz.
-    c_peak_differences_db=[3.9, 2.5, 2.2],
+    c_peak_differences=[3.9, 2.5, 2.2],
     c_peak_uncertainties_db=[0.3, 0.3, 0.3],
     c_peak_overload_indicated=False,
     # Clauses 20 and 21.
-    overload_difference_db=0.4,
+    overload_difference=0.4,
     overload_uncertainty_db=0.2,
     overload_latched=True,
     high_level_stability_db=0.03,
@@ -216,7 +216,7 @@ basic = dataclasses.replace(
     record,
     range_linearity_deviations_db=None,
     range_linearity_uncertainties_db=None,
-    c_peak_differences_db=None,
+    c_peak_differences=None,
     c_peak_uncertainties_db=None,
     c_peak_overload_indicated=None,
 )
@@ -243,7 +243,7 @@ print(short.passes, short.incomplete[0][0])  # False 18
 
 one_step = dataclasses.replace(
     record,
-    linearity_levels_db=[94.0],
+    linearity_levels=[94.0],
     linearity_deviations_db=[0.0],
     linearity_uncertainties_db=[0.18],
 )

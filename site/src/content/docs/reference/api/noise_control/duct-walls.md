@@ -156,14 +156,14 @@ DuctWallSpectrum(
     group: str = '',
     note: str = '',
     provenance: Provenance | None = None,
-    transmission_loss_63_db: float | None = None,
-    transmission_loss_125_db: float | None = None,
-    transmission_loss_250_db: float | None = None,
-    transmission_loss_500_db: float | None = None,
-    transmission_loss_1000_db: float | None = None,
-    transmission_loss_2000_db: float | None = None,
-    transmission_loss_4000_db: float | None = None,
-    transmission_loss_8000_db: float | None = None,
+    transmission_loss_63: float | None = None,
+    transmission_loss_125: float | None = None,
+    transmission_loss_250: float | None = None,
+    transmission_loss_500: float | None = None,
+    transmission_loss_1000: float | None = None,
+    transmission_loss_2000: float | None = None,
+    transmission_loss_4000: float | None = None,
+    transmission_loss_8000: float | None = None,
     direction: str = '',
     shape: str = '',
     printed_table: str = '',
@@ -186,14 +186,14 @@ transmission loss, never both, and `direction` is what says which.
 
 | Name | Description |
 | :--- | :--- |
-| `transmission_loss_63_db` | The transmission loss in the 63 Hz octave band, in decibels, in the direction `direction` names. |
-| `transmission_loss_125_db` | The same in the 125 Hz band. |
-| `transmission_loss_250_db` | The same in the 250 Hz band. |
-| `transmission_loss_500_db` | The same in the 500 Hz band. |
-| `transmission_loss_1000_db` | The same in the 1 kHz band. |
-| `transmission_loss_2000_db` | The same in the 2 kHz band. |
-| `transmission_loss_4000_db` | The same in the 4 kHz band. |
-| `transmission_loss_8000_db` | The same in the 8 kHz band, which only the two rectangular tables print a column for. |
+| `transmission_loss_63` | The transmission loss in the 63 Hz octave band, in decibels, in the direction `direction` names. |
+| `transmission_loss_125` | The same in the 125 Hz band. |
+| `transmission_loss_250` | The same in the 250 Hz band. |
+| `transmission_loss_500` | The same in the 500 Hz band. |
+| `transmission_loss_1000` | The same in the 1 kHz band. |
+| `transmission_loss_2000` | The same in the 2 kHz band. |
+| `transmission_loss_4000` | The same in the 4 kHz band. |
+| `transmission_loss_8000` | The same in the 8 kHz band, which only the two rectangular tables print a column for. |
 | `direction` | `"breakout"` for the sound that leaves the duct through its wall, `"break-in"` for the sound that enters it through the same wall. Two rows of the same size and gauge in the two directions are two measurements and not two columns of one. |
 | `shape` | What the table's own title calls the duct: `"rectangular"`, `"round"`, `"flat oval"` or `"circular"`. The chapter uses "round" for its breakout table and "circular" for its break-in one although the geometry is the same, and each row keeps the word its own page prints. |
 | `printed_table` | Which table of the chapter this row is printed in, `"Table 29"` to `"Table 34"`. |
@@ -435,10 +435,10 @@ number, is left out rather than filled with a zero;
 [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
 was.
 
-### DuctWallSpectrum.transmission_loss_db()
+### DuctWallSpectrum.transmission_loss()
 
 ```python
-DuctWallSpectrum.transmission_loss_db(band_hz: int) -> float
+DuctWallSpectrum.transmission_loss(band_hz: int) -> float
 ```
 
 The loss in one band, or a refusal that says what the page had.

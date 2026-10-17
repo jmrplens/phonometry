@@ -25,7 +25,7 @@ def _am_tone(
     fc: float,
     fmod: float,
     depth: float,
-    level_db: float,
+    level: float,
     seconds: float = 2.0,
 ) -> np.ndarray:
     """Amplitude-modulated tone at an OVERALL RMS level (pressure in Pa).
@@ -35,12 +35,12 @@ def _am_tone(
     """
     t = np.arange(int(FS * seconds)) / FS
     x = (1.0 + depth * np.cos(2.0 * np.pi * fmod * t)) * np.sin(2.0 * np.pi * fc * t)
-    return np.asarray(x * (P0 * 10.0 ** (level_db / 20.0)) / np.sqrt(np.mean(x**2)))
+    return np.asarray(x * (P0 * 10.0 ** (level / 20.0)) / np.sqrt(np.mean(x**2)))
 
 
-def _tone(fc: float, level_db: float, seconds: float = 2.0) -> np.ndarray:
-    """Unmodulated tone at ``level_db`` RMS."""
-    return _am_tone(fc, 0.0, 0.0, level_db, seconds)
+def _tone(fc: float, level: float, seconds: float = 2.0) -> np.ndarray:
+    """Unmodulated tone at ``level`` RMS."""
+    return _am_tone(fc, 0.0, 0.0, level, seconds)
 
 
 @pytest.fixture(scope="module")

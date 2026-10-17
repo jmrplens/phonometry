@@ -28,7 +28,7 @@ would be adding a difference to an absolute with nothing in the arithmetic to
 say so. Both are dimensionless.
 
 The first edition of the handbook, in its Spanish translation of 1977, prints
-a third: [`ImpactInsulation.impact_sound_improvement_db`](/phonometry/reference/api/building/impact-catalogue/#impactinsulation), the average
+a third: [`ImpactInsulation.impact_sound_improvement`](/phonometry/reference/api/building/impact-catalogue/#impactinsulation), the average
 improvement in impact sound insulation a finish, a floating screed or a timber
 floor gives over a bare concrete slab, in decibels. It predates the IIC and is
 not one: it is a level difference averaged over frequency, and nothing on the
@@ -162,7 +162,7 @@ ImpactInsulation(
     provenance: Provenance | None = None,
     impact_insulation_class: float | None = None,
     impact_insulation_class_improvement: float | None = None,
-    impact_sound_improvement_db: float | None = None,
+    impact_sound_improvement: float | None = None,
     added_load_pa: float | None = None,
     refers_to_row: str = '',
     has_section_drawing: bool = False,
@@ -186,7 +186,7 @@ improvement it qualifies.
 | Name | Description |
 | :--- | :--- |
 | `impact_insulation_class` | The IIC of the whole floor-ceiling assembly this row describes, dimensionless. Filled by Tables 32.1 to 32.7, and never on a row that gives an improvement. Two rows print no class at all and leave it empty, which [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) says. |
-| `impact_sound_improvement_db` | The average improvement in impact sound insulation a floor treatment gives over a bare concrete floor, in decibels, as Harris (1977) Tables 19.2 to 19.4 print it. It is a level difference averaged over frequency and not a rating, so it is not comparable with `impact_insulation_class` or with `impact_insulation_class_improvement`, which are dimensionless. |
+| `impact_sound_improvement` | The average improvement in impact sound insulation a floor treatment gives over a bare concrete floor, in decibels, as Harris (1977) Tables 19.2 to 19.4 print it. It is a level difference averaged over frequency and not a rating, so it is not comparable with `impact_insulation_class` or with `impact_insulation_class_improvement`, which are dimensionless. |
 | `added_load_pa` | The load a floor of Harris (1977) Table 19.4 was measured under, in pascals. The page prints it in kg/cm2, the technical atmosphere of 98 066.5 Pa, and prints 0 for an unloaded floor, which is held as zero: it is a condition of the measurement and was printed. Empty on every row of every other table, which prints no load. |
 | `impact_insulation_class_improvement` | The delta-IIC an elastic surface treatment adds over a hard massive structural floor, dimensionless. Filled by Table 32.8 alone. It is a difference between two ratings and not a rating, so it is not comparable with `impact_insulation_class` and is not to be added to one from another row: the page gives the improvement over the floor it was measured on, and its own footnote says that over wood joists it may be substantially smaller. |
 | `refers_to_row` | The row this row's printed description refers to instead of repeating the structural floor, named by the number the table prints in its own column. Empty when the description stands on its own. The description itself is printed in full and is kept whole in [`name`](/phonometry/reference/api/io/io/#cataloguerow); this is only the thing it inherits. |

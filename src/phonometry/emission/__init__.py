@@ -161,7 +161,7 @@ from .sound_power_high_frequency import (
 )
 from .sound_power_plant import (
     PLANT_AIR_ABSORPTION_DB_PER_M,
-    PLANT_BACKGROUND_CORRECTION_DB,
+    PLANT_BACKGROUND_CORRECTION,
     PLANT_METHOD_UNCERTAINTY_DB,
     PartialPlantContributions,
     PlantMeasurementCheck,
@@ -211,8 +211,8 @@ from .vibration_sound_power import (
 )
 from .workstation import (
     DEFAULT_COVERAGE_FACTOR,
-    GRADE_2_MAX_K3_DB,
-    MAX_K3_DB,
+    GRADE_2_MAX_K3,
+    MAX_K3,
     MIN_BACKGROUND_MARGIN_DB,
     NEGLIGIBLE_BACKGROUND_MARGIN_DB,
     EmissionPressureResult,
@@ -237,7 +237,7 @@ __all__ = [
     "EmissionPressureResult",
     "FieldIndicators",
     "FreeFieldCheck",
-    "GRADE_2_MAX_K3_DB",
+    "GRADE_2_MAX_K3",
     "GradeConditions",
     "HardWalledRoomCheck",
     "HardWalledSoundPowerResult",
@@ -247,7 +247,7 @@ __all__ = [
     "IntensityInstrumentComplianceResult",
     "IntensityResult",
     "InverseSquareLawResult",
-    "MAX_K3_DB",
+    "MAX_K3",
     "MicrophoneTraverse",
     "MIN_BACKGROUND_MARGIN_DB",
     "MeteorologicalCorrection",
@@ -260,7 +260,7 @@ __all__ = [
     "PartialPowerConcentration",
     "PLANT_AIR_ABSORPTION_DB_PER_M",
     "plant_air_absorption_db_per_m",
-    "PLANT_BACKGROUND_CORRECTION_DB",
+    "PLANT_BACKGROUND_CORRECTION",
     "plant_background_correction",
     "plant_characteristic_height_m",
     "plant_mean_distance_limits_m",

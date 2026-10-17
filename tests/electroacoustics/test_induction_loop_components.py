@@ -80,7 +80,7 @@ def test_null_line_lies_outside_the_perimeter() -> None:
 def test_field_levels_and_the_magnitude() -> None:
     field = ea.rectangular_loop_field(1.0, 5.0, 5.0, [0.0, 1.0], 0.0, 1.4)
     np.testing.assert_allclose(
-        field.level_db("z"), 20 * np.log10(np.abs(field.h_z_a_per_m) / 0.4), rtol=1e-12
+        field.level("z"), 20 * np.log10(np.abs(field.h_z_a_per_m) / 0.4), rtol=1e-12
     )
     np.testing.assert_allclose(
         field.magnitude_a_per_m,
@@ -502,11 +502,11 @@ def test_quadrature_example_of_5_4_14_1() -> None:
     assert math.cos(math.radians(angle)) == pytest.approx(
         ref.IEC62489_1_QUADRATURE_EXAMPLE_COS, abs=5e-4
     )
-    assert error.level_increase_db == pytest.approx(
+    assert error.level_increase == pytest.approx(
         ref.IEC62489_1_QUADRATURE_EXAMPLE_DB, abs=0.01
     )
     # The decrease is 0,79 dB, not the 0,72 dB 5.4.14.1 prints for both.
-    assert error.level_decrease_db == pytest.approx(-0.79, abs=0.005)
+    assert error.level_decrease == pytest.approx(-0.79, abs=0.005)
 
 
 def test_quadrature_folds_either_loop_leading() -> None:
@@ -530,18 +530,16 @@ def test_quadrature_in_phase_currents_cancel_where_they_subtract(phase: float) -
     # two fields add to twice one of them and cancel where they subtract.
     error = ea.quadrature_phase_error([1000.0], [phase])
     assert error.max_deviation_deg == pytest.approx(90.0)
-    assert error.level_increase_db == pytest.approx(20 * math.log10(2.0), rel=1e-12)
-    assert math.isinf(error.level_decrease_db)
-    assert error.level_decrease_db < 0.0
+    assert error.level_increase == pytest.approx(20 * math.log10(2.0), rel=1e-12)
+    assert math.isinf(error.level_decrease)
+    assert error.level_decrease < 0.0
 
 
 def test_quadrature_decrease_near_90_degrees_is_accurate() -> None:
     # 20 lg(1 - sin 89,9999 degrees), from the series 1 - sin(90 - e) = e^2/2.
     error = ea.quadrature_phase_error([1000.0], [1.0e-4])
     e = math.radians(1.0e-4)
-    assert error.level_decrease_db == pytest.approx(
-        20 * math.log10(e * e / 2.0), abs=1e-6
-    )
+    assert error.level_decrease == pytest.approx(20 * math.log10(e * e / 2.0), abs=1e-6)
 
 
 # ---------------------------------------------------------------------------

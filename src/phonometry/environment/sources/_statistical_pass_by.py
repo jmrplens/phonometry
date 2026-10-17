@@ -57,7 +57,7 @@ The example of Annex E is reproduced by this chain: its levels 78,5, 81,1 and
 83,8 dB give 79,946 dB, printed 79,9 dB. Carried at full precision from the
 coefficients Annex E prints, the same levels are 78,546, 81,114 and 83,838 dB,
 and their index, 79,985 dB, would print 80,0 dB
-(:attr:`StatisticalPassByResult.full_precision_index_db`). The printed
+(:attr:`StatisticalPassByResult.full_precision_index`). The printed
 coefficients are rounded too, so the page alone does not prove which chain the
 example was computed with: over every line that agrees with the intercept,
 slope, mean level, mean speed and vehicle sound level Annex E prints, to their
@@ -79,7 +79,7 @@ on the result and, when they fail, emitted as
 **9.4, temperature.** The vehicle sound levels should be corrected to an air
 temperature of 20 °C, and the standard says a suitable method is under
 consideration. None is implemented here: temperature-corrected levels are an
-input (``corrected_vehicle_sound_levels_db``), and the index is then computed
+input (``corrected_vehicle_sound_levels``), and the index is then computed
 for both. Clause 13 lists the corrected levels and index as optional report
 items (26 and 28) beside the mandatory uncorrected ones (25 and 27).
 
@@ -330,7 +330,7 @@ def _index_terms(
 
 
 def statistical_pass_by_index(
-    vehicle_sound_levels_db: Mapping[str, float],
+    vehicle_sound_levels: Mapping[str, float],
     *,
     road_speed_category: str,
     weighting_factors: Mapping[str, float] | None = None,
@@ -357,7 +357,7 @@ def statistical_pass_by_index(
     :func:`statistical_pass_by` reports, which rounds its levels that way
     before calling this.
 
-    :param vehicle_sound_levels_db: :math:`L_\mathrm{veh}` of cars, dual-axle
+    :param vehicle_sound_levels: :math:`L_\mathrm{veh}` of cars, dual-axle
         and multi-axle heavy vehicles, in decibels, keyed ``"1"``, ``"2a"``
         and ``"2b"``.
     :param road_speed_category: ``"low"``, ``"medium"`` or ``"high"`` (3.3),
@@ -372,7 +372,7 @@ def statistical_pass_by_index(
         negative or do not add up to 1.
     """
     road = _road_category(road_speed_category)
-    levels = _per_category(vehicle_sound_levels_db, "vehicle_sound_levels_db")
+    levels = _per_category(vehicle_sound_levels, "vehicle_sound_levels")
     weights = _weights(weighting_factors, road)
     return float(10.0 * math.log10(sum(_index_terms(levels, weights, road).values())))
 
@@ -395,7 +395,7 @@ class PassByRegression(OwnsArrays):
     :param vehicle_category: ``"1"``, ``"2a"`` or ``"2b"``.
     :param road_speed_category: ``"low"``, ``"medium"`` or ``"high"``.
     :param speeds_kmh: The measured speed of each pass-by, in km/h, read-only.
-    :param max_levels_db: The maximum A-weighted level of each pass-by, time
+    :param max_levels: The maximum A-weighted level of each pass-by, time
         weighting F, in decibels, read-only.
     :param reference_speed_kmh: The Table 1 reference speed of the category,
         in km/h.
@@ -416,7 +416,7 @@ class PassByRegression(OwnsArrays):
     vehicle_category: str
     road_speed_category: str
     speeds_kmh: NDArray[np.float64]
-    max_levels_db: NDArray[np.float64]
+    max_levels: NDArray[np.float64]
     reference_speed_kmh: float
     intercept_db: float
     slope_db_per_decade: float
@@ -431,9 +431,9 @@ class PassByRegression(OwnsArrays):
         return int(self.speeds_kmh.size)
 
     @property
-    def mean_level_db(self) -> float:
+    def mean_level(self) -> float:
         """The mean of the measured levels, in decibels."""
-        return float(np.mean(self.max_levels_db))
+        return float(np.mean(self.max_levels))
 
     @property
     def mean_speed_kmh(self) -> float:
@@ -441,12 +441,12 @@ class PassByRegression(OwnsArrays):
 
         The mean of the variable the line is fitted in, converted back, as
         Annex E prints it ("value converted from the logarithm of speed"). The
-        line passes through it at :attr:`mean_level_db`.
+        line passes through it at :attr:`mean_level`.
         """
         return float(10.0 ** np.mean(np.log10(self.speeds_kmh)))
 
     @property
-    def vehicle_sound_level_db(self) -> float:
+    def vehicle_sound_level(self) -> float:
         r""":math:`L_\mathrm{veh}`, the line at the reference speed, unrounded (9.2)."""
         return float(
             self.intercept_db
@@ -454,9 +454,9 @@ class PassByRegression(OwnsArrays):
         )
 
     @property
-    def reported_vehicle_sound_level_db(self) -> float:
+    def reported_vehicle_sound_level(self) -> float:
         r""":math:`L_\mathrm{veh}` rounded to one decimal, as 9.2 has it reported."""
-        return _round_tenth(self.vehicle_sound_level_db)
+        return _round_tenth(self.vehicle_sound_level)
 
     @property
     def speed_window_kmh(self) -> tuple[float, float]:
@@ -531,16 +531,16 @@ class PassByRegression(OwnsArrays):
 
 def _fit(
     speeds_kmh: ArrayLike,
-    max_levels_db: ArrayLike,
+    max_levels: ArrayLike,
     vehicle_category: str,
     road_speed_category: str,
 ) -> PassByRegression:
     """The least-squares line of 9.1 and the statistics clause 13 reports."""
     speeds = require_positive_array(speeds_kmh, "speeds_kmh")
-    levels = require_finite_array(max_levels_db, "max_levels_db")
+    levels = require_finite_array(max_levels, "max_levels")
     if speeds.ndim != 1 or levels.ndim != 1 or speeds.size != levels.size:
         msg = (
-            "'speeds_kmh' and 'max_levels_db' must be one-dimensional and hold "
+            "'speeds_kmh' and 'max_levels' must be one-dimensional and hold "
             "one value per pass-by each."
         )
         raise ValueError(msg)
@@ -573,7 +573,7 @@ def _fit(
         vehicle_category=vehicle_category,
         road_speed_category=road_speed_category,
         speeds_kmh=np.asarray(speeds, dtype=np.float64),
-        max_levels_db=np.asarray(levels, dtype=np.float64),
+        max_levels=np.asarray(levels, dtype=np.float64),
         reference_speed_kmh=SPB_REFERENCE_SPEEDS_KMH[road_speed_category][
             vehicle_category
         ],
@@ -614,7 +614,7 @@ def _warn_regression(regression: PassByRegression, stacklevel: int) -> None:
 
 def pass_by_regression(
     speeds_kmh: ArrayLike,
-    max_levels_db: ArrayLike,
+    max_levels: ArrayLike,
     *,
     vehicle_category: str,
     road_speed_category: str,
@@ -625,7 +625,7 @@ def pass_by_regression(
     :math:`\lg(v / 1\ \mathrm{km/h})` by least squares, and the ordinate of the
     line at the Table 1 reference speed is the vehicle sound level
     :math:`L_\mathrm{veh}` of the category
-    (:attr:`PassByRegression.vehicle_sound_level_db`).
+    (:attr:`PassByRegression.vehicle_sound_level`).
 
     Two conditions are judged on the way and emitted as
     :class:`StatisticalPassByWarning` when they fail: the 7.3 minimum number of
@@ -635,7 +635,7 @@ def pass_by_regression(
 
     :param speeds_kmh: The speed of each pass-by, in km/h, measured as the
         vehicle midpoint passes the microphone (8.4).
-    :param max_levels_db: The maximum A-weighted sound pressure level of each
+    :param max_levels: The maximum A-weighted sound pressure level of each
         pass-by, time weighting F, in decibels, in the same order.
     :param vehicle_category: ``"1"`` (cars), ``"2a"`` (dual-axle heavy
         vehicles) or ``"2b"`` (multi-axle heavy vehicles).
@@ -648,7 +648,7 @@ def pass_by_regression(
     """
     road = _road_category(road_speed_category)
     category = _vehicle_category(vehicle_category)
-    regression = _fit(speeds_kmh, max_levels_db, category, road)
+    regression = _fit(speeds_kmh, max_levels, category, road)
     _warn_regression(regression, stacklevel=3)
     return regression
 
@@ -661,16 +661,16 @@ class StatisticalPassByResult(RichDisplay):
     :param regressions: The :class:`PassByRegression` of each vehicle category,
         keyed ``"1"``, ``"2a"`` and ``"2b"``.
     :param weighting_factors: The :math:`W_x` the index was computed with.
-    :param vehicle_sound_levels_db: :math:`L_\mathrm{veh}` of each category,
+    :param vehicle_sound_levels: :math:`L_\mathrm{veh}` of each category,
         uncorrected for temperature and unrounded, in decibels.
-    :param index_db: The SPBI of those levels as 9.2 reports them, rounded to
-        one decimal (:attr:`reported_vehicle_sound_levels_db`), in decibels.
-        The index itself is not rounded; :attr:`reported_index_db` is.
-    :param corrected_vehicle_sound_levels_db: The temperature-corrected levels
+    :param index: The SPBI of those levels as 9.2 reports them, rounded to
+        one decimal (:attr:`reported_vehicle_sound_levels`), in decibels.
+        The index itself is not rounded; :attr:`reported_index` is.
+    :param corrected_vehicle_sound_levels: The temperature-corrected levels
         the caller supplied (9.4), as supplied, or ``None``.
-    :param corrected_index_db: The SPBI of the corrected levels rounded to one
+    :param corrected_index: The SPBI of the corrected levels rounded to one
         decimal, or ``None``.
-    :param reference_index_db: The SPBI of the reference surface (clause 10):
+    :param reference_index: The SPBI of the reference surface (clause 10):
         the index supplied, or that of the levels supplied rounded to one
         decimal; ``None`` when no reference was given.
     """
@@ -678,11 +678,11 @@ class StatisticalPassByResult(RichDisplay):
     road_speed_category: str
     regressions: Mapping[str, PassByRegression]
     weighting_factors: Mapping[str, float]
-    vehicle_sound_levels_db: Mapping[str, float]
-    index_db: float
-    corrected_vehicle_sound_levels_db: Mapping[str, float] | None = None
-    corrected_index_db: float | None = None
-    reference_index_db: float | None = None
+    vehicle_sound_levels: Mapping[str, float]
+    index: float
+    corrected_vehicle_sound_levels: Mapping[str, float] | None = None
+    corrected_index: float | None = None
+    reference_index: float | None = None
 
     @property
     def reference_speeds_kmh(self) -> Mapping[str, float]:
@@ -708,68 +708,66 @@ class StatisticalPassByResult(RichDisplay):
         return all(reg.reference_speed_in_window for reg in self.regressions.values())
 
     @property
-    def reported_vehicle_sound_levels_db(self) -> Mapping[str, float]:
+    def reported_vehicle_sound_levels(self) -> Mapping[str, float]:
         r""":math:`L_\mathrm{veh}` of each category rounded to one decimal (9.2).
 
         The levels the index is computed from, and the ones a report prints.
         """
-        return MappingProxyType(_reported_levels(self.vehicle_sound_levels_db))
+        return MappingProxyType(_reported_levels(self.vehicle_sound_levels))
 
     @property
-    def reported_corrected_vehicle_sound_levels_db(self) -> Mapping[str, float] | None:
+    def reported_corrected_vehicle_sound_levels(self) -> Mapping[str, float] | None:
         """The temperature-corrected levels rounded to one decimal, or ``None``."""
-        if self.corrected_vehicle_sound_levels_db is None:
+        if self.corrected_vehicle_sound_levels is None:
             return None
-        return MappingProxyType(
-            _reported_levels(self.corrected_vehicle_sound_levels_db)
-        )
+        return MappingProxyType(_reported_levels(self.corrected_vehicle_sound_levels))
 
     @property
-    def reported_index_db(self) -> float:
+    def reported_index(self) -> float:
         """The SPBI rounded to one decimal (9.2)."""
-        return _round_tenth(self.index_db)
+        return _round_tenth(self.index)
 
     @property
-    def full_precision_index_db(self) -> float:
+    def full_precision_index(self) -> float:
         r"""The SPBI of the unrounded :math:`L_\mathrm{veh}`, in decibels.
 
         Not the index the standard reports, which adds the levels of 9.2 as
-        they are reported, to one decimal (:attr:`index_db`). The two never
+        they are reported, to one decimal (:attr:`index`). The two never
         differ by more than 0,05 dB, the most a level moves when it is rounded,
         but that can be enough to move the reported digit: for the lines Annex
         E prints, this is 79,985 dB, which would print 80,0 dB, where the annex
         prints 79,9 dB.
         """
         return statistical_pass_by_index(
-            self.vehicle_sound_levels_db,
+            self.vehicle_sound_levels,
             road_speed_category=self.road_speed_category,
             weighting_factors=self.weighting_factors,
         )
 
     @property
-    def reported_corrected_index_db(self) -> float | None:
+    def reported_corrected_index(self) -> float | None:
         """The temperature-corrected SPBI rounded to one decimal, or ``None``."""
-        if self.corrected_index_db is None:
+        if self.corrected_index is None:
             return None
-        return _round_tenth(self.corrected_index_db)
+        return _round_tenth(self.corrected_index)
 
     @property
-    def difference_db(self) -> float | None:
+    def difference(self) -> float | None:
         """The SPBI less that of the reference surface, in decibels, or ``None``.
 
         Positive for a surface louder than the reference. Unrounded; 9.5 says
         that in many cases the main use of the index is this difference.
         """
-        if self.reference_index_db is None:
+        if self.reference_index is None:
             return None
-        return self.index_db - self.reference_index_db
+        return self.index - self.reference_index
 
     @property
-    def corrected_difference_db(self) -> float | None:
+    def corrected_difference(self) -> float | None:
         """The temperature-corrected SPBI less the reference one, or ``None``."""
-        if self.reference_index_db is None or self.corrected_index_db is None:
+        if self.reference_index is None or self.corrected_index is None:
             return None
-        return self.corrected_index_db - self.reference_index_db
+        return self.corrected_index - self.reference_index
 
     @property
     def index_confidence_interval_db(self) -> float:
@@ -788,7 +786,7 @@ class StatisticalPassByResult(RichDisplay):
         independent.
         """
         terms = _index_terms(
-            self.reported_vehicle_sound_levels_db,
+            self.reported_vehicle_sound_levels,
             self.weighting_factors,
             self.road_speed_category,
         )
@@ -823,10 +821,10 @@ class StatisticalPassByResult(RichDisplay):
 def statistical_pass_by(
     vehicle_categories: ArrayLike,
     speeds_kmh: ArrayLike,
-    max_levels_db: ArrayLike,
+    max_levels: ArrayLike,
     *,
     road_speed_category: str,
-    corrected_vehicle_sound_levels_db: Mapping[str, float] | None = None,
+    corrected_vehicle_sound_levels: Mapping[str, float] | None = None,
     reference_db: float | Mapping[str, float] | None = None,
     weighting_factors: Mapping[str, float] | None = None,
 ) -> StatisticalPassByResult:
@@ -839,7 +837,7 @@ def statistical_pass_by(
     decimal, as 9.2 has them reported, and combined into the index
     (:func:`statistical_pass_by_index`), so that the index is the one anyone
     recomputes from the reported levels (9.5). The unrounded levels and their
-    index stay on the result (:attr:`StatisticalPassByResult.full_precision_index_db`).
+    index stay on the result (:attr:`StatisticalPassByResult.full_precision_index`).
 
     The 7.3 counts (the two heavy categories together included) and the 9.3
     speed windows are judged, kept on the result and emitted as
@@ -848,14 +846,14 @@ def statistical_pass_by(
     :param vehicle_categories: The category of each pass-by, ``"1"``, ``"2a"``
         or ``"2b"``.
     :param speeds_kmh: The speed of each pass-by, in km/h.
-    :param max_levels_db: The maximum A-weighted level of each pass-by, time
+    :param max_levels: The maximum A-weighted level of each pass-by, time
         weighting F, in decibels.
     :param road_speed_category: ``"low"``, ``"medium"`` or ``"high"`` (3.3).
-    :param corrected_vehicle_sound_levels_db: Vehicle sound levels corrected to
+    :param corrected_vehicle_sound_levels: Vehicle sound levels corrected to
         :data:`SPB_REFERENCE_AIR_TEMPERATURE_C` by a method of the caller's
         choosing, keyed by category, for which the index is also computed,
         from the levels rounded to one decimal. 9.4 gives no method. To correct
-        each pass-by instead, which 9.4 prefers, correct ``max_levels_db`` and
+        each pass-by instead, which 9.4 prefers, correct ``max_levels`` and
         call this again.
     :param reference_db: The reference surface of clause 10: either its SPBI in
         decibels, used as given, or its three vehicle sound levels keyed by
@@ -873,14 +871,14 @@ def statistical_pass_by(
     road = _road_category(road_speed_category)
     labels = np.asarray(vehicle_categories, dtype=object).ravel()
     speeds = np.asarray(speeds_kmh, dtype=np.float64)
-    levels = np.asarray(max_levels_db, dtype=np.float64)
+    levels = np.asarray(max_levels, dtype=np.float64)
     if (
         speeds.ndim != 1
         or levels.ndim != 1
         or not (labels.size == speeds.size == levels.size)
     ):
         msg = (
-            "'vehicle_categories', 'speeds_kmh' and 'max_levels_db' must be "
+            "'vehicle_categories', 'speeds_kmh' and 'max_levels' must be "
             "one-dimensional and hold one value per pass-by each."
         )
         raise ValueError(msg)
@@ -901,7 +899,7 @@ def statistical_pass_by(
             stacklevel=2,
         )
     vehicle_levels = {
-        key: regressions[key].vehicle_sound_level_db for key in SPB_VEHICLE_CATEGORIES
+        key: regressions[key].vehicle_sound_level for key in SPB_VEHICLE_CATEGORIES
     }
     index = statistical_pass_by_index(
         _reported_levels(vehicle_levels),
@@ -910,10 +908,10 @@ def statistical_pass_by(
     )
     corrected_levels: Mapping[str, float] | None = None
     corrected_index: float | None = None
-    if corrected_vehicle_sound_levels_db is not None:
+    if corrected_vehicle_sound_levels is not None:
         corrected_levels = MappingProxyType(
             _per_category(
-                corrected_vehicle_sound_levels_db, "corrected_vehicle_sound_levels_db"
+                corrected_vehicle_sound_levels, "corrected_vehicle_sound_levels"
             )
         )
         corrected_index = statistical_pass_by_index(
@@ -936,16 +934,16 @@ def statistical_pass_by(
         road_speed_category=road,
         regressions=MappingProxyType(regressions),
         weighting_factors=MappingProxyType(weights),
-        vehicle_sound_levels_db=MappingProxyType(vehicle_levels),
-        index_db=index,
-        corrected_vehicle_sound_levels_db=corrected_levels,
-        corrected_index_db=corrected_index,
-        reference_index_db=reference_index,
+        vehicle_sound_levels=MappingProxyType(vehicle_levels),
+        index=index,
+        corrected_vehicle_sound_levels=corrected_levels,
+        corrected_index=corrected_index,
+        reference_index=reference_index,
     )
 
 
 def normalized_reference_levels(
-    surface_levels_db: Mapping[str, Mapping[str, float]],
+    surface_levels: Mapping[str, Mapping[str, float]],
 ) -> Mapping[str, float]:
     r"""The vehicle sound levels of a normalized reference surface, 10.2 and Annex D.
 
@@ -961,19 +959,19 @@ def normalized_reference_levels(
     mean is the plain reading of "average" for levels that are already
     averages.
 
-    :param surface_levels_db: The vehicle sound levels of each surface, in
+    :param surface_levels: The vehicle sound levels of each surface, in
         decibels, as a mapping from a surface label to a mapping keyed ``"1"``,
         ``"2a"`` and ``"2b"``.
     :return: The mean level of each category, in decibels, unrounded.
     :raises ValueError: For no surfaces, or a surface without exactly the three
         categories.
     """
-    if not surface_levels_db:
-        msg = "'surface_levels_db' must hold at least one surface."
+    if not surface_levels:
+        msg = "'surface_levels' must hold at least one surface."
         raise ValueError(msg)
     rows = [
-        _per_category(levels, f"surface_levels_db[{label!r}]")
-        for label, levels in surface_levels_db.items()
+        _per_category(levels, f"surface_levels[{label!r}]")
+        for label, levels in surface_levels.items()
     ]
     return MappingProxyType(
         {

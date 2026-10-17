@@ -643,7 +643,7 @@ def _named_by_helper_defaults(node: ast.AST) -> set[str]:
         ("n_events", "events"),
         ("min_n_records", "min_records"),
         ("max_n_arrivals", "maximum_n_arrivals"),
-        ("max_level_db", "maximum_level_db"),
+        ("max_level", "maximum_level"),
         ("frequencies", "frequency"),
     ],
 )
@@ -861,15 +861,15 @@ _C_I = (
 #: Where a spelling the rules below refuse is kept on purpose, keyed by
 #: location, each with the reason. An entry that matches nothing fails.
 _SPELLING_EXEMPT = {
-    "phonometry.building.measurement.joint_insulation.LaboratoryJointInsulationResult.r_s_max_db": _R_S_MAX,
-    "phonometry.building.measurement.joint_insulation.laboratory_joint_insulation(r_s_max_db)": _R_S_MAX,
+    "phonometry.building.measurement.joint_insulation.LaboratoryJointInsulationResult.r_s_max": _R_S_MAX,
+    "phonometry.building.measurement.joint_insulation.laboratory_joint_insulation(r_s_max)": _R_S_MAX,
     "phonometry.building.measurement.ratings.ImpactRatingResult.ci": _C_I,
     "phonometry.building.measurement.ratings.ExtendedImpactRatingResult.ci": _C_I,
     "phonometry.building.measurement.ratings.ExtendedImpactRatingResult.ci_50_2500": _C_I,
     "phonometry.building.measurement.ratings.ImpactImprovementRatingResult.ci_delta": _C_I,
     "phonometry.building.measurement.ratings.ImpactImprovementRatingResult.ci_r": _C_I,
     "phonometry.building.measurement.floor_covering_improvement.FloorCoveringImprovementResult.ci_delta": _C_I,
-    "phonometry.building.measurement.laboratory_improvement.LaboratoryFloorCoveringImprovementResult.ci_delta_db": _C_I,
+    "phonometry.building.measurement.laboratory_improvement.LaboratoryFloorCoveringImprovementResult.ci_delta": _C_I,
 }
 
 
@@ -1024,15 +1024,15 @@ def test_every_kept_spelling_still_exists() -> None:
             "float",
             ["'maximum' is spelled 'max'"],
         ),
-        ("max_levels_db", "param", "ArrayLike", []),
+        ("max_levels", "param", "ArrayLike", []),
         ("max_level", "field", "float", []),
-        ("min_level_db", "param", "float", []),
+        ("min_level", "param", "float", []),
         # The maximum and minimum levels Lmax and Lmin are min/max too.
-        ("maximum_levels_db", "param", "ArrayLike", ["'maximum' is spelled 'max'"]),
-        ("minimum_level_db", "param", "float", ["'minimum' is spelled 'min'"]),
+        ("maximum_levels", "param", "ArrayLike", ["'maximum' is spelled 'max'"]),
+        ("minimum_level", "param", "float", ["'minimum' is spelled 'min'"]),
         # A maximum given in decibels is the maximum level, however short.
         ("background_max_db", "field", "NDArray", [_LMAX_RULE]),
-        ("background_max_level_db", "param", "ArrayLike", []),
+        ("background_max_level", "param", "ArrayLike", []),
         # The smallest of an attenuation is an extreme, not a level.
         ("min_db", "property", "float", []),
         # A term of art is no exception, nor a noun after a preposition.

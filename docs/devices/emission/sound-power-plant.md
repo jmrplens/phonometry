@@ -274,13 +274,13 @@ print(f"H = {H:.2f} m, N = {contour.positions_m.shape[0]}, "
 levels = levels_at(contour, sources)
 background = levels - np.array([14, 13, 15, 17, 19, 20, 22, 24])
 result = contour.sound_power(levels, bands, background_levels=background)
-print(np.round(result.mean_level_db, 1))
+print(np.round(result.mean_level, 1))
 # [63.8 65.8 65.6 63.2 60.2 56.  49.1 39.9]
 print(f"dLS = {result.area_term_db:.2f} dB, dLF = {result.near_field_term_db:.2f} dB")
 # dLS = 49.03 dB, dLF = -1.22 dB
-print(np.round(result.sound_power_level_db, 1))
+print(np.round(result.sound_power_level, 1))
 # [111.6 113.6 113.5 111.2 108.5 104.8  99.4  92.1]
-print(f"LWA = {result.a_weighted_sound_power_level_db:.1f} dB, Table 1: {result.uncertainty_db}")
+print(f"LWA = {result.a_weighted_sound_power_level:.1f} dB, Table 1: {result.uncertainty_db}")
 # LWA = 113.5 dB, Table 1: (-2.5, 2.0)
 ```
 
@@ -309,7 +309,7 @@ lower, upper = result.uncertainty_db
 fig, (axl, axr) = plt.subplots(1, 2, figsize=(12.5, 5.4), layout="constrained")
 result.plot(ax=axl)
 x = np.arange(bands.size)
-axr.errorbar(x, result.sound_power_level_db, yerr=[[-lower] * x.size, [upper] * x.size],
+axr.errorbar(x, result.sound_power_level, yerr=[[-lower] * x.size, [upper] * x.size],
              fmt="o", capsize=4, label="ISO 8297 LW with the interval of Table 1")
 axr.plot(x, true_lw, "D", markerfacecolor="white", label="Power the eight sources radiate")
 axr.set_xticks(x)
@@ -438,13 +438,13 @@ adds 1.0 dB.
 ```python
 warm = contour.sound_power(levels, bands, background_levels=background,
                            temperature_c=25.0, relative_humidity_percent=40.0)
-print(np.round(warm.sound_power_level_db - result.sound_power_level_db, 2))
+print(np.round(warm.sound_power_level - result.sound_power_level, 2))
 # [0.03 0.07 0.04 0.08 0.08 0.19 0.34 2.4 ]
 reference = contour.sound_power(levels, bands, background_levels=background,
                                 temperature_c=15.0, relative_humidity_percent=70.0)
-print(np.round(warm.sound_power_level_db - reference.sound_power_level_db, 2))
+print(np.round(warm.sound_power_level - reference.sound_power_level, 2))
 # [0.01 0.01 0.02 0.05 0.1  0.19 0.43 0.97]
-print(f"LWA = {warm.a_weighted_sound_power_level_db:.1f} dB")
+print(f"LWA = {warm.a_weighted_sound_power_level:.1f} dB")
 # LWA = 113.6 dB
 ```
 
@@ -476,7 +476,7 @@ asphalt = emission.plant_measurement_contour(
     characteristic_height_m=emission.plant_characteristic_height_m([4.0, 8.0, 12.0]),
 )
 asphalt_result = asphalt.sound_power(levels_at(asphalt, asphalt_sources), bands)
-print(f"LWA = {asphalt_result.a_weighted_sound_power_level_db:.1f} dB")
+print(f"LWA = {asphalt_result.a_weighted_sound_power_level:.1f} dB")
 # LWA = 105.4 dB
 
 area = emission.partial_plant_contributions(

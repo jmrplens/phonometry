@@ -115,7 +115,7 @@ relevant = environment.sound_relevant_turbines(
     [33.5, 38.2, 29.4, 36.9, 25.1, 31.8, 27.0]
 )
 print(relevant.indices)                                  # (1, 3, 0)
-print(round(relevant.total_level_db, 1), round(relevant.relevant_level_db, 1))  # 42.3 41.4
+print(round(relevant.total_level, 1), round(relevant.relevant_level, 1))  # 42.3 41.4
 print(round(relevant.binning_wind_speed_m_s([6.1, 6.4, 5.8, 6.6, 5.5, 6.0, 5.7]), 2))  # 6.37
 ```
 
@@ -172,8 +172,8 @@ on = environment.bin_sound_levels(total_levels, speeds, type_b_uncertainty_db=0.
 off = environment.bin_sound_levels(off_levels, off_speeds, type_b_uncertainty_db=0.5)
 corrected = on.background_corrected(off)
 print(corrected.wind_speeds_m_s)                   # [ 3.  4. ...  10. 11.]
-print(np.round(corrected.level_differences_db, 1))  # 13.7 ... 3.4 2.1
-print(np.round(corrected.turbine_levels_db, 1))     # 39.2 ... 50.4 52.2
+print(np.round(corrected.level_differences, 1))  # 13.7 ... 3.4 2.1
+print(np.round(corrected.turbine_levels, 1))     # 39.2 ... 50.4 52.2
 print(corrected.regimes[-1].value)                  # three_db
 ```
 
@@ -203,7 +203,7 @@ expects of ISO 9613-2 or Nord2000 downwind and 0,5 dB for the modelling.
 
 ```python
 prediction = environment.predicted_receptor_level([36.9, 38.2, 33.5], 1.5)
-print(round(prediction.level_db, 1), round(prediction.combined_uncertainty_db, 2))  # 41.4 2.55
+print(round(prediction.level, 1), round(prediction.combined_uncertainty_db, 2))  # 41.4 2.55
 ```
 
 ## Low frequency sound indoors (Annex C)
@@ -231,13 +231,13 @@ low = environment.wind_turbine_low_frequency_level(
     np.vstack([power, power, power - 1.0]),      # three turbines, 10 Hz to 200 Hz
     distance=[650.0, 820.0, 1100.0],
     hub_height_m=120.0,
-    facade_insulation_db=environment.LOW_FREQUENCY_FACADE_INSULATION_DB[
+    facade_insulation=environment.LOW_FREQUENCY_FACADE_INSULATION[
         "Denmark brick or similar"
     ],
 )
-print(round(low.outdoor_level_db, 1), round(low.indoor_level_db, 1))   # 35.1 16.5
+print(round(low.outdoor_level, 1), round(low.indoor_level, 1))   # 35.1 16.5
 danish = environment.LOW_FREQUENCY_BANDS_HZ <= 160.0
-print(round(10.0 * np.log10(np.sum(10.0 ** (low.indoor_levels_db[danish] / 10.0))), 1))  # 15.8
+print(round(10.0 * np.log10(np.sum(10.0 ** (low.indoor_levels[danish] / 10.0))), 1))  # 15.8
 ```
 
 ### Why Table C.2 sits under ISO 9613-1
@@ -320,11 +320,11 @@ at_70 = environment.wind_turbine_low_frequency_level(
     distance=[650.0, 820.0, 1100.0],
     hub_height_m=120.0,
     air_attenuation_db_per_km=iso_70,
-    facade_insulation_db=environment.LOW_FREQUENCY_FACADE_INSULATION_DB[
+    facade_insulation=environment.LOW_FREQUENCY_FACADE_INSULATION[
         "Denmark brick or similar"
     ],
 )
-print(round(at_70.indoor_level_db - low.indoor_level_db, 3))   # -0.005
+print(round(at_70.indoor_level - low.indoor_level, 3))   # -0.005
 ```
 
 Table C.4, the reporting table, adds the distance term that Equation (C.1)
@@ -341,7 +341,7 @@ wind speed class, Equation (J.1). It is not a limit on the turbine sound itself.
 emergence = environment.sound_emergence(
     [38.5, 41.0, 43.5], [33.0, 37.5, 41.5], wind_speeds_m_s=[5.0, 6.0, 7.0]
 )
-print(emergence.emergence_db)   # [5.5 3.5 2. ]
+print(emergence.emergence)   # [5.5 3.5 2. ]
 ```
 
 ## Amplitude modulation (clause 13)
@@ -533,9 +533,9 @@ Figure A.1 for amplitude modulation: nothing below a depth of 3 dB, 3 dB at
 ```python
 k_am = environment.amplitude_modulation_adjustment(period.rating_db)
 rating = environment.wind_turbine_rating_level(
-    41.0, tonal_adjustment_db=2.0, amplitude_modulation_adjustment_db=k_am
+    41.0, tonal_adjustment=2.0, amplitude_modulation_adjustment=k_am
 )
-print(round(k_am, 2), rating.governing, round(rating.rating_level_db, 1))  # 3.81 amplitude_modulation 44.8
+print(round(k_am, 2), rating.governing, round(rating.rating_level, 1))  # 3.81 amplitude_modulation 44.8
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_rating.svg" alt="Two panels. Left: the amplitude modulation adjustment of Figure A.1 against modulation depth from 0 dB to 12 dB, zero up to 3 dB, stepping to 3 dB there, rising linearly to 5 dB at 10 dB and flat beyond, with the 10 min rating of 5.84 dB marked on it at an adjustment of 3.8 dB. Right: the three candidate adjustments as bars, tonal 2 dB, amplitude modulation 3.8 dB outlined and hatched as the governing one, which the legend names as the one applied, the most severe of A.1, impulsive zero, under the title L_r = 41.0 + 3.8 = 44.8 dB" width="96%" />

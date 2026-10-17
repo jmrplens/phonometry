@@ -53,7 +53,7 @@ import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
@@ -73,6 +73,8 @@ from ._shared import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -1559,6 +1561,11 @@ class AuditoriumQuantity(RichDisplay):
     and multi-purpose halls up to 25 000 m³. It is not a range for one band,
     for an occupied hall, or for a spatial average.
     """
+
+    #: The difference is in the unit of the quantity, decibels for some, seconds or a ratio for others.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"just_noticeable_difference": ""}
+    )
 
     symbol: str
     aspect: str

@@ -1288,7 +1288,7 @@ def _chk_iso717_1_direct_difference() -> Outcome:
         ref.ISO717_1_TABLE_E1_BANDS,
         basic_element=None,
     )
-    got = (res.delta_rw_direct_db, res.delta_rw_c_direct_db, res.delta_rw_ctr_direct_db)
+    got = (res.delta_rw_direct, res.delta_rw_c_direct, res.delta_rw_ctr_direct)
     expected = ref.ISO717_1_MEASURED_WALL_DIRECT
     return Outcome(
         expected=" / ".join(f"{v} dB" for v in expected),
@@ -1311,7 +1311,7 @@ def _chk_iso10140_1_annex_h() -> Outcome:
         bare, bare - dl, _CORE_BANDS
     )
     expected = (ref.ISO717_2_ANNEX_C2_DELTA_LW, ref.ISO717_2_ANNEX_C2_CI_DELTA)
-    got = (res.delta_lw_db, res.ci_delta_db)
+    got = (res.delta_lw, res.ci_delta)
     return Outcome(
         expected=f"ΔLw = {expected[0]} dB, CIΔ = {expected[1]} dB",
         computed=f"ΔLw = {got[0]} dB, CIΔ = {got[1]} dB",
@@ -1377,14 +1377,14 @@ def _chk_iso10140_1_formula_k2() -> Outcome:
     res = ph.building.rainfall_sound_from_intensity(
         np.full(len(bands), 50.0), bands, measuring_area_m2=1.0, excited_area_m2=1.0
     )
-    if res.l_ia_db is None:
+    if res.l_ia is None:
         return Outcome(
             expected=f"LIA = {expected:.6f} dB",
             computed="no A-weighted level",
             delta="differs",
             passed=False,
         )
-    return numeric(expected, res.l_ia_db, 1e-12, unit="dB", places=6)
+    return numeric(expected, res.l_ia, 1e-12, unit="dB", places=6)
 
 
 @register(
@@ -1402,7 +1402,7 @@ def _chk_iso10140_1_formula_k1() -> Outcome:
     res = ph.building.rainfall_sound(
         [60.0], [2.0], [1000.0], volume=100.0, excited_area_m2=4.0
     )
-    return numeric(expected, float(res.l_i_db[0]), 1e-12, unit="dB", places=6)
+    return numeric(expected, float(res.l_i[0]), 1e-12, unit="dB", places=6)
 
 
 @register(
@@ -1415,7 +1415,7 @@ def _chk_iso10140_1_formula_k4() -> Outcome:
         [50.0], [1000.0], measuring_area_m2=4.0, excited_area_m2=1.0
     )
     return numeric(
-        50.0 + 10.0 * math.log10(4.0), float(res.l_i_db[0]), 1e-12, unit="dB", places=6
+        50.0 + 10.0 * math.log10(4.0), float(res.l_i[0]), 1e-12, unit="dB", places=6
     )
 
 
@@ -1449,8 +1449,8 @@ def _chk_iso10140_1_formula_j2_limit() -> Outcome:
     below = ph.building.laboratory_joint_insulation(
         [50.0], [50.0 + margin - 0.1], [1000.0]
     )
-    formula = round(float(at_six.r_s_db[0]) - 50.0, 1)
-    applied = float(below.r_s_db[0]) - 50.0
+    formula = round(float(at_six.r_s[0]) - 50.0, 1)
+    applied = float(below.r_s[0]) - 50.0
     printed = ref.ISO10140_1_J1_LIMIT_CORRECTION_DB
     ok = math.isclose(formula, printed) and math.isclose(applied, printed)
     return Outcome(
@@ -1469,7 +1469,7 @@ def _chk_iso10140_1_formula_j2_limit() -> Outcome:
 def _chk_iso10140_1_j1_lower_limit() -> Outcome:
     maximum = ref.ISO10140_1_J1_EXAMPLE_MINIMUM_DB
     res = ph.building.laboratory_joint_insulation([maximum - 2.5], [maximum], [1000.0])
-    got = float(res.r_s_db[0])
+    got = float(res.r_s[0])
     ok = res.regime == ("maximum",) and math.isclose(got, maximum)
     return Outcome(
         expected=f"(Rs >= {maximum} dB)",
@@ -1505,8 +1505,8 @@ def _chk_iso10140_1_j1_open_bands() -> Outcome:
     res = ph.building.laboratory_joint_insulation(measured, maximum, _LAB_BANDS_18)
     direct = None if res.rating is None else res.rating.rating
     opened = res.open_band_rating
-    open_rw = None if opened is None else opened.r_s_w_db
-    open_c = None if opened is None else opened.c_db
+    open_rw = None if opened is None else opened.r_s_w
+    open_c = None if opened is None else opened.c
     ok = (direct, open_rw, open_c, res.bracketed) == (51, 59, 0, True)
     return Outcome(
         expected="Rs,w = 51 dB; opened 59 dB, C = 0 dB; in brackets",
@@ -1638,7 +1638,7 @@ def _chk_iso10140_5_reference_pane() -> Outcome:
         level, 2.2 / (bands * 2.0 * eta_ref), bands
     )
     target = 10.0 * math.log10(2.0)
-    matching = int(np.sum(np.abs(res.correction_db - target) <= 1e-9))
+    matching = int(np.sum(np.abs(res.correction - target) <= 1e-9))
     return count(matching, bands.size, subject="bands")
 
 

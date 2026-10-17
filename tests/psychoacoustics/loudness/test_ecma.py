@@ -16,10 +16,10 @@ from phonometry import psychoacoustics
 FS = 48000
 
 
-def _tone(freq: float, level_db: float, seconds: float = 1.2) -> np.ndarray:
+def _tone(freq: float, level: float, seconds: float = 1.2) -> np.ndarray:
     """Pure tone at an SPL (dB re 20 uPa), pressure in pascals."""
     t = np.arange(int(FS * seconds)) / FS
-    amp = np.sqrt(2.0) * 2e-5 * 10 ** (level_db / 20.0)
+    amp = np.sqrt(2.0) * 2e-5 * 10 ** (level / 20.0)
     return amp * np.sin(2.0 * np.pi * freq * t)
 
 

@@ -312,7 +312,7 @@ def _low_frequency() -> ph.environment.LowFrequencyLevel:
         np.full(14, 100.0),
         distance=600.0,
         hub_height_m=120.0,
-        facade_insulation_db=ph.environment.LOW_FREQUENCY_FACADE_INSULATION_DB[
+        facade_insulation=ph.environment.LOW_FREQUENCY_FACADE_INSULATION[
             "Denmark brick or similar"
         ],
     )
@@ -326,7 +326,7 @@ def _emergence() -> ph.environment.SoundEmergence:
 
 def _wt_rating() -> ph.environment.WindTurbineRatingLevel:
     return ph.environment.wind_turbine_rating_level(
-        40.0, tonal_adjustment_db=2.0, amplitude_modulation_adjustment_db=3.5
+        40.0, tonal_adjustment=2.0, amplitude_modulation_adjustment=3.5
     )
 
 
@@ -619,7 +619,7 @@ def _service_equipment_positions() -> ph.building.ServiceEquipmentPositionCheck:
 def _calibration_deviation() -> ph.building.CalibrationDeviationResult:
     """Two calibrations of a measurement against three earlier ones (Clause 5)."""
     return ph.building.verify_calibration_deviation(
-        [93.9, 94.1], previous_levels_db=[94.0, 93.8, 94.1]
+        [93.9, 94.1], previous_levels=[94.0, 93.8, 94.1]
     )
 
 
@@ -760,7 +760,7 @@ def _diffuse_field() -> ph.metrology.DiffuseFieldSensitivity:
         [1000.0, 2000.0, 4000.0, 8000.0],
         [80.2, 80.4, 80.1, 79.0],
         [80.0, 80.0, 80.0, 80.0],
-        reference_pressure_level_db=-26.0,
+        reference_pressure_level=-26.0,
     )
 
 
@@ -770,7 +770,7 @@ def _adjustment_value() -> ph.metrology.AdjustmentValue:
         [125.0, 1000.0, 8000.0],
         [94.2, 94.1, 93.4],
         94.3,
-        calibrator_level_db=94.0,
+        calibrator_level=94.0,
         tolerance_db=[1.0, 0.7, 1.5],
     )
 
@@ -783,7 +783,7 @@ def _free_field_correction() -> ph.metrology.FreeFieldCorrection:
         [94.08, 94.95, 96.6],
         [94.0, 93.1, 91.6],
         [94.0, 94.1, 94.2],
-        reference_free_field_correction_db=[0.08, 0.85, 2.4],
+        reference_free_field_correction=[0.08, 0.85, 2.4],
     )
 
 
@@ -1713,11 +1713,11 @@ def _reference_source_calibration() -> ph.emission.ReferenceSourceCalibration:
 def _reference_sound_source() -> ph.emission.ReferenceSoundSourceVerdict:
     """ISO 6926 clause 5 with three repeated sound power levels."""
     calibration = _reference_source_calibration()
-    repeated = calibration.sound_power_level_db[None, :] + np.array(
+    repeated = calibration.sound_power_level[None, :] + np.array(
         [[0.08], [-0.05], [0.02]]
     )
     return ph.emission.verify_reference_sound_source(
-        calibration, repeated_levels_db=repeated, supply_variation_db=0.15
+        calibration, repeated_levels=repeated, supply_variation_db=0.15
     )
 
 
@@ -1889,7 +1889,7 @@ def _turbine_power() -> ph.emission.TurbineSoundPowerResult:
         levels,
         surface_area=_turbine_surface().area,
         background_levels=levels - np.array([9.0, 12.0, 6.0, 15.0, 4.0, 11.0]),
-        environmental_correction_db=1.8,
+        environmental_correction=1.8,
         overhead_mask=np.array([False, False, False, False, True, False]),
     )
 
@@ -2028,12 +2028,12 @@ def _filter_periodic() -> ph.filters.FilterPeriodicVerification:
     row = [75.0, 62.0, 45.0, 20.0, 0.8, 0.3, 0.1, 0.0, 0.1, 0.2, 0.7, 19.0, 44.0, 63.0]
     row_u = [0.4, 0.4, 0.4, 0.25, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.25]
     record = ph.filters.FilterPeriodicMeasurements(
-        midband_attenuations_db=[0.1, -0.2, 0.05],
+        midband_attenuations=[0.1, -0.2, 0.05],
         midband_uncertainties_db=[0.15, 0.15, 0.25],
         linearity_deviations_db=[0.1, 0.2, 0.3],
-        linearity_levels_below_upper_db=[0.0, 20.0, 45.0],
+        linearity_levels_below_upper=[0.0, 20.0, 45.0],
         linearity_uncertainties_db=[0.1, 0.1, 0.2],
-        relative_attenuations_db=[[*row, 76.0]],
+        relative_attenuations=[[*row, 76.0]],
         relative_attenuation_uncertainties_db=[[*row_u, 0.4, 0.4, 0.4]],
     )
     return ph.filters.verify_filter_periodic(1, record, fraction=3)
@@ -2115,8 +2115,8 @@ def _induction_loop_verification() -> ph.electroacoustics.InductionLoopVerificat
         [0.5, -1.0, 2.0, -2.5],
         frequencies=[100.0, 1000.0, 5000.0],
         response_db=[[-1.0, 0.0, -2.5], [0.0, 0.0, -3.4]],
-        background_noise_levels_db=[-50.0, -49.0, -48.0, -51.0],
-        system_noise_levels_db=[-48.0, -47.5, -47.0, -48.0],
+        background_noise_levels=[-50.0, -49.0, -48.0, -51.0],
+        system_noise_levels=[-48.0, -47.5, -47.0, -48.0],
     )
 
 
@@ -2152,7 +2152,7 @@ def _programme_signal_check() -> ph.electroacoustics.ProgramSignalCheck:
     """IEC 60268-1:1985 Table II itself, judged against itself."""
     table = ph.electroacoustics.SIMULATED_PROGRAM_SPECTRUM
     return ph.electroacoustics.check_program_signal(
-        list(table), [band.relative_level_db for band in table.values()]
+        list(table), [band.relative_level for band in table.values()]
     )
 
 
@@ -2236,7 +2236,7 @@ def _ear_canal_microphone() -> ph.electroacoustics.EarCanalMicrophoneVerificatio
         entrance_area_mm2=3.5,
         canal_section_area_mm2=18.0,
         volume_mm3=90.0,
-        pink_noise_band_levels_db=[60.0, 61.5, 62.0, 60.5],
-        open_levels_db=[60.0, 62.0, 61.0],
-        sealed_levels_db=[38.0, 40.0, 41.0],
+        pink_noise_band_levels=[60.0, 61.5, 62.0, 60.5],
+        open_levels=[60.0, 62.0, 61.0],
+        sealed_levels=[38.0, 40.0, 41.0],
     )

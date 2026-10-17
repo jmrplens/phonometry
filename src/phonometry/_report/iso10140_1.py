@@ -214,8 +214,8 @@ def _floor_box(
     """The rating of Figure H.4 and the two floor ratings H.5 i) asks for."""
     symbol, term = _FLOOR_SYMBOLS[result.reference_floor]
     box = (
-        f"{symbol} = <b>{result.delta_lw_db} dB</b>; "
-        f"{term} = <b>{_signed(int(result.ci_delta_db or 0))} dB</b>"
+        f"{symbol} = <b>{result.delta_lw} dB</b>; "
+        f"{term} = <b>{_signed(int(result.ci_delta or 0))} dB</b>"
     )
     extended: list[str] = []
     reference = result.reference_rating
@@ -262,18 +262,16 @@ def render_floor_covering_form(
     _require_reportlab()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     columns: list[Column] = [
-        (t("L<sub>n,0</sub> [dB]", language), np.asarray(result.l_n0_db), 1),
+        (t("L<sub>n,0</sub> [dB]", language), np.asarray(result.l_n0), 1),
     ]
     if verbose:
-        columns.append(
-            (t("L<sub>n</sub> [dB]", language), np.asarray(result.l_n_db), 1)
-        )
-    columns.append((t("&#916;L [dB]", language), np.asarray(result.improvement_db), 1))
+        columns.append((t("L<sub>n</sub> [dB]", language), np.asarray(result.l_n), 1))
+    columns.append((t("&#916;L [dB]", language), np.asarray(result.improvement), 1))
     widths_mm = _FLOOR_VERBOSE_COLUMNS_MM if verbose else _FLOOR_COLUMNS_MM
 
     def _plot(ax: Axes | None = None, language: str = language) -> Axes:
         axes = result.plot(ax=ax, language=language, rating_range=True)
-        values = np.asarray(result.improvement_db, dtype=np.float64)
+        values = np.asarray(result.improvement, dtype=np.float64)
         _pin_range(axes, values, _DELTA_L_RANGE_DB)
         return axes
 
@@ -281,10 +279,10 @@ def render_floor_covering_form(
     verdict = None
     if metadata is not None and metadata.requirement is not None:
         symbol, _ = _FLOOR_SYMBOLS[result.reference_floor]
-        passed = float(result.delta_lw_db or 0) >= metadata.requirement
+        passed = float(result.delta_lw or 0) >= metadata.requirement
         text = t("{sym} = {rating} dB, required &#8805; {req} dB", language).format(
             sym=symbol,
-            rating=result.delta_lw_db,
+            rating=result.delta_lw,
             req=fmt_num(metadata.requirement, language),
         )
         verdict = (text, passed)
@@ -333,7 +331,7 @@ def _joint_cells(result: LaboratoryJointInsulationResult, language: str) -> list
     arrangement is also put in brackets, as J.1 writes "(Rs ≥ 50,4 dB)".
     """
     cells: list[str] = []
-    for value, regime in zip(result.r_s_db, result.regime, strict=True):
+    for value, regime in zip(result.r_s, result.regime, strict=True):
         number = format_number(float(value), language, decimals=1)
         if regime == "maximum":
             cells.append(f"(≥ {number})")
@@ -465,15 +463,15 @@ def _joint_box(
     if result.bracketed:
         box = f"({box})"
     extended: list[str] = []
-    if result.c_100_5000_db is not None and result.ctr_100_5000_db is not None:
+    if result.c_100_5000 is not None and result.ctr_100_5000 is not None:
         wide = (
-            f"C<sub>100-5000</sub> = {_signed(result.c_100_5000_db)} dB; "
-            f"C<sub>tr,100-5000</sub> = {_signed(result.ctr_100_5000_db)} dB"
+            f"C<sub>100-5000</sub> = {_signed(result.c_100_5000)} dB; "
+            f"C<sub>tr,100-5000</sub> = {_signed(result.ctr_100_5000)} dB"
         )
         extended.append(f"({wide})" if result.bracketed else wide)
     opened = result.open_band_rating
     if result.bracketed and opened is not None:
-        if opened.r_s_w_db is None or opened.c_db is None or opened.ctr_db is None:
+        if opened.r_s_w is None or opened.c is None or opened.ctr is None:
             extended.append(
                 t(
                     "In brackets: with the indicative bands taken as "
@@ -485,12 +483,12 @@ def _joint_box(
             # The open-band value of every single number the form prints, so
             # the one that moved by more than 1 dB is there to see.
             wide_open = ""
-            if result.c_100_5000_db is not None:
+            if result.c_100_5000 is not None:
                 wide_open = (
                     f"; C<sub>100-5000</sub> = "
-                    f"{_open_term(opened.c_100_5000_db, language)}; "
+                    f"{_open_term(opened.c_100_5000, language)}; "
                     f"C<sub>tr,100-5000</sub> = "
-                    f"{_open_term(opened.ctr_100_5000_db, language)}"
+                    f"{_open_term(opened.ctr_100_5000, language)}"
                 )
             extended.append(
                 t(
@@ -499,9 +497,9 @@ def _joint_box(
                     "{rating} ({c}; {ctr}) dB{extended} (J.1)",
                     language,
                 ).format(
-                    rating=opened.r_s_w_db,
-                    c=_signed(opened.c_db),
-                    ctr=_signed(opened.ctr_db),
+                    rating=opened.r_s_w,
+                    c=_signed(opened.c),
+                    ctr=_signed(opened.ctr),
                     extended=wide_open,
                 )
             )
@@ -537,10 +535,10 @@ def render_joint_form(
         columns: list[Column] = [
             (
                 t("R&#8242;<sub>s</sub> [dB]", language),
-                np.asarray(result.r_s_measured_db),
+                np.asarray(result.r_s_prime),
                 1,
             ),
-            (t("R<sub>s,max</sub> [dB]", language), np.asarray(result.r_s_max_db), 1),
+            (t("R<sub>s,max</sub> [dB]", language), np.asarray(result.r_s_max), 1),
             (header, cells, 1),
         ]
         widths: list[float] | None = _widths(_JOINT_VERBOSE_COLUMNS_MM)
@@ -552,9 +550,9 @@ def render_joint_form(
         axes = result.plot(ax=ax, language=language)
         values = np.concatenate(
             [
-                np.asarray(result.r_s_db, dtype=np.float64),
-                np.asarray(result.r_s_measured_db, dtype=np.float64),
-                np.asarray(result.r_s_max_db, dtype=np.float64),
+                np.asarray(result.r_s, dtype=np.float64),
+                np.asarray(result.r_s_prime, dtype=np.float64),
+                np.asarray(result.r_s_max, dtype=np.float64),
             ]
         )
         _pin_range(axes, values, _RS_RANGE_DB)

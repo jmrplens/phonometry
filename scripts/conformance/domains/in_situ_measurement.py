@@ -112,13 +112,13 @@ from reference_data import spatial_decay as spatial_oracle
 
 import phonometry as ph
 from phonometry.environment.propagation.barrier_in_situ import (
-    ISO10847_BACKGROUND_CORRECTIONS_DB,
-    RECEIVER_CORRECTIONS_DB,
+    ISO10847_BACKGROUND_CORRECTIONS,
+    RECEIVER_CORRECTIONS,
     ReceiverType,
 )
 from phonometry.noise_control.silencer_in_situ import (
     INSTALLATION_CASES,
-    ISO11820_BACKGROUND_CORRECTIONS_DB,
+    ISO11820_BACKGROUND_CORRECTIONS,
     ISO11820_SPEED_OF_SOUND_M_S,
     SABINE_AREA_COEFFICIENT,
 )
@@ -153,7 +153,7 @@ def _chk_iso11820_table_one() -> Outcome:
         f"{margin} dB": float(
             ph.noise_control.silencer_background_correction([float(margin)])[0]
         )
-        for margin in ISO11820_BACKGROUND_CORRECTIONS_DB
+        for margin in ISO11820_BACKGROUND_CORRECTIONS
     }
     return record(printed, computed, unit="dB")
 
@@ -192,7 +192,7 @@ def _chk_iso11820_level_shift_invariance() -> Outcome:
     shifted = ph.noise_control.in_situ_transmission_loss(
         _SOURCE + 6.5, _RECEIVER + 6.5, source_area_m2=2.0, receiver_area_m2=1.0
     )
-    worst = float(np.max(np.abs(plain.loss_db - shifted.loss_db)))
+    worst = float(np.max(np.abs(plain.loss - shifted.loss)))
     return numeric(
         0.0,
         worst,
@@ -403,11 +403,11 @@ def _holgado_insertion_loss(table: dict[float, oracle.HolgadoRow]) -> float:
         area_without_m2=area_without,
         area_with_m2=area_with,
         frequencies=list(table),
-        field_correction_difference_db=0.0,
+        field_correction_difference=0.0,
         case=18,
     )
     printed = np.array([row[4] for row in rows], dtype=np.float64)
-    return float(np.max(np.abs(result.loss_db - printed)))
+    return float(np.max(np.abs(result.loss - printed)))
 
 
 def _sabine_absorption_m2(volume_m3: float, time_s: float, speed_m_s: float) -> float:
@@ -607,7 +607,7 @@ def _chk_barron_sound_power() -> Outcome:
         ph.noise_control.silencer_sound_power_level(
             [mean],
             area=[oracle.BARRON_EXAMPLE_3_3_AREA_M2],
-            field_correction_db=[correction],
+            field_correction=[correction],
         )[0]
     )
     return numeric(
@@ -923,8 +923,8 @@ def _chk_iso11821_printed_band_pair() -> Outcome:
         distance=screen_oracle.BARRON_EXAMPLE_7_9_SCREEN_DISTANCE_M,
     )
     computed = {
-        "63 Hz": float(result.attenuation_db[0]),
-        "8000 Hz": float(result.attenuation_db[-1]),
+        "63 Hz": float(result.attenuation[0]),
+        "8000 Hz": float(result.attenuation[-1]),
     }
     printed = screen_oracle.BARRON_EXAMPLE_7_9_PRINTED_REDUCTIONS_DB
     worst = max(abs(printed[key] - computed[key]) for key in computed)
@@ -952,11 +952,11 @@ def _chk_iso11821_printed_a_weighted_pair() -> Outcome:
         screen_oracle.BARRON_TABLE_7_6_SCREENED_DB,
         frequencies=screen_oracle.BARRON_TABLE_7_6_BANDS_HZ,
         source_kind="actual",
-        a_weighted_unscreened_level_db=unscreened,
-        a_weighted_screened_level_db=screened,
+        a_weighted_unscreened_level=unscreened,
+        a_weighted_screened_level=screened,
         distance=screen_oracle.BARRON_EXAMPLE_7_9_SCREEN_DISTANCE_M,
     )
-    weighted = result.a_weighted_attenuation_db
+    weighted = result.a_weighted_attenuation
     computed = math.nan if weighted is None else float(weighted)
     return numeric(
         screen_oracle.BARRON_EXAMPLE_7_9_A_REDUCTION_DB,
@@ -986,7 +986,7 @@ def _chk_iso11821_indoor_screen_pair() -> Outcome:
         source_kind="actual",
         distance=screen_oracle.BARRON_EXAMPLE_7_10_SCREEN_DISTANCE_M,
     )
-    return numeric(printed, float(result.attenuation_db[0]), 1e-12, unit="dB", places=1)
+    return numeric(printed, float(result.attenuation[0]), 1e-12, unit="dB", places=1)
 
 
 @register(
@@ -1034,7 +1034,7 @@ def _chk_iso11821_path_level_pair() -> Outcome:
     result = ph.noise_control.screen_attenuation(
         [screen_oracle.SRL_1991_UNSCREENED_DB] * len(paths), list(paths.values())
     )
-    computed = dict(zip(printed, result.attenuation_db.tolist(), strict=True))
+    computed = dict(zip(printed, result.attenuation.tolist(), strict=True))
     return record(printed, computed, unit="dB")
 
 
@@ -1058,7 +1058,7 @@ def _chk_iso11821_ifa_printed_differences() -> Outcome:
             # A test sound source, so 5.9 forbids the A-weighted difference.
             source_kind="artificial",
         )
-        values = result.attenuation_db.tolist()
+        values = result.attenuation.tolist()
         for band, published, value in zip(bands, printed, values, strict=True):
             if (row, band) == spatial_oracle.IFA_LSA_01_234_MISPRINT:
                 continue
@@ -1195,7 +1195,7 @@ def _chk_iso10847_table_three() -> Outcome:
         f"{margin} dB": float(
             ph.environment.barrier_background_correction([float(margin)])[0]
         )
-        for margin in ISO10847_BACKGROUND_CORRECTIONS_DB
+        for margin in ISO10847_BACKGROUND_CORRECTIONS
     }
     return record(printed, computed, unit="dB")
 
@@ -1241,9 +1241,7 @@ def _chk_iso10847_methods_agree() -> Outcome:
         )
         worst = max(
             worst,
-            float(
-                np.max(np.abs(indirect.insertion_loss_db - direct.insertion_loss_db))
-            ),
+            float(np.max(np.abs(indirect.insertion_loss - direct.insertion_loss))),
         )
     return numeric(
         0.0,
@@ -1278,8 +1276,8 @@ def _chk_iso10847_receiver_correction() -> Outcome:
     # The departure from the correction, band by band, and not the largest
     # shift: a maximum passes on one band alone, and a correction that reached
     # only the first of the three would read as the whole spectrum moving.
-    correction = RECEIVER_CORRECTIONS_DB["reflecting_surface"]
-    shifts = mixed.insertion_loss_db - direct.insertion_loss_db
+    correction = RECEIVER_CORRECTIONS["reflecting_surface"]
+    shifts = mixed.insertion_loss - direct.insertion_loss
     worst = float(np.max(np.abs(shifts - correction)))
     return numeric(
         0.0,
@@ -1313,7 +1311,7 @@ def _chk_iso10847_source_normalisation() -> Outcome:
         receiver_before,
         receiver_before - attenuation + 4.0,
     )
-    worst = float(np.max(np.abs(plain.insertion_loss_db - louder.insertion_loss_db)))
+    worst = float(np.max(np.abs(plain.insertion_loss - louder.insertion_loss)))
     return numeric(
         0.0,
         worst,
@@ -1462,7 +1460,7 @@ def _cordero(case: str) -> tuple[float, int]:
     result = ph.environment.measured_insertion_loss_direct(
         [reference_before], [reference_after], [receiver_before], [receiver_after]
     )
-    return float(result.insertion_loss_db[0]), int(result.rounded()[0])
+    return float(result.insertion_loss[0]), int(result.rounded()[0])
 
 
 @register(
@@ -1513,7 +1511,7 @@ def _chk_lindeman_direct() -> Outcome:
                 [reference_after],
                 [receiver_before],
                 [receiver_after],
-            ).insertion_loss_db[0]
+            ).insertion_loss[0]
         )
         departure = abs(
             computed - barrier_oracle.LINDEMAN_TABLE_8_INSERTION_LOSS_DBA[run]
@@ -1543,9 +1541,9 @@ def _chk_lindeman_indirect() -> Outcome:
         levels["receiver before"],
         levels["receiver after"],
     )
-    departures = np.abs(result.insertion_loss_db - np.array(printed))
+    departures = np.abs(result.insertion_loss - np.array(printed))
     mean = abs(
-        float(np.mean(result.insertion_loss_db))
+        float(np.mean(result.insertion_loss))
         - barrier_oracle.LINDEMAN_TABLE_13_MEAN_DBA
     )
     matching = int(np.count_nonzero(departures <= _PRINTED_TENTH_DB)) + int(
@@ -1576,7 +1574,7 @@ def _chk_fhwa_worked_example() -> Outcome:
                     [barrier_oracle.FHWA_6_6_3_REFERENCE_AFTER_DB],
                     [barrier_oracle.FHWA_6_6_3_RECEIVER_BEFORE_DB],
                     [receiver_after],
-                ).insertion_loss_db[0]
+                ).insertion_loss[0]
             )
             + barrier_oracle.FHWA_6_6_3_EDGE_DB
         )
@@ -1713,7 +1711,7 @@ def _chk_jagniatinskis_campaign() -> Outcome:
                     [reference_after],
                     [reference_before + correction],
                     [receiver_after],
-                ).insertion_loss_db[0]
+                ).insertion_loss[0]
             )
             total += 1
             departure = abs(computed - printed)
@@ -1740,7 +1738,7 @@ def _chk_rodino_degenerate_case() -> Outcome:
         computed = float(
             ph.environment.measured_insertion_loss_direct(
                 [0.0], [0.0], [without], [with_screen]
-            ).insertion_loss_db[0]
+            ).insertion_loss[0]
         )
         departure = abs(computed - printed)
         matching += int(departure <= _PRINTED_TENTH_DB)
@@ -1778,7 +1776,7 @@ def _chk_iso10847_receiver_correction_is_a_pressure_doubling() -> Outcome:
         )
     # As above: the departure from 6 dB in every band, so that a correction
     # reaching one band and not the other two cannot be read as the doubling.
-    shifts = facade.insertion_loss_db - open_field.insertion_loss_db
+    shifts = facade.insertion_loss - open_field.insertion_loss
     worst = float(np.max(np.abs(shifts - _PRESSURE_DOUBLING_DB)))
     return numeric(
         0.0,

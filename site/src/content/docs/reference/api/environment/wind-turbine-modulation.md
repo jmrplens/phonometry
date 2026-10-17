@@ -151,7 +151,7 @@ AM_SAMPLE_INTERVAL_S = 0.1
 
 ```python
 amplitude_modulation_band_levels(
-    band_levels_db: ArrayLike,
+    band_levels: ArrayLike,
     frequencies: ArrayLike,
     *,
     band: int,
@@ -171,7 +171,7 @@ value at each nominal centre frequency.
 
 | Name | Description |
 | :--- | :--- |
-| `band_levels_db` | The logged band levels, in dB: one row per 100 ms sample and one column per one-third-octave band (a single sample may be given as one row). |
+| `band_levels` | The logged band levels, in dB: one row per 100 ms sample and one column per one-third-octave band (a single sample may be given as one row). |
 | `frequencies` | Nominal centre frequency of each column, in Hz; it must include the seven centres of `band`. |
 | `band` | The AM band number, 1 to 3 (13.6.2.1.1) or 4 to 6 (Annex G.3), as an integer; see [`AM_FREQUENCY_BANDS_HZ`](/phonometry/reference/api/environment/wind-turbine-modulation/#am_frequency_bands_hz). |
 | `weighting` | `"A"` when the band levels are already A-weighted, `"Z"` when the A-weighting is still to be applied. Required: a wrong guess is a 20 dB to 30 dB error at the lowest bands. |

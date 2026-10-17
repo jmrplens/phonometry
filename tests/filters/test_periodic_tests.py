@@ -92,14 +92,14 @@ def _per_filter(values: dict[float, float], default: float) -> list[float]:
 def _record(**overrides: object) -> filters.FilterPeriodicMeasurements:
     """A complete record that conforms to class 1, with fields replaced."""
     fields: dict[str, object] = {
-        "midband_attenuations_db": _per_filter({500.0: 0.1, 1000.0: -0.2}, 0.05),
+        "midband_attenuations": _per_filter({500.0: 0.1, 1000.0: -0.2}, 0.05),
         "midband_uncertainties_db": _per_filter({}, 0.15),
         "set_midband_frequencies_hz": _SET,
         "linearity_deviations_db": [0.1, 0.2, 0.3, -0.5] * 3,
-        "linearity_levels_below_upper_db": [0.0, 20.0, 40.0, 55.0] * 3,
+        "linearity_levels_below_upper": [0.0, 20.0, 40.0, 55.0] * 3,
         "linearity_uncertainties_db": [0.1, 0.1, 0.15, 0.3] * 3,
         "linearity_midband_frequencies_hz": [f for f in _TESTED for _ in range(4)],
-        "relative_attenuations_db": [
+        "relative_attenuations": [
             _dropped(_ROW, _LOW_DROPS),
             _ROW,
             _dropped(_ROW, _HIGH_DROPS),
@@ -121,7 +121,7 @@ def _one_linearity(
     """11.7 overrides with no filter labels, to grade the limits alone."""
     return {
         "linearity_deviations_db": deviations,
-        "linearity_levels_below_upper_db": depths,
+        "linearity_levels_below_upper": depths,
         "linearity_uncertainties_db": uncertainties,
         "linearity_midband_frequencies_hz": None,
     }
@@ -230,12 +230,12 @@ def test_a_deviation_on_its_limit_conforms_and_past_it_fails() -> None:
     """The limits of 10.2.2 are inclusive, as the TC 29 rule makes them."""
     on = filters.verify_filter_periodic(
         1,
-        _record(midband_attenuations_db=_per_filter({500.0: 0.4, 1000.0: -0.4}, 0.0)),
+        _record(midband_attenuations=_per_filter({500.0: 0.4, 1000.0: -0.4}, 0.0)),
         fraction=3,
     )
     assert on.passes
     past = filters.verify_filter_periodic(
-        1, _record(midband_attenuations_db=_per_filter({500.0: 0.41}, 0.0)), fraction=3
+        1, _record(midband_attenuations=_per_filter({500.0: 0.41}, 0.0)), fraction=3
     )
     assert not past.passes
     assert past.failed == (("10.2", "500 Hz"),)
@@ -247,7 +247,7 @@ def test_a_deviation_on_its_limit_conforms_and_past_it_fails() -> None:
 
 
 def test_class_2_widens_the_mid_band_limits() -> None:
-    record = _record(midband_attenuations_db=_per_filter({500.0: 0.55}, 0.0))
+    record = _record(midband_attenuations=_per_filter({500.0: 0.55}, 0.0))
     assert not filters.verify_filter_periodic(1, record, fraction=3).passes
     assert filters.verify_filter_periodic(2, record, fraction=3).passes
 
@@ -331,7 +331,7 @@ def test_clause_13_judges_the_stop_band_on_its_minimum_alone() -> None:
     row = list(_ROW)
     row[14] = 65.0
     record = _record(
-        relative_attenuations_db=[row, _ROW, _ROW],
+        relative_attenuations=[row, _ROW, _ROW],
         relative_attenuation_uncertainties_db=[_ROW_U, _ROW_U, _ROW_U],
     )
     verdict = filters.verify_filter_periodic(1, record, fraction=3)
@@ -360,7 +360,7 @@ def test_the_annex_b_maxima_step_past_2_db_and_40_db(
     row = list(_ROW)
     row[position] = attenuation
     record = _record(
-        relative_attenuations_db=[row, _ROW, _ROW],
+        relative_attenuations=[row, _ROW, _ROW],
         relative_attenuation_uncertainties_db=[_ROW_U, _ROW_U, _ROW_U],
     )
     clause = filters.verify_filter_periodic(2, record, fraction=3).clause("13")
@@ -372,7 +372,7 @@ def test_the_annex_b_maxima_step_past_2_db_and_40_db(
 def test_a_mid_band_attenuation_past_2_db_is_a_failure_not_unusable() -> None:
     """10.2 reads the Annex B maximum off the attenuation, as clause 13 does."""
     record = _record(
-        midband_attenuations_db=_per_filter({500.0: 2.5}, 0.0),
+        midband_attenuations=_per_filter({500.0: 2.5}, 0.0),
         midband_uncertainties_db=_per_filter({500.0: 0.25}, 0.15),
     )
     verdict = filters.verify_filter_periodic(1, record, fraction=3)
@@ -401,7 +401,7 @@ def test_clause_13_skips_the_frequencies_13_4_drops() -> None:
 
 def test_a_frequency_13_4_requires_left_out_is_incomplete() -> None:
     record = _record(
-        relative_attenuations_db=[_ROW, _dropped(_ROW, (0,)), _ROW],
+        relative_attenuations=[_ROW, _dropped(_ROW, (0,)), _ROW],
         relative_attenuation_uncertainties_db=[_ROW_U, _dropped(_ROW_U, (0,)), _ROW_U],
     )
     verdict = filters.verify_filter_periodic(1, record, fraction=3)
@@ -418,10 +418,10 @@ def test_fewer_than_three_filters_is_incomplete() -> None:
     """11.3 and 13.1: level linearity and relative attenuation on three filters."""
     record = _record(
         linearity_deviations_db=[0.1, 0.2],
-        linearity_levels_below_upper_db=[0.0, 20.0],
+        linearity_levels_below_upper=[0.0, 20.0],
         linearity_uncertainties_db=[0.1, 0.1],
         linearity_midband_frequencies_hz=[1000.0, 1000.0],
-        relative_attenuations_db=[_ROW],
+        relative_attenuations=[_ROW],
         relative_attenuation_uncertainties_db=[_ROW_U],
         tested_midband_frequencies_hz=[1000.0],
     )
@@ -457,7 +457,7 @@ def test_linearity_results_name_their_filter() -> None:
 
 def test_the_swept_test_of_10_3_replaces_10_2() -> None:
     record = _record(
-        midband_attenuations_db=None,
+        midband_attenuations=None,
         midband_uncertainties_db=None,
         bandwidth_deviations_db=_per_filter({1000.0: 0.04}, 0.05),
         bandwidth_uncertainties_db=_per_filter({}, 0.12),
@@ -469,7 +469,7 @@ def test_the_swept_test_of_10_3_replaces_10_2() -> None:
 
 def test_a_record_without_clause_13_is_incomplete() -> None:
     record = _record(
-        relative_attenuations_db=None, relative_attenuation_uncertainties_db=None
+        relative_attenuations=None, relative_attenuation_uncertainties_db=None
     )
     verdict = filters.verify_filter_periodic(1, record, fraction=3)
     assert verdict.missing == ("13",)
@@ -499,8 +499,8 @@ def test_the_other_level_ranges_of_11_9_are_graded_30_db_down() -> None:
             "'midband_uncertainties_db' must be non-negative",
         ),
         (
-            {"midband_attenuations_db": _per_filter({500.0: _NAN}, 0.1)},
-            "'midband_attenuations_db' must hold finite values",
+            {"midband_attenuations": _per_filter({500.0: _NAN}, 0.1)},
+            "'midband_attenuations' must hold finite values",
         ),
         (
             {"set_midband_frequencies_hz": [500.0, 1000.0]},
@@ -511,8 +511,8 @@ def test_the_other_level_ranges_of_11_9_are_graded_30_db_down() -> None:
             "'linearity_midband_frequencies_hz' labels",
         ),
         (
-            {"relative_attenuations_db": [_ROW[:14]] * 3},
-            "'relative_attenuations_db' must hold one row of",
+            {"relative_attenuations": [_ROW[:14]] * 3},
+            "'relative_attenuations' must hold one row of",
         ),
         (
             {"relative_attenuation_uncertainties_db": [_ROW_U, _ROW_U, _ROW_U]},
@@ -551,9 +551,9 @@ def test_the_verdicts_have_no_truth_value() -> None:
 
 def test_the_record_is_frozen_into_tuples() -> None:
     record = _record()
-    assert isinstance(record.midband_attenuations_db, tuple)
-    assert isinstance(record.relative_attenuations_db, tuple)
-    assert isinstance(record.relative_attenuations_db[0], tuple)
+    assert isinstance(record.midband_attenuations, tuple)
+    assert isinstance(record.relative_attenuations, tuple)
+    assert isinstance(record.relative_attenuations[0], tuple)
 
 
 @pytest.mark.parametrize("language", ["en", "es"])

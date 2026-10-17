@@ -60,7 +60,7 @@ levels once they are found. Step 3 of 6.2.3.2 repeats the measurement at
 (:func:`check_retest_agreement`). A hearing level of 40 dB or more calls for
 caution because of cross-hearing (6.2.3.2), and a bone-conduction level at the
 average vibrotactile threshold of 8.4 may be felt rather than heard
-(:data:`VIBROTACTILE_HEARING_LEVELS_DB`); :func:`audiogram_cautions` flags
+(:data:`VIBROTACTILE_HEARING_LEVELS`); :func:`audiogram_cautions` flags
 both.
 
 **The uncertainty (Annex A).** The hearing threshold level is modelled as the
@@ -115,8 +115,8 @@ __all__ = [
     "AIR_CONDUCTION_AMBIENT_LIMITS_DB",
     "AMBIENT_NOISE_BANDS_HZ",
     "BONE_CONDUCTION_AMBIENT_LIMITS_DB",
-    "EARPHONE_ATTENUATION_DB",
-    "VIBROTACTILE_HEARING_LEVELS_DB",
+    "EARPHONE_ATTENUATION",
+    "VIBROTACTILE_HEARING_LEVELS",
     "AmbientNoiseCheck",
     "AscendingThresholdResult",
     "AudiogramCautions",
@@ -202,7 +202,7 @@ BONE_CONDUCTION_AMBIENT_LIMITS_DB: Mapping[float, np.ndarray] = MappingProxyType
 #: supra-aural earphones, the ones Table 2 assumes), ``"ER-3A"`` (the Etymotic
 #: insert earphone) and ``"HDA 200"`` (the Sennheiser circumaural one). The
 #: HDA 200 column prints no value below 63 Hz, which is NaN here.
-EARPHONE_ATTENUATION_DB: Mapping[str, np.ndarray] = MappingProxyType(
+EARPHONE_ATTENUATION: Mapping[str, np.ndarray] = MappingProxyType(
     {
         "supra-aural": read_only(
             np.array(
@@ -233,7 +233,7 @@ EARPHONE_ATTENUATION_DB: Mapping[str, np.ndarray] = MappingProxyType(
 #: (250 Hz, 500 Hz and 1 kHz, the only ones the text gives). Its NOTE puts
 #: them about 10 dB lower for an audiometer calibrated for forehead placement,
 #: and the text warns that individuals vary widely about them.
-VIBROTACTILE_HEARING_LEVELS_DB: Mapping[float, float] = MappingProxyType(
+VIBROTACTILE_HEARING_LEVELS: Mapping[float, float] = MappingProxyType(
     {250.0: 40.0, 500.0: 60.0, 1000.0: 70.0}
 )
 
@@ -390,44 +390,44 @@ def _table_for(
 
 
 def _earphone_allowance(
-    presentation: str, earphone: str, earphone_attenuation_db: ArrayLike | None
+    presentation: str, earphone: str, earphone_attenuation: ArrayLike | None
 ) -> np.ndarray:
     """What an earphone's extra attenuation adds to the limits of Table 2.
 
     :param presentation: The presentation.
     :param earphone: A column of Table 3.
-    :param earphone_attenuation_db: Or the earphone's own attenuation per band.
+    :param earphone_attenuation: Or the earphone's own attenuation per band.
     :return: The allowance per band of :data:`AMBIENT_NOISE_BANDS_HZ`, zero
         where Table 3 prints no value.
     :raises ValueError: for an earphone named with bone conduction or sound
         field, for both forms at once, for an unknown earphone, or for an
         attenuation of the wrong length.
     """
-    supra_aural = EARPHONE_ATTENUATION_DB["supra-aural"]
+    supra_aural = EARPHONE_ATTENUATION["supra-aural"]
     if presentation != "air":
-        if earphone != "supra-aural" or earphone_attenuation_db is not None:
+        if earphone != "supra-aural" or earphone_attenuation is not None:
             msg = (
                 "an earphone only changes the limits of air conduction "
                 f"audiometry (ISO 8253-1 11.1), not of {presentation!r}."
             )
             raise ValueError(msg)
         return np.zeros(len(AMBIENT_NOISE_BANDS_HZ))
-    if earphone_attenuation_db is not None:
+    if earphone_attenuation is not None:
         if earphone != "supra-aural":
-            msg = "give either 'earphone' or 'earphone_attenuation_db', not both."
+            msg = "give either 'earphone' or 'earphone_attenuation', not both."
             raise ValueError(msg)
-        attenuation = _levels(earphone_attenuation_db, "earphone_attenuation_db")
+        attenuation = _levels(earphone_attenuation, "earphone_attenuation")
         if attenuation.size != supra_aural.size:
             msg = (
-                "'earphone_attenuation_db' must hold one attenuation per band of "
+                "'earphone_attenuation' must hold one attenuation per band of "
                 f"AMBIENT_NOISE_BANDS_HZ, {supra_aural.size} values."
             )
             raise ValueError(msg)
-    elif earphone in EARPHONE_ATTENUATION_DB:
-        attenuation = np.asarray(EARPHONE_ATTENUATION_DB[earphone], dtype=np.float64)
+    elif earphone in EARPHONE_ATTENUATION:
+        attenuation = np.asarray(EARPHONE_ATTENUATION[earphone], dtype=np.float64)
     else:
         msg = (
-            f"'earphone' must be one of {tuple(EARPHONE_ATTENUATION_DB)}; got "
+            f"'earphone' must be one of {tuple(EARPHONE_ATTENUATION)}; got "
             f"{earphone!r}."
         )
         raise ValueError(msg)
@@ -440,8 +440,8 @@ def ambient_noise_limits(
     *,
     lowest_test_frequency_hz: float = 125.0,
     earphone: str = "supra-aural",
-    earphone_attenuation_db: ArrayLike | None = None,
-    lowest_hearing_level_db: float = 0.0,
+    earphone_attenuation: ArrayLike | None = None,
+    lowest_hearing_level: float = 0.0,
     allowed_threshold_shift_db: float = 2.0,
 ) -> np.ndarray:
     r"""The maximum permissible ambient sound pressure levels of a test room.
@@ -467,13 +467,13 @@ def ambient_noise_limits(
     :param presentation: ``"air"`` (default), ``"bone"`` or ``"sound field"``.
     :param lowest_test_frequency_hz: The lowest test tone frequency: 125
         (default), 250, or for air conduction 500.
-    :param earphone: A column of :data:`EARPHONE_ATTENUATION_DB`,
+    :param earphone: A column of :data:`EARPHONE_ATTENUATION`,
         ``"supra-aural"`` (default), ``"ER-3A"`` or ``"HDA 200"``; air
         conduction only.
-    :param earphone_attenuation_db: Or the attenuation of another earphone,
+    :param earphone_attenuation: Or the attenuation of another earphone,
         one per band of :data:`AMBIENT_NOISE_BANDS_HZ`, in dB; air conduction
         only.
-    :param lowest_hearing_level_db: The lowest hearing threshold level to be
+    :param lowest_hearing_level: The lowest hearing threshold level to be
         measured, in dB; 0 by default.
     :param allowed_threshold_shift_db: The threshold shift accepted from the
         ambient noise, 2 (default) or 5, in dB.
@@ -508,14 +508,14 @@ def ambient_noise_limits(
             f"shifts the tables are written for; got {shift:g}."
         )
         raise ValueError(msg)
-    require_scalar(lowest_hearing_level_db, "lowest_hearing_level_db")
-    hearing_level = float(lowest_hearing_level_db)
+    require_scalar(lowest_hearing_level, "lowest_hearing_level")
+    hearing_level = float(lowest_hearing_level)
     if not math.isfinite(hearing_level):
-        msg = "'lowest_hearing_level_db' must be finite, in dB."
+        msg = "'lowest_hearing_level' must be finite, in dB."
         raise ValueError(msg)
     limits = np.array(column, dtype=np.float64) + allowance + hearing_level
     earphone_allowance = _earphone_allowance(
-        presentation, earphone, earphone_attenuation_db
+        presentation, earphone, earphone_attenuation
     )
     limits[: earphone_allowance.size] += earphone_allowance
     return limits
@@ -563,14 +563,14 @@ class AmbientNoiseCheck(OwnsArrays):
         each one of :attr:`table_bands_hz`.
     :ivar levels: The measured ambient sound pressure level per band, in dB.
     :ivar lowest_test_frequency_hz: The lowest test tone frequency, in hertz.
-    :ivar lowest_hearing_level_db: The lowest hearing threshold level to be
+    :ivar lowest_hearing_level: The lowest hearing threshold level to be
         measured the limits were raised for, in dB.
     :ivar noise_floor_db: The measuring chain's noise floor per band, in dB,
         or ``None`` when not given.
     :ivar earphone: For air conduction, the earphone the limits were written
         for: a column of Table 3, or ``"own attenuation"`` for an attenuation
         given band by band; ``None`` for bone conduction and sound field.
-    :ivar earphone_attenuation_db: The earphone's own attenuation per band of
+    :ivar earphone_attenuation: The earphone's own attenuation per band of
         :data:`AMBIENT_NOISE_BANDS_HZ`, in dB, when ``earphone`` is
         ``"own attenuation"``; ``None`` otherwise.
     :ivar allowed_threshold_shift_db: The threshold shift accepted from the
@@ -584,10 +584,10 @@ class AmbientNoiseCheck(OwnsArrays):
     frequencies: np.ndarray
     levels: np.ndarray
     lowest_test_frequency_hz: float
-    lowest_hearing_level_db: float
+    lowest_hearing_level: float
     noise_floor_db: np.ndarray | None = None
     earphone: str | None = None
-    earphone_attenuation_db: np.ndarray | None = None
+    earphone_attenuation: np.ndarray | None = None
     allowed_threshold_shift_db: float = _BASE_THRESHOLD_SHIFT_DB
 
     def __post_init__(self) -> None:
@@ -599,13 +599,13 @@ class AmbientNoiseCheck(OwnsArrays):
             the table does not list or listed out of order, or levels that do
             not match the bands.
         """
-        own = self.earphone_attenuation_db is not None
+        own = self.earphone_attenuation is not None
         if (self.presentation == "air") != (self.earphone is not None) or own != (
             self.earphone == "own attenuation"
         ):
             msg = (
                 "AmbientNoiseCheck: 'earphone' names a column of Table 3, or "
-                "'own attenuation' with 'earphone_attenuation_db', for air "
+                "'own attenuation' with 'earphone_attenuation', for air "
                 "conduction only."
             )
             raise ValueError(msg)
@@ -639,7 +639,7 @@ class AmbientNoiseCheck(OwnsArrays):
         :return: :func:`ambient_noise_limits` of the presentation and the
             tester's choices, at :attr:`frequencies`.
         """
-        own = self.earphone_attenuation_db
+        own = self.earphone_attenuation
         column = (
             "supra-aural" if self.earphone is None or own is not None else self.earphone
         )
@@ -647,8 +647,8 @@ class AmbientNoiseCheck(OwnsArrays):
             self.presentation,
             lowest_test_frequency_hz=self.lowest_test_frequency_hz,
             earphone=column,
-            earphone_attenuation_db=own,
-            lowest_hearing_level_db=self.lowest_hearing_level_db,
+            earphone_attenuation=own,
+            lowest_hearing_level=self.lowest_hearing_level,
             allowed_threshold_shift_db=self.allowed_threshold_shift_db,
         )
         return np.asarray(limits[self._rows], dtype=np.float64)
@@ -692,7 +692,7 @@ class AmbientNoiseCheck(OwnsArrays):
         return ~_at_least(self.levels - self.noise_floor_db, _NOISE_FLOOR_MARGIN_DB)
 
     @property
-    def lowest_measurable_hearing_level_db(self) -> float:
+    def lowest_measurable_hearing_level(self) -> float:
         """The lowest hearing threshold level this room lets be measured, in dB.
 
         11.1 raises every limit by the lowest hearing threshold level to be
@@ -703,9 +703,9 @@ class AmbientNoiseCheck(OwnsArrays):
         ISO 8253-1 has no such reporting item: with earphones or a bone
         vibrator it is the level the rule of 11.1 implies.
 
-        :return: :attr:`lowest_hearing_level_db` plus the largest exceedance.
+        :return: :attr:`lowest_hearing_level` plus the largest exceedance.
         """
-        return float(self.lowest_hearing_level_db + np.max(self.exceedance_db))
+        return float(self.lowest_hearing_level + np.max(self.exceedance_db))
 
     @property
     def passes(self) -> bool:
@@ -744,8 +744,8 @@ def check_audiometric_ambient_noise(
     presentation: str = "air",
     lowest_test_frequency_hz: float = 125.0,
     earphone: str = "supra-aural",
-    earphone_attenuation_db: ArrayLike | None = None,
-    lowest_hearing_level_db: float = 0.0,
+    earphone_attenuation: ArrayLike | None = None,
+    lowest_hearing_level: float = 0.0,
     allowed_threshold_shift_db: float = 2.0,
     frequencies: ArrayLike | None = None,
     noise_floor_db: ArrayLike | None = None,
@@ -771,9 +771,9 @@ def check_audiometric_ambient_noise(
     :param lowest_test_frequency_hz: The lowest test tone frequency, 125
         (default), 250, or for air conduction 500.
     :param earphone: A column of Table 3; air conduction only.
-    :param earphone_attenuation_db: Or another earphone's attenuation per band
+    :param earphone_attenuation: Or another earphone's attenuation per band
         of Table 3; air conduction only.
-    :param lowest_hearing_level_db: The lowest hearing threshold level to be
+    :param lowest_hearing_level: The lowest hearing threshold level to be
         measured, in dB; 0 by default.
     :param allowed_threshold_shift_db: The threshold shift accepted from the
         ambient noise, 2 (default) or 5, in dB.
@@ -793,8 +793,8 @@ def check_audiometric_ambient_noise(
         presentation,
         lowest_test_frequency_hz=lowest_test_frequency_hz,
         earphone=earphone,
-        earphone_attenuation_db=earphone_attenuation_db,
-        lowest_hearing_level_db=lowest_hearing_level_db,
+        earphone_attenuation=earphone_attenuation,
+        lowest_hearing_level=lowest_hearing_level,
         allowed_threshold_shift_db=allowed_threshold_shift_db,
     )
     table = np.asarray(bands, dtype=np.float64)
@@ -821,31 +821,31 @@ def check_audiometric_ambient_noise(
         frequencies=freqs,
         levels=levels,
         lowest_test_frequency_hz=float(lowest_test_frequency_hz),
-        lowest_hearing_level_db=float(lowest_hearing_level_db),
+        lowest_hearing_level=float(lowest_hearing_level),
         noise_floor_db=floor,
-        earphone=_earphone_name(presentation, earphone, earphone_attenuation_db),
-        earphone_attenuation_db=(
+        earphone=_earphone_name(presentation, earphone, earphone_attenuation),
+        earphone_attenuation=(
             None
-            if presentation != "air" or earphone_attenuation_db is None
-            else _levels(earphone_attenuation_db, "earphone_attenuation_db")
+            if presentation != "air" or earphone_attenuation is None
+            else _levels(earphone_attenuation, "earphone_attenuation")
         ),
         allowed_threshold_shift_db=float(allowed_threshold_shift_db),
     )
 
 
 def _earphone_name(
-    presentation: str, earphone: str, earphone_attenuation_db: ArrayLike | None
+    presentation: str, earphone: str, earphone_attenuation: ArrayLike | None
 ) -> str | None:
     """The earphone a check's limits were written for, for its figure.
 
     :param presentation: The presentation.
     :param earphone: The column of Table 3 named.
-    :param earphone_attenuation_db: The attenuation given instead, if any.
+    :param earphone_attenuation: The attenuation given instead, if any.
     :return: The name, ``"own attenuation"``, or ``None`` off air conduction.
     """
     if presentation != "air":
         return None
-    return earphone if earphone_attenuation_db is None else "own attenuation"
+    return earphone if earphone_attenuation is None else "own attenuation"
 
 
 # ---------------------------------------------------------------------------
@@ -861,26 +861,26 @@ class AscendingThresholdResult(OwnsArrays):
     the stopping rule of 6.2.3.2, so they are not fields: a result cannot
     state a threshold its ascents do not reach.
 
-    :ivar ascent_levels_db: The level at which each ascent ended in a
+    :ivar ascent_levels: The level at which each ascent ended in a
         response, in presentation order, in dB.
     :ivar shortened: Whether the shortened version was applied.
-    :ivar next_level_db: The level to present next, in dB, when the
+    :ivar next_level: The level to present next, in dB, when the
         presentations were given and no threshold is determined yet; NaN
         otherwise.
-    :ivar presentation_levels_db: The levels presented, in dB, or ``None``
+    :ivar presentation_levels: The levels presented, in dB, or ``None``
         when only the ascents were given.
     :ivar responses: Whether each presentation drew a response, or ``None``.
     """
 
-    ascent_levels_db: np.ndarray
+    ascent_levels: np.ndarray
     shortened: bool
-    next_level_db: float
-    presentation_levels_db: np.ndarray | None = None
+    next_level: float
+    presentation_levels: np.ndarray | None = None
     responses: np.ndarray | None = None
 
     def _rule(self) -> tuple[float, bool, bool]:
         return _ascending_rule(
-            [float(level) for level in self.ascent_levels_db], shortened=self.shortened
+            [float(level) for level in self.ascent_levels], shortened=self.shortened
         )
 
     @property
@@ -915,9 +915,9 @@ class AscendingThresholdResult(OwnsArrays):
 
         :return: The largest less the smallest, 0 for fewer than two ascents.
         """
-        if self.ascent_levels_db.size == 0:
+        if self.ascent_levels.size == 0:
             return 0.0
-        return float(np.ptp(self.ascent_levels_db))
+        return float(np.ptp(self.ascent_levels))
 
     @property
     def doubtful(self) -> bool:
@@ -940,9 +940,7 @@ class AscendingThresholdResult(OwnsArrays):
             return 0
         return int(
             np.sum(
-                np.isclose(
-                    self.ascent_levels_db, self.threshold_db, atol=_LEVEL_ATOL_DB
-                )
+                np.isclose(self.ascent_levels, self.threshold_db, atol=_LEVEL_ATOL_DB)
             )
         )
 
@@ -985,19 +983,19 @@ def _replay_ascending(
     responses: np.ndarray,
     *,
     shortened: bool,
-    familiarization_level_db: float | None,
+    familiarization_level: float | None,
 ) -> tuple[list[float], float, bool, bool, float]:
     """Replay a presentation sequence of the ascending method.
 
     :param levels: The levels presented, in dB.
     :param responses: Whether each drew a response.
     :param shortened: Whether the shortened version applies.
-    :param familiarization_level_db: The lowest familiarization response.
+    :param familiarization_level: The lowest familiarization response.
     :return: ``(ascents, threshold, determined, exhausted, next level)``.
     :raises ValueError: for a step the method does not take, or presentations
         after the series ended.
     """
-    _check_first_tone(levels, familiarization_level_db)
+    _check_first_tone(levels, familiarization_level)
     ascents: list[float] = []
     threshold, determined, exhausted = math.nan, False, False
     for i in range(levels.size):
@@ -1019,23 +1017,21 @@ def _replay_ascending(
         levels,
         responses,
         ascents,
-        familiarization_level_db,
+        familiarization_level,
         ended=determined,
         restart=exhausted and not shortened,
     )
     return ascents, threshold, determined, exhausted, next_level
 
 
-def _check_first_tone(
-    levels: np.ndarray, familiarization_level_db: float | None
-) -> None:
+def _check_first_tone(levels: np.ndarray, familiarization_level: float | None) -> None:
     """6.2.3.2 Step 1: the first tone 10 dB below the familiarization response.
 
     :raises ValueError: for a first tone at another level.
     """
-    if familiarization_level_db is None or not levels.size:
+    if familiarization_level is None or not levels.size:
         return
-    first = float(familiarization_level_db) - _FIRST_TONE_BELOW_DB
+    first = float(familiarization_level) - _FIRST_TONE_BELOW_DB
     if not math.isclose(levels[0], first, abs_tol=_LEVEL_ATOL_DB):
         msg = (
             f"the first tone must be {first:g} dB, 10 dB below the lowest "
@@ -1065,7 +1061,7 @@ def _next_ascending_level(
     levels: np.ndarray,
     responses: np.ndarray,
     ascents: list[float],
-    familiarization_level_db: float | None,
+    familiarization_level: float | None,
     *,
     ended: bool,
     restart: bool,
@@ -1078,8 +1074,8 @@ def _next_ascending_level(
     """
     if ended or not levels.size:
         return (
-            float(familiarization_level_db) - _FIRST_TONE_BELOW_DB
-            if not levels.size and familiarization_level_db is not None
+            float(familiarization_level) - _FIRST_TONE_BELOW_DB
+            if not levels.size and familiarization_level is not None
             else math.nan
         )
     if restart:
@@ -1089,12 +1085,12 @@ def _next_ascending_level(
 
 
 def ascending_method_threshold(
-    ascent_levels_db: ArrayLike | None = None,
+    ascent_levels: ArrayLike | None = None,
     *,
-    presentation_levels_db: ArrayLike | None = None,
+    presentation_levels: ArrayLike | None = None,
     responses: ArrayLike | None = None,
     shortened: bool = False,
-    familiarization_level_db: float | None = None,
+    familiarization_level: float | None = None,
 ) -> AscendingThresholdResult:
     """The hearing threshold level by the ascending method (6.2.3.2, 6.2.4.2).
 
@@ -1121,13 +1117,13 @@ def ascending_method_threshold(
     library's choice is to continue it with the full method on the same
     presentations, a new call with ``shortened=False``.
 
-    :param ascent_levels_db: The response level of each ascent, in dB, in
+    :param ascent_levels: The response level of each ascent, in dB, in
         order.
-    :param presentation_levels_db: Or the hearing level of every tone
+    :param presentation_levels: Or the hearing level of every tone
         presented, in dB, in order.
     :param responses: With it, whether each tone drew a response.
     :param shortened: ``True`` for the shortened version.
-    :param familiarization_level_db: The lowest level of the subject's
+    :param familiarization_level: The lowest level of the subject's
         responses during familiarization (6.2.2), in dB, to check the first
         tone of a sequence, or to give it when the sequence is empty.
     :return: :class:`AscendingThresholdResult`.
@@ -1136,38 +1132,34 @@ def ascending_method_threshold(
         presentation follows the end of the series, or more ascents are given
         than a series holds.
     """
-    sequence = presentation_levels_db is not None or responses is not None
-    if ascent_levels_db is not None and not sequence:
-        return _threshold_from_ascents(ascent_levels_db, shortened=shortened)
-    if (
-        ascent_levels_db is not None
-        or presentation_levels_db is None
-        or responses is None
-    ):
+    sequence = presentation_levels is not None or responses is not None
+    if ascent_levels is not None and not sequence:
+        return _threshold_from_ascents(ascent_levels, shortened=shortened)
+    if ascent_levels is not None or presentation_levels is None or responses is None:
         msg = (
-            "give either 'ascent_levels_db', or both 'presentation_levels_db' "
+            "give either 'ascent_levels', or both 'presentation_levels' "
             "and 'responses', and not both forms."
         )
         raise ValueError(msg)
     return _threshold_from_sequence(
-        presentation_levels_db,
+        presentation_levels,
         responses,
         shortened=shortened,
-        familiarization_level_db=familiarization_level_db,
+        familiarization_level=familiarization_level,
     )
 
 
 def _threshold_from_ascents(
-    ascent_levels_db: ArrayLike, *, shortened: bool
+    ascent_levels: ArrayLike, *, shortened: bool
 ) -> AscendingThresholdResult:
     """6.2.4.2 on the response level of each ascent, checked against 6.2.3.2.
 
     :raises ValueError: for levels that are not finite, more ascents than a
         series holds, or ascents after the series ended.
     """
-    levels = np.array(ascent_levels_db, dtype=np.float64)
+    levels = np.array(ascent_levels, dtype=np.float64)
     if levels.ndim != 1 or not np.all(np.isfinite(levels)):
-        msg = "'ascent_levels_db' must be a one-dimensional array of finite levels."
+        msg = "'ascent_levels' must be a one-dimensional array of finite levels."
         raise ValueError(msg)
     most = (_ASCENDING_SHORT if shortened else _ASCENDING_FULL)[1]
     if levels.size > most:
@@ -1186,25 +1178,25 @@ def _threshold_from_ascents(
             )
             raise ValueError(msg)
     return AscendingThresholdResult(
-        ascent_levels_db=np.asarray(ascents, dtype=np.float64),
+        ascent_levels=np.asarray(ascents, dtype=np.float64),
         shortened=shortened,
-        next_level_db=math.nan,
+        next_level=math.nan,
     )
 
 
 def _threshold_from_sequence(
-    presentation_levels_db: ArrayLike,
+    presentation_levels: ArrayLike,
     responses: ArrayLike,
     *,
     shortened: bool,
-    familiarization_level_db: float | None,
+    familiarization_level: float | None,
 ) -> AscendingThresholdResult:
     """6.2.4.2 on a whole presentation sequence, replayed against 6.2.3.2.
 
     :raises ValueError: for levels that are not finite, responses that do not
         match them, or a sequence the method does not produce.
     """
-    levels = np.array(presentation_levels_db, dtype=np.float64)
+    levels = np.array(presentation_levels, dtype=np.float64)
     heard = np.array(responses, dtype=bool)
     if (
         levels.ndim != 1
@@ -1212,7 +1204,7 @@ def _threshold_from_sequence(
         or not np.all(np.isfinite(levels))
     ):
         msg = (
-            "'presentation_levels_db' must be finite levels and 'responses' one "
+            "'presentation_levels' must be finite levels and 'responses' one "
             "boolean per presentation."
         )
         raise ValueError(msg)
@@ -1220,13 +1212,13 @@ def _threshold_from_sequence(
         levels,
         heard,
         shortened=shortened,
-        familiarization_level_db=familiarization_level_db,
+        familiarization_level=familiarization_level,
     )
     return AscendingThresholdResult(
-        ascent_levels_db=np.asarray(ascents, dtype=np.float64),
+        ascent_levels=np.asarray(ascents, dtype=np.float64),
         shortened=shortened,
-        next_level_db=next_level,
-        presentation_levels_db=levels,
+        next_level=next_level,
+        presentation_levels=levels,
         responses=heard,
     )
 
@@ -1240,15 +1232,15 @@ def _threshold_from_sequence(
 class BracketingThresholdResult(OwnsArrays):
     """The hearing threshold level by the bracketing method (6.2.4.3).
 
-    :ivar ascent_levels_db: The lowest response level of each ascent, in dB.
-    :ivar descent_levels_db: The lowest response level of each descent, in dB.
+    :ivar ascent_levels: The lowest response level of each ascent, in dB.
+    :ivar descent_levels: The lowest response level of each descent, in dB.
     :ivar mean_db: The mean of the two averages, unrounded, in dB.
     :ivar threshold_db: That mean rounded to the nearest 5 dB step, in dB; a
         mean halfway between two steps goes to the higher one.
     """
 
-    ascent_levels_db: np.ndarray
-    descent_levels_db: np.ndarray
+    ascent_levels: np.ndarray
+    descent_levels: np.ndarray
     mean_db: float
     threshold_db: float
 
@@ -1258,7 +1250,7 @@ class BracketingThresholdResult(OwnsArrays):
 
         :return: The mean.
         """
-        return float(np.mean(self.ascent_levels_db))
+        return float(np.mean(self.ascent_levels))
 
     @property
     def descent_mean_db(self) -> float:
@@ -1266,7 +1258,7 @@ class BracketingThresholdResult(OwnsArrays):
 
         :return: The mean.
         """
-        return float(np.mean(self.descent_levels_db))
+        return float(np.mean(self.descent_levels))
 
     @property
     def complete(self) -> bool:
@@ -1276,15 +1268,15 @@ class BracketingThresholdResult(OwnsArrays):
             each whose four levels differ by no more than 5 dB (the shortened
             version).
         """
-        ups, downs = self.ascent_levels_db.size, self.descent_levels_db.size
+        ups, downs = self.ascent_levels.size, self.descent_levels.size
         if min(ups, downs) >= _BRACKETING_FULL_COUNT:
             return True
         if min(ups, downs) < _BRACKETING_SHORT_COUNT:
             return False
         four = np.concatenate(
             [
-                self.ascent_levels_db[:_BRACKETING_SHORT_COUNT],
-                self.descent_levels_db[:_BRACKETING_SHORT_COUNT],
+                self.ascent_levels[:_BRACKETING_SHORT_COUNT],
+                self.descent_levels[:_BRACKETING_SHORT_COUNT],
             ]
         )
         return bool(np.ptp(four) <= _SHORT_BRACKETING_SPREAD_DB + _BOUNDARY_SLACK_DB)
@@ -1299,8 +1291,7 @@ class BracketingThresholdResult(OwnsArrays):
         """
         limit = _SPREAD_LIMIT_DB + _BOUNDARY_SLACK_DB
         return bool(
-            np.ptp(self.ascent_levels_db) > limit
-            or np.ptp(self.descent_levels_db) > limit
+            np.ptp(self.ascent_levels) > limit or np.ptp(self.descent_levels) > limit
         )
 
     def plot(
@@ -1319,7 +1310,7 @@ class BracketingThresholdResult(OwnsArrays):
 
 
 def bracketing_method_threshold(
-    ascent_levels_db: ArrayLike, descent_levels_db: ArrayLike
+    ascent_levels: ArrayLike, descent_levels: ArrayLike
 ) -> BracketingThresholdResult:
     r"""The hearing threshold level by the bracketing method (6.2.4.3).
 
@@ -1340,20 +1331,20 @@ def bracketing_method_threshold(
     the library applies wherever a standard says "nearest" without a rule for
     the tie.
 
-    :param ascent_levels_db: The lowest level at which a response occurred in
+    :param ascent_levels: The lowest level at which a response occurred in
         each ascent, in dB.
-    :param descent_levels_db: The lowest level at which a response occurred in
+    :param descent_levels: The lowest level at which a response occurred in
         each descent, in dB.
     :return: :class:`BracketingThresholdResult`, which also says whether the
         series is complete and whether 6.2.4.3 advises a repeat.
     :raises ValueError: for an empty or non-finite set of levels.
     """
-    ups = _levels(ascent_levels_db, "ascent_levels_db")
-    downs = _levels(descent_levels_db, "descent_levels_db")
+    ups = _levels(ascent_levels, "ascent_levels")
+    downs = _levels(descent_levels, "descent_levels")
     mean = 0.5 * (float(np.mean(ups)) + float(np.mean(downs)))
     return BracketingThresholdResult(
-        ascent_levels_db=ups,
-        descent_levels_db=downs,
+        ascent_levels=ups,
+        descent_levels=downs,
         mean_db=mean,
         threshold_db=_round_half_up(mean, _BRACKETING_STEP_DB),
     )
@@ -1412,7 +1403,7 @@ def _tracing_mean(levels: np.ndarray) -> float:
     :raises ValueError: when the reversals do not alternate, or no peak or no
         valley is left after 6.3.5 a).
     """
-    kinds = _reversal_kinds(levels, "reversal_levels_db")
+    kinds = _reversal_kinds(levels, "reversal_levels")
     retained = _retained_reversals(levels)
     peaks = levels[retained & kinds]
     valleys = levels[retained & ~kinds]
@@ -1429,7 +1420,7 @@ def _tracing_mean(levels: np.ndarray) -> float:
 class AutomaticThresholdResult(OwnsArrays):
     """The hearing threshold level from an automatic recording (6.3.5).
 
-    :ivar reversal_levels_db: The levels at the reversals of the tracing at
+    :ivar reversal_levels: The levels at the reversals of the tracing at
         one frequency, in order, in dB.
     :ivar mean_db: The mean of the average peak and the average valley, in dB.
     :ivar threshold_db: That mean rounded up to the next whole decibel, in dB.
@@ -1438,7 +1429,7 @@ class AutomaticThresholdResult(OwnsArrays):
     (:attr:`retained`) are read from the levels, so they are not fields.
     """
 
-    reversal_levels_db: np.ndarray
+    reversal_levels: np.ndarray
     mean_db: float
     threshold_db: float
 
@@ -1455,7 +1446,7 @@ class AutomaticThresholdResult(OwnsArrays):
             valleys, a tracing that keeps no peak or no valley after a), or a
             mean or a threshold that is not the one the kept reversals give.
         """
-        levels = _levels(self.reversal_levels_db, "reversal_levels_db", minimum=3)
+        levels = _levels(self.reversal_levels, "reversal_levels", minimum=3)
         mean = _tracing_mean(levels)
         expected = (
             ("mean_db", mean),
@@ -1482,8 +1473,8 @@ class AutomaticThresholdResult(OwnsArrays):
         :return: One boolean per reversal.
         """
         return _reversal_kinds(
-            np.asarray(self.reversal_levels_db, dtype=np.float64),
-            "reversal_levels_db",
+            np.asarray(self.reversal_levels, dtype=np.float64),
+            "reversal_levels",
         )
 
     @property
@@ -1495,9 +1486,7 @@ class AutomaticThresholdResult(OwnsArrays):
 
         :return: One boolean per reversal.
         """
-        return _retained_reversals(
-            np.asarray(self.reversal_levels_db, dtype=np.float64)
-        )
+        return _retained_reversals(np.asarray(self.reversal_levels, dtype=np.float64))
 
     @property
     def peaks_db(self) -> np.ndarray:
@@ -1506,7 +1495,7 @@ class AutomaticThresholdResult(OwnsArrays):
         :return: Their levels, in order.
         """
         return np.asarray(
-            self.reversal_levels_db[self.retained & self.is_peak], dtype=np.float64
+            self.reversal_levels[self.retained & self.is_peak], dtype=np.float64
         )
 
     @property
@@ -1516,7 +1505,7 @@ class AutomaticThresholdResult(OwnsArrays):
         :return: Their levels, in order.
         """
         return np.asarray(
-            self.reversal_levels_db[self.retained & ~self.is_peak], dtype=np.float64
+            self.reversal_levels[self.retained & ~self.is_peak], dtype=np.float64
         )
 
     @property
@@ -1549,7 +1538,7 @@ class AutomaticThresholdResult(OwnsArrays):
 
 
 def automatic_audiometry_threshold(
-    reversal_levels_db: ArrayLike,
+    reversal_levels: ArrayLike,
 ) -> AutomaticThresholdResult:
     """The hearing threshold level from an automatic recording (6.3.5).
 
@@ -1569,17 +1558,17 @@ def automatic_audiometry_threshold(
     thresholds 3 dB lower on average than manual ones with 5 dB steps; that
     is a property of the method, and nothing here corrects for it.
 
-    :param reversal_levels_db: The hearing level at each reversal of the
+    :param reversal_levels: The hearing level at each reversal of the
         tracing at one frequency, in dB, in the order they were traced.
     :return: :class:`AutomaticThresholdResult`.
     :raises ValueError: for fewer than three reversals, reversals that do not
         alternate between peaks and valleys, or a tracing that keeps no peak
         or no valley after a).
     """
-    levels = _levels(reversal_levels_db, "reversal_levels_db", minimum=3)
+    levels = _levels(reversal_levels, "reversal_levels", minimum=3)
     mean = _tracing_mean(levels)
     return AutomaticThresholdResult(
-        reversal_levels_db=levels,
+        reversal_levels=levels,
         mean_db=mean,
         # Settled first, so a mean such as 12,000 000 000 000 002 dB is not
         # taken up to 13 dB by a last-bit excess.
@@ -1620,7 +1609,7 @@ def _sweep_reversals(levels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     :raises ValueError: when the reversals do not alternate, or fewer than
         three peaks or three valleys are traced.
     """
-    kinds = _reversal_kinds(levels, "reversal_levels_db")
+    kinds = _reversal_kinds(levels, "reversal_levels")
     peaks, valleys = np.flatnonzero(kinds), np.flatnonzero(~kinds)
     if min(peaks.size, valleys.size) < _SWEEP_REVERSALS_PER_SIDE:
         msg = "a sweep-frequency tracing needs at least three peaks and three valleys."
@@ -1672,7 +1661,7 @@ class SweepThresholdResult(OwnsArrays):
     """Hearing threshold levels from a sweep-frequency tracing (7.5).
 
     :ivar reversal_frequencies: The frequency of each reversal, in hertz.
-    :ivar reversal_levels_db: The hearing level of each reversal, in dB.
+    :ivar reversal_levels: The hearing level of each reversal, in dB.
     :ivar frequencies: The frequencies the threshold was determined at, in
         hertz.
     :ivar mean_db: At each, the mean of the average of the three nearest peaks
@@ -1690,7 +1679,7 @@ class SweepThresholdResult(OwnsArrays):
     """
 
     reversal_frequencies: np.ndarray
-    reversal_levels_db: np.ndarray
+    reversal_levels: np.ndarray
     frequencies: np.ndarray
     mean_db: np.ndarray
     threshold_db: np.ndarray
@@ -1713,7 +1702,7 @@ class SweepThresholdResult(OwnsArrays):
             either, a sweep that does not run one way, or a column that is not
             the one the reversals give.
         """
-        levels = _levels(self.reversal_levels_db, "reversal_levels_db", minimum=6)
+        levels = _levels(self.reversal_levels, "reversal_levels", minimum=6)
         freqs = _sweep_frequencies(self.reversal_frequencies, levels)
         targets = _levels(self.frequencies, "frequencies")
         means, spreads = _sweep_means(freqs, levels, targets)
@@ -1745,8 +1734,8 @@ class SweepThresholdResult(OwnsArrays):
         :return: One boolean per reversal.
         """
         return _reversal_kinds(
-            np.asarray(self.reversal_levels_db, dtype=np.float64),
-            "reversal_levels_db",
+            np.asarray(self.reversal_levels, dtype=np.float64),
+            "reversal_levels",
         )
 
     @property
@@ -1776,7 +1765,7 @@ class SweepThresholdResult(OwnsArrays):
 
 def sweep_audiometry_threshold(
     reversal_frequencies: ArrayLike,
-    reversal_levels_db: ArrayLike,
+    reversal_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
 ) -> SweepThresholdResult:
@@ -1804,7 +1793,7 @@ def sweep_audiometry_threshold(
 
     :param reversal_frequencies: The frequency at each reversal, in hertz, in
         the order traced; the sweep may run upwards or downwards.
-    :param reversal_levels_db: The hearing level at each reversal, in dB.
+    :param reversal_levels: The hearing level at each reversal, in dB.
     :param frequencies: The frequencies to determine the threshold at, in
         hertz, or ``None`` for the audiometric frequencies from 125 Hz to
         8 kHz that the tracing spans.
@@ -1813,7 +1802,7 @@ def sweep_audiometry_threshold(
         or three valleys, reversals that do not alternate, a sweep that does
         not run one way, or no frequency to determine.
     """
-    levels = _levels(reversal_levels_db, "reversal_levels_db", minimum=6)
+    levels = _levels(reversal_levels, "reversal_levels", minimum=6)
     freqs = _sweep_frequencies(reversal_frequencies, levels)
     _sweep_reversals(levels)
     if frequencies is None:
@@ -1835,7 +1824,7 @@ def sweep_audiometry_threshold(
     running_f, running_l = _running_threshold(freqs, levels)
     return SweepThresholdResult(
         reversal_frequencies=freqs,
-        reversal_levels_db=levels,
+        reversal_levels=levels,
         frequencies=np.asarray(targets, dtype=np.float64),
         mean_db=means,
         threshold_db=np.array([_round_half_up(m, 1.0) for m in means]),
@@ -1866,7 +1855,7 @@ class RetestAgreementCheck(RichDisplay):
     frequency_hz: float
 
     @property
-    def difference_db(self) -> float:
+    def difference(self) -> float:
         """The repeat less the first measurement, in dB.
 
         :return: Positive for a worsening, negative for an improvement.
@@ -1879,7 +1868,7 @@ class RetestAgreementCheck(RichDisplay):
 
         :return: ``True`` when the difference is at most 5 dB either way.
         """
-        return abs(self.difference_db) <= _RETEST_AGREEMENT_DB + _BOUNDARY_SLACK_DB
+        return abs(self.difference) <= _RETEST_AGREEMENT_DB + _BOUNDARY_SLACK_DB
 
     @property
     def retest_further_frequencies(self) -> bool:
@@ -1887,7 +1876,7 @@ class RetestAgreementCheck(RichDisplay):
 
         :return: ``True`` for an improvement or a worsening of 10 dB or more.
         """
-        return abs(self.difference_db) >= _RETEST_DISAGREEMENT_DB - _BOUNDARY_SLACK_DB
+        return abs(self.difference) >= _RETEST_DISAGREEMENT_DB - _BOUNDARY_SLACK_DB
 
     def __bool__(self) -> bool:
         """Refuse to stand in for the verdict it carries.
@@ -1972,7 +1961,7 @@ class AudiogramCautions(OwnsArrays):
     vibrator_placement: str
 
     @property
-    def vibrotactile_levels_db(self) -> np.ndarray:
+    def vibrotactile_levels(self) -> np.ndarray:
         """The average vibrotactile threshold of 8.4 at each frequency, in dB.
 
         :return: One level per frequency, 10 dB lower for forehead placement,
@@ -1980,7 +1969,7 @@ class AudiogramCautions(OwnsArrays):
         """
         offset = _FOREHEAD_OFFSET_DB if self.vibrator_placement == "forehead" else 0.0
         levels = np.full(self.frequencies.size, math.nan)
-        for key, level in VIBROTACTILE_HEARING_LEVELS_DB.items():
+        for key, level in VIBROTACTILE_HEARING_LEVELS.items():
             at = np.isclose(self.frequencies, key, rtol=_FREQUENCY_RTOL, atol=0.0)
             levels[at] = level - offset
         return levels
@@ -2016,7 +2005,7 @@ class AudiogramCautions(OwnsArrays):
         """
         if self.bone_conduction_db is None:
             return np.zeros(self.frequencies.size, dtype=bool)
-        return _at_least(self.bone_conduction_db, self.vibrotactile_levels_db)
+        return _at_least(self.bone_conduction_db, self.vibrotactile_levels)
 
     @property
     def any_caution(self) -> bool:

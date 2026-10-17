@@ -123,9 +123,9 @@ class TimeInvarianceResult(OwnsArrays):
     :ivar averaging_times_s: :math:`T_\mathrm{avg}`, one per rate: the sweep
         and the silence after it during which the slowest band's output dies
         away.
-    :ivar output_levels_db: The measured time-averaged output level
+    :ivar output_levels: The measured time-averaged output level
         :math:`L_\mathrm{out}`, shape ``(rates, bands)``.
-    :ivar expected_levels_db: :math:`L_\mathrm{c}` of Formula (17), same shape.
+    :ivar expected_levels: :math:`L_\mathrm{c}` of Formula (17), same shape.
     """
 
     frequencies: np.ndarray
@@ -136,8 +136,8 @@ class TimeInvarianceResult(OwnsArrays):
     end_frequency_hz: float
     sweep_durations_s: tuple[float, ...]
     averaging_times_s: tuple[float, ...]
-    output_levels_db: np.ndarray
-    expected_levels_db: np.ndarray
+    output_levels: np.ndarray
+    expected_levels: np.ndarray
 
     def __post_init__(self) -> None:
         """Freeze the arrays and refuse levels the verdict cannot be read on.
@@ -146,10 +146,10 @@ class TimeInvarianceResult(OwnsArrays):
             and one column per band, or hold a non-finite value.
         """
         freqs = np.asarray(self.frequencies, dtype=np.float64)
-        out = np.asarray(self.output_levels_db, dtype=np.float64)
-        expected = np.asarray(self.expected_levels_db, dtype=np.float64)
+        out = np.asarray(self.output_levels, dtype=np.float64)
+        expected = np.asarray(self.expected_levels, dtype=np.float64)
         shape = (len(self.seconds_per_decade), freqs.size)
-        for name, arr in (("output_levels_db", out), ("expected_levels_db", expected)):
+        for name, arr in (("output_levels", out), ("expected_levels", expected)):
             if arr.shape != shape:
                 msg = (
                     f"'{name}' must be shaped (rates, bands) = {shape}; "
@@ -167,13 +167,13 @@ class TimeInvarianceResult(OwnsArrays):
                 msg = f"'{name}' must carry one value per sweep rate."
                 raise ValueError(msg)
         object.__setattr__(self, "frequencies", read_only(freqs))
-        object.__setattr__(self, "output_levels_db", read_only(out))
-        object.__setattr__(self, "expected_levels_db", read_only(expected))
+        object.__setattr__(self, "output_levels", read_only(out))
+        object.__setattr__(self, "expected_levels", read_only(expected))
 
     @property
     def deviations_db(self) -> np.ndarray:
         r""":math:`L_\mathrm{out} - L_\mathrm{c}`, shape ``(rates, bands)``."""
-        return np.asarray(self.output_levels_db - self.expected_levels_db)
+        return np.asarray(self.output_levels - self.expected_levels)
 
     @property
     def band_classes(self) -> tuple[int | None, ...]:
@@ -295,14 +295,14 @@ def _exponential_sweep(
 
 
 def swept_band_level(
-    input_level_db: float,
+    input_level: float,
     *,
     fraction: float,
     sweep_duration_s: float,
     averaging_time_s: float,
     start_frequency_hz: float,
     end_frequency_hz: float,
-    reference_attenuation_db: float = 0.0,
+    reference_attenuation: float = 0.0,
 ) -> float:
     r"""IEC 61260-1:2014 Formula (17): the time-averaged output of a sweep.
 
@@ -319,7 +319,7 @@ def swept_band_level(
     infinite outside it (NOTE 2). The deviation of a measured output from it
     is what 5.14.3 and IEC 61260-3:2016 10.3.6 grade.
 
-    :param input_level_db: :math:`L_\mathrm{in}`, the level of the sweep.
+    :param input_level: :math:`L_\mathrm{in}`, the level of the sweep.
     :param fraction: The bandwidth designator denominator ``b``.
     :param sweep_duration_s: :math:`T_\mathrm{sweep}`, the time from the start
         frequency to the end frequency.
@@ -327,9 +327,9 @@ def swept_band_level(
         output level.
     :param start_frequency_hz: :math:`f_\mathrm{start}`.
     :param end_frequency_hz: :math:`f_\mathrm{end}`, above the start.
-    :param reference_attenuation_db: :math:`A_\mathrm{ref}`, the reference
+    :param reference_attenuation: :math:`A_\mathrm{ref}`, the reference
         attenuation of 5.9 (0 dB by default).
-    :return: :math:`L_\mathrm{c}` in the unit of ``input_level_db``.
+    :return: :math:`L_\mathrm{c}` in the unit of ``input_level``.
     :raises ValueError: for a non-positive bandwidth designator, duration,
         averaging time or frequency, or an end frequency not above the start.
     """
@@ -346,8 +346,8 @@ def swept_band_level(
         raise ValueError(msg)
     band_ratio_lg = math.log10(_G) / b
     return (
-        float(input_level_db)
-        - float(reference_attenuation_db)
+        float(input_level)
+        - float(reference_attenuation)
         + 10.0
         * math.log10(t_sweep / t_avg * band_ratio_lg / math.log10(f_end / f_start))
     )
@@ -550,7 +550,7 @@ def verify_time_invariance(
                 averaging_time_s=t_avg,
                 start_frequency_hz=start_hz,
                 end_frequency_hz=end_hz,
-                reference_attenuation_db=a_ref,
+                reference_attenuation=a_ref,
             )
     return TimeInvarianceResult(
         frequencies=np.asarray(mids),
@@ -561,6 +561,6 @@ def verify_time_invariance(
         end_frequency_hz=end_hz,
         sweep_durations_s=tuple(sweeps),
         averaging_times_s=tuple(averages),
-        output_levels_db=outputs,
-        expected_levels_db=expected,
+        output_levels=outputs,
+        expected_levels=expected,
     )

@@ -98,7 +98,7 @@ def _chk_loudspeaker_sensitivity() -> Outcome:
     )
     # A flat 90 dB response driven at sqrt(8) V (1 W) at 1 m has a
     # characteristic sensitivity level of 90 dB exactly (the corrections vanish).
-    return numeric(90.0, result.sensitivity_level_db, 1e-6, unit="dB", places=6)
+    return numeric(90.0, result.sensitivity_level, 1e-6, unit="dB", places=6)
 
 
 @register(
@@ -155,7 +155,7 @@ def _chk_microphone_sensitivity_level() -> Outcome:
         f, rel, 12.5, tolerance_db=3.0
     )
     # Hand-computed: 20 lg 0.0125 = -38.061800 dB re 1 V/Pa.
-    return numeric(-38.061800, result.sensitivity_level_db, 1e-5, unit="dB", places=6)
+    return numeric(-38.061800, result.sensitivity_level, 1e-5, unit="dB", places=6)
 
 
 @register(
@@ -194,7 +194,7 @@ def _chk_microphone_cardioid_di() -> Outcome:
         tolerance_db=3.0,
         directivity=ph.electroacoustics.MicrophoneDirectivity(polar=(angles, pattern)),
     )
-    di = result.directivity_index_db
+    di = result.directivity_index
     if di is None:
         return Outcome(
             expected="4.771213 dB", computed="None", delta="n/a", passed=False
@@ -217,7 +217,7 @@ def _chk_microphone_equivalent_noise() -> Outcome:
         tolerance_db=3.0,
         noise=ph.electroacoustics.MicrophoneNoise(voltage_v=2.5e-6),
     )
-    noise = result.equivalent_noise_level_db
+    noise = result.equivalent_noise_level
     if noise is None:
         return Outcome(expected="20 dB SPL", computed="None", delta="n/a", passed=False)
     return numeric(20.0, noise, 1e-9, unit="dB SPL", places=6)

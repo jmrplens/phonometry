@@ -200,7 +200,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Las formas de los patrones. El índice de directividad anotado en cada curva es
-# el que devuelve `microphone_characteristics(...).directivity_index_db` para
+# el que devuelve `microphone_characteristics(...).directivity_index` para
 # esos mismos datos polares, como en el fragmento de la sección 4.
 theta = np.radians(np.linspace(0.0, 360.0, 721))
 ax = plt.subplot(projection="polar")
@@ -396,10 +396,10 @@ result = electroacoustics.microphone_characteristics(
         powering="Phantom P48 (IEC 61938)", supply_current_ma=3.1,
     ),
 )
-print(round(result.sensitivity_level_db, 1))            # -38.1 dB re 1 V/Pa
+print(round(result.sensitivity_level, 1))            # -38.1 dB re 1 V/Pa
 print(tuple(round(x) for x in result.effective_range))  # Hz
-print(round(result.directivity_index_db, 1))            # 4.8 dB (cardioide)
-print(round(result.equivalent_noise_level_db, 1))       # 14.0 dB(A)
+print(round(result.directivity_index, 1))            # 4.8 dB (cardioide)
+print(round(result.equivalent_noise_level, 1))       # 14.0 dB(A)
 print(round(result.signal_to_noise_ratio_db, 1))        # 80.0 dB re 1 Pa
 
 # Los tres patrones canónicos de la sección 2, por la misma integral de
@@ -411,7 +411,7 @@ for b in (0.0, 0.5, 1.0):
         freqs, response, 12.5, tolerance_db=3.0,
         directivity=electroacoustics.MicrophoneDirectivity(polar=(angles_rad, polar),
                                                            frequency=1000.0))
-    print(b, round(family.directivity_index_db, 1))     # 0.0 / 4.8 / 4.8 dB
+    print(b, round(family.directivity_index, 1))     # 0.0 / 4.8 / 4.8 dB
 
 result.report("microfono.pdf", metadata=ReportMetadata(measurement_standard="IEC 60268-4"),
               language="es")
@@ -446,9 +446,9 @@ cifras de la misma cápsula es la forma honrada, porque son preguntas distintas 
 las dos son legítimas.
 
 `microphone_characteristics` devuelve un `MicrophoneCharacteristics` con el
-`sensitivity_level_db`, el `effective_range`, el `directivity_index_db`, el
-`equivalent_noise_level_db`, el `max_spl_db`, la `signal_to_noise_ratio_db` y
-el `diffuse_field_sensitivity_level_db` calculados, y un `.report()` que
+`sensitivity_level`, el `effective_range`, el `directivity_index`, el
+`equivalent_noise_level`, el `max_spl`, la `signal_to_noise_ratio_db` y
+el `diffuse_field_sensitivity_level` calculados, y un `.report()` que
 escribe la ficha. La respuesta de campo libre se dibuja con su banda de
 tolerancia, el marcador de la frecuencia de referencia y los marcadores del
 rango efectivo según la proporción de IEC 60263 (una década de frecuencia igual

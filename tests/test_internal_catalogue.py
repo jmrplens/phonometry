@@ -426,16 +426,16 @@ def test_a_bound_may_leave_open_the_end_the_quantity_has_no_limit_on() -> None:
     row = DuctWallSpectrum(
         name="200 mm",
         source="ASHRAE (2019) Chapter 49 Table 30, PDF page 914 (printed p. 49.30)",
-        ranges={"transmission_loss_63_db": (45.0, None)},
-        bounded_below=frozenset({"transmission_loss_63_db"}),
+        ranges={"transmission_loss_63": (45.0, None)},
+        bounded_below=frozenset({"transmission_loss_63"}),
     )
-    assert row.ranges["transmission_loss_63_db"] == (45.0, None)
-    assert row.why_missing("transmission_loss_63_db") == (
+    assert row.ranges["transmission_loss_63"] == (45.0, None)
+    assert row.why_missing("transmission_loss_63") == (
         "the page prints a lower bound of 45 and no value"
     )
 
 
-_TL = "transmission_loss_63_db"
+_TL = "transmission_loss_63"
 
 
 @pytest.mark.parametrize(

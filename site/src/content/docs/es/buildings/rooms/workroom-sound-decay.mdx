@@ -111,7 +111,7 @@ que una nave tiene 10 dB de más en los puestos alejados.
 ```python
 res = room.spatial_decay_curve(d, distances, region="middle", far_limit_m=24.0)
 print(round(res.decay_rate_db, 2))    # 4.73 dB por duplicación
-print(round(res.mean_excess_db, 2))   # 7.33 dB
+print(round(res.mean_level_excess, 2))   # 7.33 dB
 print(res.region)                     # middle
 ```
 
@@ -222,7 +222,7 @@ corrected = room.corrected_distribution_value(d, reference, distances)
 
 fixed = room.spatial_decay_curve(corrected, distances, region="middle", far_limit_m=24.0)
 print(round(fixed.decay_rate_db, 2))    # 4.39 dB por duplicación
-print(round(fixed.mean_excess_db, 2))   # 6.73 dB
+print(round(fixed.mean_level_excess, 2))   # 6.73 dB
 ```
 
 La corrección mueve la pendiente 0,3 dB por duplicación y el nivel 0,6 dB, que es
@@ -283,8 +283,8 @@ añade la sala en el puesto de la propia máquina.
 
 ```python
 print(round(room.fitting_density(480.0, 1200.0), 2))    # 0.1
-print(round(room.workstation_level(sound_power_level_db=95.0,
-                                   emission_level_db=85.0,
+print(round(room.workstation_level(sound_power_level=95.0,
+                                   emission_level=85.0,
                                    absorption_area=200.0), 2))   # 85.79
 print(round(room.total_workstation_level([86.0, 83.0, 80.0]), 2))   # 88.44
 ```

@@ -1006,9 +1006,9 @@ for method, colour in (("linear", "#1f77b4"), ("exponential", "#2ca02c")):
     relative = trace[cut:] / trace[cut - 1]
     # The linear average empties one time constant after the cut, and a level
     # is not defined where the mean square in the window is exactly zero.
-    level_db = np.full(relative.shape, np.nan)
-    level_db[relative > 0.0] = 20.0 * np.log10(relative[relative > 0.0])
-    ax.plot(since_cut, level_db, color=colour, lw=1.8, label=f"{method} average")
+    level = np.full(relative.shape, np.nan)
+    level[relative > 0.0] = 20.0 * np.log10(relative[relative > 0.0])
+    ax.plot(since_cut, level, color=colour, lw=1.8, label=f"{method} average")
 
     # The printed band the crossing has to land in, from Table 10 or Table 11.
     printed, tolerance = {

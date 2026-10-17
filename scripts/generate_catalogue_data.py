@@ -450,7 +450,7 @@ IMPACT_INSULATION_COLUMNS = (
     ),
     ("layer_density_kg_m3", "Density of one layer", "Densidad de una capa", "kg/m³"),
     (
-        "impact_sound_improvement_db",
+        "impact_sound_improvement",
         "Average improvement",
         "Mejora media",
         "dB",
@@ -515,7 +515,7 @@ TRANSMISSION_LOSS_COLUMNS = (
     ),
     *(
         (
-            f"transmission_loss_{band}_db",
+            f"transmission_loss_{band}",
             _band_heading(band),
             _band_heading(band),
             "dB",
@@ -538,7 +538,7 @@ DUCT_TRANSMISSION_LOSS_COLUMNS = (
     ("duct_length_m", "Duct length", "Longitud del conducto", "m"),
     *(
         (
-            f"transmission_loss_{band}_db",
+            f"transmission_loss_{band}",
             _band_heading(band),
             _band_heading(band),
             "dB",

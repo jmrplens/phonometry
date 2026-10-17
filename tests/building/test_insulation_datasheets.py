@@ -34,7 +34,7 @@ def _reduction(
     values: list[float], bands: tuple[int, ...], **extra: Any
 ) -> building.SoundReductionSpectrum:
     cells = {
-        f"sound_reduction_index_{band}_db": value
+        f"sound_reduction_index_{band}": value
         for band, value in zip(bands, values, strict=True)
     }
     return building.SoundReductionSpectrum(
@@ -44,7 +44,7 @@ def _reduction(
 
 def _improvement(**extra: Any) -> building.ImpactImprovementSpectrum:
     cells = {
-        f"impact_improvement_{band}_db": value
+        f"impact_improvement_{band}": value
         for band, value in zip(_RATED, ref.ISO717_2_ANNEX_C2_DELTA_L, strict=True)
     }
     return building.ImpactImprovementSpectrum(
@@ -88,10 +88,10 @@ def test_a_missing_core_band_is_refused_with_what_the_report_had() -> None:
     row = _reduction(
         values[:5] + values[6:],
         _RATED[:5] + _RATED[6:],
-        bounded_below={"sound_reduction_index_315_db"},
-        ranges={"sound_reduction_index_315_db": (38.0, None)},
+        bounded_below={"sound_reduction_index_315"},
+        ranges={"sound_reduction_index_315": (38.0, None)},
     )
-    with pytest.raises(ValueError, match="sound_reduction_index_315_db"):
+    with pytest.raises(ValueError, match="sound_reduction_index_315"):
         row.rating()
 
 
@@ -99,11 +99,11 @@ def test_printed_ratings_that_follow_leave_no_note() -> None:
     row = _reduction(
         ref.ISO717_1_ANNEX_C2_R_50_5000,
         _BANDS,
-        weighted_sound_reduction_index_db=30.0,
-        spectrum_adaptation_term_db=-2.0,
-        traffic_spectrum_adaptation_term_db=-3.0,
-        spectrum_adaptation_term_50_5000_db=-2.0,
-        traffic_spectrum_adaptation_term_50_5000_db=-4.0,
+        weighted_sound_reduction_index=30.0,
+        spectrum_adaptation_term=-2.0,
+        traffic_spectrum_adaptation_term=-3.0,
+        spectrum_adaptation_term_50_5000=-2.0,
+        traffic_spectrum_adaptation_term_50_5000=-4.0,
     )
     assert row._catalogue_notes() == ()
 
@@ -112,8 +112,8 @@ def test_a_printed_rating_that_does_not_follow_is_noted() -> None:
     row = _reduction(
         ref.ISO717_1_ANNEX_C2_R_50_5000,
         _BANDS,
-        weighted_sound_reduction_index_db=31.0,
-        traffic_spectrum_adaptation_term_50_5000_db=-5.0,
+        weighted_sound_reduction_index=31.0,
+        traffic_spectrum_adaptation_term_50_5000=-5.0,
     )
     assert row._catalogue_notes() == (
         "Rw is printed as 31.0 and the bands give 30 (ISO 717-1 Clause 4.4); "
@@ -124,7 +124,7 @@ def test_a_printed_rating_that_does_not_follow_is_noted() -> None:
 
 
 def test_no_note_without_the_rating_bands() -> None:
-    row = _reduction([40.0, 41.0], (500, 1000), weighted_sound_reduction_index_db=99.0)
+    row = _reduction([40.0, 41.0], (500, 1000), weighted_sound_reduction_index=99.0)
     assert row._catalogue_notes() == ()
 
 
@@ -139,9 +139,9 @@ def test_the_improvement_row_rates_as_table_c2_prints() -> None:
 
 def test_the_improvement_notes_a_printed_term_that_does_not_follow() -> None:
     row = _improvement(
-        weighted_impact_improvement_db=15.0,
-        impact_improvement_adaptation_term_db=-9.0,
-        reference_floor_adaptation_term_db=-3.0,
+        weighted_impact_improvement=15.0,
+        impact_improvement_adaptation_term=-9.0,
+        reference_floor_adaptation_term=-3.0,
     )
     (note,) = row._catalogue_notes()
     assert note.startswith("CI,r is printed as -3.0 and the bands give -2")
@@ -149,14 +149,14 @@ def test_the_improvement_notes_a_printed_term_that_does_not_follow() -> None:
 
 def test_the_printed_delta_lw_reaches_the_prediction() -> None:
     """EN 12354-2 Formula 21 takes Delta Lw through printed()."""
-    row = _improvement(weighted_impact_improvement_db=15.0)
+    row = _improvement(weighted_impact_improvement=15.0)
     result = building.predicted_impact_insulation(
-        ln_w_eq=78.0, delta_l_w=row.printed("weighted_impact_improvement_db")
+        ln_w_eq=78.0, delta_l_w=row.printed("weighted_impact_improvement")
     )
     assert result.l_prime_n_w == pytest.approx(63.0)
     empty = building.ImpactImprovementSpectrum(name="Mat", source="A test")
-    with pytest.raises(ValueError, match="weighted_impact_improvement_db"):
-        empty.printed("weighted_impact_improvement_db")
+    with pytest.raises(ValueError, match="weighted_impact_improvement"):
+        empty.printed("weighted_impact_improvement")
 
 
 def test_the_rating_result_holds_its_terms_together() -> None:
@@ -209,7 +209,7 @@ def test_the_improvement_plot_keeps_a_negative_band_in_view() -> None:
     values = [-4.0, -6.0, -2.0, 3.0, 8.0, 12.0, 16.0, 20.0, 24.0, 27.0, 30.0]
     values += [33.0, 35.0, 36.0, 37.0, 38.0]
     cells = {
-        f"impact_improvement_{band}_db": value
+        f"impact_improvement_{band}": value
         for band, value in zip(_RATED, values, strict=True)
     }
     row = building.ImpactImprovementSpectrum(name="Floating floor", source="s", **cells)
@@ -227,7 +227,7 @@ def test_the_ratings_read_a_spectrum_band_by_band() -> None:
     assert building.weighted_rating(row.spectrum()).rating == 30
     assert building.weighted_rating(row.spectrum(), bands="octave").rating == (
         building.weighted_rating(
-            [row.sound_reduction_index_db(b) for b in (125, 250, 500, 1000, 2000)]
+            [row.sound_reduction_index(b) for b in (125, 250, 500, 1000, 2000)]
         ).rating
     )
     improvement = _improvement().spectrum()
@@ -276,12 +276,12 @@ def test_a_float_keyed_mapping_is_read_like_an_integer_keyed_one() -> None:
 
 def test_the_rows_refuse_a_frequency_that_is_no_band() -> None:
     row = _reduction(ref.ISO717_1_ANNEX_C2_R_50_5000, _BANDS)
-    assert row.sound_reduction_index_db(5000) == pytest.approx(29.2)
+    assert row.sound_reduction_index(5000) == pytest.approx(29.2)
     assert row.values_at(np.array([501.19])).tolist() == [
-        row.sound_reduction_index_db(500)
+        row.sound_reduction_index(500)
     ]
     with pytest.raises(ValueError, match="one-third octave band"):
-        row.sound_reduction_index_db(6300)
+        row.sound_reduction_index(6300)
     improvement = _improvement()
-    with pytest.raises(ValueError, match="impact_improvement_50_db"):
-        improvement.impact_improvement_db(50)
+    with pytest.raises(ValueError, match="impact_improvement_50"):
+        improvement.impact_improvement(50)

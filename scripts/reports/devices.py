@@ -279,7 +279,7 @@ def _free_field_correction_example() -> tuple[object, ReportMetadata, str]:
         94.0 + c_ff_rm,
         94.0 + pressure + spread / 2,
         94.0,
-        reference_free_field_correction_db=c_ff_rm,
+        reference_free_field_correction=c_ff_rm,
     )
     table_i2 = {
         "a1": 0.005,
@@ -306,17 +306,17 @@ def _free_field_correction_example() -> tuple[object, ReportMetadata, str]:
             {**table_i2, "a7": u7, "a11": u11, "a12": u11, "a15": u15},
             repeatability_dof=2,
             frequency_hz=frequency,
-            correction_db=value,
+            correction=value,
         )
         for frequency, u7, u11, u15, value in zip(
-            f, a7, a11, a15, correction.correction_db, strict=True
+            f, a7, a11, a15, correction.correction, strict=True
         )
     ]
     result = ph.metrology.verify_correction_uncertainty(
         f,
         [b.expanded_uncertainty_db for b in budgets],
         clause=correction.clause,
-        correction_db=correction.correction_db,
+        correction=correction.correction,
         coverage_factor=[b.coverage_factor for b in budgets],
         correction_range_db=correction.range_db,
     )

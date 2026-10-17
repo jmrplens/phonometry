@@ -149,8 +149,8 @@ def test_table_i3_reproduces() -> None:
 
 
 def test_budget_is_uncertainty_propagation_with_unit_sensitivities() -> None:
-    budget = _budget_i2(correction_db=0.42)
-    assert budget.correction_db == pytest.approx(0.42)
+    budget = _budget_i2(correction=0.42)
+    assert budget.correction == pytest.approx(0.42)
     assert np.allclose(np.abs(budget.uncertainty.sensitivities), 1.0, atol=1e-9)
     assert np.allclose(
         budget.uncertainty.contributions, budget.standard_uncertainties_db, atol=1e-12
@@ -455,31 +455,31 @@ _A_DEVIATION = np.array([0.2, 0.1, -0.6])
 
 def test_equal_weights_take_the_mean_deviation() -> None:
     result = metrology.adjustment_value(
-        _A_FREQUENCIES, 94.0 + _A_DEVIATION, 93.9, calibrator_level_db=94.0
+        _A_FREQUENCIES, 94.0 + _A_DEVIATION, 93.9, calibrator_level=94.0
     )
     s = -float(np.mean(_A_DEVIATION))
-    assert result.sensitivity_adjustment_db == pytest.approx(s)
+    assert result.sensitivity_adjustment == pytest.approx(s)
     assert np.allclose(result.adjusted_deviation_db, _A_DEVIATION + s)
-    assert result.calibrator_indicated_level_db == pytest.approx(93.9 + s)
-    assert result.adjustment_db == pytest.approx(94.0 - (93.9 + s))
+    assert result.calibrator_indicated_level == pytest.approx(93.9 + s)
+    assert result.adjustment == pytest.approx(94.0 - (93.9 + s))
     assert result.check_frequency_offset_db == pytest.approx(0.1 + s)
-    assert result.free_field_indicated_level_db == pytest.approx(94.0 + 0.1 + s)
-    assert result.pressure_indicated_level_db is None
-    assert result.pressure_to_free_field_correction_db is None
+    assert result.free_field_indicated_level == pytest.approx(94.0 + 0.1 + s)
+    assert result.pressure_indicated_level is None
+    assert result.pressure_to_free_field_correction is None
 
 
 def test_adjustment_value_is_l1_less_l4() -> None:
     """ΔL = L1 - L4, added to what the adjusted meter reads on the calibrator."""
     result = metrology.adjustment_value(
-        _A_FREQUENCIES, 94.0 + _A_DEVIATION, 93.7, calibrator_level_db=94.0
+        _A_FREQUENCIES, 94.0 + _A_DEVIATION, 93.7, calibrator_level=94.0
     )
     # s = +0,1 dB, so L4 = 93,7 + 0,1 = 93,8 dB and ΔL = 94,0 - 93,8 = +0,2 dB.
-    assert result.sensitivity_adjustment_db == pytest.approx(0.1, abs=1e-12)
-    assert result.calibrator_indicated_level_db == pytest.approx(93.8, abs=1e-12)
-    assert result.adjustment_db == pytest.approx(0.2, abs=1e-12)
-    assert result.adjustment_db > 0.0
-    assert result.calibrator_indicated_level_db + result.adjustment_db == (
-        pytest.approx(result.calibrator_level_db, abs=1e-12)
+    assert result.sensitivity_adjustment == pytest.approx(0.1, abs=1e-12)
+    assert result.calibrator_indicated_level == pytest.approx(93.8, abs=1e-12)
+    assert result.adjustment == pytest.approx(0.2, abs=1e-12)
+    assert result.adjustment > 0.0
+    assert result.calibrator_indicated_level + result.adjustment == (
+        pytest.approx(result.calibrator_level, abs=1e-12)
     )
 
 
@@ -489,7 +489,7 @@ def test_a_nominal_check_frequency_finds_its_exact_counterpart() -> None:
         _THIRDS,
         94.0,
         94.0,
-        calibrator_level_db=94.0,
+        calibrator_level=94.0,
         check_frequency_hz=250.0,
     )
     assert result.check_frequency_offset_db == pytest.approx(0.0, abs=1e-12)
@@ -498,13 +498,13 @@ def test_a_nominal_check_frequency_finds_its_exact_counterpart() -> None:
         94.0 + 0.01 * np.arange(_THIRDS.size),
         94.0,
         94.0,
-        reference_sensitivity_level_db=-26.0,
+        reference_sensitivity_level=-26.0,
         check_frequency_hz=250.0,
     )
     exact = float(_THIRDS[np.argmin(np.abs(_THIRDS - 250.0))])
     assert actuator.check_frequency_hz == pytest.approx(exact)
     assert exact == pytest.approx(251.188643, abs=1e-6)
-    assert actuator.correction_db[_THIRDS == exact][0] == 0.0
+    assert actuator.correction[_THIRDS == exact][0] == 0.0
 
 
 def test_tolerances_weigh_the_fit() -> None:
@@ -513,12 +513,12 @@ def test_tolerances_weigh_the_fit() -> None:
         _A_FREQUENCIES,
         94.0 + _A_DEVIATION,
         94.0,
-        calibrator_level_db=94.0,
+        calibrator_level=94.0,
         tolerance_db=tolerance,
     )
     weights = np.array([1.0, 1.0 / 0.49, 0.0])
     expected = -float(np.sum(weights * _A_DEVIATION) / np.sum(weights))
-    assert result.sensitivity_adjustment_db == pytest.approx(expected)
+    assert result.sensitivity_adjustment == pytest.approx(expected)
     assert result.weights.sum() == pytest.approx(1.0)
     assert result.weights[2] == 0.0
 
@@ -528,8 +528,8 @@ def test_the_incident_level_carries_a_field_below_the_calibrator_level() -> None
         _A_FREQUENCIES,
         90.0 + _A_DEVIATION,
         93.9,
-        calibrator_level_db=94.0,
-        incident_level_db=90.0,
+        calibrator_level=94.0,
+        incident_level=90.0,
     )
     assert np.allclose(result.free_field_deviation_db, _A_DEVIATION)
 
@@ -540,20 +540,18 @@ def test_pressure_response_gives_l3_and_the_pressure_correction() -> None:
         _A_FREQUENCIES,
         94.0 + _A_DEVIATION,
         93.9,
-        calibrator_level_db=94.0,
-        pressure_indicated_level_db=pressure,
+        calibrator_level=94.0,
+        pressure_indicated_level=pressure,
     )
-    s = result.sensitivity_adjustment_db
-    assert result.pressure_indicated_level_db == pytest.approx(94.05 + s)
-    assert np.allclose(
-        result.pressure_to_free_field_correction_db, -(pressure - 94.0 + s)
-    )
+    s = result.sensitivity_adjustment
+    assert result.pressure_indicated_level == pytest.approx(94.05 + s)
+    assert np.allclose(result.pressure_to_free_field_correction, -(pressure - 94.0 + s))
 
 
 def test_adjustment_needs_the_check_frequency_among_the_frequencies() -> None:
     with pytest.raises(ValueError, match="check_frequency_hz"):
         metrology.adjustment_value(
-            [125.0, 8000.0], [94.0, 93.0], 94.0, calibrator_level_db=94.0
+            [125.0, 8000.0], [94.0, 93.0], 94.0, calibrator_level=94.0
         )
 
 
@@ -566,7 +564,7 @@ def test_adjustment_refuses_a_tolerance_that_is_not_positive(
             _A_FREQUENCIES,
             94.0 + _A_DEVIATION,
             94.0,
-            calibrator_level_db=94.0,
+            calibrator_level=94.0,
             tolerance_db=tolerance,
         )
 
@@ -577,14 +575,14 @@ def test_adjustment_refuses_a_tolerance_infinite_everywhere() -> None:
             _A_FREQUENCIES,
             94.0 + _A_DEVIATION,
             94.0,
-            calibrator_level_db=94.0,
+            calibrator_level=94.0,
             tolerance_db=np.inf,
         )
 
 
 def test_adjustment_value_columns_are_read_only() -> None:
     result = metrology.adjustment_value(
-        _A_FREQUENCIES, 94.0 + _A_DEVIATION, 94.0, calibrator_level_db=94.0
+        _A_FREQUENCIES, 94.0 + _A_DEVIATION, 94.0, calibrator_level=94.0
     )
     with pytest.raises(ValueError, match="read-only"):
         result.free_field_deviation_db[0] = 0.0
@@ -615,11 +613,11 @@ def test_formula_d7_returns_the_correction_the_responses_define() -> None:
         _FIELD_2 + _RM_FREE,  # (D.2)
         _ON_SLM + _SLM_PRESSURE,  # (D.3)
         _ON_RM + _RM_PRESSURE,  # (D.4)
-        reference_free_field_correction_db=_REFERENCE_CORRECTION,
-        free_field_level_difference_db=_FIELD_1 - _FIELD_2,
-        calibrator_level_difference_db=_ON_SLM - _ON_RM,
+        reference_free_field_correction=_REFERENCE_CORRECTION,
+        free_field_level_difference=_FIELD_1 - _FIELD_2,
+        calibrator_level_difference=_ON_SLM - _ON_RM,
     )
-    assert np.allclose(result.correction_db, _TRUE_CORRECTION, atol=1e-12)
+    assert np.allclose(result.correction, _TRUE_CORRECTION, atol=1e-12)
     assert (result.formula, result.clause, result.n_determinations) == ("D.7", 12, 1)
     assert np.allclose(result.range_db, 0.0)
 
@@ -636,11 +634,11 @@ def test_formula_e6_returns_the_correction_with_figure_e1_labels() -> None:
         ind2,
         ind3b,
         ind3a,
-        reference_free_field_correction_db=_REFERENCE_CORRECTION,
-        free_field_level_difference_db=_FIELD_1 - _FIELD_2,
-        coupler_level_difference_db=_ON_SLM - _ON_RM,
+        reference_free_field_correction=_REFERENCE_CORRECTION,
+        free_field_level_difference=_FIELD_1 - _FIELD_2,
+        coupler_level_difference=_ON_SLM - _ON_RM,
     )
-    assert np.allclose(result.correction_db, _TRUE_CORRECTION, atol=1e-12)
+    assert np.allclose(result.correction, _TRUE_CORRECTION, atol=1e-12)
     assert (result.formula, result.clause) == ("E.6", 13)
     # (E.6) as printed, read with Figure E.1's labels, is off by twice the
     # difference of the two pressure responses (the erratum).
@@ -666,14 +664,14 @@ def test_formula_f13_returns_the_normalised_correction() -> None:
         _FIELD_1 + _SLM_FREE,  # (F.1)
         _FIELD_2 + sensitivity + gain,  # (F.2), Delta L_F,RM = S_RM + G_RC
         actuator + slm_actuator,  # (F.3)
-        reference_sensitivity_level_db=sensitivity,
+        reference_sensitivity_level=sensitivity,
         reference_channel_gain_db=gain,
-        actuator_level_db=actuator,
-        free_field_level_difference_db=_FIELD_1 - _FIELD_2,
+        actuator_level=actuator,
+        free_field_level_difference=_FIELD_1 - _FIELD_2,
     )
     absolute = _SLM_FREE - slm_actuator
-    assert np.allclose(result.correction_db, absolute - absolute[1], atol=1e-12)
-    assert result.correction_db[1] == 0.0
+    assert np.allclose(result.correction, absolute - absolute[1], atol=1e-12)
+    assert result.correction[1] == 0.0
     assert result.check_frequency_hz == 1000.0
     assert (result.formula, result.clause) == ("F.13", 14)
 
@@ -685,7 +683,7 @@ def test_the_actuator_needs_its_normalisation_frequency() -> None:
             0.0,
             0.0,
             0.0,
-            reference_sensitivity_level_db=-26.0,
+            reference_sensitivity_level=-26.0,
         )
 
 
@@ -697,13 +695,13 @@ def test_determinations_are_averaged_and_their_range_kept() -> None:
         94.0 + _RM_FREE,
         94.0 + _SLM_PRESSURE,
         94.0 + _RM_PRESSURE,
-        reference_free_field_correction_db=_REFERENCE_CORRECTION,
+        reference_free_field_correction=_REFERENCE_CORRECTION,
     )
     assert result.n_determinations == 3
-    assert np.allclose(result.correction_db, _TRUE_CORRECTION + 0.01 / 3.0)
+    assert np.allclose(result.correction, _TRUE_CORRECTION + 0.01 / 3.0)
     assert np.allclose(result.range_db, 0.05)
     with pytest.raises(ValueError, match="read-only"):
-        result.corrections_db[0, 0] = 0.0
+        result.corrections[0, 0] = 0.0
 
 
 def _three_microphones_on_three_calibrators(
@@ -719,7 +717,7 @@ def _three_microphones_on_three_calibrators(
         94.0 + _RM_FREE,
         94.0 + _SLM_PRESSURE + loading,
         94.0 + _RM_PRESSURE,
-        reference_free_field_correction_db=_REFERENCE_CORRECTION,
+        reference_free_field_correction=_REFERENCE_CORRECTION,
         **kwargs,  # type: ignore[arg-type]
     )
 
@@ -730,9 +728,9 @@ def test_the_range_is_taken_over_the_microphones() -> None:
         microphones=[1, 1, 1, 2, 2, 2, 3, 3, 3]
     )
     assert (grouped.n_determinations, grouped.n_microphones) == (9, 3)
-    assert grouped.microphone_corrections_db.shape == (3, _F.size)
+    assert grouped.microphone_corrections.shape == (3, _F.size)
     assert np.allclose(grouped.range_db, 0.0, atol=1e-12)
-    assert np.allclose(grouped.correction_db, _TRUE_CORRECTION - 0.15)
+    assert np.allclose(grouped.correction, _TRUE_CORRECTION - 0.15)
     assert grouped.microphones == (1, 1, 1, 2, 2, 2, 3, 3, 3)
     verdict = metrology.verify_correction_uncertainty(
         grouped.frequencies,
@@ -762,27 +760,27 @@ def test_determinations_must_agree_in_number() -> None:
     two = np.zeros((2, _F.size))
     with pytest.raises(ValueError, match="determinations"):
         metrology.comparison_coupler_correction(
-            _F, three, two, 0.0, 0.0, reference_free_field_correction_db=0.0
+            _F, three, two, 0.0, 0.0, reference_free_field_correction=0.0
         )
 
 
 def test_readings_need_one_column_per_frequency() -> None:
     too_long = np.zeros(_F.size + 1)
-    with pytest.raises(ValueError, match="slm_calibrator_level_db"):
+    with pytest.raises(ValueError, match="slm_calibrator_level"):
         metrology.sound_calibrator_correction(
-            _F, 0.0, 0.0, too_long, 0.0, reference_free_field_correction_db=0.0
+            _F, 0.0, 0.0, too_long, 0.0, reference_free_field_correction=0.0
         )
 
 
 def test_readings_must_be_finite() -> None:
-    with pytest.raises(ValueError, match="reference_coupler_level_db"):
+    with pytest.raises(ValueError, match="reference_coupler_level"):
         metrology.comparison_coupler_correction(
             _F,
             0.0,
             0.0,
             0.0,
             [0.0, np.nan, 0.0, 0.0],
-            reference_free_field_correction_db=0.0,
+            reference_free_field_correction=0.0,
         )
 
 
@@ -793,8 +791,8 @@ def test_correction_result_refuses_an_unknown_source() -> None:
     with pytest.raises(ValueError, match="source"):
         ffc.FreeFieldCorrection(
             frequencies=_F,
-            corrections_db=_ZEROS,
-            reference_correction_db=_ZEROS,
+            corrections=_ZEROS,
+            reference_correction=_ZEROS,
             source="pistonphone",
         )
 
@@ -803,8 +801,8 @@ def test_only_an_actuator_is_normalised() -> None:
     with pytest.raises(ValueError, match="check_frequency_hz"):
         ffc.FreeFieldCorrection(
             frequencies=_F,
-            corrections_db=_ZEROS,
-            reference_correction_db=_ZEROS,
+            corrections=_ZEROS,
+            reference_correction=_ZEROS,
             source="sound_calibrator",
             check_frequency_hz=1000.0,
         )
@@ -820,7 +818,7 @@ def _correction() -> metrology.FreeFieldCorrection:
         94.0 + _RM_FREE,
         94.0 + _SLM_PRESSURE,
         94.0 + _RM_PRESSURE,
-        reference_free_field_correction_db=_REFERENCE_CORRECTION,
+        reference_free_field_correction=_REFERENCE_CORRECTION,
     )
 
 
@@ -830,12 +828,12 @@ def test_every_result_plots(language: str) -> None:
         _A_FREQUENCIES,
         94.0 + _A_DEVIATION,
         94.0,
-        calibrator_level_db=94.0,
+        calibrator_level=94.0,
         tolerance_db=[1.0, 0.7, np.inf],
-        pressure_indicated_level_db=94.0 + _A_DEVIATION - 0.1,
+        pressure_indicated_level=94.0 + _A_DEVIATION - 0.1,
     )
     actuator = metrology.electrostatic_actuator_correction(
-        _F, 94.0 + _SLM_FREE, 94.0, 94.0, reference_sensitivity_level_db=-26.0
+        _F, 94.0 + _SLM_FREE, 94.0, 94.0, reference_sensitivity_level=-26.0
     )
     verdict = metrology.verify_correction_uncertainty(
         _F, [0.1, 0.2, 0.3, 0.4], clause=12, correction_range_db=[0.1, 0.1, 0.1, 0.5]

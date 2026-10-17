@@ -672,7 +672,7 @@ def third_octaves_from_narrowband(
 
 
 def elastic_insertion_loss(
-    levels_before_db: ArrayLike, levels_after_db: ArrayLike
+    levels_before: ArrayLike, levels_after: ArrayLike
 ) -> NDArray[np.float64]:
     r"""The insertion loss :math:`D_\mathrm{e}(f_{\mathrm{T}n})` of Annex B, Formula (B.1), in dB.
 
@@ -682,16 +682,16 @@ def elastic_insertion_loss(
     difference spectrum of Formula (B.2) is the same subtraction between any
     two spectra.
 
-    :param levels_before_db: The third-octave levels before, in decibels.
-    :param levels_after_db: The levels after, at the same point, in decibels.
+    :param levels_before: The third-octave levels before, in decibels.
+    :param levels_after: The levels after, at the same point, in decibels.
     :return: :math:`L_1 - L_2` per band, positive where the element reduces
         the level.
     :raises ValueError: If the two do not match band for band.
     """
-    before = require_finite_array(levels_before_db, "levels_before_db")
-    after = require_finite_array(levels_after_db, "levels_after_db")
+    before = require_finite_array(levels_before, "levels_before")
+    after = require_finite_array(levels_after, "levels_after")
     if before.shape != after.shape:
-        msg = "'levels_before_db' and 'levels_after_db' must match band for band."
+        msg = "'levels_before' and 'levels_after' must match band for band."
         raise ValueError(msg)
     return np.asarray(before - after, dtype=np.float64)
 
@@ -755,11 +755,11 @@ class TrainPassage(OwnsArrays):
         :math:`\tilde v_3` of Formula (4), in that order.
     :ivar intervals_s: The three stretches ``(start, end)``, in seconds.
     :ivar event_velocity_mm_s: :math:`v_\mathrm{E}` of Formula (8), from :math:`T_3`.
-    :ivar event_level_db: :math:`L_{v\mathrm{E}}` of Formula (9).
+    :ivar event_level: :math:`L_{v\mathrm{E}}` of Formula (9).
     :ivar frequencies: The nominal third-octave centres analysed.
-    :ivar band_interval_levels_db: :math:`L_{v\mathrm{F}j}(f_{\mathrm{T}n})` of Formula (6), one
+    :ivar band_interval_levels: :math:`L_{v\mathrm{F}j}(f_{\mathrm{T}n})` of Formula (6), one
         row per stretch, :math:`T_1` to :math:`T_3`.
-    :ivar band_max_levels_db: :math:`L_{v\mathrm{Fmax}}(f_{\mathrm{T}n})` of Formula
+    :ivar band_max_levels: :math:`L_{v\mathrm{Fmax}}(f_{\mathrm{T}n})` of Formula
         (7), over :math:`T_3`.
     :ivar fs: The sampling frequency of the record.
     """
@@ -772,10 +772,10 @@ class TrainPassage(OwnsArrays):
     interval_rms_mm_s: tuple[float, float, float]
     intervals_s: tuple[tuple[float, float], ...]
     event_velocity_mm_s: float
-    event_level_db: float
+    event_level: float
     frequencies: NDArray[np.float64]
-    band_interval_levels_db: NDArray[np.float64]
-    band_max_levels_db: NDArray[np.float64]
+    band_interval_levels: NDArray[np.float64]
+    band_max_levels: NDArray[np.float64]
     fs: float
 
     def plot(
@@ -965,12 +965,12 @@ def evaluate_train_passage(
         interval_rms_mm_s=(rms[0], rms[1], rms[2]),
         intervals_s=tuple((s.start / fs, s.stop / fs) for s in stretches),
         event_velocity_mm_s=event_velocity(rms[2], duration_3),
-        event_level_db=(
+        event_level=(
             event_velocity_level(rms[2], duration_3) if rms[2] > 0.0 else -math.inf
         ),
         frequencies=centres,
-        band_interval_levels_db=interval_levels,
-        band_max_levels_db=_level(
+        band_interval_levels=interval_levels,
+        band_max_levels=_level(
             np.max(band_rms[:, t3], axis=1), VELOCITY_LEVEL_REFERENCE_MM_S
         ),
         fs=fs,

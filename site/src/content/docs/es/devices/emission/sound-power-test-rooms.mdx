@@ -438,7 +438,7 @@ in_room = emission.sound_power_special_room(
     rss2, freqs, volume=72.0, nominal_reverberation_time_s=tnom, background_levels=bg2,
 )
 suitability = emission.check_special_room_suitability(in_room.sound_power_level, lw_r, freqs)
-print(np.round(suitability.difference_db, 1))   # [ 0.8  0.3  0.1 -0.1  0.2 -0.2 -0.4]
+print(np.round(suitability.difference, 1))   # [ 0.8  0.3  0.1 -0.1  0.2 -0.2 -0.4]
 print(suitability.passes)                       # True
 ```
 
@@ -475,8 +475,8 @@ print(np.round(calibration.sound_power_level_at(freqs, bandwidth="octave"), 2))
 suitability2 = emission.check_special_room_suitability(
     in_room.sound_power_level, calibration, freqs, temperature_c=22.0, static_pressure_kpa=97.5,
 )
-print(np.round(suitability2.calibrated_power_level_db, 2))  # [79.72 83.22 85.92 86.62 86.12 84.02 80.42]
-print(np.round(suitability2.difference_db, 1))   # [ 1.1  0.6  0.4  0.2  0.5  0.1 -0.1]
+print(np.round(suitability2.calibrated_power_level, 2))  # [79.72 83.22 85.92 86.62 86.12 84.02 80.42]
+print(np.round(suitability2.difference, 1))   # [ 1.1  0.6  0.4  0.2  0.5  0.1 -0.1]
 print(suitability2.passes)                       # True
 ```
 

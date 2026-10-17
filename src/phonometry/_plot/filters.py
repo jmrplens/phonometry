@@ -213,7 +213,7 @@ def plot_filter_class(
     ax = ax if ax is not None else _new_axes()
     cls = result.reference_class()
     idx = _worst_band_index(result)
-    fm = float(result.band_frequencies[idx])
+    fm = float(result.frequencies[idx])
 
     # The relative attenuation exactly as verify_filter_class reads it, on
     # the same grid: the band's response at the input rate, its
@@ -393,7 +393,7 @@ def plot_filter_bandwidth(
     from ..filters.compliance import _BANDWIDTH_LIMITS_DB
 
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.band_frequencies, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     deviation = np.array([float(b["bandwidth_deviation_db"]) for b in result.bands])
     edition_limits = _BANDWIDTH_LIMITS_DB[result.edition]
     labels = _EDITION_LABELS[result.edition]
@@ -465,7 +465,7 @@ def plot_filter_summation(
     )
 
     ax = ax if ax is not None else _new_axes()
-    mids = np.asarray(result.band_frequencies, dtype=np.float64)
+    mids = np.asarray(result.frequencies, dtype=np.float64)
     graded = [
         k for k, band in enumerate(result.bands) if band["summation_min_db"] is not None
     ]
@@ -571,7 +571,7 @@ def plot_time_invariance(
     from ..filters.time_invariance import _TIME_INVARIANCE_LIMITS_DB
 
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.band_frequencies, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     limits = {
         c: (-_TIME_INVARIANCE_LIMITS_DB[c], _TIME_INVARIANCE_LIMITS_DB[c])
         for c in (1, 2)

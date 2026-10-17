@@ -93,7 +93,7 @@ def test_unknown_engine_rejected(tmp_path: Path) -> None:
 def test_missing_band_data_rejected(tmp_path: Path) -> None:
     """A rating built without the per-band curves cannot be reported."""
     bare = building.WeightedRatingResult(rating=52, c=-1, ctr=-4, unfavourable_sum=30.0)
-    assert bare.band_centers is None
+    assert bare.frequencies is None
     out = str(tmp_path / "bare.pdf")
     with pytest.raises(ValueError, match="per-band data"):
         bare.report(out)
@@ -281,8 +281,8 @@ def test_octave_band_fiche_declares_octave_bands(tmp_path: Path) -> None:
     "One-third-octave".
     """
     result = building.weighted_impact_rating([65.0, 68.0, 67.0, 63.0, 58.0])
-    assert result.band_centers is not None
-    assert len(result.band_centers) == 5
+    assert result.frequencies is not None
+    assert len(result.frequencies) == 5
     out = tmp_path / "octave.pdf"
     result.report(str(out))
     text = _extract_text(str(out))

@@ -358,7 +358,7 @@ def _track_decay_rate() -> ph.environment.TrackDecayRate:
     rates = np.array(list(limit.values())) * 1.2
     positions = ph.environment.track_decay_excitation_positions()
     return ph.environment.track_decay_rate(
-        np.exp(-np.outer(positions, rates / 8.686)), frequencies_hz=list(limit)
+        np.exp(-np.outer(positions, rates / 8.686)), frequencies=list(limit)
     )
 
 
@@ -403,7 +403,7 @@ def _adjacent_neutrality() -> ph.environment.AdjacentVehicleNeutrality:
 def _small_roughness_deviation() -> ph.environment.SmallRoughnessDeviation:
     """ISO 3095 Annex C with the 4 cm band 2 dB over the limit at 80 km/h."""
     base = _rolling_stock_roughness()
-    levels = np.array(base.levels_db)
+    levels = np.array(base.levels)
     levels[base.bands.index(14)] += 3.0
     roughness = ph.environment.AcousticRoughnessSpectrum(base.wavelengths_m, levels)
     frequencies = [
@@ -427,20 +427,20 @@ def _small_roughness_deviation() -> ph.environment.SmallRoughnessDeviation:
     ]
     noise = 70.0 + 5.0 * np.sin(np.linspace(0.0, 3.0, len(frequencies)))
     return ph.environment.check_small_roughness_deviations(
-        roughness, noise, frequencies_hz=frequencies, speed_kmh=80.0
+        roughness, noise, frequencies=frequencies, speed_kmh=80.0
     )
 
 
 def _roughness_comparability() -> ph.environment.RoughnessComparability:
     """ISO 3095 Annex E between two tracks 3 dB apart in three bands."""
     one = _rolling_stock_roughness(-2.0)
-    levels = np.array(one.levels_db)
+    levels = np.array(one.levels)
     levels[8:11] += 3.0
     two = ph.environment.AcousticRoughnessSpectrum(one.wavelengths_m, levels)
     frequencies = [250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0]
     noise = np.full(len(frequencies), 75.0)
     return ph.environment.roughness_comparability(
-        one, two, noise, noise + 1.0, frequencies_hz=frequencies, speed_kmh=100.0
+        one, two, noise, noise + 1.0, frequencies=frequencies, speed_kmh=100.0
     )
 
 
@@ -592,7 +592,7 @@ def _service_equipment() -> ph.building.ServiceEquipmentResult:
 def _service_equipment_background() -> ph.building.ServiceEquipmentBackgroundResult:
     """Three octave bands, one of them held at 2,2 dB (ISO/DIS 16032 Clause 9)."""
     return ph.building.service_equipment_background_correction(
-        [52.0, 48.0, 41.0], [38.0, 42.0, 39.0], frequencies_hz=[125.0, 250.0, 500.0]
+        [52.0, 48.0, 41.0], [38.0, 42.0, 39.0], frequencies=[125.0, 250.0, 500.0]
     )
 
 
@@ -629,7 +629,7 @@ def _varying_background() -> ph.building.VaryingBackgroundCheck:
         [28.0, 27.0, 22.0, 20.0],
         [41.0, 35.4, 36.0, 33.5],
         observation_time_s=720.0,
-        frequencies_hz=[125.0, 250.0, 500.0, 1000.0],
+        frequencies=[125.0, 250.0, 500.0, 1000.0],
     )
 
 
@@ -1603,7 +1603,7 @@ def _high_frequency_power() -> ph.emission.HighFrequencySoundPowerResult:
     freqs = np.array([12500.0, 16000.0, 20000.0])
     room = ph.emission.room_constant_from_air_absorption(
         freqs,
-        volume_m3=200.0,
+        volume=200.0,
         surface_area_m2=210.0,
         temperature_c=23.0,
         relative_humidity_percent=50.0,
@@ -1617,7 +1617,7 @@ def _high_frequency_power() -> ph.emission.HighFrequencySoundPowerResult:
         ]
     )
     return ph.emission.high_frequency_sound_power(
-        orientations, frequencies_hz=freqs, room_constant_m2=room
+        orientations, frequencies=freqs, room_constant_m2=room
     )
 
 
@@ -1659,7 +1659,7 @@ def _inverse_square_law() -> ph.emission.InverseSquareLawResult:
             )
         )
     return ph.emission.inverse_square_law_deviations(
-        traverses, frequencies_hz=freqs, room="hemi-anechoic"
+        traverses, frequencies=freqs, room="hemi-anechoic"
     )
 
 
@@ -1670,7 +1670,7 @@ def _source_directionality() -> ph.emission.SourceDirectionalityResult:
     lobe = positions[:, 0] / 1.5
     levels = 80.0 + np.outer(lobe, np.linspace(0.3, 2.0, freqs.size))
     return ph.emission.verify_source_directionality(
-        levels, frequencies_hz=freqs, room="hemi-anechoic"
+        levels, frequencies=freqs, room="hemi-anechoic"
     )
 
 
@@ -1699,7 +1699,7 @@ def _reference_source_calibration() -> ph.emission.ReferenceSourceCalibration:
     shape = 78.0 + 2.0 * np.sin(np.linspace(0.0, np.pi, _RSS_THIRDS.size))
     levels = shape[None, :] + np.linspace(-1.0, 1.0, 20)[:, None]
     return ph.emission.reference_source_calibration(
-        levels, frequencies_hz=_RSS_THIRDS, arrangement="fixed"
+        levels, frequencies=_RSS_THIRDS, arrangement="fixed"
     )
 
 
@@ -1720,7 +1720,7 @@ def _reference_source_drift() -> ph.emission.ReferenceSourceDriftResult:
     latest = reference + np.linspace(-0.2, 0.3, _RSS_THIRDS.size)
     latest[12] += 0.5
     return ph.emission.verify_reference_source_drift(
-        reference, latest, frequencies_hz=_RSS_THIRDS
+        reference, latest, frequencies=_RSS_THIRDS
     )
 
 
@@ -1802,7 +1802,7 @@ def _hard_walled_room_check() -> ph.emission.HardWalledRoomCheck:
     spread = np.array([1.8, 1.2, 1.9, 1.0])
     orientations = 80.0 + np.linspace(0.0, 1.0, 8)[:, None] * spread[None, :]
     return ph.emission.check_hard_walled_room(
-        orientations, _ISO3743_FREQS, volume_m3=60.0, reference_box_m=[0.6, 0.5, 0.4]
+        orientations, _ISO3743_FREQS, volume=60.0, reference_box_m=[0.6, 0.5, 0.4]
     )
 
 
@@ -1826,7 +1826,7 @@ def _source_location_plan() -> ph.emission.SourceLocationPlan:
 def _special_room_power() -> ph.emission.SpecialRoomSoundPowerResult:
     """ISO 3743-2 direct method in a 70 m3 room, Tnom = 0,73 s."""
     return ph.emission.sound_power_special_room(
-        _ISO3743_ST, _ISO3743_FREQS, volume_m3=70.0, nominal_reverberation_time_s=0.73,
+        _ISO3743_ST, _ISO3743_FREQS, volume=70.0, nominal_reverberation_time_s=0.73,
         background_levels=np.array([66.0, 67.0, 66.0, 60.0]), sigma_omc_db=1.0,
     )  # fmt: skip
 
@@ -1840,7 +1840,7 @@ def _special_room_reverberation() -> ph.emission.SpecialRoomReverberationCheck:
     t = 0.7 * ph.emission.reverberation_parameter(thirds, 70.0)
     t[4] *= 1.25
     return ph.emission.check_special_room_reverberation(
-        t, thirds, volume_m3=70.0, nominal_reverberation_time_s=0.7
+        t, thirds, volume=70.0, nominal_reverberation_time_s=0.7
     )
 
 
@@ -1898,14 +1898,14 @@ def _turbine_declaration() -> ph.emission.TurbineNoiseDeclaration:
     )
 
 
-def _immission_record(fs_hz: float = 2048.0) -> np.ndarray:
+def _immission_record(fs: float = 2048.0) -> np.ndarray:
     """A two-second burst of ground vibration inside a quiet 70 s record.
 
     Long enough for two whole 30 s clock intervals, so the clock maxima and
     their r.m.s. are real rather than empty, and shaped so the meter has
     something to hold a maximum of.
     """
-    t = np.arange(int(70.0 * fs_hz)) / fs_hz
+    t = np.arange(int(70.0 * fs)) / fs
     record = np.zeros_like(t)
     burst = (t > 20.0) & (t < 22.0)
     record[burst] = (
@@ -2106,7 +2106,7 @@ def _induction_loop_verification() -> ph.electroacoustics.InductionLoopVerificat
     """IEC 60118-4:2014: four points, the response and the noise with the system on."""
     return ph.electroacoustics.verify_induction_loop_system(
         [0.5, -1.0, 2.0, -2.5],
-        frequencies_hz=[100.0, 1000.0, 5000.0],
+        frequencies=[100.0, 1000.0, 5000.0],
         response_db=[[-1.0, 0.0, -2.5], [0.0, 0.0, -3.4]],
         background_noise_levels_db=[-50.0, -49.0, -48.0, -51.0],
         system_noise_levels_db=[-48.0, -47.5, -47.0, -48.0],

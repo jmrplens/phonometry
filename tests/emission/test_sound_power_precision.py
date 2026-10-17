@@ -233,7 +233,7 @@ def test_meteorological_invalid_pressure_raises() -> None:
 # ISO 3745 - uncertainty (Eq. 24/25)
 # ==========================================================================
 def test_uncertainty_worked_example_k2() -> None:
-    """Clause 10.5 EXAMPLE: sigma_omc=2,0, sigma_R0=0,5, k=2 -> U = 4,1 dB."""
+    """Clause 10.5 EXAMPLE: sigma_omc_db=2,0, sigma_R0=0,5, k=2 -> U = 4,1 dB."""
     u = precision_uncertainty(0.5, 2.0, 2.0)
     assert u == pytest.approx(4.123, abs=1e-3)
 

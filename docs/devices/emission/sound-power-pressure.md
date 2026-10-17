@@ -201,7 +201,7 @@ these habits:
 | `room.reverberation_time`, `room.volume` | float/array, float | s, m³ | > 0 | $A = 0.16\,V/T$ for $K_2$; per-band $T$ → per-band $K_2$ |
 | `room.mean_absorption_coefficient`, `room.room_surface` | float/array, float | -, m² | `(0,1]`, > 0 | $A = \alpha\,S_v$ (Eq. A.7); per-band $\alpha$ → per-band $K_2$ |
 | `grade` | str | — | `'engineering'` (default) / `'survey'` | ISO 3744 vs ISO 3746 |
-| `omc_uncertainty` | float | dB | default `0.0` | $\sigma_\text{omc}$, operating/mounting instability, folded into $U$ |
+| `sigma_omc_db` | float | dB | default `0.0` | $\sigma_\text{omc}$, operating/mounting instability, folded into $U$ |
 
 Returns a `SoundPowerResult`: `sound_power_level` (per-band $L_W$),
 `surface_pressure_level` ($L_p$ after $K_1$/$K_2$), `mean_pressure_level`,

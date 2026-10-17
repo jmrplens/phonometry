@@ -588,7 +588,7 @@ def absorption_reference_corrected(
 # One-third-octave presentation (ISO 13472-1 Clause 4.1 / ISO 13472-2 6.6)
 # --------------------------------------------------------------------------- #
 def one_third_octave_absorption(
-    frequency: ArrayLike,
+    frequencies: ArrayLike,
     absorption: ArrayLike,
     *,
     f_min: float = PART1_FREQUENCY_RANGE[0],
@@ -605,26 +605,26 @@ def one_third_octave_absorption(
     Clause 6.6 step 5); Part 1 does not mandate clipping, so pass
     ``clip_negative=False`` to reproduce its raw output.
 
-    :param frequency: Narrow-band frequencies, in hertz.
-    :param absorption: Narrow-band absorption values aligned with ``frequency``.
+    :param frequencies: Narrow-band frequencies, in hertz.
+    :param absorption: Narrow-band absorption values aligned with ``frequencies``.
     :param f_min: Lowest band centre to report, in hertz (default 250 Hz).
     :param f_max: Highest band centre to report, in hertz (4000 Hz for Part 1;
         pass 1600 Hz for the Part-2 range).
     :param clip_negative: Set negative band results to zero (default ``True``).
     :return: Tuple ``(band_centres, band_absorption)``; a band with no
         narrow-band samples yields ``nan``.
-    :raises ValueError: If ``frequency`` and ``absorption`` differ in shape or
+    :raises ValueError: If ``frequencies`` and ``absorption`` differ in shape or
         are empty.
     """
-    freq = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
+    freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     alpha = np.atleast_1d(np.asarray(absorption, dtype=np.float64))
     require_equal_shapes(
         "one_third_octave_absorption",
-        {"frequency": freq.shape, "absorption": alpha.shape},
+        {"frequencies": freq.shape, "absorption": alpha.shape},
         "frequency",
     )
     if freq.size == 0:
-        msg = "'frequency' and 'absorption' must be non-empty."
+        msg = "'frequencies' and 'absorption' must be non-empty."
         raise ValueError(msg)
     centres = np.array(
         [c for c in _ONE_THIRD_OCTAVE_CENTERS if f_min <= c <= f_max],
@@ -935,7 +935,7 @@ def check_spot_frequency_range(frequency: ArrayLike) -> None:
     (narrow-band 220-1800 Hz). Frequencies outside :data:`SPOT_FREQUENCY_RANGE`
     raise a :class:`RoadAbsorptionWarning`; results there are advisory.
 
-    :param frequency: Frequencies to check, in hertz.
+    :param frequency: Frequency or frequencies to check, in hertz.
     :raises ValueError: If any frequency is negative.
     """
     freq = np.atleast_1d(np.asarray(frequency, dtype=np.float64))

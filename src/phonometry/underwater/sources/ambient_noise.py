@@ -192,7 +192,7 @@ class AmbientNoiseResult(OwnsArrays):
 
 
 def ocean_ambient_noise(
-    frequency_hz: NDArray[np.float64] | list[float],
+    frequencies_hz: NDArray[np.float64] | list[float],
     *,
     wind_speed_knots: float,
     shipping: NDArray[np.float64] | list[float] | None = None,
@@ -205,17 +205,17 @@ def ocean_ambient_noise(
     Energy-sums the wind-noise (rule of fives) and thermal-noise (Mellen)
     components, plus an optional caller-supplied shipping spectrum.
 
-    :param frequency_hz: Frequencies, in Hz (1-D, strictly positive).
+    :param frequencies_hz: Frequencies, in Hz (1-D, strictly positive).
     :param wind_speed_knots: Wind speed ``U``, in knots.
     :param shipping: Optional shipping-noise spectrum level per frequency, in dB
-        re 1 µPa²/Hz (same length as ``frequency_hz``), or ``None``.
+        re 1 µPa²/Hz (same length as ``frequencies_hz``), or ``None``.
     :param temperature_c: Water temperature, in degrees Celsius.
     :param density: Water density, in kg/m³.
     :param speed_of_sound: Sound speed, in m/s.
     :return: An :class:`AmbientNoiseResult`.
     :raises ValueError: If the inputs are invalid.
     """
-    f = require_positive_array(frequency_hz, "frequency_hz")
+    f = require_positive_array(frequencies_hz, "frequencies_hz")
     wind = wind_noise_spectrum(f, wind_speed_knots)
     thermal = thermal_noise_spectrum(
         f, temperature_c=temperature_c, density=density, speed_of_sound=speed_of_sound
@@ -226,7 +226,7 @@ def ocean_ambient_noise(
         ship_arr = require_finite_array(shipping, "shipping")
         require_equal_shapes(
             "ocean_ambient_noise",
-            {"frequency_hz": f.shape, "shipping": ship_arr.shape},
+            {"frequencies_hz": f.shape, "shipping": ship_arr.shape},
             "frequency",
         )
         energies = energies + 10.0 ** (ship_arr / 10.0)

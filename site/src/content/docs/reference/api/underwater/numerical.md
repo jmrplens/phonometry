@@ -300,7 +300,7 @@ sound-speed profile, so it is not repeated here.
 gaussian_beams(
     frequency_hz: float,
     depths: NDArray[np.float64] | list[float],
-    sound_speeds: NDArray[np.float64] | list[float],
+    speeds_of_sound: NDArray[np.float64] | list[float],
     *,
     source_depth: float,
     max_range: float = 10000.0,
@@ -529,7 +529,7 @@ direct way to trade resolution for time.
 | :--- | :--- |
 | `frequency_hz` | Source frequency, in Hz. |
 | `depths` | Depth samples of the profile, in metres, from `z = 0`. |
-| `sound_speeds` | Sound speed at each depth, in m/s. |
+| `speeds_of_sound` | Sound speed at each depth, in m/s. |
 | `source_depth` | Source depth, in metres, inside the water column. |
 | `max_range` | Maximum range to march to, in metres. |
 | `ranges_m` | Ranges at which to evaluate the field, in metres. Default (`None`): the marching grid itself, which puts every receiver on a column the rays were actually sampled at. |
@@ -630,7 +630,7 @@ Plot the propagation-loss field (depth increasing downward).
 normal_modes(
     frequency_hz: float,
     depths: NDArray[np.float64] | list[float],
-    sound_speeds: NDArray[np.float64] | list[float],
+    speeds_of_sound: NDArray[np.float64] | list[float],
     *,
     source_depth: float,
     receiver_depth: float,
@@ -662,7 +662,7 @@ to resolve it).
 | :--- | :--- |
 | `frequency_hz` | Source frequency, in Hz. |
 | `depths` | Depth samples of the sound-speed profile, in metres, starting at the surface `z = 0` and strictly increasing to the bottom. |
-| `sound_speeds` | Sound speed at each depth, in m/s. |
+| `speeds_of_sound` | Sound speed at each depth, in m/s. |
 | `source_depth` | Source depth `zs`, in metres. |
 | `receiver_depth` | Receiver depth for the propagation-loss slice, in m. |
 | `ranges_m` | Ranges at which to evaluate the loss, in metres; defaults to 100 m to 10 km. |
@@ -727,7 +727,7 @@ Plot the propagation loss versus range (loss increasing downward).
 parabolic_equation(
     frequency_hz: float,
     depths: NDArray[np.float64] | list[float],
-    sound_speeds: NDArray[np.float64] | list[float],
+    speeds_of_sound: NDArray[np.float64] | list[float],
     *,
     source_depth: float,
     max_range: float = 10000.0,
@@ -759,7 +759,7 @@ calibration itself is exact to ~1e-4 dB at the default `range_step`.
 | :--- | :--- |
 | `frequency_hz` | Source frequency, in Hz. |
 | `depths` | Depth samples of the profile, in metres, from `z = 0`. |
-| `sound_speeds` | Sound speed at each depth, in m/s. |
+| `speeds_of_sound` | Sound speed at each depth, in m/s. |
 | `source_depth` | Source depth, in metres. |
 | `max_range` | Maximum range, in metres. |
 | `range_step` | Range marching step $\Delta r$, in metres. |
@@ -815,7 +815,7 @@ Plot the propagation-loss field (depth increasing downward).
 ```python
 ray_trace(
     depths: NDArray[np.float64] | list[float],
-    sound_speeds: NDArray[np.float64] | list[float],
+    speeds_of_sound: NDArray[np.float64] | list[float],
     *,
     source_depth: float,
     launch_angles_deg: NDArray[np.float64] | list[float],
@@ -885,7 +885,7 @@ per ray, are the entire per-bounce record a downstream amplitude needs.
 | Name | Description |
 | :--- | :--- |
 | `depths` | Depth samples of the profile, in metres, from `z = 0`. |
-| `sound_speeds` | Sound speed at each depth, in m/s. |
+| `speeds_of_sound` | Sound speed at each depth, in m/s. |
 | `source_depth` | Source depth, in metres. |
 | `launch_angles_deg` | Launch angles from the horizontal, in degrees (positive downward). |
 | `max_range` | Maximum horizontal range to trace, in metres. |

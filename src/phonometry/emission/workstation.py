@@ -432,7 +432,7 @@ def emission_sound_pressure_level(
     return float(level) if level.ndim == 0 else level
 
 
-def operating_standard_deviation(levels_db: ArrayLike) -> float:
+def operating_standard_deviation(levels: ArrayLike) -> float:
     r"""Standard deviation of the operating and mounting conditions.
 
     .. math::
@@ -450,15 +450,15 @@ def operating_standard_deviation(levels_db: ArrayLike) -> float:
     ISO 11200:2014 Annex B disagree with each other about that, and
     ``docs/ERRATA.md`` records it; this library follows the equation.
 
-    :param levels_db: Repeated readings under the same conditions, in decibels;
+    :param levels: Repeated readings under the same conditions, in decibels;
         at least two.
     :return: :math:`\sigma_\mathrm{omc}` in decibels.
     :raises ValueError: If fewer than two readings are given.
     """
-    levels = np.asarray(levels_db, dtype=np.float64).ravel()
+    levels = np.asarray(levels, dtype=np.float64).ravel()
     if levels.size < _MIN_REPEATS:
         msg = (
-            f"'levels_db' holds {levels.size} reading(s); the standard deviation "
+            f"'levels' holds {levels.size} reading(s); the standard deviation "
             "of Equation (C.1) needs at least two."
         )
         raise ValueError(msg)
@@ -516,7 +516,7 @@ def emission_expanded_uncertainty(
     return sigma * k
 
 
-def subinterval_level(levels_db: ArrayLike, durations_s: ArrayLike) -> float:
+def subinterval_level(levels: ArrayLike, durations_s: ArrayLike) -> float:
     r"""One level for a cycle made of operating periods of different lengths.
 
     .. math::
@@ -530,18 +530,18 @@ def subinterval_level(levels_db: ArrayLike, durations_s: ArrayLike) -> float:
     a different length of time in each state, so the states are energy-averaged
     weighted by how long each lasts, not by how many there are.
 
-    :param levels_db: The level of each sub-interval, in decibels.
+    :param levels: The level of each sub-interval, in decibels.
     :param durations_s: How long each lasted, in seconds, strictly positive and
         of the same length.
     :return: The level of the whole interval, in decibels.
     :raises ValueError: If the two are of different lengths, or a duration is
         not strictly positive.
     """
-    levels = np.asarray(levels_db, dtype=np.float64).ravel()
+    levels = np.asarray(levels, dtype=np.float64).ravel()
     durations = require_positive_array(durations_s, "durations_s").ravel()
     if levels.size != durations.size:
         msg = (
-            f"'levels_db' holds {levels.size} value(s) and 'durations_s' "
+            f"'levels' holds {levels.size} value(s) and 'durations_s' "
             f"{durations.size}: one duration per sub-interval."
         )
         raise ValueError(msg)

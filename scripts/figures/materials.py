@@ -522,7 +522,7 @@ def generate_absorption_rating(output_dir: str) -> None:
     # ISO 11654:1997 Annex A.2 worked example -> alpha_w = 0.60(M).
     alpha_p = [0.35, 1.00, 0.65, 0.60, 0.55]
     result = materials.weighted_absorption(alpha_p)
-    freqs = np.asarray(result.band_centers, dtype=float)
+    freqs = np.asarray(result.frequencies, dtype=float)
     measured = np.asarray(result.measured, dtype=float)
     shifted = np.asarray(result.shifted_reference, dtype=float)
 

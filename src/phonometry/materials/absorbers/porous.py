@@ -341,7 +341,7 @@ def delany_bazley(
     :math:`0.01 < X < 1.0` validity range (Hopkins Eq. (1.174)); the values
     are still returned.
 
-    :param frequency: Frequency vector ``f``, in hertz.
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param flow_resistivity: Airflow resistivity ``sigma``, in Pa s/m2.
     :param coefficients: Preset name from :data:`DELANY_BAZLEY_COEFFICIENTS`
         (``"delany_bazley"`` rockwool/fibreglass default, ``"garai_pompoli"``
@@ -406,7 +406,7 @@ def miki(
     ``Y`` outside the fit range :math:`0.01 < f/\sigma < 1.0` (paper
     Sect. 4.1).
 
-    :param frequency: Frequency vector ``f``, in hertz.
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param flow_resistivity: Airflow resistivity ``sigma``, in Pa s/m2.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
         (Default: :data:`PUBLISHED_AIR`, the air this model was published
@@ -472,7 +472,7 @@ def johnson_champoux_allard(
     :math:`\rho_\mathrm{e} \to (T \rho / \phi)(1 + (1 - j) \delta_v / L)` as
     :math:`\omega \to \infty` (Johnson et al. 1987), pinned in the tests.
 
-    :param frequency: Frequency vector ``f``, in hertz.
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param flow_resistivity: Airflow resistivity ``sigma``, in Pa s/m2.
     :param porosity: Open porosity ``phi`` (0 < phi <= 1).
     :param tortuosity: High-frequency tortuosity :math:`T = \alpha_\infty`
@@ -1010,7 +1010,7 @@ def perforated_plate_impedance(
     thickness; use :func:`microperforated_plate_impedance` for submillimetre
     holes.
 
-    :param frequency: Frequency vector ``f``, in hertz.
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param thickness: Plate thickness ``t``, in metres.
     :param hole_radius: Hole radius ``a``, in metres.
     :param open_area: Fractional open area ``eps`` (0..1).
@@ -1072,7 +1072,7 @@ def microperforated_plate_impedance(
     for the default :math:`\delta = 0.85` per end) - gives the sheet
     transfer impedance (Cox & D'Antonio Eq. (7.35)).
 
-    :param frequency: Frequency vector ``f``, in hertz.
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param thickness: Plate thickness ``t``, in metres.
     :param hole_radius: Hole radius ``a``, in metres (submillimetre for a
         genuine microperforated design).
@@ -1118,7 +1118,7 @@ def membrane_impedance(
     3e, Eq. (7.14); Bies 5e Eq. (D.96)) plus an optional empirical
     resistance for the internal/fixing losses.
 
-    :param frequency: Frequency vector ``f``, in hertz.
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param surface_density: Mass per unit area ``m``, in kg/m2.
     :param resistance: Series flow resistance ``r``, in Pa s/m (default 0).
     :return: Complex transfer impedance ``z``, in Pa s/m.

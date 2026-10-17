@@ -226,7 +226,7 @@ unit area as *tie_stiffness_per_area* (see
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Band centre frequencies `f`, in hertz (array, > 0). |
+| `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `mass1` | Surface density of leaf 1 `m1`, in kg/m^2 (> 0). |
 | `mass2` | Surface density of leaf 2 `m2`, in kg/m^2 (> 0). |
 | `gap` | Cavity depth `d`, in m (> 0). |
@@ -524,7 +524,7 @@ no smooth model predicts.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Band centre frequencies `f`, in hertz (array, > 0). |
+| `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `mass_per_area` | Mass per unit area `m''`, in kg/m^2 (> 0). |
 | `critical_frequency_lower` | Lower coincidence frequency `fc1`, in hertz (> 0), from the stiffest direction. |
 | `critical_frequency_upper` | Upper coincidence frequency `fc2`, in hertz (> `fc1`). |
@@ -625,7 +625,7 @@ and the material's own is then not read at all.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Band centre frequencies `f`, in hertz (array, > 0). |
+| `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `material` | A key into [`PLATEAU_MATERIALS`](/phonometry/reference/api/building/panel-transmission/#plateau_materials), or a [`PlateauMaterial`](/phonometry/reference/api/solids/plateau/#plateaumaterial) row (Default: `None`). |
 | `thickness_mm` | Panel thickness, in **millimetres** (> 0), used with *material* to get the surface density. |
 | `mass_per_area` | Mass per unit area `m''`, in kg/m^2 (> 0). |
@@ -736,7 +736,7 @@ let it be computed from *bending_stiffness* and *mass_per_area* through
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Band centre frequencies `f`, in hertz (array, > 0). |
+| `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `mass_per_area` | Mass per unit area `m''`, in kg/m^2 (> 0). |
 | `critical_frequency` | Coincidence frequency `fc`, in hertz (> 0). |
 | `bending_stiffness` | Bending stiffness per unit width `B'`, in N.m, used to compute `fc` when *critical_frequency* is not given. |

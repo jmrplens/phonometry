@@ -359,9 +359,9 @@ def test_the_average_is_on_mean_squares() -> None:
     )
     mean = average_roughness_spectra([one, two])
     expected = 10.0 * np.log10(
-        (10.0 ** (one.levels_db / 10) + 10.0 ** (two.levels_db / 10)) / 2
+        (10.0 ** (one.levels / 10) + 10.0 ** (two.levels / 10)) / 2
     )
-    np.testing.assert_allclose(mean.levels_db, expected, rtol=0, atol=1e-12)
+    np.testing.assert_allclose(mean.levels, expected, rtol=0, atol=1e-12)
     assert mean.record_length_m == pytest.approx(3.0)
     assert mean.segment_count == 4
 
@@ -402,7 +402,7 @@ def test_a_spectrum_holds_its_bands_read_only() -> None:
     """The arrays of a spectrum refuse in-place writes."""
     spectrum = AcousticRoughnessSpectrum([0.1, 0.05], [1.0, 2.0])
     with pytest.raises(ValueError, match="assignment destination is read-only"):
-        spectrum.levels_db[0] = 3.0
+        spectrum.levels[0] = 3.0
 
 
 def test_a_spectrum_refuses_increasing_wavelengths() -> None:

@@ -431,9 +431,9 @@ def _levels(values: ArrayLike, name: str) -> NDArray[np.float64]:
     return require_finite_array(values, name)
 
 
-def _nominal(frequencies_hz: ArrayLike, table: tuple[float, ...]) -> NDArray[np.intp]:
+def _nominal(frequencies: ArrayLike, table: tuple[float, ...]) -> NDArray[np.intp]:
     """The index of each frequency in a nominal table, or an error."""
-    freqs = require_positive_array(frequencies_hz, "frequencies_hz")
+    freqs = require_positive_array(frequencies, "frequencies")
     grid = np.asarray(table, dtype=np.float64)
     ratio = freqs[:, None] / grid[None, :]
     hit = (ratio < _BAND_TOLERANCE) & (ratio > 1.0 / _BAND_TOLERANCE)
@@ -500,7 +500,7 @@ def predict_floor_spectrum(
 
 
 def rescale_emission_for_speed(
-    levels_db: ArrayLike, *, speed_from_km_h: float, speed_to_km_h: float
+    levels: ArrayLike, *, speed_from_km_h: float, speed_to_km_h: float
 ) -> NDArray[np.float64]:
     r"""An emission spectrum carried to another train speed, Formula (3).
 
@@ -511,7 +511,7 @@ def rescale_emission_for_speed(
     one, move with the speed while the resonances do not, and the shift is
     refused.
 
-    :param levels_db: :math:`L_{v,\mathrm{E1}}`, the spectrum measured at the first
+    :param levels: :math:`L_{v,\mathrm{E1}}`, the spectrum measured at the first
         speed, in decibels.
     :param speed_from_km_h: :math:`v_1`, the speed it was measured at.
     :param speed_to_km_h: :math:`v_2`, the speed wanted, in the same unit.
@@ -519,7 +519,7 @@ def rescale_emission_for_speed(
     :raises ValueError: For a non-positive speed, a change of more than 30 %,
         or a non-finite spectrum.
     """
-    levels = _levels(levels_db, "levels_db")
+    levels = _levels(levels, "levels")
     v_1 = require_positive(speed_from_km_h, "speed_from_km_h")
     v_2 = require_positive(speed_to_km_h, "speed_to_km_h")
     change = abs(v_2 / v_1 - 1.0)
@@ -535,7 +535,7 @@ def rescale_emission_for_speed(
 
 
 def ground_attenuation_coefficient_per_m(
-    frequencies_hz: ArrayLike, *, damping_ratio: float, shear_wave_speed_m_s: float
+    frequencies: ArrayLike, *, damping_ratio: float, shear_wave_speed_m_s: float
 ) -> NDArray[np.float64]:
     r"""The material damping of the ground, :math:`\alpha_R` of Clause 5.3.
 
@@ -544,21 +544,21 @@ def ground_attenuation_coefficient_per_m(
     the shear wave speed although the wave is the surface wave, and that is
     how it is computed here.
 
-    :param frequencies_hz: The band centres, in hertz.
+    :param frequencies: The band centres, in hertz.
     :param damping_ratio: :math:`D`, the damping ratio of the ground.
     :param shear_wave_speed_m_s: :math:`c_s`, in metres per second.
     :return: :math:`\alpha_R`, in reciprocal metres, one per band.
     :raises ValueError: For a negative damping ratio, a non-positive speed
         or a non-positive frequency.
     """
-    freqs = require_positive_array(frequencies_hz, "frequencies_hz")
+    freqs = require_positive_array(frequencies, "frequencies")
     damping = require_non_negative(damping_ratio, "damping_ratio")
     speed = require_positive(shear_wave_speed_m_s, "shear_wave_speed_m_s")
     return 2.0 * math.pi * freqs * damping / speed
 
 
 def ground_transmission_db(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     distance_m: float,
     reference_distance_m: float,
@@ -579,7 +579,7 @@ def ground_transmission_db(
     line of point sources, and Annex B says what to take off an exponent
     measured with a point excitation.
 
-    :param frequencies_hz: The band centres, in hertz.
+    :param frequencies: The band centres, in hertz.
     :param distance_m: :math:`r`, from the source to the ground in front of
         the building or to its foundation.
     :param reference_distance_m: :math:`r_0`, where the emission spectrum
@@ -594,7 +594,7 @@ def ground_transmission_db(
         damping, a damping ratio without a wave speed, or an exponent that
         does not broadcast to the bands.
     """
-    freqs = require_finite_array(frequencies_hz, "frequencies_hz")
+    freqs = require_finite_array(frequencies, "frequencies")
     distance = require_positive(distance_m, "distance_m")
     reference = require_positive(reference_distance_m, "reference_distance_m")
     exponents = np.asarray(exponent, dtype=np.float64)
@@ -668,7 +668,7 @@ def ground_to_foundation_transfer_db(
 
 
 def foundation_to_floor_transfer_db(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     floor: str,
     floor_natural_frequency_hz: float,
@@ -683,7 +683,7 @@ def foundation_to_floor_transfer_db(
     linearly in decibels over the logarithm of the ratio, and a ratio the
     table has no value for gives ``nan``.
 
-    :param frequencies_hz: The band centres, in hertz.
+    :param frequencies: The band centres, in hertz.
     :param floor: ``"concrete"`` or ``"timber"``.
     :param floor_natural_frequency_hz: :math:`f_\mathrm{e}`, positive.
     :param statistic: ``"mean"`` (default), ``"lower"`` or ``"upper"``.
@@ -692,7 +692,7 @@ def foundation_to_floor_transfer_db(
     :raises ValueError: For an unknown floor or statistic, a non-positive
         frequency, or a non-finite input.
     """
-    freqs = require_positive_array(frequencies_hz, "frequencies_hz")
+    freqs = require_positive_array(frequencies, "frequencies")
     natural = require_positive(floor_natural_frequency_hz, "floor_natural_frequency_hz")
     table = FOUNDATION_TO_FLOOR_DB[require_choice(str(floor), "floor", _FLOORS)]
     values = np.asarray(table[require_choice(str(statistic), "statistic", _STATISTICS)])
@@ -712,7 +712,7 @@ def foundation_to_floor_transfer_db(
 
 
 def kb_weighted_levels_db(
-    levels_db: ArrayLike, frequencies_hz: ArrayLike
+    levels: ArrayLike, frequencies: ArrayLike
 ) -> NDArray[np.float64]:
     r"""The KB-weighted third-octave levels, Formula (8) with Table 2.
 
@@ -722,15 +722,15 @@ def kb_weighted_levels_db(
     to 80 Hz. Bands outside those are not weighted by the table and are
     refused.
 
-    :param levels_db: :math:`L_v`, one level per band, in decibels.
-    :param frequencies_hz: The band centres, nominal, 4 Hz to 80 Hz.
+    :param levels: :math:`L_v`, one level per band, in decibels.
+    :param frequencies: The band centres, nominal, 4 Hz to 80 Hz.
     :return: :math:`L_{v,KB}`, one per band.
     :raises ValueError: For a band outside Table 2, or mismatched inputs.
     """
-    levels = _levels(levels_db, "levels_db")
-    index = _nominal(frequencies_hz, tuple(KB_WEIGHTING_TABLE_DB))
+    levels = _levels(levels, "levels")
+    index = _nominal(frequencies, tuple(KB_WEIGHTING_TABLE_DB))
     if index.shape != levels.shape:
-        msg = "'levels_db' and 'frequencies_hz' must match, one level per band."
+        msg = "'levels' and 'frequencies' must match, one level per band."
         raise ValueError(msg)
     weights = np.asarray(list(KB_WEIGHTING_TABLE_DB.values()))[index]
     return levels + weights
@@ -772,18 +772,18 @@ def peak_velocity_from_kb_mm_s(kb_fmax_zug: float) -> float:
     return PEAK_VELOCITY_FACTOR * require_non_negative(kb_fmax_zug, "kb_fmax_zug")
 
 
-def velocity_spectrum_um_s(levels_db: ArrayLike) -> NDArray[np.float64]:
+def velocity_spectrum_um_s(levels: ArrayLike) -> NDArray[np.float64]:
     r"""A level spectrum as a velocity spectrum, Formula (13).
 
     :math:`v_\mathrm{RMS}(f_{\mathrm{T}n}) = 1000 \, v_0 \,
     10^{L_v(f_{\mathrm{T}n})/20}` in micrometres per second, the form the VC
     curves of VDI 2038 Blatt 2 are drawn in.
 
-    :param levels_db: :math:`L_v`, one level per band, in decibels.
+    :param levels: :math:`L_v`, one level per band, in decibels.
     :return: :math:`v_\mathrm{RMS}`, one per band, in micrometres per second.
     :raises ValueError: For a non-finite input.
     """
-    levels = _levels(levels_db, "levels_db")
+    levels = _levels(levels, "levels")
     return _UM_PER_MM * VELOCITY_LEVEL_REFERENCE_MM_S * 10.0 ** (levels / 20.0)
 
 
@@ -791,7 +791,7 @@ def velocity_spectrum_um_s(levels_db: ArrayLike) -> NDArray[np.float64]:
 class TrainCategoryPrediction(OwnsArrays):
     r"""The prediction for one category of train, Clauses 5 and 7.
 
-    :ivar frequencies_hz: The band centres.
+    :ivar frequencies: The band centres.
     :ivar emission_db: :math:`L_{v,\mathrm{E}}` the prediction started from.
     :ivar floor_db: :math:`L_v` of Formula (1), the spectrum on the floor.
     :ivar weighted_frequencies_hz: The band centres from 4 Hz to 80 Hz the
@@ -804,7 +804,7 @@ class TrainCategoryPrediction(OwnsArrays):
     :ivar peak_velocity_mm_s: :math:`v_{\max}` of Formula (12).
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     emission_db: NDArray[np.float64]
     floor_db: NDArray[np.float64]
     weighted_frequencies_hz: NDArray[np.float64]
@@ -837,7 +837,7 @@ class TrainCategoryPrediction(OwnsArrays):
 def predict_train_category(
     emission_db: ArrayLike,
     *,
-    frequencies_hz: ArrayLike = PREDICTION_BAND_CENTRES_HZ,
+    frequencies: ArrayLike = PREDICTION_BAND_CENTRES_HZ,
     ground_db: ArrayLike = 0.0,
     foundation_db: ArrayLike = 0.0,
     floor_db: ArrayLike = 0.0,
@@ -855,7 +855,7 @@ def predict_train_category(
     category at or below 0,1 counting as zero.
 
     :param emission_db: :math:`L_{v,\mathrm{E}}`, one level per band, in decibels.
-    :param frequencies_hz: The band centres, nominal; the 19 bands from 4 Hz
+    :param frequencies: The band centres, nominal; the 19 bands from 4 Hz
         to 250 Hz by default, and at least the 14 from 4 Hz to 80 Hz.
     :param ground_db: :math:`\Delta L_{v,\mathrm{BB}}`, per band or one value.
     :param foundation_db: :math:`\Delta L_{v,\mathrm{FB}}`, per band or one value.
@@ -866,10 +866,10 @@ def predict_train_category(
     :raises ValueError: For a spectrum that does not hold the 14 bands of
         the KB assessment, or a bad term.
     """
-    freqs = require_finite_array(frequencies_hz, "frequencies_hz")
+    freqs = require_finite_array(frequencies, "frequencies")
     levels = _levels(emission_db, "emission_db")
     if freqs.shape != levels.shape:
-        msg = "'emission_db' and 'frequencies_hz' must match, one level per band."
+        msg = "'emission_db' and 'frequencies' must match, one level per band."
         raise ValueError(msg)
     floor = predict_floor_spectrum(
         levels,
@@ -890,7 +890,7 @@ def predict_train_category(
     kb_ftm = takt_maximum_kb(weighted)
     kb_fmax = TRAIN_KB_FMAX_FACTOR * kb_ftm
     return TrainCategoryPrediction(
-        frequencies_hz=freqs,
+        frequencies=freqs,
         emission_db=levels,
         floor_db=floor,
         weighted_frequencies_hz=freqs[inside],

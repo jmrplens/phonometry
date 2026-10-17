@@ -480,7 +480,7 @@ def _precision_sound_power_example() -> tuple[object, ReportMetadata, str]:
         "hemisphere",
         radius=1.0,
         frequencies=freqs,
-        sigma_omc=2.0,
+        sigma_omc_db=2.0,
     )
     metadata = ReportMetadata(
         client="Example manufacturing plant",
@@ -617,7 +617,7 @@ def _special_room_sound_power_example() -> tuple[object, ReportMetadata, str]:
     result = ph.emission.sound_power_special_room(
         np.stack([first, second]),
         freqs,
-        volume_m3=72.0,
+        volume=72.0,
         nominal_reverberation_time_s=0.77,
         background_levels=np.array([48.0, 45.0, 42.0, 40.0, 38.0, 36.0, 35.0]),
         a_weighted_levels=a_weighted,

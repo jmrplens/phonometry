@@ -339,7 +339,12 @@ class RoomModesResult(OwnsArrays):
         return {kind: int(np.count_nonzero(self.kinds == kind)) for kind in MODE_KINDS}
 
     def density(self, frequency: ArrayLike) -> np.ndarray | float:
-        """Modal density at ``frequency`` for this room (Long Equation (8.46))."""
+        """Modal density at ``frequency`` for this room (Long Equation (8.46)).
+
+        :param frequency: Frequency, in hertz (scalar or array).
+        :return: The modal density, in modes per hertz, of the shape of
+            *frequency*.
+        """
         return room_modal_density(
             frequency, self.dimensions, speed_of_sound=self.speed_of_sound
         )

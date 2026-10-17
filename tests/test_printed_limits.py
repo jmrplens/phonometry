@@ -1011,7 +1011,7 @@ _DERIVED_FLAGS = {
     ),
     "phonometry.emission.free_field_qualification.FreeFieldCheck": (
         "room",
-        "frequencies_hz",
+        "frequencies",
         "band_radius_m",
         "maximum_qualified_radius_m",
         "points_met",

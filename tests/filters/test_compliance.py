@@ -454,7 +454,7 @@ def test_a_filter_verdict_over_no_bands_states_no_class() -> None:
         result,
         band_margins=(),
         sos=(),
-        band_frequencies=np.asarray([], dtype=float),
+        frequencies=np.asarray([], dtype=float),
         factors=(),
     )
     assert empty.bands == ()

@@ -434,7 +434,7 @@ def test_lining_result_refuses_mismatched_columns() -> None:
     two_levels = np.array([45.0, 46.0])
     with pytest.raises(ValueError, match=r"LabLiningImprovementResult"):
         LabLiningImprovementResult(
-            frequencies_hz=two_bands,
+            frequencies=two_bands,
             r_without_db=one_level,
             r_with_db=two_levels,
             delta_r_db=two_levels,
@@ -579,7 +579,7 @@ def test_floor_covering_result_refuses_an_unknown_floor() -> None:
     band = np.array([500.0])
     with pytest.raises(ValueError, match=r"reference_floor"):
         LabFloorCoveringImprovementResult(
-            frequencies_hz=band,
+            frequencies=band,
             l_n0_db=one,
             l_n_db=one,
             improvement_db=one,

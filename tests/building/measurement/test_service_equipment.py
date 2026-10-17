@@ -291,11 +291,11 @@ def test_background_correction_refuses_mismatched_bands() -> None:
 def test_background_centres_are_refused_when_complex(centres: object) -> None:
     # The centres only label the plot, and a complex one is still refused by
     # name rather than cut to its real part.
-    with pytest.raises(ValueError, match="frequencies_hz"):
+    with pytest.raises(ValueError, match="frequencies"):
         building.service_equipment_background_correction(
             [50.0],
             [40.0],
-            frequencies_hz=centres,  # type: ignore[arg-type]
+            frequencies=centres,  # type: ignore[arg-type]
         )
 
 
@@ -530,7 +530,7 @@ def test_octave_standardization_leaves_out_31_5_and_8000_hz() -> None:
 def test_exact_centres_are_matched_to_nominal_bands() -> None:
     exact = 1000.0 * 10.0 ** (np.arange(-16, 11) / 10.0)
     res = building.service_equipment_level(_flat(40.0), exact, quantity="eq")
-    np.testing.assert_array_equal(res.frequencies_hz, THIRD)
+    np.testing.assert_array_equal(res.frequencies, THIRD)
 
 
 def test_a_single_reading_is_one_row() -> None:
@@ -572,8 +572,8 @@ def test_choices_are_checked(kwargs: dict[str, str], fragment: str) -> None:
 
 def _level_inputs() -> dict[str, object]:
     return {
-        "levels_db": _flat(40.0),
-        "frequencies_hz": THIRD,
+        "levels": _flat(40.0),
+        "frequencies": THIRD,
         "background_db": np.full(THIRD.size, 20.0),
         "reverberation_time_s": np.full(THIRD.size, 0.5),
         "volume_m3": 50.0,
@@ -587,7 +587,7 @@ def _level_call(**overrides: object) -> building.ServiceEquipmentResult:
 
 @pytest.mark.parametrize(
     "name",
-    ["levels_db", "frequencies_hz", "background_db", "reverberation_time_s"],
+    ["levels", "frequencies", "background_db", "reverberation_time_s"],
 )
 def test_a_complex_array_is_refused_not_cut_to_its_real_part(name: str) -> None:
     # np.asarray(z, dtype=float) keeps the real part with only a warning: a
@@ -598,8 +598,8 @@ def test_a_complex_array_is_refused_not_cut_to_its_real_part(name: str) -> None:
 
 
 def test_levels_that_are_not_numbers_are_refused_by_name() -> None:
-    with pytest.raises(ValueError, match="levels_db"):
-        _level_call(levels_db=[["forty"] * THIRD.size] * 3)
+    with pytest.raises(ValueError, match="levels"):
+        _level_call(levels=[["forty"] * THIRD.size] * 3)
 
 
 @pytest.mark.parametrize(
@@ -739,21 +739,21 @@ def test_the_spread_verdict_is_read_from_the_readings() -> None:
     # The readings are the only field: an action, a spread or a stage cannot
     # be handed to the check, so it cannot proceed on readings 8 dB apart.
     real = building.check_position_spread([50.0, 58.0, 52.0])
-    assert [f.name for f in dataclasses.fields(real)] == ["levels_db"]
+    assert [f.name for f in dataclasses.fields(real)] == ["levels"]
     assert (real.spread_db, real.action, real.passes) == (8.0, "add_positions", False)
-    narrow = dataclasses.replace(real, levels_db=[50.0, 51.0, 52.0])
+    narrow = dataclasses.replace(real, levels=[50.0, 51.0, 52.0])
     assert (narrow.spread_db, narrow.action, narrow.next_positions) == (
         2.0,
         "proceed",
         (),
     )
-    assert not real.levels_db.flags.writeable
+    assert not real.levels.flags.writeable
 
 
 def test_a_spread_check_built_with_a_partial_stage_is_refused() -> None:
     levels = [35.0, 34.0, 36.0, 35.0]
     with pytest.raises(ValueError, match="PositionSpreadCheck"):
-        building.PositionSpreadCheck(levels_db=levels)
+        building.PositionSpreadCheck(levels=levels)
 
 
 def _positions(**kwargs: object) -> building.ServiceEquipmentPositionCheck:
@@ -1196,7 +1196,7 @@ def test_background_figure_without_centres_labels_the_band_index_in_spanish() ->
 def test_background_figure() -> None:
     fig, ax = plt.subplots()
     res = building.service_equipment_background_correction(
-        [50.0, 50.0, 50.0], [35.0, 45.0, 48.0], frequencies_hz=[125.0, 250.0, 500.0]
+        [50.0, 50.0, 50.0], [35.0, 45.0, 48.0], frequencies=[125.0, 250.0, 500.0]
     )
     res.plot(ax=ax)
     labels = _legend_texts(ax)
@@ -1401,7 +1401,7 @@ def test_calibration_readings_are_refused_when_not_finite_levels(
 def test_calibration_result_checks_its_deviations() -> None:
     with pytest.raises(ValueError, match="one value per reading"):
         building.CalibrationDeviationResult(
-            levels_db=np.array([94.0, 94.1]),
+            levels=np.array([94.0, 94.1]),
             previous_levels_db=np.empty(0),
             deviations_db=np.array([0.1]),
         )
@@ -1499,7 +1499,7 @@ def test_a_background_maximum_10_db_below_lets_the_result_stand() -> None:
         [20.4, 30.3, 30.6, 15.0],
         [30.4, 40.3, 40.5, 40.0],
         observation_time_s=600.0,
-        frequencies_hz=[125.0, 250.0, 500.0, 1000.0],
+        frequencies=[125.0, 250.0, 500.0, 1000.0],
     )
     np.testing.assert_array_equal(check.margin_ok, [True, True, False, True])
     np.testing.assert_allclose(check.margin_db, [10.0, 10.0, 9.9, 25.0])
@@ -1530,7 +1530,7 @@ def test_varying_background_centres_need_one_per_band() -> None:
             [30.0, 31.0],
             [45.0, 46.0],
             observation_time_s=600.0,
-            frequencies_hz=[125.0],
+            frequencies=[125.0],
         )
 
 
@@ -1775,7 +1775,7 @@ def test_varying_background_figure_marks_the_bands_short_of_10_db() -> None:
         [20.4, 30.6, 15.0],
         [30.4, 40.5, 40.0],
         observation_time_s=720.0,
-        frequencies_hz=[125.0, 250.0, 500.0],
+        frequencies=[125.0, 250.0, 500.0],
     ).plot(ax=ax)
     marks = next(
         line for line in ax.get_lines() if line.get_label() == "less than 10 dB below"

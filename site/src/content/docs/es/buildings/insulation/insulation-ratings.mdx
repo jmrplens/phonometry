@@ -269,9 +269,9 @@ plt.show()
 
 # A mano, con los campos de la curva por banda que ahora lleva el resultado:
 fig, ax = plt.subplots()
-ax.semilogx(w.band_centers, w.measured, "o-", label="R medido")
-ax.semilogx(w.band_centers, w.shifted_reference, "s--", label="Referencia desplazada")
-ax.fill_between(w.band_centers, w.measured, w.shifted_reference,
+ax.semilogx(w.frequencies, w.measured, "o-", label="R medido")
+ax.semilogx(w.frequencies, w.shifted_reference, "s--", label="Referencia desplazada")
+ax.fill_between(w.frequencies, w.measured, w.shifted_reference,
                 where=w.measured < w.shifted_reference, interpolate=True,
                 alpha=0.3, label="Desviaciones desfavorables")
 ax.set_xlabel("Frecuencia [Hz]")
@@ -292,7 +292,7 @@ plt.show()
 
 `weighted_rating()` devuelve un `WeightedRatingResult` (`rating`, `c`, `ctr`,
 `unfavourable_sum`, todos enteros salvo la suma), más los tres campos con los
-que se dibujan las figuras de esta página: `band_centers`, `measured` y
+que se dibujan las figuras de esta página: `frequencies`, `measured` y
 `shifted_reference`, y `quantity`, que nombra lo que se ha valorado.
 
 ## Índices de ruido de impactos (ISO 717-2)
@@ -384,9 +384,9 @@ plt.show()
 # desviación desfavorable está donde el nivel MEDIDO supera la referencia).
 # Aquí la entrada fue Ln, así que la magnitud valorada es Ln,w:
 fig, ax = plt.subplots()
-ax.semilogx(res_imp.band_centers, res_imp.measured, "o-", label="Ln medido")
-ax.semilogx(res_imp.band_centers, res_imp.shifted_reference, "s--", label="Referencia desplazada")
-ax.fill_between(res_imp.band_centers, res_imp.shifted_reference, res_imp.measured,
+ax.semilogx(res_imp.frequencies, res_imp.measured, "o-", label="Ln medido")
+ax.semilogx(res_imp.frequencies, res_imp.shifted_reference, "s--", label="Referencia desplazada")
+ax.fill_between(res_imp.frequencies, res_imp.shifted_reference, res_imp.measured,
                 where=res_imp.measured > res_imp.shifted_reference, interpolate=True,
                 alpha=0.3, label="Desviaciones desfavorables")
 ax.set_xlabel("Frecuencia [Hz]")
@@ -414,7 +414,7 @@ celda las dieciséis bandas y da $-10$; la entrada del registro está en
 
 `weighted_impact_rating()` devuelve un `ImpactRatingResult` (`rating`,
 `ci` enteros, `unfavourable_sum` en dB), con los mismos tres campos de dibujo
-que el resultado aéreo: `band_centers`, `measured` y `shifted_reference`.
+que el resultado aéreo: `frequencies`, `measured` y `shifted_reference`.
 
 ## Rangos de frecuencia ampliados e índices con un decimal
 
@@ -492,10 +492,10 @@ plt.show()
 # A mano, desde las curvas por banda que porta el resultado (la curva completa
 # del rango ampliado en ext, la referencia de las bandas básicas en ext.core):
 fig, ax = plt.subplots()
-ax.semilogx(ext.band_centers, ext.measured, "o-", label="R medido")
-ax.semilogx(ext.core.band_centers, ext.core.shifted_reference, "s--",
+ax.semilogx(ext.frequencies, ext.measured, "o-", label="R medido")
+ax.semilogx(ext.core.frequencies, ext.core.shifted_reference, "s--",
             label="Referencia desplazada (bandas básicas)")
-ax.fill_between(ext.core.band_centers, ext.core.measured,
+ax.fill_between(ext.core.frequencies, ext.core.measured,
                 ext.core.shifted_reference,
                 where=ext.core.measured < ext.core.shifted_reference,
                 interpolate=True, alpha=0.3, label="Desviaciones desfavorables")

@@ -268,9 +268,9 @@ plt.show()
 # A mano, combinando ambas en unos mismos ejes:
 fig, ax = plt.subplots()
 ax.semilogx(bands, res.transmission_loss, "o-", label="R previsto (Sharp)")
-ax.semilogx(w.band_centers, w.shifted_reference, "s--",
+ax.semilogx(w.frequencies, w.shifted_reference, "s--",
             label="referencia desplazada")
-ax.fill_between(w.band_centers, w.measured, w.shifted_reference,
+ax.fill_between(w.frequencies, w.measured, w.shifted_reference,
                 where=w.measured < w.shifted_reference, interpolate=True,
                 alpha=0.3, label="desviaciones desfavorables")
 ax.axvline(fc, ls=":", color="tab:green", label=f"fc = {fc:.0f} Hz")

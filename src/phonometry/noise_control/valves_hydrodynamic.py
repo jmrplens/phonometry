@@ -1040,7 +1040,7 @@ def turbulent_distribution(frequency: ArrayLike, peak: float) -> NDArray[np.floa
     The negative exponent is easy to lose. Text extracted from the printed
     page renders it as a bare 1, which flattens the low-frequency side.
 
-    :param frequency: :math:`f_i`, the band centres, in Hz.
+    :param frequency: :math:`f_i`, the band centre or centres, in Hz (scalar or array).
     :param peak: :math:`f_\mathrm{p,turb}` from :func:`turbulent_peak_frequency`, in Hz.
     :return: :math:`F_{turb}(f_i)`, in dB.
     :raises ValueError: If a value is not positive and finite.
@@ -1066,7 +1066,7 @@ def cavitation_distribution(frequency: ArrayLike, peak: float) -> NDArray[np.flo
     that is a far broader spectrum: cavitation is heard as a wide band of
     gravel where turbulence is heard as a hiss around one frequency.
 
-    :param frequency: :math:`f_i`, the band centres, in Hz.
+    :param frequency: :math:`f_i`, the band centre or centres, in Hz (scalar or array).
     :param peak: :math:`f_\mathrm{p,cav}` from :func:`cavitation_peak_frequency`,
         in Hz.
     :return: :math:`F_{cav}(f_i)`, in dB.
@@ -1102,7 +1102,7 @@ def band_internal_levels(
     the sum is a two-humped spectrum, and which hump is taller is decided by
     :math:`\eta_\mathrm{cav}/(\eta_\mathrm{turb}+\eta_\mathrm{cav})` alone.
 
-    :param frequency: :math:`f_i`, the band centres, in Hz.
+    :param frequency: :math:`f_i`, the band centre or centres, in Hz (scalar or array).
     :param internal_level: :math:`L_{pi}` of Equation (10), in dB.
     :param turbulent_peak: :math:`f_\mathrm{p,turb}`, in Hz.
     :param cavitation_peak: :math:`f_\mathrm{p,cav}`, in Hz, or ``None`` for the
@@ -1438,7 +1438,7 @@ def valve_hydrodynamic_noise(
     pipe: LiquidPipe,
     *,
     strouhal_form: str = "annex",
-    frequency: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> HydrodynamicValveNoise:
     r"""The whole of Clauses 4 and 5, from the operating point to 1 m.
 
@@ -1462,7 +1462,7 @@ def valve_hydrodynamic_noise(
         :class:`LiquidPipe`.
     :param strouhal_form: Which printing of Equation (12) to follow,
         ``"annex"`` or ``"clause"``; see :data:`STROUHAL_CONSTANTS`.
-    :param frequency: The band centres to report, in Hz. The default is the
+    :param frequencies: The band centres to report, in Hz. The default is the
         one-third-octave set 5.4.1 prints, 50 Hz to 20 kHz.
     :return: A :class:`HydrodynamicValveNoise` carrying every printed
         intermediate as well as the level at 1 m.
@@ -1589,8 +1589,8 @@ def valve_hydrodynamic_noise(
     spreading = _spreading(bore, thickness)
     bands = (
         _default_bands()
-        if frequency is None
-        else require_positive_array(frequency, "frequency")
+        if frequencies is None
+        else require_positive_array(frequencies, "frequencies")
     )
     band_internal = band_internal_levels(
         bands,

@@ -159,7 +159,7 @@ one hour (the definition under Table H.1).
 rainfall_reference_correction(
     l_i_ref_db: ArrayLike,
     structural_reverberation_time_s: ArrayLike,
-    frequencies_hz: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> RainfallReferenceCorrection
 ```
 
@@ -185,7 +185,7 @@ $f$ in Formula (I.1) is taken as the band centre frequency given.
 | :--- | :--- |
 | `l_i_ref_db` | $L_{I,\mathrm{ref}}$ of the reference specimen per band, in dB re 1 pW/m² (e.g. `rainfall_sound(...).l_i_db`). |
 | `structural_reverberation_time_s` | Its structural reverberation time per band, measured to ISO 10140-4, in s. |
-| `frequencies_hz` | Band centre frequencies, in Hz, each one of the 18 bands of Table I.1 (100 Hz to 5 000 Hz); `None` takes all 18. |
+| `frequencies` | Band centre frequencies, in Hz, each one of the 18 bands of Table I.1 (100 Hz to 5 000 Hz); `None` takes all 18. |
 
 **Returns:** A [`RainfallReferenceCorrection`](/phonometry/reference/api/building/rainfall-sound/#rainfallreferencecorrection).
 
@@ -217,7 +217,7 @@ RAINFALL_REFERENCE_LOSS_FACTOR_DB = {100.0: -10.0, 125.0: -11.0, 160.0: -11.0, 2
 rainfall_sound(
     l_pr_db: ArrayLike,
     reverberation_time_s: ArrayLike,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     volume_m3: float,
     excited_area_m2: float,
@@ -254,7 +254,7 @@ for comparison between laboratories.
 | :--- | :--- |
 | `l_pr_db` | Room-averaged sound pressure level per band, in dB: `(bands,)` for one position of the rain generator or `(positions, bands)` for several, which are added energetically. |
 | `reverberation_time_s` | Reverberation time of the test room per band, in s. |
-| `frequencies_hz` | Band centre frequencies, in Hz. |
+| `frequencies` | Band centre frequencies, in Hz. |
 | `volume_m3` | Volume of the test room, in m³. |
 | `excited_area_m2` | Area of the specimen directly excited by the rain, $S_\mathrm{e}$, in m². |
 | `background_db` | Background noise level per band, in dB, or `None`. When given, each position's level is corrected by ISO 10140-4 ([`background_correction`](/phonometry/reference/api/building/lab-insulation/#background_correction)) before the sum. |
@@ -273,7 +273,7 @@ for comparison between laboratories.
 ```python
 rainfall_sound_from_intensity(
     l_im_db: ArrayLike,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     measuring_area_m2: float,
     excited_area_m2: float,
@@ -296,7 +296,7 @@ then follow as in K.4.2.
 | Name | Description |
 | :--- | :--- |
 | `l_im_db` | Sound intensity level measured over the surface, per band, in dB re 1 pW/m². |
-| `frequencies_hz` | Band centre frequencies, in Hz. |
+| `frequencies` | Band centre frequencies, in Hz. |
 | `measuring_area_m2` | Area of the measuring surface $S_\mathrm{m}$, in m². |
 | `excited_area_m2` | Area of the specimen directly excited by the rain, $S_\mathrm{e}$, in m². |
 | `reference_correction` | The laboratory correction, as for [`rainfall_sound`](/phonometry/reference/api/building/rainfall-sound/#rainfall_sound), or `None`. |
@@ -313,7 +313,7 @@ then follow as in K.4.2.
 
 ```python
 RainfallReferenceCorrection(
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
     l_i_ref_db: np.ndarray,
     structural_reverberation_time_s: np.ndarray,
     loss_factor: np.ndarray,
@@ -330,7 +330,7 @@ The normalization correction from the reference glass pane (Annex I).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | One-third-octave band centre frequencies, in Hz. |
+| `frequencies` | One-third-octave band centre frequencies, in Hz. |
 | `l_i_ref_db` | Measured sound intensity level of the reference specimen, $L_{I,\mathrm{ref}}$, in dB re 1 pW/m². |
 | `structural_reverberation_time_s` | Its structural reverberation time $T_\mathrm{s}$, in s. |
 | `loss_factor` | Its total loss factor $\eta = 2.2/(f T_\mathrm{s})$ (Formula (I.1)), a linear ratio. |
@@ -361,7 +361,7 @@ the laboratory is normalized by. Requires matplotlib
 
 ```python
 RainfallSoundResult(
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
     l_i_db: np.ndarray,
     l_ia_db: float | None,
     method: str,
@@ -377,7 +377,7 @@ Sound intensity level radiated by a specimen under rain (Annex K).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | One-third-octave band centre frequencies, in Hz. |
+| `frequencies` | One-third-octave band centre frequencies, in Hz. |
 | `l_i_db` | Sound intensity level $L_I$ per band, in dB re 1 pW/m² (Formula (K.1) or (K.4)). |
 | `l_ia_db` | A-weighted sound intensity level $L_{I\mathrm{A}}$, in dB (Formula (K.2)), or `None` when the 18 bands 100 Hz to 5 000 Hz are not all present. |
 | `method` | `"pressure"` (K.4.2) or `"intensity"` (K.4.3). |

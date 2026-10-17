@@ -206,7 +206,7 @@ def plot_inverse_square_law(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequencies_hz, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     if frequency_hz is None:
         column = int(np.argmin(result.band_radius_m))
     else:
@@ -230,9 +230,7 @@ def plot_inverse_square_law(
     markers = ("o", "s", "^", "v", "D", "P", "X", "*")
     drawn: list[np.ndarray] = []
     for index, (r, dev, name) in enumerate(
-        zip(
-            result.distances_m, result.deviations_db, result.traverse_names, strict=True
-        )
+        zip(result.distances, result.deviations_db, result.traverse_names, strict=True)
     ):
         values = dev[:, column]
         keep = np.isfinite(values)
@@ -319,7 +317,7 @@ def plot_free_field_check(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequencies_hz, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     positions = _band_axis(ax, freqs, language=language)
     met = np.asarray(result.band_met, dtype=bool)
     colours = [_C_PRIMARY if ok else _C_MUTED for ok in met]
@@ -409,7 +407,7 @@ def plot_source_directionality(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequencies_hz, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     positions = _band_axis(ax, freqs, language=language)
     up = dict(kwargs)
     style_default(up, "color", _C_PRIMARY)
@@ -466,7 +464,7 @@ def plot_reference_source_calibration(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequencies_hz, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     levels = np.asarray(result.sound_power_level_db, dtype=np.float64)
     positions = _band_axis(ax, freqs, language=language)
     bars = dict(kwargs)
@@ -523,7 +521,7 @@ def plot_reference_sound_source(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequencies_hz, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     positions = _band_axis(ax, freqs, language=language)
     step = dict(kwargs)
     style_default(step, "color", _C_SECONDARY)
@@ -618,7 +616,7 @@ def plot_reference_source_drift(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequencies_hz, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     positions = _band_axis(ax, freqs, language=language)
     bars = dict(kwargs)
     style_default(bars, "color", _C_PRIMARY)

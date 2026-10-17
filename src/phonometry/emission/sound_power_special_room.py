@@ -285,7 +285,7 @@ def special_room_background_correction(
 
 def reverberation_parameter(
     frequencies: ArrayLike,
-    volume_m3: float,
+    volume: float,
     *,
     surface_area_m2: float | None = None,
     speed_of_sound: float | None = None,
@@ -314,7 +314,7 @@ def reverberation_parameter(
     that volume too and nothing is read off the figure.
 
     :param frequencies: Band centre frequencies, in hertz.
-    :param volume_m3: Volume of the test room, in cubic metres.
+    :param volume: Volume of the test room, in cubic metres.
     :param surface_area_m2: Total surface area of the room, in square metres;
         with ``speed_of_sound`` it selects the NOTE form.
     :param speed_of_sound: Speed of sound, in metres per second, required
@@ -327,7 +327,7 @@ def reverberation_parameter(
     if freqs.size == 0 or not np.all(np.isfinite(freqs)) or np.any(freqs <= 0.0):
         msg = "'frequencies' must be finite and positive."
         raise ValueError(msg)
-    volume = require_positive(volume_m3, "volume_m3")
+    volume = require_positive(volume, "volume")
     if (surface_area_m2 is None) != (speed_of_sound is None):
         msg = (
             "'surface_area_m2' and 'speed_of_sound' select the NOTE form of "
@@ -382,7 +382,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
     the limiting curves. :attr:`lower_limit` and :attr:`upper_limit` are the
     bounds on :math:`T/(R\,T_\mathrm{nom})`, 0,9 and 1,1, or 0,8 and 1,2 above
     6,3 kHz, read from the bands: the standard's, not fields.
-    ``volume_m3`` is the room and ``method`` the determination it is being
+    ``volume`` is the room and ``method`` the determination it is being
     qualified for, which decides whether the 300 m³ ceiling applies.
     ``climate_product_change`` is the relative change of
     :math:`H(\theta + 5\ ^\circ\mathrm{C})` between the reverberation
@@ -399,7 +399,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
     reverberation_parameter: np.ndarray
     nominal_reverberation_time_s: float
     centred: bool
-    volume_m3: float
+    volume: float
     method: str
     climate_product_change: float = math.nan
     source_volume_m3: float = math.nan
@@ -415,7 +415,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
         require_positive(
             self.nominal_reverberation_time_s, "nominal_reverberation_time_s"
         )
-        require_positive(self.volume_m3, "volume_m3")
+        require_positive(self.volume, "volume")
         if not math.isnan(self.source_volume_m3):
             require_positive(self.source_volume_m3, "source_volume_m3")
         bands = (
@@ -476,7 +476,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
     @property
     def volume_large_enough(self) -> bool:
         """Whether the room is at least 70 m³ (6.2)."""
-        return self.volume_m3 >= _MIN_VOLUME_M3
+        return self.volume >= _MIN_VOLUME_M3
 
     @property
     def volume_small_enough(self) -> bool:
@@ -489,7 +489,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
         applies = self.method == "direct" and bool(
             np.max(self.frequencies) >= _EIGHT_KHZ_OCTAVE_LOWER_EDGE_HZ
         )
-        return not applies or self.volume_m3 <= _MAX_VOLUME_HIGH_OCTAVES_M3
+        return not applies or self.volume <= _MAX_VOLUME_HIGH_OCTAVES_M3
 
     @property
     def climate_stable(self) -> bool | None:
@@ -507,7 +507,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
         """
         if math.isnan(self.source_volume_m3):
             return None
-        ratio = float(settled(self.source_volume_m3 / self.volume_m3))
+        ratio = float(settled(self.source_volume_m3 / self.volume))
         return ratio <= _SOURCE_VOLUME_FRACTION
 
     @property
@@ -608,7 +608,7 @@ def check_special_room_reverberation(
     reverberation_time_s: ArrayLike,
     frequencies: ArrayLike,
     *,
-    volume_m3: float,
+    volume: float,
     nominal_reverberation_time_s: float | None = None,
     surface_area_m2: float | None = None,
     speed_of_sound: float | None = None,
@@ -662,7 +662,7 @@ def check_special_room_reverberation(
     :param reverberation_time_s: Measured reverberation time per band, in
         seconds, in one-third-octave bands as Figure B.3 has them.
     :param frequencies: Band centre frequencies, in hertz.
-    :param volume_m3: Volume of the test room, in cubic metres.
+    :param volume: Volume of the test room, in cubic metres.
     :param nominal_reverberation_time_s: :math:`T_\mathrm{nom}` to check, in
         seconds; ``None`` centres it.
     :param surface_area_m2: Room surface area for the NOTE form of
@@ -697,7 +697,7 @@ def check_special_room_reverberation(
     chosen = require_choice(method, "method", ("direct", "comparison"))
     r = reverberation_parameter(
         freqs,
-        volume_m3,
+        volume,
         surface_area_m2=surface_area_m2,
         speed_of_sound=speed_of_sound,
     )
@@ -725,16 +725,16 @@ def check_special_room_reverberation(
         reverberation_parameter=np.asarray(r, dtype=np.float64),
         nominal_reverberation_time_s=float(nominal),
         centred=centred,
-        volume_m3=float(volume_m3),
+        volume=float(volume),
         method=chosen,
         climate_product_change=change,
         source_volume_m3=float(source),
     )
     if check.source_size_recommended is False:
         warnings.warn(
-            f"The noise source is {source:g} m³ in a room of {volume_m3:g} m³; "
+            f"The noise source is {source:g} m³ in a room of {volume:g} m³; "
             f"clause 5 recommends at most {100.0 * _SOURCE_VOLUME_FRACTION:g} % of the "
-            f"room, {_SOURCE_VOLUME_FRACTION * volume_m3:g} m³ ({_STANDARD}).",
+            f"room, {_SOURCE_VOLUME_FRACTION * volume:g} m³ ({_STANDARD}).",
             SoundPowerWarning,
             stacklevel=2,
         )
@@ -1275,7 +1275,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
     reference source, reached it. For the comparison method
     ``mean_reference_level`` is :math:`L_{p\mathrm{r}}` and
     ``reference_power_level`` :math:`L_{W\mathrm{r}}`; for the direct method
-    both are ``NaN`` and ``volume_m3`` and ``nominal_reverberation_time_s``
+    both are ``NaN`` and ``volume`` and ``nominal_reverberation_time_s``
     carry the room instead (``NaN`` for the comparison method).
 
     ``sound_power_level_a`` is the Annex F total of the octave bands;
@@ -1298,12 +1298,12 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
     background_margin_ref_db: np.ndarray
     mean_reference_level: np.ndarray
     reference_power_level: np.ndarray
-    volume_m3: float
+    volume: float
     nominal_reverberation_time_s: float
     c2: float
     sigma_r0: np.ndarray
     sigma_r0_a: float
-    sigma_omc: float
+    sigma_omc_db: float
     coverage_factor: float
     sound_power_level_a: float
     sound_power_level_a_direct: float
@@ -1366,13 +1366,13 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
 
     @property
     def sigma_tot(self) -> np.ndarray:
-        """Formula (12) per band, in decibels; ``NaN`` without ``sigma_omc``."""
-        return np.asarray(np.hypot(self.sigma_r0, self.sigma_omc), dtype=np.float64)
+        """Formula (12) per band, in decibels; ``NaN`` without ``sigma_omc_db``."""
+        return np.asarray(np.hypot(self.sigma_r0, self.sigma_omc_db), dtype=np.float64)
 
     @property
     def sigma_tot_a(self) -> float:
         """Formula (12) with the A-weighted row of Table 5, in decibels."""
-        return float(math.hypot(self.sigma_r0_a, self.sigma_omc))
+        return float(math.hypot(self.sigma_r0_a, self.sigma_omc_db))
 
     @property
     def expanded_uncertainty(self) -> np.ndarray:
@@ -1382,7 +1382,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
     @property
     def expanded_uncertainty_a(self) -> float:
         """``U`` of the A-weighted level (Formula 13), in decibels: 5,7 dB for
-        ``sigma_omc`` = 2,0 dB and ``k`` = 2, the 11.5 EXAMPLE.
+        ``sigma_omc_db`` = 2,0 dB and ``k`` = 2, the 11.5 EXAMPLE.
         """
         return float(self.coverage_factor * self.sigma_tot_a)
 
@@ -1403,7 +1403,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
 
         A band whose background margin fell below 4 dB is hatched as not
         meeting 9.8, and the expanded uncertainty is drawn as an error bar
-        where ``sigma_omc`` was given. Requires matplotlib
+        where ``sigma_omc_db`` was given. Requires matplotlib
         (``pip install phonometry[plot]``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1642,7 +1642,7 @@ def sound_power_special_room(
     levels: ArrayLike,
     frequencies: ArrayLike,
     *,
-    volume_m3: float,
+    volume: float,
     nominal_reverberation_time_s: float,
     background_levels: ArrayLike | None = None,
     a_weighted_levels: ArrayLike | None = None,
@@ -1674,7 +1674,7 @@ def sound_power_special_room(
         ``(NS, NM, bands)`` for several source locations (9.4).
     :param frequencies: Nominal octave centres from 63 Hz to 8 kHz, ascending
         (Table F.1; 63 Hz under its footnote).
-    :param volume_m3: Volume of the test room, in cubic metres.
+    :param volume: Volume of the test room, in cubic metres.
     :param nominal_reverberation_time_s: :math:`T_\mathrm{nom}` of the room
         (6.3), in seconds, as
         :func:`check_special_room_reverberation` finds it.
@@ -1701,7 +1701,7 @@ def sound_power_special_room(
     grid, traverse = _measurement_grid(levels, "levels")
     n_sources, n_positions, n_bands = grid.shape
     freqs = _octave_frequencies(frequencies, n_bands, _TABLE_F1)
-    volume = require_positive(volume_m3, "volume_m3")
+    volume = require_positive(volume, "volume")
     nominal = require_positive(
         nominal_reverberation_time_s, "nominal_reverberation_time_s"
     )
@@ -1744,12 +1744,12 @@ def sound_power_special_room(
         background_margin_ref_db=nan_band,
         mean_reference_level=nan_band,
         reference_power_level=nan_band,
-        volume_m3=volume,
+        volume=volume,
         nominal_reverberation_time_s=nominal,
         c2=_c2_correction(temperature_c, static_pressure_kpa),
         sigma_r0=_table5_sigma(freqs),
         sigma_r0_a=_SIGMA_R0_A_DB,
-        sigma_omc=omc,
+        sigma_omc_db=omc,
         coverage_factor=float(coverage_factor),
         sound_power_level_a=_annex_f_total(level, freqs),
         sound_power_level_a_direct=level_a_direct,
@@ -1893,12 +1893,12 @@ def sound_power_special_room_comparison(
         background_margin_ref_db=margin_ref,
         mean_reference_level=np.asarray(mean_ref, dtype=np.float64),
         reference_power_level=power,
-        volume_m3=math.nan,
+        volume=math.nan,
         nominal_reverberation_time_s=math.nan,
         c2=_c2_correction(temperature_c, static_pressure_kpa),
         sigma_r0=_table5_sigma(freqs),
         sigma_r0_a=_SIGMA_R0_A_DB,
-        sigma_omc=omc,
+        sigma_omc_db=omc,
         coverage_factor=float(coverage_factor),
         sound_power_level_a=_annex_f_total(level, freqs),
         sound_power_level_a_direct=math.nan,

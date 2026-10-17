@@ -1028,7 +1028,7 @@ The gate first reads the classes: a public record with a field annotated as
 something that can hold an array and no `OwnsArrays` among its bases fails,
 and so does a copy written around an array handed to one that has it, or
 made first into a name (`f = levels.copy()`) that is only read before it is
-handed over (`frequencies_hz=read_only(f)`); a copy the function writes
+handed over (`frequencies=read_only(f)`); a copy the function writes
 into, binds again or keeps a view of is left alone. Every `handed_over`
 call has to be proved from the code, with no exemption: it is an argument
 of the record built in the `return` statement, its name is bound once to
@@ -1081,7 +1081,12 @@ of its name, the way the API already spells it (`_db`, `_hz`, `_m`, `_m_s`,
 (`alpha_s`, `r_tr_s`) is read as one, and the rare name that defeats the
 reading goes in `_SYMBOLS` in that module. A unit suffix the module does not
 spell yet goes in its `_UNITS`: `tests/test_record_display.py` fails on a
-public field whose name ends in a unit and shows none. An array is one line,
+public field whose name ends in a unit and shows none. An axis the vocabulary
+names by the bare concept has its one unit in `_NAMED_UNITS` (`frequencies`
+in Hz, `levels` in dB, `times` in s, `distances` in m); a record whose field
+of one of those names holds another quantity maps it to its unit, or to
+`""`, in a `_display_units` class attribute (`LevelCrossingResult.levels`
+are crossing levels in the units of the signal). An array is one line,
 its shape, its type and its range, never its values, and a verdict shows
 `passes` as PASS or FAIL in the title, or "no verdict" when it is not a bool.
 `repr()` and `print()` keep the dataclass's.
@@ -1164,7 +1169,7 @@ against numpy/scipy, pandas, matplotlib, scikit-learn, statsmodels and librosa).
 | Functions | `snake_case` noun phrase for computations; a verb only for actions/predicates; no `get_`/`calculate_` prefixes | `reverberation_time`, `apply_weighting`, `sensitivity` (not `calculate_sensitivity`) |
 | Public constants | `UPPER_SNAKE_CASE`, **no unit suffixes**: units go in the docstring | `OCTAVE_BANDS`, `REFERENCE_ACCELERATION` |
 | Private constants | `_UPPER_SNAKE` named after the standard's table | `_TABLE1`, `_UVL0` |
-| Parameters | `snake_case` with the canonical vocabulary: `fs`, `frequencies`, `volume`, `relative_humidity`, `temperature`, `x` (time signal); durations carry `_s`/`_hours` only where mixed units coexist | — |
+| Parameters | `snake_case` with the canonical vocabulary: `fs`, `x` (time signal); `frequencies`, `levels`, `times` and `distances` for arrays; `volume`, `temperature_c`, `relative_humidity_percent`, `static_pressure_*`. A unit goes in a name only where two units compete (the quantities `scripts/check_parameter_units.py` lists), so an axis whose unit never changes carries none; durations carry `_s`/`_hours` only where mixed units coexist | — |
 | Type aliases / Literals | `PascalCase` aliases; plain-string `Literal` values | `Real`, `Sex = Literal["male", "female"]` |
 | Warnings | `<Topic>Warning`, all inheriting from `PhonometryWarning` | `OccupationalExposureWarning` |
 | Spelling | American English in identifiers | `normalized_frequencies`, `BAND_CENTERS` |

@@ -379,7 +379,7 @@ def infinite_plate_point_mobility(
     constant across *frequency*; bundling it lets it be plotted and converted
     with the ISO 7626 mobility machinery.
 
-    :param frequency: Frequencies ``f``, in hertz (array, > 0).
+    :param frequency: Frequency ``f``, in hertz (scalar or array, > 0).
     :param bending_stiffness: Plate bending stiffness per unit width ``B'``,
         in N.m.
     :param mass_per_area: Mass per unit area ``m''``, in kg/m^2.
@@ -404,7 +404,7 @@ def infinite_beam_point_mobility(
 ) -> MobilityResult:
     r"""Infinite-beam point mobility bundled as a :class:`MobilityResult`.
 
-    :param frequency: Frequencies ``f``, in hertz (array, > 0).
+    :param frequency: Frequency ``f``, in hertz (scalar or array, > 0).
     :param bending_stiffness: Beam bending stiffness :math:`B = E I`, in N.m^2.
     :param mass_per_length: Mass per unit length ``m'``, in kg/m.
     :param location: ``"centre"`` or ``"end"``.

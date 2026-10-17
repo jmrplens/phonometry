@@ -90,11 +90,11 @@ def test_band_axis_none_xlabel_left_untouched() -> None:
 
 
 def test_plot_rating_spanish_labels_and_legend() -> None:
-    band_centers = np.array([125.0, 250.0, 500.0, 1000.0])
+    frequencies = np.array([125.0, 250.0, 500.0, 1000.0])
     measured = np.array([30.0, 35.0, 40.0, 45.0])
     reference = np.array([32.0, 34.0, 42.0, 44.0])
     ax = _plot_rating(
-        band_centers,
+        frequencies,
         measured,
         reference,
         impact=False,
@@ -111,11 +111,11 @@ def test_plot_rating_spanish_labels_and_legend() -> None:
 
 
 def test_plot_rating_unfavourable_deviations_localised() -> None:
-    band_centers = np.array([125.0, 250.0, 500.0])
+    frequencies = np.array([125.0, 250.0, 500.0])
     measured = np.array([50.0, 55.0, 60.0])
     reference = np.array([40.0, 45.0, 50.0])
     ax = _plot_rating(
-        band_centers,
+        frequencies,
         measured,
         reference,
         impact=True,
@@ -129,11 +129,11 @@ def test_plot_rating_unfavourable_deviations_localised() -> None:
 
 
 def test_plot_rating_english_default_unchanged() -> None:
-    band_centers = np.array([125.0, 250.0, 500.0])
+    frequencies = np.array([125.0, 250.0, 500.0])
     measured = np.array([30.0, 35.0, 40.0])
     reference = np.array([32.0, 34.0, 42.0])
     ax = _plot_rating(
-        band_centers,
+        frequencies,
         measured,
         reference,
         impact=False,
@@ -247,10 +247,10 @@ def test_insulation_bands_english_default_unchanged(
 
 def test_annotate_impact_500_spanish_legend_and_annotation() -> None:
     ax = _axes()
-    band_centers = np.array([125.0, 250.0, 500.0, 1000.0])
+    frequencies = np.array([125.0, 250.0, 500.0, 1000.0])
     reference = np.array([30.0, 35.0, 40.0, 45.0])
-    ax.plot(band_centers, reference)
-    _annotate_impact_500(ax, band_centers, reference, 35, language="es")
+    ax.plot(frequencies, reference)
+    _annotate_impact_500(ax, frequencies, reference, 35, language="es")
     legend_texts = _legend_texts(ax)
     assert any("lectura 500 Hz" in t for t in legend_texts)
     annotation_texts = [child.get_text() for child in ax.texts]
@@ -260,10 +260,10 @@ def test_annotate_impact_500_spanish_legend_and_annotation() -> None:
 
 def test_annotate_impact_500_english_default_unchanged() -> None:
     ax = _axes()
-    band_centers = np.array([125.0, 250.0, 500.0, 1000.0])
+    frequencies = np.array([125.0, 250.0, 500.0, 1000.0])
     reference = np.array([30.0, 35.0, 40.0, 45.0])
-    ax.plot(band_centers, reference)
-    _annotate_impact_500(ax, band_centers, reference, 35)
+    ax.plot(frequencies, reference)
+    _annotate_impact_500(ax, frequencies, reference, 35)
     legend_texts = _legend_texts(ax)
     assert any("500 Hz read" in t for t in legend_texts)
     annotation_texts = [child.get_text() for child in ax.texts]

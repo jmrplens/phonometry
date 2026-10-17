@@ -1058,7 +1058,7 @@ def test_a_coupler_impedance_keeps_columns_of_its_own() -> None:
     """
     adiabatic = np.array([1.0 + 1.0j, 2.0 + 2.0j])
     record = metrology.CouplerTransferImpedance(
-        frequencies_hz=np.array([100.0, 200.0]),
+        frequencies=np.array([100.0, 200.0]),
         coupler="plane_wave",
         adiabatic_impedance_pa_s_m3=adiabatic,
         heat_conducting_impedance_pa_s_m3=adiabatic.copy(),

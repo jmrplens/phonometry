@@ -919,7 +919,7 @@ class BinnedSoundLevels(OwnsArrays):
 
 
 def bin_sound_levels(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     wind_speeds_m_s: ArrayLike,
     wind_directions_deg: ArrayLike | None = None,
     *,
@@ -945,7 +945,7 @@ def bin_sound_levels(
       per-interval type B uncertainties of Equation (3);
     * their combination, Equation (5), :math:`\sqrt{s^2 + u^2}`.
 
-    :param levels_db: The interval levels, in dB.
+    :param levels: The interval levels, in dB.
     :param wind_speeds_m_s: The binning wind speed of each interval, in m/s.
     :param wind_directions_deg: Optional wind direction of each interval, in
         degrees from north.
@@ -969,7 +969,7 @@ def bin_sound_levels(
         msg = f"'averaging' must be one of {known}; got {averaging!r}."
         raise ValueError(msg)
     mode = _Averaging(averaging)
-    levels = require_finite_array(levels_db, "levels_db")
+    levels = require_finite_array(levels, "levels")
     type_b = np.broadcast_to(
         np.asarray(type_b_uncertainty_db, dtype=np.float64), levels.shape
     ).astype(np.float64)
@@ -1529,7 +1529,7 @@ class LowFrequencyLevel(OwnsArrays):
     Arrays with a turbine axis have one row per turbine and one column per
     band; the band arrays are summed over the turbines.
 
-    :ivar frequencies_hz: The one-third-octave centres, in Hz.
+    :ivar frequencies: The one-third-octave centres, in Hz.
     :ivar sound_power_levels_db: The turbines' band sound power levels.
     :ivar a_weighting_db: The A-weighting added to each band (zero when the
         result is unweighted).
@@ -1545,7 +1545,7 @@ class LowFrequencyLevel(OwnsArrays):
     :ivar a_weighted: Whether the levels are A-weighted.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     sound_power_levels_db: NDArray[np.float64]
     a_weighting_db: NDArray[np.float64]
     distance_terms_db: NDArray[np.float64]
@@ -1582,7 +1582,7 @@ def wind_turbine_low_frequency_level(
     *,
     distance_m: ArrayLike,
     hub_height_m: ArrayLike,
-    frequencies_hz: ArrayLike = LOW_FREQUENCY_BANDS_HZ,
+    frequencies: ArrayLike = LOW_FREQUENCY_BANDS_HZ,
     ground_correction_db: ArrayLike | None = None,
     air_attenuation_db_per_km: ArrayLike | None = None,
     facade_insulation_db: ArrayLike | None = None,
@@ -1606,9 +1606,9 @@ def wind_turbine_low_frequency_level(
     :param sound_power_levels_db: Band sound power levels from IEC 61400-11,
         in dB: one row per turbine, or one row for a single turbine.
     :param distance_m: Horizontal distance :math:`l` from each tower to the
-        receptor, in m.
+        receptor, in m (scalar or one per turbine).
     :param hub_height_m: Hub height :math:`h` of each turbine, in m.
-    :param frequencies_hz: Nominal centre of each column, in Hz (10 Hz to
+    :param frequencies: Nominal centre of each column, in Hz (10 Hz to
         200 Hz by default, :data:`LOW_FREQUENCY_BANDS_HZ`).
     :param ground_correction_db: :math:`\Delta L_\mathrm{g,LF}` per band;
         ``None`` for Table C.2 (onshore, impedance class D).
@@ -1633,7 +1633,7 @@ def wind_turbine_low_frequency_level(
             "such as 'False' is truthy and would add the A-weighting."
         )
         raise ValueError(msg)
-    freqs = require_finite_array(frequencies_hz, "frequencies_hz")
+    freqs = require_finite_array(frequencies, "frequencies")
     power = require_finite_matrix(sound_power_levels_db, "sound_power_levels_db")
     if power.shape[1] != freqs.size:
         msg = (
@@ -1692,7 +1692,7 @@ def wind_turbine_low_frequency_level(
     outdoor = np.asarray(energy_sum(outdoor_per_turbine, axis=0), dtype=np.float64)
     indoor = None if facade is None else outdoor - facade
     return LowFrequencyLevel(
-        frequencies_hz=freqs,
+        frequencies=freqs,
         sound_power_levels_db=power,
         a_weighting_db=read_only(weighting),
         distance_terms_db=read_only(distance_terms),
@@ -1927,7 +1927,7 @@ class ToneSearchLimit(OwnsArrays):
     """The upper frequency of the tonal search range (12.5.2.4).
 
     :ivar distance_m: Distance from the nearest turbine, in m.
-    :ivar frequencies_hz: The nominal one-third-octave centres searched.
+    :ivar frequencies: The nominal one-third-octave centres searched.
     :ivar attenuation_db: ISO 9613-1 attenuation of each band over the
         distance, at the exact mid-band frequency, in dB.
     :ivar upper_frequency_hz: The nominal centre of the lowest band
@@ -1938,7 +1938,7 @@ class ToneSearchLimit(OwnsArrays):
     """
 
     distance_m: float
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     attenuation_db: NDArray[np.float64]
     upper_frequency_hz: float
     _: KW_ONLY
@@ -2011,7 +2011,7 @@ def upper_tone_search_frequency(
     )
     return ToneSearchLimit(
         distance_m=distance,
-        frequencies_hz=TONE_SEARCH_BANDS_HZ,
+        frequencies=TONE_SEARCH_BANDS_HZ,
         attenuation_db=read_only(attenuation),
         upper_frequency_hz=upper,
         temperature_c=float(temperature_c),

@@ -344,7 +344,7 @@ def test_rating_rejects_a_wrong_band_count() -> None:
 
 def test_rating_rejects_mismatched_frequencies() -> None:
     with pytest.raises(
-        ValueError, match=r"'frequency' must be the 16 ASTM E413 contour bands"
+        ValueError, match=r"'frequencies' must be the 16 ASTM E413 contour bands"
     ):
         building.ceiling_attenuation_class(
             [30.0] * 16, [100.0 * (i + 1) for i in range(16)]
@@ -914,14 +914,14 @@ def test_plenum_model_rejects_ceilings_over_different_bands() -> None:
 def test_plenum_model_rejects_frequencies_of_another_length() -> None:
     """The band axis is carried into the result and plotted against Rcl."""
     with pytest.raises(
-        ValueError, match=r"'reduction_index_source'.*'frequency'.*shape"
+        ValueError, match=r"'reduction_index_source'.*'frequencies'.*shape"
     ):
         building.plenum_flanking_reduction_index(
             [30.0, 35.0, 40.0],
             [28.0, 33.0, 38.0],
             ceiling_length=4.75,
             plenum_height=0.43,
-            frequency=[125.0, 250.0],
+            frequencies=[125.0, 250.0],
         )
 
 

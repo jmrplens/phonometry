@@ -332,7 +332,7 @@ def _single_numbers(
 class LabJointInsulationResult(OwnsArrays):
     r"""Sound reduction index of a joint per metre (ISO 10140-1:2021 Annex J).
 
-    :ivar frequencies_hz: One-third-octave band centre frequencies, in Hz.
+    :ivar frequencies: One-third-octave band centre frequencies, in Hz.
     :ivar r_s_measured_db: :math:`R_\mathrm{s}'`, the index measured with the
         test element in the test opening, per band, in dB.
     :ivar r_s_max_db: :math:`R_\mathrm{s,max}`, the maximum of the test
@@ -362,7 +362,7 @@ class LabJointInsulationResult(OwnsArrays):
     and the maximum indices and ``limit_at_maximum``, so it is not a field.
     """
 
-    frequencies_hz: np.ndarray
+    frequencies: np.ndarray
     r_s_measured_db: np.ndarray
     r_s_max_db: np.ndarray
     r_s_db: np.ndarray
@@ -379,7 +379,7 @@ class LabJointInsulationResult(OwnsArrays):
         """Reject columns of different lengths, or a correction of another rule.
 
         The figure, the table of the form and the octave conversion read the
-        four columns against ``frequencies_hz`` band by band, and the regime
+        four columns against ``frequencies`` band by band, and the regime
         read from them decides which bands the form prints as minimum values.
         The corrected index is what that regime's rule of J.1 makes of the
         measured and the maximum indices, so it is held to it band by band.
@@ -389,13 +389,13 @@ class LabJointInsulationResult(OwnsArrays):
         """
         require_ranks(
             self,
-            frequencies_hz=1,
+            frequencies=1,
             r_s_measured_db=1,
             r_s_max_db=1,
             r_s_db=1,
         )
         require_same_length(
-            self, "frequencies_hz", "r_s_measured_db", "r_s_max_db", "r_s_db"
+            self, "frequencies", "r_s_measured_db", "r_s_max_db", "r_s_db"
         )
         expected = _correct(
             np.asarray(self.r_s_measured_db, dtype=np.float64),
@@ -496,7 +496,7 @@ class LabJointInsulationResult(OwnsArrays):
         transmitted power of the three thirds averaged, as Figure J.9 plots
         a joint at several gap widths in octave bands.
         """
-        return improvement_octave_bands(self.r_s_db, self.frequencies_hz)
+        return improvement_octave_bands(self.r_s_db, self.frequencies)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -621,7 +621,7 @@ def _correct(
 def lab_joint_insulation(
     r_s_measured_db: ArrayLike,
     r_s_max_db: ArrayLike,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     joint_length_m: float | None = None,
     limit_at_maximum: bool = True,
@@ -662,7 +662,7 @@ def lab_joint_insulation(
     :param r_s_measured_db: :math:`R_\mathrm{s}'` per one-third-octave band,
         in dB.
     :param r_s_max_db: :math:`R_\mathrm{s,max}` per band, in dB.
-    :param frequencies_hz: Band centre frequencies, in Hz.
+    :param frequencies: Band centre frequencies, in Hz.
     :param joint_length_m: Length of the joint under test, in m, kept for the
         form of Figure J.7; ``None`` leaves that row empty.
     :param limit_at_maximum: Set the bands within 3 dB of the maximum to
@@ -672,7 +672,7 @@ def lab_joint_insulation(
     :raises ValueError: If the three inputs disagree in length, a value is not
         finite, a frequency or the joint length is not positive.
     """
-    freqs = require_positive_array(frequencies_hz, "frequencies_hz")
+    freqs = require_positive_array(frequencies, "frequencies")
     measured = require_finite_array(r_s_measured_db, "r_s_measured_db")
     maximum = require_finite_array(r_s_max_db, "r_s_max_db")
     require_equal_shapes(
@@ -680,7 +680,7 @@ def lab_joint_insulation(
         {
             "r_s_measured_db": measured.shape,
             "r_s_max_db": maximum.shape,
-            "frequencies_hz": freqs.shape,
+            "frequencies": freqs.shape,
         },
         "band",
     )
@@ -707,7 +707,7 @@ def lab_joint_insulation(
         if bool(np.any(open_mask)):
             opened = _open_band_rating(r_s, freqs, core, open_mask)
     return LabJointInsulationResult(
-        frequencies_hz=freqs,
+        frequencies=freqs,
         r_s_measured_db=measured,
         r_s_max_db=maximum,
         r_s_db=np.asarray(r_s, dtype=np.float64),

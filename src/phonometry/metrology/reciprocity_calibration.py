@@ -192,7 +192,7 @@ class ReciprocityCalibration(OwnsArrays):
     :func:`~phonometry.metrology.free_field_reciprocity` and
     :func:`~phonometry.metrology.free_field_reciprocity_pair`.
 
-    :ivar frequencies_hz: The frequencies, in Hz.
+    :ivar frequencies: The frequencies, in Hz.
     :ivar sensitivity_v_per_pa: The complex sensitivity of each microphone,
         one row per microphone, in V/Pa: the pressure sensitivity
         :math:`M_\mathrm{p}` in a coupler, the free-field sensitivity
@@ -209,7 +209,7 @@ class ReciprocityCalibration(OwnsArrays):
         sensitivity level at each frequency, in dB, or ``None``.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     sensitivity_v_per_pa: NDArray[np.complex128]
     products_v2_per_pa2: NDArray[np.complex128]
     field: str
@@ -228,9 +228,9 @@ class ReciprocityCalibration(OwnsArrays):
         """
         require_choice(self.field, "field", _FIELDS)
         require_choice(self.method, "method", _METHODS)
-        frequencies = _frequency_axis(self.frequencies_hz)
+        frequencies = _frequency_axis(self.frequencies)
         count = frequencies.size
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         microphones = _TRIAD if self.method == "three_microphones" else _PAIR
         pairs = _TRIAD if self.method == "three_microphones" else 1
         for name, rows in (
@@ -280,7 +280,7 @@ class ReciprocityCalibration(OwnsArrays):
     @property
     def correction_db(self) -> NDArray[np.float64]:
         r""":math:`\sum_j C_j`, the corrections added to every level, in dB."""
-        total = np.zeros(self.frequencies_hz.size)
+        total = np.zeros(self.frequencies.size)
         for value in self.corrections_db.values():
             total = total + value
         return total
@@ -337,7 +337,7 @@ def _calibration(
 ) -> ReciprocityCalibration:
     """Build the result; shared by the pressure and the free-field routes."""
     return ReciprocityCalibration(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         sensitivity_v_per_pa=sensitivities,
         products_v2_per_pa2=products,
         field=field,
@@ -591,7 +591,7 @@ class ReciprocityUncertaintyBudget(OwnsArrays):
     each frequency; they are combined in quadrature and multiplied by the
     coverage factor.
 
-    :ivar frequencies_hz: The frequencies, in Hz.
+    :ivar frequencies: The frequencies, in Hz.
     :ivar field: ``"pressure"`` (IEC 61094-2) or ``"free_field"`` (IEC 61094-3).
     :ivar names: The key of each component, those of the field's Table 1 in its
         order, then any additional ones.
@@ -602,7 +602,7 @@ class ReciprocityUncertaintyBudget(OwnsArrays):
     :ivar coverage_factor: :math:`k`.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     field: str
     names: tuple[str, ...]
     components: tuple[str, ...]
@@ -620,8 +620,8 @@ class ReciprocityUncertaintyBudget(OwnsArrays):
         """
         require_choice(self.field, "field", _FIELDS)
         require_positive(self.coverage_factor, "coverage_factor")
-        frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        frequencies = _frequency_axis(self.frequencies)
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         count = len(self.names)
         if count == 0 or len(self.components) != count:
             msg = (
@@ -695,7 +695,7 @@ class ReciprocityUncertaintyBudget(OwnsArrays):
 
 
 def reciprocity_uncertainty_budget(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     standard_uncertainties_db: Mapping[str, ArrayLike],
     *,
     field: str = "pressure",
@@ -723,7 +723,7 @@ def reciprocity_uncertainty_budget(
     caller whose budget is dominated by one component with few degrees of
     freedom passes its own.
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param standard_uncertainties_db: The components, keyed by name, each a
         standard uncertainty in dB, one value or one per frequency.
     :param field: ``"pressure"`` (default) or ``"free_field"``.
@@ -736,7 +736,7 @@ def reciprocity_uncertainty_budget(
         or a value that is negative or not finite.
     """
     field = require_choice(field, "field", _FIELDS)
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     table = _BUDGET_TABLES[field]
     unknown = [key for key in standard_uncertainties_db if key not in table]
     if unknown:
@@ -770,7 +770,7 @@ def reciprocity_uncertainty_budget(
         msg = "The budget needs at least one component."
         raise ValueError(msg)
     return ReciprocityUncertaintyBudget(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         field=field,
         names=tuple(names),
         components=tuple(components),

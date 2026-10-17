@@ -31,7 +31,7 @@ from phonometry.environment.sources.track_decay import (
 _NEPER_DB = 20.0 * math.log10(math.e)
 
 #: How a grid that does not start at 0 m and increase is refused.
-_GRID_ORDER = "'distances_m' must start at the accelerometer, 0 m, and increase"
+_GRID_ORDER = "'distances' must start at the accelerometer, 0 m, and increase"
 
 
 def test_the_grid_is_the_29_points_of_figure_2() -> None:
@@ -61,7 +61,7 @@ def test_formula_1_on_a_uniform_grid_is_a_geometric_series() -> None:
     count = 80
     distances = dx * np.arange(count + 1)
     response = np.exp(-beta * distances)[:, None]
-    rate = track_decay_rate(response, frequencies_hz=[1000.0], distances_m=distances)
+    rate = track_decay_rate(response, frequencies=[1000.0], distances=distances)
     q = math.exp(-2.0 * beta * dx)
     series = dx / 2.0 + dx * sum(q**n for n in range(1, count)) + dx * q**count
     assert rate.decay_rates_db_per_m[0] == pytest.approx(4.343 / series, rel=1e-12)
@@ -73,8 +73,8 @@ def test_a_dense_grid_recovers_the_exponential_rate() -> None:
     beta = 0.23
     rate = track_decay_rate(
         np.exp(-beta * distances)[:, None],
-        frequencies_hz=[500.0],
-        distances_m=distances,
+        frequencies=[500.0],
+        distances=distances,
     )
     assert rate.decay_rates_db_per_m[0] == pytest.approx(_NEPER_DB * beta, rel=2e-4)
 
@@ -86,8 +86,8 @@ def test_mobility_and_accelerance_give_the_same_rate() -> None:
     betas = np.array([0.5, 0.1, 0.2])
     mobility = np.exp(-np.outer(positions, betas))
     accelerance = mobility * (2.0 * np.pi * frequencies)
-    one = track_decay_rate(mobility, frequencies_hz=frequencies)
-    two = track_decay_rate(accelerance, frequencies_hz=frequencies)
+    one = track_decay_rate(mobility, frequencies=frequencies)
+    two = track_decay_rate(accelerance, frequencies=frequencies)
     np.testing.assert_allclose(
         one.decay_rates_db_per_m, two.decay_rates_db_per_m, rtol=1e-12
     )
@@ -99,7 +99,7 @@ def test_formula_2_floor_and_the_suitable_bands() -> None:
     rates_db = np.array([0.1, 1.0])
     rate = track_decay_rate(
         np.exp(-np.outer(positions, rates_db / _NEPER_DB)),
-        frequencies_hz=[1000.0, 2000.0],
+        frequencies=[1000.0, 2000.0],
     )
     assert rate.minimum_measurable_db_per_m == pytest.approx(4.343 / 39.6)
     np.testing.assert_array_equal(rate.suitable, [False, True])
@@ -111,14 +111,14 @@ def test_the_far_field_drop_is_judged_against_10_db() -> None:
     rates_db = np.array([0.3, 1.0])
     rate = track_decay_rate(
         np.exp(-np.outer(positions, rates_db / _NEPER_DB)),
-        frequencies_hz=[1000.0, 2000.0],
+        frequencies=[1000.0, 2000.0],
     )
     drops = rate.far_field_drops_db
     assert drops is not None
     np.testing.assert_allclose(drops, rates_db * 39.6)
     assert rate.far_field_sufficient is True
     shallow = track_decay_rate(
-        np.exp(-np.outer(positions, [0.2 / _NEPER_DB])), frequencies_hz=[1000.0]
+        np.exp(-np.outer(positions, [0.2 / _NEPER_DB])), frequencies=[1000.0]
     )
     assert shallow.far_field_sufficient is False
 
@@ -135,7 +135,7 @@ def test_a_rate_of_exactly_twice_the_floor_is_suitable() -> None:
         "vertical",
         [250.0, 315.0, 400.0],
         [1.95 * floor, 2.0 * floor, 2.05 * floor],
-        distances_m=positions,
+        distances=positions,
         responses=np.ones((positions.size, 3)),
     )
     assert rates.minimum_measurable_db_per_m == floor
@@ -150,7 +150,7 @@ def test_a_far_field_drop_of_10_db_is_the_boundary(
     positions = track_decay_excitation_positions()
     rate = track_decay_rate(
         np.exp(-np.outer(positions, [drop_db / positions[-1] / _NEPER_DB])),
-        frequencies_hz=[1000.0],
+        frequencies=[1000.0],
     )
     drops = rate.far_field_drops_db
     assert drops is not None
@@ -169,9 +169,9 @@ def test_a_far_field_drop_of_exactly_10_db_is_sufficient(
     Carried to magnitudes and back, each of these pairs comes out a few units
     in the last place under 10 dB; the verdict must not hang on them.
     """
-    levels_db = np.array([[direct_db], [direct_db - 5.0], [farthest_db]])
+    levels = np.array([[direct_db], [direct_db - 5.0], [farthest_db]])
     rate = track_decay_rate(
-        10.0 ** (levels_db / 20.0), frequencies_hz=[1000.0], distances_m=[0.0, 0.6, 1.2]
+        10.0 ** (levels / 20.0), frequencies=[1000.0], distances=[0.0, 0.6, 1.2]
     )
     drops = rate.far_field_drops_db
     assert drops is not None
@@ -188,7 +188,7 @@ def test_a_measured_rate_of_exactly_twice_the_floor_is_suitable() -> None:
     floor; binary arithmetic lands it a few units in the last place under.
     """
     rate = track_decay_rate(
-        [[1.0], [0.75], [0.25]], frequencies_hz=[1000.0], distances_m=[0.0, 0.5, 1.4]
+        [[1.0], [0.75], [0.25]], frequencies=[1000.0], distances=[0.0, 0.5, 1.4]
     )
     floor = rate.minimum_measurable_db_per_m
     assert floor is not None
@@ -219,78 +219,76 @@ def test_an_unknown_direction_is_refused() -> None:
 
 
 @pytest.mark.parametrize(
-    "frequencies_hz",
+    "frequencies",
     [[250.0, 250.0, 315.0], [315.0, 250.0, 400.0], [250.0, 251.0, 315.0]],
     ids=["repeated", "decreasing", "same band"],
 )
-def test_the_bands_are_distinct_and_increasing(frequencies_hz: list[float]) -> None:
+def test_the_bands_are_distinct_and_increasing(frequencies: list[float]) -> None:
     """A band given twice would let the verdict read one rate and rate_at the other."""
     with pytest.raises(
-        ValueError, match="'frequencies_hz' must name distinct one-third octave bands"
+        ValueError, match="'frequencies' must name distinct one-third octave bands"
     ):
-        TrackDecayRate("vertical", frequencies_hz, [0.1, 3.0, 3.0])
+        TrackDecayRate("vertical", frequencies, [0.1, 3.0, 3.0])
 
 
 def test_measured_rates_need_distinct_bands_too() -> None:
     """The same check holds for rates computed from responses."""
     responses = np.ones((29, 2))
     with pytest.raises(
-        ValueError, match="'frequencies_hz' must name distinct one-third octave bands"
+        ValueError, match="'frequencies' must name distinct one-third octave bands"
     ):
-        track_decay_rate(responses, frequencies_hz=[250.0, 250.0])
+        track_decay_rate(responses, frequencies=[250.0, 250.0])
 
 
 def test_the_grid_starts_at_the_accelerometer() -> None:
     """The direct response is at 0 m, and the positions increase."""
     responses = np.ones((2, 1))
-    with pytest.raises(
-        ValueError, match="'distances_m' must start at the accelerometer"
-    ):
-        track_decay_rate(responses, frequencies_hz=[1000.0], distances_m=[0.1, 0.5])
+    with pytest.raises(ValueError, match="'distances' must start at the accelerometer"):
+        track_decay_rate(responses, frequencies=[1000.0], distances=[0.1, 0.5])
 
 
 def test_one_row_per_position() -> None:
     """The responses and the grid agree on the number of positions."""
     responses = np.ones((3, 1))
     with pytest.raises(ValueError, match="'responses' has 3 rows for 29 positions"):
-        track_decay_rate(responses, frequencies_hz=[1000.0])
+        track_decay_rate(responses, frequencies=[1000.0])
 
 
 def test_responses_are_positive_magnitudes() -> None:
     """A level in decibels is not a magnitude."""
     levels = -np.ones((29, 1))
     with pytest.raises(ValueError, match="'responses' are magnitudes"):
-        track_decay_rate(levels, frequencies_hz=[1000.0])
+        track_decay_rate(levels, frequencies=[1000.0])
 
 
 @pytest.mark.parametrize(
-    ("distances_m", "message"),
+    ("distances", "message"),
     [
         ([0.0, -1.0], _GRID_ORDER),
         ([0.0, 0.6, 0.6], _GRID_ORDER),
         ([0.1, 0.6], _GRID_ORDER),
-        ([0.0], "'distances_m' needs at least the direct position and one more"),
+        ([0.0], "'distances' needs at least the direct position and one more"),
         (
             [[0.0, 0.6]],
-            "'distances_m' must be one-dimensional, one distance per position",
+            "'distances' must be one-dimensional, one distance per position",
         ),
-        ([0.0, math.nan], "'distances_m' must be finite"),
-        ([0.0, math.inf], "'distances_m' must be finite"),
+        ([0.0, math.nan], "'distances' must be finite"),
+        ([0.0, math.inf], "'distances' must be finite"),
     ],
     ids=["backwards", "repeated", "off-zero", "one", "two-dimensional", "nan", "inf"],
 )
 def test_a_rate_built_directly_needs_the_grid_of_6_7(
-    distances_m: list[float], message: str
+    distances: list[float], message: str
 ) -> None:
     """6.7, Figure 2 and A.2: the direct position at 0 m, then strictly farther ones.
 
     The constructor refuses what track_decay_rate refuses, so a grid that runs
     backwards cannot make the floor of Formula 2 or the far-field drop pass.
     """
-    responses = np.ones((np.asarray(distances_m).size, 1))
+    responses = np.ones((np.asarray(distances).size, 1))
     with pytest.raises(ValueError, match=f"^{message}\\.$"):
         TrackDecayRate(
-            "vertical", [250.0], [2.5], distances_m=distances_m, responses=responses
+            "vertical", [250.0], [2.5], distances=distances, responses=responses
         )
 
 
@@ -302,7 +300,7 @@ def test_a_rate_built_directly_needs_positive_finite_magnitudes(direct: float) -
     responses = np.array([[direct], [0.1]])
     with pytest.raises(ValueError, match="'responses' are magnitudes"):
         TrackDecayRate(
-            "vertical", [250.0], [2.5], distances_m=[0.0, 0.6], responses=responses
+            "vertical", [250.0], [2.5], distances=[0.0, 0.6], responses=responses
         )
 
 
@@ -311,7 +309,7 @@ def test_a_rate_built_directly_needs_one_row_per_position() -> None:
     responses = np.ones((3, 1))
     with pytest.raises(ValueError, match="'responses' has 3 rows for 2 positions"):
         TrackDecayRate(
-            "vertical", [250.0], [2.5], distances_m=[0.0, 0.6], responses=responses
+            "vertical", [250.0], [2.5], distances=[0.0, 0.6], responses=responses
         )
 
 
@@ -321,7 +319,7 @@ def test_a_rate_built_directly_on_a_valid_grid_is_judged() -> None:
         "vertical",
         [250.0],
         [2.5],
-        distances_m=[0.0, 0.6, 1.2],
+        distances=[0.0, 0.6, 1.2],
         responses=[1.0, 0.5, 0.25],
     )
     assert rates.responses is not None
@@ -332,7 +330,7 @@ def test_a_rate_built_directly_on_a_valid_grid_is_judged() -> None:
 
 def test_the_arrays_are_read_only() -> None:
     """A result never hands out a writable array."""
-    rate = track_decay_rate(np.ones((29, 1)), frequencies_hz=[1000.0])
+    rate = track_decay_rate(np.ones((29, 1)), frequencies=[1000.0])
     with pytest.raises(ValueError, match="assignment destination is read-only"):
         rate.decay_rates_db_per_m[0] = 1.0
 

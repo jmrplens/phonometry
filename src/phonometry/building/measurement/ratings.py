@@ -533,7 +533,7 @@ class WeightedRatingResult(OwnsArrays):
         shift, in dB (Clause 4.4); at most 32,0 (16 bands) or 10,0 (5
         bands). Restates ``measured`` against ``shifted_reference`` and is
         checked against them when both are present.
-    :ivar band_centers: Band centre frequencies of the measured curve, in
+    :ivar frequencies: Band centre frequencies of the measured curve, in
         Hz. Defaults to ``None`` for backward-compatible construction.
     :ivar measured: The measured band quantities used for the rating (after
         the one-decimal reduction of Clause 4.4), in dB. Defaults to
@@ -553,7 +553,7 @@ class WeightedRatingResult(OwnsArrays):
     c: int
     ctr: int
     unfavourable_sum: float
-    band_centers: np.ndarray | None = None
+    frequencies: np.ndarray | None = None
     measured: np.ndarray | None = None
     shifted_reference: np.ndarray | None = None
     quantity: Literal["airborne"] = "airborne"
@@ -565,7 +565,7 @@ class WeightedRatingResult(OwnsArrays):
         rated over, and a fiche reads them as exactly that: ISO 717-1
         Clause 5.3 makes it declare whether the rating came from
         one-third-octave or octave bands, and it settles that from the length
-        of ``band_centers`` alone. The renderers do compare the three, but
+        of ``frequencies`` alone. The renderers do compare the three, but
         only once a report is asked for, which can be long after the rating
         was built and passed on; :meth:`plot` compares nothing and hands the
         curves to matplotlib, whose complaint about first dimensions names
@@ -593,9 +593,9 @@ class WeightedRatingResult(OwnsArrays):
             carries a non-finite value, or ``unfavourable_sum`` is not their
             own sum of unfavourable deviations.
         """
-        require_ranks(self, band_centers=1, measured=1, shifted_reference=1)
-        require_same_length(self, "band_centers", "measured", "shifted_reference")
-        _require_finite_curves(self, "band_centers", "measured", "shifted_reference")
+        require_ranks(self, frequencies=1, measured=1, shifted_reference=1)
+        require_same_length(self, "frequencies", "measured", "shifted_reference")
+        _require_finite_curves(self, "frequencies", "measured", "shifted_reference")
         _require_unfavourable_sum(self, impact=False)
 
     def plot(
@@ -651,7 +651,7 @@ class WeightedRatingResult(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``, ``symbol``
             is not a valid quantity-symbol shape, or the result was built
-            without the per-band data (``band_centers``, ``measured``,
+            without the per-band data (``frequencies``, ``measured``,
             ``shifted_reference``).
         :raises ImportError: If reportlab is not installed
             (``pip install phonometry[report]``), or matplotlib is missing for
@@ -682,7 +682,7 @@ class ImpactRatingResult(OwnsArrays):
         shift, in dB (Clause 4.3); at most 32,0 (16 bands) or 10,0 (5
         bands). Restates ``measured`` against ``shifted_reference``, with the
         impact sign, and is checked against them when both are present.
-    :ivar band_centers: Band centre frequencies of the measured curve, in
+    :ivar frequencies: Band centre frequencies of the measured curve, in
         Hz. Defaults to ``None`` for backward-compatible construction.
     :ivar measured: The measured impact levels used for the rating (after
         the one-decimal reduction of Clause 4.3.1), in dB. Defaults to
@@ -696,7 +696,7 @@ class ImpactRatingResult(OwnsArrays):
     rating: int
     ci: int
     unfavourable_sum: float
-    band_centers: np.ndarray | None = None
+    frequencies: np.ndarray | None = None
     measured: np.ndarray | None = None
     shifted_reference: np.ndarray | None = None
     quantity: Literal["impact"] = "impact"
@@ -730,9 +730,9 @@ class ImpactRatingResult(OwnsArrays):
             carries a non-finite value, or ``unfavourable_sum`` is not their
             own sum of unfavourable deviations.
         """
-        require_ranks(self, band_centers=1, measured=1, shifted_reference=1)
-        require_same_length(self, "band_centers", "measured", "shifted_reference")
-        _require_finite_curves(self, "band_centers", "measured", "shifted_reference")
+        require_ranks(self, frequencies=1, measured=1, shifted_reference=1)
+        require_same_length(self, "frequencies", "measured", "shifted_reference")
+        _require_finite_curves(self, "frequencies", "measured", "shifted_reference")
         _require_unfavourable_sum(self, impact=True)
 
     def plot(
@@ -787,7 +787,7 @@ class ImpactRatingResult(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``, ``symbol``
             is not a valid quantity-symbol shape, or the result was built
-            without the per-band data (``band_centers``, ``measured``,
+            without the per-band data (``frequencies``, ``measured``,
             ``shifted_reference``).
         :raises ImportError: If reportlab is not installed
             (``pip install phonometry[report]``), or matplotlib is missing for
@@ -826,12 +826,12 @@ def _render_iso717(
     check_language(language)
     check_engine(engine)
     if (
-        result.band_centers is None
+        result.frequencies is None
         or result.measured is None
         or result.shifted_reference is None
     ):
         msg = (
-            "report() needs the per-band data ('band_centers', 'measured', "
+            "report() needs the per-band data ('frequencies', 'measured', "
             "'shifted_reference'); build the rating with weighted_rating() or "
             "weighted_impact_rating() so they are populated."
         )
@@ -1017,7 +1017,7 @@ def weighted_rating(
         c=c,
         ctr=ctr,
         unfavourable_sum=unfavourable,
-        band_centers=np.asarray(centers, dtype=np.float64),
+        frequencies=np.asarray(centers, dtype=np.float64),
         measured=measured,
         shifted_reference=ref + shift,
     )
@@ -1140,7 +1140,7 @@ def weighted_impact_rating(
         rating=rating,
         ci=ci,
         unfavourable_sum=unfavourable,
-        band_centers=np.asarray(centers, dtype=np.float64),
+        frequencies=np.asarray(centers, dtype=np.float64),
         measured=measured,
         shifted_reference=ref - shift,
     )
@@ -1168,7 +1168,7 @@ class ImpactImprovementRatingResult(OwnsArrays):
     :ivar ci_r: The spectrum adaptation term :math:`C_\mathrm{I,r}` of the
         reference floor with the covering, in dB, which is
         :math:`C_\mathrm{I,r,0} - C_{\mathrm{I},\Delta}`. Integer.
-    :ivar band_centers: The 16 one-third-octave centre frequencies rated,
+    :ivar frequencies: The 16 one-third-octave centre frequencies rated,
         100 Hz to 3150 Hz.
     :ivar improvement: :math:`\Delta L` in those bands, in dB, as given.
     """
@@ -1176,7 +1176,7 @@ class ImpactImprovementRatingResult(OwnsArrays):
     delta_lw: int
     ci_delta: int
     ci_r: int
-    band_centers: np.ndarray
+    frequencies: np.ndarray
     improvement: np.ndarray
 
     def __post_init__(self) -> None:
@@ -1186,9 +1186,9 @@ class ImpactImprovementRatingResult(OwnsArrays):
             length or hold a value that is not finite, or if ``ci_r`` is not
             :math:`C_\mathrm{I,r,0} - C_{\mathrm{I},\Delta}`.
         """
-        require_ranks(self, band_centers=1, improvement=1)
-        require_same_length(self, "band_centers", "improvement")
-        _require_finite_curves(self, "band_centers", "improvement")
+        require_ranks(self, frequencies=1, improvement=1)
+        require_same_length(self, "frequencies", "improvement")
+        _require_finite_curves(self, "frequencies", "improvement")
         if self.ci_r != _IMPACT_REFERENCE_FLOOR_CI - self.ci_delta:
             msg = (
                 f"{type(self).__name__}: 'ci_r' must be CI,r,0 - CI,Delta = "
@@ -1222,7 +1222,7 @@ def _impact_improvement_rating(
         delta_lw=weighted_impact_improvement(dl),
         ci_delta=ci_delta,
         ci_r=_IMPACT_REFERENCE_FLOOR_CI - ci_delta,
-        band_centers=np.asarray(_FREQ_THIRD_OCTAVE, dtype=np.float64),
+        frequencies=np.asarray(_FREQ_THIRD_OCTAVE, dtype=np.float64),
         improvement=np.asarray(dl, dtype=np.float64),
     )
 
@@ -1253,7 +1253,7 @@ class ExtendedWeightedRatingResult(OwnsArrays):
     :ivar core: The integer-mode :class:`WeightedRatingResult` of the core
         bands (independent of ``one_decimal``), for plotting and the
         unfavourable-deviation sum.
-    :ivar band_centers: Band centre frequencies of the full (enlarged-range)
+    :ivar frequencies: Band centre frequencies of the full (enlarged-range)
         measured curve, in Hz. Defaults to ``None`` for
         backward-compatible construction.
     :ivar measured: The measured band quantities over the full enlarged
@@ -1271,13 +1271,13 @@ class ExtendedWeightedRatingResult(OwnsArrays):
     ctr_50_5000: float | None
     ctr_100_5000: float | None
     core: WeightedRatingResult
-    band_centers: np.ndarray | None = None
+    frequencies: np.ndarray | None = None
     measured: np.ndarray | None = None
 
     def __post_init__(self) -> None:
         """Reject an enlarged-range rating whose curve and bands disagree.
 
-        The Annex B plot shades from the ends of ``band_centers`` in to the
+        The Annex B plot shades from the ends of ``frequencies`` in to the
         ends of the core 100-3150 Hz axis, to mark which part of the curve is
         the enlarged range, and only afterwards draws ``measured`` against
         those same centres. The shading is therefore laid down before
@@ -1289,10 +1289,10 @@ class ExtendedWeightedRatingResult(OwnsArrays):
         ``core`` is not compared here: it carries the 16 core bands whatever
         the enlarged range is, and checks its own three curves.
 
-        :raises ValueError: if ``band_centers`` and ``measured`` disagree.
+        :raises ValueError: if ``frequencies`` and ``measured`` disagree.
         """
-        require_ranks(self, band_centers=1, measured=1)
-        require_same_length(self, "band_centers", "measured")
+        require_ranks(self, frequencies=1, measured=1)
+        require_same_length(self, "frequencies", "measured")
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1328,7 +1328,7 @@ class ExtendedImpactRatingResult(OwnsArrays):
         when the supplied bands do not cover 50-2500 Hz.
     :ivar core: The integer-mode :class:`ImpactRatingResult` of the core
         bands (independent of ``one_decimal``).
-    :ivar band_centers: Band centre frequencies of the full (enlarged-range)
+    :ivar frequencies: Band centre frequencies of the full (enlarged-range)
         measured curve, in Hz. Defaults to ``None`` for
         backward-compatible construction.
     :ivar measured: The measured impact levels over the full enlarged range
@@ -1340,7 +1340,7 @@ class ExtendedImpactRatingResult(OwnsArrays):
     ci: float
     ci_50_2500: float | None
     core: ImpactRatingResult
-    band_centers: np.ndarray | None = None
+    frequencies: np.ndarray | None = None
     measured: np.ndarray | None = None
 
     def __post_init__(self) -> None:
@@ -1357,10 +1357,10 @@ class ExtendedImpactRatingResult(OwnsArrays):
         ``core`` is not compared here: it carries the 16 core bands whatever
         the enlarged range is, and checks its own three curves.
 
-        :raises ValueError: if ``band_centers`` and ``measured`` disagree.
+        :raises ValueError: if ``frequencies`` and ``measured`` disagree.
         """
-        require_ranks(self, band_centers=1, measured=1)
-        require_same_length(self, "band_centers", "measured")
+        require_ranks(self, frequencies=1, measured=1)
+        require_same_length(self, "frequencies", "measured")
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1527,7 +1527,7 @@ def weighted_rating_extended(
         ctr_50_5000=extended["ctr_50_5000"],
         ctr_100_5000=extended["ctr_100_5000"],
         core=weighted_rating(np.asarray(values_by_band, dtype=np.float64)[core_idx]),
-        band_centers=freqs,
+        frequencies=freqs,
         measured=measured,
     )
 
@@ -1590,7 +1590,7 @@ def weighted_impact_rating_extended(
         core=weighted_impact_rating(
             np.asarray(values_by_band, dtype=np.float64)[core_idx]
         ),
-        band_centers=freqs,
+        frequencies=freqs,
         measured=measured,
     )
 

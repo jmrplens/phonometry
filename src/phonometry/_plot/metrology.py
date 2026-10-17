@@ -1851,7 +1851,7 @@ def plot_random_incidence_sensitivity(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    frequencies = np.asarray(result.frequencies, dtype=np.float64)
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 1.5)
     style_default(kwargs, "marker", "o")
@@ -1914,7 +1914,7 @@ def plot_diffuse_field_sensitivity(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    frequencies = np.asarray(result.frequencies, dtype=np.float64)
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 1.5)
     style_default(kwargs, "marker", "o")
@@ -2037,7 +2037,7 @@ def plot_adjustment_value(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    frequencies = np.asarray(result.frequencies, dtype=np.float64)
     if result.tolerance_db is not None:
         tolerance = np.asarray(result.tolerance_db, dtype=np.float64)
         bound = np.where(np.isfinite(tolerance), tolerance, np.nan)
@@ -2137,7 +2137,7 @@ def plot_free_field_correction(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    frequencies = np.asarray(result.frequencies, dtype=np.float64)
     corrections = np.asarray(result.corrections_db, dtype=np.float64)
     count = result.determinations
     if count > 1:
@@ -2302,7 +2302,7 @@ def plot_correction_uncertainty_verification(
     from ..metrology.free_field_corrections import maximum_expanded_uncertainty
 
     ax = ax if ax is not None else _new_axes()
-    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    frequencies = np.asarray(result.frequencies, dtype=np.float64)
     low, high = float(frequencies[0]), float(frequencies[-1])
     grid = (
         np.array([low])
@@ -2544,7 +2544,7 @@ def plot_comparison_calibration(
     from ..metrology.comparison_calibration import _FREE_FIELD_DIFFERENCE
 
     ax = ax if ax is not None else _new_axes()
-    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    frequencies = np.asarray(result.frequencies, dtype=np.float64)
     level = np.asarray(result.sensitivity_level_db, dtype=np.float64)
     if result.expanded_uncertainty_db is not None:
         uncertainty = np.asarray(result.expanded_uncertainty_db, dtype=np.float64)
@@ -2614,7 +2614,7 @@ def plot_environmental_sensitivity_correction(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    frequencies = np.asarray(result.frequencies, dtype=np.float64)
     ax.axhline(0.0, color=_C_MUTED, lw=0.8)
     values = (
         result.static_pressure_term_db,
@@ -2687,7 +2687,7 @@ def plot_jig_diameter_correction(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    frequencies = np.asarray(result.frequencies, dtype=np.float64)
     correction = np.asarray(result.correction_db, dtype=np.float64)
     uncertainty = np.asarray(result.expanded_uncertainty_db, dtype=np.float64)
     ax.fill_between(
@@ -2790,7 +2790,7 @@ def plot_diameter_sound_field_correction(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    frequencies = np.asarray(result.frequencies, dtype=np.float64)
 
     def millimetres(value: float) -> str:
         return format_number(1000.0 * value, language, decimals=3)
@@ -2862,7 +2862,7 @@ def plot_jig_coupler_verification(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    frequencies = np.asarray(result.frequencies, dtype=np.float64)
     difference = np.asarray(result.difference_db, dtype=np.float64)
     uncertainty = np.asarray(result.expanded_uncertainty_db, dtype=np.float64)
     shares = bool(np.any(np.asarray(result.shared_standard_uncertainty_db) > 0.0))
@@ -3244,7 +3244,7 @@ def plot_comparison_phase(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    frequencies = np.asarray(result.frequencies, dtype=np.float64)
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 1.6)
     style_default(kwargs, "marker", "o")
@@ -3297,7 +3297,7 @@ def plot_impedance_pressure_ratio(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    frequencies = np.asarray(result.frequencies, dtype=np.float64)
     ax.axhline(0.0, color=_C_MUTED, lw=0.8)
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 1.6)
@@ -3419,7 +3419,7 @@ def plot_time_selective_response(
     ax: Axes | None = None,
     *,
     quantity: str = "impulse",
-    frequencies_hz: NDArray[np.float64] | None = None,
+    frequencies: NDArray[np.float64] | None = None,
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
@@ -3430,7 +3430,7 @@ def plot_time_selective_response(
         :class:`~phonometry.metrology.comparison_calibration.TimeSelectiveResponse`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param quantity: ``"impulse"`` (default) or ``"response"``.
-    :param frequencies_hz: The frequencies of the response, in Hz, or
+    :param frequencies: The frequencies of the response, in Hz, or
         ``None`` for 200 from the frequency resolution to a quarter of the
         sample rate, or, with a pulse as excitation, to a tenth of the first
         zero of its spectrum if that is lower (IEC 61094-8 B.6.1).
@@ -3446,7 +3446,7 @@ def plot_time_selective_response(
     if quantity == "impulse":
         _draw_time_window(result, ax, language, kwargs)
     else:
-        _draw_windowed_response(result, ax, frequencies_hz, language, kwargs)
+        _draw_windowed_response(result, ax, frequencies, language, kwargs)
     ax.grid(visible=True, which="both", alpha=0.3)
     place_legend_clear(ax.legend(fontsize="small"))
     localize_axes(ax, language)
@@ -3459,7 +3459,7 @@ def _draw_time_window(
     """The impulse response, normalised, with the window and what it keeps."""
     from .._i18n import format_number
 
-    time_ms = 1000.0 * np.asarray(result.time_s)
+    time_ms = 1000.0 * np.asarray(result.times)
     response = np.asarray(result.impulse_response, dtype=np.float64)
     scale = float(np.max(np.abs(response)))
     ax.plot(
@@ -3492,22 +3492,22 @@ def _draw_time_window(
 def _draw_windowed_response(
     result: TimeSelectiveResponse,
     ax: Axes,
-    frequencies_hz: NDArray[np.float64] | None,
+    frequencies: NDArray[np.float64] | None,
     language: str,
     kwargs: dict[str, Any],
 ) -> None:
     """The level of the response through the window and of the whole record,
     both re the highest level through the window.
     """
-    if frequencies_hz is None:
-        top = _RESPONSE_TOP_FRACTION * result.sample_rate_hz
+    if frequencies is None:
+        top = _RESPONSE_TOP_FRACTION * result.fs
         if result.excitation is not None:
             top = min(top, result.excitation.first_zero_hz / _PULSE_ZERO_RATIO)
         frequencies = np.geomspace(
             result.frequency_resolution_hz, top, _RESPONSE_POINTS
         )
     else:
-        frequencies = np.asarray(frequencies_hz, dtype=np.float64)
+        frequencies = np.asarray(frequencies, dtype=np.float64)
     windowed = np.abs(result.response_at(frequencies))
     record = np.abs(result.record_response_at(frequencies))
     peak = float(np.max(windowed))
@@ -3553,7 +3553,7 @@ def plot_stepped_sine_impulse_response(
     style_default(kwargs, "lw", 1.2)
     kwargs.setdefault("label", _t(_IMPULSE_RESPONSE_LABEL, language))
     ax.plot(
-        1000.0 * np.asarray(result.time_s),
+        1000.0 * np.asarray(result.times),
         response / float(np.max(np.abs(response))),
         **kwargs,
     )

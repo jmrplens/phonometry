@@ -374,7 +374,7 @@ def test_verdict_forgives_a_maximum_reached_through_arithmetic() -> None:
 
 def test_verdict_derives_its_maximum_from_the_clause() -> None:
     verdict = metrology.CorrectionUncertaintyVerification(
-        clause=12, frequencies_hz=[1000.0, 10000.0], expanded_uncertainty_db=[0.3, 0.3]
+        clause=12, frequencies=[1000.0, 10000.0], expanded_uncertainty_db=[0.3, 0.3]
     )
     assert np.allclose(verdict.maximum_uncertainty_db, [0.25, 0.5])
     assert np.array_equal(verdict.failing_frequencies_hz, [1000.0])
@@ -386,7 +386,7 @@ def test_verdict_derives_its_maximum_from_the_clause() -> None:
 def test_verdict_of_clause_10_refuses_a_frequency_below_63_hz() -> None:
     with pytest.raises(ValueError, match="63 Hz"):
         metrology.CorrectionUncertaintyVerification(
-            clause=10, frequencies_hz=[50.0], expanded_uncertainty_db=[0.1]
+            clause=10, frequencies=[50.0], expanded_uncertainty_db=[0.1]
         )
 
 
@@ -735,7 +735,7 @@ def test_the_range_is_taken_over_the_microphones() -> None:
     assert np.allclose(grouped.correction_db, _TRUE_CORRECTION - 0.15)
     assert grouped.microphones == (1, 1, 1, 2, 2, 2, 3, 3, 3)
     verdict = metrology.verify_correction_uncertainty(
-        grouped.frequencies_hz,
+        grouped.frequencies,
         0.2,
         clause=grouped.clause,
         correction_range_db=grouped.range_db,
@@ -792,7 +792,7 @@ _ZEROS = np.zeros(_F.size)
 def test_correction_result_refuses_an_unknown_source() -> None:
     with pytest.raises(ValueError, match="source"):
         ffc.FreeFieldCorrection(
-            frequencies_hz=_F,
+            frequencies=_F,
             corrections_db=_ZEROS,
             reference_correction_db=_ZEROS,
             source="pistonphone",
@@ -802,7 +802,7 @@ def test_correction_result_refuses_an_unknown_source() -> None:
 def test_only_an_actuator_is_normalised() -> None:
     with pytest.raises(ValueError, match="check_frequency_hz"):
         ffc.FreeFieldCorrection(
-            frequencies_hz=_F,
+            frequencies=_F,
             corrections_db=_ZEROS,
             reference_correction_db=_ZEROS,
             source="sound_calibrator",

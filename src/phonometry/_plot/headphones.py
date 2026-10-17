@@ -195,7 +195,7 @@ def _draw_programme_check(
     """The referred band levels inside Table II's tolerances, without a title."""
     from .._i18n import localize_axes
 
-    f = check.frequencies_hz
+    f = check.frequencies
     table = check.relative_levels_db
     ax.fill_between(
         f,
@@ -300,7 +300,7 @@ def plot_rated_impedance(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    f = result.frequencies_hz
+    f = result.frequencies
     lower, upper = result.rated_frequency_range_hz
     ax.axvspan(
         lower,
@@ -424,7 +424,7 @@ def plot_programme_characteristic_voltage(
     step = max(1, levels.size // 12)
     ax.set_xticks(positions[::step])
     ax.set_xticklabels(
-        [_format_freq(f, language) for f in result.frequencies_hz[::step]],
+        [_format_freq(f, language) for f in result.frequencies[::step]],
         rotation=45,
         ha="right",
     )
@@ -565,7 +565,7 @@ def plot_coupler_frequency_response(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    f = result.frequencies_hz
+    f = result.frequencies
     if result.rated_frequency_range_hz is not None:
         for index, edge in enumerate(result.rated_frequency_range_hz):
             ax.axvline(
@@ -628,7 +628,7 @@ def plot_crosstalk_attenuation(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    f = result.frequencies_hz
+    f = result.frequencies
     ax.plot(
         f,
         result.attenuation_db,
@@ -700,7 +700,7 @@ def plot_field_comparison_response(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    positions = np.arange(result.frequencies_hz.size)
+    positions = np.arange(result.frequencies.size)
     mean = result.mean_db
     spread = result.standard_deviation_db
     ax.bar(
@@ -727,8 +727,8 @@ def plot_field_comparison_response(
         label=_t(_STANDARD_DEVIATION, language),
     )
     ax.axhline(0.0, color=_C_MUTED, lw=0.8, zorder=2)
-    _band_ticks(ax, result.frequencies_hz, language)
-    f = result.frequencies_hz
+    _band_ticks(ax, result.frequencies, language)
+    f = result.frequencies
     if iec_scale:
         ax.set_ylim(
             *_response_limits(
@@ -780,7 +780,7 @@ def plot_ear_canal_frequency_response(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    f = result.frequencies_hz
+    f = result.frequencies
     mean = result.mean_db
     spread = result.standard_deviation_db
     ax.fill_between(

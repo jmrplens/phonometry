@@ -375,7 +375,7 @@ ws3 = {
     "reference_resonance_frequency_hz": 22000,
     "test_resonance_frequency_hz": 100000,
 }   # los datos de la Tabla 1 de [1]
-model = metrology.diameter_sound_field_correction(j.frequencies_hz, **ws3)
+model = metrology.diameter_sound_field_correction(j.frequencies, **ws3)
 print(round(model.speed_of_sound, 1), model.correction_db[[0, 9, 13]].round(3))   # 345.9 [-0.004 -0.233 -1.434]
 print(np.abs(model.correction_db - j.correction_db).max().round(4))               # 0.0093
 ```
@@ -598,7 +598,7 @@ ir_ref = metrology.stepped_sine_impulse_response(f_step, heard(mic(f_step, -38.0
 ir_ws2f = metrology.stepped_sine_impulse_response(
     f_step, heard(mic(f_step, -26.4, 18000, 0.9), 1 / (1 + 1j * f_step / 6000))
 )   # el WS2F oye la reflexión fuera del eje
-print(ir_ref.duration_s, round(ir_ref.sample_rate_hz))   # 0.02 200050
+print(ir_ref.duration_s, round(ir_ref.fs))   # 0.02 200050
 ```
 
 La respuesta al impulso dura el inverso del paso en frecuencia, 20 ms. El
@@ -629,8 +629,8 @@ aire del Anexo F de la IEC 61094-2:
 ```python
 tau = metrology.reflection_free_window_s(1.0, 1.48)
 window = {"window_start_s": direct - 0.0005, "window_end_s": direct + tau}
-ref = metrology.time_selective_response(ir_ref.impulse_response, ir_ref.sample_rate_hz, **window)
-ws2f = metrology.time_selective_response(ir_ws2f.impulse_response, ir_ws2f.sample_rate_hz, **window)
+ref = metrology.time_selective_response(ir_ref.impulse_response, ir_ref.fs, **window)
+ws2f = metrology.time_selective_response(ir_ws2f.impulse_response, ir_ws2f.fs, **window)
 print(round(1000 * tau, 2), round(ref.frequency_resolution_hz))   # 1.39 530
 ```
 
@@ -1112,7 +1112,7 @@ fig.tight_layout()
 
 fig, ax = plt.subplots(figsize=(10, 6))
 fine.plot(ax, marker="none", language="es")
-ax.plot(j.frequencies_hz, j.correction_db, ls="none", marker="D", label="Tabla A.1")
+ax.plot(j.frequencies, j.correction_db, ls="none", marker="D", label="Tabla A.1")
 ax.legend()
 fig.tight_layout()
 
@@ -1127,7 +1127,7 @@ fig.tight_layout()
 fig, (ax_time, ax_response) = plt.subplots(1, 2, figsize=(13.5, 5.6))
 ws2f.plot(ax_time, language="es")
 ax_time.set_xlim(1000 * (direct - 0.0015), 1000 * (direct + 0.0035))
-ws2f.plot(ax_response, quantity="response", frequencies_hz=np.geomspace(1000, 40000, 300), language="es")
+ws2f.plot(ax_response, quantity="response", frequencies=np.geomspace(1000, 40000, 300), language="es")
 fig.tight_layout()
 
 fig, ax = plt.subplots(figsize=(10, 6))

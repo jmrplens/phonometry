@@ -172,7 +172,7 @@ res = emission.sound_power_in_situ(
         excess_levels=[8.2, 7.6, 8.9, 8.0],   # dLfA en cada posición (Anexo A)
         directivity_range=4.0,                # +/-4 dB alrededor de la máquina (7.2)
     ),
-    sigma_omc=0.5,                        # una fuente estacionaria (NOTA de 9.2)
+    sigma_omc_db=0.5,                        # una fuente estacionaria (NOTA de 9.2)
 )
 print(np.round(res.sound_power_level, 1))   # [88.8 91.5 92.6 91.8 88.9 84.7 78.6]
 print(round(res.sound_power_level_a, 1))    # 96.1 dB(A)
@@ -315,7 +315,7 @@ cobertura y probabilidad.
 | `temperature_c` | float | °C | por defecto `23.0` | Temperatura del aire en el ensayo, para $C_2$ |
 | `static_pressure_kpa` | float | kPa | por defecto `101.325` | Presión estática en el ensayo, para $C_2$; véase `static_pressure_from_altitude` |
 | `conditions` | `GradeConditions` | | | Las dos condiciones que la Tabla 2 lee juntas: `excess_levels`, el $\Delta L_{f\mathrm{A}}$ en cada posición `(n,)` en decibelios (Anexo A), y `directivity_range`, la semiamplitud del barrido de directividad ponderado A en decibelios (7.2). Si falta cualquiera de las dos, la determinación se queda en grado de control |
-| `sigma_omc` | float | dB | $\ge 0$ | Desviación típica de las condiciones de funcionamiento y montaje (9.2); `None` deja la incertidumbre en `NaN` |
+| `sigma_omc_db` | float | dB | $\ge 0$ | Desviación típica de las condiciones de funcionamiento y montaje (9.2); `None` deja la incertidumbre en `NaN` |
 | `coverage_factor` | float | | por defecto `2.0` | $k$ de la Ec. 23; 1,6 para una comparación unilateral con un límite |
 
 La función devuelve un `InSituSoundPowerResult`: `sound_power_level`
@@ -324,7 +324,7 @@ La función devuelve un `InSituSoundPowerResult`: `sound_power_level`
 (Ec. 10), `reference_power_level`, `background_correction` por posición y
 banda, `background_correction_ref` por ubicación, posición y banda,
 `background_requirement_met` y `upper_bound` por banda, `c2`, `grade`, `sigma_r0`,
-`sigma_omc`, `sigma_tot`, `expanded_uncertainty`, `coverage_factor`,
+`sigma_omc_db`, `sigma_tot`, `expanded_uncertainty`, `coverage_factor`,
 `sound_power_level_a` y `quantity`. `sound_power_level_ref` suma `c2` al
 nivel (sección 3).
 
@@ -383,7 +383,7 @@ events = np.stack([strokes + d for d in (-0.3, 0.2, 0.0, 0.4, -0.2, 0.1)], axis=
 energy = emission.sound_energy_in_situ(
     events, rss, lw_rss, freqs,                 # (4 posiciones, 6 sucesos, 7 bandas)
     background_levels=background, integration_time=4.0,
-    conditions=emission.GradeConditions(excess_levels=[8.2, 7.6, 8.9, 8.0], directivity_range=4.0), sigma_omc=2.0,
+    conditions=emission.GradeConditions(excess_levels=[8.2, 7.6, 8.9, 8.0], directivity_range=4.0), sigma_omc_db=2.0,
 )
 print(energy.quantity)                            # energy
 print(np.round(energy.sound_energy_level, 1))     # [103.7 105.3 106.1 105.3 102.4  98.6  93. ]
@@ -405,7 +405,7 @@ $\sigma_\mathrm{omc}$ = 2,0 dB, $k$ = 2.
 | `event_levels` | array 3D o 2D | dB | `(n, N, bandas)` o `(n, bandas)` | $L'_{Ei,q(\mathrm{ST})}$ por suceso, o $L'_{Ei,N(\mathrm{ST})}$ de una medición sobre $N$ sucesos |
 | `events` | int | | $\ge 1$ | $N$ para la forma 2D (Ec. 17); debe ser `None` con la forma 3D. El apartado 7.6 pide al menos cinco sucesos, así que menos de cinco avisa y la determinación no es conforme, en cualquiera de las dos formas |
 | `integration_time` | float | s | $> 0$ | $T$ de la medición del suceso; `None` aplica la Ec. 14 tal como está impresa |
-| `levels_ref`, `lw_ref`, `frequencies`, `background_levels`, `background_levels_ref`, `temperature_c`, `static_pressure_kpa`, `excess_levels`, `directivity_range`, `sigma_omc`, `coverage_factor` | | | | Como en `sound_power_in_situ()` |
+| `levels_ref`, `lw_ref`, `frequencies`, `background_levels`, `background_levels_ref`, `temperature_c`, `static_pressure_kpa`, `excess_levels`, `directivity_range`, `sigma_omc_db`, `coverage_factor` | | | | Como en `sound_power_in_situ()` |
 
 ## 3. Grado, incertidumbre y condiciones de referencia
 
@@ -450,7 +450,7 @@ condiciones de los apartados 9.2 y E.3; la NOTA de 9.2 lo sitúa cerca de
 El ejemplo de la propia norma (apartado 9.5), grado 2 con
 $\sigma_\mathrm{omc}$ = 2,0 dB y $k$ = 2, da
 $U = 2\sqrt{1{,}5^2 + 2^2}$ dB = 5 dB, que el ejemplo de energía de arriba
-reproduce. Sin `sigma_omc` el resultado lleva `sigma_r0` y deja `sigma_tot`
+reproduce. Sin `sigma_omc_db` el resultado lleva `sigma_r0` y deja `sigma_tot`
 y `expanded_uncertainty` en `NaN`, en lugar de reportar una incertidumbre
 del método como si fuera la total.
 

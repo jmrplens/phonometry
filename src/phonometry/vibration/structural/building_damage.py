@@ -575,7 +575,7 @@ def foundation_guideline_curve(
     draws; pass *frequency* to sample the same polyline elsewhere.
 
     :param building_class: One of :data:`BUILDING_CLASSES`.
-    :param frequency: Frequencies to sample at, in hertz, or ``None`` for the
+    :param frequency: Frequency or frequencies to sample at, in hertz, or ``None`` for the
         four corners of Table 1.
     :return: ``(frequency_hz, guideline_mm_s)``.
     :raises ValueError: If the class is not one of the three, or a frequency

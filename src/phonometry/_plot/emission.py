@@ -1187,7 +1187,7 @@ def plot_hard_walled_sound_power(
     8.1.3 makes it; a band that fails 4.5 otherwise (the reference source's
     margin, or no background measured) is cross-hatched, since the capped
     :math:`K_{1(\mathrm{RSS})}` lowers its level. The expanded uncertainty is
-    drawn where ``sigma_omc`` was supplied.
+    drawn where ``sigma_omc_db`` was supplied.
 
     :param result: A
         :class:`~phonometry.emission.sound_power_hard_walled.HardWalledSoundPowerResult`.
@@ -1238,7 +1238,7 @@ def plot_special_room_sound_power(
     of ISO 3743-2:2018, a band whose background requirement is not shown to
     be met (a margin below the 4 dB of 9.8, or no background measured)
     cross-hatched and named as such, which is all 9.8 says of it, and the
-    expanded uncertainty drawn where ``sigma_omc`` was supplied. The title
+    expanded uncertainty drawn where ``sigma_omc_db`` was supplied. The title
     carries the Annex F total.
 
     :param result: A

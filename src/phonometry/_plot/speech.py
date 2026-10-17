@@ -142,7 +142,7 @@ def plot_stoi(
     name = "ESTOI" if result.extended else "STOI"
     banded = result.band_scores is not None
     if banded:
-        freqs = np.asarray(result.band_frequencies, dtype=np.float64)
+        freqs = np.asarray(result.frequencies, dtype=np.float64)
         scores = np.asarray(result.band_scores, dtype=np.float64)
         positions = np.arange(scores.size)
         style_default(kwargs, "color", _C_PRIMARY)

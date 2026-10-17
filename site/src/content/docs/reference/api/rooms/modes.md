@@ -235,6 +235,14 @@ RoomModesResult.density(frequency: ArrayLike) -> np.ndarray | float
 
 Modal density at `frequency` for this room (Long Equation (8.46)).
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `frequency` | Frequency, in hertz (scalar or array). |
+
+**Returns:** The modal density, in modes per hertz, of the shape of *frequency*.
+
 ### RoomModesResult.edge_length
 
 *property*

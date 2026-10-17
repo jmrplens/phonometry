@@ -12,11 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **Results read well in a notebook.** Jupyter, JupyterLab, VS Code and Colab
   display the last line of a cell, and every public result, verdict and record
   now displays as a table of its fields instead of the dataclass repr: a
-  scalar with its unit, read from the end of the field's name (`levels_db` in
-  dB, `wind_speed_m_s` in m/s), an array as one line with its shape, its type
-  and the range of its values but never the values, a record held in a field
-  as a folded table of its own, and the outcome of a verdict, PASS or FAIL, in
-  the title. The frames of a simulation take one row, and the largest result
+  scalar with its unit, read from the end of the field's name
+  (`band_levels_db` in dB, `wind_speed_m_s` in m/s) or from the bare name of
+  an axis (`frequencies` in Hz, `levels` in dB, `times` in s), an array as one
+  line with its shape, its type and the range of its values but never the
+  values, a record held in a field as a folded table of its own, and the
+  outcome of a verdict, PASS or FAIL, in the title. The frames of a simulation take one row, and the largest result
   displays in a few kilobytes. The IPython terminal prints the same table as
   text. Showing it reads the fields and, on a verdict, `passes`, which may
   read other properties of the verdict, and draws nothing; `print()` and
@@ -1608,7 +1609,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   again for every row `from_printed` builds, and changing a cell there
   before building it again is how a row is edited: `dataclasses.replace`
   copies the derived values as they were, beside a cell they no longer
-  follow from. `io.BandedRow.values_at(frequencies_hz)`
+  follow from. `io.BandedRow.values_at(frequencies)`
   reads a banded row at an array of frequencies, for the functions that take
   one value per band by position, such as the surfaces of
   `room.sabine_reverberation_time` or the transmission loss
@@ -1950,6 +1951,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `scripts/check_doc_snippets.py`, which had never read them, and
   `scripts/check_em_dashes.py` reads the home page's data, where an em dash
   had gone unseen.
+
+- **An error names the parameter you passed.** `rigid_mass_calibration_check`
+  and `RigidMassCalibrationResult` refused a frequency that is not positive
+  as `'frequency'`, a parameter neither has; they name `frequencies`.
+  `metadiffuser_diffusion_spectrum` refuses such a frequency itself, by its
+  own name, where it used to reach the user from `metadiffuser_reflection`
+  as `'frequency'`. A new test reads the source of every public function and
+  method, follows each parameter into the functions of its module it is
+  handed to, and fails on a message that names it by a spelling the
+  vocabulary retired; it was red on these two and is green now.
 
 - **A one-element array is refused where one number is asked for, on every
   NumPy the library supports.** NumPy 2.0 to 2.3 convert a one-element array
@@ -3088,6 +3099,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   carries, and a database built by hand flies fixed-point profiles, as one
   built without them always did.
 
+- **One name per axis: the band axis of a result is `frequencies`, and an
+  axis carries no unit in its name.** The band axis of a result is
+  `frequencies` wherever it was `band_centers` (the ISO 717 and ISO 11654
+  ratings: `WeightedRatingResult`, `ImpactRatingResult`,
+  `ExtendedWeightedRatingResult`, `ExtendedImpactRatingResult` and
+  `AbsorptionRatingResult`), `centre_frequencies` (the ECMA-418-2 and
+  Moore-Glasberg results: `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`,
+  `EcmaFluctuationStrength` and `MooreGlasbergLoudness`), `band_frequencies`
+  (`FilterComplianceResult`, `STOIResult`) or `bands_hz` (`RoadDeviceRating`).
+  An axis carries no unit in its name, because its unit never changes: the
+  human-vibration instrument checks `WeightingVerification`,
+  `PhaseVerification`, `characteristic_phase_deviation` and
+  `verify_phase_response` take and carry `frequencies` where they had
+  `frequencies_hz`, and `operating_standard_deviation` and
+  `subinterval_level` take `levels` where they took `levels_db`. A few names
+  keep their unit or their second axis on purpose: the NPD distances of
+  `npd_atmosphere_increment`, which are defined in feet; the
+  `frequencies_hz` of `weighted_exposure` and `ocean_ambient_noise`, whose
+  formulas are printed with the frequency in kHz; and
+  `BandAveragedStiffness.center_frequencies`, beside its
+  `nominal_frequencies`. Compound names such as `band_levels_db`,
+  `evaluation_frequencies_hz` and `start_s` keep theirs. The vocabulary test
+  now fails on `fs_hz`, `sample_rate_hz`, `frequencies_hz`, `levels_db`,
+  `times_s`, `distances_m`, `band_centers` and the other spellings of a
+  sample rate and a band axis, except at those locations, each listed with
+  its reason, and fails too on an exception that no longer matches anything.
+  It reads the fields of a named tuple and the cached properties of a class
+  as well, which it used to pass over.
+
+- **An array is named in the plural, also where the annotation allows a
+  number.** Thirteen functions took an array of band levels or band centres
+  under a singular name: `level=` on `apply_low_frequency_procedure`,
+  `heavy_impact_octave_levels`, `a_weighted_maximum_impact_level` and
+  `standardized_maximum_impact_level`, and `frequency=` on those two and on
+  `ceiling_attenuation_class`, `plenum_flanking_reduction_index`,
+  `single_number_average`, `octave_pair_averages`,
+  `one_third_octave_absorption`, `power_injection_matrix`,
+  `power_injection_clf`, `valve_hydrodynamic_noise` and
+  `indirect_transfer_stiffness_result`. They are `levels=` and
+  `frequencies=` now, and `ship_source_spectrum` takes `frequencies=` where
+  it took `frequency_hz=`: its three ship models are written with the
+  frequency in hertz. `weighted_exposure` and `ocean_ambient_noise` take
+  `frequencies_hz=`. The test that holds an array to the plural used to read
+  only the annotation, and an `ArrayLike` admits one number as well as
+  many; it now also reads the documentation of such a parameter: one that
+  holds a value per band, a band axis or a shape is held to the plural, and
+  one that keeps a singular name has to say that it takes one value or many.
+  The vectorised functions that do, such as the panel transmission losses,
+  the porous-material models and the point mobilities, say so in their
+  documentation and keep their names.
+
+- **A speed-of-sound profile holds `speeds_of_sound`.**
+  `EffectiveSoundSpeedProfile.sound_speeds` and the `sound_speeds=` of
+  `normal_modes`, `ray_trace`, `gaussian_beams` and `parabolic_equation` are
+  `speeds_of_sound`, the plural of the `speed_of_sound` the rest of the
+  library spells, and `underwater.SoundSpeedProfile` carries `depths` and
+  `speeds_of_sound` where it carried `depth` and `sound_speed`.
+
+- **The operating and mounting standard deviation is `sigma_omc_db` on
+  every sound power function.** It was `sigma_omc` on
+  `sound_power_anechoic`, `precision_uncertainty`, `sound_power_in_situ`,
+  `sound_energy_in_situ` and `InSituSoundPowerResult`, and
+  `omc_uncertainty` on `sound_power_pressure` and `sound_energy_pressure`.
+
 - **phonometry installs on Python 3.12, and on the oldest NumPy, SciPy and
   extras it really works with.** `requires-python` drops from 3.13 to 3.12,
   and every floor in the package metadata is now the oldest release the
@@ -3444,9 +3519,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **One spelling per concept across the public names.** A census of every
   public field, parameter and property found the same quantity spelled
   several ways, and the minority now spells it the way the majority does,
-  with no alias. `sound_speed` becomes `speed_of_sound` (seventeen places
-  against eighty), and so do the `c` of `sound_intensity`, the phase-mismatch
-  conversions, `absorption_coefficient_uncertainty` and
+  with no alias. `sound_speed` becomes `speed_of_sound` (sixteen places
+  against eighty, and `speeds_of_sound` on `SoundSpeedProfile`, whose array
+  holds one per depth), and so do the `c` of `sound_intensity`, the
+  phase-mismatch conversions, `absorption_coefficient_uncertainty` and
   `monopole_source_level` and the `speed_of_sound_m_s` of
   `thickness_critical_frequency_product`; the `rho` of `sound_intensity`
   becomes `density`. `sample_rate` becomes `fs` on the FDTD `SignalSource`,

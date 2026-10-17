@@ -106,8 +106,8 @@ used when the *measurement* is reported in octaves.
 
 ```python
 a_weighted_maximum_impact_level(
-    level: ArrayLike,
-    frequency: ArrayLike | Sequence[float] | None = None,
+    levels: ArrayLike,
+    frequencies: ArrayLike | Sequence[float] | None = None,
     *,
     band: str | None = None,
 ) -> AWeightedMaximumImpactResult
@@ -126,8 +126,8 @@ corrections of Table D.3. The same formula rates `LiA,Fmax`,
 
 | Name | Description |
 | :--- | :--- |
-| `level` | Maximum impact sound pressure levels `Xi,Fmax,j`, in dB, in ascending band order. |
-| `frequency` | Optional band centre frequencies, in Hz. When given they must be exactly the rating bands of the chosen band width. |
+| `levels` | Maximum impact sound pressure levels `Xi,Fmax,j`, in dB, in ascending band order. |
+| `frequencies` | Optional band centre frequencies, in Hz. When given they must be exactly the rating bands of the chosen band width. |
 | `band` | `"third"` or `"octave"`; inferred from the number of values (12 -> third, 4 -> octave) when omitted. |
 
 **Returns:** An [`AWeightedMaximumImpactResult`](/phonometry/reference/api/building/heavy-impact/#aweightedmaximumimpactresult).
@@ -269,7 +269,7 @@ HEAVY_IMPACT_OCTAVE_BANDS = (31.5, 63.0, 125.0, 250.0, 500.0)
 ## heavy_impact_octave_levels
 
 ```python
-heavy_impact_octave_levels(level: ArrayLike) -> np.ndarray
+heavy_impact_octave_levels(levels: ArrayLike) -> np.ndarray
 ```
 
 Combine one-third-octave maximum levels into octaves (Formula (20)).
@@ -289,7 +289,7 @@ octaves with [`a_weighted_maximum_impact_level`](/phonometry/reference/api/build
 
 | Name | Description |
 | :--- | :--- |
-| `level` | One-third-octave levels in ascending order, in dB. |
+| `levels` | One-third-octave levels in ascending order, in dB. |
 
 **Returns:** The octave-band levels, in dB.
 
@@ -531,11 +531,11 @@ supplied record with the trapezoidal rule, so pass one isolated impact.
 
 ```python
 standardized_maximum_impact_level(
-    level: ArrayLike,
+    levels: ArrayLike,
     volume: float,
     reverberation_time: ArrayLike,
     *,
-    frequency: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     reference_time: float = 0.5,
     reference_volume: float = 50.0,
 ) -> StandardizedMaximumImpactResult
@@ -552,10 +552,10 @@ floor excited by the rubber ball. The reverberation term is
 
 | Name | Description |
 | :--- | :--- |
-| `level` | Energy-averaged maximum impact sound pressure level `Li,Fmax` per band, in dB. |
+| `levels` | Energy-averaged maximum impact sound pressure level `Li,Fmax` per band, in dB. |
 | `volume` | Receiving-room volume `V`, in m3 (> 0). |
 | `reverberation_time` | Receiving-room reverberation time `T` per band, in seconds (> 0); a scalar is broadcast over the bands. |
-| `frequency` | Optional band centre frequencies, in Hz. |
+| `frequencies` | Optional band centre frequencies, in Hz. |
 | `reference_time` | Reference reverberation time `T0`, in seconds (Default: 0,5 s). |
 | `reference_volume` | Reference volume `V0`, in m3 (Default: 50 m3 for dwellings). |
 

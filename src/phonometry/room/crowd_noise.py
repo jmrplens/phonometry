@@ -190,7 +190,7 @@ def speech_to_noise_ratio(
     between Equations (17.50) and (17.51). Neither the talker's power nor the
     number of talkers appears: a busier room brings its own absorption with it.
 
-    :param distance: Talker-to-listener distance ``r``, m.
+    :param distance: Talker-to-listener distance ``r``, m (scalar or array).
     :param absorption_per_table: Equivalent absorption area per occupied table
         ``A_tab``, m2.
     :param directivity: Talker directivity factor ``Q``.
@@ -220,9 +220,9 @@ def absorption_per_table(
     Long's communication bound (Equation (17.53)), with ``-9 dB`` his privacy
     bound (Equation (17.54)).
 
-    :param distance: Separation ``r``, m: the cross-table distance ``rs`` for
-        the communication bound, the table-to-table distance ``rt`` for the
-        privacy bound.
+    :param distance: Separation ``r``, m (scalar or array): the cross-table
+        distance ``rs`` for the communication bound, the table-to-table
+        distance ``rt`` for the privacy bound.
     :param speech_to_noise: Target speech-to-noise ratio ``L_SN``, dB.
     :param directivity: Talker directivity factor ``Q``.
     :return: The equivalent absorption area per table ``A_tab``, m2.

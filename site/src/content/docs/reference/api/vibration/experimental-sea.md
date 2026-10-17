@@ -233,7 +233,7 @@ $c_\mathrm{L} = \sqrt{E / (\rho (1 - \nu^2))}$.
 
 ```python
 power_injection_clf(
-    frequency: ArrayLike,
+    frequencies: ArrayLike,
     energy1: ArrayLike,
     energy2: ArrayLike,
     internal_loss_factor1: ArrayLike,
@@ -269,7 +269,7 @@ time-averaged mean-square velocity in the band.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Band centre frequencies `f`, in hertz (> 0). |
+| `frequencies` | Band centre frequencies `f`, in hertz (> 0). |
 | `energy1` | Band energy `E_1` of the driven subsystem, in J (> 0). |
 | `energy2` | Band energy `E_2` of the receiving subsystem, in J (> 0). |
 | `internal_loss_factor1` | `eta_1` (> 0), scalar or per band. |
@@ -289,7 +289,7 @@ time-averaged mean-square velocity in the band.
 
 ```python
 power_injection_matrix(
-    frequency: ArrayLike,
+    frequencies: ArrayLike,
     energies: ArrayLike,
     input_powers: ArrayLike,
 ) -> PowerInjectionResult
@@ -307,7 +307,7 @@ independent check on the measurement.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Band centre frequencies `f`, in hertz (> 0), shape `(nb,)`. |
+| `frequencies` | Band centre frequencies `f`, in hertz (> 0), shape `(nb,)`. |
 | `energies` | Measured band energies, in joules, shape `(2, 2, nb)`: `energies[i][j]` is the energy of subsystem `i` while subsystem `j` is driven (all > 0). |
 | `input_powers` | Injected powers, in watts, shape `(2, nb)`: `input_powers[j]` is the power injected into subsystem `j` during test `j` (all > 0). |
 

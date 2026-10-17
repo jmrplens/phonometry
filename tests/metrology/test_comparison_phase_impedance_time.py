@@ -378,7 +378,7 @@ def test_calibration_built_directly_refuses_a_lone_pressure_phase() -> None:
     zeros = np.zeros(_F.size)
     with pytest.raises(ValueError, match="pressure_phase_difference_deg"):
         metrology.ComparisonCalibration(
-            frequencies_hz=_F,
+            frequencies=_F,
             reference_sensitivity_level_db=_L_REF,
             output_level_differences_db=levels,
             pressure_level_difference_db=zeros,
@@ -397,7 +397,7 @@ def test_calibration_built_directly_refuses_phase_rows_of_other_determinations()
     zeros = np.zeros(_F.size)
     with pytest.raises(ValueError, match="one row per determination"):
         metrology.ComparisonCalibration(
-            frequencies_hz=_F,
+            frequencies=_F,
             reference_sensitivity_level_db=_L_REF,
             output_level_differences_db=levels,
             pressure_level_difference_db=zeros,
@@ -577,7 +577,7 @@ def test_uncertainty_is_the_level_over_root_three_as_table_d1_takes_it() -> None
     """
     ratio = 10.0 ** (0.005 / 20.0)
     result = cc.ImpedancePressureRatio(
-        frequencies_hz=np.array([2000.0]),
+        frequencies=np.array([2000.0]),
         ratio=np.array([ratio]),
         coupling="series",
         coupling_equivalent_volume_m3=np.array([1e-6]),
@@ -686,7 +686,7 @@ def test_impedance_ratio_columns_are_read_only() -> None:
     )
     assert not result.ratio.flags.writeable
     assert not result.coupling_equivalent_volume_m3.flags.writeable
-    assert not result.frequencies_hz.flags.writeable
+    assert not result.frequencies.flags.writeable
 
 
 def test_impedance_plot_draws_the_level_and_its_uncertainty_or_the_phase() -> None:
@@ -834,6 +834,20 @@ def test_phase_is_that_of_the_delay_from_the_start_of_the_record() -> None:
         result.phase_deg_at(_FT),
         cc._wrapped_deg(-360.0 * _FT * delay),
         atol=1e-9,
+    )
+
+
+def test_the_time_axis_is_the_sample_index_over_the_sample_rate() -> None:
+    record = _direct_and_reflection(t0=0.00301)
+    result = metrology.time_selective_response(
+        record,
+        _FS,
+        window_start_s=0.0025,
+        window_end_s=0.006,
+    )
+    np.testing.assert_equal(result.fs, _FS)
+    np.testing.assert_allclose(
+        result.times, np.arange(record.size) / _FS, rtol=0, atol=0
     )
 
 
@@ -1079,7 +1093,7 @@ def test_time_selective_plot_draws_the_window_or_the_two_responses() -> None:
     assert lines[1].get_label() == "Time window, Tukey, 3.50 ms"
     plt.close(fig)
     fig, ax = plt.subplots()
-    result.plot(ax, quantity="response", frequencies_hz=_FT, language="es")
+    result.plot(ax, quantity="response", frequencies=_FT, language="es")
     lines = ax.get_lines()
     np.testing.assert_allclose(lines[1].get_ydata(), 0.0, atol=1e-9)
     assert lines[0].get_label() == "Registro completo, con las reflexiones"
@@ -1110,7 +1124,7 @@ def test_formula_b3_and_b2_round_trip_through_the_window() -> None:
     impulse = metrology.stepped_sine_impulse_response(frequencies, response)
     result = metrology.time_selective_response(
         impulse.impulse_response,
-        impulse.sample_rate_hz,
+        impulse.fs,
         window_start_s=0.0025,
         window_end_s=0.006,
     )
@@ -1123,7 +1137,7 @@ def test_inverse_transform_of_a_flat_response_is_an_impulse_at_zero() -> None:
     impulse = metrology.stepped_sine_impulse_response(
         frequencies, np.ones(frequencies.size)
     )
-    assert impulse.impulse_response[0] == pytest.approx(impulse.sample_rate_hz)
+    assert impulse.impulse_response[0] == pytest.approx(impulse.fs)
     np.testing.assert_allclose(impulse.impulse_response[1:], 0.0, atol=1e-9)
 
 
@@ -1136,10 +1150,10 @@ def test_impulse_response_lasts_the_inverse_of_the_frequency_step() -> None:
     impulse = metrology.stepped_sine_impulse_response(frequencies, response)
     assert impulse.duration_s == pytest.approx(1.0 / 120.0)
     assert impulse.duration_s > 0.008
-    assert impulse.impulse_response.size / impulse.sample_rate_hz == pytest.approx(
+    assert impulse.impulse_response.size / impulse.fs == pytest.approx(
         impulse.duration_s
     )
-    assert impulse.time_s[-1] < impulse.duration_s
+    assert impulse.times[-1] < impulse.duration_s
 
 
 def test_stepped_sine_refuses_an_axis_that_does_not_start_at_zero() -> None:

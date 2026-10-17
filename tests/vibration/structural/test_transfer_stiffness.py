@@ -147,6 +147,13 @@ def test_indirect_rejects_bad_inputs() -> None:
         vibration.transfer_stiffness_indirect(500.0, 0.01 + 0j, 0.0)
 
 
+def test_indirect_result_names_its_own_frequency_axis() -> None:
+    with pytest.raises(ValueError, match=r"'frequencies' must be positive"):
+        vibration.indirect_transfer_stiffness_result(
+            [-1.0, 2.0], 0.01, blocking_mass=8.0
+        )
+
+
 # ---------------------------------------------------------------------------
 # Validity of the T << 1 approximation (ISO 10846-3, 6.1, Inequality 2)
 # ---------------------------------------------------------------------------

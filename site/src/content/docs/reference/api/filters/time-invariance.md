@@ -156,7 +156,7 @@ distribution of half-width half the resolution (IEC 61260-3:2016 5.2):
 
 ```python
 TimeInvarianceResult(
-    band_frequencies: np.ndarray,
+    frequencies: np.ndarray,
     fraction: float,
     fs: float,
     seconds_per_decade: tuple[float, ...],
@@ -188,7 +188,7 @@ Formula (A.4)), so $L_\mathrm{in} = 0$ dB.
 
 | Name | Description |
 | :--- | :--- |
-| `band_frequencies` | The exact mid-band frequencies, Hz. |
+| `frequencies` | The exact mid-band frequencies, Hz. |
 | `fraction` | The bandwidth designator denominator `b`. |
 | `fs` | The bank's sampling rate, Hz. |
 | `seconds_per_decade` | The sweep rates, one decade in so many seconds. |

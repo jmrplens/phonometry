@@ -111,7 +111,7 @@ area cancels and only the tie density `n` enters.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequencies `f`, in hertz (array, > 0). |
+| `frequency` | Frequency `f`, in hertz (scalar or array, > 0). |
 | `mass1` | Surface density `rho_s1` of the excited leaf, in kg/m^2 (> 0). |
 | `mass2` | Surface density `rho_s2` of the receiving leaf, in kg/m^2 (> 0). |
 | `bending_stiffness1` | Bending stiffness per unit width `B'` of leaf 1, in N.m (> 0); see [`phonometry.vibration.structural.point_mobility.plate_bending_stiffness`](/phonometry/reference/api/vibration/point-mobility/#plate_bending_stiffness). |

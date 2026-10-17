@@ -328,15 +328,13 @@ _A_WEIGHTED_BANDS_HZ = tuple(float(f) for f in _CK_OCTAVE)
 # --------------------------------------------------------------------------- #
 
 
-def _octave_bands(
-    frequencies_hz: ArrayLike, name: str = "frequencies_hz"
-) -> np.ndarray:
+def _octave_bands(frequencies: ArrayLike, name: str = "frequencies") -> np.ndarray:
     """Nominal octave centres for the frequencies given, in increasing order.
 
     :raises ValueError: for a frequency that names no octave band of the
         method, a band named twice, or bands out of order.
     """
-    freqs = np.atleast_1d(np.asarray(frequencies_hz, dtype=np.float64))
+    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     if freqs.ndim != 1 or freqs.size == 0 or not np.all(np.isfinite(freqs)):
         msg = f"'{name}' must be a non-empty 1-D array of finite frequencies."
         raise ValueError(msg)
@@ -546,7 +544,7 @@ def plant_background_correction_db(
 
 
 def plant_air_absorption_db_per_m(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     temperature_c: float | None = None,
     relative_humidity_percent: float | None = None,
@@ -574,7 +572,7 @@ def plant_air_absorption_db_per_m(
     when it differs markedly from 15 °C and 70 %, as Table 3 asks; the
     standard sets no number for "markedly".
 
-    :param frequencies_hz: Nominal octave-band centres, 31,5 Hz to 8 kHz.
+    :param frequencies: Nominal octave-band centres, 31,5 Hz to 8 kHz.
     :param temperature_c: Air temperature at the measurement, in °C, or
         ``None`` for Table 3.
     :param relative_humidity_percent: Relative humidity at the measurement, in
@@ -583,7 +581,7 @@ def plant_air_absorption_db_per_m(
     :raises ValueError: for a band outside the method, only one of the two
         weather values, or a humidity outside 0 % to 100 %.
     """
-    bands = _octave_bands(frequencies_hz)
+    bands = _octave_bands(frequencies)
     theta, humidity = _weather(temperature_c, relative_humidity_percent)
     if theta is None or humidity is None:
         return np.array(
@@ -1088,7 +1086,7 @@ class PlantMeasurementContour(OwnsArrays):
         return read_only(np.array(self._layout[1][self.measured], dtype=np.float64))
 
     @cached_property
-    def distances_m(self) -> NDArray[np.float64]:
+    def distances(self) -> NDArray[np.float64]:
         """:math:`d_i`, from each measured position to the nearest point of the
         plant perimeter, in metres (3.5, 9.1.2.2).
         """
@@ -1194,7 +1192,7 @@ class PlantMeasurementContour(OwnsArrays):
     @property
     def mean_distance_m(self) -> float:
         r""":math:`\bar{d}`, the average measurement distance, in metres (9.1.2.2)."""
-        return float(np.mean(self.distances_m))
+        return float(np.mean(self.distances))
 
     @property
     def distance_ratio(self) -> float:
@@ -1246,11 +1244,11 @@ class PlantMeasurementContour(OwnsArrays):
 
     def sound_power(
         self,
-        levels_db: ArrayLike,
-        frequencies_hz: ArrayLike,
+        levels: ArrayLike,
+        frequencies: ArrayLike,
         *,
         microphone_height_m: float | None = None,
-        background_levels_db: ArrayLike | None = None,
+        background_levels: ArrayLike | None = None,
         directional_microphone_angle_deg: float | ArrayLike | None = None,
         temperature_c: float | None = None,
         relative_humidity_percent: float | None = None,
@@ -1259,12 +1257,12 @@ class PlantMeasurementContour(OwnsArrays):
 
         :func:`plant_sound_power` with the geometry of the contour; see there.
 
-        :param levels_db: One row per measured position, in the order of
+        :param levels: One row per measured position, in the order of
             :attr:`positions_m`, one column per octave band, in decibels.
-        :param frequencies_hz: The octave-band centres of the columns, in Hz.
+        :param frequencies: The octave-band centres of the columns, in Hz.
         :param microphone_height_m: The height the microphones stood at, in
             metres; ``None`` for the height 9.3 prescribes.
-        :param background_levels_db: The background alone, same shape, or
+        :param background_levels: The background alone, same shape, or
             ``None``.
         :param directional_microphone_angle_deg: The 3 dB angle of a
             directional microphone, one or one per band, or ``None``.
@@ -1276,10 +1274,10 @@ class PlantMeasurementContour(OwnsArrays):
         :raises ValueError: for a number of rows that is not the number of
             measured positions, or any error of :func:`plant_sound_power`.
         """
-        levels = require_finite_matrix(levels_db, "levels_db")
+        levels = require_finite_matrix(levels, "levels")
         if levels.shape[0] != self.positions_m.shape[0]:
             msg = (
-                f"'levels_db' has {levels.shape[0]} rows for "
+                f"'levels' has {levels.shape[0]} rows for "
                 f"{self.positions_m.shape[0]} measured positions."
             )
             raise ValueError(msg)
@@ -1290,13 +1288,13 @@ class PlantMeasurementContour(OwnsArrays):
         )
         return plant_sound_power(
             levels,
-            frequencies_hz,
+            frequencies,
             measurement_area_m2=self.measurement_area_m2,
             contour_length_m=self.contour_length_m,
             microphone_height_m=height,
             mean_distance_m=self.mean_distance_m,
             plant_area_m2=self.plant_area_m2,
-            background_levels_db=background_levels_db,
+            background_levels=background_levels,
             directional_microphone_angle_deg=directional_microphone_angle_deg,
             temperature_c=temperature_c,
             relative_humidity_percent=relative_humidity_percent,
@@ -1418,10 +1416,10 @@ class PlantSoundPowerResult(OwnsArrays):
     from; every step of clause 10 is derived from them on request, so a
     result cannot carry a level that disagrees with its own inputs.
 
-    :ivar frequencies_hz: Nominal octave-band centres, in Hz.
-    :ivar measured_levels_db: The levels read at the :math:`N` positions with
+    :ivar frequencies: Nominal octave-band centres, in Hz.
+    :ivar measured_levels: The levels read at the :math:`N` positions with
         the plant operating, ``(N, bands)``, in dB re 20 µPa.
-    :ivar background_levels_db: The background alone at the same positions,
+    :ivar background_levels: The background alone at the same positions,
         or ``None`` when it could not be measured (9.5.4).
     :ivar measurement_area_m2: :math:`S_\mathrm{m}`, in square metres.
     :ivar contour_length_m: :math:`l`, in metres.
@@ -1437,9 +1435,9 @@ class PlantSoundPowerResult(OwnsArrays):
         in percent, or ``None`` for Table 3.
     """
 
-    frequencies_hz: NDArray[np.float64]
-    measured_levels_db: NDArray[np.float64]
-    background_levels_db: NDArray[np.float64] | None
+    frequencies: NDArray[np.float64]
+    measured_levels: NDArray[np.float64]
+    background_levels: NDArray[np.float64] | None
     measurement_area_m2: float
     contour_length_m: float
     microphone_height_m: float
@@ -1462,45 +1460,41 @@ class PlantSoundPowerResult(OwnsArrays):
 
         :raises ValueError: for any of the above.
         """
-        bands = read_only(_octave_bands(self.frequencies_hz))
-        object.__setattr__(self, "frequencies_hz", bands)
+        bands = read_only(_octave_bands(self.frequencies))
+        object.__setattr__(self, "frequencies", bands)
         # The record's own copies, sealed: every step of clause 10 is derived
         # from these on request, so a later write to the caller's array must
         # not reach them.
         levels = read_only(
-            np.asarray(
-                require_finite_matrix(self.measured_levels_db, "measured_levels_db")
-            )
+            np.asarray(require_finite_matrix(self.measured_levels, "measured_levels"))
         )
         if levels.shape[1] != bands.size:
             msg = (
-                f"'measured_levels_db' has {levels.shape[1]} columns for "
+                f"'measured_levels' has {levels.shape[1]} columns for "
                 f"{bands.size} octave bands."
             )
             raise ValueError(msg)
-        object.__setattr__(self, "measured_levels_db", levels)
+        object.__setattr__(self, "measured_levels", levels)
         if not any(float(b) in _A_WEIGHTED_BANDS_HZ for b in bands):
             msg = (
                 "The bands must include at least one from 63 Hz to 8 kHz, which "
                 "the A-weighting of 10.9 reads."
             )
             raise ValueError(msg)
-        if self.background_levels_db is not None:
+        if self.background_levels is not None:
             background = read_only(
                 np.asarray(
-                    require_finite_matrix(
-                        self.background_levels_db, "background_levels_db"
-                    )
+                    require_finite_matrix(self.background_levels, "background_levels")
                 )
             )
             if background.shape != levels.shape:
                 msg = (
-                    "'background_levels_db' must match 'measured_levels_db', one "
+                    "'background_levels' must match 'measured_levels', one "
                     "row per position and one column per band."
                 )
                 raise ValueError(msg)
             plant_background_correction_db(levels - background)
-            object.__setattr__(self, "background_levels_db", background)
+            object.__setattr__(self, "background_levels", background)
         for name in (
             "measurement_area_m2",
             "contour_length_m",
@@ -1524,10 +1518,10 @@ class PlantSoundPowerResult(OwnsArrays):
         """The level with the plant operating less the background, per position
         and band, in decibels; ``None`` with no background.
         """
-        if self.background_levels_db is None:
+        if self.background_levels is None:
             return None
         return np.asarray(
-            self.measured_levels_db - self.background_levels_db, dtype=np.float64
+            self.measured_levels - self.background_levels, dtype=np.float64
         )
 
     @property
@@ -1541,21 +1535,21 @@ class PlantSoundPowerResult(OwnsArrays):
         return np.asarray(plant_background_correction_db(margin), dtype=np.float64)
 
     @property
-    def levels_db(self) -> NDArray[np.float64]:
+    def levels(self) -> NDArray[np.float64]:
         """:math:`L_{pi}`, the levels corrected for the background (9.5.4),
         ``(N, bands)``, in decibels.
         """
         correction = self.background_correction_db
         if correction is None:
-            return np.array(self.measured_levels_db, dtype=np.float64)
-        return np.asarray(self.measured_levels_db - correction, dtype=np.float64)
+            return np.array(self.measured_levels, dtype=np.float64)
+        return np.asarray(self.measured_levels - correction, dtype=np.float64)
 
     @property
     def mean_level_db(self) -> NDArray[np.float64]:
         r""":math:`\overline{L_p}`, the energy average round the contour, per band
         (10.1), in decibels.
         """
-        return energy_mean(self.levels_db, axis=0)
+        return energy_mean(self.levels, axis=0)
 
     @property
     def capped(self) -> NDArray[np.bool_]:
@@ -1567,7 +1561,7 @@ class PlantSoundPowerResult(OwnsArrays):
         place of the levels either side of 5, which side depending on the
         machine, and is not replaced.
         """
-        excess = settled(self.levels_db - self.mean_level_db)
+        excess = settled(self.levels - self.mean_level_db)
         return np.asarray(excess > _EXCESS_LIMIT_DB, dtype=bool)
 
     @property
@@ -1584,7 +1578,7 @@ class PlantSoundPowerResult(OwnsArrays):
         :math:`\overline{L_p}` in a band with nothing capped.
         """
         cap = self.mean_level_db + _EXCESS_LIMIT_DB
-        return energy_mean(np.where(self.capped, cap, self.levels_db), axis=0)
+        return energy_mean(np.where(self.capped, cap, self.levels), axis=0)
 
     @property
     def area_term_db(self) -> float:
@@ -1613,7 +1607,7 @@ class PlantSoundPowerResult(OwnsArrays):
         """
         theta = self.directional_microphone_angle_deg
         if theta is None:
-            return np.zeros(self.frequencies_hz.size)
+            return np.zeros(self.frequencies.size)
         return np.asarray(
             _MICROPHONE_TERM_DB * (1.0 - theta / _RIGHT_ANGLE_DEG), dtype=np.float64
         )
@@ -1623,7 +1617,7 @@ class PlantSoundPowerResult(OwnsArrays):
         r""":math:`\alpha` per band, evaluated once."""
         return read_only(
             plant_air_absorption_db_per_m(
-                self.frequencies_hz,
+                self.frequencies,
                 temperature_c=self.temperature_c,
                 relative_humidity_percent=self.relative_humidity_percent,
             )
@@ -1664,16 +1658,16 @@ class PlantSoundPowerResult(OwnsArrays):
         of ISO 3744:2010 Annex E weights, 63 Hz to 8 kHz. A 31,5 Hz band, which
         NOTE 8 makes optional, is left out.
         """
-        keep = np.isin(self.frequencies_hz, _A_WEIGHTED_BANDS_HZ)
-        return np.array(self.frequencies_hz[keep], dtype=np.float64)
+        keep = np.isin(self.frequencies, _A_WEIGHTED_BANDS_HZ)
+        return np.array(self.frequencies[keep], dtype=np.float64)
 
     @property
     def a_weighted_sound_power_level_db(self) -> float:
         r""":math:`L_{W\mathrm{A}} = 10 \lg \sum_j 10^{0{,}1(L_{Wj} + C_j)}`, in
         dB re 1 pW (10.9).
         """
-        keep = np.isin(self.frequencies_hz, _A_WEIGHTED_BANDS_HZ)
-        bands = self.frequencies_hz[keep]
+        keep = np.isin(self.frequencies, _A_WEIGHTED_BANDS_HZ)
+        bands = self.frequencies[keep]
         return energy_sum(
             self.sound_power_level_db[keep] + _a_weighting_corrections(bands)
         )
@@ -1714,15 +1708,15 @@ class PlantSoundPowerResult(OwnsArrays):
 
 
 def plant_sound_power(
-    levels_db: ArrayLike,
-    frequencies_hz: ArrayLike,
+    levels: ArrayLike,
+    frequencies: ArrayLike,
     *,
     measurement_area_m2: float,
     contour_length_m: float,
     microphone_height_m: float,
     mean_distance_m: float,
     plant_area_m2: float,
-    background_levels_db: ArrayLike | None = None,
+    background_levels: ArrayLike | None = None,
     directional_microphone_angle_deg: float | ArrayLike | None = None,
     temperature_c: float | None = None,
     relative_humidity_percent: float | None = None,
@@ -1743,9 +1737,9 @@ def plant_sound_power(
     The geometry is the one 9.2 measures on the plot plan, to within ±5 %;
     :meth:`PlantMeasurementContour.sound_power` supplies it from polygons.
 
-    :param levels_db: :math:`L_{pi}`, one row per position and one column per
+    :param levels: :math:`L_{pi}`, one row per position and one column per
         octave band, in dB re 20 µPa.
-    :param frequencies_hz: Nominal octave-band centres of the columns, 31,5 Hz
+    :param frequencies: Nominal octave-band centres of the columns, 31,5 Hz
         to 8 kHz.
     :param measurement_area_m2: :math:`S_\mathrm{m}`, in square metres.
     :param contour_length_m: :math:`l`, in metres.
@@ -1753,7 +1747,7 @@ def plant_sound_power(
         in metres.
     :param mean_distance_m: :math:`\bar{d}`, in metres.
     :param plant_area_m2: :math:`S_\mathrm{p}`, in square metres.
-    :param background_levels_db: The background alone at each position and
+    :param background_levels: The background alone at each position and
         band, in decibels, or ``None`` where the plant could not be stopped.
     :param directional_microphone_angle_deg: :math:`\theta`, the angle at which
         a directional microphone has lost 3 dB, in degrees, one value or one
@@ -1772,12 +1766,12 @@ def plant_sound_power(
         angle outside (0°, 90°], or half a weather.
     """
     result = PlantSoundPowerResult(
-        frequencies_hz=np.asarray(frequencies_hz, dtype=np.float64),
-        measured_levels_db=require_finite_matrix(levels_db, "levels_db"),
-        background_levels_db=(
+        frequencies=np.asarray(frequencies, dtype=np.float64),
+        measured_levels=require_finite_matrix(levels, "levels"),
+        background_levels=(
             None
-            if background_levels_db is None
-            else require_finite_matrix(background_levels_db, "background_levels_db")
+            if background_levels is None
+            else require_finite_matrix(background_levels, "background_levels")
         ),
         measurement_area_m2=measurement_area_m2,
         contour_length_m=contour_length_m,
@@ -1795,7 +1789,7 @@ def plant_sound_power(
     if result.steps_2_3_applied:
         rows, cols = np.nonzero(result.capped)
         cells = ", ".join(
-            f"position {r} at {result.frequencies_hz[c]:g} Hz"
+            f"position {r} at {result.frequencies[c]:g} Hz"
             for r, c in zip(rows.tolist(), cols.tolist(), strict=True)
         )
         msg = (
@@ -2055,12 +2049,12 @@ def _reading_rows(result: PlantSoundPowerResult) -> list[PlantRequirement]:
                  "margin over the background noise (preferred)",
                  worst, ">", _PREFERRED_BACKGROUND_MARGIN_DB, "dB", advisory=True)
         )  # fmt: skip
-    present = sum(1 for band in _REQUIRED_BANDS_HZ if band in result.frequencies_hz)
+    present = sum(1 for band in _REQUIRED_BANDS_HZ if band in result.frequencies)
     rows.append(
         _row("octave_bands", "9.5.1 a)", "octave bands from 63 Hz to 4 kHz measured",
              present, ">=", len(_REQUIRED_BANDS_HZ), "")
     )  # fmt: skip
-    excess = float(settled(np.max(result.levels_db - result.mean_level_db)))
+    excess = float(settled(np.max(result.levels - result.mean_level_db)))
     rows.append(
         _row("level_excess", "10.2", "largest level above the contour average",
              excess, "<=", _EXCESS_LIMIT_DB, "dB", advisory=True)
@@ -2168,7 +2162,7 @@ def _require_same_geometry(
                 f"'sound_power' was computed with another '{name}' than the contour's."
             )
             raise ValueError(msg)
-    if sound_power.measured_levels_db.shape[0] != contour.positions_m.shape[0]:
+    if sound_power.measured_levels.shape[0] != contour.positions_m.shape[0]:
         msg = "'sound_power' has another number of positions than the contour."
         raise ValueError(msg)
 
@@ -2212,13 +2206,13 @@ class PartialPlantContributions(OwnsArrays):
     own contours, and each part's share of it (0.2 b, c).
 
     :ivar names: A name per part.
-    :ivar frequencies_hz: Nominal octave-band centres, in Hz.
+    :ivar frequencies: Nominal octave-band centres, in Hz.
     :ivar part_levels_db: :math:`L_W` of each part, ``(parts, bands)``, in
         dB re 1 pW.
     """
 
     names: tuple[str, ...]
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     part_levels_db: NDArray[np.float64]
 
     def __post_init__(self) -> None:
@@ -2227,15 +2221,15 @@ class PartialPlantContributions(OwnsArrays):
         :raises ValueError: for a name count, a band count or a level matrix
             that disagree, or bands outside the method.
         """
-        bands = read_only(_octave_bands(self.frequencies_hz))
-        object.__setattr__(self, "frequencies_hz", bands)
+        bands = read_only(_octave_bands(self.frequencies))
+        object.__setattr__(self, "frequencies", bands)
         levels = read_only(
             np.asarray(require_finite_matrix(self.part_levels_db, "part_levels_db"))
         )
         object.__setattr__(self, "part_levels_db", levels)
         object.__setattr__(self, "names", tuple(str(n) for n in self.names))
-        require_ranks(self, frequencies_hz=1, part_levels_db=2)
-        require_same_length(self, "frequencies_hz", ("part_levels_db", 1))
+        require_ranks(self, frequencies=1, part_levels_db=2)
+        require_same_length(self, "frequencies", ("part_levels_db", 1))
         if len(self.names) != levels.shape[0]:
             msg = (
                 f"PartialPlantContributions: {len(self.names)} names for "
@@ -2256,8 +2250,8 @@ class PartialPlantContributions(OwnsArrays):
     @property
     def a_weighted_part_levels_db(self) -> NDArray[np.float64]:
         r""":math:`L_{W\mathrm{A}}` of each part over the bands of 10.9, in dB re 1 pW."""
-        keep = np.isin(self.frequencies_hz, _A_WEIGHTED_BANDS_HZ)
-        ck = _a_weighting_corrections(self.frequencies_hz[keep])
+        keep = np.isin(self.frequencies, _A_WEIGHTED_BANDS_HZ)
+        ck = _a_weighting_corrections(self.frequencies[keep])
         return energy_sum(self.part_levels_db[:, keep] + ck, axis=1)
 
     @property
@@ -2316,10 +2310,10 @@ def partial_plant_contributions(
     if not parts:
         msg = "'parts' must hold at least one determination."
         raise ValueError(msg)
-    bands = parts[0].frequencies_hz
+    bands = parts[0].frequencies
     for part in parts[1:]:
-        if part.frequencies_hz.shape != bands.shape or not np.array_equal(
-            part.frequencies_hz, bands
+        if part.frequencies.shape != bands.shape or not np.array_equal(
+            part.frequencies, bands
         ):
             msg = "Every part must be determined over the same octave bands."
             raise ValueError(msg)
@@ -2330,6 +2324,6 @@ def partial_plant_contributions(
     )
     return PartialPlantContributions(
         names=labels,
-        frequencies_hz=np.asarray(bands, dtype=np.float64),
+        frequencies=np.asarray(bands, dtype=np.float64),
         part_levels_db=np.stack([p.sound_power_level_db for p in parts]),
     )

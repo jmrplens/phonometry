@@ -377,14 +377,14 @@ _RANGE_CLAUSES = (12, 13, 14)
 # ---------------------------------------------------------------------------
 
 
-def _frequency_axis(frequencies_hz: ArrayLike) -> NDArray[np.float64]:
+def _frequency_axis(frequencies: ArrayLike) -> NDArray[np.float64]:
     """Positive, finite and strictly increasing frequencies.
 
     :raises ValueError: for anything else.
     """
-    frequencies = require_positive_array(frequencies_hz, "frequencies_hz")
+    frequencies = require_positive_array(frequencies, "frequencies")
     if np.any(np.diff(frequencies) <= 0.0):
-        msg = "'frequencies_hz' must be strictly increasing."
+        msg = "'frequencies' must be strictly increasing."
         raise ValueError(msg)
     return frequencies
 
@@ -496,7 +496,7 @@ def _index_of(frequencies: NDArray[np.float64], target_hz: float, name: str) -> 
     nearest = int(np.argmin(np.abs(np.log(frequencies / target))))
     if not math.isclose(frequencies[nearest], target, rel_tol=_NOMINAL_TOLERANCE):
         msg = (
-            f"'{name}' ({target:g} Hz) must be one of 'frequencies_hz', to within "
+            f"'{name}' ({target:g} Hz) must be one of 'frequencies', to within "
             "2 %, so that the readings there can be read."
         )
         raise ValueError(msg)
@@ -612,7 +612,7 @@ class AdjustmentValue(OwnsArrays):
     adjustment. The manual states :math:`\Delta L = L_1 - L_4` as a fixed
     number, without an uncertainty (clause 8).
 
-    :ivar frequencies_hz: the frequencies of the free-field response, in Hz.
+    :ivar frequencies: the frequencies of the free-field response, in Hz.
     :ivar free_field_deviation_db: :math:`d`, the indication in the free field
         less the incident level at each frequency, before the adjustment, in
         dB.
@@ -622,7 +622,7 @@ class AdjustmentValue(OwnsArrays):
         calibrator before the adjustment, at the sensitivity the free-field
         readings were taken at, in dB.
     :ivar check_frequency_hz: :math:`f_\mathrm{R}`, the calibration check
-        frequency, in Hz: one of :attr:`frequencies_hz`.
+        frequency, in Hz: one of :attr:`frequencies`.
     :ivar tolerance_db: :math:`t` at each frequency, in dB, infinite where a
         frequency does not pull the fit; ``None`` for equal weights.
     :ivar pressure_deviation_db: the indication in a pressure field of level
@@ -630,7 +630,7 @@ class AdjustmentValue(OwnsArrays):
         in dB; ``None`` when the pressure response was not given.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     free_field_deviation_db: NDArray[np.float64]
     calibrator_level_db: float
     calibrator_reading_db: float
@@ -646,8 +646,8 @@ class AdjustmentValue(OwnsArrays):
             is not positive, or the check frequency is not among the
             frequencies.
         """
-        frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        frequencies = _frequency_axis(self.frequencies)
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         columns = ["free_field_deviation_db"]
         if self.pressure_deviation_db is not None:
             columns.append("pressure_deviation_db")
@@ -673,7 +673,7 @@ class AdjustmentValue(OwnsArrays):
         normalised to sum to one; equal without tolerances.
         """
         if self.tolerance_db is None:
-            count = self.frequencies_hz.size
+            count = self.frequencies.size
             return np.full(count, 1.0 / count)
         tolerance = self.tolerance_db
         raw = np.where(np.isfinite(tolerance), 1.0 / tolerance**2, 0.0)
@@ -709,7 +709,7 @@ class AdjustmentValue(OwnsArrays):
 
     def _check_index(self) -> int:
         return _index_of(
-            self.frequencies_hz, self.check_frequency_hz, "check_frequency_hz"
+            self.frequencies, self.check_frequency_hz, "check_frequency_hz"
         )
 
     @property
@@ -771,7 +771,7 @@ class AdjustmentValue(OwnsArrays):
 
 
 def adjustment_value(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     free_field_indicated_level_db: ArrayLike,
     calibrator_reading_db: float,
     *,
@@ -805,7 +805,7 @@ def adjustment_value(
     :math:`L_1`, ``incident_level_db`` carries it, which is the allowance the
     text asks for.
 
-    :param frequencies_hz: The frequencies of the free-field response, in Hz,
+    :param frequencies: The frequencies of the free-field response, in Hz,
         increasing, the calibration check frequency among them.
     :param free_field_indicated_level_db: What the meter indicates in the free
         field at each frequency, in dB, before the adjustment.
@@ -831,7 +831,7 @@ def adjustment_value(
         a value that is not finite, a tolerance that is not positive or finite
         nowhere, or a check frequency that is not among the frequencies.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     indicated = _band_column(
         free_field_indicated_level_db, "free_field_indicated_level_db", count
@@ -851,7 +851,7 @@ def adjustment_value(
         - level
     )
     return AdjustmentValue(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         free_field_deviation_db=indicated - incident,
         calibrator_level_db=level,
         calibrator_reading_db=require_finite(
@@ -884,7 +884,7 @@ class FreeFieldCorrection(OwnsArrays):
     the spread between the calibrators. :attr:`microphones` says which
     determinations share a microphone.
 
-    :ivar frequencies_hz: the frequencies, in Hz.
+    :ivar frequencies: the frequencies, in Hz.
     :ivar corrections_db: :math:`C_\mathrm{FF,SLM}`, or :math:`C_\mathrm{N,FF,SLM}`
         for an actuator, of each determination, in dB, shape
         ``(determinations, frequencies)``.
@@ -902,7 +902,7 @@ class FreeFieldCorrection(OwnsArrays):
         when every determination is a microphone of its own.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     corrections_db: NDArray[np.float64]
     reference_correction_db: NDArray[np.float64]
     source: str
@@ -925,8 +925,8 @@ class FreeFieldCorrection(OwnsArrays):
                 f"got {self.source!r}."
             )
             raise ValueError(msg)
-        frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        frequencies = _frequency_axis(self.frequencies)
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         corrections = np.array(
             self.corrections_db, dtype=np.float64, ndmin=2, copy=None
         )
@@ -1050,7 +1050,7 @@ class FreeFieldCorrection(OwnsArrays):
 
 
 def _substitution(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     readings: Mapping[str, ArrayLike],
     *,
     source: str,
@@ -1066,7 +1066,7 @@ def _substitution(
     reference in the free field, the meter on the source and the reference on
     the source.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     matrices = {
         name: _determinations(value, name, count) for name, value in readings.items()
@@ -1096,7 +1096,7 @@ def _substitution(
         + reference
     )
     return FreeFieldCorrection(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         corrections_db=corrections,
         reference_correction_db=reference,
         source=source,
@@ -1109,7 +1109,7 @@ def _substitution(
 
 
 def sound_calibrator_correction(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     slm_free_field_level_db: ArrayLike,
     reference_free_field_level_db: ArrayLike,
     slm_calibrator_level_db: ArrayLike,
@@ -1144,7 +1144,7 @@ def sound_calibrator_correction(
     names the microphone of each row, so that the range clause 12 judges is
     taken over the three microphones and not over the calibrators as well.
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param slm_free_field_level_db: :math:`L_\mathrm{ind1}`, the meter in the
         free field, in dB.
     :param reference_free_field_level_db: :math:`L_\mathrm{ind2}`, the
@@ -1174,7 +1174,7 @@ def sound_calibrator_correction(
         determination.
     """
     return _substitution(
-        frequencies_hz,
+        frequencies,
         {
             "slm_free_field_level_db": slm_free_field_level_db,
             "reference_free_field_level_db": reference_free_field_level_db,
@@ -1191,7 +1191,7 @@ def sound_calibrator_correction(
 
 
 def comparison_coupler_correction(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     slm_free_field_level_db: ArrayLike,
     reference_free_field_level_db: ArrayLike,
     slm_coupler_level_db: ArrayLike,
@@ -1226,7 +1226,7 @@ def comparison_coupler_correction(
     determination; E.2 step 5 asks for three microphones at least, and the
     correction is their mean.
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param slm_free_field_level_db: :math:`L_\mathrm{ind1}`, the meter in the
         free field, in dB.
     :param reference_free_field_level_db: :math:`L_\mathrm{ind2}`, the
@@ -1248,7 +1248,7 @@ def comparison_coupler_correction(
     :raises ValueError: as :func:`sound_calibrator_correction`.
     """
     return _substitution(
-        frequencies_hz,
+        frequencies,
         {
             "slm_free_field_level_db": slm_free_field_level_db,
             "reference_free_field_level_db": reference_free_field_level_db,
@@ -1265,7 +1265,7 @@ def comparison_coupler_correction(
 
 
 def electrostatic_actuator_correction(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     slm_free_field_level_db: ArrayLike,
     reference_free_field_level_db: ArrayLike,
     slm_actuator_level_db: ArrayLike,
@@ -1300,7 +1300,7 @@ def electrostatic_actuator_correction(
     determination; F.2 step 5 averages the combinations of microphone and
     actuator clause 7 asks for.
 
-    :param frequencies_hz: The frequencies, in Hz, increasing, :math:`f_0`
+    :param frequencies: The frequencies, in Hz, increasing, :math:`f_0`
         among them.
     :param slm_free_field_level_db: :math:`L_\mathrm{ind1}(f)`, the meter in
         the free field, in dB.
@@ -1327,7 +1327,7 @@ def electrostatic_actuator_correction(
     :raises ValueError: as :func:`sound_calibrator_correction`, or for an
         :math:`f_0` that is not among the frequencies.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     index = _index_of(frequencies, check_frequency_hz, "check_frequency_hz")
     named = {
@@ -1362,7 +1362,7 @@ def electrostatic_actuator_correction(
         - (normalised["slm_actuator_level_db"] - normalised["actuator_level_db"])
     )
     return FreeFieldCorrection(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         corrections_db=corrections,
         reference_correction_db=reference,
         source="electrostatic_actuator",
@@ -1800,7 +1800,7 @@ def _maximum_at(frequency: float, clause: int) -> float:
 
 
 def maximum_expanded_uncertainty(
-    frequencies_hz: ArrayLike, *, clause: int
+    frequencies: ArrayLike, *, clause: int
 ) -> NDArray[np.float64]:
     r"""The maximum permitted expanded uncertainty of a correction
     (IEC 62585:2012, clauses 9 to 14).
@@ -1822,18 +1822,18 @@ def maximum_expanded_uncertainty(
     it, so the exact base-ten frequencies of Annex H fall where their nominal
     ones do.
 
-    :param frequencies_hz: The frequencies, in Hz.
+    :param frequencies: The frequencies, in Hz.
     :param clause: The clause, 9 to 14.
     :return: The maximum at each frequency, in dB, read-only.
     :raises ValueError: for another clause, a frequency that is not positive
         and finite, or, for clause 10, a frequency below 63 Hz.
     """
     number = _clause(clause)
-    frequencies = require_positive_array(frequencies_hz, "frequencies_hz")
+    frequencies = require_positive_array(frequencies, "frequencies")
     if number == _MICROPHONE_CLAUSE and np.any(
         frequencies < _CLAUSE10_LOWEST_HZ / (1.0 + _NOMINAL_TOLERANCE)
     ):
-        msg = "IEC 62585 clause 10 states its maximum from 63 Hz; 'frequencies_hz' goes below."
+        msg = "IEC 62585 clause 10 states its maximum from 63 Hz; 'frequencies' goes below."
         raise ValueError(msg)
     return read_only(np.array([_maximum_at(float(f), number) for f in frequencies]))
 
@@ -1859,7 +1859,7 @@ class CorrectionUncertaintyVerification(OwnsArrays):
     maximum its clause does not give.
 
     :ivar clause: the clause, 9 to 14.
-    :ivar frequencies_hz: the frequencies, in Hz.
+    :ivar frequencies: the frequencies, in Hz.
     :ivar expanded_uncertainty_db: the actual expanded uncertainty at each
         frequency, in dB.
     :ivar correction_db: the corrections, in dB, which the documentation of
@@ -1872,7 +1872,7 @@ class CorrectionUncertaintyVerification(OwnsArrays):
     """
 
     clause: int
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     expanded_uncertainty_db: NDArray[np.float64]
     correction_db: NDArray[np.float64] | None = None
     coverage_factor: NDArray[np.float64] | None = None
@@ -1887,8 +1887,8 @@ class CorrectionUncertaintyVerification(OwnsArrays):
             a frequency below 63 Hz for clause 10.
         """
         _clause(self.clause)
-        frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        frequencies = _frequency_axis(self.frequencies)
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         maximum_expanded_uncertainty(frequencies, clause=self.clause)
         if self.correction_range_db is not None and self.clause not in _RANGE_CLAUSES:
             msg = (
@@ -1924,7 +1924,7 @@ class CorrectionUncertaintyVerification(OwnsArrays):
         """The maximum permitted at each frequency by the clause, in dB,
         :func:`maximum_expanded_uncertainty`.
         """
-        return maximum_expanded_uncertainty(self.frequencies_hz, clause=self.clause)
+        return maximum_expanded_uncertainty(self.frequencies, clause=self.clause)
 
     @property
     def uncertainty_passes(self) -> NDArray[np.bool_]:
@@ -1956,7 +1956,7 @@ class CorrectionUncertaintyVerification(OwnsArrays):
         ranges = self.range_passes
         if ranges is not None:
             failing = failing | ~ranges
-        return self.frequencies_hz[failing]
+        return self.frequencies[failing]
 
     @property
     def subject(self) -> str:
@@ -2055,7 +2055,7 @@ def _optional_column(
 
 
 def verify_correction_uncertainty(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     expanded_uncertainty_db: ArrayLike,
     *,
     clause: int,
@@ -2078,7 +2078,7 @@ def verify_correction_uncertainty(
     uncertainty and the coverage factor. A value that reaches its maximum
     through floating-point arithmetic is on it, not above it.
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param expanded_uncertainty_db: The actual expanded uncertainty at each
         frequency, in dB, one value or one per frequency.
     :param clause: The clause the corrections belong to: 9 (case and
@@ -2099,11 +2099,11 @@ def verify_correction_uncertainty(
         clauses 9 to 11, or a frequency below 63 Hz for clause 10.
     """
     number = _clause(clause)
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     return CorrectionUncertaintyVerification(
         clause=number,
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         expanded_uncertainty_db=_band_column(
             expanded_uncertainty_db, "expanded_uncertainty_db", count
         ),

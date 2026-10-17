@@ -263,9 +263,9 @@ def _round_tenth(value: float) -> float:
     return float(round_half_up(value, 1))
 
 
-def _reported_levels(levels_db: Mapping[str, float]) -> dict[str, float]:
+def _reported_levels(levels: Mapping[str, float]) -> dict[str, float]:
     """Three vehicle sound levels as 9.2 reports them, to one decimal."""
-    return {key: _round_tenth(value) for key, value in levels_db.items()}
+    return {key: _round_tenth(value) for key, value in levels.items()}
 
 
 def _road_category(road_speed_category: str) -> str:
@@ -318,13 +318,13 @@ def _weights(
 
 
 def _index_terms(
-    levels_db: Mapping[str, float], weights: Mapping[str, float], road: str
+    levels: Mapping[str, float], weights: Mapping[str, float], road: str
 ) -> dict[str, float]:
     """The three energy terms of the 9.5 sum, by vehicle category."""
     speeds = SPB_REFERENCE_SPEEDS_KMH[road]
     car_speed = speeds["1"]
     return {
-        key: weights[key] * (car_speed / speeds[key]) * 10.0 ** (levels_db[key] / 10.0)
+        key: weights[key] * (car_speed / speeds[key]) * 10.0 ** (levels[key] / 10.0)
         for key in SPB_VEHICLE_CATEGORIES
     }
 

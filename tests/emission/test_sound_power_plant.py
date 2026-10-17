@@ -182,13 +182,13 @@ def test_half_a_weather_is_refused() -> None:
 
 
 def test_a_band_outside_the_method_is_refused() -> None:
-    with pytest.raises(ValueError, match="'frequencies_hz' must name octave bands"):
+    with pytest.raises(ValueError, match="'frequencies' must name octave bands"):
         emission.plant_air_absorption_db_per_m([16.0])
 
 
 def test_bands_out_of_order_are_refused() -> None:
     with pytest.raises(
-        ValueError, match="'frequencies_hz' must name each octave band once"
+        ValueError, match="'frequencies' must name each octave band once"
     ):
         emission.plant_air_absorption_db_per_m([125.0, 63.0])
 
@@ -196,7 +196,7 @@ def test_bands_out_of_order_are_refused() -> None:
 @pytest.mark.parametrize("frequency", [45.0, 80.0, 90.0, 5000.0])
 def test_a_frequency_between_octaves_is_refused(frequency: float) -> None:
     """A one-third-octave centre is not read as the octave next to it."""
-    with pytest.raises(ValueError, match="'frequencies_hz' must name octave bands"):
+    with pytest.raises(ValueError, match="'frequencies' must name octave bands"):
         emission.plant_air_absorption_db_per_m([frequency])
 
 
@@ -397,11 +397,11 @@ def test_positions_are_equidistant_along_the_contour() -> None:
 def test_distances_are_to_the_nearest_point_of_the_perimeter() -> None:
     contour = _contour(position_count=16)
     # Position 1 at (27,5; -25) is straight below the bottom edge.
-    assert contour.distances_m[1] == pytest.approx(25.0)
+    assert contour.distances[1] == pytest.approx(25.0)
     np.testing.assert_allclose(contour.nearest_perimeter_points_m[1], [27.5, 0.0])
     # Position 0 at the corner (-25; -25) is nearest the plant's corner (0; 0).
-    assert contour.distances_m[0] == pytest.approx(25.0 * math.sqrt(2.0))
-    assert contour.mean_distance_m == pytest.approx(float(np.mean(contour.distances_m)))
+    assert contour.distances[0] == pytest.approx(25.0 * math.sqrt(2.0))
+    assert contour.mean_distance_m == pytest.approx(float(np.mean(contour.distances)))
 
 
 def test_microphones_point_into_the_contour_at_right_angles() -> None:
@@ -522,7 +522,7 @@ def test_the_contour_keeps_copies_of_the_callers_arrays() -> None:
         "contour_m",
         "positions_m",
         "microphone_directions",
-        "distances_m",
+        "distances",
         "aspect_angles_deg",
         "measured",
     ],
@@ -587,7 +587,7 @@ def test_omitted_positions_leave_the_layout_and_the_mean() -> None:
     partial = _contour(position_count=16, omitted_positions=[3])
     assert partial.positions_m.shape == (15, 2)
     assert partial.omitted_percent == pytest.approx(100.0 / 16.0)
-    kept = np.delete(full.distances_m, 3)
+    kept = np.delete(full.distances, 3)
     assert partial.mean_distance_m == pytest.approx(float(np.mean(kept)))
     np.testing.assert_allclose(partial.layout_positions_m, full.layout_positions_m)
 
@@ -738,8 +738,8 @@ def test_a_result_keeps_copies_of_the_callers_readings() -> None:
     before = res.sound_power_level_db.copy()
     levels += 20.0
     np.testing.assert_array_equal(res.sound_power_level_db, before)
-    assert not res.measured_levels_db.flags.writeable
-    assert not res.frequencies_hz.flags.writeable
+    assert not res.measured_levels.flags.writeable
+    assert not res.frequencies.flags.writeable
 
 
 def test_background_is_corrected_position_by_position() -> None:
@@ -748,12 +748,12 @@ def test_background_is_corrected_position_by_position() -> None:
     res = emission.plant_sound_power(
         levels, [500.0, 1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
         microphone_height_m=5.0, mean_distance_m=10.0, plant_area_m2=4e3,
-        background_levels_db=background,
+        background_levels=background,
     )  # fmt: skip
     np.testing.assert_array_equal(
         res.background_correction_db, [[1.0, 0.5], [0.0, 1.0]]
     )
-    np.testing.assert_allclose(res.levels_db, levels - [[1.0, 0.5], [0.0, 1.0]])
+    np.testing.assert_allclose(res.levels, levels - [[1.0, 0.5], [0.0, 1.0]])
 
 
 def test_a_background_too_close_makes_the_determination_invalid() -> None:
@@ -763,7 +763,7 @@ def test_a_background_too_close_makes_the_determination_invalid() -> None:
         emission.plant_sound_power(
             levels, [500.0], measurement_area_m2=1e4, contour_length_m=400.0,
             microphone_height_m=5.0, mean_distance_m=10.0, plant_area_m2=4e3,
-            background_levels_db=background,
+            background_levels=background,
         )  # fmt: skip
 
 
@@ -877,12 +877,12 @@ def test_contour_supplies_its_geometry_and_the_prescribed_height() -> None:
 def test_contour_needs_one_row_per_measured_position() -> None:
     contour = _contour()
     levels = _levels(contour.positions_m.shape[0] + 1)
-    with pytest.raises(ValueError, match="'levels_db' has .* rows for"):
+    with pytest.raises(ValueError, match="'levels' has .* rows for"):
         contour.sound_power(levels, OCTAVES)
 
 
 def test_levels_must_match_the_bands() -> None:
-    with pytest.raises(ValueError, match="'measured_levels_db' has 2 columns"):
+    with pytest.raises(ValueError, match="'measured_levels' has 2 columns"):
         emission.plant_sound_power(
             [[70.0, 71.0]], [1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
             microphone_height_m=5.0, mean_distance_m=10.0, plant_area_m2=4e3,
@@ -917,7 +917,7 @@ def _requirement(res: spp.PlantSoundPowerResult, key: str) -> spp.PlantRequireme
 def test_a_compliant_measurement_passes() -> None:
     contour = _contour()
     levels = _levels(contour.positions_m.shape[0])
-    res = contour.sound_power(levels, OCTAVES, background_levels_db=levels - 12.0)
+    res = contour.sound_power(levels, OCTAVES, background_levels=levels - 12.0)
     check = emission.check_plant_measurement(contour, res, measurement_time_s=90.0)
     assert check.passes, check.failures
     assert check.deviations == ()
@@ -1015,7 +1015,7 @@ def test_a_narrow_directional_microphone_fails_7_1() -> None:
 def test_background_under_10_db_is_a_deviation() -> None:
     contour = _contour()
     levels = _levels(contour.positions_m.shape[0])
-    res = contour.sound_power(levels, OCTAVES, background_levels_db=levels - 8.0)
+    res = contour.sound_power(levels, OCTAVES, background_levels=levels - 8.0)
     check = emission.check_plant_measurement(contour, res)
     assert check.passes
     assert [r.key for r in check.deviations] == ["background_margin_preferred"]
@@ -1137,7 +1137,7 @@ def test_background_margins_at_the_edges_of_6_b(
     """6 b): "at least 6 dB, and preferably more than 10 dB"."""
     contour = _contour()
     levels = np.round(2.0 * _levels(contour.positions_m.shape[0])) / 2.0
-    res = contour.sound_power(levels, OCTAVES, background_levels_db=levels - margin)
+    res = contour.sound_power(levels, OCTAVES, background_levels=levels - margin)
     check = emission.check_plant_measurement(contour, res)
     assert check.requirement("background_margin").holds is required
     assert check.requirement("background_margin_preferred").holds is preferred
@@ -1160,7 +1160,7 @@ def test_a_level_exactly_5_db_above_the_average_is_not_replaced() -> None:
         contour_length_m=400.0, microphone_height_m=5.0, mean_distance_m=10.0,
         plant_area_m2=4e3,
     )  # fmt: skip
-    excess = float(res.levels_db[3, 0] - res.mean_level_db[0])
+    excess = float(res.levels[3, 0] - res.mean_level_db[0])
     assert excess == pytest.approx(5.0, abs=1e-12)
     assert not res.capped[3, 0]
     assert _requirement(res, "level_excess").holds
@@ -1214,7 +1214,7 @@ def test_background_margins_of_decimal_readings_at_the_edges_of_6_b(
     shape = (contour.positions_m.shape[0], OCTAVES.size)
     res = contour.sound_power(
         np.full(shape, operating), OCTAVES,
-        background_levels_db=np.full(shape, background),
+        background_levels=np.full(shape, background),
     )  # fmt: skip
     np.testing.assert_array_equal(res.background_correction_db, correction)
     check = emission.check_plant_measurement(contour, res)
@@ -1363,7 +1363,7 @@ def test_check_plot_marks_advisory_rows_hollow() -> None:
     """
     contour = _contour()
     levels = _levels(contour.positions_m.shape[0])
-    res = contour.sound_power(levels, OCTAVES, background_levels_db=levels - 8.0)
+    res = contour.sound_power(levels, OCTAVES, background_levels=levels - 8.0)
     check = emission.check_plant_measurement(contour, res)
     ax = check.plot()
     marks = [c.get_offsets().shape[0] for c in ax.collections]

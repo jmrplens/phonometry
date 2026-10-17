@@ -267,7 +267,7 @@ class AbsorptionRatingResult(OwnsArrays):
         shift (Clause 4.2): ``shifted_reference - measured`` over the bands
         where the measured coefficient falls below the curve, and nothing
         elsewhere; at most 0.10.
-    :ivar band_centers: Octave rating-band centre frequencies, in Hz
+    :ivar frequencies: Octave rating-band centre frequencies, in Hz
         (250 Hz to 4000 Hz).
     :ivar measured: Practical absorption coefficients ``alpha_p`` used for
         the rating (snapped to the 0,05 grid of Clause 4.1).
@@ -288,7 +288,7 @@ class AbsorptionRatingResult(OwnsArrays):
     absorption_class: str
     shift: float
     unfavourable_sum: float
-    band_centers: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     measured: NDArray[np.float64]
     shifted_reference: NDArray[np.float64]
     third_octave_alpha_s: NDArray[np.float64] | None = None
@@ -304,7 +304,7 @@ class AbsorptionRatingResult(OwnsArrays):
         ever taken over curves of different lengths: the fiche refuses them on
         a guard of its own, and :meth:`plot` stops inside matplotlib before it
         can shade a deviation. What neither reader gives is the field at
-        fault. The fiche names all three at once, "needs 'band_centers',
+        fault. The fiche names all three at once, "needs 'frequencies',
         'measured' and 'shifted_reference' of equal length", leaving the
         caller to find the odd one; matplotlib names none of them, reporting
         the two shapes it could not reconcile as "x and y" from inside its own
@@ -374,7 +374,7 @@ class AbsorptionRatingResult(OwnsArrays):
             raise ValueError(msg)
         require_ranks(
             self,
-            band_centers=1,
+            frequencies=1,
             measured=1,
             shifted_reference=1,
             third_octave_alpha_s=1,
@@ -382,7 +382,7 @@ class AbsorptionRatingResult(OwnsArrays):
         )
         require_same_length(
             self,
-            "band_centers",
+            "frequencies",
             "measured",
             "shifted_reference",
             axis="octave band",
@@ -405,11 +405,11 @@ class AbsorptionRatingResult(OwnsArrays):
                         _THIRD_OCTAVE_AXIS,
                         rank=None,
                     ),
-                    "3 x band_centers": 3
+                    "3 x frequencies": 3
                     * require_axis_count(
-                        self.band_centers,
+                        self.frequencies,
                         owner,
-                        "band_centers",
+                        "frequencies",
                         "octave band",
                         rank=None,
                     ),
@@ -616,7 +616,7 @@ def _rate(
         absorption_class=absorption_class(alpha_w_units / 20.0),
         shift=shift_units / 20.0,
         unfavourable_sum=unfav_units / 20.0,
-        band_centers=np.asarray(OCTAVE_BANDS, dtype=np.float64),
+        frequencies=np.asarray(OCTAVE_BANDS, dtype=np.float64),
         measured=np.asarray([u / 20.0 for u in measured_units], dtype=np.float64),
         shifted_reference=np.asarray(
             [u / 20.0 for u in shifted_units], dtype=np.float64

@@ -53,7 +53,7 @@ def test_the_filter_verdict_carries_the_bank_data() -> None:
     assert result.overall_class == verdict.overall_class
     assert len(result.bands) == bank.num_bands
     assert len(result.sos) == bank.num_bands
-    assert result.band_frequencies.shape == (bank.num_bands,)
+    assert result.frequencies.shape == (bank.num_bands,)
     assert result.factors == tuple(int(f) for f in bank.factor)
     assert result.fs == float(bank.fs)
     assert result.fraction == int(bank.fraction)
@@ -263,7 +263,7 @@ def test_empty_bands_result_is_graceful() -> None:
         fraction=1,
         edition="2014",
         sos=(),
-        band_frequencies=np.asarray([], dtype=float),
+        frequencies=np.asarray([], dtype=float),
         factors=(),
         fs=48000.0,
         num_points=2048,

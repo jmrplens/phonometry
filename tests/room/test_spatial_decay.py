@@ -345,7 +345,7 @@ def test_a_curve_carries_its_region_and_its_two_descriptors() -> None:
     assert res.region == "whole"
     assert res.band_hz == 1000.0
     assert res.decay_rate_db == pytest.approx(4.4, abs=0.05)
-    assert res.level_excess_db.size == res.distances_m.size
+    assert res.level_excess_db.size == res.distances.size
 
 
 def test_a_region_with_one_position_is_refused() -> None:

@@ -278,7 +278,7 @@ def _take_ownership(
     Before the class's own ``__post_init__`` runs, every array an init field
     holds is replaced by a read-only copy (or, handed over, sealed as it
     is), so the class validates and normalises the record's own arrays:
-    ``np.asarray(self.levels_db)`` is that copy, and ``read_only`` on it
+    ``np.asarray(self.levels)`` is that copy, and ``read_only`` on it
     touches nobody else's array. After,
     every field is looked at once more, and an array somebody can still
     write into, one the class built and stored without sealing it or one it
@@ -320,7 +320,7 @@ class OwnsArrays(RichDisplay):
 
     Inherited by every public record of the library that can hold an array.
     Whoever builds the record, a function of the library or a caller writing
-    ``SomeResult(levels_db=levels, ...)`` by hand, each array it is given
+    ``SomeResult(levels=levels, ...)`` by hand, each array it is given
     (also inside a tuple, a list or a mapping) is replaced by a copy that
     refuses in-place writes, before the class's own ``__post_init__`` runs;
     only an array a function of the library builds for it and passes

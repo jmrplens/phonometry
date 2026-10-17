@@ -1563,8 +1563,8 @@ def plot_weighting_verification(
     )
 
     ax = ax if ax is not None else _new_axes()
-    order = np.argsort(result.frequencies_hz)
-    freqs = result.frequencies_hz[order]
+    order = np.argsort(result.frequencies)
+    freqs = result.frequencies[order]
     design = result.design[order]
     measured = result.measured[order]
     inside = result.within_tolerance[order]
@@ -2809,8 +2809,8 @@ def plot_vibration_meter_verification(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    order = np.argsort(result.frequencies_hz)
-    freqs = result.frequencies_hz[order]
+    order = np.argsort(result.frequencies)
+    freqs = result.frequencies[order]
     deviation = result.deviation_percent[order]
     lower = result.lower_percent[order]
     upper = result.upper_percent[order]
@@ -2875,7 +2875,7 @@ def plot_vibration_meter_reading(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    times = np.arange(result.kbf.size) / result.fs_hz
+    times = np.arange(result.kbf.size) / result.fs
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 1.2)
     kwargs.setdefault("label", _t(_KBF_LABEL, language))
@@ -2953,7 +2953,7 @@ def plot_assessment_velocity(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    times = np.arange(result.velocity_mm_s.size) / result.fs_hz
+    times = np.arange(result.velocity_mm_s.size) / result.fs
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 1.0)
     kwargs.setdefault(
@@ -3018,7 +3018,7 @@ def plot_train_passage(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    times = np.arange(result.velocity_mm_s.size) / result.fs_hz
+    times = np.arange(result.velocity_mm_s.size) / result.fs
     ax.plot(
         times,
         result.velocity_mm_s,
@@ -3109,7 +3109,7 @@ def plot_train_passage_spectrum(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    positions = _band_axis(ax, result.band_centres_hz, language=language)
+    positions = _band_axis(ax, result.frequencies, language=language)
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 1.6)
     kwargs.setdefault("marker", "o")
@@ -3226,7 +3226,7 @@ def plot_train_category_prediction(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    positions = _band_axis(ax, result.frequencies_hz, language=language)
+    positions = _band_axis(ax, result.frequencies, language=language)
     ax.plot(
         positions,
         result.emission_db,
@@ -3243,7 +3243,7 @@ def plot_train_category_prediction(
     style_default(kwargs, "markersize", 4)
     kwargs.setdefault("label", _t(_FLOOR_LABEL, language))
     ax.plot(positions, result.floor_db, **kwargs)
-    weighted = np.isin(result.frequencies_hz, result.weighted_frequencies_hz)
+    weighted = np.isin(result.frequencies, result.weighted_frequencies_hz)
     ax.plot(
         positions[weighted],
         result.weighted_db,
@@ -3606,7 +3606,7 @@ def plot_force_spectrum_check(
     created = ax is None
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
-    level = np.asarray(result.level_db, dtype=np.float64)
+    level = np.asarray(result.levels, dtype=np.float64)
     shown = np.where(np.isfinite(level), level, np.nan)
     low, high = result.frequency_range_hz
     ax.axvspan(

@@ -265,7 +265,7 @@ results 2 dB apart are statistically indistinguishable, and checking that
 same source against a 93 dB limit is a coin flip. Choose the grade from the
 decision the number has to support, not from the facility that happens to
 be free. And do not leave $\sigma_\text{omc}$ at its default of zero while doing
-so: `emission.sound_power_pressure(..., omc_uncertainty=2.0)` on a machine whose
+so: `emission.sound_power_pressure(..., sigma_omc_db=2.0)` on a machine whose
 installation really does scatter by 2 dB turns a $U$ of 3.0 dB into 5.0 dB, and
 the honest number is the one the declaration has to absorb.
 

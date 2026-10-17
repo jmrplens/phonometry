@@ -710,8 +710,8 @@ SpectralClass(
     class_id: str,
     operation: str,
     description: str,
-    frequencies_hz: NDArray[np.float64],
-    levels_db: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
+    levels: NDArray[np.float64],
 )
 ```
 
@@ -731,8 +731,8 @@ from it ([`revise_npd_curves`](/phonometry/reference/api/aeroacoustics/npd-atmos
 | `class_id` | Spectral class identifier (`"103"`, `"205"`...). |
 | `operation` | `"A"` (approach) or `"D"` (departure). |
 | `description` | The aircraft family the class describes. |
-| `frequencies_hz` | Nominal one-third-octave-band centre frequencies, in Hz, from 50 Hz to 10 kHz. |
-| `levels_db` | Band levels at 1 000 ft, in dB. |
+| `frequencies` | Nominal one-third-octave-band centre frequencies, in Hz, from 50 Hz to 10 kHz. |
+| `levels` | Band levels at 1 000 ft, in dB. |
 
 ### SpectralClass.plot()
 

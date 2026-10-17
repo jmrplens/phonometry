@@ -228,7 +228,7 @@ def test_the_rating_reads_the_rating_bands_and_keeps_the_prime() -> None:
     rating = noise_control.weighted_cabin_insulation(
         np.linspace(12.0, 40.0, RATING_BANDS.size), apparent=True
     )
-    assert rating.band_centres_hz.tolist() == RATING_BANDS.tolist()
+    assert rating.frequencies.tolist() == RATING_BANDS.tolist()
     assert rating.apparent is True
 
 
@@ -379,7 +379,7 @@ def test_the_flatness_limits_are_the_printed_ones() -> None:
         [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0]
     )
     check = noise_control.check_band_flatness(levels, frequencies=frequencies)
-    assert check.octave_centres_hz.tolist() == [125.0, 250.0, 500.0]
+    assert check.octave_frequencies.tolist() == [125.0, 250.0, 500.0]
     assert check.limit_db.tolist() == [6.0, 5.0, 4.0]
     assert check.all_satisfied is True
 
@@ -397,7 +397,7 @@ def test_an_octave_below_125_hz_has_no_printed_limit() -> None:
     levels = np.array([70.0, 84.0, 70.0])
     frequencies = np.array([50.0, 63.0, 80.0])
     check = noise_control.check_band_flatness(levels, frequencies=frequencies)
-    assert check.octave_centres_hz.tolist() == [63.0]
+    assert check.octave_frequencies.tolist() == [63.0]
     assert np.isnan(check.limit_db[0])
     assert check.satisfied.tolist() == [True]
 
@@ -633,7 +633,7 @@ def test_the_exact_base_ten_centres_name_the_same_bands() -> None:
     check = noise_control.check_band_flatness(
         [80.0, 82.0, 81.0], frequencies=[199.526, 251.189, 316.228]
     )
-    assert check.octave_centres_hz.tolist() == [250.0]
+    assert check.octave_frequencies.tolist() == [250.0]
 
 
 def test_the_tolerance_never_reaches_the_neighbouring_band() -> None:

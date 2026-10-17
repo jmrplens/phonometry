@@ -470,8 +470,8 @@ def _chk_exponential_decay() -> Outcome:
     beta = 0.23
     rate = ph.environment.track_decay_rate(
         np.exp(-beta * distances)[:, None],
-        frequencies_hz=[500.0],
-        distances_m=distances,
+        frequencies=[500.0],
+        distances=distances,
     )
     expected = 20.0 * math.log10(math.e) * beta
     return numeric(
@@ -500,7 +500,7 @@ def _chk_annex_c() -> Outcome:
             np.array(wavelengths), np.array(levels)
         ),
         np.full(len(_NOISE_BANDS_HZ), 70.0),
-        frequencies_hz=_NOISE_BANDS_HZ,
+        frequencies=_NOISE_BANDS_HZ,
         speed_kmh=_ALIGNED_SPEED_KMH,
     )
     bands = len(_NOISE_BANDS_HZ)

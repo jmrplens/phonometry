@@ -260,7 +260,7 @@ def render_floor_covering_form(
     :raises ImportError: If reportlab or matplotlib is not installed.
     """
     _require_reportlab()
-    freqs = np.asarray(result.frequencies_hz, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     columns: list[Column] = [
         (t("L<sub>n,0</sub> [dB]", language), np.asarray(result.l_n0_db), 1),
     ]
@@ -530,7 +530,7 @@ def render_joint_form(
     :raises ImportError: If reportlab or matplotlib is not installed.
     """
     _require_reportlab()
-    freqs = np.asarray(result.frequencies_hz, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     cells = _joint_cells(result, language)
     header = t("R<sub>s</sub> [dB]", language)
     if verbose:

@@ -395,7 +395,12 @@ class MeanGroundPlaneResult(OwnsArrays):
         require_same_length(self, "distances", "heights", axis="section vertex")
 
     def height(self, distance: float | NDArray[np.float64]) -> NDArray[np.float64]:
-        r"""The plane height :math:`a\,d + b` at ``distance``, in metres."""
+        r"""The plane height :math:`a\,d + b` at ``distance``, in metres.
+
+        :param distance: Distance :math:`d` along the section, in metres
+            (scalar or array).
+        :return: The height of the plane at each distance, in metres.
+        """
         return np.asarray(
             self.slope * np.asarray(distance, dtype=np.float64) + self.intercept,
             dtype=np.float64,

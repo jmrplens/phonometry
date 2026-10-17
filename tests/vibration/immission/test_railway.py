@@ -384,7 +384,7 @@ def test_a_steady_passage_reduces_to_its_closed_forms() -> None:
         20.0
         * math.log10(passage.event_velocity_mm_s / im.VELOCITY_LEVEL_REFERENCE_MM_S)
     )
-    band = list(passage.band_centres_hz).index(16.0)
+    band = list(passage.frequencies).index(16.0)
     expected = 20.0 * math.log10(
         (1.0 / math.sqrt(2.0)) / im.VELOCITY_LEVEL_REFERENCE_MM_S
     )
@@ -423,8 +423,8 @@ def test_the_bands_can_stop_at_80_hz() -> None:
     passage = im.evaluate_train_passage(
         _passage(), FS_HZ, t2_s=(8.0, 20.0), upper_band_hz=80.0
     )
-    assert passage.band_centres_hz[-1] == 80.0
-    assert passage.band_interval_levels_db.shape == (3, passage.band_centres_hz.size)
+    assert passage.frequencies[-1] == 80.0
+    assert passage.band_interval_levels_db.shape == (3, passage.frequencies.size)
     record = _passage()
     for upper in (500.0, 100.5):
         with pytest.raises(ValueError, match="upper_band_hz"):
@@ -441,7 +441,7 @@ def test_a_rate_that_cannot_carry_the_top_band_is_refused() -> None:
     shorter = im.evaluate_train_passage(
         record, 700, t2_s=(5.0, 15.0), upper_band_hz=250.0
     )
-    assert shorter.band_centres_hz[-1] == 250.0
+    assert shorter.frequencies[-1] == 250.0
 
 
 def test_the_stretches_nest_and_stay_inside_the_record() -> None:

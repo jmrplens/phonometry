@@ -117,7 +117,7 @@ range from 1 Hz to 10 kHz always meets the requirement.
 
 ```python
 long_term_sel(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     probabilities: ArrayLike,
     *,
     rating_adjustment_db: float = 0.0,
@@ -145,8 +145,8 @@ atmospheric-absorption class of probability 1.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | $L_{E,\mathrm{w},k,l}$ of each replica atmosphere, in dB, any shape (`(N_atm, N_exc)` or already flattened). |
-| `probabilities` | The probability of each replica, the same shape as `levels_db` (see [`replica_probabilities`](/phonometry/reference/api/environment/exposure-distribution/#replica_probabilities)). |
+| `levels` | $L_{E,\mathrm{w},k,l}$ of each replica atmosphere, in dB, any shape (`(N_atm, N_exc)` or already flattened). |
+| `probabilities` | The probability of each replica, the same shape as `levels` (see [`replica_probabilities`](/phonometry/reference/api/environment/exposure-distribution/#replica_probabilities)). |
 | `rating_adjustment_db` | `K`, in dB; 0 dB (the default) gives Equation (7). |
 
 **Returns:** The long-term average level, in dB.
@@ -184,7 +184,7 @@ excess-attenuation class.
 | `absorption_probabilities` | $\wp_{\mathrm{atm},k}$, one per atmospheric-absorption class. Annex A uses a single class of probability 1. |
 | `excess_attenuation_probabilities` | $\wp_{\mathrm{exc},l}$, one per excess-attenuation class. |
 
-**Returns:** An array of shape `(N_atm, N_exc)`, row `k` and column `l`, the shape [`sel_distribution`](/phonometry/reference/api/environment/exposure-distribution/#sel_distribution) and [`long_term_sel`](/phonometry/reference/api/environment/exposure-distribution/#long_term_sel) read `levels_db` in.
+**Returns:** An array of shape `(N_atm, N_exc)`, row `k` and column `l`, the shape [`sel_distribution`](/phonometry/reference/api/environment/exposure-distribution/#sel_distribution) and [`long_term_sel`](/phonometry/reference/api/environment/exposure-distribution/#long_term_sel) read `levels` in.
 
 **Raises**
 
@@ -196,7 +196,7 @@ excess-attenuation class.
 
 ```python
 sel_distribution(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     probabilities: ArrayLike,
     *,
     sigma_db: float = 5.0,
@@ -225,8 +225,8 @@ width, in which case the run is combined (see the module documentation).
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | $L_{E,\mathrm{w},k,l}$ of each replica atmosphere, in dB, any shape; a `(N_atm, N_exc)` array is read row by row. |
-| `probabilities` | The probability of occurrence of each replica, the same shape as `levels_db`, summing to one (see [`replica_probabilities`](/phonometry/reference/api/environment/exposure-distribution/#replica_probabilities)). |
+| `levels` | $L_{E,\mathrm{w},k,l}$ of each replica atmosphere, in dB, any shape; a `(N_atm, N_exc)` array is read row by row. |
+| `probabilities` | The probability of occurrence of each replica, the same shape as `levels`, summing to one (see [`replica_probabilities`](/phonometry/reference/api/environment/exposure-distribution/#replica_probabilities)). |
 | `sigma_db` | Standard deviation of the spread due to turbulence, in dB; 5 dB by default, the value clause 5 says is typically used. |
 | `subclasses` | $N_\mathrm{sub}$, the subclasses per class; 10 by default, the number Annex A uses. The standard fixes none. |
 
@@ -242,7 +242,7 @@ width, in which case the run is combined (see the module documentation).
 
 ```python
 SelDistribution(
-    levels_db: NDArray[np.float64],
+    levels: NDArray[np.float64],
     probabilities: NDArray[np.float64],
     lower_bounds_db: NDArray[np.float64],
     upper_bounds_db: NDArray[np.float64],
@@ -270,7 +270,7 @@ normal distribution of standard deviation `sigma_db` centred
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | $L_{E,\mathrm{w},m}$ of the `M` classes, in increasing order, in dB. |
+| `levels` | $L_{E,\mathrm{w},m}$ of the `M` classes, in increasing order, in dB. |
 | `probabilities` | $\wp_m$ of each class (Equation (14)). |
 | `lower_bounds_db` | $g_{\mathrm{L},m}$, in dB (Equations (11), (12)). |
 | `upper_bounds_db` | $g_{\mathrm{U},m}$, in dB (Equations (11), (13)). |

@@ -374,7 +374,7 @@ def render_iso11654_report(
 
     :param result: An
         :class:`~phonometry.materials.absorbers.rating.AbsorptionRatingResult`
-        carrying the octave-band ``band_centers``, ``measured`` practical
+        carrying the octave-band ``frequencies``, ``measured`` practical
         coefficients and the fitted ``shifted_reference`` curve.
     :param path: Destination path of the PDF file.
     :param metadata: Optional :class:`ReportMetadata`; ``None`` produces a
@@ -397,13 +397,13 @@ def render_iso11654_report(
         raise ImportError(_REPORTLAB_HINT) from exc
     accent = colors.HexColor(_ACCENT_HEX)
 
-    centers = np.asarray(result.band_centers, dtype=np.float64)
+    centers = np.asarray(result.frequencies, dtype=np.float64)
     measured = np.asarray(result.measured, dtype=np.float64)
     shifted = np.asarray(result.shifted_reference, dtype=np.float64)
     require_equal_shapes(
         "AbsorptionRatingResult.report",
         {
-            "band_centers": centers.shape,
+            "frequencies": centers.shape,
             "measured": measured.shape,
             "shifted_reference": shifted.shape,
         },

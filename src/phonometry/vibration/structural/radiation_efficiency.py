@@ -230,7 +230,7 @@ def radiation_efficiency(
     at-coincidence expression (Eq. 2.230); all others use the below/above
     expressions.
 
-    :param frequency: Band centre frequencies ``f``, in hertz (array, > 0).
+    :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
     :param length_x: Plate dimension ``Lx``, in m (> 0).
     :param length_y: Plate dimension ``Ly``, in m (> 0).
     :param critical_frequency: Coincidence frequency ``fc``, in hertz (> 0);

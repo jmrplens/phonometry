@@ -5458,7 +5458,7 @@ def generate_in_situ_sound_power(output_dir: str) -> None:
         conditions=emission.GradeConditions(
             excess_levels=[8.2, 7.6, 8.9, 8.0], directivity_range=4.0
         ),
-        sigma_omc=0.5,
+        sigma_omc_db=0.5,
     )
     corrected_st = st - result.background_correction
     corrected_rss = rss - result.background_correction_ref[0]
@@ -5822,7 +5822,7 @@ def generate_high_frequency_sound_power(output_dir: str) -> None:
     thirds = np.array([12500.0, 16000.0, 20000.0])
     room = emission.room_constant_from_air_absorption(
         thirds,
-        volume_m3=200.0,
+        volume=200.0,
         surface_area_m2=210.0,
         temperature_c=23.0,
         relative_humidity_percent=50.0,
@@ -5836,14 +5836,14 @@ def generate_high_frequency_sound_power(output_dir: str) -> None:
         ]
     )
     broadband = emission.high_frequency_sound_power(
-        orientations, frequencies_hz=thirds, room_constant_m2=room
+        orientations, frequencies=thirds, room_constant_m2=room
     )
     tone = emission.tone_level_from_sidebands([42.9, 41.3, 38.0])
     tones = emission.high_frequency_sound_power_comparison(
         [tone, 38.5, 31.0],
-        frequencies_hz=[15625.0, 17000.0, 20500.0],
-        reference_pressure_levels_db=[41.8, 41.2, 40.1],
-        reference_sound_power_levels_db=[44.3, 43.9, 43.0],
+        frequencies=[15625.0, 17000.0, 20500.0],
+        reference_pressure_levels=[41.8, 41.2, 40.1],
+        reference_sound_power_levels=[44.3, 43.9, 43.0],
         noise_bandwidth_hz=12.5,
     )
     fig, (axb, axt) = plt.subplots(1, 2, figsize=(12.5, 5.6))
@@ -5912,7 +5912,7 @@ def _free_field_room() -> tuple[Any, Any, Any]:
         )
     fit = emission.inverse_square_law_deviations(
         traverses,
-        frequencies_hz=grid,
+        frequencies=grid,
         room="hemi-anechoic",
         source_box_m=((-0.05, -0.05, 0.0), (0.05, 0.05, 0.08)),
     )
@@ -5920,7 +5920,7 @@ def _free_field_room() -> tuple[Any, Any, Any]:
     bands = np.arange(grid.size)[None, :]
     directionality = emission.verify_source_directionality(
         80.0 + 0.4 * np.sin(0.7 * rows + bands) * (1.0 + bands / 10.0),
-        frequencies_hz=grid,
+        frequencies=grid,
         room="hemi-anechoic",
     )
     check = emission.check_free_field(
@@ -5993,7 +5993,7 @@ def generate_reference_source_calibration(output_dir: str) -> None:
     )
     calibration = emission.reference_source_calibration(
         levels,
-        frequencies_hz=_RSS_THIRDS,
+        frequencies=_RSS_THIRDS,
         arrangement="fixed",
         conditions=emission.CalibrationConditions(
             temperature_c=20.0, static_pressure_kpa=98.6, air_absorption_db_per_m=alpha
@@ -8037,7 +8037,7 @@ def generate_special_room_reverberation(output_dir: str) -> None:
         [1.30, 1.13, 1.14, 1.01, 0.99, 0.90, 0.94, 0.86, 0.87, 0.82, 0.83,
          0.83, 0.79, 0.83, 0.79, 0.80, 0.77, 0.81, 0.74, 0.71, 0.67]
     )  # fmt: skip
-    check = emission.check_special_room_reverberation(measured, thirds, volume_m3=72.0)
+    check = emission.check_special_room_reverberation(measured, thirds, volume=72.0)
     fig, ax = plt.subplots(figsize=(10, 5.6))
     check.plot(ax=ax, language=_LANG)
     fig.tight_layout()
@@ -8082,7 +8082,7 @@ def generate_special_room_sound_power(output_dir: str) -> None:
     direct = emission.sound_power_special_room(
         levels,
         _ISO3743_FREQS,
-        volume_m3=72.0,
+        volume=72.0,
         nominal_reverberation_time_s=0.77,
         background_levels=background,
         a_weighted_levels=a_levels,
@@ -8138,7 +8138,7 @@ def generate_special_room_suitability(output_dir: str) -> None:
         np.repeat(lw_r, 3) - 10.0 * np.log10(3.0 * 2.0 * np.pi * 2.0**2), (20, 1)
     )
     calibration = emission.reference_source_calibration(
-        hemisphere, frequencies_hz=thirds, arrangement="fixed"
+        hemisphere, frequencies=thirds, arrangement="fixed"
     )
     rss = np.array(
         [
@@ -8153,7 +8153,7 @@ def generate_special_room_suitability(output_dir: str) -> None:
     in_room = emission.sound_power_special_room(
         rss,
         _ISO3743_FREQS,
-        volume_m3=72.0,
+        volume=72.0,
         nominal_reverberation_time_s=0.77,
         background_levels=np.array([48.0, 45.0, 42.0, 40.0, 38.0, 36.0, 35.0]),
         temperature_c=22.0,
@@ -8450,7 +8450,7 @@ def generate_induction_loop_verification(output_dir: str) -> None:
 
     verdict = electroacoustics.verify_induction_loop_system(
         _worship_loop_levels(),
-        frequencies_hz=[100.0, 1000.0, 5000.0],
+        frequencies=[100.0, 1000.0, 5000.0],
         response_db=[[-0.4, 0.0, -1.8], [-0.3, 0.0, -2.4], [-0.6, 0.0, -3.4]],
         background_noise_levels_db=_LOOP_NOISE_OFF_DB,
         system_noise_levels_db=_LOOP_NOISE_ON_DB,
@@ -8628,7 +8628,7 @@ def _plant_example() -> tuple[Any, Any, NDArray[np.float64]]:
     )
     levels = _plant_levels(contour, _PLANT_SOURCES)
     background = levels - np.array([14.0, 13.0, 15.0, 17.0, 19.0, 20.0, 22.0, 24.0])
-    result = contour.sound_power(levels, _PLANT_BANDS, background_levels_db=background)
+    result = contour.sound_power(levels, _PLANT_BANDS, background_levels=background)
     true_lw = 10.0 * np.log10(
         np.sum([10.0 ** (np.asarray(lw) / 10.0) for _p, lw in _PLANT_SOURCES], axis=0)
     )

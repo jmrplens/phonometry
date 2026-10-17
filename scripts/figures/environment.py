@@ -1104,7 +1104,7 @@ def generate_atmospheric_sound_speed_profiles(output_dir: str) -> None:
     )
     _fig, ax = plt.subplots(figsize=(7.0, 7.5))
     ax.plot(
-        down.sound_speeds,
+        down.speeds_of_sound,
         down.heights,
         color=COLOR_PRIMARY,
         linewidth=2.0,
@@ -1112,7 +1112,7 @@ def generate_atmospheric_sound_speed_profiles(output_dir: str) -> None:
         zorder=3,
     )
     ax.plot(
-        up.sound_speeds,
+        up.speeds_of_sound,
         up.heights,
         color=COLOR_SECONDARY,
         linewidth=2.0,
@@ -3878,17 +3878,17 @@ def _rolling_stock_track() -> tuple[ReferenceTrackCheck, SmallRoughnessDeviation
 
     decay = [
         environment.track_decay_rate(
-            responses(vertical), frequencies_hz=bands, direction="vertical"
+            responses(vertical), frequencies=bands, direction="vertical"
         ),
         environment.track_decay_rate(
-            responses(lateral), frequencies_hz=bands, direction="lateral"
+            responses(lateral), frequencies=bands, direction="lateral"
         ),
     ]
     noise = [68.0, 69.5, 71.0, 72.5, 74.0, 76.0, 78.0, 80.5, 83.0, 85.5, 87.0, 87.5, 86.5, 84.5, 82.0, 79.0, 75.5, 72.0]  # fmt: skip
     small = environment.check_small_roughness_deviations(
         environment.average_roughness_spectra(spectra),
         noise,
-        frequencies_hz=bands,
+        frequencies=bands,
         speed_kmh=160.0,
     )
     check = environment.check_reference_track(

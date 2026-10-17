@@ -186,7 +186,7 @@ _METHODS = ("direct", "comparison")
 
 
 def air_absorption_np_per_m(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,
@@ -205,19 +205,19 @@ def air_absorption_np_per_m(
     of the 16 kHz octave band, so no advisory is raised between 10 kHz and
     22,4 kHz, where ISO 9613-1 stops tabulating.
 
-    :param frequencies_hz: Frequency or frequencies ``f``, in hertz.
+    :param frequencies: Frequency or frequencies ``f``, in hertz.
     :param temperature_c: Air temperature, in degrees Celsius. Outside
         -20 °C to +50 °C emits an
         :class:`~phonometry.environment.propagation.air_absorption.AtmosphericAbsorptionWarning`.
     :param relative_humidity_percent: Relative humidity ``h_r``, in percent.
     :param static_pressure_kpa: Static pressure ``p_s``, in kilopascals
         (default 101,325 kPa, the pressure Tables 1 and 2 are printed at).
-    :return: :math:`\alpha` in Np/m, with the shape of ``frequencies_hz``.
+    :return: :math:`\alpha` in Np/m, with the shape of ``frequencies``.
     :raises ValueError: for a non-positive frequency, a temperature at or
         below absolute zero, a relative humidity outside [0, 100] % or a
         non-positive static pressure.
     """
-    freqs = np.asarray(frequencies_hz, dtype=np.float64)
+    freqs = np.asarray(frequencies, dtype=np.float64)
     _validate(
         freqs,
         temperature_c,
@@ -238,16 +238,16 @@ def air_absorption_np_per_m(
 # --- Room constant: Formulae (4), (5) and (7) --------------------------------
 
 
-def _room_geometry(volume_m3: float, surface_area_m2: float) -> tuple[float, float]:
+def _room_geometry(volume: float, surface_area_m2: float) -> tuple[float, float]:
     """The room volume and surface, each positive and finite."""
     return (
-        require_positive(volume_m3, "volume_m3"),
+        require_positive(volume, "volume"),
         require_positive(surface_area_m2, "surface_area_m2"),
     )
 
 
 def room_absorption_coefficient(
-    reverberation_time_s: ArrayLike, *, volume_m3: float, surface_area_m2: float
+    reverberation_time_s: ArrayLike, *, volume: float, surface_area_m2: float
 ) -> NDArray[np.float64]:
     r"""Room absorption coefficient from the reverberation time (ISO 9295 Formula (5)).
 
@@ -260,21 +260,21 @@ def room_absorption_coefficient(
     :param reverberation_time_s: Mean measured reverberation time ``T`` per
         band, in seconds (scalar or one value per band); clause 6.2 averages
         three or four points of the microphone path.
-    :param volume_m3: Room volume ``V``, in cubic metres.
+    :param volume: Room volume ``V``, in cubic metres.
     :param surface_area_m2: Total room surface ``S``, in square metres.
     :return: :math:`\alpha_\mathrm{room}` per band, in (0, 1).
     :raises ValueError: for a non-positive or non-finite time, volume or
         surface.
     """
     t = require_positive_array(reverberation_time_s, "reverberation_time_s")
-    volume, surface = _room_geometry(volume_m3, surface_area_m2)
+    volume, surface = _room_geometry(volume, surface_area_m2)
     return np.asarray(
         1.0 - np.exp(-_EYRING_CONSTANT * volume / (surface * t)), dtype=np.float64
     )
 
 
 def room_constant_from_reverberation_time(
-    reverberation_time_s: ArrayLike, *, volume_m3: float, surface_area_m2: float
+    reverberation_time_s: ArrayLike, *, volume: float, surface_area_m2: float
 ) -> NDArray[np.float64]:
     r"""Room constant from the measured reverberation time (ISO 9295 Formulae (4), (5)).
 
@@ -285,22 +285,22 @@ def room_constant_from_reverberation_time(
 
     :param reverberation_time_s: Mean measured reverberation time ``T`` per
         band, in seconds (scalar or one value per band).
-    :param volume_m3: Room volume ``V``, in cubic metres.
+    :param volume: Room volume ``V``, in cubic metres.
     :param surface_area_m2: Total room surface ``S``, in square metres.
     :return: ``R`` per band, in square metres.
     :raises ValueError: for a non-positive or non-finite time, volume or
         surface.
     """
     alpha = room_absorption_coefficient(
-        reverberation_time_s, volume_m3=volume_m3, surface_area_m2=surface_area_m2
+        reverberation_time_s, volume=volume, surface_area_m2=surface_area_m2
     )
     return np.asarray(float(surface_area_m2) * alpha / (1.0 - alpha), dtype=np.float64)
 
 
 def room_constant_from_air_absorption(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
-    volume_m3: float,
+    volume: float,
     surface_area_m2: float,
     temperature_c: float,
     relative_humidity_percent: float,
@@ -317,8 +317,8 @@ def room_constant_from_air_absorption(
     longer negligible there and the measured reverberation time of
     :func:`room_constant_from_reverberation_time` is the method to use.
 
-    :param frequencies_hz: Band centre or tone frequencies, in hertz.
-    :param volume_m3: Room volume ``V``, in cubic metres.
+    :param frequencies: Band centre or tone frequencies, in hertz.
+    :param volume: Room volume ``V``, in cubic metres.
     :param surface_area_m2: Total room surface ``S``, in square metres.
     :param temperature_c: Air temperature in the room, in degrees Celsius.
     :param relative_humidity_percent: Relative humidity in the room, in percent.
@@ -330,8 +330,8 @@ def room_constant_from_air_absorption(
         where :math:`8 \alpha V / S \ge 1`: the air alone would then absorb more
         than the room surface can, and Formula (7) has no finite room constant.
     """
-    volume, surface = _room_geometry(volume_m3, surface_area_m2)
-    freqs = require_positive_array(frequencies_hz, "frequencies_hz")
+    volume, surface = _room_geometry(volume, surface_area_m2)
+    freqs = require_positive_array(frequencies, "frequencies")
     alpha = air_absorption_np_per_m(
         freqs,
         temperature_c=temperature_c,
@@ -410,7 +410,7 @@ def tone_level_from_sidebands(sideband_levels_db: ArrayLike) -> float:
 
 
 def free_field_absorption_correction(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     radius_m: float,
     temperature_c: float,
@@ -429,7 +429,7 @@ def free_field_absorption_correction(
     :func:`~phonometry.emission.sound_power.sound_power_pressure` returns
     is the same thing.
 
-    :param frequencies_hz: Band centre or tone frequencies, in hertz.
+    :param frequencies: Band centre or tone frequencies, in hertz.
     :param radius_m: Radius ``r`` of the measurement hemisphere, in metres.
     :param temperature_c: Air temperature, in degrees Celsius.
     :param relative_humidity_percent: Relative humidity, in percent.
@@ -441,7 +441,7 @@ def free_field_absorption_correction(
     """
     radius = require_positive(radius_m, "radius_m")
     alpha_db_per_m = _EIGHT_686 * air_absorption_np_per_m(
-        frequencies_hz,
+        frequencies,
         temperature_c=temperature_c,
         relative_humidity_percent=relative_humidity_percent,
         static_pressure_kpa=static_pressure_kpa,
@@ -575,12 +575,12 @@ def _mean_band_level(levels: ArrayLike, name: str) -> NDArray[np.float64]:
     return require_finite_array(arr, name)
 
 
-def _band_frequencies(frequencies_hz: ArrayLike, n_bands: int) -> NDArray[np.float64]:
+def _band_frequencies(frequencies: ArrayLike, n_bands: int) -> NDArray[np.float64]:
     """One positive frequency per band, with an advisory outside the octave."""
-    freqs = require_positive_array(frequencies_hz, "frequencies_hz")
+    freqs = require_positive_array(frequencies, "frequencies")
     if freqs.shape != (n_bands,):
         msg = (
-            f"'frequencies_hz' carries {freqs.size} value(s) for {n_bands} "
+            f"'frequencies' carries {freqs.size} value(s) for {n_bands} "
             "band(s); give one frequency per band."
         )
         raise ValueError(msg)
@@ -605,9 +605,9 @@ def _per_band(value: ArrayLike, name: str, n_bands: int) -> NDArray[np.float64]:
 
 
 def high_frequency_sound_power(
-    pressure_levels_db: ArrayLike,
+    pressure_levels: ArrayLike,
     *,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     room_constant_m2: ArrayLike,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
@@ -624,11 +624,11 @@ def high_frequency_sound_power(
     calculated air absorption (:func:`room_constant_from_air_absorption`,
     clause 7).
 
-    :param pressure_levels_db: :math:`\overline{L_{p(\mathrm{ST})}}` per band,
+    :param pressure_levels: :math:`\overline{L_{p(\mathrm{ST})}}` per band,
         in dB re 20 µPa, or an ``(N, bands)`` array of the time-averaged levels
         of the four orientations (:math:`N = 4`) or three boom revolutions
         (:math:`N = 3`), energy-averaged by Formula (1).
-    :param frequencies_hz: Band centre or tone frequencies, in hertz, one per
+    :param frequencies: Band centre or tone frequencies, in hertz, one per
         band. A frequency outside 11,2 kHz to 22,4 kHz emits a
         :class:`~phonometry.emission.SoundPowerWarning`.
     :param room_constant_m2: Room constant ``R``, in square metres, a scalar or
@@ -645,9 +645,9 @@ def high_frequency_sound_power(
         or static pressure ISO 3741 cannot correct from.
     """
     _validate_meteorology(temperature_c, static_pressure_kpa)
-    mean_level = _mean_band_level(pressure_levels_db, "pressure_levels_db")
+    mean_level = _mean_band_level(pressure_levels, "pressure_levels")
     n_bands = mean_level.size
-    freqs = _band_frequencies(frequencies_hz, n_bands)
+    freqs = _band_frequencies(frequencies, n_bands)
     room_constant = _per_band(room_constant_m2, "room_constant_m2", n_bands)
     if not np.all(np.isfinite(room_constant)) or np.any(room_constant <= 0.0):
         msg = "'room_constant_m2' must be positive and finite."
@@ -671,11 +671,11 @@ def high_frequency_sound_power(
 
 
 def high_frequency_sound_power_comparison(
-    pressure_levels_db: ArrayLike,
+    pressure_levels: ArrayLike,
     *,
-    frequencies_hz: ArrayLike,
-    reference_pressure_levels_db: ArrayLike,
-    reference_sound_power_levels_db: ArrayLike | ReferenceSourceCalibration,
+    frequencies: ArrayLike,
+    reference_pressure_levels: ArrayLike,
+    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
     noise_bandwidth_hz: float | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
@@ -692,20 +692,20 @@ def high_frequency_sound_power_comparison(
     :math:`C_2` of ISO 3741, as ISO 3741 Formula (21) does for its own
     comparison method.
 
-    :param pressure_levels_db: :math:`\overline{L_{p(\mathrm{ST})}}` per band,
+    :param pressure_levels: :math:`\overline{L_{p(\mathrm{ST})}}` per band,
         in dB re 20 µPa, or an ``(N, bands)`` array averaged by Formula (1).
-    :param frequencies_hz: Band centre or tone frequencies, in hertz, one per
+    :param frequencies: Band centre or tone frequencies, in hertz, one per
         band.
-    :param reference_pressure_levels_db:
+    :param reference_pressure_levels:
         :math:`\overline{L_{p(\mathrm{FAR})}}` per band, in dB re 20 µPa,
         measured with the same bandwidth at the same location (clauses 8.3,
         8.4); a 2-D input is averaged by Formula (1) as well.
-    :param reference_sound_power_levels_db: :math:`L_{W(\mathrm{FAR})}` of the
+    :param reference_sound_power_levels: :math:`L_{W(\mathrm{FAR})}` of the
         calibrated reference source, in dB re 1 pW, a scalar or one value per
         band: per band for broadband noise, per hertz for tones. For broadband
         noise it may be the
         :class:`~phonometry.emission.ReferenceSourceCalibration` of ISO 6926,
-        read in the one-third octave bands at ``frequencies_hz`` and carried
+        read in the one-third octave bands at ``frequencies`` and carried
         from the reference conditions to those of the test by its own ``C2``,
         since clause 10.1 corrects the result as ISO 3741 does.
     :param noise_bandwidth_hz: :math:`\Delta F`, the noise bandwidth of the
@@ -725,43 +725,43 @@ def high_frequency_sound_power_comparison(
         static pressure ISO 3741 cannot correct from.
     """
     _validate_meteorology(temperature_c, static_pressure_kpa)
-    mean_level = _mean_band_level(pressure_levels_db, "pressure_levels_db")
+    mean_level = _mean_band_level(pressure_levels, "pressure_levels")
     n_bands = mean_level.size
-    freqs = _band_frequencies(frequencies_hz, n_bands)
+    freqs = _band_frequencies(frequencies, n_bands)
     reference_level = _mean_band_level(
-        reference_pressure_levels_db, "reference_pressure_levels_db"
+        reference_pressure_levels, "reference_pressure_levels"
     )
     if reference_level.shape != (n_bands,):
         msg = (
-            "'reference_pressure_levels_db' must span the same bands as "
-            f"'pressure_levels_db' ({n_bands})."
+            "'reference_pressure_levels' must span the same bands as "
+            f"'pressure_levels' ({n_bands})."
         )
         raise ValueError(msg)
     from .reference_sound_source import ReferenceSourceCalibration
 
     if noise_bandwidth_hz is not None and isinstance(
-        reference_sound_power_levels_db, ReferenceSourceCalibration
+        reference_sound_power_levels, ReferenceSourceCalibration
     ):
         msg = (
             "a tonal comparison needs the reference source's level per hertz "
-            "(clause 8.1); 'reference_sound_power_levels_db' must be given as "
+            "(clause 8.1); 'reference_sound_power_levels' must be given as "
             "levels, not as a band calibration."
         )
         raise ValueError(msg)
     reference_power = _per_band(
         _reference_power_levels(
-            reference_sound_power_levels_db,
+            reference_sound_power_levels,
             freqs,
             bandwidth="one-third-octave",
-            name="reference_sound_power_levels_db",
+            name="reference_sound_power_levels",
             temperature_c=temperature_c,
             static_pressure_kpa=static_pressure_kpa,
         ),
-        "reference_sound_power_levels_db",
+        "reference_sound_power_levels",
         n_bands,
     )
     if not np.all(np.isfinite(reference_power)):
-        msg = "'reference_sound_power_levels_db' must be finite."
+        msg = "'reference_sound_power_levels' must be finite."
         raise ValueError(msg)
     bandwidth_term = 0.0
     bandwidth = None

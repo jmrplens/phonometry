@@ -224,7 +224,7 @@ def meter(frequency_hz):
 index = [meter(f).directivity_index_db for f in bands]
 g_f = -10 * np.log10(1 + (np.array(bands) / 25000) ** 4)   # L_rd - L_o at each band
 r = metrology.random_incidence_sensitivity(bands, g_f, index)
-shown = np.isin(r.frequencies_hz, [1000, 4000, 8000, 16000])
+shown = np.isin(r.frequencies, [1000, 4000, 8000, 16000])
 print(r.correction_db[shown].round(2))              # [-0.06 -0.95 -2.66 -5.62]
 print(r.random_incidence_level_db[shown].round(2))  # [-0.06 -0.95 -2.71 -6.29]
 r.plot()                      # G_F and G_RI

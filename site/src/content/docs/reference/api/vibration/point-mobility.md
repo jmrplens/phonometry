@@ -217,7 +217,7 @@ Infinite-beam point mobility bundled as a [`MobilityResult`](/phonometry/referen
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequencies `f`, in hertz (array, > 0). |
+| `frequency` | Frequency `f`, in hertz (scalar or array, > 0). |
 | `bending_stiffness` | Beam bending stiffness $B = E I$, in N.m^2. |
 | `mass_per_length` | Mass per unit length `m'`, in kg/m. |
 | `location` | `"centre"` or `"end"`. |
@@ -314,7 +314,7 @@ with the ISO 7626 mobility machinery.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequencies `f`, in hertz (array, > 0). |
+| `frequency` | Frequency `f`, in hertz (scalar or array, > 0). |
 | `bending_stiffness` | Plate bending stiffness per unit width `B'`, in N.m. |
 | `mass_per_area` | Mass per unit area `m''`, in kg/m^2. |
 | `location` | `"centre"` or `"edge"`. |

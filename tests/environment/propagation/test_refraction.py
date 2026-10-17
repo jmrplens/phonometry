@@ -57,7 +57,7 @@ Z_GRASS = complex(11.0, 8.0)
 def test_linear_profile_is_exactly_linear() -> None:
     prof = linear_sound_speed_profile(0.1, ground_speed=340.0, max_height=100.0)
     assert prof.heights[0] == 0.0
-    assert prof.sound_speeds[0] == pytest.approx(340.0)
+    assert prof.speeds_of_sound[0] == pytest.approx(340.0)
     # A two-point profile interpolates the exact gradient at any height.
     assert prof.speed_at(50.0) == pytest.approx(345.0)
     assert prof.speed_at(np.array([0.0, 100.0])).tolist() == [340.0, 350.0]
@@ -70,9 +70,9 @@ def test_log_linear_profile_matches_salomons_eq_4_5() -> None:
     )
     # The sampled speeds follow Salomons Eq. (4.5) exactly at every grid height.
     expected = c0 + b * np.log1p(prof.heights / z0)
-    np.testing.assert_allclose(prof.sound_speeds, expected, rtol=1e-12)
+    np.testing.assert_allclose(prof.speeds_of_sound, expected, rtol=1e-12)
     assert prof.heights[0] == 0.0
-    assert prof.sound_speeds[0] == pytest.approx(c0)
+    assert prof.speeds_of_sound[0] == pytest.approx(c0)
     # The piecewise-linear interpolation tracks the log curve closely between
     # the (logarithmically spaced) samples.
     z = np.array([1.0, 10.0, 50.0])

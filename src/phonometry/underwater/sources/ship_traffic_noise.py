@@ -102,12 +102,12 @@ def _default_bands() -> NDArray[np.float64]:
     return np.asarray(10.0 ** (i / 10.0) * 1000.0, dtype=np.float64)
 
 
-def _clean_frequency(
-    frequency_hz: NDArray[np.float64] | list[float] | None,
+def _clean_frequencies(
+    frequencies: NDArray[np.float64] | list[float] | None,
 ) -> NDArray[np.float64]:
-    if frequency_hz is None:
+    if frequencies is None:
         return _default_bands()
-    return require_positive_array(frequency_hz, "frequency_hz")
+    return require_positive_array(frequencies, "frequencies")
 
 
 def _jomopans_echo(
@@ -237,7 +237,7 @@ def ship_source_spectrum(
     *,
     vessel_class: str = "containership",
     model: str = "jomopans-echo",
-    frequency_hz: NDArray[np.float64] | list[float] | None = None,
+    frequencies: NDArray[np.float64] | list[float] | None = None,
 ) -> ShipTrafficSpectrum:
     """Predicted underwater source-level spectrum of a ship.
 
@@ -249,13 +249,13 @@ def ship_source_spectrum(
         used only by ``"jomopans-echo"``.
     :param model: ``"jomopans-echo"`` (default), ``"randi"`` or
         ``"wales-heitmeyer"``.
-    :param frequency_hz: Frequencies, in Hz; defaults to the decidecade bands
+    :param frequencies: Frequencies, in Hz; defaults to the decidecade bands
         10 Hz-31.5 kHz of the JOMOPANS-ECHO validation range.
     :return: A :class:`ShipTrafficSpectrum`.
     :raises ValueError: If ``model``/``vessel_class`` is unknown or an input is
         invalid.
     """
-    f = _clean_frequency(frequency_hz)
+    f = _clean_frequencies(frequencies)
     key = model.strip().lower()
     used_class: str | None = None
     used_speed: float | None = None

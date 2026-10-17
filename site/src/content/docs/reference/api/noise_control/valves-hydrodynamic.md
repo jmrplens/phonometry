@@ -116,7 +116,7 @@ $\eta_\mathrm{cav}/(\eta_\mathrm{turb}+\eta_\mathrm{cav})$ alone.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | $f_i$, the band centres, in Hz. |
+| `frequency` | $f_i$, the band centre or centres, in Hz (scalar or array). |
 | `internal_level` | $L_{pi}$ of Equation (10), in dB. |
 | `turbulent_peak` | $f_\mathrm{p,turb}$, in Hz. |
 | `cavitation_peak` | $f_\mathrm{p,cav}$, in Hz, or `None` for the turbulent branch. |
@@ -209,7 +209,7 @@ gravel where turbulence is heard as a hiss around one frequency.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | $f_i$, the band centres, in Hz. |
+| `frequency` | $f_i$, the band centre or centres, in Hz (scalar or array). |
 | `peak` | $f_\mathrm{p,cav}$ from [`cavitation_peak_frequency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#cavitation_peak_frequency), in Hz. |
 
 **Returns:** $F_{cav}(f_i)$, in dB.
@@ -1199,7 +1199,7 @@ page renders it as a bare 1, which flattens the low-frequency side.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | $f_i$, the band centres, in Hz. |
+| `frequency` | $f_i$, the band centre or centres, in Hz (scalar or array). |
 | `peak` | $f_\mathrm{p,turb}$ from [`turbulent_peak_frequency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#turbulent_peak_frequency), in Hz. |
 
 **Returns:** $F_{turb}(f_i)$, in dB.
@@ -1322,7 +1322,7 @@ valve_hydrodynamic_noise(
     pipe: LiquidPipe,
     *,
     strouhal_form: str = 'annex',
-    frequency: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> HydrodynamicValveNoise
 ```
 
@@ -1348,7 +1348,7 @@ exactly zero, so the two branches meet without a step.
 | `valve` | The valve at the travel being examined, a [`LiquidTrim`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#liquidtrim). |
 | `pipe` | The downstream pipe and the air around it, a [`LiquidPipe`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#liquidpipe). |
 | `strouhal_form` | Which printing of Equation (12) to follow, `"annex"` or `"clause"`; see [`STROUHAL_CONSTANTS`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#strouhal_constants). |
-| `frequency` | The band centres to report, in Hz. The default is the one-third-octave set 5.4.1 prints, 50 Hz to 20 kHz. |
+| `frequencies` | The band centres to report, in Hz. The default is the one-third-octave set 5.4.1 prints, 50 Hz to 20 kHz. |
 
 **Returns:** A [`HydrodynamicValveNoise`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#hydrodynamicvalvenoise) carrying every printed intermediate as well as the level at 1 m.
 

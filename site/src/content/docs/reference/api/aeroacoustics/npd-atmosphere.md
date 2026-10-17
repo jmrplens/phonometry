@@ -120,7 +120,7 @@ shape; the spectral classes are normalised to 70 dB at 1 kHz (G4.3).
 
 ```python
 NpdAtmosphereIncrement(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     distances_m: NDArray[np.float64],
     spectrum_db: NDArray[np.float64],
     source_spectrum_db: NDArray[np.float64],
@@ -138,7 +138,7 @@ NpdAtmosphereIncrement(
 
 The NPD increment for a specified atmosphere (ECAC Doc 29 Vol. 2 Appendix D).
 
-Every per-band array runs over the 24 bands of `frequencies_hz`, and
+Every per-band array runs over the 24 bands of `frequencies`, and
 every per-distance array over `distances_m`; the two attenuation
 tables are `(bands, distances)`.
 
@@ -146,7 +146,7 @@ tables are `(bands, distances)`.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Nominal one-third-octave-band centre frequencies, in Hz (50 Hz to 10 kHz). |
+| `frequencies` | Nominal one-third-octave-band centre frequencies, in Hz (50 Hz to 10 kHz). |
 | `distances_m` | The NPD slant distances $d_i$, in metres. |
 | `spectrum_db` | The spectral class as given, $L_{n,\mathrm{ref}}(d_\mathrm{ref})$ at 1 000 ft in the AIR-1845 atmosphere, in dB. |
 | `source_spectrum_db` | $L_n(d_\mathrm{ref})$, the same spectrum with the AIR-1845 attenuation added back (Eq. D-1), in dB. |

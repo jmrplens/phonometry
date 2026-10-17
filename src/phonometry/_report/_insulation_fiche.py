@@ -265,7 +265,7 @@ def render_insulation_fiche(
         (``curve_attr``) and, for the verbose table, the report-specific
         per-band content the ``build_columns`` callback reads.
     :param rating: The ISO 717 rating of the reported quantity; its ``plot``
-        draws the fiche curve and it must carry the per-band ``band_centers``,
+        draws the fiche curve and it must carry the per-band ``frequencies``,
         ``measured`` and ``shifted_reference`` arrays.
     :param path: Destination path of the PDF file.
     :param spec: Fixed English labels for the reported quantity, with keys
@@ -284,7 +284,7 @@ def render_insulation_fiche(
     :param language: ``"en"`` (default) or ``"es"``.
     :return: The written ``path`` as a :class:`str`.
     :raises ValueError: If ``rating.quantity`` does not match ``is_impact``, or
-        the rating is missing its per-band ``band_centers`` / ``measured`` /
+        the rating is missing its per-band ``frequencies`` / ``measured`` /
         ``shifted_reference`` arrays, or those disagree in shape with the
         reported curve (all three, a manually constructed rating).
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
@@ -304,26 +304,26 @@ def render_insulation_fiche(
         msg = "The ISO 717 rating quantity does not match the reported result."
         raise ValueError(msg)
     if (
-        rating.band_centers is None
+        rating.frequencies is None
         or rating.measured is None
         or rating.shifted_reference is None
     ):
         msg = (
-            "The report needs the ISO 717 per-band rating data ('band_centers', "
+            "The report needs the ISO 717 per-band rating data ('frequencies', "
             "'measured' and 'shifted_reference') on the rating."
         )
         raise ValueError(msg)
 
     rating_symbol = spec["rating_symbol"]
     curve = np.asarray(getattr(result, curve_attr), dtype=np.float64)
-    centers = np.asarray(rating.band_centers, dtype=np.float64)
+    centers = np.asarray(rating.frequencies, dtype=np.float64)
     measured = np.asarray(rating.measured, dtype=np.float64)
     shifted = np.asarray(rating.shifted_reference, dtype=np.float64)
     require_equal_shapes(
         f"{type(result).__name__}.report",
         {
             curve_attr: curve.shape,
-            "rating.band_centers": centers.shape,
+            "rating.frequencies": centers.shape,
             "rating.measured": measured.shape,
             "rating.shifted_reference": shifted.shape,
         },

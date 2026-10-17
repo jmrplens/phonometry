@@ -208,7 +208,7 @@ def _chk_iso3382_1_directivity_energy_mean() -> Outcome:
 
 
 def _lateral_pair(
-    angles_deg: list[float], amplitudes: list[float], times_s: list[float]
+    angles_deg: list[float], amplitudes: list[float], times: list[float]
 ) -> tuple[np.ndarray, np.ndarray]:
     """An omnidirectional and a figure-of-eight response of known geometry.
 
@@ -221,7 +221,7 @@ def _lateral_pair(
     n = round(0.3 * _FS)
     omni, lateral = np.zeros(n), np.zeros(n)
     omni[100] = 1.0
-    for angle, amplitude, time in zip(angles_deg, amplitudes, times_s, strict=True):
+    for angle, amplitude, time in zip(angles_deg, amplitudes, times, strict=True):
         index = 100 + round(time * _FS)
         omni[index] += amplitude
         lateral[index] += amplitude * math.cos(math.radians(angle))

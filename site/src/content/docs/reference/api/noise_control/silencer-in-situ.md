@@ -87,7 +87,7 @@ DOWNSTREAM_DISTANCE_COEFFICIENTS = (12.0, 10.0)
 
 ```python
 extraneous_corrected_mean_level_db(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     extraneous_levels_db: ArrayLike,
 ) -> tuple[float, bool]
 ```
@@ -131,7 +131,7 @@ level itself is returned either way.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | The levels with everything running, in decibels. |
+| `levels` | The levels with everything running, in decibels. |
 | `extraneous_levels_db` | The extraneous levels at the same positions, in decibels. |
 
 **Returns:** The corrected mean level in decibels, and whether the correction reached the cap, which is a margin under 3 dB.
@@ -515,7 +515,7 @@ MAXIMUM_EXTRANEOUS_CORRECTION_DB = 3.0
 ## mean_sound_pressure_level_db
 
 ```python
-mean_sound_pressure_level_db(levels_db: ArrayLike) -> float
+mean_sound_pressure_level_db(levels: ArrayLike) -> float
 ```
 
 The mean level over the measuring points, Equation (2).
@@ -531,7 +531,7 @@ sound pressure level".
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | The levels at the measuring points, in decibels. |
+| `levels` | The levels at the measuring points, in decibels. |
 
 **Returns:** $\overline{L_p}$, in decibels.
 
@@ -604,9 +604,7 @@ diameters of the upstream measurement cross-section.
 ## octave_levels_from_third_octave_db
 
 ```python
-octave_levels_from_third_octave_db(
-    levels_db: ArrayLike,
-) -> NDArray[np.float64]
+octave_levels_from_third_octave_db(levels: ArrayLike) -> NDArray[np.float64]
 ```
 
 One-third-octave levels folded into octaves, 9.1.5.
@@ -628,7 +626,7 @@ difference taken afterwards.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | One-third-octave levels, in decibels, a multiple of three bands in ascending order. |
+| `levels` | One-third-octave levels, in decibels, a multiple of three bands in ascending order. |
 
 **Returns:** The octave levels, in decibels.
 

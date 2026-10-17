@@ -78,7 +78,7 @@ def test_period_column_of_table_a3_is_the_80_20_average() -> None:
 
 def test_table_a4_levels_probabilities_and_boundaries() -> None:
     dist = _annex_a()
-    np.testing.assert_array_equal(dist.levels_db, _column(1))
+    np.testing.assert_array_equal(dist.levels, _column(1))
     np.testing.assert_array_equal(np.round(dist.probabilities, 4), _column(2))
     np.testing.assert_array_equal(np.round(dist.lower_bounds_db, 2), _column(3))
     np.testing.assert_array_equal(np.round(dist.upper_bounds_db, 2), _column(4))
@@ -390,7 +390,7 @@ def test_result_arrays_are_read_only() -> None:
         if isinstance(getattr(dist, field.name), np.ndarray)
     }
     assert set(arrays) == {
-        "levels_db",
+        "levels",
         "probabilities",
         "lower_bounds_db",
         "upper_bounds_db",
@@ -411,7 +411,7 @@ def test_three_equal_levels_are_combined_into_one_class() -> None:
     dist = sd.sel_distribution(
         [40.0, 42.0, 42.0, 42.0, 45.0], [0.1, 0.2, 0.3, 0.1, 0.3]
     )
-    np.testing.assert_allclose(dist.levels_db, [40.0, 42.0, 45.0])
+    np.testing.assert_allclose(dist.levels, [40.0, 42.0, 45.0])
     np.testing.assert_allclose(dist.probabilities, [0.1, 0.6, 0.3])
     np.testing.assert_allclose(dist.lower_bounds_db, [39.0, 41.0, 43.5])
     np.testing.assert_allclose(dist.upper_bounds_db, [41.0, 43.5, 46.5])
@@ -421,17 +421,17 @@ def test_three_equal_levels_are_combined_into_one_class() -> None:
 def test_two_equal_levels_at_an_end_are_combined() -> None:
     """Equations (12) and (13) leave the end class of a pair with no width."""
     low = sd.sel_distribution([40.0, 40.0, 44.0], [0.3, 0.3, 0.4])
-    np.testing.assert_allclose(low.levels_db, [40.0, 44.0])
+    np.testing.assert_allclose(low.levels, [40.0, 44.0])
     np.testing.assert_allclose(low.probabilities, [0.6, 0.4])
     high = sd.sel_distribution([40.0, 44.0, 44.0], [0.4, 0.3, 0.3])
-    np.testing.assert_allclose(high.levels_db, [40.0, 44.0])
+    np.testing.assert_allclose(high.levels, [40.0, 44.0])
     np.testing.assert_allclose(high.lower_bounds_db, [38.0, 42.0])
     np.testing.assert_allclose(high.upper_bounds_db, [42.0, 46.0])
 
 
 def test_two_equal_interior_levels_keep_two_classes() -> None:
     dist = sd.sel_distribution([40.0, 42.0, 42.0, 45.0], [0.1, 0.2, 0.3, 0.4])
-    np.testing.assert_allclose(dist.levels_db, [40.0, 42.0, 42.0, 45.0])
+    np.testing.assert_allclose(dist.levels, [40.0, 42.0, 42.0, 45.0])
     np.testing.assert_allclose(dist.lower_bounds_db, [39.0, 41.0, 42.0, 43.5])
     np.testing.assert_allclose(dist.upper_bounds_db, [41.0, 42.0, 43.5, 46.5])
 
@@ -450,7 +450,7 @@ def test_grid_and_flat_inputs_give_the_same_distribution() -> None:
     probs = sd.replica_probabilities([0.6, 0.4], [0.5, 0.3, 0.2])
     grid = sd.sel_distribution(levels, probs)
     flat = sd.sel_distribution(levels.ravel(), probs.ravel())
-    np.testing.assert_array_equal(grid.levels_db, flat.levels_db)
+    np.testing.assert_array_equal(grid.levels, flat.levels)
     np.testing.assert_array_equal(
         grid.class_densities_per_db, flat.class_densities_per_db
     )
@@ -557,19 +557,19 @@ def test_refuses_a_single_distinct_level() -> None:
 
 def test_refuses_a_non_finite_level() -> None:
     levels = [40.0, float("nan")]
-    with pytest.raises(ValueError, match="'levels_db' must contain only finite"):
+    with pytest.raises(ValueError, match="'levels' must contain only finite"):
         sd.sel_distribution(levels, [0.5, 0.5])
 
 
 def test_refuses_a_complex_level() -> None:
     levels = np.array([40.0 + 1j, 44.0])
-    with pytest.raises(ValueError, match="'levels_db' must be real"):
+    with pytest.raises(ValueError, match="'levels' must be real"):
         sd.long_term_sel(levels, [0.5, 0.5])
 
 
 def test_refuses_an_empty_input() -> None:
     empty: list[float] = []
-    with pytest.raises(ValueError, match="'levels_db' must not be empty"):
+    with pytest.raises(ValueError, match="'levels' must not be empty"):
         sd.long_term_sel(empty, empty)
 
 

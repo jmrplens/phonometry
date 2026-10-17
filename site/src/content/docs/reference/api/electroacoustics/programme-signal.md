@@ -105,7 +105,7 @@ Amendment 2 replaces 12.1, the three coils that make a uniform magnetic field.
 
 ```python
 check_programme_signal(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     band_levels_db: ArrayLike,
 ) -> ProgrammeSignalCheck
 ```
@@ -127,7 +127,7 @@ table.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Band centre frequencies, in Hz, nominal or exact, each a band of Table II (20 Hz to 20 kHz) and none repeated. |
+| `frequencies` | Band centre frequencies, in Hz, nominal or exact, each a band of Table II (20 Hz to 20 kHz) and none repeated. |
 | `band_levels_db` | The band levels, in dB, on any reference. |
 
 **Returns:** A [`ProgrammeSignalCheck`](/phonometry/reference/api/electroacoustics/programme-signal/#programmesignalcheck).
@@ -141,7 +141,7 @@ table.
 ## programme_signal_filter
 
 ```python
-programme_signal_filter(frequencies_hz: ArrayLike) -> NDArray[np.complex128]
+programme_signal_filter(frequencies: ArrayLike) -> NDArray[np.complex128]
 ```
 
 The transfer function of the filter of IEC 60268-1:1985 Figure 2.
@@ -156,9 +156,9 @@ conventions the figure's notes state.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Frequencies, in Hz, any shape; each must be positive. |
+| `frequencies` | Frequencies, in Hz, any shape; each must be positive. |
 
-**Returns:** The complex response, dimensionless, with the shape of `frequencies_hz`.
+**Returns:** The complex response, dimensionless, with the shape of `frequencies`.
 
 **Raises**
 
@@ -170,7 +170,7 @@ conventions the figure's notes state.
 
 ```python
 ProgrammeSignalCheck(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     band_levels_db: NDArray[np.float64],
 )
 ```
@@ -181,8 +181,8 @@ A one-third-octave spectrum judged against IEC 60268-1:1985 Table II.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The nominal frequencies of the bands judged, in Hz, ascending. |
-| `band_levels_db` | The band levels as given, in dB, in the order of `frequencies_hz`. |
+| `frequencies` | The nominal frequencies of the bands judged, in Hz, ascending. |
+| `band_levels_db` | The band levels as given, in dB, in the order of `frequencies`. |
 
 Table II's relative levels and tolerances at the bands, and the offset
 that refers the levels to them, are read from the table, so a check

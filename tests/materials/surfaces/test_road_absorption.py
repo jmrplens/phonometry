@@ -339,10 +339,10 @@ def test_one_third_octave_clipping() -> None:
 def test_one_third_octave_guards() -> None:
     with pytest.raises(
         ValueError,
-        match=r"one_third_octave_absorption: 'frequency' .*'absorption' .*same shape",
+        match=r"one_third_octave_absorption: 'frequencies' .*'absorption' .*same shape",
     ):
         one_third_octave_absorption([250.0, 500.0], [0.1])
-    with pytest.raises(ValueError, match=r"'frequency' .*must be non-empty"):
+    with pytest.raises(ValueError, match=r"'frequencies' .*must be non-empty"):
         one_third_octave_absorption([], [])
 
 

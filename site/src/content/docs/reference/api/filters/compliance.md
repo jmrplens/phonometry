@@ -160,7 +160,7 @@ FilterComplianceResult(
     fraction: int,
     edition: str,
     sos: tuple[np.ndarray, ...],
-    band_frequencies: np.ndarray,
+    frequencies: np.ndarray,
     factors: tuple[int, ...],
     fs: float,
     num_points: int,
@@ -188,7 +188,7 @@ state a class its margins do not reach.
 | `fraction` | Bandwidth designator `b` (1 for octave, 3 for one-third-octave). |
 | `edition` | `"2014"` (IEC 61260-1:2014, classes 1/2) or `"1995"` (IEC 61260:1995 / ANSI S1.11-2004, classes 0/1/2). |
 | `sos` | Per-band second-order sections of the analysed bank (one array per band), kept so the relative attenuation can be recomputed exactly as the verifier does. |
-| `band_frequencies` | The exact mid-band frequencies `f_m` in Hz. |
+| `frequencies` | The exact mid-band frequencies `f_m` in Hz. |
 | `factors` | Per-band decimation factor; the band's processing sample rate is `fs / factor` (the multirate rate the SOS were designed at) and the factor fixes its anti-aliasing filter. Stored because the response is evaluated through both, which the verifier's public return does not otherwise expose. |
 | `fs` | The bank's full sampling rate in Hz. |
 | `num_points` | Frequency grid points per band used by the verification, retained so the redrawn curve matches the analysed grid. |

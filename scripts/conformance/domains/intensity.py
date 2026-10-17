@@ -668,7 +668,7 @@ _ISO3747_DIRECTIVITY_GRADE2 = 3.0
 def _chk_iso3747_example_uncertainty() -> Outcome:
     res = ph.emission.sound_power_in_situ(
         _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, _ISO3747_FREQS,
-        sigma_omc=2.0,
+        sigma_omc_db=2.0,
         conditions=ph.emission.GradeConditions(excess_levels=_ISO3747_EXCESS_GRADE2, directivity_range=_ISO3747_DIRECTIVITY_GRADE2),
     )  # fmt: skip
     return numeric(5.0, float(res.expanded_uncertainty), 1e-12, unit="dB", places=6)
@@ -682,7 +682,7 @@ def _chk_iso3747_example_uncertainty() -> Outcome:
 def _chk_iso3747_table2_and_e1() -> Outcome:
     grade2 = ph.emission.sound_power_in_situ(
         _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, _ISO3747_FREQS,
-        sigma_omc=4.0,
+        sigma_omc_db=4.0,
         conditions=ph.emission.GradeConditions(excess_levels=_ISO3747_EXCESS_GRADE2, directivity_range=_ISO3747_DIRECTIVITY_GRADE2),
     )  # fmt: skip
     grade3 = ph.emission.sound_power_in_situ(
@@ -1038,10 +1038,10 @@ def _chk_iso9295_eyring_room_constant() -> Outcome:
     volume, surface, time = 200.0, 210.0, 0.70
     alpha_room = 1.0 - math.exp(-0.16 * volume / (surface * time))
     alpha = ph.emission.room_absorption_coefficient(
-        time, volume_m3=volume, surface_area_m2=surface
+        time, volume=volume, surface_area_m2=surface
     )
     room = ph.emission.room_constant_from_reverberation_time(
-        time, volume_m3=volume, surface_area_m2=surface
+        time, volume=volume, surface_area_m2=surface
     )
     return record(
         {
@@ -1070,7 +1070,7 @@ def _chk_iso9295_air_room_constant() -> Outcome:
     expected = 8.0 * alpha * 200.0 / (1.0 - 8.0 * alpha * 200.0 / 210.0)
     room = ph.emission.room_constant_from_air_absorption(
         [16000.0],
-        volume_m3=200.0,
+        volume=200.0,
         surface_area_m2=210.0,
         temperature_c=23.0,
         relative_humidity_percent=50.0,
@@ -1102,7 +1102,7 @@ def _chk_iso9295_direct_level() -> Outcome:
             float(
                 ph.emission.high_frequency_sound_power(
                     [60.0, 58.0, 55.0],
-                    frequencies_hz=_ISO9295_THIRDS,
+                    frequencies=_ISO9295_THIRDS,
                     room_constant_m2=40.0,
                     temperature_c=theta,
                     static_pressure_kpa=pressure_kpa,
@@ -1123,12 +1123,12 @@ def _chk_iso9295_direct_level() -> Outcome:
 )
 def _chk_iso9295_comparison() -> Outcome:
     broadband = ph.emission.high_frequency_sound_power_comparison(
-        [55.0], frequencies_hz=[16000.0],
-        reference_pressure_levels_db=[45.0], reference_sound_power_levels_db=[50.0],
+        [55.0], frequencies=[16000.0],
+        reference_pressure_levels=[45.0], reference_sound_power_levels=[50.0],
     )  # fmt: skip
     tonal = ph.emission.high_frequency_sound_power_comparison(
-        [55.0], frequencies_hz=[16000.0],
-        reference_pressure_levels_db=[45.0], reference_sound_power_levels_db=[50.0],
+        [55.0], frequencies=[16000.0],
+        reference_pressure_levels=[45.0], reference_sound_power_levels=[50.0],
         noise_bandwidth_hz=10.0,
     )  # fmt: skip
     c2 = 15.0 * math.log10(296.15 / 296.0)

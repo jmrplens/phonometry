@@ -191,7 +191,7 @@ def plot_lab_joint_insulation(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequencies_hz, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     positions = _band_axis(ax, freqs, language=language)
     ink = ax.xaxis.label.get_color()
     ax.plot(
@@ -214,7 +214,7 @@ def plot_lab_joint_insulation(
     rating = result.rating
     if rating is not None and rating.shifted_reference is not None:
         core = [
-            int(np.argmin(np.abs(freqs - f))) for f in np.asarray(rating.band_centers)
+            int(np.argmin(np.abs(freqs - f))) for f in np.asarray(rating.frequencies)
         ]
         ax.plot(
             positions[core],
@@ -552,9 +552,7 @@ def plot_joint_gap_octaves(
             sealed.append(maximum)
     ink = theme_line(ax.xaxis.label.get_color(), ax, quiet=1.0)
     for k, maximum in enumerate(sealed):
-        freqs, values = improvement_octave_bands(
-            maximum, result.results[0].frequencies_hz
-        )
+        freqs, values = improvement_octave_bands(maximum, result.results[0].frequencies)
         index = [int(np.argmin(np.abs(centres - f))) for f in freqs]
         ax.plot(
             positions[index],

@@ -83,7 +83,7 @@ AbsorptionRatingResult(
     absorption_class: str,
     shift: float,
     unfavourable_sum: float,
-    band_centers: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     measured: NDArray[np.float64],
     shifted_reference: NDArray[np.float64],
     third_octave_alpha_s: NDArray[np.float64] | None = None,
@@ -102,7 +102,7 @@ Weighted sound absorption rating (ISO 11654:1997).
 | `absorption_class` | Sound absorption class `A`-`E` or `"Not classified"` from Table B.1 (Annex B). |
 | `shift` | Downward shift applied to the reference curve, in absorption units (Clause 4.2); $\alpha_\mathrm{w} = 1.00 - \text{shift}$. |
 | `unfavourable_sum` | Sum of the unfavourable deviations at the final shift (Clause 4.2): `shifted_reference - measured` over the bands where the measured coefficient falls below the curve, and nothing elsewhere; at most 0.10. |
-| `band_centers` | Octave rating-band centre frequencies, in Hz (250 Hz to 4000 Hz). |
+| `frequencies` | Octave rating-band centre frequencies, in Hz (250 Hz to 4000 Hz). |
 | `measured` | Practical absorption coefficients `alpha_p` used for the rating (snapped to the 0,05 grid of Clause 4.1). |
 | `shifted_reference` | Reference curve of Figure 1 after the final shift. |
 | `third_octave_alpha_s` | The fifteen one-third-octave sound absorption coefficients `alpha_s` (200 Hz to 5000 Hz, ISO 354) the rating was built from, as given; `None` when the rating was formed from octave practical coefficients only. Carried so the fiche can show the full one-third-octave table every accredited ISO 354 certificate reports. |

@@ -408,7 +408,7 @@ sound_energy_pressure(
     frequencies: np.ndarray | None = None,
     room: RoomEnvironment | None = None,
     grade: Literal['engineering', 'survey'] = 'engineering',
-    omc_uncertainty: float = 0.0,
+    sigma_omc_db: float = 0.0,
 ) -> SoundEnergyResult
 ```
 
@@ -467,7 +467,7 @@ The level holds for the meteorological conditions of the test; above
 | `frequencies` | Band mid-band frequencies (Hz) for the A-weighted total. |
 | `room` | Room absorption data behind `K2` ([`RoomEnvironment`](/phonometry/reference/api/power/sound-power/#roomenvironment)); `None` is a room with no data at all, i.e. a free field ($K_2 = 0$). |
 | `grade` | `'engineering'` (ISO 3744) or `'survey'` (ISO 3746). |
-| `omc_uncertainty` | `sigma_omc` (dB), operating/mounting instability. |
+| `sigma_omc_db` | `sigma_omc` (dB), operating/mounting instability. |
 
 **Returns:** [`SoundEnergyResult`](/phonometry/reference/api/power/sound-power/#soundenergyresult).
 
@@ -492,7 +492,7 @@ sound_power_pressure(
     frequencies: np.ndarray | None = None,
     room: RoomEnvironment | None = None,
     grade: Literal['engineering', 'survey'] = 'engineering',
-    omc_uncertainty: float = 0.0,
+    sigma_omc_db: float = 0.0,
 ) -> SoundPowerResult
 ```
 
@@ -528,7 +528,7 @@ sound power level is combined via ISO 3744 Annex E.
 | `frequencies` | Band mid-band frequencies (Hz) for the A-weighted total. |
 | `room` | Room absorption data behind `K2` ([`RoomEnvironment`](/phonometry/reference/api/power/sound-power/#roomenvironment)); `None` is a room with no data at all, i.e. a free field ($K_2 = 0$). |
 | `grade` | `'engineering'` (ISO 3744) or `'survey'` (ISO 3746). |
-| `omc_uncertainty` | `sigma_omc` (dB), operating/mounting instability. |
+| `sigma_omc_db` | `sigma_omc` (dB), operating/mounting instability. |
 
 **Returns:** [`SoundPowerResult`](/phonometry/reference/api/power/sound-power/#soundpowerresult).
 

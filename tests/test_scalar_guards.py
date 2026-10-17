@@ -326,7 +326,7 @@ _OWN_SIGNATURES: list[tuple[str, str, Callable[[object], tuple[object, ...]], st
         "emission.free_field_qualification",
         "_band_index",
         lambda v: (v,),
-        "frequencies_hz",
+        "frequencies",
     ),
     (
         "emission.free_field_qualification",
@@ -351,7 +351,7 @@ _OWN_SIGNATURES: list[tuple[str, str, Callable[[object], tuple[object, ...]], st
         "emission.sound_power_in_situ",
         "_checked_sigma_omc",
         lambda v: (v, 2.0),
-        "sigma_omc",
+        "sigma_omc_db",
     ),
     (
         "emission.sound_power_intensity_points",
@@ -446,7 +446,6 @@ _OWN_SIGNATURES: list[tuple[str, str, Callable[[object], tuple[object, ...]], st
 #: guard that asks it from one that does not.
 _OWN_PROBES: dict[str, float] = {
     "ir_length": 4096,
-    "frequencies_hz": 100.0,
     "reflecting_plane": 0.5,
     "frequencies": 1000.0,
     "poisson_ratio": 0.3,

@@ -73,7 +73,7 @@ def _energy_mean(levels: np.ndarray, axis: int | None = None) -> np.ndarray:
 
 def _direct(**kwargs: object) -> emission.SpecialRoomSoundPowerResult:
     kwargs.setdefault("background_levels", BACKGROUND)
-    kwargs.setdefault("volume_m3", 70.0)
+    kwargs.setdefault("volume", 70.0)
     kwargs.setdefault("nominal_reverberation_time_s", 0.73)
     return emission.sound_power_special_room(ST, FREQS, **kwargs)  # type: ignore[arg-type]
 
@@ -107,7 +107,7 @@ def test_a_room_that_follows_the_curve_centres_on_formula_b2() -> None:
     """If the specified curve is exactly obtained, Tnom = T1000 / R(1 000)."""
     r = emission.reverberation_parameter(THIRDS, 70.0)
     t = 0.8 * r / r[10]
-    check = emission.check_special_room_reverberation(t, THIRDS, volume_m3=70.0)
+    check = emission.check_special_room_reverberation(t, THIRDS, volume=70.0)
     assert check.centred
     assert check.nominal_reverberation_time_s == pytest.approx(0.8 / float(r[10]))
     np.testing.assert_allclose(check.normalized_ratio, 1.0, atol=1e-12)
@@ -121,7 +121,7 @@ def test_centring_balances_the_worst_bands_against_their_tolerances() -> None:
     r = emission.reverberation_parameter(THIRDS[:-2], 70.0)
     shape = np.linspace(0.95, 1.05, r.size) ** 2
     check = emission.check_special_room_reverberation(
-        0.7 * r * shape, THIRDS[:-2], volume_m3=70.0
+        0.7 * r * shape, THIRDS[:-2], volume=70.0
     )
     ratio = check.normalized_ratio
     assert float(ratio.max()) - 1.0 == pytest.approx(
@@ -140,7 +140,7 @@ def test_centring_weighs_each_band_by_its_own_tolerance() -> None:
     shape[0] = 0.96
     shape[-2:] = [1.16, 1.19]  # the 8 kHz and 10 kHz thirds run long
     t = 0.7 * r * shape
-    check = emission.check_special_room_reverberation(t, THIRDS, volume_m3=70.0)
+    check = emission.check_special_room_reverberation(t, THIRDS, volume=70.0)
     q = t / r
     width = np.where(THIRDS > 7000.0, 0.2, 0.1)
     scales = np.linspace(1.0, 2.0, 1_000_001)
@@ -155,7 +155,7 @@ def test_bands_above_6_3_khz_take_the_wider_tolerance() -> None:
     check = emission.check_special_room_reverberation(
         np.full(THIRDS.size, 0.8),
         THIRDS,
-        volume_m3=70.0,
+        volume=70.0,
         nominal_reverberation_time_s=0.8,
     )
     np.testing.assert_array_equal(check.lower_limit[-3:], [0.9, 0.8, 0.8])
@@ -165,7 +165,7 @@ def test_bands_above_6_3_khz_take_the_wider_tolerance() -> None:
 def test_a_supplied_nominal_time_is_checked_as_given() -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
     check = emission.check_special_room_reverberation(
-        0.73 * r * 1.15, THIRDS, volume_m3=70.0, nominal_reverberation_time_s=0.73
+        0.73 * r * 1.15, THIRDS, volume=70.0, nominal_reverberation_time_s=0.73
     )
     assert not check.centred
     assert not bool(np.any(check.band_within[:-2]))
@@ -177,7 +177,7 @@ def test_a_supplied_nominal_time_is_checked_as_given() -> None:
 )
 def test_nominal_time_between_0_5_and_1_0_s(tnom: float, *, ok: bool) -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
-    check = emission.check_special_room_reverberation(tnom * r, THIRDS, volume_m3=70.0)
+    check = emission.check_special_room_reverberation(tnom * r, THIRDS, volume=70.0)
     assert check.nominal_in_range is ok
 
 
@@ -198,7 +198,7 @@ def test_volume_criteria_of_6_2(
     check = emission.check_special_room_reverberation(
         0.7 * r,
         THIRDS,
-        volume_m3=volume,
+        volume=volume,
         method=method,  # type: ignore[arg-type]
     )
     assert check.volume_large_enough is large
@@ -208,7 +208,7 @@ def test_volume_criteria_of_6_2(
 def test_the_300_m3_ceiling_needs_the_8_khz_octave_in_range() -> None:
     r = emission.reverberation_parameter(THIRDS[:-3], 400.0)
     check = emission.check_special_room_reverberation(
-        0.7 * r, THIRDS[:-3], volume_m3=400.0
+        0.7 * r, THIRDS[:-3], volume=400.0
     )
     assert check.volume_small_enough
 
@@ -231,7 +231,7 @@ def test_climate_product_of_6_6(
 ) -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
     check = emission.check_special_room_reverberation(
-        0.7 * r, THIRDS, volume_m3=70.0,
+        0.7 * r, THIRDS, volume=70.0,
         relative_humidity_percent=humidity, temperature_c=temperature,
         reverberation_relative_humidity_percent=50.0, reverberation_temperature_c=20.0,
     )  # fmt: skip
@@ -242,13 +242,13 @@ def test_climate_given_in_part_is_refused() -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
     with pytest.raises(ValueError, match=r"6\.6"):
         emission.check_special_room_reverberation(
-            0.7 * r, THIRDS, volume_m3=70.0, relative_humidity_percent=50.0
+            0.7 * r, THIRDS, volume=70.0, relative_humidity_percent=50.0
         )
 
 
 def test_reverberation_check_has_no_truth_value() -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
-    check = emission.check_special_room_reverberation(0.7 * r, THIRDS, volume_m3=70.0)
+    check = emission.check_special_room_reverberation(0.7 * r, THIRDS, volume=70.0)
     with pytest.raises(TypeError, match="passes"):
         bool(check)
 
@@ -506,7 +506,7 @@ def test_direct_method_is_formula9_of_the_energy_mean() -> None:
     assert bool(np.all(res.background_requirement_met))
     assert np.all(res.background_correction == 0.0)
     assert np.all(np.isnan(res.mean_reference_level))
-    assert res.volume_m3 == 70.0
+    assert res.volume == 70.0
 
 
 def test_direct_method_corrects_each_position_by_table4() -> None:
@@ -526,7 +526,7 @@ def test_direct_method_corrects_each_position_by_table4() -> None:
 def test_source_locations_all_enter_formula8() -> None:
     locations = np.stack([ST, ST + 2.0])
     res = emission.sound_power_special_room(
-        locations, FREQS, volume_m3=70.0, nominal_reverberation_time_s=0.73,
+        locations, FREQS, volume=70.0, nominal_reverberation_time_s=0.73,
         background_levels=BACKGROUND,
     )  # fmt: skip
     np.testing.assert_allclose(
@@ -563,12 +563,12 @@ def test_a_weighted_level_by_formula9_directly() -> None:
 
 def test_direct_method_warns_outside_6_2_and_6_3() -> None:
     with pytest.warns(emission.SoundPowerWarning, match=r"6\.2"):
-        _direct(volume_m3=350.0)
+        _direct(volume=350.0)
 
 
 def test_direct_method_warns_below_70_m3() -> None:
     with pytest.warns(emission.SoundPowerWarning, match=r"at least 70"):
-        _direct(volume_m3=60.0)
+        _direct(volume=60.0)
 
 
 def test_nominal_time_outside_6_3_warns() -> None:
@@ -583,7 +583,7 @@ def test_comparison_method_is_formula10() -> None:
     expected = _energy_mean(ST, 0) + (LW_RSS - _energy_mean(RSS, 0))
     np.testing.assert_allclose(res.sound_power_level, expected, atol=1e-12)
     assert res.method == "comparison"
-    assert math.isnan(res.volume_m3)
+    assert math.isnan(res.volume)
     np.testing.assert_allclose(res.reference_power_level, LW_RSS)
 
 
@@ -730,7 +730,7 @@ def test_reverberation_plot_rings_bands_outside_the_limits() -> None:
     t = 0.7 * r
     t[3] *= 1.3
     check = emission.check_special_room_reverberation(
-        t, THIRDS, volume_m3=70.0, nominal_reverberation_time_s=0.7
+        t, THIRDS, volume=70.0, nominal_reverberation_time_s=0.7
     )
     ax = check.plot()
     labels = [line.get_label() for line in ax.lines]
@@ -770,9 +770,9 @@ def test_surface_plot_rings_what_fails_and_says_so() -> None:
 
 def test_reverberation_plot_states_the_verdict() -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
-    passing = emission.check_special_room_reverberation(0.7 * r, THIRDS, volume_m3=70.0)
+    passing = emission.check_special_room_reverberation(0.7 * r, THIRDS, volume=70.0)
     assert passing.plot().get_title().endswith(": qualified")
-    failing = emission.check_special_room_reverberation(0.7 * r, THIRDS, volume_m3=60.0)
+    failing = emission.check_special_room_reverberation(0.7 * r, THIRDS, volume=60.0)
     assert failing.plot().get_title().endswith(": not qualified")
     plt.close("all")
 
@@ -813,7 +813,7 @@ def test_the_b5_example_centres_the_room_within_its_curves() -> None:
     the limiting curves, at T/Tnom = 1,05 at 1 kHz and Tnom = 0,76 s.
     """
     check = emission.check_special_room_reverberation(
-        0.8 * FIGURE_B4, THIRDS, volume_m3=70.0
+        0.8 * FIGURE_B4, THIRDS, volume=70.0
     )
     assert check.passes
     assert 0.8 / check.nominal_reverberation_time_s == pytest.approx(1.053, abs=0.012)
@@ -831,11 +831,11 @@ def test_the_printed_1_09_of_b5_is_the_narrow_midpoint_and_fails_250_hz() -> Non
     midpoint = 0.8 / (0.5 * float(q.max() + q.min()))
     assert midpoint == pytest.approx(1.09, abs=0.015)
     printed = emission.check_special_room_reverberation(
-        t, THIRDS, volume_m3=70.0, nominal_reverberation_time_s=0.73
+        t, THIRDS, volume=70.0, nominal_reverberation_time_s=0.73
     )
     assert not printed.passes
     assert float(printed.normalized_ratio[4]) > 1.1
-    centred = emission.check_special_room_reverberation(t, THIRDS, volume_m3=70.0)
+    centred = emission.check_special_room_reverberation(t, THIRDS, volume=70.0)
     shift = 10.0 * math.log10(centred.nominal_reverberation_time_s / 0.73)
     assert shift == pytest.approx(0.17, abs=0.05)
 
@@ -849,7 +849,7 @@ def test_source_of_1_percent_of_the_room_is_recommended() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error", emission.SoundPowerWarning)
         check = emission.check_special_room_reverberation(
-            0.7 * r, THIRDS, volume_m3=70.0, source_volume_m3=0.7
+            0.7 * r, THIRDS, volume=70.0, source_volume_m3=0.7
         )
     assert check.source_size_recommended is True
     assert check.source_volume_m3 == 0.7
@@ -862,7 +862,7 @@ def test_a_larger_source_warns_but_leaves_the_verdict() -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
     with pytest.warns(emission.SoundPowerWarning, match="clause 5"):
         check = emission.check_special_room_reverberation(
-            0.7 * r, THIRDS, volume_m3=70.0, source_volume_m3=0.75
+            0.7 * r, THIRDS, volume=70.0, source_volume_m3=0.75
         )
     assert check.source_size_recommended is False
     assert check.passes
@@ -870,7 +870,7 @@ def test_a_larger_source_warns_but_leaves_the_verdict() -> None:
 
 def test_no_source_volume_reads_nothing() -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
-    check = emission.check_special_room_reverberation(0.7 * r, THIRDS, volume_m3=70.0)
+    check = emission.check_special_room_reverberation(0.7 * r, THIRDS, volume=70.0)
     assert check.source_size_recommended is None
     assert math.isnan(check.source_volume_m3)
 
@@ -879,7 +879,7 @@ def test_a_source_volume_must_be_positive() -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
     with pytest.raises(ValueError, match="source_volume_m3"):
         emission.check_special_room_reverberation(
-            0.7 * r, THIRDS, volume_m3=70.0, source_volume_m3=-0.1
+            0.7 * r, THIRDS, volume=70.0, source_volume_m3=-0.1
         )
 
 
@@ -943,7 +943,7 @@ def test_results_keep_frequencies_of_their_own() -> None:
         emission.sound_power_special_room(
             ST,
             freqs,
-            volume_m3=70.0,
+            volume=70.0,
             nominal_reverberation_time_s=0.73,
             background_levels=BACKGROUND,
         ),
@@ -1019,7 +1019,7 @@ def test_reverberation_plot_draws_t_over_tnom_within_r_scaled_limits() -> None:
     t = 0.7 * r
     t[3] *= 1.3
     check = emission.check_special_room_reverberation(
-        t, THIRDS, volume_m3=70.0, nominal_reverberation_time_s=0.7
+        t, THIRDS, volume=70.0, nominal_reverberation_time_s=0.7
     )
     ax = check.plot()
     (measured,) = [

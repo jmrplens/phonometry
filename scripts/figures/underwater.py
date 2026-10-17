@@ -430,11 +430,11 @@ def generate_underwater_sound_speed(output_dir: str) -> None:
     # then an isothermal deep layer; the pressure term then lifts c with depth.
     temps = 4.0 + 14.0 / (1.0 + (np.maximum(depths - 80.0, 0.0) / 250.0) ** 2)
     prof = underwater.sound_speed_profile(depths, temps, 35.0, model="unesco")
-    axis_depth = depths[int(np.argmin(prof.speed_of_sound))]
+    axis_depth = depths[int(np.argmin(prof.speeds_of_sound))]
     _fig, ax = plt.subplots(figsize=(7, 8))
     ax.plot(
-        prof.speed_of_sound,
-        prof.depth,
+        prof.speeds_of_sound,
+        prof.depths,
         color=COLOR_PRIMARY,
         linewidth=2.0,
         label="UNESCO sound speed",
@@ -902,7 +902,9 @@ def generate_sound_speed_models(output_dir: str) -> None:
     colors = (COLOR_PRIMARY, COLOR_SECONDARY, COLOR_TERTIARY, "#8c8c8c")
     profiles = {
         m: np.asarray(
-            underwater.sound_speed_profile(depths, temps, 35.0, model=m).speed_of_sound,
+            underwater.sound_speed_profile(
+                depths, temps, 35.0, model=m
+            ).speeds_of_sound,
             dtype=float,
         )
         for m in models

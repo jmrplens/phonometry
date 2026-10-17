@@ -126,11 +126,14 @@ FRF_UNITS: Mapping[str, str] = MappingProxyType(
 )
 
 
-def _omega(frequency: ArrayLike) -> NDArray[np.float64]:
-    r"""Angular frequency :math:`\omega = 2 \pi f` (rad/s); rejects f <= 0."""
+def _omega(frequency: ArrayLike, name: str = "frequency") -> NDArray[np.float64]:
+    r"""Angular frequency :math:`\omega = 2 \pi f` (rad/s); rejects f <= 0.
+
+    *name* is the caller's own name for the frequency, for the message.
+    """
     f = np.asarray(frequency, dtype=np.float64)
     if np.any(f <= 0.0):
-        msg = "'frequency' must be positive (mobility conversions divide by omega)."
+        msg = f"'{name}' must be positive (mobility conversions divide by omega)."
         raise ValueError(msg)
     return 2.0 * np.pi * f
 
@@ -242,7 +245,7 @@ def sdof_mobility(
 ) -> np.ndarray:
     r"""Mobility of a viscously damped SDOF resonator: :math:`Y = j \omega H`.
 
-    :param frequency: Frequency ``f``, in hertz.
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param mass: Mass ``m``, in kg.
     :param stiffness: Stiffness ``k``, N/m.
     :param damping: Viscous damping ``c``, N.s/m.
@@ -257,7 +260,7 @@ def sdof_accelerance(
 ) -> np.ndarray:
     r"""Accelerance of a viscously damped SDOF resonator: :math:`A = -\omega^2 H`.
 
-    :param frequency: Frequency ``f``, in hertz.
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param mass: Mass ``m``, in kg.
     :param stiffness: Stiffness ``k``, N/m.
     :param damping: Viscous damping ``c``, N.s/m.
@@ -326,7 +329,7 @@ class RigidMassCalibrationResult(OwnsArrays):
         require_positive(self.mass, "mass")
         require_ranks(self, frequencies=1, measured=1)
         require_same_length(self, "frequencies", "measured", axis="frequency")
-        _omega(self.frequencies)
+        _omega(self.frequencies, "frequencies")
 
     @property
     def expected(self) -> np.ndarray:
@@ -439,7 +442,7 @@ def rigid_mass_calibration_check(
         {"frf": measured.shape, "frequencies": freq.shape},
         "frequency",
     )
-    _omega(freq)
+    _omega(freq, "frequencies")
     return RigidMassCalibrationResult(
         frequencies=freq,
         measured=np.asarray(measured, dtype=np.float64),
@@ -643,7 +646,7 @@ def sdof_mobility_result(
 ) -> MobilityResult:
     """SDOF driving-point mobility bundled as a :class:`MobilityResult`.
 
-    :param frequency: Frequencies ``f``, in hertz (array).
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param mass: Mass ``m``, in kg.
     :param stiffness: Stiffness ``k``, N/m.
     :param damping: Viscous damping ``c``, N.s/m.

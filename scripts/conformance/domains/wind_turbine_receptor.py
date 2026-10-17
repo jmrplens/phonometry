@@ -394,7 +394,7 @@ def _chk_c1() -> Outcome:
         [95.0],
         distance_m=500.0,
         hub_height_m=100.0,
-        frequencies_hz=[63.0],
+        frequencies=[63.0],
         facade_insulation_db=[16.6],
     )
     indoor = result.indoor_levels_db

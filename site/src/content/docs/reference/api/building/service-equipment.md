@@ -271,7 +271,7 @@ A departure of exactly `tolerance_s` is within it.
 
 ```python
 CalibrationDeviationResult(
-    levels_db: np.ndarray,
+    levels: np.ndarray,
     previous_levels_db: np.ndarray,
     deviations_db: np.ndarray,
 )
@@ -283,9 +283,9 @@ Whether the instrumentation may be used, by its calibrations (Clause 5).
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | The calibrator readings of this measurement in the order they were taken, at the beginning and at the end, in dB. |
+| `levels` | The calibrator readings of this measurement in the order they were taken, at the beginning and at the end, in dB. |
 | `previous_levels_db` | The readings of earlier calibrations of the same instrumentation with the same calibrator, in dB; empty when none were given. |
-| `deviations_db` | Per reading of `levels_db`, the largest absolute difference from every calibration taken before it, the earlier ones and the readings of this measurement already taken, in dB; `nan` for a first reading with nothing before it. |
+| `deviations_db` | Per reading of `levels`, the largest absolute difference from every calibration taken before it, the earlier ones and the readings of this measurement already taken, in dB; `nan` for a first reading with nothing before it. |
 
 ### CalibrationDeviationResult.largest_deviation_db
 
@@ -458,7 +458,7 @@ the frequency range", which the operator chooses. A difference of exactly
 ## check_position_spread
 
 ```python
-check_position_spread(levels_db: ArrayLike) -> PositionSpreadCheck
+check_position_spread(levels: ArrayLike) -> PositionSpreadCheck
 ```
 
 Are the positions measured so far enough (ISO/DIS 16032:2023 7.4.1)?
@@ -494,7 +494,7 @@ while a later one can still pass, and a spread at a limit does not pass it
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | The 3, 6 or 9 A-weighted levels in the order of 7.4.1: `[corner, 2, 3]`, then `[corner, 4, 5]` and `[corner, 6, 7]` appended, in dB. |
+| `levels` | The 3, 6 or 9 A-weighted levels in the order of 7.4.1: `[corner, 2, 3]`, then `[corner, 4, 5]` and `[corner, 6, 7]` appended, in dB. |
 
 **Returns:** [`PositionSpreadCheck`](/phonometry/reference/api/building/service-equipment/#positionspreadcheck).
 
@@ -570,7 +570,7 @@ check_varying_background(
     equipment_levels_db: ArrayLike,
     *,
     observation_time_s: float,
-    frequencies_hz: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> VaryingBackgroundCheck
 ```
 
@@ -599,7 +599,7 @@ of the microphone positions"; the draft names the corner.
 | `background_maximum_db` | The maximum level of the background over the observation period, at the corner position, per band, in dB. |
 | `equipment_levels_db` | The service equipment sound pressure level in the same bands, in dB. |
 | `observation_time_s` | How long the background maximum was watched for, in s. |
-| `frequencies_hz` | Band centres in Hz, kept for the plot only. |
+| `frequencies` | Band centres in Hz, kept for the plot only. |
 
 **Returns:** [`VaryingBackgroundCheck`](/phonometry/reference/api/building/service-equipment/#varyingbackgroundcheck).
 
@@ -843,7 +843,7 @@ of the document with the chosen conditions reported in detail.
 ## PositionSpreadCheck
 
 ```python
-PositionSpreadCheck(levels_db: np.ndarray)
+PositionSpreadCheck(levels: np.ndarray)
 ```
 
 Whether the readings so far are enough to average (7.4.1).
@@ -857,7 +857,7 @@ an action the readings do not lead to.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | The A-weighted levels read directly from the instrument, uncorrected, in the order of 7.4.1: corner, position 2, position 3, then (corner, 4, 5) and (corner, 6, 7) for each further stage, in dB. |
+| `levels` | The A-weighted levels read directly from the instrument, uncorrected, in the order of 7.4.1: corner, position 2, position 3, then (corner, 4, 5) and (corner, 6, 7) for each further stage, in dB. |
 
 ### PositionSpreadCheck.action
 
@@ -941,10 +941,10 @@ How many sets of three readings there are: 1, 2 or 3.
 
 ```python
 service_equipment_background_correction(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     background_db: ArrayLike,
     *,
-    frequencies_hz: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> ServiceEquipmentBackgroundResult
 ```
 
@@ -969,9 +969,9 @@ the equipment, the result stands without correction
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | Measured band levels $L_1$, background included, in dB. |
+| `levels` | Measured band levels $L_1$, background included, in dB. |
 | `background_db` | Background band levels $L_2$, in dB, the same shape. |
-| `frequencies_hz` | Band centres in Hz, kept for the plot only. |
+| `frequencies` | Band centres in Hz, kept for the plot only. |
 
 **Returns:** [`ServiceEquipmentBackgroundResult`](/phonometry/reference/api/building/service-equipment/#serviceequipmentbackgroundresult).
 
@@ -985,8 +985,8 @@ the equipment, the result stands without correction
 
 ```python
 service_equipment_level(
-    levels_db: ArrayLike,
-    frequencies_hz: ArrayLike,
+    levels: ArrayLike,
+    frequencies: ArrayLike,
     *,
     quantity: Literal['Smax', 'Fmax', 'eq'],
     band: Literal['third', 'octave'] = 'third',
@@ -1017,8 +1017,8 @@ over the integration time of Annex B for an equivalent level.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | Band levels of each reading, shape `(readings, bands)` (one-dimensional for a single reading), in dB. |
-| `frequencies_hz` | Nominal band centres, in Hz, increasing: the one-third-octave bands of 25 Hz to 10 000 Hz or the octave bands of 31,5 Hz to 8 000 Hz, as `band` says. |
+| `levels` | Band levels of each reading, shape `(readings, bands)` (one-dimensional for a single reading), in dB. |
+| `frequencies` | Nominal band centres, in Hz, increasing: the one-third-octave bands of 25 Hz to 10 000 Hz or the octave bands of 31,5 Hz to 8 000 Hz, as `band` says. |
 | `quantity` | The Table 1 quantity measured: `"Smax"`, `"Fmax"` or `"eq"`. It names the single numbers and nothing else. |
 | `band` | `"third"` (default) or `"octave"`. 6 asks for the weighted values from one-third-octave bands; octave results are optional. |
 | `background_db` | Background band levels, in dB, one per band or one row per microphone position (energy-averaged over the positions, as the 2004 edition says in so many words and the draft leaves implicit). |
@@ -1069,7 +1069,7 @@ SERVICE_EQUIPMENT_WEIGHTING = {'third': {'A': {25.0: -44.7, 31.5: -39.4, 40.0: -
 ServiceEquipmentBackgroundResult(
     measured_db: np.ndarray,
     background_db: np.ndarray,
-    frequencies_hz: np.ndarray | None = None,
+    frequencies: np.ndarray | None = None,
 )
 ```
 
@@ -1085,7 +1085,7 @@ Band levels corrected for the background by Clause 9.
 | `correction_db` | The correction $K$ per band, in dB: 0 at 10 dB or more, Formula (8) from 4 dB, and 2,2 dB below 4 dB. |
 | `corrected_db` | $L = L_1 - K$ per band, in dB (Formula (7)). |
 | `regime` | Per band, `"none"` (no correction), `"corrected"` (Formula (8)) or `"limited"` (held at 2,2 dB: the band is an upper limit of the equipment level). |
-| `frequencies_hz` | The band centres, in Hz, or `None` when not given. |
+| `frequencies` | The band centres, in Hz, or `None` when not given. |
 
 The difference, the regime, the correction and the corrected level are
 read from the two measured levels and the 10 dB and 4 dB of Clause 9, so
@@ -1348,7 +1348,7 @@ At least 0,50 m (0,30 m in a small room) from every surface.
 
 ```python
 ServiceEquipmentResult(
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
     band: str,
     quantity: str,
     a_weighting_range: str,
@@ -1367,13 +1367,13 @@ ServiceEquipmentResult(
 Service-equipment sound pressure level, engineering method.
 
 Produced by [`service_equipment_level`](/phonometry/reference/api/building/service-equipment/#service_equipment_level). Every band array runs over
-`frequencies_hz`.
+`frequencies`.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Nominal band centres, in Hz. |
+| `frequencies` | Nominal band centres, in Hz. |
 | `band` | `"third"` or `"octave"`. |
 | `quantity` | The Table 1 quantity: `"Smax"`, `"Fmax"` or `"eq"`. |
 | `a_weighting_range` | `"restricted"` (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz) or `"extended"` (25 Hz to 10 000 Hz; octave 31,5 Hz to 8 000 Hz), the range the A-weighted values were summed over. |
@@ -1381,7 +1381,7 @@ Produced by [`service_equipment_level`](/phonometry/reference/api/building/servi
 | `average_db` | Formula (1) over the readings, rounded to one decimal (7.5), in dB. |
 | `background` | The Clause 9 correction, or `None` when no background was given. |
 | `corrected_db` | The average corrected for the background, in dB (the average itself when there is no background). |
-| `standardizable` | Per band, whether 7.7 lets it be standardized or normalized (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz); read from `frequencies_hz` and `band`, so it is not a field. |
+| `standardizable` | Per band, whether 7.7 lets it be standardized or normalized (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz); read from `frequencies` and `band`, so it is not a field. |
 | `standardized_db` | $L_{\mathrm{n}T}$ per band (Formula (5)), in dB, or `None` without a reverberation time. Bands outside the range are the corrected level, unstandardized. |
 | `normalized_db` | $L_\mathrm{n}$ per band (Formula (6)), in dB, or `None` without a reverberation time and a volume. |
 | `ratings` | The weighted single numbers of Table 1, rounded to whole decibels (7.8), keyed by their notation: `"LA,eq"`, `"LA,Smax,nT"`, `"LC,Fmax,n"` and so on. The C-weighted ones are present only when the bands cover the extended range. |
@@ -1491,7 +1491,7 @@ VaryingBackgroundCheck(
     background_maximum_db: np.ndarray,
     equipment_levels_db: np.ndarray,
     observation_time_s: float,
-    frequencies_hz: np.ndarray | None = None,
+    frequencies: np.ndarray | None = None,
 )
 ```
 
@@ -1506,7 +1506,7 @@ The route the NOTE to Clause 9 offers when the background varies in time.
 | `background_maximum_db` | The maximum level of the background over the observation period at the corner position, per band (or one weighted value), in dB. |
 | `equipment_levels_db` | The service equipment sound pressure level, the same bands, in dB. |
 | `observation_time_s` | How long the background maximum was watched for, in s. |
-| `frequencies_hz` | The band centres, in Hz, or `None` when not given. |
+| `frequencies` | The band centres, in Hz, or `None` when not given. |
 
 ### VaryingBackgroundCheck.limit_db
 

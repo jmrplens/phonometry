@@ -508,7 +508,7 @@ RECOMMENDED_SAMPLE_RATIO = 0.01
 ## round_robin_precision
 
 ```python
-round_robin_precision(levels_db: ArrayLike) -> RoundRobinPrecision
+round_robin_precision(levels: ArrayLike) -> RoundRobinPrecision
 ```
 
 The precision of a method from a round robin of programs
@@ -518,7 +518,7 @@ The precision of a method from a round robin of programs
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | $L_{n,m}$, the level each of `M` participants calculated at each of `N` receivers, in dB: shape `(N, M)`, at least 20 receivers and two participants. |
+| `levels` | $L_{n,m}$, the level each of `M` participants calculated at each of `N` receivers, in dB: shape `(N, M)`, at least 20 receivers and two participants. |
 
 **Returns:** A [`RoundRobinPrecision`](/phonometry/reference/api/environment/software-quality/#roundrobinprecision); its `q09_db` is the result of the round robin.
 
@@ -531,7 +531,7 @@ The precision of a method from a round robin of programs
 ## RoundRobinPrecision
 
 ```python
-RoundRobinPrecision(levels_db: NDArray[np.float64])
+RoundRobinPrecision(levels: NDArray[np.float64])
 ```
 
 The precision of a method in a round robin of programs
@@ -552,7 +552,7 @@ everything else is read from them.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | $L_{n,m}$, shape `(N, M)`: one row per receiver, one column per participant, in dB. |
+| `levels` | $L_{n,m}$, shape `(N, M)`: one row per receiver, one column per participant, in dB. |
 
 ### RoundRobinPrecision.deviations_db
 

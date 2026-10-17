@@ -96,10 +96,10 @@ def test_result_fields_and_plot() -> None:
     res = speech.stoi(x, y, FS)
     assert res.extended is False
     assert res.fs == FS
-    assert res.band_frequencies.shape == (15,)
+    assert res.frequencies.shape == (15,)
     assert res.band_scores is not None
     assert res.band_scores.shape == (15,)
-    assert res.band_frequencies[0] == pytest.approx(150.0)
+    assert res.frequencies[0] == pytest.approx(150.0)
     res.plot()  # STOI: per-band bars
     ext = speech.stoi(x, y, FS, extended=True)
     assert ext.band_scores is None

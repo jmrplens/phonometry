@@ -179,7 +179,7 @@ scaled to metres by `radius`.
 ```python
 precision_uncertainty(
     sigma_r0: float | np.ndarray,
-    sigma_omc: float = 0.0,
+    sigma_omc_db: float = 0.0,
     coverage_factor: float = 2.0,
 ) -> float | np.ndarray
 ```
@@ -196,7 +196,7 @@ $k = 1.6$ (95 %, one-sided, when comparing to a limit).
 | Name | Description |
 | :--- | :--- |
 | `sigma_r0` | Reproducibility standard deviation (Tables 2/3), dB. |
-| `sigma_omc` | Operating/mounting standard deviation `sigma_omc`, dB. |
+| `sigma_omc_db` | Operating/mounting standard deviation `sigma_omc_db`, dB. |
 | `coverage_factor` | `k` (typically 2 or 1.6). |
 
 **Returns:** `U` in decibels, scalar or per band matching `sigma_r0`.
@@ -317,7 +317,7 @@ sound_power_anechoic(
     temperature_c: float = ...,
     static_pressure_kpa: float = ...,
     air_absorption_coefficient: float | np.ndarray | None = ...,
-    sigma_omc: float = ...,
+    sigma_omc_db: float = ...,
     coverage_factor: float = ...,
     room_qualification: FreeFieldCheck | None = ...,
 ) -> PrecisionSoundPowerResult
@@ -332,7 +332,7 @@ sound_power_anechoic(
     temperature_c: float = ...,
     static_pressure_kpa: float = ...,
     air_absorption_coefficient: float | np.ndarray | None = ...,
-    sigma_omc: float = ...,
+    sigma_omc_db: float = ...,
     coverage_factor: float = ...,
     room_qualification: FreeFieldCheck | None = ...,
 ) -> PrecisionSoundPowerResult
@@ -371,7 +371,7 @@ environmental term. The reproducibility `sigma_R0` is taken from Table 3
 | `temperature_c` | Air temperature `theta` (deg C), for C1/C2. |
 | `static_pressure_kpa` | Static pressure `ps` (kPa), for C1/C2. |
 | `air_absorption_coefficient` | `a(f)` (dB/m) for C3, scalar or per band; `None` leaves $C_3 = 0$. |
-| `sigma_omc` | Operating/mounting standard deviation, dB. |
+| `sigma_omc_db` | Operating/mounting standard deviation, dB. |
 | `coverage_factor` | `k` (2 two-sided, 1.6 one-sided). |
 | `room_qualification` | The [`check_free_field`](/phonometry/reference/api/power/free-field-qualification/#check_free_field) verdict of the room (Annex A as Amendment 1:2017 wrote it). Its room type must match `surface`; a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning) says when the room is not qualified, when `radius` lies beyond the qualified radius, or when a band lies outside the qualified frequency range. |
 

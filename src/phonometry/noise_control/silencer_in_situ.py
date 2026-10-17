@@ -418,7 +418,7 @@ def silencer_background_correction_db(
     )
 
 
-def mean_sound_pressure_level_db(levels_db: ArrayLike) -> float:
+def mean_sound_pressure_level_db(levels: ArrayLike) -> float:
     r"""The mean level over the measuring points, Equation (2).
 
     .. math::
@@ -428,16 +428,16 @@ def mean_sound_pressure_level_db(levels_db: ArrayLike) -> float:
     An energy mean, which is what every clause of the standard means by "mean
     sound pressure level".
 
-    :param levels_db: The levels at the measuring points, in decibels.
+    :param levels: The levels at the measuring points, in decibels.
     :return: :math:`\overline{L_p}`, in decibels.
     :raises ValueError: For an empty or non-finite set of levels.
     """
-    values = require_finite_array(levels_db, "levels_db")
+    values = require_finite_array(levels, "levels")
     return float(energy_mean(values))
 
 
 def extraneous_corrected_mean_level_db(
-    levels_db: ArrayLike, extraneous_levels_db: ArrayLike
+    levels: ArrayLike, extraneous_levels_db: ArrayLike
 ) -> tuple[float, bool]:
     r"""The mean level with the extraneous sound taken off, Equations (17) and (18).
 
@@ -475,7 +475,7 @@ def extraneous_corrected_mean_level_db(
     measurement also emits a :class:`SilencerInSituWarning`. The corrected
     level itself is returned either way.
 
-    :param levels_db: The levels with everything running, in decibels.
+    :param levels: The levels with everything running, in decibels.
     :param extraneous_levels_db: The extraneous levels at the same positions,
         in decibels.
     :return: The corrected mean level in decibels, and whether the correction
@@ -483,10 +483,10 @@ def extraneous_corrected_mean_level_db(
     :raises ValueError: For inputs that do not match point for point, or an
         extraneous level at or above the level it is subtracted from.
     """
-    levels = require_finite_array(levels_db, "levels_db")
+    levels = require_finite_array(levels, "levels")
     extraneous = require_finite_array(extraneous_levels_db, "extraneous_levels_db")
     if levels.shape != extraneous.shape:
-        msg = "'levels_db' and 'extraneous_levels_db' must match point for point."
+        msg = "'levels' and 'extraneous_levels_db' must match point for point."
         raise ValueError(msg)
     difference = 10.0 ** (0.1 * levels) - 10.0 ** (0.1 * extraneous)
     if np.any(difference <= 0.0):
@@ -956,7 +956,7 @@ def in_situ_insertion_loss(
     )
 
 
-def octave_levels_from_third_octave_db(levels_db: ArrayLike) -> NDArray[np.float64]:
+def octave_levels_from_third_octave_db(levels: ArrayLike) -> NDArray[np.float64]:
     r"""One-third-octave levels folded into octaves, 9.1.5.
 
     The energy sum of each consecutive group of three. Clause 9.1.5 permits
@@ -972,12 +972,12 @@ def octave_levels_from_third_octave_db(levels_db: ArrayLike) -> NDArray[np.float
     difference, and ISO 11820 wants the levels folded on each side and the
     difference taken afterwards.
 
-    :param levels_db: One-third-octave levels, in decibels, a multiple of
+    :param levels: One-third-octave levels, in decibels, a multiple of
         three bands in ascending order.
     :return: The octave levels, in decibels.
     :raises ValueError: For a count that is not a multiple of three.
     """
-    values = require_finite_array(levels_db, "levels_db")
+    values = require_finite_array(levels, "levels")
     if values.size % _THIRDS_PER_OCTAVE:
         msg = (
             f"An octave is {_THIRDS_PER_OCTAVE} one-third-octave bands, so the "

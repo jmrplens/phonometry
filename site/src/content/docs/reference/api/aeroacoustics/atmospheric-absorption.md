@@ -86,7 +86,7 @@ Plot the band and pure-tone mid-band attenuation versus frequency.
 
 ```python
 arp866a_attenuation(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,
@@ -135,7 +135,7 @@ from 30 % to 90 %. Its Tables 3 to 12 print the formula from -10 °C to
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | One-third-octave bands, by nominal or exact centre frequency in Hz, from 50 Hz to 10 kHz. |
+| `frequencies` | One-third-octave bands, by nominal or exact centre frequency in Hz, from 50 Hz to 10 kHz. |
 | `temperature_c` | Air temperature `θ`, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity `RH`, in percent (0 to 100). |
 | `eta_interpolation` | `"quadratic"` (default, ISO 3891) or `"linear"` (ECAC Doc 29 Appendix D). |
@@ -152,7 +152,7 @@ from 30 % to 90 %. Its Tables 3 to 12 print the formula from -10 °C to
 
 ```python
 Arp866aAttenuation(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     evaluation_frequencies_hz: NDArray[np.float64],
     delta: NDArray[np.float64],
     eta: NDArray[np.float64],
@@ -169,7 +169,7 @@ Atmospheric attenuation coefficient per band by SAE ARP 866A (ISO 3891 Annex A).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Nominal one-third-octave-band centre frequencies, in Hz, one per band. |
+| `frequencies` | Nominal one-third-octave-band centre frequencies, in Hz, one per band. |
 | `evaluation_frequencies_hz` | The frequency `f0` of ISO 3891 Table 2 at which each band is evaluated, in Hz: the centre up to 4 kHz, the rounded lower band edge above. |
 | `delta` | The humidity-and-temperature argument `δ` of A.2 per band, dimensionless. |
 | `eta` | `η(δ)` per band, interpolated in Table 1. |

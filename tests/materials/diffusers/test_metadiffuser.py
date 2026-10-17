@@ -229,6 +229,11 @@ def test_panel_validation() -> None:
         metadiffuser_diffusion_spectrum(
             empty_band, [ABSORBER, None], depth=0.03, period_m=0.10
         )
+    below_zero = np.array([-500.0, 1000.0])
+    with pytest.raises(ValueError, match=r"'frequencies' must be strictly positive"):
+        metadiffuser_diffusion_spectrum(
+            below_zero, [ABSORBER, None], depth=0.03, period_m=0.10
+        )
     with pytest.raises(ValueError, match="at least one resonator"):
         MetadiffuserWell(0.01, ())
 

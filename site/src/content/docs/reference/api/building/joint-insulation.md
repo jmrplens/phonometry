@@ -617,7 +617,7 @@ Whether the width is no greater than 50 mm.
 lab_joint_insulation(
     r_s_measured_db: ArrayLike,
     r_s_max_db: ArrayLike,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     joint_length_m: float | None = None,
     limit_at_maximum: bool = True,
@@ -662,7 +662,7 @@ the bracketed lower limit, whichever rule corrected them.
 | :--- | :--- |
 | `r_s_measured_db` | $R_\mathrm{s}'$ per one-third-octave band, in dB. |
 | `r_s_max_db` | $R_\mathrm{s,max}$ per band, in dB. |
-| `frequencies_hz` | Band centre frequencies, in Hz. |
+| `frequencies` | Band centre frequencies, in Hz. |
 | `joint_length_m` | Length of the joint under test, in m, kept for the form of Figure J.7; `None` leaves that row empty. |
 | `limit_at_maximum` | Set the bands within 3 dB of the maximum to $R_\mathrm{s,max}$ (default), or give them the 1,3 dB correction like the other bands below 6 dB. |
 
@@ -678,7 +678,7 @@ the bracketed lower limit, whichever rule corrected them.
 
 ```python
 LabJointInsulationResult(
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
     r_s_measured_db: np.ndarray,
     r_s_max_db: np.ndarray,
     r_s_db: np.ndarray,
@@ -699,7 +699,7 @@ Sound reduction index of a joint per metre (ISO 10140-1:2021 Annex J).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | One-third-octave band centre frequencies, in Hz. |
+| `frequencies` | One-third-octave band centre frequencies, in Hz. |
 | `r_s_measured_db` | $R_\mathrm{s}'$, the index measured with the test element in the test opening, per band, in dB. |
 | `r_s_max_db` | $R_\mathrm{s,max}$, the maximum of the test arrangement with the joint sealed on both sides, in dB. |
 | `r_s_db` | $R_\mathrm{s}$, corrected for the flanking through the arrangement, in dB. In the `"limit"` and `"maximum"` bands it is a minimum value. |

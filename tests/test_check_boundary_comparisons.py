@@ -551,8 +551,8 @@ def test_an_unsettled_comparison_in_the_free_field_evaluation_is_refused() -> No
     head, tail = text.split(marker, 1)
     signature, body = tail.split(":\n", 1)
     injected = (
-        "    injected_spread = float(check.results[0].frequencies_hz[-1])"
-        " - float(check.results[0].frequencies_hz[0])\n"
+        "    injected_spread = float(check.results[0].frequencies[-1])"
+        " - float(check.results[0].frequencies[0])\n"
         "    if injected_spread >= _ORIGIN_RESOLUTION_M:\n"
         "        pass\n"
     )

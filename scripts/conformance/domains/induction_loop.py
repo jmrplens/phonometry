@@ -307,7 +307,7 @@ def _chk_response_window() -> Outcome:
     ) -> bool:
         return ea.verify_induction_loop_system(
             [0.0],
-            frequencies_hz=f,
+            frequencies=f,
             response_db=[outside, at_low, at_1k, at_high, outside],
         ).passes
 

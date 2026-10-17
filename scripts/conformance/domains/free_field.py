@@ -151,7 +151,7 @@ def _free_field_fit(distances: np.ndarray) -> emission.InverseSquareLawResult:
         emission.MicrophoneTraverse.along(u, distances, grid) for u in _DIRECTIONS
     ]
     return emission.inverse_square_law_deviations(
-        traverses, frequencies_hz=_GRID, room="anechoic"
+        traverses, frequencies=_GRID, room="anechoic"
     )
 
 
@@ -193,7 +193,7 @@ def _chk_formula_3() -> Outcome:
     levels = np.array([85.0, 80.5, 76.0, 73.5])
     fit = emission.inverse_square_law_deviations(
         [emission.MicrophoneTraverse.along((1, 0, 0), d, levels)],
-        frequencies_hz=[1000.0],
+        frequencies=[1000.0],
         room="anechoic",
     )
     expected = (np.sum(20.0 * np.log10(d)) + np.sum(levels)) / d.size
@@ -224,7 +224,7 @@ def _chk_reflection_radius() -> Outcome:
         (1, 0, 0), d, 90.0 - 20.0 * np.log10(d) + excess
     )
     fit = emission.inverse_square_law_deviations(
-        [traverse], frequencies_hz=[1000.0], room="anechoic"
+        [traverse], frequencies=[1000.0], room="anechoic"
     )
     expected = float(d[d <= limit][-1])
     return numeric(
@@ -244,7 +244,7 @@ def _chk_reflection_spread() -> Outcome:
         (1, 0, 0), d, 90.0 - 20.0 * np.log10(d) + excess
     )
     fit = emission.inverse_square_law_deviations(
-        [traverse], frequencies_hz=[1000.0], room="anechoic"
+        [traverse], frequencies=[1000.0], room="anechoic"
     )
     inside = d <= limit
     return numeric(float(np.ptp(excess[inside])),
@@ -268,7 +268,7 @@ def _chk_formula_1() -> Outcome:
         monitor_levels_db=70.0 + drift,
     )
     fit = emission.inverse_square_law_deviations(
-        [traverse], frequencies_hz=[1000.0], room="anechoic"
+        [traverse], frequencies=[1000.0], room="anechoic"
     )
     return numeric(0.0, float(np.max(np.abs(fit.deviations_db[0]))), 1e-9, unit="dB",
                    places=4)  # fmt: skip
@@ -284,12 +284,12 @@ def _chk_6926_table_1() -> Outcome:
     freqs = (80.0, 160.0, 200.0)
     lw = np.full(len(_THIRDS), 90.0)
     verdict = emission.verify_reference_sound_source(
-        lw, frequencies_hz=_THIRDS, repeated_levels_db=np.vstack([lw, lw, lw]),
+        lw, frequencies=_THIRDS, repeated_levels_db=np.vstack([lw, lw, lw]),
         directivity_index_db=np.zeros(len(_THIRDS)),
     )  # fmt: skip
     limits = dict(zip(_THIRDS, verdict.repeatability_limit_db, strict=True))
     extended = emission.verify_reference_sound_source(
-        np.full(3, 90.0), frequencies_hz=(50.0, 63.0, 80.0),
+        np.full(3, 90.0), frequencies=(50.0, 63.0, 80.0),
         repeated_levels_db=np.full((3, 3), 90.0), directivity_index_db=np.zeros(3),
     )  # fmt: skip
     computed = {
@@ -359,11 +359,11 @@ def _chk_6926_annex_a() -> Outcome:
     ratio = math.log10(303.15 / 296.0)
     monopole = emission.radiation_impedance_correction(
         temperature_c=30.0, static_pressure_kpa=95.0, radiation="monopole",
-        frequencies_hz=[100.0, 1000.0], knee_frequency_hz=500.0,
+        frequencies=[100.0, 1000.0], knee_frequency_hz=500.0,
     )  # fmt: skip
     dipole = emission.radiation_impedance_correction(
         temperature_c=30.0, static_pressure_kpa=95.0, radiation="dipole",
-        frequencies_hz=[1000.0], knee_frequency_hz=500.0,
+        frequencies=[1000.0], knee_frequency_hz=500.0,
     )  # fmt: skip
     unknown = emission.radiation_impedance_correction(
         temperature_c=30.0, static_pressure_kpa=95.0
@@ -392,7 +392,7 @@ def _chk_6926_annex_a() -> Outcome:
 def _chk_6926_formula_2() -> Outcome:
     calibration = emission.reference_source_calibration(
         np.full((20, len(_THIRDS)), 80.0),
-        frequencies_hz=_THIRDS,
+        frequencies=_THIRDS,
         arrangement="fixed",
         conditions=emission.CalibrationConditions(air_absorption_db_per_m=0.01),
     )
@@ -411,7 +411,7 @@ def _chk_6926_formula_2() -> Outcome:
 def _spectrum_verdict(lw: np.ndarray, freqs: tuple[float, ...]) -> bool:
     return bool(
         emission.verify_reference_sound_source(
-            lw, frequencies_hz=freqs, repeated_levels_db=np.vstack([lw, lw, lw]),
+            lw, frequencies=freqs, repeated_levels_db=np.vstack([lw, lw, lw]),
             directivity_index_db=np.zeros(len(freqs)),
         ).spectrum_met
     )  # fmt: skip
@@ -471,7 +471,7 @@ def _chk_6926_spectrum() -> Outcome:
 def _chk_6926_drift() -> Outcome:
     freqs = (80.0, 125.0, 1000.0)
     result = emission.verify_reference_source_drift(
-        np.zeros(3), np.zeros(3), frequencies_hz=freqs
+        np.zeros(3), np.zeros(3), frequencies=freqs
     )
     return record(
         _cells(freqs, np.round(2.83 * np.array([0.8, 0.4, 0.2]), 9)),
@@ -503,7 +503,7 @@ def _steady_enough(bands: tuple[float, ...], band: float, sigma_db: float) -> fl
     repeated[:, bands.index(band)] = _three_with_sigma(sigma_db) + 10.0
     verdict = emission.verify_reference_sound_source(
         levels,
-        frequencies_hz=bands,
+        frequencies=bands,
         repeated_levels_db=repeated,
         directivity_index_db=np.zeros(len(bands)),
     )
@@ -549,7 +549,7 @@ def _chk_6926_drift_edges() -> Outcome:
             latest = np.zeros(len(freqs))
             latest[index] = change
             result = emission.verify_reference_source_drift(
-                np.zeros(len(freqs)), latest, frequencies_hz=freqs
+                np.zeros(len(freqs)), latest, frequencies=freqs
             )
             expected[name] = verdict
             computed[name] = float(result.passes)
@@ -587,7 +587,7 @@ def _check(
 ) -> emission.FreeFieldCheck:
     fit = emission.inverse_square_law_deviations(
         traverses,
-        frequencies_hz=freqs,
+        frequencies=freqs,
         room=room,  # type: ignore[arg-type]
     )
     return emission.check_free_field(fit, bandwidth="broadband", **options)  # type: ignore[arg-type]
@@ -813,7 +813,7 @@ def _qualifies_to_the_end(frequency: float, room: str, rise_db: float) -> float:
     levels[-1] += rise_db
     fit = emission.inverse_square_law_deviations(
         [emission.MicrophoneTraverse.along((1, 0, 0), d, levels)],
-        frequencies_hz=[frequency],
+        frequencies=[frequency],
         room=room,  # type: ignore[arg-type]
     )
     return float(bool(fit.traverse_radius_m[0, 0] > d[-2]))
@@ -853,7 +853,7 @@ def _uniform_within(room: str, frequency: float, deviation_db: float) -> float:
     levels[1] -= deviation_db
     result = emission.verify_source_directionality(
         levels,
-        frequencies_hz=[frequency],
+        frequencies=[frequency],
         room=room,  # type: ignore[arg-type]
     )
     return float(result.passes)
@@ -899,7 +899,7 @@ def _chk_6926_table_b1() -> Outcome:
     freqs = (50.0, 63.0, 80.0, *_THIRDS)
     levels = np.full((20, len(freqs)), 80.0)
     pressure = emission.reference_source_calibration(
-        levels, frequencies_hz=freqs, arrangement="fixed"
+        levels, frequencies=freqs, arrangement="fixed"
     ).sound_power_level_db
 
     def agrees(band: float, difference: float) -> float:
@@ -907,7 +907,7 @@ def _chk_6926_table_b1() -> Outcome:
         intensity[freqs.index(band)] += difference
         calibration = emission.reference_source_calibration(
             levels,
-            frequencies_hz=freqs,
+            frequencies=freqs,
             arrangement="fixed",
             intensity_sound_power_level_db=intensity,
         )
@@ -938,7 +938,7 @@ def _chk_6926_supply_and_directivity() -> Outcome:
     ) -> emission.ReferenceSoundSourceVerdict:
         return emission.verify_reference_sound_source(
             lw,
-            frequencies_hz=_THIRDS,
+            frequencies=_THIRDS,
             supply_variation_db=supply,
             directivity_index_db=np.full(len(_THIRDS), directivity),
         )
@@ -963,7 +963,7 @@ def _chk_6926_supply_and_directivity() -> Outcome:
 def _chk_6926_formula_2_meteorology() -> Outcome:
     calibration = emission.reference_source_calibration(
         np.full((20, len(_THIRDS)), 80.0),
-        frequencies_hz=_THIRDS,
+        frequencies=_THIRDS,
         arrangement="fixed",
         conditions=emission.CalibrationConditions(
             temperature_c=30.0, static_pressure_kpa=95.0
@@ -991,7 +991,7 @@ def _chk_6926_formula_2_meteorology() -> Outcome:
 )
 def _chk_6926_calibration_at_the_test() -> Outcome:
     calibration = emission.reference_source_calibration(
-        np.full((20, len(_THIRDS)), 80.0), frequencies_hz=_THIRDS, arrangement="fixed"
+        np.full((20, len(_THIRDS)), 80.0), frequencies=_THIRDS, arrangement="fixed"
     )
     lp = np.full(len(_THIRDS), 70.0)
     result = emission.sound_power_comparison(

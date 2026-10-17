@@ -261,9 +261,9 @@ plt.show()
 
 # By hand, from the band curve the result now carries:
 fig, ax = plt.subplots()
-ax.semilogx(w.band_centers, w.measured, "o-", label="Measured R")
-ax.semilogx(w.band_centers, w.shifted_reference, "s--", label="Shifted reference")
-ax.fill_between(w.band_centers, w.measured, w.shifted_reference,
+ax.semilogx(w.frequencies, w.measured, "o-", label="Measured R")
+ax.semilogx(w.frequencies, w.shifted_reference, "s--", label="Shifted reference")
+ax.fill_between(w.frequencies, w.measured, w.shifted_reference,
                 where=w.measured < w.shifted_reference, interpolate=True,
                 alpha=0.3, label="Unfavourable deviations")
 ax.set_xlabel("Frequency [Hz]")
@@ -284,7 +284,7 @@ plt.show()
 
 `weighted_rating()` returns a `WeightedRatingResult` (`rating`, `c`, `ctr`,
 `unfavourable_sum`, all integers except the sum), plus the three fields the
-figures on this page are drawn from: `band_centers`, `measured` and
+figures on this page are drawn from: `frequencies`, `measured` and
 `shifted_reference`, and `quantity` naming what was rated.
 
 ## Impact ratings (ISO 717-2)
@@ -372,9 +372,9 @@ plt.show()
 # an unfavourable deviation is where the MEASURED level exceeds the reference).
 # Here the input was Ln, so the rated quantity is Ln,w:
 fig, ax = plt.subplots()
-ax.semilogx(res_imp.band_centers, res_imp.measured, "o-", label="Measured Ln")
-ax.semilogx(res_imp.band_centers, res_imp.shifted_reference, "s--", label="Shifted reference")
-ax.fill_between(res_imp.band_centers, res_imp.shifted_reference, res_imp.measured,
+ax.semilogx(res_imp.frequencies, res_imp.measured, "o-", label="Measured Ln")
+ax.semilogx(res_imp.frequencies, res_imp.shifted_reference, "s--", label="Shifted reference")
+ax.fill_between(res_imp.frequencies, res_imp.shifted_reference, res_imp.measured,
                 where=res_imp.measured > res_imp.shifted_reference, interpolate=True,
                 alpha=0.3, label="Unfavourable deviations")
 ax.set_xlabel("Frequency [Hz]")
@@ -402,7 +402,7 @@ sixteen bands in that cell and gives $-10$ instead; the registry entry is in
 
 `weighted_impact_rating()` returns an `ImpactRatingResult` (`rating`,
 `ci` integers, `unfavourable_sum` in dB), with the same three plotting fields
-as the airborne result: `band_centers`, `measured` and `shifted_reference`.
+as the airborne result: `frequencies`, `measured` and `shifted_reference`.
 
 ## Enlarged frequency ranges and one-decimal ratings
 
@@ -477,10 +477,10 @@ plt.show()
 # By hand, from the band curves the result carries (the full enlarged-range
 # curve on ext, the core-band reference on ext.core):
 fig, ax = plt.subplots()
-ax.semilogx(ext.band_centers, ext.measured, "o-", label="Measured R")
-ax.semilogx(ext.core.band_centers, ext.core.shifted_reference, "s--",
+ax.semilogx(ext.frequencies, ext.measured, "o-", label="Measured R")
+ax.semilogx(ext.core.frequencies, ext.core.shifted_reference, "s--",
             label="Shifted reference (core bands)")
-ax.fill_between(ext.core.band_centers, ext.core.measured,
+ax.fill_between(ext.core.frequencies, ext.core.measured,
                 ext.core.shifted_reference,
                 where=ext.core.measured < ext.core.shifted_reference,
                 interpolate=True, alpha=0.3, label="Unfavourable deviations")

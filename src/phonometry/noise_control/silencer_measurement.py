@@ -719,7 +719,7 @@ def open_end_transmission_loss(
     argument is far from 1, which is at the ends of the range rather than in
     the middle.
 
-    :param frequency: Band centre frequencies :math:`f`, in Hz.
+    :param frequency: Band centre frequency :math:`f`, in Hz (scalar or array).
     :param area: :math:`S`, the cross-sectional area of the duct, in m².
     :param solid_angle_sr: :math:`\Omega`, the solid angle of radiation at the
         duct end, in sr. The five configurations of Table B.1 are in
@@ -761,7 +761,7 @@ def open_end_reflection_coefficient(
     result: a test duct with an anechoic termination qualifies only if its
     reflection coefficient is no greater than 0,3.
 
-    :param frequency: Band centre frequencies :math:`f`, in Hz.
+    :param frequency: Band centre frequency :math:`f`, in Hz (scalar or array).
     :param area: :math:`S`, the cross-sectional area of the duct, in m².
     :param solid_angle_sr: :math:`\Omega`, in sr.
     :param speed_of_sound: :math:`c`, in m/s.

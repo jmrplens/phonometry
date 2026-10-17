@@ -594,7 +594,7 @@ class TestBandRoute:
             mass_flow=30.0,
             outlet_pressure_pa=8.0e5,
             incipient=INCIPIENT,
-            frequency=[63.0, 125.0, 250.0],
+            frequencies=[63.0, 125.0, 250.0],
         )
         assert result.frequencies.tolist() == [63.0, 125.0, 250.0]
         assert result.band_external_level.shape == (3,)

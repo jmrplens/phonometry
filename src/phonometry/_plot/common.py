@@ -996,7 +996,7 @@ def _hatch_invalid(bars: BarContainer, mask: np.ndarray) -> None:
 
 
 def _plot_rating(
-    band_centers: np.ndarray,
+    frequencies: np.ndarray,
     measured: np.ndarray,
     reference: np.ndarray,
     *,
@@ -1020,9 +1020,9 @@ def _plot_rating(
     ax = ax if ax is not None else _new_axes()
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(measured_label, language))
-    ax.plot(band_centers, measured, "o-", **kwargs)
+    ax.plot(frequencies, measured, "o-", **kwargs)
     ax.plot(
-        band_centers,
+        frequencies,
         reference,
         "s--",
         color=_C_REFERENCE,
@@ -1032,7 +1032,7 @@ def _plot_rating(
         measured=measured, reference=reference, impact=impact
     )
     ax.fill_between(
-        band_centers,
+        frequencies,
         measured,
         reference,
         where=unfavourable.tolist(),
@@ -1041,7 +1041,7 @@ def _plot_rating(
         label=_t("Unfavourable deviations", language),
         interpolate=True,
     )
-    _freq_axis(ax, band_centers, language=language)
+    _freq_axis(ax, frequencies, language=language)
     ax.set_ylabel(ylabel)
     if ylim is not None:
         ax.set_ylim(*ylim)
@@ -1067,7 +1067,7 @@ def _unfavourable_mask(
 
 def _annotate_impact_500(
     ax: Axes,
-    band_centers: np.ndarray,
+    frequencies: np.ndarray,
     reference: np.ndarray,
     rating: int,
     *,
@@ -1079,9 +1079,9 @@ def _annotate_impact_500(
     """
     from .._i18n import format_number
 
-    if band_centers.size == 0:
+    if frequencies.size == 0:
         return
-    idx = int(np.argmin(np.abs(band_centers - 500.0)))
+    idx = int(np.argmin(np.abs(frequencies - 500.0)))
     read_value = float(reference[idx])
     read_str = format_number(read_value, language, decimals=0)
     read_label = (
@@ -1090,7 +1090,7 @@ def _annotate_impact_500(
         else f"500 Hz read = {read_str} dB"
     )
     ax.plot(
-        [band_centers[idx]],
+        [frequencies[idx]],
         [read_value],
         marker="D",
         ls="",
@@ -1113,7 +1113,7 @@ def _annotate_impact_500(
         )
         ax.annotate(
             annotation,
-            xy=(band_centers[idx], read_value),
+            xy=(frequencies[idx], read_value),
             xytext=(0.0, -32.0),
             textcoords=_OFFSET_POINTS,
             ha="center",
@@ -1127,7 +1127,7 @@ def _require_rating_curve(
     result: WeightedRatingResult | ImpactRatingResult,
 ) -> None:
     if (
-        result.band_centers is None
+        result.frequencies is None
         or result.measured is None
         or result.shifted_reference is None
     ):

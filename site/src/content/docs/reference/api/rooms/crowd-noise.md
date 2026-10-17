@@ -101,7 +101,7 @@ bound (Equation (17.54)).
 
 | Name | Description |
 | :--- | :--- |
-| `distance` | Separation `r`, m: the cross-table distance `rs` for the communication bound, the table-to-table distance `rt` for the privacy bound. |
+| `distance` | Separation `r`, m (scalar or array): the cross-table distance `rs` for the communication bound, the table-to-table distance `rt` for the privacy bound. |
 | `speech_to_noise` | Target speech-to-noise ratio `L_SN`, dB. |
 | `directivity` | Talker directivity factor `Q`. |
 
@@ -294,7 +294,7 @@ number of talkers appears: a busier room brings its own absorption with it.
 
 | Name | Description |
 | :--- | :--- |
-| `distance` | Talker-to-listener distance `r`, m. |
+| `distance` | Talker-to-listener distance `r`, m (scalar or array). |
 | `absorption_per_table` | Equivalent absorption area per occupied table `A_tab`, m2. |
 | `directivity` | Talker directivity factor `Q`. |
 

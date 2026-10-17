@@ -455,10 +455,10 @@ class PowerInjectionResult(OwnsArrays):
 
 
 def _broadcast_bands(
-    frequency: ArrayLike, values: dict[str, ArrayLike]
+    frequencies: ArrayLike, values: dict[str, ArrayLike]
 ) -> tuple[NDArray[np.float64], dict[str, NDArray[np.float64]]]:
     """Validate a band axis and broadcast every named positive array onto it."""
-    f = require_positive_array(frequency, "frequency")
+    f = require_positive_array(frequencies, "frequencies")
     f = np.atleast_1d(f)
     out: dict[str, NDArray[np.float64]] = {}
     for name, value in values.items():
@@ -474,7 +474,7 @@ def _broadcast_bands(
 
 
 def power_injection_clf(
-    frequency: ArrayLike,
+    frequencies: ArrayLike,
     energy1: ArrayLike,
     energy2: ArrayLike,
     internal_loss_factor1: ArrayLike,
@@ -500,7 +500,7 @@ def power_injection_clf(
     subsystem mass and :math:`\langle v_i^2 \rangle` the space- and
     time-averaged mean-square velocity in the band.
 
-    :param frequency: Band centre frequencies ``f``, in hertz (> 0).
+    :param frequencies: Band centre frequencies ``f``, in hertz (> 0).
     :param energy1: Band energy ``E_1`` of the driven subsystem, in J (> 0).
     :param energy2: Band energy ``E_2`` of the receiving subsystem, in J
         (> 0).
@@ -516,7 +516,7 @@ def power_injection_clf(
         two-subsystem SEA model fits it).
     """
     f, v = _broadcast_bands(
-        frequency,
+        frequencies,
         {
             "energy1": energy1,
             "energy2": energy2,
@@ -560,7 +560,7 @@ def power_injection_clf(
 
 
 def power_injection_matrix(
-    frequency: ArrayLike,
+    frequencies: ArrayLike,
     energies: ArrayLike,
     input_powers: ArrayLike,
 ) -> PowerInjectionResult:
@@ -572,7 +572,7 @@ def power_injection_matrix(
     used, :attr:`PowerInjectionResult.modal_density_ratio` becomes an
     independent check on the measurement.
 
-    :param frequency: Band centre frequencies ``f``, in hertz (> 0), shape
+    :param frequencies: Band centre frequencies ``f``, in hertz (> 0), shape
         ``(nb,)``.
     :param energies: Measured band energies, in joules, shape ``(2, 2, nb)``:
         ``energies[i][j]`` is the energy of subsystem ``i`` while subsystem
@@ -586,7 +586,7 @@ def power_injection_matrix(
     :raises ValueError: for a bad shape, a non-positive value, or a singular
         energy matrix in some band.
     """
-    f = np.atleast_1d(require_positive_array(frequency, "frequency"))
+    f = np.atleast_1d(require_positive_array(frequencies, "frequencies"))
     e = np.asarray(energies, dtype=np.float64)
     p = np.asarray(input_powers, dtype=np.float64)
     if e.shape != (2, 2, f.size):

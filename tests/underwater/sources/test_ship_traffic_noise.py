@@ -102,7 +102,7 @@ _WALES_HEITMEYER_EQ = [
 
 def test_wales_heitmeyer_printed_equation_values() -> None:
     freqs = [f for f, _ in _WALES_HEITMEYER_EQ]
-    s = ship_source_spectrum(model="wales-heitmeyer", frequency_hz=freqs)
+    s = ship_source_spectrum(model="wales-heitmeyer", frequencies=freqs)
     for (_, psd_ref), psd in zip(_WALES_HEITMEYER_EQ, s.source_psd, strict=True):
         assert float(psd) == pytest.approx(psd_ref, abs=1e-3)
 
@@ -111,15 +111,15 @@ def test_wales_heitmeyer_printed_asymptotes() -> None:
     # The paper states the low-frequency power-law exponent is -3.6, the
     # high-frequency exponent -1.76 (= 3.594 - 2 x 0.917) and the breakpoint
     # between the asymptotes 340 Hz.
-    lo = ship_source_spectrum(model="wales-heitmeyer", frequency_hz=[30.0, 60.0])
+    lo = ship_source_spectrum(model="wales-heitmeyer", frequencies=[30.0, 60.0])
     lo_exp = float(lo.source_psd[1] - lo.source_psd[0]) / (10.0 * np.log10(2.0))
     assert lo_exp == pytest.approx(-3.6, abs=0.05)
-    hi = ship_source_spectrum(model="wales-heitmeyer", frequency_hz=[6800.0, 13600.0])
+    hi = ship_source_spectrum(model="wales-heitmeyer", frequencies=[6800.0, 13600.0])
     hi_exp = float(hi.source_psd[1] - hi.source_psd[0]) / (10.0 * np.log10(2.0))
     assert hi_exp == pytest.approx(-1.76, abs=0.01)
     # At the 340 Hz breakpoint the correction term lifts the pure power law
     # by 10 lg(2^0.917) = 2.7604 dB.
-    at = ship_source_spectrum(model="wales-heitmeyer", frequency_hz=[340.0])
+    at = ship_source_spectrum(model="wales-heitmeyer", frequencies=[340.0])
     power_law_only = 230.0 - 10.0 * 3.594 * np.log10(340.0)
     assert float(at.source_psd[0]) - power_law_only == pytest.approx(
         10.0 * np.log10(2.0**0.917), abs=1e-9
@@ -143,6 +143,11 @@ def test_unknown_class_and_model_rejected() -> None:
         ship_source_spectrum(12.0, 100.0, vessel_class="submarine")
     with pytest.raises(ValueError, match=r"'model' must be one of"):
         ship_source_spectrum(12.0, 100.0, model="urick")
+
+
+def test_a_frequency_that_is_not_positive_is_named_by_its_parameter() -> None:
+    with pytest.raises(ValueError, match=r"'frequencies' must be"):
+        ship_source_spectrum(12.0, 100.0, frequencies=[100.0, -1.0])
 
 
 def test_ship_traffic_plot_smoke() -> None:
@@ -221,7 +226,7 @@ def test_jomopans_echo_tracks_overseas_harriette_at_speed(
         speed_kn,
         173.0,
         vessel_class="bulker",
-        frequency_hz=_HARRIETTE_FREQS,
+        frequencies=_HARRIETTE_FREQS,
     )
     diff = res.band_level - np.asarray(_HARRIETTE_LEVELS[speed_kn])
     assert float(np.max(np.abs(diff))) <= 8.0
@@ -238,7 +243,7 @@ def test_jomopans_echo_overseas_harriette_low_speed_mean() -> None:
         8.0,
         173.0,
         vessel_class="bulker",
-        frequency_hz=_HARRIETTE_FREQS,
+        frequencies=_HARRIETTE_FREQS,
     )
     diff = res.band_level - np.asarray(_HARRIETTE_LEVELS[8.0])
     assert float(np.mean(np.abs(diff))) <= 6.0

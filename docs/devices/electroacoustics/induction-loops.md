@@ -308,7 +308,7 @@ off = [-38.5, -36.0, -40.2, -37.1, -35.4]   # loop off, A-weighted, dB re 400 mA
 on = [-38.1, -35.6, -39.9, -36.6, -35.0]    # system on, inputs muted
 verdict = electroacoustics.verify_induction_loop_system(
     levels,
-    frequencies_hz=[100.0, 1000.0, 5000.0],
+    frequencies=[100.0, 1000.0, 5000.0],
     response_db=[[-0.4, 0.0, -1.8], [-0.3, 0.0, -2.4], [-0.6, 0.0, -3.4]],
     background_noise_levels_db=off,
     system_noise_levels_db=on,

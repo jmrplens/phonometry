@@ -763,7 +763,7 @@ MINIMUM_REFERENCE_DISTANCE_M = 3.0
 ```python
 octave_pair_averages(
     values: ArrayLike,
-    frequency: ArrayLike,
+    frequencies: ArrayLike,
 ) -> dict[str, float]
 ```
 
@@ -786,8 +786,8 @@ pair means little for them.
 
 | Name | Description |
 | :--- | :--- |
-| `values` | Per-band values, one per entry of `frequency`. |
-| `frequency` | The band centre frequencies in Hz. |
+| `values` | Per-band values, one per entry of `frequencies`. |
+| `frequencies` | The band centre frequencies in Hz. |
 
 **Returns:** `{"low": ..., "mid": ..., "high": ...}` in the values' unit.
 
@@ -907,7 +907,7 @@ reproduces the method rather than quietly improving it.
 single_number_average(
     symbol: str,
     values: ArrayLike,
-    frequency: ArrayLike,
+    frequencies: ArrayLike,
 ) -> float
 ```
 
@@ -932,8 +932,8 @@ table.
 | Name | Description |
 | :--- | :--- |
 | `symbol` | The quantity, as [`TABLE_A1`](/phonometry/reference/api/rooms/auditorium/#table_a1) keys it. `"J_LFC"` is taken too: Table A.1 prints the early lateral energy fraction as one row, "J_LF or J_LFC", so both weightings of [`early_lateral_energy_fraction`](/phonometry/reference/api/rooms/auditorium/#early_lateral_energy_fraction) share its four bands, its just-noticeable difference and its typical range. |
-| `values` | Its per-band values, one per entry of `frequency`. |
-| `frequency` | The band centre frequencies in Hz, as a result carries them. |
+| `values` | Its per-band values, one per entry of `frequencies`. |
+| `frequencies` | The band centre frequencies in Hz, as a result carries them. |
 
 **Returns:** The single number, in the quantity's own unit.
 

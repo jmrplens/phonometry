@@ -264,7 +264,7 @@ def test_non_iso_band_count_rejected(tmp_path: Path) -> None:
         c=-2,
         ctr=-3,
         unfavourable_sum=0.0,
-        band_centers=centers,
+        frequencies=centers,
         measured=curve,
         shifted_reference=curve,
     )

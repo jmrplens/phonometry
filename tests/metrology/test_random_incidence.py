@@ -103,7 +103,7 @@ def _counted_once_index_db(result: ri.DirectivityFactor) -> float:
     second = np.isclose(result.plane_angles_deg, 90.0)
     pole = np.isclose(result.incidence_angles_deg % 180.0, 0.0)
     kept = ~(second & pole)
-    energy = 10.0 ** (0.1 * (result.levels_db - result.reference_level_db))
+    energy = 10.0 ** (0.1 * (result.levels - result.reference_level_db))
     return -10.0 * math.log10(float(np.sum(result.weights[kept] * energy[kept])))
 
 
@@ -324,35 +324,33 @@ def test_the_sum_converges_to_the_integral_of_formula_3(
 
 def test_one_plane_goes_to_the_axisymmetric_function() -> None:
     levels = np.full(36, 94.0)
-    with pytest.raises(ValueError, match="'levels_db' must hold one row per plane"):
+    with pytest.raises(ValueError, match="'levels' must hold one row per plane"):
         metrology.directivity_factor(levels)
 
 
 def test_several_planes_go_to_the_plane_function() -> None:
     levels = _omni(2, 36)
-    with pytest.raises(
-        ValueError, match="'levels_db' must be the readings of one plane"
-    ):
+    with pytest.raises(ValueError, match="'levels' must be the readings of one plane"):
         metrology.axisymmetric_directivity_factor(levels)
 
 
 @pytest.mark.parametrize("per_plane", [35, 2])
 def test_a_plane_without_both_poles_is_refused(per_plane: int) -> None:
     levels = _omni(2, per_plane)
-    with pytest.raises(ValueError, match="'levels_db' must hold an even number"):
+    with pytest.raises(ValueError, match="'levels' must hold an even number"):
         metrology.directivity_factor(levels)
 
 
 def test_a_reading_that_is_not_finite_is_refused() -> None:
     levels = _omni(2, 36)
     levels[1, 5] = math.nan
-    with pytest.raises(ValueError, match="'levels_db' must contain only finite values"):
+    with pytest.raises(ValueError, match="'levels' must contain only finite values"):
         metrology.directivity_factor(levels)
 
 
 def test_the_readings_are_held_flat_with_their_planes() -> None:
     result = metrology.directivity_factor(_omni(4, 36))
-    assert result.levels_db.shape == (144,)
+    assert result.levels.shape == (144,)
     np.testing.assert_array_equal(np.unique(result.plane_angles_deg), [0, 45, 90, 135])
     np.testing.assert_allclose(result.incidence_angles_deg[:36], np.arange(0, 360, 10))
 
@@ -361,8 +359,8 @@ def test_the_result_arrays_are_read_only_copies() -> None:
     levels = _omni(2, 36)
     result = metrology.directivity_factor(levels)
     levels[0, 3] = 0.0
-    assert result.levels_db[3] == pytest.approx(94.0)
-    for name in ("incidence_angles_deg", "plane_angles_deg", "levels_db", "weights"):
+    assert result.levels[3] == pytest.approx(94.0)
+    for name in ("incidence_angles_deg", "plane_angles_deg", "levels", "weights"):
         assert not getattr(result, name).flags.writeable
 
 
@@ -371,7 +369,7 @@ def _directivity_fields(**changes: object) -> dict[str, object]:
     fields: dict[str, object] = {
         "incidence_angles_deg": np.arange(4) * 90.0,
         "plane_angles_deg": np.zeros(4),
-        "levels_db": np.zeros(4),
+        "levels": np.zeros(4),
         "weights": np.full(4, 0.25),
         "reference_level_db": 0.0,
         "gamma": 1.0,
@@ -383,7 +381,7 @@ def _directivity_fields(**changes: object) -> dict[str, object]:
 
 
 def test_the_result_refuses_columns_of_different_lengths() -> None:
-    fields = _directivity_fields(levels_db=np.zeros(2))
+    fields = _directivity_fields(levels=np.zeros(2))
     with pytest.raises(
         ValueError, match="'weights' must be 1-D arrays of the same length"
     ):
@@ -567,9 +565,7 @@ def test_random_incidence_refuses_a_column_of_the_wrong_length() -> None:
 
 
 def test_random_incidence_refuses_frequencies_out_of_order() -> None:
-    with pytest.raises(
-        ValueError, match="'frequencies_hz' must be strictly increasing"
-    ):
+    with pytest.raises(ValueError, match="'frequencies' must be strictly increasing"):
         metrology.random_incidence_sensitivity([2000.0, 1000.0], 0.0, 0.1)
 
 
@@ -590,7 +586,7 @@ def test_random_incidence_from_a_directivity_measurement() -> None:
 def test_the_sensitivity_columns_are_read_only() -> None:
     result = metrology.random_incidence_sensitivity([1000.0], 0.0, 0.1)
     assert not result.random_incidence_level_db.flags.writeable
-    assert not result.frequencies_hz.flags.writeable
+    assert not result.frequencies.flags.writeable
 
 
 # --------------------------------------------------------------------------
@@ -735,7 +731,7 @@ def test_the_diffuse_result_refuses_an_unknown_route() -> None:
     frequencies = np.ones(1)
     with pytest.raises(ValueError, match="'route' must be one of"):
         ri.DiffuseFieldSensitivity(
-            frequencies_hz=frequencies,
+            frequencies=frequencies,
             indicated_level_db=one,
             reference_indicated_level_db=one,
             reference_sensitivity_level_db=one,

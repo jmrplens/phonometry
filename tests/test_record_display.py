@@ -571,12 +571,40 @@ def test_the_worst_case_stays_bounded() -> None:
         ("delta_rw_c", ""),
         ("sound_power_level_a", ""),
         ("subject_m", ""),
-        ("levels", ""),
         ("m", ""),
+        # The axes the vocabulary names by the bare concept, in their one unit.
+        ("frequencies", "Hz"),
+        ("octave_frequencies", "Hz"),
+        ("levels", "dB"),
+        ("background_levels", "dB"),
+        ("times", "s"),
+        ("distances", "m"),
+        ("depths", "m"),
+        ("volume", "m\N{SUPERSCRIPT THREE}"),
+        ("speeds_of_sound", "m/s"),
     ],
 )
 def test_the_unit_is_read_from_the_end_of_the_name(name: str, unit: str) -> None:
     assert display.unit_of(name) == unit
+
+
+def test_a_renamed_band_axis_keeps_its_unit_in_the_table() -> None:
+    """``frequencies_hz`` became ``frequencies`` and still shows hertz."""
+    check = phonometry.vibration.verify_weighting(
+        "Wk", [4.0, 8.0, 16.0], [1.0, 1.0, 1.0]
+    )
+    units = {row.name: row.unit for row in display._rows(check, depth=0)[0]}
+    assert units["frequencies"] == "Hz"
+
+
+def test_a_record_names_the_unit_of_a_bare_field_that_holds_another() -> None:
+    """Crossing levels are in the units of the signal, not in decibels."""
+    record = phonometry.metrology.level_crossing_rate(
+        np.sin(np.linspace(0.0, 40.0 * np.pi, 4000)), fs=1000.0
+    )
+    units = {row.name: row.unit for row in display._rows(record, depth=0)[0]}
+    assert units["levels"] == ""
+    assert units["fs"] == "Hz"
 
 
 #: The words that spell a unit and nothing else, at the end of a field's name.

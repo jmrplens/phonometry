@@ -99,7 +99,7 @@ def test_field_strength_refuses_a_nan_level() -> None:
         (
             lambda: ea.verify_induction_loop_system(
                 [0.0],
-                frequencies_hz=[100.0, 1000.0, 5000.0],
+                frequencies=[100.0, 1000.0, 5000.0],
                 response_db=np.array([0.0, 0.0, 1.0j]),
             ),
             "response_db",
@@ -164,7 +164,7 @@ def test_meter_reads_a_sine_at_its_level() -> None:
     assert reading.maximum_db == pytest.approx(-6.0, abs=0.01)
     assert reading.equivalent_db == pytest.approx(-6.0, abs=1e-6)
     assert reading.weighting == "Z"
-    assert reading.levels_db.shape == reading.times_s.shape
+    assert reading.levels.shape == reading.times.shape
 
 
 def test_meter_a_weighting_is_transparent_at_1_khz_and_19_db_down_at_100_hz() -> None:
@@ -177,7 +177,7 @@ def test_meter_a_weighting_is_transparent_at_1_khz_and_19_db_down_at_100_hz() ->
 def test_meter_levels_are_read_only() -> None:
     reading = ea.field_strength_meter(_sine(0.0, 1000.0, seconds=0.5), FS)
     with pytest.raises(ValueError, match="read-only"):
-        reading.levels_db[0] = 0.0
+        reading.levels[0] = 0.0
 
 
 def test_meter_refuses_a_silent_record() -> None:
@@ -482,7 +482,7 @@ def test_specified_level_moves_the_8_2_7_maximum_too() -> None:
 def test_frequency_response_is_normalized_to_1_khz_per_point() -> None:
     result = ea.verify_induction_loop_system(
         [0.0],
-        frequencies_hz=_F,
+        frequencies=_F,
         response_db=[[10.0, 12.0, 9.0], [-5.0, -5.0, -8.0]],
     )
     req = result.requirement("frequency_response")
@@ -493,7 +493,7 @@ def test_frequency_response_is_normalized_to_1_khz_per_point() -> None:
 def test_frequency_response_outside_the_band_is_not_judged() -> None:
     result = ea.verify_induction_loop_system(
         [0.0],
-        frequencies_hz=[50.0, 100.0, 1000.0, 5000.0, 8000.0],
+        frequencies=[50.0, 100.0, 1000.0, 5000.0, 8000.0],
         response_db=[-20.0, 0.0, 0.0, -1.0, -30.0],
     )
     assert result.passes
@@ -502,7 +502,7 @@ def test_frequency_response_outside_the_band_is_not_judged() -> None:
 
 def test_frequency_response_beyond_3_db_fails() -> None:
     result = ea.verify_induction_loop_system(
-        [0.0], frequencies_hz=_F, response_db=[0.0, 0.0, -3.5]
+        [0.0], frequencies=_F, response_db=[0.0, 0.0, -3.5]
     )
     assert result.failed == ("frequency_response",)
 
@@ -512,7 +512,7 @@ def test_frequency_response_needs_100_hz_1_khz_and_5_khz() -> None:
     response = [0.0, 0.0, 0.0]
     with pytest.raises(ValueError, match="100 Hz"):
         ea.verify_induction_loop_system(
-            [0.0], frequencies_hz=frequencies, response_db=response
+            [0.0], frequencies=frequencies, response_db=response
         )
 
 
@@ -522,14 +522,14 @@ def test_frequency_response_needs_1_khz_exactly_once() -> None:
     with pytest.raises(ValueError, match="1000 Hz exactly once"):
         ea.verify_induction_loop_system(
             [0.0],
-            frequencies_hz=[100.0, 1000.0, 1000.0, 5000.0],
+            frequencies=[100.0, 1000.0, 1000.0, 5000.0],
             response_db=[[0.0, 0.0, 5.0, 0.0]],
         )
 
 
 def test_frequencies_and_response_go_together() -> None:
     with pytest.raises(ValueError, match="go together"):
-        ea.verify_induction_loop_system([0.0], frequencies_hz=_F)
+        ea.verify_induction_loop_system([0.0], frequencies=_F)
 
 
 def test_system_noise_on_a_quiet_site_is_held_to_minus_47_db() -> None:
@@ -578,7 +578,7 @@ def test_response_exactly_3_db_from_1_khz_is_on_the_edge() -> None:
     # is +3,000 000 000 000 003 6.
     result = ea.verify_induction_loop_system(
         [0.0],
-        frequencies_hz=_F,
+        frequencies=_F,
         response_db=[[-18.6, -15.6, -15.6], [-34.7, -34.7, -31.7]],
     )
     requirement = result.requirement("frequency_response")
@@ -608,7 +608,7 @@ def test_system_noise_exactly_1_db_up_is_on_the_edge() -> None:
 def test_a_small_volume_response_on_the_edge_passes() -> None:
     response = np.tile([-18.6, -15.6, -15.6], (9, 1))
     result = ea.verify_small_volume_system(
-        np.zeros((3, 3)), layout="counter", frequencies_hz=_F, response_db=response
+        np.zeros((3, 3)), layout="counter", frequencies=_F, response_db=response
     )
     assert result.requirement("frequency_response").passes
 
@@ -616,7 +616,7 @@ def test_a_small_volume_response_on_the_edge_passes() -> None:
 def test_requirement_plot_marks_no_failure_on_the_edge() -> None:
     plt = pytest.importorskip("matplotlib.pyplot")
     requirement = ea.verify_induction_loop_system(
-        [0.0], frequencies_hz=_F, response_db=[-18.6, -15.6, -15.6]
+        [0.0], frequencies=_F, response_db=[-18.6, -15.6, -15.6]
     ).requirement("frequency_response")
     ax = requirement.plot()
     assert not [line for line in ax.lines if line.get_marker() == "x"]
@@ -724,7 +724,7 @@ def test_small_volume_frequency_response_is_judged_at_every_point() -> None:
     response = np.zeros((9, 3))
     response[4, 2] = -3.2
     result = ea.verify_small_volume_system(
-        np.zeros((3, 3)), layout="counter", frequencies_hz=_F, response_db=response
+        np.zeros((3, 3)), layout="counter", frequencies=_F, response_db=response
     )
     assert result.failed == ("frequency_response",)
 
@@ -836,7 +836,7 @@ def test_inductive_loop_doubles_before_the_table_frequency() -> None:
     expected = _doubling_frequency(0.69, 109e-6)
     assert result.doubling_frequency_hz == pytest.approx(expected, rel=1e-9)
     assert result.end_frequency_hz == pytest.approx(3150.0)
-    assert result.frequencies_hz[-1] == pytest.approx(3150.0)
+    assert result.frequencies[-1] == pytest.approx(3150.0)
 
 
 def test_doubling_above_the_table_frequency_extends_the_sweep() -> None:
@@ -903,9 +903,9 @@ def test_current_response_scales_the_loop_voltage_in_decibels() -> None:
         test_current * 2.0 * float(impedance.at(3150.0)), rel=1e-9
     )
     inside = np.flatnonzero(
-        (result.frequencies_hz > 1100.0) & (result.frequencies_hz < 1900.0)
+        (result.frequencies > 1100.0) & (result.frequencies < 1900.0)
     )[0]
-    f = float(result.frequencies_hz[inside])
+    f = float(result.frequencies[inside])
     gain = 2.0 ** (math.log(f / 1000.0) / math.log(2.0))
     assert result.voltage_v[inside] == pytest.approx(
         test_current * gain * float(impedance.at(f)), rel=1e-9
@@ -934,7 +934,7 @@ def test_current_response_has_to_reach_the_table_frequency() -> None:
 
 def _first_doubling(
     impedance: ph.electroacoustics.LoopImpedance,
-    frequencies_hz: list[float],
+    frequencies: list[float],
     currents_a: list[float],
 ) -> float:
     """The first frequency above 1 kHz where the loop voltage doubles.
@@ -943,9 +943,9 @@ def _first_doubling(
     frequencies, the voltage on a fine logarithmic grid, and the first grid
     point at or above twice the start refined by bisection.
     """
-    log_f = np.log(frequencies_hz)
+    log_f = np.log(frequencies)
     gain_db = 20 * np.log10(
-        np.asarray(currents_a) / currents_a[frequencies_hz.index(1000.0)]
+        np.asarray(currents_a) / currents_a[frequencies.index(1000.0)]
     )
 
     def voltage(f: np.ndarray) -> np.ndarray:
@@ -955,7 +955,7 @@ def _first_doubling(
         )
 
     target = 2 * float(voltage(np.array(1000.0)))
-    grid = np.geomspace(1000.0, frequencies_hz[-1], 200001)
+    grid = np.geomspace(1000.0, frequencies[-1], 200001)
     k = int(np.argmax(voltage(grid) >= target))
     low, high = float(grid[k - 1]), float(grid[k])
     for _ in range(80):
@@ -992,7 +992,7 @@ def test_overload_sweep_stops_at_the_first_doubling_of_a_peaked_response() -> No
     assert 4000.0 < expected < 5000.0
     assert result.doubling_frequency_hz == pytest.approx(expected, rel=1e-9)
     assert result.end_frequency_hz == pytest.approx(expected, rel=1e-9)
-    assert result.frequencies_hz[-1] == pytest.approx(expected, rel=1e-9)
+    assert result.frequencies[-1] == pytest.approx(expected, rel=1e-9)
     assert result.voltage_v[-1] == pytest.approx(2 * result.voltage_v[0], rel=1e-9)
 
 
@@ -1037,7 +1037,7 @@ def test_every_result_plots(language: str) -> None:
     impedance = ea.loop_impedance(0.69, 109e-6)
     verification = ea.verify_induction_loop_system(
         [0.0, 1.0],
-        frequencies_hz=_F,
+        frequencies=_F,
         response_db=[0.0, 0.0, -1.0],
         background_noise_levels_db=[-50.0, -48.0],
         system_noise_levels_db=[-48.0, -47.5],
@@ -1079,7 +1079,7 @@ def test_overload_plot_draws_the_sweep_the_compliance_and_the_verdict(
         1.0, ea.loop_impedance(2.0, 109e-6), compliance, programme="transient_speech"
     )
     ax = result.plot(language=language)
-    np.testing.assert_array_equal(ax.lines[0].get_xdata(), result.frequencies_hz)
+    np.testing.assert_array_equal(ax.lines[0].get_xdata(), result.frequencies)
     np.testing.assert_array_equal(ax.lines[0].get_ydata(), result.voltage_v)
     compliance_line = ax.lines[1]
     assert tuple(compliance_line.get_ydata()) == (compliance, compliance)
@@ -1102,7 +1102,7 @@ def test_verification_plot_draws_the_worst_margins_and_the_verdict(
     plt = pytest.importorskip("matplotlib.pyplot")
     result = ea.verify_induction_loop_system(
         [-0.5, -3.4],
-        frequencies_hz=_F,
+        frequencies=_F,
         response_db=[0.0, 0.0, -2.0],
     )
     assert not result.passes
@@ -1139,6 +1139,6 @@ def test_meter_plot_marks_the_maximum_where_it_occurs() -> None:
     ax = reading.plot()
     marker = ax.lines[-1]
     assert tuple(marker.get_ydata()) == (reading.maximum_db,)
-    peak = int(np.argmax(reading.levels_db))
-    assert tuple(marker.get_xdata()) == (reading.times_s[peak],)
+    peak = int(np.argmax(reading.levels))
+    assert tuple(marker.get_xdata()) == (reading.times[peak],)
     plt.close("all")

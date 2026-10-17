@@ -273,17 +273,19 @@ def _averaged_spectrum(
     return freqs, psd * df, df
 
 
-def _find_peak(freqs: np.ndarray, power: np.ndarray, tone_freq: float | None) -> int:
-    if tone_freq is None:
+def _find_peak(
+    freqs: np.ndarray, power: np.ndarray, tone_frequency: float | None
+) -> int:
+    if tone_frequency is None:
         in_range = (freqs >= _F_MIN) & (freqs <= _F_MAX)
         if not np.any(in_range):
             msg = "Spectrum has no bins in the 89.1 Hz - 11.2 kHz range."
             raise ValueError(msg)
         return int(np.flatnonzero(in_range)[np.argmax(power[in_range])])
-    _, _, dfc = _critical_band(tone_freq)
-    near = np.abs(freqs - tone_freq) <= dfc / 2.0
+    _, _, dfc = _critical_band(tone_frequency)
+    near = np.abs(freqs - tone_frequency) <= dfc / 2.0
     if not np.any(near):
-        msg = f"No spectrum bins near tone_freq={tone_freq!r} Hz."
+        msg = f"No spectrum bins near tone_frequency={tone_frequency!r} Hz."
         raise ValueError(msg)
     return int(np.flatnonzero(near)[np.argmax(power[near])])
 
@@ -343,7 +345,8 @@ def _pr_criterion(ft: float) -> float:
 def tone_to_noise_ratio(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
-    tone_freq: float | None = None,
+    *,
+    tone_frequency: float | None = None,
     resolution_hz: float = 1.0,
 ) -> ToneAssessment:
     """Tone-to-noise ratio of a discrete tone (ECMA-418-1:2024, clause 11).
@@ -363,7 +366,7 @@ def tone_to_noise_ratio(
     :param fs: Sample rate in Hz. Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own, and an explicit
         value that disagrees with it raises instead of silently winning.
-    :param tone_freq: Approximate tone frequency in Hz. Default (None)
+    :param tone_frequency: Approximate tone frequency in Hz. Default (None)
         assesses the highest spectral peak in the 89.1 Hz - 11.2 kHz range
         of interest. For harmonic complexes, call once per component
         (clause 11.7).
@@ -382,12 +385,12 @@ def tone_to_noise_ratio(
     if resolution_hz <= 0:
         msg = "'resolution_hz' must be positive."
         raise ValueError(msg)
-    if tone_freq is not None and tone_freq <= 0:
-        msg = "'tone_freq' must be positive."
+    if tone_frequency is not None and tone_frequency <= 0:
+        msg = "'tone_frequency' must be positive."
         raise ValueError(msg)
 
     freqs, power, df = _averaged_spectrum(x_proc, fs, resolution_hz)
-    peak = _find_peak(freqs, power, tone_freq)
+    peak = _find_peak(freqs, power, tone_frequency)
     ft = float(freqs[peak])
     f1, f2, dfc = _critical_band(ft)
     _warn_coarse_resolution(dfc, df, ft)
@@ -472,7 +475,8 @@ def _fitted_edge(
 def prominence_ratio(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
-    tone_freq: float | None = None,
+    *,
+    tone_frequency: float | None = None,
     resolution_hz: float = 1.0,
 ) -> ToneAssessment:
     """Prominence ratio of a discrete tone (ECMA-418-1:2024, clause 12).
@@ -493,7 +497,7 @@ def prominence_ratio(
     :param fs: Sample rate in Hz. Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own, and an explicit
         value that disagrees with it raises instead of silently winning.
-    :param tone_freq: Approximate tone frequency in Hz (default: highest
+    :param tone_frequency: Approximate tone frequency in Hz (default: highest
         peak in the range of interest).
     :param resolution_hz: FFT bin spacing (default 1.0 Hz).
     :return: :class:`ToneAssessment` with ``ratio_db`` = PR in dB.
@@ -509,12 +513,12 @@ def prominence_ratio(
     if resolution_hz <= 0:
         msg = "'resolution_hz' must be positive."
         raise ValueError(msg)
-    if tone_freq is not None and tone_freq <= 0:
-        msg = "'tone_freq' must be positive."
+    if tone_frequency is not None and tone_frequency <= 0:
+        msg = "'tone_frequency' must be positive."
         raise ValueError(msg)
 
     freqs, power, df = _averaged_spectrum(x_proc, fs, resolution_hz)
-    peak = _find_peak(freqs, power, tone_freq)
+    peak = _find_peak(freqs, power, tone_frequency)
     ft = float(freqs[peak])
 
     # Middle critical band (12.2).

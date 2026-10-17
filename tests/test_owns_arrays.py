@@ -640,8 +640,8 @@ def _built_by_hand() -> dict[str, tuple[Callable[[np.ndarray], object], str]]:
     )
 
     return {
-        "AnpNpdCurves": (
-            lambda a: aircraft.AnpNpdCurves(
+        "ANPNPDCurves": (
+            lambda a: aircraft.ANPNPDCurves(
                 aircraft_id="A",
                 npd_id="N",
                 metric="SEL",
@@ -877,7 +877,7 @@ def test_a_signal_handed_to_an_array_field_keeps_its_samples_writeable() -> None
         start_s=0.0,
         end_s=1.0,
         equivalent_level_db=0.0,
-        max_level_db=0.0,
+        maximum_level_db=0.0,
         front_level_db=0.0,
         rear_level_db=0.0,
         record_start_level_db=0.0,

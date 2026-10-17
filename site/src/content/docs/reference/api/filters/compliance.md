@@ -163,7 +163,7 @@ FilterComplianceResult(
     frequencies: np.ndarray,
     factors: tuple[int, ...],
     fs: float,
-    num_points: int,
+    n_points: int,
     *,
     points_per_bandwidth: int = 24,
 )
@@ -191,7 +191,7 @@ state a class its margins do not reach.
 | `frequencies` | The exact mid-band frequencies `f_m` in Hz. |
 | `factors` | Per-band decimation factor; the band's processing sample rate is `fs / factor` (the multirate rate the SOS were designed at) and the factor fixes its anti-aliasing filter. Stored because the response is evaluated through both, which the verifier's public return does not otherwise expose. |
 | `fs` | The bank's full sampling rate in Hz. |
-| `num_points` | Frequency grid points per band used by the verification, retained so the redrawn curve matches the analysed grid. |
+| `n_points` | Frequency grid points per band used by the verification, retained so the redrawn curve matches the analysed grid. |
 | `points_per_bandwidth` | `S`, the test frequencies per bandwidth of IEC 61260-2:2016 Formula (1) (IEC 61260:1995 equation (15)) the effective bandwidth and the summation were evaluated on; in the 1995 edition, the S that 5.3.3 raised the one asked for to. |
 
 Every band entry carries, besides its Table 1 margins
@@ -428,7 +428,7 @@ more in the 1995 edition. Empty for a bank with no bands.
 verify_filter_class(
     bank: OctaveFilterBank,
     *,
-    num_points: int = 32768,
+    n_points: int = 32768,
     edition: str = '2014',
     points_per_bandwidth: int = 24,
 ) -> FilterComplianceResult
@@ -444,7 +444,7 @@ its sections, so that every alias image the decimation folds onto the
 band is graded where the input carries it. Table 1 covers every
 frequency (its last rows read $\le G^{-4}$ and $\ge G^{+4}$),
 and a sampled input holds every frequency below half its sampling rate,
-so that is the range graded: `num_points` frequencies cover the
+so that is the range graded: `n_points` frequencies cover the
 band's decimated half-band and the images above it are read at the same
 spacing, up to half the input rate. The Table 1 breakpoint frequencies
 in that range are always evaluated exactly, so the pass-band
@@ -473,7 +473,7 @@ requirement on its own.
 | Name | Description |
 | :--- | :--- |
 | `bank` | The filter bank to verify (its designed SOS are analyzed; works for stateful and stateless banks alike). |
-| `num_points` | Number of frequency grid points per band on its decimated half-band (>= 16); the alias images are read at the same spacing. |
+| `n_points` | Number of frequency grid points per band on its decimated half-band (>= 16); the alias images are read at the same spacing. |
 | `edition` | `"2014"` (IEC 61260-1:2014, classes 1/2) or `"1995"` (IEC 61260:1995, adds the stricter class 0). |
 | `points_per_bandwidth` | `S`, the test frequencies per filter bandwidth of IEC 61260-2:2016 Formula (1) and IEC 61260:1995 equation (15), at least 24 (7.2.1.4 and 5.3.3). For `edition="1995"` it is where S starts: 5.3.3 raises it in steps of 12 until the filter integrated response of every band reads the same to the nearest tenth of a decibel at S and at S + 12, and the result's `points_per_bandwidth` says where it stopped. |
 

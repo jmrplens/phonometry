@@ -202,7 +202,7 @@ def circular_duct_cut_on(
     *,
     flow_velocity: float = 0.0,
     speed_of_sound: float = _C_AIR,
-    count: int = 6,
+    n_modes: int = 6,
 ) -> DuctModeResult:
     r"""Cut-on frequencies of the higher-order modes of a circular duct.
 
@@ -220,24 +220,24 @@ def circular_duct_cut_on(
     :math:`k_x = 0`: the mode is already travelling upstream, against the
     flow, at
     the frequency at which it appears. Only the first twelve modes are
-    tabulated by Norton, so ``count`` cannot exceed twelve.
+    tabulated by Norton, so ``n_modes`` cannot exceed twelve.
 
     :param diameter_m: Internal duct diameter, m (``a_i`` is half of it).
     :param flow_velocity: Mean axial flow speed ``U``, m/s (0 for still air;
         use the centre-line speed for a turbulent profile).
     :param speed_of_sound: Speed of sound ``c`` in the duct fluid, m/s.
-    :param count: How many higher-order modes to return, 1 to 12.
+    :param n_modes: How many higher-order modes to return, 1 to 12.
     :return: A :class:`DuctModeResult`.
     :raises ValueError: For a non-positive diameter, a sonic or supersonic
-        flow, or a ``count`` outside 1 to 12.
+        flow, or an ``n_modes`` outside 1 to 12.
     """
     d = require_positive(diameter_m, "diameter_m")
     mach, beta = _mach(flow_velocity, speed_of_sound)
-    if not 1 <= count <= len(CIRCULAR_EIGENVALUES):
-        msg = f"'count' must be between 1 and {len(CIRCULAR_EIGENVALUES)}."
+    if not 1 <= n_modes <= len(CIRCULAR_EIGENVALUES):
+        msg = f"'n_modes' must be between 1 and {len(CIRCULAR_EIGENVALUES)}."
         raise ValueError(msg)
     radius = 0.5 * d
-    ordered = sorted(CIRCULAR_EIGENVALUES.items(), key=lambda item: item[1])[:count]
+    ordered = sorted(CIRCULAR_EIGENVALUES.items(), key=lambda item: item[1])[:n_modes]
     modes = tuple(mode for mode, _ in ordered)
     kappa = np.array([value / radius for _, value in ordered])
     no_flow = kappa * speed_of_sound / (2.0 * np.pi)
@@ -258,7 +258,7 @@ def rectangular_duct_cut_on(
     *,
     flow_velocity: float = 0.0,
     speed_of_sound: float = _C_AIR,
-    count: int = 3,
+    n_modes: int = 3,
 ) -> DuctModeResult:
     r"""Cut-on frequencies of the higher-order modes of a rectangular duct.
 
@@ -280,23 +280,26 @@ def rectangular_duct_cut_on(
     :param height_m: Cross-sectional dimension ``b``, m.
     :param flow_velocity: Mean axial flow speed ``U``, m/s.
     :param speed_of_sound: Speed of sound ``c`` in the duct fluid, m/s.
-    :param count: How many higher-order modes to return (at least 1).
+    :param n_modes: How many higher-order modes to return (at least 1).
     :return: A :class:`DuctModeResult`.
     :raises ValueError: For non-positive dimensions, a sonic or supersonic
-        flow, or a non-positive ``count``.
+        flow, or a non-positive ``n_modes``.
     """
     a = require_positive(width_m, "width_m")
     b = require_positive(height_m, "height_m")
     mach, beta = _mach(flow_velocity, speed_of_sound)
-    if count < 1:
-        msg = "'count' must be at least 1."
+    if n_modes < 1:
+        msg = "'n_modes' must be at least 1."
         raise ValueError(msg)
-    # A (count+1)-square grid of orders always contains the `count` lowest.
+    # A (n_modes+1)-square grid of orders always contains the `n_modes` lowest.
     orders = [
-        (p, q) for p in range(count + 1) for q in range(count + 1) if (p, q) != (0, 0)
+        (p, q)
+        for p in range(n_modes + 1)
+        for q in range(n_modes + 1)
+        if (p, q) != (0, 0)
     ]
     kappa = np.array([np.pi * np.hypot(p / a, q / b) for p, q in orders])
-    order = np.argsort(kappa, kind="stable")[:count]
+    order = np.argsort(kappa, kind="stable")[:n_modes]
     modes = tuple(orders[i] for i in order)
     kappa = kappa[order]
     no_flow = kappa * speed_of_sound / (2.0 * np.pi)
@@ -345,7 +348,7 @@ def plane_wave_limit(
             height_m,
             flow_velocity=flow_velocity,
             speed_of_sound=speed_of_sound,
-            count=1,
+            n_modes=1,
         ).plane_wave_limit
     if diameter_m is None and area is not None:
         diameter_m = float(np.sqrt(4.0 * require_positive(area, "area") / np.pi))
@@ -356,7 +359,7 @@ def plane_wave_limit(
         diameter_m,
         flow_velocity=flow_velocity,
         speed_of_sound=speed_of_sound,
-        count=1,
+        n_modes=1,
     ).plane_wave_limit
 
 

@@ -751,7 +751,7 @@ def _percentiles(trace: np.ndarray, fractions: Sequence[float]) -> dict[float, f
 
 
 def loudness_moore_glasberg_time(
-    signal: Signal | Sequence[float] | np.ndarray,
+    x: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     field: Literal["free", "diffuse", "eardrum"] = "free",
@@ -767,7 +767,7 @@ def loudness_moore_glasberg_time(
     ``S''(t)`` (clause 7.9).  The signal must be calibrated so its samples are
     the instantaneous sound pressure in pascals.
 
-    :param signal: Calibrated pressure signal in pascals.  A 1-D array is
+    :param x: Calibrated pressure signal in pascals.  A 1-D array is
         treated as diotic (the same sound at both ears) for a binaural/diotic
         presentation, or as the single active ear for a monaural presentation;
         a two-channel ``(n, 2)`` array gives the left and right ear signals. Accepts a
@@ -790,12 +790,12 @@ def loudness_moore_glasberg_time(
     long-term loudness of 1.000 sone (40 phon) by definition of the sone.
     """
     _validate_conditions(field, presentation)
-    fs = resolve_fs(signal, fs, name="signal")
+    fs = resolve_fs(x, fs, name="x")
     require_scalar(fs, "fs")
     if fs <= 0.0:
         msg = f"'fs' must be a positive sampling rate, got {fs!r}."
         raise ValueError(msg)
-    left, right = _as_two_channels(signal, presentation)
+    left, right = _as_two_channels(x, presentation)
 
     comp_f, plans, perm = _spectral_plan(float(fs))
     _, stsl_l = _run_ear(left, float(fs), field, plans, comp_f, perm)

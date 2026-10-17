@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from ..noise_control.duct_path import DuctPathResult
     from ..noise_control.enclosure_insulation import EnclosureInsulationResult
     from ..noise_control.enclosures import EnclosureResult
-    from ..noise_control.hvac import HvacSpectrumResult
+    from ..noise_control.hvac import HVACSpectrumResult
     from ..noise_control.room_to_room import RoomToRoomResult
     from ..noise_control.screen_in_situ import ScreenInSituResult
     from ..noise_control.silencer_in_situ import SilencerInSituResult
@@ -169,14 +169,14 @@ def plot_reactive_silencer(
 
 
 def plot_hvac_spectrum(
-    result: HvacSpectrumResult,
+    result: HVACSpectrumResult,
     ax: Axes | None = None,
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-frequency HVAC attenuation or regenerated sound power level.
 
-    :param result: A :class:`~phonometry.noise_control.hvac.HvacSpectrumResult`.
+    :param result: A :class:`~phonometry.noise_control.hvac.HVACSpectrumResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to ``Axes.plot``.
@@ -613,7 +613,7 @@ def plot_operating_line(
     ax.set_title(
         _t("Operating line (ISO 5135 5.5.2)", language)
         + f" - {_t('worst point', language)} "
-        + decimal_comma(f"{result.maximum_deviation:.2f}", language)
+        + decimal_comma(f"{result.max_deviation:.2f}", language)
         + " dB"
     )
     ax.grid(visible=True, which="both", alpha=0.3)

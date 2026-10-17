@@ -9,6 +9,8 @@ Anchors transcribed from the official PDF:
   below (Formulae 12-13); PR >= 9,0 dB / 9,0 + 10*lg(1000/ft) (25-26).
 """
 
+from collections.abc import Callable
+
 import numpy as np
 import pytest
 from reference_data import (
@@ -21,6 +23,7 @@ from reference_data import (
 )
 
 from phonometry import psychoacoustics
+from phonometry.psychoacoustics import ToneAssessment
 from phonometry.psychoacoustics.quality.tonality import (
     _critical_band,
     _proximity_spacing,
@@ -30,14 +33,14 @@ FS = 48000
 
 
 def _tone_in_noise(
-    tone_freq: float, tone_rms: float, noise_rms: float, seconds: float = 8.0
+    tone_frequency: float, tone_rms: float, noise_rms: float, seconds: float = 8.0
 ) -> np.ndarray:
     # 8 s default (was 30 s): enough averaging for the qualitative criteria
     # tests and the 0.4 dB TNR anchor (re-measured error ~0.15 dB at 8 s);
     # the two 0.1 dB exact anchors request 16 s explicitly below.
     rng = np.random.default_rng(1234)
     t = np.arange(int(FS * seconds)) / FS
-    tone = np.sqrt(2.0) * tone_rms * np.sin(2 * np.pi * tone_freq * t)
+    tone = np.sqrt(2.0) * tone_rms * np.sin(2 * np.pi * tone_frequency * t)
     noise = noise_rms * rng.standard_normal(t.size)
     return tone + noise
 
@@ -84,7 +87,7 @@ def test_tnr_prominence_criteria() -> None:
     assert loud.prominent
 
     quiet = psychoacoustics.tone_to_noise_ratio(
-        _tone_in_noise(2000.0, 0.008, 0.05), FS, tone_freq=2000.0
+        _tone_in_noise(2000.0, 0.008, 0.05), FS, tone_frequency=2000.0
     )
     assert not quiet.prominent
 
@@ -125,7 +128,7 @@ def test_pr_criteria_and_noise_only() -> None:
 
     rng = np.random.default_rng(7)
     noise = rng.standard_normal(FS * 8)
-    result = psychoacoustics.prominence_ratio(noise, FS, tone_freq=1000.0)
+    result = psychoacoustics.prominence_ratio(noise, FS, tone_frequency=1000.0)
     assert not result.prominent
     assert abs(result.ratio_db) < 3.0  # flat spectrum: bands nearly equal
 
@@ -135,7 +138,7 @@ def test_pr_low_frequency_truncated_band() -> None:
     100 Hz (Formula 24) - the result must still be finite and sensible.
     """
     x = _tone_in_noise(120.0, 0.3, 0.02)
-    result = psychoacoustics.prominence_ratio(x, FS, tone_freq=120.0)
+    result = psychoacoustics.prominence_ratio(x, FS, tone_frequency=120.0)
     assert result.frequency == pytest.approx(120.0, abs=1.0)
     assert result.prominent
     assert result.criterion_db == pytest.approx(
@@ -159,9 +162,39 @@ def test_tnr_proximate_tones_combine() -> None:
     n0 = 0.05**2 / (FS / 2)
     _, _, dfc = _critical_band(1000.0)
     expected = 10 * np.log10((0.1**2 + 0.1**2) / (n0 * dfc))
-    result = psychoacoustics.tone_to_noise_ratio(x, FS, tone_freq=1000.0)
+    result = psychoacoustics.tone_to_noise_ratio(x, FS, tone_frequency=1000.0)
     # Demonstrated error ~0.01 dB; 0.1 keeps ample headroom (was 0.8).
     assert result.ratio_db == pytest.approx(expected, abs=0.1)
+
+
+@pytest.mark.parametrize(
+    "assess",
+    [psychoacoustics.tone_to_noise_ratio, psychoacoustics.prominence_ratio],
+)
+def test_tone_frequency_assesses_the_tone_asked_for(
+    assess: Callable[..., ToneAssessment],
+) -> None:
+    """``tone_frequency`` picks the tone, even when it is not the loudest.
+
+    A 1 kHz tone 6 dB below a 3 kHz one: left alone, the search takes the
+    louder 3 kHz tone; asked for 1 kHz, the assessment is of the weaker
+    tone, with the TNR its own level and the white noise floor give.
+    """
+    rng = np.random.default_rng(5)
+    t = np.arange(FS * 8) / FS
+    x = (
+        np.sqrt(2) * 0.02 * np.sin(2 * np.pi * 1000 * t)
+        + np.sqrt(2) * 0.04 * np.sin(2 * np.pi * 3000 * t)
+        + 0.01 * rng.standard_normal(t.size)
+    )
+    assert assess(x, FS).frequency == pytest.approx(3000.0, abs=2.0)
+    asked = assess(x, FS, tone_frequency=1000.0)
+    assert asked.frequency == pytest.approx(1000.0, abs=2.0)
+    if assess is psychoacoustics.tone_to_noise_ratio:
+        n0 = 0.01**2 / (FS / 2)
+        _, _, dfc = _critical_band(1000.0)
+        expected = 10 * np.log10(0.02**2 / (n0 * dfc))
+        assert asked.ratio_db == pytest.approx(expected, abs=0.5)
 
 
 def test_invalid_inputs() -> None:
@@ -178,12 +211,12 @@ def test_invalid_inputs() -> None:
         psychoacoustics.tone_to_noise_ratio(too_short, FS)
 
 
-def test_invalid_resolution_and_tone_freq() -> None:
+def test_invalid_resolution_and_tone_frequency() -> None:
     x = np.ones(FS)
     with pytest.raises(ValueError, match=r"'resolution_hz' must be positive"):
         psychoacoustics.tone_to_noise_ratio(x, FS, resolution_hz=0.0)
-    with pytest.raises(ValueError, match=r"'tone_freq' must be positive"):
-        psychoacoustics.prominence_ratio(x, FS, tone_freq=-100.0)
+    with pytest.raises(ValueError, match=r"'tone_frequency' must be positive"):
+        psychoacoustics.prominence_ratio(x, FS, tone_frequency=-100.0)
 
 
 def test_too_coarse_resolution_raises() -> None:
@@ -199,9 +232,11 @@ def test_coarse_resolution_warns_at_low_frequency() -> None:
     x = _tone_in_noise(250.0, 0.2, 0.02)
     coarse = r"Frequency resolution .* is coarse for the tone at"
     with pytest.warns(UserWarning, match=coarse):
-        psychoacoustics.tone_to_noise_ratio(x, FS, tone_freq=250.0, resolution_hz=4.0)
+        psychoacoustics.tone_to_noise_ratio(
+            x, FS, tone_frequency=250.0, resolution_hz=4.0
+        )
     with pytest.warns(UserWarning, match=coarse):
-        psychoacoustics.prominence_ratio(x, FS, tone_freq=250.0, resolution_hz=4.0)
+        psychoacoustics.prominence_ratio(x, FS, tone_frequency=250.0, resolution_hz=4.0)
 
 
 def test_range_edge_warns() -> None:
@@ -211,7 +246,7 @@ def test_range_edge_warns() -> None:
     """
     x = _tone_in_noise(89.1, 0.2, 0.002)
     with pytest.warns(UserWarning, match="range-of-interest edge"):
-        res = psychoacoustics.tone_to_noise_ratio(x, FS, tone_freq=89.1)
+        res = psychoacoustics.tone_to_noise_ratio(x, FS, tone_frequency=89.1)
     assert res.ratio_db > 20.0  # the ratio itself is clearly tonal
 
 
@@ -222,10 +257,10 @@ def test_numeric_noise_power_warns() -> None:
     numeric_noise = r"critical-band power is at numeric-noise level"
     silence = np.zeros(FS * 2)
     with pytest.warns(UserWarning, match=numeric_noise):
-        psychoacoustics.tone_to_noise_ratio(silence, FS, tone_freq=1000.0)
+        psychoacoustics.tone_to_noise_ratio(silence, FS, tone_frequency=1000.0)
     dc = np.full(FS * 2, 0.5)
     with pytest.warns(UserWarning, match=numeric_noise):
-        psychoacoustics.prominence_ratio(dc, FS, tone_freq=1000.0)
+        psychoacoustics.prominence_ratio(dc, FS, tone_frequency=1000.0)
 
 
 def test_plot_draws_criterion_curve_and_the_assessed_tone() -> None:
@@ -262,7 +297,7 @@ def test_plot_labels_the_prominence_ratio_family() -> None:
     import matplotlib.pyplot as plt
 
     res = psychoacoustics.prominence_ratio(
-        _tone_in_noise(250.0, 0.1, 0.02), FS, tone_freq=250.0
+        _tone_in_noise(250.0, 0.1, 0.02), FS, tone_frequency=250.0
     )
     ax = res.plot()
     assert "Prominence ratio" in ax.get_ylabel()

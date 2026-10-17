@@ -256,10 +256,10 @@ practically nothing, whereas improving the window by 5 dBA raises it by
 
 ## Plots
 
-`DbHrGlobalIndexResult.plot()` draws the band insulation together with the
+`DBHRGlobalIndexResult.plot()` draws the band insulation together with the
 transmitted level weighted by the normalised spectrum, as in the figure above:
 it shows at a glance which bands dominate the energy sum, and therefore where
-the element has to be improved. `DbHrAssessment.plot()` draws the achieved
+the element has to be improved. `DBHRAssessment.plot()` draws the achieved
 values against their limits, one per checked requirement.
 
 ## What this guide covers

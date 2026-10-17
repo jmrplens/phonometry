@@ -26,12 +26,12 @@ the NPD, the unweighted reference spectrum at 1 000 ft, in three steps:
 
 * [`SAE_AIR1845_ATTENUATION_DB_PER_100M`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#sae_air1845_attenuation_db_per_100m) -- Table D-1.
 * [`npd_atmosphere_increment`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npd_atmosphere_increment) -- the increment at each NPD distance, as an
-  [`NpdAtmosphereIncrement`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npdatmosphereincrement) with `.plot()` (the increment against
+  [`NPDAtmosphereIncrement`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npdatmosphereincrement) with `.plot()` (the increment against
   distance) and `.plot_attenuation()` (the attenuation of the two
   atmospheres against frequency).
 * [`revise_npd_curves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revise_npd_curves) -- an
-  [`AnpNpdCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves) revised by that
-  increment, as a [`RevisedNpdCurves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revisednpdcurves) with `.plot()`; its `revised`
+  [`ANPNPDCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves) revised by that
+  increment, as a [`RevisedNPDCurves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revisednpdcurves) with `.plot()`; its `revised`
   curves feed [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/#event_level) and
   [`noise_contour`](/phonometry/reference/api/aeroacoustics/airport-noise/#noise_contour) like any other NPD
   table.
@@ -58,7 +58,7 @@ npd_atmosphere_increment(
     static_pressure_kpa: float = 101.325,
     absorption: str = 'arp5534',
     distances_m: ArrayLike | None = None,
-) -> NpdAtmosphereIncrement
+) -> NPDAtmosphereIncrement
 ```
 
 NPD increment of a spectral class for a specified atmosphere (Doc 29 Appendix D).
@@ -108,7 +108,7 @@ shape; the spectral classes are normalised to 70 dB at 1 kHz (G4.3).
 | `absorption` | `"arp5534"` (default) or `"arp866a"`. |
 | `distances_m` | The NPD slant distances, in metres. `None` takes the ten standard ones of footnote 40, 200 ft to 25 000 ft. |
 
-**Returns:** An [`NpdAtmosphereIncrement`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npdatmosphereincrement).
+**Returns:** An [`NPDAtmosphereIncrement`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npdatmosphereincrement).
 
 **Raises**
 
@@ -116,10 +116,10 @@ shape; the spectral classes are normalised to 70 dB at 1 kHz (G4.3).
 | :--- | :--- |
 | ValueError | for a spectrum that is not 24 finite levels, an unknown absorption route, a distance that is not positive, or an atmosphere the chosen route refuses. |
 
-## NpdAtmosphereIncrement
+## NPDAtmosphereIncrement
 
 ```python
-NpdAtmosphereIncrement(
+NPDAtmosphereIncrement(
     frequencies: NDArray[np.float64],
     distances_m: NDArray[np.float64],
     spectrum_db: NDArray[np.float64],
@@ -160,10 +160,10 @@ tables are `(bands, distances)`.
 | `relative_humidity_percent` | Relative humidity, in percent. |
 | `static_pressure_kpa` | Air pressure, in kPa. SAE ARP 866A does not use it. |
 
-### NpdAtmosphereIncrement.distance_column()
+### NPDAtmosphereIncrement.distance_column()
 
 ```python
-NpdAtmosphereIncrement.distance_column(distance_m: float) -> int
+NPDAtmosphereIncrement.distance_column(distance_m: float) -> int
 ```
 
 Column of the tables that holds one of `distances_m`.
@@ -182,10 +182,10 @@ Column of the tables that holds one of `distances_m`.
 | :--- | :--- |
 | ValueError | if the distance is not one of the table's. |
 
-### NpdAtmosphereIncrement.plot()
+### NPDAtmosphereIncrement.plot()
 
 ```python
-NpdAtmosphereIncrement.plot(
+NPDAtmosphereIncrement.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -195,10 +195,10 @@ NpdAtmosphereIncrement.plot(
 
 Plot the increment against slant distance.
 
-### NpdAtmosphereIncrement.plot_attenuation()
+### NPDAtmosphereIncrement.plot_attenuation()
 
 ```python
-NpdAtmosphereIncrement.plot_attenuation(
+NPDAtmosphereIncrement.plot_attenuation(
     ax: Axes | None = None,
     *,
     distance_m: float = 304.8,
@@ -226,14 +226,14 @@ Plot the attenuation of both atmospheres against frequency at one distance.
 
 ```python
 revise_npd_curves(
-    curves: AnpNpdCurves,
+    curves: ANPNPDCurves,
     spectrum: SpectralClass | ArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
     absorption: str = 'arp5534',
-) -> RevisedNpdCurves
+) -> RevisedNPDCurves
 ```
 
 NPD curves recalculated for a specified atmosphere (Doc 29 Vol. 2 Appendix D).
@@ -248,14 +248,14 @@ time history (Appendix D, last paragraph of step 3).
 
 | Name | Description |
 | :--- | :--- |
-| `curves` | The NPD curves, an [`AnpNpdCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves). |
+| `curves` | The NPD curves, an [`ANPNPDCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves). |
 | `spectrum` | The spectral class of the same aircraft and operation (see [`spectral_class`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraftspectral_class)). |
 | `temperature_c` | Air temperature, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity, in percent. |
 | `static_pressure_kpa` | Air pressure, in kPa (default 101.325). |
 | `absorption` | `"arp5534"` (default) or `"arp866a"`. |
 
-**Returns:** A [`RevisedNpdCurves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revisednpdcurves).
+**Returns:** A [`RevisedNPDCurves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revisednpdcurves).
 
 **Raises**
 
@@ -263,13 +263,13 @@ time history (Appendix D, last paragraph of step 3).
 | :--- | :--- |
 | ValueError | as [`npd_atmosphere_increment`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npd_atmosphere_increment) does. |
 
-## RevisedNpdCurves
+## RevisedNPDCurves
 
 ```python
-RevisedNpdCurves(
-    original: AnpNpdCurves,
-    revised: AnpNpdCurves,
-    increment: NpdAtmosphereIncrement,
+RevisedNPDCurves(
+    original: ANPNPDCurves,
+    revised: ANPNPDCurves,
+    increment: NPDAtmosphereIncrement,
 )
 ```
 
@@ -280,13 +280,13 @@ NPD curves recalculated for a specified atmosphere (Doc 29 Vol. 2 Appendix D).
 | Name | Description |
 | :--- | :--- |
 | `original` | The curves as the ANP database gives them, in the AIR-1845 atmosphere. |
-| `revised` | The same curves with `increment` added at every power setting, an [`AnpNpdCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves) that [`level`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurveslevel) and the Doc 29 event chain read like any other. |
+| `revised` | The same curves with `increment` added at every power setting, an [`ANPNPDCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves) that [`level`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurveslevel) and the Doc 29 event chain read like any other. |
 | `increment` | The increment and everything it was computed from. |
 
-### RevisedNpdCurves.plot()
+### RevisedNPDCurves.plot()
 
 ```python
-RevisedNpdCurves.plot(
+RevisedNPDCurves.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',

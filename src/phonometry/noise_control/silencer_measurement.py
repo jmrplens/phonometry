@@ -117,8 +117,8 @@ __all__ = [
     "ISO7235_AIR_GAS_CONSTANT_J_KG_K",
     "ISO7235_REPRODUCIBILITY",
     "ISO7235_SPREAD_LIMITS",
-    "MINIMUM_FLOW_RATES",
-    "MINIMUM_PRESSURE_DIFFERENCE_PA",
+    "MIN_FLOW_RATES",
+    "MIN_PRESSURE_DIFFERENCE_PA",
     "MODAL_FILTER_ATTENUATION_DB",
     "OperatingLine",
     "RADIATION_SOLID_ANGLES",
@@ -302,11 +302,11 @@ DENSITY_RATIO_RANGE: tuple[float, float] = (0.98, 1.02)
 #: ISO 7235:2003, 6.5.2.1. The pressure difference, in Pa, the lowest of the
 #: airflow rates has to exceed, so that the smallest number in the fit is
 #: still a measurement.
-MINIMUM_PRESSURE_DIFFERENCE_PA = 10.0
+MIN_PRESSURE_DIFFERENCE_PA = 10.0
 
 #: ISO 7235:2003, 6.5.2.1 and 6.5.2.2.1. How many airflow rates each series
 #: is measured at, spread evenly over the test range.
-MINIMUM_FLOW_RATES = 5
+MIN_FLOW_RATES = 5
 
 #: ISO 7235:2003, 6.5.2.2.1. The upstream test duct is straight for at least
 #: this many equivalent diameters, or the length below, whichever is greater.
@@ -1125,10 +1125,10 @@ def pressure_loss_coefficient(
     """
     loss = _require_finite_scalar(total_loss, "total_loss")
     head = require_positive(inlet_dynamic_pressure_pa, "inlet_dynamic_pressure_pa")
-    if abs(loss) <= MINIMUM_PRESSURE_DIFFERENCE_PA:
+    if abs(loss) <= MIN_PRESSURE_DIFFERENCE_PA:
         msg = (
             "6.5.2.1 wants the lowest airflow rate of a series to produce a "
-            f"pressure difference greater than {MINIMUM_PRESSURE_DIFFERENCE_PA:.0f} "
+            f"pressure difference greater than {MIN_PRESSURE_DIFFERENCE_PA:.0f} "
             f"Pa, so that the smallest number in the fit is still a "
             f"measurement; this point is {loss!r} Pa."
         )
@@ -1160,7 +1160,7 @@ def average_pressure_loss_coefficient(
 
     Each series is at least five airflow rates spread over the test range,
     and the lowest has to produce more than
-    :data:`MINIMUM_PRESSURE_DIFFERENCE_PA`.
+    :data:`MIN_PRESSURE_DIFFERENCE_PA`.
 
     :param object_static_pressure_pa: :math:`p_{s1(\mathrm{I})i}`, the upstream
         static pressures of the series with the test object, in Pa.
@@ -1199,9 +1199,9 @@ def average_pressure_loss_coefficient(
         }
     )
     for name, size in (("test object", first.size), ("substitution duct", second.size)):
-        if size < MINIMUM_FLOW_RATES:
+        if size < MIN_FLOW_RATES:
             msg = (
-                f"6.5.2.2.1 asks for at least {MINIMUM_FLOW_RATES} airflow "
+                f"6.5.2.2.1 asks for at least {MIN_FLOW_RATES} airflow "
                 f"rates in each series; the {name} series has {size}, so the "
                 "average is over fewer points than the standard allows for."
             )
@@ -1294,7 +1294,7 @@ class OperatingLine(OwnsArrays):
     :ivar slope: dB per decade of the duty.
     :ivar intercept: The level, in dB, at a duty of 1 in whatever unit the
         duty was given in.
-    :ivar maximum_deviation: The largest distance, in dB, between a measured
+    :ivar max_deviation: The largest distance, in dB, between a measured
         point and the line.
     :ivar smallest_duty: The lowest duty measured.
     :ivar largest_duty: The highest duty measured.
@@ -1304,7 +1304,7 @@ class OperatingLine(OwnsArrays):
 
     slope: float
     intercept: float
-    maximum_deviation: float
+    max_deviation: float
     smallest_duty: float
     largest_duty: float
     duty: NDArray[np.float64]
@@ -1405,7 +1405,7 @@ def fit_operating_line(duty: ArrayLike, levels: ArrayLike) -> OperatingLine:
     return OperatingLine(
         slope=float(slope),
         intercept=float(intercept),
-        maximum_deviation=deviation,
+        max_deviation=deviation,
         smallest_duty=float(np.min(duties)),
         largest_duty=float(np.max(duties)),
         duty=duties,

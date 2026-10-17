@@ -78,7 +78,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from .lab_insulation import background_correction
+from .laboratory_insulation import background_correction
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping

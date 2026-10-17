@@ -653,11 +653,11 @@ INTEGRATED_RESPONSE_DECAYS = 10
 
 #: The bandwidth-time product ISO 3382-1:2009, Equation (6) asks a reliable
 #: decay time to clear.
-MINIMUM_BANDWIDTH_TIME_PRODUCT = 16.0
+MIN_BANDWIDTH_TIME_PRODUCT = 16.0
 
 #: The multiple of the averaging detector's own reverberation time that
 #: Equation (7) asks a reliable decay time to clear.
-MINIMUM_DETECTOR_MULTIPLE = 2.0
+MIN_DETECTOR_MULTIPLE = 2.0
 
 
 def filter_bandwidth(center: ArrayLike, fraction: int = 1) -> np.ndarray | float:
@@ -815,8 +815,8 @@ def minimum_reliable_reverberation_time(
         raise ValueError(msg)
     limit = np.asarray(
         np.maximum(
-            MINIMUM_BANDWIDTH_TIME_PRODUCT / width,
-            MINIMUM_DETECTOR_MULTIPLE * detector_time,
+            MIN_BANDWIDTH_TIME_PRODUCT / width,
+            MIN_DETECTOR_MULTIPLE * detector_time,
         ),
         dtype=np.float64,
     )

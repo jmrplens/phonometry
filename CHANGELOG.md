@@ -149,7 +149,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `building.joint_sound_reduction_index` turns the two room levels and the
   receiving room's absorption into the sound reduction index of a joint per
   metre of its length (Formula (J.1)), for the joint as tested and for the
-  arrangement with it sealed on both sides. `building.lab_joint_insulation`
+  arrangement with it sealed on both sides. `building.laboratory_joint_insulation`
   corrects the first against the second band by band, by the rules of
   ISO 10140-2:2021 A.3 that J.1 calls in: no correction from a 10 dB margin,
   Formula (J.2) down to 6 dB, the fixed 1,3 dB below it as a minimum value,
@@ -172,20 +172,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   keys it as Δbn.
 
 - **Print the floor-covering form of ISO 10140-1:2021 Figure H.4 and the joint
-  form of Figure J.7.** `LabFloorCoveringImprovementResult.report()` fills the
+  form of Figure J.7.** `LaboratoryFloorCoveringImprovementResult.report()` fills the
   form H.6.3 lets a laboratory copy: the product and specimen header, the type
   of reference floor, the curing time and the climate of the source room, the
   table of Ln,0 and ΔL beside the ΔL diagram with the frequency range of the
   ISO 717-2 rating marked, and ΔLw with CIΔ and the two floor ratings of
   H.5 i); where the form asks for a CI,r,50-2500 that the reference floor
-  cannot give, the sheet says so. `LabJointInsulationResult.report()` writes
+  cannot give, the sheet says so. `LaboratoryJointInsulationResult.report()` writes
   the data sheet J.5.2 b) asks for, the form of Figure J.7, with its diagram
   over the printed 30 dB to 80 dB, the climate of both test rooms, its minimum
   values marked, and every single number in brackets when J.1 puts them there,
   with a note that gives each of them rated with the indicative bands open.
   `ReportMetadata` gains the fields the two forms print that no other sheet
   did: `product`, `curing_time_hours`, `separating_element` and `test_signal`, and
-  `LabFloorCoveringImprovementResult.plot(rating_range=True)` draws the ΔL
+  `LaboratoryFloorCoveringImprovementResult.plot(rating_range=True)` draws the ΔL
   diagram with the frequency range of the rating marked, as the H.4 sheet
   does.
 
@@ -585,11 +585,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   source (Eq. D-1), out to the NPD distances in that atmosphere and in the one
   specified (Eqs. D-2 and D-3), A-weights both and returns the increment
   $\Delta L$ of Eq. D-4, by SAE ARP 5534 or by SAE ARP 866A;
-  `aircraft.revise_npd_curves` adds it to an `AnpNpdCurves`, and the result
+  `aircraft.revise_npd_curves` adds it to an `ANPNPDCurves`, and the result
   plots the revised curves over the original ones. The ANP database now reads
-  its `Spectral_classes.csv`: `AnpDatabase.spectral_class` and
-  `AnpAircraft.spectral_class` return a `SpectralClass`,
-  `AnpDatabase.revised_npd_curves` recalculates an aircraft's curves with its
+  its `Spectral_classes.csv`: `ANPDatabase.spectral_class` and
+  `ANPAircraft.spectral_class` return a `SpectralClass`,
+  `ANPDatabase.revised_npd_curves` recalculates an aircraft's curves with its
   own class, and `event_level` and `noise_contour` take
   `relative_humidity_percent` (and `absorption`) to run the whole Doc 29 chain
   in the air of the field, at the temperature and pressure they already read.
@@ -1020,13 +1020,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - **Linings, floor coverings and rain in the laboratory (ISO 10140-1:2021
   Annexes G, H and K).** A lining measured without and with it now gives its
-  improvement band by band, `building.lab_lining_improvement`, with the single
+  improvement band by band, `building.laboratory_lining_improvement`, with the single
   numbers ΔRw, Δ(Rw + C) and Δ(Rw + Ctr) read on the reference curve of the
   standard basic element it was measured on (ISO 717-1:2020 Annex D,
   `weighted_reduction_improvement`) and the direct differences of Formula (D.2)
   for any other wall; `check_lining_curing` is the curing condition of G.4. A
   floor covering gives ΔL on the heavyweight reference floor or on any of the
-  three lightweight ones, `lab_floor_covering_improvement`, rated as ΔLw or
+  three lightweight ones, `laboratory_floor_covering_improvement`, rated as ΔLw or
   ΔLt,1,w, ΔLt,2,w, ΔLt,3,w with its adaptation term and the two ratings H.5 i)
   asks the report to state, and `heavy_impact_improvement` is the rubber-ball
   improvement of H.6.1. `weighted_impact_improvement` and
@@ -1576,7 +1576,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   into classes with their boundaries and densities, splits them into
   subclasses, spreads each for turbulence with a Gaussian shifted by
   `environment.turbulence_level_shift` so that its energy is kept, and returns
-  a `SelDistribution` with the density, the probability of exceeding a level,
+  a `SELDistribution` with the density, the probability of exceeding a level,
   the level exceeded by any percentage of the events, both long-term levels of
   Annex A and a `.plot()` of the class density, the spread density or the
   exceedance curve. `environment.long_term_sel` gives the long-term average and
@@ -2358,7 +2358,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `room.noise_criterion`, among them. So did the objects that keep arrays to
   hand out later: `noise_control.SilencerChain` kept the caller's frequency
   grid, which the chain inside its result went on following,
-  `aircraft.AnpDatabase` built by hand kept the distances, NPD tables and
+  `aircraft.ANPDatabase` built by hand kept the distances, NPD tables and
   flight paths its curves and profiles were then read from, and
   `simulation.FDTD2D` and `simulation.ElasticFDTD2D` kept the caller's medium
   maps, which an edit afterwards set apart from the time step computed from
@@ -2382,7 +2382,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   built.** The copies above were made by the library's functions, so a
   record a caller built by hand, by calling its class directly
   (`room.ImpulseResponseResult(ir=measured, ...)`, or
-  `aircraft.AnpNpdCurves(...)` filled from the caller's own NPD data), still
+  `aircraft.ANPNPDCurves(...)` filled from the caller's own NPD data), still
   kept the arrays it was handed, and editing them afterwards edited the
   record. Every one of the 428 public records that can hold an array now
   inherits one private base that replaces each array it is built with, also
@@ -3164,13 +3164,121 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `<x>_named` searches `PUBLISHED_<X>`, and a test holds every lookup the
   packages publish to that rule.
 
-- **`AnpAircraft.database` is a public field, and `AnpDatabase` is built from
+- **An acronym is written in capitals in a class name.** Most classes already
+  did, `EPNLResult`, `STIResult` and `ZoomFFTResult` among them, and the rest
+  now follow PEP 8 too: `hearing.HTLANResult`, `NIPTSResult`,
+  `ANRLinearityResult`, `ANRTotalAttenuationResult` and
+  `REATSoundFieldCheck`; `aircraft.ANPAircraft`, `ANPDatabase`,
+  `ANPNPDCurves`, `ANPProfile`, `NPDAtmosphereIncrement`, `NPDLevelResult`,
+  `RevisedNPDCurves` and `ARP866AAttenuation`; `building.DBHRAssessment`,
+  `DBHRCheck`, `DBHRGlobalIndexResult` and `DBHRRequirement`;
+  `noise_control.HVACWarning` and `HVACSpectrumResult`;
+  `environment.SELDistribution`; `underwater.StrikeSELSpectrum`;
+  `vibration.RunningRMSDecayVerification`; and
+  `electroacoustics.AGCCharacteristic`. Ecma keeps its spelling in
+  `EcmaLoudness` and its siblings, because it is the name Ecma International
+  gives itself and not an acronym. The old names are gone, with no alias; the
+  migration guide lists the ones 3.3.0 and 4.0.0rc1 shipped, and
+  `tests/test_public_vocabulary.py` fails on a class that writes as a word an
+  acronym another class writes in capitals, or one of a curated list.
+
+- **`mic`, `lab` and `std` are spelled out.** `materials.mic_calibration_factor`
+  and `apply_mic_calibration` are `microphone_calibration_factor` and
+  `apply_microphone_calibration`. The ISO 10140 functions of `building` are
+  `laboratory_airborne_insulation`, `laboratory_impact_insulation`,
+  `laboratory_joint_insulation`, `laboratory_lining_improvement` and
+  `laboratory_floor_covering_improvement`, their results
+  `LaboratoryAirborneInsulationResult` and the rest, the warning
+  `LaboratoryInsulationWarning`, and their modules
+  `building.measurement.laboratory_insulation` and `laboratory_improvement`.
+  `TrendTestResult.std` and `StationarityTestResult.std` are
+  `standard_deviation`, `TimeDelayResult.delay_std` is
+  `delay_standard_deviation`, and `StationarityTestResult.count`, the
+  statistic of the trend test it ran, is `trend_statistic`.
+
+- **A count is `n_<plural>`.** `n_points` replaces `num_points` on
+  `verify_filter_class` and `FilterComplianceResult` and `point_count` on
+  `uniform_sample_indices`; `n_engines` replaces `ANPAircraft.num_engines` and
+  `PerformanceAircraft.engines`; `n_blades` replaces `blade_count` on
+  `fan_sound_power` and `blades` on `blade_passing_frequency`; `n_harmonics`
+  replaces `harmonics` on `gear_mesh_frequencies`, `blade_pass_frequencies`
+  and `track_excitation_frequency` and the `count` of
+  `FaultFrequencyResult.harmonics`; `n_positions` replaces `count` on
+  `precision_positions`, `TurbineMicrophoneArray.count` and `position_count`
+  on `plant_measurement_contour` and `PlantMeasurementContour`;
+  `n_low_sources` replaces `low_source_count`; `n_modes` replaces `count` on
+  the two duct cut-on functions and `WestonRegimeBoundaries.mode_count`;
+  `n_devices`, `n_tubes`, `n_segments`, `n_readings`, `n_vehicles`,
+  `n_heavy_vehicles`, `n_microphones`, `n_bursts` and `n_taps` replace the
+  `count` of `diffuser_sound_power` and `CapillaryTube`,
+  `AcousticRoughnessSpectrum.segment_count`,
+  `ServiceEquipmentResult.reading_count`, `PassByRegression.vehicle_count`,
+  `StatisticalPassByResult.heavy_vehicle_count`,
+  `FreeFieldCorrection.microphone_count`, `SawtoothBurstTest.burst_count` and
+  the `numtaps` of the DIN 4150-2 vibration meter; and
+  `machine_count_correction` and `machine_hall_velocity_mm_s` take
+  `n_machines` and `n_reference_machines`.
+
+- **A limit or an extreme is `min_`/`max_`, and the maximum level Lmax is
+  `maximum_level`.** Every public constant spelled `MINIMUM_` or `MAXIMUM_`
+  is `MIN_` or `MAX_` now, `noise_control.MIN_MICROPHONE_DISTANCE_M`,
+  `MAX_PASSAGE_ASPECT`, `room.MAX_DIRECTIVITY_STEP_DEG` and
+  `environment.MAX_WIND_SPEED_M_S` among them, and every field and parameter
+  spelled `minimum_` or `maximum_` is `min_` or `max_`:
+  `FreeFieldCheck.max_qualified_radius_m`,
+  `HardWalledRoomCheck.min_volume_m3`, `CoherenceCheck.min_records`,
+  `railway_source_power(min_speed_kmh=)` and the rest. The word stays where it is
+  part of the name of a quantity: minimum phase, maximum length sequence,
+  the maximum impact level, the takt maximum (the clock maximum of
+  DIN 45669-1 and DIN 4150-2, `TAKT_MAXIMUM_FACTOR`), and the maximum and
+  minimum levels Lmax and Lmin, also where only the unit says a level. The
+  statistical pass-by and the railway passages now spell them
+  `maximum_levels_db`, `PassByMeasurement.maximum_level_db` and
+  `TrainPassage.band_maximum_levels_db` like the rest of the library, and
+  `check_varying_background` and `VaryingBackgroundCheck` take
+  `background_maximum_level_db`, `FieldStrengthReading` reads
+  `maximum_level_db` and `plant_steady_reading` takes `maximum_level_db`
+  and `minimum_level_db`. A function or a class is named in words, `minimum`
+  and `maximum` included: `building.junction_min_vibration_reduction`,
+  `materials.max_sampled_area_radius` and
+  `environment.max_infrastructure_limit` are
+  `junction_minimum_vibration_reduction`, `maximum_sampled_area_radius` and
+  `maximum_infrastructure_limit`, and the rows of IEC 61672-1 Table B.1 are
+  `MaximumUncertaintyRow`.
+
+- **`HMLRatingResult` spells its values per subject out.**
+  `subject_h`, `subject_m` and `subject_l` are `subject_high`,
+  `subject_medium` and `subject_low`, beside `high`, `medium` and `low`.
+  `subject_m` read as a value in metres, the unit `_m` spells everywhere else
+  in the API, so the three are spelled out together.
+
+- **Every function that reads a time signal takes it as `x`.** The
+  signal-processing core always did (`octave_filter(x, fs)`, `sel(x, fs)`),
+  and thirty functions called it something else: `signal_in` on
+  `loudness_ecma`, `tonality_ecma`, `roughness_ecma`,
+  `fluctuation_strength_ecma` and `fluctuation_strength`, and `signal` on
+  `loudness_moore_glasberg_time`, the distortion and noise measurements of
+  `electroacoustics` and `check_limiting_test_signal`,
+  `impulsive_sound_adjustment`, `sound_pressure_level_history`,
+  `pass_by_measurement`, the human-vibration functions from `running_rms` to
+  `apply_band_limiting`, and `room.plot_excitation`. A call by position is
+  unchanged, and the error messages name `x`. A record field that holds an
+  output signal, such as `EnvelopeResult.signal`, keeps its name.
+
+- **`tone_to_noise_ratio` and `prominence_ratio` take `tone_frequency=`, by
+  name.** The signature is `(x, fs=None, *, tone_frequency=None,
+  resolution_hz=1.0)`: `tone_freq` was the one abbreviated frequency in the
+  API, and the two optional arguments after `fs` are keyword-only now, so a
+  call that passed the tone frequency by position raises `TypeError` instead
+  of being read differently.
+
+- **`ANPAircraft.database` is a public field, and `ANPDatabase` is built from
   what a caller can hold.** An aircraft read from an ANP database kept that
   database in a field called `_database`, which its constructor nonetheless
   required, so building one by hand meant passing a private name. It is
   `database` now, left out of `repr()` and of comparisons as before; the
   notebook table, which shows every public field, names it in one row.
-  `AnpDatabase(aircraft, npd, distances_m, profiles, spectral_classes=None)` no
+  `ANPDatabase(aircraft, npd, distances_m, profiles, spectral_classes=None)` no
   longer takes `performance`, a record of the parser's own whose type nothing
   published: `load_anp_database` fills the performance tables an export
   carries, and a database built by hand flies fixed-point profiles, as one
@@ -3250,9 +3358,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `make parameter-units` now refuses `_degrees`, `_seconds`, `_km_h`, `_db_s`,
   `_knots` and an `_h` that means hours at the end of any public name, be it
   a function, a method, a property, a field, a parameter or a constant; the
-  henry of `inductance_h` and the $H_j$ of the HML rating's `subject_h` are
-  named exceptions, and the walk now reaches the parameters of a classmethod
-  or a staticmethod as it does those of `__init__`. Knots are written kt
+  henry of `inductance_h` is the named exception, and the walk now reaches
+  the parameters of a classmethod or a staticmethod as it does those of
+  `__init__`. Knots are written kt
   wherever the library prints them: a record's notebook table, the legend of
   `AmbientNoiseResult.plot()`, the API reference and the guides, where the
   underwater pages wrote kn.
@@ -3269,7 +3377,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   four A(8) values of Directive 2002/44/EC as `HAV_EAV_A8_M_S2` and its
   siblings, `UNCONSTRAINED_BELOW_PERCENT`, and `NO_TONE_AUDIBILITY_DB`,
   `COMMUNICATION_SNR_DB`, `PRIVACY_SNR_DB`, `DEFAULT_STABILITY_MARGIN_DB`,
-  `CARDIOID_RELATIVE_DIRECTIVITY_DB` and `MINIMUM_MULTI_JUNCTION_KIJ_DB` for
+  `CARDIOID_RELATIVE_DIRECTIVITY_DB` and `MIN_MULTI_JUNCTION_KIJ_DB` for
   the decibels. A count, a label, a factor, a fraction or a ratio carries no
   unit and keeps its name, and so do the two vibration dose values, whose one
   unit is m/s^1.75. A table, which holds several figures and often several
@@ -3342,7 +3450,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `height_fundamental_frequency(height_m=)` among them; `plateau_height_db` on
   `plateau_transmission_loss` and `SoundReductionResult`; `distance_m`,
   `distances_m` and their compounds throughout `aircraft`,
-  `NpdLevelResult.distances_m` and `RotorcraftEventResult.distances_m`
+  `NPDLevelResult.distances_m` and `RotorcraftEventResult.distances_m`
   included; and `ReportMetadata.microphone_spacing_m` and
   `ReportMetadata.thickness_m`. The old names are gone.
   `npd_curve(query_distances_m=)`, `static_airflow_resistance(thickness_m=)`,
@@ -3378,7 +3486,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `attenuation_with_per_m=` and `attenuation_empty_per_m=` on
   `air_absorption_correction`; `speed_kmh` on the CNOSSOS-EU road and railway
   functions and records, `speed_range_kmh` on `RoadSurfaceCoefficients` and
-  `minimum_speed_kmh=` on `railway_source_power`; `reference_speed_m_s=` and
+  `min_speed_kmh=` on `railway_source_power`; `reference_speed_m_s=` and
   `segment_speed_m_s=` on the Doc 29 functions; `airspeed_m_s` and
   `ground_speed_m_s` on `FlightPathKinematics`; `rotational_speed_rpm=` on
   `blade_passing_frequency`; `phase_rad` on the frequency-response,
@@ -3407,8 +3515,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `ToneSearchLimit`; `sae_band_attenuation`, `AircraftBandAttenuation`,
   `AerodromeAtmosphere`, `RotorcraftAtmosphere`, `impedance_adjustment`,
   `atmospheric_adjustment`, `npd_atmosphere_increment`,
-  `NpdAtmosphereIncrement`, `revise_npd_curves` and the `AnpAircraft` and
-  `AnpDatabase` methods; `air_density_iso10534`, `air_density_astm`,
+  `NPDAtmosphereIncrement`, `revise_npd_curves` and the `ANPAircraft` and
+  `ANPDatabase` methods; `air_density_iso10534`, `air_density_astm`,
   `enclosed_gas_stiffness` and `floating_floor_resonance`;
   `sound_power_intensity_precision` and `PrecisionIntensityResult`; and
   `sea_water_density`. `atmospheric_pressure_pa` is kept for the outside
@@ -3445,8 +3553,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `AircraftBandAttenuation` (`coefficient_db_per_m`, beside the
   `coefficient_db_per_100m` of ARP 866A), on the loudspeaker and microphone
   records and `loudspeaker_characteristics` (`rated_impedance_ohm`,
-  `minimum_impedance_ohm`, `impedance_modulus_ohm`,
-  `minimum_load_impedance_ohm`, as the headphone records spell them), on
+  `min_impedance_ohm`, `impedance_modulus_ohm`,
+  `min_load_impedance_ohm`, as the headphone records spell them), on
   `ground_effect`, `atmospheric_parabolic_equation`, `barrier_insertion_loss`,
   `delany_bazley`, `miki`, `johnson_champoux_allard`, `decoupling_frequency`
   and `PorousMediumResult` (`flow_resistivity_pa_s_m2`,
@@ -3611,7 +3719,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   that constructs one of these classes directly keeps only the measured
   fields and the choices the standard leaves to the user, a few of which are
   new fields (`AmbientNoiseCheck.earphone_attenuation_db` and
-  `allowed_threshold_shift_db`, `ReatSoundFieldCheck.free_field_rejection_db`,
+  `allowed_threshold_shift_db`, `REATSoundFieldCheck.free_field_rejection_db`,
   `DiffuseSoundFieldCheck.front_to_random_index_db`,
   `OutputMassCheck.output_apparent_mass_kg`, `ToneAssessment.method`,
   `WeightedExposureResult.impulsive`, `MountingCheck.peak_acceleration_m_s2`
@@ -3686,7 +3794,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `HydrodynamicValveNoise` gains `inlet_pressure_pa` and `vapor_pressure_pa`,
   `AerodynamicValveNoise` gains `specific_heat_ratio`, `pressure_recovery`
   and `efficiency_correction`, `WindTurbineTonalityResult` gains
-  `candidate_frequency_hz` and `LabJointInsulationResult` gains
+  `candidate_frequency_hz` and `LaboratoryJointInsulationResult` gains
   `limit_at_maximum`. The numbers a regime selects are held to it when the
   result is built, so a result built by hand can no longer carry one regime
   beside the values of another: a tapping result refuses a cut-off frequency
@@ -3999,7 +4107,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **`vibration.verify_running_rms_decay` returns a verdict object.** It was
   the last `verify_*` still answering with a bare `bool`, so a caller learnt
   whether a meter passed and lost the printed interval and the measured time
-  it had been judged on. It returns a frozen `RunningRmsDecayVerification`
+  it had been judged on. It returns a frozen `RunningRMSDecayVerification`
   now, like its ISO 8041-1 siblings: `passes`, the row it was held to
   (`printed_time_s`, `tolerance_s`, `lower_time_s`, `upper_time_s`), the
   `measured_time_s` it was given and `deviation_s`, and a `.plot()` that
@@ -4069,8 +4177,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `building.insulation_expanded_uncertainty`, and that is its replacement.
   `combine_uncertainties` and `expanded_uncertainty` were 3.3.0 top-level
   names, and so were eight of the names renamed above, so the migration guide
-  lists forty-five gone, ten more than before, and 837 of the 885 published
-  by exactly one package.
+  lists all ten among the names that are gone.
 
 - **`vibration.partial_exposure` is gone: `vibration.daily_exposure` is the one
   name for an A(8).** It was an assignment, `partial_exposure =
@@ -4079,7 +4186,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   operation's partial exposure Ai(8) (ISO 5349-2 Eq. (2)), the term
   `combined_daily_exposure` sums, and its documentation now says so.
   `partial_exposure` was one of the names the 3.3.0 top level exported, so
-  the migration guide lists eleven gone, not ten.
+  the migration guide lists it among the names that are gone.
 
 - **A module lists what it defines, and its package publishes it.**
   `building.measurement.insulation` listed the ISO 717 ratings after they
@@ -5928,10 +6035,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `material_damping_factor` is the damping alone, as Figure 2 draws it. The
   building on its ground is `soil_building_natural_frequency` with its
   guide values by storeys, two storeys taking the union of the two ranges the
-  clause prints it in, `foundation_transfer_max` and `floor_transfer_max`
-  as 1 over twice the damping, and the storey estimate of Formula (4) is
-  `story_fundamental_frequency`, the one function for the estimate
-  DIN 4150-3 6.4 and ISO 4866 D.2 print as well. A blast and a
+  clause prints it in, `foundation_transfer_maximum` and
+  `floor_transfer_maximum` as 1 over twice the damping, and the storey
+  estimate of Formula (4) is `story_fundamental_frequency`, the one function
+  for the estimate DIN 4150-3 6.4 and ISO 4866 D.2 print as well. A blast and a
   falling mass are Formulae (5) and (6) with the user's constants; a hall of
   machines is Formula (7) with the nomogram of Figure 3 read off the page at a
   five-hundredth as `machine_count_correction`; a track excites at its speed
@@ -7918,7 +8025,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   And `airborne_insulation` diagnosed the wrong defect. Given a reverberation
   time carrying an extra axis, `(1, n)` against `n` bands, it said the band
   counts differed, which was false: they matched, and the extra axis was the
-  problem. Its sibling `lab_airborne_insulation` had said so correctly all
+  problem. Its sibling `laboratory_airborne_insulation` had said so correctly all
   along, because it compares sizes where this one compared shapes. The three
   field-measurement pre-screens compare sizes now, so both halves of the
   package give the same answer, and the dimensionality check they were masking
@@ -7934,7 +8041,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- `phonometry.noise_control` publishes `HvacWarning`. It fires whenever a
+- `phonometry.noise_control` publishes `HVACWarning`. It fires whenever a
   relative efficiency lands below the 50 % floor Long Table 13.6 is tabulated
   from, and it was the one warning class in the library a package could raise
   and no package published, while its sibling `PlaneWaveWarning` was exported

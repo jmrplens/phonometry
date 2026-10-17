@@ -76,7 +76,7 @@ assess_short_term_vibration(
     fs: float,
     *,
     building_class: str,
-    numtaps: int | None = None,
+    n_taps: int | None = None,
 ) -> AssessmentVelocity
 ```
 
@@ -89,7 +89,7 @@ Judge short-term vibration on a building by Annex E.
 | `velocity_mm_s` | The measured velocity at the foundation, in millimetres per second (1-D). |
 | `fs` | Sampling frequency, in hertz. |
 | `building_class` | See [`assessment_weighting_response`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_response). |
-| `numtaps` | See [`assessment_weighting_taps`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_taps). |
+| `n_taps` | See [`assessment_weighting_taps`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_taps). |
 
 **Returns:** The comparison, as an [`AssessmentVelocity`](/phonometry/reference/api/vibration/vibration-meter/#assessmentvelocity).
 
@@ -115,7 +115,7 @@ assessment_velocity(
     fs: float,
     *,
     building_class: str,
-    numtaps: int | None = None,
+    n_taps: int | None = None,
 ) -> NDArray[np.float64]
 ```
 
@@ -132,7 +132,7 @@ in time with the record it came from.
 | `velocity_mm_s` | The measured velocity, in millimetres per second (1-D). Annex E filters the unweighted signal, which has already been band-limited by 5.2.3. |
 | `fs` | Sampling frequency, in hertz. |
 | `building_class` | See [`assessment_weighting_response`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_response). |
-| `numtaps` | See [`assessment_weighting_taps`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_taps). |
+| `n_taps` | See [`assessment_weighting_taps`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_taps). |
 
 **Returns:** `v_Bn(t)`, one value per sample.
 
@@ -183,7 +183,7 @@ assessment_weighting_taps(
     fs: float,
     *,
     building_class: str,
-    numtaps: int | None = None,
+    n_taps: int | None = None,
 ) -> NDArray[np.float64]
 ```
 
@@ -201,7 +201,7 @@ removes.
 | :--- | :--- |
 | `fs` | Sampling frequency, in hertz. Table E.1 requires the Nyquist frequency to be above 315 Hz where the meter reaches that far, and this refuses a rate below 630 Hz for the same reason. |
 | `building_class` | See [`assessment_weighting_response`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_response). |
-| `numtaps` | Length of the filter, odd. The default resolves the 10 Hz corner of the target with room to spare, at half a second of taps. |
+| `n_taps` | Length of the filter, odd. The default resolves the 10 Hz corner of the target with room to spare, at half a second of taps. |
 
 **Returns:** The filter coefficients.
 

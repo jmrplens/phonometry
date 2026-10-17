@@ -141,7 +141,7 @@ AcousticRoughnessSpectrum(
     wavelengths_m: NDArray[np.float64],
     levels: NDArray[np.float64],
     record_length_m: float | None = None,
-    segment_count: int | None = None,
+    n_segments: int | None = None,
     method: str | None = None,
 )
 ```
@@ -160,7 +160,7 @@ levels of a report, which is all the ISO 3095 checks need.
 | `wavelengths_m` | The nominal band wavelengths, in metres, from the longest to the shortest as clause 9 draws them; each names the base-ten one-third octave band of wavenumber it is nominal for. |
 | `levels` | The acoustic roughness level $L_r$ of each band, dB re 1 µm. |
 | `record_length_m` | The length of roughness the spectrum was taken from, in metres: for Method B, what is left once the 2 m at either end of each record have been discarded (7.4.3); `None` when not known. |
-| `segment_count` | How many Fourier segments were averaged into it; `None` when not known, and for Method B, which has none. |
+| `n_segments` | How many Fourier segments were averaged into it; `None` when not known, and for Method B, which has none. |
 | `method` | `"A"` for the Fourier analysis of 7.4.2, `"B"` for the digital filters of 7.4.3; `None` when not known or when an average mixes the two. |
 
 ### AcousticRoughnessSpectrum.bands

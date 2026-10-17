@@ -147,8 +147,8 @@ def test_minimum_impedance_over_effective_range() -> None:
         f, spl, _R, sensitivity_band=(200.0, 4000.0), impedance=(fz, z)
     )
     # Within [50, 18000] Hz the modulus floor is ~7 ohm (>= 80 % of 8 = 6.4).
-    assert result.minimum_impedance_ohm == pytest.approx(7.0, abs=0.2)
-    assert result.minimum_impedance_ohm >= 0.8 * _R
+    assert result.min_impedance_ohm == pytest.approx(7.0, abs=0.2)
+    assert result.min_impedance_ohm >= 0.8 * _R
 
 
 def _dip_below_effective_range() -> tuple[np.ndarray, np.ndarray]:
@@ -176,8 +176,8 @@ def test_minimum_impedance_uses_rated_range_when_supplied() -> None:
     )
     lo_eff, _ = result.effective_range
     assert lo_eff > 40.0  # the dip sits outside the computed effective range
-    assert result.minimum_impedance_ohm == pytest.approx(4.0, abs=1e-9)
-    assert result.minimum_impedance_ohm < 0.8 * _R  # the 16.1 check must fail here
+    assert result.min_impedance_ohm == pytest.approx(4.0, abs=1e-9)
+    assert result.min_impedance_ohm < 0.8 * _R  # the 16.1 check must fail here
 
 
 def test_minimum_impedance_without_rated_range_misses_out_of_band_dip() -> None:
@@ -187,8 +187,8 @@ def test_minimum_impedance_without_rated_range_misses_out_of_band_dip() -> None:
     result = electroacoustics.loudspeaker_characteristics(
         f, spl, _R, sensitivity_band=(200.0, 4000.0), impedance=(fz, z)
     )
-    assert result.minimum_impedance_ohm == pytest.approx(7.0, abs=0.2)
-    assert result.minimum_impedance_ohm >= 0.8 * _R
+    assert result.min_impedance_ohm == pytest.approx(7.0, abs=0.2)
+    assert result.min_impedance_ohm >= 0.8 * _R
 
 
 # --- model validation --------------------------------------------------------

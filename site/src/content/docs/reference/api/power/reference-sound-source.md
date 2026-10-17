@@ -516,7 +516,7 @@ Whether the pressure and intensity levels agree within Table B.1 from 50 Hz to 3
 
 Per band, whether the level came from the sound intensity of Annex B.
 
-### ReferenceSourceCalibration.maximum_directivity_index_db
+### ReferenceSourceCalibration.max_directivity_index_db
 
 *property*
 

@@ -110,11 +110,11 @@ n = 1 << 16
 noise = np.random.default_rng(42).standard_normal(n)
 
 res = metrology.stationarity_test(noise, fs)        # 20 segments, mean squares
-print(res.stationary, res.count, res.bounds)   # True, 91, (64, 125)
+print(res.stationary, res.trend_statistic, res.bounds)   # True, 91, (64, 125)
 
 drifting = noise * np.linspace(1.0, 1.2, n)    # +20 % gain ramp
 res = metrology.stationarity_test(drifting, fs)
-print(res.stationary, res.count)          # False, 7  (upward trend -> low A)
+print(res.stationary, res.trend_statistic)          # False, 7  (upward trend -> low A)
 res.plot()
 ```
 
@@ -139,9 +139,9 @@ res_ramp = metrology.stationarity_test(ramp, fs)
 fig, ax = plt.subplots(figsize=(10, 6))
 index = np.arange(1, res_steady.n_segments + 1)
 ax.plot(index, res_steady.segment_values, "o-",
-        label=f"Steady noise: A = {res_steady.count}, accepted")
+        label=f"Steady noise: A = {res_steady.trend_statistic}, accepted")
 ax.plot(index, res_ramp.segment_values, "s-",
-        label=f"+20 % gain ramp: A = {res_ramp.count}, rejected")
+        label=f"+20 % gain ramp: A = {res_ramp.trend_statistic}, rejected")
 ax.set_xlabel("Segment index")
 ax.set_ylabel("Segment mean square")
 ax.legend()

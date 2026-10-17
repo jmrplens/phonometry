@@ -369,7 +369,7 @@ def test_the_record_length_is_the_length_analysed(spacing_m: float) -> None:
     spectrum = _plain(_tones((40,), 20.0, spacing_m), spacing_m)
     expected = 20.0 - 2.0 * ref.EN15610_FILTER_TRANSIENT_M
     assert spectrum.record_length_m == pytest.approx(expected)
-    assert spectrum.segment_count is None
+    assert spectrum.n_segments is None
     assert spectrum.method == "B"
 
 

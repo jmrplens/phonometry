@@ -147,7 +147,7 @@ is where an intermittent tone shows up.
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `signal_in` | 1D array | Pa | non-empty | Calibrated pressure signal |
+| `x` | 1D array | Pa | non-empty | Calibrated pressure signal |
 | `fs` | float | Hz | > 0 | Resampled to 48 kHz internally if needed |
 | `field` | str | — | `'free'` (default) / `'diffuse'` | Outer/middle-ear filter |
 | `f_low` | float, optional | Hz | default `None` | Lower edge of a user band for the $T(l)$ search |
@@ -229,7 +229,7 @@ plt.show()
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `signal_in` | 1D array | Pa | non-empty | Calibrated pressure signal |
+| `x` | 1D array | Pa | non-empty | Calibrated pressure signal |
 | `fs` | float | Hz | > 0 | Resampled to 48 kHz internally if needed |
 | `field` | str | — | `'free'` (default) / `'diffuse'` | Outer/middle-ear filter |
 
@@ -318,7 +318,7 @@ plt.show()
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `signal_in` | 1D array | Pa | non-empty | Calibrated pressure signal |
+| `x` | 1D array | Pa | non-empty | Calibrated pressure signal |
 | `fs` | float | Hz | > 0 | Resampled to 48 kHz internally if needed |
 | `field` | str | — | `'free'` (default) / `'diffuse'` | Outer/middle-ear filter |
 

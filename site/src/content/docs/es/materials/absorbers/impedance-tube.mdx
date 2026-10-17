@@ -497,10 +497,10 @@ mismatch = 10 ** (0.5 / 20) * np.exp(1j * np.radians(1.0))
 h12_i = h12 * mismatch            # configuración estándar
 h12_ii = h12 / mismatch           # micrófonos intercambiados físicamente
 
-hc = materials.mic_calibration_factor(h12_i, h12_ii)
+hc = materials.microphone_calibration_factor(h12_i, h12_ii)
 print(round(float(np.abs(hc[0])), 4), round(float(np.degrees(np.angle(hc[0]))), 2))
 # 1.0593 1.0 -- el propio desajuste, recuperado
-h12_corrected = materials.apply_mic_calibration(h12_i, hc)
+h12_corrected = materials.apply_microphone_calibration(h12_i, hc)
 print(float(np.abs(h12_corrected - h12).max()) < 1e-12)   # True
 
 # Lo que habrían afirmado los datos sin corregir, sobre una muestra de alpha = 0.75:
@@ -1004,7 +1004,7 @@ apartado 4 (`two_microphone_impedance`, `plane_wave_frequency_range`,
 `normalized_surface_impedance`, `normalized_surface_admittance`, las
 propiedades del aire del apartado 7.2 `speed_of_sound_iso10534` y
 `air_density_iso10534`, la pareja de desajuste del apartado 7.5
-`mic_calibration_factor` y `apply_mic_calibration`, y
+`microphone_calibration_factor` y `apply_microphone_calibration`, y
 `tube_attenuation_constant`). El método de matriz de transferencia con cuatro
 micrófonos de ASTM E2611 (`transfer_matrix_two_load`,
 `transfer_matrix_one_load`, `TransferMatrix`,

@@ -442,7 +442,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
 
         Nothing downstream re-establishes the pairing. The fiche decides
         whether to print a panel from the presence of the frequency array
-        alone, and :attr:`minimum_impedance_ohm` scans the modulus through a mask
+        alone, and :attr:`min_impedance_ohm` scans the modulus through a mask
         cut from the impedance frequencies, so a half-length curve surfaces
         as an index error from inside a renderer rather than at the point the
         result was assembled.
@@ -527,7 +527,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
         return float(_P_REF * 10.0 ** (self.sensitivity_level_db / 20.0))
 
     @property
-    def minimum_impedance_ohm(self) -> float | None:
+    def min_impedance_ohm(self) -> float | None:
         """Lowest impedance modulus over the rated range, ohm (16.1), or ``None``.
 
         IEC 60268-5 16.1 requires the lowest value of the impedance modulus

@@ -133,13 +133,13 @@ def test_fan_sound_power_validation(kwargs: dict[str, object], match: str) -> No
 
 
 def test_blade_passing_frequency_validation() -> None:
-    with pytest.raises(ValueError, match=r"'blades' must be a positive integer"):
+    with pytest.raises(ValueError, match=r"'n_blades' must be a positive integer"):
         hvac.blade_passing_frequency(1200.0, 0)
 
 
 def test_blade_passing_frequency_fractional_blades_raises() -> None:
     # 2.5 blades used to slip past the sign check and return 50 Hz.
-    with pytest.raises(ValueError, match="'blades' must be a positive integer"):
+    with pytest.raises(ValueError, match="'n_blades' must be a positive integer"):
         hvac.blade_passing_frequency(1200.0, 2.5)  # type: ignore[arg-type]
 
 
@@ -569,7 +569,7 @@ def test_diffuser_sound_power_velocity_and_area_exponents() -> None:
 def test_diffuser_sound_power_counts_identical_devices() -> None:
     args = (None, (24.0 * _IN) ** 2, 312.0 * _CFM, 0.05 * _IN_WG)
     one = hvac.diffuser_sound_power(*args)
-    four = hvac.diffuser_sound_power(*args, count=4)
+    four = hvac.diffuser_sound_power(*args, n_devices=4)
     assert np.allclose(four.values - one.values, 10.0 * math.log10(4.0))
 
 
@@ -580,8 +580,8 @@ def test_diffuser_sound_power_counts_identical_devices() -> None:
         ({"volume_flow": 0.0}, r"'volume_flow' must be positive"),
         ({"pressure_drop_pa": -1.0}, r"'pressure_drop_pa' must be positive"),
         ({"shape": "slot"}, r"'shape' must be one of"),
-        ({"count": 0}, r"'count' must be a positive integer"),
-        ({"count": 1.5}, "'count' must be a positive integer"),
+        ({"n_devices": 0}, r"'n_devices' must be a positive integer"),
+        ({"n_devices": 1.5}, "'n_devices' must be a positive integer"),
     ],
 )
 def test_diffuser_sound_power_validation(kwargs: dict[str, object], match: str) -> None:
@@ -725,7 +725,7 @@ def test_a_fraction_where_a_percentage_belongs_is_ten_decibels() -> None:
     changed is that the caller is told.
     """
     quiet = hvac.fan_sound_power(2.0, fan_static_pressure_pa=500.0)
-    with pytest.warns(hvac.HvacWarning, match="percentage"):
+    with pytest.warns(hvac.HVACWarning, match="percentage"):
         loud = hvac.fan_sound_power(
             2.0, fan_static_pressure_pa=500.0, relative_efficiency_percent=0.8
         )

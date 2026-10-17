@@ -478,10 +478,10 @@ mismatch = 10 ** (0.5 / 20) * np.exp(1j * np.radians(1.0))
 h12_i = h12 * mismatch            # standard configuration
 h12_ii = h12 / mismatch           # microphones physically interchanged
 
-hc = materials.mic_calibration_factor(h12_i, h12_ii)
+hc = materials.microphone_calibration_factor(h12_i, h12_ii)
 print(round(float(np.abs(hc[0])), 4), round(float(np.degrees(np.angle(hc[0]))), 2))
 # 1.0593 1.0 -- the mismatch itself, recovered
-h12_corrected = materials.apply_mic_calibration(h12_i, hc)
+h12_corrected = materials.apply_microphone_calibration(h12_i, hc)
 print(float(np.abs(h12_corrected - h12).max()) < 1e-12)   # True
 
 # What the uncorrected data would have claimed, on a sample of alpha = 0.75:
@@ -968,7 +968,7 @@ The impedance-tube trio. The ISO 10534-1 standing-wave-ratio method
 `reflection_factor`, `absorption_from_reflection`,
 `normalized_surface_impedance`, `normalized_surface_admittance`, the Clause
 7.2 air properties `speed_of_sound_iso10534` and `air_density_iso10534`, the Clause 7.5
-mismatch pair `mic_calibration_factor` and `apply_mic_calibration`, and
+mismatch pair `microphone_calibration_factor` and `apply_microphone_calibration`, and
 `tube_attenuation_constant`). The ASTM E2611 four-microphone transfer-matrix
 method (`transfer_matrix_two_load`, `transfer_matrix_one_load`,
 `TransferMatrix`, `plane_wave_frequency_range_astm`, `hydraulic_diameter`),

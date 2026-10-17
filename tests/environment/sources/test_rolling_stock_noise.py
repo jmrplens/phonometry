@@ -276,7 +276,7 @@ def test_a_steady_1_khz_tone_reads_its_own_level() -> None:
     record = pass_by_measurement(_tone(amplitude), _FS, start_s=2.0, end_s=8.0)
     expected = 10.0 * math.log10(amplitude**2 / 2.0 / _P0**2)
     assert record.equivalent_level_db == pytest.approx(expected, abs=0.02)
-    assert record.max_level_db == pytest.approx(expected, abs=0.05)
+    assert record.maximum_level_db == pytest.approx(expected, abs=0.05)
     assert record.measurement_time_s == pytest.approx(6.0)
     assert record.exposure_level_db == pytest.approx(
         record.equivalent_level_db + 10.0 * math.log10(6.0)
@@ -360,7 +360,7 @@ def test_the_maximum_is_taken_within_the_interval() -> None:
     p[burst] *= 10.0
     record = pass_by_measurement(p, _FS, start_s=2.0, end_s=8.0)
     steady = 10.0 * math.log10(0.1**2 / 2.0 / _P0**2)
-    assert record.max_level_db == pytest.approx(steady, abs=0.05)
+    assert record.maximum_level_db == pytest.approx(steady, abs=0.05)
     assert float(np.max(record.levels)) > steady + 15.0
 
 
@@ -413,7 +413,7 @@ def test_a_record_of_two_channels_is_refused(layout: str) -> None:
         "signal": Signal(np.vstack([tone, silent]), _FS),
     }
     rate = None if layout == "signal" else _FS
-    with pytest.raises(ValueError, match="'signal' must be a 1-D time series"):
+    with pytest.raises(ValueError, match="'x' must be a 1-D time series"):
         pass_by_measurement(records[layout], rate, start_s=0.5, end_s=2.5)
 
 

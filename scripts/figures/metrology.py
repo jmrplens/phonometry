@@ -937,11 +937,11 @@ def generate_stationarity_glide_blind_spot(output_dir: str) -> None:
     )
 
     title_full = (
-        f"(b) Full band: $A$ = {full.count}, inside "
+        f"(b) Full band: $A$ = {full.trend_statistic}, inside "
         f"{res_bounds(full)} (accepted and blind)"
     )
     title_band = (
-        f"(c) Band-limited {lo:.0f}-{hi:.0f} Hz: $A$ = {band.count}, "
+        f"(c) Band-limited {lo:.0f}-{hi:.0f} Hz: $A$ = {band.trend_statistic}, "
         f"outside {res_bounds(band)} (rejected)"
     )
     for ax, res, color, title in (

@@ -105,7 +105,7 @@ def test_every_image_the_verdict_reads_is_what_a_tone_reads() -> None:
     offset = round(float(bank.freq[index]) / grid.spacing_hz) * grid.spacing_hz
     read = {
         round(float(f), 6): float(d)
-        for freqs, delta_a in grid.images(0, grid.num_points)
+        for freqs, delta_a in grid.images(0, grid.n_points)
         for f, d in zip(freqs, delta_a, strict=True)
     }
     tones = [k * grid.rate_hz + sign * offset for k in (1, 2) for sign in (-1.0, 1.0)]
@@ -137,7 +137,7 @@ def test_the_check_fails_a_bank_whose_decimator_lets_images_through(
     """
     bank = filters.OctaveFilterBank(fs, fraction=1)
     monkeypatch.setattr(compliance, "_multirate_lowpass", _kaiser_5_lowpass)
-    result = filters.verify_filter_class(bank, num_points=2**12)
+    result = filters.verify_filter_class(bank, n_points=2**12)
     assert result.requirement_class("relative_attenuation") == 2
     worst = min(result.bands, key=lambda b: b["margin_class1_db"])
     assert worst["margin_class1_db"] == pytest.approx(68.9 - 70.0, abs=0.05)
@@ -149,11 +149,9 @@ def test_the_check_fails_a_bank_whose_decimator_lets_images_through(
 def test_the_default_banks_are_the_class_they_declare(fs: int, fraction: int) -> None:
     """Images graded, the default banks are class 1 of 2014 and class 0 of 1995."""
     bank = filters.OctaveFilterBank(fs, fraction=fraction)
-    assert filters.verify_filter_class(bank, num_points=2**12).overall_class == 1
+    assert filters.verify_filter_class(bank, n_points=2**12).overall_class == 1
     assert (
-        filters.verify_filter_class(
-            bank, edition="1995", num_points=2**12
-        ).overall_class
+        filters.verify_filter_class(bank, edition="1995", n_points=2**12).overall_class
         == 0
     )
 
@@ -177,7 +175,7 @@ def test_the_bank_keeps_every_image_more_than_125_db_down(
             float(bank.freq[index]),
             2**12,
         )
-        for _, delta_a in grid.images(0, grid.num_points):
+        for _, delta_a in grid.images(0, grid.n_points):
             if delta_a.size:
                 worst = min(worst, float(np.min(delta_a)))
     assert worst > 125.0
@@ -190,13 +188,13 @@ def test_the_images_read_are_all_that_can_bind(
     """Skipping the images that cannot bind leaves every margin as the full grid has it."""
     bank = filters.OctaveFilterBank(48000, fraction=3, limits=[12, 1000])
     monkeypatch.setattr(compliance, "_multirate_lowpass", decimator)
-    pruned = filters.verify_filter_class(bank, edition="1995", num_points=2**11)
+    pruned = filters.verify_filter_class(bank, edition="1995", n_points=2**11)
     monkeypatch.setattr(
         compliance,
         "_image_window",
-        lambda grid, *_: (0, grid.num_points) if grid.factor > 1 else (0, -1),
+        lambda grid, *_: (0, grid.n_points) if grid.factor > 1 else (0, -1),
     )
-    full = filters.verify_filter_class(bank, edition="1995", num_points=2**11)
+    full = filters.verify_filter_class(bank, edition="1995", n_points=2**11)
     for a, b in zip(pruned.bands, full.bands, strict=True):
         for cls in (0, 1, 2):
             key = f"margin_class{cls}_db"

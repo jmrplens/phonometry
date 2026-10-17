@@ -46,7 +46,7 @@ def _extract_text(path: str) -> str:
     return " ".join(raw.split())
 
 
-def _result() -> hvac.HvacSpectrumResult:
+def _result() -> hvac.HVACSpectrumResult:
     return hvac.flow_noise_straight_duct(_FREQS, _U, _S)
 
 

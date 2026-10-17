@@ -30,7 +30,7 @@ if TYPE_CHECKING:
         BinnedSoundLevels,
         LowFrequencyLevel,
         ModulationPeriod,
-        SelDistribution,
+        SELDistribution,
     )
 
 from .i18n import _LANG, _fmt_minus
@@ -825,7 +825,7 @@ def generate_impulse_prominence(output_dir: str) -> None:
     plt.close()
 
 
-def _tow_launcher_distribution() -> "SelDistribution":
+def _tow_launcher_distribution() -> "SELDistribution":
     """ISO 13474 Annex A: the TOW launcher heard at 3 020 m (Table A.3).
 
     The 27 A-weighted single-event levels and their 07:00 to 19:00

@@ -157,7 +157,7 @@ has to be reduced accordingly.
 ## blade_passing_frequency
 
 ```python
-blade_passing_frequency(rotational_speed_rpm: float, blades: int) -> float
+blade_passing_frequency(rotational_speed_rpm: float, n_blades: int) -> float
 ```
 
 Blade passing frequency (Long Eq. 13.4).
@@ -169,7 +169,7 @@ $f_{bp} = \mathrm{rpm} \times \mathrm{blades} / 60$.
 | Name | Description |
 | :--- | :--- |
 | `rotational_speed_rpm` | Fan speed, revolutions per minute. |
-| `blades` | Number of impeller blades. |
+| `n_blades` | Number of impeller blades. |
 
 **Returns:** The blade passing frequency, Hz.
 
@@ -177,7 +177,7 @@ $f_{bp} = \mathrm{rpm} \times \mathrm{blades} / 60$.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `blades` is not a positive integer. |
+| ValueError | If `n_blades` is not a positive integer. |
 
 ## diffuser_sound_power
 
@@ -189,8 +189,8 @@ diffuser_sound_power(
     pressure_drop_pa: float,
     *,
     shape: str = 'rectangular',
-    count: int = 1,
-) -> HvacSpectrumResult
+    n_devices: int = 1,
+) -> HVACSpectrumResult
 ```
 
 Regenerated (self) noise of a grille, register or diffuser.
@@ -234,7 +234,7 @@ left, which is why the terminal device usually sets the room criterion in
 the mid and high bands.
 
 Several identical devices serving the same room add $10 \log_{10} n$,
-which is what `count` applies.
+which is what `n_devices` applies.
 
 **Parameters**
 
@@ -245,15 +245,15 @@ which is what `count` applies.
 | `volume_flow` | Volume flow `Q` through one device, m3/s. |
 | `pressure_drop_pa` | Static pressure drop `dP` across the device, Pa. |
 | `shape` | `"rectangular"` (Eq. 13.31, includes slot diffusers) or `"round"` (Eq. 13.30). |
-| `count` | Number of identical devices `n` in the room. |
+| `n_devices` | Number of identical devices `n` in the room. |
 
-**Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the band sound power level, dB re 1e-12 W.
+**Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the band sound power level, dB re 1e-12 W.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a dimension is not positive, `count` is not a positive integer or `shape` is unknown. |
+| ValueError | If a dimension is not positive, `n_devices` is not a positive integer or `shape` is unknown. |
 
 ## elbow_insertion_loss
 
@@ -268,7 +268,7 @@ elbow_insertion_loss(
     speed_of_sound: float = 343.0,
     model: str = 'ashrae',
     lined_side: str = 'both',
-) -> HvacSpectrumResult
+) -> HVACSpectrumResult
 ```
 
 Duct bend/elbow insertion loss per bend, by either method.
@@ -305,7 +305,7 @@ one rather than as the width in the plane of the bend.
 | `speed_of_sound` | Speed of sound `c`, m/s. |
 | `model` | `"ashrae"` (default) or `"vdi2081"`. |
 
-**Returns:** A [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the insertion loss, dB per bend.
+**Returns:** A [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the insertion loss, dB per bend.
 
 ## end_reflection_loss
 
@@ -318,8 +318,8 @@ end_reflection_loss(
     method: str = 'bies',
     speed_of_sound: float = 343.0,
     aspect_ratio: float = 1.0,
-    maximum_reduction_db: float | None = 15.0,
-) -> HvacSpectrumResult
+    max_reduction_db: float | None = 15.0,
+) -> HVACSpectrumResult
 ```
 
 Duct end reflection loss (Bies Table 8.14, ASHRAE; or Long's closed form).
@@ -347,10 +347,10 @@ The two agree within a couple of decibels over the bands both cover.
 | `termination` | `"flush"` (duct flush with a wall/ceiling) or `"free"` (free space / suspended in the room). |
 | `method` | `"bies"` (Table 8.14 look-up), `"long"` (closed form) or `"vdi2081"` (VDI 2081 Part 1 Figure 28). |
 | `aspect_ratio` | **VDI 2081 only.** Nozzle length over height `m` (default 1, a square opening). Figure 28 is drawn from 1 to 30. |
-| `maximum_reduction_db` | **VDI 2081 only.** Ceiling on the reduction, dB (default 15). Section 6.6 says the theoretical value is not reached because the duct walls radiate what the nozzle reflects, and the guideline's own worked example applies exactly this cap. `None` returns the uncapped closed form. |
+| `max_reduction_db` | **VDI 2081 only.** Ceiling on the reduction, dB (default 15). Section 6.6 says the theoretical value is not reached because the duct walls radiate what the nozzle reflects, and the guideline's own worked example applies exactly this cap. `None` returns the uncapped closed form. |
 | `speed_of_sound` | Speed of sound `c`, m/s (used by the closed form; the table is indexed by frequency directly). |
 
-**Returns:** A [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the reflection loss, dB.
+**Returns:** A [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the reflection loss, dB.
 
 ## end_reflection_loss_closed_form
 
@@ -361,7 +361,7 @@ end_reflection_loss_closed_form(
     *,
     termination: str = 'flush',
     speed_of_sound: float = 343.0,
-) -> HvacSpectrumResult
+) -> HVACSpectrumResult
 ```
 
 Duct end reflection loss in closed form (Long Eqs. 14.14-14.15, Reynolds).
@@ -389,7 +389,7 @@ whose flare smooths the impedance transition into the room.
 | `termination` | `"flush"` (flush with a wall or ceiling) or `"free"` (free space). |
 | `speed_of_sound` | Speed of sound `c`, m/s. |
 
-**Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the reflection loss, dB.
+**Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the reflection loss, dB.
 
 ## equivalent_diameter
 
@@ -412,7 +412,7 @@ Equivalent duct diameter $d = \sqrt{4S/\pi}$ (Long Eq. 14.16).
 ```python
 fan_casing_attenuation(
     frequencies: ArrayLike | None = None,
-) -> HvacSpectrumResult
+) -> HVACSpectrumResult
 ```
 
 Fan-housing (casing) attenuation of the radiated power (Long Table 13.8).
@@ -432,7 +432,7 @@ the housing.
 | :--- | :--- |
 | `frequencies` | Octave-band centres, Hz; `None` (default) uses `OCTAVE_BANDS`. |
 
-**Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
+**Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
 
 ## fan_efficiency_correction
 
@@ -475,7 +475,7 @@ fan_sound_power(
     relative_efficiency_percent: float = ...,
     blade_frequency: float | None = ...,
     frequencies: ArrayLike | None = ...,
-) -> HvacSpectrumResult
+) -> HVACSpectrumResult
 
 fan_sound_power(
     volume_flow: float,
@@ -485,10 +485,10 @@ fan_sound_power(
     assembly: str,
     fan_speed_rpm: float,
     specific_sound_power_level: float | None = ...,
-    blade_count: int | None = ...,
+    n_blades: int | None = ...,
     relative_flow: float = ...,
     frequencies: ArrayLike | None = ...,
-) -> HvacSpectrumResult
+) -> HVACSpectrumResult
 ```
 
 Octave-band fan sound power from the operating point, by either method.
@@ -554,18 +554,18 @@ duty point, worth 0,1 dB at the optimum itself.
 | `volume_flow` | Volume flow through the fan `Q_\mathrm{F}`, m3/s. |
 | `fan_static_pressure_pa` | **ASHRAE only.** Fan static pressure `P_\mathrm{F}`, in **pascals gauge**. This is the pressure rise the fan produces across itself, not an ambient pressure, and it shares neither the unit nor the datum of the `static_pressure_kpa` the ISO 3740 family takes in kilopascals absolute. No plausibility guard can separate the two: 101,325 Pa is a legitimate duty for a panel or propeller fan, so the name is what keeps them apart. |
 | `fan_type` | **ASHRAE only.** One of `"airfoil_large"` / `"airfoil_small"` (backward-curved or backward-inclined centrifugal wheels above and below 36 in diameter), `"forward_curved"`, `"radial_low"` / `"radial_medium"` / `"radial_high"` (radial blades by total pressure), `"vaneaxial_hub_low"` / `"vaneaxial_hub_medium"` / `"vaneaxial_hub_high"` (hub ratios 0.3-0.4, 0.4-0.6 and 0.6-0.8), `"tubeaxial_large"` / `"tubeaxial_small"` (above and below 40 in wheel diameter) or `"propeller"`. |
-| `relative_efficiency_percent` | Static efficiency as a **percentage** of the peak (default 80, Long's recommendation when the peak is unknown). Table 13.6 is tabulated from 50 % up, so a fraction such as 0,8 falls through to the table's bottom row and returns its worst-case 16 dB correction instead of the 6 dB that 80 % earns. That is what [`HvacWarning`](/phonometry/reference/api/noise_control/hvac/#hvacwarning) says when it fires below the floor. |
+| `relative_efficiency_percent` | Static efficiency as a **percentage** of the peak (default 80, Long's recommendation when the peak is unknown). Table 13.6 is tabulated from 50 % up, so a fraction such as 0,8 falls through to the table's bottom row and returns its worst-case 16 dB correction instead of the 6 dB that 80 % earns. That is what [`HVACWarning`](/phonometry/reference/api/noise_control/hvac/#hvacwarning) says when it fires below the floor. |
 | `blade_frequency` | **ASHRAE only.** Blade passing frequency `f_bp`, Hz (from [`blade_passing_frequency`](/phonometry/reference/api/noise_control/hvac/#blade_passing_frequency)). `None` (default) places the increment in the octave band Table 13.7 tabulates for the fan type. |
 | `model` | `"ashrae"` (default) or `"vdi2081"`. |
 | `fan_total_pressure_pa` | **VDI 2081 only.** Total pressure rise `\Delta p_\mathrm{t}` across the fan, Pa. Not the static pressure of the ASHRAE law: the total pressure carries the dynamic head as well, and Equation (13) scales it by 20 rather than by 10. |
 | `assembly` | **VDI 2081 only.** `"rr"` (radial, rearwards curved blades), `"t"` (cylindrical rotor, forwards curved blades) or `"am"` (axial with a downstream diffuser). |
 | `fan_speed_rpm` | **VDI 2081 only.** Impeller speed `n`, min^-1. |
 | `specific_sound_power_level` | **VDI 2081 only.** The specific sound power level `L_\mathrm{WSM}`, dB. `None` (default) takes the representative value of the assembly, 34, 36 or 42 dB. Section 4.3.3 says a fan can sit up to 7 dB above its assembly average at the optimum duty point, so a manufacturer's own value belongs here. |
-| `blade_count` | **VDI 2081 only.** Number of impeller blades `z`, which places the blade-frequency allowance of Section 4.3.4 in the octave holding `n z / 60`. `None` (default) omits it. The allowance is nought for assemblies RR and T built to the state of the art and 4 dB for AM. |
+| `n_blades` | **VDI 2081 only.** Number of impeller blades `z`, which places the blade-frequency allowance of Section 4.3.4 in the octave holding `n z / 60`. `None` (default) omits it. The allowance is nought for assemblies RR and T built to the state of the art and 4 dB for AM. |
 | `relative_flow` | **VDI 2081 only.** Duty as a fraction of the best efficiency point, `\dot{V} / \dot{V}_\mathrm{opt}` (default 1). |
 | `frequencies` | Octave-band centres, Hz; `None` (default) uses the 63 Hz to 8 kHz bands of `OCTAVE_BANDS`. |
 
-**Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the band sound power level, dB re 1e-12 W.
+**Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the band sound power level, dB re 1e-12 W.
 
 ## flexible_duct_insertion_loss
 
@@ -574,7 +574,7 @@ flexible_duct_insertion_loss(
     frequencies: ArrayLike | None,
     diameter_m: float,
     length: float,
-) -> HvacSpectrumResult
+) -> HVACSpectrumResult
 ```
 
 Insertion loss of a lined round flexible duct (Long Table 14.4, ASHRAE 1995).
@@ -597,7 +597,7 @@ value is returned.
 | `diameter_m` | Internal diameter, m (100 mm to 406 mm tabulated). |
 | `length` | Duct run length, m (0.9 m to 3.7 m tabulated). |
 
-**Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the insertion loss, dB.
+**Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the insertion loss, dB.
 
 ## flow_noise_bend
 
@@ -613,7 +613,7 @@ flow_noise_bend(
     branch_diameter_m: float | None = None,
     approach_velocity: float | None = None,
     rounding_ratio: float | None = None,
-) -> HvacSpectrumResult
+) -> HVACSpectrumResult
 ```
 
 Flow-generated octave-band sound power of a bend or junction, by either method.
@@ -667,7 +667,7 @@ $\lg St$ is not real below one.
 | `approach_velocity` | **VDI 2081 only.** Flow speed in the main duct ahead of the junction `v_h`, m/s. `None` (default) takes it equal to `flow_velocity`, which is the bend case. |
 | `rounding_ratio` | **VDI 2081 only.** Rounding radius over branch diameter `r / d_a`, which applies the correction of Figure 18. `None` (default) leaves it out altogether, which is how the guideline's own worked example treats a bend: Figure 18 is drawn for the rounding of a **junction**, and its curves all cross zero at `r / d_a = 0,15`, so passing 0 asks for a sharp-cornered junction and is worth over 6 dB rather than nothing. Figure 18 is drawn from 0 to 0,20. |
 
-**Returns:** A [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the band sound power level, dB re 1e-12 W.
+**Returns:** A [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the band sound power level, dB re 1e-12 W.
 
 ## flow_noise_straight_duct
 
@@ -676,7 +676,7 @@ flow_noise_straight_duct(
     frequencies: ArrayLike,
     flow_velocity: float,
     area: float,
-) -> HvacSpectrumResult
+) -> HVACSpectrumResult
 ```
 
 Flow-generated octave-band sound power of a straight duct (VDI 2081-1, 5.2.1).
@@ -700,7 +700,7 @@ Eq. (8.251) prints the two as one line and credits the same guideline.
 | `flow_velocity` | Mean flow speed `v` in the duct, m/s. |
 | `area` | Duct cross-sectional area `S`, m2. |
 
-**Returns:** A [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the band sound power level, dB re 1e-12 W.
+**Returns:** A [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the band sound power level, dB re 1e-12 W.
 
 ## flow_noise_straight_duct_overall
 
@@ -758,10 +758,10 @@ outside it the sum means nothing.
 | :--- | :--- |
 | ValueError | If the speed or the area is not positive, or the weighting is neither of the two the guideline prints. |
 
-## HvacSpectrumResult
+## HVACSpectrumResult
 
 ```python
-HvacSpectrumResult(
+HVACSpectrumResult(
     frequencies: np.ndarray,
     values: np.ndarray,
     quantity: Literal['attenuation', 'sound_power_level'],
@@ -780,10 +780,10 @@ A per-frequency HVAC quantity (attenuation or regenerated power level).
 | `quantity` | What `values` holds (`"attenuation"` or `"sound_power_level"`). |
 | `label` | A short human label of the element. |
 
-### HvacSpectrumResult.plot()
+### HVACSpectrumResult.plot()
 
 ```python
-HvacSpectrumResult.plot(
+HVACSpectrumResult.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -795,10 +795,10 @@ Plot the quantity against a continuous log-frequency axis.
 
 Requires matplotlib (`pip install phonometry[plot]`).
 
-### HvacSpectrumResult.report()
+### HVACSpectrumResult.report()
 
 ```python
-HvacSpectrumResult.report(
+HVACSpectrumResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -841,7 +841,7 @@ relation.
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
 | ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
 
-## HvacWarning
+## HVACWarning
 
 An HVAC input outside the span the table it feeds was tabulated from.
 
@@ -853,7 +853,7 @@ lined_circular_duct_attenuation(
     diameter_m: float,
     length: float,
     lining_thickness_m: float,
-) -> HvacSpectrumResult
+) -> HVACSpectrumResult
 ```
 
 Insertion loss of a lined circular duct (Long Eq. 14.13, Table 14.3).
@@ -877,7 +877,7 @@ ignores it.
 | `length` | Duct run length `l`, m. |
 | `lining_thickness_m` | Lining thickness `t`, m. |
 
-**Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
+**Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
 
 ## lined_rectangular_duct_attenuation
 
@@ -890,7 +890,7 @@ lined_rectangular_duct_attenuation(
     lining_thickness_m: float,
     *,
     include_unlined: bool = False,
-) -> HvacSpectrumResult
+) -> HVACSpectrumResult
 ```
 
 Insertion loss of a lined rectangular duct (Long Eq. 14.12, Table 14.2).
@@ -916,7 +916,7 @@ ducts). Flanking limits the total to 40 dB.
 | `lining_thickness_m` | Lining thickness `t`, m. |
 | `include_unlined` | Add the unlined-duct attenuation of [`unlined_rectangular_duct_attenuation`](/phonometry/reference/api/noise_control/hvac/#unlined_rectangular_duct_attenuation), the side-wall contribution the insertion-loss measurement subtracts out. |
 
-**Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
+**Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
 
 ## octave_band_limits
 
@@ -924,7 +924,7 @@ ducts). Flanking limits the total to 40 dB.
 octave_band_limits(
     a_weighted_limit_db: float,
     frequencies: ArrayLike | None = None,
-) -> HvacSpectrumResult
+) -> HVACSpectrumResult
 ```
 
 Octave limits from an A-weighted room requirement (VDI 2081 Part 2 Eq. (1)).
@@ -952,7 +952,7 @@ test, since `K_A = -A - 5`.
 | `a_weighted_limit_db` | The A-weighted level the room is required to meet `L_A`, dB. |
 | `frequencies` | Octave-band centres, Hz; `None` (default) uses the 63 Hz to 8 kHz bands of `OCTAVE_BANDS`. |
 
-**Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the per-band limit, dB.
+**Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the per-band limit, dB.
 
 ## plenum_attenuation
 
@@ -1108,7 +1108,7 @@ section_change_loss(
     upstream_size: float | None = None,
     speed_of_sound: float = 343.0,
     cap: float = 5.0,
-) -> HvacSpectrumResult
+) -> HVACSpectrumResult
 ```
 
 Reflection at a sudden change of duct section (VDI 2081 Part 1, 6.3).
@@ -1154,7 +1154,7 @@ VDI 2081 treats the two as separate elements of the chain.
 | `speed_of_sound` | Speed of sound `c`, m/s. |
 | `cap` | The largest reduction to take, dB (default 5). |
 
-**Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the reflection loss, dB.
+**Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the reflection loss, dB.
 
 **Raises**
 
@@ -1175,7 +1175,7 @@ silencer_self_noise(
     pressure_drop_pa: float | None = None,
     approach_area: float | None = None,
     airway_width: float | None = None,
-) -> HvacSpectrumResult
+) -> HVACSpectrumResult
 ```
 
 Regenerated (self) noise of a splitter silencer (Long Eq. 14.31).
@@ -1215,7 +1215,7 @@ correction because the face size enters through `N` and `H`.
 | `approach_area` | **VDI 2081 only.** Frontal area the silencer is approached over `S`, m2. That is the duct's whole section, not the clear area between the splitters. |
 | `airway_width` | **VDI 2081 only.** Clear gap between splitters `s`, m. The Strouhal number is taken on the hydraulic diameter of that gap, which the guideline's own worked example computes as `2 s`, the parallel-plate limit, rather than as `4 A / P`; `docs/ERRATA.md` records the difference. |
 
-**Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the band sound power level, dB re 1e-12 W.
+**Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the band sound power level, dB re 1e-12 W.
 
 **Raises**
 
@@ -1296,7 +1296,7 @@ splitter_silencer_insertion_loss(
     length: float,
     airway_widths: ArrayLike,
     splitter_thickness_m: float,
-) -> HvacSpectrumResult
+) -> HVACSpectrumResult
 ```
 
 Insertion loss of a parallel-splitter (dissipative) silencer.
@@ -1335,7 +1335,7 @@ noise is a separate quantity, [`silencer_self_noise`](/phonometry/reference/api/
 | `airway_widths` | Free width of each airway between splitters, m (a scalar is taken as a single airway; give one value per airway when they differ). |
 | `splitter_thickness_m` | Full thickness of a splitter baffle, m; the equivalent liner thickness of an airway is half of it. |
 
-**Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the insertion loss, dB.
+**Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the insertion loss, dB.
 
 **Raises**
 
@@ -1352,7 +1352,7 @@ unlined_circular_duct_attenuation(
     *,
     diameter_m: float | None = None,
     model: str = 'ashrae',
-) -> HvacSpectrumResult
+) -> HVACSpectrumResult
 ```
 
 Attenuation of an unlined circular sheet-metal duct (Long Table 14.1).
@@ -1378,7 +1378,7 @@ of this element, and it is why `diameter_m` is required there and not here.
 | `diameter_m` | **VDI 2081 only.** Internal diameter, m, which selects the Table 5 row. The table stops at 1,00 m. |
 | `model` | `"ashrae"` (default, Long Table 14.1) or `"vdi2081"`. |
 
-**Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
+**Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
 
 ## unlined_rectangular_duct_attenuation
 
@@ -1391,7 +1391,7 @@ unlined_rectangular_duct_attenuation(
     *,
     wrapped: bool = False,
     model: str = 'ashrae',
-) -> HvacSpectrumResult
+) -> HVACSpectrumResult
 ```
 
 Attenuation of an unlined rectangular sheet-metal duct (Long Eqs. 14.9-14.11).
@@ -1426,7 +1426,7 @@ and is refused.
 | `wrapped` | The duct is externally wrapped with a fibreglass blanket, which doubles the 63 Hz to 250 Hz attenuation. |
 | `model` | `"ashrae"` (default, Reynolds) or `"vdi2081"` (Table 5, the largest side length selecting the row). |
 
-**Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
+**Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
 
 ## VDI2081_SPECTRAL_CORRECTION
 

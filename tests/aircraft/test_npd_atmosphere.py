@@ -40,11 +40,11 @@ from phonometry.aircraft import (
     NOY_BANDS_HZ,
     SAE_AIR1845_ATTENUATION_DB_PER_100M,
     AerodromeAtmosphere,
-    AnpDatabase,
-    AnpNpdCurves,
+    ANPDatabase,
+    ANPNPDCurves,
     FlightSegmentState,
-    NpdAtmosphereIncrement,
-    RevisedNpdCurves,
+    NPDAtmosphereIncrement,
+    RevisedNPDCurves,
     SpectralClass,
     arp866a_attenuation,
     event_level,
@@ -64,15 +64,15 @@ _HALF_MILLI = 0.0005 + 1e-9
 _HALF_DECI = 0.05 + 1e-9
 
 
-def _increment(class_id: int, absorption: str) -> NpdAtmosphereIncrement:
+def _increment(class_id: int, absorption: str) -> NPDAtmosphereIncrement:
     return npd_atmosphere_increment(
         _DB.spectral_class(class_id), absorption=absorption, **_AIR
     )
 
 
-def _curves(operation: str, table: tuple) -> AnpNpdCurves:
+def _curves(operation: str, table: tuple) -> ANPNPDCurves:
     rows = [r for r in table if r[0] == operation]
-    return AnpNpdCurves(
+    return ANPNPDCurves(
         aircraft_id="JETW",
         npd_id="JETW",
         metric="SEL",
@@ -263,7 +263,7 @@ def test_increment_rejects_tables_off_its_axes() -> None:
 def test_revised_curves_are_the_original_plus_the_increment() -> None:
     curves = _DB.npd_curves("747100", "departure", "SEL")
     rev = _DB.revised_npd_curves("747100", "departure", "SEL", **_AIR)
-    assert isinstance(rev, RevisedNpdCurves)
+    assert isinstance(rev, RevisedNPDCurves)
     expected = curves.levels + rev.increment.increment_db[None, :]
     assert np.array_equal(rev.revised.levels, expected)
     assert not rev.revised.levels.flags.writeable
@@ -362,7 +362,7 @@ def test_aircraft_carries_its_two_spectral_classes() -> None:
 def test_unknown_spectral_class_names_what_there_is() -> None:
     with pytest.raises(KeyError, match="spectral class '999'"):
         _DB.spectral_class(999)
-    bare = AnpDatabase(aircraft={}, npd={}, distances_m=_DISTANCES_M, profiles={})
+    bare = ANPDatabase(aircraft={}, npd={}, distances_m=_DISTANCES_M, profiles={})
     with pytest.raises(KeyError, match="no spectral-class table"):
         bare.spectral_class(103)
 
@@ -464,7 +464,7 @@ def test_a_misspelt_absorption_route_is_refused_without_a_humidity() -> None:
         _DB.event_level("747100", observer, "D", absorption="arp866")
 
 
-def _export(root: object, spectral: str | None) -> AnpDatabase:
+def _export(root: object, spectral: str | None) -> ANPDatabase:
     """A CSV export of the three required tables, plus the spectral one given."""
     import pathlib
     from importlib.resources import files

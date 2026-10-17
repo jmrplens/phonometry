@@ -712,13 +712,13 @@ def _assemble_loudness(
 
 
 def loudness_ecma(
-    signal_in: Signal | np.ndarray,
+    x: Signal | np.ndarray,
     fs: float | None = None,
     field: Literal["free", "diffuse"] = "free",
 ) -> EcmaLoudness:
     """Psychoacoustic loudness per ECMA-418-2:2025 (Sottek Hearing Model).
 
-    :param signal_in: Calibrated sound pressure signal in pascals. Accepts a
+    :param x: Calibrated sound pressure signal in pascals. Accepts a
         :class:`phonometry.io.Signal`, which is where "calibrated" comes
         from without arithmetic: this model reads absolute levels, so an
         uncalibrated record is taken as if one digital unit were one
@@ -741,13 +741,13 @@ def loudness_ecma(
     if field not in ("free", "diffuse"):
         msg = "field must be 'free' or 'diffuse'"
         raise ValueError(msg)
-    fs = resolve_fs(signal_in, fs, name="signal_in")
-    x = apply_calibration(
-        signal_in,
-        require_1d_signal(_typesignal(signal_in, name="signal_in")),
+    fs = resolve_fs(x, fs, name="x")
+    samples = apply_calibration(
+        x,
+        require_1d_signal(_typesignal(x, name="x"), name="x"),
     )
-    if x.size == 0:
-        msg = "signal must not be empty"
+    if samples.size == 0:
+        msg = "'x' must not be empty"
         raise ValueError(msg)
     require_scalar(fs, "fs")
     fs = float(fs)
@@ -755,9 +755,9 @@ def loudness_ecma(
         msg = "fs must be positive"
         raise ValueError(msg)
     if fs != _FS:
-        x = signal.resample(x, max(1, round(x.size * _FS / fs)))
+        samples = signal.resample(samples, max(1, round(samples.size * _FS / fs)))
 
-    n_tonal, n_noise, _, _, n_samples = _tonal_noise_split(x, field)
+    n_tonal, n_noise, _, _, n_samples = _tonal_noise_split(samples, field)
     n_single, n_spec, n_time, time = _assemble_loudness(n_tonal, n_noise, n_samples)
     return EcmaLoudness(
         loudness=n_single,

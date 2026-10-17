@@ -122,7 +122,7 @@ calculation of Long Table 14.9 and of AHRI 885 Table 8.
 | :--- | :--- |
 | `frequencies` | Octave-band centre frequencies, Hz (1-D array). The published sheets use 63 Hz to 8 kHz. |
 | `source_level` | Sound power level entering the path, dB re 1 pW; e.g. from [`phonometry.noise_control.hvac.fan_sound_power`](/phonometry/reference/api/noise_control/hvac/#fan_sound_power). |
-| `elements` | The path elements in order, as [`DuctElement`](/phonometry/reference/api/noise_control/duct-path/#ductelement) entries. Their `attenuation` and `self_noise` accept a scalar, a per-band array or an [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult). |
+| `elements` | The path elements in order, as [`DuctElement`](/phonometry/reference/api/noise_control/duct-path/#ductelement) entries. Their `attenuation` and `self_noise` accept a scalar, a per-band array or an [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult). |
 | `room_effect` | The room effect as a positive attenuation, dB (from [`phonometry.noise_control.hvac.room_effect`](/phonometry/reference/api/noise_control/hvac/#room_effect)). `None` leaves the received spectrum as a sound power level at the terminal device. |
 | `source_label` | Description of the source for the printed sheet. |
 | `criterion` | Room-criterion family, `"NC"` (default) or `"RC"`. |
@@ -160,7 +160,7 @@ One element of a duct path: what it attenuates and what it regenerates.
 | Name | Description |
 | :--- | :--- |
 | `label` | Human description of the element, e.g. `"Silencer, 3 ft, standard pressure drop"`. |
-| `attenuation` | Octave-band attenuation as a **positive** loss, dB. A scalar is broadcast over the bands; an [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) (or anything exposing `values`) is accepted directly. `None` means no attenuation. |
+| `attenuation` | Octave-band attenuation as a **positive** loss, dB. A scalar is broadcast over the bands; an [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) (or anything exposing `values`) is accepted directly. `None` means no attenuation. |
 | `self_noise` | Octave-band regenerated sound power level of the element, dB re 1 pW, or `None` when the element regenerates nothing (the cascade then applies its self-noise floor). |
 | `code` | A short worksheet code for the printed sheet (AHRI 885 style, e.g. `"D1"`, `"S"`); defaults to the row number. |
 

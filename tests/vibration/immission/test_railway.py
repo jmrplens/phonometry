@@ -389,7 +389,7 @@ def test_a_steady_passage_reduces_to_its_closed_forms() -> None:
         (1.0 / math.sqrt(2.0)) / im.VELOCITY_LEVEL_REFERENCE_MM_S
     )
     assert passage.band_interval_levels_db[1, band] == pytest.approx(expected, abs=0.2)
-    assert passage.band_max_levels_db[band] == pytest.approx(expected, abs=0.5)
+    assert passage.band_maximum_levels_db[band] == pytest.approx(expected, abs=0.5)
     others = np.delete(passage.band_interval_levels_db[1], band)
     assert np.all(others < expected - 15.0)
 

@@ -187,11 +187,11 @@ in the same order.
   pages 35 and 37 (printed pp. 29 and 31) of ISO 10140-1:2021, on PDF pages 13,
   17 and 18 (printed pp. 7, 11 and 12) of ISO 717-2:2020, and on PDF page 36
   (printed p. 27) of BS EN ISO 10140-1:2010+A2:2014.
-- **Library behaviour:** `building.lab_floor_covering_improvement` reports the
+- **Library behaviour:** `building.laboratory_floor_covering_improvement` reports the
   two ratings H.5 i) asks for and no $C_{I,r,50\text{–}2\,500}$; the
   enlarged-range term of the measured bare floor, which is defined, comes from
   `building.weighted_impact_rating_extended`. The form itself is printed by
-  `LabFloorCoveringImprovementResult.report()`, which puts those two ratings
+  `LaboratoryFloorCoveringImprovementResult.report()`, which puts those two ratings
   beside $\Delta L_w$ and $C_{I\Delta}$ and writes, where
   $C_{I,r,50\text{–}2\,500}$ would go, that it is not formed because Table 4
   starts at 100 Hz. No number the library reports depends on the form, and no
@@ -214,7 +214,7 @@ in the same order.
 - **Evidence:** Verified on PDF page 50 (printed p. 44) of ISO 10140-1:2021
   against PDF page 49 (printed p. 40) of BS EN ISO 10140-1:2010+A2:2014.
 - **Library behaviour:** none to take; no number depends on it. The form that
-  `LabJointInsulationResult.report()` prints labels the curve "shifted
+  `LaboratoryJointInsulationResult.report()` prints labels the curve "shifted
   reference (ISO 717-1)" and draws it over the rating range only.
 - **Status:** unreported (typographic, no numerical consequence).
 
@@ -3321,8 +3321,8 @@ in the same order.
   p. 13), all of BS ISO 13474:2009, the UK implementation of ISO 13474:2009
   (first edition, 2009-06-15). The levels were recomputed from Table A.3 on
   PDF page 40 (printed p. 32) of the same document.
-- **Library behaviour:** `SelDistribution.exceedance` evaluates Equation (24)
-  to infinity in closed form and `SelDistribution.exceedance_level` solves
+- **Library behaviour:** `SELDistribution.exceedance` evaluates Equation (24)
+  to infinity in closed form and `SELDistribution.exceedance_level` solves
   Equation (25)
   ([`exposure_distribution.py`](../src/phonometry/environment/assessment/exposure_distribution.py)),
   so the example returns 21,6; 31,5; 40,5; 43,0 and 47,5 dB. The conformance
@@ -10263,7 +10263,7 @@ in the same order.
   (printed p. 20) of the IOA AMWG Final Report, Version 1 (9 August 2016).
 - **Library behaviour:** `amplitude_modulation_period` rates a period of 30
   valid blocks, as 13.6.2.2 and the AMWG report do
-  (`AM_MINIMUM_VALID_BLOCKS`); the conformance rows pin the periods of 30 and
+  (`AM_MIN_VALID_BLOCKS`); the conformance rows pin the periods of 30 and
   29 valid blocks
   (`test_periods_agree_with_the_ioa_code_and_the_ts` in
   [`tests/environment/assessment/test_wind_turbine_modulation.py`](../tests/environment/assessment/test_wind_turbine_modulation.py)).

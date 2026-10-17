@@ -42,8 +42,8 @@ fs = 48000
 rng = np.random.default_rng(0)
 t = np.arange(fs) / fs
 x = np.sin(2 * np.pi * 1000 * t) + 0.05 * rng.standard_normal(fs)  # 1 kHz tone in noise
-tnr = psychoacoustics.tone_to_noise_ratio(x, fs)            # highest peak, or tone_freq=...
-pr = psychoacoustics.prominence_ratio(x, fs, tone_freq=1000.0)
+tnr = psychoacoustics.tone_to_noise_ratio(x, fs)            # highest peak, or tone_frequency=...
+pr = psychoacoustics.prominence_ratio(x, fs, tone_frequency=1000.0)
 print(round(tnr.ratio_db, 1), round(tnr.criterion_db, 1), tnr.prominent)  # 45.6 8.0 True
 print(round(pr.ratio_db, 1), round(pr.criterion_db, 1), pr.prominent)     # 45.7 9.0 True
 
@@ -217,8 +217,8 @@ noise = 0.05 * rng.standard_normal(t.size)
 for relative_db in (-24.0, -12.0, 0.0, 12.0):
     second = np.sqrt(2) * 0.012 * 10 ** (relative_db / 20)
     y = primary + second * np.sin(2 * np.pi * 1160.0 * t) + noise
-    tnr_y = psychoacoustics.tone_to_noise_ratio(y, fs, tone_freq=1000.0)
-    pr_y = psychoacoustics.prominence_ratio(y, fs, tone_freq=1000.0)
+    tnr_y = psychoacoustics.tone_to_noise_ratio(y, fs, tone_frequency=1000.0)
+    pr_y = psychoacoustics.prominence_ratio(y, fs, tone_frequency=1000.0)
     print(relative_db, round(tnr_y.ratio_db, 1), round(pr_y.ratio_db, 1))
 #   -24.0 9.2  9.8
 #   -12.0 9.2  8.7
@@ -240,7 +240,7 @@ another phenomenon. At that point the assessment is invalid rather than merely
 uncertain. The remedies are upstream: stabilise the operating point of the
 equipment under test, shorten each average and average the ratios instead of
 the spectra, or order-track the rotating source. Harmonic complexes deserve the
-same care component by component with `tone_freq=`, since a drifting
+same care component by component with `tone_frequency=`, since a drifting
 fundamental drifts proportionally more at every harmonic.
 
 ## 2. Where to measure (ECMA-74), and what the ratios need
@@ -302,7 +302,7 @@ should still be calibrated absolutely, because the clause 8/9 threshold screen
 below needs real sound pressure levels.
 
 Proximate secondary tones in the same critical band are combined per
-clause 11.6; for harmonic complexes assess each component (`tone_freq=`).
+clause 11.6; for harmonic complexes assess each component (`tone_frequency=`).
 Both methods work on Hann-windowed, RMS-averaged spectra and need no absolute
 calibration for the ratio itself (the ratios are level differences).
 
@@ -312,7 +312,7 @@ calibration for the ratio itself (the ratios are level differences).
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | 1D array | any (uncalibrated OK) | ≥ `fs/resolution_hz` samples | Ratios are level differences: calibration cancels out |
 | `fs` | int | Hz | > 0 | |
-| `tone_freq` | float, optional | Hz | 89.1–11 200; default `None` | `None` assesses the highest peak in the range of interest |
+| `tone_frequency` | float, optional | Hz | 89.1–11 200; default `None` | `None` assesses the highest peak in the range of interest |
 | `resolution_hz` | float | Hz | > 0; default `1.0` | Tone band must stay within 15 % of the critical band (clause 11.2) |
 
 Both return a `ToneAssessment(frequency, ratio_db, method)`, where `method`

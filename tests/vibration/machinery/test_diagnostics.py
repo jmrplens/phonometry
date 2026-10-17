@@ -174,7 +174,7 @@ class TestNortonProblem86:
         ``mL = 6 - 4 = 2`` and ``mL = 6 + 4 = 10`` lobes, rotating at
         ``n N (r/min) / mL`` = 10 500 and 2100 r/min, i.e. 175 Hz and 35 Hz.
         """
-        res = blade_pass_frequencies(3500.0, 6, harmonics=1, n_vanes=4)
+        res = blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
         assert res["lobe n=1 m=2"] == pytest.approx(175.0, abs=0.05)
         assert res["lobe n=1 m=10"] == pytest.approx(35.0, abs=0.05)
 
@@ -186,7 +186,7 @@ class TestNortonProblem86:
         at ``1 x 4 fs / 6 = 0,667 fs`` and the second at ``2 x 4 fs / 6 =
         1,333 fs``. Two distinct patterns, two distinct speeds.
         """
-        res = blade_pass_frequencies(60.0, 4, harmonics=2, n_vanes=2)
+        res = blade_pass_frequencies(60.0, 4, n_harmonics=2, n_vanes=2)
         fs = res.shaft_rate
         assert res["lobe n=1 m=6"] == pytest.approx(4.0 * fs / 6.0, rel=1e-12)
         assert res["lobe n=2 m=6"] == pytest.approx(8.0 * fs / 6.0, rel=1e-12)
@@ -203,7 +203,7 @@ class TestNortonProblem86:
 
     def test_rotary_blower_repeats_four_times_per_revolution(self) -> None:
         """Norton's rule: use Eq. 8.15 with ``4 x r/min`` (Section 8.4.4)."""
-        blower = blade_pass_frequencies(4.0 * 900.0, 1, harmonics=1)
+        blower = blade_pass_frequencies(4.0 * 900.0, 1, n_harmonics=1)
         assert blower["BPF"] == pytest.approx(60.0, rel=1e-12)
 
 
@@ -263,7 +263,7 @@ class TestGearMesh:
 
     def test_mesh_frequency_and_harmonics(self) -> None:
         """``GMF = N x r/min / 60`` with integer harmonics."""
-        res = gear_mesh_frequencies(1500.0, 28, harmonics=3)
+        res = gear_mesh_frequencies(1500.0, 28, n_harmonics=3)
         assert res["GMF"] == pytest.approx(28 * 25.0, rel=1e-12)
         np.testing.assert_allclose(
             res.harmonics("GMF", 3), [700.0, 1400.0, 2100.0], rtol=1e-12
@@ -271,7 +271,7 @@ class TestGearMesh:
 
     def test_sidebands_are_spaced_by_the_modulating_rate(self) -> None:
         """A once-per-revolution fault puts sidebands at ``k GMF +/- m fs``."""
-        res = gear_mesh_frequencies(1500.0, 28, harmonics=2, sidebands=2)
+        res = gear_mesh_frequencies(1500.0, 28, n_harmonics=2, sidebands=2)
         assert res["GMF+1x"] - res["GMF"] == pytest.approx(25.0, rel=1e-12)
         assert res["GMF"] - res["GMF-2x"] == pytest.approx(50.0, rel=1e-12)
         assert res["2xGMF+1x"] == pytest.approx(1425.0, rel=1e-12)
@@ -279,13 +279,13 @@ class TestGearMesh:
     def test_mating_wheel_modulation_rate(self) -> None:
         """*sideband_rate* modulates at the mating wheel's shaft rate."""
         res = gear_mesh_frequencies(
-            1500.0, 28, harmonics=1, sidebands=1, sideband_rate=17.5
+            1500.0, 28, n_harmonics=1, sidebands=1, sideband_rate=17.5
         )
         assert res["GMF+1x"] - res["GMF"] == pytest.approx(17.5, rel=1e-12)
 
     def test_non_positive_sidebands_are_dropped(self) -> None:
         """Lines at or below 0 Hz never enter the family."""
-        res = gear_mesh_frequencies(60.0, 2, harmonics=1, sidebands=3)
+        res = gear_mesh_frequencies(60.0, 2, n_harmonics=1, sidebands=3)
         assert all(line.frequency > 0.0 for line in res.lines)
 
 
@@ -307,7 +307,7 @@ class TestResultHelpers:
     def test_combine_merges_families(self) -> None:
         """A gearbox bearing carries bearing, gear and shaft lines at once."""
         bearing = bearing_fault_frequencies(1500.0, 9, 7.94, 39.0)
-        gear = gear_mesh_frequencies(1500.0, 28, harmonics=1)
+        gear = gear_mesh_frequencies(1500.0, 28, n_harmonics=1)
         both = combine_fault_lines(bearing, gear)
         assert both["BPFO"] == bearing["BPFO"]
         assert both["GMF"] == gear["GMF"]
@@ -349,7 +349,7 @@ class TestValidation:
         ("kwargs", "match"),
         [
             ({"n_teeth": 0}, "'n_teeth' must be a positive integer"),
-            ({"harmonics": 0}, "'harmonics' must be a positive integer"),
+            ({"n_harmonics": 0}, "'n_harmonics' must be a positive integer"),
             ({"sidebands": -1}, "'sidebands' must be a non-negative integer"),
             ({"sideband_rate": 0.0}, "'sideband_rate' must be positive"),
         ],
@@ -387,7 +387,7 @@ class TestValidation:
         ("kwargs", "match"),
         [
             ({"n_blades": 0}, "'n_blades' must be a positive integer"),
-            ({"harmonics": 0}, "'harmonics' must be a positive integer"),
+            ({"n_harmonics": 0}, "'n_harmonics' must be a positive integer"),
             ({"n_vanes": 0}, "'n_vanes' must be a positive integer"),
             ({"lobe_orders": 0}, "'lobe_orders' must be a positive integer"),
         ],
@@ -408,7 +408,9 @@ class TestValidation:
 
     def test_harmonics_rejects_zero_count(self) -> None:
         res = bearing_fault_frequencies(**_P85)  # type: ignore[arg-type]
-        with pytest.raises(ValueError, match=r"'count' must be a positive integer"):
+        with pytest.raises(
+            ValueError, match=r"'n_harmonics' must be a positive integer"
+        ):
             res.harmonics("BPFO", 0)
 
     def test_combine_rejects_no_results(self) -> None:

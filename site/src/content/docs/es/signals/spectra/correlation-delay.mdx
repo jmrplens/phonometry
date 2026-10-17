@@ -243,7 +243,7 @@ Conviene memorizar la firma del fallo, porque ningún número devuelto la delata
 un correlograma cuyo pico principal no sobresale mucho de sus vecinos, o un
 retardo que salta entre segmentos del mismo registro, significa que el camino
 directo no es dominante y que el retardo que tienes es el de una reflexión.
-`delay_std` no te va a avisar: la ecuación 8.129 modela la dispersión de un
+`delay_standard_deviation` no te va a avisar: la ecuación 8.129 modela la dispersión de un
 único pico, no la elección entre dos.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gcc_phat_delay.svg" alt="Correlación cruzada normalizada de un par de señales coloreadas de dos sensores frente al retardo en milisegundos: el correlador directo muestra un pico ancho alrededor del retardo verdadero de 20 muestras mientras que la curva GCC-PHAT colapsa en una espiga afilada exactamente sobre la línea discontinua del retardo verdadero" width="82%" loading="eager" />
@@ -327,7 +327,7 @@ y = np.roll(s, delay) + signals.noise_signal(fs, 4.0, color="white", rms=0.02, s
 res = signals.time_delay(x, y, fs, method="gcc", weighting="ml",
                          nperseg=2048, upsample=16, signal_bandwidth=1000.0)
 print(res.delay, res.delay_samples)     # segundos y muestras fraccionarias
-print(res.delay_std, res.delay_interval)  # sigma de la ec. 8.129, +/-2 sigma
+print(res.delay_standard_deviation, res.delay_interval)  # sigma de la ec. 8.129, +/-2 sigma
 res.plot()                              # correlación con el retardo marcado
 ```
 

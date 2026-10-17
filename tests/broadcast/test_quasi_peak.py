@@ -451,7 +451,7 @@ def test_an_empty_record_is_refused() -> None:
 
 def test_a_multichannel_record_is_refused() -> None:
     """One needle, one channel: mixing them would invent a measurement."""
-    with pytest.raises(ValueError, match=r"x must be a 1-D time series"):
+    with pytest.raises(ValueError, match=r"'x' must be a 1-D time series"):
         quasi_peak_meter(np.zeros((2, 4800)), FS)
 
 

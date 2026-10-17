@@ -49,7 +49,7 @@ _PERIOD = ref.ISO13474_ANNEX_A_DAY_FRACTION * np.array(
 )
 
 
-def _annex_a(probabilities: np.ndarray) -> environment.SelDistribution:
+def _annex_a(probabilities: np.ndarray) -> environment.SELDistribution:
     return environment.sel_distribution(
         _LEVELS,
         probabilities,
@@ -143,7 +143,7 @@ def _chk_lt2() -> Outcome:
     """Equation (A.4) as printed, integrated over the library's spread density.
 
     The row does not read the closed form the result carries: it integrates
-    ``SelDistribution.density``, the sum of the shifted Gaussians of Equation
+    ``SELDistribution.density``, the sum of the shifted Gaussians of Equation
     (23), weighted by 10^(0,1 x), so the sign and size of the shift, the
     normalisation of each Gaussian and the weight it carries all reach the
     number. The shift of Equation (22) keeps the energy of every subclass, so

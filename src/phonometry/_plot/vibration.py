@@ -63,7 +63,7 @@ if TYPE_CHECKING:
     )
     from ..vibration.human.instrumentation import (
         PhaseVerification,
-        RunningRmsDecayVerification,
+        RunningRMSDecayVerification,
         WeightingVerification,
     )
     from ..vibration.human.multiple_shock import MultipleShockResult
@@ -1693,7 +1693,7 @@ def plot_phase_verification(
 
 
 def plot_running_rms_decay_verification(
-    result: RunningRmsDecayVerification,
+    result: RunningRMSDecayVerification,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -1710,7 +1710,7 @@ def plot_running_rms_decay_verification(
     not the verdict, which is read on the span alone.
 
     :param result: A
-        :class:`~phonometry.vibration.human.instrumentation.RunningRmsDecayVerification`.
+        :class:`~phonometry.vibration.human.instrumentation.RunningRMSDecayVerification`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the measured-point ``plot`` call.
@@ -3115,7 +3115,7 @@ def plot_train_passage_spectrum(
     kwargs.setdefault("marker", "o")
     style_default(kwargs, "markersize", 4)
     kwargs.setdefault("label", _t(_MAX_LEVEL_LABEL, language))
-    ax.plot(positions, result.band_max_levels_db, **kwargs)
+    ax.plot(positions, result.band_maximum_levels_db, **kwargs)
     ax.plot(
         positions,
         result.band_interval_levels_db[1],
@@ -3696,14 +3696,12 @@ def plot_coherence_check(
         )
         excluded_label = "_nolegend_"
     ax.axhline(
-        result.minimum_coherence,
+        result.min_coherence,
         color=_C_REFERENCE,
         ls="--",
         lw=1.1,
         label=_t(_HIGH_COHERENCE_LABEL, language).format(
-            value=format_number(
-                result.minimum_coherence, language, decimals=2, trim=True
-            )
+            value=format_number(result.min_coherence, language, decimals=2, trim=True)
         ),
     )
     style_default(kwargs, "color", _C_PRIMARY)

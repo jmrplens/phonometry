@@ -354,7 +354,7 @@ def _chk_rectangular_cut_on() -> Outcome:
     Karczub's eigenvalues has to give the same number to the last bit.
     """
     exact = ph.noise_control.rectangular_duct_cut_on(
-        0.5, 0.2, speed_of_sound=343.0, count=1
+        0.5, 0.2, speed_of_sound=343.0, n_modes=1
     )
     found = ph.noise_control.modal_filter_cut_on(larger_dimension=0.5)
     return numeric(
@@ -378,7 +378,7 @@ def _chk_circular_cut_on() -> Outcome:
     a frequency the modal filter requirement steps at. The row pins the
     ratio, which is the part that does not depend on the duct.
     """
-    exact = ph.noise_control.circular_duct_cut_on(0.4, speed_of_sound=343.0, count=1)
+    exact = ph.noise_control.circular_duct_cut_on(0.4, speed_of_sound=343.0, n_modes=1)
     found = ph.noise_control.modal_filter_cut_on(diameter_m=0.4)
     return numeric(
         0.59 / (1.8412 / math.pi),
@@ -645,7 +645,7 @@ def _chk_operating_line() -> Outcome:
     computed = {
         "slope [dB/decade]": round(line.slope, 6),
         "level at 0,2 m³/s [dB]": round(line.level_at(0.2), 6),
-        "worst deviation [dB]": round(line.maximum_deviation, 6),
+        "worst deviation [dB]": round(line.max_deviation, 6),
         "lowest readable duty [m³/s]": round(line.valid_range[0], 6),
         "highest readable duty [m³/s]": round(line.valid_range[1], 6),
     }

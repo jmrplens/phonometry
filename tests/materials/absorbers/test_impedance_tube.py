@@ -41,9 +41,9 @@ from phonometry.materials.absorbers.impedance_tube import (
     ImpedanceTubeWarning,
     absorption_from_reflection,
     air_density_iso10534,
-    apply_mic_calibration,
+    apply_microphone_calibration,
     hydraulic_diameter,
-    mic_calibration_factor,
+    microphone_calibration_factor,
     normalized_surface_admittance,
     normalized_surface_impedance,
     plane_wave_frequency_range,
@@ -346,9 +346,9 @@ def test_result_is_frozen() -> None:
 def test_mic_calibration_identity() -> None:
     # A perfectly matched pair (config I == config II) gives Hc = 1.
     h = np.array([0.7 + 0.3j, 0.5 - 0.2j])
-    hc = mic_calibration_factor(h, h)
+    hc = microphone_calibration_factor(h, h)
     assert np.allclose(hc, 1.0 + 0.0j)
-    assert np.allclose(apply_mic_calibration(h, hc), h)
+    assert np.allclose(apply_microphone_calibration(h, hc), h)
 
 
 def test_mic_calibration_removes_known_mismatch() -> None:
@@ -359,9 +359,9 @@ def test_mic_calibration_removes_known_mismatch() -> None:
     mismatch = 1.05 * np.exp(1j * 0.03)
     h_config1 = true * mismatch
     h_config2 = true / mismatch
-    hc = mic_calibration_factor(h_config1, h_config2)
+    hc = microphone_calibration_factor(h_config1, h_config2)
     assert np.allclose(hc, mismatch, atol=1e-12)
-    corrected = apply_mic_calibration(h_config1, hc)
+    corrected = apply_microphone_calibration(h_config1, hc)
     assert np.allclose(corrected, true, atol=1e-12)
 
 
@@ -998,8 +998,8 @@ def test_public_exports() -> None:
         "air_density_astm",
         "tube_wavenumber",
         "tube_attenuation_constant",
-        "mic_calibration_factor",
-        "apply_mic_calibration",
+        "microphone_calibration_factor",
+        "apply_microphone_calibration",
         "two_microphone_impedance",
         "plane_wave_frequency_range",
         "plane_wave_frequency_range_astm",

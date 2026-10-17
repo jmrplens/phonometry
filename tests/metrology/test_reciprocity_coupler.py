@@ -49,7 +49,7 @@ def _mic(
 
 
 _MICS = (_mic(), _mic(140e-9, 8300.0, 1.0), _mic(150e-9, 8000.0, 1.1))
-_TUBES = metrology.CapillaryTube(length_m=0.05, radius_m=1.0 / 6000.0, count=2)
+_TUBES = metrology.CapillaryTube(length_m=0.05, radius_m=1.0 / 6000.0, n_tubes=2)
 _PLANE = metrology.PlaneWaveCoupler(
     length_m=7.5e-3, diameter_m=18.6e-3, capillary=_TUBES
 )
@@ -58,7 +58,7 @@ _LARGE = metrology.LargeVolumeCoupler(
     length_m=12.55e-3,
     diameter_m=42.88e-3,
     port_length_m=0.80e-3,
-    capillary=metrology.CapillaryTube(length_m=0.1, radius_m=0.2e-3, count=2),
+    capillary=metrology.CapillaryTube(length_m=0.1, radius_m=0.2e-3, n_tubes=2),
 )
 #: The reference conditions of clause 4, where kappa_r p_s,r is taken.
 _REFERENCE_STIFFNESS = fluids.air(**_CONDITIONS).heat_capacity_ratio * 101325.0

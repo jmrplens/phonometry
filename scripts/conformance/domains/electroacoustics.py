@@ -106,9 +106,7 @@ def _chk_piston_directivity_index() -> Outcome:
 )
 def _chk_feedback_omnidirectional() -> Outcome:
     res = ph.electroacoustics.feedback_stability(-6.0, 76.0, 80.0)
-    return numeric(
-        80.0 - 4.0, res.maximum_level_at_microphone, 1e-9, unit="dB", places=6
-    )
+    return numeric(80.0 - 4.0, res.max_level_at_microphone, 1e-9, unit="dB", places=6)
 
 
 @register(
@@ -120,9 +118,7 @@ def _chk_feedback_cardioid() -> Outcome:
     res = ph.electroacoustics.feedback_stability(
         -6.0, 78.0, 80.0, microphone_directivity=-2.0
     )
-    return numeric(
-        80.0 - 2.0, res.maximum_level_at_microphone, 1e-9, unit="dB", places=6
-    )
+    return numeric(80.0 - 2.0, res.max_level_at_microphone, 1e-9, unit="dB", places=6)
 
 
 @register(

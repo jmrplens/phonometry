@@ -363,12 +363,12 @@ the prediction disclaimer.
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
 | ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
 
-## MINIMUM_MULTI_JUNCTION_KIJ_DB
+## MIN_MULTI_JUNCTION_KIJ_DB
 
 *Constant* (`float`).
 
 ```python
-MINIMUM_MULTI_JUNCTION_KIJ_DB = -5.0
+MIN_MULTI_JUNCTION_KIJ_DB = -5.0
 ```
 
 ## multi_junction_adjustment
@@ -384,7 +384,7 @@ Formula (F.1) sums the junction `Kij` along the path and subtracts an
 adjustment `dK` that covers the transmission by wave types other than
 bending waves. Clause F.1 estimates it from published data as 4 dB for two
 junctions and 6 dB for three or more, with the resulting `Kij` floored at
-[`MINIMUM_MULTI_JUNCTION_KIJ_DB`](/phonometry/reference/api/building/installed-structure-borne/#minimum_multi_junction_kij_db).
+[`MIN_MULTI_JUNCTION_KIJ_DB`](/phonometry/reference/api/building/installed-structure-borne/#min_multi_junction_kij_db).
 
 **Parameters**
 

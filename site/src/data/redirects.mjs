@@ -13,7 +13,7 @@
 // path, which is what Astro emits.
 import { basePath } from './site.mjs';
 
-/** Old address -> where its content is published today. 436 entries. */
+/** Old address -> where its content is published today. 440 entries. */
 const moved = {
 	'/about/': '/start/about/',
 	'/environment/environmental-levels/': '/environment/assessment/environmental-levels/',
@@ -165,6 +165,8 @@ const moved = {
 	'/es/reference/api/building/building-uncertainty/': '/es/reference/api/building/uncertainty/',
 	'/es/reference/api/building/detailed-prediction/': '/es/reference/api/building/detailed-model/',
 	'/es/reference/api/building/facade-prediction/': '/es/reference/api/building/facade/',
+	'/es/reference/api/building/lab-improvement/': '/es/reference/api/building/laboratory-improvement/',
+	'/es/reference/api/building/lab-insulation/': '/es/reference/api/building/laboratory-insulation/',
 	'/es/reference/api/building/spanish-building-code/': '/es/reference/api/building/spain/',
 	'/es/reference/api/correlation/correlation/': '/es/reference/api/signals/correlation/',
 	'/es/reference/api/correlation/envelope/': '/es/reference/api/signals/envelope/',
@@ -380,6 +382,8 @@ const moved = {
 	'/reference/api/building/building-uncertainty/': '/reference/api/building/uncertainty/',
 	'/reference/api/building/detailed-prediction/': '/reference/api/building/detailed-model/',
 	'/reference/api/building/facade-prediction/': '/reference/api/building/facade/',
+	'/reference/api/building/lab-improvement/': '/reference/api/building/laboratory-improvement/',
+	'/reference/api/building/lab-insulation/': '/reference/api/building/laboratory-insulation/',
 	'/reference/api/building/spanish-building-code/': '/reference/api/building/spain/',
 	'/reference/api/correlation/correlation/': '/reference/api/signals/correlation/',
 	'/reference/api/correlation/envelope/': '/reference/api/signals/envelope/',

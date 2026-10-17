@@ -554,7 +554,7 @@ levels = np.array([38.0, 44.5, 50.0, 56.5, 62.0])    # dB(A)
 
 line = noise_control.fit_operating_line(duty, levels)
 print(round(line.slope, 2))               # 19.93 dB por década
-print(round(line.maximum_deviation, 2))   # 0.3 dB
+print(round(line.max_deviation, 2))   # 0.3 dB
 print(round(line.level_at(0.3), 1))       # 53.7 dB(A)
 ```
 

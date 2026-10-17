@@ -128,7 +128,7 @@ MicrophoneCharacteristics(
     tolerance_db: float,
     effective_range: tuple[float, float],
     rated_impedance_ohm: float | None,
-    minimum_load_impedance_ohm: float | None,
+    min_load_impedance_ohm: float | None,
     equivalent_noise_level_db: float | None,
     noise_weighting: str,
     max_spl_db: float | None,
@@ -167,7 +167,7 @@ standard's definitions (see the module docstring).
 | `tolerance_db` | Half-width of the response tolerance, in dB (12.1.1). |
 | `effective_range` | Computed effective frequency range `(lo, hi)` against the tolerance limits, in Hz (12.2). |
 | `rated_impedance_ohm` | Rated (internal) impedance, in ohm (10.2), or `None`. |
-| `minimum_load_impedance_ohm` | Rated minimum permitted load impedance, in ohm (10.3), or `None`. |
+| `min_load_impedance_ohm` | Rated minimum permitted load impedance, in ohm (10.3), or `None`. |
 | `equivalent_noise_level_db` | Equivalent sound pressure level due to inherent noise, in dB SPL with `noise_weighting` weighting (17), or `None`. |
 | `noise_weighting` | Weighting of the inherent-noise measurement (IEC 60268-1), `"A"` by default or `"468"`. |
 | `max_spl_db` | Overload sound pressure level at `max_spl_thd_percent` total harmonic distortion, in dB SPL (15.2), or `None`. |
@@ -321,7 +321,7 @@ incidence for a stated frequency, and the directivity index read from it
 ```python
 MicrophoneElectrical(
     rated_impedance_ohm: float | None = None,
-    minimum_load_impedance_ohm: float | None = None,
+    min_load_impedance_ohm: float | None = None,
     powering: str | None = None,
     supply_current_ma: float | None = None,
 )
@@ -338,7 +338,7 @@ the rated power supply of Clause 9.
 | Name | Description |
 | :--- | :--- |
 | `rated_impedance_ohm` | Rated (internal) impedance, in ohm (10.2). |
-| `minimum_load_impedance_ohm` | Rated minimum permitted load impedance, in ohm (10.3). |
+| `min_load_impedance_ohm` | Rated minimum permitted load impedance, in ohm (10.3). |
 | `powering` | Rated power supply description (9.1), e.g. the IEC 61938 phantom-powering designation and voltage. |
 | `supply_current_ma` | Current drawn from the power supply, in mA (9.1). |
 

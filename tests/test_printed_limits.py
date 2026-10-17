@@ -97,24 +97,23 @@ _VERDICT_NAME = re.compile(
 #: Limit fields the standard leaves to the user, each with the reason it stays
 #: a field.
 _CHOSEN_LIMITS = {
-    "phonometry.building.measurement.joint_insulation.JointGapSeriesCheck."
-    "minimum_gap_mm": (
+    "phonometry.building.measurement.joint_insulation.JointGapSeriesCheck.min_gap_mm": (
         "ISO 10140-1 J.4: the minimal gap width the product's series declares"
     ),
     "phonometry.building.measurement.joint_insulation.JointGapSeriesCheck."
     "nominal_gap_mm": (
         "ISO 10140-1 J.4: the nominal gap width the product's series declares"
     ),
-    "phonometry.building.measurement.lab_improvement.LiningCuringCheck."
+    "phonometry.building.measurement.laboratory_improvement.LiningCuringCheck."
     "required_curing_days": (
         "ISO 10140-1 G.4: two weeks unless the product specification sets another"
     ),
     "phonometry.building.measurement.service_equipment.BackgroundDurationCheck."
     "tolerance_s": "ISO/DIS 16032 7.6 says approximately and prints no tolerance",
-    "phonometry.building.regulation.spain.DbHrCheck.requirement": (
+    "phonometry.building.regulation.spain.DBHRCheck.requirement": (
         "the CTE DB-HR requirement the user looked up for the building"
     ),
-    "phonometry.building.regulation.spain.DbHrRequirement.limit": (
+    "phonometry.building.regulation.spain.DBHRRequirement.limit": (
         "the requirement object is the looked-up limit itself"
     ),
     "phonometry.electroacoustics.induction_loop.LoopRequirement.lower_db": (
@@ -189,10 +188,10 @@ _CHOSEN_LIMITS = {
     "phonometry.vibration.immission.train_categories.RailwayChange.guide": (
         "DIN 4150-2: the guide-value row of the area the user assesses"
     ),
-    "phonometry.vibration.structural.impact_mobility.CoherenceCheck.minimum_coherence": (
+    "phonometry.vibration.structural.impact_mobility.CoherenceCheck.min_coherence": (
         "ISO 7626-5 prints no figure for a high coherence; the default is the user's"
     ),
-    "phonometry.vibration.structural.impact_mobility.CoherenceCheck.minimum_records": (
+    "phonometry.vibration.structural.impact_mobility.CoherenceCheck.min_records": (
         "ISO 7626-5 asks five to ten impacts; where in that range is the user's"
     ),
     "phonometry.vibration.structural.impact_mobility.DoubleHitCheck.threshold_ratio": (
@@ -209,18 +208,18 @@ _NOT_LIMITS = {
     "phonometry.building.measurement.service_equipment.MeasurementDisturbanceCheck."
     "maximum_levels_db": "the measured maximum levels",
     "phonometry.building.measurement.service_equipment.VaryingBackgroundCheck."
-    "background_maximum_db": "the measured maximum of the background",
+    "background_maximum_level_db": "the measured maximum of the background",
     "phonometry.emission.free_field_qualification.SourceDirectionalityResult."
-    "maximum_negative_deviation_db": "the measured largest deviation",
+    "max_negative_deviation_db": "the measured largest deviation",
     "phonometry.emission.free_field_qualification.SourceDirectionalityResult."
-    "maximum_positive_deviation_db": "the measured largest deviation",
+    "max_positive_deviation_db": "the measured largest deviation",
     "phonometry.emission.sound_power_hard_walled.HardWalledRoomCheck."
     "max_absorption_coefficient": "the largest coefficient of the room's surfaces",
     "phonometry.environment.sources.rolling_stock_noise.TrackCondition.requirement": (
         "the requirement in words, not a value"
     ),
     "phonometry.environment.sources.statistical_pass_by.PassByRegression."
-    "max_levels_db": "the measured maximum level of each pass-by",
+    "maximum_levels_db": "the measured maximum level of each pass-by",
     "phonometry.metrology.sound_level_meter.SoundLevelMeterPeriodicRequirement."
     "over_maximum_by_correction_data": "the names of the results it concerns",
     "phonometry.noise_control.cabin_insulation.SourcePositionCheck."
@@ -280,9 +279,9 @@ _DERIVED_LIMITS = {
     ),
     "phonometry.emission.sound_power_hard_walled.HardWalledRoomCheck": (
         "limit_db",
-        "minimum_volume_m3",
+        "min_volume_m3",
         "box_dimension_limit_m",
-        "minimum_microphone_distance_m",
+        "min_microphone_distance_m",
     ),
     "phonometry.emission.sound_power_special_room.SpecialRoomReverberationCheck": (
         "lower_limit",
@@ -305,7 +304,7 @@ _DERIVED_LIMITS = {
         "axis_offset_m",
         "inverse_distance_difference_db",
     ),
-    "phonometry.hearing.real_ear_attenuation.ReatSoundFieldCheck": (
+    "phonometry.hearing.real_ear_attenuation.REATSoundFieldCheck": (
         "allowable_variation_db",
     ),
     "phonometry.hearing.sound_field_audiometry.DiffuseSoundFieldCheck": (
@@ -341,7 +340,7 @@ _DERIVED_LIMITS = {
         "tolerance_deg",
         "within_tolerance",
     ),
-    "phonometry.vibration.human.instrumentation.RunningRmsDecayVerification": (
+    "phonometry.vibration.human.instrumentation.RunningRMSDecayVerification": (
         "printed_time_s",
         "tolerance_s",
     ),
@@ -452,7 +451,7 @@ class _QualifiedFit:
     tolerance_db: float
 
     @property
-    def maximum_qualified_radius_m(self) -> float:
+    def max_qualified_radius_m(self) -> float:
         return self.radius_m
 
 
@@ -585,8 +584,8 @@ _OBSERVED = (
 _STATED_FLAGS = {
     "phonometry.aircraft.airport_noise.FlightSegmentState.ground_roll": _CALLER,
     "phonometry.aircraft.airport_noise.FlightSegmentState.landing_roll": _CALLER,
-    "phonometry.aircraft.anp_fleet.AnpProfile.ground_roll": _ROW,
-    "phonometry.aircraft.anp_fleet.AnpProfile.landing_roll": _ROW,
+    "phonometry.aircraft.anp_fleet.ANPProfile.ground_roll": _ROW,
+    "phonometry.aircraft.anp_fleet.ANPProfile.landing_roll": _ROW,
     "phonometry.broadcast.quasi_peak.QuasiPeakResult.weighted": _CALLER,
     "phonometry.building.impact_catalogue.ImpactInsulation.has_section_drawing": _ROW,
     "phonometry.building.measurement.intensity_insulation.LowFrequencyElementResult."
@@ -595,7 +594,7 @@ _STATED_FLAGS = {
     "absorbing_specimen_surface": _CALLER,
     "phonometry.building.measurement.joint_insulation.JointTestElementCheck."
     "window_or_door_gap": _CALLER,
-    "phonometry.building.measurement.joint_insulation.LabJointInsulationResult."
+    "phonometry.building.measurement.joint_insulation.LaboratoryJointInsulationResult."
     "limit_at_maximum": _CALLER,
     "phonometry.building.measurement.service_equipment.OperatingCondition."
     "equivalent_level": _ROW,
@@ -667,7 +666,7 @@ _STATED_FLAGS = {
     "phonometry.metrology.reciprocity_coupler.CouplerCheck.in_air": _CALLER,
     "phonometry.metrology.sound_calibrator.CalibratorTableRow.includes_lower": _ROW,
     "phonometry.metrology.sound_calibrator.CalibratorTableRow.includes_upper": _ROW,
-    "phonometry.metrology.sound_level_meter.MaxUncertaintyRow.includes_lower": _ROW,
+    "phonometry.metrology.sound_level_meter.MaximumUncertaintyRow.includes_lower": _ROW,
     "phonometry.metrology.sound_level_meter.SoundLevelMeterFeatures."
     "c_weighted_peak": _CALLER,
     "phonometry.metrology.sound_level_meter.SoundLevelMeterFeatures."
@@ -943,11 +942,11 @@ _DERIVED_FLAGS = {
     ),
     "phonometry.building.measurement.joint_insulation.JointGapSeriesCheck": (
         "nominal_measured",
-        "minimum_measured",
+        "min_measured",
         "working_range_measured",
         "passes",
     ),
-    "phonometry.building.measurement.joint_insulation.LabJointInsulationResult": (
+    "phonometry.building.measurement.joint_insulation.LaboratoryJointInsulationResult": (
         "regime",
     ),
     "phonometry.building.measurement.joint_insulation.JointTestElementCheck": (
@@ -955,7 +954,7 @@ _DERIVED_FLAGS = {
         "width_ok",
         "passes",
     ),
-    "phonometry.building.measurement.lab_improvement.LiningCuringCheck": (
+    "phonometry.building.measurement.laboratory_improvement.LiningCuringCheck": (
         "cured",
         "lag_within_third",
         "passes",
@@ -995,7 +994,7 @@ _DERIVED_FLAGS = {
     "phonometry.building.prediction.resilient_layers.TappingForceResult": (
         "over_critical",
     ),
-    "phonometry.building.regulation.spain.DbHrCheck": (
+    "phonometry.building.regulation.spain.DBHRCheck": (
         "reported",
         "margin",
         "complies",
@@ -1013,7 +1012,7 @@ _DERIVED_FLAGS = {
         "room",
         "frequencies",
         "band_radius_m",
-        "maximum_qualified_radius_m",
+        "max_qualified_radius_m",
         "points_met",
         "equal_spacing_met",
         "spacing_met",
@@ -1096,7 +1095,7 @@ _DERIVED_FLAGS = {
         "criterion_1",
         "negative_power_within_limit",
         "criterion_2",
-        "minimum_positions",
+        "min_positions",
         "achieved_grade",
         "confidence_interval",
         "expanded_uncertainty",

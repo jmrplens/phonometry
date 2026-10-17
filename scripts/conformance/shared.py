@@ -125,7 +125,7 @@ def _filter_class(arch: str, fraction: float) -> FilterClass:
                 grid.sos, grid.factor, grid.fs_hz, fm, breakpoints
             ),
         ),
-        *grid.images(0, grid.num_points),
+        *grid.images(0, grid.n_points),
     ]
     omega = np.concatenate([f for f, _ in parts]) / fm
     delta = np.concatenate([d for _, d in parts])

@@ -58,7 +58,7 @@ db = aircraft.load_anp_database()
 print(len(db.aircraft_ids))          # 155 aircraft types
 ac = db.aircraft("747100")
 print(ac.description)                # Boeing 747-100 / JT9DBD
-print(ac.engine_type, ac.num_engines, ac.weight_class)
+print(ac.engine_type, ac.n_engines, ac.weight_class)
 print(ac.power_parameter, ac.mounting)
 ```
 
@@ -68,7 +68,7 @@ database, and its `event_level` and `noise_contour` are those same functions
 with the NPD tables and the default profile already filled in. Keeping the two
 apart matters if you concatenate snippets from both pages.
 
-An `AnpAircraft` describes itself with the engine type and count and the ICAO
+An `ANPAircraft` describes itself with the engine type and count and the ICAO
 wake weight class, and carries two fields you will use directly.
 
 The **power parameter** names the quantity the NPD table is indexed by. It
@@ -328,7 +328,7 @@ plt.show()
 </details>
 
 `procedural_profile` crosses back into the units the noise chain speaks,
-returning the same `AnpProfile` a fixed-point lookup does. `event_level` and
+returning the same `ANPProfile` a fixed-point lookup does. `event_level` and
 `noise_contour` take an `aerodrome` for the same reason, so an aircraft that
 publishes only steps runs the whole Doc 29 chain from its identifier. That is
 309 of the database's 310 aircraft and operation pairs, against 33 with a

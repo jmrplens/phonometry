@@ -214,7 +214,7 @@ print(round(20 * np.log10(np.ptp(noise) / np.sqrt(np.mean(noise**2))), 2))  # 18
 
 combi = 0.4 * electroacoustics.combi_signal(fs, cycles=2, seed=7)  # sine bursts at 400 mA/m
 reading = electroacoustics.field_strength_meter(combi, fs)
-print(round(reading.maximum_db, 2), round(reading.equivalent_db, 2))  # 0.0 -3.98 dB
+print(round(reading.maximum_level_db, 2), round(reading.equivalent_db, 2))  # 0.0 -3.98 dB
 ```
 
 6.4 NOTE 2, and NOTE 3 to 5.4.8.2 of IEC 62489-1, print the theoretical
@@ -531,7 +531,7 @@ steps = electroacoustics.maximum_output_current(
     load_resistance_ohm=0.69,
     rated_thd_percent=1.0,
 )
-print(round(steps.maximum_current_a, 2))  # 6.36 A where the THD reaches 1 %
+print(round(steps.max_current_a, 2))  # 6.36 A where the THD reaches 1 %
 
 load = np.clip(4.5 * electroacoustics.loop_test_noise(fs, 60.0, seed=3), -14.0, 14.0)
 print(round(electroacoustics.compliance_voltage(load), 2))    # 9.9 V: clipping at ±14 V
@@ -602,7 +602,7 @@ f = np.array([100.0, 200, 500, 1000, 2000, 5000, 8000, 10000])
 z_in = np.abs(32.2 + 2j * np.pi * f * 0.53e-3)     # 32.2 ohm and 0.53 mH, about 25 turns
 level = -6.0 + 20 * np.log10(z_in[3] / z_in)       # -6 dB at 1 kHz with 0.5 V applied
 neck = electroacoustics.neck_loop_characteristics(f, level, z_in, input_voltage_v=0.5)
-print(round(neck.reference_input_voltage_v, 3), neck.minimum_impedance_ohm)  # 0.998 V 32.0 ohm
+print(round(neck.reference_input_voltage_v, 3), neck.min_impedance_ohm)  # 0.998 V 32.0 ohm
 print([round(v) for v in neck.frequencies_3db_hz])                           # [9723] Hz
 draft = electroacoustics.verify_neck_loop(32.4, neck.reference_input_voltage_v, neck_loop_type=1)
 print(draft.passes, draft.resistance_passes, draft.voltage_passes)           # True True True

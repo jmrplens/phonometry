@@ -347,7 +347,7 @@ def test_total_sel_admits_empty_bands_but_not_a_nan_one() -> None:
 
 def test_total_sel_of_an_all_empty_column_is_minus_infinity() -> None:
     """Every band empty sums to ``-inf``, which is the truthful total over it."""
-    spectrum = underwater.StrikeSelSpectrum(
+    spectrum = underwater.StrikeSELSpectrum(
         frequencies=np.array([100.0, 125.0, 160.0]),
         band_sel=np.full(3, -np.inf),
         total_sel=-np.inf,

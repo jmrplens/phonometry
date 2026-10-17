@@ -222,7 +222,7 @@ def _peak_level(pressure: NDArray[np.float64]) -> float:
     wrong in a guard: what a guard has to tell apart is a level that restates
     its trace from one that contradicts it, and an exception raised about the
     trace answers neither. A silent trace peaks at ``-inf``, the level of zero
-    pressure -- the same neutral value :attr:`StrikeSelSpectrum.band_sel`
+    pressure -- the same neutral value :attr:`StrikeSELSpectrum.band_sel`
     carries for a band that holds no energy, so the two guards in this module
     treat an undetermined level the same way.
 
@@ -341,7 +341,7 @@ class PileStrikeResult(OwnsArrays):
 
 
 @dataclass(frozen=True)
-class StrikeSelSpectrum(OwnsArrays):
+class StrikeSELSpectrum(OwnsArrays):
     """Single-strike sound exposure level resolved into fractional-octave bands.
 
     :ivar frequencies: Nominal band centre frequencies, in Hz.
@@ -426,7 +426,7 @@ class StrikeSelSpectrum(OwnsArrays):
         if undetermined.size:
             i = int(undetermined[0])
             msg = (
-                "StrikeSelSpectrum: 'band_sel' must be finite, or -inf for a "
+                "StrikeSELSpectrum: 'band_sel' must be finite, or -inf for a "
                 "band that holds no energy at all; the "
                 f"{float(np.asarray(self.frequencies)[i]):g} Hz band states "
                 f"{float(band_sel[i])!r}."
@@ -435,7 +435,7 @@ class StrikeSelSpectrum(OwnsArrays):
         total = _band_energy_sum(band_sel)
         if not math.isclose(self.total_sel, total, rel_tol=0.0, abs_tol=1e-9):
             msg = (
-                "StrikeSelSpectrum: 'total_sel' must be the energy sum of "
+                "StrikeSELSpectrum: 'total_sel' must be the energy sum of "
                 "'band_sel', 10 lg(sum 10^(SEL/10)) over the bands beside it "
                 f"and not their arithmetic sum; got {self.total_sel!r} where "
                 f"the bands sum to {total!r}."
@@ -460,7 +460,7 @@ def strike_sel_spectrum(
     *,
     fraction: int = 3,
     limits: tuple[float, float] = (10.0, 20_000.0),
-) -> StrikeSelSpectrum:
+) -> StrikeSELSpectrum:
     r"""Band-resolved single-strike sound exposure level.
 
     The sound exposure :math:`E = \int p^2 \, dt` is split between
@@ -471,7 +471,7 @@ def strike_sel_spectrum(
     falls outside ``limits``.
 
     Bands narrower than the FFT bin spacing ``fs/n`` contain no bin and are
-    reported as ``-inf`` dB (see :class:`StrikeSelSpectrum`); the result can be
+    reported as ``-inf`` dB (see :class:`StrikeSELSpectrum`); the result can be
     handed straight to
     :func:`~phonometry.underwater.bioacoustics.weighting.weighted_exposure`.
 
@@ -486,7 +486,7 @@ def strike_sel_spectrum(
         that disagrees with it raises instead of silently winning.
     :param fraction: Bandwidth fraction: 1 (octave) or 3 (one-third octave).
     :param limits: Lower and upper band-centre limits, in Hz.
-    :return: A :class:`StrikeSelSpectrum`.
+    :return: A :class:`StrikeSELSpectrum`.
     :raises ValueError: If the inputs are invalid.
     """
     from ...filters.frequencies import nominal_frequencies
@@ -539,7 +539,7 @@ def strike_sel_spectrum(
     if total <= 0.0:
         msg = "'pressure' has no energy inside the requested bands."
         raise ValueError(msg)
-    return StrikeSelSpectrum(
+    return StrikeSELSpectrum(
         frequencies=fc,
         band_sel=np.asarray(band_sel, dtype=np.float64),
         total_sel=float(10.0 * np.log10(total / e0)),

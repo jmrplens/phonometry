@@ -580,7 +580,7 @@ exterior = [90.0, 95.0, 100.0, 105.0, 110.0]
 en_los_oidos = [[60.0, 65.0, 70.0, 75.0, 80.0],   # una fila por oído
                 [61.0, 66.0, 71.0, 75.5, 78.0]]   # el último paso sube 2,5 dB
 linealidad = hearing.assess_anr_linearity(exterior, en_los_oidos)
-print(linealidad.maximum_linear_level_db)  # 105.0
+print(linealidad.max_linear_level_db)  # 105.0
 print(linealidad.linear_to_110_db)         # False
 ```
 

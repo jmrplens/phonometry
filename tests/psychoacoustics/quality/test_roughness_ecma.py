@@ -234,7 +234,7 @@ def test_invalid_field_raises() -> None:
 
 def test_empty_signal_raises() -> None:
     empty = np.array([])
-    with pytest.raises(ValueError, match="signal must not be empty"):
+    with pytest.raises(ValueError, match="'x' must not be empty"):
         psychoacoustics.roughness_ecma(empty, FS)
 
 
@@ -243,14 +243,10 @@ def test_non_finite_signal_raises() -> None:
     # washes out in the envelope stages and the result looks like silence).
     tone = _tone(1000.0, 60.0, 0.5)
     tone[100] = np.nan
-    with pytest.raises(
-        ValueError, match="'signal_in' must contain only finite samples"
-    ):
+    with pytest.raises(ValueError, match="'x' must contain only finite samples"):
         psychoacoustics.roughness_ecma(tone, FS)
     tone[100] = np.inf
-    with pytest.raises(
-        ValueError, match="'signal_in' must contain only finite samples"
-    ):
+    with pytest.raises(ValueError, match="'x' must contain only finite samples"):
         psychoacoustics.roughness_ecma(tone, FS)
 
 

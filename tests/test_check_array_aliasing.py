@@ -570,7 +570,7 @@ def test_a_plain_class_reads_its_parameter_s_annotation(
 def test_a_database_that_hands_out_its_constructor_s_arrays_is_refused(
     tmp_path: pathlib.Path,
 ) -> None:
-    """``AnpDatabase`` kept the caller's distances and gave them to its curves.
+    """``ANPDatabase`` kept the caller's distances and gave them to its curves.
 
     The record is built in a method, from ``self``; the array is caught where
     the constructor kept it.

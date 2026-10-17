@@ -603,7 +603,7 @@ def _chk_iso13472_1_kr() -> Outcome:
 
 @register(_ROAD, "ISO 13472-1:2002 Annex A", "Maximum-sampled-area radius")
 def _chk_iso13472_1_msa() -> Outcome:
-    r = ph.materials.max_sampled_area_radius(ref.ISO13472_1_MSA_WINDOW)
+    r = ph.materials.maximum_sampled_area_radius(ref.ISO13472_1_MSA_WINDOW)
     return numeric(ref.ISO13472_1_MSA_RADIUS, r, 1e-6, unit="m", places=4)
 
 

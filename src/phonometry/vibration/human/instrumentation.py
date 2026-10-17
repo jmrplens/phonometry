@@ -1231,7 +1231,7 @@ def running_rms_decay_time(integration_time: float, *, method: str) -> float:
 
 
 @dataclass(frozen=True, kw_only=True)
-class RunningRmsDecayVerification(RichDisplay):
+class RunningRMSDecayVerification(RichDisplay):
     """One measured decay time against its row of ISO 8041-1 Table 10 or 11.
 
     The row is the whole criterion: a printed time to 10 % of the initial
@@ -1326,7 +1326,7 @@ class RunningRmsDecayVerification(RichDisplay):
         :raises TypeError: Always.
         """
         msg = (
-            "a RunningRmsDecayVerification has no truth value; read its "
+            "a RunningRMSDecayVerification has no truth value; read its "
             "'.passes' for the verdict"
         )
         raise TypeError(msg)
@@ -1355,7 +1355,7 @@ class RunningRmsDecayVerification(RichDisplay):
 
 def verify_running_rms_decay(
     measured_time_s: float, *, integration_time: float, method: str
-) -> RunningRmsDecayVerification:
+) -> RunningRMSDecayVerification:
     """Verify a measured decay time against Table 10 or Table 11.
 
     The verdict is one printed row: the measured time to 10 % of the initial
@@ -1375,7 +1375,7 @@ def verify_running_rms_decay(
         so is the method: two times in seconds side by side are the kind of
         pair a positional call gets the wrong way round in silence.
     :param method: ``"linear"`` (Table 10) or ``"exponential"`` (Table 11).
-    :return: The verdict, as a :class:`RunningRmsDecayVerification` that
+    :return: The verdict, as a :class:`RunningRMSDecayVerification` that
         keeps the printed row it was judged against.
     :raises ValueError: If ``method`` is neither average, if the measured time
         is not positive and finite, or if the integration time is not one of
@@ -1391,6 +1391,6 @@ def verify_running_rms_decay(
     for printed_tau, _time, _tolerance in RUNNING_RMS_DECAY_TIME_S[averaging]:
         if math.isclose(tau, printed_tau, rel_tol=1e-9, abs_tol=0.0):
             tau = printed_tau
-    return RunningRmsDecayVerification(
+    return RunningRMSDecayVerification(
         method=averaging, integration_time=tau, measured_time_s=measured
     )

@@ -564,7 +564,7 @@ external = [90.0, 95.0, 100.0, 105.0, 110.0]
 at_the_ears = [[60.0, 65.0, 70.0, 75.0, 80.0],   # one row per ear
                [61.0, 66.0, 71.0, 75.5, 78.0]]   # rises 2.5 dB on the last step
 linearity = hearing.assess_anr_linearity(external, at_the_ears)
-print(linearity.maximum_linear_level_db)  # 105.0
+print(linearity.max_linear_level_db)  # 105.0
 print(linearity.linear_to_110_db)         # False
 ```
 

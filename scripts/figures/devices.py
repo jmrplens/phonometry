@@ -576,7 +576,7 @@ def _microphone_datasheet_example() -> "MicrophoneCharacteristics":
         ),
         electrical=electroacoustics.MicrophoneElectrical(
             rated_impedance_ohm=150.0,
-            minimum_load_impedance_ohm=1000.0,
+            min_load_impedance_ohm=1000.0,
             powering="Phantom P48 (IEC 61938)",
             supply_current_ma=3.1,
         ),
@@ -2645,8 +2645,8 @@ def generate_precision_positions_arrays(output_dir: str) -> None:
     print("Generating precision_positions_arrays.svg...")
     from phonometry import emission
 
-    hemi = emission.precision_positions("hemisphere", radius=1.0, count=40)
-    sphere = emission.precision_positions("sphere", radius=1.0, count=20)
+    hemi = emission.precision_positions("hemisphere", radius=1.0, n_positions=40)
+    sphere = emission.precision_positions("sphere", radius=1.0, n_positions=20)
 
     from matplotlib.lines import Line2D
     from matplotlib.transforms import offset_copy
@@ -3596,7 +3596,7 @@ def generate_silencer_side_branch(output_dir: str) -> None:
 
 
 def generate_hvac_end_reflection(output_dir: str) -> None:
-    """ASHRAE duct end reflection loss for three diameters (HvacSpectrumResult)."""
+    """ASHRAE duct end reflection loss for three diameters (HVACSpectrumResult)."""
     print("Generating hvac_end_reflection.svg...")
     from phonometry.noise_control import hvac
 
@@ -4088,13 +4088,13 @@ def generate_fan_sound_power(output_dir: str) -> None:
     inset = ax.inset_axes((0.07, 0.22, 0.33, 0.26))
     grid = np.linspace(40.0, 100.0, 400)
     # The inset exists to show the staircase below the 50 % floor Table 13.6 is
-    # tabulated from, which is exactly what HvacWarning is there to flag. The
+    # tabulated from, which is exactly what HVACWarning is there to flag. The
     # warning is aimed at a caller who passed a fraction where a percentage was
     # wanted, not at a figure drawing the extrapolation on purpose, so it is
     # silenced here and nowhere wider: a warnings-as-errors run would otherwise
     # stop before writing the asset.
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore", noise_control.HvacWarning)
+        warnings.simplefilter("ignore", noise_control.HVACWarning)
         corrections = [
             noise_control.fan_efficiency_correction(relative_efficiency_percent=v)
             for v in grid
@@ -4614,7 +4614,7 @@ def generate_duct_mode_cut_on(output_dir: str) -> None:
     # (c = 405 m/s) at a mean flow velocity of 200 m/s, i.e. M = 0.494, where
     # the sqrt(1 - M^2) shift separates the two ladders visibly.
     modes = noise_control.circular_duct_cut_on(
-        0.254, flow_velocity=200.0, speed_of_sound=405.0, count=6
+        0.254, flow_velocity=200.0, speed_of_sound=405.0, n_modes=6
     )
 
     _fig, ax = plt.subplots(figsize=(10, 6))
@@ -5976,7 +5976,7 @@ def generate_reference_source_calibration(output_dir: str) -> None:
     print("Generating reference_source_calibration.svg...")
     from phonometry import emission, environment
 
-    positions = emission.precision_positions("hemisphere", radius=2.0, count=20)
+    positions = emission.precision_positions("hemisphere", radius=2.0, n_positions=20)
     upward = positions[:, 2:3] / 2.0 - 0.5
     pattern = 4.0 * upward * np.sqrt(_RSS_THIRDS / 10000.0)[None, :]
     alpha = environment.air_attenuation(
@@ -8622,7 +8622,7 @@ def _plant_example() -> tuple[Any, Any, NDArray[np.float64]]:
     plant = [[0, 0], [180, 0], [180, 60], [120, 60], [120, 110], [0, 110]]
     contour_m = [[-25, -25], [205, -25], [205, 135], [-25, 135]]
     height = emission.plant_characteristic_height_m(
-        [z for (_x, _y, z), _lw in _PLANT_SOURCES], low_source_count=14
+        [z for (_x, _y, z), _lw in _PLANT_SOURCES], n_low_sources=14
     )
     contour = emission.plant_measurement_contour(
         plant, contour_m, characteristic_height_m=height

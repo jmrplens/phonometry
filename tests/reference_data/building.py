@@ -133,7 +133,7 @@ ISO16283_LF_T63_OCTAVE_S = 0.72
 # (S = 10 m2, A = 0,16 * 50 / 0,8 = 10 m2), so R = L1 - L2 = the reference. The
 # 32 dB unfavourable-deviation allowance then permits a 2 dB upward shift of the
 # reference (32 dB / 16 bands), giving Rw = curve@500 Hz (52) + 2 = 54 dB - the
-# analytic +2-shift anchor (mirrors tests/building/measurement/test_lab_insulation.py).
+# analytic +2-shift anchor (mirrors tests/building/measurement/test_laboratory_insulation.py).
 # ---------------------------------------------------------------------------
 ISO10140_2_REF_AIRBORNE_R: list[float] = [
     33,

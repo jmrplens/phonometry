@@ -21,7 +21,7 @@ with :math:`S_\mathrm{n} = 1` m², :math:`l_\mathrm{n} = 1` m, the joint length
 of every measurement, so J.1 asks for the maximum the arrangement can show,
 :math:`R_\mathrm{s,max}`, measured with the joint sealed on both sides. Unless
 it lies 10 dB or more above the measured :math:`R_\mathrm{s}'`, the result is
-corrected by the rules of ISO 10140-2:2021 A.3 (:func:`lab_joint_insulation`):
+corrected by the rules of ISO 10140-2:2021 A.3 (:func:`laboratory_joint_insulation`):
 
 * a difference of 6 dB up to 10 dB: Formula (J.2),
   :math:`R_\mathrm{s} = -10 \lg(10^{-R_\mathrm{s}'/10} - 10^{-R_\mathrm{s,max}/10})`;
@@ -106,13 +106,13 @@ __all__ = [
     "JointGapSeriesCheck",
     "JointOpenBandRating",
     "JointTestElementCheck",
-    "LabJointInsulationResult",
+    "LaboratoryJointInsulationResult",
     "check_gap_width",
     "check_joint_gap_series",
     "check_joint_test_element",
     "joint_gap_series",
     "joint_sound_reduction_index",
-    "lab_joint_insulation",
+    "laboratory_joint_insulation",
 ]
 
 #: Reference area :math:`S_\mathrm{n}` of Formula (J.1), in m².
@@ -197,7 +197,7 @@ def joint_sound_reduction_index(
 
     The same formula, with the joint sealed on both sides, gives the maximum
     of the test arrangement :math:`R_\mathrm{s,max}` that
-    :func:`lab_joint_insulation` corrects against (J.1).
+    :func:`laboratory_joint_insulation` corrects against (J.1).
 
     :param l1_db: Energy average sound pressure level in the source room, in
         dB, one value per band, or a ``(positions, bands)`` array that is
@@ -329,7 +329,7 @@ def _single_numbers(
 
 
 @dataclass(frozen=True)
-class LabJointInsulationResult(OwnsArrays):
+class LaboratoryJointInsulationResult(OwnsArrays):
     r"""Sound reduction index of a joint per metre (ISO 10140-1:2021 Annex J).
 
     :ivar frequencies: One-third-octave band centre frequencies, in Hz.
@@ -406,7 +406,7 @@ class LabJointInsulationResult(OwnsArrays):
             self.r_s_db, expected, rtol=0.0, atol=_FIELD_SLACK_DB, equal_nan=True
         ):
             msg = (
-                "LabJointInsulationResult: 'r_s_db' must be the correction of "
+                "LaboratoryJointInsulationResult: 'r_s_db' must be the correction of "
                 "J.1 each band's regime gives from 'r_s_measured_db' and "
                 f"'r_s_max_db', {expected.tolist()!r}; got "
                 f"{np.asarray(self.r_s_db).tolist()!r}."
@@ -430,7 +430,7 @@ class LabJointInsulationResult(OwnsArrays):
         )
 
     @property
-    def minimum_value(self) -> np.ndarray:
+    def min_value(self) -> np.ndarray:
         r"""Bands whose :math:`R_\mathrm{s}` is a minimum value (``"limit"`` or ``"maximum"``)."""
         return np.asarray([r in {"limit", "maximum"} for r in self.regime], dtype=bool)
 
@@ -572,8 +572,8 @@ def _indicative_bands(measured: np.ndarray, maximum: np.ndarray) -> np.ndarray:
 
     The one reading of the rule: on the measured :math:`R_\mathrm{s}'`, the
     condition the bracketed lower limit is set by, whichever correction the
-    band then received. :attr:`LabJointInsulationResult.indicative` and the
-    open-band rating of :func:`lab_joint_insulation` both call it, so the two
+    band then received. :attr:`LaboratoryJointInsulationResult.indicative` and the
+    open-band rating of :func:`laboratory_joint_insulation` both call it, so the two
     can never disagree on which bands are open.
     """
     margin = maximum - measured
@@ -618,14 +618,14 @@ def _correct(
     return corrected
 
 
-def lab_joint_insulation(
+def laboratory_joint_insulation(
     r_s_measured_db: ArrayLike,
     r_s_max_db: ArrayLike,
     frequencies: ArrayLike,
     *,
     joint_length_m: float | None = None,
     limit_at_maximum: bool = True,
-) -> LabJointInsulationResult:
+) -> LaboratoryJointInsulationResult:
     r"""Sound reduction index of a joint, corrected for the test arrangement (J.1).
 
     :math:`R_\mathrm{s}'` and :math:`R_\mathrm{s,max}` are both Formula (J.1)
@@ -655,7 +655,7 @@ def lab_joint_insulation(
     :math:`C_\mathrm{tr,100\text{-}5000}`, the evaluation of Figure J.7. Bands
     with :math:`d < 3` dB are indicative: J.1 rates the curve again with them
     taken as infinitely high, and a change of more than 1 dB puts the single
-    numbers in brackets (:attr:`LabJointInsulationResult.bracketed`). The
+    numbers in brackets (:attr:`LaboratoryJointInsulationResult.bracketed`). The
     indicative bands are read on :math:`R_\mathrm{s}'`, the same condition as
     the bracketed lower limit, whichever rule corrected them.
 
@@ -668,7 +668,7 @@ def lab_joint_insulation(
     :param limit_at_maximum: Set the bands within 3 dB of the maximum to
         :math:`R_\mathrm{s,max}` (default), or give them the 1,3 dB correction
         like the other bands below 6 dB.
-    :return: A :class:`LabJointInsulationResult`.
+    :return: A :class:`LaboratoryJointInsulationResult`.
     :raises ValueError: If the three inputs disagree in length, a value is not
         finite, a frequency or the joint length is not positive.
     """
@@ -676,7 +676,7 @@ def lab_joint_insulation(
     measured = require_finite_array(r_s_measured_db, "r_s_measured_db")
     maximum = require_finite_array(r_s_max_db, "r_s_max_db")
     require_equal_shapes(
-        "lab_joint_insulation",
+        "laboratory_joint_insulation",
         {
             "r_s_measured_db": measured.shape,
             "r_s_max_db": maximum.shape,
@@ -706,7 +706,7 @@ def lab_joint_insulation(
         open_mask = _indicative_bands(measured, maximum)
         if bool(np.any(open_mask)):
             opened = _open_band_rating(r_s, freqs, core, open_mask)
-    return LabJointInsulationResult(
+    return LaboratoryJointInsulationResult(
         frequencies=freqs,
         r_s_measured_db=measured,
         r_s_max_db=maximum,
@@ -927,9 +927,9 @@ class JointGapSeries(OwnsArrays):
     r"""Single numbers of a variable slit against its gap width (J.4, J.5.2 h), i)).
 
     :ivar gap_widths_mm: The gap widths measured, ascending, in mm.
-    :ivar results: The :class:`LabJointInsulationResult` at each width.
+    :ivar results: The :class:`LaboratoryJointInsulationResult` at each width.
     :ivar nominal_gap_mm: The nominal gap width :math:`b_\mathrm{n}`, in mm.
-    :ivar minimum_gap_mm: The minimal gap width :math:`b_\mathrm{min}` at the
+    :ivar min_gap_mm: The minimal gap width :math:`b_\mathrm{min}` at the
         maximal pressure, in mm, or ``None`` when not given.
     :ivar r_s_w_db: :math:`R_\mathrm{s,w}` at each width, in dB.
     :ivar r_s_w_c_db: :math:`R_\mathrm{s,w} + C` at each width, in dB.
@@ -938,9 +938,9 @@ class JointGapSeries(OwnsArrays):
     """
 
     gap_widths_mm: np.ndarray
-    results: tuple[LabJointInsulationResult, ...]
+    results: tuple[LaboratoryJointInsulationResult, ...]
     nominal_gap_mm: float
-    minimum_gap_mm: float | None
+    min_gap_mm: float | None
     r_s_w_db: np.ndarray
     r_s_w_c_db: np.ndarray
     r_s_w_ctr_db: np.ndarray
@@ -1056,10 +1056,11 @@ class JointGapSeries(OwnsArrays):
 
 def joint_gap_series(
     gap_widths_mm: ArrayLike,
-    results: tuple[LabJointInsulationResult, ...] | list[LabJointInsulationResult],
+    results: tuple[LaboratoryJointInsulationResult, ...]
+    | list[LaboratoryJointInsulationResult],
     *,
     nominal_gap_mm: float = _DEFAULT_NOMINAL_GAP_MM,
-    minimum_gap_mm: float | None = None,
+    min_gap_mm: float | None = None,
 ) -> JointGapSeries:
     r"""Collect the results of a variable slit at several gap widths (J.4, J.5).
 
@@ -1080,10 +1081,10 @@ def joint_gap_series(
 
     :param gap_widths_mm: The gap width ``b`` of each result, in mm (the
         average of :func:`check_gap_width`).
-    :param results: The :class:`LabJointInsulationResult` at each width, each
+    :param results: The :class:`LaboratoryJointInsulationResult` at each width, each
         with its ISO 717-1 rating.
     :param nominal_gap_mm: :math:`b_\mathrm{n}`, in mm (default 5 mm).
-    :param minimum_gap_mm: :math:`b_\mathrm{min}`, in mm, marked on the plot
+    :param min_gap_mm: :math:`b_\mathrm{min}`, in mm, marked on the plot
         when given.
     :return: A :class:`JointGapSeries`, sorted by gap width.
     :raises ValueError: If the widths and results disagree in number, two
@@ -1120,16 +1121,14 @@ def joint_gap_series(
         )
     nominal = require_non_negative(nominal_gap_mm, "nominal_gap_mm")
     minimum = (
-        None
-        if minimum_gap_mm is None
-        else require_non_negative(minimum_gap_mm, "minimum_gap_mm")
+        None if min_gap_mm is None else require_non_negative(min_gap_mm, "min_gap_mm")
     )
     table = np.asarray(numbers, dtype=np.float64)
     return JointGapSeries(
         gap_widths_mm=widths,
         results=items,
         nominal_gap_mm=nominal,
-        minimum_gap_mm=minimum,
+        min_gap_mm=minimum,
         r_s_w_db=table[:, 0],
         r_s_w_c_db=table[:, 1],
         r_s_w_ctr_db=table[:, 2],
@@ -1146,13 +1145,13 @@ class JointGapSeriesCheck(RichDisplay):
 
     :ivar gap_widths_mm: The gap widths measured, ascending, in mm.
     :ivar nominal_gap_mm: The nominal gap width :math:`b_\mathrm{n}`, in mm.
-    :ivar minimum_gap_mm: The minimal gap width :math:`b_\mathrm{min}`, in mm,
+    :ivar min_gap_mm: The minimal gap width :math:`b_\mathrm{min}`, in mm,
         or ``None`` when the series does not name it.
     """
 
     gap_widths_mm: tuple[float, ...]
     nominal_gap_mm: float
-    minimum_gap_mm: float | None
+    min_gap_mm: float | None
 
     @property
     def nominal_measured(self) -> bool:
@@ -1160,14 +1159,14 @@ class JointGapSeriesCheck(RichDisplay):
         return _measured_at(self.gap_widths_mm, self.nominal_gap_mm)
 
     @property
-    def minimum_measured(self) -> bool:
+    def min_measured(self) -> bool:
         r"""Whether a measured width is :math:`b_\mathrm{min}` (J.4 b)).
 
         ``False`` when the series names no :math:`b_\mathrm{min}`, since
         nothing then shows it was measured.
         """
-        return self.minimum_gap_mm is not None and _measured_at(
-            self.gap_widths_mm, self.minimum_gap_mm
+        return self.min_gap_mm is not None and _measured_at(
+            self.gap_widths_mm, self.min_gap_mm
         )
 
     @property
@@ -1179,9 +1178,7 @@ class JointGapSeriesCheck(RichDisplay):
     def passes(self) -> bool:
         """Whether all three were measured."""
         return (
-            self.nominal_measured
-            and self.minimum_measured
-            and self.working_range_measured
+            self.nominal_measured and self.min_measured and self.working_range_measured
         )
 
     def __bool__(self) -> bool:
@@ -1231,7 +1228,7 @@ def check_joint_gap_series(series: JointGapSeries) -> JointGapSeriesCheck:
     0,3 mm, so a measured width within 0,3 mm of a required one counts as
     that width. A series that does not name :math:`b_\mathrm{min}` fails
     J.4 b), because nothing then shows which width it was; pass
-    ``minimum_gap_mm`` to :func:`joint_gap_series`.
+    ``min_gap_mm`` to :func:`joint_gap_series`.
 
     :param series: The :class:`JointGapSeries` of the slit.
     :return: A :class:`JointGapSeriesCheck`.
@@ -1240,5 +1237,5 @@ def check_joint_gap_series(series: JointGapSeries) -> JointGapSeriesCheck:
     return JointGapSeriesCheck(
         gap_widths_mm=tuple(float(w) for w in widths),
         nominal_gap_mm=float(series.nominal_gap_mm),
-        minimum_gap_mm=series.minimum_gap_mm,
+        min_gap_mm=series.min_gap_mm,
     )

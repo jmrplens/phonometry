@@ -27,12 +27,20 @@ _STEREO = np.zeros((2, 4800))
         ph.psychoacoustics.loudness_ecma,
         ph.psychoacoustics.tonality_ecma,
         ph.psychoacoustics.roughness_ecma,
+        ph.psychoacoustics.fluctuation_strength_ecma,
         ph.psychoacoustics.loudness_moore_glasberg,
     ],
-    ids=["loudness_ecma", "tonality_ecma", "roughness_ecma", "moore_glasberg"],
+    ids=[
+        "loudness_ecma",
+        "tonality_ecma",
+        "roughness_ecma",
+        "fluctuation_strength_ecma",
+        "moore_glasberg",
+    ],
 )
 def test_stereo_input_is_rejected(
     analyze: Callable[[np.ndarray, float], object],
 ) -> None:
-    with pytest.raises(ValueError, match="1-D time series"):
+    """The refusal names the parameter the caller passed, ``x``."""
+    with pytest.raises(ValueError, match="^'x' must be a 1-D time series"):
         analyze(_STEREO, 48000.0)

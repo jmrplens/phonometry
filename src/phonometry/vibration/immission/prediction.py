@@ -97,8 +97,8 @@ __all__ = [
     "blast_peak_velocity_mm_s",
     "fall_energy_kj",
     "far_field_velocity_mm_s",
-    "floor_transfer_max",
-    "foundation_transfer_max",
+    "floor_transfer_maximum",
+    "foundation_transfer_maximum",
     "geometric_exponent",
     "impact_peak_velocity_mm_s",
     "machine_count_correction",
@@ -443,7 +443,7 @@ def soil_building_frequency_guide(stories: int) -> tuple[float, float]:
     return _HIGH_RISE_HZ
 
 
-def foundation_transfer_max(
+def foundation_transfer_maximum(
     system_damping_ratio: float = LOOSE_GROUND_SYSTEM_DAMPING,
 ) -> float:
     r"""The most a foundation passes at the building's resonance, Clause 4.3.
@@ -460,7 +460,7 @@ def foundation_transfer_max(
     return 1.0 / (2.0 * require_positive(system_damping_ratio, "system_damping_ratio"))
 
 
-def floor_transfer_max(floor_damping_ratio: float) -> float:
+def floor_transfer_maximum(floor_damping_ratio: float) -> float:
     r"""The most a floor amplifies at its resonance, Clause 4.3.
 
     :math:`V_D = 1 / (2 D_1)`, from the foundation through the walls to the
@@ -575,7 +575,7 @@ def impact_peak_velocity_mm_s(
 
 
 def track_excitation_frequency(
-    train_speed_m_s: float, *, spacing_m: float, harmonics: int = 1
+    train_speed_m_s: float, *, spacing_m: float, n_harmonics: int = 1
 ) -> NDArray[np.float64]:
     r"""The frequencies a repeating feature of the track excites, Clause 5.3.2.
 
@@ -586,19 +586,19 @@ def track_excitation_frequency(
 
     :param train_speed_m_s: :math:`v_Z`, in metres per second.
     :param spacing_m: :math:`d`, in metres.
-    :param harmonics: How many multiples to return, the fundamental first.
+    :param n_harmonics: How many multiples to return, the fundamental first.
     :return: :math:`f_A` and its multiples, in hertz.
     :raises ValueError: For a non-positive speed or spacing, or fewer than
         one harmonic.
     """
     speed = require_positive(train_speed_m_s, "train_speed_m_s")
     spacing = require_positive(spacing_m, "spacing_m")
-    count = require_count(harmonics, "harmonics")
+    count = require_count(n_harmonics, "n_harmonics")
     return np.asarray(speed / spacing * np.arange(1, count + 1), dtype=np.float64)
 
 
 def machine_count_correction(
-    machine_count: ArrayLike, *, reference_count: int
+    n_machines: ArrayLike, *, n_reference_machines: int
 ) -> NDArray[np.float64]:
     r"""The correction :math:`\chi` of Formula (7), Figure 3.
 
@@ -607,29 +607,29 @@ def machine_count_correction(
     them, and prints no closed form; the curve is read off the page at a
     five-hundredth and interpolated linearly between the readings.
 
-    :param machine_count: :math:`N`, from 4 to 100, one or many.
-    :param reference_count: :math:`N_B`, one of the six curves.
+    :param n_machines: :math:`N`, from 4 to 100, one or many.
+    :param n_reference_machines: :math:`N_B`, one of the six curves.
     :return: :math:`\chi`, one per count.
     :raises ValueError: For a count outside the figure or a reference the
         figure has no curve for.
     """
-    counts = require_finite_array(machine_count, "machine_count")
+    counts = require_finite_array(n_machines, "n_machines")
     grid = np.asarray(MACHINE_COUNT_AXIS, dtype=np.float64)
-    if reference_count not in MACHINE_COUNT_CORRECTION:
+    if n_reference_machines not in MACHINE_COUNT_CORRECTION:
         msg = (
             f"Figure 3 draws chi for N_B in {sorted(MACHINE_COUNT_CORRECTION)}, "
-            f"got {reference_count!r}."
+            f"got {n_reference_machines!r}."
         )
         raise ValueError(msg)
     if np.any(counts < grid[0]) or np.any(counts > grid[-1]):
         msg = f"Figure 3 runs from {grid[0]:g} to {grid[-1]:g} machines."
         raise ValueError(msg)
-    curve = MACHINE_COUNT_CORRECTION[reference_count]
+    curve = MACHINE_COUNT_CORRECTION[n_reference_machines]
     return np.asarray(np.interp(counts, grid, curve), dtype=np.float64)
 
 
 def machine_hall_velocity_mm_s(
-    reference_velocity_mm_s: float, machine_count: ArrayLike, *, reference_count: int
+    reference_velocity_mm_s: float, n_machines: ArrayLike, *, n_reference_machines: int
 ) -> NDArray[np.float64]:
     r"""The peak velocity outside a hall of similar machines, Formula (7).
 
@@ -640,13 +640,13 @@ def machine_hall_velocity_mm_s(
     sixty, the nearest group; beyond that the added groups are further off.
 
     :param reference_velocity_mm_s: :math:`v_B`, in millimetres per second.
-    :param machine_count: :math:`N`, from 4 to 100, one or many.
-    :param reference_count: :math:`N_B`, one of 3, 5, 10, 30, 60 or 100.
+    :param n_machines: :math:`N`, from 4 to 100, one or many.
+    :param n_reference_machines: :math:`N_B`, one of 3, 5, 10, 30, 60 or 100.
     :return: :math:`v_N`, one per count, in millimetres per second.
     :raises ValueError: For a negative velocity, or a count or reference
         outside Figure 3.
     """
     velocity = require_non_negative(reference_velocity_mm_s, "reference_velocity_mm_s")
-    counts = require_finite_array(machine_count, "machine_count")
-    chi = machine_count_correction(counts, reference_count=reference_count)
+    counts = require_finite_array(n_machines, "n_machines")
+    chi = machine_count_correction(counts, n_reference_machines=n_reference_machines)
     return np.asarray(chi * velocity * np.sqrt(counts), dtype=np.float64)

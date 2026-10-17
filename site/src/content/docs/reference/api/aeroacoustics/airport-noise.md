@@ -18,7 +18,7 @@ starts by reading a level from this table for an arbitrary power and distance.
   and log-linear in distance (Eqs. 4-3/4-4), with extrapolation beyond the
   tabulated envelope.
 * [`npd_curve`](/phonometry/reference/api/aeroacoustics/airport-noise/#npd_curve) -- the level over a distance sweep at one power, returned as
-  an [`NpdLevelResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#npdlevelresult) with a `.plot()`.
+  an [`NPDLevelResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#npdlevelresult) with a `.plot()`.
 
 The single-event stage segments a flight path and adjusts the NPD baseline per
 segment (§4.3-4.5): [`impedance_adjustment`](/phonometry/reference/api/aeroacoustics/airport-noise/#impedance_adjustment) (Eq. 4-6/4-7),
@@ -410,7 +410,7 @@ npd_curve(
     power: float,
     *,
     query_distances_m: NDArray[np.float64] | list[float] | None = None,
-) -> NpdLevelResult
+) -> NPDLevelResult
 ```
 
 NPD event level over a distance sweep at one power setting.
@@ -425,7 +425,7 @@ NPD event level over a distance sweep at one power setting.
 | `power` | Query engine power setting. |
 | `query_distances_m` | Distances to evaluate, in metres; defaults to a log sweep across the tabulated envelope. |
 
-**Returns:** An [`NpdLevelResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#npdlevelresult).
+**Returns:** An [`NPDLevelResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#npdlevelresult).
 
 **Raises**
 
@@ -469,10 +469,10 @@ tabulated envelope are extrapolated from the terminal segments.
 | :--- | :--- |
 | ValueError | If the table or inputs are invalid. |
 
-## NpdLevelResult
+## NPDLevelResult
 
 ```python
-NpdLevelResult(
+NPDLevelResult(
     distances_m: NDArray[np.float64],
     levels: NDArray[np.float64],
     power: float,
@@ -493,10 +493,10 @@ NPD event level over a distance sweep at one power (ECAC Doc 29).
 | `table_distances_m` | The tabulated slant distances, in metres. |
 | `table_levels` | The tabulated levels at the queried power, in dB. |
 
-### NpdLevelResult.plot()
+### NPDLevelResult.plot()
 
 ```python
-NpdLevelResult.plot(
+NPDLevelResult.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',

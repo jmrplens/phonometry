@@ -49,7 +49,7 @@ _PERIOD = (
 )
 
 
-def _annex_a(probabilities: np.ndarray = _PERIOD) -> sd.SelDistribution:
+def _annex_a(probabilities: np.ndarray = _PERIOD) -> sd.SELDistribution:
     return sd.sel_distribution(
         _LEVELS,
         probabilities,
@@ -58,7 +58,7 @@ def _annex_a(probabilities: np.ndarray = _PERIOD) -> sd.SelDistribution:
     )
 
 
-def _annex_a_one_subclass() -> sd.SelDistribution:
+def _annex_a_one_subclass() -> sd.SELDistribution:
     return sd.sel_distribution(
         _LEVELS, _PERIOD, sigma_db=ISO13474_ANNEX_A_SIGMA_DB, subclasses=1
     )
@@ -184,7 +184,7 @@ def test_figure_a3_levels_other_than_l50_are_not_the_roots_of_equation_25() -> N
             def tail(
                 x: float,
                 target: float = target,
-                d: sd.SelDistribution = dist,
+                d: sd.SELDistribution = dist,
                 whole: float = total,
             ) -> float:
                 below, _ = integrate.quad(
@@ -200,7 +200,7 @@ def test_figure_a3_levels_other_than_l50_are_not_the_roots_of_equation_25() -> N
 
 
 def _accumulated_from_the_drawn_start(
-    dist: sd.SelDistribution, percent: float
+    dist: sd.SELDistribution, percent: float
 ) -> float:
     """The level where 1 - (P(L > 15) - P(L > x)) falls to the percentage."""
     floor = float(dist.exceedance(ISO13474_FIGURE_A3_LOWER_LIMIT_DB))
@@ -627,19 +627,19 @@ def _fields(**overrides: object) -> dict[str, object]:
 def test_result_refuses_columns_of_different_length() -> None:
     fields = _fields(probabilities=np.array([1.0]))
     with pytest.raises(ValueError, match="per-class columns"):
-        sd.SelDistribution(**fields)  # type: ignore[arg-type]
+        sd.SELDistribution(**fields)  # type: ignore[arg-type]
 
 
 def test_result_refuses_subclass_centres_of_the_wrong_shape() -> None:
     fields = _fields(subclass_centers_db=np.zeros((2, 3)))
     with pytest.raises(ValueError, match="'subclass_centers_db' must have one row"):
-        sd.SelDistribution(**fields)  # type: ignore[arg-type]
+        sd.SELDistribution(**fields)  # type: ignore[arg-type]
 
 
 def test_result_refuses_a_class_of_no_width() -> None:
     fields = _fields(upper_bounds_db=np.array([42.0, 42.0]))
     with pytest.raises(ValueError, match="positive width"):
-        sd.SelDistribution(**fields)  # type: ignore[arg-type]
+        sd.SELDistribution(**fields)  # type: ignore[arg-type]
 
 
 def test_result_refuses_a_non_finite_column() -> None:
@@ -647,13 +647,13 @@ def test_result_refuses_a_non_finite_column() -> None:
     with pytest.raises(
         ValueError, match="'class_densities_per_db' must contain only finite"
     ):
-        sd.SelDistribution(**fields)  # type: ignore[arg-type]
+        sd.SELDistribution(**fields)  # type: ignore[arg-type]
 
 
 def test_result_refuses_replicas_that_miss_a_class() -> None:
     fields = _fields(replicas=((0,),))
     with pytest.raises(ValueError, match="'replicas' must name"):
-        sd.SelDistribution(**fields)  # type: ignore[arg-type]
+        sd.SELDistribution(**fields)  # type: ignore[arg-type]
 
 
 # ---------------------------------------------------------------------------

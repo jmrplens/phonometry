@@ -400,7 +400,7 @@ WestonRegimeBoundaries(
     reflection_loss_gradient_np_per_rad: float,
     effective_depth: float,
     cutoff_frequency: float,
-    mode_count: float,
+    n_modes: float,
 )
 ```
 
@@ -417,7 +417,7 @@ Range boundaries between Weston's four propagation regimes.
 | `reflection_loss_gradient_np_per_rad` | $\eta$, in Np/rad. |
 | `effective_depth` | Weston effective depth `He`, in metres. |
 | `cutoff_frequency` | Waveguide cut-off frequency, in Hz (`nan` when the seabed has no critical angle). |
-| `mode_count` | Number of cut-on modes, $(\omega/c_\mathrm{w}) H_\mathrm{e} \sin \psi_\mathrm{c} / \pi$ (Eq. 9.58), as a real number. |
+| `n_modes` | Number of cut-on modes, $(\omega/c_\mathrm{w}) H_\mathrm{e} \sin \psi_\mathrm{c} / \pi$ (Eq. 9.58), as a real number. |
 
 ## WestonSeabed
 

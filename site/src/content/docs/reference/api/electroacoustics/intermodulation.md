@@ -36,7 +36,7 @@ and the tones are assumed to fall on (or very near) FFT bins.
 
 ```python
 difference_frequency_distortion(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     *,
     f1: float,
@@ -70,7 +70,7 @@ tone or DC read zero.
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of product amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
+| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of product amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `f1` | Lower tone, in Hz. |
 | `f2` | Upper tone, in Hz. |
@@ -89,7 +89,7 @@ tone or DC read zero.
 
 ```python
 dynamic_intermodulation_distortion(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     *,
     f_sine: float = 15000.0,
@@ -111,7 +111,7 @@ sine amplitude.
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of product amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
+| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of product amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `f_sine` | High sine frequency, in Hz (default 15 kHz). |
 | `f_square` | Square-wave fundamental, in Hz (default 3.15 kHz). |
@@ -129,7 +129,7 @@ sine amplitude.
 
 ```python
 modulation_distortion(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     *,
     f_low: float,
@@ -165,7 +165,7 @@ as `smpte`.
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: the distortion ratios are ratios and come out unchanged, while `carrier_amplitude` and `sideband_amplitudes` carry the unit and so land in pascals when the record is calibrated. |
+| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: the distortion ratios are ratios and come out unchanged, while `carrier_amplitude` and `sideband_amplitudes` carry the unit and so land in pascals when the record is calibrated. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `f_low` | Low modulating tone `f1`, in Hz (e.g. 60 Hz). |
 | `f_high` | High carrier tone `f2`, in Hz (e.g. 7 kHz). |
@@ -249,7 +249,7 @@ the carrier, the modulation counterpart of
 
 ```python
 total_difference_frequency_distortion(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     f1: float = 8000.0,
     f2: float = 11950.0,
@@ -280,7 +280,7 @@ part of it.)
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of product amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
+| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of product amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `f1` | Lower tone, in Hz (default 8 kHz, per 14.12.10.2 b). |
 | `f2` | Upper tone, in Hz (default 11.95 kHz, per 14.12.10.2 b). |

@@ -61,15 +61,15 @@ def _text(path: Path) -> str:
     )
 
 
-def _annex_c2() -> building.LabFloorCoveringImprovementResult:
+def _annex_c2() -> building.LaboratoryFloorCoveringImprovementResult:
     """ISO 717-2:2020 Table C.2 on the heavyweight floor, ΔLw = 15 dB printed."""
     bare = np.full(16, 75.0)
-    return building.lab_floor_covering_improvement(
+    return building.laboratory_floor_covering_improvement(
         bare, bare - np.asarray(ref.ISO717_2_ANNEX_C2_DELTA_L), _CORE
     )
 
 
-def _form_bands() -> building.LabFloorCoveringImprovementResult:
+def _form_bands() -> building.LaboratoryFloorCoveringImprovementResult:
     """A vinyl on the concrete floor over the 21 bands of the form."""
     ln0 = np.array(
         [62.4, 64.1, 65.8, 67.3, 68.0, 68.9, 69.6, 70.3, 71.0, 71.8, 72.5]
@@ -79,7 +79,7 @@ def _form_bands() -> building.LabFloorCoveringImprovementResult:
         [0.3, 0.1, 0.6, 0.8, 1.2, 2.0, 3.4, 5.1, 7.2, 9.6, 12.3]
         + [15.0, 17.8, 20.4, 23.1, 25.6, 27.9, 30.1, 31.8, 33.2, 34.0]
     )
-    return building.lab_floor_covering_improvement(ln0, ln0 - delta, _FORM_BANDS)
+    return building.laboratory_floor_covering_improvement(ln0, ln0 - delta, _FORM_BANDS)
 
 
 def test_form_prints_the_printed_annex_c_rating(tmp_path: Path) -> None:
@@ -119,7 +119,7 @@ def test_full_form_over_21_bands_is_one_page(tmp_path: Path) -> None:
 
 def test_lightweight_floor_names_its_designation(tmp_path: Path) -> None:
     bare = np.full(16, 75.0)
-    res = building.lab_floor_covering_improvement(
+    res = building.laboratory_floor_covering_improvement(
         bare, bare - np.linspace(1.0, 25.0, 16), _CORE, reference_floor="lightweight_3"
     )
     out = tmp_path / "light.pdf"
@@ -164,7 +164,7 @@ def test_spanish_verbose_form_is_one_page(tmp_path: Path) -> None:
 
 
 def test_form_needs_the_weighted_reduction(tmp_path: Path) -> None:
-    res = building.lab_floor_covering_improvement(
+    res = building.laboratory_floor_covering_improvement(
         [70.0] * 3, [60.0] * 3, [500, 630, 800]
     )
     out = str(tmp_path / "x.pdf")

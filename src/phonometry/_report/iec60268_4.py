@@ -143,11 +143,11 @@ def _rated_rows(
                 f"{fmt_num(result.rated_impedance_ohm, language)} {_OHM}",
             )
         )
-    if result.minimum_load_impedance_ohm is not None:
+    if result.min_load_impedance_ohm is not None:
         rows.append(
             (
                 t("Min. load impedance", language),
-                f"{fmt_num(result.minimum_load_impedance_ohm, language)} {_OHM}",
+                f"{fmt_num(result.min_load_impedance_ohm, language)} {_OHM}",
             )
         )
     rows.extend(_noise_rows(result, language))

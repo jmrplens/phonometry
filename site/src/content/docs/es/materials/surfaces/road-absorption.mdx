@@ -341,7 +341,7 @@ $c = 340$ m/s, ventana plana de 5 ms) da unos 1,34 m.
 
 ```python
 from phonometry import materials
-print(round(materials.max_sampled_area_radius(5.0e-3), 3))   # 1.343  (metros)
+print(round(materials.maximum_sampled_area_radius(5.0e-3), 3))   # 1.343  (metros)
 ```
 
 Todo el montaje cabe en un dibujo a escala. `plot_in_situ_geometry` dibuja la
@@ -445,7 +445,7 @@ print(round(float(materials.geometric_spreading_factor_angle(
 # (ds + dm) tan(theta), es lo que estira la elipse.
 dp = 1.5 * np.tan(np.radians(30.0))
 print(round(dp, 3))                                                      # 0.866
-print(round(float(materials.max_sampled_area_radius(5.0e-3)), 3))        # 1.343
+print(round(float(materials.maximum_sampled_area_radius(5.0e-3)), 3))        # 1.343
 print(round(float(materials.msa_major_axis(5.0e-3, dp)), 3))             # 3.432
 ```
 
@@ -661,7 +661,7 @@ Adrienne del apartado 6.4 (`materials.adrienne_window`), la reducción de banda
 estrecha y a tercios de octava (`materials.in_situ_absorption_coefficient`,
 `materials.one_third_octave_absorption`,
 `materials.in_situ_absorption_spectrum`) y el radio de área muestreada del
-Anexo A (`materials.max_sampled_area_radius`), con la corrección de superficie
+Anexo A (`materials.maximum_sampled_area_radius`), con la corrección de superficie
 de referencia del Anexo B (`materials.absorption_reference_corrected`) y el
 caso de incidencia oblicua del Anexo F
 (`materials.geometric_spreading_factor_angle`, `materials.msa_major_axis` y el

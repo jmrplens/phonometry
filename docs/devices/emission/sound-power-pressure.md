@@ -267,7 +267,7 @@ import numpy as np
 from phonometry import emission
 
 # The 40 standardized hemisphere positions (unit vectors scaled by the radius).
-pos = emission.precision_positions("hemisphere", radius=1.0, count=40)
+pos = emission.precision_positions("hemisphere", radius=1.0, n_positions=40)
 print(pos.shape)                      # (40, 3)
 
 # Octave/third-octave band SPL (dB) at each of the 40 positions; here a uniform

@@ -174,7 +174,7 @@ Characteristic sensitivity as a pressure, in Pa (20.3).
 The sound pressure at 1 m for 1 W into the rated impedance:
 $p_M = p_\text{ref} \cdot 10^{L_M / 20}$.
 
-### LoudspeakerCharacteristics.minimum_impedance_ohm
+### LoudspeakerCharacteristics.min_impedance_ohm
 
 *property*
 

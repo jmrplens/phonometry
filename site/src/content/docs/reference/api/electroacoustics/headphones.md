@@ -223,7 +223,7 @@ of 8.3.4 with the level of the whole signal
 
 ```python
 check_limiting_test_signal(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     fs: int | None = None,
 ) -> LimitingTestSignalCheck
 ```
@@ -244,7 +244,7 @@ peak over its RMS against the two limits.
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | The record (1-D), or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal). |
+| `x` | The record (1-D), or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal). |
 | `fs` | Sample rate, in Hz; required for a bare array. |
 
 **Returns:** A [`LimitingTestSignalCheck`](/phonometry/reference/api/electroacoustics/headphones/#limitingtestsignalcheck).
@@ -427,7 +427,7 @@ The crosstalk attenuation of a multi-channel headphone (IEC 60268-7 8.12).
 
 The difference of the two levels at each frequency, in dB.
 
-### CrosstalkAttenuation.minimum_db
+### CrosstalkAttenuation.min_db
 
 *property*
 
@@ -1439,23 +1439,23 @@ is less than this value, this should be stated in the specification."
 
 80 % of the rated impedance, in ohms (8.2.1 b).
 
-### RatedImpedanceVerification.minimum_frequency_hz
+### RatedImpedanceVerification.min_frequency_hz
 
 *property*
 
-The frequency of `minimum_ohm`, in Hz.
+The frequency of `min_ohm`, in Hz.
 
-### RatedImpedanceVerification.minimum_ohm
+### RatedImpedanceVerification.min_ohm
 
 *property*
 
 The lowest modulus within the rated frequency range, in ohms.
 
-### RatedImpedanceVerification.minimum_ratio
+### RatedImpedanceVerification.min_ratio
 
 *property*
 
-`minimum_ohm` over the rated impedance.
+`min_ohm` over the rated impedance.
 
 ### RatedImpedanceVerification.passes
 

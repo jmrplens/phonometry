@@ -38,9 +38,9 @@ import pytest
 import reference_data as ref
 
 from phonometry import building
-from phonometry.building.measurement.lab_improvement import (
-    LabFloorCoveringImprovementResult,
-    LabLiningImprovementResult,
+from phonometry.building.measurement.laboratory_improvement import (
+    LaboratoryFloorCoveringImprovementResult,
+    LaboratoryLiningImprovementResult,
 )
 
 #: The 16 rating bands, 100 Hz to 3150 Hz.
@@ -167,7 +167,7 @@ def test_sloped_improvement_is_rated_on_each_floor(floor: str) -> None:
         == ci_delta
     )
     bare = np.full(16, 80.0)
-    res = building.lab_floor_covering_improvement(
+    res = building.laboratory_floor_covering_improvement(
         bare, bare - dl, _CORE, reference_floor=floor
     )
     assert (res.delta_lw_db, res.ci_delta_db) == (delta_lw, ci_delta)
@@ -332,7 +332,9 @@ def test_sloped_lining_direct_differences_formula_d2() -> None:
     """Formula (D.2) on two measured curves that are not parallel."""
     without = np.asarray(ref.ISO717_1_MEASURED_WALL_R)
     with_ = without + np.asarray(ref.ISO717_1_SLOPED_DELTA_R)
-    res = building.lab_lining_improvement(without, with_, _TABLE_E1, basic_element=None)
+    res = building.laboratory_lining_improvement(
+        without, with_, _TABLE_E1, basic_element=None
+    )
     direct = (
         res.delta_rw_direct_db,
         res.delta_rw_c_direct_db,
@@ -383,11 +385,11 @@ def test_lining_rating_refuses_an_unknown_element() -> None:
 # --- Annex G -----------------------------------------------------------------
 
 
-def test_lab_lining_improvement_on_the_heavy_wall() -> None:
+def test_laboratory_lining_improvement_on_the_heavy_wall() -> None:
     freqs = [*_CORE, 4000.0, 5000.0]
     without = np.linspace(40.0, 65.0, 18)
     with_ = without + 10.0
-    res = building.lab_lining_improvement(without, with_, freqs)
+    res = building.laboratory_lining_improvement(without, with_, freqs)
     np.testing.assert_allclose(res.delta_r_db, 10.0)
     assert res.rating is not None
     assert (res.rating.delta_rw, res.rating.delta_rw_c, res.rating.delta_rw_ctr) == (
@@ -406,7 +408,7 @@ def test_lab_lining_improvement_on_the_heavy_wall() -> None:
 
 
 def test_other_basic_element_keeps_only_the_direct_difference() -> None:
-    res = building.lab_lining_improvement(
+    res = building.laboratory_lining_improvement(
         np.full(16, 40.0), np.full(16, 45.0), _CORE, basic_element=None
     )
     assert res.rating is None
@@ -414,13 +416,13 @@ def test_other_basic_element_keeps_only_the_direct_difference() -> None:
 
 
 def test_lining_spectrum_without_rating_bands_has_no_rating() -> None:
-    res = building.lab_lining_improvement([40, 41], [45, 47], [500, 630])
+    res = building.laboratory_lining_improvement([40, 41], [45, 47], [500, 630])
     assert (res.rating, res.delta_rw_direct_db) == (None, None)
 
 
 def test_octave_formula_d1_averages_energy_not_decibels() -> None:
     """(D.1): -10 lg((10^-0 + 10^-1 + 10^-2)/3) for 0, 10 and 20 dB."""
-    res = building.lab_lining_improvement(
+    res = building.laboratory_lining_improvement(
         [40.0, 40.0, 40.0], [40.0, 50.0, 60.0], [100.0, 125.0, 160.0]
     )
     _, octaves = res.octave_bands()
@@ -432,8 +434,8 @@ def test_lining_result_refuses_mismatched_columns() -> None:
     two_bands = np.array([100.0, 125.0])
     one_level = np.array([40.0])
     two_levels = np.array([45.0, 46.0])
-    with pytest.raises(ValueError, match=r"LabLiningImprovementResult"):
-        LabLiningImprovementResult(
+    with pytest.raises(ValueError, match=r"LaboratoryLiningImprovementResult"):
+        LaboratoryLiningImprovementResult(
             frequencies=two_bands,
             r_without_db=one_level,
             r_with_db=two_levels,
@@ -446,10 +448,12 @@ def test_lining_result_refuses_mismatched_columns() -> None:
         )
 
 
-def test_lab_lining_improvement_refuses_mismatched_inputs() -> None:
+def test_laboratory_lining_improvement_refuses_mismatched_inputs() -> None:
     three = [40.0, 41.0, 42.0]
-    with pytest.raises(ValueError, match=r"lab_lining_improvement"):
-        building.lab_lining_improvement(three, [45.0, 46.0], [100.0, 125.0, 160.0])
+    with pytest.raises(ValueError, match=r"laboratory_lining_improvement"):
+        building.laboratory_lining_improvement(
+            three, [45.0, 46.0], [100.0, 125.0, 160.0]
+        )
 
 
 # --- G.4 curing --------------------------------------------------------------
@@ -522,7 +526,7 @@ def test_annex_c2_example_through_the_annex_h_front_end() -> None:
     """
     dl = np.asarray(ref.ISO717_2_ANNEX_C2_DELTA_L)
     bare = np.full(16, 75.0)
-    res = building.lab_floor_covering_improvement(bare, bare - dl, _CORE)
+    res = building.laboratory_floor_covering_improvement(bare, bare - dl, _CORE)
     assert (res.delta_lw_db, res.ci_delta_db) == (
         ref.ISO717_2_ANNEX_C2_DELTA_LW,
         ref.ISO717_2_ANNEX_C2_CI_DELTA,
@@ -552,7 +556,7 @@ def test_lightweight_floors_are_rated_on_their_own_curve(
     dl = np.linspace(2.0, 30.0, 18)
     bare = np.full(18, 70.0)
     freqs = [*_CORE, 4000.0, 5000.0]
-    res = building.lab_floor_covering_improvement(
+    res = building.laboratory_floor_covering_improvement(
         bare, bare - dl, freqs, reference_floor=floor
     )
     assert res.designation == designation
@@ -565,7 +569,7 @@ def test_lightweight_floors_are_rated_on_their_own_curve(
 
 
 def test_octave_formula_h2() -> None:
-    res = building.lab_floor_covering_improvement(
+    res = building.laboratory_floor_covering_improvement(
         [70.0, 70.0, 70.0], [70.0, 60.0, 50.0], [800.0, 1000.0, 1250.0]
     )
     centres, octaves = res.octave_bands()
@@ -578,7 +582,7 @@ def test_floor_covering_result_refuses_an_unknown_floor() -> None:
     one = np.array([1.0])
     band = np.array([500.0])
     with pytest.raises(ValueError, match=r"reference_floor"):
-        LabFloorCoveringImprovementResult(
+        LaboratoryFloorCoveringImprovementResult(
             frequencies=band,
             l_n0_db=one,
             l_n_db=one,
@@ -613,10 +617,10 @@ def test_every_result_plots(language: str) -> None:
     import matplotlib.pyplot as plt
 
     freqs = [*_CORE, 4000.0, 5000.0]
-    lining = building.lab_lining_improvement(
+    lining = building.laboratory_lining_improvement(
         np.linspace(40.0, 65.0, 18), np.linspace(40.0, 65.0, 18) + 8.0, freqs
     )
-    covering = building.lab_floor_covering_improvement(
+    covering = building.laboratory_floor_covering_improvement(
         np.full(18, 70.0), np.full(18, 70.0) - np.linspace(2.0, 30.0, 18), freqs
     )
     heavy = building.heavy_impact_improvement([80.0, 75.0], [78.0, 70.0], [63, 125])
@@ -646,7 +650,7 @@ def test_covering_figure_draws_the_improvement_and_names_its_terms() -> None:
 
     dl = np.asarray(ref.ISO717_2_SLOPED_DELTA_L)
     bare = np.full(16, 80.0)
-    res = building.lab_floor_covering_improvement(
+    res = building.laboratory_floor_covering_improvement(
         bare, bare - dl, _CORE, reference_floor="lightweight_3"
     )
     ax = res.plot()
@@ -655,7 +659,7 @@ def test_covering_figure_draws_the_improvement_and_names_its_terms() -> None:
     assert r"$\Delta L_\mathrm{t,3,w}$ = 11 dB" in title
     assert r"$C_{\mathrm{I}\Delta,\mathrm{t3}}$ = −3 dB" in title
     plt.close(ax.figure)
-    heavy = building.lab_floor_covering_improvement(bare, bare - dl, _CORE)
+    heavy = building.laboratory_floor_covering_improvement(bare, bare - dl, _CORE)
     ax = heavy.plot()
     assert r"$C_{\mathrm{I},\Delta}$ = −10 dB" in ax.get_title()
     plt.close(ax.figure)
@@ -695,7 +699,7 @@ def test_lining_figure_names_the_rating_it_drew() -> None:
     pytest.importorskip("matplotlib")
     import matplotlib.pyplot as plt
 
-    res = building.lab_lining_improvement(
+    res = building.laboratory_lining_improvement(
         np.full(16, 40.0), np.full(16, 52.0), _CORE, basic_element="lightweight_wall"
     )
     ax = res.plot()

@@ -187,9 +187,9 @@ def test_the_octave_band_inputs_are_checked(
 def test_annex_c_per_subject_hml() -> None:
     """All sixteen H, M and L triples of Table C.2."""
     rating = hearing.hml_rating(ref.ISO4869_2_ATTENUATION)
-    assert np.round(rating.subject_h, 1).tolist() == ref.ISO4869_2_ANNEX_C_H
-    assert np.round(rating.subject_m, 1).tolist() == ref.ISO4869_2_ANNEX_C_M
-    assert np.round(rating.subject_l, 1).tolist() == ref.ISO4869_2_ANNEX_C_L
+    assert np.round(rating.subject_high, 1).tolist() == ref.ISO4869_2_ANNEX_C_H
+    assert np.round(rating.subject_medium, 1).tolist() == ref.ISO4869_2_ANNEX_C_M
+    assert np.round(rating.subject_low, 1).tolist() == ref.ISO4869_2_ANNEX_C_L
 
 
 def test_annex_c_statistics_and_rating() -> None:
@@ -197,11 +197,11 @@ def test_annex_c_statistics_and_rating() -> None:
     rating = hearing.hml_rating(ref.ISO4869_2_ATTENUATION)
     means = tuple(
         round(float(v.mean()), 1)
-        for v in (rating.subject_h, rating.subject_m, rating.subject_l)
+        for v in (rating.subject_high, rating.subject_medium, rating.subject_low)
     )
     spreads = tuple(
         round(float(v.std(ddof=1)), 1)
-        for v in (rating.subject_h, rating.subject_m, rating.subject_l)
+        for v in (rating.subject_high, rating.subject_medium, rating.subject_low)
     )
     assert means == ref.ISO4869_2_ANNEX_C_MEANS
     assert spreads == ref.ISO4869_2_ANNEX_C_DEVIATIONS

@@ -78,7 +78,7 @@ def _chk_figure_2(frequency_hz: float) -> Outcome:
 def _chk_a18(machines: int) -> Outcome:
     computed = float(
         ph.vibration.machine_hall_velocity_mm_s(
-            0.44, [float(machines)], reference_count=3
+            0.44, [float(machines)], n_reference_machines=3
         )[0]
     )
     return numeric(_A18[machines], computed, 0.06, unit="mm/s", rel=True, places=3)

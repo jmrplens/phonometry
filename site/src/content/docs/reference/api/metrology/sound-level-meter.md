@@ -189,10 +189,10 @@ IEC61672_TABLE_5 = (PeakReference(signal='one cycle', nominal_frequency_hz=31.5,
 
 *Constant* (`tuple`).
 
-## MaxUncertaintyRow
+## MaximumUncertaintyRow
 
 ```python
-MaxUncertaintyRow(
+MaximumUncertaintyRow(
     requirement: str,
     reference: str,
     max_uncertainty: float,
@@ -217,10 +217,10 @@ One row of IEC 61672-1:2013 Table B.1, a maximum-permitted uncertainty.
 | `upper_hz` | The upper end, inclusive, in hertz, or `None`. |
 | `includes_lower` | Whether `lower_hz` belongs to the row; the page writes the bands after the first as "> 1 kHz to 2 kHz". |
 
-### MaxUncertaintyRow.contains()
+### MaximumUncertaintyRow.contains()
 
 ```python
-MaxUncertaintyRow.contains(frequency_hz: float) -> bool
+MaximumUncertaintyRow.contains(frequency_hz: float) -> bool
 ```
 
 Whether a nominal frequency falls in the row's band.

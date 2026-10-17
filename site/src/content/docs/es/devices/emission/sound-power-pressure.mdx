@@ -570,7 +570,7 @@ import numpy as np
 from phonometry import emission
 
 # Las 40 posiciones normalizadas de la semiesfera (vectores unitarios escalados por el radio).
-pos = emission.precision_positions("hemisphere", radius=1.0, count=40)
+pos = emission.precision_positions("hemisphere", radius=1.0, n_positions=40)
 print(pos.shape)                      # (40, 3)
 
 # SPL en banda de octava/tercio (dB) en cada una de las 40 posiciones; aquí un
@@ -597,10 +597,10 @@ import matplotlib.pyplot as plt
 
 fig, (axi, axd) = plt.subplots(1, 2, subplot_kw={"projection": "3d"})
 emission.plot_microphone_positions(
-    emission.precision_positions("hemisphere", radius=1.0, count=40),
+    emission.precision_positions("hemisphere", radius=1.0, n_positions=40),
     ax=axi, radius=1.0)
 emission.plot_microphone_positions(
-    emission.precision_positions("sphere", radius=1.0, count=20),
+    emission.precision_positions("sphere", radius=1.0, n_positions=20),
     ax=axd, radius=1.0)
 plt.show()
 ```

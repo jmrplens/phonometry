@@ -172,7 +172,7 @@ def _rated_rows(
                 f"{fmt_num(result.rated_sinusoidal_power, language)} W",
             )
         )
-    min_z = result.minimum_impedance_ohm
+    min_z = result.min_impedance_ohm
     if min_z is not None:
         rows.append(
             (

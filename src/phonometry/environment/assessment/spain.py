@@ -125,7 +125,7 @@ __all__ = [
     "infrastructure_limits",
     "long_term_corrected_level",
     "low_frequency_correction",
-    "max_infrastructure_limit",
+    "maximum_infrastructure_limit",
     "outdoor_quality_objectives",
     "round_reported_level",
     "tonal_correction",
@@ -988,7 +988,7 @@ def infrastructure_limits(area_type: str) -> RegulationLimits:
     )
 
 
-def max_infrastructure_limit(area_type: str) -> float:
+def maximum_infrastructure_limit(area_type: str) -> float:
     """Maximum ``LAmax`` for rail and airport infrastructure (Annex III Table A2).
 
     The limit is respected when, over a year, 97 % of all daily values stay at

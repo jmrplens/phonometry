@@ -20,8 +20,8 @@ fs = 48000
 rng = np.random.default_rng(0)
 t = np.arange(fs) / fs
 x = np.sin(2 * np.pi * 1000 * t) + 0.05 * rng.standard_normal(fs)  # 1 kHz tone in noise
-tnr = psychoacoustics.tone_to_noise_ratio(x, fs)            # highest peak, or tone_freq=...
-pr = psychoacoustics.prominence_ratio(x, fs, tone_freq=1000.0)
+tnr = psychoacoustics.tone_to_noise_ratio(x, fs)            # highest peak, or tone_frequency=...
+pr = psychoacoustics.prominence_ratio(x, fs, tone_frequency=1000.0)
 print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
 
 tnr.plot()   # the tone against its prominence criterion (needs matplotlib)
@@ -151,7 +151,7 @@ ECMA-74 (which delegates its tone assessments to ECMA-418-1) also fixes where to
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions.svg" alt="ECMA-74 emission measurement positions: seated operator microphone at 0.25 m and 1.20 m, and the four bystander positions at 1 m" width="92%"></picture>
 
 Proximate secondary tones in the same critical band are combined per
-clause 11.6; for harmonic complexes assess each component (`tone_freq=`).
+clause 11.6; for harmonic complexes assess each component (`tone_frequency=`).
 Both methods work on Hann-windowed, RMS-averaged spectra and need no absolute
 calibration (the ratios are level differences).
 
@@ -161,7 +161,7 @@ calibration (the ratios are level differences).
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | 1D array | any (uncalibrated OK) | ≥ `fs/resolution_hz` samples | Ratios are level differences: calibration cancels out |
 | `fs` | int | Hz | > 0 | |
-| `tone_freq` | float, optional | Hz | 89.1–11 200; default `None` | `None` assesses the highest peak in the range of interest |
+| `tone_frequency` | float, optional | Hz | 89.1–11 200; default `None` | `None` assesses the highest peak in the range of interest |
 | `resolution_hz` | float | Hz | > 0; default `1.0` | Tone band must stay within 15 % of the critical band (clause 11.2) |
 
 Both return a `ToneAssessment(frequency, ratio_db, method)`, where `method`

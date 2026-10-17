@@ -317,7 +317,7 @@ def test_average_is_formula_1_rounded_to_one_decimal() -> None:
     )
     expected = 10.0 * math.log10((10**4.0 + 10**4.3 + 10**4.6) / 3.0)
     np.testing.assert_allclose(res.average_db, round(expected, 1))
-    assert res.reading_count == 3
+    assert res.n_readings == 3
 
 
 @pytest.mark.parametrize(
@@ -1537,7 +1537,7 @@ def test_varying_background_centres_need_one_per_band() -> None:
 def test_varying_background_check_checks_its_bands() -> None:
     with pytest.raises(ValueError, match="one value per band"):
         building.VaryingBackgroundCheck(
-            background_maximum_db=np.array([30.0, 31.0]),
+            background_maximum_level_db=np.array([30.0, 31.0]),
             equipment_levels_db=np.array([45.0]),
             observation_time_s=600.0,
         )

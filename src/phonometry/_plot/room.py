@@ -1176,7 +1176,7 @@ def plot_open_plan(
 
 
 def plot_excitation(
-    signal: ArrayLike,
+    x: ArrayLike,
     fs: int,
     *,
     kind: str = "sweep",
@@ -1193,7 +1193,7 @@ def plot_excitation(
     waveform and its spectrogram are drawn; for an MLS the first samples of the
     bipolar sequence and its (flat) magnitude spectrum.
 
-    :param signal: The excitation samples (1D array-like).
+    :param x: The excitation samples (1D array-like).
     :param fs: Sample rate in Hz (for the time and frequency axes).
     :param kind: ``"sweep"`` (default) or ``"mls"``.
     :param ax: Existing axes for the top (time-domain) panel, or ``None`` for a
@@ -1211,7 +1211,7 @@ def plot_excitation(
     # sine sweep" beside a spectrogram announcing an exponential frequency
     # rise, with no warning.
     require_choice(kind, "kind", _EXCITATION_KINDS)
-    x = np.asarray(signal, dtype=np.float64)
+    x = np.asarray(x, dtype=np.float64)
     n = x.shape[-1]
     if n == 0:
         msg = "excitation signal is empty; nothing to plot."

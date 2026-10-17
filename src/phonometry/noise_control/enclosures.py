@@ -49,7 +49,7 @@ the model its author used.
 Turned around, the same equation answers the question a designer actually asks:
 *given the noise reduction I need, what transmission loss must the panels have?*
 That is :func:`enclosure_required_transmission_loss`, which returns the required
-``R`` per band in the same :class:`EnclosureResult`.
+``R`` per band in the same :class:`EnclosureInsertionLossResult`.
 
 **The panel transmission loss ``R`` is supplied by the caller** -- measured, or
 predicted by a panel model -- as a per-band array, a callable of frequency, or
@@ -84,7 +84,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "ENCLOSURE_MODELS",
-    "EnclosureResult",
+    "EnclosureInsertionLossResult",
     "enclosure_insertion_loss",
     "enclosure_required_transmission_loss",
 ]
@@ -106,8 +106,8 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
-class EnclosureResult(OwnsArrays):
-    r"""Insertion loss of a machine enclosure over frequency (Bies §7.4.2).
+class EnclosureInsertionLossResult(OwnsArrays):
+    r"""The predicted insertion loss of a machine enclosure (Bies §7.4.2).
 
     :ivar frequencies: Frequencies ``f``, Hz, or ``None`` if the panel ``R``
         was given as a bare per-band array with no frequency labels.
@@ -384,7 +384,7 @@ def enclosure_insertion_loss(
     *,
     frequencies: ArrayLike | None = None,
     model: str = "bies",
-) -> EnclosureResult:
+) -> EnclosureInsertionLossResult:
     r"""Net insertion loss of a machine enclosure (Bies Eqs. (7.103), (7.111)).
 
     :math:`\mathrm{IL} = R - C` with
@@ -414,7 +414,7 @@ def enclosure_insertion_loss(
         ``"bies"`` (default) carries the ``0.3`` floor of Bies Equation (7.111),
         ``"norton"`` the bare :math:`C = 10 \log_{10}(S_\mathrm{E} / R_\mathrm{i})` of Norton & Karczub
         Equation (4.115).
-    :return: An :class:`EnclosureResult`.
+    :return: An :class:`EnclosureInsertionLossResult`.
     """
     if not callable(panel_transmission_loss) and not isinstance(
         panel_transmission_loss, (np.ndarray, list, tuple)
@@ -451,7 +451,7 @@ def enclosure_insertion_loss(
         name="panel_transmission_loss",
         owner="enclosure_insertion_loss",
     )
-    return EnclosureResult(
+    return EnclosureInsertionLossResult(
         frequencies=freqs,
         panel_transmission_loss=r_b,
         correction=correction,
@@ -470,7 +470,7 @@ def enclosure_required_transmission_loss(
     *,
     frequencies: ArrayLike | None = None,
     model: str = "bies",
-) -> EnclosureResult:
+) -> EnclosureInsertionLossResult:
     r"""Panel ``R`` an enclosure needs to deliver a given insertion loss.
 
     The design equation of :func:`enclosure_insertion_loss` solved the other
@@ -495,7 +495,7 @@ def enclosure_required_transmission_loss(
         ``insertion_loss``, optional otherwise.
     :param model: Interior build-up model, one of :data:`ENCLOSURE_MODELS`
         (see :func:`enclosure_insertion_loss`).
-    :return: An :class:`EnclosureResult` whose ``panel_transmission_loss`` is
+    :return: An :class:`EnclosureInsertionLossResult` whose ``panel_transmission_loss`` is
         the **required** ``R`` and whose ``insertion_loss`` is the requested
         target, so it plots and reports like a forward calculation.
     """
@@ -509,7 +509,7 @@ def enclosure_required_transmission_loss(
         name="insertion_loss",
         owner="enclosure_required_transmission_loss",
     )
-    return EnclosureResult(
+    return EnclosureInsertionLossResult(
         frequencies=freqs,
         panel_transmission_loss=il_b + correction,
         correction=correction,

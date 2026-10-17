@@ -282,7 +282,7 @@ banda. Medidas a través del tiempo de reverberación, las mismas lecturas dan
 El resultado, un `HighFrequencySoundPowerResult`, lleva los niveles por banda
 (`sound_power_level`), el nivel medio de la sala (`mean_pressure_level`), la
 constante de sala, las dos correcciones (`c1`, `c2`) y el método, y
-`within_10_db_of_maximum` marca las bandas que quedan a menos de 10 dB de la
+`within_10_db_of_max` marca las bandas que quedan a menos de 10 dB de la
 más alta.
 
 ## 4. Tonos frente a una fuente de referencia
@@ -322,7 +322,7 @@ que da una vuelta cada 32 s.
 
 ```python
 speed = 2.0 * np.pi * 1.0 / 32.0                     # m/s a lo largo de la trayectoria
-print(emission.minimum_analyzer_bandwidth(
+print(emission.min_analyzer_bandwidth(
     15625.0, microphone_speed_m_s=speed, speed_of_sound=345.5).round(1))   # [17.8] Hz
 # La FFT es más estrecha, así que el tono es la suma de sus bandas laterales.
 tone = emission.tone_level_from_sidebands([42.9, 41.3, 38.0])
@@ -334,11 +334,11 @@ tones = emission.high_frequency_sound_power_comparison(
     reference_sound_power_levels=[44.3, 43.9, 43.0],   # dB re 1 pW por hercio
     noise_bandwidth_hz=12.5)
 print(tones.sound_power_level.round(1))              # [59.4 52.2 44.9] dB re 1 pW
-print(tones.within_10_db_of_maximum)                 # [ True  True False]
+print(tones.within_10_db_of_max)                 # [ True  True False]
 ```
 
 El apartado 13 c) pide el nivel y la frecuencia de cada tono que quede a menos
-de 10 dB del más alto, y `within_10_db_of_maximum` los marca: aquí los dos
+de 10 dB del más alto, y `within_10_db_of_max` los marca: aquí los dos
 primeros. Un ancho de banda mayor de 112 Hz emite un `SoundPowerWarning`, y sin
 `noise_bandwidth_hz` la misma función aplica la fórmula (8) a bandas de banda
 ancha. La comparación aplica solo $C_2$, como hace ISO 3741 en su propio método

@@ -89,8 +89,8 @@ counterpart in the library.
 
 | Function | Key parameters | Notes |
 | :--- | :--- | :--- |
-| `lden(lday, levening, lnight, hours=(12, 4, 8))` | period $L_\mathrm{Aeq}$ values [dB]; `hours` must sum to 24 | +5 dB evening, +10 dB night (3.6.4) |
-| `ldn(lday, lnight, hours=(15, 9))` | | +10 dB night (3.6.5) |
+| `lden(lday, levening, lnight, period_hours=(12, 4, 8))` | period $L_\mathrm{Aeq}$ values [dB]; `period_hours` must sum to 24 | +5 dB evening, +10 dB night (3.6.4) |
+| `ldn(lday, lnight, period_hours=(15, 9))` | | +10 dB night (3.6.5) |
 | `composite_rating_level(periods)` | iterable of `(level_db, hours, adjustment_db)`; hours positive, finite and summing to 24 | General Formulae (5)-(6); adjustments per Table A.1 |
 
 Where you put the microphone changes the number: ISO 1996-2 fixes the receiver positions and their façade corrections. The diagram is measurement context, not something the library computes; those position and correction procedures are not implemented, so apply the corrections to your levels yourself before any function on this page consumes them:

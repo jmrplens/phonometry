@@ -135,7 +135,7 @@ feedback_stability(
     level_loudspeaker_at_listener: float,
     *,
     microphone_directivity: float = 0.0,
-    open_microphones: int = 1,
+    n_open_microphones: int = 1,
     stability_margin: float = 10.0,
 ) -> FeedbackStabilityResult
 ```
@@ -156,7 +156,7 @@ Equation (18.20) (see the module docstring).
 | `level_loudspeaker_at_microphone` | Direct-field level $L_{\mathrm{H}\text{-}\mathrm{M}}$ produced by the loudspeaker system at the microphone, dB. |
 | `level_loudspeaker_at_listener` | Direct-field level $L_{\mathrm{H}\text{-}\mathrm{L}}$ produced by the loudspeaker system at an average listener, dB. |
 | `microphone_directivity` | Directivity index $D_\mathrm{M}(\theta)$ of the microphone toward the loudspeaker relative to the talker, dB. |
-| `open_microphones` | Number $N_\mathrm{m}$ of microphones open at once. |
+| `n_open_microphones` | Number $N_\mathrm{m}$ of microphones open at once. |
 | `stability_margin` | Required margin below oscillation, dB (default [`DEFAULT_STABILITY_MARGIN_DB`](/phonometry/reference/api/electroacoustics/sound-reinforcement/#default_stability_margin_db), Long's equalised-system value). |
 
 **Returns:** A [`FeedbackStabilityResult`](/phonometry/reference/api/electroacoustics/sound-reinforcement/#feedbackstabilityresult).
@@ -178,7 +178,7 @@ FeedbackStabilityResult(
     level_loudspeaker_at_microphone: float,
     level_loudspeaker_at_listener: float,
     microphone_directivity: float,
-    open_microphones: int,
+    n_open_microphones: int,
 )
 ```
 
@@ -200,7 +200,7 @@ Gain structure and stability verdict of a reinforcement loop.
 | `level_loudspeaker_at_microphone` | Input $L_{\mathrm{H}\text{-}\mathrm{M}}$, dB. |
 | `level_loudspeaker_at_listener` | Input $L_{\mathrm{H}\text{-}\mathrm{L}}$, dB. |
 | `microphone_directivity` | Input $D_\mathrm{M}(\theta)$, dB. |
-| `open_microphones` | Input $N_\mathrm{m}$. |
+| `n_open_microphones` | Input $N_\mathrm{m}$. |
 
 ### FeedbackStabilityResult.is_stable
 
@@ -234,7 +234,7 @@ marked. Requires matplotlib (`pip install phonometry[plot]`).
 ## open_microphone_correction
 
 ```python
-open_microphone_correction(open_microphones: int) -> float
+open_microphone_correction(n_open_microphones: int) -> float
 ```
 
 Number-of-open-microphones correction (Long Equation (18.23)).
@@ -247,7 +247,7 @@ feedback.
 
 | Name | Description |
 | :--- | :--- |
-| `open_microphones` | Number $N_\mathrm{m}$ of microphones open at once (>= 1). |
+| `n_open_microphones` | Number $N_\mathrm{m}$ of microphones open at once (>= 1). |
 
 **Returns:** The correction $\Delta L_\text{nom}$, dB.
 

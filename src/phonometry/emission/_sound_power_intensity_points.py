@@ -668,8 +668,8 @@ class PartialPowerConcentration(RichDisplay):
     The segments carrying most of the sound power, and how many new positions
     equation (B.4) asks to be spread over them.
 
-    :ivar positions: ``N``, the number of positions on the whole surface.
-    :ivar subset_positions: :math:`N_\alpha`, the segments in the selected
+    :ivar n_positions: ``N``, the number of positions on the whole surface.
+    :ivar n_subset_positions: :math:`N_\alpha`, the segments in the selected
         subset. B.1.3 requires this to be fewer than half of ``N``.
     :ivar subset_area: :math:`S_\alpha`, the total area of the subset, m^2; the
         new positions are distributed over it in proportion to segment area.
@@ -682,19 +682,19 @@ class PartialPowerConcentration(RichDisplay):
     :ivar error_factor: :math:`\Delta` for the requested grade (Table B.1).
     :ivar subset_error_factor: :math:`\Delta_\alpha`, the share of that error
         budget the subset may spend, after the remainder has taken its own.
-    :ivar additional_positions: :math:`N^*`, the smallest whole number of new
+    :ivar n_additional_positions: :math:`N^*`, the smallest whole number of new
         positions satisfying equation (B.4).
     """
 
-    positions: int
-    subset_positions: int
+    n_positions: int
+    n_subset_positions: int
     subset_area: float
     power_fraction: float
     subset_nonuniformity: float
     remainder_nonuniformity: float
     error_factor: float
     subset_error_factor: float
-    additional_positions: int
+    n_additional_positions: int
 
     def __post_init__(self) -> None:
         r"""Reject a concentration whose figures are not finite.
@@ -893,15 +893,15 @@ def partial_power_concentration(
         raise ValueError(msg)
 
     return PartialPowerConcentration(
-        positions=n_positions,
-        subset_positions=subset_size,
+        n_positions=n_positions,
+        n_subset_positions=subset_size,
         subset_area=float(np.sum(seg[subset])),
         power_fraction=alpha,
         subset_nonuniformity=float(f4_subset),
         remainder_nonuniformity=float(f4_remainder),
         error_factor=delta,
         subset_error_factor=float(delta_alpha),
-        additional_positions=int(math.ceil(4.0 * (f4_subset / delta_alpha) ** 2)),
+        n_additional_positions=int(math.ceil(4.0 * (f4_subset / delta_alpha) ** 2)),
     )
 
 
@@ -931,7 +931,7 @@ class DiscretePointIntensityResult(OwnsArrays):
     ``criterion_2`` (:math:`N > C F_4^2`, equation (B.2)) are the per-band
     verdicts, ``None`` where they could not be evaluated;
     ``min_positions`` is the :math:`C F_4^2` that criterion 2 compares
-    ``positions`` against.
+    ``n_positions`` against.
 
     ``achieved_grade`` is the per-band grade, one of ``'precision'``,
     ``'engineering'`` and ``'none'``. Grade 3 is never among them: Table B.2
@@ -1034,7 +1034,7 @@ class DiscretePointIntensityResult(OwnsArrays):
             self.a_weighting_omitted_bands,
             self.frequencies,
             cast("BandType", self.band_type),
-            self.positions,
+            self.n_positions,
             self.pressure_residual_index_db,
             self.f1,
             self.f2,
@@ -1042,7 +1042,7 @@ class DiscretePointIntensityResult(OwnsArrays):
         )
 
     @property
-    def positions(self) -> int:
+    def n_positions(self) -> int:
         """The number :math:`N` of measurement positions."""
         return int(np.shape(self.normal_intensity)[0])
 
@@ -1122,7 +1122,7 @@ class DiscretePointIntensityResult(OwnsArrays):
 
     @property
     def min_positions(self) -> np.ndarray | None:
-        r"""The :math:`C F_4^2` that criterion 2 compares :attr:`positions` against."""
+        r"""The :math:`C F_4^2` that criterion 2 compares :attr:`n_positions` against."""
         if self.f4 is None:
             return None
         return self._criterion_2[1]
@@ -1132,7 +1132,7 @@ class DiscretePointIntensityResult(OwnsArrays):
         f4 = np.asarray(self.f4, dtype=np.float64)
         return _criterion_2(
             f4,
-            self.positions,
+            self.n_positions,
             self.frequencies,
             cast("BandType", self.band_type),
             cast("DeterminationGrade", self.grade),
@@ -1154,7 +1154,7 @@ class DiscretePointIntensityResult(OwnsArrays):
             self.f3,
             np.asarray(self.f4, dtype=np.float64),
             self.pressure_residual_index_db,
-            self.positions,
+            self.n_positions,
             self.frequencies,
             cast("BandType", self.band_type),
         )
@@ -1165,7 +1165,7 @@ class DiscretePointIntensityResult(OwnsArrays):
         if self.f4 is None:
             return None
         return _confidence_interval(
-            np.asarray(self.f4, dtype=np.float64), self.positions
+            np.asarray(self.f4, dtype=np.float64), self.n_positions
         )
 
     @property
@@ -1602,7 +1602,7 @@ def _temporal_indicator(
 
 def _criterion_2(
     f4: np.ndarray,
-    positions: int,
+    n_positions: int,
     frequencies: np.ndarray | None,
     band_type: BandType,
     grade: DeterminationGrade,
@@ -1623,11 +1623,11 @@ def _criterion_2(
         dtype=np.float64,
     )
     minimum = factors * f4**2
-    # ``positions > minimum`` and not ``not (positions <= minimum)``: a NaN F4
+    # ``n_positions > minimum`` and not ``not (n_positions <= minimum)``: a NaN F4
     # marks a band whose test conditions already failed A.2.3, and it must not
     # come back qualified. The minimum is judged settled, since a C F4^2 that
     # is a whole number of positions in decimal is not exceeded by it.
-    return np.asarray(positions > settled(minimum), dtype=bool), minimum
+    return np.asarray(n_positions > settled(minimum), dtype=bool), minimum
 
 
 def _per_band_grade(
@@ -1637,7 +1637,7 @@ def _per_band_grade(
     f3: np.ndarray | None,
     f4: np.ndarray,
     residual_index: np.ndarray | None,
-    positions: int,
+    n_positions: int,
     frequencies: np.ndarray | None,
     band_type: BandType,
 ) -> np.ndarray | None:
@@ -1666,13 +1666,13 @@ def _per_band_grade(
             factor = position_count_factor(
                 grade, float(frequencies[band]), band_type=band_type
             )
-            if positions > float(settled(factor * f4[band] ** 2)):
+            if n_positions > float(settled(factor * f4[band] ** 2)):
                 verdict[band] = grade
                 break
     return verdict
 
 
-def _confidence_interval(f4: np.ndarray, positions: int) -> np.ndarray:
+def _confidence_interval(f4: np.ndarray, n_positions: int) -> np.ndarray:
     r"""The 95 % interval :math:`10 \lg(1 \pm 2 F_4/\sqrt{N})` of equation (B.3).
 
     Returned as ``(bands, 2)``, the lower end first. The lower end is ``NaN``
@@ -1681,7 +1681,7 @@ def _confidence_interval(f4: np.ndarray, positions: int) -> np.ndarray:
     since every tabulated ``C`` is at least 8 and a satisfied criterion 2 puts
     the ratio below :math:`2/\sqrt{8}`.
     """
-    spread = 2.0 * f4 / math.sqrt(positions)
+    spread = 2.0 * f4 / math.sqrt(n_positions)
     with np.errstate(divide="ignore", invalid="ignore"):
         lower = np.where(1.0 - spread > 0.0, 10.0 * np.log10(1.0 - spread), np.nan)
         upper = 10.0 * np.log10(1.0 + spread)
@@ -1791,7 +1791,7 @@ def _a_weighted_determination(
     omitted: np.ndarray | None,
     frequencies: np.ndarray | None,
     band_type: BandType,
-    positions: int,
+    n_positions: int,
     residual_index: np.ndarray | None,
     f1: np.ndarray | None,
     f2: np.ndarray | None,
@@ -1829,7 +1829,7 @@ def _a_weighted_determination(
     )
     total = float(np.sum(contributions))
     level = 10.0 * math.log10(total) if total > 0.0 else float("nan")
-    if not np.any(summed) or positions < _MIN_VARIATION_OBSERVATIONS:
+    if not np.any(summed) or n_positions < _MIN_VARIATION_OBSERVATIONS:
         return level, float("nan"), None
 
     # B.1.2: one A-weighted intensity per position, from the bands the sum
@@ -1851,7 +1851,7 @@ def _a_weighted_determination(
         contributions=contributions[summed],
         frequencies=frequencies[summed],
         band_type=band_type,
-        positions=positions,
+        n_positions=n_positions,
         residual_index=residual_index,
         f1=f1,
         f2=f2,
@@ -1867,7 +1867,7 @@ def _a_weighted_grade(
     contributions: np.ndarray,
     frequencies: np.ndarray,
     band_type: BandType,
-    positions: int,
+    n_positions: int,
     residual_index: np.ndarray | None,
     f1: np.ndarray | None,
     f2: np.ndarray | None,
@@ -1895,7 +1895,7 @@ def _a_weighted_grade(
         if not (stationary and inward_ok and bool(np.all(ld[summed] > f2[summed]))):
             continue
         factor = _a_weighted_factor(contributions, frequencies, band_type, typed)
-        if positions > float(settled(factor * f4_a**2)):
+        if n_positions > float(settled(factor * f4_a**2)):
             return grade
     return "none"
 

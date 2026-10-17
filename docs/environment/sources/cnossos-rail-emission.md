@@ -81,7 +81,7 @@ import matplotlib.pyplot as plt
 from phonometry import environment
 
 stock = environment.RollingStock(
-    axles=4,
+    n_axles=4,
     wheel_roughness=environment.wheel_roughness(environment.BrakeType.NON_TREAD),
     contact_filter=environment.contact_filter(environment.ContactFilter.LOAD_50_DIAMETER_920),
     wheel_transfer=environment.wheel_transfer(environment.WheelDiameter.MM_920),

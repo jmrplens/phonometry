@@ -439,7 +439,7 @@ def plant_characteristic_height_m(
     if heights.ndim != 1 or not np.all(np.isfinite(heights)) or np.any(heights < 0.0):
         msg = "'source_heights_m' must be a 1-D sequence of finite heights >= 0 m."
         raise ValueError(msg)
-    low = require_count(n_low_sources, "n_low_sources", minimum=0)
+    low = require_count(n_low_sources, "n_low_sources", at_least=0)
     if 0 < low < _LOW_SOURCE_MIN_COUNT:
         msg = (
             f"NOTE 7 of ISO 8297 applies to {_LOW_SOURCE_MIN_COUNT} or more "
@@ -631,7 +631,7 @@ def plant_method_uncertainty(distance_ratio: float) -> tuple[float, float]:
     return PLANT_METHOD_UNCERTAINTY_DB[below[-1]]
 
 
-def plant_steady_reading(maximum_level_db: float, minimum_level_db: float) -> float:
+def plant_steady_reading(max_level_db: float, min_level_db: float) -> float:
     r"""The level read on a sound level meter from a steady noise, 9.5.2.
 
     With time weighting S, a needle that swings over less than 5 dB marks
@@ -642,17 +642,17 @@ def plant_steady_reading(maximum_level_db: float, minimum_level_db: float) -> fl
     the level used; ``leq_range_db`` of :func:`check_plant_measurement`
     judges that one.
 
-    :param maximum_level_db: The highest level read, in decibels.
-    :param minimum_level_db: The lowest level read, in decibels.
+    :param max_level_db: The highest level read, in decibels.
+    :param min_level_db: The lowest level read, in decibels.
     :return: The level, in decibels.
     :raises ValueError: for a minimum above the maximum, or a swing of 5 dB or
         more, the swing settled to nine decimals first, so 64,1 - 59,1 dB,
         4,999 999 999 999 993 in binary, is the 5 dB it is.
     """
-    top = require_finite(maximum_level_db, "maximum_level_db")
-    bottom = require_finite(minimum_level_db, "minimum_level_db")
+    top = require_finite(max_level_db, "max_level_db")
+    bottom = require_finite(min_level_db, "min_level_db")
     if bottom > top:
-        msg = "'minimum_level_db' must not exceed 'maximum_level_db'."
+        msg = "'min_level_db' must not exceed 'max_level_db'."
         raise ValueError(msg)
     swing = float(settled(top - bottom))
     if swing >= _STEADY_RANGE_DB:
@@ -1019,9 +1019,9 @@ class PlantMeasurementContour(OwnsArrays):
         if height < 0.0:
             msg = "'characteristic_height_m' must be >= 0 m."
             raise ValueError(msg)
-        count = require_count(self.n_positions, "n_positions", minimum=_MIN_POSITIONS)
+        count = require_count(self.n_positions, "n_positions", at_least=_MIN_POSITIONS)
         omitted = tuple(
-            require_count(i, "omitted_positions", minimum=0)
+            require_count(i, "omitted_positions", at_least=0)
             for i in self.omitted_positions
         )
         if list(omitted) != sorted(set(omitted)) or any(i >= count for i in omitted):

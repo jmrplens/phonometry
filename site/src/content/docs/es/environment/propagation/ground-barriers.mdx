@@ -130,7 +130,7 @@ bands = np.array([63., 125., 250., 500., 1000., 2000., 4000., 8000.])
 # Pradera (resistividad al flujo efectiva sigma = 200 kPa.s/m^2), fuente a 1 m y
 # receptor a 1.5 m de altura, separados 50 m. La impedancia procede del modelo
 # poroso de Delany-Bazley de phonometry.materials (suelo semiinfinito).
-# Orden de los argumentos: frecuencias, source_height, receiver_height, distancia.
+# Orden de los argumentos: frecuencias, source_height_m, receiver_height_m, distancia.
 res = environment.ground_effect(bands, 1.0, 1.5, 50.0, flow_resistivity_pa_s_m2=2e5)
 print(res.excess_attenuation)     # la caída del suelo (dB re campo libre)
 print(res.reflection_coefficient) # Q complejo por banda

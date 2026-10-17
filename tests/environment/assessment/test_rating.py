@@ -48,14 +48,14 @@ def test_lden_custom_periods() -> None:
         )
         / 24
     )
-    assert environment.lden(ld, le, ln_, hours=(12, 2, 10)) == pytest.approx(
+    assert environment.lden(ld, le, ln_, period_hours=(12, 2, 10)) == pytest.approx(
         expected, abs=1e-12
     )
 
 
 def test_lden_periods_must_sum_24() -> None:
     with pytest.raises(ValueError, match=r"Period durations must sum to 24 h"):
-        environment.lden(60, 55, 50, hours=(12, 4, 9))
+        environment.lden(60, 55, 50, period_hours=(12, 4, 9))
 
 
 def test_ldn_constant_level_analytic() -> None:

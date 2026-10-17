@@ -96,7 +96,7 @@ from .vibration_meter import (
     KB_CORNER_HZ,
     TAKT_DURATION_S,
     TAKT_SUPPRESSION_THRESHOLD,
-    takt_maximum_rms,
+    takt_max_rms,
 )
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -138,7 +138,7 @@ __all__ = [
     "kb_fmax_from_peak_velocity",
     "kb_from_peak_velocity",
     "railway_assessment_severity",
-    "railway_takt_maximum_rms",
+    "railway_takt_max_rms",
     "railway_takt_spread",
 ]
 
@@ -614,7 +614,7 @@ def assessment_vibration_severity(
     not applied to road or rail traffic.
 
     :param kb_ftm: :math:`KB_\mathrm{FTm}` of each stretch, dimensionless, as
-        :func:`~phonometry.vibration.takt_maximum_rms` gives it.
+        :func:`~phonometry.vibration.takt_max_rms` gives it.
     :param exposure_s: :math:`T_{\mathrm{e},j}`, how long each stretch lasts within the
         period, in seconds.
     :param time_of_day: ``"day"`` (default, :math:`T_\mathrm{r}` = 16 h) or ``"night"``
@@ -691,7 +691,7 @@ def admissible_trains_per_hour(kb_ftm: float, a_r: float) -> float:
     return _TAKTE_PER_HOUR * (guide / severity) ** 2
 
 
-def railway_takt_maximum_rms(kb_fti: ArrayLike) -> float:
+def railway_takt_max_rms(kb_fti: ArrayLike) -> float:
     r"""The clock maximum r.m.s. of one class of train, Formula (A.1).
 
     The root of the mean square of the clock maxima the trains of the class
@@ -704,7 +704,7 @@ def railway_takt_maximum_rms(kb_fti: ArrayLike) -> float:
     :return: :math:`KB_{\mathrm{FTm},j}`.
     :raises ValueError: For an empty, non-finite or negative input.
     """
-    return takt_maximum_rms(_maxima(kb_fti))
+    return takt_max_rms(_maxima(kb_fti))
 
 
 def _maxima(kb_fti: ArrayLike) -> NDArray[np.float64]:
@@ -722,7 +722,7 @@ def railway_takt_spread(kb_fti: ArrayLike) -> float:
     KB^2_{\mathrm{FTm},j})^2}`, on the square because it is the square that Formula
     (A.3) averages, so the spread of :math:`KB_\mathrm{FTr}` follows from it by
     adding and subtracting it there. The maxima enter as they enter
-    :func:`railway_takt_maximum_rms`, a value at or below 0,1 as zero, so the
+    :func:`railway_takt_max_rms`, a value at or below 0,1 as zero, so the
     spread is about the mean square that function returns.
 
     :param kb_fti: The clock maxima the class occupied, at least two.
@@ -776,7 +776,7 @@ def railway_assessment_severity(
     how Example 8 reports :math:`0{,}325^{+0{,}059}_{-0{,}073}`.
 
     :param kb_ftm: :math:`KB_{\mathrm{FTm},j}`, one per class, as
-        :func:`railway_takt_maximum_rms` gives them.
+        :func:`railway_takt_max_rms` gives them.
     :param occupied_takte: :math:`M_j`, the clock intervals each class
         occupies in the period, one per class, which is about the number of
         its trains in the period when a train occupies one interval.

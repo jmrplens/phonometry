@@ -282,7 +282,7 @@ def _chk_gum_s1_table3_monte_carlo() -> Outcome:
     mc = ph.metrology.monte_carlo(
         lambda a, b, c, d: a + b + c + d,
         quantities,
-        trials=1_000_000,
+        n_trials=1_000_000,
         coverage=0.95,
         seed=1996,
     )
@@ -539,7 +539,7 @@ def _chk_reat_minimum_differences() -> Outcome:
     """
     computed = {
         f"{table} {protector}": round(
-            float(ph.hearing.minimum_significant_difference(u95)), 1
+            float(ph.hearing.min_significant_difference(u95)), 1
         )
         for (table, protector), (
             u95,
@@ -950,7 +950,7 @@ def _chk_multiple_shock_dose() -> Outcome:
 def _chk_multiple_shock_risk() -> Outcome:
     sd = ph.vibration.compression_dose(ph.vibration.dose_from_peaks([40.0] * 5))
     value = ph.vibration.injury_risk(
-        sd, start_age=20, years=20, days_per_year=120, sex="male"
+        sd, start_age=20, exposure_duration_years=20, days_per_year=120, sex="male"
     )
     return numeric(ref.ISO2631_5_R_MALE, value, 0.01, places=2)
 
@@ -961,7 +961,7 @@ def _chk_multiple_shock_risk() -> Outcome:
 def _chk_multiple_shock_probability() -> Outcome:
     sd = ph.vibration.compression_dose(ph.vibration.dose_from_peaks([40.0] * 5))
     r = ph.vibration.injury_risk(
-        sd, start_age=20, years=20, days_per_year=120, sex="male"
+        sd, start_age=20, exposure_duration_years=20, days_per_year=120, sex="male"
     )
     return numeric(
         ref.ISO2631_5_PI_MALE,
@@ -991,7 +991,7 @@ def _chk_multiple_shock_female_r() -> Outcome:
         ph.vibration.dose_from_peaks([40.0] * 5), mz=_MZ_FEMALE
     )
     r = ph.vibration.injury_risk(
-        sd, start_age=20, years=20, days_per_year=120, sex="female"
+        sd, start_age=20, exposure_duration_years=20, days_per_year=120, sex="female"
     )
     return numeric(ref.ISO2631_5_R_FEMALE, r, 0.01, places=2)
 

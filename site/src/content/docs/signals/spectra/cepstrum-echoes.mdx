@@ -141,7 +141,7 @@ the even power and real cepstra repeat and the complex cepstrum keeps its
 anticausal (non-minimum-phase) content. Zero-padding via `nfft` reduces
 cepstral time-aliasing when the log spectrum has sharp features, exactly like
 the `oversample` padding of
-[`minimum_phase`](/phonometry/devices/electroacoustics/swept-sine-distortion/).
+[`min_phase`](/phonometry/devices/electroacoustics/swept-sine-distortion/).
 
 ## 2. Echo detection: the rahmonic spike train
 
@@ -394,7 +394,7 @@ homomorphic deconvolution (Havelock Ch. 87, Sec. 3.3): zero the rahmonics to
 remove an echo, keep only the low quefrencies to extract a source wavelet.
 A minimum-phase signal has a causal complex cepstrum, which is why folding
 the real cepstrum onto positive quefrencies reconstructs the minimum phase
-from $|H|$ alone: [`minimum_phase`](/phonometry/devices/electroacoustics/swept-sine-distortion/)
+from $|H|$ alone: [`min_phase`](/phonometry/devices/electroacoustics/swept-sine-distortion/)
 and `phase_decomposition` run on that same folding core (Bendat & Piersol
 Sec. 13.1.4; Tohyama in Havelock Ch. 75 edits reverberation by manipulating
 exactly these causal/anticausal parts).
@@ -414,7 +414,7 @@ that matter, since additive noise randomises the phase exactly where the
 magnitude is small; and **check the round trip with `invert()` before trusting
 any edited cepstrum**: a failed unwrap shows up immediately as a reconstruction
 error far above 1e-10. When the record cannot support it, use the power cepstrum
-for detection and the real-cepstrum folding of `minimum_phase` when only a
+for detection and the real-cepstrum folding of `min_phase` when only a
 magnitude-consistent phase is needed.
 
 ## 5. The envelope spectrum: modulations as lines
@@ -563,7 +563,7 @@ removes the deterministic gear components and leaves the bearing lines clear.
 The cepstrum starts from the same one-record FFT conventions as the
 [calibrated spectral estimators](/phonometry/signals/spectra/spectral-analysis/), and its
 folding core is literally the one inside
-[`minimum_phase`](/phonometry/devices/electroacoustics/swept-sine-distortion/) - the refactor is
+[`min_phase`](/phonometry/devices/electroacoustics/swept-sine-distortion/) - the refactor is
 pinned bit-exact in the tests. The envelope spectrum is the frequency-domain
 view of the same analytic signal the
 [Hilbert envelope](/phonometry/signals/spectra/correlation-delay/) returns in time, and a

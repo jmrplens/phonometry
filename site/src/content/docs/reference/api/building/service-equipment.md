@@ -423,7 +423,7 @@ case.
 
 ```python
 check_measurement_disturbance(
-    maximum_levels_db: ArrayLike,
+    max_levels_db: ArrayLike,
     equivalent_levels_db: ArrayLike,
 ) -> MeasurementDisturbanceCheck
 ```
@@ -444,7 +444,7 @@ the frequency range", which the operator chooses. A difference of exactly
 
 | Name | Description |
 | :--- | :--- |
-| `maximum_levels_db` | The maximum level of a band in the middle of the frequency range, one per measurement period, in dB. |
+| `max_levels_db` | The maximum level of a band in the middle of the frequency range, one per measurement period, in dB. |
 | `equivalent_levels_db` | The equivalent level of the same band over the same period, one per period, in dB. |
 
 **Returns:** [`MeasurementDisturbanceCheck`](/phonometry/reference/api/building/service-equipment/#measurementdisturbancecheck).
@@ -566,7 +566,7 @@ positions, whose 0,50 m from the room surfaces 7.3 sets instead.
 
 ```python
 check_varying_background(
-    background_maximum_level_db: ArrayLike,
+    background_max_level_db: ArrayLike,
     equipment_levels_db: ArrayLike,
     *,
     observation_time_s: float,
@@ -596,7 +596,7 @@ of the microphone positions"; the draft names the corner.
 
 | Name | Description |
 | :--- | :--- |
-| `background_maximum_level_db` | The maximum level of the background over the observation period, at the corner position, per band, in dB. |
+| `background_max_level_db` | The maximum level of the background over the observation period, at the corner position, per band, in dB. |
 | `equipment_levels_db` | The service equipment sound pressure level in the same bands, in dB. |
 | `observation_time_s` | How long the background maximum was watched for, in s. |
 | `frequencies` | Band centres in Hz, kept for the plot only. |
@@ -723,7 +723,7 @@ ventilation outlet for example, is left out.
 
 ```python
 MeasurementDisturbanceCheck(
-    maximum_levels_db: np.ndarray,
+    max_levels_db: np.ndarray,
     equivalent_levels_db: np.ndarray,
 )
 ```
@@ -734,7 +734,7 @@ Whether each measurement period was free of disturbances (Clause 9).
 
 | Name | Description |
 | :--- | :--- |
-| `maximum_levels_db` | The maximum level in the middle of the frequency range, one per measurement period, in dB. |
+| `max_levels_db` | The maximum level in the middle of the frequency range, one per measurement period, in dB. |
 | `equivalent_levels_db` | The equivalent level in the same band, one per period, in dB. |
 
 ### MeasurementDisturbanceCheck.differences_db
@@ -810,10 +810,10 @@ A difference of exactly 5,0 dB is not "less than 5 dB".
 OperatingCondition(
     clause: str,
     equipment: str,
-    maximum_level: bool,
+    max_level: bool,
     equivalent_level: bool,
     conditions: str,
-    maximum_cycle: str | None,
+    max_cycle: str | None,
     equivalent_cycle: str | None,
     nominal_integration_time_s: float | None,
     parameters: Mapping[str, float] = ...,
@@ -832,10 +832,10 @@ of the document with the chosen conditions reported in detail.
 | :--- | :--- |
 | `clause` | The clause of Annex B, e.g. `"B.2.6"`. |
 | `equipment` | What the entry covers, in words. |
-| `maximum_level` | Whether the entry defines a cycle for the maximum level `Lmax`. |
+| `max_level` | Whether the entry defines a cycle for the maximum level `Lmax`. |
 | `equivalent_level` | Whether the entry defines the equivalent level `Leq`; a rubbish chute is measured as a maximum level only. |
 | `conditions` | The operating conditions, in words. |
-| `maximum_cycle` | The operating cycle for `Lmax`, or `None`. |
+| `max_cycle` | The operating cycle for `Lmax`, or `None`. |
 | `equivalent_cycle` | What the `Leq` integration time covers, or `None`. |
 | `nominal_integration_time_s` | The integration time the entry gives in seconds when it is a fixed duration (about 30 s), or `None` when it is the length of a cycle. |
 | `parameters` | The other numbers the entry prints, keyed by a name that carries the unit (`"tube_length_m"`) or says it is a count. |
@@ -1488,7 +1488,7 @@ of all, is more uncertain, and the draft states no coverage factor.
 
 ```python
 VaryingBackgroundCheck(
-    background_maximum_level_db: np.ndarray,
+    background_max_level_db: np.ndarray,
     equipment_levels_db: np.ndarray,
     observation_time_s: float,
     frequencies: np.ndarray | None = None,
@@ -1503,7 +1503,7 @@ The route the NOTE to Clause 9 offers when the background varies in time.
 
 | Name | Description |
 | :--- | :--- |
-| `background_maximum_level_db` | The maximum level of the background over the observation period at the corner position, per band (or one weighted value), in dB. |
+| `background_max_level_db` | The maximum level of the background over the observation period at the corner position, per band (or one weighted value), in dB. |
 | `equipment_levels_db` | The service equipment sound pressure level, the same bands, in dB. |
 | `observation_time_s` | How long the background maximum was watched for, in s. |
 | `frequencies` | The band centres, in Hz, or `None` when not given. |

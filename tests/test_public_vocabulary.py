@@ -70,6 +70,10 @@ _MINORITY = {
     "sound_speeds": "speeds_of_sound",
     "confidence_level": "confidence",
     "tone_freq": "tone_frequency",
+    "ci_lower": "confidence_lower",
+    "ci_upper": "confidence_upper",
+    "lower_ci": "confidence_lower",
+    "upper_ci": "confidence_upper",
 }
 
 _KHZ = (
@@ -187,12 +191,18 @@ def _public_modules() -> Iterator[object]:
 def _public_names() -> Iterator[tuple[str, str, str, str, str]]:
     """``(where, name, annotation, kind, text)`` for every public field and parameter.
 
-    ``kind`` is ``field``, ``property``, ``param`` or ``varargs``; ``text`` is
-    the ``:param`` text of a parameter, or ``""``.
+    ``kind`` is ``field``, ``property``, ``param``, ``varargs`` (``*args``) or
+    ``varkw`` (``**kwargs``); ``text`` is the ``:param`` text of a parameter,
+    or ``""``.
     """
     seen: set[str] = set()
-    for module in _public_modules():
-        for attr, obj in vars(module).items():
+    # The root publishes its three classes (``Signal``, ``ReportMetadata``,
+    # ``PhonometryWarning``) through a lazy ``__getattr__``, so they are read
+    # by name from its ``__all__``, not from its namespace.
+    root = {name: getattr(phonometry, name) for name in phonometry.__all__}
+    members = [root.items()] + [vars(module).items() for module in _public_modules()]
+    for items in members:
+        for attr, obj in items:
             if attr.startswith("_"):
                 continue
             owner = getattr(obj, "__module__", "") or ""
@@ -226,7 +236,13 @@ def _parameters(where: str, func: object) -> Iterator[tuple[str, str, str, str, 
     for parameter in signature.parameters.values():
         if parameter.name in {"self", "cls"}:
             continue
-        kind = "varargs" if parameter.kind is parameter.VAR_POSITIONAL else "param"
+        kind = (
+            "varargs"
+            if parameter.kind is parameter.VAR_POSITIONAL
+            else "varkw"
+            if parameter.kind is parameter.VAR_KEYWORD
+            else "param"
+        )
         yield (
             f"{where}({parameter.name})",
             parameter.name,
@@ -402,8 +418,10 @@ def _stale_spellings(parameter: str) -> set[str]:
 
     For ``frequencies``: ``frequency``, ``frequencies_hz``, ``frequency_hz``
     and every minority spelling that :data:`_MINORITY` maps to it; for ``x``,
-    the ``signal`` and ``signal_in`` of :data:`_SIGNAL_SPELLINGS`. A message
-    that quotes one of them names a parameter the caller cannot pass.
+    the ``signal`` and ``signal_in`` of :data:`_SIGNAL_SPELLINGS`; for a count
+    ``n_events``, the bare ``events``; and for a ``min_``/``max_`` name, the
+    same name with ``minimum``/``maximum``. A message that quotes one of them
+    names a parameter the caller cannot pass.
     """
     singular = {plural: one for one, plural in _PLURALS.items()}
     stem = _quantity(parameter)
@@ -414,6 +432,13 @@ def _stale_spellings(parameter: str) -> set[str]:
                 spellings |= {word} | {word + suffix for suffix in _UNIT_SUFFIXES}
     retired = {**_MINORITY, **_SIGNAL_SPELLINGS}
     spellings |= {old for old, new in retired.items() if new == parameter}
+    tokens = parameter.split("_")
+    if "n" in tokens[:2] and tokens[-1] != "n":
+        spellings.add("_".join(t for t in tokens if t != "n"))
+    if {"min", "max"} & set(tokens):
+        spellings.add(
+            "_".join({"min": "minimum", "max": "maximum"}.get(t, t) for t in tokens)
+        )
     return spellings - {parameter}
 
 
@@ -612,6 +637,21 @@ def _named_by_helper_defaults(node: ast.AST) -> set[str]:
     return names
 
 
+@pytest.mark.parametrize(
+    ("parameter", "stale"),
+    [
+        ("n_events", "events"),
+        ("min_n_records", "min_records"),
+        ("max_n_arrivals", "maximum_n_arrivals"),
+        ("max_level_db", "maximum_level_db"),
+        ("frequencies", "frequency"),
+    ],
+)
+def test_a_retired_spelling_of_a_parameter_is_stale(parameter: str, stale: str) -> None:
+    """A message that quotes the count or min/max spelling a name left is stale."""
+    assert stale in _stale_spellings(parameter)
+
+
 def test_a_message_names_the_parameter_the_caller_passed() -> None:
     """No message of a public function quotes a retired spelling of its parameter.
 
@@ -798,28 +838,11 @@ _SPELLED_OUT = {
     "std": "standard_deviation",
 }
 
-#: The words a ``minimum``/``maximum`` stays spelt out before: the terms of
-#: art in which it is part of a named quantity, not a limit or an extreme.
-#: The takt maximum is the clock maximum of DIN 45669-1 and DIN 4150-2, the
-#: maximum of each 30 s clock interval (Takt) that KB_FTm averages; the maximum
-#: level Lmax and the minimum level Lmin are the extremes a level meter reads
-#: over an observation, as ISO 8297 9.5.2 and ISO 16032 Clause 9 name them.
-_TERMS_OF_ART = (
-    ("minimum", "phase"),
-    ("maximum", "length", "sequence"),
-    ("maximum", "impact", "level"),
-    ("maximum", "level"),
-    ("maximum", "levels"),
-    ("minimum", "level"),
-    ("minimum", "levels"),
-    ("takt", "maximum"),
-)
+#: ``minimum`` and ``maximum`` written as the library writes them, by kind.
+_MIN_MAX = {"minimum": "min", "maximum": "max"}
 #: The unit that says a ``max`` names a level: ``max_db`` is the maximum level.
 _LEVEL_UNITS = frozenset({"db"})
-_LMAX_RULE = "the maximum level Lmax is a term of art, spelled 'maximum_level'"
-_LMIN_RULE = "the minimum level Lmin is a term of art, spelled 'minimum_level'"
-#: Words after which ``minimum``/``maximum`` is a noun, not a qualifier.
-_NOUN_AFTER = frozenset({"by", "of", "at", "to", "in", "for"})
+_LMAX_RULE = "the maximum level Lmax is spelled 'max_level'"
 
 _COUNT_RULE = "a count is n_<plural>, as in n_points"
 #: Words that begin with ``num`` and are no abbreviation of a count.
@@ -828,41 +851,45 @@ _R_S_MAX = (
     "R_s,max of ISO 10140-1 Annex J, the symbol's own subscript: the largest "
     "sound reduction index the arrangement can show, a limit, not Lmax"
 )
+#: ``ci`` as a word of a public name: a confidence bound is spelled out.
+_CI_RULE = "a confidence bound is 'confidence_lower'/'confidence_upper', never 'ci'"
+_C_I = (
+    "C_I, the impact sound spectrum adaptation term of ISO 717-2 (C_I, "
+    "C_I,50-2500, C_I,Delta, C_I,r), the symbol's own name: no confidence "
+    "interval"
+)
 #: Where a spelling the rules below refuse is kept on purpose, keyed by
 #: location, each with the reason. An entry that matches nothing fails.
 _SPELLING_EXEMPT = {
-    "phonometry.building.measurement.service_equipment.OperatingCondition.maximum_cycle": (
-        "the operating cycle of the maximum level Lmax, beside equivalent_cycle "
-        "for Leq: the term of art, not a limit"
-    ),
-    "phonometry.electroacoustics.sound_reinforcement.FeedbackStabilityResult.max_level_at_microphone": (
-        "the largest level the loop tolerates at the microphone, a limit, not "
-        "the maximum level Lmax"
-    ),
     "phonometry.building.measurement.joint_insulation.LaboratoryJointInsulationResult.r_s_max_db": _R_S_MAX,
     "phonometry.building.measurement.joint_insulation.laboratory_joint_insulation(r_s_max_db)": _R_S_MAX,
+    "phonometry.building.measurement.ratings.ImpactRatingResult.ci": _C_I,
+    "phonometry.building.measurement.ratings.ExtendedImpactRatingResult.ci": _C_I,
+    "phonometry.building.measurement.ratings.ExtendedImpactRatingResult.ci_50_2500": _C_I,
+    "phonometry.building.measurement.ratings.ImpactImprovementRatingResult.ci_delta": _C_I,
+    "phonometry.building.measurement.ratings.ImpactImprovementRatingResult.ci_r": _C_I,
+    "phonometry.building.measurement.floor_covering_improvement.FloorCoveringImprovementResult.ci_delta": _C_I,
+    "phonometry.building.measurement.laboratory_improvement.LaboratoryFloorCoveringImprovementResult.ci_delta_db": _C_I,
 }
 
 
-def _in_term_of_art(tokens: list[str], index: int) -> bool:
-    """Whether ``tokens[index]`` is the ``minimum``/``maximum`` of a term of art."""
-    for term in _TERMS_OF_ART:
-        for start in range(len(tokens) - len(term) + 1):
-            if tuple(tokens[start : start + len(term)]) == term and (
-                start <= index < start + len(term)
-            ):
-                return True
-    return False
+def _min_max_spelling(token: str, kind: str) -> str:
+    """``min``/``max`` in the case a name of *kind* writes it."""
+    short = _MIN_MAX[token]
+    if kind == "constant":
+        return short.upper()
+    return short.capitalize() if kind == "class" else short
 
 
 def _spelling_problems(name: str, *, kind: str, annotation: str = "") -> list[str]:
     """What a public name spells the way the library does not.
 
     *kind* is ``param``, ``field``, ``property``, ``constant``, ``function``,
-    ``class`` or ``module``. Every name is held to the spelled-out words and
-    to ``n_<plural>``; the min/max rule and the count rule read the names that
-    hold a value (parameters, fields, properties and constants), since a
-    function, a class or a module is named in words.
+    ``class`` or ``module``. Every name is held to the spelled-out words, to
+    ``n_<plural>`` and to ``min``/``max``: ``minimum`` and ``maximum`` appear
+    in no public name, whatever it is. The count rule and the maximum-level
+    rule read the names that hold a value (parameters, fields, properties and
+    constants).
     """
     tokens = (
         [s.lower() for s in _SEGMENT.findall(name)]
@@ -879,13 +906,14 @@ def _spelling_problems(name: str, *, kind: str, annotation: str = "") -> list[st
         for token in tokens
     ):
         problems.append(_COUNT_RULE)
+    problems += [
+        f"{token!r} is spelled {_min_max_spelling(token, kind)!r}"
+        for token in tokens
+        if token in _MIN_MAX
+    ]
+    if "ci" in tokens:
+        problems.append(_CI_RULE)
     if kind in {"class", "function", "module"}:
-        problems += [
-            f"a {kind} is named in words: {token!r} is spelled "
-            f"{'minimum' if token == 'min' else 'maximum'!r}"
-            for token in tokens
-            if token in {"min", "max"}
-        ]
         return problems
     if (
         kind != "constant"
@@ -893,21 +921,11 @@ def _spelling_problems(name: str, *, kind: str, annotation: str = "") -> list[st
         and annotation.replace(" ", "") not in {"bool", "bool|None"}
     ):
         problems.append(_COUNT_RULE)
-    for index, token in enumerate(tokens[:-1]):
-        following = tokens[index + 1]
-        if token in {"max", "maximum"} and following in _LEVEL_UNITS:
-            # ``max_db`` says "the maximum, in decibels": the maximum level.
-            problems.append(_LMAX_RULE)
-            continue
-        if (
-            token in {"minimum", "maximum"}
-            and following not in _NOUN_AFTER
-            and not _in_term_of_art(tokens, index)
-        ):
-            short = token[:3].upper() if kind == "constant" else token[:3]
-            problems.append(f"{token!r} as a limit or an extreme is spelled {short!r}")
-        if token in {"max", "min"} and following in {"level", "levels"}:
-            problems.append(_LMAX_RULE if token == "max" else _LMIN_RULE)
+    problems += [
+        _LMAX_RULE
+        for token, following in zip(tokens, tokens[1:], strict=False)
+        if token == "max" and following in _LEVEL_UNITS
+    ]
     return problems
 
 
@@ -934,13 +952,15 @@ def test_words_are_spelled_out() -> None:
 
     One spelling per word across the library: ``mic``, ``lab`` and ``std``
     are spelled out, a count is ``n_<plural>`` (never ``num_points``,
-    ``point_count`` or ``numtaps``), and a limit or an extreme held in a
-    value is ``min_``/``max_`` (``MIN_``/``MAX_`` for a constant) except in a
-    term of art, where ``minimum``/``maximum`` is part of the quantity's
-    name: minimum phase, maximum length sequence, the maximum impact level,
-    the takt maximum, and the maximum and minimum levels Lmax and Lmin, which
-    are never ``max_level``, ``min_level`` or ``max_db``. A function, a class
-    and a module are named in words, ``minimum`` and ``maximum`` included.
+    ``point_count`` or ``numtaps``), and ``minimum`` and ``maximum`` are
+    written ``min`` and ``max`` in every public name, ``MIN``/``MAX`` in a
+    constant and ``Min``/``Max`` in a class, as numpy, SciPy, scikit-learn
+    and Matplotlib write them (``max_iter``, ``min_samples_leaf``,
+    ``vmax``) and as the standards write the maximum and minimum levels
+    Lmax and Lmin. A maximum in decibels is the maximum level, ``max_level``,
+    never a bare ``max_db``. A confidence bound is ``confidence_lower`` or
+    ``confidence_upper``, so ``ci`` is a word of no public name, the ISO 717-2
+    adaptation term C_I aside.
     """
     offenders: list[str] = []
     seen: set[str] = set()
@@ -996,58 +1016,217 @@ def test_every_kept_spelling_still_exists() -> None:
             "MINIMUM_MICROPHONE_DISTANCE_M",
             "constant",
             "",
-            ["'minimum' as a limit or an extreme is spelled 'MIN'"],
+            ["'minimum' is spelled 'MIN'"],
         ),
         (
             "maximum_qualified_radius_m",
             "property",
             "float",
-            ["'maximum' as a limit or an extreme is spelled 'max'"],
+            ["'maximum' is spelled 'max'"],
         ),
-        (
-            "max_levels_db",
-            "param",
-            "ArrayLike",
-            ["the maximum level Lmax is a term of art, spelled 'maximum_level'"],
-        ),
-        ("maximum_levels_db", "param", "ArrayLike", []),
+        ("max_levels_db", "param", "ArrayLike", []),
+        ("max_level", "field", "float", []),
+        ("min_level_db", "param", "float", []),
+        # The maximum and minimum levels Lmax and Lmin are min/max too.
+        ("maximum_levels_db", "param", "ArrayLike", ["'maximum' is spelled 'max'"]),
+        ("minimum_level_db", "param", "float", ["'minimum' is spelled 'min'"]),
         # A maximum given in decibels is the maximum level, however short.
         ("background_max_db", "field", "NDArray", [_LMAX_RULE]),
-        ("background_maximum_db", "param", "ArrayLike", [_LMAX_RULE]),
-        ("background_maximum_level_db", "param", "ArrayLike", []),
-        ("min_level_db", "param", "float", [_LMIN_RULE]),
-        ("minimum_level_db", "param", "float", []),
+        ("background_max_level_db", "param", "ArrayLike", []),
         # The smallest of an attenuation is an extreme, not a level.
         ("min_db", "property", "float", []),
-        ("minimum_phase_response", "field", "NDArray", []),
-        ("TAKT_MAXIMUM_FACTOR", "constant", "", []),
-        ("over_maximum_by_correction_data", "field", "tuple", []),
-        ("standardized_maximum_impact_level", "function", "", []),
-        ("maximum_output_current", "function", "", []),
+        # A term of art is no exception, nor a noun after a preposition.
+        ("minimum_phase_response", "field", "NDArray", ["'minimum' is spelled 'min'"]),
+        ("TAKT_MAXIMUM_FACTOR", "constant", "", ["'maximum' is spelled 'MAX'"]),
+        ("exceeds_maximum", "property", "bool", ["'maximum' is spelled 'max'"]),
+        ("limit_at_max", "field", "bool", []),
+        # A function, a class and a module are held to the same spelling.
         (
-            "floor_transfer_max",
+            "standardized_maximum_impact_level",
             "function",
             "",
-            ["a function is named in words: 'max' is spelled 'maximum'"],
+            ["'maximum' is spelled 'max'"],
         ),
-        (
-            "MaxUncertaintyRow",
-            "class",
-            "",
-            ["a class is named in words: 'max' is spelled 'maximum'"],
-        ),
-        (
-            "junction_min_vibration_reduction",
-            "function",
-            "",
-            ["a function is named in words: 'min' is spelled 'minimum'"],
-        ),
+        ("floor_transfer_max", "function", "", []),
+        ("junction_min_vibration_reduction", "function", "", []),
+        ("MaxUncertaintyRow", "class", "", []),
+        ("MaximumUncertaintyRow", "class", "", ["'maximum' is spelled 'Max'"]),
+        ("minimum_phase", "module", "", ["'minimum' is spelled 'min'"]),
+        # A confidence bound is spelled out, in every form it could take.
+        ("ci_lower", "field", "NDArray", [_CI_RULE]),
+        ("ci_low", "field", "NDArray", [_CI_RULE]),
+        ("ci_lower_db", "param", "ArrayLike", [_CI_RULE]),
+        ("lower_ci_95", "field", "float", [_CI_RULE]),
+        ("ci_width", "property", "float", [_CI_RULE]),
+        ("CiBounds", "class", "", [_CI_RULE]),
+        ("confidence_lower", "field", "NDArray", []),
+        # A word that holds the letters is not the word.
+        ("acoustic_impedance", "field", "NDArray", []),
     ],
 )
 def test_the_spelling_rules_read_a_name(
     name: str, kind: str, annotation: str, expected: list[str]
 ) -> None:
     assert _spelling_problems(name, kind=kind, annotation=annotation) == expected
+
+
+# ---------------------------------------------------------------------------
+# A count says it is a count.
+# ---------------------------------------------------------------------------
+
+#: The annotations, as written, of a value that holds a whole number.
+_INT_ANNOTATIONS = frozenset({"int", "int|None", "None|int", "Optional[int]"})
+#: Units of time a duration is written in. The name before the unit says the
+#: quantity (``duration_s``, ``duration_days``, ``period_hours``); a name that
+#: is the unit alone (``seconds``, ``years``) says none, whatever it holds: a
+#: number, a tuple of the durations of several periods or an array.
+_TIME_UNITS = frozenset({"seconds", "minutes", "hours", "days", "years"})
+#: Words that end in ``s`` and are no plural: the sample rate.
+_NOT_PLURAL = frozenset({"fs"})
+#: Words after which a name is a qualifier of the noun before them.
+_PREPOSITIONS = frozenset({"at", "of", "in", "for", "to", "by", "from", "on", "with"})
+_N_RULE = "a count is n_<plural>"
+_DURATION_RULE = "a duration names its quantity before its unit"
+_SAMPLES = "a length counted in samples: the unit is the sample, as in delay_samples"
+#: Where an ``int`` named in the plural is no count, keyed by location, each
+#: with the reason. An entry that matches nothing fails the test too.
+_DECIMALS = (
+    "the number of decimals a value is rounded to, as numpy's round(decimals=): "
+    "a precision, not a tally of things"
+)
+_COUNT_EXEMPT = {
+    "phonometry.building.regulation.spain.DBHRRequirement.decimals": _DECIMALS,
+    "phonometry._internal.boundary.round_half_away_from_zero(decimals)": _DECIMALS,
+    "phonometry._internal.boundary.round_half_even(decimals)": _DECIMALS,
+    "phonometry._internal.boundary.round_half_up(decimals)": _DECIMALS,
+    "phonometry.environment.assessment.soundscape.SoundscapeCorrelation.degrees_of_freedom": (
+        "the degrees of freedom of the t test, the statistic's own name"
+    ),
+    "phonometry.signals._cepstrum.EchoDetectionResult.delay_samples": _SAMPLES,
+    "phonometry.signals._cepstrum.CepstrumResult.linear_phase_samples": _SAMPLES,
+    "phonometry.signals.test_signals.ToneBurstResult.burst_samples": _SAMPLES,
+    "phonometry.signals.test_signals.ToneBurstResult.period_samples": _SAMPLES,
+    "phonometry.simulation.elastic_fdtd.ElasticBoundaries.absorbing_layer_cells": (
+        "the thickness of the absorbing layer counted in grid cells: the unit "
+        "is the cell, as the sample is of delay_samples"
+    ),
+    "phonometry.simulation.fdtd.fdtd_simulation(absorbing_layer_cells)": (
+        "the thickness of the absorbing layer counted in grid cells: the unit "
+        "is the cell, as the sample is of delay_samples"
+    ),
+}
+
+
+def _is_plural(word: str) -> bool:
+    """Whether *word* reads as an English plural (``positions``, not ``axis``)."""
+    return (
+        word.endswith("s")
+        and not word.endswith(("ss", "us", "is"))
+        and word not in _NOT_PLURAL
+    )
+
+
+def _count_problems(name: str, annotation: str) -> list[str]:
+    """Why a value named *name* does not say it is a count or a duration.
+
+    The head noun of a name is its last word, read before a preposition
+    (``responses_at_threshold``) and before a trailing participle
+    (``positions_used``). An ``int`` whose head noun is a plural holds how
+    many of them there are, and is ``n_<plural>``, behind a ``min_``/``max_``
+    when it is a limit (``min_n_records``). A rate (``points_per_bandwidth``)
+    is not a count, and a duration is read by its unit whatever its type:
+    ``duration_days`` is a duration, ``seconds`` or ``years`` alone says no
+    quantity, and neither does ``hours`` holding the durations of three
+    periods.
+    """
+    text = annotation.replace(" ", "").replace("<class'int'>", "int")
+    whole = text in _INT_ANNOTATIONS
+    tokens = name.lower().split("_")
+    if tokens[0] in {"min", "max"}:
+        tokens = tokens[1:]
+    if not tokens or tokens[0] == "n" or "per" in tokens:
+        return []
+    for index, token in enumerate(tokens):
+        if token in _PREPOSITIONS:
+            tokens = tokens[:index]
+            break
+    while len(tokens) > 1 and tokens[-1].endswith("ed"):
+        tokens = tokens[:-1]
+    if not tokens:
+        return []
+    if tokens[-1] in _TIME_UNITS:
+        return [_DURATION_RULE] if len(tokens) == 1 else []
+    if not whole:
+        return []
+    return [_N_RULE] if _is_plural(tokens[-1]) else []
+
+
+def test_a_count_is_n_plural() -> None:
+    """``n_events``, ``n_turns``, ``n_subjects``: a count says it is one.
+
+    A parameter, a field or a property that holds a whole number of things
+    is ``n_<plural>``, the spelling ``n_samples``, ``n_points`` and
+    ``n_harmonics`` already had, so ``events=3`` cannot be read as the events
+    themselves. A class or a grade (``filter_class``), an axis, a number of
+    decimals and a length counted in samples are not counts, and a duration
+    in a unit follows the unit rule (``exposure_duration_years``).
+    """
+    offenders = sorted(
+        f"{where}: {problem}"
+        for where, name, annotation, kind, _ in _public_names()
+        if kind in {"param", "field", "property"} and where not in _COUNT_EXEMPT
+        for problem in _count_problems(name, annotation)
+    )
+    assert not offenders, "\n".join(offenders)
+
+
+def test_every_kept_count_spelling_still_exists() -> None:
+    """An exemption from the count rule that names nothing is a stale one."""
+    found = {where for where, *_ in _public_names()}
+    stale = sorted(set(_COUNT_EXEMPT) - found)
+    assert not stale, "\n".join(stale)
+
+
+@pytest.mark.parametrize(
+    ("name", "annotation", "expected"),
+    [
+        ("events", "int | None", [_N_RULE]),
+        ("microphone_positions", "int", [_N_RULE]),
+        ("min_records", "int", [_N_RULE]),
+        ("max_arrivals", "int", [_N_RULE]),
+        ("responses_at_threshold", "int", [_N_RULE]),
+        ("positions_used", "int", [_N_RULE]),
+        ("years", "int", [_DURATION_RULE]),
+        ("years", "float", [_DURATION_RULE]),
+        # A duration is read by its unit whatever it holds.
+        ("seconds", "float", [_DURATION_RULE]),
+        ("seconds", "int", [_DURATION_RULE]),
+        ("minutes", "float | None", [_DURATION_RULE]),
+        ("hours", "tuple[float, float, float]", [_DURATION_RULE]),
+        ("days", "ArrayLike", [_DURATION_RULE]),
+        ("duration_s", "float", []),
+        ("period_hours", "tuple[float, float]", []),
+        ("seconds_per_decade", "tuple[float, ...]", []),
+        ("at_least", "int", []),
+        ("n_events", "int | None", []),
+        ("min_n_records", "int", []),
+        ("max_n_arrivals", "int", []),
+        ("exposure_duration_years", "int", []),
+        ("duration_days", "int", []),
+        ("year_days", "int", []),
+        ("points_per_bandwidth", "int", []),
+        ("filter_class", "int", []),
+        ("axis", "int | None", []),
+        ("fs", "int", []),
+        # Only a whole number is a count: an array of positions is not one.
+        ("positions", "NDArray[np.float64]", []),
+        ("events", "float", []),
+    ],
+)
+def test_the_count_rule_reads_a_name(
+    name: str, annotation: str, expected: list[str]
+) -> None:
+    assert _count_problems(name, annotation) == expected
 
 
 #: A parameter that names the time signal in a spelling the API retired.

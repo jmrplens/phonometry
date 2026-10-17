@@ -692,7 +692,7 @@ def test_comparison_refuses_reference_levels_of_another_length() -> None:
 
 
 def test_formula_2_minimum_bandwidth() -> None:
-    bandwidth = emission.minimum_analyzer_bandwidth(
+    bandwidth = emission.min_analyzer_bandwidth(
         16_000.0, microphone_speed_m_s=0.4, speed_of_sound=345.0
     )
     assert float(bandwidth[0]) == pytest.approx(2.0 * 16_000.0 * 0.4 / 345.0)
@@ -734,7 +734,7 @@ def _tones() -> emission.HighFrequencySoundPowerResult:
 
 
 def test_the_tones_within_10_db_of_the_highest_are_marked() -> None:
-    np.testing.assert_array_equal(_tones().within_10_db_of_maximum, [True, True, False])
+    np.testing.assert_array_equal(_tones().within_10_db_of_max, [True, True, False])
 
 
 def test_a_tone_exactly_10_db_below_the_highest_is_reported() -> None:
@@ -744,7 +744,7 @@ def test_a_tone_exactly_10_db_below_the_highest_is_reported() -> None:
         "sound_power_level": np.array([60.0, 50.0, 49.5]),
     }
     res = emission.HighFrequencySoundPowerResult(**fields)
-    np.testing.assert_array_equal(res.within_10_db_of_maximum, [True, True, False])
+    np.testing.assert_array_equal(res.within_10_db_of_max, [True, True, False])
 
 
 def test_a_result_with_disagreeing_bands_cannot_be_built() -> None:
@@ -804,7 +804,7 @@ def test_tonal_plot_mutes_the_tone_below_the_reporting_range() -> None:
     ax = res.plot()
     stems = next(c for c in ax.collections if len(c.get_segments()) == 3)
     colours = [to_rgba(c) for c in stems.get_colors()]
-    reported = res.within_10_db_of_maximum
+    reported = res.within_10_db_of_max
     assert colours == [to_rgba(_C_PRIMARY if keep else _C_MUTED) for keep in reported]
     labels = [text.get_text() for text in ax.get_legend().get_texts()]
     assert "Tone below the reporting range" in labels

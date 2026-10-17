@@ -1168,7 +1168,7 @@ VDI 2081 treats the two as separate elements of the chain.
 silencer_self_noise(
     frequencies: ArrayLike | None,
     airway_velocity: float,
-    passages: int,
+    n_passages: int,
     height_m: float,
     *,
     model: str = 'ashrae',
@@ -1208,7 +1208,7 @@ correction because the face size enters through `N` and `H`.
 | :--- | :--- |
 | `frequencies` | Octave-band centres, Hz; `None` uses the eight octave bands from 63 Hz to 8 kHz. |
 | `airway_velocity` | Velocity `V` in the splitter airway, m/s. |
-| `passages` | Number of air passages `N` between the splitters. |
+| `n_passages` | Number of air passages `N` between the splitters. |
 | `height_m` | Silencer height `H` (or circumference, if round), m. |
 | `model` | `"ashrae"` (default, Long Eq. 14.31) or `"vdi2081"` (Section 7.2.4.2). |
 | `pressure_drop_pa` | **VDI 2081 only.** Total pressure drop across the silencer, Pa, which Equation (49) takes. |
@@ -1221,7 +1221,7 @@ correction because the face size enters through `N` and `H`.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `passages` is not a positive integer. |
+| ValueError | If `n_passages` is not a positive integer. |
 
 ## split_loss
 

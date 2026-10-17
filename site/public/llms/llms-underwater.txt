@@ -893,7 +893,7 @@ print(mean(flux.propagation_loss), mean(modes.propagation_loss))
 **UNESCO / Chen–Millero** equation (default, the international standard, in the
 Wong & Zhu 1995 ITS-90 form), **Del Grosso** (1974), **Mackenzie** (1981) or
 **Medwin** (1975). The UNESCO and Del Grosso equations use pressure, so depth is
-first converted with the Leroy & Parthiot (1998) formula (`depth_to_pressure`).
+first converted with the Leroy & Parthiot (1998) formula (`fluids.depth_to_gauge_pressure_mpa`).
 The four agree to within ~2.5 m/s in their common domain; Mackenzie's canonical
 check value is 1550.744 m/s at 25 °C, 35 ppt, 1000 m.
 
@@ -1836,7 +1836,7 @@ steeper than the traced aperture does not exist to it, and a pair of
 arrivals standing between the same two fan rays merges into no bracket at
 all, so the fan's density and half-angle are the completeness levers, and
 they stay where they are visible, in the `ray_trace` call. The multipath
-ladder of a hard-bottomed guide is unbounded, so `max_arrivals` (64 by
+ladder of a hard-bottomed guide is unbounded, so `max_n_arrivals` (64 by
 default) keeps the earliest arrivals, the flat, least-bounced ones that
 carry the energy, and warns when it truncates. And the amplitude is
 classical on purpose: a receiver standing exactly on a caustic is answered

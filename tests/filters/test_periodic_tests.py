@@ -309,7 +309,7 @@ def test_40_db_below_the_upper_boundary_is_still_5_13_3() -> None:
     assert (past.upper_limit, past.max_uncertainty) == (0.7, 0.35)
     assert not at.passes
     assert past.passes
-    assert not unusable.uncertainty_within_maximum
+    assert not unusable.uncertainty_within_max
 
 
 def test_clause_13_reads_its_maximum_off_the_attenuation() -> None:

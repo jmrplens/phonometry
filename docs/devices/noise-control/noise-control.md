@@ -232,7 +232,7 @@ plt.show()
 
 </details>
 
-`enclosure_insertion_loss` returns an `EnclosureResult` with the panel
+`enclosure_insertion_loss` returns an `EnclosureInsertionLossResult` with the panel
 `panel_transmission_loss`, the interior `correction`, the net `insertion_loss`,
 the interior `room_constant` and `.plot()`.
 
@@ -249,7 +249,7 @@ its result directly as the panel $R$. Cooling openings become short lined ducts
 rather than holes, and the machine must not touch the shell or share its slab,
 because a rigid contact bypasses the panels entirely.
 
-**Test-report fiche.** `EnclosureResult.report(path)` renders a one-page
+**Test-report fiche.** `EnclosureInsertionLossResult.report(path)` renders a one-page
 enclosure fiche: the octave-band table of the supplied panel $R$, the interior
 correction $C$ and the net $\mathrm{IL}$, the three curves plotted beside it,
 and the boxed mean insertion loss with the mean panel $R$ and the external and

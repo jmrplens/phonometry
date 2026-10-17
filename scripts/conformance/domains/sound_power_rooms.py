@@ -191,7 +191,7 @@ def _chk_iso3743_1_event_forms() -> Outcome:
         background_levels=_BACKGROUND, integration_time=1.0,
     )  # fmt: skip
     encompassing = ph.emission.sound_energy_hard_walled(
-        _ST + 10.0 * math.log10(n_events), _RSS, _LW_RSS, _FREQS, events=n_events,
+        _ST + 10.0 * math.log10(n_events), _RSS, _LW_RSS, _FREQS, n_events=n_events,
         background_levels=_BACKGROUND, integration_time=1.0,
     )  # fmt: skip
     worst = float(
@@ -689,7 +689,9 @@ def _chk_iso3743_2_table3() -> Outcome:
     for column, mics in enumerate((3, 6, 12)):
         for (band, cls), row in _TABLE_3.items():
             plan = ph.emission.special_room_source_locations(
-                70.0 + _SURVEYS[cls][:, None], [float(band)], microphone_positions=mics
+                70.0 + _SURVEYS[cls][:, None],
+                [float(band)],
+                n_microphone_positions=mics,
             )
             agree += int(
                 plan.spectral_character == (cls,)
@@ -699,9 +701,9 @@ def _chk_iso3743_2_table3() -> Outcome:
         for cls, row in _TABLE_3_A.items():
             plan = ph.emission.special_room_source_locations(
                 70.0 + _SURVEYS["broadband"][:, None], [1000.0],
-                microphone_positions=mics, a_weighted_levels=80.0 + _SURVEYS[cls],
+                n_microphone_positions=mics, a_weighted_levels=80.0 + _SURVEYS[cls],
             )  # fmt: skip
-            agree += int(plan.a_weighted_source_locations == row[column])
+            agree += int(plan.n_a_weighted_source_locations == row[column])
             total += 1
     return count(agree, total, subject="Table 3 cells")
 

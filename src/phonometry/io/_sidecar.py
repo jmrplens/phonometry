@@ -375,7 +375,7 @@ def _audio_channels(audio: Path) -> int | None:
     from ._backends import info
 
     try:
-        return info(audio).channels
+        return info(audio).n_channels
     except (OSError, ValueError, RuntimeError, ImportError):
         return None
 

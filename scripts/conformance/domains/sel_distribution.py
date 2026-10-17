@@ -54,7 +54,7 @@ def _annex_a(probabilities: np.ndarray) -> environment.SELDistribution:
         _LEVELS,
         probabilities,
         sigma_db=ref.ISO13474_ANNEX_A_SIGMA_DB,
-        subclasses=ref.ISO13474_ANNEX_A_SUBCLASSES,
+        n_subclasses=ref.ISO13474_ANNEX_A_SUBCLASSES,
     )
 
 

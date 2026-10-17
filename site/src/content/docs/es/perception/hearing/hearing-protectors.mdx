@@ -167,8 +167,8 @@ redondear da 3,21 dB:
 ```python
 tapon = hearing.REAT_WITHIN_LABORATORY_UNCERTAINTY["earplug"]["250 Hz up to 4 kHz"]
 print(round(tapon.expanded_db, 2))                                          # 2.27
-print(round(hearing.minimum_significant_difference(2.3), 1))                # 3.3
-print(round(hearing.minimum_significant_difference(tapon.expanded_db), 2))  # 3.21
+print(round(hearing.min_significant_difference(2.3), 1))                # 3.3
+print(round(hearing.min_significant_difference(tapon.expanded_db), 2))  # 3.21
 
 # La U95 típica banda a banda, lista para assess_attenuation_difference.
 print(np.round(hearing.reat_expanded_uncertainty(reat.frequencies, protector="earplug"), 1))
@@ -699,7 +699,7 @@ las Tablas A.2 y B.2, la prueba de significación del anexo B (B.1.2, y la
 diferencia mínima de B.1.1 y B.2) y las condiciones del campo sonoro del
 apartado 4.2.2 con la Tabla 1, mediante `hearing.real_ear_attenuation`,
 `hearing.assess_attenuation_difference`,
-`hearing.minimum_significant_difference`, `hearing.reat_expanded_uncertainty`
+`hearing.min_significant_difference`, `hearing.reat_expanded_uncertainty`
 y `hearing.check_reat_sound_field`. Todas las celdas derivadas de las Tablas
 A.2, A.3 y B.2, la fila del criterio y el veredicto de la Tabla B.1 y las cuatro
 diferencias mínimas se reproducen hasta el decimal impreso en la suite de tests

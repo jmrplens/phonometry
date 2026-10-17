@@ -431,8 +431,8 @@ approximation assumes $B_\mathrm{e} < B_\mathrm{r}$.
 SpectralDensityResult(
     frequencies: NDArray[np.float64],
     psd: NDArray[np.float64],
-    ci_lower: NDArray[np.float64],
-    ci_upper: NDArray[np.float64],
+    confidence_lower: NDArray[np.float64],
+    confidence_upper: NDArray[np.float64],
     confidence: float,
     random_error: float,
     n_segments: int,
@@ -454,8 +454,8 @@ Welch autospectral density with its statistical error (B&P Ch. 8).
 | :--- | :--- |
 | `frequencies` | One-sided frequency axis, in Hz. |
 | `psd` | Autospectral density $\hat{G}_{xx}(f)$ (units²/Hz for `'density'` scaling, units² for `'spectrum'`). |
-| `ci_lower` | Lower chi-square confidence bound on $G_{xx}$ (Eq. 8.163; the DC bin, and the Nyquist bin for an even segment length, use $n = n_\mathrm{d}$ degrees of freedom - a wider interval - because those bins carry a single real Fourier component). |
-| `ci_upper` | Upper chi-square confidence bound on $G_{xx}$. |
+| `confidence_lower` | Lower chi-square confidence bound on $G_{xx}$ (Eq. 8.163; the DC bin, and the Nyquist bin for an even segment length, use $n = n_\mathrm{d}$ degrees of freedom - a wider interval - because those bins carry a single real Fourier component). |
+| `confidence_upper` | Upper chi-square confidence bound on $G_{xx}$. |
 | `confidence` | Confidence level of the interval (e.g. `0.95`). |
 | `random_error` | Normalized random error $\varepsilon[\hat{G}_{xx}] = 1/\sqrt{n_\mathrm{d}}$ (Eq. 8.158) of the interior bins ($\sqrt{2/n_\mathrm{d}}$ at DC/Nyquist). |
 | `n_segments` | Raw number of (possibly overlapped) segments averaged. |

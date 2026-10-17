@@ -274,7 +274,7 @@ def test_the_directivity_index_of_3_9() -> None:
 
 def test_traverse_maxima_give_the_directivity_index() -> None:
     maxima = np.full((20, _THIRDS.size), 83.0)
-    cal = _calibration(maximum_levels_db=maxima)
+    cal = _calibration(max_levels_db=maxima)
     np.testing.assert_allclose(cal.max_directivity_index_db, 3.0, rtol=0, atol=1e-12)
 
 
@@ -406,7 +406,7 @@ def test_a_calibration_needs_finite_levels(bad: object) -> None:
         _calibration(levels)
 
 
-@pytest.mark.parametrize("name", ["background_levels", "maximum_levels_db"])
+@pytest.mark.parametrize("name", ["background_levels", "max_levels_db"])
 def test_the_background_and_the_maxima_must_be_finite(name: str) -> None:
     extra = np.full((20, _THIRDS.size), 60.0)
     extra[4, 3] = np.nan
@@ -896,14 +896,14 @@ def test_iso_3743_1_energy_reads_the_calibration() -> None:
     rss = np.full((6, 3), 72.0)
     background = np.full(3, 40.0)
     from_object = emission.sound_energy_hard_walled(
-        events, rss, cal, freqs, events=5, background_levels=background,
+        events, rss, cal, freqs, n_events=5, background_levels=background,
         integration_time=10.0, temperature_c=20.0, static_pressure_kpa=90.0,
     )  # fmt: skip
     at_test = cal.sound_power_level_at(
         freqs, bandwidth="octave", temperature_c=20.0, static_pressure_kpa=90.0
     )
     from_levels = emission.sound_energy_hard_walled(
-        events, rss, at_test, freqs, events=5, background_levels=background,
+        events, rss, at_test, freqs, n_events=5, background_levels=background,
         integration_time=10.0, temperature_c=20.0, static_pressure_kpa=90.0,
     )  # fmt: skip
     np.testing.assert_allclose(

@@ -672,16 +672,16 @@ def _steady_reference(
 
 def _burst_percent(
     fs: float,
-    cycles: int,
-    repetitions: int,
+    n_cycles: int,
+    n_repetitions: int,
     rate: float | None,
     ballistics: QuasiPeakBallistics = BS468_BALLISTICS,
 ) -> float:
     """Read one clause 2.1 or 2.2 stimulus, as a percentage of the steady reading.
 
     :param fs: Sample rate, in Hz.
-    :param cycles: Full 5 kHz periods in each burst.
-    :param repetitions: Number of bursts.
+    :param n_cycles: Full 5 kHz periods in each burst.
+    :param n_repetitions: Number of bursts.
     :param rate: Bursts per second, or ``None`` for a single burst.
     :param ballistics: The three time constants of the chain.
     :return: The reading, in percent of the steady 5 kHz reading.
@@ -691,8 +691,8 @@ def _burst_percent(
     burst = tone_burst(
         fs,
         _BURST_HZ,
-        cycles,
-        repetitions=repetitions,
+        n_cycles,
+        n_repetitions=n_repetitions,
         repetition_rate=rate,
         post_silence=_BURST_TAIL_SECONDS,
     )
@@ -866,8 +866,8 @@ def verify_quasi_peak_dynamics(
     """
     fs = require_positive(fs, "fs")
     readings = [
-        _burst_percent(fs, cycles, 1, None, ballistics)
-        for _, cycles, _, _, _ in _TABLE_2
+        _burst_percent(fs, n_cycles, 1, None, ballistics)
+        for _, n_cycles, _, _, _ in _TABLE_2
     ]
     readings += [
         _burst_percent(

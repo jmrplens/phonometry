@@ -461,11 +461,11 @@ ecualizarse.
 | `fs` | int | Hz | > 0 | Frecuencia de muestreo |
 | `f1` | float | Hz | > 0, en/por debajo de la banda más baja | Frecuencia inicial del barrido |
 | `f2` | float | Hz | `f1 < f2 <= fs/2` | Frecuencia final del barrido |
-| `seconds` | float | s | 2–4 × la T más larga esperada | Duración del barrido; ver «Dimensionar la excitación» más arriba |
+| `duration_s` | float | s | 2–4 × la T más larga esperada | Duración del barrido; ver «Dimensionar la excitación» más arriba |
 | `amplitude` | float | — | por defecto `1.0` | Amplitud de pico |
 | `fade` | float | — | `[0, 0.5)`, por defecto `0.01` | Fracción de fundido (medio Hann; elimina transitorios de inicio/fin) |
 
-`inverse_filter(fs, f1, f2, seconds, amplitude=..., fade=...)` toma exactamente
+`inverse_filter(fs, f1, f2, duration_s, amplitude=..., fade=...)` toma exactamente
 los mismos argumentos que `sweep_signal`, porque el filtro se deriva del barrido
 que tiene que invertir: es el barrido invertido en el tiempo con una envolvente de
 +6 dB/octava, que blanquea el espectro de −3 dB/octava del ESS de modo que

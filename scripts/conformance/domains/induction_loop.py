@@ -629,10 +629,10 @@ _register_figure_h1()
 )
 def _chk_loop_current_rectangle() -> Outcome:
     height = ref.IEC62489_1_FIELD_HEIGHT_M
-    current = ea.loop_current(6.0, 2.0, turns=3)
+    current = ea.loop_current(6.0, 2.0, n_turns=3)
     field = float(
         ea.rectangular_loop_field(
-            current, 6.0, 2.0, 0.0, 0.0, height, turns=3
+            current, 6.0, 2.0, 0.0, 0.0, height, n_turns=3
         ).h_z_a_per_m
     )
     return numeric(
@@ -704,7 +704,7 @@ def _register_table_b1() -> None:
     for (
         name,
         dims,
-        turns,
+        n_turns,
         printed_perimeter,
         area,
         resistance,
@@ -715,13 +715,13 @@ def _register_table_b1() -> None:
 
         def check_r(
             dims: tuple[float, ...] = dims,
-            turns: int = turns,
+            n_turns: int = n_turns,
             area: float = area,
             resistance: float = resistance,
             printed_perimeter: float = printed_perimeter,
         ) -> Outcome:
             perimeter = _perimeter(dims)
-            computed = ea.loop_resistance(perimeter, area, turns=turns)
+            computed = ea.loop_resistance(perimeter, area, n_turns=n_turns)
             label = f"{resistance:.2f} ohm"
             if abs(perimeter - printed_perimeter) > 0.051:  # noqa: PLR2004 - rounding of the column
                 label += f" (with the {perimeter:.1f} m its sides give, see ERRATA)"
@@ -739,12 +739,12 @@ def _register_table_b1() -> None:
 
             def check_l(
                 dims: tuple[float, ...] = dims,
-                turns: int = turns,
+                n_turns: int = n_turns,
                 area: float = area,
                 inductance: float = inductance,
             ) -> Outcome:
                 computed = 1e6 * ea.rectangular_loop_inductance(
-                    dims[0], dims[1], area, turns=turns, internal_inductance=False
+                    dims[0], dims[1], area, n_turns=n_turns, internal_inductance=False
                 )
                 return numeric(inductance, computed, 0.5, unit="µH", places=2)
 
@@ -823,7 +823,7 @@ def _chk_maximum_output_current() -> Outcome:
     resistance, rated = 0.47, 1.0
     voltage = [1.0, 2.0, 3.0, 3.5]
     thd = [0.2, 0.4, 0.8, 1.6]
-    result = ea.maximum_output_current(
+    result = ea.max_output_current(
         voltage, thd, load_resistance_ohm=resistance, rated_thd_percent=rated
     )
     # 1 % lies a quarter of the way from 0,8 % at 3 V to 1,6 % at 3,5 V.

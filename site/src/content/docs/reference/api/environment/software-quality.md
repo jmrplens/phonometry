@@ -572,11 +572,17 @@ $|dL_n|_{\max}$, the largest absolute deviation at each receiver, in dB.
 
 $\bar L_n$, the arithmetic mean at each receiver, in dB.
 
-### RoundRobinPrecision.participants
+### RoundRobinPrecision.n_participants
 
 *property*
 
 `M`, the number of participants.
+
+### RoundRobinPrecision.n_receivers
+
+*property*
+
+`N`, the number of receiver positions.
 
 ### RoundRobinPrecision.plot()
 
@@ -620,12 +626,6 @@ with the different software applied" (A.3, Example 1).
 *property*
 
 $R(q_{0,9})$ for `N` receivers ([`ranking_positions`](/phonometry/reference/api/environment/software-quality/#ranking_positions-1)).
-
-### RoundRobinPrecision.receivers
-
-*property*
-
-`N`, the number of receiver positions.
 
 ## SAMPLE_CLEARANCE_M
 

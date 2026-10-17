@@ -95,8 +95,8 @@ class AudioFileInfo(RichDisplay):
     container: str
     format_name: str
     fs: int
-    channels: int
-    frames: int
+    n_channels: int
+    n_samples: int
     duration: float
     bit_depth: int | None
     _: KW_ONLY
@@ -152,8 +152,8 @@ def wav_info(path: str | Path, chunks: WavChunks | None = None) -> AudioFileInfo
         container=parsed.container,
         format_name=fmt.format_name,
         fs=fmt.fs,
-        channels=fmt.channels,
-        frames=frames,
+        n_channels=fmt.channels,
+        n_samples=frames,
         duration=frames / float(fmt.fs) if fmt.fs else 0.0,
         bit_depth=(fmt.valid_bits or fmt.bits_per_sample) if lossless else None,
         lossy=fmt.lossy,

@@ -681,7 +681,10 @@ def _chk_reader_ds64_resolution() -> Outcome:
             path = Path(tmp) / f"{fourcc.decode('latin-1').lower()}.wav"
             path.write_bytes(_sixty_four_bit_file(fourcc))
             described = info(path)
-            results[fourcc.decode("latin-1")] = (described.container, described.frames)
+            results[fourcc.decode("latin-1")] = (
+                described.container,
+                described.n_samples,
+            )
     passed = results == {"RF64": ("RF64", 48), "BW64": ("BW64", 48)}
     return Outcome(
         expected="RF64: 48 frames, BW64: 48 frames (via ds64 dataSize = 96 B)",

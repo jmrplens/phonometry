@@ -214,10 +214,10 @@ amplitude at the reference distance, spread with the exponent of Figure
 FLOOR_DAMPING_RATIO_RANGE = (0.02, 0.05)
 ```
 
-## floor_transfer_maximum
+## floor_transfer_max
 
 ```python
-floor_transfer_maximum(floor_damping_ratio: float) -> float
+floor_transfer_max(floor_damping_ratio: float) -> float
 ```
 
 The most a floor amplifies at its resonance, Clause 4.3.
@@ -250,10 +250,10 @@ foundation on loose ground raise the damping.
 FOUNDATION_TRANSFER_ABOVE_RESONANCE = 0.5
 ```
 
-## foundation_transfer_maximum
+## foundation_transfer_max
 
 ```python
-foundation_transfer_maximum(system_damping_ratio: float = 0.25) -> float
+foundation_transfer_max(system_damping_ratio: float = 0.25) -> float
 ```
 
 The most a foundation passes at the building's resonance, Clause 4.3.
@@ -538,7 +538,7 @@ than it Formula (2) does not hold.
 ## soil_building_frequency_guide
 
 ```python
-soil_building_frequency_guide(stories: int) -> tuple[float, float]
+soil_building_frequency_guide(n_stories: int) -> tuple[float, float]
 ```
 
 The natural frequency Clause 4.3 gives a building on medium ground.
@@ -552,7 +552,7 @@ building gets the union, 8 Hz to 15 Hz.
 
 | Name | Description |
 | :--- | :--- |
-| `stories` | The number of storeys, at least one. |
+| `n_stories` | The number of storeys, at least one. |
 
 **Returns:** `(low, high)` in hertz; the low bound is 0 above six storeys and both are 15 for a single storey.
 

@@ -113,7 +113,7 @@ def test_square_duct_high_frequency_limits() -> None:
         f,
         side_m=5.0e-2,
         fluid=_AIR,
-        sum_terms=120,
+        n_sum_terms=120,
     )
     assert rho[0].real == pytest.approx(_RHO0, rel=1e-2)
     assert kap[0].real == pytest.approx(_GAMMA * _P0, rel=1e-2)

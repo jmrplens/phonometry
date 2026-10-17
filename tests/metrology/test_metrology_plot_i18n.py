@@ -62,7 +62,7 @@ def test_monte_carlo_es() -> None:
     mc = u.monte_carlo(
         _add4,
         [u.Quantity(0.0, 1.0, "rectangular") for _ in range(4)],
-        trials=20_000,
+        n_trials=20_000,
         seed=3,
         keep_samples=True,
     )

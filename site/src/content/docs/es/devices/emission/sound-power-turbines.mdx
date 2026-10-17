@@ -144,7 +144,7 @@ los dos extremos, 2 y 4 en los dos costados y 3 en la parte superior, estas
 tres en el plano que separa la turbina de la máquina accionada. En la
 figura 2 a ese plano está tras la caja de la turbina; en la figura 2 b, entre la
 turbina de baja y el generador, así que la biblioteca toma el número de cajas
-del lado de la turbina (`turbine_boxes`) y pone 2, 3 y 4 en la esquina exterior
+del lado de la turbina (`n_turbine_boxes`) y pone 2, 3 y 4 en la esquina exterior
 del más ancho (y más alto) de los dos paralelepípedos que se encuentran allí,
 como hacen los dos dibujos.
 
@@ -173,7 +173,7 @@ de 1,0 dB (sección 6), y `include_overhead=False` las deja fuera.
 
 ```python
 array = emission.turbine_microphone_positions(
-    surface, microphone_height_m=1.5, spacing_m=4.0, turbine_boxes=2)
+    surface, microphone_height_m=1.5, spacing_m=4.0, n_turbine_boxes=2)
 print(array.n_positions, int(array.overhead_mask.sum()))      # 23 7
 print(array.positions_m[array.key_mask])
 # [[ 0.   0.   1.5]     posición clave 1

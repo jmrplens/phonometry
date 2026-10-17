@@ -280,9 +280,9 @@ from phonometry import noise_control
 import numpy as np
 
 IN = 0.0254
-slow = noise_control.silencer_self_noise(None, airway_velocity=10.0, passages=5,
+slow = noise_control.silencer_self_noise(None, airway_velocity=10.0, n_passages=5,
                                          height_m=24 * IN)
-fast = noise_control.silencer_self_noise(None, airway_velocity=20.0, passages=5,
+fast = noise_control.silencer_self_noise(None, airway_velocity=20.0, n_passages=5,
                                          height_m=24 * IN)
 print(np.round(slow.values, 1))
 # [40.8 40.8 38.8 36.8 31.8 26.8 21.8 16.8]

@@ -143,7 +143,7 @@ __all__ = [
     "check_source_positions",
     "estimated_cabin_noise_insulation",
     "internal_noise_level",
-    "minimum_cabin_clearance_m",
+    "min_cabin_clearance_m",
     "uncertainty_conditions",
     "weighted_cabin_insulation",
 ]
@@ -444,12 +444,12 @@ class SourcePositionCheck(RichDisplay):
     and the verdict, are read from those two the way 7.2.1 reads them, so a
     check cannot be built against another rule.
 
-    :ivar positions_used: :math:`N`, the number of source positions measured.
+    :ivar n_positions_used: :math:`N`, the number of source positions measured.
     :ivar max_octave_spread_db: The largest difference in :math:`D'_p` between
         any two positions, over the octave bands, in decibels.
     """
 
-    positions_used: int
+    n_positions_used: int
     max_octave_spread_db: float
 
     def __post_init__(self) -> None:
@@ -459,10 +459,10 @@ class SourcePositionCheck(RichDisplay):
             :data:`MIN_SOURCE_POSITIONS_IN_SITU` positions or a spread that is
             negative or not finite.
         """
-        require_scalar(self.positions_used, "positions_used")
-        if int(self.positions_used) < MIN_SOURCE_POSITIONS_IN_SITU:
+        require_scalar(self.n_positions_used, "n_positions_used")
+        if int(self.n_positions_used) < MIN_SOURCE_POSITIONS_IN_SITU:
             msg = (
-                "SourcePositionCheck: 'positions_used' must be at least "
+                "SourcePositionCheck: 'n_positions_used' must be at least "
                 f"{MIN_SOURCE_POSITIONS_IN_SITU}, where 7.2.1 starts."
             )
             raise ValueError(msg)
@@ -478,7 +478,7 @@ class SourcePositionCheck(RichDisplay):
         return float(settled(self.max_octave_spread_db))
 
     @property
-    def required_positions(self) -> int:
+    def n_required_positions(self) -> int:
         """The fewest positions the spread calls for, 7.2.1.
 
         :return: The spread in decibels rounded up, never below
@@ -492,11 +492,11 @@ class SourcePositionCheck(RichDisplay):
 
     @property
     def satisfied(self) -> bool:
-        """Whether :attr:`positions_used` reaches :attr:`required_positions`."""
-        return int(self.positions_used) >= self.required_positions
+        """Whether :attr:`n_positions_used` reaches :attr:`n_required_positions`."""
+        return int(self.n_positions_used) >= self.n_required_positions
 
     @property
-    def exceeds_maximum(self) -> bool:
+    def exceeds_max(self) -> bool:
         """Whether the spread runs past :data:`MAX_SOURCE_POSITIONS_IN_SITU`.
 
         7.2.1 says so shall be stated in the report.
@@ -938,7 +938,7 @@ def check_source_positions(
         )
         raise ValueError(msg)
     spread = float(np.max(np.max(values, axis=0) - np.min(values, axis=0)))
-    return SourcePositionCheck(positions_used=positions, max_octave_spread_db=spread)
+    return SourcePositionCheck(n_positions_used=positions, max_octave_spread_db=spread)
 
 
 def _nominal_third(frequency: float) -> tuple[float, int]:
@@ -1017,7 +1017,7 @@ def check_band_flatness(
     )
 
 
-def minimum_cabin_clearance_m(
+def min_cabin_clearance_m(
     lowest_band_frequency_hz: float,
     *,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,

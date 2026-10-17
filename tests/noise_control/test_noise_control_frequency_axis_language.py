@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from phonometry.noise_control import DuctPathResult
-    from phonometry.noise_control.enclosures import EnclosureResult
+    from phonometry.noise_control.enclosures import EnclosureInsertionLossResult
     from phonometry.noise_control.hvac import HVACSpectrumResult
     from phonometry.noise_control.room_to_room import RoomToRoomResult
     from phonometry.noise_control.silencers import ReactiveSilencerResult
@@ -72,7 +72,7 @@ def _room_to_room() -> RoomToRoomResult:
     )
 
 
-def _enclosure() -> EnclosureResult:
+def _enclosure() -> EnclosureInsertionLossResult:
     return noise_control.enclosure_insertion_loss(
         np.linspace(15.0, 50.0, _BANDS.size), 6.0, 5.0, 0.3, frequencies=_BANDS
     )

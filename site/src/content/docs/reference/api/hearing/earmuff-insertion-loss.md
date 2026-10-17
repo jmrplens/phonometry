@@ -351,6 +351,14 @@ Per band, whether the open level stayed within ±1 dB (5.3).
 
 **Returns:** One boolean per band.
 
+### EarmuffInsertionLossResult.n_repetitions
+
+*property*
+
+The number of fittings measured.
+
+**Returns:** The count of occluded measurements.
+
 ### EarmuffInsertionLossResult.plot()
 
 ```python
@@ -376,14 +384,6 @@ asks of every graph, so given axes take that aspect too.
 | `kwargs` | Forwarded to the insertion loss curve. |
 
 **Returns:** The axes.
-
-### EarmuffInsertionLossResult.repetitions
-
-*property*
-
-The number of fittings measured.
-
-**Returns:** The count of occluded measurements.
 
 ### EarmuffInsertionLossResult.repetitions_sufficient
 

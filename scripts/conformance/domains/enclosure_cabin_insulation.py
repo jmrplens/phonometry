@@ -321,7 +321,7 @@ def _chk_cabin_estimate_identity() -> Outcome:
 def _chk_cabin_clearance() -> Outcome:
     printed = {"100 Hz": 1.715, "80 Hz": 2.0, "63 Hz": 2.0, "50 Hz": 2.0}
     computed = {
-        f"{frequency:g} Hz": ph.noise_control.minimum_cabin_clearance_m(frequency)
+        f"{frequency:g} Hz": ph.noise_control.min_cabin_clearance_m(frequency)
         for frequency in (100.0, 80.0, 63.0, 50.0)
     }
     return record(printed, computed, unit="m")
@@ -361,12 +361,12 @@ def _chk_source_position_criterion() -> Outcome:
     verdict = ph.noise_control.check_source_positions(spread)
     return numeric(
         6.0,
-        float(verdict.required_positions),
+        float(verdict.n_required_positions),
         0.0,
         unit="",
         expected_label="6 positions for a 9,5 dB spread, capped at six",
         computed_label=(
-            f"{verdict.required_positions} positions for "
+            f"{verdict.n_required_positions} positions for "
             f"{verdict.max_octave_spread_db:.1f} dB"
         ),
     )

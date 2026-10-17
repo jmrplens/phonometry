@@ -335,7 +335,7 @@ combi_signal(
     *,
     sine_s: float = 1.0,
     noise_s: float = 4.0,
-    cycles: int = 1,
+    n_cycles: int = 1,
     seed: int | None = None,
 ) -> np.ndarray
 ```
@@ -360,7 +360,7 @@ own zero crossings.
 | `fs` | Sample rate, in hertz. |
 | `sine_s` | Duration of each sine burst, at least 1 s; rounded to a whole number of periods. |
 | `noise_s` | Duration of each stretch of noise, at least 4 s and at least four times `sine_s`. It grows to four times the sine burst when rounding the burst to whole periods has lengthened it, so the ratio of 4:1 is never reduced, and by the few samples it takes to end on a zero crossing. |
-| `cycles` | Number of burst-and-noise cycles. |
+| `n_cycles` | Number of burst-and-noise cycles. |
 | `seed` | Seed for the noise generator. |
 
 **Returns:** The signal, starting with a sine burst.
@@ -443,7 +443,7 @@ FieldStrengthReading(
     weighting: str,
     times: np.ndarray,
     levels: np.ndarray,
-    maximum_level_db: float,
+    max_level_db: float,
     equivalent_db: float,
 )
 ```
@@ -458,7 +458,7 @@ What the true-RMS field strength meter of IEC 60118-4:2014 6.1.3 reads.
 | `weighting` | `"Z"` (flat, 6.1.2) or `"A"` (the noise measurements of clause 7 and 10.4). |
 | `times` | The time of each reading, in seconds. |
 | `levels` | The time-weighted level, 125 ms exponential averaging, in dB re 400 mA/m. |
-| `maximum_level_db` | The maximum indication over the record, the "maximum value of the magnetic field" that 8.2.7 sets to 400 mA/m, in dB re 400 mA/m. |
+| `max_level_db` | The maximum indication over the record, the "maximum value of the magnetic field" that 8.2.7 sets to 400 mA/m, in dB re 400 mA/m. |
 | `equivalent_db` | The level of the mean square over the whole record, in dB re 400 mA/m. |
 
 ### FieldStrengthReading.plot()
@@ -572,7 +572,7 @@ The verdict on one requirement.
 ```python
 loop_test_noise(
     fs: int,
-    seconds: float,
+    duration_s: float,
     *,
     rms: float = 1.0,
     seed: int | None = None,
@@ -604,7 +604,7 @@ allows plus or minus 1 dB for exactly that.
 | Name | Description |
 | :--- | :--- |
 | `fs` | Sample rate, in hertz. |
-| `seconds` | Duration, in seconds. |
+| `duration_s` | Duration, in seconds. |
 | `rms` | RMS value of the signal, in whatever unit it is scaled to. |
 | `seed` | Seed for the noise generator; the same seed reproduces the same record. |
 

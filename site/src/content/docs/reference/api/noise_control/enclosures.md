@@ -53,7 +53,7 @@ the model its author used.
 Turned around, the same equation answers the question a designer actually asks:
 *given the noise reduction I need, what transmission loss must the panels have?*
 That is [`enclosure_required_transmission_loss`](/phonometry/reference/api/noise_control/enclosures/#enclosure_required_transmission_loss), which returns the required
-`R` per band in the same [`EnclosureResult`](/phonometry/reference/api/noise_control/enclosures/#enclosureresult).
+`R` per band in the same [`EnclosureInsertionLossResult`](/phonometry/reference/api/noise_control/enclosures/#enclosureinsertionlossresult).
 
 **The panel transmission loss `R` is supplied by the caller** -- measured, or
 predicted by a panel model -- as a per-band array, a callable of frequency, or
@@ -76,7 +76,7 @@ enclosure_insertion_loss(
     *,
     frequencies: ArrayLike | None = None,
     model: str = 'bies',
-) -> EnclosureResult
+) -> EnclosureInsertionLossResult
 ```
 
 Net insertion loss of a machine enclosure (Bies Eqs. (7.103), (7.111)).
@@ -96,7 +96,7 @@ constant $R_\mathrm{i} = S_\mathrm{i} \alpha_\mathrm{i} / (1 - \alpha_\mathrm{i}
 | `frequencies` | Band centre frequencies, Hz; required when `panel_transmission_loss` is a callable, optional otherwise (used to label the result and the plot). |
 | `model` | Interior build-up model, one of [`ENCLOSURE_MODELS`](/phonometry/reference/api/noise_control/enclosures/#enclosure_models): `"bies"` (default) carries the `0.3` floor of Bies Equation (7.111), `"norton"` the bare $C = 10 \log_{10}(S_\mathrm{E} / R_\mathrm{i})$ of Norton & Karczub Equation (4.115). |
 
-**Returns:** An [`EnclosureResult`](/phonometry/reference/api/noise_control/enclosures/#enclosureresult).
+**Returns:** An [`EnclosureInsertionLossResult`](/phonometry/reference/api/noise_control/enclosures/#enclosureinsertionlossresult).
 
 ## ENCLOSURE_MODELS
 
@@ -117,7 +117,7 @@ enclosure_required_transmission_loss(
     *,
     frequencies: ArrayLike | None = None,
     model: str = 'bies',
-) -> EnclosureResult
+) -> EnclosureInsertionLossResult
 ```
 
 Panel `R` an enclosure needs to deliver a given insertion loss.
@@ -141,12 +141,12 @@ produces in the room and a noise-criterion curve.
 | `frequencies` | Band centre frequencies, Hz; required for a callable `insertion_loss`, optional otherwise. |
 | `model` | Interior build-up model, one of [`ENCLOSURE_MODELS`](/phonometry/reference/api/noise_control/enclosures/#enclosure_models) (see [`enclosure_insertion_loss`](/phonometry/reference/api/noise_control/enclosures/#enclosure_insertion_loss)). |
 
-**Returns:** An [`EnclosureResult`](/phonometry/reference/api/noise_control/enclosures/#enclosureresult) whose `panel_transmission_loss` is the **required** `R` and whose `insertion_loss` is the requested target, so it plots and reports like a forward calculation.
+**Returns:** An [`EnclosureInsertionLossResult`](/phonometry/reference/api/noise_control/enclosures/#enclosureinsertionlossresult) whose `panel_transmission_loss` is the **required** `R` and whose `insertion_loss` is the requested target, so it plots and reports like a forward calculation.
 
-## EnclosureResult
+## EnclosureInsertionLossResult
 
 ```python
-EnclosureResult(
+EnclosureInsertionLossResult(
     frequencies: np.ndarray | None,
     panel_transmission_loss: np.ndarray,
     correction: np.ndarray,
@@ -157,7 +157,7 @@ EnclosureResult(
 )
 ```
 
-Insertion loss of a machine enclosure over frequency (Bies §7.4.2).
+The predicted insertion loss of a machine enclosure (Bies §7.4.2).
 
 **Attributes**
 
@@ -171,10 +171,10 @@ Insertion loss of a machine enclosure over frequency (Bies §7.4.2).
 | `internal_area` | Internal surface area `S_i`, m2. |
 | `room_constant` | Interior room constant `R_i` per band, m2. |
 
-### EnclosureResult.plot()
+### EnclosureInsertionLossResult.plot()
 
 ```python
-EnclosureResult.plot(
+EnclosureInsertionLossResult.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -187,10 +187,10 @@ Plot the panel `R`, correction `C` and net insertion loss.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
-### EnclosureResult.report()
+### EnclosureInsertionLossResult.report()
 
 ```python
-EnclosureResult.report(
+EnclosureInsertionLossResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,

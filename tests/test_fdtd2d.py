@@ -190,9 +190,9 @@ def test_cw_source_rejects_invalid_parameters(
 @pytest.mark.parametrize(
     ("kwargs", "match"),
     [
-        ({"steps": -1}, "steps must be non-negative"),
-        ({"steps": 1, "record_every": 0}, "record_every must be >= 1"),
-        ({"steps": 1, "record_every": 1, "decimate": 0}, "decimate must be >= 1"),
+        ({"n_steps": -1}, "'n_steps' must be non-negative"),
+        ({"n_steps": 1, "record_every": 0}, "record_every must be >= 1"),
+        ({"n_steps": 1, "record_every": 1, "decimate": 0}, "decimate must be >= 1"),
     ],
 )
 def test_run_rejects_invalid_recording_controls(

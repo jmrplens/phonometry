@@ -275,7 +275,7 @@ límite de inmisión** del anexo III son los que se exigen a un emisor concreto.
 | Anexo II, Tabla A | Objetivos en el ambiente exterior por tipo de área acústica: e 60/60/50, a 65/65/55, d 70/70/65, c 73/73/63, b 75/75/65 dB (redacción del RD 1038/2012) | `outdoor_quality_objectives()` |
 | Anexo II, Tabla B | Objetivos en el ambiente interior por uso del edificio y tipo de recinto | `indoor_quality_objectives()` |
 | Anexo II, Tabla C | Objetivo de vibraciones $Law$ | `vibration_quality_objective()` |
-| Anexo III, Tablas A1 y A2 | Valores límite de nuevas infraestructuras viarias, ferroviarias y aeroportuarias, y $L_\mathrm{Amax}$ | `infrastructure_limits()`, `maximum_infrastructure_limit()` |
+| Anexo III, Tablas A1 y A2 | Valores límite de nuevas infraestructuras viarias, ferroviarias y aeroportuarias, y $L_\mathrm{Amax}$ | `infrastructure_limits()`, `max_infrastructure_limit()` |
 | Anexo III, Tabla B1 | Valores límite de infraestructuras portuarias y actividades | `activity_limits()` |
 | Anexo III, Tabla B2 | Ruido transmitido por actividades a locales acústicamente colindantes | `adjacent_premises_limits()` |
 
@@ -294,7 +294,7 @@ environment.outdoor_quality_objectives("a")                       # 65 / 65 / 55
 environment.outdoor_quality_objectives("a", urbanization="new")   # 60 / 60 / 50 dB
 environment.indoor_quality_objectives("residential", "bedrooms")  # 40 / 40 / 30 dB
 environment.infrastructure_limits("a")                            # 60 / 60 / 50 dB
-environment.maximum_infrastructure_limit("a")                         # 85 dB (LAmax)
+environment.max_infrastructure_limit("a")                         # 85 dB (LAmax)
 environment.activity_limits("a")                                  # 55 / 55 / 45 dB
 environment.adjacent_premises_limits("residential", "bedrooms")   # 35 / 35 / 25 dB
 environment.vibration_quality_objective("residential")            # 75 dB

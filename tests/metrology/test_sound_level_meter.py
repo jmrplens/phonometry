@@ -170,7 +170,7 @@ def _class_2_record(**over: Any) -> metrology.SoundLevelMeterPeriodicMeasurement
 
 #: The meter of :func:`_record` as its manual declares the one feature a
 #: record cannot count: three level ranges.
-_METER = metrology.SoundLevelMeterFeatures(level_ranges=3)
+_METER = metrology.SoundLevelMeterFeatures(n_level_ranges=3)
 
 
 def _verify(
@@ -197,7 +197,7 @@ _BASIC = metrology.SoundLevelMeterFeatures(
     s_time_weighting=False,
     time_averaged=False,
     sound_exposure_level=False,
-    level_ranges=1,
+    n_level_ranges=1,
     c_weighted_peak=False,
 )
 
@@ -901,7 +901,7 @@ def test_17_and_19_left_out_and_not_declared_keep_the_test_open() -> None:
     assert result.incomplete == ()
     assert result.undeclared == (
         (
-            "level_ranges",
+            "n_level_ranges",
             "it is not declared how many level ranges the meter has, and Clause 17 "
             "tests a meter with more than one (8.1)",
         ),
@@ -1436,7 +1436,7 @@ def test_17_4_on_every_range_and_17_3_on_every_other_complete_clause_17() -> Non
     )
     two = _verify(
         _record(**_17({"17.3": [0.1], "17.4": [0.1, 0.0]})),
-        features=metrology.SoundLevelMeterFeatures(level_ranges=2),
+        features=metrology.SoundLevelMeterFeatures(n_level_ranges=2),
     )
     assert two.passes
 
@@ -1514,7 +1514,7 @@ def test_the_number_of_level_ranges_stays_open_until_declared() -> None:
     result = metrology.verify_sound_level_meter_periodic(1, _record())
     assert result.undeclared == (
         (
-            "level_ranges",
+            "n_level_ranges",
             "it is not declared how many level ranges the meter has, and 17.4 "
             "tests every one and 17.3 every one besides the reference level range",
         ),
@@ -1524,7 +1524,7 @@ def test_the_number_of_level_ranges_stays_open_until_declared() -> None:
 
 
 def test_more_readings_than_level_ranges_is_refused() -> None:
-    features = metrology.SoundLevelMeterFeatures(level_ranges=2)
+    features = metrology.SoundLevelMeterFeatures(n_level_ranges=2)
     for record in (_record(), _record(**_17({"17.4": [0.1, 0.0, 0.2]}))):
         with pytest.raises(
             ValueError, match="covers 2 level ranges besides the reference one"
@@ -1573,7 +1573,7 @@ def test_the_record_refuses_unreadable_rows_of_clause_17(
 #: What the verdict says when a feature is declared present and its tests are
 #: left out of the basic record: the clauses missing and the gaps found.
 _DECLARED_PRESENT: list[tuple[dict[str, int], tuple[str, ...], list[str]]] = [
-    ({"level_ranges": 2}, ("17",), []),
+    ({"n_level_ranges": 2}, ("17",), []),
     ({"c_weighted_peak": True, "c_weighting": True}, ("14.2", "19"), ["11", "13"]),
     ({"c_weighting": True}, ("14.2",), ["11", "13"]),
     ({"z_weighting": True}, ("14.2",), ["11", "13"]),
@@ -1619,7 +1619,7 @@ def test_a_declared_feature_is_the_reason_the_verdict_gives() -> None:
 @pytest.mark.parametrize(
     ("clause", "present"),
     [
-        ("17", [{"level_ranges": 2}]),
+        ("17", [{"n_level_ranges": 2}]),
         ("19", [{"c_weighted_peak": True, "c_weighting": True}]),
         ("20", [{"time_averaged": True}]),
         ("14.3", [{"s_time_weighting": True}, {"time_averaged": True}]),
@@ -1664,7 +1664,7 @@ def test_not_applicable_says_why() -> None:
         "s_time_weighting",
         "time_averaged",
         "sound_exposure_level",
-        "level_ranges",
+        "n_level_ranges",
     ],
 )
 def test_a_feature_neither_declared_nor_shown_keeps_the_test_open(name: str) -> None:
@@ -1723,12 +1723,12 @@ def test_a_time_averaged_display_settles_the_sound_exposure_level() -> None:
     ("declared", "fields", "match"),
     [
         (
-            {"level_ranges": 1},
+            {"n_level_ranges": 1},
             {
                 "range_linearity_deviations_db": {"17.4": [0.1, 0.0]},
                 "range_linearity_uncertainties_db": {"17.4": [0.2, 0.2]},
             },
-            "'features.level_ranges' is 1, but Clause 17 shows it",
+            "'features.n_level_ranges' is 1, but Clause 17 shows it",
         ),
         (
             {"c_weighted_peak": False},
@@ -1914,14 +1914,14 @@ def test_a_meter_that_indicates_nothing_is_refused(declared: dict[str, bool]) ->
 
 @pytest.mark.parametrize("count", [0, -2, 1.5, True, "3", np.float64(2.0)], ids=repr)
 def test_the_number_of_level_ranges_is_a_whole_number_from_1(count: object) -> None:
-    with pytest.raises(ValueError, match="'level_ranges' must be the number"):
-        metrology.SoundLevelMeterFeatures(level_ranges=count)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="'n_level_ranges' must be the number"):
+        metrology.SoundLevelMeterFeatures(n_level_ranges=count)  # type: ignore[arg-type]
 
 
 def test_the_number_of_level_ranges_is_held_as_an_int() -> None:
-    features = metrology.SoundLevelMeterFeatures(level_ranges=np.int64(3))
-    assert type(features.level_ranges) is int
-    assert features.level_ranges == 3
+    features = metrology.SoundLevelMeterFeatures(n_level_ranges=np.int64(3))
+    assert type(features.n_level_ranges) is int
+    assert features.n_level_ranges == 3
 
 
 def test_the_features_are_frozen_and_hold_plain_booleans() -> None:
@@ -2078,7 +2078,7 @@ def test_over_the_maximum_only_by_the_correction_data_did_not_conform() -> None:
     )
     result = _verify(record, pattern_approval_public=True)
     assert result.unusable == ()
-    assert result.over_maximum_by_correction_data == (("12", "8 kHz"),)
+    assert result.over_max_by_correction_data == (("12", "8 kHz"),)
     assert result.failed == (("12", "8 kHz"),)
     assert not result.passes
     assert result.statement == (
@@ -2094,7 +2094,7 @@ def test_over_the_maximum_only_by_the_correction_data_did_not_conform() -> None:
 def test_without_the_split_the_result_is_unusable() -> None:
     result = _verify(_record(**_OVER_BY_CORRECTIONS))
     assert result.unusable == (("12", "8 kHz"),)
-    assert result.over_maximum_by_correction_data == ()
+    assert result.over_max_by_correction_data == ()
     assert "(IEC 61672-3:2013, 4.3)" in result.statement
 
 
@@ -2112,7 +2112,7 @@ def test_4_4_holds_the_uncertainty_without_the_data_to_the_maximum(
         acoustic_weighting_uncertainties_without_correction_data_db=[0.3, split_db],
     )
     result = _verify(record)
-    assert bool(result.over_maximum_by_correction_data) is four_four
+    assert bool(result.over_max_by_correction_data) is four_four
     assert bool(result.unusable) is not four_four
 
 
@@ -2141,7 +2141,7 @@ def test_4_4_reads_clause_13_by_its_band() -> None:
         electrical_weighting_uncertainties_without_correction_data_db=split,
     )
     result = _verify(record)
-    assert result.over_maximum_by_correction_data == (
+    assert result.over_max_by_correction_data == (
         ("13", "A, 16 kHz"),
         ("13", "C, 16 kHz"),
         ("13", "Z, 16 kHz"),
@@ -2176,7 +2176,7 @@ def test_only_a_failed_result_has_a_reason() -> None:
 def test_a_4_4_result_must_be_over_its_maximum() -> None:
     requirement = _verify(_record()).requirement("acoustic_weighting")
     with pytest.raises(ValueError, match=r"\['8 kHz'\] are not results"):
-        dataclasses.replace(requirement, over_maximum_by_correction_data=("8 kHz",))
+        dataclasses.replace(requirement, over_max_by_correction_data=("8 kHz",))
 
 
 def test_a_heading_keeps_the_capital_of_a_weighting_letter() -> None:
@@ -2446,7 +2446,7 @@ def test_the_verdict_figure_names_the_clauses_it_does_not_hold() -> None:
     result = _verify(
         _class_2_record(),
         2,
-        features=_basic(level_ranges=2, c_weighting=None, c_weighted_peak=None),
+        features=_basic(n_level_ranges=2, c_weighting=None, c_weighted_peak=None),
     )
     ax = result.plot()
     ticks = {t.get_text(): t.get_color() for t in ax.get_xticklabels()}

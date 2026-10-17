@@ -19,7 +19,7 @@ from phonometry.building.measurement.uncertainty import (
     band_uncertainty,
     insulation_coverage_factor,
     insulation_expanded_uncertainty,
-    maximum_repeatability_standard_deviation,
+    max_repeatability_standard_deviation,
     prediction_input_uncertainty,
     reduce_by_independent_measurements,
     satisfies_lower_requirement,
@@ -246,7 +246,7 @@ def test_sigma_r95_only_airborne() -> None:
 # Table 1 — maximum repeatability standard deviation (Clause 5.8).
 # --------------------------------------------------------------------------- #
 def test_table1_maximum_repeatability() -> None:
-    result = maximum_repeatability_standard_deviation()
+    result = max_repeatability_standard_deviation()
     expected = [
         4.0,
         3.5,

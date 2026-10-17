@@ -158,7 +158,7 @@ def test_operating_conditions_cover_annex_b() -> None:
 
 def test_rubbish_chute_is_a_maximum_level_only() -> None:
     chute = building.SERVICE_EQUIPMENT_OPERATING_CONDITIONS["rubbish_chute"]
-    assert chute.maximum_level
+    assert chute.max_level
     assert not chute.equivalent_level
     assert chute.equivalent_cycle is None
     assert dict(chute.parameters) == {
@@ -187,12 +187,12 @@ def test_only_the_temperature_mixers_run_through_the_temperature_range() -> None
     fixed at its loudest position, with neither.
     """
     tap = building.SERVICE_EQUIPMENT_OPERATING_CONDITIONS["water_tap"]
-    assert tap.maximum_cycle is not None
+    assert tap.max_cycle is not None
     assert tap.equivalent_cycle is not None
     for mixer in ("single-lever", "flow and temperature controls", "thermostatic"):
-        assert mixer in tap.maximum_cycle
+        assert mixer in tap.max_cycle
         assert mixer in tap.equivalent_cycle
-    assert "open the hot tap fully, open the cold tap" in tap.maximum_cycle
+    assert "open the hot tap fully, open the cold tap" in tap.max_cycle
     assert "both taps of a hot and cold mixer" in tap.equivalent_cycle
     assert dict(tap.parameters) == {"temperature_mixer_settings": 3.0}
 
@@ -201,10 +201,10 @@ def test_operating_condition_freezes_a_dict_of_parameters() -> None:
     condition = building.OperatingCondition(
         clause="B.9",
         equipment="test",
-        maximum_level=True,
+        max_level=True,
         equivalent_level=True,
         conditions="normal use",
-        maximum_cycle=None,
+        max_cycle=None,
         equivalent_cycle=None,
         nominal_integration_time_s=None,
         parameters={"x_m": 1.0},
@@ -1537,7 +1537,7 @@ def test_varying_background_centres_need_one_per_band() -> None:
 def test_varying_background_check_checks_its_bands() -> None:
     with pytest.raises(ValueError, match="one value per band"):
         building.VaryingBackgroundCheck(
-            background_maximum_level_db=np.array([30.0, 31.0]),
+            background_max_level_db=np.array([30.0, 31.0]),
             equipment_levels_db=np.array([45.0]),
             observation_time_s=600.0,
         )
@@ -1571,7 +1571,7 @@ def test_disturbance_check_needs_one_pair_per_period() -> None:
 def test_disturbance_check_checks_its_periods() -> None:
     with pytest.raises(ValueError, match="one maximum and one equivalent"):
         building.MeasurementDisturbanceCheck(
-            maximum_levels_db=np.array([44.0, 43.0]),
+            max_levels_db=np.array([44.0, 43.0]),
             equivalent_levels_db=np.array([40.0]),
         )
 

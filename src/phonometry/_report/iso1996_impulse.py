@@ -157,7 +157,7 @@ def _metadata_pairs(
             (t("Date of test", language), _esc(metadata.test_date)),
         ]
     period = format_number(
-        float(result.assessment_period_min), language, decimals=1, trim=True
+        float(result.assessment_period_minutes), language, decimals=1, trim=True
     )
     specs.append(
         (

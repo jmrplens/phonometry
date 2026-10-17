@@ -118,7 +118,7 @@ survey = np.array([  # 7.4: six positions, the blender running, dB
 ])
 plan = emission.hard_walled_source_locations(survey, freqs)
 print(np.round(plan.standard_deviation_db, 2))    # [0.93 0.63 0.65 0.8  0.52 0.6  0.42]
-print(plan.required_source_locations)             # 1
+print(plan.n_required_source_locations)             # 1
 ```
 
 **The comparison.** The source runs, then the reference sound source runs
@@ -247,7 +247,7 @@ The function returns a `HardWalledSoundPowerResult`: `sound_power_level`
 `background_correction` and `background_correction_ref` per band,
 `background_requirement_met`, `upper_bound`, `c2`, `sigma_r0` per band (Table 3) and
 `sigma_r0_a`, `sigma_omc_db`, `coverage_factor`, `sound_power_level_a`,
-`microphone_positions` and `source_positions`; the properties `sigma_tot`,
+`n_microphone_positions` and `n_source_positions`; the properties `sigma_tot`,
 `expanded_uncertainty` (and their `_a` forms) and `sound_power_level_ref`
 complete it.
 
@@ -515,7 +515,7 @@ survey2_a = np.array([68.4, 70.1, 68.5, 70.0, 68.1, 69.5])
 plan2 = emission.special_room_source_locations(survey2, freqs, a_weighted_levels=survey2_a)
 print(np.round(plan2.standard_deviation_db, 2))  # [1.02 0.99 3.   0.51 0.35 0.33 0.41]
 print(plan2.spectral_character[2])               # narrow-band
-print(plan2.source_locations, plan2.a_weighted_source_locations)  # [1 1 2 1 1 1 1] 1
+print(plan2.source_locations, plan2.n_a_weighted_source_locations)  # [1 1 2 1 1 1 1] 1
 ```
 
 **The direct and the comparison methods.** Every level is corrected for

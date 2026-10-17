@@ -103,7 +103,7 @@ ax_src.legend()
 
 # Derecha: la Tabla D.4 de ISO 717-2:2020, los niveles medidos frente a sus
 # contribuciones ponderadas A, con la suma energética trazada sobre ellas.
-res = building.a_weighted_maximum_impact_level([65.3, 64.5, 58.0, 55.8])
+res = building.a_weighted_max_impact_level([65.3, 64.5, 58.0, 55.8])
 xr = np.arange(4)
 ax_rate.bar(xr - 0.19, res.levels, width=0.36, label="Li,Fmax (medido)")
 ax_rate.bar(xr + 0.19, res.corrected, width=0.36, label="Li,Fmax + A (Tabla D.3)")
@@ -322,7 +322,7 @@ freqs = [63.0, 125.0, 250.0, 500.0]
 li_fmax = [65.3, 64.5, 58.0, 55.8]           # promediado en energía sobre posiciones
 t = [1.43, 3.70, 3.10, 2.38]                 # tiempo de reverberación del receptor
 
-res = building.standardized_maximum_impact_level(li_fmax, 41.4, t, frequencies=freqs)
+res = building.standardized_max_impact_level(li_fmax, 41.4, t, frequencies=freqs)
 print(res.volume_term)                        # 10 lg(41.4/50) = -0.8 dB
 print(building.fast_reverberation_correction([0.5]))   # exactamente 0 dB con T = T0
 res.plot()   # espectros medido y estandarizado (requiere matplotlib)
@@ -406,10 +406,10 @@ El ejemplo resuelto de la Tabla D.4 se reproduce exactamente, incluido el
 resultado intermedio sin redondear que imprime la norma:
 
 ```python
-# `a_weighted_maximum_impact_level` es el import del bloque de figura de arriba.
+# `a_weighted_max_impact_level` es el import del bloque de figura de arriba.
 
 # ISO 717-2:2020 Tabla D.4: una medición in situ en bandas de octava.
-res = building.a_weighted_maximum_impact_level([65.3, 64.5, 58.0, 55.8])
+res = building.a_weighted_max_impact_level([65.3, 64.5, 58.0, 55.8])
 print(list(res.corrected))   # 39.1, 48.3, 49.3, 52.6 dB
 print(res.unrounded)         # 55.350667... dB
 print(res.rating)            # 55 dB
@@ -456,11 +456,11 @@ bandas de octava de la Tabla A.1 de ISO 16283-2:2020 / Tabla F.1 de ISO
 `building.heavy_impact_source_limits` y `building.check_heavy_impact_source`;
 el nivel máximo estandarizado de presión acústica de impactos de las Fórmulas
 (4), (5) y (6) y la síntesis en octavas de la Fórmula (20), con
-`building.standardized_maximum_impact_level`,
+`building.standardized_max_impact_level`,
 `building.fast_reverberation_correction` y
 `building.heavy_impact_octave_levels`; y la valoración normativa ponderada A
 del Anexo D de ISO 717-2:2020 con las correcciones de la Tabla D.3, con
-`building.a_weighted_maximum_impact_level`.
+`building.a_weighted_max_impact_level`.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">

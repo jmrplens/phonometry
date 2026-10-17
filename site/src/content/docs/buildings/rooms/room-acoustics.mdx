@@ -571,8 +571,8 @@ and one that reaches them with a non-evaluable $T_{30}$ in either, which fall
 back to the first band whose $T_{30}$ could be evaluated. It uses the same
 `ReportMetadata` container and rendering engine as the [ISO 11654 absorption
 fiche](/phonometry/materials/absorbers/absorption-measurement/#iso-11654-report-report);
-the room-specific fields `room_volume`, `source_positions` and
-`receiver_positions` populate the header (ISO 3382 requires the room volume and
+the room-specific fields `room_volume`, `n_source_positions` and
+`n_receiver_positions` populate the header (ISO 3382 requires the room volume and
 the number of source and microphone positions to be reported), alongside
 `test_room` (the room name), `specimen` (the room description and occupancy
 state), `area`, `instrumentation`, `temperature_c`,
@@ -597,7 +597,7 @@ result.report(
         specimen="Small auditorium, fully furnished, unoccupied (1 operator present)",
         test_room="Auditorium A",
         room_volume=2830.0, area=340.0,
-        source_positions=2, receiver_positions=8,
+        n_source_positions=2, n_receiver_positions=8,
         # Clause 9.2 i) requires the accuracy grade to be stated.
         measurement_standard="ISO 3382-2 (engineering grade)",
         temperature_c=21.0, relative_humidity_percent=45.0,

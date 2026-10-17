@@ -273,7 +273,7 @@ def test_n_events_in_one_measurement_reduce_by_10_lg_n() -> None:
         np.repeat(ST[:, None, :], 8, axis=1), RSS, LW_RSS, FREQS
     )
     encompassing = emission.sound_energy_in_situ(
-        ST + 10.0 * np.log10(8.0), RSS, LW_RSS, FREQS, events=8
+        ST + 10.0 * np.log10(8.0), RSS, LW_RSS, FREQS, n_events=8
     )
     np.testing.assert_allclose(
         encompassing.sound_energy_level, one_at_a_time.sound_energy_level, atol=1e-12
@@ -542,7 +542,7 @@ def test_no_background_warns_and_meets_nothing() -> None:
 
 def test_fewer_than_five_events_warns() -> None:
     with pytest.warns(emission.SoundPowerWarning, match="7.6"):
-        emission.sound_energy_in_situ(ST, RSS, LW_RSS, FREQS, events=4)
+        emission.sound_energy_in_situ(ST, RSS, LW_RSS, FREQS, n_events=4)
 
 
 # --------------------------------------------------------------------------
@@ -681,14 +681,14 @@ def test_uncertainty_inputs_are_validated() -> None:
 
 def test_events_argument_is_checked_against_the_form() -> None:
     three_d = np.repeat(ST[:, None, :], 5, axis=1)
-    with pytest.raises(ValueError, match="'events' is counted from the second axis"):
-        emission.sound_energy_in_situ(three_d, RSS, LW_RSS, FREQS, events=5)
-    with pytest.raises(ValueError, match="'events' must be a positive integer"):
+    with pytest.raises(ValueError, match="'n_events' is counted from the second axis"):
+        emission.sound_energy_in_situ(three_d, RSS, LW_RSS, FREQS, n_events=5)
+    with pytest.raises(ValueError, match="'n_events' must be a positive integer"):
         emission.sound_energy_in_situ(ST, RSS, LW_RSS, FREQS)
-    with pytest.raises(ValueError, match="'events' must be a positive integer"):
-        emission.sound_energy_in_situ(ST, RSS, LW_RSS, FREQS, events=0)
+    with pytest.raises(ValueError, match="'n_events' must be a positive integer"):
+        emission.sound_energy_in_situ(ST, RSS, LW_RSS, FREQS, n_events=0)
     with pytest.raises(ValueError, match="'event_levels' must be a non-empty 2D or 3D"):
-        emission.sound_energy_in_situ(ST[0], RSS, LW_RSS, FREQS, events=5)
+        emission.sound_energy_in_situ(ST[0], RSS, LW_RSS, FREQS, n_events=5)
 
 
 def test_integration_time_must_be_positive() -> None:
@@ -863,7 +863,7 @@ def test_one_quiet_position_over_n_events_takes_its_band_off_the_requirement() -
         RSS,
         LW_RSS,
         FREQS,
-        events=5,
+        n_events=5,
         background_levels=background,
         background_levels_ref=RSS - 20.0,
     )

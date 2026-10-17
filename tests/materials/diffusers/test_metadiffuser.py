@@ -164,7 +164,7 @@ def test_pr_metadiffuser_specular_notch() -> None:
     # The PRD-like scattered field presents a notch at the specular
     # direction (Fig. 4(g), evaluated with 6 repetitions at 1 kHz).
     polar = metadiffuser_polar_response(
-        1000.0, PR_WELLS, depth_m=0.035, period_m=0.07, repetitions=6
+        1000.0, PR_WELLS, depth_m=0.035, period_m=0.07, n_repetitions=6
     )
     angles_deg = np.asarray(polar.angles_deg)
     specular = float(polar.levels[np.abs(angles_deg) < 3.0].mean())
@@ -180,7 +180,7 @@ def test_ternary_sequence_suppresses_the_specular_beam() -> None:
         wells,
         depth_m=0.03,
         period_m=0.10,
-        repetitions=6,
+        n_repetitions=6,
         angles_deg=np.arange(-90.0, 91.0, 1.0),
     )
     angles_deg = np.asarray(polar.angles_deg)

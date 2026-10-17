@@ -180,7 +180,12 @@ PACKAGE_WORD_QUANTITIES: dict[str, frozenset[str]] = {
 #: ANP database (``_lb``, ``_hp``), the millisecond of a toneburst, the day of
 #: a construction site and the decibels per 100 m of SAE ARP 866A are here
 #: because the tree writes them, so the pair rule below can tell a name
-#: written with one of them from the same name written bare.
+#: written with one of them from the same name written bare. The minute is
+#: ``_minutes``, spelled out as the hour is, because a trailing ``_min`` is a
+#: minimum (``f_min``, ``kij_min``): a period that ends in ``_min`` names no
+#: unit, and the rule reports it. A minute under ``per`` is the denominator
+#: of a rate and reads as one, as in the feet per minute of the ANP climb
+#: rates (``_ft_per_min``).
 UNITS = (
     "_kpa",
     "_pa",
@@ -189,6 +194,7 @@ UNITS = (
     "_c",
     "_k",
     "_ft",
+    "_ft_per_min",
     "_mm",
     "_um",
     "_m",
@@ -198,7 +204,7 @@ UNITS = (
     "_s",
     "_per_s",
     "_np_per_rad",
-    "_min",
+    "_minutes",
     "_hours",
     "_days",
     "_ms",
@@ -844,9 +850,9 @@ EXEMPT: dict[tuple[str, str, str], str] = {
     (
         "phonometry.signals.phase",
         "PhaseDecompositionResult",
-        "minimum_phase_response",
+        "min_phase_response",
     ): (
-        "the complex minimum-phase response |H| exp(j minimum_phase_rad), "
+        "the complex minimum-phase response |H| exp(j min_phase_rad), "
         "dimensionless, not an angle"
     ),
     # Verdicts held in arrays: a bool per band carries no length or angle.

@@ -260,7 +260,7 @@ def test_three_responses_at_one_level_set_the_threshold() -> None:
     )
     assert result.determined
     assert result.threshold_db == 30.0
-    assert result.responses_at_threshold == 3
+    assert result.n_responses_at_threshold == 3
     np.testing.assert_array_equal(result.ascent_levels_db, [30.0, 30.0, 30.0])
     assert math.isnan(result.next_level_db)
     assert not result.doubtful

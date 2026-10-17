@@ -669,7 +669,7 @@ def test_non_integral_counts_and_coordinates_are_rejected() -> None:
     float_source = GaussianPulse(ix=2.5, iy=3, half_width_s=1e-4)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="source ix must be an integer"):
         sim.add_source(float_source)
-    with pytest.raises(ValueError, match="steps must be an integer"):
+    with pytest.raises(ValueError, match="n_steps must be an integer"):
         sim.run(1.5)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="record_every must be an integer"):
         sim.run(10, record_every=1.5)  # type: ignore[arg-type]

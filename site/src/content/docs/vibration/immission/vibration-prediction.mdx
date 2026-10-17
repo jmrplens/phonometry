@@ -139,8 +139,8 @@ from phonometry import vibration
 
 print(f"{vibration.soil_building_natural_frequency(2.5e9, mass=4.0e5):.1f} Hz")  # 12.6 Hz
 print(vibration.soil_building_frequency_guide(4))  # (8.0, 12.0)
-print(vibration.foundation_transfer_maximum())  # 2.0
-print(f"{vibration.floor_transfer_maximum(0.03):.1f}")  # 16.7
+print(vibration.foundation_transfer_max())  # 2.0
+print(f"{vibration.floor_transfer_max(0.03):.1f}")  # 16.7
 print(vibration.story_fundamental_frequency(8))  # 1.25
 ```
 

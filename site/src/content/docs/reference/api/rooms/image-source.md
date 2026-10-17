@@ -108,7 +108,7 @@ image_source_rir(
     max_order: int = 20,
     speed_of_sound: float = 343.0,
     air_attenuation_per_m: ArrayLike = 0.0,
-    duration: float | None = None,
+    duration_s: float | None = None,
     frequencies: ArrayLike | None = None,
 ) -> ImageSourceResult
 ```
@@ -145,7 +145,7 @@ reproduces the Eyring reverberation time of the room (Kuttruff Equation
 | `max_order` | Reflection-order cut-off (total wall reflections). The shoebox has $(2/3)(2 i_0^3 + 3 i_0^2 + 4 i_0)$ audible images up to order `i0` (Kuttruff Equation (9.23)). Default 20. |
 | `speed_of_sound` | Speed of sound `c`, m/s (default 343 m/s, dry air at 20 °C). |
 | `air_attenuation_per_m` | Air *intensity* attenuation coefficient `m`, in reciprocal metres (the power attenuation coefficient of ISO 354 8.1.2.1, $m = \alpha / (10 \lg \mathrm{e})$), scalar or per-band; the pressure amplitude of each path is scaled by $\mathrm{e}^{-m r / 2}$ (Kuttruff 4.1). Default 0 (air absorption neglected). Obtain a physical `m` from [`air_power_attenuation_per_m`](/phonometry/reference/api/environment/air-absorption/#air_power_attenuation_per_m). |
-| `duration` | RIR length, s; default the latest image arrival rounded up to the next sample. |
+| `duration_s` | RIR length, s; default the latest image arrival rounded up to the next sample. |
 | `frequencies` | Optional band centre frequencies, Hz, labelling a per-band result. When given, its length must match the band count of `absorption` (or broadcast against it). |
 
 **Returns:** An [`ImageSourceResult`](/phonometry/reference/api/rooms/image-source/#imagesourceresult).

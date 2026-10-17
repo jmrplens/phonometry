@@ -266,7 +266,7 @@ from phonometry import materials
 depths = materials.qrd_well_depths(7, 490.0, speed_of_sound=343.0)
 pitch = 3.6 / 42                  # 42 wells across the 3.6 m panel
 fin = 0.005                       # thin fins, included in the pitch
-materials.plot_qrd_geometry(depths, pitch - fin, fin_width=fin, repetitions=2)
+materials.plot_qrd_geometry(depths, pitch - fin, fin_width=fin, n_repetitions=2)
 plt.show()
 
 # A predicted DiffuserPolarResponse retains its geometry, so
@@ -283,10 +283,10 @@ from phonometry import materials
 # Design frequency 490 Hz puts the deepest well at exactly 0.2 m.
 depths = materials.qrd_well_depths(7, 490.0)   # [0, 0.05, 0.2, 0.1, ...] m
 qrd = materials.predict_diffuser_polar_response(
-    3.6 / 42, 1000.0, depths=depths, repetitions=6)
+    3.6 / 42, 1000.0, depths=depths, n_repetitions=6)
 # The flat reference panel: the same 3.6 m footprint with zero-depth wells.
 flat = materials.predict_diffuser_polar_response(
-    3.6 / 42, 1000.0, depths=[0.0] * 7, repetitions=6)
+    3.6 / 42, 1000.0, depths=[0.0] * 7, n_repetitions=6)
 
 qrd.plot()   # predicted polar response, d in the title (needs matplotlib)
 
@@ -499,7 +499,7 @@ print(np.round(depths * 100, 1))               # well depths in cm:
 # Predicted far-field polar response at one frequency (5 repeated repetitions,
 # 10 cm wells), reduced to the ISO 17497-2 directional diffusion coefficient.
 surface = materials.predict_diffuser_polar_response(0.10, 2000.0, depths=depths,
-                                                    repetitions=5)
+                                                    n_repetitions=5)
 print(round(surface.coefficient, 3))           # 0.210
 surface.plot()   # predicted polar response, d in the title (needs matplotlib)
 
@@ -507,11 +507,11 @@ surface.plot()   # predicted polar response, d in the title (needs matplotlib)
 # reference (Formula (7)): the flat panel maps to exactly zero, the QRD well
 # above it.
 freqs = np.array([500, 1000, 2000, 4000], float)
-qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, repetitions=5)
+qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, n_repetitions=5)
 print(np.round(qrd.normalized, 3))             # [0.352 0.275 0.208 0.073]
 
 flat = materials.predicted_diffusion_spectrum(0.10, freqs,
-                                        depths=np.zeros_like(depths), repetitions=5)
+                                        depths=np.zeros_like(depths), n_repetitions=5)
 print(np.round(flat.normalized, 3))            # [0. 0. 0. 0.]
 ```
 
@@ -540,7 +540,7 @@ from phonometry import materials
 freqs = np.array([250, 315, 400, 500, 630, 800, 1000, 1250, 1600,
                   2000, 2500, 3150, 4000, 5000], float)
 depths = materials.qrd_well_depths(7, 500.0)
-qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, repetitions=5)
+qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, n_repetitions=5)
 
 # The DiffusionSpectrum plots the predicted d(f) directly. One line:
 qrd.plot()
@@ -548,7 +548,7 @@ plt.show()
 
 # By hand: predicted d(f) for the QRD against the flat reference.
 flat = materials.predicted_diffusion_spectrum(0.10, freqs,
-                                depths=np.zeros_like(depths), repetitions=5,
+                                depths=np.zeros_like(depths), n_repetitions=5,
                                 normalize=False)
 fig, ax = plt.subplots()
 ax.semilogx(freqs, qrd.diffusion, "o-", color="#1f77b4", label="N = 7 QRD design")

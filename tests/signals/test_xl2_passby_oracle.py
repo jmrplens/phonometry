@@ -92,7 +92,7 @@ def test_calibration_take_carries_the_instrument_bext() -> None:
     assert meta.format_name == "PCM"
     assert meta.bit_depth == 24
     assert meta.fs == 48000
-    assert meta.channels == 1
+    assert meta.n_channels == 1
     bext = meta.bext
     assert bext is not None
     assert bext.originator == "NTi Audio XL2 A2A-17367-E0"

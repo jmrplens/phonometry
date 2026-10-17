@@ -83,7 +83,7 @@ are:
   current is raised until the total harmonic distortion across the resistive
   part of the load reaches the rated value, and the current is the total
   voltage across that resistance over its value
-  (:func:`maximum_output_current`);
+  (:func:`max_output_current`);
 * the compliance voltage, 5.4.8: the maximum positive-going and negative-going
   peak voltages across the rated load, over at least 60 s of the specified
   pink noise, averaged and divided by :math:`\sqrt{2}`
@@ -176,7 +176,7 @@ __all__ = [
     "AmplifierFrequencyResponse",
     "LoopField",
     "LoopImpedance",
-    "MaximumOutputCurrent",
+    "MaxOutputCurrent",
     "NeckLoopCharacteristics",
     "NeckLoopType",
     "NeckLoopVerification",
@@ -191,7 +191,7 @@ __all__ = [
     "loop_dimensions",
     "loop_impedance",
     "loop_resistance",
-    "maximum_output_current",
+    "max_output_current",
     "neck_loop_characteristics",
     "quadrature_phase_error",
     "rectangular_loop_field",
@@ -388,7 +388,7 @@ class LoopField(OwnsArrays):
     :ivar current_a: The RMS current in each turn, in amperes.
     :ivar length_m: Length of the loop along :math:`x`, in metres.
     :ivar width_m: Width along :math:`y`, in metres.
-    :ivar turns: Number of turns.
+    :ivar n_turns: Number of turns.
     :ivar x_m: The points' :math:`x` coordinates, in metres.
     :ivar y_m: The points' :math:`y` coordinates, in metres.
     :ivar z_m: The points' :math:`z` coordinates, in metres.
@@ -400,7 +400,7 @@ class LoopField(OwnsArrays):
     current_a: float
     length_m: float
     width_m: float
-    turns: int
+    n_turns: int
     x_m: np.ndarray
     y_m: np.ndarray
     z_m: np.ndarray
@@ -471,7 +471,7 @@ def rectangular_loop_field(
     y_m: ArrayLike,
     z_m: ArrayLike,
     *,
-    turns: int = 1,
+    n_turns: int = 1,
 ) -> LoopField:
     r"""The magnetic field of a rectangular loop, by Biot and Savart.
 
@@ -492,7 +492,7 @@ def rectangular_loop_field(
     :param y_m: :math:`y` coordinates, broadcast against ``x_m``.
     :param z_m: :math:`z` coordinates (height above the loop plane),
         broadcast against both.
-    :param turns: Number of turns, all carrying the same current.
+    :param n_turns: Number of turns, all carrying the same current.
     :return: A :class:`LoopField`.
     :raises ValueError: for a non-positive dimension, a non-finite coordinate
         or a point on the conductor, where a filament's field is infinite.
@@ -500,7 +500,7 @@ def rectangular_loop_field(
     current = require_finite(current_a, "current_a")
     length = require_positive(length_m, "length_m")
     width = require_positive(width_m, "width_m")
-    n = require_count(turns, "turns")
+    n = require_count(n_turns, "n_turns")
     coordinates = (
         _as_float64(x_m, "x_m"),
         _as_float64(y_m, "y_m"),
@@ -535,7 +535,7 @@ def rectangular_loop_field(
         current_a=current,
         length_m=length,
         width_m=width,
-        turns=n,
+        n_turns=n,
         x_m=xs,
         y_m=ys,
         z_m=zs,
@@ -546,7 +546,7 @@ def rectangular_loop_field(
 
 
 def loop_center_field(
-    current_a: float, length_m: float, *, width_m: float | None = None, turns: int = 1
+    current_a: float, length_m: float, *, width_m: float | None = None, n_turns: int = 1
 ) -> float:
     r"""The field at the centre of a loop, in its plane (IEC 60118-4:2014 E.1).
 
@@ -568,14 +568,14 @@ def loop_center_field(
         metres.
     :param width_m: The other side of a rectangle, in metres; ``None`` for a
         square.
-    :param turns: Number of turns.
+    :param n_turns: Number of turns.
     :return: The field strength at the centre, in A/m.
     """
     current = require_finite(current_a, "current_a")
     side = require_positive(length_m, "length_m")
     if width_m is not None:
         side = math.sqrt(side * require_positive(width_m, "width_m"))
-    n = require_count(turns, "turns")
+    n = require_count(n_turns, "n_turns")
     return 2.0 * math.sqrt(2.0) * n * current / (math.pi * side)
 
 
@@ -585,7 +585,7 @@ def loop_current(
     *,
     height_m: float = _MEASUREMENT_HEIGHT_M,
     field_strength_a_per_m: float = _REFERENCE_FIELD_STRENGTH_A_PER_M,
-    turns: int = 1,
+    n_turns: int = 1,
 ) -> float:
     """The current a loop needs for a field strength above its centre.
 
@@ -601,14 +601,14 @@ def loop_current(
     :param width_m: Width of the loop, in metres.
     :param height_m: Height above the centre of the loop plane, in metres.
     :param field_strength_a_per_m: The field strength to reach, in A/m.
-    :param turns: Number of turns.
+    :param n_turns: Number of turns.
     :return: The RMS current in each turn, in amperes.
     """
     length = require_positive(length_m, "length_m")
     width = require_positive(width_m, "width_m")
     height = require_finite(height_m, "height_m")
     target = require_positive(field_strength_a_per_m, "field_strength_a_per_m")
-    n = require_count(turns, "turns")
+    n = require_count(n_turns, "n_turns")
     return target / (n * _axis_field_per_ampere(length, width, height))
 
 
@@ -618,7 +618,7 @@ def loop_dimensions(
     aspect_ratio: float = 1.0,
     height_m: float = _MEASUREMENT_HEIGHT_M,
     field_strength_a_per_m: float = _REFERENCE_FIELD_STRENGTH_A_PER_M,
-    turns: int = 1,
+    n_turns: int = 1,
 ) -> tuple[float, float]:
     """The largest loop an amplifier's current drives to a field strength (5.4.11).
 
@@ -638,7 +638,7 @@ def loop_dimensions(
         (1,4 m, 5.4.10.2).
     :param field_strength_a_per_m: The field strength to reach, in A/m
         (400 mA/m).
-    :param turns: Number of turns.
+    :param n_turns: Number of turns.
     :return: ``(short_side_m, long_side_m)``, in metres.
     :raises ValueError: when the current cannot reach the field strength at
         that height with a loop of any size.
@@ -650,7 +650,7 @@ def loop_dimensions(
         raise ValueError(msg)
     height = require_positive(height_m, "height_m")
     target = require_positive(field_strength_a_per_m, "field_strength_a_per_m")
-    n = require_count(turns, "turns")
+    n = require_count(n_turns, "n_turns")
 
     def field(short: float) -> float:
         return n * current * _axis_field_per_ampere(ratio * short, short, height)
@@ -691,7 +691,7 @@ def loop_resistance(
     perimeter_m: float,
     conductor_area_mm2: float,
     *,
-    turns: int = 1,
+    n_turns: int = 1,
     conductor_temperature_c: float = _COPPER_REFERENCE_TEMPERATURE_C,
 ) -> float:
     r"""The resistance of a copper loop (IEC 62489-1:2010 B.2).
@@ -707,14 +707,14 @@ def loop_resistance(
     :param perimeter_m: Length of one turn, in metres.
     :param conductor_area_mm2: Cross-sectional area of the conductor, in
         square millimetres.
-    :param turns: Number of turns.
+    :param n_turns: Number of turns.
     :param conductor_temperature_c: Temperature of the conductor, in degrees
         Celsius.
     :return: The DC resistance of the loop, in ohms.
     """
     perimeter = require_positive(perimeter_m, "perimeter_m")
     area = require_positive(conductor_area_mm2, "conductor_area_mm2")
-    n = require_count(turns, "turns")
+    n = require_count(n_turns, "n_turns")
     temperature = require_finite(conductor_temperature_c, "conductor_temperature_c")
     resistivity = _COPPER_RESISTIVITY_OHM_M * (
         1.0
@@ -732,7 +732,7 @@ def rectangular_loop_inductance(
     width_m: float,
     conductor_area_mm2: float,
     *,
-    turns: int = 1,
+    n_turns: int = 1,
     internal_inductance: bool = True,
 ) -> float:
     r"""The inductance of a rectangular loop of round wire (Grover, Formula (58)).
@@ -762,7 +762,7 @@ def rectangular_loop_inductance(
     :param width_m: The other side, in metres.
     :param conductor_area_mm2: Cross-sectional area of the round conductor,
         in square millimetres; the radius is :math:`\sqrt{a/\pi}`.
-    :param turns: Number of turns.
+    :param n_turns: Number of turns.
     :param internal_inductance: Include the flux inside the wire (the
         :math:`\mu/4` term).
     :return: The inductance, in henries.
@@ -772,7 +772,7 @@ def rectangular_loop_inductance(
     a = require_positive(length_m, "length_m")
     b = require_positive(width_m, "width_m")
     area = require_positive(conductor_area_mm2, "conductor_area_mm2")
-    n = require_count(turns, "turns")
+    n = require_count(n_turns, "n_turns")
     radius = math.sqrt(area * 1.0e-6 / math.pi)
     if radius * 10.0 > min(a, b):
         msg = (
@@ -911,7 +911,7 @@ def loop_impedance(
 
 
 @dataclass(frozen=True)
-class MaximumOutputCurrent(OwnsArrays):
+class MaxOutputCurrent(OwnsArrays):
     """The maximum (distortion-limited) output current of an amplifier (5.4.7).
 
     :ivar resistor_voltage_v: The total RMS voltage across the resistive part
@@ -956,13 +956,13 @@ class MaximumOutputCurrent(OwnsArrays):
         return plot_maximum_output_current(self, ax, language=language, **kwargs)
 
 
-def maximum_output_current(
+def max_output_current(
     resistor_voltage_v: ArrayLike,
     thd_percent: ArrayLike,
     *,
     load_resistance_ohm: float,
     rated_thd_percent: float,
-) -> MaximumOutputCurrent:
+) -> MaxOutputCurrent:
     """The maximum (distortion-limited) output current of an amplifier (5.4.7).
 
     IEC 62489-1:2010 5.4.7.1 defines it as "The maximum current, produced by a
@@ -988,7 +988,7 @@ def maximum_output_current(
         rated load, in ohms.
     :param rated_thd_percent: The rated total harmonic distortion (5.4.6), in
         percent.
-    :return: A :class:`MaximumOutputCurrent`.
+    :return: A :class:`MaxOutputCurrent`.
     :raises ValueError: for a negative distortion, which no measurement gives,
         or when the distortion never reaches the rated value, or already
         exceeds it at the first step, so the current lies outside the steps
@@ -1028,7 +1028,7 @@ def maximum_output_current(
     else:
         t = (rated - float(thd[k - 1])) / (float(thd[k]) - float(thd[k - 1]))
         maximum = float(current[k - 1] + t * (current[k] - current[k - 1]))
-    return MaximumOutputCurrent(
+    return MaxOutputCurrent(
         resistor_voltage_v=voltage,
         load_current_a=read_only(current),
         thd_percent=thd,

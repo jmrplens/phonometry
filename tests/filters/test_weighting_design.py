@@ -838,7 +838,7 @@ def test_too_few_sections_is_refused() -> None:
     """
     zeros, poles, _ = _analog_weighting_zpk("AU")
     band = _fit_band("AU", 48000)
-    with pytest.raises(ValueError, match=r"'sections' is too small"):
+    with pytest.raises(ValueError, match=r"'n_sections' is too small"):
         fit_prototype(zeros, poles, 48000.0, band, 2, 1000.0)
 
 

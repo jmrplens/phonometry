@@ -191,7 +191,7 @@ _CHOSEN_LIMITS = {
     "phonometry.vibration.structural._impact_mobility.CoherenceCheck.min_coherence": (
         "ISO 7626-5 prints no figure for a high coherence; the default is the user's"
     ),
-    "phonometry.vibration.structural._impact_mobility.CoherenceCheck.min_records": (
+    "phonometry.vibration.structural._impact_mobility.CoherenceCheck.min_n_records": (
         "ISO 7626-5 asks five to ten impacts; where in that range is the user's"
     ),
     "phonometry.vibration.structural._impact_mobility.DoubleHitCheck.threshold_ratio": (
@@ -206,9 +206,9 @@ _CHOSEN_LIMITS = {
 #: a verdict flag, the words of a requirement.
 _NOT_LIMITS = {
     "phonometry.building.measurement.service_equipment.MeasurementDisturbanceCheck."
-    "maximum_levels_db": "the measured maximum levels",
+    "max_levels_db": "the measured maximum levels",
     "phonometry.building.measurement.service_equipment.VaryingBackgroundCheck."
-    "background_maximum_level_db": "the measured maximum of the background",
+    "background_max_level_db": "the measured maximum of the background",
     "phonometry.emission.free_field_qualification.SourceDirectionalityResult."
     "max_negative_deviation_db": "the measured largest deviation",
     "phonometry.emission.free_field_qualification.SourceDirectionalityResult."
@@ -219,9 +219,9 @@ _NOT_LIMITS = {
         "the requirement in words, not a value"
     ),
     "phonometry.environment.sources._statistical_pass_by.PassByRegression."
-    "maximum_levels_db": "the measured maximum level of each pass-by",
+    "max_levels_db": "the measured maximum level of each pass-by",
     "phonometry.metrology.sound_level_meter.SoundLevelMeterPeriodicRequirement."
-    "over_maximum_by_correction_data": "the names of the results it concerns",
+    "over_max_by_correction_data": "the names of the results it concerns",
     "phonometry.noise_control._cabin_insulation.SourcePositionCheck."
     "max_octave_spread_db": "the measured spread",
     "phonometry.vibration.immission.people.RailwayAssessment.lower": (
@@ -317,9 +317,9 @@ _DERIVED_LIMITS = {
         "satisfied",
     ),
     "phonometry.noise_control._cabin_insulation.SourcePositionCheck": (
-        "required_positions",
+        "n_required_positions",
         "satisfied",
-        "exceeds_maximum",
+        "exceeds_max",
     ),
     "phonometry.noise_control.enclosure_insulation.TestEnvironmentApplicability": (
         "environmental_correction_limit_db",
@@ -597,11 +597,11 @@ _STATED_FLAGS = {
     "phonometry.building.measurement.joint_insulation.JointTestElementCheck."
     "window_or_door_gap": _CALLER,
     "phonometry.building.measurement.joint_insulation.LaboratoryJointInsulationResult."
-    "limit_at_maximum": _CALLER,
+    "limit_at_max": _CALLER,
     "phonometry.building.measurement.service_equipment.OperatingCondition."
     "equivalent_level": _ROW,
     "phonometry.building.measurement.service_equipment.OperatingCondition."
-    "maximum_level": _ROW,
+    "max_level": _ROW,
     "phonometry.building.measurement.service_equipment."
     "ServiceEquipmentPositionCheck.small_room": _CALLER,
     "phonometry.building.measurement.uncertainty.BandUncertainty.upper_limit": _CALLER,
@@ -668,7 +668,7 @@ _STATED_FLAGS = {
     "phonometry.metrology.reciprocity_coupler.CouplerCheck.in_air": _CALLER,
     "phonometry.metrology.sound_calibrator.CalibratorTableRow.includes_lower": _ROW,
     "phonometry.metrology.sound_calibrator.CalibratorTableRow.includes_upper": _ROW,
-    "phonometry.metrology.sound_level_meter.MaximumUncertaintyRow.includes_lower": _ROW,
+    "phonometry.metrology.sound_level_meter.MaxUncertaintyRow.includes_lower": _ROW,
     "phonometry.metrology.sound_level_meter.SoundLevelMeterFeatures."
     "c_weighted_peak": _CALLER,
     "phonometry.metrology.sound_level_meter.SoundLevelMeterFeatures."
@@ -1150,7 +1150,7 @@ _DERIVED_FLAGS = {
     "phonometry.environment.assessment.wind_turbine_modulation.ModulationPeriod": (
         "modulation_depths_db",
         "fundamental_frequencies_hz",
-        "valid_blocks",
+        "n_valid_blocks",
         "rated",
         "rating_db",
         "mean_modulation_frequency_hz",

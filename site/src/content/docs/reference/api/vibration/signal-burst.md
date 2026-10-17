@@ -104,7 +104,7 @@ BURST_TOLERANCE_PERCENT = {'rms': 10.0, 'vdv': 12.0, 'mtvv_linear': 10.0, 'mtvv_
 ```python
 sawtooth_burst(
     application: str,
-    cycles: int | None,
+    n_cycles: int | None,
     *,
     fs: float | None = None,
     amplitude_m_s2: float = 1.0,
@@ -116,12 +116,12 @@ The saw-tooth burst record of ISO 8041-1 Table 6 (folio 17).
 The full measurement record: zero everywhere except during the bursts,
 which start at `start_time_s` and repeat every `repeat_time_s` until
 the printed duration runs out (six bursts, in all three applications).
-Each burst is `cycles` whole saw-tooth periods, rising linearly from an
+Each burst is `n_cycles` whole saw-tooth periods, rising linearly from an
 upward zero crossing to `+amplitude_m_s2`, falling vertically to
 `-amplitude_m_s2` and ending back at zero, which is the waveform of
 Figure 3.
 
-`cycles=None` returns the continuous row of Tables 7 to 9 instead: an
+`n_cycles=None` returns the continuous row of Tables 7 to 9 instead: an
 unbroken saw-tooth from `t = 0` to the end of the printed duration. The
 start time does not apply to it, and the reason is measured rather than
 printed: read from zero, the band-limiting continuous cell of Table 7
@@ -138,7 +138,7 @@ the laboratory rig, not this record.
 | Name | Description |
 | :--- | :--- |
 | `application` | One of the keys of [`SAWTOOTH_BURST_TESTS`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst_tests). |
-| `cycles` | Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or `None` for the continuous row. |
+| `n_cycles` | Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or `None` for the continuous row. |
 | `fs` | Sampling frequency, in hertz. Finite, positive, and above twice the upper band-limiting corner of the weighting under test, below which the pass band is not represented and the indications would be an artefact of the sampling. `None` takes the recommended rate of the application. |
 | `amplitude_m_s2` | Zero-to-peak amplitude, in m/s2. The printed responses are for 1 m/s2 and scale with it. |
 
@@ -149,7 +149,7 @@ the laboratory rig, not this record.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the application, the burst length or the sampling rate is not one this clause defines, or the amplitude is not finite and positive. |
-| TypeError | If `cycles` is neither an integer nor `None`. |
+| TypeError | If `n_cycles` is neither an integer nor `None`. |
 
 ## SAWTOOTH_BURST_TESTS
 
@@ -214,7 +214,7 @@ How many bursts the printed duration holds at the repeat time.
 signal_burst_indications(
     application: str,
     name: str,
-    cycles: int | None,
+    n_cycles: int | None,
     *,
     fs: float | None = None,
 ) -> dict[str, float]
@@ -236,7 +236,7 @@ the linear and the exponential average of Annex D.
 | :--- | :--- |
 | `application` | One of the keys of [`SAWTOOTH_BURST_TESTS`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst_tests). |
 | `name` | A weighting of that application, or [`BAND_LIMITING`](/phonometry/reference/api/vibration/signal-burst/#band_limiting) for the band-limiting row. |
-| `cycles` | Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or `None` for the continuous row. |
+| `n_cycles` | Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or `None` for the continuous row. |
 | `fs` | Sampling frequency, in hertz. Finite, positive, and above twice the upper band-limiting corner of the weighting under test, below which the pass band is not represented and the indications would be an artefact of the sampling. `None` takes the recommended rate of the application. |
 
 **Returns:** The indications for a 1 m/s2 amplitude burst, keyed by the printed column names of that application's table (`"rms"`, `"vdv"`, `"mtvv_linear"`, `"mtvv_exponential"`, `"msdv"`), in the units of each quantity.
@@ -246,7 +246,7 @@ the linear and the exponential average of Annex D.
 | Exception | When |
 | :--- | :--- |
 | ValueError | As for [`sawtooth_burst`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst), and if the weighting belongs to another application. |
-| TypeError | If `cycles` is neither an integer nor `None`. |
+| TypeError | If `n_cycles` is neither an integer nor `None`. |
 
 ## SIGNAL_BURST_RESPONSE
 

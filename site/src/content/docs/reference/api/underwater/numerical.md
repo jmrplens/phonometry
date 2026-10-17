@@ -156,7 +156,7 @@ eigenrays(
     receiver_range: float,
     receiver_depth: float,
     bottom: str | FluidSeabed = 'pressure-release',
-    max_arrivals: int = 64,
+    max_n_arrivals: int = 64,
     n_steps: int | None = None,
 ) -> EigenrayResult
 ```
@@ -239,8 +239,8 @@ boundaries.
 **The cap.** The multipath count grows without bound as paths steepen: in
 an ideal waveguide nothing but spreading attenuates the high-order
 bounces, and every extra $2D$ of unfolded depth is two more
-arrivals. `max_arrivals` bounds what is returned: the earliest
-`max_arrivals` arrivals are kept, because the early paths are the flat,
+arrivals. `max_n_arrivals` bounds what is returned: the earliest
+`max_n_arrivals` arrivals are kept, because the early paths are the flat,
 least-bounced, least-attenuated ones that carry the energy, and the tail
 being discarded is the part every physical seabed drains fastest. A
 [`PhonometryWarning`](/phonometry/reference/api/filters/phonometry/#phonometrywarning) says when the cap truncated; raise
@@ -254,7 +254,7 @@ it to keep everything the fan bracketed.
 | `receiver_range` | Receiver range, in metres, within the traced range. |
 | `receiver_depth` | Receiver depth, in metres, strictly inside the water column. |
 | `bottom` | `"pressure-release"` (default) or `"rigid"`, the perfect reflector whose coefficient ($-1$ or $+1$) each bottom touch multiplies into the amplitude; or a [`FluidSeabed`](/phonometry/reference/api/underwater/numerical/#fluidseabed), whose complex Rayleigh coefficient is charged instead. The sea surface is always pressure-release. The choice touches amplitudes only; the geometry, times and angles of the eigenrays are specular either way. |
-| `max_arrivals` | Most arrivals to return (earliest kept, see above). |
+| `max_n_arrivals` | Most arrivals to return (earliest kept, see above). |
 | `n_steps` | Range samples per refinement march, receiver column included. Default (`None`): the step of `trace` itself carried over, so the search resolves what the fan resolved. |
 
 **Returns:** An [`EigenrayResult`](/phonometry/reference/api/underwater/numerical/#eigenrayresult), possibly with zero arrivals: a receiver the traced fan never crosses (a shadow zone, or simply outside the aperture) has no eigenrays to list, which is an answer and not an error.

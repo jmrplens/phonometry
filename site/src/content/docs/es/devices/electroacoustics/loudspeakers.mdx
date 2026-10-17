@@ -751,7 +751,7 @@ import matplotlib.pyplot as plt
 # `ea` importado arriba.
 fig, axes = plt.subplots(2, 1, sharey=True)
 ea.feedback_stability(-6.0, 76.0, 80.0).plot(ax=axes[0], language="es")
-ea.feedback_stability(-6.0, 76.0, 80.0, open_microphones=4).plot(ax=axes[1], language="es")
+ea.feedback_stability(-6.0, 76.0, 80.0, n_open_microphones=4).plot(ax=axes[1], language="es")
 plt.show()
 ```
 
@@ -812,7 +812,7 @@ Long. El defecto queda recogido en el
 | `level_loudspeaker_at_microphone` | float | dB | finito | $L_{\mathrm{H}\text{-}\mathrm{M}}$ |
 | `level_loudspeaker_at_listener` | float | dB | finito | $L_{\mathrm{H}\text{-}\mathrm{L}}$ |
 | `microphone_directivity` | float | dB | por defecto 0 | $D_\mathrm{M}(\theta)$, 0 omni, unos -2 cardioide |
-| `open_microphones` | int | — | ≥ 1, por defecto 1 | $N_\mathrm{m}$ |
+| `n_open_microphones` | int | — | ≥ 1, por defecto 1 | $N_\mathrm{m}$ |
 | `stability_margin` | float | dB | ≥ 0, por defecto 10 | Margen de Long para sistema ecualizado |
 
 Devuelve un `FeedbackStabilityResult` (`open_loop_gain`,

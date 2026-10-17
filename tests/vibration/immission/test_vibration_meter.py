@@ -250,10 +250,10 @@ def test_a_bad_display_is_reported_under_its_own_name() -> None:
 def test_formula_2_counts_a_suppressed_interval_in_n() -> None:
     """A clock maximum at or below 0,1 enters as zero and still counts."""
     loud = 0.8
-    assert im.takt_maximum_rms([loud, loud]) == pytest.approx(loud)
-    assert im.takt_maximum_rms([loud, 0.05]) == pytest.approx(loud / math.sqrt(2.0))
-    assert im.takt_maximum_rms([0.1, 0.05]) == pytest.approx(0.0)
-    assert im.takt_maximum_rms([]) == pytest.approx(0.0)
+    assert im.takt_max_rms([loud, loud]) == pytest.approx(loud)
+    assert im.takt_max_rms([loud, 0.05]) == pytest.approx(loud / math.sqrt(2.0))
+    assert im.takt_max_rms([0.1, 0.05]) == pytest.approx(0.0)
+    assert im.takt_max_rms([]) == pytest.approx(0.0)
 
 
 def test_a_reading_below_the_detection_limits_says_so() -> None:

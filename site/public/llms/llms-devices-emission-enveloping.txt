@@ -81,11 +81,11 @@ levels = base + rng.normal(0.0, 0.5, size=(10, 8))     # (positions, bands)
 background = np.full((10, 8), 55.0)
 
 # ISO 3744 Annex B microphone coordinates on a radius-1.5 m hemisphere.
-mic_xyz = emission.measurement_positions("hemisphere", radius=1.5, reflecting_planes=1)
+mic_xyz = emission.measurement_positions("hemisphere", radius=1.5, n_reflecting_planes=1)
 print(mic_xyz.shape)                                    # (10, 3)
 
 res = emission.sound_power_pressure(
-    levels, "hemisphere", radius=1.5, reflecting_planes=1,
+    levels, "hemisphere", radius=1.5, n_reflecting_planes=1,
     background_levels=background, frequencies=freqs,
     room=emission.RoomEnvironment(reverberation_time=0.6, volume=300.0),  # -> K2
 )
@@ -121,7 +121,7 @@ rng = np.random.default_rng(0)
 levels = base + rng.normal(0.0, 0.5, size=(10, 8))     # (positions, bands)
 background = np.full((10, 8), 55.0)
 res = emission.sound_power_pressure(
-    levels, "hemisphere", radius=1.5, reflecting_planes=1,
+    levels, "hemisphere", radius=1.5, n_reflecting_planes=1,
     background_levels=background, frequencies=freqs,
     room=emission.RoomEnvironment(reverberation_time=0.6, volume=300.0),  # -> K2
 )
@@ -200,7 +200,7 @@ these habits:
 | `radius` | float | m | > 0 (hemisphere) | Hemisphere radius $r$ |
 | `dimensions` | (float, float, float) | m | > 0 (box) | Reference-box $(l_1, l_2, l_3)$ |
 | `distance` | float | m | > 0 (box) | Measurement distance $d$ |
-| `reflecting_planes` | int | — | `1` / `2` / `3`, default `1` | Halves/quarters the hemisphere area |
+| `n_reflecting_planes` | int | — | `1` / `2` / `3`, default `1` | Halves/quarters the hemisphere area |
 | `background_levels` | 2D array or spectrum | dB | `(NM, NB)`, or `(NB,)` / `(1, NB)` | Enables $K_1$; a single spectrum broadcasts to every position |
 | `frequencies` | 1D array | Hz | nominal band centres | Enables $L_{W\mathrm{A}}$ (Annex E) |
 | `room` | `RoomEnvironment` or None | — | default `None` (free field) | The room data behind $K_2$; its fields are the three routes to $A$ below |
@@ -216,7 +216,7 @@ Returns a `SoundPowerResult`: `sound_power_level` (per-band $L_W$),
 `directivity_index` (apparent $DI_i^*$ per microphone position **and** frequency
 band, shape `(NM, NB)`; ISO 3744 clause 8.6), `surface_area`,
 `sound_power_level_a` ($L_{W\mathrm{A}}$), `uncertainty` (expanded, 95 %) and `grade`.
-`measurement_positions('hemisphere', radius=…, reflecting_planes=…, tones=…,
+`measurement_positions('hemisphere', radius=…, n_reflecting_planes=…, tones=…,
 grade=…)` returns the normative `(N, 3)` microphone coordinates (Table B.1 for
 tonal sources, B.2 for broadband). Those coordinates plot directly with
 `plot_microphone_positions`, which draws the array on its measurement
@@ -518,7 +518,7 @@ as one reading that spans them all, and reduces both to the level of one event
 at each position: the energy average of the $N_\mathrm{e}$ readings (Eq. 19) or
 the one reading less $10\log_{10} N_\mathrm{e}$ (Eq. 20). `sound_energy_pressure`
 takes `levels_positions` as a `(Ne, NM, NB)` array of the events one at a time,
-an `(NM, NB)` reading with `events=Ne`, or the `(NM, NB)` mean already formed;
+an `(NM, NB)` reading with `n_events=Ne`, or the `(NM, NB)` mean already formed;
 `mean_single_event_level` is the same reduction on its own. The background is
 the time-averaged level measured over the same window (clause 8.3.1), and it is
 compared as its exposure over that window, $L_{p(\mathrm{B})} + 10\log_{10}(T/T_0)$,
@@ -545,7 +545,7 @@ burst = emission.sound_energy_pressure(
     integration_time=10.0, frequencies=bands,
     room=emission.RoomEnvironment(reverberation_time=1.2, volume=900.0),   # -> K2
 )
-print(burst.events)                                        # 5 (Eq. 19 over the first axis)
+print(burst.n_events)                                        # 5 (Eq. 19 over the first axis)
 print(round(float(burst.environmental_correction[0]), 2))  # K2 = 2.64 dB
 print(np.round(burst.sound_energy_level, 1))               # per-band LJ, peaking at 103.5 dB at 1 kHz
 print(round(burst.sound_energy_level_a, 1))                # LJA = 107.7 dB(A)
@@ -557,11 +557,11 @@ ten_positions = np.array([70.0, 74.0, 78.0, 80.0, 79.0, 76.0, 72.0, 66.0]) + rng
 quiet = np.full((10, 8), 55.0)
 workshop = emission.RoomEnvironment(reverberation_time=0.6, volume=300.0)
 steady = emission.sound_power_pressure(
-    ten_positions, "hemisphere", radius=1.5, reflecting_planes=1,
+    ten_positions, "hemisphere", radius=1.5, n_reflecting_planes=1,
     background_levels=quiet, frequencies=octaves_hz, room=workshop,
 )
 ten_seconds = emission.sound_energy_pressure(
-    ten_positions + 10.0, "hemisphere", radius=1.5, reflecting_planes=1,
+    ten_positions + 10.0, "hemisphere", radius=1.5, n_reflecting_planes=1,
     background_levels=quiet, integration_time=10.0, frequencies=octaves_hz, room=workshop,
 )
 print(np.round(ten_seconds.sound_energy_level - steady.sound_power_level, 6))   # 10.0 in every band
@@ -579,11 +579,11 @@ altitude or below 10 °C clause 8.3.6 requires the Annex G correction
 $L_{J\mathrm{ref,atm}} = L_J + C_1 + C_2$ (Eq. G.3), which
 `reference_atmosphere_correction` evaluates from the temperature and the static
 pressure, or from the altitude through Eq. G.2. `sound_energy_pressure` takes the
-surface, position and room arguments of `sound_power_pressure` plus `events`,
+surface, position and room arguments of `sound_power_pressure` plus `n_events`,
 `background_levels` with `integration_time`, and returns a `SoundEnergyResult`
 (`sound_energy_level`, `surface_event_level`, `mean_event_level`,
 `background_correction`, `environmental_correction`, `directivity_index`,
-`surface_area`, `sound_energy_level_a`, `uncertainty`, `grade`, `events`,
+`surface_area`, `sound_energy_level_a`, `uncertainty`, `grade`, `n_events`,
 `integration_time`) with `.plot()`.
 
 ## See also
@@ -1303,7 +1303,7 @@ $C_2$, 0.13 dB, carries the result of the source under test back to them.
 
 | Function | Clause | Returns | Notes |
 | :--- | :--- | :--- | :--- |
-| `reference_source_calibration(levels, *, frequencies, arrangement, background_levels=None, maximum_levels_db=None, conditions=None, radiation="unknown", knee_frequency_hz=None, c2_db=None, intensity_sound_power_level_db=None, room_qualification=None, coverage_factor=1.96)` | 8, Formula (2) | `ReferenceSourceCalibration` | `arrangement` is `"paths"` or `"fixed"`, the column of Table 2; `room_qualification` warns when the room does not cover the bands at 2 m (8.1) |
+| `reference_source_calibration(levels, *, frequencies, arrangement, background_levels=None, max_levels_db=None, conditions=None, radiation="unknown", knee_frequency_hz=None, c2_db=None, intensity_sound_power_level_db=None, room_qualification=None, coverage_factor=1.96)` | 8, Formula (2) | `ReferenceSourceCalibration` | `arrangement` is `"paths"` or `"fixed"`, the column of Table 2; `room_qualification` warns when the room does not cover the bands at 2 m (8.1) |
 | `CalibrationConditions(*, temperature_c=23.0, static_pressure_kpa=101.325, air_absorption_db_per_m=None)` | 4, 8.4 | the air of Formula (2) | Temperature and static pressure for $C_1$ and $C_2$, $a(f)$ per band for $C_3$ |
 | `ReferenceSourceCalibration.sound_power_level_at(frequencies, *, bandwidth="one-third-octave", temperature_c=None, static_pressure_kpa=None)` | 8.4 | $L_W$ per band [dB] | With the conditions of a test, $L_W - C_2$ there |
 | `verify_reference_sound_source(calibration, *, frequencies=None, repeated_levels_db=None, supply_variation_db=None, directivity_index_db=None, reverberation_rooms_only=False)` | 5.2, 5.4, 5.5 | `ReferenceSoundSourceVerdict` | Three sound power or five sound pressure repetitions; the largest change over the declared supply range |
@@ -1534,7 +1534,7 @@ the two ends, 2 and 4 on the two long sides and 3 overhead, the last three in
 the plane between the turbine and the driven machinery. In Figure 2 a that is
 the plane after the turbine box; in Figure 2 b, between the LP turbine and the
 generator, so the library takes the number of boxes on the turbine side
-(`turbine_boxes`) and puts 2, 3 and 4 at the outer corner of the wider (and
+(`n_turbine_boxes`) and puts 2, 3 and 4 at the outer corner of the wider (and
 taller) of the two parallelepipeds that meet there, as both drawings do.
 
 The **additional positions** start at the key positions and are "arranged at
@@ -1561,7 +1561,7 @@ preliminary run has shown they change the sound power level by no more than
 
 ```python
 array = emission.turbine_microphone_positions(
-    surface, microphone_height_m=1.5, spacing_m=4.0, turbine_boxes=2)
+    surface, microphone_height_m=1.5, spacing_m=4.0, n_turbine_boxes=2)
 print(array.n_positions, int(array.overhead_mask.sum()))      # 23 7
 print(array.positions_m[array.key_mask])
 # [[ 0.   0.   1.5]     key position 1

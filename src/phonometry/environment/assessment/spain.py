@@ -125,7 +125,7 @@ __all__ = [
     "infrastructure_limits",
     "long_term_corrected_level",
     "low_frequency_correction",
-    "maximum_infrastructure_limit",
+    "max_infrastructure_limit",
     "outdoor_quality_objectives",
     "round_reported_level",
     "tonal_correction",
@@ -686,7 +686,7 @@ class NoisePhase(RichDisplay):
     least 5 s in each, and corrects it for tonal, low-frequency and impulsive
     character.
 
-    :ivar hours: Duration ``Ti`` of the phase, in hours (positive).
+    :ivar duration_hours: Duration ``Ti`` of the phase, in hours (positive).
     :ivar laeq: Background-corrected ``LAeq,Ti``, in dB. A phase in which the
         activity is shut down carries the level actually measured; the worked
         examples of the Spanish literature enter it as 0 dB.
@@ -694,11 +694,11 @@ class NoisePhase(RichDisplay):
     :ivar kf: Low-frequency correction of the phase, in dB.
     :ivar ki: Impulsive correction of the phase, in dB.
     :ivar label: Optional free-text description of the phase.
-    :raises ValueError: If ``hours`` is not positive and finite, ``laeq`` is
+    :raises ValueError: If ``duration_hours`` is not positive and finite, ``laeq`` is
         not finite, or a correction is negative.
     """
 
-    hours: float
+    duration_hours: float
     laeq: float
     kt: float = 0.0
     kf: float = 0.0
@@ -707,7 +707,7 @@ class NoisePhase(RichDisplay):
 
     def __post_init__(self) -> None:
         """Validate the duration, level and corrections."""
-        _positive(self.hours, "hours")
+        _positive(self.duration_hours, "duration_hours")
         _finite(self.laeq, "laeq")
         total_correction(self.kt, self.kf, self.ki)
 
@@ -723,7 +723,7 @@ class NoisePhase(RichDisplay):
 
 
 def evaluation_period_level(
-    phases: Sequence[NoisePhase], *, hours: float | None = None
+    phases: Sequence[NoisePhase], *, duration_hours: float | None = None
 ) -> float:
     r"""Evaluation-period level ``LKeq,T`` from its noise phases.
 
@@ -734,24 +734,24 @@ def evaluation_period_level(
     the regulation asks to report.
 
     :param phases: The noise phases of the period.
-    :param hours: Total period duration ``T``, in hours. ``None`` (default)
+    :param duration_hours: Total period duration ``T``, in hours. ``None`` (default)
         uses the sum of the phase durations, as the regulation requires
         :math:`\sum T_i = T`.
     :return: ``LKeq,T`` in dB.
-    :raises ValueError: If ``phases`` is empty, ``hours`` is not positive, or
-        the phase durations do not sum to ``hours``.
+    :raises ValueError: If ``phases`` is empty, ``duration_hours`` is not positive, or
+        the phase durations do not sum to ``duration_hours``.
     """
     items = list(phases)
     if not items:
         msg = "At least one noise phase is required."
         raise ValueError(msg)
-    durations = np.array([p.hours for p in items], dtype=np.float64)
+    durations = np.array([p.duration_hours for p in items], dtype=np.float64)
     levels = np.array([p.lkeq for p in items], dtype=np.float64)
     total = float(np.sum(durations))
-    if hours is None:
+    if duration_hours is None:
         period = total
     else:
-        period = _positive(hours, "hours")
+        period = _positive(duration_hours, "duration_hours")
         if abs(total - period) > _HOURS_SUM_TOL:
             msg = (
                 "The phase durations must sum to the period duration "
@@ -988,7 +988,7 @@ def infrastructure_limits(area_type: str) -> RegulationLimits:
     )
 
 
-def maximum_infrastructure_limit(area_type: str) -> float:
+def max_infrastructure_limit(area_type: str) -> float:
     """Maximum ``LAmax`` for rail and airport infrastructure (Annex III Table A2).
 
     The limit is respected when, over a year, 97 % of all daily values stay at
@@ -1381,7 +1381,7 @@ def _assess_period(
     if not phases:
         msg = f"Period {name!r} has no noise phases."
         raise ValueError(msg)
-    level = evaluation_period_level(phases, hours=duration)
+    level = evaluation_period_level(phases, duration_hours=duration)
     reported = round_reported_level(level)
     annual = _annual_index(
         reported,

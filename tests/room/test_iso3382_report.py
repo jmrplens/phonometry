@@ -77,8 +77,8 @@ def _full_metadata(**overrides: float) -> ReportMetadata:
         "test_room": "Auditorium A",
         "room_volume": 2830.0,
         "area": 340.0,
-        "source_positions": 2,
-        "receiver_positions": 8,
+        "n_source_positions": 2,
+        "n_receiver_positions": 8,
         "instrumentation": "Omnidirectional source + 1/2 in. microphone",
         "measurement_standard": "ISO 3382-1",
         "temperature_c": 21.0,
@@ -453,7 +453,7 @@ def test_room_volume_must_be_positive() -> None:
         ReportMetadata(room_volume=0.0)
 
 
-@pytest.mark.parametrize("field", ["source_positions", "receiver_positions"])
+@pytest.mark.parametrize("field", ["n_source_positions", "n_receiver_positions"])
 @pytest.mark.parametrize("bad", [0, -1, 2.5, True])
 def test_position_counts_must_be_positive_integers(
     field: str, bad: int | float
@@ -467,7 +467,9 @@ def test_position_counts_must_be_positive_integers(
 
 def test_position_counts_accept_positive_integers() -> None:
     """Positive integer position counts are accepted."""
-    md = ReportMetadata(source_positions=2, receiver_positions=8, room_volume=2830.0)
-    assert md.source_positions == 2
-    assert md.receiver_positions == 8
+    md = ReportMetadata(
+        n_source_positions=2, n_receiver_positions=8, room_volume=2830.0
+    )
+    assert md.n_source_positions == 2
+    assert md.n_receiver_positions == 8
     assert md.room_volume == 2830.0

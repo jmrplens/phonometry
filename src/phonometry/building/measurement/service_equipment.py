@@ -392,12 +392,12 @@ class OperatingCondition(RichDisplay):
 
     :ivar clause: The clause of Annex B, e.g. ``"B.2.6"``.
     :ivar equipment: What the entry covers, in words.
-    :ivar maximum_level: Whether the entry defines a cycle for the maximum
+    :ivar max_level: Whether the entry defines a cycle for the maximum
         level ``Lmax``.
     :ivar equivalent_level: Whether the entry defines the equivalent level
         ``Leq``; a rubbish chute is measured as a maximum level only.
     :ivar conditions: The operating conditions, in words.
-    :ivar maximum_cycle: The operating cycle for ``Lmax``, or ``None``.
+    :ivar max_cycle: The operating cycle for ``Lmax``, or ``None``.
     :ivar equivalent_cycle: What the ``Leq`` integration time covers, or
         ``None``.
     :ivar nominal_integration_time_s: The integration time the entry gives in
@@ -409,10 +409,10 @@ class OperatingCondition(RichDisplay):
 
     clause: str
     equipment: str
-    maximum_level: bool
+    max_level: bool
     equivalent_level: bool
     conditions: str
-    maximum_cycle: str | None
+    max_cycle: str | None
     equivalent_cycle: str | None
     nominal_integration_time_s: float | None
     parameters: Mapping[str, float] = field(
@@ -458,14 +458,14 @@ SERVICE_EQUIPMENT_OPERATING_CONDITIONS: Mapping[str, OperatingCondition] = (
             "water_tap": OperatingCondition(
                 clause="B.2.2",
                 equipment="water tap or valve",
-                maximum_level=True,
+                max_level=True,
                 equivalent_level=True,
                 conditions=(
                     "stop cocks fully open (or their position reported); a movable "
                     "outlet placed as close to the middle of the sink as it goes; "
                     "measured in the surrounding rooms, not the room of the installation"
                 ),
-                maximum_cycle=(
+                max_cycle=(
                     "a tap with one inlet: open fully, wait a few seconds, close; a "
                     "mixer with independent hot and cold taps: open the hot tap "
                     "fully, open the cold tap, wait a few seconds, close the hot tap, "
@@ -486,28 +486,28 @@ SERVICE_EQUIPMENT_OPERATING_CONDITIONS: Mapping[str, OperatingCondition] = (
             "shower_cabin": OperatingCondition(
                 clause="B.2.3",
                 equipment="shower cabin",
-                maximum_level=True,
+                max_level=True,
                 equivalent_level=True,
                 conditions=(
                     "shower in the wall fixture at its highest position, directed at "
                     "the floor of the cabin; the water drained off soundlessly when the "
                     "valves are to be measured alone"
                 ),
-                maximum_cycle="as for a water tap (B.2.2)",
+                max_cycle="as for a water tap (B.2.2)",
                 equivalent_cycle="as for a water tap (B.2.2)",
                 nominal_integration_time_s=_ABOUT_30_S,
             ),
             "bath": OperatingCondition(
                 clause="B.2.4",
                 equipment="bath (tub)",
-                maximum_level=True,
+                max_level=True,
                 equivalent_level=True,
                 conditions=(
                     "filling nozzle and shower treated as separate functions; without a "
                     "wall fixture the shower is held about 1,5 m above the bottom of the "
                     "tub; the bath empties while it is measured"
                 ),
-                maximum_cycle="as for a water tap (B.2.2) and, with a shower, B.2.3",
+                max_cycle="as for a water tap (B.2.2) and, with a shower, B.2.3",
                 equivalent_cycle="as for a water tap (B.2.2) and, with a shower, B.2.3",
                 nominal_integration_time_s=_ABOUT_30_S,
                 parameters={"shower_height_m": 1.5},
@@ -515,14 +515,14 @@ SERVICE_EQUIPMENT_OPERATING_CONDITIONS: Mapping[str, OperatingCondition] = (
             "filling_emptying": OperatingCondition(
                 clause="B.2.5",
                 equipment="filling and emptying a sink or bath",
-                maximum_level=True,
+                max_level=True,
                 equivalent_level=True,
                 conditions=(
                     "plug closed and the vessel filled to half its maximum level with "
                     "hot and cold water mixed equally, taps fully open; then the plug "
                     "is opened and the emptying measured on its own"
                 ),
-                maximum_cycle="the filling period, then the emptying period",
+                max_cycle="the filling period, then the emptying period",
                 equivalent_cycle="the filling period and the emptying period",
                 nominal_integration_time_s=None,
                 parameters={"fill_fraction": 0.5},
@@ -530,41 +530,41 @@ SERVICE_EQUIPMENT_OPERATING_CONDITIONS: Mapping[str, OperatingCondition] = (
             "water_closet": OperatingCondition(
                 clause="B.2.6",
                 equipment="water closet",
-                maximum_level=True,
+                max_level=True,
                 equivalent_level=True,
                 conditions=(
                     "flushing valves and cisterns operated to the end stop; a cistern "
                     "is measured from the supply valve fully open until it has closed"
                 ),
-                maximum_cycle="a full flushing and refilling cycle",
+                max_cycle="a full flushing and refilling cycle",
                 equivalent_cycle="a full flushing and refilling cycle",
                 nominal_integration_time_s=None,
             ),
             "mechanical_ventilation": OperatingCondition(
                 clause="B.3",
                 equipment="mechanical ventilation, vents and cooker hoods",
-                maximum_level=True,
+                max_level=True,
                 equivalent_level=True,
                 conditions=(
                     "manually operated systems at the setting of the highest level, "
                     "normally maximum speed or the fully open vent, after checking the "
                     "air flow is correctly adjusted"
                 ),
-                maximum_cycle="continuous operation over about 30 s",
+                max_cycle="continuous operation over about 30 s",
                 equivalent_cycle=_ABOUT_30_S_CYCLE,
                 nominal_integration_time_s=_ABOUT_30_S,
             ),
             "heating": OperatingCondition(
                 clause="B.4",
                 equipment="heating: boilers, burners and radiators",
-                maximum_level=True,
+                max_level=True,
                 equivalent_level=True,
                 conditions=(
                     "burner at full load with circulation pump, fan and fuel pump "
                     "running (maximum normal water and air flow); a radiator at the "
                     "thermostat setting of the highest constant level"
                 ),
-                maximum_cycle=(
+                max_cycle=(
                     "start from cold, run at full load, open and close each appliance "
                     "slowly, stop"
                 ),
@@ -574,20 +574,20 @@ SERVICE_EQUIPMENT_OPERATING_CONDITIONS: Mapping[str, OperatingCondition] = (
             "cooling": OperatingCondition(
                 clause="B.4",
                 equipment="cooling",
-                maximum_level=True,
+                max_level=True,
                 equivalent_level=True,
                 conditions="set to the position of the highest level",
-                maximum_cycle=_ABOUT_30_S_CYCLE,
+                max_cycle=_ABOUT_30_S_CYCLE,
                 equivalent_cycle=_ABOUT_30_S_CYCLE,
                 nominal_integration_time_s=_ABOUT_30_S,
             ),
             "lift": OperatingCondition(
                 clause="B.5",
                 equipment="lift",
-                maximum_level=True,
+                max_level=True,
                 equivalent_level=True,
                 conditions="loaded with 1 or 2 persons; the load and number reported",
-                maximum_cycle=(
+                max_cycle=(
                     "from the lowest level (at most five floors below the measurement "
                     "floor), stopping and working the door at each level, to the top "
                     "(at most five floors above), then straight back; repeated at least "
@@ -606,10 +606,10 @@ SERVICE_EQUIPMENT_OPERATING_CONDITIONS: Mapping[str, OperatingCondition] = (
             "rubbish_chute": OperatingCondition(
                 clause="B.6",
                 equipment="rubbish chute",
-                maximum_level=True,
+                max_level=True,
                 equivalent_level=False,
                 conditions="the chute clear of waste",
-                maximum_cycle=(
+                max_cycle=(
                     "two test objects dispatched together from the top storey: open-"
                     "ended unplasticized PVC tubes (or a material like it)"
                 ),
@@ -626,10 +626,10 @@ SERVICE_EQUIPMENT_OPERATING_CONDITIONS: Mapping[str, OperatingCondition] = (
             "auxiliary_equipment": OperatingCondition(
                 clause="B.7",
                 equipment="boilers, blowers, pumps and other auxiliary equipment",
-                maximum_level=True,
+                max_level=True,
                 equivalent_level=True,
                 conditions="run continuously under normal, loaded conditions",
-                maximum_cycle=(
+                max_cycle=(
                     "start, operate, stop for a manually and electrically controlled "
                     "appliance; a full cycle, start and stop included, for automatic ones"
                 ),
@@ -639,20 +639,20 @@ SERVICE_EQUIPMENT_OPERATING_CONDITIONS: Mapping[str, OperatingCondition] = (
             "car_park_door": OperatingCondition(
                 clause="B.8",
                 equipment="motor-driven car park door",
-                maximum_level=True,
+                max_level=True,
                 equivalent_level=True,
                 conditions="normal operation",
-                maximum_cycle="opening and closing the door",
+                max_cycle="opening and closing the door",
                 equivalent_cycle="a full cycle of opening and closing the door",
                 nominal_integration_time_s=None,
             ),
             "other_equipment": OperatingCondition(
                 clause="B.9",
                 equipment="other building service equipment",
-                maximum_level=True,
+                max_level=True,
                 equivalent_level=True,
                 conditions="the conditions of normal use",
-                maximum_cycle="the operating cycle of normal use",
+                max_cycle="the operating cycle of normal use",
                 equivalent_cycle="the duration of the operating cycle",
                 nominal_integration_time_s=None,
             ),
@@ -662,7 +662,7 @@ SERVICE_EQUIPMENT_OPERATING_CONDITIONS: Mapping[str, OperatingCondition] = (
                     "activities and sources that cannot be monitored or controlled, "
                     "in or near the building (music, restaurants, sports facilities)"
                 ),
-                maximum_level=True,
+                max_level=True,
                 equivalent_level=True,
                 conditions=(
                     "every source of the activity in its normal operation, automatic "
@@ -670,7 +670,7 @@ SERVICE_EQUIPMENT_OPERATING_CONDITIONS: Mapping[str, OperatingCondition] = (
                     "impossible the acoustically most reflective corner is position 1, "
                     "reported as a deviation"
                 ),
-                maximum_cycle=None,
+                max_cycle=None,
                 equivalent_cycle=(
                     "several periods of 30 s while the source is in normal operation, "
                     "within the hour the level is expected to be highest, downtime and "
@@ -1696,7 +1696,7 @@ def loudest_corner(
     for value in excluded:
         # A bool, a string or 1,7 is not the number of a corner: int() would
         # read each of them as one and leave that corner out without a word.
-        index = require_count(value, "excluded", minimum=0)
+        index = require_count(value, "excluded", at_least=0)
         if index >= levels.size:
             msg = f"Corner index {index} is out of range for {levels.size} corners."
             raise ValueError(msg)
@@ -2422,7 +2422,7 @@ class VaryingBackgroundCheck(OwnsArrays):
 
     The route the NOTE to Clause 9 offers when the background varies in time.
 
-    :ivar background_maximum_level_db: The maximum level of the background over the
+    :ivar background_max_level_db: The maximum level of the background over the
         observation period at the corner position, per band (or one weighted
         value), in dB.
     :ivar equipment_levels_db: The service equipment sound pressure level,
@@ -2432,7 +2432,7 @@ class VaryingBackgroundCheck(OwnsArrays):
     :ivar frequencies: The band centres, in Hz, or ``None`` when not given.
     """
 
-    background_maximum_level_db: np.ndarray
+    background_max_level_db: np.ndarray
     equipment_levels_db: np.ndarray
     observation_time_s: float
     frequencies: np.ndarray | None = None
@@ -2452,7 +2452,7 @@ class VaryingBackgroundCheck(OwnsArrays):
         :raises ValueError: if the levels or the centres do not share one
             band count.
         """
-        shape = np.asarray(self.background_maximum_level_db).shape
+        shape = np.asarray(self.background_max_level_db).shape
         if np.asarray(self.equipment_levels_db).shape != shape or (
             self.frequencies is not None and np.asarray(self.frequencies).shape != shape
         ):
@@ -2469,7 +2469,7 @@ class VaryingBackgroundCheck(OwnsArrays):
         """
         return np.asarray(
             np.asarray(self.equipment_levels_db, dtype=np.float64)
-            - np.asarray(self.background_maximum_level_db, dtype=np.float64),
+            - np.asarray(self.background_max_level_db, dtype=np.float64),
             dtype=np.float64,
         )
 
@@ -2527,7 +2527,7 @@ class VaryingBackgroundCheck(OwnsArrays):
 
 
 def check_varying_background(
-    background_maximum_level_db: ArrayLike,
+    background_max_level_db: ArrayLike,
     equipment_levels_db: ArrayLike,
     *,
     observation_time_s: float,
@@ -2551,7 +2551,7 @@ def check_varying_background(
     exactly 10 dB ("10 dB or more"). The 2004 edition took the maximum "in one
     of the microphone positions"; the draft names the corner.
 
-    :param background_maximum_level_db: The maximum level of the background over the
+    :param background_max_level_db: The maximum level of the background over the
         observation period, at the corner position, per band, in dB.
     :param equipment_levels_db: The service equipment sound pressure level in
         the same bands, in dB.
@@ -2562,10 +2562,10 @@ def check_varying_background(
     :raises ValueError: If a level is not finite, the shapes differ, or the
         observation time is not one positive number.
     """
-    background = _readings(background_maximum_level_db, "background_maximum_level_db")
+    background = _readings(background_max_level_db, "background_max_level_db")
     equipment = _readings(equipment_levels_db, "equipment_levels_db")
     if equipment.shape != background.shape:
-        msg = "'background_maximum_level_db' and 'equipment_levels_db' must give one level per band, the same count."
+        msg = "'background_max_level_db' and 'equipment_levels_db' must give one level per band, the same count."
         raise ValueError(msg)
     observation = _positive_number(observation_time_s, "observation_time_s")
     freqs = None
@@ -2575,7 +2575,7 @@ def check_varying_background(
             msg = "'frequencies' must give one finite centre per band."
             raise ValueError(msg)
     return VaryingBackgroundCheck(
-        background_maximum_level_db=background,
+        background_max_level_db=background,
         equipment_levels_db=equipment,
         observation_time_s=observation,
         frequencies=None if freqs is None else freqs,
@@ -2586,13 +2586,13 @@ def check_varying_background(
 class MeasurementDisturbanceCheck(OwnsArrays):
     r"""Whether each measurement period was free of disturbances (Clause 9).
 
-    :ivar maximum_levels_db: The maximum level in the middle of the frequency
+    :ivar max_levels_db: The maximum level in the middle of the frequency
         range, one per measurement period, in dB.
     :ivar equivalent_levels_db: The equivalent level in the same band, one per
         period, in dB.
     """
 
-    maximum_levels_db: np.ndarray
+    max_levels_db: np.ndarray
     equivalent_levels_db: np.ndarray
 
     @property
@@ -2610,7 +2610,7 @@ class MeasurementDisturbanceCheck(OwnsArrays):
             share one period count.
         """
         if (
-            np.asarray(self.maximum_levels_db).shape
+            np.asarray(self.max_levels_db).shape
             != np.asarray(self.equivalent_levels_db).shape
         ):
             msg = "MeasurementDisturbanceCheck: one maximum and one equivalent level per period."
@@ -2623,7 +2623,7 @@ class MeasurementDisturbanceCheck(OwnsArrays):
         :return: One difference per measurement period.
         """
         return np.asarray(
-            np.asarray(self.maximum_levels_db, dtype=np.float64)
+            np.asarray(self.max_levels_db, dtype=np.float64)
             - np.asarray(self.equivalent_levels_db, dtype=np.float64),
             dtype=np.float64,
         )
@@ -2683,7 +2683,7 @@ class MeasurementDisturbanceCheck(OwnsArrays):
 
 
 def check_measurement_disturbance(
-    maximum_levels_db: ArrayLike, equivalent_levels_db: ArrayLike
+    max_levels_db: ArrayLike, equivalent_levels_db: ArrayLike
 ) -> MeasurementDisturbanceCheck:
     r"""Was a measurement period disturbed (ISO/DIS 16032:2023 Clause 9)?
 
@@ -2697,20 +2697,20 @@ def check_measurement_disturbance(
     the frequency range", which the operator chooses. A difference of exactly
     5 dB is not "less than 5 dB" and marks the period.
 
-    :param maximum_levels_db: The maximum level of a band in the middle of the
+    :param max_levels_db: The maximum level of a band in the middle of the
         frequency range, one per measurement period, in dB.
     :param equivalent_levels_db: The equivalent level of the same band over
         the same period, one per period, in dB.
     :return: :class:`MeasurementDisturbanceCheck`.
     :raises ValueError: If a level is not finite or the two counts differ.
     """
-    maxima = _readings(maximum_levels_db, "maximum_levels_db")
+    maxima = _readings(max_levels_db, "max_levels_db")
     equivalents = _readings(equivalent_levels_db, "equivalent_levels_db")
     if maxima.shape != equivalents.shape:
-        msg = "'maximum_levels_db' and 'equivalent_levels_db' must give one level per period, the same count."
+        msg = "'max_levels_db' and 'equivalent_levels_db' must give one level per period, the same count."
         raise ValueError(msg)
     return MeasurementDisturbanceCheck(
-        maximum_levels_db=maxima, equivalent_levels_db=equivalents
+        max_levels_db=maxima, equivalent_levels_db=equivalents
     )
 
 

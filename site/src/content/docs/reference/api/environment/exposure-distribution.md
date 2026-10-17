@@ -200,7 +200,7 @@ sel_distribution(
     probabilities: ArrayLike,
     *,
     sigma_db: float = 5.0,
-    subclasses: int = 10,
+    n_subclasses: int = 10,
 ) -> SELDistribution
 ```
 
@@ -212,7 +212,7 @@ The levels of the replica atmospheres are placed in increasing order
 between their levels (Equation (11)) and the two outer boundaries mirror
 the nearest inner one about the end level (Equations (12), (13)); each
 class has the constant density $\rho_m = \wp_m/(g_{\mathrm{U},m} - g_{\mathrm{L},m})$ (Equation (15)). Each class is then divided into
-`subclasses` equal subclasses of width $b_m$ centred at
+`n_subclasses` equal subclasses of width $b_m$ centred at
 $\mu_{m,j} = g_{\mathrm{L},m} + (j - \tfrac12)b_m$ (Equations (17),
 (18)), and each subclass is replaced by a normal distribution of standard
 deviation `sigma_db` and weight $b_m\rho_m$, centred at
@@ -228,7 +228,7 @@ width, in which case the run is combined (see the module documentation).
 | `levels` | $L_{E,\mathrm{w},k,l}$ of each replica atmosphere, in dB, any shape; a `(N_atm, N_exc)` array is read row by row. |
 | `probabilities` | The probability of occurrence of each replica, the same shape as `levels`, summing to one (see [`replica_probabilities`](/phonometry/reference/api/environment/exposure-distribution/#replica_probabilities)). |
 | `sigma_db` | Standard deviation of the spread due to turbulence, in dB; 5 dB by default, the value clause 5 says is typically used. |
-| `subclasses` | $N_\mathrm{sub}$, the subclasses per class; 10 by default, the number Annex A uses. The standard fixes none. |
+| `n_subclasses` | $N_\mathrm{sub}$, the subclasses per class; 10 by default, the number Annex A uses. The standard fixes none. |
 
 **Returns:** The distribution.
 
@@ -236,7 +236,7 @@ width, in which case the run is combined (see the module documentation).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if the shapes differ, a value is not finite, a probability is negative, the probabilities do not sum to one, every probability is zero, fewer than two distinct levels remain once equal levels are combined, `sigma_db` is not positive, or `subclasses` is not a whole number of at least one. |
+| ValueError | if the shapes differ, a value is not finite, a probability is negative, the probabilities do not sum to one, every probability is zero, fewer than two distinct levels remain once equal levels are combined, `sigma_db` is not positive, or `n_subclasses` is not a whole number of at least one. |
 
 ## SELDistribution
 
@@ -250,7 +250,7 @@ SELDistribution(
     subclass_centers_db: NDArray[np.float64],
     sigma_db: float,
     level_shift_db: float,
-    subclasses: int,
+    n_subclasses: int,
     long_term_level_db: float,
     distribution_long_term_level_db: float,
     replicas: tuple[tuple[int, ...], ...],
@@ -261,7 +261,7 @@ The statistical distribution of a single-event sound exposure level
 (ISO 13474:2009, clause 5).
 
 The replica atmospheres, sorted by level, are the `M` classes of
-Equations (10) to (16); each class is split into `subclasses` equal
+Equations (10) to (16); each class is split into `n_subclasses` equal
 subclasses (Equations (17) to (20)) and each subclass is replaced by a
 normal distribution of standard deviation `sigma_db` centred
 `level_shift_db` below the subclass centre (Equations (21) to (23)).
@@ -278,7 +278,7 @@ normal distribution of standard deviation `sigma_db` centred
 | `subclass_centers_db` | $\mu_{m,j}$, shape `(M, subclasses)`, in dB (Equation (18)). |
 | `sigma_db` | $\sigma$ of the turbulent spread, in dB. |
 | `level_shift_db` | $\Delta\mu$, in dB (Equation (22)). |
-| `subclasses` | $N_\mathrm{sub}$, the subclasses per class. |
+| `n_subclasses` | $N_\mathrm{sub}$, the subclasses per class. |
 | `long_term_level_db` | $\langle L_{E,\mathrm{w}}\rangle_\mathrm{LT}$ from the classes, Equation (7); Annex A's `LT1`. |
 | `distribution_long_term_level_db` | the same average taken over the continuous distribution, Equation (A.4); Annex A's `LT2`. It differs from `long_term_level_db` only by the spreading of each class over its width, since $\Delta\mu$ preserves the energy of each subclass. |
 | `replicas` | For each class, the flat indices of the replica atmospheres it holds, in the row-major order the input was given in; a class holds more than one only where equal levels were combined. |

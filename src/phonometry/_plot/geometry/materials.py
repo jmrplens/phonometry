@@ -503,14 +503,14 @@ def plot_qrd_geometry(
     well_width: float,
     ax: Axes | None = None,
     *,
-    repetitions: int = 1,
+    n_repetitions: int = 1,
     fin_width: float | None = None,
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw the well profile of a quadratic-residue diffuser, to scale.
 
-    Wells open upward; the profile repeats ``repetitions`` times with thin fins
+    Wells open upward; the profile repeats ``n_repetitions`` times with thin fins
     between wells. Pairs with
     :func:`~phonometry.materials.qrd_well_depths`, which supplies the depth
     sequence.
@@ -518,7 +518,7 @@ def plot_qrd_geometry(
     :param depths: Well depths ``d_n``, in metres (one period).
     :param well_width: Well width ``w``, in metres.
     :param ax: Existing axes, or ``None`` to create a figure.
-    :param repetitions: Number of repeated periods (>= 1).
+    :param n_repetitions: Number of repeated periods (>= 1).
     :param fin_width: Fin thickness between wells, in metres; ``None`` draws
         ``w / 12``.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -547,8 +547,8 @@ def plot_qrd_geometry(
         msg = "'depths' must be non-negative."
         raise ValueError(msg)
     require_positive(well_width, "well_width")
-    if repetitions < 1:
-        msg = "'repetitions' must be >= 1."
+    if n_repetitions < 1:
+        msg = "'n_repetitions' must be >= 1."
         raise ValueError(msg)
     fin = (
         well_width / 12.0
@@ -561,12 +561,12 @@ def plot_qrd_geometry(
     d_max = float(d.max()) if float(d.max()) > 0.0 else well_width
     base = 0.15 * d_max
     pitch = well_width + fin
-    total_width = repetitions * n * pitch + fin
+    total_width = n_repetitions * n * pitch + fin
     # Base slab behind the deepest well.
     _material_rect(ax, 0.0, -d_max - base, total_width, base, "rigid", **kwargs)
     # Fins and well bottoms: the solid between the carved wells.
     x = 0.0
-    for _period in range(repetitions):
+    for _period in range(n_repetitions):
         for depth in d:
             _material_rect(ax, x, -d_max, fin, d_max, "plate", linewidth=0.6)
             x += fin
@@ -1250,7 +1250,7 @@ def plot_diffuser_geometry(
         result.depths,
         result.well_width,
         ax=ax,
-        repetitions=result.repetitions if result.repetitions is not None else 1,
+        n_repetitions=result.n_repetitions if result.n_repetitions is not None else 1,
         language=language,
         **kwargs,
     )

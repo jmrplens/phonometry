@@ -238,8 +238,8 @@ def _plot_density_with_band(
     color = style_pop(kwargs, "color", _C_PRIMARY)
     ax.fill_between(
         freqs[pos],
-        _db10(np.asarray(result.ci_lower, dtype=np.float64)[pos]),
-        _db10(np.asarray(result.ci_upper, dtype=np.float64)[pos]),
+        _db10(np.asarray(result.confidence_lower, dtype=np.float64)[pos]),
+        _db10(np.asarray(result.confidence_upper, dtype=np.float64)[pos]),
         color=band_color if band_color is not None else color,
         alpha=band_alpha,
         lw=0.0,
@@ -957,7 +957,7 @@ def plot_phase_decomposition(
         axp.semilogx(freqs[pos], result.phase_rad[pos], **kwargs)
         axp.semilogx(
             freqs[pos],
-            result.minimum_phase_rad[pos],
+            result.min_phase_rad[pos],
             color=_C_SECONDARY,
             ls="--",
             label=_t("Minimum phase (from $|H|$)", language),
@@ -1050,7 +1050,7 @@ def plot_tone_burst(
             "Tone burst (IEC 60268-1): {f} Hz, {cycles} cycles",
             language,
             f=f,
-            cycles=result.cycles,
+            cycles=result.n_cycles,
         )
     else:
         rate = decimal_comma(f"{result.repetition_rate:g}", language)
@@ -1058,7 +1058,7 @@ def plot_tone_burst(
             "Tone burst (IEC 60268-1): {f} Hz, {cycles} cycles, {rate}/s",
             language,
             f=f,
-            cycles=result.cycles,
+            cycles=result.n_cycles,
             rate=rate,
         )
     ax.set_title(title)

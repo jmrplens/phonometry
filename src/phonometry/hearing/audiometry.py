@@ -931,7 +931,7 @@ class AscendingThresholdResult(OwnsArrays):
         return self.span_db > _SPREAD_LIMIT_DB + _BOUNDARY_SLACK_DB
 
     @property
-    def responses_at_threshold(self) -> int:
+    def n_responses_at_threshold(self) -> int:
         """How many ascents ended at the threshold level.
 
         :return: The count, 0 when no threshold is determined.

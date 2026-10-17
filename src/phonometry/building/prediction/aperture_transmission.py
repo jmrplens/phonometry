@@ -300,7 +300,7 @@ def slit_resonance_frequencies(
     depth: float,
     width_m: float,
     *,
-    orders: int = 3,
+    n_orders: int = 3,
     speed_of_sound: float = _SPEED_OF_SOUND,
 ) -> np.ndarray:
     r"""Slit resonance frequencies :math:`d + 2e = z\lambda/2` (Hopkins
@@ -312,10 +312,10 @@ def slit_resonance_frequencies(
 
     :param depth: Slit depth ``d``, in m (> 0).
     :param width_m: Slit width ``w``, in m (> 0).
-    :param orders: Number of resonance orders ``z = 1..orders`` (>= 1).
+    :param n_orders: Number of resonance orders ``z = 1..n_orders`` (>= 1).
     :param speed_of_sound: Speed of sound in air ``c0`` (Default: 343 m/s).
     :return: The resonance frequencies (Hz), one per order.
-    :raises ValueError: for a non-positive input, ``orders < 1``, or a slit so
+    :raises ValueError: for a non-positive input, ``n_orders < 1``, or a slit so
         wide relative to its depth that the effective depth :math:`d + 2e` is
         non-positive (no resonance exists; ``width_m`` must be much less than the
         wavelength).
@@ -323,11 +323,11 @@ def slit_resonance_frequencies(
     d = require_positive(depth, "depth")
     w = require_positive(width_m, "width_m")
     c0 = require_positive(speed_of_sound, "speed_of_sound")
-    if orders < 1:
-        msg = "'orders' must be at least 1."
+    if n_orders < 1:
+        msg = "'n_orders' must be at least 1."
         raise ValueError(msg)
-    out = np.empty(orders, dtype=np.float64)
-    for i in range(orders):
+    out = np.empty(n_orders, dtype=np.float64)
+    for i in range(n_orders):
         z = i + 1
         # Fixed-point iteration on f: f = z c0 / (2 (d + 2 e(f))).
         f = z * c0 / (2.0 * d)

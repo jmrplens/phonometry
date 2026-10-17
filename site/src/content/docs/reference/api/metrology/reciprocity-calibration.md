@@ -163,7 +163,7 @@ Built by [`pressure_reciprocity`](/phonometry/reference/api/metrology/reciprocit
 
 $\sum_j C_j$, the corrections added to every level, in dB.
 
-### ReciprocityCalibration.microphones
+### ReciprocityCalibration.n_microphones
 
 *property*
 

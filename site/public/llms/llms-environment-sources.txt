@@ -588,7 +588,7 @@ import matplotlib.pyplot as plt
 from phonometry import environment
 
 stock = environment.RollingStock(
-    axles=4,
+    n_axles=4,
     wheel_roughness=environment.wheel_roughness(environment.BrakeType.NON_TREAD),
     contact_filter=environment.contact_filter(environment.ContactFilter.LOAD_50_DIAMETER_920),
     wheel_transfer=environment.wheel_transfer(environment.WheelDiameter.MM_920),
@@ -1042,7 +1042,7 @@ rng = np.random.default_rng(3095)
 p = 0.25 * np.sqrt(angle / np.pi + 1e-4) * rng.standard_normal(t.size)
 
 passby = environment.pass_by_measurement(p, fs, start_s=front_s, end_s=front_s + tp)
-print(round(tp, 2), round(passby.equivalent_level_db, 1), round(passby.maximum_level_db, 1))
+print(round(tp, 2), round(passby.equivalent_level_db, 1), round(passby.max_level_db, 1))
 # 4.5 81.3 81.9
 whole = environment.pass_by_measurement(
     p, fs, start_s=0.0, end_s=14.0, pass_by_time_s=tp,
@@ -1057,7 +1057,7 @@ print(round(whole.equivalent_level_db, 1), round(whole.normalized_level_db, 1))
 `rolling_stock_test` averages the runs of each position, rounds the mean to
 the integer (a half goes up) and keeps the highest; `stationary_test` averages
 a set on energy weighted by length, $(\pi/2) \times 7{,}5$ m for the end
-positions (Formulae 1 and 2). `type_test_speeds`, `minimum_curve_radius` and
+positions (Formulae 1 and 2). `type_test_speeds`, `min_curve_radius` and
 `acceleration_test_positions` (Figure 10) state the small rules around them.
 
 ```python

@@ -154,19 +154,19 @@ def test_assessment_period_defaults_and_validates() -> None:
     interval, so another interval may be carried instead.
     """
     default = nt.impulse_prominence([1200.0], [32.0])
-    assert default.assessment_period_min == nt._DEFAULT_ASSESSMENT_PERIOD_MIN
-    assert default.assessment_period_min == 30.0
+    assert default.assessment_period_minutes == nt._DEFAULT_ASSESSMENT_PERIOD_MINUTES
+    assert default.assessment_period_minutes == 30.0
 
-    other = nt.impulse_prominence([1200.0], [32.0], assessment_period_min=5.0)
-    assert other.assessment_period_min == 5.0
+    other = nt.impulse_prominence([1200.0], [32.0], assessment_period_minutes=5.0)
+    assert other.assessment_period_minutes == 5.0
     # The interval does not touch the prominence chain.
     assert other.prominence == pytest.approx(default.prominence)
 
     for bad in (0.0, -5.0, float("nan"), float("inf")):
         with pytest.raises(
-            ValueError, match=r"assessment_period_min must be positive and finite"
+            ValueError, match=r"assessment_period_minutes must be positive and finite"
         ):
-            nt.impulse_prominence([1200.0], [32.0], assessment_period_min=bad)
+            nt.impulse_prominence([1200.0], [32.0], assessment_period_minutes=bad)
 
 
 # --------------------------------------------------------------------------

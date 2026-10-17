@@ -163,8 +163,8 @@ on the rounded value its table prints, writing that input out: "$\sqrt{2}$ ×
 ```python
 plug = hearing.REAT_WITHIN_LABORATORY_UNCERTAINTY["earplug"]["250 Hz up to 4 kHz"]
 print(round(plug.expanded_db, 2))                                          # 2.27
-print(round(hearing.minimum_significant_difference(2.3), 1))               # 3.3
-print(round(hearing.minimum_significant_difference(plug.expanded_db), 2))  # 3.21
+print(round(hearing.min_significant_difference(2.3), 1))               # 3.3
+print(round(hearing.min_significant_difference(plug.expanded_db), 2))  # 3.21
 
 # The typical U95 band by band, ready for assess_attenuation_difference.
 print(np.round(hearing.reat_expanded_uncertainty(reat.frequencies, protector="earplug"), 1))
@@ -681,7 +681,7 @@ uncertainty of the mean of Annex A with the typical budgets of Tables A.2 and
 B.2, the significance test of Annex B (B.1.2, and the minimum difference of
 B.1.1 and B.2) and the sound-field conditions of 4.2.2 with Table 1, via
 `hearing.real_ear_attenuation`, `hearing.assess_attenuation_difference`,
-`hearing.minimum_significant_difference`, `hearing.reat_expanded_uncertainty`
+`hearing.min_significant_difference`, `hearing.reat_expanded_uncertainty`
 and `hearing.check_reat_sound_field`. Every derived cell of Tables A.2, A.3
 and B.2, the criterion row and the verdict of Table B.1 and the four minimum
 differences are reproduced to the printed decimal in the test suite and in the

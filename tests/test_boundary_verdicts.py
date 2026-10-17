@@ -246,7 +246,7 @@ def test_cabin_spread_of_3_db_asks_for_three_positions(
     check = noise_control.check_source_positions(
         [[signal, 20.0], [background, 20.0], [background, 20.0]]
     )
-    assert check.required_positions == 3
+    assert check.n_required_positions == 3
     assert check.satisfied
 
 
@@ -1112,7 +1112,7 @@ def test_a_subset_carrying_exactly_half_the_power_is_not_enough(
 ) -> None:
     # ISO 9614-1 B.1.3: take segments until more than half has passed.
     result = emission.partial_power_concentration(np.array(intensity), np.ones(10))
-    assert result.subset_positions == 3
+    assert result.n_subset_positions == 3
 
 
 #: Normal intensities, in tenths of a watt per square metre, that cancel in

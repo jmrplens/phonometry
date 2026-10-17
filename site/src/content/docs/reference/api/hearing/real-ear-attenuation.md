@@ -56,7 +56,7 @@ $$
 
 which for two equal uncertainties is $\sqrt{2}\,U_{95}$, the minimum
 difference of B.1.1 and B.2. [`assess_attenuation_difference`](/phonometry/reference/api/hearing/real-ear-attenuation/#assess_attenuation_difference) applies it
-band by band and [`minimum_significant_difference`](/phonometry/reference/api/hearing/real-ear-attenuation/#minimum_significant_difference) gives the second form.
+band by band and [`min_significant_difference`](/phonometry/reference/api/hearing/real-ear-attenuation/#min_significant_difference) gives the second form.
 B.1.1 and B.2 evaluate it on the **rounded** $U_{95}$ their tables print,
 and say so: "the expanded measurement uncertainty ... is 2,3 dB. The minimum
 difference is thus $\sqrt{2}$ × 2,3 dB = 3,3 dB". From the unrounded
@@ -280,10 +280,10 @@ separate requirements of the test site and are not judged here.
 | :--- | :--- |
 | ValueError | if a position is missing or unknown, if the bands do not match, if a rotation is given without its microphone's rejection or the other way round, or if that rejection is below the 10 dB Table 1 accepts. |
 
-## minimum_significant_difference
+## min_significant_difference
 
 ```python
-minimum_significant_difference(
+min_significant_difference(
     expanded_uncertainty_db: ArrayLike,
 ) -> float | np.ndarray
 ```
@@ -420,7 +420,7 @@ RealEarAttenuationResult(
     standard_uncertainty_db: np.ndarray,
     expanded_uncertainty_db: np.ndarray,
     frequencies: np.ndarray,
-    subjects: int,
+    n_subjects: int,
 )
 ```
 
@@ -436,7 +436,7 @@ The attenuation of a hearing protector on a panel of subjects (4.6).
 | `standard_uncertainty_db` | $u = s/\sqrt{N}$, the standard deviation of the mean (A.2), in dB. |
 | `expanded_uncertainty_db` | $U_{95} = 2u$ (A.1), in dB. |
 | `frequencies` | The centre frequencies of the test signals, in hertz. |
-| `subjects` | The number of test subjects $N$. |
+| `n_subjects` | The number of test subjects $N$. |
 
 ### RealEarAttenuationResult.plot()
 
@@ -493,7 +493,7 @@ test signal falls in, and returns its expanded uncertainty at full
 precision. These are the typical values B.1.1 and B.2 draw on when no data
 of a specific measurement are at hand; the text of both uses them rounded
 to one decimal, as the tables print them (see
-[`minimum_significant_difference`](/phonometry/reference/api/hearing/real-ear-attenuation/#minimum_significant_difference)).
+[`min_significant_difference`](/phonometry/reference/api/hearing/real-ear-attenuation/#min_significant_difference)).
 
 **Parameters**
 

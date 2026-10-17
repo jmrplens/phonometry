@@ -419,13 +419,13 @@ def test_silencer_self_noise_velocity_exponent() -> None:
 
 
 def test_silencer_self_noise_requires_passages() -> None:
-    with pytest.raises(ValueError, match=r"'passages' must be a positive integer"):
+    with pytest.raises(ValueError, match=r"'n_passages' must be a positive integer"):
         hvac.silencer_self_noise(None, 10.0, 0, 0.9)
 
 
 def test_silencer_self_noise_fractional_passages_raises() -> None:
     # 2.5 passages used to slip past the sign check into 10 lg N.
-    with pytest.raises(ValueError, match="'passages' must be a positive integer"):
+    with pytest.raises(ValueError, match="'n_passages' must be a positive integer"):
         hvac.silencer_self_noise(None, 10.0, 2.5, 0.9)  # type: ignore[arg-type]
 
 

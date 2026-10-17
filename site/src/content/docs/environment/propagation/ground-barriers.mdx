@@ -131,7 +131,7 @@ bands = np.array([63., 125., 250., 500., 1000., 2000., 4000., 8000.])
 # Grassland (effective flow resistivity sigma = 200 kPa.s/m^2), source 1 m and
 # receiver 1.5 m high, 50 m apart. The impedance comes from the Delany-Bazley
 # porous model of phonometry.materials (a semi-infinite ground).
-# Argument order: frequencies, source_height, receiver_height, distance.
+# Argument order: frequencies, source_height_m, receiver_height_m, distance.
 res = environment.ground_effect(bands, 1.0, 1.5, 50.0, flow_resistivity_pa_s_m2=2e5)
 print(res.excess_attenuation)     # the ground dip (dB re free field)
 print(res.reflection_coefficient) # complex Q per band

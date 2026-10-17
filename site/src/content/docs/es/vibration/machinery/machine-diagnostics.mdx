@@ -260,7 +260,7 @@ laterales y eleva los armónicos superiores del engrane.
 from phonometry import vibration
 
 # Un piñón de 28 dientes en un eje a 1500 r/min, con dos órdenes de bandas.
-res = vibration.gear_mesh_frequencies(1500.0, 28, n_harmonics=3, sidebands=2)
+res = vibration.gear_mesh_frequencies(1500.0, 28, n_harmonics=3, n_sidebands=2)
 print(round(res["GMF"], 1))            # 700.0
 print(round(res["GMF+1x"], 1))         # 725.0  (GMF + un orden de eje)
 print(res.harmonics("GMF", 3))         # [ 700. 1400. 2100.]
@@ -400,7 +400,7 @@ import numpy as np
 # La biblioteca prevé las líneas; los espectros de debajo se sintetizan
 # exactamente a esas frecuencias, así que la figura y los valores impresos
 # concuerdan.
-gear = vibration.gear_mesh_frequencies(1500.0, 28, n_harmonics=3, sidebands=2)
+gear = vibration.gear_mesh_frequencies(1500.0, 28, n_harmonics=3, n_sidebands=2)
 freq = np.linspace(0.0, 2400.0, 4800)
 amp = np.full_like(freq, 0.004)
 for order, height in enumerate((1.0, 0.40, 0.16), start=1):
@@ -568,7 +568,7 @@ shaft_rpm = 2000.0               # del tacómetro, no de la placa de caracterís
 # y los armónicos del eje. Todos en unos ejes.
 bearing = vibration.bearing_fault_frequencies(shaft_rpm, 15, 6.0, 34.0,
                                               contact_angle_deg=12.96)
-gear = vibration.gear_mesh_frequencies(shaft_rpm, 28, n_harmonics=2, sidebands=1)
+gear = vibration.gear_mesh_frequencies(shaft_rpm, 28, n_harmonics=2, n_sidebands=1)
 lines = vibration.combine_fault_lines(bearing, gear)
 
 spectrum = signals.envelope_spectrum(record, fs, band=(2000.0, 4000.0))

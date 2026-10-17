@@ -323,7 +323,7 @@ def _enclosure_4_16() -> tuple[float, float, np.ndarray]:
     return external_area, external_area + bare_floor + machine, absorption
 
 
-def _problem_4_16(model: str = "norton") -> noise_control.EnclosureResult:
+def _problem_4_16(model: str = "norton") -> noise_control.EnclosureInsertionLossResult:
     """Required enclosure transmission loss of problem 4.16.
 
     ``model="norton"`` is Equation (4.115), which has no ``0.3`` floor inside

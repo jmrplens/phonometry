@@ -687,7 +687,7 @@ power = emission.sound_power_intensity_points(
 )
 print(np.round(power.sound_power_level, 1))  # [83.3 86.8 88.1 89.6 90.4 90.4]
 print(round(power.sound_power_level_a, 1))   # 96.1 dB(A)
-print(round(power.surface_area, 2), power.positions)   # 14.24 16
+print(round(power.surface_area, 2), power.n_positions)   # 14.24 16
 ```
 
 ### El signo está en la impresión, no en el número
@@ -863,7 +863,7 @@ fig, (axt, axb) = plt.subplots(2, 1, sharex=True)
 for offset, grade, color in ((-0.18, "precision", "#1f77b4"),
                              (+0.18, "engineering", "#2ca02c")):
     axt.bar(bands + offset, required[grade], width=0.36, color=color)
-axt.axhline(survey.positions, color="#d62728", linestyle="--")
+axt.axhline(survey.n_positions, color="#d62728", linestyle="--")
 axt.set_ylabel("Posiciones necesarias, $C F_4^2$")
 interval = survey.confidence_interval
 axb.errorbar(bands, np.zeros_like(bands, dtype=float),
@@ -915,8 +915,8 @@ le da ninguno de los dos.
 # primeros.
 concentrated = np.array([3.0e-5, 2.4e-5, 1.8e-5, 1.4e-5] + [8.0e-6] * 8)
 subset = emission.partial_power_concentration(concentrated, np.full(12, 1.0))
-print(subset.subset_positions, round(subset.power_fraction, 2))   # 4 0.57
-print(subset.additional_positions)                                # 2
+print(subset.n_subset_positions, round(subset.power_fraction, 2))   # 4 0.57
+print(subset.n_additional_positions)                                # 2
 ```
 
 ## Elegir la sonda

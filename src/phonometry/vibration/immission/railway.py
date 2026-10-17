@@ -441,7 +441,7 @@ class AmplitudeDistribution(OwnsArrays):
 
 
 def amplitude_distribution(
-    velocity_mm_s: ArrayLike, *, bins: int = 101
+    velocity_mm_s: ArrayLike, *, n_bins: int = 101
 ) -> AmplitudeDistribution:
     """The amplitude distribution of a stretch of velocity (Clause 6.3).
 
@@ -450,17 +450,17 @@ def amplitude_distribution(
 
     :param velocity_mm_s: The velocity of the stretch, in millimetres per
         second (1-D).
-    :param bins: How many equal bins span the range of the stretch (default
+    :param n_bins: How many equal bins span the range of the stretch (default
         101, odd so that zero sits in the middle of one).
     :return: The density and its cumulative function, as an
         :class:`AmplitudeDistribution`.
     :raises ValueError: For a bad record or fewer than two bins.
     """
     x = _record(velocity_mm_s)
-    require_scalar(bins, "bins")
-    count = int(bins)
+    require_scalar(n_bins, "n_bins")
+    count = int(n_bins)
     if count < _MIN_BINS:
-        msg = f"'bins' must be at least 2; got {bins!r}."
+        msg = f"'n_bins' must be at least 2; got {n_bins!r}."
         raise ValueError(msg)
     extent = float(np.max(np.abs(x)))
     if extent <= 0.0:
@@ -759,7 +759,7 @@ class TrainPassage(OwnsArrays):
     :ivar frequencies: The nominal third-octave centres analysed.
     :ivar band_interval_levels_db: :math:`L_{v\mathrm{F}j}(f_{\mathrm{T}n})` of Formula (6), one
         row per stretch, :math:`T_1` to :math:`T_3`.
-    :ivar band_maximum_levels_db: :math:`L_{v\mathrm{Fmax}}(f_{\mathrm{T}n})` of Formula
+    :ivar band_max_levels_db: :math:`L_{v\mathrm{Fmax}}(f_{\mathrm{T}n})` of Formula
         (7), over :math:`T_3`.
     :ivar fs: The sampling frequency of the record.
     """
@@ -775,7 +775,7 @@ class TrainPassage(OwnsArrays):
     event_level_db: float
     frequencies: NDArray[np.float64]
     band_interval_levels_db: NDArray[np.float64]
-    band_maximum_levels_db: NDArray[np.float64]
+    band_max_levels_db: NDArray[np.float64]
     fs: float
 
     def plot(
@@ -970,7 +970,7 @@ def evaluate_train_passage(
         ),
         frequencies=centres,
         band_interval_levels_db=interval_levels,
-        band_maximum_levels_db=_level(
+        band_max_levels_db=_level(
             np.max(band_rms[:, t3], axis=1), VELOCITY_LEVEL_REFERENCE_MM_S
         ),
         fs=fs,

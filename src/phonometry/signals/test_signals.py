@@ -118,7 +118,7 @@ _MAX_TRANSITION_WIDTH = 0.5
 
 def noise_signal(
     fs: float,
-    seconds: float = 1.0,
+    duration_s: float = 1.0,
     *,
     color: Literal["white", "pink", "red", "blue", "violet"] = "white",
     rms: float = 1.0,
@@ -133,13 +133,13 @@ def noise_signal(
     zero-mean and rescaled to the requested RMS exactly.
 
     :param fs: Rate to generate at, in Hz.
-    :param seconds: Duration, in seconds (at least 16 samples).
+    :param duration_s: Duration, in seconds (at least 16 samples).
     :param color: Noise color: ``'white'``, ``'pink'``, ``'red'``,
         ``'blue'`` or ``'violet'``.
     :param rms: Root-mean-square value of the returned record.
     :param seed: Seed for :func:`numpy.random.default_rng`; the same seed
         reproduces the same record. ``None`` draws fresh entropy.
-    :return: The noise record, ``round(fs * seconds)`` samples.
+    :return: The noise record, ``round(fs * duration_s)`` samples.
     :raises ValueError: If the inputs or parameters are invalid.
     """
     require_scalar(fs, "fs")
@@ -147,14 +147,14 @@ def noise_signal(
     if not np.isfinite(fs_v) or fs_v <= 0.0:
         msg = "'fs' must be a positive, finite number."
         raise ValueError(msg)
-    require_scalar(seconds, "seconds")
-    seconds_v = float(seconds)
-    if not np.isfinite(seconds_v) or seconds_v <= 0.0:
-        msg = "'seconds' must be a positive, finite number."
+    require_scalar(duration_s, "duration_s")
+    duration_s_v = float(duration_s)
+    if not np.isfinite(duration_s_v) or duration_s_v <= 0.0:
+        msg = "'duration_s' must be a positive, finite number."
         raise ValueError(msg)
-    n = round(fs_v * seconds_v)
+    n = round(fs_v * duration_s_v)
     if n < _MIN_NOISE_SAMPLES:
-        msg = f"'fs'*'seconds' must give at least 16 samples, got {n}."
+        msg = f"'fs'*'duration_s' must give at least 16 samples, got {n}."
         raise ValueError(msg)
     if color not in _COLOR_EXPONENTS:
         msg = "'color' must be one of 'white', 'pink', 'red', 'blue', 'violet'."
@@ -232,13 +232,13 @@ class ToneBurstResult(OwnsArrays):
         (``amplitude`` while the gate is open, ``0`` elsewhere).
     :ivar fs: Sample rate, in Hz.
     :ivar frequency: Tone frequency, in Hz.
-    :ivar cycles: Full tone periods per burst.
+    :ivar n_cycles: Full tone periods per burst.
     :ivar amplitude: Peak amplitude of the tone.
-    :ivar burst_s: Burst duration ``cycles/frequency``, in seconds.
+    :ivar burst_s: Burst duration ``n_cycles/frequency``, in seconds.
     :ivar burst_samples: Samples per burst,
         ``round(fs * cycles / frequency)``.
     :ivar onset_sample: Index of the first sample of the first burst.
-    :ivar repetitions: Number of bursts in the record.
+    :ivar n_repetitions: Number of bursts in the record.
     :ivar repetition_rate: Bursts per second, or ``None`` (single burst).
     :ivar period_samples: Samples per repetition period
         (``round(fs/repetition_rate)``), or ``None`` (single burst).
@@ -250,12 +250,12 @@ class ToneBurstResult(OwnsArrays):
     envelope: NDArray[np.float64]
     fs: float
     frequency: float
-    cycles: int
+    n_cycles: int
     amplitude: float
     burst_s: float
     burst_samples: int
     onset_sample: int
-    repetitions: int
+    n_repetitions: int
     repetition_rate: float | None
     period_samples: int | None
     duty_cycle: float | None
@@ -302,9 +302,9 @@ class ToneBurstResult(OwnsArrays):
 def _tone_burst_scalars(
     fs: float,
     frequency: float,
-    cycles: int,
+    n_cycles: int,
     amplitude: float,
-    repetitions: int,
+    n_repetitions: int,
     pre_silence: float,
     post_silence: float,
 ) -> tuple[float, float, int, float, int]:
@@ -314,16 +314,16 @@ def _tone_burst_scalars(
     if f_v >= fs_v / 2.0:
         msg = "'frequency' must be below the Nyquist rate fs/2."
         raise ValueError(msg)
-    require_scalar(cycles, "cycles")
-    cycles_v = int(cycles)
-    if cycles_v != cycles or cycles_v < 1:
-        msg = "'cycles' must be a positive integer."
+    require_scalar(n_cycles, "n_cycles")
+    cycles_v = int(n_cycles)
+    if cycles_v != n_cycles or cycles_v < 1:
+        msg = "'n_cycles' must be a positive integer."
         raise ValueError(msg)
     amplitude_v = _positive(amplitude, "amplitude")
-    require_scalar(repetitions, "repetitions")
-    repetitions_v = int(repetitions)
-    if repetitions_v != repetitions or repetitions_v < 1:
-        msg = "'repetitions' must be a positive integer."
+    require_scalar(n_repetitions, "n_repetitions")
+    repetitions_v = int(n_repetitions)
+    if repetitions_v != n_repetitions or repetitions_v < 1:
+        msg = "'n_repetitions' must be a positive integer."
         raise ValueError(msg)
     for name, value in (("pre_silence", pre_silence), ("post_silence", post_silence)):
         if not np.isfinite(float(value)) or float(value) < 0.0:
@@ -344,7 +344,7 @@ def _tone_burst_period(
     """
     if repetition_rate is None:
         if repetitions_v > 1:
-            msg = "'repetition_rate' is required when 'repetitions' > 1."
+            msg = "'repetition_rate' is required when 'n_repetitions' > 1."
             raise ValueError(msg)
         return None, None, None
     rate_v = _positive(repetition_rate, "repetition_rate")
@@ -361,10 +361,10 @@ def _tone_burst_period(
 def tone_burst(
     fs: float,
     frequency: float,
-    cycles: int,
+    n_cycles: int,
     *,
     amplitude: float = 1.0,
-    repetitions: int = 1,
+    n_repetitions: int = 1,
     repetition_rate: float | None = None,
     pre_silence: float = 0.0,
     post_silence: float = 0.0,
@@ -373,15 +373,15 @@ def tone_burst(
 
     IEC 60268-1:1985, Clause A2.1: "The burst should start at the
     zero-crossing of the [...] tone and should consist of an integral
-    number of full periods." The burst is a sine of ``cycles`` full
+    number of full periods." The burst is a sine of ``n_cycles`` full
     periods gated by a rectangular envelope; with ``repetition_rate`` a
-    train of ``repetitions`` identical bursts is produced, one per
+    train of ``n_repetitions`` identical bursts is produced, one per
     repetition period, as in the repetitive-burst test of Clause A2.2
     (there: 5 ms bursts of 5 kHz tone at 2, 10 or 100 bursts per second).
 
     The gate closes after ``round(fs * cycles / frequency)`` samples, so
     the "integral number of full periods" is sample-exact only when
-    ``fs`` and ``frequency`` are commensurate (``fs * cycles/frequency``
+    ``fs`` and ``frequency`` are commensurate (``fs * n_cycles/frequency``
     an integer). Otherwise the gate closes up to half a sample away from
     the tone's final zero crossing and the gated waveform carries a
     residual step of up to
@@ -393,9 +393,9 @@ def tone_burst(
 
     :param fs: Rate to generate at, in Hz.
     :param frequency: Tone frequency, in Hz (below the Nyquist rate).
-    :param cycles: Full tone periods per burst (positive integer).
+    :param n_cycles: Full tone periods per burst (positive integer).
     :param amplitude: Peak amplitude of the tone.
-    :param repetitions: Number of bursts (requires ``repetition_rate``
+    :param n_repetitions: Number of bursts (requires ``repetition_rate``
         when greater than 1).
     :param repetition_rate: Bursts per second; each burst then occupies
         one full repetition period (burst plus silence). ``None`` (the
@@ -409,9 +409,9 @@ def tone_burst(
     fs_v, f_v, cycles_v, amplitude_v, repetitions_v = _tone_burst_scalars(
         fs,
         frequency,
-        cycles,
+        n_cycles,
         amplitude,
-        repetitions,
+        n_repetitions,
         pre_silence,
         post_silence,
     )
@@ -420,7 +420,7 @@ def tone_burst(
     exact_samples = fs_v * burst_s
     n_on = round(exact_samples)
     if n_on < _MIN_RECORD_SAMPLES:
-        msg = "The burst is shorter than 2 samples; increase 'cycles' or 'fs'."
+        msg = "The burst is shorter than 2 samples; increase 'n_cycles' or 'fs'."
         raise ValueError(msg)
     rate_v, period, duty = _tone_burst_period(
         fs_v, n_on, repetitions_v, repetition_rate
@@ -466,12 +466,12 @@ def tone_burst(
         envelope=envelope,
         fs=fs_v,
         frequency=f_v,
-        cycles=cycles_v,
+        n_cycles=cycles_v,
         amplitude=amplitude_v,
         burst_s=burst_s,
         burst_samples=n_on,
         onset_sample=n_pre,
-        repetitions=repetitions_v,
+        n_repetitions=repetitions_v,
         repetition_rate=rate_v,
         period_samples=period,
         duty_cycle=duty,

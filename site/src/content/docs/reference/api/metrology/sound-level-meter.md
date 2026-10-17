@@ -34,7 +34,7 @@ NOTE to 22 t) gives in the statement. The record takes that uncertainty
 beside the total,
 [`SoundLevelMeterPeriodicMeasurements.acoustic_weighting_uncertainties_without_correction_data_db`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicmeasurements)
 and its Clause 13 twin, and a result it clears is listed under
-[`SoundLevelMeterPeriodicVerification.over_maximum_by_correction_data`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationover_maximum_by_correction_data)
+[`SoundLevelMeterPeriodicVerification.over_max_by_correction_data`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationover_max_by_correction_data)
 and [`SoundLevelMeterPeriodicVerification.failed`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationfailed) rather than under
 `unusable`. Without it the total is all the verdict knows, and 4.3 applies.
 
@@ -189,10 +189,10 @@ IEC61672_TABLE_5 = (PeakReference(signal='one cycle', nominal_frequency_hz=31.5,
 
 *Constant* (`tuple`).
 
-## MaximumUncertaintyRow
+## MaxUncertaintyRow
 
 ```python
-MaximumUncertaintyRow(
+MaxUncertaintyRow(
     requirement: str,
     reference: str,
     max_uncertainty: float,
@@ -217,10 +217,10 @@ One row of IEC 61672-1:2013 Table B.1, a maximum-permitted uncertainty.
 | `upper_hz` | The upper end, inclusive, in hertz, or `None`. |
 | `includes_lower` | Whether `lower_hz` belongs to the row; the page writes the bands after the first as "> 1 kHz to 2 kHz". |
 
-### MaximumUncertaintyRow.contains()
+### MaxUncertaintyRow.contains()
 
 ```python
-MaximumUncertaintyRow.contains(frequency_hz: float) -> bool
+MaxUncertaintyRow.contains(frequency_hz: float) -> bool
 ```
 
 Whether a nominal frequency falls in the row's band.
@@ -308,7 +308,7 @@ SoundLevelMeterFeatures(
     s_time_weighting: bool | None = None,
     time_averaged: bool | None = None,
     sound_exposure_level: bool | None = None,
-    level_ranges: int | None = None,
+    n_level_ranges: int | None = None,
     c_weighted_peak: bool | None = None,
 )
 ```
@@ -348,7 +348,7 @@ meter has it (5.1.9).
 | `s_time_weighting` | The S time weighting: 14.3 and the maximum S-time-weighted toneburst responses of Clause 18. |
 | `time_averaged` | A display of time-averaged sound level: 14.3, the overload indication of Clause 20 (20.1) and the sound exposure level of the tonebursts, which 18.2 calculates from it when the meter does not measure sound exposure level. |
 | `sound_exposure_level` | The measurement of sound exposure level: the sound exposure level toneburst responses of Clause 18 (18.2). |
-| `level_ranges` | How many level ranges the meter has, as the instruction manual identifies them (IEC 61672-1 5.1.12): 1 for a meter with one, which takes Clause 17 out (17.1), and for more, the number 17.4 covers, the reference level range included, and 17.3 every one besides it. |
+| `n_level_ranges` | How many level ranges the meter has, as the instruction manual identifies them (IEC 61672-1 5.1.12): 1 for a meter with one, which takes Clause 17 out (17.1), and for more, the number 17.4 covers, the reference level range included, and 17.3 every one besides it. |
 | `c_weighted_peak` | The measurement of C-weighted peak sound level: Clause 19. |
 
 ## SoundLevelMeterPeriodicMeasurements
@@ -458,7 +458,7 @@ SoundLevelMeterPeriodicRequirement(
     labels: tuple[str, ...],
     verifications: tuple[ConformanceVerification, ...],
     checks: tuple[tuple[str, bool], ...] = (),
-    over_maximum_by_correction_data: tuple[str, ...] = (),
+    over_max_by_correction_data: tuple[str, ...] = (),
 )
 ```
 
@@ -474,7 +474,7 @@ The verdict on one requirement of IEC 61672-3:2013.
 | `labels` | What each result is (the frequency, the weighting, the toneburst or the signal), in the order given. |
 | `verifications` | One [`ConformanceVerification`](/phonometry/reference/api/metrology/conformance/#conformanceverification) per result, on the deviation from the design goal. |
 | `checks` | The yes/no requirements of the clause, each `(what, held)`: no overload or under-range indication within the linear operating range (16.4), no overload indication during the C-weighted peak test (19.3, 19.5) and the latching of the overload indicator (20.5). |
-| `over_maximum_by_correction_data` | The results whose actual uncertainty exceeds its maximum only because it includes the uncertainty of the manufacturer's free-field or random-incidence correction data (4.4): results that did not conform, for that reason, and not results 4.3 forbids using. |
+| `over_max_by_correction_data` | The results whose actual uncertainty exceeds its maximum only because it includes the uncertainty of the manufacturer's free-field or random-incidence correction data (4.4): results that did not conform, for that reason, and not results 4.3 forbids using. |
 
 ### SoundLevelMeterPeriodicRequirement.failed
 
@@ -484,7 +484,7 @@ The results that did not conform, and the failed checks.
 
 A result outside its acceptance limits and measured with an
 acceptable uncertainty, or one of
-`over_maximum_by_correction_data` (4.4). A result that is
+`over_max_by_correction_data` (4.4). A result that is
 `unusable` shows nothing about the meter (4.3) and is not here.
 
 ### SoundLevelMeterPeriodicRequirement.failure_reason()
@@ -535,7 +535,7 @@ electrical test of the frequency weightings, whose limits run from
 0,7 dB to 16 dB, is drawn as each result's margin to its nearer limit
 instead. A result whose uncertainty exceeds its maximum is drawn
 hollow, as 4.3 forbids using it, and a result of
-`over_maximum_by_correction_data` as one that did not conform
+`over_max_by_correction_data` as one that did not conform
 (4.4). The title names the clause and its verdict above the clause's
 heading.
 
@@ -562,7 +562,7 @@ What the clause tests, as its heading reads.
 
 The results whose uncertainty exceeds the maximum permitted (4.3).
 
-All of them but those of `over_maximum_by_correction_data`,
+All of them but those of `over_max_by_correction_data`,
 which 4.4 lets the test proceed with.
 
 ## SoundLevelMeterPeriodicVerification
@@ -655,7 +655,7 @@ without what it tests, or without the feature it needs: Clause 19
 for a meter declared without frequency weighting C (IEC 61672-1
 5.1.10). It is neither `missing` nor needed for a pass.
 
-### SoundLevelMeterPeriodicVerification.over_maximum_by_correction_data
+### SoundLevelMeterPeriodicVerification.over_max_by_correction_data
 
 *property*
 

@@ -180,8 +180,8 @@ class OpenPlanResult(OwnsArrays):
         :param metadata: Optional
             :class:`~phonometry.ReportMetadata`; ``None`` produces a bare
             characterisation fiche (metrics, plot and result only). The
-            open-plan-specific fields ``area`` (floor area), ``source_positions``
-            and ``receiver_positions`` (the number of measurement positions)
+            open-plan-specific fields ``area`` (floor area), ``n_source_positions``
+            and ``n_receiver_positions`` (the number of measurement positions)
             populate the header, alongside ``client``, ``test_room`` (the
             office or zone), ``specimen`` (the description and furnishing
             state), ``instrumentation``, ``temperature_c``, ``relative_humidity_percent``,

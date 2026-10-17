@@ -384,7 +384,7 @@ def test_meshed_qrd_far_field_matches_fraunhofer_model(qrd_levels: np.ndarray) -
         F0,
         depths=QRD_DEPTHS,
         angles_deg=POLAR_ANGLES,
-        repetitions=1,
+        n_repetitions=1,
         include_obliquity=True,
     )
     # Full wave vs Fraunhofer: high pattern correlation, lobe-level
@@ -460,7 +460,7 @@ def test_meshed_metadiffuser_far_field_matches_tmm_model(
         depth_m=META_DEPTH,
         period_m=PITCH,
         angles_deg=POLAR_ANGLES,
-        repetitions=1,
+        n_repetitions=1,
     )
     reflection = metadiffuser_reflection(
         np.asarray([F0]), wells, depth_m=META_DEPTH, period_m=PITCH
@@ -470,7 +470,7 @@ def test_meshed_metadiffuser_far_field_matches_tmm_model(
         F0,
         reflection=reflection,
         angles_deg=POLAR_ANGLES,
-        repetitions=1,
+        n_repetitions=1,
         include_obliquity=True,
     )
     sel = np.abs(POLAR_ANGLES) <= 60.0

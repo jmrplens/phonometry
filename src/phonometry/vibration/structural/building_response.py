@@ -142,7 +142,7 @@ def _refuse_unused(model: str, **given: object) -> None:
     :raises ValueError: On the first argument the model does not use.
     """
     used = {
-        "stories": {"stories"},
+        "stories": {"n_stories"},
         "height": {"height_m", "coefficient"},
         "height_width": {"height_m", "width_m", "coefficient"},
         "slenderness": {"height_m", "width_m", "coefficient"},
@@ -159,7 +159,7 @@ def _refuse_unused(model: str, **given: object) -> None:
 def fundamental_period(
     model: PeriodModel | str,
     *,
-    stories: int | None = None,
+    n_stories: int | None = None,
     height_m: float | None = None,
     width_m: float | None = None,
     coefficient: float | None = None,
@@ -168,7 +168,7 @@ def fundamental_period(
 
     Four predictors, and which arguments are needed depends on which:
 
-    * ``"stories"`` needs *stories*: :math:`T = 0{,}1\,n`.
+    * ``"stories"`` needs *n_stories*: :math:`T = 0{,}1\,n`.
     * ``"height"`` needs *height_m*: :math:`T = k_1 h`.
     * ``"height_width"`` needs both and *width_m*: :math:`T = k_2 h/\sqrt{b}`.
     * ``"slenderness"`` needs both:
@@ -179,7 +179,7 @@ def fundamental_period(
     *coefficient* to use the value of a particular code.
 
     :param model: One of :data:`PERIOD_MODELS`.
-    :param stories: Number of storeys ``n``, for the storey model.
+    :param n_stories: Number of storeys ``n``, for the storey model.
     :param height_m: Height ``h`` above the base, in metres.
     :param width_m: Width ``b`` parallel to the force, in metres.
     :param coefficient: The code coefficient, or ``None`` for the midpoint of
@@ -193,16 +193,16 @@ def fundamental_period(
     name = require_choice(str(model), "model", PERIOD_MODELS)
     _refuse_unused(
         name,
-        stories=stories,
+        n_stories=n_stories,
         height_m=height_m,
         width_m=width_m,
         coefficient=coefficient,
     )
     if name == "stories":
-        if stories is None:
-            msg = "The storey model needs 'stories'."
+        if n_stories is None:
+            msg = "The storey model needs 'n_stories'."
             raise ValueError(msg)
-        return 1.0 / story_fundamental_frequency(stories)
+        return 1.0 / story_fundamental_frequency(n_stories)
     if height_m is None:
         msg = f"The {name!r} model needs 'height_m'."
         raise ValueError(msg)
@@ -223,7 +223,7 @@ def fundamental_period(
 def fundamental_frequency(
     model: PeriodModel | str,
     *,
-    stories: int | None = None,
+    n_stories: int | None = None,
     height_m: float | None = None,
     width_m: float | None = None,
     coefficient: float | None = None,
@@ -235,7 +235,7 @@ def fundamental_frequency(
     reader should not have to remember which.
 
     :param model: One of :data:`PERIOD_MODELS`.
-    :param stories: Number of storeys ``n``, for the storey model.
+    :param n_stories: Number of storeys ``n``, for the storey model.
     :param height_m: Height ``h`` above the base, in metres.
     :param width_m: Width ``b`` parallel to the force, in metres.
     :param coefficient: The code coefficient, or ``None`` for the midpoint.
@@ -243,7 +243,7 @@ def fundamental_frequency(
     """
     return 1.0 / fundamental_period(
         model,
-        stories=stories,
+        n_stories=n_stories,
         height_m=height_m,
         width_m=width_m,
         coefficient=coefficient,
@@ -339,7 +339,7 @@ class BuildingFrequencyEstimate(RichDisplay):
 def estimate_fundamental_frequency(
     model: PeriodModel | str,
     *,
-    stories: int | None = None,
+    n_stories: int | None = None,
     height_m: float | None = None,
     width_m: float | None = None,
     coefficient: float | None = None,
@@ -347,7 +347,7 @@ def estimate_fundamental_frequency(
     """One prediction, bundled with the coefficient and the error band.
 
     :param model: One of :data:`PERIOD_MODELS`.
-    :param stories: Number of storeys ``n``, for the storey model.
+    :param n_stories: Number of storeys ``n``, for the storey model.
     :param height_m: Height ``h`` above the base, in metres.
     :param width_m: Width ``b`` parallel to the force, in metres.
     :param coefficient: The code coefficient, or ``None`` for the midpoint.
@@ -356,7 +356,7 @@ def estimate_fundamental_frequency(
     """
     period = fundamental_period(
         model,
-        stories=stories,
+        n_stories=n_stories,
         height_m=height_m,
         width_m=width_m,
         coefficient=coefficient,

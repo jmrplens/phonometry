@@ -84,7 +84,9 @@ def _multiple_shock_example() -> tuple[object, ReportMetadata, str]:
     peaks = np.array([40.0] * 5)
     dz = dose_from_peaks(peaks)
     sd = compression_dose(dz, mz=_MZ_MALE)
-    r = injury_risk(sd, start_age=20, years=20, days_per_year=120, sex="male")
+    r = injury_risk(
+        sd, start_age=20, exposure_duration_years=20, days_per_year=120, sex="male"
+    )
     result = MultipleShockResult(
         sex="male",
         acceleration_dose=dz,
@@ -93,7 +95,7 @@ def _multiple_shock_example() -> tuple[object, ReportMetadata, str]:
         risk=r,
         probability=float(injury_probability(r, sex="male")),
         start_age=20.0,
-        years=20,
+        exposure_duration_years=20,
         days_per_year=120.0,
         peaks=peaks,
         risk_thresholds=_RISK_THRESHOLDS_MALE,

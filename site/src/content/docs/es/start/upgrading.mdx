@@ -4,7 +4,7 @@ description: "Lo que la 4.0 movió, renombró y retiró, y cómo encontrar la gr
 ---
 
 La 4.0 rompe duro y no lleva capa de compatibilidad. Casi nada se ha borrado:
-de los 885 nombres que la raíz exportaba en la 3.3.0, sesenta y siete no existen ya
+de los 885 nombres que la raíz exportaba en la 3.3.0, sesenta y nueve no existen ya
 en ningún sitio y el resto simplemente vive en una dirección con nombre en vez
 de en una plana. Así que el trabajo es sobre todo un barrido de imports, y esta
 página es sobre todo un mapa.
@@ -30,7 +30,7 @@ print("laeq" in phonometry.__all__)     # False
 from phonometry.signals import laeq     # esta es la grafía nueva
 ```
 
-Medido sobre la superficie entera, 815 de aquellos 885 nombres de la raíz los
+Medido sobre la superficie entera, 813 de aquellos 885 nombres de la raíz los
 publica hoy exactamente un subpaquete, ninguno dos, y ninguno necesita una ruta
 más profunda que `phonometry.<subpaquete>`. Otros tres siguen en la raíz, donde
 siempre estuvieron. Así que el cambio no tiene ambigüedad: busca el subpaquete e
@@ -342,7 +342,7 @@ palabra para dos cosas:
 | `ground_speed=` en `linear_sound_speed_profile`, `log_linear_sound_speed_profile`, `ray_curvature_radius` y `shadow_zone_distance`, la velocidad del sonido junto al suelo | `ground_speed_of_sound=` |
 | `RayTraceResult.profile_speeds` | `.profile_speeds_of_sound` |
 | `blade_passing_frequency(rotational_speed=)` | `rotational_speed_rpm=` |
-| `.phase` en `FrequencyResponseResult`, `CrossSpectralDensityResult`, `PhaseDecompositionResult`, `EnvelopeResult` y `MobilityResult`; `.minimum_phase` y `.excess_phase` en `PhaseDecompositionResult`; `CrossSpectralDensityResult.phase_std`, todos en radianes | `.phase_rad`, `.minimum_phase_rad`, `.excess_phase_rad` y `.phase_standard_deviation_rad` |
+| `.phase` en `FrequencyResponseResult`, `CrossSpectralDensityResult`, `PhaseDecompositionResult`, `EnvelopeResult` y `MobilityResult`; `.minimum_phase` y `.excess_phase` en `PhaseDecompositionResult`; `CrossSpectralDensityResult.phase_std`, todos en radianes | `.phase_rad`, `.min_phase_rad`, `.excess_phase_rad` y `.phase_standard_deviation_rad` |
 | `residual_index_from_phase_mismatch(phase_mismatch=)` e `IntensityInstrumentComplianceResult.phase_mismatch()`, en grados | `phase_mismatch_deg=` y `.phase_mismatch_deg()` |
 
 Un nombre tiene además una sola grafía dentro de un paquete. Donde una palabra
@@ -525,8 +525,8 @@ impreso, y por eso la superficie de CNOSSOS de abajo sigue siendo
 | `centre=` en `room.filter_bandwidth` y `room.source_directivity_limit` | `center=` |
 | `location="centre"` en las movilidades e impedancias puntuales de placas y vigas infinitas de `vibration` | `location="center"` |
 | `.unfavourable_sum` en `WeightedRatingResult`, `ImpactRatingResult` y `AbsorptionRatingResult` | `.unfavorable_sum` |
-| `vibration.storey_fundamental_frequency(storeys)`, `STOREY_FREQUENCY_MIN_STOREYS`, `STOREY_FREQUENCY_NUMERATOR_HZ`, `STOREY_PERIOD_COEFFICIENT_S` | `vibration.story_fundamental_frequency(stories)`, `STORY_FREQUENCY_MIN_STORIES`, `STORY_FREQUENCY_NUMERATOR_HZ`, `STORY_PERIOD_COEFFICIENT_S` |
-| `storeys=` y el modelo `"storeys"` en `fundamental_period`, `fundamental_frequency` y `estimate_fundamental_frequency` | `stories=` y `"stories"` |
+| `vibration.storey_fundamental_frequency(storeys)`, `STOREY_FREQUENCY_MIN_STOREYS`, `STOREY_FREQUENCY_NUMERATOR_HZ`, `STOREY_PERIOD_COEFFICIENT_S` | `vibration.story_fundamental_frequency(n_stories)`, `STORY_FREQUENCY_MIN_STORIES`, `STORY_FREQUENCY_NUMERATOR_HZ`, `STORY_PERIOD_COEFFICIENT_S` |
+| `storeys=` y el modelo `"storeys"` en `fundamental_period`, `fundamental_frequency` y `estimate_fundamental_frequency` | `n_stories=` y el modelo `"stories"` |
 | `draught=` en `underwater.monopole_source_level` | `draft_m=`, que además dice su unidad |
 | `procedure="aeroplane"` en `aircraft.effective_perceived_noise_level` | `procedure="airplane"`, que sigue siendo el valor por defecto |
 | `urbanisation=` en `environment.outdoor_quality_objectives` | `urbanization=` |
@@ -540,15 +540,20 @@ Una palabra también tiene una sola grafía. Un acrónimo se escribe en mayúscu
 dentro del nombre de una clase, como siempre lo estuvieron `EPNLResult` y
 `STIResult`; Ecma, que es el nombre que la organización se da a sí misma y no
 un acrónimo, es la excepción (`EcmaLoudness`). `mic`, `lab` y `std` se
-escriben enteros. Un recuento es `n_<plural>`. Un límite o un extremo es `min_`
-o `max_`, y `MIN_` o `MAX_` en una constante, salvo donde la palabra forma
-parte del nombre de una magnitud: fase mínima, secuencia de longitud máxima,
-el nivel máximo de impacto, el máximo por intervalo (*Takt*) de DIN 45669-1 y
-DIN 4150-2 (`TAKT_MAXIMUM_FACTOR`) y los niveles máximo y mínimo Lmax y Lmin,
-que son `maximum_level` y `minimum_level` también cuando sólo la unidad dice que
-es un nivel (`maximum_level_db`, nunca `max_db`). El nombre de una función o de
-una clase va en palabras, `minimum` y `maximum` incluidas
-(`junction_minimum_vibration_reduction`). Una función que lee una señal temporal la toma primero, como `x`, el nombre que ya
+escriben enteros. Un recuento es `n_<plural>`, y un límite sobre
+uno, `min_n_` o `max_n_` (`min_n_records`, `max_n_arrivals`); una duración
+nombra su magnitud antes que su unidad, nunca la unidad sola
+(`exposure_duration_years`, `duration_s`, `period_hours`), con el minuto
+escrito entero (`assessment_period_minutes`) porque un `_min` final es un
+mínimo, y un número de clase, un eje, un número de decimales y una longitud contada en muestras no son
+recuentos. `minimum` y `maximum` se
+escriben `min` y `max` en todo nombre público, `MIN` y `MAX` en una constante
+y `Min` y `Max` en una clase, como los escriben numpy, SciPy, scikit-learn y
+Matplotlib, términos consagrados incluidos: los niveles máximo y mínimo Lmax y
+Lmin son `max_level` y `min_level` (nunca un `max_db` a secas), el máximo por
+intervalo (*Takt*) de DIN 45669-1 y DIN 4150-2 es `TAKT_MAX_FACTOR` y la
+reconstrucción de fase mínima es `min_phase`. Una cota de confianza es
+`confidence_lower` o `confidence_upper`. Una función que lee una señal temporal la toma primero, como `x`, el nombre que ya
 usaban `octave_filter(x, fs)` y el resto de funciones de señal; llamada por
 posición, no cambia nada. Los nombres de la raíz de la 3.3.0 que están entre
 estos aparecen en la tabla de los nombres que ya no están.
@@ -569,8 +574,35 @@ estos aparecen en la tabla de los nombres que ya no están.
 | `harmonics=` en `gear_mesh_frequencies` y `blade_pass_frequencies`, y el `count` de `FaultFrequencyResult.harmonics` | `n_harmonics` |
 | `SawtoothBurstTest.burst_count` | `.n_bursts` |
 | `room.MAXIMUM_DIRECTIVITY_STEP_DEG`, `MINIMUM_BANDWIDTH_TIME_PRODUCT`, `MINIMUM_DETECTOR_MULTIPLE` y `MINIMUM_REFERENCE_DISTANCE_M`, `noise_control.MAXIMUM_PASSAGE_ASPECT`, `MINIMUM_FLOW_RATES` y `MINIMUM_PRESSURE_DIFFERENCE_PA`, `emission.MINIMUM_BACKGROUND_MARGIN_DB` | `MAX_DIRECTIVITY_STEP_DEG`, `MIN_BANDWIDTH_TIME_PRODUCT`, `MIN_DETECTOR_MULTIPLE`, `MIN_REFERENCE_DISTANCE_M`, `MAX_PASSAGE_ASPECT`, `MIN_FLOW_RATES`, `MIN_PRESSURE_DIFFERENCE_PA`, `MIN_BACKGROUND_MARGIN_DB` |
-| `environment.max_infrastructure_limit` | `maximum_infrastructure_limit`: el nombre de una función va en palabras |
 | `OperatingLine.maximum_deviation`, `maximum_open_loop_gain` y `maximum_level_at_microphone` en `FeedbackStabilityResult`, `maximum_reduction_db=` en `end_reflection_loss`, `LoudspeakerCharacteristics.minimum_impedance`, `minimum_load_impedance` en `MicrophoneCharacteristics` y `MicrophoneElectrical`, `DiscretePointIntensityResult.minimum_positions`, `minimum_speed=` en `railway_source_power` | `max_deviation`, `max_open_loop_gain`, `max_level_at_microphone`, `max_reduction_db=`, `min_impedance_ohm`, `min_load_impedance_ohm`, `min_positions`, `min_speed_kmh=` |
+| `building.a_weighted_maximum_impact_level`, `standardized_maximum_impact_level`, `AWeightedMaximumImpactResult` y `StandardizedMaximumImpactResult` | `a_weighted_max_impact_level`, `standardized_max_impact_level`, `AWeightedMaxImpactResult` y `StandardizedMaxImpactResult`: `max` y `min` en todo nombre público, términos consagrados incluidos |
+| `room.minimum_reliable_reverberation_time` y `minimum_receiver_positions` | `min_reliable_reverberation_time` y `min_receiver_positions` |
+| `PhaseDecompositionResult.minimum_phase_response` | `.min_phase_response` |
+| `maximum_levels=` en `aircraft.event_level` y `noise_contour` | `max_levels=` |
+| `ci_lower` y `ci_upper` en `SpectralDensityResult` y `MultitaperSpectralDensityResult` | `confidence_lower` y `confidence_upper`, como en `MethodBSummary` |
+| `elements=` en `low_frequency_element_normalized_difference`, y `LowFrequencyElementResult.elements` | `n_elements` |
+| `orders=` en `slit_resonance_frequencies`, y el `junctions` de `multi_junction_adjustment` | `n_orders=` y `n_junctions` |
+| `open_microphones=` en `feedback_stability` y `open_microphone_correction`, y `FeedbackStabilityResult.open_microphones` | `n_open_microphones` |
+| `events=` en `sound_energy_pressure`, `mean_single_event_level`, `sound_energy_in_situ`, `sound_energy_reverberation` y `sound_energy_comparison`, y `.events` en `SoundEnergyResult` y `ReverberationSoundEnergyResult` | `n_events` |
+| `reflecting_planes=` en `measurement_positions`, `sound_power_pressure` y `sound_energy_pressure` | `n_reflecting_planes=` |
+| `.positions` en `DiscretePointIntensityResult`, y `.positions`, `.subset_positions` y `.additional_positions` en `PartialPowerConcentration` | `.n_positions`, `.n_subset_positions` y `.n_additional_positions` |
+| `RollingStock.axles`, `VehicleDescriptor.axles` y el `axles` de `rolling_sound_power` | `n_axles` |
+| `sweep_points=` en `verify_weighting_class`, y `WeightingComplianceResult.sweep_points` | `n_sweep_points` |
+| `AssumedProtectionResult.subjects` | `.n_subjects` |
+| `io.AudioFileInfo.channels` y `.frames` | `.n_channels` y `.n_samples`, las muestras por canal, como en `Signal` |
+| `quadrature_points=` en `diffuse_field_absorption`, y `sum_terms=` en `helmholtz_resonator_impedance` y `rectangular_duct_properties` | `n_quadrature_points=` y `n_sum_terms=` |
+| `repetitions=` en `predict_diffuser_polar_response`, `predicted_diffusion_spectrum`, `metadiffuser_diffusion_spectrum`, `metadiffuser_polar_response` y `plot_qrd_geometry`, y `DiffuserPolarResponse.repetitions` | `n_repetitions` |
+| `cycles=` y `repetitions=` en `signals.tone_burst`, `ToneBurstResult.cycles` y `.repetitions`, y `cycles=` en `vibration.sawtooth_burst` y `signal_burst_indications` | `n_cycles` y `n_repetitions` |
+| `trials=` en `metrology.monte_carlo`, y `MonteCarloResult.trials` | `n_trials` |
+| el `passages` de `silencer_self_noise`, `valve_style_modifier`, `multihole_incipient_cavitation_ratio` y `uniform_passage_style_modifier`, y el `stages` de `stage_level_correction` | `n_passages` y `n_stages` |
+| el `steps` de `FDTD2D.run` y `ElasticFDTD2D.run`, y `max_arrivals=` en `underwater.eigenrays` | `n_steps` y `max_n_arrivals=` |
+| `sidebands=` en `gear_mesh_frequencies` y `induction_motor_frequencies`, el `poles`, el `rotor_bars` y el `slot_harmonics` de `induction_motor_frequencies`, y `lobe_orders=` en `blade_pass_frequencies` | `n_sidebands`, `n_poles`, `n_rotor_bars`, `n_slot_harmonics` y `n_lobe_orders` |
+| `years=` en `hearing.nipts` y `htlan` y en `vibration.injury_risk` y `multiple_shock_assessment`, y `.years` en los resultados de la ISO 1999 (`NiptsResult` y `HtlanResult` en la 3.3.0) y en `MultipleShockResult` | `exposure_duration_years`: una duración nombra su magnitud antes que su unidad |
+| `environment.NoisePhase.hours` y `hours=` en `evaluation_period_level` | `duration_hours` |
+| `seconds=` en `room.sweep_signal`, `inverse_filter` y `shaped_sweep_signal`, en `electroacoustics.synchronized_sweep_signal` y `swept_sine_distortion`, en `signals.noise_signal` y en `speech.stipa_signal`; `duration=` en `room.image_source_rir`, y `SweptSineDistortionResult.duration` | `duration_s`, la grafía que ya tenían las demás duraciones en segundos |
+| `hours=` en `environment.lden` y `ldn` | `period_hours=`, que pasa a ser keyword-only |
+| `assessment_period_min=` en `environment.impulse_prominence`, y `ImpulseProminenceResult.assessment_period_min` | `assessment_period_minutes`: un `_min` final se lee como un mínimo (`f_min`), así que el minuto se escribe entero, como la hora |
+| `ReportMetadata.source_positions` y `.receiver_positions` | `.n_source_positions` y `.n_receiver_positions` |
 | `signal_in=` en `loudness_ecma`, `tonality_ecma`, `roughness_ecma`, `fluctuation_strength_ecma` y `fluctuation_strength`; `signal=` en `loudness_moore_glasberg_time`, en las medidas de distorsión y de ruido de `electroacoustics` (`thd`, `thd_plus_noise`, `sinad`, `weighted_thd`, `harmonic_analysis`, `harmonic_distortion`, `dynamic_range`, `idle_channel_noise`, `modulation_distortion`, `difference_frequency_distortion`, `total_difference_frequency_distortion`, `dynamic_intermodulation_distortion`), en `impulsive_sound_adjustment` y `sound_pressure_level_history`, en las funciones de vibración humana (`running_rms`, `mtvv`, `vibration_dose_value`, `motion_sickness_dose_value`, `crest_factor`, `apply_weighting`, `apply_band_limiting`) y en `room.plot_excitation` | `x` |
 | `tone_freq=` en `tone_to_noise_ratio` y `prominence_ratio` | `tone_frequency=`, que, como `resolution_hz=`, pasa a ser keyword-only |
 
@@ -707,7 +739,7 @@ así en la 3.3.0 o en la 4.0.0rc1 y ya no:
 | `REFERENCE_VELOCITY`, `REFERENCE_FORCE`, `REFERENCE_SOUND_POWER` y `FREE_VELOCITY_REFERENCE` de `building.measurement.structure_borne_power` (`building.structure_borne_power` en la 3.3.0), y `REFERENCE_PRESSURE` de `environment.assessment.impulsive_sound` (`environmental.impulsive_sound` en la 3.3.0) | el `.value` de la entrada de `metrology.ISO1683_REFERENCE_VALUES` de la que se leía cada uno, porque la entrada es un registro y no un número: `["solid"]["velocity"].value` (1 nm/s), `["solid"]["force"].value` (1 µN), `["gas"]["sound_power"].value` (1 pW), `["solid"]["velocity_alternative"].value` (los 50 nm/s de la nota b de la tabla 3, la referencia de velocidad libre de la ISO 9611) y `["gas"]["sound_pressure"].value` (20 µPa) |
 | `REFERENCE_MOBILITY` y `CHARACTERISTIC_PLATE_MOBILITY` de `building.measurement.structure_borne_power` (`building.structure_borne_power` en la 3.3.0), y `REFERENCE_PLATE_MOBILITY` de `building.prediction.installed_structure_borne` (`building.installed_structure_borne` en la 3.3.0) | no se publican. `REFERENCE_MOBILITY` es la movilidad de referencia de 1 m/(N s) del apartado 5 de la EN 15657, que las funciones aplican en sus fórmulas (15), (17) y (18); la movilidad de la placa es el valor por defecto de `characteristic_mobility=` y de `plate_mobility=` |
 | `SPEED_OF_SOUND`, `AIR_DENSITY`, `REFERENCE_FREQUENCY`, `REFERENCE_LENGTH` y `MAX_RADIATION_FACTOR` de `building.prediction.detailed_model` | no se publican. El aire es `building.EN_12354_AIR`, que lleva los 340 m/s y los 1,29 kg/m³ |
-| los coeficientes, límites y valores por defecto de `environment.assessment.impulsive_sound` (`environmental.impulse_prominence` y `environmental.impulsive_sound` en la 3.3.0): `PROMINENCE_COEFFS`, `ADJUSTMENT_SLOPE`, `ADJUSTMENT_THRESHOLD`, `ONSET_RATE_LIMIT`, `DEFAULT_ASSESSMENT_PERIOD_MIN`, `ONSET_GRADIENT_LIMIT`, `TIME_WEIGHTING_F_TAU`, `MERGE_GAP`, `SAMPLE_INTERVAL_RANGE`, `DEFAULT_SAMPLE_INTERVAL`, `HIGHLY_IMPULSIVE_LIMIT` | no se publican: cada uno lo aplica `impulse_prominence` o `impulsive_sound_adjustment`, y los dos valores por defecto son los de `dt=` (20 ms) y `assessment_period_min=` (30 min) |
+| los coeficientes, límites y valores por defecto de `environment.assessment.impulsive_sound` (`environmental.impulse_prominence` y `environmental.impulsive_sound` en la 3.3.0): `PROMINENCE_COEFFS`, `ADJUSTMENT_SLOPE`, `ADJUSTMENT_THRESHOLD`, `ONSET_RATE_LIMIT`, `DEFAULT_ASSESSMENT_PERIOD_MIN`, `ONSET_GRADIENT_LIMIT`, `TIME_WEIGHTING_F_TAU`, `MERGE_GAP`, `SAMPLE_INTERVAL_RANGE`, `DEFAULT_SAMPLE_INTERVAL`, `HIGHLY_IMPULSIVE_LIMIT` | no se publican: cada uno lo aplica `impulse_prominence` o `impulsive_sound_adjustment`, y los dos valores por defecto son los de `dt=` (20 ms) y `assessment_period_minutes=` (30 min) |
 | las constantes del anexo C de `vibration.human.multiple_shock` (`vibration.multiple_shock_vibration` en la 3.3.0): `MZ_MALE`, `MZ_FEMALE`, `DOSE_AMPLITUDE_FACTOR`, `DOSE_EXPONENT`, `GRAVITY`, `ULTIMATE_STRENGTH_INTERCEPT`, `STRENGTH_AGE_SLOPE_MALE`, `STRENGTH_AGE_SLOPE_FEMALE`, `WEIBULL_MALE`, `WEIBULL_FEMALE`, `RISK_THRESHOLDS_MALE`, `RISK_THRESHOLDS_FEMALE` | no se publican: las funciones toman `sex=` y aplican la pareja que nombra. `compression_dose(..., mz=)` toma por defecto 0,029, el valor masculino de la fórmula C.2; pasa 0,025 para el femenino |
 | `DEFAULT_HEADWIND_KT` y `APPROACH_WEIGHT_FRACTION` de `aircraft.flight_performance` | no se publican: los 8 kt por defecto de `Aerodrome(headwind_kt=)`, y el 0,9 del peso máximo de aterrizaje con el que se vuela la aproximación |
 | `STANDARD_ATMOSPHERIC_PRESSURE` de `materials.resilient.dynamic_stiffness` (`materials.dynamic_stiffness` en la 3.3.0) | no se publica: los 0,1 MPa por defecto de `static_pressure_pa=` |
@@ -719,7 +751,7 @@ así en la 3.3.0 o en la 4.0.0rc1 y ya no:
 | `AUDIBILITY_THRESHOLD_SONE_HMS` de `psychoacoustics.loudness.ecma` (`psychoacoustics.loudness_ecma` en la 3.3.0) | no se publica, y ninguna función lo aplica: el apartado 5.1.9 de la ECMA-418-2 considera audible una señal cuando su sonoridad básica total supera 0,01 sone_HMS |
 | `J1_FIRST_ZERO` de `electroacoustics.piston` | desaparece: nadie lo leía. Es `scipy.special.jn_zeros(1, 1)[0]` |
 | `critical_bandwidth` de `environment.sources.wind_turbine` (`environmental.wind_turbine_noise` en la 3.3.0) | el `critical_bandwidth` del `WindTurbineTonalityResult`. `environment.critical_bandwidth` es otra banda, la de la ISO 1996-2 |
-| `reference_sound` de `psychoacoustics.quality.sharpness` (`psychoacoustics.sharpness` en la 3.3.0) | no se publica: la biblioteca construye la señal de ensayo del apartado 6 de la DIN 45692 sólo para fijar su propia normalización. Es un ruido limitado a la banda de 920 a 1080 Hz con 60 dB: pasa `signals.noise_signal(fs, seconds)` por un filtro paso banda de 920 a 1080 Hz, escálalo a 0,02 Pa de valor eficaz, y `psychoacoustics.sharpness_din` le da 1,00 acum |
+| `reference_sound` de `psychoacoustics.quality.sharpness` (`psychoacoustics.sharpness` en la 3.3.0) | no se publica: la biblioteca construye la señal de ensayo del apartado 6 de la DIN 45692 sólo para fijar su propia normalización. Es un ruido limitado a la banda de 920 a 1080 Hz con 60 dB: pasa `signals.noise_signal(fs, duration_s)` por un filtro paso banda de 920 a 1080 Hz, escálalo a 0,02 Pa de valor eficaz, y `psychoacoustics.sharpness_din` le da 1,00 acum |
 | `check_guidance` de `underwater.bioacoustics.weighting` | no se publica. Las funciones que toman `guidance=` rechazan una desconocida, y `underwater.WEIGHTING_GUIDANCE` nombra las conocidas |
 
 Los alias de tipo que definen estos módulos (`NCMethod`, `EventMetric` y los
@@ -1120,7 +1152,7 @@ indica en qué versión apareció cada veredicto.
 | `building.PositionSpreadCheck` | `limit_db`, `stage`, `spread_db`, `action`, `next_positions`, `corner_standard_deviation_db` | `levels`, del que se leen todos | después de 4.0.0rc1 |
 | `building.HeavyImpactSourceCheck` | `frequencies`, `nominal`, `tolerance_db`, `deviation`, `within_tolerance`, `passes` | `source`, `measured` | 4.0.0rc1 |
 | `noise_control.BandFlatnessCheck` | `limit_db`, `satisfied` | `octave_frequencies`, `spread_db` | después de 4.0.0rc1 |
-| `noise_control.SourcePositionCheck` | `required_positions`, `satisfied`, `exceeds_maximum` | `positions_used`, `max_octave_spread_db` | después de 4.0.0rc1 |
+| `noise_control.SourcePositionCheck` | `n_required_positions`, `satisfied`, `exceeds_max` | `n_positions_used`, `max_octave_spread_db` | después de 4.0.0rc1 |
 | `noise_control.TestEnvironmentApplicability` | `environmental_correction_limit_db`, `background_margin_limit_db`, `required_area_ratio`, `applicable` | `base_standard`, `actual_area_ratio`, `mean_absorption_coefficient` | después de 4.0.0rc1 |
 | `environment.ReflectionGridCheck` | `nominal_m`, `deviations_m`, `within` | `check`, `path_differences_m` | después de 4.0.0rc1 |
 | `emission.HardWalledRoomCheck` | `limit_db`, `min_volume_m3`, `box_dimension_limit_m`, `min_microphone_distance_m` | las bandas, la sala y la caja de referencia | después de 4.0.0rc1 |
@@ -1233,10 +1265,10 @@ marca un campo que solo se pasa por nombre.
 | `emission.DiscretePointIntensityResult` | todo salvo los indicadores y el grado: `partial_power`, `sound_power`, `sound_power_level`, `achieved_grade`, los dos criterios, las cifras con ponderación A y el resto | gana `normal_intensity`, `segment_areas_m2`, `pressure_residual_index_db`, `band_type` | 4.0.0rc1 |
 | `emission.TurbineTestEnvironmentCheck` | `correction_ok`, `wind_ok`, `windscreen_advised` | `environmental_correction_db`, `ratio`, `wind_speed_m_s` | después de 4.0.0rc1 |
 | `environment.ImpulseOnset` | `level_difference`, `prominence`, `qualifies` | `level_start`, `level_end`, `onset_rate` | 3.3.0 |
-| `environment.ImpulseProminenceResult` | `per_impulse`, `qualifies`, `prominence`, `adjustment` | `onset_rates`, `level_differences`, `assessment_period_min` | 3.3.0 |
+| `environment.ImpulseProminenceResult` | `per_impulse`, `qualifies`, `prominence`, `adjustment` | `onset_rates`, `level_differences`, `assessment_period_minutes` | 3.3.0 |
 | `environment.ResidualCorrectionResult` | `reliable` | `margin` | 3.3.0 |
 | `environment.PeriodAssessment` | `reported_level`, `reported_long_term`, `max_phase_level`, `phase_pass`, `daily_pass`, `long_term_pass` | `phases`, los dos niveles y `limit`; gana `new_activity`, solo por nombre | 4.0.0rc1 |
-| `environment.ModulationPeriod` | `modulation_depths_db`, `fundamental_frequencies_hz`, `valid_blocks`, `rated`, `rating_db`, `mean_modulation_frequency_hz`, `mode_modulation_frequency_hz` | `blocks` | después de 4.0.0rc1 |
+| `environment.ModulationPeriod` | `modulation_depths_db`, `fundamental_frequencies_hz`, `n_valid_blocks`, `rated`, `rating_db`, `mean_modulation_frequency_hz`, `mode_modulation_frequency_hz` | `blocks` | después de 4.0.0rc1 |
 | `environment.SoundRelevantTurbines` | `relevant`, `total_level_db`, `relevant_level_db` | `predicted_levels_db` | después de 4.0.0rc1 |
 | `environment.WindShearProfile` | `typical` | `shear_exponent` | después de 4.0.0rc1 |
 | `environment.WindTurbineTonalityResult` | `is_audible` | `tonal_audibility`, `has_identified_tone`, que también es de solo lectura (sección siguiente) | 3.3.0 |
@@ -1376,7 +1408,7 @@ lee `band_type` de `vibration_reduction_index` (véase debajo de la tabla).
 | `metrology.WaveMotionCorrection` | `interpolated` | `frequencies`, `speed_of_sound_ratio` | después de 4.0.0rc1 |
 | `noise_control.CabinInsulationResult` | `apparent` (ISO 11957, 3.6) | `method` | después de 4.0.0rc1 |
 | `environment.WindTurbineTonalityResult` | `has_identified_tone` (IEC 61400-11, 9.5.2 a 9.5.4) | `levels`, `frequencies`; gana `candidate_frequency_hz`, solo por nombre | 3.3.0 |
-| `building.LaboratoryJointInsulationResult` | `regime` (ISO 10140-1, J.1) | `r_s_measured_db`, `r_s_max_db`; gana `limit_at_maximum`, solo por nombre | después de 4.0.0rc1 |
+| `building.LaboratoryJointInsulationResult` | `regime` (ISO 10140-1, J.1) | `r_s_measured_db`, `r_s_max_db`; gana `limit_at_max`, solo por nombre | después de 4.0.0rc1 |
 | `environment.TurbineSoundLevels` | `regimes` (IEC TS 61400-11-2, 11.7) | `total_levels_db`, `background_levels` | después de 4.0.0rc1 |
 | `underwater.WestonPropagationResult` | `regime` | `range_m`, `boundaries` | 4.0.0rc1 |
 | `signals.SynchronousAverageResult` | `interpolated`, f_s T no es un número entero de muestras | `fs`, `period_s` | 4.0.0rc1 |
@@ -1447,9 +1479,9 @@ except ValueError as error:
 # True
 ```
 
-## Los sesenta y siete nombres que ya no están
+## Los sesenta y nueve nombres que ya no están
 
-Todo lo demás se movió. Estos sesenta y siete no existen en ningún módulo público:
+Todo lo demás se movió. Estos sesenta y nueve no existen en ningún módulo público:
 
 | Ya no está | Qué escribir en su lugar |
 | --- | --- |
@@ -1490,7 +1522,8 @@ Todo lo demás se movió. Estos sesenta y siete no existen en ningún módulo p�
 | `HvacSpectrumResult` | `noise_control.HVACSpectrumResult` |
 | `mic_calibration_factor`, `apply_mic_calibration` | `materials.microphone_calibration_factor`, `materials.apply_microphone_calibration` |
 | `lab_airborne_insulation`, `lab_impact_insulation`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `LabInsulationWarning` | `building.laboratory_airborne_insulation`, `building.laboratory_impact_insulation`, `building.LaboratoryAirborneInsulationResult`, `building.LaboratoryImpactInsulationResult`, `building.LaboratoryInsulationWarning` |
-| `junction_min_vibration_reduction`, `max_sampled_area_radius` | `building.junction_minimum_vibration_reduction`, `materials.maximum_sampled_area_radius`: el nombre de una función va en palabras, `minimum` y `maximum` incluidas |
+| `EnclosureResult` | `noise_control.EnclosureInsertionLossResult`, lo que devuelve `enclosure_insertion_loss`, junto a `EnclosureInsulationResult` |
+| `maximum_repeatability_standard_deviation`, `minimum_cumulative_duration_hours`, `minimum_phase` | `building.max_repeatability_standard_deviation`, `hearing.min_cumulative_duration_hours`, `signals.min_phase`: `max` y `min` en todo nombre público |
 
 ## Lo que no ha cambiado
 

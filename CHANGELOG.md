@@ -1138,7 +1138,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `rectangular_loop_inductance` by Grover's Formula (58), which reproduce the
   resistances of Table B.1 and, without the internal term, four of its
   inductances; `loop_impedance`; the
-  amplifier's `maximum_output_current` where the distortion reaches its
+  amplifier's `max_output_current` where the distortion reaches its
   rating (5.4.7), `compliance_voltage`, noise, frequency response, AGC range
   against the 32 dB of 5.4.13.4 and quadrature phase error; and
   `neck_loop_characteristics` with `verify_neck_loop` against the two types
@@ -1163,7 +1163,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   (Formulae 1 to 3); `rolling_stock_test` gives the result of the
   constant-speed, starting and braking tests from their runs, the highest
   rounded mean with the 3 dB spread of 9.3; `type_test_speeds`,
-  `minimum_curve_radius` and `acceleration_test_positions` (Figure 10) state
+  `min_curve_radius` and `acceleration_test_positions` (Figure 10) state
   the rules around them, and `impulsiveness_rise_speed` (Annex A),
   `check_adjacent_vehicle_neutrality` (6.3.4) and `background_level_increase`
   (Annex D) complete the tests. `check_reference_track` judges a test track
@@ -1209,7 +1209,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   with a reference sound source, for broadband noise (Formula (8)) and for
   tones read against a source calibrated per hertz (Formula (9)), and the
   result marks the tones within 10 dB of the highest that the report has to
-  carry. `minimum_analyzer_bandwidth` and `tone_level_from_sidebands` are
+  carry. `min_analyzer_bandwidth` and `tone_level_from_sidebands` are
   the bandwidth a moving microphone needs and the sideband sum when the FFT is
   narrower (Formulae (2) and (3)), `free_field_absorption_correction` the
   $K_\alpha = r\alpha$ of the free-field method beyond 2 m (Formula (10)), and
@@ -1342,7 +1342,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   97 kPa and any component a laboratory's method needs, and takes the
   coverage factor from the Welch-Satterthwaite effective degrees of freedom;
   a budget refuses a combination its own columns do not give.
-  `metrology.maximum_expanded_uncertainty` gives the maxima of clauses 9 to
+  `metrology.max_expanded_uncertainty` gives the maxima of clauses 9 to
   14, and `metrology.verify_correction_uncertainty` judges the expanded
   uncertainties against them, and for clauses 12 to 14 the range of the
   corrections over the microphones too, returning a verdict whose `passes`
@@ -1517,7 +1517,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `hml_rating` and `snr_rating` unchanged, and `.plot()` draws the mean
   downwards on the grid Clause 6 l) asks for. `hearing.assess_attenuation_difference`
   applies the Annex B test band by band, significant when the difference of the
-  means exceeds `√(U95,1² + U95,2²)`, and `hearing.minimum_significant_difference`
+  means exceeds `√(U95,1² + U95,2²)`, and `hearing.min_significant_difference`
   gives its `√2·U95` form. `hearing.REAT_WITHIN_LABORATORY_UNCERTAINTY` and
   `hearing.REAT_BETWEEN_LABORATORY_UNCERTAINTY` carry the components of Tables
   A.2 and B.2 as `hearing.ProtectorUncertaintyBudget` rows, with the combined
@@ -1843,7 +1843,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   feature the meter lacks, so `metrology.SoundLevelMeterFeatures`, passed as
   `features`, declares the optional ones (C and Z, F and S, a time-averaged
   display, sound exposure level and C-weighted peak) and the number of level
-  ranges, `level_ranges`: a feature declared present owes its tests, one
+  ranges, `n_level_ranges`: a feature declared present owes its tests, one
   declared absent takes its clauses out under `not_applicable`, together with
   the one IEC 61672-1 makes depend on it (no C-weighted peak without C,
   5.1.10; no S without F, 5.1.9), and one neither declared nor shown is listed
@@ -3219,32 +3219,100 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `machine_count_correction` and `machine_hall_velocity_mm_s` take
   `n_machines` and `n_reference_machines`.
 
-- **A limit or an extreme is `min_`/`max_`, and the maximum level Lmax is
-  `maximum_level`.** Every public constant spelled `MINIMUM_` or `MAXIMUM_`
-  is `MIN_` or `MAX_` now, `noise_control.MIN_MICROPHONE_DISTANCE_M`,
-  `MAX_PASSAGE_ASPECT`, `room.MAX_DIRECTIVITY_STEP_DEG` and
-  `environment.MAX_WIND_SPEED_M_S` among them, and every field and parameter
-  spelled `minimum_` or `maximum_` is `min_` or `max_`:
-  `FreeFieldCheck.max_qualified_radius_m`,
-  `HardWalledRoomCheck.min_volume_m3`, `CoherenceCheck.min_records`,
-  `railway_source_power(min_speed_kmh=)` and the rest. The word stays where it is
-  part of the name of a quantity: minimum phase, maximum length sequence,
-  the maximum impact level, the takt maximum (the clock maximum of
-  DIN 45669-1 and DIN 4150-2, `TAKT_MAXIMUM_FACTOR`), and the maximum and
-  minimum levels Lmax and Lmin, also where only the unit says a level. The
-  statistical pass-by and the railway passages now spell them
-  `maximum_levels_db`, `PassByMeasurement.maximum_level_db` and
-  `TrainPassage.band_maximum_levels_db` like the rest of the library, and
-  `check_varying_background` and `VaryingBackgroundCheck` take
-  `background_maximum_level_db`, `FieldStrengthReading` reads
-  `maximum_level_db` and `plant_steady_reading` takes `maximum_level_db`
-  and `minimum_level_db`. A function or a class is named in words, `minimum`
-  and `maximum` included: `building.junction_min_vibration_reduction`,
-  `materials.max_sampled_area_radius` and
-  `environment.max_infrastructure_limit` are
-  `junction_minimum_vibration_reduction`, `maximum_sampled_area_radius` and
-  `maximum_infrastructure_limit`, and the rows of IEC 61672-1 Table B.1 are
-  `MaximumUncertaintyRow`.
+- **Every count says it is a count.** A parameter, a field or a property
+  that holds a whole number of things is `n_<plural>` across the library,
+  and a limit on one is `min_n_` or `max_n_`: `n_events` on the sound
+  energy functions of `emission` and their `SoundEnergyResult` and
+  `ReverberationSoundEnergyResult`, `n_reflecting_planes` on
+  `measurement_positions`, `sound_power_pressure` and `sound_energy_pressure`,
+  `n_positions`, `n_subset_positions` and `n_additional_positions` on the
+  ISO 9614-1 results, `n_elements` on the ISO 15186-3 element difference,
+  `n_orders` on `slit_resonance_frequencies`, `n_junctions` on
+  `multi_junction_adjustment`, `n_open_microphones` on the feedback
+  functions, `n_axles` on the CNOSSOS-EU rolling stock, `n_sweep_points` on
+  `verify_weighting_class`, `n_subjects` on the hearing protector results,
+  `n_quadrature_points`, `n_sum_terms` and `n_repetitions` on the absorbers
+  and diffusers of `materials`, `n_cycles` and `n_repetitions` on
+  `signals.tone_burst` and `ToneBurstResult` and `n_cycles` on the saw-tooth
+  burst of `vibration`, `n_trials` on `metrology.monte_carlo`, `n_passages`
+  and `n_stages` on the silencer and valve functions of `noise_control`,
+  `n_steps` on `FDTD2D.run` and `ElasticFDTD2D.run`, `max_n_arrivals` on
+  `underwater.eigenrays`, `n_sidebands`, `n_poles`, `n_rotor_bars`,
+  `n_slot_harmonics` and `n_lobe_orders` on the fault frequencies of
+  `vibration`, `n_stories` on the building models, and
+  `ReportMetadata.n_source_positions` and `n_receiver_positions`.
+  `io.AudioFileInfo` reads `n_channels` and `n_samples`, the samples per
+  channel, as `Signal` does. A duration names its quantity before its unit,
+  never the unit alone: the ISO 1999 and ISO 2631-5 functions and results
+  take `exposure_duration_years` where they took `years`,
+  `environment.NoisePhase` and `evaluation_period_level` take
+  `duration_hours`. Every sweep and test signal generator takes
+  `duration_s` where it took `seconds`, the spelling the other durations in
+  seconds already had: `room.sweep_signal`, `inverse_filter` and
+  `shaped_sweep_signal`, the swept sine, headphone, induction loop and
+  programme signals of `electroacoustics`, `signals.noise_signal` and
+  `speech.stipa_signal`. `room.image_source_rir` takes it where it took
+  `duration`, and `SweptSineDistortionResult` holds it. `environment.lden`
+  and `ldn` take the durations of their periods as `period_hours`, by name,
+  where they took `hours`. `environment.impulse_prominence` and its
+  `ImpulseProminenceResult` take the assessment period as
+  `assessment_period_minutes` where they took `assessment_period_min`: a
+  trailing `_min` reads as a minimum (`f_min`), so the minute is spelled out,
+  as the hour is, and `scripts/check_parameter_units.py` no longer reads
+  `_min` as a unit. A class number, an axis, a number of decimals and
+  a length counted in samples (`delay_samples`) are not counts and keep their
+  names, and so does a vectorised argument that takes one count or many.
+  The migration guide lists every renamed name that 3.3.0 or 4.0.0rc1
+  shipped, and `tests/test_public_vocabulary.py` fails on a whole number
+  named in the plural without `n_`, on a duration named by its unit alone,
+  whatever it holds, and on a message that names a count by its old
+  spelling.
+
+- **A confidence bound says it is one.** The spectral density results of
+  `signals`, `SpectralDensityResult` and `MultitaperSpectralDensityResult`,
+  carry their chi-square bounds as `confidence_lower` and
+  `confidence_upper`, the spelling `MethodBSummary` already had, where they
+  held `ci_lower` and `ci_upper`. `tests/test_public_vocabulary.py` fails on
+  `ci` as a word of any public name, so a `ci_low` or a `ci_width` cannot
+  come back, and keeps only the impact sound adaptation term C_I of ISO
+  717-2 (`ci`, `ci_delta`, `ci_r`), each where it is.
+
+- **`noise_control.EnclosureResult` is `EnclosureInsertionLossResult`.**
+  It is what `enclosure_insertion_loss` returns, the insertion loss
+  predicted from the walls and the lining, and it now reads beside
+  `EnclosureInsulationResult`, the insulation ISO 11546 measures once the
+  enclosure is built. The two summaries in the API reference say which is
+  predicted and which is measured.
+
+- **`minimum` and `maximum` are `min` and `max` in every public name.**
+  Every public constant spelled `MINIMUM_` or `MAXIMUM_` is `MIN_` or `MAX_`
+  now, `noise_control.MIN_MICROPHONE_DISTANCE_M`, `MAX_PASSAGE_ASPECT`,
+  `room.MAX_DIRECTIVITY_STEP_DEG`, `environment.MAX_WIND_SPEED_M_S` and
+  `vibration.TAKT_MAX_FACTOR` among them, and every field, parameter,
+  property, function and class follows, as numpy, SciPy, scikit-learn and
+  Matplotlib write the two words and as the standards write the maximum and
+  minimum levels Lmax and Lmin. A term of art is no exception: the
+  statistical pass-by and the railway passages spell their maximum levels
+  `max_levels_db`, `PassByMeasurement.max_level_db` and
+  `TrainPassage.band_max_levels_db`, `check_varying_background` takes
+  `background_max_level_db`, `plant_steady_reading` takes `max_level_db` and
+  `min_level_db`, `aircraft.event_level` and `noise_contour` take
+  `max_levels=`, the heavy impact functions of `building` are
+  `a_weighted_max_impact_level` and `standardized_max_impact_level` with
+  `AWeightedMaxImpactResult` and `StandardizedMaxImpactResult`, the
+  minimum-phase reconstruction is `signals.min_phase` with
+  `PhaseDecompositionResult.min_phase_rad` and `min_phase_response`, and
+  `building.max_repeatability_standard_deviation`,
+  `hearing.min_cumulative_duration_hours`,
+  `room.min_reliable_reverberation_time` and `min_receiver_positions` follow.
+  `FreeFieldCheck.max_qualified_radius_m`, `HardWalledRoomCheck.min_volume_m3`
+  and `railway_source_power(min_speed_kmh=)` take the short spelling where
+  they spelled the word out. `building.junction_min_vibration_reduction`,
+  `materials.max_sampled_area_radius` and `environment.max_infrastructure_limit`
+  keep the names they shipped with. A maximum given in decibels is the
+  maximum level, `max_level`, never a bare `max_db`, and
+  `tests/test_public_vocabulary.py` fails on `minimum` or `maximum` in any
+  public name, constant, class or module.
 
 - **`HMLRatingResult` spells its values per subject out.**
   `subject_h`, `subject_m` and `subject_l` are `subject_high`,
@@ -3316,8 +3384,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **An array is named in the plural, also where the annotation allows a
   number.** Thirteen functions took an array of band levels or band centres
   under a singular name: `level=` on `apply_low_frequency_procedure`,
-  `heavy_impact_octave_levels`, `a_weighted_maximum_impact_level` and
-  `standardized_maximum_impact_level`, and `frequency=` on those two and on
+  `heavy_impact_octave_levels`, `a_weighted_max_impact_level` and
+  `standardized_max_impact_level`, and `frequency=` on those two and on
   `ceiling_attenuation_class`, `plenum_flanking_reduction_index`,
   `single_number_average`, `octave_pair_averages`,
   `one_third_octave_absorption`, `power_injection_matrix`,
@@ -3491,7 +3559,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `ground_speed_m_s` on `FlightPathKinematics`; `rotational_speed_rpm=` on
   `blade_passing_frequency`; `phase_rad` on the frequency-response,
   cross-spectrum, phase-decomposition, envelope and mobility results, with
-  `minimum_phase_rad`, `excess_phase_rad` and
+  `min_phase_rad`, `excess_phase_rad` and
   `CrossSpectralDensityResult.phase_standard_deviation_rad`; and
   `phase_mismatch_deg` on `residual_index_from_phase_mismatch` and
   `IntensityInstrumentComplianceResult.phase_mismatch_deg()`. The sound speed
@@ -3622,9 +3690,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and `location="centre"` on the infinite plate and beam mobilities and
   impedances is `location="center"`. `unfavourable_sum` on the ISO 717 and
   ISO 11654 ratings is `unfavorable_sum`. `storey_fundamental_frequency(storeys)`
-  is `story_fundamental_frequency(stories)`, with `STORY_FREQUENCY_MIN_STORIES`,
+  is `story_fundamental_frequency(n_stories)`, with `STORY_FREQUENCY_MIN_STORIES`,
   `STORY_FREQUENCY_NUMERATOR_HZ` and `STORY_PERIOD_COEFFICIENT_S`, and the ISO
-  4866 building models take `stories=` and the model `"stories"`.
+  4866 building models take `n_stories=` and the model `"stories"`.
   `monopole_source_level` takes `draft_m=`, which says its unit too, where it
   took `draught=`; `effective_perceived_noise_level` takes
   `procedure="airplane"`; `outdoor_quality_objectives` takes `urbanization=`;
@@ -3795,7 +3863,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `AerodynamicValveNoise` gains `specific_heat_ratio`, `pressure_recovery`
   and `efficiency_correction`, `WindTurbineTonalityResult` gains
   `candidate_frequency_hz` and `LaboratoryJointInsulationResult` gains
-  `limit_at_maximum`. The numbers a regime selects are held to it when the
+  `limit_at_max`. The numbers a regime selects are held to it when the
   result is built, so a result built by hand can no longer carry one regime
   beside the values of another: a tapping result refuses a cut-off frequency
   or a force spectrum of the other regime, a liquid valve a pressure ratio
@@ -4973,7 +5041,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `check_source_positions` is the criterion of 7.2.1, where the number of
   loudspeaker positions is read off the spread of the answer itself rather
   than fixed in advance; `check_band_flatness` is the 6, 5 and 4 dB of 6.4;
-  `minimum_cabin_clearance_m` is the clearance of 6.2; `internal_noise_level`
+  `min_cabin_clearance_m` is the clearance of 6.2; `internal_noise_level`
   is the noise the cabin makes on its own, corrected for the background only
   inside the window 6.7 sets; and `uncertainty_conditions` is what clause 10
   will and will not say.
@@ -6107,8 +6175,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `material_damping_factor` is the damping alone, as Figure 2 draws it. The
   building on its ground is `soil_building_natural_frequency` with its
   guide values by storeys, two storeys taking the union of the two ranges the
-  clause prints it in, `foundation_transfer_maximum` and
-  `floor_transfer_maximum` as 1 over twice the damping, and the storey
+  clause prints it in, `foundation_transfer_max` and
+  `floor_transfer_max` as 1 over twice the damping, and the storey
   estimate of Formula (4) is `story_fundamental_frequency`, the one function
   for the estimate DIN 4150-3 6.4 and ISO 4866 D.2 print as well. A blast and a
   falling mass are Formulae (5) and (6) with the user's constants; a hall of

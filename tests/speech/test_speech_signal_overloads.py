@@ -57,7 +57,7 @@ def _speech(seed: int = 0) -> np.ndarray:
 
 
 _IR = _impulse_response()
-_STIPA = stipa_signal(FS, seconds=18.0, seed=1)
+_STIPA = stipa_signal(FS, duration_s=18.0, seed=1)
 _CLEAN = _speech(0)
 _DEGRADED = _CLEAN + 0.3 * _speech(1)
 
@@ -171,7 +171,7 @@ def test_a_reference_at_another_rate_is_refused() -> None:
     perfect score for a mismatch, instead of saying anything was wrong.
     """
     measured = Signal(_STIPA, FS)
-    half = Signal(stipa_signal(FS // 2, seconds=18.0, seed=2), FS // 2)
+    half = Signal(stipa_signal(FS // 2, duration_s=18.0, seed=2), FS // 2)
     with pytest.raises(
         ValueError, match=r"'x' and 'reference' are Signals recorded at different"
     ):
@@ -185,7 +185,7 @@ def test_the_reference_recording_is_read_and_then_cancels() -> None:
     normalised by the total intensity of their own band, so the calibrated
     call has to match both the pre-scaled one and the bare one.
     """
-    reference = stipa_signal(FS, seconds=18.0, seed=2)
+    reference = stipa_signal(FS, duration_s=18.0, seed=2)
     calibrated = stipa(
         Signal(_STIPA, FS), reference=Signal(reference, FS, calibration_factor=CAL)
     )

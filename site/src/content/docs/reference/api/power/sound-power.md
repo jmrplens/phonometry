@@ -166,7 +166,7 @@ with that shape; scalar inputs return a scalar, unchanged.
 mean_single_event_level(
     levels: np.ndarray,
     *,
-    events: int | None = None,
+    n_events: int | None = None,
 ) -> np.ndarray
 ```
 
@@ -175,7 +175,7 @@ Mean single event time-integrated level of one event (ISO 3744 Eq. 19/20).
 Two ways of measuring $N_\mathrm{e}$ sound emission events reach the
 same quantity, the single event time-integrated sound pressure level of
 *one* event at a microphone position. Measured one at a time
-(`events=None`), the first axis of `levels` holds one entry per event
+(`n_events=None`), the first axis of `levels` holds one entry per event
 and the mean is their energy average, ISO 3744:2010 Eq. (19):
 
 $$
@@ -183,7 +183,7 @@ L'_{Ei(\mathrm{ST})} = 10 \log_{10}\!\left[ \frac{1}{N_\mathrm{e}} \sum_{q=1}^{N
 $$
 
 Measured as one level that encompasses $N_\mathrm{e}$ successive
-events (`events` $= N_\mathrm{e}$), the level of one event is the
+events (`n_events` $= N_\mathrm{e}$), the level of one event is the
 measurement less $10 \log_{10} N_\mathrm{e}$, Eq. (20):
 
 $$
@@ -198,16 +198,16 @@ are accepted with a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-
 
 | Name | Description |
 | :--- | :--- |
-| `levels` | With `events=None`, the per-event levels in decibels with the events on the first axis (`(Ne,)`, `(Ne, NB)` or `(Ne, NM, NB)`); otherwise the one measurement encompassing `events` events, of any shape. |
-| `events` | `None` when each entry of the first axis is one event, else the number of events the single measurement encompasses. |
+| `levels` | With `n_events=None`, the per-event levels in decibels with the events on the first axis (`(Ne,)`, `(Ne, NB)` or `(Ne, NM, NB)`); otherwise the one measurement encompassing `n_events` events, of any shape. |
+| `n_events` | `None` when each entry of the first axis is one event, else the number of events the single measurement encompasses. |
 
-**Returns:** The level of one event, in decibels: `levels` less its first axis for `events=None`, the shape of `levels` otherwise.
+**Returns:** The level of one event, in decibels: `levels` less its first axis for `n_events=None`, the shape of `levels` otherwise.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for non-finite levels, an empty first axis or a non-positive `events`. |
+| ValueError | for non-finite levels, an empty first axis or a non-positive `n_events`. |
 
 ## measurement_positions
 
@@ -216,7 +216,7 @@ measurement_positions(
     surface: Literal['hemisphere', 'box'],
     *,
     radius: float,
-    reflecting_planes: int = 1,
+    n_reflecting_planes: int = 1,
     tones: bool = True,
     grade: Literal['engineering', 'survey'] = 'engineering',
 ) -> np.ndarray
@@ -238,7 +238,7 @@ returned as an `(N, 3)` array of Cartesian `(x, y, z)` in metres.
 | :--- | :--- |
 | `surface` | `'hemisphere'` (only shape with a coordinate table). |
 | `radius` | Hemisphere radius `r`, in metres. |
-| `reflecting_planes` | Number of reflecting planes (1, 2 or 3). |
+| `n_reflecting_planes` | Number of reflecting planes (1, 2 or 3). |
 | `tones` | If True use Table B.1, else Table B.2. |
 | `grade` | `'engineering'` or `'survey'`. |
 
@@ -401,8 +401,8 @@ sound_energy_pressure(
     radius: float | None = None,
     dimensions: tuple[float, float, float] | None = None,
     distance: float | None = None,
-    reflecting_planes: int = 1,
-    events: int | None = None,
+    n_reflecting_planes: int = 1,
+    n_events: int | None = None,
     background_levels: np.ndarray | None = None,
     integration_time: float | None = None,
     frequencies: np.ndarray | None = None,
@@ -422,7 +422,7 @@ microphone position through a period that encompasses the full burst
 is either the `(NM, NB)` mean single event level of one event at each
 position, a `(Ne, NM, NB)` array of the $N_\mathrm{e}$ events measured
 one at a time (reduced by Eq. 19), or the `(NM, NB)` level of one
-measurement encompassing `events` successive events (reduced by Eq. 20).
+measurement encompassing `n_events` successive events (reduced by Eq. 20).
 The positions are then energy-averaged as in 8.2.2 (clause 8.3.3), the
 surface level is corrected for background noise and for the test
 environment and the surface term added:
@@ -455,13 +455,13 @@ The level holds for the meteorological conditions of the test; above
 
 | Name | Description |
 | :--- | :--- |
-| `levels_positions` | Single event levels, in decibels: `(NM, NB)` means, `(Ne, NM, NB)` per-event levels, or `(NM, NB)` of one measurement of `events` events. |
+| `levels_positions` | Single event levels, in decibels: `(NM, NB)` means, `(Ne, NM, NB)` per-event levels, or `(NM, NB)` of one measurement of `n_events` events. |
 | `surface` | `'hemisphere'` or `'box'`. |
 | `radius` | Hemisphere radius `r` (metres), for `surface='hemisphere'`. |
 | `dimensions` | Reference box `(l1, l2, l3)` (metres), for `'box'`. |
 | `distance` | Measurement distance `d` (metres), for `'box'`. |
-| `reflecting_planes` | Number of reflecting planes (1, 2 or 3). |
-| `events` | The number of events `Ne` one measurement encompasses (Eq. 20); `None` when `levels_positions` is per event or already the mean of one event. |
+| `n_reflecting_planes` | Number of reflecting planes (1, 2 or 3). |
+| `n_events` | The number of events `Ne` one measurement encompasses (Eq. 20); `None` when `levels_positions` is per event or already the mean of one event. |
 | `background_levels` | `(NM, NB)` time-averaged background levels for `K1`, or a single spectrum `(NB,)` / `(1, NB)` broadcast to every position; measured over the same interval as the events. |
 | `integration_time` | The interval `T` of the single event levels, in seconds; required with `background_levels`. |
 | `frequencies` | Band mid-band frequencies (Hz) for the A-weighted total. |
@@ -487,7 +487,7 @@ sound_power_pressure(
     radius: float | None = None,
     dimensions: tuple[float, float, float] | None = None,
     distance: float | None = None,
-    reflecting_planes: int = 1,
+    n_reflecting_planes: int = 1,
     background_levels: np.ndarray | None = None,
     frequencies: np.ndarray | None = None,
     room: RoomEnvironment | None = None,
@@ -523,7 +523,7 @@ sound power level is combined via ISO 3744 Annex E.
 | `radius` | Hemisphere radius `r` (metres), for `surface='hemisphere'`. |
 | `dimensions` | Reference box `(l1, l2, l3)` (metres), for `'box'`. |
 | `distance` | Measurement distance `d` (metres), for `'box'`. |
-| `reflecting_planes` | Number of reflecting planes (1, 2 or 3). |
+| `n_reflecting_planes` | Number of reflecting planes (1, 2 or 3). |
 | `background_levels` | `(NM, NB)` background levels for `K1`, or a single spectrum `(NB,)` / `(1, NB)` broadcast to every position. |
 | `frequencies` | Band mid-band frequencies (Hz) for the A-weighted total. |
 | `room` | Room absorption data behind `K2` ([`RoomEnvironment`](/phonometry/reference/api/power/sound-power/#roomenvironment)); `None` is a room with no data at all, i.e. a free field ($K_2 = 0$). |
@@ -547,7 +547,7 @@ SoundEnergyResult(
     sound_energy_level_a: float,
     uncertainty: float,
     grade: str,
-    events: int | None,
+    n_events: int | None,
     integration_time: float | None,
 )
 ```
@@ -570,7 +570,7 @@ position and band, shape `(NM, NB)`, formed from the single event levels
 exactly as clause 3.24 allows. `uncertainty` is the expanded uncertainty
 $U = 2\sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$ (95 %),
 which clause 9.1 Eq. (24) makes the same for `LJ` as for `LW`.
-`events` is the number of single sound emission events $N_\mathrm{e}$
+`n_events` is the number of single sound emission events $N_\mathrm{e}$
 the levels were reduced from, or `None` when the caller supplied the
 per-position mean single event levels directly; `integration_time` is
 the interval $T$ of the single event levels, in seconds, or `None`

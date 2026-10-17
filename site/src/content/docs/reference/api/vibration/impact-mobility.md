@@ -199,7 +199,7 @@ check_coherence(
     frequency_range_hz: tuple[float, float],
     exclude_hz: Sequence[tuple[float, float]] = (),
     min_coherence: float = 0.9,
-    min_records: int = 5,
+    min_n_records: int = 5,
 ) -> CoherenceCheck
 ```
 
@@ -207,14 +207,14 @@ Is the averaged estimate's coherence high over the range of interest? (9.1)
 
 The check passes when the coherence exceeds `min_coherence` (0,9,
 what 9.1 calls high) at every frequency of the range that is not excluded,
-and at least `min_records` impacts were averaged (five, the lower end
+and at least `min_n_records` impacts were averaged (five, the lower end
 of the five to ten 9.1 says a high coherence needs). A single impact has a
 coherence of 1 by construction and fails the second condition.
 
 8.6 finds three to five impacts usually enough to verify data quality in a
 low-noise environment; the coherence estimate itself, 9.1 adds, needs five
 to ten records to be trusted. Averaging five impacts satisfies both, and a
-lower `min_records` states that fewer were judged enough.
+lower `min_n_records` states that fewer were judged enough.
 
 **Parameters**
 
@@ -224,7 +224,7 @@ lower `min_records` states that fewer were judged enough.
 | `frequency_range_hz` | `(f_low, f_high)`, in hertz. |
 | `exclude_hz` | Bands `(f_low, f_high)` to leave out of the verdict, such as anti-resonances (9.1, NOTE 1) (Default: none). |
 | `min_coherence` | The coherence to exceed (Default: 0.9). |
-| `min_records` | The fewest impacts to accept, a whole number of at least 1 (Default: 5). |
+| `min_n_records` | The fewest impacts to accept, a whole number of at least 1 (Default: 5). |
 
 **Returns:** A [`CoherenceCheck`](/phonometry/reference/api/vibration/impact-mobility/#coherencecheck).
 
@@ -232,7 +232,7 @@ lower `min_records` states that fewer were judged enough.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for an invalid range, exclusion or limit, a `min_records` that is not a whole number of at least 1, or exclusions that leave no frequency of the range to judge. |
+| ValueError | for an invalid range, exclusion or limit, a `min_n_records` that is not a whole number of at least 1, or exclusions that leave no frequency of the range to judge. |
 
 ## check_double_hit
 
@@ -415,9 +415,9 @@ CoherenceCheck(
     coherence: np.ndarray,
     judged: np.ndarray,
     *,
-    impacts: int,
+    n_impacts: int,
     min_coherence: float = 0.9,
-    min_records: int = 5,
+    min_n_records: int = 5,
 )
 ```
 
@@ -438,9 +438,9 @@ be excluded from the judgement.
 | `frequencies` | Frequencies in the range of interest, in hertz. |
 | `coherence` | Ordinary coherence $\gamma^2$ at each. |
 | `judged` | Per frequency, whether it enters the verdict (`False` where excluded as an anti-resonance). |
-| `impacts` | Number of impacts averaged. |
+| `n_impacts` | Number of impacts averaged. |
 | `min_coherence` | The coherence each judged frequency must exceed. |
-| `min_records` | The fewest impacts the check accepts. |
+| `min_n_records` | The fewest impacts the check accepts. |
 
 ### CoherenceCheck.enough_records
 
@@ -548,7 +548,7 @@ Force at the peak of every impact, in N.
 
 Time of the peak of every impact, in seconds.
 
-### DoubleHitCheck.impacts
+### DoubleHitCheck.n_impacts
 
 *property*
 
@@ -1078,7 +1078,7 @@ ImpactMobilityResult(
     coherence: np.ndarray,
     force_energy_spectral_density: np.ndarray,
     *,
-    impacts: int,
+    n_impacts: int,
     exponential_decay_rate_per_s: float = 0.0,
     response_quantity: Literal['acceleration', 'velocity', 'displacement'] = 'acceleration',
     driving_point: bool = True,
@@ -1095,7 +1095,7 @@ Mobility averaged over impacts at one point (ISO 7626-5:2019, 8.6).
 | `mobility` | Complex mobility `Y` per frequency, in m/(N·s): the averaged estimate of 8.6 as measured, exponential window included. Its resonance peaks are therefore lower than the structure's when a window was used; `fit_mode` and the correction of Annex A restore them. |
 | `coherence` | Ordinary coherence $\gamma^2$ per frequency (9.1); identically 1 for a single impact. |
 | `force_energy_spectral_density` | Averaged one-sided energy spectral density of the windowed force, $G_{FF}$ in N²·s/Hz (3.4). |
-| `impacts` | Number of impacts averaged. |
+| `n_impacts` | Number of impacts averaged. |
 | `exponential_decay_rate_per_s` | Decay rate `a` of the exponential window applied, in 1/s (0 for none). |
 | `response_quantity` | What the response channel measured: `"acceleration"`, `"velocity"` or `"displacement"`. |
 | `driving_point` | `True` if force and response are co-located. |
@@ -1246,17 +1246,17 @@ not sufficient.
 | `fs` | Its sample rate, in Hz. |
 | `full_scale` | The largest magnitude the channel handles linearly, in the unit of the record. |
 
-### OverloadCheck.clipped_samples
-
-*property*
-
-How many samples reach the full scale.
-
 ### OverloadCheck.headroom_db
 
 *property*
 
 Distance from the peak to the full scale, in dB (infinite for silence).
+
+### OverloadCheck.n_clipped_samples
+
+*property*
+
+How many samples reach the full scale.
 
 ### OverloadCheck.passes
 

@@ -62,9 +62,9 @@ def test_annex_c_the_chain_from_the_sum_level() -> None:
     """
     total = im.band_sum_level(PRINTED)
     assert round(total, 1) == 78.1
-    assert im.takt_maximum_kb(PRINTED) == pytest.approx(0.4008, abs=0.0001)
+    assert im.takt_max_kb(PRINTED) == pytest.approx(0.4008, abs=0.0001)
     # The print carries the rounded 78,1 dB on: one band at that level.
-    kb_ftm = im.takt_maximum_kb([78.1])
+    kb_ftm = im.takt_max_kb([78.1])
     assert kb_ftm == pytest.approx(0.4018, abs=0.0001)
     kb_fmax = im.TRAIN_KB_FMAX_FACTOR * kb_ftm
     assert round(kb_fmax, 1) == 0.6

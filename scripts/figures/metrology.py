@@ -293,7 +293,7 @@ def _slm_periodic_verification() -> "SoundLevelMeterPeriodicVerification":
         high_level_stability_uncertainty_db=0.07,
     )
     return metrology.verify_sound_level_meter_periodic(
-        1, record, features=metrology.SoundLevelMeterFeatures(level_ranges=2)
+        1, record, features=metrology.SoundLevelMeterFeatures(n_level_ranges=2)
     )
 
 
@@ -815,7 +815,7 @@ def generate_uncertainty(output_dir: str) -> None:
 
     result = ph.metrology.uncertainty_propagation(model, quantities)
     mc = ph.metrology.monte_carlo(
-        model, quantities, trials=1_000_000, coverage=0.95, seed=1
+        model, quantities, n_trials=1_000_000, coverage=0.95, seed=1
     )
     k, big = result.expanded(0.95)
 
@@ -1174,7 +1174,7 @@ def generate_uncertainty_gum_vs_mc(output_dir: str) -> None:
         mc = ph.metrology.monte_carlo(
             model,
             quantities,
-            trials=400_000,
+            n_trials=400_000,
             coverage=0.95,
             seed=1,
             keep_samples=True,

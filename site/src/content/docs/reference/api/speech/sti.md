@@ -244,7 +244,7 @@ biased low (an ideal loopback gives STI ~0.956 at 5 s vs ~0.998 at 18 s).
 ```python
 stipa_signal(
     fs: int,
-    seconds: float = 18.0,
+    duration_s: float = 18.0,
     level_db: float | None = None,
     seed: int | None = None,
 ) -> np.ndarray
@@ -265,11 +265,11 @@ in amplitude through its square root (Annex B).
 | Name | Description |
 | :--- | :--- |
 | `fs` | Sample rate in Hz (>= 22,5 kHz). |
-| `seconds` | Duration in seconds (the standard recommends 15 s to 25 s; default 18 s). |
+| `duration_s` | Duration in seconds (the standard recommends 15 s to 25 s; default 18 s). |
 | `level_db` | Optional overall level in dB SPL: the output is scaled so its RMS, taken as pascals, sits at `level_db` re 20 uPa. Default (None) normalizes the RMS to 0,1 (digital full scale headroom for the 12-14 dB crest factor). |
 | `seed` | Seed for the pink-noise generator (None: random). |
 
-**Returns:** Test signal, 1D array of `round(seconds * fs)` samples.
+**Returns:** Test signal, 1D array of `round(duration_s * fs)` samples.
 
 ## STIResult
 

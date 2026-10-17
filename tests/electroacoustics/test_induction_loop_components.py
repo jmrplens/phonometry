@@ -53,7 +53,7 @@ def test_on_axis_field_matches_the_closed_form() -> None:
 
 def test_far_on_axis_the_loop_is_a_dipole() -> None:
     length, width, z = 1.0, 0.5, 200.0
-    field = ea.rectangular_loop_field(3.0, length, width, 0.0, 0.0, z, turns=2)
+    field = ea.rectangular_loop_field(3.0, length, width, 0.0, 0.0, z, n_turns=2)
     moment = 2 * 3.0 * length * width
     assert float(field.h_z_a_per_m) == pytest.approx(
         moment / (2.0 * math.pi * z**3), rel=1e-4
@@ -63,7 +63,7 @@ def test_far_on_axis_the_loop_is_a_dipole() -> None:
 def test_field_is_symmetric_and_turns_scale_it() -> None:
     x = np.array([-2.0, -1.0, 1.0, 2.0])
     one = ea.rectangular_loop_field(1.0, 6.0, 4.0, x, 0.5, 1.2)
-    three = ea.rectangular_loop_field(1.0, 6.0, 4.0, x, 0.5, 1.2, turns=3)
+    three = ea.rectangular_loop_field(1.0, 6.0, 4.0, x, 0.5, 1.2, n_turns=3)
     np.testing.assert_allclose(one.h_z_a_per_m, one.h_z_a_per_m[::-1], rtol=1e-12)
     np.testing.assert_allclose(one.h_x_a_per_m, -one.h_x_a_per_m[::-1], rtol=1e-12)
     np.testing.assert_allclose(three.h_z_a_per_m, 3.0 * one.h_z_a_per_m, rtol=1e-12)
@@ -159,20 +159,20 @@ def test_loop_current_default_height_is_the_one_of_5_4_10_2() -> None:
 
 
 @pytest.mark.parametrize(
-    ("length", "width", "turns"), [(20.0, 10.0, 1), (6.0, 2.0, 3), (30.0, 10.0, 1)]
+    ("length", "width", "n_turns"), [(20.0, 10.0, 1), (6.0, 2.0, 3), (30.0, 10.0, 1)]
 )
 def test_loop_current_of_a_rectangle_against_biot_savart(
-    length: float, width: float, turns: int
+    length: float, width: float, n_turns: int
 ) -> None:
-    current = ea.loop_current(length, width, turns=turns)
+    current = ea.loop_current(length, width, n_turns=n_turns)
     field = ea.rectangular_loop_field(
-        current, length, width, 0.0, 0.0, 1.4, turns=turns
+        current, length, width, 0.0, 0.0, 1.4, n_turns=n_turns
     )
     assert float(field.h_z_a_per_m) == pytest.approx(0.4, rel=1e-12)
 
 
 def test_loop_current_divides_by_the_turns() -> None:
-    assert ea.loop_current(8.0, 6.0, turns=4) == pytest.approx(
+    assert ea.loop_current(8.0, 6.0, n_turns=4) == pytest.approx(
         ea.loop_current(8.0, 6.0) / 4.0, rel=1e-12
     )
 
@@ -183,10 +183,10 @@ def test_loop_current_reproduces_figure_h1(aspect: float) -> None:
     assert ea.loop_current(10.0 * aspect, 10.0) == pytest.approx(printed, abs=0.03)
 
 
-@pytest.mark.parametrize(("aspect", "turns"), [(1.0, 1), (3.0, 1), (3.0, 2)])
-def test_loop_dimensions_against_biot_savart(aspect: float, turns: int) -> None:
-    short, long = ea.loop_dimensions(5.0, aspect_ratio=aspect, turns=turns)
-    field = ea.rectangular_loop_field(5.0, long, short, 0.0, 0.0, 1.4, turns=turns)
+@pytest.mark.parametrize(("aspect", "n_turns"), [(1.0, 1), (3.0, 1), (3.0, 2)])
+def test_loop_dimensions_against_biot_savart(aspect: float, n_turns: int) -> None:
+    short, long = ea.loop_dimensions(5.0, aspect_ratio=aspect, n_turns=n_turns)
+    field = ea.rectangular_loop_field(5.0, long, short, 0.0, 0.0, 1.4, n_turns=n_turns)
     assert float(field.h_z_a_per_m) == pytest.approx(0.4, rel=1e-9)
 
 
@@ -226,18 +226,18 @@ def _perimeter(dims: tuple[float, ...]) -> float:
     "row", ref.IEC62489_1_TABLE_B1, ids=[r[0] for r in ref.IEC62489_1_TABLE_B1]
 )
 def test_table_b1_resistance(row: tuple) -> None:
-    _, dims, turns, _, area, resistance, *_ = row
-    computed = ea.loop_resistance(_perimeter(dims), area, turns=turns)
+    _, dims, n_turns, _, area, resistance, *_ = row
+    computed = ea.loop_resistance(_perimeter(dims), area, n_turns=n_turns)
     assert round(computed, 2) == pytest.approx(resistance)
 
 
 def test_counter_loop_perimeter_is_misprinted() -> None:
-    _, dims, turns, printed, area, resistance, *_ = ref.IEC62489_1_TABLE_B1[1]
+    _, dims, n_turns, printed, area, resistance, *_ = ref.IEC62489_1_TABLE_B1[1]
     assert _perimeter(dims) == pytest.approx(1.6)
     assert printed == pytest.approx(1.5)
-    assert round(ea.loop_resistance(printed, area, turns=turns), 2) != pytest.approx(
-        resistance
-    )
+    assert round(
+        ea.loop_resistance(printed, area, n_turns=n_turns), 2
+    ) != pytest.approx(resistance)
 
 
 def test_copper_resistivity_and_its_temperature_coefficient() -> None:
@@ -265,9 +265,9 @@ def test_e3_resistance_of_a_square_loop() -> None:
     ids=list(ref.IEC62489_1_TABLE_B1_INDUCTANCE_REPRODUCED),
 )
 def test_table_b1_inductance_without_the_internal_term(row: tuple) -> None:
-    _, dims, turns, _, area, _, inductance, *_ = row
+    _, dims, n_turns, _, area, _, inductance, *_ = row
     computed = ea.rectangular_loop_inductance(
-        dims[0], dims[1], area, turns=turns, internal_inductance=False
+        dims[0], dims[1], area, n_turns=n_turns, internal_inductance=False
     )
     assert round(computed * 1e6) == pytest.approx(inductance)
 
@@ -695,7 +695,7 @@ _STEPS_THD = [0.1, 0.2, 0.5, 1.5, 3.0]
 def test_maximum_output_current_is_read_where_the_thd_reaches_its_rating() -> None:
     # Between 3 V (0,5 %) and 4 V (1,5 %) across 0,5 ohm the distortion
     # passes 1 % half way: 3,5 V, so 7 A.
-    result = ea.maximum_output_current(
+    result = ea.max_output_current(
         _STEPS_V, _STEPS_THD, load_resistance_ohm=0.5, rated_thd_percent=1.0
     )
     assert result.max_current_a == pytest.approx(7.0, rel=1e-12)
@@ -703,7 +703,7 @@ def test_maximum_output_current_is_read_where_the_thd_reaches_its_rating() -> No
 
 
 def test_maximum_output_current_at_a_step_that_equals_the_rating() -> None:
-    result = ea.maximum_output_current(
+    result = ea.max_output_current(
         _STEPS_V, _STEPS_THD, load_resistance_ohm=2.0, rated_thd_percent=1.5
     )
     assert result.max_current_a == pytest.approx(2.0, rel=1e-12)
@@ -711,14 +711,14 @@ def test_maximum_output_current_at_a_step_that_equals_the_rating() -> None:
 
 def test_maximum_output_current_needs_the_rating_to_be_reached() -> None:
     with pytest.raises(ValueError, match="never reaches"):
-        ea.maximum_output_current(
+        ea.max_output_current(
             _STEPS_V, _STEPS_THD, load_resistance_ohm=1.0, rated_thd_percent=5.0
         )
 
 
 def test_maximum_output_current_needs_a_first_step_below_the_rating() -> None:
     with pytest.raises(ValueError, match="first step"):
-        ea.maximum_output_current(
+        ea.max_output_current(
             _STEPS_V, _STEPS_THD, load_resistance_ohm=1.0, rated_thd_percent=0.05
         )
 
@@ -727,7 +727,7 @@ def test_maximum_output_current_needs_ascending_steps() -> None:
     voltages = [1.0, 3.0, 2.0]
     distortion = [0.1, 0.5, 2.0]
     with pytest.raises(ValueError, match="ascending"):
-        ea.maximum_output_current(
+        ea.max_output_current(
             voltages, distortion, load_resistance_ohm=1.0, rated_thd_percent=1.0
         )
 
@@ -742,20 +742,20 @@ def test_maximum_output_current_refuses_a_negative_distortion(
 ) -> None:
     voltages = [1.0, 2.0, 3.0][: len(distortion)]
     with pytest.raises(ValueError, match="'thd_percent' must be non-negative"):
-        ea.maximum_output_current(
+        ea.max_output_current(
             voltages, distortion, load_resistance_ohm=1.0, rated_thd_percent=1.0
         )
 
 
 def test_maximum_output_current_accepts_no_distortion_at_the_first_step() -> None:
-    result = ea.maximum_output_current(
+    result = ea.max_output_current(
         [1.0, 2.0], [0.0, 2.0], load_resistance_ohm=1.0, rated_thd_percent=1.0
     )
     assert result.max_current_a == pytest.approx(1.5, rel=1e-12)
 
 
 def test_maximum_output_current_arrays_are_read_only() -> None:
-    result = ea.maximum_output_current(
+    result = ea.max_output_current(
         _STEPS_V, _STEPS_THD, load_resistance_ohm=0.5, rated_thd_percent=1.0
     )
     with pytest.raises(ValueError, match="read-only"):
@@ -783,7 +783,7 @@ def test_every_result_plots(language: str) -> None:
             input_voltage_v=1.0,
         ),
         ea.verify_neck_loop(32.0, 1.0),
-        ea.maximum_output_current(
+        ea.max_output_current(
             _STEPS_V, _STEPS_THD, load_resistance_ohm=0.5, rated_thd_percent=1.0
         ),
     )
@@ -831,7 +831,7 @@ def test_maximum_output_current_plot_draws_the_steps_the_rating_and_the_current(
     None
 ):
     plt = pytest.importorskip("matplotlib.pyplot")
-    result = ea.maximum_output_current(
+    result = ea.max_output_current(
         _STEPS_V, _STEPS_THD, load_resistance_ohm=0.5, rated_thd_percent=1.0
     )
     ax = result.plot()

@@ -73,7 +73,7 @@ single = signals.tone_burst(48000, 5000, 25)
 print(single.burst_samples)         # 240 samples = 5 ms at 48 kHz
 
 # Clause A2.2: 5 ms bursts at 10 bursts per second.
-train = signals.tone_burst(48000, 5000, 25, repetitions=4, repetition_rate=10)
+train = signals.tone_burst(48000, 5000, 25, n_repetitions=4, repetition_rate=10)
 print(train.period_samples, train.duty_cycle)   # 4800, 0.05
 train.plot()                        # waveform with the gating envelope
 ```
@@ -105,7 +105,7 @@ from phonometry import signals
 
 fs = 48000.0
 single = signals.tone_burst(fs, 5000, 25, pre_silence=0.001, post_silence=0.001)
-train = signals.tone_burst(fs, 5000, 25, repetitions=4, repetition_rate=10)
+train = signals.tone_burst(fs, 5000, 25, n_repetitions=4, repetition_rate=10)
 
 fig, axes = plt.subplots(2, 1, figsize=(10, 6.4))
 t_ms = 1e3 * np.arange(single.signal.size) / single.fs

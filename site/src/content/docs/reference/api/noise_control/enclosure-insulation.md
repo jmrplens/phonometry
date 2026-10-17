@@ -353,7 +353,7 @@ EnclosureInsulationResult(
 )
 ```
 
-The insertion loss of an enclosure, band by band.
+The measured insulation of an enclosure, band by band (ISO 11546).
 
 **Attributes**
 

@@ -168,7 +168,10 @@ def _scenario_pairs(
             t("Age at start b [years]", language),
             format_number(float(result.start_age), language, decimals=0, trim=True),
         ),
-        (t("Exposure duration n [years]", language), str(int(result.years))),
+        (
+            t("Exposure duration n [years]", language),
+            str(int(result.exposure_duration_years)),
+        ),
         (
             t("Exposure days per year N", language),
             format_number(float(result.days_per_year), language, decimals=0, trim=True),

@@ -74,11 +74,11 @@ levels = base + rng.normal(0.0, 0.5, size=(10, 8))     # (positions, bands)
 background = np.full((10, 8), 55.0)
 
 # ISO 3744 Annex B microphone coordinates on a radius-1.5 m hemisphere.
-mic_xyz = emission.measurement_positions("hemisphere", radius=1.5, reflecting_planes=1)
+mic_xyz = emission.measurement_positions("hemisphere", radius=1.5, n_reflecting_planes=1)
 print(mic_xyz.shape)                                    # (10, 3)
 
 res = emission.sound_power_pressure(
-    levels, "hemisphere", radius=1.5, reflecting_planes=1,
+    levels, "hemisphere", radius=1.5, n_reflecting_planes=1,
     background_levels=background, frequencies=freqs,
     room=emission.RoomEnvironment(reverberation_time=0.6, volume=300.0),  # -> K2
 )
@@ -114,7 +114,7 @@ rng = np.random.default_rng(0)
 levels = base + rng.normal(0.0, 0.5, size=(10, 8))     # (positions, bands)
 background = np.full((10, 8), 55.0)
 res = emission.sound_power_pressure(
-    levels, "hemisphere", radius=1.5, reflecting_planes=1,
+    levels, "hemisphere", radius=1.5, n_reflecting_planes=1,
     background_levels=background, frequencies=freqs,
     room=emission.RoomEnvironment(reverberation_time=0.6, volume=300.0),  # -> K2
 )
@@ -193,7 +193,7 @@ these habits:
 | `radius` | float | m | > 0 (hemisphere) | Hemisphere radius $r$ |
 | `dimensions` | (float, float, float) | m | > 0 (box) | Reference-box $(l_1, l_2, l_3)$ |
 | `distance` | float | m | > 0 (box) | Measurement distance $d$ |
-| `reflecting_planes` | int | — | `1` / `2` / `3`, default `1` | Halves/quarters the hemisphere area |
+| `n_reflecting_planes` | int | — | `1` / `2` / `3`, default `1` | Halves/quarters the hemisphere area |
 | `background_levels` | 2D array or spectrum | dB | `(NM, NB)`, or `(NB,)` / `(1, NB)` | Enables $K_1$; a single spectrum broadcasts to every position |
 | `frequencies` | 1D array | Hz | nominal band centres | Enables $L_{W\mathrm{A}}$ (Annex E) |
 | `room` | `RoomEnvironment` or None | — | default `None` (free field) | The room data behind $K_2$; its fields are the three routes to $A$ below |
@@ -209,7 +209,7 @@ Returns a `SoundPowerResult`: `sound_power_level` (per-band $L_W$),
 `directivity_index` (apparent $DI_i^*$ per microphone position **and** frequency
 band, shape `(NM, NB)`; ISO 3744 clause 8.6), `surface_area`,
 `sound_power_level_a` ($L_{W\mathrm{A}}$), `uncertainty` (expanded, 95 %) and `grade`.
-`measurement_positions('hemisphere', radius=…, reflecting_planes=…, tones=…,
+`measurement_positions('hemisphere', radius=…, n_reflecting_planes=…, tones=…,
 grade=…)` returns the normative `(N, 3)` microphone coordinates (Table B.1 for
 tonal sources, B.2 for broadband). Those coordinates plot directly with
 `plot_microphone_positions`, which draws the array on its measurement
@@ -511,7 +511,7 @@ as one reading that spans them all, and reduces both to the level of one event
 at each position: the energy average of the $N_\mathrm{e}$ readings (Eq. 19) or
 the one reading less $10\log_{10} N_\mathrm{e}$ (Eq. 20). `sound_energy_pressure`
 takes `levels_positions` as a `(Ne, NM, NB)` array of the events one at a time,
-an `(NM, NB)` reading with `events=Ne`, or the `(NM, NB)` mean already formed;
+an `(NM, NB)` reading with `n_events=Ne`, or the `(NM, NB)` mean already formed;
 `mean_single_event_level` is the same reduction on its own. The background is
 the time-averaged level measured over the same window (clause 8.3.1), and it is
 compared as its exposure over that window, $L_{p(\mathrm{B})} + 10\log_{10}(T/T_0)$,
@@ -538,7 +538,7 @@ burst = emission.sound_energy_pressure(
     integration_time=10.0, frequencies=bands,
     room=emission.RoomEnvironment(reverberation_time=1.2, volume=900.0),   # -> K2
 )
-print(burst.events)                                        # 5 (Eq. 19 over the first axis)
+print(burst.n_events)                                        # 5 (Eq. 19 over the first axis)
 print(round(float(burst.environmental_correction[0]), 2))  # K2 = 2.64 dB
 print(np.round(burst.sound_energy_level, 1))               # per-band LJ, peaking at 103.5 dB at 1 kHz
 print(round(burst.sound_energy_level_a, 1))                # LJA = 107.7 dB(A)
@@ -550,11 +550,11 @@ ten_positions = np.array([70.0, 74.0, 78.0, 80.0, 79.0, 76.0, 72.0, 66.0]) + rng
 quiet = np.full((10, 8), 55.0)
 workshop = emission.RoomEnvironment(reverberation_time=0.6, volume=300.0)
 steady = emission.sound_power_pressure(
-    ten_positions, "hemisphere", radius=1.5, reflecting_planes=1,
+    ten_positions, "hemisphere", radius=1.5, n_reflecting_planes=1,
     background_levels=quiet, frequencies=octaves_hz, room=workshop,
 )
 ten_seconds = emission.sound_energy_pressure(
-    ten_positions + 10.0, "hemisphere", radius=1.5, reflecting_planes=1,
+    ten_positions + 10.0, "hemisphere", radius=1.5, n_reflecting_planes=1,
     background_levels=quiet, integration_time=10.0, frequencies=octaves_hz, room=workshop,
 )
 print(np.round(ten_seconds.sound_energy_level - steady.sound_power_level, 6))   # 10.0 in every band
@@ -572,11 +572,11 @@ altitude or below 10 °C clause 8.3.6 requires the Annex G correction
 $L_{J\mathrm{ref,atm}} = L_J + C_1 + C_2$ (Eq. G.3), which
 `reference_atmosphere_correction` evaluates from the temperature and the static
 pressure, or from the altitude through Eq. G.2. `sound_energy_pressure` takes the
-surface, position and room arguments of `sound_power_pressure` plus `events`,
+surface, position and room arguments of `sound_power_pressure` plus `n_events`,
 `background_levels` with `integration_time`, and returns a `SoundEnergyResult`
 (`sound_energy_level`, `surface_event_level`, `mean_event_level`,
 `background_correction`, `environmental_correction`, `directivity_index`,
-`surface_area`, `sound_energy_level_a`, `uncertainty`, `grade`, `events`,
+`surface_area`, `sound_energy_level_a`, `uncertainty`, `grade`, `n_events`,
 `integration_time`) with `.plot()`.
 
 ## See also

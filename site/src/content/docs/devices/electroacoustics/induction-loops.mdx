@@ -258,9 +258,9 @@ print(electroacoustics.band_limit_response([100.0, 5000.0]).round(2))  # [-0.71 
 noise = electroacoustics.loop_test_noise(fs, 30.0, seed=7)
 print(round(20 * np.log10(np.ptp(noise) / np.sqrt(np.mean(noise**2))), 2))  # 18.06 dB
 
-combi = 0.4 * electroacoustics.combi_signal(fs, cycles=2, seed=7)  # sine bursts at 400 mA/m
+combi = 0.4 * electroacoustics.combi_signal(fs, n_cycles=2, seed=7)  # sine bursts at 400 mA/m
 reading = electroacoustics.field_strength_meter(combi, fs)
-print(round(reading.maximum_level_db, 2), round(reading.equivalent_db, 2))  # 0.0 -3.98 dB
+print(round(reading.max_level_db, 2), round(reading.equivalent_db, 2))  # 0.0 -3.98 dB
 ```
 
 6.4 NOTE 2, and NOTE 3 to 5.4.8.2 of IEC 62489-1, print the theoretical
@@ -571,7 +571,7 @@ measured characteristics that are computations are these:
   deviation from 90° over 100 Hz to 5 kHz.
 
 ```python
-steps = electroacoustics.maximum_output_current(
+steps = electroacoustics.max_output_current(
     [2.0, 3.0, 4.0, 4.5, 5.0],            # V across the 0.69 ohm of the rated load
     [0.05, 0.08, 0.3, 1.2, 4.0],          # THD there, %
     load_resistance_ohm=0.69,

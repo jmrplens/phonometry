@@ -46,7 +46,7 @@ from ._cabin_insulation import (
     check_source_positions,
     estimated_cabin_noise_insulation,
     internal_noise_level,
-    minimum_cabin_clearance_m,
+    min_cabin_clearance_m,
     uncertainty_conditions,
     weighted_cabin_insulation,
 )
@@ -103,7 +103,7 @@ from .enclosure_insulation import (
 )
 from .enclosures import (
     ENCLOSURE_MODELS,
-    EnclosureResult,
+    EnclosureInsertionLossResult,
     enclosure_insertion_loss,
     enclosure_required_transmission_loss,
 )
@@ -441,7 +441,7 @@ __all__ = [
     "enclosure_required_transmission_loss",
     "EnclosureInsulationResult",
     "EnclosureInsulationWarning",
-    "EnclosureResult",
+    "EnclosureInsertionLossResult",
     "end_reflection_loss",
     "end_reflection_loss_closed_form",
     "ENGINEERING_STANDARD_DEVIATION_DB",
@@ -555,7 +555,7 @@ __all__ = [
     "MIN_SOURCE_TO_CABIN_M",
     "MIN_SOURCE_TO_MICROPHONE_IN_SITU_M",
     "MIN_SOURCE_TO_MICROPHONE_M",
-    "minimum_cabin_clearance_m",
+    "min_cabin_clearance_m",
     "MIN_FLOW_RATES",
     "MIN_MICROPHONE_DISTANCE_M",
     "MIN_PRESSURE_DIFFERENCE_PA",

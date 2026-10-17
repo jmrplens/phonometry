@@ -712,7 +712,7 @@ def plot_field_comparison_response(
             edgecolor=_C_EDGE,
             width=0.7,
             zorder=3,
-            label=_t(_MEAN_OF_PERSONS, language, n=result.persons),
+            label=_t(_MEAN_OF_PERSONS, language, n=result.n_persons),
         ),
     )
     ax.errorbar(
@@ -812,7 +812,7 @@ def plot_ear_canal_frequency_response(
             marker="o",
             ms=3.5,
             zorder=3,
-            label=_t(_MEAN_OF_PERSONS, language, n=result.persons),
+            label=_t(_MEAN_OF_PERSONS, language, n=result.n_persons),
         ),
     )
     ax.axhline(0.0, color=_C_EDGE, lw=0.8, ls="--", zorder=2)

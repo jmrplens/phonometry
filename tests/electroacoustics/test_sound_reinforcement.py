@@ -150,7 +150,7 @@ def test_open_microphones_eat_the_headroom() -> None:
         LONG_OPEN_LOOP_GAIN, 74.0, LEVEL_AT_LISTENER
     )
     four = electroacoustics.feedback_stability(
-        LONG_OPEN_LOOP_GAIN, 74.0, LEVEL_AT_LISTENER, open_microphones=4
+        LONG_OPEN_LOOP_GAIN, 74.0, LEVEL_AT_LISTENER, n_open_microphones=4
     )
     assert four.nom_correction == pytest.approx(10.0 * math.log10(4.0))
     assert one.headroom - four.headroom == pytest.approx(four.nom_correction)
@@ -162,13 +162,13 @@ def test_open_microphones_eat_the_headroom() -> None:
 def test_maximum_open_loop_gain_is_the_stability_edge() -> None:
     """Setting Z_S to its maximum lands the loop exactly on the margin line."""
     probe = electroacoustics.feedback_stability(
-        0.0, 74.0, LEVEL_AT_LISTENER, open_microphones=3
+        0.0, 74.0, LEVEL_AT_LISTENER, n_open_microphones=3
     )
     at_limit = electroacoustics.feedback_stability(
         probe.max_open_loop_gain,
         74.0,
         LEVEL_AT_LISTENER,
-        open_microphones=3,
+        n_open_microphones=3,
     )
     assert at_limit.loop_gain == pytest.approx(-at_limit.stability_margin)
     assert at_limit.is_stable
@@ -177,7 +177,7 @@ def test_maximum_open_loop_gain_is_the_stability_edge() -> None:
 
 def test_loop_gain_is_the_sum_of_its_parts() -> None:
     result = electroacoustics.feedback_stability(
-        -4.0, 70.0, 78.0, microphone_directivity=-2.5, open_microphones=6
+        -4.0, 70.0, 78.0, microphone_directivity=-2.5, n_open_microphones=6
     )
     assert result.loop_gain == pytest.approx(
         result.open_loop_gain + result.feedback_loop_gain + result.nom_correction
@@ -198,7 +198,7 @@ def test_plot_bars_echo_the_gain_structure() -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    result = electroacoustics.feedback_stability(-6.0, 74.0, 80.0, open_microphones=2)
+    result = electroacoustics.feedback_stability(-6.0, 74.0, 80.0, n_open_microphones=2)
     ax = result.plot()
     heights = [patch.get_height() for patch in ax.patches]
     assert heights == pytest.approx(
@@ -267,7 +267,7 @@ def test_validation_errors() -> None:
     ):
         electroacoustics.feedback_stability(-6.0, 74.0, 80.0, stability_margin=-1.0)
     with pytest.raises(ValueError, match="integer of at least 1"):
-        electroacoustics.feedback_stability(-6.0, 74.0, 80.0, open_microphones=0)
+        electroacoustics.feedback_stability(-6.0, 74.0, 80.0, n_open_microphones=0)
 
 
 @pytest.mark.parametrize(

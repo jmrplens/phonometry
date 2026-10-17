@@ -296,7 +296,7 @@ quantities = [
     metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
 ]
 mc = metrology.monte_carlo(lambda a, b, c, d: a + b + c + d, quantities,
-                    trials=1_000_000, coverage=0.95, seed=1)
+                    n_trials=1_000_000, coverage=0.95, seed=1)
 
 print(round(mc.value, 2))                 # 74.0
 print(round(mc.standard_uncertainty, 3))  # 0.407 dB  (coincide con la uc de arriba)
@@ -378,7 +378,7 @@ quantities = [
 ]
 model = lambda a, b, c, d: a + b + c + d
 result = metrology.uncertainty_propagation(model, quantities)
-mc = metrology.monte_carlo(model, quantities, trials=1_000_000, coverage=0.95, seed=1,
+mc = metrology.monte_carlo(model, quantities, n_trials=1_000_000, coverage=0.95, seed=1,
                     keep_samples=True)
 k, U = result.expanded(0.95)
 

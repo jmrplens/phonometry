@@ -255,7 +255,7 @@ def test_the_transfer_function_moves_with_an_unequal_pair() -> None:
 _F1, _F2 = 100.0, 5000.0
 _SWEEP = synchronized_sweep_signal(FS, _F1, _F2, 1.0)
 _RECORDED = _SWEEP + 0.02 * _SWEEP**2 + 0.005 * _SWEEP**3
-_SWEEP_KWARGS = {"f1": _F1, "f2": _F2, "seconds": 1.0, "n_harmonics": 3}
+_SWEEP_KWARGS = {"f1": _F1, "f2": _F2, "duration_s": 1.0, "n_harmonics": 3}
 
 
 def test_swept_sine_takes_the_signal_the_reader_returns() -> None:

@@ -186,7 +186,7 @@ $D_\mathrm{2,S}$ in dB, reflecting the informative quality ranges of Annex A
 where a larger spatial decay is better; the room passes at or above it). It
 uses the same `ReportMetadata` container as the [ISO 3382-1/-2 room-acoustics
 fiche](room-acoustics.md#iso-3382-report-report); the open-plan-specific fields
-`area` (floor area), `source_positions` and `receiver_positions` (the number of
+`area` (floor area), `n_source_positions` and `n_receiver_positions` (the number of
 measurement positions) populate the header, alongside `client`, `test_room`,
 `specimen`, `instrumentation`, `temperature_c`, `relative_humidity_percent`,
 `static_pressure_kpa`, `measurement_standard`, `test_date`, `laboratory`,
@@ -211,7 +211,7 @@ result.report(
     metadata=ReportMetadata(
         test_room="Open-plan office B",
         specimen="Furnished, unoccupied, background noise present",
-        area=420.0, source_positions=2, receiver_positions=7,
+        area=420.0, n_source_positions=2, n_receiver_positions=7,
         measurement_standard="ISO 3382-3",
         temperature_c=22.0, relative_humidity_percent=45.0,
         laboratory="Phonometry Reference Laboratory",

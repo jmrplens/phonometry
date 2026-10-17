@@ -87,7 +87,7 @@ def _chk_fit_period() -> Outcome:
 )
 def _chk_storeys() -> Outcome:
     """The storey rule, which DIN 4150-3 6.4 prints in the same words."""
-    computed = ph.vibration.fundamental_frequency("stories", stories=10)
+    computed = ph.vibration.fundamental_frequency("stories", n_stories=10)
     return numeric(1.0, computed, _TOLERANCE, unit="Hz", places=4)
 
 

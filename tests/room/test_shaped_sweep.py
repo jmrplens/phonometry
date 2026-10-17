@@ -115,7 +115,7 @@ def test_group_delay_grows_with_cumulative_target_power() -> None:
     lead = tau[0]
     expected = lead + 2.0 * np.cumsum(power) / float(np.sum(power))
     np.testing.assert_allclose(tau, expected, atol=1e-12)
-    # The group delay spans exactly 'seconds' end to end.
+    # The group delay spans exactly 'duration_s' end to end.
     assert tau[-1] - tau[0] == pytest.approx(2.0, abs=1e-12)
     assert np.all(np.diff(tau) >= 0.0)
 
@@ -127,7 +127,7 @@ def test_crest_factor_stays_near_the_swept_sine_ideal() -> None:
 
 
 def test_crest_factor_is_finite_when_the_core_window_collapses() -> None:
-    # A tiny 'seconds' next to a dominant 'start_delay' rounds the two edges
+    # A tiny 'duration_s' next to a dominant 'start_delay' rounds the two edges
     # of the constant-envelope window onto the same sample, leaving an empty
     # core slice; the crest factor must still come out finite (the statistic
     # falls back to the whole retained sweep) rather than NaN/inf.
@@ -177,7 +177,7 @@ def test_rejects_bad_inputs() -> None:
         room.shaped_sweep_signal(FS, 500.0, 100.0, 1.0)
     with pytest.raises(ValueError, match=r"f2 must not exceed the Nyquist"):
         room.shaped_sweep_signal(FS, 50.0, 30000.0, 1.0)
-    with pytest.raises(ValueError, match=r"seconds must be positive"):
+    with pytest.raises(ValueError, match=r"duration_s must be positive"):
         room.shaped_sweep_signal(FS, 50.0, 5000.0, 0.0)
     with pytest.raises(ValueError, match=r"amplitude must be positive"):
         room.shaped_sweep_signal(FS, 50.0, 5000.0, 1.0, amplitude=0.0)

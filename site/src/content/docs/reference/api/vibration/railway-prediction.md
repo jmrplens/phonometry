@@ -616,18 +616,18 @@ refused.
 SPEED_RESCALING_LIMIT = 0.3
 ```
 
-## TAKT_MAXIMUM_FACTOR
+## TAKT_MAX_FACTOR
 
 *Constant* (`float`).
 
 ```python
-TAKT_MAXIMUM_FACTOR = 1.0
+TAKT_MAX_FACTOR = 1.0
 ```
 
-## takt_maximum_kb
+## takt_max_kb
 
 ```python
-takt_maximum_kb(weighted_levels_db: ArrayLike) -> float
+takt_max_kb(weighted_levels_db: ArrayLike) -> float
 ```
 
 The clock maximum r.m.s. of a category from its spectrum, Formula (9).

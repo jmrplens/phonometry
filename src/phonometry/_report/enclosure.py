@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Machine-enclosure insertion-loss performance fiche (reportlab renderer).
 
-Renders a :class:`~phonometry.noise_control.enclosures.EnclosureResult` (the
+Renders a :class:`~phonometry.noise_control.enclosures.EnclosureInsertionLossResult` (the
 net insertion loss of a close or free-standing machine enclosure, Bies, Hansen
 & Howard, *Engineering Noise Control* 5th ed., section 7.4.2) to a one-page
 enclosure-performance sheet:
@@ -50,7 +50,7 @@ from ._noise_control_fiche import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
-    from ..noise_control.enclosures import EnclosureResult
+    from ..noise_control.enclosures import EnclosureInsertionLossResult
     from .metadata import ReportMetadata
 
 
@@ -78,7 +78,7 @@ def _prediction_statement(language: str = "en") -> str:
     )
 
 
-def _caption(result: EnclosureResult, language: str = "en") -> str:
+def _caption(result: EnclosureInsertionLossResult, language: str = "en") -> str:
     """The caption declaring the analysis band set above the table."""
     freqs = getattr(result, "frequencies", None)
     if freqs is None:
@@ -90,7 +90,7 @@ def _caption(result: EnclosureResult, language: str = "en") -> str:
 
 
 def _value_table(
-    result: EnclosureResult, *, verbose: bool, language: str = "en"
+    result: EnclosureInsertionLossResult, *, verbose: bool, language: str = "en"
 ) -> Table:
     """Build the per-band table (nominal frequency, R, C, IL; verbose adds R_i).
 
@@ -139,7 +139,7 @@ def _value_table(
 
 
 def _statement(
-    result: EnclosureResult, language: str = "en"
+    result: EnclosureInsertionLossResult, language: str = "en"
 ) -> tuple[float, str, list[str]]:
     """The boxed mean insertion loss and its extended enclosure terms."""
     mean_il = mean_finite(result.insertion_loss)
@@ -181,7 +181,7 @@ def _basis_strip(language: str = "en") -> str:
 
 
 def render_enclosure_report(
-    result: EnclosureResult,
+    result: EnclosureInsertionLossResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -191,7 +191,7 @@ def render_enclosure_report(
     """Render a machine-enclosure insertion-loss fiche to a PDF at ``path``.
 
     :param result: An
-        :class:`~phonometry.noise_control.enclosures.EnclosureResult` carrying
+        :class:`~phonometry.noise_control.enclosures.EnclosureInsertionLossResult` carrying
         the per-band panel transmission loss ``R``, the interior build-up
         correction ``C``, the net insertion loss ``IL = R - C`` and the external
         and internal surface areas.

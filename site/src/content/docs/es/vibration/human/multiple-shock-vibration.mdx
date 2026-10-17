@@ -301,7 +301,7 @@ from phonometry import vibration
 # años, 120 días/año.
 dz = vibration.dose_from_peaks([40.0] * 5)
 sd = vibration.compression_dose(dz)                     # 1.62 MPa
-r = vibration.injury_risk(sd, start_age=20, years=20, days_per_year=120)
+r = vibration.injury_risk(sd, start_age=20, exposure_duration_years=20, days_per_year=120)
 print(round(r, 2))                               # 1.22
 print(round(100 * vibration.injury_probability(r)))     # 37  % de riesgo de lesión
 ```
@@ -332,7 +332,7 @@ veredicto.
 ```python
 for sex, mz in (("male", 0.029), ("female", 0.025)):
     sd_sex = vibration.compression_dose(dz, mz=mz)
-    r_sex = vibration.injury_risk(sd_sex, start_age=20, years=20,
+    r_sex = vibration.injury_risk(sd_sex, start_age=20, exposure_duration_years=20,
                                   days_per_year=120, sex=sex)
     print(sex, round(sd_sex, 2), round(r_sex, 2),
           round(100 * float(vibration.injury_probability(r_sex, sex=sex))))
@@ -360,7 +360,7 @@ fs = 256.0
 az = np.zeros(2560)
 az[256::512] = 60.0
 result = vibration.multiple_shock_assessment(
-    az, fs, start_age=20, years=20, days_per_year=120, sex="male",
+    az, fs, start_age=20, exposure_duration_years=20, days_per_year=120, sex="male",
     measurement_time=10.0,      # t_m: el registro dura 10 s
     exposure_time=4 * 3600.0,   # t_d: 4 h al día en este vehículo
 )
@@ -407,7 +407,7 @@ grid = np.linspace(0.0, 3.0, 300)
 for sex, etiqueta in (("male", "hombre"), ("female", "mujer")):
     ax_r.plot(grid, 100.0 * vibration.injury_probability(grid, sex=sex), label=etiqueta)
 sd = vibration.compression_dose(vibration.dose_from_peaks([40.0] * 5))
-r = vibration.injury_risk(sd, start_age=20, years=20, days_per_year=120)
+r = vibration.injury_risk(sd, start_age=20, exposure_duration_years=20, days_per_year=120)
 for level, r_level in zip((10, 50, 90), (0.72, 1.42, 2.17)):  # Tabla C.2, hombre
     ax_r.axhline(level, color="#7f7f7f", linestyle=":", lw=0.8)
     ax_r.plot([r_level, r_level], [0.0, level], color="#7f7f7f", linestyle=":", lw=0.8)
@@ -475,7 +475,7 @@ from phonometry import vibration, ReportMetadata
 peaks = np.array([40.0] * 5)
 dz = vibration.dose_from_peaks(peaks)
 sd = vibration.compression_dose(dz)
-r = vibration.injury_risk(sd, start_age=20, years=20, days_per_year=120)
+r = vibration.injury_risk(sd, start_age=20, exposure_duration_years=20, days_per_year=120)
 result = vibration.MultipleShockResult(
     sex="male",
     acceleration_dose=dz,
@@ -484,7 +484,7 @@ result = vibration.MultipleShockResult(
     risk=r,
     probability=float(vibration.injury_probability(r)),
     start_age=20.0,
-    years=20,
+    exposure_duration_years=20,
     days_per_year=120.0,
     peaks=peaks,
     risk_thresholds=(0.72, 1.42, 2.17),   # Tabla C.2, hombre: riesgo del 10 / 50 / 90 %

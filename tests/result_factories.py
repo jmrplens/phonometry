@@ -42,7 +42,7 @@ def _zwicker_stationary() -> ph.psychoacoustics.ZwickerLoudness:
 
 
 def _sti() -> ph.speech.STIResult:
-    sig = ph.speech.stipa_signal(fs=FS, seconds=16.0, seed=3)
+    sig = ph.speech.stipa_signal(fs=FS, duration_s=16.0, seed=3)
     return ph.speech.stipa(sig, FS)
 
 
@@ -492,7 +492,7 @@ def _diffuse_absorption() -> ph.materials.DiffuseFieldAbsorptionResult:
     f = np.linspace(400.0, 4000.0, 8)
     med = ph.materials.miki(f, 20000.0)
     return ph.materials.diffuse_field_absorption(
-        f, [ph.materials.PorousLayer(0.05, med)], quadrature_points=16
+        f, [ph.materials.PorousLayer(0.05, med)], n_quadrature_points=16
     )
 
 
@@ -526,7 +526,7 @@ def _monte_carlo() -> ph.metrology.MonteCarloResult:
     return ph.metrology.monte_carlo(
         lambda a, b, c: a + b + c,
         _MC_QUANTITIES,
-        trials=2000,
+        n_trials=2000,
         seed=7,
         keep_samples=True,
     )
@@ -2130,9 +2130,9 @@ def _amplifier_overload() -> ph.electroacoustics.AmplifierOverloadVerification:
     return ph.electroacoustics.verify_amplifier_overload(3.0, _loop_impedance(), 6.0)
 
 
-def _maximum_output_current() -> ph.electroacoustics.MaximumOutputCurrent:
+def _maximum_output_current() -> ph.electroacoustics.MaxOutputCurrent:
     """IEC 62489-1:2010 5.4.7: five steps of level into 0,5 ohm, rated at 1 % THD."""
-    return ph.electroacoustics.maximum_output_current(
+    return ph.electroacoustics.max_output_current(
         [1.0, 2.0, 3.0, 4.0, 5.0],
         [0.1, 0.2, 0.5, 1.5, 3.0],
         load_resistance_ohm=0.5,

@@ -290,7 +290,7 @@ class AssumedProtectionResult(OwnsArrays):
     :ivar performance: The protection performance ``x``, in per cent.
     :ivar alpha: The Table 1 constant that ``performance`` selected.
     :ivar frequencies: Octave-band mid-frequencies, in hertz.
-    :ivar subjects: Number of test subjects the distribution came from.
+    :ivar n_subjects: Number of test subjects the distribution came from.
     """
 
     apv: np.ndarray
@@ -299,7 +299,7 @@ class AssumedProtectionResult(OwnsArrays):
     performance: int
     alpha: float
     frequencies: np.ndarray
-    subjects: int
+    n_subjects: int
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -367,7 +367,7 @@ def assumed_protection_value(
         performance=int(performance),
         alpha=alpha,
         frequencies=freqs,
-        subjects=int(grid.shape[0]),
+        n_subjects=int(grid.shape[0]),
     )
 
 

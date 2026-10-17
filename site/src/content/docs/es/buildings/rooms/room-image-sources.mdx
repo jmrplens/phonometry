@@ -117,7 +117,7 @@ res = room.image_source_rir(
     absorption=0.12,          # absorción de pared uniforme (escalar)
     fs=48000,
     # Orden suficiente para cubrir un ajuste de T30; véase «Elegir max_order,
-    # duration y fs» más abajo. El 20 por defecto trunca a la mitad la cola de
+    # duration_s y fs» más abajo. El 20 por defecto trunca a la mitad la cola de
     # esta sala.
     max_order=60,
 )
@@ -369,7 +369,7 @@ plt.show()
 | `max_order` | int | — | ≥ 0, defecto 20 | Corte de orden de reflexión |
 | `speed_of_sound` | float | m/s | > 0, defecto 343 | Velocidad del sonido `c` |
 | `air_attenuation_per_m` | float o (n,) | 1/m | ≥ 0, defecto 0 | Coeficiente de intensidad del aire `m` |
-| `duration` | float, opcional | s | > 0 | Longitud de la RIR (defecto: última llegada) |
+| `duration_s` | float, opcional | s | > 0 | Longitud de la RIR (defecto: última llegada) |
 | `frequencies` | (n,), opcional | Hz | — | Centros de banda que etiquetan un resultado por banda |
 
 Devuelve un `ImageSourceResult` (`ir`, `fs`, `frequencies` y la tabla exacta de
@@ -379,7 +379,7 @@ propiedad `direct_time`. `audible_image_count(order)` da el
 recuento de imágenes de la caja de zapatos y `reflection_density(t, volume)` la
 densidad $4\pi c^3 t^2 / V$.
 
-### Elegir `max_order`, `duration` y `fs`
+### Elegir `max_order`, `duration_s` y `fs`
 
 `max_order` no es un mando de calidad, es un **horizonte temporal**. La retícula
 de imágenes solo está completa hasta un radio de aproximadamente `max_order` ×
@@ -454,7 +454,7 @@ plt.show()
 **`t30_valid` no ve una retícula truncada.** Lee el rango de decaimiento del
 array que le entreguen, así que devuelve `True` en todos los órdenes de la tabla
 anterior. El indicador detecta una *grabación* ruidosa o demasiado corta; no puede
-detectar un modelo que dejó de generar reflexiones. Una `duration` más corta que
+detectar un modelo que dejó de generar reflexiones. Una `duration_s` más corta que
 el decaimiento trunca la cola exactamente igual, y en silencio.
 
 Otras dos advertencias pertenecen a este mismo apartado. `fs` cuantiza todas las

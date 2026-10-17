@@ -81,11 +81,11 @@ def test_rejects_invalid_arguments() -> None:
     with pytest.raises(ValueError, match=r"'fs' must be a positive, finite number"):
         ph.signals.noise_signal(0.0, 1.0)
     with pytest.raises(
-        ValueError, match=r"'seconds' must be a positive, finite number"
+        ValueError, match=r"'duration_s' must be a positive, finite number"
     ):
         ph.signals.noise_signal(FS, -1.0)
     with pytest.raises(
-        ValueError, match=r"'fs'\*'seconds' must give at least .* samples"
+        ValueError, match=r"'fs'\*'duration_s' must give at least .* samples"
     ):
         ph.signals.noise_signal(FS, 1e-5)
     with pytest.raises(ValueError, match="'color'"):

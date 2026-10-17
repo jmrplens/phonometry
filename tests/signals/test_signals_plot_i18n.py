@@ -206,7 +206,7 @@ def test_phase_decomposition_es() -> None:
 
 
 def test_tone_burst_es_and_bad_language() -> None:
-    res = ph.signals.tone_burst(FS, 5000.0, 25, repetitions=2, repetition_rate=10.0)
+    res = ph.signals.tone_burst(FS, 5000.0, 25, n_repetitions=2, repetition_rate=10.0)
     ax = res.plot(language="es")
     assert "Salva de tono (IEC 60268-1)" in ax.get_title()
     assert ax.get_xlabel() == "Tiempo [s]"

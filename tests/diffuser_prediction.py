@@ -61,7 +61,7 @@ def predicted_arc(
         ref.ISO17497_2_QRD_WELL_WIDTH,
         frequency,
         depths=depths,
-        repetitions=ref.ISO17497_2_QRD_PERIODS,
+        n_repetitions=ref.ISO17497_2_QRD_PERIODS,
         source_angle_deg=source_angle_deg,
         speed_of_sound=ref.ISO17497_2_SPEED_OF_SOUND,
     )

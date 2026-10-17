@@ -711,18 +711,10 @@ MID_FREQUENCY_OCTAVES_HZ = (500.0, 1000.0)
 MID_FREQUENCY_THIRD_OCTAVES_HZ = (400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0)
 ```
 
-## MIN_REFERENCE_DISTANCE_M
-
-*Constant* (`float`).
+## min_receiver_positions
 
 ```python
-MIN_REFERENCE_DISTANCE_M = 3.0
-```
-
-## minimum_receiver_positions
-
-```python
-minimum_receiver_positions(seats: ArrayLike) -> NDArray[np.float64] | float
+min_receiver_positions(seats: ArrayLike) -> NDArray[np.float64] | float
 ```
 
 Fewest microphone positions a hall of a given size wants (Table A.2).
@@ -758,6 +750,14 @@ as balconies and under-balcony areas will need more than this.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a seat count is not a positive, finite number. |
+
+## MIN_REFERENCE_DISTANCE_M
+
+*Constant* (`float`).
+
+```python
+MIN_REFERENCE_DISTANCE_M = 3.0
+```
 
 ## octave_pair_averages
 

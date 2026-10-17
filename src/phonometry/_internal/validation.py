@@ -260,26 +260,26 @@ def require_fraction(value: float, name: str) -> float:
     return number
 
 
-def require_count(value: object, name: str, *, minimum: int = 1) -> int:
-    """Require a whole number of things, at least *minimum*.
+def require_count(value: object, name: str, *, at_least: int = 1) -> int:
+    """Require a whole number of things, at least *at_least*.
 
     An ``int`` or a numpy integer, or a float that is whole, such as 3.0;
     never a bool, a string or a non-finite number.
 
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
-    :param minimum: The smallest count accepted, 1 by default.
+    :param at_least: The smallest count accepted, 1 by default.
     :return: The validated value as an ``int``.
     :raises ValueError: for anything that is not a whole number at or above
-        *minimum*.
+        *at_least*.
     """
-    msg = f"'{name}' must be a whole number, at least {minimum}, got {value!r}."
+    msg = f"'{name}' must be a whole number, at least {at_least}, got {value!r}."
     if isinstance(value, bool) or not isinstance(
         value, (int, float, np.integer, np.floating)
     ):
         raise ValueError(msg)
     number = float(value)
-    if not math.isfinite(number) or not number.is_integer() or number < minimum:
+    if not math.isfinite(number) or not number.is_integer() or number < at_least:
         raise ValueError(msg)
     return int(number)
 

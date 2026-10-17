@@ -71,7 +71,7 @@ def test_the_insertion_loss_is_the_open_level_less_the_occluded_one() -> None:
         result.repetition_insertion_loss_db[0] - result.repetition_insertion_loss_db[2],
         0.8,
     )
-    assert result.repetitions == 3
+    assert result.n_repetitions == 3
     assert result.repetitions_sufficient
 
 

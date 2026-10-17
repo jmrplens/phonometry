@@ -58,7 +58,7 @@ def generate_metadiffuser_ntff_polar(output_dir: str) -> None:
         wells,
         depth_m=depth,
         period_m=period_m,
-        repetitions=1,
+        n_repetitions=1,
     )
     angles, levels = _meshed_metadiffuser_ntff_levels()
     _fig, ax = plt.subplots(

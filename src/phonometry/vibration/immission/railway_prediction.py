@@ -119,7 +119,7 @@ __all__ = [
     "PREDICTION_BAND_CENTERS_HZ",
     "RECOMMENDED_DISTANCES_M",
     "SPEED_RESCALING_LIMIT",
-    "TAKT_MAXIMUM_FACTOR",
+    "TAKT_MAX_FACTOR",
     "TrainCategoryPrediction",
     "foundation_to_floor_transfer",
     "ground_attenuation_coefficient_per_m",
@@ -133,7 +133,7 @@ __all__ = [
     "predict_floor_spectrum",
     "predict_train_category",
     "rescale_emission_for_speed",
-    "takt_maximum_kb",
+    "takt_max_kb",
     "train_decay_exponent",
     "train_velocity_ratio",
     "velocity_spectrum_um_s",
@@ -201,7 +201,7 @@ SPEED_RESCALING_LIMIT: float = 0.3
 
 #: :math:`c_{\mathrm{T}1}` of Formula (9): 1 for the Max Hold spectra with the time
 #: weighting Fast that Clause 5.2 asks for.
-TAKT_MAXIMUM_FACTOR: float = 1.0
+TAKT_MAX_FACTOR: float = 1.0
 
 #: :math:`\beta` of Formula (12): the peak velocity is 3 times
 #: :math:`KB_\mathrm{Fmax,Zug}`, an empirical factor.
@@ -736,7 +736,7 @@ def kb_weighted_levels(
     return levels + weights
 
 
-def takt_maximum_kb(weighted_levels_db: ArrayLike) -> float:
+def takt_max_kb(weighted_levels_db: ArrayLike) -> float:
     r"""The clock maximum r.m.s. of a category from its spectrum, Formula (9).
 
     :math:`KB_\mathrm{FTm,Zug} = c_{\mathrm{T}1} v_0
@@ -755,7 +755,7 @@ def takt_maximum_kb(weighted_levels_db: ArrayLike) -> float:
     levels = _levels(weighted_levels_db, "weighted_levels_db")
     total = band_sum_level(levels)
     return float(
-        TAKT_MAXIMUM_FACTOR * VELOCITY_LEVEL_REFERENCE_MM_S * 10.0 ** (total / 20.0)
+        TAKT_MAX_FACTOR * VELOCITY_LEVEL_REFERENCE_MM_S * 10.0 ** (total / 20.0)
     )
 
 
@@ -887,7 +887,7 @@ def predict_train_category(
         )
         raise ValueError(msg)
     weighted = kb_weighted_levels(floor[inside], freqs[inside])
-    kb_ftm = takt_maximum_kb(weighted)
+    kb_ftm = takt_max_kb(weighted)
     kb_fmax = TRAIN_KB_FMAX_FACTOR * kb_ftm
     return TrainCategoryPrediction(
         frequencies=freqs,

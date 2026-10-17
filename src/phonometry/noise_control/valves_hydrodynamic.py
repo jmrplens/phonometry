@@ -409,7 +409,7 @@ def incipient_cavitation_ratio(
 
 
 def multihole_incipient_cavitation_ratio(
-    passages: int, hole_diameter_m: float, pressure_recovery: float
+    n_passages: int, hole_diameter_m: float, pressure_recovery: float
 ) -> float:
     r"""Equation (3b): the same threshold for a multihole trim.
 
@@ -424,7 +424,7 @@ def multihole_incipient_cavitation_ratio(
     :math:`\pi/4`, so two trims with the same open area and different hole
     counts get the same threshold here.
 
-    :param passages: :math:`N_o`, the number of independent, identical flow
+    :param n_passages: :math:`N_o`, the number of independent, identical flow
         passages.
     :param hole_diameter_m: :math:`d_H`, the hole diameter, in m.
     :param pressure_recovery: :math:`F_L`, dimensionless.
@@ -433,7 +433,7 @@ def multihole_incipient_cavitation_ratio(
     :raises ValueError: If the passage count is not a whole number of one or
         more, or another value is not positive and finite.
     """
-    count = _require_count(passages, "passages")
+    count = _require_count(n_passages, "n_passages")
     diameter_m = require_positive(hole_diameter_m, "hole_diameter_m")
     recovery = _require_recovery(pressure_recovery)
     inner = _MULTIHOLE_OFFSET + _MULTIHOLE_FACTOR * count * diameter_m**2 / recovery
@@ -1842,7 +1842,7 @@ def last_stage_differential(
     return float(min(p1n - p2, threshold * (p1n - pv)))
 
 
-def uniform_passage_style_modifier(passages: int) -> float:
+def uniform_passage_style_modifier(n_passages: int) -> float:
     r"""Equation (29): the style modifier of a last stage full of openings.
 
     .. math::
@@ -1856,12 +1856,12 @@ def uniform_passage_style_modifier(passages: int) -> float:
     openings therefore give a quarter of the jet diameter, a sixteenth of the
     jet area, and a peak frequency four times higher.
 
-    :param passages: :math:`N_o`, the number of uniform openings within the
+    :param n_passages: :math:`N_o`, the number of uniform openings within the
         last stage.
     :return: :math:`F_d`, dimensionless.
     :raises ValueError: If the count is not a whole number of one or more.
     """
-    count = _require_count(passages, "passages")
+    count = _require_count(n_passages, "n_passages")
     return float(math.sqrt(1.0 / count))
 
 

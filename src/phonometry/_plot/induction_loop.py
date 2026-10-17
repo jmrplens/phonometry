@@ -46,7 +46,7 @@ if TYPE_CHECKING:
         AmplifierFrequencyResponse,
         LoopField,
         LoopImpedance,
-        MaximumOutputCurrent,
+        MaxOutputCurrent,
         NeckLoopCharacteristics,
         NeckLoopVerification,
         QuadraturePhaseError,
@@ -668,7 +668,7 @@ def plot_field_strength_reading(
     peak = int(np.argmax(np.where(finite, result.levels, -np.inf)))
     ax.plot(
         [result.times[peak]],
-        [result.maximum_level_db],
+        [result.max_level_db],
         ls="none",
         marker="D",
         ms=6,
@@ -677,7 +677,7 @@ def plot_field_strength_reading(
         label=_t(
             "Maximum {level} dB",
             language,
-            level=_num(result.maximum_level_db, language),
+            level=_num(result.max_level_db, language),
         ),
     )
     ax.set_xlabel(_t("Time [s]", language))
@@ -970,7 +970,7 @@ def plot_amplifier_overload(
 
 
 def plot_maximum_output_current(
-    result: MaximumOutputCurrent,
+    result: MaxOutputCurrent,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -978,7 +978,7 @@ def plot_maximum_output_current(
 ) -> Axes:
     """The distortion against the load current, with the rated THD and the maximum.
 
-    :param result: A :class:`~phonometry.electroacoustics.induction_loop_components.MaximumOutputCurrent`.
+    :param result: A :class:`~phonometry.electroacoustics.induction_loop_components.MaxOutputCurrent`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language.
     :param kwargs: Forwarded to the distortion curve's ``Axes.plot``.

@@ -261,7 +261,7 @@ $$
 
 (Eq. 19), or its several-location form (Eq. 20). `sound_energy_in_situ`
 takes the events as a 3D `(n, N, bands)` array or as a 2D `(n, bands)`
-measurement with `events=N`, and returns the same result type with
+measurement with `n_events=N`, and returns the same result type with
 `quantity='energy'`, the level in `sound_energy_level` and the Annex D total
 in `sound_energy_level_a`.
 
@@ -305,7 +305,7 @@ the inputs are the same: grade 2, $\sigma_\mathrm{omc}$ = 2,0 dB, $k$ = 2.
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `event_levels` | 3D or 2D array | dB | `(n, N, bands)` or `(n, bands)` | $L'_{Ei,q(\mathrm{ST})}$ per event, or $L'_{Ei,N(\mathrm{ST})}$ of one measurement over $N$ events |
-| `events` | int | | $\ge 1$ | $N$ for the 2D form (Eq. 17); must be `None` with the 3D form. Clause 7.6 asks for at least five events, so fewer than five warns and the determination is nonconforming, on either form |
+| `n_events` | int | | $\ge 1$ | $N$ for the 2D form (Eq. 17); must be `None` with the 3D form. Clause 7.6 asks for at least five events, so fewer than five warns and the determination is nonconforming, on either form |
 | `integration_time` | float | s | $> 0$ | $T$ of the event measurement; `None` applies Eq. 14 as printed |
 | `levels_ref`, `lw_ref`, `frequencies`, `background_levels`, `background_levels_ref`, `temperature_c`, `static_pressure_kpa`, `excess_levels`, `directivity_range`, `sigma_omc_db`, `coverage_factor` | | | | As in `sound_power_in_situ()` |
 

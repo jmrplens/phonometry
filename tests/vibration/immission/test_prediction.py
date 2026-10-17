@@ -138,10 +138,10 @@ def test_clause_4_3_the_building_on_its_ground() -> None:
     assert im.soil_building_frequency_guide(2) == (8.0, 15.0)
     assert im.soil_building_frequency_guide(4) == (8.0, 12.0)
     assert im.soil_building_frequency_guide(9) == (0.0, 8.0)
-    assert im.foundation_transfer_maximum() == 2.0
-    assert im.foundation_transfer_maximum(0.5) == 1.0
-    assert im.floor_transfer_maximum(0.02) == 25.0
-    assert im.floor_transfer_maximum(0.05) == 10.0
+    assert im.foundation_transfer_max() == 2.0
+    assert im.foundation_transfer_max(0.5) == 1.0
+    assert im.floor_transfer_max(0.02) == 25.0
+    assert im.floor_transfer_max(0.05) == 10.0
     assert im.FLOOR_DAMPING_RATIO_RANGE == (0.02, 0.05)
     assert im.FOUNDATION_TRANSFER_ABOVE_RESONANCE == 0.5
     # Formula (4) is the storey estimate DIN 4150-3 6.4 prints too, and one

@@ -1543,7 +1543,7 @@ def verify_amplifier_overload(
     impedance: LoopImpedance,
     compliance_voltage_v: float,
     *,
-    program: Literal["transient_speech", "speech", "music"] = "speech",
+    program: Literal["transient_speech", "speech", "music", "programme"] = "speech",
     current_response: AmplifierFrequencyResponse | None = None,
 ) -> AmplifierOverloadVerification:
     r"""Does the amplifier clip in the overload test of 10.3 as amended?

@@ -143,8 +143,8 @@ from .programme_signal import (
     simulated_programme_signal,
 )
 from .sound_reinforcement import (
-    CARDIOID_RELATIVE_DIRECTIVITY,
-    DEFAULT_STABILITY_MARGIN,
+    CARDIOID_RELATIVE_DIRECTIVITY_DB,
+    DEFAULT_STABILITY_MARGIN_DB,
     FeedbackStabilityResult,
     feedback_loop_gain,
     feedback_stability,
@@ -159,8 +159,8 @@ from .swept_sine import (
 __all__ = [
     "ACOUSTIC_COUPLINGS",
     "BACK_RADIATIONS",
-    "CARDIOID_RELATIVE_DIRECTIVITY",
-    "DEFAULT_STABILITY_MARGIN",
+    "CARDIOID_RELATIVE_DIRECTIVITY_DB",
+    "DEFAULT_STABILITY_MARGIN_DB",
     "EARPHONE_TYPES",
     "NECK_LOOP_TYPES",
     "OVERLOAD_TEST_FREQUENCIES",

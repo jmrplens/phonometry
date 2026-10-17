@@ -202,12 +202,12 @@ def test_foundation_to_floor_at_the_tabulated_ratios_and_between() -> None:
 
 def test_formula_3_rescales_a_spectrum_and_stops_at_30_percent() -> None:
     shifted = im.rescale_emission_for_speed(
-        [50.0, 60.0], speed_from_km_h=50.0, speed_to_km_h=65.0
+        [50.0, 60.0], speed_from_kmh=50.0, speed_to_kmh=65.0
     )
     assert shifted[0] == pytest.approx(50.0 + 20.0 * math.log10(1.3))
     assert shifted[1] - 60.0 == pytest.approx(2.28, abs=0.005)
     with pytest.raises(ValueError, match="30%"):
-        im.rescale_emission_for_speed([50.0], speed_from_km_h=50.0, speed_to_km_h=100.0)
+        im.rescale_emission_for_speed([50.0], speed_from_kmh=50.0, speed_to_kmh=100.0)
 
 
 def test_formulae_4_to_6_the_transmission_through_the_ground() -> None:

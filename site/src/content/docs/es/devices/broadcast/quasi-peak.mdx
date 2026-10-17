@@ -170,7 +170,7 @@ print(round(broadcast.quasi_peak_meter(calibration, fs).reading, 6))   # 0.775
 ```
 
 Por eso un array pelado o un `Signal` sin calibrar se leen como un registro de
-tensión frente a `broadcast.DBQPS_REFERENCE`, 0,775 V. Un `Signal`
+tensión frente a `broadcast.DBQPS_REFERENCE_V`, 0,775 V. Un `Signal`
 **calibrado** presenta sus muestras en pascales, como en todo el resto de la
 biblioteca, y entonces hay que darle una `reference` propia: 0,775 V no es una
 presión, y BS.468-4 no ofrece ninguna presión que poner en su lugar, así que la

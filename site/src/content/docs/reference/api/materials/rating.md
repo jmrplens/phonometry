@@ -106,7 +106,7 @@ Weighted sound absorption rating (ISO 11654:1997).
 | `measured` | Practical absorption coefficients `alpha_p` used for the rating (snapped to the 0,05 grid of Clause 4.1). |
 | `shifted_reference` | Reference curve of Figure 1 after the final shift. |
 | `third_octave_alpha_s` | The fifteen one-third-octave sound absorption coefficients `alpha_s` (200 Hz to 5000 Hz, ISO 354) the rating was built from, as given; `None` when the rating was formed from octave practical coefficients only. Carried so the fiche can show the full one-third-octave table every accredited ISO 354 certificate reports. |
-| `third_octave_bands` | The one-third-octave centre frequencies, in Hz, that pair with `third_octave_alpha_s` (the module [`THIRD_OCTAVE_BANDS`](/phonometry/reference/api/materials/rating/#third_octave_bands)); `None` when `third_octave_alpha_s` is. |
+| `third_octave_bands` | The one-third-octave centre frequencies, in Hz, that pair with `third_octave_alpha_s` (the module [`RATING_THIRD_OCTAVE_BANDS_HZ`](/phonometry/reference/api/materials/rating/#rating_third_octave_bands_hz)); `None` when `third_octave_alpha_s` is. |
 
 ### AbsorptionRatingResult.plot()
 
@@ -176,14 +176,6 @@ full ISO 354 one-third-octave `alpha_s` table with the octave
 | ValueError | If `engine` is not `"reportlab"`. |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
 
-## OCTAVE_BANDS
-
-*Constant* (`tuple`).
-
-```python
-OCTAVE_BANDS = (250, 500, 1000, 2000, 4000)
-```
-
 ## practical_absorption_coefficient
 
 ```python
@@ -208,20 +200,28 @@ Practical sound absorption coefficients `alpha_p` (ISO 11654 Clause 4.1).
 | :--- | :--- |
 | ValueError | if any coefficient is negative or the wrong number of values is supplied. |
 
+## RATING_OCTAVE_BANDS_HZ
+
+*Constant* (`tuple`).
+
+```python
+RATING_OCTAVE_BANDS_HZ = (250, 500, 1000, 2000, 4000)
+```
+
+## RATING_THIRD_OCTAVE_BANDS_HZ
+
+*Constant* (`tuple`).
+
+```python
+RATING_THIRD_OCTAVE_BANDS_HZ = (200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000)
+```
+
 ## REFERENCE_CURVE
 
 *Constant* (`mapping`).
 
 ```python
 REFERENCE_CURVE = {250: 0.8, 500: 1.0, 1000: 1.0, 2000: 1.0, 4000: 0.9}
-```
-
-## THIRD_OCTAVE_BANDS
-
-*Constant* (`tuple`).
-
-```python
-THIRD_OCTAVE_BANDS = (200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000)
 ```
 
 ## weighted_absorption
@@ -278,7 +278,7 @@ ISO 354 certificate carries.
 | :--- | :--- |
 | `third_octave_alpha_s` | The fifteen one-third-octave coefficients `alpha_s` from 200 Hz to 5000 Hz (ISO 354), as a sequence ordered low to high or a mapping keyed by band centre frequency (Hz). Values may exceed 1,00 (reverberation-room measurement); the octave coefficient is capped at 1,00. |
 
-**Returns:** A frozen [`AbsorptionRatingResult`](/phonometry/reference/api/materials/rating/#absorptionratingresult) identical to [`weighted_absorption`](/phonometry/reference/api/materials/rating/#weighted_absorption) on the derived `alpha_p`, additionally carrying `third_octave_alpha_s` (the input as given) and `third_octave_bands` ([`THIRD_OCTAVE_BANDS`](/phonometry/reference/api/materials/rating/#third_octave_bands)).
+**Returns:** A frozen [`AbsorptionRatingResult`](/phonometry/reference/api/materials/rating/#absorptionratingresult) identical to [`weighted_absorption`](/phonometry/reference/api/materials/rating/#weighted_absorption) on the derived `alpha_p`, additionally carrying `third_octave_alpha_s` (the input as given) and `third_octave_bands` ([`RATING_THIRD_OCTAVE_BANDS_HZ`](/phonometry/reference/api/materials/rating/#rating_third_octave_bands_hz)).
 
 **Raises**
 

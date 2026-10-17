@@ -78,12 +78,12 @@ convenience, not a normative chain.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## AERODYNAMIC_REFERENCE_SPEED
+## AERODYNAMIC_REFERENCE_SPEED_KMH
 
 *Constant* (`float`).
 
 ```python
-AERODYNAMIC_REFERENCE_SPEED = 300.0
+AERODYNAMIC_REFERENCE_SPEED_KMH = 300.0
 ```
 
 ## aerodynamic_sound_power
@@ -119,12 +119,12 @@ At the reference speed the result is Table G-6 verbatim.
 | :--- | :--- |
 | ValueError | If the speed is not positive. |
 
-## AERODYNAMIC_THRESHOLD_SPEED
+## AERODYNAMIC_THRESHOLD_SPEED_KMH
 
 *Constant* (`float`).
 
 ```python
-AERODYNAMIC_THRESHOLD_SPEED = 200.0
+AERODYNAMIC_THRESHOLD_SPEED_KMH = 200.0
 ```
 
 ## BrakeType
@@ -407,28 +407,28 @@ RailRoughnessClass(*values)
 
 Digit 2 of the track descriptor, Table [2.3.b].
 
-## RAILWAY_MINIMUM_SPEED
+## RAILWAY_MINIMUM_SPEED_KMH
 
 *Constant* (`float`).
 
 ```python
-RAILWAY_MINIMUM_SPEED = 50.0
+RAILWAY_MINIMUM_SPEED_KMH = 50.0
 ```
 
-## RAILWAY_OCTAVE_BANDS
+## RAILWAY_OCTAVE_BANDS_HZ
 
 *Constant* (`tuple`).
 
 ```python
-RAILWAY_OCTAVE_BANDS = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0)
+RAILWAY_OCTAVE_BANDS_HZ = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0)
 ```
 
-## RAILWAY_SOURCE_HEIGHTS
+## RAILWAY_SOURCE_HEIGHTS_M
 
 *Constant* (`tuple`).
 
 ```python
-RAILWAY_SOURCE_HEIGHTS = (0.5, 4.0)
+RAILWAY_SOURCE_HEIGHTS_M = (0.5, 4.0)
 ```
 
 ## railway_source_power
@@ -482,12 +482,12 @@ below the minimum speed nor while idling.
 | :--- | :--- |
 | ValueError | If the traffic is empty or an input is invalid. |
 
-## RAILWAY_THIRD_OCTAVE_BANDS
+## RAILWAY_THIRD_OCTAVE_BANDS_HZ
 
 *Constant* (`tuple`).
 
 ```python
-RAILWAY_THIRD_OCTAVE_BANDS = (50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0, 10000.0)
+RAILWAY_THIRD_OCTAVE_BANDS_HZ = (50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0, 10000.0)
 ```
 
 ## RailwayEmissionResult
@@ -583,12 +583,12 @@ One vehicle of the traffic on a track section.
 | `condition` | The [`RunningCondition`](/phonometry/reference/api/environment/cnossos-rail/#runningcondition) `c`. |
 | `idling_time` | Total idling time `T_idle` within `T_ref`, in the same unit as `T_ref`; used only when `condition` is idling. |
 
-## REFERENCE_JOINT_DENSITY
+## REFERENCE_JOINT_DENSITY_PER_M
 
 *Constant* (`float`).
 
 ```python
-REFERENCE_JOINT_DENSITY = 0.01
+REFERENCE_JOINT_DENSITY_PER_M = 0.01
 ```
 
 ## rolling_sound_power
@@ -921,12 +921,12 @@ TractionVehicle(*values)
 
 Columns of Table G-5, the traction sound power per vehicle.
 
-## TRAM_MINIMUM_SPEED
+## TRAM_MINIMUM_SPEED_KMH
 
 *Constant* (`float`).
 
 ```python
-TRAM_MINIMUM_SPEED = 30.0
+TRAM_MINIMUM_SPEED_KMH = 30.0
 ```
 
 ## VehicleDescriptor

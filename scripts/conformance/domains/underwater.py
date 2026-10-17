@@ -274,12 +274,12 @@ def _chk_uwp_seabed() -> Outcome:
 @register(
     _UW_PROP,
     "Wenz wind noise (rule of fives)",
-    "Wind spectrum level at 1 kHz, 5 kn (canonical anchor), dB re 1 µPa²/Hz",
+    "Wind spectrum level at 1 kHz, 5 kt (canonical anchor), dB re 1 µPa²/Hz",
 )
 def _chk_uwp_wind_noise() -> Outcome:
     # Wenz/Knudsen "25 dB (5 x 5)" is re 0.0002 dyn/cm2 = 20 uPa; re 1 uPa
     # (ISO 18405) the anchor is 25 + 20*lg(20) = 51.0206 dB (matches the
-    # published Wenz chart: ~50 dB at 1 kHz for 4-6 kn).
+    # published Wenz chart: ~50 dB at 1 kHz for 4-6 kt).
     got = float(ph.underwater.wind_noise_spectrum(1000.0, 5.0)[0])
     return numeric(51.0206, got, 1e-4, unit="dB", places=4)
 
@@ -304,7 +304,7 @@ def _chk_uwp_thermal_noise() -> Outcome:
 @register(
     _UW_PROP,
     "JOMOPANS-ECHO ship source level",
-    "Bulker V=13.5 kn L=211 m band level at 1 kHz (File S1 oracle), dB re 1 µPa m",
+    "Bulker V=13.5 kt L=211 m band level at 1 kHz (File S1 oracle), dB re 1 µPa m",
 )
 def _chk_uwp_ship_traffic() -> Outcome:
     # Oracle: authors' Excel reference calculator (File S1), decidecade band.

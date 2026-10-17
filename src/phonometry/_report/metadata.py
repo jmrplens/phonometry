@@ -100,7 +100,7 @@ class ReportMetadata(RichDisplay):
         thickness of the resilient layer under load; it is shown in millimetres.
     :ivar mounting: Mounting condition of the specimen (e.g. the ISO 10140-1
         mounting code or a short description).
-    :ivar curing_time_h: Curing time of the specimen before the test, in
+    :ivar curing_time_hours: Curing time of the specimen before the test, in
         hours (zero or more); the floor-covering form of ISO 10140-1:2021
         Figure H.4 prints it, and H.5 d) asks for the curing time of a
         floating slab.
@@ -177,7 +177,7 @@ class ReportMetadata(RichDisplay):
     required_class: int | None = None
     notes: str | None = None
     tube_shape: str | None = None
-    curing_time_h: float | None = None
+    curing_time_hours: float | None = None
     separating_element: str | None = None
     test_signal: str | None = None
 
@@ -212,7 +212,7 @@ class ReportMetadata(RichDisplay):
     )
     #: Durations that may be zero but never negative: a covering laid loose
     #: needs no curing at all.
-    _NON_NEGATIVE_FIELDS = ("curing_time_h",)
+    _NON_NEGATIVE_FIELDS = ("curing_time_hours",)
     #: Relative-humidity fields: finite and within 0..100 %.
     _HUMIDITY_FIELDS = (
         "relative_humidity_percent",

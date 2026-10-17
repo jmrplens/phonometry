@@ -90,8 +90,9 @@ def test_the_loaders_build_what_they_built_before_but_the_listed_cells() -> None
     derived texts of the nineteen Hopkins rows whose estimated Poisson ratio
     they rest on, the note of Cox Table 6.5's aerogel row, the credit of
     every row of Rossing's tables of B/A, now keyed by the row or the table,
-    and the notes of the eight wetted sands of Cox Table 6.7. Nothing else of
-    any row moved.
+    the notes of the eight wetted sands of Cox Table 6.7, and the decay rate of
+    Harris's damping treatments, which spells its unit ``_db_per_s`` now,
+    wherever a row keys the cell by its field. Nothing else of any row moved.
     """
     fp = catalogue_fingerprint
     before = fp.row_contract(fp.resilient_layer_row(fp.one_row_shape(fp.baseline())))
@@ -113,6 +114,16 @@ def test_the_loaders_build_what_they_built_before_but_the_listed_cells() -> None
         for key in before["PUBLISHED_NONLINEARITY"]
     }
     listed |= {("PUBLISHED_GROUND", key, "note") for key in fp.WET_SAND_ROWS}
+    old_field, new_field = fp.DECAY_RATE_FIELD
+    for key, row in before["PUBLISHED_DAMPING_TREATMENTS"].items():
+        name = "PUBLISHED_DAMPING_TREATMENTS"
+        if old_field in row:
+            listed |= {(name, key, old_field), (name, key, new_field)}
+        listed |= {
+            (name, key, field)
+            for field, value in row.items()
+            if isinstance(value, dict) and old_field in value
+        }
     assert moved == listed
     assert all(set(before[name]) == set(live[name]) for name in before)
 

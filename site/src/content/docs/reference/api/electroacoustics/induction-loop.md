@@ -333,8 +333,8 @@ the two exchanged (see `docs/ERRATA.md`). The plus or minus 1 dB flatness
 combi_signal(
     fs: int,
     *,
-    sine_seconds: float = 1.0,
-    noise_seconds: float = 4.0,
+    sine_s: float = 1.0,
+    noise_s: float = 4.0,
     cycles: int = 1,
     seed: int | None = None,
 ) -> np.ndarray
@@ -358,8 +358,8 @@ own zero crossings.
 | Name | Description |
 | :--- | :--- |
 | `fs` | Sample rate, in hertz. |
-| `sine_seconds` | Duration of each sine burst, at least 1 s; rounded to a whole number of periods. |
-| `noise_seconds` | Duration of each stretch of noise, at least 4 s and at least four times `sine_seconds`. It grows to four times the sine burst when rounding the burst to whole periods has lengthened it, so the ratio of 4:1 is never reduced, and by the few samples it takes to end on a zero crossing. |
+| `sine_s` | Duration of each sine burst, at least 1 s; rounded to a whole number of periods. |
+| `noise_s` | Duration of each stretch of noise, at least 4 s and at least four times `sine_s`. It grows to four times the sine burst when rounding the burst to whole periods has lengthened it, so the ratio of 4:1 is never reduced, and by the few samples it takes to end on a zero crossing. |
 | `cycles` | Number of burst-and-noise cycles. |
 | `seed` | Seed for the noise generator. |
 

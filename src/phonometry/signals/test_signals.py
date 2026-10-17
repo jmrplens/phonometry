@@ -234,7 +234,7 @@ class ToneBurstResult(OwnsArrays):
     :ivar frequency: Tone frequency, in Hz.
     :ivar cycles: Full tone periods per burst.
     :ivar amplitude: Peak amplitude of the tone.
-    :ivar burst_seconds: Burst duration ``cycles/frequency``, in seconds.
+    :ivar burst_s: Burst duration ``cycles/frequency``, in seconds.
     :ivar burst_samples: Samples per burst,
         ``round(fs * cycles / frequency)``.
     :ivar onset_sample: Index of the first sample of the first burst.
@@ -252,7 +252,7 @@ class ToneBurstResult(OwnsArrays):
     frequency: float
     cycles: int
     amplitude: float
-    burst_seconds: float
+    burst_s: float
     burst_samples: int
     onset_sample: int
     repetitions: int
@@ -416,8 +416,8 @@ def tone_burst(
         post_silence,
     )
 
-    burst_seconds = cycles_v / f_v
-    exact_samples = fs_v * burst_seconds
+    burst_s = cycles_v / f_v
+    exact_samples = fs_v * burst_s
     n_on = round(exact_samples)
     if n_on < _MIN_RECORD_SAMPLES:
         msg = "The burst is shorter than 2 samples; increase 'cycles' or 'fs'."
@@ -468,7 +468,7 @@ def tone_burst(
         frequency=f_v,
         cycles=cycles_v,
         amplitude=amplitude_v,
-        burst_seconds=burst_seconds,
+        burst_s=burst_s,
         burst_samples=n_on,
         onset_sample=n_pre,
         repetitions=repetitions_v,

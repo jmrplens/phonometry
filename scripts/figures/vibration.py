@@ -3614,7 +3614,7 @@ def generate_meter_tolerance_regions(output_dir: str) -> None:
     design = np.asarray(vibration.weighting_factors(name, freqs))
     upper, lower = vibration.weighting_tolerance_percent(name, freqs)
     step_upper, step_lower = vibration.weighting_tolerance_percent(name, steps)
-    step_phase = vibration.phase_tolerance_degrees(name, steps)
+    step_phase = vibration.phase_tolerance_deg(name, steps)
     top = design * (1.0 + upper / 100.0)
     bottom = design * (1.0 + lower / 100.0)
 
@@ -3756,7 +3756,7 @@ def generate_meter_tolerance_regions(output_dir: str) -> None:
     ax_magnitude.text(
         math.sqrt(ft2 * ft3),
         -31.0,
-        f"{_fmt_minus(vibration.UNCONSTRAINED_BELOW, '.0f')} %: below "
+        f"{_fmt_minus(vibration.UNCONSTRAINED_BELOW_PERCENT, '.0f')} %: below "
         "$f_\\mathrm{t1}$ and\nabove $f_\\mathrm{t4}$ the standard sets\n"
         "no lower limit at all",
         fontsize=9,
@@ -4030,7 +4030,7 @@ def generate_meter_phase_verification(output_dir: str) -> None:
     )
     steps = np.unique(np.concatenate(([fmin, fmax], edges)))
     step_masks = _table_5_masks(steps, transitions)
-    step_limit = vibration.phase_tolerance_degrees(name, steps)
+    step_limit = vibration.phase_tolerance_deg(name, steps)
     # The two tails have no limit, so their fill runs to the top of the panel
     # instead of to a value.
     ceiling_deg = 1.55 * skirt_phase
@@ -4130,7 +4130,7 @@ def generate_meter_phase_verification(output_dir: str) -> None:
     # The other end of that very same pair, which is the whole of the
     # attribution rule: Formula (H.3) hands the value to the lower of the two.
     pair_hz = float(pole_check.frequencies[fail_index + 1])
-    upper_limit = float(vibration.phase_tolerance_degrees(name, [pair_hz])[0])
+    upper_limit = float(vibration.phase_tolerance_deg(name, [pair_hz])[0])
     ax_cpd.plot(
         [fail_hz, pair_hz],
         [fail_deg, fail_deg],
@@ -4850,7 +4850,9 @@ def generate_meter_uncertainty_allowance(output_dir: str) -> None:
     )
     ax_sweep.plot(
         steps,
-        np.where(step_lower > vibration.UNCONSTRAINED_BELOW, step_lower, np.nan),
+        np.where(
+            step_lower > vibration.UNCONSTRAINED_BELOW_PERCENT, step_lower, np.nan
+        ),
         color=COLOR_FG,
         linewidth=1.2,
         alpha=0.75,
@@ -4871,7 +4873,7 @@ def generate_meter_uncertainty_allowance(output_dir: str) -> None:
     # lower limit is -100 % the verification subtracts nothing, so drawing a
     # downward arm there would draw a comparison the library does not make.
     _point_upper, point_lower = vibration.weighting_tolerance_percent(name, freqs)
-    unconstrained = point_lower <= vibration.UNCONSTRAINED_BELOW
+    unconstrained = point_lower <= vibration.UNCONSTRAINED_BELOW_PERCENT
     arms = np.vstack(
         (
             np.where(unconstrained, 0.0, uncertainty),
@@ -4971,7 +4973,7 @@ def generate_meter_uncertainty_allowance(output_dir: str) -> None:
     for colour, _region, (upper, lower) in reversed(regions):
         floor = (
             np.full(u_axis.shape, lower)
-            if lower <= vibration.UNCONSTRAINED_BELOW
+            if lower <= vibration.UNCONSTRAINED_BELOW_PERCENT
             else lower + u_axis
         )
         ax_window.fill_between(
@@ -4982,7 +4984,7 @@ def generate_meter_uncertainty_allowance(output_dir: str) -> None:
             zorder=0,
         )
     for _colour, _region, (upper, lower) in regions:
-        if lower <= vibration.UNCONSTRAINED_BELOW:
+        if lower <= vibration.UNCONSTRAINED_BELOW_PERCENT:
             # The tail shares its ceiling with the skirt and has no floor, so
             # it contributes no edge of its own.
             continue

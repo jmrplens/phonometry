@@ -5011,7 +5011,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Comportamiento de la biblioteca:**
   [`cnossos_road`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/sources/cnossos_road.py)
   trabaja sobre la rejilla corregida de 63 Hz a 8 kHz
-  (`ROAD_OCTAVE_BANDS`), fijada por
+  (`ROAD_OCTAVE_BANDS_HZ`), fijada por
   `test_octave_bands_are_the_corrected_range` y por los casos del libro de
   cálculo, cuyos niveles publicados cubren las ocho bandas.
 - **Estado:** corregido por el organismo emisor (corrección de errores del 10
@@ -11722,8 +11722,8 @@ concordancia con las fuentes publicadas:
   por debajo de la incertidumbre de un ensayo de pérdida de presión y es lo que
   muestra un resultado calculado según la norma. La
   biblioteca conserva las dos constantes impresas, como
-  [`ISO7235_GAS_CONSTANT`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/silencer_measurement.py)
-  y `ISO7235_ABSOLUTE_ZERO_OFFSET`, para que un resultado se pueda reproducir
+  [`ISO7235_AIR_GAS_CONSTANT_J_KG_K`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/silencer_measurement.py)
+  y `ISO7235_ABSOLUTE_ZERO_OFFSET_K`, para que un resultado se pueda reproducir
   tal como lo da la norma, y la fila de conformidad «Normal air density
   (Eqs. (10), (21), (22))» deja constancia del tamaño de la diferencia.
 

@@ -65,7 +65,7 @@ from .atmospheric_absorption import (
     _sae_band,
     arp866a_attenuation,
 )
-from .certification import NOY_BANDS
+from .certification import NOY_BANDS_HZ
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -120,7 +120,7 @@ def _nominal_a_weighting_db(bands: NDArray[np.float64]) -> NDArray[np.float64]:
 
 #: IEC 61672-1:2013 Table 3: the nominal A-weighting of the 24 bands from 50 Hz
 #: to 10 kHz, in dB, the ``-A_n`` of Doc 29 Eq. D-4.
-_A_WEIGHTING_DB = _nominal_a_weighting_db(NOY_BANDS)
+_A_WEIGHTING_DB = _nominal_a_weighting_db(NOY_BANDS_HZ)
 #: Feet to metres: the NPD distances are defined in feet.
 _FT_M = 0.3048
 #: The reference distance ``d_ref`` of the spectral classes, 1 000 ft. The
@@ -143,9 +143,9 @@ def _spectrum_levels(spectrum: SpectralClass | ArrayLike) -> NDArray[np.float64]
     """The 24 band levels of a spectral class, or of a bare array of them."""
     raw = spectrum.levels if isinstance(spectrum, SpectralClass) else spectrum
     levels = require_finite_array(raw, "spectrum")
-    if levels.size != NOY_BANDS.size:
+    if levels.size != NOY_BANDS_HZ.size:
         msg = (
-            f"'spectrum' must carry the {NOY_BANDS.size} one-third-octave-band "
+            f"'spectrum' must carry the {NOY_BANDS_HZ.size} one-third-octave-band "
             f"levels from 50 Hz to 10 kHz of a spectral class; got {levels.size}."
         )
         raise ValueError(msg)
@@ -381,7 +381,7 @@ def npd_atmosphere_increment(
         if distances_m is None
         else require_positive_array(distances_m, "distances_m")
     )
-    frequencies = np.array(NOY_BANDS, dtype=np.float64)
+    frequencies = np.array(NOY_BANDS_HZ, dtype=np.float64)
     rates = np.array(
         [SAE_AIR1845_ATTENUATION_DB_PER_100M[float(f)] for f in frequencies]
     )

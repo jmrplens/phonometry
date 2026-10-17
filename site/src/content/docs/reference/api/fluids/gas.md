@@ -86,10 +86,10 @@ out.
 IDEAL_GAS_VALIDITY = "ideal gas: exact for a dilute gas and within about 1 % of a printed table for the light gases at room conditions. The density comes out light by 1 - Z, the compressibility factor's distance from unity, and that grows with the molecule: carbon dioxide is 0,7 % light and sulphur hexafluoride 2 % against Hopkins Table A1, where the speeds still land within 0,5 m/s."
 ```
 
-## MOLAR_GAS_CONSTANT
+## MOLAR_GAS_CONSTANT_J_MOL_K
 
 *Constant* (`float`).
 
 ```python
-MOLAR_GAS_CONSTANT = 8.31446261815324
+MOLAR_GAS_CONSTANT_J_MOL_K = 8.31446261815324
 ```

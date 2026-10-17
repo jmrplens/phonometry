@@ -190,7 +190,7 @@ def _floor_header(
             ),
             (
                 t("Curing time [h]", language),
-                _number(md.curing_time_h if md else None, language),
+                _number(md.curing_time_hours if md else None, language),
             ),
             (
                 t("Air temp. in the source room [&#176;C]", language),
@@ -251,7 +251,7 @@ def render_floor_covering_form(
     :param result: The floor-covering improvement, with its ISO 717-2 rating
         (checked by the caller).
     :param path: Destination path of the PDF file.
-    :param metadata: The header fields; ``product`` and ``curing_time_h``
+    :param metadata: The header fields; ``product`` and ``curing_time_hours``
         fill the product identification and curing time rows.
     :param verbose: When ``True``, the table also shows ``Ln`` with the
         covering.

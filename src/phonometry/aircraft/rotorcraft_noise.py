@@ -1855,10 +1855,10 @@ def _event_metrics(
 
 def _noy_band_indices(frequencies: NDArray[np.float64]) -> NDArray[np.intp] | None:
     """Indices of the 24 noy bands (50 Hz-10 kHz) in a band grid, or ``None``."""
-    from .certification import NOY_BANDS
+    from .certification import NOY_BANDS_HZ
 
     idx = []
-    for band in NOY_BANDS:
+    for band in NOY_BANDS_HZ:
         hits = np.nonzero(np.isclose(frequencies, band, rtol=0.06))[0]
         if hits.size != 1:
             return None

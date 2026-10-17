@@ -95,10 +95,10 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 __all__ = [
-    "TAPPING_DROP_HEIGHT",
-    "TAPPING_HAMMER_MASS",
-    "TAPPING_HAMMER_RADIUS",
-    "TAPPING_IMPACT_RATE",
+    "TAPPING_DROP_HEIGHT_M",
+    "TAPPING_HAMMER_MASS_KG",
+    "TAPPING_HAMMER_RADIUS_M",
+    "TAPPING_IMPACT_RATE_HZ",
     "CoveringImprovementResult",
     "FloatingFloorImprovementResult",
     "TappingForceResult",
@@ -121,20 +121,20 @@ __all__ = [
 
 #: Mass ``m`` of one ISO tapping-machine hammer, in kg (ISO 10140-5; Hopkins
 #: 3.6.3: "a free-falling mass of 0,5 kg").
-TAPPING_HAMMER_MASS: float = 0.5
+TAPPING_HAMMER_MASS_KG: float = 0.5
 
 #: Drop height ``h`` of the hammer, in m (Hopkins 3.6.3: "a drop-height of
 #: 0,04 m").
-TAPPING_DROP_HEIGHT: float = 0.04
+TAPPING_DROP_HEIGHT_M: float = 0.04
 
 #: Impact repetition rate ``fi`` of the machine, in Hz: five hammers giving
 #: ten impacts per second, so ``Ti = 1/fi = 0,1 s`` (Hopkins 3.6.3).
-TAPPING_IMPACT_RATE: float = 10.0
+TAPPING_IMPACT_RATE_HZ: float = 10.0
 
 #: Radius ``r`` of the circular contact area assumed for the hammer, in m
 #: (Hopkins 3.6.3.1: "The hammer radius, 15 mm, can be used as an estimate").
 #: Vigran Eq. (8.51) uses the equivalent hammer area ``Sh = 7 cm²``.
-TAPPING_HAMMER_RADIUS: float = 0.015
+TAPPING_HAMMER_RADIUS_M: float = 0.015
 
 #: Standard acceleration of free fall ``g``, in m/s²; reproduces the printed
 #: impact velocity ``vo = 0,886 m/s`` of Hopkins 3.6.3.1.
@@ -202,7 +202,7 @@ def _band_factor(band: BandWidth) -> float:
 # 1. The ISO tapping machine as a mass-spring-dashpot (Hopkins 3.6.3)
 # --------------------------------------------------------------------------- #
 def hammer_impact_velocity(
-    drop_height: float = TAPPING_DROP_HEIGHT, *, gravity: float = _GRAVITY
+    drop_height: float = TAPPING_DROP_HEIGHT_M, *, gravity: float = _GRAVITY
 ) -> float:
     r"""Hammer velocity at impact :math:`v_0 = \sqrt{2 g h}` (Hopkins
     Eq. 3.85).
@@ -224,7 +224,7 @@ def plate_contact_stiffness(
     youngs_modulus: float,
     *,
     poisson_ratio: float = 0.2,
-    radius: float = TAPPING_HAMMER_RADIUS,
+    radius: float = TAPPING_HAMMER_RADIUS_M,
 ) -> float:
     r"""Contact stiffness of a plate material
     :math:`K = 2 r E/(1 - \nu^{2})` (Eq. 3.97).
@@ -254,7 +254,7 @@ def covering_contact_stiffness(
     youngs_modulus: float,
     thickness: float,
     *,
-    radius: float = TAPPING_HAMMER_RADIUS,
+    radius: float = TAPPING_HAMMER_RADIUS_M,
 ) -> float:
     r"""Contact stiffness of a soft floor covering
     :math:`K = E \pi r^{2}/d` (Eq. 3.98).
@@ -302,7 +302,7 @@ def tapping_cut_off_frequency(
     contact_stiffness: float,
     impedance: float,
     *,
-    mass: float = TAPPING_HAMMER_MASS,
+    mass: float = TAPPING_HAMMER_MASS_KG,
 ) -> float:
     r"""Cut-off frequency ``fco`` of the force spectrum (Eqs. 3.101/3.102).
 
@@ -335,7 +335,7 @@ def tapping_cut_off_frequency(
 
 
 def hammer_limiting_frequency(
-    impedance: float, *, mass: float = TAPPING_HAMMER_MASS
+    impedance: float, *, mass: float = TAPPING_HAMMER_MASS_KG
 ) -> float:
     r"""Limiting frequency :math:`f_\mathrm{limit} = Z_\mathrm{dp}/(2 \pi m)` (Hopkins
     Eq. 3.106).
@@ -362,7 +362,7 @@ def force_pulse(
     contact_stiffness: float,
     impedance: float,
     *,
-    mass: float = TAPPING_HAMMER_MASS,
+    mass: float = TAPPING_HAMMER_MASS_KG,
     impact_velocity: float | None = None,
 ) -> np.ndarray:
     r"""Force pulse ``F1(t)`` of a single hammer impact (Eqs. 3.95/3.96).
@@ -504,7 +504,7 @@ class TappingForceResult(OwnsArrays):
     lower_limit: float
     upper_limit: float
     band: str = "third"
-    mass_kg: float = TAPPING_HAMMER_MASS
+    mass_kg: float = TAPPING_HAMMER_MASS_KG
 
     def __post_init__(self) -> None:
         """Reject a force spectrum whose per-band quantities disagree.
@@ -631,8 +631,8 @@ def tapping_force_spectrum(
     contact_stiffness: float,
     impedance: float,
     *,
-    mass: float = TAPPING_HAMMER_MASS,
-    impact_rate: float = TAPPING_IMPACT_RATE,
+    mass: float = TAPPING_HAMMER_MASS_KG,
+    impact_rate: float = TAPPING_IMPACT_RATE_HZ,
     impact_velocity: float | None = None,
     band: BandWidth = "third",
 ) -> TappingForceResult:
@@ -837,8 +837,8 @@ def covering_improvement(
     plate_stiffness: float,
     impedance: float,
     *,
-    mass: float = TAPPING_HAMMER_MASS,
-    impact_rate: float = TAPPING_IMPACT_RATE,
+    mass: float = TAPPING_HAMMER_MASS_KG,
+    impact_rate: float = TAPPING_IMPACT_RATE_HZ,
     band: BandWidth = "third",
 ) -> CoveringImprovementResult:
     r"""Improvement of impact sound insulation by a soft covering (Eq. 4.114).

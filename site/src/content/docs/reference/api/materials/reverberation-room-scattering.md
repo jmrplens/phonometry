@@ -103,12 +103,12 @@ ISO 9613-1 using the measured temperature and relative humidity.
 | :--- | :--- |
 | ValueError | if any value is negative or non-finite. |
 
-## BASE_PLATE_BANDS
+## BASE_PLATE_BANDS_HZ
 
 *Constant* (`tuple`).
 
 ```python
-BASE_PLATE_BANDS = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000)
+BASE_PLATE_BANDS_HZ = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000)
 ```
 
 ## BASE_PLATE_MAX_SCATTERING
@@ -187,7 +187,7 @@ limit.
 
 | Name | Description |
 | :--- | :--- |
-| `scattering` | Measured base-plate scattering coefficients, either a mapping keyed by one-third-octave centre frequency (Hz) or a sequence of 18 values ordered as [`BASE_PLATE_BANDS`](/phonometry/reference/api/materials/reverberation-room-scattering/#base_plate_bands). |
+| `scattering` | Measured base-plate scattering coefficients, either a mapping keyed by one-third-octave centre frequency (Hz) or a sequence of 18 values ordered as [`BASE_PLATE_BANDS_HZ`](/phonometry/reference/api/materials/reverberation-room-scattering/#base_plate_bands_hz). |
 
 **Returns:** Tuple of the centre frequencies (Hz) that exceed the limit, in ascending order (empty if the base plate is compliant).
 

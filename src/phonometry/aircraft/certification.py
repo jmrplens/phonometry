@@ -44,7 +44,7 @@ if TYPE_CHECKING:
     from .._report.metadata import ReportMetadata
 
 #: The 24 one-third-octave band centre frequencies (Hz) used by PNL/EPNL.
-NOY_BANDS: NDArray[np.float64] = read_only(
+NOY_BANDS_HZ: NDArray[np.float64] = read_only(
     np.array(
         [
             50.0,
@@ -402,7 +402,9 @@ def tone_correction(
         msg = "'start_band' must be an integer between 0 (50 Hz) and 3 (100 Hz)."
         raise ValueError(msg)
     _, excess = _tone_background(spl, start=start)
-    factors = [_tone_factor(float(excess[i]), float(NOY_BANDS[i])) for i in range(24)]
+    factors = [
+        _tone_factor(float(excess[i]), float(NOY_BANDS_HZ[i])) for i in range(24)
+    ]
     return float(max(factors))
 
 
@@ -736,7 +738,7 @@ def effective_perceived_noise_level(
         ``procedure`` is not ``"aeroplane"`` or ``"helicopter"``.
     """
     arr = np.asarray(spectra, dtype=np.float64)
-    if arr.ndim != 2 or arr.shape[1] != NOY_BANDS.size or arr.shape[0] < 1:  # noqa: PLR2004
+    if arr.ndim != 2 or arr.shape[1] != NOY_BANDS_HZ.size or arr.shape[0] < 1:  # noqa: PLR2004
         msg = "'spectra' must have shape (K, 24)."
         raise ValueError(msg)
     if not np.all(np.isfinite(arr)):
@@ -766,7 +768,7 @@ def effective_perceived_noise_level(
     else:
         times = np.concatenate([[0.0], np.cumsum(dt_raw)[:-1]])
     return EPNLResult(
-        frequencies=NOY_BANDS,
+        frequencies=NOY_BANDS_HZ,
         times=times,
         pnl=pnl,
         tone_correction=corr,

@@ -798,7 +798,7 @@ def generate_quasi_peak_meter(output_dir: str) -> None:
     # two horizontal lines is then Table 3's 10-per-second cell drawn to
     # scale, against which the printed reference reading is -2.3 dB.
     steady = np.sin(2.0 * np.pi * 5000.0 * np.arange(3 * int(fs)) / fs)
-    reference = broadcast.DBQPS_REFERENCE
+    reference = broadcast.DBQPS_REFERENCE_V
     amplitude = reference / broadcast.quasi_peak_meter(steady, fs).reading
     burst = signals.tone_burst(
         fs,
@@ -7017,9 +7017,9 @@ def generate_control_valve_noise(output_dir: str) -> None:
     stream: dict[str, Any] = {
         "inlet_pressure_pa": 1.0e6,
         "inlet_density": 5.3,
-        "inlet_temperature_k": 450.0,
+        "inlet_temperature_c": 176.85,
         "specific_heat_ratio": 1.22,
-        "molecular_mass": 19.8,
+        "molar_mass_kg_kmol": 19.8,
     }
     trim = noise_control.ValveTrim(
         flow_coefficient=90.0,

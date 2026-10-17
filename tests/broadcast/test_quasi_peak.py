@@ -46,7 +46,7 @@ from reference_data import (
 
 from phonometry.broadcast import (
     BS468_BALLISTICS,
-    DBQPS_REFERENCE,
+    DBQPS_REFERENCE_V,
     QuasiPeakBallistics,
     QuasiPeakDynamicsResult,
     QuasiPeakResult,
@@ -387,7 +387,7 @@ def test_switching_out_the_weighting_network_changes_the_reading() -> None:
 @pytest.mark.parametrize(
     ("reference", "expected"),
     [
-        (DBQPS_REFERENCE, "dBqps"),
+        (DBQPS_REFERENCE_V, "dBqps"),
         (2e-5, "dB re 20 uPa"),
         (1.0, "dB re 1"),
     ],
@@ -494,7 +494,7 @@ def test_a_two_dimensional_trace_is_refused() -> None:
         QuasiPeakResult(
             reading=1.0,
             level_db=0.0,
-            reference=DBQPS_REFERENCE,
+            reference=DBQPS_REFERENCE_V,
             trace=np.ones((2, 3)),
             fs=FS,
             weighted=True,

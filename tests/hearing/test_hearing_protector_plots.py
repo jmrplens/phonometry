@@ -164,7 +164,7 @@ def test_the_protected_level_figure_labels_the_bands_it_was_given() -> None:
     )
     ax = result.plot()
     assert [t.get_text() for t in ax.get_xticklabels()] == [
-        f"{f:g}" for f in hearing.PROTECTOR_OCTAVE_BANDS[1:]
+        f"{f:g}" for f in hearing.PROTECTOR_OCTAVE_BANDS_HZ[1:]
     ]
     plt.close("all")
 

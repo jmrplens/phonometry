@@ -2113,7 +2113,7 @@ CNOSSOS_ROAD_TABLE_F4_SPEED_RANGE: dict[str, tuple[float, float] | None] = {
 # and 3)" (Directive (EU) 2015/996, Annex II 2.2.3, unamended). The powered
 # two-wheelers of category 4 have no rolling noise, so the Directive prints no
 # K_m for them and the correction is identically zero.
-CNOSSOS_ROAD_TEMPERATURE_K: dict[str, float] = {
+CNOSSOS_ROAD_TEMPERATURE_COEFFICIENTS_DB_PER_C: dict[str, float] = {
     "1": 0.08,
     "2": 0.04,
     "3": 0.04,

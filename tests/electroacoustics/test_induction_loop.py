@@ -271,7 +271,7 @@ def test_pink_noise_refuses_a_duration_shorter_than_one_sample() -> None:
 
 
 def test_combi_signal_levels_and_durations() -> None:
-    x = ea.combi_signal(FS, sine_seconds=1.0, noise_seconds=4.0, cycles=2, seed=5)
+    x = ea.combi_signal(FS, sine_s=1.0, noise_s=4.0, cycles=2, seed=5)
     n_sine = FS
     ramp = round(ref.IEC60118_4_COMBI_RAMP_MS * 1e-3 * FS)
     burst = x[ramp : n_sine - ramp]
@@ -309,12 +309,12 @@ def test_combi_transitions_are_near_zero_crossings() -> None:
 
 def test_combi_refuses_too_short_a_burst() -> None:
     with pytest.raises(ValueError, match="Table 2"):
-        ea.combi_signal(FS, sine_seconds=0.5)
+        ea.combi_signal(FS, sine_s=0.5)
 
 
 def test_combi_refuses_less_than_four_times_the_noise() -> None:
     with pytest.raises(ValueError, match="at least 4 times"):
-        ea.combi_signal(FS, sine_seconds=2.0, noise_seconds=5.0)
+        ea.combi_signal(FS, sine_s=2.0, noise_s=5.0)
 
 
 @pytest.mark.parametrize(("sine", "noise"), [(1.2496, 4.9984), (2.4995, 9.998)])
@@ -324,7 +324,7 @@ def test_combi_keeps_four_times_the_noise_once_the_sine_is_rounded(
     # 1,2496 s of sine rounds up to 1 250 whole periods, 1,25 s, and 4,9984 s
     # of noise would leave a ratio of 3,999: Table 2 says the ratio of 4:1
     # shall not be reduced.
-    x = ea.combi_signal(FS, sine_seconds=sine, noise_seconds=noise, seed=1)
+    x = ea.combi_signal(FS, sine_s=sine, noise_s=noise, seed=1)
     n_sine = round(round(sine * 1000.0) * FS / 1000.0)
     assert n_sine > sine * FS
     assert x.size - n_sine >= 4 * n_sine

@@ -110,8 +110,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 __all__ = [
-    "LOW_FREQUENCY_BANDS",
-    "LOW_FREQUENCY_VOLUME_LIMIT",
+    "LOW_FREQUENCY_PROCEDURE_BANDS_HZ",
+    "LOW_FREQUENCY_VOLUME_LIMIT_M3",
     "LowFrequencyProcedure",
     "LowFrequencyResult",
     "LowFrequencyWarning",
@@ -143,13 +143,13 @@ class LowFrequencyWarning(PhonometryWarning):
 #: The three one-third-octave bands the low-frequency procedure covers, in Hz.
 #: Part 1 Clause 8.1, Part 2 Clause 8.1 and Part 3 Clause 7.3.1 name the same
 #: three and no others; 100 Hz upwards always keeps the default procedure.
-LOW_FREQUENCY_BANDS: Final[tuple[float, float, float]] = (50.0, 63.0, 80.0)
+LOW_FREQUENCY_PROCEDURE_BANDS_HZ: Final[tuple[float, float, float]] = (50.0, 63.0, 80.0)
 
 #: Room volume, in m³, at and above which the low-frequency procedure is not
 #: used. Every clause prints the trigger as "smaller than 25 m³ (calculated to
 #: the nearest cubic metre)", so the comparison is strict and 25 m³ exactly
 #: does not trigger.
-LOW_FREQUENCY_VOLUME_LIMIT: Final = 25.0
+LOW_FREQUENCY_VOLUME_LIMIT_M3: Final = 25.0
 
 #: Corners the standards require: "a minimum of four corners" in Part 1
 #: Clause 8.3, Part 2 Clause 8.3 and Part 3 Clause 7.3.2 alike. Parts 1 and 2
@@ -211,7 +211,7 @@ def low_frequency_procedure_applies(volume: float) -> bool:
     if not math.isfinite(value) or value <= 0.0:
         msg = f"'volume' must be a positive, finite room volume in m³; got {volume!r}."
         raise ValueError(msg)
-    return math.floor(value + 0.5) < LOW_FREQUENCY_VOLUME_LIMIT
+    return math.floor(value + 0.5) < LOW_FREQUENCY_VOLUME_LIMIT_M3
 
 
 def _require_volume_triggers(volume: float, name: str) -> None:
@@ -269,12 +269,14 @@ def _named_low_frequency_bands(frequencies: ArrayLike) -> list[float]:
         return []
     counts = [
         np.count_nonzero(np.isclose(centres, target, rtol=_BAND_MATCH_RTOL))
-        for target in LOW_FREQUENCY_BANDS
+        for target in LOW_FREQUENCY_PROCEDURE_BANDS_HZ
     ]
     if any(count > 1 for count in counts):
         return []
     return [
-        band for band, count in zip(LOW_FREQUENCY_BANDS, counts, strict=True) if count
+        band
+        for band, count in zip(LOW_FREQUENCY_PROCEDURE_BANDS_HZ, counts, strict=True)
+        if count
     ]
 
 
@@ -336,7 +338,7 @@ def _warn_when_the_procedure_is_required(
     remedy = (
         f"Pass a LowFrequencyProcedure as '{argument}', or leave the optional "
         "low range of Clause 5 out and report 100 Hz to 3150 Hz alone."
-        if len(named) == len(LOW_FREQUENCY_BANDS)
+        if len(named) == len(LOW_FREQUENCY_PROCEDURE_BANDS_HZ)
         else (
             "The procedure runs on the three bands together, so complete the "
             "low range to 50 Hz, 63 Hz and 80 Hz and pass a "
@@ -521,7 +523,7 @@ class LowFrequencyProcedure(OwnsArrays):
                 f"got {corners.ndim} dimension(s)."
             )
             raise ValueError(msg)
-        if corners.shape[-1] != len(LOW_FREQUENCY_BANDS):
+        if corners.shape[-1] != len(LOW_FREQUENCY_PROCEDURE_BANDS_HZ):
             msg = (
                 "'corner_levels' must carry exactly the three low-frequency "
                 "bands (50 Hz, 63 Hz, 80 Hz) on its last axis; got shape "
@@ -608,7 +610,7 @@ def _low_frequency_indices(frequencies: np.ndarray) -> np.ndarray:
     """
     indices: list[int] = []
     missing: list[float] = []
-    for target in LOW_FREQUENCY_BANDS:
+    for target in LOW_FREQUENCY_PROCEDURE_BANDS_HZ:
         match = np.flatnonzero(np.isclose(frequencies, target, rtol=_BAND_MATCH_RTOL))
         if match.size == 0:
             missing.append(target)

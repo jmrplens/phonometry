@@ -90,7 +90,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
 #: Default speed of sound ``c0`` (20 degC dry air), in m/s.
-DEFAULT_SPEED_OF_SOUND = 343.0
+_SPEED_OF_SOUND_M_S = 343.0
 
 #: Wall order for a six-tuple of coefficients: the low and high wall of each
 #: axis. ``x0``/``xL`` are the walls at ``x = 0`` / ``x = Lx`` and so on.
@@ -562,7 +562,7 @@ def image_source_rir(
     *,
     fs: int,
     max_order: int = 20,
-    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND,
+    speed_of_sound: float = _SPEED_OF_SOUND_M_S,
     air_attenuation: ArrayLike = 0.0,
     duration: float | None = None,
     frequencies: ArrayLike | None = None,
@@ -603,7 +603,7 @@ def image_source_rir(
         shoebox has :math:`(2/3)(2 i_0^3 + 3 i_0^2 + 4 i_0)` audible images
         up to order ``i0`` (Kuttruff Equation (9.23)). Default 20.
     :param speed_of_sound: Speed of sound ``c``, m/s (default
-        :data:`DEFAULT_SPEED_OF_SOUND`).
+        343 m/s, dry air at 20 °C).
     :param air_attenuation: Air *intensity* attenuation constant ``m``, in
         neper per metre (scalar or per-band); the pressure amplitude of each
         path is scaled by :math:`\mathrm{e}^{-m r / 2}` (Kuttruff 4.1). Default 0 (air
@@ -717,7 +717,7 @@ def audible_image_count(max_order: int) -> int:
 
 
 def reflection_density(
-    time: ArrayLike, volume: float, speed_of_sound: float = DEFAULT_SPEED_OF_SOUND
+    time: ArrayLike, volume: float, speed_of_sound: float = _SPEED_OF_SOUND_M_S
 ) -> np.ndarray | float:
     r"""Temporal density of reflections :math:`dN/dt = 4 \pi c^3 t^2 / V`.
 

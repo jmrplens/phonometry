@@ -3,7 +3,7 @@
 
 Oracle for JOMOPANS-ECHO: the authors' own Excel reference implementation
 (File S1 of MacGillivray & de Jong 2021), cached values for a Bulker sailing at
-13.5 kn with length 211 m, in decidecade bands. RANDI is pinned against the
+13.5 kt with length 211 m, in decidecade bands. RANDI is pinned against the
 printed Table 2 of the RANDI 3.1 physics report, and Wales-Heitmeyer against
 the mean-spectrum equation and asymptote statements printed in the 2002 paper.
 """
@@ -23,7 +23,7 @@ from phonometry.underwater.sources.ship_traffic_noise import (
 )
 
 # Excel File S1 cached values: (frequency Hz, source PSD, decidecade band SL)
-# for a Bulker, V = 13.5 kn, l = 211 m.
+# for a Bulker, V = 13.5 kt, l = 211 m.
 _ECHO_ORACLE = [
     (10.0, 157.234, 160.870),
     (12.5893, 158.4025, 163.0386),
@@ -75,7 +75,7 @@ def test_randi_and_wales_heitmeyer_run() -> None:
     r = ship_source_spectrum(15.0, 250.0, model="randi")
     w = ship_source_spectrum(model="wales-heitmeyer")
     assert r.vessel_class is None
-    assert w.speed_knots is None
+    assert w.speed_kt is None
     assert w.length_m is None
     # Both give physically plausible source PSD near 100-160 dB at 1 kHz.
     assert 100.0 < _at(r, 1000.0)[0] < 200.0
@@ -164,7 +164,7 @@ def test_ship_traffic_plot_smoke() -> None:
 # table deviates ~1-3 dB from its own equations; those cells and the Fishing
 # row, whose assumed average is not reproducible, are excluded).
 _RANDI_TABLE2 = [
-    # (length ft, speed kn, {frequency: level})
+    # (length ft, speed kt, {frequency: level})
     (337.5, 12.5, {10.0: 160.9, 50.0: 162.6, 100.0: 153.5, 300.0: 137.1}),  # Merchant
     (450.0, 14.0, {10.0: 167.0, 25.0: 170.8, 50.0: 168.6, 100.0: 159.2}),  # Tanker
     (
@@ -234,7 +234,7 @@ def test_jomopans_echo_tracks_overseas_harriette_at_speed(
 
 
 def test_jomopans_echo_overseas_harriette_low_speed_mean() -> None:
-    # At 8 kn the v^6 speed law of the class average under-predicts the
+    # At 8 kt the v^6 speed law of the class average under-predicts the
     # machinery-dominated high bands of this particular ship (a documented
     # limitation of speed-scaled class averages at low speed), so only the
     # six-band mean deviation is constrained, at 6 dB (about one class

@@ -22,7 +22,7 @@ import numpy as np
 import pytest
 
 from phonometry.materials.diffusers.design import (
-    DEFAULT_POLAR_ANGLES,
+    DEFAULT_POLAR_ANGLES_DEG,
     DiffuserPolarResponse,
     predict_diffuser_polar_response,
     predicted_diffusion_spectrum,
@@ -115,7 +115,7 @@ def test_obliquity_factor_is_symmetric_kirchhoff(psi: float) -> None:
     freq, c = 1000.0, 343.0
     k = 2.0 * np.pi * freq / c
     reflection = np.exp(-2j * k * depths)
-    angles_deg = np.asarray(DEFAULT_POLAR_ANGLES, dtype=np.float64)
+    angles_deg = np.asarray(DEFAULT_POLAR_ANGLES_DEG, dtype=np.float64)
     common = {
         "source_angle_deg": psi,
         "repetitions": 3,
@@ -157,9 +157,9 @@ def test_polar_levels_peak_referenced_to_zero() -> None:
 
 
 def test_default_polar_angles_are_iso_semicircle() -> None:
-    assert DEFAULT_POLAR_ANGLES[0] == -90
-    assert DEFAULT_POLAR_ANGLES[-1] == 90
-    assert len(DEFAULT_POLAR_ANGLES) == 37
+    assert DEFAULT_POLAR_ANGLES_DEG[0] == -90
+    assert DEFAULT_POLAR_ANGLES_DEG[-1] == 90
+    assert len(DEFAULT_POLAR_ANGLES_DEG) == 37
 
 
 def test_predict_returns_result_dataclass() -> None:

@@ -205,7 +205,7 @@ strip and a footer with the fixed disclaimer.
 | ValueError | If `engine` is not `"reportlab"`. |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
 
-## NOY_BANDS
+## NOY_BANDS_HZ
 
 *Constant* (`numpy.ndarray, shape (24,)`).
 

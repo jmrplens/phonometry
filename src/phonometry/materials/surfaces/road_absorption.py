@@ -86,11 +86,11 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 Complex = NDArray[np.complex128]
 
 #: Mandatory source-to-reference-plane distance ``ds`` (ISO 13472-1, 4.2), m.
-DEFAULT_SOURCE_HEIGHT = 1.25
+DEFAULT_SOURCE_HEIGHT_M = 1.25
 #: Mandatory microphone-to-reference-plane distance ``dm`` (ISO 13472-1, 4.2), m.
-DEFAULT_MIC_HEIGHT = 0.25
+DEFAULT_MICROPHONE_HEIGHT_M = 0.25
 #: Speed of sound of the Annex A worked example (ISO 13472-1), in m/s.
-DEFAULT_SPEED_OF_SOUND = 340.0
+ISO13472_SPEED_OF_SOUND_M_S = 340.0
 
 #: Flat-portion duration mandated by ISO 13472-1 Clause 6.4, in seconds (5 ms).
 _ADRIENNE_FLAT = 5.0e-3
@@ -103,11 +103,11 @@ _BLACKMAN_HARRIS = (0.35875, 0.48829, 0.14128, 0.01168)
 _EDGE_SHAPES = ("blackman-harris", "cosine-squared")
 
 #: One-third-octave working range of ISO 13472-1 (Scope), in hertz.
-PART1_FREQUENCY_RANGE = (250.0, 4000.0)
+PART1_FREQUENCY_RANGE_HZ = (250.0, 4000.0)
 #: One-third-octave working range of ISO 13472-2 (Scope), in hertz.
-SPOT_FREQUENCY_RANGE = (250.0, 1600.0)
+SPOT_FREQUENCY_RANGE_HZ = (250.0, 1600.0)
 #: Narrow-band equivalent range of ISO 13472-2 (Clause 3.1 NOTE), in hertz.
-SPOT_NARROW_BAND_RANGE = (220.0, 1800.0)
+SPOT_NARROW_BAND_RANGE_HZ = (220.0, 1800.0)
 
 #: Nominal one-third-octave midband frequencies spanning both methods, in hertz.
 _ONE_THIRD_OCTAVE_CENTERS = (
@@ -134,12 +134,12 @@ _SPOT_SMAX_FACTOR = 0.45
 _SPOT_SMIN_FACTOR = 0.05
 
 __all__ = [
-    "DEFAULT_MIC_HEIGHT",
-    "DEFAULT_SOURCE_HEIGHT",
-    "DEFAULT_SPEED_OF_SOUND",
-    "PART1_FREQUENCY_RANGE",
-    "SPOT_FREQUENCY_RANGE",
-    "SPOT_NARROW_BAND_RANGE",
+    "DEFAULT_MICROPHONE_HEIGHT_M",
+    "DEFAULT_SOURCE_HEIGHT_M",
+    "ISO13472_SPEED_OF_SOUND_M_S",
+    "PART1_FREQUENCY_RANGE_HZ",
+    "SPOT_FREQUENCY_RANGE_HZ",
+    "SPOT_NARROW_BAND_RANGE_HZ",
     "InsituAbsorptionResult",
     "RoadAbsorptionWarning",
     "absorption_reference_corrected",
@@ -175,8 +175,8 @@ _SPEED_POSITIVE = "'speed_of_sound' must be positive."
 
 
 def geometric_spreading_factor(
-    source_height: float = DEFAULT_SOURCE_HEIGHT,
-    mic_height: float = DEFAULT_MIC_HEIGHT,
+    source_height_m: float = DEFAULT_SOURCE_HEIGHT_M,
+    microphone_height_m: float = DEFAULT_MICROPHONE_HEIGHT_M,
 ) -> float:
     r"""Geometrical-spreading factor ``Kr`` (ISO 13472-1:2002, Clause 4.1).
 
@@ -186,21 +186,24 @@ def geometric_spreading_factor(
     (Annex C). The mandatory geometry :math:`d_\mathrm{s} = 1.25` m,
     :math:`d_\mathrm{m} = 0.25` m gives :math:`K_\mathrm{r} = 2/3` (Clause 4.2).
 
-    :param source_height: Source-to-reference-plane distance ``ds``, in metres.
-    :param mic_height: Microphone-to-reference-plane distance ``dm``, in metres.
+    :param source_height_m: Source-to-reference-plane distance ``ds``, in metres.
+    :param microphone_height_m: Microphone-to-reference-plane distance ``dm``, in metres.
     :return: Geometrical-spreading factor ``Kr`` (dimensionless,
         :math:`0 < K_\mathrm{r} < 1`).
     :raises ValueError: If ``ds`` or ``dm`` is not positive or
         :math:`d_\mathrm{s} \le d_\mathrm{m}`.
     """
-    _check_geometry(source_height, mic_height)
-    return float((source_height - mic_height) / (source_height + mic_height))
+    _check_geometry(source_height_m, microphone_height_m)
+    return float(
+        (source_height_m - microphone_height_m)
+        / (source_height_m + microphone_height_m)
+    )
 
 
 def geometric_spreading_factor_angle(
     incidence_angle_rad: float,
-    source_height: float = DEFAULT_SOURCE_HEIGHT,
-    mic_height: float = DEFAULT_MIC_HEIGHT,
+    source_height_m: float = DEFAULT_SOURCE_HEIGHT_M,
+    microphone_height_m: float = DEFAULT_MICROPHONE_HEIGHT_M,
 ) -> float:
     r"""Oblique geometrical-spreading factor (ISO 13472-1, Annex F).
 
@@ -210,18 +213,18 @@ def geometric_spreading_factor_angle(
     cosine is unity and ``Kr,theta`` collapses to ``Kr`` (Clause 4.1).
 
     :param incidence_angle_rad: Incidence angle ``theta``, in **radians**.
-    :param source_height: Source-to-reference-plane distance ``ds``, in metres.
-    :param mic_height: Microphone-to-reference-plane distance ``dm``, in metres.
+    :param source_height_m: Source-to-reference-plane distance ``ds``, in metres.
+    :param microphone_height_m: Microphone-to-reference-plane distance ``dm``, in metres.
     :return: Oblique factor ``Kr,theta`` (positive root, dimensionless).
     """
-    kr = geometric_spreading_factor(source_height, mic_height)
+    kr = geometric_spreading_factor(source_height_m, microphone_height_m)
     cos_sq = float(np.cos(incidence_angle_rad)) ** 2
     return float(np.sqrt(1.0 - cos_sq * (1.0 - kr**2)))
 
 
 def reflected_path_delay(
-    mic_height: float = DEFAULT_MIC_HEIGHT,
-    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND,
+    microphone_height_m: float = DEFAULT_MICROPHONE_HEIGHT_M,
+    speed_of_sound: float = ISO13472_SPEED_OF_SOUND_M_S,
 ) -> float:
     r"""Reflected-path arrival delay ``dtau`` (ISO 13472-1:2002, Annex C).
 
@@ -230,17 +233,17 @@ def reflected_path_delay(
     is the delay undone by the phase-restoration term of
     :func:`insitu_reflection_factor`.
 
-    :param mic_height: Microphone-to-reference-plane distance ``dm``, in metres.
+    :param microphone_height_m: Microphone-to-reference-plane distance ``dm``, in metres.
     :param speed_of_sound: Speed of sound ``c``, in metres per second.
     :return: Delay ``dtau``, in seconds.
     :raises ValueError: If ``dm`` or ``c`` is not positive.
     """
-    if mic_height <= 0.0:
-        msg = "'mic_height' must be positive."
+    if microphone_height_m <= 0.0:
+        msg = "'microphone_height_m' must be positive."
         raise ValueError(msg)
     if speed_of_sound <= 0.0:
         raise ValueError(_SPEED_POSITIVE)
-    return float(2.0 * mic_height / speed_of_sound)
+    return float(2.0 * microphone_height_m / speed_of_sound)
 
 
 # --------------------------------------------------------------------------- #
@@ -384,8 +387,8 @@ def insitu_reflection_factor(
     incident_ir: SignalInput,
     reflected_ir: SignalInput,
     *,
-    source_height: float = DEFAULT_SOURCE_HEIGHT,
-    mic_height: float = DEFAULT_MIC_HEIGHT,
+    source_height_m: float = DEFAULT_SOURCE_HEIGHT_M,
+    microphone_height_m: float = DEFAULT_MICROPHONE_HEIGHT_M,
     incidence_angle_rad: float = 0.0,
     fs: float | None = None,
     delay: float | None = None,
@@ -414,8 +417,8 @@ def insitu_reflection_factor(
         real, same sampling as ``incident_ir``. Same treatment as
         ``incident_ir``: its calibration is applied too, which is what makes
         the shared factor cancel rather than skew the ratio.
-    :param source_height: Source-to-plane distance ``ds``, in metres.
-    :param mic_height: Microphone-to-plane distance ``dm``, in metres.
+    :param source_height_m: Source-to-plane distance ``ds``, in metres.
+    :param microphone_height_m: Microphone-to-plane distance ``dm``, in metres.
     :param incidence_angle_rad: Incidence angle ``theta``, in radians (0 = normal).
     :param fs: Sampling frequency, in hertz; required with ``delay`` for phase
         restoration, and otherwise unused. Either record may be a
@@ -430,7 +433,7 @@ def insitu_reflection_factor(
         without ``fs``.
     """
     kr = geometric_spreading_factor_angle(
-        incidence_angle_rad, source_height, mic_height
+        incidence_angle_rad, source_height_m, microphone_height_m
     )
     fs = resolve_optional_pair_fs(
         incident_ir, reflected_ir, fs, names=("incident_ir", "reflected_ir")
@@ -470,8 +473,8 @@ def power_reflection_coefficient(
     incident_ir: SignalInput,
     reflected_ir: SignalInput,
     *,
-    source_height: float = DEFAULT_SOURCE_HEIGHT,
-    mic_height: float = DEFAULT_MIC_HEIGHT,
+    source_height_m: float = DEFAULT_SOURCE_HEIGHT_M,
+    microphone_height_m: float = DEFAULT_MICROPHONE_HEIGHT_M,
     incidence_angle_rad: float = 0.0,
     n: int | None = None,
 ) -> Real:
@@ -492,14 +495,14 @@ def power_reflection_coefficient(
     :param reflected_ir: Windowed reflected impulse response ``hr(t)``,
         real. Same treatment as ``incident_ir``; two Signals recorded at
         different rates are refused rather than arbitrated.
-    :param source_height: Source-to-plane distance ``ds``, in metres.
-    :param mic_height: Microphone-to-plane distance ``dm``, in metres.
+    :param source_height_m: Source-to-plane distance ``ds``, in metres.
+    :param microphone_height_m: Microphone-to-plane distance ``dm``, in metres.
     :param incidence_angle_rad: Incidence angle ``theta``, in radians.
     :param n: FFT length; defaults to the longer input.
     :return: Sound-power reflection factor ``QW(f)`` (real).
     """
     kr = geometric_spreading_factor_angle(
-        incidence_angle_rad, source_height, mic_height
+        incidence_angle_rad, source_height_m, microphone_height_m
     )
     hi, hr, _length = _transfer_functions(incident_ir, reflected_ir, n)
     ratio = np.abs(hr) / np.abs(hi)
@@ -510,8 +513,8 @@ def insitu_absorption_coefficient(
     incident_ir: SignalInput,
     reflected_ir: SignalInput,
     *,
-    source_height: float = DEFAULT_SOURCE_HEIGHT,
-    mic_height: float = DEFAULT_MIC_HEIGHT,
+    source_height_m: float = DEFAULT_SOURCE_HEIGHT_M,
+    microphone_height_m: float = DEFAULT_MICROPHONE_HEIGHT_M,
     incidence_angle_rad: float = 0.0,
     n: int | None = None,
 ) -> Real:
@@ -532,8 +535,8 @@ def insitu_absorption_coefficient(
     :param reflected_ir: Windowed reflected impulse response ``hr(t)``,
         real. Same treatment as ``incident_ir``; two Signals recorded at
         different rates are refused rather than arbitrated.
-    :param source_height: Source-to-plane distance ``ds``, in metres.
-    :param mic_height: Microphone-to-plane distance ``dm``, in metres.
+    :param source_height_m: Source-to-plane distance ``ds``, in metres.
+    :param microphone_height_m: Microphone-to-plane distance ``dm``, in metres.
     :param incidence_angle_rad: Incidence angle ``theta``, in radians (0 = normal).
     :param n: FFT length; defaults to the longer input.
     :return: Absorption coefficient ``alpha(f)`` at the ``rfft`` frequency bins.
@@ -541,8 +544,8 @@ def insitu_absorption_coefficient(
     qw = power_reflection_coefficient(
         incident_ir,
         reflected_ir,
-        source_height=source_height,
-        mic_height=mic_height,
+        source_height_m=source_height_m,
+        microphone_height_m=microphone_height_m,
         incidence_angle_rad=incidence_angle_rad,
         n=n,
     )
@@ -591,8 +594,8 @@ def one_third_octave_absorption(
     frequencies: ArrayLike,
     absorption: ArrayLike,
     *,
-    f_min: float = PART1_FREQUENCY_RANGE[0],
-    f_max: float = PART1_FREQUENCY_RANGE[1],
+    f_min: float = PART1_FREQUENCY_RANGE_HZ[0],
+    f_max: float = PART1_FREQUENCY_RANGE_HZ[1],
     clip_negative: bool = True,
 ) -> tuple[Real, Real]:
     r"""Aggregate narrow-band absorption into one-third-octave bands.
@@ -649,16 +652,16 @@ class InsituAbsorptionResult(OwnsArrays):
     :ivar frequencies: One-third-octave band centre frequencies, in hertz.
     :ivar absorption: Sound-absorption coefficient ``alpha`` per band (a band
         with no contributing narrow-band samples is ``nan``).
-    :ivar source_height: Source height the spectrum was reduced with, in
-        metres, retained (with ``mic_height``) so :meth:`plot_geometry`
+    :ivar source_height_m: Source height the spectrum was reduced with, in
+        metres, retained (with ``microphone_height_m``) so :meth:`plot_geometry`
         can draw the set-up; ``None`` for hand-built results.
-    :ivar mic_height: Microphone height, in metres, or ``None``.
+    :ivar microphone_height_m: Microphone height, in metres, or ``None``.
     """
 
     frequencies: Real
     absorption: Real
-    source_height: float | None = None
-    mic_height: float | None = None
+    source_height_m: float | None = None
+    microphone_height_m: float | None = None
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -696,12 +699,12 @@ def insitu_absorption_spectrum(
     reflected_ir: SignalInput,
     fs: float | None = None,
     *,
-    source_height: float = DEFAULT_SOURCE_HEIGHT,
-    mic_height: float = DEFAULT_MIC_HEIGHT,
+    source_height_m: float = DEFAULT_SOURCE_HEIGHT_M,
+    microphone_height_m: float = DEFAULT_MICROPHONE_HEIGHT_M,
     incidence_angle_rad: float = 0.0,
     n: int | None = None,
-    f_min: float = PART1_FREQUENCY_RANGE[0],
-    f_max: float = PART1_FREQUENCY_RANGE[1],
+    f_min: float = PART1_FREQUENCY_RANGE_HZ[0],
+    f_max: float = PART1_FREQUENCY_RANGE_HZ[1],
     clip_negative: bool = True,
 ) -> InsituAbsorptionResult:
     """In-situ one-third-octave absorption spectrum (ISO 13472-1, Clause 4.1).
@@ -725,8 +728,8 @@ def insitu_absorption_spectrum(
         bare arrays; either may be a :class:`~phonometry.io.Signal` and
         supply it, and two Signals recorded at different rates are refused
         rather than arbitrated.
-    :param source_height: Source-to-plane distance ``ds``, in metres.
-    :param mic_height: Microphone-to-plane distance ``dm``, in metres.
+    :param source_height_m: Source-to-plane distance ``ds``, in metres.
+    :param microphone_height_m: Microphone-to-plane distance ``dm``, in metres.
     :param incidence_angle_rad: Incidence angle ``theta``, in radians (0 = normal).
     :param n: FFT length; defaults to the longer of the two impulse responses.
     :param f_min: Lowest band centre to report, in hertz (default 250 Hz).
@@ -753,8 +756,8 @@ def insitu_absorption_spectrum(
     alpha = insitu_absorption_coefficient(
         hi_t,
         hr_t,
-        source_height=source_height,
-        mic_height=mic_height,
+        source_height_m=source_height_m,
+        microphone_height_m=microphone_height_m,
         incidence_angle_rad=incidence_angle_rad,
         n=length,
     )
@@ -765,8 +768,8 @@ def insitu_absorption_spectrum(
     return InsituAbsorptionResult(
         frequencies=centres,
         absorption=band,
-        source_height=float(source_height),
-        mic_height=float(mic_height),
+        source_height_m=float(source_height_m),
+        microphone_height_m=float(microphone_height_m),
     )
 
 
@@ -776,9 +779,9 @@ def insitu_absorption_spectrum(
 def max_sampled_area_radius(
     window_width: float,
     *,
-    source_height: float = DEFAULT_SOURCE_HEIGHT,
-    mic_height: float = DEFAULT_MIC_HEIGHT,
-    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND,
+    source_height_m: float = DEFAULT_SOURCE_HEIGHT_M,
+    microphone_height_m: float = DEFAULT_MICROPHONE_HEIGHT_M,
+    speed_of_sound: float = ISO13472_SPEED_OF_SOUND_M_S,
 ) -> float:
     r"""Radius of the maximum sampled area (ISO 13472-1:2002, Annex A).
 
@@ -796,19 +799,19 @@ def max_sampled_area_radius(
     :math:`r \approx 1.34` m.
 
     :param window_width: Temporal-window width ``Tw`` (reflected wave), seconds.
-    :param source_height: Source-to-plane distance ``ds``, in metres.
-    :param mic_height: Microphone-to-plane distance ``dm``, in metres.
+    :param source_height_m: Source-to-plane distance ``ds``, in metres.
+    :param microphone_height_m: Microphone-to-plane distance ``dm``, in metres.
     :param speed_of_sound: Speed of sound ``c``, in metres per second.
     :return: Maximum-sampled-area radius ``r``, in metres.
     :raises ValueError: On non-positive geometry or window width.
     """
-    _check_geometry(source_height, mic_height)
+    _check_geometry(source_height_m, microphone_height_m)
     if window_width <= 0.0:
         msg = "'window_width' must be positive."
         raise ValueError(msg)
     if speed_of_sound <= 0.0:
         raise ValueError(_SPEED_POSITIVE)
-    ds, dm, ctw = source_height, mic_height, speed_of_sound * window_width
+    ds, dm, ctw = source_height_m, microphone_height_m, speed_of_sound * window_width
     numerator = np.sqrt(
         (ds + dm + ctw / 2.0) * (ds + ctw / 2.0) * (2.0 * dm + ctw) * ctw
     )
@@ -819,9 +822,9 @@ def msa_major_axis(
     window_width: float,
     projected_distance: float,
     *,
-    source_height: float = DEFAULT_SOURCE_HEIGHT,
-    mic_height: float = DEFAULT_MIC_HEIGHT,
-    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND,
+    source_height_m: float = DEFAULT_SOURCE_HEIGHT_M,
+    microphone_height_m: float = DEFAULT_MICROPHONE_HEIGHT_M,
+    speed_of_sound: float = ISO13472_SPEED_OF_SOUND_M_S,
 ) -> float:
     r"""Major axis of the oblique sampled-area ellipsoid (ISO 13472-1,
     Annex F).
@@ -832,8 +835,8 @@ def msa_major_axis(
 
     :param window_width: Temporal-window width ``Tw``, in seconds.
     :param projected_distance: Projected source-to-mic distance ``dp``, in metres.
-    :param source_height: Source-to-plane distance ``ds``, in metres.
-    :param mic_height: Microphone-to-plane distance ``dm``, in metres.
+    :param source_height_m: Source-to-plane distance ``ds``, in metres.
+    :param microphone_height_m: Microphone-to-plane distance ``dm``, in metres.
     :param speed_of_sound: Speed of sound ``c``, in metres per second.
     :return: Major axis ``a``, in metres.
     :raises ValueError: On non-positive window width, speed, or negative ``dp``.
@@ -846,12 +849,12 @@ def msa_major_axis(
     if projected_distance < 0.0:
         msg = "'projected_distance' must be non-negative."
         raise ValueError(msg)
-    if source_height <= 0.0 or mic_height <= 0.0:
+    if source_height_m <= 0.0 or microphone_height_m <= 0.0:
         msg = "Heights must be positive."
         raise ValueError(msg)
     return float(
         speed_of_sound * window_width
-        + np.hypot(source_height + mic_height, projected_distance)
+        + np.hypot(source_height_m + microphone_height_m, projected_distance)
     )
 
 
@@ -861,7 +864,7 @@ def msa_major_axis(
 # phonometry.materials.absorbers.impedance_tube.two_microphone_impedance (ISO 10534-2, Clause 7).
 # --------------------------------------------------------------------------- #
 def spot_tube_upper_frequency(
-    diameter_m: float, speed_of_sound: float = DEFAULT_SPEED_OF_SOUND
+    diameter_m: float, speed_of_sound: float = ISO13472_SPEED_OF_SOUND_M_S
 ) -> float:
     r"""Upper usable frequency of the spot tube (ISO 13472-2:2010, 5.4.1).
 
@@ -884,10 +887,10 @@ def spot_tube_upper_frequency(
 
 
 def spot_microphone_spacing_bounds(
-    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND,
+    speed_of_sound: float = ISO13472_SPEED_OF_SOUND_M_S,
     *,
-    f_min: float = SPOT_NARROW_BAND_RANGE[0],
-    f_max: float = SPOT_NARROW_BAND_RANGE[1],
+    f_min: float = SPOT_NARROW_BAND_RANGE_HZ[0],
+    f_max: float = SPOT_NARROW_BAND_RANGE_HZ[1],
 ) -> tuple[float, float]:
     r"""Microphone-spacing bounds ``(s_min, s_max)`` (ISO 13472-2:2010, 5.4.2).
 
@@ -932,7 +935,7 @@ def check_spot_frequency_range(frequency: ArrayLike) -> None:
     """Advise when a spot-method frequency is out of range (ISO 13472-2, Scope).
 
     The spot method is valid over the one-third-octave bands 250-1600 Hz
-    (narrow-band 220-1800 Hz). Frequencies outside :data:`SPOT_FREQUENCY_RANGE`
+    (narrow-band 220-1800 Hz). Frequencies outside :data:`SPOT_FREQUENCY_RANGE_HZ`
     raise a :class:`RoadAbsorptionWarning`; results there are advisory.
 
     :param frequency: Frequency or frequencies to check, in hertz.
@@ -942,7 +945,7 @@ def check_spot_frequency_range(frequency: ArrayLike) -> None:
     if np.any(freq < 0.0):
         msg = "'frequency' must be non-negative."
         raise ValueError(msg)
-    lo, hi = SPOT_FREQUENCY_RANGE
+    lo, hi = SPOT_FREQUENCY_RANGE_HZ
     if np.any(freq < lo) or np.any(freq > hi):
         warnings.warn(
             f"Frequencies outside the ISO 13472-2 spot range "
@@ -998,11 +1001,11 @@ def spot_internal_loss_correction(
     return np.asarray(corrected, dtype=np.float64)
 
 
-def _check_geometry(source_height: float, mic_height: float) -> None:
+def _check_geometry(source_height_m: float, microphone_height_m: float) -> None:
     """Validate the source/microphone heights of the extended-surface geometry."""
-    if source_height <= 0.0 or mic_height <= 0.0:
-        msg = "'source_height' and 'mic_height' must be positive."
+    if source_height_m <= 0.0 or microphone_height_m <= 0.0:
+        msg = "'source_height_m' and 'microphone_height_m' must be positive."
         raise ValueError(msg)
-    if source_height <= mic_height:
-        msg = "'source_height' must exceed 'mic_height'."
+    if source_height_m <= microphone_height_m:
+        msg = "'source_height_m' must exceed 'microphone_height_m'."
         raise ValueError(msg)

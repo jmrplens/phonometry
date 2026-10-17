@@ -299,12 +299,12 @@ residential acoustic areas.
 | :--- | :--- |
 | ValueError | For an unknown use/room combination, an unknown dominant noise, or a non-finite `Ld`. |
 
-## DB_HR_FREQUENCIES
+## DB_HR_FREQUENCIES_HZ
 
 *Constant* (`tuple`).
 
 ```python
-DB_HR_FREQUENCIES = (100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0)
+DB_HR_FREQUENCIES_HZ = (100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0)
 ```
 
 ## db_hr_global_index

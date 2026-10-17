@@ -32,7 +32,7 @@ import pytest
 
 from phonometry import environment
 
-BANDS = np.array(environment.DEFAULT_FREQUENCIES)
+BANDS = np.array(environment.DEFAULT_FREQUENCIES_HZ)
 
 
 # --------------------------------------------------------------------------- #
@@ -551,7 +551,7 @@ def test_public_exports() -> None:
         "barrier_attenuation",
         "meteorological_correction",
         "directivity_omega",
-        "DEFAULT_FREQUENCIES",
+        "DEFAULT_FREQUENCIES_HZ",
         "PropagationGeometry",
         "GroundFactors",
         "AtmosphericConditions",

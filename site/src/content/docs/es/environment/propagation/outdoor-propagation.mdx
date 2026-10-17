@@ -685,7 +685,7 @@ corta frente a la diferencia de camino.
 | :--- | :--- | :--- | :--- | :--- |
 | `distance` | float | m | > 0 | Distancia fuente–receptor en línea recta $d$ |
 | `source_height` / `receiver_height` | float | m | ≥ 0 | $h_\mathrm{s}$, $h_\mathrm{r}$ sobre el suelo |
-| `frequencies` | array 1D | Hz | def. 8 octavas 63–8000 | `DEFAULT_FREQUENCIES` |
+| `frequencies` | array 1D | Hz | def. 8 octavas 63–8000 | `DEFAULT_FREQUENCIES_HZ` |
 | `ground_source` / `ground_middle` / `ground_receiver` | float | — | `[0, 1]`, def. `0.0` | Factor de suelo $G$ (0 duro, 1 poroso) |
 | `barrier` | `Barrier` o None | — | def. `None` | Obstáculo de apantallamiento |
 | `temperature_c` / `relative_humidity_percent` / `atmospheric_pressure_kpa` | float | °C / % / kPa | 20 / 70 / 101.325 | Pasados a $A_\mathrm{atm}$ |

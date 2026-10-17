@@ -33,7 +33,7 @@ from phonometry.aircraft.atmospheric_absorption import (
     arp866a_attenuation,
     sae_band_attenuation,
 )
-from phonometry.aircraft.certification import NOY_BANDS
+from phonometry.aircraft.certification import NOY_BANDS_HZ
 from phonometry.environment.propagation.air_absorption import air_attenuation
 
 # Published SAE-Method constants (ARP 5534 §3.2.2), for the independent oracle.
@@ -252,9 +252,9 @@ def test_arp866a_formula_at_1_khz() -> None:
 
 def test_arp866a_evaluates_table_2_frequencies() -> None:
     res = arp866a_attenuation(
-        NOY_BANDS, temperature_c=15.0, relative_humidity_percent=70.0
+        NOY_BANDS_HZ, temperature_c=15.0, relative_humidity_percent=70.0
     )
-    assert np.array_equal(res.frequencies, NOY_BANDS)
+    assert np.array_equal(res.frequencies, NOY_BANDS_HZ)
     assert tuple(res.evaluation_frequencies_hz[-5:]) == (
         4000.0,
         4500.0,
@@ -262,7 +262,7 @@ def test_arp866a_evaluates_table_2_frequencies() -> None:
         7100.0,
         9000.0,
     )
-    assert np.array_equal(res.evaluation_frequencies_hz[:20], NOY_BANDS[:20])
+    assert np.array_equal(res.evaluation_frequencies_hz[:20], NOY_BANDS_HZ[:20])
     exact = 1000.0 * 10.0 ** (np.array([-12.0, 7.0]) / 10.0)  # 63.0957, 5011.87
     by_exact = arp866a_attenuation(
         exact, temperature_c=15.0, relative_humidity_percent=70.0
@@ -326,7 +326,7 @@ def test_arp866a_arrays_must_agree() -> None:
 
 def test_arp866a_plot_smoke() -> None:
     res = arp866a_attenuation(
-        NOY_BANDS, temperature_c=10.0, relative_humidity_percent=80.0
+        NOY_BANDS_HZ, temperature_c=10.0, relative_humidity_percent=80.0
     )
     ax = res.plot(language="es")
     assert ax.get_ylabel().startswith("Coeficiente")
@@ -340,7 +340,7 @@ def _coefficients(humidity: float, interpolation: str) -> np.ndarray:
     return np.column_stack(
         [
             arp866a_attenuation(
-                NOY_BANDS,
+                NOY_BANDS_HZ,
                 temperature_c=t,
                 relative_humidity_percent=humidity,
                 eta_interpolation=interpolation,

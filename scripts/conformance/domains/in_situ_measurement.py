@@ -119,7 +119,7 @@ from phonometry.environment.propagation.barrier_in_situ import (
 from phonometry.noise_control.silencer_in_situ import (
     INSTALLATION_CASES,
     ISO11820_BACKGROUND_CORRECTIONS_DB,
-    ISO11820_SOUND_SPEED_M_S,
+    ISO11820_SPEED_OF_SOUND_M_S,
     SABINE_AREA_COEFFICIENT,
 )
 
@@ -233,7 +233,7 @@ def _chk_iso11820_temperature_correction() -> Outcome:
 )
 def _chk_iso11820_sabine_area() -> Outcome:
     volume, time = 300.0, 1.2
-    expected = SABINE_AREA_COEFFICIENT * volume / (ISO11820_SOUND_SPEED_M_S * time)
+    expected = SABINE_AREA_COEFFICIENT * volume / (ISO11820_SPEED_OF_SOUND_M_S * time)
     computed = float(ph.noise_control.reverberant_surface_area_m2(volume, [time])[0])
     return numeric(expected, computed, 1e-9, unit="m2", places=4)
 

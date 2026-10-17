@@ -330,12 +330,20 @@ room's volume and reverberation time.
 ISO11691_REPRODUCIBILITY = ((1250.0, 2.0), (10000.0, 3.0))
 ```
 
-## ISO7235_ABSOLUTE_ZERO_OFFSET
+## ISO7235_ABSOLUTE_ZERO_OFFSET_K
 
 *Constant* (`float`).
 
 ```python
-ISO7235_ABSOLUTE_ZERO_OFFSET = 273.0
+ISO7235_ABSOLUTE_ZERO_OFFSET_K = 273.0
+```
+
+## ISO7235_AIR_GAS_CONSTANT_J_KG_K
+
+*Constant* (`float`).
+
+```python
+ISO7235_AIR_GAS_CONSTANT_J_KG_K = 287.0
 ```
 
 ## ISO7235_COVERAGE_FACTOR
@@ -344,14 +352,6 @@ ISO7235_ABSOLUTE_ZERO_OFFSET = 273.0
 
 ```python
 ISO7235_COVERAGE_FACTOR = 2.0
-```
-
-## ISO7235_GAS_CONSTANT
-
-*Constant* (`float`).
-
-```python
-ISO7235_GAS_CONSTANT = 287.0
 ```
 
 ## ISO7235_REPRODUCIBILITY
@@ -642,7 +642,7 @@ coefficient is scaled by that one factor rather than shifted, which
 leaves it 0,069 % low. That is far under the uncertainty of a
 pressure-loss test, and using the printed constants is what reproduces a
 result computed to the standard, which is why
-[`ISO7235_ABSOLUTE_ZERO_OFFSET`](/phonometry/reference/api/noise_control/silencer-measurement/#iso7235_absolute_zero_offset) and [`ISO7235_GAS_CONSTANT`](/phonometry/reference/api/noise_control/silencer-measurement/#iso7235_gas_constant)
+[`ISO7235_ABSOLUTE_ZERO_OFFSET_K`](/phonometry/reference/api/noise_control/silencer-measurement/#iso7235_absolute_zero_offset_k) and [`ISO7235_AIR_GAS_CONSTANT_J_KG_K`](/phonometry/reference/api/noise_control/silencer-measurement/#iso7235_air_gas_constant_j_kg_k)
 carry them as printed.
 
 **Parameters**

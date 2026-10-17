@@ -96,12 +96,12 @@ def test_matches_the_published_closed_form(frequency: float) -> None:
 def test_erb_bandwidth_is_the_stated_straight_line() -> None:
     """ERB_N = C1 (C2 f + 1): the intercept at 0 Hz is C1, the slope C1 C2."""
     assert float(np.asarray(psychoacoustics.erb_bandwidth(0.0))[()]) == pytest.approx(
-        psychoacoustics.ERB_C1
+        psychoacoustics.ERB_C1_HZ
     )
     lo = float(np.asarray(psychoacoustics.erb_bandwidth(1000.0))[()])
     hi = float(np.asarray(psychoacoustics.erb_bandwidth(2000.0))[()])
     assert hi - lo == pytest.approx(
-        psychoacoustics.ERB_C1 * psychoacoustics.ERB_C2 * 1000.0
+        psychoacoustics.ERB_C1_HZ * psychoacoustics.ERB_C2_PER_HZ * 1000.0
     )
 
 
@@ -113,7 +113,7 @@ def test_cam_is_the_integral_of_one_over_the_erb() -> None:
     ``C_CAM = ln(10) / (C1 C2)`` between the three constants.
     """
     assert psychoacoustics.CAM_C == pytest.approx(
-        math.log(10.0) / (psychoacoustics.ERB_C1 * psychoacoustics.ERB_C2),
+        math.log(10.0) / (psychoacoustics.ERB_C1_HZ * psychoacoustics.ERB_C2_PER_HZ),
         rel=5e-5,
     )
     f = np.linspace(0.0, 4000.0, 400001)
@@ -151,8 +151,8 @@ def test_scalar_in_scalar_out_array_in_array_out() -> None:
 
 def test_loudness_model_shares_these_constants() -> None:
     """ISO 532-2 Formulae (1) and (6) are the same functions, not a copy."""
-    assert mg._ERB_C1 is psychoacoustics.ERB_C1
-    assert mg._ERB_C2 is psychoacoustics.ERB_C2
+    assert mg._ERB_C1 is psychoacoustics.ERB_C1_HZ
+    assert mg._ERB_C2 is psychoacoustics.ERB_C2_PER_HZ
     assert mg._CAM_C is psychoacoustics.CAM_C
     grid = np.array([100.0, 1000.0, 8000.0])
     assert np.allclose(

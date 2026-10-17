@@ -106,7 +106,7 @@ from .noise_reducing_devices import (
     sound_reflection_rating,
 )
 from .outdoor_propagation import (
-    DEFAULT_FREQUENCIES,
+    DEFAULT_FREQUENCIES_HZ,
     AtmosphericConditions,
     Barrier,
     DirectivityCorrection,
@@ -208,7 +208,7 @@ __all__ = [
     "BarrierInSituWarning",
     "CLOSE_SOURCE_DISTANCE_M",
     "CLOUD_COVER_CLASSES",
-    "DEFAULT_FREQUENCIES",
+    "DEFAULT_FREQUENCIES_HZ",
     "directivity_omega",
     "DirectivityCorrection",
     "EffectiveSoundSpeedProfile",

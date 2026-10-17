@@ -320,7 +320,7 @@ for speed in (60.0, 160.0, 300.0):
         environment.roughness_to_frequency(wheel[1], wheel[0], speed),
         environment.roughness_to_frequency(filt[1], filt[0], speed),
     )
-    ax.semilogx(environment.RAILWAY_THIRD_OCTAVE_BANDS, total, label=f"v = {speed:g} km/h")
+    ax.semilogx(environment.RAILWAY_THIRD_OCTAVE_BANDS_HZ, total, label=f"v = {speed:g} km/h")
 ax.legend()
 plt.show()
 ```

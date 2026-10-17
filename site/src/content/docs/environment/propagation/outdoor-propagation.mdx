@@ -658,7 +658,7 @@ works when the wavelength is short next to the path difference.
 | :--- | :--- | :--- | :--- | :--- |
 | `distance` | float | m | > 0 | Straight-line source–receiver distance $d$ |
 | `source_height` / `receiver_height` | float | m | ≥ 0 | $h_\mathrm{s}$, $h_\mathrm{r}$ above ground |
-| `frequencies` | 1D array | Hz | default 8 octaves 63–8000 | `DEFAULT_FREQUENCIES` |
+| `frequencies` | 1D array | Hz | default 8 octaves 63–8000 | `DEFAULT_FREQUENCIES_HZ` |
 | `ground_source` / `ground_middle` / `ground_receiver` | float | — | `[0, 1]`, default `0.0` | Ground factor $G$ (0 hard, 1 porous) |
 | `barrier` | `Barrier` or None | — | default `None` | Screening obstacle |
 | `temperature_c` / `relative_humidity_percent` / `atmospheric_pressure_kpa` | float | °C / % / kPa | 20 / 70 / 101.325 | Passed to $A_\mathrm{atm}$ |

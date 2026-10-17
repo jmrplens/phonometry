@@ -3,13 +3,13 @@
 # Upgrading from 3.3 to 4.0
 
 4.0 is a hard break with no compatibility layer. Almost nothing was deleted:
-of the 885 names the root exported in 3.3.0, eleven exist nowhere any more and
-the rest simply live at a named address instead of a flat one. So most of the
+of the 885 names the root exported in 3.3.0, thirty-five exist nowhere any more
+and the rest simply live at a named address instead of a flat one. So most of the
 work is an import sweep, and this page is mostly a map.
 
 Read the first two sections and you can fix the imports. Read the third even
-if you are in a hurry, because in three places the obvious fix is the wrong
-one, and one of those three changes a number without raising anything.
+if you are in a hurry, because in four places the obvious fix is the wrong
+one, and two of those four change a number without raising anything.
 
 ## The one rule: imports move down one level
 
@@ -27,7 +27,7 @@ print("laeq" in phonometry.__all__)     # False
 from phonometry.signals import laeq     # this is the new spelling
 ```
 
-Measured across the whole surface, 871 of those 885 root names are published
+Measured across the whole surface, 847 of those 885 root names are published
 today by exactly one subpackage, none by two, and none needs a path deeper
 than `phonometry.<subpackage>`. Three more are still at the root, where they
 always were. So the swap is unambiguous: find the subpackage, import from it.
@@ -99,7 +99,7 @@ happened to it:
 | 3.3.0 module | Where its contents are now |
 | --- | --- |
 | `phonometry.impedance_tube` | `materials.absorbers.impedance_tube` (two-microphone transfer function), `materials.absorbers.four_microphone` (`TransferMatrix`, `transfer_matrix_one_load`, `wave_decomposition`, `face_quantities`, `air_layer_transfer_matrix`), `materials.absorbers.standing_wave`, and `fluids` |
-| `phonometry.scattering_diffusion` | `materials.diffusers.reverberation_room_scattering` for the reverberation-room part (`ScatteringResult`, `ScatteringUncertainty`, `BASE_PLATE_BANDS` and the rest), `materials.diffusers.scattering_diffusion` for the nine free-field names |
+| `phonometry.scattering_diffusion` | `materials.diffusers.reverberation_room_scattering` for the reverberation-room part (`ScatteringResult`, `ScatteringUncertainty`, `BASE_PLATE_BANDS_HZ` and the rest), `materials.diffusers.scattering_diffusion` for the nine free-field names |
 | `phonometry.materials.porous_absorber` | `materials.absorbers.porous` for the bulk-material models, `materials.absorbers.layered` for the whole multilayer API (`layered_absorber`, `AirLayer`, `MembraneLayer`, `PerforatedPlateLayer`, `MicroperforatedPlateLayer`, `LayeredAbsorberResult`) |
 | `phonometry.metrology.spectra` | `signals.spectra`, plus `signals.multitaper` (`multitaper_psd`) and `signals.windows` (`window_metrics`) |
 | `phonometry.compliance` | `filters.compliance` (`FilterComplianceResult`, `class_limits`, `verify_filter_class`), `filters.weighting_compliance` (`verify_weighting_class`, `weighting_class_limits`), `aircraft.measurement_system` (`verify_aircraft_noise_system`) |
@@ -109,10 +109,10 @@ The other twenty-five moved whole, and the resolver above finds them without
 reading this table. Each of the first three was reachable by two paths in
 3.3.0, the flat one and the one under its package, and both are gone.
 
-## Three where the obvious fix is the wrong one
+## Four where the obvious fix is the wrong one
 
 Everything else on this page announces itself the moment you run it, and the
-fix is the one it looks like. These three are not that.
+fix is the one it looks like. These four are not that.
 
 ### The impedance-tube helpers took kelvin
 
@@ -140,6 +140,22 @@ amount. Convert the value, do not just rename the keyword.
 
 With the conversion applied both return exactly what they returned in 3.3.0,
 bit for bit.
+
+### `GasStream` took kelvin
+
+`noise_control.GasStream` held the inlet temperature of IEC 60534-8-3 as
+`inlet_temperature_k` in 4.0.0rc1, in **kelvin**, the way Clause 5 reads it.
+In 4.0 the field is `inlet_temperature_c`, in degrees Celsius like every other
+temperature the library takes, and the conversion to the absolute temperature
+Clause 5 needs happens inside. The keyword fails, so you will notice, but
+450.0 is as legitimate a number in one unit as in the other: rename the
+keyword and keep the number, and the gas is 273.15 K hotter. Annex A's
+example 1 at 450 K puts 91.7 dB(A) at 1 m from the pipe; the same 450 read as
+degrees Celsius puts 93.0 dB(A) there, and nothing raises.
+
+| 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `GasStream(inlet_temperature_k=T_kelvin, ...)` | `GasStream(inlet_temperature_c=T_kelvin - 273.15, ...)` |
 
 ### `scattering_diffusion.speed_of_sound` took Celsius, and its replacement answers differently
 
@@ -240,6 +256,53 @@ longer reads a missing gas term as zero: 3.3.0 returned $s'_\mathrm{t}$ from
 `installed_dynamic_stiffness(20e6, 50.0)`, Formula 6 with its second term
 dropped, and 4.0 raises and asks for $s'_\mathrm{a}$.
 
+The ISO 13472-1 functions of `materials` spell the microphone out and give
+both heights in metres, and two temperatures say which scale they are on:
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `mic_height=` and `source_height=` on every ISO 13472-1 function of `materials` that takes them, and on `plot_insitu_geometry` | `microphone_height_m=`, `source_height_m=` |
+| `InsituAbsorptionResult.mic_height` and `.source_height` | `.microphone_height_m` and `.source_height_m` |
+| `GasStream.inlet_temperature_k`, in kelvin | `inlet_temperature_c`, in degrees Celsius: convert the number, as the section above shows |
+| `RoadEmissionCoefficients.temperature_k`, the CNOSSOS-EU $K_m$ in dB per degree Celsius, whose `_k` read as kelvin | `temperature_coefficient_db_per_c` |
+
+A published constant follows the same rule, and it needs it more, because a
+number on its own has nothing but its name to say what it is in: `10.0` is
+hertz, decibels or a count. A constant that holds one number ends in its unit,
+or in `_DB` when it is in decibels, unless it is a count, a factor or a ratio;
+a table whose name says what it holds (bands, speeds, heights) ends in the
+unit of that. The constants that the 3.3.0 root exported are in the table of
+gone names at the end of this page; these are the rest.
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `noise_control.ISO7235_GAS_CONSTANT`, 287 J/(kg K) | `ISO7235_AIR_GAS_CONSTANT_J_KG_K` |
+| `noise_control.UNIVERSAL_GAS_CONSTANT`, 8314 J/(kmol K) | `IEC60534_MOLAR_GAS_CONSTANT_J_KMOL_K` |
+| `noise_control.AIR_SOUND_SPEED_M_S`, `PIPE_SOUND_SPEED_M_S` | `AIR_SPEED_OF_SOUND_M_S`, `PIPE_SPEED_OF_SOUND_M_S` |
+| `environment.ROAD_REFERENCE_SPEED`, `RAILWAY_MINIMUM_SPEED`, `TRAM_MINIMUM_SPEED`, `AERODYNAMIC_THRESHOLD_SPEED`, `AERODYNAMIC_REFERENCE_SPEED`, all in km/h | the same names ending in `_KMH` |
+| `environment.ROAD_REFERENCE_TEMPERATURE` | `ROAD_REFERENCE_TEMPERATURE_C` |
+| `environment.ROAD_SOURCE_HEIGHT`, `RAILWAY_SOURCE_HEIGHTS` | `ROAD_SOURCE_HEIGHT_M`, `RAILWAY_SOURCE_HEIGHTS_M` |
+| `environment.ROAD_OCTAVE_BANDS`, `RAILWAY_OCTAVE_BANDS`, `RAILWAY_THIRD_OCTAVE_BANDS` | the same names ending in `_HZ` |
+| `building.LOW_FREQUENCY_BANDS` | `LOW_FREQUENCY_PROCEDURE_BANDS_HZ`, beside the `environment.LOW_FREQUENCY_BANDS_HZ` of another standard |
+| `building.HEAVY_IMPACT_OCTAVE_BANDS`, `TABLE_F1_OCTAVE_BANDS`, `DB_HR_FREQUENCIES` | the same names ending in `_HZ` |
+| `building.TAPPING_DROP_HEIGHT`, `TAPPING_HAMMER_RADIUS`, `TAPPING_HAMMER_MASS`, `TAPPING_IMPACT_RATE` | `TAPPING_DROP_HEIGHT_M`, `TAPPING_HAMMER_RADIUS_M`, `TAPPING_HAMMER_MASS_KG`, `TAPPING_IMPACT_RATE_HZ` |
+| `building.LOW_FREQUENCY_VOLUME_LIMIT` | `LOW_FREQUENCY_VOLUME_LIMIT_M3` |
+| `hearing.AUDIOMETRIC_FREQUENCIES`, `PROTECTOR_OCTAVE_BANDS` | `AUDIOMETRIC_FREQUENCIES_HZ`, `PROTECTOR_OCTAVE_BANDS_HZ` |
+| `building.MINIMUM_MULTI_JUNCTION_KIJ`, −5 dB | `MINIMUM_MULTI_JUNCTION_KIJ_DB` |
+| `broadcast.DBQPS_REFERENCE`, 0.775 V | `DBQPS_REFERENCE_V` |
+| `electroacoustics.CARDIOID_RELATIVE_DIRECTIVITY`, `DEFAULT_STABILITY_MARGIN`, both in dB | the same names ending in `_DB` |
+| `environment.REFERENCE_JOINT_DENSITY`, joints per metre | `REFERENCE_JOINT_DENSITY_PER_M` |
+| `noise_control.ISO7235_ABSOLUTE_ZERO_OFFSET`, 273 K | `ISO7235_ABSOLUTE_ZERO_OFFSET_K` |
+| `psychoacoustics.ERB_C1`, in Hz, and `ERB_C2`, per Hz | `ERB_C1_HZ`, `ERB_C2_PER_HZ` |
+| `room.COMMUNICATION_SNR`, `PRIVACY_SNR`, both in dB | the same names ending in `_DB` |
+| `vibration.UNCONSTRAINED_BELOW`, the −100 % of ISO 8041-1 | `UNCONSTRAINED_BELOW_PERCENT`, beside `CENTRAL_TOLERANCE_PERCENT` and the rest |
+
+The gas constants show why a constant needs its unit as much as a parameter
+does. Two constants of one package shared the words "gas constant" for
+287 J/(kg K) and 8314 J/(kmol K), and `fluids` publishes 8.314 J/(mol K) as a
+third: three figures 29 and 1000 apart under one name. Each now carries its
+whole unit.
+
 ## Conditions and flags are written by name
 
 Two rules made 37 signatures keyword-only. A condition or an option that
@@ -310,6 +373,19 @@ hertz, `levels` in decibels and the sample rate is `fs` on every function.
 `times, levels = decay_curve(ir, fs)` still unpacks the decay curve, in the
 same order. The FDTD solvers keep `c` and `rho`, which name the maps their
 equations are written in.
+
+A unit has one spelling too. A duration ends in `_s` or `_hours`, an angle in
+`_deg`, a speed in kilometres per hour in `_kmh` and one in knots in `_kt`, a
+decay rate in `_db_per_s`; `_seconds`, `_degrees`, `_km_h`, `_knots`, `_db_s`
+and an `_h` that means hours appear nowhere in the public API any more.
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `vibration.phase_tolerance_degrees` | `vibration.phase_tolerance_deg` |
+| `ToneBurstResult.burst_seconds` | `.burst_s` |
+| `wind_speed_knots=` on `ocean_ambient_noise` and `wind_noise_spectrum`, and `AmbientNoiseResult.wind_speed_knots` | `wind_speed_kt`, the spelling the aircraft speeds use |
+| `speed_knots=` on `ship_source_spectrum`, and `ShipTrafficSpectrum.speed_knots` | `speed_kt` |
+| `GasStream.molecular_mass`, in kg/kmol | `GasStream.molar_mass_kg_kmol`, the name the fluids catalogue gives its `molar_mass_kg_mol` per mole |
 
 ## Every public name has one address
 
@@ -1028,9 +1104,9 @@ except ValueError as error:
 # True
 ```
 
-## The eleven names that are gone
+## The thirty-five names that are gone
 
-Everything else moved. These eleven exist in no public module:
+Everything else moved. These thirty-five exist in no public module:
 
 | Gone | What to write instead |
 | --- | --- |
@@ -1042,6 +1118,23 @@ Everything else moved. These eleven exist in no public module:
 | `depth_to_pressure` | `fluids.depth_to_gauge_pressure_mpa(depth_m=...)`, which returns the same number, or `fluids.depth_to_absolute_pressure_pa` for the absolute one. Both are keyword-only and both take an optional `latitude_deg` |
 | `TransmissionLossResult` | `PropagationLossResult`, with `.tl` renamed to `.pl` |
 | `partial_exposure` | `vibration.daily_exposure`, called with one operation's value and duration. `partial_exposure` was a second name for the same function, and the number does not move |
+| `DEFAULT_SPEED_OF_SOUND` | `materials.ISO13472_SPEED_OF_SOUND_M_S`, the 340 m/s of ISO 13472-1 Annex A. The 343 m/s the room modules default to is private now; pass `speed_of_sound=` to say which you mean |
+| `OCTAVE_BANDS`, `THIRD_OCTAVE_BANDS` | `materials.RATING_OCTAVE_BANDS_HZ`, `materials.RATING_THIRD_OCTAVE_BANDS_HZ`, the bands of the ISO 11654 rating |
+| `BASE_PLATE_BANDS` | `materials.BASE_PLATE_BANDS_HZ` |
+| `DEFAULT_POLAR_ANGLES` | `materials.DEFAULT_POLAR_ANGLES_DEG` |
+| `DEFAULT_MIC_HEIGHT`, `DEFAULT_SOURCE_HEIGHT` | `materials.DEFAULT_MICROPHONE_HEIGHT_M`, `materials.DEFAULT_SOURCE_HEIGHT_M` |
+| `PART1_FREQUENCY_RANGE`, `SPOT_FREQUENCY_RANGE`, `SPOT_NARROW_BAND_RANGE` | `materials.PART1_FREQUENCY_RANGE_HZ`, `materials.SPOT_FREQUENCY_RANGE_HZ`, `materials.SPOT_NARROW_BAND_RANGE_HZ` |
+| `REFERENCE_ACCELERATION` | `vibration.ACCELERATION_LEVEL_REFERENCE_M_S2`, the 1 µm/s² of ISO 1683. `vibration.REFERENCE_ACCELERATION_M_S2` is another thing, the Table 1 reference conditions of ISO 8041-1 |
+| `REFERENCE_AREA` | `building.REFERENCE_AREA_M2` |
+| `REFERENCE_VELOCITY` | `emission.REFERENCE_VELOCITY_M_S` |
+| `DEFAULT_FREQUENCIES` | `environment.DEFAULT_FREQUENCIES_HZ` |
+| `NOY_BANDS` | `aircraft.NOY_BANDS_HZ` |
+| `UNDERWATER_REFERENCE_PRESSURE` | `underwater.UNDERWATER_REFERENCE_PRESSURE_PA` |
+| `UNDERWATER_REFERENCE_EXPOSURE` | `underwater.UNDERWATER_REFERENCE_EXPOSURE_PA2_S`, the 1 µPa² s of ISO 1683 in Pa² s |
+| `NORMALIZED_IMPEDANCE` | `emission.NORMALIZED_IMPEDANCE_PA_S_M`, the 411 Pa s/m of ISO/TS 7849 |
+| `NO_TONE_AUDIBILITY` | `psychoacoustics.NO_TONE_AUDIBILITY_DB` |
+| `REFERENCE_STIFFNESS` | `vibration.REFERENCE_STIFFNESS_N_M` |
+| `HAV_EAV_A8`, `HAV_ELV_A8`, `WBV_EAV_A8`, `WBV_ELV_A8` | `vibration.HAV_EAV_A8_M_S2`, `vibration.HAV_ELV_A8_M_S2`, `vibration.WBV_EAV_A8_M_S2`, `vibration.WBV_ELV_A8_M_S2`, the A(8) values of Directive 2002/44/EC. `WBV_EAV_VDV` and `WBV_ELV_VDV` keep their names, because a vibration dose value has the one unit, m/s^1.75 |
 
 ## What did not change
 

@@ -553,7 +553,7 @@ def _floor_covering_form_example() -> tuple[object, ReportMetadata, str]:
         specimen="Category I covering, three specimens of 650 mm x 350 mm laid "
         "loose on the 140 mm concrete reference floor",
         mass_per_area=2.6,
-        curing_time_h=0.0,
+        curing_time_hours=0.0,
         source_temperature_c=21.2,
         source_relative_humidity_percent=48.0,
         receiving_volume=58.0,

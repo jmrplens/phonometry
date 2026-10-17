@@ -73,7 +73,7 @@ _RANDI_DF_PLATEAU_MAX_HZ = 28.4
 #: the factor again stays continuous.
 _RANDI_DF_CUTOFF_HZ = 191.6
 
-#: JOMOPANS-ECHO per-class parameters: ``class -> (V_C [kn], cargo, D_lo, D_hi)``
+#: JOMOPANS-ECHO per-class parameters: ``class -> (V_C [kt], cargo, D_lo, D_hi)``
 #: (Table 1 and sheet *Parameters* of File S1). ``D_lo`` is the damping of the
 #: cargo low-frequency hump; ``D_hi`` the damping of the main spectrum.
 _VESSEL_CLASSES: dict[str, tuple[float, bool, float, float]] = {
@@ -111,14 +111,14 @@ def _clean_frequencies(
 
 
 def _jomopans_echo(
-    f: NDArray[np.float64], vessel_class: str, speed_knots: float, length_m: float
+    f: NDArray[np.float64], vessel_class: str, speed_kt: float, length_m: float
 ) -> NDArray[np.float64]:
     key = vessel_class.strip().lower()
     if key not in _VESSEL_CLASSES:
         msg = f"'vessel_class' must be one of {VESSEL_CLASSES}, got {vessel_class!r}."
         raise ValueError(msg)
     v_c, cargo, d_lo, d_hi = _VESSEL_CLASSES[key]
-    v = require_positive(speed_knots, "speed_knots")
+    v = require_positive(speed_kt, "speed_kt")
     length = require_positive(length_m, "length_m")
     hump = cargo & (f < _CARGO_HUMP_MAX_HZ)
     k = np.where(hump, 208.0, 191.0)
@@ -137,9 +137,9 @@ def _jomopans_echo(
 
 
 def _randi(
-    f: NDArray[np.float64], speed_knots: float, length_m: float
+    f: NDArray[np.float64], speed_kt: float, length_m: float
 ) -> NDArray[np.float64]:
-    v = require_positive(speed_knots, "speed_knots")
+    v = require_positive(speed_kt, "speed_kt")
     length_ft = require_positive(length_m, "length_m") * 3.28084
     lf = -10.0 * np.log10(
         10.0 ** (-1.06 * np.log10(f) - 14.34) + 10.0 ** (3.32 * np.log10(f) - 21.425)
@@ -181,7 +181,7 @@ class ShipTrafficSpectrum(OwnsArrays):
         (``source_psd`` plus :math:`10 \log_{10}(0.231 f)`).
     :ivar model: The model used.
     :ivar vessel_class: The vessel class (JOMOPANS-ECHO only; else ``None``).
-    :ivar speed_knots: Speed used, in knots (``None`` if the model ignores it).
+    :ivar speed_kt: Speed used, in knots (``None`` if the model ignores it).
     :ivar length_m: Length used, in metres (``None`` if the model ignores it).
     """
 
@@ -190,7 +190,7 @@ class ShipTrafficSpectrum(OwnsArrays):
     band_level: NDArray[np.float64]
     model: str
     vessel_class: str | None
-    speed_knots: float | None
+    speed_kt: float | None
     length_m: float | None
 
     def __post_init__(self) -> None:
@@ -232,7 +232,7 @@ class ShipTrafficSpectrum(OwnsArrays):
 
 
 def ship_source_spectrum(
-    speed_knots: float = 12.0,
+    speed_kt: float = 12.0,
     length_m: float = 100.0,
     *,
     vessel_class: str = "containership",
@@ -241,7 +241,7 @@ def ship_source_spectrum(
 ) -> ShipTrafficSpectrum:
     """Predicted underwater source-level spectrum of a ship.
 
-    :param speed_knots: Vessel speed, in knots (used by ``"jomopans-echo"`` and
+    :param speed_kt: Vessel speed, in knots (used by ``"jomopans-echo"`` and
         ``"randi"``; ignored by ``"wales-heitmeyer"``).
     :param length_m: Vessel length, in metres (used by ``"jomopans-echo"`` and
         ``"randi"``; ignored by ``"wales-heitmeyer"``).
@@ -261,13 +261,13 @@ def ship_source_spectrum(
     used_speed: float | None = None
     used_length: float | None = None
     if key == "jomopans-echo":
-        psd = _jomopans_echo(f, vessel_class, speed_knots, length_m)
+        psd = _jomopans_echo(f, vessel_class, speed_kt, length_m)
         used_class = vessel_class.strip().lower()
-        used_speed = float(speed_knots)
+        used_speed = float(speed_kt)
         used_length = float(length_m)
     elif key == "randi":
-        psd = _randi(f, speed_knots, length_m)
-        used_speed = float(speed_knots)
+        psd = _randi(f, speed_kt, length_m)
+        used_speed = float(speed_kt)
         used_length = float(length_m)
     elif key == "wales-heitmeyer":
         psd = _wales_heitmeyer(f)
@@ -281,6 +281,6 @@ def ship_source_spectrum(
         band_level=np.asarray(band, dtype=np.float64),
         model=key,
         vessel_class=used_class,
-        speed_knots=used_speed,
+        speed_kt=used_speed,
         length_m=used_length,
     )

@@ -102,7 +102,7 @@ PROTECTION_PERFORMANCES: Mapping[int, float] = MappingProxyType(
 #: The eight octave bands of Formula (2), in hertz. ``f(1) = 63`` Hz through
 #: ``f(8) = 8000`` Hz; the reference spectra of Tables 2 and 3 start at
 #: ``k = 2``.
-PROTECTOR_OCTAVE_BANDS: tuple[float, ...] = (
+PROTECTOR_OCTAVE_BANDS_HZ: tuple[float, ...] = (
     63.0,
     125.0,
     250.0,
@@ -377,10 +377,10 @@ def _octave_axis(
     :raises ValueError: if the count does not match, or if no default fits.
     """
     if frequencies is None:
-        if count == len(PROTECTOR_OCTAVE_BANDS):
-            return np.asarray(PROTECTOR_OCTAVE_BANDS, dtype=np.float64)
-        if count == len(PROTECTOR_OCTAVE_BANDS) - 1:
-            return np.asarray(PROTECTOR_OCTAVE_BANDS[1:], dtype=np.float64)
+        if count == len(PROTECTOR_OCTAVE_BANDS_HZ):
+            return np.asarray(PROTECTOR_OCTAVE_BANDS_HZ, dtype=np.float64)
+        if count == len(PROTECTOR_OCTAVE_BANDS_HZ) - 1:
+            return np.asarray(PROTECTOR_OCTAVE_BANDS_HZ[1:], dtype=np.float64)
         msg = (
             f"{owner}: pass 'frequencies' explicitly for {count} bands; only "
             "the eight octaves of Formula (2), or those seven without 63 Hz, "
@@ -544,7 +544,7 @@ def _a_weighting_axis(
     :raises ValueError: if the count does not match, if any value is not
         finite, or if no tabulated default covers the given bands.
     """
-    standard = np.asarray(PROTECTOR_OCTAVE_BANDS, dtype=np.float64)
+    standard = np.asarray(PROTECTOR_OCTAVE_BANDS_HZ, dtype=np.float64)
     if a_weighting is None:
         for offset in (0, 1):
             bands = standard[offset:]
@@ -697,9 +697,9 @@ def _from_125_hz(grid: np.ndarray, owner: str) -> np.ndarray:
     :return: The seven columns from 125 Hz to 8000 Hz.
     :raises ValueError: for any band count but seven or eight.
     """
-    if grid.shape[1] == len(PROTECTOR_OCTAVE_BANDS):
+    if grid.shape[1] == len(PROTECTOR_OCTAVE_BANDS_HZ):
         return grid[:, 1:]
-    if grid.shape[1] == len(PROTECTOR_OCTAVE_BANDS) - 1:
+    if grid.shape[1] == len(PROTECTOR_OCTAVE_BANDS_HZ) - 1:
         return grid
     msg = (
         f"{owner}: 'attenuation' must carry the eight octave bands from 63 Hz "

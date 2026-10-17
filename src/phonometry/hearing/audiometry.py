@@ -103,7 +103,7 @@ from .sound_field_audiometry import (
 from .sound_field_audiometry import (
     SOUND_FIELD_AMBIENT_LIMITS_DB as _SOUND_FIELD_LIMITS_DB,
 )
-from .threshold import AUDIOMETRIC_FREQUENCIES as _AUDIOMETRIC_FREQUENCIES
+from .threshold import AUDIOMETRIC_FREQUENCIES_HZ as _AUDIOMETRIC_FREQUENCIES
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

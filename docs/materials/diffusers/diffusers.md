@@ -144,12 +144,12 @@ those limits and a checker.
 from phonometry import materials
 
 # The normative per-band ceilings (Table 1): 0.05 up to 500 Hz, rising to 0.25.
-# materials.BASE_PLATE_BANDS is the band tuple; materials.BASE_PLATE_MAX_SCATTERING maps band -> ceiling.
-print(materials.BASE_PLATE_BANDS[0], materials.BASE_PLATE_MAX_SCATTERING[100])   # 100 0.05
+# materials.BASE_PLATE_BANDS_HZ is the band tuple; materials.BASE_PLATE_MAX_SCATTERING maps band -> ceiling.
+print(materials.BASE_PLATE_BANDS_HZ[0], materials.BASE_PLATE_MAX_SCATTERING[100])   # 100 0.05
 
 # A base plate whose measured scattering stays under the ceiling passes silently;
 # an over-limit band raises a ScatteringDiffusionWarning listing the offenders.
-materials.check_base_plate_scattering([0.02] * len(materials.BASE_PLATE_BANDS))
+materials.check_base_plate_scattering([0.02] * len(materials.BASE_PLATE_BANDS_HZ))
 ```
 
 **Test-report fiche.** `ScatteringResult.report(path)` renders a one-page

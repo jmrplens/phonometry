@@ -844,7 +844,7 @@ def _chk_iso16283_low_frequency_trigger() -> Outcome:
 )
 def _chk_iso16283_low_frequency_bands() -> Outcome:
     printed = ref.ISO16283_LF_BANDS_HZ
-    computed = list(ph.building.LOW_FREQUENCY_BANDS)
+    computed = list(ph.building.LOW_FREQUENCY_PROCEDURE_BANDS_HZ)
     return record(
         {f"band {i + 1}": v for i, v in enumerate(printed)},
         {f"band {i + 1}": v for i, v in enumerate(computed)},
@@ -2184,7 +2184,7 @@ def _chk_iso16283_2_rubber_ball_spectrum() -> Outcome:
         delta=f"max |dev| {float(np.max(np.abs(check.deviation))):.3f} dB",
         passed=bool(
             check.passes
-            and np.allclose(freqs, ph.building.HEAVY_IMPACT_OCTAVE_BANDS)
+            and np.allclose(freqs, ph.building.HEAVY_IMPACT_OCTAVE_BANDS_HZ)
             and np.allclose(upper - lower, [2.0, 3.0, 3.0, 4.0, 4.0])
         ),
     )

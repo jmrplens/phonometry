@@ -36,7 +36,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ..acoustics import UNDERWATER_REFERENCE_PRESSURE, _positive
+from ..acoustics import UNDERWATER_REFERENCE_PRESSURE_PA, _positive
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -74,7 +74,7 @@ def radiated_noise_level(rms_pressure_pa: float, distance: float) -> float:
     p = _positive(rms_pressure_pa, "rms_pressure_pa")
     r = _positive(distance, "distance")
     return float(
-        20.0 * np.log10(p / UNDERWATER_REFERENCE_PRESSURE)
+        20.0 * np.log10(p / UNDERWATER_REFERENCE_PRESSURE_PA)
         + 20.0 * np.log10(r / _REFERENCE_DISTANCE)
     )
 

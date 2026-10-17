@@ -198,12 +198,12 @@ line never amplifies).
 | :--- | :--- |
 | ValueError | If `distance` or any frequency is not positive. |
 
-## DEFAULT_FREQUENCIES
+## DEFAULT_FREQUENCIES_HZ
 
 *Constant* (`tuple`).
 
 ```python
-DEFAULT_FREQUENCIES = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0)
+DEFAULT_FREQUENCIES_HZ = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0)
 ```
 
 ## directivity_omega

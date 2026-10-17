@@ -783,6 +783,66 @@ def wet_sands_fit_in_words(
     return out
 
 
+#: The decay rate of a damping treatment, before and after it spelled its unit
+#: the way every other rate in the library does.
+DECAY_RATE_FIELD = ("decay_rate_db_s", "decay_rate_db_per_s")
+
+
+def _field_renamed(row: Row, old: str, new: str) -> tuple[Row, bool]:
+    """*row* with the field *old* called *new*, at its top and one level down.
+
+    A cell is keyed by its field at the top of a row and again inside the
+    records that hold something per field (the printed ranges, the hedges,
+    the conversions), so both levels move together.
+    """
+    moved = False
+
+    def renamed(record: Row) -> Row:
+        nonlocal moved
+        if old not in record:
+            return record
+        moved = True
+        return {new if key == old else key: value for key, value in record.items()}
+
+    out = renamed(dict(row))
+    out = {
+        key: renamed(value) if isinstance(value, dict) else value
+        for key, value in out.items()
+    }
+    return out, moved
+
+
+def decay_rate_spelled_once(
+    catalogues: Mapping[str, Mapping[str, Row]],
+) -> dict[str, dict[str, Row]]:
+    """The dump taken through the rename of the damping treatments' decay rate.
+
+    ``DampingTreatment`` called its decay rate ``decay_rate_db_s``, the one
+    name in the library that spelled decibels per second without the
+    ``_per_``. One thing moved, and nothing else may:
+
+    * the field named by the first of :data:`DECAY_RATE_FIELD` is named by
+      the second in every row of ``PUBLISHED_DAMPING_TREATMENTS`` that holds
+      it, wherever the row keys a cell by its field. No value moved.
+
+    :raises ValueError: when no row holds the old field, so that the step can
+        never claim a rename it did not make.
+    """
+    out = {name: dict(rows) for name, rows in catalogues.items()}
+    name = "PUBLISHED_DAMPING_TREATMENTS"
+    old, new = DECAY_RATE_FIELD
+    rows = dict(out[name])
+    moved_any = False
+    for key, row in rows.items():
+        rows[key], moved = _field_renamed(row, old, new)
+        moved_any = moved_any or moved
+    if not moved_any:
+        msg = f"{name}: no row holds {old!r}"
+        raise ValueError(msg)
+    out[name] = rows
+    return out
+
+
 #: Every change since the baseline, oldest first.
 CHANGES: tuple[Change, ...] = (
     one_row_shape,
@@ -794,6 +854,7 @@ CHANGES: tuple[Change, ...] = (
     aerogel_note_in_words,
     nonlinearity_credits_by_scope,
     wet_sands_fit_in_words,
+    decay_rate_spelled_once,
 )
 
 

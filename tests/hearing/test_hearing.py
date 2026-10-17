@@ -20,9 +20,9 @@ from phonometry.hearing import threshold as h
 
 
 def test_frequency_and_table_shapes() -> None:
-    assert h.AUDIOMETRIC_FREQUENCIES.size == 11
-    assert h.AUDIOMETRIC_FREQUENCIES[0] == 125.0
-    assert h.AUDIOMETRIC_FREQUENCIES[-1] == 8000.0
+    assert h.AUDIOMETRIC_FREQUENCIES_HZ.size == 11
+    assert h.AUDIOMETRIC_FREQUENCIES_HZ[0] == 125.0
+    assert h.AUDIOMETRIC_FREQUENCIES_HZ[-1] == 8000.0
     for table in (h._SU_MALE, h._SL_MALE, h._SU_FEMALE, h._SL_FEMALE):
         assert table.shape == (11, 6)
     for table in (h._MEDIAN_MALE, h._MEDIAN_FEMALE):

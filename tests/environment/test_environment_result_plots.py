@@ -164,6 +164,46 @@ def test_reflection_index_plot_speaks_spanish() -> None:
         plt.close(fig)
 
 
+def test_reflection_uncertainty_plot_draws_each_band_and_states_the_rating() -> None:
+    """Table B.2 as a figure: eighteen U_j as bars, U of DL_RI in the legend.
+
+    The per-band values are in units of the index, a ratio, and the rating's
+    is a level in decibels, so the rating is stated rather than drawn on an
+    axis it does not share; the axis label carries no decibel.
+    """
+    from result_factories import _reflection_index_uncertainty
+
+    result = _reflection_index_uncertainty()
+    fig, ax = plt.subplots()
+    try:
+        result.plot(ax=ax)
+        heights = [patch.get_height() for patch in ax.patches]
+        np.testing.assert_allclose(heights, result.expanded_uncertainty)
+        assert "[dB]" not in ax.get_ylabel()
+        assert not ax.lines
+        labels = [text.get_text() for text in ax.get_legend().get_texts()]
+        assert labels[1] == "$U$ of $DL_{RI}$ = 1.59 dB"
+        assert "high column of Table A.1" in ax.get_title()
+        assert "$k_p$ = 1.96" in ax.get_title()
+    finally:
+        plt.close(fig)
+
+
+def test_reflection_uncertainty_plot_speaks_spanish() -> None:
+    from result_factories import _reflection_index_uncertainty
+
+    result = _reflection_index_uncertainty()
+    fig, ax = plt.subplots()
+    try:
+        result.plot(ax=ax, language="es")
+        assert ax.get_ylabel() == "Incertidumbre expandida $U_j$ de $RI$"
+        assert "columna alta de la tabla A.1" in ax.get_title()
+        labels = [text.get_text() for text in ax.get_legend().get_texts()]
+        assert labels == ["$U_j$ de cada banda", "$U$ de $DL_{RI}$ = 1,59 dB"]
+    finally:
+        plt.close(fig)
+
+
 def test_reflection_rating_plot_hatches_the_bands_it_leaves_out() -> None:
     from result_factories import _reflection_index
 

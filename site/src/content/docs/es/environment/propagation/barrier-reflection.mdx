@@ -188,7 +188,7 @@ dispositivo que no es plano.
 ```python
 window = environment.adrienne_reflection_window(fs, environment.ADRIENNE_SHORT_LENGTH_S)
 print(window.size)                                        # 288 muestras a 48 kHz
-print(round(environment.adrienne_low_frequency_limit_hz(7.9e-3), 1))   # 162.5 Hz
+print(round(environment.adrienne_low_frequency_limit(7.9e-3), 1))   # 162.5 Hz
 ```
 
 Los flancos son la fórmula (7) muestreada tal como está impresa, cada uno la
@@ -385,8 +385,8 @@ print(annex_b.reflection_index.round(2)[4:10])  # [0.39 0.36 0.26 0.12 0.05 0.09
 print(annex_b.rating.reported)                 # 8 dB, lo impreso bajo la tabla
 print(round(annex_b.rating.rating, 2))         # 7.65 dB antes de redondear, véase abajo
 
-u_bands, u_rating = annex_b.expanded_uncertainty()   # tabla A.1, columna alta, k = 1,96
-print(round(u_rating, 2))                            # 1.59 dB, tabla B.2
+u = environment.reflection_index_expanded_uncertainty()  # tabla A.1, columna alta, k = 1,96
+print(round(u.rating_db, 2))                             # 1.59 dB, tabla B.2
 ```
 
 <ThemeImage
@@ -423,6 +423,27 @@ cobertura, 1,59 dB para el índice global; en siete bandas la tabla B.2 imprime
 una centésima menos que 1,96 veces la $s_\mathrm{R}$ de la tabla A.1, como darían
 desviaciones típicas sin redondear. La impresión no dice qué valores multiplicó
 el ejemplo, y la biblioteca multiplica los impresos.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_uncertainty.svg"
+  alt="Barras de la incertidumbre expandida U j del índice de reflexión acústica en cada una de las dieciocho bandas de tercio de octava de 100 Hz a 5 kHz, de la columna alta de la tabla A.1 con un factor de cobertura de 1,96: 0,63 en 100 Hz, 0,35 en 125 Hz, entre 0,24 y 0,31 de 160 Hz a 2,5 kHz, y después 0,33, 0,39 y 0,45 en 3,15, 4 y 5 kHz. La leyenda da la incertidumbre expandida de DL RI, 1,59 dB."
+  width="92%"
+/>
+
+*La columna alta de la tabla A.1 por 1,96, banda a banda: el ensayo
+interlaboratorio coincidió menos en 100 Hz. Las $U_j$ van en unidades del
+índice, que es un cociente, y los 1,59 dB de $DL_{RI}$ son un nivel, así que los
+da la leyenda y no el eje.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+u.plot(language="es")
+plt.show()
+```
+
+</details>
 
 ## Relación con las otras partes de la EN 1793
 

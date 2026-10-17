@@ -734,7 +734,7 @@ def _render_iso16283_facade(
 
 
 def energy_average_level(
-    levels: Sequence[float] | np.ndarray, axis: int = -1
+    levels: Sequence[float] | np.ndarray, *, axis: int = -1
 ) -> np.ndarray | float:
     r"""Energy-average sound pressure level (ISO 16283-1:2014, Formula (9)).
 
@@ -744,7 +744,9 @@ def energy_average_level(
 
     :param levels: Sound pressure levels, in dB, at the ``n`` positions to
         be averaged along ``axis``.
-    :param axis: Axis over which to average (default the last axis).
+    :param axis: Axis over which to average (default the last axis), by
+        name, as every function of the library that reduces along an axis
+        takes it.
     :return: The energy-average level, in dB; a scalar ``float`` when the
         result is zero-dimensional, otherwise an array.
     :raises ValueError: If ``levels`` is empty or contains non-finite

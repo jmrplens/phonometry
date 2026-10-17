@@ -16,7 +16,7 @@ import reference_data as ref
 
 from phonometry.aircraft.rotorcraft_propagation import _FLOW_RESISTIVITY
 from phonometry.environment.propagation import (
-    PUBLISHED_GROUND,
+    PUBLISHED_GROUND_SURFACES,
     GroundSurface,
     ground_surfaces_named,
 )
@@ -35,7 +35,7 @@ _TABLES = {
 def test_every_table_holds_the_rows_its_page_prints() -> None:
     """Row counts per table, so a dropped row cannot pass unnoticed."""
     counted: dict[str, int] = {}
-    for row in PUBLISHED_GROUND.values():
+    for row in PUBLISHED_GROUND_SURFACES.values():
         counted[row.table] = counted.get(row.table, 0) + 1
 
     assert counted == _TABLES
@@ -43,14 +43,14 @@ def test_every_table_holds_the_rows_its_page_prints() -> None:
 
 def test_every_row_cites_a_document_a_page_and_a_folio() -> None:
     """Read the citations the way the provenance gate reads them."""
-    for key, row in PUBLISHED_GROUND.items():
+    for key, row in PUBLISHED_GROUND_SURFACES.items():
         assert row.source.startswith(("Bies 5e ", "Cox & D'Antonio 3e ")), key
         assert "PDF page" in row.source, key
         assert "printed p" in row.source, key
 
 
 def test_every_row_is_named_and_keyed_by_its_table() -> None:
-    for key, row in PUBLISHED_GROUND.items():
+    for key, row in PUBLISHED_GROUND_SURFACES.items():
         assert row.name, key
         assert key == f"{row.table}/{key.split('/', 1)[1]}"
 
@@ -68,8 +68,8 @@ def test_the_two_books_agree_where_they_share_a_source(
     matched through a conversion as well as through two readings of two
     different pages.
     """
-    from_bies = PUBLISHED_GROUND[f"bies-2017-table-5-1/{bies}"]
-    from_cox = PUBLISHED_GROUND[f"cox-2017-table-6-7/{cox}"]
+    from_bies = PUBLISHED_GROUND_SURFACES[f"bies-2017-table-5-1/{bies}"]
+    from_cox = PUBLISHED_GROUND_SURFACES[f"cox-2017-table-6-7/{cox}"]
 
     held = [
         row.ranges.get("flow_resistivity_pa_s_m2") or row.flow_resistivity_pa_s_m2
@@ -90,7 +90,7 @@ def test_each_ground_class_carries_its_letter_and_its_two_factors(
     key: str, letter: str, resistivity: float, iso_g: float, nmpb_g: float
 ) -> None:
     """The class table is not measured ground: it is what the models define."""
-    row = PUBLISHED_GROUND[f"bies-2017-table-5-2/{key}"]
+    row = PUBLISHED_GROUND_SURFACES[f"bies-2017-table-5-2/{key}"]
 
     assert row.harmonoise_class == letter
     assert row.flow_resistivity_pa_s_m2 == pytest.approx(resistivity, rel=1e-12)
@@ -106,7 +106,7 @@ def test_the_two_ground_factors_differ_for_two_of_the_eight_classes() -> None:
     """
     classes = {
         row.harmonoise_class: row
-        for row in PUBLISHED_GROUND.values()
+        for row in PUBLISHED_GROUND_SURFACES.values()
         if row.harmonoise_class
     }
 
@@ -129,7 +129,7 @@ def test_the_rotorcraft_model_and_the_book_print_the_same_eight_numbers() -> Non
     """
     from_book = {
         row.harmonoise_class: row.flow_resistivity_pa_s_m2
-        for row in PUBLISHED_GROUND.values()
+        for row in PUBLISHED_GROUND_SURFACES.values()
         if row.harmonoise_class
     }
 
@@ -145,7 +145,7 @@ def test_the_cell_printed_with_two_decimal_points_is_not_a_number() -> None:
     Guessing at 1,73 or 1,7 would be inventing a resistivity, so the cell
     keeps what the page printed and the row says the number is missing.
     """
-    row = PUBLISHED_GROUND["cox-2017-table-6-7/heath_line_1_marked_b"]
+    row = PUBLISHED_GROUND_SURFACES["cox-2017-table-6-7/heath_line_1_marked_b"]
 
     assert row.flow_resistivity_pa_s_m2 is None
     assert "1.7.3" in row.unquantified["flow_resistivity_pa_s_m2"]
@@ -154,7 +154,7 @@ def test_the_cell_printed_with_two_decimal_points_is_not_a_number() -> None:
 
 def test_an_uncertainty_the_page_prints_is_kept_beside_its_value() -> None:
     """Cox prints ``(540 +/- 92) x 10^3`` and two rows where it swamps the value."""
-    row = PUBLISHED_GROUND["cox-2017-table-6-7/humus_on_pine_forest_floor"]
+    row = PUBLISHED_GROUND_SURFACES["cox-2017-table-6-7/humus_on_pine_forest_floor"]
 
     assert row.flow_resistivity_pa_s_m2 == pytest.approx(230_000.0, rel=1e-12)
     assert row.uncertainty["flow_resistivity_pa_s_m2"] == pytest.approx(
@@ -171,7 +171,7 @@ def test_one_surface_fitted_three_ways_is_three_rows() -> None:
     """
     lawns = [
         row
-        for key, row in PUBLISHED_GROUND.items()
+        for key, row in PUBLISHED_GROUND_SURFACES.items()
         if key.startswith("cox-2017-table-6-7/lawn")
     ]
 
@@ -185,7 +185,7 @@ def test_a_negative_porosity_decay_is_kept_negative() -> None:
     """Nine of Cox's rows print one, and a sign is a reading like any other."""
     negatives = [
         row
-        for row in PUBLISHED_GROUND.values()
+        for row in PUBLISHED_GROUND_SURFACES.values()
         if (row.porosity_decay_rate_per_m or 0.0) < 0.0
     ]
 
@@ -194,7 +194,7 @@ def test_a_negative_porosity_decay_is_kept_negative() -> None:
 
 def test_a_row_answers_none_where_its_page_printed_nothing() -> None:
     """Bies prints no porosity at all, and a row of his says so."""
-    row = PUBLISHED_GROUND["bies-2017-table-5-1/sugar_snow"]
+    row = PUBLISHED_GROUND_SURFACES["bies-2017-table-5-1/sugar_snow"]
 
     assert row.porosity is None
     assert row.why_missing("porosity") == (
@@ -221,7 +221,7 @@ def test_a_name_no_page_prints_answers_with_nothing() -> None:
 
 def test_a_row_is_frozen_and_so_are_the_mappings_it_holds() -> None:
     """The catalogue is one object shared by every caller."""
-    row = PUBLISHED_GROUND["cox-2017-table-6-7/heath_line_1_marked_b"]
+    row = PUBLISHED_GROUND_SURFACES["cox-2017-table-6-7/heath_line_1_marked_b"]
 
     with pytest.raises(AttributeError, match=r"cannot assign to field 'name'"):
         row.name = "edited"  # type: ignore[misc]
@@ -230,4 +230,6 @@ def test_a_row_is_frozen_and_so_are_the_mappings_it_holds() -> None:
 
 
 def test_the_catalogue_holds_ground_surfaces() -> None:
-    assert all(isinstance(row, GroundSurface) for row in PUBLISHED_GROUND.values())
+    assert all(
+        isinstance(row, GroundSurface) for row in PUBLISHED_GROUND_SURFACES.values()
+    )

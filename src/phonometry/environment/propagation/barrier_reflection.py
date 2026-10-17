@@ -84,7 +84,7 @@ the limit as three curves (Figure 14) without the formula behind them.
 method's authors (Garai and Guidorzi, J. Acoust. Soc. Am. 108 (2000) 1054,
 section III.D): the window ends where the first unwanted component arrives,
 and its low frequency limit is the first notch of its spectrum
-(:func:`adrienne_low_frequency_limit_hz`, 162,5 Hz for 7,9 ms, which the
+(:func:`adrienne_low_frequency_limit`, 162,5 Hz for 7,9 ms, which the
 paper gives as about 160 Hz). Against the curves read off Figure 14 it
 follows microphone 5 within 5 % from 2,75 m up (5,5 % below at 2,5 m). At
 microphone 2 it comes out about 3 % to 10 % above the printed curve, set by
@@ -155,12 +155,14 @@ __all__ = [
     "ReflectionFrequencyLimit",
     "ReflectionGridCheck",
     "ReflectionIndexResult",
-    "adrienne_low_frequency_limit_hz",
+    "ReflectionIndexUncertainty",
+    "adrienne_low_frequency_limit",
     "adrienne_reflection_window",
     "check_reflection_grid_position",
     "geometric_divergence_corrections",
     "reflection_grid_paths_m",
     "reflection_index",
+    "reflection_index_expanded_uncertainty",
     "reflection_index_from_positions",
     "reflection_low_frequency_limit",
     "reflection_sampled_area_radius_m",
@@ -581,7 +583,7 @@ def _window_spectrum(frequency_hz: float, window_length_s: float) -> float:
     return abs(rising + body + falling)
 
 
-def adrienne_low_frequency_limit_hz(window_length_s: float) -> float:
+def adrienne_low_frequency_limit(window_length_s: float) -> float:
     r"""The first notch in the spectrum of an Adrienne window, in hertz.
 
     Garai and Guidorzi (J. Acoust. Soc. Am. 108 (2000) 1054, section III.D.4)
@@ -1128,38 +1130,6 @@ class ReflectionIndexResult(OwnsArrays):
     gain_corrections: NDArray[np.float64] | None = None
     subtraction_reductions_db: NDArray[np.float64] | None = None
 
-    def expanded_uncertainty(
-        self,
-        *,
-        estimate: Literal["median", "low", "high"] = "high",
-        coverage_factor: float = 1.96,
-    ) -> tuple[NDArray[np.float64], float]:
-        r"""Expanded uncertainty from the reproducibility of Table A.1 (A.2).
-
-        :math:`U_j = k_p\, s_{\mathrm{R},j}`, with :math:`s_\mathrm{R}` taken as the combined
-        standard uncertainty. Annex B.5 takes the high column and
-        :math:`k_p` = 1,96 for 95 % coverage, which is the default.
-
-        :param estimate: The column of Table A.1, ``"median"``, ``"low"`` or
-            ``"high"``.
-        :param coverage_factor: :math:`k_p`.
-        :return: The eighteen :math:`U_j` and the :math:`U` of
-            :math:`DL_{RI}` in decibels.
-        :raises ValueError: On an unknown column or a non-positive factor.
-        """
-        column = ("median", "low", "high").index(
-            require_choice(estimate, "estimate", ("median", "low", "high"))
-        )
-        factor = require_positive(coverage_factor, "coverage_factor")
-        per_band = np.array(
-            [
-                REFLECTION_INDEX_PRECISION[band]["reproducibility"][column]
-                for band in _BANDS_HZ
-            ]
-        )
-        rating = REFLECTION_RATING_PRECISION_DB["reproducibility"][column]
-        return read_only(factor * per_band), factor * rating
-
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
     ) -> Axes:
@@ -1178,6 +1148,93 @@ class ReflectionIndexResult(OwnsArrays):
         return plot_reflection_index(
             self, ax=ax, language=check_language(language), **kwargs
         )
+
+
+@dataclass(frozen=True)
+class ReflectionIndexUncertainty(OwnsArrays):
+    r"""The expanded uncertainty of a declared sound reflection index (A.2).
+
+    :math:`U_j = k_p\, s_{\mathrm{R},j}` per band and :math:`U = k_p\,
+    s_\mathrm{R}` of :math:`DL_{RI}`, with the reproducibility standard
+    deviation of Table A.1 taken as the combined standard uncertainty.
+
+    :ivar frequencies: The eighteen band centres, 100 Hz to 5 kHz, the
+        bands of :attr:`ReflectionIndexResult.frequencies`.
+    :ivar expanded_uncertainty: :math:`U_j` per band, aligned with
+        ``frequencies``, in units of the index itself: :math:`RI` is a ratio,
+        and Table B.2 prints its :math:`U_j` beside it as one (0,62 at
+        100 Hz against an :math:`RI` of 0,58).
+    :ivar rating_db: :math:`U` of the single-number rating :math:`DL_{RI}`,
+        in decibels, the one row of Table A.1 that is a level.
+    :ivar estimate: The column of Table A.1 read: ``"median"``, ``"low"`` or
+        ``"high"``.
+    :ivar coverage_factor: :math:`k_p`.
+    """
+
+    frequencies: NDArray[np.float64]
+    expanded_uncertainty: NDArray[np.float64]
+    rating_db: float
+    estimate: Literal["median", "low", "high"]
+    coverage_factor: float
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Draw :math:`U_j` band by band with the :math:`U` of :math:`DL_{RI}`.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the ``Axes.bar`` call.
+        :return: The :class:`~matplotlib.axes.Axes`.
+        """
+        from ..._i18n import check_language
+        from ..._plot.environment import plot_reflection_index_uncertainty
+
+        return plot_reflection_index_uncertainty(
+            self, ax=ax, language=check_language(language), **kwargs
+        )
+
+
+def reflection_index_expanded_uncertainty(
+    *,
+    estimate: Literal["median", "low", "high"] = "high",
+    coverage_factor: float = 1.96,
+) -> ReflectionIndexUncertainty:
+    r"""Expanded uncertainty of a sound reflection index from Table A.1 (A.2).
+
+    :math:`U_j = k_p\, s_{\mathrm{R},j}`, with :math:`s_\mathrm{R}` taken as
+    the combined standard uncertainty. Annex B.5 takes the high column and
+    :math:`k_p` = 1,96 for 95 % coverage, which is the default. The
+    reproducibility is the standard's, not the measurement's, so the answer
+    depends on the column and the factor alone: one call serves every
+    :class:`ReflectionIndexResult`.
+
+    :param estimate: The column of Table A.1, ``"median"``, ``"low"`` or
+        ``"high"``.
+    :param coverage_factor: :math:`k_p`.
+    :return: A :class:`ReflectionIndexUncertainty`, the eighteen
+        :math:`U_j` aligned with the bands, in units of the index, and the
+        :math:`U` of :math:`DL_{RI}`, in decibels.
+    :raises ValueError: On an unknown column or a non-positive factor.
+    """
+    column = ("median", "low", "high").index(
+        require_choice(estimate, "estimate", ("median", "low", "high"))
+    )
+    factor = require_positive(coverage_factor, "coverage_factor")
+    per_band = np.array(
+        [
+            REFLECTION_INDEX_PRECISION[band]["reproducibility"][column]
+            for band in _BANDS_HZ
+        ]
+    )
+    rating = REFLECTION_RATING_PRECISION_DB["reproducibility"][column]
+    return ReflectionIndexUncertainty(
+        frequencies=np.asarray(_BANDS_HZ, dtype=np.float64),
+        expanded_uncertainty=factor * per_band,
+        rating_db=float(factor * rating),
+        estimate=estimate,
+        coverage_factor=factor,
+    )
 
 
 def _result(
@@ -1435,7 +1492,7 @@ class ReflectionFrequencyLimit(OwnsArrays):
         trailing edge last as long as the delay between the reflection and
         that component, plus the 0,5 ms leading edge.
     :ivar low_frequency_limit_hz: Per microphone, the first notch of that
-        window's spectrum (:func:`adrienne_low_frequency_limit_hz`).
+        window's spectrum (:func:`adrienne_low_frequency_limit`).
     :ivar limiting_component: Per microphone, ``"ground"`` for the ground
         reflection on the source side, ``"top edge"`` or ``"side edge"`` for
         a diffraction by an edge of the device.
@@ -1566,7 +1623,7 @@ def reflection_low_frequency_limit(
             )
             raise ValueError(msg)
         windows[k] = _LEADING_EDGE_S + delay
-        limits[k] = adrienne_low_frequency_limit_hz(float(windows[k]))
+        limits[k] = adrienne_low_frequency_limit(float(windows[k]))
         components.append(component)
     return ReflectionFrequencyLimit(
         device_height_m=height,

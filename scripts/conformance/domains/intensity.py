@@ -1149,7 +1149,7 @@ def _chk_iso9295_comparison() -> Outcome:
     "three equal sidebands summing to 10 lg 3 above one",
 )
 def _chk_iso9295_tone_under_moving_microphone() -> Outcome:
-    bandwidth = ph.emission.minimum_analyzer_bandwidth_hz(
+    bandwidth = ph.emission.minimum_analyzer_bandwidth(
         16000.0, microphone_speed_m_s=0.4, speed_of_sound=345.0
     )
     total = ph.emission.tone_level_from_sidebands([50.0, 50.0, 50.0])
@@ -1509,12 +1509,12 @@ def _chk_iso8297_note_11() -> Outcome:
     "Intensity & sound power",
     "ISO 8297:1994 Table 2",
     "Background correction at differences of 6 to 10 dB and at 12 dB, read through "
-    "plant_background_correction_db",
+    "plant_background_correction",
 )
 def _chk_iso8297_table_2() -> Outcome:
     expected = {f"{d} dB": c for d, c in ref.ISO8297_TABLE_2} | {"12 dB": 0.0}
     computed = {
-        f"{d} dB": float(ph.emission.plant_background_correction_db(float(d)))
+        f"{d} dB": float(ph.emission.plant_background_correction(float(d)))
         for d in (*(row[0] for row in ref.ISO8297_TABLE_2), 12)
     }
     return record(expected, computed, unit="dB")
@@ -1530,7 +1530,7 @@ def _chk_iso8297_table_1() -> Outcome:
     expected: dict[str, float] = {}
     computed: dict[str, float] = {}
     for ratio, lower, upper in ref.ISO8297_TABLE_1:
-        got = ph.emission.plant_method_uncertainty_db(ratio)
+        got = ph.emission.plant_method_uncertainty(ratio)
         expected |= {f"{ratio:g} lower": lower, f"{ratio:g} upper": upper}
         computed |= {f"{ratio:g} lower": got[0], f"{ratio:g} upper": got[1]}
     return record(expected, computed, unit="dB")

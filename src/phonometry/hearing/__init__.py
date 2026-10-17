@@ -81,7 +81,7 @@ from .noise_induced_hearing_loss import (
     HtlanResult,
     NiptsResult,
     NoiseInducedHearingLossWarning,
-    combine_age_and_noise,
+    age_and_noise_threshold,
     htlan,
     nipts,
 )
@@ -181,7 +181,7 @@ __all__ = [
     "check_random_incidence_field",
     "check_reat_sound_field",
     "check_retest_agreement",
-    "combine_age_and_noise",
+    "age_and_noise_threshold",
     "COVERAGE_FACTOR",
     "DIFFUSE_FIELD_VARIATION_LIMITS",
     "DiffuseSoundFieldCheck",

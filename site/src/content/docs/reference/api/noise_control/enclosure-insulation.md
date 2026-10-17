@@ -59,7 +59,7 @@ What this module computes, and what it refuses to
 Every equation of clauses 6 and 7 is here, with the weighted rating of
 ISO 717-1 delegated to [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating) rather than
 re-derived, and the A-weighted estimate of the annexes written so that it
-cannot disagree with its own inputs: [`estimated_a_weighted_insulation`](/phonometry/reference/api/noise_control/enclosure-insulation/#estimated_a_weighted_insulation)
+cannot disagree with its own inputs: [`estimated_a_weighted_enclosure_insulation`](/phonometry/reference/api/noise_control/enclosure-insulation/#estimated_a_weighted_enclosure_insulation)
 reduces algebraically to the difference of the two A-weighted totals computed
 from the same assumed spectrum, which is the only exact oracle either part
 offers.
@@ -126,10 +126,42 @@ ARTIFICIAL_SOURCE_DROP_MM = 40.0
 ARTIFICIAL_SOURCE_EXAMPLE_LWA_DB = 110.0
 ```
 
-## artificial_source_insulation
+## ARTIFICIAL_SOURCE_LEAK_RATIO_ADVISORY
+
+*Constant* (`float`).
 
 ```python
-artificial_source_insulation(
+ARTIFICIAL_SOURCE_LEAK_RATIO_ADVISORY = 0.02
+```
+
+## ARTIFICIAL_SOURCE_MAX_FILL_RATIO
+
+*Constant* (`float`).
+
+```python
+ARTIFICIAL_SOURCE_MAX_FILL_RATIO = 0.25
+```
+
+## ARTIFICIAL_SOURCE_PLATE_MM
+
+*Constant* (`tuple`).
+
+```python
+ARTIFICIAL_SOURCE_PLATE_MM = (4.0, 800.0, 300.0)
+```
+
+## ARTIFICIAL_SOURCE_STANDOFF_MM
+
+*Constant* (`float`).
+
+```python
+ARTIFICIAL_SOURCE_STANDOFF_MM = 60.0
+```
+
+## enclosure_artificial_source_insulation
+
+```python
+enclosure_artificial_source_insulation(
     level_without_by_position: ArrayLike,
     level_with_by_position: ArrayLike,
     *,
@@ -172,37 +204,137 @@ $D_p$ and 9.4 e) reports whichever it was. That is `quantity`.
 | :--- | :--- |
 | ValueError | For arrays that are not two-dimensional and matched, fewer than two source positions, or an unknown quantity. |
 
-## ARTIFICIAL_SOURCE_LEAK_RATIO_ADVISORY
-
-*Constant* (`float`).
+## enclosure_reciprocity_insulation
 
 ```python
-ARTIFICIAL_SOURCE_LEAK_RATIO_ADVISORY = 0.02
+enclosure_reciprocity_insulation(
+    external_levels: ArrayLike,
+    internal_levels: ArrayLike,
+    *,
+    frequencies: ArrayLike | None = None,
+    band_fraction: int = 3,
+) -> EnclosureInsulationResult
 ```
 
-## ARTIFICIAL_SOURCE_MAX_FILL_RATIO
+Insertion loss measured from the outside in, Equation (5) of part 1.
 
-*Constant* (`float`).
+$D_{p\mathrm{r}} = \overline{L_{p,\text{ext}}} - \overline{L_{p,\text{int}}}$:
+the enclosure is put in a diffuse field, the field is measured around it
+and again inside it, and the difference is the insulation the enclosure
+would give a source within it. The method belongs to the laboratory, and it
+is the one case where the enclosure is measured without any source inside
+at all.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `external_levels` | The averaged level in the field outside, per band, in decibels. |
+| `internal_levels` | The averaged level inside the enclosure standing in that field, per band, in decibels. |
+| `frequencies` | Nominal band centres, in hertz. |
+| `band_fraction` | 3 for one-third octaves (default), 1 for octaves. |
+
+**Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult) whose quantity is `"reciprocity"`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For spectra that do not match, non-finite values or an unknown band fraction. |
+
+## enclosure_sound_power_insulation
 
 ```python
-ARTIFICIAL_SOURCE_MAX_FILL_RATIO = 0.25
+enclosure_sound_power_insulation(
+    level_without: ArrayLike,
+    level_with: ArrayLike,
+    *,
+    frequencies: ArrayLike | None = None,
+    a_weighted_without: float | None = None,
+    a_weighted_with: float | None = None,
+    base_standard: str = 'ISO 3744',
+    condition: Literal['laboratory', 'in-situ'] = 'laboratory',
+    source_kind: Literal['actual', 'reciprocity', 'artificial'] = 'actual',
+    band_fraction: int = 3,
+) -> EnclosureInsulationResult
 ```
 
-## ARTIFICIAL_SOURCE_PLATE_MM
+Insertion loss from two sound power determinations, Equations (1) and (2).
 
-*Constant* (`tuple`).
+$D_W = L_{W,\text{without}} - L_{W,\text{with}}$ band by band, and
+$D_{W\mathrm{A}}$ the same difference of the A-weighted totals. Where the
+A-weighted pair is not supplied it is computed from the band spectra with
+the ISO 3744 Annex E table, which is what the note to clause 6.2 prefers.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `level_without` | Sound power levels of the machine without the enclosure, in decibels. |
+| `level_with` | The same with the enclosure in place, in decibels. |
+| `frequencies` | Nominal band centres, in hertz. |
+| `a_weighted_without` | $L_{WA}$ without the enclosure, in decibels, when it was measured rather than computed. |
+| `a_weighted_with` | The same with the enclosure, in decibels. |
+| `base_standard` | The standard the sound power came from, as Table 1 lists them. |
+| `condition` | `"laboratory"` for part 1, `"in-situ"` for part 2. |
+| `source_kind` | `"actual"`, `"reciprocity"` or `"artificial"`. |
+| `band_fraction` | 3 for one-third octaves (default), 1 for octaves. |
+
+**Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For spectra that do not match, non-finite values, half an A-weighted pair, an unknown condition, source kind or band fraction, or a combination of condition and source kind Table 1 does not have. |
+
+## enclosure_sound_pressure_insulation
 
 ```python
-ARTIFICIAL_SOURCE_PLATE_MM = (4.0, 800.0, 300.0)
+enclosure_sound_pressure_insulation(
+    level_without: ArrayLike,
+    level_with: ArrayLike,
+    *,
+    frequencies: ArrayLike | None = None,
+    a_weighted_without: float | None = None,
+    a_weighted_with: float | None = None,
+    base_standard: str = 'ISO 11201',
+    condition: Literal['laboratory', 'in-situ'] = 'laboratory',
+    source_kind: Literal['actual', 'reciprocity', 'artificial'] = 'actual',
+    band_fraction: int = 3,
+) -> EnclosureInsulationResult
 ```
 
-## ARTIFICIAL_SOURCE_STANDOFF_MM
+Insertion loss from two sound pressure levels, Equations (3) and (4).
 
-*Constant* (`float`).
+$D_p = L_{p,\text{without}} - L_{p,\text{with}}$ at one stated
+position, with the same microphone positions in both runs, and
+$D_{p\mathrm{A}}$ the difference of the A-weighted values. The position is
+part of the answer: the standard requires it in the report, because an
+insertion loss at the operator's ear and one a metre from the panel are
+different numbers about the same enclosure.
 
-```python
-ARTIFICIAL_SOURCE_STANDOFF_MM = 60.0
-```
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `level_without` | Sound pressure levels without the enclosure, in decibels. |
+| `level_with` | The same with the enclosure, in decibels. |
+| `frequencies` | Nominal band centres, in hertz. |
+| `a_weighted_without` | $L_{pA}$ without the enclosure, in decibels, when it was measured rather than computed. |
+| `a_weighted_with` | The same with the enclosure, in decibels. |
+| `base_standard` | The standard the pressure levels came from. |
+| `condition` | `"laboratory"` for part 1, `"in-situ"` for part 2. |
+| `source_kind` | `"actual"`, `"reciprocity"` or `"artificial"`. |
+| `band_fraction` | 3 for one-third octaves (default), 1 for octaves. |
+
+**Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For spectra that do not match, non-finite values, half an A-weighted pair, an unknown condition, source kind or band fraction, or a combination of condition and source kind Table 1 does not have. |
 
 ## EnclosureInsulationResult
 
@@ -275,10 +407,10 @@ The band values as clause 9.4 reports them, to the nearest decibel.
 
 The measurement is outside a condition ISO 11546 states.
 
-## estimated_a_weighted_insulation
+## estimated_a_weighted_enclosure_insulation
 
 ```python
-estimated_a_weighted_insulation(
+estimated_a_weighted_enclosure_insulation(
     spectrum_levels: ArrayLike,
     insulation: ArrayLike,
     *,
@@ -422,44 +554,6 @@ One row of Table 1: a way of measuring and what it yields.
 PREFERRED_BAND_RANGE_HZ = {3: (50.0, 10000.0), 1: (63.0, 8000.0)}
 ```
 
-## reciprocity_insulation
-
-```python
-reciprocity_insulation(
-    external_levels: ArrayLike,
-    internal_levels: ArrayLike,
-    *,
-    frequencies: ArrayLike | None = None,
-    band_fraction: int = 3,
-) -> EnclosureInsulationResult
-```
-
-Insertion loss measured from the outside in, Equation (5) of part 1.
-
-$D_{p\mathrm{r}} = \overline{L_{p,\text{ext}}} - \overline{L_{p,\text{int}}}$:
-the enclosure is put in a diffuse field, the field is measured around it
-and again inside it, and the difference is the insulation the enclosure
-would give a source within it. The method belongs to the laboratory, and it
-is the one case where the enclosure is measured without any source inside
-at all.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `external_levels` | The averaged level in the field outside, per band, in decibels. |
-| `internal_levels` | The averaged level inside the enclosure standing in that field, per band, in decibels. |
-| `frequencies` | Nominal band centres, in hertz. |
-| `band_fraction` | 3 for one-third octaves (default), 1 for octaves. |
-
-**Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult) whose quantity is `"reciprocity"`.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | For spectra that do not match, non-finite values or an unknown band fraction. |
-
 ## ROOM_ABSORPTION_ESTIMATES
 
 *Constant* (`mapping`).
@@ -493,100 +587,6 @@ catalogue quotes whichever reads better.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive ratio. |
-
-## sound_power_insulation
-
-```python
-sound_power_insulation(
-    level_without: ArrayLike,
-    level_with: ArrayLike,
-    *,
-    frequencies: ArrayLike | None = None,
-    a_weighted_without: float | None = None,
-    a_weighted_with: float | None = None,
-    base_standard: str = 'ISO 3744',
-    condition: Literal['laboratory', 'in-situ'] = 'laboratory',
-    source_kind: Literal['actual', 'reciprocity', 'artificial'] = 'actual',
-    band_fraction: int = 3,
-) -> EnclosureInsulationResult
-```
-
-Insertion loss from two sound power determinations, Equations (1) and (2).
-
-$D_W = L_{W,\text{without}} - L_{W,\text{with}}$ band by band, and
-$D_{W\mathrm{A}}$ the same difference of the A-weighted totals. Where the
-A-weighted pair is not supplied it is computed from the band spectra with
-the ISO 3744 Annex E table, which is what the note to clause 6.2 prefers.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `level_without` | Sound power levels of the machine without the enclosure, in decibels. |
-| `level_with` | The same with the enclosure in place, in decibels. |
-| `frequencies` | Nominal band centres, in hertz. |
-| `a_weighted_without` | $L_{WA}$ without the enclosure, in decibels, when it was measured rather than computed. |
-| `a_weighted_with` | The same with the enclosure, in decibels. |
-| `base_standard` | The standard the sound power came from, as Table 1 lists them. |
-| `condition` | `"laboratory"` for part 1, `"in-situ"` for part 2. |
-| `source_kind` | `"actual"`, `"reciprocity"` or `"artificial"`. |
-| `band_fraction` | 3 for one-third octaves (default), 1 for octaves. |
-
-**Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult).
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | For spectra that do not match, non-finite values, half an A-weighted pair, an unknown condition, source kind or band fraction, or a combination of condition and source kind Table 1 does not have. |
-
-## sound_pressure_insulation
-
-```python
-sound_pressure_insulation(
-    level_without: ArrayLike,
-    level_with: ArrayLike,
-    *,
-    frequencies: ArrayLike | None = None,
-    a_weighted_without: float | None = None,
-    a_weighted_with: float | None = None,
-    base_standard: str = 'ISO 11201',
-    condition: Literal['laboratory', 'in-situ'] = 'laboratory',
-    source_kind: Literal['actual', 'reciprocity', 'artificial'] = 'actual',
-    band_fraction: int = 3,
-) -> EnclosureInsulationResult
-```
-
-Insertion loss from two sound pressure levels, Equations (3) and (4).
-
-$D_p = L_{p,\text{without}} - L_{p,\text{with}}$ at one stated
-position, with the same microphone positions in both runs, and
-$D_{p\mathrm{A}}$ the difference of the A-weighted values. The position is
-part of the answer: the standard requires it in the report, because an
-insertion loss at the operator's ear and one a metre from the panel are
-different numbers about the same enclosure.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `level_without` | Sound pressure levels without the enclosure, in decibels. |
-| `level_with` | The same with the enclosure, in decibels. |
-| `frequencies` | Nominal band centres, in hertz. |
-| `a_weighted_without` | $L_{pA}$ without the enclosure, in decibels, when it was measured rather than computed. |
-| `a_weighted_with` | The same with the enclosure, in decibels. |
-| `base_standard` | The standard the pressure levels came from. |
-| `condition` | `"laboratory"` for part 1, `"in-situ"` for part 2. |
-| `source_kind` | `"actual"`, `"reciprocity"` or `"artificial"`. |
-| `band_fraction` | 3 for one-third octaves (default), 1 for octaves. |
-
-**Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult).
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | For spectra that do not match, non-finite values, half an A-weighted pair, an unknown condition, source kind or band fraction, or a combination of condition and source kind Table 1 does not have. |
 
 ## source_position_clearance_m
 
@@ -753,10 +753,10 @@ $4 / ((10^{K_2/10} - 1)\,\alpha)$ at
 UNRESTRICTED_ENCLOSURE_VOLUME_M3 = 2.0
 ```
 
-## weighted_insulation
+## weighted_enclosure_insulation
 
 ```python
-weighted_insulation(
+weighted_enclosure_insulation(
     insulation: ArrayLike,
     *,
     quantity: str = 'sound_power',

@@ -313,7 +313,7 @@ def _third_octave_bank() -> ph.filters.OctaveFilterBank:
 def _chk_bank_bandwidth() -> Outcome:
     result = ph.filters.verify_filter_class(_third_octave_bank())
     worst = max(abs(b["bandwidth_deviation_db"]) for b in result.bands)
-    margin = result.binding_margin_db("effective_bandwidth", 1)
+    margin = result.binding_margin("effective_bandwidth", 1)
     return Outcome(
         expected="class 1 (|Delta B| <= 0.4 dB)",
         computed=f"class {result.requirement_class('effective_bandwidth')} "
@@ -333,7 +333,7 @@ def _chk_bank_summation() -> Outcome:
     inner = [b for b in result.bands if b["summation_min_db"] is not None]
     low = min(b["summation_min_db"] for b in inner)
     high = max(b["summation_max_db"] for b in inner)
-    margin = result.binding_margin_db("summation", 1)
+    margin = result.binding_margin("summation", 1)
     return Outcome(
         expected="class 1 (-1.8 dB <= Delta P <= +0.8 dB)",
         computed=f"class {result.requirement_class('summation')} "

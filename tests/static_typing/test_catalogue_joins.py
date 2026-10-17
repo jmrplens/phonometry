@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """A published catalogue joined with yours keeps its row class, for mypy too.
 
-``PUBLISHED_POROUS | mine`` goes straight into a lookup's ``catalogue=``, and
+``PUBLISHED_POROUS_MATERIALS | mine`` goes straight into a lookup's ``catalogue=``, and
 the join is typed so that it is accepted there: the union of the two sides'
 row classes, which for two catalogues of one class is that class. The
 suite checks the join at run time; this file holds the typing, and it only
@@ -40,9 +40,9 @@ def test_a_join_either_way_round_is_a_mapping_of_the_row_class() -> None:
     mine = io.parse_catalogue(_EXAMPLE, row_type=materials.PorousMaterial)
     assert_type(mine, io.Catalogue[materials.PorousMaterial])
 
-    both = materials.PUBLISHED_POROUS | mine
+    both = materials.PUBLISHED_POROUS_MATERIALS | mine
     assert_type(both, Mapping[str, materials.PorousMaterial])
-    reversed_join = mine | materials.PUBLISHED_POROUS
+    reversed_join = mine | materials.PUBLISHED_POROUS_MATERIALS
     assert_type(reversed_join, Mapping[str, materials.PorousMaterial])
 
     found = materials.porous_materials_named("Foam", catalogue=both)

@@ -34,7 +34,7 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import require_positive, require_positive_array
-from ..absorbers.porous import PUBLISHED_AIR, Complex
+from ..absorbers.porous import ABSORBER_AIR, Complex
 from ..absorbers.slow_sound import HelmholtzResonator, slit_helmholtz_absorber
 from .design import (
     DEFAULT_POLAR_ANGLES_DEG,
@@ -181,7 +181,7 @@ def metadiffuser_reflection(
     period_m: float,
     angle_rad: float = 0.0,
     resonator_geometry: str = "slit",
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> MetadiffuserResult:
     r"""Per-well reflection spectra of a metadiffuser panel (Sci. Rep. Eq. (6)).
 
@@ -252,7 +252,7 @@ def metadiffuser_polar_response(
     source_angle_deg: float = 0.0,
     repetitions: int = 1,
     resonator_geometry: str = "slit",
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> DiffuserPolarResponse:
     """Far-field polar response of a metadiffuser at one frequency.
 
@@ -319,7 +319,7 @@ def metadiffuser_diffusion_spectrum(
     source_angle_deg: float = 0.0,
     repetitions: int = 1,
     resonator_geometry: str = "slit",
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> DiffusionSpectrum:
     r"""Normalized diffusion-coefficient spectrum ``d_n(f)`` of a metadiffuser.
 

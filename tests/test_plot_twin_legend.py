@@ -500,7 +500,7 @@ _RUN_BANDS = _THIRDS
 
 
 def _enclosure() -> Axes:
-    return ph.noise_control.sound_power_insulation(
+    return ph.noise_control.enclosure_sound_power_insulation(
         _LOUDER, _QUIETER, frequencies=_RUN_BANDS
     ).plot()
 

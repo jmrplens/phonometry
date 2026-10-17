@@ -254,7 +254,7 @@ típica. `metrology.IEC61094_5_TABLE_D1` guarda cada fila con su valor
 declarado, su divisor y la incertidumbre típica que imprime, y las siete que
 declaran un valor lo reproducen.
 `metrology.comparison_uncertainty_budget` las combina con
-`metrology.combine_uncertainty`, cada componente con un coeficiente de
+`metrology.uncertainty_propagation`, cada componente con un coeficiente de
 sensibilidad de 1 en el modelo en niveles, y multiplica por $k = 2$:
 
 ```python

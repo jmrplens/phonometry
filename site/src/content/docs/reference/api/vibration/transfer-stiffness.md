@@ -511,7 +511,7 @@ driving_point_uncertainty(
 
 Uncertainty of a band level measured by the driving-point method (ISO 10846-5 Annex B).
 
-Table B.1, built on [`phonometry.metrology.combine_uncertainty`](/phonometry/reference/api/metrology/uncertainty/#combine_uncertainty):
+Table B.1, built on [`phonometry.metrology.uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation):
 
 - $\hat{L}_{k,\mathrm{av}}$, signal processing and background
   noise, normal, 0,3 dB (B.3.1);

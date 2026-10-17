@@ -194,7 +194,7 @@ _GUM = "Measurement uncertainty (GUM / Supplement 1)"
 )
 def _chk_gum_additive() -> Outcome:
     quantities = [ph.metrology.Quantity(0.0, 1.0) for _ in range(4)]
-    result = ph.metrology.combine_uncertainty(
+    result = ph.metrology.uncertainty_propagation(
         lambda a, b, c, d: a + b + c + d, quantities
     )
     return numeric(ref.GUM_ADDITIVE_UC, result.combined_uncertainty, 1e-9, places=4)
@@ -210,7 +210,7 @@ def _chk_gum_coverage() -> Outcome:
 @register(_GUM, "ISO/IEC Guide 98-3 Annex G.4", "Welch-Satterthwaite effective dof")
 def _chk_gum_welch() -> Outcome:
     quantities = [ph.metrology.Quantity(0.0, 1.0, dof=10) for _ in range(4)]
-    result = ph.metrology.combine_uncertainty(
+    result = ph.metrology.uncertainty_propagation(
         lambda a, b, c, d: a + b + c + d, quantities
     )
     return numeric(ref.GUM_WELCH_VEFF, result.effective_dof, 1e-6, places=3)
@@ -223,7 +223,7 @@ def _gum_h1_result() -> UncertaintyResult:
     with warnings.catch_warnings():
         # alphaS and theta are genuinely flat directions at the H.1 estimates.
         warnings.simplefilter("ignore")
-        return ph.metrology.combine_uncertainty(
+        return ph.metrology.uncertainty_propagation(
             lambda ls, d, a_s, th, da, dth: ls + d - ls * (da * th + a_s * dth),
             quantities,
         )
@@ -260,7 +260,7 @@ def _chk_gum_h2_correlated() -> Outcome:
     quantities = [
         ph.metrology.Quantity(m, s) for m, s in zip(means, u_means, strict=True)
     ]
-    result = ph.metrology.combine_uncertainty(
+    result = ph.metrology.uncertainty_propagation(
         lambda v, i, p: v / i * math.cos(p), quantities, correlation=r
     )
     return numeric(
@@ -348,7 +348,7 @@ def _chk_nihl_annex_c_compression() -> Outcome:
     h = ref.ISO1999_ANNEX_C_H[2]
     n = ref.ISO1999_ANNEX_C_N[2]
     # H' - H is what Formula (1) leaves of the noise component at that band.
-    value = float(ph.hearing.combine_age_and_noise(h, n)) - h
+    value = float(ph.hearing.age_and_noise_threshold(h, n)) - h
     return numeric(
         ref.ISO1999_ANNEX_C_N_4K_COMPRESSED, value, 0.05, unit="dB", places=1
     )
@@ -372,7 +372,7 @@ def _chk_nihl_annex_c_htlan() -> Outcome:
     """
     h = np.asarray(ref.ISO1999_ANNEX_C_H, dtype=float)
     n = np.asarray(ref.ISO1999_ANNEX_C_N, dtype=float)
-    compressed = ph.hearing.combine_age_and_noise(h, n) - h
+    compressed = ph.hearing.age_and_noise_threshold(h, n) - h
     noise = np.where(h + n > ref.ISO1999_ANNEX_C_COMPRESSION_FENCE, compressed, n)
     value = float(np.mean(h) + np.mean(noise))
     return numeric(ref.ISO1999_ANNEX_C_HTLAN, value, 0.05, unit="dB", places=1)

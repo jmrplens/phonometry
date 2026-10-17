@@ -184,7 +184,7 @@ device that is not flat.
 ```python
 window = environment.adrienne_reflection_window(fs, environment.ADRIENNE_SHORT_LENGTH_S)
 print(window.size)                                        # 288 samples at 48 kHz
-print(round(environment.adrienne_low_frequency_limit_hz(7.9e-3), 1))   # 162.5 Hz
+print(round(environment.adrienne_low_frequency_limit(7.9e-3), 1))   # 162.5 Hz
 ```
 
 The edges are Formula (7) sampled as printed, each a half of a full
@@ -375,8 +375,8 @@ print(annex_b.reflection_index.round(2)[4:10])  # [0.39 0.36 0.26 0.12 0.05 0.09
 print(annex_b.rating.reported)                 # 8 dB, as printed under the table
 print(round(annex_b.rating.rating, 2))         # 7.65 dB before rounding, see below
 
-u_bands, u_rating = annex_b.expanded_uncertainty()   # Table A.1, high column, k = 1.96
-print(round(u_rating, 2))                            # 1.59 dB, Table B.2
+u = environment.reflection_index_expanded_uncertainty()  # Table A.1, high column, k = 1.96
+print(round(u.rating_db, 2))                             # 1.59 dB, Table B.2
 ```
 
 <ThemeImage
@@ -413,6 +413,27 @@ single number; in seven bands Table B.2 prints a hundredth less than 1,96
 times the $s_\mathrm{R}$ of Table A.1, as unrounded standard deviations would give. The
 print does not say which values the example multiplied, and the library
 multiplies the printed ones.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_uncertainty.svg"
+  alt="Bars of the expanded uncertainty U j of the sound reflection index in each of the eighteen one-third octave bands from 100 Hz to 5 kHz, from the high column of Table A.1 with a coverage factor of 1.96: 0.63 at 100 Hz, 0.35 at 125 Hz, between 0.24 and 0.31 from 160 Hz to 2.5 kHz, then 0.33, 0.39 and 0.45 at 3.15, 4 and 5 kHz. The legend states the expanded uncertainty of DL RI, 1.59 dB."
+  width="92%"
+/>
+
+*The high column of Table A.1 times 1,96, band by band: the inter-laboratory
+test agreed least at 100 Hz. The $U_j$ are in units of the index, which is a
+ratio, and the 1,59 dB of $DL_{RI}$ is a level, so the legend states it rather
+than the axis.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+u.plot()
+plt.show()
+```
+
+</details>
 
 ## Relation to the other parts of EN 1793
 

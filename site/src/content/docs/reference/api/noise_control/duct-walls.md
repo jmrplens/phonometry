@@ -88,18 +88,10 @@ is published from there.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## DUCT_WALL_BANDS_HZ
-
-*Constant* (`tuple`).
+## duct_transmission_loss_named
 
 ```python
-DUCT_WALL_BANDS_HZ = (63, 125, 250, 500, 1000, 2000, 4000, 8000)
-```
-
-## duct_wall_named
-
-```python
-duct_wall_named(
+duct_transmission_loss_named(
     name: str,
     *,
     catalogue: Mapping[str, DuctWallSpectrum] | None = None,
@@ -129,6 +121,14 @@ apart two rows of one diameter.
 | Exception | When |
 | :--- | :--- |
 | TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`DuctWallSpectrum`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum), naming its key. |
+
+## DUCT_WALL_BANDS_HZ
+
+*Constant* (`tuple`).
+
+```python
+DUCT_WALL_BANDS_HZ = (63, 125, 250, 500, 1000, 2000, 4000, 8000)
+```
 
 ## DuctWallSpectrum
 

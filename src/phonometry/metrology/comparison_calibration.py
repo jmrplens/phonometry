@@ -69,7 +69,7 @@ in a pressure field takes the reference's free-field to pressure sensitivity
 level difference of IEC/TS 61094-7 (IEC 61094-8 Table 1 and 8.2).
 
 **Uncertainty.** :func:`comparison_uncertainty_budget` combines, on
-:func:`~phonometry.metrology.combine_uncertainty`, the components of IEC
+:func:`~phonometry.metrology.uncertainty_propagation`, the components of IEC
 61094-5 Table D.1 or IEC 61094-8 Table 2, each with a sensitivity of 1 in the
 level model above, and multiplies the combined standard uncertainty by the
 coverage factor :math:`k = 2` both parts report with (IEC 61094-5 7.9 and D.2,
@@ -231,7 +231,7 @@ from .free_field_corrections import (
     _determinations,
     _frequency_axis,
 )
-from .uncertainty import Quantity, UncertaintyResult, combine_uncertainty
+from .uncertainty import Quantity, UncertaintyResult, uncertainty_propagation
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -2575,7 +2575,7 @@ def comparison_uncertainty_budget(
     exhaustive (D.1, 8.1), so a component may be left out and
     ``additional_components`` adds the ones a set-up needs, such as the
     diameter correction of a WS3 microphone in the jig (Table D.1, special
-    cases). The combination is :func:`~phonometry.metrology.combine_uncertainty`
+    cases). The combination is :func:`~phonometry.metrology.uncertainty_propagation`
     on the level model, every component with a sensitivity of 1, which is the
     root-sum-square of D.3; the expanded uncertainty is :math:`k = 2` times
     it, the coverage factor 7.9 and D.2 of the first part and 8.8 of the
@@ -2635,7 +2635,7 @@ def comparison_uncertainty_budget(
     def model(*values: float) -> float:
         return float(sum(values))
 
-    result = combine_uncertainty(model, quantities)
+    result = uncertainty_propagation(model, quantities)
     return ComparisonUncertaintyBudget(
         frequency_hz=require_positive(frequency_hz, "frequency_hz"),
         field=field,

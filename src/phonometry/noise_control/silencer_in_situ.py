@@ -50,20 +50,20 @@ The corrections that are not a correction
 Clause 4 corrects for background noise from a **printed table**, not from the
 usual logarithmic subtraction, and the two do not agree: at a margin of 5 dB
 the table takes off 2 dB where the formula takes off 1,7, and at 8 dB it takes
-off 1 where the formula takes off 0,7. :func:`silencer_background_correction_db`
+off 1 where the formula takes off 0,7. :func:`silencer_background_correction`
 implements the table as printed, and says so.
 
 Where the extraneous sound can be measured on its own, 9.1.1 and 9.1.2 offer
 the energy route of Equations (17) and (18) instead, and cap it: **the maximum
 correction is 3 dB**. A measurement that needs more than that does not yield
 the quantity at all, and the clause says what may be stated instead, which is
-an inequality. :func:`extraneous_corrected_mean_level_db` returns whether the
+an inequality. :func:`extraneous_corrected_mean_level` returns whether the
 cap was reached so that a capped value cannot be reported as a determination.
 
 Clause 9.1.5 is the one prohibition worth reading twice: converting
 one-third-octave data to octave data is permissible **for measured sound
 pressure levels only, but not for level differences**.
-:func:`octave_levels_from_third_octave_db` does the permitted conversion, and
+:func:`octave_levels_from_third_octave` does the permitted conversion, and
 the docstring names the function in this library that does the forbidden one
 for a different standard.
 """
@@ -118,25 +118,25 @@ __all__ = [
     "InstallationCase",
     "SilencerInSituResult",
     "SilencerInSituWarning",
-    "silencer_background_correction_db",
-    "extraneous_corrected_mean_level_db",
+    "silencer_background_correction",
+    "extraneous_corrected_mean_level",
     "flow_velocity_m_s",
     "gas_density_kg_m3",
     "in_situ_insertion_loss",
     "in_situ_transmission_loss",
-    "insertion_level_difference_db",
+    "insertion_level_difference",
     "installation_case",
-    "mean_sound_pressure_level_db",
+    "silencer_mean_sound_pressure_level",
     "measurement_distance_downstream_m",
     "measurement_distance_upstream_m",
-    "octave_levels_from_third_octave_db",
+    "octave_levels_from_third_octave",
     "reverberant_surface_area_m2",
     "silencer_flow_velocity_m_s",
-    "sound_power_level_db",
+    "silencer_sound_power_level",
     "static_pressure_difference_pa",
-    "temperature_field_correction_db",
+    "temperature_field_correction",
     "total_pressure_loss_pa",
-    "transmission_level_difference_db",
+    "transmission_level_difference",
     "velocity_pressure_pa",
 ]
 
@@ -366,7 +366,7 @@ def installation_case(number: int) -> InstallationCase:
     return case
 
 
-def silencer_background_correction_db(
+def silencer_background_correction(
     level_difference_db: ArrayLike,
 ) -> NDArray[np.float64]:
     r"""The background correction of Table 1, in decibels to subtract.
@@ -418,7 +418,7 @@ def silencer_background_correction_db(
     )
 
 
-def mean_sound_pressure_level_db(levels: ArrayLike) -> float:
+def silencer_mean_sound_pressure_level(levels: ArrayLike) -> float:
     r"""The mean level over the measuring points, Equation (2).
 
     .. math::
@@ -436,7 +436,7 @@ def mean_sound_pressure_level_db(levels: ArrayLike) -> float:
     return float(energy_mean(values))
 
 
-def extraneous_corrected_mean_level_db(
+def extraneous_corrected_mean_level(
     levels: ArrayLike, extraneous_levels_db: ArrayLike
 ) -> tuple[float, bool]:
     r"""The mean level with the extraneous sound taken off, Equations (17) and (18).
@@ -522,7 +522,7 @@ def extraneous_corrected_mean_level_db(
     return corrected, capped
 
 
-def transmission_level_difference_db(
+def transmission_level_difference(
     source_levels_db: ArrayLike, receiver_levels_db: ArrayLike
 ) -> NDArray[np.float64]:
     r"""The level difference across the silencer, Equation (1).
@@ -549,7 +549,7 @@ def transmission_level_difference_db(
     return np.asarray(source - receiver, dtype=np.float64)
 
 
-def insertion_level_difference_db(
+def insertion_level_difference(
     levels_without_db: ArrayLike, levels_with_db: ArrayLike
 ) -> NDArray[np.float64]:
     r"""The level difference the silencer made, Equation (3).
@@ -609,7 +609,7 @@ def reverberant_surface_area_m2(
     return np.asarray(SABINE_AREA_COEFFICIENT * volume / (celerity * times))
 
 
-def sound_power_level_db(
+def silencer_sound_power_level(
     mean_level_db: ArrayLike,
     *,
     area: ArrayLike,
@@ -651,7 +651,7 @@ def sound_power_level_db(
     return np.asarray(levels + 10.0 * np.log10(area) + correction, dtype=np.float64)
 
 
-def temperature_field_correction_db(
+def temperature_field_correction(
     *, receiver_temperature_c: float, source_temperature_c: float
 ) -> float:
     r"""The field correction difference two temperatures make, Equations (20) and (22).
@@ -832,7 +832,7 @@ def in_situ_transmission_loss(
     The level difference of Equation (1), the ratio of the two measurement
     areas, and the difference of the two field corrections.
     :func:`installation_case` says which areas the installation calls for;
-    :func:`temperature_field_correction_db` is the correction difference two
+    :func:`temperature_field_correction` is the correction difference two
     temperatures make.
 
     Every term is a band quantity (3.3, printed folio 3, PDF page 11). A
@@ -860,7 +860,7 @@ def in_situ_transmission_loss(
         area or band centre, a field correction that is not finite, or a case
         that is not a transmission one.
     """
-    difference = transmission_level_difference_db(source_levels_db, receiver_levels_db)
+    difference = transmission_level_difference(source_levels_db, receiver_levels_db)
     entry = None
     if case is not None:
         entry = installation_case(case)
@@ -934,7 +934,7 @@ def in_situ_insertion_loss(
         area or band centre, a field correction that is not finite, or a case
         that is not an insertion one.
     """
-    difference = insertion_level_difference_db(levels_without_db, levels_with_db)
+    difference = insertion_level_difference(levels_without_db, levels_with_db)
     entry = None
     if case is not None:
         entry = installation_case(case)
@@ -956,7 +956,7 @@ def in_situ_insertion_loss(
     )
 
 
-def octave_levels_from_third_octave_db(levels: ArrayLike) -> NDArray[np.float64]:
+def octave_levels_from_third_octave(levels: ArrayLike) -> NDArray[np.float64]:
     r"""One-third-octave levels folded into octaves, 9.1.5.
 
     The energy sum of each consecutive group of three. Clause 9.1.5 permits

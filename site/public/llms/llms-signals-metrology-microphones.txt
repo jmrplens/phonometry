@@ -115,7 +115,7 @@ eight rows with its printed standard uncertainty, and the stated value and
 divisor of the seven that state one; the repeatability row states no value
 and prints 0,025 dB as a standard uncertainty.
 `metrology.comparison_uncertainty_budget` combines the components on
-`metrology.combine_uncertainty` and multiplies by `k = 2`:
+`metrology.uncertainty_propagation` and multiplies by `k = 2`:
 
 ```python
 d1 = {

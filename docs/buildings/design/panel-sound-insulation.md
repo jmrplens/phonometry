@@ -240,7 +240,7 @@ it.
 import numpy as np
 from phonometry import building, solids
 
-glass = solids.plateau_material_named("glass")[0]
+glass = solids.plateau_data_named("glass")[0]
 bands = np.array([250.0, 500.0, 1000.0, 2000.0, 4000.0])
 by_row = building.plateau_transmission_loss(bands, material=glass, thickness_mm=6.0,
                                             field_correction=5.5)

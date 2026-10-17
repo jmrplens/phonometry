@@ -208,59 +208,59 @@ def test_fpi_shape_mismatch_raises() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_combine_subareas_energy_average() -> None:
+def test_subarea_intensity_level_energy_average() -> None:
     """Equal-level subareas average to the same level; Sm is the total."""
-    lin, sm = building.combine_subareas([[40.0, 42.0], [40.0, 42.0]], [5.0, 5.0])
+    lin, sm = building.subarea_intensity_level([[40.0, 42.0], [40.0, 42.0]], [5.0, 5.0])
     np.testing.assert_allclose(lin, [40.0, 42.0])
     assert sm == pytest.approx(10.0)
 
 
-def test_combine_subareas_area_weighting() -> None:
+def test_subarea_intensity_level_area_weighting() -> None:
     """The larger subarea dominates the energy average."""
-    lin, sm = building.combine_subareas([[50.0], [40.0]], [9.0, 1.0])
+    lin, sm = building.subarea_intensity_level([[50.0], [40.0]], [9.0, 1.0])
     expected = 10.0 * np.log10((9.0 * 10**5.0 + 1.0 * 10**4.0) / 10.0)
     assert lin[0] == pytest.approx(expected)
     assert sm == pytest.approx(10.0)
 
 
-def test_combine_subareas_validation() -> None:
+def test_subarea_intensity_level_validation() -> None:
     with pytest.raises(ValueError, match=r"'l_in' must be a two-dimensional"):
-        building.combine_subareas([40.0, 42.0], [5.0])
+        building.subarea_intensity_level([40.0, 42.0], [5.0])
     with pytest.raises(ValueError, match=r"'measurement_area'.*one value per subarea"):
-        building.combine_subareas([[40.0, 42.0], [40.0, 42.0]], [5.0])
+        building.subarea_intensity_level([[40.0, 42.0], [40.0, 42.0]], [5.0])
     with pytest.raises(ValueError, match=r"'measurement_area' must be a one-dim"):
-        building.combine_subareas([[40.0], [42.0]], [[5.0], [5.0]])
+        building.subarea_intensity_level([[40.0], [42.0]], [[5.0], [5.0]])
     with pytest.raises(
         ValueError, match=r"'measurement_area' must contain non-zero, finite areas"
     ):
-        building.combine_subareas([[40.0], [42.0]], [5.0, 0.0])
+        building.subarea_intensity_level([[40.0], [42.0]], [5.0, 0.0])
 
 
-def test_combine_subareas_negative_direction_rule() -> None:
+def test_subarea_intensity_level_negative_direction_rule() -> None:
     """Clause 6.4.6: a reverse-flow subarea enters Formula (11) with -Smi
     while Sm keeps the unsigned area sum (Formula (12)).
     """
     # Forward 9 m2 at 50 dB, reverse 1 m2 at 40 dB (~10 % reverse power).
-    lin, sm = building.combine_subareas([[50.0], [40.0]], [9.0, -1.0])
+    lin, sm = building.subarea_intensity_level([[50.0], [40.0]], [9.0, -1.0])
     expected = 10.0 * np.log10((9.0 * 10**5.0 - 1.0 * 10**4.0) / 10.0)
     assert lin[0] == pytest.approx(expected)
     assert sm == pytest.approx(10.0)  # Sm = sum(|Smi|)
     # The unsigned sum would overestimate LIn by 10 lg(9,1/8,9) ~ 0,1 dB of
     # numerator energy for this case; check the exact signed/unsigned gap.
-    unsigned, _ = building.combine_subareas([[50.0], [40.0]], [9.0, 1.0])
+    unsigned, _ = building.subarea_intensity_level([[50.0], [40.0]], [9.0, 1.0])
     assert unsigned[0] - lin[0] == pytest.approx(10.0 * np.log10(9.1 / 8.9))
 
 
-def test_combine_subareas_reverse_flow_dominating_raises() -> None:
+def test_subarea_intensity_level_reverse_flow_dominating_raises() -> None:
     # Reverse energy equal to (or exceeding) the forward flow leaves no level.
     with pytest.raises(
         ValueError, match=r"signed subarea energy sum of Formula \(11\) is not positive"
     ):
-        building.combine_subareas([[50.0], [50.0]], [5.0, -5.0])
+        building.subarea_intensity_level([[50.0], [50.0]], [5.0, -5.0])
     with pytest.raises(
         ValueError, match=r"signed subarea energy sum of Formula \(11\) is not positive"
     ):
-        building.combine_subareas([[50.0], [53.0]], [5.0, -5.0])
+        building.subarea_intensity_level([[50.0], [53.0]], [5.0, -5.0])
 
 
 # ---------------------------------------------------------------------------

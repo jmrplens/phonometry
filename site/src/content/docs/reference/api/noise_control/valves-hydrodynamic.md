@@ -366,10 +366,10 @@ printed.
 | :--- | :--- |
 | ValueError | If a value is not positive and finite, or only one of the two ratios the floor needs was given. |
 
-## combine_stage_levels
+## combined_stage_level
 
 ```python
-combine_stage_levels(*levels: float) -> float
+combined_stage_level(levels: ArrayLike) -> float
 ```
 
 Equation (27): the stages of a multistage trim, added.
@@ -388,7 +388,7 @@ stage is absorbed inside the trim.
 
 | Name | Description |
 | :--- | :--- |
-| `levels` | $L_{pAe,1m,i}$, one per stage, in dB. |
+| `levels` | $L_{pAe,1m,i}$, one per stage, in dB: a sequence of two or more. |
 
 **Returns:** Their energy sum, in dB.
 
@@ -396,7 +396,7 @@ stage is absorbed inside the trim.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If fewer than two levels are given, or one is not finite. |
+| ValueError | If `levels` is not one sequence of at least two levels, or one is not finite. |
 
 ## corrected_incipient_ratio
 

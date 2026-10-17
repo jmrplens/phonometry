@@ -260,7 +260,7 @@ method_b_summary(
     scale_values: Mapping[str, ArrayLike] | ArrayLike,
     *,
     sites: ArrayLike | Sequence[object] | None = None,
-    confidence_level: float = 0.95,
+    confidence: float = 0.95,
 ) -> MethodBSummary
 ```
 
@@ -278,7 +278,7 @@ the sample standard deviation and $\gamma$ the confidence level,
 | :--- | :--- |
 | `scale_values` | The scale values from 1 to 5, read to one decimal by [`method_b_scale_values`](/phonometry/reference/api/environment/soundscape/#method_b_scale_values), `NaN` for a blank: a mapping from scale name to one value per response, a 1-D array for one scale, or a 2-D array `(responses, scales)` whose three or four columns are the scales of Figure C.7 in their printed order. |
 | `sites` | The site of each response; `None` puts every response at one site named `"all"`. |
-| `confidence_level` | The level of the interval, `0.95` by default. |
+| `confidence` | The level of the interval, `0.95` by default. |
 
 **Returns:** A [`MethodBSummary`](/phonometry/reference/api/environment/soundscape/#methodbsummary).
 
@@ -360,7 +360,7 @@ MethodBSummary(
     confidence_upper: NDArray[np.float64],
     medians: NDArray[np.float64],
     counts: NDArray[np.int64],
-    confidence_level: float,
+    confidence: float,
 )
 ```
 
@@ -386,7 +386,7 @@ deviation or interval there (`NaN`).
 | `confidence_upper` | Upper end of the confidence interval of the mean. |
 | `medians` | Median, the ordinal statistic. |
 | `counts` | Number of answers. |
-| `confidence_level` | The level of the interval, `0.95` unless chosen. |
+| `confidence` | The level of the interval, `0.95` unless chosen. |
 
 ### MethodBSummary.plot()
 

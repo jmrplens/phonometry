@@ -235,7 +235,7 @@ for reading in ("quadratic", "linear"):
         [4000.0], temperature_c=10.0, relative_humidity_percent=80.0,
         eta_interpolation=reading,
     )
-    print(reading, np.round(band.path_attenuation_db(7620.0), 1))
+    print(reading, np.round(band.path_attenuation(7620.0), 1))
 # quadratic [203.1], linear [204.4] dB en 25000 ft; la tabla D-3b imprime 204.355
 ```
 

@@ -116,10 +116,10 @@ def test_the_air_sets_the_critical_frequency() -> None:
         area=20.0,
         length1=5.0,
         length2=4.0,
-        fluid=materials.PUBLISHED_AIR,
+        fluid=materials.ABSORBER_AIR,
     )
     ratio = faster.critical_frequency / _element("floor").critical_frequency
-    assert ratio == pytest.approx((materials.PUBLISHED_AIR.speed_of_sound / 340.0) ** 2)
+    assert ratio == pytest.approx((materials.ABSORBER_AIR.speed_of_sound / 340.0) ** 2)
 
 
 def test_no_loss_factor_the_row_holds_is_ever_read() -> None:

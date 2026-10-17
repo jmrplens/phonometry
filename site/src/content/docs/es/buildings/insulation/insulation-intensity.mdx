@@ -313,7 +313,7 @@ $F_{pI}$ se mueve menos de 1 dB, el requisito se cumple.
 ### Combinar subáreas, y el signo que las acompaña
 
 Un elemento de ensayo grande o no homogéneo se barre como varias subáreas
-$S_{\mathrm{m}i}$, y `combine_subareas` hace el promedio energético ponderado por área
+$S_{\mathrm{m}i}$, y `subarea_intensity_level` hace el promedio energético ponderado por área
 de la Fórmula (11) con $S_\mathrm{m} = \sum_i |S_{\mathrm{m}i}|$ (Fórmula (12)). El
 apartado 6.4.6 añade la regla que no tiene equivalente en ningún método por
 presión: cuando la intensidad neta de una subárea apunta al *lado equivocado*,
@@ -333,11 +333,11 @@ l_in_sub = np.array([
     np.full(16, 39.0),    # 5.5 m2, hacia fuera
     np.full(16, 33.0),    # 1.5 m2, HACIA DENTRO -> área negativa
 ])
-l_in_comb, s_m = building.combine_subareas(l_in_sub, [5.0, 5.5, -1.5])
+l_in_comb, s_m = building.subarea_intensity_level(l_in_sub, [5.0, 5.5, -1.5])
 print(round(float(l_in_comb[0]), 2), s_m)     # 39.36 12.0
 
 # Ignorar el signo infla la potencia transmitida, es decir, baja RI:
-l_in_naive, _ = building.combine_subareas(l_in_sub, [5.0, 5.5, 1.5])
+l_in_naive, _ = building.subarea_intensity_level(l_in_sub, [5.0, 5.5, 1.5])
 print(round(float(l_in_naive[0] - l_in_comb[0]), 2))   # 0.24
 ```
 
@@ -367,7 +367,7 @@ $10\log_{10}(S_\mathrm{m}/S)$ de $R_I$.
 `intensity_element_normalized_difference()` un
 `IntensityElementNormalizedResult` (`d_i_n_e`, `rating`);
 `surface_pressure_intensity_indicator()` devuelve un array y
-`combine_subareas()` una pareja `(LIn, Sm)`. Los campos `rating` solo se forman
+`subarea_intensity_level()` una pareja `(LIn, Sm)`. Los campos `rating` solo se forman
 con exactamente 16 valores de tercio de octava o 5 de octava, y son `None` en
 otro caso, así que un barrido tomado sobre el rango completo de ISO 15186-1, de
 100 Hz a 5000 Hz (apartado 6.6, 18 bandas), hay que recortarlo al rango de
@@ -796,7 +796,7 @@ normalizada de elemento (apartado 3.9), con la combinación de subáreas de las
 Fórmulas (11)-(12) y el indicador presión-intensidad de la superficie,
 mediante `building.intensity_sound_reduction`, `building.adaptation_term_kc`,
 `building.intensity_element_normalized_difference`,
-`building.surface_pressure_intensity_indicator` y `building.combine_subareas`;
+`building.surface_pressure_intensity_indicator` y `building.subarea_intensity_level`;
 los índices globales reutilizan el motor verificado de ISO 717-1, y ambos
 resultados escriben la ficha de ensayo de una página con `.report()`. También
 está cubierta la variante de baja frecuencia de ISO 15186-3:2002: el índice de

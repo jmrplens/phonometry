@@ -476,10 +476,7 @@ def _chk_reflection_rating() -> Outcome:
     "1,96 times the high reproducibility of Table A.1, 0,81 dB",
 )
 def _chk_reflection_rating_uncertainty() -> Outcome:
-    positions = np.asarray(ref_reflection.TABLE_B1_POSITIONS).T
-    _, expanded = ph.environment.reflection_index_from_positions(
-        positions
-    ).expanded_uncertainty()
+    expanded = ph.environment.reflection_index_expanded_uncertainty().rating_db
     return numeric(
         ref_reflection.TABLE_B2_RATING_EXPANDED_DB, expanded, 0.005, unit="dB"
     )
@@ -491,10 +488,9 @@ def _chk_reflection_rating_uncertainty() -> Outcome:
     "the eleven cells 1,96 times the printed sR gives; the other seven are a hundredth lower, as unrounded sR would give",
 )
 def _chk_reflection_band_uncertainty() -> Outcome:
-    positions = np.asarray(ref_reflection.TABLE_B1_POSITIONS).T
-    per_band, _ = ph.environment.reflection_index_from_positions(
-        positions
-    ).expanded_uncertainty()
+    per_band = (
+        ph.environment.reflection_index_expanded_uncertainty().expanded_uncertainty
+    )
     cells = [
         (value, printed)
         for band, value, printed in zip(

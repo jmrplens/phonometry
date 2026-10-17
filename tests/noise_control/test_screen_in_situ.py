@@ -107,13 +107,13 @@ def test_an_unknown_source_kind_is_refused() -> None:
 
 
 def test_the_background_correction_is_the_boxed_formula() -> None:
-    corrected = noise_control.background_corrected_level_db([80.0], [72.0])
+    corrected = noise_control.screen_background_corrected_level([80.0], [72.0])
     expected = 10.0 * math.log10(10.0**8.0 - 10.0**7.2)
     assert corrected[0] == pytest.approx(expected)
 
 
 def test_a_wide_margin_leaves_the_level_alone() -> None:
-    corrected = noise_control.background_corrected_level_db([80.0], [60.0])
+    corrected = noise_control.screen_background_corrected_level([80.0], [60.0])
     assert corrected[0] == pytest.approx(80.0)
 
 
@@ -123,21 +123,21 @@ def test_the_correction_window_is_the_printed_one() -> None:
     assert ISO11821_MINIMUM_BACKGROUND_MARGIN_DB == 6.0
     assert ISO11821_PREFERRED_BACKGROUND_MARGIN_DB == 10.0
     # At the two ends of the window the correction is 1,2563 dB and 0,4576 dB.
-    at_six = noise_control.background_corrected_level_db([80.0], [74.0])
-    at_ten = noise_control.background_corrected_level_db([80.0], [70.0])
+    at_six = noise_control.screen_background_corrected_level([80.0], [74.0])
+    at_ten = noise_control.screen_background_corrected_level([80.0], [70.0])
     assert 80.0 - at_six[0] == pytest.approx(1.2563, abs=1e-4)
     assert 80.0 - at_ten[0] == pytest.approx(0.4576, abs=1e-3)
 
 
 def test_a_thin_margin_is_refused_rather_than_corrected() -> None:
     with pytest.raises(ValueError, match="unacceptable"):
-        noise_control.background_corrected_level_db([80.0], [76.0])
+        noise_control.screen_background_corrected_level([80.0], [76.0])
 
 
 def test_the_directivity_index_is_the_mean_less_the_position() -> None:
     levels = np.full(DIRECTIVITY_POSITIONS, 80.0)
     levels[0] = 70.0
-    index = noise_control.directivity_index_db(levels)
+    index = noise_control.screen_source_directivity_index(levels)
     mean = 10.0 * math.log10((11.0 * 10.0**8.0 + 10.0**7.0) / DIRECTIVITY_POSITIONS)
     assert index[0] == pytest.approx(mean - 70.0)
     assert index[0] > 0.0
@@ -147,11 +147,13 @@ def test_the_directivity_index_is_the_mean_less_the_position() -> None:
 def test_the_directivity_index_needs_twelve_positions() -> None:
     eleven_positions = np.full(11, 80.0)
     with pytest.raises(ValueError, match="12 positions"):
-        noise_control.directivity_index_db(eleven_positions)
+        noise_control.screen_source_directivity_index(eleven_positions)
 
 
 def test_an_omnidirectional_source_has_no_directivity() -> None:
-    index = noise_control.directivity_index_db(np.full(DIRECTIVITY_POSITIONS, 80.0))
+    index = noise_control.screen_source_directivity_index(
+        np.full(DIRECTIVITY_POSITIONS, 80.0)
+    )
     assert np.allclose(index, 0.0)
 
 
@@ -183,24 +185,22 @@ def test_a_screen_under_one_and_a_half_metres_is_reported() -> None:
 
 
 def test_the_impulse_level_is_an_arithmetic_mean() -> None:
-    assert noise_control.impulse_mean_level_db([80.0, 82.0, 81.0]) == pytest.approx(
-        81.0
-    )
+    assert noise_control.impulse_mean_level([80.0, 82.0, 81.0]) == pytest.approx(81.0)
 
 
 def test_a_spread_past_three_decibels_asks_for_three_more() -> None:
     with pytest.warns(ScreenInSituWarning, match="more repeats"):
-        noise_control.impulse_mean_level_db([80.0, 84.0, 82.0])
+        noise_control.impulse_mean_level([80.0, 84.0, 82.0])
 
 
 def test_a_spread_past_five_decibels_is_invalid() -> None:
     with pytest.raises(ValueError, match="invalid"):
-        noise_control.impulse_mean_level_db([80.0, 86.0, 82.0])
+        noise_control.impulse_mean_level([80.0, 86.0, 82.0])
 
 
 def test_fewer_than_three_repeats_is_refused() -> None:
     with pytest.raises(ValueError, match="at least"):
-        noise_control.impulse_mean_level_db([80.0, 82.0])
+        noise_control.impulse_mean_level([80.0, 82.0])
     assert IMPULSE_REPEATS == 3
     assert IMPULSE_REPEAT_DEVIATION_DB == 3.0
     assert IMPULSE_INVALID_DEVIATION_DB == 5.0
@@ -439,7 +439,7 @@ def test_the_background_correction_matches_a_printed_worked_example() -> None:
     # background, corrected to 81.7 dB. A 6 dB margin, the lower edge of the
     # window of 5.7, so the clause corrects rather than refusing.
     level, background, printed = silencer_in_situ.BARRON_EXAMPLE_3_6_DB
-    corrected = noise_control.background_corrected_level_db([level], [background])
+    corrected = noise_control.screen_background_corrected_level([level], [background])
     assert corrected[0] == pytest.approx(printed, abs=0.05)
     assert level - corrected[0] == pytest.approx(
         silencer_in_situ.BARRON_TABLE_3_4_DB[level - background], abs=0.05
@@ -457,7 +457,9 @@ def test_the_printed_correction_table_holds_across_the_window() -> None:
     }
     assert len(printed) == 7
     for margin, correction in printed.items():
-        corrected = noise_control.background_corrected_level_db([83.0], [83.0 - margin])
+        corrected = noise_control.screen_background_corrected_level(
+            [83.0], [83.0 - margin]
+        )
         assert round(83.0 - float(corrected[0]), 1) == pytest.approx(correction)
 
 
@@ -467,12 +469,12 @@ def test_the_upper_edge_of_the_window_is_still_corrected() -> None:
     # The first margin is exactly 10 dB, so this pins the edge itself: 5.7
     # drops the correction past 10 dB, not at it.
     rows = oracle.HANSEN_EXAMPLE_3_25_DB
-    corrected = noise_control.background_corrected_level_db(
+    corrected = noise_control.screen_background_corrected_level(
         [row[0] for row in rows], [row[1] for row in rows]
     )
     assert corrected[0] == pytest.approx(rows[0][2], abs=0.05)
     assert corrected[1] == pytest.approx(rows[1][2], abs=0.05)
-    assert noise_control.background_corrected_level_db([90.1], [80.0])[
+    assert noise_control.screen_background_corrected_level([90.1], [80.0])[
         0
     ] == pytest.approx(90.1)
 
@@ -482,19 +484,19 @@ def test_the_six_decibel_correction_is_the_one_two_standards_print() -> None:
     # print 1,3 dB for a 6 dB margin, from the same energy subtraction 5.7
     # boxes. Neither reads the margin as 5.7 does: both apply the value as a
     # floor below 6 dB, where ISO 11821 refuses the measurement instead.
-    corrected = noise_control.background_corrected_level_db([70.0], [64.0])
+    corrected = noise_control.screen_background_corrected_level([70.0], [64.0])
     assert 70.0 - corrected[0] == pytest.approx(
         oracle.ISO140_3_SIX_DB_MARGIN_CORRECTION_DB, abs=0.05
     )
     with pytest.raises(ValueError, match="unacceptable"):
-        noise_control.background_corrected_level_db([70.0], [64.5])
+        noise_control.screen_background_corrected_level([70.0], [64.5])
 
 
 def test_the_logarithmic_mean_under_the_directivity_index_is_printed() -> None:
     # Barron (2003) Table 3-2 and Example 3-5, folios 61, 68 and 69: ten levels
     # measured around a motor, whose energy mean is printed as 80.6 dB, and
     # the ring of three at 41.4 degrees, printed as 81.8 dB. Definition 3.10
-    # reads twelve positions on a horizontal circle, so directivity_index_db
+    # reads twelve positions on a horizontal circle, so screen_source_directivity_index
     # refuses this set; the mean it takes internally is reached here through
     # the entry point that publishes one.
     levels = list(silencer_in_situ.BARRON_EXAMPLE_3_3_LEVELS_DB)
@@ -506,4 +508,4 @@ def test_the_logarithmic_mean_under_the_directivity_index_is_printed() -> None:
         means["ring of three"], abs=0.05
     )
     with pytest.raises(ValueError, match="12 positions"):
-        noise_control.directivity_index_db(levels)
+        noise_control.screen_source_directivity_index(levels)

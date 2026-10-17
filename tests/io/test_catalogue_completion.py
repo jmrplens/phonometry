@@ -92,10 +92,14 @@ def test_the_loaders_build_what_they_built_before_but_the_listed_cells() -> None
     every row of Rossing's tables of B/A, now keyed by the row or the table,
     the notes of the eight wetted sands of Cox Table 6.7, and the decay rate of
     Harris's damping treatments, which spells its unit ``_db_per_s`` now,
-    wherever a row keys the cell by its field. Nothing else of any row moved.
+    wherever a row keys the cell by its field. Nothing else of any row moved;
+    the three catalogues renamed after their lookups are compared under the
+    names they carry now.
     """
     fp = catalogue_fingerprint
-    before = fp.row_contract(fp.resilient_layer_row(fp.one_row_shape(fp.baseline())))
+    before = fp.catalogues_named_as_their_lookups(
+        fp.row_contract(fp.resilient_layer_row(fp.one_row_shape(fp.baseline())))
+    )
     live = fp.dump()
     assert sorted(live) == sorted(before)
     moved = {
@@ -108,12 +112,12 @@ def test_the_loaders_build_what_they_built_before_but_the_listed_cells() -> None
     listed = {
         ("PUBLISHED_ABSORPTION_AREAS", key, field) for key, field in fp.EXACT_CONVERSION
     } | {("PUBLISHED_SOLIDS", key, "derived") for key in fp.MIXED_BASIS_ROWS}
-    listed.add(("PUBLISHED_POROUS", "cox-2017-table-6-5/aerogel", "note"))
+    listed.add(("PUBLISHED_POROUS_MATERIALS", "cox-2017-table-6-5/aerogel", "note"))
     listed |= {
         ("PUBLISHED_NONLINEARITY", key, "attributed_to")
         for key in before["PUBLISHED_NONLINEARITY"]
     }
-    listed |= {("PUBLISHED_GROUND", key, "note") for key in fp.WET_SAND_ROWS}
+    listed |= {("PUBLISHED_GROUND_SURFACES", key, "note") for key in fp.WET_SAND_ROWS}
     old_field, new_field = fp.DECAY_RATE_FIELD
     for key, row in before["PUBLISHED_DAMPING_TREATMENTS"].items():
         name = "PUBLISHED_DAMPING_TREATMENTS"
@@ -150,7 +154,7 @@ def test_printed_fields_keeps_what_the_page_gives_in_another_unit_or_row() -> No
     assert cells["absorption_area_500_m2"] == musician.absorption_area_500_m2
     assert cells["converted"] == musician.converted
     sheet = next(
-        row for row in materials.PUBLISHED_FLOW_RESISTANCE.values() if row.carried
+        row for row in materials.PUBLISHED_RESISTIVE_SHEETS.values() if row.carried
     )
     assert sheet.printed_fields()["carried"] == sheet.carried
 

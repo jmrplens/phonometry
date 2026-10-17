@@ -1247,7 +1247,7 @@ class MethodBSummary(OwnsArrays):
     :ivar confidence_upper: Upper end of the confidence interval of the mean.
     :ivar medians: Median, the ordinal statistic.
     :ivar counts: Number of answers.
-    :ivar confidence_level: The level of the interval, ``0.95`` unless chosen.
+    :ivar confidence: The level of the interval, ``0.95`` unless chosen.
     """
 
     items: tuple[str, ...]
@@ -1258,7 +1258,7 @@ class MethodBSummary(OwnsArrays):
     confidence_upper: NDArray[np.float64]
     medians: NDArray[np.float64]
     counts: NDArray[np.int64]
-    confidence_level: float
+    confidence: float
 
     def __post_init__(self) -> None:
         """Refuse columns that disagree with the sites and scales.
@@ -1280,10 +1280,8 @@ class MethodBSummary(OwnsArrays):
                     f"MethodBSummary: '{name}' must have shape {shape} (sites, items)."
                 )
                 raise ValueError(msg)
-        if not 0.0 < self.confidence_level < 1.0:
-            msg = (
-                "MethodBSummary: 'confidence_level' must lie strictly between 0 and 1."
-            )
+        if not 0.0 < self.confidence < 1.0:
+            msg = "MethodBSummary: 'confidence' must lie strictly between 0 and 1."
             raise ValueError(msg)
 
     def plot(
@@ -1309,7 +1307,7 @@ def method_b_summary(
     scale_values: Mapping[str, ArrayLike] | ArrayLike,
     *,
     sites: ArrayLike | Sequence[object] | None = None,
-    confidence_level: float = 0.95,
+    confidence: float = 0.95,
 ) -> MethodBSummary:
     r"""Mean, standard deviation and confidence interval of Method B
     ratings per site (ISO/TS 12913-3 B.2, Table B.1).
@@ -1326,14 +1324,14 @@ def method_b_summary(
         columns are the scales of Figure C.7 in their printed order.
     :param sites: The site of each response; ``None`` puts every response at
         one site named ``"all"``.
-    :param confidence_level: The level of the interval, ``0.95`` by default.
+    :param confidence: The level of the interval, ``0.95`` by default.
     :return: A :class:`MethodBSummary`.
     :raises ValueError: for a value outside 1 to 5, a confidence level not
         strictly between 0 and 1, or sites that do not match the responses.
     """
-    require_scalar(confidence_level, "confidence_level")
-    if not 0.0 < confidence_level < 1.0:
-        msg = "'confidence_level' must lie strictly between 0 and 1."
+    require_scalar(confidence, "confidence")
+    if not 0.0 < confidence < 1.0:
+        msg = "'confidence' must lie strictly between 0 and 1."
         raise ValueError(msg)
     questions = tuple(scale.question for scale in METHOD_B_SCALES)
     items, matrix = _columns(
@@ -1355,7 +1353,7 @@ def method_b_summary(
                 sd[i, j] = float(np.std(answered, ddof=1))
     with np.errstate(invalid="ignore"):
         dof = np.where(counts > 1, counts - 1, np.nan)
-        quantile = stats.t.ppf(0.5 * (1.0 + confidence_level), dof)
+        quantile = stats.t.ppf(0.5 * (1.0 + confidence), dof)
         half = quantile * sd / np.sqrt(np.where(counts > 0, counts, np.nan))
     return MethodBSummary(
         items=items,
@@ -1366,7 +1364,7 @@ def method_b_summary(
         confidence_upper=read_only(np.asarray(means + half, dtype=np.float64)),
         medians=read_only(medians),
         counts=read_only(counts),
-        confidence_level=float(confidence_level),
+        confidence=float(confidence),
     )
 
 

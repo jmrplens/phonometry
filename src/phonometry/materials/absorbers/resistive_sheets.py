@@ -11,7 +11,7 @@ flow resistance.
 
 Not the flow resistivity, which is the other catalogue
 ------------------------------------------------------
-:data:`~phonometry.materials.absorbers.PUBLISHED_POROUS` holds a flow
+:data:`~phonometry.materials.absorbers.PUBLISHED_POROUS_MATERIALS` holds a flow
 **resistivity**, ``sigma``, in Pa s/m2: a property of a bulk material, per
 metre of it, which has to be multiplied by a thickness before it means
 anything. This catalogue holds a flow **resistance**, ``R_s``, in Pa s/m: a
@@ -113,9 +113,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
 __all__ = [
-    "PUBLISHED_FLOW_RESISTANCE",
+    "PUBLISHED_RESISTIVE_SHEETS",
     "ResistiveSheet",
-    "resistive_sheet_named",
+    "resistive_sheets_named",
 ]
 
 #: The published tables this catalogue reads, in the order the book prints
@@ -143,7 +143,7 @@ class ResistiveSheet(CatalogueRow):
         facing, ``R_s``, in pascal seconds per metre, which is the N s/m3 the
         three tables print and the mks rayls TABLE 8.6 also heads its column
         with. Per unit **area**, so unlike the flow resistivity of
-        :data:`~phonometry.materials.absorbers.PUBLISHED_POROUS` it is not
+        :data:`~phonometry.materials.absorbers.PUBLISHED_POROUS_MATERIALS` it is not
         multiplied by a thickness.
     :ivar normalized_flow_resistance: The same resistance divided by the
         characteristic impedance of air, dimensionless, as two of the tables
@@ -245,13 +245,13 @@ def _rows() -> dict[str, ResistiveSheet]:
 #: ``materials/absorbers/data/ver-beranek-2006-table-8-7.json``, Vér & Beranek
 #: 2e TABLE 8.7, PDF page 267 (printed p. 263). The resistance is per unit
 #: area, in Pa s/m, and is not the per-metre flow resistivity of
-#: :data:`PUBLISHED_POROUS`.
-PUBLISHED_FLOW_RESISTANCE: MappingProxyType[str, ResistiveSheet] = MappingProxyType(
+#: :data:`PUBLISHED_POROUS_MATERIALS`.
+PUBLISHED_RESISTIVE_SHEETS: MappingProxyType[str, ResistiveSheet] = MappingProxyType(
     _rows()
 )
 
 
-def resistive_sheet_named(
+def resistive_sheets_named(
     name: str, *, catalogue: Mapping[str, ResistiveSheet] | None = None
 ) -> tuple[ResistiveSheet, ...]:
     """Every facing a page labels *name*, matched whole and without case.
@@ -267,11 +267,11 @@ def resistive_sheet_named(
     :param name: The label as its page prints it: ``"80"``, ``"1584"``,
         ``"FM 122"``.
     :param catalogue: The rows to search in place of
-        :data:`PUBLISHED_FLOW_RESISTANCE`: a catalogue of your own that
+        :data:`PUBLISHED_RESISTIVE_SHEETS`: a catalogue of your own that
         :func:`phonometry.io.read_catalogue` returns,
-        ``PUBLISHED_FLOW_RESISTANCE | mine`` to search both at once, or any
+        ``PUBLISHED_RESISTIVE_SHEETS | mine`` to search both at once, or any
         mapping of key to row (Default: ``None``, which searches
-        :data:`PUBLISHED_FLOW_RESISTANCE`).
+        :data:`PUBLISHED_RESISTIVE_SHEETS`).
     :return: The matching rows, in catalogue order. Empty when none match.
     :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
         row that is not a :class:`ResistiveSheet`, naming its key.
@@ -281,9 +281,9 @@ def resistive_sheet_named(
         row
         for row in rows_to_search(
             catalogue,
-            PUBLISHED_FLOW_RESISTANCE,
+            PUBLISHED_RESISTIVE_SHEETS,
             ResistiveSheet,
-            "resistive_sheet_named",
+            "resistive_sheets_named",
         )
         if search_text(row.name) == wanted
     )

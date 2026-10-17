@@ -17,7 +17,7 @@ import pytest
 
 from phonometry import environment, io, materials
 from phonometry.environment.propagation import (
-    PUBLISHED_GROUND,
+    PUBLISHED_GROUND_SURFACES,
     GroundSurface,
     linear_sound_speed_profile,
 )
@@ -32,11 +32,15 @@ pytestmark = pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
 BANDS = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0])
 
 #: Harmonoise class D, "normal uncompacted ground", as Bies prints it.
-CLASS_D = PUBLISHED_GROUND["bies-2017-table-5-2/normal_uncompacted_ground"]
+CLASS_D = PUBLISHED_GROUND_SURFACES["bies-2017-table-5-2/normal_uncompacted_ground"]
 #: A sports field Cox prints three times, once per model it was fitted with.
-FIELD_DB = PUBLISHED_GROUND["cox-2017-table-6-7/sports_field_delany_bazley"]
-FIELD_SEMI = PUBLISHED_GROUND["cox-2017-table-6-7/sports_field_semi_phenomenological"]
-FIELD_VARIABLE = PUBLISHED_GROUND["cox-2017-table-6-7/sports_field_variable_porosity"]
+FIELD_DB = PUBLISHED_GROUND_SURFACES["cox-2017-table-6-7/sports_field_delany_bazley"]
+FIELD_SEMI = PUBLISHED_GROUND_SURFACES[
+    "cox-2017-table-6-7/sports_field_semi_phenomenological"
+]
+FIELD_VARIABLE = PUBLISHED_GROUND_SURFACES[
+    "cox-2017-table-6-7/sports_field_variable_porosity"
+]
 
 
 def test_the_medium_is_the_model_of_the_printed_resistivity() -> None:
@@ -123,7 +127,7 @@ def test_the_parabolic_equation_takes_the_row_at_its_frequency() -> None:
 
 
 def test_an_interval_is_refused_in_the_pages_terms() -> None:
-    lawn = PUBLISHED_GROUND["bies-2017-table-5-1/lawn"]
+    lawn = PUBLISHED_GROUND_SURFACES["bies-2017-table-5-1/lawn"]
     assert lawn.ranges["flow_resistivity_pa_s_m2"] == (250_000.0, 400_000.0)
     with pytest.raises(
         ValueError,
@@ -197,7 +201,7 @@ WET_SANDS = tuple(
 def test_a_sand_the_text_ties_to_another_model_is_refused_by_both(
     key: str, model: str
 ) -> None:
-    sand = PUBLISHED_GROUND[key]
+    sand = PUBLISHED_GROUND_SURFACES[key]
     with pytest.raises(
         ValueError,
         match=r"whose parameters the text beside the table gives as those of "
@@ -211,12 +215,13 @@ def test_every_fit_a_published_row_names_is_one_the_method_knows() -> None:
     """A new table whose rows name a fit fails here until the fit is mapped."""
     named = {
         row.variant
-        for row in PUBLISHED_GROUND.values()
+        for row in PUBLISHED_GROUND_SURFACES.values()
         if row.variant.lower().startswith("fitted")
     }
     assert named == set(module._FITS) == set(FOOTNOTE_MODELS)
     tied = {
-        (PUBLISHED_GROUND[key].table, PUBLISHED_GROUND[key].name) for key in WET_SANDS
+        (PUBLISHED_GROUND_SURFACES[key].table, PUBLISHED_GROUND_SURFACES[key].name)
+        for key in WET_SANDS
     }
     assert tied == set(module._FITS_IN_TEXT)
 
@@ -226,7 +231,7 @@ def test_every_published_row_goes_only_into_the_models_its_page_allows(
     model: str,
 ) -> None:
     """Each row with one printed resistivity, whatever marks its fit or none."""
-    for key, row in PUBLISHED_GROUND.items():
+    for key, row in PUBLISHED_GROUND_SURFACES.items():
         try:
             row.printed("flow_resistivity_pa_s_m2")
         except ValueError:

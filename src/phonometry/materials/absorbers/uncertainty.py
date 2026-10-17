@@ -125,12 +125,12 @@ _ALPHA_W_SIGMA: dict[str, float] = {"reproducibility": 0.035, "repeatability": 0
 #: Single-number rating ``DLα,NRD`` scale factors (Clause 7, Formulae (8)/(9)).
 _DLALPHA_FACTOR: dict[str, float] = {"reproducibility": 0.10, "repeatability": 0.02}
 
-#: Float-key match tolerance for the Table 3 confidence-level lookup; far below
+#: Float-key match tolerance for the Table 3 coverage-probability lookup; far below
 #: the 0.009 minimum gap between tabulated levels.
-_CONFIDENCE_MATCH_TOL = 1e-9
+_COVERAGE_MATCH_TOL = 1e-9
 
 #: Table 3 (Clause 8): coverage factors ``k`` for a Gaussian measurand, keyed by
-#: confidence level as a fraction. Values are the standard's rounded factors
+#: coverage probability as a fraction. Values are the standard's rounded factors
 #: (1,0 / 1,3 / 1,6 / 2,0 / 2,6 / 3,3), which differ from the Gaussian-exact
 #: factors of ISO 12999-1 Table 8.
 _COVERAGE_FACTORS: dict[float, float] = {
@@ -172,20 +172,18 @@ def _round_report(u: np.ndarray, decimals: int) -> np.ndarray:
     return np.floor(np.asarray(u, dtype=np.float64) * scale + 0.5) / scale
 
 
-def absorption_coverage_factor(confidence: float = 0.95) -> float:
-    """Return the coverage factor ``k`` for a confidence level (Table 3).
+def absorption_coverage_factor(coverage: float = 0.95) -> float:
+    """Return the coverage factor ``k`` for a coverage probability (Table 3).
 
-    :param confidence: Confidence level as a fraction; one of
+    :param coverage: Coverage probability as a fraction; one of
         ``0.68, 0.80, 0.90, 0.95, 0.99, 0.999`` (Table 3, Gaussian measurand).
-    :raises ValueError: Confidence level not tabulated in Table 3.
+    :raises ValueError: Coverage probability not tabulated in Table 3.
     """
     for level, k in _COVERAGE_FACTORS.items():
-        if abs(level - confidence) < _CONFIDENCE_MATCH_TOL:
+        if abs(level - coverage) < _COVERAGE_MATCH_TOL:
             return k
     valid = ", ".join(f"{level:g}" for level in _COVERAGE_FACTORS)
-    msg = (
-        f"Confidence level {confidence!r} is not tabulated in Table 3. Valid: {valid}."
-    )
+    msg = f"Coverage probability {coverage!r} is not tabulated in Table 3. Valid: {valid}."
     raise ValueError(msg)
 
 
@@ -311,7 +309,7 @@ def _band_uncertainty(
     values_name: str,
     quantity: str,
     condition: str,
-    confidence: float,
+    coverage: float,
     band_kind: str,
 ) -> AbsorptionUncertaintyResult:
     r"""Shared engine for the coefficient formulae
@@ -332,7 +330,7 @@ def _band_uncertainty(
     m, n = _table_constants(frequencies, table, band_kind)
     sigma_r = m * values + n
     u = sigma_r if condition == _REPRODUCIBILITY else _REPEATABILITY_FACTOR * sigma_r
-    k = absorption_coverage_factor(confidence)
+    k = absorption_coverage_factor(coverage)
     return AbsorptionUncertaintyResult(
         quantity=quantity,
         condition=condition,
@@ -349,7 +347,7 @@ def sound_absorption_coefficient_uncertainty(
     frequencies: float | Sequence[float] | np.ndarray,
     *,
     condition: str = "reproducibility",
-    confidence: float = 0.95,
+    coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:
     r"""Uncertainty of the ISO 354 sound absorption coefficient ``αs``
     (Clause 5).
@@ -361,9 +359,9 @@ def sound_absorption_coefficient_uncertainty(
     :param frequencies: One-third-octave midband frequencies in Hz (Table 1,
         63-5000), aligned with ``alpha``.
     :param condition: ``"reproducibility"`` (default) or ``"repeatability"``.
-    :param confidence: Confidence level for the coverage factor ``k`` (Table 3).
+    :param coverage: Coverage probability for the coverage factor ``k`` (Table 3).
     :raises ValueError: Mismatched shapes, an untabulated frequency, an unknown
-        ``condition`` or an untabulated ``confidence``.
+        ``condition`` or an untabulated ``coverage``.
     """
     return _band_uncertainty(
         _finite_bands(alpha, "alpha"),
@@ -373,7 +371,7 @@ def sound_absorption_coefficient_uncertainty(
         values_name="alpha",
         quantity="absorption_coefficient",
         condition=_condition(condition),
-        confidence=confidence,
+        coverage=coverage,
         band_kind="one-third-octave",
     )
 
@@ -383,7 +381,7 @@ def equivalent_area_uncertainty(
     frequencies: float | Sequence[float] | np.ndarray,
     *,
     condition: str = "reproducibility",
-    confidence: float = 0.95,
+    coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:
     r"""Uncertainty of the ISO 354 equivalent sound absorption area ``AT``
     (Clause 5).
@@ -395,9 +393,9 @@ def equivalent_area_uncertainty(
     :param frequencies: One-third-octave midband frequencies in Hz (Table 1),
         aligned with ``area``.
     :param condition: ``"reproducibility"`` (default) or ``"repeatability"``.
-    :param confidence: Confidence level for the coverage factor ``k`` (Table 3).
+    :param coverage: Coverage probability for the coverage factor ``k`` (Table 3).
     :raises ValueError: Mismatched shapes, an untabulated frequency, an unknown
-        ``condition`` or an untabulated ``confidence``.
+        ``condition`` or an untabulated ``coverage``.
     """
     a = _finite_bands(area, "area")
     f = _finite_bands(frequencies, "frequencies")
@@ -410,7 +408,7 @@ def equivalent_area_uncertainty(
     cond = _condition(condition)
     sigma_r = m * a + n * _EQUIV_AREA_REFERENCE_S
     u = sigma_r if cond == _REPRODUCIBILITY else _REPEATABILITY_FACTOR * sigma_r
-    k = absorption_coverage_factor(confidence)
+    k = absorption_coverage_factor(coverage)
     return AbsorptionUncertaintyResult(
         quantity="equivalent_area",
         condition=cond,
@@ -427,7 +425,7 @@ def practical_coefficient_uncertainty(
     frequencies: float | Sequence[float] | np.ndarray,
     *,
     condition: str = "reproducibility",
-    confidence: float = 0.95,
+    coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:
     r"""Uncertainty of the ISO 11654 practical absorption coefficient ``αp``
     (Clause 6).
@@ -439,9 +437,9 @@ def practical_coefficient_uncertainty(
     :param frequencies: Octave midband frequencies in Hz (Table 2, 250-4000),
         aligned with ``alpha_p``.
     :param condition: ``"reproducibility"`` (default) or ``"repeatability"``.
-    :param confidence: Confidence level for the coverage factor ``k`` (Table 3).
+    :param coverage: Coverage probability for the coverage factor ``k`` (Table 3).
     :raises ValueError: Mismatched shapes, an untabulated frequency, an unknown
-        ``condition`` or an untabulated ``confidence``.
+        ``condition`` or an untabulated ``coverage``.
     """
     return _band_uncertainty(
         _finite_bands(alpha_p, "alpha_p"),
@@ -451,7 +449,7 @@ def practical_coefficient_uncertainty(
         values_name="alpha_p",
         quantity="practical_coefficient",
         condition=_condition(condition),
-        confidence=confidence,
+        coverage=coverage,
         band_kind="octave",
     )
 
@@ -462,9 +460,9 @@ def _single_number(
     *,
     quantity: str,
     condition: str,
-    confidence: float,
+    coverage: float,
 ) -> AbsorptionUncertaintyResult:
-    k = absorption_coverage_factor(confidence)
+    k = absorption_coverage_factor(coverage)
     empty = np.asarray([], dtype=np.float64)
     return AbsorptionUncertaintyResult(
         quantity=quantity,
@@ -481,7 +479,7 @@ def weighted_coefficient_uncertainty(
     alpha_w: float = 0.0,
     *,
     condition: str = "reproducibility",
-    confidence: float = 0.95,
+    coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:
     r"""Uncertainty of the ISO 11654 weighted absorption coefficient ``αw``
     (Clause 7).
@@ -493,8 +491,8 @@ def weighted_coefficient_uncertainty(
     :param alpha_w: Weighted sound absorption coefficient ``αw`` (carried through
         for the reported interval; does not affect ``u``).
     :param condition: ``"reproducibility"`` (default) or ``"repeatability"``.
-    :param confidence: Confidence level for the coverage factor ``k`` (Table 3).
-    :raises ValueError: Unknown ``condition`` or an untabulated ``confidence``.
+    :param coverage: Coverage probability for the coverage factor ``k`` (Table 3).
+    :raises ValueError: Unknown ``condition`` or an untabulated ``coverage``.
     """
     cond = _condition(condition)
     return _single_number(
@@ -502,7 +500,7 @@ def weighted_coefficient_uncertainty(
         _ALPHA_W_SIGMA[cond],
         quantity="weighted_coefficient",
         condition=cond,
-        confidence=confidence,
+        coverage=coverage,
     )
 
 
@@ -510,7 +508,7 @@ def single_number_rating_uncertainty(
     dl_alpha: float,
     *,
     condition: str = "reproducibility",
-    confidence: float = 0.95,
+    coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:
     r"""Uncertainty of the EN 1793-1 single-number rating ``DLα,NRD``
     (Clause 7).
@@ -520,9 +518,9 @@ def single_number_rating_uncertainty(
 
     :param dl_alpha: Single-number rating ``DLα,NRD``, in dB (non-negative).
     :param condition: ``"reproducibility"`` (default) or ``"repeatability"``.
-    :param confidence: Confidence level for the coverage factor ``k`` (Table 3).
+    :param coverage: Coverage probability for the coverage factor ``k`` (Table 3).
     :raises ValueError: Negative ``dl_alpha``, unknown ``condition`` or an
-        untabulated ``confidence``.
+        untabulated ``coverage``.
     """
     require_scalar(dl_alpha, "dl_alpha")
     value = float(dl_alpha)
@@ -535,5 +533,5 @@ def single_number_rating_uncertainty(
         _DLALPHA_FACTOR[cond] * value,
         quantity="single_number_rating",
         condition=cond,
-        confidence=confidence,
+        coverage=coverage,
     )

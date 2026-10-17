@@ -789,18 +789,20 @@ def test_the_six_percent_porosities_of_cox_are_held_as_misprinted() -> None:
     cent, so the six cells are empty and ``misprinted`` quotes what the page
     prints. Every other porosity the catalogue holds is a fraction.
     """
-    from phonometry.environment.propagation import PUBLISHED_GROUND
+    from phonometry.environment.propagation import PUBLISHED_GROUND_SURFACES
 
     held = {
         key: row
-        for key, row in PUBLISHED_GROUND.items()
+        for key, row in PUBLISHED_GROUND_SURFACES.items()
         if "porosity" in row.misprinted
     }
     assert sorted(held) == sorted(f"cox-2017-table-6-7/{key}" for key in _COX_PER_CENT)
     for row in held.values():
         assert row.porosity is None
         assert "porosity" not in row.uncertainty
-    fractions = [row.porosity for row in PUBLISHED_GROUND.values() if row.porosity]
+    fractions = [
+        row.porosity for row in PUBLISHED_GROUND_SURFACES.values() if row.porosity
+    ]
     assert fractions
     assert all(0.0 < value <= 1.0 for value in fractions)
 
@@ -810,9 +812,9 @@ def test_why_a_per_cent_porosity_is_missing_quotes_the_page(
     key: str, figure: str
 ) -> None:
     """The answer is what the page prints, not that it printed nothing."""
-    from phonometry.environment.propagation import PUBLISHED_GROUND
+    from phonometry.environment.propagation import PUBLISHED_GROUND_SURFACES
 
-    row = PUBLISHED_GROUND[f"cox-2017-table-6-7/{key}"]
+    row = PUBLISHED_GROUND_SURFACES[f"cox-2017-table-6-7/{key}"]
     why = row.why_missing("porosity")
     assert why.startswith(f"the page prints “{figure}” in its Porosity column")
     assert "docs/ERRATA.md" in why
@@ -822,9 +824,9 @@ def test_why_a_per_cent_porosity_is_missing_quotes_the_page(
 
 def test_a_porosity_the_page_leaves_empty_still_says_so() -> None:
     """Tall crops prints a dash, which is a different answer from the six."""
-    from phonometry.environment.propagation import PUBLISHED_GROUND
+    from phonometry.environment.propagation import PUBLISHED_GROUND_SURFACES
 
-    row = PUBLISHED_GROUND["cox-2017-table-6-7/tall_crops"]
+    row = PUBLISHED_GROUND_SURFACES["cox-2017-table-6-7/tall_crops"]
     assert row.why_missing("porosity") == (
         "the page does not give it, and it does not follow from the cells that it does"
     )

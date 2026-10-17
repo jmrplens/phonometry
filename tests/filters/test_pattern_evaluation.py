@@ -366,9 +366,9 @@ def test_binding_margin_reads_the_requirement_and_refuses_a_foreign_class() -> N
     bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[500, 2000])
     result = filters.verify_filter_class(bank)
     expected = min(b["bandwidth_margin_class1_db"] for b in result.bands)
-    assert result.binding_margin_db("effective_bandwidth", 1) == expected
+    assert result.binding_margin("effective_bandwidth", 1) == expected
     with pytest.raises(KeyError, match="class 0 is not one of"):
-        result.binding_margin_db("effective_bandwidth", 0)
+        result.binding_margin("effective_bandwidth", 0)
 
 
 def test_a_verdict_refuses_a_requirement_carried_by_some_bands_only() -> None:

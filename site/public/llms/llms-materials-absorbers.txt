@@ -129,7 +129,7 @@ Eq. (6), $c = 331 + 0.6\,t$; the sound absorption coefficient is
 $\alpha_\mathrm{s} = (A_2 - A_1)/S$ (Eq. (8)/(9)). The coefficient may exceed 1.0 from
 edge and diffraction effects (Clause 3.7 NOTE 2) and is never clamped. Air
 attenuation enters only through the per-band coefficient $m$ (default 0, the
-zero-attenuation reference); pass `attenuation_from_alpha` of an ISO 9613-1
+zero-attenuation reference); pass `power_attenuation_from_alpha` of an ISO 9613-1
 value when it is needed.
 
 ISO 354 is a characterisation: it produces the $\alpha_\mathrm{s}$ spectrum, not a
@@ -265,7 +265,7 @@ $$
 
 with $c$ from the room air temperature $t$ in °C (valid 15–30 °C) and $m$ the
 power attenuation coefficient of air (default 0; convert an ISO 9613-1
-$\alpha$ in dB/m with `attenuation_from_alpha`). Because edge and diffraction
+$\alpha$ in dB/m with `power_attenuation_from_alpha`). Because edge and diffraction
 effects can scatter more energy than the sample's flat area intercepts,
 $\alpha_\mathrm{s}$ may exceed 1.0 and is never clamped (ISO 354 Clause 3.7).
 
@@ -327,7 +327,7 @@ here checks any of it.
 
 `absorption_area()` returns the equivalent absorption area $A$ (m²) with the
 shape of `t60`; `absorption_coefficient()` returns $\alpha_\mathrm{s}$;
-`attenuation_from_alpha(alpha)` converts an ISO 9613-1 $\alpha$ (dB/m) to $m$.
+`power_attenuation_from_alpha(alpha)` converts an ISO 9613-1 $\alpha$ (dB/m) to $m$.
 
 
 ## 3. Weighted rating and absorption class (ISO 11654)
@@ -593,7 +593,7 @@ freqs = [63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
 alpha_s = [0.33, 0.35, 0.39, 0.38, 0.37, 0.36, 0.36, 0.36, 0.43, 0.49,
            0.58, 0.63, 0.68, 0.71, 0.73, 0.75, 0.77, 0.79, 0.81, 0.81]
-result = materials.sound_absorption_coefficient_uncertainty(alpha_s, freqs, confidence=0.95)
+result = materials.sound_absorption_coefficient_uncertainty(alpha_s, freqs, coverage=0.95)
 result.plot()   # alpha_s with the +/-U (k = 2) reproducibility ribbon
 plt.show()
 ```
@@ -603,7 +603,7 @@ plt.show()
 from phonometry import materials
 
 # Reproducibility uncertainty of alpha_s at 1000 Hz (Table 1: m=0.040, n=0.015).
-r = materials.sound_absorption_coefficient_uncertainty([0.68], [1000], confidence=0.95)
+r = materials.sound_absorption_coefficient_uncertainty([0.68], [1000], coverage=0.95)
 print(round(float(r.standard_uncertainty[0]), 4))            # 0.0422 (sigma_R)
 print(float(r.reported_expanded_uncertainty[0]))             # 0.08  (U, k=2)
 r.plot()   # the figure above: alpha_s with its +/-U (k = 2) ribbon
@@ -1828,7 +1828,7 @@ $\rho_\mathrm{e} \to (\alpha_\infty \rho_0/\phi)(1 + (1-j)\,\delta_v/\Lambda)$ a
 frequency, and the isothermal-to-adiabatic transition in $K_\mathrm{e}$.
 
 Five parameters is four more than a caller usually has, so the specimens this
-guide computes with are published as `PUBLISHED_POROUS`, keyed by the table
+guide computes with are published as `PUBLISHED_POROUS_MATERIALS`, keyed by the table
 they were read from and the row they are: `'allard-2009-table-6-1/domisol_coffrage'`
 is the glass wool of Allard & Atalla Table 6.1 (printed p. 124), whose
 characteristic lengths are printed in the prose of their Sect. 6.5.4 on the
@@ -2012,7 +2012,7 @@ from phonometry import materials
 
 # The soft fibrous layer of Allard & Atalla Table 11.2, 50 mm, published
 # once with the page it was read on.
-soft = materials.PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
+soft = materials.PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-2/soft_fibrous"]
 print(soft.source)
 # Allard & Atalla 2e Table 11.2, PDF page 260 (printed p. 254)
 
@@ -2068,7 +2068,7 @@ import numpy as np
 from phonometry import materials
 
 bands = np.array([100, 125, 160, 200, 250, 315, 400, 500, 1000], dtype=float)
-soft = materials.PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
+soft = materials.PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-2/soft_fibrous"]
 rigid = soft.medium(bands)
 limp = materials.limp_frame(
     rigid, frame_density=soft.frame_density_kg_m3, porosity=soft.porosity
@@ -2165,7 +2165,7 @@ import numpy as np
 from phonometry import materials
 
 # The published glass wool "Domisol Coffrage", 100 mm, glued.
-glass_wool = materials.PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
+glass_wool = materials.PUBLISHED_POROUS_MATERIALS["allard-2009-table-6-1/domisol_coffrage"]
 print(glass_wool.source)
 # Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123); Allard & Atalla 2e Table 11.8, PDF page 281 (printed p. 275)
 
@@ -2229,7 +2229,7 @@ import numpy as np
 from phonometry import materials
 
 bands = np.array([250, 315, 400, 500, 630, 800, 1000], dtype=float)
-glass_wool = materials.PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
+glass_wool = materials.PUBLISHED_POROUS_MATERIALS["allard-2009-table-6-1/domisol_coffrage"]
 shear, poisson = glass_wool.frame_constants()
 med = glass_wool.medium(bands)
 poroelastic = materials.PoroelasticLayer(

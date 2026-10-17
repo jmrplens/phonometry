@@ -105,7 +105,7 @@ SCHIRMER_LEAK_RATIO = oracle.SCHIRMER_LEAK_RATIO
 
 def _barron_pressure() -> noise_control.EnclosureInsulationResult:
     """Equations (3) and (4) on the two printed sound pressure spectra."""
-    return noise_control.sound_pressure_insulation(
+    return noise_control.enclosure_sound_pressure_insulation(
         BARRON_LP_WITHOUT_DB,
         BARRON_LP_WITH_DB,
         frequencies=OCTAVES_HZ,
@@ -151,7 +151,7 @@ def test_barron_example_7_8_annex_c_estimate() -> None:
     to the tenth the book prints. That equality is what pins the sign of the
     A-weighting term the annex prints as an attenuation.
     """
-    estimate = noise_control.estimated_a_weighted_insulation(
+    estimate = noise_control.estimated_a_weighted_enclosure_insulation(
         BARRON_LP_WITHOUT_DB, BARRON_IL_DB, frequencies=OCTAVES_HZ
     )
     assert estimate == _barron_pressure().a_weighted_insulation
@@ -169,7 +169,7 @@ def test_barron_example_7_8_sound_power_insulation() -> None:
     the table itself is inconsistent in, and the test below says how.
     """
     keep = OCTAVES_HZ != oracle.BARRON_TABLE_7_5_INCONSISTENT_BAND_HZ
-    result = noise_control.sound_power_insulation(
+    result = noise_control.enclosure_sound_power_insulation(
         BARRON_LW_DB[keep],
         BARRON_LW_OUT_DB[keep],
         frequencies=OCTAVES_HZ[keep],
@@ -225,7 +225,7 @@ def test_harris_estimated_reduction(case: str) -> None:
     construction rather than a quotation.
     """
     reduction_db, printed_dba = HARRIS_CASES[case]
-    estimate = noise_control.estimated_a_weighted_insulation(
+    estimate = noise_control.estimated_a_weighted_enclosure_insulation(
         HARRIS_BEFORE_DB, reduction_db, frequencies=OCTAVES_HZ
     )
     assert estimate == pytest.approx(HARRIS_BEFORE_DBA - printed_dba, abs=1.0), case
@@ -241,7 +241,7 @@ def test_harris_example_1a_is_the_loose_case() -> None:
     loose = "Example 1(a), plywood"
     departures = {}
     for case, (reduction, printed) in HARRIS_CASES.items():
-        estimate = noise_control.estimated_a_weighted_insulation(
+        estimate = noise_control.estimated_a_weighted_enclosure_insulation(
             HARRIS_BEFORE_DB, reduction, frequencies=OCTAVES_HZ
         )
         departures[case] = abs(estimate - (HARRIS_BEFORE_DBA - printed))
@@ -257,7 +257,7 @@ def test_iso717_calculation_example_through_clause_7_4() -> None:
     enclosure physics, because clause 7.4 contains none: the same table backs
     the rating rows of the building domain.
     """
-    rated = noise_control.weighted_insulation(
+    rated = noise_control.weighted_enclosure_insulation(
         ISO717_TABLE_C1_DB, quantity="sound_power", band_fraction=3
     )
     assert (rated.rating, rated.c, rated.ctr) == (30, -2, -3)
@@ -291,7 +291,9 @@ def test_clause_9_4_rounding_is_rule_a_of_iso_80000_1() -> None:
         )
     }
     given = [multiple for multiple, _ in printed.values()]
-    rounded = noise_control.sound_power_insulation(given, [0.0] * len(given)).rounded()
+    rounded = noise_control.enclosure_sound_power_insulation(
+        given, [0.0] * len(given)
+    ).rounded()
     for got, (name, (_, want)) in zip(rounded.tolist(), printed.items(), strict=True):
         assert got == want, name
 
@@ -318,7 +320,7 @@ def test_suva_a_weighted_sound_power_total() -> None:
     """
     reference = np.full(SUVA_LW_DB.size, -300.0)
     reference[SUVA_OCTAVES_HZ == 1000.0] = 0.0
-    result = noise_control.sound_power_insulation(
+    result = noise_control.enclosure_sound_power_insulation(
         SUVA_LW_DB,
         reference,
         frequencies=SUVA_OCTAVES_HZ,

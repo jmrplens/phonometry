@@ -54,7 +54,7 @@ The two guards worth knowing
 Clause 5.7 corrects for the background with the ordinary energy subtraction,
 not with a table, and it draws two hard lines: under 6 dB "the environmental
 conditions are not acceptable", and over 10 dB there is nothing to correct.
-[`background_corrected_level_db`](/phonometry/reference/api/noise_control/screen-in-situ/#background_corrected_level_db) refuses the first and skips the second.
+[`screen_background_corrected_level`](/phonometry/reference/api/noise_control/screen-in-situ/#screen_background_corrected_level) refuses the first and skips the second.
 
 Clause 5.9 is the other: the A-weighted attenuation $D_{p\mathrm{A}}$ **shall not
 be determined when an artificial sound source is used**, because an A-weighted
@@ -63,46 +63,6 @@ not the machine's. [`screen_attenuation`](/phonometry/reference/api/noise_contro
 number the standard forbids.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
-
-## background_corrected_level_db
-
-```python
-background_corrected_level_db(
-    levels: ArrayLike,
-    background_levels: ArrayLike,
-) -> NDArray[np.float64]
-```
-
-The level with the background taken off, clause 5.7.
-
-$$
-L_p = 10 \lg \left(10^{L_{ps}/10} - 10^{L_{pb}/10}\right)
-$$
-
-The plain energy subtraction, applied band by band at each measurement
-position. Where ISO 11820 corrects from a stepped table, this standard
-prints the formula and boxes it.
-
-Clause 5.7 draws the window itself. A margin over 10 dB needs no
-correction and the level is returned unchanged. A margin under 6 dB means
-"the environmental conditions are not acceptable", which is a refusal and
-not a warning: the background it names includes wind-generated noise, so
-the remedy is to wait for a quieter day rather than to correct harder.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `levels` | The level with the sources on, per band, in decibels. |
-| `background_levels` | The level with them off, per band, in decibels. |
-
-**Returns:** The corrected level per band, in decibels.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | For inputs that do not match band for band, or a margin under [`ISO11821_MINIMUM_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/noise_control/screen-in-situ/#iso11821_minimum_background_margin_db). |
 
 ## BACKGROUND_CORRECTION_WINDOW_DB
 
@@ -119,41 +79,6 @@ BACKGROUND_CORRECTION_WINDOW_DB = (6.0, 10.0)
 ```python
 DIRECTIVITY_CIRCLE_RADIUS_M = 1.5
 ```
-
-## directivity_index_db
-
-```python
-directivity_index_db(levels: ArrayLike) -> NDArray[np.float64]
-```
-
-The directivity index of a source, definition 3.10.
-
-$DI_i = L_{360} - L_{30,i}$, where $L_{360}$ is the
-logarithmic mean of the levels at twelve positions evenly spaced on a
-horizontal circle of about 1,5 m radius around the source, and
-$L_{30,i}$ the level at one of them.
-
-The sign is the way round to notice. Written as the mean less the
-position, the index is **positive where the position is quieter than the
-mean**, which is the opposite of the directivity index of the emission
-standards. Clause 5.2.2 then reads naturally: an artificial source
-qualifies while no position falls more than
-[`DIRECTIVITY_INDEX_LIMIT_DB`](/phonometry/reference/api/noise_control/screen-in-situ/#directivity_index_limit_db) below the mean, which is a bound on how
-much of a shadow the source casts on itself.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `levels` | The levels at the twelve positions, in decibels. |
-
-**Returns:** $DI_i$ at each position, in decibels.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | For a count that is not [`DIRECTIVITY_POSITIONS`](/phonometry/reference/api/noise_control/screen-in-situ/#directivity_positions). |
 
 ## DIRECTIVITY_INDEX_LIMIT_DB
 
@@ -187,10 +112,10 @@ ENGINEERING_STANDARD_DEVIATION_DB = 2.0
 IMPULSE_INVALID_DEVIATION_DB = 5.0
 ```
 
-## impulse_mean_level_db
+## impulse_mean_level
 
 ```python
-impulse_mean_level_db(repeat_levels_db: ArrayLike) -> float
+impulse_mean_level(repeat_levels_db: ArrayLike) -> float
 ```
 
 The level of an impulsive measurement, 5.6.2.1.
@@ -356,7 +281,7 @@ $D_p = L_{p1} - L_{p2}$, the unscreened level less the screened one
 at the same position, band by band. Clause 5.8 adds the condition that
 makes the subtraction mean anything: either both levels are time-averaged,
 or both are arithmetic means of several $L_{S\text{max}}$ values.
-The two kinds are not mixed, and [`impulse_mean_level_db`](/phonometry/reference/api/noise_control/screen-in-situ/#impulse_mean_level_db) is the
+The two kinds are not mixed, and [`impulse_mean_level`](/phonometry/reference/api/noise_control/screen-in-situ/#impulse_mean_level) is the
 second of them.
 
 $D_{p\mathrm{A}} = L_{p\mathrm{A}1} - L_{p\mathrm{A}2}$ is clause 5.9, and it carries the
@@ -386,6 +311,46 @@ machine's, so the pair is refused rather than computed under
 | :--- | :--- |
 | ValueError | For spectra that do not match, a band centre or a distance that is not strictly positive, an unknown source kind, half an A-weighted pair, or an A-weighted pair with an artificial source. |
 
+## screen_background_corrected_level
+
+```python
+screen_background_corrected_level(
+    levels: ArrayLike,
+    background_levels: ArrayLike,
+) -> NDArray[np.float64]
+```
+
+The level with the background taken off, clause 5.7.
+
+$$
+L_p = 10 \lg \left(10^{L_{ps}/10} - 10^{L_{pb}/10}\right)
+$$
+
+The plain energy subtraction, applied band by band at each measurement
+position. Where ISO 11820 corrects from a stepped table, this standard
+prints the formula and boxes it.
+
+Clause 5.7 draws the window itself. A margin over 10 dB needs no
+correction and the level is returned unchanged. A margin under 6 dB means
+"the environmental conditions are not acceptable", which is a refusal and
+not a warning: the background it names includes wind-generated noise, so
+the remedy is to wait for a quieter day rather than to correct harder.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `levels` | The level with the sources on, per band, in decibels. |
+| `background_levels` | The level with them off, per band, in decibels. |
+
+**Returns:** The corrected level per band, in decibels.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For inputs that do not match band for band, or a margin under [`ISO11821_MINIMUM_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/noise_control/screen-in-situ/#iso11821_minimum_background_margin_db). |
+
 ## SCREEN_DISTANCE_FACTORS
 
 *Constant* (`tuple`).
@@ -393,6 +358,41 @@ machine's, so the pair is refused rather than computed under
 ```python
 SCREEN_DISTANCE_FACTORS = (0.25, 0.5, 1.0, 2.0)
 ```
+
+## screen_source_directivity_index
+
+```python
+screen_source_directivity_index(levels: ArrayLike) -> NDArray[np.float64]
+```
+
+The directivity index of a source, definition 3.10.
+
+$DI_i = L_{360} - L_{30,i}$, where $L_{360}$ is the
+logarithmic mean of the levels at twelve positions evenly spaced on a
+horizontal circle of about 1,5 m radius around the source, and
+$L_{30,i}$ the level at one of them.
+
+The sign is the way round to notice. Written as the mean less the
+position, the index is **positive where the position is quieter than the
+mean**, which is the opposite of the directivity index of the emission
+standards. Clause 5.2.2 then reads naturally: an artificial source
+qualifies while no position falls more than
+[`DIRECTIVITY_INDEX_LIMIT_DB`](/phonometry/reference/api/noise_control/screen-in-situ/#directivity_index_limit_db) below the mean, which is a bound on how
+much of a shadow the source casts on itself.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `levels` | The levels at the twelve positions, in decibels. |
+
+**Returns:** $DI_i$ at each position, in decibels.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For a count that is not [`DIRECTIVITY_POSITIONS`](/phonometry/reference/api/noise_control/screen-in-situ/#directivity_positions). |
 
 ## ScreenInSituResult
 

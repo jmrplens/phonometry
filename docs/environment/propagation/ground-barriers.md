@@ -121,7 +121,7 @@ effect is reciprocal under an exchange of source and receiver heights.
 
 ### A ground from a catalogue
 
-A row of `environment.PUBLISHED_GROUND`, or of [a catalogue of your own](../../io/material-catalogues.md),
+A row of `environment.PUBLISHED_GROUND_SURFACES`, or of [a catalogue of your own](../../io/material-catalogues.md),
 gives the impedance itself: `GroundSurface.medium` is the porous half-space
 of its effective flow resistivity, by the Delany and Bazley or the Miki
 model, which `ground_effect` takes as `impedance`, `barrier_insertion_loss`
@@ -134,12 +134,12 @@ curve of the case above:
 
 ```python
 octaves = [125.0, 250.0, 500.0, 1000.0]
-pasture = environment.PUBLISHED_GROUND["bies-2017-table-5-2/normal_uncompacted_ground"]
+pasture = environment.PUBLISHED_GROUND_SURFACES["bies-2017-table-5-2/normal_uncompacted_ground"]
 ground = pasture.medium(octaves, model="miki")
 over_pasture = environment.ground_effect(octaves, 1.0, 1.5, 50.0, impedance=ground)
 print(over_pasture.excess_attenuation.round(2))   # [  3.84  -3.18 -13.19  -2.96]
 
-field = environment.PUBLISHED_GROUND["cox-2017-table-6-7/sports_field_delany_bazley"]
+field = environment.PUBLISHED_GROUND_SURFACES["cox-2017-table-6-7/sports_field_delany_bazley"]
 try:
     field.medium(octaves, model="miki")
 except ValueError as error:

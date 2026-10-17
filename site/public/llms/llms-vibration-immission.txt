@@ -1925,7 +1925,7 @@ with an exponent measured per band (Formula (6)); the level difference is
 ```python
 from phonometry import vibration
 
-delta = vibration.ground_transmission_db(
+delta = vibration.ground_transmission(
     [8.0, 31.5, 125.0],
     distance_m=25.0,
     reference_distance_m=8.0,
@@ -1950,11 +1950,11 @@ says overestimates considerably.
 ```python
 from phonometry import vibration
 
-print(vibration.ground_to_foundation_transfer_db("basement")[:5])  # [-4.  -3.5 -3.6 -4.2 -4.2]
-print(vibration.foundation_to_floor_transfer_db(
+print(vibration.ground_to_foundation_transfer("basement")[:5])  # [-4.  -3.5 -3.6 -4.2 -4.2]
+print(vibration.foundation_to_floor_transfer(
     [8.0, 16.0, 20.0, 40.0], floor="concrete", floor_natural_frequency_hz=20.0
 ))  # [ 3.26  9.94 17.26  3.27]
-print(vibration.ground_to_floor_transfer_db("timber", floor_natural_frequency_hz=16.0)[4:8])
+print(vibration.ground_to_floor_transfer("timber", floor_natural_frequency_hz=16.0)[4:8])
 # [ 6.03 10.07 16.    8.51]
 ```
 
@@ -1976,7 +1976,7 @@ for ax, floor in zip(axes, ("concrete", "timber"), strict=True):
     for natural in (8.0, 16.0, 63.0):
         ax.plot(
             positions,
-            vibration.ground_to_floor_transfer_db(floor, floor_natural_frequency_hz=natural),
+            vibration.ground_to_floor_transfer(floor, floor_natural_frequency_hz=natural),
             marker="o",
             label=rf"$f_\mathrm{{e}}$ = {natural:g} Hz",
         )
@@ -2088,7 +2088,7 @@ from phonometry import vibration
 
 print(vibration.point_to_line_transition_distance_m(75.0, wavelength_m=12.5))  # 450.0
 print(vibration.train_decay_exponent(1.0))  # 0.7
-print(f"{vibration.line_source_correction_db(50.0, reference_distance_m=8.0, exponent_correction=0.3):.2f} dB")  # 4.78 dB
+print(f"{vibration.line_source_correction(50.0, reference_distance_m=8.0, exponent_correction=0.3):.2f} dB")  # 4.78 dB
 print(vibration.RECOMMENDED_DISTANCES_M["urban"])  # {'tunnel': 20.0, 'surface': 25.0}
 ```
 
@@ -2289,15 +2289,17 @@ its whole footprint, which is the safe side for a source that is close,
 moving or impulsive. And the lowest horizontal natural frequency of a
 building of five storeys or more is about `10 / n` Hz (Formula (4)), which
 matters where a tall slender building meets a low excitation frequency.
+DIN 4150-3 prints the same estimate in 6.4 and ISO 4866 in D.2, so one
+function, `storey_fundamental_frequency`, answers for all three.
 
 ```python
 from phonometry import vibration
 
-print(f"{vibration.soil_building_natural_frequency_hz(2.5e9, mass=4.0e5):.1f} Hz")  # 12.6 Hz
-print(vibration.soil_building_frequency_guide_hz(4))  # (8.0, 12.0)
+print(f"{vibration.soil_building_natural_frequency(2.5e9, mass=4.0e5):.1f} Hz")  # 12.6 Hz
+print(vibration.soil_building_frequency_guide(4))  # (8.0, 12.0)
 print(vibration.foundation_transfer_max())  # 2.0
 print(f"{vibration.floor_transfer_max(0.03):.1f}")  # 16.7
-print(vibration.storey_frequency_hz(8))  # 1.25
+print(vibration.storey_fundamental_frequency(8))  # 1.25
 ```
 
 ## 3. Single events: a blast and a falling mass
@@ -2342,7 +2344,7 @@ rail vibration reaches about 80 m, further on soft layers.
 ```python
 from phonometry import vibration
 
-print(vibration.track_excitation_frequency_hz(80 / 3.6, spacing_m=0.6, harmonics=2).round(1))  # [37.  74.1]
+print(vibration.track_excitation_frequency(80 / 3.6, spacing_m=0.6, harmonics=2).round(1))  # [37.  74.1]
 print(vibration.TRACK_TRANSMITTED_BANDS_HZ["ballast"])  # (40.0, 80.0)
 ```
 

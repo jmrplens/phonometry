@@ -24,7 +24,7 @@ from phonometry.noise_control import (
     DUCT_WALL_BANDS_HZ,
     PUBLISHED_DUCT_TRANSMISSION_LOSS,
     DuctWallSpectrum,
-    duct_wall_named,
+    duct_transmission_loss_named,
 )
 
 #: The data file this catalogue is read from, as the key spells it.
@@ -399,7 +399,7 @@ def test_one_size_in_the_two_directions_is_two_rows() -> None:
     columns and claim the page had measured one specimen twice, which it never
     says it did.
     """
-    both = duct_wall_named("305 × 305 mm")
+    both = duct_transmission_loss_named("305 × 305 mm")
     assert len(both) == 2
     breakout, break_in = both
     assert (breakout.direction, break_in.direction) == ("breakout", "break-in")
@@ -565,9 +565,11 @@ def test_the_break_in_credit_quotes_a_sentence_the_chapter_got_wrong() -> None:
 # The shape of the catalogue
 # ---------------------------------------------------------------------------
 def test_the_lookup_matches_a_part_of_a_printed_label() -> None:
-    assert len(duct_wall_named("1220")) == 14
-    assert duct_wall_named("305 × 152") == duct_wall_named("305 × 152 MM")
-    assert duct_wall_named("unobtainium") == ()
+    assert len(duct_transmission_loss_named("1220")) == 14
+    assert duct_transmission_loss_named("305 × 152") == duct_transmission_loss_named(
+        "305 × 152 MM"
+    )
+    assert duct_transmission_loss_named("unobtainium") == ()
 
 
 def test_the_bands_these_tables_print_are_published() -> None:

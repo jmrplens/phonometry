@@ -91,7 +91,7 @@ truncate the integral at 75-87 degrees instead of 90 (Sect. D.5); set
 | `angle_limit_rad` | Upper integration angle `theta_lim`, in radians (0 \< theta_lim \<= pi/2; default pi/2). |
 | `quadrature_points` | Gauss-Legendre order (default 64). |
 | `termination` | As in [`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber). |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** A [`DiffuseFieldAbsorptionResult`](/phonometry/reference/api/materials/layered/#diffusefieldabsorptionresult).
 
@@ -176,7 +176,7 @@ extremely attenuating layers); the raw chain matrix is still returned in
 | `layers` | Layer stack from the incidence side to the termination. |
 | `angle_rad` | Polar angle of incidence `theta`, in radians ($0 \le \theta < \pi/2 - 10^{-6}$; grazing incidence is excluded). |
 | `termination` | `"rigid"` (default), `"free"`, or a non-zero complex impedance (scalar or per-frequency array), in Pa s/m. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** A [`LayeredAbsorberResult`](/phonometry/reference/api/materials/layered/#layeredabsorberresult).
 

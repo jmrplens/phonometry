@@ -21,10 +21,10 @@ import reference_data as ref
 
 from phonometry import materials
 from phonometry.materials.absorbers import (
-    PUBLISHED_FLOW_RESISTANCE,
-    PUBLISHED_POROUS,
+    PUBLISHED_POROUS_MATERIALS,
+    PUBLISHED_RESISTIVE_SHEETS,
     ResistiveSheet,
-    resistive_sheet_named,
+    resistive_sheets_named,
 )
 
 #: The three files this catalogue is read from, one per printed table, as the
@@ -75,12 +75,12 @@ FIELDS_8_7 = {
 
 
 def _row(name: str) -> ResistiveSheet:
-    return resistive_sheet_named(name)[0]
+    return resistive_sheets_named(name)[0]
 
 
 def _of(table: str) -> tuple[ResistiveSheet, ...]:
     return tuple(
-        row for row in PUBLISHED_FLOW_RESISTANCE.values() if row.table == table
+        row for row in PUBLISHED_RESISTIVE_SHEETS.values() if row.table == table
     )
 
 
@@ -110,7 +110,7 @@ def _block_head(name: str, column: str) -> tuple[str, str]:
 # The transcription against the second reading
 # ---------------------------------------------------------------------------
 def test_the_catalogue_holds_every_row_of_the_three_tables() -> None:
-    assert len(PUBLISHED_FLOW_RESISTANCE) == 29
+    assert len(PUBLISHED_RESISTIVE_SHEETS) == 29
     assert len(ref.VER_BERANEK_8_5) == len(_of(TABLE_8_5)) == 5
     assert len(ref.VER_BERANEK_8_6) == len(_of(TABLE_8_6)) == 13
     assert len(ref.VER_BERANEK_8_7) == len(_of(TABLE_8_7)) == 11
@@ -122,7 +122,7 @@ def test_the_rows_are_in_the_order_the_pages_print_them() -> None:
         for table in (ref.VER_BERANEK_8_5, ref.VER_BERANEK_8_6, ref.VER_BERANEK_8_7)
         for name, _values in table
     ]
-    assert [row.name for row in PUBLISHED_FLOW_RESISTANCE.values()] == printed
+    assert [row.name for row in PUBLISHED_RESISTIVE_SHEETS.values()] == printed
 
 
 @pytest.mark.parametrize(
@@ -259,7 +259,7 @@ def test_the_misprinted_pound_cell_is_recorded_beside_the_mass_that_is_served() 
     assert "ERRATA" in row.note
     assert not row.misprinted
     assert [r.name for r in _of(TABLE_8_5) if r.note] == ["80"]
-    assert not any(row.misprinted for row in PUBLISHED_FLOW_RESISTANCE.values())
+    assert not any(row.misprinted for row in PUBLISHED_RESISTIVE_SHEETS.values())
 
 
 def test_the_glass_cloth_surface_density_is_one_wrong_factor_on_every_row() -> None:
@@ -437,7 +437,7 @@ def test_a_resistance_is_not_a_resistivity() -> None:
     would pass every other test in this file.
     """
     sheet = _row("80")
-    porous = next(iter(PUBLISHED_POROUS.values()))
+    porous = next(iter(PUBLISHED_POROUS_MATERIALS.values()))
     assert hasattr(sheet, "specific_flow_resistance_pa_s_m")
     assert not hasattr(sheet, "flow_resistivity_pa_s_m2")
     assert hasattr(porous, "flow_resistivity_pa_s_m2")
@@ -445,23 +445,23 @@ def test_a_resistance_is_not_a_resistivity() -> None:
 
 
 def test_the_lookup_matches_a_whole_name_only() -> None:
-    assert len(resistive_sheet_named("12")) == 1
-    assert resistive_sheet_named("12")[0].table == TABLE_8_5
-    assert resistive_sheet_named("fm 122") == resistive_sheet_named("FM 122")
-    assert resistive_sheet_named("FM") == ()
+    assert len(resistive_sheets_named("12")) == 1
+    assert resistive_sheets_named("12")[0].table == TABLE_8_5
+    assert resistive_sheets_named("fm 122") == resistive_sheets_named("FM 122")
+    assert resistive_sheets_named("FM") == ()
 
 
 def test_the_catalogue_is_reachable_from_the_package() -> None:
-    assert materials.PUBLISHED_FLOW_RESISTANCE is PUBLISHED_FLOW_RESISTANCE
+    assert materials.PUBLISHED_RESISTIVE_SHEETS is PUBLISHED_RESISTIVE_SHEETS
     assert all(
         key.startswith(f"{row.table}/") and row.table in TABLES
-        for key, row in PUBLISHED_FLOW_RESISTANCE.items()
+        for key, row in PUBLISHED_RESISTIVE_SHEETS.items()
     )
 
 
 def test_the_catalogue_cannot_be_written_to() -> None:
     with pytest.raises(TypeError):
-        PUBLISHED_FLOW_RESISTANCE["x/y"] = ResistiveSheet(name="x", source="nowhere")  # type: ignore[index]
+        PUBLISHED_RESISTIVE_SHEETS["x/y"] = ResistiveSheet(name="x", source="nowhere")  # type: ignore[index]
 
 
 def test_every_row_says_which_printed_table_it_came_from() -> None:
@@ -485,6 +485,6 @@ def test_every_row_says_which_printed_table_it_came_from() -> None:
             assert row.source.count("PDF page") == 1, row.name
             assert printed in row.source, row.name
             assert folio in row.source, row.name
-    assert {row.source for row in PUBLISHED_FLOW_RESISTANCE.values()} == {
+    assert {row.source for row in PUBLISHED_RESISTIVE_SHEETS.values()} == {
         _of(table)[0].source for table in TABLES
     }

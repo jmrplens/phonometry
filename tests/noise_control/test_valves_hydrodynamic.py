@@ -863,16 +863,26 @@ class TestMultistageTrim:
             )
 
     def test_the_stage_levels_add_in_energy(self) -> None:
-        assert hydro.combine_stage_levels(80.0, 80.0) == pytest.approx(
+        assert hydro.combined_stage_level([80.0, 80.0]) == pytest.approx(
             83.0103, abs=5e-4
         )
-        assert hydro.combine_stage_levels(80.0, 60.0, 60.0) == pytest.approx(
+        assert hydro.combined_stage_level([80.0, 60.0, 60.0]) == pytest.approx(
             80.0864, abs=5e-4
         )
 
     def test_the_sum_needs_more_than_one_stage(self) -> None:
         with pytest.raises(ValueError, match="at least 2 levels"):
-            hydro.combine_stage_levels(80.0)
+            hydro.combined_stage_level([80.0])
+
+    def test_the_stages_come_as_one_sequence(self) -> None:
+        # The levels are one argument, as every other energy sum takes them;
+        # a table of them is refused rather than summed over both axes.
+        with pytest.raises(TypeError, match="positional argument"):
+            hydro.combined_stage_level(80.0, 80.0)  # type: ignore[call-arg]
+
+    def test_a_table_of_stage_levels_is_refused(self) -> None:
+        with pytest.raises(ValueError, match="'levels' must be a non-empty 1-D array"):
+            hydro.combined_stage_level([[80.0, 80.0], [70.0, 70.0]])
 
     def test_the_last_stage_differential_is_capped_by_its_own_threshold(self) -> None:
         # Equation (28) caps with x_Fzp1,n, not with F_L^2 as Equation (2)

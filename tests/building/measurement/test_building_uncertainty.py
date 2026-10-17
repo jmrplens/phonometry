@@ -13,10 +13,10 @@ import math
 import numpy as np
 import pytest
 
+from phonometry import metrology
 from phonometry.building.measurement.uncertainty import (
     UncertainValue,
     band_uncertainty,
-    combine_uncertainties,
     insulation_coverage_factor,
     insulation_expanded_uncertainty,
     maximum_repeatability_standard_deviation,
@@ -374,7 +374,7 @@ def test_sigma_r95_single_number_impact_absent() -> None:
 # Table 8 — coverage factors (Clause 8), every row.
 # --------------------------------------------------------------------------- #
 @pytest.mark.parametrize(
-    ("confidence", "k"),
+    ("coverage", "k"),
     [
         (0.68, 1.00),
         (0.80, 1.28),
@@ -384,12 +384,12 @@ def test_sigma_r95_single_number_impact_absent() -> None:
         (0.999, 3.29),
     ],
 )
-def test_table8_two_sided(confidence: float, k: float) -> None:
-    assert insulation_coverage_factor(confidence, one_sided=False) == pytest.approx(k)
+def test_table8_two_sided(coverage: float, k: float) -> None:
+    assert insulation_coverage_factor(coverage, one_sided=False) == pytest.approx(k)
 
 
 @pytest.mark.parametrize(
-    ("confidence", "k"),
+    ("coverage", "k"),
     [
         (0.84, 1.00),
         (0.90, 1.28),
@@ -399,14 +399,14 @@ def test_table8_two_sided(confidence: float, k: float) -> None:
         (0.9995, 3.29),
     ],
 )
-def test_table8_one_sided(confidence: float, k: float) -> None:
-    assert insulation_coverage_factor(confidence, one_sided=True) == pytest.approx(k)
+def test_table8_one_sided(coverage: float, k: float) -> None:
+    assert insulation_coverage_factor(coverage, one_sided=True) == pytest.approx(k)
 
 
-def test_coverage_factor_unknown_confidence() -> None:
+def test_coverage_factor_unknown_coverage() -> None:
     with pytest.raises(
         ValueError,
-        match=r"Confidence level .* is not tabulated for the two-sided test",
+        match=r"Coverage probability .* is not tabulated for the two-sided test",
     ):
         insulation_coverage_factor(0.925)
 
@@ -416,7 +416,7 @@ def test_coverage_factors_table_is_public() -> None:
     from phonometry.building.measurement.uncertainty import COVERAGE_FACTORS
 
     assert phonometry.building.COVERAGE_FACTORS is COVERAGE_FACTORS
-    # Keyed by (confidence, one_sided); matches the functional lookup.
+    # Keyed by (coverage, one_sided); matches the functional lookup.
     assert COVERAGE_FACTORS[(0.95, False)] == pytest.approx(1.96)
     assert COVERAGE_FACTORS[(0.95, True)] == pytest.approx(1.65)
 
@@ -480,8 +480,10 @@ def test_uncertain_value_one_sided_for_conformity() -> None:
 # --------------------------------------------------------------------------- #
 # Combination rules — Annexes A/B/C with hand-computed oracles.
 # --------------------------------------------------------------------------- #
-def test_combine_uncertainties_quadrature() -> None:
-    assert combine_uncertainties(3.0, 4.0) == pytest.approx(5.0)
+def test_combined_standard_uncertainty_quadrature() -> None:
+    # Formula (C.2) with unit sensitivity coefficients: the one root-sum-square
+    # of the library, in metrology.
+    assert metrology.combined_standard_uncertainty([3.0, 4.0]) == pytest.approx(5.0)
 
 
 def test_prediction_input_uncertainty_annex_a_example() -> None:
@@ -494,7 +496,7 @@ def test_prediction_input_uncertainty_annex_a_example() -> None:
 def test_predicted_uncertainty_annex_a_example() -> None:
     # Annex A: u_calc = u_input (single element), u_reality = 0.8 -> u_pred ~ 2.0.
     u_input = prediction_input_uncertainty(1.2, 1.0, 1)
-    u_pred = combine_uncertainties(u_input, 0.8)
+    u_pred = metrology.combined_standard_uncertainty([u_input, 0.8])  # (A.2)
     assert u_pred == pytest.approx(math.sqrt(4.08))
     assert round(u_pred, 1) == 2.0
 

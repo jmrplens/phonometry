@@ -28,7 +28,7 @@ beside each model or standard that fixes it, and they disagree:
 | Key | c (m/s) | rho (kg/m3) | What fixes it |
 | --- | ---: | ---: | --- |
 | `iec-61094-2-annex-f/air` | 345,87 | 1,186 | IEC 61094-2 Annex F at the ISO 9053-2 Annex A.3 reference state |
-| `allard-2009-jca/air` | 343 | 1,205 | the constants the Johnson-Champoux-Allard model was published with |
+| `phonometry-absorbers/air` | 343 | 1,205 | this library's own default for the absorber models, a dry air at 20 °C at textbook values |
 | `en-12354-annex-a/air` | 340 | 1,29 | EN/ISO 12354, the Annex A speed and the Annex B density |
 | `phonometry-solver/air` | 343 | 1,2 | this library's own default for the acoustic solver |
 

@@ -12,7 +12,7 @@ import numpy as np
 import pytest
 import reference_data as ref
 
-from phonometry import environment
+from phonometry import environment, metrology
 from phonometry.environment.assessment.measurement import (
     EnvironmentalMeasurementWarning,
 )
@@ -196,32 +196,32 @@ def test_gaussian_residual_rejects_inverted_percentiles() -> None:
 # ---------------------------------------------------------------------------
 def test_combined_uncertainty_g2() -> None:
     """Annex G.2 component products combine to u = 2.18 dB."""
-    u = environment.combined_standard_uncertainty(ref.ISO1996_2_G2_CONTRIBUTIONS)
+    u = metrology.combined_standard_uncertainty(ref.ISO1996_2_G2_CONTRIBUTIONS)
     assert u == pytest.approx(ref.ISO1996_2_G2_COMBINED, abs=0.01)
 
 
 def test_expanded_uncertainty_g2() -> None:
     """k = 2 (95 %) expansion of the G.2 uncertainty -> 4.36 dB."""
-    u = environment.combined_standard_uncertainty(ref.ISO1996_2_G2_CONTRIBUTIONS)
+    u = metrology.combined_standard_uncertainty(ref.ISO1996_2_G2_CONTRIBUTIONS)
     assert environment.environmental_expanded_uncertainty(u) == pytest.approx(
         ref.ISO1996_2_G2_EXPANDED, abs=0.01
     )
     assert environment.environmental_expanded_uncertainty(
-        u, confidence=0.80
+        u, coverage=0.80
     ) == pytest.approx(1.3 * u)
 
 
 def test_combined_uncertainty_accepts_pairs() -> None:
     """(uncertainty, sensitivity) pairs give the same result as the products."""
     pairs = [(1.0, 2.0), (3.0, 1.0)]
-    assert environment.combined_standard_uncertainty(pairs) == pytest.approx(
+    assert metrology.combined_standard_uncertainty(pairs) == pytest.approx(
         np.hypot(2.0, 3.0)
     )
 
 
-def test_expanded_uncertainty_bad_confidence() -> None:
-    with pytest.raises(ValueError, match=r"'confidence' must be one of"):
-        environment.environmental_expanded_uncertainty(1.0, confidence=0.90)
+def test_expanded_uncertainty_bad_coverage() -> None:
+    with pytest.raises(ValueError, match=r"'coverage' must be one of"):
+        environment.environmental_expanded_uncertainty(1.0, coverage=0.90)
 
 
 def test_residual_correction_uncertainty_f9() -> None:

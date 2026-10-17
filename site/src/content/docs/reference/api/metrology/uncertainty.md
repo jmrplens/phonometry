@@ -32,37 +32,45 @@ the probabilistically symmetric interval only -- the adaptive procedure of
 Supplement 1 clause 7.9 and the shortest coverage interval of 5.3.4 are not
 implemented; its inputs are sampled independently (the multivariate-Gaussian
 path of 6.4.8 for non-independent quantities is not implemented -- use
-[`combine_uncertainty`](/phonometry/reference/api/metrology/uncertainty/#combine_uncertainty) with `correlation` for correlated budgets).
+[`uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation) with `correlation` for correlated budgets).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## combine_uncertainty
+## combined_standard_uncertainty
 
 ```python
-combine_uncertainty(
-    model: Callable[..., float],
-    quantities: Sequence[Quantity],
-    correlation: ArrayLike | None = None,
-) -> UncertaintyResult
+combined_standard_uncertainty(
+    contributions: Sequence[float] | Sequence[tuple[float, float]] | np.ndarray,
+) -> float
 ```
 
-Combined standard uncertainty by the GUM law of propagation (clause 5).
+Combined standard uncertainty of independent contributions, root-sum-square.
+
+$u_\mathrm{c} = \sqrt{\sum_j (c_j u_j)^2}$: the law of
+propagation of uncertainty for uncorrelated input quantities
+(ISO/IEC Guide 98-3:2008, 5.1.2, Equation (10), written with
+$c_j u(x_j)$ as in 5.1.3), the same sum ISO 1996-2:2017 prints as
+Formula (2) for an environmental noise level and ISO 12999-1:2020 as
+Formula (C.2) for building acoustics, where Formula (A.2) adds the
+model-to-reality term to a predicted value the same way. Every domain
+that adds independent contributions in quadrature calls this one
+function; [`uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation) is the full budget, with
+sensitivity coefficients from a model, correlations and degrees of
+freedom.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `model` | The measurement function $f(x_1, \ldots, x_N)$ returning `y`. |
-| `quantities` | The input [`Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity) objects, in the order the model takes its arguments. |
-| `correlation` | Optional `N x N` correlation matrix $r_{ij}$ between the inputs; `None` treats them as uncorrelated. With a non-identity matrix and finite input dof the effective degrees of freedom are `NaN` (undefined; the GUM defines no correlated fallback -- Welch-Satterthwaite holds for independent inputs only) and an [`UncertaintyWarning`](/phonometry/reference/api/metrology/uncertainty/#uncertaintywarning) is issued when finite input dof would otherwise have been propagated. |
+| `contributions` | Either the products $c_j u_j$, one per contribution, in the unit of the result (decibels for a level), or `(u_j, c_j)` pairs whose product is formed here, with `u_j` non-negative. Independent inputs are assumed, so there is no covariance term. |
 
-**Returns:** An [`UncertaintyResult`](/phonometry/reference/api/metrology/uncertainty/#uncertaintyresult) with $u_\mathrm{c}(y)$, the sensitivity coefficients, the contributions and the effective degrees of freedom.
+**Returns:** $u_\mathrm{c}$, in the unit of the contributions.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for no inputs, a malformed correlation matrix, or a model that is not finite at the estimates or one evaluation step either side of them. |
+| ValueError | If `contributions` is empty, holds a value that is not finite, a pair that is not `(uncertainty, sensitivity)`, or a pair whose uncertainty is negative. |
 
 ## coverage_factor
 
@@ -87,19 +95,6 @@ Coverage factor `k` from the t-distribution (GUM clause 6, Annex G).
 | :--- | :--- |
 | ValueError | for a coverage outside (0, 1). |
 
-## expanded_uncertainty
-
-```python
-expanded_uncertainty(
-    result: UncertaintyResult,
-    coverage: float = 0.95,
-) -> tuple[float, float]
-```
-
-Coverage factor and expanded uncertainty of a GUM result (clause 6).
-
-Convenience wrapper for [`UncertaintyResult.expanded`](/phonometry/reference/api/metrology/uncertainty/#uncertaintyresultexpanded).
-
 ## monte_carlo
 
 ```python
@@ -122,7 +117,7 @@ probabilistically symmetric coverage interval (clause 7.7).
 
 The inputs are sampled **independently**: the Supplement's
 multivariate-Gaussian path for non-independent quantities (6.4.8) is not
-implemented (use [`combine_uncertainty`](/phonometry/reference/api/metrology/uncertainty/#combine_uncertainty) with `correlation` for a
+implemented (use [`uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation) with `correlation` for a
 correlated budget). The number of trials is fixed (the adaptive procedure
 of clause 7.9 is not implemented) and the reported interval is the
 probabilistically symmetric one (not the 5.3.4 shortest interval).
@@ -248,6 +243,34 @@ u_shaped(value: float, half_width: float, name: str = '') -> Quantity
 Type B quantity with a U-shaped (arcsine) PDF of half-width `a`.
 
 The standard uncertainty is $a / \sqrt{2}$.
+
+## uncertainty_propagation
+
+```python
+uncertainty_propagation(
+    model: Callable[..., float],
+    quantities: Sequence[Quantity],
+    correlation: ArrayLike | None = None,
+) -> UncertaintyResult
+```
+
+Combined standard uncertainty by the GUM law of propagation (clause 5).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `model` | The measurement function $f(x_1, \ldots, x_N)$ returning `y`. |
+| `quantities` | The input [`Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity) objects, in the order the model takes its arguments. |
+| `correlation` | Optional `N x N` correlation matrix $r_{ij}$ between the inputs; `None` treats them as uncorrelated. With a non-identity matrix and finite input dof the effective degrees of freedom are `NaN` (undefined; the GUM defines no correlated fallback -- Welch-Satterthwaite holds for independent inputs only) and an [`UncertaintyWarning`](/phonometry/reference/api/metrology/uncertainty/#uncertaintywarning) is issued when finite input dof would otherwise have been propagated. |
+
+**Returns:** An [`UncertaintyResult`](/phonometry/reference/api/metrology/uncertainty/#uncertaintyresult) with $u_\mathrm{c}(y)$, the sensitivity coefficients, the contributions and the effective degrees of freedom.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for no inputs, a malformed correlation matrix, or a model that is not finite at the estimates or one evaluation step either side of them. |
 
 ## UncertaintyResult
 

@@ -291,6 +291,121 @@ def test_a_lone_number_without_its_unit_put_back_is_reported(
     assert [entry.name for entry in found] == ["TAPPING_IMPACT_RATE"]
 
 
+def test_every_public_function_is_named_for_what_it_returns() -> None:
+    found, stale = cpu.unit_named_functions()
+    assert found == []
+    assert stale == []
+
+
+def test_a_level_function_named_with_its_decibels_put_back_is_reported(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A function that ends in ``_db`` or ``_hz`` again fails the rule.
+
+    The two units a function name never carries, one function each, and one
+    that keeps a unit its quantity is written in twice (``_mm_s``), which
+    passes.
+    """
+
+    def plant_background_correction_db(level: float) -> float:
+        return level
+
+    def track_excitation_frequency_hz(speed_kmh: float) -> float:
+        return speed_kmh
+
+    def far_field_velocity_again_mm_s(level: float) -> float:
+        return level
+
+    added = {
+        "plant_background_correction_db": plant_background_correction_db,
+        "track_excitation_frequency_hz": track_excitation_frequency_hz,
+        "far_field_velocity_again_mm_s": far_field_velocity_again_mm_s,
+    }
+    for name, function in added.items():
+        function.__module__ = "phonometry.signals"
+        monkeypatch.setattr(phonometry.signals, name, function, raising=False)
+    monkeypatch.setattr(
+        phonometry.signals, "__all__", [*phonometry.signals.__all__, *added]
+    )
+    found, _ = cpu.unit_named_functions()
+    assert sorted(entry.qualname for entry in found) == [
+        "plant_background_correction_db",
+        "track_excitation_frequency_hz",
+    ]
+
+
+def test_a_method_named_with_its_decibels_is_reported_and_a_property_is_not(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A method, a classmethod and a staticmethod are functions; a property is not.
+
+    A property reads like a field, and a field keeps the unit of what it
+    holds, so ``burst_level_db`` as a property passes where the same name as
+    a method fails.
+    """
+
+    def margin_db(self: object) -> float:
+        return 0.0
+
+    def from_level_db(cls: type, level: float) -> float:
+        return level
+
+    def bandwidth_hz(fs: float) -> float:
+        return fs
+
+    record = phonometry.signals.ToneBurstResult
+    monkeypatch.setattr(record, "margin_db", margin_db, raising=False)
+    monkeypatch.setattr(
+        record, "from_level_db", classmethod(from_level_db), raising=False
+    )
+    monkeypatch.setattr(
+        record, "bandwidth_hz", staticmethod(bandwidth_hz), raising=False
+    )
+    monkeypatch.setattr(
+        record, "burst_level_db", property(lambda self: 0.0), raising=False
+    )
+    found, _ = cpu.unit_named_functions()
+    assert sorted(entry.qualname for entry in found) == [
+        "ToneBurstResult.bandwidth_hz",
+        "ToneBurstResult.from_level_db",
+        "ToneBurstResult.margin_db",
+    ]
+
+
+def test_a_method_inherited_from_a_base_no_module_exports_is_reported(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A published class answers to what its private base defines.
+
+    ``AirLayer`` and seventeen other layers inherit ``plot`` from
+    ``_DrawableLayer``, which no module exports; a ``_db`` method planted
+    there is called on every one of them, and it is reported once, under the
+    class that defines it.
+    """
+    from phonometry.materials.absorbers import layered
+
+    def margin_db(self: object) -> float:
+        return 0.0
+
+    monkeypatch.setattr(layered._DrawableLayer, "margin_db", margin_db, raising=False)
+    found, _ = cpu.unit_named_functions()
+    assert [entry.qualname for entry in found] == ["_DrawableLayer.margin_db"]
+
+
+def test_a_function_exemption_nothing_needs_is_stale(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setitem(
+        cpu.FUNCTION_UNIT_EXEMPT,
+        ("phonometry.noise_control.silencer_in_situ", "sound_power_level_db"),
+        "a reason nobody needs",
+    )
+    _, stale = cpu.unit_named_functions()
+    assert stale == [
+        ("phonometry.noise_control.silencer_in_situ", "sound_power_level_db")
+    ]
+
+
 def test_an_exemption_a_name_no_longer_needs_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

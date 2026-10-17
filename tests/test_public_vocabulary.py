@@ -66,6 +66,7 @@ _MINORITY = {
     "time_s": "times",
     "distances_m": "distances",
     "sound_speeds": "speeds_of_sound",
+    "confidence_level": "confidence",
 }
 
 _KHZ = (

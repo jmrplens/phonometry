@@ -33,7 +33,9 @@ storeys and under 8 Hz above six; the foundation passes at most
 0,25 of loose ground, and a mean of 0,5 above it, or all of it on rock; a
 floor amplifies by at most :math:`1 / (2 D_1)`, 10 to 25 for a concrete
 floor; and the lowest horizontal natural frequency of a building of five
-storeys or more is about :math:`10 / n` Hz (Formula (4)).
+storeys or more is about :math:`10 / n` Hz (Formula (4)), the estimate
+DIN 4150-3 prints in 6.4 and ISO 4866 in D.2 as well, so it has one home:
+:func:`~phonometry.vibration.storey_fundamental_frequency`.
 
 **Sources** (Clause 5). A blast in the far field follows
 :math:`v_{\max} = k (L/L_0)^b (R/R_0)^{-m}` (Formula (5)) with the charge per
@@ -88,7 +90,6 @@ __all__ = [
     "RAIL_INFLUENCE_RANGE_M",
     "RAIL_SUPPORT_SPACING_M",
     "SOURCE_EXPONENTS",
-    "STOREY_FORMULA_MIN_STOREYS",
     "TRACK_TRANSMITTED_BANDS_HZ",
     "TRAIN_CHAIN_EXPONENT_RANGE",
     "VEHICLE_NATURAL_FREQUENCIES_HZ",
@@ -104,10 +105,9 @@ __all__ = [
     "machine_hall_velocity_mm_s",
     "material_damping_factor",
     "reference_distance_m",
-    "soil_building_frequency_guide_hz",
-    "soil_building_natural_frequency_hz",
-    "storey_frequency_hz",
-    "track_excitation_frequency_hz",
+    "soil_building_frequency_guide",
+    "soil_building_natural_frequency",
+    "track_excitation_frequency",
 ]
 
 #: Figure 1 (printed page 6): the exponent :math:`n` of Formula (2) by the
@@ -153,9 +153,6 @@ FOUNDATION_TRANSFER_ABOVE_RESONANCE: float = 0.5
 #: The damping ratio :math:`D_1` of a reinforced concrete floor (Clause
 #: 4.3): between 0,02 and 0,05, so the floor amplifies by 10 to 25 at most.
 FLOOR_DAMPING_RATIO_RANGE: tuple[float, float] = (0.02, 0.05)
-
-#: The fewest storeys the storey formula of Formula (4) is meant for: 5.
-STOREY_FORMULA_MIN_STOREYS: int = 5
 
 #: How far the vibration of a blast is very rarely relevant beyond (Clause
 #: 5.1.2), in metres: 1500 for quarry blasting, 400 for construction
@@ -404,7 +401,7 @@ def material_damping_factor(
     return np.asarray(np.exp(-alpha * distances), dtype=np.float64)
 
 
-def soil_building_natural_frequency_hz(stiffness: float, *, mass: float) -> float:
+def soil_building_natural_frequency(stiffness: float, *, mass: float) -> float:
     r"""The natural frequency of a building on its ground, Formula (3).
 
     :math:`f_B = \frac{1}{2\pi}\sqrt{k_B / m_B}`: the ground as a spring under
@@ -422,7 +419,7 @@ def soil_building_natural_frequency_hz(stiffness: float, *, mass: float) -> floa
     return math.sqrt(stiffness / mass) / (2.0 * math.pi)
 
 
-def soil_building_frequency_guide_hz(storeys: int) -> tuple[float, float]:
+def soil_building_frequency_guide(storeys: int) -> tuple[float, float]:
     """The natural frequency Clause 4.3 gives a building on medium ground.
 
     About 15 Hz for one or two storeys, 8 Hz to 12 Hz for two to six, under
@@ -477,24 +474,6 @@ def floor_transfer_max(floor_damping_ratio: float) -> float:
     :raises ValueError: For a non-positive damping ratio.
     """
     return 1.0 / (2.0 * require_positive(floor_damping_ratio, "floor_damping_ratio"))
-
-
-def storey_frequency_hz(storeys: int) -> float:
-    r"""The lowest horizontal natural frequency of a building, Formula (4).
-
-    :math:`f_1 \approx 10 / n` Hz for a building of :math:`n` storeys, meant
-    for five and more, where a tall slender building meets a low excitation
-    frequency.
-
-    :param storeys: :math:`n`, at least five.
-    :return: :math:`f_1`, in hertz.
-    :raises ValueError: For fewer than five storeys.
-    """
-    count = require_count(storeys, "storeys")
-    if count < STOREY_FORMULA_MIN_STOREYS:
-        msg = f"the storey formula is for {STOREY_FORMULA_MIN_STOREYS} storeys and more, got {count}."
-        raise ValueError(msg)
-    return 10.0 / count
 
 
 def blast_peak_velocity_mm_s(
@@ -595,7 +574,7 @@ def impact_peak_velocity_mm_s(
     )
 
 
-def track_excitation_frequency_hz(
+def track_excitation_frequency(
     train_speed_m_s: float, *, spacing_m: float, harmonics: int = 1
 ) -> NDArray[np.float64]:
     r"""The frequencies a repeating feature of the track excites, Clause 5.3.2.

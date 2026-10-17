@@ -690,15 +690,28 @@ class TestExpander:
 
     def test_two_equal_spectra_combine_to_three_decibels_more(self) -> None:
         one = np.array([80.0, 90.0])
-        assert valves.combine_internal_levels(one, one) == pytest.approx(one + 3.0103)
+        assert valves.combined_internal_levels((one, one)) == pytest.approx(
+            one + 3.0103
+        )
 
     def test_it_refuses_a_combination_of_one(self) -> None:
         with pytest.raises(ValueError, match="at least two spectra"):
-            valves.combine_internal_levels(np.array([80.0]))
+            valves.combined_internal_levels([np.array([80.0])])
+
+    def test_one_spectrum_on_its_own_is_not_a_sequence_of_spectra(self) -> None:
+        """A lone spectrum would be read band by band as one-band sources."""
+        spectrum = np.array([80.0, 90.0])
+        with pytest.raises(ValueError, match="band spectrum"):
+            valves.combined_internal_levels(spectrum)
+
+    def test_the_spectra_come_as_one_sequence(self) -> None:
+        one = np.array([80.0, 90.0])
+        with pytest.raises(TypeError, match="positional argument"):
+            valves.combined_internal_levels(one, one)  # type: ignore[call-arg]
 
     def test_it_refuses_spectra_of_different_shapes(self) -> None:
         with pytest.raises(ValueError, match="same shape"):
-            valves.combine_internal_levels(np.zeros(3), np.zeros(4))
+            valves.combined_internal_levels((np.zeros(3), np.zeros(4)))
 
 
 class TestPrintedTables:

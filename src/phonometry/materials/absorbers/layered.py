@@ -55,7 +55,7 @@ from ..._internal.validation import (
     require_scalar,
 )
 from .porous import (
-    PUBLISHED_AIR,
+    ABSORBER_AIR,
     Complex,
     PorousMediumResult,
     membrane_impedance,
@@ -687,7 +687,7 @@ def layered_absorber(
     *,
     angle_rad: float = 0.0,
     termination: str | complex | ArrayLike = "rigid",
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> LayeredAbsorberResult:
     r"""Transfer-matrix prediction of a layered absorber at one angle.
 
@@ -723,8 +723,8 @@ def layered_absorber(
     :param termination: ``"rigid"`` (default), ``"free"``, or a non-zero
         complex impedance (scalar or per-frequency array), in Pa s/m.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
-        (Default: :data:`PUBLISHED_AIR`, the air this model was published
-        with). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
+        (Default: :data:`ABSORBER_AIR`, dry air at 20 degC at textbook
+        values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`LayeredAbsorberResult`.
     """
@@ -811,7 +811,7 @@ def diffuse_field_absorption(
     angle_limit_rad: float = np.pi / 2.0,
     quadrature_points: int = 64,
     termination: str | complex | ArrayLike = "rigid",
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> DiffuseFieldAbsorptionResult:
     r"""Random-incidence absorption by the Paris integral (Mechel Sect. D.5).
 
@@ -835,8 +835,8 @@ def diffuse_field_absorption(
     :param quadrature_points: Gauss-Legendre order (default 64).
     :param termination: As in :func:`layered_absorber`.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
-        (Default: :data:`PUBLISHED_AIR`, the air this model was published
-        with). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
+        (Default: :data:`ABSORBER_AIR`, dry air at 20 degC at textbook
+        values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`DiffuseFieldAbsorptionResult`.
     """

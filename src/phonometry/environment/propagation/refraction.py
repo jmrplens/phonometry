@@ -63,7 +63,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ...materials.absorbers.porous import PUBLISHED_AIR
+from ...materials.absorbers.porous import ABSORBER_AIR
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -660,7 +660,7 @@ def atmospheric_parabolic_equation(
     max_height_m: float = 100.0,
     range_step: float | None = None,
     height_step_m: float | None = None,
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> AtmosphericPEResult:
     r"""Relative-level field from the Green's Function Parabolic Equation (GFPE).
 
@@ -710,8 +710,8 @@ def atmospheric_parabolic_equation(
     :param height_step_m: Vertical grid spacing ``dz``, in metres. Default
         (``None``): a tenth of a wavelength (Salomons Sec. G.2).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
-        (Default: :data:`PUBLISHED_AIR`, the air this model was published
-        with). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
+        (Default: :data:`ABSORBER_AIR`, dry air at 20 degC at textbook
+        values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: An :class:`AtmosphericPEResult`.
     :raises ValueError: If the inputs are invalid or the impedance is unspecified.

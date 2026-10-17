@@ -29,7 +29,7 @@ Eq. (6), $c = 331 + 0.6\,t$; the sound absorption coefficient is
 $\alpha_\mathrm{s} = (A_2 - A_1)/S$ (Eq. (8)/(9)). The coefficient may exceed 1.0 from
 edge and diffraction effects (Clause 3.7 NOTE 2) and is never clamped. Air
 attenuation enters only through the per-band coefficient $m$ (default 0, the
-zero-attenuation reference); pass `attenuation_from_alpha` of an ISO 9613-1
+zero-attenuation reference); pass `power_attenuation_from_alpha` of an ISO 9613-1
 value when it is needed.
 
 ISO 354 is a characterisation: it produces the $\alpha_\mathrm{s}$ spectrum, not a
@@ -165,7 +165,7 @@ $$
 
 with $c$ from the room air temperature $t$ in °C (valid 15–30 °C) and $m$ the
 power attenuation coefficient of air (default 0; convert an ISO 9613-1
-$\alpha$ in dB/m with `attenuation_from_alpha`). Because edge and diffraction
+$\alpha$ in dB/m with `power_attenuation_from_alpha`). Because edge and diffraction
 effects can scatter more energy than the sample's flat area intercepts,
 $\alpha_\mathrm{s}$ may exceed 1.0 and is never clamped (ISO 354 Clause 3.7).
 
@@ -227,7 +227,7 @@ here checks any of it.
 
 `absorption_area()` returns the equivalent absorption area $A$ (m²) with the
 shape of `t60`; `absorption_coefficient()` returns $\alpha_\mathrm{s}$;
-`attenuation_from_alpha(alpha)` converts an ISO 9613-1 $\alpha$ (dB/m) to $m$.
+`power_attenuation_from_alpha(alpha)` converts an ISO 9613-1 $\alpha$ (dB/m) to $m$.
 
 
 ## 3. Weighted rating and absorption class (ISO 11654)
@@ -493,7 +493,7 @@ freqs = [63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
 alpha_s = [0.33, 0.35, 0.39, 0.38, 0.37, 0.36, 0.36, 0.36, 0.43, 0.49,
            0.58, 0.63, 0.68, 0.71, 0.73, 0.75, 0.77, 0.79, 0.81, 0.81]
-result = materials.sound_absorption_coefficient_uncertainty(alpha_s, freqs, confidence=0.95)
+result = materials.sound_absorption_coefficient_uncertainty(alpha_s, freqs, coverage=0.95)
 result.plot()   # alpha_s with the +/-U (k = 2) reproducibility ribbon
 plt.show()
 ```
@@ -503,7 +503,7 @@ plt.show()
 from phonometry import materials
 
 # Reproducibility uncertainty of alpha_s at 1000 Hz (Table 1: m=0.040, n=0.015).
-r = materials.sound_absorption_coefficient_uncertainty([0.68], [1000], confidence=0.95)
+r = materials.sound_absorption_coefficient_uncertainty([0.68], [1000], coverage=0.95)
 print(round(float(r.standard_uncertainty[0]), 4))            # 0.0422 (sigma_R)
 print(float(r.reported_expanded_uncertainty[0]))             # 0.08  (U, k=2)
 r.plot()   # the figure above: alpha_s with its +/-U (k = 2) ribbon

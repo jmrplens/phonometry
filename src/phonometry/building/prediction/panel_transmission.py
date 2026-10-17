@@ -103,7 +103,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ...materials.absorbers.porous import PUBLISHED_AIR
+from ...materials.absorbers.porous import ABSORBER_AIR
 from ...solids import PUBLISHED_PLATEAU_DATA, PlateauMaterial
 from ...vibration.structural.point_mobility import plate_bending_stiffness
 from ...vibration.structural.radiation_efficiency import coincidence_frequency
@@ -120,7 +120,7 @@ if TYPE_CHECKING:
 
 #: Default speed of sound in air ``c0``, m/s, of the single-property entry
 #: points: the published air's own, so the module spells 343 m/s once.
-_SPEED_OF_SOUND: float = PUBLISHED_AIR.speed_of_sound
+_SPEED_OF_SOUND: float = ABSORBER_AIR.speed_of_sound
 #: Field-incidence correction ``dB`` of Bies 5e Eq. 7.42, PDF page 409
 #: (printed p. 380), keyed by band width.
 _FIELD_CORRECTION: dict[str, float] = {"third": 5.5, "octave": 4.0}
@@ -220,7 +220,7 @@ def mass_law_transmission_loss(
     incidence: str = "field",
     band: str = "third",
     field_correction: float | None = None,
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> np.ndarray:
     r"""Mass-law transmission loss of a limp panel (Bies Eq. 7.40/7.42).
 
@@ -238,7 +238,7 @@ def mass_law_transmission_loss(
     :param field_correction: Explicit field-incidence correction, in dB
         (>= 0), overriding the band table (Default: ``None``).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
-        :data:`PUBLISHED_AIR`, the air these models are published with).
+        :data:`ABSORBER_AIR`, dry air at 20 degC at textbook values).
     :return: The transmission loss ``TL``, in dB.
     :raises ValueError: for a non-positive input or unknown incidence/band.
     """
@@ -408,7 +408,7 @@ def single_panel_transmission_loss(
     band: str = "third",
     coincidence_model: str = "sharp",
     field_correction: float | None = None,
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> SoundReductionResult:
     r"""Sound reduction index of a single panel, Sharp's method (Bies 7.2.4.1).
 
@@ -456,7 +456,7 @@ def single_panel_transmission_loss(
         region, in dB (>= 0), overriding the band table (Default: ``None``;
         Norton's Eq. 3.106 uses a flat 5 dB).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
-        :data:`PUBLISHED_AIR`, the air these models are published with).
+        :data:`ABSORBER_AIR`, dry air at 20 degC at textbook values).
     :return: A :class:`SoundReductionResult` (model ``"sharp-single"`` or
         ``"cremer-single"``).
     :raises ValueError: for a non-positive input, an unknown coincidence model,
@@ -693,7 +693,7 @@ def plateau_transmission_loss(
     plateau_height_db: float | None = None,
     frequency_ratio: float | None = None,
     field_correction: float = _NORTON_FIELD_CORRECTION,
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> SoundReductionResult:
     r"""Plateau-method estimate of a single panel's TL (Norton 3.9.1).
 
@@ -740,7 +740,7 @@ def plateau_transmission_loss(
     :param field_correction: Field-incidence correction of the mass-law line,
         in dB (Default: 5.0, Norton Eq. 3.106).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
-        :data:`PUBLISHED_AIR`, the air these models are published with).
+        :data:`ABSORBER_AIR`, dry air at 20 degC at textbook values).
     :return: A :class:`SoundReductionResult` (model ``"plateau"``) carrying
         :attr:`~SoundReductionResult.plateau_height_db`,
         :attr:`~SoundReductionResult.plateau_start` (point A) and
@@ -1140,7 +1140,7 @@ def orthotropic_transmission_loss(
     area: float | None = None,
     limiting_angle_deg: float = 78.0,
     band: str = "third",
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> SoundReductionResult:
     r"""Orthotropic-panel sound reduction index (Vigran 6.5.3, Bies 7.2.4.5).
 
@@ -1217,7 +1217,7 @@ def orthotropic_transmission_loss(
     :param band: Band width for the field correction of the Heckl mass-law
         branch (``"third"``/``"octave"``).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
-        :data:`PUBLISHED_AIR`, the air these models are published with).
+        :data:`ABSORBER_AIR`, dry air at 20 degC at textbook values).
     :return: A :class:`SoundReductionResult` (model ``"orthotropic-integral"``
         or ``"orthotropic-heckl"``) carrying ``fc1`` in
         :attr:`~SoundReductionResult.critical_frequency` and ``fc2`` in
@@ -1301,7 +1301,7 @@ def mass_spring_mass_resonance(
     *,
     cavity_medium: PorousMediumResult | None = None,
     tie_stiffness_per_area: float = 0.0,
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> float:
     r"""Mass-spring-mass resonance ``f0`` of a double wall (Bies Eq. 7.62).
 
@@ -1328,7 +1328,7 @@ def mass_spring_mass_resonance(
     :param tie_stiffness_per_area: Stiffness per unit area :math:`N k / S` of a
         connection array bridging the cavity, in N/m^3 (>= 0, Default: 0).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
-        :data:`PUBLISHED_AIR`, the air these models are published with).
+        :data:`ABSORBER_AIR`, dry air at 20 degC at textbook values).
     :return: The mass-spring-mass resonance ``f0``, in hertz.
     :raises ValueError: for a non-positive input.
     """
@@ -1362,7 +1362,7 @@ def double_wall_transmission_loss(
     cavity_medium: PorousMediumResult | None = None,
     tie_stiffness_per_area: float = 0.0,
     band: str = "third",
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> SoundReductionResult:
     r"""Sound reduction index of a double wall (Bies 7.2.6, Eq. 7.64).
 
@@ -1389,7 +1389,7 @@ def double_wall_transmission_loss(
         connection array bridging the cavity, in N/m^3 (>= 0, Default: 0).
     :param band: Band width for the field correction (``"third"``/``"octave"``).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
-        :data:`PUBLISHED_AIR`, the air these models are published with).
+        :data:`ABSORBER_AIR`, dry air at 20 degC at textbook values).
     :return: A :class:`SoundReductionResult` (model ``"double-wall"``).
     :raises ValueError: for a non-positive input.
     """

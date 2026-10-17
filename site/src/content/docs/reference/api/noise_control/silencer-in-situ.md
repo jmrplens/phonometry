@@ -56,20 +56,20 @@ The corrections that are not a correction
 Clause 4 corrects for background noise from a **printed table**, not from the
 usual logarithmic subtraction, and the two do not agree: at a margin of 5 dB
 the table takes off 2 dB where the formula takes off 1,7, and at 8 dB it takes
-off 1 where the formula takes off 0,7. [`silencer_background_correction_db`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencer_background_correction_db)
+off 1 where the formula takes off 0,7. [`silencer_background_correction`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencer_background_correction)
 implements the table as printed, and says so.
 
 Where the extraneous sound can be measured on its own, 9.1.1 and 9.1.2 offer
 the energy route of Equations (17) and (18) instead, and cap it: **the maximum
 correction is 3 dB**. A measurement that needs more than that does not yield
 the quantity at all, and the clause says what may be stated instead, which is
-an inequality. [`extraneous_corrected_mean_level_db`](/phonometry/reference/api/noise_control/silencer-in-situ/#extraneous_corrected_mean_level_db) returns whether the
+an inequality. [`extraneous_corrected_mean_level`](/phonometry/reference/api/noise_control/silencer-in-situ/#extraneous_corrected_mean_level) returns whether the
 cap was reached so that a capped value cannot be reported as a determination.
 
 Clause 9.1.5 is the one prohibition worth reading twice: converting
 one-third-octave data to octave data is permissible **for measured sound
 pressure levels only, but not for level differences**.
-[`octave_levels_from_third_octave_db`](/phonometry/reference/api/noise_control/silencer-in-situ/#octave_levels_from_third_octave_db) does the permitted conversion, and
+[`octave_levels_from_third_octave`](/phonometry/reference/api/noise_control/silencer-in-situ/#octave_levels_from_third_octave) does the permitted conversion, and
 the docstring names the function in this library that does the forbidden one
 for a different standard.
 
@@ -83,10 +83,10 @@ for a different standard.
 DOWNSTREAM_DISTANCE_COEFFICIENTS = (12.0, 10.0)
 ```
 
-## extraneous_corrected_mean_level_db
+## extraneous_corrected_mean_level
 
 ```python
-extraneous_corrected_mean_level_db(
+extraneous_corrected_mean_level(
     levels: ArrayLike,
     extraneous_levels_db: ArrayLike,
 ) -> tuple[float, bool]
@@ -296,7 +296,7 @@ $$
 The level difference of Equation (1), the ratio of the two measurement
 areas, and the difference of the two field corrections.
 [`installation_case`](/phonometry/reference/api/noise_control/silencer-in-situ/#installation_case) says which areas the installation calls for;
-[`temperature_field_correction_db`](/phonometry/reference/api/noise_control/silencer-in-situ/#temperature_field_correction_db) is the correction difference two
+[`temperature_field_correction`](/phonometry/reference/api/noise_control/silencer-in-situ/#temperature_field_correction) is the correction difference two
 temperatures make.
 
 Every term is a band quantity (3.3, printed folio 3, PDF page 11). A
@@ -327,10 +327,10 @@ band, or one value per band.
 | :--- | :--- |
 | ValueError | For spectra that do not match, an area or a field correction that is neither one value nor one per band, a non-positive area or band centre, a field correction that is not finite, or a case that is not a transmission one. |
 
-## insertion_level_difference_db
+## insertion_level_difference
 
 ```python
-insertion_level_difference_db(
+insertion_level_difference(
     levels_without_db: ArrayLike,
     levels_with_db: ArrayLike,
 ) -> NDArray[np.float64]
@@ -512,35 +512,6 @@ ISO11820_THIRD_OCTAVE_BAND_RANGE_HZ = (50.0, 5000.0)
 MAXIMUM_EXTRANEOUS_CORRECTION_DB = 3.0
 ```
 
-## mean_sound_pressure_level_db
-
-```python
-mean_sound_pressure_level_db(levels: ArrayLike) -> float
-```
-
-The mean level over the measuring points, Equation (2).
-
-$$
-\overline{L_p} = 10 \lg \left(\frac{1}{N} \sum_j 10^{0,1 L_{pj}}\right)
-$$
-
-An energy mean, which is what every clause of the standard means by "mean
-sound pressure level".
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `levels` | The levels at the measuring points, in decibels. |
-
-**Returns:** $\overline{L_p}$, in decibels.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | For an empty or non-finite set of levels. |
-
 ## measurement_distance_downstream_m
 
 ```python
@@ -601,10 +572,10 @@ diameters of the upstream measurement cross-section.
 | :--- | :--- |
 | ValueError | For a non-positive area. |
 
-## octave_levels_from_third_octave_db
+## octave_levels_from_third_octave
 
 ```python
-octave_levels_from_third_octave_db(levels: ArrayLike) -> NDArray[np.float64]
+octave_levels_from_third_octave(levels: ArrayLike) -> NDArray[np.float64]
 ```
 
 One-third-octave levels folded into octaves, 9.1.5.
@@ -687,10 +658,10 @@ so.
 SABINE_AREA_COEFFICIENT = 13.815510557964275
 ```
 
-## silencer_background_correction_db
+## silencer_background_correction
 
 ```python
-silencer_background_correction_db(
+silencer_background_correction(
     level_difference_db: ArrayLike,
 ) -> NDArray[np.float64]
 ```
@@ -760,6 +731,75 @@ why 9.2 asks for it rather than for the duct velocity.
 | :--- | :--- |
 | ValueError | For a non-positive area. |
 
+## silencer_mean_sound_pressure_level
+
+```python
+silencer_mean_sound_pressure_level(levels: ArrayLike) -> float
+```
+
+The mean level over the measuring points, Equation (2).
+
+$$
+\overline{L_p} = 10 \lg \left(\frac{1}{N} \sum_j 10^{0,1 L_{pj}}\right)
+$$
+
+An energy mean, which is what every clause of the standard means by "mean
+sound pressure level".
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `levels` | The levels at the measuring points, in decibels. |
+
+**Returns:** $\overline{L_p}$, in decibels.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For an empty or non-finite set of levels. |
+
+## silencer_sound_power_level
+
+```python
+silencer_sound_power_level(
+    mean_level_db: ArrayLike,
+    *,
+    area: ArrayLike,
+    field_correction_db: ArrayLike = 0.0,
+) -> NDArray[np.float64]
+```
+
+A mean level read as a sound power, Equations (5), (7), (9) and (11).
+
+$$
+L_W = \overline{L_p} + 10 \lg \frac{S}{S_0} + K, \qquad S_0 = 1\ \text{m}^2
+$$
+
+The four equations differ only in which side of the silencer and which run
+they belong to. $S$ is whichever area the case calls for, from
+[`installation_case`](/phonometry/reference/api/noise_control/silencer-in-situ/#installation_case), and $K$ the field correction of Annex A,
+which NOTE 4 expects to stay under
+[`TYPICAL_FIELD_CORRECTION_LIMIT_DB`](/phonometry/reference/api/noise_control/silencer-in-situ/#typical_field_correction_limit_db) in absolute value once the areas
+have been chosen as 3.3 and 3.4 define them.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `mean_level_db` | $\overline{L_p}$ per band, in decibels. |
+| `area` | $S$, in square metres. |
+| `field_correction_db` | $K$, in decibels. |
+
+**Returns:** $L_W$ per band, in decibels.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For a non-positive area or mismatched shapes. |
+
 ## SilencerInSituResult
 
 ```python
@@ -823,46 +863,6 @@ The symbol clause 11 reports this as, `"D_ts"` or `"D_is"`.
 
 The measurement is outside a condition ISO 11820 states.
 
-## sound_power_level_db
-
-```python
-sound_power_level_db(
-    mean_level_db: ArrayLike,
-    *,
-    area: ArrayLike,
-    field_correction_db: ArrayLike = 0.0,
-) -> NDArray[np.float64]
-```
-
-A mean level read as a sound power, Equations (5), (7), (9) and (11).
-
-$$
-L_W = \overline{L_p} + 10 \lg \frac{S}{S_0} + K, \qquad S_0 = 1\ \text{m}^2
-$$
-
-The four equations differ only in which side of the silencer and which run
-they belong to. $S$ is whichever area the case calls for, from
-[`installation_case`](/phonometry/reference/api/noise_control/silencer-in-situ/#installation_case), and $K$ the field correction of Annex A,
-which NOTE 4 expects to stay under
-[`TYPICAL_FIELD_CORRECTION_LIMIT_DB`](/phonometry/reference/api/noise_control/silencer-in-situ/#typical_field_correction_limit_db) in absolute value once the areas
-have been chosen as 3.3 and 3.4 define them.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `mean_level_db` | $\overline{L_p}$ per band, in decibels. |
-| `area` | $S$, in square metres. |
-| `field_correction_db` | $K$, in decibels. |
-
-**Returns:** $L_W$ per band, in decibels.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | For a non-positive area or mismatched shapes. |
-
 ## static_pressure_difference_pa
 
 ```python
@@ -905,10 +905,10 @@ says in words.
 | :--- | :--- |
 | ValueError | For a value that is not finite, or a non-positive density or area. |
 
-## temperature_field_correction_db
+## temperature_field_correction
 
 ```python
-temperature_field_correction_db(
+temperature_field_correction(
     *,
     receiver_temperature_c: float,
     source_temperature_c: float,
@@ -984,10 +984,10 @@ also the static pressure difference.
 
 **Returns:** $\Delta p_\mathrm{T}$, in pascals.
 
-## transmission_level_difference_db
+## transmission_level_difference
 
 ```python
-transmission_level_difference_db(
+transmission_level_difference(
     source_levels_db: ArrayLike,
     receiver_levels_db: ArrayLike,
 ) -> NDArray[np.float64]

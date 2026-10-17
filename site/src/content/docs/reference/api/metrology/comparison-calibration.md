@@ -75,7 +75,7 @@ in a pressure field takes the reference's free-field to pressure sensitivity
 level difference of IEC/TS 61094-7 (IEC 61094-8 Table 1 and 8.2).
 
 **Uncertainty.** [`comparison_uncertainty_budget`](/phonometry/reference/api/metrology/comparison-calibration/#comparison_uncertainty_budget) combines, on
-[`combine_uncertainty`](/phonometry/reference/api/metrology/uncertainty/#combine_uncertainty), the components of IEC
+[`uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation), the components of IEC
 61094-5 Table D.1 or IEC 61094-8 Table 2, each with a sensitivity of 1 in the
 level model above, and multiplies the combined standard uncertainty by the
 coverage factor $k = 2$ both parts report with (IEC 61094-5 7.9 and D.2,
@@ -302,7 +302,7 @@ semi-range of 0,03 dB, say. They are keyed by the names of
 exhaustive (D.1, 8.1), so a component may be left out and
 `additional_components` adds the ones a set-up needs, such as the
 diameter correction of a WS3 microphone in the jig (Table D.1, special
-cases). The combination is [`combine_uncertainty`](/phonometry/reference/api/metrology/uncertainty/#combine_uncertainty)
+cases). The combination is [`uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation)
 on the level model, every component with a sensitivity of 1, which is the
 root-sum-square of D.3; the expanded uncertainty is $k = 2$ times
 it, the coverage factor 7.9 and D.2 of the first part and 8.8 of the

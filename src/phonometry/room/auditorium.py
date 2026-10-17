@@ -369,7 +369,7 @@ def free_field_reference_level(
 
 
 def directivity_energy_average(
-    levels: ArrayLike, axis: int = -1
+    levels: ArrayLike, *, axis: int = -1
 ) -> NDArray[np.float64] | float:
     r"""Average a free-field measurement over bearings around the source.
 

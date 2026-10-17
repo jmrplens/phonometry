@@ -244,7 +244,7 @@ number of similar measurements, and prints 0,025 dB as a standard
 uncertainty. `metrology.IEC61094_5_TABLE_D1` holds each row with its stated
 value, its divisor and the standard uncertainty it prints, and the seven that
 state a value reproduce it. `metrology.comparison_uncertainty_budget` combines them on
-`metrology.combine_uncertainty`, every component with a sensitivity of 1 in
+`metrology.uncertainty_propagation`, every component with a sensitivity of 1 in
 the level model, and multiplies by $k = 2$:
 
 ```python

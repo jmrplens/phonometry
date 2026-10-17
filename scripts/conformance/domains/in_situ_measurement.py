@@ -151,7 +151,7 @@ def _chk_iso11820_table_one() -> Outcome:
     }
     computed = {
         f"{margin} dB": float(
-            ph.noise_control.silencer_background_correction_db([float(margin)])[0]
+            ph.noise_control.silencer_background_correction([float(margin)])[0]
         )
         for margin in ISO11820_BACKGROUND_CORRECTIONS_DB
     }
@@ -166,7 +166,7 @@ def _chk_iso11820_table_one() -> Outcome:
 )
 def _chk_iso11820_table_against_the_formula() -> Outcome:
     margins = np.arange(3, 11, dtype=float)
-    table = ph.noise_control.silencer_background_correction_db(margins)
+    table = ph.noise_control.silencer_background_correction(margins)
     exact = -10.0 * np.log10(1.0 - 10.0 ** (-0.1 * margins))
     worst = float(np.max(np.abs(table - exact)))
     return numeric(
@@ -214,10 +214,10 @@ def _chk_iso11820_temperature_correction() -> Outcome:
         "20 C and 200 C": 5.0 * math.log10(293.0 / 473.0),
     }
     computed = {
-        "20 C both sides": ph.noise_control.temperature_field_correction_db(
+        "20 C both sides": ph.noise_control.temperature_field_correction(
             receiver_temperature_c=20.0, source_temperature_c=20.0
         ),
-        "20 C and 200 C": ph.noise_control.temperature_field_correction_db(
+        "20 C and 200 C": ph.noise_control.temperature_field_correction(
             receiver_temperature_c=20.0, source_temperature_c=200.0
         ),
     }
@@ -308,7 +308,7 @@ def _chk_iso11820_installation_cases() -> Outcome:
 )
 def _chk_iso11820_octave_fold() -> Outcome:
     thirds = [30.0, 30.0, 5.0]
-    permitted = float(ph.noise_control.octave_levels_from_third_octave_db(thirds)[0])
+    permitted = float(ph.noise_control.octave_levels_from_third_octave(thirds)[0])
     expected = 10.0 * math.log10(sum(10.0 ** (0.1 * v) for v in thirds))
     forbidden = float(ph.noise_control.octave_insertion_loss(thirds)[0])
     agrees = abs(permitted - expected) < 1e-9 and abs(permitted - forbidden) > 1.0
@@ -364,9 +364,7 @@ _WORKED_SUBTRACTIONS = {
 
 def _folded_octave_level(third_octave_db: tuple[float, ...]) -> float:
     """One octave level out of its three one-third octaves, 9.1.5."""
-    return float(
-        ph.noise_control.octave_levels_from_third_octave_db(third_octave_db)[0]
-    )
+    return float(ph.noise_control.octave_levels_from_third_octave(third_octave_db)[0])
 
 
 def _background_correction_db(margin_db: float) -> float:
@@ -377,7 +375,7 @@ def _background_correction_db(margin_db: float) -> float:
         # governs what may be reported; this row is about the arithmetic under
         # it, which the module returns uncapped either way.
         warnings.simplefilter("ignore", ph.noise_control.SilencerInSituWarning)
-        corrected, _ = ph.noise_control.extraneous_corrected_mean_level_db(
+        corrected, _ = ph.noise_control.extraneous_corrected_mean_level(
             [_CARRIER_DB], [_CARRIER_DB - margin_db]
         )
     return _CARRIER_DB - corrected
@@ -473,7 +471,7 @@ def _chk_iso14163_octave_attenuation() -> Outcome:
 def _chk_holgado_mean_level() -> Outcome:
     worst = 0.0
     for positions, printed in oracle.HOLGADO_TABLE_XL.values():
-        computed = ph.noise_control.mean_sound_pressure_level_db(positions)
+        computed = ph.noise_control.silencer_mean_sound_pressure_level(positions)
         worst = max(worst, abs(computed - printed))
     return numeric(
         0.0,
@@ -546,9 +544,9 @@ def _chk_worked_background_subtractions() -> Outcome:
     printed = {name: values[2] for name, values in _WORKED_SUBTRACTIONS.items()}
     computed = {
         name: round(
-            ph.noise_control.extraneous_corrected_mean_level_db(
-                [values[0]], [values[1]]
-            )[0],
+            ph.noise_control.extraneous_corrected_mean_level([values[0]], [values[1]])[
+                0
+            ],
             1,
         )
         for name, values in _WORKED_SUBTRACTIONS.items()
@@ -572,14 +570,14 @@ def _chk_barron_mean_and_area_term() -> Outcome:
     }
     computed = {
         mean_label: round(
-            ph.noise_control.mean_sound_pressure_level_db(
+            ph.noise_control.silencer_mean_sound_pressure_level(
                 oracle.BARRON_EXAMPLE_3_4_LEVELS_DB
             ),
             1,
         ),
         area_label: round(
             float(
-                ph.noise_control.sound_power_level_db(
+                ph.noise_control.silencer_sound_power_level(
                     [0.0], area=[oracle.BARRON_EXAMPLE_3_4_AREA_M2]
                 )[0]
             ),
@@ -597,7 +595,7 @@ def _chk_barron_mean_and_area_term() -> Outcome:
     "correction, all three terms together",
 )
 def _chk_barron_sound_power() -> Outcome:
-    mean = ph.noise_control.mean_sound_pressure_level_db(
+    mean = ph.noise_control.silencer_mean_sound_pressure_level(
         oracle.BARRON_EXAMPLE_3_3_LEVELS_DB
     )
     # The third term of the book's Eq. (3-30) is the characteristic impedance
@@ -606,7 +604,7 @@ def _chk_barron_sound_power() -> Outcome:
     # answer, so the row does exercise the term and not just the first two.
     correction = -10.0 * math.log10(oracle.BARRON_EXAMPLE_3_3_IMPEDANCE_RAYL / 400.0)
     level = float(
-        ph.noise_control.sound_power_level_db(
+        ph.noise_control.silencer_sound_power_level(
             [mean],
             area=[oracle.BARRON_EXAMPLE_3_3_AREA_M2],
             field_correction_db=[correction],
@@ -652,7 +650,9 @@ def _chk_ver_beranek_area_term() -> Outcome:
         oracle.VER_BERANEK_EXAMPLE_4_2_REVERBERATION_TIME_S,
         oracle.VER_BERANEK_EXAMPLE_4_2_SPEED_M_S,
     )
-    term = float(ph.noise_control.sound_power_level_db([0.0], area=[absorption])[0])
+    term = float(
+        ph.noise_control.silencer_sound_power_level([0.0], area=[absorption])[0]
+    )
     return numeric(
         oracle.VER_BERANEK_EXAMPLE_4_2_AREA_TERM_DB, term, 0.05, unit="dB", places=2
     )
@@ -831,9 +831,9 @@ def _chk_iso11821_background_window() -> Outcome:
     printed = {"margin 6 dB": 1.2563, "margin 10 dB": 0.4576}
     computed = {
         "margin 6 dB": 80.0
-        - float(ph.noise_control.background_corrected_level_db([80.0], [74.0])[0]),
+        - float(ph.noise_control.screen_background_corrected_level([80.0], [74.0])[0]),
         "margin 10 dB": 80.0
-        - float(ph.noise_control.background_corrected_level_db([80.0], [70.0])[0]),
+        - float(ph.noise_control.screen_background_corrected_level([80.0], [70.0])[0]),
     }
     worst = max(abs(printed[k] - computed[k]) for k in printed)
     return numeric(
@@ -871,7 +871,7 @@ def _chk_iso11821_microphone_distances() -> Outcome:
 def _chk_iso11821_directivity_index() -> Outcome:
     levels = np.full(12, 80.0)
     levels[0] = 70.0
-    index = ph.noise_control.directivity_index_db(levels)
+    index = ph.noise_control.screen_source_directivity_index(levels)
     mean = 10.0 * math.log10((11.0 * 10.0**8.0 + 10.0**7.0) / 12.0)
     expected = mean - 70.0
     return numeric(expected, float(index[0]), 1e-9, unit="dB")
@@ -1075,7 +1075,9 @@ def _chk_iso11821_ifa_printed_differences() -> Outcome:
 )
 def _chk_iso11821_background_worked_example() -> Outcome:
     level, background, printed = oracle.BARRON_EXAMPLE_3_6_DB
-    corrected = ph.noise_control.background_corrected_level_db([level], [background])
+    corrected = ph.noise_control.screen_background_corrected_level(
+        [level], [background]
+    )
     return numeric(printed, float(corrected[0]), 0.05, unit="dB", places=4)
 
 
@@ -1090,7 +1092,7 @@ def _chk_iso11821_background_printed_table() -> Outcome:
     computed: dict[str, float] = {}
     for margin, _ in _BARRON_TABLE_3_4_WINDOW_DB:
         level = 83.0
-        corrected = ph.noise_control.background_corrected_level_db(
+        corrected = ph.noise_control.screen_background_corrected_level(
             [level], [level - margin]
         )
         computed[f"{margin:g} dB"] = round(level - float(corrected[0]), 1)
@@ -1106,7 +1108,7 @@ def _chk_iso11821_background_printed_table() -> Outcome:
 )
 def _chk_iso11821_background_at_the_upper_edge() -> Outcome:
     rows = screen_oracle.HANSEN_EXAMPLE_3_25_DB
-    corrected = ph.noise_control.background_corrected_level_db(
+    corrected = ph.noise_control.screen_background_corrected_level(
         [row[0] for row in rows], [row[1] for row in rows]
     )
     printed = tuple(row[2] for row in rows)
@@ -1134,7 +1136,7 @@ def _chk_iso11821_background_sibling_value() -> Outcome:
     # Neither sibling reads the margin the way 5.7 does: both apply 1,3 dB as
     # a floor below 6 dB, where ISO 11821 refuses the measurement instead. The
     # value is borrowed for the boundary, not the rule around it.
-    corrected = ph.noise_control.background_corrected_level_db([70.0], [64.0])
+    corrected = ph.noise_control.screen_background_corrected_level([70.0], [64.0])
     return numeric(
         screen_oracle.ISO140_3_SIX_DB_MARGIN_CORRECTION_DB,
         70.0 - float(corrected[0]),
@@ -1153,7 +1155,7 @@ def _chk_iso11821_background_sibling_value() -> Outcome:
 )
 def _chk_iso11821_directivity_mean() -> Outcome:
     # Ten positions on a hemisphere, where 3.10 reads twelve on a horizontal
-    # circle, so directivity_index_db refuses this set as printed. What the
+    # circle, so screen_source_directivity_index refuses this set as printed. What the
     # mean itself is worth is checked through the entry point that publishes
     # it, which shares the helper the directivity index calls.
     printed = screen_oracle.BARRON_EXAMPLE_3_5_MEANS_DB
@@ -1191,7 +1193,7 @@ def _chk_iso10847_table_three() -> Outcome:
     }
     computed = {
         f"{margin} dB": float(
-            ph.environment.barrier_background_correction_db([float(margin)])[0]
+            ph.environment.barrier_background_correction([float(margin)])[0]
         )
         for margin in ISO10847_BACKGROUND_CORRECTIONS_DB
     }
@@ -1205,8 +1207,8 @@ def _chk_iso10847_table_three() -> Outcome:
     "tables and not one helper",
 )
 def _chk_two_background_tables() -> Outcome:
-    silencer = float(ph.noise_control.silencer_background_correction_db([9.0])[0])
-    barrier = float(ph.environment.barrier_background_correction_db([9.0])[0])
+    silencer = float(ph.noise_control.silencer_background_correction([9.0])[0])
+    barrier = float(ph.environment.barrier_background_correction([9.0])[0])
     printed = {"ISO 11820 subtracts": 0.5, "ISO 10847 adds": -1.0}
     computed = {"ISO 11820 subtracts": silencer, "ISO 10847 adds": barrier}
     return record(printed, computed, unit="dB")
@@ -1649,7 +1651,7 @@ def _chk_fhwa_wind_classes() -> Outcome:
 def _refuses_a_margin_under_four() -> bool:
     """Whether a margin under the printed floor is refused as invalid."""
     try:
-        ph.environment.barrier_background_correction_db(
+        ph.environment.barrier_background_correction(
             [barrier_oracle.CEN_TS_16272_7_MINIMUM_MARGIN_DB - 0.1]
         )
     except ValueError:
@@ -1668,7 +1670,7 @@ def _chk_cen_ts_background_table() -> Outcome:
     # The table prints two rows and not six: "4 and 5" against -2 dB, then
     # "6, 7, 8, 9" against -1 dB, so the grouping is part of what it says.
     rows = tuple(
-        bool(np.all(ph.environment.barrier_background_correction_db(margins) == value))
+        bool(np.all(ph.environment.barrier_background_correction(margins) == value))
         for margins, value in barrier_oracle.CEN_TS_16272_7_TABLE_4_DB
     )
     readings = (

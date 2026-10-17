@@ -135,7 +135,7 @@ CoherentOutputSpectrumResult(
     window: str,
     nperseg: int,
     overlap: float,
-    scaling: str,
+    scaling: Literal['density', 'spectrum'],
 )
 ```
 
@@ -177,7 +177,7 @@ $G_{yy} = G_{vv} + G_{nn}$
 CoherentOutputSpectrumResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
 ```
@@ -253,7 +253,7 @@ CrossSpectralDensityResult(
     window: str,
     nperseg: int,
     overlap: float,
-    scaling: str,
+    scaling: Literal['density', 'spectrum'],
 )
 ```
 
@@ -287,7 +287,7 @@ estimate, as Bendat & Piersol recommend for measured data (Section 9.2).
 CrossSpectralDensityResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
 ```
@@ -447,7 +447,7 @@ SpectralDensityResult(
     window: str,
     nperseg: int,
     overlap: float,
-    scaling: str,
+    scaling: Literal['density', 'spectrum'],
 )
 ```
 
@@ -478,7 +478,7 @@ Welch autospectral density with its statistical error (B&P Ch. 8).
 SpectralDensityResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

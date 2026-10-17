@@ -209,18 +209,30 @@ def _chk_duct_path_table_14_9() -> Outcome:
         source_level=[90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0],
         elements=[
             DuctElement(
-                "Elbow", [0, 1, 2, 3, 3, 3, 3, 3], [41, 39, 36, 29, 20, 6, 0, 0]
+                label="Elbow",
+                attenuation=[0, 1, 2, 3, 3, 3, 3, 3],
+                self_noise=[41, 39, 36, 29, 20, 6, 0, 0],
             ),
             DuctElement(
-                "Silencer",
-                [7, 12, 16, 28, 35, 35, 28, 17],
-                [49, 43, 44, 42, 42, 45, 35, 24],
+                label="Silencer",
+                attenuation=[7, 12, 16, 28, 35, 35, 28, 17],
+                self_noise=[49, 43, 44, 42, 42, 45, 35, 24],
             ),
-            DuctElement("Lined duct 36x24", [2, 2, 3, 7, 15, 12, 11, 9]),
-            DuctElement("Split 25%", 6.0),
-            DuctElement("Lined duct 18x12", [3, 3, 5, 11, 25, 22, 16, 13]),
-            DuctElement("Flexible duct", [14, 14, 16, 15, 17, 22, 16, 13]),
-            DuctElement("Diffuser", 0.0, [33, 32, 29, 23, 15, 4, 0, 0]),
+            DuctElement(
+                label="Lined duct 36x24", attenuation=[2, 2, 3, 7, 15, 12, 11, 9]
+            ),
+            DuctElement(label="Split 25%", attenuation=6.0),
+            DuctElement(
+                label="Lined duct 18x12", attenuation=[3, 3, 5, 11, 25, 22, 16, 13]
+            ),
+            DuctElement(
+                label="Flexible duct", attenuation=[14, 14, 16, 15, 17, 22, 16, 13]
+            ),
+            DuctElement(
+                label="Diffuser",
+                attenuation=0.0,
+                self_noise=[33, 32, 29, 23, 15, 4, 0, 0],
+            ),
         ],
         room_effect=[6, 6, 5, 5, 6, 7, 6, 6],
     )

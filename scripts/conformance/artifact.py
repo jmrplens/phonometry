@@ -38,7 +38,7 @@ import json
 import math
 import re
 import unicodedata
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from .compare import document_problems
 from .references import Cited, Reference, ReferenceKind, documents, parse
@@ -341,7 +341,12 @@ _BY_DESIGN: dict[str, str] = {
 }
 
 #: The weighting curves and rates the showcase table reports, in table order.
-_WEIGHTING_PANEL_ROWS = (("A", 48000), ("A", 96000), ("C", 48000), ("G", 48000))
+_WEIGHTING_PANEL_ROWS: tuple[tuple[Literal["A", "C", "G"], int], ...] = (
+    ("A", 48000),
+    ("A", 96000),
+    ("C", 48000),
+    ("G", 48000),
+)
 
 
 def _filter_panel() -> dict[str, Any]:

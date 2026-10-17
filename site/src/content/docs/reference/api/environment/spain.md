@@ -94,7 +94,9 @@ ACOUSTIC_AREA_TYPES = {'e': 'sanitary, educational and cultural land use requiri
 ## activity_limits
 
 ```python
-activity_limits(area_type: str) -> RegulationLimits
+activity_limits(
+    area_type: Literal['a', 'b', 'c', 'd', 'e', 'cultural', 'educational', 'entertainment', 'industrial', 'recreational', 'residential', 'sanitary', 'sanitary_educational_cultural', 'tertiary'],
+) -> RegulationLimits
 ```
 
 Outdoor immission limits for activities and ports (Annex III Table B1).
@@ -157,7 +159,7 @@ The verdict: every period meets every evaluated criterion.
 ActivityAssessment.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -172,7 +174,7 @@ ActivityAssessment.report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = 'es',
+    language: Literal['en', 'es'] = 'es',
 ) -> str
 ```
 
@@ -204,8 +206,8 @@ assessment against the applicable limits and the boxed verdict.
 
 ```python
 adjacent_premises_limits(
-    building_use: str,
-    room_type: str,
+    building_use: Literal['residential', 'office', 'sanitary', 'educational', 'administrative', 'cultural', 'dwelling', 'health', 'hospital', 'hospitalario', 'housing', 'offices'],
+    room_type: Literal['living', 'bedrooms', 'professional_offices', 'offices', 'classrooms', 'reading_rooms', 'aulas', 'bedroom', 'classroom', 'dormitorios', 'estancias', 'living_areas', 'living_rooms', 'professional_office', 'reading_room'],
 ) -> RegulationLimits
 ```
 
@@ -397,8 +399,8 @@ table.
 
 ```python
 indoor_quality_objectives(
-    building_use: str,
-    room_type: str,
+    building_use: Literal['residential', 'sanitary', 'educational', 'cultural', 'dwelling', 'health', 'hospital', 'hospitalario', 'housing'],
+    room_type: Literal['living', 'bedrooms', 'classrooms', 'reading_rooms', 'aulas', 'bedroom', 'classroom', 'dormitorios', 'estancias', 'living_areas', 'living_rooms', 'reading_room'],
 ) -> RegulationLimits
 ```
 
@@ -426,7 +428,9 @@ cultural buildings.
 ## infrastructure_limits
 
 ```python
-infrastructure_limits(area_type: str) -> RegulationLimits
+infrastructure_limits(
+    area_type: Literal['a', 'b', 'c', 'd', 'e', 'cultural', 'educational', 'entertainment', 'industrial', 'recreational', 'residential', 'sanitary', 'sanitary_educational_cultural', 'tertiary'],
+) -> RegulationLimits
 ```
 
 Immission limits for new transport infrastructure (Annex III Table A1).
@@ -525,7 +529,9 @@ $L_\mathrm{f} > 15$) leave no other consistent reading. See
 ## max_infrastructure_limit
 
 ```python
-max_infrastructure_limit(area_type: str) -> float
+max_infrastructure_limit(
+    area_type: Literal['a', 'b', 'c', 'd', 'e', 'cultural', 'educational', 'entertainment', 'industrial', 'recreational', 'residential', 'sanitary', 'sanitary_educational_cultural', 'tertiary'],
+) -> float
 ```
 
 Maximum `LAmax` for rail and airport infrastructure (Annex III Table A2).
@@ -551,6 +557,7 @@ or below it (Article 25.1 a iii).
 
 ```python
 NoisePhase(
+    *,
     duration_hours: float,
     laeq: float,
     kt: float = 0.0,
@@ -601,9 +608,9 @@ The corrected level `LKeq,Ti` of the phase, in dB.
 
 ```python
 outdoor_quality_objectives(
-    area_type: str,
+    area_type: Literal['a', 'b', 'c', 'd', 'e', 'cultural', 'educational', 'entertainment', 'industrial', 'recreational', 'residential', 'sanitary', 'sanitary_educational_cultural', 'tertiary'],
     *,
-    urbanization: str = 'existing',
+    urbanization: Literal['existing', 'new'] = 'existing',
 ) -> RegulationLimits
 ```
 
@@ -636,7 +643,7 @@ numeric objective: footnote (2) refers it to the adjoining areas.
 
 ```python
 PeriodAssessment(
-    period: str,
+    period: Literal['day', 'evening', 'night'],
     phases: tuple[NoisePhase, ...],
     duration_hours: float,
     evaluation_period_level: float,
@@ -772,6 +779,7 @@ RD1367_PERIOD_HOURS = {'day': 12.0, 'evening': 4.0, 'night': 8.0}
 
 ```python
 RegulationLimits(
+    *,
     day: float,
     evening: float,
     night: float,
@@ -909,7 +917,7 @@ Tonal correction `Kt` of RD 1367/2007 (Annex IV A.3.3).
 TonalCorrectionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -948,7 +956,9 @@ correction of, say, 4.5 dB is not a reading the regulation can produce.
 ## vibration_quality_objective
 
 ```python
-vibration_quality_objective(building_use: str) -> float
+vibration_quality_objective(
+    building_use: Literal['residential', 'sanitary', 'educational', 'cultural', 'dwelling', 'health', 'hospital', 'hospitalario', 'housing'],
+) -> float
 ```
 
 Indoor vibration quality objective `Law`, in dB (Annex II Table C).

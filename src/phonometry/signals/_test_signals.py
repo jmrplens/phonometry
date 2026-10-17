@@ -78,6 +78,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
+
 
 __all__ = [
     "ResampledSignalResult",
@@ -134,8 +136,8 @@ _MAX_TRANSITION_WIDTH = 0.5
 
 def noise_signal(
     fs: float,
-    duration_s: float = 1.0,
     *,
+    duration_s: float = 1.0,
     color: Literal["white", "pink", "red", "blue", "violet"] = "white",
     rms: float = 1.0,
     seed: int | None = None,
@@ -303,7 +305,7 @@ class ToneBurstResult(OwnsArrays):
         require_same_length(self, "signal", "envelope", axis="sample")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the burst waveform with its gating envelope.
 
@@ -584,7 +586,7 @@ class ResampledSignalResult(OwnsArrays):
         return int(self.filter_taps.size)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the delivered anti-alias filter against its design spec.
 

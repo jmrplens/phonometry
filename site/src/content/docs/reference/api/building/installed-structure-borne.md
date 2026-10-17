@@ -308,7 +308,7 @@ in dB.
 InstalledSourceResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -325,9 +325,9 @@ InstalledSourceResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -682,7 +682,7 @@ $$
 
 ```python
 typical_element_mobility(
-    structure: str,
+    structure: Literal['mass', 'bar_end', 'beam', 'plate', 'pipe', 'mass_spring'],
     *,
     frequency: ArrayLike | None = None,
     mass: float | None = None,

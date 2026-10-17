@@ -11,11 +11,11 @@ from .distortion import (
     HarmonicDistortionResult,
     harmonic_analysis,
     harmonic_distortion,
-    itu_r_468_weighting,
     sinad,
     thd,
     thd_plus_noise,
     weighted_thd,
+    weighting_bs468,
 )
 from .frequency_response import (
     CoherenceResult,
@@ -248,7 +248,7 @@ __all__ = [
     "headphone_source_emf",
     "idle_channel_noise",
     "impedance_code",
-    "itu_r_468_weighting",
+    "weighting_bs468",
     "loop_center_field",
     "loop_current",
     "loop_dimensions",

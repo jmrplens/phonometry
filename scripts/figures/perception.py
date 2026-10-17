@@ -9,6 +9,7 @@ here is embedded by a page under ``perception/``.
 
 import itertools
 from functools import cache
+from typing import Literal
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
@@ -3277,7 +3278,10 @@ def generate_sii_octave_masking_blindness(output_dir: str) -> None:
     from phonometry import speech
 
     levels = np.arange(45.0, 80.1, 1.0)
-    styles = {
+    styles: dict[
+        Literal["critical-band", "equally-contributing", "one-third-octave", "octave"],
+        tuple[str, str],
+    ] = {
         "critical-band": ("-", COLOR_PRIMARY),
         "equally-contributing": ("-", COLOR_TERTIARY),
         "one-third-octave": ("-", COLOR_FG),
@@ -4429,7 +4433,9 @@ def generate_audiometric_zero_earphones(output_dir: str) -> None:
     freqs = hearing.RETSPL_FREQUENCIES_HZ
     _fig, (ax_ref, ax_gap) = plt.subplots(1, 2, figsize=(12.8, 5.6))
 
-    styles = (
+    styles: tuple[
+        tuple[Literal["DT 48", "TDH 39", "other supra-aural"], str, str, str], ...
+    ] = (
         ("DT 48", "o-", COLOR_PRIMARY, "Beyer DT 48 (IEC 60303 coupler)"),
         ("TDH 39", "s-", COLOR_SECONDARY, "Telephonics TDH 39 (same coupler)"),
         (

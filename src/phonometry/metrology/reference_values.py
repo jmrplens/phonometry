@@ -22,13 +22,13 @@ implement names another:
   also used for structure-borne sound, against which the velocity level comes
   out close to the associated sound pressure and intensity levels.
 
-:data:`ISO1683_REFERENCE_VALUES` holds all of them, keyed by medium and then
+:data:`REFERENCE_VALUES` holds all of them, keyed by medium and then
 by quantity, and every value is in the coherent SI unit its row names, so the
 20 µPa of air is ``2e-05`` Pa::
 
     from phonometry import metrology
 
-    p0 = metrology.ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"]
+    p0 = metrology.REFERENCE_VALUES["gas"]["sound_pressure"]
     p0.value, p0.unit, p0.printed  # (2e-05, 'Pa', '20 µPa')
 
 Note b of Table 2 gives the offset between the two pressure references, a
@@ -51,20 +51,20 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final, Literal
 
 from .._internal.display import RichDisplay
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-__all__ = ["ISO1683_REFERENCE_VALUES", "ReferenceValue"]
+__all__ = ["REFERENCE_VALUES", "ReferenceValue"]
 
 
 #: Where each row is printed in ISO 1683:2015.
-_TABLE_1 = "Table 1"
-_TABLE_2 = "Table 2"
-_TABLE_3 = "Table 3"
+_TABLE_1: Final = "Table 1"
+_TABLE_2: Final = "Table 2"
+_TABLE_3: Final = "Table 3"
 
 
 @dataclass(frozen=True)
@@ -84,11 +84,11 @@ class ReferenceValue(RichDisplay):
     """
 
     quantity: str
-    medium: str
+    medium: Literal["gas", "liquid", "solid"]
     value: float
     unit: str
     printed: str
-    table: str
+    table: Literal["Table 1", "Table 2", "Table 3", "Table 3, note b"]
 
 
 def _rows(rows: dict[str, ReferenceValue]) -> Mapping[str, ReferenceValue]:
@@ -98,7 +98,7 @@ def _rows(rows: dict[str, ReferenceValue]) -> Mapping[str, ReferenceValue]:
 #: ISO 1683:2015 Tables 1 to 3 and the alternative of note b of Table 3, keyed
 #: by medium (``"gas"``, ``"liquid"``, ``"solid"``) and then by quantity. Read
 #: from UNE-EN ISO 1683:2016, PDF pages 8 and 9 (printed folios 8 and 9).
-ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingProxyType(
+REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingProxyType(
     {
         "gas": _rows(
             {

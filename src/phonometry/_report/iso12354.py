@@ -61,6 +61,7 @@ from ._layout import (
 from .iso717 import _metadata_pairs
 
 if TYPE_CHECKING:
+    from .._i18n import Language
     from ..building.measurement.ratings import ImpactRatingResult, WeightedRatingResult
     from ..building.prediction.detailed_model import (
         DetailedAirborneResult,
@@ -92,7 +93,7 @@ _SIMPLIFIED_STATEMENT = (
 _DETAILED_MODEL_SD_RANGE = (1.5, 2.5)
 
 
-def _detailed_model_sd(language: str) -> str:
+def _detailed_model_sd(language: Language) -> str:
     """The detailed-model standard-deviation range, localised.
 
     Every other number on a fiche goes through :func:`format_number`, so the
@@ -112,7 +113,7 @@ def _prediction_verdict(
     rating_symbol: str,
     *,
     is_impact: bool,
-    language: str,
+    language: Language,
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag for a predicted rating against a requirement.
 
@@ -155,7 +156,7 @@ def _render_prediction_fiche(
     metric_rows: list[tuple[str, str]],
     is_impact: bool,
     metadata: ReportMetadata | None,
-    language: str,
+    language: Language,
     basis_values: dict[str, str] | None = None,
     statement: tuple[str, dict[str, Any]] = (_SIMPLIFIED_STATEMENT, {}),
 ) -> str:
@@ -267,7 +268,7 @@ def render_iso12354_airborne_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a predicted apparent airborne insulation fiche (EN/ISO 12354-1).
 
@@ -333,7 +334,7 @@ def render_iso12354_impact_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a predicted apparent impact insulation fiche (EN/ISO 12354-2).
 
@@ -401,7 +402,7 @@ def _detailed_path_rows(
     result: DetailedAirborneResult | DetailedImpactResult,
     *,
     verbose: bool,
-    language: str,
+    language: Language,
 ) -> list[tuple[str, str]]:
     """Per-path rows of a detailed-model fiche: energy share, largest first.
 
@@ -449,7 +450,7 @@ def render_iso12354_detailed_airborne_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a detailed per-band airborne prediction fiche (EN/ISO 12354-1).
 
@@ -499,7 +500,7 @@ def render_iso12354_detailed_impact_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a detailed per-band impact prediction fiche (EN/ISO 12354-2).
 
@@ -567,7 +568,7 @@ def render_iso12354_facade_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a predicted facade sound insulation fiche (EN/ISO 12354-3).
 

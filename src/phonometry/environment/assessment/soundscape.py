@@ -119,6 +119,10 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+
+EnvironmentType = Literal["real", "recorded", "virtual"]
+
 __all__ = [
     "METHOD_A_ALTERNATIVE_PART_1",
     "METHOD_A_SCALES",
@@ -182,7 +186,7 @@ class QuestionnaireScale(RichDisplay):
         (Method B) rather than in one of the boxes (Method A).
     """
 
-    method: str
+    method: Literal["A", "B"]
     part: int
     figure: str
     subject: str
@@ -662,7 +666,7 @@ class MethodASummary(OwnsArrays):
                 raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the median of each item per site, with its range as a bar.
 
@@ -771,7 +775,7 @@ class PleasantnessEventfulness(OwnsArrays):
     """
 
     sites: tuple[str, ...]
-    central_tendency: str
+    central_tendency: Literal["median", "mean"]
     attribute_values: NDArray[np.float64]
     pleasantness: NDArray[np.float64]
     eventfulness: NDArray[np.float64]
@@ -821,7 +825,7 @@ class PleasantnessEventfulness(OwnsArrays):
         *,
         normalized: bool = True,
         respondents: bool = False,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         r"""Plot the sites on the two-dimensional model of Figure A.1.
@@ -967,13 +971,13 @@ class SoundscapeCorrelation(OwnsArrays):
     :ivar y_ranks: The ranks of ``y``; ``None`` for Pearson.
     """
 
-    method: str
-    formula: str
+    method: Literal["spearman", "pearson"]
+    formula: Literal["(A.3)", "(A.4)", "(B.1)"]
     coefficient: float
     p_value: float
     t_statistic: float
     degrees_of_freedom: int
-    alternative: str
+    alternative: Literal["two-sided", "greater", "less"]
     x: NDArray[np.float64]
     y: NDArray[np.float64]
     x_ranks: NDArray[np.float64] | None = None
@@ -1007,7 +1011,7 @@ class SoundscapeCorrelation(OwnsArrays):
         return int(np.size(self.x))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the pairs, as ranks for Spearman, with the coefficient.
 
@@ -1129,6 +1133,7 @@ def spearman_rank_correlation(
     y_ranks = np.asarray(stats.rankdata(y_arr, method="average"), dtype=np.float64)
     d_squared = float(np.sum((x_ranks - y_ranks) ** 2))
     tie_x, tie_y = _tie_term(x_ranks), _tie_term(y_ranks)
+    formula: Literal["(A.3)", "(A.4)", "(B.1)"]
     if tie_x > 0.0 or tie_y > 0.0:
         base = (n**3 - n) / 12.0
         numerator = 2.0 * base - tie_x - tie_y - d_squared
@@ -1299,7 +1304,7 @@ class MethodBSummary(OwnsArrays):
             raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the mean of each scale per site with its confidence interval.
 
@@ -1437,7 +1442,7 @@ class SourceRanking(OwnsArrays):
             raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the median rank of each source per site, with its range.
 
@@ -1621,7 +1626,7 @@ class SoundscapeAcousticEnvironment(RichDisplay):
         reproduced.
     """
 
-    environment_type: str
+    environment_type: EnvironmentType
     sound_sources: str
     weather_and_wind: str
     time_of_year_and_day: str

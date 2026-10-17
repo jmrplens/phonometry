@@ -20,6 +20,8 @@ from typing import Any
 import assets_dir
 import matplotlib.pyplot as plt
 
+from phonometry._i18n import Language
+
 from .aircraft import (
     generate_aircraft_atmospheric_absorption,
     generate_airport_contour,
@@ -179,7 +181,6 @@ from .devices import (
     generate_intensity_demo,
     generate_intensity_scan_power,
     generate_intermodulation_tests,
-    generate_itu_r_468_weighting,
     generate_k1_k2_corrections,
     generate_k_weighting_response,
     generate_loudness_gating,
@@ -253,6 +254,7 @@ from .devices import (
     generate_vdi2081_room_step,
     generate_vdi2081_section_change,
     generate_vibration_sound_power,
+    generate_weighting_bs468,
     generate_workstation_emission,
 )
 from .environment import (
@@ -1258,7 +1260,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # The ITU-R BS.468-4 network behind the weighted THD, the AES17 CCIR-RMS
     # noise figures and the dB(468) microphone self-noise, and the products
     # each of the three scalar intermodulation tests counts.
-    generate_itu_r_468_weighting,
+    generate_weighting_bs468,
     generate_intermodulation_tests,
     # Swept-sine harmonic separation: THD(f) by order from one synchronized
     # sweep (Farina 2000 / Novak et al. 2015), the separated harmonic
@@ -1748,7 +1750,9 @@ if not _ANIM_FIELDS.keys() <= _ANIMATIONS.keys():
     raise RuntimeError(msg)
 
 
-def _render_anim_variant(clip: str, output_dir: str, lang: str, *, dark: bool) -> None:
+def _render_anim_variant(
+    clip: str, output_dir: str, lang: Language, *, dark: bool
+) -> None:
     """Render one language/theme variant of *clip* (fork child entry)."""
     set_lang(lang)
     set_theme(dark=dark)
@@ -1888,7 +1892,7 @@ def generate_animations(
 # inside the worker before each figure runs, exactly as the sequential loop
 # did, so the output bytes are identical either way.
 # ====================================================================
-_VARIANTS: tuple[tuple[str, bool], ...] = (
+_VARIANTS: tuple[tuple[Language, bool], ...] = (
     ("en", False),
     ("en", True),
     ("es", False),
@@ -1948,7 +1952,7 @@ if not (_GROUPED_FIGURES | _FIGURE_WEIGHTS.keys()) <= _REGISTRY_NAMES:
 
 
 def _run_figure_task(
-    func_name: str, variants: tuple[tuple[str, bool], ...], img_dir: str
+    func_name: str, variants: tuple[tuple[Language, bool], ...], img_dir: str
 ) -> str:
     """Render one figure in the given language/theme variants (worker entry).
 
@@ -1998,7 +2002,7 @@ def _generate_figures_parallel(
     import multiprocessing as mp
     from concurrent.futures import FIRST_EXCEPTION, ProcessPoolExecutor, wait
 
-    tasks: list[tuple[str, tuple[tuple[str, bool], ...]]] = []
+    tasks: list[tuple[str, tuple[tuple[Language, bool], ...]]] = []
     for func in funcs:
         if func.__name__.removeprefix("generate_") in _GROUPED_FIGURES:
             tasks.append((func.__name__, _VARIANTS))

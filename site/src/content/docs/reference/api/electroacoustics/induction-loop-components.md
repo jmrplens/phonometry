@@ -222,7 +222,7 @@ The steady-state output/input characteristic of an amplifier (5.4.13).
 AGCCharacteristic.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -368,7 +368,7 @@ response measured at one-third-octave centres is read between them.
 AmplifierFrequencyResponse.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -712,7 +712,9 @@ same arrays describe it turned on its side.
 ### LoopField.level()
 
 ```python
-LoopField.level(component: str = 'z') -> np.ndarray
+LoopField.level(
+    component: Literal['x', 'y', 'z', 'magnitude'] = 'z',
+) -> np.ndarray
 ```
 
 The field strength level of one component, dB re 400 mA/m.
@@ -743,8 +745,8 @@ The magnitude of the field strength vector, in A/m.
 LoopField.plot(
     ax: Axes | None = None,
     *,
-    component: str = 'z',
-    language: str = 'en',
+    component: Literal['x', 'y', 'z', 'magnitude'] = 'z',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -853,7 +855,7 @@ The RMS voltage that drives a current through the loop (IEC 60118-4 E.3).
 LoopImpedance.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -953,7 +955,7 @@ The maximum (distortion-limited) output current of an amplifier (5.4.7).
 MaxOutputCurrent.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1058,7 +1060,7 @@ What IEC 62489-1:2010+A1:2014 clause 9 states for a neck loop.
 NeckLoopCharacteristics.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1140,7 +1142,7 @@ Whether the loop meets both limits of its type.
 NeckLoopVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1259,7 +1261,7 @@ Where the in-phase parts add, the level rises by this, in dB.
 QuadraturePhaseError.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

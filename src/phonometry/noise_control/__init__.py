@@ -108,7 +108,7 @@ from .enclosures import (
     enclosure_required_transmission_loss,
 )
 from .hvac import (
-    VDI2081_SPECTRAL_CORRECTION,
+    SPECTRAL_CORRECTION,
     HVACSpectrumResult,
     HVACWarning,
     air_terminal_damper_correction,
@@ -690,7 +690,7 @@ __all__ = [
     "valve_style_modifier",
     "ValveNoiseWarning",
     "ValveTrim",
-    "VDI2081_SPECTRAL_CORRECTION",
+    "SPECTRAL_CORRECTION",
     "velocity_pressure_pa",
     "VELOCITY_PROFILE_TOLERANCE_PERCENT",
     "VELOCITY_UNIFORMITY_TOLERANCE_PERCENT",

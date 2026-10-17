@@ -144,7 +144,7 @@ plt.show()
 
 # By hand: both sources per position above, Eq. 11 below.
 corrected_st = st - res.background_correction
-corrected_rss = rss - res.background_correction_ref[0]
+corrected_rss = rss - res.reference_background_correction[0]
 x = np.arange(freqs.size)
 fig, (axt, axb) = plt.subplots(2, 1, figsize=(10, 8.4), sharex=True)
 for i, offset in enumerate(np.linspace(-0.27, 0.27, st.shape[0])):
@@ -221,11 +221,11 @@ with the grade and the expanded uncertainty.
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `levels` | 2D array | dB | `(n, bands)` | Measured $L'_{pi(\mathrm{ST})}$, one row per microphone position, three or four positions (7.4.1) |
-| `levels_ref` | 2D or 3D array | dB | `(n, bands)` or `(m, n, bands)` | The reference source at the same positions, one grid per location, corrected per its manufacturer but not for background |
-| `lw_ref` | 1D or 2D array, or `ReferenceSourceCalibration` | dB | `(bands,)` or `(m, bands)` | Calibrated $L_{W(\mathrm{RSS})}$, per location when each was calibrated in its own similar position (Eq. 12); a [`ReferenceSourceCalibration`](free-field-qualification.md) is summed from its one-third octave bands into the octaves at `frequencies` |
+| `reference_levels` | 2D or 3D array | dB | `(n, bands)` or `(m, n, bands)` | The reference source at the same positions, one grid per location, corrected per its manufacturer but not for background |
+| `reference_sound_power_levels` | 1D or 2D array, or `ReferenceSourceCalibration` | dB | `(bands,)` or `(m, bands)` | Calibrated $L_{W(\mathrm{RSS})}$, per location when each was calibrated in its own similar position (Eq. 12); a [`ReferenceSourceCalibration`](free-field-qualification.md) is summed from its one-third octave bands into the octaves at `frequencies` |
 | `frequencies` | 1D array | Hz | 63 Hz to 8 kHz octaves | Nominal octave mid-band frequencies of Table D.1; required. Clause 3.11 puts the general-purpose range at 125 Hz to 8 kHz; the 63 Hz row of Table D.1 carries footnote a, which allows it only where the test environment, the reference sound source and the instrumentation are satisfactory at that frequency |
 | `background_levels` | 1D or 2D array | dB | `(bands,)` or `(n, bands)` | $L_{pi(\mathrm{B})}$; one spectrum serves every position. `None` warns and leaves `background_requirement_met` `False` in every band, since 7.5 measures it at each position and 8.1 needs the margin |
-| `background_levels_ref` | 1D or 2D array | dB | same shapes | Background for the reference-source reading; `None` reuses `background_levels` (7.5) |
+| `reference_background_levels` | 1D or 2D array | dB | same shapes | Background for the reference-source reading; `None` reuses `background_levels` (7.5) |
 | `temperature_c` | float | °C | default `23.0` | Air temperature at the test, for $C_2$ |
 | `static_pressure_kpa` | float | kPa | default `101.325` | Static pressure at the test, for $C_2$; see `static_pressure_from_altitude` |
 | `conditions` | `GradeConditions` | | | The two conditions Table 2 reads together: `excess_levels`, the $\Delta L_{f\mathrm{A}}$ at each position `(n,)` in decibels (Annex A), and `directivity_range`, the half-width of the A-weighted directivity survey in decibels (7.2). Either one left out leaves the determination at survey grade |
@@ -236,10 +236,10 @@ The function returns an `InSituSoundPowerResult`: `sound_power_level` (Eq. 11
 or 12, at the conditions of the test), `mean_source_level` and
 `mean_reference_level` (Eq. 8, 9), `reference_levels` per location (Eq. 10),
 `reference_power_level`, `background_correction` per position and band,
-`background_correction_ref` per location, position and band,
+`reference_background_correction` per location, position and band,
 `background_requirement_met` and `upper_bound` per band, `c2`, `grade`, `sigma_r0`,
 `sigma_omc_db`, `sigma_tot`, `expanded_uncertainty`, `coverage_factor`,
-`sound_power_level_a` and `quantity`. `sound_power_level_ref` adds `c2` to
+`sound_power_level_a` and `quantity`. `sound_power_level_at_reference_conditions` adds `c2` to
 the level (section 3).
 
 ## 2. Impulsive sources: the sound energy level (Eq. 13 to 20)
@@ -307,7 +307,7 @@ the inputs are the same: grade 2, $\sigma_\mathrm{omc}$ = 2,0 dB, $k$ = 2.
 | `event_levels` | 3D or 2D array | dB | `(n, N, bands)` or `(n, bands)` | $L'_{Ei,q(\mathrm{ST})}$ per event, or $L'_{Ei,N(\mathrm{ST})}$ of one measurement over $N$ events |
 | `n_events` | int | | $\ge 1$ | $N$ for the 2D form (Eq. 17); must be `None` with the 3D form. Clause 7.6 asks for at least five events, so fewer than five warns and the determination is nonconforming, on either form |
 | `integration_time` | float | s | $> 0$ | $T$ of the event measurement; `None` applies Eq. 14 as printed |
-| `levels_ref`, `lw_ref`, `frequencies`, `background_levels`, `background_levels_ref`, `temperature_c`, `static_pressure_kpa`, `excess_levels`, `directivity_range`, `sigma_omc_db`, `coverage_factor` | | | | As in `sound_power_in_situ()` |
+| `reference_levels`, `reference_sound_power_levels`, `frequencies`, `background_levels`, `reference_background_levels`, `temperature_c`, `static_pressure_kpa`, `excess_levels`, `directivity_range`, `sigma_omc_db`, `coverage_factor` | | | | As in `sound_power_in_situ()` |
 
 ## 3. Grade, uncertainty and reference conditions
 
@@ -341,7 +341,7 @@ carries the level to 101,325 kPa and 23,0 °C, the same $C_2$ as ISO 3741
 clause 9.1.4, and Eq. C.2 estimates the static pressure from the altitude,
 $p_\mathrm{s} = p_{\mathrm{s},0}\,(1 - a H_\mathrm{a})^b$ with $a$ = 2,2560 × 10⁻⁵ m⁻¹
 and $b$ = 5,2553. The result exposes `c2` and the properties
-`sound_power_level_ref` and `sound_energy_level_ref` (Eq. C.1, C.3).
+`sound_power_level_at_reference_conditions` and `sound_energy_level_at_reference_conditions` (Eq. C.1, C.3).
 $\theta_\mathrm{ref}$ is printed as 296 K beside a reference temperature of
 23,0 °C (296,15 K), so at exactly the reference conditions $C_2$ is
 +0,003 3 dB and not zero; ISO 3741 and ISO 3744 print the same 296 K, so the
@@ -356,7 +356,7 @@ high = emission.sound_power_in_situ(
     temperature_c=27.0, static_pressure_kpa=ps,
 )
 print(round(high.c2, 3))                            # 0.423 dB
-print(round(float(high.sound_power_level[3]), 2), round(float(high.sound_power_level_ref[3]), 2))
+print(round(float(high.sound_power_level[3]), 2), round(float(high.sound_power_level_at_reference_conditions[3]), 2))
 # 91.76 at the test conditions, 92.18 under the reference conditions (1 kHz)
 
 # Annex A along a line of sight from the reference source, A-weighted.

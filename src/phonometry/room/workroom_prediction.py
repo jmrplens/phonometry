@@ -51,7 +51,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
@@ -67,6 +67,9 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
     from numpy.typing import ArrayLike
+
+Category = Literal["1", "2a", "2b", "2c"]
+Region = Literal["near", "middle", "far"]
 
 __all__ = [
     "FITTING_DETAIL_LEVELS",
@@ -153,8 +156,8 @@ class PredictionMethod(RichDisplay):
     :param source_detail: The levels of Table 3 it may be fed.
     """
 
-    category: str
-    family: str
+    category: Category
+    family: Literal["diffuse field", "geometrical"]
     rooms: str
     room_detail: tuple[int, ...]
     fitting_detail: tuple[int, ...]
@@ -234,7 +237,7 @@ class PredictionDetailCheck(RichDisplay):
     :ivar source_detail: The level of Table 3 the sources are described at.
     """
 
-    category: str
+    category: Category
     room_detail: int
     fitting_detail: int
     source_detail: int
@@ -268,7 +271,7 @@ class PredictionDetailCheck(RichDisplay):
         raise TypeError(msg)
 
 
-def prediction_method(category: str) -> PredictionMethod:
+def prediction_method(category: Category) -> PredictionMethod:
     """One category of Table 4, with the detail levels of Table E.1.
 
     :param category: ``"1"``, ``"2a"``, ``"2b"`` or ``"2c"``.
@@ -283,7 +286,7 @@ def prediction_method(category: str) -> PredictionMethod:
 
 
 def check_prediction_detail(
-    category: str,
+    category: Category,
     *,
     room_detail: int,
     fitting_detail: int,
@@ -446,7 +449,7 @@ def total_workstation_level(
     return float(energy_sum(levels))
 
 
-def typical_decay_range(region: str) -> _Range:
+def typical_decay_range(region: Region) -> _Range:
     """What 4.3 says ``DL2`` usually is in one region, in decibels.
 
     :param region: ``"near"``, ``"middle"`` or ``"far"``.
@@ -457,7 +460,7 @@ def typical_decay_range(region: str) -> _Range:
     return _region(region, TYPICAL_DECAY_RANGE_DB)
 
 
-def typical_excess_range(region: str) -> _Range:
+def typical_excess_range(region: Region) -> _Range:
     """What 4.3 says ``DLf`` usually is in one region, in decibels.
 
     The clause prints a range for the middle region alone, and adds that in

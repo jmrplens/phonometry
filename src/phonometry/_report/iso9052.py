@@ -50,22 +50,23 @@ from ._material_fiche import (
 )
 
 if TYPE_CHECKING:
+    from .._i18n import Language
     from ..materials.resilient.dynamic_stiffness import DynamicStiffnessResult
     from .metadata import ReportMetadata
 
 
-def _mn(value: float, language: str = "en") -> str:
+def _mn(value: float, language: Language = "en") -> str:
     """Dynamic stiffness in MN/m3 to the nearest MN/m3 (Clause 9)."""
     return format_number(value / 1e6, language, decimals=0)
 
 
-def _hz(value: float, language: str = "en") -> str:
+def _hz(value: float, language: Language = "en") -> str:
     """A frequency to 0,1 Hz."""
     return format_number(value, language, decimals=1)
 
 
 def _metadata_pairs(
-    metadata: ReportMetadata, language: str = "en"
+    metadata: ReportMetadata, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the dynamic-stiffness header grid.
 
@@ -97,7 +98,7 @@ def _metadata_pairs(
 
 
 def _metric_rows(
-    result: DynamicStiffnessResult, language: str = "en"
+    result: DynamicStiffnessResult, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """The scalar results shown in the left-hand metrics table.
 
@@ -154,7 +155,7 @@ def _metric_rows(
     return rows
 
 
-def _statement(result: DynamicStiffnessResult, language: str = "en") -> str:
+def _statement(result: DynamicStiffnessResult, language: Language = "en") -> str:
     """The boxed apparent dynamic stiffness ``s't`` (Formula 4)."""
     return t(
         "Apparent dynamic stiffness s&#8242;<sub>t</sub> = "
@@ -163,7 +164,9 @@ def _statement(result: DynamicStiffnessResult, language: str = "en") -> str:
     ).format(value=_mn(result.apparent_stiffness_n_m3, language))
 
 
-def _extended_terms(result: DynamicStiffnessResult, language: str = "en") -> list[str]:
+def _extended_terms(
+    result: DynamicStiffnessResult, language: Language = "en"
+) -> list[str]:
     """The installed ``s'`` and the test resonance ``fr`` shown beside the box."""
     resolved = bool(np.isfinite(result.dynamic_stiffness_n_m3))
     s_installed = (
@@ -186,7 +189,7 @@ def _extended_terms(result: DynamicStiffnessResult, language: str = "en") -> lis
     return terms
 
 
-def _basis_line(metadata: ReportMetadata | None, language: str = "en") -> str:
+def _basis_line(metadata: ReportMetadata | None, language: Language = "en") -> str:
     """The standard-basis line, naming the measurement standard when supplied."""
     return standard_basis_line(
         "{standard} resonance measurement of the apparent dynamic stiffness "
@@ -206,7 +209,7 @@ def render_dynamic_stiffness_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an EN 29052-1 dynamic-stiffness fiche to a PDF at ``path``.
 

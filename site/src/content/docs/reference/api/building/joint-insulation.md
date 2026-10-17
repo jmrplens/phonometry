@@ -201,7 +201,7 @@ Whether both hold; otherwise J.2.2 says to readjust the mounting.
 GapWidthCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -318,6 +318,7 @@ of the test arrangement $R_\mathrm{s,max}$ that
 
 ```python
 JointGapSeries(
+    *,
     gap_widths_mm: np.ndarray,
     results: tuple[LaboratoryJointInsulationResult, ...],
     nominal_gap_mm: float,
@@ -379,7 +380,7 @@ reads the straight line between the two widths either side.
 JointGapSeries.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     quantity: Literal['r_s_w', 'r_s_w_c', 'r_s_w_ctr'] = 'r_s_w_ctr',
     **kwargs: Any,
 ) -> Axes
@@ -405,7 +406,7 @@ $b_\mathrm{n} + 3$ marked. Requires matplotlib
 JointGapSeries.plot_octave_bands(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -495,7 +496,7 @@ Whether all three were measured.
 JointGapSeriesCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -557,7 +558,7 @@ range.
 JointOpenBandRating.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -612,7 +613,7 @@ Whether both the length and the width hold.
 JointTestElementCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -776,7 +777,7 @@ Formula (D.1).
 LaboratoryJointInsulationResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -826,9 +827,9 @@ LaboratoryJointInsulationResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

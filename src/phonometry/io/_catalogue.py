@@ -99,7 +99,7 @@ from dataclasses import dataclass, field
 from fractions import Fraction
 from pathlib import Path
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, NoReturn
+from typing import TYPE_CHECKING, Any, Literal, NoReturn
 
 from .._internal.catalogue import (
     CATALOGUE_BASES,
@@ -2601,8 +2601,8 @@ def write_catalogue(
     catalogue: str | None = None,
     about: str | None = None,
     provenance: Provenance | None = None,
-    delimiter: str = ",",
-    decimal: str = ".",
+    delimiter: Literal[",", ";", "\t"] = ",",
+    decimal: Literal[".", ","] = ".",
     overwrite: bool = False,
 ) -> tuple[Path, ...]:
     """Write rows as a catalogue file that reads back into the same rows.

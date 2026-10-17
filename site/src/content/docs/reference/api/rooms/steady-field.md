@@ -283,7 +283,7 @@ steady_state_spl(
     room_constant: ArrayLike,
     *,
     directivity: ArrayLike = ...,
-    source_model: str = ...,
+    source_model: Literal['constant_power', 'constant_volume', 'constant_pressure'] = ...,
     characteristic_impedance: float | None = ...,
 ) -> np.ndarray | float
 
@@ -293,7 +293,7 @@ steady_state_spl(
     *,
     absorption_area: ArrayLike,
     directivity: ArrayLike = ...,
-    source_model: str = ...,
+    source_model: Literal['constant_power', 'constant_volume', 'constant_pressure'] = ...,
     characteristic_impedance: float | None = ...,
 ) -> np.ndarray | float
 ```
@@ -370,7 +370,7 @@ Steady-state SPL versus distance in a room, split direct / reverberant.
 SteadyFieldResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

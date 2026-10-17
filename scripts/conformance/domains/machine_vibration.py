@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import functools
 import math
+from typing import Literal
 
 import numpy as np
 
@@ -365,7 +366,10 @@ def _chk_significant_change() -> Outcome:
 #: library is the first, and a row that compared the library with itself would
 #: certify nothing. The two were read against the printed page separately on
 #: 2026-09-05, 57 cells each, and neither differs from it.
-_PRINTED_GEAR_ZONES: dict[str, tuple[str, dict[float, tuple[float, float, float]]]] = {
+_PRINTED_GEAR_ZONES: dict[
+    Literal["displacement", "velocity", "acceleration"],
+    tuple[str, dict[float, tuple[float, float, float]]],
+] = {
     "displacement": (
         "um",
         {
@@ -425,7 +429,9 @@ _PRINTED_GEAR_CLASSES: dict[tuple[str, str], tuple[float, float, float | None]] 
 _GEAR_TOLERANCE = 0.0005
 
 
-def _chk_gear_zone_row(quantity: str, rating: float) -> Outcome:
+def _chk_gear_zone_row(
+    quantity: Literal["displacement", "velocity", "acceleration"], rating: float
+) -> Outcome:
     """One row of Table 2, 3 or 4, compared boundary by boundary."""
     unit, rows = _PRINTED_GEAR_ZONES[quantity]
     published = ph.vibration.gear_unit_zone_boundaries(quantity, rating).as_tuple

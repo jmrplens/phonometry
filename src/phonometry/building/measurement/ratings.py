@@ -84,7 +84,7 @@ from ..._internal.boundary import round_half_away_from_zero, round_half_up
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_sum
-from ..._internal.types import BAND_SET_NAMES
+from ..._internal.types import BAND_SET_NAMES, ReportEngine
 from ..._internal.validation import (
     check_engine,
     require_band_fraction,
@@ -101,6 +101,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
     from ..._internal.types import BandFraction
     from ..._report.metadata import ReportMetadata
 
@@ -593,7 +594,7 @@ class WeightedRatingResult(OwnsArrays):
         _require_unfavourable_sum(self, impact=False)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the measured curve vs the shifted reference (ISO 717-1).
 
@@ -613,9 +614,9 @@ class WeightedRatingResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
         symbol: str | None = None,
     ) -> str:
         """Render an ISO 717-1 airborne sound-insulation fiche to a PDF.
@@ -727,7 +728,7 @@ class ImpactRatingResult(OwnsArrays):
         _require_unfavourable_sum(self, impact=True)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the measured curve vs the shifted reference (ISO 717-2).
 
@@ -747,9 +748,9 @@ class ImpactRatingResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
         symbol: str | None = None,
     ) -> str:
         """Render an ISO 717-2 impact-insulation fiche to a PDF.
@@ -800,9 +801,9 @@ def _render_iso717(
     path: str,
     *,
     metadata: ReportMetadata | None,
-    engine: str,
+    engine: ReportEngine,
     verbose: bool,
-    language: str,
+    language: Language,
     symbol: str | None = None,
 ) -> str:
     """Validate the report request and delegate to the reportlab renderer.
@@ -1182,7 +1183,7 @@ class ImpactImprovementRatingResult(OwnsArrays):
             raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the improvement spectrum with its rating (ISO 717-2).
 
@@ -1279,7 +1280,7 @@ class ExtendedWeightedRatingResult(OwnsArrays):
         require_same_length(self, "frequencies", "measured")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the enlarged-range curve vs the shifted reference (Annex B).
 
@@ -1347,7 +1348,7 @@ class ExtendedImpactRatingResult(OwnsArrays):
         require_same_length(self, "frequencies", "measured")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the enlarged-range curve vs the shifted reference (ISO 717-2).
 
@@ -1895,7 +1896,7 @@ class ReductionImprovementRating(RichDisplay):
     :ivar with_lining: The rating of ``Rref,with``.
     """
 
-    basic_element: str
+    basic_element: Literal["heavy_wall", "heavy_floor", "lightweight_wall"]
     delta_rw: float
     delta_rw_c: float
     delta_rw_ctr: float
@@ -1928,7 +1929,7 @@ class ReductionImprovementRating(RichDisplay):
         return _ELEMENT_INDEX[self.basic_element]
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``Rref,without`` and ``Rref,with`` with the improvement ratings.
 

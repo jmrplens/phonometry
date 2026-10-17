@@ -207,10 +207,10 @@ from phonometry import building
 # wall, a window, a small skylight and an acoustically-treated air inlet (a Dn,e
 # element).
 elements = [
-    building.FacadeElement("wall",     area=6.0, r=[41, 46, 52, 58, 64]),   # octave 125-2000
-    building.FacadeElement("window",   area=4.5, r=[23, 22, 30, 36, 37]),
-    building.FacadeElement("skylight", area=0.5, r=[24, 27, 30, 33, 30]),
-    building.FacadeElement("air inlet", dn_e=[28, 23, 25, 38, 44]),         # small element
+    building.FacadeElement(name="wall",     area=6.0, r=[41, 46, 52, 58, 64]),   # octave 125-2000
+    building.FacadeElement(name="window",   area=4.5, r=[23, 22, 30, 36, 37]),
+    building.FacadeElement(name="skylight", area=0.5, r=[24, 27, 30, 33, 30]),
+    building.FacadeElement(name="air inlet", dn_e=[28, 23, 25, 38, 44]),         # small element
 ]
 fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
                              frequencies=[125, 250, 500, 1000, 2000], fraction=1)
@@ -231,10 +231,10 @@ from phonometry import building
 # wall, a window, a small skylight and an acoustically-treated air inlet (a Dn,e
 # element).
 elements = [
-    building.FacadeElement("wall",     area=6.0, r=[41, 46, 52, 58, 64]),   # octave 125-2000
-    building.FacadeElement("window",   area=4.5, r=[23, 22, 30, 36, 37]),
-    building.FacadeElement("skylight", area=0.5, r=[24, 27, 30, 33, 30]),
-    building.FacadeElement("air inlet", dn_e=[28, 23, 25, 38, 44]),         # small element
+    building.FacadeElement(name="wall",     area=6.0, r=[41, 46, 52, 58, 64]),   # octave 125-2000
+    building.FacadeElement(name="window",   area=4.5, r=[23, 22, 30, 36, 37]),
+    building.FacadeElement(name="skylight", area=0.5, r=[24, 27, 30, 33, 30]),
+    building.FacadeElement(name="air inlet", dn_e=[28, 23, 25, 38, 44]),         # small element
 ]
 fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
                              frequencies=[125, 250, 500, 1000, 2000], fraction=1)
@@ -276,9 +276,9 @@ from phonometry import building
 # The prediction's composite drawn as areas: 6 m2 of wall, a 1.5 m2 window
 # and its 0.3 m2 roller shutter box.
 elements = [
-    building.FacadeElement("Masonry wall", area=6.0, r=[50.0] * 5),
-    building.FacadeElement("Window", area=1.5, r=[30.0] * 5),
-    building.FacadeElement("Roller shutter box", area=0.3, r=[22.0] * 5),
+    building.FacadeElement(name="Masonry wall", area=6.0, r=[50.0] * 5),
+    building.FacadeElement(name="Window", area=1.5, r=[30.0] * 5),
+    building.FacadeElement(name="Roller shutter box", area=0.3, r=[22.0] * 5),
 ]
 building.plot_facade_elements(elements)
 plt.show()
@@ -315,10 +315,10 @@ from phonometry import building, ReportMetadata
 
 # EN 12354-3 Annex F facade -> D2m,nT,w = 33 dB (R'tr,s,w = 31, Ctr = -3).
 elements = [
-    building.FacadeElement("Masonry wall", area=6.0, r=[41, 46, 52, 58, 64]),
-    building.FacadeElement("Glazing",      area=4.5, r=[23, 22, 30, 36, 37]),
-    building.FacadeElement("Roof light",   area=0.5, r=[24, 27, 30, 33, 30]),
-    building.FacadeElement("Air inlet", dn_e=[28, 23, 25, 38, 44]),
+    building.FacadeElement(name="Masonry wall", area=6.0, r=[41, 46, 52, 58, 64]),
+    building.FacadeElement(name="Glazing",      area=4.5, r=[23, 22, 30, 36, 37]),
+    building.FacadeElement(name="Roof light",   area=0.5, r=[24, 27, 30, 33, 30]),
+    building.FacadeElement(name="Air inlet", dn_e=[28, 23, 25, 38, 44]),
 ]
 fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
                              frequencies=[125, 250, 500, 1000, 2000], fraction=1)
@@ -348,8 +348,8 @@ from phonometry import building
 # explicitly to reproduce Annex G; by default no cap is applied.
 bands = [63, 125, 250, 500, 1000, 2000, 4000, 8000]
 seg = building.radiated_sound_power(
-    [building.FacadeElement("wall", area=176.0, r=[32, 36, 36, 33, 39, 49, 57, 63]),
-     building.FacadeElement("door", area=24.0,  r=[21, 23, 28, 30, 30, 30, 30, 30])],
+    [building.FacadeElement(name="wall", area=176.0, r=[32, 36, 36, 33, 39, 49, 57, 63]),
+     building.FacadeElement(name="door", area=24.0,  r=[21, 23, 28, 30, 30, 30, 30, 30])],
     lp_in=[70, 74, 76, 72, 70, 67, 62, 57], area=200.0, c_d=-5.0,
     r_prime_cap=40.0, octave_bands=bands)
 print(round(seg.l_w[0], 1), round(seg.l_w[1], 1))     # 59.8 61.2  (LW at 63/125 Hz)
@@ -380,8 +380,8 @@ from phonometry import building
 # industrial door, inside level Lp,in, Cd = -5 dB.
 bands = [63, 125, 250, 500, 1000, 2000, 4000, 8000]
 seg = building.radiated_sound_power(
-    [building.FacadeElement("wall", area=176.0, r=[32, 36, 36, 33, 39, 49, 57, 63]),
-     building.FacadeElement("door", area=24.0,  r=[21, 23, 28, 30, 30, 30, 30, 30])],
+    [building.FacadeElement(name="wall", area=176.0, r=[32, 36, 36, 33, 39, 49, 57, 63]),
+     building.FacadeElement(name="door", area=24.0,  r=[21, 23, 28, 30, 30, 30, 30, 30])],
     lp_in=[70, 74, 76, 72, 70, 67, 62, 57], area=200.0, c_d=-5.0,
     r_prime_cap=40.0, octave_bands=bands)
 
@@ -471,10 +471,10 @@ from phonometry import building
 # The Annex F façade predicted above, now "measured" in a receiving room of
 # 50 m3 whose reverberation time is exactly T0 = 0.5 s.
 elements = [
-    building.FacadeElement("wall",     area=6.0, r=[41, 46, 52, 58, 64]),
-    building.FacadeElement("window",   area=4.5, r=[23, 22, 30, 36, 37]),
-    building.FacadeElement("skylight", area=0.5, r=[24, 27, 30, 33, 30]),
-    building.FacadeElement("air inlet", dn_e=[28, 23, 25, 38, 44]),
+    building.FacadeElement(name="wall",     area=6.0, r=[41, 46, 52, 58, 64]),
+    building.FacadeElement(name="window",   area=4.5, r=[23, 22, 30, 36, 37]),
+    building.FacadeElement(name="skylight", area=0.5, r=[24, 27, 30, 33, 30]),
+    building.FacadeElement(name="air inlet", dn_e=[28, 23, 25, 38, 44]),
 ]
 volume, area = 50.0, 11.3
 fac = building.facade_sound_reduction(elements, area=area, volume=volume,

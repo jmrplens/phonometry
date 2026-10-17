@@ -149,7 +149,7 @@ def test_resample_to_length_padding_and_trimming() -> None:
 
 @pytest.mark.parametrize(
     ("entry", "field"),
-    [("resolve_samples", "x"), ("apply_calibration", "ref_signal")],
+    [("resolve_samples", "x"), ("apply_calibration", "reference_signal")],
 )
 def test_a_factor_that_overflows_its_samples_is_refused(entry: str, field: str) -> None:
     """Two finite numbers whose product is not, and nothing saw it.

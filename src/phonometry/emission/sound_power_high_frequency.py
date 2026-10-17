@@ -115,7 +115,7 @@ from __future__ import annotations
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -147,6 +147,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
     from .reference_sound_source import ReferenceSourceCalibration
 
 __all__ = [
@@ -521,7 +522,7 @@ class HighFrequencySoundPowerResult(OwnsArrays):
     noise_bandwidth_hz: float | None
     c1: float
     c2: float
-    method: str
+    method: Literal["direct", "comparison"]
     tonal: bool
 
     def __post_init__(self) -> None:
@@ -567,7 +568,7 @@ class HighFrequencySoundPowerResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the band levels, with the mean room level they came from.
 
@@ -858,7 +859,11 @@ _TABLE_3: MappingProxyType[tuple[bool, str], tuple[str, ...]] = MappingProxyType
 
 
 def high_frequency_levels_to_determine(
-    *, noise_125_hz_to_8_khz: str, noise_16_khz_octave: str
+    *,
+    noise_125_hz_to_8_khz: Literal["broadband", "narrowband", "none"],
+    noise_16_khz_octave: Literal[
+        "none", "broadband", "discrete_tone", "multiple_tones"
+    ],
 ) -> tuple[str, ...]:
     """The sound power levels to determine for a type of noise (ISO 9295 Table 3).
 

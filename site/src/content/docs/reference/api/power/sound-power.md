@@ -278,7 +278,7 @@ plot_microphone_positions(
     *,
     ax: Axes3D | None = None,
     radius: float | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes3D
 ```
@@ -393,6 +393,7 @@ whether it was measured or estimated from the altitude by Eq. (G.2), and
 
 ```python
 RoomEnvironment(
+    *,
     absorption_area: float | np.ndarray | None = None,
     reverberation_time: float | np.ndarray | None = None,
     volume: float | None = None,
@@ -586,7 +587,7 @@ SoundEnergyResult(
     surface_area: float,
     sound_energy_level_a: float,
     uncertainty: float,
-    grade: str,
+    grade: Literal['engineering', 'survey'],
     n_events: int | None,
     integration_time: float | None,
 )
@@ -622,7 +623,7 @@ when no background correction needed it.
 SoundEnergyResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -646,7 +647,7 @@ SoundPowerResult(
     surface_area: float,
     sound_power_level_a: float,
     uncertainty: float,
-    grade: str,
+    grade: Literal['engineering', 'survey'],
 )
 ```
 
@@ -722,7 +723,7 @@ $L_{W\mathrm{Ad}} = L_{W\mathrm{A}} + K_{W\mathrm{A}}$ (ISO 4871 clause 3.15).
 SoundPowerResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -739,9 +740,9 @@ SoundPowerResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

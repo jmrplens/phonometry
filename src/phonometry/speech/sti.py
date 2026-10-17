@@ -36,6 +36,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
     from ..io._signal import Signal
 from scipy import signal
@@ -53,7 +55,7 @@ from .._internal.warnings import PhonometryWarning
 from ..filters.core import OctaveFilterBank
 from ..filters.frequencies import nominal_frequencies
 from ..io._resolve import apply_calibration, resolve_fs, resolve_pair_fs
-from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ..metrology.reference_values import REFERENCE_VALUES
 
 __all__ = [
     "STIResult",
@@ -65,7 +67,7 @@ __all__ = [
 ]
 
 #: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
-_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_P0 = REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 
 class STIWarning(PhonometryWarning):
@@ -199,7 +201,7 @@ class STIResult(OwnsArrays):
             raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-band MTI bars with the STI and rating letter.
 
@@ -216,9 +218,9 @@ class STIResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an IEC 60268-16 speech-transmission-index fiche to a PDF.
 
@@ -375,6 +377,7 @@ def _truncated_mtf(mtf: np.ndarray, *, stacklevel: int = 4) -> np.ndarray:
     :func:`sti_adjusted_for_levels`, which calls here directly, passes 3.
     """
     m = np.array(mtf, dtype=np.float64)
+    # The number is a count of array axes, not a quantity.
     if m.ndim != 2 or m.shape[0] != _NUM_BANDS:  # noqa: PLR2004
         msg = (
             f"'mtf' must have shape ({_NUM_BANDS}, n_modulation_frequencies), "
@@ -1040,6 +1043,7 @@ def _pink_noise(n: int, rng: np.random.Generator) -> np.ndarray:
 
 def stipa_signal(
     fs: int,
+    *,
     duration_s: float = 18.0,
     level: float | None = None,
     seed: int | None = None,

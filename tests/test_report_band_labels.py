@@ -164,7 +164,7 @@ def test_the_uncertainty_column_reads_the_centres_and_not_the_labels() -> None:
     centres, fraction = nominal_bands(_THIRDS)
     assert centres is not None
     # The one-third-octave designator
-    assert fraction == 3  # noqa: PLR2004
+    assert fraction == 3
     assert all(isinstance(float(centre), float) for centre in centres)
     spanish, _ = band_labels(_THIRDS, _THIRDS.size, "es")
     assert "31,5" in spanish

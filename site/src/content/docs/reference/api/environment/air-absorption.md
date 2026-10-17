@@ -228,7 +228,7 @@ plottable wrapper and re-runs none of the maths.
 AtmosphericAttenuation.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

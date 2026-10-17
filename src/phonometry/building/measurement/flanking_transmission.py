@@ -101,7 +101,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
-    from ..._internal.types import BandFraction
+    from ..._i18n import Language
+    from ..._internal.types import BandFraction, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -125,7 +126,7 @@ __all__ = [
 ]
 
 
-def _validate_report_request(engine: str, language: str) -> None:
+def _validate_report_request(engine: ReportEngine, language: Language) -> None:
     """Reject an unknown engine or language before a fiche is rendered.
 
     Shared by the three flanking result ``report`` methods: only the
@@ -476,7 +477,7 @@ class VibrationReductionResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``Kij`` against frequency.
 
@@ -494,9 +495,9 @@ class VibrationReductionResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a vibration reduction index ``Kij`` junction fiche to a PDF.
 
@@ -559,6 +560,7 @@ def _validate_octave_triples(freq_groups: np.ndarray) -> None:
 
 def _detect_fraction(frequencies: np.ndarray | None) -> int:
     """1 (octaves) when consecutive centres step by ~2, else 3 (one-third octaves)."""
+    # The fewest values the step below can work with, not a quantity.
     if frequencies is None or frequencies.size < 2:  # noqa: PLR2004
         return 3
     ratio = float(np.median(frequencies[1:] / frequencies[:-1]))
@@ -665,6 +667,7 @@ def vibration_reduction_index(
         msg = "Supply both structural reverberation times (i and j) or neither."
         raise ValueError(msg)
 
+    # Both of the two structural reverberation times.
     if ts_given == 2:  # noqa: PLR2004
         if freq is None:
             msg = (
@@ -791,7 +794,7 @@ class FlankingLevelDifferenceResult(OwnsArrays):
     rating: WeightedRatingResult | None
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``Dn,f`` against the shifted ISO 717-1 reference curve."""
         if self.rating is None:
@@ -807,9 +810,9 @@ class FlankingLevelDifferenceResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
         part: int = 2,
     ) -> str:
         """Render a normalized flanking level difference ``Dn,f`` fiche to a PDF.
@@ -875,7 +878,7 @@ class FlankingImpactLevelResult(OwnsArrays):
     rating: ImpactRatingResult | None
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``Ln,f`` against the shifted ISO 717-2 reference curve."""
         if self.rating is None:
@@ -891,9 +894,9 @@ class FlankingImpactLevelResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
         part: int = 2,
     ) -> str:
         """Render a normalized flanking impact level ``Ln,f`` fiche to a PDF.
@@ -1189,7 +1192,7 @@ class StrongCouplingCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot ``Dv,ij`` band by band against the bound of Formula (15).
 

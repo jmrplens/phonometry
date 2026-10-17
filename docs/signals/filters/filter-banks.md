@@ -215,9 +215,9 @@ rng = np.random.default_rng(1)
 x = rng.standard_normal(fs)                 # one second of noise
 
 eq = filters.ParametricEQ(fs, [
-    filters.EQSection("lowshelf", 100.0, gain_db=4.0),
-    filters.EQSection("peaking", 1000.0, gain_db=-6.0, bw=1.0),  # one-octave cut
-    filters.EQSection("highshelf", 8000.0, gain_db=3.0),
+    filters.EQSection(filter_type="lowshelf", f0=100.0, gain_db=4.0),
+    filters.EQSection(filter_type="peaking", f0=1000.0, gain_db=-6.0, bw=1.0),  # one-octave cut
+    filters.EQSection(filter_type="highshelf", f0=8000.0, gain_db=3.0),
 ])
 y = eq.filter(x)              # apply the cascade
 res = eq.response()           # frozen result carrying the SOS cascade
@@ -238,13 +238,13 @@ from phonometry import filters
 
 fs = 48000
 family = [
-    filters.EQSection("peaking", 1000.0, gain_db=6.0, q=1.4),
-    filters.EQSection("lowshelf", 125.0, gain_db=6.0),
-    filters.EQSection("highshelf", 4000.0, gain_db=-6.0),
-    filters.EQSection("lowpass", 10000.0),
-    filters.EQSection("highpass", 50.0),
-    filters.EQSection("bandpass", 500.0, q=2.0),
-    filters.EQSection("notch", 2000.0, q=6.0),
+    filters.EQSection(filter_type="peaking", f0=1000.0, gain_db=6.0, q=1.4),
+    filters.EQSection(filter_type="lowshelf", f0=125.0, gain_db=6.0),
+    filters.EQSection(filter_type="highshelf", f0=4000.0, gain_db=-6.0),
+    filters.EQSection(filter_type="lowpass", f0=10000.0),
+    filters.EQSection(filter_type="highpass", f0=50.0),
+    filters.EQSection(filter_type="bandpass", f0=500.0, q=2.0),
+    filters.EQSection(filter_type="notch", f0=2000.0, q=6.0),
 ]
 fig, ax = plt.subplots(figsize=(10, 6))
 for section in family:

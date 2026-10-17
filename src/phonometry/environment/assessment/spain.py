@@ -81,7 +81,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -102,7 +102,20 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
     from ..._report.metadata import ReportMetadata
+
+BuildingUse = Literal[
+    "residential",
+    "sanitary",
+    "educational",
+    "cultural",
+    "dwelling",
+    "health",
+    "hospital",
+    "hospitalario",
+    "housing",
+]
 
 __all__ = [
     "ACOUSTIC_AREA_TYPES",
@@ -134,8 +147,11 @@ __all__ = [
     "vibration_quality_objective",
 ]
 
+#: The three evaluation periods of RD 1367/2007: day, evening and night.
+EvaluationPeriod = Literal["day", "evening", "night"]
+
 #: The three daily evaluation periods of Annex I A.1.
-RD1367_EVALUATION_PERIODS: tuple[str, str, str] = ("day", "evening", "night")
+RD1367_EVALUATION_PERIODS: tuple[EvaluationPeriod, ...] = ("day", "evening", "night")
 
 #: Default duration of each evaluation period, in hours (Annex I A.1 a).
 RD1367_PERIOD_HOURS: Mapping[str, float] = MappingProxyType(
@@ -180,6 +196,28 @@ _AREA_ALIASES: dict[str, str] = {
     "transport": "f",
     "general_systems": "f",
 }
+
+#: An acoustic area type the limit tables hold a row for: the letter, or one
+#: of its aliases. Area type ``"f"`` (general transport-infrastructure
+#: systems) is not one: its row of Annex II Table A prints footnote (2), which
+#: refers it to the adjoining areas, and Tables A1, A2 and B1 of Annex III
+#: have no row for it.
+AreaType = Literal[
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "cultural",
+    "educational",
+    "entertainment",
+    "industrial",
+    "recreational",
+    "residential",
+    "sanitary",
+    "sanitary_educational_cultural",
+    "tertiary",
+]
 
 # --------------------------------------------------------------------------- #
 # Limit tables
@@ -413,7 +451,7 @@ class TonalCorrectionResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the band spectrum with the emergent-tone differences ``Lt``."""
         from ..._i18n import check_language
@@ -679,7 +717,7 @@ def corrected_level(
 # --------------------------------------------------------------------------- #
 # Noise phases and period integration (Annex IV A.3.4.2 b)
 # --------------------------------------------------------------------------- #
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class NoisePhase(RichDisplay):
     """A noise phase ``Ti`` of steady emission within an evaluation period.
 
@@ -815,7 +853,7 @@ def long_term_corrected_level(
 # --------------------------------------------------------------------------- #
 # Limit-table lookups
 # --------------------------------------------------------------------------- #
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RegulationLimits(RichDisplay):
     """A day/evening/night limit triple read from RD 1367/2007.
 
@@ -896,7 +934,9 @@ def _area_key(area_type: str, table: Mapping[str, Any]) -> str:
 
 
 def outdoor_quality_objectives(
-    area_type: str, *, urbanization: str = "existing"
+    area_type: AreaType,
+    *,
+    urbanization: Literal["existing", "new"] = "existing",
 ) -> RegulationLimits:
     """Outdoor acoustic quality objectives ``Ld``/``Le``/``Ln`` (Annex II Table A).
 
@@ -951,7 +991,23 @@ def _indoor_key(
     return use, room
 
 
-def indoor_quality_objectives(building_use: str, room_type: str) -> RegulationLimits:
+def indoor_quality_objectives(
+    building_use: BuildingUse,
+    room_type: Literal[
+        "living",
+        "bedrooms",
+        "classrooms",
+        "reading_rooms",
+        "aulas",
+        "bedroom",
+        "classroom",
+        "dormitorios",
+        "estancias",
+        "living_areas",
+        "living_rooms",
+        "reading_room",
+    ],
+) -> RegulationLimits:
     """Indoor acoustic quality objectives ``Ld``/``Le``/``Ln`` (Annex II Table B).
 
     The objectives that the *whole set* of emitters reaching a habitable room
@@ -975,7 +1031,7 @@ def indoor_quality_objectives(building_use: str, room_type: str) -> RegulationLi
     )
 
 
-def vibration_quality_objective(building_use: str) -> float:
+def vibration_quality_objective(building_use: BuildingUse) -> float:
     """Indoor vibration quality objective ``Law``, in dB (Annex II Table C).
 
     :param building_use: ``"residential"``, ``"sanitary"`` (alias
@@ -993,7 +1049,7 @@ def vibration_quality_objective(building_use: str) -> float:
     return _VIBRATION_OBJECTIVES[use]
 
 
-def infrastructure_limits(area_type: str) -> RegulationLimits:
+def infrastructure_limits(area_type: AreaType) -> RegulationLimits:
     """Immission limits for new transport infrastructure (Annex III Table A1).
 
     New road, rail and airport infrastructure must not transmit to the outdoor
@@ -1014,7 +1070,7 @@ def infrastructure_limits(area_type: str) -> RegulationLimits:
     )
 
 
-def max_infrastructure_limit(area_type: str) -> float:
+def max_infrastructure_limit(area_type: AreaType) -> float:
     """Maximum ``LAmax`` for rail and airport infrastructure (Annex III Table A2).
 
     The limit is respected when, over a year, 97 % of all daily values stay at
@@ -1028,7 +1084,7 @@ def max_infrastructure_limit(area_type: str) -> float:
     return _MAX_INFRASTRUCTURE_LIMITS[key]
 
 
-def activity_limits(area_type: str) -> RegulationLimits:
+def activity_limits(area_type: AreaType) -> RegulationLimits:
     """Outdoor immission limits for activities and ports (Annex III Table B1).
 
     The ``LK,d``/``LK,e``/``LK,n`` an installation, establishment or activity
@@ -1050,7 +1106,39 @@ def activity_limits(area_type: str) -> RegulationLimits:
     )
 
 
-def adjacent_premises_limits(building_use: str, room_type: str) -> RegulationLimits:
+def adjacent_premises_limits(
+    building_use: Literal[
+        "residential",
+        "office",
+        "sanitary",
+        "educational",
+        "administrative",
+        "cultural",
+        "dwelling",
+        "health",
+        "hospital",
+        "hospitalario",
+        "housing",
+        "offices",
+    ],
+    room_type: Literal[
+        "living",
+        "bedrooms",
+        "professional_offices",
+        "offices",
+        "classrooms",
+        "reading_rooms",
+        "aulas",
+        "bedroom",
+        "classroom",
+        "dormitorios",
+        "estancias",
+        "living_areas",
+        "living_rooms",
+        "professional_office",
+        "reading_room",
+    ],
+) -> RegulationLimits:
     """Limits on noise transmitted to adjacent premises (Annex III Table B2).
 
     Two premises are acoustically adjacent when noise never travels between
@@ -1099,7 +1187,7 @@ class PeriodAssessment(RichDisplay):
         :data:`RD1367_EVALUATION_PERIODS`.
     """
 
-    period: str
+    period: Literal["day", "evening", "night"]
     phases: tuple[NoisePhase, ...]
     duration_hours: float
     evaluation_period_level: float
@@ -1271,7 +1359,7 @@ class ActivityAssessment(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-period indices against their RD 1367/2007 limits."""
         from ..._i18n import check_language
@@ -1287,7 +1375,7 @@ class ActivityAssessment(RichDisplay):
         *,
         metadata: ReportMetadata | None = None,
         verbose: bool = False,
-        language: str = "es",
+        language: Language = "es",
     ) -> str:
         """Render a one-page noise inspection fiche (``acta``) to ``path``.
 
@@ -1394,7 +1482,7 @@ def _annual_index(
 
 
 def _assess_period(
-    name: str,
+    name: EvaluationPeriod,
     phases: tuple[NoisePhase, ...],
     duration: float,
     limit: float,

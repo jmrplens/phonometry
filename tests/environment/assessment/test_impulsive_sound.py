@@ -247,7 +247,8 @@ def test_calibration_offset_leaves_adjustment_unchanged() -> None:
 
 def test_level_history_interval_within_range() -> None:
     signal = _tone(1000.0, 1.0, 1.0)
-    times, levels = iso.sound_pressure_level_history(signal, FS, dt=0.02)
+    history = iso.sound_pressure_level_history(signal, FS, dt=0.02)
+    times, levels = history.times, history.levels
     assert levels.shape == times.shape
     realised = times[1] - times[0]
     lo, hi = iso._SAMPLE_INTERVAL_RANGE
@@ -321,21 +322,19 @@ def test_plot_unknown_language_raises() -> None:
     plt.close("all")
 
 
-def test_the_level_history_still_unpacks_as_the_pair_it_replaced() -> None:
-    """The migration this change had to survive.
+def test_the_level_history_is_read_by_name() -> None:
+    """The history is a record like every other, not the pair it replaced.
 
-    Every caller of ``sound_pressure_level_history`` wrote
-    ``times, levels = ...``, so the result is iterable and yields those two
-    in that order, the same way DecayCurve replaced its own tuple return.
+    ``times, levels = sound_pressure_level_history(...)`` unpacked the pair
+    by position; the record is read by name, and refuses to be unpacked.
     """
     rng = np.random.default_rng(0)
     signal = 0.01 * rng.standard_normal(FS * 2)
     result = iso.sound_pressure_level_history(signal, FS, dt=0.02)
-
-    times, levels = result
-    assert np.array_equal(times, result.times)
-    assert np.array_equal(levels, result.levels)
+    assert result.times.shape == result.levels.shape
     assert result.dt == pytest.approx(0.02)
+    with pytest.raises(TypeError, match="LevelHistory"):
+        iter(result)
 
 
 def test_the_level_history_draws_its_own_trace() -> None:

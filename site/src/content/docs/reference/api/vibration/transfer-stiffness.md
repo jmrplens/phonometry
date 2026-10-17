@@ -197,7 +197,7 @@ Band level $L_{k,\mathrm{av}}$ re 1 N/m, in dB, NaN where undetermined.
 BandAveragedStiffness.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -690,7 +690,7 @@ Driving-point stiffness magnitude $|k_{1,1}|$, in N/m.
 DrivingPointStiffnessResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -795,7 +795,7 @@ Expanded uncertainty $U = 2u$, in dB (Formula (B.3)).
 DrivingPointUncertainty.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -818,7 +818,7 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 ```python
 effective_blocking_mass(
-    force: ArrayLike,
+    force_n: ArrayLike,
     first_acceleration_m_s2: ArrayLike,
     second_acceleration_m_s2: ArrayLike,
     *,
@@ -843,7 +843,7 @@ follow ISO 7626-1 and ISO 7626-2. See [`EffectiveBlockingMass`](/phonometry/refe
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz, strictly increasing. |
-| `force` | Excitation force phasor `F2`, in N, one per frequency. |
+| `force_n` | Excitation force phasor `F2`, in N, one per frequency. |
 | `first_acceleration_m_s2` | Acceleration phasor $a'_1$, in m/s², one per frequency. |
 | `second_acceleration_m_s2` | Acceleration phasor $a''_1$, in m/s², one per frequency. |
 | `blocking_mass` | The mass `m2` of the block, in kg. |
@@ -918,7 +918,7 @@ The 40 Hz below which a deviation is not read as a loss of rigidity, in hertz.
 EffectiveBlockingMass.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1064,7 +1064,7 @@ Whether the condition holds at every frequency judged.
 LevelDifferenceCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1212,7 +1212,7 @@ Whether `m0` is within its limit at every frequency judged.
 OutputMassCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1430,7 +1430,7 @@ Transfer-stiffness magnitude $|k_{2,1}|$, in N/m.
 TransferStiffnessResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1447,9 +1447,9 @@ TransferStiffnessResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -1499,7 +1499,9 @@ no pass/fail verdict.
 ### TransferStiffnessResult.to()
 
 ```python
-TransferStiffnessResult.to(target: str) -> np.ndarray
+TransferStiffnessResult.to(
+    target: Literal['receptance', 'mobility', 'accelerance', 'dynamic_stiffness', 'impedance', 'apparent_mass'],
+) -> np.ndarray
 ```
 
 Convert $k_{2,1}$ to an FRF (ISO 10846-1 Annex A / Table A.2).

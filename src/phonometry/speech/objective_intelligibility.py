@@ -58,6 +58,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
     from ..io._signal import Signal
 
 __all__ = [
@@ -146,7 +147,7 @@ class STOIResult(OwnsArrays):
         require_same_length(self, "band_scores", "frequencies")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the intermediate intelligibility that averages to the index.
 

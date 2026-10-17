@@ -537,7 +537,7 @@ def test_defined_names_reads_what_the_module_binds_itself() -> None:
         source.splitlines(keepends=True),
         filename,
     )
-    exec(compile(source, filename, "exec"), module.__dict__)  # noqa: S102
+    exec(compile(source, filename, "exec"), module.__dict__)
     try:
         assert gate.defined_names(module) == [
             "FAST",

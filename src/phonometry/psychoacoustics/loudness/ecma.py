@@ -56,6 +56,7 @@ from ...io._resolve import apply_calibration, resolve_fs
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
     from ...io._signal import Signal
 
 from ..._internal.frozen import OwnsArrays
@@ -66,7 +67,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ...metrology.reference_values import REFERENCE_VALUES
 
 __all__ = [
     "EcmaLoudness",
@@ -79,7 +80,7 @@ __all__ = [
 
 _FS = 48000  # normative sampling rate r_s (Clause 5.1.1)
 # Reference pressure p~_0 = 20 uPa (Clause 5.1.8), the ISO 1683 value.
-_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_P0 = REFERENCE_VALUES["gas"]["sound_pressure"].value
 _EPS = 1e-12  # additive constant used throughout the standard
 
 _N_FADE = 240  # 5 ms fade-in, n_fadein = 0.005 * 48000 (Formula 1)
@@ -316,7 +317,7 @@ class EcmaLoudness(OwnsArrays):
         require_same_length(self, "times", "loudness_vs_time", axis="time block")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | np.ndarray:
         """Plot the average specific loudness N'(z) (see :mod:`phonometry._plot.psychoacoustics`).
 

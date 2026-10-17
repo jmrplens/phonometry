@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
     from ..simulation.elastic_fdtd import ElasticFDTDResult, ElasticSource
     from ..simulation.fdtd import FDTDResult
 
@@ -68,7 +69,7 @@ _FIELD_SYMBOLS = {
 }
 
 
-def _t(text: str, language: str = "en", **fmt: Any) -> str:
+def _t(text: str, language: Language = "en", **fmt: Any) -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     s = _STRINGS.get(text, text) if language == "es" else text
     return s.format(**fmt) if fmt else s
@@ -83,7 +84,7 @@ def _render_probe_lines(
     xlabel: str,
     ylabel: str,
     title: str,
-    language: str,
+    language: Language,
     **kwargs: Any,
 ) -> Axes:
     """Draw labelled probe time histories with the shared styling."""
@@ -105,7 +106,7 @@ def _render_probe_lines(
 
 def _probe_labels(
     positions: NDArray[np.float64],
-    language: str,
+    language: Language,
 ) -> list[str]:
     """One ``probe (x, y) m`` label per probe position."""
     from .._i18n import format_number
@@ -131,7 +132,7 @@ def _render_snapshot(
     probe_positions: NDArray[np.float64],
     colorbar_label: str,
     title: str,
-    language: str,
+    language: Language,
     **kwargs: Any,
 ) -> Axes:
     """Render one field raster with the geometry overlaid (shared core)."""
@@ -188,7 +189,7 @@ def _render_snapshot(
 def _snapshot_time_text(
     snapshot_times: NDArray[np.float64],
     frame: int,
-    language: str,
+    language: Language,
 ) -> str:
     """The localised snapshot time in milliseconds."""
     from .._i18n import format_number
@@ -197,7 +198,11 @@ def _snapshot_time_text(
 
 
 def plot_fdtd_probes(
-    result: FDTDResult, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    result: FDTDResult,
+    ax: Axes | None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
 ) -> Axes:
     """Pressure time history at each probe of an FDTD run.
 
@@ -227,7 +232,7 @@ def plot_fdtd_snapshot(
     ax: Axes | None = None,
     *,
     frame: int = -1,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """One recorded pressure-field snapshot with the geometry overlaid.
@@ -291,7 +296,7 @@ def plot_elastic_probes(
     result: ElasticFDTDResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Recorded time history of every probe/field pair of an elastic run.
@@ -341,7 +346,7 @@ def plot_elastic_snapshot(
     ax: Axes | None = None,
     *,
     frame: int = -1,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """One recorded elastic field snapshot with the geometry overlaid.

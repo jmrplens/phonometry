@@ -121,16 +121,16 @@ def test_waterhouse_term_vanishes_at_high_frequency() -> None:
 def test_comparison_method_exact_by_construction() -> None:
     """LW = LW(RSS) + (Lp(ST) - Lp(RSS) + C2), recovered digit-exact."""
     theta, ps = 20.0, 100.0
-    lw_ref = np.array([90.0, 92.0, 88.0])
+    reference_sound_power_levels = np.array([90.0, 92.0, 88.0])
     lp_rss = np.array([70.0, 71.0, 69.0])
     # Choose a target LW and back out Lp(ST).
     lw_target = np.array([85.0, 95.0, 80.0])
-    lp_st = lw_target - lw_ref + lp_rss - _c2(theta, ps)
+    lp_st = lw_target - reference_sound_power_levels + lp_rss - _c2(theta, ps)
 
     res = emission.sound_power_comparison(
         lp_st,
         lp_rss,
-        lw_ref,
+        reference_sound_power_levels,
         temperature_c=theta,
         static_pressure_kpa=ps,
     )
@@ -141,10 +141,10 @@ def test_comparison_method_exact_by_construction() -> None:
 
 def test_comparison_reference_conditions_c2_near_zero() -> None:
     """At theta=23 C, ps=101,325 kPa the C2 correction is ~0 (theta1=296 K)."""
-    lw_ref = np.array([90.0])
+    reference_sound_power_levels = np.array([90.0])
     lp_rss = np.array([70.0])
     lp_st = np.array([80.0])
-    res = emission.sound_power_comparison(lp_st, lp_rss, lw_ref)
+    res = emission.sound_power_comparison(lp_st, lp_rss, reference_sound_power_levels)
     # LW ~ 90 + (80 - 70) = 100, plus a ~0,003 dB C2 term.
     assert np.isclose(res.sound_power_level[0], 100.0, atol=0.01)
 
@@ -155,34 +155,34 @@ def test_comparison_fewer_than_six_positions_warns() -> None:
     """
     levels = np.array([[80.0], [80.1], [79.9]])  # 3 positions, tight spread
     lp_rss = np.array([70.0])
-    lw_ref = np.array([90.0])
+    reference_sound_power_levels = np.array([90.0])
     with pytest.warns(
         emission.SoundPowerWarning,
         match=r"microphone position\(s\) were supplied; an unqualified reverberation room requires",
     ):
-        emission.sound_power_comparison(levels, lp_rss, lw_ref)
+        emission.sound_power_comparison(levels, lp_rss, reference_sound_power_levels)
 
 
 def test_comparison_interposition_std_above_criterion_warns() -> None:
     """sM > 1,5 dB across the comparison test-source positions warns (Eq. 10)."""
     levels = np.array([[70.0], [80.0], [72.0], [78.0], [71.0], [79.0]])
     lp_rss = np.array([70.0])
-    lw_ref = np.array([90.0])
+    reference_sound_power_levels = np.array([90.0])
     with pytest.warns(
         emission.SoundPowerWarning,
         match=r"Inter-position standard deviation exceeds the ISO 3741 sM criterion",
     ):
-        emission.sound_power_comparison(levels, lp_rss, lw_ref)
+        emission.sound_power_comparison(levels, lp_rss, reference_sound_power_levels)
 
 
 def test_comparison_1d_spectra_emit_no_sampling_warning() -> None:
     """Already-averaged 1D spectra carry no per-position info -> no advisory."""
     lp_st = np.array([80.0, 80.0])
     lp_rss = np.array([70.0, 70.0])
-    lw_ref = np.array([90.0, 90.0])
+    reference_sound_power_levels = np.array([90.0, 90.0])
     with warnings.catch_warnings():
         warnings.simplefilter("error", emission.SoundPowerWarning)
-        emission.sound_power_comparison(lp_st, lp_rss, lw_ref)
+        emission.sound_power_comparison(lp_st, lp_rss, reference_sound_power_levels)
 
 
 # --------------------------------------------------------------------------
@@ -363,12 +363,12 @@ def test_comparison_method_corrects_test_source_per_position() -> None:
     levels = np.array([[70.0], [68.0], [66.0], [72.0], [71.0], [69.0]])
     background = np.array([[58.0], [60.0], [59.0], [60.0], [62.0], [58.0]])
     lp_rss = np.array([70.0])
-    lw_ref = np.array([90.0])
+    reference_sound_power_levels = np.array([90.0])
     with pytest.warns(emission.SoundPowerWarning):
         res = emission.sound_power_comparison(
             levels,
             lp_rss,
-            lw_ref,
+            reference_sound_power_levels,
             frequencies=freqs,
             background_levels=background,
         )
@@ -389,7 +389,7 @@ def test_comparison_short_reference_margin_warns_without_an_upper_bound() -> Non
             np.array([70.0]),
             np.array([90.0]),
             frequencies=freqs,
-            background_levels_ref=np.array([67.0]),
+            reference_background_levels=np.array([67.0]),
         )
     assert not any("levels are upper bounds" in str(w.message) for w in seen)
 
@@ -507,22 +507,33 @@ def test_direct_method_invalid_pressure_raises(ps: float) -> None:
 
 
 def test_comparison_method_invalid_temperature_raises() -> None:
-    levels, levels_ref, lw_ref = (np.array([80.0]), np.array([70.0]), np.array([90.0]))
+    levels, reference_levels, reference_sound_power_levels = (
+        np.array([80.0]),
+        np.array([70.0]),
+        np.array([90.0]),
+    )
     with pytest.raises(
         ValueError, match=r"'temperature_c' must be finite and greater than"
     ):
         emission.sound_power_comparison(
-            levels, levels_ref, lw_ref, temperature_c=-300.0
+            levels, reference_levels, reference_sound_power_levels, temperature_c=-300.0
         )
 
 
 def test_comparison_method_invalid_pressure_raises() -> None:
-    levels, levels_ref, lw_ref = (np.array([80.0]), np.array([70.0]), np.array([90.0]))
+    levels, reference_levels, reference_sound_power_levels = (
+        np.array([80.0]),
+        np.array([70.0]),
+        np.array([90.0]),
+    )
     with pytest.raises(
         ValueError, match=r"'static_pressure_kpa' must be finite and positive"
     ):
         emission.sound_power_comparison(
-            levels, levels_ref, lw_ref, static_pressure_kpa=0.0
+            levels,
+            reference_levels,
+            reference_sound_power_levels,
+            static_pressure_kpa=0.0,
         )
 
 
@@ -597,15 +608,15 @@ def test_comparison_wrong_frequency_length_raises_clean_error() -> None:
     ValueError (shape check ahead of the background broadcasting).
     """
     levels = np.array([80.0, 81.0, 82.0])
-    levels_ref = np.array([70.0, 71.0, 72.0])
-    lw_ref = np.array([90.0, 91.0, 92.0])
+    reference_levels = np.array([70.0, 71.0, 72.0])
+    reference_sound_power_levels = np.array([90.0, 91.0, 92.0])
     background = np.array([50.0, 51.0, 52.0])
     short_freqs = np.array([1000.0, 2000.0])  # wrong length (2 != 3)
     with pytest.raises(ValueError, match=r"'frequencies' length must match"):
         emission.sound_power_comparison(
             levels,
-            levels_ref,
-            lw_ref,
+            reference_levels,
+            reference_sound_power_levels,
             frequencies=short_freqs,
             background_levels=background,
         )
@@ -615,14 +626,16 @@ def test_comparison_wrong_shape_raises_without_sampling_warning() -> None:
     """Malformed shapes raise ValueError before any position-sampling advisory
     (warn-after-validate: a fewer-than-6-positions input must not warn first).
     """
-    # 3 positions (< 6) x 2 bands, but levels_ref spans 3 bands -> mismatch.
+    # 3 positions (< 6) x 2 bands, but reference_levels spans 3 bands -> mismatch.
     levels = np.array([[80.0, 81.0], [80.1, 81.1], [79.9, 80.9]])
-    levels_ref = np.array([70.0, 71.0, 72.0])
-    lw_ref = np.array([90.0, 91.0])
+    reference_levels = np.array([70.0, 71.0, 72.0])
+    reference_sound_power_levels = np.array([90.0, 91.0])
     with warnings.catch_warnings():
         warnings.simplefilter("error", emission.SoundPowerWarning)
         with pytest.raises(ValueError, match="span the same bands"):
-            emission.sound_power_comparison(levels, levels_ref, lw_ref)
+            emission.sound_power_comparison(
+                levels, reference_levels, reference_sound_power_levels
+            )
 
 
 # --------------------------------------------------------------------------
@@ -633,7 +646,7 @@ def test_comparison_reports_applied_background_correction() -> None:
     14), and reporting the field does not alter the computed LW.
     """
     freqs = np.array([1000.0])
-    lw_ref = np.array([90.0])
+    reference_sound_power_levels = np.array([90.0])
     lp_rss = np.array([70.0])
     lp_st = np.array([80.0])
     background = np.array([70.0])  # dLp = 10 dB at 1 kHz (>= lower criterion)
@@ -643,7 +656,7 @@ def test_comparison_reports_applied_background_correction() -> None:
     res = emission.sound_power_comparison(
         lp_st,
         lp_rss,
-        lw_ref,
+        reference_sound_power_levels,
         frequencies=freqs,
         background_levels=background,
     )

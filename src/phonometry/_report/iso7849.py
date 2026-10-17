@@ -62,6 +62,7 @@ from ._sound_power_fiche import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..emission.vibration_sound_power import VibrationSoundPowerResult
     from .metadata import ReportMetadata
 
@@ -77,7 +78,7 @@ def _is_survey(result: VibrationSoundPowerResult) -> bool:
     return bool(np.all(np.abs(eps - 1.0) < _UNITY_TOLERANCE))
 
 
-def _basis(result: VibrationSoundPowerResult, language: str = "en") -> str:
+def _basis(result: VibrationSoundPowerResult, language: Language = "en") -> str:
     """The standard-basis line naming the vibration method and its part."""
     if _is_survey(result):
         return t(
@@ -95,7 +96,7 @@ def _basis(result: VibrationSoundPowerResult, language: str = "en") -> str:
 
 
 def _value_table(
-    result: VibrationSoundPowerResult, *, verbose: bool, language: str = "en"
+    result: VibrationSoundPowerResult, *, verbose: bool, language: Language = "en"
 ) -> Table:
     """Build the full-width per-band table (nominal frequency, Lv, LW).
 
@@ -138,7 +139,7 @@ def _value_table(
     return power_value_table(header, rows_data, widths, fraction)
 
 
-def _eps_cell(value: float, language: str = "en") -> str:
+def _eps_cell(value: float, language: Language = "en") -> str:
     """The radiation-factor cell (three decimals), or an em dash when not finite."""
     if not np.isfinite(value):
         return "—"
@@ -146,7 +147,7 @@ def _eps_cell(value: float, language: str = "en") -> str:
 
 
 def _statement(
-    result: VibrationSoundPowerResult, language: str = "en"
+    result: VibrationSoundPowerResult, language: Language = "en"
 ) -> tuple[str, list[str]]:
     """The boxed sound-power result and its extended terms.
 
@@ -176,7 +177,7 @@ def _statement(
     return statement, extended
 
 
-def _relation_strip(language: str = "en") -> str:
+def _relation_strip(language: Language = "en") -> str:
     """The sound-power-relation line for the basis strip (Eq. 12/15)."""
     imp = format_number(10.0 * math.log10(411.0 / 400.0), language, decimals=2)
     return t(
@@ -191,7 +192,7 @@ def _relation_strip(language: str = "en") -> str:
     ).format(imp=imp)
 
 
-def _factor_strip(result: VibrationSoundPowerResult, language: str = "en") -> str:
+def _factor_strip(result: VibrationSoundPowerResult, language: Language = "en") -> str:
     """The radiation-factor / A-weighting line for the basis strip."""
     if _is_survey(result):
         factor = t(
@@ -229,7 +230,7 @@ def render_vibration_power_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a sound-power-from-vibration determination fiche to a PDF at ``path``.
 

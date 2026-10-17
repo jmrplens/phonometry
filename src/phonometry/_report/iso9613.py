@@ -60,6 +60,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..environment.propagation.ground_barriers import BarrierInsertionLoss
     from ..environment.propagation.outdoor_propagation import (
         OutdoorAttenuation,
@@ -91,7 +92,7 @@ class _AttenuationLevels(NamedTuple):
     ck: NDArrayF
 
 
-def _fmt(value: float, language: str, decimals: int = 1) -> str:
+def _fmt(value: float, language: Language, decimals: int = 1) -> str:
     """A quantity rounded to ``decimals`` decimals, localised separator."""
     return format_number(float(value), language, decimals=decimals)
 
@@ -139,7 +140,7 @@ def _a_weighted_level(receiver_level: NDArrayF, ck: NDArrayF) -> float:
 def _attenuation_metadata_pairs(
     result: OutdoorAttenuation,
     metadata: ReportMetadata | None,
-    language: str,
+    language: Language,
 ) -> list[tuple[str, str]]:
     """Ordered (label, value) pairs of the attenuation-fiche header grid.
 
@@ -187,7 +188,7 @@ def _attenuation_table(
     levels: _AttenuationLevels | None,
     *,
     verbose: bool,
-    language: str,
+    language: Language,
 ) -> Table:
     """The full-width per-band attenuation table (ISO 9613-2:1996, clause 7).
 
@@ -257,7 +258,7 @@ def _attenuation_table(
     return stacked_table(data, [w * mm for w in widths])
 
 
-def _attenuation_statement(la_dw: float, language: str) -> str:
+def _attenuation_statement(la_dw: float, language: Language) -> str:
     """The boxed A-weighted downwind level ``LAT(DW)`` at the receiver."""
     return t(
         "A-weighted downwind level at the receiver L<sub>AT</sub>(DW) = <b>{la} dB</b>",
@@ -265,7 +266,7 @@ def _attenuation_statement(la_dw: float, language: str) -> str:
     ).format(la=_fmt(la_dw, language))
 
 
-def _breakdown_statement(result: OutdoorAttenuation, language: str) -> str:
+def _breakdown_statement(result: OutdoorAttenuation, language: Language) -> str:
     """The boxed octave-band range of the total attenuation ``A``.
 
     Reported when no source emission is supplied, so the fiche still closes on
@@ -283,7 +284,7 @@ def _breakdown_statement(result: OutdoorAttenuation, language: str) -> str:
 
 
 def _attenuation_verdict(
-    la_dw: float, requirement: float, language: str
+    la_dw: float, requirement: float, language: Language
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag against a declared maximum level.
 
@@ -338,7 +339,7 @@ def render_outdoor_attenuation_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
     source_emission: SourceEmission | None = None,
 ) -> str:
     """Render an ISO 9613-2 outdoor-propagation prediction fiche to ``path``.
@@ -490,7 +491,7 @@ _BARRIER_MODEL: dict[str, str] = {
 def _barrier_metadata_pairs(
     result: BarrierInsertionLoss,
     metadata: ReportMetadata | None,
-    language: str,
+    language: Language,
 ) -> list[tuple[str, str]]:
     """Ordered (label, value) pairs of the barrier-fiche header grid."""
     ground = (
@@ -512,7 +513,7 @@ def _barrier_metadata_pairs(
 
 
 def _barrier_table(
-    result: BarrierInsertionLoss, *, verbose: bool, language: str
+    result: BarrierInsertionLoss, *, verbose: bool, language: Language
 ) -> Table:
     """The per-band barrier insertion-loss table (``IL`` and, verbose, ``N``)."""
     from reportlab.lib.units import mm
@@ -542,7 +543,7 @@ def _barrier_table(
     return stacked_table(data, [w * mm for w in widths])
 
 
-def _barrier_statement(mean_il: float, language: str) -> str:
+def _barrier_statement(mean_il: float, language: Language) -> str:
     """The boxed mean insertion loss over the octave bands."""
     return t(
         "Mean insertion loss (63 Hz to 8 kHz) IL = <b>{il} dB</b>", language
@@ -550,7 +551,7 @@ def _barrier_statement(mean_il: float, language: str) -> str:
 
 
 def _barrier_verdict(
-    mean_il: float, requirement: float, language: str
+    mean_il: float, requirement: float, language: Language
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag against a declared minimum insertion loss.
 
@@ -572,7 +573,7 @@ def render_barrier_insertion_loss_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a barrier insertion-loss prediction fiche to ``path``.
 

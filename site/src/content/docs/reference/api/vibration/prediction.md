@@ -286,7 +286,12 @@ on rock there is no reduction.
 ## geometric_exponent
 
 ```python
-geometric_exponent(*, geometry: str, character: str, wave: str) -> float
+geometric_exponent(
+    *,
+    geometry: Literal['point', 'line'],
+    character: Literal['harmonic', 'impulsive'],
+    wave: Literal['surface', 'body'],
+) -> float
 ```
 
 The exponent $n$ of Formula (2) for a source and a wave, Figure 1.

@@ -62,7 +62,7 @@ from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -87,6 +87,10 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
+
+    from ..._i18n import Language
+
+RainType = Literal["intense", "heavy"]
 
 __all__ = [
     "ARTIFICIAL_RAIN",
@@ -412,7 +416,7 @@ class RainGeneratorVerification(OwnsArrays):
         ``None``.
     """
 
-    rain_type: str
+    rain_type: RainType
     rainfall_rate_mm_h: float
     drop_diameters_mm: np.ndarray | None
     fall_velocities_m_s: np.ndarray | None
@@ -497,7 +501,7 @@ class RainGeneratorVerification(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot each measured quantity against its tolerance window.
 
@@ -524,7 +528,7 @@ def _share_of(values: np.ndarray, centre: float, half_width: float) -> float:
 def verify_rain_generator(
     rainfall_rate_mm_h: float,
     *,
-    rain_type: str = "heavy",
+    rain_type: RainType = "heavy",
     drop_diameters_mm: ArrayLike | None = None,
     fall_velocities_m_s: ArrayLike | None = None,
 ) -> RainGeneratorVerification:
@@ -581,7 +585,7 @@ class RainfallReferenceCorrection(OwnsArrays):
     r"""The normalization correction from the reference glass pane (Annex I).
 
     :ivar frequencies: One-third-octave band centre frequencies, in Hz.
-    :ivar l_i_ref: Measured sound intensity level of the reference
+    :ivar l_i_reference: Measured sound intensity level of the reference
         specimen, :math:`L_{I,\mathrm{ref}}`, in dB re 1 pW/m².
     :ivar structural_reverberation_time: Its structural reverberation time
         :math:`T_\mathrm{s}`, in s.
@@ -591,21 +595,21 @@ class RainfallReferenceCorrection(OwnsArrays):
         :math:`\eta_\mathrm{ref}` of Table I.1 as a linear ratio, like
         ``loss_factor``: :math:`10^{x/10}` of the decibel value :math:`x` the
         table prints (:data:`RAINFALL_REFERENCE_LOSS_FACTOR_DB`).
-    :ivar l_i_m_ref: The level corrected to the reference loss factor,
+    :ivar l_i_m_reference: The level corrected to the reference loss factor,
         :math:`L_{I,\mathrm{m,ref}}`, in dB (Formula (I.2)).
-    :ivar l_ic_ref: The reference level :math:`L_{I\mathrm{c,ref}}` of
+    :ivar l_ic_reference: The reference level :math:`L_{I\mathrm{c,ref}}` of
         Table I.1, in dB.
     :ivar correction: :math:`\Delta L_{I\mathrm{c}} = L_{I,\mathrm{m,ref}} -
         L_{I\mathrm{c,ref}}`, in dB (Formula (I.3)).
     """
 
     frequencies: np.ndarray
-    l_i_ref: np.ndarray
+    l_i_reference: np.ndarray
     structural_reverberation_time: np.ndarray
     loss_factor: np.ndarray
     reference_loss_factor: np.ndarray
-    l_i_m_ref: np.ndarray
-    l_ic_ref: np.ndarray
+    l_i_m_reference: np.ndarray
+    l_ic_reference: np.ndarray
     correction: np.ndarray
 
     def __post_init__(self) -> None:
@@ -615,19 +619,19 @@ class RainfallReferenceCorrection(OwnsArrays):
         """
         fields = (
             "frequencies",
-            "l_i_ref",
+            "l_i_reference",
             "structural_reverberation_time",
             "loss_factor",
             "reference_loss_factor",
-            "l_i_m_ref",
-            "l_ic_ref",
+            "l_i_m_reference",
+            "l_ic_reference",
             "correction",
         )
         require_ranks(self, **dict.fromkeys(fields, 1))
         require_same_length(self, *fields)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the corrected reference level against Table I.1.
 
@@ -646,7 +650,7 @@ class RainfallReferenceCorrection(OwnsArrays):
 
 
 def rainfall_reference_correction(
-    l_i_ref: ArrayLike,
+    l_i_reference: ArrayLike,
     structural_reverberation_time: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
@@ -669,7 +673,7 @@ def rainfall_reference_correction(
 
     :math:`f` in Formula (I.1) is taken as the band centre frequency given.
 
-    :param l_i_ref: :math:`L_{I,\mathrm{ref}}` of the reference specimen per
+    :param l_i_reference: :math:`L_{I,\mathrm{ref}}` of the reference specimen per
         band, in dB re 1 pW/m² (e.g. ``rainfall_sound(...).l_i``).
     :param structural_reverberation_time: Its structural reverberation time
         per band, measured to ISO 10140-4, in s.
@@ -679,7 +683,7 @@ def rainfall_reference_correction(
     :raises ValueError: If the inputs disagree in length, a level is not
         finite, a time or frequency is not positive, or a band is not in
         Table I.1.
-    :raises TypeError: if ``frequencies``, ``l_i_ref`` or
+    :raises TypeError: if ``frequencies``, ``l_i_reference`` or
         ``structural_reverberation_time`` holds a text or a value that is not a real
         number.
     """
@@ -688,7 +692,7 @@ def rainfall_reference_correction(
         if frequencies is None
         else require_positive_array(frequencies, "frequencies")
     )
-    level = require_finite_array(l_i_ref, "l_i_ref")
+    level = require_finite_array(l_i_reference, "l_i_reference")
     t_s = require_positive_array(
         structural_reverberation_time, "structural_reverberation_time"
     )
@@ -696,7 +700,7 @@ def rainfall_reference_correction(
         "rainfall_reference_correction",
         {
             "frequencies": freqs.shape,
-            "l_i_ref": level.shape,
+            "l_i_reference": level.shape,
             "structural_reverberation_time": t_s.shape,
         },
         "band",
@@ -704,21 +708,21 @@ def rainfall_reference_correction(
     eta_ref_db = _table_values(
         RAINFALL_REFERENCE_LOSS_FACTOR_DB, freqs, _outside_table_i1
     )
-    l_ic_ref = _table_values(
+    l_ic_reference = _table_values(
         RAINFALL_REFERENCE_INTENSITY_LEVELS, freqs, _outside_table_i1
     )
     eta = _LOSS_FACTOR_CONSTANT / (freqs * t_s)  # Formula (I.1)
     eta_ref = 10.0 ** (eta_ref_db / 10.0)
-    l_i_m_ref = level + 10.0 * np.log10(eta / eta_ref)  # Formula (I.2)
+    l_i_m_reference = level + 10.0 * np.log10(eta / eta_ref)  # Formula (I.2)
     return RainfallReferenceCorrection(
         frequencies=freqs,
-        l_i_ref=level,
+        l_i_reference=level,
         structural_reverberation_time=t_s,
         loss_factor=eta,
         reference_loss_factor=eta_ref,
-        l_i_m_ref=l_i_m_ref,
-        l_ic_ref=l_ic_ref,
-        correction=l_i_m_ref - l_ic_ref,  # Formula (I.3)
+        l_i_m_reference=l_i_m_reference,
+        l_ic_reference=l_ic_reference,
+        correction=l_i_m_reference - l_ic_reference,  # Formula (I.3)
     )
 
 
@@ -748,7 +752,7 @@ class RainfallSoundResult(OwnsArrays):
     frequencies: np.ndarray
     l_i: np.ndarray
     l_ia: float | None
-    method: str
+    method: Literal["pressure", "intensity"]
     correction: np.ndarray | None = None
     l_i_norm: np.ndarray | None = None
     l_ia_norm: float | None = None
@@ -814,7 +818,7 @@ class RainfallSoundResult(OwnsArrays):
         return np.asarray(self.l_i + 10.0 * np.log10(area), dtype=np.float64)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the sound intensity level per band, normalized when available.
 
@@ -921,6 +925,7 @@ def rainfall_sound(
     levels = _as_float64(l_pr, "l_pr")
     if levels.ndim == 1:
         levels = levels[np.newaxis, :]
+    # The number is a count of array axes, not a quantity.
     if levels.ndim != 2 or levels.shape[0] == 0:  # noqa: PLR2004
         msg = "'l_pr' must be (bands,) or (positions, bands)."
         raise ValueError(msg)

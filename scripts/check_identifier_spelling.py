@@ -436,6 +436,36 @@ EXEMPT: dict[tuple[str, str, str], str] = {
         "aluminium",
     ): _PRINTED_MATERIAL,
     (
+        "phonometry.building.prediction.panel_transmission",
+        "plateau_transmission_loss(material)",
+        "aluminium",
+    ): _PRINTED_MATERIAL,
+    (
+        "phonometry.environment.sources.cnossos_road",
+        "road_surface_coefficients(surface)",
+        "optimised brushed down concrete",
+    ): _PRINTED_SURFACE,
+    (
+        "phonometry.environment.sources.cnossos_road",
+        "road_rolling_noise(surface)",
+        "optimised brushed down concrete",
+    ): _PRINTED_SURFACE,
+    (
+        "phonometry.environment.sources.cnossos_road",
+        "road_propulsion_noise(surface)",
+        "optimised brushed down concrete",
+    ): _PRINTED_SURFACE,
+    (
+        "phonometry.environment.sources.cnossos_road",
+        "road_vehicle_sound_power(surface)",
+        "optimised brushed down concrete",
+    ): _PRINTED_SURFACE,
+    (
+        "phonometry.environment.sources.cnossos_road",
+        "road_source_power(surface)",
+        "optimised brushed down concrete",
+    ): _PRINTED_SURFACE,
+    (
         "phonometry.room.auditorium",
         "TEST_REPORT_ITEMS",
         "for theatres, whether the safety curtain or decorative curtains were "

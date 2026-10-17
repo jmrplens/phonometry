@@ -41,8 +41,8 @@ from __future__ import annotations
 
 import math
 import warnings
-from dataclasses import KW_ONLY, dataclass, field
-from typing import TYPE_CHECKING, Any
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -55,6 +55,10 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
+
+    from .._i18n import Language
+
+Operation = Literal["D", "A"]
 
 __all__ = [
     "Aerodrome",
@@ -222,9 +226,9 @@ _IDLE_APPROACH = "idleapproach"
 
 #: ANP operation code for a departure, and for the ``D`` half of the merged
 #: take-off/landing speed-coefficient column of ``Aerodynamic_coefficients``.
-_DEPARTURE = "D"
+_DEPARTURE: Operation = "D"
 #: ANP operation code for an arrival.
-_ARRIVAL = "A"
+_ARRIVAL: Operation = "A"
 
 _DEPARTURE_STEP_TYPES = ("takeoff", "climb", "accelerate", "level", "level-accelerate")
 _APPROACH_STEP_TYPES = (
@@ -285,7 +289,7 @@ def _transition_offset(length_ft: float) -> float:
 # --------------------------------------------------------------------------
 # Aerodrome and atmosphere (B3)
 # --------------------------------------------------------------------------
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class Aerodrome(RichDisplay):
     """The aerodrome, its weather and the runway a procedure is flown from.
 
@@ -313,7 +317,6 @@ class Aerodrome(RichDisplay):
     """
 
     elevation_ft: float
-    _: KW_ONLY
     temperature_c: float = 15.0
     sea_level_pressure_inhg: float = _STANDARD_PRESSURE_INHG
     headwind_kt: float = _DEFAULT_HEADWIND_KT
@@ -467,7 +470,7 @@ _ISA_SEA_LEVEL = Aerodrome(elevation_ft=0.0, temperature_c=15.0)
 # --------------------------------------------------------------------------
 # Coefficient tables
 # --------------------------------------------------------------------------
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class JetEngineCoefficients(RichDisplay):
     """One ANP ``Jet_Engine_Coefficients`` row: the Eq. B-9 thrust polynomial.
 
@@ -525,7 +528,7 @@ class JetEngineCoefficients(RichDisplay):
         )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class PropellerEngineCoefficients(RichDisplay):
     """One ANP ``Propeller_Engine_Coefficients`` row: the Eq. B-12 thrust.
 
@@ -586,7 +589,7 @@ class PropellerEngineCoefficients(RichDisplay):
         ) / pressure_ratio
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class AerodynamicCoefficients(RichDisplay):
     """One ANP ``Aerodynamic_Coefficients`` row: a flap configuration.
 
@@ -626,7 +629,7 @@ class AerodynamicCoefficients(RichDisplay):
         )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class PerformanceAircraft(RichDisplay):
     """One aeroplane's Appendix B coefficient set.
 
@@ -706,7 +709,7 @@ class PerformanceAircraft(RichDisplay):
         """
         return _APPROACH_WEIGHT_FRACTION * self.max_landing_weight_lb
 
-    def flap(self, operation: str, flap_id: str) -> AerodynamicCoefficients:
+    def flap(self, operation: Operation, flap_id: str) -> AerodynamicCoefficients:
         """Aerodynamic coefficients for one flap configuration.
 
         :param operation: ``"A"`` (arrival) or ``"D"`` (departure).
@@ -733,7 +736,7 @@ class PerformanceAircraft(RichDisplay):
 # --------------------------------------------------------------------------
 # Procedural steps
 # --------------------------------------------------------------------------
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class DepartureStep(RichDisplay):
     """One row of an ANP departure procedural-step table (B6.1).
 
@@ -778,7 +781,6 @@ class DepartureStep(RichDisplay):
     step_type: str
     thrust_rating: str
     flap_id: str
-    _: KW_ONLY
     end_altitude_ft: float | None = None
     rate_of_climb_ft_per_min: float | None = None
     end_calibrated_airspeed_kt: float | None = None
@@ -864,7 +866,7 @@ class DepartureStep(RichDisplay):
         return _canonical_step_type(self.step_type)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ApproachStep(RichDisplay):
     """One row of an ANP approach procedural-step table (B7.1).
 
@@ -895,7 +897,6 @@ class ApproachStep(RichDisplay):
 
     step_type: str
     flap_id: str
-    _: KW_ONLY
     start_altitude_ft: float | None = None
     start_calibrated_airspeed_kt: float | None = None
     descent_angle_deg: float | None = None
@@ -1133,7 +1134,7 @@ class FlightProfile(RichDisplay):
     """
 
     aircraft_id: str
-    operation: str
+    operation: Operation
     procedure_id: str
     points: tuple[ProfilePoint, ...]
 
@@ -1208,7 +1209,7 @@ class FlightProfile(RichDisplay):
         return self._column("corrected_net_thrust_lb")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the profile's height and thrust against distance along the track."""
         from .._i18n import check_language
@@ -1233,7 +1234,7 @@ class _Flight:
     aircraft: PerformanceAircraft
     aerodrome: Aerodrome
     weight_lb: float
-    operation: str
+    operation: Operation
 
     # -- atmosphere and thrust ---------------------------------------------
     def altitude_ft(self, height_ft: float) -> float:

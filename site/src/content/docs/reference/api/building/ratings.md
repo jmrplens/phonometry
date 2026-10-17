@@ -111,7 +111,7 @@ Values are integers unless computed with `one_decimal=True`.
 ExtendedImpactRatingResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -177,7 +177,7 @@ frequency range.
 ExtendedWeightedRatingResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -301,7 +301,7 @@ one of the two terms, so both are here.
 ImpactImprovementRatingResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -345,7 +345,7 @@ Single-number weighted impact rating and CI (ISO 717-2).
 ImpactRatingResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -364,9 +364,9 @@ ImpactRatingResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     symbol: str | None = None,
 ) -> str
 ```
@@ -411,7 +411,7 @@ LINING_REFERENCE_ELEMENTS = {'heavy_wall': {50.0: 35.3, 63.0: 37.3, 80.0: 39.4, 
 
 ```python
 ReductionImprovementRating(
-    basic_element: str,
+    basic_element: Literal['heavy_wall', 'heavy_floor', 'lightweight_wall'],
     delta_rw: float,
     delta_rw_c: float,
     delta_rw_ctr: float,
@@ -465,7 +465,7 @@ The element index of ISO 717-1:2020 D.3: `"heavy"` or `"light"`.
 ReductionImprovementRating.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -793,7 +793,7 @@ Single-number weighted rating and adaptation terms (ISO 717-1).
 WeightedRatingResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -812,9 +812,9 @@ WeightedRatingResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     symbol: str | None = None,
 ) -> str
 ```

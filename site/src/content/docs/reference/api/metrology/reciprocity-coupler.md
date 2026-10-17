@@ -149,7 +149,7 @@ values were computed with.
 ## CapillaryTube
 
 ```python
-CapillaryTube(length_m: float, radius_m: float, n_tubes: int = 1)
+CapillaryTube(*, length_m: float, radius_m: float, n_tubes: int = 1)
 ```
 
 Identical open capillary tubes that equalise the static pressure of a
@@ -201,7 +201,7 @@ $Z_{\mathrm{a,C}} = Z_{\mathrm{a,t}}\tanh\gamma l_\mathrm{C}$
 CapillaryTubeImpedance.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -231,7 +231,7 @@ check_coupler(
     static_pressure_pa: float,
     relative_humidity_percent: float,
     gas: Fluid | None = None,
-    heat_conduction_method: str = 'exact',
+    heat_conduction_method: Literal['exact', 'approximation'] = 'exact',
 ) -> CouplerCheck
 ```
 
@@ -284,7 +284,7 @@ coupler_parameter_uncertainty(
     relative_humidity_percent: float,
     microphone: int = 1,
     gas: Fluid | None = None,
-    heat_conduction_method: str = 'exact',
+    heat_conduction_method: Literal['exact', 'approximation'] = 'exact',
 ) -> CouplerParameterUncertainty
 ```
 
@@ -343,7 +343,7 @@ coupler_transfer_impedance(
     static_pressure_pa: float,
     relative_humidity_percent: float,
     gas: Fluid | None = None,
-    heat_conduction_method: str = 'exact',
+    heat_conduction_method: Literal['exact', 'approximation'] = 'exact',
 ) -> CouplerTransferImpedance
 ```
 
@@ -398,7 +398,7 @@ not change the result.
 
 ```python
 CouplerCheck(
-    coupler: str,
+    coupler: Literal['plane_wave', 'large_volume'],
     length_to_diameter_ratio: float,
     broadband_margin: float | None,
     lowest_x: float | None,
@@ -482,7 +482,7 @@ The verdict: the formulas the calibration uses hold where it uses them.
 CouplerCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -512,6 +512,7 @@ For a plane-wave coupler, whether $R$ is within the 0,5 to 0,75 C.2 recommends.
 
 ```python
 CouplerDimensions(
+    *,
     microphone_diameter_mm: float,
     front_cavity_diameter_mm: float,
     coupler_diameter_mm: float,
@@ -625,7 +626,7 @@ Built by [`coupler_parameter_uncertainty`](/phonometry/reference/api/metrology/r
 CouplerParameterUncertainty.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -647,7 +648,7 @@ Plot each component against frequency.
 ```python
 CouplerTransferImpedance(
     frequencies: NDArray[np.float64],
-    coupler: str,
+    coupler: Literal['plane_wave', 'large_volume'],
     adiabatic_impedance_pa_s_m3: NDArray[np.complex128],
     heat_conducting_impedance_pa_s_m3: NDArray[np.complex128],
     capillary_correction: NDArray[np.complex128],
@@ -688,7 +689,7 @@ $20\lg|Z''_{\mathrm{a},12}/Z'_{\mathrm{a},12}|$, in dB.
 CouplerTransferImpedance.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -724,7 +725,7 @@ heat_conduction_correction(
     surface_area_m2: float,
     length_to_diameter_ratio: float,
     gas: Fluid,
-    method: str = 'exact',
+    method: Literal['exact', 'approximation'] = 'exact',
 ) -> HeatConductionCorrection
 ```
 
@@ -767,7 +768,7 @@ HeatConductionCorrection(
     x: NDArray[np.float64],
     transfer_function: NDArray[np.complex128],
     heat_capacity_ratio: float,
-    method: str,
+    method: Literal['exact', 'approximation'],
 )
 ```
 
@@ -799,7 +800,7 @@ volume, in dB.
 HeatConductionCorrection.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -893,6 +894,7 @@ frequency is read at its value divided by it.
 
 ```python
 LargeVolumeCoupler(
+    *,
     length_m: float,
     diameter_m: float,
     port_length_m: float,
@@ -1037,6 +1039,7 @@ $Z_\mathrm{a}$: alternate this with
 
 ```python
 PlaneWaveCoupler(
+    *,
     length_m: float,
     diameter_m: float,
     capillary: CapillaryTube | None = None,
@@ -1149,6 +1152,7 @@ reciprocal (5.1.1).
 
 ```python
 ReciprocityMicrophone(
+    *,
     equivalent_volume_m3: float,
     resonance_frequency_hz: float,
     loss_factor: float,
@@ -1252,7 +1256,7 @@ temperature_transfer_function(
     length_to_diameter_ratio: float,
     x: ArrayLike,
     *,
-    method: str = 'exact',
+    method: Literal['exact', 'approximation'] = 'exact',
 ) -> NDArray[np.complex128]
 ```
 
@@ -1341,7 +1345,7 @@ correction; any other is interpolated between two rows.
 WaveMotionCorrection.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

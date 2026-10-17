@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import math
 import warnings
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
@@ -19,6 +20,9 @@ from reference_data import ISO8041_1_ANNEX_B_PHASES_DEG
 from phonometry import vibration
 from phonometry.vibration.human import instrumentation as ins
 from phonometry.vibration.human.exposure import HumanVibrationWarning
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 # Table 4, as the decimals printed beside the exponents. The module builds
 # them from the exponents, so these are the independent side of the check.
@@ -656,7 +660,9 @@ def test_a_perfect_phase_response_deviates_by_nothing() -> None:
         ),
     ],
 )
-def test_formula_6_needs_a_pair_of_ascending_frequencies(call) -> None:  # noqa: ANN001
+def test_formula_6_needs_a_pair_of_ascending_frequencies(
+    call: Callable[[list[float], list[float]], object],
+) -> None:
     """One frequency is not a pair, and an unordered grid is not a grid.
 
     The formula divides by ``f(n+1) - f(n)``, so two equal frequencies are a
@@ -684,7 +690,9 @@ def test_formula_6_needs_a_pair_of_ascending_frequencies(call) -> None:  # noqa:
         ),
     ],
 )
-def test_the_phase_measurement_is_checked_before_it_is_judged(call) -> None:  # noqa: ANN001
+def test_the_phase_measurement_is_checked_before_it_is_judged(
+    call: Callable[[list[float], list[float]], object],
+) -> None:
     with pytest.raises(ValueError, match=r"same shape"):
         call([1.0, 2.0, 4.0], [0.0, 0.0])
     with pytest.raises(ValueError, match=r"'frequencies' must be strictly positive"):

@@ -122,6 +122,8 @@ from ...materials.absorbers.porous import ABSORBER_AIR, delany_bazley, miki
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
     from ...fluids import Fluid
     from ...materials.absorbers.porous import PorousMediumResult
@@ -261,7 +263,7 @@ class SphericalGroundResult(OwnsArrays):
     r_reflected: float
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot the excess attenuation :math:`\Delta L` versus frequency.
 
@@ -657,7 +659,7 @@ class BarrierInsertionLoss(OwnsArrays):
     frequencies: Real
     insertion_loss: Real
     fresnel_number: Real
-    method: str
+    method: Literal["kurze_anderson", "exact"]
     _: KW_ONLY
     ground: bool
     source_height_m: float
@@ -737,7 +739,7 @@ class BarrierInsertionLoss(OwnsArrays):
                 raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the insertion loss versus frequency.
 
@@ -752,7 +754,7 @@ class BarrierInsertionLoss(OwnsArrays):
         )
 
     def plot_geometry(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the source-barrier-receiver section to scale.
 
@@ -770,9 +772,9 @@ class BarrierInsertionLoss(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a one-page barrier insertion-loss prediction fiche to a PDF.
 

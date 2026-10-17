@@ -29,7 +29,7 @@ import sys
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_ROOT / "scripts"))
 
-from check_release_artifacts import tracked_package_files  # noqa: E402
+from check_release_artifacts import tracked_package_files
 
 
 def problems(version: str, tracked: list[str]) -> tuple[list[str], int]:
@@ -57,7 +57,7 @@ def problems(version: str, tracked: list[str]) -> tuple[list[str], int]:
         try:
             importlib.import_module(module.name)
         # Every failure is reported, none is expected.
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             found.append(f"{module.name} does not import: {type(exc).__name__}: {exc}")
     package = importlib.resources.files("phonometry")
     for path in tracked:

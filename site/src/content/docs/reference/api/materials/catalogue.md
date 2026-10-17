@@ -384,7 +384,7 @@ Whether this library computed this field instead of reading it.
 PorousMaterial.medium(
     frequency: ArrayLike,
     *,
-    model: str = 'johnson_champoux_allard',
+    model: Literal['johnson_champoux_allard', 'delany_bazley', 'miki'] = 'johnson_champoux_allard',
     fluid: Fluid = ...,
 ) -> PorousMediumResult
 ```

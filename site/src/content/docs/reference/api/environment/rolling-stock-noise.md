@@ -154,7 +154,7 @@ Whether the adjacent vehicle adds no more than 2,0 dB.
 AdjacentVehicleNeutrality.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -557,6 +557,7 @@ G.2): build it with [`phonometry.metrology.rectangular`](/phonometry/reference/a
 
 ```python
 PassByMeasurement(
+    *,
     times: NDArray[np.float64],
     levels: NDArray[np.float64],
     start_s: float,
@@ -623,7 +624,7 @@ trailer unit, whose $T_p$ is that of half the unit.
 PassByMeasurement.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -704,7 +705,7 @@ The result $y$, the reading plus every mean value correction, in dB.
 PassByUncertainty.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -816,8 +817,8 @@ length of a line analysed by EN 15610 Method B.
 ReferenceTrackCheck.plot(
     ax: Axes | None = None,
     *,
-    panel: str = 'roughness',
-    language: str = 'en',
+    panel: Literal['roughness', 'decay'] = 'roughness',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -869,7 +870,7 @@ The impulsive character of a level history, Annex A.
 RiseSpeedResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -898,7 +899,7 @@ The rise speed $s = \max(s_j)$, in dB/s; `None` when no slope rises 10 dB.
 rolling_stock_test(
     run_levels: Mapping[str, ArrayLike],
     *,
-    method: str = 'constant_speed',
+    method: Literal['constant_speed', 'acceleration_maximum', 'acceleration_averaged', 'braking'] = 'constant_speed',
 ) -> RollingStockTestResult
 ```
 
@@ -938,7 +939,7 @@ ROLLING_STOCK_TEST_METHODS = ('constant_speed', 'acceleration_maximum', 'acceler
 
 ```python
 RollingStockTestResult(
-    method: str,
+    method: Literal['constant_speed', 'acceleration_maximum', 'acceleration_averaged', 'braking'],
     run_levels: Mapping[str, tuple[float, ...]],
 )
 ```
@@ -976,7 +977,7 @@ The arithmetic mean of each position's runs, in dB, unrounded.
 RollingStockTestResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1123,7 +1124,7 @@ The minimum envelope of the two roughness spectra, Formula E.1.
 RoughnessComparability.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1195,7 +1196,7 @@ Whether the effect is at most 1 dB, C.3.
 SmallRoughnessDeviation.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1320,7 +1321,7 @@ The arithmetic mean of the set levels, in dB, unrounded.
 StationaryTestResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

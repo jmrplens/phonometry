@@ -210,7 +210,7 @@ def test_static_pressure_outside_clause_6_is_refused(pressure_kpa: float) -> Non
 
 
 def test_additional_components_enter_the_budget() -> None:
-    extra = metrology.Quantity(0.0, 0.02, name="actuator drive")
+    extra = metrology.Quantity(value=0.0, uncertainty=0.02, name="actuator drive")
     budget = _budget_i2(additional_components=[extra])
     assert budget.descriptors[-1] == "actuator drive"
     base = _budget_i2()

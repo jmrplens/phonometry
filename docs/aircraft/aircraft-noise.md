@@ -189,7 +189,7 @@ needs the one-third-octave-band attenuation over the path. The pure-tone
 coefficient is the one of ISO 9613-1, whose terms ARP 5534 §3.1 repeats in its
 Eqs. 1-3, with the saturation vapour pressure ARP 5534 prints in Eqs. 5-6 (the
 longer form of ANSI S1.26, not the Annex B formula of `air_attenuation`); on top
-of it `sae_band_attenuation` adds the **SAE Method**
+of it `band_attenuation_arp5534` adds the **SAE Method**
 (ARP 5534 §3.2.2), a regression that maps the pure-tone mid-band path-length
 attenuation $\delta_\mathrm{t} = \alpha\,s$ to the band attenuation $\delta_\mathrm{B}$ and stays
 consistent with the ISO/ANSI Exact Method well beyond the 50 dB limit of the
@@ -212,7 +212,7 @@ freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # 50 Hz-10 kHz thirds
 fig, ax = plt.subplots()
 # solid: SAE band attenuation, dashed: pure-tone mid-band
 for s in (1000.0, 7620.0):
-    att = aircraft.sae_band_attenuation(
+    att = aircraft.band_attenuation_arp5534(
         freqs, s, temperature_c=25.0, relative_humidity_percent=70.0
     )
     line, = ax.semilogx(att.frequencies, att.band_attenuation, marker="o",
@@ -233,13 +233,13 @@ import numpy as np
 from phonometry import aircraft
 
 freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # 50 Hz–10 kHz thirds
-att = aircraft.sae_band_attenuation(freqs, path_length_m=7620.0,
+att = aircraft.band_attenuation_arp5534(freqs, path_length_m=7620.0,
                               temperature_c=25.0, relative_humidity_percent=70.0)
 print(att.band_attenuation)   # δ_B per band, dB
 att.plot()                    # band vs pure-tone mid-band (needs matplotlib)
 ```
 
-`sae_band_attenuation` returns an `AircraftBandAttenuation` with `band_attenuation`
+`band_attenuation_arp5534` returns an `AircraftBandAttenuation` with `band_attenuation`
 ($\delta_\mathrm{B}$), `midband_attenuation` ($\delta_\mathrm{t} = \alpha\,s$) and the pure-tone
 `coefficient_db_per_m` ($\alpha$, dB/m). The SAE Method is valid roughly 6–32 °C and 20–95 % RH (the 14 CFR
 Part 36 test window), over path lengths to 7620 m, and is reciprocal
@@ -248,11 +248,11 @@ Part 36 test window), over path lengths to 7620 m, and is reciprocal
 The adjustment those attenuations feed is given by Appendix 2 §8, which
 transports a measured EPNL to the reference day and the reference flight path.
 This is not implemented, in either its simplified or its integrated form:
-`air_attenuation` and `sae_band_attenuation` supply the test-day and
+`air_attenuation` and `band_attenuation_arp5534` supply the test-day and
 reference-day coefficients of its first terms, but the flight-path geometry
 and the four $\Delta$ terms are left to the reader. Those terms take the
 coefficients in dB/100 m and multiply them by 0.01 and the path in metres
-(§8.3.2.1), where `air_attenuation` returns dB/m and `sae_band_attenuation`
+(§8.3.2.1), where `air_attenuation` returns dB/m and `band_attenuation_arp5534`
 the attenuation over the whole path in dB, so neither takes the 0.01. The EPNL
 of section 3 is therefore the as-measured, test-day value; adjust it first, and
 only then report it against a certification limit.

@@ -57,7 +57,7 @@ hall, and this module does not make them follow the weather.
 
 ```python
 assess_perceptible_difference(
-    symbol: str,
+    symbol: Literal['G', 'EDT', 'C80', 'D50', 'Ts', 'J_LF', 'J_LFC', 'L_J'],
     first: ArrayLike,
     second: ArrayLike,
 ) -> PerceptibleDifference
@@ -225,7 +225,7 @@ early_lateral_energy_fraction(
     lateral_ir: Signal | list[float] | NDArray[np.float64],
     fs: int | None = None,
     *,
-    weighting: str = 'squared',
+    weighting: Literal['squared', 'cosine'] = 'squared',
     limits: tuple[float, float] | None = (125.0, 4000.0),
     fraction: int = 1,
 ) -> LateralEnergyResult
@@ -506,7 +506,7 @@ B.4 assumes a just-noticeable difference of 0,075.
 InterauralCorrelationResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -660,7 +660,7 @@ octave bands and no just-noticeable difference at all: "Not known".
 LateLateralResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -704,7 +704,7 @@ gives them a just-noticeable difference of 0,05 and a typical range of
 LateralEnergyResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -959,7 +959,7 @@ reproduces the method rather than quietly improving it.
 
 ```python
 single_number_average(
-    symbol: str,
+    symbol: Literal['G', 'EDT', 'C80', 'D50', 'Ts', 'J_LF', 'J_LFC', 'L_J'],
     values: ArrayLike,
     *,
     frequencies: ArrayLike,
@@ -1178,7 +1178,7 @@ obtained. All three are in decibels and `strength` is exactly
 SoundStrengthResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | np.ndarray
 ```
@@ -1348,7 +1348,7 @@ just-noticeable differences, so this module has none.
 StageSupportResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

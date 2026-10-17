@@ -273,7 +273,7 @@ Per-band intensity element normalized level difference (ISO 15186-1).
 IntensityElementNormalizedResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -292,9 +292,9 @@ IntensityElementNormalizedResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     fpi: Sequence[float] | np.ndarray | None = None,
     residual_index: Sequence[float] | np.ndarray | None = None,
 ) -> str
@@ -384,7 +384,7 @@ Per-band intensity sound reduction index (ISO 15186-1:2000).
 IntensityReductionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -404,9 +404,9 @@ IntensityReductionResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     fpi: Sequence[float] | np.ndarray | None = None,
     residual_index: Sequence[float] | np.ndarray | None = None,
 ) -> str
@@ -715,7 +715,7 @@ The Clause 6.4.2 limit on `FpI` that this result was judged by.
 LowFrequencyElementResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -789,7 +789,7 @@ does not have to restate which of the two limits applies.
 LowFrequencyIntensityResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

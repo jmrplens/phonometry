@@ -54,6 +54,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
     from ..io._signal import Signal
 
 __all__ = [
@@ -172,7 +173,7 @@ class FrequencyResponseResult(OwnsArrays):
     magnitude_db: NDArray[np.float64]
     phase_rad: NDArray[np.float64]
     coherence: NDArray[np.float64]
-    estimator: str
+    estimator: Literal["H1", "H2"]
 
     def __post_init__(self) -> None:
         """Reject an estimate whose curves do not share one frequency axis.
@@ -214,7 +215,7 @@ class FrequencyResponseResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | NDArray[Any]:
         """Plot the Bode magnitude/phase and the coherence.
 
@@ -321,7 +322,7 @@ class CoherenceResult(OwnsArrays):
     coherence: NDArray[np.float64]
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the coherence against frequency, on 0 to 1.
 

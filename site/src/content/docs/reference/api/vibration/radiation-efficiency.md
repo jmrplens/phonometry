@@ -105,7 +105,7 @@ plot_plate_geometry(
     *,
     ax: Axes | None = None,
     boundary: str = 'simply_supported',
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -143,8 +143,8 @@ radiation_efficiency(
     length_y: float,
     critical_frequency: float,
     *,
-    boundary: str = 'simply_supported',
-    baffle: str = 'infinite',
+    boundary: Literal['simply_supported', 'clamped'] = 'simply_supported',
+    baffle: Literal['infinite', 'perpendicular'] = 'infinite',
     speed_of_sound: float = 343.0,
 ) -> RadiationEfficiencyResult
 ```
@@ -187,8 +187,8 @@ RadiationEfficiencyResult(
     critical_frequency: float,
     length_x: float,
     length_y: float,
-    boundary: str,
-    baffle: str,
+    boundary: Literal['simply_supported', 'clamped'],
+    baffle: Literal['infinite', 'perpendicular'],
 )
 ```
 
@@ -212,7 +212,7 @@ Frequency-averaged plate radiation efficiency (Hopkins 2.9.4).
 RadiationEfficiencyResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -228,7 +228,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 RadiationEfficiencyResult.plot_geometry(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

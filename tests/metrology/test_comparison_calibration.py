@@ -181,7 +181,9 @@ def test_budget_takes_quantities_and_additional_components() -> None:
         frequency_hz=8000.0,
         additional_components=[
             metrology.Quantity(
-                0.0, float(jig.standard_uncertainty_db[0]), name="WS3 diameter"
+                value=0.0,
+                uncertainty=float(jig.standard_uncertainty_db[0]),
+                name="WS3 diameter",
             )
         ],
     )
@@ -214,7 +216,7 @@ def test_budget_refuses_a_component_of_the_other_table() -> None:
 
 
 def test_budget_refuses_an_unnamed_additional_component() -> None:
-    extra = [metrology.Quantity(0.0, 0.01)]
+    extra = [metrology.Quantity(value=0.0, uncertainty=0.01)]
     with pytest.raises(ValueError, match=r"needs a name of its own"):
         metrology.comparison_uncertainty_budget(
             {"reference": 0.025}, frequency_hz=1000.0, additional_components=extra

@@ -619,7 +619,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   certification tests (ECAC Doc 29 Vol. 2 Appendix D, SAE ARP 866A through
   ISO 3891).** The ANP noise-power-distance data are normalised to the SAE
   AIR-1845 atmosphere, the mean attenuation rates of Table D-1, now published
-  as `aircraft.SAE_AIR1845_ATTENUATION_DB_PER_100M`.
+  as `aircraft.AIR1845_ATTENUATION_DB_PER_100M`.
   `aircraft.npd_atmosphere_increment` takes a spectral class back to the
   source (Eq. D-1), out to the NPD distances in that atmosphere and in the one
   specified (Eqs. D-2 and D-3), A-weights both and returns the increment
@@ -632,7 +632,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   own class, and `event_level` and `noise_contour` take
   `relative_humidity_percent` (and `absorption`) to run the whole Doc 29 chain
   in the air of the field, at the temperature and pressure they already read.
-  `aircraft.arp866a_attenuation` is the legacy SAE ARP 866A coefficient in the
+  `aircraft.attenuation_arp866a` is the legacy SAE ARP 866A coefficient in the
   form ISO 3891:1978 Annex A gives it, evaluated at the band centre up to
   4 kHz and at the lower band edge above. Its Table 1 asks for "a form of
   quadratic interpolation" of $\eta(\delta)$ without saying which, and the two
@@ -909,7 +909,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   bands, as the comparison method of 10.3 already read it; levels passed as
   such are taken as already carried to the test. The room's levels to pass
   are the `sound_power_level` of `sound_power_special_room`, the level at the
-  test, and not its `sound_power_level_ref`, which would count $C_2$ twice.
+  test, and not its `sound_power_level_at_reference_conditions`, which would count $C_2$ twice.
   `SpecialRoomSuitabilityCheck` now holds both spectra,
   `measured_power_level` and `calibrated_power_level` as read, and
   derives `difference` from them. Every ISO 3743-1 and ISO 3743-2 result
@@ -1732,7 +1732,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   carried over, and a paragraph that grades time weightings against a Table 2
   row Part 2 no longer prints; in 12.22, "exited" printed for "excited".
 - **The ISO 1683 reference values, published once and read by every level.**
-  `metrology.ISO1683_REFERENCE_VALUES` holds ISO 1683:2015 Tables 1 to 3,
+  `metrology.REFERENCE_VALUES` holds ISO 1683:2015 Tables 1 to 3,
   the reference values for sound in gases, sound in liquids and vibration,
   and the 50 nm/s that note b of Table 3 says is also used for structure-borne
   sound, keyed by medium (`"gas"`, `"liquid"`, `"solid"`) and quantity. Each
@@ -2060,7 +2060,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `ValueError` that names the parameter, on every NumPy. That covers the
   shared positive, finite, non-negative, temperature and fraction checks, the
   humidity of ISO 354 and of ISO 9613-1 (and so of `atmospheric_absorption`
-  and `sae_band_attenuation`), and the guards the modules keep for their own
+  and `band_attenuation_arp5534`), and the guards the modules keep for their own
   parameters, from `absorption_class`, `reference_atmosphere_correction` and
   `minimum_reliable_reverberation_time` to `is_significant_change`,
   `blade_passing_frequency` and `low_frequency_procedure_applies`. The shared
@@ -2828,7 +2828,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   source's sidecar once, checks it and carries those bytes.
 
 - **SAE ARP 5534 band attenuation uses the ARP's own saturation vapour
-  pressure.** `aircraft.sae_band_attenuation` took its pure-tone coefficient
+  pressure.** `aircraft.band_attenuation_arp5534` took its pure-tone coefficient
   whole from ISO 9613-1, whose Annex B writes the saturation vapour pressure
   in a short form; ARP 5534 repeats the ISO 9613-1 absorption terms in its
   Eqs. 1-3 but prints the longer ANSI S1.26 form in Eqs. 5-6, which gives a
@@ -3141,6 +3141,151 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   carries each kind of empty list, printed the way the older versions print.
 
 ### Changed
+
+- **Every fixed choice of the public API is a `Literal` of its options.** A
+  parameter or a record field that the library checks against a fixed set of
+  strings is annotated with a `Literal` of those strings: the `language` of a
+  figure, the `engine` of a fiche, the `mode` of `OctaveFilterBank.filter`,
+  the `weighting` of `weighting_filter`, the `method` of `sii_procedure`, the
+  edition of a standard, the area type of `environment.activity_limits` and
+  its two RD 1367 siblings, the nine ISO 8041-1 weightings of `vibration`,
+  the hearing groups of `underwater`, the string half of a union such as the
+  `seabed` of the Weston functions, `"sand" | "mud"` beside a `WestonSeabed`,
+  or the CNOSSOS-EU codes beside their `Enum`, and some four hundred more.
+  `underwater.detection_range` takes the `law` and `model` of
+  `propagation_loss` with the same types. A type checker and an
+  editor offer the options and refuse a misspelling before the call runs; the
+  API reference lists them on each parameter. A string that is open by its
+  nature (a catalogue name, a label, a clause a caller writes) stays `str`,
+  and a catalogue row keeps its text cells `str`, as the catalogue contract
+  requires. `scripts/check_choice_literals.py` (`make choice-literals`, and a
+  step of the CI job that checks public names) fails on a closed choice typed
+  `str`, alone or in a union: one handed to a shared validator, compared with
+  a set of strings, looked up by key, documented with two quoted options or
+  more, written beside an `Enum` of its options, or passed on to a function
+  that does one of those; it follows the text through `str(...)`,
+  `.strip().lower()` and the locals bound from it, through a dict spread into
+  a call and through a function the body imports, and a table handed on
+  beside it closes the helper that checks it. A test holds every such
+  `Literal` to the table that answers it. `noise_control.InstallationCase`
+  reads `"any"` in `source_side` for the four insertion cases, as its
+  documentation said, instead of a sentence.
+
+- **A parameter whose name carries its unit and that has a default is written
+  by name.** `signals.noise_signal(fs, duration_s=2.0)`,
+  `speech.stipa_signal(fs, duration_s=18.0)`,
+  `underwater.ship_source_spectrum(12.0, length_m=100.0)`,
+  `emission.qualification_frequencies(100.0, high_hz=10000.0)`,
+  `environment.adrienne_reflection_window(fs, window_length_s=...)`,
+  `environment.bin_sound_levels(..., wind_directions_deg=...)` and
+  `bin_amplitude_modulation(..., wind_directions_deg=...)`, and
+  `hearing.job_based_exposure(..., sample_duration_hours=...)`: the `_s`, the
+  `_m` and the `_deg` say the unit only where the name is written.
+  `scripts/check_parameter_units.py` refuses a unit-named default after the
+  first parameter that a caller can reach by position, whatever quantity the
+  name holds.
+
+- **Every record you build and hand to a function takes its fields by name.**
+  The rule that held the records with a frequency or a wavelength axis now
+  holds every public record another public function takes, and the records
+  those hold: about a hundred more, from `fluids.Fluid`,
+  `materials.HelmholtzResonator` and `simulation.Material` to the ANP
+  aircraft coefficients, the CNOSSOS-EU road and railway records, the
+  microphone and loudspeaker data sheets, the duct elements of
+  `noise_control`, the six layers of `materials.layered_absorber` and the
+  acoustic and elastic FDTD sources (`GaussianPulse`, `CWSource`,
+  `SignalSource`, `PlaneWaveSource`, `ExplosionSource`, `ForceSource`), are
+  `@dataclass(kw_only=True)`, and a positional call
+  raises `TypeError`. `io.Signal(x, fs)` keeps its two first fields by
+  position: the samples and their rate are the pair every function of the
+  library takes that way. A result the library builds and another function
+  takes whole keeps its fields where they are. `RoadEmissionCoefficients`
+  still pickles and deep-copies, now by keyword. `check_parameter_units.py`
+  refuses a record a public function takes whose constructor accepts a field
+  by position, a record a union alias in its signature stands for included
+  (`Layer`, `AnySource`), with an exemption table that fails when an entry
+  goes stale. The one-line examples of the API reference and the guides, which
+  no snippet gate runs, are read by a test that refuses a record built by
+  position and a record unpacked like a tuple.
+
+- **`room.DecayCurve` and `environment.LevelHistory` no longer unpack.** Both
+  kept an `__iter__` so that the `(times, levels)` pair they replaced still
+  unpacked, and a line that swapped the two names still ran. They are read by
+  name, `curve.times` and `curve.levels`, like every other record, and
+  `times, levels = room.decay_curve(ir, fs)` raises `TypeError`. A test holds
+  every public record to it.
+
+- **A time signal that is one physical quantity carries its unit.** The
+  underwater levels take `pressure_pa` (`sound_pressure_level`,
+  `peak_sound_pressure_level`, `sound_exposure_level`, `pile_strike_metrics`,
+  `single_strike_sel`, `strike_sel_spectrum`, and `PileStrikeResult.pressure_pa`),
+  the multiple-shock functions `acceleration_m_s2`, and the impact-force and
+  impact-mobility functions `force_n`, as `velocity_mm_s` already was in the
+  DIN 4150 and DIN 45669 functions. A signal in any unit is `x`: the record of
+  `check_overload` and `energy_spectral_density` is `x` now, and the samples
+  `vibration.OverloadCheck` and `ResponseDecayCheck` keep are `x` and
+  `response`, the names they came in by. A test refuses a signal parameter or
+  field named for a quantity without its unit, or named `record`, and a
+  message that still quotes a parameter by its old spelling.
+
+- **The two ends of a range come lower first everywhere.**
+  `emission.plant_steady_reading` takes `min_level` before `max_level`, the
+  IEC 60268-1 rows of `electroacoustics.ProgramSpectrumBand` and
+  `ProgramSignalCheck` give `lower_tolerance_db` before `upper_tolerance_db`,
+  and the damping rows give `youngs_modulus_min_pa` before
+  `youngs_modulus_max_pa`, in the catalogue schema too. A test reads every
+  public signature and record for a pair written upper first.
+
+- **`ref` is written `reference`.** The sound power comparison functions take
+  `reference_levels`, `reference_background_levels` and
+  `reference_sound_power_levels` (`levels_ref`, `background_levels_ref` and
+  `lw_ref` before); the in-situ, hard-walled and special-room results read
+  `reference_background_correction`, `reference_background_margin_db` and
+  `sound_power_level_at_reference_conditions` (and its A-weighted and
+  sound-energy companions), the levels carried to the reference
+  meteorological conditions by `C2`, not those of the reference source;
+  `metrology.sensitivity` takes
+  `reference_signal`; and `building.RainfallReferenceCorrection` holds
+  `l_i_reference`, `l_i_m_reference` and `l_ic_reference`. SPL, SEL, SNR and
+  RMS stay as terms of art, like `L_max`. The spelling test refuses `ref` in
+  any public name.
+
+- **A temperature is in degrees Celsius; a temperature interval and a
+  coefficient per degree are in kelvin.** An absolute temperature ends in
+  `_c`; a difference, a tolerance, an uncertainty of a temperature or a
+  coefficient per degree ends in `_k` or `_per_k` (`u_temperature_k`,
+  `temperature_coefficient_db_per_k`): an interval is the same number in
+  kelvin and in degrees Celsius, and the SI writes it in kelvin whichever of
+  the two a standard prints. The CNOSSOS-EU coefficient of
+  `RoadEmissionCoefficients` is `temperature_coefficient_db_per_k`, the number
+  Directive (EU) 2015/996 prints per degree Celsius, and the ISO 10847 limit
+  on the difference between the mean temperatures of the two campaigns is
+  `environment.TEMPERATURE_TOLERANCE_K` (`TEMPERATURE_TOLERANCE_C`), the
+  10 °C the standard prints. `check_parameter_units.py` reads each name for
+  its scale.
+
+- **A standard's designation is in a name only where it tells two things
+  apart, and is written one way.** The body is joined to its number, first in
+  a constant, a class or a field and last in a function: `building.EN12354_AIR`
+  (`EN_12354_AIR`), `aircraft.AIR1845_ATTENUATION_DB_PER_100M`
+  (`SAE_AIR1845_ATTENUATION_DB_PER_100M`), `aircraft.band_attenuation_arp5534`
+  (`sae_band_attenuation`), `aircraft.attenuation_arp866a`
+  (`arp866a_attenuation`), `electroacoustics.weighting_bs468`
+  (`itu_r_468_weighting`), `materials.air_density_astm_e2611`,
+  `speed_of_sound_astm_e2611` and `plane_wave_frequency_range_astm_e2611`
+  beside `air_density_iso10534`, and `GroundSurface.iso9613_ground_factor`.
+  Where nothing in the package needs telling apart, the designation is gone:
+  `metrology.REFERENCE_VALUES` (`ISO1683_REFERENCE_VALUES`), whose module is
+  the ISO 1683 one, and `noise_control.SPECTRAL_CORRECTION`
+  (`VDI2081_SPECTRAL_CORRECTION`), the package's only spectral correction,
+  whose own text cites VDI 2081 Part 2. A test
+  reads every public name for the form.
+
+- **`signals.test_signals` is private.** pytest collects a module whose name
+  starts with `test_`, and the prefix is left to test files. Every function it
+  held keeps its `signals.` address (`signals.noise_signal`,
+  `signals.tone_burst`, `signals.resample_signal` and the rest), so only the
+  import through the module path goes. A test refuses a public module named like a test file.
 
 - **Releases are uploaded through PyPI's trusted publishing, signed, with
   their provenance and an SBOM, and a manual run of the release is a
@@ -3809,7 +3954,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - **The air the absorber models default to is `materials.ABSORBER_AIR`.** It
   was `PUBLISHED_AIR`, a `Fluid` sharing its prefix with every catalogue of
-  rows. It sits now beside `ANNEX_A_AIR` and `EN_12354_AIR`, named for the
+  rows. It sits now beside `ANNEX_A_AIR` and `EN12354_AIR`, named for the
   standards that print them, and `SIMULATION_AIR`, the solver's own, and it no
   longer says it is the air the Johnson-Champoux-Allard model was published
   with: Allard and Atalla state theirs at 18 degC, 1,213 kg/m3 and 342 m/s, and
@@ -3953,8 +4098,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   statistical pass-by and the railway passages spell their maximum levels
   `max_levels`, `PassByMeasurement.max_level` and
   `TrainPassage.band_max_levels`, `check_varying_background` takes
-  `background_max_level`, `plant_steady_reading` takes `max_level` and
-  `min_level`, `aircraft.event_level` and `noise_contour` take
+  `background_max_level`, `plant_steady_reading` takes `min_level` and
+  `max_level`, `aircraft.event_level` and `noise_contour` take
   `max_levels=`, the heavy impact functions of `building` are
   `a_weighted_max_impact_level` and `standardized_max_impact_level` with
   `AWeightedMaxImpactResult` and `StandardizedMaxImpactResult`, the
@@ -4151,8 +4296,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and the same 450 read as °C moves its level at 1 m from 91.7 dB(A) to
   93.0 dB(A) without an error.
   `environment.RoadEmissionCoefficients.temperature_k`, the CNOSSOS-EU $K_m$
-  in dB per °C whose `_k` read as kelvin, is
-  `temperature_coefficient_db_per_c`.
+  in dB per degree, which read as a temperature in kelvin, is
+  `temperature_coefficient_db_per_k`: a coefficient per degree is per kelvin,
+  the same number as per degree Celsius.
 
 - **A length says whether it is in metres, millimetres or feet: thickness,
   spacing and height carry their unit.** A thickness was metres on a layer and
@@ -4238,11 +4384,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `atmospheric_attenuation`,
   `AtmosphericAttenuation`, `AtmosphericConditions`, `atmospheric_absorption`,
   `outdoor_propagation_attenuation`, `upper_tone_search_frequency` and
-  `ToneSearchLimit`; `sae_band_attenuation`, `AircraftBandAttenuation`,
+  `ToneSearchLimit`; `band_attenuation_arp5534`, `AircraftBandAttenuation`,
   `AerodromeAtmosphere`, `RotorcraftAtmosphere`, `impedance_adjustment`,
   `atmospheric_adjustment`, `npd_atmosphere_increment`,
   `NPDAtmosphereIncrement`, `revise_npd_curves` and the `ANPAircraft` and
-  `ANPDatabase` methods; `air_density_iso10534`, `air_density_astm`,
+  `ANPDatabase` methods; `air_density_iso10534`, `air_density_astm_e2611`,
   `enclosed_gas_stiffness` and `floating_floor_resonance`;
   `sound_power_intensity_precision` and `PrecisionIntensityResult`; and
   `sea_water_density`. `atmospheric_pressure_pa` is kept for the outside
@@ -4258,7 +4404,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   its unit if a second unit competes for the word and drops it if the word
   only ever had one. The unit is added on `RotorcraftHemisphere` and
   `RotorcraftEventResult` (`azimuth_deg`, `polar_deg`), on
-  `sae_band_attenuation` and `AircraftBandAttenuation` (`path_length_m`), on
+  `band_attenuation_arp5534` and `AircraftBandAttenuation` (`path_length_m`), on
   `double_wall_transmission_loss`, `mass_spring_mass_resonance` and
   `SoundReductionResult` (`gap_m`), on `HeavyImpactSourceSpec` and
   `HeavyImpactSourceCheck` (`tolerance_db`), on the loudspeaker and
@@ -4954,7 +5100,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   published, are the private defaults of `radiated_sound_power_level`'s
   `reference_impedance=` and `reference_area=`, and `REFERENCE_SOUND_POWER`,
   which nothing read, is gone: the 1 pW is
-  `metrology.ISO1683_REFERENCE_VALUES["gas"]["sound_power"]`.
+  `metrology.REFERENCE_VALUES["gas"]["sound_power"]`.
 
 - **No type alias is public.** `emission.DeclarationForm`, published since
   3.3.0, and the `Grade`, `Surface` and `EQFilterType` that
@@ -5022,7 +5168,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   efforts are read from `speech.sii_procedure(...)` and
   `speech.standard_speech_spectra()`, the NIPTS frequencies from the
   `hearing.nipts(...)` result, and the ISO 1683 references from
-  `metrology.ISO1683_REFERENCE_VALUES`; the coefficients, limits and defaults
+  `metrology.REFERENCE_VALUES`; the coefficients, limits and defaults
   of `environment.assessment.impulsive_sound`,
   `vibration.human.multiple_shock`, `building.prediction.detailed_model` and
   the rest are private, each applied by the function that reads it or taken
@@ -7704,7 +7850,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - `noise_control.octave_band_limits` turns an A-weighted room requirement into
   a per-octave one by Equation (1) of VDI 2081 Part 2, and
-  `VDI2081_SPECTRAL_CORRECTION` publishes the curve it uses. The curve is the
+  `SPECTRAL_CORRECTION` publishes the curve it uses. The curve is the
   inverse A-weighting less 5 dB: a spectrum flat in A-weighted terms would earn
   9 dB for the sum of eight octaves, and the guideline takes 5 because the
   noise of an air-conditioning system does not follow that curve.
@@ -7769,7 +7915,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Two rows for the branch split of the SAE Method, replacing the one that
   computed both sides itself. SAE ARP 5534 Section 3.2.2 splits at a mid-band
   attenuation of 150 dB, Equation (7) below it and Equation (8) above, and the
-  two are printed to meet there within 0,003 dB. `sae_band_attenuation` takes a
+  two are printed to meet there within 0,003 dB. `band_attenuation_arp5534` takes a
   path length rather than an attenuation, so the split is reached by scaling
   the path: one call at unit length gives the coefficient, and 150 divided by
   it is the length at which the mid-band attenuation lands exactly on the
@@ -7903,7 +8049,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   sound.
 
   Each domain publishes the air it is written around rather than repeating the
-  numbers: `building.EN_12354_AIR` is the 340 m/s of EN/ISO 12354 Annex A with
+  numbers: `building.EN12354_AIR` is the 340 m/s of EN/ISO 12354 Annex A with
   the 1,29 kg/m³ of Annex B, and `simulation.SIMULATION_AIR` is the `AIR`
   material the solvers run in, written as a fluid. Both are `Fluid` values, so
   a caller who has measured their air passes it instead.
@@ -9003,8 +9149,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   was wanted. The helpers are now
   `speed_of_sound_iso10534(temperature_c=...)`,
   `air_density_iso10534(temperature_c=..., static_pressure_kpa=...)`,
-  `speed_of_sound_astm(temperature_c=...)`,
-  `air_density_astm(temperature_c=..., static_pressure_kpa=...)` and
+  `speed_of_sound_astm_e2611(temperature_c=...)`,
+  `air_density_astm_e2611(temperature_c=..., static_pressure_kpa=...)` and
   `speed_of_sound_iso17497(temperature_c=...)`.
 
   `speed_of_sound` is gone as a bare name and will not be reassigned. It was

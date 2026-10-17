@@ -125,7 +125,7 @@ MultitaperSpectralDensityResult(
     resolution_bandwidth: float,
     *,
     adaptive: bool,
-    scaling: str,
+    scaling: Literal['density', 'spectrum'],
 )
 ```
 
@@ -167,7 +167,7 @@ costs degrees of freedom there (P&W Eq. 370b).
 MultitaperSpectralDensityResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

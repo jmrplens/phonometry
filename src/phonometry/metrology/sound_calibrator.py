@@ -84,7 +84,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, fields
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 
@@ -96,6 +96,22 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
+
+    from .._i18n import Language
+
+CalibratorClass = Literal["LS", "LS/M", "1", "1/M", "2"]
+EnvironmentalTest = Literal["full", "abbreviated"]
+CalibratorRequirement = Literal[
+    "level",
+    "fluctuation",
+    "frequency",
+    "distortion",
+    "supply_voltage",
+    "environmental_level",
+    "environmental_level_in_band",
+    "environmental_frequency",
+    "field_immunity",
+]
 
 __all__ = [
     "ABBREVIATED_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT",
@@ -165,7 +181,7 @@ class CalibratorTableRow(RichDisplay):
         below = f <= self.upper_hz if self.includes_upper else f < self.upper_hz
         return above and below
 
-    def for_class(self, calibrator_class: str) -> float | None:
+    def for_class(self, calibrator_class: CalibratorClass) -> float | None:
         """The figure this row prints for a class, or ``None`` for a dash.
 
         :param calibrator_class: ``"LS"``, ``"1"`` or ``"2"``, or a /M
@@ -193,12 +209,12 @@ def _row(
 #: (laboratory standard), 1 and 2, and the pistonphone designations LS/M and
 #: 1/M that meet their class only with the manufacturer's static-pressure
 #: correction applied (5.1.5).
-CALIBRATOR_CLASSES: tuple[str, ...] = ("LS", "LS/M", "1", "1/M", "2")
+CALIBRATOR_CLASSES: tuple[CalibratorClass, ...] = ("LS", "LS/M", "1", "1/M", "2")
 
 #: The requirements :func:`verify_sound_calibrator` grades, in the order it
 #: reports them. The unit of each is in its name in
 #: :class:`SoundCalibratorMeasurements`.
-CALIBRATOR_REQUIREMENTS: tuple[str, ...] = (
+CALIBRATOR_REQUIREMENTS: tuple[CalibratorRequirement, ...] = (
     "level",
     "fluctuation",
     "frequency",
@@ -379,19 +395,19 @@ ABBREVIATED_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT: Mapping[str, float] = MappingPr
 )
 
 #: The two environmental tests A.6 allows.
-_ENVIRONMENTAL_TESTS: tuple[str, ...] = ("full", "abbreviated")
+_ENVIRONMENTAL_TESTS: tuple[EnvironmentalTest, ...] = ("full", "abbreviated")
 
 
-def _base_class(calibrator_class: str) -> str:
+def _base_class(calibrator_class: str) -> CalibratorClass:
     """The class a designation reads its limits from: ``"1/M"`` is class 1.
 
     :raises ValueError: for a designation Table 1 does not list.
     """
     designation = _designation(calibrator_class)
-    return designation.split("/", 1)[0]
+    return cast("CalibratorClass", designation.split("/", 1)[0])
 
 
-def _designation(calibrator_class: str | int) -> str:
+def _designation(calibrator_class: str | int) -> CalibratorClass:
     """Normalise a class designation, accepting ``1``, ``"1"`` and ``"ls/m"``.
 
     :raises ValueError: for a designation Table 1 does not list.
@@ -407,7 +423,9 @@ def _designation(calibrator_class: str | int) -> str:
 
 
 def _banded(
-    table: tuple[CalibratorTableRow, ...], base: str, nominal_frequency_hz: float
+    table: tuple[CalibratorTableRow, ...],
+    base: CalibratorClass,
+    nominal_frequency_hz: float,
 ) -> float | None:
     """The figure a banded table prints for a class at a nominal frequency."""
     for row in table:
@@ -493,7 +511,7 @@ def _values(value: float | Sequence[float], name: str) -> tuple[float, ...]:
     return tuple(float(v) for v in np.atleast_1d(array))
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class SoundCalibratorMeasurements(RichDisplay):
     """What a laboratory measured on a sound calibrator, for IEC 60942:2017.
 
@@ -634,7 +652,10 @@ class SoundCalibratorMeasurements(RichDisplay):
             raise ValueError(msg)
         _broadcast(values, spread, uncertainty)
 
-    def pairs(self, requirement: str) -> tuple[tuple[float, float], ...]:
+    def pairs(
+        self,
+        requirement: CalibratorRequirement,
+    ) -> tuple[tuple[float, float], ...]:
         """The ``(deviation, uncertainty)`` pairs measured for a requirement.
 
         :param requirement: One of :data:`CALIBRATOR_REQUIREMENTS`.
@@ -724,7 +745,7 @@ class SoundCalibratorRequirement(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw each measurement against the requirement's limits, as Figure E.1.
 
@@ -760,7 +781,7 @@ class SoundCalibratorVerification(RichDisplay):
 
     calibrator_class: str
     nominal_frequency_hz: float
-    environmental_test: str
+    environmental_test: EnvironmentalTest
     measurements: SoundCalibratorMeasurements
     requirements: tuple[SoundCalibratorRequirement, ...]
 
@@ -805,7 +826,7 @@ class SoundCalibratorVerification(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw how much of each allowance every measurement uses.
 
@@ -854,7 +875,10 @@ _RULES: dict[str, _Rule] = {
 
 
 def _limits(
-    requirement: str, base: str, nominal_frequency_hz: float, environmental_test: str
+    requirement: CalibratorRequirement,
+    base: CalibratorClass,
+    nominal_frequency_hz: float,
+    environmental_test: str,
 ) -> tuple[float, float]:
     """The acceptance limit and the maximum uncertainty of one requirement."""
     f = nominal_frequency_hz
@@ -921,11 +945,11 @@ def _limits(
 
 
 def verify_sound_calibrator(
-    calibrator_class: str,
+    calibrator_class: CalibratorClass,
     measurements: SoundCalibratorMeasurements,
     *,
     nominal_frequency_hz: float,
-    environmental_test: str = "full",
+    environmental_test: EnvironmentalTest = "full",
 ) -> SoundCalibratorVerification:
     """Verify what a laboratory measured on a sound calibrator against IEC 60942:2017.
 
@@ -962,7 +986,7 @@ def verify_sound_calibrator(
     :raises TypeError: if ``nominal_frequency_hz`` is not a single number.
     """
     designation = _designation(calibrator_class)
-    base = designation.split("/", 1)[0]
+    base = _base_class(designation)
     f = require_positive(nominal_frequency_hz, "nominal_frequency_hz")
     test = require_choice(
         str(environmental_test), "environmental_test", _ENVIRONMENTAL_TESTS

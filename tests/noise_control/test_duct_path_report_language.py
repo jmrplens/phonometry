@@ -41,7 +41,9 @@ def _path(source_level: np.ndarray) -> DuctPathResult:
     return duct_path(
         frequencies=_BANDS,
         source_level=source_level,
-        elements=[DuctElement("Duct, 6 m, 25 mm lining", 3.0, code="2")],
+        elements=[
+            DuctElement(label="Duct, 6 m, 25 mm lining", attenuation=3.0, code="2")
+        ],
         room_effect=0.0,
         source_label="Fan",
         criterion="NC",

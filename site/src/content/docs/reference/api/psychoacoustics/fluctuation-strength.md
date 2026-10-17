@@ -189,7 +189,7 @@ Fluctuation strength of a signal (Osses 2016 model).
 FluctuationStrengthResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

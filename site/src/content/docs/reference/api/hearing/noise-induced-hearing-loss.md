@@ -111,7 +111,7 @@ the extrapolation caveat.
 ```python
 HTLANResult(
     age: float,
-    sex: str,
+    sex: Literal['male', 'female'],
     l_ex: float,
     exposure_duration_years: float,
     fractile: float,
@@ -146,7 +146,7 @@ All arrays are in dB and aligned with `frequencies`.
 HTLANResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -163,9 +163,9 @@ HTLANResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -284,7 +284,7 @@ All arrays are in dB and aligned with `frequencies`.
 NIPTSResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -301,9 +301,9 @@ NIPTSResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

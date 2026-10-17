@@ -66,7 +66,9 @@ def _resonator() -> ph.materials.HelmholtzResonator:
 
 
 def _metadiffuser() -> ph.materials.MetadiffuserResult:
-    well = ph.materials.MetadiffuserWell(1.0e-3, (_resonator(),))
+    well = ph.materials.MetadiffuserWell(
+        slit_height_m=1.0e-3, resonators=(_resonator(),)
+    )
     return ph.materials.metadiffuser_reflection(
         np.array([500.0, 1000.0]), (well, None), depth_m=0.03, period_m=0.1
     )
@@ -89,7 +91,7 @@ def _in_situ() -> ph.materials.InSituAbsorptionResult:
 
 def _layered() -> ph.materials.LayeredAbsorberResult:
     return ph.materials.layered_absorber(
-        np.array([500.0, 1000.0]), [ph.materials.AirLayer(0.05)]
+        np.array([500.0, 1000.0]), [ph.materials.AirLayer(thickness_m=0.05)]
     )
 
 

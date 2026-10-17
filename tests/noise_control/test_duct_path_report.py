@@ -40,37 +40,37 @@ def _supply() -> DuctPathResult:
         source_level=[90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0],
         elements=[
             DuctElement(
-                "Elbow, 36 x 24 in, unlined",
-                [0, 1, 2, 3, 3, 3, 3, 3],
-                [41, 39, 36, 29, 20, 6, 0, 0],
+                label="Elbow, 36 x 24 in, unlined",
+                attenuation=[0, 1, 2, 3, 3, 3, 3, 3],
+                self_noise=[41, 39, 36, 29, 20, 6, 0, 0],
                 code="2",
             ),
             DuctElement(
-                "Silencer, standard pressure drop, 3 ft",
-                [7, 12, 16, 28, 35, 35, 28, 17],
-                [49, 43, 44, 42, 42, 45, 35, 24],
+                label="Silencer, standard pressure drop, 3 ft",
+                attenuation=[7, 12, 16, 28, 35, 35, 28, 17],
+                self_noise=[49, 43, 44, 42, 42, 45, 35, 24],
                 code="3",
             ),
             DuctElement(
-                "Duct, 36 x 24 in, 5 ft, 1 in lining",
-                [2, 2, 3, 7, 15, 12, 11, 9],
+                label="Duct, 36 x 24 in, 5 ft, 1 in lining",
+                attenuation=[2, 2, 3, 7, 15, 12, 11, 9],
                 code="4",
             ),
-            DuctElement("Branch split, 25 per cent", 6.0, code="5"),
+            DuctElement(label="Branch split, 25 per cent", attenuation=6.0, code="5"),
             DuctElement(
-                "Duct, 18 x 12 in, 6 ft, 1 in lining",
-                [3, 3, 5, 11, 25, 22, 16, 13],
+                label="Duct, 18 x 12 in, 6 ft, 1 in lining",
+                attenuation=[3, 3, 5, 11, 25, 22, 16, 13],
                 code="6",
             ),
             DuctElement(
-                "Flexible duct, 12 in diameter, 6 ft",
-                [14, 14, 16, 15, 17, 22, 16, 13],
+                label="Flexible duct, 12 in diameter, 6 ft",
+                attenuation=[14, 14, 16, 15, 17, 22, 16, 13],
                 code="7",
             ),
             DuctElement(
-                "Rectangular diffuser, 312 cfm",
-                0.0,
-                [33, 32, 29, 23, 15, 4, 0, 0],
+                label="Rectangular diffuser, 312 cfm",
+                attenuation=0.0,
+                self_noise=[33, 32, 29, 23, 15, 4, 0, 0],
                 code="8",
             ),
         ],
@@ -197,7 +197,7 @@ def test_combined_paths_sheet_lists_its_contributions(tmp_path: Path) -> None:
     other = duct_path(
         frequencies=_OCTAVE_BANDS,
         source_level=[90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0],
-        elements=[DuctElement("Return plenum", 30.0, code="R")],
+        elements=[DuctElement(label="Return plenum", attenuation=30.0, code="R")],
         room_effect=8.0,
         criterion="NC",
         target=30.0,
@@ -222,7 +222,12 @@ def test_a_long_path_still_renders_on_one_page(
         frequencies=_OCTAVE_BANDS,
         source_level=[90.0] * 8,
         elements=[
-            DuctElement(f"Duct element {i}", 3.0, [40.0 - i] * 8, code=str(i))
+            DuctElement(
+                label=f"Duct element {i}",
+                attenuation=3.0,
+                self_noise=[40.0 - i] * 8,
+                code=str(i),
+            )
             for i in range(1, 26)
         ],
         room_effect=6.0,

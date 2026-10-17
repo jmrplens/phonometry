@@ -365,7 +365,7 @@ The number of fittings measured.
 EarmuffInsertionLossResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -468,7 +468,7 @@ Whether the fixture's isolation meets 5.1.4 in every band.
 FixtureIsolationVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -551,7 +551,7 @@ The five input quantities of Table B.1, in its order.
 InsertionLossUncertaintyBudget.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -644,7 +644,7 @@ Whether the plane wave qualifies, every requirement judged.
 PlaneProgressiveWaveCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

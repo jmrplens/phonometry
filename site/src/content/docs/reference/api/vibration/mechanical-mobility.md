@@ -85,8 +85,8 @@ random error with its \< 5 % averaging criterion ([`random_error_percent`](/phon
 ```python
 convert_frf(
     value: ArrayLike,
-    source: str,
-    target: str,
+    source: Literal['receptance', 'mobility', 'accelerance', 'dynamic_stiffness', 'impedance', 'apparent_mass'],
+    target: Literal['receptance', 'mobility', 'accelerance', 'dynamic_stiffness', 'impedance', 'apparent_mass'],
     *,
     frequency: ArrayLike,
 ) -> np.ndarray
@@ -173,7 +173,7 @@ Mobility phase, in radians.
 MobilityResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -190,9 +190,9 @@ MobilityResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -234,7 +234,9 @@ verdict.
 ### MobilityResult.to()
 
 ```python
-MobilityResult.to(target: str) -> np.ndarray
+MobilityResult.to(
+    target: Literal['receptance', 'mobility', 'accelerance', 'dynamic_stiffness', 'impedance', 'apparent_mass'],
+) -> np.ndarray
 ```
 
 Convert the mobility to another FRF kind (see [`convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf)).
@@ -311,7 +313,7 @@ RigidMassCalibrationResult(
     measured: np.ndarray,
     *,
     mass: float,
-    quantity: str,
+    quantity: Literal['accelerance', 'mobility'],
 )
 ```
 
@@ -350,7 +352,7 @@ Known correct magnitude of the block per frequency.
 RigidMassCalibrationResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | np.ndarray
 ```
@@ -500,7 +502,7 @@ verify_rigid_mass_calibration(
     mass: float,
     *,
     frequencies: ArrayLike,
-    quantity: str = 'accelerance',
+    quantity: Literal['accelerance', 'mobility'] = 'accelerance',
 ) -> RigidMassCalibrationResult
 ```
 

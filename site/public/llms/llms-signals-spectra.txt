@@ -294,7 +294,7 @@ import numpy as np
 from phonometry import signals
 
 fs = 48000.0
-x = signals.noise_signal(fs, 20.0, color="pink", seed=11)
+x = signals.noise_signal(fs, duration_s=20.0, color="pink", seed=11)
 res = signals.power_spectral_density(x, fs, nperseg=4096)
 band = (res.frequencies >= 20.0) & (res.frequencies <= 20000.0)
 freqs = res.frequencies[band]
@@ -343,7 +343,7 @@ import numpy as np
 from phonometry import signals
 
 delay = int(0.002 * fs)                                     # a 2 ms delay path
-noise = signals.noise_signal(fs, 20.0, rms=0.3, seed=9)     # uncorrelated noise
+noise = signals.noise_signal(fs, duration_s=20.0, rms=0.3, seed=9)     # uncorrelated noise
 y = 0.9 * np.concatenate([np.zeros(delay), x[:-delay]]) + noise
 res = signals.cross_spectral_density(x, y, fs)
 print(res.magnitude_random_error[100], res.phase_standard_deviation_rad[100])  # bin 100 errors
@@ -369,8 +369,8 @@ from phonometry import signals
 fs = 8000.0
 tau = 0.002                                   # 2 ms = 16 samples
 delay = int(tau * fs)
-x = signals.noise_signal(fs, 8.0, seed=8)
-noise = signals.noise_signal(fs, 8.0, rms=0.3, seed=9)
+x = signals.noise_signal(fs, duration_s=8.0, seed=8)
+noise = signals.noise_signal(fs, duration_s=8.0, rms=0.3, seed=9)
 y = 0.9 * np.concatenate([np.zeros(delay), x[:-delay]]) + noise
 
 res = signals.cross_spectral_density(x, y, fs)
@@ -433,8 +433,8 @@ import numpy as np
 from phonometry import signals
 
 fs = 48000.0
-x = signals.noise_signal(fs, 8.0, color="white", seed=1)
-noise = signals.noise_signal(fs, 8.0, color="white", rms=0.5, seed=2)
+x = signals.noise_signal(fs, duration_s=8.0, color="white", seed=1)
+noise = signals.noise_signal(fs, duration_s=8.0, color="white", rms=0.5, seed=2)
 y = 0.8 * x + noise                      # SNR = 0.64/0.25 at every frequency
 
 res = signals.coherent_output_spectrum(x, y, fs)
@@ -459,8 +459,8 @@ import numpy as np
 from phonometry import signals
 
 fs = 48000.0
-x = signals.noise_signal(fs, 8.0, color="white", seed=1)
-noise = signals.noise_signal(fs, 8.0, color="white", rms=0.5, seed=2)
+x = signals.noise_signal(fs, duration_s=8.0, color="white", seed=1)
+noise = signals.noise_signal(fs, duration_s=8.0, color="white", rms=0.5, seed=2)
 y = 0.8 * x + noise                      # SNR = 0.64/0.25 per band
 
 res = signals.coherent_output_spectrum(x, y, fs, nperseg=2048)
@@ -548,8 +548,8 @@ seed reproduces the same record bit for bit.
 ```python
 from phonometry import signals
 
-pink = signals.noise_signal(48000, 10.0, color="pink", seed=7)     # deterministic
-white = signals.noise_signal(48000, 10.0, color="white", rms=0.5, seed=7)
+pink = signals.noise_signal(48000, duration_s=10.0, color="pink", seed=7)     # deterministic
+white = signals.noise_signal(48000, duration_s=10.0, color="white", rms=0.5, seed=7)
 ```
 
 Measured over three decades (20 Hz – 20 kHz) with the estimator of section 1,
@@ -684,7 +684,7 @@ import numpy as np
 from phonometry import signals
 
 fs = 48000.0
-x = signals.noise_signal(fs, 8192 / fs, color="pink", seed=11)   # 171 ms record
+x = signals.noise_signal(fs, duration_s=8192 / fs, color="pink", seed=11)   # 171 ms record
 single = signals.multitaper_psd(x, fs, n_tapers=1, adaptive=False)
 res = signals.multitaper_psd(x, fs)                              # NW = 4, K = 7
 band = (res.frequencies >= 20.0) & (res.frequencies <= 20000.0)
@@ -817,11 +817,11 @@ from phonometry import signals
 fs = 8192.0
 # Input 1 drives a low-frequency path; input 2 = 0.7*x1 + independent noise
 # drives a high-frequency path, so input 2 is correlated with input 1.
-x1 = signals.noise_signal(fs, 32.0, color="white", seed=1)
-x2 = 0.7 * x1 + signals.noise_signal(fs, 32.0, color="white", seed=2)
+x1 = signals.noise_signal(fs, duration_s=32.0, color="white", seed=1)
+x2 = 0.7 * x1 + signals.noise_signal(fs, duration_s=32.0, color="white", seed=2)
 low = signal.butter(4, 400.0, fs=fs, output="sos")
 high = signal.butter(4, 1500.0, btype="high", fs=fs, output="sos")
-noise = signals.noise_signal(fs, 32.0, color="white", rms=0.05, seed=3)
+noise = signals.noise_signal(fs, duration_s=32.0, color="white", rms=0.05, seed=3)
 y = signal.sosfilt(low, x1) + signal.sosfilt(high, x2) + noise
 
 res = signals.miso_coherence([x1, x2], y, fs, nperseg=2048)
@@ -958,7 +958,7 @@ recorded alongside the two above, coherent with neither. Pass `order` to
 choose:
 
 ```python
-x3 = signals.noise_signal(fs, 32.0, color="white", seed=4)   # the third, weak source
+x3 = signals.noise_signal(fs, duration_s=32.0, color="white", seed=4)   # the third, weak source
 res = signals.miso_coherence([x1, x2, x3], y, fs, order=(2, 0, 1))
 res.order            # (2, 0, 1): the order actually applied
 res.plot()           # the two panels, recomputed in the applied order
@@ -1115,7 +1115,7 @@ n_imp = int(0.06 * fs)                              # impact at t = 2.5 s
 x[int(2.5 * fs):int(2.5 * fs) + n_imp] += 0.4 * (
     rng.standard_normal(n_imp) * np.exp(-np.arange(n_imp) / (0.012 * fs))
 )
-x += signals.noise_signal(fs, 4.0, color="pink",            # 45 dB SPL floor
+x += signals.noise_signal(fs, duration_s=4.0, color="pink",            # 45 dB SPL floor
                           rms=p_ref * 10.0 ** (45.0 / 20.0), seed=10)
 
 res = signals.spectrogram(x, fs, nperseg=1024, overlap=0.75, scaling="spectrum")
@@ -1445,7 +1445,7 @@ impulse[0] = 1.0
 b, a = sp_signal.butter(2, [0.004, 0.9], btype="bandpass")
 direct = sp_signal.lfilter(b, a, impulse)              # broadband click
 ir = direct + 0.5 * np.roll(direct, int(0.008 * fs))   # echo at 8 ms
-ir += signals.noise_signal(fs, n / fs, color="white", rms=1e-4, seed=13)
+ir += signals.noise_signal(fs, duration_s=n / fs, color="white", rms=1e-4, seed=13)
 
 res = signals.echo_detection(ir, fs, min_quefrency=0.002)
 
@@ -1641,7 +1641,7 @@ fs = 8192.0
 seconds = 4.0
 t = np.arange(int(seconds * fs)) / fs
 x = (1.0 + 0.4 * np.cos(2 * np.pi * 25.0 * t)) * np.cos(2 * np.pi * 1000.0 * t)
-x += signals.noise_signal(fs, seconds, color="white", rms=0.03, seed=8)
+x += signals.noise_signal(fs, duration_s=seconds, color="white", rms=0.03, seed=8)
 
 res = signals.envelope_spectrum(x, fs)
 
@@ -1761,7 +1761,7 @@ periodic = (
     + 0.5 * np.cos(2.0 * np.pi * 3.0 * phase + 0.4)
     - 0.3 * np.cos(2.0 * np.pi * 6.0 * phase)
 )
-recording = periodic + signals.noise_signal(fs, phase.size / fs, rms=0.9, seed=11)
+recording = periodic + signals.noise_signal(fs, duration_s=phase.size / fs, rms=0.9, seed=11)
 res = signals.time_synchronous_average(recording, fs, period_s=period_s, n_averages=n_avg)
 
 fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(11, 4.6))
@@ -2071,8 +2071,8 @@ from phonometry import signals
 
 fs = 8192.0
 delay = 102                                  # 12.45 ms
-x = signals.noise_signal(fs, 2.0, seed=4)
-interference = signals.noise_signal(fs, 2.0, rms=0.5, seed=5)
+x = signals.noise_signal(fs, duration_s=2.0, seed=4)
+interference = signals.noise_signal(fs, duration_s=2.0, rms=0.5, seed=5)
 y = 0.8 * np.concatenate([np.zeros(delay), x[:-delay]]) + interference
 
 res = signals.correlation(x, y, fs, normalization="coefficient", max_lag=0.05)
@@ -2099,8 +2099,8 @@ from phonometry import signals
 
 fs = 8192.0
 delay = 102                                  # 12.45 ms
-x = signals.noise_signal(fs, 2.0, seed=4)
-interference = signals.noise_signal(fs, 2.0, rms=0.5, seed=5)
+x = signals.noise_signal(fs, duration_s=2.0, seed=4)
+interference = signals.noise_signal(fs, duration_s=2.0, rms=0.5, seed=5)
 y = 0.8 * np.concatenate([np.zeros(delay), x[:-delay]]) + interference
 
 res = signals.correlation(x, y, fs, normalization="coefficient", max_lag=0.05)
@@ -2199,9 +2199,9 @@ from phonometry import signals
 fs = 8192.0
 delay = 20  # samples
 b, a = sp_signal.butter(2, 800.0 / (fs / 2.0))   # colored common signal
-s = sp_signal.lfilter(b, a, signals.noise_signal(fs, 4.0, color="white", seed=10))
-x = s + signals.noise_signal(fs, 4.0, color="white", rms=0.02, seed=11)
-y = np.roll(s, delay) + signals.noise_signal(fs, 4.0, color="white", rms=0.02, seed=12)
+s = sp_signal.lfilter(b, a, signals.noise_signal(fs, duration_s=4.0, color="white", seed=10))
+x = s + signals.noise_signal(fs, duration_s=4.0, color="white", rms=0.02, seed=11)
+y = np.roll(s, delay) + signals.noise_signal(fs, duration_s=4.0, color="white", rms=0.02, seed=12)
 
 direct = signals.time_delay(x, y, fs, method="direct", max_delay=0.01)
 phat = signals.time_delay(x, y, fs, method="gcc", weighting="phat",
@@ -2247,9 +2247,9 @@ from phonometry import signals
 fs = 8192.0
 delay = 20  # samples
 b, a = sp_signal.butter(2, 800.0 / (fs / 2.0))   # colored common signal
-s = sp_signal.lfilter(b, a, signals.noise_signal(fs, 4.0, color="white", seed=10))
-x = s + signals.noise_signal(fs, 4.0, color="white", rms=0.02, seed=11)
-y = np.roll(s, delay) + signals.noise_signal(fs, 4.0, color="white", rms=0.02, seed=12)
+s = sp_signal.lfilter(b, a, signals.noise_signal(fs, duration_s=4.0, color="white", seed=10))
+x = s + signals.noise_signal(fs, duration_s=4.0, color="white", rms=0.02, seed=11)
+y = np.roll(s, delay) + signals.noise_signal(fs, duration_s=4.0, color="white", rms=0.02, seed=12)
 
 res = signals.time_delay(x, y, fs, method="gcc", weighting="ml",
                          nperseg=2048, upsample=16, signal_bandwidth=1000.0)
@@ -2598,7 +2598,7 @@ numbers the caller controls:
 ```python
 from phonometry import signals
 
-x = signals.noise_signal(44100, 5.0, color="pink", seed=1)
+x = signals.noise_signal(44100, duration_s=5.0, color="pink", seed=1)
 res = signals.resample_signal(x, 44100, fs_new=48000)   # 120 dB alias rejection
 print(res.up, res.down)                  # 160, 147
 print(res.n_taps, res.passband_edge_hz)  # designed FIR, 20947.5 Hz
@@ -2621,7 +2621,7 @@ import numpy as np
 from scipy import signal
 from phonometry import signals
 
-x = signals.noise_signal(44100, 5.0, color="pink", seed=1)
+x = signals.noise_signal(44100, duration_s=5.0, color="pink", seed=1)
 res = signals.resample_signal(x, 44100, fs_new=48000)   # 120 dB alias rejection
 
 # res is the ResampledSignalResult computed in the example above.

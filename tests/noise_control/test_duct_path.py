@@ -166,7 +166,9 @@ def _build(
         frequencies=_OCTAVE_BANDS,
         source_level=FAN_LW,
         elements=[
-            DuctElement(name, attenuation, self_noise, code=str(i))
+            DuctElement(
+                label=name, attenuation=attenuation, self_noise=self_noise, code=str(i)
+            )
             for i, (name, attenuation, self_noise) in enumerate(elements, start=2)
         ],
         room_effect=room_effect,
@@ -296,7 +298,7 @@ def test_self_noise_floor_can_be_disabled() -> None:
     without = duct_path(
         frequencies=_OCTAVE_BANDS,
         source_level=FAN_LW,
-        elements=[DuctElement("Silencer", 60.0)],
+        elements=[DuctElement(label="Silencer", attenuation=60.0)],
         self_noise_floor=None,
     )
     assert np.all(np.isneginf(without.stages[0].self_noise))
@@ -305,7 +307,7 @@ def test_self_noise_floor_can_be_disabled() -> None:
     with_floor = duct_path(
         frequencies=_OCTAVE_BANDS,
         source_level=FAN_LW,
-        elements=[DuctElement("Silencer", 60.0)],
+        elements=[DuctElement(label="Silencer", attenuation=60.0)],
     )
     assert np.all(with_floor.received_level >= 0.0)
 
@@ -314,7 +316,7 @@ def test_no_room_effect_leaves_a_sound_power_level() -> None:
     res = duct_path(
         frequencies=_OCTAVE_BANDS,
         source_level=FAN_LW,
-        elements=[DuctElement("Duct", 3.0)],
+        elements=[DuctElement(label="Duct", attenuation=3.0)],
     )
     assert res.room_effect is None
     assert res.target is None
@@ -331,7 +333,7 @@ def test_element_accepts_an_hvac_spectrum_result() -> None:
     res = duct_path(
         frequencies=_OCTAVE_BANDS,
         source_level=FAN_LW,
-        elements=[DuctElement("Round duct", spectrum)],
+        elements=[DuctElement(label="Round duct", attenuation=spectrum)],
     )
     assert np.allclose(res.stages[0].attenuation, spectrum.values)
 
@@ -340,7 +342,7 @@ def test_rc_criterion_family() -> None:
     res = duct_path(
         frequencies=_OCTAVE_BANDS,
         source_level=FAN_LW,
-        elements=[DuctElement("Silencer", 50.0)],
+        elements=[DuctElement(label="Silencer", attenuation=50.0)],
         room_effect=6.0,
         criterion="RC",
         target=35.0,
@@ -351,7 +353,7 @@ def test_rc_criterion_family() -> None:
 
 
 def test_section_declares_the_plane_wave_limit() -> None:
-    elements = [DuctElement("Duct", 3.0)]
+    elements = [DuctElement(label="Duct", attenuation=3.0)]
 
     with pytest.warns(
         PlaneWaveWarning, match=r"Supply: .* above the first duct cut-on frequency"
@@ -372,7 +374,7 @@ def test_no_section_means_no_validity_warning() -> None:
         duct_path(
             frequencies=_OCTAVE_BANDS,
             source_level=FAN_LW,
-            elements=[DuctElement("Duct", 3.0)],
+            elements=[DuctElement(label="Duct", attenuation=3.0)],
         )
 
 
@@ -399,7 +401,7 @@ def test_duct_path_validation(kwargs: dict[str, object], match: str) -> None:
     call: dict[str, object] = {
         "frequencies": _OCTAVE_BANDS,
         "source_level": FAN_LW,
-        "elements": [DuctElement("Duct", 3.0)],
+        "elements": [DuctElement(label="Duct", attenuation=3.0)],
     }
     call.update(kwargs)
     with pytest.raises(ValueError, match=match):
@@ -416,7 +418,7 @@ def test_elements_must_be_duct_elements() -> None:
 
 
 def test_element_spectrum_must_be_finite() -> None:
-    elements = [DuctElement("Duct", [1, 2, 3, 4, 5, 6, 7, np.nan])]
+    elements = [DuctElement(label="Duct", attenuation=[1, 2, 3, 4, 5, 6, 7, np.nan])]
     with pytest.raises(
         ValueError, match=r"'elements\[0\]\.attenuation' must be finite"
     ):
@@ -435,7 +437,7 @@ def test_combine_requires_matching_bands() -> None:
     other = duct_path(
         frequencies=[63.0, 125.0],
         source_level=[90.0, 86.0],
-        elements=[DuctElement("Duct", 3.0)],
+        elements=[DuctElement(label="Duct", attenuation=3.0)],
     )
     with pytest.raises(ValueError, match="same analysis bands"):
         combine_duct_paths([supply, other])

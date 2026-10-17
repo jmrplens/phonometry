@@ -236,7 +236,7 @@ Minimum-phase / all-pass decomposition of a frequency response.
 PhaseDecompositionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
 ```

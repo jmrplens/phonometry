@@ -68,7 +68,7 @@ slant_distance(
     hub_height_m: float,
     rotor_diameter_m: float,
     *,
-    rotor_axis: str = 'horizontal',
+    rotor_axis: Literal['horizontal', 'vertical'] = 'horizontal',
 ) -> float
 ```
 
@@ -224,7 +224,7 @@ $\Delta L_\mathrm{a} > 0$ *and* `has_identified_tone`.
 WindTurbineTonalityResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -238,9 +238,9 @@ WindTurbineTonalityResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

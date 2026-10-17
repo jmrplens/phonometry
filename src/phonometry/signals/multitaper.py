@@ -49,6 +49,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
     from ..io._signal import Signal
 
 __all__ = [
@@ -139,7 +140,7 @@ class MultitaperSpectralDensityResult(OwnsArrays):
     resolution_bandwidth: float
     _: KW_ONLY
     adaptive: bool
-    scaling: str
+    scaling: Literal["density", "spectrum"]
 
     def __post_init__(self) -> None:
         r"""Reject an estimate whose columns leave one of its two axes.
@@ -210,7 +211,7 @@ class MultitaperSpectralDensityResult(OwnsArrays):
         require_same_length(self, "eigenvalues", "weights", axis="taper")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the multitaper density in dB with its confidence band.
 

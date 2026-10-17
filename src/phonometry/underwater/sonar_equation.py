@@ -49,7 +49,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -66,6 +66,13 @@ from .._internal.validation import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
+
+    from .._i18n import Language
+    from .propagation.closed_form import (
+        AbsorptionModel,
+        PropagationLossResult,
+        SpreadingLaw,
+    )
 
 __all__ = [
     "DetectionRangeResult",
@@ -135,7 +142,7 @@ class SonarEquationResult(OwnsArrays):
     :ivar reverberation_limited: Whether the active case is reverberation-limited.
     """
 
-    mode: str
+    mode: Literal["passive", "active"]
     signal_excess: NDArray[np.float64]
     snr: NDArray[np.float64]
     figure_of_merit: float
@@ -207,7 +214,7 @@ class SonarEquationResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot signal excess versus propagation loss with the detection limit."""
         from .._i18n import check_language
@@ -355,7 +362,7 @@ class DetectionRangeResult(OwnsArrays):
     model: str
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the propagation loss against the figure of merit."""
         from .._i18n import check_language
@@ -370,13 +377,13 @@ def detection_range(
     figure_of_merit: float,
     frequency_hz: float,
     *,
-    law: str = "spherical",
+    law: SpreadingLaw = "spherical",
     transition_range: float | None = None,
     temperature_c: float = 10.0,
     salinity: float = 35.0,
     depth: float = 0.0,
     ph: float = 8.0,
-    model: str = "francois-garrison",
+    model: AbsorptionModel = "francois-garrison",
     max_range: float = 500_000.0,
     n_points: int = 400,
 ) -> DetectionRangeResult:
@@ -421,18 +428,22 @@ def detection_range(
     if require_count(n_points, "n_points", at_least=None) < _MIN_CURVE_POINTS:
         msg = "'n_points' must be at least 2."
         raise ValueError(msg)
-    options = {
-        "law": law,
-        "temperature_c": temperature_c,
-        "salinity": salinity,
-        "depth": depth,
-        "ph": ph,
-        "model": model,
-        "transition_range": transition_range,
-    }
+
+    def _curve(ranges: NDArray[np.float64] | float) -> PropagationLossResult:
+        return propagation_loss(
+            ranges,
+            frequency_hz,
+            law=law,
+            temperature_c=temperature_c,
+            salinity=salinity,
+            depth=depth,
+            ph=ph,
+            model=model,
+            transition_range=transition_range,
+        )
 
     def _loss(r: float) -> float:
-        return float(propagation_loss(r, frequency_hz, **options).pl[0])  # type: ignore[arg-type]
+        return float(_curve(r).pl[0])
 
     lo = 1e-3
     if _loss(rmax) < fom:
@@ -447,7 +458,7 @@ def detection_range(
         upper,
         require_count(n_points, "n_points", at_least=None),
     )
-    curve = propagation_loss(grid, frequency_hz, **options)  # type: ignore[arg-type]
+    curve = _curve(grid)
     return DetectionRangeResult(
         detection_range=root,
         figure_of_merit=fom,
@@ -465,7 +476,7 @@ def detection_range_from_curve(
     range_m: NDArray[np.float64] | list[float],
     propagation_loss: NDArray[np.float64] | list[float],
     *,
-    crossing: str = "first",
+    crossing: Literal["first", "last"] = "first",
 ) -> float:
     """Detection range read off a computed propagation-loss curve.
 

@@ -99,7 +99,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -122,7 +122,10 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
     from ..._internal.types import BandFraction
+
+Source = Literal["rubber_ball", "bang_machine"]
 
 __all__ = [
     "HEAVY_IMPACT_A_WEIGHTING",
@@ -255,7 +258,7 @@ class HeavyImpactSourceSpec(RichDisplay):
     :ivar description: One-line description of the source.
     """
 
-    name: str
+    name: Source
     frequencies: tuple[float, ...]
     force_exposure_level: tuple[float, ...]
     tolerance_db: tuple[float, ...]
@@ -315,7 +318,7 @@ _SPECS: dict[str, HeavyImpactSourceSpec] = {
 
 
 def heavy_impact_source_specification(
-    source: str = "rubber_ball",
+    source: Source = "rubber_ball",
 ) -> HeavyImpactSourceSpec:
     """Printed specification of a standard heavy and soft impact source.
 
@@ -354,7 +357,7 @@ class HeavyImpactSourceLimits(OwnsArrays):
 
 
 def heavy_impact_source_limits(
-    source: str = "rubber_ball",
+    source: Source = "rubber_ball",
 ) -> HeavyImpactSourceLimits:
     """Octave-band ``LFE`` tolerance band of a heavy impact source.
 
@@ -375,7 +378,7 @@ def heavy_impact_source_limits(
 
 
 def impact_force_exposure_level(
-    force: SignalInput,
+    force_n: SignalInput,
     fs: float | None = None,
     *,
     reference_force: float = _FORCE_REFERENCE,
@@ -402,11 +405,11 @@ def impact_force_exposure_level(
        per band, then hand the five results to
        :func:`check_heavy_impact_source`.
 
-    :param force: Sampled instantaneous force ``F(t)``, in newtons (1-D).
+    :param force_n: Sampled instantaneous force ``F(t)``, in newtons (1-D).
         Accepts a :class:`phonometry.io.Signal` for its rate; a calibration
         factor it carries is deliberately not applied, because this record
         is a force in newtons and not a pressure.
-    :param fs: Sampling rate of *force*, in hertz (> 0). Required
+    :param fs: Sampling rate of *force_n*, in hertz (> 0). Required
         for a bare array; a :class:`~phonometry.io.Signal` brings its own,
         and an explicit value that disagrees with it raises instead of
         silently winning.
@@ -418,21 +421,21 @@ def impact_force_exposure_level(
     :raises TypeError: if ``reference_force`` or ``reference_time`` is not a single
         number.
     """
-    rate = resolve_fs(force, fs, name="force")
+    rate = resolve_fs(force_n, fs, name="force_n")
     # calibrate=False: a Signal may carry a digital-to-pascal factor and
     # this record is a force in newtons. See phonometry.io._resolve.
     f = require_finite_array(
-        resolve_samples(force, calibrate=False, name="force"), "force"
+        resolve_samples(force_n, calibrate=False, name="force_n"), "force_n"
     )
     if f.size < _MIN_TRAPEZOID_SAMPLES:
-        msg = "'force' must be a 1-D record of at least two samples."
+        msg = "'force_n' must be a 1-D record of at least two samples."
         raise ValueError(msg)
     fs = require_positive(rate, "fs")
     f0 = require_positive(reference_force, "reference_force")
     tref = require_positive(reference_time, "reference_time")
     energy = float(np.trapezoid((f / f0) ** 2, dx=1.0 / fs))
     if energy <= 0.0:
-        msg = "'force' must carry non-zero energy."
+        msg = "'force_n' must carry non-zero energy."
         raise ValueError(msg)
     return float(10.0 * np.log10(energy / tref))
 
@@ -451,7 +454,7 @@ class HeavyImpactSourceCheck(OwnsArrays):
         octave bands 31,5 Hz to 500 Hz, in dB re 1 N.
     """
 
-    source: str
+    source: Source
     measured: np.ndarray
 
     def __post_init__(self) -> None:
@@ -522,7 +525,7 @@ class HeavyImpactSourceCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the measured ``LFE`` against the printed tolerance band.
 
@@ -537,7 +540,7 @@ class HeavyImpactSourceCheck(OwnsArrays):
 
 
 def check_heavy_impact_source(
-    force_exposure_level: ArrayLike, source: str = "rubber_ball"
+    force_exposure_level: ArrayLike, source: Source = "rubber_ball"
 ) -> HeavyImpactSourceCheck:
     """Check a measured heavy impact source against its printed spectrum.
 
@@ -680,7 +683,7 @@ class StandardizedMaxImpactResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``Li,Fmax`` and ``L'i,Fmax,V,T`` per band.
 
@@ -843,7 +846,7 @@ class AWeightedMaxImpactResult(OwnsArrays):
         require_same_length(self, "frequencies", "levels", "a_weighting", "corrected")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the band levels, their A-weighted contributions and the rating.
 

@@ -75,7 +75,10 @@ def _receiver_levels(ground: environment.GroundFactors, distance: float) -> np.n
     return environment.predicted_receiver_level(
         np.full(BANDS.size, SOUND_POWER_DB),
         environment.PropagationGeometry(
-            distance, SOURCE[2], RECEIVER[2], projected_distance=DP
+            distance=distance,
+            source_height_m=SOURCE[2],
+            receiver_height_m=RECEIVER[2],
+            projected_distance=DP,
         ),
         frequencies=BANDS,
         ground=ground,
@@ -165,7 +168,9 @@ def test_flat_ground_of_one_kind_reproduces_its_printed_table(
     case: str, g: float, levels: tuple[float, ...], total: float, total_a: float
 ) -> None:
     """T01, T02 and T03: reflecting, mixed and porous ground, band by band."""
-    computed = _receiver_levels(environment.GroundFactors(g, g, g), D3_FLAT)
+    computed = _receiver_levels(
+        environment.GroundFactors(source=g, middle=g, receiver=g), D3_FLAT
+    )
     assert computed == pytest.approx(levels, abs=ENVELOPE_DB), case
     assert _energy_sum(computed) == pytest.approx(total, abs=ENVELOPE_DB)
     assert _energy_sum(computed, A_WEIGHTING_DB) == pytest.approx(
@@ -196,8 +201,12 @@ def test_hard_ground_gives_back_the_three_decibels_it_reflects() -> None:
 
 def test_porous_ground_costs_most_where_the_notch_falls() -> None:
     """T03 against T01: the loss peaks at 250 Hz and dies away above 2 kHz."""
-    hard = _receiver_levels(environment.GroundFactors(0.0, 0.0, 0.0), D3_FLAT)
-    porous = _receiver_levels(environment.GroundFactors(1.0, 1.0, 1.0), D3_FLAT)
+    hard = _receiver_levels(
+        environment.GroundFactors(source=0.0, middle=0.0, receiver=0.0), D3_FLAT
+    )
+    porous = _receiver_levels(
+        environment.GroundFactors(source=1.0, middle=1.0, receiver=1.0), D3_FLAT
+    )
     difference = hard - porous
     assert int(np.argmax(difference)) == 2
     assert difference[-1] == pytest.approx(difference[-2], abs=0.01)

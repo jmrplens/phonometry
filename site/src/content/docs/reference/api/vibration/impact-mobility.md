@@ -168,7 +168,7 @@ Per frequency, whether the phase is within +/- 5 degrees of zero.
 ChannelMatchVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | np.ndarray
 ```
@@ -239,7 +239,7 @@ lower `min_n_records` states that fewer were judged enough.
 
 ```python
 check_double_hit(
-    force: Signal | Sequence[float] | np.ndarray,
+    force_n: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     threshold_ratio: float = 0.1,
@@ -277,7 +277,7 @@ as several. The unfiltered force avoids both effects.
 
 | Name | Description |
 | :--- | :--- |
-| `force` | One force record, 1-D, in N. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this record is a force in newtons and not a pressure. |
+| `force_n` | One force record, 1-D, in N. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this record is a force in newtons and not a pressure. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `threshold_ratio` | Fraction of the largest force an excursion must exceed to count as an impact, in (0, 1) (Default: 0.1). |
 
@@ -294,7 +294,7 @@ as several. The unfiltered force avoids both effects.
 
 ```python
 check_force_spectrum(
-    force: Signal | Sequence[float] | np.ndarray,
+    force_n: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     frequency_range_hz: tuple[float, float],
@@ -315,7 +315,7 @@ reported beside it as [`ForceSpectrumCheck.energy_fraction_above`](/phonometry/r
 
 | Name | Description |
 | :--- | :--- |
-| `force` | One force record, 1-D, in N (windowed or not, as it will be processed). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this record is a force in newtons and not a pressure. |
+| `force_n` | One force record, 1-D, in N (windowed or not, as it will be processed). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this record is a force in newtons and not a pressure. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `frequency_range_hz` | `(f_low, f_high)`, the frequency range of interest, in hertz. |
 | `max_drop_db` | The largest fall across the range to accept, in dB. |
@@ -332,7 +332,7 @@ reported beside it as [`ForceSpectrumCheck.energy_fraction_above`](/phonometry/r
 
 ```python
 check_overload(
-    record: Signal | Sequence[float] | np.ndarray,
+    x: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     full_scale: float,
@@ -345,7 +345,7 @@ Did one channel of the record stay below its full scale? (8.4)
 
 | Name | Description |
 | :--- | :--- |
-| `record` | One record, 1-D, in any unit. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, so the samples stay in the unit the channel recorded them in, the unit of its full scale. |
+| `x` | One record, 1-D, in any unit. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, so the samples stay in the unit the channel recorded them in, the unit of its full scale. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `full_scale` | The manufacturer's maximum for linear operation, in the unit of the record. |
 
@@ -368,7 +368,7 @@ check_response_decay(
     exponential_window: bool = False,
     segment_s: float | None = None,
     start_s: float = 0.0,
-    force: Signal | Sequence[float] | np.ndarray | None = None,
+    force_n: Signal | Sequence[float] | np.ndarray | None = None,
 ) -> ResponseDecayCheck
 ```
 
@@ -392,7 +392,7 @@ far. Pass the response as recorded, before any window.
 | `exponential_window` | Whether the record is to be processed with an exponential window (Default: `False`). |
 | `segment_s` | Length of the segments the levels are read over, in seconds; make it at least one period of the lowest mode (Default: `None`, one tenth of the record). |
 | `start_s` | Time from which the highest peak is sought, in seconds (Default: 0, the whole record, as the clause reads). |
-| `force` | The force record of the same impact, same length (Default: `None`). When given, the highest peak is sought only after the force pulse, where the force has fallen back to 1 % of its peak, so a driving-point acceleration is judged on its free decay and not on the impact it follows (the mass line). The later of this and `start_s` is used. A Signal likewise, its factor not applied. |
+| `force_n` | The force record of the same impact, same length (Default: `None`). When given, the highest peak is sought only after the force pulse, where the force has fallen back to 1 % of its peak, so a driving-point acceleration is judged on its free decay and not on the impact it follows (the mass line). The later of this and `start_s` is used. A Signal likewise, its factor not applied. |
 
 **Returns:** A [`ResponseDecayCheck`](/phonometry/reference/api/vibration/impact-mobility/#responsedecaycheck).
 
@@ -470,7 +470,7 @@ Whether every judged frequency is high and the records are enough.
 CoherenceCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -501,7 +501,7 @@ NaN where the coherence is zero.
 
 ```python
 DoubleHitCheck(
-    force: np.ndarray,
+    force_n: np.ndarray,
     fs: float,
     impact_indices: np.ndarray,
     *,
@@ -527,7 +527,7 @@ be tolerated".
 
 | Name | Description |
 | :--- | :--- |
-| `force` | The force record judged, in N, as a bare array (a [`Signal`](/phonometry/reference/api/io/io/#signal) passed in is read without its calibration factor, and its samples are what is kept). |
+| `force_n` | The force record judged, in N, as a bare array (a [`Signal`](/phonometry/reference/api/io/io/#signal) passed in is read without its calibration factor, and its samples are what is kept). |
 | `fs` | Its sample rate, in Hz. |
 | `impact_indices` | Sample index of the peak of every impact found, in time order; the first entry is not necessarily the largest. |
 | `threshold_ratio` | The fraction of the largest peak an excursion had to exceed to count as an impact. |
@@ -578,7 +578,7 @@ Whether the record holds a single impact.
 DoubleHitCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | np.ndarray
 ```
@@ -629,7 +629,7 @@ Time of every sample of the record, in seconds.
 
 ```python
 energy_spectral_density(
-    record: Signal | Sequence[float] | np.ndarray,
+    x: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
 ) -> EnergySpectralDensity
 ```
@@ -647,7 +647,7 @@ The DC bin and, for an even record, the Nyquist bin are not doubled.
 
 | Name | Description |
 | :--- | :--- |
-| `record` | One record, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is not applied. |
+| `x` | One record, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is not applied. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 
 **Returns:** The DFT bin frequencies from 0 Hz to the Nyquist frequency, in hertz, and the density at each, in the record's unit squared times s/Hz, as an [`EnergySpectralDensity`](/phonometry/reference/api/vibration/impact-mobility/#energyspectraldensity).
@@ -683,7 +683,7 @@ position.
 EnergySpectralDensity.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -867,7 +867,7 @@ Factor on the measured peak of each mode, $\hat\zeta_r / \zeta_r$.
 ExponentialWindowCorrection.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1007,7 +1007,7 @@ Whether the density falls no further than the limit across the range.
 ForceSpectrumCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1038,7 +1038,7 @@ HIGH_COHERENCE = 0.9
 
 ```python
 impact_mobility(
-    force: Signal | Sequence[float] | np.ndarray,
+    force_n: Signal | Sequence[float] | np.ndarray,
     response: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
@@ -1055,7 +1055,7 @@ impact_mobility(
 
 Mobility from impact records, averaged as 8.6 prescribes.
 
-Each row of `force` and `response` is one impact at the same point,
+Each row of `force_n` and `response` is one impact at the same point,
 triggered as 8.2 describes. The force is multiplied by the force window
 (8.5.1) and both records by the exponential window (8.5.2), both are
 transformed, and the estimate is the averaged cross-spectrum of response
@@ -1088,7 +1088,7 @@ that way.
 
 | Name | Description |
 | :--- | :--- |
-| `force` | Force records, in N: one record (1-D) or one per row (2-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), one channel per impact, for its rate; a calibration factor it carries is deliberately not applied, because this record is a force and not a pressure. |
+| `force_n` | Force records, in N: one record (1-D) or one per row (2-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), one channel per impact, for its rate; a calibration factor it carries is deliberately not applied, because this record is a force and not a pressure. |
 | `response` | Response records, same shape, in m/s², m/s or m as `response_quantity` says; a Signal likewise, its factor not applied. |
 | `fs` | Sample rate, in Hz. Required when both records are bare arrays; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value, or a second Signal, that disagrees with it raises. |
 | `response_quantity` | `"acceleration"` (default), `"velocity"` or `"displacement"`. |
@@ -1202,7 +1202,7 @@ Mobility phase, in radians.
 ImpactMobilityResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | np.ndarray
 ```
@@ -1231,9 +1231,9 @@ ImpactMobilityResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -1266,7 +1266,9 @@ window and the coherence at the mobility peak.
 ### ImpactMobilityResult.to()
 
 ```python
-ImpactMobilityResult.to(target: str) -> np.ndarray
+ImpactMobilityResult.to(
+    target: Literal['receptance', 'mobility', 'accelerance', 'dynamic_stiffness', 'impedance', 'apparent_mass'],
+) -> np.ndarray
 ```
 
 Convert the mobility to another FRF kind (see [`.convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf)).
@@ -1274,7 +1276,7 @@ Convert the mobility to another FRF kind (see [`.convert_frf`](/phonometry/refer
 ## OverloadCheck
 
 ```python
-OverloadCheck(record: np.ndarray, fs: float, *, full_scale: float)
+OverloadCheck(x: np.ndarray, fs: float, *, full_scale: float)
 ```
 
 Did the record stay inside the linear range of its channel? (8.4)
@@ -1291,7 +1293,7 @@ not sufficient.
 
 | Name | Description |
 | :--- | :--- |
-| `record` | The record judged, in its own unit, as a bare array (a [`Signal`](/phonometry/reference/api/io/io/#signal) passed in is read without its calibration factor, and its samples are what is kept). |
+| `x` | The record judged, in its own unit, as a bare array (a [`Signal`](/phonometry/reference/api/io/io/#signal) passed in is read without its calibration factor, and its samples are what is kept). |
 | `fs` | Its sample rate, in Hz. |
 | `full_scale` | The largest magnitude the channel handles linearly, in the unit of the record. |
 
@@ -1325,7 +1327,7 @@ Largest magnitude in the record, in its unit.
 OverloadCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1364,7 +1366,7 @@ RESPONSE_MIDPOINT_RATIO = 0.1
 
 ```python
 ResponseDecayCheck(
-    record: np.ndarray,
+    response: np.ndarray,
     fs: float,
     *,
     segment_s: float,
@@ -1410,7 +1412,7 @@ record passed to [`check_response_decay`](/phonometry/reference/api/vibration/im
 
 | Name | Description |
 | :--- | :--- |
-| `record` | The response record judged, unwindowed, in its own unit, as a bare array (a [`Signal`](/phonometry/reference/api/io/io/#signal) passed in is read without its calibration factor, and its samples are what is kept). |
+| `response` | The response record judged, unwindowed, in its own unit, as a bare array (a [`Signal`](/phonometry/reference/api/io/io/#signal) passed in is read without its calibration factor, and its samples are what is kept). |
 | `fs` | Its sample rate, in Hz. |
 | `segment_s` | Length of the segments the end and midpoint levels are read over, in seconds. |
 | `exponential_window` | Whether the record is to be processed with an exponential window (25 % limit) or without (1 %). |
@@ -1471,7 +1473,7 @@ When the highest peak from `start_s` on occurs, in seconds.
 ResponseDecayCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1498,7 +1500,7 @@ single_mode_fit(
     *,
     frequencies: ArrayLike,
     band_hz: tuple[float, float],
-    kind: str = 'mobility',
+    kind: Literal['accelerance', 'mobility', 'receptance'] = 'mobility',
     exponential_decay_rate_per_s: float = 0.0,
 ) -> SingleModeFitResult
 ```
@@ -1557,7 +1559,7 @@ SingleModeFitResult(
     residue: complex,
     direct_term: complex,
     *,
-    kind: str = 'mobility',
+    kind: Literal['accelerance', 'mobility', 'receptance'] = 'mobility',
     exponential_decay_rate_per_s: float = 0.0,
 )
 ```
@@ -1664,7 +1666,7 @@ The fitted model at any frequencies, window included, of kind `kind`.
 SingleModeFitResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

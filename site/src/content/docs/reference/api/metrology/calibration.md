@@ -17,7 +17,7 @@ The calibration reference recording looks unreliable.
 
 ```python
 sensitivity(
-    ref_signal: Signal,
+    reference_signal: Signal,
     target_spl: float = ...,
     reference_pressure_pa: float = ...,
     fs: int | None = ...,
@@ -25,12 +25,12 @@ sensitivity(
     validate: bool = ...,
     max_fluctuation_db: float | None = ...,
     frequency: float = ...,
-    calibrator_class: str = ...,
+    calibrator_class: Literal['LS', 'LS/M', '1', '1/M', '2'] = ...,
     narrowband: bool = ...,
 ) -> float
 
 sensitivity(
-    ref_signal: Signal | Sequence[float] | np.ndarray,
+    reference_signal: Signal | Sequence[float] | np.ndarray,
     target_spl: float = ...,
     reference_pressure_pa: float = ...,
     *,
@@ -38,12 +38,12 @@ sensitivity(
     validate: bool = ...,
     max_fluctuation_db: float | None = ...,
     frequency: float = ...,
-    calibrator_class: str = ...,
+    calibrator_class: Literal['LS', 'LS/M', '1', '1/M', '2'] = ...,
     narrowband: bool = ...,
 ) -> float
 
 sensitivity(
-    ref_signal: Signal | Sequence[float] | np.ndarray,
+    reference_signal: Signal | Sequence[float] | np.ndarray,
     target_spl: float,
     reference_pressure_pa: float,
     fs: int,
@@ -51,12 +51,12 @@ sensitivity(
     validate: bool = ...,
     max_fluctuation_db: float | None = ...,
     frequency: float = ...,
-    calibrator_class: str = ...,
+    calibrator_class: Literal['LS', 'LS/M', '1', '1/M', '2'] = ...,
     narrowband: bool = ...,
 ) -> float
 
 sensitivity(
-    ref_signal: Signal | Sequence[float] | np.ndarray,
+    reference_signal: Signal | Sequence[float] | np.ndarray,
     target_spl: float = ...,
     reference_pressure_pa: float = ...,
     fs: int | None = ...,
@@ -64,7 +64,7 @@ sensitivity(
     validate: bool = ...,
     max_fluctuation_db: float | None = ...,
     frequency: float = ...,
-    calibrator_class: str = ...,
+    calibrator_class: Literal['LS', 'LS/M', '1', '1/M', '2'] = ...,
     narrowband: Literal[False] = ...,
 ) -> float
 ```
@@ -100,7 +100,7 @@ integrator attack).
 
 | Name | Description |
 | :--- | :--- |
-| `ref_signal` | Recording of the calibration tone. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately **not** applied, because this function is what produces such a factor and folding an existing one in would calibrate the calibration. |
+| `reference_signal` | Recording of the calibration tone. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately **not** applied, because this function is what produces such a factor and folding an existing one in would calibrate the calibration. |
 | `target_spl` | The known SPL level of the calibrator (default 94 dB). |
 | `reference_pressure_pa` | Reference pressure (default 20 microPascals). |
 | `fs` | Sample rate of the recording in Hz. Required for the stability validation; without it the check is skipped. A [`Signal`](/phonometry/reference/api/io/io/#signal) supplies it, so a read take gets the validation for free, and an explicit value that disagrees raises. |

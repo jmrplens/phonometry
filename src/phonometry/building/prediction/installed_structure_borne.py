@@ -74,7 +74,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -84,7 +84,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
-    from ..._internal.types import BandFraction
+    from ..._i18n import Language
+    from ..._internal.types import BandFraction, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 
@@ -99,7 +100,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ...metrology.reference_values import REFERENCE_VALUES
 from .resilient_layers import TAPPING_HAMMER_MASS_KG
 
 __all__ = [
@@ -514,7 +515,7 @@ def _table_d1_arguments(
 
 
 def typical_element_mobility(
-    structure: str,
+    structure: Literal["mass", "bar_end", "beam", "plate", "pipe", "mass_spring"],
     *,
     frequency: ArrayLike | None = None,
     mass: float | None = None,
@@ -671,7 +672,7 @@ def typical_element_mobility(
 #: The ``10^-12`` the closed form under Table F.1 divides by, in N²: the square
 #: of the 1 µN reference force of ISO 1683:2015 Table 3, which is why the force
 #: level it gives is re 1e-6 N.
-_FORCE_REFERENCE_SQUARED = ISO1683_REFERENCE_VALUES["solid"]["force"].value ** 2
+_FORCE_REFERENCE_SQUARED = REFERENCE_VALUES["solid"]["force"].value ** 2
 
 #: EN 12354-5, Table F.1: the nominal octave-band centre frequencies of the
 #: header row, in hertz. The standard prints the first as "31".
@@ -1093,7 +1094,7 @@ class InstalledSourceResult(OwnsArrays):
         return float(10.0 * np.log10(np.sum(10.0 ** (0.1 * lt))))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-path and total normalised sound pressure levels.
 
@@ -1111,9 +1112,9 @@ class InstalledSourceResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an EN 12354-5 installed structure-borne prediction fiche.
 

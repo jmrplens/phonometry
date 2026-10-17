@@ -100,7 +100,7 @@ import functools
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from scipy.special import jn_zeros, jv
@@ -129,7 +129,11 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
     from ..fluids import Fluid
+
+Coupler = Literal["plane_wave", "large_volume"]
+Method = Literal["exact", "approximation"]
 
 __all__ = [
     "IEC61094_2_TABLE_C1",
@@ -245,7 +249,7 @@ _PAIR_SIZE = 2
 # Annex A.2: heat conduction in a closed cavity at low frequencies
 # ---------------------------------------------------------------------------
 
-_HEAT_CONDUCTION_METHODS = ("exact", "approximation")
+_HEAT_CONDUCTION_METHODS: tuple[Method, ...] = ("exact", "approximation")
 
 #: The zeros of :math:`J_0` computed by scipy before the McMahon expansion
 #: takes over; past the fortieth it agrees with them to 3e-14.
@@ -329,7 +333,7 @@ def temperature_transfer_function(
     length_to_diameter_ratio: float,
     x: ArrayLike,
     *,
-    method: str = "exact",
+    method: Method = "exact",
 ) -> NDArray[np.complex128]:
     r"""Gerber's complex temperature transfer function :math:`E_V` of a
     cylindrical cavity (IEC 61094-2:2009 A.2, Formula (A.2) and Table A.1).
@@ -397,7 +401,7 @@ class HeatConductionCorrection(OwnsArrays):
     x: NDArray[np.float64]
     transfer_function: NDArray[np.complex128]
     heat_capacity_ratio: float
-    method: str
+    method: Method
 
     def __post_init__(self) -> None:
         """Publish the columns read-only.
@@ -430,7 +434,7 @@ class HeatConductionCorrection(OwnsArrays):
         return 20.0 * np.log10(np.abs(self.volume_factor))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot :math:`|\Delta_\mathrm{H}|` in dB and its phase against frequency.
 
@@ -455,7 +459,7 @@ def heat_conduction_correction(
     surface_area_m2: float,
     length_to_diameter_ratio: float,
     gas: Fluid,
-    method: str = "exact",
+    method: Method = "exact",
 ) -> HeatConductionCorrection:
     r"""The heat-conduction correction :math:`\Delta_\mathrm{H}` of a closed
     cavity (IEC 61094-2:2009 5.5, A.2).
@@ -546,7 +550,7 @@ def _end_admittance(
 # ---------------------------------------------------------------------------
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class CapillaryTube(RichDisplay):
     r"""Identical open capillary tubes that equalise the static pressure of a
     coupler (IEC 61094-2:2009 5.6 and Annex B).
@@ -619,7 +623,7 @@ class CapillaryTubeImpedance(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot the real and imaginary parts of :math:`Z_{\mathrm{a,C}}` in
         GPa·s/m³, the unit of Tables B.1 and B.2.
@@ -716,7 +720,7 @@ def capillary_tube_impedance(
 # ---------------------------------------------------------------------------
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ReciprocityMicrophone(RichDisplay):
     r"""The parameters of a laboratory standard microphone that enter the
     acoustic transfer impedance (IEC 61094-2:2009 7.3.3 and Annex E).
@@ -874,7 +878,7 @@ def microphone_acoustic_impedance(
     return (blocked - 1.0 / admittance) / sensitivity**2
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class PlaneWaveCoupler(RichDisplay):
     r"""A plane-wave coupler: a cylinder of the diameter of the front cavities
     (IEC 61094-2:2009 C.2, Table C.1 and Figure C.1).
@@ -901,7 +905,7 @@ class PlaneWaveCoupler(RichDisplay):
         require_positive(self.diameter_m, "diameter_m")
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class LargeVolumeCoupler(RichDisplay):
     r"""A large-volume coupler: a cylinder much larger than the front cavities
     and the equivalent volumes (IEC 61094-2:2009 C.3, Table C.2 and Figure C.2).
@@ -1020,7 +1024,7 @@ def _closed_cavity(
     return volume, surface
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class CouplerDimensions(RichDisplay):
     """One column of IEC 61094-2:2009 Table C.1 or Table C.2, the nominal
     dimensions of a coupler for one type of laboratory standard microphone,
@@ -1054,13 +1058,25 @@ class CouplerDimensions(RichDisplay):
 IEC61094_2_TABLE_C1: Mapping[str, CouplerDimensions] = MappingProxyType(
     {
         "LS1P": CouplerDimensions(
-            23.77, 18.6, 18.6, 1.95, coupler_length_range_mm=(3.5, 9.5)
+            microphone_diameter_mm=23.77,
+            front_cavity_diameter_mm=18.6,
+            coupler_diameter_mm=18.6,
+            front_cavity_depth_mm=1.95,
+            coupler_length_range_mm=(3.5, 9.5),
         ),
         "LS2aP": CouplerDimensions(
-            13.2, 9.3, 9.3, 0.5, coupler_length_range_mm=(3.0, 7.0)
+            microphone_diameter_mm=13.2,
+            front_cavity_diameter_mm=9.3,
+            coupler_diameter_mm=9.3,
+            front_cavity_depth_mm=0.5,
+            coupler_length_range_mm=(3.0, 7.0),
         ),
         "LS2bP": CouplerDimensions(
-            12.15, 9.8, 9.8, 0.7, coupler_length_range_mm=(3.5, 6.0)
+            microphone_diameter_mm=12.15,
+            front_cavity_diameter_mm=9.8,
+            coupler_diameter_mm=9.8,
+            front_cavity_depth_mm=0.7,
+            coupler_length_range_mm=(3.5, 6.0),
         ),
     }
 )
@@ -1071,15 +1087,15 @@ IEC61094_2_TABLE_C1: Mapping[str, CouplerDimensions] = MappingProxyType(
 IEC61094_2_TABLE_C2: Mapping[str, CouplerDimensions] = MappingProxyType(
     {
         "LS1P": CouplerDimensions(
-            23.77, 18.6, 42.88, 1.95, coupler_length_mm=12.55,
+            microphone_diameter_mm=23.77, front_cavity_diameter_mm=18.6, coupler_diameter_mm=42.88, front_cavity_depth_mm=1.95, coupler_length_mm=12.55,
             port_length_mm=0.80, tolerance_mm=0.03,
         ),
         "LS2aP": CouplerDimensions(
-            13.2, 9.3, 18.30, 0.5, coupler_length_mm=3.50,
+            microphone_diameter_mm=13.2, front_cavity_diameter_mm=9.3, coupler_diameter_mm=18.30, front_cavity_depth_mm=0.5, coupler_length_mm=3.50,
             port_length_mm=0.40, tolerance_mm=0.03,
         ),
         "LS2bP": CouplerDimensions(
-            12.15, 9.8, 18.30, 0.7, coupler_length_mm=3.50,
+            microphone_diameter_mm=12.15, front_cavity_diameter_mm=9.8, coupler_diameter_mm=18.30, front_cavity_depth_mm=0.7, coupler_length_mm=3.50,
             port_length_mm=0.40, tolerance_mm=0.03,
         ),
     }
@@ -1128,7 +1144,7 @@ class CouplerTransferImpedance(OwnsArrays):
     """
 
     frequencies: NDArray[np.float64]
-    coupler: str
+    coupler: Coupler
     adiabatic_impedance_pa_s_m3: NDArray[np.complex128]
     heat_conducting_impedance_pa_s_m3: NDArray[np.complex128]
     capillary_correction: NDArray[np.complex128]
@@ -1178,7 +1194,7 @@ class CouplerTransferImpedance(OwnsArrays):
         return -20.0 * np.log10(np.abs(self.capillary_correction))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the heat-conduction and capillary corrections of the transfer
         impedance, in dB, against frequency.
@@ -1218,7 +1234,7 @@ def _large_volume(
     microphones: tuple[ReciprocityMicrophone, ReciprocityMicrophone],
     gas: Fluid,
     static_pressure_pa: float,
-    method: str,
+    method: Method,
 ) -> CouplerTransferImpedance:
     r"""Formula (3) with :math:`\Delta_\mathrm{H}` (A.1) and :math:`\Delta_\mathrm{C}`."""
     omega = 2.0 * math.pi * frequencies
@@ -1330,7 +1346,7 @@ def coupler_transfer_impedance(
     static_pressure_pa: float,
     relative_humidity_percent: float,
     gas: Fluid | None = None,
-    heat_conduction_method: str = "exact",
+    heat_conduction_method: Method = "exact",
 ) -> CouplerTransferImpedance:
     r"""The acoustic transfer impedance :math:`Z_{\mathrm{a},12}` of a coupler
     closed by two microphones (IEC 61094-2:2009 5.4 to 5.6).
@@ -1638,7 +1654,7 @@ class WaveMotionCorrection(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the correction against frequency, with the rows of Table C.3.
 
@@ -1765,7 +1781,7 @@ class CouplerCheck(RichDisplay):
         states its domain for, rather than another gas.
     """
 
-    coupler: str
+    coupler: Coupler
     length_to_diameter_ratio: float
     broadband_margin: float | None
     lowest_x: float | None
@@ -1867,7 +1883,7 @@ class CouplerCheck(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot each condition as its margin to the limit it is held to.
 
@@ -1904,7 +1920,7 @@ def check_coupler(
     static_pressure_pa: float,
     relative_humidity_percent: float,
     gas: Fluid | None = None,
-    heat_conduction_method: str = "exact",
+    heat_conduction_method: Method = "exact",
 ) -> CouplerCheck:
     r"""Do the coupler formulas of IEC 61094-2:2009 hold for this calibration?
 
@@ -2049,7 +2065,7 @@ class CouplerParameterUncertainty(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot each component against frequency.
 
@@ -2072,7 +2088,7 @@ def _pair_impedances(
     coupler: PlaneWaveCoupler | LargeVolumeCoupler,
     microphones: Sequence[ReciprocityMicrophone],
     conditions: tuple[float, float, float],
-    method: str,
+    method: Method,
     gas: Fluid | None,
 ) -> dict[str, NDArray[np.complex128]]:
     """The corrected transfer impedance of the three pairs."""
@@ -2178,7 +2194,7 @@ def coupler_parameter_uncertainty(
     relative_humidity_percent: float,
     microphone: int = 1,
     gas: Fluid | None = None,
-    heat_conduction_method: str = "exact",
+    heat_conduction_method: Method = "exact",
 ) -> CouplerParameterUncertainty:
     r"""The uncertainty components of the acoustic transfer impedance, one
     parameter at a time (IEC 61094-2:2009 7.5).

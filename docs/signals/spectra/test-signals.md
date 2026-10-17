@@ -107,7 +107,7 @@ numbers the caller controls:
 ```python
 from phonometry import signals
 
-x = signals.noise_signal(44100, 5.0, color="pink", seed=1)
+x = signals.noise_signal(44100, duration_s=5.0, color="pink", seed=1)
 res = signals.resample_signal(x, 44100, fs_new=48000)   # 120 dB alias rejection
 print(res.up, res.down)                  # 160, 147
 print(res.n_taps, res.passband_edge_hz)  # designed FIR, 20947.5 Hz
@@ -130,7 +130,7 @@ import numpy as np
 from scipy import signal
 from phonometry import signals
 
-x = signals.noise_signal(44100, 5.0, color="pink", seed=1)
+x = signals.noise_signal(44100, duration_s=5.0, color="pink", seed=1)
 res = signals.resample_signal(x, 44100, fs_new=48000)   # 120 dB alias rejection
 
 # res is the ResampledSignalResult computed in the example above.

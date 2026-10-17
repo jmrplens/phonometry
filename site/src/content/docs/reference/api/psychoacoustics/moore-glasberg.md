@@ -176,7 +176,7 @@ pattern is that of a single ear before binaural inhibition; the total
 MooreGlasbergLoudness.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

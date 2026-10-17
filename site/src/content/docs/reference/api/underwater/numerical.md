@@ -60,6 +60,7 @@ frequencies in Hz. The water column has a pressure-release surface at z = 0.
 
 ```python
 BeamFan(
+    *,
     max_angle_deg: float = 80.0,
     n_beams: int | None = None,
     beam_width: float | None = None,
@@ -140,7 +141,7 @@ $\tau_j$.
 EigenrayResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -155,7 +156,7 @@ eigenrays(
     *,
     receiver_range: float,
     receiver_depth: float,
-    bottom: str | FluidSeabed = 'pressure-release',
+    bottom: Literal['pressure-release', 'rigid'] | FluidSeabed = 'pressure-release',
     max_n_arrivals: int = 64,
     n_steps: int | None = None,
 ) -> EigenrayResult
@@ -270,9 +271,9 @@ it to keep everything the fan bracketed.
 
 ```python
 FluidSeabed(
+    *,
     density: float,
     speed_of_sound: float,
-    *,
     water_density: float = 1000.0,
 )
 ```
@@ -311,8 +312,8 @@ gaussian_beams(
     n_depth_points: int = 200,
     fan: BeamFan | None = None,
     range_step: float = 25.0,
-    bottom: str | FluidSeabed = 'pressure-release',
-    absorption: str | VolumeAbsorption | None = None,
+    bottom: Literal['pressure-release', 'rigid'] | FluidSeabed = 'pressure-release',
+    absorption: Literal['francois-garrison', 'ainslie-mccolm', 'thorp'] | VolumeAbsorption | None = None,
     bathymetry: tuple[NDArray[np.float64] | list[float], NDArray[np.float64] | list[float]] | None = None,
 ) -> GaussianBeamResult
 ```
@@ -620,7 +621,7 @@ can be subtracted.
 GaussianBeamResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -639,7 +640,7 @@ normal_modes(
     receiver_depth: float,
     ranges_m: NDArray[np.float64] | list[float] | None = None,
     density: float = 1000.0,
-    bottom: str = 'pressure-release',
+    bottom: Literal['pressure-release', 'rigid'] = 'pressure-release',
     n_depth_points: int | None = None,
 ) -> NormalModeResult
 ```
@@ -718,7 +719,7 @@ Normal-mode solution of a range-independent waveguide.
 NormalModeResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -819,7 +820,7 @@ Parabolic-equation propagation-loss field.
 ParabolicEquationResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -921,6 +922,7 @@ per ray, are the entire per-bounce record a downstream amplitude needs.
 
 ```python
 RayTraceResult(
+    *,
     launch_angles_deg: NDArray[np.float64],
     ranges: NDArray[np.float64],
     depths: NDArray[np.float64],
@@ -963,7 +965,7 @@ Ray-tracing solution through a sound-speed profile.
 RayTraceResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -974,8 +976,8 @@ Plot the ray paths (depth increasing downward).
 
 ```python
 VolumeAbsorption(
-    model: str,
     *,
+    model: Literal['francois-garrison', 'ainslie-mccolm', 'thorp'],
     temperature_c: float = 10.0,
     salinity: float = 35.0,
     ph: float = 8.0,

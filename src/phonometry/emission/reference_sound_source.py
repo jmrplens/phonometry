@@ -109,6 +109,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
     from .._internal.types import BandFraction
     from ._sound_power_anechoic import PrecisionSoundPowerResult
 
@@ -466,7 +467,7 @@ class ReferenceSourceCalibration(OwnsArrays):
     c3: np.ndarray
     expanded_uncertainty_db: np.ndarray
     coverage_factor: float
-    arrangement: str
+    arrangement: Literal["paths", "fixed"]
     radiation: str | None
     knee_frequency_hz: float | None
     intensity_sound_power_level: np.ndarray | None = None
@@ -682,7 +683,7 @@ class ReferenceSourceCalibration(OwnsArrays):
         return np.array(out, dtype=np.float64)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the calibrated spectrum with its expanded uncertainty.
 
@@ -1221,7 +1222,7 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw each requirement as a share of its limit, per band.
 
@@ -1460,7 +1461,7 @@ class ReferenceSourceDriftResult(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the change of each band against its limit.
 

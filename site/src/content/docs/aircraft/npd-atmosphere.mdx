@@ -54,7 +54,7 @@ in decibels per 100 m, from 50 Hz to 10 kHz.
 ```python
 from phonometry import aircraft
 
-rates = aircraft.SAE_AIR1845_ATTENUATION_DB_PER_100M
+rates = aircraft.AIR1845_ATTENUATION_DB_PER_100M
 print(rates[1000.0], rates[10000.0])   # 0.59 9.836 dB/100 m
 ```
 
@@ -203,7 +203,7 @@ one.
 evaluates the pure-tone coefficient at the exact mid-band frequency and maps the
 pure-tone attenuation over the path to a band attenuation with the SAE Method,
 so the band attenuation depends on the path length and on the pressure. It is
-[`sae_band_attenuation`](/phonometry/aircraft/aircraft-noise/) of the
+[`band_attenuation_arp5534`](/phonometry/aircraft/aircraft-noise/) of the
 certification guide. Its pure-tone coefficient is the one of ISO 9613-1 with the
 saturation vapour pressure that ARP 5534 prints in its Eqs. 5-6, the longer form
 of ANSI S1.26; with the shorter ISO 9613-1 form 57 of the 240 cells of Table
@@ -214,20 +214,20 @@ printed digit.
 rate per band that depends on temperature and humidity only. SAE ARP 866A is
 not reachable as a document of its own; its formula is given in ISO 3891:1978
 Annex A, which is where phonometry implements it from, as
-`arp866a_attenuation`:
+`attenuation_arp866a`:
 
 ```python
 import numpy as np
 from phonometry import aircraft
 
-absorption = aircraft.arp866a_attenuation(
+absorption = aircraft.attenuation_arp866a(
     [1000.0, 10000.0], temperature_c=10.0, relative_humidity_percent=80.0
 )
 print(absorption.evaluation_frequencies_hz)             # [1000. 9000.] Hz
 print(np.round(absorption.coefficient_db_per_100m, 3))  # [0.439 9.774] dB/100 m
 
 for reading in ("quadratic", "linear"):
-    band = aircraft.arp866a_attenuation(
+    band = aircraft.attenuation_arp866a(
         [4000.0], temperature_c=10.0, relative_humidity_percent=80.0,
         eta_interpolation=reading,
     )
@@ -244,7 +244,7 @@ from Table 1, whose note says "a form of quadratic interpolation shall be used"
 without saying which, and the two documents that print this attenuation read
 it differently. ISO 3891's own Table 10 (80 %, -10 °C to 40 °C) is reproduced
 in all its 264 cells by the parabola through three neighbouring entries of
-Table 1, which is the default of `arp866a_attenuation`; linear interpolation
+Table 1, which is the default of `attenuation_arp866a`; linear interpolation
 misses 11 of them. Doc 29 Table D-3b, and through it Tables D-5 and D-6c, is
 reproduced by linear interpolation, which the quadratic misses by up to 1.2 dB
 at 25000 ft, so the Appendix D route reads $\eta$ linearly. The two part only

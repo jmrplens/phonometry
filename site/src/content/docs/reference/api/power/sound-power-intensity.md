@@ -308,6 +308,7 @@ criterion 1 and criterion 2 are evaluable.
 
 ```python
 PrecisionFieldIndicators(
+    *,
     ft: np.ndarray | None,
     f_pi_unsigned: np.ndarray,
     f_pi_signed: np.ndarray,
@@ -367,7 +368,7 @@ Judged on the settled share of the gross power, as in ISO 9614-2.
 PrecisionIntensityResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -384,9 +385,9 @@ PrecisionIntensityResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     indicators: PrecisionFieldIndicators | None = None,
     criteria: PrecisionCriteria | None = None,
     residual_index: float | Sequence[float] | np.ndarray | None = None,
@@ -686,7 +687,7 @@ The magnitude level $10 \log_{10}(|P_i|/P_0)$ (Eq. 8), per segment and band.
 SoundPowerIntensityResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -703,9 +704,9 @@ SoundPowerIntensityResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

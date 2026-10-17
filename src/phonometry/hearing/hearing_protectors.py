@@ -57,7 +57,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -69,6 +69,8 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
+
+    from .._i18n import Language
 
 __all__ = [
     "AssumedProtectionResult",
@@ -305,7 +307,7 @@ class AssumedProtectionResult(OwnsArrays):
     n_subjects: int
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the mean attenuation, its spread and the assumed protection.
 
@@ -433,7 +435,7 @@ class ProtectedLevelResult(OwnsArrays):
     effective_level: float
     noise_reduction: float | None
     performance: int | None
-    method: str
+    method: Literal["octave-band", "HML", "SNR"]
     band_levels: np.ndarray | None = None
     frequencies: np.ndarray | None = None
 
@@ -446,7 +448,7 @@ class ProtectedLevelResult(OwnsArrays):
         return _round_half_up(self.effective_level)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the band levels the protector leaves, where there are any.
 
@@ -581,7 +583,7 @@ def _a_weighting_axis(
     return weighting
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class HMLRatingResult(OwnsArrays):
     r"""The three ``HML`` attenuation values of a protector (Clause 7.2).
 
@@ -620,7 +622,7 @@ class HMLRatingResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the predicted noise level reduction against ``LpC - LpA``.
 
@@ -792,7 +794,7 @@ def _finite_levels(**levels: float) -> tuple[float, ...]:
     return tuple(out)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class SNRRatingResult(OwnsArrays):
     r"""The single number rating of a protector (Clause 8.2).
 
@@ -820,7 +822,7 @@ class SNRRatingResult(OwnsArrays):
         return _round_half_up(self.snr)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the per-subject ratings the single number was reduced from.
 

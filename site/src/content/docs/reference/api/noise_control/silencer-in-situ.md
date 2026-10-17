@@ -435,9 +435,9 @@ side is not part of what is measured.
 ```python
 InstallationCase(
     number: int,
-    source_side: str,
-    receiver_side: str,
-    quantity: str,
+    source_side: Literal['duct', 'diffuse_room', 'non_diffuse_room', 'open_space'] | Literal['any'],
+    receiver_side: Literal['duct', 'diffuse_room', 'non_diffuse_room', 'open_space'],
+    quantity: Literal['transmission', 'insertion'],
     source_area_rule: str,
     receiver_area_rule: str,
 )
@@ -857,7 +857,7 @@ SilencerInSituResult(
     area_term_db: NDArray[np.float64],
     field_correction_difference: NDArray[np.float64],
     loss: NDArray[np.float64],
-    quantity: str,
+    quantity: Literal['transmission', 'insertion'],
     case: InstallationCase | None,
 )
 ```
@@ -882,7 +882,7 @@ A silencer measured where it stands, ISO 11820 Equation (19) or (21).
 SilencerInSituResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

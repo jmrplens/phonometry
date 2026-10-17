@@ -16,6 +16,8 @@ answer.
 
 from __future__ import annotations
 
+from typing import Literal
+
 import numpy as np
 import reference_data as ref
 
@@ -117,7 +119,9 @@ def _chk_sii_standard_quiet() -> Outcome:
 
 
 def _sii_official_case(
-    method: str,
+    method: Literal[
+        "critical-band", "equally-contributing", "one-third-octave", "octave"
+    ],
     speech: tuple[float, ...],
     noise: tuple[float, ...],
     threshold: tuple[float, ...],

@@ -79,7 +79,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -97,6 +97,13 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
+
+    from ..._i18n import Language
+
+#: The wall ties Hopkins Table A4 prints a stiffness for.
+WallTie = Literal[
+    "butterfly", "double_triangle", "vertical_twist", "vertical_twist_100mm"
+]
 
 __all__ = [
     "WALL_TIE_STIFFNESS",
@@ -146,7 +153,7 @@ WALL_TIE_STIFFNESS: Mapping[str, WallTieStiffness] = MappingProxyType(
 )
 
 
-def wall_tie_stiffness(tie: str) -> WallTieStiffness:
+def wall_tie_stiffness(tie: WallTie) -> WallTieStiffness:
     """Look up a wall tie in Hopkins Table A4.
 
     :param tie: One of ``"butterfly"``, ``"double_triangle"``,
@@ -164,7 +171,7 @@ def wall_tie_stiffness(tie: str) -> WallTieStiffness:
         raise ValueError(msg) from None
 
 
-def wall_tie_stiffness_per_area(ties_per_area: float, tie: str | float) -> float:
+def wall_tie_stiffness_per_area(ties_per_area: float, tie: WallTie | float) -> float:
     r"""Stiffness per unit area of a tie array, :math:`N k / S` (Hopkins
     Eq. 4.89).
 
@@ -252,7 +259,7 @@ class WallTieCouplingResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``eta_ij(f)`` against the rigid-connection ceiling.
 
@@ -274,7 +281,7 @@ def wall_tie_coupling_loss_factor(
     bending_stiffness2: float,
     *,
     ties_per_area: float,
-    tie: str | float | None = None,
+    tie: WallTie | float | None = None,
 ) -> WallTieCouplingResult:
     r"""Coupling loss factor of a wall-tie array (Hopkins Eqs. 4.87 and 4.88).
 

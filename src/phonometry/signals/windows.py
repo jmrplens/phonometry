@@ -39,6 +39,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
+
 __all__ = [
     "WindowMetricsResult",
     "window_metrics",
@@ -141,7 +143,7 @@ class WindowMetricsResult(OwnsArrays):
         return self.enbw_bins * _positive(fs, "fs") / self.n
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | NDArray[Any]:
         """Plot the window shape and its spectrum with the metrics marked.
 

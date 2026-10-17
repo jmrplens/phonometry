@@ -123,7 +123,7 @@ GroundSurface(
     porosity: float | None = None,
     water_content_percent: float | None = None,
     porosity_decay_rate_per_m: float | None = None,
-    iso_9613_ground_factor: float | None = None,
+    iso9613_ground_factor: float | None = None,
     nmpb_ground_factor: float | None = None,
     harmonoise_class: str = '',
 )
@@ -144,7 +144,7 @@ saying what the cell held instead.
 | `porosity` | Open porosity, where the fit that produced the resistivity also produced one, as the fraction of the volume that is open, from 0 to 1. Cox's Table 6.7 prints six of its porosities as 26.9 to 58.1 in a column that prints a fraction on every other row and states no unit; a porosity of 36.5 is not a porosity, so those six cells are empty, and [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) quotes the figure the page prints. |
 | `water_content_percent` | Water content of the specimen, per cent, for the sands Cox tabulates wet and dry. The resistivity of a sand is not monotonic in it, which is the point of printing it. |
 | `porosity_decay_rate_per_m` | The rate `zeta` at which porosity falls with depth in the variable-porosity model, in 1/m. It is negative for several surfaces, which is what the page prints. |
-| `iso_9613_ground_factor` | The ground factor `G` of ISO 9613-2 for a ground class: 0 for hard ground, 1 for porous ground. |
+| `iso9613_ground_factor` | The ground factor `G` of ISO 9613-2 for a ground class: 0 for hard ground, 1 for porous ground. |
 | `nmpb_ground_factor` | The ground factor `G` of NMPB-2008 for the same class, which is not always the ISO one: two of the eight classes differ. |
 | `harmonoise_class` | The class letter, `"A"` to `"H"`, for a row of the class table, and the empty string for a measured surface. |
 | `name` | The material as the table names it, attribution stripped. |

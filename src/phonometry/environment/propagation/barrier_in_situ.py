@@ -85,6 +85,8 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+
 __all__ = [
     "ISO10847_BACKGROUND_CORRECTIONS",
     "CLOSE_SOURCE_DISTANCE_M",
@@ -107,7 +109,7 @@ __all__ = [
     "REFERENCE_ELEVATION_INCREMENT_DEG",
     "REFERENCE_MICROPHONE_CLEARANCE_M",
     "SHORT_DISTANCE_RATIO",
-    "TEMPERATURE_TOLERANCE_C",
+    "TEMPERATURE_TOLERANCE_K",
     "ISO10847_THIRD_OCTAVE_BAND_EXTENDED_RANGE_HZ",
     "ISO10847_THIRD_OCTAVE_BAND_RANGE_HZ",
     "WIND_CLASSES",
@@ -182,9 +184,10 @@ WIND_VECTOR_TOLERANCE_M_S: float = 2.0
 SHORT_DISTANCE_RATIO: float = 0.1
 
 #: 6.3.2: the two campaigns are made with average temperatures within this
-#: many degrees Celsius of each other. No level is adjusted for the
+#: many kelvin of each other, a difference of two temperatures, which the
+#: standard prints as 10 °C, the same interval. No level is adjusted for the
 #: difference.
-TEMPERATURE_TOLERANCE_C: float = 10.0
+TEMPERATURE_TOLERANCE_K: float = 10.0
 
 #: Table 2 (6.3.4): the four classes of cloud cover, as the table describes
 #: them. The two campaigns are made in the same class.
@@ -615,7 +618,7 @@ class MeasuredBarrierInsertionLoss(OwnsArrays):
     receiver_levels_before: NDArray[np.float64]
     receiver_levels_after: NDArray[np.float64]
     insertion_loss: NDArray[np.float64]
-    method: str
+    method: Literal["direct", "indirect"]
     receiver_correction_before: float
     receiver_correction_after: float
 
@@ -630,7 +633,7 @@ class MeasuredBarrierInsertionLoss(OwnsArrays):
         return np.asarray(round_half_even(self.insertion_loss), dtype=np.int_)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the four levels and the insertion loss they give.
 

@@ -86,7 +86,7 @@ Predicted apparent airborne insulation (EN 12354-1:2000, Formula 26).
 AirbornePredictionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -103,9 +103,9 @@ AirbornePredictionResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -363,7 +363,7 @@ is used unchanged.
 ## FlankingPath
 
 ```python
-FlankingPath(label: str, kind: Literal['Ff', 'Df', 'Fd'], r_ij_w: float)
+FlankingPath(*, label: str, kind: Literal['Ff', 'Df', 'Fd'], r_ij_w: float)
 ```
 
 One flanking transmission path (Ff, Df or Fd) of the simplified model.
@@ -436,7 +436,7 @@ Predicted apparent impact insulation (EN 12354-2:2000, Formula 21).
 ImpactPredictionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -453,9 +453,9 @@ ImpactPredictionResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -630,7 +630,12 @@ Supported `junction_type` values and their formulas:
 ## PathContribution
 
 ```python
-PathContribution(label: str, kind: str, r_w: float, energy_fraction: float)
+PathContribution(
+    label: str,
+    kind: Literal['Dd', 'Ff', 'Df', 'Fd'],
+    r_w: float,
+    energy_fraction: float,
+)
 ```
 
 A transmission path with its share of the total transmitted energy.

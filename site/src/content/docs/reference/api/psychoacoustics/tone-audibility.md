@@ -791,8 +791,8 @@ Tone frequency of the decisive (most audible) tone, in Hz.
 ToneAudibilityResult.plot(
     ax: Axes | None = None,
     *,
-    view: str = 'audibility',
-    language: str = 'en',
+    view: Literal['audibility', 'levels'] = 'audibility',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -823,9 +823,9 @@ ToneAudibilityResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

@@ -11,7 +11,7 @@ a regulation quotes. Everything here is embedded by a page under
 """
 
 import warnings
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -873,10 +873,11 @@ def generate_heavy_impact_sources(output_dir: str) -> None:
     _fig, (ax_src, ax_rate) = plt.subplots(1, 2, figsize=(13.0, 5.6))
 
     x = np.arange(5)
-    for source, colour in (
+    sources: tuple[tuple[Literal["rubber_ball", "bang_machine"], str], ...] = (
         ("rubber_ball", COLOR_PRIMARY),
         ("bang_machine", COLOR_SECONDARY),
-    ):
+    )
+    for source, colour in sources:
         spec = building.heavy_impact_source_specification(source)
         limits = building.heavy_impact_source_limits(source)
         _f, lower, upper = limits.frequencies, limits.lower, limits.upper
@@ -1410,9 +1411,9 @@ def generate_facade_elevation_geometry(output_dir: str) -> None:
     from phonometry import building
 
     elements = [
-        building.FacadeElement("Masonry wall", area=6.0, r=[50.0] * 5),
-        building.FacadeElement("Window", area=1.5, r=[30.0] * 5),
-        building.FacadeElement("Roller shutter box", area=0.3, r=[22.0] * 5),
+        building.FacadeElement(name="Masonry wall", area=6.0, r=[50.0] * 5),
+        building.FacadeElement(name="Window", area=1.5, r=[30.0] * 5),
+        building.FacadeElement(name="Roller shutter box", area=0.3, r=[22.0] * 5),
     ]
     _fig, ax = plt.subplots(figsize=(9.0, 6.0))
     building.plot_facade_elements(elements, ax=ax, language=_LANG)
@@ -2240,10 +2241,10 @@ def generate_radiated_power_outdoor(output_dir: str) -> None:
     seg = building.radiated_sound_power(
         [
             building.FacadeElement(
-                "wall", area=176.0, r=[32, 36, 36, 33, 39, 49, 57, 63]
+                name="wall", area=176.0, r=[32, 36, 36, 33, 39, 49, 57, 63]
             ),
             building.FacadeElement(
-                "door", area=24.0, r=[21, 23, 28, 30, 30, 30, 30, 30]
+                name="door", area=24.0, r=[21, 23, 28, 30, 30, 30, 30, 30]
             ),
         ],
         lp_in=[70, 74, 76, 72, 70, 67, 62, 57],

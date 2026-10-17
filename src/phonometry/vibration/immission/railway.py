@@ -62,7 +62,7 @@ from ..._internal.validation import (
     require_positive,
     require_scalar,
 )
-from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ...metrology.reference_values import REFERENCE_VALUES
 from .vibration_meter import (
     KB_TIME_CONSTANT_S,
     _exponential_running_rms,
@@ -78,6 +78,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
     from ...signals.spectra import SpectralDensityResult
 
 __all__ = [
@@ -115,7 +116,7 @@ __all__ = [
 #: the :math:`10^{-6}` m/s² of DIN EN 21683, the same number
 #: ``vibration.ACCELERATION_LEVEL_REFERENCE_M_S2`` publishes for human exposure and
 #: ISO 1683:2015 keeps in Table 3.
-_ACCELERATION_REFERENCE_M_S2 = ISO1683_REFERENCE_VALUES["solid"]["acceleration"].value
+_ACCELERATION_REFERENCE_M_S2 = REFERENCE_VALUES["solid"]["acceleration"].value
 
 #: The reference velocity of Formula (2), in millimetres per second: the
 #: :math:`5 \cdot 10^{-8}` m/s DIN 45672-2:1995-07 defines there (Seite 4),
@@ -828,7 +829,7 @@ class TrainPassage(OwnsArrays):
     fs: float
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the running level with the three stretches marked on it.
 
@@ -848,7 +849,7 @@ class TrainPassage(OwnsArrays):
         return plot_train_passage(self, ax=ax, language=language, **kwargs)
 
     def plot_spectrum(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the interval and maximum third-octave levels, as Figure 6 does.
 

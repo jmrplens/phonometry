@@ -339,7 +339,7 @@ import numpy as np
 from phonometry import materials
 
 a, d, f0 = 3.0e-2, 5.0e-2, 300.0
-base = materials.HelmholtzResonator(1.0e-3, 3.0e-3, 30.0e-3, 27.0e-3)
+base = materials.HelmholtzResonator(neck_length_m=1.0e-3, neck_side_m=3.0e-3, cavity_length_m=30.0e-3, cavity_side_m=27.0e-3)
 design = materials.critical_coupling_design(f0, base, lattice_step_m=a, period_m=d)
 h0 = design.slit_height_m
 

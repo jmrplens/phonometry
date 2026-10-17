@@ -104,7 +104,11 @@ the same critical band are combined per clause 11.6 (Formulae 14-16).
 ## ToneAssessment
 
 ```python
-ToneAssessment(frequency: float, ratio_db: float, method: str)
+ToneAssessment(
+    frequency: float,
+    ratio_db: float,
+    method: Literal['tone_to_noise_ratio', 'prominence_ratio'],
+)
 ```
 
 Result of a discrete-tone prominence assessment.
@@ -133,7 +137,7 @@ calibrated absolute levels) are the caller's responsibility.
 ToneAssessment.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

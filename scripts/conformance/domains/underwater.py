@@ -311,7 +311,7 @@ def _chk_uwp_thermal_noise() -> Outcome:
 def _chk_uwp_ship_traffic() -> Outcome:
     # Oracle: authors' Excel reference calculator (File S1), decidecade band.
     s = ph.underwater.ship_source_spectrum(
-        13.5, 211.0, vessel_class="bulker", model="jomopans-echo"
+        13.5, length_m=211.0, vessel_class="bulker", model="jomopans-echo"
     )
     idx = int(
         min(range(len(s.frequencies)), key=lambda i: abs(s.frequencies[i] - 1000.0))

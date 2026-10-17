@@ -76,7 +76,7 @@ import math
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -93,6 +93,14 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from ..._i18n import Language
+
+Spectrum = Literal["road", "railway"]
+
+#: The Annex A categories of EN 1793-1 (absorption, A1 to A5) and EN 1793-2
+#: (airborne sound insulation, B1 to B4).
+RoadCategory = Literal["A1", "A2", "A3", "A4", "A5", "B1", "B2", "B3", "B4"]
 
 __all__ = [
     "ABSORPTION_CATEGORIES",
@@ -213,7 +221,7 @@ _BAND_MATCH = 0.01
 #: EN 1793-1:2012, Table A.1. Categories of absorptive performance, read
 #: off the reported integer: each pair is the inclusive range of that
 #: category, open at either end for A1 and A5.
-ABSORPTION_CATEGORIES: tuple[tuple[str, int, int], ...] = (
+ABSORPTION_CATEGORIES: tuple[tuple[RoadCategory, int, int], ...] = (
     ("A1", -(2**31), 3),
     ("A2", 4, 7),
     ("A3", 8, 11),
@@ -223,7 +231,7 @@ ABSORPTION_CATEGORIES: tuple[tuple[str, int, int], ...] = (
 
 #: EN 1793-2:2012, Table A.1. Categories of airborne sound insulation, on
 #: the same reading.
-INSULATION_CATEGORIES: tuple[tuple[str, int, int], ...] = (
+INSULATION_CATEGORIES: tuple[tuple[RoadCategory, int, int], ...] = (
     ("B1", -(2**31), 14),
     ("B2", 15, 24),
     ("B3", 25, 34),
@@ -243,7 +251,7 @@ class RoadDeviceWarning(PhonometryWarning):
     """
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RoadDeviceRating(OwnsArrays):
     """One single-number rating of a road traffic noise reducing device.
 
@@ -270,16 +278,16 @@ class RoadDeviceRating(OwnsArrays):
 
     rating: float
     reported: int
-    category: str | None
-    quantity: str
-    spectrum: str
+    category: RoadCategory | None
+    quantity: Literal["absorption", "insulation", "reflection"]
+    spectrum: Spectrum
     frequencies: NDArray[np.float64]
     values: NDArray[np.float64]
     weights: NDArray[np.float64]
     lowest_band_hz: float = TRAFFIC_NOISE_BANDS_HZ[0]
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-band input against the spectrum that weights it.
 
@@ -321,7 +329,9 @@ def _weighted(
     return band_values, np.asarray(SPECTRA[spectrum], dtype=float)
 
 
-def _category(reported: int, ladder: tuple[tuple[str, int, int], ...]) -> str:
+def _category(
+    reported: int, ladder: tuple[tuple[RoadCategory, int, int], ...]
+) -> RoadCategory:
     """The Annex A category the reported integer falls in."""
     require_scalar(reported, "reported")
     for name, low, high in ladder:
@@ -332,7 +342,7 @@ def _category(reported: int, ladder: tuple[tuple[str, int, int], ...]) -> str:
 
 
 def sound_absorption_rating(
-    absorption_coefficients: ArrayLike, *, spectrum: str = "road"
+    absorption_coefficients: ArrayLike, *, spectrum: Spectrum = "road"
 ) -> RoadDeviceRating:
     r"""``DLα``, the single-number rating of sound absorption.
 
@@ -387,7 +397,7 @@ def sound_absorption_rating(
 
 
 def airborne_insulation_rating(
-    sound_reduction_index: ArrayLike, *, spectrum: str = "road"
+    sound_reduction_index: ArrayLike, *, spectrum: Spectrum = "road"
 ) -> RoadDeviceRating:
     r"""``DL_R``, the single-number rating of airborne sound insulation.
 

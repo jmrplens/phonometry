@@ -50,13 +50,22 @@ def _example_periods() -> dict[str, list[rd.NoisePhase]]:
     """
     return {
         "day": [
-            rd.NoisePhase(2.0, 0.0, label="closed"),
-            rd.NoisePhase(6.0, _NOISY["laeq"], kt=_NOISY["kt"], kf=_NOISY["kf"]),
-            rd.NoisePhase(4.0, _REST["laeq"], kt=_REST["kt"], kf=_REST["kf"]),
+            rd.NoisePhase(duration_hours=2.0, laeq=0.0, label="closed"),
+            rd.NoisePhase(
+                duration_hours=6.0,
+                laeq=_NOISY["laeq"],
+                kt=_NOISY["kt"],
+                kf=_NOISY["kf"],
+            ),
+            rd.NoisePhase(
+                duration_hours=4.0, laeq=_REST["laeq"], kt=_REST["kt"], kf=_REST["kf"]
+            ),
         ],
         "evening": [
-            rd.NoisePhase(2.0, _REST["laeq"], kt=_REST["kt"], kf=_REST["kf"]),
-            rd.NoisePhase(2.0, 0.0, label="closed"),
+            rd.NoisePhase(
+                duration_hours=2.0, laeq=_REST["laeq"], kt=_REST["kt"], kf=_REST["kf"]
+            ),
+            rd.NoisePhase(duration_hours=2.0, laeq=0.0, label="closed"),
         ],
     }
 
@@ -240,7 +249,7 @@ def test_long_term_level_unweighted_is_the_plain_energy_mean() -> None:
 
 def test_evaluation_period_rejects_durations_that_do_not_sum_to_the_period() -> None:
     """Annex IV A.3.4.2 b requires "La suma de los Ti = T"."""
-    phases = [rd.NoisePhase(2.0, 50.0)]
+    phases = [rd.NoisePhase(duration_hours=2.0, laeq=50.0)]
     with pytest.raises(ValueError, match="sum Ti = T"):
         rd.evaluation_period_level(phases, duration_hours=12.0)
 
@@ -535,7 +544,9 @@ def test_assess_activity_flags_a_phase_that_exceeds_the_five_decibel_allowance()
     None
 ):
     """Article 25.1 b iii: no measured LKeq,Ti more than 5 dB above the limit."""
-    phases = {"night": [rd.NoisePhase(8.0, 51.0)]}  # limit 45 dB, allowance 50 dB
+    phases = {
+        "night": [rd.NoisePhase(duration_hours=8.0, laeq=51.0)]
+    }  # limit 45 dB, allowance 50 dB
     verdict = rd.assess_activity(phases, rd.activity_limits("a"), new_activity=False)
     night = verdict.periods[0]
     assert night.phase_limit == 50.0
@@ -561,7 +572,7 @@ def test_the_daily_index_takes_three_decibels_and_a_phase_five(
 ) -> None:
     """Between the two allowances a period fails on the day and passes on the phase."""
     verdict = rd.assess_activity(
-        {"day": [rd.NoisePhase(12.0, level)]},
+        {"day": [rd.NoisePhase(duration_hours=12.0, laeq=level)]},
         rd.activity_limits("a"),
         new_activity=False,
     )
@@ -587,15 +598,15 @@ def test_noise_phase_validation() -> None:
     with pytest.raises(
         ValueError, match=r"'duration_hours' must be a positive, finite number"
     ):
-        rd.NoisePhase(0.0, 50.0)
+        rd.NoisePhase(duration_hours=0.0, laeq=50.0)
     with pytest.raises(
         ValueError, match=r"'duration_hours' must be a positive, finite number"
     ):
-        rd.NoisePhase(-1.0, 50.0)
+        rd.NoisePhase(duration_hours=-1.0, laeq=50.0)
     with pytest.raises(ValueError, match=r"'laeq' must be finite"):
-        rd.NoisePhase(1.0, math.nan)
+        rd.NoisePhase(duration_hours=1.0, laeq=math.nan)
     with pytest.raises(ValueError, match=r"'kt' must be 0"):
-        rd.NoisePhase(1.0, 50.0, kt=-3.0)
+        rd.NoisePhase(duration_hours=1.0, laeq=50.0, kt=-3.0)
 
 
 def test_corrections_are_graded_zero_three_or_six() -> None:
@@ -683,12 +694,12 @@ def test_assess_activity_validation() -> None:
     empty_day: dict[str, list[rd.NoisePhase]] = {"day": []}
     with pytest.raises(ValueError, match="no noise phases"):
         rd.assess_activity(empty_day, limits)
-    afternoon = {"afternoon": [rd.NoisePhase(1.0, 50.0)]}
+    afternoon = {"afternoon": [rd.NoisePhase(duration_hours=1.0, laeq=50.0)]}
     with pytest.raises(
         ValueError, match=r"None of the supplied keys is an evaluation period"
     ):
         rd.assess_activity(afternoon, limits)
-    day = {"day": [rd.NoisePhase(12.0, 50.0)]}
+    day = {"day": [rd.NoisePhase(duration_hours=12.0, laeq=50.0)]}
     with pytest.raises(
         ValueError,
         match=r"'operating_days' must be a positive integer no larger than 'year_days'",

@@ -86,7 +86,7 @@ import math
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -106,6 +106,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from .._i18n import Language
 
 __all__ = [
     "CIRCULAR_CUT_ON_COEFFICIENT",
@@ -599,7 +601,11 @@ def survey_reproducibility(frequency: float) -> float:
 
 
 def measurement_reproducibility(
-    frequency: float, *, quantity: str = "insertion_loss"
+    frequency: float,
+    *,
+    quantity: Literal[
+        "insertion_loss", "transmission_loss", "intensity"
+    ] = "insertion_loss",
 ) -> float:
     r"""ISO 7235 Table 7: the reproducibility standard deviation.
 
@@ -632,7 +638,11 @@ def measurement_reproducibility(
 
 
 def measurement_expanded_uncertainty(
-    frequency: float, *, quantity: str = "insertion_loss"
+    frequency: float,
+    *,
+    quantity: Literal[
+        "insertion_loss", "transmission_loss", "intensity"
+    ] = "insertion_loss",
 ) -> float:
     """ISO 7235 7.9: twice the reproducibility, for 95 % coverage.
 
@@ -1380,7 +1390,7 @@ class OperatingLine(OwnsArrays):
         return float(self.slope * math.log10(point) + self.intercept)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the measured points and the line fitted through them.
 

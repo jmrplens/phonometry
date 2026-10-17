@@ -28,10 +28,14 @@ Oracle: ISO 8041-1:2017, printed folios 17, 18 and 19 (PDF pages 25, 26 and
 from __future__ import annotations
 
 import functools
+from typing import TYPE_CHECKING
 
 import phonometry as ph
 
 from ..registry import Outcome, count, numeric, register
+
+if TYPE_CHECKING:
+    from phonometry.vibration.human.signal_burst import BurstApplication, BurstRow
 
 _BURST = "Saw-tooth signal burst (ISO 8041-1 5.9)"
 
@@ -62,7 +66,9 @@ _TABLES = {
 
 
 @functools.cache
-def _indications(application: str, row: str, cycles: int | None) -> dict[str, float]:
+def _indications(
+    application: BurstApplication, row: BurstRow, cycles: int | None
+) -> dict[str, float]:
     """The library's indications for one printed line, computed once."""
     return ph.vibration.signal_burst_indications(application, row, cycles)
 

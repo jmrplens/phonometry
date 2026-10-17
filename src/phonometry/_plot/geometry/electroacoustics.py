@@ -47,6 +47,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
     from ...electroacoustics.piston import RadiatingPistonResult
 
 #: Spanish translations of the fixed strings rendered here, keyed by their
@@ -66,7 +67,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Translate a fixed UI string to Spanish, else return it unchanged."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -82,7 +83,7 @@ def plot_piston_geometry(
     angles_rad: ArrayLike,
     directivity: ArrayLike,
     lobe_label: str | None = ...,
-    language: str = ...,
+    language: Language = ...,
     **kwargs: Any,
 ) -> Axes: ...
 
@@ -93,7 +94,7 @@ def plot_piston_geometry(
     *,
     ax: Axes | None = ...,
     lobe_label: str | None = ...,
-    language: str = ...,
+    language: Language = ...,
     **kwargs: Any,
 ) -> Axes: ...
 
@@ -105,7 +106,7 @@ def plot_piston_geometry(
     angles_rad: ArrayLike | None = None,
     directivity: ArrayLike | None = None,
     lobe_label: str | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw a baffled piston to scale, optionally with a directivity lobe.
@@ -195,7 +196,7 @@ def plot_piston_result_geometry(
     ax: Axes | None = None,
     *,
     frequency_index: int = -1,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Baffled-piston drawing for a radiating-piston result.
@@ -242,7 +243,7 @@ def plot_sound_reinforcement_geometry(
     listener_distance: float,
     *,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw the four points of a reinforcement feedback loop.

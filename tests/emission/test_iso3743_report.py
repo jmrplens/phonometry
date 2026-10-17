@@ -211,7 +211,7 @@ def test_hard_walled_short_reference_margin_is_no_upper_bound(
             _LW_RSS,
             frequencies=_FREQS,
             background_levels=_BACKGROUND,
-            background_levels_ref=bg_ref,
+            reference_background_levels=bg_ref,
         )
     text = _render(res, tmp_path, "rss.pdf")
     assert f"{res.sound_power_level[0]:.1f} *" in text

@@ -301,7 +301,7 @@ class FormatChunk:
         return tuple(labels)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class BroadcastMetadata(RichDisplay):
     r"""The ``bext`` broadcast extension chunk of EBU Tech 3285 (v2, 2011).
 

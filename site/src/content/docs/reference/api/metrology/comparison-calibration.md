@@ -343,7 +343,7 @@ ComparisonCalibration(
     pressure_level_difference: NDArray[np.float64],
     corrections: Mapping[str, NDArray[np.float64]],
     field: Literal['pressure', 'free'],
-    excitation: str,
+    excitation: Literal['simultaneous', 'sequential'],
     expanded_uncertainty_db: NDArray[np.float64] | None = None,
     *,
     reference_sensitivity_phase_deg: NDArray[np.float64] | None = None,
@@ -407,8 +407,8 @@ $\arg R_V$, the mean over the determinations, in degrees, or
 ComparisonCalibration.plot(
     ax: Axes | None = None,
     *,
-    quantity: str = 'level',
-    language: str = 'en',
+    quantity: Literal['level', 'phase'] = 'level',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -530,7 +530,7 @@ decimal at most, which is why both parts accept the logarithmic form.
 ComparisonUncertaintyBudget.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -746,7 +746,7 @@ $\arg R_P$, in degrees.
 DiameterSoundFieldCorrection.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -919,7 +919,7 @@ $\delta_H\,(H - H_0)$, in dB.
 EnvironmentalSensitivityCorrection.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1029,7 +1029,7 @@ $A = d + \tau c$, Formula (B.1), in m.
 FreeFieldRegion.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1174,7 +1174,7 @@ and $p_{s,\mathrm{r}}$ = 101,325 kPa):
 ImpedancePressureRatio(
     frequencies: NDArray[np.float64],
     ratio: NDArray[np.complex128],
-    coupling: str,
+    coupling: Literal['coupler', 'series'],
     coupling_equivalent_volume_m3: NDArray[np.complex128],
 )
 ```
@@ -1220,8 +1220,8 @@ $\arg R_P$, in degrees.
 ImpedancePressureRatio.plot(
     ax: Axes | None = None,
     *,
-    quantity: str = 'level',
-    language: str = 'en',
+    quantity: Literal['level', 'phase'] = 'level',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1312,7 +1312,7 @@ JigCouplerVerification(
     calibration_uncertainty_db: NDArray[np.float64],
     validation_level: NDArray[np.float64],
     validation_uncertainty_db: NDArray[np.float64],
-    validation: str,
+    validation: Literal['comparison', 'reciprocity'],
     unvalidated_frequencies_hz: NDArray[np.float64],
     *,
     shared_standard_uncertainty_db: NDArray[np.float64] = ...,
@@ -1427,7 +1427,7 @@ frequencies in `unvalidated_frequencies_hz` are not covered.
 JigCouplerVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1486,7 +1486,7 @@ magnitude, in dB (read as $k = 2$, 7.9 and D.2).
 JigDiameterCorrection.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1629,7 +1629,7 @@ half-duration $b$ of 2,5 µs, at which the spectrum has fallen by
 ## RectangularPulse
 
 ```python
-RectangularPulse(duration_s: float, amplitude_v: float = 1.0)
+RectangularPulse(*, duration_s: float, amplitude_v: float = 1.0)
 ```
 
 The rectangular pulse of the direct impulse method (IEC 61094-8:2012
@@ -1695,7 +1695,7 @@ RectangularPulse.plot(
     ax: Axes | None = None,
     *,
     upper_frequency_hz: float | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1749,7 +1749,7 @@ centred on the time origin, where it is real.
 
 ```python
 ReferenceCalibrationRow(
-    microphone_types: str,
+    microphone_types: Literal['LS', 'LS and WS'],
     method: str,
     references: tuple[str, ...],
     expanded_uncertainty_1khz_db: float,
@@ -2164,7 +2164,7 @@ $f_\mathrm{s} = N\,\Delta f$, in Hz.
 SteppedSineImpulseResponse.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -2196,7 +2196,7 @@ time_selective_response(
     *,
     window_start_s: float,
     window_end_s: float,
-    window_shape: str = 'tukey',
+    window_shape: Literal['tukey', 'hann', 'hamming', 'rectangular'] = 'tukey',
     taper_fraction: float = 0.25,
     excitation: RectangularPulse | None = None,
 ) -> TimeSelectiveResponse
@@ -2256,7 +2256,7 @@ TimeSelectiveResponse(
     fs: float,
     window_start_s: float,
     window_end_s: float,
-    window_shape: str = 'tukey',
+    window_shape: Literal['tukey', 'hann', 'hamming', 'rectangular'] = 'tukey',
     taper_fraction: float = 0.25,
     excitation: RectangularPulse | None = None,
 )
@@ -2373,9 +2373,9 @@ the record.
 TimeSelectiveResponse.plot(
     ax: Axes | None = None,
     *,
-    quantity: str = 'impulse',
+    quantity: Literal['impulse', 'response'] = 'impulse',
     frequencies: ArrayLike | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

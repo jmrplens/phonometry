@@ -44,6 +44,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
     from ...room.image_source import ImageSourceResult
     from ...room.open_plan import OpenPlanResult
 
@@ -63,7 +64,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Translate a fixed UI string to Spanish, else return it unchanged."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -80,7 +81,7 @@ def plot_image_source_geometry(
     ax: Axes | None = None,
     *,
     max_order: int | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw the image-source lattice in plan view (x-y), to scale.
@@ -211,7 +212,7 @@ def plot_open_plan_geometry(
     ax: Axes | None = None,
     rd: float | None = None,
     rp: float | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw the open-plan measurement line to scale.
@@ -243,6 +244,7 @@ def plot_open_plan_geometry(
     # ahead of it would turn a grid of shape (2, 2) into four microphones on
     # a line that was never measured, instead of refusing the extra axis.
     pos = np.sort(require_positive_array(positions, "positions"))
+    # The fewest values the step below can work with, not a quantity.
     if pos.size < 2:  # noqa: PLR2004
         msg = "'positions' needs at least two positive distances."
         raise ValueError(msg)
@@ -321,7 +323,7 @@ def plot_open_plan_result_geometry(
     result: OpenPlanResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Measurement-line drawing of the positions a result was fitted on."""

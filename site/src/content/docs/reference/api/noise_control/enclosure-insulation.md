@@ -163,7 +163,7 @@ ARTIFICIAL_SOURCE_STANDOFF_MM = 60.0
 ```python
 check_enclosure_test_environment(
     *,
-    base_standard: str,
+    base_standard: Literal['ISO 3743-1', 'ISO 3744', 'ISO 3746', 'ISO 3747', 'ISO 9614-1', 'ISO 9614-2', 'ISO 11201', 'ISO 11202', 'ISO 11204'],
     mean_absorption_coefficient: float,
     room_surface_area_m2: float,
     measurement_surface_area_m2: float,
@@ -220,7 +220,7 @@ enclosure_artificial_source_insulation(
     level_with_by_position: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-    quantity: str = 'sound_power',
+    quantity: Literal['sound_power', 'sound_pressure'] = 'sound_power',
     condition: Literal['laboratory', 'in-situ'] = 'laboratory',
     fraction: Literal[1, 3] = 3,
 ) -> EnclosureInsulationResult
@@ -402,10 +402,10 @@ EnclosureInsulationResult(
     level_without: NDArray[np.float64],
     level_with: NDArray[np.float64],
     insulation: NDArray[np.float64],
-    quantity: str,
+    quantity: Literal['sound_power', 'sound_pressure', 'reciprocity'],
     a_weighted_insulation: float | None,
-    condition: str,
-    source_kind: str,
+    condition: Literal['laboratory', 'in-situ'],
+    source_kind: Literal['actual', 'reciprocity', 'artificial'],
     base_standard: str,
     fraction: int,
 )
@@ -434,7 +434,7 @@ The measured insulation of an enclosure, band by band (ISO 11546).
 EnclosureInsulationResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -467,7 +467,7 @@ The measurement is outside a condition ISO 11546 states.
 
 ```python
 EnclosureTestEnvironmentCheck(
-    base_standard: str,
+    base_standard: Literal['ISO 3743-1', 'ISO 3744', 'ISO 3746', 'ISO 3747', 'ISO 9614-1', 'ISO 9614-2', 'ISO 11201', 'ISO 11202', 'ISO 11204'],
     actual_area_ratio: float,
     mean_absorption_coefficient: float,
 )
@@ -767,7 +767,7 @@ UNRESTRICTED_ENCLOSURE_VOLUME_M3 = 2.0
 weighted_enclosure_insulation(
     insulation: ArrayLike,
     *,
-    quantity: str = 'sound_power',
+    quantity: Literal['sound_power', 'reciprocity'] = 'sound_power',
     fraction: Literal[1, 3] = 3,
 ) -> WeightedEnclosureInsulation
 ```
@@ -806,7 +806,7 @@ WeightedEnclosureInsulation(
     ctr: int,
     unfavorable_sum: float,
     frequencies: NDArray[np.float64],
-    quantity: str,
+    quantity: Literal['sound_power', 'reciprocity'],
 )
 ```
 

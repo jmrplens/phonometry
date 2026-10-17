@@ -144,7 +144,7 @@ Assumed protection values of a hearing protector (Clause 5).
 AssumedProtectionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -297,6 +297,7 @@ HML_REFERENCE_NOISES = ((62.6, 70.8, 81.0, 90.4, 96.2, 94.7, 92.3), (68.9, 78.3,
 
 ```python
 HMLRatingResult(
+    *,
     high: float,
     medium: float,
     low: float,
@@ -331,7 +332,7 @@ The three `HML` attenuation values of a protector (Clause 7.2).
 HMLRatingResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -413,7 +414,7 @@ ProtectedLevelResult(
     effective_level: float,
     noise_reduction: float | None,
     performance: int | None,
-    method: str,
+    method: Literal['octave-band', 'HML', 'SNR'],
     band_levels: np.ndarray | None = None,
     frequencies: np.ndarray | None = None,
 )
@@ -438,7 +439,7 @@ The A-weighted level left at the ear behind a protector.
 ProtectedLevelResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -589,6 +590,7 @@ what the `HML` method's three values recover.
 
 ```python
 SNRRatingResult(
+    *,
     snr: float,
     subject_snr: np.ndarray,
     mean: float,
@@ -617,7 +619,7 @@ The single number rating of a protector (Clause 8.2).
 SNRRatingResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

@@ -20,7 +20,7 @@ leaf never imports domain code at module level.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 
@@ -52,11 +52,21 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.patches import Rectangle
 
+    from ..._i18n import Language
     from ...noise_control.silencers import (
         ReactiveSilencerResult,
         SilencerChain,
         SilencerChainElement,
     )
+
+#: The named reactive silencers a drawing exists for.
+SilencerKind = Literal[
+    "expansion chamber",
+    "extended-tube chamber",
+    "Helmholtz resonator",
+    "quarter-wave resonator",
+]
+
 
 #: The ``ReactiveSilencerResult.kind`` strings, shared with the dispatcher.
 _KIND_EXPANSION = "expansion chamber"
@@ -99,7 +109,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Translate a fixed UI string to Spanish, else return it unchanged."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -153,7 +163,7 @@ def _draw_chamber(
     length: float,
     chamber_area: float,
     pipe_area: float,
-    language: str,
+    language: Language,
     *,
     inlet_extension: float = 0.0,
     outlet_extension: float = 0.0,
@@ -241,7 +251,7 @@ def _draw_hr_cavity(
     branch_len: float,
     cavity_side: float,
     cavity_volume: float,
-    language: str,
+    language: Language,
 ) -> None:
     """Cavity drawn as the equivalent cube (V^(1/3) on each side)."""
     from ..._i18n import format_number
@@ -299,7 +309,7 @@ def _draw_branch_silencer(
     ax: Axes,
     kind: str,
     duct_area: float,
-    language: str,
+    language: Language,
     *,
     neck_area: float | None = None,
     neck_length: float | None = None,
@@ -449,7 +459,7 @@ def _validate_branch_geometry(
 
 
 def plot_silencer_geometry(
-    kind: str,
+    kind: SilencerKind,
     *,
     ax: Axes | None = None,
     length: float | None = None,
@@ -462,7 +472,7 @@ def plot_silencer_geometry(
     neck_length: float | None = None,
     cavity_volume: float | None = None,
     branch_area: float | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw a reactive silencer cross-section to scale.
@@ -555,7 +565,7 @@ def plot_silencer_result_geometry(
     result: ReactiveSilencerResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
 ) -> Axes:
     """Silencer drawing for a result that retained a geometry of either kind.
 
@@ -568,7 +578,7 @@ def plot_silencer_result_geometry(
     # A named device holds its geometry: the record refuses neither or both.
     geometry = cast("dict[str, float]", result.geometry)
     return plot_silencer_geometry(
-        result.kind,
+        cast("SilencerKind", result.kind),
         ax=ax,
         language=language,
         **dict(geometry),
@@ -654,7 +664,7 @@ def _draw_chain_ducts(ax: Axes, segments: Sequence[_Segment], wall: float) -> No
             )
 
 
-def _branch_label(branch: _Branch, index: int, total: int, language: str) -> str:
+def _branch_label(branch: _Branch, index: int, total: int, language: Language) -> str:
     """The callout text of a branch point: what it is, and where it bites."""
     from ..._i18n import format_number
 
@@ -675,7 +685,7 @@ def _draw_branch_points(
     branches: Sequence[_Branch],
     wall: float,
     d_max: float,
-    language: str,
+    language: Language,
 ) -> None:
     """Mark each shunt where it joins the run, with a leader to its callout.
 
@@ -721,7 +731,7 @@ def _dimension_chain(
     total: float,
     d_max: float,
     wall: float,
-    language: str,
+    language: Language,
 ) -> None:
     """Dimension every run's length, each distinct bore, and the whole.
 
@@ -795,7 +805,7 @@ def plot_silencer_chain_geometry(
     chain: SilencerChain,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
 ) -> Axes:
     """Draw a hand-built element chain: ducts to scale, branch points marked.
 
@@ -857,7 +867,7 @@ def plot_plenum_geometry(
     *,
     ax: Axes | None = None,
     angle_rad: float = 0.0,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw the plenum-chamber section honouring the acoustic geometry.

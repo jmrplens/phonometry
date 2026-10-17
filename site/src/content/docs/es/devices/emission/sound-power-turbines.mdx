@@ -126,10 +126,10 @@ y la excitatriz.
 from phonometry import emission
 
 boxes = [                      # longitud, anchura, altura sobre el suelo [m]
-    emission.TurbineReferenceBox(6.0, 4.0, 3.5, "AP-MP"),
-    emission.TurbineReferenceBox(5.0, 5.0, 4.5, "BP"),
-    emission.TurbineReferenceBox(7.0, 3.5, 3.0, "Generador"),
-    emission.TurbineReferenceBox(3.0, 2.5, 2.2, "Excitatriz"),
+    emission.TurbineReferenceBox(length_m=6.0, width_m=4.0, height_m=3.5, label="AP-MP"),
+    emission.TurbineReferenceBox(length_m=5.0, width_m=5.0, height_m=4.5, label="BP"),
+    emission.TurbineReferenceBox(length_m=7.0, width_m=3.5, height_m=3.0, label="Generador"),
+    emission.TurbineReferenceBox(length_m=3.0, width_m=2.5, height_m=2.2, label="Excitatriz"),
 ]
 surface = emission.turbine_measurement_surface(boxes)
 print(surface.lengths_m, surface.widths_m, surface.heights_m)

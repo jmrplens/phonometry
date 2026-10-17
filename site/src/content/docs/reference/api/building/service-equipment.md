@@ -239,7 +239,7 @@ of the draft.
 BackgroundDurationCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -318,7 +318,7 @@ Whether no reading deviates from an earlier one by more than 0,5 dB.
 CalibrationDeviationResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -668,7 +668,7 @@ Whether every calculated value is within 2 dB of the instrument.
 InstrumentAgreementCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -779,7 +779,7 @@ Whether no period shows a disturbance.
 MeasurementDisturbanceCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -910,7 +910,7 @@ Whether the readings may be averaged as they are.
 PositionSpreadCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1136,7 +1136,7 @@ Per band, whether the background held the correction at 2,2 dB.
 ServiceEquipmentBackgroundResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1166,6 +1166,7 @@ Per band, `"none"`, `"corrected"` or `"limited"` (Clause 9).
 
 ```python
 ServiceEquipmentPositionCheck(
+    *,
     room_dimensions_m: np.ndarray,
     corner_position_m: np.ndarray,
     room_positions_m: np.ndarray,
@@ -1256,7 +1257,7 @@ positions (`preferred_separation`).
 ServiceEquipmentPositionCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1355,8 +1356,8 @@ At least 0,50 m (0,30 m in a small room) from every surface.
 ServiceEquipmentResult(
     frequencies: np.ndarray,
     fraction: int,
-    quantity: str,
-    a_weighting_range: str,
+    quantity: Literal['Smax', 'Fmax', 'eq'],
+    a_weighting_range: Literal['restricted', 'extended'],
     reading_levels: np.ndarray,
     average_levels: np.ndarray,
     background: ServiceEquipmentBackgroundResult | None,
@@ -1407,7 +1408,7 @@ The number of readings averaged by Formula (1).
 ServiceEquipmentResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1452,7 +1453,7 @@ report to mention them whenever they contribute to a weighted value.
 ### ServiceEquipmentResult.upper_limit()
 
 ```python
-ServiceEquipmentResult.upper_limit(weighting: str) -> bool
+ServiceEquipmentResult.upper_limit(weighting: Literal['A', 'C']) -> bool
 ```
 
 Whether a weighted value is an upper limit because of the background.
@@ -1560,7 +1561,7 @@ Whether the result can be regarded valid without correction.
 VaryingBackgroundCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

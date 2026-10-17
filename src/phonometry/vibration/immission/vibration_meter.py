@@ -96,6 +96,8 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+
 __all__ = [
     "ASSESSMENT_GUIDE_VALUES_MM_S",
     "ASSESSMENT_WEIGHTING_TOLERANCE",
@@ -574,7 +576,7 @@ class VibrationMeterVerification(OwnsArrays):
         return float(self.frequencies[int(np.argmax(used))])
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the deviation against the tolerance band it is judged by.
 
@@ -860,7 +862,7 @@ class VibrationMeterReading(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Draw :math:`KB_\mathrm{F}(t)` with its maximum and the clock maxima on it.
 
@@ -1104,7 +1106,7 @@ class AssessmentVelocity(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the weighted velocity against its guideline value.
 

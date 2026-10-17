@@ -48,8 +48,8 @@ Source (clean-room, implemented from the published standard): ECAC.CEAC Doc 29,
 
 ```python
 Aerodrome(
-    elevation_ft: float,
     *,
+    elevation_ft: float,
     temperature_c: float = 15.0,
     sea_level_pressure_inhg: float = 29.92,
     headwind_kt: float = 8.0,
@@ -171,6 +171,7 @@ True airspeed from a calibrated one at *altitude_ft* (Eq. B-7), kt.
 
 ```python
 AerodynamicCoefficients(
+    *,
     drag_ratio: float,
     ground_roll_coefficient: float | None = None,
     speed_coefficient: float | None = None,
@@ -239,9 +240,9 @@ forwards from the same anchor, so touchdown is where the two sweeps meet.
 
 ```python
 ApproachStep(
+    *,
     step_type: str,
     flap_id: str,
-    *,
     start_altitude_ft: float | None = None,
     start_calibrated_airspeed_kt: float | None = None,
     descent_angle_deg: float | None = None,
@@ -323,10 +324,10 @@ by an inserted transition point (B6.1.6).
 
 ```python
 DepartureStep(
+    *,
     step_type: str,
     thrust_rating: str,
     flap_id: str,
-    *,
     end_altitude_ft: float | None = None,
     rate_of_climb_ft_per_min: float | None = None,
     end_calibrated_airspeed_kt: float | None = None,
@@ -386,7 +387,7 @@ what the model branches on.
 ```python
 FlightProfile(
     aircraft_id: str,
-    operation: str,
+    operation: Literal['D', 'A'],
     procedure_id: str,
     points: tuple[ProfilePoint, ...],
 )
@@ -432,7 +433,7 @@ Distance along the ground track per point, ft.
 FlightProfile.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -461,7 +462,7 @@ Neither is repaired, because the tabulated numbers are the manufacturer's.
 ## JetEngineCoefficients
 
 ```python
-JetEngineCoefficients(e: float, f: float, ga: float, gb: float, h: float)
+JetEngineCoefficients(*, e: float, f: float, ga: float, gb: float, h: float)
 ```
 
 One ANP `Jet_Engine_Coefficients` row: the Eq. B-9 thrust polynomial.
@@ -507,6 +508,7 @@ Corrected net thrust per engine, lb (Eq. B-9, and Eq. B-10 in kind).
 
 ```python
 PerformanceAircraft(
+    *,
     aircraft_id: str,
     n_engines: int,
     max_static_thrust_lb: float,
@@ -551,7 +553,7 @@ weight and the fraction explicitly, three times.
 
 ```python
 PerformanceAircraft.flap(
-    operation: str,
+    operation: Literal['D', 'A'],
     flap_id: str,
 ) -> AerodynamicCoefficients
 ```
@@ -596,7 +598,7 @@ One point of a Doc 29 flight profile.
 ## PropellerEngineCoefficients
 
 ```python
-PropellerEngineCoefficients(efficiency: float, power_hp: float)
+PropellerEngineCoefficients(*, efficiency: float, power_hp: float)
 ```
 
 One ANP `Propeller_Engine_Coefficients` row: the Eq. B-12 thrust.

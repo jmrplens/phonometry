@@ -129,6 +129,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
+
 FreeFieldRoom = Literal["anechoic", "hemi-anechoic"]
 QualificationBandwidth = Literal["discrete-frequency", "broadband"]
 
@@ -361,7 +363,7 @@ def directionality_tolerance(
 
 
 def qualification_frequencies(
-    low_hz: float = 100.0, high_hz: float = 10000.0
+    low_hz: float = 100.0, *, high_hz: float = 10000.0
 ) -> np.ndarray:
     """The frequencies ISO 3745:2012/Amd.1:2017 A.2.3 evaluates over a range.
 
@@ -507,7 +509,7 @@ def _checked_background(value: ArrayLike, levels: np.ndarray) -> np.ndarray:
     return background
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class MicrophoneTraverse(OwnsArrays):
     r"""One straight microphone traverse of ISO 26101:2017 5.1.3.2.
 
@@ -918,7 +920,7 @@ class InverseSquareLawResult(OwnsArrays):
     """
 
     frequencies: np.ndarray
-    room: str
+    room: Literal["anechoic", "hemi-anechoic"]
     origin_m: np.ndarray
     origin_fitted: bool
     source_box_m: np.ndarray | None
@@ -1004,7 +1006,7 @@ class InverseSquareLawResult(OwnsArrays):
         ax: Axes | None = None,
         *,
         frequency_hz: float | None = None,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Draw the deviations along every traverse at one frequency.
@@ -1317,7 +1319,7 @@ class SourceDirectionalityResult(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the extreme deviations per band against Table B.1.
 
@@ -1562,7 +1564,7 @@ def _path_angles_ok(fit: InverseSquareLawResult, radius: float) -> bool:
     return True
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class FreeFieldCheck(OwnsArrays):
     r"""Whether a room qualifies as anechoic or hemi-anechoic for ISO 3745.
 
@@ -1597,7 +1599,7 @@ class FreeFieldCheck(OwnsArrays):
         A.4.3, ISO 26101 5.1.4.3 and A.2.5.
     """
 
-    bandwidth: str
+    bandwidth: Literal["discrete-frequency", "broadband"]
     results: tuple[InverseSquareLawResult, ...]
     source_directionality: tuple[SourceDirectionalityResult | None, ...]
     measurement_radius_m: float | None
@@ -1878,7 +1880,7 @@ class FreeFieldCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the qualified distance per frequency against the radius judged.
 

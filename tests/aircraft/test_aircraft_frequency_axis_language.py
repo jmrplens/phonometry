@@ -21,7 +21,7 @@ mpl.use("Agg")
 import matplotlib.pyplot as plt
 import pytest
 
-from phonometry.aircraft.atmospheric_absorption import sae_band_attenuation
+from phonometry.aircraft.atmospheric_absorption import band_attenuation_arp5534
 from phonometry.environment import AtmosphericAbsorptionWarning
 
 if TYPE_CHECKING:
@@ -41,7 +41,7 @@ def _close_figures() -> Iterator[None]:
 def _tick_labels(language: str) -> list[str]:
     # The bands below 50 Hz are outside ISO 9613-1 Table 1, and the result says so.
     with pytest.warns(AtmosphericAbsorptionWarning, match="tabulated range"):
-        result = sae_band_attenuation(_THIRDS, 500.0)
+        result = band_attenuation_arp5534(_THIRDS, 500.0)
     ax: Axes = result.plot(language=language)
     return [t.get_text() for t in ax.get_xticklabels() if t.get_text()]
 

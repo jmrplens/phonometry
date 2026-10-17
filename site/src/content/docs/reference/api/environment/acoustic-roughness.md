@@ -144,7 +144,7 @@ AcousticRoughnessSpectrum(
     levels: NDArray[np.float64],
     record_length_m: float | None = None,
     n_segments: int | None = None,
-    method: str | None = None,
+    method: Literal['A', 'B'] | None = None,
 )
 ```
 
@@ -201,7 +201,7 @@ AcousticRoughnessSpectrum.plot(
     ax: Axes | None = None,
     *,
     limit_db: Mapping[float, float] | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

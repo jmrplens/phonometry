@@ -56,6 +56,7 @@ from ._noise_control_fiche import PREDICTION_DISCLAIMER
 from ._sound_power_fiche import metadata_pairs
 
 if TYPE_CHECKING:
+    from .._i18n import Language
     from ..noise_control._duct_path import DuctPathResult
     from ..room.noise_criteria import NCResult, RCResult
     from .metadata import ReportMetadata
@@ -83,7 +84,7 @@ _LABEL_CHARS = 46
 _MIN_SHEET_ROWS = 4
 
 
-def _band_header(frequencies: np.ndarray, language: str) -> list[str]:
+def _band_header(frequencies: np.ndarray, language: Language) -> list[str]:
     """Column headings: the row-code and element columns, then the band centres."""
     from ..filters.frequencies import _format_nominal_freq
 
@@ -92,7 +93,7 @@ def _band_header(frequencies: np.ndarray, language: str) -> list[str]:
     ]
 
 
-def _cell(value: float, language: str) -> str:
+def _cell(value: float, language: Language) -> str:
     """One band cell: the value at whole-decibel display rounding."""
     if not np.isfinite(value):
         return "-"
@@ -169,7 +170,7 @@ def _flow_height(flow: list[Any]) -> float:
 
 
 def _elide(
-    rows: list[dict[str, Any]], budget: int, language: str
+    rows: list[dict[str, Any]], budget: int, language: Language
 ) -> list[dict[str, Any]]:
     """Trim a path too long to print to ``budget`` rows, eliding the middle.
 
@@ -203,7 +204,7 @@ def _elide(
     ]
 
 
-def _element_label(row: dict[str, Any], language: str) -> str:
+def _element_label(row: dict[str, Any], language: Language) -> str:
     """The printed element description, translated for the fixed row names."""
     label = str(row["label"])
     if row["kind"] in ("sum", "self_noise", "level", "room_effect", "received"):
@@ -217,7 +218,7 @@ def _sheet_table(
     result: DuctPathResult,
     *,
     verbose: bool,
-    language: str,
+    language: Language,
     rows: list[dict[str, Any]] | None = None,
 ) -> tuple[Any, int]:
     """Build the full-width element table and report how many rows it has.
@@ -271,7 +272,9 @@ def _sheet_table(
     return table, len(rows)
 
 
-def _rating_designation(rating: NCResult | RCResult, *, language: str = "en") -> str:
+def _rating_designation(
+    rating: NCResult | RCResult, *, language: Language = "en"
+) -> str:
     """The room-criterion designation, at the display rounding of a fiche.
 
     The rating objects print their designation with ``:g``, which is right for
@@ -293,7 +296,9 @@ def _rating_designation(rating: NCResult | RCResult, *, language: str = "en") ->
     return decimal_comma(str(getattr(rating, "label", "")), language)
 
 
-def _rating_statement(result: DuctPathResult, language: str) -> tuple[str, list[str]]:
+def _rating_statement(
+    result: DuctPathResult, language: Language
+) -> tuple[str, list[str]]:
     """The boxed rating headline and the terms printed alongside it."""
     rating = result.rating
     label = _rating_designation(rating, language=language)
@@ -311,7 +316,7 @@ def _rating_statement(result: DuctPathResult, language: str) -> tuple[str, list[
     return statement, extended
 
 
-def _verdict(result: DuctPathResult, language: str) -> tuple[str, bool] | None:
+def _verdict(result: DuctPathResult, language: Language) -> tuple[str, bool] | None:
     """The band-by-band verdict against the design criterion curve, if declared."""
     passed = result.meets_target
     if passed is None:
@@ -345,7 +350,7 @@ def _verdict(result: DuctPathResult, language: str) -> tuple[str, bool] | None:
     return text, passed
 
 
-def _basis_strips(result: DuctPathResult, language: str) -> list[str]:
+def _basis_strips(result: DuctPathResult, language: Language) -> list[str]:
     """The method-basis strips explaining the sheet's arithmetic."""
     strips = [
         t(
@@ -379,7 +384,7 @@ def render_duct_path_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a duct-borne noise path calculation sheet to a PDF at ``path``.
 
@@ -520,7 +525,7 @@ def _fit_to_one_page(
     rows: list[dict[str, Any]],
     *,
     verbose: bool,
-    language: str,
+    language: Language,
 ) -> None:
     """Shrink the sheet's table in place until the flow fits one page.
 

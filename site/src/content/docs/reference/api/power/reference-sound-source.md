@@ -394,7 +394,7 @@ Whether every requirement of clause 5 is judged and met (5.1).
 ReferenceSoundSourceVerdict.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -461,7 +461,7 @@ ReferenceSourceCalibration(
     c3: np.ndarray,
     expanded_uncertainty_db: np.ndarray,
     coverage_factor: float,
-    arrangement: str,
+    arrangement: Literal['paths', 'fixed'],
     radiation: str | None,
     knee_frequency_hz: float | None,
     intensity_sound_power_level: np.ndarray | None = None,
@@ -539,7 +539,7 @@ The highest directivity index over the positions, per band (5.5).
 ReferenceSourceCalibration.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -662,7 +662,7 @@ Whether every band stays within 2,83 times Table 1.
 ReferenceSourceDriftResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

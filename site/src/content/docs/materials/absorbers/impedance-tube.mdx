@@ -115,7 +115,7 @@ $0.45\,c$).*
 ```python
 for spacing, diameter_m in ((0.100, 0.100), (0.050, 0.100), (0.020, 0.029)):
     iso = materials.plane_wave_frequency_range(spacing, 343.2, diameter_m=diameter_m)
-    astm = materials.plane_wave_frequency_range_astm(spacing, 343.2, diameter_m=diameter_m)
+    astm = materials.plane_wave_frequency_range_astm_e2611(spacing, 343.2, diameter_m=diameter_m)
     print(f"{diameter_m * 1e3:.0f} mm bore, s = {spacing * 1e3:.0f} mm:",
           f"ISO {iso[0]:.0f}-{iso[1]:.0f} Hz, ASTM {astm[0]:.0f}-{astm[1]:.0f} Hz")
 ```
@@ -188,7 +188,7 @@ the sample holder.
 The same helper covers square and rectangular tubes: pass `shape="square"` or
 `shape="rectangular"` and the Eq. (3) factor replaces the circular one, with
 $d$ the maximum side length. The four-microphone branch keeps its own limits
-in `plane_wave_frequency_range_astm`: ASTM E2611 retains the unrounded
+in `plane_wave_frequency_range_astm_e2611`: ASTM E2611 retains the unrounded
 circular constant ($f\,d < 0.586\,c$, 6.2.4.1), the same rectangular
 $f\,d < 0.500\,c$ (6.2.5), a slightly stricter spacing bound
 $f\,s < 0.40\,c$ (6.5.4) and a laxer low end at 1 % of the wavelength
@@ -572,7 +572,7 @@ from phonometry import materials
 # the true reflection factor, from which the transfer function H12 follows.
 f = np.linspace(200.0, 1500.0, 260)
 med = materials.miki(f, 20000.0)
-layer = materials.layered_absorber(f, [materials.PorousLayer(0.05, med)])
+layer = materials.layered_absorber(f, [materials.PorousLayer(thickness_m=0.05, medium=med)])
 spacing, x1, c0 = 0.10, 0.20, 343.2
 k0 = materials.tube_wavenumber(f, c0)
 x2 = x1 - spacing
@@ -791,7 +791,7 @@ from phonometry import materials
 # ASTM E2611 machinery: TL and hard-backed absorption of the same specimen.
 f = np.linspace(200.0, 1600.0, 300)
 med = materials.miki(f, 20000.0)
-layer = materials.layered_absorber(f, [materials.PorousLayer(0.05, med)])
+layer = materials.layered_absorber(f, [materials.PorousLayer(thickness_m=0.05, medium=med)])
 chain = layer.transfer_matrix                       # shape (2, 2, len(f))
 tm = materials.TransferMatrix(t11=chain[0, 0], t12=chain[0, 1],
                               t21=chain[1, 0], t22=chain[1, 1])
@@ -834,7 +834,7 @@ from phonometry import materials
 
 f = np.linspace(200.0, 1600.0, 300)
 med = materials.miki(f, 20000.0)
-layer = materials.layered_absorber(f, [materials.PorousLayer(0.05, med)])
+layer = materials.layered_absorber(f, [materials.PorousLayer(thickness_m=0.05, medium=med)])
 chain = layer.transfer_matrix                       # shape (2, 2, len(f))
 tm = materials.TransferMatrix(t11=chain[0, 0], t12=chain[0, 1],
                               t21=chain[1, 0], t22=chain[1, 1])
@@ -971,7 +971,7 @@ The impedance-tube trio. The ISO 10534-1 standing-wave-ratio method
 mismatch pair `microphone_calibration_factor` and `apply_microphone_calibration`, and
 `tube_attenuation_constant`). The ASTM E2611 four-microphone transfer-matrix
 method (`transfer_matrix_two_load`, `transfer_matrix_one_load`,
-`TransferMatrix`, `plane_wave_frequency_range_astm`, `hydraulic_diameter`),
+`TransferMatrix`, `plane_wave_frequency_range_astm_e2611`, `hydraulic_diameter`),
 with the to-scale geometry drawings of both tubes. The virtual FDTD tubes of
 section 5, whose recovered spectra are cross-checked against the analytic
 answer on every commit.

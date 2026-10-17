@@ -21,7 +21,7 @@ references:
     year: 2015
     title: "Acoustics. Preferred reference values for acoustical and vibratory levels"
     designation: "ISO 1683:2015"
-    note: "Tables 1 to 3, the reference value every level on this page is counted from (20 µPa for sound in air), published as metrology.ISO1683_REFERENCE_VALUES; note b of Table 2, the 26.0 dB between the air and water pressure references. Read in the Spanish adoption UNE-EN ISO 1683:2016."
+    note: "Tables 1 to 3, the reference value every level on this page is counted from (20 µPa for sound in air), published as metrology.REFERENCE_VALUES; note b of Table 2, the 26.0 dB between the air and water pressure references. Read in the Spanish adoption UNE-EN ISO 1683:2016."
   - type: book
     authors: ["Kinsler, L. E.", "Frey, A. R.", "Coppens, A. B.", "Sanders, J. V."]
     year: 2000
@@ -858,7 +858,7 @@ and the sound exposure level (`sel`, verified against the Table 4 $L_{\mathrm{A}
 column); IEC 61252:1993's sound exposure and $L_\mathrm{EX,8h}$ (`sound_exposure`,
 `lex_8h`); the fractional-octave-band spectrogram of
 `OctaveFilterBank.spectrogram`; and the ISO 1683:2015 reference values every
-level is counted from, published as `metrology.ISO1683_REFERENCE_VALUES`.
+level is counted from, published as `metrology.REFERENCE_VALUES`.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">
@@ -911,7 +911,7 @@ A level in decibels is a ratio to a reference value, so it means nothing
 until the reference is named. ISO 1683:2015 fixes one per quantity, and the
 library counts every level from it unless the standard a function implements
 names another. The table is published as
-`metrology.ISO1683_REFERENCE_VALUES`, keyed by medium and then by quantity:
+`metrology.REFERENCE_VALUES`, keyed by medium and then by quantity:
 
 | Quantity | Gases (Table 1) | Liquids (Table 2) | Vibration (Table 3) |
 |:---|:---|:---|:---|
@@ -938,6 +938,6 @@ and ISO 9611 count the surface velocity from the same value, which is the
 ```python
 from phonometry import metrology
 
-p0 = metrology.ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"]
+p0 = metrology.REFERENCE_VALUES["gas"]["sound_pressure"]
 print(p0.value, p0.unit, p0.printed)  # 2e-05 Pa 20 µPa
 ```

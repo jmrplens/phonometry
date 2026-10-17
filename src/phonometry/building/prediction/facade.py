@@ -67,7 +67,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import atan, log10, pi
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -88,7 +88,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
-    from ..._internal.types import BandFraction
+    from ..._i18n import Language
+    from ..._internal.types import BandFraction, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -119,7 +120,7 @@ def _as_array(value: float | Sequence[float] | np.ndarray, name: str) -> np.ndar
     return arr
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class FacadeElement(OwnsArrays):
     """One façade element as a transmission path (EN 12354-3/-4).
 
@@ -301,7 +302,7 @@ class FacadePredictionResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-element partial indices and the façade ``R'`` / ``D2m,nT``."""
         from ..._i18n import check_language
@@ -311,7 +312,7 @@ class FacadePredictionResult(OwnsArrays):
         return plot_facade_prediction(self, ax=ax, language=language, **kwargs)
 
     def plot_geometry(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the composite facade elevation, element areas to scale.
 
@@ -329,9 +330,9 @@ class FacadePredictionResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a predicted façade sound insulation report to a PDF (EN 12354-3).
 
@@ -416,7 +417,7 @@ class RadiatedPowerResult(OwnsArrays):
         require_same_length(self, "l_w", "r_prime", "frequencies")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the radiated sound power level ``LW`` per band."""
         from ..._i18n import check_language
@@ -667,7 +668,18 @@ _DLFS_HEIGHT_EDGES = (1.5, 2.5)
 
 
 def facade_shape_level_difference(
-    shape: str,
+    shape: Literal[
+        "plane_facade",
+        "gallery_2",
+        "gallery_3",
+        "gallery_4",
+        "gallery_5",
+        "balcony_6",
+        "balcony_7",
+        "balcony_8",
+        "terrace_open",
+        "terrace_closed",
+    ],
     *,
     line_of_sight: float = 0.0,
     absorption: float = 0.3,

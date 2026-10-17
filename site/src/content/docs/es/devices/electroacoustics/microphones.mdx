@@ -248,7 +248,7 @@ vigente y escribe la ponderación `"468"` allí donde toma una. La relación
 señal-ruido re 1 Pa (94 dB SPL) se deriva del mismo
 nivel de ruido equivalente, y el nivel de presión acústica de sobrecarga
 (apartado 15.2) acota el rango útil por arriba. La propia curva de
-ponderación ITU-R BS.468-4 está expuesta como `itu_r_468_weighting` en el
+ponderación ITU-R BS.468-4 está expuesta como `weighting_bs468` en el
 [conjunto de distorsión de
 electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/),
 donde también pondera la THD.
@@ -261,12 +261,12 @@ del ruido de cada cápsula: 2,4 dB para el espectro 1/f decreciente del ejemplo 
 del **detector de cuasipico** de la ITU-R BS.468-4, que lee un ruido más alto que un
 detector de valor eficaz; ese detector es
 [`broadcast.quasi_peak_meter`](/phonometry/es/devices/broadcast/quasi-peak/) y
-lee un registro, mientras que `itu_r_468_weighting` es solo la red, así que un
+lee un registro, mientras que `weighting_bs468` es solo la red, así que un
 nivel calculado con la red y una suma en valor eficaz sigue sin ser una cifra en
 dBqps y no se debe comparar con una de una hoja de características.*
 
 El espectro de banda que ahí se dibuja es el que el fragmento de la sección 4
-pasa como `MicrophoneNoise(spectrum=...)`, ponderado con `itu_r_468_weighting`
+pasa como `MicrophoneNoise(spectrum=...)`, ponderado con `weighting_bs468`
 del [módulo de electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/)
 y con ponderación A, y sumado después banda a banda.
 
@@ -641,7 +641,7 @@ ITU-R BS.468-4 ahora sí lo está, en [Medidor de
 cuasipico](/phonometry/es/devices/broadcast/quasi-peak/), pero lee un registro y
 el apartado 17 toma una tensión o un nivel declarados, así que `weighting="468"`
 en esta página sigue siendo una etiqueta sobre la cifra de un fabricante, y un
-nivel de ruido propio calculado con `itu_r_468_weighting` y una suma en valor
+nivel de ruido propio calculado con `weighting_bs468` y una suma en valor
 eficaz sigue sin ser una cifra en dBqps. La
 edición implementada está congelada en IEC 60268-4:2014; la revisión de 2018
 que la sustituye no es la verificada. La calibración acústica de una cadena en

@@ -85,7 +85,7 @@ from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.levels_math import energy_mean, energy_sum
-from .._internal.types import as_float_or_array
+from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
     require_choice,
@@ -114,6 +114,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from .._report.metadata import ReportMetadata
     from .declaration import DeclarationForm, NoiseEmissionDeclaration
 
@@ -137,7 +138,7 @@ __all__ = [
 Surface = Literal["hemisphere", "box"]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RoomEnvironment(OwnsArrays):
     r"""Room data behind the environmental correction ``K2`` (ISO 3744 Annex A).
 
@@ -367,7 +368,7 @@ class SoundPowerResult(OwnsArrays):
     surface_area: float
     sound_power_level_a: float
     uncertainty: float
-    grade: str
+    grade: Grade
 
     def __post_init__(self) -> None:
         """Reject a determination whose per-band quantities disagree.
@@ -443,7 +444,7 @@ class SoundPowerResult(OwnsArrays):
             raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the LW spectrum with the A-weighted total annotated.
 
@@ -461,9 +462,9 @@ class SoundPowerResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an ISO 3744/3746 sound-power determination fiche to a PDF.
 
@@ -906,6 +907,7 @@ def _measurement_surface(
             msg = "'dimensions' and 'distance' are required for a box."
             raise ValueError(msg)
         dims = require_positive_array(dimensions, "dimensions")
+        # The length of a fixed-size argument, not a quantity.
         if dims.size != 3:  # noqa: PLR2004
             msg = "'dimensions' must be 3 positive values (l1, l2, l3)."
             raise ValueError(msg)
@@ -1077,6 +1079,7 @@ def sound_power_pressure(
     grade = _check_grade(grade)
     sigma_omc_db = require_non_negative(sigma_omc_db, "sigma_omc_db")
     levels = np.atleast_2d(np.asarray(levels_positions, dtype=np.float64))
+    # The number is a count of array axes, not a quantity.
     if levels.ndim != 2:  # noqa: PLR2004
         msg = "'levels_positions' must be a 2D (positions, bands) array."
         raise ValueError(msg)
@@ -1215,7 +1218,7 @@ class SoundEnergyResult(OwnsArrays):
     surface_area: float
     sound_energy_level_a: float
     uncertainty: float
-    grade: str
+    grade: Grade
     n_events: int | None
     integration_time: float | None
 
@@ -1280,7 +1283,7 @@ class SoundEnergyResult(OwnsArrays):
             raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the LJ spectrum with the A-weighted total annotated.
 
@@ -1450,6 +1453,7 @@ def _event_position_levels(
         per-event array given together with ``n_events``.
     """
     arr = np.asarray(levels_positions, dtype=np.float64)
+    # The number is a count of array axes, not a quantity.
     if arr.ndim == 3:  # noqa: PLR2004
         if n_events is not None:
             msg = (
@@ -1461,6 +1465,7 @@ def _event_position_levels(
         count = int(arr.shape[0])
         arr = _single_event_mean(arr, None, name="levels_positions", stacklevel=4)
         return arr, count
+    # The number is a count of array axes, not a quantity.
     if arr.ndim != 2:  # noqa: PLR2004
         msg = (
             "'levels_positions' must be a 2D (positions, bands) array of single "

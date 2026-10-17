@@ -333,7 +333,7 @@ answer is left out of both; a site where nobody answered an item has
 MethodASummary.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -396,7 +396,7 @@ deviation or interval there (`NaN`).
 MethodBSummary.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -523,7 +523,7 @@ PLEASANTNESS_EVENTFULNESS_RANGE = 9.65685424949238
 ```python
 PleasantnessEventfulness(
     sites: tuple[str, ...],
-    central_tendency: str,
+    central_tendency: Literal['median', 'mean'],
     attribute_values: NDArray[np.float64],
     pleasantness: NDArray[np.float64],
     eventfulness: NDArray[np.float64],
@@ -583,7 +583,7 @@ PleasantnessEventfulness.plot(
     *,
     normalized: bool = True,
     respondents: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -610,7 +610,7 @@ ones at 45 degrees, and every site a point.
 
 ```python
 QuestionnaireScale(
-    method: str,
+    method: Literal['A', 'B'],
     part: int,
     figure: str,
     subject: str,
@@ -649,7 +649,7 @@ prints its own questionnaire from this table should correct them.
 
 ```python
 SoundscapeAcousticEnvironment(
-    environment_type: str,
+    environment_type: Literal['real', 'recorded', 'virtual'],
     sound_sources: str,
     weather_and_wind: str,
     time_of_year_and_day: str,
@@ -679,13 +679,13 @@ The studied acoustic environment (ISO/TS 12913-2 A.3 a) to h)).
 
 ```python
 SoundscapeCorrelation(
-    method: str,
-    formula: str,
+    method: Literal['spearman', 'pearson'],
+    formula: Literal['(A.3)', '(A.4)', '(B.1)'],
     coefficient: float,
     p_value: float,
     t_statistic: float,
     degrees_of_freedom: int,
-    alternative: str,
+    alternative: Literal['two-sided', 'greater', 'less'],
     x: NDArray[np.float64],
     y: NDArray[np.float64],
     x_ranks: NDArray[np.float64] | None = None,
@@ -724,7 +724,7 @@ Number of cases, the pairs the coefficient was computed from.
 SoundscapeCorrelation.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -867,7 +867,7 @@ sites, then by how often they were listed.
 SourceRanking.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

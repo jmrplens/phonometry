@@ -102,6 +102,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -138,8 +140,8 @@ _KC_APPROX_COEFF = 61.4
 
 def _validate_intensity_report(
     *,
-    engine: str,
-    language: str,
+    engine: ReportEngine,
+    language: Language,
     rating: WeightedRatingResult | None,
     curve: np.ndarray,
     label: str,
@@ -251,7 +253,7 @@ class IntensityReductionResult(OwnsArrays):
                 _positive_area(value, name)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``RI`` against the shifted ISO 717-1 reference curve.
 
@@ -274,9 +276,9 @@ class IntensityReductionResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
         fpi: Sequence[float] | np.ndarray | None = None,
         residual_index: Sequence[float] | np.ndarray | None = None,
     ) -> str:
@@ -379,7 +381,7 @@ class IntensityElementNormalizedResult(OwnsArrays):
     n: int = 1
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``DI,n,e`` against the shifted ISO 717-1 reference curve.
 
@@ -401,9 +403,9 @@ class IntensityElementNormalizedResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
         fpi: Sequence[float] | np.ndarray | None = None,
         residual_index: Sequence[float] | np.ndarray | None = None,
     ) -> str:
@@ -658,6 +660,7 @@ def subarea_intensity_level(
         or exceed the forward flow, so no level exists).
     """
     levels = np.asarray(l_in, dtype=np.float64)
+    # The number is a count of array axes, not a quantity.
     if levels.ndim != 2:  # noqa: PLR2004
         msg = "'l_in' must be a two-dimensional (subareas, bands) array."
         raise ValueError(msg)
@@ -1224,7 +1227,7 @@ class LowFrequencyIntensityResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the index per band, hatching any band Clause 6.4.2 refuses.
 
@@ -1427,7 +1430,7 @@ class LowFrequencyElementResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw ``DI,n,e`` per band, hatching any band Clause 6.4.2 refuses.
 

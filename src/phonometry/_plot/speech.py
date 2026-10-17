@@ -23,6 +23,7 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..speech.objective_intelligibility import STOIResult
     from ..speech.sii import SIIProcedure, SIIResult, StandardSpeechSpectrum
     from ..speech.sti import STIResult
@@ -68,7 +69,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -77,7 +78,7 @@ def plot_sti(
     result: STIResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-band modulation transfer index bars with the STI and rating.
@@ -120,7 +121,7 @@ def plot_stoi(
     result: STOIResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Intermediate intelligibility that averages to the STOI/ESTOI index.
@@ -185,7 +186,7 @@ def plot_sii(
     result: SIIResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-band audibility and its importance-weighted contribution to the SII.
@@ -246,7 +247,7 @@ def plot_sii_procedure(
     result: SIIProcedure,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Band-importance function of one ANSI S3.5-1997 band procedure.
@@ -299,7 +300,7 @@ def plot_standard_speech_spectrum(
     result: StandardSpeechSpectrum,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Standard speech spectrum level by vocal effort (ANSI S3.5-1997 Table 3).

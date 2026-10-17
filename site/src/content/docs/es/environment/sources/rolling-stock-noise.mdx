@@ -559,7 +559,7 @@ rows = [  # tabla G.2: entrada, corrección del valor medio e incertidumbre típ
     ("distancia", 0.0, 0.06), ("nivel del terreno", 0.515, 0.30), ("redondeo", 0.0, 0.29),
 ]
 budget = environment.pass_by_uncertainty(
-    55.0, [metrology.Quantity(v, u, name=n) for n, v, u in rows]
+    55.0, [metrology.Quantity(value=v, uncertainty=u, name=n) for n, v, u in rows]
 )
 print(round(budget.level, 2), round(budget.combined_uncertainty_db, 2),
       round(budget.expanded_uncertainty_db, 2))

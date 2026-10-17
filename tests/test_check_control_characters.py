@@ -126,9 +126,9 @@ def test_nothing_the_scan_skips_is_text() -> None:
     """
     root = ccc.ROOT
     # A fixed argument vector
-    listed = subprocess.run(  # noqa: S603
+    listed = subprocess.run(
         # git is on PATH
-        ["git", "-C", str(root), "ls-files", "-z"],  # noqa: S607
+        ["git", "-C", str(root), "ls-files", "-z"],
         capture_output=True,
         check=True,
         text=True,

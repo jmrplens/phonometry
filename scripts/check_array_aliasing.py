@@ -1107,7 +1107,7 @@ class Reader:
             env = self.statement(statement, env)
         return env
 
-    def statement(self, node: ast.stmt, env: dict[str, Value]) -> dict[str, Value]:  # noqa: C901, PLR0911, PLR0912
+    def statement(self, node: ast.stmt, env: dict[str, Value]) -> dict[str, Value]:
         if isinstance(node, ast.Assign):
             value = self.expr(node.value, env)
             for target in node.targets:
@@ -1459,7 +1459,7 @@ class Reader:
         return self.builds_container(node)
 
     # -- expressions -----------------------------------------------------
-    def expr(self, node: ast.expr, env: dict[str, Value]) -> Value:  # noqa: C901, PLR0911, PLR0912
+    def expr(self, node: ast.expr, env: dict[str, Value]) -> Value:
         if isinstance(node, ast.Name):
             return env.get(node.id, _CLEAN)
         if isinstance(node, ast.Attribute):
@@ -1545,7 +1545,7 @@ class Reader:
                 self.expr(child, env)
         return _CLEAN
 
-    def call(self, node: ast.Call, env: dict[str, Value]) -> Value:  # noqa: C901, PLR0911, PLR0912
+    def call(self, node: ast.Call, env: dict[str, Value]) -> Value:
         func = node.func
         arguments = [self.expr(a, env) for a in node.args]
         keywords = {k.arg: self.expr(k.value, env) for k in node.keywords}
@@ -1938,7 +1938,7 @@ class Reader:
             self.tree.syntax[node] = (parents, uses)
         return self.tree.syntax[node]
 
-    def harmless(  # noqa: C901, PLR0911, PLR0912
+    def harmless(
         self, node: ast.expr, parents: Mapping[ast.AST, ast.AST], depth: int
     ) -> bool:
         """Whether what *node* holds (the array, or a view of it) is only read.
@@ -2023,7 +2023,7 @@ class Reader:
             )
         return False
 
-    def harmless_argument(  # noqa: PLR0911
+    def harmless_argument(
         self,
         call: ast.Call,
         node: ast.expr,
@@ -2256,7 +2256,7 @@ class Reader:
         self, node: ast.Call, arguments: list[Value], env: dict[str, Value]
     ) -> None:
         owner = self.function.owner
-        if len(node.args) < 3:  # noqa: PLR2004
+        if len(node.args) < 3:
             return
         names = _constant_strings(node.args[1], self.constants) or ()
         target = node.args[0]
@@ -2390,7 +2390,7 @@ def _record_annotation(node: ast.expr) -> tuple[str, bool] | None:
     if isinstance(node, ast.Subscript) and _base_name(node.value) in _SEQUENCES:
         inner = node.slice
         if isinstance(inner, ast.Tuple):
-            if len(inner.elts) != 2 or not (  # noqa: PLR2004
+            if len(inner.elts) != 2 or not (
                 isinstance(inner.elts[1], ast.Constant)
                 and inner.elts[1].value is Ellipsis
             ):
@@ -2604,7 +2604,7 @@ def _bindings(
     return found
 
 
-def _binds_unknown(  # noqa: PLR0911
+def _binds_unknown(
     node: ast.AST, name: str, function: ast.FunctionDef | ast.AsyncFunctionDef
 ) -> bool:
     """Whether *node* binds *name* to something other than a plain value."""

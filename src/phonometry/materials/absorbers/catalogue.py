@@ -68,7 +68,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, Literal
 
 from ..._internal.catalogue import (
     CatalogueRow,
@@ -311,7 +311,9 @@ class PorousMaterial(CatalogueRow):
         self,
         frequency: ArrayLike,
         *,
-        model: str = "johnson_champoux_allard",
+        model: Literal[
+            "johnson_champoux_allard", "delany_bazley", "miki"
+        ] = "johnson_champoux_allard",
         fluid: Fluid = ABSORBER_AIR,
     ) -> PorousMediumResult:
         """The equivalent fluid of this specimen.

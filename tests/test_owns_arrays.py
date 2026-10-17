@@ -464,7 +464,7 @@ def _elastic_fdtd() -> object:
     dx = 0.05
     c_p = 5900.0
     dt = 0.6 * dx / (c_p * np.sqrt(2.0))
-    pulse = simulation.GaussianPulse(0, 0, 2e-4)
+    pulse = simulation.GaussianPulse(ix=0, iy=0, half_width_s=2e-4)
     return simulation.elastic_fdtd_simulation(
         c_p,
         3200.0,
@@ -566,7 +566,7 @@ def _elastic_fdtd_engine() -> object:
     from phonometry import simulation
 
     sim = simulation.ElasticFDTD2D(5900.0, 3200.0, 0.05, rho=7850.0, shape=(60, 100))
-    pulse = simulation.GaussianPulse(0, 0, 2e-4)
+    pulse = simulation.GaussianPulse(ix=0, iy=0, half_width_s=2e-4)
     sim.add_source(simulation.ExplosionSource(ix=50, iy=30, waveform=pulse.value))
     return sim
 

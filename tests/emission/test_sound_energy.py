@@ -416,8 +416,8 @@ def test_annex_g_applies_alike_to_lw_and_lj() -> None:
     )
     lw = emission.sound_power_pressure(np.full((10, 1), 80.0), "hemisphere", radius=1.0)
     lj_ref = lj.sound_energy_level + corr.total
-    lw_ref = lw.sound_power_level + corr.total
-    np.testing.assert_allclose(lj_ref, lw_ref)
+    reference_sound_power_levels = lw.sound_power_level + corr.total
+    np.testing.assert_allclose(lj_ref, reference_sound_power_levels)
     assert corr.total > 0.0  # thinner and colder air than the reference
 
 
@@ -608,13 +608,17 @@ def test_room_refusals() -> None:
 def test_comparison_method_eq31_exact_by_construction() -> None:
     """L_J = L_W(RSS) + (L_E(ST) - L_p(RSS)) + C2, digit-exact."""
     theta, ps = 20.0, 100.0
-    lw_ref = np.array([90.0, 92.0, 88.0])
+    reference_sound_power_levels = np.array([90.0, 92.0, 88.0])
     le = np.array([84.0, 85.5, 83.0])
     lp_rss = np.array([78.0, 79.0, 76.0])
     res = emission.sound_energy_comparison(
-        le, lp_rss, lw_ref, temperature_c=theta, static_pressure_kpa=ps
+        le,
+        lp_rss,
+        reference_sound_power_levels,
+        temperature_c=theta,
+        static_pressure_kpa=ps,
     )
-    expected = lw_ref + (le - lp_rss) + _c2(theta, ps)
+    expected = reference_sound_power_levels + (le - lp_rss) + _c2(theta, ps)
     np.testing.assert_allclose(res.sound_energy_level, expected, atol=1e-12)
     assert res.method == "comparison"
     assert np.isnan(res.c1)
@@ -632,16 +636,16 @@ def test_comparison_identity_with_the_sound_power_comparison() -> None:
     bg = lp - 9.0
     lp_rss = lp - 2.0
     bg_rss = lp_rss - 12.0
-    lw_ref = np.array([85.0, 86.0, 84.0])
+    reference_sound_power_levels = np.array([85.0, 86.0, 84.0])
     freqs = np.array([500.0, 1000.0, 2000.0])
     shift = 10.0 * np.log10(8.0)
     lw = emission.sound_power_comparison(
-        lp, lp_rss, lw_ref, frequencies=freqs, background_levels=bg,
-        background_levels_ref=bg_rss,
+        lp, lp_rss, reference_sound_power_levels, frequencies=freqs, background_levels=bg,
+        reference_background_levels=bg_rss,
     )  # fmt: skip
     lj = emission.sound_energy_comparison(
-        lp + shift, lp_rss, lw_ref, frequencies=freqs, background_levels=bg,
-        integration_time=8.0, background_levels_ref=bg_rss,
+        lp + shift, lp_rss, reference_sound_power_levels, frequencies=freqs, background_levels=bg,
+        integration_time=8.0, reference_background_levels=bg_rss,
     )  # fmt: skip
     np.testing.assert_allclose(lj.sound_energy_level, lw.sound_power_level + shift)
     np.testing.assert_allclose(lj.background_correction, lw.background_correction)
@@ -668,10 +672,11 @@ def test_comparison_refusals() -> None:
             background_levels=le - 10.0,
         )  # fmt: skip
     with pytest.raises(
-        ValueError, match="'frequencies' are required to apply 'background_levels_ref'"
+        ValueError,
+        match="'frequencies' are required to apply 'reference_background_levels'",
     ):
         emission.sound_energy_comparison(
-            le, le - 2.0, np.full(3, 85.0), background_levels_ref=le - 12.0
+            le, le - 2.0, np.full(3, 85.0), reference_background_levels=le - 12.0
         )
 
 

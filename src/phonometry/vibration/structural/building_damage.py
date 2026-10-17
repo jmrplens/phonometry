@@ -95,6 +95,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+
 __all__ = [
     "BENDING_STRESS_CONSTANT",
     "BUILDING_CLASSES",
@@ -459,7 +461,7 @@ class DamageAssessment(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw Bild 1 with this measurement on it.
 

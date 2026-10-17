@@ -406,7 +406,7 @@ def test_a_failing_requirement_is_drawn_inside_the_axes(requirement: str) -> Non
         fraction=3,
         order=2,
         limits=[125, 1000],
-        design=filters.FilterDesign("cheby1", ripple=3.0),
+        design=filters.FilterDesign(filter_type="cheby1", ripple=3.0),
     )
     result = filters.verify_filter_class(bank)
     assert result.requirement_class(requirement) is None

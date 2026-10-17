@@ -64,7 +64,7 @@ Composite ambient-noise spectrum (Wenz framework).
 AmbientNoiseResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

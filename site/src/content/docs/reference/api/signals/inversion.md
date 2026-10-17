@@ -114,7 +114,7 @@ a band-limited unit impulse at sample 0.
 InverseFilterResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

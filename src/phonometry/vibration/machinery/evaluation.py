@@ -83,6 +83,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+
 __all__ = [
     "GEAR_ACCEPTANCE_HEADROOM",
     "GEAR_DISPLACEMENT_CORNER_HZ",
@@ -156,7 +158,7 @@ ZONE_LIMIT_FACTORS: Mapping[str, float] = MappingProxyType(
 )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ZoneBoundaries(RichDisplay):
     """The three magnitudes that separate the four evaluation zones.
 
@@ -345,7 +347,7 @@ class VectorChangeResult(RichDisplay):
         return float(self.final[0] - self.initial[0])
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the polar diagram of Figure D.1.
 
@@ -465,20 +467,20 @@ INDUSTRIAL_MACHINE_ZONES: Mapping[tuple[str, str], MachineZoneLimits] = (
     MappingProxyType(
         {
             ("group_1", "rigid"): MachineZoneLimits(
-                displacement_um=ZoneBoundaries(29.0, 57.0, 90.0),
-                velocity_mm_s=ZoneBoundaries(2.3, 4.5, 7.1),
+                displacement_um=ZoneBoundaries(a_b=29.0, b_c=57.0, c_d=90.0),
+                velocity_mm_s=ZoneBoundaries(a_b=2.3, b_c=4.5, c_d=7.1),
             ),
             ("group_1", "flexible"): MachineZoneLimits(
-                displacement_um=ZoneBoundaries(45.0, 90.0, 140.0),
-                velocity_mm_s=ZoneBoundaries(3.5, 7.1, 11.0),
+                displacement_um=ZoneBoundaries(a_b=45.0, b_c=90.0, c_d=140.0),
+                velocity_mm_s=ZoneBoundaries(a_b=3.5, b_c=7.1, c_d=11.0),
             ),
             ("group_2", "rigid"): MachineZoneLimits(
-                displacement_um=ZoneBoundaries(22.0, 45.0, 71.0),
-                velocity_mm_s=ZoneBoundaries(1.4, 2.8, 4.5),
+                displacement_um=ZoneBoundaries(a_b=22.0, b_c=45.0, c_d=71.0),
+                velocity_mm_s=ZoneBoundaries(a_b=1.4, b_c=2.8, c_d=4.5),
             ),
             ("group_2", "flexible"): MachineZoneLimits(
-                displacement_um=ZoneBoundaries(37.0, 71.0, 113.0),
-                velocity_mm_s=ZoneBoundaries(2.3, 4.5, 7.1),
+                displacement_um=ZoneBoundaries(a_b=37.0, b_c=71.0, c_d=113.0),
+                velocity_mm_s=ZoneBoundaries(a_b=2.3, b_c=4.5, c_d=7.1),
             ),
         }
     )
@@ -493,8 +495,8 @@ OPERATIONAL_LIMIT_HEADROOM = 1.25
 
 
 def industrial_machine_zone(
-    group: str,
-    support: str,
+    group: Literal["group_1", "group_2"],
+    support: Literal["rigid", "flexible"],
     *,
     displacement_um: ArrayLike | None = None,
     velocity_mm_s: ArrayLike | None = None,
@@ -682,33 +684,33 @@ GEAR_UNIT_ZONES: Mapping[str, Mapping[float, ZoneBoundaries]] = MappingProxyType
     {
         "displacement": MappingProxyType(
             {
-                31.5: ZoneBoundaries(20.0, 31.5, 50.0),
-                50.0: ZoneBoundaries(31.5, 50.0, 80.0),
-                80.0: ZoneBoundaries(50.0, 80.0, 125.0),
-                125.0: ZoneBoundaries(80.0, 125.0, 200.0),
-                200.0: ZoneBoundaries(125.0, 200.0, 315.0),
+                31.5: ZoneBoundaries(a_b=20.0, b_c=31.5, c_d=50.0),
+                50.0: ZoneBoundaries(a_b=31.5, b_c=50.0, c_d=80.0),
+                80.0: ZoneBoundaries(a_b=50.0, b_c=80.0, c_d=125.0),
+                125.0: ZoneBoundaries(a_b=80.0, b_c=125.0, c_d=200.0),
+                200.0: ZoneBoundaries(a_b=125.0, b_c=200.0, c_d=315.0),
             }
         ),
         "velocity": MappingProxyType(
             {
-                3.15: ZoneBoundaries(2.0, 3.15, 5.0),
-                5.0: ZoneBoundaries(3.15, 5.0, 8.0),
-                8.0: ZoneBoundaries(5.0, 8.0, 12.5),
-                12.5: ZoneBoundaries(8.0, 12.5, 20.0),
-                20.0: ZoneBoundaries(12.5, 20.0, 31.5),
+                3.15: ZoneBoundaries(a_b=2.0, b_c=3.15, c_d=5.0),
+                5.0: ZoneBoundaries(a_b=3.15, b_c=5.0, c_d=8.0),
+                8.0: ZoneBoundaries(a_b=5.0, b_c=8.0, c_d=12.5),
+                12.5: ZoneBoundaries(a_b=8.0, b_c=12.5, c_d=20.0),
+                20.0: ZoneBoundaries(a_b=12.5, b_c=20.0, c_d=31.5),
             }
         ),
         "acceleration": MappingProxyType(
             {
-                5.0: ZoneBoundaries(3.15, 5.0, 8.0),
-                8.0: ZoneBoundaries(5.0, 8.0, 12.5),
-                12.5: ZoneBoundaries(8.0, 12.5, 20.0),
-                20.0: ZoneBoundaries(12.5, 20.0, 31.5),
-                31.5: ZoneBoundaries(20.0, 31.5, 50.0),
-                50.0: ZoneBoundaries(31.5, 50.0, 80.0),
-                80.0: ZoneBoundaries(50.0, 80.0, 125.0),
-                125.0: ZoneBoundaries(80.0, 125.0, 200.0),
-                200.0: ZoneBoundaries(125.0, 200.0, 315.0),
+                5.0: ZoneBoundaries(a_b=3.15, b_c=5.0, c_d=8.0),
+                8.0: ZoneBoundaries(a_b=5.0, b_c=8.0, c_d=12.5),
+                12.5: ZoneBoundaries(a_b=8.0, b_c=12.5, c_d=20.0),
+                20.0: ZoneBoundaries(a_b=12.5, b_c=20.0, c_d=31.5),
+                31.5: ZoneBoundaries(a_b=20.0, b_c=31.5, c_d=50.0),
+                50.0: ZoneBoundaries(a_b=31.5, b_c=50.0, c_d=80.0),
+                80.0: ZoneBoundaries(a_b=50.0, b_c=80.0, c_d=125.0),
+                125.0: ZoneBoundaries(a_b=80.0, b_c=125.0, c_d=200.0),
+                200.0: ZoneBoundaries(a_b=125.0, b_c=200.0, c_d=315.0),
             }
         ),
     }
@@ -770,7 +772,9 @@ GEAR_UNIT_CLASSES: Mapping[tuple[str, str], GearUnitRatings] = MappingProxyType(
 GEAR_ACCEPTANCE_HEADROOM = 1.25
 
 
-def gear_unit_zone_boundaries(quantity: str, rating: float) -> ZoneBoundaries:
+def gear_unit_zone_boundaries(
+    quantity: Literal["displacement", "velocity", "acceleration"], rating: float
+) -> ZoneBoundaries:
     """The three boundaries Table 2, 3 or 4 prints for one rating.
 
     The tables are printed for the rating numbers they list and for no others,

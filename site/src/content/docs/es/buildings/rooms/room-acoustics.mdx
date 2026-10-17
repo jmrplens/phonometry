@@ -148,7 +148,8 @@ t = np.arange(fs) / fs
 # ir: respuesta al impulso de sala medida; aquí la sustituye un decaimiento sintético de pendiente única.
 ir = np.concatenate([np.zeros(10), np.exp(-13.8155 * t / 2.0)])
 
-time, level = room.decay_curve(ir, fs)                    # curva de Schroeder (0 dB en t = 0)
+decay = room.decay_curve(ir, fs)          # curva de Schroeder (0 dB en t = 0)
+time, level = decay.times, decay.levels
 
 res = room.room_parameters(ir, fs, limits=None)           # banda única de banda ancha
 print(round(float(res.t30[0]), 2))                   # 1.0  s
@@ -178,10 +179,11 @@ fs = 48000
 t = np.arange(fs) / fs
 # ir: respuesta al impulso de sala medida; aquí la sustituye un decaimiento sintético de pendiente única.
 ir = np.concatenate([np.zeros(10), np.exp(-13.8155 * t / 2.0)])
-time, level = room.decay_curve(ir, fs)                    # curva de Schroeder (0 dB en t = 0)
+decay = room.decay_curve(ir, fs)          # curva de Schroeder (0 dB en t = 0)
+time, level = decay.times, decay.levels
 
 # En una línea — la curva de Schroeder con los ajustes rectos EDT/T20/T30:
-decay = room.decay_curve(ir, fs)          # un DecayCurve (se sigue desempaquetando como time, level)
+decay = room.decay_curve(ir, fs)          # un DecayCurve: se leen decay.times y decay.levels
 decay.plot(language="es")
 plt.show()
 
@@ -516,7 +518,8 @@ ruido), los indicadores `edt_valid`/`t20_valid`/`t30_valid`
 valor marcado como válido quede dentro de la DAP del 5 %) y `curvature`
 $C = 100\ (T_{30}/T_{20} - 1)$ % (valores por encima del 10 % señalan un
 decaimiento no recto). `decay_curve(ir, fs, band=None, fraction=1, zero_phase=False)`
-devuelve solo la curva `(time, level)` para una banda o la respuesta de banda ancha.
+devuelve solo la curva de decaimiento para una banda o la respuesta de banda ancha, un
+`DecayCurve` que se lee por nombre como `.times` y `.levels`.
 
 ### Promediar sobre posiciones
 

@@ -41,51 +41,51 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 
-from phonometry._internal.catalogue import read_table  # noqa: E402
-from phonometry.building import (  # noqa: E402
+from phonometry._internal.catalogue import read_table
+from phonometry.building import (
     PUBLISHED_IMPACT_INSULATION,
     PUBLISHED_TRANSMISSION_LOSS,
     TRANSMISSION_LOSS_BANDS_HZ,
 )
-from phonometry.building.prediction.detailed_model import EN_12354_AIR  # noqa: E402
-from phonometry.environment.propagation import PUBLISHED_GROUND_SURFACES  # noqa: E402
-from phonometry.fluids import (  # noqa: E402
+from phonometry.building.prediction.detailed_model import EN12354_AIR
+from phonometry.environment.propagation import PUBLISHED_GROUND_SURFACES
+from phonometry.fluids import (
     PUBLISHED_FLUIDS,
     PUBLISHED_GASES,
     PUBLISHED_NONLINEARITY,
 )
-from phonometry.materials.absorbers import (  # noqa: E402
+from phonometry.materials.absorbers import (
     ABSORPTION_BANDS_HZ,
-    ANNEX_A_AIR,  # noqa: E402
+    ANNEX_A_AIR,
     PUBLISHED_ABSORPTION,
     PUBLISHED_ABSORPTION_AREAS,
     PUBLISHED_CARPETS,
     PUBLISHED_POROUS_MATERIALS,
     PUBLISHED_RESISTIVE_SHEETS,
 )
-from phonometry.materials.absorbers.porous import ABSORBER_AIR  # noqa: E402
-from phonometry.materials.diffusers import (  # noqa: E402
+from phonometry.materials.absorbers.porous import ABSORBER_AIR
+from phonometry.materials.diffusers import (
     DIFFUSION_BANDS_HZ,
     PUBLISHED_DIFFUSION,
     PUBLISHED_PREDICTED_SCATTERING,
     PUBLISHED_SCATTERING,
     SCATTERING_BANDS_HZ,
 )
-from phonometry.materials.resilient import (  # noqa: E402
+from phonometry.materials.resilient import (
     PUBLISHED_RESILIENT_LAYERS,
     PUBLISHED_RESILIENT_MODULI,
 )
-from phonometry.noise_control import (  # noqa: E402
+from phonometry.noise_control import (
     DUCT_WALL_BANDS_HZ,
     PUBLISHED_DUCT_TRANSMISSION_LOSS,
 )
-from phonometry.room.enclosed_space_absorption import (  # noqa: E402
+from phonometry.room.enclosed_space_absorption import (
     _AIR_ATTENUATION,
     _OCTAVE_BANDS,
     _PUBLISHED_AIR_CONDITION,
 )
-from phonometry.simulation.ntff import SIMULATION_AIR  # noqa: E402
-from phonometry.solids import (  # noqa: E402
+from phonometry.simulation.ntff import SIMULATION_AIR
+from phonometry.solids import (
     PUBLISHED_DAMPING,
     PUBLISHED_DAMPING_TREATMENTS,
     PUBLISHED_ORTHOTROPIC_WOOD,
@@ -237,15 +237,15 @@ DAMPING_COLUMNS = (
         "°C",
     ),
     (
-        "youngs_modulus_max_pa",
-        "Young's modulus, stiff end",
-        "Módulo de Young, extremo rígido",
-        "Pa",
-    ),
-    (
         "youngs_modulus_min_pa",
         "Young's modulus, soft end",
         "Módulo de Young, extremo blando",
+        "Pa",
+    ),
+    (
+        "youngs_modulus_max_pa",
+        "Young's modulus, stiff end",
+        "Módulo de Young, extremo rígido",
         "Pa",
     ),
     (
@@ -622,7 +622,7 @@ GROUND_COLUMNS = (
         "1/m",
     ),
     (
-        "iso_9613_ground_factor",
+        "iso9613_ground_factor",
         "ISO 9613-2 ground factor",
         "Factor de suelo ISO 9613-2",
         "",
@@ -1146,7 +1146,7 @@ def rows(
 #: costs the library nothing.
 IN_TREE_FLUIDS = {
     "iec-61094-2-annex-f/air": ANNEX_A_AIR,
-    "en-12354-annex-a/air": EN_12354_AIR,
+    "en-12354-annex-a/air": EN12354_AIR,
     "phonometry-absorbers/air": ABSORBER_AIR,
     "phonometry-solver/air": SIMULATION_AIR,
 }

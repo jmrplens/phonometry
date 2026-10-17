@@ -6,7 +6,7 @@ one-third-octave-band spectra, and correcting a measured flyover to reference
 atmospheric conditions requires the band attenuation over the propagation path.
 Two SAE practices give it.
 
-* :func:`sae_band_attenuation` -- SAE ARP 5534, the current practice. Its
+* :func:`band_attenuation_arp5534` -- SAE ARP 5534, the current practice. Its
   pure-tone coefficient (Eqs. 1-6) is the ISO 9613-1 one, Eqs. 1-3 repeating
   :func:`~phonometry.environment.propagation.air_absorption.air_attenuation`
   term for term, except for the saturation vapour pressure: Eqs. 5-6 write it
@@ -17,7 +17,7 @@ Two SAE practices give it.
   consistent with the ISO/ANSI Exact Method well beyond the 50 dB limit of the
   older Approximate Method. The result is an :class:`AircraftBandAttenuation`
   with a ``.plot()``.
-* :func:`arp866a_attenuation` -- SAE ARP 866A (1975), the legacy practice that
+* :func:`attenuation_arp866a` -- SAE ARP 866A (1975), the legacy practice that
   ECAC Doc 29 Vol. 2 Appendix D still offers for recalculating NPD data, in the
   form ISO 3891:1978 Annex A gives it: an attenuation coefficient per band, in
   decibels per 100 m, independent of pressure and of path length, evaluated at
@@ -35,7 +35,7 @@ Tables D-3b and D-3c, and ARP 866A against ISO 3891 Table 10 as well.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -62,11 +62,15 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
+
+EtaInterpolation = Literal["quadratic", "linear"]
+
 __all__ = [
     "ARP866AAttenuation",
     "AircraftBandAttenuation",
-    "arp866a_attenuation",
-    "sae_band_attenuation",
+    "attenuation_arp866a",
+    "band_attenuation_arp5534",
 ]
 
 # SAE Method regression constants (ARP 5534 §3.2.2, Eqs. 7-8).
@@ -215,7 +219,7 @@ class AircraftBandAttenuation(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the band and pure-tone mid-band attenuation versus frequency."""
         from .._i18n import check_language
@@ -226,7 +230,7 @@ class AircraftBandAttenuation(OwnsArrays):
         )
 
 
-def sae_band_attenuation(
+def band_attenuation_arp5534(
     frequencies: NDArray[np.float64] | list[float],
     path_length_m: float,
     *,
@@ -438,7 +442,7 @@ class ARP866AAttenuation(OwnsArrays):
     :ivar temperature_c: Air temperature ``θ``, in degrees Celsius.
     :ivar relative_humidity_percent: Relative humidity ``RH``, in percent.
     :ivar eta_interpolation: How ``η`` was read between the entries of Table 1,
-        ``"quadratic"`` or ``"linear"`` (see :func:`arp866a_attenuation`).
+        ``"quadratic"`` or ``"linear"`` (see :func:`attenuation_arp866a`).
     """
 
     frequencies: NDArray[np.float64]
@@ -448,7 +452,7 @@ class ARP866AAttenuation(OwnsArrays):
     coefficient_db_per_100m: NDArray[np.float64]
     temperature_c: float
     relative_humidity_percent: float
-    eta_interpolation: str
+    eta_interpolation: EtaInterpolation
 
     def __post_init__(self) -> None:
         """Reject a coefficient set whose arrays do not all run over the same bands.
@@ -501,13 +505,13 @@ class ARP866AAttenuation(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the attenuation coefficient versus frequency."""
         from .._i18n import check_language
-        from .._plot.aircraft import plot_arp866a_attenuation
+        from .._plot.aircraft import plot_attenuation_arp866a
 
-        return plot_arp866a_attenuation(
+        return plot_attenuation_arp866a(
             self, ax=ax, language=check_language(language), **kwargs
         )
 
@@ -538,16 +542,16 @@ def _eta_quadratic(delta: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 #: The two readings of the interpolation Table 1 asks for (see
-#: :func:`arp866a_attenuation`).
-_ETA_INTERPOLATION = ("quadratic", "linear")
+#: :func:`attenuation_arp866a`).
+_ETA_INTERPOLATION: tuple[EtaInterpolation, ...] = ("quadratic", "linear")
 
 
-def arp866a_attenuation(
+def attenuation_arp866a(
     frequencies: ArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,
-    eta_interpolation: str = "quadratic",
+    eta_interpolation: EtaInterpolation = "quadratic",
 ) -> ARP866AAttenuation:
     r"""One-third-octave-band attenuation coefficient by SAE ARP 866A (ISO 3891 Annex A).
 

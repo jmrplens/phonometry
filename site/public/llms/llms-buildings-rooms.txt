@@ -560,7 +560,8 @@ t = np.arange(fs) / fs
 # ir: measured room impulse response; a synthetic single-slope decay stands in here.
 ir = np.concatenate([np.zeros(10), np.exp(-13.8155 * t / 2.0)])
 
-time, level = room.decay_curve(ir, fs)                    # Schroeder curve (0 dB at t = 0)
+decay = room.decay_curve(ir, fs)          # Schroeder curve (0 dB at t = 0)
+time, level = decay.times, decay.levels
 
 res = room.room_parameters(ir, fs, limits=None)           # broadband single band
 print(round(float(res.t30[0]), 2))                   # 1.0  s
@@ -590,10 +591,11 @@ fs = 48000
 t = np.arange(fs) / fs
 # ir: measured room impulse response; a synthetic single-slope decay stands in here.
 ir = np.concatenate([np.zeros(10), np.exp(-13.8155 * t / 2.0)])
-time, level = room.decay_curve(ir, fs)                    # Schroeder curve (0 dB at t = 0)
+decay = room.decay_curve(ir, fs)          # Schroeder curve (0 dB at t = 0)
+time, level = decay.times, decay.levels
 
 # One line — Schroeder decay with the EDT/T20/T30 straight-line fits:
-decay = room.decay_curve(ir, fs)          # a DecayCurve (still unpacks as time, level)
+decay = room.decay_curve(ir, fs)          # a DecayCurve: read decay.times and decay.levels
 decay.plot()
 plt.show()
 
@@ -737,7 +739,8 @@ T20 and 54 dB for T30 so the tail-compensation bias of a flagged-valid value
 stays within the 5 % JND) and `curvature`
 $C = 100\ (T_{30}/T_{20} - 1)$ % (values above 10 % flag a non-straight
 decay). `decay_curve(ir, fs, band=None, fraction=1, zero_phase=False)` returns
-just the `(time, level)` curve for one band or the broadband response.
+just the decay curve for one band or the broadband response, a `DecayCurve`
+read by name as `.times` and `.levels`.
 
 ISO 3382-1 Annex A defines more parameters than this: the sound strength $G$
 and the binaural/spatial parameters LF, LFC and IACC are not implemented:

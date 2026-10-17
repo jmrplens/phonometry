@@ -187,7 +187,7 @@ unidireccional por su propio mecanismo:
   atrás es lo que la hace unidireccional, y tras el frente la energía
   residual queda al nivel del ruido numérico. Es lo que usa la animación
   de difusión del QRD.
-- `PlaneWaveSource(direction, waveform, offset=...)` registrada con
+- `PlaneWaveSource(direction=..., waveform=..., offset=...)` registrada con
   `add_source()` inyecta una onda plana sostenida sobre una línea de
   celdas: la presión incidente y la velocidad de la cara adyacente se
   excitan a la vez, de modo que el campo lanzado es plano en la
@@ -200,8 +200,8 @@ from phonometry.simulation import FDTD2D, CWSource, PlaneWaveSource
 
 sim = FDTD2D(343.0, 0.01, shape=(160, 80), sponge_width=20,
              sponge_sides=("top", "bottom"))
-tone = CWSource(0, 0, frequency=1000.0)          # reutilizada como forma de onda
-sim.add_source(PlaneWaveSource("down", tone.value, offset=22))
+tone = CWSource(ix=0, iy=0, frequency=1000.0)          # reutilizada como forma de onda
+sim.add_source(PlaneWaveSource(direction="down", waveform=tone.value, offset=22))
 # o, para un paquete único: sim.add_plane_wave("down", center=0.4,
 #                                              width=0.08, wavelength=0.34)
 ```
@@ -239,7 +239,7 @@ import matplotlib.pyplot as plt
 sim = FDTD2D(343.0, 0.01, shape=(160, 80), sponge_width=20,
              sponge_sides=("top", "bottom"))
 sim.add_source(PlaneWaveSource(
-    "down", CWSource(0, 0, frequency=1000.0).value, offset=22))
+    direction="down", waveform=CWSource(ix=0, iy=0, frequency=1000.0).value, offset=22))
 sim.run(700)                                   # rampa + llenado + unos periodos
 
 body = sim.p[60:140, :]
@@ -408,7 +408,7 @@ mask[25:35, 40:44] = True
 sim = simulation.FDTD2D(343.0, 0.05, shape=(60, 90), sponge_width=8,
                         sponge_sides=("left", "right"),
                         edge_impedance={"top": 413.0}, obstacle_mask=mask)
-sim.add_source(simulation.GaussianPulse(10, 30, half_width_s=1e-3))
+sim.add_source(simulation.GaussianPulse(ix=10, iy=30, half_width_s=1e-3))
 
 # Comprueba el dominio antes de correrlo: aún no se ha dado ningún paso.
 sim.plot_geometry(probes=[(3.0, 1.5), (4.0, 2.0)], language="es")
@@ -690,7 +690,7 @@ for n, (h, ln, lc, wn, wc) in enumerate(rows):
 sim = simulation.FDTD2D(c0, dx, shape=mask.shape, sponge_width=sponge,
                         cfl=0.9, obstacle_mask=mask)  # 340 celdas/lambda:
 sim.add_source(simulation.PlaneWaveSource(          # dispersión despreciable
-    "down", simulation.CWSource(0, 0, f0).value, offset=sponge))
+    direction="down", waveform=simulation.CWSource(ix=0, iy=0, frequency=f0).value, offset=sponge))
 probe = sim.add_contour_probe(lat - marg, lat + face + marg - 1,
                               r_face - front, r_face + slab + marg - 1,
                               frequencies=[f0])
@@ -703,9 +703,9 @@ pattern = simulation.far_field_from_contour(
     origin=((lat + face / 2.0) * dx, r_face * dx))
 levels = 20 * np.log10(np.abs(pattern) / np.abs(pattern).max())
 
-wells = [materials.MetadiffuserWell(h * 1e-3,
-                                    (materials.HelmholtzResonator(ln * 1e-3, wn * 1e-3,
-                                                        lc * 1e-3, wc * 1e-3),) * 2)
+wells = [materials.MetadiffuserWell(slit_height_m=h * 1e-3,
+                                    resonators=(materials.HelmholtzResonator(neck_length_m=ln * 1e-3, neck_side_m=wn * 1e-3,
+                                                        cavity_length_m=lc * 1e-3, cavity_side_m=wc * 1e-3),) * 2)
          for h, ln, lc, wn, wc in rows]
 model = materials.metadiffuser_polar_response(f0, wells, depth_m=0.02, period_m=pitch,
                                               angles_deg=angles_deg, n_repetitions=1)

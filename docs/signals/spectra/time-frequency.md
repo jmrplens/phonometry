@@ -93,7 +93,7 @@ n_imp = int(0.06 * fs)                              # impact at t = 2.5 s
 x[int(2.5 * fs):int(2.5 * fs) + n_imp] += 0.4 * (
     rng.standard_normal(n_imp) * np.exp(-np.arange(n_imp) / (0.012 * fs))
 )
-x += signals.noise_signal(fs, 4.0, color="pink",            # 45 dB SPL floor
+x += signals.noise_signal(fs, duration_s=4.0, color="pink",            # 45 dB SPL floor
                           rms=p_ref * 10.0 ** (45.0 / 20.0), seed=10)
 
 res = signals.spectrogram(x, fs, nperseg=1024, overlap=0.75, scaling="spectrum")

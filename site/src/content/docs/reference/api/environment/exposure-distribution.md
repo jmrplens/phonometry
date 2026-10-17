@@ -383,8 +383,8 @@ the lowest of the usual set; `exceedance_level(1)` the highest.
 SELDistribution.plot(
     ax: Axes | None = None,
     *,
-    view: str = 'density',
-    language: str = 'en',
+    view: Literal['classes', 'density', 'exceedance'] = 'density',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

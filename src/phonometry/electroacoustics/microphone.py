@@ -63,7 +63,7 @@ so the report never merely repeats a manufacturer number:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -78,7 +78,7 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ..metrology.reference_values import REFERENCE_VALUES
 from .loudspeaker import (
     _as_curve,
     _require_frequency_pair,
@@ -89,7 +89,13 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
+
+NoiseWeighting = Literal["A", "468"]
+#: A rated characteristic :meth:`MicrophoneCharacteristics.plot` draws.
+MicrophoneQuantity = Literal["response", "directivity", "noise", "distortion"]
 
 __all__ = [
     "MicrophoneCharacteristics",
@@ -102,7 +108,7 @@ __all__ = [
 
 #: Standard reference sound pressure, 20 uPa (IEC 60268-4 17.2 e), which
 #: is the ISO 1683:2015 Table 1 value.
-_P_REF = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_P_REF = REFERENCE_VALUES["gas"]["sound_pressure"].value
 #: Reference sensitivity M_r = 1 V/Pa (IEC 60268-4 11.1).
 _M_REF = 1.0
 #: Standard reference frequency for the rated sensitivity, Hz (11.3).
@@ -264,7 +270,7 @@ def _overload_spl(
     return float(spl[i] + frac * (spl[j] - spl[i]))
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class MicrophoneDirectivity(OwnsArrays):
     r"""Directional characteristics of the microphone (IEC 60268-4 Clause 13).
 
@@ -292,7 +298,7 @@ class MicrophoneDirectivity(OwnsArrays):
 _DEFAULT_DIRECTIVITY = MicrophoneDirectivity()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class MicrophoneNoise(OwnsArrays):
     """Inherent noise of the microphone (IEC 60268-4 Clause 17).
 
@@ -322,7 +328,7 @@ class MicrophoneNoise(OwnsArrays):
 
     voltage_v: float | None = None
     equivalent_level: float | None = None
-    weighting: str = "A"
+    weighting: NoiseWeighting = "A"
     spectrum: tuple[ArrayLike, ArrayLike] | None = None
 
 
@@ -336,7 +342,7 @@ _DEFAULT_NOISE = MicrophoneNoise()
 _NOISE_WEIGHTINGS = ("A", "468")
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class MicrophoneOverload(OwnsArrays):
     """Overload sound pressure and the distortion it is read from (14.2/15.2).
 
@@ -363,7 +369,7 @@ class MicrophoneOverload(OwnsArrays):
 _DEFAULT_OVERLOAD = MicrophoneOverload()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class MicrophoneElectrical(RichDisplay):
     """Electrical impedance and rated power supply (IEC 60268-4 Clauses 10/9).
 
@@ -458,7 +464,7 @@ class MicrophoneCharacteristics(OwnsArrays):
     rated_impedance_ohm: float | None
     min_load_impedance_ohm: float | None
     equivalent_noise_level: float | None
-    noise_weighting: str
+    noise_weighting: NoiseWeighting
     max_spl: float | None
     max_spl_thd_percent: float
     distortion_spl: NDArray[np.float64] | None
@@ -606,9 +612,9 @@ class MicrophoneCharacteristics(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render the IEC 60268-4 microphone-characteristics fiche to a PDF.
 
@@ -651,8 +657,8 @@ class MicrophoneCharacteristics(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        quantity: str = "response",
-        language: str = "en",
+        quantity: MicrophoneQuantity = "response",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Plot one IEC 60268-4 microphone rated characteristic on one axes.
@@ -854,7 +860,7 @@ def microphone_characteristics(
             "electrical.min_load_impedance_ohm",
         ),
         equivalent_noise_level=noise_level,
-        noise_weighting=str(noise.weighting),
+        noise_weighting=noise.weighting,
         max_spl=max_spl,
         max_spl_thd_percent=thd_limit,
         distortion_spl=d_spl,

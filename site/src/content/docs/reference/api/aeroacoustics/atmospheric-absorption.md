@@ -12,7 +12,7 @@ one-third-octave-band spectra, and correcting a measured flyover to reference
 atmospheric conditions requires the band attenuation over the propagation path.
 Two SAE practices give it.
 
-* [`sae_band_attenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#sae_band_attenuation) -- SAE ARP 5534, the current practice. Its
+* [`band_attenuation_arp5534`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#band_attenuation_arp5534) -- SAE ARP 5534, the current practice. Its
   pure-tone coefficient (Eqs. 1-6) is the ISO 9613-1 one, Eqs. 1-3 repeating
   [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation)
   term for term, except for the saturation vapour pressure: Eqs. 5-6 write it
@@ -23,7 +23,7 @@ Two SAE practices give it.
   consistent with the ISO/ANSI Exact Method well beyond the 50 dB limit of the
   older Approximate Method. The result is an [`AircraftBandAttenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#aircraftbandattenuation)
   with a `.plot()`.
-* [`arp866a_attenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#arp866a_attenuation) -- SAE ARP 866A (1975), the legacy practice that
+* [`attenuation_arp866a`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#attenuation_arp866a) -- SAE ARP 866A (1975), the legacy practice that
   ECAC Doc 29 Vol. 2 Appendix D still offers for recalculating NPD data, in the
   form ISO 3891:1978 Annex A gives it: an attenuation coefficient per band, in
   decibels per 100 m, independent of pressure and of path length, evaluated at
@@ -75,22 +75,92 @@ One-third-octave-band atmospheric attenuation over a path (SAE ARP 5534).
 AircraftBandAttenuation.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
 
 Plot the band and pure-tone mid-band attenuation versus frequency.
 
-## arp866a_attenuation
+## ARP866AAttenuation
 
 ```python
-arp866a_attenuation(
+ARP866AAttenuation(
+    frequencies: NDArray[np.float64],
+    evaluation_frequencies_hz: NDArray[np.float64],
+    delta: NDArray[np.float64],
+    eta: NDArray[np.float64],
+    coefficient_db_per_100m: NDArray[np.float64],
+    temperature_c: float,
+    relative_humidity_percent: float,
+    eta_interpolation: Literal['quadratic', 'linear'],
+)
+```
+
+Atmospheric attenuation coefficient per band by SAE ARP 866A (ISO 3891 Annex A).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | Nominal one-third-octave-band centre frequencies, in Hz, one per band. |
+| `evaluation_frequencies_hz` | The frequency `f0` of ISO 3891 Table 2 at which each band is evaluated, in Hz: the centre up to 4 kHz, the rounded lower band edge above. |
+| `delta` | The humidity-and-temperature argument `δ` of A.2 per band, dimensionless. |
+| `eta` | `η(δ)` per band, interpolated in Table 1. |
+| `coefficient_db_per_100m` | The attenuation coefficient `α` per band, in decibels per 100 m. |
+| `temperature_c` | Air temperature `θ`, in degrees Celsius. |
+| `relative_humidity_percent` | Relative humidity `RH`, in percent. |
+| `eta_interpolation` | How `η` was read between the entries of Table 1, `"quadratic"` or `"linear"` (see [`attenuation_arp866a`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#attenuation_arp866a)). |
+
+### ARP866AAttenuation.path_attenuation()
+
+```python
+ARP866AAttenuation.path_attenuation(
+    path_length_m: float | ArrayLike,
+) -> NDArray[np.float64]
+```
+
+Attenuation over a path, $\alpha \cdot s / 100$, in dB.
+
+ARP 866A gives a rate, so the attenuation is proportional to the path
+length and does not depend on the pressure, unlike SAE ARP 5534.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path_length_m` | Path length `s`, in metres: one length, or a 1-D sequence of them. |
+
+**Returns:** One value per band for a single length, or an array of shape `(bands, lengths)`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | if a length is negative or not finite. |
+
+### ARP866AAttenuation.plot()
+
+```python
+ARP866AAttenuation.plot(
+    ax: Axes | None = None,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the attenuation coefficient versus frequency.
+
+## attenuation_arp866a
+
+```python
+attenuation_arp866a(
     frequencies: ArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,
-    eta_interpolation: str = 'quadratic',
+    eta_interpolation: Literal['quadratic', 'linear'] = 'quadratic',
 ) -> ARP866AAttenuation
 ```
 
@@ -149,80 +219,10 @@ from 30 % to 90 %. Its Tables 3 to 12 print the formula from -10 °C to
 | ValueError | for a band outside Table 2, a temperature at or below absolute zero, a humidity outside 0 % to 100 %, or an unknown interpolation. |
 | TypeError | if `eta_interpolation` is not a text, `relative_humidity_percent` or `temperature_c` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
-## ARP866AAttenuation
+## band_attenuation_arp5534
 
 ```python
-ARP866AAttenuation(
-    frequencies: NDArray[np.float64],
-    evaluation_frequencies_hz: NDArray[np.float64],
-    delta: NDArray[np.float64],
-    eta: NDArray[np.float64],
-    coefficient_db_per_100m: NDArray[np.float64],
-    temperature_c: float,
-    relative_humidity_percent: float,
-    eta_interpolation: str,
-)
-```
-
-Atmospheric attenuation coefficient per band by SAE ARP 866A (ISO 3891 Annex A).
-
-**Attributes**
-
-| Name | Description |
-| :--- | :--- |
-| `frequencies` | Nominal one-third-octave-band centre frequencies, in Hz, one per band. |
-| `evaluation_frequencies_hz` | The frequency `f0` of ISO 3891 Table 2 at which each band is evaluated, in Hz: the centre up to 4 kHz, the rounded lower band edge above. |
-| `delta` | The humidity-and-temperature argument `δ` of A.2 per band, dimensionless. |
-| `eta` | `η(δ)` per band, interpolated in Table 1. |
-| `coefficient_db_per_100m` | The attenuation coefficient `α` per band, in decibels per 100 m. |
-| `temperature_c` | Air temperature `θ`, in degrees Celsius. |
-| `relative_humidity_percent` | Relative humidity `RH`, in percent. |
-| `eta_interpolation` | How `η` was read between the entries of Table 1, `"quadratic"` or `"linear"` (see [`arp866a_attenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#arp866a_attenuation)). |
-
-### ARP866AAttenuation.path_attenuation()
-
-```python
-ARP866AAttenuation.path_attenuation(
-    path_length_m: float | ArrayLike,
-) -> NDArray[np.float64]
-```
-
-Attenuation over a path, $\alpha \cdot s / 100$, in dB.
-
-ARP 866A gives a rate, so the attenuation is proportional to the path
-length and does not depend on the pressure, unlike SAE ARP 5534.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `path_length_m` | Path length `s`, in metres: one length, or a 1-D sequence of them. |
-
-**Returns:** One value per band for a single length, or an array of shape `(bands, lengths)`.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | if a length is negative or not finite. |
-
-### ARP866AAttenuation.plot()
-
-```python
-ARP866AAttenuation.plot(
-    ax: Axes | None = None,
-    *,
-    language: str = 'en',
-    **kwargs: Any,
-) -> Axes
-```
-
-Plot the attenuation coefficient versus frequency.
-
-## sae_band_attenuation
-
-```python
-sae_band_attenuation(
+band_attenuation_arp5534(
     frequencies: NDArray[np.float64] | list[float],
     path_length_m: float,
     *,

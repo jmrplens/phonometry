@@ -312,7 +312,10 @@ GEAR_UNIT_CLASSES = {('I', 'a'): GearUnitRatings(displacement=31.5, velocity=3.1
 ## gear_unit_zone_boundaries
 
 ```python
-gear_unit_zone_boundaries(quantity: str, rating: float) -> ZoneBoundaries
+gear_unit_zone_boundaries(
+    quantity: Literal['displacement', 'velocity', 'acceleration'],
+    rating: float,
+) -> ZoneBoundaries
 ```
 
 The three boundaries Table 2, 3 or 4 prints for one rating.
@@ -388,8 +391,8 @@ The three rating numbers Table 5 gives one class of gear unit.
 
 ```python
 industrial_machine_zone(
-    group: str,
-    support: str,
+    group: Literal['group_1', 'group_2'],
+    support: Literal['rigid', 'flexible'],
     *,
     displacement_um: ArrayLike | None = None,
     velocity_mm_s: ArrayLike | None = None,
@@ -585,7 +588,7 @@ magnitude, and only the second is the change in the vibration.
 VectorChangeResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -655,7 +658,7 @@ ZONE_LIMIT_FACTORS = {'A': 1.0, 'B': 2.56, 'C': 6.4}
 ## ZoneBoundaries
 
 ```python
-ZoneBoundaries(a_b: float, b_c: float, c_d: float)
+ZoneBoundaries(*, a_b: float, b_c: float, c_d: float)
 ```
 
 The three magnitudes that separate the four evaluation zones.

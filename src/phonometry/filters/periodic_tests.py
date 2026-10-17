@@ -98,7 +98,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -112,6 +112,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
+
+    from .._i18n import Language
+
+Clause = Literal["10.2", "10.3", "11.7", "11.9", "13"]
 
 __all__ = [
     "PERIODIC_TEST_ATTENUATION_LIMITS_DB",
@@ -523,7 +527,7 @@ class PeriodicTestClause(RichDisplay):
         result, which its figure is drawn against; ``None`` otherwise.
     """
 
-    clause: str
+    clause: Clause
     title: str
     labels: tuple[str, ...]
     verifications: tuple[ConformanceVerification, ...]
@@ -586,7 +590,7 @@ class PeriodicTestClause(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw every result of the clause against its limits.
 
@@ -637,7 +641,7 @@ class FilterPeriodicVerification(RichDisplay):
         ``"10"`` (10.2 or 10.3), ``"11.7"`` and ``"13"``; 11.9 applies only to
         a filter with more than one level range and is never missing.
         """
-        present = {c.clause for c in self.clauses}
+        present: set[str] = {c.clause for c in self.clauses}
         if "10.3" in present:
             present.add("10")
         if "10.2" in present:
@@ -836,7 +840,7 @@ class FilterPeriodicVerification(RichDisplay):
             f"specifications in IEC 61260-1:2014.{tail}"
         )
 
-    def clause(self, clause: str) -> PeriodicTestClause:
+    def clause(self, clause: Clause) -> PeriodicTestClause:
         """The verdict on one clause.
 
         :param clause: ``"10.2"``, ``"10.3"``, ``"11.7"``, ``"11.9"`` or
@@ -862,7 +866,7 @@ class FilterPeriodicVerification(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw every result's margin to its acceptance limits, clause by clause.
 
@@ -916,7 +920,7 @@ def _filter_labels(frequencies: Sequence[float] | None, count: int) -> list[str]
 
 
 def _clause_10(
-    clause: str,
+    clause: Clause,
     deviations: Sequence[float],
     uncertainties: Sequence[float],
     labels: list[str],

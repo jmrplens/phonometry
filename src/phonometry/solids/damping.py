@@ -87,10 +87,10 @@ class DampingMaterial(CatalogueRow):
         :attr:`max_loss_factor` occurs when the material is worked at 10 Hz.
     :ivar peak_temperature_at_100_hz_c: The same at 100 Hz.
     :ivar peak_temperature_at_1000_hz_c: The same at 1000 Hz.
-    :ivar youngs_modulus_max_pa: Storage Young's modulus at the stiff end, for
-        low temperatures or high frequencies.
     :ivar youngs_modulus_min_pa: Storage Young's modulus at the soft end, for
         high temperatures or low frequencies.
+    :ivar youngs_modulus_max_pa: Storage Young's modulus at the stiff end, for
+        low temperatures or high frequencies.
     :ivar youngs_modulus_transition_pa: Storage Young's modulus in the band
         where the loss factor peaks, which is the one that belongs beside
         :attr:`max_loss_factor`.
@@ -105,8 +105,8 @@ class DampingMaterial(CatalogueRow):
     peak_temperature_at_10_hz_c: float | None = None
     peak_temperature_at_100_hz_c: float | None = None
     peak_temperature_at_1000_hz_c: float | None = None
-    youngs_modulus_max_pa: float | None = None
     youngs_modulus_min_pa: float | None = None
+    youngs_modulus_max_pa: float | None = None
     youngs_modulus_transition_pa: float | None = None
     loss_modulus_max_pa: float | None = None
 

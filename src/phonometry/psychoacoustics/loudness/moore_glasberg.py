@@ -49,6 +49,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
     from ...io._signal import Signal
 
 from ..._internal.frozen import OwnsArrays
@@ -59,7 +60,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ...metrology.reference_values import REFERENCE_VALUES
 from ..erb_scale import (
     CAM_C,
     ERB_C1_HZ,
@@ -76,7 +77,7 @@ __all__ = [
 ]
 
 #: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
-_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_P0 = REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 # ---------------------------------------------------------------------------
 # Fixed transfer functions (clauses 7.2, 7.3, Table 1)
@@ -633,7 +634,7 @@ class MooreGlasbergLoudness(OwnsArrays):
             raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the specific loudness N'(i) over the ERB-number scale.
 
@@ -870,6 +871,7 @@ def _as_components(
     array = np.asarray(components, dtype=np.float64)
     if array.size == 0:
         return np.empty(0, dtype=np.float64), np.empty(0, dtype=np.float64)
+    # The number is a count of array axes, not a quantity.
     if array.ndim != 2 or array.shape[1] != 2:  # noqa: PLR2004
         msg = (
             "components must be a sequence of (frequency_Hz, level_dB) pairs, "

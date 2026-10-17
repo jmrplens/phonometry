@@ -70,6 +70,7 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    from .._i18n import Language
     from ..emission.intensity_compliance import (
         IntensityInstrumentComplianceResult,
     )
@@ -86,7 +87,7 @@ _DEVICE_PHRASE = {
 }
 
 
-def _device_phrase(device: str, language: str) -> str:
+def _device_phrase(device: str, language: Language) -> str:
     """The localised Table 2 column-group name of a device kind.
 
     An unrecognised tag is refused rather than labelled as a complete
@@ -108,7 +109,7 @@ def _device_phrase(device: str, language: str) -> str:
     return t(_DEVICE_PHRASE[kind], language)
 
 
-def _basis(metadata: ReportMetadata | None, language: str = "en") -> str:
+def _basis(metadata: ReportMetadata | None, language: Language = "en") -> str:
     """The standard-basis line for the fiche."""
     table = t("IEC 61043:1993, Table 2", language)
     measurement_standard = (
@@ -122,7 +123,7 @@ def _basis(metadata: ReportMetadata | None, language: str = "en") -> str:
 
 
 def _metadata_pairs(
-    metadata: ReportMetadata, language: str = "en"
+    metadata: ReportMetadata, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the header grid.
 
@@ -150,7 +151,7 @@ def _class_cell(band_class: int | None) -> str:
 
 
 def _band_rows(
-    result: IntensityInstrumentComplianceResult, language: str = "en"
+    result: IntensityInstrumentComplianceResult, language: Language = "en"
 ) -> list[list[Any]]:
     """Header plus per-band rows of the results table.
 
@@ -194,7 +195,7 @@ def _band_rows(
 
 
 def _statement(
-    result: IntensityInstrumentComplianceResult, language: str = "en"
+    result: IntensityInstrumentComplianceResult, language: Language = "en"
 ) -> tuple[str, list[str]]:
     """The boxed class statement and the extended terms beside it."""
     device = _device_phrase(result.device, language)
@@ -237,7 +238,7 @@ def _statement(
 
 
 def _basis_strip(
-    result: IntensityInstrumentComplianceResult, language: str = "en"
+    result: IntensityInstrumentComplianceResult, language: Language = "en"
 ) -> str:
     """The measurement-basis line: the index definition, mask and scope.
 
@@ -262,7 +263,7 @@ def _basis_strip(
 def _verdict(
     result: IntensityInstrumentComplianceResult,
     required_class: int,
-    language: str = "en",
+    language: Language = "en",
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag against a required class.
 
@@ -288,7 +289,7 @@ def render_iec61043_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an IEC 61043 class-verification fiche to a PDF at ``path``.
 

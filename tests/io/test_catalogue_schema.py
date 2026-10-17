@@ -41,7 +41,7 @@ _SCRIPTS = str(pathlib.Path(__file__).resolve().parents[2] / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-import generate_catalogue_schema as generator  # noqa: E402
+import generate_catalogue_schema as generator
 
 ROW_CLASSES = generator.published_row_classes()
 SCHEMA = io.catalogue_schema(*ROW_CLASSES)

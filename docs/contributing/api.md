@@ -405,9 +405,9 @@ room.noise_criterion(levels, frequencies)
 **Exceptions.** The values the axis labels stay positional, in their order. A frequency axis is `frequencies`, `frequency` where a function is vectorized over it, `frequencies_hz` in underwater, or a name ending in one of them (`tone_frequencies`); a wavelength axis is `wavelengths`, a name starting with it (`wavelengths_mm`), or `wavelength` when vectorized. Any other exception is declared in `FUNCTION_AXIS_EXEMPT` of `scripts/check_parameter_units.py`, with its reason.
 
 <a id="a18"></a>
-### A18. Make the frequency or wavelength axis of a record a caller builds keyword-only
+### A18. Make every record a caller builds keyword-only
 
-**Why.** An input record is built field by field like a function call, so a frequency axis and the values it labels, two arrays of one length, bind either way round in it ([A17](#a17)). A condition a record holds is keyword-only for the same reason ([N22](naming.md#n22)).
+**Why.** An input record is built field by field like a function call, so two fields of one type bind either way round in it: a frequency axis and the values it labels ([A17](#a17)), a label and a code, a lower and an upper attenuation. A condition a record holds is keyword-only for the same reason ([N22](naming.md#n22)), and a record that takes its fields by name keeps every call site readable as the record grows.
 
 **Do**
 
@@ -435,9 +435,9 @@ class TonalBands:
 TonalBands((500.0, 1000.0), (60.0, 55.0))  # swapped, no error
 ```
 
-**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_the_tree_writes_every_input_record_axis_by_name`
+**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_the_tree_writes_every_input_record_axis_by_name`, `tests/test_check_parameter_units.py::test_the_tree_writes_every_input_record_by_name`, `tests/test_check_parameter_units.py::test_every_field_of_an_input_record_is_written_by_name`, `tests/test_check_parameter_units.py::test_a_record_behind_a_union_alias_is_written_by_name`, `tests/test_curated_examples.py::test_no_inline_example_builds_a_record_by_position_or_unpacks_one`
 
-**Exceptions.** The rule covers a record a caller builds to hand to a function (`aircraft.RotorcraftHemisphere`, `electroacoustics.LoopImpedance`) or to put inside one (the `environment.WavelengthSpectrum` a `RollingStock` holds); a `KW_ONLY` marker before the axis also satisfies it. A result one function hands whole to another is declared in `RECORD_AXIS_EXEMPT` of `scripts/check_parameter_units.py`, with its reason.
+**Exceptions.** The rule covers every public record another public function takes (`aircraft.RotorcraftHemisphere`, `fluids.Fluid`, `noise_control.DuctElement`), each record a union alias in a signature stands for (the six layers `materials.layered_absorber` takes as `Layer`, the sources `simulation.FDTD2D.add_source` takes as `AnySource`), and every record one of those holds (the `environment.WavelengthSpectrum` a `RollingStock` holds): `@dataclass(kw_only=True)`. A result one function hands whole to another is declared in `RECORD_AXIS_EXEMPT` of `scripts/check_parameter_units.py`, with its reason; a record that keeps a positional field goes in `RECORD_POSITIONAL_EXEMPT` with its reason, and only `io.Signal` does: `Signal(x, fs)` is the pair every function takes by position. A stale entry fails.
 
 <a id="a19"></a>
 ### A19. Write a boolean by name, in the definition and at the call
@@ -497,9 +497,9 @@ def f(x: float, *, weighted: Literal[False] = ...) -> B: ...
 **Exceptions.** A choice of more than two options is a `Literal` of strings, not a flag ([A21](#a21)).
 
 <a id="a21"></a>
-### A21. Type a choice as a `Literal` of strings, never `str`, and its options tuple alike
+### A21. Type every fixed choice as a `Literal` of its options, never `str`, and its options tuple alike
 
-**Why.** A misspelled choice reached the function as a plain string, and a `| str` beside a `Literal` hid the options from the type checker. Typed alike, `require_choice` hands the value back as the alias. A choice offered in more than one place reads the same in every one: the band set, the sound field and the weighting are its cases ([A22](#a22) to [A24](#a24)).
+**Why.** About 675 public choices were typed `str` (`language` in some 374 places, `engine` in 76, `weighting_filter(weighting)`, `OctaveFilterBank.filter(mode)`): a misspelled choice reached the function as a plain string, an editor offered nothing, and a `| str` beside a `Literal` hid the options from the type checker. Typed alike, `require_choice` hands the value back as the alias. A choice offered in more than one place reads the same in every one: the band set, the sound field and the weighting are its cases ([A22](#a22) to [A24](#a24)).
 
 **Do**
 
@@ -517,11 +517,13 @@ field = require_choice("free", "field", FIELDS)
 
 ```py
 def response(field: Literal["free", "diffuse"] | str = "free"): ...
+def response(field: str = "free"):
+    if field not in ("free", "diffuse"): ...
 ```
 
-**Enforced by:** `tests/test_choice_vocabulary.py::test_no_choice_offers_a_band_set_by_name`, `tests/test_choice_vocabulary.py::test_a_sound_field_is_free_diffuse_or_pressure`, `tests/test_choice_vocabulary.py::test_a_weighting_is_chosen_by_weighting`, review
+**Enforced by:** `scripts/check_choice_literals.py`, `make choice-literals`, `CI: Check that every fixed public choice is typed Literal`, `tests/test_check_choice_literals.py::test_every_public_choice_of_the_package_is_a_literal`, `tests/test_check_choice_literals.py::test_every_vocabulary_offers_what_its_table_holds`, `tests/test_choice_vocabulary.py::test_no_choice_offers_a_band_set_by_name`, `tests/test_choice_vocabulary.py::test_a_sound_field_is_free_diffuse_or_pressure`, `tests/test_choice_vocabulary.py::test_a_weighting_is_chosen_by_weighting`
 
-**Exceptions.** A band set is the integer `Literal[1, 3]` ([A22](#a22)), not a string. `Literal[True]` and `Literal[False]` in `@overload` signatures are typing devices, not choices ([A20](#a20)). The tests refuse a `str` for the band set, the sound field and the weighting flags; any other choice typed `str` is review.
+**Exceptions.** The guard calls a public `str` parameter or field, alone or in a union (`str | float`, `Literal[...] | str`), a closed choice when the code treats it as one: it hands it to a shared validator (`require_choice`, `check_language`, `check_engine`), compares it with a set of strings, looks it up by key, documents two quoted options or more, writes it beside an `Enum` of the options (`RoadSurface | str`), or passes it on to a function that does one of those. It reads the text through `str(...)`, `.strip().lower()` and the locals bound from it, through a dict spread into a call and into a function the body imports, and a table handed on beside it (`_area_key(area_type, _ACTIVITY_LIMITS)`) closes the helper's `key not in table`. A string open by its nature (a label, a catalogue name, a clause a caller writes) stays `str` and goes in `OPEN` of `scripts/check_choice_literals.py`, keyed by (module, qualified name, parameter) with its reason; a stale entry fails. A catalogue row keeps its text cells `str`, as the catalogue contract requires. A band set is the integer `Literal[1, 3]` ([A22](#a22)), not a string. `Literal[True]` and `Literal[False]` in `@overload` signatures are typing devices, not choices ([A20](#a20)).
 
 <a id="a22"></a>
 ### A22. Choose a band set with `fraction`: 1 for octaves, 3 for one-third octaves
@@ -644,25 +646,27 @@ def energy_average(levels, axis=0): ...
 <a id="a27"></a>
 ### A27. Put the two ends of a range lower first
 
-**Why.** The vibration tolerance limits came `(upper, lower)` while the filter and weighting masks came `(lower, upper)`; the swap is silent, because both arrays have the same shape.
+**Why.** The vibration tolerance limits came `(upper, lower)` while the filter and weighting masks came `(lower, upper)`, and `plant_steady_reading` took `max_level` before `min_level`; the swap is silent, because both arrays have the same shape and both numbers are levels.
 
 **Do**
 
 ```python
-from phonometry import vibration
+from phonometry import emission, vibration
 
 lower, upper = vibration.weighting_tolerance_percent("Wk", [16.0])
+reading = emission.plant_steady_reading(min_level=78.0, max_level=82.0)
 ```
 
 **Don't**
 
 ```py
 upper, lower = weighting_tolerance_percent(name, frequencies)
+def plant_steady_reading(max_level, min_level): ...
 ```
 
-**Enforced by:** review
+**Enforced by:** `tests/test_public_vocabulary.py::test_the_two_ends_of_a_range_come_lower_first`, `tests/test_public_vocabulary.py::test_the_range_order_rule_reads_a_list`, review
 
-**Exceptions.** An ordered set the source prints that is not a range keeps its printed order (`HMLRatingResult`: high, medium, low).
+**Exceptions.** The test reads every public signature and record field list for a twin written upper first: `upper` before `lower`, `max` before `min`, `high` before `low`. An ordered set the source prints that is not a range keeps its printed order (`HMLRatingResult`: high, medium, low), declared in `_RANGE_ORDER_EXEMPT` of the test with its reason; a stale entry fails. A returned pair is review.
 
 <a id="a28"></a>
 ### A28. Take `ax` first in `.plot()`, data first in `plot_` helpers, the rest by name
@@ -788,7 +792,7 @@ bands.frequencies, bands.lower_edges, bands.upper_edges
 freq, lower, upper, labels = filters.nominal_frequencies(1)
 ```
 
-**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_the_tree_answers_several_quantities_as_records`
+**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_the_tree_answers_several_quantities_as_records`, `tests/test_public_vocabulary.py::test_no_record_unpacks_like_a_tuple`
 
 **Exceptions.** A tuple stays only for like items whose order nobody has to remember (the two ends of a range, lower first; the two biquad stages of BS.1770 in cascade order; the `*_named` collections), declared in `TUPLE_RETURN_EXEMPT` of `scripts/check_parameter_units.py`, keyed by module and qualified name, with the reason. A `NamedTuple` counts as a tuple, and a public record is never one: a record has no `__iter__`, so unpacking it raises `TypeError`.
 

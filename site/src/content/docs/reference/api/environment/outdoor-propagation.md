@@ -124,11 +124,11 @@ reference conditions of the tabulated coefficients.
 
 ```python
 Barrier(
+    *,
     source_to_edge: float,
     edge_to_receiver: float,
     parallel_distance: float = 0.0,
     edge_separation: float | None = None,
-    *,
     ground_reflections_by_image: bool = False,
     lateral: bool = False,
     line_of_sight_clear: bool = False,
@@ -251,7 +251,7 @@ $$
 ## DirectivityCorrection
 
 ```python
-DirectivityCorrection(index: float = 0.0, d_omega: float = 0.0)
+DirectivityCorrection(*, index: float = 0.0, d_omega: float = 0.0)
 ```
 
 Directivity correction $D_\mathrm{c} = D_i + D_\Omega$ (Eq. (3)).
@@ -401,6 +401,7 @@ solid-angle index [`directivity_omega`](/phonometry/reference/api/environment/ou
 
 ```python
 GroundFactors(
+    *,
     source: float = 0.0,
     middle: float = 0.0,
     receiver: float = 0.0,
@@ -612,7 +613,7 @@ contributions separately.
 OutdoorAttenuation.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -629,9 +630,9 @@ OutdoorAttenuation.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     source_emission: SourceEmission | None = None,
 ) -> str
 ```
@@ -724,6 +725,7 @@ convenience.
 
 ```python
 PropagationGeometry(
+    *,
     distance: float,
     source_height_m: float,
     receiver_height_m: float,
@@ -803,6 +805,7 @@ middle-region term altogether.
 
 ```python
 SourceEmission(
+    *,
     sound_power_level: ArrayLike,
     directivity_index: float = 0.0,
     d_omega: float = 0.0,

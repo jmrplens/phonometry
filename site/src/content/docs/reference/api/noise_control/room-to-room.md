@@ -100,7 +100,8 @@ partition is specified from.
 
 ```python
 DesignCriterion(
-    family: str = 'NC',
+    *,
+    family: Literal['NC', 'RC'] = 'NC',
     target: float | None = None,
     flanking_penalty: float = 0.0,
 )
@@ -194,6 +195,7 @@ added, as it is not in [`phonometry.room.steady_state_spl`](/phonometry/referenc
 
 ```python
 RoomToRoomResult(
+    *,
     frequencies: np.ndarray,
     source_level: np.ndarray,
     transmission_loss: np.ndarray,
@@ -203,7 +205,7 @@ RoomToRoomResult(
     received_level: np.ndarray,
     flanking_penalty: float,
     source_power_level: np.ndarray | None,
-    criterion: str,
+    criterion: Literal['NC', 'RC'],
     target: float | None,
     label: str,
     receiver_distance_m: float | None = None,
@@ -268,7 +270,7 @@ the two-step designation procedure behind `rating`.
 RoomToRoomResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -338,11 +340,12 @@ a hand calculation writes down, in that order.
 
 ```python
 SourceRoom(
+    *,
     level: ArrayLike | None = None,
     power_level: ArrayLike | None = None,
     room_constant: ArrayLike | None = None,
     directivity: float = 1.0,
-    model: str = 'constant_power',
+    model: Literal['constant_power', 'constant_volume', 'constant_pressure'] = 'constant_power',
 )
 ```
 

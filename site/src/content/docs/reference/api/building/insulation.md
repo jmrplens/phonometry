@@ -222,7 +222,7 @@ Per-band field airborne sound insulation (ISO 16283-1:2014).
 AirborneInsulationResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -238,11 +238,11 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 AirborneInsulationResult.report(
     path: str,
     *,
-    quantity: str = 'dnt',
+    quantity: Literal['dnt', 'r_prime'] = 'dnt',
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -319,7 +319,7 @@ facade_insulation(
     area: float | None = None,
     volume: float | None = None,
     surface_level: Sequence[float] | np.ndarray | None = None,
-    method: str = 'loudspeaker',
+    method: Literal['road_traffic', 'loudspeaker'] = 'loudspeaker',
     t0: float = 0.5,
     frequencies: Sequence[float] | np.ndarray | None = None,
     low_frequency: LowFrequencyProcedure | None = None,
@@ -405,7 +405,7 @@ FacadeInsulationResult(
     d_2m_n: np.ndarray | None,
     r_prime: np.ndarray | None,
     frequencies: np.ndarray | None = None,
-    method: str = 'loudspeaker',
+    method: Literal['road_traffic', 'loudspeaker'] = 'loudspeaker',
     low_frequency: LowFrequencyResult | None = None,
 )
 ```
@@ -430,7 +430,7 @@ Per-band field façade sound insulation (ISO 16283-3).
 FacadeInsulationResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -448,11 +448,11 @@ matplotlib (`pip install phonometry[plot]`); returns the
 FacadeInsulationResult.report(
     path: str,
     *,
-    quantity: str = 'd_2m_nt',
+    quantity: Literal['d_2m_nt', 'd_2m_n', 'r_prime'] = 'd_2m_nt',
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -591,7 +591,7 @@ Per-band field impact sound insulation (ISO 16283-2).
 ImpactInsulationResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -607,11 +607,11 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ImpactInsulationResult.report(
     path: str,
     *,
-    quantity: str = 'l_n_t',
+    quantity: Literal['l_n_t', 'l_n'] = 'l_n_t',
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -685,7 +685,7 @@ ReportMetadata(
     requirement: float | None = None,
     required_class: int | None = None,
     notes: str | None = None,
-    tube_shape: str | None = None,
+    tube_shape: Literal['circular', 'rectangular', 'square'] | None = None,
     curing_time_hours: float | None = None,
     separating_element: str | None = None,
     test_signal: str | None = None,

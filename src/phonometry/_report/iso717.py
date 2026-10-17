@@ -61,6 +61,7 @@ from ._layout import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..building.measurement.ratings import ImpactRatingResult, WeightedRatingResult
     from .metadata import ReportMetadata
 
@@ -124,7 +125,7 @@ def _band_symbol_markup(symbol: str) -> str:
 
 def _labels(
     result: WeightedRatingResult | ImpactRatingResult,
-    language: str = "en",
+    language: Language = "en",
     symbol: str | None = None,
 ) -> tuple[str, str, str, str]:
     """Return ``(title, rating_part, statement, value_header)`` for the quantity.
@@ -158,7 +159,7 @@ def _labels(
 
 def _metadata_pairs(
     metadata: ReportMetadata,
-    language: str = "en",
+    language: Language = "en",
 ) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
     """Build the two ordered (label, value) groups of the header grid.
 
@@ -259,7 +260,7 @@ def _value_table(
     value_header: str,
     *,
     verbose: bool,
-    language: str = "en",
+    language: Language = "en",
 ) -> Table:
     """Build the left-hand one-third-octave table (accredited or Annex C).
 
@@ -328,7 +329,7 @@ def _value_table(
 def _verdict(
     result: WeightedRatingResult | ImpactRatingResult,
     requirement: float,
-    language: str = "en",
+    language: Language = "en",
     symbol: str | None = None,
 ) -> tuple[str, bool]:
     """Return the verdict text and a PASS flag for a supplied requirement.
@@ -358,7 +359,7 @@ def _verdict(
 def _extended_terms(
     result: WeightedRatingResult | ImpactRatingResult,
     *,
-    language: str = "en",
+    language: Language = "en",
 ) -> list[str]:
     """Return the extended spectrum-adaptation terms the result carries, if any.
 
@@ -424,7 +425,7 @@ def _validated_curves(
 
 
 def _basis_line(
-    metadata: ReportMetadata | None, rating_part: str, language: str
+    metadata: ReportMetadata | None, rating_part: str, language: Language
 ) -> str:
     """Standard-basis line under the title: measurement standard plus rating."""
     measurement_standard = (
@@ -446,7 +447,7 @@ def render_iso717_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
     symbol: str | None = None,
 ) -> str:
     """Render an ISO 717 accredited-laboratory rating fiche to a PDF at ``path``.

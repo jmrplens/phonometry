@@ -820,15 +820,17 @@ def generate_porous_absorber_designs(output_dir: str) -> None:
         cases: list[tuple[str, list[Layer], str, str]] = [
             (
                 r"Porous layer 50 mm ($\sigma$ = 20 kPa·s/m²)",
-                [materials.PorousLayer(0.05, med)],
+                [materials.PorousLayer(thickness_m=0.05, medium=med)],
                 COLOR_PRIMARY,
                 "-",
             ),
             (
                 "Microperforated panel + 48 mm cavity",
                 [
-                    materials.MicroperforatedPlateLayer(0.5e-3, 0.15e-3, 0.008),
-                    materials.AirLayer(0.048),
+                    materials.MicroperforatedPlateLayer(
+                        thickness_m=0.5e-3, hole_radius=0.15e-3, open_area=0.008
+                    ),
+                    materials.AirLayer(thickness_m=0.048),
                 ],
                 COLOR_SECONDARY,
                 "-",
@@ -836,9 +838,11 @@ def generate_porous_absorber_designs(output_dir: str) -> None:
             (
                 "Perforated panel 6 mm + porous 25 mm + air",
                 [
-                    materials.PerforatedPlateLayer(0.006, 0.0025, 0.05),
-                    materials.PorousLayer(0.025, med),
-                    materials.AirLayer(0.019),
+                    materials.PerforatedPlateLayer(
+                        thickness_m=0.006, hole_radius=0.0025, open_area=0.05
+                    ),
+                    materials.PorousLayer(thickness_m=0.025, medium=med),
+                    materials.AirLayer(thickness_m=0.019),
                 ],
                 COLOR_TERTIARY,
                 "-",
@@ -846,9 +850,9 @@ def generate_porous_absorber_designs(output_dir: str) -> None:
             (
                 "Membrane 2 kg/m² + air + porous 38 mm",
                 [
-                    materials.MembraneLayer(2.0),
-                    materials.AirLayer(0.01),
-                    materials.PorousLayer(0.038, med_light),
+                    materials.MembraneLayer(surface_density=2.0),
+                    materials.AirLayer(thickness_m=0.01),
+                    materials.PorousLayer(thickness_m=0.038, medium=med_light),
                 ],
                 "#9467bd",
                 "-",
@@ -1070,12 +1074,19 @@ def generate_biot_frame_resonance(output_dir: str) -> None:
     thickness = 0.10
     f = np.linspace(200.0, 1500.0, 1300)
     medium = specimen.medium(f)
-    rigid = materials.layered_absorber(f, [materials.PorousLayer(thickness, medium)])
+    rigid = materials.layered_absorber(
+        f, [materials.PorousLayer(thickness_m=thickness, medium=medium)]
+    )
     biot = materials.layered_absorber(
         f,
         [
             materials.PoroelasticLayer(
-                thickness, medium, porosity, tortuosity, frame_density, shear_modulus
+                thickness_m=thickness,
+                medium=medium,
+                porosity=porosity,
+                tortuosity=tortuosity,
+                frame_density=frame_density,
+                shear_modulus=shear_modulus,
             )
         ],
     )
@@ -1255,9 +1266,11 @@ def generate_absorber_stack_geometry(output_dir: str) -> None:
     frequency = np.linspace(200.0, 4000.0, 100)
     medium = materials.miki(frequency, 20000.0)
     layers: list[Any] = [
-        materials.MicroperforatedPlateLayer(0.001, 0.0002, 0.01),
-        materials.AirLayer(0.03),
-        materials.PorousLayer(0.05, medium),
+        materials.MicroperforatedPlateLayer(
+            thickness_m=0.001, hole_radius=0.0002, open_area=0.01
+        ),
+        materials.AirLayer(thickness_m=0.03),
+        materials.PorousLayer(thickness_m=0.05, medium=medium),
     ]
     _fig, ax = plt.subplots(figsize=(10, 6.2))
     materials.plot_absorber_stack(layers, ax=ax, language=_LANG)
@@ -1350,8 +1363,15 @@ def _qr_metadiffuser_wells() -> tuple[Any, float, float]:
     rows = _METADIFFUSER_T1_ROWS
     wells = [
         materials.MetadiffuserWell(
-            h * 1e-3,
-            (materials.HelmholtzResonator(ln * 1e-3, wn * 1e-3, lc * 1e-3, wc * 1e-3),)
+            slit_height_m=h * 1e-3,
+            resonators=(
+                materials.HelmholtzResonator(
+                    neck_length_m=ln * 1e-3,
+                    neck_side_m=wn * 1e-3,
+                    cavity_length_m=lc * 1e-3,
+                    cavity_side_m=wc * 1e-3,
+                ),
+            )
             * 2,
         )
         for h, ln, lc, wn, wc in rows
@@ -3015,7 +3035,9 @@ def generate_impedance_tube_result(output_dir: str) -> None:
     # through the Clause 7 chain.
     f = np.linspace(200.0, 1500.0, 260)
     med = materials.miki(f, 20000.0)
-    layer = materials.layered_absorber(f, [materials.PorousLayer(0.05, med)])
+    layer = materials.layered_absorber(
+        f, [materials.PorousLayer(thickness_m=0.05, medium=med)]
+    )
     spacing, x1, c0 = 0.10, 0.20, 343.2
     k0 = materials.tube_wavenumber(f, c0)
     x2 = x1 - spacing
@@ -3050,7 +3072,9 @@ def generate_transfer_matrix_tl(output_dir: str) -> None:
     # hard-backed absorption of the same specimen.
     f = np.linspace(200.0, 1600.0, 300)
     med = materials.miki(f, 20000.0)
-    layer = materials.layered_absorber(f, [materials.PorousLayer(0.05, med)])
+    layer = materials.layered_absorber(
+        f, [materials.PorousLayer(thickness_m=0.05, medium=med)]
+    )
     chain = layer.transfer_matrix
     tm = materials.TransferMatrix(
         t11=chain[0, 0], t12=chain[0, 1], t21=chain[1, 0], t22=chain[1, 1]
@@ -3091,8 +3115,10 @@ def generate_mpp_absorption_peak(output_dir: str) -> None:
     res = materials.layered_absorber(
         f,
         [
-            materials.MicroperforatedPlateLayer(0.2e-3, 0.1e-3, eps),
-            materials.AirLayer(0.06),
+            materials.MicroperforatedPlateLayer(
+                thickness_m=0.2e-3, hole_radius=0.1e-3, open_area=eps
+            ),
+            materials.AirLayer(thickness_m=0.06),
         ],
     )
     res.plot(language=_LANG)
@@ -3111,7 +3137,9 @@ def generate_diffuse_field_absorption(output_dir: str) -> None:
     # coefficient exceeds the normal-incidence one at low frequency because
     # the oblique waves travel a longer path inside the layer.
     f = np.geomspace(125.0, 4000.0, 200)
-    layers: list[Any] = [materials.PorousLayer(0.05, materials.miki(f, 20000.0))]
+    layers: list[Any] = [
+        materials.PorousLayer(thickness_m=0.05, medium=materials.miki(f, 20000.0))
+    ]
     normal = materials.layered_absorber(f, layers)
     diffuse = materials.diffuse_field_absorption(f, layers)
     ax = diffuse.plot(language=_LANG)
@@ -3454,7 +3482,12 @@ def generate_flow_resistivity_window(output_dir: str) -> None:
     )
     for sigma, color, style, tag in family:
         layer = materials.layered_absorber(
-            freq, [materials.PorousLayer(thickness, materials.miki(freq, sigma))]
+            freq,
+            [
+                materials.PorousLayer(
+                    thickness_m=thickness, medium=materials.miki(freq, sigma)
+                )
+            ],
         )
         ax_f.semilogx(
             freq,
@@ -3487,7 +3520,8 @@ def generate_flow_resistivity_window(output_dir: str) -> None:
                         np.array([band]),
                         [
                             materials.PorousLayer(
-                                thickness, materials.miki(np.array([band]), s)
+                                thickness_m=thickness,
+                                medium=materials.miki(np.array([band]), s),
                             )
                         ],
                     ).absorption[0]
@@ -3512,7 +3546,8 @@ def generate_flow_resistivity_window(output_dir: str) -> None:
                     np.array([1000.0]),
                     [
                         materials.PorousLayer(
-                            thickness, materials.miki(np.array([1000.0]), s)
+                            thickness_m=thickness,
+                            medium=materials.miki(np.array([1000.0]), s),
                         )
                     ],
                 ).absorption[0]
@@ -3567,7 +3602,7 @@ def generate_tube_working_ranges(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(11, 5.6))
     for i, (label, spacing, diameter_m, astm, color) in enumerate(rows):
         band = (
-            materials.plane_wave_frequency_range_astm
+            materials.plane_wave_frequency_range_astm_e2611
             if astm
             else materials.plane_wave_frequency_range
         )
@@ -3851,7 +3886,7 @@ def generate_porous_model_comparison(output_dir: str) -> None:
     # extrapolation failure the guide warns about actually shows.
     for label, medium, color, style in media:
         zs = materials.layered_absorber(
-            freq, [materials.PorousLayer(0.05, medium)]
+            freq, [materials.PorousLayer(thickness_m=0.05, medium=medium)]
         ).normalized_impedance
         ax_s.semilogx(
             freq, zs.real, color=color, linestyle=style, linewidth=2.0, label=label
@@ -3991,7 +4026,11 @@ def generate_oblique_absorption(output_dir: str) -> None:
         (2000.0, COLOR_FG),
     ):
         one = np.array([band])
-        layers = (materials.PorousLayer(0.05, materials.miki(one, 20000.0)),)
+        layers = (
+            materials.PorousLayer(
+                thickness_m=0.05, medium=materials.miki(one, 20000.0)
+            ),
+        )
         bulk = np.array(
             [
                 float(
@@ -4045,7 +4084,9 @@ def generate_oblique_absorption(output_dir: str) -> None:
     ax_t.legend(loc="lower left", fontsize=9)
 
     freq = np.geomspace(125.0, 4000.0, 90)
-    layers_f = (materials.PorousLayer(0.05, materials.miki(freq, 20000.0)),)
+    layers_f = (
+        materials.PorousLayer(thickness_m=0.05, medium=materials.miki(freq, 20000.0)),
+    )
     diffuse = materials.diffuse_field_absorption(freq, layers_f).absorption
     normal = materials.layered_absorber(freq, layers_f)
     statistical = np.asarray(
@@ -4120,8 +4161,10 @@ def generate_sheet_transfer_impedance(output_dir: str) -> None:
     stack = materials.layered_absorber(
         freq,
         [
-            materials.MicroperforatedPlateLayer(0.2e-3, 0.1e-3, open_area),
-            materials.AirLayer(cavity),
+            materials.MicroperforatedPlateLayer(
+                thickness_m=0.2e-3, hole_radius=0.1e-3, open_area=open_area
+            ),
+            materials.AirLayer(thickness_m=cavity),
         ],
     )
     peak = int(np.argmax(stack.absorption))

@@ -82,7 +82,7 @@ $\mathrm{SEL}_{\mathrm{ss}} + 10 \log_{10} N$.
 
 ```python
 pile_strike_metrics(
-    pressure: Signal | Sequence[float] | np.ndarray,
+    pressure_pa: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
 ) -> PileStrikeResult
 ```
@@ -96,7 +96,7 @@ and the 90 %-energy pulse duration of one recorded hammer strike.
 
 | Name | Description |
 | :--- | :--- |
-| `pressure` | Sound-pressure time series of one strike (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
+| `pressure_pa` | Sound-pressure time series of one strike (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 
 **Returns:** A [`PileStrikeResult`](/phonometry/reference/api/underwater/pile-driving-noise/#pilestrikeresult).
@@ -115,7 +115,7 @@ PileStrikeResult(
     peak_spl: float,
     spl: float,
     pulse_duration: float,
-    pressure: Signal | NDArray[np.float64],
+    pressure_pa: Signal | NDArray[np.float64],
     fs: float,
 )
 ```
@@ -130,7 +130,7 @@ Per-strike pile-driving metrics (ISO 18406).
 | `peak_spl` | Zero-to-peak sound pressure level, in dB re 1 µPa. |
 | `spl` | Sound pressure level (Leq over the record), in dB re 1 µPa. |
 | `pulse_duration` | 90 %-energy pulse duration, in s. |
-| `pressure` | The strike pressure waveform, in Pa, in the type it arrived as: a [`Signal`](/phonometry/reference/api/io/io/#signal) when the input was one (carrying `calibration_factor=1.0` when it was calibrated), a bare array otherwise. |
+| `pressure_pa` | The strike pressure waveform, in Pa, in the type it arrived as: a [`Signal`](/phonometry/reference/api/io/io/#signal) when the input was one (carrying `calibration_factor=1.0` when it was calibrated), a bare array otherwise. |
 | `fs` | Sample rate, in Hz. |
 
 ### PileStrikeResult.plot()
@@ -139,7 +139,7 @@ Per-strike pile-driving metrics (ISO 18406).
 PileStrikeResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
 ```
@@ -150,7 +150,7 @@ Plot the strike waveform and its cumulative energy.
 
 ```python
 single_strike_sel(
-    pressure: Signal | Sequence[float] | np.ndarray,
+    pressure_pa: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
 ) -> float
 ```
@@ -164,7 +164,7 @@ pulse, in dB re 1 µPa²·s.
 
 | Name | Description |
 | :--- | :--- |
-| `pressure` | Sound-pressure time series of one strike (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
+| `pressure_pa` | Sound-pressure time series of one strike (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 
 **Returns:** Single-strike SEL, in dB re 1 µPa²·s.
@@ -179,7 +179,7 @@ pulse, in dB re 1 µPa²·s.
 
 ```python
 strike_sel_spectrum(
-    pressure: Signal | Sequence[float] | np.ndarray,
+    pressure_pa: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     fraction: int = 3,
@@ -205,7 +205,7 @@ handed straight to
 
 | Name | Description |
 | :--- | :--- |
-| `pressure` | Sound-pressure time series of one strike (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
+| `pressure_pa` | Sound-pressure time series of one strike (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `fraction` | Bandwidth fraction: 1 (octave) or 3 (one-third octave). |
 | `limits` | Lower and upper band-centre limits, in Hz. |
@@ -251,7 +251,7 @@ Single-strike sound exposure level resolved into fractional-octave bands.
 StrikeSELSpectrum.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

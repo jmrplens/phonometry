@@ -60,11 +60,12 @@ from ._sound_power_fiche import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..building.prediction.installed_structure_borne import InstalledSourceResult
     from .metadata import ReportMetadata
 
 
-def _basis(language: str = "en") -> str:
+def _basis(language: Language = "en") -> str:
     """The prediction-basis line naming EN 12354-5:2009."""
     return t(
         "Predicted normalised structure-borne sound pressure level "
@@ -77,7 +78,7 @@ def _basis(language: str = "en") -> str:
     )
 
 
-def _caption(result: InstalledSourceResult, language: str = "en") -> str:
+def _caption(result: InstalledSourceResult, language: Language = "en") -> str:
     """The caption declaring the analysis band set above the table."""
     freqs = getattr(result, "frequencies", None)
     if freqs is None:
@@ -102,7 +103,7 @@ def _column_widths(n_columns: int) -> list[float]:
 
 
 def _value_table(
-    result: InstalledSourceResult, *, verbose: bool, language: str = "en"
+    result: InstalledSourceResult, *, verbose: bool, language: Language = "en"
 ) -> Table:
     """Build the full-width per-band multi-path table.
 
@@ -139,7 +140,7 @@ def _value_table(
 
 
 def _statement(
-    result: InstalledSourceResult, language: str = "en"
+    result: InstalledSourceResult, language: Language = "en"
 ) -> tuple[str, list[str]]:
     """The boxed total ``L_n,s`` and its extended terms."""
     overall = float(result.overall_level)
@@ -165,7 +166,7 @@ def _statement(
     return statement, extended
 
 
-def _relation_strip(language: str = "en") -> str:
+def _relation_strip(language: Language = "en") -> str:
     """The Formula 18a/17 relation line for the basis strip."""
     return t(
         "L<sub>n,s,<i>ij</i></sub> = L<sub>Ws,inst,<i>i</i></sub> - "
@@ -181,7 +182,7 @@ def _relation_strip(language: str = "en") -> str:
     )
 
 
-def _prediction_strip(language: str = "en") -> str:
+def _prediction_strip(language: Language = "en") -> str:
     """The prediction disclaimer for the basis strip."""
     return t(
         "Predicted (estimated) result computed from the characteristic "
@@ -198,7 +199,7 @@ def render_installed_structure_borne_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an EN 12354-5 installed structure-borne prediction fiche.
 

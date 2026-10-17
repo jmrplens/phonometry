@@ -11,7 +11,7 @@ under ``devices/``.
 import math
 import re
 import warnings
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
@@ -3719,10 +3719,11 @@ def generate_duct_attenuation_elements(output_dir: str) -> None:
     ax.set_title("(b) One bend, $W$ = 24 in", pad=8)
 
     ax = axes[1][0]
-    for method, color, style in (
+    methods: tuple[tuple[Literal["bies", "long"], str, str], ...] = (
         ("bies", COLOR_PRIMARY, "-"),
         ("long", COLOR_SECONDARY, "--"),
-    ):
+    )
+    for method, color, style in methods:
         er = hvac.end_reflection_loss(bands[:6], diameter_m=0.30, method=method)
         ax.semilogx(
             bands[:6],
@@ -4009,7 +4010,7 @@ def generate_fan_sound_power(output_dir: str) -> None:
 
     cfm, in_wg = 0.0004719474432, 249.0
     volume_flow, static_pressure_pa = 5000 * cfm, 2 * in_wg
-    fan_type = "forward_curved"
+    fan_type: Literal["forward_curved"] = "forward_curved"
     _fig, ax = plt.subplots(figsize=(10, 6.4))
     for efficiency, color, style in (
         (90.0, COLOR_TERTIARY, ":"),
@@ -4226,37 +4227,39 @@ def _long_duct_paths() -> tuple[Any, Any]:
         source_level=fan,
         elements=[
             noise_control.DuctElement(
-                "Elbow, 36 x 24 in, unlined",
-                [0, 1, 2, 3, 3, 3, 3, 3],
-                [41, 39, 36, 29, 20, 6, 0, 0],
+                label="Elbow, 36 x 24 in, unlined",
+                attenuation=[0, 1, 2, 3, 3, 3, 3, 3],
+                self_noise=[41, 39, 36, 29, 20, 6, 0, 0],
                 code="2",
             ),
             noise_control.DuctElement(
-                "Silencer, 3 ft, standard pressure drop",
-                [7, 12, 16, 28, 35, 35, 28, 17],
-                [49, 43, 44, 42, 42, 45, 35, 24],
+                label="Silencer, 3 ft, standard pressure drop",
+                attenuation=[7, 12, 16, 28, 35, 35, 28, 17],
+                self_noise=[49, 43, 44, 42, 42, 45, 35, 24],
                 code="3",
             ),
             noise_control.DuctElement(
-                "Duct, 36 x 24 in, 5 ft, 1 in lining",
-                [2, 2, 3, 7, 15, 12, 11, 9],
+                label="Duct, 36 x 24 in, 5 ft, 1 in lining",
+                attenuation=[2, 2, 3, 7, 15, 12, 11, 9],
                 code="4",
             ),
-            noise_control.DuctElement("Split, 25 per cent", 6.0, code="5"),
             noise_control.DuctElement(
-                "Duct, 18 x 12 in, 6 ft, 1 in lining",
-                [3, 3, 5, 11, 25, 22, 16, 13],
+                label="Split, 25 per cent", attenuation=6.0, code="5"
+            ),
+            noise_control.DuctElement(
+                label="Duct, 18 x 12 in, 6 ft, 1 in lining",
+                attenuation=[3, 3, 5, 11, 25, 22, 16, 13],
                 code="6",
             ),
             noise_control.DuctElement(
-                "Flexible duct, 12 in, 6 ft",
-                [14, 14, 16, 15, 17, 22, 16, 13],
+                label="Flexible duct, 12 in, 6 ft",
+                attenuation=[14, 14, 16, 15, 17, 22, 16, 13],
                 code="7",
             ),
             noise_control.DuctElement(
-                "Rectangular diffuser, 312 cfm",
-                None,
-                [33, 32, 29, 23, 15, 4, 0, 0],
+                label="Rectangular diffuser, 312 cfm",
+                attenuation=None,
+                self_noise=[33, 32, 29, 23, 15, 4, 0, 0],
                 code="8",
             ),
         ],
@@ -4270,32 +4273,32 @@ def _long_duct_paths() -> tuple[Any, Any]:
         source_level=fan,
         elements=[
             noise_control.DuctElement(
-                "Elbow, 36 x 24 in, unlined",
-                [0, 1, 2, 3, 3, 3, 3, 3],
-                [43, 42, 39, 33, 24, 12, 0, 0],
+                label="Elbow, 36 x 24 in, unlined",
+                attenuation=[0, 1, 2, 3, 3, 3, 3, 3],
+                self_noise=[43, 42, 39, 33, 24, 12, 0, 0],
                 code="2",
             ),
             noise_control.DuctElement(
-                "Silencer, 5 ft, low-frequency type",
-                [16, 21, 35, 41, 41, 28, 21, 15],
-                [51, 49, 53, 56, 56, 59, 60, 53],
+                label="Silencer, 5 ft, low-frequency type",
+                attenuation=[16, 21, 35, 41, 41, 28, 21, 15],
+                self_noise=[51, 49, 53, 56, 56, 59, 60, 53],
                 code="3",
             ),
             noise_control.DuctElement(
-                "Elbow, 36 x 24 in, lined, 1 in",
-                [1, 2, 3, 4, 5, 6, 8, 10],
-                [39, 38, 34, 28, 18, 4, 0, 0],
+                label="Elbow, 36 x 24 in, lined, 1 in",
+                attenuation=[1, 2, 3, 4, 5, 6, 8, 10],
+                self_noise=[39, 38, 34, 28, 18, 4, 0, 0],
                 code="4",
             ),
             noise_control.DuctElement(
-                "Plenum, 800 sq ft, 50 per cent lined",
-                [12, 13, 19, 20, 20, 20, 21, 21],
+                label="Plenum, 800 sq ft, 50 per cent lined",
+                attenuation=[12, 13, 19, 20, 20, 20, 21, 21],
                 code="5",
             ),
             noise_control.DuctElement(
-                "Rectangular grille, 24 x 24 in, 563 cfm",
-                None,
-                [30, 29, 26, 20, 12, 1, 0, 0],
+                label="Rectangular grille, 24 x 24 in, 563 cfm",
+                attenuation=None,
+                self_noise=[30, 29, 26, 20, 12, 1, 0, 0],
                 code="6",
             ),
         ],
@@ -4341,7 +4344,7 @@ def generate_enclosure_required_tl(output_dir: str) -> None:
     bare_floor = 2.5 * 3.5 - 1.5 * 2.5
     alpha = room.mean_absorption([(radiating, wool), (bare_floor + machine, concrete)])
 
-    def _required(model: str) -> "EnclosureInsertionLossResult":
+    def _required(model: Literal["bies", "norton"]) -> "EnclosureInsertionLossResult":
         return noise_control.enclosure_required_transmission_loss(
             lp1 - nc45,
             radiating,
@@ -4771,13 +4774,13 @@ def generate_loudness_range(output_dir: str) -> None:
     save_figure(output_dir, "loudness_range.svg")
 
 
-def generate_itu_r_468_weighting(output_dir: str) -> None:
+def generate_weighting_bs468(output_dir: str) -> None:
     """The ITU-R BS.468-4 network and its CCIR-RMS renormalisation."""
-    print("Generating itu_r_468_weighting...")
+    print("Generating weighting_bs468...")
     from phonometry import electroacoustics
 
     freqs = np.geomspace(20.0, 20000.0, 600)
-    w468 = np.asarray(electroacoustics.itu_r_468_weighting(freqs), dtype=float)
+    w468 = np.asarray(electroacoustics.weighting_bs468(freqs), dtype=float)
     ccir = w468 - 5.63
 
     _fig, ax = plt.subplots(figsize=(10, 6))
@@ -4813,7 +4816,7 @@ def generate_itu_r_468_weighting(output_dir: str) -> None:
     for f0, level, col, txt in (
         (
             6300.0,
-            float(electroacoustics.itu_r_468_weighting([6300.0])[0]),
+            float(electroacoustics.weighting_bs468([6300.0])[0]),
             COLOR_PRIMARY,
             "+12.2 dB at 6.3 kHz",
         ),
@@ -4860,7 +4863,7 @@ def generate_itu_r_468_weighting(output_dir: str) -> None:
         color=COLOR_FG,
     )
     plt.tight_layout()
-    save_figure(output_dir, "itu_r_468_weighting.svg")
+    save_figure(output_dir, "weighting_bs468.svg")
     plt.close()
 
 
@@ -5133,7 +5136,7 @@ def generate_microphone_noise_weightings(output_dir: str) -> None:
 
     fa, wa_curve = measure_weighting_response(48000, "A")
     a_w = np.interp(noise_f, fa, wa_curve)
-    w468 = np.asarray(electroacoustics.itu_r_468_weighting(noise_f), dtype=float)
+    w468 = np.asarray(electroacoustics.weighting_bs468(noise_f), dtype=float)
 
     def total(bands: NDArray[np.float64], weight: NDArray[np.float64]) -> float:
         return float(10.0 * np.log10(np.sum(10.0 ** ((bands + weight) / 10.0))))
@@ -5464,7 +5467,7 @@ def generate_in_situ_sound_power(output_dir: str) -> None:
         sigma_omc_db=0.5,
     )
     corrected_st = st - result.background_correction
-    corrected_rss = rss - result.background_correction_ref[0]
+    corrected_rss = rss - result.reference_background_correction[0]
     failing = ~np.asarray(result.background_requirement_met, dtype=bool)
 
     fig, (axt, axb) = plt.subplots(
@@ -5480,7 +5483,7 @@ def generate_in_situ_sound_power(output_dir: str) -> None:
             (st[i], corrected_st[i], COLOR_PRIMARY),
             (rss[i], corrected_rss[i], COLOR_TERTIARY),
         ):
-            moved = measured - corrected > 0.05  # noqa: PLR2004
+            moved = measured - corrected > 0.05
             axt.vlines(
                 x[moved] + offset,
                 corrected[moved],
@@ -6025,7 +6028,7 @@ _VDI_BANDS = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0
 _VDI_A_WEIGHTING = np.array([-26.2, -16.1, -8.6, -3.2, 0.0, 1.2, 1.0, -1.1])
 
 
-def _vdi_fan(assembly: str) -> NDArray[np.float64]:
+def _vdi_fan(assembly: Literal["rr", "t", "am"]) -> NDArray[np.float64]:
     """Element 1 of the worked sheet, for one assembly type."""
     from phonometry import noise_control
 
@@ -6044,7 +6047,7 @@ def generate_vdi2081_fan_assemblies(output_dir: str) -> None:
     """One duty point, three assemblies: what the German method asks first."""
     print("Generating vdi2081_fan_assemblies...")
 
-    assemblies = (
+    assemblies: tuple[tuple[Literal["rr", "t", "am"], str, str, str], ...] = (
         ("rr", "radial, blades curved backwards", COLOR_PRIMARY, "-"),
         ("t", "cylindrical rotor, blades curved forwards", COLOR_TERTIARY, "--"),
         ("am", "axial, with a diffuser downstream", COLOR_SECONDARY, "-."),
@@ -7357,7 +7360,12 @@ def generate_silencer_measurement(output_dir: str) -> None:
     # as the step functions they are.
     ax3 = axes[2]
     steps = np.logspace(np.log10(50.0), np.log10(10000.0), 400)
-    for quantity, colour, style, label in (
+    quantities: tuple[
+        tuple[
+            Literal["insertion_loss", "transmission_loss", "intensity"], str, str, str
+        ],
+        ...,
+    ] = (
         ("insertion_loss", COLOR_PRIMARY, "-", "ISO 7235 Table 7, insertion loss"),
         (
             "transmission_loss",
@@ -7366,7 +7374,8 @@ def generate_silencer_measurement(output_dir: str) -> None:
             "ISO 7235 Table 7, transmission loss",
         ),
         ("intensity", COLOR_QUATERNARY, "-.", "ISO 7235 Table 7, sound intensity"),
-    ):
+    )
+    for quantity, colour, style, label in quantities:
         inside = steps[steps <= (5000.0 if quantity == "intensity" else 10000.0)]
         ax3.step(
             inside,
@@ -8095,7 +8104,7 @@ def generate_special_room_sound_power(output_dir: str) -> None:
         a_weighted_background_levels=46.0,
         sigma_omc_db=0.5,
     )
-    lw_ref = np.array([80.0, 83.5, 86.2, 86.9, 86.4, 84.3, 80.7])
+    reference_sound_power_levels = np.array([80.0, 83.5, 86.2, 86.9, 86.4, 84.3, 80.7])
     rss = np.array(
         [
             [74.5, 76.8, 79.8, 80.0, 80.2, 77.2, 73.7],
@@ -8107,7 +8116,11 @@ def generate_special_room_sound_power(output_dir: str) -> None:
         ]
     )
     comparison = emission.sound_power_special_room_comparison(
-        levels, rss, lw_ref, frequencies=_ISO3743_FREQS, background_levels=background
+        levels,
+        rss,
+        reference_sound_power_levels,
+        frequencies=_ISO3743_FREQS,
+        background_levels=background,
     )
     fig, (axt, axb) = plt.subplots(2, 1, figsize=(10, 8.6), height_ratios=(0.85, 1.0))
     plan.plot(ax=axt, language=_LANG)
@@ -8222,10 +8235,10 @@ def _turbine_example() -> tuple[
     surface = emission.turbine_measurement_surface(
         [
             emission.TurbineReferenceBox(
-                length,
-                width,
-                height,
-                _TURBINE_PARTS_ES[part] if _LANG == "es" else part,
+                length_m=length,
+                width_m=width,
+                height_m=height,
+                label=_TURBINE_PARTS_ES[part] if _LANG == "es" else part,
             )
             for length, width, height, part in _TURBINE_SET
         ]

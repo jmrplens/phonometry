@@ -34,7 +34,7 @@ import publish_assets
 def _git(cwd: pathlib.Path, *args: str) -> str:
     # rstrip and not strip, for the same reason the script does: the porcelain
     # status of an unstaged change begins with a space that is part of it.
-    return subprocess.run(  # noqa: S603
+    return subprocess.run(
         ["git", "-C", str(cwd), *args], check=True, capture_output=True, text=True
     ).stdout.rstrip("\n")
 

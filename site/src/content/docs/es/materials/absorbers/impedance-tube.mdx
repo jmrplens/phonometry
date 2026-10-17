@@ -120,7 +120,7 @@ $0{,}45\,c$).*
 ```python
 for spacing, diameter_m in ((0.100, 0.100), (0.050, 0.100), (0.020, 0.029)):
     iso = materials.plane_wave_frequency_range(spacing, 343.2, diameter_m=diameter_m)
-    astm = materials.plane_wave_frequency_range_astm(spacing, 343.2, diameter_m=diameter_m)
+    astm = materials.plane_wave_frequency_range_astm_e2611(spacing, 343.2, diameter_m=diameter_m)
     print(f"tubo de {diameter_m * 1e3:.0f} mm, s = {spacing * 1e3:.0f} mm:",
           f"ISO {iso[0]:.0f}-{iso[1]:.0f} Hz, ASTM {astm[0]:.0f}-{astm[1]:.0f} Hz")
 ```
@@ -198,7 +198,7 @@ portamuestras.
 La misma función auxiliar cubre tubos cuadrados y rectangulares: con `shape="square"`
 o `shape="rectangular"` el factor de la Ec. (3) sustituye al circular, con
 $d$ el lado mayor. La rama de cuatro micrófonos mantiene sus propios límites
-en `plane_wave_frequency_range_astm`: ASTM E2611 conserva la constante
+en `plane_wave_frequency_range_astm_e2611`: ASTM E2611 conserva la constante
 circular sin redondear ($f\,d < 0{,}586\,c$, 6.2.4.1), el mismo
 $f\,d < 0{,}500\,c$ rectangular (6.2.5), una cota de separación algo más
 estricta $f\,s < 0{,}40\,c$ (6.5.4) y un extremo bajo más laxo en el 1 % de
@@ -595,7 +595,7 @@ from phonometry import materials
 # modelo de capa da el factor de reflexión verdadero, del que sale la H12.
 f = np.linspace(200.0, 1500.0, 260)
 med = materials.miki(f, 20000.0)
-layer = materials.layered_absorber(f, [materials.PorousLayer(0.05, med)])
+layer = materials.layered_absorber(f, [materials.PorousLayer(thickness_m=0.05, medium=med)])
 spacing, x1, c0 = 0.10, 0.20, 343.2
 k0 = materials.tube_wavenumber(f, c0)
 x2 = x1 - spacing
@@ -822,7 +822,7 @@ from phonometry import materials
 # misma probeta.
 f = np.linspace(200.0, 1600.0, 300)
 med = materials.miki(f, 20000.0)
-layer = materials.layered_absorber(f, [materials.PorousLayer(0.05, med)])
+layer = materials.layered_absorber(f, [materials.PorousLayer(thickness_m=0.05, medium=med)])
 chain = layer.transfer_matrix                       # forma (2, 2, len(f))
 tm = materials.TransferMatrix(t11=chain[0, 0], t12=chain[0, 1],
                               t21=chain[1, 0], t22=chain[1, 1])
@@ -866,7 +866,7 @@ from phonometry import materials
 
 f = np.linspace(200.0, 1600.0, 300)
 med = materials.miki(f, 20000.0)
-layer = materials.layered_absorber(f, [materials.PorousLayer(0.05, med)])
+layer = materials.layered_absorber(f, [materials.PorousLayer(thickness_m=0.05, medium=med)])
 chain = layer.transfer_matrix                       # forma (2, 2, len(f))
 tm = materials.TransferMatrix(t11=chain[0, 0], t12=chain[0, 1],
                               t21=chain[1, 0], t22=chain[1, 1])
@@ -1008,7 +1008,7 @@ propiedades del aire del apartado 7.2 `speed_of_sound_iso10534` y
 `tube_attenuation_constant`). El método de matriz de transferencia con cuatro
 micrófonos de ASTM E2611 (`transfer_matrix_two_load`,
 `transfer_matrix_one_load`, `TransferMatrix`,
-`plane_wave_frequency_range_astm`, `hydraulic_diameter`), con los dibujos a
+`plane_wave_frequency_range_astm_e2611`, `hydraulic_diameter`), con los dibujos a
 escala de ambos tubos. Los tubos FDTD virtuales de la sección 5, cuyos
 espectros recuperados se contrastan con la respuesta analítica en cada commit.
 </ScopeClaim>

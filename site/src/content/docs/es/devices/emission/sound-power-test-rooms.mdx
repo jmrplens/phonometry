@@ -179,7 +179,7 @@ res = emission.sound_power_hard_walled(
 print(np.round(res.sound_power_level, 1))         # [89.1 92.2 94.3 96.3 93.7 89.6 84.2]
 print(round(res.sound_power_level_a, 1))          # 100.1 dB(A)
 print(np.round(res.background_correction, 2))     # [1.3  0.14 0.   0.   0.   0.   0.  ]
-print(np.round(res.background_correction_ref, 2)) # [0.59 0.24 0.   0.   0.   0.   0.  ]
+print(np.round(res.reference_background_correction, 2)) # [0.59 0.24 0.   0.   0.   0.   0.  ]
 print(res.background_requirement_met)             # [False  True  True  True  True  True  True]
 print(res.upper_bound)                            # [ True False False False False False False]
 print(round(res.expanded_uncertainty_a, 1))       # 3.6 dB (k = 2)
@@ -236,11 +236,11 @@ plt.show()
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
 | `levels` | array 1D, 2D o 3D | dB | `(bandas,)`, `(NM, bandas)` o `(NS, NM, bandas)` | $L'_{pi(\mathrm{ST})}$ medidos: un recorrido (NOTA de 8.1.2), una fila por posición fija (al menos tres, 7.3) o una rejilla por ubicación de la fuente (Ec. 9) |
-| `levels_ref` | array 1D o 2D | dB | `(bandas,)` o `(NM, bandas)` | La fuente de referencia en las mismas posiciones, o en el mismo recorrido |
-| `lw_ref` | array 1D o `ReferenceSourceCalibration` | dB | `(bandas,)` | $L_{W(\mathrm{RSS})}$ calibrado en las condiciones del ensayo; una [`ReferenceSourceCalibration`](/phonometry/es/devices/emission/free-field-qualification/) se suma de sus bandas de tercio de octava a las octavas de `frequencies` y se lee allí, menos su propio $C_2$ |
+| `reference_levels` | array 1D o 2D | dB | `(bandas,)` o `(NM, bandas)` | La fuente de referencia en las mismas posiciones, o en el mismo recorrido |
+| `reference_sound_power_levels` | array 1D o `ReferenceSourceCalibration` | dB | `(bandas,)` | $L_{W(\mathrm{RSS})}$ calibrado en las condiciones del ensayo; una [`ReferenceSourceCalibration`](/phonometry/es/devices/emission/free-field-qualification/) se suma de sus bandas de tercio de octava a las octavas de `frequencies` y se lee allí, menos su propio $C_2$ |
 | `frequencies` | array 1D | Hz | octavas de 125 Hz a 8 kHz | Centros de octava ascendentes (3.11); se acepta 63 Hz donde la sala y la instrumentación son satisfactorias en esa banda (nota de la Tabla B.1) |
 | `background_levels` | array 1D o 2D | dB | `(bandas,)` o `(NM, bandas)` | $L_{pi(\mathrm{B})}$, promediados con la Ec. 12. `None` avisa y deja `background_requirement_met` en `False` en todas las bandas |
-| `background_levels_ref` | array 1D o 2D | dB | mismas formas | Ruido de fondo de la lectura de la fuente de referencia; `None` reutiliza `background_levels` |
+| `reference_background_levels` | array 1D o 2D | dB | mismas formas | Ruido de fondo de la lectura de la fuente de referencia; `None` reutiliza `background_levels` |
 | `temperature_c` | float | °C | por defecto `23.0` | Para $C_2$ (Anexo A) |
 | `static_pressure_kpa` | float | kPa | por defecto `101.325` | Para $C_2$; `static_pressure_from_altitude` la da a partir de la altitud (Ec. A.2) |
 | `sigma_omc_db` | float | dB | $\ge 0$ | Condiciones de funcionamiento y montaje (9.2); `None` deja la incertidumbre en `NaN` |
@@ -249,12 +249,12 @@ plt.show()
 La función devuelve un `HardWalledSoundPowerResult`: `sound_power_level`
 (Ec. 14), `mean_source_level`, `mean_reference_level` y
 `mean_background_level` (Ec. 10 a 12), `reference_power_level`,
-`background_correction` y `background_correction_ref` por banda,
+`background_correction` y `reference_background_correction` por banda,
 `background_requirement_met`, `upper_bound`, `c2`, `sigma_r0` por banda (Tabla 3) y
 `sigma_r0_a`, `sigma_omc_db`, `coverage_factor`, `sound_power_level_a`,
 `n_microphone_positions` y `n_source_positions`; lo completan las propiedades
 `sigma_tot`, `expanded_uncertainty` (y sus formas `_a`) y
-`sound_power_level_ref`.
+`sound_power_level_at_reference_conditions`.
 
 ### Ráfagas: el nivel de energía acústica (Ec. 15 a 20)
 
@@ -454,7 +454,7 @@ la calibración, que el apartado 8.4 de la ISO 6926 pide que compartan el
 laboratorio y el usuario. Los niveles que se pasan como tales se toman como
 ya llevados al ensayo, y entonces las condiciones solo tienen que ser
 válidas. Los niveles de la sala que se pasan son `sound_power_level`, el
-nivel en el ensayo, y no `sound_power_level_ref`, que el Anexo E ya ha
+nivel en el ensayo, y no `sound_power_level_at_reference_conditions`, que el Anexo E ya ha
 llevado a las condiciones de referencia y que entonces contaría $C_2$ dos
 veces. Aquí los mismos niveles de la sala se leen como un ensayo a 22 °C y
 97,5 kPa, frente a una calibración ISO 6926 de la misma fuente hecha en una
@@ -621,10 +621,10 @@ plt.show()
 | `temperature_c`, `static_pressure_kpa` | float | °C, kPa | `23.0`, `101.325` | Para $C_2$ (Anexo E) |
 | `sigma_omc_db`, `coverage_factor` | float | dB, | `None`, `2.0` | Fórmulas 12 y 13 |
 
-`sound_power_special_room_comparison()` recibe `levels`, `levels_ref` (al
-menos seis posiciones, 10.3), `lw_ref` (los niveles o una
+`sound_power_special_room_comparison()` recibe `levels`, `reference_levels` (al
+menos seis posiciones, 10.3), `reference_sound_power_levels` (los niveles o una
 `ReferenceSourceCalibration`, como en la Parte 1), `frequencies`,
-`background_levels`, `background_levels_ref` y los mismos cuatro últimos
+`background_levels`, `reference_background_levels` y los mismos cuatro últimos
 argumentos. Ambas
 devuelven un `SpecialRoomSoundPowerResult`: `sound_power_level`,
 `mean_pressure_level`, `background_correction`,
@@ -697,7 +697,7 @@ high = emission.sound_power_hard_walled(
     temperature_c=19.0, static_pressure_kpa=ps,
 )
 print(round(ps, 2), round(high.c2, 3))            # 88.79 kPa, 0.488 dB (Ec. A.2, A.1)
-print(round(high.sound_power_level_a_ref, 1))     # 100.6 dB(A) en las condiciones de referencia
+print(round(high.sound_power_level_a_at_reference_conditions, 1))     # 100.6 dB(A) en las condiciones de referencia
 print(round(emission.reproducibility_from_round_robin(1.9, 1.1), 2))  # 1.55 dB (Ec. 24)
 ```
 
@@ -819,7 +819,7 @@ calibración, el Anexo A de la Parte 2 (A.1 y la Tabla A.1: ±1 dB de 100 Hz a
 para la Parte 1, son cosa de su certificado de calibración y no se juzgan
 aquí. Una calibración ISO 6926 hecha en
 [Campo libre y fuente de referencia](/phonometry/es/devices/emission/free-field-qualification/), que juzga los requisitos de
-ISO 6926, la toman ambas comparaciones como `lw_ref`, y la evaluación de
+ISO 6926, la toman ambas comparaciones como `reference_sound_power_levels`, y la evaluación de
 idoneidad de 6.7 como `calibrated_power_levels`, y la leen en las
 condiciones del ensayo.
 </ScopeClaim>

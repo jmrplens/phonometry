@@ -274,8 +274,8 @@ its bin by [`bin_amplitude_modulation`](/phonometry/reference/api/environment/wi
 bin_amplitude_modulation(
     ratings_db: ArrayLike,
     wind_speeds_m_s: ArrayLike,
-    wind_directions_deg: ArrayLike | None = None,
     *,
+    wind_directions_deg: ArrayLike | None = None,
     bands: Iterable[int] = (1, 2, 3),
     excluded: ArrayLike | None = None,
     sector_width_deg: float = 30.0,
@@ -357,7 +357,7 @@ speed; one column per band in `bands`.
 BinnedModulation.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -432,7 +432,7 @@ ModulationBlock.plot(
     ax: Axes | None = None,
     *,
     kind: Literal['spectrum', 'series'] = 'spectrum',
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -545,7 +545,7 @@ Number of valid blocks, the `n` number of 13.6.2.2.
 ModulationPeriod.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

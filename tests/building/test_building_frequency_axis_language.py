@@ -100,10 +100,10 @@ def _radiated_power(language: str) -> Axes:
     result = ph.building.radiated_sound_power(
         [
             ph.building.FacadeElement(
-                "wall", area=176.0, r=[36, 36, 33, 39, 49, 57, 63]
+                name="wall", area=176.0, r=[36, 36, 33, 39, 49, 57, 63]
             ),
             ph.building.FacadeElement(
-                "door", area=24.0, r=[23, 28, 30, 30, 30, 30, 30]
+                name="door", area=24.0, r=[23, 28, 30, 30, 30, 30, 30]
             ),
         ],
         lp_in=[74, 76, 72, 70, 67, 62, 57],

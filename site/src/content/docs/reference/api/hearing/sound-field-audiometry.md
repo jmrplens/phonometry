@@ -252,7 +252,7 @@ DiffuseSoundFieldCheck(
     left_right_difference: np.ndarray,
     directional_variation_db: np.ndarray,
     front_to_random_index: np.ndarray | None,
-    standard: str,
+    standard: Literal['ISO 8253-2 5.3', 'ISO 4869-3 5.2.2'],
     positions: tuple[str, ...] = ('front', 'back', 'left', 'right', 'up', 'down'),
 )
 ```
@@ -351,7 +351,7 @@ Whether the field qualifies as diffuse, every requirement judged.
 DiffuseSoundFieldCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -499,7 +499,7 @@ Whether the field qualifies at every test frequency given.
 FreeSoundFieldCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

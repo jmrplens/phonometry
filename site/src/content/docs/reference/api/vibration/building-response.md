@@ -87,7 +87,7 @@ The ± 50 % band of D.2 around `frequency_hz`.
 BuildingFrequencyEstimate.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

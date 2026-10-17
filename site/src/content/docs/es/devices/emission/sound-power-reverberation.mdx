@@ -358,7 +358,7 @@ El procedimiento son dos mediciones y dos fondos. La fuente de ensayo se mide
 primero, en las seis posiciones o sobre el recorrido de la sección 1. La RSS se
 pone después en marcha **en la misma cámara, en las mismas posiciones de
 micrófono o sobre el mismo recorrido**, con la fuente en ensayo dejada donde
-estaba, y con su propia lectura de fondo (para eso está `background_levels_ref`).
+estaba, y con su propia lectura de fondo (para eso está `reference_background_levels`).
 La RSS se sitúa sobre el suelo a más de 1,5 m de las paredes; la posición
 preferida es la que ocupa la fuente en ensayo, y cuando esta no se puede mover,
 la RSS se coloca lo más cerca de ella que resulte practicable, pero nunca a menos
@@ -387,19 +387,19 @@ de las dos fuentes.
 
 ### Parámetros de `sound_power_comparison()`
 
-`sound_power_comparison(levels, levels_ref, lw_ref, *, frequencies=None,
-background_levels=…, background_levels_ref=…, temperature_c=23.0,
+`sound_power_comparison(levels, reference_levels, reference_sound_power_levels, *, frequencies=None,
+background_levels=…, reference_background_levels=…, temperature_c=23.0,
 static_pressure_kpa=101.325)` toma los mismos niveles de cámara más los niveles
 de la fuente de referencia y su potencia conocida.
 
 | Parámetro | Tipo | Unidades | Rango / defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
-| `levels_ref` | array 1D o 2D | dB | coincide con `levels` | SPL medio de cámara con la fuente de referencia (RSS) en marcha |
-| `lw_ref` | array 1D o `ReferenceSourceCalibration` | dB | por banda | Potencia acústica conocida $L_W(\text{RSS})$ de la fuente de referencia, de su calibración ISO 6926; una [`ReferenceSourceCalibration`](/phonometry/es/devices/emission/free-field-qualification/) se lee en las bandas de tercio de octava de `frequencies` |
+| `reference_levels` | array 1D o 2D | dB | coincide con `levels` | SPL medio de cámara con la fuente de referencia (RSS) en marcha |
+| `reference_sound_power_levels` | array 1D o `ReferenceSourceCalibration` | dB | por banda | Potencia acústica conocida $L_W(\text{RSS})$ de la fuente de referencia, de su calibración ISO 6926; una [`ReferenceSourceCalibration`](/phonometry/es/devices/emission/free-field-qualification/) se lee en las bandas de tercio de octava de `frequencies` |
 | `background_levels` | array 1D o 2D | dB | coincide con `levels` | Ruido de fondo de la fuente de ensayo; $K_1$ por banda sobre $L_p(\text{ST})$ |
-| `background_levels_ref` | array 1D o 2D | dB | coincide con `levels_ref` | Ruido de fondo de la fuente de **referencia**; $K_1$ por banda sobre $L_p(\text{RSS})$ |
+| `reference_background_levels` | array 1D o 2D | dB | coincide con `reference_levels` | Ruido de fondo de la fuente de **referencia**; $K_1$ por banda sobre $L_p(\text{RSS})$ |
 
-`background_levels_ref` corrige por ruido de fondo el nivel de cámara de la fuente
+`reference_background_levels` corrige por ruido de fondo el nivel de cámara de la fuente
 de referencia $L_p(\text{RSS})$ igual que `background_levels` lo hace para la
 fuente de ensayo; ambos requieren `frequencies` (el criterio ISO 3741 depende de
 la frecuencia).
@@ -593,7 +593,7 @@ print(np.round(lj_octave, 1))         # de 99.8 dB a 87.7 dB, tres tercios sumad
 | :--- | :--- | :--- | :--- | :--- |
 | `levels` | array 1D, 2D o 3D | dB | por banda, `(NM, NB)` o `(Ne, NM, NB)` | Niveles de suceso aislado: por suceso en el primer eje (Ec. 22), una lectura de `n_events` sucesos (Ec. 23), o la media de un suceso |
 | `t60`, `volume`, `surface_area`, `frequencies` | como en la sección 1 | | | Solo método directo. Ahí `frequencies` es obligatorio; el método de comparación lo pide solo cuando se da `background_levels`, porque la corrección es por banda |
-| `levels_ref`, `lw_ref`, `background_levels_ref` | como en la sección 2 | | | Solo método de comparación; la fuente de referencia es estacionaria y conserva la corrección de 9.1.2 |
+| `reference_levels`, `reference_sound_power_levels`, `reference_background_levels` | como en la sección 2 | | | Solo método de comparación; la fuente de referencia es estacionaria y conserva la corrección de 9.1.2 |
 | `n_events` | int o None | | `>= 1`, por defecto `None` | $N_\mathrm{e}$ abarcados por una lectura (Ec. 23); al menos 5 sin aviso |
 | `background_levels` | array 1D o 2D | dB | coincide con `levels` | Fondo promediado en el tiempo sobre la misma ventana; $K_{1i}$ por posición (Ec. 25/26) |
 | `integration_time` | float | s | > 0, obligatorio con `background_levels` | La ventana $T$; el fondo se compara como $L_{pi(\mathrm{B})} + 10\log_{10}(T/T_0)$ |

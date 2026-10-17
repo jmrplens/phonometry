@@ -108,9 +108,9 @@ d = math.hypot(d_p, 3.0)
 levels = np.asarray(
     environment.predicted_receiver_level(
         np.full(8, 93.0),
-        environment.PropagationGeometry(d, 1.0, 4.0, projected_distance=d_p),
+        environment.PropagationGeometry(distance=d, source_height_m=1.0, receiver_height_m=4.0, projected_distance=d_p),
         frequencies=bands,
-        ground=environment.GroundFactors(1.0, 1.0, 1.0),
+        ground=environment.GroundFactors(source=1.0, middle=1.0, receiver=1.0),
         atmosphere=environment.AtmosphericConditions(
             temperature_c=20.0, relative_humidity_percent=70.0
         ),

@@ -87,6 +87,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
 
 
@@ -104,7 +106,7 @@ from ..._internal.validation import (
 )
 from ..._internal.warnings import PhonometryWarning
 from ...filters.frequencies import _nominal_freq_for_band
-from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ...metrology.reference_values import REFERENCE_VALUES
 from ...metrology.uncertainty import (
     Quantity,
     UncertaintyResult,
@@ -220,8 +222,8 @@ _THIRD_OCTAVE = 3
 #: The references ISO 10846-4:2003 3.15 and 3.16 give the force and
 #: acceleration levels of Inequality (3): 1 µN and 1 µm/s², which are those of
 #: ISO 1683:2015 Table 3.
-_FORCE_REFERENCE_N = ISO1683_REFERENCE_VALUES["solid"]["force"].value
-_ACCELERATION_REFERENCE_M_S2 = ISO1683_REFERENCE_VALUES["solid"]["acceleration"].value
+_FORCE_REFERENCE_N = REFERENCE_VALUES["solid"]["force"].value
+_ACCELERATION_REFERENCE_M_S2 = REFERENCE_VALUES["solid"]["acceleration"].value
 
 
 class TransferStiffnessWarning(PhonometryWarning):
@@ -585,7 +587,17 @@ class TransferStiffnessResult(OwnsArrays):
         """
         return loss_factor(self.transfer_stiffness)
 
-    def to(self, target: str) -> np.ndarray:
+    def to(
+        self,
+        target: Literal[
+            "receptance",
+            "mobility",
+            "accelerance",
+            "dynamic_stiffness",
+            "impedance",
+            "apparent_mass",
+        ],
+    ) -> np.ndarray:
         r"""Convert :math:`k_{2,1}` to an FRF (ISO 10846-1 Annex A / Table A.2).
 
         ``target`` is ``"impedance"`` (:math:`Z = k/(j\omega)`) or
@@ -620,7 +632,7 @@ class TransferStiffnessResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the transfer-stiffness level ``L_k(f)``.
 
@@ -639,9 +651,9 @@ class TransferStiffnessResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         r"""Render a dynamic-transfer-stiffness fiche to a PDF (ISO 10846).
 
@@ -897,7 +909,7 @@ class BandAveragedStiffness(OwnsArrays):
         return out
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the band levels, with the undetermined bands marked.
 
@@ -1147,7 +1159,7 @@ class LevelDifferenceCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the level difference against its limit, failures marked.
 
@@ -1442,7 +1454,7 @@ class OutputMassCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the mass limit over frequency against the mass in place.
 
@@ -1683,7 +1695,7 @@ class EffectiveBlockingMass(OwnsArrays):
         return np.asarray(freq < freq[first])
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the deviation from ``m2`` with the 1 dB tolerance and ``f3``.
 
@@ -1703,7 +1715,7 @@ class EffectiveBlockingMass(OwnsArrays):
 
 
 def effective_blocking_mass(
-    force: ArrayLike,
+    force_n: ArrayLike,
     first_acceleration_m_s2: ArrayLike,
     second_acceleration_m_s2: ArrayLike,
     *,
@@ -1722,7 +1734,7 @@ def effective_blocking_mass(
     ``f3``.
 
     :param frequencies: Frequencies, in hertz, strictly increasing.
-    :param force: Excitation force phasor ``F2``, in N, one per frequency.
+    :param force_n: Excitation force phasor ``F2``, in N, one per frequency.
     :param first_acceleration_m_s2: Acceleration phasor :math:`a'_1`, in
         m/s², one per frequency.
     :param second_acceleration_m_s2: Acceleration phasor :math:`a''_1`, in
@@ -1738,11 +1750,11 @@ def effective_blocking_mass(
     blocking_mass = require_positive(blocking_mass, "blocking_mass")
     freq = _frequency_axis(frequencies, owner)
     _require_increasing(freq, owner)
-    force = np.asarray(force, dtype=np.complex128)
+    force_n = np.asarray(force_n, dtype=np.complex128)
     first = np.asarray(first_acceleration_m_s2, dtype=np.complex128)
     second = np.asarray(second_acceleration_m_s2, dtype=np.complex128)
     if (
-        force.shape != freq.shape
+        force_n.shape != freq.shape
         or first.shape != freq.shape
         or second.shape != freq.shape
     ):
@@ -1758,7 +1770,7 @@ def effective_blocking_mass(
             "m2,eff is undefined there."
         )
         raise ValueError(msg)
-    m_eff = np.abs(2.0 * force / summed)
+    m_eff = np.abs(2.0 * force_n / summed)
     if not np.all(np.isfinite(m_eff)) or not np.all(m_eff > 0.0):
         msg = f"{owner}: the effective mass must be finite and positive at every frequency."
         raise ValueError(msg)
@@ -2007,7 +2019,7 @@ class DrivingPointStiffnessResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot the driving-point stiffness level with the 6.2 threshold and :math:`f_\mathrm{UL}`.
 
@@ -2209,7 +2221,7 @@ class DrivingPointUncertainty(RichDisplay):
         return self.coverage_factor * self.combined_uncertainty_db
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the contribution of each input quantity, with ``u`` and ``U``.
 
@@ -2311,25 +2323,40 @@ def driving_point_uncertainty(
     }
     quantities = (
         Quantity(
-            band_level,
-            u["signal_uncertainty_db"],
-            "gaussian",
+            value=band_level,
+            uncertainty=u["signal_uncertainty_db"],
+            distribution="gaussian",
             name=_ANNEX_B_NAMES[0],
         ),
         Quantity(
-            0.0, u["instrumentation_uncertainty_db"], "gaussian", name=_ANNEX_B_NAMES[1]
+            value=0.0,
+            uncertainty=u["instrumentation_uncertainty_db"],
+            distribution="gaussian",
+            name=_ANNEX_B_NAMES[1],
         ),
         Quantity(
-            0.0, 0.5 * spread / math.sqrt(3.0), "rectangular", name=_ANNEX_B_NAMES[2]
+            value=0.0,
+            uncertainty=0.5 * spread / math.sqrt(3.0),
+            distribution="rectangular",
+            name=_ANNEX_B_NAMES[2],
         ),
         Quantity(
-            0.0, u["test_rig_uncertainty_db"], "rectangular", name=_ANNEX_B_NAMES[3]
+            value=0.0,
+            uncertainty=u["test_rig_uncertainty_db"],
+            distribution="rectangular",
+            name=_ANNEX_B_NAMES[3],
         ),
         Quantity(
-            0.0, u["discrepancy_uncertainty_db"], "rectangular", name=_ANNEX_B_NAMES[4]
+            value=0.0,
+            uncertainty=u["discrepancy_uncertainty_db"],
+            distribution="rectangular",
+            name=_ANNEX_B_NAMES[4],
         ),
         Quantity(
-            0.0, u["linearity_uncertainty_db"], "rectangular", name=_ANNEX_B_NAMES[5]
+            value=0.0,
+            uncertainty=u["linearity_uncertainty_db"],
+            distribution="rectangular",
+            name=_ANNEX_B_NAMES[5],
         ),
     )
     budget = uncertainty_propagation(_sum_of_inputs, quantities)

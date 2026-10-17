@@ -66,7 +66,8 @@ _A2_DRAFT = "E DIN EN 62489-1/A2:2017-10"
 _FS = 48000
 
 
-# A verdict is a flag
+# The verdict is the one argument, and the function's name already says it:
+# a keyword at every call would only repeat it.
 def _pass_fail(passes: bool) -> float:  # noqa: FBT001
     """A verdict as the 1 or 0 a record compares."""
     return 1.0 if passes else 0.0
@@ -723,7 +724,7 @@ def _register_table_b1() -> None:
             computed = ea.loop_resistance(perimeter, area, n_turns=n_turns)
             label = f"{resistance:.2f} ohm"
             # Rounding of the column
-            if abs(perimeter - printed_perimeter) > 0.051:  # noqa: PLR2004
+            if abs(perimeter - printed_perimeter) > 0.051:
                 label += f" (with the {perimeter:.1f} m its sides give, see ERRATA)"
             return numeric(
                 resistance, computed, 0.005, unit="ohm", places=3, expected_label=label

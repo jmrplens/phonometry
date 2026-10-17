@@ -69,6 +69,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
 
 __all__ = [
@@ -298,7 +300,7 @@ def _task_sampling_uncertainty(levels: Sequence[float]) -> float:
 # --------------------------------------------------------------------------- #
 # Result dataclasses.
 # --------------------------------------------------------------------------- #
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class Task(RichDisplay):
     """One task of a task-based measurement (ISO 9612:2009 Clause 9).
 
@@ -414,7 +416,7 @@ class TaskContribution(RichDisplay):
         )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ExposureResult(RichDisplay):
     r"""Daily noise exposure level and its expanded uncertainty (ISO 9612:2009).
 
@@ -442,7 +444,7 @@ class ExposureResult(RichDisplay):
     lex_8h: float
     combined_standard_uncertainty: float
     expanded_uncertainty: float
-    strategy: str
+    strategy: Literal["task", "job", "full_day"]
     coverage_factor: float = COVERAGE_FACTOR
     lp_aeqte: float | None = None  # energy-averaged level (job/full-day), dB
     effective_duration_hours: float | None = None  # T_e, hours
@@ -451,7 +453,6 @@ class ExposureResult(RichDisplay):
     u2: float | None = None
     u3: float | None = None
     n_samples: int | None = None
-    _: KW_ONLY
     instrument: InstrumentClass | None = None
     tasks: tuple[TaskContribution, ...] = field(default_factory=tuple)
     sample_range_db: float | None = None
@@ -576,7 +577,7 @@ class ExposureResult(RichDisplay):
         return self.lex_8h + self.expanded_uncertainty
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-task contributions with the ``LEX,8h`` line.
 
@@ -597,9 +598,9 @@ class ExposureResult(RichDisplay):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an ISO 9612 occupational noise-exposure fiche to a PDF.
 
@@ -821,7 +822,7 @@ def _sampled_exposure(
     effective_duration_hours: float,
     instrument: InstrumentClass,
     u3: float,
-    strategy: str,
+    strategy: Literal["task", "job", "full_day"],
     *,
     warn: bool,
 ) -> ExposureResult:
@@ -883,8 +884,8 @@ def job_based_exposure(
     instrument: InstrumentClass = "personal_exposimeter",
     u3: float = _U3_DEFAULT,
     n_workers: int | None = None,
-    sample_duration_hours: float | None = None,
     *,
+    sample_duration_hours: float | None = None,
     warn: bool = True,
 ) -> ExposureResult:
     r"""Daily noise exposure level from job-based measurements (ISO 9612:2009 Clause 10).

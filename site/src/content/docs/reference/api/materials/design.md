@@ -105,7 +105,7 @@ A predicted far-field polar response of a diffuser at one frequency.
 DiffuserPolarResponse.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -121,7 +121,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the polar
 DiffuserPolarResponse.plot_geometry(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -147,7 +147,7 @@ plot_qrd_geometry(
     ax: Axes | None = None,
     n_repetitions: int = 1,
     fin_width: float | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

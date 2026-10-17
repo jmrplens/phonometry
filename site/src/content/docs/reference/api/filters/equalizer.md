@@ -94,7 +94,7 @@ Frequency response of a parametric-EQ cascade (RBJ Audio EQ Cookbook).
 EQResponseResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     show_sections: bool = True,
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
@@ -118,6 +118,7 @@ With `ax` given, only the magnitude panel is drawn on it.
 
 ```python
 EQSection(
+    *,
     filter_type: Literal['peaking', 'lowshelf', 'highshelf', 'lowpass', 'highpass', 'bandpass', 'bandpass_skirt', 'notch', 'allpass'],
     f0: float,
     gain_db: float = 0.0,

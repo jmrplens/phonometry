@@ -199,6 +199,7 @@ $\rho_a = \phi \rho_0 (\alpha_\infty - 1)$ (Eq. (6.44)):
 
 ```python
 BiotWavesResult(
+    *,
     frequencies: NDArray[np.float64],
     porosity: float,
     tortuosity: float,
@@ -302,7 +303,7 @@ Wavenumber `delta_b` of the frame-borne wave, in rad/m.
 BiotWavesResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

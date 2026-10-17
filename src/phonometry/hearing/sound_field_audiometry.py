@@ -69,7 +69,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
@@ -82,6 +82,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
+
+    from .._i18n import Language
 
 __all__ = [
     "DIFFUSE_FIELD_VARIATION_LIMITS",
@@ -174,8 +176,8 @@ DIFFUSE_FIELD_VARIATION_LIMITS: tuple[tuple[float, float], ...] = (
 
 #: The two clauses that judge a diffuse field the same way, each with its own
 #: Table 1.
-_SOUND_FIELD_CLAUSE = "ISO 8253-2 5.3"
-_RANDOM_INCIDENCE_CLAUSE = "ISO 4869-3 5.2.2"
+_SOUND_FIELD_CLAUSE: Final = "ISO 8253-2 5.3"
+_RANDOM_INCIDENCE_CLAUSE: Final = "ISO 4869-3 5.2.2"
 
 #: The test frequencies of Table B.1, in hertz, 125 Hz to 12,5 kHz. The
 #: paragraph above the table announces them from 200 Hz; the table prints
@@ -456,7 +458,7 @@ class DiffuseSoundFieldCheck(OwnsArrays):
     left_right_difference: np.ndarray
     directional_variation_db: np.ndarray
     front_to_random_index: np.ndarray | None
-    standard: str
+    standard: Literal["ISO 8253-2 5.3", "ISO 4869-3 5.2.2"]
     positions: tuple[str, ...] = _DIFFUSE_POSITIONS
 
     def __post_init__(self) -> None:
@@ -574,7 +576,7 @@ class DiffuseSoundFieldCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw each condition against its limit, band by band.
 
@@ -596,7 +598,7 @@ def _diffuse_field_check(
     front_to_random_index: ArrayLike | None,
     frequencies: ArrayLike | None,
     default_frequencies: np.ndarray | tuple[float, ...],
-    standard: str,
+    standard: Literal["ISO 8253-2 5.3", "ISO 4869-3 5.2.2"],
     owner: str,
 ) -> DiffuseSoundFieldCheck:
     """The diffuse-field judgement both ISO 8253-2 and ISO 4869-3 make.
@@ -982,7 +984,7 @@ class FreeSoundFieldCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the lateral and axial conditions against their limits.
 

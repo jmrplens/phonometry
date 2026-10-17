@@ -67,6 +67,7 @@ from ._layout import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..environment.assessment.impulsive_sound import ImpulseProminenceResult
     from .metadata import ReportMetadata
 
@@ -78,7 +79,7 @@ if TYPE_CHECKING:
 _MAX_TABLE_ROWS = 12
 
 
-def _fmt(value: float, language: str, decimals: int = 1) -> str:
+def _fmt(value: float, language: Language, decimals: int = 1) -> str:
     """A quantity rounded to ``decimals`` decimals, localised separator."""
     return format_number(float(value), language, decimals=decimals)
 
@@ -121,7 +122,7 @@ def _select_rows(per_impulse: np.ndarray, governing: int) -> tuple[list[int], in
     return sorted(top), n - len(top)
 
 
-def _qualifies_markup(*, qualifies: bool, language: str = "en") -> str:
+def _qualifies_markup(*, qualifies: bool, language: Language = "en") -> str:
     """Inline markup for the per-impulse qualifies column.
 
     An onset qualifies as an impulse when its onset rate exceeds 10 dB/s
@@ -136,7 +137,7 @@ def _qualifies_markup(*, qualifies: bool, language: str = "en") -> str:
 def _metadata_pairs(
     result: ImpulseProminenceResult,
     metadata: ReportMetadata | None,
-    language: str = "en",
+    language: Language = "en",
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the assessment header grid.
 
@@ -168,7 +169,9 @@ def _metadata_pairs(
     return [(label, value) for label, value in specs if value]
 
 
-def _per_impulse_table(result: ImpulseProminenceResult, language: str = "en") -> Table:
+def _per_impulse_table(
+    result: ImpulseProminenceResult, language: Language = "en"
+) -> Table:
     """The full-width per-impulse table (onset rate, level difference, P).
 
     One row per candidate impulse: the onset rate (dB/s), the level difference
@@ -242,7 +245,7 @@ def _per_impulse_table(result: ImpulseProminenceResult, language: str = "en") ->
 
 
 def _statement(
-    result: ImpulseProminenceResult, language: str = "en"
+    result: ImpulseProminenceResult, language: Language = "en"
 ) -> tuple[str, list[str]]:
     """The boxed governing prominence ``P`` and the derived adjustment ``KI``.
 
@@ -273,7 +276,7 @@ def _statement(
 
 
 def _verdict(
-    result: ImpulseProminenceResult, requirement: float, language: str = "en"
+    result: ImpulseProminenceResult, requirement: float, language: Language = "en"
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag against a supplied maximum governing prominence.
 
@@ -292,7 +295,7 @@ def _verdict(
     return text, passed
 
 
-def _basis_line(measurement_standard: str | None, language: str = "en") -> str:
+def _basis_line(measurement_standard: str | None, language: Language = "en") -> str:
     """The standard-basis line, with the measurement standard when supplied."""
     if measurement_standard:
         return t(
@@ -308,7 +311,7 @@ def _basis_line(measurement_standard: str | None, language: str = "en") -> str:
     )
 
 
-def _prominence_note(result: ImpulseProminenceResult, language: str = "en") -> str:
+def _prominence_note(result: ImpulseProminenceResult, language: Language = "en") -> str:
     """The prominence-category note: whether a prominent impulse is present.
 
     Two independent gates can withhold the adjustment, so the note states the
@@ -348,7 +351,7 @@ def render_impulse_prominence_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an impulsive-sound prominence assessment fiche to a PDF at ``path``.
 

@@ -60,6 +60,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from ..._i18n import Language
     from ...io._signal import Signal
 
 __all__ = [
@@ -77,13 +78,13 @@ _ENERGY_LOW = 0.05
 _ENERGY_HIGH = 0.95
 
 
-def single_strike_sel(pressure: SignalInput, fs: float | None = None) -> float:
+def single_strike_sel(pressure_pa: SignalInput, fs: float | None = None) -> float:
     """Single-strike sound exposure level ``SEL_ss`` (ISO 18406 Formulae 3-4).
 
     The sound exposure level of one hammer-strike pulse, integrated over the
     pulse, in dB re 1 µPa²·s.
 
-    :param pressure: Sound-pressure time series of one strike (1-D), in
+    :param pressure_pa: Sound-pressure time series of one strike (1-D), in
         Pa. Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the
         samples: this quantity is a pressure, and the underwater reference
@@ -95,7 +96,7 @@ def single_strike_sel(pressure: SignalInput, fs: float | None = None) -> float:
     :return: Single-strike SEL, in dB re 1 µPa²·s.
     :raises ValueError: If the inputs are invalid.
     """
-    return sound_exposure_level(pressure, fs)
+    return sound_exposure_level(pressure_pa, fs)
 
 
 def cumulative_sel(single_sels: NDArray[np.float64] | list[float]) -> float:
@@ -181,14 +182,14 @@ def _require_metrics_restate(result: PileStrikeResult) -> None:
     being excused by it.
 
     :param result: The strike whose stored metrics are measured.
-    :raises ValueError: if any of the four does not restate ``pressure``, or
+    :raises ValueError: if any of the four does not restate ``pressure_pa``, or
         ``pulse_duration`` does not restate it at ``fs``.
     """
     # In pascals whatever the stored type: a Signal presents its samples
     # through its own calibration, which is 1.0 on the ones this module
     # builds and may be anything on one built by hand.
     trace = apply_calibration(
-        result.pressure, np.asarray(result.pressure, dtype=np.float64)
+        result.pressure_pa, np.asarray(result.pressure_pa, dtype=np.float64)
     )
     # A trace carrying no energy has no exposure and no pressure level, and
     # the two entry points that compute them say so by refusing outright. The
@@ -220,7 +221,7 @@ def _require_metrics_restate(result: PileStrikeResult) -> None:
         if math.isclose(stored, expected, rel_tol=0.0, abs_tol=1e-9):
             continue
         msg = (
-            f"PileStrikeResult: '{name}' must be {what} of 'pressure', the "
+            f"PileStrikeResult: '{name}' must be {what} of 'pressure_pa', the "
             f"trace it summarises; got {stored!r} where the trace states "
             f"{expected!r}."
         )
@@ -273,7 +274,7 @@ class PileStrikeResult(OwnsArrays):
     :ivar peak_spl: Zero-to-peak sound pressure level, in dB re 1 µPa.
     :ivar spl: Sound pressure level (Leq over the record), in dB re 1 µPa.
     :ivar pulse_duration: 90 %-energy pulse duration, in s.
-    :ivar pressure: The strike pressure waveform, in Pa, in the type it
+    :ivar pressure_pa: The strike pressure waveform, in Pa, in the type it
         arrived as: a :class:`~phonometry.io.Signal` when the input was one
         (carrying ``calibration_factor=1.0`` when it was calibrated), a bare
         array otherwise.
@@ -284,7 +285,7 @@ class PileStrikeResult(OwnsArrays):
     peak_spl: float
     spl: float
     pulse_duration: float
-    pressure: Signal | NDArray[np.float64]
+    pressure_pa: Signal | NDArray[np.float64]
     fs: float
 
     def __post_init__(self) -> None:
@@ -312,37 +313,37 @@ class PileStrikeResult(OwnsArrays):
         recomputed a metric along another floating-point path is not refused
         over the last bit.
 
-        :raises ValueError: if ``pressure`` is not a non-empty, finite,
+        :raises ValueError: if ``pressure_pa`` is not a non-empty, finite,
             one-dimensional trace, is a Signal at a rate other than ``fs``, or
             any of the four stored metrics does not restate it.
         """
-        trace = np.asarray(self.pressure)
+        trace = np.asarray(self.pressure_pa)
         # The rank helper waives its pin when every field it was given is a
         # bare number, an exemption meant for the entry points that answer in
-        # scalars. Here 'pressure' is the only field listed, so a lone number
+        # scalars. Here 'pressure_pa' is the only field listed, so a lone number
         # satisfies the whole set and walks past it, with a size of one and a
         # peak of its own that the comparison below is happy to confirm. A
         # trace of one sample is a trace; a number is not one, so the rank is
         # pinned here in its own right.
         if trace.ndim != 1:
             msg = (
-                "PileStrikeResult: 'pressure' must be a one-dimensional "
+                "PileStrikeResult: 'pressure_pa' must be a one-dimensional "
                 f"waveform; got shape {trace.shape}."
             )
             raise ValueError(msg)
-        require_ranks(self, pressure=1)
-        require_signal_rate(self, "pressure", self.fs)
+        require_ranks(self, pressure_pa=1)
+        require_signal_rate(self, "pressure_pa", self.fs)
         if trace.size == 0:
             msg = (
-                "PileStrikeResult: 'pressure' must carry at least one sample; "
+                "PileStrikeResult: 'pressure_pa' must carry at least one sample; "
                 "a strike with no waveform has no peak to state."
             )
             raise ValueError(msg)
-        require_finite_fields(self, "pressure")
+        require_finite_fields(self, "pressure_pa")
         _require_metrics_restate(self)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | NDArray[Any]:
         """Plot the strike waveform and its cumulative energy."""
         from ..._i18n import check_language
@@ -456,7 +457,7 @@ class StrikeSELSpectrum(OwnsArrays):
             raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-band single-strike SEL."""
         from ..._i18n import check_language
@@ -468,7 +469,7 @@ class StrikeSELSpectrum(OwnsArrays):
 
 
 def strike_sel_spectrum(
-    pressure: SignalInput,
+    pressure_pa: SignalInput,
     fs: float | None = None,
     *,
     fraction: int = 3,
@@ -488,7 +489,7 @@ def strike_sel_spectrum(
     handed straight to
     :func:`~phonometry.underwater.bioacoustics.weighting.weighted_exposure`.
 
-    :param pressure: Sound-pressure time series of one strike (1-D), in
+    :param pressure_pa: Sound-pressure time series of one strike (1-D), in
         Pa. Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the
         samples: this quantity is a pressure, and the underwater reference
@@ -509,8 +510,8 @@ def strike_sel_spectrum(
     """
     from ...filters.frequencies import nominal_frequencies
 
-    fs = resolve_fs(pressure, fs, name="pressure")
-    sig = _validate_pressure(pressure, min_samples=2)
+    fs = resolve_fs(pressure_pa, fs, name="pressure_pa")
+    sig = _validate_pressure(pressure_pa, min_samples=2)
     fs_v = _positive(fs, "fs")
     # The value the caller passed, not its truncation: int() would silently
     # turn 3.9 into one-third octaves and 1.4 into octaves.
@@ -560,7 +561,7 @@ def strike_sel_spectrum(
         band_sel = 10.0 * np.log10(band_energy / e0)
     total = float(band_energy.sum())
     if total <= 0.0:
-        msg = "'pressure' has no energy inside the requested bands."
+        msg = "'pressure_pa' has no energy inside the requested bands."
         raise ValueError(msg)
     return StrikeSELSpectrum(
         frequencies=fc,
@@ -573,14 +574,14 @@ def strike_sel_spectrum(
 
 
 def pile_strike_metrics(
-    pressure: SignalInput, fs: float | None = None
+    pressure_pa: SignalInput, fs: float | None = None
 ) -> PileStrikeResult:
     """Full per-strike pile-driving metrics (ISO 18406).
 
     Bundles the single-strike SEL, the peak sound pressure level, the SPL/Leq
     and the 90 %-energy pulse duration of one recorded hammer strike.
 
-    :param pressure: Sound-pressure time series of one strike (1-D), in
+    :param pressure_pa: Sound-pressure time series of one strike (1-D), in
         Pa. Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the
         samples: this quantity is a pressure, and the underwater reference
@@ -592,14 +593,14 @@ def pile_strike_metrics(
     :return: A :class:`PileStrikeResult`.
     :raises ValueError: If the inputs are invalid.
     """
-    fs = resolve_fs(pressure, fs, name="pressure")
-    sig = _validate_pressure(pressure, min_samples=2)
+    fs = resolve_fs(pressure_pa, fs, name="pressure_pa")
+    sig = _validate_pressure(pressure_pa, min_samples=2)
     fs_v = _positive(fs, "fs")
     return PileStrikeResult(
         single_strike_sel=sound_exposure_level(sig, fs_v),
         peak_spl=peak_sound_pressure_level(sig),
         spl=sound_pressure_level(sig),
         pulse_duration=_pulse_duration(sig, fs_v),
-        pressure=like_input(pressure, sig),
+        pressure_pa=like_input(pressure_pa, sig),
         fs=fs_v,
     )

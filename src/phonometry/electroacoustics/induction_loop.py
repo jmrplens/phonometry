@@ -106,7 +106,7 @@ import itertools
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from scipy import optimize, signal
@@ -132,7 +132,42 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
     from .induction_loop_components import AmplifierFrequencyResponse, LoopImpedance
+
+Weighting = Literal["Z", "A"]
+
+#: The requirements an induction-loop verification grades, by name.
+RequirementName = Literal[
+    "field_strength",
+    "field_strength_reached",
+    "frequency_response",
+    "system_noise",
+    "field_strength_range",
+    "standing_area",
+]
+
+#: The layouts a loop system is verified on: the useful volume of clause 8 and the small-volume layouts of clause 9.
+Layout = Literal[
+    "useful_volume",
+    "refuge_small",
+    "refuge_large",
+    "counter",
+    "refuge_useful_volume",
+    "counter_useful_volume",
+]
+
+#: The small-volume layouts of clause 9.
+SmallVolumeLayout = Literal[
+    "refuge_small",
+    "refuge_large",
+    "counter",
+    "refuge_useful_volume",
+    "counter_useful_volume",
+]
+
+#: The small-volume layouts whose points Figures 2 and 3 print.
+PointLayout = Literal["refuge_small", "refuge_large", "counter"]
 
 __all__ = [
     "OVERLOAD_TEST_FREQUENCIES",
@@ -325,7 +360,13 @@ _USEFUL_VOLUME_HEIGHTS: Mapping[str, tuple[float, ...]] = MappingProxyType(
 #: The layouts :func:`verify_small_volume_system` accepts: the three of
 #: Figures 2 and 3, and the useful magnetic field volume of 9.4 in place of a
 #: refuge's points or a counter's.
-_SMALL_VOLUME_LAYOUTS = (*_LAYOUT_HEIGHTS, *_USEFUL_VOLUME_HEIGHTS)
+_SMALL_VOLUME_LAYOUTS: tuple[SmallVolumeLayout, ...] = (
+    "refuge_small",
+    "refuge_large",
+    "counter",
+    "refuge_useful_volume",
+    "counter_useful_volume",
+)
 
 
 # ---------------------------------------------------------------------------
@@ -437,14 +478,14 @@ class FieldStrengthReading(OwnsArrays):
     """
 
     fs: int
-    weighting: str
+    weighting: Weighting
     times: np.ndarray
     levels: np.ndarray
     max_level: float
     equivalent_level: float
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the meter reading against time, with the 0 dB reference.
 
@@ -463,7 +504,7 @@ class FieldStrengthReading(OwnsArrays):
 
 
 def field_strength_meter(
-    x: ArrayLike, fs: int, *, weighting: str = "Z"
+    x: ArrayLike, fs: int, *, weighting: Weighting = "Z"
 ) -> FieldStrengthReading:
     """Read a magnetic field strength record like the true-RMS meter of 6.1.3.
 
@@ -488,6 +529,7 @@ def field_strength_meter(
 
     record = require_finite_array(x, "x")
     rate = require_count(fs, "fs")
+    curve: Weighting
     curve = require_choice(weighting, "weighting", ("Z", "A"))
     weighted = (
         record if curve == "Z" else np.asarray(weighting_filter(record, rate, "A"))
@@ -544,10 +586,10 @@ def band_limit_response(frequencies: ArrayLike) -> np.ndarray:
 
 def _band_limited_noise(fs: int, n: int, rms: float, seed: int | None) -> np.ndarray:
     """``n`` samples of the pink noise of 6.4 at an RMS of ``rms``."""
-    from ..signals.test_signals import noise_signal
+    from ..signals._test_signals import noise_signal
 
     settle = round(_NOISE_SETTLING_S * fs)
-    raw = noise_signal(float(fs), (n + settle) / fs, color="pink", seed=seed)
+    raw = noise_signal(float(fs), duration_s=(n + settle) / fs, color="pink", seed=seed)
     high = signal.butter(
         _BAND_LIMIT_ORDER, _BAND_LIMIT_HZ[0], "highpass", fs=fs, output="sos"
     )
@@ -701,7 +743,9 @@ def combi_signal(
 # ---------------------------------------------------------------------------
 
 
-def small_volume_measurement_points(layout: str) -> np.ndarray:
+def small_volume_measurement_points(
+    layout: PointLayout,
+) -> np.ndarray:
     """The measurement points of a disabled refuge or a counter (clause 9 as amended).
 
     ``"refuge_small"`` is Figure 2 a), for a magnetic field source of small
@@ -805,7 +849,7 @@ class BackgroundNoiseAssessment(OwnsArrays):
         return self.reference_signal_to_noise_ratio_db < _SNR_MINIMUM_DB
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the noise at each point against the 47, 32 and 22 dB lines.
 
@@ -880,7 +924,7 @@ class LoopRequirement(RichDisplay):
     :ivar upper_limits_db: The upper limit of each, in dB.
     """
 
-    name: str
+    name: RequirementName
     clause: str
     levels: tuple[float, ...]
     lower_limits_db: tuple[float, ...]
@@ -928,7 +972,7 @@ class LoopRequirement(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw each judged value against its limits.
 
@@ -962,8 +1006,8 @@ class InductionLoopVerification(RichDisplay):
         :attr:`passes`.
     """
 
-    clause: str
-    layout: str
+    clause: Literal["8", "9"]
+    layout: Layout
     requirements: tuple[LoopRequirement, ...]
     background_noise: BackgroundNoiseAssessment | None = None
 
@@ -1002,7 +1046,7 @@ class InductionLoopVerification(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the worst margin of every requirement as a bar.
 
@@ -1032,7 +1076,7 @@ def _levels(values: ArrayLike, name: str) -> np.ndarray:
 
 
 def _band_requirement(
-    name: str, clause: str, values: np.ndarray, low: float, high: float
+    name: RequirementName, clause: str, values: np.ndarray, low: float, high: float
 ) -> LoopRequirement:
     """A requirement with the same limits for every value."""
     flat = tuple(float(v) for v in values.ravel())
@@ -1251,7 +1295,7 @@ def _height_coverage(
 def verify_small_volume_system(
     field_strength_levels: ArrayLike,
     *,
-    layout: str,
+    layout: SmallVolumeLayout,
     heights_m: ArrayLike | None = None,
     standing_area_levels: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
@@ -1476,7 +1520,7 @@ class AmplifierOverloadVerification(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the loop voltage along the sweep against the compliance voltage.
 
@@ -1499,7 +1543,7 @@ def verify_amplifier_overload(
     impedance: LoopImpedance,
     compliance_voltage_v: float,
     *,
-    program: str = "speech",
+    program: Literal["transient_speech", "speech", "music"] = "speech",
     current_response: AmplifierFrequencyResponse | None = None,
 ) -> AmplifierOverloadVerification:
     r"""Does the amplifier clip in the overload test of 10.3 as amended?

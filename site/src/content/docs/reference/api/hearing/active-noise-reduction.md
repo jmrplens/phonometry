@@ -161,7 +161,7 @@ The active insertion loss of an ANR earmuff on a panel of subjects.
 ActiveInsertionLossResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -289,7 +289,7 @@ Whether every step at every ear stayed linear.
 ANRLinearityResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -344,7 +344,7 @@ The total attenuation of an ANR earmuff and its ISO 4869-2 ratings (5.5).
 ANRTotalAttenuationResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

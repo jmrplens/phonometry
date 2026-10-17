@@ -11,7 +11,8 @@ A ventilation duct network attenuates fan noise through several mechanisms
 that add up along the path, and it *regenerates* noise wherever the airflow is
 disturbed. This module gathers the element models that a duct-borne noise
 calculation needs, from two engineering references that are kept side by side
-rather than merged:
+rather than merged, with the German guideline VDI 2081 beside them as a third
+model where it gives one:
 
 * **Bies, Hansen & Howard**, *Engineering Noise Control* 5th ed., Chapter 8,
   for the **duct end reflection** (§8.13, Table 8.14), the **bends/elbows**
@@ -26,6 +27,14 @@ rather than merged:
   reflection** (Eqs. 14.14-14.16), the **silencer self-noise** (Eq. 14.31 with
   Table 14.8) and the **room effect** that turns the sound power arriving at
   the terminal device into a sound pressure level in the room.
+* **VDI 2081** Part 1 for the German **fan model** (Section 4.3), the
+  **flow noise** of straight ducts and bends (Section 5.2), the straight-duct,
+  bend, branch and end-reflection **reductions** (Tables 5 and 7, Equation
+  (35), Figure 28) and the silencer self-noise (Section 7.2.4.2), each
+  selected with `model="vdi2081"` (`method="vdi2081"` for the end
+  reflection); and Part 2 for the **octave limits** an A-weighted room
+  requirement sets, read through the spectral assessment curve
+  [`SPECTRAL_CORRECTION`](/phonometry/reference/api/noise_control/hvac/#spectral_correction).
 
 Both references trace back to the same ASHRAE data for the elbows: Bies
 Table 8.11 is indexed by $W / \lambda$ and Long Tables 14.5-14.7 by the
@@ -85,7 +94,7 @@ diameter $D = \sqrt{4S/\pi}$.
 air_terminal_damper_correction(
     pressure_ratio: float,
     *,
-    location: str = 'diffuser_neck',
+    location: Literal['diffuser_neck', 'plenum_inlet', 'supply_duct'] = 'diffuser_neck',
 ) -> float
 ```
 
@@ -124,7 +133,7 @@ The table is interpolated linearly between its tabulated pressure ratios
 air_terminal_velocity_limit(
     design_criterion: float,
     *,
-    opening: str = 'supply',
+    opening: Literal['supply', 'return'] = 'supply',
 ) -> float
 ```
 
@@ -191,7 +200,7 @@ diffuser_sound_power(
     volume_flow: float,
     pressure_drop_pa: float,
     *,
-    shape: str = 'rectangular',
+    shape: Literal['rectangular', 'round'] = 'rectangular',
     n_devices: int = 1,
 ) -> HVACSpectrumResult
 ```
@@ -266,12 +275,12 @@ elbow_insertion_loss(
     frequencies: ArrayLike,
     width_m: float,
     *,
-    bend_type: str = 'square',
+    bend_type: Literal['round', 'square'] = 'square',
     vanes: bool = False,
     lined: bool = False,
     speed_of_sound: float = 343.0,
-    model: str = 'ashrae',
-    lined_side: str = 'both',
+    model: Literal['ashrae', 'vdi2081'] = 'ashrae',
+    lined_side: Literal['both', 'one'] = 'both',
 ) -> HVACSpectrumResult
 ```
 
@@ -324,8 +333,8 @@ end_reflection_loss(
     frequencies: ArrayLike,
     diameter_m: float,
     *,
-    termination: str = 'flush',
-    method: str = 'bies',
+    termination: Literal['flush', 'room', 'wall', 'edge', 'corner', 'free'] = 'flush',
+    method: Literal['vdi2081', 'bies', 'long'] = 'bies',
     speed_of_sound: float = 343.0,
     aspect_ratio: float = 1.0,
     max_reduction: float | None = 15.0,
@@ -375,7 +384,7 @@ end_reflection_loss_closed_form(
     frequencies: ArrayLike,
     diameter_m: float,
     *,
-    termination: str = 'flush',
+    termination: Literal['flush', 'free'] = 'flush',
     speed_of_sound: float = 343.0,
 ) -> HVACSpectrumResult
 ```
@@ -500,7 +509,7 @@ fan_sound_power(
     *,
     fan_static_pressure_pa: float,
     model: Literal['ashrae'] = ...,
-    fan_type: str = ...,
+    fan_type: Literal['airfoil_large', 'airfoil_small', 'forward_curved', 'radial_low', 'radial_medium', 'radial_high', 'vaneaxial_hub_low', 'vaneaxial_hub_medium', 'vaneaxial_hub_high', 'tubeaxial_large', 'tubeaxial_small', 'propeller'] = ...,
     relative_efficiency_percent: float = ...,
     blade_frequency: float | None = ...,
     frequencies: ArrayLike | None = ...,
@@ -511,7 +520,7 @@ fan_sound_power(
     *,
     model: Literal['vdi2081'],
     fan_total_pressure_pa: float,
-    assembly: str,
+    assembly: Literal['rr', 't', 'am'],
     fan_speed_rpm: float,
     specific_sound_power_level: float | None = ...,
     n_blades: int | None = ...,
@@ -650,7 +659,7 @@ flow_noise_bend(
     height_m: float,
     *,
     density: float = 1.206,
-    model: str = 'ashrae',
+    model: Literal['ashrae', 'vdi2081'] = 'ashrae',
     branch_diameter_m: float | None = None,
     approach_velocity: float | None = None,
     rounding_ratio: float | None = None,
@@ -762,7 +771,7 @@ flow_noise_straight_duct_overall(
     flow_velocity: float,
     area: float,
     *,
-    weighting: str = 'Z',
+    weighting: Literal['Z', 'A'] = 'Z',
 ) -> float
 ```
 
@@ -840,7 +849,7 @@ A per-frequency HVAC quantity (attenuation or regenerated power level).
 HVACSpectrumResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -856,9 +865,9 @@ HVACSpectrumResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -999,7 +1008,7 @@ $$
 L_{\mathrm{Okt,max}} = L_A + K_A
 $$
 
-with the correction [`VDI2081_SPECTRAL_CORRECTION`](/phonometry/reference/api/noise_control/hvac/#vdi2081_spectral_correction), which is the
+with the correction [`SPECTRAL_CORRECTION`](/phonometry/reference/api/noise_control/hvac/#spectral_correction), which is the
 inverse A-weighting less 5 dB. The 5 dB is what Section 1.1 allows for
 summing eight octave bands: a spectrum flat in A-weighted terms would earn
 9 dB, and the guideline takes 5 because the noise of an air-conditioning
@@ -1080,7 +1089,7 @@ plot_plenum_geometry(
     *,
     ax: Axes | None = None,
     angle_rad: float = 0.0,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1179,7 +1188,7 @@ section_change_loss(
     upstream_area: float,
     downstream_area: float,
     *,
-    shape: str = 'rectangular',
+    shape: Literal['rectangular', 'round'] = 'rectangular',
     upstream_size: float | None = None,
     speed_of_sound: float = 343.0,
     cap: float = 5.0,
@@ -1247,7 +1256,7 @@ silencer_self_noise(
     n_passages: int,
     height_m: float,
     *,
-    model: str = 'ashrae',
+    model: Literal['ashrae', 'vdi2081'] = 'ashrae',
     pressure_drop_pa: float | None = None,
     approach_area: float | None = None,
     airway_width: float | None = None,
@@ -1300,6 +1309,10 @@ correction because the face size enters through `N` and `H`.
 | ValueError | If `n_passages` is not a positive integer. |
 | TypeError | if `model` is not a text, or `airway_velocity`, `airway_width`, `approach_area`, `height_m`, `n_passages` or `pressure_drop_pa` is not a single number. |
 
+## SPECTRAL_CORRECTION
+
+*Constant* (`numpy.ndarray, shape (8,)`).
+
 ## split_loss
 
 ```python
@@ -1308,7 +1321,7 @@ split_loss(
     branch_areas: ArrayLike,
     *,
     branch: int = 0,
-    model: str = 'ashrae',
+    model: Literal['ashrae', 'vdi2081'] = 'ashrae',
 ) -> float
 ```
 
@@ -1431,7 +1444,7 @@ unlined_circular_duct_attenuation(
     length: float,
     *,
     diameter_m: float | None = None,
-    model: str = 'ashrae',
+    model: Literal['ashrae', 'vdi2081'] = 'ashrae',
 ) -> HVACSpectrumResult
 ```
 
@@ -1476,7 +1489,7 @@ unlined_rectangular_duct_attenuation(
     length: float,
     *,
     wrapped: bool = False,
-    model: str = 'ashrae',
+    model: Literal['ashrae', 'vdi2081'] = 'ashrae',
 ) -> HVACSpectrumResult
 ```
 
@@ -1519,7 +1532,3 @@ and is refused.
 | Exception | When |
 | :--- | :--- |
 | TypeError | if `model` is not a text, or `height_m`, `length` or `width_m` is not a single number. |
-
-## VDI2081_SPECTRAL_CORRECTION
-
-*Constant* (`numpy.ndarray, shape (8,)`).

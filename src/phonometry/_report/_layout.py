@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from reportlab.lib.styles import ParagraphStyle, StyleSheet1
     from reportlab.platypus import Flowable, Paragraph, Table
 
+    from .._i18n import Language
     from .metadata import ReportMetadata
 
 #: Installation hints for the three soft dependencies of the report.
@@ -149,7 +150,7 @@ def measurement_basis_style() -> ParagraphStyle:
     )
 
 
-def fmt_num(value: float, language: str = "en") -> str:
+def fmt_num(value: float, language: Language = "en") -> str:
     """Format a number with up to one decimal, dropping a trailing ``.0``.
 
     Delegates to :func:`phonometry._i18n.format_number`, so English keeps a
@@ -160,7 +161,7 @@ def fmt_num(value: float, language: str = "en") -> str:
     return format_number(value, language, decimals=1, trim=True)
 
 
-def fmt_meta(value: float, language: str = "en") -> str:
+def fmt_meta(value: float, language: Language = "en") -> str:
     """Format a user-supplied metadata number without losing precision.
 
     The header grid prints values the client supplied (a sample area of
@@ -221,7 +222,7 @@ def render_figure_drawing(
     expand_step: float | None = None,
     figsize: tuple[float, float] | None = None,
     subplot_kw: dict[str, Any] | None = None,
-    language: str = "en",
+    language: Language = "en",
 ) -> Drawing:
     """Draw a result's plot as a scaled, vector reportlab ``Drawing``.
 
@@ -533,6 +534,7 @@ def _octave_grouping(band_centres: ArrayLike | None) -> int | None:
     if band_centres is None:
         return None
     centres = np.asarray(band_centres, dtype=np.float64)
+    # The fewest values the step below can work with, not a quantity.
     if centres.size < 3 or np.any(centres <= 0.0):  # noqa: PLR2004
         return None
     ratios = centres[1:] / centres[:-1]
@@ -748,7 +750,7 @@ def compliance_table(
     rows: list[tuple[str, str, str, str]],
     *,
     col_widths: list[float] | None = None,
-    language: str = "en",
+    language: Language = "en",
 ) -> Table:
     """A full-width 4-column ``metric | measured | target/limit | result`` table.
 
@@ -893,7 +895,7 @@ def analysis_cell_styles(prefix: str) -> tuple[Any, Any, Any]:
     return header_style, label_style, value_style
 
 
-def exceedance_markup(*, exceeded: bool | None, language: str = "en") -> str:
+def exceedance_markup(*, exceeded: bool | None, language: Language = "en") -> str:
     """Inline status markup for an exceeded / not-exceeded assessment row.
 
     Shared by the exposure fiches (occupational noise, human vibration): a red
@@ -1001,7 +1003,7 @@ def result_box(
 
 
 def verdict_flow(
-    text: str, *, passed: bool, styles: StyleSheet1, language: str = "en"
+    text: str, *, passed: bool, styles: StyleSheet1, language: Language = "en"
 ) -> list[Any]:
     """The PASS/FAIL verdict paragraph for a precomputed comparison.
 
@@ -1031,7 +1033,7 @@ def verdict_flow(
 
 def footer_flow(
     metadata: ReportMetadata | None,
-    language: str = "en",
+    language: Language = "en",
     *,
     disclaimer: str | None = None,
 ) -> list[Any]:

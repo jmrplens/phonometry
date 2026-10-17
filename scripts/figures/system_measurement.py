@@ -258,7 +258,7 @@ def generate_resampling_antialias(output_dir: str) -> None:
     print("Generating resampling_antialias...")
     from phonometry import signals
 
-    x = signals.noise_signal(44100, 5.0, color="pink", seed=1)
+    x = signals.noise_signal(44100, duration_s=5.0, color="pink", seed=1)
     res = signals.resample_signal(x, 44100, fs_new=48000)  # 120 dB alias rejection
 
     fs_up = res.original_fs * res.up

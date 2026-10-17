@@ -243,7 +243,7 @@ Whether some level places every band inside its tolerance.
 ProgramSignalCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -279,8 +279,8 @@ The upper tolerances of Table II at the bands, in dB.
 ```python
 ProgramSpectrumBand(
     relative_level: float,
-    upper_tolerance_db: float,
     lower_tolerance_db: float,
+    upper_tolerance_db: float,
 )
 ```
 
@@ -291,8 +291,8 @@ One row of IEC 60268-1:1985 Table II.
 | Name | Description |
 | :--- | :--- |
 | `relative_level` | The relative level of the one-third-octave band, in dB. |
-| `upper_tolerance_db` | The upper tolerance, in dB, as printed (a positive number). |
 | `lower_tolerance_db` | The lower tolerance, in dB, as printed (a positive number). |
+| `upper_tolerance_db` | The upper tolerance, in dB, as printed (a positive number). |
 
 ## simulated_program_signal
 

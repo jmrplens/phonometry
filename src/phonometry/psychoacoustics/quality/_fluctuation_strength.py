@@ -54,16 +54,17 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import require_ranks, require_same_length, require_scalar
 from ...io._resolve import apply_calibration, resolve_fs
-from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ...metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from ..._i18n import Language
     from ...io._signal import Signal
 
 #: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
-_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_P0 = REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 # --------------------------------------------------------------------------- #
 # Closed form: AM broadband noise (Fastl & Zwicker Eq. 10.2)
@@ -264,7 +265,7 @@ class FluctuationStrengthResult(OwnsArrays):
         require_same_length(self, "bark_axis", "specific", axis="auditory filter")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the specific fluctuation strength against critical-band rate."""
         from ..._i18n import check_language

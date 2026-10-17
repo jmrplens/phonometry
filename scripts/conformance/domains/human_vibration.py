@@ -9,12 +9,17 @@ quantities of ISO 5349-1/-2, and the daily exposure A(8) that Directive
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Literal
+
 import numpy as np
 import reference_data as ref
 
 import phonometry as ph
 
 from ..registry import Outcome, numeric, register
+
+if TYPE_CHECKING:
+    from phonometry.vibration.human.exposure import WeightingName
 
 _HUMAN_VIB = "Human vibration (ISO 8041 / 2631 / 5349)"
 
@@ -215,7 +220,7 @@ def _chk_directive_2002_44() -> Outcome:
 #: 0,4 Hz / 100 Hz pair (Table B.8), and the three weightings whose corners
 #: differ (Tables B.5, B.6 and B.9).
 #: ``(weighting, band number, printed label, printed factor)``.
-_BAND_LIMITING_SAMPLES = (
+_BAND_LIMITING_SAMPLES: tuple[tuple[WeightingName, int, str, float], ...] = (
     ("Wk", -2, "0,631", 0.9279),
     ("Wf", -4, "0,3981", 0.9279),
     ("Wh", 10, "10", 0.9291),
@@ -262,7 +267,9 @@ def _register_band_limiting_samples() -> None:
     for weighting, band, label, printed in _BAND_LIMITING_SAMPLES:
 
         def _check(
-            weighting: str = weighting, band: int = band, printed: float = printed
+            weighting: WeightingName = weighting,
+            band: int = band,
+            printed: float = printed,
         ) -> Outcome:
             factor = float(
                 ph.vibration.band_limiting_factors(weighting, _true_centre(band))[0]
@@ -292,7 +299,9 @@ def _chk_iso8041_wf_annex_b_reference_band() -> Outcome:
 # ---------------------------------------------------------------------------
 # Tables 10 and 11: the decay of the running r.m.s. after the signal stops.
 # ---------------------------------------------------------------------------
-def _measured_decay_time_s(integration_time_s: float, method: str) -> float:
+def _measured_decay_time_s(
+    integration_time_s: float, method: Literal["linear", "exponential"]
+) -> float:
     """5.13 applied to :func:`running_rms`: hold, cut, time down to 10 %."""
     fs = 5000.0
     frequency = ph.vibration.REFERENCE_FREQUENCY_HZ["Wk"]
@@ -325,7 +334,14 @@ def _measured_decay_time_s(integration_time_s: float, method: str) -> float:
 
 def _register_decay_times() -> None:
     """One row per printed decay time of Tables 10 and 11."""
-    tables = (
+    tables: tuple[
+        tuple[
+            Literal["linear", "exponential"],
+            str,
+            tuple[tuple[float, float, float], ...],
+        ],
+        ...,
+    ] = (
         ("linear", "Table 10", ref.ISO8041_1_TABLE10_DECAY_S),
         ("exponential", "Table 11", ref.ISO8041_1_TABLE11_DECAY_S),
     )
@@ -333,7 +349,7 @@ def _register_decay_times() -> None:
         for tau, printed, tolerance in rows:
 
             def _check(
-                method: str = method,
+                method: Literal["linear", "exponential"] = method,
                 tau: float = tau,
                 printed: float = printed,
                 tolerance: float = tolerance,

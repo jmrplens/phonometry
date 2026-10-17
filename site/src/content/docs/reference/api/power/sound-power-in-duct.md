@@ -196,7 +196,7 @@ InDuctSoundPowerResult(
     characteristic_impedance: float,
     speed_of_sound: float,
     flow_velocity: float,
-    shield: str,
+    shield: Literal['sampling-tube', 'nose-cone', 'foam-ball'],
     sound_power_level_a: float,
 )
 ```
@@ -246,7 +246,7 @@ flow at the microphone exceeds the 40 m/s of the sampling tube
 InDuctSoundPowerResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

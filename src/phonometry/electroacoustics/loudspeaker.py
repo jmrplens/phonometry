@@ -49,7 +49,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -64,12 +64,14 @@ from .._internal.validation import (
     require_real,
     require_same_length,
 )
-from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ..metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
     from .piston import RadiatingPistonResult
     from .swept_sine import SweptSineDistortionResult
@@ -83,7 +85,7 @@ __all__ = [
 
 #: Standard reference sound pressure, 20 uPa (IEC 60268-5 20.2), which is
 #: the ISO 1683:2015 Table 1 value.
-_P_REF = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_P_REF = REFERENCE_VALUES["gas"]["sound_pressure"].value
 #: One-octave half-width factor sqrt(2): a one-octave band centred at ``f`` is
 #: ``[f / sqrt(2), f * sqrt(2)]`` (IEC 60268-5 21.2 reference band).
 _OCTAVE_HALF = float(np.sqrt(2.0))
@@ -260,7 +262,11 @@ def _effective_range(
     return lower, upper
 
 
-@dataclass(frozen=True)
+#: A rated characteristic :meth:`LoudspeakerCharacteristics.plot` draws.
+LoudspeakerQuantity = Literal["response", "impedance", "thd", "directivity"]
+
+
+@dataclass(frozen=True, kw_only=True)
 class LoudspeakerDirectivity(OwnsArrays):
     """Directional characteristics of the loudspeaker (IEC 60268-5 Clause 23).
 
@@ -293,7 +299,7 @@ class LoudspeakerDirectivity(OwnsArrays):
 _DEFAULT_DIRECTIVITY = LoudspeakerDirectivity()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class LoudspeakerRatings(RichDisplay):
     """Manufacturer-stated ratings (IEC 60268-5 Clauses 18 and 19).
 
@@ -573,9 +579,9 @@ class LoudspeakerCharacteristics(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render the IEC 60268-5 loudspeaker-characteristics fiche to a PDF.
 
@@ -617,8 +623,8 @@ class LoudspeakerCharacteristics(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        quantity: str = "response",
-        language: str = "en",
+        quantity: LoudspeakerQuantity = "response",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Plot one IEC 60268-5 loudspeaker rated characteristic on one axes.

@@ -500,7 +500,7 @@ _SILENCER_ATTENUATION = (6.0, 17.0, 42.0, 41.0, 47.0, 33.0, 20.0, 18.0)
 )
 def _chk_assessment_curve() -> Outcome:
     """``K_A = -A - 5``, the inverse A-weighting less the eight-band allowance."""
-    return _worst_band(_PRINTED_KA, ph.noise_control.VDI2081_SPECTRAL_CORRECTION, 1e-9)
+    return _worst_band(_PRINTED_KA, ph.noise_control.SPECTRAL_CORRECTION, 1e-9)
 
 
 @register(

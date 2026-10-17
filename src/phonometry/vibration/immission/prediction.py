@@ -60,7 +60,7 @@ from __future__ import annotations
 
 import math
 from types import MappingProxyType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
@@ -267,7 +267,12 @@ _REFERENCE_ENERGY_KJ = 1.0
 _KJ_PER_KN_M = 1.0
 
 
-def geometric_exponent(*, geometry: str, character: str, wave: str) -> float:
+def geometric_exponent(
+    *,
+    geometry: Literal["point", "line"],
+    character: Literal["harmonic", "impulsive"],
+    wave: Literal["surface", "body"],
+) -> float:
     """The exponent :math:`n` of Formula (2) for a source and a wave, Figure 1.
 
     :param geometry: ``"point"`` or ``"line"``.

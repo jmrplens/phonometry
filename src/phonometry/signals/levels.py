@@ -15,7 +15,7 @@ signatures are unchanged -- a plain array with an explicit ``fs`` and
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
@@ -35,11 +35,12 @@ from ..io._resolve import (
 from ..io._resolve import (
     resolve_samples as _resolve_samples_raw,
 )
-from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ..metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from ..filters.weighting import Weighting
     from ..io._signal import Signal
 
 __all__ = [
@@ -53,7 +54,7 @@ __all__ = [
 ]
 
 #: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
-_REF_PRESSURE = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_REF_PRESSURE = REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 
 def _level_db(
@@ -146,8 +147,8 @@ def ln_levels(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
     n: Sequence[int] = (10, 50, 90),
-    mode: str = "fast",
-    weighting: str = "Z",
+    mode: Literal["fast", "slow", "impulse"] = "fast",
+    weighting: Weighting = "Z",
     *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
@@ -182,6 +183,7 @@ def ln_levels(
     x_proc = _resolve_samples_raw(x, calibrate=False)
     _validate_level_input(x_proc, calibration_factor)
     for value in n:
+        # The two ends of the percentile scale.
         if not 0 < value < 100:  # noqa: PLR2004
             msg = "Percentile values in 'n' must be between 0 and 100."
             raise ValueError(msg)
@@ -268,7 +270,7 @@ def lc_peak(
 def sel(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
-    weighting: str = "Z",
+    weighting: Weighting = "Z",
     *,
     calibration_factor: float | None = None,
     dbfs: bool = False,

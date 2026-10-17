@@ -271,7 +271,7 @@ plt.show()
 
 | Function | Clause | Returns | Notes |
 | :--- | :--- | :--- | :--- |
-| `MicrophoneTraverse(positions_m, levels, monitor_levels=None, background_levels=None, name="", targets=())` | 5.1.3.2, A.3.3 | one traverse | `nan` marks a point not measured at a frequency, which is how a spacing that changes with frequency is written; `targets` names what the path is selected towards among `"dihedral corner"`, `"trihedral corner"`, `"boundary center"`, `"closest boundary"` and `"unique features"` |
+| `MicrophoneTraverse(positions_m=..., levels=..., monitor_levels=None, background_levels=None, name="", targets=())` | 5.1.3.2, A.3.3 | one traverse | `nan` marks a point not measured at a frequency, which is how a spacing that changes with frequency is written; `targets` names what the path is selected towards among `"dihedral corner"`, `"trihedral corner"`, `"boundary center"`, `"closest boundary"` and `"unique features"` |
 | `MicrophoneTraverse.along(direction, distances, levels, *, start_m=(0, 0, 0), ...)` | 5.1.3.2 | one traverse | Laid out along a straight line |
 | `inverse_square_law_deviations(traverses, *, frequencies, room, origin_m=None, source_box_m=None)` | Formulae (1) to (4) | `InverseSquareLawResult` | One call per test source; `origin_m` or `source_box_m`, not both |
 | `inverse_square_law_tolerance(frequencies, *, room)` | Table A.1 | limit per band [dB] | A tone is read in the one-third octave band that contains it |

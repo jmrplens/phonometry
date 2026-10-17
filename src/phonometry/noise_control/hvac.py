@@ -5,7 +5,8 @@ A ventilation duct network attenuates fan noise through several mechanisms
 that add up along the path, and it *regenerates* noise wherever the airflow is
 disturbed. This module gathers the element models that a duct-borne noise
 calculation needs, from two engineering references that are kept side by side
-rather than merged:
+rather than merged, with the German guideline VDI 2081 beside them as a third
+model where it gives one:
 
 * **Bies, Hansen & Howard**, *Engineering Noise Control* 5th ed., Chapter 8,
   for the **duct end reflection** (§8.13, Table 8.14), the **bends/elbows**
@@ -20,6 +21,14 @@ rather than merged:
   reflection** (Eqs. 14.14-14.16), the **silencer self-noise** (Eq. 14.31 with
   Table 14.8) and the **room effect** that turns the sound power arriving at
   the terminal device into a sound pressure level in the room.
+* **VDI 2081** Part 1 for the German **fan model** (Section 4.3), the
+  **flow noise** of straight ducts and bends (Section 5.2), the straight-duct,
+  bend, branch and end-reflection **reductions** (Tables 5 and 7, Equation
+  (35), Figure 28) and the silencer self-noise (Section 7.2.4.2), each
+  selected with ``model="vdi2081"`` (``method="vdi2081"`` for the end
+  reflection); and Part 2 for the **octave limits** an A-weighted room
+  requirement sets, read through the spectral assessment curve
+  :data:`SPECTRAL_CORRECTION`.
 
 Both references trace back to the same ASHRAE data for the elbows: Bies
 Table 8.11 is indexed by :math:`W / \lambda` and Long Tables 14.5-14.7 by the
@@ -76,7 +85,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 
@@ -99,10 +108,36 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
 
+Shape = Literal["rectangular", "round"]
+Model = Literal["ashrae", "vdi2081"]
+
+#: The VDI 2081 fan assemblies: ``"rr"`` radial with rearwards curved blades,
+#: ``"t"`` a cylindrical rotor with forwards curved blades, ``"am"`` axial
+#: with a downstream diffuser.
+Assembly = Literal["rr", "t", "am"]
+
+#: The fan types of the ASHRAE fan sound power model.
+FanType = Literal[
+    "airfoil_large",
+    "airfoil_small",
+    "forward_curved",
+    "radial_low",
+    "radial_medium",
+    "radial_high",
+    "vaneaxial_hub_low",
+    "vaneaxial_hub_medium",
+    "vaneaxial_hub_high",
+    "tubeaxial_large",
+    "tubeaxial_small",
+    "propeller",
+]
+
 __all__ = [
-    "VDI2081_SPECTRAL_CORRECTION",
+    "SPECTRAL_CORRECTION",
     "HVACSpectrumResult",
     "HVACWarning",
     "air_terminal_damper_correction",
@@ -393,7 +428,7 @@ _VDI2081_END_REFLECTION_CAP = 15.0
 #: over the octaves 63 Hz to 8 kHz. It is the inverse A-weighting less the 5 dB
 #: the guideline allows for summing eight octave bands, rounded to whole
 #: decibels as printed.
-VDI2081_SPECTRAL_CORRECTION: NDArray[np.float64] = read_only(
+SPECTRAL_CORRECTION: NDArray[np.float64] = read_only(
     np.array([21, 11, 4, -2, -5, -6, -6, -4], dtype=float)
 )
 
@@ -573,9 +608,10 @@ _DAMPER_CORRECTION: dict[str, NDArray[np.float64]] = {
 
 
 def _frequencies(frequencies: ArrayLike) -> NDArray[np.float64]:
-    # A copy, so a result never hands out _OCTAVE_BANDS (read-only) or the
-    # caller's own array.
-    f = np.array(frequencies, dtype=np.float64, ndmin=1)
+    # Converted only when it must, never copied: every function here hands it
+    # to an HVACSpectrumResult, which keeps its own read-only copy, and
+    # nothing writes into it before that.
+    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     if f.ndim != 1 or f.size == 0:
         msg = "'frequencies' must be a non-empty 1-D array."
         raise ValueError(msg)
@@ -679,7 +715,7 @@ class HVACSpectrumResult(OwnsArrays):
         require_choice(self.quantity, "quantity", ("attenuation", "sound_power_level"))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the quantity against a continuous log-frequency axis.
 
@@ -696,9 +732,9 @@ class HVACSpectrumResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an HVAC duct-noise-spectrum fiche to ``path``.
 
@@ -749,8 +785,8 @@ def end_reflection_loss(
     frequencies: ArrayLike,
     diameter_m: float,
     *,
-    termination: str = "flush",
-    method: str = "bies",
+    termination: Literal["flush", "room", "wall", "edge", "corner", "free"] = "flush",
+    method: Literal["vdi2081", "bies", "long"] = "bies",
     speed_of_sound: float = _C_AIR,
     aspect_ratio: float = 1.0,
     max_reduction: float | None = _VDI2081_END_REFLECTION_CAP,
@@ -820,7 +856,8 @@ def end_reflection_loss(
         return end_reflection_loss_closed_form(
             frequencies,
             diameter_m,
-            termination=termination,
+            # The closed form takes "flush" and "free" and refuses the rest.
+            termination=cast("Literal['flush', 'free']", termination),
             speed_of_sound=speed_of_sound,
         )
     f = _frequencies(frequencies)
@@ -921,12 +958,12 @@ def elbow_insertion_loss(
     frequencies: ArrayLike,
     width_m: float,
     *,
-    bend_type: str = "square",
+    bend_type: Literal["round", "square"] = "square",
     vanes: bool = False,
     lined: bool = False,
     speed_of_sound: float = _C_AIR,
-    model: str = "ashrae",
-    lined_side: str = "both",
+    model: Model = "ashrae",
+    lined_side: Literal["both", "one"] = "both",
 ) -> HVACSpectrumResult:
     r"""Duct bend/elbow insertion loss per bend, by either method.
 
@@ -1113,7 +1150,7 @@ def flow_noise_straight_duct_overall(
     flow_velocity: float,
     area: float,
     *,
-    weighting: str = "Z",
+    weighting: Literal["Z", "A"] = "Z",
 ) -> float:
     r"""Overall flow-noise sound power of a straight duct (VDI 2081 Part 1, 5.2.1).
 
@@ -1166,7 +1203,7 @@ def flow_noise_bend(
     height_m: float,
     *,
     density: float = 1.206,
-    model: str = "ashrae",
+    model: Model = "ashrae",
     branch_diameter_m: float | None = None,
     approach_velocity: float | None = None,
     rounding_ratio: float | None = None,
@@ -1331,6 +1368,7 @@ def fan_efficiency_correction(*, relative_efficiency_percent: float) -> float:
     :raises TypeError: if ``relative_efficiency_percent`` is not a single number.
     """
     eta = require_positive(relative_efficiency_percent, "relative_efficiency_percent")
+    # A percentage of the peak efficiency is at most 100.
     if eta > 100.0:  # noqa: PLR2004
         msg = "'relative_efficiency_percent' must not exceed 100 per cent."
         raise ValueError(msg)
@@ -1415,7 +1453,7 @@ def fan_sound_power(
     *,
     fan_static_pressure_pa: float,
     model: Literal["ashrae"] = ...,
-    fan_type: str = ...,
+    fan_type: FanType = ...,
     relative_efficiency_percent: float = ...,
     blade_frequency: float | None = ...,
     frequencies: ArrayLike | None = ...,
@@ -1428,7 +1466,7 @@ def fan_sound_power(
     *,
     model: Literal["vdi2081"],
     fan_total_pressure_pa: float,
-    assembly: str,
+    assembly: Assembly,
     fan_speed_rpm: float,
     specific_sound_power_level: float | None = ...,
     n_blades: int | None = ...,
@@ -1439,16 +1477,16 @@ def fan_sound_power(
 
 # Two models with two argument groups, and the overloads above fix which
 # group a given call may use.
-def fan_sound_power(  # noqa: PLR0913
+def fan_sound_power(
     volume_flow: float,
     *,
     fan_static_pressure_pa: float | None = None,
-    fan_type: str = "forward_curved",
+    fan_type: FanType = "forward_curved",
     relative_efficiency_percent: float = 80.0,
     blade_frequency: float | None = None,
-    model: str = "ashrae",
+    model: Model = "ashrae",
     fan_total_pressure_pa: float | None = None,
-    assembly: str | None = None,
+    assembly: Assembly | None = None,
     fan_speed_rpm: float | None = None,
     specific_sound_power_level: float | None = None,
     n_blades: int | None = None,
@@ -1637,7 +1675,7 @@ def octave_band_limits(
 
        L_{\mathrm{Okt,max}} = L_A + K_A
 
-    with the correction :data:`VDI2081_SPECTRAL_CORRECTION`, which is the
+    with the correction :data:`SPECTRAL_CORRECTION`, which is the
     inverse A-weighting less 5 dB. The 5 dB is what Section 1.1 allows for
     summing eight octave bands: a spectrum flat in A-weighted terms would earn
     9 dB, and the guideline takes 5 because the noise of an air-conditioning
@@ -1664,7 +1702,7 @@ def octave_band_limits(
         raise ValueError(msg)
     return HVACSpectrumResult(
         frequencies=f,
-        values=limit + VDI2081_SPECTRAL_CORRECTION[idx],
+        values=limit + SPECTRAL_CORRECTION[idx],
         quantity="sound_power_level",
         label=f"VDI 2081 octave limits for {limit:.0f} dB(A)",
     )
@@ -1918,7 +1956,7 @@ def unlined_rectangular_duct_attenuation(
     length: float,
     *,
     wrapped: bool = False,
-    model: str = "ashrae",
+    model: Model = "ashrae",
 ) -> HVACSpectrumResult:
     r"""Attenuation of an unlined rectangular sheet-metal duct (Long Eqs. 14.9-14.11).
 
@@ -2006,7 +2044,7 @@ def unlined_circular_duct_attenuation(
     length: float,
     *,
     diameter_m: float | None = None,
-    model: str = "ashrae",
+    model: Model = "ashrae",
 ) -> HVACSpectrumResult:
     """Attenuation of an unlined circular sheet-metal duct (Long Table 14.1).
 
@@ -2221,7 +2259,7 @@ def section_change_loss(
     upstream_area: float,
     downstream_area: float,
     *,
-    shape: str = "rectangular",
+    shape: Shape = "rectangular",
     upstream_size: float | None = None,
     speed_of_sound: float = _C_AIR,
     cap: float = _VDI2081_SECTION_CHANGE_CAP,
@@ -2332,7 +2370,7 @@ def split_loss(
     branch_areas: ArrayLike,
     *,
     branch: int = 0,
-    model: str = "ashrae",
+    model: Model = "ashrae",
 ) -> float:
     r"""Power split loss into one branch of a duct division (Long Eq. 14.17).
 
@@ -2408,7 +2446,7 @@ def end_reflection_loss_closed_form(
     frequencies: ArrayLike,
     diameter_m: float,
     *,
-    termination: str = "flush",
+    termination: Literal["flush", "free"] = "flush",
     speed_of_sound: float = _C_AIR,
 ) -> HVACSpectrumResult:
     r"""Duct end reflection loss in closed form (Long Eqs. 14.14-14.15, Reynolds).
@@ -2549,7 +2587,7 @@ def silencer_self_noise(
     n_passages: int,
     height_m: float,
     *,
-    model: str = "ashrae",
+    model: Model = "ashrae",
     pressure_drop_pa: float | None = None,
     approach_area: float | None = None,
     airway_width: float | None = None,
@@ -2666,7 +2704,7 @@ def diffuser_sound_power(
     volume_flow: float,
     pressure_drop_pa: float,
     *,
-    shape: str = "rectangular",
+    shape: Shape = "rectangular",
     n_devices: int = 1,
 ) -> HVACSpectrumResult:
     r"""Regenerated (self) noise of a grille, register or diffuser.
@@ -2761,7 +2799,7 @@ def diffuser_sound_power(
 
 
 def air_terminal_velocity_limit(
-    design_criterion: float, *, opening: str = "supply"
+    design_criterion: float, *, opening: Literal["supply", "return"] = "supply"
 ) -> float:
     """Maximum recommended neck velocity of a diffuser or register.
 
@@ -2799,7 +2837,9 @@ def air_terminal_velocity_limit(
 
 
 def air_terminal_damper_correction(
-    pressure_ratio: float, *, location: str = "diffuser_neck"
+    pressure_ratio: float,
+    *,
+    location: Literal["diffuser_neck", "plenum_inlet", "supply_duct"] = "diffuser_neck",
 ) -> float:
     """Level to add to a diffuser sound rating for a throttled volume damper.
 

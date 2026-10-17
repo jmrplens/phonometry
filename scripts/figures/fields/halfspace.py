@@ -111,7 +111,7 @@ def _halfspace_fields() -> tuple[Any, Any, Any, Any, Any, float]:
     probe_cols = (src_ix + 150, src_ix + 300)
     rows = slice(0, _HS_HALF, 2)
     cols = slice(src_ix - _HS_HALF, src_ix + _HS_HALF, 2)
-    pulse = simulation.GaussianPulse(0, 0, half_width_s=_HS_SRC_W).value
+    pulse = simulation.GaussianPulse(ix=0, iy=0, half_width_s=_HS_SRC_W).value
 
     stacks: list[Any] = []
     traces: list[Any] = []

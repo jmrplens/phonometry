@@ -18,7 +18,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -32,6 +32,7 @@ from ...signals.spectra import _welch_autospectrum
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
     from ...io._signal import Signal
 
 __all__ = [
@@ -167,7 +168,7 @@ class ToneAssessment(RichDisplay):
 
     frequency: float
     ratio_db: float
-    method: str
+    method: Literal["tone_to_noise_ratio", "prominence_ratio"]
 
     def __post_init__(self) -> None:
         """Reject a ratio the standard does not define.
@@ -204,7 +205,7 @@ class ToneAssessment(RichDisplay):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the assessed tone against the ECMA-418-1 prominence criterion.
 

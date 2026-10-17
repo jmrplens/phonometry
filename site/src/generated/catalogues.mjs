@@ -46767,7 +46767,7 @@ export const catalogues = {
         "unit": "1/m"
       },
       {
-        "field": "iso_9613_ground_factor",
+        "field": "iso9613_ground_factor",
         "heading": "ISO 9613-2 ground factor",
         "headingEs": "Factor de suelo ISO 9613-2",
         "unit": ""
@@ -54508,16 +54508,16 @@ export const catalogues = {
         "unit": "°C"
       },
       {
-        "field": "youngs_modulus_max_pa",
-        "heading": "Young's modulus, stiff end",
-        "headingEs": "Módulo de Young, extremo rígido",
-        "unit": "GPa"
-      },
-      {
         "field": "youngs_modulus_min_pa",
         "heading": "Young's modulus, soft end",
         "headingEs": "Módulo de Young, extremo blando",
         "unit": "MPa"
+      },
+      {
+        "field": "youngs_modulus_max_pa",
+        "heading": "Young's modulus, stiff end",
+        "headingEs": "Módulo de Young, extremo rígido",
+        "unit": "GPa"
       },
       {
         "field": "youngs_modulus_transition_pa",
@@ -54575,16 +54575,16 @@ export const catalogues = {
             "printed": "120 °F"
           },
           {
-            "text": "2,068",
-            "kind": "converted",
-            "note": "",
-            "printed": "3e5 psi"
-          },
-          {
             "text": "8,274",
             "kind": "converted",
             "note": "",
             "printed": "1.2e3 psi"
+          },
+          {
+            "text": "2,068",
+            "kind": "converted",
+            "note": "",
+            "printed": "3e5 psi"
           },
           {
             "text": "131",
@@ -54645,16 +54645,16 @@ export const catalogues = {
             "printed": "125 °F"
           },
           {
-            "text": "11,03",
-            "kind": "converted",
-            "note": "",
-            "printed": "1.6e6 psi"
-          },
-          {
             "text": "206,8",
             "kind": "converted",
             "note": "",
             "printed": "3e4 psi"
+          },
+          {
+            "text": "11,03",
+            "kind": "converted",
+            "note": "",
+            "printed": "1.6e6 psi"
           },
           {
             "text": "1 517",
@@ -54715,16 +54715,16 @@ export const catalogues = {
             "printed": "−10 °F"
           },
           {
-            "text": "4,137",
-            "kind": "converted",
-            "note": "",
-            "printed": "6e5 psi"
-          },
-          {
             "text": "20,68",
             "kind": "converted",
             "note": "",
             "printed": "3e3 psi"
+          },
+          {
+            "text": "4,137",
+            "kind": "converted",
+            "note": "",
+            "printed": "6e5 psi"
           },
           {
             "text": "289,6",
@@ -54785,16 +54785,16 @@ export const catalogues = {
             "printed": "110 °F"
           },
           {
-            "text": "0,1517",
-            "kind": "converted",
-            "note": "",
-            "printed": "2.2e4 psi"
-          },
-          {
             "text": "2,068",
             "kind": "converted",
             "note": "",
             "printed": "3e2 psi"
+          },
+          {
+            "text": "0,1517",
+            "kind": "converted",
+            "note": "",
+            "printed": "2.2e4 psi"
           },
           {
             "text": "17,93",
@@ -54855,16 +54855,16 @@ export const catalogues = {
             "printed": "90 °F"
           },
           {
-            "text": "2,068",
-            "kind": "converted",
-            "note": "",
-            "printed": "3e5 psi"
-          },
-          {
             "text": "1,379",
             "kind": "converted",
             "note": "",
             "printed": "2e2 psi"
+          },
+          {
+            "text": "2,068",
+            "kind": "converted",
+            "note": "",
+            "printed": "3e5 psi"
           },
           {
             "text": "53,09",
@@ -54925,16 +54925,16 @@ export const catalogues = {
             "printed": "100 °F"
           },
           {
-            "text": "5,516",
-            "kind": "converted",
-            "note": "",
-            "printed": "8e5 psi"
-          },
-          {
             "text": "4,137",
             "kind": "converted",
             "note": "",
             "printed": "6e2 psi"
+          },
+          {
+            "text": "5,516",
+            "kind": "converted",
+            "note": "",
+            "printed": "8e5 psi"
           },
           {
             "text": "151,7",
@@ -54995,16 +54995,16 @@ export const catalogues = {
             "printed": "125 °F"
           },
           {
-            "text": "20,68",
-            "kind": "converted",
-            "note": "",
-            "printed": "3e6 psi"
-          },
-          {
             "text": "22,75",
             "kind": "converted",
             "note": "",
             "printed": "3.3e3 psi"
+          },
+          {
+            "text": "20,68",
+            "kind": "converted",
+            "note": "",
+            "printed": "3e6 psi"
           },
           {
             "text": "689,5",
@@ -55065,16 +55065,16 @@ export const catalogues = {
             "printed": "75 °F"
           },
           {
-            "text": "2,068",
-            "kind": "converted",
-            "note": "",
-            "printed": "3e5 psi"
-          },
-          {
             "text": "1,034",
             "kind": "converted",
             "note": "",
             "printed": "1.5e2 psi"
+          },
+          {
+            "text": "2,068",
+            "kind": "converted",
+            "note": "",
+            "printed": "3e5 psi"
           },
           {
             "text": "46,19",
@@ -55135,16 +55135,16 @@ export const catalogues = {
             "printed": "130 °F"
           },
           {
-            "text": "",
-            "kind": "absent",
-            "note": "the page prints \"3G5\" here, which is not a number in the table's own e-notation, and the defect is registered in docs/ERRATA.md under \"Vér & Beranek 2e (2006), TABLE 14.1\"",
-            "noteEs": "la página imprime aquí \"3G5\", que no es un número en la propia notación exponencial de la tabla, y el defecto está registrado en docs/ERRATA.md, en la entrada «Vér & Beranek 2e (2006), TABLE 14.1»"
-          },
-          {
             "text": "0,8274",
             "kind": "converted",
             "note": "",
             "printed": "1.2e2 psi"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints \"3G5\" here, which is not a number in the table's own e-notation, and the defect is registered in docs/ERRATA.md under \"Vér & Beranek 2e (2006), TABLE 14.1\"",
+            "noteEs": "la página imprime aquí \"3G5\", que no es un número en la propia notación exponencial de la tabla, y el defecto está registrado en docs/ERRATA.md, en la entrada «Vér & Beranek 2e (2006), TABLE 14.1»"
           },
           {
             "text": "41,37",
@@ -55205,16 +55205,16 @@ export const catalogues = {
             "printed": "185 °F"
           },
           {
-            "text": "1,379",
-            "kind": "converted",
-            "note": "",
-            "printed": "2e5 psi"
-          },
-          {
             "text": "4,137",
             "kind": "converted",
             "note": "",
             "printed": "6e2 psi"
+          },
+          {
+            "text": "1,379",
+            "kind": "converted",
+            "note": "",
+            "printed": "2e5 psi"
           },
           {
             "text": "75,84",
@@ -55275,16 +55275,16 @@ export const catalogues = {
             "printed": "70 °F"
           },
           {
-            "text": "2,068",
-            "kind": "converted",
-            "note": "",
-            "printed": "3e5 psi"
-          },
-          {
             "text": "0,4826",
             "kind": "converted",
             "note": "",
             "printed": "7e1 psi"
+          },
+          {
+            "text": "2,068",
+            "kind": "converted",
+            "note": "",
+            "printed": "3e5 psi"
           },
           {
             "text": "31,72",
@@ -55348,13 +55348,13 @@ export const catalogues = {
             "text": "0,2068",
             "kind": "converted",
             "note": "",
-            "printed": "3e4 psi"
+            "printed": "3e1 psi"
           },
           {
             "text": "0,2068",
             "kind": "converted",
             "note": "",
-            "printed": "3e1 psi"
+            "printed": "3e4 psi"
           },
           {
             "text": "6,895",
@@ -55415,16 +55415,16 @@ export const catalogues = {
             "printed": "80 °F"
           },
           {
-            "text": "0,8963",
-            "kind": "converted",
-            "note": "",
-            "printed": "1.3e5 psi"
-          },
-          {
             "text": "0,5516",
             "kind": "converted",
             "note": "",
             "printed": "8e1 psi"
+          },
+          {
+            "text": "0,8963",
+            "kind": "converted",
+            "note": "",
+            "printed": "1.3e5 psi"
           },
           {
             "text": "22,06",
@@ -55485,16 +55485,16 @@ export const catalogues = {
             "printed": "15 °F"
           },
           {
-            "text": "1,034",
-            "kind": "converted",
-            "note": "",
-            "printed": "1.5e5 psi"
-          },
-          {
             "text": "2,068",
             "kind": "converted",
             "note": "",
             "printed": "3e2 psi"
+          },
+          {
+            "text": "1,034",
+            "kind": "converted",
+            "note": "",
+            "printed": "1.5e5 psi"
           },
           {
             "text": "1,448",
@@ -55556,16 +55556,16 @@ export const catalogues = {
             "printed": "85 °F"
           },
           {
-            "text": "0,9653",
-            "kind": "converted",
-            "note": "",
-            "printed": "1.4e5 psi"
-          },
-          {
             "text": "0,2068",
             "kind": "converted",
             "note": "",
             "printed": "3e1 psi"
+          },
+          {
+            "text": "0,9653",
+            "kind": "converted",
+            "note": "",
+            "printed": "1.4e5 psi"
           },
           {
             "text": "13,79",
@@ -55626,16 +55626,16 @@ export const catalogues = {
             "printed": "−20 °F"
           },
           {
-            "text": "1,379",
-            "kind": "converted",
-            "note": "",
-            "printed": "2e5 psi"
-          },
-          {
             "text": "1,034",
             "kind": "converted",
             "note": "",
             "printed": "1.5e2 psi"
+          },
+          {
+            "text": "1,379",
+            "kind": "converted",
+            "note": "",
+            "printed": "2e5 psi"
           },
           {
             "text": "37,92",
@@ -55696,16 +55696,16 @@ export const catalogues = {
             "printed": "125 °F"
           },
           {
-            "text": "",
-            "kind": "absent",
-            "note": "the page prints \"e35\" here, which is not a number in the table's own e-notation, and the defect is registered in docs/ERRATA.md under \"Vér & Beranek 2e (2006), TABLE 14.1\"",
-            "noteEs": "la página imprime aquí \"e35\", que no es un número en la propia notación exponencial de la tabla, y el defecto está registrado en docs/ERRATA.md, en la entrada «Vér & Beranek 2e (2006), TABLE 14.1»"
-          },
-          {
             "text": "34,47",
             "kind": "converted",
             "note": "",
             "printed": "5e3 psi"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints \"e35\" here, which is not a number in the table's own e-notation, and the defect is registered in docs/ERRATA.md under \"Vér & Beranek 2e (2006), TABLE 14.1\"",
+            "noteEs": "la página imprime aquí \"e35\", que no es un número en la propia notación exponencial de la tabla, y el defecto está registrado en docs/ERRATA.md, en la entrada «Vér & Beranek 2e (2006), TABLE 14.1»"
           },
           {
             "text": "268,9",

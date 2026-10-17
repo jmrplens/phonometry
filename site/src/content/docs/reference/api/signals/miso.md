@@ -135,7 +135,7 @@ MISOCoherenceResult(
     window: str,
     nperseg: int,
     overlap: float,
-    scaling: str,
+    scaling: Literal['density', 'spectrum'],
 )
 ```
 
@@ -191,7 +191,7 @@ zero report the first input (index 0).
 MISOCoherenceResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
 ```

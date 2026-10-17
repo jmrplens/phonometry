@@ -174,6 +174,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+
 __all__ = [
     "CERTIFIED_RESULT_TOLERANCE_DB",
     "MIN_SAMPLE_SIZE",
@@ -430,7 +432,7 @@ class LevelDifferenceQuantiles(OwnsArrays):
         return float(np.std(self.sorted_differences, ddof=1))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the sorted sample by rank, with the two quantiles marked.
 
@@ -742,7 +744,7 @@ class RoundRobinPrecision(OwnsArrays):
         return float(ranked[self.rank_q09 - 1])
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Draw the distribution of :math:`|dL_n|_{\max}`, as Figure A.3 does.
 
@@ -918,7 +920,7 @@ class CalculationVerification(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw each result against its certified interval, row by row.
 

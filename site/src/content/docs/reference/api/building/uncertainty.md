@@ -126,8 +126,8 @@ upper limit for airborne, situation A (Annex D Table D.1).
 
 ```python
 BandUncertainty(
-    measurand: str,
-    situation: str,
+    measurand: Literal['airborne', 'impact', 'impact_reduction'],
+    situation: Literal['A', 'B', 'C'],
     frequencies: tuple[float, ...],
     uncertainties: tuple[float, ...],
     *,
@@ -153,7 +153,7 @@ One-third-octave-band standard uncertainties (ISO 12999-1 Tables 2/4/6/D.1).
 BandUncertainty.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -353,7 +353,7 @@ The verdict: the margin is positive, Formula (5) or (4) holds.
 
 ```python
 single_number_uncertainty(
-    quantity: str,
+    quantity: Literal['r_w', 'r_w+c_50_3150', 'r_w+c_50_5000', 'r_w+c_100_3150', 'r_w+c_100_5000', 'r_w+ctr_50_3150', 'r_w+ctr_50_5000', 'r_w+ctr_100_3150', 'r_w+ctr_100_5000', 'ln_w', 'ln_w+ci', 'delta_lw', 'rprime_w', 'r_prime_w', 'dn_w', 'dnw', 'dnt_w', 'dntw', 'lprime_n_w', 'lnprime_w', 'lnt_w', 'lprime_nt_w', 'delta_l_w'],
     situation: Literal['A', 'B', 'C'],
     *,
     upper_limit: bool = False,
@@ -432,7 +432,7 @@ and is not reproduced here.
 ```python
 uncertain_value(
     value: float,
-    quantity: str,
+    quantity: Literal['r_w', 'r_w+c_50_3150', 'r_w+c_50_5000', 'r_w+c_100_3150', 'r_w+c_100_5000', 'r_w+ctr_50_3150', 'r_w+ctr_50_5000', 'r_w+ctr_100_3150', 'r_w+ctr_100_5000', 'ln_w', 'ln_w+ci', 'delta_lw', 'rprime_w', 'r_prime_w', 'dn_w', 'dnw', 'dnt_w', 'dntw', 'lprime_n_w', 'lnprime_w', 'lnt_w', 'lprime_nt_w', 'delta_l_w'],
     situation: Literal['A', 'B', 'C'],
     *,
     coverage: float = 0.95,

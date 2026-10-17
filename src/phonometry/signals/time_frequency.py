@@ -75,6 +75,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
     from ..io._signal import Signal
 
 __all__ = [
@@ -156,7 +157,7 @@ class SpectrogramResult(OwnsArrays):
     window: str
     nperseg: int
     overlap: float
-    scaling: str
+    scaling: Literal["density", "spectrum"]
 
     def __post_init__(self) -> None:
         """Reject a display whose raster does not match the plane it is on.
@@ -184,7 +185,7 @@ class SpectrogramResult(OwnsArrays):
         require_same_length(self, "times", ("power", 1), axis="segment")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the spectrogram in dB over the time-frequency plane.
 
@@ -369,7 +370,7 @@ class ZoomFFTResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the zoom power spectrum in dB over the zoom band.
 

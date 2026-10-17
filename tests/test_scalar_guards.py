@@ -622,8 +622,8 @@ _PUBLIC_CALLS: list[tuple[str, Callable[[object], object], float, str]] = [
         "volume",
     ),
     (
-        "aircraft.sae_band_attenuation",
-        lambda v: aircraft.sae_band_attenuation(
+        "aircraft.band_attenuation_arp5534",
+        lambda v: aircraft.band_attenuation_arp5534(
             [100.0, 1000.0, 4000.0], 100.0, relative_humidity_percent=v
         ),
         54.0,
@@ -1422,7 +1422,7 @@ def _baseline(
         try:
             _quietly(function, arguments)
         # Any refusal means: try the next value
-        except Exception:  # noqa: BLE001
+        except Exception:
             continue
         return arguments
     return None
@@ -1491,7 +1491,7 @@ def _array_refusals() -> tuple[list[str], int]:
                         continue
                     outcome = f"an anonymous TypeError ({refusal})"
                 # Reported, not hidden
-                except Exception as refusal:  # noqa: BLE001
+                except Exception as refusal:
                     outcome = f"{type(refusal).__name__} ({refusal})"
                 else:
                     outcome = "accepted"

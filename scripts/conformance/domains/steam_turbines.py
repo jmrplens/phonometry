@@ -117,7 +117,7 @@ def _chk_table_one() -> Outcome:
 )
 def _chk_measurement_distance() -> Outcome:
     """A single box grows by d at each end, on each side and on top."""
-    box = emission.TurbineReferenceBox(8.0, 3.0, 2.5)
+    box = emission.TurbineReferenceBox(length_m=8.0, width_m=3.0, height_m=2.5)
     surface = emission.turbine_measurement_surface([box])
     d = oracle.IEC61063_MEASUREMENT_DISTANCE_M
     printed = {"length": 2.0 * d, "width": 2.0 * d, "height": d}
@@ -159,7 +159,12 @@ def _chk_equation_one() -> Outcome:
         for i in range(len(widths) - 1)
     )
     surface = emission.turbine_measurement_surface(
-        [emission.TurbineReferenceBox(*box) for box in _LARGE_SET]
+        [
+            emission.TurbineReferenceBox(
+                length_m=length, width_m=width, height_m=height
+            )
+            for length, width, height in _LARGE_SET
+        ]
     )
     return numeric(faces + ends + steps, surface.area, 1e-9, unit="m2", places=3)
 

@@ -95,6 +95,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
+
 #: Sound power level of one talker in normal conversation, dB re 1 pW
 #: (Long, Chapter 17, "a normal conversational level").
 NORMAL_VOICE_POWER_LEVEL = 70.0
@@ -376,7 +378,7 @@ class CrowdNoiseResult(OwnsArrays):
         return self.signal_level - self.levels
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the self-noise level against occupancy, one curve per absorption.
 

@@ -9,7 +9,7 @@ embedded by a page under ``vibration/``.
 """
 
 import math
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 
 def _sci_math(value: float, digits: int = 2) -> str:
@@ -53,6 +53,8 @@ if TYPE_CHECKING:
     from matplotlib.artist import Artist
 
     from phonometry.vibration._choices import BuildingClass
+    from phonometry.vibration.human.exposure import WeightingName
+    from phonometry.vibration.human.signal_burst import BurstApplication
     from phonometry.vibration.structural.building_damage import PipelineMaterial
     from phonometry.vibration.structural.building_response import PeriodModel
 
@@ -946,7 +948,7 @@ def generate_vibration_weighting_family(output_dir: str) -> None:
     # so the axis has to run from 0,05 Hz to 1,5 kHz for the nine curves to be
     # comparable at all. Grouped by the part of the family each belongs to.
     freqs = np.geomspace(0.05, 1500.0, 900)
-    curves = (
+    curves: tuple[tuple[WeightingName, str, str, Any, float], ...] = (
         ("Wk", "Wk: seat surface, vertical (ISO 2631-1)", COLOR_PRIMARY, "-", 2.4),
         ("Wd", "Wd: seat surface, horizontal", COLOR_PRIMARY, "--", 1.6),
         ("Wc", "Wc: backrest, x", COLOR_PRIMARY, (0, (1, 1, 3, 1)), 1.6),
@@ -1612,7 +1614,7 @@ def generate_bearing_fault_envelope(output_dir: str) -> None:
     ring = np.exp(-tau / 6.0e-4) * np.sin(2.0 * np.pi * 3000.0 * tau)
     x = np.convolve(impacts, ring)[: t.size] * 0.6
     x += 0.35 * np.sin(2.0 * np.pi * fs_shaft * t)  # residual unbalance
-    x += signals.noise_signal(fs, seconds, color="white", rms=0.25, seed=17)
+    x += signals.noise_signal(fs, duration_s=seconds, color="white", rms=0.25, seed=17)
 
     res = signals.envelope_spectrum(x, fs, band=(2000.0, 4000.0))
     keep = res.frequencies <= 4.6 * bpfo
@@ -2176,7 +2178,7 @@ def generate_envelope_chain_steps(output_dir: str) -> None:
     ring = np.exp(-tau / 6.0e-4) * np.sin(2.0 * np.pi * 3000.0 * tau)
     x = np.convolve(impacts, ring)[: t.size] * 0.6
     x += 0.35 * np.sin(2.0 * np.pi * fs_shaft * t)
-    x += signals.noise_signal(fs, seconds, color="white", rms=0.25, seed=17)
+    x += signals.noise_signal(fs, duration_s=seconds, color="white", rms=0.25, seed=17)
 
     band = (2000.0, 4000.0)
     res = signals.envelope_spectrum(x, fs, band=band)
@@ -3603,7 +3605,7 @@ def generate_meter_tolerance_regions(output_dir: str) -> None:
     # Wk carries the transition frequencies Table 4 gives six of the nine
     # weightings (Wb, Wc, Wd, We, Wj and Wk share one row), so the picture is
     # the common case rather than a special one.
-    name = "Wk"
+    name: WeightingName = "Wk"
     transitions = vibration.TRANSITION_FREQUENCIES_HZ[name]
     ft1, ft2, ft3, ft4 = transitions
     fmin, fmax = 0.1, 400.0
@@ -3960,7 +3962,7 @@ def generate_meter_phase_verification(output_dir: str) -> None:
 
     from phonometry import vibration
 
-    name = "Wk"
+    name: WeightingName = "Wk"
     transitions = vibration.TRANSITION_FREQUENCIES_HZ[name]
     ft3 = transitions[2]
     # The nominal frequency range of a whole-body meter, on the exact
@@ -4442,7 +4444,7 @@ def generate_meter_weighting_verification(output_dir: str) -> None:
 
     from phonometry import vibration
 
-    name = "Wk"
+    name: WeightingName = "Wk"
     ft1, ft2, ft3, ft4 = vibration.TRANSITION_FREQUENCIES_HZ[name]
 
     # The guide's own bench sweep, on the one-third-octave centres of Formula
@@ -4750,7 +4752,7 @@ def generate_meter_uncertainty_allowance(output_dir: str) -> None:
 
     from phonometry import vibration
 
-    name = "Wk"
+    name: WeightingName = "Wk"
     # 12.11.2 is the mechanical frequency-response test, which is the test
     # this drawing grades, and 4.5 % is the most it lets a laboratory carry:
     # the general prohibition is 12.1 (folio 28), and the per-test maxima it
@@ -5189,7 +5191,7 @@ def generate_meter_running_rms_decay(output_dir: str) -> None:
     print("Generating meter_running_rms_decay...")
     from phonometry import vibration
 
-    name = "Wk"
+    name: WeightingName = "Wk"
     tau_s = 1.0
     fs = 2000.0
     cut_s = 10.0
@@ -5653,8 +5655,8 @@ def generate_meter_signal_burst_response(output_dir: str) -> None:
     print("Generating meter_signal_burst_response...")
     from phonometry import vibration
 
-    application = "whole-body"
-    name = "Wk"
+    application: BurstApplication = "whole-body"
+    name: WeightingName = "Wk"
     test = vibration.SAWTOOTH_BURST_TESTS[application]
     longest = test.cycle_counts[-1]
     burst_span_s = longest / test.frequency_hz
@@ -6461,7 +6463,8 @@ def generate_people_guide_values(output_dir: str) -> None:
     positions = np.arange(len(areas), dtype=float)
     width = 0.38
     _fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.6), sharey=True)
-    for ax, time_of_day in zip(axes, ("day", "night"), strict=True):
+    periods: tuple[Literal["day", "night"], ...] = ("day", "night")
+    for ax, time_of_day in zip(axes, periods, strict=True):
         values = [
             vibration.guide_values(area, time_of_day=time_of_day) for area in areas
         ]
@@ -6686,7 +6689,7 @@ def generate_building_transfer_spectra(output_dir: str) -> None:
         16.0: (COLOR_SECONDARY, "--"),
         63.0: (COLOR_TERTIARY, ":"),
     }
-    titles = {
+    titles: dict[Literal["concrete", "timber"], str] = {
         "concrete": "concrete floors, Table A.1",
         "timber": "timber floors, Table A.2",
     }

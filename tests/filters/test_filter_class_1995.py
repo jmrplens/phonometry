@@ -386,7 +386,7 @@ def test_a_bank_whose_neighbours_overlap_fails_the_summation(filter_type: str) -
         fraction=1,
         order=6,
         limits=[125, 4000],
-        design=filters.FilterDesign(filter_type),
+        design=filters.FilterDesign(filter_type=filter_type),
     )
     result = filters.verify_filter_class(bank, edition="1995")
     assert result.requirement_class("summation") is None

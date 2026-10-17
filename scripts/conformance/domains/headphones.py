@@ -62,6 +62,8 @@ _BANDS = np.array(
 )
 
 
+# The verdict is the one argument, and the function's name already says it:
+# a keyword at every call would only repeat it.
 def _flag(passes: bool) -> float:  # noqa: FBT001
     """A verdict as the 1 or 0 a record compares."""
     return 1.0 if passes else 0.0

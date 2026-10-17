@@ -61,7 +61,8 @@ def published_names() -> dict[str, str]:
             continue
         try:
             module = importlib.import_module(info.name)
-        except Exception:  # noqa: BLE001 - an unimportable module is another gate's
+        # An unimportable module is another gate's
+        except Exception:  # noqa: BLE001
             continue
         for name in dir(module):
             if not name.startswith("PUBLISHED_"):

@@ -168,7 +168,8 @@ def test_the_package_imports_on_its_own() -> None:
     import subprocess
     import sys
 
-    result = subprocess.run(  # noqa: S603 - fixed argument list, no shell
+    # Fixed argument list, no shell
+    result = subprocess.run(  # noqa: S603
         [
             sys.executable,
             "-c",

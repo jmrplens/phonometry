@@ -19,7 +19,8 @@ import numpy as np
 from phonometry.io import Signal
 
 
-def assert_same(a: Any, b: Any, path: str = "result") -> None:  # noqa: ANN401 - deep-compares results of any shape: dataclasses, dicts, sequences, arrays, scalars
+# Deep-compares results of any shape: dataclasses, dicts, sequences, arrays, scalars
+def assert_same(a: Any, b: Any, path: str = "result") -> None:  # noqa: ANN401
     """Assert two results are identical, walking result objects field by field.
 
     Every failure names the field path it reached and, at a leaf, what the two

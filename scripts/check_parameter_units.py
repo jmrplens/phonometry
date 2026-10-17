@@ -2846,7 +2846,8 @@ def fixed_tuple_items(annotation: object) -> tuple[str, ...] | None:
         items = inner.elts if isinstance(inner, ast.Tuple) else [inner]
         if any(isinstance(i, ast.Constant) and i.value is Ellipsis for i in items):
             continue
-        if len(items) >= 2:  # noqa: PLR2004 - one item is not a bundle
+        # One item is not a bundle
+        if len(items) >= 2:  # noqa: PLR2004
             return tuple(ast.unparse(i) for i in items)
     return None
 

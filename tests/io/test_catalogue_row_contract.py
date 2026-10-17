@@ -730,7 +730,8 @@ def test_optional_float_is_checked_as_the_number_it_is() -> None:
     not tell them apart if it wanted to; what it refuses is an annotation it
     has no check for.
     """
-    cls = _subclass(typing.Optional[float])  # noqa: UP045 - the spelling under test
+    # The spelling under test
+    cls = _subclass(typing.Optional[float])  # noqa: UP045
     assert cls(name="x", source="y", reading=1.5).reading == 1.5
     with pytest.raises(io.CatalogueError, match="reading holds nan"):
         cls(name="x", source="y", reading=float("nan"))

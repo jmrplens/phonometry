@@ -132,7 +132,8 @@ def test_the_result_survives_a_round_trip_through_pickle() -> None:
     result = aircraft.verify_aircraft_noise_system(
         directional={4000.0: {90: 1.9}}, linearity={"reference": 0.3}
     )
-    again = pickle.loads(pickle.dumps(result))  # noqa: S301 - our own bytes
+    # Our own bytes
+    again = pickle.loads(pickle.dumps(result))  # noqa: S301
     assert again.checks == result.checks
     assert again.passes is True
 

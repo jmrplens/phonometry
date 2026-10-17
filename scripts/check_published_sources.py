@@ -12,13 +12,14 @@ vacuous.
 
 1. **The grammar of a ``source`` field.** Every public record that carries one,
    and every mapping or sequence of such records, has to write it the way the
-   errata registry writes its evidence (CONTRIBUTING.md "Filing an errata
-   entry"): the document, the table or section, the PDF page and the printed
-   folio, cited by designation and never by file path. A row whose columns come
-   off two pages names both, separated by ``"; "``. :data:`FOLIO_FORMS` has the
-   four spellings, including the one for a page that prints no folio at all,
-   and each of them takes either a page number or the chapter-and-page form a
-   handbook of independently paginated chapters prints.
+   errata registry writes its evidence
+   (docs/contributing/docs-and-figures.md#f57): the document, the table or
+   section, the PDF page and the printed folio, cited by designation and never
+   by file path. A row whose columns come off two pages names both, separated
+   by ``"; "``. :data:`FOLIO_FORMS` has the four spellings, including the one
+   for a page that prints no folio at all, and each of them takes either a page
+   number or the chapter-and-page form a handbook of independently paginated
+   chapters prints.
    Nothing published here needs that fourth form yet; it is accepted from the
    start so that the first row that does cannot invent a second spelling for an
    unnumbered page. ``scripts/check_errata_evidence.py``, which reads the same
@@ -55,10 +56,11 @@ vacuous.
    there rather than citing a page that prints nothing.
 
 A standard is deliberately outside the registry. ISO, IEC, EN and DIN number
-their own clauses and tables, and CONTRIBUTING.md asks for a citation by that
-number; a PDF page would pin the reading to one copy of a document this project
-does not redistribute. A book numbers nothing a reader can resolve without the
-page, which is exactly why the errata rule demands one.
+their own clauses and tables, and docs/contributing/docstrings.md#d13 asks
+for a citation by that number; a PDF page would pin the reading to one copy
+of a document this project does not redistribute. A book numbers nothing a
+reader can resolve without the page, which is exactly why the errata rule
+demands one.
 
 :data:`PAGE_UNKNOWN` is the escape hatch, and it is a ratchet in both
 directions: an entry whose banner now cites its page fails until the line is

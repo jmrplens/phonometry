@@ -446,18 +446,21 @@ class SpatialDecayResult(OwnsArrays):
     region: str
     band: float | None = None
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Draw the curve, the free-field reference and the fitted slope.
 
         :param ax: Axes to draw on; a new figure is made when omitted.
-        :param kwargs: Passed to the renderer, including ``language``.
+        :param language: ``"en"`` (default) or ``"es"`` for the labels.
+        :param kwargs: Passed to the renderer.
         :return: The axes drawn on.
         """
         from .._i18n import check_language
         from .._plot.room import plot_spatial_decay
 
-        check_language(kwargs.get("language", "en"))
-        return plot_spatial_decay(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_spatial_decay(self, ax=ax, language=language, **kwargs)
 
 
 def sound_distribution_value(

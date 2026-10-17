@@ -46,7 +46,8 @@ _SCRIPTS = str(Path(__file__).resolve().parent)
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-import reports  # noqa: F401  (its __init__ pins the thread pools first)
+# Its __init__ pins the thread pools first
+import reports  # noqa: F401
 from reports.building import (
     _airborne_example,
     _field_airborne_example,

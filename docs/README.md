@@ -371,3 +371,7 @@ field itself on a finite-difference grid.
 Run the test suite with `pytest tests/`, the full quality gate with `make check`
 (ruff + mypy + bandit + tests), and regenerate the documentation images with
 `make graphs`. See [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+## Contributing
+
+- [Contributor style guide](contributing/index.md): how phonometry names things, shapes its API, documents and comments its code, handles numbers, tests itself, documents and draws, and words its prose, for the people and the coding agents who change the library; every rule has an identifier a review can cite and names the check that enforces it. It lives only in this repository, with no page on the site

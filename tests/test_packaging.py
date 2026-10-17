@@ -173,7 +173,8 @@ def _tracked(paths: list[str], root: pathlib.Path = _ROOT) -> set[str]:
     where this runs. *root* is a parameter so the predicate can be asked
     about a repository built for the purpose.
     """
-    listed = subprocess.run(  # noqa: S603 - fixed argv, paths from our own page
+    # Fixed argv, paths from our own page
+    listed = subprocess.run(  # noqa: S603
         ["git", "-C", str(root), "ls-files", "-z", "--", *paths],  # noqa: S607
         capture_output=True,
         text=True,
@@ -184,7 +185,8 @@ def _tracked(paths: list[str], root: pathlib.Path = _ROOT) -> set[str]:
 
 def _git(root: pathlib.Path, *args: str) -> None:
     """Run one git command in *root*, for building a fixture repository."""
-    subprocess.run(  # noqa: S603 - fixed argv, arguments from this file
+    # Fixed argv, arguments from this file
+    subprocess.run(  # noqa: S603
         ["git", "-C", str(root), *args],  # noqa: S607
         capture_output=True,
         text=True,

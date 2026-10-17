@@ -173,7 +173,7 @@ def _round_report(u: np.ndarray, decimals: int) -> np.ndarray:
 
 
 def absorption_coverage_factor(coverage: float = 0.95) -> float:
-    """Return the coverage factor ``k`` for a coverage probability (Table 3).
+    """The coverage factor ``k`` for a coverage probability (Table 3).
 
     :param coverage: Coverage probability as a fraction; one of
         ``0.68, 0.80, 0.90, 0.95, 0.99, 0.999`` (Table 3, Gaussian measurand).

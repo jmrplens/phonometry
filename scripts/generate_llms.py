@@ -211,6 +211,11 @@ def _routes() -> list[tuple[str, str]]:
         # this the target cannot run at all in a checkout that has any.
         if _git_ignored(path):
             continue
+        # The contributor guide is for the repository's readers (people and
+        # coding agents working on phonometry), not the library's: it has no
+        # site page and stays out of llms.txt by design.
+        if path.relative_to(DOCS).parts[0] == "contributing":
+            continue
         route = path.relative_to(DOCS).with_suffix("").as_posix()
         # A folder's own page is `<folder>/index.md`, as on the site.
         route = route.removesuffix("/index")

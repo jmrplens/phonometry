@@ -206,6 +206,43 @@ def test_every_second_or_private_address_is_reported(tmp_path: pathlib.Path) -> 
     ]
 
 
+def test_a_published_type_variable_or_protocol_is_reported(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``TypeVar`` or a ``Protocol`` in an ``__all__`` is refused like an alias.
+
+    Both only describe types, and the guard knew it for the names a module
+    leaves unlisted; a listed one passed as long as it was not an alias.
+    """
+    package = tmp_path / "fake_typing_domain"
+    package.mkdir()
+    (package / "__init__.py").write_text(
+        "from .leaf import Proto, T, made\n__all__ = ['Proto', 'T', 'made']\n",
+        encoding="utf-8",
+    )
+    (package / "leaf.py").write_text(
+        "from typing import Protocol, TypeVar\n"
+        "T = TypeVar('T')\n"
+        "class Proto(Protocol):\n    def size(self) -> int: ...\n"
+        "def made():\n    return 1\n"
+        "__all__ = ['Proto', 'T', 'made']\n",
+        encoding="utf-8",
+    )
+    sys.path.insert(0, str(tmp_path))
+    try:
+        import importlib
+
+        domain = importlib.import_module("fake_typing_domain")
+    finally:
+        sys.path.remove(str(tmp_path))
+    assert gate.surface_problems([domain]) == [
+        "fake_typing_domain.__all__ lists 'Proto', a Protocol",
+        "fake_typing_domain.__all__ lists 'T', a TypeVar",
+        "fake_typing_domain.leaf.__all__ lists 'Proto', a Protocol",
+        "fake_typing_domain.leaf.__all__ lists 'T', a TypeVar",
+    ]
+
+
 def test_a_plain_name_row_must_name_something_public() -> None:
     """A withdrawn name whose row stayed teaches an import that fails."""
     markdown = (

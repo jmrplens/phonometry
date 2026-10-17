@@ -105,13 +105,13 @@ Multichannel support: If x is 2D (channels, samples), each channel is filtered.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | (*Union[List[float], np.ndarray, phonometry.io.Signal]*) Input signal (1D array or 2D array [channels, samples]), or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) read from a measurement file. |
-| `fs` | (*Optional[int]*) Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `fraction` | (*float*) Bandwidth 'b'. Examples: 1/3-octave b=3, 1-octave b=1, 2/3-octave b=1.5. Default: 1. |
-| `order` | (*int*) Order of the filter. Default: 6. |
-| `limits` | (*Optional[List[float]]*) Minimum and maximum limit frequencies [f_min, f_max]. Default [12, 20000]. |
-| `sigbands` | (*bool*) If True, also return the signal in the time domain divided into bands. |
-| `detrend` | (*bool*) If True, remove DC offset before filtering. Default: True. |
+| `x` | Input signal (1D array or 2D array [channels, samples]), or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) read from a measurement file. |
+| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `fraction` | Bandwidth 'b'. Examples: 1/3-octave b=3, 1-octave b=1, 2/3-octave b=1.5. Default: 1. |
+| `order` | Order of the filter. Default: 6. |
+| `limits` | Minimum and maximum limit frequencies [f_min, f_max]. Default [12, 20000]. |
+| `sigbands` | If True, also return the signal in the time domain divided into bands. |
+| `detrend` | If True, remove DC offset before filtering. Default: True. |
 | `mode` | 'rms' or 'peak'. Default: 'rms'. |
 | `nominal` | If True, return IEC 61260-1 nominal frequency labels (List[str]) instead of exact floats. |
 | `design` | How the band filters are designed: family, ripple, stopband attenuation and multirate decimation ([`FilterDesign`](/phonometry/reference/api/filters/core/#filterdesign)). The default 'butter' family is the only one that meets the class 1 mask of IEC 61260-1 Table 1 with the default parameters; for `cheby2` scipy pins the deep-stopband floor at exactly `attenuation`, so it must be >= 70 dB to clear the class 1 limit (matches [`OctaveFilterBank`](/phonometry/reference/api/filters/core/#octavefilterbank), which also says how the decimated banks grade on the summation of outputs). |

@@ -81,3 +81,13 @@ def test_the_intensity_shard_holds_only_the_intensity_routes(slug: str) -> None:
         "devices/emission/intensity",
     ]
     assert "devices/emission/vibration-sound-power" in members["devices-emission"]
+
+
+def test_the_contributor_guide_stays_out_of_llms() -> None:
+    """docs/contributing/ is repository-only: it has no site page and no llms entry.
+
+    Without the exclusion ``_routes()`` raises, because a mirror page with no
+    page on the site is exactly what it exists to catch.
+    """
+    routes = [route for _, route in llms._routes()]
+    assert not any(route.startswith("contributing") for route in routes)

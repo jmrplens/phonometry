@@ -126,7 +126,7 @@ _ANCHOR = re.compile(r"\]\(#([^)]+)\)")
 
 #: An opening display-maths fence with the formula on the same line. The tail
 #: is the fence's meta, so the block does not end where the author thinks.
-_MATH_META = re.compile(r"^\$\$\s*\S")
+_MATH_META = re.compile(r"^[ \t]*\$\$\s*\S")
 
 #: The line that opens and closes the YAML frontmatter, and nothing else.
 _FRONTMATTER = "---"

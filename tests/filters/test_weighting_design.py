@@ -608,7 +608,8 @@ def test_the_design_does_not_depend_on_the_blas_thread_count() -> None:
             OPENBLAS_NUM_THREADS=threads,
             MKL_NUM_THREADS=threads,
         )
-        return subprocess.run(  # noqa: S603  # fixed argv, no shell, no user input
+        # Fixed argv, no shell, no user input
+        return subprocess.run(  # noqa: S603
             [sys.executable, "-c", script],
             check=True,
             capture_output=True,
@@ -655,7 +656,8 @@ def test_the_design_does_not_depend_on_the_blas_kernel() -> None:
     digests = {}
     for kernel in _KERNEL_SETS:
         environment = dict(os.environ, OPENBLAS_CORETYPE=kernel)
-        finished = subprocess.run(  # noqa: S603  # fixed argv, no shell, no user input
+        # Fixed argv, no shell, no user input
+        finished = subprocess.run(  # noqa: S603
             [sys.executable, "-c", script],
             check=False,
             capture_output=True,
@@ -698,7 +700,8 @@ def test_the_design_does_not_depend_on_the_numpy_kernel() -> None:
     digests = {}
     for disabled in ("", "X86_V3 X86_V4 AVX512_ICL AVX512_SPR"):
         environment = dict(os.environ, NPY_DISABLE_CPU_FEATURES=disabled)
-        finished = subprocess.run(  # noqa: S603  # fixed argv, no shell, no user input
+        # Fixed argv, no shell, no user input
+        finished = subprocess.run(  # noqa: S603
             [sys.executable, "-c", script],
             check=False,
             capture_output=True,

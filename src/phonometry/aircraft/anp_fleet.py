@@ -701,7 +701,7 @@ class ANPDatabase:
         return sorted(self._aircraft)
 
     def aircraft(self, aircraft_id: str) -> ANPAircraft:
-        """Return the :class:`ANPAircraft` for an identifier.
+        """The :class:`ANPAircraft` for an identifier.
 
         :raises KeyError: If the identifier is not in the database.
         """

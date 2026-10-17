@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Contributors and coding agents have one written style guide.**
+  `docs/contributing/` says how phonometry names things, shapes its public API,
+  writes docstrings and comments, compares and holds numbers, writes tests,
+  documents and draws, and words its prose, commits and pull requests. Every
+  rule has an identifier a review can cite (N7, F35), one example to follow and
+  one to avoid, and names the check that enforces it, or says that review
+  does; an index lists every rule, and the rules no script checks yet. The
+  guide lives only in the repository. CONTRIBUTING now keeps the process and
+  links each page of the guide, `AGENTS.md` sends coding agents to it before
+  anything else, and the review bot cites its rules. A test holds the guide to
+  itself: every check it names exists, every link into it resolves, and the
+  index and the pages agree.
+
 - **The background correction of ISO 16251-1 and the strong-coupling check of
   ISO 10848-1 draw themselves.** `building.BackgroundCorrectedLevel.plot()`
   draws the margin of each band above the background over the three regimes
@@ -1970,6 +1983,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a diagram shows is the one its clause prints.
 
 ### Fixed
+
+- **The impulsive-sound analysis refuses a stereo signal instead of reading it
+  as one channel twice as long.** `environment.sound_pressure_level_history`
+  and `environment.impulsive_sound_adjustment` flattened a `(2, n)` signal into
+  one series of twice the length and returned levels and an adjustment for it.
+  Both now raise a `ValueError` naming `x`, as every other single-channel
+  analysis does.
+
+- **The layered-absorber and slit-resonator plots label their frequency axis by
+  octave.** Drawing the reflection factor over the absorption curve reset the
+  axis, so `materials.LayeredAbsorberResult.plot()` and
+  `materials.SlitResonatorAbsorberResult.plot()` labeled frequency as 10^2 and
+  10^3. The reflection factor is now drawn on the axis as it is, and keeps the
+  octave-center labels.
+
+- **Every `.plot()` names its `language`, and the panel rating fiche its
+  `metadata`.** The `.plot()` of the laboratory, survey and intensity
+  insulation results of `building` and of `room.SpatialDecayResult` handed the
+  drawing on and took `language` only through `**kwargs`, so their signatures
+  and the API reference did not show it; `building.SoundReductionResult.report()`
+  did the same with `metadata` and `language`. They now name them, keyword-only,
+  and a test requires `language` on every `.plot()`.
 
 - **The survey positions over one reflecting plane are those of ISO 3746.**
   `emission.measurement_positions("hemisphere", ..., grade="survey")` over one

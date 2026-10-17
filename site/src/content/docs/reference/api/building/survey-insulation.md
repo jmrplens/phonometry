@@ -365,7 +365,12 @@ Per-band airborne sound insulation, survey method (ISO 10052).
 ### SurveyAirborneResult.plot()
 
 ```python
-SurveyAirborneResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+SurveyAirborneResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot `DnT` against the shifted ISO 717-1 reference curve.
@@ -444,7 +449,12 @@ Per-band façade sound insulation, survey method (ISO 10052).
 ### SurveyFacadeResult.plot()
 
 ```python
-SurveyFacadeResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+SurveyFacadeResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot `D2m,nT` against the shifted ISO 717-1 reference curve.
@@ -516,7 +526,12 @@ Per-band impact sound insulation, survey method (ISO 10052).
 ### SurveyImpactResult.plot()
 
 ```python
-SurveyImpactResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+SurveyImpactResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot `L'nT` against the shifted ISO 717-2 reference curve.

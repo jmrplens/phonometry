@@ -151,7 +151,7 @@ def _warn_outside_domain(l_ex: float, years: float, fractile: float) -> None:
 
 
 @dataclass(frozen=True)
-class NiptsResult(OwnsArrays):
+class NIPTSResult(OwnsArrays):
     """Noise-induced permanent threshold shift (ISO 1999:2013, clause 6.3).
 
     All arrays are in dB and aligned with :data:`NIPTS_FREQUENCIES`.
@@ -243,7 +243,7 @@ class NiptsResult(OwnsArrays):
         )
         if np.asarray(self.frequencies).size == 0:
             msg = (
-                "NiptsResult: 'frequencies' must carry at least one "
+                "NIPTSResult: 'frequencies' must carry at least one "
                 "audiometric frequency; the prediction is empty."
             )
             raise ValueError(msg)
@@ -314,7 +314,7 @@ class NiptsResult(OwnsArrays):
 
 
 @dataclass(frozen=True)
-class HtlanResult(OwnsArrays):
+class HTLANResult(OwnsArrays):
     r"""Hearing threshold level associated with age and noise (clause 6.1).
 
     All arrays are in dB and aligned with :data:`NIPTS_FREQUENCIES`.
@@ -377,7 +377,7 @@ class HtlanResult(OwnsArrays):
         ``Q = 100 (1 - fractile)`` - as does the plot title. Left unguarded
         they publish a finished, internally consistent-looking accredited
         sheet whose stated conditions are nonsense. As in
-        :class:`NiptsResult`, only finiteness is construction's business: the
+        :class:`NIPTSResult`, only finiteness is construction's business: the
         age floor of ISO 7029 and the fractile's (0, 1) interval belong to
         :func:`htlan`.
 
@@ -397,7 +397,7 @@ class HtlanResult(OwnsArrays):
         )
         if np.asarray(self.frequencies).size == 0:
             msg = (
-                "HtlanResult: 'frequencies' must carry at least one "
+                "HTLANResult: 'frequencies' must carry at least one "
                 "audiometric frequency; the prediction is empty."
             )
             raise ValueError(msg)
@@ -520,7 +520,7 @@ def nipts(
     years: float,
     fractile: float = 0.5,
     frequencies: ArrayLike | None = None,
-) -> NiptsResult:
+) -> NIPTSResult:
     """Noise-induced permanent threshold shift (ISO 1999:2013, clause 6.3).
 
     Returns, per audiometric frequency, the median NIPTS ``N50`` (Formula 2,
@@ -540,7 +540,7 @@ def nipts(
         gives the median. The reliable range of the standard is 0.05-0.95.
     :param frequencies: Optional subset of the audiometric frequencies, in
         hertz; ``None`` uses all six (500 Hz - 6000 Hz).
-    :return: A :class:`NiptsResult` with the distribution and ``.plot()``.
+    :return: A :class:`NIPTSResult` with the distribution and ``.plot()``.
     :raises ValueError: for a non-positive duration, a fractile outside (0, 1),
         or an unknown frequency.
 
@@ -566,7 +566,7 @@ def nipts(
     z = float(ndtri(fractile))
     value = np.maximum(n50 + z * (du if z >= 0.0 else dl), 0.0)
 
-    return NiptsResult(
+    return NIPTSResult(
         l_ex=float(l_ex),
         years=float(years),
         fractile=float(fractile),
@@ -609,7 +609,7 @@ def htlan(
     years: float,
     fractile: float = 0.5,
     frequencies: ArrayLike | None = None,
-) -> HtlanResult:
+) -> HTLANResult:
     r"""Hearing threshold level associated with age and noise (clause 6.1).
 
     Combines the age component ``H`` (HTLA from database A, evaluated from
@@ -627,7 +627,7 @@ def htlan(
     :param fractile: Population fractile in (0, 1) applied to both components.
     :param frequencies: Optional subset of the audiometric frequencies, in
         hertz; ``None`` uses all six (500 Hz - 6000 Hz).
-    :return: An :class:`HtlanResult` with ``htla``, ``nipts``, ``threshold`` and
+    :return: An :class:`HTLANResult` with ``htla``, ``nipts``, ``threshold`` and
         ``.plot()``.
     :raises ValueError: for an age below 18, an unknown sex, a non-positive
         duration, a fractile outside (0, 1), or an unknown frequency.
@@ -642,7 +642,7 @@ def htlan(
     noise = nipts(l_ex, years, fractile, frequencies=freqs).value
     threshold = age_and_noise_threshold(htla, noise)
 
-    return HtlanResult(
+    return HTLANResult(
         age=float(age),
         sex=sex,
         l_ex=float(l_ex),

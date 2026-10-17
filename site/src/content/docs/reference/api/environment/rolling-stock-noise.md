@@ -422,7 +422,7 @@ The smallest radius of curvature the test track may have, 6.2.2.
 
 ```python
 pass_by_measurement(
-    signal: Signal | Sequence[float] | np.ndarray,
+    x: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     start_s: float,
@@ -462,7 +462,7 @@ level at its rear; the result keeps both margins.
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | The sound pressure record in pascals, unweighted, one channel, or a mono [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied. |
+| `x` | The sound pressure record in pascals, unweighted, one channel, or a mono [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied. |
 | `fs` | The sampling rate, in hertz; a Signal brings its own. |
 | `start_s` | $T_1$, in seconds from the start of the record. |
 | `end_s` | $T_2$, in seconds. |
@@ -556,7 +556,7 @@ PassByMeasurement(
     start_s: float,
     end_s: float,
     equivalent_level_db: float,
-    max_level_db: float,
+    maximum_level_db: float,
     front_level_db: float,
     rear_level_db: float,
     record_start_level_db: float,
@@ -576,7 +576,7 @@ The levels of one pass-by record, 6.5 and 6.6.3.
 | `start_s` | $T_1$, the start of the measurement time interval. |
 | `end_s` | $T_2$, its end, in seconds. |
 | `equivalent_level_db` | $L_{p\mathrm{Aeq},T}$ over $T_1$ to $T_2$, in dB; the pass-by level $L_{p\mathrm{Aeq},T_p}$ when the interval is the pass-by time. |
-| `max_level_db` | $L_{p\mathrm{AFmax}}$ within the interval, in dB. |
+| `maximum_level_db` | $L_{p\mathrm{AFmax}}$ within the interval, in dB. |
 | `front_level_db` | $L_{p\mathrm{AF}}$ when the front of the train is opposite the microphone, in dB. |
 | `rear_level_db` | $L_{p\mathrm{AF}}$ when its rear is, in dB. |
 | `record_start_level_db` | $L_{p\mathrm{AF}}$ at the start of the record, in dB. |

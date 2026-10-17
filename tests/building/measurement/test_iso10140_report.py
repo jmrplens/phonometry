@@ -48,19 +48,19 @@ _T_UNITY = np.full(16, 0.5)
 _V_UNITY = 31.25
 
 
-def _airborne_result(**kwargs: float) -> building.LabAirborneInsulationResult:
+def _airborne_result(**kwargs: float) -> building.LaboratoryAirborneInsulationResult:
     """A lab airborne result whose R equals the ISO 717-1 Annex C curve."""
     l1 = np.full(16, 90.0)
     l2 = l1 - np.asarray(_AIRBORNE_R, dtype=np.float64)
     params = {"area": 10.0, "volume": _V_UNITY, **kwargs}
-    return building.lab_airborne_insulation(l1, l2, _T_UNITY, **params)
+    return building.laboratory_airborne_insulation(l1, l2, _T_UNITY, **params)
 
 
-def _impact_result(**kwargs: float) -> building.LabImpactInsulationResult:
+def _impact_result(**kwargs: float) -> building.LaboratoryImpactInsulationResult:
     """A lab impact result whose Ln equals the ISO 717-2 Annex C curve."""
     li = np.asarray(_IMPACT_LN, dtype=np.float64)
     params = {"volume": _V_UNITY, **kwargs}
-    return building.lab_impact_insulation(li, _T_UNITY, **params)
+    return building.laboratory_impact_insulation(li, _T_UNITY, **params)
 
 
 def _extract_text(path: str) -> str:
@@ -165,7 +165,7 @@ def test_octave_band_fiche_renders(tmp_path: Path) -> None:
     """A five-octave-band laboratory result also yields a one-page fiche."""
     l1 = np.full(5, 90.0)
     r = np.array([30.0, 40.0, 48.0, 52.0, 55.0])
-    result = building.lab_airborne_insulation(
+    result = building.laboratory_airborne_insulation(
         l1, l1 - r, np.full(5, 0.5), area=10.0, volume=_V_UNITY
     )
     assert result.rating is not None
@@ -217,7 +217,7 @@ def test_unknown_language_rejected(tmp_path: Path) -> None:
 def test_missing_rating_rejected(tmp_path: Path) -> None:
     """A result without the ISO 717 rating (non-core band count) is rejected."""
     l1 = np.full(8, 90.0)
-    result = building.lab_airborne_insulation(
+    result = building.laboratory_airborne_insulation(
         l1, np.full(8, 50.0), np.full(8, 0.5), area=10.0, volume=_V_UNITY
     )
     assert result.rating is None
@@ -236,7 +236,7 @@ def test_rating_without_per_band_data_rejected(tmp_path: Path) -> None:
     bare_rating = building.WeightedRatingResult(
         rating=30, c=-2, ctr=-3, unfavorable_sum=0.0
     )
-    result = building.LabAirborneInsulationResult(
+    result = building.LaboratoryAirborneInsulationResult(
         r=np.asarray(_AIRBORNE_R, dtype=np.float64),
         absorption_area=np.full(16, 10.0),
         rating=bare_rating,
@@ -251,7 +251,7 @@ def test_rating_without_per_band_data_rejected(tmp_path: Path) -> None:
 def test_manual_impact_result_renders(tmp_path: Path) -> None:
     """A manually built lab impact result reports its Ln fiche."""
     result = _impact_result()
-    bare = building.LabImpactInsulationResult(
+    bare = building.LaboratoryImpactInsulationResult(
         l_n=result.l_n, absorption_area=result.absorption_area, rating=result.rating
     )
     out = tmp_path / "bare.pdf"
@@ -283,7 +283,7 @@ def test_report_rejects_band_count_mismatch(tmp_path: Path) -> None:
     out = str(tmp_path / "x.pdf")
     with pytest.raises(
         ValueError,
-        match=r"LabAirborneInsulationResult\.report: .*'rating\.frequencies' "
+        match=r"LaboratoryAirborneInsulationResult\.report: .*'rating\.frequencies' "
         r".* must all have the same shape, one value per band",
     ):
         bad.report(out)

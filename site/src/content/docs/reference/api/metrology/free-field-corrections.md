@@ -535,7 +535,7 @@ through floating-point arithmetic: the comparison is the one
 [`verify_conformance`](/phonometry/reference/api/metrology/conformance/#verify_conformance) makes for the IEC TC 29
 instrument standards, which forgives an excess of one part in
 $10^9$. The maximum is derived from the clause and the frequencies,
-`maximum_uncertainty_db`, so a verdict cannot be judged against a
+`max_uncertainty_db`, so a verdict cannot be judged against a
 maximum its clause does not give.
 
 **Attributes**
@@ -562,7 +562,7 @@ The frequencies where either requirement fails, in Hz.
 The maximum less the expanded uncertainty at each frequency, in dB:
 negative where it fails.
 
-### CorrectionUncertaintyVerification.maximum_uncertainty_db
+### CorrectionUncertaintyVerification.max_uncertainty_db
 
 *property*
 
@@ -843,7 +843,7 @@ The formula applied: `"D.7"`, `"E.6"` or `"F.13"`.
 The correction of each microphone, the mean over its
 determinations, in dB, shape `(microphones, frequencies)`.
 
-### FreeFieldCorrection.microphone_count
+### FreeFieldCorrection.n_microphones
 
 *property*
 

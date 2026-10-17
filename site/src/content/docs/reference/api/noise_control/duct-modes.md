@@ -51,7 +51,7 @@ circular_duct_cut_on(
     *,
     flow_velocity: float = 0.0,
     speed_of_sound: float = 343.0,
-    count: int = 6,
+    n_modes: int = 6,
 ) -> DuctModeResult
 ```
 
@@ -72,7 +72,7 @@ The flow lowers every cut-on frequency and shifts the cut-on away from
 $k_x = 0$: the mode is already travelling upstream, against the
 flow, at
 the frequency at which it appears. Only the first twelve modes are
-tabulated by Norton, so `count` cannot exceed twelve.
+tabulated by Norton, so `n_modes` cannot exceed twelve.
 
 **Parameters**
 
@@ -81,7 +81,7 @@ tabulated by Norton, so `count` cannot exceed twelve.
 | `diameter_m` | Internal duct diameter, m (`a_i` is half of it). |
 | `flow_velocity` | Mean axial flow speed `U`, m/s (0 for still air; use the centre-line speed for a turbulent profile). |
 | `speed_of_sound` | Speed of sound `c` in the duct fluid, m/s. |
-| `count` | How many higher-order modes to return, 1 to 12. |
+| `n_modes` | How many higher-order modes to return, 1 to 12. |
 
 **Returns:** A [`DuctModeResult`](/phonometry/reference/api/noise_control/duct-modes/#ductmoderesult).
 
@@ -89,7 +89,7 @@ tabulated by Norton, so `count` cannot exceed twelve.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a non-positive diameter, a sonic or supersonic flow, or a `count` outside 1 to 12. |
+| ValueError | For a non-positive diameter, a sonic or supersonic flow, or an `n_modes` outside 1 to 12. |
 
 ## DuctModeResult
 
@@ -210,7 +210,7 @@ rectangular_duct_cut_on(
     *,
     flow_velocity: float = 0.0,
     speed_of_sound: float = 343.0,
-    count: int = 3,
+    n_modes: int = 3,
 ) -> DuctModeResult
 ```
 
@@ -236,7 +236,7 @@ wavelength across the wider side.
 | `height_m` | Cross-sectional dimension `b`, m. |
 | `flow_velocity` | Mean axial flow speed `U`, m/s. |
 | `speed_of_sound` | Speed of sound `c` in the duct fluid, m/s. |
-| `count` | How many higher-order modes to return (at least 1). |
+| `n_modes` | How many higher-order modes to return (at least 1). |
 
 **Returns:** A [`DuctModeResult`](/phonometry/reference/api/noise_control/duct-modes/#ductmoderesult).
 
@@ -244,4 +244,4 @@ wavelength across the wider side.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For non-positive dimensions, a sonic or supersonic flow, or a non-positive `count`. |
+| ValueError | For non-positive dimensions, a sonic or supersonic flow, or a non-positive `n_modes`. |

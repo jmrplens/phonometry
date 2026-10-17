@@ -260,7 +260,7 @@ ninguno es opcional en la práctica:
 | `reference_pressure_pa` | `2e-05` Pa | Solo se cambia para un medio distinto del aire |
 | `onset_rate_method` | `'least_squares'` | El ajuste sobre la subida detectada |
 
-`environment.sound_pressure_level_history(signal, fs, *, dt=..., calibration_offset=...)`
+`environment.sound_pressure_level_history(x, fs, *, dt=..., calibration_offset=...)`
 es ese mismo paso del apartado 4 por separado (ponderación A, ponderación
 temporal F y remuestreo a la rejilla de 10-25 ms) para quien quiera el historial
 sin el ajuste. Arranca en caliente el integrador de F con el valor cuadrático

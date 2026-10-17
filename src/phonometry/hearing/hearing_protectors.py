@@ -576,9 +576,9 @@ class HMLRatingResult(OwnsArrays):
     :ivar high: :math:`H_x`, the high-frequency value, in dB, unrounded.
     :ivar medium: :math:`M_x`, the medium-frequency value, in dB, unrounded.
     :ivar low: :math:`L_x`, the low-frequency value, in dB, unrounded.
-    :ivar subject_h: :math:`H_j` per test subject, in dB (Formula (12)).
-    :ivar subject_m: :math:`M_j` per test subject, in dB (Formula (13)).
-    :ivar subject_l: :math:`L_j` per test subject, in dB (Formula (14)).
+    :ivar subject_high: :math:`H_j` per test subject, in dB (Formula (12)).
+    :ivar subject_medium: :math:`M_j` per test subject, in dB (Formula (13)).
+    :ivar subject_low: :math:`L_j` per test subject, in dB (Formula (14)).
     :ivar predicted_reduction: :math:`PNR_{ji}` per subject and reference
         noise, in dB, a ``(subjects, 8)`` grid (Formula (15)).
     :ivar performance: The protection performance ``x``, in per cent.
@@ -588,9 +588,9 @@ class HMLRatingResult(OwnsArrays):
     high: float
     medium: float
     low: float
-    subject_h: np.ndarray
-    subject_m: np.ndarray
-    subject_l: np.ndarray
+    subject_high: np.ndarray
+    subject_medium: np.ndarray
+    subject_low: np.ndarray
     predicted_reduction: np.ndarray
     performance: int
     alpha: float
@@ -673,16 +673,16 @@ def hml_rating(
     pnr = _REFERENCE_TOTAL - 10.0 * np.log10(summed)
     quiet, loud = pnr[:, 0:4], pnr[:, 4:8]
     d_quiet, d_loud = weights[0:4], weights[4:8]
-    subject_h = 0.25 * quiet.sum(axis=1) - 0.48 * (d_quiet * quiet).sum(axis=1)
-    subject_m = 0.25 * loud.sum(axis=1) - 0.16 * (d_loud * loud).sum(axis=1)
-    subject_l = 0.25 * loud.sum(axis=1) + 0.23 * (d_loud * loud).sum(axis=1)
+    subject_high = 0.25 * quiet.sum(axis=1) - 0.48 * (d_quiet * quiet).sum(axis=1)
+    subject_medium = 0.25 * loud.sum(axis=1) - 0.16 * (d_loud * loud).sum(axis=1)
+    subject_low = 0.25 * loud.sum(axis=1) + 0.23 * (d_loud * loud).sum(axis=1)
     return HMLRatingResult(
-        high=float(subject_h.mean() - alpha * subject_h.std(ddof=1)),
-        medium=float(subject_m.mean() - alpha * subject_m.std(ddof=1)),
-        low=float(subject_l.mean() - alpha * subject_l.std(ddof=1)),
-        subject_h=subject_h,
-        subject_m=subject_m,
-        subject_l=subject_l,
+        high=float(subject_high.mean() - alpha * subject_high.std(ddof=1)),
+        medium=float(subject_medium.mean() - alpha * subject_medium.std(ddof=1)),
+        low=float(subject_low.mean() - alpha * subject_low.std(ddof=1)),
+        subject_high=subject_high,
+        subject_medium=subject_medium,
+        subject_low=subject_low,
         predicted_reduction=pnr,
         performance=int(performance),
         alpha=alpha,

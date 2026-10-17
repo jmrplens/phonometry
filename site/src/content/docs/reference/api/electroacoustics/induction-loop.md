@@ -443,7 +443,7 @@ FieldStrengthReading(
     weighting: str,
     times: np.ndarray,
     levels: np.ndarray,
-    maximum_db: float,
+    maximum_level_db: float,
     equivalent_db: float,
 )
 ```
@@ -458,7 +458,7 @@ What the true-RMS field strength meter of IEC 60118-4:2014 6.1.3 reads.
 | `weighting` | `"Z"` (flat, 6.1.2) or `"A"` (the noise measurements of clause 7 and 10.4). |
 | `times` | The time of each reading, in seconds. |
 | `levels` | The time-weighted level, 125 ms exponential averaging, in dB re 400 mA/m. |
-| `maximum_db` | The maximum indication over the record, the "maximum value of the magnetic field" that 8.2.7 sets to 400 mA/m, in dB re 400 mA/m. |
+| `maximum_level_db` | The maximum indication over the record, the "maximum value of the magnetic field" that 8.2.7 sets to 400 mA/m, in dB re 400 mA/m. |
 | `equivalent_db` | The level of the mean square over the whole record, in dB re 400 mA/m. |
 
 ### FieldStrengthReading.plot()

@@ -343,7 +343,7 @@ def test_invalid_fs() -> None:
 
 def test_empty_signal() -> None:
     empty = np.array([])
-    with pytest.raises(ValueError, match="signal must not be empty"):
+    with pytest.raises(ValueError, match="'x' must not be empty"):
         psychoacoustics.tonality_ecma(empty, FS)
 
 

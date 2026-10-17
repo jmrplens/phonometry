@@ -267,7 +267,7 @@ def _assemble_tonality(
 
 
 def tonality_ecma(
-    signal_in: Signal | np.ndarray,
+    x: Signal | np.ndarray,
     fs: float | None = None,
     field: Literal["free", "diffuse"] = "free",
     f_low: float | None = None,
@@ -275,7 +275,7 @@ def tonality_ecma(
 ) -> EcmaTonality:
     """Psychoacoustic tonality per ECMA-418-2:2025 (Sottek Hearing Model).
 
-    :param signal_in: Calibrated sound pressure signal in pascals. Accepts a
+    :param x: Calibrated sound pressure signal in pascals. Accepts a
         :class:`phonometry.io.Signal`, which is where "calibrated" comes
         from without arithmetic: this model reads absolute levels, so an
         uncalibrated record is taken as if one digital unit were one
@@ -301,13 +301,13 @@ def tonality_ecma(
     if field not in ("free", "diffuse"):
         msg = "field must be 'free' or 'diffuse'"
         raise ValueError(msg)
-    fs = resolve_fs(signal_in, fs, name="signal_in")
-    x = apply_calibration(
-        signal_in,
-        require_1d_signal(_typesignal(signal_in, name="signal_in")),
+    fs = resolve_fs(x, fs, name="x")
+    samples = apply_calibration(
+        x,
+        require_1d_signal(_typesignal(x, name="x"), name="x"),
     )
-    if x.size == 0:
-        msg = "signal must not be empty"
+    if samples.size == 0:
+        msg = "'x' must not be empty"
         raise ValueError(msg)
     require_scalar(fs, "fs")
     fs = float(fs)
@@ -315,10 +315,10 @@ def tonality_ecma(
         msg = "fs must be positive"
         raise ValueError(msg)
     if fs != _FS:
-        x = signal.resample(x, round(x.size * _FS / fs))
+        samples = signal.resample(samples, round(samples.size * _FS / fs))
 
     z_lo, z_hi = _band_range(f_low, f_high)
-    n_tonal, n_noise, f_ton, _, n_samples = _tonal_noise_split(x, field)
+    n_tonal, n_noise, f_ton, _, n_samples = _tonal_noise_split(samples, field)
     t_single, t_spec, f_spec, t_time, f_time, time = _assemble_tonality(
         n_tonal, n_noise, f_ton, n_samples, z_lo, z_hi
     )

@@ -82,13 +82,13 @@ if TYPE_CHECKING:
 
 __all__ = [
     "HeavyImpactImprovementResult",
-    "LabFloorCoveringImprovementResult",
-    "LabLiningImprovementResult",
+    "LaboratoryFloorCoveringImprovementResult",
+    "LaboratoryLiningImprovementResult",
     "LiningCuringCheck",
     "check_lining_curing",
     "heavy_impact_improvement",
-    "lab_floor_covering_improvement",
-    "lab_lining_improvement",
+    "laboratory_floor_covering_improvement",
+    "laboratory_lining_improvement",
 ]
 
 #: The 16 one-third-octave bands, 100 Hz to 3 150 Hz, on which ISO 717 rates a
@@ -162,7 +162,7 @@ def _paired_spectra(
 
 
 @dataclass(frozen=True)
-class LabLiningImprovementResult(OwnsArrays):
+class LaboratoryLiningImprovementResult(OwnsArrays):
     r"""Improvement of airborne sound insulation by a lining (ISO 10140-1 Annex G).
 
     :ivar frequencies: One-third-octave band centre frequencies, in Hz.
@@ -236,13 +236,13 @@ class LabLiningImprovementResult(OwnsArrays):
         return plot_lab_lining_improvement(self, ax=ax, language=language, **kwargs)
 
 
-def lab_lining_improvement(
+def laboratory_lining_improvement(
     r_without_db: ArrayLike,
     r_with_db: ArrayLike,
     frequencies: ArrayLike,
     *,
     basic_element: BasicElement | None = "heavy_wall",
-) -> LabLiningImprovementResult:
+) -> LaboratoryLiningImprovementResult:
     r"""Improvement of airborne sound insulation by a lining (ISO 10140-1:2021 G).
 
     The basic element is measured to ISO 10140-2 without and then with the
@@ -272,18 +272,18 @@ def lab_lining_improvement(
     read off the numbers, so neither is refused here.
 
     :param r_without_db: ``Rwithout`` per one-third-octave band, in dB
-        (e.g. ``lab_airborne_insulation(...).r``).
+        (e.g. ``laboratory_airborne_insulation(...).r``).
     :param r_with_db: ``Rwith`` per band, in dB.
     :param frequencies: Band centre frequencies, in Hz.
     :param basic_element: ``"heavy_wall"`` (default), ``"heavy_floor"``,
         ``"lightweight_wall"`` or ``None`` for a basic element that is not one
         of the three standard ones.
-    :return: A :class:`LabLiningImprovementResult`.
+    :return: A :class:`LaboratoryLiningImprovementResult`.
     :raises ValueError: If the three inputs disagree in length, a value is not
         finite, a frequency is not positive, or ``basic_element`` is unknown.
     """
     freqs, without, with_ = _paired_spectra(
-        "lab_lining_improvement",
+        "laboratory_lining_improvement",
         frequencies,
         ("r_without_db", r_without_db),
         ("r_with_db", r_with_db),
@@ -314,7 +314,7 @@ def lab_lining_improvement(
             rating = weighted_reduction_improvement(
                 delta[inside], freqs[inside], basic_element=basic_element
             )
-    return LabLiningImprovementResult(
+    return LaboratoryLiningImprovementResult(
         frequencies=freqs,
         r_without_db=without,
         r_with_db=with_,
@@ -452,7 +452,7 @@ def check_lining_curing(
 
 
 @dataclass(frozen=True)
-class LabFloorCoveringImprovementResult(OwnsArrays):
+class LaboratoryFloorCoveringImprovementResult(OwnsArrays):
     r"""Improvement of impact sound insulation by a floor covering (Annex H).
 
     :ivar frequencies: One-third-octave band centre frequencies, in Hz.
@@ -607,13 +607,13 @@ class LabFloorCoveringImprovementResult(OwnsArrays):
         )
 
 
-def lab_floor_covering_improvement(
+def laboratory_floor_covering_improvement(
     l_n0_db: ArrayLike,
     l_n_db: ArrayLike,
     frequencies: ArrayLike,
     *,
     reference_floor: ReferenceFloor = "heavyweight",
-) -> LabFloorCoveringImprovementResult:
+) -> LaboratoryFloorCoveringImprovementResult:
     r"""Improvement of impact sound insulation by a floor covering (ISO 10140-1 H).
 
     The reference floor is measured to ISO 10140-3 with the tapping machine,
@@ -638,7 +638,7 @@ def lab_floor_covering_improvement(
 
     :param l_n0_db: ``Ln0`` per one-third-octave band, in dB: the
         energy-averaged normalized level of the bare floor (e.g.
-        ``lab_impact_insulation(...).l_n``). For small category I specimens
+        ``laboratory_impact_insulation(...).l_n``). For small category I specimens
         measured with the tapping machine beside each specimen, it is the
         arithmetic mean of the two positions either side (H.4.6.1.1).
     :param l_n_db: ``Ln`` with the covering, per band, in dB.
@@ -646,13 +646,13 @@ def lab_floor_covering_improvement(
         formed on the 16 bands 100 Hz to 3 150 Hz when all are present.
     :param reference_floor: ``"heavyweight"`` (default), ``"lightweight_1"``,
         ``"lightweight_2"`` or ``"lightweight_3"``.
-    :return: A :class:`LabFloorCoveringImprovementResult`.
+    :return: A :class:`LaboratoryFloorCoveringImprovementResult`.
     :raises ValueError: If the three inputs disagree in length, a value is not
         finite, a frequency is not positive, or ``reference_floor`` is not one
         of the four floors.
     """
     freqs, bare, covered = _paired_spectra(
-        "lab_floor_covering_improvement",
+        "laboratory_floor_covering_improvement",
         frequencies,
         ("l_n0_db", l_n0_db),
         ("l_n_db", l_n_db),
@@ -673,7 +673,7 @@ def lab_floor_covering_improvement(
         curve = np.fromiter(_REFERENCE_FLOORS[reference_floor].values(), dtype=float)
         reference_rating = weighted_impact_rating(curve - rated)
         bare_rating = weighted_impact_rating(bare[core])
-    return LabFloorCoveringImprovementResult(
+    return LaboratoryFloorCoveringImprovementResult(
         frequencies=freqs,
         l_n0_db=bare,
         l_n_db=covered,

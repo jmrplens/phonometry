@@ -219,7 +219,7 @@ y = np.roll(s, delay) + signals.noise_signal(fs, 4.0, color="white", rms=0.02, s
 res = signals.time_delay(x, y, fs, method="gcc", weighting="ml",
                          nperseg=2048, upsample=16, signal_bandwidth=1000.0)
 print(res.delay, res.delay_samples)     # seconds and fractional samples
-print(res.delay_std, res.delay_interval)  # Eq. 8.129 sigma, +/-2 sigma
+print(res.delay_standard_deviation, res.delay_interval)  # Eq. 8.129 sigma, +/-2 sigma
 res.plot()                              # correlation with the delay marked
 ```
 

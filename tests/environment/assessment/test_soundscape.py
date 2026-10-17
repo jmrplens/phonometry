@@ -128,7 +128,7 @@ def test_method_b_scales_are_figure_c7() -> None:
         "extremely",
     )
     assert sc.METHOD_B_SCALES[3].categories[0] == "never"
-    assert sc.METHOD_B_MAXIMUM_SOURCES == max(ISO12913_3_TABLE_B1_RANKS)
+    assert sc.METHOD_B_MAX_SOURCES == max(ISO12913_3_TABLE_B1_RANKS)
 
 
 def test_published_tables_are_read_only() -> None:

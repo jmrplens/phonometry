@@ -125,8 +125,8 @@ from phonometry import vibration
 
 print(f"{vibration.soil_building_natural_frequency(2.5e9, mass=4.0e5):.1f} Hz")  # 12.6 Hz
 print(vibration.soil_building_frequency_guide(4))  # (8.0, 12.0)
-print(vibration.foundation_transfer_max())  # 2.0
-print(f"{vibration.floor_transfer_max(0.03):.1f}")  # 16.7
+print(vibration.foundation_transfer_maximum())  # 2.0
+print(f"{vibration.floor_transfer_maximum(0.03):.1f}")  # 16.7
 print(vibration.story_fundamental_frequency(8))  # 1.25
 ```
 
@@ -172,7 +172,7 @@ rail vibration reaches about 80 m, further on soft layers.
 ```python
 from phonometry import vibration
 
-print(vibration.track_excitation_frequency(80 / 3.6, spacing_m=0.6, harmonics=2).round(1))  # [37.  74.1]
+print(vibration.track_excitation_frequency(80 / 3.6, spacing_m=0.6, n_harmonics=2).round(1))  # [37.  74.1]
 print(vibration.TRACK_TRANSMITTED_BANDS_HZ["ballast"])  # (40.0, 80.0)
 ```
 
@@ -190,8 +190,8 @@ groups added after that are further off.
 ```python
 from phonometry import vibration
 
-print(vibration.machine_count_correction([12.0], reference_count=3).round(3))  # [0.448]
-print(vibration.machine_hall_velocity_mm_s(0.44, [12.0, 44.0, 56.0], reference_count=3).round(2))
+print(vibration.machine_count_correction([12.0], n_reference_machines=3).round(3))  # [0.448]
+print(vibration.machine_hall_velocity_mm_s(0.44, [12.0, 44.0, 56.0], n_reference_machines=3).round(2))
 # [0.68 0.89 0.97], against 0.57, 0.95 and 1.04 measured
 ```
 

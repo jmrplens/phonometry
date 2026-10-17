@@ -223,7 +223,7 @@ Importan cuatro límites, y la biblioteca lo dice en tres de ellos lanzando
 
 ### Informe de NIPTS (`.report()`)
 
-`NiptsResult.report(path)` genera una ficha PDF de una página con la
+`NIPTSResult.report(path)` genera una ficha PDF de una página con la
 presentación de la predicción de pérdida auditiva inducida por ruido que emite
 un servicio de higiene industrial para un grupo de exposición, según la
 **ISO 1999:2013** (apartado 6.3): la línea de base de la predicción, un bloque
@@ -265,7 +265,7 @@ el repositorio; pulsa la vista previa para abrir el PDF.
 	name="iso1999_nipts_example"
 	title="Informe de ejemplo de predicción de NIPTS según ISO 1999 (PDF)"
 	description="Ficha de predicción de la pérdida auditiva inducida por ruido de una página: un encabezado de metadatos (empresa, grupo de trabajadores, lugar de trabajo, fecha de la evaluación), una tabla con el NIPTS mediano N50 y el del fractil pedido de 500 Hz a 6000 Hz (12,9 dB y 17,8 dB a 4000 Hz), el gráfico del espectro con su banda de fractiles del 10 al 90 %, y el NIPTS previsto promediado en 2/3/4 kHz = 13,9 dB enmarcado, para una exposición al ruido LEX,8h = 90 dB durante 20 años con fractil poblacional Q = 10 %."
-	caption="Ficha de predicción de NIPTS (NiptsResult.report), el desplazamiento promediado en el conjunto de 2/3/4 kHz."
+	caption="Ficha de predicción de NIPTS (NIPTSResult.report), el desplazamiento promediado en el conjunto de 2/3/4 kHz."
 />
 
 ## 2. Edad y ruido combinados: HTLAN (apartado 6.1)
@@ -451,16 +451,16 @@ población más allá del fence* depende de la dispersión de fractiles, no solo
 la mediana, así que debe leerse de la distribución, nunca del umbral mediano en
 solitario.
 
-El `NiptsResult` lleva la `median` ($N_{50}$), las
+El `NIPTSResult` lleva la `median` ($N_{50}$), las
 `spread_upper`/`spread_lower` y
-el `value` en el fractil pedido; el `HtlanResult` lleva `htla`, `nipts` y el
+el `value` en el fractil pedido; el `HTLANResult` lleva `htla`, `nipts` y el
 `threshold` combinado. Ambos exponen `.plot()`. La componente de edad por sí
 sola es el tema de la guía de
 [umbral de audición](/phonometry/es/perception/hearing/hearing-threshold/).
 
 ### Informe de HTLAN (`.report()`)
 
-`HtlanResult.report(path)` genera la ficha hermana para el umbral combinado,
+`HTLANResult.report(path)` genera la ficha hermana para el umbral combinado,
 según el apartado 6.1 de la **ISO 1999:2013**: la misma línea de base de la
 predicción y el mismo encabezado de metadatos que la ficha de NIPTS, pero con
 una tabla que lleva la componente de edad $H$, la de ruido $N$ y la combinada
@@ -497,7 +497,7 @@ el repositorio; pulsa la vista previa para abrir el PDF.
 	name="iso1999_htlan_example"
 	title="Informe de ejemplo de predicción de HTLAN según ISO 1999 (PDF)"
 	description="Ficha de predicción del nivel umbral de audición asociado a la edad y al ruido de una página: un encabezado de metadatos, una tabla con la componente de edad H, la de ruido N y el umbral combinado H' de 500 Hz a 6000 Hz (20,2, 24,8 y 40,8 dB a 4000 Hz), el gráfico de las tres curvas, y el nivel umbral de audición previsto promediado en 2/3/4 kHz = 33,0 dB HL enmarcado, para un oyente varón de 60 años expuesto a LEX,8h = 95 dB durante 30 años con fractil poblacional Q = 50 %."
-	caption="Ficha de umbral por edad y ruido (HtlanResult.report), el HTLAN promediado en el conjunto de 2/3/4 kHz."
+	caption="Ficha de umbral por edad y ruido (HTLANResult.report), el HTLAN promediado en el conjunto de 2/3/4 kHz."
 />
 
 ## Qué cubre esta guía

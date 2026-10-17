@@ -58,10 +58,10 @@ if TYPE_CHECKING:
         LowFrequencyElementResult,
         LowFrequencyIntensityResult,
     )
-    from ..building.measurement.lab_improvement import (
+    from ..building.measurement.laboratory_improvement import (
         HeavyImpactImprovementResult,
-        LabFloorCoveringImprovementResult,
-        LabLiningImprovementResult,
+        LaboratoryFloorCoveringImprovementResult,
+        LaboratoryLiningImprovementResult,
         LiningCuringCheck,
     )
     from ..building.measurement.low_frequency import LowFrequencyResult
@@ -116,8 +116,8 @@ if TYPE_CHECKING:
         ImpactPredictionResult,
     )
     from ..building.regulation.spain import (
-        DbHrAssessment,
-        DbHrGlobalIndexResult,
+        DBHRAssessment,
+        DBHRGlobalIndexResult,
     )
 
 #: Shared x-axis label for the frequency-domain building plots.
@@ -1755,7 +1755,7 @@ _DB_HR_SPECTRUM_LABELS = {
 
 
 def plot_db_hr_global_index(
-    result: DbHrGlobalIndexResult,
+    result: DBHRGlobalIndexResult,
     ax: Axes | None = None,
     language: str = "en",
     **kwargs: Any,
@@ -1768,7 +1768,7 @@ def plot_db_hr_global_index(
     the index.
 
     :param result: A
-        :class:`~phonometry.building.regulation.spain.DbHrGlobalIndexResult`.
+        :class:`~phonometry.building.regulation.spain.DBHRGlobalIndexResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the band-insulation ``bar`` call.
@@ -1823,7 +1823,7 @@ def plot_db_hr_global_index(
 
 
 def plot_db_hr_assessment(
-    result: DbHrAssessment, ax: Axes | None = None, language: str = "en", **kwargs: Any
+    result: DBHRAssessment, ax: Axes | None = None, language: str = "en", **kwargs: Any
 ) -> Axes:
     """Achieved values against their CTE DB-HR requirements.
 
@@ -1833,7 +1833,7 @@ def plot_db_hr_assessment(
     that is not met.
 
     :param result: A
-        :class:`~phonometry.building.regulation.spain.DbHrAssessment`.
+        :class:`~phonometry.building.regulation.spain.DBHRAssessment`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the achieved-value ``scatter`` call.
@@ -3294,7 +3294,7 @@ def plot_varying_background(
     ax = ax if ax is not None else _new_axes()
     freqs = result.frequencies
     equipment = np.asarray(result.equipment_levels_db, dtype=np.float64)
-    background = np.asarray(result.background_maximum_db, dtype=np.float64)
+    background = np.asarray(result.background_maximum_level_db, dtype=np.float64)
     labels = freqs if freqs is not None else np.arange(equipment.size) + 1.0
     positions = _band_axis(
         ax,
@@ -3643,7 +3643,7 @@ def plot_reduction_improvement_rating(
 
 
 def plot_lab_lining_improvement(
-    result: LabLiningImprovementResult,
+    result: LaboratoryLiningImprovementResult,
     ax: Axes | None = None,
     language: str = "en",
     **kwargs: Any,
@@ -3651,7 +3651,7 @@ def plot_lab_lining_improvement(
     """Improvement ``ΔR`` of a lining per band (ISO 10140-1:2021 Annex G).
 
     :param result: A
-        :class:`~phonometry.building.measurement.lab_improvement.LabLiningImprovementResult`.
+        :class:`~phonometry.building.measurement.laboratory_improvement.LaboratoryLiningImprovementResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the improvement-curve ``plot`` call.
@@ -3696,7 +3696,7 @@ def plot_lining_curing_check(
     of at most a third of the curing time.
 
     :param result: A
-        :class:`~phonometry.building.measurement.lab_improvement.LiningCuringCheck`.
+        :class:`~phonometry.building.measurement.laboratory_improvement.LiningCuringCheck`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the marker of this measurement.
@@ -3753,7 +3753,7 @@ def plot_lining_curing_check(
 
 
 def plot_lab_floor_covering_improvement(
-    result: LabFloorCoveringImprovementResult,
+    result: LaboratoryFloorCoveringImprovementResult,
     ax: Axes | None = None,
     language: str = "en",
     *,
@@ -3763,7 +3763,7 @@ def plot_lab_floor_covering_improvement(
     """Improvement ``ΔL`` of a floor covering per band (ISO 10140-1:2021 Annex H).
 
     :param result: A
-        :class:`~phonometry.building.measurement.lab_improvement.LabFloorCoveringImprovementResult`.
+        :class:`~phonometry.building.measurement.laboratory_improvement.LaboratoryFloorCoveringImprovementResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param rating_range: Mark the frequency range of the ISO 717-2 rating,
@@ -3817,7 +3817,7 @@ def plot_heavy_impact_improvement(
     """Improvement ``ΔLr`` of a floor covering under the rubber ball (H.6.1).
 
     :param result: A
-        :class:`~phonometry.building.measurement.lab_improvement.HeavyImpactImprovementResult`.
+        :class:`~phonometry.building.measurement.laboratory_improvement.HeavyImpactImprovementResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the improvement-curve ``plot`` call.

@@ -930,7 +930,7 @@ class DiscretePointIntensityResult(OwnsArrays):
     (Figure B.1's unnumbered :math:`F_3 - F_2 \le 3` dB gate) and
     ``criterion_2`` (:math:`N > C F_4^2`, equation (B.2)) are the per-band
     verdicts, ``None`` where they could not be evaluated;
-    ``minimum_positions`` is the :math:`C F_4^2` that criterion 2 compares
+    ``min_positions`` is the :math:`C F_4^2` that criterion 2 compares
     ``positions`` against.
 
     ``achieved_grade`` is the per-band grade, one of ``'precision'``,
@@ -1121,7 +1121,7 @@ class DiscretePointIntensityResult(OwnsArrays):
         return self._criterion_2[0]
 
     @property
-    def minimum_positions(self) -> np.ndarray | None:
+    def min_positions(self) -> np.ndarray | None:
         r"""The :math:`C F_4^2` that criterion 2 compares :attr:`positions` against."""
         if self.f4 is None:
             return None

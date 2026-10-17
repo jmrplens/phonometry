@@ -78,7 +78,7 @@ from phonometry import building
 l1 = np.full(16, 80.0)
 l2 = np.full(16, 40.0)
 t2 = np.full(16, 0.5)
-lab = building.lab_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
+lab = building.laboratory_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
 print(round(float(lab.r[0]), 1))              # 38.0  R = L1 - L2 + 10 lg(S/A)
 print(round(float(lab.absorption_area[0]), 1))     # 16.0  A = 0.16 V / T (m^2)
 print(lab.rating.rating, lab.rating.c, lab.rating.ctr)   # 38 0 0  ->  Rw(C;Ctr)
@@ -86,7 +86,7 @@ print(lab.rating.rating, lab.rating.c, lab.rating.ctr)   # 38 0 0  ->  Rw(C;Ctr)
 # Impact: the tapping-machine level Li normalized to A0 = 10 m^2 gives Ln
 li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
                73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
-imp = building.lab_impact_insulation(li, t2, volume=50.0)
+imp = building.laboratory_impact_insulation(li, t2, volume=50.0)
 print(round(float(imp.l_n[0]), 1))            # 64.1  Ln = Li + 10 lg(A/A0)
 print(imp.rating.rating, imp.rating.ci)       # 81 -11  ->  Ln,w(CI)
 
@@ -97,9 +97,9 @@ print(np.round(corrected, 1))                 # [28.7 31.7 50.0]  (1.3 dB cap tw
 lab.rating.plot()   # measured R vs shifted ISO 717-1 reference (needs matplotlib)
 ```
 
-A margin at or below 6 dB emits a `LabInsulationWarning` and flags the band as
+A margin at or below 6 dB emits a `LaboratoryInsulationWarning` and flags the band as
 the limit of measurement; catch it with `warnings.simplefilter("error",
-LabInsulationWarning)`. The automatic rating is formed only when exactly 16
+LaboratoryInsulationWarning)`. The automatic rating is formed only when exactly 16
 one-third-octave or 5 octave values are supplied (`rating` is `None` otherwise).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lab_insulation_result_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lab_insulation_result.svg" alt="The two ISO 10140 laboratory quantities side by side: the measured sound reduction index R against the shifted ISO 717-1 reference on the left, and the normalized impact sound pressure level Ln against the shifted ISO 717-2 reference on the right, each panel annotated with its single-number rating" width="92%"></picture>
@@ -124,10 +124,10 @@ r = np.array([20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
               28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5])
 l1 = np.full(16, 90.0)
 t2 = np.full(16, 0.8)
-lab = building.lab_airborne_insulation(l1, l1 - r, t2, area=10.0, volume=50.0)
+lab = building.laboratory_airborne_insulation(l1, l1 - r, t2, area=10.0, volume=50.0)
 li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
                73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
-imp = building.lab_impact_insulation(li, t2, volume=50.0)
+imp = building.laboratory_impact_insulation(li, t2, volume=50.0)
 
 # One line each — R (or Ln) vs its shifted ISO 717 reference:
 lab.plot()
@@ -154,7 +154,7 @@ plt.show()
 
 </details>
 
-### `lab_airborne_insulation()` / `lab_impact_insulation()` parameters
+### `laboratory_airborne_insulation()` / `laboratory_impact_insulation()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
@@ -164,9 +164,9 @@ plt.show()
 | `area` | float | m² | > 0 | Free test-opening area $S$ (airborne only) |
 | `volume` | float | m³ | > 0 | Receiving-room volume $V$ |
 
-`lab_airborne_insulation()` returns a `LabAirborneInsulationResult` (`r`,
-`absorption_area`, `rating`); `lab_impact_insulation()` a
-`LabImpactInsulationResult` (`l_n`, `absorption_area`, `rating`);
+`laboratory_airborne_insulation()` returns a `LaboratoryAirborneInsulationResult` (`r`,
+`absorption_area`, `rating`); `laboratory_impact_insulation()` a
+`LaboratoryImpactInsulationResult` (`l_n`, `absorption_area`, `rating`);
 `background_correction(signal_and_background, background)` returns the corrected
 levels directly.
 
@@ -174,8 +174,8 @@ levels directly.
 
 Both laboratory results write the one-page ISO 10140 test report directly, laid
 out like the accredited laboratory reports rated per ISO 717.
-`LabAirborneInsulationResult.report()` renders the sound reduction index $R$
-fiche (ISO 10140-2:2010) and `LabImpactInsulationResult.report()` the
+`LaboratoryAirborneInsulationResult.report()` renders the sound reduction index $R$
+fiche (ISO 10140-2:2010) and `LaboratoryImpactInsulationResult.report()` the
 normalized impact sound pressure level $L_\mathrm{n}$ fiche (ISO 10140-3:2010). Each
 fiche names the laboratory standard in its basis line, evaluates the
 ISO 717-1 / ISO 717-2 single-number rating (16 one-third-octave bands from
@@ -203,7 +203,7 @@ from phonometry import building, ReportMetadata
 l1 = np.full(16, 90.0)
 r = np.array([20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
               28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5])
-lab = building.lab_airborne_insulation(
+lab = building.laboratory_airborne_insulation(
     l1, l1 - r, np.full(16, 0.8), area=10.0, volume=50.0
 )
 lab.plot()   # measured R vs shifted ISO 717-1 reference (needs matplotlib)
@@ -226,7 +226,7 @@ lab.report("Rw_lab_chain.pdf", metadata=metadata,
 # Laboratory impact: tapping-machine levels in the receiving room
 li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
                73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
-imp = building.lab_impact_insulation(li, np.full(16, 0.8), volume=50.0)
+imp = building.laboratory_impact_insulation(li, np.full(16, 0.8), volume=50.0)
 imp.report("Lnw_lab.pdf",
            metadata=ReportMetadata(requirement=80.0))  # Ln,w (CI)
 ```
@@ -236,11 +236,11 @@ are kept in the repository. Click either preview to open the PDF:
 
 [![Laboratory airborne ISO 10140-2 example report: metadata header, one-third-octave R table beside the measured-versus-shifted-reference curve, boxed Rw (C; Ctr), the precision-method statement and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_airborne_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_airborne_example.pdf)
 
-*Laboratory airborne fiche (`LabAirborneInsulationResult.report`), Rw (C; Ctr).*
+*Laboratory airborne fiche (`LaboratoryAirborneInsulationResult.report`), Rw (C; Ctr).*
 
 [![Laboratory impact ISO 10140-3 example report: the same laboratory layout for the normalized impact level Ln with the 500 Hz read-off, boxed Ln,w (CI), the precision-method statement and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_impact_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_impact_example.pdf)
 
-*Laboratory impact fiche (`LabImpactInsulationResult.report`), Ln,w (CI).*
+*Laboratory impact fiche (`LaboratoryImpactInsulationResult.report`), Ln,w (CI).*
 
 ## Beyond the pressure method
 
@@ -306,7 +306,7 @@ their own pages: intensity (ISO 15186), the floor-covering improvement
   engine behind $R_\mathrm{w}$ and $L_\mathrm{n,w}$.
 - [Sound Power](../../devices/emission/sound-power.md): the $L_W$ methods that share the
   absorption-area machinery of the receiving room.
-- API reference: [`building.measurement.lab_insulation`](https://docs.jmrp.io/phonometry/reference/api/building/lab-insulation/).
+- API reference: [`building.measurement.laboratory_insulation`](https://docs.jmrp.io/phonometry/reference/api/building/laboratory-insulation/).
 - [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#transmission-loss): the
   band-by-band transmission loss and single-number ratings the books print for
   real constructions.

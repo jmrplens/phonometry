@@ -395,14 +395,14 @@ def plot_pass_by_measurement(
         peak = int(np.flatnonzero(inside)[np.argmax(result.levels[inside])])
         ax.plot(
             [result.times[peak]],
-            [result.max_level_db],
+            [result.maximum_level_db],
             linestyle="none",
             marker="v",
             ms=8,
             color=_C_REFERENCE,
             label=(
                 r"$L_{p\mathrm{AFmax}}$ = "
-                f"{format_number(result.max_level_db, language)} dB"
+                f"{format_number(result.maximum_level_db, language)} dB"
             ),
         )
     ax.set_xlabel(_t(_TIME_LABEL, language))

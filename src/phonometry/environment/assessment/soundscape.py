@@ -122,7 +122,7 @@ if TYPE_CHECKING:
 __all__ = [
     "METHOD_A_ALTERNATIVE_PART_1",
     "METHOD_A_SCALES",
-    "METHOD_B_MAXIMUM_SOURCES",
+    "METHOD_B_MAX_SOURCES",
     "METHOD_B_SCALES",
     "PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES",
     "PLEASANTNESS_EVENTFULNESS_RANGE",
@@ -408,7 +408,7 @@ METHOD_B_SCALES: tuple[QuestionnaireScale, ...] = (
 #: sound sources a participant lists is "not predefined but limited to
 #: eight", so a rank runs from 1, the most noticeable, to at most 8
 #: (ISO/TS 12913-3 Table B.1).
-METHOD_B_MAXIMUM_SOURCES = 8
+METHOD_B_MAX_SOURCES = 8
 
 #: The half-range of the coordinates of Formulas (A.1) and (A.2) of
 #: ISO/TS 12913-3, :math:`4 + \sqrt{32} \approx 9.66`: every attribute at
@@ -1468,10 +1468,10 @@ def method_b_source_ranking(
             msg = f"'rankings[{k}]' must be a list of source names, the most noticeable first."
             raise ValueError(msg)
         names = tuple(str(name).strip() for name in listed)
-        if len(names) > METHOD_B_MAXIMUM_SOURCES:
+        if len(names) > METHOD_B_MAX_SOURCES:
             msg = (
                 f"'rankings[{k}]' lists {len(names)} sources; ISO/TS 12913-2 C.3.2.4 "
-                f"limits the list to {METHOD_B_MAXIMUM_SOURCES}."
+                f"limits the list to {METHOD_B_MAX_SOURCES}."
             )
             raise ValueError(msg)
         if any(not name for name in names) or len(set(names)) != len(names):

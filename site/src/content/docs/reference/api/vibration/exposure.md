@@ -73,7 +73,7 @@ ACCELERATION_LEVEL_REFERENCE_M_S2 = 1e-06
 
 ```python
 apply_band_limiting(
-    signal: Signal | Sequence[float] | np.ndarray,
+    x: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     name: str,
@@ -99,7 +99,7 @@ and the switch-on transient is part of what they measure.
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | Unweighted acceleration time history (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `x` | Unweighted acceleration time history (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
 | `fs` | Sampling frequency, in hertz (> 0). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)) whose band-limiting pair is applied. |
 
@@ -109,13 +109,13 @@ and the switch-on transient is part of what they measure.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if `signal` is not 1-D, `fs` is not positive, or `name` is unknown. |
+| ValueError | if `x` is not 1-D, `fs` is not positive, or `name` is unknown. |
 
 ## apply_weighting
 
 ```python
 apply_weighting(
-    signal: Signal | Sequence[float] | np.ndarray,
+    x: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     name: str,
@@ -135,7 +135,7 @@ negligible, as for any block frequency-domain filtering.
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | Unweighted acceleration time history (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `x` | Unweighted acceleration time history (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
 | `fs` | Sampling frequency, in hertz (> 0). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). |
 
@@ -145,7 +145,7 @@ negligible, as for any block frequency-domain filtering.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if `signal` is not 1-D, `fs` is not positive, or `name` is unknown. |
+| ValueError | if `x` is not 1-D, `fs` is not positive, or `name` is unknown. |
 
 ## band_limiting_factors
 
@@ -244,7 +244,7 @@ $A(8) = \sqrt{\sum_i A_i(8)^2}$.
 ## crest_factor
 
 ```python
-crest_factor(signal: Signal | Sequence[float] | np.ndarray) -> float
+crest_factor(x: Signal | Sequence[float] | np.ndarray) -> float
 ```
 
 Crest factor of a weighted signal (ISO 2631-1 clause 6.2.1).
@@ -261,7 +261,7 @@ inadequate.
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), of which only the samples are read: a peak-to-r.m.s. ratio needs no sample rate, and a calibration factor the object carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `x` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), of which only the samples are read: a peak-to-r.m.s. ratio needs no sample rate, and a calibration factor the object carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
 
 **Returns:** The crest factor (dimensionless); `0` for an all-zero signal.
 
@@ -640,7 +640,7 @@ Advisory for out-of-range human-vibration measurement conditions.
 
 ```python
 motion_sickness_dose_value(
-    signal: Signal | Sequence[float] | np.ndarray,
+    x: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
 ) -> float
 ```
@@ -655,7 +655,7 @@ m/s^1.5; the `Wf`-weighted signal is the intended input.
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `x` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
 | `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 
 **Returns:** The MSDV, in m/s^1.5.
@@ -670,7 +670,7 @@ m/s^1.5; the `Wf`-weighted signal is the intended input.
 
 ```python
 mtvv(
-    signal: Signal | Sequence[float] | np.ndarray,
+    x: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     integration_time: float = 1.0,
@@ -694,7 +694,7 @@ defines the MTVV on.
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `x` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
 | `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `integration_time` | Running-r.m.s. averaging time, in seconds (1 s). |
 | `method` | `"linear"` (Eq. (2), the default) or `"exponential"` (Eq. (3)), forwarded to [`running_rms`](/phonometry/reference/api/vibration/exposure/#running_rms). |
@@ -719,7 +719,7 @@ REFERENCE_DURATION_S = 28800.0
 
 ```python
 running_rms(
-    signal: Signal | Sequence[float] | np.ndarray,
+    x: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     integration_time: float = 1.0,
@@ -733,7 +733,7 @@ Running r.m.s. of a weighted signal (ISO 2631-1 Eqs. (2)/(3)).
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `x` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
 | `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `integration_time` | Averaging time `tau`, in seconds (default 1 s, the "slow" constant of ISO 2631-1 6.3.1). |
 | `method` | `"linear"` (Eq. (2), a sliding rectangular average) or `"exponential"` (Eq. (3), a single-pole average). |
@@ -750,7 +750,7 @@ Running r.m.s. of a weighted signal (ISO 2631-1 Eqs. (2)/(3)).
 
 ```python
 vibration_dose_value(
-    signal: Signal | Sequence[float] | np.ndarray,
+    x: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
 ) -> float
 ```
@@ -764,7 +764,7 @@ m/s^1.75; more sensitive to peaks than the r.m.s. value.
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `x` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
 | `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 
 **Returns:** The VDV, in m/s^1.75.

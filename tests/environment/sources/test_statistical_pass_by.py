@@ -28,7 +28,7 @@ from phonometry import environment
 from phonometry.environment.sources.statistical_pass_by import (
     SPB_ANNEX_D_SURFACES_DB,
     SPB_CONFIDENCE_INTERVALS_DB,
-    SPB_MINIMUM_VEHICLE_COUNTS,
+    SPB_MIN_VEHICLE_COUNTS,
     SPB_NORMALIZED_REFERENCE_DB,
     SPB_REFERENCE_SPEEDS_KMH,
     SPB_SPEED_WINDOW_STANDARD_DEVIATIONS,
@@ -108,7 +108,7 @@ def test_table_2_and_the_counts_of_7_3_and_9_3() -> None:
         dict(SPB_VEHICLE_STANDARD_DEVIATIONS_DB) == ref.TABLE_2_STANDARD_DEVIATIONS_DB
     )
     assert dict(SPB_CONFIDENCE_INTERVALS_DB) == ref.TABLE_2_CONFIDENCE_INTERVALS_DB
-    assert dict(SPB_MINIMUM_VEHICLE_COUNTS) == ref.MINIMUM_VEHICLE_COUNTS
+    assert dict(SPB_MIN_VEHICLE_COUNTS) == ref.MINIMUM_VEHICLE_COUNTS
     assert (
         dict(SPB_SPEED_WINDOW_STANDARD_DEVIATIONS)
         == ref.SPEED_WINDOW_STANDARD_DEVIATIONS
@@ -155,7 +155,7 @@ def test_annex_d_does_not_decide_between_means() -> None:
         (SPB_REFERENCE_SPEEDS_KMH, "medium"),
         (SPB_REFERENCE_SPEEDS_KMH["medium"], "1"),
         (SPB_WEIGHTING_FACTORS["high"], "2b"),
-        (SPB_MINIMUM_VEHICLE_COUNTS, "2"),
+        (SPB_MIN_VEHICLE_COUNTS, "2"),
         (SPB_ANNEX_D_SURFACES_DB["A1"], "1"),
         (SPB_NORMALIZED_REFERENCE_DB, "2a"),
     ],
@@ -176,7 +176,7 @@ def test_result_arrays_refuse_writes(annex_e: StatisticalPassByResult) -> None:
 # --------------------------------------------------------------------------
 def test_annex_e_lines_are_recovered(annex_e: StatisticalPassByResult) -> None:
     for category, regression in annex_e.regressions.items():
-        assert regression.vehicle_count == ref.ANNEX_E_VEHICLE_COUNTS[category]
+        assert regression.n_vehicles == ref.ANNEX_E_VEHICLE_COUNTS[category]
         assert regression.intercept_db == pytest.approx(
             ref.ANNEX_E_INTERCEPTS_DB[category], abs=1e-9
         )
@@ -196,7 +196,7 @@ def test_annex_e_lines_are_recovered(annex_e: StatisticalPassByResult) -> None:
         assert (
             round(regression.mean_level_db, 1) == (ref.ANNEX_E_MEAN_LEVELS_DB[category])
         )
-    assert annex_e.heavy_vehicle_count == ref.ANNEX_E_HEAVY_VEHICLE_COUNT
+    assert annex_e.n_heavy_vehicles == ref.ANNEX_E_HEAVY_VEHICLE_COUNT
 
 
 def test_annex_e_vehicle_sound_levels(annex_e: StatisticalPassByResult) -> None:
@@ -265,7 +265,7 @@ def test_annex_e_corrected_index_and_difference(
 
 
 def test_annex_e_meets_7_3_and_9_3(annex_e: StatisticalPassByResult) -> None:
-    assert annex_e.meets_minimum_counts
+    assert annex_e.meets_min_counts
     assert annex_e.reference_speeds_in_window
 
 
@@ -556,7 +556,7 @@ def test_too_few_vehicles_of_a_category_warns() -> None:
         regression = pass_by_regression(
             speeds, levels, vehicle_category="1", road_speed_category="medium"
         )
-    assert not regression.meets_minimum_count
+    assert not regression.meets_min_count
 
 
 def test_too_few_heavy_vehicles_together_warns() -> None:
@@ -576,8 +576,8 @@ def test_too_few_heavy_vehicles_together_warns() -> None:
         rows[2].extend(levels.tolist())
     with pytest.warns(StatisticalPassByWarning, match="heavy vehicles"):
         result = statistical_pass_by(*rows, road_speed_category="medium")
-    assert result.heavy_vehicle_count == 60
-    assert not result.meets_minimum_counts
+    assert result.n_heavy_vehicles == 60
+    assert not result.meets_min_counts
 
 
 def _site_rows(counts: dict[str, int]) -> tuple[list[str], list[float], list[float]]:
@@ -611,17 +611,17 @@ def test_the_7_3_counts_are_met_on_the_boundary() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error", StatisticalPassByWarning)
         result = statistical_pass_by(*rows, road_speed_category="medium")
-    assert result.heavy_vehicle_count == 80
-    assert all(r.meets_minimum_count for r in result.regressions.values())
-    assert result.meets_minimum_counts
+    assert result.n_heavy_vehicles == 80
+    assert all(r.meets_min_count for r in result.regressions.values())
+    assert result.meets_min_counts
 
 
 def test_one_car_short_of_7_3_warns() -> None:
     rows = _site_rows({"1": 99, "2a": 30, "2b": 50})
     with pytest.warns(StatisticalPassByWarning, match="category '1'"):
         result = statistical_pass_by(*rows, road_speed_category="medium")
-    assert not result.regressions["1"].meets_minimum_count
-    assert not result.meets_minimum_counts
+    assert not result.regressions["1"].meets_min_count
+    assert not result.meets_min_counts
 
 
 def test_one_heavy_vehicle_short_of_7_3_warns() -> None:
@@ -629,10 +629,10 @@ def test_one_heavy_vehicle_short_of_7_3_warns() -> None:
     rows = _site_rows({"1": 100, "2a": 30, "2b": 49})
     with pytest.warns(StatisticalPassByWarning, match="80 heavy vehicles"):
         result = statistical_pass_by(*rows, road_speed_category="medium")
-    assert result.regressions["2a"].meets_minimum_count
-    assert result.regressions["2b"].meets_minimum_count
-    assert result.heavy_vehicle_count == 79
-    assert not result.meets_minimum_counts
+    assert result.regressions["2a"].meets_min_count
+    assert result.regressions["2b"].meets_min_count
+    assert result.n_heavy_vehicles == 79
+    assert not result.meets_min_counts
 
 
 # --------------------------------------------------------------------------

@@ -812,7 +812,7 @@ _MULTI_JUNCTION_ADJUSTMENT: dict[int, float] = {1: 0.0, 2: 4.0, 3: 6.0}
 #: value for Kij should normally not become less than - 5 dB", the point at
 #: which the standard reads the junctions as transmitting the whole
 #: structure-borne power.
-MINIMUM_MULTI_JUNCTION_KIJ_DB: float = -5.0
+MIN_MULTI_JUNCTION_KIJ_DB: float = -5.0
 
 
 def multi_junction_adjustment(junctions: int) -> float:
@@ -823,7 +823,7 @@ def multi_junction_adjustment(junctions: int) -> float:
     adjustment ``dK`` that covers the transmission by wave types other than
     bending waves. Clause F.1 estimates it from published data as 4 dB for two
     junctions and 6 dB for three or more, with the resulting ``Kij`` floored at
-    :data:`MINIMUM_MULTI_JUNCTION_KIJ_DB`.
+    :data:`MIN_MULTI_JUNCTION_KIJ_DB`.
 
     :param junctions: Number of junctions the transmission path crosses (>= 1).
     :return: The adjustment ``dK``, in dB (0,0 for a single junction).

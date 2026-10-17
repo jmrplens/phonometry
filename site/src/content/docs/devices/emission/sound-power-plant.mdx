@@ -68,10 +68,10 @@ at every position (9.3), its reference direction horizontal and at 90° to the
 contour, towards the plant (9.4).
 
 `plant_measurement_contour()` takes the two polygons in metres and lays the
-positions along the contour from its first vertex. With no `position_count`
+positions along the contour from its first vertex. With no `n_positions`
 it chooses the fewest that meet 9.1.1 c); give your own layout, and the
 positions a river or a building made you leave out (at most 10 %, 9.1.2.4),
-as `position_count` and `omitted_positions`.
+as `n_positions` and `omitted_positions`.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_measurement_contour.svg" alt="Plan of an L-shaped plant area, 180 m by 110 m with a 60 m by 50 m notch cut from its top right corner, hatched in orange, with eight star markers for its noise sources. A rectangular measurement contour 780 m long runs 25 m outside it, and thirteen measurement positions sit on the contour 60 m apart, each with a short green arrow pointing horizontally at the plant at right angles to the contour, the one at the bottom left corner pointing diagonally inwards. A dotted grey line joins each position to the nearest point of the plant perimeter. The title gives N = 13, an average measurement distance of 30.9 m and a microphone height of 8.3 m; the legend sits outside the plan on the right" width="100%" />
 
@@ -93,7 +93,7 @@ from phonometry import emission
 plant = [[0, 0], [180, 0], [180, 60], [120, 60], [120, 110], [0, 110]]
 contour_m = [[-25, -25], [205, -25], [205, 135], [-25, 135]]
 source_heights_m = [3.0, 6.5, 12.0, 9.0, 4.0, 15.0, 7.5, 5.0]
-H = emission.plant_characteristic_height_m(source_heights_m, low_source_count=14)
+H = emission.plant_characteristic_height_m(source_heights_m, n_low_sources=14)
 contour = emission.plant_measurement_contour(plant, contour_m, characteristic_height_m=H)
 fig, ax = plt.subplots(figsize=(10.5, 5.8), layout="constrained")
 contour.plot(ax=ax)
@@ -285,7 +285,7 @@ def levels_at(contour, sources):
 
 # Fourteen motors and pumps lower than 2 m are counted by NOTE 7, at 1 m.
 H = emission.plant_characteristic_height_m(
-    [z for (_x, _y, z), _lw in sources], low_source_count=14
+    [z for (_x, _y, z), _lw in sources], n_low_sources=14
 )
 contour = emission.plant_measurement_contour(plant, contour_m, characteristic_height_m=H)
 print(f"H = {H:.2f} m, N = {contour.positions_m.shape[0]}, "

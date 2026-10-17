@@ -223,7 +223,7 @@ def plot_filter_class(
         int(result.factors[idx]),
         float(result.fs),
         fm,
-        int(result.num_points),
+        int(result.n_points),
     )
     freqs, delta_a = grid.baseband()
     omega = freqs / fm

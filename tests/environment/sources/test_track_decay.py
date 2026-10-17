@@ -101,7 +101,7 @@ def test_formula_2_floor_and_the_suitable_bands() -> None:
         np.exp(-np.outer(positions, rates_db / _NEPER_DB)),
         frequencies=[1000.0, 2000.0],
     )
-    assert rate.minimum_measurable_db_per_m == pytest.approx(4.343 / 39.6)
+    assert rate.min_measurable_db_per_m == pytest.approx(4.343 / 39.6)
     np.testing.assert_array_equal(rate.suitable, [False, True])
 
 
@@ -138,7 +138,7 @@ def test_a_rate_of_exactly_twice_the_floor_is_suitable() -> None:
         distances=positions,
         responses=np.ones((positions.size, 3)),
     )
-    assert rates.minimum_measurable_db_per_m == floor
+    assert rates.min_measurable_db_per_m == floor
     np.testing.assert_array_equal(rates.suitable, [False, True, True])
 
 
@@ -190,7 +190,7 @@ def test_a_measured_rate_of_exactly_twice_the_floor_is_suitable() -> None:
     rate = track_decay_rate(
         [[1.0], [0.75], [0.25]], frequencies=[1000.0], distances=[0.0, 0.5, 1.4]
     )
-    floor = rate.minimum_measurable_db_per_m
+    floor = rate.min_measurable_db_per_m
     assert floor is not None
     assert rate.decay_rates_db_per_m[0] == pytest.approx(2.0 * floor, rel=1e-12)
     np.testing.assert_array_equal(rate.suitable, [True])
@@ -199,7 +199,7 @@ def test_a_measured_rate_of_exactly_twice_the_floor_is_suitable() -> None:
 def test_rates_from_a_report_carry_no_grid() -> None:
     """A TrackDecayRate built from printed rates has no floor and no drop to judge."""
     rates = TrackDecayRate("lateral", [250.0, 315.0], [2.5, 1.9])
-    assert rates.minimum_measurable_db_per_m is None
+    assert rates.min_measurable_db_per_m is None
     assert rates.far_field_sufficient is None
     assert rates.suitable.all()
     assert rates.rate_at(315.0) == pytest.approx(1.9)
@@ -324,7 +324,7 @@ def test_a_rate_built_directly_on_a_valid_grid_is_judged() -> None:
     )
     assert rates.responses is not None
     assert rates.responses.shape == (3, 1)
-    assert rates.minimum_measurable_db_per_m == pytest.approx(4.343 / 1.2)
+    assert rates.min_measurable_db_per_m == pytest.approx(4.343 / 1.2)
     assert rates.far_field_sufficient is True
 
 

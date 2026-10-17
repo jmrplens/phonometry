@@ -62,7 +62,7 @@ paths = [(1, 1, 1), (1, 1, 0.3), (0, 1, 0.5), (1, 0, 0.2), (-1, 0.5, 0.6)]
 traverses = [emission.MicrophoneTraverse.along(u, d, exact) for u in paths]
 fit = emission.inverse_square_law_deviations(
     traverses, frequencies=[1000.0], room="anechoic")
-print(round(fit.maximum_qualified_radius_m, 2))   # 3.0 m
+print(round(fit.max_qualified_radius_m, 2))   # 3.0 m
 print(fit.source_strength_db[:, 0].round(2))      # [90. 90. 90. 90. 90.]
 print(fit.largest_deviation_db.round(3))          # [0.]
 ```
@@ -216,14 +216,14 @@ room = emission.inverse_square_law_deviations(
 print(room.origin_m.round(3))                 # [0.005 0.05  0.   ] m
 print(room.band_radius_m.round(2))            # [2.76 2.95 2.95 ... 2.95] m
 print(room.largest_deviation_db.round(1))     # [2.5 2.3 1.2 1.2 1.3 1.3 1.2 ...] dB
-print(round(room.maximum_qualified_radius_m, 2))   # 2.76 m
+print(round(room.max_qualified_radius_m, 2))   # 2.76 m
 
 foot = emission.inverse_square_law_deviations(
     traverses, frequencies=grid, room="hemi-anechoic", origin_m=(0.0, 0.0, 0.0))
-print(round(foot.maximum_qualified_radius_m, 2))   # 2.73 m
+print(round(foot.max_qualified_radius_m, 2))   # 2.73 m
 at_centre = emission.inverse_square_law_deviations(
     traverses, frequencies=grid, room="hemi-anechoic", origin_m=centre)
-print(round(at_centre.maximum_qualified_radius_m, 2))   # 2.72 m
+print(round(at_centre.max_qualified_radius_m, 2))   # 2.72 m
 print(at_centre.largest_deviation_db.round(1))     # [2.4 1.7 1.2 0.8 0.7 0.6 0.6 ...] dB
 ```
 
@@ -281,7 +281,7 @@ The result carries the distances, the corrected levels, $b$ per traverse and
 frequency beside the starting value of Formula (3), the deviations, the
 qualified distance of each traverse (`traverse_radius_m`), of each frequency
 on every traverse (`band_radius_m`) and of the whole room
-(`maximum_qualified_radius_m`), and the largest deviation within each band's
+(`max_qualified_radius_m`), and the largest deviation within each band's
 radius.
 
 ## 4. The verdict of the amended Annex A
@@ -339,7 +339,7 @@ check = emission.check_free_field(
     room, bandwidth="discrete-frequency", source_directionality=source,
     measurement_radius_m=1.5, paths_in_working_area=True,
     reflecting_plane_absorption_coefficient=0.02, reflecting_plane_margin_m=1.2)
-print(check.passes, round(check.maximum_qualified_radius_m, 2))   # True 2.76
+print(check.passes, round(check.max_qualified_radius_m, 2))   # True 2.76
 print(check.full_frequency_range, check.path_angles_met)          # True True
 print(check.path_targets_met, bool(check.equal_spacing_met.all()))  # True True
 
@@ -485,7 +485,7 @@ thirds = np.array([100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0
 source_lw = np.array([86.0, 86.8, 87.5, 88.1, 88.4, 88.6, 88.7, 88.6, 88.4, 88.1,
                       87.7, 87.2, 86.6, 85.9, 85.1, 84.2, 83.2, 82.1, 80.9, 79.6,
                       78.2])
-positions = emission.precision_positions("hemisphere", radius=2.0, count=20)
+positions = emission.precision_positions("hemisphere", radius=2.0, n_positions=20)
 upward = positions[:, 2:3] / 2.0 - 0.5
 pattern = 4.0 * upward * np.sqrt(thirds / 10000.0)[None, :]
 alpha = environment.air_attenuation(

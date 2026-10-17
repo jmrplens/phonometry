@@ -25,7 +25,7 @@ anim_fdtd_barrier b5409c675ae36b1c
 anim_fdtd_critical_angle 178f6e5121f27ae8
 anim_fdtd_diffusion ec6d4bb0a1a61be9
 anim_fdtd_dispersion 97b68dbe39a3cf64
-anim_fdtd_duct_cut_on 22ab2f840ae69843
+anim_fdtd_duct_cut_on e84e110e02afca04
 anim_fdtd_ducting cc024ba715ceb0d0
 anim_fdtd_expansion_chamber e9989cf67079d977
 anim_fdtd_ground_effect 99a51457fd8353a4

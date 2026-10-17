@@ -440,12 +440,12 @@ ISO11820_ATMOSPHERIC_PRESSURE_PA = 100000.0
 ISO11820_BACKGROUND_CORRECTIONS_DB = {3: 3.0, 4: 2.0, 5: 2.0, 6: 1.0, 7: 1.0, 8: 1.0, 9: 0.5, 10: 0.5}
 ```
 
-## ISO11820_MINIMUM_BACKGROUND_MARGIN_DB
+## ISO11820_MIN_BACKGROUND_MARGIN_DB
 
 *Constant* (`float`).
 
 ```python
-ISO11820_MINIMUM_BACKGROUND_MARGIN_DB = 3.0
+ISO11820_MIN_BACKGROUND_MARGIN_DB = 3.0
 ```
 
 ## ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K
@@ -504,12 +504,12 @@ ISO11820_THIRD_OCTAVE_BAND_EXTENDED_RANGE_HZ = (25.0, 10000.0)
 ISO11820_THIRD_OCTAVE_BAND_RANGE_HZ = (50.0, 5000.0)
 ```
 
-## MAXIMUM_EXTRANEOUS_CORRECTION_DB
+## MAX_EXTRANEOUS_CORRECTION_DB
 
 *Constant* (`float`).
 
 ```python
-MAXIMUM_EXTRANEOUS_CORRECTION_DB = 3.0
+MAX_EXTRANEOUS_CORRECTION_DB = 3.0
 ```
 
 ## measurement_distance_downstream_m
@@ -695,7 +695,7 @@ the 10 dB row.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a margin under [`ISO11820_MINIMUM_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/noise_control/silencer-in-situ/#iso11820_minimum_background_margin_db), which Table 1 calls invalid. |
+| ValueError | For a margin under [`ISO11820_MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/noise_control/silencer-in-situ/#iso11820_min_background_margin_db), which Table 1 calls invalid. |
 
 ## silencer_flow_velocity_m_s
 

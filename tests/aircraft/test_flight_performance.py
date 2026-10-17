@@ -131,7 +131,7 @@ def _aircraft(aircraft_id: str) -> PerformanceAircraft:
     ]
     return PerformanceAircraft(
         aircraft_id=aircraft_id,
-        engines=engines,
+        n_engines=engines,
         max_static_thrust_lb=static_thrust,
         max_landing_weight_lb=landing_weight,
         jet_coefficients={
@@ -553,10 +553,10 @@ def test_aerodynamic_coefficients_refuse_a_non_finite_drag_ratio() -> None:
 
 
 def test_performance_aircraft_refuses_an_engineless_aeroplane() -> None:
-    with pytest.raises(ValueError, match=r"PerformanceAircraft: 'engines'"):
+    with pytest.raises(ValueError, match=r"PerformanceAircraft: 'n_engines'"):
         PerformanceAircraft(
             aircraft_id="JETW",
-            engines=0,
+            n_engines=0,
             max_static_thrust_lb=25000.0,
             max_landing_weight_lb=159222.0,
         )
@@ -566,7 +566,7 @@ def test_performance_aircraft_refuses_a_landing_weight_of_zero() -> None:
     with pytest.raises(ValueError, match=r"'max_landing_weight_lb'"):
         PerformanceAircraft(
             aircraft_id="JETW",
-            engines=2,
+            n_engines=2,
             max_static_thrust_lb=25000.0,
             max_landing_weight_lb=0.0,
         )
@@ -853,7 +853,7 @@ def test_minimum_reduced_thrust_refuses_a_single_engine_aeroplane() -> None:
     """Eq. B-13 divides by ``N - 1`` and the engine-out case does not exist."""
     single = PerformanceAircraft(
         aircraft_id="ONE",
-        engines=1,
+        n_engines=1,
         max_static_thrust_lb=25000.0,
         max_landing_weight_lb=159222.0,
         jet_coefficients=_aircraft("JETW").jet_coefficients,
@@ -1071,7 +1071,7 @@ def test_an_aeroplane_in_both_engine_tables_is_refused() -> None:
     """Eq. B-9 and Eq. B-12 would disagree, and Doc 29 breaks no tie (O-11)."""
     both = PerformanceAircraft(
         aircraft_id="BOTH",
-        engines=2,
+        n_engines=2,
         max_static_thrust_lb=25000.0,
         max_landing_weight_lb=159222.0,
         jet_coefficients=_aircraft("JETW").jet_coefficients,

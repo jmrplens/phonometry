@@ -223,11 +223,11 @@ n = 1 << 16
 noise = np.random.default_rng(42).standard_normal(n)
 
 res = metrology.stationarity_test(noise, fs)        # 20 segmentos, valores cuadráticos medios
-print(res.stationary, res.count, res.bounds)   # True, 91, (64, 125)
+print(res.stationary, res.trend_statistic, res.bounds)   # True, 91, (64, 125)
 
 drifting = noise * np.linspace(1.0, 1.2, n)    # rampa de ganancia del +20 %
 res = metrology.stationarity_test(drifting, fs)
-print(res.stationary, res.count)          # False, 7  (tendencia al alza -> A bajo)
+print(res.stationary, res.trend_statistic)          # False, 7  (tendencia al alza -> A bajo)
 res.plot(language="es")
 ```
 
@@ -260,9 +260,9 @@ res_ramp = metrology.stationarity_test(ramp, fs)
 fig, ax = plt.subplots(figsize=(10, 6))
 index = np.arange(1, res_steady.n_segments + 1)
 ax.plot(index, res_steady.segment_values, "o-",
-        label=f"Ruido estable: A = {res_steady.count}, aceptado")
+        label=f"Ruido estable: A = {res_steady.trend_statistic}, aceptado")
 ax.plot(index, res_ramp.segment_values, "s-",
-        label=f"Rampa de ganancia del +20 %: A = {res_ramp.count}, rechazado")
+        label=f"Rampa de ganancia del +20 %: A = {res_ramp.trend_statistic}, rechazado")
 ax.set_xlabel("Índice de segmento")
 ax.set_ylabel("Valor cuadrático medio por segmento")
 ax.legend()
@@ -280,7 +280,7 @@ porque solo una de ellas tiene una secuencia por segmento que llevar:
 
 | | `trend_test` → `TrendTestResult` | `stationarity_test` → `StationarityTestResult` |
 | :--- | :--- | :--- |
-| el conteo $A$ | `statistic` | `count` |
+| el conteo $A$ | `statistic` | `trend_statistic` |
 | el veredicto | `trend_free` | `stationary` |
 | región de aceptación | `bounds` (semiabierta) | `bounds` (semiabierta) |
 | valor p exacto | `p_value` | `p_value` |
@@ -359,15 +359,15 @@ sos = signal.butter(6, [200 / (fs / 2), 400 / (fs / 2)], btype="band",
 
 full = metrology.stationarity_test(glide, fs)
 banded = metrology.stationarity_test(signal.sosfiltfilt(sos, glide), fs)
-print(full.count, full.stationary)       # 96 True   -- ciego
-print(banded.count, banded.stationary)   # 173 False -- lo pilla
+print(full.trend_statistic, full.stationary)       # 96 True   -- ciego
+print(banded.trend_statistic, banded.stationary)   # 173 False -- lo pilla
 
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 7))
 for ax, res, label in ((ax1, full, "banda completa"),
                        (ax2, banded, "200-400 Hz")):
     ax.plot(np.arange(1, res.n_segments + 1), res.segment_values, "o-")
     ax.set_ylim(-0.03, 0.58)
-    ax.set_title(f"{label}: A = {res.count}, aceptación {res.bounds}")
+    ax.set_title(f"{label}: A = {res.trend_statistic}, aceptación {res.bounds}")
     ax.set_xlabel("Índice de segmento")
     ax.set_ylabel("Valor cuadrático medio por segmento")
 plt.show()

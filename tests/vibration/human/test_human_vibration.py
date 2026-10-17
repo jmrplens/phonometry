@@ -227,7 +227,7 @@ def test_apply_weighting_scales_sine_by_magnitude() -> None:
 
 def test_apply_weighting_validates() -> None:
     two_dimensional = np.zeros((2, 2))
-    with pytest.raises(ValueError, match=r"'signal' must be a non-empty 1-D array"):
+    with pytest.raises(ValueError, match=r"'x' must be a non-empty 1-D array"):
         hv.apply_weighting(two_dimensional, 1000.0, name="Wk")
     with pytest.raises(ValueError, match=r"'fs' must be a positive, finite"):
         hv.apply_weighting([1.0, 2.0], 0.0, name="Wk")
@@ -713,12 +713,12 @@ def test_all_nonpositive_frequencies_return_zero_response() -> None:
 
 
 def test_apply_weighting_rejects_empty_signal() -> None:
-    with pytest.raises(ValueError, match=r"'signal' must be a non-empty"):
+    with pytest.raises(ValueError, match=r"'x' must be a non-empty"):
         hv.apply_weighting([], 1000.0, name="Wk")
 
 
 def test_running_rms_rejects_empty_signal() -> None:
-    with pytest.raises(ValueError, match=r"'signal' must be a non-empty"):
+    with pytest.raises(ValueError, match=r"'x' must be a non-empty"):
         hv.running_rms([], 1000.0)
 
 

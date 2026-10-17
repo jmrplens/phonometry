@@ -204,8 +204,8 @@ _LETTER_UNITS = frozenset({"m", "s", "v"})
 #: quantity, each with the words that say it: ``temperature_c`` is in degrees
 #: Celsius and ``delta_rw_c`` is the spectrum adaptation term C,
 #: ``load_current_a`` is in amperes and ``sound_power_level_a`` is A-weighted,
-#: ``inductance_h`` is in henries, and ``subject_h`` is :math:`H_j` of
-#: ISO 4869-2. An hour is spelled ``_hours``, never ``_h``.
+#: and ``inductance_h`` is in henries. An hour is spelled ``_hours``, never
+#: ``_h``.
 _QUALIFIED_UNITS: Mapping[str, tuple[tuple[frozenset[str], str], ...]] = (
     MappingProxyType(
         {
@@ -219,10 +219,6 @@ _QUALIFIED_UNITS: Mapping[str, tuple[tuple[frozenset[str], str], ...]] = (
 
 #: The coordinates, after which a one-letter unit is one: ``x_m`` is in metres.
 _COORDINATES = frozenset({"x", "y", "z"})
-
-#: Names that end in a unit and are a symbol all the same: ``subject_m`` is
-#: :math:`M_j` of ISO 4869-2 for each subject, in decibels.
-_SYMBOLS = frozenset({"subject_m"})
 
 #: The Greek letters a symbol is spelt with in a name.
 _GREEK = frozenset(
@@ -301,15 +297,13 @@ def unit_of(name: str) -> str:
     letter nor a Greek letter: a name such as ``alpha_s``, ``c_s`` or
     ``r_tr_s`` is a symbol and its subscript, not a quantity in seconds.
     Four more letters are a unit only where the name says their quantity
-    (:data:`_QUALIFIED_UNITS`), and the names in :data:`_SYMBOLS` have none.
+    (:data:`_QUALIFIED_UNITS`).
 
     :param name: The name of a field.
     :return: The unit's symbol, or an empty string.
     """
     if name in _NAMED_UNITS:
         return _NAMED_UNITS[name]
-    if name in _SYMBOLS:
-        return ""
     words = name.lower().split("_")
     if len(words) == 1:  # a unit needs a word before it
         return ""

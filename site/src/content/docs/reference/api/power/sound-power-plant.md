@@ -411,7 +411,7 @@ PLANT_BACKGROUND_CORRECTION_DB = {6: 1.0, 7: 1.0, 8: 1.0, 9: 0.5, 10: 0.5}
 plant_characteristic_height_m(
     source_heights_m: ArrayLike,
     *,
-    low_source_count: int = 0,
+    n_low_sources: int = 0,
 ) -> float
 ```
 
@@ -421,7 +421,7 @@ The mean height of the midpoints of the noise sources, derived from the
 equipment lists and the elevation drawings,
 $H = \frac{1}{n}\sum_{k=1}^{n} h_k$. NOTE 7 lets a plant with ten or
 more sources lower than 2 m count them approximately (to ±10 %) and take
-each at 1 m: pass those sources as `low_source_count` and leave them out
+each at 1 m: pass those sources as `n_low_sources` and leave them out
 of `source_heights_m`.
 
 **Parameters**
@@ -429,7 +429,7 @@ of `source_heights_m`.
 | Name | Description |
 | :--- | :--- |
 | `source_heights_m` | $h_k$, the height of the midpoint of each source not counted by NOTE 7, in metres. May be empty when every source is. |
-| `low_source_count` | How many sources lower than 2 m NOTE 7 takes at 1 m; 0, or at least 10. |
+| `n_low_sources` | How many sources lower than 2 m NOTE 7 takes at 1 m; 0, or at least 10. |
 
 **Returns:** $H$, in metres.
 
@@ -476,7 +476,7 @@ plant_measurement_contour(
     contour_m: ArrayLike,
     *,
     characteristic_height_m: float,
-    position_count: int | None = None,
+    n_positions: int | None = None,
     omitted_positions: Sequence[int] = (),
 ) -> PlantMeasurementContour
 ```
@@ -484,10 +484,10 @@ plant_measurement_contour(
 Lay the measurement positions on a contour round the plant area, 9.1.
 
 The positions are spaced equally along the contour from its first vertex.
-With no `position_count`, the layout is the smallest that meets 9.1.1 c),
+With no `n_positions`, the layout is the smallest that meets 9.1.1 c),
 $D_\mathrm{m} = l/N \le 2\bar{d}$, with $\bar{d}$ taken over
 that same layout, from three positions up. A layout of your own is given
-as `position_count`, and the positions that could not be measured, a
+as `n_positions`, and the positions that could not be measured, a
 river or a building in the way (9.1.2.4), as `omitted_positions`.
 
 The contour is not required to meet 9.1.1 here: a first contour drawn on
@@ -501,8 +501,8 @@ the plan and found wanting is how the procedure starts (9.1.2.3, NOTE 6).
 | `plant_outline_m` | Vertices of the plant area, in metres. |
 | `contour_m` | Vertices of the measurement contour round it, in metres. |
 | `characteristic_height_m` | $H$, in metres, from [`plant_characteristic_height_m`](/phonometry/reference/api/power/sound-power-plant/#plant_characteristic_height_m). |
-| `position_count` | Positions in the layout, or `None` for the fewest 9.1.1 c) allows. |
-| `omitted_positions` | Indices into the layout of positions not measured; needs `position_count`, since the indices refer to it. |
+| `n_positions` | Positions in the layout, or `None` for the fewest 9.1.1 c) allows. |
+| `omitted_positions` | Indices into the layout of positions not measured; needs `n_positions`, since the indices refer to it. |
 
 **Returns:** A [`PlantMeasurementContour`](/phonometry/reference/api/power/sound-power-plant/#plantmeasurementcontour).
 
@@ -645,7 +645,10 @@ The geometry is the one 9.2 measures on the plot plan, to within ±5 %;
 ## plant_steady_reading
 
 ```python
-plant_steady_reading(maximum_db: float, minimum_db: float) -> float
+plant_steady_reading(
+    maximum_level_db: float,
+    minimum_level_db: float,
+) -> float
 ```
 
 The level read on a sound level meter from a steady noise, 9.5.2.
@@ -662,8 +665,8 @@ judges that one.
 
 | Name | Description |
 | :--- | :--- |
-| `maximum_db` | The highest level read, in decibels. |
-| `minimum_db` | The lowest level read, in decibels. |
+| `maximum_level_db` | The highest level read, in decibels. |
+| `minimum_level_db` | The lowest level read, in decibels. |
 
 **Returns:** The level, in decibels.
 
@@ -762,7 +765,7 @@ PlantMeasurementContour(
     plant_outline_m: NDArray[np.float64],
     contour_m: NDArray[np.float64],
     characteristic_height_m: float,
-    position_count: int,
+    n_positions: int,
     omitted_positions: tuple[int, ...] = (),
 )
 ```
@@ -771,7 +774,7 @@ A measurement contour round a plant area on the plot plan, clauses 9.1 to 9.4.
 
 The plant area and the contour are polygons in metres, in any consistent
 plane coordinates; the contour encloses the plant and does not touch it.
-The layout is `position_count` positions spaced equally along the
+The layout is `n_positions` positions spaced equally along the
 contour from its first vertex (9.1.2.4, $D_\mathrm{m} = l/N$), of
 which those listed in `omitted_positions` could not be measured; every
 quantity below is taken over the positions that were.
@@ -783,7 +786,7 @@ quantity below is taken over the positions that were.
 | `plant_outline_m` | Vertices of the plant area, `(n, 2)`, in metres. |
 | `contour_m` | Vertices of the measurement contour, `(n, 2)`, in metres. |
 | `characteristic_height_m` | $H$, in metres (9.2 c). |
-| `position_count` | Positions in the equidistant layout. |
+| `n_positions` | Positions in the equidistant layout. |
 | `omitted_positions` | Indices into the layout of the positions left out (9.1.2.4), in increasing order. |
 
 ### PlantMeasurementContour.contour_length_m
@@ -809,7 +812,7 @@ The largest horizontal dimension of the plant area, in metres (1.2).
 *property*
 
 Every position of the equidistant layout, omitted ones included,
-`(position_count, 2)`, in metres.
+`(n_positions, 2)`, in metres.
 
 ### PlantMeasurementContour.mean_distance_limits_m
 
@@ -830,7 +833,7 @@ $\bar{d}$, the average measurement distance, in metres (9.1.2.2).
 $S_\mathrm{m}$, the total area the contour encloses, plant
 included, in square metres (3.4).
 
-### PlantMeasurementContour.minimum_receiver_distance_m
+### PlantMeasurementContour.min_receiver_distance_m
 
 *property*
 

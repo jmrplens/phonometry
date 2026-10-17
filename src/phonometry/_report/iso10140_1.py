@@ -5,14 +5,14 @@ ISO 10140-1 prints a form for two of its products and lets the user copy it:
 
 * Figure H.4, the laboratory reduction of impact sound by a floor covering on
   a reference floor
-  (:class:`~phonometry.building.measurement.lab_improvement.LabFloorCoveringImprovementResult`):
+  (:class:`~phonometry.building.measurement.laboratory_improvement.LaboratoryFloorCoveringImprovementResult`):
   the header of the product, the specimen and the climate, the table of
   ``Ln,0`` and ``ΔL`` beside the ``ΔL`` diagram with the frequency range of the
   ISO 717-2 rating marked, the rating ``ΔLw``, ``CIΔ`` and ``CI,r,50-2500``
   and the statement that the result comes from an artificial source on a
   specified reference floor;
 * Figure J.7, the sound reduction index of joints
-  (:class:`~phonometry.building.measurement.joint_insulation.LabJointInsulationResult`):
+  (:class:`~phonometry.building.measurement.joint_insulation.LaboratoryJointInsulationResult`):
   the header with the test length, the separation wall, the test noise and the
   maximum joint sound reduction index, the table of ``Rs`` from 100 Hz to
   5 000 Hz beside its diagram and the evaluation according to ISO 717-1,
@@ -49,9 +49,9 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
-    from ..building.measurement.joint_insulation import LabJointInsulationResult
-    from ..building.measurement.lab_improvement import (
-        LabFloorCoveringImprovementResult,
+    from ..building.measurement.joint_insulation import LaboratoryJointInsulationResult
+    from ..building.measurement.laboratory_improvement import (
+        LaboratoryFloorCoveringImprovementResult,
     )
     from .metadata import ReportMetadata
 
@@ -134,7 +134,7 @@ def _pin_range(axes: Axes, values: np.ndarray, printed: tuple[float, float]) -> 
 
 
 def _floor_header(
-    result: LabFloorCoveringImprovementResult,
+    result: LaboratoryFloorCoveringImprovementResult,
     metadata: ReportMetadata | None,
     language: str,
 ) -> list[tuple[str, str]]:
@@ -209,7 +209,7 @@ def _floor_header(
 
 
 def _floor_box(
-    result: LabFloorCoveringImprovementResult, language: str
+    result: LaboratoryFloorCoveringImprovementResult, language: str
 ) -> tuple[str, list[str]]:
     """The rating of Figure H.4 and the two floor ratings H.5 i) asks for."""
     symbol, term = _FLOOR_SYMBOLS[result.reference_floor]
@@ -239,7 +239,7 @@ def _floor_box(
 
 
 def render_floor_covering_form(
-    result: LabFloorCoveringImprovementResult,
+    result: LaboratoryFloorCoveringImprovementResult,
     path: str,
     *,
     metadata: ReportMetadata | None,
@@ -326,7 +326,7 @@ def render_floor_covering_form(
 # --- Figure J.7 --------------------------------------------------------------
 
 
-def _joint_cells(result: LabJointInsulationResult, language: str) -> list[str]:
+def _joint_cells(result: LaboratoryJointInsulationResult, language: str) -> list[str]:
     """``Rs`` per band, as the table of Figure J.7 prints it.
 
     A minimum value carries ``≥``, and one set to the maximum of the
@@ -345,7 +345,7 @@ def _joint_cells(result: LabJointInsulationResult, language: str) -> list[str]:
 
 
 def _joint_header(
-    result: LabJointInsulationResult,
+    result: LaboratoryJointInsulationResult,
     metadata: ReportMetadata | None,
     language: str,
 ) -> list[tuple[str, str]]:
@@ -452,7 +452,7 @@ def _open_term(value: int | None, language: str) -> str:
 
 
 def _joint_box(
-    result: LabJointInsulationResult, language: str
+    result: LaboratoryJointInsulationResult, language: str
 ) -> tuple[str, list[str]]:
     """The evaluation of Figure J.7, bracketed when J.1 says so."""
     rating = result.rating
@@ -509,7 +509,7 @@ def _joint_box(
 
 
 def render_joint_form(
-    result: LabJointInsulationResult,
+    result: LaboratoryJointInsulationResult,
     path: str,
     *,
     metadata: ReportMetadata | None,

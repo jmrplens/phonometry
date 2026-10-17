@@ -58,7 +58,7 @@ db = aircraft.load_anp_database()
 print(len(db.aircraft_ids))          # 155 tipos de aeronave
 ac = db.aircraft("747100")
 print(ac.description)                # Boeing 747-100 / JT9DBD
-print(ac.engine_type, ac.num_engines, ac.weight_class)
+print(ac.engine_type, ac.n_engines, ac.weight_class)
 print(ac.power_parameter, ac.mounting)
 ```
 
@@ -68,7 +68,7 @@ datos, y sus `event_level` y `noise_contour` son esas mismas funciones con las
 tablas NPD y el perfil por defecto ya rellenados. Mantener los dos separados
 importa si encadenas snippets de las dos páginas.
 
-Un `AnpAircraft` se describe con el tipo y número de motores y la clase de
+Un `ANPAircraft` se describe con el tipo y número de motores y la clase de
 estela OACI, y lleva dos campos que usarás directamente.
 
 El **parámetro de potencia** nombra la magnitud con la que está indexada la
@@ -336,7 +336,7 @@ plt.show()
 </details>
 
 `procedural_profile` cruza de vuelta a las unidades que habla la cadena de ruido
-y devuelve el mismo `AnpProfile` que una consulta de punto fijo. `event_level` y
+y devuelve el mismo `ANPProfile` que una consulta de punto fijo. `event_level` y
 `noise_contour` aceptan un `aerodrome` por la misma razón, así que una aeronave
 que solo publica pasos recorre entera la cadena de Doc 29 desde su
 identificador. Son 309 de los 310 pares de aeronave y operación de la base,

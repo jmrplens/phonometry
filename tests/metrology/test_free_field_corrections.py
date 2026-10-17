@@ -314,14 +314,14 @@ def test_exact_frequencies_refuse_a_designator_that_is_not_whole(
 # --------------------------------------------------------------------------
 # Clauses 9 to 14: the maxima and the verdict
 # --------------------------------------------------------------------------
-@pytest.mark.parametrize(("clause", "nominal_hz", "maximum_db"), ref.IEC62585_MAXIMA)
+@pytest.mark.parametrize(("clause", "nominal_hz", "max_db"), ref.IEC62585_MAXIMA)
 def test_maxima_of_clauses_9_to_14(
-    clause: int, nominal_hz: float, maximum_db: float
+    clause: int, nominal_hz: float, max_db: float
 ) -> None:
     """At the nominal frequency and at its exact base-ten counterpart."""
     frequencies = sorted({nominal_hz, _EXACT[nominal_hz]})
     maxima = metrology.maximum_expanded_uncertainty(frequencies, clause=clause)
-    assert np.allclose(maxima, maximum_db, atol=1e-12)
+    assert np.allclose(maxima, max_db, atol=1e-12)
 
 
 def test_a_frequency_within_two_percent_of_a_boundary_is_read_as_it() -> None:
@@ -362,13 +362,13 @@ def test_verdict_forgives_a_maximum_reached_through_arithmetic() -> None:
     """0,1 + 0,2 is 0,300 000 000 000 000 04 in binary: on 0,30 dB, not above."""
     reached = 0.1 + 0.2
     verdict = metrology.verify_correction_uncertainty([5000.0], [reached], clause=11)
-    assert reached > verdict.maximum_uncertainty_db[0]
+    assert reached > verdict.max_uncertainty_db[0]
     assert verdict.passes
     spread = 0.05 * 7
     ranged = metrology.verify_correction_uncertainty(
         [8000.0], [0.2], clause=12, correction_range_db=[spread]
     )
-    assert spread > ranged.maximum_uncertainty_db[0]
+    assert spread > ranged.max_uncertainty_db[0]
     assert ranged.passes
 
 
@@ -376,9 +376,9 @@ def test_verdict_derives_its_maximum_from_the_clause() -> None:
     verdict = metrology.CorrectionUncertaintyVerification(
         clause=12, frequencies=[1000.0, 10000.0], expanded_uncertainty_db=[0.3, 0.3]
     )
-    assert np.allclose(verdict.maximum_uncertainty_db, [0.25, 0.5])
+    assert np.allclose(verdict.max_uncertainty_db, [0.25, 0.5])
     assert np.array_equal(verdict.failing_frequencies_hz, [1000.0])
-    assert "maximum_uncertainty_db" not in {
+    assert "max_uncertainty_db" not in {
         field.name for field in dataclasses.fields(verdict)
     }
 
@@ -443,7 +443,7 @@ def test_verdict_from_the_budgets_of_annex_i() -> None:
         coverage_factor=[b.coverage_factor for b in budgets],
     )
     assert verdict.passes
-    assert np.allclose(verdict.maximum_uncertainty_db, [0.25, 0.35])
+    assert np.allclose(verdict.max_uncertainty_db, [0.25, 0.35])
 
 
 # --------------------------------------------------------------------------
@@ -729,7 +729,7 @@ def test_the_range_is_taken_over_the_microphones() -> None:
     grouped = _three_microphones_on_three_calibrators(
         microphones=[1, 1, 1, 2, 2, 2, 3, 3, 3]
     )
-    assert (grouped.determinations, grouped.microphone_count) == (9, 3)
+    assert (grouped.determinations, grouped.n_microphones) == (9, 3)
     assert grouped.microphone_corrections_db.shape == (3, _F.size)
     assert np.allclose(grouped.range_db, 0.0, atol=1e-12)
     assert np.allclose(grouped.correction_db, _TRUE_CORRECTION - 0.15)
@@ -743,7 +743,7 @@ def test_the_range_is_taken_over_the_microphones() -> None:
     assert verdict.passes
     # Without the grouping every determination is a microphone of its own.
     ungrouped = _three_microphones_on_three_calibrators()
-    assert ungrouped.microphone_count == 9
+    assert ungrouped.n_microphones == 9
     assert np.allclose(ungrouped.range_db, 0.30)
 
 

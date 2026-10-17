@@ -84,7 +84,7 @@ def test_the_test_signal_is_table_6(
     assert test.repeat_time_s == pytest.approx(repeat)
     assert test.duration_s == pytest.approx(duration)
     assert test.cycle_counts == (1, 2, 4, 8, 16)
-    assert test.burst_count == 6
+    assert test.n_bursts == 6
 
 
 def test_table_6_covers_the_nine_weightings_once_each() -> None:
@@ -154,7 +154,7 @@ def test_the_record_holds_six_bursts_at_the_printed_repeat_time() -> None:
     assert record.size == round(test.duration_s * fs)
     active = np.flatnonzero(np.abs(record) > 1e-9) / fs
     gaps = np.flatnonzero(np.diff(active) > 1.0)
-    assert gaps.size + 1 == test.burst_count
+    assert gaps.size + 1 == test.n_bursts
     assert active[0] == pytest.approx(test.start_time_s, abs=2.0 / fs)
 
 
@@ -197,7 +197,7 @@ def test_a_burst_started_at_the_peak_misses_the_printed_cell() -> None:
     peak_phased = np.zeros_like(good)
     start = test.start_time_s
     span = 1.0 / test.frequency_hz
-    for _ in range(test.burst_count):
+    for _ in range(test.n_bursts):
         inside = (times >= start) & (times < start + span)
         cycles = test.frequency_hz * (times[inside] - start)
         peak_phased[inside] = 2.0 * np.mod(cycles, 1.0) - 1.0

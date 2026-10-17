@@ -517,10 +517,10 @@ $L_\mathrm{f} > 15$) leave no other consistent reading. See
 | :--- | :--- |
 | ValueError | If either level is not finite. |
 
-## max_infrastructure_limit
+## maximum_infrastructure_limit
 
 ```python
-max_infrastructure_limit(area_type: str) -> float
+maximum_infrastructure_limit(area_type: str) -> float
 ```
 
 Maximum `LAmax` for rail and airport infrastructure (Annex III Table A2).

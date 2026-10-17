@@ -1051,7 +1051,7 @@ def _chk_iso16283_low_frequency_shared() -> Outcome:
 def _chk_lab_airborne_rw() -> Outcome:
     # S = A (A = 0,16*50/0,8 = 10 = area) => R = L1 - L2 = the reference curve.
     ref_r = np.asarray(ref.ISO10140_2_REF_AIRBORNE_R, dtype=float)
-    res = ph.building.lab_airborne_insulation(
+    res = ph.building.laboratory_airborne_insulation(
         np.full(16, 90.0), 90.0 - ref_r, np.full(16, 0.8), area=10.0, volume=50.0
     )
     assert res.rating is not None
@@ -1282,7 +1282,7 @@ def _chk_iso717_1_sloped_lining() -> Outcome:
 )
 def _chk_iso717_1_direct_difference() -> Outcome:
     without = np.asarray(ref.ISO717_1_MEASURED_WALL_R, dtype=float)
-    res = ph.building.lab_lining_improvement(
+    res = ph.building.laboratory_lining_improvement(
         without,
         without + np.asarray(ref.ISO717_1_SLOPED_DELTA_R, dtype=float),
         ref.ISO717_1_TABLE_E1_BANDS,
@@ -1307,7 +1307,9 @@ def _chk_iso717_1_direct_difference() -> Outcome:
 def _chk_iso10140_1_annex_h() -> Outcome:
     dl = np.asarray(ref.ISO717_2_ANNEX_C2_DELTA_L, dtype=float)
     bare = np.full(16, 75.0)
-    res = ph.building.lab_floor_covering_improvement(bare, bare - dl, _CORE_BANDS)
+    res = ph.building.laboratory_floor_covering_improvement(
+        bare, bare - dl, _CORE_BANDS
+    )
     expected = (ref.ISO717_2_ANNEX_C2_DELTA_LW, ref.ISO717_2_ANNEX_C2_CI_DELTA)
     got = (res.delta_lw_db, res.ci_delta_db)
     return Outcome(
@@ -1443,8 +1445,10 @@ def _chk_iso10140_1_formula_j2_limit() -> Outcome:
     # Formula (J.2) at that margin has to round to the printed value, and the
     # library has to apply exactly the printed value just below it.
     margin = ref.ISO10140_1_J1_LIMIT_MARGIN_DB
-    at_six = ph.building.lab_joint_insulation([50.0], [50.0 + margin], [1000.0])
-    below = ph.building.lab_joint_insulation([50.0], [50.0 + margin - 0.1], [1000.0])
+    at_six = ph.building.laboratory_joint_insulation([50.0], [50.0 + margin], [1000.0])
+    below = ph.building.laboratory_joint_insulation(
+        [50.0], [50.0 + margin - 0.1], [1000.0]
+    )
     formula = round(float(at_six.r_s_db[0]) - 50.0, 1)
     applied = float(below.r_s_db[0]) - 50.0
     printed = ref.ISO10140_1_J1_LIMIT_CORRECTION_DB
@@ -1464,7 +1468,7 @@ def _chk_iso10140_1_formula_j2_limit() -> Outcome:
 )
 def _chk_iso10140_1_j1_lower_limit() -> Outcome:
     maximum = ref.ISO10140_1_J1_EXAMPLE_MINIMUM_DB
-    res = ph.building.lab_joint_insulation([maximum - 2.5], [maximum], [1000.0])
+    res = ph.building.laboratory_joint_insulation([maximum - 2.5], [maximum], [1000.0])
     got = float(res.r_s_db[0])
     ok = res.regime == ("maximum",) and math.isclose(got, maximum)
     return Outcome(
@@ -1498,7 +1502,7 @@ def _chk_iso10140_1_j1_open_bands() -> Outcome:
     maximum[6:10] = 44.0
     measured = maximum - 12.0
     measured[6:10] = 42.0
-    res = ph.building.lab_joint_insulation(measured, maximum, _LAB_BANDS_18)
+    res = ph.building.laboratory_joint_insulation(measured, maximum, _LAB_BANDS_18)
     direct = None if res.rating is None else res.rating.rating
     opened = res.open_band_rating
     open_rw = None if opened is None else opened.r_s_w_db
@@ -1523,7 +1527,9 @@ def _chk_iso10140_1_j1_open_bands() -> Outcome:
 )
 def _chk_iso10140_2_table_a1() -> Outcome:
     measured = np.asarray(ref.ISO10140_2_TABLE_A1_R_F, dtype=float)
-    res = ph.building.lab_joint_insulation(measured, measured + 20.0, _LAB_BANDS_18)
+    res = ph.building.laboratory_joint_insulation(
+        measured, measured + 20.0, _LAB_BANDS_18
+    )
     rating = res.rating
     expected = dict(
         zip(("Rw", "C", "Ctr"), ref.ISO10140_2_TABLE_A1_RATING, strict=True)
@@ -1578,18 +1584,20 @@ def _chk_iso10140_1_j4_widths() -> Outcome:
     # than nominal". The same rated result stands at every width: only the
     # widths the series names are judged.
     maximum = np.full(18, 60.0)
-    rated = ph.building.lab_joint_insulation(maximum - 12.0, maximum, _LAB_BANDS_18)
+    rated = ph.building.laboratory_joint_insulation(
+        maximum - 12.0, maximum, _LAB_BANDS_18
+    )
 
     def passes(widths: list[float], **kwargs: float) -> bool:
         series = ph.building.joint_gap_series(widths, [rated] * len(widths), **kwargs)
         return ph.building.check_joint_gap_series(series).passes
 
     cases = [
-        (passes([3.0, 5.0, 8.0], minimum_gap_mm=3.0), True),
-        (passes([3.0, 5.0], minimum_gap_mm=3.0), False),
+        (passes([3.0, 5.0, 8.0], min_gap_mm=3.0), True),
+        (passes([3.0, 5.0], min_gap_mm=3.0), False),
         (passes([3.0, 5.0, 8.0]), False),
-        (passes([3.0, 6.0, 8.0], nominal_gap_mm=6.0, minimum_gap_mm=3.0), False),
-        (passes([3.0, 6.0, 9.0], nominal_gap_mm=6.0, minimum_gap_mm=3.0), True),
+        (passes([3.0, 6.0, 8.0], nominal_gap_mm=6.0, min_gap_mm=3.0), False),
+        (passes([3.0, 6.0, 9.0], nominal_gap_mm=6.0, min_gap_mm=3.0), True),
     ]
     matching = sum(1 for got, expected in cases if got is expected)
     return count(matching, len(cases), subject="series")

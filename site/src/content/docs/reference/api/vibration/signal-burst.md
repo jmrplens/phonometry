@@ -193,12 +193,6 @@ One application's row of ISO 8041-1 Table 6 (folio 17).
 | `max_fall_time_s` | The largest fall time 12.13 allows a real generator, in seconds. The record [`sawtooth_burst`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst) synthesises has the ideal vertical fall of Figure 3; this is the laboratory limit, not a property of the synthesised signal. |
 | `recommended_sampling_rate_hz` | The rate [`sawtooth_burst`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst) uses when the caller names none. Chosen so that the printed cells are reproduced to a few tenths of a per cent, which is not a normative figure: nothing in the standard prescribes a sampling rate. |
 
-### SawtoothBurstTest.burst_count
-
-*property*
-
-How many bursts the printed duration holds at the repeat time.
-
 ### SawtoothBurstTest.frequency_hz
 
 *property*
@@ -207,6 +201,12 @@ The saw-tooth frequency, in hertz.
 
 Table 6 prints it beside the angular frequency (79,58 Hz, 15,915 Hz
 and 0,397 9 Hz); this is the division, not the rounded decimal.
+
+### SawtoothBurstTest.n_bursts
+
+*property*
+
+How many bursts the printed duration holds at the repeat time.
 
 ## signal_burst_indications
 

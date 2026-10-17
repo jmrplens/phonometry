@@ -732,7 +732,7 @@ For a basic element that is not one of the three standard ones, D.3 takes
 the ratings "directly from the single-number ratings for that basic
 element with and without the tested acoustical lining", the direct
 difference `ΔRw,direct` of Formula (D.2); that needs both measured
-curves and is what [`lab_lining_improvement`](/phonometry/reference/api/building/lab-improvement/#lab_lining_improvement)
+curves and is what [`laboratory_lining_improvement`](/phonometry/reference/api/building/laboratory-improvement/#laboratory_lining_improvement)
 returns beside this rating.
 
 **Parameters**

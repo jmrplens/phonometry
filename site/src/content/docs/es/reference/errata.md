@@ -239,12 +239,12 @@ dos ediciones con las mismas entradas y en el mismo orden.
   ISO 10140-1:2021, en las páginas 13, 17 y 18 del PDF (pp. 7, 11 y 12
   impresas) de ISO 717-2:2020, y en la página 36 del PDF (p. 27 impresa) de
   BS EN ISO 10140-1:2010+A2:2014.
-- **Comportamiento de la biblioteca:** `building.lab_floor_covering_improvement`
+- **Comportamiento de la biblioteca:** `building.laboratory_floor_covering_improvement`
   da las dos valoraciones que pide H.5 i) y ningún
   $C_{I,r,50\text{–}2\,500}$; el término de rango ampliado del suelo desnudo
   medido, que sí está definido, sale de
   `building.weighted_impact_rating_extended`. El formulario mismo lo imprime
-  `LabFloorCoveringImprovementResult.report()`, que pone esas dos valoraciones
+  `LaboratoryFloorCoveringImprovementResult.report()`, que pone esas dos valoraciones
   junto a $\Delta L_w$ y $C_{I\Delta}$ y escribe, donde iría
   $C_{I,r,50\text{–}2\,500}$, que no se forma porque la Tabla 4 empieza en
   100 Hz. Ningún número de la biblioteca depende del formulario, y no hizo
@@ -269,7 +269,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   ISO 10140-1:2021 frente a la página 49 del PDF (p. 40 impresa) de
   BS EN ISO 10140-1:2010+A2:2014.
 - **Comportamiento de la biblioteca:** nada que hacer; ningún número depende
-  de ello. El formulario que imprime `LabJointInsulationResult.report()`
+  de ello. El formulario que imprime `LaboratoryJointInsulationResult.report()`
   rotula la curva «curva de referencia desplazada (ISO 717-1)» y la dibuja
   solo sobre el intervalo de la valoración.
 - **Estado:** sin notificar (tipográfico, sin consecuencia numérica).
@@ -3602,9 +3602,9 @@ dos ediciones con las mismas entradas y en el mismo orden.
   adopción británica de ISO 13474:2009 (primera edición, 2009-06-15). Los
   niveles se recalcularon a partir de la Tabla A.3, en la página 40 del PDF
   (p. 32 impresa) del mismo documento.
-- **Comportamiento de la biblioteca:** `SelDistribution.exceedance` evalúa la
+- **Comportamiento de la biblioteca:** `SELDistribution.exceedance` evalúa la
   Ecuación (24) hasta infinito en forma cerrada y
-  `SelDistribution.exceedance_level` resuelve la Ecuación (25)
+  `SELDistribution.exceedance_level` resuelve la Ecuación (25)
   ([`exposure_distribution.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/assessment/exposure_distribution.py)),
   así que el ejemplo devuelve 21,6; 31,5; 40,5; 43,0 y 47,5 dB. La
   comprobación de conformidad «ISO 13474:2009 Equation (25), Figure A.3»
@@ -10908,7 +10908,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   Version 1 (9 de agosto de 2016).
 - **Comportamiento de la biblioteca:** `amplitude_modulation_period` valora
   un periodo de 30 bloques válidos, como hacen el 13.6.2.2 y el informe del
-  AMWG (`AM_MINIMUM_VALID_BLOCKS`); las filas de conformidad fijan los
+  AMWG (`AM_MIN_VALID_BLOCKS`); las filas de conformidad fijan los
   periodos de 30 y de 29 bloques válidos
   (`test_periods_agree_with_the_ioa_code_and_the_ts` en
   [`tests/environment/assessment/test_wind_turbine_modulation.py`](https://github.com/jmrplens/phonometry/blob/main/tests/environment/assessment/test_wind_turbine_modulation.py)).

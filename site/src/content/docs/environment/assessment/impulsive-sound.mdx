@@ -257,7 +257,7 @@ none of them is optional in practice:
 | `reference_pressure_pa` | `2e-05` Pa | Only change it for a non-air medium |
 | `onset_rate_method` | `'least_squares'` | The fit over the detected rise |
 
-`environment.sound_pressure_level_history(signal, fs, *, dt=..., calibration_offset=...)`
+`environment.sound_pressure_level_history(x, fs, *, dt=..., calibration_offset=...)`
 is the same Clause 4 step on its own (A-weighting, F time weighting and
 resampling onto the 10-25 ms grid) for a caller who wants the history without
 the adjustment. It warm-starts the F integrator at the first window's mean

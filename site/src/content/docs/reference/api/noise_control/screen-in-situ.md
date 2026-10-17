@@ -168,12 +168,12 @@ IMPULSE_REPEATS = 3
 ISO11821_BAND_RANGE_HZ = {3: (100.0, 5000.0), 1: (125.0, 4000.0)}
 ```
 
-## ISO11821_MINIMUM_BACKGROUND_MARGIN_DB
+## ISO11821_MIN_BACKGROUND_MARGIN_DB
 
 *Constant* (`float`).
 
 ```python
-ISO11821_MINIMUM_BACKGROUND_MARGIN_DB = 6.0
+ISO11821_MIN_BACKGROUND_MARGIN_DB = 6.0
 ```
 
 ## ISO11821_PREFERRED_BACKGROUND_MARGIN_DB
@@ -194,7 +194,7 @@ Where the microphones stand in front of a screen, 5.5.2.
 
 A quarter, a half, once and twice the screen height, along a line
 perpendicular to the screen, and never closer than
-[`MINIMUM_MICROPHONE_DISTANCE_M`](/phonometry/reference/api/noise_control/screen-in-situ/#minimum_microphone_distance_m). Under 4 m the quarter-height
+[`MIN_MICROPHONE_DISTANCE_M`](/phonometry/reference/api/noise_control/screen-in-situ/#min_microphone_distance_m). Under 4 m the quarter-height
 position falls inside that floor and is pushed out to it; at 2 m and under
 the half-height one is pushed out too, and then the two nearest positions
 coincide. The clause keeps the floor rather than the factor, so the
@@ -220,20 +220,20 @@ an average.
 | :--- | :--- |
 | ValueError | For a non-positive height. |
 
-## MINIMUM_MICROPHONE_DISTANCE_M
+## MIN_MICROPHONE_DISTANCE_M
 
 *Constant* (`float`).
 
 ```python
-MINIMUM_MICROPHONE_DISTANCE_M = 1.0
+MIN_MICROPHONE_DISTANCE_M = 1.0
 ```
 
-## MINIMUM_SCREEN_DIMENSION_M
+## MIN_SCREEN_DIMENSION_M
 
 *Constant* (`float`).
 
 ```python
-MINIMUM_SCREEN_DIMENSION_M = 1.5
+MIN_SCREEN_DIMENSION_M = 1.5
 ```
 
 ## OPERATOR_HEIGHT_M
@@ -349,7 +349,7 @@ the remedy is to wait for a quieter day rather than to correct harder.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For inputs that do not match band for band, or a margin under [`ISO11821_MINIMUM_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/noise_control/screen-in-situ/#iso11821_minimum_background_margin_db). |
+| ValueError | For inputs that do not match band for band, or a margin under [`ISO11821_MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/noise_control/screen-in-situ/#iso11821_min_background_margin_db). |
 
 ## SCREEN_DISTANCE_FACTORS
 

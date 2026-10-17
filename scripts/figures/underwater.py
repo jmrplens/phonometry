@@ -369,7 +369,7 @@ def generate_weston_regimes(output_dir: str) -> None:
         "$f$ = 250 Hz, $H$ = 50 m, medium sand\n"
         f"$\\psi_\\mathrm{{c}}$ = {np.degrees(bounds.critical_angle_rad):.1f}°, "
         f"$\\eta$ = {bounds.reflection_loss_gradient_np_per_rad:.2f} Np/rad, "
-        f"{bounds.mode_count:.0f} modes",
+        f"{bounds.n_modes:.0f} modes",
         transform=ax.transAxes,
         va="bottom",
         ha="right",

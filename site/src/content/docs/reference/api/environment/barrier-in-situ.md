@@ -97,7 +97,7 @@ one takes off 1. They are two tables and they stay two tables.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a margin under [`ISO10847_MINIMUM_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/environment/barrier-in-situ/#iso10847_minimum_background_margin_db), which 6.4 calls invalid. |
+| ValueError | For a margin under [`ISO10847_MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/environment/barrier-in-situ/#iso10847_min_background_margin_db), which 6.4 calls invalid. |
 
 ## BarrierInSituWarning
 
@@ -234,12 +234,12 @@ distance.
 ISO10847_BACKGROUND_CORRECTIONS_DB = {4: -2.0, 5: -2.0, 6: -1.0, 7: -1.0, 8: -1.0, 9: -1.0}
 ```
 
-## ISO10847_MINIMUM_BACKGROUND_MARGIN_DB
+## ISO10847_MIN_BACKGROUND_MARGIN_DB
 
 *Constant* (`float`).
 
 ```python
-ISO10847_MINIMUM_BACKGROUND_MARGIN_DB = 4.0
+ISO10847_MIN_BACKGROUND_MARGIN_DB = 4.0
 ```
 
 ## ISO10847_OCTAVE_BAND_EXTENDED_RANGE_HZ
@@ -298,12 +298,12 @@ LINE_SOURCE_DIVERGENCE_DB = 3.0
 LONG_DISTANCE_M = 250.0
 ```
 
-## MAXIMUM_WIND_SPEED_M_S
+## MAX_WIND_SPEED_M_S
 
 *Constant* (`float`).
 
 ```python
-MAXIMUM_WIND_SPEED_M_S = 5.0
+MAX_WIND_SPEED_M_S = 5.0
 ```
 
 ## measured_insertion_loss_direct
@@ -484,20 +484,20 @@ The values as clause 10 c) reports them, to the nearest decibel.
 
 The symbol clause 8.2 reports this as, `"D_IL"` or `"D'_IL"`.
 
-## MINIMUM_RECEIVER_HEIGHT_M
+## MIN_RECEIVER_HEIGHT_M
 
 *Constant* (`float`).
 
 ```python
-MINIMUM_RECEIVER_HEIGHT_M = 1.2
+MIN_RECEIVER_HEIGHT_M = 1.2
 ```
 
-## MINIMUM_REPETITIONS
+## MIN_REPETITIONS
 
 *Constant* (`int`).
 
 ```python
-MINIMUM_REPETITIONS = 3
+MIN_REPETITIONS = 3
 ```
 
 ## POINT_SOURCE_DIVERGENCE_DB
@@ -629,7 +629,7 @@ printed "+ 1 to - 5" and read here as -1 to -5 (see the errata).
 The calm class carries a footnote of its own over all distances: it counts
 "only with the case of temperature inversion".
 
-Above [`MAXIMUM_WIND_SPEED_M_S`](/phonometry/reference/api/environment/barrier-in-situ/#maximum_wind_speed_m_s) in absolute value no measurement is
+Above [`MAX_WIND_SPEED_M_S`](/phonometry/reference/api/environment/barrier-in-situ/#max_wind_speed_m_s) in absolute value no measurement is
 made at all, which is a refusal rather than a class.
 
 **Parameters**
@@ -645,7 +645,7 @@ made at all, which is a refusal rather than a class.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a component that is not finite, or past [`MAXIMUM_WIND_SPEED_M_S`](/phonometry/reference/api/environment/barrier-in-situ/#maximum_wind_speed_m_s) in absolute value. |
+| ValueError | For a component that is not finite, or past [`MAX_WIND_SPEED_M_S`](/phonometry/reference/api/environment/barrier-in-situ/#max_wind_speed_m_s) in absolute value. |
 
 ## WIND_CLASSES
 

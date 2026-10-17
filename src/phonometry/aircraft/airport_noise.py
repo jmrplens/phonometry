@@ -12,7 +12,7 @@ starts by reading a level from this table for an arbitrary power and distance.
   and log-linear in distance (Eqs. 4-3/4-4), with extrapolation beyond the
   tabulated envelope.
 * :func:`npd_curve` -- the level over a distance sweep at one power, returned as
-  an :class:`NpdLevelResult` with a ``.plot()``.
+  an :class:`NPDLevelResult` with a ``.plot()``.
 
 The single-event stage segments a flight path and adjusts the NPD baseline per
 segment (§4.3-4.5): :func:`impedance_adjustment` (Eq. 4-6/4-7),
@@ -361,7 +361,7 @@ def _interp_distance(
 
 
 @dataclass(frozen=True)
-class NpdLevelResult(OwnsArrays):
+class NPDLevelResult(OwnsArrays):
     """NPD event level over a distance sweep at one power (ECAC Doc 29).
 
     :ivar distances_m: Slant distances, in metres.
@@ -460,7 +460,7 @@ def npd_curve(
     power: float,
     *,
     query_distances_m: NDArray[np.float64] | list[float] | None = None,
-) -> NpdLevelResult:
+) -> NPDLevelResult:
     """NPD event level over a distance sweep at one power setting.
 
     :param powers: Tabulated engine power settings.
@@ -469,7 +469,7 @@ def npd_curve(
     :param power: Query engine power setting.
     :param query_distances_m: Distances to evaluate, in metres; defaults to a log
         sweep across the tabulated envelope.
-    :return: An :class:`NpdLevelResult`.
+    :return: An :class:`NPDLevelResult`.
     :raises ValueError: If the inputs are invalid.
     """
     p, d, lv = _clean_table(powers, distances_m, levels)
@@ -479,7 +479,7 @@ def npd_curve(
         dq = np.atleast_1d(np.asarray(query_distances_m, dtype=np.float64))
     level = npd_level(p, d, lv, power, dq)
     row = npd_level(p, d, lv, power, d)  # tabulated levels at the queried power
-    return NpdLevelResult(
+    return NPDLevelResult(
         distances_m=dq,
         levels=level,
         power=float(power),

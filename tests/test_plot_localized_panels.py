@@ -210,7 +210,7 @@ def test_a_contour_colorbar_reaches_spanish() -> None:
 def _microphone_positions(language: str) -> Axes:
     figure = plt.figure()
     axes = figure.add_subplot(projection="3d")
-    positions = emission.precision_positions("hemisphere", count=20, radius=1.0)
+    positions = emission.precision_positions("hemisphere", n_positions=20, radius=1.0)
     return geometry_emission.plot_microphone_positions(
         positions, ax=axes, radius=1.0, language=language
     )

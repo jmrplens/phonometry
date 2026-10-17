@@ -565,10 +565,10 @@ for the three time constants the standard tabulates.
 RUNNING_RMS_DECAY_TIME_S = {'linear': ((0.125, 0.124, 0.005), (1.0, 0.99, 0.05), (8.0, 7.92, 0.2)), 'exponential': ((0.125, 0.58, 0.03), (1.0, 4.61, 0.25), (8.0, 36.8, 2.0))}
 ```
 
-## RunningRmsDecayVerification
+## RunningRMSDecayVerification
 
 ```python
-RunningRmsDecayVerification(
+RunningRMSDecayVerification(
     *,
     method: str,
     integration_time: float,
@@ -593,19 +593,19 @@ not nor be built against another row.
 | `integration_time` | The printed time constant the row is for, in seconds. |
 | `measured_time_s` | The measured time to 10 % of the initial indicated value, as supplied, in seconds. |
 
-### RunningRmsDecayVerification.deviation_s
+### RunningRMSDecayVerification.deviation_s
 
 *property*
 
 The measured time minus the printed one, in seconds.
 
-### RunningRmsDecayVerification.lower_time_s
+### RunningRMSDecayVerification.lower_time_s
 
 *property*
 
 The shortest decay time the row accepts, in seconds.
 
-### RunningRmsDecayVerification.passes
+### RunningRMSDecayVerification.passes
 
 *property*
 
@@ -615,10 +615,10 @@ True says the time weighting decays as clause 5.13 requires, and
 nothing more: the other clauses a meter is graded on are hardware
 measurements this cannot stand in for.
 
-### RunningRmsDecayVerification.plot()
+### RunningRMSDecayVerification.plot()
 
 ```python
-RunningRmsDecayVerification.plot(
+RunningRMSDecayVerification.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -639,19 +639,19 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to `phonometry._plot.vibration.plot_running_rms_decay_verification`. |
 
-### RunningRmsDecayVerification.printed_time_s
+### RunningRMSDecayVerification.printed_time_s
 
 *property*
 
 The decay time the row prints, in seconds.
 
-### RunningRmsDecayVerification.tolerance_s
+### RunningRMSDecayVerification.tolerance_s
 
 *property*
 
 The tolerance printed beside it, in seconds.
 
-### RunningRmsDecayVerification.upper_time_s
+### RunningRMSDecayVerification.upper_time_s
 
 *property*
 
@@ -763,7 +763,7 @@ verify_running_rms_decay(
     *,
     integration_time: float,
     method: str,
-) -> RunningRmsDecayVerification
+) -> RunningRMSDecayVerification
 ```
 
 Verify a measured decay time against Table 10 or Table 11.
@@ -786,7 +786,7 @@ against a band the standard does not give.
 | `integration_time` | The averaging time it was measured at, which has to be one of the printed 0,125 s, 1 s and 8 s. Keyword-only, and so is the method: two times in seconds side by side are the kind of pair a positional call gets the wrong way round in silence. |
 | `method` | `"linear"` (Table 10) or `"exponential"` (Table 11). |
 
-**Returns:** The verdict, as a [`RunningRmsDecayVerification`](/phonometry/reference/api/vibration/instrumentation/#runningrmsdecayverification) that keeps the printed row it was judged against.
+**Returns:** The verdict, as a [`RunningRMSDecayVerification`](/phonometry/reference/api/vibration/instrumentation/#runningrmsdecayverification) that keeps the printed row it was judged against.
 
 **Raises**
 

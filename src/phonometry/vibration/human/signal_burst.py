@@ -179,7 +179,7 @@ class SawtoothBurstTest(RichDisplay):
         return self.angular_frequency_rad_s / (2.0 * math.pi)
 
     @property
-    def burst_count(self) -> int:
+    def n_bursts(self) -> int:
         """How many bursts the printed duration holds at the repeat time."""
         return int(
             math.ceil((self.duration_s - self.start_time_s) / self.repeat_time_s)
@@ -528,7 +528,7 @@ def sawtooth_burst(
     record = np.zeros(n, dtype=np.float64)
     span_s = burst_cycles / frequency
     start = test.start_time_s
-    for _ in range(test.burst_count):
+    for _ in range(test.n_bursts):
         inside = (times >= start) & (times < start + span_s)
         record[inside] = _ramp(frequency * (times[inside] - start), amplitude)
         start += test.repeat_time_s

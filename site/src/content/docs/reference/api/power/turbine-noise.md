@@ -670,12 +670,6 @@ and down the rear end towards 5.
 | `turbine_boxes` | How many of the reference boxes enclose the turbine; key positions 2, 3 and 4 stand in the plane that follows them. |
 | `positions_per_box` | Positions on one long side within the length of each parallelepiped (the other side mirrors them). |
 
-### TurbineMicrophoneArray.count
-
-*property*
-
-Number of positions, key and additional, overhead included.
-
 ### TurbineMicrophoneArray.every_box_sampled
 
 *property*
@@ -693,6 +687,12 @@ read from `positions_m`.
 *property*
 
 Which positions are the five key positions of Figure 2.
+
+### TurbineMicrophoneArray.n_positions
+
+*property*
+
+Number of positions, key and additional, overhead included.
 
 ### TurbineMicrophoneArray.plot()
 

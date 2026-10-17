@@ -77,7 +77,7 @@ from .induction_loop import (
 )
 from .induction_loop_components import (
     NECK_LOOP_TYPES,
-    AgcCharacteristic,
+    AGCCharacteristic,
     AmplifierFrequencyResponse,
     LoopField,
     LoopImpedance,
@@ -167,7 +167,7 @@ __all__ = [
     "REFERENCE_FIELD_STRENGTH_A_PER_M",
     "SIMULATED_PROGRAM_SPECTRUM",
     "TRANSDUCER_PRINCIPLES",
-    "AgcCharacteristic",
+    "AGCCharacteristic",
     "AmplifierFrequencyResponse",
     "AmplifierOverloadVerification",
     "BackgroundNoiseAssessment",

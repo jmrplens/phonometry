@@ -585,7 +585,7 @@ def weighting_factors(name: str, frequencies: ArrayLike) -> Real:
     return frequency_weighting(name, frequencies).magnitude
 
 
-def apply_weighting(signal: SignalInput, fs: float | None = None, *, name: str) -> Real:
+def apply_weighting(x: SignalInput, fs: float | None = None, *, name: str) -> Real:
     """Apply frequency weighting ``name`` to a time signal (ISO 8041-1).
 
     The exact analog response :func:`frequency_weighting` is applied in the
@@ -595,7 +595,7 @@ def apply_weighting(signal: SignalInput, fs: float | None = None, *, name: str) 
     to a record long enough (or pre-tapered) that the boundary transient is
     negligible, as for any block frequency-domain filtering.
 
-    :param signal: Unweighted acceleration time history (1-D), in m/s2. Accepts a
+    :param x: Unweighted acceleration time history (1-D), in m/s2. Accepts a
         :class:`phonometry.io.Signal` for its rate; a calibration factor it
         carries is deliberately not applied, because this quantity is an
         acceleration in m/s2 and not a pressure.
@@ -604,15 +604,13 @@ def apply_weighting(signal: SignalInput, fs: float | None = None, *, name: str) 
         that disagrees with it raises instead of silently winning.
     :param name: Weighting name (one of :data:`WEIGHTING_NAMES`).
     :return: The frequency-weighted acceleration signal, same length as input.
-    :raises ValueError: if ``signal`` is not 1-D, ``fs`` is not positive, or
+    :raises ValueError: if ``x`` is not 1-D, ``fs`` is not positive, or
         ``name`` is unknown.
     """
-    return _apply_response(signal, fs, name=name, band_limiting=False)
+    return _apply_response(x, fs, name=name, band_limiting=False)
 
 
-def apply_band_limiting(
-    signal: SignalInput, fs: float | None = None, *, name: str
-) -> Real:
+def apply_band_limiting(x: SignalInput, fs: float | None = None, *, name: str) -> Real:
     """Apply the band-limiting weighting of ``name`` to a time signal.
 
     The band-limiting weighting of :func:`band_limiting_response` (ISO 8041-1
@@ -628,7 +626,7 @@ def apply_band_limiting(
     printed values come from a zero-state digital simulation (5.9, NOTE 1)
     and the switch-on transient is part of what they measure.
 
-    :param signal: Unweighted acceleration time history (1-D), in m/s2. Accepts a
+    :param x: Unweighted acceleration time history (1-D), in m/s2. Accepts a
         :class:`phonometry.io.Signal` for its rate; a calibration factor it
         carries is deliberately not applied, because this quantity is an
         acceleration in m/s2 and not a pressure.
@@ -638,18 +636,18 @@ def apply_band_limiting(
     :param name: Weighting name (one of :data:`WEIGHTING_NAMES`) whose
         band-limiting pair is applied.
     :return: The band-limited acceleration signal, same length as input.
-    :raises ValueError: if ``signal`` is not 1-D, ``fs`` is not positive, or
+    :raises ValueError: if ``x`` is not 1-D, ``fs`` is not positive, or
         ``name`` is unknown.
     """
-    return _apply_response(signal, fs, name=name, band_limiting=True)
+    return _apply_response(x, fs, name=name, band_limiting=True)
 
 
 def _apply_response(
-    signal: SignalInput, fs: float | None, *, name: str, band_limiting: bool
+    x: SignalInput, fs: float | None, *, name: str, band_limiting: bool
 ) -> Real:
     """Multiply a record by one of the two responses of ``name`` (real FFT)."""
-    fs = resolve_fs(signal, fs, name="signal")
-    x = _weighted_signal(signal)
+    fs = resolve_fs(x, fs, name="x")
+    x = _weighted_signal(x)
     fs = _positive_fs(fs)
     n = x.size
     freqs = np.fft.rfftfreq(n, d=1.0 / fs).astype(np.float64)
@@ -790,7 +788,7 @@ def weighted_acceleration(
 # ---------------------------------------------------------------------------
 # Time-domain metrics (ISO 2631-1 clause 6; ISO 8041-1 clause 3.1.2).
 # ---------------------------------------------------------------------------
-def _weighted_signal(signal: SignalInput) -> Real:
+def _weighted_signal(x: SignalInput) -> Real:
     """The 1-D acceleration record, never scaled to pascals.
 
     A :class:`~phonometry.io.Signal` may carry a digital-to-pascal factor,
@@ -798,11 +796,9 @@ def _weighted_signal(signal: SignalInput) -> Real:
     unit conversion nobody asked for. This is the exemption the contract
     describes for a quantity that is not a pressure.
     """
-    x = np.asarray(
-        resolve_samples(signal, calibrate=False, name="signal"), dtype=np.float64
-    )
+    x = np.asarray(resolve_samples(x, calibrate=False, name="x"), dtype=np.float64)
     if x.ndim != 1 or x.size == 0:
-        msg = "'signal' must be a non-empty 1-D array."
+        msg = "'x' must be a non-empty 1-D array."
         raise ValueError(msg)
     return x
 
@@ -818,7 +814,7 @@ def _positive_fs(fs: float) -> float:
 
 
 def running_rms(
-    signal: SignalInput,
+    x: SignalInput,
     fs: float | None = None,
     *,
     integration_time: float = 1.0,
@@ -826,7 +822,7 @@ def running_rms(
 ) -> Real:
     """Running r.m.s. of a weighted signal (ISO 2631-1 Eqs. (2)/(3)).
 
-    :param signal: Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a
+    :param x: Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a
         :class:`phonometry.io.Signal` for its rate; a calibration factor it
         carries is deliberately not applied, because this quantity is an
         acceleration in m/s2 and not a pressure.
@@ -841,8 +837,8 @@ def running_rms(
     :raises ValueError: for a bad signal, non-positive ``fs``/``tau`` or an
         unknown ``method``.
     """
-    fs = resolve_fs(signal, fs, name="signal")
-    x = _weighted_signal(signal)
+    fs = resolve_fs(x, fs, name="x")
+    x = _weighted_signal(x)
     fs = _positive_fs(fs)
     require_scalar(integration_time, "integration_time")
     tau = float(integration_time)
@@ -871,7 +867,7 @@ def running_rms(
 
 
 def mtvv(
-    signal: SignalInput,
+    x: SignalInput,
     fs: float | None = None,
     *,
     integration_time: float = 1.0,
@@ -889,7 +885,7 @@ def mtvv(
     default is the linear average of Eq. (2), which is what ISO 2631-1
     defines the MTVV on.
 
-    :param signal: Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a
+    :param x: Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a
         :class:`phonometry.io.Signal` for its rate; a calibration factor it
         carries is deliberately not applied, because this quantity is an
         acceleration in m/s2 and not a pressure.
@@ -904,19 +900,17 @@ def mtvv(
         unknown ``method``.
     """
     return float(
-        np.max(
-            running_rms(signal, fs, integration_time=integration_time, method=method)
-        )
+        np.max(running_rms(x, fs, integration_time=integration_time, method=method))
     )
 
 
-def vibration_dose_value(signal: SignalInput, fs: float | None = None) -> float:
+def vibration_dose_value(x: SignalInput, fs: float | None = None) -> float:
     r"""Vibration dose value ``VDV`` (ISO 2631-1 Eq. (5)).
 
     :math:`\mathrm{VDV} = \left( \int a_\mathrm{w}(t)^4 \, dt \right)^{1/4}`, in
     m/s^1.75; more sensitive to peaks than the r.m.s. value.
 
-    :param signal: Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a
+    :param x: Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a
         :class:`phonometry.io.Signal` for its rate; a calibration factor it
         carries is deliberately not applied, because this quantity is an
         acceleration in m/s2 and not a pressure.
@@ -926,20 +920,20 @@ def vibration_dose_value(signal: SignalInput, fs: float | None = None) -> float:
     :return: The VDV, in m/s^1.75.
     :raises ValueError: for a bad signal or non-positive ``fs``.
     """
-    fs = resolve_fs(signal, fs, name="signal")
-    x = _weighted_signal(signal)
+    fs = resolve_fs(x, fs, name="x")
+    x = _weighted_signal(x)
     fs = _positive_fs(fs)
     return float(np.sum(x**4 / fs) ** 0.25)
 
 
-def motion_sickness_dose_value(signal: SignalInput, fs: float | None = None) -> float:
+def motion_sickness_dose_value(x: SignalInput, fs: float | None = None) -> float:
     r"""Motion sickness dose value ``MSDV`` (ISO 2631-1 clause 9; 8041-1
     3.1.2.5).
 
     :math:`\mathrm{MSDV} = \left( \int a_\mathrm{w}(t)^2 \, dt \right)^{1/2}`, in
     m/s^1.5; the ``Wf``-weighted signal is the intended input.
 
-    :param signal: Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a
+    :param x: Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a
         :class:`phonometry.io.Signal` for its rate; a calibration factor it
         carries is deliberately not applied, because this quantity is an
         acceleration in m/s2 and not a pressure.
@@ -949,13 +943,13 @@ def motion_sickness_dose_value(signal: SignalInput, fs: float | None = None) -> 
     :return: The MSDV, in m/s^1.5.
     :raises ValueError: for a bad signal or non-positive ``fs``.
     """
-    fs = resolve_fs(signal, fs, name="signal")
-    x = _weighted_signal(signal)
+    fs = resolve_fs(x, fs, name="x")
+    x = _weighted_signal(x)
     fs = _positive_fs(fs)
     return float(np.sum(x**2 / fs) ** 0.5)
 
 
-def crest_factor(signal: SignalInput) -> float:
+def crest_factor(x: SignalInput) -> float:
     """Crest factor of a weighted signal (ISO 2631-1 clause 6.2.1).
 
     The modulus of the ratio of the peak weighted acceleration to its r.m.s.
@@ -966,14 +960,14 @@ def crest_factor(signal: SignalInput) -> float:
     the threshold above which ISO 2631-1 6.2.2 deems the basic method
     inadequate.
 
-    :param signal: Frequency-weighted acceleration signal (1-D), in m/s2.
+    :param x: Frequency-weighted acceleration signal (1-D), in m/s2.
         Accepts a :class:`phonometry.io.Signal`, of which only the samples
         are read: a peak-to-r.m.s. ratio needs no sample rate, and a
         calibration factor the object carries is deliberately not applied,
         because this quantity is an acceleration in m/s2 and not a pressure.
     :return: The crest factor (dimensionless); ``0`` for an all-zero signal.
     """
-    x = _weighted_signal(signal)
+    x = _weighted_signal(x)
     rms = float(np.sqrt(np.mean(x**2)))
     # rms is a root-mean-square, so it is >= 0; <= 0 means an all-zero signal.
     if rms <= 0.0:

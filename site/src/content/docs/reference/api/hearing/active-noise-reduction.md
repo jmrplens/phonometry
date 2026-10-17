@@ -184,7 +184,7 @@ Draw the mean active insertion loss with its expanded uncertainty.
 anr_total_attenuation(
     reat: ArrayLike | RealEarAttenuationResult,
     insertion_loss_db: ArrayLike | ActiveInsertionLossResult,
-) -> AnrTotalAttenuationResult
+) -> ANRTotalAttenuationResult
 ```
 
 The total attenuation of an ANR earmuff, subject by subject (5.5).
@@ -214,7 +214,7 @@ attenuation from 63 Hz then still places the 100 Hz band, by interpolation.
 | `reat` | The passive attenuation, a [`RealEarAttenuationResult`](/phonometry/reference/api/hearing/real-ear-attenuation/#realearattenuationresult) or its `(subjects, octaves)` grid in dB on the octave bands 63 Hz or 125 Hz to 8 kHz. |
 | `insertion_loss_db` | The active insertion loss, an [`ActiveInsertionLossResult`](/phonometry/reference/api/hearing/active-noise-reduction/#activeinsertionlossresult) or a grid [`active_insertion_loss`](/phonometry/reference/api/hearing/active-noise-reduction/#active_insertion_loss) accepts, on the one-third-octave bands of 5.3.1. |
 
-**Returns:** [`AnrTotalAttenuationResult`](/phonometry/reference/api/hearing/active-noise-reduction/#anrtotalattenuationresult).
+**Returns:** [`ANRTotalAttenuationResult`](/phonometry/reference/api/hearing/active-noise-reduction/#anrtotalattenuationresult).
 
 **Raises**
 
@@ -226,10 +226,10 @@ attenuation from 63 Hz then still places the 100 Hz band, by interpolation.
 
 *Constant* (`phonometry.hearing.real_ear_attenuation.ProtectorUncertaintyBudget`).
 
-## AnrLinearityResult
+## ANRLinearityResult
 
 ```python
-AnrLinearityResult(
+ANRLinearityResult(
     external_levels_db: np.ndarray,
     ear_levels_db: np.ndarray,
     increments_db: np.ndarray,
@@ -246,7 +246,7 @@ How far up an ANR earmuff stays linear (5.4.4).
 | `ear_levels_db` | The 125 Hz octave-band level at the ear, one row per sample, subject and ear, one column per external level, in dB. |
 | `increments_db` | The step at the ear for each step outside, in dB. |
 
-### AnrLinearityResult.linear
+### ANRLinearityResult.linear
 
 *property*
 
@@ -254,7 +254,7 @@ Per ear and step, whether the step at the ear is 5 dB ± 1 dB.
 
 **Returns:** A `(ears, steps)` boolean grid.
 
-### AnrLinearityResult.linear_to_110_db
+### ANRLinearityResult.linear_to_110_db
 
 *property*
 
@@ -262,7 +262,7 @@ Whether it stayed linear up to 110 dB, which 5.6 i) then states.
 
 **Returns:** `True` when every step is linear and the last external level is 110 dB.
 
-### AnrLinearityResult.maximum_linear_level_db
+### ANRLinearityResult.max_linear_level_db
 
 *property*
 
@@ -275,7 +275,7 @@ the first step already fails.
 
 **Returns:** The level 5.6 i) reports, in dB.
 
-### AnrLinearityResult.passes
+### ANRLinearityResult.passes
 
 *property*
 
@@ -283,10 +283,10 @@ Whether every step at every ear stayed linear.
 
 **Returns:** `True` when the earmuff is linear over the whole range tested.
 
-### AnrLinearityResult.plot()
+### ANRLinearityResult.plot()
 
 ```python
-AnrLinearityResult.plot(
+ANRLinearityResult.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -306,10 +306,10 @@ Draw every step at the ear against the 5 dB ± 1 dB it should be.
 
 **Returns:** The axes.
 
-## AnrTotalAttenuationResult
+## ANRTotalAttenuationResult
 
 ```python
-AnrTotalAttenuationResult(
+ANRTotalAttenuationResult(
     total_octave_db: np.ndarray,
     total_third_octave_db: np.ndarray,
     reat_third_octave_db: np.ndarray,
@@ -338,10 +338,10 @@ The total attenuation of an ANR earmuff and its ISO 4869-2 ratings (5.5).
 | `hml` | The H, M and L values at 84 %. |
 | `snr` | The SNR at 84 %. |
 
-### AnrTotalAttenuationResult.plot()
+### ANRTotalAttenuationResult.plot()
 
 ```python
-AnrTotalAttenuationResult.plot(
+ANRTotalAttenuationResult.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -369,7 +369,7 @@ assess_anr_linearity(
     ear_levels_db: ArrayLike | None = None,
     *,
     ear_third_octave_levels_db: ArrayLike | None = None,
-) -> AnrLinearityResult
+) -> ANRLinearityResult
 ```
 
 Up to what external level does the earmuff stay linear? (5.4.4).
@@ -390,7 +390,7 @@ and if it holds up to 110 dB, that is stated.
 | `ear_levels_db` | The 125 Hz octave-band level at the ear, in dB, with the external levels on the last axis and any number of leading axes (sample, subject, ear). |
 | `ear_third_octave_levels_db` | Instead, the 100 Hz, 125 Hz and 160 Hz one-third-octave levels at the ear, with those three on the last axis and the external levels on the one before. |
 
-**Returns:** [`AnrLinearityResult`](/phonometry/reference/api/hearing/active-noise-reduction/#anrlinearityresult).
+**Returns:** [`ANRLinearityResult`](/phonometry/reference/api/hearing/active-noise-reduction/#anrlinearityresult).
 
 **Raises**
 

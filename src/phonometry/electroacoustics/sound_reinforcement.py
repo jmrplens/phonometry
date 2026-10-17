@@ -176,9 +176,9 @@ class FeedbackStabilityResult(RichDisplay):
     :ivar headroom: Gain that may still be added before the required margin is
         used up, ``-stability_margin - loop_gain``, dB; negative when the
         criterion of Equation (18.24) is already violated.
-    :ivar maximum_open_loop_gain: Largest :math:`Z_\mathrm{S}` the loop tolerates,
+    :ivar max_open_loop_gain: Largest :math:`Z_\mathrm{S}` the loop tolerates,
         dB.
-    :ivar maximum_level_at_microphone: Largest :math:`L_{\mathrm{H}\text{-}\mathrm{M}}` the
+    :ivar max_level_at_microphone: Largest :math:`L_{\mathrm{H}\text{-}\mathrm{M}}` the
         loop tolerates, dB, for the given :math:`Z_\mathrm{S}` (Equations (18.20)
         to (18.22)).
     :ivar level_loudspeaker_at_microphone: Input :math:`L_{\mathrm{H}\text{-}\mathrm{M}}`,
@@ -196,8 +196,8 @@ class FeedbackStabilityResult(RichDisplay):
     margin: float
     headroom: float
     _: KW_ONLY
-    maximum_open_loop_gain: float
-    maximum_level_at_microphone: float
+    max_open_loop_gain: float
+    max_level_at_microphone: float
     level_loudspeaker_at_microphone: float
     level_loudspeaker_at_listener: float
     microphone_directivity: float
@@ -296,8 +296,8 @@ def feedback_stability(
         stability_margin=margin_required,
         margin=-loop,
         headroom=-margin_required - loop,
-        maximum_open_loop_gain=-margin_required - g_s - d_nom,
-        maximum_level_at_microphone=l_hl - d_m - margin_required - z_s - d_nom,
+        max_open_loop_gain=-margin_required - g_s - d_nom,
+        max_level_at_microphone=l_hl - d_m - margin_required - z_s - d_nom,
         level_loudspeaker_at_microphone=l_hm,
         level_loudspeaker_at_listener=l_hl,
         microphone_directivity=d_m,

@@ -974,7 +974,7 @@ class InverseSquareLawResult(OwnsArrays):
         )
 
     @property
-    def maximum_qualified_radius_m(self) -> float:
+    def max_qualified_radius_m(self) -> float:
         """The largest radius every traverse meets at every frequency (A.2.4).
 
         :return: The smallest of :attr:`band_radius_m`, in metres.
@@ -1246,16 +1246,16 @@ class SourceDirectionalityResult(OwnsArrays):
     :ivar frequencies: The one-third octave mid-band frequencies, in hertz.
     :ivar room: The room type the source is to qualify.
     :ivar mean_level_db: The arithmetic mean of the decibel levels per band.
-    :ivar maximum_positive_deviation_db: The largest level above the mean.
-    :ivar maximum_negative_deviation_db: The largest level below the mean, a
+    :ivar max_positive_deviation_db: The largest level above the mean.
+    :ivar max_negative_deviation_db: The largest level below the mean, a
         negative number.
     """
 
     frequencies: np.ndarray
     room: str
     mean_level_db: np.ndarray
-    maximum_positive_deviation_db: np.ndarray
-    maximum_negative_deviation_db: np.ndarray
+    max_positive_deviation_db: np.ndarray
+    max_negative_deviation_db: np.ndarray
 
     def __post_init__(self) -> None:
         """Reject a room or a frequency Table B.1 cannot be read for.
@@ -1286,8 +1286,8 @@ class SourceDirectionalityResult(OwnsArrays):
         """
         limit = self.tolerance_db + _SLACK
         return np.asarray(
-            (self.maximum_positive_deviation_db <= limit)
-            & (-self.maximum_negative_deviation_db <= limit),
+            (self.max_positive_deviation_db <= limit)
+            & (-self.max_negative_deviation_db <= limit),
             dtype=bool,
         )
 
@@ -1370,8 +1370,8 @@ def verify_source_directionality(
         frequencies=freqs,
         room=room,
         mean_level_db=mean,
-        maximum_positive_deviation_db=deviation.max(axis=0),
-        maximum_negative_deviation_db=deviation.min(axis=0),
+        max_positive_deviation_db=deviation.max(axis=0),
+        max_negative_deviation_db=deviation.min(axis=0),
     )
 
 
@@ -1563,7 +1563,7 @@ class FreeFieldCheck(OwnsArrays):
     The verdict of the amended ISO 3745:2012 Annex A over the frequencies
     evaluated, with the ISO 26101:2017 clauses it defers to. Every per-band
     array is aligned with :attr:`frequencies` (ascending) and judged within
-    :attr:`maximum_qualified_radius_m`.
+    :attr:`max_qualified_radius_m`.
 
     Every verdict, the radius and the reduced range are read from the
     analyses and the declarations the check holds, against the figures the
@@ -1660,7 +1660,7 @@ class FreeFieldCheck(OwnsArrays):
         return self._reading.band_radius_m.copy()
 
     @property
-    def maximum_qualified_radius_m(self) -> float:
+    def max_qualified_radius_m(self) -> float:
         """The A.2.4 radius over every evaluated frequency, in metres."""
         return float(np.min(self._reading.band_radius_m))
 
@@ -1754,7 +1754,7 @@ class FreeFieldCheck(OwnsArrays):
         """
         if self.room != "hemi-anechoic":
             return None
-        radius = self.maximum_qualified_radius_m
+        radius = self.max_qualified_radius_m
         return all(_path_angles_ok(fit, radius) for fit in self.results)
 
     @property
@@ -1842,7 +1842,7 @@ class FreeFieldCheck(OwnsArrays):
         room_level = room_level and self.path_targets_met is not False
         room_level = room_level and self.working_area_met is not False
         radius_ok = self.measurement_radius_m is None or (
-            self.maximum_qualified_radius_m >= self.measurement_radius_m - _SLACK
+            self.max_qualified_radius_m >= self.measurement_radius_m - _SLACK
         )
         return bool(
             not self.not_judged

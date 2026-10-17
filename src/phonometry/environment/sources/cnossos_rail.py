@@ -99,12 +99,12 @@ if TYPE_CHECKING:
 __all__ = [
     "AERODYNAMIC_REFERENCE_SPEED_KMH",
     "AERODYNAMIC_THRESHOLD_SPEED_KMH",
-    "RAILWAY_MINIMUM_SPEED_KMH",
+    "RAILWAY_MIN_SPEED_KMH",
     "RAILWAY_OCTAVE_BANDS_HZ",
     "RAILWAY_SOURCE_HEIGHTS_M",
     "RAILWAY_THIRD_OCTAVE_BANDS_HZ",
     "REFERENCE_JOINT_DENSITY_PER_M",
-    "TRAM_MINIMUM_SPEED_KMH",
+    "TRAM_MIN_SPEED_KMH",
     "BrakeType",
     "BridgeType",
     "ContactFilter",
@@ -197,9 +197,9 @@ RAILWAY_OCTAVE_BANDS_HZ: tuple[float, ...] = (
 #: (2.3.1): source A at 0,5 m and source B at 4,0 m.
 RAILWAY_SOURCE_HEIGHTS_M: tuple[float, float] = (0.5, 4.0)
 #: Speed floor used to determine the total effective roughness of a train, km/h.
-RAILWAY_MINIMUM_SPEED_KMH = 50.0
+RAILWAY_MIN_SPEED_KMH = 50.0
 #: Speed floor used instead for trams and light metro, km/h.
-TRAM_MINIMUM_SPEED_KMH = 30.0
+TRAM_MIN_SPEED_KMH = 30.0
 #: Speed above which aerodynamic noise is relevant (2.3.13), km/h.
 AERODYNAMIC_THRESHOLD_SPEED_KMH = 200.0
 #: Reference speed ``v_0`` of (2.3.13) and (2.3.14), km/h.
@@ -2537,13 +2537,11 @@ def _rolling_and_bridge(
     return rolling, bridge
 
 
-def _roughness_speed_floor(
-    stock: RollingStock, minimum_speed_kmh: float | None
-) -> float:
+def _roughness_speed_floor(stock: RollingStock, min_speed_kmh: float | None) -> float:
     """Speed floor of 2.3.2: 50 km/h, or 30 km/h for a tram or light metro."""
-    if minimum_speed_kmh is not None:
-        return _finite(minimum_speed_kmh, "minimum_speed_kmh")
-    return TRAM_MINIMUM_SPEED_KMH if stock.tram else RAILWAY_MINIMUM_SPEED_KMH
+    if min_speed_kmh is not None:
+        return _finite(min_speed_kmh, "min_speed_kmh")
+    return TRAM_MIN_SPEED_KMH if stock.tram else RAILWAY_MIN_SPEED_KMH
 
 
 def _flow_term(vehicle: RailwayVehicle, reference_time: float, length: float) -> float:
@@ -2663,7 +2661,7 @@ def railway_source_power(
     psi: float = 0.0,
     phi: float = 90.0,
     reference_time: float = 12.0,
-    minimum_speed_kmh: float | None = None,
+    min_speed_kmh: float | None = None,
     interpolation: RoughnessInterpolation = RoughnessInterpolation.PROPORTIONAL,
     directivity_edition: DirectivityEdition = DirectivityEdition.CURRENT,
 ) -> RailwayEmissionResult:
@@ -2688,7 +2686,7 @@ def railway_source_power(
         default 90 deg is broadside, where the dipole correction is 0 dB.
     :param reference_time: Reference period ``T_ref`` of (2.3.4), in the same
         unit as ``idling_time``.
-    :param minimum_speed_kmh: Speed floor used to determine the total effective
+    :param min_speed_kmh: Speed floor used to determine the total effective
         roughness, in km/h; ``None`` (the default) selects 50 km/h, or 30 km/h
         for a tram. Pass ``0`` to switch the floor off, which also switches off
         the exclusion of impact noise below it.
@@ -2724,7 +2722,7 @@ def railway_source_power(
         sources, omni, breakdown = _vehicle_spectra(
             vehicle,
             track,
-            _roughness_speed_floor(vehicle.stock, minimum_speed_kmh),
+            _roughness_speed_floor(vehicle.stock, min_speed_kmh),
             interpolation,
             ver_aero_b,
         )

@@ -541,7 +541,7 @@ class ReferenceSourceCalibration(OwnsArrays):
         return _room_qualified(self.room_qualification, freqs)
 
     @property
-    def maximum_directivity_index_db(self) -> np.ndarray:
+    def max_directivity_index_db(self) -> np.ndarray:
         """The highest directivity index over the positions, per band (5.5).
 
         :return: One value per band, in dB.
@@ -706,7 +706,7 @@ def _room_qualified(check: FreeFieldCheck, freqs: np.ndarray) -> bool:
         return False
     if check.passes:
         low, high = float(check.frequencies[0]), float(check.frequencies[-1])
-        radius = check.maximum_qualified_radius_m
+        radius = check.max_qualified_radius_m
     elif check.conforming_range_hz is not None and not check.not_judged:
         low, high = check.conforming_range_hz
         radius = check.conforming_radius_m
@@ -1267,7 +1267,7 @@ def _clause5_levels(
             raise ValueError(msg)
         freqs = calibration.frequencies
         lw = calibration.sound_power_level_db
-        fallback = calibration.maximum_directivity_index_db
+        fallback = calibration.max_directivity_index_db
     else:
         if frequencies is None:
             msg = "'frequencies' is required with a plain level array."

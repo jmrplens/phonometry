@@ -473,7 +473,7 @@ class TestModalFilterCutOn:
         # to the last bit.
         from phonometry.noise_control import rectangular_duct_cut_on
 
-        exact = rectangular_duct_cut_on(0.5, 0.2, speed_of_sound=343.0, count=1)
+        exact = rectangular_duct_cut_on(0.5, 0.2, speed_of_sound=343.0, n_modes=1)
         found = sm.modal_filter_cut_on(larger_dimension=0.5, speed_of_sound=343.0)
         assert found == pytest.approx(float(exact.cut_on_no_flow[0]))
 
@@ -482,7 +482,7 @@ class TestModalFilterCutOn:
         # the printed 0,59 sits 0,67 % above it.
         from phonometry.noise_control import circular_duct_cut_on
 
-        exact = circular_duct_cut_on(0.4, speed_of_sound=343.0, count=1)
+        exact = circular_duct_cut_on(0.4, speed_of_sound=343.0, n_modes=1)
         found = sm.modal_filter_cut_on(diameter_m=0.4, speed_of_sound=343.0)
         ratio = found / float(exact.cut_on_no_flow[0])
         assert ratio == pytest.approx(1.0067, abs=5e-5)
@@ -639,8 +639,8 @@ class TestPressureLossCoefficient:
             )
 
     def test_the_five_rates_and_the_ten_pascals(self) -> None:
-        assert sm.MINIMUM_FLOW_RATES == 5
-        assert sm.MINIMUM_PRESSURE_DIFFERENCE_PA == pytest.approx(10.0)
+        assert sm.MIN_FLOW_RATES == 5
+        assert sm.MIN_PRESSURE_DIFFERENCE_PA == pytest.approx(10.0)
 
     def test_a_point_below_ten_pascals_warns(self) -> None:
         # 6.5.2.1 wants even the lowest airflow rate of a series to produce
@@ -653,7 +653,7 @@ class TestPressureLossCoefficient:
         # The clause reads "greater than 10 Pa", so the boundary itself is
         # outside what it allows and cannot be the lowest rate of a series.
         with pytest.warns(sm.SilencerMeasurementWarning, match="10 Pa"):
-            sm.pressure_loss_coefficient(sm.MINIMUM_PRESSURE_DIFFERENCE_PA, 64.0)
+            sm.pressure_loss_coefficient(sm.MIN_PRESSURE_DIFFERENCE_PA, 64.0)
 
     def test_a_point_just_above_ten_pascals_is_quiet(self) -> None:
         with warnings.catch_warnings():
@@ -744,7 +744,7 @@ class TestOperatingLine:
         levels = 50.0 + 20.0 * np.log10(duty / 0.2)
         line = sm.fit_operating_line(duty, levels)
         assert line.slope == pytest.approx(20.0)
-        assert line.maximum_deviation == pytest.approx(0.0, abs=1e-9)
+        assert line.max_deviation == pytest.approx(0.0, abs=1e-9)
         assert line.level_at(0.2) == pytest.approx(50.0)
 
     def test_it_keeps_the_points_it_was_given(self) -> None:

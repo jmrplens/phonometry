@@ -557,7 +557,7 @@ def test_neck_loop_characteristics() -> None:
         input_voltage_v=1.0,
     )
     assert result.reference_input_voltage_v == pytest.approx(10 ** (-0.5 / 20))
-    assert result.minimum_impedance_ohm == pytest.approx(32.0)
+    assert result.min_impedance_ohm == pytest.approx(32.0)
     assert len(result.frequencies_3db_hz) == 2
     low, high = result.frequencies_3db_hz
     assert 100.0 < low < 200.0
@@ -571,7 +571,7 @@ def test_neck_loop_minimum_impedance_rounds_half_up() -> None:
         [16.5, 20.0, 30.0],
         input_voltage_v=1.0,
     )
-    assert result.minimum_impedance_ohm == pytest.approx(17.0)
+    assert result.min_impedance_ohm == pytest.approx(17.0)
 
 
 def test_neck_loop_minimum_impedance_is_taken_over_100_hz_to_5_khz_only() -> None:
@@ -583,7 +583,7 @@ def test_neck_loop_minimum_impedance_is_taken_over_100_hz_to_5_khz_only() -> Non
         [20.0, 32.0, 33.0, 40.0, 50.0],
         input_voltage_v=1.0,
     )
-    assert result.minimum_impedance_ohm == pytest.approx(32.0)
+    assert result.min_impedance_ohm == pytest.approx(32.0)
 
 
 def test_neck_loop_takes_the_magnitude_of_a_complex_impedance() -> None:
@@ -593,7 +593,7 @@ def test_neck_loop_takes_the_magnitude_of_a_complex_impedance() -> None:
         [3 + 4j, 8.0, 9.0],
         input_voltage_v=1.0,
     )
-    assert result.minimum_impedance_ohm == pytest.approx(5.0)
+    assert result.min_impedance_ohm == pytest.approx(5.0)
 
 
 def test_neck_loop_types_are_the_draft_ones() -> None:
@@ -698,7 +698,7 @@ def test_maximum_output_current_is_read_where_the_thd_reaches_its_rating() -> No
     result = ea.maximum_output_current(
         _STEPS_V, _STEPS_THD, load_resistance_ohm=0.5, rated_thd_percent=1.0
     )
-    assert result.maximum_current_a == pytest.approx(7.0, rel=1e-12)
+    assert result.max_current_a == pytest.approx(7.0, rel=1e-12)
     np.testing.assert_allclose(result.load_current_a, np.array(_STEPS_V) / 0.5)
 
 
@@ -706,7 +706,7 @@ def test_maximum_output_current_at_a_step_that_equals_the_rating() -> None:
     result = ea.maximum_output_current(
         _STEPS_V, _STEPS_THD, load_resistance_ohm=2.0, rated_thd_percent=1.5
     )
-    assert result.maximum_current_a == pytest.approx(2.0, rel=1e-12)
+    assert result.max_current_a == pytest.approx(2.0, rel=1e-12)
 
 
 def test_maximum_output_current_needs_the_rating_to_be_reached() -> None:
@@ -751,7 +751,7 @@ def test_maximum_output_current_accepts_no_distortion_at_the_first_step() -> Non
     result = ea.maximum_output_current(
         [1.0, 2.0], [0.0, 2.0], load_resistance_ohm=1.0, rated_thd_percent=1.0
     )
-    assert result.maximum_current_a == pytest.approx(1.5, rel=1e-12)
+    assert result.max_current_a == pytest.approx(1.5, rel=1e-12)
 
 
 def test_maximum_output_current_arrays_are_read_only() -> None:

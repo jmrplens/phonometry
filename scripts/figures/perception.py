@@ -726,9 +726,11 @@ def _tnr_pr_neighbour_sweep() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         amplitude = np.sqrt(2) * 0.012 * 10 ** (rel / 20)
         x = primary + amplitude * np.sin(2 * np.pi * 1160.0 * t) + noise
         tnr.append(
-            psychoacoustics.tone_to_noise_ratio(x, fs, tone_freq=1000.0).ratio_db
+            psychoacoustics.tone_to_noise_ratio(x, fs, tone_frequency=1000.0).ratio_db
         )
-        pr.append(psychoacoustics.prominence_ratio(x, fs, tone_freq=1000.0).ratio_db)
+        pr.append(
+            psychoacoustics.prominence_ratio(x, fs, tone_frequency=1000.0).ratio_db
+        )
     return relative, np.array(tnr), np.array(pr)
 
 
@@ -745,7 +747,7 @@ def generate_tnr_pr_comparison(output_dir: str) -> None:
         2 * np.pi * 250.0 * t
     ) + 0.03 * rng.standard_normal(t.size)
     tnr_fan = psychoacoustics.tone_to_noise_ratio(fan, fs)
-    pr_fan = psychoacoustics.prominence_ratio(fan, fs, tone_freq=250.0)
+    pr_fan = psychoacoustics.prominence_ratio(fan, fs, tone_frequency=250.0)
 
     freqs = np.logspace(np.log10(89.1), np.log10(11200.0), 400)
     tnr_criterion = np.where(freqs < 1000.0, 8.0 + 8.33 * np.log10(1000.0 / freqs), 8.0)

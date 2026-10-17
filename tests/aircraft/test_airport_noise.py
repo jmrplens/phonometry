@@ -20,7 +20,7 @@ from phonometry.aircraft.airport_noise import (
     FlightSegmentState,
     FlyoverResult,
     NoiseContourResult,
-    NpdLevelResult,
+    NPDLevelResult,
     _segment_geometry,
     duration_correction,
     engine_installation_correction,
@@ -84,7 +84,7 @@ def test_power_extrapolation() -> None:
 
 def test_npd_curve_result_and_plot() -> None:
     res = npd_curve(_P, _D, _L, 1500.0)
-    assert isinstance(res, NpdLevelResult)
+    assert isinstance(res, NPDLevelResult)
     assert res.distances_m.shape == res.levels.shape
     assert res.table_distances_m.shape == res.table_levels.shape
     # tabulated levels at P=1500 are the row means

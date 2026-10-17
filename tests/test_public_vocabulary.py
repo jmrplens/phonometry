@@ -32,10 +32,12 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import pytest
+
 import phonometry
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterable, Iterator
 
 #: A bare name that spells a concept the rest of the API spells otherwise,
 #: mapped to the spelling it has to use.
@@ -67,6 +69,7 @@ _MINORITY = {
     "distances_m": "distances",
     "sound_speeds": "speeds_of_sound",
     "confidence_level": "confidence",
+    "tone_freq": "tone_frequency",
 }
 
 _KHZ = (
@@ -82,15 +85,15 @@ _AIRCRAFT = (
 #: Where a minority spelling is kept on purpose, keyed by location, each with
 #: the reason. An entry that matches nothing any more fails the test too.
 _MINORITY_EXEMPT = {
-    "phonometry.aircraft.npd_atmosphere.NpdAtmosphereIncrement.distances_m": _FEET,
+    "phonometry.aircraft.npd_atmosphere.NPDAtmosphereIncrement.distances_m": _FEET,
     "phonometry.aircraft.npd_atmosphere.npd_atmosphere_increment(distances_m)": _FEET,
-    "phonometry.aircraft.airport_noise.NpdLevelResult.distances_m": _AIRCRAFT,
+    "phonometry.aircraft.airport_noise.NPDLevelResult.distances_m": _AIRCRAFT,
     "phonometry.aircraft.airport_noise.event_level(distances_m)": _AIRCRAFT,
     "phonometry.aircraft.airport_noise.noise_contour(distances_m)": _AIRCRAFT,
     "phonometry.aircraft.airport_noise.npd_curve(distances_m)": _AIRCRAFT,
     "phonometry.aircraft.airport_noise.npd_level(distances_m)": _AIRCRAFT,
-    "phonometry.aircraft.anp_fleet.AnpDatabase.__init__(distances_m)": _AIRCRAFT,
-    "phonometry.aircraft.anp_fleet.AnpNpdCurves.distances_m": _AIRCRAFT,
+    "phonometry.aircraft.anp_fleet.ANPDatabase.__init__(distances_m)": _AIRCRAFT,
+    "phonometry.aircraft.anp_fleet.ANPNPDCurves.distances_m": _AIRCRAFT,
     "phonometry.aircraft.rotorcraft_noise.RotorcraftEventResult.distances_m": _AIRCRAFT,
     "phonometry.aircraft.rotorcraft_propagation.MeanGroundPlaneResult.distances_m": (
         _AIRCRAFT
@@ -398,7 +401,8 @@ def _stale_spellings(parameter: str) -> set[str]:
     """The other spellings of *parameter* the vocabulary has retired.
 
     For ``frequencies``: ``frequency``, ``frequencies_hz``, ``frequency_hz``
-    and every minority spelling that :data:`_MINORITY` maps to it. A message
+    and every minority spelling that :data:`_MINORITY` maps to it; for ``x``,
+    the ``signal`` and ``signal_in`` of :data:`_SIGNAL_SPELLINGS`. A message
     that quotes one of them names a parameter the caller cannot pass.
     """
     singular = {plural: one for one, plural in _PLURALS.items()}
@@ -408,7 +412,8 @@ def _stale_spellings(parameter: str) -> set[str]:
         for word in (base, singular.get(base, base), _PLURALS.get(base, base)):
             if word in _PLURALS or word in singular:
                 spellings |= {word} | {word + suffix for suffix in _UNIT_SUFFIXES}
-    spellings |= {old for old, new in _MINORITY.items() if new == parameter}
+    retired = {**_MINORITY, **_SIGNAL_SPELLINGS}
+    spellings |= {old for old, new in retired.items() if new == parameter}
     return spellings - {parameter}
 
 
@@ -543,6 +548,70 @@ class _Module:
         return self._exposure[key]
 
 
+#: The modules of the shared helpers every domain hands its values to. A
+#: helper there that names the value in its message by a defaulted argument
+#: (``name="signal"``) speaks for every caller that leaves the argument out.
+_SHARED_HELPER_MODULES = (
+    "phonometry._internal.validation",
+    "phonometry._internal.utils",
+    "phonometry.io._resolve",
+)
+
+
+@functools.cache
+def _helper_name_defaults() -> dict[str, dict[str, tuple[int | None, str]]]:
+    """Each shared helper's defaulted name arguments: ``{param: (position, default)}``.
+
+    A name argument is ``name`` or one ending in ``_name``; the position is
+    ``None`` for a keyword-only one.
+    """
+    positional = {
+        inspect.Parameter.POSITIONAL_ONLY,
+        inspect.Parameter.POSITIONAL_OR_KEYWORD,
+    }
+    helpers: dict[str, dict[str, tuple[int | None, str]]] = {}
+    for module_name in _SHARED_HELPER_MODULES:
+        module = importlib.import_module(module_name)
+        for attr, obj in vars(module).items():
+            if not inspect.isfunction(obj) or obj.__module__ != module_name:
+                continue
+            parameters = list(inspect.signature(obj).parameters.values())
+            defaults = {
+                p.name: (index if p.kind in positional else None, p.default)
+                for index, p in enumerate(parameters)
+                if (p.name == "name" or p.name.endswith("_name"))
+                and isinstance(p.default, str)
+            }
+            if defaults:
+                helpers[attr] = defaults
+    return helpers
+
+
+def _named_by_helper_defaults(node: ast.AST) -> set[str]:
+    """The names a shared helper's message gives a value it was handed unnamed.
+
+    ``require_1d_signal(x)`` with a defaulted ``name="signal"`` tells the
+    caller of a function that takes ``x`` that its ``signal`` is wrong.
+    """
+    helpers = _helper_name_defaults()
+    names: set[str] = set()
+    for call in ast.walk(node):
+        if not (
+            isinstance(call, ast.Call)
+            and isinstance(call.func, ast.Name)
+            and call.func.id in helpers
+        ):
+            continue
+        passed = {keyword.arg for keyword in call.keywords}
+        for parameter, (position, default) in helpers[call.func.id].items():
+            if parameter in passed or (
+                position is not None and position < len(call.args)
+            ):
+                continue
+            names |= {default} if _IDENTIFIER.match(default) else set()
+    return names
+
+
 def test_a_message_names_the_parameter_the_caller_passed() -> None:
     """No message of a public function quotes a retired spelling of its parameter.
 
@@ -553,7 +622,9 @@ def test_a_message_names_the_parameter_the_caller_passed() -> None:
     the source of the installed package and, for each public function and
     method, follows each parameter through the functions of its module it is
     passed to, and fails on a message that names it by one of the spellings
-    the vocabulary above retired.
+    the vocabulary above retired. A shared helper of another module that a
+    value reaches without its name argument names it by that argument's
+    default, so the default is read as well.
     """
     root = Path(phonometry.__file__).parent
     offenders: list[str] = []
@@ -568,10 +639,433 @@ def test_a_message_names_the_parameter_the_caller_passed() -> None:
             parameters = _parameter_names(function)
             for parameter in parameters:
                 stale = _stale_spellings(parameter) - set(parameters)
-                named = _named_in(function) | module.passed_on(function, parameter)
+                named = (
+                    _named_in(function)
+                    | _named_by_helper_defaults(function)
+                    | module.passed_on(function, parameter)
+                )
                 offenders += [
                     f"{relative.as_posix()}:{function.lineno} {qualified}({parameter}): "
                     f"a message calls it {old!r}"
                     for old in sorted(named & stale)
                 ]
+    assert not offenders, "\n".join(offenders)
+
+
+# ---------------------------------------------------------------------------
+# Acronyms are capitals, and words are spelled out.
+# ---------------------------------------------------------------------------
+
+#: The pieces of a class name: a run of capitals that is an acronym
+#: (``EPNL`` in ``EPNLResult``), a capitalised word, a lower-case run and a
+#: run of digits.
+_SEGMENT = re.compile(r"[A-Z]+(?=[A-Z][a-z]|\d|$)|[A-Z][a-z]+|[a-z]+|\d+")
+
+#: Acronyms a class name writes in capitals even where no other public class
+#: spells them yet: the standards bodies and the quantities the library
+#: names. A capitalised segment that reads as one of these (``Hvac``,
+#: ``Npd``, ``DbHr``) is the acronym in the wrong case.
+_ACRONYMS = frozenset(
+    {
+        "AGC",
+        "ANP",
+        "ANR",
+        "ANSI",
+        "ARP",
+        "ASTM",
+        "DBHR",
+        "DIN",
+        "EBU",
+        "ECAC",
+        "EPNL",
+        "FDTD",
+        "FFT",
+        "HML",
+        "HTLAN",
+        "HVAC",
+        "ICAO",
+        "IEC",
+        "ISO",
+        "MLS",
+        "NIPTS",
+        "NMFS",
+        "NPD",
+        "REAT",
+        "RMS",
+        "SAE",
+        "SEL",
+        "SII",
+        "SNR",
+        "SPL",
+        "STI",
+        "STOI",
+        "THD",
+        "VDI",
+    }
+)
+
+#: Capitalised segments that are names, not acronyms, with the reason.
+_PROPER_NAMES = {
+    "Ecma": "Ecma International writes its own name so; it is not an acronym",
+}
+
+
+def _public_classes() -> dict[str, str]:
+    """Every public class by name, mapped to where it is defined."""
+    classes: dict[str, str] = {}
+    for module in _public_modules():
+        for attr, obj in vars(module).items():
+            if attr.startswith("_") or not inspect.isclass(obj):
+                continue
+            owner = getattr(obj, "__module__", "") or ""
+            if owner.startswith("phonometry"):
+                classes[attr] = f"{owner}.{obj.__qualname__}"
+    return classes
+
+
+def _acronym_offenders(names: Iterable[str]) -> list[str]:
+    """The class names that write an acronym as a capitalised word.
+
+    The acronyms are the curated :data:`_ACRONYMS` and every run of capitals
+    another of *names* writes (``SNR`` in ``SNRRatingResult``). A run of
+    capitalised segments is held against them joined, so ``DbHrCheck`` is
+    found as ``DBHR``.
+    """
+    names = list(names)
+    known = set(_ACRONYMS)
+    for name in names:
+        known |= {s for s in _SEGMENT.findall(name) if len(s) > 1 and s.isupper()}
+    offenders: list[str] = []
+    for name in names:
+        segments = _SEGMENT.findall(name)
+        words = [
+            s if s[:1].isupper() and s[1:].islower() and s not in _PROPER_NAMES else ""
+            for s in segments
+        ]
+        found = {
+            "".join(words[i:j])
+            for i in range(len(words))
+            for j in range(i + 1, len(words) + 1)
+            if all(words[i:j]) and "".join(words[i:j]).upper() in known
+        }
+        offenders += [
+            f"{name}: {word!r} is the acronym {word.upper()!r}"
+            for word in sorted(found)
+        ]
+    return offenders
+
+
+def test_an_acronym_is_written_in_capitals() -> None:
+    """``HTLANResult`` beside ``HMLRatingResult``, never ``HtlanResult``.
+
+    PEP 8 writes an acronym in a CapWords name in capitals, and most of the
+    library's classes already did (``EPNLResult``, ``STIResult``,
+    ``ZoomFFTResult``). A class that writes one as a word (``HvacWarning``)
+    is the minority spelling. Ecma is the one exception: the organisation
+    spells its own name so.
+    """
+    classes = _public_classes()
+    assert len(classes) > 500, "the walk found too few classes to mean anything"
+    offenders = [
+        f"{classes[line.split(':')[0]]}: {line.split(': ', 1)[1]}"
+        for line in _acronym_offenders(classes)
+    ]
+    assert not offenders, "\n".join(sorted(offenders))
+
+
+@pytest.mark.parametrize(
+    ("names", "expected"),
+    [
+        (["HtlanResult"], ["HtlanResult: 'Htlan' is the acronym 'HTLAN'"]),
+        (["DbHrCheck"], ["DbHrCheck: 'DbHr' is the acronym 'DBHR'"]),
+        (["Arp866aAttenuation"], ["Arp866aAttenuation: 'Arp' is the acronym 'ARP'"]),
+        # An acronym another class writes in capitals is learnt from it.
+        (["QwxResult", "QWXTable"], ["QwxResult: 'Qwx' is the acronym 'QWX'"]),
+        (["HTLANResult", "DBHRCheck", "ARP866AAttenuation", "EcmaLoudness"], []),
+    ],
+)
+def test_the_acronym_rule_reads_a_class_name(
+    names: list[str], expected: list[str]
+) -> None:
+    assert _acronym_offenders(names) == expected
+
+
+#: Abbreviations the library spells out, mapped to the word it uses.
+_SPELLED_OUT = {
+    "mic": "microphone",
+    "mics": "microphones",
+    "lab": "laboratory",
+    "std": "standard_deviation",
+}
+
+#: The words a ``minimum``/``maximum`` stays spelt out before: the terms of
+#: art in which it is part of a named quantity, not a limit or an extreme.
+#: The takt maximum is the clock maximum of DIN 45669-1 and DIN 4150-2, the
+#: maximum of each 30 s clock interval (Takt) that KB_FTm averages; the maximum
+#: level Lmax and the minimum level Lmin are the extremes a level meter reads
+#: over an observation, as ISO 8297 9.5.2 and ISO 16032 Clause 9 name them.
+_TERMS_OF_ART = (
+    ("minimum", "phase"),
+    ("maximum", "length", "sequence"),
+    ("maximum", "impact", "level"),
+    ("maximum", "level"),
+    ("maximum", "levels"),
+    ("minimum", "level"),
+    ("minimum", "levels"),
+    ("takt", "maximum"),
+)
+#: The unit that says a ``max`` names a level: ``max_db`` is the maximum level.
+_LEVEL_UNITS = frozenset({"db"})
+_LMAX_RULE = "the maximum level Lmax is a term of art, spelled 'maximum_level'"
+_LMIN_RULE = "the minimum level Lmin is a term of art, spelled 'minimum_level'"
+#: Words after which ``minimum``/``maximum`` is a noun, not a qualifier.
+_NOUN_AFTER = frozenset({"by", "of", "at", "to", "in", "for"})
+
+_COUNT_RULE = "a count is n_<plural>, as in n_points"
+#: Words that begin with ``num`` and are no abbreviation of a count.
+_WORDS_FROM_NUM = ("number", "numer", "numpy")
+_R_S_MAX = (
+    "R_s,max of ISO 10140-1 Annex J, the symbol's own subscript: the largest "
+    "sound reduction index the arrangement can show, a limit, not Lmax"
+)
+#: Where a spelling the rules below refuse is kept on purpose, keyed by
+#: location, each with the reason. An entry that matches nothing fails.
+_SPELLING_EXEMPT = {
+    "phonometry.building.measurement.service_equipment.OperatingCondition.maximum_cycle": (
+        "the operating cycle of the maximum level Lmax, beside equivalent_cycle "
+        "for Leq: the term of art, not a limit"
+    ),
+    "phonometry.electroacoustics.sound_reinforcement.FeedbackStabilityResult.max_level_at_microphone": (
+        "the largest level the loop tolerates at the microphone, a limit, not "
+        "the maximum level Lmax"
+    ),
+    "phonometry.building.measurement.joint_insulation.LaboratoryJointInsulationResult.r_s_max_db": _R_S_MAX,
+    "phonometry.building.measurement.joint_insulation.laboratory_joint_insulation(r_s_max_db)": _R_S_MAX,
+}
+
+
+def _in_term_of_art(tokens: list[str], index: int) -> bool:
+    """Whether ``tokens[index]`` is the ``minimum``/``maximum`` of a term of art."""
+    for term in _TERMS_OF_ART:
+        for start in range(len(tokens) - len(term) + 1):
+            if tuple(tokens[start : start + len(term)]) == term and (
+                start <= index < start + len(term)
+            ):
+                return True
+    return False
+
+
+def _spelling_problems(name: str, *, kind: str, annotation: str = "") -> list[str]:
+    """What a public name spells the way the library does not.
+
+    *kind* is ``param``, ``field``, ``property``, ``constant``, ``function``,
+    ``class`` or ``module``. Every name is held to the spelled-out words and
+    to ``n_<plural>``; the min/max rule and the count rule read the names that
+    hold a value (parameters, fields, properties and constants), since a
+    function, a class or a module is named in words.
+    """
+    tokens = (
+        [s.lower() for s in _SEGMENT.findall(name)]
+        if kind == "class"
+        else name.lower().split("_")
+    )
+    problems = [
+        f"{token!r} is spelled {_SPELLED_OUT[token]!r}"
+        for token in tokens
+        if token in _SPELLED_OUT
+    ]
+    if any(
+        token.startswith("num") and not token.startswith(_WORDS_FROM_NUM)
+        for token in tokens
+    ):
+        problems.append(_COUNT_RULE)
+    if kind in {"class", "function", "module"}:
+        problems += [
+            f"a {kind} is named in words: {token!r} is spelled "
+            f"{'minimum' if token == 'min' else 'maximum'!r}"
+            for token in tokens
+            if token in {"min", "max"}
+        ]
+        return problems
+    if (
+        kind != "constant"
+        and tokens[-1] == "count"
+        and annotation.replace(" ", "") not in {"bool", "bool|None"}
+    ):
+        problems.append(_COUNT_RULE)
+    for index, token in enumerate(tokens[:-1]):
+        following = tokens[index + 1]
+        if token in {"max", "maximum"} and following in _LEVEL_UNITS:
+            # ``max_db`` says "the maximum, in decibels": the maximum level.
+            problems.append(_LMAX_RULE)
+            continue
+        if (
+            token in {"minimum", "maximum"}
+            and following not in _NOUN_AFTER
+            and not _in_term_of_art(tokens, index)
+        ):
+            short = token[:3].upper() if kind == "constant" else token[:3]
+            problems.append(f"{token!r} as a limit or an extreme is spelled {short!r}")
+        if token in {"max", "min"} and following in {"level", "levels"}:
+            problems.append(_LMAX_RULE if token == "max" else _LMIN_RULE)
+    return problems
+
+
+def _module_names() -> Iterator[tuple[str, str, str]]:
+    """``(where, name, kind)`` for every name a public module lists in ``__all__``."""
+    for module in _public_modules():
+        for name in getattr(module, "__all__", ()):
+            obj = getattr(module, name)
+            kind = (
+                "class"
+                if inspect.isclass(obj)
+                else "function"
+                if callable(obj)
+                else "module"
+                if inspect.ismodule(obj)
+                else "constant"
+            )
+            if kind != "module":
+                yield f"{module.__name__}.{name}", name, kind
+
+
+def test_words_are_spelled_out() -> None:
+    """``microphone``, ``laboratory``, ``standard_deviation``, ``n_points``, ``max_``.
+
+    One spelling per word across the library: ``mic``, ``lab`` and ``std``
+    are spelled out, a count is ``n_<plural>`` (never ``num_points``,
+    ``point_count`` or ``numtaps``), and a limit or an extreme held in a
+    value is ``min_``/``max_`` (``MIN_``/``MAX_`` for a constant) except in a
+    term of art, where ``minimum``/``maximum`` is part of the quantity's
+    name: minimum phase, maximum length sequence, the maximum impact level,
+    the takt maximum, and the maximum and minimum levels Lmax and Lmin, which
+    are never ``max_level``, ``min_level`` or ``max_db``. A function, a class
+    and a module are named in words, ``minimum`` and ``maximum`` included.
+    """
+    offenders: list[str] = []
+    seen: set[str] = set()
+    for where, name, annotation, kind, _ in _public_names():
+        if kind == "varargs" or where in seen:
+            continue
+        seen.add(where)
+        if where in _SPELLING_EXEMPT:
+            continue
+        offenders += [
+            f"{where}: {problem}"
+            for problem in _spelling_problems(name, kind=kind, annotation=annotation)
+        ]
+    for where, name, kind in _module_names():
+        if where in seen or where in _SPELLING_EXEMPT:
+            continue
+        seen.add(where)
+        offenders += [
+            f"{where}: {problem}" for problem in _spelling_problems(name, kind=kind)
+        ]
+    for module in _public_modules():
+        path = module.__name__  # type: ignore[attr-defined]
+        leaf = path.rsplit(".", 1)[-1]
+        offenders += [
+            f"{path}: {problem}" for problem in _spelling_problems(leaf, kind="module")
+        ]
+    assert not offenders, "\n".join(sorted(set(offenders)))
+
+
+def test_every_kept_spelling_still_exists() -> None:
+    """An exemption from the spelling rules that names nothing is a stale one."""
+    found = {where for where, *_ in _public_names()} | {
+        where for where, *_ in _module_names()
+    }
+    stale = sorted(set(_SPELLING_EXEMPT) - found)
+    assert not stale, "\n".join(stale)
+
+
+@pytest.mark.parametrize(
+    ("name", "kind", "annotation", "expected"),
+    [
+        ("mic_calibration_factor", "function", "", ["'mic' is spelled 'microphone'"]),
+        ("LabInsulationWarning", "class", "", ["'lab' is spelled 'laboratory'"]),
+        ("lab_insulation", "module", "", ["'lab' is spelled 'laboratory'"]),
+        ("delay_std", "field", "float", ["'std' is spelled 'standard_deviation'"]),
+        ("num_points", "param", "int", [_COUNT_RULE]),
+        ("numtaps", "param", "int | None", [_COUNT_RULE]),
+        ("point_count", "param", "int", [_COUNT_RULE]),
+        ("count", "field", "int", [_COUNT_RULE]),
+        ("meets_min_count", "property", "bool", []),
+        ("number", "field", "int", []),
+        (
+            "MINIMUM_MICROPHONE_DISTANCE_M",
+            "constant",
+            "",
+            ["'minimum' as a limit or an extreme is spelled 'MIN'"],
+        ),
+        (
+            "maximum_qualified_radius_m",
+            "property",
+            "float",
+            ["'maximum' as a limit or an extreme is spelled 'max'"],
+        ),
+        (
+            "max_levels_db",
+            "param",
+            "ArrayLike",
+            ["the maximum level Lmax is a term of art, spelled 'maximum_level'"],
+        ),
+        ("maximum_levels_db", "param", "ArrayLike", []),
+        # A maximum given in decibels is the maximum level, however short.
+        ("background_max_db", "field", "NDArray", [_LMAX_RULE]),
+        ("background_maximum_db", "param", "ArrayLike", [_LMAX_RULE]),
+        ("background_maximum_level_db", "param", "ArrayLike", []),
+        ("min_level_db", "param", "float", [_LMIN_RULE]),
+        ("minimum_level_db", "param", "float", []),
+        # The smallest of an attenuation is an extreme, not a level.
+        ("min_db", "property", "float", []),
+        ("minimum_phase_response", "field", "NDArray", []),
+        ("TAKT_MAXIMUM_FACTOR", "constant", "", []),
+        ("over_maximum_by_correction_data", "field", "tuple", []),
+        ("standardized_maximum_impact_level", "function", "", []),
+        ("maximum_output_current", "function", "", []),
+        (
+            "floor_transfer_max",
+            "function",
+            "",
+            ["a function is named in words: 'max' is spelled 'maximum'"],
+        ),
+        (
+            "MaxUncertaintyRow",
+            "class",
+            "",
+            ["a class is named in words: 'max' is spelled 'maximum'"],
+        ),
+        (
+            "junction_min_vibration_reduction",
+            "function",
+            "",
+            ["a function is named in words: 'min' is spelled 'minimum'"],
+        ),
+    ],
+)
+def test_the_spelling_rules_read_a_name(
+    name: str, kind: str, annotation: str, expected: list[str]
+) -> None:
+    assert _spelling_problems(name, kind=kind, annotation=annotation) == expected
+
+
+#: A parameter that names the time signal in a spelling the API retired.
+_SIGNAL_SPELLINGS = {"signal": "x", "signal_in": "x"}
+
+
+def test_the_time_signal_is_x() -> None:
+    """A function that reads a time signal takes it as ``x``, first.
+
+    The signal-processing core always did (``octave_filter(x, fs)``,
+    ``sel(x, fs)``), and thirty functions in psychoacoustics,
+    electroacoustics, environment, vibration and room called it ``signal``
+    or ``signal_in`` instead. A record field that holds an output signal
+    (``EnvelopeResult.signal``) is not a parameter and keeps its name.
+    """
+    offenders = sorted(
+        f"{where}: the time signal is {_SIGNAL_SPELLINGS[name]!r}"
+        for where, name, _, kind, _ in _public_names()
+        if kind == "param" and name in _SIGNAL_SPELLINGS
+    )
     assert not offenders, "\n".join(offenders)

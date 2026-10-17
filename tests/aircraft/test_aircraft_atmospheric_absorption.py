@@ -29,7 +29,7 @@ from iso3891_tables_data import (
 
 from phonometry.aircraft.atmospheric_absorption import (
     AircraftBandAttenuation,
-    Arp866aAttenuation,
+    ARP866AAttenuation,
     arp866a_attenuation,
     sae_band_attenuation,
 )
@@ -239,7 +239,7 @@ def test_arp866a_formula_at_1_khz() -> None:
     res = arp866a_attenuation(
         [1000.0], temperature_c=10.0, relative_humidity_percent=80.0
     )
-    assert isinstance(res, Arp866aAttenuation)
+    assert isinstance(res, ARP866AAttenuation)
     assert float(res.delta[0]) == pytest.approx(
         _iso3891_delta(1000.0, 10.0, 80.0), rel=1e-12
     )

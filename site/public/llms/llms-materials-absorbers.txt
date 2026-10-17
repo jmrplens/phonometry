@@ -1364,7 +1364,7 @@ The high-level `two_microphone_impedance` wraps this chain and returns an
 `ImpedanceTubeResult` with absorption, reflection factor, surface impedance and
 normalised impedance, applying the plane-wave frequency-range check and optional
 tube attenuation; correct any microphone mismatch beforehand with
-`apply_mic_calibration`. Its `.plot()` draws the absorption spectrum
+`apply_microphone_calibration`. Its `.plot()` draws the absorption spectrum
 $\alpha(f)$ with the reflection-factor magnitude $|r|$ overlaid.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_result_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_result.svg" alt="ISO 10534-2 two-microphone tube result for a 50 mm porous absorber: the normal-incidence absorption coefficient rising from about 0.2 at 200 Hz towards 0.97 above 1 kHz, with the reflection-factor magnitude falling as its mirror image" width="80%"></picture>

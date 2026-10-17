@@ -719,10 +719,10 @@ def test_criterion_2_compares_the_position_count_with_c_times_f4_squared() -> No
         intensity, areas, frequencies=[1000.0], grade="engineering"
     )
     assert result.f4 is not None
-    assert result.minimum_positions is not None
-    assert result.minimum_positions[0] == pytest.approx(29.0 * result.f4[0] ** 2)
+    assert result.min_positions is not None
+    assert result.min_positions[0] == pytest.approx(29.0 * result.f4[0] ** 2)
     assert result.criterion_2 is not None
-    assert bool(result.criterion_2[0]) is bool(12 > result.minimum_positions[0])
+    assert bool(result.criterion_2[0]) is bool(12 > result.min_positions[0])
 
 
 def test_criterion_2_needs_the_band_centres() -> None:
@@ -730,7 +730,7 @@ def test_criterion_2_needs_the_band_centres() -> None:
     intensity, areas = _uniform_surface()
     result = emission.sound_power_intensity_points(intensity, areas)
     assert result.criterion_2 is None
-    assert result.minimum_positions is None
+    assert result.min_positions is None
 
 
 def test_criterion_2_has_no_per_band_form_at_the_survey_grade() -> None:

@@ -902,7 +902,7 @@ def assessment_weighting_response(
 
 
 def assessment_weighting_taps(
-    fs: float, *, building_class: str, numtaps: int | None = None
+    fs: float, *, building_class: str, n_taps: int | None = None
 ) -> NDArray[np.float64]:
     """A linear-phase FIR that realises an Annex E weighting.
 
@@ -916,7 +916,7 @@ def assessment_weighting_taps(
         frequency to be above 315 Hz where the meter reaches that far, and
         this refuses a rate below 630 Hz for the same reason.
     :param building_class: See :func:`assessment_weighting_response`.
-    :param numtaps: Length of the filter, odd. The default resolves the 10 Hz
+    :param n_taps: Length of the filter, odd. The default resolves the 10 Hz
         corner of the target with room to spare, at half a second of taps.
     :return: The filter coefficients.
     :raises ValueError: For a rate below 630 Hz, an even or non-positive
@@ -934,14 +934,14 @@ def assessment_weighting_taps(
     name = require_choice(
         str(building_class), "building_class", tuple(ASSESSMENT_GUIDE_VALUES_MM_S)
     )
-    if numtaps is None:
+    if n_taps is None:
         taps = int(round(fs / 2.0))
         taps += 1 - taps % 2
     else:
-        require_scalar(numtaps, "numtaps")
-        taps = int(numtaps)
+        require_scalar(n_taps, "n_taps")
+        taps = int(n_taps)
         if taps <= 0 or taps % 2 == 0:
-            msg = f"'numtaps' must be a positive odd number; got {numtaps!r}."
+            msg = f"'n_taps' must be a positive odd number; got {n_taps!r}."
             raise ValueError(msg)
     grid_hz = np.linspace(0.0, fs / 2.0, 512)
     gains = np.empty_like(grid_hz)
@@ -958,7 +958,7 @@ def assessment_velocity(
     fs: float,
     *,
     building_class: str,
-    numtaps: int | None = None,
+    n_taps: int | None = None,
 ) -> NDArray[np.float64]:
     """The assessment velocity ``v_Bn(t)`` of Annex E, in mm/s.
 
@@ -971,13 +971,13 @@ def assessment_velocity(
         band-limited by 5.2.3.
     :param fs: Sampling frequency, in hertz.
     :param building_class: See :func:`assessment_weighting_response`.
-    :param numtaps: See :func:`assessment_weighting_taps`.
+    :param n_taps: See :func:`assessment_weighting_taps`.
     :return: ``v_Bn(t)``, one value per sample.
     :raises ValueError: For a bad record, a rate below 630 Hz, or an unknown
         class.
     """
     x = _record(velocity_mm_s)
-    taps = assessment_weighting_taps(fs, building_class=building_class, numtaps=numtaps)
+    taps = assessment_weighting_taps(fs, building_class=building_class, n_taps=n_taps)
     delay = (taps.size - 1) // 2
     padded = np.concatenate((x, np.zeros(delay, dtype=np.float64)))
     return np.asarray(sig.lfilter(taps, [1.0], padded)[delay:], dtype=np.float64)
@@ -1058,7 +1058,7 @@ def assess_short_term_vibration(
     fs: float,
     *,
     building_class: str,
-    numtaps: int | None = None,
+    n_taps: int | None = None,
 ) -> AssessmentVelocity:
     """Judge short-term vibration on a building by Annex E.
 
@@ -1066,7 +1066,7 @@ def assess_short_term_vibration(
         millimetres per second (1-D).
     :param fs: Sampling frequency, in hertz.
     :param building_class: See :func:`assessment_weighting_response`.
-    :param numtaps: See :func:`assessment_weighting_taps`.
+    :param n_taps: See :func:`assessment_weighting_taps`.
     :return: The comparison, as an :class:`AssessmentVelocity`.
     :raises ValueError: For a bad record, a rate below 630 Hz, or an unknown
         class.
@@ -1075,7 +1075,7 @@ def assess_short_term_vibration(
         str(building_class), "building_class", tuple(ASSESSMENT_GUIDE_VALUES_MM_S)
     )
     weighted = assessment_velocity(
-        velocity_mm_s, fs, building_class=name, numtaps=numtaps
+        velocity_mm_s, fs, building_class=name, n_taps=n_taps
     )
     return AssessmentVelocity(
         assessment_velocity_mm_s=float(np.max(np.abs(weighted))),

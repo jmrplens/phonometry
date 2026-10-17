@@ -87,7 +87,7 @@ cut-off level $L_0$ and the coefficients $u$, $v$ of Table 1 are lowest where
 the ear is most vulnerable, so the same $L_\mathrm{EX,8h}$ buys far more shift at
 4 kHz than at 500 Hz.
 
-**Test-report fiche.** `NiptsResult.report(path)` renders the one-page
+**Test-report fiche.** `NIPTSResult.report(path)` renders the one-page
 prediction an occupational-hygiene service issues for an exposure group,
 following ISO 1999:2013 clause 6.3: a prediction-basis line, an optional
 metadata header (company, worker or group, workplace, date of assessment), a
@@ -214,9 +214,9 @@ population's *percentage beyond fence* depends on the fractile spread, not just
 the median, so it must be read from the distribution, never from the median
 threshold alone.
 
-The `NiptsResult` carries the `median` ($N_{50}$), the
+The `NIPTSResult` carries the `median` ($N_{50}$), the
 `spread_upper`/`spread_lower`
-and the `value` at the requested fractile; the `HtlanResult` carries `htla`,
+and the `value` at the requested fractile; the `HTLANResult` carries `htla`,
 `nipts` and the combined `threshold`. Both expose `.plot()`. The age component
 alone is the subject of the [hearing-threshold](hearing-threshold.md) guide.
 
@@ -227,7 +227,7 @@ always draws its age component from ISO 7029:2017. For a database-B
 assessment, `age_and_noise_threshold(htla, nipts_value)` runs Formula (1) on an
 externally supplied HTLA array; computing database B itself is out of scope.
 
-**Test-report fiche.** `HtlanResult.report(path)` renders the companion fiche
+**Test-report fiche.** `HTLANResult.report(path)` renders the companion fiche
 for the combined threshold, following ISO 1999:2013 clause 6.1. It carries the
 same prediction-basis line and metadata header as the NIPTS fiche, but its
 table has three columns (the age component $H$, the noise component $N$ and

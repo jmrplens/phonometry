@@ -1933,7 +1933,9 @@ def generate_lab_insulation_result(output_dir: str) -> None:
     )
     l1 = np.full(16, 90.0)
     t2 = np.full(16, 0.8)
-    lab = building.lab_airborne_insulation(l1, l1 - r, t2, area=10.0, volume=50.0)
+    lab = building.laboratory_airborne_insulation(
+        l1, l1 - r, t2, area=10.0, volume=50.0
+    )
     li = np.array(
         [
             62.1,
@@ -1954,7 +1956,7 @@ def generate_lab_insulation_result(output_dir: str) -> None:
             71.2,
         ]
     )
-    imp = building.lab_impact_insulation(li, t2, volume=50.0)
+    imp = building.laboratory_impact_insulation(li, t2, volume=50.0)
     assert lab.rating is not None
     assert imp.rating is not None
 

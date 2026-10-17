@@ -92,7 +92,7 @@ def test_example_4_4_accepted_at_5_percent() -> None:
     assert res.n == 20
     # Eq. (4.54)-(4.55): mean 95, variance 237.5.
     assert res.mean == pytest.approx(95.0)
-    assert res.std == pytest.approx(np.sqrt(237.5))
+    assert res.standard_deviation == pytest.approx(np.sqrt(237.5))
     assert 0.0 < res.p_value <= 1.0
 
 
@@ -255,6 +255,13 @@ def test_stationary_noise_is_accepted() -> None:
     # Segment centres: half a segment in, one segment apart.
     assert res.segment_times[0] == pytest.approx(res.segment_duration / 2)
     assert np.diff(res.segment_times) == pytest.approx(res.segment_duration)
+    # The trend test it ran on the segment sequence, and its null moments:
+    # Eqs. (4.54)-(4.55) for N = 20, mean 95 and variance 237.5.
+    trend = ph.metrology.trend_test(res.segment_values)
+    assert res.trend_statistic == trend.statistic
+    assert res.mean == pytest.approx(95.0)
+    assert res.standard_deviation == pytest.approx(np.sqrt(237.5))
+    assert res.standard_deviation == pytest.approx(trend.standard_deviation)
 
 
 def test_gain_ramp_is_rejected_like_example_10_3() -> None:
@@ -264,7 +271,7 @@ def test_gain_ramp_is_rejected_like_example_10_3() -> None:
     x = rng.standard_normal(n) * np.linspace(1.0, 1.2, n)
     res = ph.metrology.stationarity_test(x, FS)
     assert not res.stationary
-    assert res.count < res.bounds[0]  # upward trend depresses A
+    assert res.trend_statistic < res.bounds[0]  # upward trend depresses A
     runs = ph.metrology.stationarity_test(x, FS, method="runs")
     assert not runs.stationary
 

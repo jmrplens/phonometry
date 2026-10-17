@@ -257,7 +257,7 @@ for comparison between laboratories.
 | `frequencies` | Band centre frequencies, in Hz. |
 | `volume` | Volume of the test room, in m³. |
 | `excited_area_m2` | Area of the specimen directly excited by the rain, $S_\mathrm{e}$, in m². |
-| `background_db` | Background noise level per band, in dB, or `None`. When given, each position's level is corrected by ISO 10140-4 ([`background_correction`](/phonometry/reference/api/building/lab-insulation/#background_correction)) before the sum. |
+| `background_db` | Background noise level per band, in dB, or `None`. When given, each position's level is corrected by ISO 10140-4 ([`background_correction`](/phonometry/reference/api/building/laboratory-insulation/#background_correction)) before the sum. |
 | `reference_correction` | The laboratory correction: a [`RainfallReferenceCorrection`](/phonometry/reference/api/building/rainfall-sound/#rainfallreferencecorrection) covering every band, or $\Delta L_{I\mathrm{c}}$ per band in dB, or `None`. |
 
 **Returns:** A [`RainfallSoundResult`](/phonometry/reference/api/building/rainfall-sound/#rainfallsoundresult).

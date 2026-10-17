@@ -346,14 +346,6 @@ SPELLING_EXEMPT: dict[tuple[str, str, str], str] = {
         "loop_impedance",
         "inductance_h",
     ): _HENRY,
-    (
-        "phonometry.hearing.hearing_protectors",
-        "HMLRatingResult",
-        "subject_h",
-    ): (
-        "H_j of ISO 4869-2 Formula (12) per test subject, the H of the HML "
-        "rating and a value in decibels, not hours"
-    ),
 }
 
 #: A function is named for the quantity it returns, and these are the units a
@@ -450,7 +442,7 @@ CONSTANT_EXEMPT: dict[tuple[str, str], str] = {
         _A_COUNT,
         "environment.assessment.wind_turbine_modulation",
         "AM_BLOCK_SAMPLES",
-        "AM_MINIMUM_VALID_BLOCKS",
+        "AM_MIN_VALID_BLOCKS",
     ),
     **_exempt(
         "the prominence ratio p_AM of Formula (13), one spectral line over the "
@@ -464,18 +456,14 @@ CONSTANT_EXEMPT: dict[tuple[str, str], str] = {
         "environment.assessment.spain",
         "RD1367_PERIOD_CLOCK_LIMITS",
     ),
-    **_exempt(
-        _A_COUNT, "environment.assessment.soundscape", "METHOD_B_MAXIMUM_SOURCES"
-    ),
+    **_exempt(_A_COUNT, "environment.assessment.soundscape", "METHOD_B_MAX_SOURCES"),
     **_exempt(
         "the half-range of the ISO/TS 12913-3 coordinates, which are scale "
         "points and carry no unit",
         "environment.assessment.soundscape",
         "PLEASANTNESS_EVENTFULNESS_RANGE",
     ),
-    **_exempt(
-        _A_COUNT, "environment.propagation.barrier_in_situ", "MINIMUM_REPETITIONS"
-    ),
+    **_exempt(_A_COUNT, "environment.propagation.barrier_in_situ", "MIN_REPETITIONS"),
     **_exempt(
         "the numbers of the microphones of the grid, labels",
         "environment.propagation.barrier_reflection",
@@ -486,9 +474,7 @@ CONSTANT_EXEMPT: dict[tuple[str, str], str] = {
         "environment.propagation.noise_reducing_devices",
         "ABSORPTION_RATIO_LIMIT",
     ),
-    **_exempt(
-        _A_COUNT, "environment.propagation.software_quality", "MINIMUM_SAMPLE_SIZE"
-    ),
+    **_exempt(_A_COUNT, "environment.propagation.software_quality", "MIN_SAMPLE_SIZE"),
     **_exempt(
         "how many standard deviations of the measured speed, a pure number",
         "environment.sources.statistical_pass_by",
@@ -537,7 +523,7 @@ CONSTANT_EXEMPT: dict[tuple[str, str], str] = {
     **_exempt(
         "how many airflow rates a series is measured at, a count",
         "noise_control.silencer_measurement",
-        "MINIMUM_FLOW_RATES",
+        "MIN_FLOW_RATES",
     ),
     **_exempt(
         "solid angles, whose only unit is the steradian; the degree and radian "
@@ -560,7 +546,7 @@ CONSTANT_EXEMPT: dict[tuple[str, str], str] = {
     **_exempt(
         "the length-to-diameter ratio of a flow passage, a pure number",
         "noise_control.valves",
-        "MAXIMUM_PASSAGE_ASPECT",
+        "MAX_PASSAGE_ASPECT",
     ),
     **_exempt(
         _A_LABEL,
@@ -587,9 +573,9 @@ CONSTANT_EXEMPT: dict[tuple[str, str], str] = {
     **_exempt(
         "a bandwidth times a decay time, a pure number",
         "room.acoustics",
-        "MINIMUM_BANDWIDTH_TIME_PRODUCT",
+        "MIN_BANDWIDTH_TIME_PRODUCT",
     ),
-    **_exempt(_A_MULTIPLE, "room.acoustics", "MINIMUM_DETECTOR_MULTIPLE"),
+    **_exempt(_A_MULTIPLE, "room.acoustics", "MIN_DETECTOR_MULTIPLE"),
     **_exempt(
         "a difference of IACC, a correlation coefficient and a pure number",
         "room.auditorium",

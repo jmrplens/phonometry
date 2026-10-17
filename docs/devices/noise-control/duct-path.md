@@ -137,7 +137,7 @@ vibrating casing radiates low frequency as freely as the unhoused fan.
 
 Everything between the fan and the room removes something, and most of it
 is free. The models are Long Chapter 14 with the Reynolds (1990)
-regressions, and they all return an `HvacSpectrumResult` with `.values`,
+regressions, and they all return an `HVACSpectrumResult` with `.values`,
 `.plot()` and `.report()`.
 
 **Straight ducts.** An unlined rectangular duct loses energy into the
@@ -612,7 +612,7 @@ import numpy as np
 from phonometry import noise_control
 
 # Norton problem 7.2: a 0.65 x 0.4 m air-conditioning duct at 15 m/s.
-modes = noise_control.rectangular_duct_cut_on(0.65, 0.40, flow_velocity=15.0, count=6)
+modes = noise_control.rectangular_duct_cut_on(0.65, 0.40, flow_velocity=15.0, n_modes=6)
 print(modes.modes[:3])                          # ((1, 0), (0, 1), (1, 1))
 print(np.round(modes.cut_on[:3], 1))            # [263.6 428.3 502.9] Hz
 print(np.round(modes.cut_on_no_flow[:3], 1))    # [263.8 428.8 503.4] Hz
@@ -664,7 +664,7 @@ from phonometry import noise_control
 
 # Norton problem 7.1: a 254 mm circular duct carrying steam at 200 m/s.
 steam = noise_control.circular_duct_cut_on(0.254, flow_velocity=200.0,
-                                           speed_of_sound=405.0, count=6)
+                                           speed_of_sound=405.0, n_modes=6)
 print(steam.modes)
 # ((1, 0), (2, 0), (0, 1), (3, 0), (4, 0), (1, 1))
 print(np.round(steam.cut_on_no_flow, 1))
@@ -694,12 +694,12 @@ from phonometry import noise_control
 
 # One line for one duct: the cut-on ladder with the plane-wave band shaded.
 steam = noise_control.circular_duct_cut_on(0.254, flow_velocity=200.0,
-                                           speed_of_sound=405.0, count=6)
+                                           speed_of_sound=405.0, n_modes=6)
 steam.plot()
 plt.show()
 
 # The ventilation duct of problem 7.2, where the flow shift is negligible.
-noise_control.rectangular_duct_cut_on(0.65, 0.40, flow_velocity=15.0, count=6).plot()
+noise_control.rectangular_duct_cut_on(0.65, 0.40, flow_velocity=15.0, n_modes=6).plot()
 plt.show()
 ```
 

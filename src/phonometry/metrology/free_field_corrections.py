@@ -999,7 +999,7 @@ class FreeFieldCorrection(OwnsArrays):
         )
 
     @property
-    def microphone_count(self) -> int:
+    def n_microphones(self) -> int:
         """The number of microphones the determinations were made with."""
         return len(self._microphone_rows())
 
@@ -1855,7 +1855,7 @@ class CorrectionUncertaintyVerification(OwnsArrays):
     :func:`~phonometry.metrology.verify_conformance` makes for the IEC TC 29
     instrument standards, which forgives an excess of one part in
     :math:`10^9`. The maximum is derived from the clause and the frequencies,
-    :attr:`maximum_uncertainty_db`, so a verdict cannot be judged against a
+    :attr:`max_uncertainty_db`, so a verdict cannot be judged against a
     maximum its clause does not give.
 
     :ivar clause: the clause, 9 to 14.
@@ -1920,7 +1920,7 @@ class CorrectionUncertaintyVerification(OwnsArrays):
             object.__setattr__(self, name, read_only(column))
 
     @property
-    def maximum_uncertainty_db(self) -> NDArray[np.float64]:
+    def max_uncertainty_db(self) -> NDArray[np.float64]:
         """The maximum permitted at each frequency by the clause, in dB,
         :func:`maximum_expanded_uncertainty`.
         """
@@ -1931,7 +1931,7 @@ class CorrectionUncertaintyVerification(OwnsArrays):
         """Whether the expanded uncertainty is within the maximum, frequency
         by frequency.
         """
-        return _at_most_each(self.expanded_uncertainty_db, self.maximum_uncertainty_db)
+        return _at_most_each(self.expanded_uncertainty_db, self.max_uncertainty_db)
 
     @property
     def range_passes(self) -> NDArray[np.bool_] | None:
@@ -1940,14 +1940,14 @@ class CorrectionUncertaintyVerification(OwnsArrays):
         """
         if self.correction_range_db is None:
             return None
-        return _at_most_each(self.correction_range_db, self.maximum_uncertainty_db)
+        return _at_most_each(self.correction_range_db, self.max_uncertainty_db)
 
     @property
     def margin_db(self) -> NDArray[np.float64]:
         """The maximum less the expanded uncertainty at each frequency, in dB:
         negative where it fails.
         """
-        return self.maximum_uncertainty_db - self.expanded_uncertainty_db
+        return self.max_uncertainty_db - self.expanded_uncertainty_db
 
     @property
     def failing_frequencies_hz(self) -> NDArray[np.float64]:

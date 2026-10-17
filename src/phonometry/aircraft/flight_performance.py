@@ -595,7 +595,7 @@ class PerformanceAircraft(RichDisplay):
     """One aeroplane's Appendix B coefficient set.
 
     :ivar aircraft_id: ANP aircraft identifier.
-    :ivar engines: Number of engines supplying thrust ``N``.
+    :ivar n_engines: Number of engines supplying thrust ``N``.
     :ivar max_static_thrust_lb: Maximum sea-level static thrust per engine, lb.
         Read only by Eq. B-79 and Eq. B-81, where a Decelerate step's start
         thrust is a percentage of it.
@@ -614,7 +614,7 @@ class PerformanceAircraft(RichDisplay):
     """
 
     aircraft_id: str
-    engines: int
+    n_engines: int
     max_static_thrust_lb: float
     max_landing_weight_lb: float
     jet_coefficients: Mapping[str, JetEngineCoefficients] = field(default_factory=dict)
@@ -644,10 +644,10 @@ class PerformanceAircraft(RichDisplay):
             thrust is not finite and positive.
         """
         require_finite_fields(self, "max_static_thrust_lb", "max_landing_weight_lb")
-        if self.engines < 1:
+        if self.n_engines < 1:
             msg = (
-                "PerformanceAircraft: 'engines' must be at least 1; got "
-                f"{self.engines!r}."
+                "PerformanceAircraft: 'n_engines' must be at least 1; got "
+                f"{self.n_engines!r}."
             )
             raise ValueError(msg)
         for name in ("max_static_thrust_lb", "max_landing_weight_lb"):
@@ -1313,7 +1313,7 @@ class _Flight:
             denominator has nothing to divide by and the safety case the
             gradient comes from does not exist.
         """
-        engines = self.aircraft.engines
+        engines = self.aircraft.n_engines
         # The N-1 denominator of Eq. B-13.
         if engines < 2:  # noqa: PLR2004
             msg = (
@@ -1347,7 +1347,7 @@ class _Flight:
         """
         return (
             drag_ratio
-            / (self.aircraft.engines * math.cos(bank_rad))
+            / (self.aircraft.n_engines * math.cos(bank_rad))
             * self.corrected_weight_lb(altitude_ft)
         )
 
@@ -1484,7 +1484,7 @@ def _takeoff_points(
         aero.ground_roll_coefficient
         * flight.aerodrome.temperature_ratio(altitude_ft)
         * flight.corrected_weight_lb(altitude_ft) ** 2
-        / (flight.aircraft.engines * rotation_thrust_lb)
+        / (flight.aircraft.n_engines * rotation_thrust_lb)
     )
     # Eq. B-17 before Eq. B-18: the gradient correction reads the wind-corrected
     # distance, so the order is fixed by the algebra rather than by preference.
@@ -1616,7 +1616,7 @@ def _climb_point(
     )
     k_factor = _CLIMB_K_LOW if cas_kt <= _CLIMB_K_SPEED_KT else _CLIMB_K_HIGH
     sin_gamma = k_factor * (
-        flight.aircraft.engines
+        flight.aircraft.n_engines
         * mid_thrust_lb
         / flight.corrected_weight_lb(mid_altitude_ft)
         - drag_ratio / math.cos(bank_rad)
@@ -1703,7 +1703,7 @@ def _accelerate_point(
             bank_rad=bank_rad,
         )
         max_acceleration_ft_s2 = _G_FT_S2 * (
-            flight.aircraft.engines
+            flight.aircraft.n_engines
             * mid_thrust_lb
             / flight.corrected_weight_lb(mid_altitude_ft)
             - drag_ratio / math.cos(bank_rad)
@@ -1812,7 +1812,7 @@ def _level_accelerate_point(
     )
     # Eq. B-31.
     max_acceleration_ft_s2 = _G_FT_S2 * (
-        flight.aircraft.engines
+        flight.aircraft.n_engines
         * mid_thrust_lb
         / flight.corrected_weight_lb(altitude_ft)
         - drag_ratio / math.cos(bank_rad)
@@ -2072,7 +2072,7 @@ def _headwind_thrust_correction_lb(
         * flight.corrected_weight_lb(altitude_ft)
         * math.sin(gamma_rad)
         * (flight.aerodrome.headwind_kt - DEFAULT_HEADWIND_KT)
-        / (flight.aircraft.engines * calibrated_airspeed_kt)
+        / (flight.aircraft.n_engines * calibrated_airspeed_kt)
     )
 
 
@@ -2109,7 +2109,7 @@ def _land_points(
     # which is harmless on a runway, where the bank angle is zero.
     thrust_lb = (
         flight.corrected_weight_lb(altitude_ft)
-        / flight.aircraft.engines
+        / flight.aircraft.n_engines
         * (aero.drag_ratio - math.sin(approach_gamma_rad) / _DESCENT_WIND_CONSTANT)
     ) + _headwind_thrust_correction_lb(
         flight,
@@ -2354,7 +2354,7 @@ def _approach_thrust_lb(
     kind = step.kind
     bank_rad = math.radians(step.bank_angle_deg)
     corrected_weight_lb = flight.corrected_weight_lb(altitude_ft)
-    engines = flight.aircraft.engines
+    engines = flight.aircraft.n_engines
     if kind == "level":
         return _approach_level_thrust_lb(
             corrected_weight_lb=corrected_weight_lb,

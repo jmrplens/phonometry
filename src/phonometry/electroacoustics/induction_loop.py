@@ -429,7 +429,7 @@ class FieldStrengthReading(OwnsArrays):
     :ivar times: The time of each reading, in seconds.
     :ivar levels: The time-weighted level, 125 ms exponential averaging, in
         dB re 400 mA/m.
-    :ivar maximum_db: The maximum indication over the record, the "maximum
+    :ivar maximum_level_db: The maximum indication over the record, the "maximum
         value of the magnetic field" that 8.2.7 sets to 400 mA/m, in dB re
         400 mA/m.
     :ivar equivalent_db: The level of the mean square over the whole record,
@@ -440,7 +440,7 @@ class FieldStrengthReading(OwnsArrays):
     weighting: str
     times: np.ndarray
     levels: np.ndarray
-    maximum_db: float
+    maximum_level_db: float
     equivalent_db: float
 
     def plot(
@@ -502,7 +502,7 @@ def field_strength_meter(
         weighting=curve,
         times=read_only(np.arange(record.size, dtype=np.float64) / rate),
         levels=read_only(levels),
-        maximum_db=float(np.max(levels)),
+        maximum_level_db=float(np.max(levels)),
         equivalent_db=10.0 * math.log10(equivalent / reference_square),
     )
 

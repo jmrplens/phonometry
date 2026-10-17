@@ -93,7 +93,7 @@ def _plane_wave() -> metrology.PlaneWaveCoupler:
         length_m=7.5e-3,
         diameter_m=diameter,
         capillary=metrology.CapillaryTube(
-            length_m=0.05, radius_m=_SIXTH_MM / 1000.0, count=2
+            length_m=0.05, radius_m=_SIXTH_MM / 1000.0, n_tubes=2
         ),
     )
 

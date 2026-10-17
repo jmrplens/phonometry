@@ -51,7 +51,7 @@ _PROBLEM_7_1 = (
 
 
 def test_norton_problem_7_1_no_flow() -> None:
-    res = duct_modes.circular_duct_cut_on(0.254, speed_of_sound=_C_STEAM, count=6)
+    res = duct_modes.circular_duct_cut_on(0.254, speed_of_sound=_C_STEAM, n_modes=6)
     assert res.mach == 0.0
     assert res.modes == tuple(mode for mode, _, _, _ in _PROBLEM_7_1)
     expected = [f for _, f, _, _ in _PROBLEM_7_1]
@@ -62,7 +62,7 @@ def test_norton_problem_7_1_no_flow() -> None:
 
 def test_norton_problem_7_1_with_flow() -> None:
     res = duct_modes.circular_duct_cut_on(
-        0.254, flow_velocity=200.0, speed_of_sound=_C_STEAM, count=6
+        0.254, flow_velocity=200.0, speed_of_sound=_C_STEAM, n_modes=6
     )
     assert res.modes == tuple(mode for mode, _, _, _ in _PROBLEM_7_1)
     # The printed answers are rounded to the hertz; the (1, 1) entry (2354 Hz)
@@ -78,7 +78,7 @@ def test_norton_problem_7_1_with_flow() -> None:
 
 
 def test_norton_problem_7_2() -> None:
-    res = duct_modes.rectangular_duct_cut_on(0.65, 0.4, flow_velocity=15.0, count=3)
+    res = duct_modes.rectangular_duct_cut_on(0.65, 0.4, flow_velocity=15.0, n_modes=3)
     # The (1, 1) mode at 503 Hz cuts on before the (2, 0) mode at 527 Hz.
     assert res.modes == ((1, 0), (0, 1), (1, 1))
     assert np.allclose(res.cut_on, [264.0, 428.0, 503.0], atol=0.6)
@@ -143,8 +143,8 @@ def test_no_warning_below_the_limit() -> None:
             {"diameter_m": 0.2, "flow_velocity": 400.0},
             r"'flow_velocity' must be subsonic",
         ),
-        ({"diameter_m": 0.2, "count": 0}, r"'count' must be between"),
-        ({"diameter_m": 0.2, "count": 13}, r"'count' must be between"),
+        ({"diameter_m": 0.2, "n_modes": 0}, r"'n_modes' must be between"),
+        ({"diameter_m": 0.2, "n_modes": 13}, r"'n_modes' must be between"),
     ],
 )
 def test_circular_validation(kwargs: dict[str, float], match: str) -> None:
@@ -157,7 +157,10 @@ def test_circular_validation(kwargs: dict[str, float], match: str) -> None:
     [
         ({"width_m": 0.0, "height_m": 0.4}, r"'width_m' must be positive"),
         ({"width_m": 0.65, "height_m": -0.4}, r"'height_m' must be positive"),
-        ({"width_m": 0.65, "height_m": 0.4, "count": 0}, r"'count' must be at least"),
+        (
+            {"width_m": 0.65, "height_m": 0.4, "n_modes": 0},
+            r"'n_modes' must be at least",
+        ),
         (
             {"width_m": 0.65, "height_m": 0.4, "flow_velocity": 400.0},
             r"'flow_velocity' must be subsonic",
@@ -177,7 +180,7 @@ def test_plot_draws_both_ladders_and_shades_the_plane_wave_band() -> None:
     from matplotlib.axes import Axes
 
     res = duct_modes.circular_duct_cut_on(
-        0.254, flow_velocity=200.0, speed_of_sound=_C_STEAM, count=6
+        0.254, flow_velocity=200.0, speed_of_sound=_C_STEAM, n_modes=6
     )
     ax = res.plot()
     assert isinstance(ax, Axes)

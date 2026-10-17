@@ -75,7 +75,7 @@ r_without = np.array([36.1, 37.0, 38.2, 39.5, 40.3, 41.2, 40.6, 41.8, 43.9,
 delta_r = np.array([-2.1, -5.4, -3.2, 1.5, 4.8, 7.9, 10.6, 12.9, 14.7, 16.2,
                     17.4, 18.3, 19.1, 19.6, 19.9, 19.5, 18.2, 16.4, 15.8,
                     17.1, 18.0])
-res = building.lab_lining_improvement(r_without, r_without + delta_r, freqs,
+res = building.laboratory_lining_improvement(r_without, r_without + delta_r, freqs,
                                       basic_element="heavy_wall")
 rating = res.rating
 print(rating.index, rating.delta_rw, rating.delta_rw_c, rating.delta_rw_ctr)
@@ -100,7 +100,7 @@ two measured curves:
 ```python
 print(res.delta_rw_direct_db, res.delta_rw_c_direct_db, res.delta_rw_ctr_direct_db)
 # 13 12 9
-other = building.lab_lining_improvement(r_without, r_without + delta_r, freqs,
+other = building.laboratory_lining_improvement(r_without, r_without + delta_r, freqs,
                                         basic_element=None)
 print(other.rating, other.delta_rw_direct_db)                   # None 13
 ```
@@ -156,7 +156,7 @@ r_without = np.array([36.1, 37.0, 38.2, 39.5, 40.3, 41.2, 40.6, 41.8, 43.9,
 delta_r = np.array([-2.1, -5.4, -3.2, 1.5, 4.8, 7.9, 10.6, 12.9, 14.7, 16.2,
                     17.4, 18.3, 19.1, 19.6, 19.9, 19.5, 18.2, 16.4, 15.8,
                     17.1, 18.0])
-res = building.lab_lining_improvement(r_without, r_without + delta_r, freqs)
+res = building.laboratory_lining_improvement(r_without, r_without + delta_r, freqs)
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.6))
 res.plot(ax=ax1)
@@ -219,7 +219,7 @@ l_n0 = np.array([70.5, 73.4, 75.8, 77.2, 78.9, 78.1, 77.6, 78.3, 77.1, 75.4,
                  73.8, 71.2, 68.9, 65.7, 62.8, 59.6, 56.9, 53.8])
 delta_l = np.array([0.4, 0.8, 1.5, 2.3, 3.4, 4.9, 6.8, 9.1, 11.6, 14.2, 16.9,
                     19.8, 22.4, 25.1, 27.3, 29.4, 30.8, 31.9])
-cover = building.lab_floor_covering_improvement(l_n0, l_n0 - delta_l, freqs,
+cover = building.laboratory_floor_covering_improvement(l_n0, l_n0 - delta_l, freqs,
                                                 reference_floor="lightweight_3")
 print(cover.designation, cover.delta_lw_db, cover.ci_delta_db)   # ΔLt,3,w 8 -3
 print(cover.reference_rating.rating, cover.bare_rating.rating)   # 67 75
@@ -305,7 +305,7 @@ l_n0 = np.array([70.5, 73.4, 75.8, 77.2, 78.9, 78.1, 77.6, 78.3, 77.1, 75.4,
                  73.8, 71.2, 68.9, 65.7, 62.8, 59.6, 56.9, 53.8])
 delta_l = np.array([0.4, 0.8, 1.5, 2.3, 3.4, 4.9, 6.8, 9.1, 11.6, 14.2, 16.9,
                     19.8, 22.4, 25.1, 27.3, 29.4, 30.8, 31.9])
-cover = building.lab_floor_covering_improvement(l_n0, l_n0 - delta_l, freqs,
+cover = building.laboratory_floor_covering_improvement(l_n0, l_n0 - delta_l, freqs,
                                                 reference_floor="lightweight_3")
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.6))
@@ -356,7 +356,7 @@ go.
 
 [![ISO 10140-1 Figure H.4 example report: the form's header with manufacturer, product, reference floor type, mass per unit area, curing time and the climate of the source room, the one-third-octave table of Ln,0 and delta L beside the delta L diagram with the ISO 717-2 rating range dashed, the boxed delta Lw = 15 dB and CI,delta, the two floor ratings and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_1_floor_covering_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_1_floor_covering_example.pdf)
 
-*The form of Figure H.4 (`LabFloorCoveringImprovementResult.report`), filled
+*The form of Figure H.4 (`LaboratoryFloorCoveringImprovementResult.report`), filled
 with the floor and the covering of ISO 717-2:2020 Annex C: $\Delta L_\mathrm{w}
 = 15$ dB, as Table C.2 prints it.*
 
@@ -425,7 +425,7 @@ r_max = np.array([40.2, 42.8, 45.1, 48.6, 51.9, 54.3, 56.8, 58.9, 60.7, 62.4,
                   63.8, 65.1, 66.2, 67.0, 67.6, 68.1, 68.5, 69.0])
 r_seal = np.array([33.4, 35.1, 37.9, 40.6, 43.0, 45.2, 46.1, 46.8, 47.0, 46.2,
                    45.1, 46.9, 49.8, 52.6, 55.4, 58.9, 63.1, 66.2])
-seal = building.lab_joint_insulation(r_seal, r_max, freqs, joint_length_m=5.4)
+seal = building.laboratory_joint_insulation(r_seal, r_max, freqs, joint_length_m=5.4)
 print(seal.regime[-4:])
 # ('uncorrected', 'corrected', 'limit', 'maximum')
 print(np.round(seal.r_s_db[-4:], 1))           # [55.4 59.5 64.4 69. ]
@@ -490,10 +490,10 @@ $b_\mathrm{n} + 3$ are the ones products are compared by (J.5.2 h)).
 loss = {3.0: -2.5, 4.0: -1.2, 5.0: 0.0, 6.0: 2.5, 8.0: 8.0, 10.0: 12.5,
         12.0: 13.0}                            # dB lost against 5 mm, mid band
 slope = np.linspace(0.6, 1.4, 18)              # and more at high frequency
-results = [building.lab_joint_insulation(
+results = [building.laboratory_joint_insulation(
                np.minimum(r_seal - db * slope, r_max - 0.5), r_max, freqs)
            for db in loss.values()]
-series = building.joint_gap_series(list(loss), results, minimum_gap_mm=3.0)
+series = building.joint_gap_series(list(loss), results, min_gap_mm=3.0)
 print(series.r_s_w_ctr_db)        # [48. 47. 45. 43. 38. 33. 33.]
 print(series.at_gap(7.0), series.working_range_mm)        # 40.5 (5.0, 8.0)
 ```
@@ -515,7 +515,7 @@ since nothing then shows which width it was.
 
 ```python
 widths = building.check_joint_gap_series(series)
-print(widths.nominal_measured, widths.minimum_measured,
+print(widths.nominal_measured, widths.min_measured,
       widths.working_range_measured, widths.passes)     # True True True True
 ```
 
@@ -542,14 +542,14 @@ r_max = np.array([40.2, 42.8, 45.1, 48.6, 51.9, 54.3, 56.8, 58.9, 60.7, 62.4,
                   63.8, 65.1, 66.2, 67.0, 67.6, 68.1, 68.5, 69.0])
 r_seal = np.array([33.4, 35.1, 37.9, 40.6, 43.0, 45.2, 46.1, 46.8, 47.0, 46.2,
                    45.1, 46.9, 49.8, 52.6, 55.4, 58.9, 63.1, 66.2])
-seal = building.lab_joint_insulation(r_seal, r_max, freqs, joint_length_m=5.4)
+seal = building.laboratory_joint_insulation(r_seal, r_max, freqs, joint_length_m=5.4)
 loss = {3.0: -2.5, 4.0: -1.2, 5.0: 0.0, 6.0: 2.5, 8.0: 8.0, 10.0: 12.5,
         12.0: 13.0}
 slope = np.linspace(0.6, 1.4, 18)
-results = [building.lab_joint_insulation(
+results = [building.laboratory_joint_insulation(
                np.minimum(r_seal - db * slope, r_max - 0.5), r_max, freqs)
            for db in loss.values()]
-series = building.joint_gap_series(list(loss), results, minimum_gap_mm=3.0)
+series = building.joint_gap_series(list(loss), results, min_gap_mm=3.0)
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.6))
 seal.plot(ax=ax1)
@@ -586,7 +586,7 @@ seal.report("joint.pdf", metadata=ReportMetadata(
 
 [![ISO 10140-1 Figure J.7 example report: the form's header with the test length, separation wall, test noise and the maximum joint sound reduction index, the one-third-octave table of Rs from 100 Hz to 5000 Hz beside its diagram with the two top bands as minimum values, the boxed Rs,w (C; Ctr) with the enlarged-range terms and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_1_joint_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_1_joint_example.pdf)
 
-*The form of Figure J.7 (`LabJointInsulationResult.report`), Rs,w (C; Ctr).*
+*The form of Figure J.7 (`LaboratoryJointInsulationResult.report`), Rs,w (C; Ctr).*
 
 ## Rain on a roof (Annex K)
 
@@ -981,7 +981,7 @@ doors, windows, glazing, small technical elements, floors, shutters).
 - [Sound Insulation by Intensity (ISO 15186)](insulation-intensity.md):
   the intensity method K.4.3 allows for rain.
 - API reference:
-  [`building.measurement.lab_improvement`](https://docs.jmrp.io/phonometry/reference/api/building/lab-improvement/),
+  [`building.measurement.laboratory_improvement`](https://docs.jmrp.io/phonometry/reference/api/building/laboratory-improvement/),
   [`building.measurement.joint_insulation`](https://docs.jmrp.io/phonometry/reference/api/building/joint-insulation/),
   [`building.measurement.rainfall_sound`](https://docs.jmrp.io/phonometry/reference/api/building/rainfall-sound/)
   and [`building.measurement.ratings`](https://docs.jmrp.io/phonometry/reference/api/building/ratings/).

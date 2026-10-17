@@ -86,6 +86,15 @@ if TYPE_CHECKING:
     from .flight_performance import Aerodrome
     from .npd_atmosphere import RevisedNPDCurves
 
+__all__ = [
+    "ANPAircraft",
+    "ANPDatabase",
+    "ANPNPDCurves",
+    "ANPProfile",
+    "SpectralClass",
+    "load_anp_database",
+]
+
 #: Feet-to-metres conversion (NPD slant distances and profile altitudes/distances).
 _FT_M = 0.3048
 #: How far, in Hz, a spectral-class column may sit from its nominal band.

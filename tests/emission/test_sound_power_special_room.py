@@ -425,7 +425,7 @@ def test_9_5_class_edges_are_those_of_table_3(s_m: float, cls: str) -> None:
     upper edge is reached only through Formula (5); the classification itself
     is read at the edge directly.
     """
-    from phonometry.emission.sound_power_special_room import _sm_class
+    from phonometry.emission._sound_power_special_room import _sm_class
 
     assert _sm_class(s_m) == cls
 

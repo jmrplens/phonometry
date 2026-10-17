@@ -50,6 +50,13 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+__all__ = [
+    "PropagationLossResult",
+    "propagation_loss",
+    "seawater_absorption",
+    "spreading_loss",
+]
+
 _SPREADING_LAWS = ("spherical", "cylindrical", "practical")
 _ABSORPTION_MODELS = ("francois-garrison", "ainslie-mccolm", "thorp")
 #: Metres per kilometre.

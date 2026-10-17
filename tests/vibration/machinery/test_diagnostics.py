@@ -437,7 +437,7 @@ class TestEnvelopeChainIntegration:
     """
 
     def test_envelope_spectrum_peaks_on_the_predicted_bpfo(self) -> None:
-        from phonometry.signals.envelope import envelope_spectrum
+        from phonometry.signals import envelope_spectrum
 
         res = bearing_fault_frequencies(**_P85)  # type: ignore[arg-type]
         bpfo = res["BPFO"]

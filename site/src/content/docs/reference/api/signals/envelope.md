@@ -1,9 +1,11 @@
 ---
-title: "signals.envelope"
+title: "signals: envelope"
 description: "Envelope and instantaneous phase via the Hilbert transform."
 sidebar:
   label: "envelope"
 ---
+
+Every name on this page is published by `phonometry.signals`: `from phonometry import signals`, then `signals.<name>`.
 
 Envelope and instantaneous phase via the Hilbert transform.
 

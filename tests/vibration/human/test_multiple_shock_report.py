@@ -23,10 +23,10 @@ from report_assertions import assert_one_page
 
 from phonometry import ReportMetadata
 from phonometry.vibration.human.multiple_shock import (
-    MZ_FEMALE,
-    MZ_MALE,
-    RISK_THRESHOLDS_FEMALE,
-    RISK_THRESHOLDS_MALE,
+    _MZ_FEMALE,
+    _MZ_MALE,
+    _RISK_THRESHOLDS_FEMALE,
+    _RISK_THRESHOLDS_MALE,
     MultipleShockResult,
     compression_dose,
     dose_from_peaks,
@@ -63,8 +63,8 @@ def _result_from_peaks(
     dose/risk formulae rather than by inverting the seat-to-spine transfer
     function of an artificial time history.
     """
-    mz = MZ_MALE if sex == "male" else MZ_FEMALE
-    thresholds = RISK_THRESHOLDS_MALE if sex == "male" else RISK_THRESHOLDS_FEMALE
+    mz = _MZ_MALE if sex == "male" else _MZ_FEMALE
+    thresholds = _RISK_THRESHOLDS_MALE if sex == "male" else _RISK_THRESHOLDS_FEMALE
     peaks = np.asarray(peaks, dtype=float)
     dz = dose_from_peaks(peaks)
     sd = compression_dose(dz, mz=mz)

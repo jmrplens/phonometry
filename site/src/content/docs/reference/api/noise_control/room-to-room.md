@@ -8,7 +8,7 @@ sidebar:
 Room-to-room noise reduction: source room, partition, receiving room, criterion.
 
 The other classic bookkeeping exercise of noise control, beside the duct-borne
-cascade of [`phonometry.noise_control.duct_path`](/phonometry/reference/api/noise_control/duct-path/). A machine runs in one
+cascade of [`phonometry.noise_control.duct_path`](/phonometry/reference/api/noise_control/duct-path/#duct_path). A machine runs in one
 room, a partition separates that room from an occupied one, and the question is
 the octave-band spectrum in the occupied room and whether it meets a design
 criterion. The answer is a short chain, and every link of it already exists in

@@ -80,6 +80,25 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+__all__ = [
+    "FlightConditionInterpolation",
+    "FlightPathKinematics",
+    "RotorcraftAtmosphere",
+    "RotorcraftEventResult",
+    "RotorcraftGround",
+    "RotorcraftHemisphere",
+    "RotorcraftNoiseContourResult",
+    "RotorcraftTrackState",
+    "flight_condition_weights",
+    "flight_path_kinematics",
+    "hemisphere_source_level",
+    "hover_derived_hemisphere",
+    "hover_ring_hemisphere",
+    "interpolated_source_level",
+    "rotorcraft_event_level",
+    "rotorcraft_noise_contour",
+]
+
 #: Standard acceleration of gravity, in m/s² (Eq. 20).
 _G0 = 9.80665
 

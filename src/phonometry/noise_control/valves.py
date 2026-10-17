@@ -126,6 +126,7 @@ __all__ = [
     "valve_style_modifier",
     "ValveNoiseWarning",
     "ValveTrim",
+    "MAX_PASSAGE_ASPECT",
 ]
 
 # --------------------------------------------------------------------------

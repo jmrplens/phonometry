@@ -95,27 +95,40 @@ from ..._internal.validation import (
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 from .flanking_transmission import total_loss_factor
 
+__all__ = [
+    "StructureBornePowerResult",
+    "characteristic_reception_plate_power",
+    "equivalent_blocked_force_level",
+    "equivalent_free_velocity_level",
+    "mean_free_velocity_level",
+    "plate_loss_factor",
+    "reception_plate_power",
+    "source_mobility_from_levels",
+    "spatial_mean_velocity_level",
+    "structure_borne_power_level",
+]
+
 #: EN 15657 vibratory velocity reference ``v0`` (= ISO 1683 10^-9 m/s), m/s.
-REFERENCE_VELOCITY: float = ISO1683_REFERENCE_VALUES["solid"]["velocity"].value
+_REFERENCE_VELOCITY: float = ISO1683_REFERENCE_VALUES["solid"]["velocity"].value
 #: Reference structure-borne sound power ``P0``, W: the 10⁻¹² W EN 15657:2018
 #: clause 7.1 counts the power level ``L_Ws`` from. ISO 1683 lists no
 #: structure-borne power; the number is the airborne 1 pW of its Table 1, and
 #: it is read from there.
-REFERENCE_SOUND_POWER: float = ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value
+_REFERENCE_SOUND_POWER: float = ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value
 #: Reference mobility ``Y0`` of EN 15657 Formulae (15)/(17)/(18), m/(N.s).
-REFERENCE_MOBILITY: float = 1.0
+_REFERENCE_MOBILITY: float = 1.0
 #: Reference force ``F0`` of the equivalent blocked force level (EN 15657), N:
 #: the 1 µN of ISO 1683:2015 Table 3.
-REFERENCE_FORCE: float = ISO1683_REFERENCE_VALUES["solid"]["force"].value
+_REFERENCE_FORCE: float = ISO1683_REFERENCE_VALUES["solid"]["force"].value
 #: Characteristic mobility ``Y_R,inf,low`` of the standard 10 cm concrete
 #: reception plate (EN 15657:2018, clause 7.2.4), m/(N.s).
-CHARACTERISTIC_PLATE_MOBILITY: float = 5.0e-6
+_CHARACTERISTIC_PLATE_MOBILITY: float = 5.0e-6
 #: ISO 9611:1996 free-velocity reference ``v0`` (clause 7), m/s: the 50 nm/s
 #: ISO 1683:2015 keeps for structure-borne sound in note b of Table 3.
-FREE_VELOCITY_REFERENCE: float = 5.0e-8
+_FREE_VELOCITY_REFERENCE: float = 5.0e-8
 #: The constant of Formula 19, ``(v0 / F0)^2`` in (m/(N.s))^2: 1e-6 for the
 #: 1 nm/s and 1 µN references the two levels are counted from.
-_MOBILITY_LEVEL_CONSTANT = (REFERENCE_VELOCITY / REFERENCE_FORCE) ** 2
+_MOBILITY_LEVEL_CONSTANT = (_REFERENCE_VELOCITY / _REFERENCE_FORCE) ** 2
 
 
 def spatial_mean_velocity_level(levels: ArrayLike) -> float:
@@ -157,7 +170,7 @@ def structure_borne_power_level(
     area: float,
     loss_factor: ArrayLike,
     *,
-    reference_velocity: float = REFERENCE_VELOCITY,
+    reference_velocity: float = _REFERENCE_VELOCITY,
 ) -> np.ndarray:
     r"""Structure-borne power injected into the reception plate (EN 15657, Formula 14).
 
@@ -217,7 +230,7 @@ def structure_borne_power_level(
             f"together; got shapes {lv.shape}, {f.shape} and {eta.shape}."
         )
         raise ValueError(msg) from None
-    offset = 10.0 * np.log10(reference_velocity**2 / REFERENCE_SOUND_POWER)
+    offset = 10.0 * np.log10(reference_velocity**2 / _REFERENCE_SOUND_POWER)
     lw = 10.0 * np.log10(2.0 * np.pi * f * eta * mass_per_area * area) + lv + offset
     return np.asarray(lw, dtype=np.float64)
 
@@ -457,13 +470,15 @@ def equivalent_blocked_force_level(
             f"got shapes {lw.shape} and {y.shape}."
         )
         raise ValueError(msg) from None
-    return np.asarray(lw - 10.0 * np.log10(y_re / REFERENCE_MOBILITY), dtype=np.float64)
+    return np.asarray(
+        lw - 10.0 * np.log10(y_re / _REFERENCE_MOBILITY), dtype=np.float64
+    )
 
 
 def characteristic_reception_plate_power(
     blocked_force_level: ArrayLike,
     *,
-    characteristic_mobility: float = CHARACTERISTIC_PLATE_MOBILITY,
+    characteristic_mobility: float = _CHARACTERISTIC_PLATE_MOBILITY,
 ) -> np.ndarray:
     r"""Characteristic reception-plate power level (EN 15657:2018, Formula 17).
 
@@ -488,7 +503,7 @@ def characteristic_reception_plate_power(
     )
     lf = np.asarray(blocked_force_level, dtype=np.float64)
     return np.asarray(
-        lf + 10.0 * np.log10(characteristic_mobility / REFERENCE_MOBILITY),
+        lf + 10.0 * np.log10(characteristic_mobility / _REFERENCE_MOBILITY),
         dtype=np.float64,
     )
 
@@ -538,7 +553,7 @@ def equivalent_free_velocity_level(
             f"got shapes {lw.shape} and {y.shape}."
         )
         raise ValueError(msg) from None
-    term = np.abs(y) ** 2 / (y_re * REFERENCE_MOBILITY)
+    term = np.abs(y) ** 2 / (y_re * _REFERENCE_MOBILITY)
     return np.asarray(lw + 10.0 * np.log10(term) + 60.0, dtype=np.float64)
 
 
@@ -579,7 +594,7 @@ def source_mobility_from_levels(
         )
         raise ValueError(msg) from None
     return np.asarray(
-        REFERENCE_MOBILITY
+        _REFERENCE_MOBILITY
         * np.sqrt(10.0 ** ((lv - lf) / 10.0) * _MOBILITY_LEVEL_CONSTANT),
         dtype=np.float64,
     )

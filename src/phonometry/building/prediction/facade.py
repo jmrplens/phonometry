@@ -89,6 +89,17 @@ if TYPE_CHECKING:
 
     from ..._report.metadata import ReportMetadata
 
+__all__ = [
+    "FacadeElement",
+    "FacadePredictionResult",
+    "RadiatedPowerResult",
+    "facade_shape_level_difference",
+    "facade_sound_reduction",
+    "outdoor_attenuation",
+    "outdoor_level",
+    "radiated_sound_power",
+]
+
 #: Reference absorption area ``A₀`` (Formulas 8, 14), in m².
 _A0 = 10.0
 #: Reference area ``S₀`` (Formula 2), in m².

@@ -864,8 +864,8 @@ def generate_multiple_shock(output_dir: str) -> None:
     print("Generating multiple_shock.png...")
     from phonometry import vibration
     from phonometry.vibration.human.multiple_shock import (
-        MZ_MALE,
-        RISK_THRESHOLDS_MALE,
+        _MZ_MALE,
+        _RISK_THRESHOLDS_MALE,
     )
 
     _fig, (ax_h, ax_r) = plt.subplots(1, 2, figsize=(12.5, 5.4))
@@ -898,11 +898,11 @@ def generate_multiple_shock(output_dir: str) -> None:
         prob = 100.0 * vibration.injury_probability(grid, sex=sex)
         ax_r.plot(grid, prob, color=colour, label=f"{sex}")
     # The worked example: five 40 m/s2 peaks, 82 kg male -> R = 1.22.
-    sd = vibration.compression_dose(vibration.dose_from_peaks([40.0] * 5), mz=MZ_MALE)
+    sd = vibration.compression_dose(vibration.dose_from_peaks([40.0] * 5), mz=_MZ_MALE)
     r_male = vibration.injury_risk(
         sd, start_age=20, years=20, days_per_year=120, sex="male"
     )
-    for level, r_val in zip((10, 50, 90), RISK_THRESHOLDS_MALE, strict=True):
+    for level, r_val in zip((10, 50, 90), _RISK_THRESHOLDS_MALE, strict=True):
         ax_r.axhline(level, color="#7f7f7f", linestyle=":", lw=0.8)
         ax_r.plot([r_val, r_val], [0.0, level], color="#7f7f7f", linestyle=":", lw=0.8)
     ax_r.scatter(

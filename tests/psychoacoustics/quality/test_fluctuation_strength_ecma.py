@@ -23,7 +23,7 @@ import pytest
 from phonometry import psychoacoustics
 
 _fse = importlib.import_module(
-    "phonometry.psychoacoustics.quality.fluctuation_strength_ecma"
+    "phonometry.psychoacoustics.quality._fluctuation_strength_ecma"
 )
 
 FS = 48000

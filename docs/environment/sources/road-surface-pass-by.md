@@ -157,4 +157,4 @@ editions of ISO 11819-1 were not consulted.
 - [In-situ road-surface absorption](../../materials/surfaces/road-absorption.md):
   the ISO 13472 absorption of the surface itself.
 - [Errata in published sources](../../ERRATA.md): the two ISO 11819-1 entries.
-- API reference: [`environment.sources.statistical_pass_by`](https://docs.jmrp.io/phonometry/reference/api/environment/statistical-pass-by/).
+- API reference: [`environment`: statistical pass-by](https://docs.jmrp.io/phonometry/reference/api/environment/statistical-pass-by/).

@@ -11,6 +11,36 @@ rather than an ear.
 
 from __future__ import annotations
 
+from ._earmuff_insertion_loss import (
+    ATF_FRONT_TO_RANDOM_INDEX_DB,
+    EARMUFF_INSERTION_LOSS_UNCERTAINTY,
+    EARMUFF_TEST_BANDS_HZ,
+    RANDOM_INCIDENCE_VARIATION_LIMITS,
+    EarmuffInsertionLossResult,
+    FixtureIsolationCheck,
+    InsertionLossUncertaintyBudget,
+    PlaneProgressiveWaveCheck,
+    check_plane_progressive_wave,
+    check_random_incidence_field,
+    earmuff_insertion_loss,
+    verify_fixture_isolation,
+)
+from ._real_ear_attenuation import (
+    REAT_BETWEEN_LABORATORY_UNCERTAINTY,
+    REAT_FIELD_VARIATION_LIMITS,
+    REAT_FREQUENCY_RANGES,
+    REAT_WITHIN_LABORATORY_UNCERTAINTY,
+    AttenuationDifferenceResult,
+    ProtectorUncertaintyBudget,
+    RealEarAttenuationResult,
+    REATSoundFieldCheck,
+    allowable_field_variation,
+    assess_attenuation_difference,
+    check_reat_sound_field,
+    minimum_significant_difference,
+    real_ear_attenuation,
+    reat_expanded_uncertainty,
+)
 from .active_noise_reduction import (
     ANR_WITHIN_LABORATORY_UNCERTAINTY,
     ActiveInsertionLossResult,
@@ -43,20 +73,6 @@ from .audiometry import (
     check_audiometric_ambient_noise,
     check_retest_agreement,
     sweep_audiometry_threshold,
-)
-from .earmuff_insertion_loss import (
-    ATF_FRONT_TO_RANDOM_INDEX_DB,
-    EARMUFF_INSERTION_LOSS_UNCERTAINTY,
-    EARMUFF_TEST_BANDS_HZ,
-    RANDOM_INCIDENCE_VARIATION_LIMITS,
-    EarmuffInsertionLossResult,
-    FixtureIsolationCheck,
-    InsertionLossUncertaintyBudget,
-    PlaneProgressiveWaveCheck,
-    check_plane_progressive_wave,
-    check_random_incidence_field,
-    earmuff_insertion_loss,
-    verify_fixture_isolation,
 )
 from .hearing_protectors import (
     HML_REFERENCE_C_MINUS_A,
@@ -97,22 +113,6 @@ from .occupational_exposure import (
     minimum_cumulative_duration_hours,
     table_c4_contribution,
     task_based_exposure,
-)
-from .real_ear_attenuation import (
-    REAT_BETWEEN_LABORATORY_UNCERTAINTY,
-    REAT_FIELD_VARIATION_LIMITS,
-    REAT_FREQUENCY_RANGES,
-    REAT_WITHIN_LABORATORY_UNCERTAINTY,
-    AttenuationDifferenceResult,
-    ProtectorUncertaintyBudget,
-    RealEarAttenuationResult,
-    REATSoundFieldCheck,
-    allowable_field_variation,
-    assess_attenuation_difference,
-    check_reat_sound_field,
-    minimum_significant_difference,
-    real_ear_attenuation,
-    reat_expanded_uncertainty,
 )
 from .sound_field_audiometry import (
     DIFFUSE_FIELD_VARIATION_LIMITS,

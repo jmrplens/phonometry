@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Duct-borne noise path calculation sheet (reportlab renderer).
 
-Renders a :class:`~phonometry.noise_control.duct_path.DuctPathResult` to a
+Renders a :class:`~phonometry.noise_control.DuctPathResult` to a
 one-page duct-path calculation sheet in the layout the published procedures
 use:
 
@@ -56,7 +56,7 @@ from ._noise_control_fiche import PREDICTION_DISCLAIMER
 from ._sound_power_fiche import metadata_pairs
 
 if TYPE_CHECKING:
-    from ..noise_control.duct_path import DuctPathResult
+    from ..noise_control._duct_path import DuctPathResult
     from ..room.noise_criteria import NCResult, RCResult
     from .metadata import ReportMetadata
 
@@ -177,7 +177,7 @@ def _elide(
     head and the room effect, the received spectrum and the criterion curve at
     the foot, with as many leading elements as fit and a single row saying how
     many were left out. A path long enough to trigger this is one whose sheet
-    belongs in :meth:`~phonometry.noise_control.duct_path.DuctPathResult.table`
+    belongs in :meth:`~phonometry.noise_control.DuctPathResult.table`
     rather than on a one-page fiche.
     """
     tail_kinds = ("room_effect", "received", "criterion")
@@ -384,7 +384,7 @@ def render_duct_path_report(
     """Render a duct-borne noise path calculation sheet to a PDF at ``path``.
 
     :param result: A
-        :class:`~phonometry.noise_control.duct_path.DuctPathResult` carrying
+        :class:`~phonometry.noise_control.DuctPathResult` carrying
         the element cascade, the received spectrum and the design criterion.
     :param path: Destination path of the PDF file.
     :param metadata: Optional :class:`ReportMetadata`; ``None`` produces a bare
@@ -527,7 +527,7 @@ def _fit_to_one_page(
     A fiche is one page. This measures what the assembled flow asks for and, as
     long as it overruns the frame, elides the middle element rows and rebuilds
     the table; the complete sheet always stays available through
-    :meth:`~phonometry.noise_control.duct_path.DuctPathResult.table`.
+    :meth:`~phonometry.noise_control.DuctPathResult.table`.
     """
     while len(rows) > _MIN_SHEET_ROWS:
         used = _flow_height(flow)

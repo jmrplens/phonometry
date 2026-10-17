@@ -85,6 +85,14 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+__all__ = [
+    "AtmosphericAbsorptionWarning",
+    "AtmosphericAttenuation",
+    "air_attenuation",
+    "air_power_attenuation_per_m",
+    "atmospheric_attenuation",
+]
+
 #: Reference air temperature ``T0`` (ISO 9613-1:1993, clause 4.2), in kelvins.
 _T0 = 293.15
 #: Reference ambient pressure ``pr`` (ISO 9613-1:1993, clause 4.2), in kPa.

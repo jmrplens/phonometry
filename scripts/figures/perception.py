@@ -2405,9 +2405,9 @@ def generate_sii_vocal_efforts(output_dir: str) -> None:
     """ANSI S3.5-1997 Table 3 standard speech spectra by vocal effort."""
     print("Generating sii_vocal_efforts.png...")
     from phonometry import speech
-    from phonometry.speech.sii import BAND_CENTERS, VOCAL_EFFORTS
+    from phonometry.speech.sii import _BAND_CENTERS, _VOCAL_EFFORTS
 
-    freqs = BAND_CENTERS
+    freqs = _BAND_CENTERS
     # Distinct hues (not COLOR_GRID, which blends into the gridlines and is
     # near-invisible on a light background) for the four ordered efforts.
     colours = {
@@ -2419,7 +2419,7 @@ def generate_sii_vocal_efforts(output_dir: str) -> None:
     _fig, (ax_s, ax_i) = plt.subplots(1, 2, figsize=(12.5, 5.6))
 
     # --- Left: the four standard speech spectra. ---
-    for effort in VOCAL_EFFORTS:
+    for effort in _VOCAL_EFFORTS:
         ax_s.plot(
             freqs,
             speech.standard_speech_spectrum(effort),
@@ -2461,14 +2461,16 @@ def generate_sii_vocal_efforts(output_dir: str) -> None:
             16.0,
         ]
     )
-    indices = [speech.speech_intelligibility_index(e, noise).sii for e in VOCAL_EFFORTS]
-    positions = np.arange(len(VOCAL_EFFORTS))
-    bar_colours = [colours[e] for e in VOCAL_EFFORTS]
+    indices = [
+        speech.speech_intelligibility_index(e, noise).sii for e in _VOCAL_EFFORTS
+    ]
+    positions = np.arange(len(_VOCAL_EFFORTS))
+    bar_colours = [colours[e] for e in _VOCAL_EFFORTS]
     ax_i.bar(positions, indices, width=0.6, color=bar_colours, zorder=2)
     for x, v in zip(positions, indices, strict=True):
         ax_i.text(x, v + 0.01, f"{v:.2f}", ha="center", va="bottom", fontweight="bold")
     ax_i.set_xticks(positions)
-    ax_i.set_xticklabels([e.capitalize() for e in VOCAL_EFFORTS])
+    ax_i.set_xticklabels([e.capitalize() for e in _VOCAL_EFFORTS])
     ax_i.set_ylim(0.0, 1.0)
     ax_i.set_ylabel("Speech Intelligibility Index")
     ax_i.set_title("SII vs vocal effort in a fixed noise", pad=10)
@@ -2734,9 +2736,9 @@ def generate_nipts_level_growth(output_dir: str) -> None:
     """ISO 1999 NIPTS against exposure level: the cut-off and the square law."""
     print("Generating nipts_level_growth.png...")
     from phonometry import hearing
-    from phonometry.hearing.noise_induced_hearing_loss import NIPTS_FREQUENCIES
+    from phonometry.hearing.noise_induced_hearing_loss import _NIPTS_FREQUENCIES
 
-    freqs = NIPTS_FREQUENCIES
+    freqs = _NIPTS_FREQUENCIES
     levels = np.arange(75.0, 100.5, 0.5)
     med = np.array([hearing.nipts(float(x), 40.0, 0.5).median for x in levels])
 
@@ -3547,9 +3549,9 @@ def generate_noise_induced_hearing_loss(output_dir: str) -> None:
     """ISO 1999 noise-induced permanent threshold shift and HTLAN combination."""
     print("Generating noise_induced_hearing_loss.png...")
     from phonometry import hearing
-    from phonometry.hearing.noise_induced_hearing_loss import NIPTS_FREQUENCIES
+    from phonometry.hearing.noise_induced_hearing_loss import _NIPTS_FREQUENCIES
 
-    freqs = NIPTS_FREQUENCIES
+    freqs = _NIPTS_FREQUENCIES
     _fig, (ax_n, ax_h) = plt.subplots(1, 2, figsize=(12.5, 5.6))
 
     # --- Left: median NIPTS growth with exposure duration at 95 dB. ---

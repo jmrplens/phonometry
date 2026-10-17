@@ -128,7 +128,7 @@ def _nc_31_5() -> noise_criteria.NCResult:
     interpolated and carries a decimal of its own.
     """
     levels = noise_criteria.nc_curve(40.0).copy()
-    levels[list(noise_criteria.OCTAVE_BANDS).index(31.5)] += 10.0
+    levels[list(noise_criteria.NC_OCTAVE_BANDS_HZ).index(31.5)] += 10.0
     result = noise_criteria.noise_criterion(levels)
     assert result.governing_frequency == pytest.approx(31.5)
     return result

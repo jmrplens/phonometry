@@ -85,6 +85,23 @@ if TYPE_CHECKING:
 
     from ..._report.metadata import ReportMetadata
 
+__all__ = [
+    "MultipleShockResult",
+    "acceleration_dose",
+    "compression_dose",
+    "daily_dose",
+    "daily_dose_multi",
+    "dose_from_peaks",
+    "injury_probability",
+    "injury_risk",
+    "multiple_shock_assessment",
+    "response_peaks",
+    "seat_to_spine_transfer",
+    "spinal_response",
+    "static_stress",
+    "ultimate_strength",
+]
+
 
 # ---------------------------------------------------------------------------
 # Normative constants (Clause 5).
@@ -104,40 +121,40 @@ _TRANSFER_POLES: tuple[tuple[float, float], ...] = (
 )
 
 #: Amplitude response factor of the spine in the dose (Formula 3).
-DOSE_AMPLITUDE_FACTOR = 1.07
+_DOSE_AMPLITUDE_FACTOR = 1.07
 
 #: Palmgren-Miner fatigue exponent of the dose (Formula 3).
-DOSE_EXPONENT = 6.0
+_DOSE_EXPONENT = 6.0
 
 # ---------------------------------------------------------------------------
 # Annex C constants (health-effect assessment).
 # ---------------------------------------------------------------------------
 
 #: Acceleration gravity used for the static stress (clause C, ``9.81 m/s2``).
-GRAVITY = 9.81
+_GRAVITY = 9.81
 
 #: Stress conversion ``mz`` (MPa per m/s2) by sex (Formula C.2).
-MZ_MALE = 0.029
-MZ_FEMALE = 0.025
+_MZ_MALE = 0.029
+_MZ_FEMALE = 0.025
 
 #: Ultimate lumbar strength intercept ``6.75 MPa`` (Formula C.4).
-ULTIMATE_STRENGTH_INTERCEPT = 6.75
+_ULTIMATE_STRENGTH_INTERCEPT = 6.75
 
 #: Age slope ``Sage`` of the ultimate strength by sex, MPa/year (Formula C.4).
-STRENGTH_AGE_SLOPE_MALE = 0.052
-STRENGTH_AGE_SLOPE_FEMALE = 0.039
+_STRENGTH_AGE_SLOPE_MALE = 0.052
+_STRENGTH_AGE_SLOPE_FEMALE = 0.039
 
 #: Weibull coefficients ``(alpha, beta)`` of the injury model by sex (Table C.1).
-WEIBULL_MALE: tuple[float, float] = (1.613, 2.799)
-WEIBULL_FEMALE: tuple[float, float] = (0.959, 3.709)
+_WEIBULL_MALE: tuple[float, float] = (1.613, 2.799)
+_WEIBULL_FEMALE: tuple[float, float] = (0.959, 3.709)
 
 #: R values for 10 %, 50 % and 90 % risk of injury by sex (Table C.2).
-RISK_THRESHOLDS_MALE: tuple[float, float, float] = (0.72, 1.42, 2.17)
-RISK_THRESHOLDS_FEMALE: tuple[float, float, float] = (0.52, 0.87, 1.20)
+_RISK_THRESHOLDS_MALE: tuple[float, float, float] = (0.72, 1.42, 2.17)
+_RISK_THRESHOLDS_FEMALE: tuple[float, float, float] = (0.52, 0.87, 1.20)
 
 
 def _mz_for_sex(sex: str) -> float:
-    return MZ_MALE if sex == "male" else MZ_FEMALE
+    return _MZ_MALE if sex == "male" else _MZ_FEMALE
 
 
 # ---------------------------------------------------------------------------
@@ -246,8 +263,8 @@ def dose_from_peaks(peaks: ArrayLike) -> float:
     az = np.asarray(peaks, dtype=np.float64).ravel()
     if az.size == 0:
         return 0.0
-    total = float(np.sum(az**DOSE_EXPONENT))
-    return float(DOSE_AMPLITUDE_FACTOR * total ** (1.0 / DOSE_EXPONENT))
+    total = float(np.sum(az**_DOSE_EXPONENT))
+    return float(_DOSE_AMPLITUDE_FACTOR * total ** (1.0 / _DOSE_EXPONENT))
 
 
 def acceleration_dose(acceleration: SignalInput, fs: float | None = None) -> float:
@@ -284,7 +301,7 @@ def daily_dose(dose: float, exposure_time: float, measurement_time: float) -> fl
     """
     exposure_time = require_positive(exposure_time, "exposure_time")
     measurement_time = require_positive(measurement_time, "measurement_time")
-    return float(dose * (exposure_time / measurement_time) ** (1.0 / DOSE_EXPONENT))
+    return float(dose * (exposure_time / measurement_time) ** (1.0 / _DOSE_EXPONENT))
 
 
 def daily_dose_multi(
@@ -320,8 +337,8 @@ def daily_dose_multi(
     if not np.all(tm > 0.0) or not np.all(td > 0.0):
         msg = "exposure_times and measurement_times must be positive."
         raise ValueError(msg)
-    total = float(np.sum(dz**DOSE_EXPONENT * (td / tm)))
-    return float(total ** (1.0 / DOSE_EXPONENT))
+    total = float(np.sum(dz**_DOSE_EXPONENT * (td / tm)))
+    return float(total ** (1.0 / _DOSE_EXPONENT))
 
 
 # ---------------------------------------------------------------------------
@@ -329,23 +346,24 @@ def daily_dose_multi(
 # ---------------------------------------------------------------------------
 
 
-def compression_dose(daily_dose_value: float, *, mz: float = MZ_MALE) -> float:
+def compression_dose(daily_dose_value: float, *, mz: float = _MZ_MALE) -> float:
     r"""Daily compressive stress :math:`S_\mathrm{d}` (Annex C, Formula C.1).
 
     :param daily_dose_value: The daily acceleration dose :math:`D_\mathrm{zd}`,
         m/s2.
-    :param mz: Stress conversion :math:`m_\mathrm{z}` (MPa per m/s2); default the
-        82 kg male value :data:`MZ_MALE`. See :data:`MZ_FEMALE`.
+    :param mz: Stress conversion :math:`m_\mathrm{z}` (MPa per m/s2) of
+        Formula C.2; default 0.029, the 82 kg male value, and 0.025 for the
+        female.
     :return: The daily compressive stress :math:`S_\mathrm{d} = m_\mathrm{z} D_\mathrm{zd}`, MPa.
     """
     return mz * daily_dose_value
 
 
-def static_stress(mz: float = MZ_MALE) -> float:
+def static_stress(mz: float = _MZ_MALE) -> float:
     r"""Static compressive stress :math:`S_\text{stat} = m_\mathrm{z} \cdot 9.81`
     (Annex C), MPa.
     """
-    return mz * GRAVITY
+    return mz * _GRAVITY
 
 
 def ultimate_strength(
@@ -361,9 +379,9 @@ def ultimate_strength(
         :math:`S_\mathrm{u} = 6.75 - S_\text{age} (b+i)`, MPa.
     """
     require_choice(sex, "sex", _SEXES)
-    slope = STRENGTH_AGE_SLOPE_MALE if sex == "male" else STRENGTH_AGE_SLOPE_FEMALE
+    slope = _STRENGTH_AGE_SLOPE_MALE if sex == "male" else _STRENGTH_AGE_SLOPE_FEMALE
     years = np.asarray(age, dtype=np.float64)
-    return ULTIMATE_STRENGTH_INTERCEPT - slope * years
+    return _ULTIMATE_STRENGTH_INTERCEPT - slope * years
 
 
 def injury_risk(
@@ -410,9 +428,9 @@ def injury_risk(
             "exposure period; the age range exceeds the model's validity."
         )
         raise ValueError(msg)
-    numerator = daily_compression * days_per_year ** (1.0 / DOSE_EXPONENT)
-    total = float(np.sum((numerator / strength) ** DOSE_EXPONENT))
-    return float(total ** (1.0 / DOSE_EXPONENT))
+    numerator = daily_compression * days_per_year ** (1.0 / _DOSE_EXPONENT)
+    total = float(np.sum((numerator / strength) ** _DOSE_EXPONENT))
+    return float(total ** (1.0 / _DOSE_EXPONENT))
 
 
 def injury_probability(
@@ -428,14 +446,14 @@ def injury_probability(
         scalar input, otherwise an array. Negative :math:`R` gives 0.
     """
     require_choice(sex, "sex", _SEXES)
-    alpha, beta = WEIBULL_MALE if sex == "male" else WEIBULL_FEMALE
+    alpha, beta = _WEIBULL_MALE if sex == "male" else _WEIBULL_FEMALE
     r = np.asarray(risk, dtype=np.float64)
     prob = 1.0 - np.exp(-((np.maximum(r, 0.0) / alpha) ** beta))
     return as_float_or_array(prob)
 
 
 def _risk_thresholds(sex: str) -> tuple[float, float, float]:
-    return RISK_THRESHOLDS_MALE if sex == "male" else RISK_THRESHOLDS_FEMALE
+    return _RISK_THRESHOLDS_MALE if sex == "male" else _RISK_THRESHOLDS_FEMALE
 
 
 @dataclass(frozen=True)

@@ -659,7 +659,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **Sound power of small movable sources in a hard-walled or a special
   reverberation test room (ISO 3743-1, ISO 3743-2).** The two members of the
   ISO 3740 family the sound power guide listed as missing are implemented in
-  two new modules. `emission.sound_power_hard_walled` is the ISO 3743-1:2010
+  `emission`. `emission.sound_power_hard_walled` is the ISO 3743-1:2010
   comparison with a reference sound source: the energy means of Eq. 9 to 12,
   the background correction of 8.1.3 applied once per band on the means, with
   no correction above a 15 dB margin, Eq. 13 from 6 dB and a fixed 1.3 dB
@@ -674,7 +674,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   box, absorption coefficients and the eight orientations of a directional
   source against Table 3), `hard_walled_source_locations` reads the number of
   source locations from the survey of 7.4 and Table 2, and
-  `reproducibility_from_round_robin` is Eq. 24. In the second module,
+  `reproducibility_from_round_robin` is Eq. 24. For the special room,
   `emission.sound_power_special_room` is the direct method of ISO 3743-2:2018,
   Formula 9 per octave band and for the A-weighted level measured directly,
   with the stepped background correction of Table 4 at each position, and
@@ -759,9 +759,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   as Clause 6 asks, increasing downwards at 50 dB per decade, on any axes. The
   hearing protectors guide has a new section on it.
 
-- **Mobility measured with an impact hammer (ISO 7626-5).** The
-  `vibration.structural.impact_mobility` module processes the records of
-  ISO 7626-5:2019, one impact and its free decay per record.
+- **Mobility measured with an impact hammer (ISO 7626-5).** `vibration`
+  processes the records of ISO 7626-5:2019, one impact and its free decay per
+  record.
   `energy_spectral_density` is the $G_{FF} = 2\lvert F\rvert^2$ of 3.3 and
   3.4, `force_window` the window of 8.5.1 that is unity over the pulse and
   exactly zero elsewhere, and `exponential_window` with
@@ -4119,7 +4119,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   dictionaries, even where the annotation said `Mapping`, so
   `GUIDE_VALUES["residential"] = ...` or `REFERENCE_CURVE[500] = 0.0` changed
   a printed number for every caller in the process without anything raising,
-  and published arrays such as `speech.sii.BAND_IMPORTANCE` took in-place
+  and published arrays such as the NC curves (`room.NC_CURVES_DB`) took in-place
   arithmetic the same way. The tables are now read-only mappings
   (`types.MappingProxyType`) down to the dictionaries nested inside them, the
   arrays have their `writeable` flag cleared, and
@@ -4194,8 +4194,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   among them, and `LowFrequencyProcedure`; `building.prediction.resilient_layers`
   listed the five ISO 12354-1 Annex D lining names after they moved to
   `building.prediction.linings`; `noise_control.screen_in_situ` listed the
-  operator sphere `noise_control.cabin_insulation` owns, and
-  `noise_control.cabin_insulation` listed the band ranges, `leak_ratio` and
+  operator sphere the ISO 11957 cabin module owns, and that module listed
+  the band ranges, `leak_ratio` and
   `seal_ratio` that ISO 11957 shares with ISO 11546 and
   `noise_control.enclosure_insulation` publishes. Each name is
   published once, by its package and the module that defines it, and
@@ -4233,6 +4233,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   changes it reported thirty-two listings. It also fails on a row of the
   curated API table for a plain name nothing publishes, which is what
   `DeclarationForm` left behind when its row stayed.
+
+- **A module is never hidden behind a function of its own name.** Thirty-one
+  modules shared their name with the function their package publishes:
+  `signals/correlation.py` sat beside `signals.correlation()`, so `import
+  phonometry.signals.correlation as m` bound the function and
+  `signals.correlation.time_delay` raised `AttributeError`, while the API
+  reference had a page under that address. Each of them is private now
+  (`signals/_correlation.py`), the function keeps its name and every name the
+  package published from the module keeps its address: only the import
+  through the file path is gone, and `from phonometry.signals import
+  time_delay` is the spelling. The thirty-one are `broadcast.program_loudness`,
+  `building.measurement.rainfall_sound`, the eight sound power modules of
+  `emission` (`sound_power_anechoic`, `sound_power_hard_walled`,
+  `sound_power_in_duct`, `sound_power_in_situ`, `sound_power_intensity`,
+  `sound_power_intensity_points`, `sound_power_reverberation`,
+  `sound_power_special_room`), `environment.sources.statistical_pass_by`,
+  `fluids.air`, `hearing.earmuff_insertion_loss`,
+  `hearing.real_ear_attenuation`, `materials.absorbers.airflow_resistance`,
+  `noise_control.cabin_insulation`, `noise_control.duct_path`, five of
+  `psychoacoustics.quality` (`fluctuation_strength`,
+  `fluctuation_strength_ecma`, `roughness_ecma`, `tonality_ecma`,
+  `tone_audibility`), `room.crowd_noise`, `room.impulse_response`,
+  `signals.cepstrum`, `signals.correlation`, `signals.envelope`,
+  `underwater.propagation.seabed_reflection` and three of
+  `vibration.structural` (`impact_mobility`, `junction_transmission`,
+  `radiation_efficiency`). The type aliases four of the `emission` modules
+  defined went with them (`PrecisionSurface`, `PrecisionArray`,
+  `PrecisionRoom`, `MicrophoneShield`, `Grade`, `BandType` and
+  `DeterminationGrade`): annotate with the `Literal` each stood for. The API
+  reference keeps each page at its URL,
+  titled by its domain (`signals: correlation`) and opening with the package
+  every name on it is imported from, so no page claims an address that does
+  not import.
+
+- **Every public module says what it publishes.** A hundred and nineteen
+  public modules had no `__all__`, so a constant one of them defined for its
+  own use looked as public as its functions, and some reached guides and
+  scripts through the full module path. Every public module now lists what it
+  defines and its package publishes, and anything else it defines is private.
+  The NC curves a guide drew by hand are published by `room` with their unit:
+  `room.NC_OCTAVE_BANDS_HZ`, `room.NC_RATINGS` and `room.NC_CURVES_DB` (they
+  were `OCTAVE_BANDS`, `NC_INDICES` and `NC_CURVES` of
+  `room.noise_criteria`). The SII band importances, band centres and vocal
+  efforts are read from `speech.sii_procedure(...)` and
+  `speech.standard_speech_spectra()`, the NIPTS frequencies from the
+  `hearing.nipts(...)` result, and the ISO 1683 references from
+  `metrology.ISO1683_REFERENCE_VALUES`; the coefficients, limits and defaults
+  of `environment.assessment.impulsive_sound`,
+  `vibration.human.multiple_shock`, `building.prediction.detailed_model` and
+  the rest are private, each applied by the function that reads it or taken
+  as the default of a parameter. No function applies the ECMA-418-2
+  thresholds that are private now, the 0.01 sone_HMS audibility criterion of
+  its loudness and the prominence thresholds of its tonality (0.4 tu_HMS),
+  roughness (0.2 asper) and fluctuation strength (0.2 vacil_HMS). The
+  migration guide gives each with its clause, to compare a result against.
+  The constant `electroacoustics.piston.J1_FIRST_ZERO` and
+  `noise_control.duct_modes.PLANE_WAVE_EIGENVALUE`, which nothing read, are
+  gone. The migration guide lists every name and what to write instead.
+  `hearing.hearing_protectors` and `noise_control.valves` list the constants
+  their packages publish from them, which they had left out.
+
+  `scripts/check_api_reference.py` holds the modules to both. It fails when a
+  public module shares its name with something else its package holds (read
+  before the module is imported, and in the package's `__init__`, so neither a
+  module nothing imports nor one another import reached first slips by), when
+  a public module has no `__all__`, when a module defines a name its package
+  publishes and does not list it, and when it defines a public-looking name
+  that is not listed and is not a type alias, a `TypeVar` or a `Protocol`.
+  An exception is keyed by location with its reason, and one that no longer
+  applies is reported too. Run on the tree before these changes it reported
+  165 problems: 31 hidden modules, 119 modules without `__all__` and 15 names
+  left out of a list.
 
 ### Fixed
 
@@ -4889,7 +4961,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   it is cross-checked against `emission.environmental_correction`.
 
 - **ISO 11957:1996**, the sound pressure insulation of a sound-protecting
-  cabin, in `phonometry.noise_control.cabin_insulation`. An enclosure keeps
+  cabin, in `phonometry.noise_control`. An enclosure keeps
   noise in and a cabin keeps it out, and the second is measured as one
   subtraction between the level in the room and the level inside the empty
   cabin. `cabin_insulation` is Equations (1), (2) and (3); the in-situ methods
@@ -9708,8 +9780,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   loss-factor budget. Anchored on the printed answer to Norton's problem 6.10
   (eta12 = 4.26e-4, eta21 = 3.92e-4, 1.31 W).
 
-- Two closed-form junction coupling loss factors in
-  `vibration/junction_transmission.py`: `right_angle_transmission_coefficient`
+- Two closed-form junction coupling loss factors in `vibration`:
+  `right_angle_transmission_coefficient`
   (Norton Eqs. 6.53 to 6.55, the normal- and random-incidence coefficient of
   two plates meeting at right angles, which reproduces Norton Eq. 6.52 when fed
   to the existing `coupling_loss_factor`) and
@@ -9757,7 +9829,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `rectangular_room_modes`, and a section in the image-source guide in English
   and Spanish.
 
-- Crowd self-noise of an occupied room (`room/crowd_noise.py`): `crowd_noise`
+- Crowd self-noise of an occupied room (`room`): `crowd_noise`
   evaluates the reverberant level a room's own occupants generate against
   occupancy for a set of absorption areas, with `speech_direct_level`,
   `crowd_noise_level`, `speech_to_noise_ratio` and `absorption_per_table` as
@@ -9860,8 +9932,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `R'w` 52 dB with `C` -1 and `Ctr` -5 and agrees to the integer on both
   published spectra. New figure `dbhr_global_index`, four conformance checks
   and a guide in English and Spanish.
-- End-to-end HVAC duct-borne noise calculation. `duct_path` (new
-  `noise_control/duct_path.py`) cascades a fan-to-room path element by
+- End-to-end HVAC duct-borne noise calculation. `duct_path` (new in
+  `noise_control`) cascades a fan-to-room path element by
   element, subtracting each attenuation, combining each element's regenerated
   sound power on an energy basis over a 0 dB self-noise floor, applying the
   room effect and rating the received spectrum against an NC or RC design
@@ -10391,11 +10463,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   until 5.0.
 
 - Four `room` modules and one `aircraft` module lose the prefix their package
-  already says: `room.room_acoustics`, `room.room_ir`, `room.room_noise` and
-  `room.room_modes` are `room.acoustics`, `room.impulse_response`,
-  `room.noise_criteria` and `room.modes`, and `aircraft.aircraft_noise` is
-  `aircraft.certification`. Two of them say more than the prefix did: `ir` was
-  opaque for the ISO 18233 acquisition, and `noise` alone did not say that the
+  already says: `room.room_acoustics`, `room.room_noise` and
+  `room.room_modes` are `room.acoustics`, `room.noise_criteria` and
+  `room.modes`, `room.room_ir` became the impulse-response functions `room`
+  publishes, and `aircraft.aircraft_noise` is `aircraft.certification`. Two
+  of them say more than the prefix did: `ir` was opaque for the ISO 18233
+  acquisition, and `noise` alone did not say that the
   module is the ANSI/ASA S12.2 NC and RC criteria. The certification module is
   what ICAO Annex 16 calls it.
 
@@ -11301,7 +11374,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   is `UncertaintyResult.expanded(coverage)`. The renamed constants
   `OCTAVE_BANDS_HZ`, `THIRD_OCTAVE_BANDS_HZ`, `BAND_CENTRES` and
   `ExposureWarning` are gone; use `RATING_OCTAVE_BANDS_HZ`,
-  `RATING_THIRD_OCTAVE_BANDS_HZ`, `BAND_CENTERS` and
+  `RATING_THIRD_OCTAVE_BANDS_HZ`, the `frequencies` of
+  `speech.sii_procedure("one-third-octave")` and
   `OccupationalExposureWarning`. `BASE_PLATE_BANDS_HZ`, the third constant
   alias, is the constant's own name in 4.0. The deprecated keywords are gone too:
   `sample_rate` is `fs` in the ISO 13472 functions, `humidity` is

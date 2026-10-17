@@ -13,11 +13,11 @@ This module computes the families set out in M. P. Norton and D. G. Karczub,
 8.4.7 pumps, 8.4.8 electrical equipment), and hands them to the signal chain
 that already exists in :mod:`phonometry.signals`: band-pass the structural
 resonance the defect impacts ring, detect its envelope and transform it
-(:func:`~phonometry.signals.envelope.envelope_spectrum`), average
+(:func:`~phonometry.signals.envelope_spectrum`), average
 synchronously with the shaft
 (:func:`~phonometry.signals.synchronous_average.time_synchronous_average`)
 or collapse the harmonic families in the cepstrum
-(:func:`~phonometry.signals.cepstrum.cepstrum`). The result object's
+(:func:`~phonometry.signals.cepstrum`). The result object's
 :meth:`FaultFrequencyResult.plot` draws the predicted lines **on top of a
 measured envelope spectrum**, which is the working view.
 
@@ -279,7 +279,7 @@ class FaultFrequencyResult(RichDisplay):
         """Overlay the predicted lines on a measured envelope spectrum.
 
         Pass the measurement as ``spectrum=`` (an
-        :class:`~phonometry.signals.envelope.EnvelopeSpectrumResult`, or any
+        :class:`~phonometry.signals.EnvelopeSpectrumResult`, or any
         object exposing ``frequencies`` and ``amplitude``); without it the
         predicted lines are drawn alone as a labelled stem plot.
 

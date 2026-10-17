@@ -110,6 +110,15 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import DTypeLike
 
+__all__ = [
+    "TimeWeightedEnvelope",
+    "TimeWeighting",
+    "WeightingFilter",
+    "linkwitz_riley",
+    "time_weighting",
+    "weighting_filter",
+]
+
 #: Rejection message shared by the four entry points that take ``fs``.
 _FS_POSITIVE = "Sample rate 'fs' must be positive."
 

@@ -1,9 +1,11 @@
 ---
-title: "fluids.air"
+title: "fluids: humid air"
 description: "Humid air (IEC 61094-2:2009, Annex F)."
 sidebar:
   label: "air"
 ---
+
+Every name on this page is published by `phonometry.fluids`: `from phonometry import fluids`, then `fluids.<name>`.
 
 Humid air (IEC 61094-2:2009, Annex F).
 

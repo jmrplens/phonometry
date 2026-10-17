@@ -84,12 +84,12 @@ from phonometry.speech import sii
 
 def test_band_importance_sums_to_one() -> None:
     # ANSI S3.5-1997 Table 3: the band-importance function is normalised.
-    assert sii.BAND_IMPORTANCE.sum() == pytest.approx(
+    assert sii._BAND_IMPORTANCE.sum() == pytest.approx(
         ANSIS3_5_BAND_IMPORTANCE_SUM, abs=1e-12
     )
-    assert sii.BAND_IMPORTANCE.size == 18
+    assert sii._BAND_IMPORTANCE.size == 18
     np.testing.assert_allclose(
-        sii.BAND_CENTERS,
+        sii._BAND_CENTERS,
         [
             160.0,
             200.0,
@@ -216,7 +216,7 @@ def test_masking_slope_keeps_the_printed_summation_order() -> None:
     noise = np.linspace(45.0, 5.0, 18)
     result = sii.speech_intelligibility_index(speech, noise)
 
-    f = sii.BAND_CENTERS
+    f = sii._BAND_CENTERS
     b = np.maximum(noise, speech - 24.0)
     c = -80.0 + 0.6 * (b + 10.0 * np.log10(f) - 6.353)
     expected = np.empty(18)
@@ -271,20 +271,20 @@ def test_vocal_effort_spectra_spot_values() -> None:
     assert sii.standard_speech_spectrum("raised")[8] == pytest.approx(33.86)
     assert sii.standard_speech_spectrum("loud")[8] == pytest.approx(ANSIS3_5_LOUD_1KHZ)
     assert sii.standard_speech_spectrum("shout")[8] == pytest.approx(51.31)
-    assert sii.VOCAL_EFFORTS == ("normal", "raised", "loud", "shout")
+    assert sii._VOCAL_EFFORTS == ("normal", "raised", "loud", "shout")
 
 
 def test_vocal_effort_overall_level_increases() -> None:
     # The overall speech level grows with vocal effort (Table 3): reconstruct
     # each spectrum's overall free-field SPL and check it is monotone.
-    f = sii.BAND_CENTERS
+    f = sii._BAND_CENTERS
     bw = (2.0 ** (1 / 6) - 2.0 ** (-1 / 6)) * f
     overall = [
         10.0
         * np.log10(
             np.sum(10.0 ** ((sii.standard_speech_spectrum(e) + 10 * np.log10(bw)) / 10))
         )
-        for e in sii.VOCAL_EFFORTS
+        for e in sii._VOCAL_EFFORTS
     ]
     assert overall == sorted(overall)  # normal < raised < loud < shout
     # Matches the known ANSI vocal-effort overall levels (dB SPL).
@@ -298,7 +298,7 @@ def test_higher_effort_raises_index_in_noise() -> None:
     # In a fixed noise, speaking louder improves intelligibility.
     noise = np.full(18, 40.0)
     indices = [
-        sii.speech_intelligibility_index(e, noise).sii for e in sii.VOCAL_EFFORTS
+        sii.speech_intelligibility_index(e, noise).sii for e in sii._VOCAL_EFFORTS
     ]
     assert indices == sorted(indices)
     assert indices[3] > indices[0]
@@ -465,7 +465,7 @@ def test_result_fields_present() -> None:
     assert result.band_importance.shape == (18,)
     assert result.disturbance.shape == (18,)
     assert result.masking.shape == (18,)
-    np.testing.assert_allclose(result.frequencies, sii.BAND_CENTERS)
+    np.testing.assert_allclose(result.frequencies, sii._BAND_CENTERS)
 
 
 def test_plot_returns_axes() -> None:
@@ -483,9 +483,9 @@ def test_standard_speech_spectra_family_matches_table3() -> None:
     """The result wrapper only stacks the bare Table 3 arrays."""
     res = sii.standard_speech_spectra()
     assert isinstance(res, sii.StandardSpeechSpectrum)
-    assert res.vocal_efforts == sii.VOCAL_EFFORTS
+    assert res.vocal_efforts == sii._VOCAL_EFFORTS
     assert res.levels.shape == (4, 18)
-    np.testing.assert_allclose(res.frequencies, sii.BAND_CENTERS)
+    np.testing.assert_allclose(res.frequencies, sii._BAND_CENTERS)
     for i, effort in enumerate(res.vocal_efforts):
         np.testing.assert_allclose(res.levels[i], sii.standard_speech_spectrum(effort))
     # ANSI S3.5-1997 Table 3 anchor values, in dB SPL.
@@ -909,7 +909,7 @@ def test_default_method_is_unchanged_one_third_octave() -> None:
     explicit = sii.speech_intelligibility_index("normal", method="one-third-octave")
     assert default.method == "one-third-octave"
     assert default.sii == explicit.sii
-    np.testing.assert_allclose(default.frequencies, sii.BAND_CENTERS)
+    np.testing.assert_allclose(default.frequencies, sii._BAND_CENTERS)
 
 
 def test_speech_intelligibility_index_rejects_unknown_method() -> None:

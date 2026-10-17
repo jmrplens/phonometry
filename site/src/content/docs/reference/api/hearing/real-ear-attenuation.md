@@ -1,9 +1,11 @@
 ---
-title: "hearing.real_ear_attenuation"
+title: "hearing: real-ear attenuation"
 description: "Real-ear attenuation of a hearing protector and its uncertainty (ISO 4869-1:2018)."
 sidebar:
   label: "real_ear_attenuation"
 ---
+
+Every name on this page is published by `phonometry.hearing`: `from phonometry import hearing`, then `hearing.<name>`.
 
 Real-ear attenuation of a hearing protector and its uncertainty (ISO 4869-1:2018).
 

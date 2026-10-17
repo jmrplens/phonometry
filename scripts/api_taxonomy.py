@@ -24,6 +24,12 @@ reader who knows where a function lives in the code can predict where its
 page lives. The section listed above is the exception, and it is
 deliberate.
 
+A mapped module may be private. A module that a function of its package names
+(``signals/correlation.py`` beside ``signals.correlation()``) is private, so
+that the package attribute and the module never compete for one address; its
+names are published by the package, and its page keeps its URL and takes the
+title :data:`PRIVATE_MODULE_TOPICS` gives it.
+
 The generator additionally checks the taxonomy against reality: every module
 that owns a public name must be mapped here, and every mapped module must
 still exist (see ``scripts/generate_api_docs.py``).
@@ -79,11 +85,11 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.signals.time_frequency",
             "phonometry.signals.test_signals",
             "phonometry.signals.phase",
-            "phonometry.signals.cepstrum",
+            "phonometry.signals._cepstrum",
             "phonometry.signals.synchronous_average",
             "phonometry.signals.inversion",
-            "phonometry.signals.correlation",
-            "phonometry.signals.envelope",
+            "phonometry.signals._correlation",
+            "phonometry.signals._envelope",
         ),
     ),
     Section(
@@ -112,7 +118,7 @@ _SECTION_LIST: tuple[Section, ...] = (
         label_es="Fluidos",
         modules=(
             "phonometry.fluids",
-            "phonometry.fluids.air",
+            "phonometry.fluids._air",
             "phonometry.fluids.gas",
             "phonometry.fluids.water",
             "phonometry.fluids.catalogue",
@@ -156,12 +162,12 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.psychoacoustics.loudness.ecma",
             "phonometry.psychoacoustics.loudness.contours",
             "phonometry.psychoacoustics.quality.sharpness",
-            "phonometry.psychoacoustics.quality.roughness_ecma",
+            "phonometry.psychoacoustics.quality._roughness_ecma",
             "phonometry.psychoacoustics.quality.tonality",
-            "phonometry.psychoacoustics.quality.tonality_ecma",
-            "phonometry.psychoacoustics.quality.tone_audibility",
-            "phonometry.psychoacoustics.quality.fluctuation_strength",
-            "phonometry.psychoacoustics.quality.fluctuation_strength_ecma",
+            "phonometry.psychoacoustics.quality._tonality_ecma",
+            "phonometry.psychoacoustics.quality._tone_audibility",
+            "phonometry.psychoacoustics.quality._fluctuation_strength",
+            "phonometry.psychoacoustics.quality._fluctuation_strength_ecma",
             "phonometry.psychoacoustics.quality.annoyance",
             "phonometry.psychoacoustics.erb_scale",
         ),
@@ -186,10 +192,10 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.hearing.sound_field_audiometry",
             "phonometry.hearing.noise_induced_hearing_loss",
             "phonometry.hearing.occupational_exposure",
-            "phonometry.hearing.real_ear_attenuation",
+            "phonometry.hearing._real_ear_attenuation",
             "phonometry.hearing.hearing_protectors",
             "phonometry.hearing.active_noise_reduction",
-            "phonometry.hearing.earmuff_insertion_loss",
+            "phonometry.hearing._earmuff_insertion_loss",
         ),
     ),
     Section(
@@ -199,7 +205,7 @@ _SECTION_LIST: tuple[Section, ...] = (
         modules=(
             "phonometry.room.acoustics",
             "phonometry.room.auditorium",
-            "phonometry.room.impulse_response",
+            "phonometry.room._impulse_response",
             "phonometry.room.noise_criteria",
             "phonometry.room.open_plan",
             "phonometry.room.reverberation_prediction",
@@ -207,7 +213,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.room.image_source",
             "phonometry.room.steady_field",
             "phonometry.room.modes",
-            "phonometry.room.crowd_noise",
+            "phonometry.room._crowd_noise",
             "phonometry.room.spatial_decay",
             "phonometry.room.workroom_prediction",
         ),
@@ -231,7 +237,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.building.measurement.laboratory_insulation",
             "phonometry.building.measurement.laboratory_improvement",
             "phonometry.building.measurement.joint_insulation",
-            "phonometry.building.measurement.rainfall_sound",
+            "phonometry.building.measurement._rainfall_sound",
             "phonometry.building.measurement.survey_insulation",
             "phonometry.building.measurement.service_equipment",
             "phonometry.building.measurement.intensity_insulation",
@@ -256,7 +262,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.materials.absorbers.sound_absorption",
             "phonometry.materials.absorbers.rating",
             "phonometry.materials.absorbers.uncertainty",
-            "phonometry.materials.absorbers.airflow_resistance",
+            "phonometry.materials.absorbers._airflow_resistance",
             "phonometry.materials.resilient.dynamic_stiffness",
             "phonometry.materials.resilient.moduli",
             "phonometry.materials.absorbers.impedance_tube",
@@ -289,9 +295,9 @@ _SECTION_LIST: tuple[Section, ...] = (
         modules=(
             "phonometry.vibration.structural.mechanical_mobility",
             "phonometry.vibration.structural.point_mobility",
-            "phonometry.vibration.structural.impact_mobility",
-            "phonometry.vibration.structural.radiation_efficiency",
-            "phonometry.vibration.structural.junction_transmission",
+            "phonometry.vibration.structural._impact_mobility",
+            "phonometry.vibration.structural._radiation_efficiency",
+            "phonometry.vibration.structural._junction_transmission",
             "phonometry.vibration.structural.experimental_sea",
             "phonometry.vibration.machinery.diagnostics",
             "phonometry.vibration.machinery.evaluation",
@@ -320,7 +326,7 @@ _SECTION_LIST: tuple[Section, ...] = (
         modules=(
             "phonometry.environment.propagation.outdoor_propagation",
             "phonometry.environment.sources.cnossos_road",
-            "phonometry.environment.sources.statistical_pass_by",
+            "phonometry.environment.sources._statistical_pass_by",
             "phonometry.environment.propagation.ground_barriers",
             "phonometry.environment.propagation.ground_surfaces",
             "phonometry.environment.propagation.noise_reducing_devices",
@@ -372,7 +378,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.underwater.propagation.sound_speed",
             "phonometry.underwater.sonar_equation",
             "phonometry.underwater.sources.ambient_noise",
-            "phonometry.underwater.propagation.seabed_reflection",
+            "phonometry.underwater.propagation._seabed_reflection",
             "phonometry.underwater.sources.ship_radiated_noise",
             "phonometry.underwater.sources.ship_traffic_noise",
             "phonometry.underwater.sources.pile_driving_noise",
@@ -387,16 +393,16 @@ _SECTION_LIST: tuple[Section, ...] = (
         label_es="Potencia acústica e intensidad",
         modules=(
             "phonometry.emission.sound_power",
-            "phonometry.emission.sound_power_anechoic",
+            "phonometry.emission._sound_power_anechoic",
             "phonometry.emission.free_field_qualification",
             "phonometry.emission.reference_sound_source",
-            "phonometry.emission.sound_power_intensity",
-            "phonometry.emission.sound_power_intensity_points",
-            "phonometry.emission.sound_power_reverberation",
-            "phonometry.emission.sound_power_in_situ",
-            "phonometry.emission.sound_power_hard_walled",
-            "phonometry.emission.sound_power_special_room",
-            "phonometry.emission.sound_power_in_duct",
+            "phonometry.emission._sound_power_intensity",
+            "phonometry.emission._sound_power_intensity_points",
+            "phonometry.emission._sound_power_reverberation",
+            "phonometry.emission._sound_power_in_situ",
+            "phonometry.emission._sound_power_hard_walled",
+            "phonometry.emission._sound_power_special_room",
+            "phonometry.emission._sound_power_in_duct",
             "phonometry.emission.sound_power_plant",
             "phonometry.emission.sound_power_high_frequency",
             "phonometry.emission.turbine_noise",
@@ -435,12 +441,12 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.noise_control.silencers",
             "phonometry.noise_control.silencer_measurement",
             "phonometry.noise_control.hvac",
-            "phonometry.noise_control.duct_path",
+            "phonometry.noise_control._duct_path",
             "phonometry.noise_control.duct_modes",
             "phonometry.noise_control.duct_walls",
             "phonometry.noise_control.enclosures",
             "phonometry.noise_control.enclosure_insulation",
-            "phonometry.noise_control.cabin_insulation",
+            "phonometry.noise_control._cabin_insulation",
             "phonometry.noise_control.silencer_in_situ",
             "phonometry.noise_control.screen_in_situ",
             "phonometry.noise_control.room_to_room",
@@ -453,7 +459,7 @@ _SECTION_LIST: tuple[Section, ...] = (
         label_en="Broadcast metering",
         label_es="Medición en radiodifusión",
         modules=(
-            "phonometry.broadcast.program_loudness",
+            "phonometry.broadcast._program_loudness",
             "phonometry.broadcast.quasi_peak",
         ),
     ),
@@ -525,7 +531,7 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # the Johnson-Champoux-Allard model is credited to fluids unless said
     # otherwise. It belongs to the model that publishes those constants.
     "ABSORBER_AIR": "phonometry.materials.absorbers.porous",
-    "ANNEX_A_AIR": "phonometry.materials.absorbers.airflow_resistance",
+    "ANNEX_A_AIR": "phonometry.materials.absorbers._airflow_resistance",
     "EN_12354_AIR": "phonometry.building.prediction.detailed_model",
     "SIMULATION_AIR": "phonometry.simulation.ntff",
     # The same holds for an uncertainty budget: the ISO 4869-6 one is an
@@ -534,9 +540,9 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "ANR_WITHIN_LABORATORY_UNCERTAINTY": "phonometry.hearing.active_noise_reduction",
     # The three assumed conditions are owned by the air model and re-exported
     # by the package, so a plain scan sees them in both.
-    "DEFAULT_CO2_MOLE_FRACTION": "phonometry.fluids.air",
-    "DEFAULT_RELATIVE_HUMIDITY_PERCENT": "phonometry.fluids.air",
-    "DEFAULT_STATIC_PRESSURE_PA": "phonometry.fluids.air",
+    "DEFAULT_CO2_MOLE_FRACTION": "phonometry.fluids._air",
+    "DEFAULT_RELATIVE_HUMIDITY_PERCENT": "phonometry.fluids._air",
+    "DEFAULT_STATIC_PRESSURE_PA": "phonometry.fluids._air",
     # The speed of sound the critical-frequency columns are printed for is
     # owned by the module that uses it and re-exported by the package, the
     # same shape as the three above.
@@ -777,8 +783,8 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # imported by the discrete-point determination that gates on it.
     "TEMPORAL_VARIABILITY_LIMIT": "phonometry.emission.intensity",
     # Defined in phonometry._plot.room; documented helper for the ISO 18233
-    # excitation signals that live in room.impulse_response.
-    "plot_excitation": "phonometry.room.impulse_response",
+    # excitation signals, beside room.impulse_response that measures with them.
+    "plot_excitation": "phonometry.room._impulse_response",
     # Defined in phonometry._plot.geometry; documented with the materials
     # module whose devices each drawing depicts.
     "plot_absorber_stack": "phonometry.materials.absorbers.porous",
@@ -798,11 +804,11 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "plot_sound_reinforcement_geometry": "phonometry.electroacoustics.sound_reinforcement",
     "plot_facade_elements": "phonometry.building.prediction.facade",
     "plot_double_wall_geometry": "phonometry.building.prediction.panel_transmission",
-    "plot_junction_geometry": "phonometry.vibration.structural.junction_transmission",
+    "plot_junction_geometry": "phonometry.vibration.structural._junction_transmission",
     "plot_in_situ_geometry": "phonometry.materials.surfaces.road_absorption",
     "plot_dynamic_stiffness_rig": "phonometry.materials.resilient.dynamic_stiffness",
     "plot_goniometer_geometry": "phonometry.materials.diffusers.scattering_diffusion",
-    "plot_plate_geometry": "phonometry.vibration.structural.radiation_efficiency",
+    "plot_plate_geometry": "phonometry.vibration.structural._radiation_efficiency",
     "plot_open_plan_geometry": "phonometry.room.open_plan",
     "plot_pp_probe_geometry": "phonometry.emission.intensity",
     # Defined in underwater.acoustics, also re-exported by
@@ -815,6 +821,79 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # building insulation ratings whose report() method it drives.
     "ReportMetadata": "phonometry.building.measurement.insulation",
 }
+
+#: The page title of each private module the reference documents, as words.
+#: A module that a function of its package names (``signals/correlation.py``
+#: beside ``signals.correlation()``) is private, because the package attribute
+#: of that name is the function and ``import phonometry.signals.correlation``
+#: would bind it. Its names are published by the package and its page keeps the
+#: URL it always had, but the page cannot be titled with a module address that
+#: no longer exists, so it is titled by its domain and its subject instead
+#: (``signals: correlation``) and opens by naming the package to import from.
+#: The subject is words, never a standard's designation: the site search weighs
+#: a title above the standards a guide's bibliography declares, so a reference
+#: page titled with a designation competes with the guides written to it. The
+#: three ECMA-418-2 pages are told from their neighbours by the hearing model
+#: they implement, and their summaries still name the standard.
+#: Every private module a section lists needs its words here, and nothing else
+#: may have them.
+PRIVATE_MODULE_TOPICS: dict[str, str] = {
+    "phonometry.broadcast._program_loudness": "program loudness and true peak",
+    "phonometry.building.measurement._rainfall_sound": "rainfall sound",
+    "phonometry.emission._sound_power_anechoic": "sound power in an anechoic room",
+    "phonometry.emission._sound_power_hard_walled": "sound power in a hard-walled room",
+    "phonometry.emission._sound_power_in_duct": "sound power in a duct",
+    "phonometry.emission._sound_power_in_situ": "sound power in situ",
+    "phonometry.emission._sound_power_intensity": "sound power by intensity scanning",
+    "phonometry.emission._sound_power_intensity_points": (
+        "sound power by intensity at points"
+    ),
+    "phonometry.emission._sound_power_reverberation": (
+        "sound power in a reverberation room"
+    ),
+    "phonometry.emission._sound_power_special_room": (
+        "sound power in a special reverberation room"
+    ),
+    "phonometry.environment.sources._statistical_pass_by": "statistical pass-by",
+    "phonometry.fluids._air": "humid air",
+    "phonometry.hearing._earmuff_insertion_loss": "earmuff insertion loss",
+    "phonometry.hearing._real_ear_attenuation": "real-ear attenuation",
+    "phonometry.materials.absorbers._airflow_resistance": "airflow resistance",
+    "phonometry.noise_control._cabin_insulation": "cabin insulation",
+    "phonometry.noise_control._duct_path": "duct path",
+    "phonometry.psychoacoustics.quality._fluctuation_strength": "fluctuation strength",
+    "phonometry.psychoacoustics.quality._fluctuation_strength_ecma": (
+        "fluctuation strength (Sottek model)"
+    ),
+    "phonometry.psychoacoustics.quality._roughness_ecma": "roughness (Sottek model)",
+    "phonometry.psychoacoustics.quality._tonality_ecma": "tonality (Sottek model)",
+    "phonometry.psychoacoustics.quality._tone_audibility": "tone audibility",
+    "phonometry.room._crowd_noise": "crowd noise",
+    "phonometry.room._impulse_response": "impulse response",
+    "phonometry.signals._cepstrum": "cepstrum",
+    "phonometry.signals._correlation": "correlation",
+    "phonometry.signals._envelope": "envelope",
+    "phonometry.underwater.propagation._seabed_reflection": "seabed reflection",
+    "phonometry.vibration.structural._impact_mobility": "impact mobility",
+    "phonometry.vibration.structural._junction_transmission": "junction transmission",
+    "phonometry.vibration.structural._radiation_efficiency": "radiation efficiency",
+}
+
+
+def is_private_module(module: str) -> bool:
+    """Whether ``module`` (full dotted name) is private: a part starts with ``_``.
+
+    :param module: Full module name, e.g. ``"phonometry.signals._correlation"``.
+    """
+    return any(part.startswith("_") for part in module.split(".")[1:])
+
+
+def is_documented_module(module: str) -> bool:
+    """Whether the reference has a page for ``module`` (full dotted name).
+
+    :param module: Full module name, public or private.
+    """
+    return module in _MODULE_TO_SECTION
 
 
 def module_section(module: str) -> Section:
@@ -860,6 +939,15 @@ def _build_module_index() -> dict[str, Section]:
                 )
                 raise ValueError(msg)
             index[module] = section
+    titled = set(PRIVATE_MODULE_TOPICS)
+    private = {module for module in index if is_private_module(module)}
+    if titled != private:
+        msg = (
+            "every private module a section lists needs its page title in "
+            "PRIVATE_MODULE_TOPICS, and nothing else may have one: untitled "
+            f"{sorted(private - titled)}, unlisted {sorted(titled - private)}"
+        )
+        raise ValueError(msg)
     for name, module in OBJECT_MODULE_OVERRIDES.items():
         if module not in index:
             msg = (

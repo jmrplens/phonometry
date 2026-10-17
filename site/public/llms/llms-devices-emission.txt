@@ -461,7 +461,7 @@ the clause 6.2 verification verdict.*
   absorption area that feed the room corrections.
 - [Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/): energy averaging and the A-weighting behind $L_{W\mathrm{A}}$.
 - [Theory](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/): the Waterhouse, $K_1$/$K_2$ and $C_1$/$C_2$ derivations.
-- API reference: [`emission.sound_power`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power/), [`emission.sound_power_reverberation`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-reverberation/) and [`emission.sound_power_intensity`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-intensity/).
+- API reference: [`emission.sound_power`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power/), [`emission`: sound power in a reverberation room](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-reverberation/) and [`emission`: sound power by intensity scanning](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-intensity/).
 
 ## Quick answers
 
@@ -922,7 +922,7 @@ implemented, so a duct outside 0.15 m to 2 m is refused.
   modes whose cut-on bounds the plane-wave range of Eq. 12.
 - [Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/): energy averaging and the
   A-weighting behind $L_{W\mathrm{A}}$.
-- API reference: [`emission.sound_power_in_duct`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-in-duct/).
+- API reference: [`emission`: sound power in a duct](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-in-duct/).
 
 ## References
 

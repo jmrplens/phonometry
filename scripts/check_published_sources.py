@@ -410,7 +410,7 @@ SOURCED: dict[tuple[str, str], str] = {
     ),
     (
         "noise_control/duct_modes.py",
-        "CIRCULAR_EIGENVALUES",
+        "_CIRCULAR_EIGENVALUES",
     ): "Norton & Karczub (2003) Table 7.1, twelve circular-duct eigenvalues",
     (
         "noise_control/hvac.py",
@@ -504,7 +504,7 @@ SOURCED: dict[tuple[str, str], str] = {
         "WESTON_SEABEDS",
     ): "Ainslie (2010) Table 9.1, two characteristic seabeds",
     (
-        "vibration/structural/junction_transmission.py",
+        "vibration/structural/_junction_transmission.py",
         "_JUNCTIONS",
     ): "Hopkins (2007) Eqs. 5.12 and 5.13, four sets of junction constants",
     (
@@ -516,11 +516,11 @@ SOURCED: dict[tuple[str, str], str] = {
         "_PLATE_CONSTANT",
     ): "Cremer 3e Table 5.1, the two thin-plate constants",
     (
-        "vibration/structural/radiation_efficiency.py",
+        "vibration/structural/_radiation_efficiency.py",
         "_C_BC",
     ): "Hopkins (2007) Eq. 2.227, the boundary-condition constant",
     (
-        "vibration/structural/radiation_efficiency.py",
+        "vibration/structural/_radiation_efficiency.py",
         "_C_OB",
     ): "Hopkins (2007) Eq. 2.227, the baffle-orientation constant",
 }

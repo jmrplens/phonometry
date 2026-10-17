@@ -154,7 +154,7 @@ def test_assessment_period_defaults_and_validates() -> None:
     interval, so another interval may be carried instead.
     """
     default = nt.impulse_prominence([1200.0], [32.0])
-    assert default.assessment_period_min == nt.DEFAULT_ASSESSMENT_PERIOD_MIN
+    assert default.assessment_period_min == nt._DEFAULT_ASSESSMENT_PERIOD_MIN
     assert default.assessment_period_min == 30.0
 
     other = nt.impulse_prominence([1200.0], [32.0], assessment_period_min=5.0)

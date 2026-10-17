@@ -318,15 +318,17 @@ harmonic series shows several such peaks; a hiss shows a flat, low pattern.
 Calling `.plot()` without an axes adds the time-dependent $T(l)$ panel, which
 is where an intermittent tone shows up.
 
-**Reading a tonality.** ECMA-418-2 clause 6.3 attaches its prominence
-criterion to the *pattern*, not to the single value: a tonal component in band
+**Reading a tonality.** ECMA-418-2 clause 6.3 gives two prominence criteria,
+both at 0.4 tu_HMS, and `tonality_ecma()` applies neither: it returns the
+values they are read from. For a stationary sound, a tonal component in band
 $z_\text{tonal}$ counts as prominent when the specific tonality
 $T'(z_\text{tonal})$ exceeds 0.4 tu_HMS, is a local maximum along $z$, and
-carries a tonal frequency lying between its neighbouring band centres. So a
-prominence statement is read from `specific_tonality` and `tonal_frequencies`,
-never from $T$ alone. The standard attaches no limit to the overall $T$, which
-makes it a magnitude for comparing designs rather than a pass/fail test; the
-test is the ECMA-418-1 tone-to-noise and prominence ratio of
+carries a tonal frequency between the centre frequencies $F(z_\text{tonal} - 1)$
+and $F(z_\text{tonal} + 1)$; that statement is read from `specific_tonality` and
+`tonal_frequencies`. For a non-stationary sound, the signal contains prominent
+tonalities when the single value $T$ of Formula (63) exceeds 0.4 tu_HMS. The
+test for one discrete tone against the noise around it is the ECMA-418-1
+tone-to-noise and prominence ratio of
 [Prominent Discrete Tones](/phonometry/perception/psychoacoustics/tone-prominence/).
 
 ### `tonality_ecma()` parameters
@@ -623,7 +625,7 @@ Annoyance](/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/).
 
 ## See also
 
-- API reference: [`psychoacoustics.quality.sharpness`](/phonometry/reference/api/psychoacoustics/sharpness/), [`psychoacoustics.quality.tonality_ecma`](/phonometry/reference/api/psychoacoustics/tonality-ecma/), [`psychoacoustics.quality.roughness_ecma`](/phonometry/reference/api/psychoacoustics/roughness-ecma/) and [`psychoacoustics.quality.fluctuation_strength_ecma`](/phonometry/reference/api/psychoacoustics/fluctuation-strength-ecma/).
+- API reference: [`psychoacoustics.quality.sharpness`](/phonometry/reference/api/psychoacoustics/sharpness/), [`psychoacoustics`: tonality (Sottek model)](/phonometry/reference/api/psychoacoustics/tonality-ecma/), [`psychoacoustics`: roughness (Sottek model)](/phonometry/reference/api/psychoacoustics/roughness-ecma/) and [`psychoacoustics`: fluctuation strength (Sottek model)](/phonometry/reference/api/psychoacoustics/fluctuation-strength-ecma/).
 - Theory: [Advanced loudness models and sound quality](/phonometry/reference/theory/perception/#advanced-loudness-models--sound-quality): the specific-loudness pattern the sharpness, roughness and fluctuation-strength metrics are all built on.
 
 </SeeAlso>

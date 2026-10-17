@@ -159,7 +159,7 @@ What is not here
 The rated conditions (7.1, 8.6.6, 8.8, 8.13, 8.14) are stated, not computed.
 The external field (8.9) and the unwanted radiation (8.10) are readings. The
 sound attenuation of 8.11 is measured "as specified in ISO 4869-1", which
-[`phonometry.hearing.real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/) computes from the open and
+[`phonometry.hearing.real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation) computes from the open and
 occluded thresholds of the subjects; for a headphone with active noise
 compensation, which the NOTE of 8.11.2 says "may require a modified
 procedure", [`phonometry.hearing.anr_total_attenuation`](/phonometry/reference/api/hearing/active-noise-reduction/#anr_total_attenuation) follows ISO

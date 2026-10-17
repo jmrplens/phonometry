@@ -2,7 +2,7 @@
 r"""Room-to-room noise reduction: source room, partition, receiving room, criterion.
 
 The other classic bookkeeping exercise of noise control, beside the duct-borne
-cascade of :mod:`phonometry.noise_control.duct_path`. A machine runs in one
+cascade of :func:`phonometry.noise_control.duct_path`. A machine runs in one
 room, a partition separates that room from an occupied one, and the question is
 the octave-band spectrum in the occupied room and whether it meets a design
 criterion. The answer is a short chain, and every link of it already exists in
@@ -127,6 +127,13 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from ..room.noise_criteria import NCResult, RCResult
+
+__all__ = [
+    "DesignCriterion",
+    "RoomToRoomResult",
+    "SourceRoom",
+    "room_to_room_transmission",
+]
 
 
 @dataclass(frozen=True)

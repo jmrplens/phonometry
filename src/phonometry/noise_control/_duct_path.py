@@ -524,12 +524,12 @@ def duct_path(
     family, goal = validate_target(criterion, target)
 
     if section is not None:
-        from .duct_modes import plane_wave_limit, warn_above_plane_wave_limit
+        from .duct_modes import _warn_above_plane_wave_limit, plane_wave_limit
 
         limit = plane_wave_limit(
             flow_velocity=flow_velocity, speed_of_sound=speed_of_sound, **section
         )
-        warn_above_plane_wave_limit(f, limit, label)
+        _warn_above_plane_wave_limit(f, limit, label)
 
     stages: list[DuctPathStage] = []
     for position, element in enumerate(elements, start=1):

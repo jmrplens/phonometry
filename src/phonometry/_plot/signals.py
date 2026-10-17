@@ -11,17 +11,17 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.typing import ColorType
 
-    from ..signals.cepstrum import (
+    from ..signals._cepstrum import (
         CepstrumResult,
         EchoDetectionResult,
         LifterResult,
     )
-    from ..signals.correlation import (
+    from ..signals._correlation import (
         AlignedImpulseResponseResult,
         CorrelationResult,
         TimeDelayResult,
     )
-    from ..signals.envelope import EnvelopeResult, EnvelopeSpectrumResult
+    from ..signals._envelope import EnvelopeResult, EnvelopeSpectrumResult
     from ..signals.inversion import InverseFilterResult
     from ..signals.miso import MISOCoherenceResult
     from ..signals.multitaper import MultitaperSpectralDensityResult
@@ -741,7 +741,7 @@ def plot_correlation(
 ) -> Axes:
     """Correlation estimate against the lag in seconds.
 
-    :param result: A :class:`~phonometry.signals.correlation.CorrelationResult`.
+    :param result: A :class:`~phonometry.signals.CorrelationResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the ``plot`` call.
@@ -784,7 +784,7 @@ def plot_time_delay(
 ) -> Axes:
     """Correlation function with the estimated delay marked.
 
-    :param result: A :class:`~phonometry.signals.correlation.TimeDelayResult`.
+    :param result: A :class:`~phonometry.signals.TimeDelayResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the correlation ``plot`` call.
@@ -840,7 +840,7 @@ def plot_aligned_impulse_response(
     """Reference and aligned impulse responses overlaid.
 
     :param result: An
-        :class:`~phonometry.signals.correlation.AlignedImpulseResponseResult`.
+        :class:`~phonometry.signals.AlignedImpulseResponseResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the aligned-IR ``plot`` call.
@@ -877,7 +877,7 @@ def plot_envelope(
 
     With ``ax`` given, only the signal/envelope panel is drawn on it.
 
-    :param result: An :class:`~phonometry.signals.envelope.EnvelopeResult`.
+    :param result: An :class:`~phonometry.signals.EnvelopeResult`.
     :param ax: Existing axes for the envelope panel, or ``None`` for a
         fresh two-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1187,7 +1187,7 @@ def plot_cepstrum(
 ) -> Axes:
     """Cepstrum against quefrency, over the unambiguous first half-axis.
 
-    :param result: A :class:`~phonometry.signals.cepstrum.CepstrumResult`.
+    :param result: A :class:`~phonometry.signals.CepstrumResult`.
     :param ax: Existing axes, or ``None`` for a fresh figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the cepstrum line.
@@ -1292,7 +1292,7 @@ def plot_lifter(
 
     With ``ax`` given, only the spectrum panel is drawn on it.
 
-    :param result: A :class:`~phonometry.signals.cepstrum.LifterResult`.
+    :param result: A :class:`~phonometry.signals.LifterResult`.
     :param ax: Existing axes for the spectrum panel, or ``None`` for a
         fresh two-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1370,7 +1370,7 @@ def plot_echo_detection(
     """Power cepstrum with the searched band and the detected echo marked.
 
     :param result: An
-        :class:`~phonometry.signals.cepstrum.EchoDetectionResult`.
+        :class:`~phonometry.signals.EchoDetectionResult`.
     :param ax: Existing axes, or ``None`` for a fresh figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the cepstrum line.
@@ -1427,7 +1427,7 @@ def plot_envelope_spectrum(
     With ``ax`` given, only the spectrum panel is drawn on it.
 
     :param result: An
-        :class:`~phonometry.signals.envelope.EnvelopeSpectrumResult`.
+        :class:`~phonometry.signals.EnvelopeSpectrumResult`.
     :param ax: Existing axes for the spectrum panel, or ``None`` for a
         fresh two-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.

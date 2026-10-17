@@ -48,6 +48,14 @@ from ._state import Fluid
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
+__all__ = [
+    "depth_to_absolute_pressure_pa",
+    "depth_to_gauge_pressure_mpa",
+    "sea_water",
+    "sea_water_density",
+    "sea_water_sound_speed",
+]
+
 #: Bar per megapascal (1 MPa = 10 bar).
 _BAR_PER_MPA = 10.0
 #: kg/cm² per bar (100 kPa = 1.019716 kg/cm²; 1 bar = 100 kPa).

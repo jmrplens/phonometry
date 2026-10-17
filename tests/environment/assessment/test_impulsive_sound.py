@@ -119,7 +119,7 @@ def test_strongly_impulsive_near_cap() -> None:
     ki = float(iso.impulse_adjustment(o.prominence))
     assert o.prominence == pytest.approx(p_hand, abs=1e-9)
     assert ki == pytest.approx(1.8 * (p_hand - 5.0), abs=1e-9)
-    assert ki > iso.HIGHLY_IMPULSIVE_LIMIT  # highly impulsive (Clause 7)
+    assert ki > iso._HIGHLY_IMPULSIVE_LIMIT  # highly impulsive (Clause 7)
     assert iso._categorise(ki) == "highly impulsive"
 
 
@@ -132,7 +132,7 @@ def test_regular_impulsive_category() -> None:
     p_hand = 3.0 * math.log10(20.0) + 2.0 * math.log10(10.0)
     assert o.onset_rate == pytest.approx(20.0, abs=1e-9)
     assert ki == pytest.approx(1.8 * (p_hand - 5.0), abs=1e-9)
-    assert 0.0 < ki <= iso.HIGHLY_IMPULSIVE_LIMIT
+    assert 0.0 < ki <= iso._HIGHLY_IMPULSIVE_LIMIT
     assert iso._categorise(ki) == "regular impulsive"
 
 
@@ -229,7 +229,7 @@ def test_impulsive_burst_is_detected_and_highly_impulsive() -> None:
     result = iso.impulsive_sound_adjustment(signal, FS)
     assert len(result.onsets) >= 1
     assert result.governing_onset is not None
-    assert result.governing_onset.onset_rate > iso.ONSET_GRADIENT_LIMIT
+    assert result.governing_onset.onset_rate > iso._ONSET_GRADIENT_LIMIT
     assert result.adjustment > 0.0
     assert result.category == "highly impulsive"
     assert result.adjusted_laeq == pytest.approx(result.laeq + result.adjustment)
@@ -250,7 +250,7 @@ def test_level_history_interval_within_range() -> None:
     times, levels = iso.sound_pressure_level_history(signal, FS, dt=0.02)
     assert levels.shape == times.shape
     realised = times[1] - times[0]
-    lo, hi = iso.SAMPLE_INTERVAL_RANGE
+    lo, hi = iso._SAMPLE_INTERVAL_RANGE
     assert lo <= realised <= hi
 
 

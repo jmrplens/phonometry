@@ -48,6 +48,14 @@ if TYPE_CHECKING:
 
     from ..io._signal import Signal
 
+__all__ = [
+    "ModulationDistortionResult",
+    "difference_frequency_distortion",
+    "dynamic_intermodulation_distortion",
+    "modulation_distortion",
+    "total_difference_frequency_distortion",
+]
+
 #: Intermodulation product search half-width, in FFT bins. Wide enough to catch
 #: a product under mild window leakage, narrow enough (together with the
 #: spacing-based cap below) that neighbouring products, the primary tones and

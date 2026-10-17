@@ -96,6 +96,17 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+__all__ = [
+    "SOURCE_POWER_MODELS",
+    "SteadyFieldResult",
+    "critical_distance",
+    "room_constant",
+    "sabine_absorption_area",
+    "schroeder_frequency",
+    "steady_state_field",
+    "steady_state_spl",
+]
+
 
 def _require_fraction_below_one(value: ArrayLike, name: str) -> NDArray[np.float64]:
     """Validate a mean absorption in ``(0, 1)`` (scalar or per-band)."""

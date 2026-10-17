@@ -123,6 +123,25 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+__all__ = [
+    "DEFAULT_COVERAGE_FACTOR",
+    "GRADE_2_MAX_K3_DB",
+    "MAX_K3_DB",
+    "NEGLIGIBLE_BACKGROUND_MARGIN_DB",
+    "EmissionPressureResult",
+    "background_noise_correction_at_workstation",
+    "emission_expanded_uncertainty",
+    "emission_sound_pressure_level",
+    "environmental_ratio_from_absorption",
+    "environmental_ratio_from_k2",
+    "grade_from_local_correction",
+    "local_environmental_correction",
+    "operating_standard_deviation",
+    "subinterval_level",
+    "total_standard_deviation",
+    "MIN_BACKGROUND_MARGIN_DB",
+]
+
 #: Margin, in decibels, above which the background is negligible and
 #: :math:`K_1 = 0` (ISO 11201:2010 5.4.2, ISO 11202:2010 6.4.2,
 #: ISO 11204:2010 5.4.2).

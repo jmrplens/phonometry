@@ -95,6 +95,19 @@ if TYPE_CHECKING:
 
     from ..._report.metadata import ReportMetadata
 
+__all__ = [
+    "SurveyAirborneResult",
+    "SurveyFacadeResult",
+    "SurveyImpactResult",
+    "SurveyServiceEquipmentResult",
+    "estimate_reverberation_index",
+    "reverberation_index",
+    "survey_airborne_insulation",
+    "survey_facade_insulation",
+    "survey_impact_insulation",
+    "survey_service_equipment_level",
+]
+
 
 def _validate_report_request(engine: str, language: str) -> None:
     """Reject an unknown engine or language before a survey fiche is rendered.

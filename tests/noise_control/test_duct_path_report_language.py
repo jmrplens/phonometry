@@ -21,7 +21,7 @@ from phonometry._report.duct_path import (
     _rating_statement,
     _verdict,
 )
-from phonometry.noise_control.duct_path import DuctElement, DuctPathResult, duct_path
+from phonometry.noise_control import DuctElement, DuctPathResult, duct_path
 from phonometry.room import noise_criteria
 
 _BANDS = np.array([31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
@@ -30,7 +30,7 @@ _BANDS = np.array([31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
 def _interpolated_nc_at_31_5() -> noise_criteria.NCResult:
     """An NC-40 spectrum raised 10 dB at 31,5 Hz: an interpolated tangency there."""
     levels = noise_criteria.nc_curve(40.0).copy()
-    levels[list(noise_criteria.OCTAVE_BANDS).index(31.5)] += 10.0
+    levels[list(noise_criteria.NC_OCTAVE_BANDS_HZ).index(31.5)] += 10.0
     rating = noise_criteria.noise_criterion(levels)
     assert rating.out_of_range is None
     assert rating.governing_frequency == pytest.approx(31.5)
@@ -50,7 +50,9 @@ def _path(source_level: np.ndarray) -> DuctPathResult:
 
 
 def _nc_30_on_the_bands() -> np.ndarray:
-    return noise_criteria.nc_curve(30.0)[np.isin(noise_criteria.OCTAVE_BANDS, _BANDS)]
+    return noise_criteria.nc_curve(30.0)[
+        np.isin(noise_criteria.NC_OCTAVE_BANDS_HZ, _BANDS)
+    ]
 
 
 def test_the_designation_reaches_spanish() -> None:

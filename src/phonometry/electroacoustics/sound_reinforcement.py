@@ -91,6 +91,15 @@ from .._internal.validation import require_scalar
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+__all__ = [
+    "CARDIOID_RELATIVE_DIRECTIVITY_DB",
+    "DEFAULT_STABILITY_MARGIN_DB",
+    "FeedbackStabilityResult",
+    "feedback_loop_gain",
+    "feedback_stability",
+    "open_microphone_correction",
+]
+
 #: Feedback stability margin used by Long for an equalised system, dB.
 DEFAULT_STABILITY_MARGIN_DB = 10.0
 

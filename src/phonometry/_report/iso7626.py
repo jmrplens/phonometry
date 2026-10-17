@@ -41,7 +41,7 @@ from ._frf_fiche import frequency_range, frf_metadata_pairs, render_frf_fiche
 from ._i18n import format_number, t
 
 if TYPE_CHECKING:
-    from ..vibration.structural.impact_mobility import ImpactMobilityResult
+    from ..vibration.structural._impact_mobility import ImpactMobilityResult
     from ..vibration.structural.mechanical_mobility import MobilityResult
     from .metadata import ReportMetadata
 
@@ -256,7 +256,7 @@ def render_impact_mobility_report(
     impacts, the exponential window and the coherence at the peak.
 
     :param result: An
-        :class:`~phonometry.vibration.structural.impact_mobility.ImpactMobilityResult`.
+        :class:`~phonometry.vibration.structural.ImpactMobilityResult`.
     :param path: Destination path of the PDF file.
     :param metadata: Optional :class:`ReportMetadata`.
     :param verbose: Accepted for a uniform ``.report()`` signature; no effect.

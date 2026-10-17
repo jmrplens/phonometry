@@ -307,7 +307,7 @@ def test_analyze_spectrum_137hz_tone_audibility() -> None:
 def test_detect_tone_at_first_line_not_dropped() -> None:
     # Regression: a peak on the very first line must not be skipped because the
     # left-neighbour test wrapped around to the last line (lev[-1]).
-    from phonometry.psychoacoustics.quality.tone_audibility import _detect_tones
+    from phonometry.psychoacoustics.quality._tone_audibility import _detect_tones
 
     freqs = np.arange(100.0, 100.0 + 2.7 * 40, 2.7)
     levels = np.full(freqs.size, 50.0)
@@ -932,7 +932,7 @@ def test_table_e2_fg_uncertainty() -> None:
     summands (the Clause 6 reading for combined tones) and the decisive
     tone's noise lines, U reproduces the printed 3.21 dB.
     """
-    from phonometry.psychoacoustics.quality.tone_audibility import (
+    from phonometry.psychoacoustics.quality._tone_audibility import (
         _mean_narrowband_level_lines,
     )
 
@@ -947,7 +947,7 @@ def test_table_e2_fg_uncertainty() -> None:
 
 
 def test_uncertainty_constants_and_validation() -> None:
-    from phonometry.psychoacoustics.quality.tone_audibility import (
+    from phonometry.psychoacoustics.quality._tone_audibility import (
         COVERAGE_FACTOR_90,
         SIGMA_NARROWBAND_LEVEL,
     )
@@ -1056,7 +1056,7 @@ def test_din_anhang_i_decisive_tone_uncertainty() -> None:
     the decisive tone reproduces the printed u = 3.18 dB from the K = 4 tone
     lines and the M noise lines of the final Formula (6) iteration.
     """
-    from phonometry.psychoacoustics.quality.tone_audibility import (
+    from phonometry.psychoacoustics.quality._tone_audibility import (
         _mean_narrowband_level_lines,
     )
 

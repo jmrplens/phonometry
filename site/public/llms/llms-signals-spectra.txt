@@ -1703,7 +1703,7 @@ log spectrum only.
 - [Time synchronous averaging](https://docs.jmrp.io/phonometry/signals/spectra/synchronous-averaging/): removing the synchronous part before running an envelope spectrum on the residual.
 - [Machine fault frequencies](https://docs.jmrp.io/phonometry/vibration/machinery/machine-diagnostics/): the bearing and gear families read off exactly this envelope spectrum.
 - [Swept-sine distortion](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/): the minimum-phase folding that shares this page's core.
-- API reference: [`signals.cepstrum`](https://docs.jmrp.io/phonometry/reference/api/signals/cepstrum/).
+- API reference: [`signals`: cepstrum](https://docs.jmrp.io/phonometry/reference/api/signals/cepstrum/).
 
 ## References
 
@@ -2467,7 +2467,7 @@ there is no multi-sensor TDOA solver.
 - [Calibrated spectral analysis](https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/): the cross-spectrum the GCC weightings are built from, and the two-channel acquisition rules.
 - [Test signals](https://docs.jmrp.io/phonometry/signals/spectra/test-signals/): the band-limited fractional-delay kernel behind the sub-sample alignment.
 - [Time synchronous averaging](https://docs.jmrp.io/phonometry/signals/spectra/synchronous-averaging/): the same alignment applied per revolution.
-- API reference: [`signals.correlation`](https://docs.jmrp.io/phonometry/reference/api/signals/correlation/) and [`signals.envelope`](https://docs.jmrp.io/phonometry/reference/api/signals/envelope/).
+- API reference: [`signals`: correlation](https://docs.jmrp.io/phonometry/reference/api/signals/correlation/) and [`signals`: envelope](https://docs.jmrp.io/phonometry/reference/api/signals/envelope/).
 
 ## References
 

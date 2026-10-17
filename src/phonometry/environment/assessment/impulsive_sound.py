@@ -85,6 +85,22 @@ if TYPE_CHECKING:
 
     from ..._report.metadata import ReportMetadata
 
+__all__ = [
+    "ImpulseOnset",
+    "ImpulseProminenceResult",
+    "ImpulseProminenceWarning",
+    "ImpulsiveSoundResult",
+    "ImpulsiveSoundWarning",
+    "LevelHistory",
+    "detect_onsets",
+    "impulse_adjustment",
+    "impulse_prominence",
+    "impulsive_sound_adjustment",
+    "predicted_prominence",
+    "rating_level",
+    "sound_pressure_level_history",
+]
+
 
 class ImpulseProminenceWarning(PhonometryWarning):
     """A supplied level rise does not qualify as an impulse (clause 4.5)."""
@@ -95,22 +111,22 @@ class ImpulseProminenceWarning(PhonometryWarning):
 # ---------------------------------------------------------------------------
 
 #: Coefficients ``(k1, k2)`` of ``P = k1*lg(onset_rate) + k2*lg(LD)`` (Formula 1).
-PROMINENCE_COEFFS: tuple[float, float] = (3.0, 2.0)
+_PROMINENCE_COEFFS: tuple[float, float] = (3.0, 2.0)
 
 #: Adjustment slope ``k3`` in ``KI = k3*(P - k4)`` (Formula 2).
-ADJUSTMENT_SLOPE: float = 1.8
+_ADJUSTMENT_SLOPE: float = 1.8
 
 #: Prominence threshold ``k4`` below which no adjustment is made (Formula 2).
-ADJUSTMENT_THRESHOLD: float = 5.0
+_ADJUSTMENT_THRESHOLD: float = 5.0
 
 #: Minimum onset rate, in dB/s, for a level rise to count as an impulse (4.5).
-ONSET_RATE_LIMIT: float = 10.0
+_ONSET_RATE_LIMIT: float = 10.0
 
 #: Default assessment time interval, in minutes, over which the governing
 #: impulse is taken: "The default assessment time interval is 30 min"
 #: (ISO/PAS 1996-3:2022, Clause 5). Another interval may be assessed, so it is
 #: a default rather than a fixed value.
-DEFAULT_ASSESSMENT_PERIOD_MIN: float = 30.0
+_DEFAULT_ASSESSMENT_PERIOD_MIN: float = 30.0
 
 
 @dataclass(frozen=True)
@@ -131,7 +147,7 @@ class ImpulseProminenceResult(OwnsArrays):
     onset_rates: np.ndarray
     level_differences: np.ndarray
     _: KW_ONLY
-    assessment_period_min: float = DEFAULT_ASSESSMENT_PERIOD_MIN
+    assessment_period_min: float = _DEFAULT_ASSESSMENT_PERIOD_MIN
 
     def __post_init__(self) -> None:
         """Reject a set of impulses whose per-impulse columns disagree.
@@ -184,7 +200,7 @@ class ImpulseProminenceResult(OwnsArrays):
         Onset rate above 10 dB/s (clause 4.5; clause 8 applies the adjustment
         "for sounds with onset rates larger than 10 dB/s" only).
         """
-        return np.asarray(np.asarray(self.onset_rates) > ONSET_RATE_LIMIT, dtype=bool)
+        return np.asarray(np.asarray(self.onset_rates) > _ONSET_RATE_LIMIT, dtype=bool)
 
     @property
     def prominence(self) -> float:
@@ -289,7 +305,7 @@ def predicted_prominence(
     time-weighting-F level history: the onset rate is the slope of the onset in
     dB/s and the level difference is the level rise over the onset in dB
     (clauses 4.6-4.7). An impulse qualifies when its onset rate exceeds
-    :data:`ONSET_RATE_LIMIT` (10 dB/s).
+    10 dB/s (clause 4.5).
 
     :param onset_rate: Onset rate(s), in dB/s (> 0).
     :param level_difference: Level difference(s), in dB (> 0).
@@ -304,7 +320,7 @@ def predicted_prominence(
     if np.any(orate <= 0.0) or np.any(ld <= 0.0):
         msg = "onset_rate and level_difference must be positive."
         raise ValueError(msg)
-    k1, k2 = PROMINENCE_COEFFS
+    k1, k2 = _PROMINENCE_COEFFS
     return k1 * np.log10(orate) + k2 * np.log10(ld)
 
 
@@ -322,14 +338,14 @@ def impulse_adjustment(prominence: ArrayLike) -> np.ndarray:
     :return: The adjustment ``KI``, in dB, clamped at zero.
     """
     p = np.asarray(prominence, dtype=np.float64)
-    return np.maximum(ADJUSTMENT_SLOPE * (p - ADJUSTMENT_THRESHOLD), 0.0)
+    return np.maximum(_ADJUSTMENT_SLOPE * (p - _ADJUSTMENT_THRESHOLD), 0.0)
 
 
 def impulse_prominence(
     onset_rates: ArrayLike,
     level_differences: ArrayLike,
     *,
-    assessment_period_min: float = DEFAULT_ASSESSMENT_PERIOD_MIN,
+    assessment_period_min: float = _DEFAULT_ASSESSMENT_PERIOD_MIN,
 ) -> ImpulseProminenceResult:
     """Governing prominence and adjustment of a set of impulses (clauses 7-8).
 
@@ -371,7 +387,7 @@ def impulse_prominence(
         "impulse",
     )
     predicted_prominence(orate, ld)  # refuses a non-positive rate or difference
-    qualifies = orate > ONSET_RATE_LIMIT
+    qualifies = orate > _ONSET_RATE_LIMIT
     if not np.all(qualifies):
         warnings.warn(
             "One or more level rises have onset rates at or below 10 dB/s: "
@@ -445,28 +461,28 @@ class ImpulsiveSoundWarning(PhonometryWarning):
 # ---------------------------------------------------------------------------
 
 #: Reference sound pressure, in pascal (20 uPa, ISO 1683:2015 Table 1).
-REFERENCE_PRESSURE: float = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_REFERENCE_PRESSURE: float = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 #: Gradient, in dB/s, that the positive slope of ``LpAF`` must exceed for a
 #: point to belong to an onset (Clauses 3.3 and 4, procedures a-d).
-ONSET_GRADIENT_LIMIT: float = 10.0
+_ONSET_GRADIENT_LIMIT: float = 10.0
 
 #: F time-weighting time constant, in seconds (Clause 4, Formula 1).
-TIME_WEIGHTING_F_TAU: float = 0.125
+_TIME_WEIGHTING_F_TAU: float = 0.125
 
 #: Shortest separation, in seconds, below which successive onsets are merged
 #: and short irregularities on an onset are excluded (Clauses 3.3 and 4 d).
-MERGE_GAP: float = 0.050
+_MERGE_GAP: float = 0.050
 
 #: Permitted range of the ``LpAF`` sampling interval, in seconds (Clause 4).
-SAMPLE_INTERVAL_RANGE: tuple[float, float] = (0.010, 0.025)
+_SAMPLE_INTERVAL_RANGE: tuple[float, float] = (0.010, 0.025)
 
 #: Default ``LpAF`` sampling interval, in seconds (within the permitted range).
-DEFAULT_SAMPLE_INTERVAL: float = 0.020
+_DEFAULT_SAMPLE_INTERVAL: float = 0.020
 
 #: Upper bound of the *regular impulsive* category (Clause 7); above it the
 #: source is *highly impulsive*.
-HIGHLY_IMPULSIVE_LIMIT: float = 5.0
+_HIGHLY_IMPULSIVE_LIMIT: float = 5.0
 
 #: The three source categories of Clause 7, which are both the value reported in
 #: ``ImpulsiveSoundResult.category`` and the key of their plot translation.
@@ -520,7 +536,7 @@ class ImpulseOnset(RichDisplay):
     def qualifies(self) -> bool:
         """Whether the onset rate exceeds 10 dB/s on a rise, so the onset can contribute an adjustment (Clause 6)."""
         return bool(
-            self.onset_rate > ONSET_GRADIENT_LIMIT and self.level_difference > 0.0
+            self.onset_rate > _ONSET_GRADIENT_LIMIT and self.level_difference > 0.0
         )
 
 
@@ -685,8 +701,8 @@ def sound_pressure_level_history(
     x: SignalInput,
     fs: float | None = None,
     *,
-    dt: float = DEFAULT_SAMPLE_INTERVAL,
-    reference_pressure_pa: float = REFERENCE_PRESSURE,
+    dt: float = _DEFAULT_SAMPLE_INTERVAL,
+    reference_pressure_pa: float = _REFERENCE_PRESSURE,
     calibration_offset: float = 0.0,
 ) -> LevelHistory:
     r"""A frequency-weighted, F time-weighted level history ``LpAF`` (Clause 4).
@@ -722,7 +738,7 @@ def sound_pressure_level_history(
     if not math.isfinite(fs) or fs <= 0.0:
         msg = "fs must be positive."
         raise ValueError(msg)
-    lo, hi = SAMPLE_INTERVAL_RANGE
+    lo, hi = _SAMPLE_INTERVAL_RANGE
     require_scalar(dt, "dt")
     if not lo <= dt <= hi:
         msg = f"dt must be within {lo * 1e3:g}-{hi * 1e3:g} ms (Clause 4); got {dt * 1e3:g} ms."
@@ -734,7 +750,7 @@ def sound_pressure_level_history(
     weighted = np.asarray(weighting_filter(x, round(fs), curve="A"), dtype=np.float64)
     # Warm-start the F integrator at the first window's mean square so a steady
     # interval does not show a spurious onset from the processing start-up.
-    window = min(weighted.size, max(1, round(TIME_WEIGHTING_F_TAU * fs)))
+    window = min(weighted.size, max(1, round(_TIME_WEIGHTING_F_TAU * fs)))
     warm_start = float(np.mean(weighted[:window] ** 2))
     mean_square = np.asarray(
         time_weighting(weighted, round(fs), mode="fast", initial_state=warm_start),
@@ -788,7 +804,7 @@ def _raw_runs(gradient: np.ndarray) -> list[tuple[int, int]]:
     A rising run is a maximal set of consecutive gradient samples exceeding the
     limit; the onset spans level samples ``start .. end`` inclusive.
     """
-    above = gradient > ONSET_GRADIENT_LIMIT
+    above = gradient > _ONSET_GRADIENT_LIMIT
     runs: list[tuple[int, int]] = []
     n = above.size
     i = 0
@@ -823,9 +839,9 @@ def _merge_runs(
         end_slope = (levels[e2] - levels[e1]) / (times[e2] - times[e1])
         start_slope = (levels[s2] - levels[s1]) / (times[s2] - times[s1])
         if (
-            0.0 <= gap <= MERGE_GAP
-            and end_slope > ONSET_GRADIENT_LIMIT
-            and start_slope > ONSET_GRADIENT_LIMIT
+            0.0 <= gap <= _MERGE_GAP
+            and end_slope > _ONSET_GRADIENT_LIMIT
+            and start_slope > _ONSET_GRADIENT_LIMIT
         ):
             merged[-1] = (s1, e2)
         else:
@@ -916,7 +932,7 @@ def _categorise(adjustment: float) -> str:
     """Source category from the adjustment (Clause 7)."""
     if adjustment <= 0.0:
         return _CATEGORY_NOT_IMPULSIVE
-    if adjustment <= HIGHLY_IMPULSIVE_LIMIT:
+    if adjustment <= _HIGHLY_IMPULSIVE_LIMIT:
         return _CATEGORY_REGULAR_IMPULSIVE
     return _CATEGORY_HIGHLY_IMPULSIVE
 
@@ -925,8 +941,8 @@ def impulsive_sound_adjustment(
     x: SignalInput,
     fs: float | None = None,
     *,
-    dt: float = DEFAULT_SAMPLE_INTERVAL,
-    reference_pressure_pa: float = REFERENCE_PRESSURE,
+    dt: float = _DEFAULT_SAMPLE_INTERVAL,
+    reference_pressure_pa: float = _REFERENCE_PRESSURE,
     calibration_offset: float = 0.0,
     onset_rate_method: _OnsetRateMethod = "least_squares",
     laeq: float | None = None,

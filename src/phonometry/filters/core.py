@@ -39,6 +39,17 @@ from .frequencies import _genfreqs
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+__all__ = [
+    "BlockProcessing",
+    "FilterBankWarning",
+    "FilterDesign",
+    "LevelCalibration",
+    "OctaveFilterBank",
+    "OctaveFilterResult",
+    "ResponsePlot",
+    "octave_filter",
+]
+
 #: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
 _P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 

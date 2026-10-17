@@ -339,7 +339,7 @@ STI/STIPA, and [Theory](../../reference/theory/perception.md) for the underlying
 
 ## See also
 
-- API reference: [`psychoacoustics.quality.sharpness`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/sharpness/), [`psychoacoustics.quality.tonality_ecma`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/tonality-ecma/), [`psychoacoustics.quality.roughness_ecma`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/roughness-ecma/) and [`psychoacoustics.quality.fluctuation_strength_ecma`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/fluctuation-strength-ecma/).
+- API reference: [`psychoacoustics.quality.sharpness`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/sharpness/), [`psychoacoustics`: tonality (Sottek model)](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/tonality-ecma/), [`psychoacoustics`: roughness (Sottek model)](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/roughness-ecma/) and [`psychoacoustics`: fluctuation strength (Sottek model)](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/fluctuation-strength-ecma/).
 - Theory: [Advanced loudness models and sound quality](../../reference/theory/perception.md#advanced-loudness-models--sound-quality): the specific-loudness pattern the sharpness, roughness and fluctuation-strength metrics are all built on.
 
 ## References

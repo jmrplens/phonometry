@@ -20,7 +20,7 @@ import pytest
 from scipy import signal
 
 from phonometry import room
-from phonometry.room.impulse_response import ImpulseResponseWarning
+from phonometry.room import ImpulseResponseWarning
 
 
 def _periodic_response(

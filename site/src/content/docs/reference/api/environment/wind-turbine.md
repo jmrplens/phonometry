@@ -15,7 +15,7 @@ Two closed-form quantities of the standard:
   ([`slant_distance`](/phonometry/reference/api/environment/wind-turbine/#slant_distance)),
   $L_{W\mathrm{A}} = L_p - 6 + 10 \cdot \log_{10}(4\pi R_1^2/S_0)$ (Formula 26).
 * [`wind_turbine_tonality`](/phonometry/reference/api/environment/wind-turbine/#wind_turbine_tonality) -- the tonal-audibility chain (Formulae 30-34):
-  the critical bandwidth ([`critical_bandwidth`](/phonometry/reference/api/environment/measurement/#critical_bandwidth)), the masking-noise level,
+  the critical bandwidth (Formula 30), the masking-noise level,
   the tonality and the audibility criterion, giving the tonal audibility
   `ΔL_a` that decides whether a tone is audible.
 

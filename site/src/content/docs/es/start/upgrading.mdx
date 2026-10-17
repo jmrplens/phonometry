@@ -645,6 +645,98 @@ print(round(noise_control.combined_stage_level([80.0, 80.0]), 2))
 # 83.01
 ```
 
+## Un módulo nunca queda oculto tras una función de su mismo nombre
+
+Veintitrés módulos de la 4.0.0rc1 compartían nombre con la función que su
+paquete publicaba: `signals/correlation.py` estaba junto a
+`signals.correlation()`. El atributo del paquete es la función, así que
+`import phonometry.signals.correlation as m` ligaba la función,
+`signals.correlation.time_delay` lanzaba `AttributeError` y sólo `from
+phonometry.signals.correlation import time_delay` llegaba al módulo. Todos esos
+módulos son ahora privados. La función conserva su nombre, cada nombre que el
+paquete publicaba desde el módulo conserva su dirección, y lo único que
+desaparece es el import a través de la ruta del fichero:
+
+| 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `from phonometry.signals.correlation import time_delay` | `from phonometry.signals import time_delay` |
+| `from phonometry.fluids.air import air` | `from phonometry.fluids import air`, o `fluids.air(...)` tras `from phonometry import fluids` |
+| `broadcast.program_loudness`, `emission.sound_power_anechoic`, `emission.sound_power_in_duct`, `emission.sound_power_in_situ`, `emission.sound_power_intensity`, `emission.sound_power_intensity_points`, `emission.sound_power_reverberation`, `fluids.air`, `materials.absorbers.airflow_resistance`, `noise_control.duct_path`, `psychoacoustics.quality.fluctuation_strength`, `psychoacoustics.quality.fluctuation_strength_ecma`, `psychoacoustics.quality.roughness_ecma`, `psychoacoustics.quality.tonality_ecma`, `psychoacoustics.quality.tone_audibility`, `room.crowd_noise`, `room.impulse_response`, `signals.cepstrum`, `signals.correlation`, `signals.envelope`, `underwater.propagation.seabed_reflection`, `vibration.structural.junction_transmission`, `vibration.structural.radiation_efficiency` como rutas de módulo | el paquete que precede al último punto, que publica la función y sus compañeras: `from phonometry.room import impulse_response, mls_impulse_response` |
+| los números que esos módulos guardaban para sí: los umbrales y las duraciones de bloque de `broadcast.program_loudness` (`ABSOLUTE_GATE`, `RELATIVE_GATE`, `BLOCK_DURATION`, `BLOCK_OVERLAP`, `SHORT_TERM_DURATION`, `MAX_METER_STEP`, `LRA_RELATIVE_GATE`, `LRA_PERCENTILES`), `DEFAULT_SELF_NOISE_FLOOR` de `noise_control.duct_path`, y `SIGMA_NARROWBAND_LEVEL` y `COVERAGE_FACTOR_90` de `psychoacoustics.quality.tone_audibility` | no se publican, como antes: sus paquetes nunca los recogieron. Cada uno sale del documento que sigue su módulo, y la función que lo lee lo aplica o lo toma como valor por defecto de `self_noise_floor=`, `sigma_level_db=` o `coverage_factor=`. El paso de 0,1 s es el periodo de la frecuencia de actualización de 10 Hz que exige la EBU Tech 3341, y el suelo de 0 dB es el valor por defecto de la hoja de cálculo de conductos de *Architectural Acoustics* de Long |
+| los umbrales de prominencia `PROMINENT_TONALITY_TU_HMS`, `PROMINENT_ROUGHNESS_ASPER` y `PROMINENT_FLUCTUATION_STRENGTH_VACIL` de los módulos de la ECMA-418-2 | no se publican, y ninguna función los aplica: compara tú el resultado. El apartado 6.3 de la ECMA-418-2 considera prominente una tonalidad cuando, en un sonido estacionario, `specific_tonality` supera 0,4 tu_HMS en un máximo local cuya entrada de `tonal_frequencies` cae entre las frecuencias centrales situadas un Bark_HMS por debajo y por encima, o, en un sonido no estacionario, cuando `tonality` supera 0,4 tu_HMS. El apartado 7.2 considera prominente una aspereza cuando `roughness` supera 0,2 asper, y el apartado 9.2 una intensidad de fluctuación cuando `fluctuation_strength` supera 0,2 vacil_HMS |
+
+En la 3.3.0 varios de ellos vivían en otro sitio (`metrology/correlation.py`,
+`psychoacoustics/tone_audibility.py`); también allí la respuesta es importar
+del paquete.
+
+Los alias de tipo que definían esos módulos se fueron con ellos, y ya no hay
+ruta pública que llegue a ellos: `PrecisionSurface`, `PrecisionArray` y
+`PrecisionRoom` de `emission.sound_power_anechoic`, `MicrophoneShield` de
+`emission.sound_power_in_duct`, `Grade` y `BandType` de
+`emission.sound_power_intensity`, y `DeterminationGrade` y `BandType` de
+`emission.sound_power_intensity_points`. Anota con el `Literal` que
+representaba cada uno: `Literal["sphere", "hemisphere"]` para
+`PrecisionSurface`, y así con los demás.
+
+```python
+from phonometry import room, signals
+
+print(callable(signals.correlation), callable(signals.time_delay))
+print(callable(room.impulse_response), callable(room.mls_impulse_response))
+# True True
+# True True
+```
+
+### Y todo módulo público dice lo que publica
+
+Un módulo sin `__all__` no dice cuáles de sus nombres son públicos, así que una
+constante que definía para su propio uso parecía tan pública como sus
+funciones, y algunas llegaron a las guías y a los scripts por la ruta completa
+del módulo. Todo módulo público lista ahora lo que define y su paquete publica,
+y lo demás que define lleva un guion bajo delante. Estos nombres se alcanzaban
+así en la 3.3.0 o en la 4.0.0rc1 y ya no:
+
+| 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `OCTAVE_BANDS`, `NC_INDICES` y `NC_CURVES` de `room.noise_criteria` (`room.room_noise` en la 3.3.0) | `room.NC_OCTAVE_BANDS_HZ`, `room.NC_RATINGS` y `room.NC_CURVES_DB`, publicados con su unidad: las diez bandas de la tabla 1 de la ANSI/ASA S12.2, sus doce designaciones y sus niveles por banda |
+| `BAND_CENTERS`, `BAND_IMPORTANCE`, `REFERENCE_INTERNAL_NOISE` y `VOCAL_EFFORTS` de `speech.sii` (`hearing.sii` en la 3.3.0) | `speech.sii_procedure("one-third-octave")`, cuyos `frequencies`, `band_importance` e `internal_noise` son los mismos arrays, y `speech.standard_speech_spectra().vocal_efforts` |
+| `NIPTS_FREQUENCIES` de `hearing.noise_induced_hearing_loss` | las `frequencies` del resultado de `hearing.nipts(...)` |
+| `VALIDATED_YEARS`, `VALIDATED_FRACTILES` y `VALIDATED_L_EX_MAX` del mismo módulo | no se publican. `nipts` y `htlan` avisan fuera de los 1 a 40 años, los fractiles de 0,05 a 0,95 y los 100 dB que valida la ISO 1999 |
+| `OCTAVE_BANDS` de `noise_control.hvac` y de `room.enclosed_space_absorption` | no se publican: cada uno es el eje de bandas por defecto de sus funciones, y todo resultado lleva sus `frequencies` |
+| `SPEED_OF_SOUND`, `AIR_ATTENUATION` y `PUBLISHED_AIR_CONDITION` (`DEFAULT_AIR_CONDITION` en la 3.3.0) de `room.enclosed_space_absorption` | no se publican: los 345,6 m/s por defecto de `speed_of_sound=`, y las seis condiciones que admite `air_condition=`, que su docstring enumera, con `"20C_50-70"` como la que recomienda el apartado 4.3 |
+| `REFERENCE_VELOCITY`, `REFERENCE_FORCE`, `REFERENCE_SOUND_POWER` y `FREE_VELOCITY_REFERENCE` de `building.measurement.structure_borne_power` (`building.structure_borne_power` en la 3.3.0), y `REFERENCE_PRESSURE` de `environment.assessment.impulsive_sound` (`environmental.impulsive_sound` en la 3.3.0) | el `.value` de la entrada de `metrology.ISO1683_REFERENCE_VALUES` de la que se leía cada uno, porque la entrada es un registro y no un número: `["solid"]["velocity"].value` (1 nm/s), `["solid"]["force"].value` (1 µN), `["gas"]["sound_power"].value` (1 pW), `["solid"]["velocity_alternative"].value` (los 50 nm/s de la nota b de la tabla 3, la referencia de velocidad libre de la ISO 9611) y `["gas"]["sound_pressure"].value` (20 µPa) |
+| `REFERENCE_MOBILITY` y `CHARACTERISTIC_PLATE_MOBILITY` de `building.measurement.structure_borne_power` (`building.structure_borne_power` en la 3.3.0), y `REFERENCE_PLATE_MOBILITY` de `building.prediction.installed_structure_borne` (`building.installed_structure_borne` en la 3.3.0) | no se publican. `REFERENCE_MOBILITY` es la movilidad de referencia de 1 m/(N s) del apartado 5 de la EN 15657, que las funciones aplican en sus fórmulas (15), (17) y (18); la movilidad de la placa es el valor por defecto de `characteristic_mobility=` y de `plate_mobility=` |
+| `SPEED_OF_SOUND`, `AIR_DENSITY`, `REFERENCE_FREQUENCY`, `REFERENCE_LENGTH` y `MAX_RADIATION_FACTOR` de `building.prediction.detailed_model` | no se publican. El aire es `building.EN_12354_AIR`, que lleva los 340 m/s y los 1,29 kg/m³ |
+| los coeficientes, límites y valores por defecto de `environment.assessment.impulsive_sound` (`environmental.impulse_prominence` y `environmental.impulsive_sound` en la 3.3.0): `PROMINENCE_COEFFS`, `ADJUSTMENT_SLOPE`, `ADJUSTMENT_THRESHOLD`, `ONSET_RATE_LIMIT`, `DEFAULT_ASSESSMENT_PERIOD_MIN`, `ONSET_GRADIENT_LIMIT`, `TIME_WEIGHTING_F_TAU`, `MERGE_GAP`, `SAMPLE_INTERVAL_RANGE`, `DEFAULT_SAMPLE_INTERVAL`, `HIGHLY_IMPULSIVE_LIMIT` | no se publican: cada uno lo aplica `impulse_prominence` o `impulsive_sound_adjustment`, y los dos valores por defecto son los de `dt=` (20 ms) y `assessment_period_min=` (30 min) |
+| las constantes del anexo C de `vibration.human.multiple_shock` (`vibration.multiple_shock_vibration` en la 3.3.0): `MZ_MALE`, `MZ_FEMALE`, `DOSE_AMPLITUDE_FACTOR`, `DOSE_EXPONENT`, `GRAVITY`, `ULTIMATE_STRENGTH_INTERCEPT`, `STRENGTH_AGE_SLOPE_MALE`, `STRENGTH_AGE_SLOPE_FEMALE`, `WEIBULL_MALE`, `WEIBULL_FEMALE`, `RISK_THRESHOLDS_MALE`, `RISK_THRESHOLDS_FEMALE` | no se publican: las funciones toman `sex=` y aplican la pareja que nombra. `compression_dose(..., mz=)` toma por defecto 0,029, el valor masculino de la fórmula C.2; pasa 0,025 para el femenino |
+| `DEFAULT_HEADWIND_KT` y `APPROACH_WEIGHT_FRACTION` de `aircraft.flight_performance` | no se publican: los 8 kt por defecto de `Aerodrome(headwind_kt=)`, y el 0,9 del peso máximo de aterrizaje con el que se vuela la aproximación |
+| `STANDARD_ATMOSPHERIC_PRESSURE` de `materials.resilient.dynamic_stiffness` (`materials.dynamic_stiffness` en la 3.3.0) | no se publica: los 0,1 MPa por defecto de `static_pressure_pa=` |
+| `REFERENCE_SPACING` de `emission.intensity_compliance` | no se publica: la separación nominal de micrófonos de 25 mm de la Tabla 2 de IEC 61043, el valor por defecto de `spacing_m=` de `residual_index_limits` y `verify_intensity_class` |
+| `DISTRIBUTIONS` de `metrology.uncertainty` | no se publica: `metrology.Quantity` rechaza un `distribution=` fuera de `"gaussian"`, `"rectangular"`, `"triangular"` y `"u-shaped"` y nombra las cuatro |
+| `CIRCULAR_EIGENVALUES`, `PLANE_WAVE_EIGENVALUE` y `warn_above_plane_wave_limit` de `noise_control.duct_modes` | `noise_control.circular_duct_cut_on` y `noise_control.plane_wave_limit`; los resultados del silenciador y del recorrido de conducto lanzan ellos mismos `PlaneWaveWarning` por encima del límite |
+| `WALL_ORDER` de `room.image_source` | no se publica: un `absorption=` por pared va en el orden `x0`, `xL`, `y0`, `yL`, `z0`, `zL` |
+| `MAX_ENUMERATED_LATTICE` de `room.modes`, `SAMPLE_RATE` de `speech.objective_intelligibility` (`hearing.objective_intelligibility` en la 3.3.0) | no se publican: un límite de la retícula que `room_modes` indica cuando rechaza el cálculo, y los 10 kHz a los que remuestrea `speech.stoi` |
+| `AUDIBILITY_THRESHOLD_SONE_HMS` de `psychoacoustics.loudness.ecma` (`psychoacoustics.loudness_ecma` en la 3.3.0) | no se publica, y ninguna función lo aplica: el apartado 5.1.9 de la ECMA-418-2 considera audible una señal cuando su sonoridad básica total supera 0,01 sone_HMS |
+| `J1_FIRST_ZERO` de `electroacoustics.piston` | desaparece: nadie lo leía. Es `scipy.special.jn_zeros(1, 1)[0]` |
+| `critical_bandwidth` de `environment.sources.wind_turbine` (`environmental.wind_turbine_noise` en la 3.3.0) | el `critical_bandwidth` del `WindTurbineTonalityResult`. `environment.critical_bandwidth` es otra banda, la de la ISO 1996-2 |
+| `reference_sound` de `psychoacoustics.quality.sharpness` (`psychoacoustics.sharpness` en la 3.3.0) | no se publica: la biblioteca construye la señal de ensayo del apartado 6 de la DIN 45692 sólo para fijar su propia normalización. Es un ruido limitado a la banda de 920 a 1080 Hz con 60 dB: pasa `signals.noise_signal(fs, seconds)` por un filtro paso banda de 920 a 1080 Hz, escálalo a 0,02 Pa de valor eficaz, y `psychoacoustics.sharpness_din` le da 1,00 acum |
+| `check_guidance` de `underwater.bioacoustics.weighting` | no se publica. Las funciones que toman `guidance=` rechazan una desconocida, y `underwater.WEIGHTING_GUIDANCE` nombra las conocidas |
+
+Los alias de tipo que definen estos módulos (`NCMethod`, `EventMetric` y los
+demás) tampoco se listan, por la regla de más arriba, y se siguen pudiendo
+importar como anotaciones.
+
+```python
+from phonometry import hearing, room, speech
+
+print(room.NC_CURVES_DB[room.NC_RATINGS == 40][0][:3])
+print(round(speech.sii_procedure("one-third-octave").band_importance.sum(), 6))
+print(hearing.nipts(95.0, 40.0, 0.9).frequencies[:3])
+# [84. 74. 64.]
+# 1.0
+# [ 500. 1000. 2000.]
+```
+
 ## Todo `.plot()` toma primero los ejes
 
 El `.plot()` de cada resultado se lee ahora `plot(ax=None, *, ...)`: primero
@@ -785,15 +877,15 @@ bandera `writeable`. Leer no cambia; escribir lanza `TypeError` en una tabla y
 El código que retocaba una tabla publicada tiene que copiarla antes:
 
 ```python
+from phonometry import room
 from phonometry.materials.absorbers import REFERENCE_CURVE
-from phonometry.speech.sii import BAND_IMPORTANCE
 
 curve = dict(REFERENCE_CURVE)
 curve[4000] = 1.0
-weights = BAND_IMPORTANCE.copy()
-weights[0] = 0.0
-print(REFERENCE_CURVE[4000], curve[4000], weights[0], BAND_IMPORTANCE[0])
-# 0.9 1.0 0.0 0.0083
+curves = room.NC_CURVES_DB.copy()
+curves[0, 0] = 0.0
+print(REFERENCE_CURVE[4000], curve[4000], curves[0, 0], room.NC_CURVES_DB[0, 0])
+# 0.9 1.0 0.0 78.0
 ```
 
 Una tabla que lleva tablas dentro necesita copiar cada nivel, como en

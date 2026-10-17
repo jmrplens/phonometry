@@ -61,8 +61,8 @@ def test_multiple_shock_spanish_title_translates_sex() -> None:
 
     mpl.use("Agg")
     from phonometry.vibration.human.multiple_shock import (
-        MZ_MALE,
-        RISK_THRESHOLDS_MALE,
+        _MZ_MALE,
+        _RISK_THRESHOLDS_MALE,
         MultipleShockResult,
         compression_dose,
         dose_from_peaks,
@@ -72,7 +72,7 @@ def test_multiple_shock_spanish_title_translates_sex() -> None:
 
     peaks = np.full(5, 40.0)
     dz = dose_from_peaks(peaks)
-    sd = compression_dose(dz, mz=MZ_MALE)
+    sd = compression_dose(dz, mz=_MZ_MALE)
     r = injury_risk(sd, start_age=20.0, years=20, days_per_year=120.0, sex="male")
     res = MultipleShockResult(
         sex="male",
@@ -85,7 +85,7 @@ def test_multiple_shock_spanish_title_translates_sex() -> None:
         years=20,
         days_per_year=120.0,
         peaks=peaks,
-        risk_thresholds=RISK_THRESHOLDS_MALE,
+        risk_thresholds=_RISK_THRESHOLDS_MALE,
     )
     ax_en = res.plot(language="en")
     assert ax_en.get_title() == "ISO 2631-5 injury probability: male"
@@ -183,7 +183,7 @@ def test_a_non_finite_measured_spectrum_is_refused_by_field(field: str) -> None:
     ``spectrum`` is a structural contract, anything exposing the two vectors,
     so there is no construction of ours to pin it at and the refusal is where
     the caller's parameter is named. No producer emits one:
-    :func:`phonometry.signals.envelope.envelope_spectrum` refuses a non-finite
+    :func:`phonometry.signals._envelope.envelope_spectrum` refuses a non-finite
     record before it transforms it.
     """
     pytest.importorskip("matplotlib")

@@ -1,9 +1,11 @@
 ---
-title: "room.impulse_response"
+title: "room: impulse response"
 description: "Impulse-response acquisition per BS EN ISO 18233:2006."
 sidebar:
   label: "impulse_response"
 ---
+
+Every name on this page is published by `phonometry.room`: `from phonometry import room`, then `room.<name>`.
 
 Impulse-response acquisition per BS EN ISO 18233:2006.
 

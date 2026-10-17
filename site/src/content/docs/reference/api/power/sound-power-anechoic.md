@@ -1,9 +1,11 @@
 ---
-title: "emission.sound_power_anechoic"
+title: "emission: sound power in an anechoic room"
 description: "Sound power level of a noise source in an anechoic or hemi-anechoic room, from sound pressure measurements over an enveloping surface: ISO 3745:2012 (precision, accuracy grade 1)."
 sidebar:
   label: "sound_power_anechoic"
 ---
+
+Every name on this page is published by `phonometry.emission`: `from phonometry import emission`, then `emission.<name>`.
 
 Sound power level of a noise source in an anechoic or hemi-anechoic room, from
 sound pressure measurements over an enveloping surface: ISO 3745:2012

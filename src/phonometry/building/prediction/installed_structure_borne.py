@@ -99,12 +99,36 @@ from ..._internal.validation import (
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 from .resilient_layers import TAPPING_HAMMER_MASS_KG
 
+__all__ = [
+    "REFERENCE_AREA_M2",
+    "TABLE_D1_QUANTITIES",
+    "TABLE_F1_FORCE_LEVEL",
+    "TABLE_F1_OCTAVE_BANDS_HZ",
+    "InstalledSourceResult",
+    "coupling_term",
+    "coupling_term_force_source",
+    "coupling_term_velocity_source",
+    "installed_power_from_reception_plate",
+    "installed_source_prediction",
+    "installed_structure_borne_power_level",
+    "multi_junction_adjustment",
+    "structure_borne_pressure_level_path",
+    "structure_to_airborne_adjustment",
+    "tapping_machine_characteristic_power_level",
+    "tapping_machine_coupling_term",
+    "tapping_machine_force_level",
+    "tapping_machine_force_level_estimate",
+    "total_structure_borne_pressure_level",
+    "typical_element_mobility",
+    "MIN_MULTI_JUNCTION_KIJ_DB",
+]
+
 #: Reference area ``S0 = A0`` of EN 12354-5 (Formula 18a), m^2.
 REFERENCE_AREA_M2: float = 10.0
 
 #: Characteristic mobility ``Y_inf,rec`` of the EN 15657 reference reception
 #: plate (10 cm concrete; EN 12354-5 Annex I / EN 15657:2018 7.2.4), m/(N.s).
-REFERENCE_PLATE_MOBILITY: float = 5.0e-6
+_REFERENCE_PLATE_MOBILITY: float = 5.0e-6
 
 
 def _positive_real_part(values: ArrayLike, name: str) -> np.ndarray:
@@ -884,7 +908,7 @@ def installed_power_from_reception_plate(
     reception_plate_level: ArrayLike,
     receiver_mobility: ArrayLike,
     *,
-    plate_mobility: float = REFERENCE_PLATE_MOBILITY,
+    plate_mobility: float = _REFERENCE_PLATE_MOBILITY,
 ) -> np.ndarray:
     r"""Mobility correction of the reception-plate power (EN 12354-5, Annex I).
 

@@ -126,10 +126,10 @@ if TYPE_CHECKING:
     from ..measurement.ratings import ImpactRatingResult, WeightedRatingResult
 
 #: Speed of sound in air ``co`` used throughout EN/ISO 12354 (Annex A): 340 m/s.
-SPEED_OF_SOUND: float = 340.0
+_SPEED_OF_SOUND: float = 340.0
 
 #: Density of air ``ρo`` of the Annex B transmission model, in kg/m³.
-AIR_DENSITY: float = 1.29
+_AIR_DENSITY: float = 1.29
 
 #: The air EN/ISO 12354 works in, as a :class:`~phonometry.fluids.Fluid`: the
 #: 340 m/s its Annex A uses throughout and the 1,29 kg/m3 of the Annex B
@@ -142,17 +142,17 @@ EN_12354_AIR = Fluid(
     composition={},
     model="EN/ISO 12354 Annex A speed of sound with the Annex B air density",
     validity="",
-    properties={"speed_of_sound": SPEED_OF_SOUND, "density": AIR_DENSITY},
+    properties={"speed_of_sound": _SPEED_OF_SOUND, "density": _AIR_DENSITY},
 )
 
 #: Reference frequency ``fref`` of Formulae (11), (C.4) and Part 2 (B.2): 1 kHz.
-REFERENCE_FREQUENCY: float = 1000.0
+_REFERENCE_FREQUENCY: float = 1000.0
 
 #: Reference coupling length ``lo`` (Clause 4.2.2.3): 1 m.
-REFERENCE_LENGTH: float = 1.0
+_REFERENCE_LENGTH: float = 1.0
 
 #: Upper bound on every radiation factor ("In all cases σ ≤ 2,0", Annex B).
-MAX_RADIATION_FACTOR: float = 2.0
+_MAX_RADIATION_FACTOR: float = 2.0
 
 #: Constant ``2,2`` of the structural reverberation time ``Ts = 2,2/(f ηtot)``
 #: (Formula C.1) and of the equivalent absorption length (Formula 11).
@@ -282,7 +282,7 @@ def bending_radiation_factor(
     critical_frequency: float,
     length1: float,
     length2: float,
-    speed_of_sound: float = SPEED_OF_SOUND,
+    speed_of_sound: float = _SPEED_OF_SOUND,
 ) -> np.ndarray:
     r"""Radiation factor for free bending waves ``σ`` (Formulae B.4 to B.6).
 
@@ -333,7 +333,7 @@ def bending_radiation_factor(
     # sigma1 diverges as f approaches fc from above, so it is evaluated only
     # where it applies and pinned to the cap exactly at fc.
     safe = np.where(above, f, 2.0 * fc)
-    sigma1 = np.where(above, 1.0 / np.sqrt(1.0 - fc / safe), MAX_RADIATION_FACTOR)
+    sigma1 = np.where(above, 1.0 / np.sqrt(1.0 - fc / safe), _MAX_RADIATION_FACTOR)
 
     if f11 <= fc / 2.0:
         sigma = _mode_dense_radiation_factor(f, fc, l1, l2, c0, sigma1)
@@ -342,7 +342,7 @@ def bending_radiation_factor(
     else:
         sigma = np.where((f < fc) & (sigma2 < sigma3), sigma2, sigma3)
         sigma = np.where(above & (sigma1 < sigma3), sigma1, sigma)
-    return np.asarray(np.minimum(sigma, MAX_RADIATION_FACTOR), dtype=np.float64)
+    return np.asarray(np.minimum(sigma, _MAX_RADIATION_FACTOR), dtype=np.float64)
 
 
 def _mode_dense_radiation_factor(
@@ -373,7 +373,7 @@ def forced_radiation_factor(
     *,
     length1: float,
     length2: float,
-    speed_of_sound: float = SPEED_OF_SOUND,
+    speed_of_sound: float = _SPEED_OF_SOUND,
 ) -> np.ndarray:
     r"""Radiation factor for forced waves ``σf`` (Formula B.3).
 
@@ -416,7 +416,7 @@ def forced_radiation_factor(
         - 1.0 / (4.0 * np.pi * l1 * l2 * k0**2)
     )
     sigma_f = 0.5 * (np.log(k0 * np.sqrt(l1 * l2)) - lam)
-    return np.asarray(np.clip(sigma_f, 0.0, MAX_RADIATION_FACTOR), dtype=np.float64)
+    return np.asarray(np.clip(sigma_f, 0.0, _MAX_RADIATION_FACTOR), dtype=np.float64)
 
 
 # --------------------------------------------------------------------------- #
@@ -575,7 +575,7 @@ def bare_floor_impact_level(
         - _IMPACT_MASS_COEFFICIENT * np.log10(m)
         + 10.0 * np.log10(ts)
         + 10.0 * np.log10(sigma)
-        + 10.0 * np.log10(f / REFERENCE_FREQUENCY),
+        + 10.0 * np.log10(f / _REFERENCE_FREQUENCY),
         dtype=np.float64,
     )
 
@@ -618,7 +618,7 @@ def perimeter_absorption_coefficient(
     if not np.all(np.isfinite(kij)):
         msg = "'vibration_reduction_indices' must be finite."
         raise ValueError(msg)
-    return float(np.sum(np.sqrt(fc / REFERENCE_FREQUENCY) * 10.0 ** (-kij / 10.0)))
+    return float(np.sum(np.sqrt(fc / _REFERENCE_FREQUENCY) * 10.0 ** (-kij / 10.0)))
 
 
 def in_situ_total_loss_factor(
@@ -778,7 +778,7 @@ def in_situ_equivalent_absorption_length(
     *,
     area: float,
     situ_reverberation_time: ArrayLike,
-    speed_of_sound: float = SPEED_OF_SOUND,
+    speed_of_sound: float = _SPEED_OF_SOUND,
 ) -> np.ndarray:
     r"""In-situ equivalent absorption length ``asitu`` (Formula 11).
 
@@ -983,7 +983,7 @@ def flanking_reduction_index_from_normalized_difference(
         + r_j / 2.0
         + np.asarray(delta_r_j, dtype=np.float64)
         + dv
-        + 10.0 * np.log10(ss / (REFERENCE_LENGTH * lij)),
+        + 10.0 * np.log10(ss / (_REFERENCE_LENGTH * lij)),
         dtype=np.float64,
     )
 
@@ -1208,7 +1208,7 @@ def flanking_impact_level_from_normalized_difference(
         + (r_i - r_j) / 2.0
         - np.asarray(delta_r_j, dtype=np.float64)
         - dv
-        - 10.0 * np.log10(si / (REFERENCE_LENGTH * lij)),
+        - 10.0 * np.log10(si / (_REFERENCE_LENGTH * lij)),
         dtype=np.float64,
     )
 

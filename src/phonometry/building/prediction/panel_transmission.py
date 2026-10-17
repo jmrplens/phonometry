@@ -105,8 +105,8 @@ from ..._internal.validation import (
 )
 from ...materials.absorbers.porous import ABSORBER_AIR
 from ...solids import PUBLISHED_PLATEAU_DATA, PlateauMaterial
+from ...vibration.structural._radiation_efficiency import coincidence_frequency
 from ...vibration.structural.point_mobility import plate_bending_stiffness
-from ...vibration.structural.radiation_efficiency import coincidence_frequency
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -440,7 +440,7 @@ def single_panel_transmission_loss(
 
     Provide the coincidence frequency directly through *critical_frequency*, or
     let it be computed from *bending_stiffness* and *mass_per_area* through
-    :func:`~phonometry.vibration.structural.radiation_efficiency.coincidence_frequency`.
+    :func:`~phonometry.vibration.structural.coincidence_frequency`.
 
     :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
     :param mass_per_area: Mass per unit area ``m''``, in kg/m^2 (> 0).
@@ -975,7 +975,7 @@ def orthotropic_critical_frequencies(
     :math:`f_\mathrm{c} = \frac{c_0^{2}}{2 \pi} \sqrt{m'' / B}` evaluated for both
     principal bending stiffnesses (Vigran Eq. (6.107), printed p. 252; the
     same closed form as the isotropic
-    :func:`~phonometry.vibration.structural.radiation_efficiency.coincidence_frequency`).
+    :func:`~phonometry.vibration.structural.coincidence_frequency`).
     The stiffest direction gives the **lowest** coincidence frequency, so the
     returned pair is sorted: ``fc1`` from the larger stiffness, ``fc2`` from the
     smaller. For a corrugated sheet ``fc1`` can sit at a few hundred hertz while

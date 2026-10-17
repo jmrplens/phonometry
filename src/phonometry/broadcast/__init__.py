@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from .program_loudness import (
+from ._program_loudness import (
     DEFAULT_CHANNEL_WEIGHTS,
     KWeightingResponse,
     ProgramLoudnessResult,

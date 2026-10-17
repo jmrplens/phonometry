@@ -78,6 +78,15 @@ if TYPE_CHECKING:
 
     from ..._report.metadata import ReportMetadata
 
+__all__ = [
+    "LaboratoryAirborneInsulationResult",
+    "LaboratoryImpactInsulationResult",
+    "LaboratoryInsulationWarning",
+    "background_correction",
+    "laboratory_airborne_insulation",
+    "laboratory_impact_insulation",
+]
+
 #: Reference equivalent absorption area A0 for the normalized impact level
 #: (ISO 10140-3:2010, Clause 3.2) and the element-normalized level difference
 #: (ISO 10140-2:2010, Clause 3.3): 10 m² for the laboratory.

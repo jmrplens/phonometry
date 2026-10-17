@@ -1,9 +1,11 @@
 ---
-title: "emission.sound_power_reverberation"
+title: "emission: sound power in a reverberation room"
 description: "Sound power level of a noise source measured in a reverberation test room: ISO 3741:2010 (precision method, accuracy grade 1)."
 sidebar:
   label: "sound_power_reverberation"
 ---
+
+Every name on this page is published by `phonometry.emission`: `from phonometry import emission`, then `emission.<name>`.
 
 Sound power level of a noise source measured in a reverberation test room:
 ISO 3741:2010 (precision method, accuracy grade 1).
@@ -146,7 +148,7 @@ is held at the criterion value and the corrected level is an upper bound.
 
 Other standards reach for this one by name rather than repeat it:
 ISO 11957:1996 asks for a correction "in accordance with ISO 3741" four
-times over, and [`phonometry.noise_control.cabin_insulation`](/phonometry/reference/api/noise_control/cabin-insulation/) calls
+times over, and [`phonometry.noise_control.cabin_insulation`](/phonometry/reference/api/noise_control/cabin-insulation/#cabin_insulation) calls
 this.
 
 **Parameters**

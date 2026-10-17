@@ -90,9 +90,7 @@ def test_plane_wave_eigenvalue_is_the_first_cut_on() -> None:
     diameter_m, c = 0.254, 343.0
     limit = duct_modes.plane_wave_limit(diameter_m=diameter_m, speed_of_sound=c)
     k = 2.0 * np.pi * limit / c
-    assert k * (diameter_m / 2.0) == pytest.approx(
-        duct_modes.PLANE_WAVE_EIGENVALUE, rel=1e-12
-    )
+    assert k * (diameter_m / 2.0) == pytest.approx(1.8412, rel=1e-12)
 
 
 def test_plane_wave_limit_accepts_area_and_rectangle() -> None:
@@ -118,7 +116,7 @@ def test_warn_above_plane_wave_limit() -> None:
         duct_modes.PlaneWaveWarning,
         match=r"test duct: .* above the first duct cut-on frequency",
     ):
-        mask = duct_modes.warn_above_plane_wave_limit(
+        mask = duct_modes._warn_above_plane_wave_limit(
             [125.0, 250.0, 500.0, 1000.0], 263.6, "test duct"
         )
     assert mask.tolist() == [False, False, True, True]
@@ -127,7 +125,9 @@ def test_warn_above_plane_wave_limit() -> None:
 def test_no_warning_below_the_limit() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        mask = duct_modes.warn_above_plane_wave_limit([63.0, 125.0], 263.6, "test duct")
+        mask = duct_modes._warn_above_plane_wave_limit(
+            [63.0, 125.0], 263.6, "test duct"
+        )
     assert not mask.any()
 
 

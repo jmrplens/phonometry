@@ -1,9 +1,11 @@
 ---
-title: "psychoacoustics.quality.tone_audibility"
+title: "psychoacoustics: tone audibility"
 description: "Objective audibility of tones in noise -- engineering method (ISO/PAS 20065:2016)."
 sidebar:
   label: "tone_audibility"
 ---
+
+Every name on this page is published by `phonometry.psychoacoustics`: `from phonometry import psychoacoustics`, then `psychoacoustics.<name>`.
 
 Objective audibility of tones in noise -- engineering method (ISO/PAS 20065:2016).
 

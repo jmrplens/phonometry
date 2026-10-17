@@ -21,7 +21,7 @@ mpl.use("Agg")
 import matplotlib.pyplot as plt
 import pytest
 
-from phonometry.broadcast.program_loudness import k_weighting_response
+from phonometry.broadcast import k_weighting_response
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

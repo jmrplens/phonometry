@@ -17,7 +17,7 @@ mpl.use("Agg")
 import numpy as np
 import pytest
 
-from phonometry.underwater.propagation.seabed_reflection import (
+from phonometry.underwater.propagation import (
     BottomLossResult,
     SeabedReflection,
     bottom_reflection_loss,

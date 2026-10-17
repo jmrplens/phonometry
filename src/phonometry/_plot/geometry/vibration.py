@@ -30,10 +30,10 @@ from ._draft import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-    from ...vibration.structural.junction_transmission import (
+    from ...vibration.structural._junction_transmission import (
         JunctionTransmissionResult,
     )
-    from ...vibration.structural.radiation_efficiency import (
+    from ...vibration.structural._radiation_efficiency import (
         RadiationEfficiencyResult,
     )
 

@@ -24,6 +24,11 @@ from ..loudness.zwicker import ZwickerLoudness, loudness_zwicker
 if TYPE_CHECKING:
     from ...io._signal import Signal
 
+__all__ = [
+    "sharpness_din",
+    "sharpness_din_from_specific",
+]
+
 #: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
 _P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 
@@ -85,7 +90,7 @@ def _moment(specific: np.ndarray, method: str) -> float:
     raise ValueError(msg)
 
 
-def reference_sound(
+def _reference_sound(
     fs: int = 48000, seconds: float = 2.0, seed: int = 45692
 ) -> np.ndarray:
     """The DIN 45692 clause 6 standard test signal.
@@ -105,7 +110,7 @@ def reference_sound(
 
 def _reference_specific() -> np.ndarray:
     """Specific loudness of the clause 6 reference sound (signal path)."""
-    return loudness_zwicker(reference_sound(), 48000, stationary=True).specific
+    return loudness_zwicker(_reference_sound(), 48000, stationary=True).specific
 
 
 _K_DIN: float | None = None

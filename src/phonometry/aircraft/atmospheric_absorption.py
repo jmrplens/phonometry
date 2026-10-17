@@ -62,6 +62,13 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+__all__ = [
+    "ARP866AAttenuation",
+    "AircraftBandAttenuation",
+    "arp866a_attenuation",
+    "sae_band_attenuation",
+]
+
 # SAE Method regression constants (ARP 5534 §3.2.2, Eqs. 7-8).
 _A = 0.867942
 _B = 0.111761

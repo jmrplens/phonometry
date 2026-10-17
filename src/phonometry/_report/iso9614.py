@@ -2,7 +2,7 @@
 """Sound power by intensity determination fiches (reportlab, ISO 9614-2 / -3).
 
 Renders a
-:class:`~phonometry.emission.sound_power_intensity.SoundPowerIntensityResult`
+:class:`~phonometry.emission.SoundPowerIntensityResult`
 (sound power determined from the normal sound intensity scanned over a surface
 enclosing the source, ISO 9614-2:1996 engineering grade 2 or survey grade 3) to
 a one-page PDF laid out like a sound-power test sheet:
@@ -28,7 +28,7 @@ a one-page PDF laid out like a sound-power test sheet:
   identity/disclaimer block.
 
 The precision sibling,
-:class:`~phonometry.emission.sound_power_intensity.PrecisionIntensityResult`
+:class:`~phonometry.emission.PrecisionIntensityResult`
 (ISO 9614-3:2002, the same scan qualified to accuracy grade 1), prints the same
 sheet with the content **that** standard asks a report to state (clause 10):
 
@@ -84,7 +84,7 @@ if TYPE_CHECKING:
 
     from reportlab.platypus import Table
 
-    from ..emission.sound_power_intensity import (
+    from ..emission._sound_power_intensity import (
         PrecisionCriteria,
         PrecisionFieldIndicators,
         PrecisionIntensityResult,
@@ -310,7 +310,7 @@ def render_intensity_power_report(
     """Render a sound-power-by-intensity determination fiche to a PDF at ``path``.
 
     :param result: A
-        :class:`~phonometry.emission.sound_power_intensity.SoundPowerIntensityResult`
+        :class:`~phonometry.emission.SoundPowerIntensityResult`
         carrying the per-band ``sound_power_level``, the field indicators and
         the A-weighted total.
     :param path: Destination path of the PDF file.
@@ -383,7 +383,7 @@ def _band_uncertainty(result: PrecisionIntensityResult) -> np.ndarray:
     centres, fraction = nominal_bands(frequencies)
     if centres is None or fraction != _THIRD_OCTAVE_FRACTION:
         return uncertainty
-    from ..emission.sound_power_intensity import _sigma_r0_9614_3
+    from ..emission._sound_power_intensity import _sigma_r0_9614_3
 
     for i, centre in enumerate(centres):
         try:
@@ -576,7 +576,7 @@ def _precision_level_a(result: PrecisionIntensityResult, omitted: np.ndarray) ->
     not_applicable = np.asarray(result.not_applicable_band, dtype=bool)
     if np.array_equal(omitted, not_applicable):
         return float(result.sound_power_level_a)
-    from ..emission.sound_power_intensity import _precision_a_weighted_total
+    from ..emission._sound_power_intensity import _precision_a_weighted_total
 
     lw = np.asarray(result.sound_power_level, dtype=np.float64)
     return _precision_a_weighted_total(
@@ -851,7 +851,7 @@ def render_precision_intensity_report(
     """Render an ISO 9614-3 precision sound-power fiche to a PDF at ``path``.
 
     :param result: A
-        :class:`~phonometry.emission.sound_power_intensity.PrecisionIntensityResult`
+        :class:`~phonometry.emission.PrecisionIntensityResult`
         carrying the per-band ``sound_power_level``, its normalized
         counterpart and the A-weighted total.
     :param path: Destination path of the PDF file.

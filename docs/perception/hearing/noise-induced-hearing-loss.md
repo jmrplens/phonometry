@@ -157,11 +157,12 @@ to 40.8 dB rather than their 45.0 dB sum; the compression term removes 4.2 dB.
 ```python
 import matplotlib.pyplot as plt
 from phonometry import hearing
-from phonometry.hearing.noise_induced_hearing_loss import NIPTS_FREQUENCIES as f
 
 # One line for the NIPTS spectrum with its fractile band:
-hearing.nipts(95.0, 40.0, 0.9).plot()
+result = hearing.nipts(95.0, 40.0, 0.9)
+result.plot()
 plt.show()
+f = result.frequencies   # the six audiometric frequencies of the standard
 
 # By hand, both panels:
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.5, 5.6))

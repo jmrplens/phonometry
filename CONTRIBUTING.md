@@ -1244,6 +1244,51 @@ carried the real name, and moving them was the moment to call them what they
 draw. That is a separate, deliberate change with its own justification, not
 part of the move, and it stops at names no caller outside the file can see.
 
+### A module and what it publishes
+
+A **module never takes the name of a function its package publishes.** When
+`signals` publishes the function `correlation`, a module `signals/correlation.py`
+beside it is hidden: the package attribute `signals.correlation` is the
+function, so `import phonometry.signals.correlation as m` binds the function,
+`signals.correlation.time_delay` raises `AttributeError`, and the module can be
+reached only by a `from` import of its file path, an address nobody can guess
+and the reference cannot honestly print. Such a module is private, with a
+leading underscore (`signals/_correlation.py`), and every name in it is reached
+through the package. It is the convention PEP 8 sets for internal interfaces
+and the one NumPy (`numpy._core`) and SciPy (since 1.8) follow for their
+implementation modules. The API reference keeps one page for it, titled by its
+domain and its subject in words (`signals: correlation`), and the page says
+which package its names are imported from. The subject never names a standard:
+the site search weighs a title above the standards a guide declares, so a page
+titled `tonality (ECMA-418-2)` would compete with the guides written to
+ECMA-418-2 on a search for it. `tests/test_api_docs_generator.py` refuses a
+title with a number in it.
+
+**Every public module declares `__all__`, and the list is the whole truth.** It
+lists the names the module defines and its package publishes, no more and no
+fewer. Anything else the module defines at the top level takes a leading
+underscore: a constant it reads for itself (`_OCTAVE_BANDS`), a helper a
+sibling calls (`_warn_above_plane_wave_limit`). A name without the underscore
+reads as public to every reader and every tool, so a constant left bare ends up
+in a guide or a script through the full module path and cannot be renamed
+without breaking it. The exceptions are typing constructs, which stay
+`PascalCase` and are not published (a type alias, a `TypeVar`, a `Protocol`),
+and the rare name listed in `UNLISTED_EXEMPTIONS` of
+`scripts/check_api_reference.py`, keyed by location with its reason. When a
+guide needs a value a module kept for itself, publish it through the package
+with its unit in the name and a row in the curated API table, as `room` does
+with `NC_CURVES_DB`; more often the value is already on a result
+(`nipts(...).frequencies`) and that is what the guide should read.
+
+`scripts/check_api_reference.py` holds both rules: it walks every public
+module and fails on a module hidden behind a name of its package, on a module
+without `__all__`, on a published name a module defines and does not list, and
+on a public-looking name it defines and neither lists nor makes private. A
+hidden module is looked for twice, because importing a submodule replaces the
+package attribute of its name: the walk reads that attribute before it imports
+the module, and it reads the package's `__init__`, where any statement but
+`from . import <module>` that binds the module's name hides it.
+
 ### Deprecations
 
 Renames of **published** API keep the old name working for one cycle:

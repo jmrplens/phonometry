@@ -72,8 +72,8 @@ def _multiple_shock_example() -> tuple[object, ReportMetadata, str]:
     published Annex C values.
     """
     from phonometry.vibration.human.multiple_shock import (
-        MZ_MALE,
-        RISK_THRESHOLDS_MALE,
+        _MZ_MALE,
+        _RISK_THRESHOLDS_MALE,
         MultipleShockResult,
         compression_dose,
         dose_from_peaks,
@@ -83,7 +83,7 @@ def _multiple_shock_example() -> tuple[object, ReportMetadata, str]:
 
     peaks = np.array([40.0] * 5)
     dz = dose_from_peaks(peaks)
-    sd = compression_dose(dz, mz=MZ_MALE)
+    sd = compression_dose(dz, mz=_MZ_MALE)
     r = injury_risk(sd, start_age=20, years=20, days_per_year=120, sex="male")
     result = MultipleShockResult(
         sex="male",
@@ -96,7 +96,7 @@ def _multiple_shock_example() -> tuple[object, ReportMetadata, str]:
         years=20,
         days_per_year=120.0,
         peaks=peaks,
-        risk_thresholds=RISK_THRESHOLDS_MALE,
+        risk_thresholds=_RISK_THRESHOLDS_MALE,
     )
     metadata = ReportMetadata(
         client="Example transport operator",

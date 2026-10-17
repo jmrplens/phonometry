@@ -1,9 +1,11 @@
 ---
-title: "psychoacoustics.quality.roughness_ecma"
+title: "psychoacoustics: roughness (Sottek model)"
 description: "Psychoacoustic roughness per ECMA-418-2:2025 (4th ed., Sottek Hearing Model)."
 sidebar:
   label: "roughness_ecma"
 ---
+
+Every name on this page is published by `phonometry.psychoacoustics`: `from phonometry import psychoacoustics`, then `psychoacoustics.<name>`.
 
 Psychoacoustic roughness per ECMA-418-2:2025 (4th ed., Sottek Hearing Model).
 

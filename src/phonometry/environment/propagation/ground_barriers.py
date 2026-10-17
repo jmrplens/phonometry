@@ -123,6 +123,16 @@ if TYPE_CHECKING:
     from ...fluids import Fluid
     from ...materials.absorbers.porous import PorousMediumResult
 
+__all__ = [
+    "BarrierInsertionLoss",
+    "SphericalGroundResult",
+    "barrier_insertion_loss",
+    "fresnel_number",
+    "ground_effect",
+    "kurze_anderson_attenuation",
+    "spherical_reflection_coefficient",
+]
+
 #: The diffraction models :func:`barrier_insertion_loss` implements, and the
 #: only tags a :class:`BarrierInsertionLoss` may carry: the fiche and the plot
 #: both name the model from this tag, so one they do not know would be printed

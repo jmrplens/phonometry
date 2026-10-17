@@ -27,6 +27,12 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from ..hearing._earmuff_insertion_loss import (
+        EarmuffInsertionLossResult,
+        FixtureIsolationCheck,
+        InsertionLossUncertaintyBudget,
+        PlaneProgressiveWaveCheck,
+    )
     from ..hearing.audiometry import (
         AmbientNoiseCheck,
         AscendingThresholdResult,
@@ -36,12 +42,6 @@ if TYPE_CHECKING:
         BracketingThresholdResult,
         RetestAgreementCheck,
         SweepThresholdResult,
-    )
-    from ..hearing.earmuff_insertion_loss import (
-        EarmuffInsertionLossResult,
-        FixtureIsolationCheck,
-        InsertionLossUncertaintyBudget,
-        PlaneProgressiveWaveCheck,
     )
     from ..hearing.sound_field_audiometry import (
         DiffuseSoundFieldCheck,
@@ -884,7 +884,7 @@ def plot_insertion_loss_uncertainty(
     """The five contributions of Table B.1 as bars, the combined value on top.
 
     Works for
-    :class:`~phonometry.hearing.earmuff_insertion_loss.InsertionLossUncertaintyBudget`.
+    :class:`~phonometry.hearing.InsertionLossUncertaintyBudget`.
 
     :param result: An insertion loss uncertainty budget.
     :param ax: Existing axes, or ``None`` to create a figure.
@@ -1185,7 +1185,7 @@ def plot_earmuff_insertion_loss(
     box takes that aspect whether this creates them or they are passed in.
     Each fitting is drawn faint behind the mean, and the expanded uncertainty
     as bars on it. Works for
-    :class:`~phonometry.hearing.earmuff_insertion_loss.EarmuffInsertionLossResult`.
+    :class:`~phonometry.hearing.EarmuffInsertionLossResult`.
 
     :param result: An insertion loss result.
     :param ax: Existing axes, or ``None`` to create a figure.
@@ -1249,7 +1249,7 @@ def plot_plane_progressive_wave(
     """The two conditions of a plane progressive wave, each on its limit.
 
     Works for
-    :class:`~phonometry.hearing.earmuff_insertion_loss.PlaneProgressiveWaveCheck`.
+    :class:`~phonometry.hearing.PlaneProgressiveWaveCheck`.
 
     :param result: A plane progressive wave check.
     :param ax: Existing axes, or ``None`` to create a figure.
@@ -1319,7 +1319,7 @@ def plot_fixture_isolation(
     """The fixture's acoustic isolation against the least 5.1.4 asks.
 
     Works for
-    :class:`~phonometry.hearing.earmuff_insertion_loss.FixtureIsolationCheck`.
+    :class:`~phonometry.hearing.FixtureIsolationCheck`.
 
     :param result: A fixture isolation check.
     :param ax: Existing axes, or ``None`` to create a figure.

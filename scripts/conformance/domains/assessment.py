@@ -975,20 +975,20 @@ def _chk_multiple_shock_probability() -> Outcome:
     _MSV, "ISO 2631-5:2018 Annex C NOTE 5", "Compressive stress Sd, female example"
 )
 def _chk_multiple_shock_female_sd() -> Outcome:
-    from phonometry.vibration.human.multiple_shock import MZ_FEMALE
+    from phonometry.vibration.human.multiple_shock import _MZ_FEMALE
 
     sd = ph.vibration.compression_dose(
-        ph.vibration.dose_from_peaks([40.0] * 5), mz=MZ_FEMALE
+        ph.vibration.dose_from_peaks([40.0] * 5), mz=_MZ_FEMALE
     )
     return numeric(ref.ISO2631_5_SD_FEMALE, sd, 0.01, unit="MPa", places=2)
 
 
 @register(_MSV, "ISO 2631-5:2018 Annex C NOTE 5", "Stress variable R, female example")
 def _chk_multiple_shock_female_r() -> Outcome:
-    from phonometry.vibration.human.multiple_shock import MZ_FEMALE
+    from phonometry.vibration.human.multiple_shock import _MZ_FEMALE
 
     sd = ph.vibration.compression_dose(
-        ph.vibration.dose_from_peaks([40.0] * 5), mz=MZ_FEMALE
+        ph.vibration.dose_from_peaks([40.0] * 5), mz=_MZ_FEMALE
     )
     r = ph.vibration.injury_risk(
         sd, start_age=20, years=20, days_per_year=120, sex="female"

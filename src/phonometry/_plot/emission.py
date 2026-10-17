@@ -39,37 +39,37 @@ if TYPE_CHECKING:
     from matplotlib.container import BarContainer
     from matplotlib.patches import Rectangle
 
-    from ..emission.intensity import FieldIndicators, IntensityResult
-    from ..emission.intensity_compliance import (
-        IntensityInstrumentComplianceResult,
-    )
-    from ..emission.sound_power import SoundEnergyResult, SoundPowerResult
-    from ..emission.sound_power_anechoic import PrecisionSoundPowerResult
-    from ..emission.sound_power_hard_walled import (
+    from ..emission._sound_power_anechoic import PrecisionSoundPowerResult
+    from ..emission._sound_power_hard_walled import (
         HardWalledRoomCheck,
         HardWalledSoundPowerResult,
         SourceLocationPlan,
     )
-    from ..emission.sound_power_high_frequency import HighFrequencySoundPowerResult
-    from ..emission.sound_power_in_duct import InDuctSoundPowerResult
-    from ..emission.sound_power_in_situ import InSituSoundPowerResult
-    from ..emission.sound_power_intensity import (
+    from ..emission._sound_power_in_duct import InDuctSoundPowerResult
+    from ..emission._sound_power_in_situ import InSituSoundPowerResult
+    from ..emission._sound_power_intensity import (
         PrecisionIntensityResult,
         SoundPowerIntensityResult,
     )
-    from ..emission.sound_power_intensity_points import (
+    from ..emission._sound_power_intensity_points import (
         DiscretePointIntensityResult,
     )
-    from ..emission.sound_power_reverberation import (
+    from ..emission._sound_power_reverberation import (
         ReverberationSoundEnergyResult,
         ReverberationSoundPowerResult,
     )
-    from ..emission.sound_power_special_room import (
+    from ..emission._sound_power_special_room import (
         SpecialRoomReverberationCheck,
         SpecialRoomSoundPowerResult,
         SpecialRoomSuitabilityCheck,
         SpecialRoomSurfaceCheck,
     )
+    from ..emission.intensity import FieldIndicators, IntensityResult
+    from ..emission.intensity_compliance import (
+        IntensityInstrumentComplianceResult,
+    )
+    from ..emission.sound_power import SoundEnergyResult, SoundPowerResult
+    from ..emission.sound_power_high_frequency import HighFrequencySoundPowerResult
     from ..emission.turbine_noise import (
         TurbineMeasurementSurface,
         TurbineMicrophoneArray,
@@ -408,16 +408,16 @@ def plot_sound_power(
     """Sound power level spectrum with the A-weighted total annotated.
 
     Works for :class:`~phonometry.emission.sound_power.SoundPowerResult`,
-    :class:`~phonometry.emission.sound_power_anechoic.PrecisionSoundPowerResult`,
-    :class:`~phonometry.emission.sound_power_reverberation.ReverberationSoundPowerResult`,
+    :class:`~phonometry.emission.PrecisionSoundPowerResult`,
+    :class:`~phonometry.emission.ReverberationSoundPowerResult`,
     the two intensity-scanning results,
-    :class:`~phonometry.emission.sound_power_intensity.SoundPowerIntensityResult`
+    :class:`~phonometry.emission.SoundPowerIntensityResult`
     and
-    :class:`~phonometry.emission.sound_power_intensity.PrecisionIntensityResult`,
+    :class:`~phonometry.emission.PrecisionIntensityResult`,
     the discrete-point one,
-    :class:`~phonometry.emission.sound_power_intensity_points.DiscretePointIntensityResult`,
+    :class:`~phonometry.emission.DiscretePointIntensityResult`,
     and the in-duct one,
-    :class:`~phonometry.emission.sound_power_in_duct.InDuctSoundPowerResult`;
+    :class:`~phonometry.emission.InDuctSoundPowerResult`;
     for the three intensity variants the bands where the net power is
     non-positive (``negative_band`` / ``not_applicable_band``) are hatched and
     greyed as unusable.
@@ -500,7 +500,7 @@ def plot_sound_energy(
     single-event determinations,
     :class:`~phonometry.emission.sound_power.SoundEnergyResult` (ISO 3744
     clause 8.3 / ISO 3746 clause 8.4) and
-    :class:`~phonometry.emission.sound_power_reverberation.ReverberationSoundEnergyResult`
+    :class:`~phonometry.emission.ReverberationSoundEnergyResult`
     (ISO 3741 clause 9.2): one bar per band of :math:`L_J`, the standard the
     result came from in the title and :math:`L_{J\mathrm{A}}` beside it when
     the band centres were supplied. Neither determination flags an
@@ -564,7 +564,7 @@ def plot_in_situ_sound_power(
     since its level is no bound either way. The report has to say both.
 
     :param result: An
-        :class:`~phonometry.emission.sound_power_in_situ.InSituSoundPowerResult`.
+        :class:`~phonometry.emission.InSituSoundPowerResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the band :meth:`~matplotlib.axes.Axes.bar`.
@@ -1190,7 +1190,7 @@ def plot_hard_walled_sound_power(
     drawn where ``sigma_omc_db`` was supplied.
 
     :param result: A
-        :class:`~phonometry.emission.sound_power_hard_walled.HardWalledSoundPowerResult`.
+        :class:`~phonometry.emission.HardWalledSoundPowerResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the band :meth:`~matplotlib.axes.Axes.bar`.
@@ -1242,7 +1242,7 @@ def plot_special_room_sound_power(
     carries the Annex F total.
 
     :param result: A
-        :class:`~phonometry.emission.sound_power_special_room.SpecialRoomSoundPowerResult`.
+        :class:`~phonometry.emission.SpecialRoomSoundPowerResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the band :meth:`~matplotlib.axes.Axes.bar`.
@@ -1291,7 +1291,7 @@ def plot_hard_walled_room_check(
     every criterion evaluated (4.2, 4.3 and 4.4).
 
     :param result: A
-        :class:`~phonometry.emission.sound_power_hard_walled.HardWalledRoomCheck`.
+        :class:`~phonometry.emission.HardWalledRoomCheck`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the spread bars.
@@ -1358,7 +1358,7 @@ def plot_source_location_plan(
     the A-weighted row as a bar of its own when it was surveyed.
 
     :param result: A
-        :class:`~phonometry.emission.sound_power_hard_walled.SourceLocationPlan`.
+        :class:`~phonometry.emission.SourceLocationPlan`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the standard-deviation bars.
@@ -1472,7 +1472,7 @@ def plot_special_room_reverberation(
     the verdict of 6.2, 6.3 and 6.6 together.
 
     :param result: A
-        :class:`~phonometry.emission.sound_power_special_room.SpecialRoomReverberationCheck`.
+        :class:`~phonometry.emission.SpecialRoomReverberationCheck`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the measured curve.
@@ -1560,7 +1560,7 @@ def plot_special_room_surfaces(
     room above the curves for it.
 
     :param result: A
-        :class:`~phonometry.emission.sound_power_special_room.SpecialRoomSurfaceCheck`.
+        :class:`~phonometry.emission.SpecialRoomSurfaceCheck`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to every wall and ceiling curve.
@@ -1652,7 +1652,7 @@ def plot_special_room_suitability(
     its calibration, within the ± Table 1 limits of ISO 3743-2:2018 6.7.
 
     :param result: A
-        :class:`~phonometry.emission.sound_power_special_room.SpecialRoomSuitabilityCheck`.
+        :class:`~phonometry.emission.SpecialRoomSuitabilityCheck`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the difference bars.

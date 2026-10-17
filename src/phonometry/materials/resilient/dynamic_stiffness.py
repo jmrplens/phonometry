@@ -89,6 +89,19 @@ from ..._internal.types import as_float_or_array
 from ..._internal.validation import check_engine, require_non_negative, require_positive
 from ..._internal.warnings import PhonometryWarning
 
+__all__ = [
+    "PUBLISHED_RESILIENT_LAYERS",
+    "DynamicStiffnessResult",
+    "DynamicStiffnessWarning",
+    "ResilientLayer",
+    "apparent_dynamic_stiffness",
+    "enclosed_gas_stiffness",
+    "floating_floor_resonance",
+    "installed_dynamic_stiffness",
+    "natural_frequency",
+    "resilient_layer",
+]
+
 # ---------------------------------------------------------------------------
 # Constants.
 # ---------------------------------------------------------------------------
@@ -96,7 +109,7 @@ from ..._internal.warnings import PhonometryWarning
 #: Atmospheric pressure ``p0`` used by EN 29052-1 for the enclosed-gas term
 #: (clause 8.2 NOTE: ``p0 = 0,1 MPa``), in pascals. The standard rounds one
 #: atmosphere to 0,1 MPa; pass the true 101 325 Pa explicitly if preferred.
-STANDARD_ATMOSPHERIC_PRESSURE = 1.0e5
+_STANDARD_ATMOSPHERIC_PRESSURE = 1.0e5
 
 #: Airflow-resistivity thresholds of clause 8.2, in kPa.s/m2.
 _HIGH_RESISTIVITY = 100.0
@@ -158,7 +171,7 @@ def enclosed_gas_stiffness(
     thickness_m: ArrayLike,
     porosity: float,
     *,
-    static_pressure_pa: float = STANDARD_ATMOSPHERIC_PRESSURE,
+    static_pressure_pa: float = _STANDARD_ATMOSPHERIC_PRESSURE,
 ) -> np.ndarray | float:
     r"""Enclosed-gas dynamic stiffness per unit area ``s'a`` (Formula 7).
 
@@ -169,7 +182,7 @@ def enclosed_gas_stiffness(
         in metres (scalar or array).
     :param porosity: Porosity ``epsilon`` of the specimen (0-1).
     :param static_pressure_pa: Atmospheric pressure ``p0``, in pascals
-        (default :data:`STANDARD_ATMOSPHERIC_PRESSURE`, the standard's 0,1 MPa).
+        (default the standard's 0,1 MPa).
     :return: The enclosed-gas dynamic stiffness per unit area ``s'a``, in N/m3.
 
     .. note::
@@ -761,7 +774,7 @@ def floating_floor_resonance(
     airflow_resistivity_kpa_s_m2: float = float("inf"),
     thickness_m: float | None = None,
     porosity: float | None = None,
-    static_pressure_pa: float = STANDARD_ATMOSPHERIC_PRESSURE,
+    static_pressure_pa: float = _STANDARD_ATMOSPHERIC_PRESSURE,
 ) -> DynamicStiffnessResult:
     r"""Full EN 29052-1 chain: measured resonance -> installed ``s'`` and ``f0``.
 

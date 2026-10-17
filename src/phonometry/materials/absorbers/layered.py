@@ -51,6 +51,7 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    require_count,
     require_non_negative,
     require_positive_array,
     require_scalar,
@@ -575,6 +576,8 @@ def _split_fluid_run(
 
     :raises ValueError: when the run would need more than *limit* blocks.
     """
+    require_scalar(budget, "budget")
+    require_scalar(limit, "limit")
     losses = [
         float(np.max(np.abs(np.imag(b)))) if kind == _FLUID else 0.0
         for kind, _, b in terms
@@ -860,7 +863,7 @@ def diffuse_field_absorption(
         msg = "'angle_limit_rad' must satisfy 0 < angle_limit <= pi/2."
         raise ValueError(msg)
     require_scalar(n_quadrature_points, "n_quadrature_points")
-    n = int(n_quadrature_points)
+    n = require_count(n_quadrature_points, "n_quadrature_points", at_least=None)
     if n < _MIN_QUADRATURE_POINTS:
         msg = "'n_quadrature_points' must be at least 2."
         raise ValueError(msg)

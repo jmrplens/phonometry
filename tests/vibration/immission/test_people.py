@@ -362,7 +362,7 @@ def test_table_2_is_not_applicable_to_a_sensitive_area_or_to_part_days() -> None
     with pytest.raises(ValueError, match="whole number"):
         im.construction_guide_values(6.9)
     a_flag = True
-    with pytest.raises(ValueError, match="whole number"):
+    with pytest.raises(TypeError, match="whole number"):
         im.construction_guide_values(a_flag)
 
 

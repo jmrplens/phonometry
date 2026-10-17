@@ -405,7 +405,7 @@ def test_impedance_is_read_at_frequencies_of_any_shape() -> None:
     grid = impedance.at([[1000.0, 2000.0], [4000.0, 8000.0]])
     assert grid.shape == (2, 2)
     assert grid[0, 0] == pytest.approx(float(impedance.at(1000.0)), rel=1e-15)
-    with pytest.raises(ValueError, match="'frequency_hz' must be real"):
+    with pytest.raises(TypeError, match="'frequency_hz' must be real"):
         impedance.at(np.array([1000.0 + 1.0j]))
 
 
@@ -648,9 +648,20 @@ def test_neck_loop_refuses_an_unknown_type() -> None:
         ea.verify_neck_loop(32.0, 1.0, neck_loop_type=3)
 
 
-@pytest.mark.parametrize("kind", [True, False, "1", 1.5, None])
-def test_neck_loop_refuses_a_type_that_is_not_a_whole_number(kind: object) -> None:
-    with pytest.raises(ValueError, match="'neck_loop_type' must be one of"):
+@pytest.mark.parametrize(
+    ("kind", "refusal"),
+    [
+        (True, TypeError),
+        (False, TypeError),
+        ("1", TypeError),
+        (1.5, ValueError),
+        (None, TypeError),
+    ],
+)
+def test_neck_loop_refuses_a_type_that_is_not_a_whole_number(
+    kind: object, refusal: type[Exception]
+) -> None:
+    with pytest.raises(refusal, match="'neck_loop_type' must be one of"):
         ea.verify_neck_loop(32.0, 1.0, neck_loop_type=kind)  # type: ignore[arg-type]
 
 
@@ -668,7 +679,7 @@ def test_neck_loop_refuses_a_negative_real_impedance() -> None:
             [-32.0, 32.0, 32.0],
             input_voltage_v=1.0,
         )
-    with pytest.raises(ValueError, match="'impedance_ohm' must be numeric"):
+    with pytest.raises(TypeError, match="'impedance_ohm' must be numbers, not text"):
         ea.neck_loop_characteristics(
             [100.0, 1000.0, 5000.0],
             [0.0, 0.0, 0.0],
@@ -678,7 +689,7 @@ def test_neck_loop_refuses_a_negative_real_impedance() -> None:
 
 
 def test_loop_field_refuses_complex_coordinates() -> None:
-    with pytest.raises(ValueError, match="'x_m' must be real"):
+    with pytest.raises(TypeError, match="'x_m' must be real"):
         ea.rectangular_loop_field(1.0, 2.0, 2.0, np.array([0.1j]), 0.0, 0.5)
 
 

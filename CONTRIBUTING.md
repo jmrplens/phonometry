@@ -1184,7 +1184,8 @@ against numpy/scipy, pandas, matplotlib, scikit-learn, statsmodels and librosa).
 | Levels | A level and a level difference are in decibels by definition (a loudness level in phon, ISO 532-1:2017, 3.16), so a public name whose **head noun** is one carries no `_db`, in a parameter, a field, a property, a function or a constant. The head noun is the last noun of the name once the words that qualify it from behind are set aside (a band `_1000`, a weighting `_a`, `_before`/`_after`, `_with`/`_without`, `_max`/`_min`), or the noun before a phrase that follows it (`band_levels_at_characteristic`): a level (`level`, `levels`, `spl`), a loss, an insulation, an isolation, a reduction, a rejection, a difference, an improvement, a single-value attenuation, a correction, an adjustment (ISO 1996-1:2016, 3.3.1: a quantity added to a level), an index, an emergence or the adaptation term of ISO 717, a shift, an increase, a decrease, an excess, a drop, a rise, a change or an increment of a level the name names (`level_shift`, `level_excess`; a bare `shift` or `drop_db` names no level and keeps its unit), and a name spelled as the printed symbol of one, as its first word or as its head (`l_n`, `delta_lw`; in `building` `r_s_w`, `d_2m_nt`, `c`, `ctr` and the vibration reduction index `k_ij`, `kij` in `MIN_MULTI_JUNCTION_KIJ`; in `emission` the corrections `c1` to `c3` and `k1` to `k3`, so the cap on K3 is `MAX_K3`; in `materials` an `l1` is the length of ASTM E2611 and not a level). A name whose head noun does not say decibel keeps the suffix: a tolerance, a margin, a limit not itself named a level, an uncertainty, a deviation, a step, a slope (`_db_per_decade`) or a rate (`_db_per_m`), a ratio (`signal_to_noise_ratio_db`), a statistic of a level (`sigma_level_db`), and a difference of another quantity (`phase_difference_deg`; a pressure loss is in pascals). A notebook table shows such a field in dB (a loudness level in phon) by the same reading, beside a real number only. `make parameter-units` fails on a public name whose head noun says decibel and that ends in `_db`; `LEVEL_SUFFIX_EXEMPT` in `scripts/check_parameter_units.py` lists, with its reason, a name that holds something else under the word | `insertion_loss`, `band_levels`, `sound_reduction_index_1000`, `velocity_level_difference`, `ground_to_floor_level_difference`, `EARPHONE_ATTENUATION`, beside `tolerance_db`, `background_margin_db`, `expanded_uncertainty_db` |
 | Words | One spelling per word, in every public name: `microphone`, `laboratory`, `standard_deviation` and `frequency`/`frequencies`, never `mic`, `lab`, `std` or `freq`/`freqs`. The public attributes a plain class sets on `self` are held to these words as a dataclass field is. A count held in a parameter, a field or a property is `n_<plural>` (`n_points`, `n_engines`, `n_events`), never `num_points`, `point_count`, `numtaps`, a bare `count` or a bare plural such as `events`; a limit on a count is `min_n_`/`max_n_` (`min_n_records`, `max_n_arrivals`). A class or grade number (`filter_class`), an axis, a number of decimals and a length counted in samples (`delay_samples`) are not counts; an array of tallies (`counts`, `cycle_counts`) and a vectorised argument that takes one count or many keep their names; a duration names its quantity before its unit (`exposure_duration_years`, `duration_s`, `period_hours`), never the unit alone (`seconds`, `hours`, `years`), whatever it holds: one number, the durations of several periods or an array, and a minute is `_minutes` (`assessment_period_minutes`), never `_min`, which is a minimum (`f_min`). `minimum` and `maximum` are written `min` and `max` in every public name, `MIN`/`MAX` in a constant and `Min`/`Max` in a class, as numpy, SciPy, scikit-learn and Matplotlib write them, terms of art included: the maximum and minimum levels Lmax and Lmin are `max_level` and `min_level` (never a bare `max_db`), the takt maximum is `TAKT_MAX_FACTOR` and the minimum-phase reconstruction `min_phase`. A confidence bound is `confidence_lower`/`confidence_upper`, never `ci_lower`, and `ci` is a word of no public name but the impact sound adaptation term C_I of ISO 717-2 (`ci`, `ci_delta`, `ci_r`). `tests/test_public_vocabulary.py` holds all of them, with each exception keyed by location and its reason | `microphone_calibration_factor`, `n_points`, `n_events`, `min_n_records`, `MIN_MICROPHONE_DISTANCE_M`, `max_qualified_radius_m`, `max_levels`, `min_phase` |
 | Type aliases / Literals | `PascalCase` aliases; plain-string `Literal` values | `Real`, `Sex = Literal["male", "female"]` |
-| Warnings | `<Topic>Warning`, all inheriting from `PhonometryWarning` | `OccupationalExposureWarning` |
+| Warnings | `<Topic>Warning`, a strict subclass of `PhonometryWarning` that its package publishes, so a caller filters one topic by name and every topic through the root. Every `warnings.warn` passes its topic class explicitly, never the root and never nothing (a bare `UserWarning`); a helper that warns for several topics takes the class as a parameter typed `type[PhonometryWarning]`. A filter the library sets inside its own code names the topic it silences, never `UserWarning` or the root, and a docstring lists a warning under `:warns <Topic>Warning:`, never `:raises`. `tests/test_package_architecture.py` holds all of them | `OccupationalExposureWarning`, `FilterBankWarning` |
+| Exceptions | `<Topic>Error`, subclassing the built-in it refines, so the `except` a caller already writes still catches it: a catalogue that does not hold what a row needs is a `CatalogueError(ValueError)`, a quantity a fluid's model does not determine a `FluidPropertyUnavailableError(AttributeError)`, which keeps `hasattr` and `getattr` with a default answering as they do for any missing attribute. `tests/test_package_architecture.py` reads every exception a package publishes against the suffix | `CatalogueError`, `FluidPropertyUnavailableError` |
 | Spelling | American English in every identifier, and in every value a caller types (a `Literal` choice, a default, an enum value, a key of a published table, a string of a published tuple of choices): `center`, `program`, `fiber`, `story` and `stories`, `vapor`, `modeling`, `normalized`, `behavior`, `neighbor`, `unfavorable`, `liter`, `aluminum`, `-ize`. In situ is one spelling, `in_situ` (`InSitu` in a class name). **`catalogue` is the one British form kept**: it is an American variant too, every name writes it the same way, and it is part of the versioned file format a user writes (the `"catalogue"` key, `phonometry-catalogue` and the schema URN `urn:phonometry:schema:catalogue:1`), so renaming it would break every catalogue file already written. A string a published source prints keeps its print, keyed by where it is in `EXEMPT` of `scripts/check_identifier_spelling.py` (the CNOSSOS road surface `"optimised brushed down concrete"`), and so does a surname (the `"doutres"` limp-frame criterion). `make identifier-spelling` holds it, and reads the `-ise`, `-yse`, `-our`, `-tre` and `-bre` endings as whole families, so a word it has never seen (`harmonised`, `theatre`) is caught too | `normalized_frequencies`, `center_frequency`, `story_fundamental_frequency`, `in_situ_absorption_spectrum`, `read_catalogue` |
 | Choices | A choice offered in more than one place reads the same in every one. A band set is `fraction`, `1` for octaves and `3` for one-third octaves, the integer `OctaveFilterBank` takes, never `band="third"`, `bands="third-octave"`, `band_type`, `bandwidth` or `band_fraction`, and a table read by band set is keyed by that integer; the speech intelligibility index keeps `method="one-third-octave"`, which names a procedure of ANSI S3.5. A choice named for a band set never takes a `str`. A free, a diffuse and a pressure field are written `"free"`, `"diffuse"` and `"pressure"`, never `"free-field"` or `"free_field"`, and every `field` that names a sound field states its options in a `Literal`; the quasi-free field of ISO 8253-2, the plane wave at normal incidence of the slit model and the eardrum of the Moore-Glasberg models keep their own words. A frequency weighting is chosen by `weighting`, never `curve`, `a_weighted` or `weighted`, and an unweighted signal is `weighting="Z"`, never `"unweighted"` or `None`: the Z-weighting of IEC 61672-1 on the sound-level weightings, and elsewhere whatever the standard leaves unweighted. A flag that reads the A-weighted single-number row of a printed table instead of its band rows is not a choice of curve and keeps its name (`emission.error_factor(a_weighted=)`, `building.estimate_reverberation_index(weighted=)`). A choice is a `Literal` in the signature, with no `\| str` beside it, and its tuple of options is typed with the same alias, so `require_choice` hands the value back as that alias. `tests/test_choice_vocabulary.py` holds them, reading every alias as its definition and every module-level tuple and table, private ones included, and calling each retired spelling to see it refused, with each exception keyed by location and its reason | `fraction=3`, `field="free"`, `weighting="Z"`, `building_class: BuildingClass` |
 | Tests | `test_<module>.py`, 1:1 with the module; cross-cutting suites get a descriptive name | `test_impulse_prominence.py` |
@@ -1236,6 +1237,86 @@ these rules. A method that tests membership or provenance (`contains`,
 `is_derived`), looks up one requirement of a verdict by its clause, or says
 how a value is to be reported (`upper_limit`) answers no pass or fail, and is
 keyed there with its reason.
+
+### A lookup that misses
+
+A judgement or a result is often asked for one of the things it holds, and the
+exception a miss raises says which kind of asking it was:
+
+| Asked for | Missing | Raises |
+|---|---|---|
+| a name or a key, by `method(name)` or `obj[key]` | the result does not hold it | `KeyError`, as `dict` does, with the key matched exactly as a `dict` key is: `RegulationLimits["noon"]` and `RegulationLimits["Day"]`, `FilterComplianceResult.binding_margin("no_such_requirement", 1)`, a verdict's `.requirement(name)` |
+| a number: a frequency, a wavelength, a class | it lies outside what the result covers or the standard defines | `ValueError`: `TrackDecayRate.rate_at(400.0)` on rates without that band, `AcousticRoughnessSpectrum.level_at(0.2)`, `binding_margin(requirement, 0)` for a class the edition does not define |
+| a cell of a published row | the page prints no number there | `ValueError`, from `CatalogueRow.printed`, naming what the page holds instead |
+
+A choice passed to a function (`period="noon"`, `fraction=2`, a weighting
+name) that names none of the options raises `ValueError`, whatever it looks
+up inside; a choice among names given as something other than a text
+(`period=5`) is the wrong type, a `TypeError`, as `require_choice` has it.
+That holds for the selectors of a plot too:
+`FilterComplianceResult.plot(requirement=...)` and
+`BinauralIndicators.plot(parameter=...)` refuse an unknown name with
+`ValueError`, because the name chooses what to draw rather than reading an
+entry back. The same name read back from the result,
+`binding_margin(requirement, ...)`, is a key, and a miss is a `KeyError`.
+
+### The class of a refusal
+
+The Python documentation draws the line between the two exceptions a guard
+raises. [`TypeError`](https://docs.python.org/3/library/exceptions.html#TypeError)
+is "raised when an operation or function is applied to an object of
+inappropriate type", and
+[`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError)
+"when an operation or function receives an argument that has the right type
+but an inappropriate value". The library follows it:
+
+- **A wrong type is a `TypeError`**: a text, a bool or `None` where a number
+  is asked for, an array where one number is (numpy 2.4 itself refuses
+  `float()` of one with `TypeError`), a complex value where a real one is, an
+  array of the wrong dtype (a mask that is not boolean, counts that are not
+  integers, readings held as text), a number where a pair or a sequence is,
+  an object that is not the record a function takes, a choice among names
+  given as something other than a text. The shared guards ask
+  the rank first and refuse an array that way, naming the parameter
+  (`require_scalar`, `require_positive` and the rest); `require_count` refuses
+  a count that is not a number with `TypeError` and one that is not a whole
+  number at or above its minimum with `ValueError`.
+- **A text is the wrong type wherever a number is asked for, whatever it
+  reads as.** `float()` and `np.asarray(..., dtype=float)` parse text, which
+  is what they are for, but a guard is not a parser: `math.sqrt("4")` and
+  `np.sqrt("4")` refuse it with `TypeError`, and so do the shared guards,
+  one value or an array of them, for `"94.0"` and `"fifty"` alike.
+- **A whole number goes through `require_count`, never through `int()`
+  alone.** `int()` truncates 2,5 to 2 without a word, takes `True` as 1 and
+  parses `"3"`; every parameter written as an `int` is read through
+  `require_count`, with `at_least=None` where it has no lower bound.
+- **A right type with a wrong value is a `ValueError`**: a negative length, a
+  count of 2,5, a level that is not finite, a choice that is not one of the
+  options.
+- **A condition that asks both is two refusals**: `if not isinstance(n, int)
+  or n < 1` becomes a `TypeError` for the type and a `ValueError` for the
+  value, because one exception cannot be both. A handler that rewords a
+  refusal keeps its class: `except TypeError` re-raises `TypeError` and
+  `except ValueError` re-raises `ValueError`.
+- **Data the library reads is a `ValueError`** whatever is wrong in it: a
+  sidecar whose factor is a text, a catalogue cell holding a word where a
+  number goes. The file is malformed; the call is not, and the refusal names
+  the file. `CatalogueError` is a `ValueError` for that reason, and the
+  sidecar parser and `CalibrationSidecar`'s own checks are the named
+  exemptions of the guard.
+
+`tests/test_error_kinds.py` reads `src` for the shapes a type refusal takes
+(an `if` that asks only for a type, a dtype or a rank against one number, an
+`or` that joins one of those to a value, a chain of type dispatches falling
+through to a `raise`, an `except TypeError` that raises another class) and
+fails on each one that raises anything but `TypeError`, with its exemptions
+keyed by function and their reasons. It also fails on an `int()` of an
+`int` parameter that `require_count` does not read, and on a public function
+that raises `TypeError` without a `:raises TypeError:` field, since the API
+reference is written from those fields. `tests/test_scalar_guards.py` calls
+every public function whose parameters all take one number and gives each
+such parameter a one-element array, a two-element array and a text in turn:
+each must be a `TypeError` that names it.
 
 ### Module length
 

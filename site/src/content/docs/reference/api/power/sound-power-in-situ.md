@@ -481,4 +481,5 @@ where the base reaches zero, some 44 km up, and that is refused.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if `altitude` is not a single finite number or `1 - a Ha` is not positive. |
+| TypeError | if `altitude` is an array: one site at a time. |
+| ValueError | if `altitude` is not a finite number or `1 - a Ha` is not positive. |

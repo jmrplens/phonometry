@@ -61,7 +61,12 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_ranks, require_same_length, require_scalar
+from .._internal.validation import (
+    require_count,
+    require_ranks,
+    require_same_length,
+    require_scalar,
+)
 from ..io._resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
@@ -105,6 +110,9 @@ def _positive(value: float, name: str) -> float:
 
 
 def _validate_sweep_band(fs: float, f1: float, f2: float) -> None:
+    require_scalar(fs, "fs")
+    require_scalar(f1, "f1")
+    require_scalar(f2, "f2")
     if f2 <= f1:
         msg = "'f2' must be greater than 'f1'."
         raise ValueError(msg)
@@ -173,6 +181,7 @@ def synchronized_sweep_signal(
         :func:`swept_sine_distortion`.
     :return: The sweep samples, length :math:`\lceil T f_\mathrm{s} \rceil`.
     """
+    require_scalar(fade, "fade")
     fs_v = _positive(fs, "fs")
     f1_v = _positive(f1, "f1")
     _validate_sweep_band(fs_v, f1_v, float(f2))
@@ -541,7 +550,7 @@ def _harmonic_window(
     min_spacing = int(np.floor(delays_samples[-1] - delays_samples[-2]))
     if ir_length is not None:
         require_scalar(ir_length, "ir_length")
-        window = int(ir_length)
+        window = require_count(ir_length, "ir_length", at_least=None)
         if window < _MIN_IR_LENGTH:
             msg = f"'ir_length' must be at least {_MIN_IR_LENGTH} samples."
             raise ValueError(msg)
@@ -581,6 +590,7 @@ def _check_farina_span(
     arriving beyond it (n > f2/f1, up to the window half-width) would wrap
     onto the causal linear response and read back a spurious copy of H1.
     """
+    require_scalar(window, "window")
     anticausal = sweep_samples - 1
     if delays_samples[-1] + window / 2.0 <= anticausal:
         return
@@ -695,7 +705,7 @@ def swept_sine_distortion(
         msg = "'method' must be 'synchronized' or 'farina'."
         raise ValueError(msg)
     require_scalar(n_harmonics, "n_harmonics")
-    n_orders = int(n_harmonics)
+    n_orders = require_count(n_harmonics, "n_harmonics", at_least=None)
     if n_orders < _MIN_HARMONIC_ORDER:
         msg = "'n_harmonics' must be at least 2."
         raise ValueError(msg)

@@ -15,8 +15,9 @@ then checks, cell by cell, by the tag on each cell:
 * ``inline-plot``: ``.plot()`` puts out a PNG through the inline backend;
 * ``verdict``: a verdict is displayed with its outcome, FAIL here;
 * ``report``: ``.report()`` writes a PDF to a temporary path;
-* ``warning``: a :class:`~phonometry.PhonometryWarning` reaches the cell's
-  stderr.
+* ``warning``: the :class:`~phonometry.filters.FilterBankWarning` the cell
+  provokes, a topic class under :class:`~phonometry.PhonometryWarning`,
+  reaches the cell's stderr by its own name.
 
 A cell that raises fails the run before any of this is read. The notebook is
 committed without outputs; this never writes it back. It needs nbclient,
@@ -118,16 +119,22 @@ def _report(outputs: Outputs) -> str:
     return ".report() writes a PDF"
 
 
+#: The topic class the warning cell provokes: a band above fs/2 dropped by
+#: a filter bank. Every warning of the library is a topic class under
+#: PhonometryWarning, and Python prints the topic, not the root.
+WARNING = "FilterBankWarning"
+
+
 def _warning(outputs: Outputs) -> str:
     stderr = "".join(
         output["text"]
         for output in outputs
         if output["output_type"] == "stream" and output["name"] == "stderr"
     )
-    if "PhonometryWarning" not in stderr:
-        msg = f"no PhonometryWarning on stderr: {stderr[:200]!r}"
+    if f"{WARNING}: " not in stderr:
+        msg = f"no {WARNING} on stderr: {stderr[:200]!r}"
         raise NotebookError(msg)
-    return "a PhonometryWarning reaches the cell's stderr"
+    return f"a {WARNING} reaches the cell's stderr"
 
 
 #: What each tagged cell must have put out, and how it is read.

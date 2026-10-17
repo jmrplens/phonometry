@@ -31,7 +31,10 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.display import RichDisplay
-from .._internal.validation import require_equal_counts
+from .._internal.validation import (
+    require_equal_counts,
+    require_scalar,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -108,6 +111,8 @@ class Signal(RichDisplay):
     source: SignalOrigin | None = None
 
     def __post_init__(self) -> None:
+        require_scalar(self.calibration_factor, "calibration_factor")
+        require_scalar(self.fs, "fs")
         data = np.atleast_2d(np.asarray(self.data, dtype=np.float64))
         if data.ndim != 2:  # noqa: PLR2004
             msg = f"data must be 1-D or (channels, samples); got {data.ndim}-D"

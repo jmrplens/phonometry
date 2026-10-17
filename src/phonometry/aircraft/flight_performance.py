@@ -48,6 +48,7 @@ import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.validation import require_finite_fields, require_scalar
+from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -61,6 +62,7 @@ __all__ = [
     "ApproachStep",
     "DepartureStep",
     "FlightProfile",
+    "FlightProfileWarning",
     "JetEngineCoefficients",
     "PerformanceAircraft",
     "ProfilePoint",
@@ -68,6 +70,21 @@ __all__ = [
     "approach_profile",
     "departure_profile",
 ]
+
+
+class FlightProfileWarning(PhonometryWarning):
+    """A procedure whose steps disagree with the notes of Doc 29 B7.1.4.
+
+    Emitted by :func:`approach_profile` for a Level-Idle step whose start
+    altitude differs from that of the step after it, when that step is a
+    Level-Idle step (Case 1) or neither a Level-Idle nor a Descend-Idle step
+    (Case 2): the inconsistency B7.1.4 says "the system should warn the user"
+    about. It is also emitted, as a consistency note B7.1.4 states without
+    asking for a warning, for a Level-Idle step whose start CAS is below that
+    of the same following step, which is an acceleration on an idle segment.
+    Neither is repaired, because the tabulated numbers are the manufacturer's.
+    """
+
 
 # --------------------------------------------------------------------------
 # Constants fixed by the standard (B2.1, B2.2, B3)
@@ -320,6 +337,8 @@ class Aerodrome(RichDisplay):
         :raises ValueError: if a field is not finite, the sea-level pressure is
             not positive, or the runway gradient is not below 1 in magnitude.
         """
+        require_scalar(self.runway_gradient_ratio, "runway_gradient_ratio")
+        require_scalar(self.sea_level_pressure_inhg, "sea_level_pressure_inhg")
         require_finite_fields(
             self,
             "elevation_ft",
@@ -657,6 +676,7 @@ class PerformanceAircraft(RichDisplay):
         :raises ValueError: if the engine count is below one, or a weight or
             thrust is not finite and positive.
         """
+        require_scalar(self.n_engines, "n_engines")
         require_finite_fields(self, "max_static_thrust_lb", "max_landing_weight_lb")
         if self.n_engines < 1:
             msg = (
@@ -899,6 +919,7 @@ class ApproachStep(RichDisplay):
         :raises ValueError: if the step type is not one of the eight of B7.1, or
             the parameters that type is solved from are missing.
         """
+        require_scalar(self.distance_ft, "distance_ft")
         kind = self.kind
         if kind not in _APPROACH_STEP_TYPES:
             msg = (
@@ -2634,32 +2655,41 @@ def _non_isa_adjusted(
 
 
 def _warn_level_idle_inputs(step: ApproachStep, anchor: _Anchor) -> None:
-    """Raise the two consistency warnings B7.1.4 asks for, without fixing them.
+    """Emit the consistency warnings of B7.1.4, without fixing anything.
 
-    Doc 29 asks that "the system should warn the user" when consecutive
-    Level-Idle steps disagree about the altitude they are flown at, and when the
-    calibrated airspeed rises rather than falls along a decelerating segment.
-    Neither is repaired here: the tabulated numbers are the manufacturer's, and
-    a silently corrected input is a profile nobody can trace back to its table.
+    B7.1.4 (Doc 29 5th edition, Volume 2, folios B-42 to B-44) splits a
+    Level-Idle step by the step after it. When that step is a Level-Idle step
+    (Case 1) or neither a Level-Idle nor a Descend-Idle step (Case 2), its
+    notes say the two steps should start at one altitude, "If not, the system
+    should warn the user", and that the start CAS of the Level-Idle step
+    should be at or above that of the following step, which they state
+    without asking for a warning; both are reported here. Case 1 writes its
+    notes for a following Level-Idle step only, so a following Descend-Idle
+    step, which Case 1 also covers, is held to neither. Nothing is repaired:
+    the tabulated numbers are the manufacturer's, and a silently corrected
+    input is a profile nobody can trace back to its table.
     """
-    if anchor.step.kind != "level-idle":
+    following = anchor.step
+    if following.kind == "descend-idle":
         return
-    if step.start_altitude_ft != anchor.step.start_altitude_ft:
+    case = "Case 1" if following.kind == "level-idle" else "Case 2"
+    altitude = following.start_altitude_ft
+    if altitude is not None and step.start_altitude_ft != altitude:
         msg = (
-            "consecutive Level-Idle steps should be flown at one altitude "
-            f"(B7.1.4); {step.start_altitude_ft!r} ft is followed by "
-            f"{anchor.step.start_altitude_ft!r} ft."
+            "a Level-Idle step should start at the altitude of the step after "
+            f"it (B7.1.4, {case}); {step.start_altitude_ft!r} ft is followed "
+            f"by a {following.step_type} step at {altitude!r} ft."
         )
-        warnings.warn(msg, stacklevel=2)
+        warnings.warn(msg, FlightProfileWarning, stacklevel=2)
     start = step.start_calibrated_airspeed_kt
-    following = anchor.step.start_calibrated_airspeed_kt
-    if start is not None and following is not None and start < following:
+    next_cas = following.start_calibrated_airspeed_kt
+    if start is not None and next_cas is not None and start < next_cas:
         msg = (
             "a Level-Idle step's start CAS should be at or above the following "
-            f"step's (B7.1.4); {start!r} kt is followed by {following!r} kt, "
-            "which is an acceleration on an idle segment."
+            f"step's (B7.1.4, {case}); {start!r} kt is followed by {next_cas!r} "
+            "kt, which is an acceleration on an idle segment."
         )
-        warnings.warn(msg, stacklevel=2)
+        warnings.warn(msg, FlightProfileWarning, stacklevel=2)
 
 
 def _approach_point2(
@@ -2766,6 +2796,8 @@ def approach_profile(
     :return: A :class:`FlightProfile` with ``operation="A"``.
     :raises ValueError: if the procedure carries no Land step to anchor it, or
         a step cannot be flown as specified.
+    :warns FlightProfileWarning: if consecutive Level-Idle steps are flown at
+        different altitudes, or one's calibrated airspeed rises along it.
     """
     kinds = [step.kind for step in steps]
     if kinds.count("land") != 1:

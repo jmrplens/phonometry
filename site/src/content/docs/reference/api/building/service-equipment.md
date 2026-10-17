@@ -376,7 +376,8 @@ the same positions, is not a number and is left to the operator.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a duration is not a positive, finite number, or the tolerance is not one finite number of 0 s or more. |
+| TypeError | If a duration or the tolerance is a text or a flag, or the tolerance is an array. |
+| ValueError | If a duration is not a positive, finite number, or the tolerance is not a finite number of 0 s or more. |
 
 ## check_instrument_agreement
 
@@ -560,7 +561,8 @@ positions, whose 0,50 m from the room surfaces 7.3 sets instead.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a dimension is not positive, a coordinate is not a finite real number, no room position is given, a position lies outside the room, `small_room` is not `True` or `False`, or an obstacle distance is not a finite distance of 0 m or more. |
+| TypeError | If `small_room` is not `True` or `False`, or a coordinate or distance is text or not a number. |
+| ValueError | If a dimension is not positive, a coordinate is not finite, no room position is given, a position lies outside the room, or an obstacle distance is not a finite distance of 0 m or more. |
 
 ## check_varying_background
 
@@ -717,7 +719,8 @@ ventilation outlet for example, is left out.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a level is not finite, `excluded` is not a sequence of whole numbers, an index is out of range, or every corner is excluded. |
+| TypeError | If `excluded` is not a sequence, or holds a bool, a text or anything else that is not a number. |
+| ValueError | If a level is not finite, an index is not a whole number or is out of range, or every corner is excluded. |
 
 ## MeasurementDisturbanceCheck
 

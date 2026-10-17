@@ -87,10 +87,10 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
+    require_count,
     require_finite_array,
     require_non_negative,
     require_positive,
-    require_scalar,
 )
 from .vibration_meter import (
     KB_CORNER_HZ,
@@ -545,12 +545,8 @@ def construction_guide_values(
     :raises ValueError: For a duration that is not a whole number of days
         from 1 to 78, an unknown stage, an unknown area or a sensitive one.
     """
-    require_scalar(duration_days, "duration_days")
-    if isinstance(duration_days, bool) or float(duration_days) != int(duration_days):
-        msg = f"'duration_days' must be a whole number of working days, got {duration_days!r}."
-        raise ValueError(msg)
-    days = int(duration_days)
-    if days < 1 or days > _CONSTRUCTION_MAX_DAYS:
+    days = require_count(duration_days, "duration_days")
+    if days > _CONSTRUCTION_MAX_DAYS:
         msg = (
             "Table 2 covers 1 to 78 working days; the standard makes no "
             f"statement beyond that. Got {duration_days!r}."

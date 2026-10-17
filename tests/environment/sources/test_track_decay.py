@@ -205,10 +205,10 @@ def test_rates_from_a_report_carry_no_grid() -> None:
     assert rates.rate_at(315.0) == pytest.approx(1.9)
 
 
-def test_a_missing_band_is_a_key_error() -> None:
+def test_a_frequency_without_a_band_is_a_value_error() -> None:
     """rate_at names the band it could not find."""
     rates = TrackDecayRate("vertical", [250.0], [2.5])
-    with pytest.raises(KeyError, match="no band at 400 Hz"):
+    with pytest.raises(ValueError, match="no band at 400 Hz"):
         rates.rate_at(400.0)
 
 

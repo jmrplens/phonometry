@@ -378,7 +378,7 @@ modulación por banda que produce el índice.
   width="92%"
 />
 
-`stipa` emite un `UserWarning` cuando la grabación es más corta que los 15 s
+`stipa` emite un `speech.STIWarning` cuando la grabación es más corta que los 15 s
 recomendados (práctica STIPA de IEC 60268-16, de 15 s a 25 s): por debajo de eso
 las componentes de modulación lentas se promedian sobre muy pocos periodos y el
 STI queda sesgado a la baja (un bucle de retorno ideal da STI ≈ 0,956 a 5 s
@@ -499,7 +499,7 @@ Cada vía tiene modos de fallo que la norma hace explícitos:
   mediciones directas repetidas se dispersan hasta alrededor de 0,03 STI
   incluso en condiciones estacionarias (y más en ruido fluctuante); repite y
   compara en lugar de fiarte de una sola pasada, y respeta la duración mínima
-  que señala el `UserWarning` de arriba.
+  que señala el `speech.STIWarning` de arriba.
 
 De esos cuatro, la dependencia del nivel es la que se descarta con más facilidad,
 así que merece la pena ver de qué tamaño es:

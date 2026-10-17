@@ -58,7 +58,12 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_ranks, require_same_length, require_scalar
+from .._internal.validation import (
+    require_count,
+    require_ranks,
+    require_same_length,
+    require_scalar,
+)
 from .._internal.warnings import PhonometryWarning
 from ..io._resolve import (
     apply_calibration,
@@ -77,11 +82,22 @@ if TYPE_CHECKING:
 __all__ = [
     "ResampledSignalResult",
     "ToneBurstResult",
+    "ToneBurstWarning",
     "fractional_delay",
     "noise_signal",
     "resample_signal",
     "tone_burst",
 ]
+
+
+class ToneBurstWarning(PhonometryWarning):
+    """A tone burst whose gate cannot close on the tone's zero crossing.
+
+    Emitted by :func:`tone_burst` when the sample rate and the tone frequency
+    are incommensurate, so the gate closes away from the final zero crossing
+    and leaves a residual step, which the message quantifies.
+    """
+
 
 #: Power-law exponent α of ``Gxx(f) ∝ f^α`` per color.
 _COLOR_EXPONENTS: dict[str, float] = {
@@ -315,13 +331,13 @@ def _tone_burst_scalars(
         msg = "'frequency' must be below the Nyquist rate fs/2."
         raise ValueError(msg)
     require_scalar(n_cycles, "n_cycles")
-    cycles_v = int(n_cycles)
+    cycles_v = require_count(n_cycles, "n_cycles", at_least=None)
     if cycles_v != n_cycles or cycles_v < 1:
         msg = "'n_cycles' must be a positive integer."
         raise ValueError(msg)
     amplitude_v = _positive(amplitude, "amplitude")
     require_scalar(n_repetitions, "n_repetitions")
-    repetitions_v = int(n_repetitions)
+    repetitions_v = require_count(n_repetitions, "n_repetitions", at_least=None)
     if repetitions_v != n_repetitions or repetitions_v < 1:
         msg = "'n_repetitions' must be a positive integer."
         raise ValueError(msg)
@@ -342,6 +358,8 @@ def _tone_burst_period(
 
     ``(None, None, None)`` for a single burst without a repetition rate.
     """
+    require_scalar(n_on, "n_on")
+    require_scalar(repetitions_v, "repetitions_v")
     if repetition_rate is None:
         if repetitions_v > 1:
             msg = "'repetition_rate' is required when 'n_repetitions' > 1."
@@ -388,8 +406,7 @@ def tone_burst(
     :math:`\text{amplitude} \cdot \sin(\pi \cdot \text{frequency}/f_\mathrm{s})`
     there
     (e.g. 10 cycles of 997 Hz at 48 kHz span 481.44 samples, gated at
-    481); a :class:`~phonometry.PhonometryWarning` quantifies the
-    realized residual.
+    481); a :class:`ToneBurstWarning` quantifies the realized residual.
 
     :param fs: Rate to generate at, in Hz.
     :param frequency: Tone frequency, in Hz (below the Nyquist rate).
@@ -405,6 +422,7 @@ def tone_burst(
         repetition period), in seconds.
     :return: A :class:`ToneBurstResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :warns ToneBurstWarning: If ``fs`` and ``frequency`` are incommensurate.
     """
     fs_v, f_v, cycles_v, amplitude_v, repetitions_v = _tone_burst_scalars(
         fs,
@@ -439,7 +457,7 @@ def tone_burst(
             "samples away from the tone's final zero crossing, leaving a "
             f"residual step of {residual:.3g} (peak amplitude "
             f"{amplitude_v:g}).",
-            PhonometryWarning,
+            ToneBurstWarning,
             stacklevel=2,
         )
 
@@ -641,7 +659,7 @@ def resample_signal(
         msg = "'transition_width' must be in (0, 0.5]."
         raise ValueError(msg)
     require_scalar(max_denominator, "max_denominator")
-    max_den = int(max_denominator)
+    max_den = require_count(max_denominator, "max_denominator", at_least=None)
     if max_den < 1:
         msg = "'max_denominator' must be a positive integer."
         raise ValueError(msg)

@@ -266,8 +266,15 @@ def test_garbage_input_is_refused_naming_the_parameter(
     parameter refused; the shared conversion now answers for all four
     validators in one voice.
     """
-    for garbage in (("bad",), object(), {"a": 1}):
-        with pytest.raises(ValueError, match="'x' must be numeric"):
+    # A text, an object and a mapping are all the wrong type: a guard is not
+    # a parser, so a text is refused whatever it reads as.
+    for garbage, words in (
+        (("bad",), "numbers, not text"),
+        (("1.0",), "numbers, not text"),
+        (object(), "numeric"),
+        ({"a": 1}, "numeric"),
+    ):
+        with pytest.raises(TypeError, match=f"'x' must be {words}"):
             validator(garbage, "x", *args)
 
 
@@ -297,9 +304,11 @@ def test_a_complex_input_is_refused_rather_than_flattened(
     warning and not an error, so ``np.array([1 + 2j])`` used to reach the
     guards as ``[1.0]`` and satisfy every one of them. A *list* of complex
     numbers raised, because that path fails the conversion outright, so the
-    two spellings of the same input disagreed with each other.
+    two spellings of the same input disagreed with each other. A complex
+    value where a real one belongs is the wrong type, so the refusal is a
+    ``TypeError``.
     """
-    with pytest.raises(ValueError, match="'x' must be real, not complex"):
+    with pytest.raises(TypeError, match="'x' must be real, not complex"):
         validator(complex_input, "x", *args)
 
 
@@ -370,9 +379,10 @@ def test_a_non_numeric_field_is_refused_naming_the_field() -> None:
     bare ``TypeError``, not the documented ``ValueError``, for the other,
     neither naming the field nor the result it sits on.
     """
-    for garbage in ("abc", np.array(["a", "b"]), object(), [object()]):
+    # A text, read as a number or not, and an object are the wrong type.
+    for garbage in ("abc", np.array(["a", "b"]), ("94.0",), object(), [object()]):
         result = _Result(first=garbage)
-        with pytest.raises(ValueError, match="_Result: 'first' must be numeric"):
+        with pytest.raises(TypeError, match="_Result: 'first' must be numeric"):
             require_finite_fields(result, "first")
 
 
@@ -385,7 +395,12 @@ def test_a_count_is_a_whole_number_and_nothing_else() -> None:
     assert require_count(3.0, "storeys") == 3
     assert require_count(np.int64(4), "storeys") == 4
     assert require_count(0, "storeys", at_least=0) == 0
-    for bad in (True, "3", float("inf"), float("nan"), 2.9, 0, -1, None, [3]):
+    # What is not a number at all is the wrong type; a number that is not
+    # whole, or is below the minimum, is the right type with a wrong value.
+    for bad in (True, "3", None, [3]):
+        with pytest.raises(TypeError, match="'storeys' must be a whole number"):
+            require_count(bad, "storeys")
+    for bad in (float("inf"), float("nan"), 2.9, 0, -1):
         with pytest.raises(
             ValueError, match="'storeys' must be a whole number, at least 1"
         ):

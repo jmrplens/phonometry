@@ -65,6 +65,7 @@ import pytest
 from scipy.io import wavfile
 
 from phonometry import speech
+from phonometry.speech import STIWarning
 from phonometry.speech.sti import _MOD_FREQS, _NUM_BANDS, _sti_from_mtf
 
 FS = 48000
@@ -147,7 +148,7 @@ def _stipa_quiet(x: np.ndarray) -> speech.STIResult:
     (dead bands and junk m > 1,3 in the two-band C.4.2 signals).
     """
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore", UserWarning)
+        warnings.simplefilter("ignore", STIWarning)
         return speech.stipa(x, FS)
 
 

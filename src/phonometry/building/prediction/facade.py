@@ -171,6 +171,8 @@ class FacadeElement(OwnsArrays):
 
     def tau(self, total_area: float, n_bands: int) -> np.ndarray:
         """Transmission factor ``τ`` of this element for the whole façade area."""
+        require_scalar(n_bands, "n_bands")
+        require_scalar(total_area, "total_area")
         if total_area <= 0:
             msg = "'total_area' (façade area S) must be positive."
             raise ValueError(msg)
@@ -437,6 +439,7 @@ def _apparent_reduction(
     elements: Sequence[FacadeElement], total_area: float, owner: str
 ) -> tuple[np.ndarray, dict[str, np.ndarray]]:
     r""":math:`R' = -10 \log_{10}(\sum \tau)` (F. 10 / Part 4 F. 3), plus ``Rp``."""
+    require_scalar(total_area, "total_area")
     if not elements:
         msg = "At least one façade element is required."
         raise ValueError(msg)
@@ -614,6 +617,9 @@ def outdoor_attenuation(width_m: float, height_m: float, distance: float) -> flo
     :param distance: Perpendicular distance ``d`` to the reception point, in m.
     :return: ``Atot`` in dB (subtract from ``LW`` to get the exterior ``Lp``).
     """
+    require_scalar(distance, "distance")
+    require_scalar(height_m, "height_m")
+    require_scalar(width_m, "width_m")
     w, h, d = float(width_m), float(height_m), float(distance)
     if min(w, h, d) <= 0:
         msg = "'width_m', 'height_m' and 'distance' must be positive."

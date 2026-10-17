@@ -49,7 +49,7 @@ from .._internal.frozen import (
     frozen_rows,
     reduce_with_plain_rows,
 )
-from .._internal.validation import require_choice, require_scalar
+from .._internal.validation import require_choice, require_count, require_scalar
 from .weighting import WeightingFilter, _runtime_frequency_response
 
 if TYPE_CHECKING:
@@ -504,6 +504,7 @@ def weighting_class_limits(
     :raises ValueError: if the edition is unknown or does not define the
         requested class.
     """
+    require_scalar(weighting_class, "weighting_class")
     spec = _edition_spec(edition)
     if weighting_class not in spec["classes"]:
         msg = (
@@ -1007,5 +1008,5 @@ def verify_weighting_class(
         weighting=str(wf.weighting),
         edition=edition,
         fs=float(wf.fs),
-        n_sweep_points=int(n_sweep_points),
+        n_sweep_points=require_count(n_sweep_points, "n_sweep_points", at_least=None),
     )

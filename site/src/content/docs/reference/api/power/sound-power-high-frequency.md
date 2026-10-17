@@ -341,6 +341,7 @@ comparison method.
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | for a band calibration given as the reference when `noise_bandwidth_hz` asks for a tonal comparison, which needs levels. |
 | ValueError | for non-finite levels, reference levels that do not span the same bands, a non-positive bandwidth, or a temperature or static pressure ISO 3741 cannot correct from. |
 
 ## HighFrequencySoundPowerResult

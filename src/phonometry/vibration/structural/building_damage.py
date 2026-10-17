@@ -81,6 +81,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     require_choice,
+    require_count,
     require_non_negative,
     require_positive,
 )
@@ -527,20 +528,14 @@ def story_fundamental_frequency(n_stories: int) -> float:
 
     :param n_stories: The number of storeys ``n``.
     :return: The estimated lowest horizontal natural frequency, in hertz.
-    :raises ValueError: If the storey count is not a positive integer.
+    :raises TypeError: If the storey count is not a number.
+    :raises ValueError: If the storey count is not a whole number of at
+        least 1.
     :warns BuildingDamageWarning: Below
         :data:`STORY_FREQUENCY_MIN_STORIES`, where the estimate is an
         extrapolation of a rule the standard offers for taller buildings.
     """
-    # ValueError rather than TypeError, so every argument this module refuses
-    # raises the same class.
-    if isinstance(n_stories, bool) or not isinstance(n_stories, (int, np.integer)):
-        msg = "'n_stories' must be an integer."
-        raise ValueError(msg)  # noqa: TRY004
-    n = int(n_stories)
-    if n < 1:
-        msg = f"'n_stories' must be at least 1; got {n}."
-        raise ValueError(msg)
+    n = require_count(n_stories, "n_stories")
     if n < STORY_FREQUENCY_MIN_STORIES:
         # A warning and not a refusal: 6.4 says "about five storeys", and a
         # four-storey building is not on the far side of a line the standard

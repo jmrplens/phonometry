@@ -330,20 +330,22 @@ def _require_frequency_pair(owner: object, name: str) -> None:
     a single sample yields a degenerate but honest range.
 
     The conversion to ``float`` is what refuses a pair of the right shape
-    whose members are not numbers at all, and its own complaint is caught for
-    the sake of it: ``("low", "high")`` reaches the guard as a ``ValueError``
-    reading ``could not convert string to float: 'low'`` and a pair of
-    arbitrary objects as a ``TypeError`` from inside ``float`` -- neither
-    names the field, neither names the result it belongs to, and the second
-    is not the ``ValueError`` this guard documents. The helper validates
+    whose members are not numbers at all, and its own complaint is renamed
+    for the sake of it: ``("low", "high")`` reaches the guard as a
+    ``ValueError`` reading ``could not convert string to float: 'low'`` and a
+    pair of arbitrary objects as a ``TypeError`` from inside ``float``, and
+    neither names the field or the result it belongs to. Each keeps its
+    class, with the field's name in the message. The helper validates
     fields of two result types (both loudspeaker band edges and
     ``MicrophoneCharacteristics.effective_range``), so the owner's type name
     is what tells the two apart in the message.
 
     :param owner: The instance whose field is read.
     :param name: Field name holding a ``(lo, hi)`` tuple or ``None``.
-    :raises ValueError: if the field is not numeric, or is not a finite,
-        ordered, positive pair.
+    :raises TypeError: if the field is not a flat pair, or a member is not a
+        number.
+    :raises ValueError: if a member is a text that reads as no number, or the
+        field is not a finite, ordered, positive pair of two.
     """
     value = getattr(owner, name)
     if value is None:
@@ -354,9 +356,14 @@ def _require_frequency_pair(owner: object, name: str) -> None:
     except ValueError:
         # A ragged pair, one member an array: numpy has no shape to give.
         shape = None
-    if shape != (2,):
+    if shape is None or len(shape) != 1 or isinstance(value, (str, bytes)):
+        # Not a flat sequence of two numbers at all: a number, a text, or a
+        # pair with an array inside it is the wrong type for a pair.
         described = "a ragged sequence" if shape is None else f"shape {shape}"
         msg = f"{owner_name}: '{name}' must be a (lo, hi) pair; got {described}."
+        raise TypeError(msg)
+    if shape != (2,):
+        msg = f"{owner_name}: '{name}' must be a (lo, hi) pair; got shape {shape}."
         raise ValueError(msg)
     numeric = f"{owner_name}: '{name}' must be numeric."
     lo, hi = require_real(value[0], numeric), require_real(value[1], numeric)

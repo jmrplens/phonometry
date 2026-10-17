@@ -567,9 +567,10 @@ def test_measurement_humidity_above_saturation_raises() -> None:
 
 
 def test_measurement_non_numeric_humidity_raises_by_name() -> None:
-    # Not float()'s anonymous "could not convert string to float".
+    # Not float()'s anonymous "could not convert string to float": a text is
+    # the wrong type, named.
     with pytest.raises(
-        ValueError, match=r"'relative_humidity_percent' must be within \[0, 100\]"
+        TypeError, match=r"'relative_humidity_percent' must be within \[0, 100\]"
     ):
         materials.measure_sound_absorption(
             _FREQS, _T1, _T2, volume=200.0, area=10.8, relative_humidity_percent="wet"
@@ -580,7 +581,7 @@ def test_measurement_one_element_array_humidity_raises_by_name() -> None:
     # float() refuses a 1-d array with TypeError, not ValueError; the guard
     # renames that failure too instead of dying inside float().
     with pytest.raises(
-        ValueError, match=r"'relative_humidity_percent' must be within \[0, 100\]"
+        TypeError, match=r"'relative_humidity_percent' must be within \[0, 100\]"
     ):
         materials.measure_sound_absorption(
             _FREQS,

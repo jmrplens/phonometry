@@ -26,6 +26,7 @@ from reference_data import (
 )
 
 from phonometry import room
+from phonometry.room import NoiseCriterionWarning
 from phonometry.room import noise_criteria as rn
 
 
@@ -202,7 +203,7 @@ def test_rc_missing_d4_bands_warn() -> None:
     # Clause D.4 rates a spectrum with at least the 31.5 Hz to 4000 Hz
     # octave bands; a subset missing any of them warns that the absent bands
     # are skipped by the spectral-tag deviation tests.
-    with pytest.warns(UserWarning, match="31.5 Hz to 4000 Hz"):
+    with pytest.warns(NoiseCriterionWarning, match="31.5 Hz to 4000 Hz"):
         rn.room_criterion([40.0, 35.0, 30.0], [500.0, 1000.0, 2000.0])
 
 
@@ -453,7 +454,7 @@ def test_an_rc_rating_refuses_a_rating_that_is_not_an_integer(bad: object) -> No
     tabulated family.
     """
     result = rn.room_criterion(rn.rc_curve(35.0))
-    with pytest.raises(ValueError, match="'rating' must be an integer"):
+    with pytest.raises(TypeError, match="'rating' must be an integer"):
         dataclasses.replace(result, rating=bad)
 
 
@@ -482,7 +483,7 @@ def test_an_rc_rating_keeps_the_bands_it_was_never_given() -> None:
     rating and the curve derived from it, which are finite here even though
     seven of the ten bands were never measured.
     """
-    with pytest.warns(UserWarning, match="31.5 Hz to 4000 Hz octave bands"):
+    with pytest.warns(NoiseCriterionWarning, match="31.5 Hz to 4000 Hz octave bands"):
         result = rn.room_criterion([35.0, 32.0, 30.0], [500.0, 1000.0, 2000.0])
     absent = np.isnan(np.asarray(result.levels))
     assert absent.sum() == 7

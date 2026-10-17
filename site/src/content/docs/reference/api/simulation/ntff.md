@@ -183,6 +183,7 @@ cancellation (below 0.01 dB on the validation scenes).
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | For a `contour` that is not a [`ContourPhasors`](/phonometry/reference/api/simulation/ntff/#contourphasors). |
 | ValueError | For invalid angles, a non-positive `distance`, or an observation circle that does not clear the contour. |
 
 ## SIMULATION_AIR

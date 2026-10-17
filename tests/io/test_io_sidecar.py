@@ -767,10 +767,6 @@ def test_a_real_number_of_any_type_is_kept_as_a_float(
             _not_real("calibration_factor", "True", optional=False),
         ),
         (
-            Signal(data=np.zeros(8), fs=FS, calibration_factor=np.array([2.5])),
-            _not_real("calibration_factor", "array([2.5])", optional=False),
-        ),
-        (
             Signal(
                 data=np.zeros(8),
                 fs=FS,
@@ -789,7 +785,7 @@ def test_a_real_number_of_any_type_is_kept_as_a_float(
             "channel_labels must be text; got 1",
         ),
     ],
-    ids=["factor-bool", "factor-one-element-array", "past-a-mebibyte", "label-number"],
+    ids=["factor-bool", "past-a-mebibyte", "label-number"],
 )
 def test_a_signal_no_sidecar_holds_is_refused_before_its_audio_is_written(
     tmp_path: Path, signal: Signal, message: str
@@ -798,6 +794,14 @@ def test_a_signal_no_sidecar_holds_is_refused_before_its_audio_is_written(
     with pytest.raises(ValueError, match=re.escape(message)):
         write(tmp_path / "meas.wav", signal, sidecar=True)
     assert list(tmp_path.iterdir()) == []
+
+
+def test_a_signal_whose_factor_is_an_array_is_refused_before_any_write() -> None:
+    # One factor per signal: an array, even of one element, is the wrong
+    # type, and the Signal itself refuses it, long before a sidecar is
+    # written.
+    with pytest.raises(TypeError, match="'calibration_factor' must be one number"):
+        Signal(data=np.zeros(8), fs=FS, calibration_factor=np.array([2.5]))
 
 
 @pytest.mark.parametrize(
@@ -1236,8 +1240,10 @@ def test_a_hard_link_to_a_sidecar_keeps_the_calibration_it_had(
 def test_write_sidecar_true_requires_a_calibrated_signal(
     tmp_path: Path,
 ) -> None:
+    # A bare array is the wrong type for a sidecar; a Signal without a
+    # calibration is the right type with nothing to carry.
     with pytest.raises(
-        ValueError, match=r"sidecar=True needs a Signal with a calibration_factor"
+        TypeError, match=r"sidecar=True needs a Signal with a calibration_factor"
     ):
         write(tmp_path / "x.wav", np.zeros(8), FS, sidecar=True)
     uncalibrated = Signal(data=np.zeros(8), fs=FS)

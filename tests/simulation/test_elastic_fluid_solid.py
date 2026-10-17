@@ -554,15 +554,23 @@ def test_from_regions_and_material_validation() -> None:
         ElasticFDTD2D.from_regions(
             (10, 10), 0.01, background=WATER, regions=[(wrong_shape_mask, STEEL)]
         )
-    with pytest.raises(ValueError, match="background must be a Material"):
+    # A mask of the right shape and the wrong dtype is the wrong type.
+    with pytest.raises(TypeError, match="mask must be a boolean"):
+        ElasticFDTD2D.from_regions(
+            (10, 10),
+            0.01,
+            background=WATER,
+            regions=[(np.zeros((10, 10)), STEEL)],
+        )
+    with pytest.raises(TypeError, match="background must be a Material"):
         ElasticFDTD2D.from_regions((10, 10), 0.01, background="water")
-    with pytest.raises(ValueError, match=r"regions\[0\] must be a Material"):
+    with pytest.raises(TypeError, match=r"regions\[0\] must be a Material"):
         ElasticFDTD2D.from_regions(
             (10, 10), 0.01, background=WATER, regions=[(np.s_[0:2, :], (1480.0, 0.0))]
         )
     with pytest.raises(ValueError, match="at least 2 x 2"):
         ElasticFDTD2D.from_regions((1, 10), 0.01, background=WATER)
-    with pytest.raises(ValueError, match=r"shape\[0\] must be an integer"):
+    with pytest.raises(ValueError, match=r"'shape\[0\]' must be a whole number"):
         ElasticFDTD2D.from_regions(
             (10.5, 10),
             0.01,  # type: ignore[arg-type]

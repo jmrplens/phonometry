@@ -325,7 +325,7 @@ is anchored on the 2017 editions throughout.
 **What the two mass inputs are, and where the closed form stops.** Annex B's
 $164 - 35\lg(m'/m'_0)$ is not a theory: it is a regression fitted to measured
 **homogeneous heavyweight** floors between **100 and 600 kg/m²**, and
-`equivalent_impact_level` raises a `UserWarning` when it is called outside that
+`equivalent_impact_level` emits a `building.BuildingPredictionWarning` when it is called outside that
 band. It works inside it because a bare massive slab's impact level is set by its
 mass and by the roughly constant loss factor of masonry construction. It fails
 outside it because a light or ribbed floor radiates through its own resonances

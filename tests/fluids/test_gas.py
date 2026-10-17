@@ -24,7 +24,7 @@ import pytest
 import reference_data as ref
 
 from phonometry import fluids
-from phonometry.fluids import FluidAssumptionWarning, FluidPropertyUnavailable
+from phonometry.fluids import FluidAssumptionWarning, FluidPropertyUnavailableError
 
 
 def _at_table_conditions(gamma: float, molar_mass: float) -> fluids.Fluid:
@@ -110,7 +110,7 @@ def test_a_transport_property_is_refused_rather_than_invented() -> None:
     """Nothing in the closure determines a viscosity, so nothing returns one."""
     gas = _at_table_conditions(1.4, 0.029)
 
-    with pytest.raises(FluidPropertyUnavailable, match="ideal gas"):
+    with pytest.raises(FluidPropertyUnavailableError, match="ideal gas"):
         _ = gas.viscosity
 
 

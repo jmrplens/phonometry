@@ -21,6 +21,10 @@ import numpy as np
 
 from .._internal.peaks import inter_sample_peak
 from .._internal.types import as_float_or_array
+from .._internal.validation import (
+    require_count,
+    require_scalar,
+)
 from ..filters.weighting import _require_str, time_weighting, weighting_filter
 from ..io._resolve import (
     resolve_calibration as _resolve_calibration,
@@ -68,6 +72,7 @@ def _level_db(
 
 def _validate_level_input(x_proc: np.ndarray, calibration_factor: float) -> None:
     """Shared validation for the public level functions."""
+    require_scalar(calibration_factor, "calibration_factor")
     if x_proc.shape[-1] == 0:
         msg = "Input signal 'x' cannot be empty."
         raise ValueError(msg)
@@ -242,9 +247,7 @@ def lc_peak(
         oversampling and detect the peak on the original sample grid.
     :return: Scalar for 1D input, array of shape (channels,) for 2D input.
     """
-    if not isinstance(oversample, (int, np.integer)) or oversample < 1:
-        msg = "oversample must be an integer >= 1."
-        raise ValueError(msg)
+    oversample = require_count(oversample, "oversample")
     fs = _resolve_fs(x, fs)
     calibration_factor = _resolve_calibration(x, calibration_factor)
     x_proc = _resolve_samples_raw(x, calibrate=False)
@@ -290,6 +293,7 @@ def sel(
     :param dbfs: If True, reference digital full scale instead of 20 uPa.
     :return: Scalar for 1D input, array of shape (channels,) for 2D input.
     """
+    require_scalar(fs, "fs")
     fs = _resolve_fs(x, fs)
     calibration_factor = _resolve_calibration(x, calibration_factor)
     x_proc = _resolve_samples_raw(x, calibrate=False)
@@ -331,6 +335,7 @@ def sound_exposure(
         calibrated Signal's own factor, then 1.0.
     :return: Exposure in Pa²·h (scalar or per-channel array).
     """
+    require_scalar(duration_hours, "duration_hours")
     fs = _resolve_fs(x, fs)
     calibration = _resolve_calibration(x, calibration_factor)
     x_proc = _resolve_samples_raw(x, calibrate=False)

@@ -249,7 +249,7 @@ nominal thickness a product sheet prints. With them it takes the clause 8.2
 branch that resistivity picks:
 
 ```python
-from phonometry import io, materials
+from phonometry import materials
 
 report = materials.ResilientLayer(
     name="Example layer",
@@ -258,7 +258,7 @@ report = materials.ResilientLayer(
 )
 try:
     report.natural_frequency(mass_per_area_kg_m2=120.0)
-except io.CatalogueError as refusal:
+except ValueError as refusal:
     print(refusal)
 # 'Example layer' gives the apparent dynamic stiffness s't of a test specimen,
 # 6 MN/m3, and not the dynamic stiffness s' of the installed layer [...]: pass

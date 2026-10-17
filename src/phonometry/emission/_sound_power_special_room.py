@@ -92,9 +92,11 @@ from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
     require_choice,
+    require_count,
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ._shared import (
     SoundPowerWarning,
@@ -858,6 +860,7 @@ class SpecialRoomSurfaceCheck(OwnsArrays):
 
 def _coefficients(value: ArrayLike, name: str, ndim: int) -> np.ndarray:
     """Absorption coefficients of the given rank, finite and in [0, 1]."""
+    require_scalar(ndim, "ndim")
     arr = np.asarray(value, dtype=np.float64)
     if (
         arr.ndim != ndim
@@ -1243,7 +1246,9 @@ def special_room_source_locations(
         standard_deviation_db=np.asarray(s_m, dtype=np.float64),
         source_locations=locations,
         additional_room_locations=np.zeros(n_bands, dtype=np.int64),
-        n_microphone_positions=int(n_microphone_positions),
+        n_microphone_positions=require_count(
+            n_microphone_positions, "n_microphone_positions", at_least=None
+        ),
         a_weighted_standard_deviation_db=s_a,
         n_a_weighted_source_locations=n_a,
     )
@@ -1319,6 +1324,8 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
             positive, a count is below one, or a per-band array disagrees with
             the rest.
         """
+        require_scalar(self.n_microphone_positions, "n_microphone_positions")
+        require_scalar(self.n_source_positions, "n_source_positions")
         require_choice(self.method, "method", ("direct", "comparison"))
         require_positive(self.coverage_factor, "coverage_factor")
         if self.n_microphone_positions < 1 or self.n_source_positions < 1:

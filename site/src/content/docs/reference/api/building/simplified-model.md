@@ -151,6 +151,17 @@ flanking construction and the model assumptions is recorded in
 | ValueError | If `engine` is unknown or `language` is not supported. |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
 
+## BuildingPredictionWarning
+
+A building prediction read outside the range its relation is stated for.
+
+Emitted when the bare-floor equivalent impact level of EN 12354-2 Annex B
+is asked for a mass per unit area outside 100 kg/m² to 600 kg/m², and when
+a lining of ISO 12354-1:2017 Annex D is rated at a resonance frequency or
+on a base rating outside the ranges Table D.1 and Clause D.2.2 state. The
+number is still returned: it is the printed relation extrapolated, which
+the standard does not cover.
+
 ## combined_lining_improvement
 
 ```python
@@ -195,7 +206,7 @@ the closed form
 used in the Annex E worked example for a homogeneous concrete floor. The
 Annex B relation is stated for homogeneous floors of 100 kg/m² to
 600 kg/m²; outside that envelope the value is an extrapolation and a
-`UserWarning` is emitted.
+[`BuildingPredictionWarning`](/phonometry/reference/api/building/simplified-model/#buildingpredictionwarning) is emitted.
 
 **Parameters**
 
@@ -210,6 +221,12 @@ Annex B relation is stated for homogeneous floors of 100 kg/m² to
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `mass_per_area` is not positive. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| BuildingPredictionWarning | If `mass_per_area` lies outside the 100-600 kg/m² the relation is stated for. |
 
 ## flanking_element
 

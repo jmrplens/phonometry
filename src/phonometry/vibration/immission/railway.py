@@ -57,6 +57,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_mean, energy_sum
 from ..._internal.validation import (
     _as_float64,
+    require_count,
     require_finite_array,
     require_positive,
     require_scalar,
@@ -270,6 +271,7 @@ def running_acceleration_level(
 
 def _slice(size: int, fs: float, interval_s: tuple[float, float]) -> slice:
     """The samples of a ``(start, end)`` stretch of a record, in seconds."""
+    require_scalar(size, "size")
     start_s, end_s = (float(bound) for bound in interval_s)
     if not (math.isfinite(start_s) and math.isfinite(end_s)) or end_s <= start_s:
         msg = (
@@ -421,7 +423,10 @@ def passage_average_level(
         raise ValueError(msg)
     if axis is None:
         return float(energy_mean(levels))
-    return np.asarray(energy_mean(levels, axis=int(axis)), dtype=np.float64)
+    return np.asarray(
+        energy_mean(levels, axis=require_count(axis, "axis", at_least=None)),
+        dtype=np.float64,
+    )
 
 
 @dataclass(frozen=True)
@@ -458,7 +463,7 @@ def amplitude_distribution(
     """
     x = _record(velocity_mm_s)
     require_scalar(n_bins, "n_bins")
-    count = int(n_bins)
+    count = require_count(n_bins, "n_bins", at_least=None)
     if count < _MIN_BINS:
         msg = f"'n_bins' must be at least 2; got {n_bins!r}."
         raise ValueError(msg)
@@ -820,7 +825,7 @@ def _band_running_rms(
     x: NDArray[np.float64], fs: float, upper_band_hz: float
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The third octaves of Clause 7.2 and the running r.m.s. in each."""
-    from ...filters import OctaveFilterBank
+    from ...filters import FilterBankWarning, OctaveFilterBank
 
     rate = round(fs)
     if not math.isclose(rate, fs, rel_tol=0.0, abs_tol=1e-9):
@@ -831,7 +836,7 @@ def _band_running_rms(
     with warnings.catch_warnings():
         # A band the rate cannot carry is dropped by the bank with a warning,
         # and the check below turns that into the error it is here.
-        warnings.simplefilter("ignore", UserWarning)
+        warnings.simplefilter("ignore", FilterBankWarning)
         bank = OctaveFilterBank(
             rate, fraction=3, limits=[PASSAGE_BANDS_HZ[0], upper_band_hz]
         )

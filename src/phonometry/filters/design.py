@@ -8,6 +8,7 @@ from __future__ import annotations
 import numpy as np
 from scipy import signal
 
+from .._internal.validation import require_scalar
 from .frequencies import _format_nominal_freq
 
 __all__: list[str] = []
@@ -19,6 +20,7 @@ _MIN_STANDARD_TICKS = 3
 
 def _cheby2_transition_ratio(order: int, attenuation: float) -> float:
     """Ratio between stopband-edge and -3 dB frequencies for a Chebyshev II prototype."""
+    require_scalar(attenuation, "attenuation")
     # Below ~3.01 dB the -3 dB point does not exist (arccosh argument < 1).
     if attenuation <= 10 * np.log10(2):
         msg = "cheby2 'attenuation' must be greater than 3.01 dB."

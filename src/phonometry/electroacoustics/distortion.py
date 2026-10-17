@@ -36,7 +36,12 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_ranks, require_same_length, require_scalar
+from .._internal.validation import (
+    require_count,
+    require_ranks,
+    require_same_length,
+    require_scalar,
+)
 from ..filters.weighting import _itu_r_468_prototype
 from ..io._resolve import apply_calibration, resolve_fs
 
@@ -325,7 +330,7 @@ def harmonic_distortion(
     if isinstance(order, (int, np.integer)) or (
         isinstance(order, (float, np.floating)) and float(order).is_integer()
     ):
-        order_v = int(order)
+        order_v = require_count(order, "order", at_least=None)
     else:
         msg = "'order' must be an integer."
         raise ValueError(msg)
@@ -350,6 +355,8 @@ def _notched_residual(
     twice-filtered) response per AES17 5.2.8; the single-pass ``iirnotch``
     design is sharpened by ``_FILTFILT_NOTCH_Q_FACTOR`` to realise it.
     """
+    require_scalar(fs, "fs")
+    require_scalar(f0, "f0")
     from scipy import signal as sp_signal
 
     if f0 >= fs / 2.0:

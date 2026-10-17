@@ -15,6 +15,7 @@ import pytest
 import reference_data as ref
 
 from phonometry import building
+from phonometry.building import BuildingPredictionWarning
 
 # --------------------------------------------------------------------------
 # Annex E junction Kij — validated against the Annex H input table
@@ -673,11 +674,13 @@ def test_standardized_level_difference_annex_h3_closure() -> None:
 def test_equivalent_impact_level_warns_outside_envelope() -> None:
     # Annex B covers 100-600 kg/m2; outside it the closed form extrapolates.
     with pytest.warns(
-        UserWarning, match=r"mass_per_area = .* lies outside the .* envelope"
+        BuildingPredictionWarning,
+        match=r"mass_per_area = .* lies outside the .* envelope",
     ):
         building.equivalent_impact_level(50.0)
     with pytest.warns(
-        UserWarning, match=r"mass_per_area = .* lies outside the .* envelope"
+        BuildingPredictionWarning,
+        match=r"mass_per_area = .* lies outside the .* envelope",
     ):
         building.equivalent_impact_level(800.0)
     # Inside the envelope no warning is emitted.

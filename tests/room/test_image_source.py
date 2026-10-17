@@ -466,11 +466,11 @@ def test_max_order_must_be_a_non_negative_integer() -> None:
     # A fractional or NaN order used to pass the sign check and die inside
     # range() as the builtin TypeError, naming nothing.
     args = ((5.0, 4.0, 3.0), (1.0, 1.0, 1.5), (3.0, 2.5, 1.2), 0.2)
-    with pytest.raises(ValueError, match="'max_order' must be a non-negative integer"):
+    with pytest.raises(ValueError, match="'max_order' must be a whole number"):
         room.image_source_rir(*args, fs=8000, max_order=2.5)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="'max_order' must be a non-negative integer"):
+    with pytest.raises(ValueError, match="'max_order' must be a whole number"):
         room.image_source_rir(*args, fs=8000, max_order=math.nan)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="'max_order' must be a non-negative integer"):
+    with pytest.raises(ValueError, match="'max_order' must be a whole number"):
         room.image_source_rir(*args, fs=8000, max_order=-1)
 
 
@@ -519,9 +519,9 @@ def test_air_attenuation_must_be_a_band_vector() -> None:
 def test_audible_image_count_requires_an_integer_order() -> None:
     # A fractional order used to be truncated silently (2.9 returned the
     # order-2 count) and a non-numeric one died on the comparison itself.
-    with pytest.raises(ValueError, match="'max_order' must be a non-negative integer"):
+    with pytest.raises(ValueError, match="'max_order' must be a whole number"):
         room.audible_image_count(2.9)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="'max_order' must be a non-negative integer"):
+    with pytest.raises(ValueError, match="'max_order' must be a whole number"):
         room.audible_image_count(-1)
 
 

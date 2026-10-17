@@ -366,7 +366,7 @@ modulation analysis that yields the index.
   width="92%"
 />
 
-`stipa` emits a `UserWarning` when the recording is shorter than the
+`stipa` emits a `speech.STIWarning` when the recording is shorter than the
 recommended 15 s (IEC 60268-16 STIPA practice, 15 s to 25 s): below that the
 slow modulation components are averaged over too few periods and the STI is
 biased low (an ideal loopback gives STI ≈ 0.956 at 5 s vs ≈ 0.998 at 18 s).
@@ -478,7 +478,7 @@ Each route has failure modes the standard is explicit about:
   direct measurements scatter by up to about 0.03 STI even in steady
   conditions (and more in fluctuating noise); repeat and compare rather than
   trusting a single run, and respect the minimum duration flagged by the
-  `UserWarning` above.
+  `speech.STIWarning` above.
 
 The level dependence is the one of those four that is easy to dismiss, so it is
 worth seeing how large it is:

@@ -315,7 +315,12 @@ angles of two frequency components in the most unfavourable manner."
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is negative or not finite. Formula (6) prints the quantity inside absolute-value bars, so a negative one is not a characteristic phase deviation and is refused rather than folded. |
-| UserWarning | [`HumanVibrationWarning`](/phonometry/reference/api/vibration/exposure/#humanvibrationwarning) when a value exceeds the 30 degrees NOTE 2 limits the approximation to. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| HumanVibrationWarning | When a value exceeds the 30 degrees NOTE 2 limits the approximation to. |
 
 ## phase_tolerance_deg
 
@@ -753,7 +758,12 @@ this function does not perform.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the weighting is not one of the nine, if the two arrays do not have the same shape, if a frequency is not positive and finite, if a phase is not finite, or if there are fewer than two frequencies or they do not strictly ascend. |
-| UserWarning | [`HumanVibrationWarning`](/phonometry/reference/api/vibration/exposure/#humanvibrationwarning) when every phase error is a half turn, which is an inverted signal rather than a phase response the criterion can grade. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| HumanVibrationWarning | When every phase error is a half turn, which is an inverted signal rather than a phase response the criterion can grade. |
 
 ## verify_running_rms_decay
 

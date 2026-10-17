@@ -129,7 +129,8 @@ without a warning, since its lines were excluded rather than missing.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for frequencies that are not one-dimensional, finite, positive and distinct, a stiffness of another length or not finite, a mask that is not boolean or has another length, or no valid line. |
+| TypeError | for a mask that is not boolean. |
+| ValueError | for frequencies that are not one-dimensional, finite, positive and distinct, a stiffness of another length or not finite, a mask of another length, or no valid line. |
 
 **Warns**
 

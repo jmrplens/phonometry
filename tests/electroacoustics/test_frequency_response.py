@@ -153,7 +153,7 @@ def test_rejects_bad_nperseg() -> None:
 def test_rejects_fractional_nperseg() -> None:
     # int() used to truncate 64.7 to 64 silently instead of refusing.
     x = np.zeros(1000)
-    with pytest.raises(ValueError, match="'nperseg' must be a positive integer"):
+    with pytest.raises(ValueError, match="'nperseg' must be a whole number"):
         electroacoustics.transfer_function(x, x, FS, nperseg=64.7)  # type: ignore[arg-type]
 
 
@@ -182,20 +182,20 @@ def test_rejects_overlap_beyond_float_range() -> None:
 
 def test_coherence_rejects_fractional_nperseg() -> None:
     x = np.zeros(1000)
-    with pytest.raises(ValueError, match="'nperseg' must be a positive integer"):
+    with pytest.raises(ValueError, match="'nperseg' must be a whole number"):
         electroacoustics.coherence(x, x, FS, nperseg=64.7)  # type: ignore[arg-type]
 
 
 def test_rejects_non_numeric_overlap() -> None:
     # Used to die as TypeError inside float().
     x = np.zeros(1000)
-    with pytest.raises(ValueError, match=r"'overlap' must be in \[0, 1\)"):
+    with pytest.raises(TypeError, match=r"'overlap' must be in \[0, 1\)"):
         electroacoustics.transfer_function(x, x, FS, overlap=None)  # type: ignore[arg-type]
 
 
 def test_coherence_rejects_non_numeric_overlap() -> None:
     x = np.zeros(1000)
-    with pytest.raises(ValueError, match=r"'overlap' must be in \[0, 1\)"):
+    with pytest.raises(TypeError, match=r"'overlap' must be in \[0, 1\)"):
         electroacoustics.coherence(x, x, FS, overlap="half")  # type: ignore[arg-type]
 
 

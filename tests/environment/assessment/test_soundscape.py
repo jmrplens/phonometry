@@ -170,9 +170,13 @@ def test_scale_values_from_box_positions() -> None:
     assert math.isnan(float(sc.method_a_scale_values([np.nan], part=2)[0]))
 
 
-@pytest.mark.parametrize("part", [0, 5, True])
-def test_scale_values_refuse_an_unknown_part(part: int) -> None:
-    with pytest.raises(ValueError, match="'part'"):
+@pytest.mark.parametrize(
+    ("part", "refusal"), [(0, ValueError), (5, ValueError), (True, TypeError)]
+)
+def test_scale_values_refuse_an_unknown_part(
+    part: int, refusal: type[Exception]
+) -> None:
+    with pytest.raises(refusal, match="'part'"):
         sc.method_a_scale_values([1], part=part)
 
 
@@ -624,7 +628,7 @@ def test_source_ranking_refuses_a_source_listed_twice() -> None:
 
 def test_source_ranking_refuses_a_bare_string() -> None:
     rankings = "traffic"
-    with pytest.raises(ValueError, match="'rankings'"):
+    with pytest.raises(TypeError, match="'rankings'"):
         sc.method_b_source_ranking(rankings)  # type: ignore[arg-type]
 
 
@@ -702,23 +706,23 @@ def test_a_missing_measurement_result_names_a3_f() -> None:
 
 def test_a_non_numeric_result_is_refused() -> None:
     results = {**_RESULTS, "N5": "loud"}
-    with pytest.raises(ValueError, match="'N5' must be finite"):
+    with pytest.raises(TypeError, match="'N5' must be finite"):
         _environment(measurement_results=results)
 
 
 def test_a_recorded_environment_needs_its_reproduction() -> None:
-    with pytest.raises(ValueError, match=r"A\.3 h\)"):
+    with pytest.raises(TypeError, match=r"A\.3 h\)"):
         _environment(environment_type="recorded")
 
 
 def test_a_field_study_needs_its_site_description() -> None:
-    with pytest.raises(ValueError, match=r"A\.3 g\)"):
+    with pytest.raises(TypeError, match=r"A\.3 g\)"):
         _environment(site_description=None)
 
 
 def test_a_recorded_environment_needs_its_site_description() -> None:
     """A.3 g) asks it of "a study based on audio recordings" too."""
-    with pytest.raises(ValueError, match=r"A\.3 g\)"):
+    with pytest.raises(TypeError, match=r"A\.3 g\)"):
         _environment(
             environment_type="recorded",
             site_description=None,
@@ -753,7 +757,7 @@ def test_data_collection_needs_a_copy_of_the_instrument() -> None:
 def test_a_report_refuses_a_part_of_the_wrong_kind() -> None:
     participants = _participants()
     collection = _collection()
-    with pytest.raises(ValueError, match="acoustic_environment"):
+    with pytest.raises(TypeError, match="acoustic_environment"):
         sc.SoundscapeReport(participants, "a park", collection)  # type: ignore[arg-type]
 
 

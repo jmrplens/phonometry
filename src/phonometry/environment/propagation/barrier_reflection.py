@@ -1036,7 +1036,7 @@ def _grid_positions(
                     f"'{name}' mixes Signals with bare numbers; give one (9, N) "
                     f"record or nine-channel Signal per grid position."
                 )
-                raise ValueError(msg)
+                raise TypeError(msg)
             entries.append(entry)
         return entries
     records = np.asarray(values, dtype=np.float64)

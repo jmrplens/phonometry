@@ -195,7 +195,7 @@ def test_a_non_numeric_angle_grid_is_refused_by_name() -> None:
     assert result.angles_rad is not None
     lettered = np.array(["bad"] * result.angles_rad.size, dtype=object)
     with pytest.raises(
-        ValueError, match="RadiatingPistonResult: 'angles_rad' must be numeric"
+        TypeError, match="RadiatingPistonResult: 'angles_rad' must be numeric"
     ):
         dataclasses.replace(result, angles_rad=lettered)
 

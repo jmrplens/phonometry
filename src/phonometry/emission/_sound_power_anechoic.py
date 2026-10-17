@@ -49,7 +49,12 @@ from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum, weighted_energy_mean
 from .._internal.types import as_float_or_array
-from .._internal.validation import check_engine, require_ranks, require_same_length
+from .._internal.validation import (
+    check_engine,
+    require_ranks,
+    require_same_length,
+    require_scalar,
+)
 from ._shared import _S0, SoundPowerWarning, _a_weighting_corrections
 
 if TYPE_CHECKING:
@@ -458,6 +463,7 @@ def precision_positions(
     :param n_positions: ``20`` (primary array) or ``40`` (full array).
     :return: ``(n_positions, 3)`` microphone coordinates, in metres.
     """
+    require_scalar(radius, "radius")
     if surface not in ("sphere", "hemisphere"):
         raise ValueError(_SURFACE_CHOICE_MSG)
     if array not in ("general", "broadband"):
@@ -580,6 +586,9 @@ def meteorological_corrections(
         :math:`A_0 = \alpha(f)\,r`.
     :return: :class:`MeteorologicalCorrection`.
     """
+    require_scalar(radius, "radius")
+    require_scalar(static_pressure_kpa, "static_pressure_kpa")
+    require_scalar(temperature_c, "temperature_c")
     if static_pressure_kpa <= 0.0:
         msg = "'static_pressure_kpa' must be positive (kPa)."
         raise ValueError(msg)
@@ -607,6 +616,7 @@ def meteorological_corrections(
 
 def _sigma_r0_3745(nominal: int, room: PrecisionRoom) -> float:
     """Per-band sigma_R0 (ISO 3745:2012 Table 2 hemi / Table 3 anechoic), dB."""
+    require_scalar(nominal, "nominal")
     if 50 <= nominal <= 80:  # noqa: PLR2004
         return 2.0
     if 100 <= nominal <= 630:  # noqa: PLR2004
@@ -641,6 +651,8 @@ def precision_uncertainty(
     :param coverage_factor: ``k`` (typically 2 or 1.6).
     :return: ``U`` in decibels, scalar or per band matching ``sigma_r0``.
     """
+    require_scalar(coverage_factor, "coverage_factor")
+    require_scalar(sigma_omc_db, "sigma_omc_db")
     if coverage_factor <= 0.0:
         msg = "'coverage_factor' must be positive."
         raise ValueError(msg)
@@ -884,6 +896,7 @@ def sound_power_anechoic(
     :return: :class:`PrecisionSoundPowerResult`.
     :raises ValueError: for a room qualification of the other room type.
     """
+    require_scalar(radius, "radius")
     if surface not in ("sphere", "hemisphere"):
         raise ValueError(_SURFACE_CHOICE_MSG)
     if radius <= 0:

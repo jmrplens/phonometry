@@ -34,9 +34,11 @@ from .._internal.frozen import OwnsArrays
 # Shared Welch-core defaults and helpers (single source of truth for the
 # segment policy across the spectral estimators).
 from .._internal.validation import (
+    require_count,
     require_equal_counts,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ..io._resolve import apply_calibration, resolve_pair_fs
 from ..signals.spectra import (
@@ -122,20 +124,29 @@ def _welch_params(
     overflow on an integer beyond float range; kept exact, such an integer
     falls through to the range check, which refuses it by name.
     """
-    if (
-        not isinstance(overlap, (int, float, np.integer, np.floating))
-        or not 0.0 <= overlap < 1.0
+    require_scalar(n, "n")
+    msg = "'overlap' must be in [0, 1)."
+    if isinstance(overlap, bool) or not isinstance(
+        overlap, (int, float, np.integer, np.floating)
     ):
-        msg = "'overlap' must be in [0, 1)."
+        raise TypeError(msg)
+    if not 0.0 <= overlap < 1.0:
         raise ValueError(msg)
-    if nperseg is not None and (
-        not isinstance(nperseg, (int, float, np.integer, np.floating))
-        or (isinstance(nperseg, (float, np.floating)) and not math.isfinite(nperseg))
-        or int(nperseg) != nperseg
-    ):
+    if nperseg is not None:
         msg = "'nperseg' must be a positive integer."
-        raise ValueError(msg)
-    seg = _default_nperseg(n, fs) if nperseg is None else int(nperseg)
+        if isinstance(nperseg, bool) or not isinstance(
+            nperseg, (int, float, np.integer, np.floating)
+        ):
+            raise TypeError(msg)
+        if (
+            isinstance(nperseg, (float, np.floating)) and not math.isfinite(nperseg)
+        ) or require_count(nperseg, "nperseg", at_least=None) != nperseg:
+            raise ValueError(msg)
+    seg = (
+        _default_nperseg(n, fs)
+        if nperseg is None
+        else require_count(nperseg, "nperseg", at_least=None)
+    )
     if seg < _MIN_SAMPLES or seg > n:
         msg = "'nperseg' must be between 32 and the signal length."
         raise ValueError(msg)

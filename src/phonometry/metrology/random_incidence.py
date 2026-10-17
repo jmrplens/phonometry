@@ -704,6 +704,7 @@ def _plane_count(count: int, name: str) -> int:
     :raises ValueError: for an odd count, which misses the pole at 180°, or
         fewer than four readings.
     """
+    require_scalar(count, "count")
     if count % 2 or count < 2 * _MIN_HALF_CIRCLE_STEPS:
         msg = (
             f"'{name}' must hold an even number of readings round the full "

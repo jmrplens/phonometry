@@ -1096,6 +1096,11 @@ see `docs/ERRATA.md`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite, if fewer than two stages were given, or if the stages between them would take more than the differential the valve has. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
 | ValveNoiseWarning | If the stage coefficients miss the series law by more than 5 %, which leaves the last stage carrying a differential nobody chose. |
 
 ## StageConditions

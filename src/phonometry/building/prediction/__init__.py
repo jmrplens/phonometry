@@ -144,6 +144,7 @@ from .resilient_layers import (
 )
 from .simplified_model import (
     AirbornePredictionResult,
+    BuildingPredictionWarning,
     FlankingPath,
     ImpactPredictionResult,
     PathContribution,
@@ -175,6 +176,7 @@ __all__ = [
     "TAPPING_IMPACT_RATE_HZ",
     "WALL_TIE_STIFFNESS",
     "AirbornePredictionResult",
+    "BuildingPredictionWarning",
     "ApertureTransmissionResult",
     "BandPath",
     "CeilingAttenuationResult",

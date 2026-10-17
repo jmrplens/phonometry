@@ -126,11 +126,7 @@ def test_source_outside_the_grid_is_rejected() -> None:
         ({"shape": (0, 10)}, "shape must be a pair of positive integers"),
         ({"shape": (-1, 10)}, "shape must be a pair of positive integers"),
         ({"shape": (10, 10.5)}, "shape must be a pair of positive integers"),
-        ({"shape": 10}, "shape must be a pair of positive integers"),
         ({"shape": (10, 10, 10)}, "shape must be a pair of positive integers"),
-        ({"c": 343.0 + 50.0j}, "c must be real"),
-        ({"c": np.full((10, 10), 343.0 + 50.0j)}, "c must be real"),
-        ({"rho": 1.2 + 3.0j}, "rho must be real"),
     ],
 )
 def test_constructor_rejects_invalid_arguments(
@@ -142,6 +138,34 @@ def test_constructor_rejects_invalid_arguments(
     dx = full.pop("dx")
     with pytest.raises(ValueError, match=match):
         fdtd2d.FDTD2D(c, dx, **full)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+        # A number where the pair belongs, a count that is no number, and a
+        # complex medium are each the wrong type.
+        ({"shape": 10}, "shape must be a pair of positive integers"),
+        ({"shape": (10, "10")}, "shape must be a pair of positive integers"),
+        ({"c": 343.0 + 50.0j}, "c must be real"),
+        ({"c": np.full((10, 10), 343.0 + 50.0j)}, "c must be real"),
+        ({"rho": 1.2 + 3.0j}, "rho must be real"),
+    ],
+)
+def test_constructor_rejects_arguments_of_the_wrong_type(
+    kwargs: dict[str, object],
+    match: str,
+) -> None:
+    full: dict[str, object] = {"c": 343.0, "dx": 0.05, "shape": (10, 10), **kwargs}
+    c = full.pop("c")
+    dx = full.pop("dx")
+    with pytest.raises(TypeError, match=match):
+        fdtd2d.FDTD2D(c, dx, **full)  # type: ignore[arg-type]
+
+
+def test_a_whole_float_grid_shape_is_taken_as_its_counts() -> None:
+    sim = fdtd2d.FDTD2D(343.0, 0.05, shape=(10.0, 12))  # type: ignore[arg-type]
+    assert sim.c.shape == (10, 12)
 
 
 def test_sponge_sides_accepts_a_bare_string() -> None:

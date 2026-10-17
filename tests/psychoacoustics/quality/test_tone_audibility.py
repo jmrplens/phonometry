@@ -781,32 +781,37 @@ def test_result_rejects_a_line_spacing_that_is_not_a_resolution(bad: float) -> N
 
 
 @pytest.mark.parametrize(
-    "bad",
-    ["1.0e-3 Hz", None, 10**400],
+    ("bad", "refusal"),
+    [("1.0e-3 Hz", TypeError), (None, TypeError), (10**400, ValueError)],
     ids=["string", "none", "huge-integer"],
 )
-def test_result_rejects_a_line_spacing_that_is_not_numeric(bad: object) -> None:
+def test_result_rejects_a_line_spacing_that_is_not_numeric(
+    bad: object, refusal: type[Exception]
+) -> None:
     """A spacing that is not a number never reaches the resolution check.
 
     ``float`` stops all three first, under its own wording and its own types:
     ``could not convert string to float: '1.0e-3 Hz'``, a ``TypeError`` for
     the ``None`` and an ``OverflowError`` for the integer too large for a
-    double. None of them names the field or the result, and two are not the
-    ``ValueError`` the guard documents.
+    double. None of them names the field or the result; the refusal does,
+    with ``TypeError`` for the text and the ``None``, the two of the wrong
+    type.
     """
     good = _annex_e_result()
     with pytest.raises(
-        ValueError, match=r"ToneAudibilityResult: 'line_spacing_hz' must be numeric\."
+        refusal, match=r"ToneAudibilityResult: 'line_spacing_hz' must be numeric\."
     ):
         dataclasses.replace(good, line_spacing_hz=bad)
 
 
 @pytest.mark.parametrize(
-    "fill",
-    ["two", object(), 10**400],
+    ("fill", "refusal"),
+    [("two", TypeError), (object(), TypeError), (10**400, ValueError)],
     ids=["string", "object", "huge-integer"],
 )
-def test_result_rejects_group_sizes_that_are_not_numeric(fill: object) -> None:
+def test_result_rejects_group_sizes_that_are_not_numeric(
+    fill: object, refusal: type[Exception]
+) -> None:
     """A tally that is not a number never reaches the count check either.
 
     The cast to ``float64`` stops all three inside numpy: ``could not convert
@@ -817,7 +822,7 @@ def test_result_rejects_group_sizes_that_are_not_numeric(fill: object) -> None:
     good = _annex_e_result()
     counts = np.array([fill] * good.tone_frequencies.size, dtype=object)
     with pytest.raises(
-        ValueError, match=r"ToneAudibilityResult: 'group_sizes' must be numeric\."
+        refusal, match=r"ToneAudibilityResult: 'group_sizes' must be numeric\."
     ):
         dataclasses.replace(good, group_sizes=counts)
 

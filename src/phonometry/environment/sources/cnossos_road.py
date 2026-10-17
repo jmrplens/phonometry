@@ -662,6 +662,8 @@ def _studded_correction(
     coefficients: RoadEmissionCoefficients,
 ) -> NDArray[np.float64]:
     """``dL_studdedtyres,i,m`` of (2.2.6) to (2.2.9), in dB per octave band."""
+    require_scalar(studded_fraction, "studded_fraction")
+    require_scalar(studded_months, "studded_months")
     if not 0.0 <= studded_fraction <= 1.0:
         msg = "'studded_fraction' must be a fraction in [0, 1]."
         raise ValueError(msg)

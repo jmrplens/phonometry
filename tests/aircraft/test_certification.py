@@ -222,9 +222,9 @@ def test_tone_correction_start_band_must_be_an_integral_index() -> None:
     spl = np.full(24, 70.0)
     with pytest.raises(ValueError, match="'start_band' must be an integer"):
         tone_correction(spl, start_band=2.9)
-    with pytest.raises(ValueError, match="'start_band' must be an integer"):
+    with pytest.raises(TypeError, match="'start_band' must be an integer"):
         tone_correction(spl, start_band=None)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="'start_band' must be an integer"):
+    with pytest.raises(TypeError, match="'start_band' must be an integer"):
         tone_correction(spl, start_band="airplane")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="'start_band' must be an integer"):
         tone_correction(spl, start_band=-0.4)
@@ -595,7 +595,7 @@ def test_a_window_that_is_not_a_pair_of_indices_is_refused() -> None:
     import dataclasses
 
     result = _flyover()
-    with pytest.raises(ValueError, match=r"'band_limits' must be a pair"):
+    with pytest.raises(TypeError, match=r"'band_limits' must be a pair"):
         dataclasses.replace(result, band_limits=(0.5, 9.5))
 
 
@@ -610,13 +610,15 @@ def test_the_epnl_integration_refuses_a_window_that_is_not_one() -> None:
     """A window is two ordered record indices, and a level is finite."""
     with pytest.raises(ValueError, match="0 <= kF <= kL"):
         EPNLIntegration(90.0, 95.0, 0.0, (3, 1))
-    with pytest.raises(ValueError, match="pair of 0-based"):
+    with pytest.raises(TypeError, match="pair of 0-based"):
         EPNLIntegration(90.0, 95.0, 0.0, (1.5, 3))  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="pair of 0-based"):
+        EPNLIntegration(90.0, 95.0, 0.0, (0, 1, 2))  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="'epnl' must be finite"):
         EPNLIntegration(float("nan"), 95.0, 0.0, (0, 1))
     with pytest.raises(
         ValueError, match="'bandsharing_adjustment' must be non-negative"
     ):
         EPNLIntegration(90.0, 95.0, -1.0, (0, 1))
-    with pytest.raises(ValueError, match="'pnltm'"):
+    with pytest.raises(TypeError, match="'pnltm'"):
         EPNLIntegration(90.0, np.array([95.0]), 0.0, (0, 1))  # type: ignore[arg-type]

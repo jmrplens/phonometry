@@ -229,6 +229,12 @@ forwards from the same anchor, so touchdown is where the two sweeps meet.
 | :--- | :--- |
 | ValueError | if the procedure carries no Land step to anchor it, or a step cannot be flown as specified. |
 
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| FlightProfileWarning | if consecutive Level-Idle steps are flown at different altitudes, or one's calibrated airspeed rises along it. |
+
 ## ApproachStep
 
 ```python
@@ -437,6 +443,19 @@ Plot the profile's height and thrust against distance along the track.
 *property*
 
 True airspeed per point, kt.
+
+## FlightProfileWarning
+
+A procedure whose steps disagree with the notes of Doc 29 B7.1.4.
+
+Emitted by [`approach_profile`](/phonometry/reference/api/aeroacoustics/flight-performance/#approach_profile) for a Level-Idle step whose start
+altitude differs from that of the step after it, when that step is a
+Level-Idle step (Case 1) or neither a Level-Idle nor a Descend-Idle step
+(Case 2): the inconsistency B7.1.4 says "the system should warn the user"
+about. It is also emitted, as a consistency note B7.1.4 states without
+asking for a warning, for a Level-Idle step whose start CAS is below that
+of the same following step, which is an acceleration on an idle segment.
+Neither is repaired, because the tabulated numbers are the manufacturer's.
 
 ## JetEngineCoefficients
 

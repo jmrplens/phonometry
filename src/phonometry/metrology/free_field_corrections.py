@@ -100,6 +100,7 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
+    _as_float64,
     check_engine,
     require_count,
     require_finite,
@@ -394,6 +395,7 @@ def _band_column(values: ArrayLike, name: str, count: int) -> NDArray[np.float64
 
     :raises ValueError: if it is neither a scalar nor one value per frequency.
     """
+    require_scalar(count, "count")
     column = require_finite_array(values, name)
     if column.size == 1:
         return np.full(count, float(column[0]))
@@ -415,11 +417,8 @@ def _determinations(values: ArrayLike, name: str, count: int) -> NDArray[np.floa
     :raises ValueError: for a value that is not finite, a column count that is
         not the number of frequencies, or more than two dimensions.
     """
-    try:
-        array = np.asarray(values, dtype=np.float64)
-    except (TypeError, ValueError) as exc:
-        msg = f"'{name}' must be numeric."
-        raise ValueError(msg) from exc
+    require_scalar(count, "count")
+    array = _as_float64(values, name)
     if array.ndim > _MATRIX_RANK or array.size == 0:
         msg = f"'{name}' must be a scalar, one value per frequency or a matrix."
         raise ValueError(msg)
@@ -463,21 +462,23 @@ def _microphone_labels(
 ) -> tuple[Hashable, ...]:
     """One hashable label per determination, as a tuple.
 
-    :raises ValueError: for a single string, labels that are not hashable, or
-        a count other than the number of determinations.
+    :raises TypeError: for a single string.
+    :raises ValueError: for labels that are not hashable, or a count other
+        than the number of determinations.
     """
+    require_scalar(determinations, "determinations")
     if isinstance(microphones, (str, bytes)):
         msg = (
             "'microphones' must hold one label per determination, not a single string."
         )
-        raise ValueError(msg)
+        raise TypeError(msg)
     try:
         labels = tuple(microphones)
         for label in labels:
             hash(label)
     except TypeError as exc:
         msg = "'microphones' must be a sequence of hashable labels."
-        raise ValueError(msg) from exc
+        raise TypeError(msg) from exc
     if len(labels) != determinations:
         msg = (
             f"'microphones' must hold one label per determination ({determinations}); "
@@ -575,11 +576,7 @@ def _tolerance_column(
     """
     if tolerance_db is None:
         return None
-    try:
-        tolerance = np.atleast_1d(np.asarray(tolerance_db, dtype=np.float64))
-    except (TypeError, ValueError) as exc:
-        msg = "'tolerance_db' must be numeric."
-        raise ValueError(msg) from exc
+    tolerance = np.atleast_1d(_as_float64(tolerance_db, "tolerance_db"))
     if tolerance.ndim != 1 or tolerance.size not in (1, count):
         msg = (
             f"'tolerance_db' must hold one value per frequency ({count}) or a "
@@ -1419,6 +1416,7 @@ class CorrectionUncertaintyBudget(OwnsArrays):
             :attr:`uncertainty` is not the combination of the components the
             columns state.
         """
+        require_scalar(self.coverage, "coverage")
         require_positive(self.frequency_hz, "frequency_hz")
         count = len(self.descriptors)
         if len(self.symbols) != count:
@@ -1748,15 +1746,20 @@ def correction_uncertainty_budget(
 def _clause(clause: object) -> int:
     """A clause of IEC 62585 that states a maximum uncertainty: 9 to 14.
 
-    :raises ValueError: for any other.
+    :raises TypeError: for anything but a number, a bool included.
+    :raises ValueError: for a number that is not one of those clauses, a
+        fraction such as 12.5 among them.
     """
     msg = (
         "'clause' must be one of the IEC 62585 clauses that state a maximum "
         f"expanded uncertainty, {tuple(_MAXIMUM_UNCERTAINTY_DB)}; got {clause!r}."
     )
-    if isinstance(clause, bool) or not isinstance(clause, (int, np.integer)):
-        raise ValueError(msg)
-    number = int(clause)
+    try:
+        number = require_count(clause, "clause", at_least=None)
+    except TypeError:
+        raise TypeError(msg) from None
+    except ValueError:
+        raise ValueError(msg) from None
     if number not in _MAXIMUM_UNCERTAINTY_DB:
         raise ValueError(msg)
     return number

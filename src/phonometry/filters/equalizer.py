@@ -384,6 +384,8 @@ def _check_section_stability(
     pole pair on the unit circle -- and the filter would ring forever
     without any arithmetic error to flag it.
     """
+    require_scalar(a1, "a1")
+    require_scalar(a2, "a2")
     if abs(a2) < 1.0 and abs(a1) < 1.0 + a2:
         return
     msg = (
@@ -400,6 +402,7 @@ def _check_section_stability(
 
 def _section_sos(fs: float, section: EQSection) -> NDArray[np.float64]:
     """One normalized SOS row ``[b0, b1, b2, 1, a1, a2]`` for the section."""
+    require_scalar(fs, "fs")
     if section.f0 >= fs / 2:
         msg = (
             f"Centre frequency f0 = {section.f0} Hz must sit below the "
@@ -607,6 +610,9 @@ class ParametricEQ:
         :return: An :class:`EQResponseResult` (carries the SOS cascade and
             plots the magnitude/phase response).
         """
+        require_scalar(f_max, "f_max")
+        require_scalar(f_min, "f_min")
+        require_scalar(n_points, "n_points")
         if n_points < _MIN_RESPONSE_POINTS:
             msg = "'n_points' must be at least 2."
             raise ValueError(msg)

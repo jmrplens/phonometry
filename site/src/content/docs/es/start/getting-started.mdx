@@ -383,7 +383,7 @@ hacen deciden lo que valen los niveles:
 - **Graba a 48 kHz o más.** A 44,1 kHz se descartan las bandas por encima de
   $f_\mathrm{s}/2$: el banco devuelve 32 bandas que terminan en 15 848,9 Hz en lugar de
   las 33 que terminan en 19 952,6 Hz de arriba, y lo avisa con un
-  `PhonometryWarning`.
+  `filters.FilterBankWarning`.
 - **Repite la comprobación del calibrador al final.** La diferencia entre antes
   y después es la cota de deriva de todo lo capturado en medio, y un criterio
   habitual invalida la serie cuando supera 0,5 dB.

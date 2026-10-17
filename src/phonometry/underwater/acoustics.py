@@ -28,7 +28,10 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from .._internal.validation import require_real
+from .._internal.validation import (
+    require_real,
+    require_scalar,
+)
 from ..io._resolve import SignalInput, apply_calibration, resolve_fs
 from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 
@@ -86,6 +89,7 @@ def _finite(value: float, name: str) -> float:
 def _validate_pressure(
     pressure: SignalInput, *, min_samples: int = 1
 ) -> NDArray[np.float64]:
+    require_scalar(min_samples, "min_samples")
     sig = np.asarray(pressure, dtype=np.float64)
     if sig.ndim != 1:
         msg = "'pressure' must be one-dimensional."
@@ -200,7 +204,8 @@ def underwater_to_in_air_spl(level: float) -> float:
 
     :param level: Level in dB re 1 µPa.
     :return: The same pressure expressed in dB re 20 µPa.
-    :raises ValueError: If the level is not a finite number.
+    :raises TypeError: If the level is an array or not a number.
+    :raises ValueError: If the level is not finite.
     """
     return float(_finite(level, "level") - _REFERENCE_OFFSET_DB)
 
@@ -214,6 +219,7 @@ def in_air_to_underwater_spl(level: float) -> float:
 
     :param level: Level in dB re 20 µPa.
     :return: The same pressure expressed in dB re 1 µPa.
-    :raises ValueError: If the level is not a finite number.
+    :raises TypeError: If the level is an array or not a number.
+    :raises ValueError: If the level is not finite.
     """
     return float(_finite(level, "level") + _REFERENCE_OFFSET_DB)

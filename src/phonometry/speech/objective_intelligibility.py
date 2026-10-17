@@ -46,6 +46,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    require_count,
     require_equal_shapes,
     require_ranks,
     require_same_length,
@@ -269,9 +270,9 @@ def _resample_to_internal(sig: NDArray[np.float64], fs: int) -> NDArray[np.float
 
     from scipy.signal import resample_poly
 
-    g = gcd(int(fs), _SAMPLE_RATE)
+    g = gcd(require_count(fs, "fs", at_least=None), _SAMPLE_RATE)
     up = _SAMPLE_RATE // g
-    down = int(fs) // g
+    down = require_count(fs, "fs", at_least=None) // g
     return np.asarray(resample_poly(sig, up, down), dtype=np.float64)
 
 
@@ -360,12 +361,12 @@ def stoi(
     fs = resolve_pair_fs(clean, degraded, fs, names=("clean", "degraded"))
     x, y = _validate_pair(clean, degraded)
     require_scalar(fs, "fs")
-    if int(fs) <= 0:
+    if require_count(fs, "fs", at_least=None) <= 0:
         msg = "'fs' must be a positive sample rate."
         raise ValueError(msg)
 
-    x = _resample_to_internal(x, int(fs))
-    y = _resample_to_internal(y, int(fs))
+    x = _resample_to_internal(x, require_count(fs, "fs", at_least=None))
+    y = _resample_to_internal(y, require_count(fs, "fs", at_least=None))
     x, y = _remove_silent_frames(x, y)
 
     # Guard before the transform: with fewer than 30 short-time frames left

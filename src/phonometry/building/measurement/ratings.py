@@ -93,6 +93,7 @@ from ..._internal.validation import (
     require_present,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -860,6 +861,7 @@ def _resolve_band_set(
     :return: ``(reference, max_unfavourable, index_500, spectrum1,
         spectrum2)``.
     """
+    require_scalar(n, "n")
     if fraction == _THIRD_OCTAVE or (fraction is None and n == _N_THIRD_OCTAVE_BANDS):
         if n != _N_THIRD_OCTAVE_BANDS:
             msg = f"One-third-octave rating needs 16 bands (100-3150 Hz), got {n}."
@@ -914,6 +916,7 @@ def _best_shift(
     The shift is searched on an integer grid of ``step`` ticks to keep the
     0,1 dB steps exact.
     """
+    require_scalar(step, "step")
     scale = round(1.0 / step)
     if scale < 1 or abs(scale * step - 1.0) > _STEP_DIVISOR_TOLERANCE:
         msg = "'step' must divide 1 dB exactly (e.g. 1.0 or 0.1)."
@@ -1008,6 +1011,7 @@ def _resolve_impact_band_set(
     :return: ``(reference, max_unfavourable, index_500, octave_offset,
         ci_band_count)``.
     """
+    require_scalar(n, "n")
     if fraction == _THIRD_OCTAVE or (fraction is None and n == _N_THIRD_OCTAVE_BANDS):
         if n != _N_THIRD_OCTAVE_BANDS:
             msg = (
@@ -1161,6 +1165,8 @@ class ImpactImprovementRatingResult(OwnsArrays):
             length or hold a value that is not finite, or if ``ci_r`` is not
             :math:`C_\mathrm{I,r,0} - C_{\mathrm{I},\Delta}`.
         """
+        require_scalar(self.ci_delta, "ci_delta")
+        require_scalar(self.ci_r, "ci_r")
         require_ranks(self, frequencies=1, improvement=1)
         require_same_length(self, "frequencies", "improvement")
         _require_finite_curves(self, "frequencies", "improvement")

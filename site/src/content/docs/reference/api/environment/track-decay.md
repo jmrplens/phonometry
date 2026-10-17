@@ -229,7 +229,7 @@ The decay rate of the band a nominal frequency names, in dB/m.
 
 | Exception | When |
 | :--- | :--- |
-| KeyError | If the spectrum has no such band. |
+| ValueError | If the spectrum has no band at that frequency: a number outside what the result covers, not a missing key. |
 
 ### TrackDecayRate.suitable
 

@@ -56,8 +56,10 @@ from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
 from ..._internal.validation import (
     require_choice,
+    require_count,
     require_equal_shapes,
     require_finite,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -626,6 +628,7 @@ def insulation_coverage_factor(
     :param one_sided: Use the one-sided column (conformity checks, Formulae 4/5).
     :raises ValueError: Coverage probability not tabulated in Table 8.
     """
+    require_scalar(coverage, "coverage")
     table = _COVERAGE_ONE_SIDED if one_sided else _COVERAGE_TWO_SIDED
     for level, k in table.items():
         if abs(level - coverage) < _COVERAGE_MATCH_TOL:
@@ -656,6 +659,7 @@ def insulation_expanded_uncertainty(
     :param one_sided: Use the one-sided coverage factor (conformity checks).
     :raises ValueError: Negative ``u`` or an untabulated coverage probability.
     """
+    require_scalar(u, "u")
     if u < 0:
         msg = "Standard uncertainty u must be non-negative."
         raise ValueError(msg)
@@ -725,11 +729,11 @@ def prediction_input_uncertainty(
     :raises ValueError: A non-integer or non-positive ``n``, or a negative
         standard deviation.
     """
+    require_scalar(sigma_product, "sigma_product")
+    require_scalar(sigma_reproducibility, "sigma_reproducibility")
     # A fractional or NaN ``n`` sails past a bare ``n < 1`` and is divided
     # by, so integrality is required explicitly (numpy integers included).
-    if not isinstance(n, (int, np.integer)) or n < 1:
-        msg = "n must be a positive integer."
-        raise ValueError(msg)
+    n = require_count(n, "n")
     if sigma_reproducibility < 0 or sigma_product < 0:
         msg = "Standard deviations must be non-negative."
         raise ValueError(msg)
@@ -747,6 +751,8 @@ def reduce_by_independent_measurements(u: float, m: int) -> float:
     :param m: Number of independent measurements (:math:`m \ge 1`).
     :raises ValueError: Non-positive ``m`` or negative ``u``.
     """
+    require_scalar(m, "m")
+    require_scalar(u, "u")
     if m < 1:
         msg = "m must be a positive integer."
         raise ValueError(msg)
@@ -850,13 +856,16 @@ class RequirementConformity(RichDisplay):
     def __post_init__(self) -> None:
         """Reject a side the clause does not name, or numbers it cannot judge.
 
+        :raises TypeError: For a value that is not one number, or a ``bound``
+            that is not a text.
         :raises ValueError: For a ``bound`` other than ``"minimum"`` and
             ``"maximum"``, a value that is not finite, or a negative
             uncertainty.
         """
         require_choice(self.bound, "bound", _BOUNDS)
-        for name in ("value_db", "expanded_uncertainty_db", "requirement_db"):
-            require_finite(getattr(self, name), name)
+        require_finite(self.value_db, "value_db")
+        require_finite(self.expanded_uncertainty_db, "expanded_uncertainty_db")
+        require_finite(self.requirement_db, "requirement_db")
         if self.expanded_uncertainty_db < 0.0:
             msg = "'expanded_uncertainty_db' must not be negative."
             raise ValueError(msg)
@@ -913,6 +922,8 @@ def assess_requirement_conformity(
     :param requirement_db: :math:`Y_\mathrm{required}`, in dB.
     :param bound: ``"minimum"`` (Formula (5)) or ``"maximum"`` (Formula (4)).
     :return: The verdict, as a :class:`RequirementConformity`.
+    :raises TypeError: For a value that is not one number, or a ``bound`` that
+        is not a text.
     :raises ValueError: For an unknown ``bound``, a value that is not finite or
         a negative uncertainty.
     """

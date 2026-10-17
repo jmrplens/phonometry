@@ -98,6 +98,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_band_fraction,
     require_choice,
+    require_count,
     require_non_negative,
     require_positive,
     require_ranks,
@@ -952,9 +953,9 @@ def orthotropic_plate_resonance(
     :raises ValueError: for a non-positive input or a mode order below 1.
     """
     require_scalar(mode_x, "mode_x")
-    i = int(mode_x)
+    i = require_count(mode_x, "mode_x", at_least=None)
     require_scalar(mode_z, "mode_z")
-    n = int(mode_z)
+    n = require_count(mode_z, "mode_z", at_least=None)
     if i < 1 or n < 1:
         msg = "'mode_x' and 'mode_z' must be integers >= 1."
         raise ValueError(msg)
@@ -1233,6 +1234,7 @@ def orthotropic_transmission_loss(
         coincidence range that is not increasing, or a Heckl construction whose
         points would be out of order.
     """
+    require_scalar(limiting_angle_deg, "limiting_angle_deg")
     chosen = require_choice(method, "method", ("integral", "heckl"))
     m2 = require_positive(mass_per_area, "mass_per_area")
     fc1 = require_positive(critical_frequency_lower, "critical_frequency_lower")

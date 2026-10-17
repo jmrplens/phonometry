@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from ._warnings import FilterBankWarning
 from .compliance import (
     FilterComplianceResult,
     class_limits,
@@ -10,7 +11,6 @@ from .compliance import (
 )
 from .core import (
     BlockProcessing,
-    FilterBankWarning,
     FilterDesign,
     LevelCalibration,
     OctaveFilterBank,

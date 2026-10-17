@@ -812,7 +812,7 @@ def test_the_working_area_is_a_declaration() -> None:
 def test_a_working_area_declaration_must_be_a_bool() -> None:
     """A string such as "no" is truthy, and would be read as a declaration."""
     traverses = _free_field_traverses(_SPACING)
-    with pytest.raises(ValueError, match="'paths_in_working_area' must be True"):
+    with pytest.raises(TypeError, match="'paths_in_working_area' must be True"):
         _qualified(traverses, paths_in_working_area="no")
     assert _qualified(traverses, paths_in_working_area=np.True_).working_area_met
 

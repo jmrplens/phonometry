@@ -76,7 +76,11 @@ import numpy as np
 
 from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
-from ..._internal.validation import check_engine, require_equal_shapes
+from ..._internal.validation import (
+    check_engine,
+    require_equal_shapes,
+    require_scalar,
+)
 from ..._internal.warnings import PhonometryWarning
 from ...fluids import Fluid
 
@@ -336,6 +340,8 @@ def linear_airflow_velocity(volume_flow_rate: float, area: float) -> float:
     ``volume_flow_rate`` is ``q_v`` (m3/s) and ``area`` is ``A`` (m2); returns
     ``u`` in m/s.
     """
+    require_scalar(area, "area")
+    require_scalar(volume_flow_rate, "volume_flow_rate")
     if volume_flow_rate < 0.0:
         msg = "'volume_flow_rate' must be non-negative."
         raise ValueError(msg)
@@ -351,6 +357,8 @@ def airflow_resistance(pressure_drop_pa: float, volume_flow_rate: float) -> floa
     specimen (Pa) and ``volume_flow_rate`` is the volumetric airflow rate
     ``q_v`` (m3/s). Returns ``R`` in Pa*s/m3.
     """
+    require_scalar(pressure_drop_pa, "pressure_drop_pa")
+    require_scalar(volume_flow_rate, "volume_flow_rate")
     if pressure_drop_pa < 0.0:
         msg = "'pressure_drop_pa' must be non-negative."
         raise ValueError(msg)
@@ -379,6 +387,10 @@ def specific_airflow_resistance(
 
     The unit is pascal second per metre (Pa*s/m), not Pa*s/m2.
     """
+    require_scalar(area, "area")
+    require_scalar(pressure_drop_pa, "pressure_drop_pa")
+    require_scalar(resistance, "resistance")
+    require_scalar(velocity, "velocity")
     from_resistance = resistance is not None and area is not None
     from_pressure = pressure_drop_pa is not None and velocity is not None
     if from_resistance == from_pressure:
@@ -417,6 +429,8 @@ def airflow_resistivity(specific_resistance: float, thickness_m: float) -> float
     ``specific_resistance`` is ``R_s`` (Pa*s/m) and ``thickness_m`` is ``d`` (m),
     the specimen thickness in the flow direction. Returns ``sigma`` in Pa*s/m2.
     """
+    require_scalar(specific_resistance, "specific_resistance")
+    require_scalar(thickness_m, "thickness_m")
     if specific_resistance < 0.0:
         msg = "'specific_resistance' must be non-negative."
         raise ValueError(msg)
@@ -467,6 +481,9 @@ def static_airflow_resistance(
     resistance. A velocity above the clause 7.5 upper limit (15 mm/s) raises
     :class:`AirflowResistanceWarning`.
     """
+    require_scalar(area, "area")
+    require_scalar(evaluation_velocity, "evaluation_velocity")
+    require_scalar(thickness_m, "thickness_m")
     u = np.asarray(velocities, dtype=np.float64)
     dp = np.asarray(pressure_drops_pa, dtype=np.float64)
     if u.ndim != 1 or dp.ndim != 1:
@@ -533,6 +550,9 @@ def piston_volume_flow_rate(
     stroke amplitude ``h`` (m) and ``piston_area`` the piston cross-section
     ``A_P`` (m2). Returns ``q_v`` in m3/s.
     """
+    require_scalar(frequency, "frequency")
+    require_scalar(piston_area, "piston_area")
+    require_scalar(stroke_amplitude, "stroke_amplitude")
     if frequency <= 0.0:
         raise ValueError(_FREQUENCY_POSITIVE_MSG)
     if stroke_amplitude < 0.0:
@@ -573,6 +593,7 @@ def thermal_boundary_layer_thickness(
     with the Annex A.3 example (:math:`f = 2` Hz) both pairs give ``1.83e-3 m``, because
     the printed pair preserves the tabulated diffusivity.
     """
+    require_scalar(frequency, "frequency")
     if frequency <= 0.0:
         raise ValueError(_FREQUENCY_POSITIVE_MSG)
     omega = 2.0 * math.pi * frequency
@@ -613,6 +634,8 @@ def effective_kappa(
     (:math:`S = 0.0471` m2, :math:`V = 7.854\times 10^{-4}` m3,
     :math:`f = 2` Hz) yields :math:`\kappa' = 1.370`.
     """
+    require_scalar(cavity_surface, "cavity_surface")
+    require_scalar(cavity_volume, "cavity_volume")
     if cavity_surface <= 0.0:
         msg = "'cavity_surface' must be positive."
         raise ValueError(msg)
@@ -700,6 +723,14 @@ def alternating_airflow_resistance(
     with :func:`piston_volume_flow_rate` and :func:`linear_airflow_velocity` if
     the rig is near either end of the range.
     """
+    require_scalar(level_specimen, "level_specimen")
+    require_scalar(level_termination, "level_termination")
+    require_scalar(cavity_volume, "cavity_volume")
+    require_scalar(frequency, "frequency")
+    require_scalar(kappa_prime, "kappa_prime")
+    require_scalar(piston_stroke_specimen, "piston_stroke_specimen")
+    require_scalar(piston_stroke_termination, "piston_stroke_termination")
+    require_scalar(static_pressure_pa, "static_pressure_pa")
     if frequency <= 0.0:
         raise ValueError(_FREQUENCY_POSITIVE_MSG)
     if cavity_volume <= 0.0:

@@ -15,7 +15,7 @@ import pytest
 
 from phonometry.fluids import (
     Fluid,
-    FluidPropertyUnavailable,
+    FluidPropertyUnavailableError,
     depth_to_absolute_pressure_pa,
     depth_to_gauge_pressure_mpa,
     sea_water,
@@ -106,7 +106,7 @@ def test_sea_water_refuses_what_no_source_here_prints(quantity: str) -> None:
     for.
     """
     water = sea_water(temperature_c=10.0)
-    with pytest.raises(FluidPropertyUnavailable, match="Ainslie"):
+    with pytest.raises(FluidPropertyUnavailableError, match="Ainslie"):
         getattr(water, quantity)
 
 

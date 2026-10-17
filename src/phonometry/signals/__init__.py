@@ -56,6 +56,7 @@ from .synchronous_average import (
 from .test_signals import (
     ResampledSignalResult,
     ToneBurstResult,
+    ToneBurstWarning,
     fractional_delay,
     noise_signal,
     resample_signal,
@@ -89,6 +90,7 @@ __all__ = [
     "SynchronousAverageResult",
     "TimeDelayResult",
     "ToneBurstResult",
+    "ToneBurstWarning",
     "WindowMetricsResult",
     "ZoomFFTResult",
     "align_impulse_responses",

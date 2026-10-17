@@ -288,8 +288,8 @@ def test_background_correction_refuses_mismatched_bands() -> None:
 )
 def test_background_centres_are_refused_when_complex(centres: object) -> None:
     # The centres only label the plot, and a complex one is still refused by
-    # name rather than cut to its real part.
-    with pytest.raises(ValueError, match="frequencies"):
+    # name, as the wrong type, rather than cut to its real part.
+    with pytest.raises(TypeError, match="frequencies"):
         building.service_equipment_background_correction(
             [50.0],
             [40.0],
@@ -591,13 +591,15 @@ def test_a_complex_array_is_refused_not_cut_to_its_real_part(name: str) -> None:
     # np.asarray(z, dtype=float) keeps the real part with only a warning: a
     # spectrum of 40 + 1j dB would be rated as one of 40 dB.
     complex_value = np.asarray(_level_inputs()[name]) + 1j
-    with pytest.raises(ValueError, match=name):
+    with pytest.raises(TypeError, match=name):
         _level_call(**{name: complex_value})
 
 
-def test_levels_that_are_not_numbers_are_refused_by_name() -> None:
-    with pytest.raises(ValueError, match="levels"):
-        _level_call(levels=[["forty"] * THIRD.size] * 3)
+@pytest.mark.parametrize("text", ["forty", "40.0"], ids=["word", "numeric"])
+def test_levels_that_are_not_numbers_are_refused_by_name(text: str) -> None:
+    """Levels held as text are the wrong type, whatever the text reads as."""
+    with pytest.raises(TypeError, match="levels"):
+        _level_call(levels=[[text] * THIRD.size] * 3)
 
 
 @pytest.mark.parametrize(
@@ -618,15 +620,26 @@ def test_levels_that_are_not_numbers_are_refused_by_name() -> None:
     ],
 )
 def test_the_volume_and_t0_are_one_positive_number(name: str, value: object) -> None:
-    with pytest.raises(ValueError, match=name):
+    with pytest.raises(TypeError, match=name):
         _level_call(**{name: value})
 
 
-@pytest.mark.parametrize("value", ["x", 1 + 1j, -1.0, 0.0, None])
-def test_t0_is_refused_by_name_without_a_reverberation_time(value: object) -> None:
+@pytest.mark.parametrize(
+    ("value", "refusal"),
+    [
+        ("x", TypeError),
+        (1 + 1j, TypeError),
+        (-1.0, ValueError),
+        (0.0, ValueError),
+        (None, TypeError),
+    ],
+)
+def test_t0_is_refused_by_name_without_a_reverberation_time(
+    value: object, refusal: type[Exception]
+) -> None:
     # Formula (5) is never reached without a reverberation time; the T0 the
     # call names is still one positive number or a refusal.
-    with pytest.raises(ValueError, match="reference_reverberation_time_s"):
+    with pytest.raises(refusal, match="reference_reverberation_time_s"):
         _level_call(
             reverberation_time=None,
             volume=None,
@@ -1024,13 +1037,23 @@ def test_loudest_corner_needs_a_corner_left() -> None:
 
 
 @pytest.mark.parametrize(
-    "excluded",
-    [[1.7], [True], ["1"], [-1], 1, "1", [[1]]],
+    ("excluded", "refusal"),
+    [
+        ([1.7], ValueError),
+        ([True], TypeError),
+        (["1"], TypeError),
+        ([-1], ValueError),
+        (1, TypeError),
+        ("1", TypeError),
+        ([[1]], TypeError),
+    ],
     ids=["1.7", "True", "'1'", "-1", "bare 1", "bare '1'", "nested"],
 )
-def test_an_excluded_corner_is_named_by_a_whole_index(excluded: object) -> None:
+def test_an_excluded_corner_is_named_by_a_whole_index(
+    excluded: object, refusal: type[Exception]
+) -> None:
     # int() would read 1.7, True and '1' each as corner 1 and leave it out.
-    with pytest.raises(ValueError, match="excluded"):
+    with pytest.raises(refusal, match="excluded"):
         building.loudest_corner([50.0, 52.0, 51.0, 49.0], excluded=excluded)  # type: ignore[arg-type]
 
 
@@ -1041,19 +1064,28 @@ def test_excluded_corners_as_numpy_indices() -> None:
 
 
 @pytest.mark.parametrize(
-    ("kwargs", "name"),
+    ("kwargs", "name", "refusal"),
     [
-        ({"room_dimensions_m": np.array([5.0 + 1j, 4.0, 2.6])}, "room_dimensions_m"),
-        ({"corner_position_m": np.array([0.5 + 1j, 0.5, 0.5])}, "corner_position_m"),
-        ({"room_positions_m": [("2.5", "2.0", "x")]}, "room_positions_m"),
-        ({"small_room": "no"}, "small_room"),
-        ({"small_room": 0.3}, "small_room"),
+        (
+            {"room_dimensions_m": np.array([5.0 + 1j, 4.0, 2.6])},
+            "room_dimensions_m",
+            TypeError,
+        ),
+        (
+            {"corner_position_m": np.array([0.5 + 1j, 0.5, 0.5])},
+            "corner_position_m",
+            TypeError,
+        ),
+        ({"room_positions_m": [("2.5", "2.0", "x")]}, "room_positions_m", TypeError),
+        ({"room_positions_m": [("2.5", "2.0", "1.2")]}, "room_positions_m", TypeError),
+        ({"small_room": "no"}, "small_room", TypeError),
+        ({"small_room": 0.3}, "small_room", TypeError),
     ],
 )
 def test_position_inputs_are_refused_by_name(
-    kwargs: dict[str, object], name: str
+    kwargs: dict[str, object], name: str, refusal: type[Exception]
 ) -> None:
-    with pytest.raises(ValueError, match=name):
+    with pytest.raises(refusal, match=name):
         _positions(**kwargs)
 
 
@@ -1301,21 +1333,23 @@ def test_an_obstacle_distance_not_given_is_not_judged() -> None:
 
 
 @pytest.mark.parametrize(
-    "distance",
+    ("distance", "refusal"),
     [
-        -0.1,
-        math.nan,
-        [],
-        "0.3",
-        True,
-        [0.3, "0.4"],
-        [[0.3], [0.4]],
-        [[0.3], [0.4, 0.5]],
+        (-0.1, ValueError),
+        (math.nan, ValueError),
+        ([], ValueError),
+        ("0.3", TypeError),
+        (True, TypeError),
+        ([0.3, "0.4"], TypeError),
+        ([[0.3], [0.4]], ValueError),
+        ([[0.3], [0.4, 0.5]], ValueError),
     ],
     ids=repr,
 )
-def test_an_obstacle_distance_is_refused_by_name(distance: object) -> None:
-    with pytest.raises(ValueError, match="corner_obstacle_distance_m"):
+def test_an_obstacle_distance_is_refused_by_name(
+    distance: object, refusal: type[Exception]
+) -> None:
+    with pytest.raises(refusal, match="corner_obstacle_distance_m"):
         _positions(corner_obstacle_distance_m=distance)
 
 
@@ -1383,15 +1417,19 @@ def test_one_calibration_alone_has_nothing_to_be_compared_with() -> None:
             {"calibration_levels": [94.0], "previous_levels": [math.nan]},
             "'previous_levels'",
         ),
-        ({"calibration_levels": ["94.0", "94.1"]}, "'calibration_levels'"),
     ],
-    ids=["infinite", "two-dimensional", "nan earlier", "text"],
+    ids=["infinite", "two-dimensional", "nan earlier"],
 )
 def test_calibration_readings_are_refused_when_not_finite_levels(
     kwargs: dict[str, object], blamed: str
 ) -> None:
     with pytest.raises(ValueError, match=blamed):
         building.verify_calibration_deviation(**kwargs)  # type: ignore[arg-type]
+
+
+def test_calibration_readings_given_as_text_are_the_wrong_type() -> None:
+    with pytest.raises(TypeError, match="'calibration_levels'"):
+        building.verify_calibration_deviation(["94.0", "94.1"])  # type: ignore[list-item]
 
 
 def test_calibration_result_checks_its_deviations() -> None:
@@ -1450,10 +1488,22 @@ def test_the_background_tolerance_is_never_set_by_the_library() -> None:
 
 
 @pytest.mark.parametrize(
-    "durations", [0.0, -30.0, math.nan, [], [[30.0]], "30", True], ids=repr
+    ("durations", "refusal"),
+    [
+        (0.0, ValueError),
+        (-30.0, ValueError),
+        (math.nan, ValueError),
+        ([], ValueError),
+        ([[30.0]], ValueError),
+        ("30", TypeError),
+        (True, TypeError),
+    ],
+    ids=repr,
 )
-def test_background_durations_are_refused_unless_positive(durations: object) -> None:
-    with pytest.raises(ValueError, match="durations_s"):
+def test_background_durations_are_refused_unless_positive(
+    durations: object, refusal: type[Exception]
+) -> None:
+    with pytest.raises(refusal, match="durations_s"):
         building.check_background_duration(
             durations,  # type: ignore[arg-type]
             tolerance_s=1.0,
@@ -1461,12 +1511,21 @@ def test_background_durations_are_refused_unless_positive(durations: object) -> 
 
 
 @pytest.mark.parametrize(
-    "tolerance", [-1.0, math.nan, math.inf, "1", True, [1.0]], ids=repr
+    ("tolerance", "refusal"),
+    [
+        (-1.0, ValueError),
+        (math.nan, ValueError),
+        (math.inf, ValueError),
+        ("1", TypeError),
+        (True, TypeError),
+        ([1.0], TypeError),
+    ],
+    ids=repr,
 )
 def test_the_background_tolerance_is_one_duration_of_0_s_or_more(
-    tolerance: object,
+    tolerance: object, refusal: type[Exception]
 ) -> None:
-    with pytest.raises(ValueError, match="tolerance_s"):
+    with pytest.raises(refusal, match="tolerance_s"):
         building.check_background_duration(
             [30.0],
             tolerance_s=tolerance,  # type: ignore[arg-type]
@@ -1510,9 +1569,21 @@ def test_varying_background_inputs_are_refused_by_name() -> None:
         )
 
 
-@pytest.mark.parametrize("observation", [0.0, -600.0, "600", True, [600.0]], ids=repr)
-def test_the_observation_time_is_one_positive_number(observation: object) -> None:
-    with pytest.raises(ValueError, match="observation_time_s"):
+@pytest.mark.parametrize(
+    ("observation", "refusal"),
+    [
+        (0.0, ValueError),
+        (-600.0, ValueError),
+        ("600", TypeError),
+        (True, TypeError),
+        ([600.0], TypeError),
+    ],
+    ids=repr,
+)
+def test_the_observation_time_is_one_positive_number(
+    observation: object, refusal: type[Exception]
+) -> None:
+    with pytest.raises(refusal, match="observation_time_s"):
         building.check_varying_background(
             [30.0],
             [45.0],

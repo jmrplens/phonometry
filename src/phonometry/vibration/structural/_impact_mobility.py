@@ -437,14 +437,7 @@ def exponential_decay_rate(n_samples: int, fs: float, *, final_value: float) -> 
 
 def _sample_count(n_samples: object) -> int:
     """A record length in samples: a whole number of at least 16."""
-    if (
-        isinstance(n_samples, bool)
-        or not isinstance(n_samples, (int, np.integer))
-        or int(n_samples) < _MIN_SAMPLES
-    ):
-        msg = f"'n_samples' must be a whole number of at least {_MIN_SAMPLES}."
-        raise ValueError(msg)
-    return int(n_samples)
+    return require_count(n_samples, "n_samples", at_least=_MIN_SAMPLES)
 
 
 # ---------------------------------------------------------------------------
@@ -791,10 +784,9 @@ class ImpactMobilityResult(OwnsArrays):
         if np.any(~(coherence >= 0.0)) or np.any(coherence > 1.0):
             msg = f"{owner}: 'coherence' must lie in [0, 1]."
             raise ValueError(msg)
-        require_scalar(self.n_impacts, "n_impacts")
-        if isinstance(self.n_impacts, bool) or int(self.n_impacts) < 1:
-            msg = f"{owner}: 'n_impacts' must be at least 1."
-            raise ValueError(msg)
+        object.__setattr__(
+            self, "n_impacts", require_count(self.n_impacts, "n_impacts")
+        )
         require_non_negative(
             self.exponential_decay_rate_per_s, "exponential_decay_rate_per_s"
         )
@@ -1565,10 +1557,12 @@ def _pair(value: object, name: str) -> tuple[float, float]:
         f"'{name}' must be a pair of numbers (f_low, f_high), in hertz; got {value!r}."
     )
     if isinstance(value, (str, bytes)) or not isinstance(value, Iterable):
-        raise ValueError(msg)
+        raise TypeError(msg)
     try:
         low, high = (require_real(edge, msg) for edge in value)
-    except (TypeError, ValueError):
+    except TypeError:
+        raise TypeError(msg) from None
+    except ValueError:  # not two edges, or a text that reads as no number
         raise ValueError(msg) from None
     return low, high
 
@@ -1584,6 +1578,7 @@ def _frequency_range(
     ``nyquist`` is half the sample rate, the bound of 8.3, whether or not a
     DFT bin falls on it (an odd record has none there).
     """
+    require_scalar(nyquist, "nyquist")
     low, high = _pair(frequency_range_hz, name)
     low = require_non_negative(low, f"{name}[0]")
     high = require_positive(high, f"{name}[1]")
@@ -2182,6 +2177,7 @@ class CoherenceCheck(OwnsArrays):
             coherence outside (0, 1), or a count is not a whole number of at
             least 1 (a bool is refused).
         """
+        require_scalar(self.min_coherence, "min_coherence")
         require_ranks(self, frequencies=1, coherence=1, judged=1)
         require_same_length(
             self, "frequencies", "coherence", "judged", axis="frequency"
@@ -2333,10 +2329,10 @@ def _exclusions(exclude_hz: object) -> list[tuple[float, float]]:
         f"[(40.0, 50.0)]; got {exclude_hz!r}."
     )
     if isinstance(exclude_hz, (str, bytes)) or not isinstance(exclude_hz, Iterable):
-        raise ValueError(msg)
+        raise TypeError(msg)
     bands = list(exclude_hz)
     if any(isinstance(band, (int, float, np.number)) for band in bands):
-        raise ValueError(msg)
+        raise TypeError(msg)
     return [
         _frequency_range(band, name=f"exclude_hz[{index}]")
         for index, band in enumerate(bands)

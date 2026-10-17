@@ -152,6 +152,7 @@ def refuse_foreign_rate(x: SignalInput, fs: float, what: str) -> None:
     :param what: What the object is, for the message ("filter bank").
     :raises ValueError: If *x* is a Signal at a different rate.
     """
+    require_scalar(fs, "fs")
     if isinstance(x, Signal) and x.fs != fs:
         msg = (
             f"the Signal was recorded at {x.fs} Hz but this {what} was "

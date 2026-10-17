@@ -79,7 +79,11 @@ import numpy as np
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
-from .._internal.validation import require_non_negative, require_positive
+from .._internal.validation import (
+    require_non_negative,
+    require_positive,
+    require_scalar,
+)
 from .free_field_corrections import _band_column, _frequency_axis
 from .reciprocity_calibration import (
     _TRIAD_PAIRS,
@@ -419,6 +423,7 @@ def _positions(
     acoustic_centers_m: Sequence[ArrayLike], count: int, microphones: int
 ) -> list[NDArray[np.float64]]:
     """The acoustic centre of each microphone at each frequency."""
+    require_scalar(microphones, "microphones")
     if len(acoustic_centers_m) != microphones:
         msg = (
             f"'acoustic_centers_m' must hold one entry per microphone ({microphones})."
@@ -460,6 +465,7 @@ def _product(
 
 def _distances(diaphragm_distances_m: Sequence[float], count: int) -> list[float]:
     """The distances between the diaphragms, one per pair."""
+    require_scalar(count, "count")
     if len(diaphragm_distances_m) != count:
         msg = f"'diaphragm_distances_m' must hold one distance per pair ({count})."
         raise ValueError(msg)

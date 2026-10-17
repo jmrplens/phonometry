@@ -344,7 +344,7 @@ está anclada en las ediciones de 2017 de principio a fin.
 **Qué son las dos masas de entrada y dónde se acaba la forma cerrada.** El
 $164 - 35\lg(m'/m'_0)$ del Anexo B no es una teoría: es una regresión ajustada a
 forjados **pesados homogéneos** medidos entre **100 y 600 kg/m²**, y
-`equivalent_impact_level` lanza un `UserWarning` cuando se le llama fuera de esa
+`equivalent_impact_level` emite un `building.BuildingPredictionWarning` cuando se le llama fuera de esa
 franja. Dentro funciona porque el nivel de impactos de una losa masiva desnuda lo
 fijan su masa y el factor de pérdidas aproximadamente constante de la
 construcción de fábrica. Fuera falla porque un forjado ligero o nervado radia a

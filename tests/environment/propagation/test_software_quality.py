@@ -129,9 +129,14 @@ def test_ranking_positions_refuse_a_sample_below_twenty() -> None:
         environment.ranking_positions(19)
 
 
-@pytest.mark.parametrize("bad", [25.5, True, "25", math.nan])
-def test_ranking_positions_refuse_what_is_not_a_count(bad: object) -> None:
-    with pytest.raises(ValueError, match="sample_size"):
+@pytest.mark.parametrize(
+    ("bad", "refusal"),
+    [(25.5, ValueError), (True, TypeError), ("25", TypeError), (math.nan, ValueError)],
+)
+def test_ranking_positions_refuse_what_is_not_a_count(
+    bad: object, refusal: type[Exception]
+) -> None:
+    with pytest.raises(refusal, match="sample_size"):
         environment.ranking_positions(bad)  # type: ignore[arg-type]
 
 
@@ -399,7 +404,7 @@ def test_the_contour_length_must_be_finite_and_positive(bad: float) -> None:
 @pytest.mark.parametrize("bad", ["100", b"100", True], ids=["str", "bytes", "bool"])
 def test_the_contour_length_must_be_a_number(bad: object) -> None:
     """A string or a bool converts through float() and would pass for a length."""
-    with pytest.raises(ValueError, match="total_length_m"):
+    with pytest.raises(TypeError, match="total_length_m"):
         environment.contour_sample_chainages_m(bad, 20)  # type: ignore[arg-type]
 
 
@@ -494,19 +499,21 @@ def test_a_round_robin_needs_a_matrix() -> None:
 def test_a_round_robin_refuses_complex_levels() -> None:
     """A float64 cast would keep the real part and only warn."""
     levels = np.ones((20, 2)) * (1.0 + 1.0j)
-    with pytest.raises(ValueError, match="levels"):
+    with pytest.raises(TypeError, match="levels"):
         environment.round_robin_precision(levels)
-    with pytest.raises(ValueError, match="levels"):
+    with pytest.raises(TypeError, match="levels"):
         environment.RoundRobinPrecision(levels=levels)
 
 
 @pytest.mark.parametrize(
-    "bad",
-    [[[50.0, 51.0], [52.0]] * 10, [["a", "b"]] * 20],
+    ("bad", "refusal"),
+    [([[50.0, 51.0], [52.0]] * 10, ValueError), ([["a", "b"]] * 20, TypeError)],
     ids=["ragged", "strings"],
 )
-def test_a_round_robin_names_the_levels_it_cannot_read(bad: object) -> None:
-    with pytest.raises(ValueError, match="levels"):
+def test_a_round_robin_names_the_levels_it_cannot_read(
+    bad: object, refusal: type[Exception]
+) -> None:
+    with pytest.raises(refusal, match="levels"):
         environment.round_robin_precision(bad)  # type: ignore[arg-type]
 
 

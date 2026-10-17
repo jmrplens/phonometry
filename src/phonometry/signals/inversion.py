@@ -48,7 +48,12 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.utils import _typesignal
-from .._internal.validation import require_ranks, require_same_length, require_scalar
+from .._internal.validation import (
+    require_count,
+    require_ranks,
+    require_same_length,
+    require_scalar,
+)
 from ..io._resolve import SignalInput, apply_calibration
 from ..io._resolve import resolve_fs as _resolve_signal_fs
 from ..io._signal import Signal
@@ -371,6 +376,7 @@ def _validated_response(
 
 def _validated_band(f_range: tuple[float, float], fs: float) -> tuple[float, float]:
     """Validate the equalization band against the sample rate."""
+    require_scalar(fs, "fs")
     f1, f2 = float(f_range[0]), float(f_range[1])
     if f1 <= 0.0:
         msg = "f_range[0] must be positive"
@@ -482,6 +488,9 @@ def regularized_inverse_filter(
     :param delay: Modeling delay in samples. Default ``n_fft // 2``.
     :return: An :class:`InverseFilterResult`.
     """
+    require_scalar(regularization_inside, "regularization_inside")
+    require_scalar(regularization_outside, "regularization_outside")
+    require_scalar(transition_octaves, "transition_octaves")
     h = _validated_response(response)
     fs_v = _resolve_fs(response, fs)
     f1, f2 = _validated_band(f_range, fs_v)
@@ -496,7 +505,7 @@ def regularized_inverse_filter(
     if size < h.size:
         msg = "n_fft must be at least the response length"
         raise ValueError(msg)
-    lag = size // 2 if delay is None else int(delay)
+    lag = size // 2 if delay is None else require_count(delay, "delay", at_least=None)
     if not 0 <= lag < size:
         msg = "delay must be in [0, n_fft)"
         raise ValueError(msg)

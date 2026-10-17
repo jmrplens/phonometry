@@ -522,7 +522,7 @@ _RETIRED_SPELLINGS: list[tuple[str, Callable[[], object], type[Exception], str]]
             [50.0] * 16,
             fraction="third-octave",  # type: ignore[arg-type]
         ),
-        ValueError,
+        TypeError,
         _FRACTION_REFUSED,
     ),
     (
@@ -532,13 +532,13 @@ _RETIRED_SPELLINGS: list[tuple[str, Callable[[], object], type[Exception], str]]
             10.0,
             fraction="third",  # type: ignore[arg-type]
         ),
-        ValueError,
+        TypeError,
         _FRACTION_REFUSED,
     ),
     (
         "reference source 'octave'",
         _reference_source_level_by_word,
-        ValueError,
+        TypeError,
         _FRACTION_REFUSED,
     ),
     (
@@ -653,12 +653,28 @@ def test_a_band_fraction_is_one_or_three(value: int) -> None:
     assert require_band_fraction(value, "fraction") == value
 
 
-@pytest.mark.parametrize("value", [True, 3.0, "third", 2, 24, None])
-def test_anything_else_is_refused_as_a_band_set(value: object) -> None:
-    """A flag, a measured number or a word is not read as a band set."""
+@pytest.mark.parametrize(
+    ("value", "refusal"),
+    [
+        (True, TypeError),
+        (3.0, TypeError),
+        ("third", TypeError),
+        (None, TypeError),
+        (2, ValueError),
+        (24, ValueError),
+    ],
+)
+def test_anything_else_is_refused_as_a_band_set(
+    value: object, refusal: type[Exception]
+) -> None:
+    """A flag, a measured number or a word is not read as a band set.
+
+    Each is the wrong type for the integer a band set is; an integer other
+    than 1 or 3 is the right type with a wrong value.
+    """
     from phonometry._internal.validation import require_band_fraction
 
-    with pytest.raises(ValueError, match="'fraction' must be 1 .octave. or 3"):
+    with pytest.raises(refusal, match="'fraction' must be 1 .octave. or 3"):
         require_band_fraction(value, "fraction")
 
 

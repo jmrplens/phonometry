@@ -66,8 +66,8 @@ def test_parametric_eq_es_and_bad_language() -> None:
     eq = ph.filters.ParametricEQ(
         FS,
         [
-            ph.filters.EQSection("lowshelf", 100.0, gain_db=4.0),
-            ph.filters.EQSection("peaking", 1000.0, gain_db=-6.0, q=1.5),
+            ph.filters.EQSection(filter_type="lowshelf", f0=100.0, gain_db=4.0),
+            ph.filters.EQSection(filter_type="peaking", f0=1000.0, gain_db=-6.0, q=1.5),
         ],
     )
     res = eq.response(n_points=64)

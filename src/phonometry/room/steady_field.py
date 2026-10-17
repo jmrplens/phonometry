@@ -77,7 +77,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -96,6 +96,11 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from .._i18n import Language
+
+#: The three sound power models of a source near reflecting planes (Norton Table 4.5).
+SourceModel = Literal["constant_power", "constant_volume", "constant_pressure"]
 
 __all__ = [
     "SOURCE_POWER_MODELS",
@@ -323,7 +328,7 @@ def steady_state_spl(
     room_constant: ArrayLike,
     *,
     directivity: ArrayLike = ...,
-    source_model: str = ...,
+    source_model: SourceModel = ...,
     characteristic_impedance: float | None = ...,
 ) -> np.ndarray | float: ...
 
@@ -335,7 +340,7 @@ def steady_state_spl(
     *,
     absorption_area: ArrayLike,
     directivity: ArrayLike = ...,
-    source_model: str = ...,
+    source_model: SourceModel = ...,
     characteristic_impedance: float | None = ...,
 ) -> np.ndarray | float: ...
 
@@ -347,7 +352,7 @@ def steady_state_spl(
     *,
     absorption_area: ArrayLike | None = None,
     directivity: ArrayLike = 1.0,
-    source_model: str = "constant_power",
+    source_model: SourceModel = "constant_power",
     characteristic_impedance: float | None = None,
 ) -> np.ndarray | float:
     r"""Steady-state sound pressure level in a room (Bies Equation (6.43)).
@@ -485,7 +490,7 @@ class SteadyFieldResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot direct, reverberant and total SPL against distance.
 

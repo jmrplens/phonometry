@@ -42,6 +42,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from ..._i18n import Language
+
 __all__ = [
     "ShipSourceLevelResult",
     "hydrophone_depths",
@@ -208,7 +210,7 @@ class ShipSourceLevelResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot RNL, source level and the ΔL surface correction vs frequency."""
         from ..._i18n import check_language

@@ -13,7 +13,7 @@ leaf never imports domain code at module level.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from ..._internal.validation import require_positive
 from ..common import _new_axes
@@ -30,6 +30,7 @@ from ._draft import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
     from ...vibration.structural._junction_transmission import (
         JunctionTransmissionResult,
     )
@@ -46,7 +47,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Translate a fixed UI string to Spanish, else return it unchanged."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -55,12 +56,12 @@ def _t(text: str, language: str = "en") -> str:
 # Plate junction (L / T / X).
 # ---------------------------------------------------------------------------
 def plot_junction_geometry(
-    junction: str,
+    junction: Literal["L", "T1", "T2", "X"],
     thickness1_m: float,
     thickness2_m: float,
     *,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw a plate junction cross-section to scale.
@@ -125,7 +126,7 @@ def plot_junction_result_geometry(
     result: JunctionTransmissionResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Junction drawing at the plate thicknesses a result was computed for."""
@@ -148,7 +149,7 @@ def plot_plate_geometry(
     *,
     ax: Axes | None = None,
     boundary: str = "simply_supported",
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw the baffled rectangular plate of the radiation model, to scale.
@@ -188,7 +189,7 @@ def plot_radiation_result_geometry(
     result: RadiationEfficiencyResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Plate drawing for a radiation-efficiency result (always retained)."""

@@ -89,7 +89,7 @@ def test_quarry_blasting_takes_the_a_o_of_row_1_by_day_in_rows_3_and_4() -> None
     night, and not elsewhere, and always as a rare short event.
     """
     quarry = im.guide_values("residential", source="quarry_blasting")
-    assert quarry == im.GuideValues(0.15, 6.0, 0.07)
+    assert quarry == im.GuideValues(a_u=0.15, a_o=6.0, a_r=0.07)
     assert im.guide_values("mixed", source="quarry_blasting").a_o == 6.0
     assert im.guide_values("commercial", source="quarry_blasting") == im.guide_values(
         "commercial"
@@ -377,7 +377,7 @@ def test_the_draft_changes_one_cell_of_table_1() -> None:
             draft = im.guide_values(area, time_of_day=period, edition="2023")
             if area == "mixed" and period == "night":
                 assert draft == im.GuideValues(
-                    0.1, 0.3, 0.07, time_of_day="night", edition="2023"
+                    a_u=0.1, a_o=0.3, a_r=0.07, time_of_day="night", edition="2023"
                 )
             else:
                 assert (draft.a_u, draft.a_o, draft.a_r) == (
@@ -436,7 +436,7 @@ def test_the_draft_tolerates_an_existing_road_by_half() -> None:
     """
     plain = im.guide_values("residential", edition="2023")
     tolerated = im.guide_values("residential", source="road_existing", edition="2023")
-    assert tolerated == im.GuideValues(0.225, 3.0, 0.105, edition="2023")
+    assert tolerated == im.GuideValues(a_u=0.225, a_o=3.0, a_r=0.105, edition="2023")
     assert tolerated.a_o == plain.a_o
     assert im.ROAD_EXISTING_TOLERANCE_FACTOR == 1.5
     with pytest.raises(ValueError, match="source"):
@@ -451,7 +451,9 @@ def test_the_draft_bounds_an_induced_seismic_event_by_the_daytime_a_o() -> None:
     night = im.guide_values(
         "residential", time_of_day="night", source="induced_seismic", edition="2023"
     )
-    assert night == im.GuideValues(0.1, 3.0, 0.05, time_of_day="night", edition="2023")
+    assert night == im.GuideValues(
+        a_u=0.1, a_o=3.0, a_r=0.05, time_of_day="night", edition="2023"
+    )
     verdict = im.assess_people_in_buildings(
         im.induced_seismic_kb_fmax(5.0), night, source="induced_seismic", edition="2023"
     )

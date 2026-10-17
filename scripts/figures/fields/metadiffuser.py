@@ -82,7 +82,13 @@ def _meshed_metadiffuser_ntff_levels() -> tuple[Any, Any]:
     sim = FDTD2D(
         343.0, dx, shape=(ny, nx), sponge_width=sponge, cfl=0.9, obstacle_mask=mask
     )
-    sim.add_source(PlaneWaveSource("down", CWSource(0, 0, f0).value, offset=sponge))
+    sim.add_source(
+        PlaneWaveSource(
+            direction="down",
+            waveform=CWSource(ix=0, iy=0, frequency=f0).value,
+            offset=sponge,
+        )
+    )
     probe = sim.add_contour_probe(
         lat - marg,
         lat + face_cells + marg - 1,

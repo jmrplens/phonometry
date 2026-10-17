@@ -90,7 +90,7 @@ import math
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -109,6 +109,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from .._i18n import Language
+
+Region = Literal["near", "middle", "far", "whole"]
 
 __all__ = [
     "ADJACENT_BAND_LIMIT_DB",
@@ -443,11 +447,11 @@ class SpatialDecayResult(OwnsArrays):
     level_excess: NDArray[np.float64]
     decay_rate_db: float
     mean_level_excess: float
-    region: str
+    region: Region
     band: float | None = None
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the curve, the free-field reference and the fitted slope.
 
@@ -1056,7 +1060,7 @@ def spatial_decay_curve(
     *,
     near_limit_m: float = TYPICAL_NEAR_LIMIT_M,
     far_limit_m: float = TYPICAL_FAR_LIMIT_M,
-    region: str = "middle",
+    region: Region = "middle",
     band: float | None = None,
 ) -> SpatialDecayResult:
     """The curve of one region with its two descriptors, clause 6.

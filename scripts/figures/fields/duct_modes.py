@@ -115,7 +115,9 @@ def _duct_cut_on_fields() -> tuple[Any, Any, Any, Any, Any, tuple[float, float]]
             c0, dx, shape=(ny, nx), sponge_width=_DUCT_SPONGE, sponge_sides=("right",)
         )
         sim.add_source(
-            fdtd2d.CWSource(src_ix, src_iy, frequency=f, ramp_cycles=_DUCT_RAMP_S * f)
+            fdtd2d.CWSource(
+                ix=src_ix, iy=src_iy, frequency=f, ramp_cycles=_DUCT_RAMP_S * f
+            )
         )
         frames: list[Any] = []
         column: list[Any] = []

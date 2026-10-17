@@ -124,12 +124,13 @@ def _register_61260_1_table_c1() -> None:
     ), uncertainty, maximum, conforms, outcome in ref.IEC61260_1_TABLE_C1:
 
         def check(
+            *,
             deviation: float = deviation,
             lower: float = lower,
             upper: float = upper,
             uncertainty: float = uncertainty,
             maximum: float = maximum,
-            conforms: bool = conforms,  # noqa: FBT001
+            conforms: bool = conforms,
             outcome: int = outcome,
         ) -> Outcome:
             result = ph.metrology.verify_conformance(

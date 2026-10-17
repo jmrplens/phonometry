@@ -44,7 +44,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`signals.windows`](/phonometry/reference/api/signals/windows/) | Figures of merit of a spectral-analysis taper (Harris 1978). |
 | [`signals.miso`](/phonometry/reference/api/signals/miso/) | Multiple and partial coherence of a multiple-input/single-output system. |
 | [`signals.time_frequency`](/phonometry/reference/api/signals/time-frequency/) | Calibrated time-frequency analysis: STFT spectrogram and zoom FFT. |
-| [`signals.test_signals`](/phonometry/reference/api/signals/test-signals/) | Test signals and sample-rate utilities. |
+| [`signals`: test signals](/phonometry/reference/api/signals/test-signals/) | Test signals and sample-rate utilities. |
 | [`signals.phase`](/phonometry/reference/api/signals/phase/) | Phase utilities: minimum phase, group delay and excess phase. |
 | [`signals`: cepstrum](/phonometry/reference/api/signals/cepstrum/) | Cepstral analysis: real/power/complex cepstrum, liftering and echo detection. |
 | [`signals.synchronous_average`](/phonometry/reference/api/signals/synchronous-average/) | Time synchronous averaging (TSA) of a periodic waveform in noise. |

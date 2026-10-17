@@ -804,10 +804,12 @@ def generate_uncertainty(output_dir: str) -> None:
     # A-weighted level: reading plus calibration, instrument and positional
     # corrections (all zero-mean); the model is their sum.
     quantities = [
-        ph.metrology.Quantity(74.0, 0.0, name="Reading"),
+        ph.metrology.Quantity(value=74.0, uncertainty=0.0, name="Reading"),
         ph.metrology.rectangular(0.0, 0.20, name="Calibration"),
         ph.metrology.rectangular(0.0, 0.30, name="Instrument"),
-        ph.metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
+        ph.metrology.Quantity(
+            value=0.0, uncertainty=0.35, dof=9, name="Position (Type A)"
+        ),
     ]
 
     def model(a: float, b: float, c: float, d: float) -> float:
@@ -1128,7 +1130,7 @@ def generate_uncertainty_gum_vs_mc(output_dir: str) -> None:
     # the Gaussian interval overcovers it.
     q_a = [
         ph.metrology.rectangular(0.0, 1.0, name="Dominant rectangular"),
-        ph.metrology.Quantity(0.0, 0.1, name="Small Gaussian"),
+        ph.metrology.Quantity(value=0.0, uncertainty=0.1, name="Small Gaussian"),
     ]
     panels.append(
         (
@@ -1142,8 +1144,8 @@ def generate_uncertainty_gum_vs_mc(output_dir: str) -> None:
 
     # B. Non-linear model: the energy sum of two levels with wide inputs.
     q_b = [
-        ph.metrology.Quantity(70.0, 3.0, name="L1"),
-        ph.metrology.Quantity(70.0, 3.0, name="L2"),
+        ph.metrology.Quantity(value=70.0, uncertainty=3.0, name="L1"),
+        ph.metrology.Quantity(value=70.0, uncertainty=3.0, name="L2"),
     ]
     panels.append(
         (
@@ -1156,7 +1158,7 @@ def generate_uncertainty_gum_vs_mc(output_dir: str) -> None:
     )
 
     # C. An output against a physical bound.
-    q_c = [ph.metrology.Quantity(0.95, 0.06, name="alpha")]
+    q_c = [ph.metrology.Quantity(value=0.95, uncertainty=0.06, name="alpha")]
     # The clamp piles a finite probability mass exactly on the bound, so the
     # histogram spike there is cut off to keep the rest of the shape readable.
     panels.append(
@@ -1257,8 +1259,8 @@ def generate_uncertainty_correlation(output_dir: str) -> None:
 
     u_i = 0.3
     pair = [
-        ph.metrology.Quantity(0.0, u_i, name="Term 1"),
-        ph.metrology.Quantity(0.0, u_i, name="Term 2"),
+        ph.metrology.Quantity(value=0.0, uncertainty=u_i, name="Term 1"),
+        ph.metrology.Quantity(value=0.0, uncertainty=u_i, name="Term 2"),
     ]
     rho = np.linspace(-1.0, 1.0, 81)
     same, opposite = [], []

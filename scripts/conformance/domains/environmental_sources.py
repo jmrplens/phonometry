@@ -65,9 +65,9 @@ def _chk_cnossos_road_workbook() -> Outcome:
     for case in ref.cnossos_road_workbook_cases():
         traffic = [
             ph.environment.RoadTraffic(
-                ph.environment.RoadVehicleCategory(c),
-                float(case[f"q_{c}"]),
-                float(case[f"v_{c}"]),
+                category=ph.environment.RoadVehicleCategory(c),
+                flow_rate=float(case[f"q_{c}"]),
+                speed_kmh=float(case[f"v_{c}"]),
                 studded_fraction=0.5 if c == "1" else 0.0,
             )
             for c in ("1", "2", "3", "4a", "4b")

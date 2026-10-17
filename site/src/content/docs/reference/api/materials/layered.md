@@ -50,7 +50,7 @@ layers evaluate come from
 ## AirLayer
 
 ```python
-AirLayer(thickness_m: float)
+AirLayer(*, thickness_m: float)
 ```
 
 A plain air gap of `thickness_m` metres inside the stack.
@@ -64,7 +64,7 @@ diffuse_field_absorption(
     *,
     angle_limit_rad: float = 1.5707963267948966,
     n_quadrature_points: int = 64,
-    termination: str | complex | ArrayLike = 'rigid',
+    termination: Literal['rigid', 'free'] | complex | Sequence[complex] | NDArray[np.number[Any]] = 'rigid',
     fluid: Fluid = ...,
 ) -> DiffuseFieldAbsorptionResult
 ```
@@ -124,7 +124,7 @@ $\sin^2(\theta_{\mathrm{limit}})$.
 DiffuseFieldAbsorptionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -143,7 +143,7 @@ layered_absorber(
     layers: list[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer] | tuple[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer, ...],
     *,
     angle_rad: float = 0.0,
-    termination: str | complex | ArrayLike = 'rigid',
+    termination: Literal['rigid', 'free'] | complex | Sequence[complex] | NDArray[np.number[Any]] = 'rigid',
     fluid: Fluid = ...,
 ) -> LayeredAbsorberResult
 ```
@@ -227,7 +227,7 @@ layer first) so `plot_geometry` can draw the cross-section.
 LayeredAbsorberResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -244,7 +244,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 LayeredAbsorberResult.plot_geometry(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -257,7 +257,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ## MembraneLayer
 
 ```python
-MembraneLayer(surface_density: float, resistance: float = 0.0)
+MembraneLayer(*, surface_density: float, resistance: float = 0.0)
 ```
 
 A limp impervious membrane (see [`membrane_impedance`](/phonometry/reference/api/materials/porous/#membrane_impedance)).
@@ -266,6 +266,7 @@ A limp impervious membrane (see [`membrane_impedance`](/phonometry/reference/api
 
 ```python
 MicroperforatedPlateLayer(
+    *,
     thickness_m: float,
     hole_radius: float,
     open_area: float,
@@ -279,6 +280,7 @@ A microperforated plate (see [`microperforated_plate_impedance`](/phonometry/ref
 
 ```python
 PerforatedPlateLayer(
+    *,
     thickness_m: float,
     hole_radius: float,
     open_area: float,
@@ -292,6 +294,7 @@ A rigid perforated plate (see [`perforated_plate_impedance`](/phonometry/referen
 
 ```python
 PoroelasticLayer(
+    *,
     thickness_m: float,
     medium: PorousMediumResult,
     porosity: float,
@@ -326,7 +329,7 @@ decoupled screen (air on both sides, their Sect. 11.3.6).
 ## PorousLayer
 
 ```python
-PorousLayer(thickness_m: float, medium: PorousMediumResult)
+PorousLayer(*, thickness_m: float, medium: PorousMediumResult)
 ```
 
 A porous layer of `thickness_m` metres described by *medium*.

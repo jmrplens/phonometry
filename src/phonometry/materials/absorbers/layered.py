@@ -44,7 +44,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast
 
 import numpy as np
 
@@ -67,11 +67,12 @@ from .porous import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
     from ..._internal.types import Real
     from ...fluids import Fluid
 
@@ -117,7 +118,7 @@ class _DrawableLayer(RichDisplay):
     """
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw this layer's cross-section to scale (dimensioned).
 
@@ -133,7 +134,12 @@ class _DrawableLayer(RichDisplay):
         )
 
 
-@dataclass(frozen=True)
+#: A termination of the layer stack by name: ``"rigid"`` for a hard wall,
+#: ``"free"`` for free air behind the last layer.
+TerminationName = Literal["rigid", "free"]
+
+
+@dataclass(frozen=True, kw_only=True)
 class AirLayer(_DrawableLayer):
     """A plain air gap of ``thickness_m`` metres inside the stack."""
 
@@ -152,7 +158,7 @@ class AirLayer(_DrawableLayer):
         require_non_negative(self.thickness_m, "thickness_m")
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class PorousLayer(_DrawableLayer):
     """A porous layer of ``thickness_m`` metres described by *medium*.
 
@@ -166,7 +172,7 @@ class PorousLayer(_DrawableLayer):
     medium: PorousMediumResult
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class PerforatedPlateLayer(_DrawableLayer):
     """A rigid perforated plate (see :func:`perforated_plate_impedance`)."""
 
@@ -181,7 +187,7 @@ class PerforatedPlateLayer(_DrawableLayer):
     end_correction: float | None = None
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class MicroperforatedPlateLayer(_DrawableLayer):
     """A microperforated plate (see :func:`microperforated_plate_impedance`)."""
 
@@ -196,7 +202,7 @@ class MicroperforatedPlateLayer(_DrawableLayer):
     end_correction: float = 0.85
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class MembraneLayer(_DrawableLayer):
     """A limp impervious membrane (see :func:`membrane_impedance`)."""
 
@@ -204,7 +210,7 @@ class MembraneLayer(_DrawableLayer):
     resistance: float = 0.0
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class PoroelasticLayer(_DrawableLayer):
     """A porous layer whose frame is elastic (full Biot theory).
 
@@ -281,7 +287,7 @@ class LayeredAbsorberResult(OwnsArrays):
         require_present(self, "layers")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot the absorption spectrum :math:`\alpha(f)` with
         :math:`\lvert R \rvert` overlaid.
@@ -296,7 +302,7 @@ class LayeredAbsorberResult(OwnsArrays):
         return plot_layered_absorber(self, ax=ax, language=language, **kwargs)
 
     def plot_geometry(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the solved stack cross-section to scale (dimensioned).
 
@@ -325,7 +331,7 @@ class DiffuseFieldAbsorptionResult(OwnsArrays):
     angle_limit_rad: float
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot the random-incidence absorption spectrum
         :math:`\alpha_{\mathrm{dif}}(f)`.
@@ -450,7 +456,10 @@ def _layer_terms(
 
 
 def _termination_admittance(
-    termination: str | complex | ArrayLike,
+    termination: TerminationName
+    | complex
+    | Sequence[complex]
+    | NDArray[np.number[Any]],
     f: Real,
     *,
     cos_t: float,
@@ -474,7 +483,10 @@ def _termination_admittance(
 
 
 def _termination_impedance(
-    termination: str | complex | ArrayLike,
+    termination: TerminationName
+    | complex
+    | Sequence[complex]
+    | NDArray[np.number[Any]],
     f: Real,
     *,
     cos_t: float,
@@ -707,7 +719,10 @@ def layered_absorber(
     layers: list[Layer] | tuple[Layer, ...],
     *,
     angle_rad: float = 0.0,
-    termination: str | complex | ArrayLike = "rigid",
+    termination: TerminationName
+    | complex
+    | Sequence[complex]
+    | NDArray[np.number[Any]] = "rigid",
     fluid: Fluid = ABSORBER_AIR,
 ) -> LayeredAbsorberResult:
     r"""Transfer-matrix prediction of a layered absorber at one angle.
@@ -833,7 +848,10 @@ def diffuse_field_absorption(
     *,
     angle_limit_rad: float = np.pi / 2.0,
     n_quadrature_points: int = 64,
-    termination: str | complex | ArrayLike = "rigid",
+    termination: TerminationName
+    | complex
+    | Sequence[complex]
+    | NDArray[np.number[Any]] = "rigid",
     fluid: Fluid = ABSORBER_AIR,
 ) -> DiffuseFieldAbsorptionResult:
     r"""Random-incidence absorption by the Paris integral (Mechel Sect. D.5).

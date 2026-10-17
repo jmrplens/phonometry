@@ -49,6 +49,7 @@ from ._frf_fiche import frequency_range, frf_metadata_pairs, render_frf_fiche
 from ._i18n import format_number, t
 
 if TYPE_CHECKING:
+    from .._i18n import Language
     from ..vibration.structural.transfer_stiffness import (
         BandAveragedStiffness,
         TransferStiffnessResult,
@@ -73,14 +74,14 @@ def _is_indirect(result: TransferStiffnessResult) -> bool:
     return result.blocking_mass is not None
 
 
-def _method(result: TransferStiffnessResult, language: str = "en") -> str:
+def _method(result: TransferStiffnessResult, language: Language = "en") -> str:
     """The determination-method phrase naming the ISO 10846 part."""
     if _is_indirect(result):
         return t("indirect blocking-mass method (ISO 10846-3:2002)", language)
     return t("direct method (ISO 10846-2:2008)", language)
 
 
-def _basis(result: TransferStiffnessResult, language: str = "en") -> str:
+def _basis(result: TransferStiffnessResult, language: Language = "en") -> str:
     """The standard-basis line naming the determination method."""
     return t(
         "Determination of the dynamic transfer stiffness k<sub>2,1</sub> of a "
@@ -136,13 +137,13 @@ def _low_frequency_values(
     return float(freq[index]), magnitude, level, eta
 
 
-def _mn(value: float, language: str = "en") -> str:
+def _mn(value: float, language: Language = "en") -> str:
     """A stiffness magnitude in MN/m, to two decimals."""
     return format_number(value / 1e6, language, decimals=2)
 
 
 def _metric_rows(
-    result: TransferStiffnessResult, language: str = "en"
+    result: TransferStiffnessResult, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """The characteristic points shown in the left-hand table.
 
@@ -188,7 +189,7 @@ def _metric_rows(
     return rows
 
 
-def _statement(result: TransferStiffnessResult, language: str = "en") -> str:
+def _statement(result: TransferStiffnessResult, language: Language = "en") -> str:
     """The boxed representative value: the low-frequency transfer-stiffness level."""
     _, _, level, _ = _low_frequency_values(result)
     return t(
@@ -198,7 +199,9 @@ def _statement(result: TransferStiffnessResult, language: str = "en") -> str:
     ).format(value=format_number(level, language, decimals=1))
 
 
-def _extended_terms(result: TransferStiffnessResult, language: str = "en") -> list[str]:
+def _extended_terms(
+    result: TransferStiffnessResult, language: Language = "en"
+) -> list[str]:
     """The stiffness magnitude, the method and the loss factor shown beside the box."""
     freq, magnitude, _, eta = _low_frequency_values(result)
     return [
@@ -230,7 +233,7 @@ def _band_levels(result: TransferStiffnessResult) -> BandAveragedStiffness:
 
 
 def _band_level_flow(
-    result: TransferStiffnessResult, language: str = "en"
+    result: TransferStiffnessResult, language: Language = "en"
 ) -> list[Any]:
     """The clause 10 band-level table, twelve bands a row, or a note.
 
@@ -339,7 +342,7 @@ def render_transfer_stiffness_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 10846 dynamic-transfer-stiffness fiche to a PDF at ``path``.
 

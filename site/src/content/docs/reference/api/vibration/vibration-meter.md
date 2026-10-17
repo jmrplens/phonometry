@@ -260,7 +260,7 @@ The Table E.2 value the peak is compared with, in mm/s.
 AssessmentVelocity.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -811,7 +811,7 @@ reading is not a measurement of a smaller vibration.
 VibrationMeterReading.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -884,7 +884,7 @@ Whether every graded frequency keeps to its limits.
 VibrationMeterVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

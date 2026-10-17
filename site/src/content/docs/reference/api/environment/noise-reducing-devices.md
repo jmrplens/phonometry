@@ -93,7 +93,7 @@ ABSORPTION_RATIO_LIMIT = 0.99
 airborne_insulation_rating(
     sound_reduction_index: ArrayLike,
     *,
-    spectrum: str = 'road',
+    spectrum: Literal['road', 'railway'] = 'road',
 ) -> RoadDeviceRating
 ```
 
@@ -146,11 +146,12 @@ NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB = (-20.0, -20.0, -18.0, -16.0, -15.0, -14.0
 
 ```python
 RoadDeviceRating(
+    *,
     rating: float,
     reported: int,
-    category: str | None,
-    quantity: str,
-    spectrum: str,
+    category: Literal['A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3', 'B4'] | None,
+    quantity: Literal['absorption', 'insulation', 'reflection'],
+    spectrum: Literal['road', 'railway'],
     frequencies: NDArray[np.float64],
     values: NDArray[np.float64],
     weights: NDArray[np.float64],
@@ -180,7 +181,7 @@ One single-number rating of a road traffic noise reducing device.
 RoadDeviceRating.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -207,7 +208,7 @@ Clause 5.8 exceeds it (a reflection ratio of 0,99 itself is not limited).
 sound_absorption_rating(
     absorption_coefficients: ArrayLike,
     *,
-    spectrum: str = 'road',
+    spectrum: Literal['road', 'railway'] = 'road',
 ) -> RoadDeviceRating
 ```
 

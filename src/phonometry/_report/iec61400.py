@@ -65,11 +65,12 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    from .._i18n import Language
     from ..environment.sources.wind_turbine import WindTurbineTonalityResult
     from .metadata import ReportMetadata
 
 
-def _fmt(value: float, language: str, decimals: int = 1) -> str:
+def _fmt(value: float, language: Language, decimals: int = 1) -> str:
     """A quantity rounded to ``decimals`` decimals, localised separator."""
     return format_number(float(value), language, decimals=decimals)
 
@@ -93,7 +94,7 @@ def _audible_as_displayed(result: WindTurbineTonalityResult) -> bool:
 
 
 def _metadata_pairs(
-    metadata: ReportMetadata | None, language: str = "en"
+    metadata: ReportMetadata | None, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the tonality header grid.
 
@@ -114,7 +115,7 @@ def _metadata_pairs(
 
 
 def _metric_rows(
-    result: WindTurbineTonalityResult, language: str = "en"
+    result: WindTurbineTonalityResult, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """The critical-band / masking analysis shown in the left-hand table.
 
@@ -143,7 +144,7 @@ def _metric_rows(
     ]
 
 
-def _basis_line(measurement_standard: str | None, language: str = "en") -> str:
+def _basis_line(measurement_standard: str | None, language: Language = "en") -> str:
     """The standard-basis line, with the measurement standard when supplied."""
     if measurement_standard:
         return t(
@@ -161,7 +162,7 @@ def _basis_line(measurement_standard: str | None, language: str = "en") -> str:
 
 
 def _statement(
-    result: WindTurbineTonalityResult, language: str = "en"
+    result: WindTurbineTonalityResult, language: Language = "en"
 ) -> tuple[str, list[str]]:
     """The boxed decisive tonal audibility ``ΔL_a`` and the tone frequency.
 
@@ -190,7 +191,9 @@ def _statement(
     return statement, extended
 
 
-def _decision_phrase(result: WindTurbineTonalityResult, language: str = "en") -> str:
+def _decision_phrase(
+    result: WindTurbineTonalityResult, language: Language = "en"
+) -> str:
     """A short coloured phrase carrying the audibility decision.
 
     When no tone was identified in the critical band the result carries no
@@ -214,7 +217,7 @@ def _decision_phrase(result: WindTurbineTonalityResult, language: str = "en") ->
 
 
 def _verdict(
-    result: WindTurbineTonalityResult, requirement: float, language: str = "en"
+    result: WindTurbineTonalityResult, requirement: float, language: Language = "en"
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag against a supplied maximum tonal audibility.
 
@@ -231,7 +234,7 @@ def _verdict(
     return text, passed
 
 
-def _decision_note(result: WindTurbineTonalityResult, language: str = "en") -> str:
+def _decision_note(result: WindTurbineTonalityResult, language: Language = "en") -> str:
     """The measurement-basis note stating the audibility decision."""
     delta = _fmt(display_round(result.tonal_audibility), language)
     if not result.has_identified_tone:
@@ -263,7 +266,7 @@ def render_wind_turbine_tonality_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a wind-turbine tonal audibility assessment fiche to a PDF at ``path``.
 

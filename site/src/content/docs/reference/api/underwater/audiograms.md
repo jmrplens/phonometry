@@ -57,7 +57,7 @@ AUDIOGRAM_GROUPS = ('HF', 'VHF', 'SI', 'PCW', 'OCW', 'PCA', 'OCA')
 
 ```python
 audiogram_parameters(
-    group: str,
+    group: Literal['HF', 'VHF', 'SI', 'PCW', 'OCW', 'PCA', 'OCA'],
     *,
     normalized: bool = False,
 ) -> AudiogramParameters
@@ -146,7 +146,7 @@ Hearing threshold versus frequency.
 AudiogramResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -166,7 +166,7 @@ BEST_HEARING_FREQUENCY_KHZ = {'HF': (55.0, 58.0), 'VHF': (105.0, 105.0), 'SI': (
 ```python
 group_audiogram(
     frequency_hz: NDArray[np.float64] | list[float] | float,
-    group: str,
+    group: Literal['HF', 'VHF', 'SI', 'PCW', 'OCW', 'PCA', 'OCA'],
     *,
     normalized: bool = False,
 ) -> AudiogramResult

@@ -25,7 +25,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
@@ -43,6 +43,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
     from .._internal.types import FreeOrDiffuseField
 
 __all__ = [
@@ -227,7 +228,7 @@ class AgeThresholdResult(OwnsArrays):
     """
 
     age: float
-    sex: str
+    sex: Literal["male", "female"]
     fractile: float
     frequencies: np.ndarray
     median: np.ndarray
@@ -277,7 +278,7 @@ class AgeThresholdResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the median threshold with the fractile band over frequency.
 
@@ -540,7 +541,7 @@ _RETSPL_OTHER: np.ndarray = np.array(
 #: the default of two entry points, and a name that drifts between them would
 #: be a lookup that fails rather than a typo anyone sees.
 _DT48 = "DT 48"
-_TDH39 = "TDH 39"
+_TDH39: Final = "TDH 39"
 _OTHER = "other supra-aural"
 
 _RETSPL = {
@@ -582,7 +583,8 @@ def _select_retspl(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndar
 
 
 def earphone_reference_level(
-    earphone: str = _TDH39, frequencies: ArrayLike | None = None
+    earphone: Literal["DT 48", "TDH 39", "other supra-aural"] = _TDH39,
+    frequencies: ArrayLike | None = None,
 ) -> np.ndarray:
     """Reference equivalent threshold sound pressure level (ISO 389-1:1998).
 
@@ -608,7 +610,7 @@ def earphone_reference_level(
 
 def hearing_level_to_coupler_spl(
     hearing_level: ArrayLike,
-    earphone: str = _TDH39,
+    earphone: Literal["DT 48", "TDH 39", "other supra-aural"] = _TDH39,
     *,
     frequencies: ArrayLike | None = None,
 ) -> np.ndarray:

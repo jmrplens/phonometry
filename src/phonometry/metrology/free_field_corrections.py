@@ -93,7 +93,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -123,7 +123,10 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
+    from .uncertainty import Distribution
 
 __all__ = [
     "IEC62585_TABLE_I1",
@@ -224,7 +227,7 @@ class UncertaintyComponentRow(RichDisplay):
 
     symbol: str
     description: str
-    distribution: str
+    distribution: Literal["rectangular", "normal"]
     divisor: float
 
 
@@ -234,6 +237,7 @@ _SQRT3 = math.sqrt(3.0)
 def _row(
     symbol: str, description: str, divisor: float = _SQRT3
 ) -> UncertaintyComponentRow:
+    distribution: Literal["rectangular", "normal"]
     distribution = "rectangular" if math.isclose(divisor, _SQRT3) else "normal"
     return UncertaintyComponentRow(
         symbol=symbol,
@@ -594,7 +598,7 @@ def _tolerance_column(
     return np.array(np.broadcast_to(tolerance, (count,)))
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class AdjustmentValue(OwnsArrays):
     r"""The adjustment value at the calibration check frequency
     (IEC 62585:2012, Annex A).
@@ -752,7 +756,7 @@ class AdjustmentValue(OwnsArrays):
         return -(self.pressure_deviation_db + self.sensitivity_adjustment)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot the free-field deviation before and after the adjustment,
         with the tolerances it was weighed against.
@@ -871,7 +875,7 @@ def adjustment_value(
 # ---------------------------------------------------------------------------
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class FreeFieldCorrection(OwnsArrays):
     r"""The corrections that bring a meter on a source to its free-field
     response (IEC 62585:2012, Formulas (D.7), (E.6) and (F.13)).
@@ -908,7 +912,7 @@ class FreeFieldCorrection(OwnsArrays):
     frequencies: NDArray[np.float64]
     corrections: NDArray[np.float64]
     reference_correction: NDArray[np.float64]
-    source: str
+    source: Literal["sound_calibrator", "comparison_coupler", "electrostatic_actuator"]
     check_frequency_hz: float | None = None
     microphones: tuple[Hashable, ...] | None = None
 
@@ -1032,7 +1036,7 @@ class FreeFieldCorrection(OwnsArrays):
         return _SOURCES[self.source][1]
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot the correction against frequency, with every determination
         and the range between them.
@@ -1055,7 +1059,7 @@ def _substitution(
     frequencies: ArrayLike,
     readings: Mapping[str, ArrayLike],
     *,
-    source: str,
+    source: Literal["sound_calibrator", "comparison_coupler", "electrostatic_actuator"],
     reference_correction: ArrayLike,
     source_level_difference_db: ArrayLike,
     source_difference_name: str,
@@ -1544,7 +1548,7 @@ class CorrectionUncertaintyBudget(OwnsArrays):
         return self.coverage_factor * self.combined_uncertainty_db
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot the standard uncertainty of each component, with
         :math:`u_\mathrm{c}`, :math:`k` and :math:`U`.
@@ -1587,9 +1591,9 @@ def _static_pressure_component(
         if frequency_hz <= upper * (1.0 + _NOMINAL_TOLERANCE)
     )
     return Quantity(
-        0.0,
-        expanded / _STATIC_PRESSURE_COVERAGE_FACTOR,
-        "gaussian",
+        value=0.0,
+        uncertainty=expanded / _STATIC_PRESSURE_COVERAGE_FACTOR,
+        distribution="gaussian",
         name=_STATIC_PRESSURE,
     )
 
@@ -1688,6 +1692,7 @@ def correction_uncertainty_budget(
     values: list[float] = []
     divisors: list[float] = []
     signs: list[float] = []
+    distribution: Distribution
     for key, row in IEC62585_TABLE_I1.items():
         value = float(stated_uncertainties_db[key])
         if not (math.isfinite(value) and value >= 0.0):
@@ -1698,10 +1703,10 @@ def correction_uncertainty_budget(
         )
         quantities.append(
             Quantity(
-                0.0,
-                value / row.divisor,
-                distribution,
-                dof if key == _REPEATABILITY else math.inf,
+                value=0.0,
+                uncertainty=value / row.divisor,
+                distribution=distribution,
+                dof=dof if key == _REPEATABILITY else math.inf,
                 name=key,
             )
         )
@@ -1729,10 +1734,10 @@ def correction_uncertainty_budget(
         name = component.name or f"additional {index + 1}"
         quantities.append(
             Quantity(
-                0.0,
-                component.uncertainty,
-                component.distribution,
-                component.dof,
+                value=0.0,
+                uncertainty=component.uncertainty,
+                distribution=component.distribution,
+                dof=component.dof,
                 name=name,
             )
         )
@@ -2011,7 +2016,7 @@ class CorrectionUncertaintyVerification(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the expanded uncertainty and the range against the maximum of
         the clause.
@@ -2034,9 +2039,9 @@ class CorrectionUncertaintyVerification(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render the documentation of clause 15 n) and o) to a PDF.
 

@@ -64,9 +64,9 @@ from __future__ import annotations
 
 import math
 import warnings
-from dataclasses import KW_ONLY, dataclass
+from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
@@ -92,6 +92,9 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Sequence
 
     from numpy.typing import ArrayLike, NDArray
+
+Coefficient = Literal["Cv", "Kv"]
+Form = Literal["annex", "clause"]
 
 __all__ = [
     "ACOUSTIC_POWER_RATIOS",
@@ -373,7 +376,7 @@ def incipient_cavitation_ratio(
     style_modifier: float,
     pressure_recovery: float,
     *,
-    coefficient: str = "Cv",
+    coefficient: Coefficient = "Cv",
 ) -> float:
     r"""Equation (3a): where cavitation becomes audible, estimated.
 
@@ -711,7 +714,7 @@ def internal_sound_pressure_level(
     )
 
 
-def jet_strouhal_number(  # noqa: PLR0913
+def jet_strouhal_number(
     *,
     flow_coefficient: float,
     style_modifier: float,
@@ -721,8 +724,8 @@ def jet_strouhal_number(  # noqa: PLR0913
     seat_diameter_m: float,
     inlet_pressure_pa: float,
     vapor_pressure_pa: float,
-    coefficient: str = "Cv",
-    form: str = "annex",
+    coefficient: Coefficient = "Cv",
+    form: Form = "annex",
 ) -> float:
     r"""Equation (12): the Strouhal number of the jet.
 
@@ -890,7 +893,7 @@ def pipe_ring_frequency(
     return float(wall / (math.pi * bore))
 
 
-def reference_transmission_loss(  # noqa: PLR0913
+def reference_transmission_loss(
     internal_diameter_m: float,
     wall_thickness_m: float,
     *,
@@ -1408,7 +1411,7 @@ def _default_bands() -> NDArray[np.float64]:
     return np.asarray(bands[(bands >= low) & (bands <= high)], dtype=np.float64)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class LiquidStream(RichDisplay):
     r"""The liquid and the operating point, which Clause 4.1 reads first.
 
@@ -1429,7 +1432,7 @@ class LiquidStream(RichDisplay):
     speed_of_sound: float
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class LiquidTrim(RichDisplay):
     r"""The valve, at the travel being examined.
 
@@ -1456,10 +1459,10 @@ class LiquidTrim(RichDisplay):
     power_ratio: float
     valve_diameter_m: float
     seat_diameter_m: float
-    coefficient: str = "Cv"
+    coefficient: Coefficient = "Cv"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class LiquidPipe(RichDisplay):
     r"""The pipe the noise comes out of, and the air around it.
 
@@ -1474,7 +1477,6 @@ class LiquidPipe(RichDisplay):
     internal_diameter_m: float
     wall_thickness_m: float
     density: float
-    _: KW_ONLY
     speed_of_sound: float = PIPE_SPEED_OF_SOUND_M_S
     air_density: float = AIR_DENSITY_KG_M3
     air_sound_speed: float = AIR_SPEED_OF_SOUND_M_S
@@ -1485,7 +1487,7 @@ def valve_hydrodynamic_noise(
     valve: LiquidTrim,
     pipe: LiquidPipe,
     *,
-    strouhal_form: str = "annex",
+    strouhal_form: Form = "annex",
     frequencies: ArrayLike | None = None,
 ) -> HydrodynamicValveNoise:
     r"""The whole of Clauses 4 and 5, from the operating point to 1 m.
@@ -1924,7 +1926,7 @@ def uniform_passage_style_modifier(n_passages: int) -> float:
 
 
 def last_stage_seat_diameter_mm(
-    flow_coefficient: float, *, coefficient: str = "Cv"
+    flow_coefficient: float, *, coefficient: Coefficient = "Cv"
 ) -> float:
     r"""6.3.2 b): the seat diameter of the last stage, estimated.
 

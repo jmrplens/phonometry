@@ -134,7 +134,7 @@ def _chk_iso3743_1_k1_rules() -> Outcome:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", ph.emission.SoundPowerWarning)
         res = _hard_walled(
-            background_levels=background, background_levels_ref=_BACKGROUND
+            background_levels=background, reference_background_levels=_BACKGROUND
         )
     expected = {"K1(6 dB)": 1.2563, "K1(4 dB)": 1.3, "K1(15,5 dB)": 0.0}
     computed = {
@@ -308,13 +308,13 @@ def _chk_iso3743_1_background_vs_iso11546() -> Outcome:
     mean_st = _energy_mean(_ST)
     at = ph.emission.sound_power_hard_walled(
         _ST, _RSS, _LW_RSS, frequencies=_FREQS, background_levels=mean_st - 6.0,
-        background_levels_ref=_BACKGROUND,
+        reference_background_levels=_BACKGROUND,
     )  # fmt: skip
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", ph.emission.SoundPowerWarning)
         below = ph.emission.sound_power_hard_walled(
             _ST, _RSS, _LW_RSS, frequencies=_FREQS, background_levels=mean_st - 5.99,
-            background_levels_ref=_BACKGROUND,
+            reference_background_levels=_BACKGROUND,
         )  # fmt: skip
     threshold = (
         6.0
@@ -669,9 +669,13 @@ def _chk_iso3743_comparison_calibration() -> Outcome:
     }
     computed = {
         "ISO 3743-1 LW": round(float(part1.sound_power_level[3]), 9),
-        "ISO 3743-1 LW ref": round(float(part1.sound_power_level_ref[3]), 9),
+        "ISO 3743-1 LW ref": round(
+            float(part1.sound_power_level_at_reference_conditions[3]), 9
+        ),
         "ISO 3743-2 LW": round(float(part2.sound_power_level[3]), 9),
-        "ISO 3743-2 LW ref": round(float(part2.sound_power_level_ref[3]), 9),
+        "ISO 3743-2 LW ref": round(
+            float(part2.sound_power_level_at_reference_conditions[3]), 9
+        ),
     }
     return record(expected, computed, unit="dB")
 
@@ -797,7 +801,7 @@ def _chk_iso3743_2_reference_background() -> Outcome:
         [90.0],
         frequencies=[1000.0],
         background_levels=[50.0],
-        background_levels_ref=[75.0],
+        reference_background_levels=[75.0],
     )
     return numeric(87.0, float(res.sound_power_level[0]), 1e-9, unit="dB", places=9)
 

@@ -88,7 +88,7 @@ weather given, [`plant_air_absorption_db_per_m`](/phonometry/reference/api/power
 printed; with a temperature and a humidity it evaluates the attenuation
 coefficient of ISO 3891:1978 Annex A (SAE ARP 866A) at the one-third-octave
 band centred on each octave, through the transcription
-[`phonometry.aircraft.atmospheric_absorption.arp866a_attenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#arp866a_attenuation) that
+[`phonometry.aircraft.atmospheric_absorption.attenuation_arp866a`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#attenuation_arp866a) that
 the ECAC Doc 29 Appendix D implementation reads; there is no second copy of
 it here. ISO 3891 gives no evaluation frequency below 50 Hz, so the 31,5 Hz
 band keeps the 0 of Table 3 in any weather. At 15 °C and 70 % the formula
@@ -279,7 +279,7 @@ $L_{W\mathrm{A}}$ of the parts together, in dB re 1 pW.
 PartialPlantContributions.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -334,7 +334,7 @@ temperature and relative humidity at the time of the measurement, which
 Table 3 asks for when they "differ markedly" from those, the coefficient
 of ISO 3891:1978 Annex A (SAE ARP 866A) that Table 3 was taken from,
 evaluated at the one-third-octave band centred on each octave by
-[`phonometry.aircraft.atmospheric_absorption.arp866a_attenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#arp866a_attenuation)
+[`phonometry.aircraft.atmospheric_absorption.attenuation_arp866a`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#attenuation_arp866a)
 (the parabolic reading of its Table 1 that reproduces ISO 3891 Table 10)
 and turned from dB/100 m into dB/m. ISO 3891 gives no evaluation frequency
 below 50 Hz, so the 31,5 Hz band keeps the 0 of Table 3.
@@ -651,7 +651,7 @@ The geometry is the one 9.2 measures on the plot plan, to within ±5 %;
 ## plant_steady_reading
 
 ```python
-plant_steady_reading(max_level: float, min_level: float) -> float
+plant_steady_reading(min_level: float, max_level: float) -> float
 ```
 
 The level read on a sound level meter from a steady noise, 9.5.2.
@@ -668,8 +668,8 @@ judges that one.
 
 | Name | Description |
 | :--- | :--- |
-| `max_level` | The highest level read, in decibels. |
 | `min_level` | The lowest level read, in decibels. |
+| `max_level` | The highest level read, in decibels. |
 
 **Returns:** The level, in decibels.
 
@@ -678,7 +678,7 @@ judges that one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a minimum above the maximum, or a swing of 5 dB or more, the swing settled to nine decimals first, so 64,1 - 59,1 dB, 4,999 999 999 999 993 in binary, is the 5 dB it is. |
-| TypeError | if `max_level` or `min_level` is not a single number. |
+| TypeError | if `min_level` or `max_level` is not a single number. |
 
 ## PlantMeasurementCheck
 
@@ -723,7 +723,7 @@ hold (`deviations`) still go in the report.
 PlantMeasurementCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -766,6 +766,7 @@ The requirement with this key.
 
 ```python
 PlantMeasurementContour(
+    *,
     plant_outline_m: NDArray[np.float64],
     contour_m: NDArray[np.float64],
     characteristic_height_m: float,
@@ -877,7 +878,7 @@ point source that stands for the plant, in metres.
 PlantMeasurementContour.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -956,7 +957,7 @@ PlantRequirement(
     clause: str,
     description: str,
     value: float,
-    comparison: str,
+    comparison: Literal['>', '>=', '<=', '='],
     limit: float,
     unit: str,
     holds: bool,
@@ -1141,7 +1142,7 @@ in decibels (10.5).
 PlantSoundPowerResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

@@ -583,6 +583,6 @@ def test_a_weighting_verdict_survives_a_round_trip_through_pickle() -> None:
         filters.WeightingFilter(fs=48000, weighting="A")
     )
     # Our own bytes
-    again = pickle.loads(pickle.dumps(result))  # noqa: S301
+    again = pickle.loads(pickle.dumps(result))
     assert again.overall_class == result.overall_class
     assert again.bands == result.bands

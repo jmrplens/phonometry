@@ -177,7 +177,7 @@ ventana de Kaiser, a partir de dos números que controla quien llama:
 ```python
 from phonometry import signals
 
-x = signals.noise_signal(44100, 5.0, color="pink", seed=1)
+x = signals.noise_signal(44100, duration_s=5.0, color="pink", seed=1)
 res = signals.resample_signal(x, 44100, fs_new=48000)   # 120 dB de rechazo de alias
 print(res.up, res.down)                  # 160, 147
 print(res.n_taps, res.passband_edge_hz)  # FIR diseñado, 20947.5 Hz
@@ -201,7 +201,7 @@ import numpy as np
 from scipy import signal
 from phonometry import signals
 
-x = signals.noise_signal(44100, 5.0, color="pink", seed=1)
+x = signals.noise_signal(44100, duration_s=5.0, color="pink", seed=1)
 res = signals.resample_signal(x, 44100, fs_new=48000)   # 120 dB de rechazo de alias
 
 # res es el ResampledSignalResult calculado en el ejemplo de arriba.
@@ -358,6 +358,6 @@ afirmaciones de exactitud son formas cerradas, no normativas.
 - [Análisis espectral](/phonometry/es/signals/spectra/spectral-analysis/): la verificación del ruido de colores y las métricas de ventanas.
 - [Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/): las excitaciones de MLS y barrido exponencial del retrato de familia, tal como las usa ISO 18233.
 - [Medición de sistemas](/phonometry/es/signals/spectra/system-measurement/): la pareja de Golay y el barrido conformado, los otros dos miembros de la familia.
-- Referencia de la API: [`signals.test_signals`](/phonometry/es/reference/api/signals/test-signals/).
+- Referencia de la API: [`signals`: test signals](/phonometry/es/reference/api/signals/test-signals/).
 
 </SeeAlso>

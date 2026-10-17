@@ -1235,7 +1235,8 @@ def animate_schroeder(output_dir: str) -> None:
     ir = rng.standard_normal(t.size) * np.exp(
         -6.9077 * t / reverb_t
     ) + rng.standard_normal(t.size) * 10.0 ** (-45.0 / 20.0)
-    time, level = room.decay_curve(ir, fs)
+    decay = room.decay_curve(ir, fs)
+    time, level = decay.times, decay.levels
     res = room.room_parameters(ir, fs, limits=None)
     t20, t30 = float(res.t20[0]), float(res.t30[0])
     p2 = ir.astype(np.float64) ** 2

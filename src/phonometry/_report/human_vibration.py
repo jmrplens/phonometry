@@ -73,6 +73,7 @@ from ._layout import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..vibration.human.exposure import DailyVibrationExposure, ExposureAssessment
     from .metadata import ReportMetadata
 
@@ -99,14 +100,14 @@ _KIND_TOTAL_SYMBOL: dict[str, str] = {
 }
 
 
-def _unit(metric: str, language: str = "en") -> str:
+def _unit(metric: str, language: Language = "en") -> str:
     """The exposure unit: ``m/s2`` for ``A(8)``, ``m/s^1.75`` for the VDV."""
     if metric == "vdv":
         return "m/s<sup>" + decimal_comma("1.75", language) + "</sup>"
     return "m/s<sup>2</sup>"
 
 
-def _fmt_acc(value: float, language: str = "en") -> str:
+def _fmt_acc(value: float, language: Language = "en") -> str:
     """A vibration magnitude rounded to the fiche's display precision."""
     from ._i18n import format_number
 
@@ -117,14 +118,14 @@ def _fmt_acc(value: float, language: str = "en") -> str:
     )
 
 
-def _fmt_hours(seconds: float, language: str = "en") -> str:
+def _fmt_hours(seconds: float, language: Language = "en") -> str:
     """A daily exposure time in hours, up to two decimals (trailing zeros cut)."""
     from ._i18n import format_number
 
     return format_number(float(seconds) / 3600.0, language, decimals=2, trim=True)
 
 
-def _basis(result: DailyVibrationExposure, language: str = "en") -> str:
+def _basis(result: DailyVibrationExposure, language: Language = "en") -> str:
     """The standard-basis line: the ISO method plus the assessment Directive."""
     kind = str(result.assessment.kind)
     quantity = t(_KIND_QUANTITY.get(kind, kind), language)
@@ -142,7 +143,7 @@ def _esc(value: str | None) -> str | None:
 
 
 def _metadata_pairs(
-    metadata: ReportMetadata | None, language: str = "en"
+    metadata: ReportMetadata | None, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the header grid.
 
@@ -165,7 +166,7 @@ def _metadata_pairs(
 
 
 def _operations_table(
-    result: DailyVibrationExposure, *, verbose: bool = False, language: str = "en"
+    result: DailyVibrationExposure, *, verbose: bool = False, language: Language = "en"
 ) -> Table:
     """The per-operation exposure-analysis table (ISO 5349-1/-2 Eqs. (2)/(3)).
 
@@ -255,7 +256,7 @@ def _operations_table(
 
 
 def _assessment_rows(
-    result: DailyVibrationExposure, language: str = "en"
+    result: DailyVibrationExposure, language: Language = "en"
 ) -> list[tuple[str, str, str, bool]]:
     """The Directive 2002/44/EC assessment rows.
 
@@ -286,7 +287,9 @@ def _assessment_rows(
     ]
 
 
-def _assessment_table(result: DailyVibrationExposure, language: str = "en") -> Table:
+def _assessment_table(
+    result: DailyVibrationExposure, language: Language = "en"
+) -> Table:
     """The Directive 2002/44/EC assessment table (exceeded / not exceeded)."""
     from reportlab.lib.units import mm
 
@@ -341,7 +344,7 @@ def _displayed_zone(assessment: ExposureAssessment) -> str:
     return "below action"
 
 
-def _statement(result: DailyVibrationExposure, language: str = "en") -> str:
+def _statement(result: DailyVibrationExposure, language: Language = "en") -> str:
     """The boxed result statement: the daily exposure ``A(8)`` and its zone."""
     assessment = result.assessment
     unit = _unit(str(assessment.metric), language)
@@ -353,7 +356,9 @@ def _statement(result: DailyVibrationExposure, language: str = "en") -> str:
     ).format(a8=_fmt_acc(float(result.a8), language), unit=unit, zone=zone)
 
 
-def _verdict(result: DailyVibrationExposure, language: str = "en") -> tuple[str, bool]:
+def _verdict(
+    result: DailyVibrationExposure, language: Language = "en"
+) -> tuple[str, bool]:
     """Verdict text and PASS flag against the Directive 2002/44/EC limit value.
 
     The exposure limit value is the daily exposure a worker may in no
@@ -392,7 +397,7 @@ def render_human_vibration_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a daily vibration exposure assessment fiche to a PDF at ``path``.
 

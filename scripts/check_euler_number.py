@@ -57,7 +57,7 @@ _HERE = pathlib.Path(__file__).resolve().parent
 if str(_HERE) not in sys.path:
     sys.path.insert(0, str(_HERE))
 
-from check_subscript_slope import (  # noqa: E402
+from check_subscript_slope import (
     _UPRIGHT_WRAPPERS,
     tex_regions,
 )

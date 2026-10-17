@@ -821,7 +821,7 @@ def test_a_rigid_block_has_its_own_mass_and_no_upper_limit() -> None:
     a = force / m2
     em = vibration.effective_blocking_mass(
         frequencies=f,
-        force=force,
+        force_n=force,
         first_acceleration_m_s2=a,
         second_acceleration_m_s2=a,
         blocking_mass=m2,
@@ -836,7 +836,7 @@ def test_formula_6_divides_twice_the_force_by_the_sum_of_the_two_accelerations()
 ):
     em = vibration.effective_blocking_mass(
         frequencies=[100.0],
-        force=[3.0 + 0j],
+        force_n=[3.0 + 0j],
         first_acceleration_m_s2=[0.1 + 0.02j],
         second_acceleration_m_s2=[0.2 - 0.02j],
         blocking_mass=20.0,
@@ -852,7 +852,7 @@ def test_f3_is_where_the_effective_mass_leaves_1_db() -> None:
     ones = np.ones(f.size, dtype=complex)
     em = vibration.effective_blocking_mass(
         frequencies=f,
-        force=m_eff * ones,
+        force_n=m_eff * ones,
         first_acceleration_m_s2=ones,
         second_acceleration_m_s2=ones,
         blocking_mass=m2,
@@ -876,7 +876,7 @@ def test_f3_is_interpolated_in_log_frequency_and_the_mask_ends_before_it() -> No
     ones = np.ones(f.size, dtype=complex)
     em = vibration.effective_blocking_mass(
         frequencies=f,
-        force=m_eff * ones,
+        force_n=m_eff * ones,
         first_acceleration_m_s2=ones,
         second_acceleration_m_s2=ones,
         blocking_mass=m2,
@@ -901,7 +901,7 @@ def test_a_deviation_below_40_hz_does_not_set_f3() -> None:
     ones = np.ones(f.size, dtype=complex)
     em = vibration.effective_blocking_mass(
         frequencies=f,
-        force=m_eff * ones,
+        force_n=m_eff * ones,
         first_acceleration_m_s2=ones,
         second_acceleration_m_s2=ones,
         blocking_mass=20.0,
@@ -915,7 +915,7 @@ def test_effective_mass_refuses_accelerations_that_cancel() -> None:
     with pytest.raises(ValueError, match="sum to zero"):
         vibration.effective_blocking_mass(
             frequencies=[100.0, 200.0],
-            force=ones,
+            force_n=ones,
             first_acceleration_m_s2=ones,
             second_acceleration_m_s2=-ones,
             blocking_mass=20.0,
@@ -927,7 +927,7 @@ def test_effective_mass_refuses_an_unsorted_sweep() -> None:
     with pytest.raises(ValueError, match="must increase strictly"):
         vibration.effective_blocking_mass(
             frequencies=[200.0, 100.0],
-            force=ones,
+            force_n=ones,
             first_acceleration_m_s2=ones,
             second_acceleration_m_s2=ones,
             blocking_mass=20.0,

@@ -50,7 +50,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -71,7 +71,10 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
     from ..io._signal import Signal
+
+Kind = Literal["magnitude", "squared"]
 
 __all__ = [
     "EnvelopeResult",
@@ -159,7 +162,7 @@ class EnvelopeResult(OwnsArrays):
         require_signal_rate(self, "signal", self.signal_fs, rate_field="signal_fs")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | NDArray[Any]:
         """Plot the signal with its envelope and the instantaneous frequency.
 
@@ -302,7 +305,7 @@ class EnvelopeSpectrumResult(OwnsArrays):
     frequencies: NDArray[np.float64]
     amplitude: NDArray[np.float64]
     mean_level: float
-    kind: str
+    kind: Kind
     times: NDArray[np.float64]
     envelope: NDArray[np.float64]
     window: str
@@ -387,7 +390,7 @@ class EnvelopeSpectrumResult(OwnsArrays):
             raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | NDArray[Any]:
         """Plot the detected envelope and its amplitude spectrum.
 
@@ -444,7 +447,7 @@ def envelope_spectrum(
     x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     *,
-    kind: str = "magnitude",
+    kind: Kind = "magnitude",
     window: str = "hann",
     nfft: int | None = None,
     remove_dc: bool = True,

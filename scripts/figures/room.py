@@ -9,7 +9,7 @@ noise the room is left with. Everything here is embedded by a page under
 ``buildings/rooms/``.
 """
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
@@ -57,7 +57,8 @@ def generate_schroeder_decay(output_dir: str) -> None:
     ir = ir + rng.standard_normal(t.size) * 10.0 ** (-45.0 / 20.0)
 
     # Library outputs: the annotated numbers are exactly these.
-    time, level = room.decay_curve(ir, fs)
+    decay = room.decay_curve(ir, fs)
+    time, level = decay.times, decay.levels
     res = room.room_parameters(ir, fs, limits=None)
     edt, t20, t30 = float(res.edt[0]), float(res.t20[0]), float(res.t30[0])
 
@@ -2159,7 +2160,11 @@ def generate_enclosed_space_air_term(output_dir: str) -> None:
         (2000.0, 1000.0, COLOR_SECONDARY, "2000 m³ hall"),
     )
     for volume, area, colour, label in styles:
-        for condition, dash in ((None, "-"), ("20C_50-70", "--")):
+        conditions: tuple[tuple[Literal["20C_50-70"] | None, str], ...] = (
+            (None, "-"),
+            ("20C_50-70", "--"),
+        )
+        for condition, dash in conditions:
             res = room.enclosed_space_reverberation(
                 [(area, soft)], volume, air_condition=condition
             )
@@ -2645,7 +2650,8 @@ def generate_image_source_bands(output_dir: str) -> None:
             air_attenuation_per_m=attenuation,
         )
         for row, freq, colour in zip(banded.ir, freqs, colours, strict=True):
-            time, level = room.decay_curve(row, banded.fs)
+            decay = room.decay_curve(row, banded.fs)
+            time, level = decay.times, decay.levels
             label = f"{freq:g} Hz{tag}" if not tag else None
             ax.plot(
                 time, level, dash, color=colour, linewidth=1.8, label=label, zorder=5
@@ -2914,7 +2920,8 @@ def generate_decay_signatures(output_dir: str) -> None:
     _fig, axes = plt.subplots(1, 3, figsize=(13.2, 4.8), sharey=True)
     for ax, (name, signal, verdict) in zip(axes, cases, strict=True):
         res = room.room_parameters(signal, fs, limits=None)
-        time, level = room.decay_curve(signal, fs)
+        decay = room.decay_curve(signal, fs)
+        time, level = decay.times, decay.levels
         ax.plot(time, level, color=COLOR_PRIMARY, linewidth=1.8, zorder=5)
         for edge, colour in (
             (-5.0, COLOR_TERTIARY),

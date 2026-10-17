@@ -89,7 +89,7 @@ weather given, :func:`plant_air_absorption_db_per_m` returns Table 3 as
 printed; with a temperature and a humidity it evaluates the attenuation
 coefficient of ISO 3891:1978 Annex A (SAE ARP 866A) at the one-third-octave
 band centred on each octave, through the transcription
-:func:`phonometry.aircraft.atmospheric_absorption.arp866a_attenuation` that
+:func:`phonometry.aircraft.atmospheric_absorption.attenuation_arp866a` that
 the ECAC Doc 29 Appendix D implementation reads; there is no second copy of
 it here. ISO 3891 gives no evaluation frequency below 50 Hz, so the 31,5 Hz
 band keeps the 0 of Table 3 in any weather. At 15 °C and 70 % the formula
@@ -131,7 +131,7 @@ import warnings
 from dataclasses import KW_ONLY, dataclass
 from functools import cached_property
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -161,6 +161,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from .._i18n import Language
 
 __all__ = [
     "PLANT_AIR_ABSORPTION_DB_PER_M",
@@ -562,7 +564,7 @@ def plant_air_absorption_db_per_m(
     Table 3 asks for when they "differ markedly" from those, the coefficient
     of ISO 3891:1978 Annex A (SAE ARP 866A) that Table 3 was taken from,
     evaluated at the one-third-octave band centred on each octave by
-    :func:`phonometry.aircraft.atmospheric_absorption.arp866a_attenuation`
+    :func:`phonometry.aircraft.atmospheric_absorption.attenuation_arp866a`
     (the parabolic reading of its Table 1 that reproduces ISO 3891 Table 10)
     and turned from dB/100 m into dB/m. ISO 3891 gives no evaluation frequency
     below 50 Hz, so the 31,5 Hz band keeps the 0 of Table 3.
@@ -595,12 +597,12 @@ def plant_air_absorption_db_per_m(
         return np.array(
             [PLANT_AIR_ABSORPTION_DB_PER_M[float(b)] for b in bands], dtype=np.float64
         )
-    from ..aircraft.atmospheric_absorption import arp866a_attenuation
+    from ..aircraft.atmospheric_absorption import attenuation_arp866a
 
     alpha = np.zeros_like(bands)
     covered = bands >= _ISO3891_LOWEST_BAND_HZ
     if np.any(covered):
-        arp = arp866a_attenuation(
+        arp = attenuation_arp866a(
             bands[covered], temperature_c=theta, relative_humidity_percent=humidity
         )
         alpha[covered] = arp.coefficient_db_per_100m / 100.0
@@ -640,7 +642,7 @@ def plant_method_uncertainty(distance_ratio: float) -> tuple[float, float]:
     return PLANT_METHOD_UNCERTAINTY_DB[below[-1]]
 
 
-def plant_steady_reading(max_level: float, min_level: float) -> float:
+def plant_steady_reading(min_level: float, max_level: float) -> float:
     r"""The level read on a sound level meter from a steady noise, 9.5.2.
 
     With time weighting S, a needle that swings over less than 5 dB marks
@@ -651,16 +653,16 @@ def plant_steady_reading(max_level: float, min_level: float) -> float:
     the level used; ``leq_range_db`` of :func:`check_plant_measurement`
     judges that one.
 
-    :param max_level: The highest level read, in decibels.
     :param min_level: The lowest level read, in decibels.
+    :param max_level: The highest level read, in decibels.
     :return: The level, in decibels.
     :raises ValueError: for a minimum above the maximum, or a swing of 5 dB or
         more, the swing settled to nine decimals first, so 64,1 - 59,1 dB,
         4,999 999 999 999 993 in binary, is the 5 dB it is.
-    :raises TypeError: if ``max_level`` or ``min_level`` is not a single number.
+    :raises TypeError: if ``min_level`` or ``max_level`` is not a single number.
     """
-    top = require_finite(max_level, "max_level")
     bottom = require_finite(min_level, "min_level")
+    top = require_finite(max_level, "max_level")
     if bottom > top:
         msg = "'min_level' must not exceed 'max_level'."
         raise ValueError(msg)
@@ -979,7 +981,7 @@ def _walk(contour: np.ndarray, count: int) -> tuple[np.ndarray, np.ndarray]:
 # --------------------------------------------------------------------------- #
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class PlantMeasurementContour(OwnsArrays):
     r"""A measurement contour round a plant area on the plot plan, clauses 9.1 to 9.4.
 
@@ -1313,7 +1315,7 @@ class PlantMeasurementContour(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the plan: plant area, contour, positions and their microphone
         directions, in the manner of Figure 1.
@@ -1367,20 +1369,20 @@ def plant_measurement_contour(
     omitted = tuple(omitted_positions)
     if n_positions is not None:
         return PlantMeasurementContour(
-            np.asarray(plant_outline_m, dtype=np.float64),
-            np.asarray(contour_m, dtype=np.float64),
-            characteristic_height_m,
-            n_positions,
-            omitted,
+            plant_outline_m=np.asarray(plant_outline_m, dtype=np.float64),
+            contour_m=np.asarray(contour_m, dtype=np.float64),
+            characteristic_height_m=characteristic_height_m,
+            n_positions=n_positions,
+            omitted_positions=omitted,
         )
     if omitted:
         msg = "'omitted_positions' index a layout; give its 'n_positions' with them."
         raise ValueError(msg)
     first = PlantMeasurementContour(
-        np.asarray(plant_outline_m, dtype=np.float64),
-        np.asarray(contour_m, dtype=np.float64),
-        characteristic_height_m,
-        _MIN_POSITIONS,
+        plant_outline_m=np.asarray(plant_outline_m, dtype=np.float64),
+        contour_m=np.asarray(contour_m, dtype=np.float64),
+        characteristic_height_m=characteristic_height_m,
+        n_positions=_MIN_POSITIONS,
     )
     # d_i is never below the smallest distance between the two outlines, so
     # a spacing of twice that meets 9.1.1 c) whatever the layout.
@@ -1401,7 +1403,10 @@ def plant_measurement_contour(
     floor = max(_MIN_POSITIONS, math.ceil(first.contour_length_m / (2.0 * reach)))
     for count in range(min(floor, ceiling), ceiling + 1):
         layout = PlantMeasurementContour(
-            first.plant_outline_m, first.contour_m, characteristic_height_m, count
+            plant_outline_m=first.plant_outline_m,
+            contour_m=first.contour_m,
+            characteristic_height_m=characteristic_height_m,
+            n_positions=count,
         )
         # Judged settled, as the 9.1.1 c) row of the report judges it.
         excess = layout.position_spacing_m - (
@@ -1410,7 +1415,10 @@ def plant_measurement_contour(
         if is_at_most(float(settled(excess)), 0.0):
             return layout
     return PlantMeasurementContour(
-        first.plant_outline_m, first.contour_m, characteristic_height_m, ceiling
+        plant_outline_m=first.plant_outline_m,
+        contour_m=first.contour_m,
+        characteristic_height_m=characteristic_height_m,
+        n_positions=ceiling,
     )
 
 
@@ -1704,7 +1712,7 @@ class PlantSoundPowerResult(OwnsArrays):
             return None
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot the octave-band :math:`L_W` beside the contour average it was
         built from, with :math:`L_{W\mathrm{A}}` in the title.
@@ -1857,7 +1865,7 @@ class PlantRequirement(RichDisplay):
     clause: str
     description: str
     value: float
-    comparison: str
+    comparison: Literal[">", ">=", "<=", "="]
     limit: float
     unit: str
     holds: bool
@@ -1899,7 +1907,7 @@ def _row(
     clause: str,
     description: str,
     value: float,
-    comparison: str,
+    comparison: Literal[">", ">=", "<=", "="],
     limit: float,
     unit: str,
     *,
@@ -1993,7 +2001,7 @@ class PlantMeasurementCheck(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot how far each requirement is inside or outside its limit.
 
@@ -2287,7 +2295,7 @@ class PartialPlantContributions(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot each part's :math:`L_W` and their total, band by band.
 

@@ -109,8 +109,8 @@ adrienne_window(
     flat_duration: float = 0.005,
     leading_duration: float = 0.0005,
     trailing_duration: float = 0.005,
-    leading_edge: str = 'blackman-harris',
-    trailing_edge: str = 'blackman-harris',
+    leading_edge: Literal['blackman-harris', 'cosine-squared'] = 'blackman-harris',
+    trailing_edge: Literal['blackman-harris', 'cosine-squared'] = 'blackman-harris',
 ) -> NDArray[np.float64]
 ```
 
@@ -450,7 +450,7 @@ An in-situ one-third-octave absorption spectrum (ISO 13472-1).
 InSituAbsorptionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -466,7 +466,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 InSituAbsorptionResult.plot_geometry(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -635,7 +635,7 @@ tuple used to be unpacked by position.
 OneThirdOctaveAbsorption.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -669,7 +669,7 @@ plot_in_situ_geometry(
     source_height_m: float = 1.25,
     microphone_height_m: float = 0.25,
     sampled_radius: float | None = 1.34,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

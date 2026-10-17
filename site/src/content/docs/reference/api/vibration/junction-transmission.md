@@ -160,9 +160,9 @@ compared against:
 angular_average_transmission_coefficient(
     chi: float,
     psi: float,
-    junction: str = 'X',
+    junction: Literal['X', 'T1', 'T2', 'L'] = 'X',
     *,
-    section: str = 'corner',
+    section: Literal['corner', 'straight'] = 'corner',
 ) -> float
 ```
 
@@ -195,7 +195,7 @@ corner_transmission_coefficient(
     angle_rad: ArrayLike,
     chi: float,
     psi: float,
-    junction: str = 'X',
+    junction: Literal['X', 'T1', 'T2', 'L'] = 'X',
 ) -> NDArray[np.float64]
 ```
 
@@ -292,7 +292,7 @@ transmits fully).
 
 ```python
 junction_transmission(
-    junction: str,
+    junction: Literal['X', 'T1', 'T2', 'L'],
     thickness1_m: float,
     wave_speed1: float,
     surface_density1: float,
@@ -378,7 +378,7 @@ $\psi = (h_2 c_{\mathrm{L}2} \rho_{\mathrm{s}2}) / (h_1 c_{\mathrm{L}1} \rho_{\m
 
 ```python
 JunctionTransmissionResult(
-    junction: str,
+    junction: Literal['X', 'T1', 'T2', 'L'],
     chi: float,
     psi: float,
     critical_frequency1: float,
@@ -431,7 +431,7 @@ constants `T1` \<-> `T2`) gives the same $K_{21} = K_{12}$.
 JunctionTransmissionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -447,7 +447,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 JunctionTransmissionResult.plot_geometry(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -480,12 +480,12 @@ position.
 
 ```python
 plot_junction_geometry(
-    junction: str,
+    junction: Literal['L', 'T1', 'T2', 'X'],
     thickness1_m: float,
     thickness2_m: float,
     *,
     ax: Axes | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -594,7 +594,7 @@ right_angle_transmission_coefficient(
     density2: float,
     wave_speed1: float,
     wave_speed2: float,
-    incidence: str = 'random',
+    incidence: Literal['random', 'normal'] = 'random',
 ) -> float
 ```
 
@@ -652,7 +652,7 @@ straight_transmission_coefficient(
     angle_rad: ArrayLike,
     chi: float,
     psi: float,
-    junction: str = 'X',
+    junction: Literal['X', 'T1', 'T2', 'L'] = 'X',
 ) -> NDArray[np.float64]
 ```
 

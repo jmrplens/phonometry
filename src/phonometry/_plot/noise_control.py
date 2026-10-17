@@ -26,6 +26,7 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..noise_control._cabin_insulation import CabinInsulationResult
     from ..noise_control._duct_path import DuctPathResult
     from ..noise_control.duct_modes import DuctModeResult
@@ -109,7 +110,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -117,7 +118,7 @@ def _t(text: str, language: str = "en") -> str:
 def plot_reactive_silencer(
     result: ReactiveSilencerResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Transmission (and insertion) loss of a reactive silencer over frequency.
@@ -171,7 +172,7 @@ def plot_reactive_silencer(
 def plot_hvac_spectrum(
     result: HVACSpectrumResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-frequency HVAC attenuation or regenerated sound power level.
@@ -251,7 +252,10 @@ def _cascade_series(result: DuctPathResult) -> list[tuple[str, np.ndarray]]:
 
 
 def plot_duct_path(
-    result: DuctPathResult, ax: Axes | None = None, language: str = "en", **kwargs: Any
+    result: DuctPathResult,
+    ax: Axes | None = None,
+    language: Language = "en",
+    **kwargs: Any,
 ) -> Axes:
     """Cascade of a duct-borne noise path against the room-criterion curve.
 
@@ -324,7 +328,7 @@ def plot_duct_path(
 def plot_room_to_room(
     result: RoomToRoomResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Source-room level, received level and criterion curve of a partition.
@@ -420,7 +424,10 @@ def plot_room_to_room(
 
 
 def plot_duct_modes(
-    result: DuctModeResult, ax: Axes | None = None, language: str = "en", **kwargs: Any
+    result: DuctModeResult,
+    ax: Axes | None = None,
+    language: Language = "en",
+    **kwargs: Any,
 ) -> Axes:
     """Cut-on frequency of each higher-order duct mode, with and without flow.
 
@@ -479,7 +486,7 @@ def plot_duct_modes(
 def plot_enclosure(
     result: EnclosureInsertionLossResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Panel R, interior correction C and net insertion loss of an enclosure.
@@ -544,7 +551,7 @@ def plot_enclosure(
 def plot_operating_line(
     result: OperatingLine,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The ISO 5135 5.5.2 fit: the test points and the line through them.
@@ -639,7 +646,7 @@ _ENCLOSURE_SYMBOLS = {
 def plot_enclosure_insulation(
     result: EnclosureInsulationResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The two runs of ISO 11546 and the insulation between them.
@@ -680,7 +687,7 @@ def plot_enclosure_insulation(
 def plot_cabin_insulation(
     result: CabinInsulationResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The room, the inside of the cabin and the insulation between them.
@@ -717,7 +724,7 @@ def plot_cabin_insulation(
 def plot_silencer_in_situ(
     result: SilencerInSituResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The level difference of ISO 11820 and the loss it becomes.
@@ -791,7 +798,7 @@ def plot_silencer_in_situ(
 def plot_screen_in_situ(
     result: ScreenInSituResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The two levels of ISO 11821 and the attenuation between them.

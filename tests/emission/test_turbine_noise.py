@@ -40,10 +40,16 @@ from phonometry.emission import SoundPowerWarning
 #: The four parts of a large set, as Figure 2 b draws them: HP and IP casings
 #: in one box, the LP turbine in its own, then generator and exciter.
 LARGE_SET = (
-    emission.TurbineReferenceBox(6.0, 4.0, 3.5, "HP-IP"),
-    emission.TurbineReferenceBox(5.0, 5.0, 4.5, "LP"),
-    emission.TurbineReferenceBox(7.0, 3.5, 3.0, "Generator"),
-    emission.TurbineReferenceBox(3.0, 2.5, 2.2, "Exciter"),
+    emission.TurbineReferenceBox(
+        length_m=6.0, width_m=4.0, height_m=3.5, label="HP-IP"
+    ),
+    emission.TurbineReferenceBox(length_m=5.0, width_m=5.0, height_m=4.5, label="LP"),
+    emission.TurbineReferenceBox(
+        length_m=7.0, width_m=3.5, height_m=3.0, label="Generator"
+    ),
+    emission.TurbineReferenceBox(
+        length_m=3.0, width_m=2.5, height_m=2.2, label="Exciter"
+    ),
 )
 
 
@@ -127,7 +133,7 @@ def test_table_2_refuses_a_difference_that_is_not_finite() -> None:
 
 def test_one_box_is_the_iso_3746_parallelepiped() -> None:
     surface = emission.turbine_measurement_surface(
-        [emission.TurbineReferenceBox(8.0, 3.0, 2.5)]
+        [emission.TurbineReferenceBox(length_m=8.0, width_m=3.0, height_m=2.5)]
     )
     d = oracle.IEC61063_MEASUREMENT_DISTANCE_M
     length, width, height = 8.0 + 2 * d, 3.0 + 2 * d, 2.5 + d
@@ -165,8 +171,8 @@ def test_equation_1_overcounts_when_the_tallest_box_is_not_the_widest() -> None:
     """A tall narrow box beside a low wide one."""
     surface = emission.turbine_measurement_surface(
         [
-            emission.TurbineReferenceBox(4.0, 1.0, 5.0),
-            emission.TurbineReferenceBox(4.0, 5.0, 1.0),
+            emission.TurbineReferenceBox(length_m=4.0, width_m=1.0, height_m=5.0),
+            emission.TurbineReferenceBox(length_m=4.0, width_m=5.0, height_m=1.0),
         ]
     )
     # Sections 3 m wide by 6 m tall and 7 m by 2 m: ends of 18 and 14 m2 and
@@ -180,9 +186,9 @@ def test_equation_1_overcounts_when_the_tallest_box_is_not_the_widest() -> None:
 def test_equation_1_undercounts_a_small_box_between_two_large_ones() -> None:
     surface = emission.turbine_measurement_surface(
         [
-            emission.TurbineReferenceBox(3.0, 3.0, 4.0),
-            emission.TurbineReferenceBox(3.0, 1.0, 1.0),
-            emission.TurbineReferenceBox(3.0, 3.0, 4.0),
+            emission.TurbineReferenceBox(length_m=3.0, width_m=3.0, height_m=4.0),
+            emission.TurbineReferenceBox(length_m=3.0, width_m=1.0, height_m=1.0),
+            emission.TurbineReferenceBox(length_m=3.0, width_m=3.0, height_m=4.0),
         ]
     )
     # Sections 5 x 5, 3 x 2 and 5 x 5: ends of 25 m2 each and two steps of
@@ -253,8 +259,12 @@ def test_the_five_key_positions_of_figure_2_b() -> None:
 def test_figure_2_a_puts_the_coupling_after_the_turbine() -> None:
     surface = emission.turbine_measurement_surface(
         [
-            emission.TurbineReferenceBox(4.0, 3.0, 3.0, "turbine"),
-            emission.TurbineReferenceBox(9.0, 2.0, 2.0, "gear and compressor"),
+            emission.TurbineReferenceBox(
+                length_m=4.0, width_m=3.0, height_m=3.0, label="turbine"
+            ),
+            emission.TurbineReferenceBox(
+                length_m=9.0, width_m=2.0, height_m=2.0, label="gear and compressor"
+            ),
         ]
     )
     array = emission.turbine_microphone_positions(
@@ -266,7 +276,7 @@ def test_figure_2_a_puts_the_coupling_after_the_turbine() -> None:
 
 def test_a_single_box_has_its_coupling_plane_at_mid_length() -> None:
     surface = emission.turbine_measurement_surface(
-        [emission.TurbineReferenceBox(8.0, 3.0, 2.5)]
+        [emission.TurbineReferenceBox(length_m=8.0, width_m=3.0, height_m=2.5)]
     )
     array = emission.turbine_microphone_positions(
         surface, microphone_height_m=1.0, spacing_m=2.0
@@ -322,8 +332,12 @@ def test_the_overhead_line_comes_down_the_rear_end() -> None:
     """A tall rear box puts positions on the rear end above key position 5."""
     surface = emission.turbine_measurement_surface(
         [
-            emission.TurbineReferenceBox(4.0, 3.0, 3.0, "turbine"),
-            emission.TurbineReferenceBox(2.0, 3.0, 5.0, "generator"),
+            emission.TurbineReferenceBox(
+                length_m=4.0, width_m=3.0, height_m=3.0, label="turbine"
+            ),
+            emission.TurbineReferenceBox(
+                length_m=2.0, width_m=3.0, height_m=5.0, label="generator"
+            ),
         ]
     )
     array = emission.turbine_microphone_positions(
@@ -364,9 +378,9 @@ def test_one_position_on_a_parallelepiped_is_enough() -> None:
 def test_a_spacing_too_long_for_a_casing_is_reported() -> None:
     surface = emission.turbine_measurement_surface(
         [
-            emission.TurbineReferenceBox(10.0, 4.0, 3.0),
-            emission.TurbineReferenceBox(0.4, 3.0, 2.0),
-            emission.TurbineReferenceBox(10.0, 4.0, 3.0),
+            emission.TurbineReferenceBox(length_m=10.0, width_m=4.0, height_m=3.0),
+            emission.TurbineReferenceBox(length_m=0.4, width_m=3.0, height_m=2.0),
+            emission.TurbineReferenceBox(length_m=10.0, width_m=4.0, height_m=3.0),
         ]
     )
     with pytest.warns(SoundPowerWarning, match="7.2.2"):

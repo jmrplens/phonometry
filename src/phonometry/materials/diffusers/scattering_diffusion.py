@@ -48,7 +48,8 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
-    from ..._internal.types import Real
+    from ..._i18n import Language
+    from ..._internal.types import Real, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 
@@ -148,7 +149,7 @@ class DiffusionResult(OwnsArrays):
             raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the polar response with the diffusion coefficient annotated.
 
@@ -166,9 +167,9 @@ class DiffusionResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an ISO 17497-2 polar-response test-report fiche to a PDF.
 
@@ -281,7 +282,7 @@ class DiffusionSpectrum(OwnsArrays):
                 raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the diffusion coefficient ``d`` versus frequency.
 
@@ -299,9 +300,9 @@ class DiffusionSpectrum(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an ISO 17497-2 diffusion-coefficient test-report fiche to a PDF.
 

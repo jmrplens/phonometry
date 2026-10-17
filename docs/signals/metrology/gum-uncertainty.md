@@ -39,10 +39,10 @@ from phonometry import metrology
 # A-weighted level: a reading plus zero-mean calibration, instrument and
 # positional corrections. The model is their sum.
 quantities = [
-    metrology.Quantity(74.0, 0.0, name="Reading"),
+    metrology.Quantity(value=74.0, uncertainty=0.0, name="Reading"),
     metrology.rectangular(0.0, 0.20, name="Calibration"),
     metrology.rectangular(0.0, 0.30, name="Instrument"),
-    metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
+    metrology.Quantity(value=0.0, uncertainty=0.35, dof=9, name="Position (Type A)"),
 ]
 result = metrology.uncertainty_propagation(lambda a, b, c, d: a + b + c + d, quantities)
 
@@ -98,10 +98,10 @@ output quantities) is not implemented at all.
 from phonometry import metrology
 
 quantities = [
-    metrology.Quantity(74.0, 0.0, name="Reading"),
+    metrology.Quantity(value=74.0, uncertainty=0.0, name="Reading"),
     metrology.rectangular(0.0, 0.20, name="Calibration"),
     metrology.rectangular(0.0, 0.30, name="Instrument"),
-    metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
+    metrology.Quantity(value=0.0, uncertainty=0.35, dof=9, name="Position (Type A)"),
 ]
 mc = metrology.monte_carlo(lambda a, b, c, d: a + b + c + d, quantities,
                     n_trials=1_000_000, coverage=0.95, seed=1)
@@ -147,10 +147,10 @@ import numpy as np
 from phonometry import metrology
 
 quantities = [
-    metrology.Quantity(74.0, 0.0, name="Reading"),
+    metrology.Quantity(value=74.0, uncertainty=0.0, name="Reading"),
     metrology.rectangular(0.0, 0.20, name="Calibration"),
     metrology.rectangular(0.0, 0.30, name="Instrument"),
-    metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
+    metrology.Quantity(value=0.0, uncertainty=0.35, dof=9, name="Position (Type A)"),
 ]
 model = lambda a, b, c, d: a + b + c + d
 result = metrology.uncertainty_propagation(model, quantities)
@@ -210,7 +210,7 @@ those standardized cases:
 
 - **Calibration.** The calibrator's class tolerance and the pre/post drift
   bound of [Calibration](calibration.md) are textbook Type B inputs:
-  propagate them (`Quantity(..., "rectangular")`) through the level model
+  propagate them (`Quantity(..., distribution="rectangular")`) through the level model
   rather than quoting the tolerance alone.
 - **Environmental levels.** The ISO 1996-2 combined uncertainty of the
   [Environmental levels](../../environment/assessment/environmental-levels.md) page is Formula (2) of

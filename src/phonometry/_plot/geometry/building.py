@@ -38,6 +38,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
     from ...building.prediction.aperture_transmission import (
         ApertureTransmissionResult,
     )
@@ -55,7 +56,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Translate a fixed UI string to Spanish, else return it unchanged."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -69,7 +70,7 @@ def plot_aperture_geometry(
     *,
     ax: Axes | None = ...,
     width_m: float,
-    language: str = ...,
+    language: Language = ...,
     **kwargs: Any,
 ) -> Axes: ...
 
@@ -80,7 +81,7 @@ def plot_aperture_geometry(
     *,
     ax: Axes | None = ...,
     radius: float,
-    language: str = ...,
+    language: Language = ...,
     **kwargs: Any,
 ) -> Axes: ...
 
@@ -91,7 +92,7 @@ def plot_aperture_geometry(
     ax: Axes | None = None,
     width_m: float | None = None,
     radius: float | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw the section through a wall aperture to scale.
@@ -180,7 +181,7 @@ def plot_aperture_result_geometry(
     result: ApertureTransmissionResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Aperture section for a result, drawn from the geometry it keeps."""
@@ -211,7 +212,7 @@ def plot_facade_elements(
     elements: Sequence[FacadeElement],
     *,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw a composite facade elevation with element areas to scale.
@@ -303,7 +304,7 @@ def plot_facade_result_geometry(
     result: FacadePredictionResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Facade elevation for a prediction, drawn from the ``elements`` it keeps."""
@@ -325,7 +326,7 @@ def plot_double_wall_geometry(
     *,
     ax: Axes | None = None,
     resonance_frequency: float | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw the mass-spring-mass double wall to scale.
@@ -403,7 +404,7 @@ def plot_double_wall_result_geometry(
     result: SoundReductionResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Double-wall drawing for a result that retained its geometry."""

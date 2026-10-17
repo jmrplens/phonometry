@@ -64,6 +64,7 @@ from .._internal.validation import (
 )
 from ._criterion import (
     CRITERION_FAMILIES,
+    CriterionFamily,
     as_band_spectrum,
     curve_of,
     exceedance_of,
@@ -76,8 +77,11 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
     from ..room.noise_criteria import NCResult, RCResult
+
 
 #: Default self-noise sound power level, dB re 1 pW, used where an element has
 #: no regenerated-noise data and as the floor for a negative computed level
@@ -90,7 +94,7 @@ def _combine(a: NDArray[np.float64], b: NDArray[np.float64]) -> NDArray[np.float
     return 10.0 * np.log10(10.0 ** (a / 10.0) + 10.0 ** (b / 10.0))
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class DuctElement(OwnsArrays):
     """One element of a duct path: what it attenuates and what it regenerates.
 
@@ -174,7 +178,7 @@ class DuctPathResult(OwnsArrays):
     stages: tuple[DuctPathStage, ...]
     room_effect: np.ndarray | None
     received_level: np.ndarray
-    criterion: str
+    criterion: CriterionFamily
     target: float | None
     label: str
     contributions: tuple[tuple[str, np.ndarray], ...] = field(default_factory=tuple)
@@ -390,7 +394,7 @@ class DuctPathResult(OwnsArrays):
 
     # -- presentation -----------------------------------------------------
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the spectrum cascading down the path against the criterion curve.
 
@@ -415,9 +419,9 @@ class DuctPathResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render the duct-borne noise calculation sheet to a PDF at ``path``.
 
@@ -469,7 +473,7 @@ def duct_path(
     frequencies: ArrayLike,
     room_effect: ArrayLike | None = None,
     source_label: str = "Fan",
-    criterion: str = "NC",
+    criterion: CriterionFamily = "NC",
     target: float | None = None,
     self_noise_floor: float | None = DEFAULT_SELF_NOISE_FLOOR,
     section: dict[str, float] | None = None,

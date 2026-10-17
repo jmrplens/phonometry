@@ -40,6 +40,7 @@ from ...io._resolve import apply_calibration, resolve_fs
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
     from ...io._signal import Signal
 
 from ..._internal.frozen import OwnsArrays
@@ -157,7 +158,7 @@ class EcmaTonality(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | np.ndarray:
         """Plot the average specific tonality T'(z) (see :mod:`phonometry._plot.psychoacoustics`).
 

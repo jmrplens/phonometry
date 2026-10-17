@@ -190,7 +190,7 @@ class TestAdrienneWindow:
     def test_the_three_printed_lengths(self, length_s: float) -> None:
         # At 100 kHz every printed length is a whole number of samples.
         fs = 100_000.0
-        window = prop.adrienne_reflection_window(fs, length_s)
+        window = prop.adrienne_reflection_window(fs, window_length_s=length_s)
         lead, flat, trail = oracle.WINDOW_PARTS_S[length_s]
         assert window.size == round((lead + flat + trail) * fs)
         n_lead, n_flat = round(lead * fs), round(flat * fs)
@@ -207,7 +207,7 @@ class TestAdrienneWindow:
 
     def test_a_window_no_longer_than_its_leading_edge_is_refused(self) -> None:
         with pytest.raises(ValueError, match="'window_length_s' must exceed"):
-            prop.adrienne_reflection_window(_FS, 0.4e-3)
+            prop.adrienne_reflection_window(_FS, window_length_s=0.4e-3)
 
     def test_the_notch_of_the_standard_window_is_about_160_hz(self) -> None:
         # Garai and Guidorzi (2000), III.D.4: about 160 Hz for 7,9 ms.
@@ -224,7 +224,7 @@ class TestAdrienneWindow:
     def test_the_notch_is_a_minimum_of_the_sampled_window(self) -> None:
         # Independent of the closed form: a finely sampled window's spectrum.
         fs = 2_000_000.0
-        window = prop.adrienne_reflection_window(fs, 7.9e-3)
+        window = prop.adrienne_reflection_window(fs, window_length_s=7.9e-3)
         size = 1 << 23
         spectrum = np.abs(np.fft.rfft(window, n=size))
         freqs = np.fft.rfftfreq(size, 1.0 / fs)

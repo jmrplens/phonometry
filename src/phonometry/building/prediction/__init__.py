@@ -21,7 +21,7 @@ from .ceiling_plenum import (
     plenum_flanking_reduction_index,
 )
 from .detailed_model import (
-    EN_12354_AIR,
+    EN12354_AIR,
     BandPath,
     DetailedAirborneResult,
     DetailedImpactResult,
@@ -165,7 +165,7 @@ from .simplified_model import (
 
 __all__ = [
     "CEILING_ATTENUATION_CONTOUR",
-    "EN_12354_AIR",
+    "EN12354_AIR",
     "MIN_MULTI_JUNCTION_KIJ",
     "PLATEAU_MATERIALS",
     "REFERENCE_AREA_M2",

@@ -118,7 +118,7 @@ Table 1 family, for which the standard defines no NC rating.
 NCResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -135,9 +135,9 @@ NCResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -256,7 +256,7 @@ equals the 31.5 Hz level.
 RCResult(
     rating: int,
     lmf: float,
-    classification: str,
+    classification: Literal['N', 'R', 'H', 'RH'],
     reference_curve: np.ndarray,
     frequencies: np.ndarray,
     levels: np.ndarray,
@@ -304,7 +304,7 @@ the standard's tabulated family.
 RCResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -321,9 +321,9 @@ RCResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

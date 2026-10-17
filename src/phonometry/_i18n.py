@@ -41,7 +41,7 @@ def check_language(language: str) -> Language:
 
 def format_number(
     value: float,
-    language: str = "en",
+    language: Language = "en",
     *,
     decimals: int = 1,
     trim: bool = False,
@@ -102,7 +102,7 @@ def fmt_minus(value: float, spec: str = "") -> str:
     return _MINUS_RE.sub("\\1−", format(value, spec), count=1)
 
 
-def decimal_comma(value: str, language: str = "en") -> str:
+def decimal_comma(value: str, language: Language = "en") -> str:
     """Swap the decimal point of an already-formatted number for the locale.
 
     Useful when a number was produced by an ``f"{x:.2f}"`` literal and only its
@@ -111,7 +111,7 @@ def decimal_comma(value: str, language: str = "en") -> str:
     return value.replace(".", ",") if language == "es" else value
 
 
-def localize_axes(ax: Axes, language: str = "en") -> None:
+def localize_axes(ax: Axes, language: Language = "en") -> None:
     """Localise the tick-label decimal separator of ``ax`` for the language.
 
     For Spanish, every major tick label of ``ax`` is reformatted so decimals use

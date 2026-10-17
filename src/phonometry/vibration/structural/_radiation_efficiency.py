@@ -63,7 +63,7 @@ with ``L1`` the smaller and ``L2`` the larger plate dimension.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -79,14 +79,19 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+
+Boundary = Literal["simply_supported", "clamped"]
+Baffle = Literal["infinite", "perpendicular"]
+
 #: Default speed of sound in air ``c0``, m/s (20 degC).
 _SPEED_OF_SOUND: float = 343.0
 #: Boundary-condition constant ``C_BC`` of Hopkins (2007) Eq. 2.227, stated
 #: under the equation on PDF page 236 (printed p. 209).
-_C_BC: dict[str, float] = {"simply_supported": 1.0, "clamped": 2.0}
+_C_BC: dict[Boundary, float] = {"simply_supported": 1.0, "clamped": 2.0}
 #: Baffle-orientation constant ``C_OB`` of Hopkins (2007) Eq. 2.227, stated
 #: under the equation on PDF page 236 (printed p. 209).
-_C_OB: dict[str, float] = {"infinite": 1.0, "perpendicular": 2.0}
+_C_OB: dict[Baffle, float] = {"infinite": 1.0, "perpendicular": 2.0}
 #: Half a one-third octave (ratio) around fc for the at-coincidence band.
 _COINCIDENCE_HALF_WIDTH: float = 2.0 ** (1.0 / 6.0)
 
@@ -140,8 +145,8 @@ class RadiationEfficiencyResult(OwnsArrays):
     critical_frequency: float
     length_x: float
     length_y: float
-    boundary: str
-    baffle: str
+    boundary: Boundary
+    baffle: Baffle
 
     def __post_init__(self) -> None:
         r"""Reject an efficiency that does not carry one value per band.
@@ -172,7 +177,7 @@ class RadiationEfficiencyResult(OwnsArrays):
         return np.asarray(10.0 * np.log10(sigma), dtype=np.float64)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the radiation efficiency ``sigma(f)`` on log-log axes.
 
@@ -187,7 +192,7 @@ class RadiationEfficiencyResult(OwnsArrays):
         )
 
     def plot_geometry(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the baffled plate to scale.
 
@@ -220,8 +225,8 @@ def radiation_efficiency(
     length_y: float,
     critical_frequency: float,
     *,
-    boundary: str = "simply_supported",
-    baffle: str = "infinite",
+    boundary: Boundary = "simply_supported",
+    baffle: Baffle = "infinite",
     speed_of_sound: float = _SPEED_OF_SOUND,
 ) -> RadiationEfficiencyResult:
     r"""Frequency-averaged radiation efficiency of a plate (Hopkins 2.9.4).

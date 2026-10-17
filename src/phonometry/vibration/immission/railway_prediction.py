@@ -83,7 +83,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -104,6 +104,11 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from ..._i18n import Language
+
+Floor = Literal["concrete", "timber"]
+Statistic = Literal["mean", "lower", "upper"]
 
 __all__ = [
     "FLOOR_NATURAL_FREQUENCIES_HZ",
@@ -629,7 +634,7 @@ def ground_transmission(
 
 
 def ground_to_floor_level_difference(
-    floor: str, *, floor_natural_frequency_hz: float
+    floor: Floor, *, floor_natural_frequency_hz: float
 ) -> NDArray[np.float64]:
     r"""The level difference from the ground to a floor, Tables A.1 and A.2.
 
@@ -657,7 +662,7 @@ def ground_to_floor_level_difference(
 
 
 def ground_to_foundation_level_difference(
-    level: str, *, statistic: str = "mean"
+    level: Literal["basement", "ground_floor"], *, statistic: Statistic = "mean"
 ) -> NDArray[np.float64]:
     r"""The level difference from the ground into the foundation, Tables A.3 and A.4.
 
@@ -683,9 +688,9 @@ def ground_to_foundation_level_difference(
 def foundation_to_floor_level_difference(
     frequencies: ArrayLike,
     *,
-    floor: str,
+    floor: Floor,
     floor_natural_frequency_hz: float,
-    statistic: str = "mean",
+    statistic: Statistic = "mean",
 ) -> NDArray[np.float64]:
     r"""The level difference from the foundation to a floor, Tables A.5 and A.6.
 
@@ -838,7 +843,7 @@ class TrainCategoryPrediction(OwnsArrays):
     peak_velocity_mm_s: float
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the emission, the floor spectrum and the KB-weighted bands.
 
@@ -979,7 +984,9 @@ def line_source_correction(
 
 
 def train_decay_exponent(
-    point_exponent: float, *, fitted_with: str = "power_and_damping"
+    point_exponent: float,
+    *,
+    fitted_with: Literal["power_and_damping", "power_law"] = "power_and_damping",
 ) -> float:
     r"""The decay exponent of a train from that of a point excitation, Annex B.
 

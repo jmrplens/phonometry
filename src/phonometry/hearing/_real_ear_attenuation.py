@@ -72,7 +72,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -87,6 +87,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
+
+    from .._i18n import Language
 
 __all__ = [
     "REAT_BETWEEN_LABORATORY_UNCERTAINTY",
@@ -316,7 +318,7 @@ class RealEarAttenuationResult(OwnsArrays):
     n_subjects: int
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the mean attenuation the way Clause 6 l) asks for it.
 
@@ -439,7 +441,7 @@ def _frequency_range(frequency: float) -> str:
 def reat_expanded_uncertainty(
     frequencies: ArrayLike,
     *,
-    protector: str,
+    protector: Literal["earplug", "earmuff"],
     between_laboratories: bool = False,
 ) -> np.ndarray:
     """The typical :math:`U_{95}` of a mean attenuation, band by band (A.2, B.2).
@@ -595,7 +597,7 @@ class AttenuationDifferenceResult(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw each band's difference against the criterion it has to beat.
 
@@ -895,7 +897,7 @@ class REATSoundFieldCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw each condition of 4.2.2 against its limit, band by band.
 

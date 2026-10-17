@@ -150,7 +150,7 @@ ImpedanceTubeResult(
     spacing_m: float,
     x1: float,
     diameter_m: float | None = None,
-    shape: str | None = None,
+    shape: Literal['circular', 'rectangular', 'square'] | None = None,
 )
 ```
 
@@ -178,7 +178,7 @@ them.
 ImpedanceTubeResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -194,7 +194,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ImpedanceTubeResult.plot_geometry(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -211,9 +211,9 @@ ImpedanceTubeResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -328,7 +328,7 @@ plane_wave_frequency_range(
     speed_of_sound: float,
     *,
     diameter_m: float | None = None,
-    shape: str = 'circular',
+    shape: Literal['circular', 'rectangular', 'square'] = 'circular',
 ) -> tuple[float, float]
 ```
 
@@ -367,10 +367,10 @@ plot_impedance_tube_geometry(
     spacing_m: float,
     x1: float,
     diameter_m: float | None = None,
-    shape: str | None = 'circular',
+    shape: Literal['circular', 'rectangular', 'square'] | None = 'circular',
     sample_thickness_m: float | None = None,
     speed_of_sound: float = 343.2,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -418,9 +418,9 @@ plot_transmission_tube_geometry(
     s2: float,
     thickness_m: float,
     diameter_m: float | None = None,
-    shape: str | None = 'circular',
+    shape: Literal['circular', 'rectangular', 'square'] | None = 'circular',
     speed_of_sound: float = 343.2,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -433,7 +433,7 @@ its thickness, the two downstream microphones at `l2` and `l2 + s2`
 (measured from the front face, the module's locked convention), and the
 changeable termination of the two-load method, with the ASTM working
 range of
-[`plane_wave_frequency_range_astm`](/phonometry/reference/api/materials/four-microphone/#plane_wave_frequency_range_astm).
+[`plane_wave_frequency_range_astm_e2611`](/phonometry/reference/api/materials/four-microphone/#plane_wave_frequency_range_astm_e2611).
 
 **Parameters**
 
@@ -631,7 +631,7 @@ two_microphone_impedance(
     characteristic_impedance: float,
     attenuation_np_per_m: ArrayLike | None = None,
     diameter_m: float | None = None,
-    shape: str = 'circular',
+    shape: Literal['circular', 'rectangular', 'square'] = 'circular',
 ) -> ImpedanceTubeResult
 ```
 

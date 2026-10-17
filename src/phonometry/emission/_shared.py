@@ -353,11 +353,11 @@ def _background_exposure(
 
 
 def _reference_power_levels(
-    lw_ref: object,
+    reference_sound_power_levels: object,
     frequencies: object,
     *,
     fraction: BandFraction,
-    name: str = "lw_ref",
+    name: str = "reference_sound_power_levels",
     temperature_c: float | None = None,
     static_pressure_kpa: float | None = None,
 ) -> np.ndarray:
@@ -372,7 +372,7 @@ def _reference_power_levels(
     calibrated, under the reference conditions (ISO 3747, whose Equation (9)
     corrects the measured levels of the reference source instead).
 
-    :param lw_ref: The levels, or a calibration.
+    :param reference_sound_power_levels: The levels, or a calibration.
     :param frequencies: The bands the method works in; required with a
         calibration.
     :param fraction: The bands of the method, 3 for one-third octaves or 1 for
@@ -388,15 +388,15 @@ def _reference_power_levels(
     """
     from .reference_sound_source import ReferenceSourceCalibration
 
-    if not isinstance(lw_ref, ReferenceSourceCalibration):
-        return np.asarray(lw_ref, dtype=np.float64)
+    if not isinstance(reference_sound_power_levels, ReferenceSourceCalibration):
+        return np.asarray(reference_sound_power_levels, dtype=np.float64)
     if frequencies is None:
         msg = (
             f"'frequencies' are required to read '{name}' from a "
             "ReferenceSourceCalibration."
         )
         raise ValueError(msg)
-    return lw_ref.sound_power_level_at(
+    return reference_sound_power_levels.sound_power_level_at(
         np.asarray(frequencies, dtype=np.float64),
         fraction=fraction,
         temperature_c=temperature_c,

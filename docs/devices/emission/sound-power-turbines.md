@@ -102,10 +102,10 @@ one box, the LP turbine in its own, then the generator and the exciter.
 from phonometry import emission
 
 boxes = [                      # length, width, height above the floor [m]
-    emission.TurbineReferenceBox(6.0, 4.0, 3.5, "HP-IP"),
-    emission.TurbineReferenceBox(5.0, 5.0, 4.5, "LP"),
-    emission.TurbineReferenceBox(7.0, 3.5, 3.0, "Generator"),
-    emission.TurbineReferenceBox(3.0, 2.5, 2.2, "Exciter"),
+    emission.TurbineReferenceBox(length_m=6.0, width_m=4.0, height_m=3.5, label="HP-IP"),
+    emission.TurbineReferenceBox(length_m=5.0, width_m=5.0, height_m=4.5, label="LP"),
+    emission.TurbineReferenceBox(length_m=7.0, width_m=3.5, height_m=3.0, label="Generator"),
+    emission.TurbineReferenceBox(length_m=3.0, width_m=2.5, height_m=2.2, label="Exciter"),
 ]
 surface = emission.turbine_measurement_surface(boxes)
 print(surface.lengths_m, surface.widths_m, surface.heights_m)

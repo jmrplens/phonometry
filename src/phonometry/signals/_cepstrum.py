@@ -67,7 +67,7 @@ remedy, exactly like the ``oversample`` padding of
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -85,7 +85,11 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
     from ..io._signal import Signal
+
+Kind = Literal["power", "real", "complex"]
+Mode = Literal["lowpass", "highpass"]
 
 __all__ = [
     "CepstrumResult",
@@ -208,7 +212,7 @@ class CepstrumResult(OwnsArrays):
 
     quefrencies: NDArray[np.float64]
     cepstrum: NDArray[np.float64]
-    kind: str
+    kind: Kind
     fs: float
     nfft: int
     linear_phase_samples: int
@@ -255,7 +259,7 @@ class CepstrumResult(OwnsArrays):
         return np.asarray(np.fft.ifft(spectrum).real, dtype=np.float64)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the cepstrum against quefrency (positive quefrencies).
 
@@ -272,7 +276,7 @@ def cepstrum(
     x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     *,
-    kind: str = "power",
+    kind: Kind = "power",
     nfft: int | None = None,
 ) -> CepstrumResult:
     """Cepstrum of a record: power, real or complex.
@@ -357,7 +361,7 @@ class LifterResult(OwnsArrays):
     quefrencies: NDArray[np.float64]
     cepstrum: NDArray[np.float64]
     cutoff: float
-    mode: str
+    mode: Mode
     fs: float
     nfft: int
 
@@ -401,7 +405,7 @@ class LifterResult(OwnsArrays):
         require_same_length(self, "quefrencies", "cepstrum", axis="quefrency")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | NDArray[Any]:
         """Plot the cepstrum with the cutoff and the two log spectra.
 
@@ -421,7 +425,7 @@ def lifter(
     fs: float | None = None,
     *,
     cutoff: float,
-    mode: str = "lowpass",
+    mode: Mode = "lowpass",
     nfft: int | None = None,
 ) -> LifterResult:
     """Lifter a record's log spectrum: keep quefrencies below or above a cutoff.
@@ -572,7 +576,7 @@ class EchoDetectionResult(OwnsArrays):
         require_same_length(self, "quefrencies", "cepstrum", axis="quefrency")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the power cepstrum with the detected echo marked.
 

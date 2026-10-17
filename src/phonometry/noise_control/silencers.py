@@ -132,6 +132,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
 
 __all__ = [
@@ -652,7 +654,7 @@ class ReactiveSilencerResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the transmission (and insertion) loss against frequency.
 
@@ -665,7 +667,9 @@ class ReactiveSilencerResult(OwnsArrays):
         check_language(language)
         return plot_reactive_silencer(self, ax=ax, language=language, **kwargs)
 
-    def plot_geometry(self, ax: Axes | None = None, *, language: str = "en") -> Axes:
+    def plot_geometry(
+        self, ax: Axes | None = None, *, language: Language = "en"
+    ) -> Axes:
         """Draw the silencer cross-section to scale (dimensioned side cut).
 
         A named device is drawn from its ``geometry``; a result assembled by a
@@ -693,9 +697,9 @@ class ReactiveSilencerResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a reactive-silencer transmission-loss fiche to ``path``.
 
@@ -1316,7 +1320,9 @@ class SilencerChain:
             chain=self._snapshot(),
         )
 
-    def plot_geometry(self, ax: Axes | None = None, *, language: str = "en") -> Axes:
+    def plot_geometry(
+        self, ax: Axes | None = None, *, language: Language = "en"
+    ) -> Axes:
         """Draw the chain: its ducts to scale, its branch points marked.
 
         Every duct is drawn at its declared length and equivalent circular

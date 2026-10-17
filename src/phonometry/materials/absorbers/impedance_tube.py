@@ -32,7 +32,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -53,8 +53,11 @@ from ..._internal.warnings import PhonometryWarning
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-    from ..._internal.types import Real
+    from ..._i18n import Language
+    from ..._internal.types import Real, ReportEngine
     from ..._report.metadata import ReportMetadata
+
+Shape = Literal["circular", "rectangular", "square"]
 
 Complex = NDArray[np.complex128]
 
@@ -91,7 +94,7 @@ _SPEED_OF_SOUND_POSITIVE = "'speed_of_sound' must be positive."
 #: Aliases accepted for the tube cross-section ``shape`` arguments. A square
 #: tube is the rectangular case with equal sides (ISO 10534-2, 4.1;
 #: ASTM E2611-19, 6.2.5).
-_SHAPE_ALIASES = {
+_SHAPE_ALIASES: dict[str, Literal["circular", "rectangular"]] = {
     "circular": "circular",
     "rectangular": "rectangular",
     "square": "rectangular",
@@ -183,7 +186,7 @@ def air_density_iso10534(
 # ---------------------------------------------------------------------------
 # Cross-section helpers, wavenumber and tube attenuation (ISO 10534-2).
 # ---------------------------------------------------------------------------
-def _canonical_shape(shape: str) -> str:
+def _canonical_shape(shape: str) -> Literal["circular", "rectangular"]:
     """Normalise a cross-section name to ``"circular"``/``"rectangular"``."""
     try:
         return _SHAPE_ALIASES[shape]
@@ -456,7 +459,7 @@ def plane_wave_frequency_range(
     speed_of_sound: float,
     *,
     diameter_m: float | None = None,
-    shape: str = "circular",
+    shape: Shape = "circular",
 ) -> tuple[float, float]:
     r"""Working plane-wave frequency range ``(f_l, f_u)`` (ISO 10534-2, 4.2-4.5).
 
@@ -570,7 +573,7 @@ class ImpedanceTubeResult(OwnsArrays):
     spacing_m: float
     x1: float
     diameter_m: float | None = None
-    shape: str | None = None
+    shape: Shape | None = None
 
     def __post_init__(self) -> None:
         """Reject a result whose per-frequency arrays cannot be reported.
@@ -638,7 +641,7 @@ class ImpedanceTubeResult(OwnsArrays):
                 raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the absorption spectrum ``alpha(f)`` with ``|r|`` overlaid.
 
@@ -652,7 +655,7 @@ class ImpedanceTubeResult(OwnsArrays):
         return plot_impedance_tube(self, ax=ax, language=language, **kwargs)
 
     def plot_geometry(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the two-microphone tube to scale (dimensioned side view).
 
@@ -672,9 +675,9 @@ class ImpedanceTubeResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         r"""Render an ISO 10534-2 impedance-tube test-report fiche to a PDF.
 
@@ -734,7 +737,7 @@ def two_microphone_impedance(
     characteristic_impedance: float,
     attenuation_np_per_m: ArrayLike | None = None,
     diameter_m: float | None = None,
-    shape: str = "circular",
+    shape: Shape = "circular",
 ) -> ImpedanceTubeResult:
     """Full two-microphone reduction (ISO 10534-2:2001, Clause 7).
 

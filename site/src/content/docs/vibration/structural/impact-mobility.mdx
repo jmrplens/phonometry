@@ -280,7 +280,7 @@ midpoint of the record about **10 %** of the highest (8.3, 8.5.2).
 # Give the check the force of the same impact: a driving-point acceleration
 # follows the force during the impact (the mass line), so the decay is judged
 # from the end of the pulse on.
-decay = vibration.check_response_decay(accel, fs, force=force)
+decay = vibration.check_response_decay(accel, fs, force_n=force)
 print(decay.passes, round(100 * decay.end_ratio, 1))    # False 21.1 (%)
 print(round(100 * decay.midpoint_ratio, 1))             # 46.3 (%), not 10 %
 ```
@@ -304,7 +304,7 @@ Annex A becomes too sensitive to errors in the damping estimate (8.5.2), and
 the check applies that limit when told a window will be used:
 
 ```python
-windowed_decay = vibration.check_response_decay(accel, fs, force=force,
+windowed_decay = vibration.check_response_decay(accel, fs, force_n=force,
                                                 exponential_window=True)
 print(windowed_decay.passes, windowed_decay.limit_ratio)   # True 0.25
 

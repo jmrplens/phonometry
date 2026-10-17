@@ -65,11 +65,12 @@ if TYPE_CHECKING:
     from matplotlib.projections.polar import PolarAxes
     from reportlab.graphics.shapes import Drawing
 
+    from .._i18n import Language
     from ..electroacoustics.microphone import MicrophoneCharacteristics
     from .metadata import ReportMetadata
 
 
-def _basis(metadata: ReportMetadata | None, language: str = "en") -> str:
+def _basis(metadata: ReportMetadata | None, language: Language = "en") -> str:
     """The standard-basis line: IEC 60268-4 with the IEC 60263 graph convention."""
     import html
 
@@ -87,13 +88,13 @@ def _basis(metadata: ReportMetadata | None, language: str = "en") -> str:
     )
 
 
-def _db_1(value: float, language: str = "en") -> str:
+def _db_1(value: float, language: Language = "en") -> str:
     """A level rounded to one decimal, locale-formatted."""
     return format_number(value, language, decimals=1)
 
 
 def _noise_rows(
-    result: MicrophoneCharacteristics, language: str = "en"
+    result: MicrophoneCharacteristics, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """The equivalent-noise and signal-to-noise table rows, when known."""
     rows: list[tuple[str, str]] = []
@@ -117,7 +118,7 @@ def _noise_rows(
 
 
 def _rated_rows(
-    result: MicrophoneCharacteristics, language: str = "en"
+    result: MicrophoneCharacteristics, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """The rated-characteristics table rows (only the quantities that exist)."""
     import html
@@ -183,7 +184,7 @@ def _rated_rows(
 # IEC 60263 characteristic graphs
 # --------------------------------------------------------------------------- #
 def _response_drawing(
-    result: MicrophoneCharacteristics, target_width: float, language: str = "en"
+    result: MicrophoneCharacteristics, target_width: float, language: Language = "en"
 ) -> Drawing:
     """Free-field response with the tolerance band and effective-range markers.
 
@@ -211,7 +212,7 @@ def _response_drawing(
 
 
 def _secondary_drawing(
-    result: MicrophoneCharacteristics, target_width: float, language: str = "en"
+    result: MicrophoneCharacteristics, target_width: float, language: Language = "en"
 ) -> Drawing | None:
     """Directional-pattern, noise-spectrum and distortion panels for the data.
 
@@ -266,7 +267,7 @@ def _secondary_drawing(
     return _drawing_from_figure(fig, target_width, language)
 
 
-def _statement(result: MicrophoneCharacteristics, language: str = "en") -> str:
+def _statement(result: MicrophoneCharacteristics, language: Language = "en") -> str:
     """The boxed headline: free-field sensitivity and effective range."""
     return t(
         "Free-field sensitivity <b>{mv} mV/Pa</b> ({level} dB re 1 V/Pa at "
@@ -282,7 +283,7 @@ def _statement(result: MicrophoneCharacteristics, language: str = "en") -> str:
 
 
 def _verdict(
-    result: MicrophoneCharacteristics, requirement: float, language: str = "en"
+    result: MicrophoneCharacteristics, requirement: float, language: Language = "en"
 ) -> tuple[str, bool] | None:
     """Noise verdict: the equivalent noise level must not exceed the requirement."""
     level = result.equivalent_noise_level
@@ -305,7 +306,7 @@ def render_iec60268_4_report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an IEC 60268-4 microphone-characteristics fiche to a PDF at ``path``.
 

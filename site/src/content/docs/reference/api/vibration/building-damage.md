@@ -223,7 +223,7 @@ The guideline value the velocity is compared with, in mm/s.
 DamageAssessment.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

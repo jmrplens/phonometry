@@ -64,7 +64,7 @@ averages is not, in general, optimal.
 **Non-integer samples per period.** When :math:`f_\mathrm{s} T` is not an integer
 the period boundaries fall between samples. Each block is then aligned to
 a common integer grid by the band-limited fractional delay of
-:func:`phonometry.signals.test_signals.fractional_delay` before averaging, so
+:func:`phonometry.signals.fractional_delay` before averaging, so
 the periodic waveform is recovered within the interpolation error of that
 band-limited shift. An integer :math:`f_\mathrm{s} T` needs no interpolation and
 the waveform is recovered to machine precision. The averaged samples stay
@@ -91,13 +91,14 @@ from .._internal.validation import (
     require_scalar,
 )
 from ..io._resolve import like_input, require_signal_rate, resolve_fs
+from ._test_signals import _validate_1d_finite, fractional_delay
 from .spectra import _positive
-from .test_signals import _validate_1d_finite, fractional_delay
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
     from ..io._signal import Signal
 
 __all__ = [
@@ -309,7 +310,7 @@ class SynchronousAverageResult(OwnsArrays):
         return float(np.sqrt(self.n_averages))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | NDArray[Any]:
         """Plot the averaged waveform and the comb-filter magnitude.
 
@@ -407,7 +408,7 @@ def time_synchronous_average(
     sliced
     directly and a noiseless periodic signal is recovered exactly; otherwise
     each period is aligned to a common integer grid by the band-limited
-    fractional delay of :func:`~phonometry.signals.test_signals.fractional_delay`
+    fractional delay of :func:`~phonometry.signals.fractional_delay`
     and recovered within that interpolation error.
 
     :param x: Signal, 1-D, containing the periodic component plus noise. Accepts a :class:`phonometry.io.Signal`, whose

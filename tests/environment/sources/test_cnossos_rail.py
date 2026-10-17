@@ -744,10 +744,10 @@ def test_flow_term_is_exact() -> None:
     """(2.3.2): doubling the flow raises the line power by exactly 10 lg 2."""
     track = _reference_track(impact_roughness=None)
     single = railway_source_power(
-        RailwayVehicle(_reference_stock(), flow_rate=10.0, speed_kmh=100.0), track
+        RailwayVehicle(stock=_reference_stock(), flow_rate=10.0, speed_kmh=100.0), track
     )
     doubled = railway_source_power(
-        RailwayVehicle(_reference_stock(), flow_rate=20.0, speed_kmh=100.0), track
+        RailwayVehicle(stock=_reference_stock(), flow_rate=20.0, speed_kmh=100.0), track
     )
     np.testing.assert_allclose(
         doubled.total_line_power - single.total_line_power,
@@ -761,7 +761,7 @@ def test_idling_excludes_rolling_and_uses_the_idling_flow_term() -> None:
     track = _reference_track()
     idling = railway_source_power(
         RailwayVehicle(
-            _reference_stock(),
+            stock=_reference_stock(),
             condition=RunningCondition.IDLING,
             idling_time=1.0,
         ),
@@ -787,11 +787,11 @@ def test_minimum_speed_floor_and_impact_exclusion() -> None:
     """
     plain = _reference_track(impact_roughness=None)
     slow = railway_source_power(
-        RailwayVehicle(_reference_stock(), flow_rate=10.0, speed_kmh=20.0), plain
+        RailwayVehicle(stock=_reference_stock(), flow_rate=10.0, speed_kmh=20.0), plain
     )
     floored = railway_source_power(
         RailwayVehicle(
-            _reference_stock(), flow_rate=10.0, speed_kmh=RAILWAY_MIN_SPEED_KMH
+            stock=_reference_stock(), flow_rate=10.0, speed_kmh=RAILWAY_MIN_SPEED_KMH
         ),
         plain,
     )
@@ -816,10 +816,12 @@ def test_minimum_speed_floor_and_impact_exclusion() -> None:
         (120.0, True),
     ):
         with_joints = railway_source_power(
-            RailwayVehicle(_reference_stock(), flow_rate=10.0, speed_kmh=speed), jointed
+            RailwayVehicle(stock=_reference_stock(), flow_rate=10.0, speed_kmh=speed),
+            jointed,
         )
         without = railway_source_power(
-            RailwayVehicle(_reference_stock(), flow_rate=10.0, speed_kmh=speed), plain
+            RailwayVehicle(stock=_reference_stock(), flow_rate=10.0, speed_kmh=speed),
+            plain,
         )
         differs = bool(
             np.any(
@@ -831,7 +833,7 @@ def test_minimum_speed_floor_and_impact_exclusion() -> None:
     # a tram keeps its impact noise down to 30 km/h
     tram = railway_source_power(
         RailwayVehicle(
-            _reference_stock(tram=True),
+            stock=_reference_stock(tram=True),
             flow_rate=10.0,
             speed_kmh=TRAM_MIN_SPEED_KMH,
         ),
@@ -839,7 +841,7 @@ def test_minimum_speed_floor_and_impact_exclusion() -> None:
     )
     tram_without = railway_source_power(
         RailwayVehicle(
-            _reference_stock(tram=True),
+            stock=_reference_stock(tram=True),
             flow_rate=10.0,
             speed_kmh=TRAM_MIN_SPEED_KMH,
         ),
@@ -856,13 +858,13 @@ def test_aerodynamic_noise_only_above_200_kmh() -> None:
     )
     below = railway_source_power(
         RailwayVehicle(
-            _reference_stock(aerodynamic=aero), flow_rate=1.0, speed_kmh=200.0
+            stock=_reference_stock(aerodynamic=aero), flow_rate=1.0, speed_kmh=200.0
         ),
         track,
     )
     above = railway_source_power(
         RailwayVehicle(
-            _reference_stock(aerodynamic=aero), flow_rate=1.0, speed_kmh=201.0
+            stock=_reference_stock(aerodynamic=aero), flow_rate=1.0, speed_kmh=201.0
         ),
         track,
     )
@@ -875,13 +877,13 @@ def test_bridge_is_a_separate_omnidirectional_source_at_height_a() -> None:
     bridge = bridge_transfer(BridgeType.PLUS_10_DBA)
     track = _reference_track(bridge_transfer=bridge, impact_roughness=None)
     on_axis = railway_source_power(
-        RailwayVehicle(_reference_stock(), flow_rate=10.0, speed_kmh=100.0),
+        RailwayVehicle(stock=_reference_stock(), flow_rate=10.0, speed_kmh=100.0),
         track,
         phi=0.0,
         psi=30.0,
     )
     broadside = railway_source_power(
-        RailwayVehicle(_reference_stock(), flow_rate=10.0, speed_kmh=100.0),
+        RailwayVehicle(stock=_reference_stock(), flow_rate=10.0, speed_kmh=100.0),
         track,
         phi=90.0,
         psi=0.0,
@@ -894,7 +896,7 @@ def test_bridge_is_a_separate_omnidirectional_source_at_height_a() -> None:
     )
     # and it survives the -20 dB dipole null that removes everything else
     without = railway_source_power(
-        RailwayVehicle(_reference_stock(), flow_rate=10.0, speed_kmh=100.0),
+        RailwayVehicle(stock=_reference_stock(), flow_rate=10.0, speed_kmh=100.0),
         _reference_track(impact_roughness=None),
         phi=0.0,
         psi=30.0,
@@ -906,11 +908,11 @@ def test_superstructure_is_optional_and_freight_only() -> None:
     """(2.3.10) applies to vehicle type ``a`` only, and its table is all zeros."""
     track = _reference_track(impact_roughness=None)
     plain = railway_source_power(
-        RailwayVehicle(_reference_stock(), flow_rate=10.0, speed_kmh=100.0), track
+        RailwayVehicle(stock=_reference_stock(), flow_rate=10.0, speed_kmh=100.0), track
     )
     freight = railway_source_power(
         RailwayVehicle(
-            _reference_stock(superstructure_transfer=superstructure_transfer()),
+            stock=_reference_stock(superstructure_transfer=superstructure_transfer()),
             flow_rate=10.0,
             speed_kmh=100.0,
         ),
@@ -922,7 +924,7 @@ def test_superstructure_is_optional_and_freight_only() -> None:
 
 def test_traffic_mix_is_summed_energetically() -> None:
     track = _reference_track(impact_roughness=None)
-    one = RailwayVehicle(_reference_stock(), flow_rate=10.0, speed_kmh=100.0)
+    one = RailwayVehicle(stock=_reference_stock(), flow_rate=10.0, speed_kmh=100.0)
     single = railway_source_power(one, track)
     pair = railway_source_power([one, one], track)
     np.testing.assert_allclose(
@@ -939,9 +941,9 @@ def test_invalid_inputs() -> None:
         railway_source_power([], track)
     # the vehicles are built outside the raises blocks, so each block holds
     # exactly the one call whose exception is under test
-    standing = RailwayVehicle(stock, flow_rate=1.0, speed_kmh=0.0)
-    negative_flow = RailwayVehicle(stock, flow_rate=-1.0, speed_kmh=50.0)
-    running = RailwayVehicle(stock, flow_rate=1.0, speed_kmh=50.0)
+    standing = RailwayVehicle(stock=stock, flow_rate=1.0, speed_kmh=0.0)
+    negative_flow = RailwayVehicle(stock=stock, flow_rate=-1.0, speed_kmh=50.0)
+    running = RailwayVehicle(stock=stock, flow_rate=1.0, speed_kmh=50.0)
     zero_length = _reference_track(length=0.0)
     with pytest.raises(ValueError, match="positive number of km/h"):
         railway_source_power(standing, track)
@@ -1003,7 +1005,7 @@ def test_invalid_inputs() -> None:
 def _emission_result() -> RailwayEmissionResult:
     """One emission as the public entry point hands it back, to be bent."""
     return railway_source_power(
-        RailwayVehicle(_reference_stock(), flow_rate=10.0, speed_kmh=100.0),
+        RailwayVehicle(stock=_reference_stock(), flow_rate=10.0, speed_kmh=100.0),
         _reference_track(),
     )
 
@@ -1064,7 +1066,7 @@ def test_result_plot_draws_both_heights() -> None:
     mpl.use("Agg")
 
     result = railway_source_power(
-        RailwayVehicle(_reference_stock(), flow_rate=10.0, speed_kmh=100.0),
+        RailwayVehicle(stock=_reference_stock(), flow_rate=10.0, speed_kmh=100.0),
         _reference_track(),
     )
     ax = result.plot()

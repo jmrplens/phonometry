@@ -473,7 +473,7 @@ def test_a_5_db_range_read_in_decimal_keeps_the_arithmetic_mean() -> None:
     row alike.
     """
     levels = np.array([64.4, 59.4, 61.0, 62.3, 63.1, 60.2])
-    assert float(np.ptp(levels)) > 5.0  # noqa: PLR2004
+    assert float(np.ptp(levels)) > 5.0
     plan = emission.special_room_source_locations(
         levels[:, None], frequencies=[500.0], a_weighted_levels=levels
     )
@@ -639,7 +639,7 @@ def test_comparison_background_margin_of_the_reference_counts() -> None:
             LW_RSS,
             frequencies=FREQS,
             background_levels=BACKGROUND,
-            background_levels_ref=bg_ref,
+            reference_background_levels=bg_ref,
         )
     assert not bool(res.background_requirement_met[0])
 
@@ -658,7 +658,7 @@ def test_comparison_corrects_the_reference_levels_by_table4() -> None:
         LW_RSS,
         frequencies=FREQS,
         background_levels=BACKGROUND,
-        background_levels_ref=bg_ref,
+        reference_background_levels=bg_ref,
     )
     lpr = float(_energy_mean(RSS[:, 0] - table4))
     assert res.mean_reference_level[0] == pytest.approx(lpr, abs=1e-12)
@@ -677,7 +677,7 @@ def test_comparison_reference_correction_moves_formula10_by_its_table4_row() -> 
         [90.0],
         frequencies=[1000.0],
         background_levels=[50.0],
-        background_levels_ref=[75.0],
+        reference_background_levels=[75.0],
     )
     assert res.mean_reference_level[0] == pytest.approx(78.0, abs=1e-12)
     assert res.sound_power_level[0] == pytest.approx(87.0, abs=1e-12)
@@ -705,7 +705,8 @@ def test_annex_e_c2_matches_part_1() -> None:
     )  # fmt: skip
     assert direct.c2 == pytest.approx(part1.c2, abs=1e-15)
     np.testing.assert_allclose(
-        direct.sound_power_level_ref, direct.sound_power_level + direct.c2
+        direct.sound_power_level_at_reference_conditions,
+        direct.sound_power_level + direct.c2,
     )
 
 

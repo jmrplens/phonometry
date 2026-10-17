@@ -49,6 +49,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..building.measurement.joint_insulation import LaboratoryJointInsulationResult
     from ..building.measurement.laboratory_improvement import (
         LaboratoryFloorCoveringImprovementResult,
@@ -110,7 +111,7 @@ def _text(value: str | None) -> str | None:
     return None if value is None else html.escape(value)
 
 
-def _number(value: float | None, language: str) -> str | None:
+def _number(value: float | None, language: Language) -> str | None:
     """A header number printed as the caller wrote it."""
     return None if value is None else fmt_meta(value, language)
 
@@ -136,7 +137,7 @@ def _pin_range(axes: Axes, values: np.ndarray, printed: tuple[float, float]) -> 
 def _floor_header(
     result: LaboratoryFloorCoveringImprovementResult,
     metadata: ReportMetadata | None,
-    language: str,
+    language: Language,
 ) -> list[tuple[str, str]]:
     """The header fields of Figure H.4, in the order the form prints them."""
     md = metadata
@@ -209,7 +210,7 @@ def _floor_header(
 
 
 def _floor_box(
-    result: LaboratoryFloorCoveringImprovementResult, language: str
+    result: LaboratoryFloorCoveringImprovementResult, language: Language
 ) -> tuple[str, list[str]]:
     """The rating of Figure H.4 and the two floor ratings H.5 i) asks for."""
     symbol, term = _FLOOR_SYMBOLS[result.reference_floor]
@@ -244,7 +245,7 @@ def render_floor_covering_form(
     *,
     metadata: ReportMetadata | None,
     verbose: bool,
-    language: str,
+    language: Language,
 ) -> str:
     """Render the form of ISO 10140-1:2021 Figure H.4 to a PDF.
 
@@ -269,7 +270,7 @@ def render_floor_covering_form(
     columns.append((t("&#916;L [dB]", language), np.asarray(result.improvement), 1))
     widths_mm = _FLOOR_VERBOSE_COLUMNS_MM if verbose else _FLOOR_COLUMNS_MM
 
-    def _plot(ax: Axes | None = None, language: str = language) -> Axes:
+    def _plot(ax: Axes | None = None, language: Language = language) -> Axes:
         axes = result.plot(ax=ax, language=language, rating_range=True)
         values = np.asarray(result.improvement, dtype=np.float64)
         _pin_range(axes, values, _DELTA_L_RANGE_DB)
@@ -324,7 +325,9 @@ def render_floor_covering_form(
 # --- Figure J.7 --------------------------------------------------------------
 
 
-def _joint_cells(result: LaboratoryJointInsulationResult, language: str) -> list[str]:
+def _joint_cells(
+    result: LaboratoryJointInsulationResult, language: Language
+) -> list[str]:
     """``Rs`` per band, as the table of Figure J.7 prints it.
 
     A minimum value carries ``≥``, and one set to the maximum of the
@@ -345,7 +348,7 @@ def _joint_cells(result: LaboratoryJointInsulationResult, language: str) -> list
 def _joint_header(
     result: LaboratoryJointInsulationResult,
     metadata: ReportMetadata | None,
-    language: str,
+    language: Language,
 ) -> list[tuple[str, str]]:
     """The header fields of Figure J.7, in the order the form prints them."""
     md = metadata
@@ -394,7 +397,7 @@ def _joint_header(
 
 
 def _room_climate(
-    temperature: float | None, humidity: float | None, language: str
+    temperature: float | None, humidity: float | None, language: Language
 ) -> str | None:
     """``20.5 °C, 47 %`` for one room, or ``None`` when neither is known."""
     parts = []
@@ -405,7 +408,7 @@ def _room_climate(
     return ", ".join(parts) if parts else None
 
 
-def _joint_climate(md: ReportMetadata, language: str) -> str | None:
+def _joint_climate(md: ReportMetadata, language: Language) -> str | None:
     """The climate in both test rooms, as the row of Figure J.7 asks.
 
     The per-room fields when given, the single ``temperature_c`` and
@@ -444,13 +447,13 @@ def _joint_climate(md: ReportMetadata, language: str) -> str | None:
     return " / ".join(rooms)
 
 
-def _open_term(value: int | None, language: str) -> str:
+def _open_term(value: int | None, language: Language) -> str:
     """An open-band adaptation term with its sign, or *unbounded*."""
     return t("unbounded", language) if value is None else f"{_signed(value)} dB"
 
 
 def _joint_box(
-    result: LaboratoryJointInsulationResult, language: str
+    result: LaboratoryJointInsulationResult, language: Language
 ) -> tuple[str, list[str]]:
     """The evaluation of Figure J.7, bracketed when J.1 says so."""
     rating = result.rating
@@ -512,7 +515,7 @@ def render_joint_form(
     *,
     metadata: ReportMetadata | None,
     verbose: bool,
-    language: str,
+    language: Language,
 ) -> str:
     """Render the form of ISO 10140-1:2021 Figure J.7 to a PDF.
 
@@ -546,7 +549,7 @@ def render_joint_form(
         columns = [(header, cells, 1)]
         widths = None
 
-    def _plot(ax: Axes | None = None, language: str = language) -> Axes:
+    def _plot(ax: Axes | None = None, language: Language = language) -> Axes:
         axes = result.plot(ax=ax, language=language)
         values = np.concatenate(
             [
@@ -607,6 +610,7 @@ def _require_reportlab() -> None:
     :raises ImportError: If reportlab is not installed.
     """
     try:
+        # Imported only to fail early, with the hint, when the optional dependency is absent.
         import reportlab  # noqa: F401
     except ImportError as exc:
         raise ImportError(_REPORTLAB_HINT) from exc
@@ -629,7 +633,7 @@ def _compose(
     draw: Callable[..., Axes],
     result: ResultBlock,
     metadata: ReportMetadata | None,
-    language: str,
+    language: Language,
 ) -> str:
     """Hand one form to the shared sound-insulation skeleton."""
     return compose_insulation_fiche(

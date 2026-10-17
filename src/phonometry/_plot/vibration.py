@@ -56,6 +56,7 @@ if TYPE_CHECKING:
     from matplotlib.projections.polar import PolarAxes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
     from ..vibration.human.exposure import (
         DailyVibrationExposure,
         WeightedSpectrum,
@@ -529,7 +530,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -540,7 +541,7 @@ def _plot_verdict_points(
     values: NDArray[np.float64],
     inside: NDArray[np.bool_],
     kwargs: dict[str, Any],
-    language: str,
+    language: Language,
 ) -> None:
     """The measured points of a verifier, green inside the band and red outside.
 
@@ -573,7 +574,7 @@ def plot_vibration_weighting(
     result: WeightingResponse,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Frequency-weighting factor (dB) versus frequency (ISO 8041-1).
@@ -611,7 +612,7 @@ def plot_weighted_spectrum(
     result: WeightedSpectrum,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Unweighted vs weighted one-third-octave acceleration spectrum.
@@ -680,7 +681,7 @@ def plot_daily_exposure(
     result: DailyVibrationExposure,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Partial daily exposures against the EAV / ELV (Directive 2002/44/EC).
@@ -796,7 +797,7 @@ def plot_mobility(
     result: MobilityResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Mobility magnitude ``|Y(f)|`` on log-log axes (ISO 7626-1).
@@ -846,7 +847,7 @@ def plot_rigid_mass_calibration(
     result: RigidMassCalibrationResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Rigid-mass operational calibration check (ISO 7626-2, 7.5.2).
@@ -984,7 +985,7 @@ def plot_transfer_stiffness(
     result: TransferStiffnessResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Dynamic transfer stiffness level ``L_k(f)`` on a log-frequency axis.
@@ -1041,7 +1042,7 @@ def plot_band_averaged_stiffness(
     result: BandAveragedStiffness,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """One-third-octave band levels ``L_k,av`` on a band axis (ISO 10846).
@@ -1118,7 +1119,7 @@ def plot_level_difference_check(
     result: LevelDifferenceCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """A level difference against its ISO 10846 limit, failures marked.
@@ -1182,7 +1183,7 @@ def plot_output_mass_check(
     result: OutputMassCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The ISO 10846-4 Inequality (3) mass limit against the mass in place.
@@ -1238,7 +1239,7 @@ def plot_effective_blocking_mass(
     result: EffectiveBlockingMass,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Deviation of the effective blocking mass from ``m2``, with ``f3`` marked.
@@ -1304,7 +1305,7 @@ def plot_driving_point_stiffness(
     result: DrivingPointStiffnessResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Driving-point stiffness level with the 6.2 threshold and ``f_UL`` (ISO 10846-5).
@@ -1385,7 +1386,7 @@ def plot_driving_point_uncertainty(
     result: DrivingPointUncertainty,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The ISO 10846-5 Annex B budget, one bar per input quantity, with ``U = 2u``.
@@ -1426,7 +1427,7 @@ def plot_radiation_efficiency(
     result: RadiationEfficiencyResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Radiation efficiency ``sigma(f)`` on log-log axes (Hopkins 2.9.4).
@@ -1470,7 +1471,7 @@ def plot_seat_transmission(
     result: SeatTransmissionResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The runs of one simulated input vibration test, and the SEAT between them.
@@ -1541,7 +1542,7 @@ def plot_weighting_verification(
     result: WeightingVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """A measured weighting response inside the band ISO 8041-1 allows it.
@@ -1624,7 +1625,7 @@ def plot_phase_verification(
     result: PhaseVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The characteristic phase deviation inside the band ISO 8041-1 allows it.
@@ -1699,7 +1700,7 @@ def plot_running_rms_decay_verification(
     result: RunningRMSDecayVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """A measured running r.m.s. decay time inside the interval ISO 8041-1 prints.
@@ -1797,7 +1798,7 @@ _DAMAGE_CLASS_LABELS = {
 _DAMAGE_CLASS_COLORS = (_C_PRIMARY, _C_TERTIARY, _C_SECONDARY)
 
 
-def _damage_curves(ax: Axes, result: DamageAssessment, language: str) -> float:
+def _damage_curves(ax: Axes, result: DamageAssessment, language: Language) -> float:
     """Draw Bild 1 and return where the reading sits on the frequency axis."""
     from ..vibration.structural.building_damage import (
         BUILDING_CLASSES,
@@ -1835,7 +1836,7 @@ def _damage_curves(ax: Axes, result: DamageAssessment, language: str) -> float:
     return x_point
 
 
-def _damage_bars(ax: Axes, result: DamageAssessment, language: str) -> float:
+def _damage_bars(ax: Axes, result: DamageAssessment, language: Language) -> float:
     """Draw the printed value per class and return where the reading sits."""
     from ..vibration.structural.building_damage import (
         BUILDING_CLASSES,
@@ -1869,7 +1870,7 @@ def _damage_bars(ax: Axes, result: DamageAssessment, language: str) -> float:
     return float(positions[BUILDING_CLASSES.index(result.building_class)])
 
 
-def _damage_title(result: DamageAssessment, language: str) -> str:
+def _damage_title(result: DamageAssessment, language: Language) -> str:
     """Name the table the reading was read against."""
     if result.location == "foundation":
         return _t("Guideline values at the foundation (DIN 4150-3 Table 1)", language)
@@ -1888,7 +1889,7 @@ def plot_damage_assessment(
     result: DamageAssessment,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The guideline values the assessment was actually read against.
@@ -1943,7 +1944,7 @@ def plot_building_frequency(
     result: BuildingFrequencyEstimate,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Figure D.1 of ISO 4866 with one estimate on it.
@@ -2010,7 +2011,7 @@ def plot_multiple_shock(
     result: MultipleShockResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Injury-probability curve ``P(R)`` with this assessment's ``R`` marked.
@@ -2081,7 +2082,7 @@ def _draw_measured_spectrum(
     frequencies: NDArray[np.float64] | None,
     amplitude: NDArray[np.float64] | None,
     f_max: float,
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
 ) -> float:
     """Draw the measured curve under the overlay; return its peak amplitude.
@@ -2205,7 +2206,7 @@ def _draw_fault_lines(
     ax: Axes,
     result: FaultFrequencyResult,
     f_max: float,
-    language: str,
+    language: Language,
     *,
     annotate: bool,
 ) -> float:
@@ -2322,7 +2323,7 @@ def plot_fault_frequencies(
     result: FaultFrequencyResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     spectrum: _SpectrumLike | None = None,
     max_frequency: float | None = None,
     annotate: bool = True,
@@ -2393,7 +2394,7 @@ def plot_power_injection(
     result: PowerInjectionResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Loss-factor budget of a two-subsystem SEA model (Norton Ch. 6).
@@ -2461,7 +2462,7 @@ def plot_junction_transmission(
     result: JunctionTransmissionResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Plot ``tau(theta)`` versus incidence angle (Hopkins Eqs 5.12/5.13).
@@ -2570,7 +2571,7 @@ def plot_vector_change(
     result: VectorChangeResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     unit: str | None = None,
     **kwargs: Any,
 ) -> Axes:
@@ -2673,7 +2674,7 @@ def plot_signal_burst_verification(
     result: SignalBurstVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Signal-burst deviations against the tolerance printed beside them.
@@ -2790,7 +2791,7 @@ def plot_vibration_meter_verification(
     result: VibrationMeterVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """A measured response inside the band DIN 45669-1 Tables 2 and 3 allow.
@@ -2857,7 +2858,7 @@ def plot_vibration_meter_reading(
     result: VibrationMeterReading,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The weighted vibration severity of one record, with what it reduces to.
@@ -2936,7 +2937,7 @@ def plot_assessment_velocity(
     result: AssessmentVelocity,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The Annex E assessment velocity against the one value it is judged by.
@@ -3000,7 +3001,7 @@ def plot_train_passage(
     result: TrainPassage,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """One passage against time, with the three stretches it is read over.
@@ -3092,7 +3093,7 @@ def plot_train_passage_spectrum(
     result: TrainPassage,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The interval and maximum third-octave levels of one passage (Figure 6).
@@ -3141,7 +3142,7 @@ def plot_people_assessment(
     result: PeopleAssessment,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The two assessment quantities of DIN 4150-2 against the three guide values.
@@ -3210,7 +3211,7 @@ def plot_train_category_prediction(
     result: TrainCategoryPrediction,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The emission spectrum, the predicted floor spectrum and the KB-weighted bands.
@@ -3275,7 +3276,7 @@ def plot_train_category_prediction(
 # ---------------------------------------------------------------------------
 
 
-def _verdict_word(*, passes: bool, language: str) -> str:
+def _verdict_word(*, passes: bool, language: Language) -> str:
     """The PASS/FAIL word the ISO 7626 verdict titles carry, localised."""
     return _t("PASS" if passes else "FAIL", language)
 
@@ -3284,7 +3285,7 @@ def plot_impact_mobility(
     result: ImpactMobilityResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Averaged impact mobility ``|Y(f)|`` and its coherence (ISO 7626-5, 8.6).
@@ -3375,7 +3376,7 @@ def plot_single_mode_fit(
     result: SingleModeFitResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """One mode fitted over its band, and the same mode with the window taken out.
@@ -3442,7 +3443,7 @@ def plot_exponential_window_correction(
     result: ExponentialWindowCorrection,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Each mode's apparent damping, split into the true part and the window's.
@@ -3498,7 +3499,7 @@ def plot_double_hit_check(
     result: DoubleHitCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """The force record with its impacts, and its energy spectral density (6.4).
@@ -3515,7 +3516,7 @@ def plot_double_hit_check(
     from ..vibration.structural._impact_mobility import energy_spectral_density
 
     times = result.times
-    force = np.asarray(result.force, dtype=np.float64)
+    force = np.asarray(result.force_n, dtype=np.float64)
     peaks = result.impact_peaks
     primary = float(peaks[int(np.argmax(np.abs(peaks)))])
     last = float(np.max(result.impact_times_s))
@@ -3593,7 +3594,7 @@ def plot_force_spectrum_check(
     result: ForceSpectrumCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The force energy spectral density against the range and the limit (6.3).
@@ -3674,7 +3675,7 @@ def plot_coherence_check(
     result: CoherenceCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The coherence against its minimum, excluded frequencies shaded (9.1).
@@ -3745,7 +3746,7 @@ def plot_overload_check(
     result: OverloadCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """A record against its full scale, clipped samples marked (8.4).
@@ -3761,7 +3762,7 @@ def plot_overload_check(
 
     created = ax is None
     ax = ax if ax is not None else _new_axes()
-    record = np.asarray(result.record, dtype=np.float64)
+    record = np.asarray(result.x, dtype=np.float64)
     times = np.arange(record.size) / result.fs
     full_scale_label = _t(_FULL_SCALE_LABEL, language)
     for level in (result.full_scale, -result.full_scale):
@@ -3806,7 +3807,7 @@ def plot_response_decay_check(
     result: ResponseDecayCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The response level against the levels 8.3 and 8.5.2 ask for.
@@ -3832,7 +3833,7 @@ def plot_response_decay_check(
 
     created = ax is None
     ax = ax if ax is not None else _new_axes()
-    record = np.abs(np.asarray(result.record, dtype=np.float64))
+    record = np.abs(np.asarray(result.response, dtype=np.float64))
     size = record.size
     times = np.arange(size) / result.fs
     floor = -80.0
@@ -3949,7 +3950,7 @@ def plot_channel_match(
     result: ChannelMatchVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Channel-to-channel magnitude and phase deviations against 8.1.
@@ -4051,7 +4052,7 @@ def plot_energy_spectral_density(
     result: EnergySpectralDensity,
     *,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The energy spectral density of a record, in dB re its highest bin (3.4).

@@ -36,10 +36,10 @@ its blocks, which introduces a step between them.
 
 ```python
 FilterDesign(
-    filter_type: str = 'butter',
+    *,
+    filter_type: Literal['butter', 'cheby1', 'cheby2', 'ellip', 'bessel'] = 'butter',
     ripple: float = 0.1,
     attenuation: float = 72.0,
-    *,
     resample: bool = True,
 )
 ```
@@ -61,7 +61,7 @@ sections, evaluated band by band on a decimated sample rate.
 ## LevelCalibration
 
 ```python
-LevelCalibration(factor: float = 1.0, *, dbfs: bool = False)
+LevelCalibration(*, factor: float = 1.0, dbfs: bool = False)
 ```
 
 How the energy in a band becomes a level reading.
@@ -85,7 +85,7 @@ octave_filter(
     *,
     sigbands: bool = False,
     detrend: bool = True,
-    mode: str = 'rms',
+    mode: Literal['rms', 'peak'] = 'rms',
     nominal: bool = False,
     design: FilterDesign = ...,
     calibration: LevelCalibration = ...,
@@ -167,7 +167,7 @@ OctaveFilterBank.filter(
     x: Signal | list[float] | np.ndarray,
     *,
     sigbands: bool = False,
-    mode: str = 'rms',
+    mode: Literal['rms', 'peak'] = 'rms',
     detrend: bool = True,
     calculate_level: bool = True,
     nominal: bool = False,
@@ -222,7 +222,7 @@ OctaveFilterBank.spectrogram(
     x: Signal | list[float] | np.ndarray,
     window_time: float = 0.125,
     overlap: float = 0.5,
-    mode: str = 'rms',
+    mode: Literal['rms', 'peak'] = 'rms',
     *,
     detrend: bool = True,
     zero_phase: bool = False,
@@ -289,7 +289,7 @@ first two were. They have names now.
 OctaveFilterResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -376,7 +376,7 @@ OctaveSpectrogramResult.plot(
     ax: Axes | None = None,
     *,
     channel: int | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

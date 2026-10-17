@@ -24,6 +24,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
 
+    from phonometry._i18n import Language
+
 # The miss recorder sits at the top of ``scripts/``, next to the checker that
 # reads what it writes; the figures package is a subdirectory of the same
 # place. Guard the path the way the other cross-imports in ``scripts/`` do
@@ -42,7 +44,7 @@ import figure_language_audit as _audit
 # Language support: every figure is also generated in Spanish ("_es" suffix).
 # Translation happens at savefig time by walking the figure's Text artists,
 # so the generator functions stay single-language (English) internally.
-_LANG = "en"
+_LANG: Language = "en"
 _LANG_SUFFIX = ""
 
 _ES_EXACT = {
@@ -2364,7 +2366,7 @@ _ES_EXACT = {
     "Noise on the input: $H_2$ is unbiased": "Ruido en la entrada: $H_2$ es el insesgado",
     # The measured coherence trace (la coherencia, feminine).
     "measured": "medida",
-    # itu_r_468_weighting figure (ITU-R BS.468-4 network and CCIR-RMS form)
+    # weighting_bs468 figure (ITU-R BS.468-4 network and CCIR-RMS form)
     "The ITU-R BS.468-4 Network and Its CCIR-RMS Form": "La red ITU-R BS.468-4 y su forma CCIR-RMS",
     "Weighting [dB]": "Ponderación [dB]",
     "A-weighting (reference)": "Ponderación A (referencia)",
@@ -6981,7 +6983,7 @@ def _fmt_minus(value: float, spec: str = "") -> str:
     return _LEADING_SIGN_RE.sub("\\1\u2212", format(value, spec), count=1)
 
 
-def set_lang(lang: str) -> None:
+def set_lang(lang: Language) -> None:
     """Switch the output language ('en' or 'es')."""
     global _LANG, _LANG_SUFFIX
     _LANG = lang

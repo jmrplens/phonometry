@@ -27,7 +27,7 @@ reduced to the ISO 17497-2 directional diffusion coefficient.
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -57,8 +57,11 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
     from ..._internal.types import Real
     from ...fluids import Fluid
+
+ResonatorGeometry = Literal["square", "slit"]
 
 __all__ = [
     "MetadiffuserResult",
@@ -73,7 +76,7 @@ __all__ = [
 _MIN_WELLS = 2
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class MetadiffuserWell(RichDisplay):
     r"""One slit of a metadiffuser panel.
 
@@ -132,7 +135,7 @@ class MetadiffuserResult(OwnsArrays):
         require_present(self, "wells", "depth_m", "period_m")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-well and face-averaged absorption spectra.
 
@@ -146,7 +149,7 @@ class MetadiffuserResult(OwnsArrays):
         return plot_metadiffuser_absorption(self, ax=ax, language=language, **kwargs)
 
     def plot_geometry(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the panel cross-section to scale (slits and resonators).
 
@@ -192,7 +195,7 @@ def metadiffuser_reflection(
     depth_m: float,
     period_m: float,
     angle_rad: float = 0.0,
-    resonator_geometry: str = "slit",
+    resonator_geometry: ResonatorGeometry = "slit",
     fluid: Fluid = ABSORBER_AIR,
 ) -> MetadiffuserResult:
     r"""Per-well reflection spectra of a metadiffuser panel (Sci. Rep. Eq. (6)).
@@ -265,7 +268,7 @@ def metadiffuser_polar_response(
     angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
     n_repetitions: int = 1,
-    resonator_geometry: str = "slit",
+    resonator_geometry: ResonatorGeometry = "slit",
     fluid: Fluid = ABSORBER_AIR,
 ) -> DiffuserPolarResponse:
     """Far-field polar response of a metadiffuser at one frequency.
@@ -333,7 +336,7 @@ def metadiffuser_diffusion_spectrum(
     angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
     n_repetitions: int = 1,
-    resonator_geometry: str = "slit",
+    resonator_geometry: ResonatorGeometry = "slit",
     fluid: Fluid = ABSORBER_AIR,
 ) -> DiffusionSpectrum:
     r"""Normalized diffusion-coefficient spectrum ``d_n(f)`` of a metadiffuser.

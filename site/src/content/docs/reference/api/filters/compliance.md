@@ -121,7 +121,7 @@ class_limits(
     filter_class: int,
     omega: np.ndarray,
     *,
-    edition: str = '2014',
+    edition: Literal['2014', '1995'] = '2014',
 ) -> tuple[np.ndarray, np.ndarray]
 ```
 
@@ -164,7 +164,7 @@ exactly.
 FilterComplianceResult(
     band_margins: tuple[Mapping[str, Any], ...],
     fraction: int,
-    edition: str,
+    edition: Literal['2014', '1995'],
     sos: tuple[np.ndarray, ...],
     frequencies: np.ndarray,
     factors: tuple[int, ...],
@@ -294,7 +294,7 @@ FilterComplianceResult.plot(
     ax: Axes | None = None,
     *,
     requirement: str = 'relative_attenuation',
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -365,9 +365,9 @@ FilterComplianceResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -441,7 +441,7 @@ verify_filter_class(
     bank: OctaveFilterBank,
     *,
     n_points: int = 32768,
-    edition: str = '2014',
+    edition: Literal['2014', '1995'] = '2014',
     points_per_bandwidth: int = 24,
 ) -> FilterComplianceResult
 ```

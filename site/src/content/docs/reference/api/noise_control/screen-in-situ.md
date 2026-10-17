@@ -408,7 +408,7 @@ ScreenInSituResult(
     screened_levels: NDArray[np.float64],
     attenuation: NDArray[np.float64],
     a_weighted_attenuation: float | None,
-    source_kind: str,
+    source_kind: Literal['actual', 'artificial'],
     distance: float | None,
 )
 ```
@@ -433,7 +433,7 @@ The in-situ attenuation of a removable screen, ISO 11821 clause 5.8.
 ScreenInSituResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

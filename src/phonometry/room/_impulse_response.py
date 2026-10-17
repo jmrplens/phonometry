@@ -93,6 +93,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import DTypeLike
 
+    from .._i18n import Language
     from ..io._signal import Signal
 
 #: Warn from mls_impulse_response when the recovered IR still carries more than
@@ -203,7 +204,7 @@ class ImpulseResponseResult(OwnsArrays):
         return self.ir.dtype
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | np.ndarray:
         """Plot the impulse response: waveform and log-magnitude decay.
 
@@ -276,6 +277,7 @@ def sweep_signal(
         raise ValueError(msg)
 
     n = round(duration_s * fs)
+    # The fewest values the step below can work with, not a quantity.
     if n < 2:  # noqa: PLR2004
         msg = "duration_s*fs must yield at least 2 samples"
         raise ValueError(msg)
@@ -432,7 +434,7 @@ def impulse_response(
     reference: Signal | list[float] | np.ndarray,
     fs: int | None = None,
     *,
-    method: str = ...,
+    method: Literal["spectral", "farina"] = ...,
     f_range: tuple[float, float] | None = ...,
     regularization: float = ...,
     length: int | None = ...,
@@ -445,7 +447,7 @@ def impulse_response(
     reference: Signal | list[float] | np.ndarray,
     fs: int | None = None,
     *,
-    method: str = "spectral",
+    method: Literal["spectral", "farina"] = "spectral",
     f_range: tuple[float, float] | None = None,
     regularization: float = 1e-6,
     length: int | None = None,
@@ -800,6 +802,7 @@ def golay_impulse_response(
         msg = "both Golay codes must be one-dimensional."
         raise ValueError(msg)
     period = code_a.size
+    # A Golay code takes two samples at least.
     if period < 2 or code_b.size != period:  # noqa: PLR2004
         msg = (
             "'pair' must hold two equal-length codes of at least 2 samples "
@@ -932,7 +935,7 @@ class ShapedSweepResult(OwnsArrays):
         return int(self.signal.size)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | np.ndarray:
         """Plot the sweep waveform and its spectrum against the target.
 
@@ -977,6 +980,7 @@ def _shaped_target_db(
         raise ValueError(msg)
     t_freq = np.asarray(target[0], dtype=np.float64)
     t_db = np.asarray(target[1], dtype=np.float64)
+    # The number is a count of array axes, not a quantity.
     if t_freq.ndim != 1 or t_freq.size < 2:  # noqa: PLR2004
         msg = (
             "an array target must be a (frequencies, magnitude_db) pair "
@@ -1036,7 +1040,7 @@ def shaped_sweep_signal(
     f2: float,
     duration_s: float,
     *,
-    target: str | tuple[np.ndarray, np.ndarray] = "pink",
+    target: Literal["white", "pink"] | tuple[np.ndarray, np.ndarray] = "pink",
     amplitude: float = 1.0,
     start_delay: float | None = None,
     fade: float = 0.01,
@@ -1184,6 +1188,7 @@ def shaped_sweep_signal(
     # that would make the statistic blow up; fall back to the whole
     # retained sweep in that degenerate case.
     core = sweep[round(lead * fs_v) : round((lead + duration_s) * fs_v)]
+    # The fewest values the step below can work with, not a quantity.
     if core.size < 2:  # noqa: PLR2004
         core = sweep
     rms = float(np.sqrt(np.mean(core**2)))

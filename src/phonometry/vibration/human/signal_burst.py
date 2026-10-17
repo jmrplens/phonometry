@@ -81,7 +81,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
@@ -90,6 +90,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import require_choice, require_positive, require_scalar
 from .exposure import (
+    WeightingName,
     _params,
     frequency_weighting,
     motion_sickness_dose_value,
@@ -102,6 +103,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
+
+    from ..._i18n import Language
 
 __all__ = [
     "BAND_LIMITING",
@@ -117,7 +120,13 @@ __all__ = [
 
 #: The row of Tables 7 to 9 that grades the band-limiting response instead of
 #: a frequency weighting, named rather than spelled out at every call site.
-BAND_LIMITING = "band-limiting"
+BAND_LIMITING: Final = "band-limiting"
+
+#: An application of ISO 8041-1:2017 Table 6, by name.
+BurstApplication = Literal["hand-arm", "whole-body", "low-frequency-whole-body"]
+
+#: A row of Tables 7 to 9: a frequency weighting, or the band-limiting row.
+BurstRow = Literal[WeightingName, "band-limiting"]
 
 #: The averaging time of the two MTVV columns of Table 8, in seconds. Not
 #: printed in the table: recovered by reproducing it, and the "slow" constant
@@ -170,9 +179,9 @@ class SawtoothBurstTest(RichDisplay):
         figure: nothing in the standard prescribes a sampling rate.
     """
 
-    application: str
-    weightings: tuple[str, ...]
-    band_limiting_weighting: str
+    application: BurstApplication
+    weightings: tuple[WeightingName, ...]
+    band_limiting_weighting: WeightingName
     angular_frequency_rad_s: float
     start_time_s: float
     cycle_counts: tuple[int, ...]
@@ -198,9 +207,9 @@ class SawtoothBurstTest(RichDisplay):
         )
 
 
-_HAND_ARM = "hand-arm"
-_WHOLE_BODY = "whole-body"
-_LOW_FREQUENCY_WHOLE_BODY = "low-frequency-whole-body"
+_HAND_ARM: Final = "hand-arm"
+_WHOLE_BODY: Final = "whole-body"
+_LOW_FREQUENCY_WHOLE_BODY: Final = "low-frequency-whole-body"
 
 #: The printed burst lengths of Table 6, shared by the three applications.
 _CYCLE_COUNTS = (1, 2, 4, 8, 16)
@@ -416,7 +425,7 @@ def _require_application(application: str) -> SawtoothBurstTest:
     return SAWTOOTH_BURST_TESTS[key]
 
 
-def _require_row(test: SawtoothBurstTest, name: str) -> str:
+def _require_row(test: SawtoothBurstTest, name: str) -> BurstRow:
     """Return the row of ``name`` in ``test`` or raise ``ValueError``.
 
     A weighting that belongs to another application is refused rather than
@@ -477,7 +486,7 @@ def _require_sampling_rate(test: SawtoothBurstTest, fs: float | None) -> float:
 
 
 def sawtooth_burst(
-    application: str,
+    application: BurstApplication,
     n_cycles: int | None,
     *,
     fs: float | None = None,
@@ -563,7 +572,7 @@ def _ramp(cycles_elapsed: NDArray[np.float64], amplitude: float) -> NDArray[np.f
 
 
 def _band_limiting_response(
-    name: str, frequencies: NDArray[np.float64]
+    name: WeightingName, frequencies: NDArray[np.float64]
 ) -> NDArray[np.complex128]:
     r"""The band-limiting response :math:`H_h(s) H_l(s)` of Formulae (1) and (2).
 
@@ -588,7 +597,11 @@ def _band_limiting_response(
 
 
 def _zero_state_filter(
-    record: NDArray[np.float64], fs: float, name: str, *, band_limiting: bool
+    record: NDArray[np.float64],
+    fs: float,
+    name: WeightingName,
+    *,
+    band_limiting: bool,
 ) -> NDArray[np.float64]:
     """Apply a response to a record with the filter starting at rest.
 
@@ -617,8 +630,8 @@ def _zero_state_filter(
 
 
 def signal_burst_indications(
-    application: str,
-    name: str,
+    application: BurstApplication,
+    name: BurstRow,
     n_cycles: int | None,
     *,
     fs: float | None = None,
@@ -665,6 +678,7 @@ def signal_burst_indications(
 
     printed = SIGNAL_BURST_RESPONSE[test.application, row, burst_cycles]
     indications: dict[str, float] = {}
+    method: Literal["linear", "exponential"]
     for quantity in printed:
         if quantity == "rms":
             indications[quantity] = float(np.sqrt(np.mean(weighted**2)))
@@ -708,8 +722,8 @@ class SignalBurstVerification(OwnsArrays):
     verification cannot be built against other cells.
     """
 
-    application: str
-    weighting: str
+    application: BurstApplication
+    weighting: BurstRow
     amplitude_m_s2: float
     cycle_counts: tuple[int | None, ...]
     quantities: tuple[str, ...]
@@ -805,7 +819,7 @@ class SignalBurstVerification(OwnsArrays):
         return float(flat[int(np.argmax(np.abs(flat)))])
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the deviations against the printed tolerance band.
 
@@ -825,8 +839,8 @@ class SignalBurstVerification(OwnsArrays):
 
 
 def verify_signal_burst_response(
-    application: str,
-    name: str,
+    application: BurstApplication,
+    name: BurstRow,
     measured: Mapping[int | None, Mapping[str, float]],
     *,
     amplitude_m_s2: float = 1.0,

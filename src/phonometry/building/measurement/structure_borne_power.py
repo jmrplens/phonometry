@@ -80,6 +80,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
 
 
@@ -92,7 +94,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ...metrology.reference_values import REFERENCE_VALUES
 from .flanking_transmission import total_loss_factor
 
 __all__ = [
@@ -109,17 +111,17 @@ __all__ = [
 ]
 
 #: EN 15657 vibratory velocity reference ``v0`` (= ISO 1683 10^-9 m/s), m/s.
-_REFERENCE_VELOCITY: float = ISO1683_REFERENCE_VALUES["solid"]["velocity"].value
+_REFERENCE_VELOCITY: float = REFERENCE_VALUES["solid"]["velocity"].value
 #: Reference structure-borne sound power ``P0``, W: the 10⁻¹² W EN 15657:2018
 #: clause 7.1 counts the power level ``L_Ws`` from. ISO 1683 lists no
 #: structure-borne power; the number is the airborne 1 pW of its Table 1, and
 #: it is read from there.
-_REFERENCE_SOUND_POWER: float = ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value
+_REFERENCE_SOUND_POWER: float = REFERENCE_VALUES["gas"]["sound_power"].value
 #: Reference mobility ``Y0`` of EN 15657 Formulae (15)/(17)/(18), m/(N.s).
 _REFERENCE_MOBILITY: float = 1.0
 #: Reference force ``F0`` of the equivalent blocked force level (EN 15657), N:
 #: the 1 µN of ISO 1683:2015 Table 3.
-_REFERENCE_FORCE: float = ISO1683_REFERENCE_VALUES["solid"]["force"].value
+_REFERENCE_FORCE: float = REFERENCE_VALUES["solid"]["force"].value
 #: Characteristic mobility ``Y_R,inf,low`` of the standard 10 cm concrete
 #: reception plate (EN 15657:2018, clause 7.2.4), m/(N.s).
 _CHARACTERISTIC_PLATE_MOBILITY: float = 5.0e-6
@@ -312,7 +314,7 @@ class StructureBornePowerResult(OwnsArrays):
         return float(10.0 * np.log10(np.sum(10.0 ** (0.1 * lw))))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the characteristic structure-borne power level per band.
 
@@ -330,9 +332,9 @@ class StructureBornePowerResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an EN 15657 structure-borne sound power fiche to ``path``.
 

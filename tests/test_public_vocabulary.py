@@ -502,7 +502,7 @@ def _stale_spellings(parameter: str) -> set[str]:
         for word in (base, singular.get(base, base), _PLURALS.get(base, base)):
             if word in _PLURALS or word in singular:
                 spellings |= {word} | {word + suffix for suffix in _UNIT_SUFFIXES}
-    retired = {**_MINORITY, **_SIGNAL_SPELLINGS}
+    retired = {**_MINORITY, **_SIGNAL_SPELLINGS, **_QUANTITY_SPELLINGS}
     spellings |= {old for old, new in retired.items() if new == parameter}
     tokens = parameter.split("_")
     if "n" in tokens[:2] and tokens[-1] != "n":
@@ -514,18 +514,22 @@ def _stale_spellings(parameter: str) -> set[str]:
     return spellings - {parameter}
 
 
-def _named_in(node: ast.AST) -> set[str]:
+def _named_in(node: ast.AST, constants: dict[str, str] | None = None) -> set[str]:
     """The identifiers a function body puts in front of a user.
 
-    A quoted identifier inside any string, and a bare identifier handed to a
-    call next to a value (``require_positive_array(f, "frequency")``) or as a
-    key of a mapping handed to one (``{"frequency": f.shape}``), which the
-    validation helpers quote in their own messages.
+    A quoted identifier inside any string, in the body or in a module-level
+    message the body raises by name (``raise ValueError(_NO_ENERGY_MSG)``),
+    and a bare identifier handed to a call next to a value
+    (``require_positive_array(f, "frequency")``) or as a key of a mapping
+    handed to one (``{"frequency": f.shape}``), which the validation helpers
+    quote in their own messages.
     """
     names: set[str] = set()
     for child in ast.walk(node):
         if isinstance(child, ast.Constant) and isinstance(child.value, str):
             names |= set(_QUOTED.findall(child.value))
+        if isinstance(child, ast.Name) and constants and child.id in constants:
+            names |= set(_QUOTED.findall(constants[child.id]))
         if not isinstance(child, ast.Call):
             continue
         arguments = [*child.args, *(keyword.value for keyword in child.keywords)]
@@ -611,6 +615,17 @@ class _Module:
                     if isinstance(child, ast.FunctionDef)
                 ]
         self._exposure: dict[tuple[str, str], set[str]] = {}
+        #: The module-level strings, by name: a message a function raises by
+        #: the name of a constant quotes what the constant holds.
+        self.constants = {
+            target.id: node.value.value
+            for node in tree.body
+            if isinstance(node, ast.Assign)
+            and isinstance(node.value, ast.Constant)
+            and isinstance(node.value.value, str)
+            for target in node.targets
+            if isinstance(target, ast.Name)
+        }
 
     def passed_on(self, function: ast.FunctionDef, parameter: str) -> set[str]:
         """The names *parameter* reaches a message under, in the functions it is passed to."""
@@ -640,7 +655,7 @@ class _Module:
         if key not in self._exposure:
             self._exposure[key] = set()  # a recursive call adds nothing new
             function = self.functions[name]
-            own = {parameter} & _named_in(function)
+            own = {parameter} & _named_in(function, self.constants)
             self._exposure[key] = own | self.passed_on(function, parameter)
         return self._exposure[key]
 
@@ -753,7 +768,7 @@ def test_a_message_names_the_parameter_the_caller_passed() -> None:
             for parameter in parameters:
                 stale = _stale_spellings(parameter) - set(parameters)
                 named = (
-                    _named_in(function)
+                    _named_in(function, module.constants)
                     | _named_by_helper_defaults(function)
                     | module.passed_on(function, parameter)
                 )
@@ -911,6 +926,8 @@ _SPELLED_OUT = {
     "std": "standard_deviation",
     "freq": "frequency",
     "freqs": "frequencies",
+    "ref": "reference",
+    "refs": "references",
 }
 
 #: ``minimum`` and ``maximum`` written as the library writes them, by kind.
@@ -1032,7 +1049,9 @@ def test_words_are_spelled_out() -> None:
     constant and ``Min``/``Max`` in a class, as numpy, SciPy, scikit-learn
     and Matplotlib write them (``max_iter``, ``min_samples_leaf``,
     ``vmax``) and as the standards write the maximum and minimum levels
-    Lmax and Lmin. A maximum in decibels is the maximum level, ``max_level``,
+    Lmax and Lmin. ``ref`` is written ``reference``, so the level of a
+    reference sound source is ``reference_levels``; the acronyms SPL, SEL, SNR
+    and RMS stay, as terms of art, like Lmax. A maximum in decibels is the maximum level, ``max_level``,
     never a bare ``max_db``. A confidence bound is ``confidence_lower`` or
     ``confidence_upper``, so ``ci`` is a word of no public name, the ISO 717-2
     adaptation term C_I aside. The attributes a plain class writes on
@@ -1248,8 +1267,8 @@ _COUNT_EXEMPT = {
     ),
     "phonometry.signals._cepstrum.EchoDetectionResult.delay_samples": _SAMPLES,
     "phonometry.signals._cepstrum.CepstrumResult.linear_phase_samples": _SAMPLES,
-    "phonometry.signals.test_signals.ToneBurstResult.burst_samples": _SAMPLES,
-    "phonometry.signals.test_signals.ToneBurstResult.period_samples": _SAMPLES,
+    "phonometry.signals._test_signals.ToneBurstResult.burst_samples": _SAMPLES,
+    "phonometry.signals._test_signals.ToneBurstResult.period_samples": _SAMPLES,
     "phonometry.simulation.elastic_fdtd.ElasticBoundaries.absorbing_layer_cells": (
         "the thickness of the absorbing layer counted in grid cells: the unit "
         "is the cell, as the sample is of delay_samples"
@@ -1376,6 +1395,19 @@ def test_the_count_rule_reads_a_name(
 #: A parameter that names the time signal in a spelling the API retired.
 _SIGNAL_SPELLINGS = {"signal": "x", "signal_in": "x"}
 
+#: The spellings a signal of one quantity, a generic record and a reference
+#: value had before they said their unit or their word whole.
+_QUANTITY_SPELLINGS = {
+    "pressure": "pressure_pa",
+    "force": "force_n",
+    "acceleration": "acceleration_m_s2",
+    "record": "x",
+    "levels_ref": "reference_levels",
+    "background_levels_ref": "reference_background_levels",
+    "lw_ref": "reference_sound_power_levels",
+    "ref_signal": "reference_signal",
+}
+
 
 def test_the_time_signal_is_x() -> None:
     """A function that reads a time signal takes it as ``x``, first.
@@ -1392,3 +1424,441 @@ def test_the_time_signal_is_x() -> None:
         if kind == "param" and name in _SIGNAL_SPELLINGS
     )
     assert not offenders, "\n".join(offenders)
+
+
+#: A time signal named for the quantity it holds, without its unit.
+_BARE_SIGNAL_QUANTITIES = frozenset(
+    {
+        "pressure",
+        "pressures",
+        "force",
+        "forces",
+        "acceleration",
+        "accelerations",
+        "velocity",
+        "velocities",
+        "displacement",
+        "displacements",
+        "voltage",
+        "current",
+        "record",
+        "records",
+    }
+)
+_SIGNAL_TYPES = re.compile(r"\bSignal(?:Input)?\b")
+#: The word a signal of no particular quantity was called before it was ``x``.
+_RECORD_WORDS = frozenset({"record", "records"})
+
+
+def test_a_signal_named_for_its_quantity_carries_its_unit() -> None:
+    """``x`` for the generic signal; ``pressure_pa``, ``force_n``, ``acceleration_m_s2``.
+
+    A time signal that is one physical quantity is named for it with its
+    unit, as ``velocity_mm_s`` is in the DIN 4150 and DIN 45669 functions:
+    the underwater levels read a pressure in pascals, the multiple-shock
+    model an acceleration in m/s², an impact hammer a force in newtons.
+    A record in any unit is the generic signal, ``x``. The rule reads every
+    public parameter and field typed as a signal (``Signal``, ``SignalInput``),
+    and every one named ``record`` whatever its type: a result that keeps the
+    samples it judged as a bare array (``OverloadCheck.x``) is held to the
+    same name as the parameter they came in by.
+    """
+    offenders = sorted(
+        f"{where}: a signal of one quantity is named with its unit "
+        "(pressure_pa, force_n, acceleration_m_s2), a generic one is 'x'"
+        for where, name, annotation, kind, _ in _public_names()
+        if kind in {"param", "field"}
+        and name in _BARE_SIGNAL_QUANTITIES
+        and (_SIGNAL_TYPES.search(annotation) or name in _RECORD_WORDS)
+    )
+    assert not offenders, "\n".join(offenders)
+
+
+def test_no_record_unpacks_like_a_tuple() -> None:
+    """A record is read by name: ``curve.times``, never ``times, levels = curve``.
+
+    ``DecayCurve`` and ``LevelHistory`` kept an ``__iter__`` so that the
+    ``(times, levels)`` pair they replaced still unpacked; a line that swapped
+    the two names still ran. A public record (a dataclass) defines no
+    ``__iter__``, so unpacking one raises ``TypeError``. A mapping of rows
+    iterates its keys, as a ``dict`` does: that is a collection, not a record.
+    """
+    import collections.abc
+
+    offenders: list[str] = []
+    seen: set[str] = set()
+    for module in _public_modules():
+        for exported in getattr(module, "__all__", ()):
+            obj = getattr(module, exported)
+            if not (inspect.isclass(obj) and dataclasses.is_dataclass(obj)):
+                continue
+            key = f"{obj.__module__}.{obj.__qualname__}"
+            if key in seen or issubclass(obj, collections.abc.Mapping):
+                continue
+            seen.add(key)
+            for klass in obj.__mro__:
+                if (getattr(klass, "__module__", "") or "").startswith(
+                    "phonometry"
+                ) and "__iter__" in vars(klass):
+                    offenders.append(f"{key}: defines __iter__ in {klass.__qualname__}")
+                    break
+    assert not offenders, "\n".join(sorted(offenders))
+
+
+# --------------------------------------------------------------------------- #
+# A standard's designation is in a name only where it distinguishes, one form
+# --------------------------------------------------------------------------- #
+#: The bodies whose documents a public name may carry, by their number. ASTM
+#: numbers begin with a letter (``E2611``), so they read ``astm_e2611``; every
+#: other body is joined to its number (``iso10534``, ``IEC61094_2``, ``BS468``,
+#: ``ARP866A``, ``AIR1845``), and a part number follows an underscore.
+_DESIGNATION = re.compile(
+    r"(?:iso|iec|en|din|bs|vdi|arp|air|ansi|ecma)\d+[a-z]?(?:_\d+)?|astm_e\d+",
+    re.IGNORECASE,
+)
+#: A body written apart from its number, a series spelled out after it, or an
+#: ASTM body without its number: ``EN_12354``, ``iso_9613``, ``itu_r_468``,
+#: ``SAE_AIR1845``, ``air_density_astm``.
+_SPLIT_DESIGNATION = re.compile(
+    r"(?:^|_)(?:iso|iec|en|din|bs|vdi|arp|ansi|ecma|itu_r|sae)_\d"
+    r"|(?:^|_)sae_(?:air|arp)\d"
+    r"|(?:^|_)astm(?!_e\d)(?:_|$)",
+    re.IGNORECASE,
+)
+
+_TABLE = "a printed table number, which belongs to its document"
+_INSTANCE = (
+    "the one published instance of a record a caller builds with other "
+    "values: the designation names the document that fixes these"
+)
+_SIBLINGS = (
+    "the package offers the same quantity by more than one document, and the "
+    "designation is what tells them apart"
+)
+_FAMILY = (
+    "a constant of a module whose constants keep their designation, because "
+    "one of them would otherwise share a name with another standard's"
+)
+_OWNER = (
+    "without it the name would be another package's public name, and one "
+    "public name has one owner"
+)
+#: Every public name that keeps a designation, keyed by ``module.name`` of the
+#: package that publishes it, with the reason. A designation anywhere else is
+#: dropped: the module the name lives in already says which standard it
+#: follows. An entry that matches nothing fails.
+_DESIGNATION_KEPT: dict[str, str] = {
+    **dict.fromkeys(
+        (
+            "phonometry.metrology.IEC61094_2_TABLE_1",
+            "phonometry.metrology.IEC61094_2_TABLE_C1",
+            "phonometry.metrology.IEC61094_2_TABLE_C2",
+            "phonometry.metrology.IEC61094_2_TABLE_C3",
+            "phonometry.metrology.IEC61094_3_TABLE_1",
+            "phonometry.metrology.IEC61094_5_TABLE_A1",
+            "phonometry.metrology.IEC61094_5_TABLE_D1",
+            "phonometry.metrology.IEC61094_8_TABLE_1",
+            "phonometry.metrology.IEC61094_8_TABLE_2",
+            "phonometry.metrology.IEC61183_TABLE_B1",
+            "phonometry.metrology.IEC61672_TABLE_4",
+            "phonometry.metrology.IEC61672_TABLE_5",
+            "phonometry.metrology.IEC61672_TABLE_B1",
+            "phonometry.metrology.IEC62585_TABLE_I1",
+        ),
+        _TABLE,
+    ),
+    "phonometry.broadcast.BS468_BALLISTICS": _INSTANCE,
+    "phonometry.building.EN12354_AIR": _INSTANCE,
+    **dict.fromkeys(
+        (
+            "phonometry.aircraft.AIR1845_ATTENUATION_DB_PER_100M",
+            "phonometry.aircraft.ARP866AAttenuation",
+            "phonometry.aircraft.attenuation_arp866a",
+            "phonometry.aircraft.band_attenuation_arp5534",
+            "phonometry.materials.ISO13472_SPEED_OF_SOUND_M_S",
+            "phonometry.materials.air_density_iso10534",
+            "phonometry.materials.speed_of_sound_iso10534",
+            "phonometry.materials.air_density_astm_e2611",
+            "phonometry.materials.speed_of_sound_astm_e2611",
+            "phonometry.materials.plane_wave_frequency_range_astm_e2611",
+            "phonometry.materials.speed_of_sound_iso17497",
+            "phonometry.electroacoustics.weighting_bs468",
+            "phonometry.environment.GroundSurface.iso9613_ground_factor",
+            "phonometry.emission.FreeFieldCheck.iso26101_spacing_met",
+        ),
+        _SIBLINGS,
+    ),
+    **dict.fromkeys(
+        (
+            "phonometry.environment.ISO10847_MIN_BACKGROUND_MARGIN_DB",
+            "phonometry.materials.EN16487_COVERAGE_FACTOR",
+            "phonometry.vibration.ISO8041_COVERAGE_FACTOR",
+            "phonometry.room.ISO14257_MIN_BACKGROUND_MARGIN_DB",
+            "phonometry.room.ISO14257_REFERENCE_DISTANCE_M",
+            "phonometry.noise_control.ISO7235_COVERAGE_FACTOR",
+        ),
+        _OWNER,
+    ),
+    **dict.fromkeys(
+        (
+            "phonometry.environment.ISO10847_BACKGROUND_CORRECTIONS",
+            "phonometry.environment.ISO10847_OCTAVE_BAND_EXTENDED_RANGE_HZ",
+            "phonometry.environment.ISO10847_OCTAVE_BAND_RANGE_HZ",
+            "phonometry.environment.ISO10847_PREFERRED_BACKGROUND_MARGIN_DB",
+            "phonometry.environment.ISO10847_THIRD_OCTAVE_BAND_EXTENDED_RANGE_HZ",
+            "phonometry.environment.ISO10847_THIRD_OCTAVE_BAND_RANGE_HZ",
+            "phonometry.room.ISO14257_PREFERRED_BACKGROUND_MARGIN_DB",
+            "phonometry.noise_control.IEC60534_MOLAR_GAS_CONSTANT_J_KMOL_K",
+            "phonometry.noise_control.ISO11691_REPRODUCIBILITY",
+            "phonometry.noise_control.ISO11820_AIR_GAS_CONSTANT_J_KG_K",
+            "phonometry.noise_control.ISO11820_ATMOSPHERIC_PRESSURE_PA",
+            "phonometry.noise_control.ISO11820_BACKGROUND_CORRECTIONS",
+            "phonometry.noise_control.ISO11820_MIN_BACKGROUND_MARGIN_DB",
+            "phonometry.noise_control.ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K",
+            "phonometry.noise_control.ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB",
+            "phonometry.noise_control.ISO11820_OCTAVE_BAND_EXTENDED_RANGE_HZ",
+            "phonometry.noise_control.ISO11820_OCTAVE_BAND_RANGE_HZ",
+            "phonometry.noise_control.ISO11820_SPEED_OF_SOUND_M_S",
+            "phonometry.noise_control.ISO11820_THIRD_OCTAVE_BAND_EXTENDED_RANGE_HZ",
+            "phonometry.noise_control.ISO11820_THIRD_OCTAVE_BAND_RANGE_HZ",
+            "phonometry.noise_control.ISO11821_BAND_RANGE_HZ",
+            "phonometry.noise_control.ISO11821_MIN_BACKGROUND_MARGIN_DB",
+            "phonometry.noise_control.ISO11821_PREFERRED_BACKGROUND_MARGIN_DB",
+            "phonometry.noise_control.ISO11957_MIN_BACKGROUND_MARGIN_DB",
+            "phonometry.noise_control.ISO11957_PREFERRED_BACKGROUND_MARGIN_DB",
+            "phonometry.noise_control.ISO7235_ABSOLUTE_ZERO_OFFSET_K",
+            "phonometry.noise_control.ISO7235_AIR_GAS_CONSTANT_J_KG_K",
+            "phonometry.noise_control.ISO7235_REPRODUCIBILITY",
+            "phonometry.noise_control.ISO7235_SPREAD_LIMITS",
+        ),
+        _FAMILY,
+    ),
+}
+
+
+def _designated_names() -> Iterator[tuple[str, str, str]]:
+    """``(key, name, kind)`` of every public name that holds a designation.
+
+    The key is the package that publishes the name, then the name, and for a
+    field or a property the class between them: where a caller reads it.
+    """
+    for package_name in phonometry.__all__:
+        package = getattr(phonometry, package_name)
+        if not inspect.ismodule(package):
+            continue
+        for name in getattr(package, "__all__", ()):
+            obj = getattr(package, name)
+            kind = (
+                "class"
+                if inspect.isclass(obj)
+                else "function"
+                if callable(obj)
+                else "module"
+                if inspect.ismodule(obj)
+                else "constant"
+            )
+            if kind == "module":
+                continue
+            key = f"{package.__name__}.{name}"
+            if _DESIGNATION.search(name) or _SPLIT_DESIGNATION.search(name):
+                yield key, name, kind
+            if kind != "class":
+                continue
+            members = (
+                [field.name for field in dataclasses.fields(obj)]
+                if (dataclasses.is_dataclass(obj))
+                else []
+            )
+            members += [
+                attribute
+                for attribute, member in vars(obj).items()
+                if not attribute.startswith("_")
+                and isinstance(member, (property, functools.cached_property))
+            ]
+            for member in members:
+                if _DESIGNATION.search(member) or _SPLIT_DESIGNATION.search(member):
+                    yield f"{key}.{member}", member, "field"
+
+
+def _designation_problems(name: str, kind: str) -> list[str]:
+    """How a name that holds a designation writes it the library's way not."""
+    problems: list[str] = []
+    if _SPLIT_DESIGNATION.search(name):
+        problems.append(
+            "a designation joins its body to its number (EN12354, iso9613, "
+            "BS468, AIR1845), with a part number after an underscore"
+        )
+        return problems
+    found = _DESIGNATION.search(name)
+    if found is None:  # pragma: no cover - the walk yields only designated names
+        return problems
+    if kind == "function" and found.end() != len(name):
+        problems.append(
+            "a function carries its designation last (air_density_iso10534)"
+        )
+    if kind != "function" and found.start() != 0:
+        problems.append(
+            "a constant, a class or a field carries its designation first "
+            "(EN12354_AIR, ARP866AAttenuation)"
+        )
+    return problems
+
+
+def test_a_standard_designation_is_written_one_way_and_only_where_it_distinguishes() -> (
+    None
+):
+    """``EN12354_AIR``, ``air_density_iso10534``: one form, and only where it tells.
+
+    Where the module a name lives in already says which standard it follows,
+    the designation is dropped (``metrology.REFERENCE_VALUES``, not
+    ``ISO1683_REFERENCE_VALUES``). Where it tells two things apart, it stays,
+    written one way: the body joined to its number, a part after an
+    underscore, first in a constant, a class or a field and last in a
+    function. :data:`_DESIGNATION_KEPT` names every one that stays and why.
+    """
+    offenders: list[str] = []
+    found: set[str] = set()
+    for key, name, kind in _designated_names():
+        found.add(key)
+        offenders += [
+            f"{key}: {problem}" for problem in _designation_problems(name, kind)
+        ]
+        if key not in _DESIGNATION_KEPT:
+            offenders.append(
+                f"{key}: the module already says which standard this follows; "
+                "drop the designation, or list the name in _DESIGNATION_KEPT "
+                "with what it tells apart"
+            )
+    stale = sorted(set(_DESIGNATION_KEPT) - found)
+    offenders += [f"{key}: listed in _DESIGNATION_KEPT and not found" for key in stale]
+    assert not offenders, "\n".join(sorted(offenders))
+
+
+@pytest.mark.parametrize(
+    ("name", "kind", "expected"),
+    [
+        ("EN_12354_AIR", "constant", 1),
+        ("iso_9613_ground_factor", "field", 1),
+        ("itu_r_468_weighting", "function", 1),
+        ("SAE_AIR1845_ATTENUATION_DB_PER_100M", "constant", 1),
+        ("arp866a_attenuation", "function", 1),
+        ("air_density_astm", "function", 1),
+        ("COVERAGE_FACTOR_EN16487", "constant", 1),
+        ("EN12354_AIR", "constant", 0),
+        ("air_density_iso10534", "function", 0),
+        ("plane_wave_frequency_range_astm_e2611", "function", 0),
+        ("IEC61094_2_TABLE_C1", "constant", 0),
+        ("ARP866AAttenuation", "class", 0),
+    ],
+)
+def test_the_designation_rule_reads_a_name(name: str, kind: str, expected: int) -> None:
+    assert len(_designation_problems(name, kind)) == expected
+
+
+# --------------------------------------------------------------------------- #
+# The two ends of a range come lower first
+# --------------------------------------------------------------------------- #
+#: The words that name the two ends of a range, upper word first.
+_RANGE_ENDS = (("upper", "lower"), ("max", "min"), ("high", "low"))
+_SPREADS = (
+    "the spreads of the upper and the lower half of a distribution about its "
+    "median, two parameters of one curve, not the two ends of a range"
+)
+#: Pairs kept upper first on purpose, keyed by location and the upper name,
+#: each with its reason. An entry that matches nothing fails.
+_RANGE_ORDER_EXEMPT: dict[str, str] = {
+    "phonometry.hearing.hearing_protectors.HMLRatingResult.high": (
+        "H, M and L of ISO 4869-2 are an ordered set the standard prints in "
+        "that order, not the two ends of a range"
+    ),
+    "phonometry.hearing.hearing_protectors.HMLRatingResult.subject_high": (
+        "the per-subject H, M and L, printed in the order of the rating"
+    ),
+    "phonometry.hearing.threshold.AgeThresholdResult.spread_upper": _SPREADS,
+    "phonometry.hearing.noise_induced_hearing_loss.NIPTSResult.spread_upper": (
+        _SPREADS
+    ),
+}
+
+
+def _upper_before_lower(names: list[str]) -> list[tuple[str, str]]:
+    """The ``(upper, lower)`` twins of *names* in which the upper comes first."""
+    position = {name: index for index, name in enumerate(names)}
+    found: list[tuple[str, str]] = []
+    for name in names:
+        words = name.split("_")
+        for upper, lower in _RANGE_ENDS:
+            if upper not in words:
+                continue
+            twin = "_".join(lower if word == upper else word for word in words)
+            if position.get(twin, -1) > position[name]:
+                found.append((name, twin))
+    return found
+
+
+def _ordered_members() -> Iterator[tuple[str, list[str]]]:
+    """``(where, names)``: every public signature and record field list, in order."""
+    seen: set[str] = set()
+    for module in _public_modules():
+        for exported in getattr(module, "__all__", ()):
+            obj = getattr(module, exported)
+            owner = getattr(obj, "__module__", "") or ""
+            if not owner.startswith("phonometry"):
+                continue
+            key = f"{owner}.{exported}"
+            if key in seen:
+                continue
+            seen.add(key)
+            if inspect.isclass(obj):
+                if dataclasses.is_dataclass(obj):
+                    yield key, [field.name for field in dataclasses.fields(obj)]
+                for attribute, member in vars(obj).items():
+                    if inspect.isfunction(member) and not attribute.startswith("_"):
+                        yield (
+                            f"{key}.{attribute}",
+                            list(inspect.signature(member).parameters),
+                        )
+            elif inspect.isfunction(obj):
+                yield key, list(inspect.signature(obj).parameters)
+
+
+def test_the_two_ends_of_a_range_come_lower_first() -> None:
+    """``plant_steady_reading(min_level, max_level)``, ``lower_`` before ``upper_``.
+
+    The filter and weighting masks came ``(lower, upper)`` while the vibration
+    tolerances came ``(upper, lower)``, and both arrays have the same shape, so
+    a swap is silent. Every signature and every record field list puts the
+    lower end first: ``lower`` before ``upper``, ``min`` before ``max``,
+    ``low`` before ``high``.
+    """
+    offenders: list[str] = []
+    found: set[str] = set()
+    for where, names in _ordered_members():
+        for upper, lower in _upper_before_lower(names):
+            location = f"{where}.{upper}"
+            found.add(location)
+            if location not in _RANGE_ORDER_EXEMPT:
+                offenders.append(f"{where}: {upper!r} comes before {lower!r}")
+    offenders += [
+        f"{location}: listed in _RANGE_ORDER_EXEMPT and not found"
+        for location in sorted(set(_RANGE_ORDER_EXEMPT) - found)
+    ]
+    assert not offenders, "\n".join(sorted(offenders))
+
+
+@pytest.mark.parametrize(
+    ("names", "expected"),
+    [
+        (["max_level", "min_level"], [("max_level", "min_level")]),
+        (
+            ["upper_tolerance_db", "lower_tolerance_db"],
+            [("upper_tolerance_db", "lower_tolerance_db")],
+        ),
+        (["min_level", "max_level"], []),
+        (["x", "fs", "high_hz"], []),
+    ],
+)
+def test_the_range_order_rule_reads_a_list(
+    names: list[str], expected: list[tuple[str, str]]
+) -> None:
+    assert _upper_before_lower(names) == expected

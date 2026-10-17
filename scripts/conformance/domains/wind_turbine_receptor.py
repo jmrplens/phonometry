@@ -444,12 +444,12 @@ def _chk_table_a1() -> Outcome:
         env.tonal_adjustment_from_mean_audibility(upper) == k
         for upper, k in oracle.WT_TABLE_A1
     ]
-    checks.append(env.tonal_adjustment_from_mean_audibility(12.01) == 6)  # noqa: PLR2004
+    checks.append(env.tonal_adjustment_from_mean_audibility(12.01) == 6)
     checks += [
         env.tonal_adjustment_from_mean_audibility(upper, coarse=True) == k
         for upper, k in oracle.WT_A2_COARSE
     ]
-    checks.append(env.tonal_adjustment_from_mean_audibility(9.01, coarse=True) == 6)  # noqa: PLR2004
+    checks.append(env.tonal_adjustment_from_mean_audibility(9.01, coarse=True) == 6)
     return count(sum(checks), len(checks), subject="limits of Table A.1 and A.2")
 
 

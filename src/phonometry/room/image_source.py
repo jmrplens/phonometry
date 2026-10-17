@@ -90,6 +90,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
+
 __all__ = [
     "ImageSourceResult",
     "audible_image_count",
@@ -153,6 +155,7 @@ def _resolve_walls(
         # A per-band curve, uniform across walls (this branch also handles a
         # length-6 curve when frequencies declares six bands).
         walls = np.broadcast_to(alpha, (6, alpha.shape[0])).copy()
+    # The number is a count of array axes, not a quantity.
     elif alpha.ndim == 2 and alpha.shape[0] == len(_WALL_ORDER):  # noqa: PLR2004
         walls = alpha
     else:
@@ -353,7 +356,7 @@ class ImageSourceResult(OwnsArrays):
         return float(self.times[int(np.argmin(self.distances))])
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot the reflectogram: reflection level in dB against arrival time.
 
@@ -373,7 +376,7 @@ class ImageSourceResult(OwnsArrays):
         ax: Axes | None = None,
         *,
         max_order: int | None = None,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Draw the image-source lattice in plan view (x-y), to scale.

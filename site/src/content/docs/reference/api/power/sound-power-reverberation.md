@@ -153,7 +153,7 @@ unpacked by position.
 OctaveBandLevels.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -228,7 +228,7 @@ ReverberationSoundEnergyResult(
     c2: float,
     speed_of_sound: float,
     sound_energy_level_a: float,
-    method: str,
+    method: Literal['direct', 'comparison'],
     n_events: int | None,
     integration_time: float | None,
 )
@@ -261,7 +261,7 @@ background correction needed it.
 ReverberationSoundEnergyResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -285,7 +285,7 @@ ReverberationSoundPowerResult(
     c2: float,
     speed_of_sound: float,
     sound_power_level_a: float,
-    method: str,
+    method: Literal['direct', 'comparison'],
 )
 ```
 
@@ -315,7 +315,7 @@ or `'comparison'`.
 ReverberationSoundPowerResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -332,9 +332,9 @@ ReverberationSoundPowerResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -379,14 +379,14 @@ and the speed of sound.
 ```python
 sound_energy_comparison(
     levels: np.ndarray,
-    levels_ref: np.ndarray,
-    lw_ref: np.ndarray | ReferenceSourceCalibration,
+    reference_levels: np.ndarray,
+    reference_sound_power_levels: np.ndarray | ReferenceSourceCalibration,
     *,
     frequencies: np.ndarray | None = None,
     n_events: int | None = None,
     background_levels: np.ndarray | None = None,
     integration_time: float | None = None,
-    background_levels_ref: np.ndarray | None = None,
+    reference_background_levels: np.ndarray | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundEnergyResult
@@ -395,7 +395,7 @@ sound_energy_comparison(
 Sound energy level in a reverberation room, comparison method
 (ISO 3741:2010 clause 9.2.5).
 
-A reference sound source of known per-band sound power `lw_ref` runs
+A reference sound source of known per-band sound power `reference_sound_power_levels` runs
 steadily at the same microphone positions as the source under test, whose
 single event levels `levels` take any of the forms
 [`sound_energy_reverberation`](/phonometry/reference/api/power/sound-power-reverberation/#sound_energy_reverberation) accepts. The sound energy level in each
@@ -420,13 +420,13 @@ time-averaged correction of 9.1.2.
 | Name | Description |
 | :--- | :--- |
 | `levels` | Single event levels of the source under test, in decibels. |
-| `levels_ref` | Mean room SPL per band (1D) or `(NM, NB)` per-position time-averaged levels of the reference sound source, in decibels. |
-| `lw_ref` | Known sound power level `LW(RSS)` per band, in decibels, under the meteorological conditions of the test (Eq. 31), or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, read in the one-third octave bands at `frequencies` and carried from the reference conditions to those of the test by its own `C2`. |
+| `reference_levels` | Mean room SPL per band (1D) or `(NM, NB)` per-position time-averaged levels of the reference sound source, in decibels. |
+| `reference_sound_power_levels` | Known sound power level `LW(RSS)` per band, in decibels, under the meteorological conditions of the test (Eq. 31), or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, read in the one-third octave bands at `frequencies` and carried from the reference conditions to those of the test by its own `C2`. |
 | `frequencies` | Band mid-frequencies (Hz) for the `K1` criterion and the A-weighted total. |
 | `n_events` | The number of events `Ne` one measurement encompasses (Eq. 23); `None` when `levels` is per event or already the mean of one event. |
 | `background_levels` | Time-averaged background levels for the `K1` correction of `levels` (per position, or a single spectrum). |
 | `integration_time` | The interval `T` of the single event levels, in seconds; required with `background_levels`. |
-| `background_levels_ref` | Background levels matching `levels_ref`. |
+| `reference_background_levels` | Background levels matching `reference_levels`. |
 | `temperature_c` | Air temperature `theta` in the room, in degrees Celsius. |
 | `static_pressure_kpa` | Static pressure `ps` in the room, in kilopascals. |
 
@@ -515,12 +515,12 @@ NOTE 1), so that the energies Eq. (25) subtracts share one reference;
 ```python
 sound_power_comparison(
     levels: np.ndarray,
-    levels_ref: np.ndarray,
-    lw_ref: np.ndarray | ReferenceSourceCalibration,
+    reference_levels: np.ndarray,
+    reference_sound_power_levels: np.ndarray | ReferenceSourceCalibration,
     *,
     frequencies: np.ndarray | None = None,
     background_levels: np.ndarray | None = None,
-    background_levels_ref: np.ndarray | None = None,
+    reference_background_levels: np.ndarray | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundPowerResult
@@ -528,7 +528,7 @@ sound_power_comparison(
 
 Sound power level in a reverberation room, comparison method (ISO 3741).
 
-A reference sound source of known per-band sound power `lw_ref` is
+A reference sound source of known per-band sound power `reference_sound_power_levels` is
 measured at the same microphone positions as the source under test. The
 sound power level in each band follows Eq. (21):
 
@@ -546,11 +546,11 @@ the two sources, so the room absorption need not be known.
 | Name | Description |
 | :--- | :--- |
 | `levels` | Mean room SPL per band (1D) or `(NM, NB)` per-position levels of the source under test, in decibels. |
-| `levels_ref` | Same, for the reference sound source, in decibels. |
-| `lw_ref` | Known sound power level `LW(RSS)` per band, in decibels, under the meteorological conditions of the test (Eq. 21), or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, read in the one-third octave bands at `frequencies` and carried from the reference conditions to those of the test by its own `C2`. |
+| `reference_levels` | Same, for the reference sound source, in decibels. |
+| `reference_sound_power_levels` | Known sound power level `LW(RSS)` per band, in decibels, under the meteorological conditions of the test (Eq. 21), or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, read in the one-third octave bands at `frequencies` and carried from the reference conditions to those of the test by its own `C2`. |
 | `frequencies` | Band mid-frequencies (Hz) for the A-weighted total; required with a calibration. |
 | `background_levels` | Background levels for the `K1` correction of `levels` (per position, or a single spectrum; applied per position per Eq. 14/15 before the Eq. 16 average when `levels` is 2D). |
-| `background_levels_ref` | Background levels matching `levels_ref`. |
+| `reference_background_levels` | Background levels matching `reference_levels`. |
 | `temperature_c` | Air temperature `theta` in the room, in degrees Celsius. |
 | `static_pressure_kpa` | Static pressure `ps` in the room, in kilopascals. |
 

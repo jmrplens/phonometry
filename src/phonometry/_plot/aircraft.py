@@ -25,6 +25,7 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..aircraft.airport_noise import (
         FlyoverResult,
         NoiseContourResult,
@@ -144,14 +145,18 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en", **fmt: Any) -> str:
+def _t(text: str, language: Language = "en", **fmt: Any) -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     s = _STRINGS.get(text, text) if language == "es" else text
     return s.format(**fmt) if fmt else s
 
 
 def plot_epnl(
-    result: EPNLResult, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    result: EPNLResult,
+    ax: Axes | None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
 ) -> Axes:
     """PNL and PNLT time histories with PNLTM and the 10 dB-down window.
 
@@ -212,7 +217,7 @@ def plot_aircraft_band_attenuation(
     result: AircraftBandAttenuation,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """One-third-octave-band and pure-tone mid-band attenuation versus frequency.
@@ -257,7 +262,7 @@ def plot_npd_level(
     result: NPDLevelResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """NPD event level versus slant distance (log axis), with the tabulated nodes.
@@ -292,7 +297,7 @@ def plot_flyover(
     result: FlyoverResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-segment contributions to a single-event level (ECAC Doc 29).
@@ -339,7 +344,7 @@ def plot_rotorcraft_hemisphere(
     ax: Axes | None = None,
     *,
     band: float | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Fore-aft directivity section of a rotorcraft noise hemisphere (ECAC Doc 32).
@@ -397,7 +402,7 @@ def plot_noise_contour(
     result: NoiseContourResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Filled single-event noise contours over the ground plane (ECAC Doc 29).
@@ -441,7 +446,7 @@ def plot_flight_path_kinematics(
     result: FlightPathKinematics,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Speed and angle profiles of a rotorcraft track (ECAC Doc 32).
@@ -518,7 +523,7 @@ def plot_rotorcraft_event(
     result: RotorcraftEventResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """A-weighted level time history of a rotorcraft event (ECAC Doc 32).
@@ -575,7 +580,7 @@ def plot_rotorcraft_noise_contour(
     result: RotorcraftNoiseContourResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Filled rotorcraft single-event noise contours over the ground plane.
@@ -619,7 +624,7 @@ def plot_mean_ground_plane(
     result: MeanGroundPlaneResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Terrain section with its fitted mean ground plane (ECAC Doc 32 guidance).
@@ -667,7 +672,7 @@ def plot_terrain_screening(
     result: TerrainScreeningResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Terrain screening section: profile, line of sight and diffracted path.
@@ -743,7 +748,11 @@ def plot_terrain_screening(
 
 
 def plot_anp_npd(
-    result: ANPNPDCurves, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    result: ANPNPDCurves,
+    ax: Axes | None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
 ) -> Axes:
     """NPD curve at each tabulated power against slant distance.
 
@@ -782,7 +791,11 @@ def plot_anp_npd(
 
 
 def plot_anp_profile(
-    result: ANPProfile, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    result: ANPProfile,
+    ax: Axes | None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
 ) -> Axes:
     """Trajectory altitude against along-track distance, runway points marked.
 
@@ -829,7 +842,7 @@ def plot_flight_profile(
     result: FlightProfile,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Height and corrected net thrust against distance along the ground track.
@@ -900,7 +913,7 @@ _FT_M = 0.3048
 
 
 def _air_label(
-    temperature_c: float, relative_humidity_percent: float, language: str
+    temperature_c: float, relative_humidity_percent: float, language: Language
 ) -> str:
     """``"10 °C, 80 %"`` in the figure's language."""
     from .._i18n import format_number
@@ -915,11 +928,11 @@ def _route_label(absorption: str, air: str) -> str:
     return f"{_ROUTE_LABELS[absorption]} ({air})"
 
 
-def plot_arp866a_attenuation(
+def plot_attenuation_arp866a(
     result: ARP866AAttenuation,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """SAE ARP 866A attenuation coefficient versus frequency (ISO 3891 Annex A).
@@ -963,7 +976,7 @@ def plot_spectral_class(
     result: SpectralClass,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """ANP spectral class: band level at 1000 ft versus frequency.
@@ -1006,7 +1019,7 @@ def plot_npd_atmosphere_increment(
     result: NPDAtmosphereIncrement,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """ECAC Doc 29 Appendix D increment against slant distance.
@@ -1052,7 +1065,7 @@ def plot_npd_atmosphere_attenuation(
     *,
     column: int,
     reference: bool = True,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Band attenuation of the AIR-1845 and the specified atmosphere at one distance.
@@ -1116,7 +1129,7 @@ def plot_revised_npd_curves(
     result: RevisedNPDCurves,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Revised NPD curves (solid) over the original ones (dashed) against distance.

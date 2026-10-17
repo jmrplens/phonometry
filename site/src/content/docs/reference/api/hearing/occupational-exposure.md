@@ -61,10 +61,11 @@ COVERAGE_FACTOR = 1.65
 
 ```python
 ExposureResult(
+    *,
     lex_8h: float,
     combined_standard_uncertainty: float,
     expanded_uncertainty: float,
-    strategy: str,
+    strategy: Literal['task', 'job', 'full_day'],
     coverage_factor: float = 1.65,
     lp_aeqte: float | None = None,
     effective_duration_hours: float | None = None,
@@ -73,7 +74,6 @@ ExposureResult(
     u2: float | None = None,
     u3: float | None = None,
     n_samples: int | None = None,
-    *,
     instrument: Literal['class1', 'class2', 'personal_exposimeter'] | None = None,
     tasks: tuple[TaskContribution, ...] = ...,
     sample_range_db: float | None = None,
@@ -104,7 +104,7 @@ Daily noise exposure level and its expanded uncertainty (ISO 9612:2009).
 ExposureResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -123,9 +123,9 @@ ExposureResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -236,8 +236,8 @@ job_based_exposure(
     instrument: Literal['class1', 'class2', 'personal_exposimeter'] = 'personal_exposimeter',
     u3: float = 1.0,
     n_workers: int | None = None,
-    sample_duration_hours: float | None = None,
     *,
+    sample_duration_hours: float | None = None,
     warn: bool = True,
 ) -> ExposureResult
 ```
@@ -330,6 +330,7 @@ uncertainty `u1`. The `u1` axis is anchored at the origin (`u1 = 0` gives
 
 ```python
 Task(
+    *,
     samples: tuple[float, ...],
     duration_hours: float,
     duration_samples: tuple[float, ...] | None = None,

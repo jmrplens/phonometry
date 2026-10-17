@@ -145,7 +145,7 @@ d2m_nt_a(
     level_difference: Sequence[float] | np.ndarray,
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
-    spectrum: str = 'pink',
+    spectrum: Literal['pink', 'railway'] = 'pink',
 ) -> DBHRGlobalIndexResult
 ```
 
@@ -183,7 +183,7 @@ d2m_nt_atr(
     level_difference: Sequence[float] | np.ndarray,
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
-    spectrum: str = 'traffic',
+    spectrum: Literal['traffic', 'aircraft'] = 'traffic',
 ) -> DBHRGlobalIndexResult
 ```
 
@@ -221,8 +221,8 @@ report are stated in is not the same.
 
 ```python
 db_hr_airborne_requirement(
-    receiving_room: str,
-    source_room: str,
+    receiving_room: Literal['protected', 'habitable'],
+    source_room: Literal['same_unit', 'other_unit', 'installations', 'activity'],
     *,
     shared_opening: bool = False,
 ) -> tuple[DBHRRequirement, ...]
@@ -263,10 +263,10 @@ those instead.
 ```python
 db_hr_facade_requirement(
     ld: float,
-    building_use: str,
-    room_type: str,
+    building_use: Literal['residential', 'hospital', 'cultural', 'sanitary', 'educational', 'administrative', 'docente', 'dwelling', 'hospitalario', 'housing', 'office', 'offices', 'teaching'],
+    room_type: Literal['bedrooms', 'living', 'classrooms', 'aulas', 'bedroom', 'classroom', 'dormitories', 'dormitorios', 'estancias', 'living_room', 'living_rooms'],
     *,
-    dominant_noise: str = 'road',
+    dominant_noise: Literal['road', 'railway', 'aircraft'] = 'road',
     quiet_facade: bool = False,
 ) -> DBHRRequirement
 ```
@@ -314,7 +314,7 @@ DB_HR_FREQUENCIES_HZ = (100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 
 ```python
 db_hr_global_index(
     band_values: Sequence[float] | np.ndarray,
-    spectrum: str = 'pink',
+    spectrum: Literal['pink', 'traffic', 'railway', 'aircraft'] = 'pink',
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
     name: str | None = None,
@@ -347,8 +347,8 @@ one-third-octave bands 100 Hz to 5 kHz (Formulae (A.5) to (A.7)).
 
 ```python
 db_hr_impact_requirement(
-    receiving_room: str,
-    source_room: str,
+    receiving_room: Literal['protected', 'habitable'],
+    source_room: Literal['other_unit', 'installations', 'activity'],
 ) -> DBHRRequirement
 ```
 
@@ -417,7 +417,7 @@ requirements, so this function returns the one route asked for.
 
 ```python
 db_hr_reverberation_requirement(
-    room_use: str,
+    room_use: Literal['classroom', 'conference_hall', 'lecture_hall', 'aula', 'restaurant', 'dining_room', 'comedor', 'common_area', 'common_areas', 'zonas_comunes'],
     *,
     furnished: bool = False,
 ) -> DBHRRequirement
@@ -472,7 +472,7 @@ The verdict: every requirement is met.
 DBHRAssessment.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -531,7 +531,7 @@ DBHRGlobalIndexResult(
     intermediate: float,
     reported: int,
     name: str,
-    spectrum: str,
+    spectrum: Literal['pink', 'traffic', 'railway', 'aircraft'],
     frequencies: np.ndarray,
     band_values: np.ndarray,
     spectrum_levels: np.ndarray,
@@ -563,7 +563,7 @@ A DB-HR A-weighted global insulation index.
 DBHRGlobalIndexResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -574,9 +574,10 @@ Plot the band insulation with the weighted per-band contributions.
 
 ```python
 DBHRRequirement(
+    *,
     quantity: str,
     limit: float,
-    direction: str,
+    direction: Literal['min', 'max'],
     unit: str,
     decimals: int,
     reference: str,

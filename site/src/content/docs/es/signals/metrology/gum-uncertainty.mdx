@@ -137,10 +137,10 @@ from phonometry import metrology
 # Nivel ponderado A: una lectura más correcciones de calibración, de
 # instrumento y de posición de media cero. El modelo es su suma.
 quantities = [
-    metrology.Quantity(74.0, 0.0, name="Reading"),
+    metrology.Quantity(value=74.0, uncertainty=0.0, name="Reading"),
     metrology.rectangular(0.0, 0.20, name="Calibration"),
     metrology.rectangular(0.0, 0.30, name="Instrument"),
-    metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
+    metrology.Quantity(value=0.0, uncertainty=0.35, dof=9, name="Position (Type A)"),
 ]
 result = metrology.uncertainty_propagation(lambda a, b, c, d: a + b + c + d, quantities)
 
@@ -291,10 +291,10 @@ intervalo más corto de 5.3.4.
 from phonometry import metrology
 
 quantities = [
-    metrology.Quantity(74.0, 0.0, name="Reading"),
+    metrology.Quantity(value=74.0, uncertainty=0.0, name="Reading"),
     metrology.rectangular(0.0, 0.20, name="Calibration"),
     metrology.rectangular(0.0, 0.30, name="Instrument"),
-    metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
+    metrology.Quantity(value=0.0, uncertainty=0.35, dof=9, name="Position (Type A)"),
 ]
 mc = metrology.monte_carlo(lambda a, b, c, d: a + b + c + d, quantities,
                     n_trials=1_000_000, coverage=0.95, seed=1)
@@ -372,10 +372,10 @@ import numpy as np
 from phonometry import metrology
 
 quantities = [
-    metrology.Quantity(74.0, 0.0, name="Reading"),
+    metrology.Quantity(value=74.0, uncertainty=0.0, name="Reading"),
     metrology.rectangular(0.0, 0.20, name="Calibration"),
     metrology.rectangular(0.0, 0.30, name="Instrument"),
-    metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
+    metrology.Quantity(value=0.0, uncertainty=0.35, dof=9, name="Position (Type A)"),
 ]
 model = lambda a, b, c, d: a + b + c + d
 result = metrology.uncertainty_propagation(model, quantities)

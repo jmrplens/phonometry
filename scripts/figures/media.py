@@ -327,6 +327,7 @@ def _write_gpu_ffmpeg_wrapper(target: str, image: str, workdir: str) -> str:
     """
     import shlex
     import tempfile
+    from pathlib import Path
 
     q_target = shlex.quote(target)
     q_image = shlex.quote(image)
@@ -347,7 +348,7 @@ ssh -o BatchMode=yes -- {q_target} "rm -f {q_dir}/$rid"
         "w", suffix=".sh", prefix="ffmpeg-gpu-", delete=False
     ) as handle:
         handle.write(script)
-    os.chmod(handle.name, 0o755)  # noqa: PTH101
+    Path(handle.name).chmod(0o755)
     return handle.name
 
 
@@ -406,6 +407,9 @@ def _save_animation(
         except (RuntimeError, subprocess.CalledProcessError, OSError) as exc:
             print(f"  [gpu-encode] {stem}: {exc}; falling back to VP9")
         finally:
+            # The code that draws the clips is hashed into
+            # scripts/animation_fingerprints.txt, so rewriting this asks for a
+            # re-render that would draw the very same frames.
             os.remove(wrapper)  # noqa: PTH107
     if not saved:
         writer = FFMpegWriter(
@@ -422,6 +426,9 @@ def _save_animation(
     made_gif = False
     if make_gif and _LANG == "en":
         gif = _anim_path(output_dir, stem, "gif")
+        # The code that draws the clips is hashed into
+        # scripts/animation_fingerprints.txt, so rewriting this asks for a
+        # re-render that would draw the very same frames.
         palette = os.path.join(output_dir, f".{stem}{_FILENAME_SUFFIX}_pal.png")  # noqa: PTH118
         vf = (
             f"fps={_GIF_FPS if gif_fps is None else gif_fps},"
@@ -461,6 +468,9 @@ def _save_animation(
             ],
             check=True,
         )
+        # The code that draws the clips is hashed into
+        # scripts/animation_fingerprints.txt, so rewriting this asks for a
+        # re-render that would draw the very same frames.
         os.remove(palette)  # noqa: PTH107
         made_gif = True
     plt.close(fig)

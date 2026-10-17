@@ -9,6 +9,8 @@ waveform out of noise. Everything here is embedded by a page under
 ``signals/spectra/``.
 """
 
+from typing import Literal
+
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import signal as scipy_signal
@@ -40,9 +42,11 @@ def generate_gcc_phat_delay(output_dir: str) -> None:
     # Colored common signal: a Butterworth roll-off keeps some power in
     # every band (the Knapp & Carter condition for a usable PHAT phase).
     b, a = sp_signal.butter(2, 800.0 / (fs / 2.0))
-    s = sp_signal.lfilter(b, a, signals.noise_signal(fs, 4.0, color="white", seed=10))
-    noise_x = signals.noise_signal(fs, 4.0, color="white", rms=0.02, seed=11)
-    noise_y = signals.noise_signal(fs, 4.0, color="white", rms=0.02, seed=12)
+    s = sp_signal.lfilter(
+        b, a, signals.noise_signal(fs, duration_s=4.0, color="white", seed=10)
+    )
+    noise_x = signals.noise_signal(fs, duration_s=4.0, color="white", rms=0.02, seed=11)
+    noise_y = signals.noise_signal(fs, duration_s=4.0, color="white", rms=0.02, seed=12)
     x = s + noise_x
     y = np.roll(s, delay) + noise_y
 
@@ -119,7 +123,7 @@ def generate_cepstrum_echo(output_dir: str) -> None:
     b, bb = sp_signal.butter(2, [0.004, 0.9], btype="bandpass")
     direct = sp_signal.lfilter(b, bb, impulse)
     ir = direct + a * np.roll(direct, round(delay_s * fs))
-    ir += signals.noise_signal(fs, n / fs, color="white", rms=1e-4, seed=13)
+    ir += signals.noise_signal(fs, duration_s=n / fs, color="white", rms=1e-4, seed=13)
 
     res = signals.echo_detection(ir, fs, min_quefrency=0.002)
 
@@ -189,7 +193,7 @@ def generate_envelope_spectrum(output_dir: str) -> None:
     t = np.arange(int(seconds * fs)) / fs
     a0, m, fm = 1.0, 0.4, 25.0
     x = a0 * (1.0 + m * np.cos(2.0 * np.pi * fm * t)) * np.cos(2.0 * np.pi * 1000.0 * t)
-    x += signals.noise_signal(fs, seconds, color="white", rms=0.03, seed=8)
+    x += signals.noise_signal(fs, duration_s=seconds, color="white", rms=0.03, seed=8)
 
     res = signals.envelope_spectrum(x, fs)
 
@@ -255,7 +259,9 @@ def generate_synchronous_average(output_dir: str) -> None:
         + 0.5 * np.cos(2.0 * np.pi * 3.0 * phase + 0.4)
         - 0.3 * np.cos(2.0 * np.pi * 6.0 * phase)
     )
-    signal = periodic + signals.noise_signal(fs, phase.size / fs, rms=0.9, seed=11)
+    signal = periodic + signals.noise_signal(
+        fs, duration_s=phase.size / fs, rms=0.9, seed=11
+    )
     res = signals.time_synchronous_average(
         signal, fs, period_s=period_s, n_averages=n_avg
     )
@@ -384,7 +390,7 @@ def generate_cepstrum_variants(output_dir: str) -> None:
     # Above the tail of the three cepstra, which run along zero right across
     # the panel: lower down, that band ran through the "0.0" of the zoom.
     axins = ax.inset_axes((0.60, 0.40, 0.26, 0.40))
-    variants = (
+    variants: tuple[tuple[Literal["power", "real", "complex"], str, str, str], ...] = (
         ("power", COLOR_PRIMARY, "-", "Power cepstrum"),
         ("real", COLOR_TERTIARY, "--", "Real cepstrum (exactly half the power)"),
         ("complex", COLOR_SECONDARY, ":", "Complex cepstrum"),
@@ -529,8 +535,8 @@ def generate_correlation_normalizations(output_dir: str) -> None:
 
     fs = 8192.0
     delay = 102  # 12.45 ms
-    x = signals.noise_signal(fs, 2.0, seed=4)
-    interference = signals.noise_signal(fs, 2.0, rms=0.5, seed=5)
+    x = signals.noise_signal(fs, duration_s=2.0, seed=4)
+    interference = signals.noise_signal(fs, duration_s=2.0, rms=0.5, seed=5)
     y = 0.8 * np.concatenate([np.zeros(delay), x[:-delay]]) + interference
 
     coeff = signals.correlation(x, y, fs, normalization="coefficient", max_lag=0.05)

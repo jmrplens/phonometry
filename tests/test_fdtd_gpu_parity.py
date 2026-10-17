@@ -54,7 +54,7 @@ def _cupy_or_none() -> ModuleType | None:
         cupy.cuda.runtime.getDeviceCount()
         cupy.arange(1).sum()
     # Any import/CUDA failure means no GPU
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
     return cupy
 
@@ -597,7 +597,9 @@ def _source_cases() -> dict[str, tuple[list[dict[str, Any]], list[Any]]]:
             [fdtd_dispatch.plane("right", fdtd_dispatch.cw(_SOURCE_F), offset=2)],
             [
                 PlaneWaveSource(
-                    "right", CWSource(0, 0, frequency=_SOURCE_F).value, offset=2
+                    direction="right",
+                    waveform=CWSource(ix=0, iy=0, frequency=_SOURCE_F).value,
+                    offset=2,
                 )
             ],
         ),
@@ -609,8 +611,8 @@ def _source_cases() -> dict[str, tuple[list[dict[str, Any]], list[Any]]]:
             ],
             [
                 PlaneWaveSource(
-                    "down",
-                    CWSource(0, 0, frequency=_SOURCE_F).value,
+                    direction="down",
+                    waveform=CWSource(ix=0, iy=0, frequency=_SOURCE_F).value,
                     offset=3,
                     amplitude=0.5,
                 )

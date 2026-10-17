@@ -104,7 +104,7 @@ infinite_beam_impedance(
     bending_stiffness: float,
     mass_per_length: float,
     *,
-    location: str = 'center',
+    location: Literal['center', 'end'] = 'center',
 ) -> NDArray[np.complex128]
 ```
 
@@ -141,7 +141,7 @@ infinite_beam_mobility(
     bending_stiffness: float,
     mass_per_length: float,
     *,
-    location: str = 'center',
+    location: Literal['center', 'end'] = 'center',
 ) -> NDArray[np.complex128]
 ```
 
@@ -210,7 +210,7 @@ infinite_beam_point_mobility(
     bending_stiffness: float,
     mass_per_length: float,
     *,
-    location: str = 'center',
+    location: Literal['center', 'end'] = 'center',
 ) -> MobilityResult
 ```
 
@@ -234,7 +234,7 @@ infinite_plate_impedance(
     bending_stiffness: float,
     mass_per_area: float,
     *,
-    location: str = 'center',
+    location: Literal['center', 'edge'] = 'center',
 ) -> float
 ```
 
@@ -270,7 +270,7 @@ infinite_plate_mobility(
     bending_stiffness: float,
     mass_per_area: float,
     *,
-    location: str = 'center',
+    location: Literal['center', 'edge'] = 'center',
 ) -> float
 ```
 
@@ -304,7 +304,7 @@ infinite_plate_point_mobility(
     bending_stiffness: float,
     mass_per_area: float,
     *,
-    location: str = 'center',
+    location: Literal['center', 'edge'] = 'center',
 ) -> MobilityResult
 ```
 
@@ -328,7 +328,10 @@ with the ISO 7626 mobility machinery.
 ## injected_power
 
 ```python
-injected_power(force: ArrayLike, mobility: ArrayLike) -> NDArray[np.float64]
+injected_power(
+    force_n: ArrayLike,
+    mobility: ArrayLike,
+) -> NDArray[np.float64]
 ```
 
 Time-averaged vibrational power injected by a point force (Cremer 5.23).
@@ -341,8 +344,8 @@ near-field energy.
 
 | Name | Description |
 | :--- | :--- |
-| `force` | Point-force amplitude `F` (peak, scalar or array), in N. |
-| `mobility` | Complex point mobility `Y` (broadcast with *force*), in m/(N.s). |
+| `force_n` | Point-force amplitude `F` (peak, scalar or array), in N. |
+| `mobility` | Complex point mobility `Y` (broadcast with *force_n*), in m/(N.s). |
 
 **Returns:** The injected power `W`, in W.
 

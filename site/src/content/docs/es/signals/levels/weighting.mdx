@@ -268,7 +268,7 @@ misma respuesta. La **exacta** es la que hace un sonómetro: ponderar la forma d
 onda y luego filtrar por bandas.
 
 ```python
-band_source = signals.noise_signal(fs, 20.0, color="pink", rms=0.05, seed=3)
+band_source = signals.noise_signal(fs, duration_s=20.0, color="pink", rms=0.05, seed=3)
 filtered = filters.octave_filter(
     filters.weighting_filter(band_source, fs, weighting="A"), fs, fraction=3)
 weighted_bands, centres = filtered.levels, filtered.frequencies

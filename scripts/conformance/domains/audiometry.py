@@ -37,6 +37,7 @@ and prints its rows from 125 Hz, and ISO 4869-3 Table 1 writes "> 5" where
 from __future__ import annotations
 
 import math
+from typing import Literal
 
 import numpy as np
 import reference_data as ref
@@ -354,7 +355,11 @@ def _chk_vibrotactile() -> Outcome:
     offset = ref.ISO8253_1_FOREHEAD_OFFSET_DB
     expected: dict[str, float] = {}
     computed: dict[str, float] = {}
-    for placement, lower in (("mastoid", 0.0), ("forehead", offset)):
+    placements: tuple[tuple[Literal["mastoid", "forehead"], float], ...] = (
+        ("mastoid", 0.0),
+        ("forehead", offset),
+    )
+    for placement, lower in placements:
         levels = hearing.audiogram_cautions(
             freqs,
             bone_conduction_threshold_levels=[0.0] * len(freqs),

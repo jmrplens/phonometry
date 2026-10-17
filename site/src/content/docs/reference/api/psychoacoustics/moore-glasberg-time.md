@@ -143,7 +143,7 @@ time); the standard itself reports only the peak long-term loudness
 MooreGlasbergTimeVaryingLoudness.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

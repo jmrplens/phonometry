@@ -64,6 +64,7 @@ from ._layout import (
 if TYPE_CHECKING:
     from reportlab.platypus import Paragraph, Table
 
+    from .._i18n import Language
     from ..vibration.human.multiple_shock import MultipleShockResult
     from .metadata import ReportMetadata
 
@@ -87,7 +88,7 @@ _BAND_LABELS: tuple[str, ...] = (
 )
 
 
-def _fmt(value: float, decimals: int, language: str = "en") -> str:
+def _fmt(value: float, decimals: int, language: Language = "en") -> str:
     """A quantity rounded to a display precision, with the locale separator."""
     from ._i18n import format_number
 
@@ -96,7 +97,7 @@ def _fmt(value: float, decimals: int, language: str = "en") -> str:
     )
 
 
-def _fmt_percent(probability: float, language: str = "en") -> str:
+def _fmt_percent(probability: float, language: Language = "en") -> str:
     """The injury probability as a whole-number percentage (e.g. ``37 %``)."""
     from ._i18n import format_number
 
@@ -128,7 +129,7 @@ def _esc(value: str | None) -> str | None:
 
 
 def _metadata_pairs(
-    metadata: ReportMetadata | None, language: str = "en"
+    metadata: ReportMetadata | None, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the header grid.
 
@@ -150,7 +151,7 @@ def _metadata_pairs(
 
 
 def _scenario_pairs(
-    result: MultipleShockResult, language: str = "en"
+    result: MultipleShockResult, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """The exposure-scenario grid pairs (subject sex and exposure period).
 
@@ -186,7 +187,7 @@ def _unit_ms2() -> str:
     return "m/s<sup>2</sup>"
 
 
-def _analysis_table(result: MultipleShockResult, language: str = "en") -> Table:
+def _analysis_table(result: MultipleShockResult, language: Language = "en") -> Table:
     """The dose-and-stress analysis table (Clause 5 dose and Annex C stress).
 
     One row per quantity (quantity, symbol, value with unit, clause reference):
@@ -265,7 +266,9 @@ def _analysis_table(result: MultipleShockResult, language: str = "en") -> Table:
     return table
 
 
-def _classification_table(result: MultipleShockResult, language: str = "en") -> Table:
+def _classification_table(
+    result: MultipleShockResult, language: Language = "en"
+) -> Table:
     """The Annex C risk-classification table against the Table C.2 levels.
 
     Four rows partition the stress variable ``R`` by the Table C.2 risk levels
@@ -347,7 +350,7 @@ def _classification_table(result: MultipleShockResult, language: str = "en") -> 
     return table
 
 
-def _statement(result: MultipleShockResult, language: str = "en") -> str:
+def _statement(result: MultipleShockResult, language: Language = "en") -> str:
     """The boxed result statement: R, the injury probability and the risk band."""
     band = t(_BAND_LABELS[_band_index(result)], language)
     return t("R = <b>{r}</b>, &#928; = <b>{p}</b> &nbsp; ({band})", language).format(
@@ -357,7 +360,7 @@ def _statement(result: MultipleShockResult, language: str = "en") -> str:
     )
 
 
-def _zone_row(result: MultipleShockResult, language: str = "en") -> Paragraph:
+def _zone_row(result: MultipleShockResult, language: Language = "en") -> Paragraph:
     """The classification zone row stating the Annex C risk band for ``R``."""
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 
@@ -384,7 +387,7 @@ def render_iso2631_5_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a whole-body multiple-shock health-risk fiche to a PDF at ``path``.
 

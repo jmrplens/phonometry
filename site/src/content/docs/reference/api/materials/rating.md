@@ -79,6 +79,7 @@ Sound absorption class for `alpha_w` (ISO 11654 Table B.1, Annex B).
 
 ```python
 AbsorptionRatingResult(
+    *,
     alpha_w: float,
     shape_indicator: str,
     absorption_class: str,
@@ -115,7 +116,7 @@ Weighted sound absorption rating (ISO 11654:1997).
 AbsorptionRatingResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -141,9 +142,9 @@ AbsorptionRatingResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

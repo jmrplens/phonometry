@@ -26,14 +26,14 @@ def test_calibration_logic() -> None:
     # Create a 'recording' of a 94dB tone (RMS = 0.5 for example)
     rms_ref = 0.5
     t = np.linspace(0, 1, fs)
-    ref_signal = rms_ref * np.sqrt(2) * np.sin(2 * np.pi * 1000 * t)
+    reference_signal = rms_ref * np.sqrt(2) * np.sin(2 * np.pi * 1000 * t)
 
     # Calculate sensitivity
-    factor = metrology.sensitivity(ref_signal, target_spl=94.0)
+    factor = metrology.sensitivity(reference_signal, target_spl=94.0)
 
     # Analyze same signal with that factor
     spl = filters.octave_filter(
-        ref_signal,
+        reference_signal,
         fs,
         fraction=1,
         limits=[800, 1200],

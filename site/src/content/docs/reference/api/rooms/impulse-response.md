@@ -175,7 +175,7 @@ impulse_response(
     reference: Signal | list[float] | np.ndarray,
     fs: int | None = None,
     *,
-    method: str = ...,
+    method: Literal['spectral', 'farina'] = ...,
     f_range: tuple[float, float] | None = ...,
     regularization: float = ...,
     length: int | None = ...,
@@ -244,7 +244,7 @@ forward to `ir`.
 ImpulseResponseResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | np.ndarray
 ```
@@ -387,9 +387,9 @@ plot_excitation(
     x: ArrayLike,
     fs: int,
     *,
-    kind: str = 'sweep',
+    kind: Literal['sweep', 'mls'] = 'sweep',
     ax: Axes | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | np.ndarray
 ```
@@ -431,7 +431,7 @@ shaped_sweep_signal(
     f2: float,
     duration_s: float,
     *,
-    target: str | tuple[np.ndarray, np.ndarray] = 'pink',
+    target: Literal['white', 'pink'] | tuple[np.ndarray, np.ndarray] = 'pink',
     amplitude: float = 1.0,
     start_delay: float | None = None,
     fade: float = 0.01,
@@ -533,7 +533,7 @@ the result, together with the achieved crest factor.
 ShapedSweepResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | np.ndarray
 ```

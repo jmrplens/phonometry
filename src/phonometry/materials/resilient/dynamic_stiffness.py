@@ -79,13 +79,14 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
     from ..._report.metadata import ReportMetadata
 
 
 from ..._internal.boundary import settled
 from ..._internal.catalogue import CatalogueRow, read_table, take
 from ..._internal.display import RichDisplay
-from ..._internal.types import as_float_or_array
+from ..._internal.types import ReportEngine, as_float_or_array
 from ..._internal.validation import (
     check_engine,
     require_non_negative,
@@ -705,7 +706,7 @@ class DynamicStiffnessResult(RichDisplay):
         require_positive(self.floor_mass_per_area_kg_m2, "floor_mass_per_area_kg_m2")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``f0(s')`` with this design point marked.
 
@@ -723,9 +724,9 @@ class DynamicStiffnessResult(RichDisplay):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an EN 29052-1 dynamic-stiffness test-report fiche to a PDF.
 

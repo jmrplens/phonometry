@@ -103,7 +103,7 @@ track_decay_rate(
     frequencies: ArrayLike,
     distances: ArrayLike | None = None,
     sleeper_spacing_m: float = 0.6,
-    direction: str = 'vertical',
+    direction: Literal['vertical', 'lateral'] = 'vertical',
 ) -> TrackDecayRate
 ```
 
@@ -141,7 +141,7 @@ the ratio to the direct response enters.
 ```python
 TrackDecayRate(
     *,
-    direction: str,
+    direction: Literal['vertical', 'lateral'],
     frequencies: NDArray[np.float64],
     decay_rates_db_per_m: NDArray[np.float64],
     distances: NDArray[np.float64] | None = None,
@@ -190,7 +190,7 @@ TrackDecayRate.plot(
     ax: Axes | None = None,
     *,
     limit_db_per_m: Mapping[float, float] | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

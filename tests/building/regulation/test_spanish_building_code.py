@@ -733,7 +733,13 @@ def test_a_check_reads_its_verdict_from_the_value() -> None:
     very geometry said otherwise. All three are read from the value now.
     """
     requirement = hr.DBHRRequirement(
-        "DnT,A", 50.0, "min", "dBA", 0, "DB-HR 2.1", "between dwellings"
+        quantity="DnT,A",
+        limit=50.0,
+        direction="min",
+        unit="dBA",
+        decimals=0,
+        reference="DB-HR 2.1",
+        description="between dwellings",
     )
     check = hr.DBHRCheck(requirement, 45.0)
     assert (check.reported, check.margin, check.passes) == (45.0, -5.0, False)
@@ -750,9 +756,23 @@ def test_a_check_rounds_by_the_requirements_decimals() -> None:
     same achieved value is a different reported value under each requirement,
     and half of a last place rounds up rather than to even.
     """
-    seconds = hr.DBHRRequirement("T", 0.7, "max", "s", 1, "DB-HR 2.2", "classroom")
+    seconds = hr.DBHRRequirement(
+        quantity="T",
+        limit=0.7,
+        direction="max",
+        unit="s",
+        decimals=1,
+        reference="DB-HR 2.2",
+        description="classroom",
+    )
     decibels = hr.DBHRRequirement(
-        "DnT,A", 50.0, "min", "dBA", 0, "DB-HR 2.1", "between dwellings"
+        quantity="DnT,A",
+        limit=50.0,
+        direction="min",
+        unit="dBA",
+        decimals=0,
+        reference="DB-HR 2.1",
+        description="between dwellings",
     )
     assert hr.check_db_hr_requirement(0.649, seconds).reported == pytest.approx(0.6)
     assert hr.check_db_hr_requirement(50.5, decibels).reported == pytest.approx(51.0)
@@ -769,7 +789,13 @@ def test_a_check_on_an_undetermined_value_is_refused() -> None:
     derived fields mutually consistent and reach the figure as a verdict.
     """
     requirement = hr.DBHRRequirement(
-        "DnT,A", 50.0, "min", "dBA", 0, "DB-HR 2.1", "between dwellings"
+        quantity="DnT,A",
+        limit=50.0,
+        direction="min",
+        unit="dBA",
+        decimals=0,
+        reference="DB-HR 2.1",
+        description="between dwellings",
     )
     with pytest.raises(ValueError, match=r"DBHRCheck: 'value' must be finite"):
         hr.DBHRCheck(requirement, math.nan)
@@ -802,8 +828,27 @@ def test_requirement_direction_is_validated() -> None:
     "max", so the dataclass rejects any other spelling at construction.
     """
     with pytest.raises(ValueError, match=r"'direction' must be"):
-        hr.DBHRRequirement("D2m,nT,Atr", 32.0, "minimum", "dBA", 0, "ref", "desc")
-    assert hr.DBHRRequirement("T", 0.7, "max", "s", 1, "ref", "desc").direction == "max"
+        hr.DBHRRequirement(
+            quantity="D2m,nT,Atr",
+            limit=32.0,
+            direction="minimum",
+            unit="dBA",
+            decimals=0,
+            reference="ref",
+            description="desc",
+        )
+    assert (
+        hr.DBHRRequirement(
+            quantity="T",
+            limit=0.7,
+            direction="max",
+            unit="s",
+            decimals=1,
+            reference="ref",
+            description="desc",
+        ).direction
+        == "max"
+    )
 
 
 def test_published_spectra_are_read_only() -> None:

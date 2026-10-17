@@ -222,7 +222,7 @@ Arrival time of the direct sound (order 0), s.
 ImageSourceResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -241,7 +241,7 @@ ImageSourceResult.plot_geometry(
     ax: Axes | None = None,
     *,
     max_order: int | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

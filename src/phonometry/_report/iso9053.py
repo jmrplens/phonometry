@@ -49,27 +49,28 @@ from ._material_fiche import (
 )
 
 if TYPE_CHECKING:
+    from .._i18n import Language
     from ..materials.absorbers._airflow_resistance import StaticAirflowResult
     from .metadata import ReportMetadata
 
 
-def _pas(value: float, language: str = "en") -> str:
+def _pas(value: float, language: Language = "en") -> str:
     """A resistance quantity to the nearest whole Pa*s unit."""
     return format_number(value, language, decimals=0)
 
 
-def _mm_s(value_m_s: float, language: str = "en") -> str:
+def _mm_s(value_m_s: float, language: Language = "en") -> str:
     """A linear airflow velocity (stored in m/s) printed in mm/s to 0,1 mm/s."""
     return format_number(value_m_s * 1e3, language, decimals=1, trim=True)
 
 
-def _pa(value: float, language: str = "en") -> str:
+def _pa(value: float, language: Language = "en") -> str:
     """A pressure difference to 0,1 Pa."""
     return format_number(value, language, decimals=1, trim=True)
 
 
 def _metadata_pairs(
-    metadata: ReportMetadata, language: str = "en"
+    metadata: ReportMetadata, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the airflow-resistance header grid.
 
@@ -90,7 +91,7 @@ def _metadata_pairs(
 
 
 def _metric_rows(
-    result: StaticAirflowResult, language: str = "en"
+    result: StaticAirflowResult, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """The scalar results shown in the left-hand metrics table.
 
@@ -143,7 +144,7 @@ def _metric_rows(
     return rows
 
 
-def _statement(result: StaticAirflowResult, language: str = "en") -> str:
+def _statement(result: StaticAirflowResult, language: Language = "en") -> str:
     """The boxed specific airflow resistance ``R_s`` (clause 7.5)."""
     return t(
         "Specific airflow resistance R<sub>s</sub> = <b>{value} Pa&#183;s/m</b>",
@@ -151,7 +152,9 @@ def _statement(result: StaticAirflowResult, language: str = "en") -> str:
     ).format(value=_pas(result.specific_resistance, language))
 
 
-def _extended_terms(result: StaticAirflowResult, language: str = "en") -> list[str]:
+def _extended_terms(
+    result: StaticAirflowResult, language: Language = "en"
+) -> list[str]:
     """The airflow resistance ``R``, resistivity ``sigma`` and evaluation velocity."""
     terms = [
         t(
@@ -173,7 +176,7 @@ def _extended_terms(result: StaticAirflowResult, language: str = "en") -> list[s
     return terms
 
 
-def _basis_line(metadata: ReportMetadata | None, language: str = "en") -> str:
+def _basis_line(metadata: ReportMetadata | None, language: Language = "en") -> str:
     """The standard-basis line, naming the measurement standard when supplied."""
     return standard_basis_line(
         "{standard} static-method determination of the airflow resistance "
@@ -192,7 +195,7 @@ def render_static_airflow_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 9053-1 static airflow-resistance fiche to a PDF at ``path``.
 

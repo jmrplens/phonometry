@@ -1,9 +1,11 @@
 ---
-title: "signals.test_signals"
+title: "signals: test signals"
 description: "Test signals and sample-rate utilities."
 sidebar:
   label: "test_signals"
 ---
+
+Every name on this page is published by `phonometry.signals`: `from phonometry import signals`, then `signals.<name>`.
 
 Test signals and sample-rate utilities.
 
@@ -122,8 +124,8 @@ signal is - or use odd lengths, and the operation is exact.
 ```python
 noise_signal(
     fs: float,
-    duration_s: float = 1.0,
     *,
+    duration_s: float = 1.0,
     color: Literal['white', 'pink', 'red', 'blue', 'violet'] = 'white',
     rms: float = 1.0,
     seed: int | None = None,
@@ -254,7 +256,7 @@ Length of the designed anti-alias FIR.
 ResampledSignalResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -391,7 +393,7 @@ a train of identical bursts, one per repetition period (Clause A2.2).
 ToneBurstResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

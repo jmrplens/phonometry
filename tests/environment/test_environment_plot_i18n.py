@@ -83,8 +83,12 @@ def test_plot_cnossos_road_emission_spanish_labels() -> None:
 
     result = road_source_power(
         [
-            RoadTraffic(RoadVehicleCategory.LIGHT, 1000.0, 50.0),
-            RoadTraffic(RoadVehicleCategory.HEAVY, 100.0, 50.0),
+            RoadTraffic(
+                category=RoadVehicleCategory.LIGHT, flow_rate=1000.0, speed_kmh=50.0
+            ),
+            RoadTraffic(
+                category=RoadVehicleCategory.HEAVY, flow_rate=100.0, speed_kmh=50.0
+            ),
         ]
     )
     ax = result.plot(language="es")

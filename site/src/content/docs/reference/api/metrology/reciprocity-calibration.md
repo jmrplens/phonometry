@@ -132,7 +132,7 @@ ReciprocityCalibration(
     sensitivity_v_per_pa: NDArray[np.complex128],
     products_v2_per_pa2: NDArray[np.complex128],
     field: Literal['pressure', 'free'],
-    method: str,
+    method: Literal['three_microphones', 'auxiliary_source'],
     corrections: Mapping[str, NDArray[np.float64]],
     expanded_uncertainty_db: NDArray[np.float64] | None = None,
 )
@@ -183,7 +183,7 @@ both parts: a NOTE in IEC 61094-2, the running text in IEC 61094-3).
 ReciprocityCalibration.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -282,7 +282,7 @@ part and 7.8 of the second prefer, while accepting the logarithmic one
 ReciprocityUncertaintyBudget.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

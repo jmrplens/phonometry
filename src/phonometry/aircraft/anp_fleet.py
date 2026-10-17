@@ -41,7 +41,7 @@ from __future__ import annotations
 
 import csv
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, NamedTuple, cast
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple, cast
 
 import numpy as np
 
@@ -59,6 +59,7 @@ from .airport_noise import (
     EventMetric,
     FlightSegmentState,
     FlyoverResult,
+    Mounting,
     NoiseContourResult,
     event_level,
     noise_contour,
@@ -83,8 +84,14 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
     from .flight_performance import Aerodrome
     from .npd_atmosphere import RevisedNPDCurves
+
+Operation = Literal["departure", "D", "arrival", "A"]
+Metric = Literal["SEL", "LAmax"]
+Absorption = Literal["arp5534", "arp866a"]
+OperationCode = Literal["A", "D"]
 
 __all__ = [
     "ANPAircraft",
@@ -111,13 +118,17 @@ _STANDARD_PRESSURE_KPA = 101.325
 #: distance grid, which needs at least two tabulated distances.
 _MIN_NPD_DISTANCES = 2
 #: Lateral-directivity identifier -> Doc 29 engine mounting.
-_MOUNTING = {"wing": "wing", "fuselage": "fuselage", "prop": "propeller"}
+_MOUNTING: dict[str, Mounting] = {
+    "wing": "wing",
+    "fuselage": "fuselage",
+    "prop": "propeller",
+}
 #: ANP operation code for departure (on-ground segments are a ground roll).
-_DEPARTURE = "D"
+_DEPARTURE: OperationCode = "D"
 #: ANP operation code for arrival (on-ground segments are a landing roll).
-_ARRIVAL = "A"
+_ARRIVAL: OperationCode = "A"
 #: Operation aliases -> ANP operation code (``"A"`` arrival, ``"D"`` departure).
-_OPERATION = {
+_OPERATION: dict[str, OperationCode] = {
     "a": _ARRIVAL,
     "arrival": _ARRIVAL,
     "arrivals": _ARRIVAL,
@@ -130,7 +141,7 @@ _OPERATION = {
     "take-off": _DEPARTURE,
 }
 #: Supported NPD noise metrics for the Doc 29 chain.
-_METRICS = ("SEL", "LAmax")
+_METRICS: tuple[Metric, ...] = ("SEL", "LAmax")
 #: The ANP database's identifier for an aircraft's default fixed-point profile,
 #: selected when the caller passes ``profile_id=None``.
 _DEFAULT_PROFILE_ID = "DEFAULT"
@@ -143,7 +154,7 @@ _COL_THRUST_RATING = "Thrust Rating"
 _COL_OP_TYPE = "Op Type"
 
 
-def _operation_code(operation: str) -> str:
+def _operation_code(operation: str) -> OperationCode:
     """Normalise an operation label to the ANP code ``"A"``/``"D"``."""
     key = str(operation).strip().lower()
     if key not in _OPERATION:
@@ -272,7 +283,7 @@ def _distances_m(header: Iterable[str]) -> NDArray[np.float64]:
     return distances
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ANPNPDCurves(OwnsArrays):
     """ANP Noise-Power-Distance curves for one aircraft, metric and operation.
 
@@ -291,8 +302,8 @@ class ANPNPDCurves(OwnsArrays):
 
     aircraft_id: str
     npd_id: str
-    metric: str
-    operation: str
+    metric: Metric
+    operation: OperationCode
     power_parameter: str
     powers: NDArray[np.float64]
     distances_m: NDArray[np.float64]
@@ -335,7 +346,7 @@ class ANPNPDCurves(OwnsArrays):
         return npd_level(self.powers, self.distances_m, self.levels, power, distance_m)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the NPD curve at each tabulated power versus slant distance."""
         from .._i18n import check_language
@@ -364,7 +375,7 @@ class ANPProfile(OwnsArrays):
     """
 
     aircraft_id: str
-    operation: str
+    operation: OperationCode
     profile_id: str
     stage_length: int | str
     path: NDArray[np.float64]
@@ -420,7 +431,7 @@ class ANPProfile(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the trajectory altitude versus along-track distance."""
         from .._i18n import check_language
@@ -451,7 +462,7 @@ class SpectralClass(OwnsArrays):
     """
 
     class_id: str
-    operation: str
+    operation: OperationCode
     description: str
     frequencies: NDArray[np.float64]
     levels: NDArray[np.float64]
@@ -465,7 +476,7 @@ class SpectralClass(OwnsArrays):
         require_same_length(self, "frequencies", "levels")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the band levels versus frequency."""
         from .._i18n import check_language
@@ -499,18 +510,18 @@ class ANPAircraft(RichDisplay):
     engine_type: str
     n_engines: int
     weight_class: str
-    mounting: str
+    mounting: Mounting
     npd_id: str
     power_parameter: str
     approach_spectral_class_id: str
     departure_spectral_class_id: str
     database: ANPDatabase = field(repr=False, compare=False)
 
-    def npd_curves(self, operation: str, metric: str = "SEL") -> ANPNPDCurves:
+    def npd_curves(self, operation: Operation, metric: Metric = "SEL") -> ANPNPDCurves:
         """NPD curves for this aircraft (see :meth:`ANPDatabase.npd_curves`)."""
         return self.database.npd_curves(self.aircraft_id, operation, metric)
 
-    def spectral_class(self, operation: str) -> SpectralClass:
+    def spectral_class(self, operation: Operation) -> SpectralClass:
         """Spectral class of this aircraft's NPD for an operation.
 
         :param operation: ``"departure"``/``"D"`` or ``"arrival"``/``"A"``.
@@ -527,13 +538,13 @@ class ANPAircraft(RichDisplay):
 
     def revised_npd_curves(
         self,
-        operation: str,
-        metric: str = "SEL",
+        operation: Operation,
+        metric: Metric = "SEL",
         *,
         temperature_c: float,
         relative_humidity_percent: float,
         static_pressure_kpa: float = _STANDARD_PRESSURE_KPA,
-        absorption: str = "arp5534",
+        absorption: Absorption = "arp5534",
     ) -> RevisedNPDCurves:
         """NPD curves for another atmosphere (see :meth:`ANPDatabase.revised_npd_curves`)."""
         return self.database.revised_npd_curves(
@@ -547,7 +558,11 @@ class ANPAircraft(RichDisplay):
         )
 
     def profile(
-        self, operation: str, stage_length: int = 1, *, profile_id: str | None = None
+        self,
+        operation: Operation,
+        stage_length: int = 1,
+        *,
+        profile_id: str | None = None,
     ) -> ANPProfile:
         """Fixed-point profile (see :meth:`ANPDatabase.profile`)."""
         return self.database.profile(
@@ -557,7 +572,7 @@ class ANPAircraft(RichDisplay):
     def event_level(
         self,
         observer: NDArray[np.float64] | list[float],
-        operation: str,
+        operation: Operation,
         *,
         aerodrome: Aerodrome | None = None,
         stage_length: int | str = 1,
@@ -565,7 +580,7 @@ class ANPAircraft(RichDisplay):
         temperature_c: float | None = None,
         static_pressure_kpa: float | None = None,
         relative_humidity_percent: float | None = None,
-        absorption: str = "arp5534",
+        absorption: Absorption = "arp5534",
     ) -> FlyoverResult:
         """Single-event level at a receiver (see :meth:`ANPDatabase.event_level`)."""
         return self.database.event_level(
@@ -583,7 +598,7 @@ class ANPAircraft(RichDisplay):
 
     def noise_contour(
         self,
-        operation: str,
+        operation: Operation,
         *,
         x: NDArray[np.float64] | list[float],
         y: NDArray[np.float64] | list[float],
@@ -593,7 +608,7 @@ class ANPAircraft(RichDisplay):
         temperature_c: float | None = None,
         static_pressure_kpa: float | None = None,
         relative_humidity_percent: float | None = None,
-        absorption: str = "arp5534",
+        absorption: Absorption = "arp5534",
     ) -> NoiseContourResult:
         """Single-event ground contour (see :meth:`ANPDatabase.noise_contour`)."""
         return self.database.noise_contour(
@@ -758,13 +773,13 @@ class ANPDatabase:
     def revised_npd_curves(
         self,
         aircraft_id: str,
-        operation: str,
-        metric: str = "SEL",
+        operation: Operation,
+        metric: Metric = "SEL",
         *,
         temperature_c: float,
         relative_humidity_percent: float,
         static_pressure_kpa: float = _STANDARD_PRESSURE_KPA,
-        absorption: str = "arp5534",
+        absorption: Absorption = "arp5534",
     ) -> RevisedNPDCurves:
         """NPD curves recalculated for another atmosphere (Doc 29 Vol. 2 Appendix D).
 
@@ -798,7 +813,7 @@ class ANPDatabase:
         )
 
     def npd_curves(
-        self, aircraft_id: str, operation: str, metric: str = "SEL"
+        self, aircraft_id: str, operation: Operation, metric: Metric = "SEL"
     ) -> ANPNPDCurves:
         """NPD curves for an aircraft, operation and noise metric.
 
@@ -840,7 +855,7 @@ class ANPDatabase:
     def profile(
         self,
         aircraft_id: str,
-        operation: str,
+        operation: Operation,
         stage_length: int | str = 1,
         *,
         profile_id: str | None = None,
@@ -997,7 +1012,7 @@ class ANPDatabase:
     def procedural_steps(
         self,
         aircraft_id: str,
-        operation: str,
+        operation: Operation,
         stage_length: int | str = 1,
         *,
         profile_id: str | None = None,
@@ -1066,7 +1081,7 @@ class ANPDatabase:
     def flight_profile(
         self,
         aircraft_id: str,
-        operation: str,
+        operation: Operation,
         *,
         aerodrome: Aerodrome,
         stage_length: int | str = 1,
@@ -1135,7 +1150,7 @@ class ANPDatabase:
     def procedural_profile(
         self,
         aircraft_id: str,
-        operation: str,
+        operation: Operation,
         *,
         aerodrome: Aerodrome,
         stage_length: int | str = 1,
@@ -1191,7 +1206,7 @@ class ANPDatabase:
     def _doc29_inputs(
         self,
         aircraft_id: str,
-        operation: str,
+        operation: Operation,
         stage_length: int | str,
         aerodrome: Aerodrome | None = None,
         npd_air: _NPDAir | None = None,
@@ -1260,7 +1275,7 @@ class ANPDatabase:
         self,
         aircraft_id: str,
         observer: NDArray[np.float64] | list[float],
-        operation: str,
+        operation: Operation,
         *,
         aerodrome: Aerodrome | None = None,
         stage_length: int | str = 1,
@@ -1268,7 +1283,7 @@ class ANPDatabase:
         temperature_c: float | None = None,
         static_pressure_kpa: float | None = None,
         relative_humidity_percent: float | None = None,
-        absorption: str = "arp5534",
+        absorption: Absorption = "arp5534",
     ) -> FlyoverResult:
         """Doc 29 single-event level of an ANP aircraft at a receiver.
 
@@ -1327,7 +1342,7 @@ class ANPDatabase:
     def noise_contour(
         self,
         aircraft_id: str,
-        operation: str,
+        operation: Operation,
         *,
         x: NDArray[np.float64] | list[float],
         y: NDArray[np.float64] | list[float],
@@ -1337,7 +1352,7 @@ class ANPDatabase:
         temperature_c: float | None = None,
         static_pressure_kpa: float | None = None,
         relative_humidity_percent: float | None = None,
-        absorption: str = "arp5534",
+        absorption: Absorption = "arp5534",
     ) -> NoiseContourResult:
         """Doc 29 single-event ground contour of an ANP aircraft.
 
@@ -1439,13 +1454,13 @@ class _NPDAir(NamedTuple):
 
     atmosphere: AerodromeAtmosphere
     relative_humidity_percent: float
-    absorption: str
+    absorption: Absorption
 
 
 def _npd_air(
     atmosphere: AerodromeAtmosphere,
     relative_humidity_percent: float | None,
-    absorption: str,
+    absorption: Absorption,
 ) -> _NPDAir | None:
     """The Appendix D air, or ``None`` when no humidity asks for one.
 
@@ -1459,10 +1474,10 @@ def _npd_air(
     """
     from .npd_atmosphere import _ABSORPTION
 
-    require_choice(absorption, "absorption", _ABSORPTION)
+    route = require_choice(absorption, "absorption", _ABSORPTION)
     if relative_humidity_percent is None:
         return None
-    return _NPDAir(atmosphere, float(relative_humidity_percent), absorption)
+    return _NPDAir(atmosphere, float(relative_humidity_percent), route)
 
 
 def _read_tables(path: Path | str | None) -> dict[str, str]:
@@ -1504,6 +1519,7 @@ def _parse_npd(
     level_cols = [c for c in rows[0] if c.startswith("L_") and c.endswith("ft")]
     distances = _distances_m(rows[0].keys())
     grouped: dict[tuple[str, str, str], list[tuple[float, list[float]]]] = {}
+    key: tuple[str, str, str]
     for row in rows:
         metric = row["Noise Metric"]
         if metric not in _METRICS:
@@ -1540,6 +1556,7 @@ def _parse_profiles(
     """
     rows = _rows(text)
     grouped: dict[tuple[str, str, str, int], list[tuple[int, list[float]]]] = {}
+    key: tuple[str, str, str, int]
     for row in rows:
         key = (
             row["ACFT_ID"],

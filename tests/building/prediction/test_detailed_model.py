@@ -485,7 +485,10 @@ def test_table_l11_lightweight_flanking_paths_and_total() -> None:
     result = building.detailed_airborne_prediction(
         BANDS,
         direct_index=ref.ISO12354_TABLE_L12_RD_FLOOR,
-        flanking_paths=[BandPath("Ff", "Ff", ff), BandPath("Df", "Df", df)],
+        flanking_paths=[
+            BandPath(label="Ff", kind="Ff", values=ff),
+            BandPath(label="Df", kind="Df", values=df),
+        ],
     )
     assert result.r_prime == pytest.approx(ref.ISO12354_TABLE_L11_R_PRIME, abs=TOL)
     assert result.rating is not None
@@ -575,7 +578,10 @@ def test_impact_prediction_without_a_direct_path_sums_the_flanking_paths() -> No
     values = np.full(BANDS.size, 50.0)
     result = building.detailed_impact_prediction(
         BANDS,
-        flanking_paths=[BandPath("Ff1", "Ff", values), BandPath("Ff2", "Ff", values)],
+        flanking_paths=[
+            BandPath(label="Ff1", kind="Ff", values=values),
+            BandPath(label="Ff2", kind="Ff", values=values),
+        ],
     )
     assert [p.label for p in result.paths] == ["Ff1", "Ff2"]
     assert result.l_prime_n == pytest.approx(50.0 + 10.0 * np.log10(2.0))
@@ -629,7 +635,7 @@ def test_table_g11_lightweight_impact_paths_and_total() -> None:
     result = building.detailed_impact_prediction(
         BANDS,
         direct_level=direct,
-        flanking_paths=[BandPath("Df", "Df", flanking)],
+        flanking_paths=[BandPath(label="Df", kind="Df", values=flanking)],
     )
     assert result.l_prime_n == pytest.approx(ref.ISO12354_TABLE_G11_LN_TOTAL, abs=TOL)
     assert result.rating is not None

@@ -32,6 +32,7 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..electroacoustics.headphones import (
         CouplerFrequencyResponse,
         CrosstalkAttenuation,
@@ -170,27 +171,27 @@ _HEADROOM = 1.3
 _MIN_RESPONSE_SPAN_DB = 40.0
 
 
-def _t(text: str, language: str = "en", **fmt: Any) -> str:
+def _t(text: str, language: Language = "en", **fmt: Any) -> str:
     """Localise a fixed string; English is returned verbatim."""
     s = _STRINGS.get(text, text) if language == "es" else text
     return s.format(**fmt) if fmt else s
 
 
-def _num(value: float, language: str, decimals: int = 1) -> str:
+def _num(value: float, language: Language, decimals: int = 1) -> str:
     """A number with the language's decimal separator and a true minus."""
     from .._i18n import format_number
 
     return format_number(value, language, decimals=decimals)
 
 
-def _verdict(*, passes: bool, language: str) -> str:
+def _verdict(*, passes: bool, language: Language) -> str:
     """The verdict word."""
     english, spanish = _VERDICTS[passes]
     return spanish if language == "es" else english
 
 
 def _draw_programme_check(
-    check: ProgramSignalCheck, ax: Axes, language: str, kwargs: dict[str, Any]
+    check: ProgramSignalCheck, ax: Axes, language: Language, kwargs: dict[str, Any]
 ) -> None:
     """The referred band levels inside Table II's tolerances, without a title."""
     from .._i18n import localize_axes
@@ -231,7 +232,7 @@ def plot_programme_signal_check(
     check: ProgramSignalCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Band levels, referred by the check's offset, inside Table II of IEC 60268-1.
@@ -258,7 +259,7 @@ def plot_limiting_test_signal_check(
     check: LimitingTestSignalCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The clipped programme signal of IEC 60268-7 8.3.2: spectrum and peak ratio.
@@ -286,7 +287,7 @@ def plot_rated_impedance(
     result: RatedImpedanceVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The modulus of a headphone's impedance with its rated value and 80 % of it.
@@ -373,7 +374,7 @@ def plot_programme_characteristic_voltage(
     result: ProgramCharacteristicVoltage,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The band levels at the characteristic voltage, whose power sum is 94 dB.
@@ -459,7 +460,7 @@ def plot_programme_characteristic_voltage(
     return ax
 
 
-def _plain_log_ticks(ax: Axes, values: np.ndarray, language: str) -> None:
+def _plain_log_ticks(ax: Axes, values: np.ndarray, language: Language) -> None:
     """Label a logarithmic voltage axis at 1, 2 and 5 per decade, as plain numbers."""
     import matplotlib.ticker as mticker
 
@@ -484,7 +485,7 @@ def plot_protection_voltage(
     result: ProtectionVoltage,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The change of sensitivity against the e.m.f., with the 1 dB line of 8.3.6.2 b).
@@ -550,7 +551,7 @@ def plot_coupler_frequency_response(
     result: CouplerFrequencyResponse,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     iec_scale: bool = True,
     **kwargs: Any,
 ) -> Axes:
@@ -615,7 +616,7 @@ def plot_crosstalk_attenuation(
     result: CrosstalkAttenuation,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The crosstalk attenuation of 8.12 against frequency.
@@ -666,7 +667,7 @@ def _response_limits(lowest: float, highest: float) -> tuple[float, float]:
     return bottom, bottom + span
 
 
-def _band_ticks(ax: Axes, frequencies: np.ndarray, language: str) -> None:
+def _band_ticks(ax: Axes, frequencies: np.ndarray, language: Language) -> None:
     """Label a bar axis with every other band centre."""
     from .common import _format_freq
 
@@ -684,7 +685,7 @@ def plot_field_comparison_response(
     result: FieldComparisonResponse,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     iec_scale: bool = True,
     **kwargs: Any,
 ) -> Axes:
@@ -764,7 +765,7 @@ def plot_ear_canal_frequency_response(
     result: EarCanalFrequencyResponse,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     iec_scale: bool = True,
     **kwargs: Any,
 ) -> Axes:
@@ -843,7 +844,7 @@ def plot_ear_canal_microphone(
     result: EarCanalMicrophoneVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The five measurable items of Annex B as shares of their limits.

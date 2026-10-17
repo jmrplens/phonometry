@@ -49,7 +49,7 @@ import math
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
@@ -174,9 +174,12 @@ WEIGHTED_UNCERTAINTY: float = 0.08
 #: reproducibility standard deviation to reach those figures.
 EN16487_COVERAGE_FACTOR: float = 2.8
 
+#: A mounting this test code admits, by its EN ISO 354 Annex B letter.
+MountingLetter = Literal["A", "B", "E", "J"]
+
 #: 4.1.1.2 and 4.1.2.1: the mountings this test code admits, by the letter
 #: EN ISO 354 Annex B gives them.
-MOUNTING_TYPES: Mapping[str, str] = MappingProxyType(
+MOUNTING_TYPES: Mapping[MountingLetter, str] = MappingProxyType(
     {
         "A": "attached directly against a hard surface, with no air space",
         "B": "glued to a hard surface with a 3 mm air space kept by corner shims",
@@ -333,7 +336,7 @@ class CeilingSpecimenCheck(RichDisplay):
         raise TypeError(msg)
 
 
-def mounting_type(letter: str) -> str:
+def mounting_type(letter: MountingLetter) -> str:
     """What one mounting letter of EN ISO 354 Annex B means here.
 
     :param letter: ``"A"``, ``"B"``, ``"E"`` or ``"J"``.
@@ -521,7 +524,7 @@ def _warn_about(*, check: CeilingSpecimenCheck) -> None:
 def check_ceiling_specimen(
     *,
     area: float,
-    mounting: str = "E",
+    mounting: MountingLetter = "E",
     depth_mm: float | None = None,
     deflection_mm: float = 0.0,
     substructure_width_mm: float = 0.0,

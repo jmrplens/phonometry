@@ -753,7 +753,7 @@ One passage reduced the way Clauses 5 to 7 reduce it.
 TrainPassage.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -779,7 +779,7 @@ Figure 6 are `plot_spectrum`.
 TrainPassage.plot_spectrum(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

@@ -251,7 +251,7 @@ An emission sound pressure level and the two corrections behind it.
 EmissionPressureResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

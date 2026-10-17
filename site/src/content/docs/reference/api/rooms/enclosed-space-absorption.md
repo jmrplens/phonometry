@@ -69,7 +69,7 @@ enclosed_space_reverberation(
     *,
     objects: ArrayLike = (),
     object_fraction: float = 0.0,
-    air_condition: str | None = None,
+    air_condition: Literal['10C_30-50', '10C_50-70', '10C_70-90', '20C_30-50', '20C_50-70', '20C_70-90'] | None = None,
     frequencies: ArrayLike = ...,
     speed_of_sound: float = 345.6,
 ) -> ReverberationResult
@@ -222,7 +222,7 @@ Absorption area and reverberation time of an enclosed space (Clause 4).
 ReverberationResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -239,9 +239,9 @@ ReverberationResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

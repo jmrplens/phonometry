@@ -294,7 +294,7 @@ DiffuseFieldSensitivity(
     reference_indicated_level: NDArray[np.float64],
     reference_sensitivity_level: NDArray[np.float64],
     reference_correction: NDArray[np.float64],
-    route: str,
+    route: Literal['random_incidence', 'free', 'pressure'],
 )
 ```
 
@@ -343,7 +343,7 @@ $\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}$, in dB
 DiffuseFieldSensitivity.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -432,7 +432,7 @@ DirectivityFactor(
     reference_level: float,
     gamma: float,
     largest_element_fraction: float,
-    formula: str,
+    formula: Literal['A.3', 'A.4', 'A.5'],
 )
 ```
 
@@ -473,8 +473,8 @@ $G_\mathrm{F}$, and what Table B.1 tabulates.
 DirectivityFactor.plot(
     ax: Axes | None = None,
     *,
-    view: str = 'response',
-    language: str = 'en',
+    view: Literal['response', 'weights'] = 'response',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -705,8 +705,8 @@ field relative to a plane wave from its reference direction.
 RandomIncidenceSensitivity.plot(
     ax: Axes | None = None,
     *,
-    view: str = 'levels',
-    language: str = 'en',
+    view: Literal['levels', 'correction'] = 'levels',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

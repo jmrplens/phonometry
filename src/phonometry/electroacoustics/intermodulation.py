@@ -46,6 +46,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
     from ..io._signal import Signal
 
 __all__ = [
@@ -148,7 +149,7 @@ class ModulationDistortionResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot the carrier and its modulation sidebands, with d2/d3
         annotated.
@@ -323,6 +324,7 @@ def difference_frequency_distortion(
     if ref <= 0.0:
         msg = "No primary tones found at 'f1'/'f2'."
         raise ValueError(msg)
+    # The order of the distortion product, as the standard numbers it.
     if order == 2:  # noqa: PLR2004
         value = _imd_component(freqs, amp, fb - fa, half, exclude=(fa, fb))
     else:

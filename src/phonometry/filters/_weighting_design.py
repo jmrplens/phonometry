@@ -54,7 +54,7 @@ output:
   the realised cascade are referred to one anchor frequency, and
   :func:`_anchor_hz` chooses it so that it always exists: the standard's own
   reference frequency at every rate that can carry it, and the middle of the
-  fit band below ``2 * f_ref``, where the reference frequency is past the
+  fit band below ``2 * reference_frequency_hz``, where the reference frequency is past the
   Nyquist frequency and asking the warp for it returns its alias rather than
   an error. What the pin fixes is the *level*, not the frequency: the cascade
   is set to the printed curve's own decibels at the anchor, so a tone reads
@@ -336,17 +336,19 @@ def _corner_bounds(
     return limits[0], limits[1]
 
 
-def _anchor_hz(fs: float, band: tuple[float, float], f_ref: float) -> float:
+def _anchor_hz(
+    fs: float, band: tuple[float, float], reference_frequency_hz: float
+) -> float:
     r"""The frequency at which the design is pinned to the printed curve.
 
     The standard's own reference frequency whenever the rate can carry it,
     which is what makes the realised response exactly 0 dB where the standard
     prints a zero tolerance.
 
-    Below ``2 * f_ref`` the rate cannot carry it, and the bilinear warp
+    Below ``2 * reference_frequency_hz`` the rate cannot carry it, and the bilinear warp
     :math:`2 f_s \tan(\pi f / f_s)` does not merely fail there, it answers:
     it leaves the positive axis at the Nyquist frequency and comes back as the
-    alias, or as :math:`\Omega \simeq 0` whenever ``fs`` divides ``f_ref``.
+    alias, or as :math:`\Omega \simeq 0` whenever ``fs`` divides ``reference_frequency_hz``.
     Anchoring on that answer is what used to hand the search an objective with
     no solution -- at ``fs = 1000`` the B weighting's residual could not fall
     below 424 dB, because the fit was being asked to read 0 dB at dc, where
@@ -362,11 +364,11 @@ def _anchor_hz(fs: float, band: tuple[float, float], f_ref: float) -> float:
 
     :param fs: Sampling rate in Hz.
     :param band: The fit band in Hz, already clipped to the Nyquist frequency.
-    :param f_ref: The standard's reference frequency in Hz.
+    :param reference_frequency_hz: The standard's reference frequency in Hz.
     :return: The anchor frequency in Hz, strictly inside *band*.
     """
-    if 2.0 * f_ref < fs:
-        return f_ref
+    if 2.0 * reference_frequency_hz < fs:
+        return reference_frequency_hz
     low, high = band
     return float(np.sqrt(low * high))
 
@@ -1034,9 +1036,12 @@ def _log_distance2(roots: np.ndarray, omega: np.ndarray) -> np.ndarray:
 
 
 def _analog_db(
-    zeros: np.ndarray, poles: np.ndarray, frequencies: np.ndarray, f_ref: float
+    zeros: np.ndarray,
+    poles: np.ndarray,
+    frequencies: np.ndarray,
+    reference_frequency_hz: float,
 ) -> np.ndarray:
-    """The prototype's magnitude in dB, relative to its value at *f_ref*.
+    """The prototype's magnitude in dB, relative to its value at *reference_frequency_hz*.
 
     The same quantity :func:`_log_mag2` computes for a trial prototype, for the
     printed one, and deliberately in the same shape: a sum of logarithms rather
@@ -1046,7 +1051,7 @@ def _analog_db(
     spelling was one decade of sampling rate away from doing.
     """
     omega = 2.0 * np.pi * np.asarray(frequencies, dtype=float)
-    omega_ref = np.array([2.0 * np.pi * f_ref])
+    omega_ref = np.array([2.0 * np.pi * reference_frequency_hz])
 
     def shape(at: np.ndarray) -> np.ndarray:
         top = _log_distance2(zeros, at) if np.asarray(zeros).size else np.zeros(at.size)
@@ -1137,7 +1142,7 @@ def fit_prototype(
     fs: float,
     band: tuple[float, float],
     n_sections: int,
-    f_ref: float,
+    reference_frequency_hz: float,
 ) -> tuple[np.ndarray, np.ndarray]:
     r"""Analog prototype whose bilinear image tracks *zeros*/*poles* at *fs*.
 
@@ -1169,8 +1174,8 @@ def fit_prototype(
         :func:`phonometry.filters.weighting._fit_band`.
     :param n_sections: Biquad n_sections, i.e. half the degree of the realised
         filter.
-    :param f_ref: The standard's reference frequency. The residual is measured
-        relative to the response at :func:`_anchor_hz`, which is *f_ref* itself
+    :param reference_frequency_hz: The standard's reference frequency. The residual is measured
+        relative to the response at :func:`_anchor_hz`, which is *reference_frequency_hz* itself
         at every rate that can carry it.
     :return: ``(zeros, poles)`` of the fitted prototype in rad/s, ready for
         :func:`scipy.signal.bilinear_zpk`.
@@ -1187,7 +1192,7 @@ def fit_prototype(
             "Hz, which the sampling rate has closed."
         )
         raise ValueError(msg)
-    anchor = _anchor_hz(fs, band, f_ref)
+    anchor = _anchor_hz(fs, band, reference_frequency_hz)
     edges = _warped(np.array([low, high]), fs)
     span = (float(edges[0]), float(edges[1]))
     omega = _scalar_geomspace(span[0], span[1], _GRID_POINTS)
@@ -1214,15 +1219,15 @@ def design_sos(
     fs: float,
     band: tuple[float, float],
     n_sections: int,
-    f_ref: float,
+    reference_frequency_hz: float,
 ) -> np.ndarray:
-    """Second-order sections realising the prototype at *fs*, 0 dB at *f_ref*.
+    """Second-order sections realising the prototype at *fs*, 0 dB at *reference_frequency_hz*.
 
     The gain is folded into the first section so that the realised response
     reads the printed curve's own level at :func:`_anchor_hz`. At every rate
-    that can carry *f_ref* the anchor is *f_ref*, that level is exactly 0 dB,
+    that can carry *reference_frequency_hz* the anchor is *reference_frequency_hz*, that level is exactly 0 dB,
     and the response is exactly 0 dB where the standard prints a zero
-    tolerance. Below ``2 * f_ref`` no sampled signal carries that frequency, so
+    tolerance. Below ``2 * reference_frequency_hz`` no sampled signal carries that frequency, so
     the anchor moves into the band and the printed level there -- which is not
     0 dB -- is what the cascade is pinned to. The absolute gain is the
     standard's either way: a 200 Hz tone reads the same number of decibels at
@@ -1235,13 +1240,13 @@ def design_sos(
     :return: The cascade.
     """
     fitted_zeros, fitted_poles = fit_prototype(
-        zeros, poles, fs, band, n_sections, f_ref
+        zeros, poles, fs, band, n_sections, reference_frequency_hz
     )
-    anchor = _anchor_hz(fs, band, f_ref)
+    anchor = _anchor_hz(fs, band, reference_frequency_hz)
     digital = signal.bilinear_zpk(fitted_zeros, fitted_poles, 1.0, fs)
     sos = signal.zpk2sos(*digital)
     printed = _analog_db(
-        np.asarray(zeros), np.asarray(poles), np.array([anchor]), f_ref
+        np.asarray(zeros), np.asarray(poles), np.array([anchor]), reference_frequency_hz
     )
     sos[0, :3] /= _cascade_magnitude(sos, anchor, fs) / 10.0 ** (printed[0] / 20.0)
     return np.asarray(sos, dtype=np.float64)
@@ -1253,7 +1258,7 @@ def fitted_prototype_hz(
     fs: float,
     band: tuple[float, float],
     n_sections: int,
-    f_ref: float,
+    reference_frequency_hz: float,
 ) -> tuple[np.ndarray, np.ndarray]:
     """The fitted prototype's zeros and poles in Hz, for reading beside a table.
 
@@ -1262,6 +1267,6 @@ def fitted_prototype_hz(
     printed corner frequencies, moved by the warp the fit is undoing.
     """
     fitted_zeros, fitted_poles = fit_prototype(
-        zeros, poles, fs, band, n_sections, f_ref
+        zeros, poles, fs, band, n_sections, reference_frequency_hz
     )
     return fitted_zeros / (2.0 * np.pi), fitted_poles / (2.0 * np.pi)

@@ -27,6 +27,7 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..hearing._earmuff_insertion_loss import (
         EarmuffInsertionLossResult,
         FixtureIsolationVerification,
@@ -208,12 +209,12 @@ _PRESENTATION_NAMES = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Localise a fixed string; English is returned verbatim."""
     return _STRINGS.get(text, text) if language == "es" else text
 
 
-def _number(value: float, language: str, spec: str = ".1f") -> str:
+def _number(value: float, language: Language, spec: str = ".1f") -> str:
     """A number formatted for a label, with the locale's decimal separator.
 
     :param value: The number.
@@ -226,7 +227,7 @@ def _number(value: float, language: str, spec: str = ".1f") -> str:
     return decimal_comma(fmt_minus(value, spec), language)
 
 
-def _finish(ax: Axes, language: str, *, headroom: float = 0.0) -> Axes:
+def _finish(ax: Axes, language: Language, *, headroom: float = 0.0) -> Axes:
     """Grid, legend and localised ticks, the same on every renderer here.
 
     :param ax: The axes.
@@ -248,7 +249,7 @@ def _finish(ax: Axes, language: str, *, headroom: float = 0.0) -> Axes:
     return ax
 
 
-def _log_frequency_axis(ax: Axes, freqs: np.ndarray, language: str) -> None:
+def _log_frequency_axis(ax: Axes, freqs: np.ndarray, language: Language) -> None:
     """A logarithmic frequency axis over the bands, labelled with centres.
 
     :param ax: The axes.
@@ -265,7 +266,7 @@ def plot_ambient_noise(
     result: AmbientNoiseCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The measured ambient spectrum against the maximum permissible levels.
@@ -335,7 +336,7 @@ def plot_ascending_threshold(
     result: AscendingThresholdResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The presentations of the ascending method and the threshold they give.
@@ -431,7 +432,7 @@ def plot_bracketing_threshold(
     result: BracketingThresholdResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The lowest response levels of the ascents and descents, and the threshold.
@@ -501,7 +502,7 @@ def plot_automatic_threshold(
     result: AutomaticThresholdResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The tracing through its reversals, the averages and the threshold.
@@ -570,7 +571,7 @@ def plot_sweep_threshold(
     result: SweepThresholdResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The sweep tracing, its running threshold and the thresholds found.
@@ -630,7 +631,7 @@ def plot_retest_agreement(
     result: RetestAgreementCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The first and the repeat measurement, and the 5 dB either side.
@@ -698,7 +699,7 @@ def plot_audiogram_cautions(
     result: AudiogramCautions,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """An audiogram with the levels ISO 8253-1 asks to treat with caution.
@@ -801,7 +802,7 @@ def _plot_budget(
     values: tuple[float, ...],
     combined: float,
     title: str,
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
 ) -> Axes:
     """Bars of an uncertainty budget's components, with the combined value.
@@ -840,7 +841,7 @@ def plot_audiometric_uncertainty(
     result: AudiometricUncertaintyBudget,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The eight contributions of Table A.1 as bars, the combined value on top.
@@ -891,7 +892,7 @@ def plot_insertion_loss_uncertainty(
     result: InsertionLossUncertaintyBudget,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The five contributions of Table B.1 as bars, the combined value on top.
@@ -935,7 +936,7 @@ def plot_diffuse_sound_field(
     result: DiffuseSoundFieldCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The two conditions of a diffuse field, each against its limit.
@@ -1046,7 +1047,7 @@ def plot_free_sound_field(
     result: FreeSoundFieldCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The lateral and axial conditions of a free or quasi-free field.
@@ -1162,7 +1163,7 @@ def plot_free_sound_field(
     return _finish(ax, language, headroom=0.6)
 
 
-def _free_field_verdict(result: FreeSoundFieldCheck, language: str) -> str:
+def _free_field_verdict(result: FreeSoundFieldCheck, language: Language) -> str:
     """The verdict a free or quasi-free field's title states.
 
     A quasi-free field that meets its requirements over an unbroken run of the
@@ -1194,7 +1195,7 @@ def plot_earmuff_insertion_loss(
     result: EarmuffInsertionLossResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The insertion loss of an earmuff, drawn as ISO 4869-3 Clause 6 asks.
@@ -1262,7 +1263,7 @@ def plot_plane_progressive_wave(
     result: PlaneProgressiveWaveCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The two conditions of a plane progressive wave, each on its limit.
@@ -1332,7 +1333,7 @@ def plot_fixture_isolation(
     result: FixtureIsolationVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The fixture's acoustic isolation against the least 5.1.4 asks.

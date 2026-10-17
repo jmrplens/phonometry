@@ -29,7 +29,7 @@ actually produced, never asserted from the nominal alpha.
 """
 
 from functools import lru_cache
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -51,6 +51,9 @@ from ..theme import (
     COLOR_SECONDARY,
     FIELD_STROKE,
 )
+
+if TYPE_CHECKING:
+    from phonometry.simulation.fdtd import Side
 
 _AP_C0, _AP_RHO = 343.0, 1.2
 _AP_LX, _AP_LY = 8.0, 2.5  # a flat, corridor-like section [m]
@@ -159,7 +162,7 @@ def _absorption_placement_fields() -> tuple[Any, ...]:
     burst = np.sin(2.0 * np.pi * _AP_F0 * tb) * np.hanning(tb.size)
     z_a = zeta_a * _AP_RHO * _AP_C0
     z_b = zeta_b * _AP_RHO * _AP_C0
-    edges = (
+    edges: tuple[dict[Side, float], ...] = (
         {"left": z_a, "right": z_a, "top": z_a, "bottom": z_a},
         {"top": z_b, "bottom": z_b},
     )

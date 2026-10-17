@@ -65,7 +65,14 @@ def test_the_signals_rate_is_used_when_none_is_given() -> None:
         (time_weighting, {}),
         (linkwitz_riley, {"frequency": 800.0}),
         (octave_filter, {"fraction": 3}),
-        (parametric_eq, {"sections": EQSection("peaking", 1000.0, 3.0, 1.0)}),
+        (
+            parametric_eq,
+            {
+                "sections": EQSection(
+                    filter_type="peaking", f0=1000.0, gain_db=3.0, q=1.0
+                )
+            },
+        ),
     ],
 )
 def test_a_conflicting_rate_is_refused_a_matching_one_is_not(
@@ -86,7 +93,14 @@ def test_a_conflicting_rate_is_refused_a_matching_one_is_not(
         (time_weighting, {}),
         (linkwitz_riley, {"frequency": 800.0}),
         (octave_filter, {"fraction": 3}),
-        (parametric_eq, {"sections": EQSection("peaking", 1000.0, 3.0, 1.0)}),
+        (
+            parametric_eq,
+            {
+                "sections": EQSection(
+                    filter_type="peaking", f0=1000.0, gain_db=3.0, q=1.0
+                )
+            },
+        ),
     ],
 )
 def test_a_bare_array_still_requires_fs(
@@ -128,7 +142,7 @@ def test_linkwitz_riley_splits_the_calibrated_signal() -> None:
 
 def test_parametric_eq_equalizes_in_pascals() -> None:
     x = _tone()
-    section = EQSection("peaking", 1000.0, 3.0, 1.0)
+    section = EQSection(filter_type="peaking", f0=1000.0, gain_db=3.0, q=1.0)
     assert np.array_equal(
         parametric_eq(Signal(x, FS, calibration_factor=CAL), sections=section),
         parametric_eq(CAL * x, FS, sections=section),
@@ -213,7 +227,9 @@ def test_a_bank_with_its_own_factor_does_not_apply_the_objects_too() -> None:
 
 
 def test_the_eq_cascade_refuses_a_signal_recorded_at_another_rate() -> None:
-    eq = ParametricEQ(FS, EQSection("peaking", 1000.0, 3.0, 1.0))
+    eq = ParametricEQ(
+        FS, EQSection(filter_type="peaking", f0=1000.0, gain_db=3.0, q=1.0)
+    )
     foreign = Signal(_tone(), FS // 2)
     with pytest.raises(ValueError, match="designed for 48000 Hz"):
         eq.filter(foreign)
@@ -221,7 +237,9 @@ def test_the_eq_cascade_refuses_a_signal_recorded_at_another_rate() -> None:
 
 def test_the_eq_cascade_honours_the_signals_calibration() -> None:
     x = _tone()
-    eq = ParametricEQ(FS, EQSection("peaking", 1000.0, 3.0, 1.0))
+    eq = ParametricEQ(
+        FS, EQSection(filter_type="peaking", f0=1000.0, gain_db=3.0, q=1.0)
+    )
     assert np.array_equal(
         eq.filter(Signal(x, FS, calibration_factor=CAL)), eq.filter(CAL * x)
     )
@@ -247,7 +265,7 @@ def test_the_arguments_behind_fs_are_keyword_only_and_required() -> None:
     need the value, and the reader would have to run it to find out.
     """
     sig = Signal(_tone(), FS)
-    section = EQSection("peaking", 1000.0, 3.0, 1.0)
+    section = EQSection(filter_type="peaking", f0=1000.0, gain_db=3.0, q=1.0)
     with pytest.raises(
         TypeError,
         match=r"linkwitz_riley\(\).*required keyword-only argument: 'frequency'",

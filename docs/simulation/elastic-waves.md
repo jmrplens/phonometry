@@ -75,7 +75,7 @@ res = simulation.elastic_fdtd_simulation(
     shape=(501, 501),
     sources=[simulation.ExplosionSource(
         ix=250, iy=250,
-        waveform=simulation.GaussianPulse(0, 0, half_width_s=w).value)],
+        waveform=simulation.GaussianPulse(ix=0, iy=0, half_width_s=w).value)],
     recording=simulation.ElasticRecording(
         probes=[(350, 250), (470, 250)], probe_fields=("p",)),
 )
@@ -140,8 +140,8 @@ res = simulation.elastic_fdtd_simulation(
     shape=(300, 600),
     sources=[simulation.ForceSource(
         ix=300, iy=0, direction="y", amplitude=1e6,
-        waveform=simulation.GaussianPulse(0, 0, half_width_s=w).value)],
-    boundaries=simulation.ElasticBoundaries({"top": "free"}),
+        waveform=simulation.GaussianPulse(ix=0, iy=0, half_width_s=w).value)],
+    boundaries=simulation.ElasticBoundaries(sides={"top": "free"}),
     recording=simulation.ElasticRecording(snapshot_every=steps,
                                           snapshot_field="vy"),
 )
@@ -328,7 +328,7 @@ from phonometry.simulation import Material, STEEL, WATER, scholte_speed
 
 print(round(scholte_speed(WATER, STEEL), 1))       # 1479.6, 0.03 % below water
 seabed = Material(c_p=3500.0, c_s=2000.0, rho=2500.0)
-print(round(scholte_speed(Material(1500.0, 0.0, 1000.0), seabed), 1))  # 1436.0
+print(round(scholte_speed(Material(c_p=1500.0, c_s=0.0, rho=1000.0), seabed), 1))  # 1436.0
 ```
 
 Those two numbers tell the whole story. Over a **stiff** bed (steel) the
@@ -377,7 +377,7 @@ res = simulation.elastic_fdtd_simulation(
     c_p, c_s, dx, 0.232, rho=rho,
     sources=[simulation.ExplosionSource(ix=60, iy=89, waveform=ricker,
                                         amplitude=1e3)],
-    boundaries=simulation.ElasticBoundaries("absorbing",
+    boundaries=simulation.ElasticBoundaries(sides="absorbing",
                                             absorbing_layer_cells=20),
     recording=simulation.ElasticRecording(snapshot_every=steps,
                                           snapshot_field="vy"),

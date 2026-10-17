@@ -5,7 +5,7 @@ where it was read.
 
 Every level this library returns is a ratio to a reference value, and ISO
 1683:2015 fixes one per quantity. The package publishes them once, as
-``phonometry.metrology.ISO1683_REFERENCE_VALUES``, and before that table
+``phonometry.metrology.REFERENCE_VALUES``, and before that table
 existed the same 20 µPa had been typed out seventeen times, the same 1 pW
 seven times, and one name, ``_P0``, meant a pressure in four modules and a power
 in two. A copy is harmless until one of them is typed wrong, and nothing then says
@@ -92,7 +92,7 @@ SOURCE = ROOT / "src" / "phonometry"
 TABLE_MODULE = pathlib.PurePosixPath("metrology/reference_values.py")
 
 #: What a caller is told to use instead of a copy.
-TABLE_NAME = "ISO1683_REFERENCE_VALUES"
+TABLE_NAME = "REFERENCE_VALUES"
 
 #: The quantities the guard holds to the table, as the last word of the
 #: table's own ``quantity`` field. ``distance`` is in Table 2 and is not here:
@@ -319,7 +319,11 @@ def _literal(node: ast.expr, name: str, constants: dict[str, object]) -> object:
 
 
 def _module_constants(tree: ast.Module) -> dict[str, object]:
-    """The names a module binds to a literal at its top level."""
+    """The names a module binds to a literal at its top level.
+
+    Annotated bindings count too: ``_TABLE_1: Final = "Table 1"`` is the
+    same constant, written so a type checker keeps its literal type.
+    """
     constants: dict[str, object] = {}
     for statement in tree.body:
         if (
@@ -329,6 +333,12 @@ def _module_constants(tree: ast.Module) -> dict[str, object]:
             and isinstance(statement.value, ast.Constant)
         ):
             constants[statement.targets[0].id] = statement.value.value
+        elif (
+            isinstance(statement, ast.AnnAssign)
+            and isinstance(statement.target, ast.Name)
+            and isinstance(statement.value, ast.Constant)
+        ):
+            constants[statement.target.id] = statement.value.value
     return constants
 
 

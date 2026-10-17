@@ -72,7 +72,7 @@ from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -82,6 +82,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
 
 
@@ -97,6 +99,16 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
+
+Quantity = Literal["accelerance", "mobility"]
+FrfKind = Literal[
+    "receptance",
+    "mobility",
+    "accelerance",
+    "dynamic_stiffness",
+    "impedance",
+    "apparent_mass",
+]
 
 __all__ = [
     "FRF_UNITS",
@@ -174,7 +186,7 @@ def _from_receptance(
 
 
 def convert_frf(
-    value: ArrayLike, source: str, target: str, *, frequency: ArrayLike
+    value: ArrayLike, source: FrfKind, target: FrfKind, *, frequency: ArrayLike
 ) -> np.ndarray:
     r"""Convert a frequency-response function between any two kinds (Table 1).
 
@@ -330,7 +342,7 @@ class RigidMassCalibrationResult(OwnsArrays):
     measured: np.ndarray
     _: KW_ONLY
     mass: float
-    quantity: str
+    quantity: Quantity
 
     def __post_init__(self) -> None:
         """Reject a calibration whose per-frequency quantities disagree.
@@ -401,7 +413,7 @@ class RigidMassCalibrationResult(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | np.ndarray:
         """Plot the rigid-mass calibration check (ISO 7626-2, 7.5.2).
 
@@ -425,7 +437,7 @@ def verify_rigid_mass_calibration(
     mass: float,
     *,
     frequencies: ArrayLike,
-    quantity: str = "accelerance",
+    quantity: Quantity = "accelerance",
 ) -> RigidMassCalibrationResult:
     r"""Verify an operational calibration on a rigid mass (ISO 7626-2, 7.5.2).
 
@@ -587,7 +599,7 @@ class MobilityResult(OwnsArrays):
         """Mobility phase, in radians."""
         return np.asarray(np.angle(self.mobility), dtype=np.float64)
 
-    def to(self, target: str) -> np.ndarray:
+    def to(self, target: FrfKind) -> np.ndarray:
         r"""Convert the mobility to another FRF kind (see :func:`convert_frf`).
 
         The force-per-motion kinds are element-wise reciprocals, i.e. the
@@ -601,7 +613,7 @@ class MobilityResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the mobility magnitude ``|Y(f)|``.
 
@@ -618,9 +630,9 @@ class MobilityResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a mechanical-mobility measurement fiche to a PDF (ISO 7626).
 

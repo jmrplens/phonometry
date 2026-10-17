@@ -57,7 +57,9 @@ SII_METHODS = ('critical-band', 'equally-contributing', 'one-third-octave', 'oct
 ## sii_procedure
 
 ```python
-sii_procedure(method: str = 'one-third-octave') -> SIIProcedure
+sii_procedure(
+    method: Literal['critical-band', 'equally-contributing', 'one-third-octave', 'octave'] = 'one-third-octave',
+) -> SIIProcedure
 ```
 
 Build the plottable band table of an ANSI S3.5-1997 band procedure.
@@ -80,7 +82,7 @@ Build the plottable band table of an ANSI S3.5-1997 band procedure.
 
 ```python
 SIIProcedure(
-    method: str,
+    method: Literal['critical-band', 'equally-contributing', 'one-third-octave', 'octave'],
     frequencies: np.ndarray,
     band_edges: np.ndarray,
     band_importance: np.ndarray,
@@ -113,7 +115,7 @@ plottable view of the tabulated constants and runs none of the SII maths.
 SIIProcedure.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -149,7 +151,7 @@ SIIResult(
     disturbance: np.ndarray,
     masking: np.ndarray,
     level_distortion: np.ndarray,
-    method: str = 'one-third-octave',
+    method: Literal['critical-band', 'equally-contributing', 'one-third-octave', 'octave'] = 'one-third-octave',
 )
 ```
 
@@ -181,7 +183,7 @@ Result of a Speech Intelligibility Index computation (ANSI S3.5-1997).
 SIIResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -198,9 +200,9 @@ SIIResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -242,7 +244,7 @@ speech_intelligibility_index(
     noise_spectrum: ArrayLike | None = None,
     *,
     threshold: ArrayLike | None = None,
-    method: str = 'one-third-octave',
+    method: Literal['critical-band', 'equally-contributing', 'one-third-octave', 'octave'] = 'one-third-octave',
     band_importance: ArrayLike | None = None,
 ) -> SIIResult
 ```
@@ -276,7 +278,7 @@ equally-contributing critical bands or the 6 octave bands.
 
 ```python
 standard_speech_spectra(
-    vocal_efforts: str | Sequence[str] = ('normal', 'raised', 'loud', 'shout'),
+    vocal_efforts: Literal['normal', 'raised', 'loud', 'shout'] | Sequence[Literal['normal', 'raised', 'loud', 'shout']] = ('normal', 'raised', 'loud', 'shout'),
 ) -> StandardSpeechSpectrum
 ```
 
@@ -305,7 +307,9 @@ function, which still returns the bare per-band array.
 ## standard_speech_spectrum
 
 ```python
-standard_speech_spectrum(vocal_effort: str = 'normal') -> np.ndarray
+standard_speech_spectrum(
+    vocal_effort: Literal['normal', 'raised', 'loud', 'shout'] = 'normal',
+) -> np.ndarray
 ```
 
 Standard speech spectrum level by vocal effort (ANSI S3.5-1997 Table 3).
@@ -357,7 +361,7 @@ constants that [`standard_speech_spectrum`](/phonometry/reference/api/speech/sii
 StandardSpeechSpectrum.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

@@ -163,6 +163,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
     from ..._internal.types import BandFraction
 
 __all__ = [
@@ -1031,7 +1032,7 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
         return bool(np.any(self.limited))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot measured, background and corrected band levels.
 
@@ -1169,8 +1170,8 @@ class ServiceEquipmentResult(OwnsArrays):
 
     frequencies: np.ndarray
     fraction: int
-    quantity: str
-    a_weighting_range: str
+    quantity: Literal["Smax", "Fmax", "eq"]
+    a_weighting_range: Literal["restricted", "extended"]
     reading_levels: np.ndarray
     average_levels: np.ndarray
     background: ServiceEquipmentBackgroundResult | None
@@ -1241,7 +1242,7 @@ class ServiceEquipmentResult(OwnsArrays):
             np.asarray(self.frequencies), _WEIGHTING_RANGES[self.fraction][key]
         )
 
-    def upper_limit(self, weighting: str) -> bool:
+    def upper_limit(self, weighting: Literal["A", "C"]) -> bool:
         """Whether a weighted value is an upper limit because of the background.
 
         A band the background held at 2,2 dB (Clause 9) that lies in the range
@@ -1298,7 +1299,7 @@ class ServiceEquipmentResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the band spectrum through each step of the method.
 
@@ -1616,7 +1617,7 @@ class PositionSpreadCheck(OwnsArrays):
         raise TypeError(_refuse_truth_value("PositionSpreadCheck"))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the readings against the spread the stage allows.
 
@@ -1735,7 +1736,7 @@ def loudest_corner(
     return int(np.argmax(candidates))
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ServiceEquipmentPositionCheck(OwnsArrays):
     """Whether the positions keep the corner height of 7.2 and the distances of 7.3.
 
@@ -1939,7 +1940,7 @@ class ServiceEquipmentPositionCheck(OwnsArrays):
         raise TypeError(_refuse_truth_value("ServiceEquipmentPositionCheck"))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the room in plan with the positions and their clearances.
 
@@ -2237,7 +2238,7 @@ class CalibrationDeviationResult(OwnsArrays):
         raise TypeError(_refuse_truth_value("CalibrationDeviationResult"))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot each reading against the window the earlier calibrations leave it.
 
@@ -2382,7 +2383,7 @@ class BackgroundDurationCheck(OwnsArrays):
         raise TypeError(_refuse_truth_value("BackgroundDurationCheck"))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot each duration against the 30 s of 7.6 and the tolerance accepted.
 
@@ -2540,7 +2541,7 @@ class VaryingBackgroundCheck(OwnsArrays):
         raise TypeError(_refuse_truth_value("VaryingBackgroundCheck"))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the equipment level against the background maximum, per band.
 
@@ -2696,7 +2697,7 @@ class MeasurementDisturbanceCheck(OwnsArrays):
         raise TypeError(_refuse_truth_value("MeasurementDisturbanceCheck"))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot each period's maximum-to-equivalent difference against 5 dB.
 
@@ -2824,7 +2825,7 @@ class InstrumentAgreementCheck(RichDisplay):
         raise TypeError(_refuse_truth_value("InstrumentAgreementCheck"))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot each calculated-less-instrument difference against 2 dB.
 

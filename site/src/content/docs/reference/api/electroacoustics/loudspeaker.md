@@ -196,8 +196,8 @@ rated range is given.
 LoudspeakerCharacteristics.plot(
     ax: Axes | None = None,
     *,
-    quantity: str = 'response',
-    language: str = 'en',
+    quantity: Literal['response', 'impedance', 'thd', 'directivity'] = 'response',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -235,9 +235,9 @@ LoudspeakerCharacteristics.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -274,6 +274,7 @@ sensitivity verdict when a requirement is given, and the footer.
 
 ```python
 LoudspeakerDirectivity(
+    *,
     piston: RadiatingPistonResult | None = None,
     polar: tuple[ArrayLike, ArrayLike] | None = None,
     frequency: float | None = None,
@@ -302,6 +303,7 @@ directivity of a radiating piston.
 
 ```python
 LoudspeakerRatings(
+    *,
     frequency_range: tuple[float, float] | None = None,
     noise_power: float | None = None,
     sinusoidal_power: float | None = None,

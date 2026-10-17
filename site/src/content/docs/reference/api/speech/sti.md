@@ -256,6 +256,7 @@ biased low (an ideal loopback gives STI ~0.956 at 5 s vs ~0.998 at 18 s).
 ```python
 stipa_signal(
     fs: int,
+    *,
     duration_s: float = 18.0,
     level: float | None = None,
     seed: int | None = None,
@@ -358,7 +359,7 @@ edition the procedure comes from.
 STIResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -375,9 +376,9 @@ STIResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

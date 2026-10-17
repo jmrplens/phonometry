@@ -15,6 +15,7 @@ about the same filter.
 from __future__ import annotations
 
 import math
+from typing import Literal
 
 import numpy as np
 import reference_data as ref
@@ -38,7 +39,11 @@ from ..shared import _filter_class, _weighting_deviation
 _CLASS_0_GREATEST_MINIMUM_DB = 75.0
 
 
-def _filter_class_check(arch: str, fraction: float, label: str) -> Outcome:
+def _filter_class_check(
+    arch: Literal["butter", "cheby1", "cheby2", "ellip", "bessel"],
+    fraction: float,
+    label: str,
+) -> Outcome:
     res = _filter_class(arch, fraction)
     margin = res.min_margin1
     ok = res.overall_class == 1
@@ -262,7 +267,9 @@ def _chk_alias_images_2014() -> Outcome:
     )
 
 
-def _weighting_type0_check(curve: str, fs: int) -> Outcome:
+def _weighting_type0_check(
+    curve: Literal["A", "C", "B", "D", "G", "AU", "468", "Z"], fs: int
+) -> Outcome:
     """Grade one weighting against the IEC 651:1979 Table V Type 0 mask.
 
     Type 0 is the tightest of the four instrument types of subclause 1.2 and
@@ -317,7 +324,9 @@ def _chk_map_breakpoint_table_f1() -> Outcome:
     )
 
 
-def _weighting_check(curve: str, fs: int) -> Outcome:
+def _weighting_check(
+    curve: Literal["A", "C", "B", "D", "G", "AU", "468", "Z"], fs: int
+) -> Outcome:
     res = _weighting_deviation(curve, fs)
     headroom = res.min_headroom
     band = f"[{res.bind_lower:+.2f}, {res.bind_upper:+.2f}] dB"

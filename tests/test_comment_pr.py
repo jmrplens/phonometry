@@ -180,7 +180,7 @@ def test_the_comment_still_imports_on_the_standard_library_alone() -> None:
         f"{str(_ROOT / '.github' / 'scripts' / 'comment_pr.py')!r})\n"
         "spec.loader.exec_module(importlib.util.module_from_spec(spec))\n"
     )
-    result = subprocess.run(  # noqa: S603
+    result = subprocess.run(
         [sys.executable, "-c", program],
         capture_output=True,
         text=True,

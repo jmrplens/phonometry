@@ -83,6 +83,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
+
 __all__ = [
     "MISOCoherenceResult",
     "miso_coherence",
@@ -166,6 +168,7 @@ def _validate_inputs(
         # are bare arrays and would otherwise reach the estimate in digital
         # units.
         rows = list(np.atleast_2d(resolve_samples(inputs, name="inputs")))
+    # The number is a count of array axes, not a quantity.
     elif isinstance(inputs, np.ndarray) and inputs.ndim == 2:  # noqa: PLR2004
         rows = [np.ascontiguousarray(row, dtype=np.float64) for row in inputs]
     else:
@@ -456,7 +459,7 @@ class MISOCoherenceResult(OwnsArrays):
     window: str
     nperseg: int
     overlap: float
-    scaling: str
+    scaling: Literal["density", "spectrum"]
 
     def __post_init__(self) -> None:
         """Reject a result whose arrays do not span its own two axes.
@@ -548,7 +551,7 @@ class MISOCoherenceResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | NDArray[Any]:
         """Plot the per-input coherent output spectra and multiple coherence.
 

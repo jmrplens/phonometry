@@ -469,7 +469,7 @@ def test_absorption_defaults_route_to_francois_garrison_at_the_source() -> None:
         receiver_depths_m=np.array([zs]),
         fan=BeamFan(max_angle_deg=30.0),
         absorption=VolumeAbsorption(
-            "francois-garrison", temperature_c=4.0, salinity=34.0, ph=7.9
+            model="francois-garrison", temperature_c=4.0, salinity=34.0, ph=7.9
         ),
     )
     expected = float(

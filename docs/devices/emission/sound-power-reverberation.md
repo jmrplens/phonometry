@@ -163,19 +163,19 @@ counterpart of $L_W$ defined in the same clauses, is section 3.
 | `temperature_c` | float | °C | default `23.0` | Sets $c$, $C_1$, $C_2$ |
 | `static_pressure_kpa` | float | kPa | default `101.325` | Sets $C_1$, $C_2$ |
 
-`sound_power_comparison(levels, levels_ref, lw_ref, *, frequencies=None,
-background_levels=…, background_levels_ref=…, temperature_c=23.0,
+`sound_power_comparison(levels, reference_levels, reference_sound_power_levels, *, frequencies=None,
+background_levels=…, reference_background_levels=…, temperature_c=23.0,
 static_pressure_kpa=101.325)` takes the same room levels plus the reference
 source's levels and known power.
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `levels_ref` | 1D or 2D array | dB | matches `levels` | Mean room SPL with the reference source (RSS) running |
-| `lw_ref` | 1D array or `ReferenceSourceCalibration` | dB | per band | Known sound power $L_W(\text{RSS})$ of the reference source; a [`ReferenceSourceCalibration`](free-field-qualification.md) is read in the one-third octave bands at `frequencies` |
+| `reference_levels` | 1D or 2D array | dB | matches `levels` | Mean room SPL with the reference source (RSS) running |
+| `reference_sound_power_levels` | 1D array or `ReferenceSourceCalibration` | dB | per band | Known sound power $L_W(\text{RSS})$ of the reference source; a [`ReferenceSourceCalibration`](free-field-qualification.md) is read in the one-third octave bands at `frequencies` |
 | `background_levels` | 1D or 2D array | dB | matches `levels` | Background for the test source; per-band $K_1$ on $L_p(\text{ST})$ |
-| `background_levels_ref` | 1D or 2D array | dB | matches `levels_ref` | Background for the **reference** source; per-band $K_1$ on $L_p(\text{RSS})$ |
+| `reference_background_levels` | 1D or 2D array | dB | matches `reference_levels` | Background for the **reference** source; per-band $K_1$ on $L_p(\text{RSS})$ |
 
-`background_levels_ref` background-corrects the reference-source room level
+`reference_background_levels` background-corrects the reference-source room level
 $L_p(\text{RSS})$ exactly as `background_levels` does for the test source;
 both need `frequencies` (the ISO 3741 criterion is frequency-dependent). Both
 return a

@@ -387,7 +387,7 @@ def speed_of_sound(temperature_k):
 **Exceptions.** A clause that prints its formula as `sqrt(273 + theta)` or `1245/(273 + t)` guards its own pole with the constant it prints (`-273.0`), not with the shared absolute zero; the test pins three such modules (`emission/_shared.py`, `emission/_sound_power_anechoic.py`, `building/measurement/intensity_insulation.py`).
 
 <a id="x14"></a>
-### X14. Read a reference value from `ISO1683_REFERENCE_VALUES`; never type it again
+### X14. Read a reference value from `REFERENCE_VALUES`; never type it again
 
 **Why.** Before the table existed, 20 µPa was typed seventeen times and 1 pW seven times, and `_P0` meant a pressure in four modules and a power in two. A copy is harmless until one is typed wrong, and then nothing says which is right.
 
@@ -396,7 +396,7 @@ def speed_of_sound(temperature_k):
 ```python
 from phonometry import metrology
 
-p0 = metrology.ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+p0 = metrology.REFERENCE_VALUES["gas"]["sound_pressure"].value
 ```
 
 **Don't**

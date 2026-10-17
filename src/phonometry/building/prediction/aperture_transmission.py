@@ -74,6 +74,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
+
 #: Default speed of sound in air ``c0``, m/s (20 degC).
 _SPEED_OF_SOUND: float = 343.0
 #: Euler-Mascheroni constant in the slit end correction (Hopkins Eq. 4.100).
@@ -83,7 +85,7 @@ _EULER_GAMMA: float = 0.57722
 _FIELD_M: dict[Literal["diffuse", "normal"], float] = {"diffuse": 8.0, "normal": 4.0}
 #: Slit-position constant ``n`` of Hopkins (2007) Eq. 4.99, printed with the
 #: equation's symbols on PDF page 522 (printed p. 495).
-_POSITION_N: dict[str, float] = {"mid": 1.0, "edge": 0.5}
+_POSITION_N: dict[Literal["mid", "edge"], float] = {"mid": 1.0, "edge": 0.5}
 
 __all__ = [
     "ApertureTransmissionResult",
@@ -112,7 +114,7 @@ def transmission_loss_from_coefficient(tau: ArrayLike) -> np.ndarray:
     return np.asarray(-10.0 * np.log10(t), dtype=np.float64)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ApertureTransmissionResult(OwnsArrays):
     """Transmission through a slit or circular aperture (Hopkins 4.3.10).
 
@@ -129,7 +131,7 @@ class ApertureTransmissionResult(OwnsArrays):
 
     frequencies: np.ndarray
     transmission_coefficient: np.ndarray
-    kind: str
+    kind: Literal["slit", "circular"]
     depth: float
     width_m: float | None = None
     radius: float | None = None
@@ -201,7 +203,7 @@ class ApertureTransmissionResult(OwnsArrays):
         return transmission_loss_from_coefficient(self.transmission_coefficient)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the aperture sound reduction index ``R(f)``.
 
@@ -215,7 +217,7 @@ class ApertureTransmissionResult(OwnsArrays):
         return plot_aperture_transmission(self, ax=ax, language=language, **kwargs)
 
     def plot_geometry(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the wall-aperture cross-section to scale.
 
@@ -242,7 +244,7 @@ def slit_transmission_coefficient(
     depth: float,
     *,
     field: Literal["diffuse", "normal"] = "diffuse",
-    position: str = "mid",
+    position: Literal["mid", "edge"] = "mid",
     speed_of_sound: float = _SPEED_OF_SOUND,
 ) -> ApertureTransmissionResult:
     r"""Transmission coefficient of a straight-edged slit (Hopkins Eq. 4.99).

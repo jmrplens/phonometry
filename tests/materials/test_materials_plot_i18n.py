@@ -155,7 +155,7 @@ def _layered() -> materials.LayeredAbsorberResult:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         med = delany_bazley(f, 20000.0, fluid=ABSORBER_AIR)
-        return layered_absorber(f, [PorousLayer(0.05, med)])
+        return layered_absorber(f, [PorousLayer(thickness_m=0.05, medium=med)])
 
 
 def _diffuse() -> materials.DiffuseFieldAbsorptionResult:
@@ -163,7 +163,7 @@ def _diffuse() -> materials.DiffuseFieldAbsorptionResult:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         med = delany_bazley(f, 20000.0, fluid=ABSORBER_AIR)
-        return diffuse_field_absorption(f, [PorousLayer(0.05, med)])
+        return diffuse_field_absorption(f, [PorousLayer(thickness_m=0.05, medium=med)])
 
 
 # (id, builder, expected Spanish substring) for every materials result renderer.

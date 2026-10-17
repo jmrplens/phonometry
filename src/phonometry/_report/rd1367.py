@@ -80,6 +80,7 @@ if TYPE_CHECKING:
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..environment.assessment.spain import (
         ActivityAssessment,
         PeriodAssessment,
@@ -95,7 +96,7 @@ _PERIOD_LABELS = {"day": "Day", "evening": "Evening", "night": "Night"}
 _FULL_HEIGHT_MAX_ROWS = 5
 
 
-def _fmt(value: float, language: str, decimals: int = 1) -> str:
+def _fmt(value: float, language: Language, decimals: int = 1) -> str:
     """A quantity rounded to ``decimals`` decimals, localised separator."""
     return format_number(float(value), language, decimals=decimals)
 
@@ -108,7 +109,7 @@ def _esc(value: str | None) -> str | None:
 def _metadata_pairs(
     result: ActivityAssessment,
     metadata: ReportMetadata | None,
-    language: str = "en",
+    language: Language = "en",
 ) -> list[tuple[str, str]]:
     """Ordered (label, value) pairs of the inspection-report header grid.
 
@@ -146,7 +147,7 @@ def _metadata_pairs(
 
 
 def _phase_table(
-    result: ActivityAssessment, *, verbose: bool = False, language: str = "en"
+    result: ActivityAssessment, *, verbose: bool = False, language: Language = "en"
 ) -> Table:
     """The full-width *fases de ruido* table.
 
@@ -202,7 +203,7 @@ def _phase_table(
     return stacked_table(data, [w * mm for w in widths])
 
 
-def _status_markup(*, passed: bool | None, language: str = "en") -> str:
+def _status_markup(*, passed: bool | None, language: Language = "en") -> str:
     """Inline PASS / FAIL / not-assessed markup for a criterion cell."""
     if passed is None:
         return f"<font color='{_MUTED_HEX}'>&#8211;</font>"
@@ -212,7 +213,7 @@ def _status_markup(*, passed: bool | None, language: str = "en") -> str:
 
 
 def _criterion_cell(
-    value: float | None, limit: float, *, passed: bool | None, language: str
+    value: float | None, limit: float, *, passed: bool | None, language: Language
 ) -> str:
     """``value / limit`` markup for one Article 25 criterion."""
     if value is None:
@@ -228,7 +229,7 @@ def _result_row(
     period: PeriodAssessment,
     label_style: ParagraphStyle,
     value_style: ParagraphStyle,
-    language: str,
+    language: Language,
 ) -> list[Any]:
     """The six cells of one period row of the Article 25.1 b results table.
 
@@ -274,7 +275,7 @@ def _result_row(
     ]
 
 
-def _results_table(result: ActivityAssessment, language: str = "en") -> Table:
+def _results_table(result: ActivityAssessment, language: Language = "en") -> Table:
     """The per-period results table against the Article 25.1 b criteria.
 
     One row per assessed period, each cell showing the assessed index against
@@ -306,7 +307,7 @@ def _results_table(result: ActivityAssessment, language: str = "en") -> Table:
 
 
 def _statement(
-    result: ActivityAssessment, language: str = "en"
+    result: ActivityAssessment, language: Language = "en"
 ) -> tuple[str, list[str]]:
     """The boxed conclusion: the governing period and the overall verdict."""
 
@@ -354,7 +355,7 @@ def _statement(
     return statement, extended
 
 
-def _verdict(result: ActivityAssessment, language: str = "en") -> tuple[str, bool]:
+def _verdict(result: ActivityAssessment, language: Language = "en") -> tuple[str, bool]:
     """Verdict text and PASS flag against the Article 25 criteria."""
     failed = [p for p in result.periods if not p.passes]
     if not failed:
@@ -377,7 +378,7 @@ def render_activity_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "es",
+    language: Language = "es",
 ) -> str:
     """Render an RD 1367/2007 activity inspection fiche to a PDF at ``path``.
 
@@ -437,7 +438,7 @@ def render_activity_report(
     flow.append(Spacer(1, 6))
 
     def _assessment_plot(
-        ax: Axes | None = None, language: str = "en", **kwargs: Any
+        ax: Axes | None = None, language: Language = "en", **kwargs: Any
     ) -> Axes:
         from .._plot.environment import plot_activity_assessment
 

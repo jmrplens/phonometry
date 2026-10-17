@@ -100,7 +100,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -114,6 +114,7 @@ from .._internal.validation import (
     require_same_length,
 )
 from ._criterion import (
+    CriterionFamily,
     as_band_spectrum,
     curve_of,
     exceedance_of,
@@ -126,7 +127,9 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
     from ..room.noise_criteria import NCResult, RCResult
+
 
 __all__ = [
     "DesignCriterion",
@@ -136,7 +139,7 @@ __all__ = [
 ]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class SourceRoom(OwnsArrays):
     r"""The source room of the chain: what drives the partition.
 
@@ -171,7 +174,9 @@ class SourceRoom(OwnsArrays):
     power_level: ArrayLike | None = None
     room_constant: ArrayLike | None = None
     directivity: float = 1.0
-    model: str = "constant_power"
+    model: Literal["constant_power", "constant_volume", "constant_pressure"] = (
+        "constant_power"
+    )
 
     def __post_init__(self) -> None:
         """Refuse a source room that does not describe one source.
@@ -195,7 +200,7 @@ class SourceRoom(OwnsArrays):
             raise ValueError(msg)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class DesignCriterion(RichDisplay):
     """The design criterion the receiving room is held to.
 
@@ -212,12 +217,12 @@ class DesignCriterion(RichDisplay):
         air leaks (Norton's "a few dB"). Default ``0``.
     """
 
-    family: str = "NC"
+    family: CriterionFamily = "NC"
     target: float | None = None
     flanking_penalty: float = 0.0
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RoomToRoomResult(OwnsArrays):
     r"""The room-to-room chain of one partition (Norton 2e, 4.9).
 
@@ -265,7 +270,7 @@ class RoomToRoomResult(OwnsArrays):
     received_level: np.ndarray
     flanking_penalty: float
     source_power_level: np.ndarray | None
-    criterion: str
+    criterion: CriterionFamily
     target: float | None
     label: str
     receiver_distance_m: float | None = None
@@ -474,7 +479,7 @@ class RoomToRoomResult(OwnsArrays):
 
     # -- presentation -----------------------------------------------------
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the source-room level, the noise reduction and what arrives.
 

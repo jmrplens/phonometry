@@ -344,7 +344,7 @@ def _chk_itu_468_peak() -> Outcome:
     # Table 1 prints +12,2 dB here; the Fig. 1a network the row samples reads
     # +12.2167 dB, so the tolerance is the table's own rounding quantum and
     # not the 1e-9 an interpolated table used to return for its own knot.
-    value = float(ph.electroacoustics.itu_r_468_weighting([6300.0])[0])
+    value = float(ph.electroacoustics.weighting_bs468([6300.0])[0])
     return numeric(12.2, value, ref.ITU_R_468_TABLE1_ROUNDING_DB, unit="dB", places=4)
 
 

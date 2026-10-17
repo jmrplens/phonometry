@@ -45,7 +45,7 @@ _SCRIPTS = str(pathlib.Path(__file__).resolve().parents[1] / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-import generate_api_docs as gad  # noqa: E402
+import generate_api_docs as gad
 
 #: The words a choice used for a band set before every band set became
 #: ``fraction=1`` (octaves) or ``fraction=3`` (one-third octaves).
@@ -316,7 +316,7 @@ def _module_values() -> tuple[tuple[str, object], ...]:
 
 def _strings_in(value: object, depth: int = 0) -> Iterator[str]:
     """The strings a published tuple holds, or a published table is keyed by."""
-    if depth > 4:  # noqa: PLR2004
+    if depth > 4:
         return
     if isinstance(value, Mapping):
         for key, item in value.items():
@@ -679,5 +679,5 @@ def test_anything_else_is_refused_as_a_band_set(
 
 
 def test_the_walk_reaches_the_package() -> None:
-    assert sum(1 for _ in _choices()) > 5000  # noqa: PLR2004
+    assert sum(1 for _ in _choices()) > 5000
     assert phonometry.__name__ == "phonometry"

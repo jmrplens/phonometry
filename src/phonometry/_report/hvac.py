@@ -51,6 +51,7 @@ from ._noise_control_fiche import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..noise_control.hvac import HVACSpectrumResult
     from .metadata import ReportMetadata
 
@@ -107,7 +108,7 @@ def _a_weighted_total(
     return _overall_level(weighted)
 
 
-def _basis(result: HVACSpectrumResult, language: str = "en") -> str:
+def _basis(result: HVACSpectrumResult, language: Language = "en") -> str:
     """The prediction-basis line naming the quantity and the Bies chapter."""
     if _is_power(result):
         return t(
@@ -125,7 +126,7 @@ def _basis(result: HVACSpectrumResult, language: str = "en") -> str:
     )
 
 
-def _prediction_statement(result: HVACSpectrumResult, language: str = "en") -> str:
+def _prediction_statement(result: HVACSpectrumResult, language: Language = "en") -> str:
     """The prediction statement printed under the boxed figure."""
     if _is_power(result):
         return t(
@@ -144,7 +145,7 @@ def _prediction_statement(result: HVACSpectrumResult, language: str = "en") -> s
     )
 
 
-def _element_label(result: HVACSpectrumResult, language: str = "en") -> str:
+def _element_label(result: HVACSpectrumResult, language: Language = "en") -> str:
     """The element label, with its descriptive words translated.
 
     The result carries a short English label built from the element kind and
@@ -166,7 +167,7 @@ def _element_label(result: HVACSpectrumResult, language: str = "en") -> str:
     return f"{t(head, language)} ({', '.join(parts)})"
 
 
-def _caption(result: HVACSpectrumResult, language: str = "en") -> str:
+def _caption(result: HVACSpectrumResult, language: Language = "en") -> str:
     """The caption declaring the analysis band set above the table."""
     _, fraction = nominal_bands(getattr(result, "frequencies", None))
     power = _is_power(result)
@@ -194,7 +195,7 @@ def _value_table(
     *,
     verbose: bool,
     corrections: np.ndarray | None,
-    language: str = "en",
+    language: Language = "en",
 ) -> Table:
     """Build the per-band table (nominal frequency and the reported quantity).
 
@@ -236,7 +237,7 @@ def _value_table(
 def _statement(
     result: HVACSpectrumResult,
     corrections: np.ndarray | None,
-    language: str = "en",
+    language: Language = "en",
 ) -> tuple[float, bool, str, list[str]]:
     """The boxed headline figure, its pass direction and the extended terms.
 
@@ -289,7 +290,7 @@ def _statement(
 def _basis_strip(
     result: HVACSpectrumResult,
     corrections: np.ndarray | None,
-    language: str = "en",
+    language: Language = "en",
 ) -> list[str]:
     """The method-basis strip(s) for the reported quantity."""
     if _is_power(result):
@@ -327,7 +328,7 @@ def render_hvac_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an HVAC duct-noise-spectrum fiche to a PDF at ``path``.
 

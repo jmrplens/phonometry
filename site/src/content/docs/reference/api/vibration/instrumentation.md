@@ -78,7 +78,9 @@ figures as Part 1 on a shorter list of clauses:
 ## band_limited_weighting_factor
 
 ```python
-band_limited_weighting_factor(name: str) -> float
+band_limited_weighting_factor(
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
+) -> float
 ```
 
 The factor that makes the second row of Table 2 satisfiable.
@@ -215,7 +217,9 @@ INDICATION_TOLERANCE_PERCENT = 4.0
 ## indication_tolerance_percent
 
 ```python
-indication_tolerance_percent(name: str) -> float
+indication_tolerance_percent(
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
+) -> float
 ```
 
 The Table 2 indication tolerance at the reference frequency.
@@ -329,7 +333,7 @@ angles of two frequency components in the most unfavourable manner."
 
 ```python
 phase_tolerance_deg(
-    name: str,
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
     frequencies: ArrayLike,
 ) -> NDArray[np.float64]
 ```
@@ -360,7 +364,7 @@ r.m.s.-only meter is not graded on phase at all.
 
 ```python
 PhaseVerification(
-    weighting: str,
+    weighting: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
     frequencies: NDArray[np.float64],
     measured_phase_deg: NDArray[np.float64],
     design_phase_deg: NDArray[np.float64],
@@ -420,7 +424,7 @@ the printed formula is taken.
 PhaseVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -487,7 +491,9 @@ REFERENCE_FREQUENCY_HZ = {'Wb': 15.915494309189533, 'Wc': 15.915494309189533, 'W
 ## reference_indication
 
 ```python
-reference_indication(name: str) -> float
+reference_indication(
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
+) -> float
 ```
 
 The weighted indication a conforming meter shows at the reference.
@@ -529,7 +535,11 @@ RUNNING_RMS_DECAY_RATE_DB_PER_S = ((0.125, 31.0, 40.0), (1.0, 3.8, 4.9), (8.0, 0
 ## running_rms_decay_time
 
 ```python
-running_rms_decay_time(integration_time: float, *, method: str) -> float
+running_rms_decay_time(
+    integration_time: float,
+    *,
+    method: Literal['linear', 'exponential'],
+) -> float
 ```
 
 When the running r.m.s. falls to 10 % after the signal is shut off.
@@ -579,7 +589,7 @@ RUNNING_RMS_DECAY_TIME_S = {'linear': ((0.125, 0.124, 0.005), (1.0, 0.99, 0.05),
 ```python
 RunningRMSDecayVerification(
     *,
-    method: str,
+    method: Literal['linear', 'exponential'],
     integration_time: float,
     measured_time_s: float,
 )
@@ -630,7 +640,7 @@ measurements this cannot stand in for.
 RunningRMSDecayVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -702,7 +712,7 @@ UNCONSTRAINED_BELOW_PERCENT = -100.0
 
 ```python
 verify_phase_response(
-    name: str,
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
     measured_phase_deg: ArrayLike,
     *,
     frequencies: ArrayLike,
@@ -778,7 +788,7 @@ verify_running_rms_decay(
     measured_time_s: float,
     *,
     integration_time: float,
-    method: str,
+    method: Literal['linear', 'exponential'],
 ) -> RunningRMSDecayVerification
 ```
 
@@ -815,7 +825,7 @@ against a band the standard does not give.
 
 ```python
 verify_weighting(
-    name: str,
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
     measured_factors: ArrayLike,
     *,
     frequencies: ArrayLike,
@@ -874,7 +884,7 @@ WEIGHTING_CONSISTENCY_TOLERANCE_PERCENT = 3.0
 
 ```python
 weighting_tolerance_percent(
-    name: str,
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
     frequencies: ArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]
 ```
@@ -900,7 +910,8 @@ The Table 5 band around a weighting, region by region.
 
 ```python
 WeightingVerification(
-    weighting: str,
+    *,
+    weighting: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
     frequencies: NDArray[np.float64],
     measured: NDArray[np.float64],
     design: NDArray[np.float64],
@@ -948,7 +959,7 @@ same standard are hardware measurements this cannot stand in for.
 WeightingVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

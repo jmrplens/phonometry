@@ -128,7 +128,7 @@ measurement wants a steady, sufficiently long capture.
 so the perceptual emphasis of the distortion products is accounted for. The
 default weighting is the network the clause requires: the IEC 60268-1
 Appendix A curve, i.e. ITU-R BS.468-4, which peaks at +12.2 dB near 6.3 kHz
-(exposed as `itu_r_468_weighting`); `'A'` and `'C'` remain as labelled options.
+(exposed as `weighting_bs468`); `'A'` and `'C'` remain as labelled options.
 Per the clause, the weighted measurement is valid for fundamental frequencies
 between 31.5 Hz and 400 Hz:
 
@@ -137,7 +137,7 @@ from phonometry import electroacoustics
 
 print(electroacoustics.weighted_thd(signal, fs, 100.0))                  # ITU-R BS.468-4 network
 print(electroacoustics.weighted_thd(signal, fs, 100.0, weighting="A"))   # A-weighted variant
-print(electroacoustics.itu_r_468_weighting([6300.0]))                    # [+12.2167] dB
+print(electroacoustics.weighting_bs468([6300.0]))                    # [+12.2167] dB
 ```
 
 ### 2.2 Dynamic range and idle channel noise (AES17-2015 6.4)

@@ -311,7 +311,7 @@ The seat magnitude corrected to an intended input (10.2.3).
 SeatTransmissionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

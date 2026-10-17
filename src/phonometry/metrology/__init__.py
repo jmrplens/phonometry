@@ -152,7 +152,7 @@ from .reciprocity_free_field import (
     free_field_transfer_impedance,
     reciprocity_air_attenuation,
 )
-from .reference_values import ISO1683_REFERENCE_VALUES, ReferenceValue
+from .reference_values import REFERENCE_VALUES, ReferenceValue
 from .sound_calibrator import (
     ABBREVIATED_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT,
     ABBREVIATED_LEVEL_REDUCTIONS,
@@ -246,7 +246,7 @@ __all__ = [
     "IEC61672_TABLE_5",
     "IEC61672_TABLE_B1",
     "IEC62585_TABLE_I1",
-    "ISO1683_REFERENCE_VALUES",
+    "REFERENCE_VALUES",
     "LEVEL_ACCEPTANCE_LIMITS_DB",
     "LEVEL_MAX_UNCERTAINTY_DB",
     "PERIODIC_TEST_ENVIRONMENT",

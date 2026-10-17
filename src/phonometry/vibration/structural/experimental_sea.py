@@ -75,7 +75,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -92,6 +92,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
     from ..._internal.types import BandFraction
 
 __all__ = [
@@ -330,7 +331,7 @@ class PowerInjectionResult(OwnsArrays):
     input_power2: NDArray[np.float64]
     modal_density1: NDArray[np.float64] | None
     modal_density2: NDArray[np.float64] | None
-    method: str
+    method: Literal["single-drive", "two-drive"]
 
     def __post_init__(self) -> None:
         """Reject a loss-factor budget whose per-band quantities disagree.
@@ -448,7 +449,7 @@ class PowerInjectionResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the loss-factor budget against frequency.
 

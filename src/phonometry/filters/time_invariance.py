@@ -54,6 +54,7 @@ from .core import _decimate_and_filter
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from .core import OctaveFilterBank
 
 __all__ = [
@@ -207,7 +208,7 @@ class TimeInvarianceResult(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot every band's deviation from Formula (17), one line per rate.
 

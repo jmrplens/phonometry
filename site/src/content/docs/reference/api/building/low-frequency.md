@@ -103,7 +103,7 @@ apply_low_frequency_procedure(
     *,
     frequencies: ArrayLike,
     reverberation_time: ArrayLike | None = None,
-    room: str = 'receiving',
+    room: Literal['receiving', 'source'] = 'receiving',
 ) -> LowFrequencyResult
 ```
 
@@ -278,6 +278,7 @@ LOW_FREQUENCY_VOLUME_LIMIT_M3 = 25.0
 
 ```python
 LowFrequencyProcedure(
+    *,
     volume: float,
     corner_levels: Sequence[float] | np.ndarray,
     reverberation_63_octave: float | None = None,
@@ -336,7 +337,7 @@ What the low-frequency procedure did to one room's band values.
 LowFrequencyResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

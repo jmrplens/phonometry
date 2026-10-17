@@ -240,10 +240,10 @@ def test_limp_layer_drops_the_low_frequency_absorption_of_the_table_11_2_layer()
         rigid, TABLE_11_2_FRAME_DENSITY, porosity=TABLE_11_2["porosity"]
     )
     a_rigid = materials.layered_absorber(
-        f, [materials.PorousLayer(TABLE_11_2_THICKNESS, rigid)]
+        f, [materials.PorousLayer(thickness_m=TABLE_11_2_THICKNESS, medium=rigid)]
     )
     a_limp = materials.layered_absorber(
-        f, [materials.PorousLayer(TABLE_11_2_THICKNESS, limp)]
+        f, [materials.PorousLayer(thickness_m=TABLE_11_2_THICKNESS, medium=limp)]
     )
     assert float(a_limp.absorption[0]) < float(a_rigid.absorption[0]) - 0.02
     assert float(a_limp.absorption[1]) == pytest.approx(

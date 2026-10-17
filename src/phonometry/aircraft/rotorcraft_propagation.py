@@ -54,7 +54,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -74,6 +74,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
+
 __all__ = [
     "MeanGroundPlaneResult",
     "TerrainScreeningResult",
@@ -90,8 +92,11 @@ __all__ = [
 _RH = 60.0
 #: Speed of sound at ICAO reference conditions, in m/s (Eq. 22).
 _C = 346.1
+#: A CNOSSOS-EU ground class, by the letter Doc 32 Table 5 gives it.
+GroundClass = Literal["A", "B", "C", "D", "E", "F", "G", "H"]
+
 #: CNOSSOS-EU flow resistivity by ground class, in Pa·s/m² (Doc 32 Table 5 / D1.5d Table 5).
-_FLOW_RESISTIVITY = {
+_FLOW_RESISTIVITY: dict[str, float] = {
     "A": 12.5e3,  # very soft (snow, moss)
     "B": 31.5e3,  # soft forest floor
     "C": 80.0e3,  # uncompacted loose ground (turf, grass)
@@ -164,7 +169,7 @@ def atmospheric_adjustment(
     reference implementation. The guidance's alternative per-band mapping (SAE
     method by Rickley et al., its Table 4) coincides below 3.15 kHz and deviates
     by up to 2.2 dB/km at 8-10 kHz; for a path-dependent band mapping use
-    :func:`~phonometry.aircraft.atmospheric_absorption.sae_band_attenuation`.
+    :func:`~phonometry.aircraft.atmospheric_absorption.band_attenuation_arp5534`.
 
     .. note::
         The printed guidance Eq. 27 pairs the coefficient ``6.6928e-6`` with
@@ -261,7 +266,7 @@ def ground_effect_adjustment(
     receiver_height_m: float,
     horizontal_distance_m: float,
     *,
-    flow_resistivity: float | str = "G",
+    flow_resistivity: float | GroundClass = "G",
 ) -> NDArray[np.float64]:
     r"""Ground-effect adjustment ``ΔLg`` over an impedance plane (Eq. 28-35).
 
@@ -441,7 +446,7 @@ class MeanGroundPlaneResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the terrain section and the fitted mean ground plane."""
         from .._i18n import check_language
@@ -735,7 +740,7 @@ class TerrainScreeningResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the section geometry: terrain, line of sight and sound path."""
         from .._i18n import check_language
@@ -753,7 +758,7 @@ def terrain_screening_adjustment(
     heights_m: NDArray[np.float64] | list[float],
     *,
     frequencies: NDArray[np.float64] | list[float],
-    flow_resistivity: float | str | NDArray[np.float64] | list[float] = "G",
+    flow_resistivity: float | GroundClass | NDArray[np.float64] | list[float] = "G",
 ) -> TerrainScreeningResult:
     r"""Ground effect and terrain screening over a vertical section (§A.4.4-A.4.5).
 
@@ -882,6 +887,7 @@ def _upper_hull(points: NDArray[np.float64]) -> NDArray[np.float64]:
     """The upper convex hull of ``(d, z)`` points sorted by ``d``."""
     hull: list[np.ndarray] = []
     for pt in points:
+        # The fewest values the step below can work with, not a quantity.
         while len(hull) >= 2:  # noqa: PLR2004
             u, v = hull[-2], hull[-1]
             if (v[0] - u[0]) * (pt[1] - u[1]) - (v[1] - u[1]) * (pt[0] - u[0]) >= 0.0:

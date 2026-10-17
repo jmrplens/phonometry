@@ -167,7 +167,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from scipy.integrate import quad
@@ -187,6 +187,10 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+
+Junction = Literal["X", "T1", "T2", "L"]
+
 #: Reference frequency ``f_ref`` of Hopkins Eq. 5.116, in Hz.
 _REFERENCE_FREQUENCY: float = 1000.0
 
@@ -198,7 +202,7 @@ _SPEED_OF_SOUND: float = 343.0
 #: ``J1`` and ``J2`` are stated under Eq. 5.12 on the first folio and ``J3``
 #: under Eq. 5.13 on the second. ``J3 is None`` where no straight section
 #: exists.
-_JUNCTIONS: dict[str, tuple[float, float, float | None]] = {
+_JUNCTIONS: dict[Junction, tuple[float, float, float | None]] = {
     "X": (1.0, 1.0, 1.0),
     "T1": (2.0, 0.5, 0.5),
     "T2": (2.0, 2.0, None),
@@ -329,7 +333,7 @@ def _check_angle(angle_rad: ArrayLike) -> NDArray[np.float64]:
 
 
 def corner_transmission_coefficient(
-    angle_rad: ArrayLike, chi: float, psi: float, junction: str = "X"
+    angle_rad: ArrayLike, chi: float, psi: float, junction: Junction = "X"
 ) -> NDArray[np.float64]:
     r"""Transmission around a corner ``tau12(theta)`` (Hopkins Eq. 5.12).
 
@@ -360,7 +364,7 @@ def corner_transmission_coefficient(
 
 
 def straight_transmission_coefficient(
-    angle_rad: ArrayLike, chi: float, psi: float, junction: str = "X"
+    angle_rad: ArrayLike, chi: float, psi: float, junction: Junction = "X"
 ) -> NDArray[np.float64]:
     r"""Transmission across a straight section ``tau13(theta)`` (Hopkins 5.13).
 
@@ -431,7 +435,11 @@ def inline_transmission_coefficient(chi: float, psi: float) -> float:
 
 
 def angular_average_transmission_coefficient(
-    chi: float, psi: float, junction: str = "X", *, section: str = "corner"
+    chi: float,
+    psi: float,
+    junction: Junction = "X",
+    *,
+    section: Literal["corner", "straight"] = "corner",
 ) -> float:
     r"""Diffuse-field angular average of a transmission coefficient (Hopkins 5.6).
 
@@ -531,7 +539,7 @@ def right_angle_transmission_coefficient(
     density2: float,
     wave_speed1: float,
     wave_speed2: float,
-    incidence: str = "random",
+    incidence: Literal["random", "normal"] = "random",
 ) -> float:
     r"""Right-angle plate junction ``tau12`` (Norton Eqs. 6.53 to 6.55).
 
@@ -730,7 +738,7 @@ class JunctionTransmissionResult(OwnsArrays):
     :ivar thickness2_m: Plate 2 thickness, in metres.
     """
 
-    junction: str
+    junction: Junction
     chi: float
     psi: float
     critical_frequency1: float
@@ -790,7 +798,7 @@ class JunctionTransmissionResult(OwnsArrays):
         return float(kij)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``tau(theta)`` versus incidence angle for this junction.
 
@@ -805,7 +813,7 @@ class JunctionTransmissionResult(OwnsArrays):
         )
 
     def plot_geometry(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the plate-junction cross-section to scale.
 
@@ -820,7 +828,7 @@ class JunctionTransmissionResult(OwnsArrays):
 
 
 def junction_transmission(
-    junction: str,
+    junction: Junction,
     thickness1_m: float,
     wave_speed1: float,
     surface_density1: float,

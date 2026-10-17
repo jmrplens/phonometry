@@ -37,8 +37,8 @@ def _close_figures() -> Iterator[None]:
 
 def test_facade_result_retains_elements_and_draws() -> None:
     elements = [
-        pm.building.FacadeElement("Masonry wall", area=6.0, r=[50.0] * 5),
-        pm.building.FacadeElement("Window", area=1.5, r=[30.0] * 5),
+        pm.building.FacadeElement(name="Masonry wall", area=6.0, r=[50.0] * 5),
+        pm.building.FacadeElement(name="Window", area=1.5, r=[30.0] * 5),
     ]
     res = pm.building.facade_sound_reduction(
         elements, area=7.5, volume=30.0, frequencies=FREQ
@@ -54,7 +54,7 @@ def test_a_facade_element_refuses_a_nan_area() -> None:
     the tile widths and render a titled, empty elevation.
     """
     with pytest.raises(ValueError, match="'area' must be positive"):
-        pm.building.FacadeElement("Window", area=float("nan"), r=[30.0] * 5)
+        pm.building.FacadeElement(name="Window", area=float("nan"), r=[30.0] * 5)
 
 
 def test_an_area_less_facade_element_takes_the_nominal_tile() -> None:
@@ -66,8 +66,8 @@ def test_an_area_less_facade_element_takes_the_nominal_tile() -> None:
     """
     ax = pm.building.plot_facade_elements(
         [
-            pm.building.FacadeElement("Masonry wall", area=6.0, r=[50.0] * 5),
-            pm.building.FacadeElement("Airbrick", dn_e=[35.0] * 5),
+            pm.building.FacadeElement(name="Masonry wall", area=6.0, r=[50.0] * 5),
+            pm.building.FacadeElement(name="Airbrick", dn_e=[35.0] * 5),
         ]
     )
     drawn = [

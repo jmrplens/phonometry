@@ -236,7 +236,7 @@ weighting `"468"` wherever it takes one. The signal-to-noise ratio re 1 Pa
 (94 dB SPL) is
 derived from the same equivalent noise level, and the overload sound
 pressure level (clause 15.2) bounds the usable range from above. The
-ITU-R BS.468-4 weighting curve itself is exposed as `itu_r_468_weighting` in the
+ITU-R BS.468-4 weighting curve itself is exposed as `weighting_bs468` in the
 [electroacoustics distortion set](/phonometry/devices/electroacoustics/electroacoustics/),
 where it also weights THD.
 
@@ -248,12 +248,12 @@ for a hissier capsule. The rest of the customary 10 dB comes from the ITU-R BS.4
 **quasi-peak detector**, which reads a noise higher than an r.m.s. detector
 does; that detector is
 [`broadcast.quasi_peak_meter`](/phonometry/devices/broadcast/quasi-peak/) and it
-reads a recording, while `itu_r_468_weighting` is the network only, so a level
+reads a recording, while `weighting_bs468` is the network only, so a level
 computed with the network and an r.m.s. sum is still not a dBqps figure and must
 not be compared with one from a datasheet.*
 
 The band spectrum drawn there is the one the section-4 snippet passes as
-`MicrophoneNoise(spectrum=...)`, weighted with `itu_r_468_weighting` from the
+`MicrophoneNoise(spectrum=...)`, weighted with `weighting_bs468` from the
 [electroacoustics module](/phonometry/devices/electroacoustics/electroacoustics/) and
 with A-weighting, then summed band by band.
 
@@ -612,7 +612,7 @@ here. The ITU-R BS.468-4 quasi-peak detector now is, in [Quasi-peak programme
 meter](/phonometry/devices/broadcast/quasi-peak/), but it reads a recording and
 clause 17 takes a stated voltage or level, so `weighting="468"` on this page
 stays a label on a supplier's figure, and an inherent-noise level computed from
-`itu_r_468_weighting` and an r.m.s. sum is still not a dBqps figure. The implemented edition is frozen at IEC 60268-4:2014; the superseding
+`weighting_bs468` and an r.m.s. sum is still not a dBqps figure. The implemented edition is frozen at IEC 60268-4:2014; the superseding
 2018 revision is not the one checked. Acoustic calibration of a working chain,
 sensitivity into pascals and dBFS, lives in [Calibration and
 dBFS](/phonometry/signals/metrology/calibration/).

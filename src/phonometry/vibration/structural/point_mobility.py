@@ -58,7 +58,7 @@ bending wavenumber.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
@@ -70,6 +70,9 @@ from .mechanical_mobility import MobilityResult
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
+
+BeamLocation = Literal["center", "end"]
+PlateLocation = Literal["center", "edge"]
 
 __all__ = [
     "beam_bending_wave_speed",
@@ -179,7 +182,10 @@ def _omega(frequency: ArrayLike) -> NDArray[np.float64]:
 
 
 def infinite_plate_impedance(
-    bending_stiffness: float, mass_per_area: float, *, location: str = "center"
+    bending_stiffness: float,
+    mass_per_area: float,
+    *,
+    location: PlateLocation = "center",
 ) -> float:
     r"""Point impedance of an infinite thin plate (Cremer Table 5.1).
 
@@ -208,7 +214,10 @@ def infinite_plate_impedance(
 
 
 def infinite_plate_mobility(
-    bending_stiffness: float, mass_per_area: float, *, location: str = "center"
+    bending_stiffness: float,
+    mass_per_area: float,
+    *,
+    location: PlateLocation = "center",
 ) -> float:
     r"""Point mobility of an infinite thin plate
     :math:`Y = 1 / (C \sqrt{B' m''})`.
@@ -239,7 +248,7 @@ def infinite_beam_impedance(
     bending_stiffness: float,
     mass_per_length: float,
     *,
-    location: str = "center",
+    location: BeamLocation = "center",
 ) -> NDArray[np.complex128]:
     r"""Point impedance of an infinite beam in bending (Cremer Table 5.1).
 
@@ -270,7 +279,7 @@ def infinite_beam_mobility(
     bending_stiffness: float,
     mass_per_length: float,
     *,
-    location: str = "center",
+    location: BeamLocation = "center",
 ) -> NDArray[np.complex128]:
     r"""Point mobility of an infinite beam in bending (Cremer Table 5.1).
 
@@ -366,19 +375,19 @@ def longitudinal_rod_mobility(
 # ---------------------------------------------------------------------------
 
 
-def injected_power(force: ArrayLike, mobility: ArrayLike) -> NDArray[np.float64]:
+def injected_power(force_n: ArrayLike, mobility: ArrayLike) -> NDArray[np.float64]:
     r"""Time-averaged vibrational power injected by a point force (Cremer 5.23).
 
     :math:`W = 0.5\, |F|^2 \operatorname{Re}\{Y\}`: only the real part
     (conductance) of the mobility carries power; the reactive part stores
     near-field energy.
 
-    :param force: Point-force amplitude ``F`` (peak, scalar or array), in N.
-    :param mobility: Complex point mobility ``Y`` (broadcast with *force*),
+    :param force_n: Point-force amplitude ``F`` (peak, scalar or array), in N.
+    :param mobility: Complex point mobility ``Y`` (broadcast with *force_n*),
         in m/(N.s).
     :return: The injected power ``W``, in W.
     """
-    f = np.asarray(force, dtype=np.complex128)
+    f = np.asarray(force_n, dtype=np.complex128)
     y = np.asarray(mobility, dtype=np.complex128)
     return np.asarray(0.5 * np.abs(f) ** 2 * y.real, dtype=np.float64)
 
@@ -388,7 +397,7 @@ def infinite_plate_point_mobility(
     bending_stiffness: float,
     mass_per_area: float,
     *,
-    location: str = "center",
+    location: PlateLocation = "center",
 ) -> MobilityResult:
     """Infinite-plate point mobility bundled as a :class:`MobilityResult`.
 
@@ -417,7 +426,7 @@ def infinite_beam_point_mobility(
     bending_stiffness: float,
     mass_per_length: float,
     *,
-    location: str = "center",
+    location: BeamLocation = "center",
 ) -> MobilityResult:
     r"""Infinite-beam point mobility bundled as a :class:`MobilityResult`.
 

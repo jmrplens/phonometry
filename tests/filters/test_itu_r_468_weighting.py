@@ -31,7 +31,7 @@ import reference_data as ref
 from scipy import signal as sp_signal
 
 from phonometry import filters
-from phonometry.electroacoustics import itu_r_468_weighting
+from phonometry.electroacoustics import weighting_bs468
 from phonometry.filters.weighting import (
     _FIT_SECTIONS,
     _ITU_R_468_LADDER,
@@ -124,7 +124,7 @@ def test_prototype_reproduces_all_21_rows_of_table_1() -> None:
     """
     freqs = np.array([row[0] for row in ref.ITU_R_468_TABLE1])
     printed = np.array([row[1] for row in ref.ITU_R_468_TABLE1])
-    error = itu_r_468_weighting(freqs) - printed
+    error = weighting_bs468(freqs) - printed
     assert np.max(np.abs(error)) <= ref.ITU_R_468_NETWORK_VS_TABLE1_DB
     assert float(np.sqrt(np.mean(error**2))) == pytest.approx(0.0264, abs=0.001)
 
@@ -170,7 +170,7 @@ def test_realised_filter_tracks_the_network_far_inside_the_mask(fs: int) -> None
     rows = _demonstrable_rows(fs)
     freqs = np.array([row[0] for row in rows])
     budget = np.array([_row_budget(row[2]) for row in rows])
-    departure = _realised_response_db(fs, freqs) - itu_r_468_weighting(freqs)
+    departure = _realised_response_db(fs, freqs) - weighting_bs468(freqs)
     assert np.max(np.abs(departure) / budget) < 0.5
 
 

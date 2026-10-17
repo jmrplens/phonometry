@@ -69,7 +69,7 @@ assess_railway_change(
     kb_ftr_before: float,
     kb_ftr_after: float,
     guide: GuideValues,
-    time_of_day: str = 'day',
+    time_of_day: Literal['day', 'night'] = 'day',
 ) -> RailwayChange
 ```
 
@@ -124,10 +124,10 @@ RAILWAY_CHANGE_TOLERANCE_PERCENT = 25.0
 
 ```python
 railway_guide_values(
-    area: str,
+    area: Literal['industrial', 'commercial', 'mixed', 'residential', 'sensitive'],
     *,
-    time_of_day: str = 'day',
-    alignment: str = 'surface',
+    time_of_day: Literal['day', 'night'] = 'day',
+    alignment: Literal['surface', 'underground'] = 'surface',
 ) -> GuideValues
 ```
 
@@ -199,7 +199,7 @@ RailwayChange(
     kb_ftr_before: float,
     kb_ftr_after: float,
     guide: GuideValues,
-    time_of_day: str,
+    time_of_day: Literal['day', 'night'],
 )
 ```
 
@@ -269,7 +269,7 @@ train_assessment_severity(
     trains: ArrayLike,
     *,
     alpha: ArrayLike,
-    time_of_day: str = 'day',
+    time_of_day: Literal['day', 'night'] = 'day',
 ) -> float
 ```
 
@@ -381,7 +381,11 @@ TRAIN_KINDS = ('tram_metro', 's_bahn', 'passenger', 'freight', 'freight_long')
 ## train_weighting_factor
 
 ```python
-train_weighting_factor(kind: str, *, alignment: str = 'surface') -> float
+train_weighting_factor(
+    kind: Literal['tram_metro', 's_bahn', 'passenger', 'freight', 'freight_long'],
+    *,
+    alignment: Literal['surface', 'underground'] = 'surface',
+) -> float
 ```
 
 The weighting factor $\alpha_\mathrm{Zug}$ of Table 2 for one category.

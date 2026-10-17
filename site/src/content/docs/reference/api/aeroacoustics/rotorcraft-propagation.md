@@ -81,7 +81,7 @@ default). This matches the guidance Eq. 27 to 0.02 dB/km and the NORAH2
 reference implementation. The guidance's alternative per-band mapping (SAE
 method by Rickley et al., its Table 4) coincides below 3.15 kHz and deviates
 by up to 2.2 dB/km at 8-10 kHz; for a path-dependent band mapping use
-[`sae_band_attenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#sae_band_attenuation).
+[`band_attenuation_arp5534`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#band_attenuation_arp5534).
 
 :::note
 The printed guidance Eq. 27 pairs the coefficient `6.6928e-6` with
@@ -183,7 +183,7 @@ ground_effect_adjustment(
     receiver_height_m: float,
     horizontal_distance_m: float,
     *,
-    flow_resistivity: float | str = 'G',
+    flow_resistivity: float | Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] = 'G',
 ) -> NDArray[np.float64]
 ```
 
@@ -347,7 +347,7 @@ The plane height $a\,d + b$ at `distance_m`, in metres.
 MeanGroundPlaneResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -396,7 +396,7 @@ terrain_screening_adjustment(
     heights_m: NDArray[np.float64] | list[float],
     *,
     frequencies: NDArray[np.float64] | list[float],
-    flow_resistivity: float | str | NDArray[np.float64] | list[float] = 'G',
+    flow_resistivity: float | Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] | NDArray[np.float64] | list[float] = 'G',
 ) -> TerrainScreeningResult
 ```
 
@@ -490,7 +490,7 @@ from the section, the source and the receiver, so it is not a field.
 TerrainScreeningResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

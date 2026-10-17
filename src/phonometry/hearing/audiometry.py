@@ -89,7 +89,7 @@ import math
 from collections import Counter
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -110,6 +110,14 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
+
+    from .._i18n import Language
+
+Presentation = Literal["air", "bone", "sound field"]
+VibratorPlacement = Literal["mastoid", "forehead"]
+
+#: The earphones whose columns ISO 8253-1 Table 3 prints.
+Earphone = Literal["supra-aural", "ER-3A", "HDA 200"]
 
 __all__ = [
     "AIR_CONDUCTION_AMBIENT_LIMITS_DB",
@@ -437,10 +445,10 @@ def _earphone_allowance(
 
 
 def ambient_noise_limits(
-    presentation: str = "air",
+    presentation: Presentation = "air",
     *,
     lowest_test_frequency_hz: float = 125.0,
-    earphone: str = "supra-aural",
+    earphone: Earphone = "supra-aural",
     earphone_attenuation: ArrayLike | None = None,
     lowest_hearing_level: float = 0.0,
     allowed_threshold_shift_db: float = 2.0,
@@ -585,13 +593,15 @@ class AmbientNoiseCheck(OwnsArrays):
     so :attr:`passes` needs every band of the table.
     """
 
-    presentation: str
+    presentation: Presentation
     frequencies: np.ndarray
     levels: np.ndarray
     lowest_test_frequency_hz: float
     lowest_hearing_level: float
     noise_floor_levels: np.ndarray | None = None
-    earphone: str | None = None
+    earphone: Literal["supra-aural", "ER-3A", "HDA 200", "own attenuation"] | None = (
+        None
+    )
     earphone_attenuation: np.ndarray | None = None
     allowed_threshold_shift_db: float = _BASE_THRESHOLD_SHIFT_DB
 
@@ -647,8 +657,12 @@ class AmbientNoiseCheck(OwnsArrays):
             tester's choices, at :attr:`frequencies`.
         """
         own = self.earphone_attenuation
-        column = (
-            "supra-aural" if self.earphone is None or own is not None else self.earphone
+        column: Earphone = (
+            "supra-aural"
+            if self.earphone is None
+            or own is not None
+            or self.earphone == "own attenuation"
+            else self.earphone
         )
         limits = ambient_noise_limits(
             self.presentation,
@@ -731,7 +745,7 @@ class AmbientNoiseCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the measured spectrum against the limits, exceedances marked.
 
@@ -748,9 +762,9 @@ class AmbientNoiseCheck(OwnsArrays):
 def check_audiometric_ambient_noise(
     levels: ArrayLike,
     *,
-    presentation: str = "air",
+    presentation: Presentation = "air",
     lowest_test_frequency_hz: float = 125.0,
-    earphone: str = "supra-aural",
+    earphone: Earphone = "supra-aural",
     earphone_attenuation: ArrayLike | None = None,
     lowest_hearing_level: float = 0.0,
     allowed_threshold_shift_db: float = 2.0,
@@ -841,8 +855,8 @@ def check_audiometric_ambient_noise(
 
 
 def _earphone_name(
-    presentation: str, earphone: str, earphone_attenuation: ArrayLike | None
-) -> str | None:
+    presentation: str, earphone: Earphone, earphone_attenuation: ArrayLike | None
+) -> Earphone | Literal["own attenuation"] | None:
     """The earphone a check's limits were written for, for its figure.
 
     :param presentation: The presentation.
@@ -954,7 +968,7 @@ class AscendingThresholdResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the presentations, heard and not heard, and the threshold.
 
@@ -1304,7 +1318,7 @@ class BracketingThresholdResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the ascents' and descents' levels, their means and the threshold.
 
@@ -1532,7 +1546,7 @@ class AutomaticThresholdResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the tracing through its reversals, the ignored ones faded.
 
@@ -1758,7 +1772,7 @@ class SweepThresholdResult(OwnsArrays):
         return np.asarray(self.spread_db > _SPREAD_LIMIT_DB + _BOUNDARY_SLACK_DB)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the tracing, its running threshold and the thresholds found.
 
@@ -1899,7 +1913,7 @@ class RetestAgreementCheck(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the two measurements and the 5 dB either side of the first.
 
@@ -1976,7 +1990,7 @@ class AudiogramCautions(OwnsArrays):
     frequencies: np.ndarray
     air_conduction_threshold_levels: np.ndarray | None
     bone_conduction_threshold_levels: np.ndarray | None
-    vibrator_placement: str
+    vibrator_placement: VibratorPlacement
 
     @property
     def vibrotactile_levels(self) -> np.ndarray:
@@ -2037,7 +2051,7 @@ class AudiogramCautions(OwnsArrays):
         return bool(np.any(self.cross_hearing) or np.any(self.vibrotactile))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the audiogram with the caution levels and the levels flagged.
 
@@ -2056,7 +2070,7 @@ def audiogram_cautions(
     *,
     air_conduction_threshold_levels: ArrayLike | None = None,
     bone_conduction_threshold_levels: ArrayLike | None = None,
-    vibrator_placement: str = "mastoid",
+    vibrator_placement: VibratorPlacement = "mastoid",
 ) -> AudiogramCautions:
     """Flag the levels of an audiogram that call for caution (6.2.3.2, 8.4).
 
@@ -2233,7 +2247,7 @@ class AudiometricUncertaintyBudget(RichDisplay):
         return _COVERAGE_FACTOR * self.combined_uncertainty_db
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the eight contributions as bars, with the combined value.
 
@@ -2250,7 +2264,7 @@ class AudiometricUncertaintyBudget(RichDisplay):
 def audiometric_uncertainty(
     frequency: float,
     *,
-    conduction: str = "air",
+    conduction: Literal["air", "bone"] = "air",
     masked: bool = False,
     level_step_db: float = 5.0,
     environment_uncertainty_db: float = _ENVIRONMENT_DB,

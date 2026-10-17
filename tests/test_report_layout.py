@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 pytest.importorskip("reportlab")
 
-from phonometry._report._layout import (  # noqa: E402
+from phonometry._report._layout import (
     _octave_grouping,
     _require_column_widths,
     band_table,

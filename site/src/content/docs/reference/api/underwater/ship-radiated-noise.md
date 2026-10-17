@@ -162,7 +162,7 @@ Equivalent monopole source level of a ship (ISO 17208-2).
 ShipSourceLevelResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

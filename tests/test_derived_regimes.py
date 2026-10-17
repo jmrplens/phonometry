@@ -693,7 +693,9 @@ def test_an_average_keeps_the_period_grid_of_its_rate() -> None:
 
 
 def test_a_converged_design_reached_perfect_absorption() -> None:
-    resonator = materials.HelmholtzResonator(0.01, 0.01, 0.05, 0.02)
+    resonator = materials.HelmholtzResonator(
+        neck_length_m=0.01, neck_side_m=0.01, cavity_length_m=0.05, cavity_side_m=0.02
+    )
     with pytest.raises(ValueError, match="absorption"):
         materials.CriticalCouplingResult(
             target_frequency=300.0,

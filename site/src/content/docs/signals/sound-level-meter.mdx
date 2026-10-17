@@ -68,7 +68,7 @@ calibrator = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(3 * fs) / fs)
 
 # "Street" measurement: 10 s of pink background noise plus a 1 s horn-like
 #   1 kHz event, so the statistical levels have something to separate.
-recording = signals.noise_signal(fs, 10.0, color="pink", rms=0.02, seed=7)
+recording = signals.noise_signal(fs, duration_s=10.0, color="pink", rms=0.02, seed=7)
 recording[4 * fs : 5 * fs] += 0.2 * np.sqrt(2) * np.sin(
     2 * np.pi * 1000 * np.arange(fs) / fs
 )
@@ -357,7 +357,7 @@ runs = (np.split(at_full_scale, np.flatnonzero(np.diff(at_full_scale) > 1) + 1)
 clipped_runs = sum(1 for run in runs if run.size >= 2)
 
 # (b) Under-range: the same chain capturing its own noise (dummy capsule).
-self_noise = signals.noise_signal(fs, 3.0, color="pink", rms=2e-4, seed=11)
+self_noise = signals.noise_signal(fs, duration_s=3.0, color="pink", rms=2e-4, seed=11)
 margin = la_eq - signals.laeq(self_noise, fs, calibration_factor=cal)
 
 # (c) Drift: the calibrator tone recorded again after the measurement.

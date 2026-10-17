@@ -44,6 +44,8 @@ from .simplified_model import BuildingPredictionWarning
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
+
 __all__ = [
     "LiningImprovementResult",
     "lining_improvement",
@@ -353,7 +355,7 @@ class LiningImprovementResult(RichDisplay):
     glued_area: float | None = None
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the Annex D ratings against the resonance frequency.
 
@@ -456,6 +458,7 @@ def lining_improvement(
             )
             raise ValueError(msg)
         area = require_positive(glued_area, "glued_area")
+        # A percentage is at most 100.
         if area > 100.0:  # noqa: PLR2004
             msg = "'glued_area' is a percentage and cannot exceed 100."
             raise ValueError(msg)

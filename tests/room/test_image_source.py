@@ -373,7 +373,8 @@ def test_fdtd_damping_decay_recovers_t60() -> None:
     )
     p = res.pressures[0]
     fs = round(1.0 / res.dt)
-    time, level = room.decay_curve(p, fs)
+    decay = room.decay_curve(p, fs)
+    time, level = decay.times, decay.levels
     mask = (level <= -5.0) & (level >= -35.0)
     slope = np.polyfit(time[mask], level[mask], 1)[0]
     t30 = -60.0 / slope

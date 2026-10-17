@@ -67,7 +67,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays
-from ..._internal.types import as_float_or_array
+from ..._internal.types import ReportEngine, as_float_or_array
 from ..._internal.validation import (
     check_engine,
     require_1d_signal,
@@ -84,6 +84,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -183,7 +184,9 @@ def seat_to_spine_transfer(frequencies: ArrayLike) -> np.ndarray:
     return np.asarray(response, dtype=np.complex128)
 
 
-def spinal_response(acceleration: SignalInput, fs: float | None = None) -> np.ndarray:
+def spinal_response(
+    acceleration_m_s2: SignalInput, fs: float | None = None
+) -> np.ndarray:
     r"""Vertical spinal response :math:`A_\mathrm{z}(t)` (clause 5.2, Formula 2).
 
     Applies the seat-to-spine transfer function to the measured conditioned
@@ -197,7 +200,7 @@ def spinal_response(acceleration: SignalInput, fs: float | None = None) -> np.nd
     the positive response peaks of the dose. Subtract the mean (or
     high-pass) of :math:`a_\mathrm{z}(t)` before calling.
 
-    :param acceleration: Measured, conditioned (zero-mean) vertical seat
+    :param acceleration_m_s2: Measured, conditioned (zero-mean) vertical seat
         acceleration :math:`a_\mathrm{z}(t)`, m/s2. Accepts a
         :class:`phonometry.io.Signal` for its rate; a calibration factor it
         carries is deliberately not applied, because this quantity is an
@@ -211,11 +214,13 @@ def spinal_response(acceleration: SignalInput, fs: float | None = None) -> np.nd
     :raises ValueError: for a record that is not 1-D, is empty or carries
         non-finite samples.
     """
-    fs = require_positive(resolve_fs(acceleration, fs, name="acceleration"), "fs")
+    fs = require_positive(
+        resolve_fs(acceleration_m_s2, fs, name="acceleration_m_s2"), "fs"
+    )
     # calibrate=False: a Signal may carry a digital-to-pascal factor, and
     # this is an acceleration in m/s2. See phonometry.io._resolve.
     az = np.asarray(
-        resolve_samples(acceleration, calibrate=False, name="acceleration"),
+        resolve_samples(acceleration_m_s2, calibrate=False, name="acceleration_m_s2"),
         dtype=np.float64,
     )
     if az.ndim != 1:
@@ -270,7 +275,7 @@ def dose_from_peaks(peaks: ArrayLike) -> float:
     return float(_DOSE_AMPLITUDE_FACTOR * total ** (1.0 / _DOSE_EXPONENT))
 
 
-def acceleration_dose(acceleration: SignalInput, fs: float | None = None) -> float:
+def acceleration_dose(acceleration_m_s2: SignalInput, fs: float | None = None) -> float:
     r"""Acceleration dose :math:`D_\mathrm{z}` from a seat acceleration time history.
 
     Filters the acceleration through the seat-to-spine transfer function
@@ -278,7 +283,7 @@ def acceleration_dose(acceleration: SignalInput, fs: float | None = None) -> flo
     Formula 3. The input must be conditioned (DC-removed); see
     :func:`spinal_response`.
 
-    :param acceleration: Measured, conditioned (zero-mean) vertical seat
+    :param acceleration_m_s2: Measured, conditioned (zero-mean) vertical seat
         acceleration :math:`a_\mathrm{z}(t)`, m/s2. Accepts a
         :class:`phonometry.io.Signal` for its rate; a calibration factor it
         carries is deliberately not applied, because this quantity is an
@@ -289,7 +294,7 @@ def acceleration_dose(acceleration: SignalInput, fs: float | None = None) -> flo
         winning.
     :return: The acceleration dose :math:`D_\mathrm{z}`, m/s2.
     """
-    return dose_from_peaks(response_peaks(spinal_response(acceleration, fs)))
+    return dose_from_peaks(response_peaks(spinal_response(acceleration_m_s2, fs)))
 
 
 def daily_dose(dose: float, exposure_time: float, measurement_time: float) -> float:
@@ -541,7 +546,7 @@ class MultipleShockResult(OwnsArrays):
                 raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot the injury-probability curve with this assessment's
         :math:`R`.
@@ -561,9 +566,9 @@ class MultipleShockResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         r"""Render a whole-body multiple-shock health-risk fiche to a PDF.
 
@@ -621,7 +626,7 @@ class MultipleShockResult(OwnsArrays):
 
 @overload
 def multiple_shock_assessment(
-    acceleration: SignalInput,
+    acceleration_m_s2: SignalInput,
     fs: float | None = None,
     *,
     start_age: float,
@@ -636,7 +641,7 @@ def multiple_shock_assessment(
 
 @overload
 def multiple_shock_assessment(
-    acceleration: SignalInput,
+    acceleration_m_s2: SignalInput,
     fs: float | None = None,
     *,
     start_age: float,
@@ -648,7 +653,7 @@ def multiple_shock_assessment(
 
 
 def multiple_shock_assessment(
-    acceleration: SignalInput,
+    acceleration_m_s2: SignalInput,
     fs: float | None = None,
     *,
     start_age: float,
@@ -673,7 +678,7 @@ def multiple_shock_assessment(
     (:func:`~phonometry.vibration.weighted_acceleration`,
     :func:`~phonometry.vibration.vibration_dose_value`).
 
-    :param acceleration: Measured, conditioned (zero-mean) vertical seat
+    :param acceleration_m_s2: Measured, conditioned (zero-mean) vertical seat
         acceleration :math:`a_\mathrm{z}(t)`, m/s2. Accepts a
         :class:`phonometry.io.Signal` for its rate; a calibration factor it
         carries is deliberately not applied, because this quantity is an
@@ -705,7 +710,7 @@ def multiple_shock_assessment(
         )
         raise ValueError(msg)
     mz = _mz_for_sex(sex) if mz is None else mz
-    peaks = response_peaks(spinal_response(acceleration, fs))
+    peaks = response_peaks(spinal_response(acceleration_m_s2, fs))
     dz = dose_from_peaks(peaks)
     if exposure_time is not None and measurement_time is not None:
         dzd = daily_dose(dz, exposure_time, measurement_time)

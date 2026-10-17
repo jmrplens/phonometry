@@ -108,7 +108,7 @@ def test_annex_c_formula_11_with_the_printed_inputs() -> None:
     assert round(day, 3) == 0.090
     assert round(night, 3) == 0.040
     guide = im.guide_values("mixed", edition="2023")
-    assert guide == im.GuideValues(0.2, 5.0, 0.1, edition="2023")
+    assert guide == im.GuideValues(a_u=0.2, a_o=5.0, a_r=0.1, edition="2023")
     assert im.assess_people_in_buildings(
         0.6, guide, kb_ftr=day, source="railway", edition="2023"
     ).passes

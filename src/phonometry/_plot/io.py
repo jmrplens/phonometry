@@ -10,6 +10,7 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..io._signal import Signal
 
 from .common import (
@@ -34,7 +35,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en", **fmt: Any) -> str:
+def _t(text: str, language: Language = "en", **fmt: Any) -> str:
     """Localise a fixed string; English is returned verbatim."""
     s = _STRINGS.get(text, text) if language == "es" else text
     return s.format(**fmt) if fmt else s
@@ -70,7 +71,7 @@ def _draw_channels(
     t: np.ndarray,
     y: np.ndarray,
     result: Signal,
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
 ) -> None:
     """Draw one line per channel, labelled and with a legend when there are several."""
@@ -99,7 +100,7 @@ def plot_signal(
     result: Signal,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     scale: str = "linear",
     **kwargs: Any,
 ) -> Axes:

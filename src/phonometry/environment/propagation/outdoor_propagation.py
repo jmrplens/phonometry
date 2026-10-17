@@ -43,7 +43,7 @@ left to the caller. Accuracy of the method is stated in Table 5 (clause 9): with
 
 from __future__ import annotations
 
-from dataclasses import KW_ONLY, dataclass
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -65,6 +65,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -124,7 +126,7 @@ _NOMINAL_BANDS = np.array(DEFAULT_FREQUENCIES_HZ, dtype=np.float64)
 _MIN_PROFILE_POINTS = 2
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class Barrier(RichDisplay):
     r"""Screening obstacle for the ISO 9613-2 barrier term (clause 7.4).
 
@@ -162,7 +164,6 @@ class Barrier(RichDisplay):
     edge_to_receiver: float
     parallel_distance: float = 0.0
     edge_separation: float | None = None
-    _: KW_ONLY
     ground_reflections_by_image: bool = False
     lateral: bool = False
     line_of_sight_clear: bool = False
@@ -193,7 +194,7 @@ class Barrier(RichDisplay):
         return self.edge_separation is not None
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class PropagationGeometry(RichDisplay):
     r"""Source-to-receiver geometry of the propagation path (ISO 9613-2:1996).
 
@@ -215,7 +216,7 @@ class PropagationGeometry(RichDisplay):
     projected_distance: float | None = None
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class GroundFactors(RichDisplay):
     """Ground factors ``G`` of the three regions (ISO 9613-2:1996, clause 7.3.1).
 
@@ -252,7 +253,7 @@ class AtmosphericConditions(RichDisplay):
     static_pressure_kpa: float = 101.325
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class DirectivityCorrection(RichDisplay):
     r"""Directivity correction :math:`D_\mathrm{c} = D_i + D_\Omega` (Eq. (3)).
 
@@ -270,7 +271,7 @@ class DirectivityCorrection(RichDisplay):
     d_omega: float = 0.0
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class SourceEmission(OwnsArrays):
     r"""Source emission terms for the ISO 9613-2 downwind receiver level (Eq. (3)).
 
@@ -403,7 +404,7 @@ class OutdoorAttenuation(OwnsArrays):
             raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the stacked per-band attenuation terms with the total.
 
@@ -422,9 +423,9 @@ class OutdoorAttenuation(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
         source_emission: SourceEmission | None = None,
     ) -> str:
         """Render a one-page ISO 9613-2 outdoor-propagation prediction fiche.

@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
     from ..materials.absorbers._airflow_resistance import StaticAirflowResult
     from ..materials.absorbers.biot import BiotWavesResult
     from ..materials.absorbers.four_microphone import TransferMatrix
@@ -153,12 +154,12 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     return _STRINGS.get(text, text) if language == "es" else text
 
 
-def _localize_band_axes(ax: Axes, language: str) -> None:
+def _localize_band_axes(ax: Axes, language: Language) -> None:
     """Comma-localise the numeric y-axis of a categorical band plot.
 
     :func:`~phonometry._i18n.localize_axes` reformats only the automatic numeric
@@ -174,7 +175,7 @@ def _localize_band_axes(ax: Axes, language: str) -> None:
 def plot_weighted_absorption(
     result: AbsorptionRatingResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Practical absorption curve vs the shifted reference (ISO 11654:1997).
@@ -217,7 +218,7 @@ def plot_weighted_absorption(
 def plot_sound_absorption(
     result: SoundAbsorptionMeasurement,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Sound absorption coefficient ``alpha_s`` versus frequency (ISO 354:2003).
@@ -254,7 +255,7 @@ def plot_sound_absorption(
 def plot_scattering_coefficient(
     result: ScatteringResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Random-incidence scattering coefficient ``s`` versus frequency.
@@ -288,7 +289,7 @@ def plot_scattering_coefficient(
 def plot_base_plate_scattering(
     result: BasePlateScatteringCheck,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The base plate's scattering coefficient against the stepped limit of Table 1.
@@ -356,7 +357,10 @@ def plot_base_plate_scattering(
 
 
 def plot_diffusion_polar(
-    result: DiffusionResult, ax: Axes | None = None, language: str = "en", **kwargs: Any
+    result: DiffusionResult,
+    ax: Axes | None = None,
+    language: Language = "en",
+    **kwargs: Any,
 ) -> Axes:
     """Polar reflected-level response with the diffusion coefficient annotated.
 
@@ -394,7 +398,7 @@ def plot_diffusion_polar(
 def plot_scattering_report(
     result: ScatteringResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Scattering coefficient ``s`` and ``alpha_s`` on a categorical band axis.
@@ -451,7 +455,7 @@ def plot_scattering_report(
 def plot_diffusion_report(
     result: DiffusionSpectrum,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Directional diffusion coefficient ``d(f)`` on a categorical band axis.
@@ -507,7 +511,10 @@ def plot_diffusion_report(
 
 
 def plot_diffusion_polar_report(
-    result: DiffusionResult, ax: Axes | None = None, language: str = "en", **kwargs: Any
+    result: DiffusionResult,
+    ax: Axes | None = None,
+    language: Language = "en",
+    **kwargs: Any,
 ) -> Axes:
     """Polar reflected-level response for the diffusion fiche (opaque fill).
 
@@ -552,7 +559,7 @@ def plot_diffusion_polar_report(
 def plot_in_situ_absorption(
     result: InSituAbsorptionResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """In-situ one-third-octave absorption spectrum ``alpha(f)``.
@@ -584,7 +591,7 @@ def plot_in_situ_absorption(
 def plot_dynamic_stiffness(
     result: DynamicStiffnessResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Floating-floor natural frequency ``f0(s')`` with the design point marked.
@@ -638,7 +645,7 @@ def plot_dynamic_stiffness(
 def plot_impedance_tube(
     result: ImpedanceTubeResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Normal-incidence absorption spectrum with |r| overlaid (ISO 10534-2).
@@ -684,7 +691,7 @@ def plot_impedance_tube(
 def plot_static_airflow(
     result: StaticAirflowResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Fitted pressure-drop curve with the evaluation point (ISO 9053-1).
@@ -736,7 +743,7 @@ def plot_static_airflow(
 def plot_absorption_uncertainty(
     result: AbsorptionUncertaintyResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Absorption quantity with its expanded-uncertainty ribbon (ISO 12999-2).
@@ -803,7 +810,7 @@ def _absorption_spectrum_axes(
     *,
     title: str,
     label: str,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Shared alpha(f) spectrum renderer for the absorber predictions."""
@@ -830,7 +837,7 @@ def _absorption_reflection_axes(
     reflection: np.ndarray,
     *,
     title: str,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Shared alpha(f) + |R| renderer for the oblique-incidence absorbers.
@@ -864,7 +871,7 @@ def _absorption_reflection_axes(
 def plot_porous_medium(
     result: PorousMediumResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Normalised characteristic values of a porous medium vs frequency.
@@ -917,7 +924,10 @@ _BIOT_IMAG_PART = r", $-\mathrm{Im}(\delta)$"
 
 
 def plot_biot_waves(
-    result: BiotWavesResult, ax: Axes | None = None, language: str = "en", **kwargs: Any
+    result: BiotWavesResult,
+    ax: Axes | None = None,
+    language: Language = "en",
+    **kwargs: Any,
 ) -> Axes:
     """The three Biot wavenumbers of a poroelastic layer vs frequency.
 
@@ -984,7 +994,7 @@ def plot_biot_waves(
 def plot_layered_absorber(
     result: LayeredAbsorberResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Oblique-incidence absorption spectrum with |R| overlaid.
@@ -1021,7 +1031,7 @@ def plot_layered_absorber(
 def plot_slit_resonator_absorber(
     result: SlitResonatorAbsorberResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Absorption spectrum of a slit panel loaded with Helmholtz resonators.
@@ -1059,7 +1069,7 @@ def plot_slit_resonator_absorber(
 def plot_diffuse_field_absorption(
     result: DiffuseFieldAbsorptionResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Random-incidence (Paris-integral) absorption spectrum.
@@ -1096,7 +1106,7 @@ def plot_diffuse_field_absorption(
 def plot_diffuser_polar_response(
     result: DiffuserPolarResponse,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Predicted far-field polar response of a diffuser design.
@@ -1155,7 +1165,7 @@ def plot_transfer_matrix(
     frequency: ArrayLike,
     characteristic_impedance: float,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Transmission loss and hard-backed absorption of a transfer matrix.
@@ -1227,7 +1237,7 @@ def plot_transfer_matrix(
 def plot_metadiffuser_absorption(
     result: MetadiffuserResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-well and face-averaged absorption spectra of a metadiffuser.
@@ -1265,7 +1275,7 @@ def plot_metadiffuser_absorption(
 def _plot_band_absorption(
     result: InSituAbsorptionResult | OneThirdOctaveAbsorption,
     ax: Axes | None,
-    language: str,
+    language: Language,
     title: str,
     **kwargs: Any,
 ) -> Axes:
@@ -1304,7 +1314,7 @@ def plot_one_third_octave_absorption(
     result: OneThirdOctaveAbsorption,
     *,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Narrow-band absorption averaged into one-third-octave bands.

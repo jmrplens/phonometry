@@ -880,7 +880,7 @@ def _hands_to_a_type_checking_validator(
             if parameter is not None:
                 handed.add(parameter)
         # Four calls deep
-        elif name in helpers and depth < 4:  # noqa: PLR2004
+        elif name in helpers and depth < 4:
             helper = helpers[name]
             reached = _hands_to_a_type_checking_validator(
                 helper, helpers, validators, through_self=False, depth=depth + 1

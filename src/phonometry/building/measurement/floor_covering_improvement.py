@@ -51,7 +51,7 @@ from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -65,7 +65,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ...metrology.reference_values import REFERENCE_VALUES
 from .ratings import impact_improvement_adaptation_term, weighted_impact_improvement
 
 if TYPE_CHECKING:
@@ -74,7 +74,11 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
+
+Quantity = Literal["ΔL", "ΔR", "Rs", "LI", "LI,norm"]
 
 __all__ = [
     "BackgroundCorrectedLevel",
@@ -88,7 +92,7 @@ __all__ = [
 
 #: Reference acceleration ``a0`` for the acceleration level (Formula (1)): 1e-6 m/s²,
 #: the ISO 1683:2015 Table 3 value.
-_ACCELERATION_REFERENCE = ISO1683_REFERENCE_VALUES["solid"]["acceleration"].value
+_ACCELERATION_REFERENCE = REFERENCE_VALUES["solid"]["acceleration"].value
 
 #: Background-correction thresholds (Formula (2)), in dB.
 _MARGIN_NEGLIGIBLE = 15.0
@@ -234,7 +238,7 @@ class BackgroundCorrectedLevel(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot the margin :math:`L' - L_\mathrm{b}` of each band against the criterion.
 
@@ -412,7 +416,7 @@ class FloorCoveringImprovementResult(OwnsArrays):
         return improvement_octave_bands(self.improvement, frequencies=self.frequencies)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the improvement spectrum ``ΔL`` (with ``ΔLw`` when available).
 
@@ -430,9 +434,9 @@ class FloorCoveringImprovementResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         r"""Render an ISO 16251-1 impact-improvement test-report fiche to PDF.
 
@@ -584,11 +588,13 @@ def impact_improvement(
         # is at the limit of measurement where any position of either floor
         # is, so the smallest margin is the one the result keeps.
         margins = np.minimum(l0 - lb, l1 - lb)
+        # The number is a count of array axes, not a quantity.
         margin = margins.min(axis=0) if margins.ndim == 2 else margins  # noqa: PLR2004
         l0 = background_corrected_level(l0, lb).corrected_levels
         l1 = background_corrected_level(l1, lb).corrected_levels
 
     delta_per_position = l0 - l1  # Formula (3)
+    # The number is a count of array axes, not a quantity.
     if delta_per_position.ndim == 2:  # noqa: PLR2004
         improvement = delta_per_position.mean(axis=0)  # Formula (4)
     else:
@@ -632,7 +638,7 @@ class OctaveBandSpectrum(OwnsArrays):
 
     frequencies: np.ndarray
     values: np.ndarray
-    quantity: str
+    quantity: Quantity
 
     def __post_init__(self) -> None:
         """Reject an unknown quantity or columns of different lengths.
@@ -647,7 +653,7 @@ class OctaveBandSpectrum(OwnsArrays):
         require_same_length(self, "frequencies", "values")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the octave values against their octave bands.
 
@@ -669,7 +675,7 @@ def improvement_octave_bands(
     improvement: Sequence[float] | np.ndarray,
     *,
     frequencies: Sequence[float] | np.ndarray,
-    quantity: str = "ΔL",
+    quantity: Quantity = "ΔL",
 ) -> OctaveBandSpectrum:
     r"""Convert a one-third-octave improvement spectrum to octaves (F. (5)).
 

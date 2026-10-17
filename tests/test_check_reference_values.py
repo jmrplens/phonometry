@@ -61,11 +61,22 @@ def test_the_table_read_from_the_source_is_the_published_one() -> None:
     """The gate reads the AST, so it has to agree with what a caller imports."""
     published = {
         f"{medium}/{key}": (row.value, "note" in row.table)
-        for medium, rows in metrology.ISO1683_REFERENCE_VALUES.items()
+        for medium, rows in metrology.REFERENCE_VALUES.items()
         for key, row in rows.items()
     }
     read = {row.key: (row.value, row.alternative) for row in crv.table_rows()}
     assert read == published
+
+
+def test_a_constant_annotated_final_is_read_like_a_plain_one() -> None:
+    """``_TABLE_1: Final = "Table 1"`` names the same text as the bare binding."""
+    import ast
+
+    tree = ast.parse('_TABLE_1: Final = "Table 1"\n_TABLE_2 = "Table 2"\n')
+    assert crv._module_constants(tree) == {
+        "_TABLE_1": "Table 1",
+        "_TABLE_2": "Table 2",
+    }
 
 
 def test_the_table_holds_the_eighteen_values_and_the_alternative() -> None:
@@ -224,8 +235,8 @@ def test_a_copy_fails_even_beside_a_citation(package: pathlib.Path) -> None:
 def test_a_value_read_from_the_table_passes(package: pathlib.Path) -> None:
     """A pointer is not a number, so there is nothing to compare."""
     source = """\
-        from .metrology.reference_values import ISO1683_REFERENCE_VALUES
-        _P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+        from .metrology.reference_values import REFERENCE_VALUES
+        _P0 = REFERENCE_VALUES["gas"]["sound_pressure"].value
         _P0_SQUARED = _P0**2
     """
     assert _findings(package, source) == []
@@ -471,23 +482,22 @@ def test_the_package_is_clean() -> None:
 _MUTATIONS = [
     (
         "electroacoustics/loudspeaker.py",
-        '_P_REF = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value',
+        '_P_REF = REFERENCE_VALUES["gas"]["sound_pressure"].value',
         "_P_REF = 2e-6",
     ),
     (
         "building/measurement/structure_borne_power.py",
-        'REFERENCE_FORCE: float = ISO1683_REFERENCE_VALUES["solid"]["force"].value',
+        'REFERENCE_FORCE: float = REFERENCE_VALUES["solid"]["force"].value',
         "REFERENCE_FORCE: float = 1.0e-5",
     ),
     (
         "underwater/sources/ambient_noise.py",
-        '_P_REF = ISO1683_REFERENCE_VALUES["liquid"]["sound_pressure"].value',
+        '_P_REF = REFERENCE_VALUES["liquid"]["sound_pressure"].value',
         "_P_REF = 1e-5",
     ),
     (
         "noise_control/valves.py",
-        '_REFERENCE_SOUND_POWER_W = ISO1683_REFERENCE_VALUES["gas"]["sound_power"]'
-        ".value",
+        '_REFERENCE_SOUND_POWER_W = REFERENCE_VALUES["gas"]["sound_power"].value',
         "_REFERENCE_SOUND_POWER_W = 1.0e-11",
     ),
     (

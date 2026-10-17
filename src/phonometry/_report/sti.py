@@ -51,6 +51,7 @@ from ._layout import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..speech.sti import STIResult
     from .metadata import ReportMetadata
 
@@ -67,10 +68,11 @@ def _is_stipa(result: STIResult) -> bool:
     frequencies of A.2.2.
     """
     mtf = np.asarray(result.mtf)
+    # The number is a count of array axes, not a quantity.
     return mtf.ndim == 2 and mtf.shape[1] == 2  # noqa: PLR2004
 
 
-def _method_phrase(result: STIResult, language: str = "en") -> str:
+def _method_phrase(result: STIResult, language: Language = "en") -> str:
     """The measurement-method phrase used in the basis line."""
     return (
         t("STIPA, direct method", language)
@@ -80,7 +82,7 @@ def _method_phrase(result: STIResult, language: str = "en") -> str:
 
 
 def _metadata_pairs(
-    metadata: ReportMetadata, language: str = "en"
+    metadata: ReportMetadata, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the header grid.
 
@@ -100,7 +102,7 @@ def _metadata_pairs(
     ]
 
 
-def _band_table(result: STIResult, language: str = "en") -> Table:
+def _band_table(result: STIResult, language: Language = "en") -> Table:
     """Build the left-hand per-octave-band modulation-transfer-index table.
 
     Called only after :func:`render_sti_report` has imported reportlab.
@@ -154,13 +156,13 @@ def _band_table(result: STIResult, language: str = "en") -> Table:
     return table
 
 
-def _statement(result: STIResult, language: str = "en") -> str:
+def _statement(result: STIResult, language: Language = "en") -> str:
     """The boxed single-number statement ``STI = X``."""
     value = format_number(display_round(float(result.sti), 2), language, decimals=2)
     return f"STI = <b>{value}</b>"
 
 
-def _extended_terms(result: STIResult, language: str = "en") -> list[str]:
+def _extended_terms(result: STIResult, language: Language = "en") -> list[str]:
     """The Annex F qualification band and the method shown beside the box."""
     return [
         t("Qualification band (IEC 60268-16 Annex F): {value}", language).format(
@@ -171,7 +173,7 @@ def _extended_terms(result: STIResult, language: str = "en") -> list[str]:
 
 
 def _verdict(
-    result: STIResult, requirement: float, language: str = "en"
+    result: STIResult, requirement: float, language: Language = "en"
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag: the STI passes at or above the requirement.
 
@@ -194,7 +196,7 @@ def _verdict(
 
 
 def _basis_line(
-    result: STIResult, metadata: ReportMetadata | None, language: str
+    result: STIResult, metadata: ReportMetadata | None, language: Language
 ) -> str:
     """The standard-basis line, stating the measurement method."""
     method = _method_phrase(result, language)
@@ -217,7 +219,7 @@ def render_sti_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an IEC 60268-16 speech-transmission-index fiche to a PDF at ``path``.
 

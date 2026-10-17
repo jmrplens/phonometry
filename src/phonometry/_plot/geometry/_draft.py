@@ -38,6 +38,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.patches import Rectangle
 
+    from ..._i18n import Language
+
 #: Axis labels shared by the plan-view and 3-D renderers.
 _AXIS_X = "x [m]"
 _AXIS_Y = "y [m]"
@@ -65,19 +67,19 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Translate a fixed UI string to Spanish, else return it unchanged."""
     return _STRINGS.get(text, text) if language == "es" else text
 
 
-def _check_language(language: str) -> None:
+def _check_language(language: Language) -> None:
     """Reject unknown languages with the shared package error."""
     from ..._i18n import check_language
 
     check_language(language)
 
 
-def _mm(value: float, language: str) -> str:
+def _mm(value: float, language: Language) -> str:
     """A length in millimetres, localised, trimmed (0.05 -> ``"50 mm"``)."""
     from ..._i18n import format_number
 
@@ -88,7 +90,7 @@ def _mm(value: float, language: str) -> str:
     )
 
 
-def _metres(value: float, language: str) -> str:
+def _metres(value: float, language: Language) -> str:
     """A length in metres, localised, trimmed (1.5 -> ``"1.5 m"``)."""
     from ..._i18n import format_number
 
@@ -283,7 +285,7 @@ def _incidence_arrow(
     x: float,
     y: float,
     length: float,
-    language: str,
+    language: Language,
     *,
     downward: bool = False,
 ) -> None:
@@ -342,7 +344,7 @@ def _loudspeaker(
     x: float,
     y_centre: float,
     size: float,
-    language: str,
+    language: Language,
     *,
     label_ha: str = "center",
 ) -> None:

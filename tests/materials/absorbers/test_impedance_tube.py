@@ -27,11 +27,11 @@ import pytest
 from phonometry.fluids import characteristic_impedance
 from phonometry.materials.absorbers.four_microphone import (
     TransferMatrix,
-    air_density_astm,
+    air_density_astm_e2611,
     air_layer_transfer_matrix,
     face_quantities,
-    plane_wave_frequency_range_astm,
-    speed_of_sound_astm,
+    plane_wave_frequency_range_astm_e2611,
+    speed_of_sound_astm_e2611,
     transfer_matrix_one_load,
     transfer_matrix_two_load,
     wave_decomposition,
@@ -81,14 +81,14 @@ def test_speed_of_sound_iso_20c() -> None:
 
 def test_speed_of_sound_astm_20c() -> None:
     # ASTM Eq. (4) c = 20.047*sqrt(273.15 + T), T in degC.
-    assert float(speed_of_sound_astm(temperature_c=20.0)) == pytest.approx(
+    assert float(speed_of_sound_astm_e2611(temperature_c=20.0)) == pytest.approx(
         343.24, abs=0.02
     )
 
 
 def test_both_speed_formulas_agree_at_20c() -> None:
     iso = float(speed_of_sound_iso10534(temperature_c=20.0))
-    astm = float(speed_of_sound_astm(temperature_c=20.0))
+    astm = float(speed_of_sound_astm_e2611(temperature_c=20.0))
     assert iso == pytest.approx(astm, abs=0.2)
 
 
@@ -97,7 +97,7 @@ def test_air_density_reference_values() -> None:
     rho_iso = air_density_iso10534(temperature_c=19.85, static_pressure_kpa=101.325)
     assert float(rho_iso) == pytest.approx(1.186, abs=1e-9)
     # ASTM Eq. (5) at 20 degC, 101.325 kPa -> 1.2020 kg/m3 (notes 2.11).
-    rho_astm = air_density_astm(temperature_c=20.0, static_pressure_kpa=101.325)
+    rho_astm = air_density_astm_e2611(temperature_c=20.0, static_pressure_kpa=101.325)
     assert float(rho_astm) == pytest.approx(1.2020, abs=1e-3)
 
 
@@ -105,11 +105,11 @@ def test_air_property_domain_errors() -> None:
     with pytest.raises(ValueError, match="'temperature_c' must be finite and above"):
         speed_of_sound_iso10534(temperature_c=-300.0)
     with pytest.raises(ValueError, match="'temperature_c' must be finite and above"):
-        speed_of_sound_astm(temperature_c=-300.0)
+        speed_of_sound_astm_e2611(temperature_c=-300.0)
     with pytest.raises(ValueError, match="'static_pressure_kpa' must be positive"):
         air_density_iso10534(temperature_c=19.85, static_pressure_kpa=-1.0)
     with pytest.raises(ValueError, match="'static_pressure_kpa' must be positive"):
-        air_density_astm(temperature_c=20.0, static_pressure_kpa=-1.0)
+        air_density_astm_e2611(temperature_c=20.0, static_pressure_kpa=-1.0)
 
 
 def test_air_density_astm_rejects_temperature_below_absolute_zero() -> None:
@@ -118,10 +118,10 @@ def test_air_density_astm_rejects_temperature_below_absolute_zero() -> None:
     Below absolute zero that ratio is negative, so rho would come back
     negative and carry the sign into every rho c the four-microphone
     reduction builds on. The temperature is refused at the door, exactly as
-    ``speed_of_sound_astm`` refuses it above.
+    ``speed_of_sound_astm_e2611`` refuses it above.
     """
     with pytest.raises(ValueError, match="'temperature_c' must be finite and above"):
-        air_density_astm(temperature_c=-300.0, static_pressure_kpa=101.325)
+        air_density_astm_e2611(temperature_c=-300.0, static_pressure_kpa=101.325)
 
 
 def test_air_density_mismatched_arrays_raise() -> None:
@@ -137,8 +137,8 @@ def test_air_density_mismatched_arrays_raise() -> None:
 _AIR_HELPERS = (
     (speed_of_sound_iso10534, {}),
     (air_density_iso10534, {}),
-    (speed_of_sound_astm, {}),
-    (air_density_astm, {}),
+    (speed_of_sound_astm_e2611, {}),
+    (air_density_astm_e2611, {}),
 )
 
 
@@ -406,7 +406,7 @@ def test_plane_wave_range_rectangular_bound() -> None:
 def test_plane_wave_range_square_alias() -> None:
     # A square tube is the rectangular case with d the side length, in both
     # the ISO 10534-2 and the ASTM E2611-19 bounds.
-    for fn in (plane_wave_frequency_range, plane_wave_frequency_range_astm):
+    for fn in (plane_wave_frequency_range, plane_wave_frequency_range_astm_e2611):
         square = fn(0.03, C0, diameter_m=0.05, shape="square")
         rectangular = fn(0.03, C0, diameter_m=0.05, shape="rectangular")
         assert square == rectangular
@@ -416,19 +416,19 @@ def test_plane_wave_range_invalid_shape() -> None:
     with pytest.raises(ValueError, match=r"'shape' must be"):
         plane_wave_frequency_range(0.03, C0, diameter_m=0.05, shape="oval")
     with pytest.raises(ValueError, match=r"'shape' must be"):
-        plane_wave_frequency_range_astm(0.03, C0, diameter_m=0.05, shape="oval")
+        plane_wave_frequency_range_astm_e2611(0.03, C0, diameter_m=0.05, shape="oval")
 
 
 def test_plane_wave_range_astm_bounds() -> None:
     # ASTM E2611-19: upper = min(0,40 c/s (6.5.4), 0,586 c/d circular
     # (6.2.4.1) or 0,500 c/d rectangular (6.2.5)); lower = c / (100 s), the
     # spacing greater than 1 % of the wavelength (6.2.3).
-    f_lower, f_upper = plane_wave_frequency_range_astm(
+    f_lower, f_upper = plane_wave_frequency_range_astm_e2611(
         0.03, C0, diameter_m=0.05, shape="circular"
     )
     assert f_upper == pytest.approx(min(0.40 * C0 / 0.03, 0.586 * C0 / 0.05))
     assert f_lower == pytest.approx(C0 / (100.0 * 0.03))
-    _, f_upper_rect = plane_wave_frequency_range_astm(
+    _, f_upper_rect = plane_wave_frequency_range_astm_e2611(
         0.03, C0, diameter_m=0.05, shape="rectangular"
     )
     assert f_upper_rect == pytest.approx(min(0.40 * C0 / 0.03, 0.50 * C0 / 0.05))
@@ -996,16 +996,16 @@ def test_public_exports() -> None:
         "normalized_surface_impedance",
         "normalized_surface_admittance",
         "speed_of_sound_iso10534",
-        "speed_of_sound_astm",
+        "speed_of_sound_astm_e2611",
         "air_density_iso10534",
-        "air_density_astm",
+        "air_density_astm_e2611",
         "tube_wavenumber",
         "tube_attenuation_constant",
         "microphone_calibration_factor",
         "apply_microphone_calibration",
         "two_microphone_impedance",
         "plane_wave_frequency_range",
-        "plane_wave_frequency_range_astm",
+        "plane_wave_frequency_range_astm_e2611",
         "hydraulic_diameter",
         "standing_wave_absorption",
         "standing_wave_reflection",

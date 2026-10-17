@@ -193,10 +193,11 @@ IEC61672_TABLE_5 = (PeakReference(signal='one cycle', nominal_frequency_hz=31.5,
 
 ```python
 MaxUncertaintyRow(
+    *,
     requirement: str,
     reference: str,
     max_uncertainty: float,
-    unit: str = 'dB',
+    unit: Literal['dB', 'dB/s'] = 'dB',
     lower_hz: float | None = None,
     upper_hz: float | None = None,
     includes_lower: bool = True,
@@ -239,7 +240,7 @@ A row that is not banded by frequency contains every frequency.
 
 ```python
 PeakReference(
-    signal: str,
+    signal: Literal['one cycle', 'positive half cycle', 'negative half cycle'],
     nominal_frequency_hz: float,
     reference_difference: float,
     class_1_limits_db: tuple[float, float],
@@ -522,7 +523,7 @@ Whether every result conforms (4.1) and every check held.
 SoundLevelMeterPeriodicRequirement.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -687,7 +688,7 @@ failed check.
 SoundLevelMeterPeriodicVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

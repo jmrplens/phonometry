@@ -52,6 +52,7 @@ from ._layout import fmt_num
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from .._i18n import Language
     from ..building.measurement.intensity_insulation import (
         IntensityElementNormalizedResult,
         IntensityReductionResult,
@@ -131,7 +132,7 @@ def _even_widths(n_columns: int) -> list[float]:
 
 
 def _areas_sentence(
-    area: float | None, measurement_area: float | None, language: str
+    area: float | None, measurement_area: float | None, language: Language
 ) -> str:
     """The Clause 8 g) sentence stating ``S`` and ``Sm``, or ``""``.
 
@@ -166,7 +167,7 @@ def render_iso15186_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
     fpi: Sequence[float] | np.ndarray | None = None,
     residual_index: Sequence[float] | np.ndarray | None = None,
 ) -> str:
@@ -199,7 +200,7 @@ def render_iso15186_report(
     )
 
     def build_columns(
-        value_header: str, curve: np.ndarray, *, verbose: bool, language: str
+        value_header: str, curve: np.ndarray, *, verbose: bool, language: Language
     ) -> tuple[Sequence[Column], str, Any]:
         """The table: ``f | RI`` plus the optional ``RI,M`` / ``FpI`` / ``δpI0``."""
         from reportlab.lib.units import mm
@@ -285,7 +286,7 @@ _DINE_SPEC: dict[str, str] = {
 
 
 def _element_extras_sentence(
-    result: IntensityElementNormalizedResult, language: str
+    result: IntensityElementNormalizedResult, language: Language
 ) -> str:
     """The Clause 8 g) sentence for the element fiche: ``Sm`` and ``N``."""
     sentence = _areas_sentence(
@@ -309,7 +310,7 @@ def render_iso15186_element_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
     fpi: Sequence[float] | np.ndarray | None = None,
     residual_index: Sequence[float] | np.ndarray | None = None,
 ) -> str:
@@ -353,7 +354,7 @@ def render_iso15186_element_report(
     )
 
     def build_columns(
-        value_header: str, curve: np.ndarray, *, verbose: bool, language: str
+        value_header: str, curve: np.ndarray, *, verbose: bool, language: Language
     ) -> tuple[Sequence[Column], str, Any]:
         """The ISO 717 table; the ``FpI`` / ``δpI0`` columns replace verbose."""
         if not extra:

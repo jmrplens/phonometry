@@ -79,7 +79,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -87,6 +87,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
     from .reference_sound_source import ReferenceSourceCalibration
 
@@ -115,6 +117,8 @@ from ._shared import (
     _validate_event_count,
     _validate_meteorology,
 )
+
+Method = Literal["direct", "comparison"]
 
 _A0 = 1.0  #: Reference absorption area, in square metres (ISO 3741, Eq. 20).
 #: K1 qualification edges: bands at or below the low edge or at or above the
@@ -186,7 +190,7 @@ class ReverberationSoundPowerResult(OwnsArrays):
     c2: float
     speed_of_sound: float
     sound_power_level_a: float
-    method: str
+    method: Method
 
     def __post_init__(self) -> None:
         """Reject a determination whose per-band quantities disagree.
@@ -232,7 +236,7 @@ class ReverberationSoundPowerResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the LW spectrum with the A-weighted total annotated.
 
@@ -250,9 +254,9 @@ class ReverberationSoundPowerResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an ISO 3741 reverberation-room sound-power determination fiche.
 
@@ -316,6 +320,7 @@ def _mean_level(levels: np.ndarray) -> np.ndarray:
     arr = np.asarray(levels, dtype=np.float64)
     if arr.ndim == 1:
         return arr
+    # The number is a count of array axes, not a quantity.
     if arr.ndim == 2:  # noqa: PLR2004
         return energy_mean(arr, axis=0)
     msg = "'levels' must be a 1D spectrum or a 2D (positions, bands) array."
@@ -414,6 +419,7 @@ def _background_corrected_mean(
     """
     arr = np.asarray(levels, dtype=np.float64)
     raw_mean = _mean_level(levels)
+    # The number is a count of array axes, not a quantity.
     if arr.ndim == 2:  # noqa: PLR2004
         bg = np.asarray(background_levels, dtype=np.float64)
         # Checked before the broadcast, not after it. A 1-D spectrum of the
@@ -538,6 +544,7 @@ def _position_sampling_warnings(levels: np.ndarray, stacklevel: int) -> None:
     spectrum carries no per-position information and is skipped.
     """
     arr = np.asarray(levels, dtype=np.float64)
+    # The number is a count of array axes, not a quantity.
     if arr.ndim != 2:  # noqa: PLR2004
         return
     n_positions = arr.shape[0]
@@ -665,8 +672,8 @@ def _direct_terms(
 
 def _comparison_inputs(
     n_bands: int,
-    levels_ref: np.ndarray,
-    lw_ref: np.ndarray | ReferenceSourceCalibration,
+    reference_levels: np.ndarray,
+    reference_sound_power_levels: np.ndarray | ReferenceSourceCalibration,
     frequencies: np.ndarray | None,
     *,
     temperature_c: float,
@@ -680,19 +687,19 @@ def _comparison_inputs(
 
     :return: ``(Lp(RSS), LW(RSS), frequencies or None)``, each spanning the
         ``n_bands`` of the source under test.
-    :raises ValueError: if the reference levels, ``lw_ref`` or ``frequencies``
+    :raises ValueError: if the reference levels, ``reference_sound_power_levels`` or ``frequencies``
         do not span the same bands as the source under test.
     """
-    lp_rss = _mean_level(levels_ref)
+    lp_rss = _mean_level(reference_levels)
     lw_rss = _reference_power_levels(
-        lw_ref,
+        reference_sound_power_levels,
         frequencies,
         fraction=3,
         temperature_c=temperature_c,
         static_pressure_kpa=static_pressure_kpa,
     )
     if lp_rss.shape != (n_bands,) or lw_rss.shape != (n_bands,):
-        msg = "'levels', 'levels_ref' and 'lw_ref' must span the same bands."
+        msg = "'levels', 'reference_levels' and 'reference_sound_power_levels' must span the same bands."
         raise ValueError(msg)
     freqs = None if frequencies is None else np.asarray(frequencies, dtype=np.float64)
     if freqs is not None and freqs.shape != (n_bands,):
@@ -809,18 +816,18 @@ def sound_power_reverberation(
 
 def sound_power_comparison(
     levels: np.ndarray,
-    levels_ref: np.ndarray,
-    lw_ref: np.ndarray | ReferenceSourceCalibration,
+    reference_levels: np.ndarray,
+    reference_sound_power_levels: np.ndarray | ReferenceSourceCalibration,
     *,
     frequencies: np.ndarray | None = None,
     background_levels: np.ndarray | None = None,
-    background_levels_ref: np.ndarray | None = None,
+    reference_background_levels: np.ndarray | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundPowerResult:
     r"""Sound power level in a reverberation room, comparison method (ISO 3741).
 
-    A reference sound source of known per-band sound power ``lw_ref`` is
+    A reference sound source of known per-band sound power ``reference_sound_power_levels`` is
     measured at the same microphone positions as the source under test. The
     sound power level in each band follows Eq. (21):
 
@@ -836,8 +843,8 @@ def sound_power_comparison(
 
     :param levels: Mean room SPL per band (1D) or ``(NM, NB)`` per-position
         levels of the source under test, in decibels.
-    :param levels_ref: Same, for the reference sound source, in decibels.
-    :param lw_ref: Known sound power level ``LW(RSS)`` per band, in decibels,
+    :param reference_levels: Same, for the reference sound source, in decibels.
+    :param reference_sound_power_levels: Known sound power level ``LW(RSS)`` per band, in decibels,
         under the meteorological conditions of the test (Eq. 21), or the
         :class:`~phonometry.emission.ReferenceSourceCalibration` of ISO 6926,
         read in the one-third octave bands at ``frequencies`` and carried from
@@ -847,7 +854,7 @@ def sound_power_comparison(
     :param background_levels: Background levels for the ``K1`` correction of
         ``levels`` (per position, or a single spectrum; applied per position
         per Eq. 14/15 before the Eq. 16 average when ``levels`` is 2D).
-    :param background_levels_ref: Background levels matching ``levels_ref``.
+    :param reference_background_levels: Background levels matching ``reference_levels``.
     :param temperature_c: Air temperature ``theta`` in the room, in degrees Celsius.
     :param static_pressure_kpa: Static pressure ``ps`` in the room, in kilopascals.
     :return: :class:`ReverberationSoundPowerResult` (``method='comparison'``).
@@ -857,8 +864,8 @@ def sound_power_comparison(
     n_bands = lp_st.shape[0]
     lp_rss, lw_rss, freqs = _comparison_inputs(
         n_bands,
-        levels_ref,
-        lw_ref,
+        reference_levels,
+        reference_sound_power_levels,
         frequencies,
         temperature_c=temperature_c,
         static_pressure_kpa=static_pressure_kpa,
@@ -875,7 +882,9 @@ def sound_power_comparison(
         lp_st, k1_st = _background_corrected_mean(
             levels, background_levels, _require_frequencies(freqs, "background_levels")
         )
-    lp_rss = _reference_source_level(lp_rss, levels_ref, background_levels_ref, freqs)
+    lp_rss = _reference_source_level(
+        lp_rss, reference_levels, reference_background_levels, freqs
+    )
 
     c2 = _c2_correction(temperature_c, static_pressure_kpa)
     lw = np.asarray(lw_rss + (lp_st - lp_rss + c2), dtype=np.float64)
@@ -898,8 +907,8 @@ def sound_power_comparison(
 
 def _reference_source_level(
     lp_rss: np.ndarray,
-    levels_ref: np.ndarray,
-    background_levels_ref: np.ndarray | None,
+    reference_levels: np.ndarray,
+    reference_background_levels: np.ndarray | None,
     freqs: np.ndarray | None,
 ) -> np.ndarray:
     """The reference source's mean room level, background-corrected if asked.
@@ -908,12 +917,12 @@ def _reference_source_level(
     time-averaged one of 9.1.2 (Eq. 14/15 before Eq. 17) in both the sound
     power and the sound energy comparison.
     """
-    if background_levels_ref is None:
+    if reference_background_levels is None:
         return lp_rss
     corrected, _ = _background_corrected_mean(
-        levels_ref,
-        background_levels_ref,
-        _require_frequencies(freqs, "background_levels_ref"),
+        reference_levels,
+        reference_background_levels,
+        _require_frequencies(freqs, "reference_background_levels"),
         reference=True,
     )
     return corrected
@@ -959,7 +968,7 @@ class ReverberationSoundEnergyResult(OwnsArrays):
     c2: float
     speed_of_sound: float
     sound_energy_level_a: float
-    method: str
+    method: Method
     n_events: int | None
     integration_time: float | None
 
@@ -1007,7 +1016,7 @@ class ReverberationSoundEnergyResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the LJ spectrum with the A-weighted total annotated.
 
@@ -1040,6 +1049,7 @@ def _room_event_levels(
         per-event array given together with ``n_events``.
     """
     arr = np.asarray(levels, dtype=np.float64)
+    # The number is a count of array axes, not a quantity.
     if arr.ndim == 3:  # noqa: PLR2004
         if n_events is not None:
             msg = (
@@ -1177,21 +1187,21 @@ def sound_energy_reverberation(
 
 def sound_energy_comparison(
     levels: np.ndarray,
-    levels_ref: np.ndarray,
-    lw_ref: np.ndarray | ReferenceSourceCalibration,
+    reference_levels: np.ndarray,
+    reference_sound_power_levels: np.ndarray | ReferenceSourceCalibration,
     *,
     frequencies: np.ndarray | None = None,
     n_events: int | None = None,
     background_levels: np.ndarray | None = None,
     integration_time: float | None = None,
-    background_levels_ref: np.ndarray | None = None,
+    reference_background_levels: np.ndarray | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundEnergyResult:
     r"""Sound energy level in a reverberation room, comparison method
     (ISO 3741:2010 clause 9.2.5).
 
-    A reference sound source of known per-band sound power ``lw_ref`` runs
+    A reference sound source of known per-band sound power ``reference_sound_power_levels`` runs
     steadily at the same microphone positions as the source under test, whose
     single event levels ``levels`` take any of the forms
     :func:`sound_energy_reverberation` accepts. The sound energy level in each
@@ -1213,9 +1223,9 @@ def sound_energy_comparison(
     time-averaged correction of 9.1.2.
 
     :param levels: Single event levels of the source under test, in decibels.
-    :param levels_ref: Mean room SPL per band (1D) or ``(NM, NB)`` per-position
+    :param reference_levels: Mean room SPL per band (1D) or ``(NM, NB)`` per-position
         time-averaged levels of the reference sound source, in decibels.
-    :param lw_ref: Known sound power level ``LW(RSS)`` per band, in decibels,
+    :param reference_sound_power_levels: Known sound power level ``LW(RSS)`` per band, in decibels,
         under the meteorological conditions of the test (Eq. 31), or the
         :class:`~phonometry.emission.ReferenceSourceCalibration` of ISO 6926,
         read in the one-third octave bands at ``frequencies`` and carried from
@@ -1229,7 +1239,7 @@ def sound_energy_comparison(
         correction of ``levels`` (per position, or a single spectrum).
     :param integration_time: The interval ``T`` of the single event levels, in
         seconds; required with ``background_levels``.
-    :param background_levels_ref: Background levels matching ``levels_ref``.
+    :param reference_background_levels: Background levels matching ``reference_levels``.
     :param temperature_c: Air temperature ``theta`` in the room, in degrees Celsius.
     :param static_pressure_kpa: Static pressure ``ps`` in the room, in kilopascals.
     :return: :class:`ReverberationSoundEnergyResult` (``method='comparison'``).
@@ -1247,8 +1257,8 @@ def sound_energy_comparison(
     n_bands = le_st.shape[0]
     lp_rss, lw_rss, freqs = _comparison_inputs(
         n_bands,
-        levels_ref,
-        lw_ref,
+        reference_levels,
+        reference_sound_power_levels,
         frequencies,
         temperature_c=temperature_c,
         static_pressure_kpa=static_pressure_kpa,
@@ -1262,7 +1272,9 @@ def sound_energy_comparison(
         le_st, k1_st = _background_corrected_mean(
             event_levels, exposure, _require_frequencies(freqs, "background_levels")
         )
-    lp_rss = _reference_source_level(lp_rss, levels_ref, background_levels_ref, freqs)
+    lp_rss = _reference_source_level(
+        lp_rss, reference_levels, reference_background_levels, freqs
+    )
 
     c2 = _c2_correction(temperature_c, static_pressure_kpa)
     lj = np.asarray(lw_rss + (le_st - lp_rss) + c2, dtype=np.float64)
@@ -1302,7 +1314,7 @@ class OctaveBandLevels(OwnsArrays):
     levels: np.ndarray
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the octave-band levels against their octaves.
 

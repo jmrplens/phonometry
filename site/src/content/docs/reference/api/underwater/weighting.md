@@ -67,9 +67,9 @@ implements **1.36**; the printed 1.37 remains available as
 ```python
 auditory_weighting(
     frequency_hz: NDArray[np.float64] | list[float] | float,
-    group: str,
+    group: Literal['LF', 'MF', 'HF', 'VHF', 'PW', 'OW', 'PA', 'OA', 'SI', 'PCW', 'OCW', 'PCA', 'OCA'],
     *,
-    guidance: str = 'nmfs-2024',
+    guidance: Literal['nmfs-2024', 'nmfs-2018', 'southall-2019'] = 'nmfs-2024',
 ) -> AuditoryWeightingResult
 ```
 
@@ -99,8 +99,8 @@ AuditoryWeightingResult(
     weighting: NDArray[np.float64],
     exposure_function: NDArray[np.float64],
     parameters: WeightingParameters,
-    guidance: str,
-    group: str,
+    guidance: Literal['nmfs-2024', 'nmfs-2018', 'southall-2019'],
+    group: Literal['LF', 'MF', 'HF', 'VHF', 'PW', 'OW', 'PA', 'OA', 'SI', 'PCW', 'OCW', 'PCA', 'OCA'],
     weighted_tts_onset: float,
 )
 ```
@@ -125,7 +125,7 @@ Auditory weighting and exposure functions of one hearing group.
 AuditoryWeightingResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -136,9 +136,9 @@ Plot the weighting function versus frequency.
 
 ```python
 exposure_criteria(
-    group: str,
+    group: Literal['LF', 'MF', 'HF', 'VHF', 'PW', 'OW', 'PA', 'OA', 'SI', 'PCW', 'OCW', 'PCA', 'OCA'],
     *,
-    guidance: str = 'nmfs-2024',
+    guidance: Literal['nmfs-2024', 'nmfs-2018', 'southall-2019'] = 'nmfs-2024',
     impulsive: bool = False,
 ) -> ExposureCriteria
 ```
@@ -166,14 +166,14 @@ Published TTS and injury onset criteria of a hearing group.
 ```python
 ExposureCriteria(
     group: str,
-    guidance: str,
+    guidance: Literal['nmfs-2024', 'nmfs-2018', 'southall-2019'],
     *,
     impulsive: bool,
     tts_sel: float | None,
     injury_sel: float | None,
     tts_peak_spl: float | None,
     injury_peak_spl: float | None,
-    injury_label: str,
+    injury_label: Literal['PTS', 'AUD INJ'],
     sel_reference: str,
     peak_reference: str,
     source: str,
@@ -205,7 +205,9 @@ is not published by that guidance version.
 ## hearing_groups
 
 ```python
-hearing_groups(guidance: str = 'nmfs-2024') -> tuple[str, ...]
+hearing_groups(
+    guidance: Literal['nmfs-2024', 'nmfs-2018', 'southall-2019'] = 'nmfs-2024',
+) -> tuple[str, ...]
 ```
 
 Hearing-group codes defined by a guidance version.
@@ -229,10 +231,10 @@ Hearing-group codes defined by a guidance version.
 ```python
 weighted_exposure(
     band_sel: NDArray[np.float64] | list[float],
-    group: str,
+    group: Literal['LF', 'MF', 'HF', 'VHF', 'PW', 'OW', 'PA', 'OA', 'SI', 'PCW', 'OCW', 'PCA', 'OCA'],
     *,
     frequencies_hz: NDArray[np.float64] | list[float],
-    guidance: str = 'nmfs-2024',
+    guidance: Literal['nmfs-2024', 'nmfs-2018', 'southall-2019'] = 'nmfs-2024',
     impulsive: bool = True,
     n_events: int = 1,
     peak_spl: float | None = None,
@@ -289,8 +291,8 @@ WeightedExposureResult(
     peak_margin: float | None,
     tts_peak_margin: float | None,
     *,
-    guidance: str,
-    group: str,
+    guidance: Literal['nmfs-2024', 'nmfs-2018', 'southall-2019'],
+    group: Literal['LF', 'MF', 'HF', 'VHF', 'PW', 'OW', 'PA', 'OA', 'SI', 'PCW', 'OCW', 'PCA', 'OCA'],
     impulsive: bool,
 )
 ```
@@ -352,7 +354,7 @@ Whether any TTS-onset criterion is reached, on the same `margin >= 0` convention
 WeightedExposureResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -371,9 +373,9 @@ WEIGHTING_GUIDANCE = ('nmfs-2024', 'nmfs-2018', 'southall-2019')
 
 ```python
 weighting_parameters(
-    group: str,
+    group: Literal['LF', 'MF', 'HF', 'VHF', 'PW', 'OW', 'PA', 'OA', 'SI', 'PCW', 'OCW', 'PCA', 'OCA'],
     *,
-    guidance: str = 'nmfs-2024',
+    guidance: Literal['nmfs-2024', 'nmfs-2018', 'southall-2019'] = 'nmfs-2024',
 ) -> WeightingParameters
 ```
 
@@ -398,8 +400,8 @@ Weighting/exposure parameters of one hearing group.
 
 ```python
 WeightingParameters(
-    group: str,
-    guidance: str,
+    group: Literal['LF', 'MF', 'HF', 'VHF', 'PW', 'OW', 'PA', 'OA', 'SI', 'PCW', 'OCW', 'PCA', 'OCA'],
+    guidance: Literal['nmfs-2024', 'nmfs-2018', 'southall-2019'],
     description: str,
     a: float,
     b: float,

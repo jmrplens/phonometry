@@ -112,7 +112,7 @@ envelope_spectrum(
     x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     *,
-    kind: str = 'magnitude',
+    kind: Literal['magnitude', 'squared'] = 'magnitude',
     window: str = 'hann',
     nfft: int | None = None,
     remove_dc: bool = True,
@@ -220,7 +220,7 @@ All output arrays share the (possibly decimated) time axis
 EnvelopeResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
 ```
@@ -240,7 +240,7 @@ EnvelopeSpectrumResult(
     frequencies: NDArray[np.float64],
     amplitude: NDArray[np.float64],
     mean_level: float,
-    kind: str,
+    kind: Literal['magnitude', 'squared'],
     times: NDArray[np.float64],
     envelope: NDArray[np.float64],
     window: str,
@@ -276,7 +276,7 @@ Amplitude spectrum of a signal's envelope (B&P Section 13.3).
 EnvelopeSpectrumResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
 ```

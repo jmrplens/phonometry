@@ -61,11 +61,12 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    from .._i18n import Language
     from ..room.open_plan import OpenPlanResult
     from .metadata import ReportMetadata
 
 
-def _num(value: float, language: str, *, decimals: int = 1) -> str:
+def _num(value: float, language: Language, *, decimals: int = 1) -> str:
     """Format a single-number quantity, or an em dash when it is not finite.
 
     A non-finite quantity (``D2,S`` / ``Lp,A,S,4m`` when fewer than two
@@ -80,7 +81,7 @@ def _num(value: float, language: str, *, decimals: int = 1) -> str:
 
 
 def _metadata_pairs(
-    metadata: ReportMetadata, language: str = "en"
+    metadata: ReportMetadata, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the open-plan header grid.
 
@@ -117,7 +118,9 @@ def _metadata_pairs(
     return escaped_pairs(specs)
 
 
-def _metric_rows(result: OpenPlanResult, language: str = "en") -> list[tuple[str, str]]:
+def _metric_rows(
+    result: OpenPlanResult, language: Language = "en"
+) -> list[tuple[str, str]]:
     """The four single-number quantities shown in the left-hand metrics table.
 
     ``D2,S`` (dB per distance doubling), ``Lp,A,S,4m`` (dB), ``rD`` (m) and
@@ -144,7 +147,9 @@ def _metric_rows(result: OpenPlanResult, language: str = "en") -> list[tuple[str
     ]
 
 
-def _statement(result: OpenPlanResult, language: str = "en") -> tuple[str, list[str]]:
+def _statement(
+    result: OpenPlanResult, language: Language = "en"
+) -> tuple[str, list[str]]:
     """The boxed spatial-decay-rate statement and its remaining quantities.
 
     ``D2,S`` is boxed as the headline descriptor of the standard's title
@@ -169,7 +174,7 @@ def _statement(result: OpenPlanResult, language: str = "en") -> tuple[str, list[
 
 
 def _verdict(
-    result: OpenPlanResult, requirement: float, language: str = "en"
+    result: OpenPlanResult, requirement: float, language: Language = "en"
 ) -> tuple[str, bool] | None:
     """Verdict text and PASS flag for a supplied target spatial decay rate.
 
@@ -209,7 +214,7 @@ def render_iso3382_3_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an open-plan office acoustics fiche to a PDF at ``path``.
 

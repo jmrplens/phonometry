@@ -43,8 +43,8 @@ _SCRIPTS = str(pathlib.Path(__file__).resolve().parents[2] / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-import catalogue_fingerprint  # noqa: E402
-import check_frozen_constants as cfc  # noqa: E402
+import catalogue_fingerprint
+import check_frozen_constants as cfc
 
 _SOURCE = "Example Acoustics Ltd, Panel 40 technical data sheet, Rev. 4, p. 2"
 

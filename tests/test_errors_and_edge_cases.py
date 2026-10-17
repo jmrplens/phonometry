@@ -376,15 +376,15 @@ def test_a_refusal_names_the_parameter_of_the_entry_point_that_was_called() -> N
 
     **Verification:**
     - Reach the same refusal through `sensitivity`, whose signal parameter is
-      called `ref_signal`.
+      called `reference_signal`.
 
     **Expectation:**
-    - The message names `'ref_signal'`, not `'x'`.
+    - The message names `'reference_signal'`, not `'x'`.
     """
     poisoned = np.sin(2 * np.pi * 1000.0 * np.arange(4800) / 48000.0)
     poisoned[100] = np.nan
     with pytest.raises(
-        ValueError, match="'ref_signal' must contain only finite samples"
+        ValueError, match="'reference_signal' must contain only finite samples"
     ):
         metrology.sensitivity(poisoned, fs=48000)
 

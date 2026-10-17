@@ -60,7 +60,7 @@ import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal, get_args
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -80,15 +80,20 @@ from ..._internal.validation import (
 )
 from ..._internal.warnings import PhonometryWarning
 from ...io._resolve import SignalInput, resolve_fs, resolve_samples
-from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ...metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Callable, Mapping
 
     from matplotlib.axes import Axes
 
-    from ..._internal.types import Real
+    from ..._i18n import Language
+    from ..._internal.types import Real, ReportEngine
     from ..._report.metadata import ReportMetadata
+
+Kind = Literal["hav", "wbv"]
+Metric = Literal["a8", "vdv"]
+Method = Literal["linear", "exponential"]
 
 Complex = NDArray[np.complex128]
 
@@ -135,9 +140,7 @@ __all__ = [
 # ---------------------------------------------------------------------------
 #: Reference acceleration ``a0 = 10^-6 m/s2`` for vibration levels
 #: (ISO 8041-1:2017, 3.1.2.2, after ISO 1683:2015 Table 3).
-ACCELERATION_LEVEL_REFERENCE_M_S2 = ISO1683_REFERENCE_VALUES["solid"][
-    "acceleration"
-].value
+ACCELERATION_LEVEL_REFERENCE_M_S2 = REFERENCE_VALUES["solid"]["acceleration"].value
 
 #: Reference duration ``T0 = 8 h = 28 800 s`` of the daily exposure ``A(8)``
 #: (ISO 5349-1:2001, 3.2; ISO 2631-1:1997, B.1).
@@ -339,8 +342,11 @@ _WEIGHTINGS: dict[str, _WParams] = {
     ),
 }
 
+#: A frequency weighting of ISO 8041-1:2017 Table 3, by name.
+WeightingName = Literal["Wb", "Wc", "Wd", "We", "Wf", "Wh", "Wj", "Wk", "Wm"]
+
 #: The nine ISO 8041-1 frequency-weighting names, in Table 3 order.
-WEIGHTING_NAMES: tuple[str, ...] = tuple(_WEIGHTINGS)
+WEIGHTING_NAMES: tuple[WeightingName, ...] = get_args(WeightingName)
 
 
 def _params(name: str) -> _WParams:
@@ -470,7 +476,7 @@ class WeightingResponse(OwnsArrays):
     band_limiting: bool = False
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the weighting factor (dB) versus frequency.
 
@@ -511,7 +517,9 @@ def _response_result(
     )
 
 
-def frequency_weighting(name: str, frequencies: ArrayLike) -> WeightingResponse:
+def frequency_weighting(
+    name: WeightingName, frequencies: ArrayLike
+) -> WeightingResponse:
     """Frequency-weighting response ``H(f)`` (ISO 8041-1:2017, Formula (5)).
 
     Evaluates the overall weighting - band limiting, acceleration-velocity
@@ -525,7 +533,9 @@ def frequency_weighting(name: str, frequencies: ArrayLike) -> WeightingResponse:
     return _response_result(name, frequencies, band_limiting=False)
 
 
-def band_limiting_response(name: str, frequencies: ArrayLike) -> WeightingResponse:
+def band_limiting_response(
+    name: WeightingName, frequencies: ArrayLike
+) -> WeightingResponse:
     r"""Band-limiting weighting response (ISO 8041-1:2017, Formulae (1), (2)).
 
     The band-limiting weighting is the high-pass and low-pass pair of the
@@ -558,7 +568,7 @@ def band_limiting_response(name: str, frequencies: ArrayLike) -> WeightingRespon
     return _response_result(name, frequencies, band_limiting=True)
 
 
-def band_limiting_factors(name: str, frequencies: ArrayLike) -> Real:
+def band_limiting_factors(name: WeightingName, frequencies: ArrayLike) -> Real:
     """Band-limiting weighting factors (ISO 8041-1:2017, Annex B).
 
     Convenience wrapper over :func:`band_limiting_response` returning only the
@@ -572,7 +582,7 @@ def band_limiting_factors(name: str, frequencies: ArrayLike) -> Real:
     return band_limiting_response(name, frequencies).magnitude
 
 
-def weighting_factors(name: str, frequencies: ArrayLike) -> Real:
+def weighting_factors(name: WeightingName, frequencies: ArrayLike) -> Real:
     """Weighting factors ``|H(f)|`` of weighting ``name`` (ISO 8041-1).
 
     Convenience wrapper over :func:`frequency_weighting` returning only the
@@ -585,7 +595,9 @@ def weighting_factors(name: str, frequencies: ArrayLike) -> Real:
     return frequency_weighting(name, frequencies).magnitude
 
 
-def apply_weighting(x: SignalInput, fs: float | None = None, *, name: str) -> Real:
+def apply_weighting(
+    x: SignalInput, fs: float | None = None, *, name: WeightingName
+) -> Real:
     """Apply frequency weighting ``name`` to a time signal (ISO 8041-1).
 
     The exact analog response :func:`frequency_weighting` is applied in the
@@ -611,7 +623,9 @@ def apply_weighting(x: SignalInput, fs: float | None = None, *, name: str) -> Re
     return _apply_response(x, fs, name=name, band_limiting=False)
 
 
-def apply_band_limiting(x: SignalInput, fs: float | None = None, *, name: str) -> Real:
+def apply_band_limiting(
+    x: SignalInput, fs: float | None = None, *, name: WeightingName
+) -> Real:
     """Apply the band-limiting weighting of ``name`` to a time signal.
 
     The band-limiting weighting of :func:`band_limiting_response` (ISO 8041-1
@@ -716,7 +730,7 @@ class WeightedSpectrum(OwnsArrays):
                 raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the unweighted and weighted band spectra with ``a_w``.
 
@@ -732,7 +746,7 @@ class WeightedSpectrum(OwnsArrays):
 
 
 def weighted_acceleration(
-    band_accelerations: ArrayLike, weighting: str, *, frequencies: ArrayLike
+    band_accelerations: ArrayLike, weighting: WeightingName, *, frequencies: ArrayLike
 ) -> WeightedSpectrum:
     r"""Weighted r.m.s. acceleration from a band spectrum (ISO 2631-1
     Eq. (9)).
@@ -820,7 +834,7 @@ def running_rms(
     fs: float | None = None,
     *,
     integration_time: float = 1.0,
-    method: str = "linear",
+    method: Method = "linear",
 ) -> Real:
     """Running r.m.s. of a weighted signal (ISO 2631-1 Eqs. (2)/(3)).
 
@@ -874,7 +888,7 @@ def mtvv(
     fs: float | None = None,
     *,
     integration_time: float = 1.0,
-    method: str = "linear",
+    method: Method = "linear",
 ) -> float:
     """Maximum transient vibration value (ISO 2631-1 Eq. (4)).
 
@@ -1227,8 +1241,8 @@ class ExposureAssessment(RichDisplay):
     """
 
     value: float
-    kind: str
-    metric: str
+    kind: Kind
+    metric: Metric
 
     def __post_init__(self) -> None:
         """Reject an assessment whose kind or metric tag is unknown or unpaired.
@@ -1298,8 +1312,8 @@ class ExposureAssessment(RichDisplay):
 def exposure_assessment(
     value: float,
     *,
-    kind: str,
-    metric: str = "a8",
+    kind: Kind,
+    metric: Metric = "a8",
 ) -> ExposureAssessment:
     """Assess a daily exposure against Directive 2002/44/EC (Article 3).
 
@@ -1369,7 +1383,7 @@ class DailyVibrationExposure(OwnsArrays):
                 raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the partial exposures against the EAV / ELV thresholds.
 
@@ -1388,9 +1402,9 @@ class DailyVibrationExposure(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a daily vibration exposure assessment fiche to a PDF.
 
@@ -1444,7 +1458,7 @@ def daily_vibration_exposure(
     total_values: ArrayLike,
     durations_s: ArrayLike,
     *,
-    kind: str,
+    kind: Kind,
     labels: list[str] | tuple[str, ...] | None = None,
 ) -> DailyVibrationExposure:
     """Daily exposure from several operations, assessed (ISO 5349 + Directive).

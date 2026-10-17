@@ -10,12 +10,15 @@ and the RD 1367/2007 assessment of an activity against the limits binding it.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 import phonometry as ph
 from phonometry import ReportMetadata
+
+if TYPE_CHECKING:
+    from phonometry._i18n import Language
 
 
 def _tone_audibility_example() -> tuple[object, ReportMetadata, str]:
@@ -221,7 +224,7 @@ class _WithSourceEmission:
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         return str(
             self._result.report(
@@ -326,15 +329,27 @@ def _rd1367_example() -> tuple[object, ReportMetadata, str, dict[str, Any]]:
     finds the Spanish this example writes into the fiche.
     """
     day = [
-        ph.environment.NoisePhase(2.0, 0.0, label="Actividad cerrada"),
         ph.environment.NoisePhase(
-            6.0, 50.0, kt=6.0, kf=3.0, label="Máquina ruidosa activa"
+            duration_hours=2.0, laeq=0.0, label="Actividad cerrada"
         ),
-        ph.environment.NoisePhase(4.0, 48.0, kt=3.0, kf=3.0, label="Resto de fuentes"),
+        ph.environment.NoisePhase(
+            duration_hours=6.0,
+            laeq=50.0,
+            kt=6.0,
+            kf=3.0,
+            label="Máquina ruidosa activa",
+        ),
+        ph.environment.NoisePhase(
+            duration_hours=4.0, laeq=48.0, kt=3.0, kf=3.0, label="Resto de fuentes"
+        ),
     ]
     evening = [
-        ph.environment.NoisePhase(2.0, 48.0, kt=3.0, kf=3.0, label="Resto de fuentes"),
-        ph.environment.NoisePhase(2.0, 0.0, label="Actividad cerrada"),
+        ph.environment.NoisePhase(
+            duration_hours=2.0, laeq=48.0, kt=3.0, kf=3.0, label="Resto de fuentes"
+        ),
+        ph.environment.NoisePhase(
+            duration_hours=2.0, laeq=0.0, label="Actividad cerrada"
+        ),
     ]
     result = ph.environment.assess_activity(
         {"day": day, "evening": evening},

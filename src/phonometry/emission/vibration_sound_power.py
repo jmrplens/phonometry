@@ -56,6 +56,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
 
 
@@ -415,7 +417,7 @@ class VibrationSoundPowerResult(OwnsArrays):
         return float(10.0 * np.log10(np.sum(10.0 ** (0.1 * (lw + ck)))))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the radiated sound power level per band.
 
@@ -433,9 +435,9 @@ class VibrationSoundPowerResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         r"""Render an ISO/TS 7849 sound-power-from-vibration determination fiche.
 

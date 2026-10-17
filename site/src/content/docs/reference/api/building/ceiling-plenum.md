@@ -180,7 +180,7 @@ Ceiling attenuation class (ASTM E1414 rated through ASTM E413).
 CeilingAttenuationResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -283,7 +283,7 @@ plenum_flanking_reduction_index(
     *,
     ceiling_length: float,
     plenum_height_m: float,
-    sidewalls: str = ...,
+    sidewalls: Literal['absorbing', 'reflecting'] = ...,
     frequencies: ArrayLike | None = ...,
     attenuation_source_per_m: ArrayLike,
     attenuation_receiving_per_m: ArrayLike,
@@ -298,7 +298,7 @@ plenum_flanking_reduction_index(
     *,
     ceiling_length: float,
     plenum_height_m: float,
-    sidewalls: str = ...,
+    sidewalls: Literal['absorbing', 'reflecting'] = ...,
     frequencies: ArrayLike | None = ...,
     source_length: float | None = ...,
     split_source: float = ...,
@@ -361,7 +361,7 @@ PlenumFlankingResult(
     reduction_index_receiving: np.ndarray,
     geometry_term: float | None,
     penalty: np.ndarray,
-    model: str,
+    model: Literal['undamped', 'attenuated'],
     epsilon: float,
     plenum_height_m: float,
     ceiling_length: float,
@@ -392,7 +392,7 @@ Ceiling/plenum flanking path of a suspended ceiling (Vigran 9.2.3).
 PlenumFlankingResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

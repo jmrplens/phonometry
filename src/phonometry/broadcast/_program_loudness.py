@@ -42,7 +42,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from math import ceil, isclose
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from scipy import signal
@@ -55,11 +55,12 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
     from .._report.metadata import ReportMetadata
 
 from .._internal.frozen import OwnsArrays
 from .._internal.peaks import inter_sample_peak
-from .._internal.types import as_float_or_array
+from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
     require_count,
@@ -326,7 +327,7 @@ class KWeightingResponse(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the K-weighting magnitude response versus frequency.
 
@@ -447,6 +448,7 @@ def channel_weight(
     if np.any(theta > _MAX_AZIMUTH_DEG) or np.any(phi > _MAX_ELEVATION_DEG):
         msg = "azimuth must be within +/-360 deg and elevation within +/-90 deg."
         raise ValueError(msg)
+    # Degrees of a half and of a whole turn.
     theta = np.where(theta > 180.0, 360.0 - theta, theta)  # noqa: PLR2004
     side = (
         (theta >= _SIDE_AZIMUTH_MIN_DEG)
@@ -855,7 +857,7 @@ class ProgramLoudnessResult(OwnsArrays):
         _require_series_maximum(self, "max_short_term", "short_term")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot momentary and short-term loudness over time, with the
         integrated loudness and the loudness range annotated.
@@ -876,10 +878,10 @@ class ProgramLoudnessResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
-        tolerance: str = "qc",
+        language: Language = "en",
+        tolerance: Literal["qc", "live"] = "qc",
     ) -> str:
         """Render an EBU R 128 programme-loudness compliance fiche to a PDF.
 

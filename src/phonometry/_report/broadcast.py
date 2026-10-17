@@ -52,6 +52,7 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    from .._i18n import Language
     from ..broadcast._program_loudness import ProgramLoudnessResult
     from .metadata import ReportMetadata
 
@@ -81,7 +82,7 @@ _MAX_TRUE_PEAK_DBTP = -1.0
 _ABSENT = "—"
 
 
-def _measured(value: float, language: str = "en") -> str:
+def _measured(value: float, language: Language = "en") -> str:
     """One measured level as the fiche prints it, or an em dash when undefined.
 
     Digital silence is a programme an end user can hand this fiche, and every
@@ -110,7 +111,7 @@ def _delta_lu(integrated: float, target: float) -> float | None:
 
 
 def _metadata_pairs(
-    metadata: ReportMetadata, language: str = "en"
+    metadata: ReportMetadata, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the loudness header grid.
 
@@ -170,7 +171,7 @@ def _compliance_rows(
     result: ProgramLoudnessResult,
     target: float,
     tolerance_lu: float,
-    language: str = "en",
+    language: Language = "en",
 ) -> list[tuple[str, str, str, str]]:
     """Build the compliance-table rows for the EBU R 128 fiche.
 
@@ -251,7 +252,7 @@ def _has_undefined_reading(result: ProgramLoudnessResult) -> bool:
     )
 
 
-def _statement(result: ProgramLoudnessResult, language: str = "en") -> str:
+def _statement(result: ProgramLoudnessResult, language: Language = "en") -> str:
     """The boxed single-number statement ``I = X LUFS (LRA = Y, max TP = Z)``.
 
     Each of the three readings is stated by :func:`_measured`, so a programme
@@ -268,7 +269,7 @@ def _verdict(
     result: ProgramLoudnessResult,
     target: float,
     tolerance: str = "qc",
-    language: str = "en",
+    language: Language = "en",
 ) -> tuple[str, bool]:
     """Combined verdict text and PASS flag (integrated loudness and true peak).
 
@@ -297,7 +298,7 @@ def render_program_loudness_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
     tolerance: str = "qc",
 ) -> str:
     """Render an EBU R 128 programme-loudness fiche to a PDF at ``path``.

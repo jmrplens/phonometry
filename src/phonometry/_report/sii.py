@@ -57,6 +57,7 @@ if TYPE_CHECKING:
 
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..speech.sii import SIIResult
     from .metadata import ReportMetadata
 
@@ -113,7 +114,7 @@ def _procedure_wording(table: Mapping[str, str], method: str, role: str) -> str:
 
 
 def _metadata_pairs(
-    metadata: ReportMetadata, language: str = "en"
+    metadata: ReportMetadata, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the header grid.
 
@@ -133,7 +134,9 @@ def _metadata_pairs(
     ]
 
 
-def _band_table(result: SIIResult, *, verbose: bool, language: str = "en") -> Table:
+def _band_table(
+    result: SIIResult, *, verbose: bool, language: Language = "en"
+) -> Table:
     """Build the left-hand per-band audibility table of the procedure.
 
     The default table carries the equivalent speech spectrum level ``Ei'``, the
@@ -211,14 +214,14 @@ def _band_table(result: SIIResult, *, verbose: bool, language: str = "en") -> Ta
     return table
 
 
-def _statement(result: SIIResult, language: str = "en") -> str:
+def _statement(result: SIIResult, language: Language = "en") -> str:
     """The boxed single-number statement ``SII = X``."""
     value = format_number(display_round(float(result.sii), 3), language, decimals=3)
     return f"SII = <b>{value}</b>"
 
 
 def _verdict(
-    result: SIIResult, requirement: float, language: str = "en"
+    result: SIIResult, requirement: float, language: Language = "en"
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag: the SII passes at or above the requirement.
 
@@ -246,7 +249,7 @@ def render_sii_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ANSI S3.5-1997 speech-intelligibility-index fiche to ``path``.
 

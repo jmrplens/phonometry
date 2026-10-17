@@ -40,7 +40,7 @@ from phonometry.environment.propagation.barrier_in_situ import (
     REFERENCE_ELEVATION_INCREMENT_DEG,
     REFERENCE_MICROPHONE_CLEARANCE_M,
     SHORT_DISTANCE_RATIO,
-    TEMPERATURE_TOLERANCE_C,
+    TEMPERATURE_TOLERANCE_K,
     WIND_VECTOR_TOLERANCE_M_S,
     BarrierInSituWarning,
 )
@@ -400,7 +400,7 @@ def test_the_printed_constants() -> None:
     assert MIN_RECEIVER_HEIGHT_M == 1.2
     assert MIN_REPETITIONS == 3
     assert LONG_DISTANCE_M == 250.0
-    assert TEMPERATURE_TOLERANCE_C == 10.0
+    assert TEMPERATURE_TOLERANCE_K == 10.0
     assert EQUIVALENT_SECTOR_DEG == 60.0
     assert EQUIVALENT_SURROUNDINGS_RADIUS_M == 30.0
     assert POINT_SOURCE_DIVERGENCE_DB == 6.0

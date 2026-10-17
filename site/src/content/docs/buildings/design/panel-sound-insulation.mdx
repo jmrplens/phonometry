@@ -948,7 +948,7 @@ from phonometry import vibration
 
 z_plate = vibration.infinite_plate_impedance(bp, mass)          # Z = 8 sqrt(B' m'') [N.s/m]
 print(round(z_plate))                                 # real, frequency independent
-w = vibration.injected_power(force=10.0, mobility=1.0 / z_plate)
+w = vibration.injected_power(force_n=10.0, mobility=1.0 / z_plate)
 print(round(float(w) * 1e3, 3), "mW")                 # W = |F|^2 / (16 sqrt(B' m''))
 ```
 

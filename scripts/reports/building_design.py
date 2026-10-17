@@ -139,10 +139,12 @@ def _facade_prediction_example() -> tuple[object, ReportMetadata, str]:
     tested prediction code (see tests/reference_data/).
     """
     elements = [
-        ph.building.FacadeElement("Masonry wall", area=6.0, r=[41, 46, 52, 58, 64]),
-        ph.building.FacadeElement("Glazing", area=4.5, r=[23, 22, 30, 36, 37]),
-        ph.building.FacadeElement("Roof light", area=0.5, r=[24, 27, 30, 33, 30]),
-        ph.building.FacadeElement("Air inlet", dn_e=[28, 23, 25, 38, 44]),
+        ph.building.FacadeElement(
+            name="Masonry wall", area=6.0, r=[41, 46, 52, 58, 64]
+        ),
+        ph.building.FacadeElement(name="Glazing", area=4.5, r=[23, 22, 30, 36, 37]),
+        ph.building.FacadeElement(name="Roof light", area=0.5, r=[24, 27, 30, 33, 30]),
+        ph.building.FacadeElement(name="Air inlet", dn_e=[28, 23, 25, 38, 44]),
     ]
     result = ph.building.facade_sound_reduction(
         elements,

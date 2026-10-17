@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..metrology.reciprocity_calibration import (
         ReciprocityCalibration,
         ReciprocityUncertaintyBudget,
@@ -288,19 +289,19 @@ _STRINGS: Mapping[str, str] = MappingProxyType(
 )
 
 
-def _t(text: str, language: str = "en", **fmt: Any) -> str:
+def _t(text: str, language: Language = "en", **fmt: Any) -> str:
     """Localise a fixed string; English is returned verbatim."""
     s = _STRINGS.get(text, text) if language == "es" else text
     return s.format(**fmt) if fmt else s
 
 
-def _component_label(name: str, language: str) -> str:
+def _component_label(name: str, language: Language) -> str:
     """The legend name of a component: its short name, or its own name."""
     label = _COMPONENT_LABELS.get(name)
     return name if label is None else _t(label, language)
 
 
-def _frequency_axes(ax: Axes, language: str, ylabel: str, title: str) -> None:
+def _frequency_axes(ax: Axes, language: Language, ylabel: str, title: str) -> None:
     """The common dressing of a frequency plot."""
     from .._i18n import localize_axes
 
@@ -314,7 +315,7 @@ def _frequency_axes(ax: Axes, language: str, ylabel: str, title: str) -> None:
     localize_axes(ax, language)
 
 
-def _band_label(uncertainty: np.ndarray, language: str) -> str:
+def _band_label(uncertainty: np.ndarray, language: Language) -> str:
     """The legend entry of the uncertainty band, with the range of U.
 
     A band of a few hundredths of a decibel is narrower than the curves on an
@@ -338,7 +339,7 @@ def plot_reciprocity_calibration(
     result: ReciprocityCalibration,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The sensitivity level of each microphone of a reciprocity calibration.
@@ -405,7 +406,7 @@ def plot_reciprocity_budget(
     result: ReciprocityUncertaintyBudget,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The components of a reciprocity budget and its expanded uncertainty
@@ -466,7 +467,7 @@ def plot_heat_conduction_correction(
     result: HeatConductionCorrection,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r""":math:`20\lg|\Delta_\mathrm{H}|` against frequency.
@@ -507,7 +508,7 @@ def plot_capillary_tube_impedance(
     result: CapillaryTubeImpedance,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The real and imaginary parts of the input impedance of a capillary tube,
@@ -555,7 +556,7 @@ def plot_coupler_transfer_impedance(
     result: CouplerTransferImpedance,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The heat-conduction and capillary corrections of a coupler, in dB.
@@ -608,7 +609,7 @@ def plot_wave_motion_correction(
     result: WaveMotionCorrection,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The wave-motion correction of the large-volume coupler, with the rows of
@@ -653,7 +654,7 @@ def _margin_bars(
     ax: Axes,
     labels: list[str],
     values: list[float],
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
 ) -> None:
     """Horizontal bars of value re limit, with the limit at 1."""
@@ -689,7 +690,7 @@ def plot_coupler_check(
     result: CouplerCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Each condition of a coupler check as its value re its limit.
@@ -737,7 +738,7 @@ def plot_parameter_uncertainty(
     result: CouplerParameterUncertainty | FreeFieldParameterUncertainty,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     field: str = "pressure",
     **kwargs: Any,
 ) -> Axes:
@@ -789,7 +790,7 @@ def plot_air_attenuation(
     result: ReciprocityAirAttenuation,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The attenuation of sound in air and its three parts, in dB/m.
@@ -853,7 +854,7 @@ def plot_acoustic_centre(
     result: AcousticCenter,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The inverse of the measured pressure against distance, the fitted line
@@ -914,7 +915,7 @@ def plot_free_field_arrangement(
     result: FreeFieldArrangementCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Every condition of a free-field arrangement check: each distance against
@@ -1000,7 +1001,7 @@ def plot_free_field_arrangement(
     return ax
 
 
-def _arrangement_title(result: FreeFieldArrangementCheck, language: str) -> str:
+def _arrangement_title(result: FreeFieldArrangementCheck, language: Language) -> str:
     """The verdict, and on a second line the conditions that fail it."""
     verdict = "as recommended" if result.passes else "not as recommended"
     title = _t(

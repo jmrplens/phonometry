@@ -161,7 +161,7 @@ Improvement for the heavy/soft impact source (ISO 10140-1:2021 H.6.1).
 HeavyImpactImprovementResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -289,7 +289,7 @@ LaboratoryFloorCoveringImprovementResult(
     l_n0: np.ndarray,
     l_n: np.ndarray,
     improvement: np.ndarray,
-    reference_floor: str,
+    reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'],
     delta_lw: int | None,
     ci_delta: int | None,
     reference_rating: ImpactRatingResult | None,
@@ -336,7 +336,7 @@ over the three one-third-octave bands of each octave present.
 LaboratoryFloorCoveringImprovementResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     rating_range: bool = False,
     **kwargs: Any,
 ) -> Axes
@@ -363,9 +363,9 @@ LaboratoryFloorCoveringImprovementResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -415,7 +415,7 @@ LaboratoryLiningImprovementResult(
     r_without: np.ndarray,
     r_with: np.ndarray,
     delta_r: np.ndarray,
-    basic_element: str | None,
+    basic_element: Literal['heavy_wall', 'heavy_floor', 'lightweight_wall'] | None,
     rating: ReductionImprovementRating | None,
     delta_rw_direct: int | None,
     delta_rw_c_direct: int | None,
@@ -457,7 +457,7 @@ whose three bands are present.
 LaboratoryLiningImprovementResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -531,7 +531,7 @@ Whether either condition holds.
 LiningCuringCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

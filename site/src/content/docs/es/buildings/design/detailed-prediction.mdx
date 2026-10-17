@@ -215,7 +215,7 @@ bands = np.array([50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630,
 # arma a partir de sus uniones: su suma de perímetro es 2,659 m (fórmula C.4) y
 # su `reverberation_time` es Ts,situ.
 el = building.in_situ_element(building.HomogeneousElement(
-    "floor", 20.0, 5.0, 4.0, 484.0, 76.8, 0.005, 2.659, 2200.0, 3800.0), bands)
+    label="floor", area=20.0, length1=5.0, length2=4.0, mass_per_area=484.0, critical_frequency=76.8, internal_loss_factor=0.005, perimeter_absorption=2.659, density=2200.0, longitudinal_velocity=3800.0), bands)
 
 # Un R y un Ln de laboratorio medidos para ese mismo forjado, trasladados al
 # edificio.
@@ -313,8 +313,8 @@ a_at_int = building.perimeter_absorption_coefficient(
     critical_frequencies=[76.8, 128.4, 128.4])
 floor_perimeter = 9.0 * (a_at_ext + a_at_int)         # 2,659 m (fórmula C.4)
 
-floor = building.HomogeneousElement("floor", 20.0, 5.0, 4.0, 484.0, 76.8, 0.005,
-                                    floor_perimeter, 2200.0, 3800.0)
+floor = building.HomogeneousElement(label="floor", area=20.0, length1=5.0, length2=4.0, mass_per_area=484.0, critical_frequency=76.8, internal_loss_factor=0.005,
+                                    perimeter_absorption=floor_perimeter, density=2200.0, longitudinal_velocity=3800.0)
 el = building.in_situ_element(floor, bands)
 print(np.round(el.total_loss_factor[[0, 10]], 4))     # [0.0831 0.029 ]  tabla L.3
 print(np.round(el.sound_reduction_index[[0, 10]], 1)) # [31.8 54.9]      tabla L.3
@@ -365,7 +365,7 @@ f0 = 160.0 * np.sqrt(8.0 / 73.5)                      # 52,8 Hz (fórmula C.2)
 delta = building.floating_floor_improvement(bands, resonance_frequency=f0)  # 30 lg(f/f0)
 
 wall = building.in_situ_element(building.HomogeneousElement(
-    "ext1", 11.0, 4.0, 2.75, 219.0, 92.6, 0.0125, 2.375, 600.0, 1900.0), bands)
+    label="ext1", area=11.0, length1=4.0, length2=2.75, mass_per_area=219.0, critical_frequency=92.6, internal_loss_factor=0.0125, perimeter_absorption=2.375, density=600.0, longitudinal_velocity=1900.0), bands)
 
 # Trayectoria D1 (Df: forjado separador -> fachada 1), tabla L.4.
 d1 = building.airborne_flanking_path(
@@ -475,7 +475,7 @@ specs = {
     "int2": (13.75, 5.0, 2.75, 360.0, 128.4, 0.01,
              10.0 * int_top + 2.75 * int_side, 1800.0, 2500.0),
 }
-situ = {name: building.in_situ_element(building.HomogeneousElement(name, *spec), bands)
+situ = {name: building.in_situ_element(building.HomogeneousElement(label=name, *spec), bands)
         for name, spec in specs.items()}
 delta = building.floating_floor_improvement(bands,
                                             resonance_frequency=160.0 * np.sqrt(8.0 / 73.5))
@@ -655,7 +655,7 @@ constructiva nueva.
 | `frequencies` | array | Hz | > 0 | Frecuencias centrales de banda |
 | `fraction` | int | — | `3` (tercios de octava, por defecto) / `1` (octavas) | Fija la banda que lleva la rama $f \approx f_\mathrm{c}$ |
 | `resonant_only` | bool | — | por defecto `False` | Elimina el término de transmisión forzada por debajo de $f_\mathrm{c}$ (Anexo B.1, trayectorias por flancos) |
-| `fluid` | `Fluid` | — | por defecto `EN_12354_AIR` | Los 340 m/s del Anexo A con los 1,29 kg/m³ del Anexo B; pásale un `fluids.air()` calculado para predecir en el aire del edificio |
+| `fluid` | `Fluid` | — | por defecto `EN12354_AIR` | Los 340 m/s del Anexo A con los 1,29 kg/m³ del Anexo B; pásale un `fluids.air()` calculado para predecir en el aire del edificio |
 
 ## Parámetros de `airborne_flanking_path()` / `impact_flanking_path()`
 

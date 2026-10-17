@@ -60,6 +60,7 @@ from ._sound_power_fiche import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..emission._sound_power_reverberation import ReverberationSoundPowerResult
     from .metadata import ReportMetadata
 
@@ -76,7 +77,7 @@ def _is_comparison(result: ReverberationSoundPowerResult) -> bool:
     return getattr(result, "method", "direct") == "comparison"
 
 
-def _basis(result: ReverberationSoundPowerResult, language: str = "en") -> str:
+def _basis(result: ReverberationSoundPowerResult, language: Language = "en") -> str:
     """The standard-basis line naming the reverberation-room method and grade."""
     grade = t("precision method, accuracy grade 1", language)
     if _is_comparison(result):
@@ -95,7 +96,7 @@ def _basis(result: ReverberationSoundPowerResult, language: str = "en") -> str:
 
 
 def _value_table(
-    result: ReverberationSoundPowerResult, *, verbose: bool, language: str = "en"
+    result: ReverberationSoundPowerResult, *, verbose: bool, language: Language = "en"
 ) -> Table:
     """Build the full-width per-band table (nominal frequency, Lp, LW).
 
@@ -161,7 +162,7 @@ def _value_table(
 
 
 def _statement(
-    result: ReverberationSoundPowerResult, language: str = "en"
+    result: ReverberationSoundPowerResult, language: Language = "en"
 ) -> tuple[str, list[str]]:
     """The boxed sound-power result and its extended terms.
 
@@ -185,7 +186,7 @@ def _statement(
 
 
 def _corrections_strip(
-    result: ReverberationSoundPowerResult, language: str = "en"
+    result: ReverberationSoundPowerResult, language: Language = "en"
 ) -> str:
     """The applied-corrections line for the basis strip (Eq. 20 or Eq. 21)."""
     c2 = format_number(float(result.c2), language, decimals=2)
@@ -214,7 +215,7 @@ def _corrections_strip(
     ).format(c=c, c1=c1, c2=c2)
 
 
-def _a_weighting_strip(language: str = "en") -> str:
+def _a_weighting_strip(language: Language = "en") -> str:
     """The A-weighting citation line (ISO 3741 Annex F)."""
     return t(
         "The A-weighted sound power level L<sub>WA</sub> combines the band "
@@ -231,7 +232,7 @@ def render_reverberation_power_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a reverberation-room sound-power determination fiche to ``path``.
 

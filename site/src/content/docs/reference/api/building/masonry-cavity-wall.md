@@ -91,7 +91,7 @@ wall_tie_coupling_loss_factor(
     bending_stiffness2: float,
     *,
     ties_per_area: float,
-    tie: str | float | None = None,
+    tie: Literal['butterfly', 'double_triangle', 'vertical_twist', 'vertical_twist_100mm'] | float | None = None,
 ) -> WallTieCouplingResult
 ```
 
@@ -139,7 +139,9 @@ WALL_TIE_STIFFNESS = {'butterfly': WallTieStiffness(cavity_width_m=0.05, stiffne
 ## wall_tie_stiffness
 
 ```python
-wall_tie_stiffness(tie: str) -> WallTieStiffness
+wall_tie_stiffness(
+    tie: Literal['butterfly', 'double_triangle', 'vertical_twist', 'vertical_twist_100mm'],
+) -> WallTieStiffness
 ```
 
 Look up a wall tie in Hopkins Table A4.
@@ -161,7 +163,10 @@ Look up a wall tie in Hopkins Table A4.
 ## wall_tie_stiffness_per_area
 
 ```python
-wall_tie_stiffness_per_area(ties_per_area: float, tie: str | float) -> float
+wall_tie_stiffness_per_area(
+    ties_per_area: float,
+    tie: Literal['butterfly', 'double_triangle', 'vertical_twist', 'vertical_twist_100mm'] | float,
+) -> float
 ```
 
 Stiffness per unit area of a tie array, $N k / S$ (Hopkins
@@ -225,7 +230,7 @@ Structure-borne coupling of a wall-tie array (Hopkins Eqs. 4.87/4.88).
 WallTieCouplingResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

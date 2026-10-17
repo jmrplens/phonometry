@@ -52,6 +52,7 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    from .._i18n import Language
     from ..filters.compliance import FilterComplianceResult
     from .metadata import ReportMetadata
 
@@ -116,7 +117,7 @@ _REQUIREMENT_CAPTIONS: dict[str, str] = {
 
 
 def _requirement_rows(
-    result: FilterComplianceResult, language: str = "en"
+    result: FilterComplianceResult, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """One row per requirement graded: its class, binding margin and range."""
     from .._i18n import fmt_minus
@@ -156,7 +157,7 @@ def _requirement_rows(
 def _basis(
     metadata: ReportMetadata | None,
     edition: str,
-    language: str = "en",
+    language: Language = "en",
     *,
     requirements: tuple[str, ...] = ("relative_attenuation",),
 ) -> str:
@@ -186,7 +187,7 @@ def _basis(
 
 
 def _metadata_pairs(
-    metadata: ReportMetadata, language: str = "en"
+    metadata: ReportMetadata, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the header grid.
 
@@ -206,7 +207,7 @@ def _metadata_pairs(
     ]
 
 
-def _fraction_label(fraction: int, language: str = "en") -> str:
+def _fraction_label(fraction: int, language: Language = "en") -> str:
     """Human bandwidth-designator label (``1/1-octave``, ``1/3-octave``, ...)."""
     if fraction == 1:
         return t("1/1-octave", language)
@@ -230,7 +231,7 @@ def _band_label(exact_freq: float, fraction: int) -> str:
 
 
 def _metric_rows(
-    result: FilterComplianceResult, language: str = "en"
+    result: FilterComplianceResult, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Per-band rows: nominal mid-band frequency vs achieved class and margin.
 
@@ -255,7 +256,7 @@ def _metric_rows(
     return rows
 
 
-def _statement(result: FilterComplianceResult, language: str = "en") -> str:
+def _statement(result: FilterComplianceResult, language: Language = "en") -> str:
     """The boxed class-compliance statement with the binding margin."""
     if result.overall_class is not None:
         margin = _binding_margin(result, result.overall_class)
@@ -277,7 +278,7 @@ def _statement(result: FilterComplianceResult, language: str = "en") -> str:
 
 
 def _verdict(
-    result: FilterComplianceResult, required_class: int, language: str = "en"
+    result: FilterComplianceResult, required_class: int, language: Language = "en"
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag against a required class.
 
@@ -303,7 +304,7 @@ def render_iec61260_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an IEC 61260-1 filter-class-compliance fiche to a PDF at ``path``.
 

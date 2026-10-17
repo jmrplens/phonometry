@@ -103,7 +103,7 @@ def test_complex_cepstrum_echo_rahmonics_are_exact() -> None:
 
 def test_echo_on_broadband_noise_source() -> None:
     """The spike survives a non-trivial source: x = s + a*s(t-t0), circular."""
-    s = ph.signals.noise_signal(FS, N / FS, color="white", seed=20260721)
+    s = ph.signals.noise_signal(FS, duration_s=N / FS, color="white", seed=20260721)
     x = s + ALPHA * np.roll(s, DELAY)
     res = ph.signals.cepstrum(x, FS, kind="power")
     # ln X = ln S + ln(1 + a e^{-j theta}) exactly (circular shift), so the
@@ -166,7 +166,7 @@ def test_echo_detection_reads_delay_and_reflection_exactly() -> None:
 
 
 def test_echo_detection_on_noise_source() -> None:
-    s = ph.signals.noise_signal(FS, N / FS, color="white", seed=42)
+    s = ph.signals.noise_signal(FS, duration_s=N / FS, color="white", seed=42)
     x = s + 0.25 * np.roll(s, 200)
     res = ph.signals.echo_detection(x, FS, min_quefrency=0.005)
     assert res.delay_samples == 200
@@ -188,7 +188,7 @@ def test_echo_detection_negative_reflection_exact() -> None:
 
 
 def test_echo_detection_negative_reflection_on_noise_source() -> None:
-    s = ph.signals.noise_signal(FS, N / FS, color="white", seed=42)
+    s = ph.signals.noise_signal(FS, duration_s=N / FS, color="white", seed=42)
     x = s - 0.25 * np.roll(s, 200)
     res = ph.signals.echo_detection(x, FS, min_quefrency=0.005)
     assert res.delay_samples == 200
@@ -265,7 +265,7 @@ def test_highpass_lifter_keeps_the_ripple_extrema() -> None:
 
 
 def test_lifter_modes_are_exactly_complementary() -> None:
-    x = ph.signals.noise_signal(FS, 0.5, color="pink", seed=3)
+    x = ph.signals.noise_signal(FS, duration_s=0.5, color="pink", seed=3)
     low = ph.signals.lifter(x, FS, cutoff=0.002, mode="lowpass")
     high = ph.signals.lifter(x, FS, cutoff=0.002, mode="highpass")
     np.testing.assert_allclose(

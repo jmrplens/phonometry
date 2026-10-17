@@ -91,6 +91,8 @@ from .._internal.validation import require_count, require_scalar
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
+
 __all__ = [
     "CARDIOID_RELATIVE_DIRECTIVITY_DB",
     "DEFAULT_STABILITY_MARGIN_DB",
@@ -231,7 +233,7 @@ class FeedbackStabilityResult(RichDisplay):
         return bool(settled(self.loop_gain + self.stability_margin) <= 0.0)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot the gain structure against the oscillation and margin
         lines.

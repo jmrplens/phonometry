@@ -75,6 +75,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
+
 __all__ = [
     "MODE_KINDS",
     "RoomModesResult",
@@ -156,6 +158,7 @@ def room_mode_frequency(
         single = True
     else:
         single = False
+    # The number is a count of array axes, not a quantity.
     if n.ndim != 2 or n.shape[1] != _N_ROOM_AXES:  # noqa: PLR2004
         msg = "'orders' must be a triple (nx, ny, nz) or an (N, 3) array."
         raise ValueError(msg)
@@ -364,7 +367,7 @@ class RoomModesResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | np.ndarray:
         """Plot the mode ladder by kind and the modal density.
 

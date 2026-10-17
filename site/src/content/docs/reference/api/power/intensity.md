@@ -214,7 +214,7 @@ FieldIndicators.plot(
     ax: Axes | None = None,
     *,
     dynamic_capability: float | np.ndarray | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -337,7 +337,7 @@ it is keyword-only.
 IntensityResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -354,7 +354,7 @@ and matplotlib (`pip install phonometry[plot]`); returns the
 IntensityResult.plot_geometry(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -371,7 +371,7 @@ plot_pp_probe_geometry(
     spacing_m: float = 0.012,
     *,
     ax: Axes | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

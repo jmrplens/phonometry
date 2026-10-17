@@ -105,8 +105,10 @@ def _open_end_fields(
                 "bottom": 1.2 * 343.0,
             },
         )
-        tone = fdtd2d.CWSource(0, 0, frequency=frequency)
-        sim.add_source(fdtd2d.PlaneWaveSource("right", tone.value, offset=2))
+        tone = fdtd2d.CWSource(ix=0, iy=0, frequency=frequency)
+        sim.add_source(
+            fdtd2d.PlaneWaveSource(direction="right", waveform=tone.value, offset=2)
+        )
         axis = y0 + bore // 2
         period = round(1.0 / (frequency * sim.dt))
         settle = round(_OPEN_SETTLE_S / sim.dt)

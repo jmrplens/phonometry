@@ -62,6 +62,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import DTypeLike
 
+    from .._i18n import Language
+
 
 __all__ = [
     "InverseFilterResult",
@@ -302,7 +304,7 @@ class InverseFilterResult(OwnsArrays):
         return np.asarray(full[self.delay : self.delay + arr.size])
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot the measured, inverse and equalized magnitudes.
 

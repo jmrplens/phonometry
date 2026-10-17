@@ -41,7 +41,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -63,6 +63,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
+
 __all__ = [
     "FDTD2D",
     "CWSource",
@@ -76,7 +78,12 @@ __all__ = [
 
 Field2D = NDArray[np.float64]
 
-_SIDES = ("left", "right", "top", "bottom")
+#: A side of the rectangular domain, by name.
+Side = Literal["left", "right", "top", "bottom"]
+#: How a side of the acoustic domain is terminated, by name.
+AcousticBoundary = Literal["rigid", "absorbing"]
+
+_SIDES: tuple[Side, ...] = ("left", "right", "top", "bottom")
 #: Plane-wave travel directions accepted by ``FDTD2D.add_plane_wave``.
 _SIDE_TRAVEL = ("down", "up", "left", "right")
 
@@ -123,7 +130,7 @@ def _positive_map(name: str, field: Field2D) -> None:
         raise ValueError(msg)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class GaussianPulse(RichDisplay):
     r"""A soft Gaussian pressure pulse injected at one cell.
 
@@ -164,7 +171,7 @@ class GaussianPulse(RichDisplay):
         return self.amplitude * float(np.exp(-(((t - t0) / self.half_width_s) ** 2)))
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class CWSource(RichDisplay):
     """A continuous sine drive with a smooth cosine-ramped onset.
 
@@ -209,7 +216,7 @@ class CWSource(RichDisplay):
         )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class SignalSource(OwnsArrays):
     """An arbitrary sampled waveform injected at one cell.
 
@@ -268,7 +275,7 @@ class SignalSource(OwnsArrays):
         )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class PlaneWaveSource(RichDisplay):
     """A sustained one-way plane wave injected on a line near one edge.
 
@@ -391,6 +398,7 @@ def _validate_sponge_damping(
     if not np.all(np.isfinite(damping_map)) or np.any(damping_map < 0.0):
         msg = "damping must be non-negative and finite"
         raise ValueError(msg)
+    # The number is a count of array axes, not a quantity.
     if damping_map.ndim == 2 and damping_map.shape != (ny, nx):  # noqa: PLR2004
         msg = (
             f"damping map shape {damping_map.shape} does not match the grid {(ny, nx)}"
@@ -487,6 +495,7 @@ def _grid_shape(shape: object) -> tuple[int, int]:
     msg = f"shape must be a pair of positive integers (ny, nx); got {shape!r}"
     if not isinstance(shape, (tuple, list)):
         raise TypeError(msg)
+    # The length of a fixed-size argument, not a quantity.
     if len(shape) != 2:  # noqa: PLR2004
         raise ValueError(msg)
     try:
@@ -510,6 +519,7 @@ def _resolve_c_map(c: float | Field2D, shape: tuple[int, int] | None) -> Field2D
         c_map = np.full(_grid_shape(shape), float(np.real(c)), dtype=np.float64)
     else:
         c_map = np.asarray(c, dtype=np.float64)
+    # The number is a count of array axes, not a quantity.
     if c_map.ndim != 2:  # noqa: PLR2004
         msg = "c must be a 2D (ny, nx) map"
         raise ValueError(msg)
@@ -535,11 +545,11 @@ def _resolve_rho_map(rho: float | Field2D, ny: int, nx: int) -> Field2D:
 
 
 def _resolve_sponge_sides(
-    sponge_sides: str | Iterable[str] | None,
-) -> tuple[str, ...]:
+    sponge_sides: Side | Iterable[Side] | None,
+) -> tuple[Side, ...]:
     """Normalise the sponge-side spec into a validated tuple of side names."""
     if sponge_sides is None:
-        sides: tuple[str, ...] = _SIDES
+        sides: tuple[Side, ...] = _SIDES
     elif isinstance(sponge_sides, str):
         # A bare string would iterate per character; treat it as one side.
         sides = (sponge_sides,)
@@ -865,11 +875,11 @@ class FDTD2D:
         rho: float | Field2D = 1.2,
         cfl: float = 0.6,
         sponge_width: int = 0,
-        sponge_sides: str | Iterable[str] | None = None,
+        sponge_sides: Side | Iterable[Side] | None = None,
         sponge_reflection: float = 1e-4,
         damping: float | NDArray[np.float64] = 0.0,
         shape: tuple[int, int] | None = None,
-        edge_impedance: Mapping[str, float | NDArray[np.float64]] | None = None,
+        edge_impedance: Mapping[Side, float | NDArray[np.float64]] | None = None,
         obstacle_mask: NDArray[np.bool_] | None = None,
     ) -> None:
         require_scalar(cfl, "cfl")
@@ -976,7 +986,7 @@ class FDTD2D:
 
     def _build_edges(
         self,
-        edge_impedance: Mapping[str, float | NDArray[np.float64]] | None,
+        edge_impedance: Mapping[Side, float | NDArray[np.float64]] | None,
         sponge_width: int,
         sponge_sides: tuple[str, ...],
         ny: int,
@@ -1017,7 +1027,7 @@ class FDTD2D:
 
     def add_plane_wave(
         self,
-        direction: str,
+        direction: Literal["down", "up", "left", "right"],
         *,
         center: float,
         width: float,
@@ -1095,7 +1105,7 @@ class FDTD2D:
         ax: Axes | None = None,
         *,
         probes: ArrayLike | None = None,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Draw the configured domain before running it.
@@ -1411,9 +1421,9 @@ class FDTDResult(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        kind: str = "probes",
+        kind: Literal["probes", "snapshot"] = "probes",
         frame: int = -1,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Plot the probe histories or one recorded field snapshot.
@@ -1446,10 +1456,11 @@ class FDTDResult(OwnsArrays):
 
 
 def _parse_boundaries(
-    boundaries: str | Mapping[str, str | float | NDArray[np.float64]],
-) -> tuple[tuple[str, ...], dict[str, float | NDArray[np.float64]]]:
+    boundaries: AcousticBoundary
+    | Mapping[Side, AcousticBoundary | float | NDArray[np.float64]],
+) -> tuple[tuple[Side, ...], dict[Side, float | NDArray[np.float64]]]:
     """Split the boundary spec into sponge sides and impedance sides."""
-    spec: dict[str, str | float | NDArray[np.float64]]
+    spec: dict[Side, str | float | NDArray[np.float64]]
     if isinstance(boundaries, str):
         spec = dict.fromkeys(_SIDES, boundaries)
     else:
@@ -1458,8 +1469,8 @@ def _parse_boundaries(
             msg = f"unknown boundary sides: {sorted(unknown)}"
             raise ValueError(msg)
         spec = {side: boundaries.get(side, "rigid") for side in _SIDES}
-    absorbing: list[str] = []
-    impedance: dict[str, float | NDArray[np.float64]] = {}
+    absorbing: list[Side] = []
+    impedance: dict[Side, float | NDArray[np.float64]] = {}
     for side in _SIDES:
         value = spec[side]
         if isinstance(value, str):
@@ -1547,7 +1558,8 @@ def fdtd_simulation(
     rho: float | Field2D = 1.2,
     cfl: float = 0.6,
     probes: Sequence[tuple[int, int]] = (),
-    boundaries: str | Mapping[str, str | float | NDArray[np.float64]] = "rigid",
+    boundaries: AcousticBoundary
+    | Mapping[Side, AcousticBoundary | float | NDArray[np.float64]] = "rigid",
     absorbing_layer_cells: int = 20,
     obstacle_mask: NDArray[np.bool_] | None = None,
     damping: float = 0.0,

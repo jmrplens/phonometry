@@ -71,7 +71,7 @@ quantile of `fractile` and the spread is the upper one for `z >= 0`
 ```python
 AgeThresholdResult(
     age: float,
-    sex: str,
+    sex: Literal['male', 'female'],
     fractile: float,
     frequencies: np.ndarray,
     median: np.ndarray,
@@ -104,7 +104,7 @@ All arrays are in dB and aligned with [`AUDIOMETRIC_FREQUENCIES_HZ`](/phonometry
 AgeThresholdResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -130,7 +130,7 @@ EARPHONE_COUPLERS = {'DT 48': 'IEC 60303 acoustic coupler', 'TDH 39': 'IEC 60303
 
 ```python
 earphone_reference_level(
-    earphone: str = 'TDH 39',
+    earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'] = 'TDH 39',
     frequencies: ArrayLike | None = None,
 ) -> np.ndarray
 ```
@@ -179,7 +179,7 @@ FIELDS = ('free', 'diffuse')
 ```python
 hearing_level_to_coupler_spl(
     hearing_level: ArrayLike,
-    earphone: str = 'TDH 39',
+    earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'] = 'TDH 39',
     *,
     frequencies: ArrayLike | None = None,
 ) -> np.ndarray

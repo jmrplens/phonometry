@@ -95,7 +95,7 @@ by position.
 CoherenceResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -121,7 +121,7 @@ FrequencyResponseResult(
     magnitude_db: NDArray[np.float64],
     phase_rad: NDArray[np.float64],
     coherence: NDArray[np.float64],
-    estimator: str,
+    estimator: Literal['H1', 'H2'],
 )
 ```
 
@@ -145,7 +145,7 @@ Piersol).
 FrequencyResponseResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
 ```

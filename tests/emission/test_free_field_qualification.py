@@ -179,7 +179,7 @@ def test_unknown_room_is_refused() -> None:
 def test_qualification_frequencies_of_a23() -> None:
     """One-third octaves below 125 Hz and above 4 kHz, octaves between."""
     np.testing.assert_array_equal(emission.qualification_frequencies(), _GRID)
-    extended = emission.qualification_frequencies(50.0, 20000.0)
+    extended = emission.qualification_frequencies(50.0, high_hz=20000.0)
     np.testing.assert_array_equal(
         extended,
         [50.0, 63.0, 80.0, *_GRID, 12500.0, 16000.0, 20000.0],
@@ -188,7 +188,7 @@ def test_qualification_frequencies_of_a23() -> None:
 
 def test_qualification_frequencies_refuse_an_empty_range() -> None:
     with pytest.raises(ValueError, match="'high_hz'"):
-        emission.qualification_frequencies(1000.0, 500.0)
+        emission.qualification_frequencies(1000.0, high_hz=500.0)
 
 
 # --- Formulae (1) to (4): the closed forms --------------------------------------

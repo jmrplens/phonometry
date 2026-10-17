@@ -100,7 +100,7 @@ $\Delta V = 10 \cdot \log_{10}(V_{\mathrm{ref}}/V_{\mathrm{seg}})$.
 ```python
 engine_installation_correction(
     depression_deg: float,
-    mounting: str = 'wing',
+    mounting: Literal['wing', 'fuselage', 'propeller'] = 'wing',
 ) -> float
 ```
 
@@ -134,7 +134,7 @@ event_level(
     max_levels: NDArray[np.float64] | list[list[float]],
     *,
     reference_speed_m_s: float = 82.31104,
-    mounting: str = 'wing',
+    mounting: Literal['wing', 'fuselage', 'propeller'] = 'wing',
     metric: Literal['exposure', 'maximum'] = 'exposure',
     atmosphere: AerodromeAtmosphere = ...,
     segments: FlightSegmentState = ...,
@@ -225,7 +225,7 @@ Single-event noise level of an aircraft movement at a receiver.
 FlyoverResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -305,7 +305,7 @@ noise_contour(
     x: NDArray[np.float64] | list[float],
     y: NDArray[np.float64] | list[float],
     reference_speed_m_s: float = 82.31104,
-    mounting: str = 'wing',
+    mounting: Literal['wing', 'fuselage', 'propeller'] = 'wing',
     metric: Literal['exposure', 'maximum'] = 'exposure',
     atmosphere: AerodromeAtmosphere = ...,
     segments: FlightSegmentState = ...,
@@ -398,7 +398,7 @@ Single-event noise level over a ground grid (ECAC Doc 29).
 NoiseContourResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -505,7 +505,7 @@ NPD event level over a distance sweep at one power (ECAC Doc 29).
 NPDLevelResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -518,7 +518,7 @@ Plot the interpolated level versus slant distance (log axis).
 start_of_roll_directivity(
     azimuth_deg: float,
     distance_m: float,
-    engine: str = 'jet',
+    engine: Literal['jet', 'turboprop'] = 'jet',
 ) -> float
 ```
 

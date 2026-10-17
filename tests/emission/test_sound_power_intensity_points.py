@@ -30,7 +30,7 @@ import pytest
 import reference_data as ref
 
 from phonometry import emission
-from phonometry.emission.sound_power_intensity_points import (
+from phonometry.emission._sound_power_intensity_points import (
     _TABLE_2_S,
     _TABLE_B2,
     ActionCode,
@@ -2358,7 +2358,7 @@ def test_every_intensity_result_is_captioned_with_its_own_part() -> None:
     was captioned with the pressure methods it exists to outrank.
     """
     from phonometry._plot.common import _sound_power_designation
-    from phonometry.emission.sound_power_intensity import (
+    from phonometry.emission import (
         PrecisionIntensityResult,
         SoundPowerIntensityResult,
     )

@@ -45,8 +45,11 @@ from typing import TYPE_CHECKING, TypeAliasType, get_origin, get_overloads
 
 from api_taxonomy import (
     OBJECT_MODULE_OVERRIDES,
+    PRIVATE_MODULE_TOPICS,
     SECTIONS,
     Section,
+    is_documented_module,
+    is_private_module,
     module_section,
     public_names,
 )
@@ -501,6 +504,15 @@ class ModuleDoc:
     label: str
     intro: str
     members: tuple[MemberDoc, ...]
+    #: The package a private module's names are imported from, which its page
+    #: names before anything else; empty for a public module, whose title is
+    #: already the address to import from.
+    home: str = ""
+    #: The names on a private module's page that another package publishes,
+    #: each with that package, so the opening names them rather than send the
+    #: reader to ``home`` for them (``plot_junction_geometry`` is drawn beside
+    #: the vibration junctions and published by ``phonometry.building``).
+    elsewhere: tuple[tuple[str, str], ...] = ()
 
     @property
     def url(self) -> str:
@@ -582,12 +594,19 @@ def inherited_ivars(obj: type) -> str:
 
 
 def attribute_module(name: str, obj: object) -> str:
-    """Return the full public module that documents public name ``name``."""
+    """Return the full module whose page documents public name ``name``.
+
+    That is the module that defines it, when the reference has a page for that
+    module: a public one, or a private one a section lists because a function
+    of its package names it (``signals._correlation``).
+    """
     override = OBJECT_MODULE_OVERRIDES.get(name)
     if override is not None:
         return override
     module = getattr(obj, "__module__", None)
-    if isinstance(module, str) and _is_public_module(module):
+    if isinstance(module, str) and (
+        _is_public_module(module) or is_documented_module(module)
+    ):
         return module
     if isinstance(module, str):
         msg = (
@@ -1192,7 +1211,11 @@ def _build_page(
     module = importlib.import_module(module_name)
     attribute_docs = _attribute_docstrings(module)
     relative = module_name.removeprefix("phonometry.")
-    basename = relative.rsplit(".", 1)[-1] if not top_level else "phonometry"
+    # A private module keeps the URL and the sidebar label it had while it was
+    # public, so no link to its page breaks.
+    basename = (
+        relative.rsplit(".", 1)[-1].lstrip("_") if not top_level else "phonometry"
+    )
     intro = (
         top_level_intro(names) if top_level else inspect.cleandoc(module.__doc__ or "")
     )
@@ -1257,6 +1280,20 @@ def _build_page(
                 )
             )
     title = "phonometry" if top_level else relative
+    home = ""
+    elsewhere: tuple[tuple[str, str], ...] = ()
+    if is_private_module(module_name):
+        # Its names are published by the domain package, and its title says so
+        # rather than claim a module address nobody can import.
+        home = ".".join(module_name.split(".")[:2])
+        title = (
+            f"{home.removeprefix('phonometry.')}: {PRIVATE_MODULE_TOPICS[module_name]}"
+        )
+        elsewhere = tuple(
+            (member.name, owners[member.name].__name__)
+            for member in members
+            if owners[member.name].__name__ != home
+        )
     return ModuleDoc(
         module=module_name,
         section=section,
@@ -1265,6 +1302,8 @@ def _build_page(
         label=basename,
         intro=intro,
         members=tuple(members),
+        home=home,
+        elsewhere=elsewhere,
     )
 
 
@@ -1424,7 +1463,7 @@ def _page_description(page: ModuleDoc) -> str:
     if not lead:
         if page.module == "phonometry":
             return "Top-level convenience API of the phonometry package."
-        return f"Public API of {page.module}."
+        return f"Public API of {page.home or page.module}."
 
     if len(lead) > _MAX_DESCRIPTION:
         # Cut on a sentence boundary where there is one in range, so the
@@ -1451,6 +1490,8 @@ def render_module_page(
         _frontmatter(page.title, description, page.label),
         "",
     ]
+    if page.home:
+        out.extend([home_sentence(page), ""])
     if page.intro:
         out.extend([render_prose(page.intro, xref, stats), ""])
     out.extend([BANNER, ""])
@@ -1509,6 +1550,47 @@ def render_module_page(
     return re.sub(r"\n{3,}", "\n\n", text).strip("\n") + "\n"
 
 
+def home_sentence(page: ModuleDoc) -> str:
+    """The opening of a private module's page: the package to import from.
+
+    A name on the page that another package publishes is named with that
+    package, so the opening holds for every name on the page.
+
+    :param page: A page whose module is private (``page.home`` is set).
+    :return: The sentence naming the package, with the import it takes, and
+        one more per name another package publishes.
+    """
+    package = page.home.removeprefix("phonometry.")
+    but = "".join(
+        f" but `{name}`" if i == 0 else f" and `{name}`"
+        for i, (name, _) in enumerate(page.elsewhere)
+    )
+    sentence = (
+        f"Every name on this page{but} is published by `{page.home}`: "
+        f"`from phonometry import {package}`, then `{package}.<name>`."
+    )
+    return " ".join(
+        [
+            sentence,
+            *(f"`{name}` is published by `{owner}`." for name, owner in page.elsewhere),
+        ]
+    )
+
+
+def _index_link(page: ModuleDoc) -> str:
+    """The first cell of a page's row on the index: its address, or its title.
+
+    A public module's title is the address a reader imports, so it reads as
+    code. A private module's page is titled by its domain and subject, and the
+    code span is the domain alone.
+    """
+    if not page.home:
+        return f"[`{page.title}`]({page.url})"
+    package = page.home.removeprefix("phonometry.")
+    topic = page.title.removeprefix(f"{package}: ")
+    return f"[`{package}`: {topic}]({page.url})"
+
+
 def render_index(
     pages: list[ModuleDoc],
     xref: dict[str, str],
@@ -1525,8 +1607,8 @@ def render_index(
         "---",
         "",
         (
-            "The complete public API, one page per module. Import the domain "
-            "subpackage and call through it:"
+            "The complete public API, one page per module or subject. Import "
+            "the domain subpackage and call through it:"
         ),
         "",
         BANNER,
@@ -1560,7 +1642,7 @@ def render_index(
             [
                 f"## {section.label_en}",
                 "",
-                "| Module | Summary |",
+                "| Page | Summary |",
                 "| :--- | :--- |",
             ]
         )
@@ -1570,7 +1652,7 @@ def render_index(
             paragraph = page.intro.strip().split("\n\n", 1)[0].replace("\n", " ")
             summary = _first_sentence(paragraph)
             cell = render_cell(summary, xref, stats)
-            out.append(f"| [`{page.title}`]({page.url}) | {cell} |")
+            out.append(f"| {_index_link(page)} | {cell} |")
         out.append("")
     return "\n".join(out).strip("\n") + "\n"
 

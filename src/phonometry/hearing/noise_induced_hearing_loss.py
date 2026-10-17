@@ -46,13 +46,22 @@ if TYPE_CHECKING:
 
     from .._report.metadata import ReportMetadata
 
+__all__ = [
+    "HTLANResult",
+    "NIPTSResult",
+    "NoiseInducedHearingLossWarning",
+    "age_and_noise_threshold",
+    "htlan",
+    "nipts",
+]
+
 
 # ---------------------------------------------------------------------------
 # Normative constants.
 # ---------------------------------------------------------------------------
 
 #: Audiometric frequencies of ISO 1999, in hertz (clause 6.3.1, Table 1).
-NIPTS_FREQUENCIES: np.ndarray = read_only(
+_NIPTS_FREQUENCIES: np.ndarray = read_only(
     np.array([500.0, 1000.0, 2000.0, 3000.0, 4000.0, 6000.0], dtype=np.float64)
 )
 
@@ -92,21 +101,21 @@ _FORMULA_2_MIN_YEARS = 10.0
 #: 10 to 40 years and Formula (3) is "valid for exposure durations between
 #: 1 year and 10 years"; below 1 year its results "represent an extrapolation"
 #: (clause 6.3.1).
-VALIDATED_YEARS: tuple[float, float] = (1.0, 40.0)
+_VALIDATED_YEARS: tuple[float, float] = (1.0, 40.0)
 
 #: Population fractiles the standard considers reliable. In ISO 1999's ``Q``
 #: (the percentage with worse hearing) the "tails of the statistical
 #: distributions for 0 % < Q < 5 % and for 95 % < Q < 100 % are unreliable and
 #: should not be estimated" (clause 6.3.2); in the library's complementary
 #: ``fractile`` that is the closed interval 0.05 to 0.95.
-VALIDATED_FRACTILES: tuple[float, float] = (0.05, 0.95)
+_VALIDATED_FRACTILES: tuple[float, float] = (0.05, 0.95)
 
 #: Highest noise exposure level, in dB, covered by the standard's data: the
 #: Annex D examples span L_EX,8h = 85 dB to 100 dB, and the Scope's NOTE 4
 #: "restrict[s] the validity to the stated ranges of the variables,
 #: percentages, sound exposure levels, and frequency ranges" (use beyond
 #: 200 Pa / 140 dB is explicitly "recognized as extrapolation").
-VALIDATED_L_EX_MAX: float = 100.0
+_VALIDATED_L_EX_MAX: float = 100.0
 
 
 class NoiseInducedHearingLossWarning(PhonometryWarning):
@@ -123,7 +132,7 @@ def _warn_outside_domain(l_ex: float, years: float, fractile: float) -> None:
     the computation available (only non-positive durations and fractiles
     outside (0, 1) are rejected outright).
     """
-    if not VALIDATED_YEARS[0] <= years <= VALIDATED_YEARS[1]:
+    if not _VALIDATED_YEARS[0] <= years <= _VALIDATED_YEARS[1]:
         warnings.warn(
             f"exposure duration {years:g} years is outside the 1-40 year "
             f"range ISO 1999:2013 validates (clause 6.3.1); the result is an "
@@ -131,7 +140,7 @@ def _warn_outside_domain(l_ex: float, years: float, fractile: float) -> None:
             NoiseInducedHearingLossWarning,
             stacklevel=3,
         )
-    if not VALIDATED_FRACTILES[0] <= fractile <= VALIDATED_FRACTILES[1]:
+    if not _VALIDATED_FRACTILES[0] <= fractile <= _VALIDATED_FRACTILES[1]:
         warnings.warn(
             f"fractile {fractile:g} lies in the distribution tails "
             f"(Q < 5 % or Q > 95 %) that ISO 1999:2013 calls unreliable and "
@@ -139,7 +148,7 @@ def _warn_outside_domain(l_ex: float, years: float, fractile: float) -> None:
             NoiseInducedHearingLossWarning,
             stacklevel=3,
         )
-    if l_ex > VALIDATED_L_EX_MAX:
+    if l_ex > _VALIDATED_L_EX_MAX:
         warnings.warn(
             f"L_EX,8h = {l_ex:g} dB exceeds the 100 dB covered by "
             f"ISO 1999:2013 (Annex D; Scope NOTE 4 restricts validity to the "
@@ -154,7 +163,7 @@ def _warn_outside_domain(l_ex: float, years: float, fractile: float) -> None:
 class NIPTSResult(OwnsArrays):
     """Noise-induced permanent threshold shift (ISO 1999:2013, clause 6.3).
 
-    All arrays are in dB and aligned with :data:`NIPTS_FREQUENCIES`.
+    All arrays are in dB and aligned with ``frequencies``.
 
     :ivar l_ex: Noise exposure level normalized to 8 h, ``L_EX,8h``, in dB.
     :ivar years: Exposure duration, in years.
@@ -317,7 +326,7 @@ class NIPTSResult(OwnsArrays):
 class HTLANResult(OwnsArrays):
     r"""Hearing threshold level associated with age and noise (clause 6.1).
 
-    All arrays are in dB and aligned with :data:`NIPTS_FREQUENCIES`.
+    All arrays are in dB and aligned with ``frequencies``.
 
     :ivar age: Listener age, in years.
     :ivar sex: ``"male"`` or ``"female"``.
@@ -473,7 +482,7 @@ def _select(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndarray:
     fr = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     idx = []
     for f in fr:
-        matches = np.isclose(NIPTS_FREQUENCIES, f, rtol=1e-3)
+        matches = np.isclose(_NIPTS_FREQUENCIES, f, rtol=1e-3)
         if not matches.any():
             msg = (
                 f"frequency {f} Hz is not an ISO 1999 audiometric frequency "
@@ -544,9 +553,8 @@ def nipts(
     :raises ValueError: for a non-positive duration, a fractile outside (0, 1),
         or an unknown frequency.
 
-    Outside the standard's validated domain (durations of
-    :data:`VALIDATED_YEARS`, fractiles of :data:`VALIDATED_FRACTILES`,
-    exposure levels up to :data:`VALIDATED_L_EX_MAX`) the computation still
+    Outside the standard's validated domain (durations of 1 to 40 years,
+    fractiles of 0.05 to 0.95, exposure levels up to 100 dB) the computation still
     runs but a :class:`NoiseInducedHearingLossWarning` marks the result as an
     extrapolation, and the ``.report()`` fiche prints the matching caveat.
     """
@@ -570,7 +578,7 @@ def nipts(
         l_ex=float(l_ex),
         years=float(years),
         fractile=float(fractile),
-        frequencies=_select(NIPTS_FREQUENCIES, frequencies),
+        frequencies=_select(_NIPTS_FREQUENCIES, frequencies),
         median=_select(n50, frequencies),
         value=_select(value, frequencies),
         spread_upper=_select(du, frequencies),
@@ -637,7 +645,7 @@ def htlan(
     :class:`NoiseInducedHearingLossWarning` and the ``.report()`` fiche prints
     the extrapolation caveat.
     """
-    freqs = _select(NIPTS_FREQUENCIES, frequencies)
+    freqs = _select(_NIPTS_FREQUENCIES, frequencies)
     htla = age_threshold(age, sex, fractile, frequencies=freqs).threshold
     noise = nipts(l_ex, years, fractile, frequencies=freqs).value
     threshold = age_and_noise_threshold(htla, noise)

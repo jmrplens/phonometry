@@ -56,13 +56,13 @@ from phonometry.fluids import (  # noqa: E402
 )
 from phonometry.materials.absorbers import (  # noqa: E402
     ABSORPTION_BANDS_HZ,
+    ANNEX_A_AIR,  # noqa: E402
     PUBLISHED_ABSORPTION,
     PUBLISHED_ABSORPTION_AREAS,
     PUBLISHED_CARPETS,
     PUBLISHED_POROUS_MATERIALS,
     PUBLISHED_RESISTIVE_SHEETS,
 )
-from phonometry.materials.absorbers.airflow_resistance import ANNEX_A_AIR  # noqa: E402
 from phonometry.materials.absorbers.porous import ABSORBER_AIR  # noqa: E402
 from phonometry.materials.diffusers import (  # noqa: E402
     DIFFUSION_BANDS_HZ,
@@ -80,9 +80,9 @@ from phonometry.noise_control import (  # noqa: E402
     PUBLISHED_DUCT_TRANSMISSION_LOSS,
 )
 from phonometry.room.enclosed_space_absorption import (  # noqa: E402
-    AIR_ATTENUATION,
-    OCTAVE_BANDS,
-    PUBLISHED_AIR_CONDITION,
+    _AIR_ATTENUATION,
+    _OCTAVE_BANDS,
+    _PUBLISHED_AIR_CONDITION,
 )
 from phonometry.simulation.ntff import SIMULATION_AIR  # noqa: E402
 from phonometry.solids import (  # noqa: E402
@@ -559,7 +559,7 @@ AIR_ATTENUATION_COLUMNS = tuple(
         _band_heading(int(band)),
         "Np/m",
     )
-    for band in OCTAVE_BANDS
+    for band in _OCTAVE_BANDS
 )
 
 #: One column per one-third octave band, which is where the decimal
@@ -1370,9 +1370,9 @@ def air_conditions() -> list[dict[str, Any]]:
     :return: One record per condition, in the order the table prints them.
     """
     records = []
-    for key, coefficients in AIR_ATTENUATION.items():
+    for key, coefficients in _AIR_ATTENUATION.items():
         temperature, _, humidity = key.partition("_")
-        recommended = key == PUBLISHED_AIR_CONDITION
+        recommended = key == _PUBLISHED_AIR_CONDITION
         records.append(
             {
                 "key": f"{AIR_ATTENUATION_TABLE}/{key}",
@@ -1388,7 +1388,7 @@ def air_conditions() -> list[dict[str, Any]]:
                         f"{coefficient:.{_AIR_ATTENUATION_FIGURES}g}"
                     )
                     for band, coefficient in zip(
-                        OCTAVE_BANDS, coefficients, strict=True
+                        _OCTAVE_BANDS, coefficients, strict=True
                     )
                 },
             }
@@ -1843,7 +1843,7 @@ def main(argv: list[str] | None = None) -> int:
         "predicted scattering": len(PUBLISHED_PREDICTED_SCATTERING),
         "absorption areas": len(PUBLISHED_ABSORPTION_AREAS),
         "fluids": len(PUBLISHED_FLUIDS) + len(IN_TREE_FLUIDS),
-        "air conditions": len(AIR_ATTENUATION),
+        "air conditions": len(_AIR_ATTENUATION),
     }
     print(f"{OUTPUT.name}: " + ", ".join(f"{n} {k}" for k, n in counts.items()))
     return 0

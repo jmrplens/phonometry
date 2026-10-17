@@ -22,6 +22,36 @@ ANSIS12_2_NC40_SELF = 40.0  # NC-40 curve -> tangency rating (Table 1)
 ANSIS12_2_RC31_63HZ = 51.0  # RC-31 curve, 63 Hz octave-band level (Table D.1)
 ANSIS12_2_RC35_LMF = 35.0  # RC-35 curve, mid-frequency average LMF (clause D.4)
 
+# Table 1, the NC curves to the nearest decibel, typed from the printed page
+# (ANSI/ASA S12.2-2019, PDF page 18, printed page 6): the octave-band centres
+# of its header and one row per designation, NC-15 first, 16 Hz to 8000 Hz.
+ANSIS12_2_NC_TABLE_1_BANDS_HZ = (
+    16.0,
+    31.5,
+    63.0,
+    125.0,
+    250.0,
+    500.0,
+    1000.0,
+    2000.0,
+    4000.0,
+    8000.0,
+)
+ANSIS12_2_NC_TABLE_1 = (
+    (15.0, (78, 61, 47, 36, 28, 22, 18, 14, 12, 11)),
+    (20.0, (79, 63, 50, 40, 33, 26, 22, 20, 17, 16)),
+    (25.0, (80, 65, 54, 44, 37, 31, 27, 24, 22, 22)),
+    (30.0, (81, 68, 57, 48, 41, 35, 32, 29, 28, 27)),
+    (35.0, (82, 71, 60, 52, 45, 40, 36, 34, 33, 32)),
+    (40.0, (84, 74, 64, 56, 50, 44, 41, 39, 38, 37)),
+    (45.0, (85, 76, 67, 60, 54, 49, 46, 44, 43, 42)),
+    (50.0, (87, 79, 71, 64, 58, 54, 51, 49, 48, 47)),
+    (55.0, (89, 82, 74, 67, 62, 58, 56, 54, 53, 52)),
+    (60.0, (90, 85, 77, 71, 66, 63, 60, 59, 58, 57)),
+    (65.0, (90, 88, 80, 75, 71, 68, 65, 64, 63, 62)),
+    (70.0, (90, 90, 84, 79, 75, 72, 71, 70, 68, 68)),
+)
+
 # ---------------------------------------------------------------------------
 # Sound absorption in enclosed spaces - EN 12354-6:2003, Annex E worked
 # example (4,54 x 2,73 x 2,40 = 29,75 m3 room, 1000 Hz octave band). Case 1

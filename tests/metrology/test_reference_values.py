@@ -101,16 +101,16 @@ def test_note_b_of_table_2_is_the_air_to_water_offset() -> None:
         (underwater.UNDERWATER_REFERENCE_PRESSURE_PA, "liquid", "sound_pressure"),
         (underwater.UNDERWATER_REFERENCE_EXPOSURE_PA2_S, "liquid", "sound_exposure"),
         (vibration.ACCELERATION_LEVEL_REFERENCE_M_S2, "solid", "acceleration"),
-        (impulsive_sound.REFERENCE_PRESSURE, "gas", "sound_pressure"),
-        (structure_borne_power.REFERENCE_VELOCITY, "solid", "velocity"),
-        (structure_borne_power.REFERENCE_SOUND_POWER, "gas", "sound_power"),
-        (structure_borne_power.REFERENCE_FORCE, "solid", "force"),
+        (impulsive_sound._REFERENCE_PRESSURE, "gas", "sound_pressure"),
+        (structure_borne_power._REFERENCE_VELOCITY, "solid", "velocity"),
+        (structure_borne_power._REFERENCE_SOUND_POWER, "gas", "sound_power"),
+        (structure_borne_power._REFERENCE_FORCE, "solid", "force"),
     ],
 )
-def test_the_published_constants_are_the_table_values(
+def test_the_constants_that_predate_the_table_are_its_values(
     constant: float, medium: str, key: str
 ) -> None:
-    """The constants that existed before the table now read it."""
+    """The constants that existed before the table, public or private, read it."""
     assert constant == _TABLE[medium][key].value
 
 
@@ -118,4 +118,4 @@ def test_the_structure_borne_references_that_differ_keep_their_value() -> None:
     """ISO/TS 7849 and ISO 9611 count from 50 nm/s, the note b alternative."""
     alternative = _TABLE["solid"]["velocity_alternative"].value
     assert emission.REFERENCE_VELOCITY_M_S == alternative
-    assert structure_borne_power.FREE_VELOCITY_REFERENCE == alternative
+    assert structure_borne_power._FREE_VELOCITY_REFERENCE == alternative

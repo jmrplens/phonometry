@@ -1382,7 +1382,7 @@ in the same order.
   $0{,}9999$.
 - **Library behaviour:** implements the flush-to-end reading with a code note
   in
-  [`roughness_ecma.py`](../src/phonometry/psychoacoustics/quality/roughness_ecma.py).
+  [`_roughness_ecma.py`](../src/phonometry/psychoacoustics/quality/_roughness_ecma.py).
 - **Status:** unreported.
 
 ## ECMA-418-2:2025 (4th edition), clause 9.1.4, Formula (127) (HSA kernel phase)
@@ -1498,7 +1498,7 @@ in the same order.
   20065:2016 and PDF page 14 (printed p. 14) of DIN 45681:2005-03.
 - **Library behaviour:** follows the DIN/$\sqrt{2}$ reading (it matches the
   only executable reference), with the choice recorded in
-  [`tone_audibility.py`](../src/phonometry/psychoacoustics/quality/tone_audibility.py).
+  [`_tone_audibility.py`](../src/phonometry/psychoacoustics/quality/_tone_audibility.py).
 - **Status:** unreported.
 
 ## DIN 45681:2005-03, Anhang I, Tabelle I.6, row "6 FG"
@@ -2761,7 +2761,7 @@ in the same order.
   p. 7) of ISO 9614-1:1993, where the qualifier is present.
 - **Library behaviour:** implements the signed reading throughout, which is the
   ISO text.
-  [`sound_power_intensity_points`](../src/phonometry/emission/sound_power_intensity_points.py)
+  [`sound_power_intensity_points`](../src/phonometry/emission/_sound_power_intensity_points.py)
   sums signed partial powers, flags the bands whose sum is not positive as
   outside the method, and reports $F_3 - F_2$ as the excess the inward flow
   produces; `normal_intensity_from_levels` carries the $(-)$ of the print as a
@@ -2821,7 +2821,7 @@ in the same order.
   9614-1:2010.
 - **Library behaviour:** follows the intended target. $F_4(\alpha)$ and
   $F_4(1-\alpha)$ are computed per A.2.4 in
-  [`partial_power_concentration`](../src/phonometry/emission/sound_power_intensity_points.py).
+  [`partial_power_concentration`](../src/phonometry/emission/_sound_power_intensity_points.py).
   The reference changes no number the library reports, so no other change was
   needed.
 - **Status:** unreported (cross-reference defect, no numerical consequence).
@@ -2852,7 +2852,7 @@ in the same order.
 - **Library behaviour:** reports the interval of Formula (B.3) for every band,
   so the statement clause 10.5 c) asks for can be made about any band that
   needs it. `confidence_interval` on
-  [`DiscretePointIntensityResult`](../src/phonometry/emission/sound_power_intensity_points.py)
+  [`DiscretePointIntensityResult`](../src/phonometry/emission/_sound_power_intensity_points.py)
   carries the pair, and `criterion_2` says which bands the requirement applies
   to. The defect changes no number, only where a reader is sent to find the
   formula.
@@ -2881,7 +2881,7 @@ in the same order.
   pp. 26, 27 and 17) of UNE-EN ISO 9614-1:2010.
 - **Library behaviour:** follows Figure B.1 and clause 8.3.2. `required_actions`
   on
-  [`DiscretePointIntensityResult`](../src/phonometry/emission/sound_power_intensity_points.py)
+  [`DiscretePointIntensityResult`](../src/phonometry/emission/_sound_power_intensity_points.py)
   answers a band that fails criterion 2 with action c above 1 dB and action d
   at 1 dB and below, pinned at the boundary itself by
   `test_action_d_is_the_action_at_exactly_one_decibel` in
@@ -2945,7 +2945,7 @@ in the same order.
 - **Library behaviour:** implements the power reading, and applies the
   substitution whenever the condition holds rather than leaving it to the
   caller, which satisfies both prints. `_a_weighted_factor` in
-  [`sound_power_intensity_points.py`](../src/phonometry/emission/sound_power_intensity_points.py)
+  [`_sound_power_intensity_points.py`](../src/phonometry/emission/_sound_power_intensity_points.py)
   compares the summed A-weighted contribution of the 800 Hz to 5 kHz bands with
   half the total contribution and reads the 200 Hz to 630 Hz row of Table B.2
   when it falls short.
@@ -4004,7 +4004,7 @@ in the same order.
 - **Library behaviour:** implements $0.76 \cdot 10^{-3}$ with a note at the
   formula; the carrier-frequency sweep test would catch a regression to the
   printed value
-  ([`fluctuation_strength.py`](../src/phonometry/psychoacoustics/quality/fluctuation_strength.py)).
+  ([`_fluctuation_strength.py`](../src/phonometry/psychoacoustics/quality/_fluctuation_strength.py)).
 - **Status:** unreported (conference paper rather than a standard).
 
 ## Medwin & Clay, Fundamentals of Acoustical Oceanography (1998), Eq. (3.4.30) (boric-acid coefficient)
@@ -4294,7 +4294,7 @@ in the same order.
   offered that conversion as corroboration. Verified on PDF page 665 (printed
   p. 666) of Long, Architectural Acoustics 2e (2014).
 - **Library behaviour:** `absorption_per_table` in
-  [`crowd_noise.py`](../src/phonometry/room/crowd_noise.py) computes the bound
+  [`_crowd_noise.py`](../src/phonometry/room/_crowd_noise.py) computes the bound
   from Eq. (17.52) rather than hardcoding either constant, so both bounds stay
   mutually consistent; the 6.313 value and the printed 3.16 are pinned by
   regression tests
@@ -4436,7 +4436,7 @@ in the same order.
   loss factor at all. Verified on PDF page 438 (printed p. 418) of Norton &
   Karczub, Fundamentals of Noise and Vibration Analysis for Engineers 2e:2003.
 - **Library behaviour:** `point_connection_coupling_loss_factor` in
-  [`junction_transmission.py`](../src/phonometry/vibration/structural/junction_transmission.py)
+  [`_junction_transmission.py`](../src/phonometry/vibration/structural/_junction_transmission.py)
   implements the squared form, with the printed column pinned by a regression
   test
   ([`tests/vibration/structural/test_junction_transmission.py`](../tests/vibration/structural/test_junction_transmission.py))
@@ -5545,7 +5545,7 @@ in the same order.
   page 30 (printed p. 21) of BS EN ISO 3747:2010.
 - **Library behaviour:** the Annex E uncertainty budget is not modelled; the
   library evaluates Eq. (A.1) as printed
-  ([`excess_sound_pressure_level`](../src/phonometry/emission/sound_power_in_situ.py)),
+  ([`excess_sound_pressure_level`](../src/phonometry/emission/_sound_power_in_situ.py)),
   which the misprint does not touch. No number changes.
 - **Status:** unreported.
 
@@ -5574,7 +5574,7 @@ in the same order.
   1,013 25 × 10⁵ Pa, $\theta_\mathrm{ref}$ = 296 K). Verified on PDF page 46
   (printed p. 37) and PDF page 36 (printed p. 27) of BS EN ISO 3747:2010.
 - **Library behaviour:** implements Annex C as printed:
-  [`static_pressure_from_altitude`](../src/phonometry/emission/sound_power_in_situ.py)
+  [`static_pressure_from_altitude`](../src/phonometry/emission/_sound_power_in_situ.py)
   evaluates Eq. (C.2) and the result's `c2` the correction, so a site at
   500 m gets the 0,26 dB the annex gives. The Annex E budget is not
   modelled. Pinned by `test_static_pressure_from_altitude_eq_c2` in
@@ -5603,7 +5603,7 @@ in the same order.
   excess factor at all, so the slip is not inherited from the family.
 - **Library behaviour:** the Annex E uncertainty budget is not modelled, and
   the excess itself is evaluated from Eq. (A.1) by
-  [`excess_sound_pressure_level`](../src/phonometry/emission/sound_power_in_situ.py).
+  [`excess_sound_pressure_level`](../src/phonometry/emission/_sound_power_in_situ.py).
   No number changes.
 - **Status:** unreported.
 
@@ -5722,7 +5722,7 @@ in the same order.
   Table 5 on PDF page 22 (printed p. 16) of ISO 3743-2:2018.
 - **Library behaviour:** reads the row as the four octaves it spans, 500 Hz to
   4 kHz, each with 1,5 dB
-  ([`sound_power_hard_walled.py`](../src/phonometry/emission/sound_power_hard_walled.py)).
+  ([`_sound_power_hard_walled.py`](../src/phonometry/emission/_sound_power_hard_walled.py)).
   Pinned by `test_table3_sigma_r0_per_band_and_a_weighted` in
   [`tests/emission/test_sound_power_hard_walled.py`](../tests/emission/test_sound_power_hard_walled.py)
   and by the conformance check "ISO 3743-1:2010 Table 3".
@@ -5756,7 +5756,7 @@ in the same order.
   and PDF page 31 (printed p. 22) of BS EN ISO 3743-1:2010.
 - **Library behaviour:** implements Annex A as printed: a site at 500 m and
   23 °C gets $C_2$ = 0,26 dB in `c2` and in `sound_power_level_ref`
-  ([`sound_power_hard_walled.py`](../src/phonometry/emission/sound_power_hard_walled.py)).
+  ([`_sound_power_hard_walled.py`](../src/phonometry/emission/_sound_power_hard_walled.py)).
   The Annex C budget is not modelled. Pinned by
   `test_annex_a_c2_at_500_m_is_0_26_db` in
   [`tests/emission/test_sound_power_hard_walled.py`](../tests/emission/test_sound_power_hard_walled.py)
@@ -5807,7 +5807,7 @@ in the same order.
   p. 36) of ISO 3743-2:2018.
 - **Library behaviour:** implements Annex E as printed, with the same
   $C_2$ as Part 1
-  ([`sound_power_special_room.py`](../src/phonometry/emission/sound_power_special_room.py)).
+  ([`_sound_power_special_room.py`](../src/phonometry/emission/_sound_power_special_room.py)).
   The Annex D budget is not modelled. Pinned by
   `test_annex_e_c2_matches_part_1` in
   [`tests/emission/test_sound_power_special_room.py`](../tests/emission/test_sound_power_special_room.py)
@@ -5834,7 +5834,7 @@ in the same order.
   (printed p. 15) of ISO 3743-2:2018, against Equation (24) on PDF page 27
   (printed p. 18) of BS EN ISO 3743-1:2010.
 - **Library behaviour:**
-  [`reproducibility_from_round_robin`](../src/phonometry/emission/sound_power_hard_walled.py)
+  [`reproducibility_from_round_robin`](../src/phonometry/emission/_sound_power_hard_walled.py)
   evaluates the difference for both parts, and warns when
   $\sigma_\mathrm{omc}$ exceeds $\sigma_\mathrm{tot}/\sqrt{2}$ as both parts
   ask. Pinned by `test_round_robin_reproducibility_is_the_quadrature_difference`
@@ -5982,7 +5982,7 @@ in the same order.
 - **Library behaviour:** `reverberation_parameter` and
   `check_special_room_reverberation` evaluate Formula (1) for every volume,
   70 m³ included, and take nothing from the figure
-  ([`sound_power_special_room.py`](../src/phonometry/emission/sound_power_special_room.py)).
+  ([`_sound_power_special_room.py`](../src/phonometry/emission/_sound_power_special_room.py)).
   The difference at 100 Hz is a quarter of the ±10 % tolerance of 6.3.
   Pinned by `test_formula1_gives_the_1_06_of_formula_b2_for_70_m3` in
   [`tests/emission/test_sound_power_special_room.py`](../tests/emission/test_sound_power_special_room.py)
@@ -6014,7 +6014,7 @@ in the same order.
   upper edge of the 6,3 kHz band, so 8 kHz and 10 kHz take 0,8 and 1,2 and
   6,3 kHz keeps 0,9 and 1,1, and `SpecialRoomReverberationCheck.plot` draws
   the curves that way
-  ([`sound_power_special_room.py`](../src/phonometry/emission/sound_power_special_room.py)).
+  ([`_sound_power_special_room.py`](../src/phonometry/emission/_sound_power_special_room.py)).
   Pinned by `test_bands_above_6_3_khz_take_the_wider_tolerance` in
   [`tests/emission/test_sound_power_special_room.py`](../tests/emission/test_sound_power_special_room.py)
   and by the conformance check "ISO 3743-2:2018 6.3".
@@ -6056,7 +6056,7 @@ in the same order.
   printed 0,73 s in the $L_W$ of Formula (9). A value given in
   `nominal_reverberation_time_s` is checked as given, and the printed 0,73 s
   fails at 250 Hz
-  ([`sound_power_special_room.py`](../src/phonometry/emission/sound_power_special_room.py)).
+  ([`_sound_power_special_room.py`](../src/phonometry/emission/_sound_power_special_room.py)).
   Pinned by `test_the_b5_example_centres_the_room_within_its_curves` and
   `test_the_printed_1_09_of_b5_is_the_narrow_midpoint_and_fails_250_hz` in
   [`tests/emission/test_sound_power_special_room.py`](../tests/emission/test_sound_power_special_room.py)
@@ -6082,7 +6082,7 @@ in the same order.
   (printed p. 36) of the same document.
 - **Library behaviour:** Formula (F.1) forms `sound_power_level_a` from the
   octave bands of both methods, as Annex E is written for both
-  ([`sound_power_special_room.py`](../src/phonometry/emission/sound_power_special_room.py)).
+  ([`_sound_power_special_room.py`](../src/phonometry/emission/_sound_power_special_room.py)).
   Pinned by `test_comparison_a_weighted_total_is_annex_f` and
   `test_a_weighted_level_by_formula9_directly` in
   [`tests/emission/test_sound_power_special_room.py`](../tests/emission/test_sound_power_special_room.py).
@@ -6112,7 +6112,7 @@ in the same order.
   p. 28) and of Table A.6 on PDF page 40 (printed p. 30).
 - **Library behaviour:** reads $-1{,}24 \times 10^{-5}$, the value the
   neighbours bracket, in `_TABLE_A5` of
-  [`sound_power_in_duct.py`](../src/phonometry/emission/sound_power_in_duct.py).
+  [`_sound_power_in_duct.py`](../src/phonometry/emission/_sound_power_in_duct.py).
   The table's comment and
   `test_table_a5_5000_hz_reads_the_missing_digit_as_one` in
   [`tests/emission/test_sound_power_in_duct.py`](../tests/emission/test_sound_power_in_duct.py)
@@ -6138,7 +6138,7 @@ in the same order.
   ISO 5136:2003, against Equation (3) on PDF page 16 (printed p. 6) and
   Equation (7) on PDF page 28 (printed p. 18).
 - **Library behaviour:** evaluates Equation (7);
-  [`flow_modal_correction`](../src/phonometry/emission/sound_power_in_duct.py)
+  [`flow_modal_correction`](../src/phonometry/emission/_sound_power_in_duct.py)
   cites it. No number changes.
 - **Status:** unreported (cross-reference defect, no numerical consequence).
 
@@ -6217,7 +6217,7 @@ in the same order.
 - **Evidence:** PDF page 36 (printed p. 26) of ISO 5136:2003, against the
   header row of Table A.1 on PDF page 35 (printed p. 25).
 - **Library behaviour:** the column is read as $a_9$. `_TABLE_A2` in
-  [`sound_power_in_duct.py`](../src/phonometry/emission/sound_power_in_duct.py)
+  [`_sound_power_in_duct.py`](../src/phonometry/emission/_sound_power_in_duct.py)
   carries the 20 000 Hz row as the ten coefficients $a_0$ to $a_9$, and
   `test_table_a2_20_khz_row_reads_the_last_column_as_a9` in
   [`tests/emission/test_sound_power_in_duct.py`](../tests/emission/test_sound_power_in_duct.py)
@@ -6237,7 +6237,7 @@ in the same order.
   10 kHz.
 - **Evidence:** PDF page 40 (printed p. 30) of ISO 5136:2003.
 - **Library behaviour:** $4{,}52 \times 10^{-1}$ in `_TABLE_A6` of
-  [`sound_power_in_duct.py`](../src/phonometry/emission/sound_power_in_duct.py).
+  [`_sound_power_in_duct.py`](../src/phonometry/emission/_sound_power_in_duct.py).
 - **Status:** unreported (typographic, no numerical consequence).
 
 ## ISO 5136:2003, Table I.2 (continued), 20 000 Hz row (the exponents of $a_8$ and $a_9$)
@@ -8346,7 +8346,7 @@ in the same order.
 - **Consequence for the standard's own tables:** none; the standard prints no
   worked layout.
 - **Library behaviour:**
-  [`minimum_cabin_clearance_m`](../src/phonometry/noise_control/cabin_insulation.py)
+  [`minimum_cabin_clearance_m`](../src/phonometry/noise_control/_cabin_insulation.py)
   returns the flat 2 m from 50 Hz to 80 Hz and the half wavelength above,
   exactly as printed, and a test asserts that the low branch is the smaller
   of the two so that the non-monotonicity cannot be "fixed" silently.
@@ -8372,7 +8372,7 @@ in the same order.
   BS EN ISO 11957:2009.
 - **Consequence for the standard's own tables:** none.
 - **Library behaviour:**
-  [`minimum_cabin_clearance_m`](../src/phonometry/noise_control/cabin_insulation.py)
+  [`minimum_cabin_clearance_m`](../src/phonometry/noise_control/_cabin_insulation.py)
   returns one distance for the walls, the ceiling and the diffusing elements
   alike, which is the reading the words carry, and says so.
 - **Status:** not reported.
@@ -8393,7 +8393,7 @@ in the same order.
   11957:2009.
 - **Consequence for the standard's own tables:** none.
 - **Library behaviour:**
-  [`internal_noise_level`](../src/phonometry/noise_control/cabin_insulation.py)
+  [`internal_noise_level`](../src/phonometry/noise_control/_cabin_insulation.py)
   applies the ISO 3741 correction inside the 6 dB to 10 dB window the same
   sentence sets.
 - **Status:** not reported.
@@ -8414,7 +8414,7 @@ in the same order.
   13 (printed p. 4) of ISO 11957:1996 as published in BS EN ISO 11957:2009.
 - **Consequence for the standard's own tables:** none.
 - **Library behaviour:**
-  [`MIN_SIGNAL_TO_BACKGROUND_DB`](../src/phonometry/noise_control/cabin_insulation.py)
+  [`MIN_SIGNAL_TO_BACKGROUND_DB`](../src/phonometry/noise_control/_cabin_insulation.py)
   and `PREFERRED_SIGNAL_TO_BACKGROUND_DB` carry 6 dB and 12 dB, and the
   warning names the margin that was actually reached.
 - **Status:** not reported.
@@ -8839,7 +8839,7 @@ in the same order.
   reference speeds of 80 and 70 km/h fall inside 73,6 to 106,4, 64,8 to 88,6
   and 66,9 to 81,2 km/h.
 - **Library behaviour:**
-  [`PassByRegression`](../src/phonometry/environment/sources/statistical_pass_by.py)
+  [`PassByRegression`](../src/phonometry/environment/sources/_statistical_pass_by.py)
   reports the spread of $\lg v$ and the 9.3 window in km/h it gives, and the
   conformance suite does not use the printed speed spreads as an oracle.
 - **Status:** unreported.
@@ -10186,7 +10186,7 @@ in the same order.
   Verified on PDF page 8 (printed p. 4) of ISO 4869-3:2007, and on PDF page
   13 (printed p. 7) of ISO 8253-2:2009.
 - **Library behaviour:** follows the text.
-  [`RANDOM_INCIDENCE_VARIATION_LIMITS`](../src/phonometry/hearing/earmuff_insertion_loss.py)
+  [`RANDOM_INCIDENCE_VARIATION_LIMITS`](../src/phonometry/hearing/_earmuff_insertion_loss.py)
   allows 5 dB from an index of 5 dB and 4 dB from 4 dB up to below 5 dB, and
   the conformance check "ISO 4869-3:2007 5.2.2, Table 1" pins the row for
   5 dB. A field that meets 4 dB passes either reading.
@@ -10238,7 +10238,7 @@ in the same order.
 - **Library behaviour:** none needed. The frequency grouping of 12.5.2.6 and
   the 1 min mean of 12.5.2.7 are not implemented; the tonal audibility the
   library computes is that of ISO/PAS 20065:2016
-  ([`tone_audibility.py`](../src/phonometry/psychoacoustics/quality/tone_audibility.py)).
+  ([`_tone_audibility.py`](../src/phonometry/psychoacoustics/quality/_tone_audibility.py)).
 - **Status:** unreported.
 
 ## IEC TS 61400-11-2:2024, 13.6.2.2 against 13.6.3 (a 10 min period of exactly 30 valid blocks)
@@ -11129,7 +11129,7 @@ published sources:
   rather than zero. ISO 3741:2010 clause 9.1.4 and ISO 3744:2010 print the
   same $\theta_1$ = 296 K, so it is the family's rounding and not a misprint
   of one part; the library keeps 296 K in the shared `C2` of
-  [`sound_power_reverberation.py`](../src/phonometry/emission/sound_power_reverberation.py)
+  [`_sound_power_reverberation.py`](../src/phonometry/emission/_sound_power_reverberation.py)
   and pins the residual (conformance check "ISO 3747:2010 Annex C"). Do not
   "correct" it to 296,15 K.
 - **ISO 3747:2010 Eq. (14), the single-event background margin:**
@@ -11143,7 +11143,7 @@ published sources:
   and on the corresponding pages of the two siblings, so it is the family's
   convention and is not registered against one part. The library applies
   Eq. (14) as printed by default and offers `integration_time` on
-  [`sound_energy_in_situ`](../src/phonometry/emission/sound_power_in_situ.py)
+  [`sound_energy_in_situ`](../src/phonometry/emission/_sound_power_in_situ.py)
   to carry the background to the event's interval first.
 
 - **ISO 5136:2003, clause 5.3.4.3, the sign of Equation (8):** the clause
@@ -11163,7 +11163,7 @@ published sources:
   that is kept, and the standard says in the same breath that what is left
   biases $L_W$ high. Read on PDF page 29 (printed p. 19) of ISO 5136:2003.
   Registered here so that nobody "corrects" the sign of Equation (8), which
-  [`flow_modal_correction`](../src/phonometry/emission/sound_power_in_duct.py)
+  [`flow_modal_correction`](../src/phonometry/emission/_sound_power_in_duct.py)
   implements as printed and `test_eq8_omnidirectional_shields` in
   [`tests/emission/test_sound_power_in_duct.py`](../tests/emission/test_sound_power_in_duct.py)
   pins.

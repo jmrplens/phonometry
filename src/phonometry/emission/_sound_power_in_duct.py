@@ -107,7 +107,7 @@ from .._internal.validation import (
     require_same_length,
 )
 from ._shared import _S0, SoundPowerWarning
-from .sound_power_reverberation import _speed_of_sound
+from ._sound_power_reverberation import _speed_of_sound
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes

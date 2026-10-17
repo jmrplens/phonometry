@@ -48,7 +48,7 @@ Equivalent absorption area of the air (Formula 2).
 
 | Name | Description |
 | :--- | :--- |
-| `m` | Power attenuation coefficient of air, in Neper per metre (see `AIR_ATTENUATION`). |
+| `m` | Power attenuation coefficient of air, in Neper per metre (Table 1 prints it for the six conditions `air_condition` names). |
 | `volume` | Volume of the empty enclosed space `V`, m3. |
 | `object_fraction` | Object fraction `psi` (0-1). |
 
@@ -72,7 +72,7 @@ enclosed_space_reverberation(
 Predict the absorption area and reverberation time per octave band.
 
 Chains the total equivalent absorption area (Formula 1, with the air term
-of Formula 2 from `AIR_ATTENUATION` when `air_condition` is given)
+of Formula 2 from Table 1 when `air_condition` is given)
 and the reverberation time (Formula 5).
 
 **Parameters**
@@ -83,8 +83,8 @@ and the reverberation time (Formula 5).
 | `volume` | Volume of the empty enclosed space `V`, m3. |
 | `objects` | Equivalent absorption areas of the objects `Aobj`, m2. |
 | `object_fraction` | Object fraction `psi` (0-1). |
-| `air_condition` | A key of `AIR_ATTENUATION` (e.g. `"20C_50-70"`) to include air absorption, or `None` to neglect it. |
-| `frequencies` | Octave-band centre frequencies, in hertz. The built-in `air_condition` profiles require the standard `OCTAVE_BANDS`. |
+| `air_condition` | One of the six conditions of Table 1 to include air absorption (`"10C_30-50"`, `"10C_50-70"`, `"10C_70-90"`, `"20C_30-50"`, `"20C_50-70"`, `"20C_70-90"`; clause 4.3 recommends `"20C_50-70"` when the room's own conditions are not known), or `None` to neglect it. |
+| `frequencies` | Octave-band centre frequencies, in hertz. The built-in `air_condition` profiles require the standard's seven octave bands, 125 Hz to 8 kHz. |
 | `speed_of_sound` | Speed of sound `c0`, m/s. |
 
 **Returns:** The [`ReverberationResult`](/phonometry/reference/api/rooms/enclosed-space-absorption/#reverberationresult).
@@ -169,7 +169,7 @@ Reverberation time from the equivalent absorption area (Formula 5).
 | `absorption_area` | Total equivalent absorption area `A`, m2. |
 | `volume` | Volume of the empty enclosed space `V`, m3. |
 | `object_fraction` | Object fraction `psi` (0-1). |
-| `speed_of_sound` | Speed of sound `c0`, m/s (default `SPEED_OF_SOUND`, giving the factor `0.16`). |
+| `speed_of_sound` | Speed of sound `c0`, m/s (default 345.6, which gives the factor `0.16`). |
 
 **Returns:** The reverberation time $T = \frac{55.3}{c_0} \frac{V (1 - \psi)}{A}$, s.
 

@@ -19,7 +19,10 @@ import pytest
 from scipy import special
 
 from phonometry import electroacoustics
-from phonometry.electroacoustics.piston import J1_FIRST_ZERO
+
+#: First zero of the Bessel function J1, where the first directivity null of
+#: the baffled piston sits (``ka sin theta``, Beranek & Mellow).
+J1_FIRST_ZERO = float(special.jn_zeros(1, 1)[0])
 
 
 def test_resistance_reactance_closed_form() -> None:

@@ -46,6 +46,11 @@ if TYPE_CHECKING:
 
     from .._report.metadata import ReportMetadata
 
+__all__ = [
+    "OpenPlanResult",
+    "open_plan_metrics",
+]
+
 #: Reference distance for the logarithmic distance axis of D2,S
 #: (ISO 3382-3:2012, 6.2, Equation (5)): r0 = 1 m.
 _R0 = 1.0

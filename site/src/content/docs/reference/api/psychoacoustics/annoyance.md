@@ -39,10 +39,11 @@ open SQAT reference implementation.
 directly. [`psychoacoustic_annoyance_from_signal`](/phonometry/reference/api/psychoacoustics/annoyance/#psychoacoustic_annoyance_from_signal) is a convenience that
 derives them from a calibrated pressure signal using the library's existing
 models -- N5/S from ISO 532-1 Zwicker loudness and DIN 45692 sharpness, R from
-ECMA-418-2 roughness and F from [`fluctuation_strength`](/phonometry/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength). That composite mixes model families (Zwicker N5/S,
-Sottek R, Osses F); the original PA model was calibrated with Zwicker-family
-sensations, so the signal convenience is an engineering estimate, while
-[`psychoacoustic_annoyance`](/phonometry/reference/api/psychoacoustics/annoyance/#psychoacoustic_annoyance) is the exact model.
+ECMA-418-2 roughness and F from
+[`fluctuation_strength`](/phonometry/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength). That composite
+mixes model families (Zwicker N5/S, Sottek R, Osses F); the original PA model
+was calibrated with Zwicker-family sensations, so the signal convenience is an
+engineering estimate, while [`psychoacoustic_annoyance`](/phonometry/reference/api/psychoacoustics/annoyance/#psychoacoustic_annoyance) is the exact model.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 

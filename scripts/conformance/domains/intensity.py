@@ -36,7 +36,7 @@ from ..registry import (
 from .levels import _FS
 
 if TYPE_CHECKING:
-    from phonometry.emission.sound_power_intensity_points import (
+    from phonometry.emission._sound_power_intensity_points import (
         BandType,
         DeterminationGrade,
     )
@@ -234,7 +234,7 @@ def _reverb_bracket(
     """Independent re-implementation of the ISO 3741 Eq. (20) bracket.
 
     The two constants below are deliberately different and mirror the library
-    (:func:`phonometry.emission.sound_power_reverberation._speed_of_sound` and its C1/C2
+    (:func:`phonometry.emission._sound_power_reverberation._speed_of_sound` and its C1/C2
     terms): the speed of sound uses the rounded 273 of ISO 3741 clause 9.1.4
     (``c = 20,05*sqrt(273 + theta)``), while the C1/C2 barometric corrections
     use the exact absolute-zero offset 273.15 in their temperature ratios.

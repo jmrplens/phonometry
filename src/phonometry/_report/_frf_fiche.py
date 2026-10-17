@@ -48,7 +48,7 @@ if TYPE_CHECKING:
 
     import numpy as np
 
-    from ..vibration.structural.impact_mobility import ImpactMobilityResult
+    from ..vibration.structural._impact_mobility import ImpactMobilityResult
     from ..vibration.structural.mechanical_mobility import MobilityResult
     from ..vibration.structural.transfer_stiffness import TransferStiffnessResult
     from .metadata import ReportMetadata

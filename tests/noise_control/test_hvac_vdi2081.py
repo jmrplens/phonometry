@@ -108,7 +108,7 @@ def test_the_strouhal_number_carries_no_diameter() -> None:
     circumference, so the printed 0,6 m of Table 1 is a nomogram result rather
     than an input to the spectrum.
     """
-    strouhal = hvac.OCTAVE_BANDS * 60.0 / (math.pi * FAN_SPEED_RPM)
+    strouhal = hvac._OCTAVE_BANDS * 60.0 / (math.pi * FAN_SPEED_RPM)
     assert strouhal == pytest.approx(PRINTED_STROUHAL, rel=5e-4)
 
 
@@ -188,7 +188,7 @@ def test_the_blade_allowance_lands_in_the_octave_that_holds_it() -> None:
     )
     passing = FAN_SPEED_RPM * 12.0 / 60.0  # 250 Hz
     difference = bladed.values - plain.values
-    holds = np.abs(np.log2(hvac.OCTAVE_BANDS / passing)) < 0.5
+    holds = np.abs(np.log2(hvac._OCTAVE_BANDS / passing)) < 0.5
     assert difference[holds] == pytest.approx(4.0, abs=1e-9)
     assert difference[~holds] == pytest.approx(0.0, abs=1e-9)
 
@@ -310,7 +310,7 @@ def test_the_straight_runs_reproduce_table_5() -> None:
     """
     width, height, length = RECTANGULAR_RUN
     rect = hvac.unlined_rectangular_duct_attenuation(
-        hvac.OCTAVE_BANDS, width, height, length, model="vdi2081"
+        hvac._OCTAVE_BANDS, width, height, length, model="vdi2081"
     )
     assert rect.values == pytest.approx(PRINTED_RECTANGULAR_DB, abs=1e-9)
 
@@ -319,7 +319,7 @@ def test_the_straight_runs_reproduce_table_5() -> None:
         (2.000, PRINTED_ROUND_2M_DB),
     ):
         round_duct = hvac.unlined_circular_duct_attenuation(
-            hvac.OCTAVE_BANDS, run_length, diameter_m=0.160, model="vdi2081"
+            hvac._OCTAVE_BANDS, run_length, diameter_m=0.160, model="vdi2081"
         )
         assert round_duct.values == pytest.approx(printed, abs=1e-9)
 
@@ -336,7 +336,7 @@ def test_the_bend_shifts_table_7_onto_its_own_limit_frequency() -> None:
     assert limit == pytest.approx(PRINTED_LIMIT_FREQUENCY_HZ, abs=0.5)
 
     bend = hvac.elbow_insertion_loss(
-        hvac.OCTAVE_BANDS,
+        hvac._OCTAVE_BANDS,
         BEND_DIAMETER_M,
         bend_type="round",
         speed_of_sound=EXAMPLE_SPEED_OF_SOUND,
@@ -353,14 +353,14 @@ def test_a_wider_bend_moves_the_same_row_further_down() -> None:
     three octaves higher and takes the row three octaves up with it.
     """
     tabulated = hvac.elbow_insertion_loss(
-        hvac.OCTAVE_BANDS, 1.250, speed_of_sound=340.0, model="vdi2081"
+        hvac._OCTAVE_BANDS, 1.250, speed_of_sound=340.0, model="vdi2081"
     )
     # c / (2 a) = 136 Hz, inside the 125 Hz octave, so nothing moves: the row's
     # 63 Hz, 125 Hz and 250 Hz columns arrive where they are printed.
     assert tabulated.values[:3] == pytest.approx((3.0, 7.0, 6.0), abs=1e-9)
 
     narrow = hvac.elbow_insertion_loss(
-        hvac.OCTAVE_BANDS, 1.250 / 8.0, speed_of_sound=340.0, model="vdi2081"
+        hvac._OCTAVE_BANDS, 1.250 / 8.0, speed_of_sound=340.0, model="vdi2081"
     )
     assert narrow.values[3:6] == pytest.approx((3.0, 7.0, 6.0), abs=1e-9)
     assert narrow.values[:3] == pytest.approx((0.0, 0.0, 0.0), abs=1e-9)
@@ -396,7 +396,7 @@ def test_the_vdi_duct_models_refuse_what_they_cannot_answer() -> None:
 
     with pytest.raises(ValueError, match=r"'wrapped' has no meaning"):
         hvac.unlined_rectangular_duct_attenuation(
-            hvac.OCTAVE_BANDS, 0.5, 0.4, 1.0, wrapped=True, model="vdi2081"
+            hvac._OCTAVE_BANDS, 0.5, 0.4, 1.0, wrapped=True, model="vdi2081"
         )
 
     with pytest.raises(ValueError, match=r"outside VDI 2081 Table 5"):
@@ -406,7 +406,7 @@ def test_the_vdi_duct_models_refuse_what_they_cannot_answer() -> None:
 
     with pytest.raises(ValueError, match=r"prints no row for a bend lined on one"):
         hvac.elbow_insertion_loss(
-            hvac.OCTAVE_BANDS,
+            hvac._OCTAVE_BANDS,
             0.5,
             vanes=True,
             lined=True,
@@ -427,9 +427,9 @@ def test_lining_one_side_of_a_corner_is_its_own_row() -> None:
         "speed_of_sound": 340.0,
         "model": "vdi2081",
     }
-    both = hvac.elbow_insertion_loss(hvac.OCTAVE_BANDS, 1.250, **common)  # type: ignore[arg-type]
+    both = hvac.elbow_insertion_loss(hvac._OCTAVE_BANDS, 1.250, **common)  # type: ignore[arg-type]
     one = hvac.elbow_insertion_loss(
-        hvac.OCTAVE_BANDS,
+        hvac._OCTAVE_BANDS,
         1.250,
         lined_side="one",
         **common,  # type: ignore[arg-type]
@@ -579,12 +579,12 @@ def test_the_straight_run_model_is_already_the_german_one() -> None:
     relative shape is a fit, and the guideline prints the two separately.
     """
     spectrum = hvac.flow_noise_straight_duct(
-        hvac.OCTAVE_BANDS, STRAIGHT_VELOCITY, STRAIGHT_AREA_M2
+        hvac._OCTAVE_BANDS, STRAIGHT_VELOCITY, STRAIGHT_AREA_M2
     )
     overall = (
         7.0 + 50.0 * math.log10(STRAIGHT_VELOCITY) + 10.0 * math.log10(STRAIGHT_AREA_M2)
     )
-    shape = -2.0 - 26.0 * np.log10(1.14 + 0.02 * hvac.OCTAVE_BANDS / STRAIGHT_VELOCITY)
+    shape = -2.0 - 26.0 * np.log10(1.14 + 0.02 * hvac._OCTAVE_BANDS / STRAIGHT_VELOCITY)
     assert spectrum.values == pytest.approx(overall + shape, abs=1e-9)
 
 
@@ -596,7 +596,7 @@ def test_the_junction_flow_noise_reproduces_element_3() -> None:
     it off the element's own 4200 m3/h would put the ratio at one and lose five
     decibels at 63 Hz.
     """
-    strouhal = hvac.OCTAVE_BANDS * JUNCTION_BRANCH_DIAMETER / JUNCTION_BRANCH_VELOCITY
+    strouhal = hvac._OCTAVE_BANDS * JUNCTION_BRANCH_DIAMETER / JUNCTION_BRANCH_VELOCITY
     assert strouhal == pytest.approx(PRINTED_JUNCTION_STROUHAL, rel=5e-3)
 
     lg_st = np.log10(strouhal)
@@ -608,7 +608,7 @@ def test_the_junction_flow_noise_reproduces_element_3() -> None:
     assert correction == pytest.approx(PRINTED_JUNCTION_K_DB, abs=0.05)
 
     noise = hvac.flow_noise_bend(
-        hvac.OCTAVE_BANDS,
+        hvac._OCTAVE_BANDS,
         JUNCTION_BRANCH_VELOCITY,
         0.30,
         0.6,
@@ -628,7 +628,7 @@ def test_a_bend_is_the_same_law_with_one_velocity() -> None:
     nought: a sharp-cornered junction earns over 6 dB there.
     """
     bend = hvac.flow_noise_bend(
-        hvac.OCTAVE_BANDS,
+        hvac._OCTAVE_BANDS,
         BEND_VELOCITY,
         BEND_AREA_M2,
         0.16,
@@ -638,7 +638,7 @@ def test_a_bend_is_the_same_law_with_one_velocity() -> None:
     assert bend.values == pytest.approx(PRINTED_BEND_NOISE_DB, abs=0.05)
 
     sharp = hvac.flow_noise_bend(
-        hvac.OCTAVE_BANDS,
+        hvac._OCTAVE_BANDS,
         BEND_VELOCITY,
         BEND_AREA_M2,
         0.16,
@@ -654,7 +654,7 @@ def test_a_bend_is_the_same_law_with_one_velocity() -> None:
     # A junction rounded to 0,15 of its branch diameter is the crossing point,
     # so it lands back on the uncorrected law.
     crossing = hvac.flow_noise_bend(
-        hvac.OCTAVE_BANDS,
+        hvac._OCTAVE_BANDS,
         BEND_VELOCITY,
         BEND_AREA_M2,
         0.16,
@@ -673,14 +673,14 @@ def test_below_a_strouhal_number_of_one_the_fit_does_not_apply() -> None:
     there.
     """
     slow = hvac.flow_noise_bend(
-        hvac.OCTAVE_BANDS,
+        hvac._OCTAVE_BANDS,
         20.0,
         0.05,
         0.2,
         model="vdi2081",
         branch_diameter_m=0.05,
     )
-    below = hvac.OCTAVE_BANDS * 0.05 / 20.0 <= 1.0
+    below = hvac._OCTAVE_BANDS * 0.05 / 20.0 <= 1.0
     assert np.all(np.isneginf(slow.values[below]))
     assert np.all(np.isfinite(slow.values[~below]))
 
@@ -688,7 +688,7 @@ def test_below_a_strouhal_number_of_one_the_fit_does_not_apply() -> None:
 def test_the_vdi_flow_noise_asks_for_the_branch_it_is_written_on() -> None:
     """Equation (18) is written on the branch diameter, which Bies does not take."""
     with pytest.raises(ValueError, match=r"model='vdi2081' needs 'branch_diameter_m'"):
-        hvac.flow_noise_bend(hvac.OCTAVE_BANDS, 5.0, 0.2, 0.4, model="vdi2081")
+        hvac.flow_noise_bend(hvac._OCTAVE_BANDS, 5.0, 0.2, 0.4, model="vdi2081")
 
 
 # ---------------------------------------------------------------------------
@@ -725,7 +725,7 @@ def test_the_silencer_self_noise_reproduces_element_2() -> None:
     assert weighted == pytest.approx(PRINTED_SILENCER_LWA_DB, abs=0.05)
 
     noise = hvac.silencer_self_noise(
-        hvac.OCTAVE_BANDS,
+        hvac._OCTAVE_BANDS,
         SILENCER_GAP_VELOCITY,
         5,
         0.6,
@@ -749,12 +749,12 @@ def test_the_example_computes_on_twice_the_gap_not_on_the_diameter_it_prints() -
     """
     printed = np.array(PRINTED_SILENCER_STROUHAL)
     from_printed_diameter = (
-        hvac.OCTAVE_BANDS
+        hvac._OCTAVE_BANDS
         * PRINTED_SILENCER_HYDRAULIC_DIAMETER_M
         / SILENCER_GAP_VELOCITY
     )
     from_twice_the_gap = (
-        hvac.OCTAVE_BANDS * 2.0 * SILENCER_GAP_M / SILENCER_GAP_VELOCITY
+        hvac._OCTAVE_BANDS * 2.0 * SILENCER_GAP_M / SILENCER_GAP_VELOCITY
     )
     # The row is printed to one decimal, so the test is whether each value
     # rounds onto its cell, which is the only comparison the print supports.
@@ -770,7 +770,7 @@ def test_the_nozzle_reflection_reproduces_element_18() -> None:
     15,8 dB at 63 Hz into the 15,0 it carries forward.
     """
     uncapped = hvac.end_reflection_loss(
-        hvac.OCTAVE_BANDS,
+        hvac._OCTAVE_BANDS,
         NOZZLE_DIAMETER_M,
         termination="wall",
         method="vdi2081",
@@ -780,7 +780,7 @@ def test_the_nozzle_reflection_reproduces_element_18() -> None:
     assert uncapped.values == pytest.approx(PRINTED_NOZZLE_DB, abs=0.05)
 
     capped = hvac.end_reflection_loss(
-        hvac.OCTAVE_BANDS,
+        hvac._OCTAVE_BANDS,
         NOZZLE_DIAMETER_M,
         termination="wall",
         method="vdi2081",
@@ -822,7 +822,7 @@ def test_the_vdi_silencer_and_nozzle_refuse_what_they_cannot_answer() -> None:
 
     with pytest.raises(ValueError, match=r"'termination' must be one of"):
         hvac.end_reflection_loss(
-            hvac.OCTAVE_BANDS, 0.2, termination="duct", method="vdi2081"
+            hvac._OCTAVE_BANDS, 0.2, termination="duct", method="vdi2081"
         )
 
 
@@ -846,7 +846,7 @@ SILENCER_ATTENUATION_DB = (6.0, 17.0, 42.0, 41.0, 47.0, 33.0, 20.0, 18.0)
 
 def _energy_sum(*spectra: object) -> np.ndarray:
     """Add sound power levels band by band."""
-    total = np.zeros(len(hvac.OCTAVE_BANDS))
+    total = np.zeros(len(hvac._OCTAVE_BANDS))
     for spectrum in spectra:
         total += 10.0 ** (np.asarray(spectrum, dtype=float) / 10.0)
     return 10.0 * np.log10(total)
@@ -900,7 +900,7 @@ def test_the_chain_carries_the_example_from_the_fan_to_the_second_junction() -> 
     running = fan + (PRINTED_OVERALL_DB - total)
 
     silencer_noise = hvac.silencer_self_noise(
-        hvac.OCTAVE_BANDS,
+        hvac._OCTAVE_BANDS,
         SILENCER_GAP_VELOCITY,
         5,
         0.6,
@@ -916,7 +916,7 @@ def test_the_chain_carries_the_example_from_the_fan_to_the_second_junction() -> 
         0.30 + 0.36 + 0.42, [0.30, 0.36, 0.42], branch=0, model="vdi2081"
     )
     junction_noise = hvac.flow_noise_bend(
-        hvac.OCTAVE_BANDS,
+        hvac._OCTAVE_BANDS,
         JUNCTION_BRANCH_VELOCITY,
         0.30,
         0.6,
@@ -935,7 +935,7 @@ def test_the_octave_limits_refuse_a_level_that_is_not_one() -> None:
 
 
 def test_a_default_band_axis_is_the_results_own_copy() -> None:
-    """``frequencies=None`` reads :data:`hvac.OCTAVE_BANDS`, which refuses writes.
+    """``frequencies=None`` reads :data:`hvac._OCTAVE_BANDS`, which refuses writes.
 
     The two VDI spectra used to hand that array back as their own
     ``frequencies``, so writing into a result edited the published bands for
@@ -958,5 +958,5 @@ def test_a_default_band_axis_is_the_results_own_copy() -> None:
         ),
     )
     for result in results:
-        assert not np.shares_memory(result.frequencies, hvac.OCTAVE_BANDS)
+        assert not np.shares_memory(result.frequencies, hvac._OCTAVE_BANDS)
         assert not result.frequencies.flags.writeable

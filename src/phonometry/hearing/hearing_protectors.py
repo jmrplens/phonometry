@@ -72,7 +72,13 @@ if TYPE_CHECKING:
 __all__ = [
     "AssumedProtectionResult",
     "HMLRatingResult",
+    "HML_REFERENCE_C_MINUS_A",
+    "HML_REFERENCE_D",
+    "HML_REFERENCE_NOISES",
+    "PINK_NOISE_A_WEIGHTED",
     "PROTECTION_PERFORMANCES",
+    "PROTECTOR_A_WEIGHTING",
+    "PROTECTOR_OCTAVE_BANDS_HZ",
     "ProtectedLevelResult",
     "SNRRatingResult",
     "assumed_protection_value",

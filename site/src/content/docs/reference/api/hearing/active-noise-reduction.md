@@ -16,7 +16,7 @@ subject:
 
 - the **passive** attenuation, the real-ear attenuation at threshold of
   ISO 4869-1 with the circuit off, in octave bands
-  ([`real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/));
+  ([`real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation));
 - the **active insertion loss** (3.4), measured with a microphone in each
   closed ear canal (MIRE, ISO 11904-1) as the difference between the level at
   the ear in the passive and in the active mode, in one-third-octave bands of a
@@ -224,7 +224,7 @@ attenuation from 63 Hz then still places the 100 Hz band, by interpolation.
 
 ## ANR_WITHIN_LABORATORY_UNCERTAINTY
 
-*Constant* (`phonometry.hearing.real_ear_attenuation.ProtectorUncertaintyBudget`).
+*Constant* (`phonometry.hearing.ProtectorUncertaintyBudget`).
 
 ## ANRLinearityResult
 

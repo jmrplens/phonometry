@@ -294,7 +294,7 @@ Todo lo que hay entre el ventilador y la sala quita algo, y casi todo sale
 gratis. Los modelos son los del capítulo 14 de Long con las regresiones de
 Reynolds (1990), y todos devuelven un `HVACSpectrumResult` con `.values`,
 `.plot()` y `.report()`. Todos toman las bandas de análisis como primer
-argumento, y `None` significa las `hvac.OCTAVE_BANDS` por omisión, el conjunto
+argumento, y `None` significa las bandas de octava por omisión, el conjunto
 de 63 Hz a 8 kHz que usan las hojas publicadas; pásale tu propio vector cuando
 la hoja corra sobre otras bandas.
 
@@ -976,7 +976,7 @@ difiere de la Tabla 1 de la ANSI/ASA S12.2-2019 en 1 dB, solo en la banda de
 import matplotlib.pyplot as plt
 
 # Todos los modelos están importados arriba; nc_curve devuelve la curva de 10
-# bandas alineada con OCTAVE_BANDS, que empieza en 16 Hz, así que las ocho
+# bandas alineada con room.NC_OCTAVE_BANDS_HZ, que empieza en 16 Hz, así que las ocho
 # bandas de la hoja son nc_curve(30)[2:].
 impresa = [3, 3, 5, 11, 25, 22, 16, 13]      # fila de 18 x 12 in, 6 ft de Long
 calculada = noise_control.lined_rectangular_duct_attenuation(
@@ -1239,7 +1239,7 @@ cumple y un local que no suelan ser uno de ellos:
   la constante de sala que hay detrás del efecto de sala y del término
   reverberante del plenum.
 - Referencia de la API:
-  [`noise_control.duct_path`](/phonometry/es/reference/api/noise_control/duct-path/),
+  [`noise_control`: duct path](/phonometry/es/reference/api/noise_control/duct-path/),
   [`noise_control.duct_modes`](/phonometry/es/reference/api/noise_control/duct-modes/),
   [`noise_control.hvac`](/phonometry/es/reference/api/noise_control/hvac/).
 

@@ -130,15 +130,15 @@ _CHOSEN_LIMITS = {
     "phonometry.emission.sound_power_plant.PlantRequirement.tolerance": (
         "one row of a generic requirement record"
     ),
-    "phonometry.emission.sound_power_special_room.SpecialRoomReverberationCheck."
+    "phonometry.emission._sound_power_special_room.SpecialRoomReverberationCheck."
     "nominal_reverberation_time_s": (
         "ISO 3743-2 6.2: the room's T_nom, supplied or centred on the measured values"
     ),
-    "phonometry.emission.sound_power_special_room.SpecialRoomSoundPowerResult."
+    "phonometry.emission._sound_power_special_room.SpecialRoomSoundPowerResult."
     "nominal_reverberation_time_s": (
         "ISO 3743-2 6.2: the room's T_nom, supplied or centred on the measured values"
     ),
-    "phonometry.emission.sound_power_intensity.PrecisionCriteria."
+    "phonometry.emission._sound_power_intensity.PrecisionCriteria."
     "repeatability_limit_db": (
         "ISO 9614-3 C.1: the s the caller sets in place of Table 1, which is read "
         "from the frequencies otherwise"
@@ -173,7 +173,7 @@ _CHOSEN_LIMITS = {
     ),
     "phonometry.metrology.sound_calibrator.SoundCalibratorVerification."
     "nominal_frequency_hz": "IEC 60942: the calibrator's nominal frequency, as stated",
-    "phonometry.noise_control.duct_path.DuctPathResult.criterion": (
+    "phonometry.noise_control._duct_path.DuctPathResult.criterion": (
         "the NC or RC family the user designs to, a name and not a value"
     ),
     "phonometry.noise_control.room_to_room.RoomToRoomResult.criterion": (
@@ -188,16 +188,16 @@ _CHOSEN_LIMITS = {
     "phonometry.vibration.immission.train_categories.RailwayChange.guide": (
         "DIN 4150-2: the guide-value row of the area the user assesses"
     ),
-    "phonometry.vibration.structural.impact_mobility.CoherenceCheck.min_coherence": (
+    "phonometry.vibration.structural._impact_mobility.CoherenceCheck.min_coherence": (
         "ISO 7626-5 prints no figure for a high coherence; the default is the user's"
     ),
-    "phonometry.vibration.structural.impact_mobility.CoherenceCheck.min_records": (
+    "phonometry.vibration.structural._impact_mobility.CoherenceCheck.min_records": (
         "ISO 7626-5 asks five to ten impacts; where in that range is the user's"
     ),
-    "phonometry.vibration.structural.impact_mobility.DoubleHitCheck.threshold_ratio": (
+    "phonometry.vibration.structural._impact_mobility.DoubleHitCheck.threshold_ratio": (
         "ISO 7626-5 6.4 prints no threshold; the library's default is the user's"
     ),
-    "phonometry.vibration.structural.impact_mobility.ForceSpectrumCheck.max_drop_db": (
+    "phonometry.vibration.structural._impact_mobility.ForceSpectrumCheck.max_drop_db": (
         "ISO 7626-5 prints no drop for the force spectrum; the default is the user's"
     ),
 }
@@ -213,16 +213,16 @@ _NOT_LIMITS = {
     "max_negative_deviation_db": "the measured largest deviation",
     "phonometry.emission.free_field_qualification.SourceDirectionalityResult."
     "max_positive_deviation_db": "the measured largest deviation",
-    "phonometry.emission.sound_power_hard_walled.HardWalledRoomCheck."
+    "phonometry.emission._sound_power_hard_walled.HardWalledRoomCheck."
     "max_absorption_coefficient": "the largest coefficient of the room's surfaces",
     "phonometry.environment.sources.rolling_stock_noise.TrackCondition.requirement": (
         "the requirement in words, not a value"
     ),
-    "phonometry.environment.sources.statistical_pass_by.PassByRegression."
+    "phonometry.environment.sources._statistical_pass_by.PassByRegression."
     "maximum_levels_db": "the measured maximum level of each pass-by",
     "phonometry.metrology.sound_level_meter.SoundLevelMeterPeriodicRequirement."
     "over_maximum_by_correction_data": "the names of the results it concerns",
-    "phonometry.noise_control.cabin_insulation.SourcePositionCheck."
+    "phonometry.noise_control._cabin_insulation.SourcePositionCheck."
     "max_octave_spread_db": "the measured spread",
     "phonometry.vibration.immission.people.RailwayAssessment.lower": (
         "KB_FTr with the spread taken off, a result"
@@ -277,24 +277,26 @@ _DERIVED_LIMITS = {
     "phonometry.emission.reference_sound_source.ReferenceSourceDriftResult": (
         "limit_db",
     ),
-    "phonometry.emission.sound_power_hard_walled.HardWalledRoomCheck": (
+    "phonometry.emission._sound_power_hard_walled.HardWalledRoomCheck": (
         "limit_db",
         "min_volume_m3",
         "box_dimension_limit_m",
         "min_microphone_distance_m",
     ),
-    "phonometry.emission.sound_power_special_room.SpecialRoomReverberationCheck": (
+    "phonometry.emission._sound_power_special_room.SpecialRoomReverberationCheck": (
         "lower_limit",
         "upper_limit",
     ),
-    "phonometry.emission.sound_power_special_room.SpecialRoomSuitabilityCheck": (
+    "phonometry.emission._sound_power_special_room.SpecialRoomSuitabilityCheck": (
         "limit_db",
     ),
     "phonometry.hearing.audiometry.AmbientNoiseCheck": (
         "limits_db",
         "table_bands_hz",
     ),
-    "phonometry.hearing.earmuff_insertion_loss.FixtureIsolationCheck": ("required_db",),
+    "phonometry.hearing._earmuff_insertion_loss.FixtureIsolationCheck": (
+        "required_db",
+    ),
     "phonometry.environment.propagation.barrier_reflection.ReflectionGridCheck": (
         "nominal_m",
         "deviations_m",
@@ -304,17 +306,17 @@ _DERIVED_LIMITS = {
         "axis_offset_m",
         "inverse_distance_difference_db",
     ),
-    "phonometry.hearing.real_ear_attenuation.REATSoundFieldCheck": (
+    "phonometry.hearing._real_ear_attenuation.REATSoundFieldCheck": (
         "allowable_variation_db",
     ),
     "phonometry.hearing.sound_field_audiometry.DiffuseSoundFieldCheck": (
         "allowable_variation_db",
     ),
-    "phonometry.noise_control.cabin_insulation.BandFlatnessCheck": (
+    "phonometry.noise_control._cabin_insulation.BandFlatnessCheck": (
         "limit_db",
         "satisfied",
     ),
-    "phonometry.noise_control.cabin_insulation.SourcePositionCheck": (
+    "phonometry.noise_control._cabin_insulation.SourcePositionCheck": (
         "required_positions",
         "satisfied",
         "exceeds_maximum",
@@ -621,7 +623,7 @@ _STATED_FLAGS = {
     "tonal": _CALLER,
     "phonometry.emission.sound_power_plant.PlantRequirement.advisory": _RECORD,
     "phonometry.emission.sound_power_plant.PlantRequirement.holds": _RECORD,
-    "phonometry.emission.sound_power_special_room.SpecialRoomReverberationCheck."
+    "phonometry.emission._sound_power_special_room.SpecialRoomReverberationCheck."
     "centered": _CALLER,
     "phonometry.emission.turbine_noise.TurbineNoiseDeclaration.tonal": _CALLER,
     "phonometry.environment.assessment.soundscape.QuestionnaireScale.continuous": _ROW,
@@ -691,7 +693,7 @@ _STATED_FLAGS = {
     "corrections_in_manual": _CALLER,
     "phonometry.metrology.sound_level_meter.SoundLevelMeterPeriodicVerification."
     "pattern_approval_public": _CALLER,
-    "phonometry.noise_control.cabin_insulation.WeightedCabinInsulation.apparent": (
+    "phonometry.noise_control._cabin_insulation.WeightedCabinInsulation.apparent": (
         _CALLER
     ),
     "phonometry.noise_control.enclosure_insulation.MethodEntry.band_values": _ROW,
@@ -700,8 +702,8 @@ _STATED_FLAGS = {
     "phonometry.noise_control.silencer_in_situ.InstallationCase.source_area_rule": _ROW,
     "phonometry.room.auditorium.AuditoriumQuantity.energy_averaged": _ROW,
     "phonometry.room.auditorium.AuditoriumQuantity.relative_jnd": _ROW,
-    "phonometry.signals.envelope.EnvelopeResult.antialias": _CALLER,
-    "phonometry.signals.envelope.EnvelopeSpectrumResult.remove_dc": _CALLER,
+    "phonometry.signals._envelope.EnvelopeResult.antialias": _CALLER,
+    "phonometry.signals._envelope.EnvelopeSpectrumResult.remove_dc": _CALLER,
     "phonometry.signals.multitaper.MultitaperSpectralDensityResult.adaptive": _CALLER,
     "phonometry.simulation.elastic_fdtd.ElasticFDTDResult.obstacle_mask": _CALLER,
     "phonometry.simulation.fdtd.FDTDResult.obstacle_mask": _CALLER,
@@ -718,10 +720,10 @@ _STATED_FLAGS = {
     "phonometry.vibration.immission.people.PeopleAssessment.rare_short_events": _CALLER,
     "phonometry.vibration.structural.building_damage.DamageAssessment."
     "massive_structure": _CALLER,
-    "phonometry.vibration.structural.impact_mobility.ImpactMobilityResult."
+    "phonometry.vibration.structural._impact_mobility.ImpactMobilityResult."
     "driving_point": _CALLER,
-    "phonometry.vibration.structural.impact_mobility.CoherenceCheck.judged": _CALLER,
-    "phonometry.vibration.structural.impact_mobility.ResponseDecayCheck."
+    "phonometry.vibration.structural._impact_mobility.CoherenceCheck.judged": _CALLER,
+    "phonometry.vibration.structural._impact_mobility.ResponseDecayCheck."
     "exponential_window": _CALLER,
     "phonometry.vibration.structural.mechanical_mobility.MobilityResult."
     "driving_point": _CALLER,
@@ -959,7 +961,7 @@ _DERIVED_FLAGS = {
         "lag_within_third",
         "passes",
     ),
-    "phonometry.building.measurement.rainfall_sound.RainGeneratorVerification": (
+    "phonometry.building.measurement._rainfall_sound.RainGeneratorVerification": (
         "rate_deviation_mm_h",
         "rate_ok",
         "drop_share",
@@ -1041,18 +1043,18 @@ _DERIVED_FLAGS = {
         "intensity_agreement",
         "room_qualified",
     ),
-    "phonometry.emission.sound_power_hard_walled.HardWalledSoundPowerResult": (
+    "phonometry.emission._sound_power_hard_walled.HardWalledSoundPowerResult": (
         "background_requirement_met",
         "upper_bound",
     ),
-    "phonometry.emission.sound_power_hard_walled.SourceLocationPlan": (
+    "phonometry.emission._sound_power_hard_walled.SourceLocationPlan": (
         "spectral_character",
         "a_weighted_spectral_character",
     ),
-    "phonometry.emission.sound_power_in_duct.InDuctSoundPowerResult": (
+    "phonometry.emission._sound_power_in_duct.InDuctSoundPowerResult": (
         "information_only_band",
     ),
-    "phonometry.emission.sound_power_in_situ.InSituSoundPowerResult": (
+    "phonometry.emission._sound_power_in_situ.InSituSoundPowerResult": (
         "background_requirement_met",
         "upper_bound",
         "grade",
@@ -1060,14 +1062,14 @@ _DERIVED_FLAGS = {
         "sigma_tot",
         "expanded_uncertainty",
     ),
-    "phonometry.emission.sound_power_intensity.PrecisionIntensityResult": (
+    "phonometry.emission._sound_power_intensity.PrecisionIntensityResult": (
         "sound_power",
         "not_applicable_band",
         "sound_power_level",
         "sound_power_level_normalized",
         "sound_power_level_a",
     ),
-    "phonometry.emission.sound_power_intensity.SoundPowerIntensityResult": (
+    "phonometry.emission._sound_power_intensity.SoundPowerIntensityResult": (
         "partial_power_level",
         "sound_power",
         "negative_band",
@@ -1078,7 +1080,7 @@ _DERIVED_FLAGS = {
         "a_weighting_omitted_bands",
         "sound_power_level_a",
     ),
-    "phonometry.emission.sound_power_intensity.PrecisionCriteria": (
+    "phonometry.emission._sound_power_intensity.PrecisionCriteria": (
         "criterion_1",
         "criterion_2",
         "criterion_3",
@@ -1086,7 +1088,7 @@ _DERIVED_FLAGS = {
         "criterion_5",
         "qualified",
     ),
-    "phonometry.emission.sound_power_intensity_points.DiscretePointIntensityResult": (
+    "phonometry.emission._sound_power_intensity_points.DiscretePointIntensityResult": (
         "partial_power",
         "sound_power",
         "sound_power_level",
@@ -1104,7 +1106,7 @@ _DERIVED_FLAGS = {
         "field_nonuniformity_a",
         "achieved_grade_a",
     ),
-    "phonometry.emission.sound_power_special_room.SpecialRoomSoundPowerResult": (
+    "phonometry.emission._sound_power_special_room.SpecialRoomSoundPowerResult": (
         "background_requirement_met",
         "background_requirement_met_a",
     ),
@@ -1196,7 +1198,7 @@ _DERIVED_FLAGS = {
     "phonometry.hearing.audiometry.SweepThresholdResult": ("is_peak",),
     "phonometry.hearing.occupational_exposure.ExposureResult": ("sampling_advisory",),
     "phonometry.hearing.occupational_exposure.TaskContribution": ("spread_advisory",),
-    "phonometry.hearing.real_ear_attenuation.AttenuationDifferenceResult": (
+    "phonometry.hearing._real_ear_attenuation.AttenuationDifferenceResult": (
         "difference_db",
         "criterion_db",
         "significant",
@@ -1232,8 +1234,8 @@ _DERIVED_FLAGS = {
         "annex_a_range",
         "attenuation_accuracy",
     ),
-    "phonometry.noise_control.cabin_insulation.CabinInsulationResult": ("apparent",),
-    "phonometry.noise_control.cabin_insulation.CabinUncertainty": (
+    "phonometry.noise_control._cabin_insulation.CabinInsulationResult": ("apparent",),
+    "phonometry.noise_control._cabin_insulation.CabinUncertainty": (
         "ratio_satisfied",
         "stateable",
         "stated_band_range_hz",

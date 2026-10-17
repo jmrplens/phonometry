@@ -77,6 +77,15 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
     from ..._report.metadata import ReportMetadata
 
+__all__ = [
+    "AbsorptionWarning",
+    "SoundAbsorptionMeasurement",
+    "absorption_area",
+    "absorption_coefficient",
+    "measure_sound_absorption",
+    "power_attenuation_from_alpha",
+]
+
 #: Sabine constant of ISO 354:2003, Eq. (5)/(7) (55,3 exactly as printed).
 _SABINE = 55.3
 #: ``10 * lg e`` (ISO 354:2003, 8.1.2.1), lg = log10; ~= 4,342944819.

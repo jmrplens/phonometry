@@ -72,6 +72,21 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+__all__ = [
+    "WESTON_REGIMES",
+    "WESTON_SEABEDS",
+    "WestonPropagationResult",
+    "WestonRegimeBoundaries",
+    "WestonSeabed",
+    "critical_grazing_angle",
+    "effective_depth",
+    "loss_parameter",
+    "reflection_loss_gradient",
+    "waveguide_cutoff_frequency",
+    "weston_propagation_loss",
+    "weston_regime_boundaries",
+]
+
 #: Regime labels, in order of increasing range.
 WESTON_REGIMES = ("spherical", "cylindrical", "mode-stripping", "single-mode")
 

@@ -86,6 +86,11 @@ from .moore_glasberg import (
     _validate_conditions,
 )
 
+__all__ = [
+    "MooreGlasbergTimeVaryingLoudness",
+    "loudness_moore_glasberg_time",
+]
+
 # One entry per FFT window: (segment length, Hann window, sum of window^2,
 # in-band bin indices, output slice into the concatenation-order level array,
 # FFT length).  The FFT length is >= the segment length so the Hann window is

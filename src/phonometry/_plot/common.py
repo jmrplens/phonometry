@@ -42,20 +42,20 @@ if TYPE_CHECKING:
     from matplotlib.typing import ColorType, LegendLocType
 
     from ..building.measurement.ratings import ImpactRatingResult, WeightedRatingResult
-    from ..emission.sound_power import SoundEnergyResult, SoundPowerResult
-    from ..emission.sound_power_anechoic import PrecisionSoundPowerResult
-    from ..emission.sound_power_in_duct import InDuctSoundPowerResult
-    from ..emission.sound_power_intensity import (
+    from ..emission._sound_power_anechoic import PrecisionSoundPowerResult
+    from ..emission._sound_power_in_duct import InDuctSoundPowerResult
+    from ..emission._sound_power_intensity import (
         PrecisionIntensityResult,
         SoundPowerIntensityResult,
     )
-    from ..emission.sound_power_intensity_points import (
+    from ..emission._sound_power_intensity_points import (
         DiscretePointIntensityResult,
     )
-    from ..emission.sound_power_reverberation import (
+    from ..emission._sound_power_reverberation import (
         ReverberationSoundEnergyResult,
         ReverberationSoundPowerResult,
     )
+    from ..emission.sound_power import SoundEnergyResult, SoundPowerResult
     from ..room.acoustics import RoomAcousticsResult
 
 _INSTALL_HINT = (
@@ -1232,14 +1232,14 @@ def _sound_power_designation(
     enveloping-surface one is clause 8.3 of ISO 3744 (clause 8.4 of ISO
     3746), which is the fallback.
     """
-    from ..emission.sound_power_anechoic import PrecisionSoundPowerResult
-    from ..emission.sound_power_in_duct import InDuctSoundPowerResult
-    from ..emission.sound_power_intensity import (
+    from ..emission._sound_power_anechoic import PrecisionSoundPowerResult
+    from ..emission._sound_power_in_duct import InDuctSoundPowerResult
+    from ..emission._sound_power_intensity import (
         PrecisionIntensityResult,
         SoundPowerIntensityResult,
     )
-    from ..emission.sound_power_intensity_points import DiscretePointIntensityResult
-    from ..emission.sound_power_reverberation import (
+    from ..emission._sound_power_intensity_points import DiscretePointIntensityResult
+    from ..emission._sound_power_reverberation import (
         ReverberationSoundEnergyResult,
         ReverberationSoundPowerResult,
     )

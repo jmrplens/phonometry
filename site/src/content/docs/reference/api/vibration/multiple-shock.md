@@ -105,7 +105,7 @@ Daily compressive stress $S_\mathrm{d}$ (Annex C, Formula C.1).
 | Name | Description |
 | :--- | :--- |
 | `daily_dose_value` | The daily acceleration dose $D_\mathrm{zd}$, m/s2. |
-| `mz` | Stress conversion $m_\mathrm{z}$ (MPa per m/s2); default the 82 kg male value `MZ_MALE`. See `MZ_FEMALE`. |
+| `mz` | Stress conversion $m_\mathrm{z}$ (MPa per m/s2) of Formula C.2; default 0.029, the 82 kg male value, and 0.025 for the female. |
 
 **Returns:** The daily compressive stress $S_\mathrm{d} = m_\mathrm{z} D_\mathrm{zd}$, MPa.
 

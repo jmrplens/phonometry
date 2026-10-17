@@ -52,7 +52,7 @@ and [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#ai
 reproduces every one of its 162 entries.
 
 **The wave number** $k = \omega/c$ takes the speed of sound of IEC
-61094-2 Annex F ([`air`](/phonometry/reference/api/fluids/air/)), by default with the
+61094-2 Annex F ([`air`](/phonometry/reference/api/fluids/air/#air)), by default with the
 dispersion of its NOTE to F.3: $c = c_0[1 + \sum_n c\,\alpha_{\mathrm{v}n}/ (2\pi f_{\mathrm{v}n})]$, a few parts in $10^5$ that reach a few tenths of
 a degree of phase at 20 kHz over 0,2 m. Annex B.1 points to it ("including
 dispersion effects").

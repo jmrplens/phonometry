@@ -1,9 +1,11 @@
 ---
-title: "room.crowd_noise"
+title: "room: crowd noise"
 description: "Crowd self-noise in a restaurant: the cocktail-party equilibrium."
 sidebar:
   label: "crowd_noise"
 ---
+
+Every name on this page is published by `phonometry.room`: `from phonometry import room`, then `room.<name>`.
 
 Crowd self-noise in a restaurant: the cocktail-party equilibrium.
 

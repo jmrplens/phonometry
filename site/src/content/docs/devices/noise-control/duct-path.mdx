@@ -283,8 +283,8 @@ Everything between the fan and the room removes something, and most of it
 is free. The models are Long Chapter 14 with the Reynolds (1990)
 regressions, and they all return an `HVACSpectrumResult` with `.values`,
 `.plot()` and `.report()`. Every model takes the analysis bands as its first
-argument, and `None` means the default `hvac.OCTAVE_BANDS`, the 63 Hz to 8 kHz
-set the published sheets use; pass your own vector when the sheet runs on
+argument, and `None` means the default octave bands from 63 Hz to 8 kHz,
+the set the published sheets use; pass your own vector when the sheet runs on
 different bands.
 
 **Straight ducts.** An unlined rectangular duct loses energy into the
@@ -933,7 +933,7 @@ by 1 dB, in the 1 kHz band alone.*
 import matplotlib.pyplot as plt
 
 # Every model is imported above; nc_curve returns the 10-band curve aligned
-# with OCTAVE_BANDS, which starts at 16 Hz, so the sheet's eight bands are
+# with room.NC_OCTAVE_BANDS_HZ, which starts at 16 Hz, so the sheet's eight bands are
 # nc_curve(30)[2:].
 printed = [3, 3, 5, 11, 25, 22, 16, 13]      # Long's 18 x 12 in, 6 ft row
 computed = noise_control.lined_rectangular_duct_attenuation(
@@ -1178,7 +1178,7 @@ are usually one of them:
 - [Steady-state room field](/phonometry/buildings/rooms/room-image-sources/): the
   room constant behind the room effect and the plenum reverberant term.
 - API reference:
-  [`noise_control.duct_path`](/phonometry/reference/api/noise_control/duct-path/),
+  [`noise_control`: duct path](/phonometry/reference/api/noise_control/duct-path/),
   [`noise_control.duct_modes`](/phonometry/reference/api/noise_control/duct-modes/),
   [`noise_control.hvac`](/phonometry/reference/api/noise_control/hvac/).
 

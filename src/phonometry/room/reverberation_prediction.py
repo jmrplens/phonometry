@@ -88,6 +88,17 @@ from .._internal.validation import (
     require_same_length,
 )
 
+__all__ = [
+    "ReverberationModelResult",
+    "arau_puchades_reverberation_time",
+    "eyring_reverberation_time",
+    "fitzroy_reverberation_time",
+    "mean_absorption",
+    "millington_sette_reverberation_time",
+    "reverberation_time_models",
+    "sabine_reverberation_time",
+]
+
 # ---------------------------------------------------------------------------
 # Constants.
 # ---------------------------------------------------------------------------

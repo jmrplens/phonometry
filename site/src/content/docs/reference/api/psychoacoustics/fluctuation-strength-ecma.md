@@ -1,9 +1,11 @@
 ---
-title: "psychoacoustics.quality.fluctuation_strength_ecma"
+title: "psychoacoustics: fluctuation strength (Sottek model)"
 description: "Psychoacoustic fluctuation strength per ECMA-418-2:2025 (4th ed., Clause 9)."
 sidebar:
   label: "fluctuation_strength_ecma"
 ---
+
+Every name on this page is published by `phonometry.psychoacoustics`: `from phonometry import psychoacoustics`, then `psychoacoustics.<name>`.
 
 Psychoacoustic fluctuation strength per ECMA-418-2:2025 (4th ed., Clause 9).
 

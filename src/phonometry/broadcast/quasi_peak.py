@@ -126,6 +126,16 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+__all__ = [
+    "BS468_BALLISTICS",
+    "DBQPS_REFERENCE_V",
+    "QuasiPeakBallistics",
+    "QuasiPeakDynamicsResult",
+    "QuasiPeakResult",
+    "quasi_peak_meter",
+    "verify_quasi_peak_dynamics",
+]
+
 try:
     from numba import jit as _numba_jit
 except ImportError:  # pragma: no cover - depends on install extras

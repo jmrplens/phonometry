@@ -298,7 +298,7 @@ which screens an earmuff by its insertion loss on an acoustic test fixture
   baseline any protected exposure is judged against.
 - [Audiometric Test Methods (ISO 8253-1 and -2)](audiometry.md): the
   diffuse-field test the site of ISO 4869-3 shares.
-- API reference: [`hearing.real_ear_attenuation`](https://docs.jmrp.io/phonometry/reference/api/hearing/real-ear-attenuation/),
+- API reference: [`hearing`: real-ear attenuation](https://docs.jmrp.io/phonometry/reference/api/hearing/real-ear-attenuation/),
   [`hearing.hearing_protectors`](https://docs.jmrp.io/phonometry/reference/api/hearing/hearing-protectors/),
   [`hearing.active_noise_reduction`](https://docs.jmrp.io/phonometry/reference/api/hearing/active-noise-reduction/)
-  and [`hearing.earmuff_insertion_loss`](https://docs.jmrp.io/phonometry/reference/api/hearing/earmuff-insertion-loss/).
+  and [`hearing`: earmuff insertion loss](https://docs.jmrp.io/phonometry/reference/api/hearing/earmuff-insertion-loss/).

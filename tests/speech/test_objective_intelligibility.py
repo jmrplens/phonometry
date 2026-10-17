@@ -23,7 +23,7 @@ import pytest
 from phonometry import speech
 from phonometry.speech import objective_intelligibility as oi
 
-FS = oi.SAMPLE_RATE  # 10 kHz: the internal rate, so the contrast skips resampling.
+FS = oi._SAMPLE_RATE  # 10 kHz: the internal rate, so the contrast skips resampling.
 
 
 def _speech_like(seed: int, seconds: float = 3.0) -> np.ndarray:

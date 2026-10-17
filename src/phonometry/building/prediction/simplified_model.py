@@ -70,6 +70,24 @@ if TYPE_CHECKING:
 
     from ..._report.metadata import ReportMetadata
 
+__all__ = [
+    "AirbornePredictionResult",
+    "FlankingPath",
+    "ImpactPredictionResult",
+    "PathContribution",
+    "combined_lining_improvement",
+    "equivalent_impact_level",
+    "flanking_element",
+    "flanking_path",
+    "impact_flanking_correction",
+    "junction_minimum_vibration_reduction",
+    "junction_vibration_reduction",
+    "predicted_airborne_insulation",
+    "predicted_impact_insulation",
+    "standardized_impact_level",
+    "standardized_level_difference",
+]
+
 #: Reference coupling length ``l0`` in Formula (28a), in metres (Clause 4.4.1).
 _L0 = 1.0
 

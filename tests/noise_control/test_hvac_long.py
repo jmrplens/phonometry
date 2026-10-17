@@ -164,7 +164,7 @@ def test_unlined_rectangular_duct_eqs_14_9_and_14_11() -> None:
 
     An 18 x 12 in duct 6 ft long has ``P / S = 2 (1.5 + 1) / 1.5 = 10/3 ft^-1``.
     """
-    bands = hvac.OCTAVE_BANDS
+    bands = hvac._OCTAVE_BANDS
     res = hvac.unlined_rectangular_duct_attenuation(
         bands, 18.0 * _IN, 12.0 * _IN, 6.0 * _FT
     )
@@ -222,7 +222,7 @@ def test_lined_rectangular_duct_adds_the_unlined_contribution() -> None:
     lined = hvac.lined_rectangular_duct_attenuation(*args)
     total = hvac.lined_rectangular_duct_attenuation(*args, include_unlined=True)
     unlined = hvac.unlined_rectangular_duct_attenuation(
-        hvac.OCTAVE_BANDS, 18.0 * _IN, 12.0 * _IN, 6.0 * _FT
+        hvac._OCTAVE_BANDS, 18.0 * _IN, 12.0 * _IN, 6.0 * _FT
     )
     assert np.allclose(total.values, lined.values + unlined.values)
 

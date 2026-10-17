@@ -55,17 +55,27 @@ from .._internal.validation import (
     require_same_length,
 )
 
+__all__ = [
+    "ReverberationResult",
+    "air_absorption_area",
+    "enclosed_space_reverberation",
+    "equivalent_absorption_area",
+    "hard_object_absorption",
+    "object_fraction",
+    "reverberation_time",
+]
+
 # ---------------------------------------------------------------------------
 # Normative constants.
 # ---------------------------------------------------------------------------
 
 #: Octave-band centre frequencies of Table 1, in hertz.
-OCTAVE_BANDS: np.ndarray = read_only(
+_OCTAVE_BANDS: np.ndarray = read_only(
     np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0], dtype=np.float64)
 )
 
 #: Speed of sound giving ``55.3/c0 = 0.16`` (clause 4.4 NOTE), in m/s.
-SPEED_OF_SOUND = 345.6
+_SPEED_OF_SOUND = 345.6
 
 #: Reverberation-time constant of Formula 5 (``55.3``).
 _RT_CONSTANT = 55.3
@@ -74,9 +84,9 @@ _RT_CONSTANT = 55.3
 _OBJECT_EXPONENT = 2.0 / 3.0
 
 #: Power attenuation coefficient ``m`` in air, in Neper per metre, by
-#: temperature/humidity condition over :data:`OCTAVE_BANDS` (Table 1). The
+#: temperature/humidity condition over :data:`_OCTAVE_BANDS` (Table 1). The
 #: table lists ``10**-3 Neper/m``; the values here are already in Neper/m.
-AIR_ATTENUATION: Mapping[str, np.ndarray] = MappingProxyType(
+_AIR_ATTENUATION: Mapping[str, np.ndarray] = MappingProxyType(
     {
         "10C_30-50": read_only(np.array([0.1, 0.2, 0.5, 1.1, 2.7, 9.4, 29.0]) * 1e-3),
         "10C_50-70": read_only(np.array([0.1, 0.2, 0.5, 0.8, 1.8, 5.9, 21.1]) * 1e-3),
@@ -88,7 +98,7 @@ AIR_ATTENUATION: Mapping[str, np.ndarray] = MappingProxyType(
 )
 
 #: The recommended default air condition (clause 4.3): 20 C, 50 %-70 % humidity.
-PUBLISHED_AIR_CONDITION = "20C_50-70"
+_PUBLISHED_AIR_CONDITION = "20C_50-70"
 
 
 # ---------------------------------------------------------------------------
@@ -138,8 +148,8 @@ def air_absorption_area(
 ) -> np.ndarray | float:
     r"""Equivalent absorption area of the air (Formula 2).
 
-    :param m: Power attenuation coefficient of air, in Neper per metre (see
-        :data:`AIR_ATTENUATION`).
+    :param m: Power attenuation coefficient of air, in Neper per metre (Table 1
+        prints it for the six conditions ``air_condition`` names).
     :param volume: Volume of the empty enclosed space ``V``, m3.
     :param object_fraction: Object fraction ``psi`` (0-1).
     :return: The air absorption area
@@ -207,15 +217,15 @@ def reverberation_time(
     volume: float,
     *,
     object_fraction: float = 0.0,
-    speed_of_sound: float = SPEED_OF_SOUND,
+    speed_of_sound: float = _SPEED_OF_SOUND,
 ) -> np.ndarray | float:
     r"""Reverberation time from the equivalent absorption area (Formula 5).
 
     :param absorption_area: Total equivalent absorption area ``A``, m2.
     :param volume: Volume of the empty enclosed space ``V``, m3.
     :param object_fraction: Object fraction ``psi`` (0-1).
-    :param speed_of_sound: Speed of sound ``c0``, m/s (default
-        :data:`SPEED_OF_SOUND`, giving the factor ``0.16``).
+    :param speed_of_sound: Speed of sound ``c0``, m/s (default 345.6, which
+        gives the factor ``0.16``).
     :return: The reverberation time
         :math:`T = \frac{55.3}{c_0} \frac{V (1 - \psi)}{A}`, s.
     :raises ValueError: if ``absorption_area`` is not positive and finite.
@@ -369,13 +379,13 @@ def enclosed_space_reverberation(
     objects: ArrayLike = (),
     object_fraction: float = 0.0,
     air_condition: str | None = None,
-    frequencies: ArrayLike = OCTAVE_BANDS,
-    speed_of_sound: float = SPEED_OF_SOUND,
+    frequencies: ArrayLike = _OCTAVE_BANDS,
+    speed_of_sound: float = _SPEED_OF_SOUND,
 ) -> ReverberationResult:
     """Predict the absorption area and reverberation time per octave band.
 
     Chains the total equivalent absorption area (Formula 1, with the air term
-    of Formula 2 from :data:`AIR_ATTENUATION` when ``air_condition`` is given)
+    of Formula 2 from Table 1 when ``air_condition`` is given)
     and the reverberation time (Formula 5).
 
     :param surfaces: Sequence of ``(area, absorption_coefficient)`` pairs; each
@@ -383,32 +393,37 @@ def enclosed_space_reverberation(
     :param volume: Volume of the empty enclosed space ``V``, m3.
     :param objects: Equivalent absorption areas of the objects ``Aobj``, m2.
     :param object_fraction: Object fraction ``psi`` (0-1).
-    :param air_condition: A key of :data:`AIR_ATTENUATION` (e.g.
-        ``"20C_50-70"``) to include air absorption, or ``None`` to neglect it.
+    :param air_condition: One of the six conditions of Table 1 to include air
+        absorption (``"10C_30-50"``, ``"10C_50-70"``, ``"10C_70-90"``,
+        ``"20C_30-50"``, ``"20C_50-70"``, ``"20C_70-90"``; clause 4.3
+        recommends ``"20C_50-70"`` when the room's own conditions are not
+        known), or ``None`` to neglect it.
     :param frequencies: Octave-band centre frequencies, in hertz. The built-in
-        ``air_condition`` profiles require the standard :data:`OCTAVE_BANDS`.
+        ``air_condition`` profiles require the standard's seven octave bands,
+        125 Hz to 8 kHz.
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The :class:`ReverberationResult`.
     """
-    # A copy, so the result never hands out OCTAVE_BANDS (read-only) or the
+    # A copy, so the result never hands out _OCTAVE_BANDS (read-only) or the
     # caller's own array.
     freq = np.array(frequencies, dtype=np.float64)
-    if air_condition is not None and not np.array_equal(freq, OCTAVE_BANDS):
+    if air_condition is not None and not np.array_equal(freq, _OCTAVE_BANDS):
         msg = (
-            "the built-in air_condition profiles cover the standard "
-            "OCTAVE_BANDS only; for custom frequencies compute the air term "
+            "the built-in air_condition profiles cover the seven octave bands "
+            "of Table 1 only, 125 Hz to 8 kHz; for custom frequencies compute "
+            "the air term "
             "with air_absorption_area and pass it to equivalent_absorption_area."
         )
         raise ValueError(msg)
     if air_condition is None:
         air_area: np.ndarray | float = 0.0
-    elif air_condition in AIR_ATTENUATION:
+    elif air_condition in _AIR_ATTENUATION:
         air_area = air_absorption_area(
-            AIR_ATTENUATION[air_condition], volume, object_fraction
+            _AIR_ATTENUATION[air_condition], volume, object_fraction
         )
     else:
         msg = (
-            f"air_condition must be one of {tuple(AIR_ATTENUATION)} or None; "
+            f"air_condition must be one of {tuple(_AIR_ATTENUATION)} or None; "
             f"got {air_condition!r}."
         )
         raise ValueError(msg)

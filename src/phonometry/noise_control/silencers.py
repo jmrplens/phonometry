@@ -123,8 +123,8 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
+from .duct_modes import _warn_above_plane_wave_limit
 from .duct_modes import plane_wave_limit as _plane_wave_limit
-from .duct_modes import warn_above_plane_wave_limit
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -132,6 +132,23 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from .._report.metadata import ReportMetadata
+
+__all__ = [
+    "ReactiveSilencerResult",
+    "SilencerChain",
+    "SilencerChainElement",
+    "cascade",
+    "duct_matrix",
+    "expansion_chamber",
+    "extended_tube_chamber",
+    "helmholtz_impedance",
+    "helmholtz_resonator",
+    "insertion_loss",
+    "quarter_wave_impedance",
+    "quarter_wave_resonator",
+    "shunt_matrix",
+    "transmission_loss",
+]
 
 #: Reference air properties at 20 degC, 101.325 kPa.
 _C_AIR = 343.0
@@ -738,7 +755,7 @@ def _result(
         ]
     if areas:
         limit = _plane_wave_limit(area=max(areas), speed_of_sound=c)
-        warn_above_plane_wave_limit(f, limit, kind, stacklevel=4)
+        _warn_above_plane_wave_limit(f, limit, kind, stacklevel=4)
     tl = transmission_loss(
         t,
         inlet_area=inlet_area,

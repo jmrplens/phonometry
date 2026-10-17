@@ -100,7 +100,7 @@ def plate_bending_stiffness(
 
     :math:`B' = E h^3 / (12 (1 - \nu^2))`, the plate bending stiffness ``B'``
     in N.m used throughout this module and by the coincidence frequency of
-    :func:`phonometry.vibration.structural.radiation_efficiency.coincidence_frequency`.
+    :func:`phonometry.vibration.structural.coincidence_frequency`.
 
     :param youngs_modulus: Young's modulus ``E`` of the plate material, in Pa.
     :param thickness_m: Plate thickness ``h``, in m.

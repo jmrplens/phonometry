@@ -1,9 +1,11 @@
 ---
-title: "hearing.earmuff_insertion_loss"
+title: "hearing: earmuff insertion loss"
 description: "The insertion loss of an earmuff on an acoustic test fixture (ISO 4869-3:2007)."
 sidebar:
   label: "earmuff_insertion_loss"
 ---
+
+Every name on this page is published by `phonometry.hearing`: `from phonometry import hearing`, then `hearing.<name>`.
 
 The insertion loss of an earmuff on an acoustic test fixture (ISO 4869-3:2007).
 
@@ -34,7 +36,7 @@ ISO 4869-1. So [`EarmuffInsertionLossResult`](/phonometry/reference/api/hearing/
 [`phonometry.hearing.assumed_protection_value`](/phonometry/reference/api/hearing/hearing-protectors/#assumed_protection_value),
 [`phonometry.hearing.hml_rating`](/phonometry/reference/api/hearing/hearing-protectors/#hml_rating) or
 [`phonometry.hearing.snr_rating`](/phonometry/reference/api/hearing/hearing-protectors/#snr_rating): those take the real-ear attenuation of
-sixteen subjects, [`phonometry.hearing.real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/), and
+sixteen subjects, [`phonometry.hearing.real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation), and
 nothing here converts one into the other.
 
 **The test site (5.1.4, 5.2).** [`check_random_incidence_field`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#check_random_incidence_field) judges
@@ -206,7 +208,7 @@ to Table B.1's 0,3 dB, 0,5 dB and 0,2 dB.
 
 The result is an insertion loss on a fixture. It screens production and
 ageing and is not the real-ear attenuation ISO 4869-2 needs (Clause 1);
-use [`phonometry.hearing.real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/) for that.
+use [`phonometry.hearing.real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation) for that.
 
 **Parameters**
 
@@ -230,7 +232,7 @@ use [`phonometry.hearing.real_ear_attenuation`](/phonometry/reference/api/hearin
 
 ## EARMUFF_INSERTION_LOSS_UNCERTAINTY
 
-*Constant* (`phonometry.hearing.earmuff_insertion_loss.InsertionLossUncertaintyBudget`).
+*Constant* (`phonometry.hearing.InsertionLossUncertaintyBudget`).
 
 ## EARMUFF_TEST_BANDS_HZ
 

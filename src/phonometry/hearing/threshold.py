@@ -38,6 +38,20 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+__all__ = [
+    "AUDIOMETRIC_FREQUENCIES_HZ",
+    "EARPHONES",
+    "EARPHONE_COUPLERS",
+    "FIELDS",
+    "RETSPL_FREQUENCIES_HZ",
+    "SEXES",
+    "AgeThresholdResult",
+    "age_threshold",
+    "earphone_reference_level",
+    "hearing_level_to_coupler_spl",
+    "reference_threshold",
+]
+
 
 # ---------------------------------------------------------------------------
 # Normative constants.

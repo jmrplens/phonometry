@@ -23,11 +23,10 @@ import matplotlib.pyplot as plt
 
 from phonometry import room
 from phonometry._plot.room import plot_excitation
+from phonometry.room import CrowdNoiseResult, ImpulseResponseResult, crowd_noise
 from phonometry.room import enclosed_space_absorption as esa
 from phonometry.room import noise_criteria as rn
-from phonometry.room.crowd_noise import CrowdNoiseResult, crowd_noise
 from phonometry.room.image_source import ImageSourceResult, image_source_rir
-from phonometry.room.impulse_response import ImpulseResponseResult
 from phonometry.room.modes import RoomModesResult, room_modes
 from phonometry.room.open_plan import OpenPlanResult, open_plan_metrics
 from phonometry.room.reverberation_prediction import (

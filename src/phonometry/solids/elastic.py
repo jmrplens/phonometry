@@ -46,6 +46,17 @@ import math
 
 from .._internal.validation import require_finite, require_positive
 
+__all__ = [
+    "DEFAULT_SPEED_OF_SOUND_M_S",
+    "beam_longitudinal_speed",
+    "bulk_longitudinal_speed",
+    "plate_longitudinal_speed",
+    "thickness_critical_frequency_product",
+    "youngs_modulus_from_beam_speed",
+    "youngs_modulus_from_bulk_speed",
+    "youngs_modulus_from_plate_speed",
+]
+
 #: Speed of sound in air at 20 degC, the reference the critical-frequency
 #: tables of Hopkins, Long and Mechel are printed for.
 DEFAULT_SPEED_OF_SOUND_M_S = 343.0

@@ -46,6 +46,17 @@ if TYPE_CHECKING:
 
     from ..io._signal import Signal
 
+__all__ = [
+    "HarmonicDistortionResult",
+    "harmonic_analysis",
+    "harmonic_distortion",
+    "itu_r_468_weighting",
+    "sinad",
+    "thd",
+    "thd_plus_noise",
+    "weighted_thd",
+]
+
 #: Default number of harmonics summed for the THD (IEC 60268-3).
 _DEFAULT_N_HARMONICS = 10
 #: Lowest harmonic order (the fundamental is order 1, not a harmonic): the

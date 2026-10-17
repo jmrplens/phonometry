@@ -24,7 +24,7 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-    from ..broadcast.program_loudness import (
+    from ..broadcast._program_loudness import (
         KWeightingResponse,
         ProgramLoudnessResult,
     )

@@ -7,7 +7,7 @@ from .._plot.geometry import (
     plot_plenum_geometry,
     plot_silencer_geometry,
 )
-from .cabin_insulation import (
+from ._cabin_insulation import (
     BAND_FLATNESS_LIMIT_DB,
     DEFAULT_BAND_FLATNESS_LIMIT_DB,
     IN_SITU_EXCESS_STANDARD_DEVIATION_DB,
@@ -50,19 +50,19 @@ from .cabin_insulation import (
     uncertainty_conditions,
     weighted_cabin_insulation,
 )
+from ._duct_path import (
+    DuctElement,
+    DuctPathResult,
+    DuctPathStage,
+    combine_duct_paths,
+    duct_path,
+)
 from .duct_modes import (
     DuctModeResult,
     PlaneWaveWarning,
     circular_duct_cut_on,
     plane_wave_limit,
     rectangular_duct_cut_on,
-)
-from .duct_path import (
-    DuctElement,
-    DuctPathResult,
-    DuctPathStage,
-    combine_duct_paths,
-    duct_path,
 )
 from .duct_walls import (
     DUCT_WALL_BANDS_HZ,

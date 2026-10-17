@@ -79,12 +79,7 @@ if TYPE_CHECKING:
     )
     from ..vibration.machinery.diagnostics import FaultFrequencyResult
     from ..vibration.machinery.evaluation import VectorChangeResult
-    from ..vibration.structural.building_damage import DamageAssessment
-    from ..vibration.structural.building_response import (
-        BuildingFrequencyEstimate,
-    )
-    from ..vibration.structural.experimental_sea import PowerInjectionResult
-    from ..vibration.structural.impact_mobility import (
+    from ..vibration.structural._impact_mobility import (
         ChannelMatchVerification,
         CoherenceCheck,
         DoubleHitCheck,
@@ -95,14 +90,19 @@ if TYPE_CHECKING:
         ResponseDecayCheck,
         SingleModeFitResult,
     )
-    from ..vibration.structural.junction_transmission import (
+    from ..vibration.structural._junction_transmission import (
         JunctionTransmissionResult,
     )
+    from ..vibration.structural._radiation_efficiency import RadiationEfficiencyResult
+    from ..vibration.structural.building_damage import DamageAssessment
+    from ..vibration.structural.building_response import (
+        BuildingFrequencyEstimate,
+    )
+    from ..vibration.structural.experimental_sea import PowerInjectionResult
     from ..vibration.structural.mechanical_mobility import (
         MobilityResult,
         RigidMassCalibrationResult,
     )
-    from ..vibration.structural.radiation_efficiency import RadiationEfficiencyResult
     from ..vibration.structural.transfer_stiffness import (
         BandAveragedStiffness,
         DrivingPointStiffnessResult,
@@ -116,7 +116,7 @@ if TYPE_CHECKING:
     class _SpectrumLike(Protocol):
         """A measured spectrum: anything exposing the two plotted vectors.
 
-        :class:`~phonometry.signals.envelope.EnvelopeSpectrumResult` is the
+        :class:`~phonometry.signals.EnvelopeSpectrumResult` is the
         expected case, but the fault-line overlay only reads these two
         array-likes, so the contract is stated structurally.
         """
@@ -1429,7 +1429,7 @@ def plot_radiation_efficiency(
     """Radiation efficiency ``sigma(f)`` on log-log axes (Hopkins 2.9.4).
 
     :param result: A
-        :class:`~phonometry.vibration.structural.radiation_efficiency.RadiationEfficiencyResult`.
+        :class:`~phonometry.vibration.structural.RadiationEfficiencyResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the ``sigma`` curve ``plot``.
@@ -2265,7 +2265,7 @@ def _measured_spectrum_vectors(
     ``spectrum`` is a structural contract, anything exposing the two vectors,
     so there is no construction of ours to pin it at and the refusals belong
     where the caller's parameter is named. Our own producer,
-    :func:`phonometry.signals.envelope.envelope_spectrum`, satisfies all three
+    :func:`phonometry.signals.envelope_spectrum`, satisfies all three
     of them, which is why every mistake here is in what the caller assembled.
 
     Each check answers a failure the next one cannot see. **A run of bins** is
@@ -2337,7 +2337,7 @@ def plot_fault_frequencies(
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param spectrum: Measured spectrum to draw underneath: an
-        :class:`~phonometry.signals.envelope.EnvelopeSpectrumResult`, or any
+        :class:`~phonometry.signals.EnvelopeSpectrumResult`, or any
         object exposing ``frequencies`` and ``amplitude``. Without it the
         predicted lines are drawn alone.
     :param max_frequency: Upper limit of the frequency axis, in hertz
@@ -2468,7 +2468,7 @@ def plot_junction_transmission(
     reference lines.
 
     :param result: A
-        :class:`~phonometry.vibration.structural.junction_transmission.JunctionTransmissionResult`.
+        :class:`~phonometry.vibration.structural.JunctionTransmissionResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the corner-curve ``plot``.
@@ -3290,14 +3290,14 @@ def plot_impact_mobility(
     column holds the magnitude and the coherence of 9.1 beneath it.
 
     :param result: An
-        :class:`~phonometry.vibration.structural.impact_mobility.ImpactMobilityResult`.
+        :class:`~phonometry.vibration.structural.ImpactMobilityResult`.
     :param ax: Existing axes for the magnitude, or ``None`` for a fresh figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the magnitude curve.
     :return: The axes (``ax`` given) or the two-axes array.
     """
     from .._i18n import format_number, localize_axes
-    from ..vibration.structural.impact_mobility import HIGH_COHERENCE
+    from ..vibration.structural._impact_mobility import HIGH_COHERENCE
 
     freq = np.asarray(result.frequencies, dtype=np.float64)
     magnitude = np.asarray(result.magnitude, dtype=np.float64)
@@ -3378,7 +3378,7 @@ def plot_single_mode_fit(
     """One mode fitted over its band, and the same mode with the window taken out.
 
     :param result: A
-        :class:`~phonometry.vibration.structural.impact_mobility.SingleModeFitResult`.
+        :class:`~phonometry.vibration.structural.SingleModeFitResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the fitted curve.
@@ -3445,7 +3445,7 @@ def plot_exponential_window_correction(
     """Each mode's apparent damping, split into the true part and the window's.
 
     :param result: An
-        :class:`~phonometry.vibration.structural.impact_mobility.ExponentialWindowCorrection`.
+        :class:`~phonometry.vibration.structural.ExponentialWindowCorrection`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the bars of the true damping.
@@ -3501,7 +3501,7 @@ def plot_double_hit_check(
     """The force record with its impacts, and its energy spectral density (6.4).
 
     :param result: A
-        :class:`~phonometry.vibration.structural.impact_mobility.DoubleHitCheck`.
+        :class:`~phonometry.vibration.structural.DoubleHitCheck`.
     :param ax: Existing axes for the time history, or ``None`` for a fresh
         two-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -3509,7 +3509,7 @@ def plot_double_hit_check(
     :return: The axes (``ax`` given) or the two-axes array.
     """
     from .._i18n import format_number, localize_axes
-    from ..vibration.structural.impact_mobility import energy_spectral_density
+    from ..vibration.structural._impact_mobility import energy_spectral_density
 
     times = result.times
     force = np.asarray(result.force, dtype=np.float64)
@@ -3595,7 +3595,7 @@ def plot_force_spectrum_check(
     """The force energy spectral density against the range and the limit (6.3).
 
     :param result: A
-        :class:`~phonometry.vibration.structural.impact_mobility.ForceSpectrumCheck`.
+        :class:`~phonometry.vibration.structural.ForceSpectrumCheck`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the density curve.
@@ -3676,7 +3676,7 @@ def plot_coherence_check(
     """The coherence against its minimum, excluded frequencies shaded (9.1).
 
     :param result: A
-        :class:`~phonometry.vibration.structural.impact_mobility.CoherenceCheck`.
+        :class:`~phonometry.vibration.structural.CoherenceCheck`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the coherence curve.
@@ -3747,7 +3747,7 @@ def plot_overload_check(
     """A record against its full scale, clipped samples marked (8.4).
 
     :param result: An
-        :class:`~phonometry.vibration.structural.impact_mobility.OverloadCheck`.
+        :class:`~phonometry.vibration.structural.OverloadCheck`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the record curve.
@@ -3817,14 +3817,14 @@ def plot_response_decay_check(
     peak, is shaded.
 
     :param result: A
-        :class:`~phonometry.vibration.structural.impact_mobility.ResponseDecayCheck`.
+        :class:`~phonometry.vibration.structural.ResponseDecayCheck`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the segment-peak curve.
     :return: The axes.
     """
     from .._i18n import format_number, localize_axes
-    from ..vibration.structural.impact_mobility import RESPONSE_MIDPOINT_RATIO
+    from ..vibration.structural._impact_mobility import RESPONSE_MIDPOINT_RATIO
 
     created = ax is None
     ax = ax if ax is not None else _new_axes()
@@ -3951,7 +3951,7 @@ def plot_channel_match(
     """Channel-to-channel magnitude and phase deviations against 8.1.
 
     :param result: A
-        :class:`~phonometry.vibration.structural.impact_mobility.ChannelMatchVerification`.
+        :class:`~phonometry.vibration.structural.ChannelMatchVerification`.
     :param ax: Existing axes for the magnitude panel, or ``None`` for a fresh
         two-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -3959,7 +3959,7 @@ def plot_channel_match(
     :return: The axes (``ax`` given) or the two-axes array.
     """
     from .._i18n import localize_axes
-    from ..vibration.structural.impact_mobility import (
+    from ..vibration.structural._impact_mobility import (
         CHANNEL_MAGNITUDE_TOLERANCE,
         CHANNEL_PHASE_TOLERANCE_DEG,
     )

@@ -374,7 +374,7 @@ repository; click the preview to open the PDF.
 - [Theory](../../reference/theory/perception.md#tone-prominence-tnr-and-pr-ecma-418-1):
   the neighbouring family of tone metrics, TNR and PR, derived from the same
   critical-band picture.
-- API reference: [`psychoacoustics.quality.tone_audibility`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/tone-audibility/).
+- API reference: [`psychoacoustics`: tone audibility](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/tone-audibility/).
 
 ## References
 

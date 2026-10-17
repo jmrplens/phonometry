@@ -55,6 +55,20 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+__all__ = [
+    "Aerodrome",
+    "AerodynamicCoefficients",
+    "ApproachStep",
+    "DepartureStep",
+    "FlightProfile",
+    "JetEngineCoefficients",
+    "PerformanceAircraft",
+    "ProfilePoint",
+    "PropellerEngineCoefficients",
+    "approach_profile",
+    "departure_profile",
+]
+
 # --------------------------------------------------------------------------
 # Constants fixed by the standard (B2.1, B2.2, B3)
 # --------------------------------------------------------------------------
@@ -81,13 +95,13 @@ _PRESSURE_EXPONENT = 5.256
 #: Doc 29's own modelling default headwind, kt (B4.4). Eq. B-16's equivalent
 #: take-off distance is defined *into* this wind, and Eq. B-17, B-22, B-28 and
 #: B-33 correct away from it, which is why 8 appears as a bare number in each.
-DEFAULT_HEADWIND_KT = 8.0
+_DEFAULT_HEADWIND_KT = 8.0
 
 #: Approach weight as a fraction of the maximum landing weight (folio B-31,
 #: repeated at B-39, B-46 and B-47): "W is the aircraft approach weight (lb),
 #: which corresponds to 90% of the MLW available in the ANP 'Aircraft' table".
 #: The ANP ``Default_weights`` arrival row is *not* this weight and is not used.
-APPROACH_WEIGHT_FRACTION = 0.9
+_APPROACH_WEIGHT_FRACTION = 0.9
 
 #: Climb-angle factor K of Eq. B-21, for a calibrated airspeed at or below
 #: :data:`_CLIMB_K_SPEED_KT`. It "accounts for the effects on climb gradient of
@@ -285,7 +299,7 @@ class Aerodrome(RichDisplay):
     _: KW_ONLY
     temperature_c: float = 15.0
     sea_level_pressure_inhg: float = _STANDARD_PRESSURE_INHG
-    headwind_kt: float = DEFAULT_HEADWIND_KT
+    headwind_kt: float = _DEFAULT_HEADWIND_KT
     runway_gradient_ratio: float = 0.0
 
     def __post_init__(self) -> None:
@@ -666,7 +680,7 @@ class PerformanceAircraft(RichDisplay):
         number for most of the fleet; Doc 29 names the aircraft table's landing
         weight and the fraction explicitly, three times.
         """
-        return APPROACH_WEIGHT_FRACTION * self.max_landing_weight_lb
+        return _APPROACH_WEIGHT_FRACTION * self.max_landing_weight_lb
 
     def flap(self, operation: str, flap_id: str) -> AerodynamicCoefficients:
         """Aerodynamic coefficients for one flap configuration.
@@ -1400,7 +1414,7 @@ class _Flight:
             both carry it into a denominator; Doc 29's own reference cases stay
             between -5 and 8 kt.
         """
-        reference = speed_kt - DEFAULT_HEADWIND_KT
+        reference = speed_kt - _DEFAULT_HEADWIND_KT
         actual = speed_kt - self.aerodrome.headwind_kt
         if reference <= 0.0 or actual <= 0.0:
             msg = (
@@ -2071,7 +2085,7 @@ def _headwind_thrust_correction_lb(
         _DESCENT_WIND_CONSTANT
         * flight.corrected_weight_lb(altitude_ft)
         * math.sin(gamma_rad)
-        * (flight.aerodrome.headwind_kt - DEFAULT_HEADWIND_KT)
+        * (flight.aerodrome.headwind_kt - _DEFAULT_HEADWIND_KT)
         / (flight.aircraft.n_engines * calibrated_airspeed_kt)
     )
 

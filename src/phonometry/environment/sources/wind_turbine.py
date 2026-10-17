@@ -9,7 +9,7 @@ Two closed-form quantities of the standard:
   (:func:`slant_distance`),
   :math:`L_{W\mathrm{A}} = L_p - 6 + 10 \cdot \log_{10}(4\pi R_1^2/S_0)` (Formula 26).
 * :func:`wind_turbine_tonality` -- the tonal-audibility chain (Formulae 30-34):
-  the critical bandwidth (:func:`critical_bandwidth`), the masking-noise level,
+  the critical bandwidth (Formula 30), the masking-noise level,
   the tonality and the audibility criterion, giving the tonal audibility
   ``ΔL_a`` that decides whether a tone is audible.
 
@@ -47,6 +47,14 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._report.metadata import ReportMetadata
+
+__all__ = [
+    "WindTurbineNoiseWarning",
+    "WindTurbineTonalityResult",
+    "apparent_sound_power_level",
+    "slant_distance",
+    "wind_turbine_tonality",
+]
 
 
 class WindTurbineNoiseWarning(PhonometryWarning):
@@ -141,7 +149,7 @@ def apparent_sound_power_level(
     return float(10.0 * np.log10(np.sum(10.0 ** (lwa_bands / 10.0))))
 
 
-def critical_bandwidth(fc: float) -> float:
+def _critical_bandwidth(fc: float) -> float:
     r"""Critical bandwidth about a tone (IEC 61400-11 Formula 30), in Hz.
 
     :math:`\mathrm{CBW} = 25 + 75 \cdot [1 + 1.4 \cdot
@@ -169,7 +177,7 @@ def _critical_band_edges(fc: float) -> tuple[float, float]:
     f = _positive(fc, "fc")
     if _LOW_FREQ_MIN <= f <= _LOW_FREQ_MAX:
         return _LOW_FREQ_MIN, _LOW_FREQ_MIN + _LOW_FREQ_BANDWIDTH
-    cbw = critical_bandwidth(f)
+    cbw = _critical_bandwidth(f)
     return f - cbw / 2.0, f + cbw / 2.0
 
 
@@ -605,7 +613,7 @@ def _tonality_chain(
     """Formulas 30 to 34 about the candidate line ``peak``, in the order of
     :data:`_TONALITY_METRICS`.
     """
-    cbw = critical_bandwidth(float(fr[peak]))
+    cbw = _critical_bandwidth(float(fr[peak]))
     possible_tone, is_tone, l_pn_avg = _tone_lines(lv, fr, peak)
     tone_positions = np.nonzero(is_tone)[0]
     if not (possible_tone and tone_positions.size > 0):

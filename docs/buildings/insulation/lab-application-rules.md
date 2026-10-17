@@ -983,5 +983,5 @@ doors, windows, glazing, small technical elements, floors, shutters).
 - API reference:
   [`building.measurement.laboratory_improvement`](https://docs.jmrp.io/phonometry/reference/api/building/laboratory-improvement/),
   [`building.measurement.joint_insulation`](https://docs.jmrp.io/phonometry/reference/api/building/joint-insulation/),
-  [`building.measurement.rainfall_sound`](https://docs.jmrp.io/phonometry/reference/api/building/rainfall-sound/)
+  [`building`: rainfall sound](https://docs.jmrp.io/phonometry/reference/api/building/rainfall-sound/)
   and [`building.measurement.ratings`](https://docs.jmrp.io/phonometry/reference/api/building/ratings/).

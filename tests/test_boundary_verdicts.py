@@ -806,7 +806,7 @@ def test_a_pressure_intensity_indicator_of_exactly_10_db_qualifies(
 def test_a_position_spread_of_exactly_1_5_db_does_not_warn() -> None:
     # ISO 3741 8.4.2.2: the sM criterion is exceeded only past 1,5 dB. Three
     # levels 1,5 dB apart have a standard deviation of exactly 1,5 dB.
-    from phonometry.emission.sound_power_reverberation import (
+    from phonometry.emission._sound_power_reverberation import (
         _position_sampling_warnings,
     )
 
@@ -825,7 +825,7 @@ def test_a_reverberation_time_exactly_at_v_over_s_warns(
     volume: float, surface: float, time: float
 ) -> None:
     # ISO 3741 Table 1 / 5.2: T at or below V/S makes the room too absorptive.
-    from phonometry.emission.sound_power_reverberation import (
+    from phonometry.emission._sound_power_reverberation import (
         _room_qualification_warnings,
     )
 
@@ -984,7 +984,7 @@ def test_a_db_hr_value_that_is_a_half_rounds_up() -> None:
 
 
 def test_a_pass_by_level_that_is_a_half_tenth_rounds_up() -> None:
-    from phonometry.environment.sources.statistical_pass_by import _round_tenth
+    from phonometry.environment.sources._statistical_pass_by import _round_tenth
 
     # 64,1 - 1,35 is 62,75 in decimal and 62,749 999 999 999 99 in binary.
     assert _round_tenth(64.1 - 1.35) == pytest.approx(62.8, abs=1e-12)
@@ -1278,7 +1278,7 @@ def test_an_rc_mid_frequency_average_on_a_half_rates_even(
     # these averages are 39,5 and 36,5 in decimal, under and over in binary.
     levels = np.full(10, 30.0)
     levels[5:8] = mid
-    result = room.room_criterion(levels, room.noise_criteria.OCTAVE_BANDS)
+    result = room.room_criterion(levels, room.noise_criteria.NC_OCTAVE_BANDS_HZ)
     assert result.rating == rating
 
 
@@ -1293,7 +1293,7 @@ def test_an_nc_speech_interference_level_on_a_half_rates_even(
     # SIL are 29,5 and 24,5 in decimal, under and over in binary.
     levels = np.zeros(10)
     levels[5:9] = sil_levels
-    result = room.noise_criterion(levels, room.noise_criteria.OCTAVE_BANDS)
+    result = room.noise_criterion(levels, room.noise_criteria.NC_OCTAVE_BANDS_HZ)
     assert result.method == "SIL"
     assert result.rating == rating
 
@@ -1318,7 +1318,7 @@ def test_iso_3747_reads_a_margin_on_its_criterion_as_decimal(
 ) -> None:
     # ISO 3747 8.1: K1 is zero only above 15 dB, and 6 dB is a valid margin,
     # so neither a 15 dB nor a 6 dB margin takes K1 to zero or marks it short.
-    from phonometry.emission.sound_power_in_situ import _background_correction
+    from phonometry.emission._sound_power_in_situ import _background_correction
 
     k1, met = _background_correction(np.array([signal - background]))
     assert float(k1[0]) > 0.0

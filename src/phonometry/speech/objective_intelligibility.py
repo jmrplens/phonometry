@@ -59,12 +59,17 @@ if TYPE_CHECKING:
 
     from ..io._signal import Signal
 
+__all__ = [
+    "STOIResult",
+    "stoi",
+]
+
 # ---------------------------------------------------------------------------
 # Algorithm constants (Taal et al. 2011 Section II; Jensen & Taal 2016 II-A).
 # ---------------------------------------------------------------------------
 
 #: Internal sample rate, in hertz (Taal et al. 2011 Section II).
-SAMPLE_RATE: int = 10_000
+_SAMPLE_RATE: int = 10_000
 
 #: Short-time frame length, in samples (256 = 25.6 ms at 10 kHz).
 _FRAME: int = 256
@@ -163,7 +168,7 @@ def _third_octave_matrix() -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     (Taal et al. 2011 Eq. 1). The upper-edge bin is exclusive, so adjacent
     bands do not double-count a shared bin.
     """
-    f = np.linspace(0.0, SAMPLE_RATE, _NFFT + 1)[: _NFFT // 2 + 1]
+    f = np.linspace(0.0, _SAMPLE_RATE, _NFFT + 1)[: _NFFT // 2 + 1]
     k = np.arange(_N_BANDS, dtype=np.float64)
     centers = _MIN_CENTER * 2.0 ** (k / 3.0)
     edges_low = _MIN_CENTER * 2.0 ** ((2.0 * k - 1.0) / 6.0)
@@ -257,15 +262,15 @@ def _band_spectrogram(
 
 
 def _resample_to_internal(sig: NDArray[np.float64], fs: int) -> NDArray[np.float64]:
-    """Resample ``sig`` from ``fs`` to :data:`SAMPLE_RATE` (no-op when equal)."""
-    if fs == SAMPLE_RATE:
+    """Resample ``sig`` from ``fs`` to :data:`_SAMPLE_RATE` (no-op when equal)."""
+    if fs == _SAMPLE_RATE:
         return sig
     from math import gcd
 
     from scipy.signal import resample_poly
 
-    g = gcd(int(fs), SAMPLE_RATE)
-    up = SAMPLE_RATE // g
+    g = gcd(int(fs), _SAMPLE_RATE)
+    up = _SAMPLE_RATE // g
     down = int(fs) // g
     return np.asarray(resample_poly(sig, up, down), dtype=np.float64)
 
@@ -417,5 +422,5 @@ def stoi(
         segment_scores=np.asarray(segment_scores, dtype=np.float64),
         band_scores=band_scores,
         frequencies=centers,
-        fs=SAMPLE_RATE,
+        fs=_SAMPLE_RATE,
     )

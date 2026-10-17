@@ -20,6 +20,10 @@ import enum
 import pathlib
 import sys
 import types
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -242,3 +246,271 @@ def test_the_library_gives_every_public_name_one_address() -> None:
         if inspect.ismodule(getattr(phonometry, name))
     ]
     assert gate.surface_problems(domains) == []
+
+
+# ---------------------------------------------------------------------------
+# A module is reached by its name, and says what it publishes
+# ---------------------------------------------------------------------------
+_FAKE_MODULES = {
+    "__init__.py": (
+        "from . import listed, nested\n"
+        "from ._kept import kept\n"
+        "from .probe import probe\n"
+        "from .bare import bare\n"
+        "from .listed import TABLE\n"
+        "__all__ = ['TABLE', 'bare', 'kept', 'listed', 'nested', 'probe']\n"
+    ),
+    "probe.py": "def probe():\n    return 1\n__all__ = ['probe']\n",
+    "bare.py": "def bare():\n    return 2\n",
+    "listed.py": (
+        "from math import pi\n"
+        "from typing import Literal, Protocol, TypeVar\n"
+        "Mode = Literal['a', 'b']\n"
+        "T = TypeVar('T')\n"
+        "class Shaped(Protocol):\n    size: int\n"
+        "TABLE = (1, 2)\n"
+        "LIMIT = 3.0\n"
+        "_OWN = 4.0\n"
+        "def helper():\n    return pi\n"
+        "__all__ = ['helper']\n"
+    ),
+    "_kept.py": "def kept():\n    return 4\n",
+    "nested/__init__.py": "from .version import version\n__all__ = ['version']\n",
+    "nested/version.py": "version = '1.0'\n__all__ = ['version']\n",
+}
+
+
+def _fake_package(
+    tmp_path: pathlib.Path, name: str, files: dict[str, str]
+) -> types.ModuleType:
+    package = tmp_path / name
+    for filename, source in files.items():
+        path = package / filename
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(source, encoding="utf-8")
+    sys.path.insert(0, str(tmp_path))
+    try:
+        import importlib
+
+        return importlib.import_module(name)
+    finally:
+        sys.path.remove(str(tmp_path))
+
+
+def test_a_module_hidden_behind_a_name_of_its_package_is_reported(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function, or a constant, that takes a module's name hides the module.
+
+    ``probe`` publishes a function of its own name, so ``import pkg.probe as m``
+    binds the function. ``bare`` does the same and lists nothing as well, so it
+    is reported twice. ``nested.version`` is hidden behind a string: whatever
+    takes the name hides the module, not only a function. ``listed`` is
+    reached by its name, and its ``__all__`` leaves out two things: ``TABLE``,
+    which its package publishes, and ``LIMIT``, which nobody does. What stays
+    quiet is as much the point: ``listed``'s alias, ``TypeVar`` and
+    ``Protocol`` (typing constructs, never published), its ``_OWN``, the ``pi``
+    it imports, and ``_kept``, which takes the name of the function it
+    defines, which is how such a module is written: private, with its names
+    reached through the package.
+    """
+    domain = _fake_package(tmp_path, "fake_module_domain", _FAKE_MODULES)
+    problems = gate.module_problems([domain])
+    hidden = (
+        "fake_module_domain.{leaf} is hidden behind fake_module_domain.{leaf}, "
+        "a function: `import fake_module_domain.{leaf}` binds the function, so "
+        "the module is private (_{leaf}) and its names are reached through "
+        "fake_module_domain"
+    )
+    assert problems == [
+        hidden.format(leaf="bare"),
+        "fake_module_domain.bare declares no __all__, so nothing says which of "
+        "its names are public",
+        "fake_module_domain.listed defines 'TABLE', which fake_module_domain "
+        "publishes, and its __all__ does not list it",
+        "fake_module_domain.listed defines 'LIMIT' and its __all__ does not list "
+        "it; a name its package does not publish is private (_LIMIT)",
+        "fake_module_domain.nested.version is hidden behind "
+        "fake_module_domain.nested.version, a str: `import "
+        "fake_module_domain.nested.version` binds the str, so the module is "
+        "private (_version) and its names are reached through "
+        "fake_module_domain.nested",
+        hidden.format(leaf="probe"),
+    ]
+
+
+def test_a_package_without_all_is_reported_like_any_module(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The domain package is walked too: it is the first module a reader meets."""
+    files = {
+        "__init__.py": "from .leaf import thing\n",
+        "leaf.py": "def thing():\n    return 1\n__all__ = ['thing']\n",
+    }
+    domain = _fake_package(tmp_path, "fake_bare_domain", files)
+    assert gate.module_problems([domain]) == [
+        "fake_bare_domain declares no __all__, so nothing says which of its "
+        "names are public"
+    ]
+
+
+_STRAY_LEAF = {
+    "__init__.py": "from ._impl import probe\n__all__ = ['probe']\n",
+    "_impl.py": "def probe():\n    return 1\n__all__ = ['probe']\n",
+    "probe.py": "def other():\n    return 2\n__all__ = ['other']\n",
+}
+
+
+def test_a_leaf_its_package_never_imports_is_still_found_hidden(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The package attribute is read before the walk imports the leaf.
+
+    ``probe.py`` sits beside the ``probe`` the package publishes from
+    ``_impl`` and nothing imports it. Importing it for the first time would
+    bind the package attribute to the module, so a check that read the
+    attribute afterwards saw a module and passed; and the walk would leave the
+    library publishing the module instead of the function.
+    """
+    domain = _fake_package(tmp_path, "fake_stray_domain", _STRAY_LEAF)
+    published = domain.probe
+    problems = gate.module_problems([domain])
+    assert problems == [
+        "fake_stray_domain.probe is hidden behind fake_stray_domain.probe, a "
+        "function: `import fake_stray_domain.probe` binds the function, so the "
+        "module is private (_probe) and its names are reached through "
+        "fake_stray_domain"
+    ]
+    assert domain.probe is published
+
+
+def test_a_leaf_another_import_reached_first_is_found_in_the_package_source(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Once something has imported the leaf, only the ``__init__`` source shows it.
+
+    The import already replaced the published function with the module, so
+    every attribute the walk can read says module. The package's own
+    statement that gave the name to something else is still there to read.
+    """
+    import importlib
+
+    domain = _fake_package(tmp_path, "fake_early_domain", _STRAY_LEAF)
+    importlib.import_module("fake_early_domain.probe")
+    problems = gate.module_problems([domain])
+    assert problems == [
+        "fake_early_domain.probe is hidden behind fake_early_domain.probe: the "
+        "package binds 'probe' by `from ._impl import probe`, so the module is "
+        "private (_probe) and its names are reached through fake_early_domain"
+    ]
+
+
+_BINDINGS = {
+    "from . import probe": None,
+    "from fake_pkg import probe": None,
+    "import fake_pkg.probe": None,
+    "from .probe import probe": "from .probe import probe",
+    "from ._impl import run as probe": "from ._impl import run as probe",
+    "import json as probe": "import json as probe",
+    "def probe():\n    pass": "def probe",
+    "class probe:\n    pass": "class probe",
+    "probe = 1": "probe = ...",
+    "if True:\n    probe: int = 1": "probe = ...",
+    "try:\n    pass\nexcept ImportError:\n    probe = None": "probe = ...",
+    "def other():\n    probe = 1": None,
+}
+
+
+def test_only_importing_the_submodule_itself_leaves_its_name_alone() -> None:
+    """Every other statement of an ``__init__`` that binds the name hides it."""
+    import ast
+
+    for statement, binding in _BINDINGS.items():
+        found = [
+            gate._binding_other_than_submodule(node, "fake_pkg", "probe")
+            for node in gate._module_level_statements(ast.parse(statement).body)
+        ]
+        first = next((text for text in found if text is not None), None)
+        assert first == binding, statement
+
+
+def test_the_library_reaches_every_public_module_by_its_name() -> None:
+    import inspect
+
+    import phonometry
+
+    domains = [
+        getattr(phonometry, name)
+        for name in phonometry.__all__
+        if inspect.ismodule(getattr(phonometry, name))
+    ]
+    assert gate.module_problems(domains) == []
+
+
+def test_an_exemption_is_keyed_by_location_and_cannot_go_stale(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An entry quiets the one name it names, and reports itself once unused."""
+    files = {
+        "__init__.py": "from .leaf import thing\n__all__ = ['thing']\n",
+        "leaf.py": "LIMIT = 3.0\ndef thing():\n    return LIMIT\n__all__ = ['thing']\n",
+    }
+    domain = _fake_package(tmp_path, "fake_exempt_domain", files)
+    monkeypatch.setattr(
+        gate,
+        "UNLISTED_EXEMPTIONS",
+        {
+            "fake_exempt_domain.leaf.LIMIT": "read by thing only",
+            "fake_exempt_domain.leaf.GONE": "no longer defined",
+        },
+    )
+    assert gate.module_problems([domain]) == [
+        "UNLISTED_EXEMPTIONS names fake_exempt_domain.leaf.GONE, which is no "
+        "longer defined unlisted; drop the entry"
+    ]
+
+
+def test_defined_names_reads_what_the_module_binds_itself() -> None:
+    """Imports and ``TYPE_CHECKING`` blocks define nothing; branches that run do."""
+    module = types.ModuleType("fake_defined")
+    source = (
+        "from math import pi\n"
+        "from typing import TYPE_CHECKING\n"
+        "if TYPE_CHECKING:\n"
+        "    ONLY_TYPED = 1\n"
+        "try:\n"
+        "    import numpy\n"
+        "    FAST = True\n"
+        "except ImportError:\n"
+        "    FAST = False\n"
+        "A, (B, C) = 1, (2, 3)\n"
+        "D: int\n"
+        "E: int = 5\n"
+        "type Alias = int\n"
+        "class K:\n    pass\n"
+        "def f():\n    return pi\n"
+    )
+    import linecache
+
+    filename = "<fake_defined>"
+    module.__file__ = filename
+    linecache.cache[filename] = (
+        len(source),
+        None,
+        source.splitlines(keepends=True),
+        filename,
+    )
+    exec(compile(source, filename, "exec"), module.__dict__)  # noqa: S102
+    try:
+        assert gate.defined_names(module) == [
+            "FAST",
+            "A",
+            "B",
+            "C",
+            "E",
+            "Alias",
+            "K",
+            "f",
+        ]
+    finally:
+        linecache.cache.pop(filename, None)

@@ -14,6 +14,12 @@ import numpy as np
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
+__all__ = [
+    "composite_rating_level",
+    "lden",
+    "ldn",
+]
+
 # Absolute tolerance, in hours, on the periods-sum-to-24-h check
 # (ISO 1996-1:2016, 6.5): pure FP-accumulation slack, not a quantity
 # from the standard.

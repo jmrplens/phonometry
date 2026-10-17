@@ -42,7 +42,7 @@ def test_annex_e_case1_bare_room() -> None:
 def test_annex_e_case1_air_note() -> None:
     # With air absorption Aair = 0.12 m2 the reverberation time becomes 2.0 s.
     a = m.equivalent_absorption_area(_BARE_SURFACES)
-    aair = m.air_absorption_area(m.AIR_ATTENUATION["20C_50-70"][3], _VOLUME)
+    aair = m.air_absorption_area(m._AIR_ATTENUATION["20C_50-70"][3], _VOLUME)
     assert aair == pytest.approx(0.12, abs=0.005)
     assert m.reverberation_time(a + aair, _VOLUME) == pytest.approx(2.0, abs=0.05)
 
@@ -94,7 +94,7 @@ def test_air_absorption_area_formula_2() -> None:
 
 def test_reverberation_factor_is_016() -> None:
     # 55.3 / c0 = 0.16 for the standard's c0 = 345.6 m/s.
-    assert m._RT_CONSTANT / m.SPEED_OF_SOUND == pytest.approx(0.16, abs=1e-4)
+    assert m._RT_CONSTANT / m._SPEED_OF_SOUND == pytest.approx(0.16, abs=1e-4)
 
 
 def test_object_fraction_formula_3() -> None:
@@ -116,7 +116,7 @@ def test_enclosed_space_reverberation_spectrum() -> None:
     # More absorption at high frequency shortens the reverberation time.
     assert result.reverberation_time[0] > result.reverberation_time[-1]
     # Cross-check the 1000 Hz band against the primitives.
-    aair = m.air_absorption_area(m.AIR_ATTENUATION["20C_50-70"][3], 50.0)
+    aair = m.air_absorption_area(m._AIR_ATTENUATION["20C_50-70"][3], 50.0)
     a_1k = m.equivalent_absorption_area([(20.0, 0.40)], air_area=aair)
     assert result.absorption_area[3] == pytest.approx(a_1k)
 
@@ -263,7 +263,7 @@ def test_air_condition_requires_standard_bands() -> None:
     # The built-in Table 1 profiles cover the standard octave bands only.
     with pytest.raises(
         ValueError,
-        match=r"air_condition profiles cover the standard OCTAVE_BANDS only",
+        match=r"air_condition profiles cover the seven octave bands of Table 1 only",
     ):
         m.enclosed_space_reverberation(
             [(20.0, 0.5)],
@@ -274,7 +274,7 @@ def test_air_condition_requires_standard_bands() -> None:
 
 
 def test_the_default_band_axis_is_the_results_own_copy() -> None:
-    """The default ``frequencies`` is :data:`OCTAVE_BANDS`, which refuses writes.
+    """The default ``frequencies`` is the module's own octave-band axis, read-only.
 
     The result used to carry that very array, so writing into
     ``result.frequencies`` edited the published bands for every later caller.
@@ -282,5 +282,5 @@ def test_the_default_band_axis_is_the_results_own_copy() -> None:
     result holds.
     """
     result = m.enclosed_space_reverberation([(20.0, 0.5)], 50.0)
-    assert not np.shares_memory(result.frequencies, m.OCTAVE_BANDS)
+    assert not np.shares_memory(result.frequencies, m._OCTAVE_BANDS)
     assert not result.frequencies.flags.writeable

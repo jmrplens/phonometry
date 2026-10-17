@@ -88,7 +88,7 @@ from .._internal.validation import (
 )
 from .._internal.warnings import PhonometryWarning
 from ..emission._shared import _a_weighting_corrections
-from ..emission.sound_power_reverberation import reverberation_background_correction
+from ..emission._sound_power_reverberation import reverberation_background_correction
 from ._insulation_shared import (
     _THIRD_OCTAVE,
     PREFERRED_BAND_RANGE_HZ,

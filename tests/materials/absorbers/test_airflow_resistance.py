@@ -36,7 +36,7 @@ from reference_data import (
 )
 
 from phonometry.fluids import Fluid
-from phonometry.materials.absorbers.airflow_resistance import (
+from phonometry.materials.absorbers import (
     AirflowResistanceWarning,
     StaticAirflowResult,
     airflow_resistance,

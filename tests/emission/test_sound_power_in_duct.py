@@ -35,7 +35,7 @@ import pytest
 import reference_data as ref
 
 from phonometry import emission
-from phonometry.emission.sound_power_in_duct import (
+from phonometry.emission._sound_power_in_duct import (
     _TABLE_A1,
     _TABLE_A2,
     _TABLE_A3,

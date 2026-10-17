@@ -62,6 +62,15 @@ from .._internal.types import as_float_or_array
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
+__all__ = [
+    "CAM_C",
+    "ERB_C1_HZ",
+    "ERB_C2_PER_HZ",
+    "cam_from_frequency",
+    "erb_bandwidth",
+    "frequency_from_cam",
+]
+
 #: Slope-and-offset constant of ``ERB_N = C1 (C2 f + 1)``, Hz.
 ERB_C1_HZ = 24.673
 

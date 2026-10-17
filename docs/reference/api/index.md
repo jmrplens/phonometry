@@ -1514,6 +1514,7 @@ documents, one page per module.
 | `noise_criterion` | `function` | **NC rating, clause 5.2.2 two-step (ANSI/ASA S12.2-2019).**<br>• `levels`: octave-band SPL [dB] (the 10 bands 16 Hz–8 kHz without `frequencies`)<br>• `frequencies`: optional band centres [Hz] (subset allowed) | `nc = room.noise_criterion(levels)`<br><br>• `NCResult`; NC-(SIL) designation, tangency when exceeded |
 | `room_criterion` | `function` | **RC Mark II rating (ANSI/ASA S12.2-2019 Annex D).**<br>• `levels`: octave-band SPL [dB]<br>• `frequencies`: optional band centres [Hz] | `rc = room.room_criterion(levels)`<br><br>• `RCResult`; LMF average + 'N'/'R'/'H'/'RH' tag |
 | `nc_curve` | `function` | **NC curve levels (Table 1).**<br>• `index`: NC designation 15–70 (intermediate values interpolated band by band) | `nc_curve(35)  # [82, 71, 60, ...]`<br><br>• 10 band levels [dB], 16 Hz–8 kHz |
+| `NC_OCTAVE_BANDS_HZ` / `NC_RATINGS` / `NC_CURVES_DB` | `ndarray` | **The NC curves of ANSI/ASA S12.2-2019 Table 1.**<br>• `NC_OCTAVE_BANDS_HZ`: the ten octave bands, 16 Hz–8 kHz [Hz]<br>• `NC_RATINGS`: the twelve tabulated designations, NC-15 to NC-70<br>• `NC_CURVES_DB`: their band levels [dB], one row per designation, one column per band | `room.NC_CURVES_DB[room.NC_RATINGS == 40][0]  # the NC-40 curve`<br><br>• aligned with `room.NC_OCTAVE_BANDS_HZ` |
 | `rc_curve` | `function` | **RC Mark II curve (Table D.1).**<br>• `index`: RC designation (value at 1000 Hz) | `rc_curve(35)`<br><br>• −5 dB/octave line, 10 bands [dB] |
 | `NCResult` | `dataclass` | **NC rating result.**<br>• `rating`: NC designation (NaN outside NC-15…NC-70, see `out_of_range`)<br>• `sil`, `tangency_rating`, `method`, `label`<br>• `governing_frequency`: tangency band [Hz]<br>• `frequencies` [Hz], `levels` [dB]<br>• `.plot()` | `nc.rating, nc.label` |
 | `RCResult` | `dataclass` | **RC Mark II result.**<br>• `rating`: LMF rounded [dB], int<br>• `lmf`: 500/1000/2000 Hz average [dB]<br>• `classification`: 'N'/'R'/'H'/'RH'<br>• `reference_curve` [dB], `frequencies` [Hz], `levels` [dB]<br>• `.plot()` | `rc.rating, rc.classification` |
@@ -2447,7 +2448,7 @@ documents, one page per module.
   `octave_filter`, `nominal_frequencies`, `normalized_frequencies`,
   `sensitivity`, `insulation_coverage_factor`,
   `insulation_expanded_uncertainty`, `RATING_OCTAVE_BANDS_HZ`,
-  `RATING_THIRD_OCTAVE_BANDS_HZ`, `phonometry.speech.sii.BAND_CENTERS`,
-  `OccupationalExposureWarning`, `fs`, `relative_humidity_percent` and
-  `volume`. The third constant alias, `BASE_PLATE_BANDS_HZ`, is the name of
-  the constant itself in 4.0.
+  `RATING_THIRD_OCTAVE_BANDS_HZ`, the `frequencies` of
+  `speech.sii_procedure("one-third-octave")`, `OccupationalExposureWarning`,
+  `fs`, `relative_humidity_percent` and `volume`. The third constant alias,
+  `BASE_PLATE_BANDS_HZ`, is the name of the constant itself in 4.0.

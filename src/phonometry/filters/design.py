@@ -10,6 +10,8 @@ from scipy import signal
 
 from .frequencies import _format_nominal_freq
 
+__all__: list[str] = []
+
 # Fewest standard-frequency ticks that must land inside the plotted range
 # before _showfilter falls back to plain powers-of-10 decade ticks.
 _MIN_STANDARD_TICKS = 3

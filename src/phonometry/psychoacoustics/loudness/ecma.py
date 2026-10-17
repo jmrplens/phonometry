@@ -68,6 +68,11 @@ from ..._internal.validation import (
 )
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 
+__all__ = [
+    "EcmaLoudness",
+    "loudness_ecma",
+]
+
 # --------------------------------------------------------------------------
 # Global constants (Clause 5)
 # --------------------------------------------------------------------------
@@ -82,7 +87,7 @@ _N_FADE = 240  # 5 ms fade-in, n_fadein = 0.005 * 48000 (Formula 1)
 #: Audibility criterion (Clause 5.1.9): a signal is considered audible when
 #: its total basis loudness (sum of the specific basis loudness over the 53
 #: bands with dz = 0.5) exceeds this value, in sone_HMS.
-AUDIBILITY_THRESHOLD_SONE_HMS = 0.01
+_AUDIBILITY_THRESHOLD_SONE_HMS = 0.01
 
 # Auditory filter bank (Clause 5.1.4)
 _DF0 = 81.9289  # delta f at f = 0 [Hz] (below Formula 10)

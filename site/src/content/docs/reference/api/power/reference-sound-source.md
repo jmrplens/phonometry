@@ -56,7 +56,7 @@ standard deviation from which clause 11 builds the expanded uncertainty.
 The calibration is consumed where a comparison method asks for
 $L_{W(\mathrm{RSS})}$: [`sound_power_comparison`](/phonometry/reference/api/power/sound-power-reverberation/#sound_power_comparison),
 [`sound_energy_comparison`](/phonometry/reference/api/power/sound-power-reverberation/#sound_energy_comparison),
-[`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/),
+[`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ),
 [`sound_energy_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_energy_in_situ) and
 [`high_frequency_sound_power_comparison`](/phonometry/reference/api/power/sound-power-high-frequency/#high_frequency_sound_power_comparison) accept a
 [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) where they accept the levels, and read the
@@ -202,7 +202,7 @@ Calibrate a reference sound source in a hemi-anechoic room (ISO 6926 clause 8).
 
 The one-third octave band levels over the 2 m hemisphere are corrected
 for background position by position and energy-averaged as ISO 3745
-prescribes ([`sound_power_anechoic`](/phonometry/reference/api/power/sound-power-anechoic/)), then
+prescribes ([`sound_power_anechoic`](/phonometry/reference/api/power/sound-power-anechoic/#sound_power_anechoic)), then
 Formula (2) carries them to the sound power level under the reference
 meteorological conditions with the $C_1$, $C_2$ and
 $C_3$ of 8.4. The directivity index of each position (3.9) is its

@@ -54,6 +54,12 @@ if TYPE_CHECKING:
 
     from ..io._signal import Signal
 
+__all__ = [
+    "FrequencyResponseResult",
+    "coherence",
+    "transfer_function",
+]
+
 
 def _validate_pair(
     x: Signal | NDArray[np.float64] | list[float],

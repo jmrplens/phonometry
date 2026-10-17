@@ -17,7 +17,7 @@ from phonometry.psychoacoustics import (
     sharpness_din,
     sharpness_din_from_specific,
 )
-from phonometry.psychoacoustics.quality.sharpness import reference_sound
+from phonometry.psychoacoustics.quality.sharpness import _reference_sound
 
 FS = 48000
 
@@ -98,7 +98,7 @@ def _level_for_4_sone(f_lo: float, f_hi: float) -> float:
 
 def test_reference_signal_is_one_acum() -> None:
     """Clause 6: the standard test signal gives exactly 1.00 acum."""
-    s = sharpness_din(reference_sound(), FS)
+    s = sharpness_din(_reference_sound(), FS)
     assert s == pytest.approx(1.00, abs=1e-9)
 
 
@@ -146,7 +146,7 @@ def test_annex_b_variants() -> None:
     formulas, unlike the normative method whose k is derived from this very
     signal. Measured: ~0.96 acum (Aures), ~1.02 acum (von Bismarck).
     """
-    spec = loudness_zwicker(reference_sound(), FS, stationary=True).specific
+    spec = loudness_zwicker(_reference_sound(), FS, stationary=True).specific
     for method in ("aures", "bismarck"):
         s = sharpness_din_from_specific(spec, method=method)
         assert abs(s - 1.0) < 0.05, f"{method}: S={s:.6f}"

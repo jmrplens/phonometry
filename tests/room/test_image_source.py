@@ -34,7 +34,7 @@ import numpy as np
 import pytest
 
 from phonometry import room
-from phonometry.room.image_source import WALL_ORDER
+from phonometry.room.image_source import _WALL_ORDER
 from phonometry.simulation import GaussianPulse, fdtd_simulation
 
 C = 343.0
@@ -84,7 +84,7 @@ def test_fully_absorbing_wall_annihilates_its_reflections() -> None:
     # images that never touch that wall survive.
     dims = (6.0, 5.0, 4.0)
     alpha = np.zeros(6)
-    alpha[WALL_ORDER.index("z0")] = 1.0  # floor perfectly absorbing
+    alpha[_WALL_ORDER.index("z0")] = 1.0  # floor perfectly absorbing
     res = room.image_source_rir(
         dims, (2.0, 2.0, 2.0), (4.0, 3.0, 2.0), alpha, fs=48000, max_order=6
     )

@@ -37,9 +37,8 @@ of Noise and Vibration Analysis for Engineers* 2nd ed., section 7.3:
 The practical consequence in a ventilation duct is blunt: a 0.65 m x 0.4 m
 air-conditioning duct cuts on at 264 Hz, so plane-wave silencer algebra is
 valid only in the 63 Hz to 250 Hz octaves. [`plane_wave_limit`](/phonometry/reference/api/noise_control/duct-modes/#plane_wave_limit) returns
-that frequency and `warn_above_plane_wave_limit` issues the
-[`PlaneWaveWarning`](/phonometry/reference/api/noise_control/duct-modes/#planewavewarning) the silencer and duct-path results raise on the
-caller's behalf.
+that frequency, and the silencer and duct-path results raise
+[`PlaneWaveWarning`](/phonometry/reference/api/noise_control/duct-modes/#planewavewarning) on the caller's behalf above it.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 

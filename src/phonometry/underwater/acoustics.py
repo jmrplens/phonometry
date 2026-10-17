@@ -35,6 +35,16 @@ from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
+__all__ = [
+    "UNDERWATER_REFERENCE_EXPOSURE_PA2_S",
+    "UNDERWATER_REFERENCE_PRESSURE_PA",
+    "in_air_to_underwater_spl",
+    "peak_sound_pressure_level",
+    "sound_exposure_level",
+    "sound_pressure_level",
+    "underwater_to_in_air_spl",
+]
+
 #: ISO 1683:2015 Table 2, the reference values for sound in liquids.
 _LIQUID = ISO1683_REFERENCE_VALUES["liquid"]
 #: Underwater reference sound pressure ``p₀`` (Pa), i.e. 1 µPa (ISO 18405;

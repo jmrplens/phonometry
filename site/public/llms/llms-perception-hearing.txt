@@ -1000,11 +1000,12 @@ to 40.8 dB rather than their 45.0 dB sum; the compression term removes 4.2 dB.
 ```python
 import matplotlib.pyplot as plt
 from phonometry import hearing
-from phonometry.hearing.noise_induced_hearing_loss import NIPTS_FREQUENCIES as f
 
 # One line for the NIPTS spectrum with its fractile band:
-hearing.nipts(95.0, 40.0, 0.9).plot()
+result = hearing.nipts(95.0, 40.0, 0.9)
+result.plot()
 plt.show()
+f = result.frequencies   # the six audiometric frequencies of the standard
 
 # By hand, both panels:
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.5, 5.6))
@@ -1448,9 +1449,9 @@ which screens an earmuff by its insertion loss on an acoustic test fixture
   baseline any protected exposure is judged against.
 - [Audiometric Test Methods (ISO 8253-1 and -2)](https://docs.jmrp.io/phonometry/perception/hearing/audiometry/): the
   diffuse-field test the site of ISO 4869-3 shares.
-- API reference: [`hearing.real_ear_attenuation`](https://docs.jmrp.io/phonometry/reference/api/hearing/real-ear-attenuation/),
+- API reference: [`hearing`: real-ear attenuation](https://docs.jmrp.io/phonometry/reference/api/hearing/real-ear-attenuation/),
   [`hearing.hearing_protectors`](https://docs.jmrp.io/phonometry/reference/api/hearing/hearing-protectors/),
   [`hearing.active_noise_reduction`](https://docs.jmrp.io/phonometry/reference/api/hearing/active-noise-reduction/)
-  and [`hearing.earmuff_insertion_loss`](https://docs.jmrp.io/phonometry/reference/api/hearing/earmuff-insertion-loss/).
+  and [`hearing`: earmuff insertion loss](https://docs.jmrp.io/phonometry/reference/api/hearing/earmuff-insertion-loss/).
 
 ---

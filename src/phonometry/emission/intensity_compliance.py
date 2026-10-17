@@ -93,7 +93,7 @@ __all__ = [
 
 #: Nominal microphone separation the IEC 61043 Table 2 figures apply to, in
 #: metres (25 mm). Note 1 of the table rescales them by ``10 lg(x/25)``.
-REFERENCE_SPACING_M = 0.025
+_REFERENCE_SPACING_M = 0.025
 
 #: IEC 61043:1993 Table 2 (EN 61043:1994 standard page 14): minimum
 #: pressure-residual intensity index requirements, in decibels, for probes,
@@ -184,7 +184,7 @@ def _spacing_offset(spacing: float) -> float:
     if not np.isfinite(spacing) or spacing <= 0.0:
         msg = "'spacing_m' must be a positive, finite distance in metres."
         raise ValueError(msg)
-    return float(10.0 * np.log10(spacing / REFERENCE_SPACING_M))
+    return float(10.0 * np.log10(spacing / _REFERENCE_SPACING_M))
 
 
 def _check_device(device: str) -> tuple[int, int]:
@@ -202,7 +202,7 @@ def _check_device(device: str) -> tuple[int, int]:
 def residual_index_limits(
     device: str = "instrument",
     *,
-    spacing_m: float = REFERENCE_SPACING_M,
+    spacing_m: float = _REFERENCE_SPACING_M,
     frequencies: list[float] | np.ndarray | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     r"""IEC 61043:1993 Table 2 minimum pressure-residual intensity index.
@@ -301,7 +301,7 @@ def verify_intensity_class(
     frequencies: list[float] | np.ndarray,
     *,
     device: str = "instrument",
-    spacing_m: float = REFERENCE_SPACING_M,
+    spacing_m: float = _REFERENCE_SPACING_M,
 ) -> IntensityInstrumentComplianceResult:
     r"""Verify a measured ``delta_pI0`` spectrum against IEC 61043:1993 Table 2.
 

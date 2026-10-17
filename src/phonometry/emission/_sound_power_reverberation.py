@@ -362,7 +362,7 @@ def reverberation_background_correction(
 
     Other standards reach for this one by name rather than repeat it:
     ISO 11957:1996 asks for a correction "in accordance with ISO 3741" four
-    times over, and :mod:`phonometry.noise_control.cabin_insulation` calls
+    times over, and :func:`phonometry.noise_control.cabin_insulation` calls
     this.
 
     :param levels: Band levels measured with the background present, in

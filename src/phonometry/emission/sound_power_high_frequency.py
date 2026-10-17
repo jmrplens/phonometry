@@ -279,6 +279,8 @@ def room_absorption_coefficient(
     :return: :math:`\alpha_\mathrm{room}` per band, in (0, 1).
     :raises ValueError: for a non-positive or non-finite time, volume or
         surface.
+    :raises TypeError: if ``surface_area`` or ``volume`` is not a single number, or
+        ``reverberation_time`` holds a text or a value that is not a real number.
     """
     t = require_positive_array(reverberation_time, "reverberation_time")
     volume, surface = _room_geometry(volume, surface_area)
@@ -343,6 +345,8 @@ def room_constant_from_air_absorption(
         for the atmospheric inputs :func:`air_absorption_np_per_m` refuses, or
         where :math:`8 \alpha V / S \ge 1`: the air alone would then absorb more
         than the room surface can, and Formula (7) has no finite room constant.
+    :raises TypeError: if ``surface_area`` or ``volume`` is not a single number, or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     volume, surface = _room_geometry(volume, surface_area)
     freqs = require_positive_array(frequencies, "frequencies")
@@ -396,6 +400,9 @@ def min_analyzer_bandwidth(
     :param speed_of_sound: Speed of sound ``c``, in metres per second.
     :return: The minimum bandwidth :math:`\Delta f`, in hertz.
     :raises ValueError: for a non-positive or non-finite input.
+    :raises TypeError: if ``microphone_speed_m_s`` or ``speed_of_sound`` is not a single
+        number, or ``tone_frequency_hz`` holds a text or a value that is not a real
+        number.
     """
     f = require_positive_array(tone_frequency_hz, "tone_frequency_hz")
     v = require_positive(microphone_speed_m_s, "microphone_speed_m_s")
@@ -415,6 +422,8 @@ def tone_level_from_sidebands(sideband_levels: ArrayLike) -> float:
         :math:`L_i`, in decibels re 20 µPa.
     :return: :math:`L_\mathrm{tot}`, in decibels re 20 µPa.
     :raises ValueError: for an empty or non-finite input.
+    :raises TypeError: if ``sideband_levels`` holds a text or a value that is not a real
+        number.
     """
     levels = require_finite_array(sideband_levels, "sideband_levels")
     return energy_sum(levels)
@@ -452,6 +461,7 @@ def free_field_absorption_correction(
     :return: :math:`K_\alpha` per frequency, in decibels.
     :raises ValueError: for a non-positive radius or the atmospheric inputs
         :func:`air_absorption_np_per_m` refuses.
+    :raises TypeError: if ``radius`` is not a single number.
     """
     radius = require_positive(radius, "radius")
     alpha_db_per_m = _EIGHT_686 * air_absorption_np_per_m(
@@ -520,6 +530,7 @@ class HighFrequencySoundPowerResult(OwnsArrays):
         :raises ValueError: if ``method`` is neither ``'direct'`` nor
             ``'comparison'``, if a per-band field is not one-dimensional, or
             if two of them do not carry one value per band.
+        :raises TypeError: if ``method`` is not a text.
         """
         require_choice(self.method, "method", _METHODS)
         require_ranks(
@@ -657,6 +668,8 @@ def high_frequency_sound_power(
     :raises ValueError: for non-finite levels, a room constant that is not
         positive, frequencies that do not match the bands, or a temperature
         or static pressure ISO 3741 cannot correct from.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     _validate_meteorology(temperature_c, static_pressure_kpa)
     mean_level = _mean_band_level(pressure_levels, "pressure_levels")
@@ -735,7 +748,9 @@ def high_frequency_sound_power_comparison(
         ``method='comparison'``, ``tonal`` set when ``noise_bandwidth_hz`` is
         given.
     :raises TypeError: for a band calibration given as the reference when
-        ``noise_bandwidth_hz`` asks for a tonal comparison, which needs levels.
+        ``noise_bandwidth_hz`` asks for a tonal comparison, which needs levels,
+        a ``noise_bandwidth_hz`` that is not one number, or ``frequencies``
+        that hold a text or a value that is not a number.
     :raises ValueError: for non-finite levels, reference levels that do not
         span the same bands, a non-positive bandwidth, or a temperature or
         static pressure ISO 3741 cannot correct from.
@@ -880,6 +895,8 @@ def high_frequency_levels_to_determine(
     :raises ValueError: for a noise type the table does not name, or for a
         combination it has no row for: no significant noise in either range,
         or broadband noise in the 16 kHz octave with none below it.
+    :raises TypeError: if ``noise_125_hz_to_8_khz`` or ``noise_16_khz_octave`` is not a
+        text.
     """
     below = require_choice(
         noise_125_hz_to_8_khz, "noise_125_hz_to_8_khz", _NOISE_125_HZ_TO_8_KHZ

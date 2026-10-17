@@ -78,6 +78,34 @@ $\overline{K}_{ij}$, as Part 4 Clause 9 requires. Because ISO 10848 contains no
 worked numeric example, conformance is anchored on closed-form identities
 (simplified $K_{ij}$, $a_j$ at $f_\mathrm{ref}$, $\eta$).
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/strong_coupling_check_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/strong_coupling_check.svg" alt="ISO 10848-1 Formula (15) across one-third-octave bands from 100 Hz to 5000 Hz for a 140 mm concrete wall excited and the 200 mm wall it meets: the one-way velocity level difference Dv,ij rising from 4.2 dB to 12.6 dB against the 6.1 dB bound, with the strong-coupling side under the bound shaded and the five lowest bands, where the inequality does not hold, marked" width="80%"></picture>
+
+*Formula (15) asks a 140 mm concrete wall excited ($m_i$ = 322 kg/m², $f_{\mathrm{c}i}$ = 133 Hz) and the 200 mm wall it meets ($m_j$ = 460 kg/m², $f_{\mathrm{c}j}$ = 93 Hz) for a one-way $D_{\mathrm{v},ij}$ of at least 6.1 dB. The measured difference falls short of it in the five lowest bands: there the two walls are strongly coupled, they cannot be taken as separate SEA subsystems, and the measured $K_{ij}$ may not be relevant (4.3.3). From 315 Hz up the inequality holds, so the coupling is weak enough for the SEA picture $K_{ij}$ rests on. The bound moves when $i$ and $j$ swap, so each direction is judged on its own.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import building
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630,
+         800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+# One-way velocity level difference, the 140 mm wall i excited (dB):
+dv_ij = [4.2, 4.7, 5.1, 5.5, 5.9, 6.4, 6.8, 7.4, 7.9,
+         8.5, 9.0, 9.6, 10.1, 10.7, 11.2, 11.7, 12.1, 12.6]
+check = building.check_strong_coupling(
+    dv_ij, mass_i=322.0, mass_j=460.0,
+    critical_frequency_i=133.0, critical_frequency_j=93.0, frequencies=freqs,
+)
+print(round(check.min_velocity_level_difference, 1))   # 6.1 dB
+print(int(check.holds.sum()), check.passes)            # 13 False
+check.plot()
+plt.show()
+```
+
+</details>
+
 Those checks are the only enforcement there is. The acquisition itself
 (shielding the other elements, a shield meeting $\Delta R_\text{min}$, the
 position counts and separations, the accelerometer mass-loading inequality,

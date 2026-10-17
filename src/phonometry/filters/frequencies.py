@@ -146,6 +146,7 @@ def nominal_frequencies(
         (``.frequencies``), the band edges (``.lower_edges`` and
         ``.upper_edges``) and the nominal labels (``.labels``).
     :raises ValueError: for a non-positive or non-finite ``fraction``.
+    :raises TypeError: if ``fraction`` is not a single number.
     """
     # Zero used to reach _bandedge's division, NaN the index rounding, and a
     # negative fraction never terminated: the band centres underflow to 0.0
@@ -313,6 +314,7 @@ def normalized_frequencies(fraction: int) -> list[float]:
 
     :param fraction: 1 or 3 (Octave or 1/3 Octave).
     :return: List of standard frequencies.
+    :raises TypeError: if ``fraction`` is not a single number.
     """
     require_scalar(fraction, "fraction")
     predefined = {

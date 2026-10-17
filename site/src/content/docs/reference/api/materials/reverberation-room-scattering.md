@@ -76,6 +76,7 @@ the standard is taken as a single (mean) speed of sound.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for non-positive `V`, `S`, `c` or `T`. |
+| TypeError | if `area` or `volume` is not a single number. |
 
 ## BASE_PLATE_BANDS_HZ
 
@@ -141,6 +142,7 @@ must not exceed the Table 1 limits (Clause 6.2). See
 | Exception | When |
 | :--- | :--- |
 | ValueError | for non-positive `V`, `S`, `c` or `T`. |
+| TypeError | if `area` or `volume` is not a single number. |
 
 ## BasePlateScatteringCheck
 
@@ -302,6 +304,7 @@ situation 2 adds the test sample, still without turntable rotation
 | Exception | When |
 | :--- | :--- |
 | ValueError | for non-positive `V`, `S`, `c` or `T`. |
+| TypeError | if `area` or `volume` is not a single number. |
 
 ## reverberation_time_uncertainty
 
@@ -593,6 +596,7 @@ apparent (specular) absorption includes the energy lost to scattering.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for non-positive `V`, `S`, `c` or `T`. |
+| TypeError | if `area` or `volume` is not a single number. |
 
 ## speed_of_sound_iso17497
 
@@ -617,3 +621,4 @@ $c = 343.2 \sqrt{(273.15 + t) / 293.15}$ (m/s).
 | Exception | When |
 | :--- | :--- |
 | ValueError | if any temperature is at or below -273.15 degC. |
+| TypeError | if `temperature_c` holds a text or a value that is not a real number. |

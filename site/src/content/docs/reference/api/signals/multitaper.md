@@ -105,6 +105,7 @@ the resolution bandwidth $2W$).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `n_tapers` is a flag, a text or an array where a count goes. |
 
 ## MultitaperSpectralDensityResult
 

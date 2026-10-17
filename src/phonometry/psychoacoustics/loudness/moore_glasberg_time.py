@@ -438,6 +438,7 @@ class MooreGlasbergTimeVaryingLoudness(OwnsArrays):
             frame axis, if ``n_max`` is not a finite non-negative sone value
             or is not the maximum of ``long_term_loudness``, or if
             ``loudness_level_max`` is not ``n_max`` through Table 5.
+        :raises TypeError: if ``n_max`` is not a single number.
         """
         require_ranks(
             self,
@@ -790,6 +791,7 @@ def loudness_moore_glasberg_time(
     :param percentiles: Fractions (percent) for which the exceeded long-term
         loudness is reported.
     :return: A :class:`MooreGlasbergTimeVaryingLoudness`.
+    :raises TypeError: if ``fs`` is not a single number.
 
     A steady 1 kHz tone at 40 dB SPL, binaural, free field, yields a peak
     long-term loudness of 1.000 sone (40 phon) by definition of the sone.

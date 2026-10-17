@@ -83,6 +83,7 @@ if TYPE_CHECKING:
         ChannelMatchVerification,
         CoherenceCheck,
         DoubleHitCheck,
+        EnergySpectralDensity,
         ExponentialWindowCorrection,
         ForceSpectrumCheck,
         ImpactMobilityResult,
@@ -523,6 +524,8 @@ _STRINGS: dict[str, str] = {
     _PHASE_AXIS_LABEL: "Fase [°]",
     _CHANNEL_TITLE: "ISO 7626-5 8.1: concordancia entre canales",
     _COMPLIANCE_AXIS_LABEL: "Receptancia $|H|$ [m/N]",
+    "Energy spectral density $G$ [dB re highest bin]": "Densidad espectral de energía $G$ [dB re máximo]",
+    "ISO 7626-5 energy spectral density": "Densidad espectral de energía ISO 7626-5",
 }
 
 
@@ -3229,7 +3232,7 @@ def plot_train_category_prediction(
     positions = _band_axis(ax, result.frequencies, language=language)
     ax.plot(
         positions,
-        result.emission_db,
+        result.emission_levels,
         color=_C_TERTIARY,
         ls="--",
         lw=1.4,
@@ -3242,11 +3245,11 @@ def plot_train_category_prediction(
     kwargs.setdefault("marker", "o")
     style_default(kwargs, "markersize", 4)
     kwargs.setdefault("label", _t(_FLOOR_LABEL, language))
-    ax.plot(positions, result.floor_db, **kwargs)
+    ax.plot(positions, result.floor_levels, **kwargs)
     weighted = np.isin(result.frequencies, result.weighted_frequencies_hz)
     ax.plot(
         positions[weighted],
-        result.weighted_db,
+        result.weighted_levels,
         color=_C_SECONDARY,
         ls=":",
         lw=1.4,
@@ -3558,7 +3561,8 @@ def plot_double_hit_check(
 
     axes = _new_axes_column(2, figsize=(8.0, 6.6))
     _history(axes[0], **kwargs)
-    freqs, esd = energy_spectral_density(force, result.fs)
+    spectrum = energy_spectral_density(force, result.fs)
+    freqs, esd = spectrum.frequencies, spectrum.density
     axe = axes[1]
     shown = np.where(esd[1:] > 0.0, esd[1:], np.nan)
     axe.semilogy(
@@ -4041,3 +4045,48 @@ def plot_channel_match(
         localize_axes(axis, language)
     _lay_out_own_figure(axes[0])
     return axes
+
+
+def plot_energy_spectral_density(
+    result: EnergySpectralDensity,
+    *,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The energy spectral density of a record, in dB re its highest bin (3.4).
+
+    The density is drawn relative to its highest bin, the reading 6.3 makes of
+    a force spectrum, so the curve says how far each frequency falls below the
+    peak whatever the unit of the record; a bin with no energy is left out.
+
+    :param result: An
+        :class:`~phonometry.vibration.structural.EnergySpectralDensity`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the density curve.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    density = np.asarray(result.density, dtype=np.float64)
+    peak = float(np.max(density))
+    shown = np.full_like(density, np.nan)
+    if peak > 0.0:
+        with np.errstate(divide="ignore"):
+            level = 10.0 * np.log10(density / peak)
+        shown = np.where(np.isfinite(level), level, np.nan)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "linewidth", 1.4)
+    ax.plot(freq, shown, **kwargs)
+    ax.set_xlim(0.0, float(freq[-1]))
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t("Energy spectral density $G$ [dB re highest bin]", language))
+    ax.set_title(_t("ISO 7626-5 energy spectral density", language))
+    if "label" in kwargs:
+        ax.legend(loc="best", fontsize="small")
+    ax.grid(visible=True, alpha=0.3)
+    localize_axes(ax, language)
+    return ax

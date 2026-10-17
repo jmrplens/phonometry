@@ -423,6 +423,7 @@ class DBHRGlobalIndexResult(OwnsArrays):
         :raises ValueError: if the four per-band columns disagree in length,
             if one of them carries an axis beyond the band axis, or if
             ``spectrum`` is not one of the Annex A table keys.
+        :raises TypeError: if ``spectrum`` is not a text.
         """
         require_choice(self.spectrum, "spectrum", tuple(DB_HR_NORMALIZED_SPECTRA))
         require_ranks(
@@ -692,6 +693,7 @@ def window_size_correction(area: float) -> int:
     :return: The correction, in dB (0, -1, -2 or -3), to be *added* to the
         catalogue ``RA`` or ``RA,tr``.
     :raises ValueError: If ``area`` is not positive and finite.
+    :raises TypeError: if ``area`` is not a single number.
     """
     value = _positive(area, "area")
     for bound, correction in _WINDOW_SIZE_CORRECTIONS:
@@ -767,6 +769,7 @@ class DBHRCheck(RichDisplay):
         verdict.
 
         :raises ValueError: if ``value`` is not finite.
+        :raises TypeError: if ``value`` is not a single number.
         """
         require_scalar(self.value, "value")
         if not math.isfinite(self.value):
@@ -877,6 +880,7 @@ def db_hr_facade_requirement(
         railway-dominant site, on ``D2m,nT,A``.
     :raises ValueError: For an unknown use/room combination, an unknown
         dominant noise, or a non-finite ``Ld``.
+    :raises TypeError: if ``ld`` is not a single number.
     """
     value = _finite(ld, "ld")
     use = _normalise(building_use, _USE_ALIASES, "building_use")
@@ -1267,6 +1271,7 @@ def check_db_hr_requirement(value: float, requirement: DBHRRequirement) -> DBHRC
     :param requirement: The :class:`DBHRRequirement` to check against.
     :return: A :class:`DBHRCheck`.
     :raises ValueError: If ``value`` is not finite.
+    :raises TypeError: if ``value`` is not a single number.
     """
     return DBHRCheck(requirement=requirement, value=_finite(value, "value"))
 

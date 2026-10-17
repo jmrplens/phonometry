@@ -184,6 +184,7 @@ def room_constant(
         :func:`phonometry.room.mean_absorption`.
     :return: The room constant ``R``, m2; a float for a scalar input,
         otherwise a per-band array.
+    :raises TypeError: if ``surface_area`` is not a single number.
     """
     surface_area = require_positive(surface_area, "surface_area")
     alpha = _require_fraction_below_one(mean_absorption, "mean_absorption")
@@ -267,6 +268,7 @@ def sabine_absorption_area(
     :return: The equivalent absorption area ``A``, m2.
     :raises ValueError: If the volume, the time or the speed is not positive
         and finite.
+    :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number.
     """
     v = require_positive(volume, "volume")
     c = require_positive(speed_of_sound, "speed_of_sound")
@@ -288,6 +290,7 @@ def schroeder_frequency(
     :param reverberation_time: Reverberation time ``T``, s (scalar or per-band).
     :param volume: Room volume ``V``, m3.
     :return: The Schroeder frequency, Hz.
+    :raises TypeError: if ``volume`` is not a single number.
     """
     volume = require_positive(volume, "volume")
     t = np.asarray(reverberation_time, dtype=np.float64)
@@ -396,6 +399,8 @@ def steady_state_spl(
         ``distance``, the measure or ``directivity`` is not positive and
         finite; or if ``source_model`` is not one of
         :data:`SOURCE_POWER_MODELS`.
+    :raises TypeError: if ``source_model`` is not a text, or
+        ``characteristic_impedance`` is not a single number.
     """
     lw = np.asarray(sound_power_level, dtype=np.float64)
     # Named measure (not rc) to avoid confusion with the critical distance rc.
@@ -520,6 +525,8 @@ def steady_state_field(
     :param characteristic_impedance: Optional ``rho c`` for the Bies
         :math:`10 \log_{10}(\rho c / 400)` term (``None`` omits it).
     :return: A :class:`SteadyFieldResult`.
+    :raises TypeError: if ``characteristic_impedance``, ``directivity``,
+        ``mean_absorption`` or ``sound_power_level`` is not a single number.
     """
     require_scalar(mean_absorption, "mean_absorption")
     require_scalar(sound_power_level, "sound_power_level")

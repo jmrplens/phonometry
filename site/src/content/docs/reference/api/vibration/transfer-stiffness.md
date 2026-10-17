@@ -254,6 +254,12 @@ limit $T \ll 1$.
 
 **Returns:** The complex transmissibility `T`.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `damping`, `mass` or `stiffness` is not a single number. |
+
 ## blocking_force_ratio
 
 ```python
@@ -389,6 +395,7 @@ lighter `m0`, or stiffer (more, or larger) force transducers. See
 | Exception | When |
 | :--- | :--- |
 | ValueError | for frequencies that are not finite and positive, a negative mass, or level spectra that do not carry one finite level per frequency. |
+| TypeError | if `output_mass_kg` is not a single number. |
 
 **Warns**
 
@@ -561,6 +568,7 @@ encourages, and the note to (B.3) allows doing so band by band.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-finite band level, or a negative or non-finite spread or standard uncertainty. |
+| TypeError | if `band_level` or `repeatability_range_db` is not a single number. |
 
 ## DrivingPointStiffnessResult
 
@@ -847,6 +855,7 @@ follow ISO 7626-1 and ISO 7626-2. See [`EffectiveBlockingMass`](/phonometry/refe
 | Exception | When |
 | :--- | :--- |
 | ValueError | for frequencies that are not finite, positive and strictly increasing, phasors of another length, a zero or non-finite effective mass, or a non-positive `m2`. |
+| TypeError | if `blocking_mass` is not a single number. |
 
 ## EffectiveBlockingMass
 
@@ -978,6 +987,12 @@ not [`valid`](/phonometry/reference/api/vibration/transfer-stiffness/#transferst
 | `flange_mass` | Output-flange mass `mf`, in kg (Default: 0.0). |
 
 **Returns:** The [`TransferStiffnessResult`](/phonometry/reference/api/vibration/transfer-stiffness/#transferstiffnessresult) (indirect method).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `blocking_mass` or `flange_mass` is not a single number. |
 
 **Warns**
 
@@ -1307,6 +1322,7 @@ $|10 \log_{10}(m_{2,\mathrm{eff}}^2 / m_2^2)| \le 1$ dB
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive frequency or blocking mass. |
+| TypeError | if `blocking_mass` or `flange_mass` is not a single number. |
 
 **Warns**
 
@@ -1343,6 +1359,7 @@ stiffness.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive reference, a non-finite stiffness, or a zero stiffness magnitude (a dead channel has no level). |
+| TypeError | if `reference` is not a single number. |
 
 ## TransferStiffnessResult
 

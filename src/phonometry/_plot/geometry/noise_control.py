@@ -20,7 +20,7 @@ leaf never imports domain code at module level.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -491,6 +491,9 @@ def plot_silencer_geometry(
     :param kwargs: Forwarded to the outline of the main bore: the chamber
         shell of a chamber, the duct of a side branch.
     :return: The axes.
+    :raises TypeError: if ``branch_area``, ``cavity_volume``, ``chamber_area``,
+        ``duct_area``, ``inlet_extension``, ``length``, ``neck_area``, ``neck_length``,
+        ``outlet_extension`` or ``pipe_area`` is not a single number.
     """
     _check_language(language)
     if kind not in _SILENCER_KINDS:
@@ -562,17 +565,13 @@ def plot_silencer_result_geometry(
     """
     if result.chain is not None:
         return plot_silencer_chain_geometry(result.chain, ax=ax, language=language)
-    if result.geometry is None:
-        msg = (
-            "This result does not retain its geometry; call "
-            "plot_silencer_geometry(kind, ...) with the original arguments."
-        )
-        raise ValueError(msg)
+    # A named device holds its geometry: the record refuses neither or both.
+    geometry = cast("dict[str, float]", result.geometry)
     return plot_silencer_geometry(
         result.kind,
         ax=ax,
         language=language,
-        **dict(result.geometry),
+        **dict(geometry),
     )
 
 
@@ -881,6 +880,8 @@ def plot_plenum_geometry(
     :return: The axes.
     :raises ValueError: naming the first of the three that is not finite and
         positive, or for an angle outside ``[0, pi/2)``.
+    :raises TypeError: if ``angle_rad``, ``exit_area``, ``line_of_sight`` or
+        ``wall_area`` is not a single number.
     """
     require_scalar(angle_rad, "angle_rad")
     from matplotlib.patches import Rectangle

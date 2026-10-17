@@ -297,6 +297,8 @@ def reference_distance_m(
     :param rayleigh_wavelength_m: :math:`\lambda_R`, in metres.
     :return: :math:`R_1`, in metres.
     :raises ValueError: For a negative extent or a non-positive wavelength.
+    :raises TypeError: if ``rayleigh_wavelength_m`` or ``source_extent_m`` is not a
+        single number.
     """
     extent = require_non_negative(source_extent_m, "source_extent_m")
     wavelength = require_positive(rayleigh_wavelength_m, "rayleigh_wavelength_m")
@@ -318,6 +320,7 @@ def attenuation_coefficient_per_m(
     :return: :math:`\alpha`, in reciprocal metres.
     :raises ValueError: For a negative damping ratio or a non-positive
         wavelength.
+    :raises TypeError: if ``damping_ratio`` or ``wavelength_m`` is not a single number.
     """
     damping = require_non_negative(damping_ratio, "damping_ratio")
     wavelength = require_positive(wavelength_m, "wavelength_m")
@@ -351,6 +354,9 @@ def far_field_velocity_mm_s(
     :return: :math:`\bar v`, one per distance, in millimetres per second.
     :raises ValueError: For a negative amplitude, exponent or attenuation, a
         non-positive reference distance, or a distance in the near field.
+    :raises TypeError: if ``attenuation_per_m``, ``exponent``, ``reference_distance_m``
+        or ``reference_velocity_mm_s`` is not a single number, or ``distance_m`` holds a
+        text or a value that is not a real number.
     """
     amplitude = require_non_negative(reference_velocity_mm_s, "reference_velocity_mm_s")
     distances = require_finite_array(distance_m, "distance_m")
@@ -389,6 +395,8 @@ def material_damping_factor(
     :return: The factor, one per distance, between 0 and 1.
     :raises ValueError: For a negative distance or damping ratio, or a
         non-positive frequency or wave speed.
+    :raises TypeError: if ``frequency_hz`` or ``wave_speed_m_s`` is not a single number,
+        or ``distance_m`` holds a text or a value that is not a real number.
     """
     distances = require_finite_array(distance_m, "distance_m")
     if np.any(distances < 0.0):
@@ -413,6 +421,7 @@ def soil_building_natural_frequency(stiffness: float, *, mass: float) -> float:
     :param mass: :math:`m_B`, in kilograms.
     :return: :math:`f_B`, in hertz.
     :raises ValueError: For a non-positive stiffness or mass.
+    :raises TypeError: if ``mass`` or ``stiffness`` is not a single number.
     """
     stiffness = require_positive(stiffness, "stiffness")
     mass = require_positive(mass, "mass")
@@ -432,6 +441,8 @@ def soil_building_frequency_guide(n_stories: int) -> tuple[float, float]:
         and both are 15 for a single storey.
     :raises ValueError: For fewer than one storey or a count that is not
         whole.
+    :raises TypeError: if ``n_stories`` is a flag, a text or an array where a count
+        goes.
     """
     count = require_count(n_stories, "n_stories")
     if count < _LOW_RISE_STOREYS:
@@ -456,6 +467,7 @@ def foundation_transfer_max(
     :param system_damping_ratio: :math:`D_0`, positive; 0,25 by default.
     :return: :math:`V_F`.
     :raises ValueError: For a non-positive damping ratio.
+    :raises TypeError: if ``system_damping_ratio`` is not a single number.
     """
     return 1.0 / (2.0 * require_positive(system_damping_ratio, "system_damping_ratio"))
 
@@ -472,6 +484,7 @@ def floor_transfer_max(floor_damping_ratio: float) -> float:
     :param floor_damping_ratio: :math:`D_1`, positive.
     :return: :math:`V_D`.
     :raises ValueError: For a non-positive damping ratio.
+    :raises TypeError: if ``floor_damping_ratio`` is not a single number.
     """
     return 1.0 / (2.0 * require_positive(floor_damping_ratio, "floor_damping_ratio"))
 
@@ -501,6 +514,9 @@ def blast_peak_velocity_mm_s(
     :return: :math:`v_{\max}`, one per distance, in millimetres per second.
     :raises ValueError: For a non-positive charge, distance or coefficient,
         or a negative exponent.
+    :raises TypeError: if ``charge_exponent``, ``charge_kg``, ``coefficient_mm_s`` or
+        ``distance_exponent`` is not a single number, or ``distance_m`` holds a text or
+        a value that is not a real number.
     """
     charge = require_positive(charge_kg, "charge_kg")
     distances = _distances(distance_m)
@@ -533,6 +549,7 @@ def fall_energy_kj(weight_kn: float, *, drop_height_m: float) -> float:
     :param drop_height_m: :math:`h`, in metres.
     :return: :math:`E`, in kilojoules.
     :raises ValueError: For a non-positive weight or height.
+    :raises TypeError: if ``drop_height_m`` or ``weight_kn`` is not a single number.
     """
     weight = require_positive(weight_kn, "weight_kn")
     height = require_positive(drop_height_m, "drop_height_m")
@@ -561,6 +578,9 @@ def impact_peak_velocity_mm_s(
     :return: :math:`v_{\max}`, one per distance, in millimetres per second.
     :raises ValueError: For a non-positive energy, distance or coefficient,
         or a negative exponent.
+    :raises TypeError: if ``coefficient_mm_s``, ``distance_exponent`` or
+        ``fall_energy_kj`` is not a single number, or ``distance_m`` holds a text or a
+        value that is not a real number.
     """
     energy = require_positive(fall_energy_kj, "fall_energy_kj")
     distances = _distances(distance_m)
@@ -590,6 +610,8 @@ def track_excitation_frequency(
     :return: :math:`f_A` and its multiples, in hertz.
     :raises ValueError: For a non-positive speed or spacing, or fewer than
         one harmonic.
+    :raises TypeError: if ``spacing_m`` or ``train_speed_m_s`` is not a single number,
+        or ``n_harmonics`` is a flag, a text or an array where a count goes.
     """
     speed = require_positive(train_speed_m_s, "train_speed_m_s")
     spacing = require_positive(spacing_m, "spacing_m")
@@ -612,6 +634,8 @@ def machine_count_correction(
     :return: :math:`\chi`, one per count.
     :raises ValueError: For a count outside the figure or a reference the
         figure has no curve for.
+    :raises TypeError: if ``n_machines`` holds a text or a value that is not a real
+        number.
     """
     counts = require_finite_array(n_machines, "n_machines")
     grid = np.asarray(MACHINE_COUNT_AXIS, dtype=np.float64)
@@ -645,6 +669,8 @@ def machine_hall_velocity_mm_s(
     :return: :math:`v_N`, one per count, in millimetres per second.
     :raises ValueError: For a negative velocity, or a count or reference
         outside Figure 3.
+    :raises TypeError: if ``reference_velocity_mm_s`` is not a single number, or
+        ``n_machines`` holds a text or a value that is not a real number.
     """
     velocity = require_non_negative(reference_velocity_mm_s, "reference_velocity_mm_s")
     counts = require_finite_array(n_machines, "n_machines")

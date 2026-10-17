@@ -115,6 +115,7 @@ shape; the spectral classes are normalised to 70 dB at 1 kHz (G4.3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a spectrum that is not 24 finite levels, an unknown absorption route, a distance that is not positive, or an atmosphere the chosen route refuses. |
+| TypeError | if `absorption` is not a text, or `distances_m` holds a text or a value that is not a real number. |
 
 ## NPDAtmosphereIncrement
 

@@ -99,12 +99,14 @@ from .linings import (
 from .masonry_cavity_wall import (
     WALL_TIE_STIFFNESS,
     WallTieCouplingResult,
+    WallTieStiffness,
     wall_tie_coupling_loss_factor,
     wall_tie_stiffness,
     wall_tie_stiffness_per_area,
 )
 from .panel_transmission import (
     PLATEAU_MATERIALS,
+    CorrugatedPlateStiffness,
     SoundReductionResult,
     corrugated_plate_mass_factor,
     corrugated_plate_stiffness,
@@ -209,6 +211,7 @@ __all__ = [
     "composite_transmission_loss",
     "corrugated_plate_mass_factor",
     "corrugated_plate_stiffness",
+    "CorrugatedPlateStiffness",
     "coupling_term",
     "coupling_term_force_source",
     "coupling_term_velocity_source",
@@ -296,6 +299,7 @@ __all__ = [
     "typical_element_mobility",
     "wall_tie_coupling_loss_factor",
     "wall_tie_stiffness",
+    "WallTieStiffness",
     "wall_tie_stiffness_per_area",
     "weighted_floating_floor_improvement",
     "weighted_lining_improvement",

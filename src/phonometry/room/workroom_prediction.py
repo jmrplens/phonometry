@@ -343,6 +343,7 @@ def fitting_density(surface_area: float, volume: float) -> float:
     :param volume: :math:`V`, in cubic metres.
     :return: :math:`q`, in reciprocal metres.
     :raises ValueError: For a non-positive area or volume.
+    :raises TypeError: if ``surface_area`` or ``volume`` is not a single number.
     """
     area = require_positive(surface_area, "surface_area")
     volume = require_positive(volume, "volume")
@@ -377,6 +378,8 @@ def workstation_level_increase(
         area, or an emission level above the sound power level, which would
         put the workstation inside a measurement surface smaller than a square
         metre.
+    :raises TypeError: if ``absorption_area``, ``emission_level`` or
+        ``sound_power_level`` is not a single number.
     """
     power = require_finite(sound_power_level, "sound_power_level")
     emission = require_finite(emission_level, "emission_level")
@@ -418,7 +421,7 @@ def workstation_level(
 
 
 def total_workstation_level(
-    contributions_db: ArrayLike, *, existing_level: float | None = None
+    contribution_levels: ArrayLike, *, existing_level: float | None = None
 ) -> float:
     """What a workstation hears once the new machines are installed, Annex B.
 
@@ -428,14 +431,16 @@ def total_workstation_level(
     and the workstation, except at a machine's own workstation, where
     :func:`workstation_level` gives it from the declared emission values.
 
-    :param contributions_db: The level each new machine alone would give at
+    :param contribution_levels: The level each new machine alone would give at
         this workstation, in decibels.
     :param existing_level: The level already there, in decibels, which for
         a workstation with no machine is the background noise.
     :return: The total, in decibels.
     :raises ValueError: For levels that are not finite.
+    :raises TypeError: if ``existing_level`` is not a single number, or
+        ``contribution_levels`` holds a text or a value that is not a real number.
     """
-    levels = require_finite_array(contributions_db, "contributions_db")
+    levels = require_finite_array(contribution_levels, "contribution_levels")
     if existing_level is not None:
         levels = np.append(levels, require_finite(existing_level, "existing_level"))
     return float(energy_sum(levels))

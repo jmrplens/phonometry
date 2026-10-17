@@ -307,6 +307,8 @@ class EnclosureInsulationResult(OwnsArrays):
         """Refuse a band set ISO 11546 does not rate in.
 
         :raises ValueError: if ``fraction`` is not 1 or 3.
+        :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
+            float).
         """
         require_band_fraction(self.fraction, "fraction")
 
@@ -381,6 +383,8 @@ class EnclosureTestEnvironmentCheck(RichDisplay):
 
         :raises ValueError: For an unknown standard, a coefficient outside
             ``(0, 1]`` or a ratio that is not positive.
+        :raises TypeError: if ``actual_area_ratio`` or ``mean_absorption_coefficient``
+            is not a single number.
         """
         require_choice(
             str(self.base_standard),
@@ -568,6 +572,10 @@ def enclosure_sound_power_insulation(
         an A-weighted pair, an unknown condition, source kind or band
         fraction, or a combination of condition and source kind Table 1 does
         not have.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float),
+        ``a_weighted_with`` or ``a_weighted_without`` is not a single number, or
+        ``frequencies``, ``level_with`` or ``level_without`` holds a text or a value
+        that is not a real number.
     """
     return _insulation(
         level_without,
@@ -621,6 +629,10 @@ def enclosure_sound_pressure_insulation(
         an A-weighted pair, an unknown condition, source kind or band
         fraction, or a combination of condition and source kind Table 1 does
         not have.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float),
+        ``a_weighted_with`` or ``a_weighted_without`` is not a single number, or
+        ``frequencies``, ``level_with`` or ``level_without`` holds a text or a value
+        that is not a real number.
     """
     return _insulation(
         level_without,
@@ -663,6 +675,9 @@ def enclosure_reciprocity_insulation(
         quantity is ``"reciprocity"``.
     :raises ValueError: For spectra that do not match, non-finite values or an
         unknown band fraction.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``external_levels``, ``frequencies`` or ``internal_levels`` holds a text or a
+        value that is not a real number.
     """
     return _insulation(
         external_levels,
@@ -714,6 +729,9 @@ def enclosure_artificial_source_insulation(
         :class:`EnclosureInsulationResult`.
     :raises ValueError: For arrays that are not two-dimensional and matched,
         fewer than two source positions, or an unknown quantity.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``frequencies``, ``level_with_by_position`` or ``level_without_by_position``
+        holds a text or a value that is not a real number.
     """
     kind = require_choice(str(quantity), "quantity", _ARTIFICIAL_QUANTITIES)
     without = require_finite_matrix(
@@ -772,6 +790,8 @@ def weighted_enclosure_insulation(
         octaves.
     :return: The rating, as a :class:`WeightedEnclosureInsulation`.
     :raises ValueError: For a spectrum that does not carry the rating bands.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``insulation`` holds a text or a value that is not a real number.
     """
     from ..building import weighted_rating
 
@@ -823,6 +843,8 @@ def estimated_a_weighted_enclosure_insulation(
     :param frequencies: Nominal band centres, in hertz.
     :return: :math:`D_{W\mathrm{A},\mathrm{e}}`, in decibels.
     :raises ValueError: For inputs that do not match band for band.
+    :raises TypeError: if ``frequencies``, ``insulation`` or ``spectrum_levels`` holds a
+        text or a value that is not a real number.
     """
     levels = require_finite_array(spectrum_levels, "spectrum_levels")
     loss = require_finite_array(insulation, "insulation")
@@ -848,6 +870,7 @@ def source_position_clearance_m(shortest_inner_dimension_m: float) -> float:
     :param shortest_inner_dimension_m: :math:`d`, in metres.
     :return: The least distance to any wall, in metres.
     :raises ValueError: For a non-positive dimension.
+    :raises TypeError: if ``shortest_inner_dimension_m`` is not a single number.
     """
     dimension = require_positive(
         shortest_inner_dimension_m, "shortest_inner_dimension_m"
@@ -868,6 +891,8 @@ def fill_ratio(source_volume_m3: float, interior_volume_m3: float) -> float:
         metres.
     :return: The ratio, dimensionless.
     :raises ValueError: For a non-positive volume.
+    :raises TypeError: if ``interior_volume_m3`` or ``source_volume_m3`` is not a single
+        number.
     """
     source = require_positive(source_volume_m3, "source_volume_m3")
     interior = require_positive(interior_volume_m3, "interior_volume_m3")
@@ -916,6 +941,9 @@ def check_enclosure_test_environment(
     :return: The verdict, as an :class:`EnclosureTestEnvironmentCheck`.
     :raises ValueError: For an unknown standard, a coefficient outside
         ``(0, 1]`` or a non-positive area.
+    :raises TypeError: if ``mean_absorption_coefficient``,
+        ``measurement_surface_area_m2`` or ``room_surface_area_m2`` is not a single
+        number.
     """
     name = require_choice(
         str(base_standard), "base_standard", tuple(TEST_ENVIRONMENT_REQUIREMENTS)

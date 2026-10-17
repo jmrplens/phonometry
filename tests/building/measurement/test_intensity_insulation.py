@@ -212,14 +212,18 @@ def test_fpi_shape_mismatch_raises() -> None:
 
 def test_subarea_intensity_level_energy_average() -> None:
     """Equal-level subareas average to the same level; Sm is the total."""
-    lin, sm = building.subarea_intensity_level([[40.0, 42.0], [40.0, 42.0]], [5.0, 5.0])
+    combined = building.subarea_intensity_level(
+        [[40.0, 42.0], [40.0, 42.0]], [5.0, 5.0]
+    )
+    lin, sm = combined.levels, combined.measurement_area
     np.testing.assert_allclose(lin, [40.0, 42.0])
     assert sm == pytest.approx(10.0)
 
 
 def test_subarea_intensity_level_area_weighting() -> None:
     """The larger subarea dominates the energy average."""
-    lin, sm = building.subarea_intensity_level([[50.0], [40.0]], [9.0, 1.0])
+    combined = building.subarea_intensity_level([[50.0], [40.0]], [9.0, 1.0])
+    lin, sm = combined.levels, combined.measurement_area
     expected = 10.0 * np.log10((9.0 * 10**5.0 + 1.0 * 10**4.0) / 10.0)
     assert lin[0] == pytest.approx(expected)
     assert sm == pytest.approx(10.0)
@@ -243,13 +247,14 @@ def test_subarea_intensity_level_negative_direction_rule() -> None:
     while Sm keeps the unsigned area sum (Formula (12)).
     """
     # Forward 9 m2 at 50 dB, reverse 1 m2 at 40 dB (~10 % reverse power).
-    lin, sm = building.subarea_intensity_level([[50.0], [40.0]], [9.0, -1.0])
+    combined = building.subarea_intensity_level([[50.0], [40.0]], [9.0, -1.0])
+    lin, sm = combined.levels, combined.measurement_area
     expected = 10.0 * np.log10((9.0 * 10**5.0 - 1.0 * 10**4.0) / 10.0)
     assert lin[0] == pytest.approx(expected)
     assert sm == pytest.approx(10.0)  # Sm = sum(|Smi|)
     # The unsigned sum would overestimate LIn by 10 lg(9,1/8,9) ~ 0,1 dB of
     # numerator energy for this case; check the exact signed/unsigned gap.
-    unsigned, _ = building.subarea_intensity_level([[50.0], [40.0]], [9.0, 1.0])
+    unsigned = building.subarea_intensity_level([[50.0], [40.0]], [9.0, 1.0]).levels
     assert unsigned[0] - lin[0] == pytest.approx(10.0 * np.log10(9.1 / 8.9))
 
 

@@ -130,6 +130,7 @@ reproduces his published eigenfrequencies.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
+| TypeError | if `corrugation_amplitude` or `corrugation_wavelength` is not a single number. |
 
 ## corrugated_plate_stiffness
 
@@ -141,7 +142,7 @@ corrugated_plate_stiffness(
     *,
     youngs_modulus: float,
     poisson_ratio: float = 0.3,
-) -> tuple[float, float, float]
+) -> CorrugatedPlateStiffness
 ```
 
 Equivalent orthotropic stiffnesses of a "wavy" corrugated plate.
@@ -184,13 +185,33 @@ the eigenfrequencies. Remember to scale the surface density by
 | `youngs_modulus` | Young's modulus `E`, in Pa (> 0). |
 | `poisson_ratio` | Poisson's ratio `nu` (Default: 0.3). |
 
-**Returns:** The triple `(Bx, Bz, Bxz)` in N.m.
+**Returns:** The three stiffnesses, in N.m, as a [`CorrugatedPlateStiffness`](/phonometry/reference/api/building/panel-transmission/#corrugatedplatestiffness) (`b_x_n_m`, `b_z_n_m`, `b_xz_n_m`).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or $\lvert\nu\rvert \ge 1$. |
+| TypeError | if `corrugation_amplitude`, `corrugation_wavelength`, `poisson_ratio`, `thickness_m` or `youngs_modulus` is not a single number. |
+
+## CorrugatedPlateStiffness
+
+```python
+CorrugatedPlateStiffness(b_x_n_m: float, b_z_n_m: float, b_xz_n_m: float)
+```
+
+The equivalent orthotropic stiffnesses of a corrugated plate (Vigran Eq. 3.115).
+
+What [`corrugated_plate_stiffness`](/phonometry/reference/api/building/panel-transmission/#corrugated_plate_stiffness) returns: the three stiffnesses,
+named, where a `(Bx, Bz, Bxz)` tuple used to be unpacked by position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `b_x_n_m` | $B_x$, the bending stiffness across the corrugations, in N·m. |
+| `b_z_n_m` | $B_z$, the bending stiffness along the corrugations, in N·m. |
+| `b_xz_n_m` | $B_{xz}$, the twisting stiffness Eq. (3.113) needs, in N·m. |
 
 ## double_wall_transmission_loss
 
@@ -243,6 +264,7 @@ unit area as *tie_stiffness_per_area* (see
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
+| TypeError | if `gap_m`, `loss_factor`, `mass1` or `mass2` is not a single number. |
 
 ## field_incidence_correction
 
@@ -265,6 +287,7 @@ Field-incidence mass-law correction `dB` (Bies Eq. 7.42).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a band set other than 1 or 3. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float). |
 
 ## mass_law_transmission_loss
 
@@ -306,6 +329,7 @@ builds its estimate on).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input, an unknown incidence or a band set other than 1 or 3. |
+| TypeError | if `incidence` is not a text, or `field_correction` or `mass_per_area` is not a single number. |
 
 ## mass_spring_mass_resonance
 
@@ -355,6 +379,7 @@ tie density and Hopkins' Table A4.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
+| TypeError | if `gap_m`, `mass1`, `mass2` or `tie_stiffness_per_area` is not a single number. |
 
 ## orthotropic_critical_frequencies
 
@@ -396,6 +421,7 @@ dominates over most of the useful frequency range.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
+| TypeError | if `bending_stiffness_1`, `bending_stiffness_2`, `mass_per_area` or `speed_of_sound` is not a single number. |
 
 ## orthotropic_plate_resonance
 
@@ -449,6 +475,7 @@ $1.5 f_{1,1}$ (Bies, Sect. 7.2.4).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or a mode order below 1. |
+| TypeError | if `bending_stiffness_x`, `bending_stiffness_xz`, `bending_stiffness_z`, `length_x`, `length_z` or `mass_per_area` is not a single number, or `mode_x` or `mode_z` is a flag, a text or an array where a count goes. |
 
 ## orthotropic_transmission_loss
 
@@ -542,6 +569,7 @@ no smooth model predicts.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input, an unknown method, a coincidence range that is not increasing, or a Heckl construction whose points would be out of order. |
+| TypeError | if `method` is not a text, or `area`, `critical_frequency_lower`, `critical_frequency_upper`, `limiting_angle_deg`, `loss_factor` or `mass_per_area` is not a single number. |
 
 ## PLATEAU_MATERIALS
 
@@ -641,7 +669,7 @@ and the material's own is then not read at all.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input, an unknown material name, a row that does not print a number the construction reads, or an under-specified panel. |
-| TypeError | for a *material* that is neither a name nor a [`PlateauMaterial`](/phonometry/reference/api/solids/plateau/#plateaumaterial). |
+| TypeError | for a *material* that is neither a name nor a [`PlateauMaterial`](/phonometry/reference/api/solids/plateau/#plateaumaterial), or a `thickness_mm`, `mass_per_area`, `plateau_height_db`, `frequency_ratio` or `field_correction` that is not one number. |
 
 ## plot_double_wall_geometry
 
@@ -683,6 +711,7 @@ resonance is annotated when given.
 | Exception | When |
 | :--- | :--- |
 | ValueError | naming the first of the three that is not finite and positive, or `resonance_frequency` when one is passed that is not. |
+| TypeError | if `gap_m`, `mass1`, `mass2` or `resonance_frequency` is not a single number. |
 
 ## single_panel_transmission_loss
 
@@ -753,6 +782,7 @@ let it be computed from *bending_stiffness* and *mass_per_area* through
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input, an unknown coincidence model, or if neither *critical_frequency* nor *bending_stiffness* is given. |
+| TypeError | if `coincidence_model` is not a text, or `critical_frequency`, `field_correction`, `loss_factor` or `mass_per_area` is not a single number. |
 
 ## SoundReductionResult
 

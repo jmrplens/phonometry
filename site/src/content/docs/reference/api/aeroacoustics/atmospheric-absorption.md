@@ -147,6 +147,7 @@ from 30 % to 90 %. Its Tables 3 to 12 print the formula from -10 °C to
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a band outside Table 2, a temperature at or below absolute zero, a humidity outside 0 % to 100 %, or an unknown interpolation. |
+| TypeError | if `eta_interpolation` is not a text, `relative_humidity_percent` or `temperature_c` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## ARP866AAttenuation
 
@@ -259,3 +260,4 @@ Annex B form leaves 57 of them up to 0.036 dB off.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `path_length_m` is not a single number, or `frequencies` holds a text or a value that is not a real number. |

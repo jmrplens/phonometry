@@ -138,6 +138,12 @@ which length that is stays with the caller.
 
 **Returns:** $f_\mathrm{k}$, in hertz.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `d0_m` or `speed_of_sound` is not a single number. |
+
 ## radiation_impedance_correction
 
 ```python
@@ -177,6 +183,7 @@ calibration used should be the one the user applies.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown radiation character, a monopole or dipole without frequencies and knee frequency, or a dipole band below the knee frequency, for which Annex A gives no formula. |
+| TypeError | if `knee_frequency_hz` is not a single number. |
 
 ## reference_source_calibration
 
@@ -239,6 +246,7 @@ marks the bands whose level was replaced, as B.2 asks the report to.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for bands that are not ascending one-third octaves from 50 Hz to 20 kHz, no position, levels, background levels, maxima or a manufacturer's $C_2$ that are not finite, or inconsistent shapes. |
+| TypeError | if `coverage_factor` is not a single number. |
 
 ## reference_source_reproducibility
 
@@ -274,6 +282,7 @@ as printed: the 3 150 Hz one-third octave band sits in the 200 Hz to
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a band outside Table 2 or an unknown option. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float). |
 
 ## ReferenceSoundSourceVerdict
 
@@ -613,6 +622,7 @@ calibrated.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a band the calibration does not cover, an octave asked at a frequency that is not an octave mid-band, only one of the two conditions, or conditions asked of a calibration that used the manufacturer's $C_2$, whose value at the test only the manufacturer gives. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float). |
 
 ## ReferenceSourceDriftResult
 

@@ -76,6 +76,12 @@ calibrated so that `x` is the instantaneous sound pressure in pascals.
 
 **Returns:** A [`MooreGlasbergLoudness`](/phonometry/reference/api/psychoacoustics/moore-glasberg/#mooreglasbergloudness).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fs` is not a single number. |
+
 ## loudness_moore_glasberg_from_spectrum
 
 ```python

@@ -129,6 +129,7 @@ def cumulative_sel_identical(sel_ss: float, n_strikes: int) -> float:
     :return: Cumulative SEL, in dB re 1 µPa²·s.
     :raises ValueError: If ``n_strikes`` is not a whole number
         :math:`\ge 1`.
+    :raises TypeError: if ``n_strikes`` or ``sel_ss`` is not a single number.
     """
     require_scalar(sel_ss, "sel_ss")
     require_scalar(n_strikes, "n_strikes")
@@ -500,7 +501,8 @@ def strike_sel_spectrum(
     :param limits: Lower and upper band-centre limits, in Hz.
     :return: A :class:`StrikeSELSpectrum`.
     :raises TypeError: If ``limits`` is not a sequence, or holds a text or
-        anything else that is not a number.
+        anything else that is not a number, or ``fraction`` is a bool, a text
+        or an array rather than a whole number.
     :raises ValueError: If the inputs are invalid: a ``fraction`` other than 1
         or 3, ``limits`` that are not a finite, increasing, positive pair, or
         a pressure or sampling rate the analysis cannot take.

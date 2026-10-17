@@ -103,12 +103,30 @@ __all__ = [
     "WallTieCouplingResult",
     "wall_tie_coupling_loss_factor",
     "wall_tie_stiffness",
+    "WallTieStiffness",
     "wall_tie_stiffness_per_area",
 ]
 
+
+@dataclass(frozen=True)
+class WallTieStiffness(OwnsArrays):
+    """The dynamic stiffness of a wall tie and the cavity it was measured at.
+
+    A row of :data:`WALL_TIE_STIFFNESS` (Hopkins Table A4), and what
+    :func:`wall_tie_stiffness` returns, named, where a ``(cavity width,
+    stiffness)`` tuple used to be unpacked by position.
+
+    :ivar cavity_width_m: The cavity width the tie was measured at, in m.
+    :ivar stiffness: Its dynamic stiffness ``sX mm``, in N/m.
+    """
+
+    cavity_width_m: float
+    stiffness: float
+
+
 #: Dynamic stiffness of wall ties, transcribed digit-for-digit from Hopkins
-#: (2007) **Table A4**, PDF page 637 (printed p. 610), as ``(cavity width in m,
-#: dynamic stiffness ``sX mm`` in N/m)``. The three 50 mm ties are those of
+#: (2007) **Table A4**, PDF page 637 (printed p. 610), as :class:`WallTieStiffness` rows
+#: (cavity width in m, dynamic stiffness ``sX mm`` in N/m). The three 50 mm ties are those of
 #: BS 1243:1978 measured by Hopkins, Wilson & Craik (1999) (their Table 1
 #: prints the same 1,7 / 16,1 / 94,0 MN/m, with a standard deviation only for
 #: the two butterfly rows, the other two being single samples); the 100 mm
@@ -116,24 +134,27 @@ __all__ = [
 #: is a property of the tie *at that cavity width*: the same vertical-twist
 #: design measures 94,0 MN/m at 50 mm and 43,4 MN/m at 100 mm, so pass the
 #: matching ``gap_m`` to the double-wall functions.
-WALL_TIE_STIFFNESS: Mapping[str, tuple[float, float]] = MappingProxyType(
+WALL_TIE_STIFFNESS: Mapping[str, WallTieStiffness] = MappingProxyType(
     {
-        "butterfly": (0.050, 1.7e6),
-        "double_triangle": (0.050, 16.1e6),
-        "vertical_twist": (0.050, 94.0e6),
-        "vertical_twist_100mm": (0.100, 43.4e6),
+        "butterfly": WallTieStiffness(cavity_width_m=0.050, stiffness=1.7e6),
+        "double_triangle": WallTieStiffness(cavity_width_m=0.050, stiffness=16.1e6),
+        "vertical_twist": WallTieStiffness(cavity_width_m=0.050, stiffness=94.0e6),
+        "vertical_twist_100mm": WallTieStiffness(
+            cavity_width_m=0.100, stiffness=43.4e6
+        ),
     }
 )
 
 
-def wall_tie_stiffness(tie: str) -> tuple[float, float]:
+def wall_tie_stiffness(tie: str) -> WallTieStiffness:
     """Look up a wall tie in Hopkins Table A4.
 
     :param tie: One of ``"butterfly"``, ``"double_triangle"``,
         ``"vertical_twist"`` (all at a 50 mm cavity) or
         ``"vertical_twist_100mm"``.
-    :return: ``(cavity_width, stiffness)``: the cavity width in m at which the
-        tie was measured, and its dynamic stiffness ``sX mm`` in N/m.
+    :return: The row, as a :class:`WallTieStiffness`: the cavity width in m
+        at which the tie was measured (``cavity_width_m``) and its dynamic
+        stiffness ``sX mm`` in N/m (``stiffness``).
     :raises ValueError: for an unknown tie name.
     """
     try:
@@ -159,10 +180,11 @@ def wall_tie_stiffness_per_area(ties_per_area: float, tie: str | float) -> float
         stiffness ``k`` of one tie, in N/m (> 0).
     :return: The stiffness per unit area :math:`n k`, in N/m^3.
     :raises ValueError: for a non-positive input or an unknown tie name.
+    :raises TypeError: if ``tie`` or ``ties_per_area`` is not a single number.
     """
     n = require_positive(ties_per_area, "ties_per_area")
     k = (
-        wall_tie_stiffness(tie)[1]
+        wall_tie_stiffness(tie).stiffness
         if isinstance(tie, str)
         else require_positive(tie, "tie")
     )
@@ -280,6 +302,9 @@ def wall_tie_coupling_loss_factor(
         (:math:`Y_\mathrm{c} = 0`, the screw/nail/bolt limit).
     :return: A :class:`WallTieCouplingResult`.
     :raises ValueError: for a non-positive input or an unknown tie name.
+    :raises TypeError: if ``mass1``, ``mass2``, ``tie`` or ``ties_per_area`` is not a
+        single number, or ``frequency`` holds a text or a value that is not a real
+        number.
     """
     f = require_finite_array(frequency, "frequency")
     if np.any(f <= 0.0):
@@ -295,7 +320,7 @@ def wall_tie_coupling_loss_factor(
     k: float | None = None
     if tie is not None:
         k = (
-            wall_tie_stiffness(tie)[1]
+            wall_tie_stiffness(tie).stiffness
             if isinstance(tie, str)
             else require_positive(tie, "tie")
         )

@@ -193,7 +193,7 @@ def _chk_three_db_rule() -> Outcome:
     "Type B uncertainty examples: typical range and standard uncertainty, dB",
 )
 def _chk_table3() -> Outcome:
-    published = env.TYPE_B_UNCERTAINTY_EXAMPLES_DB
+    published = env.EXAMPLE_TYPE_B_UNCERTAINTIES_DB
     printed = oracle.WT_TABLE3_TYPE_B_DB
     names = set(published) | set(printed)
     matching = sum(

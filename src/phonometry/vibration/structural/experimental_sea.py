@@ -133,6 +133,8 @@ def bar_modal_density(length: float, longitudinal_wave_speed: float) -> float:
         :math:`c_\mathrm{L} = \sqrt{E/\rho}`, in m/s (> 0).
     :return: The modal density ``n(f)``, in modes per hertz.
     :raises ValueError: for a non-positive input.
+    :raises TypeError: if ``length`` or ``longitudinal_wave_speed`` is not a single
+        number.
     """
     ell = require_positive(length, "length")
     c_l = require_positive(longitudinal_wave_speed, "longitudinal_wave_speed")
@@ -157,6 +159,9 @@ def beam_modal_density(
     :param bending_stiffness: Flexural stiffness ``E I``, in N.m^2 (> 0).
     :return: The modal density ``n(f)``, in modes per hertz.
     :raises ValueError: for a non-positive input.
+    :raises TypeError: if ``bending_stiffness``, ``length`` or ``mass_per_length`` is
+        not a single number, or ``frequency`` holds a text or a value that is not a real
+        number.
     """
     f = require_positive_array(frequency, "frequency")
     ell = require_positive(length, "length")
@@ -181,6 +186,8 @@ def flat_plate_modal_density(
     :param longitudinal_wave_speed: Plate wave speed ``cL``, in m/s (> 0).
     :return: The modal density ``n(f)``, in modes per hertz.
     :raises ValueError: for a non-positive input.
+    :raises TypeError: if ``area``, ``longitudinal_wave_speed`` or ``thickness_m`` is
+        not a single number.
     """
     s = require_positive(area, "area")
     t = require_positive(thickness_m, "thickness_m")
@@ -200,6 +207,8 @@ def ring_frequency(mean_radius: float, longitudinal_wave_speed: float) -> float:
     :param longitudinal_wave_speed: Plate wave speed ``cL``, in m/s (> 0).
     :return: The ring frequency ``fr``, in hertz.
     :raises ValueError: for a non-positive input.
+    :raises TypeError: if ``longitudinal_wave_speed`` or ``mean_radius`` is not a single
+        number.
     """
     a_m = require_positive(mean_radius, "mean_radius")
     c_l = require_positive(longitudinal_wave_speed, "longitudinal_wave_speed")
@@ -251,6 +260,9 @@ def cylindrical_shell_modal_density(
     :return: The modal density ``n(f)``, in modes per hertz.
     :raises ValueError: for a non-positive input or a band set other than 1
         or 3.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float),
+        ``area``, ``longitudinal_wave_speed`` or ``thickness_m`` is not a single number,
+        or ``frequency`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequency, "frequency")
     s = require_positive(area, "area")
@@ -519,6 +531,8 @@ def power_injection_clf(
         subsystem
         holds at least as much modal energy as the driven one, so no
         two-subsystem SEA model fits it).
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     f, v = _broadcast_bands(
         frequencies,
@@ -588,6 +602,8 @@ def power_injection_matrix(
         the first test (subsystem 1 driven).
     :raises ValueError: for a bad shape, a non-positive value, or a singular
         energy matrix in some band.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     f = np.atleast_1d(require_positive_array(frequencies, "frequencies"))
     e = np.asarray(energies, dtype=np.float64)

@@ -119,15 +119,15 @@ so they are not fields.
 
 True where the margin is under the preferred 10 dB and over the 6 dB.
 
-[`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_preferred_signal_to_background_db) and
-[`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_min_signal_to_background_db) bound the window where
+[`ISO14257_PREFERRED_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_preferred_background_margin_db) and
+[`ISO14257_MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_min_background_margin_db) bound the window where
 the clause asks for the ISO 3744 background correction.
 
 ### BackgroundMarginCheck.passes
 
 *property*
 
-The verdict: every margin clears [`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_preferred_signal_to_background_db).
+The verdict: every margin clears [`ISO14257_PREFERRED_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_preferred_background_margin_db).
 
 That is the only case that needs nothing done to it.
 
@@ -135,7 +135,7 @@ That is the only case that needs nothing done to it.
 
 *property*
 
-True where the margin is at or under [`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_min_signal_to_background_db).
+True where the margin is at or under [`ISO14257_MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_min_background_margin_db).
 
 The clause offers no correction for those. Judged settled.
 
@@ -180,13 +180,14 @@ read band by band.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For inputs that are not finite or do not match position for position. |
+| TypeError | if `background_levels` or `levels` holds a text or a value that is not a real number. |
 
 ## corrected_distribution_value
 
 ```python
 corrected_distribution_value(
-    distribution_values_db: ArrayLike,
-    measured_reference_db: ArrayLike,
+    distribution_levels: ArrayLike,
+    measured_reference_levels: ArrayLike,
     distances: ArrayLike,
     *,
     source_height_m: float = 0.0,
@@ -211,8 +212,8 @@ meter saw.
 
 | Name | Description |
 | :--- | :--- |
-| `distribution_values_db` | $D_j(r)$ in the room, in decibels. |
-| `measured_reference_db` | $D_{\mathrm{meas,ref}\,j}(r)$ measured for this source over a reflecting plane, in decibels. |
+| `distribution_levels` | $D_j(r)$ in the room, in decibels. |
+| `measured_reference_levels` | $D_{\mathrm{meas,ref}\,j}(r)$ measured for this source over a reflecting plane, in decibels. |
 | `distances` | $r$ at each position, in metres. |
 | `source_height_m` | $h_\mathrm{S}$, in metres. |
 | `path_height_m` | $h_\mathrm{P}$, in metres. |
@@ -224,6 +225,7 @@ meter saw.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For inputs that do not match position for position, or a correction that leaves no energy at all. |
+| TypeError | if `distances`, `distribution_levels` or `measured_reference_levels` holds a text or a value that is not a real number. |
 
 ## DECADE_TO_DOUBLING
 
@@ -266,6 +268,7 @@ recorded and reported, which is why they are arguments here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive distance, boundaries that do not increase, a near boundary inside the first metre, which would leave the near region empty, or a distance inside that first metre, which the clause does not evaluate. |
+| TypeError | if `distance`, `far_limit_m` or `near_limit_m` is not a single number. |
 
 ## EVALUATION_DISTANCES_M
 
@@ -312,6 +315,7 @@ the free field folded into a half space.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a distance that is not strictly positive or a negative height. |
+| TypeError | if `path_height_m` or `source_height_m` is not a single number, or `distances` holds a text or a value that is not a real number. |
 
 ## FREE_FIELD_OFFSET_DB
 
@@ -321,20 +325,20 @@ the free field folded into a half space.
 FREE_FIELD_OFFSET_DB = 11.0
 ```
 
-## ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB
+## ISO14257_MIN_BACKGROUND_MARGIN_DB
 
 *Constant* (`float`).
 
 ```python
-ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB = 6.0
+ISO14257_MIN_BACKGROUND_MARGIN_DB = 6.0
 ```
 
-## ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB
+## ISO14257_PREFERRED_BACKGROUND_MARGIN_DB
 
 *Constant* (`float`).
 
 ```python
-ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB = 10.0
+ISO14257_PREFERRED_BACKGROUND_MARGIN_DB = 10.0
 ```
 
 ## ISO14257_REFERENCE_DISTANCE_M
@@ -349,7 +353,7 @@ ISO14257_REFERENCE_DISTANCE_M = 1.0
 
 ```python
 level_excess(
-    distribution_values_db: ArrayLike,
+    distribution_levels: ArrayLike,
     distances: ArrayLike,
 ) -> NDArray[np.float64]
 ```
@@ -364,7 +368,7 @@ $$
 
 | Name | Description |
 | :--- | :--- |
-| `distribution_values_db` | $D$ at each position, in decibels. |
+| `distribution_levels` | $D$ at each position, in decibels. |
 | `distances` | $r$ at each position, in metres. |
 
 **Returns:** $\mathrm{DL}_\mathrm{f}$ at each position, in decibels.
@@ -374,12 +378,13 @@ $$
 | Exception | When |
 | :--- | :--- |
 | ValueError | For inputs that do not match position for position. |
+| TypeError | if `distances` or `distribution_levels` holds a text or a value that is not a real number. |
 
 ## level_excess_at
 
 ```python
 level_excess_at(
-    distribution_values_db: ArrayLike,
+    distribution_levels: ArrayLike,
     distances: ArrayLike,
     distance: float,
 ) -> float
@@ -405,7 +410,7 @@ the errata registry records it.
 
 | Name | Description |
 | :--- | :--- |
-| `distribution_values_db` | $D_i$ at the positions of the range, in decibels. |
+| `distribution_levels` | $D_i$ at the positions of the range, in decibels. |
 | `distances` | $r_i$ at the same positions, in metres. |
 | `distance` | $r$, the distance to read at, in metres. |
 
@@ -416,6 +421,7 @@ the errata registry records it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For inputs that do not match, fewer than two positions, or a non-positive distance. |
+| TypeError | if `distance` is not a single number, or `distances` or `distribution_levels` holds a text or a value that is not a real number. |
 
 ## MAX_DIRECTIVITY_INDEX
 
@@ -429,7 +435,7 @@ MAX_DIRECTIVITY_INDEX = 8.0
 
 ```python
 mean_level_excess(
-    distribution_values_db: ArrayLike,
+    distribution_levels: ArrayLike,
     distances: ArrayLike,
 ) -> float
 ```
@@ -448,7 +454,7 @@ far weighs the same as one twice as near rather than twice as much.
 
 | Name | Description |
 | :--- | :--- |
-| `distribution_values_db` | $D$ at the positions of the range, in decibels. |
+| `distribution_levels` | $D$ at the positions of the range, in decibels. |
 | `distances` | $r$ at the same positions, in metres, in increasing order. |
 
 **Returns:** $\mathrm{DL}_\mathrm{f}(r_n, r_m)$, in decibels.
@@ -458,6 +464,7 @@ far weighs the same as one twice as near rather than twice as much.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For inputs that do not match, fewer than two positions, or distances that do not increase. |
+| TypeError | if `distances` or `distribution_levels` holds a text or a value that is not a real number. |
 
 ## MIN_SOURCE_TO_WALL_M
 
@@ -479,7 +486,7 @@ NEAR_REGION_START_M = 1.0
 
 ```python
 normalized_distribution_value(
-    distribution_values_db: ArrayLike,
+    distribution_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
 ) -> float
@@ -509,7 +516,7 @@ the exact normalisation, which returns a flat curve unchanged, call
 
 | Name | Description |
 | :--- | :--- |
-| `distribution_values_db` | $D_j$ in each band, in decibels, in the order of [`SPATIAL_DECAY_BANDS_HZ`](/phonometry/reference/api/rooms/spatial-decay/#spatial_decay_bands_hz) unless `frequencies` says otherwise. |
+| `distribution_levels` | $D_j$ in each band, in decibels, in the order of [`SPATIAL_DECAY_BANDS_HZ`](/phonometry/reference/api/rooms/spatial-decay/#spatial_decay_bands_hz) unless `frequencies` says otherwise. |
 | `frequencies` | The nominal octave centres the values belong to, in hertz. |
 
 **Returns:** $D_\mathrm{Norm}$, in decibels.
@@ -519,6 +526,7 @@ the exact normalisation, which returns a flat curve unchanged, call
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a count that is not the six bands of Table 1, or a frequency the table does not name. |
+| TypeError | if `distribution_levels` or `frequencies` holds a text or a value that is not a real number. |
 
 ## NORMALIZED_OFFSET_DB
 
@@ -573,6 +581,7 @@ which the two endpoints land on printed bands.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive frequency. |
+| TypeError | if `frequency_hz` is not a single number. |
 
 ## PINK_NOISE_WEIGHTS_DB
 
@@ -619,6 +628,7 @@ used here, because it is the curve the standard draws in its own figures.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a distance that is not strictly positive. |
+| TypeError | if `distances` holds a text or a value that is not a real number. |
 
 ## sound_distribution_value
 
@@ -653,6 +663,7 @@ back the same.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For inputs that are not finite or do not broadcast. |
+| TypeError | if `levels` or `sound_power_levels` holds a text or a value that is not a real number. |
 
 ## SOURCE_ON_FLOOR_HEIGHT_M
 
@@ -674,7 +685,7 @@ SPATIAL_DECAY_BANDS_HZ = (125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0)
 
 ```python
 spatial_decay_curve(
-    distribution_values_db: ArrayLike,
+    distribution_levels: ArrayLike,
     distances: ArrayLike,
     *,
     near_limit_m: float = 5.0,
@@ -690,7 +701,7 @@ The curve of one region with its two descriptors, clause 6.
 
 | Name | Description |
 | :--- | :--- |
-| `distribution_values_db` | $D$ at every measured position, in decibels, over the whole path. |
+| `distribution_levels` | $D$ at every measured position, in decibels, over the whole path. |
 | `distances` | $r$ at the same positions, in metres, in increasing order. |
 | `near_limit_m` | $d_1$ of 6.2, in metres. |
 | `far_limit_m` | $d_2$ of 6.2, in metres. |
@@ -704,12 +715,13 @@ The curve of one region with its two descriptors, clause 6.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown region, inputs that do not match, or a region holding fewer than two measured positions. |
+| TypeError | if `band` is not a single number, or `distances` or `distribution_levels` holds a text or a value that is not a real number. |
 
 ## spatial_decay_rate
 
 ```python
 spatial_decay_rate(
-    distribution_values_db: ArrayLike,
+    distribution_levels: ArrayLike,
     distances: ArrayLike,
 ) -> float
 ```
@@ -732,7 +744,7 @@ number of decibels per doubling.
 
 | Name | Description |
 | :--- | :--- |
-| `distribution_values_db` | $D_i$ at the positions of the range, in decibels. |
+| `distribution_levels` | $D_i$ at the positions of the range, in decibels. |
 | `distances` | $r_i$ at the same positions, in metres. |
 
 **Returns:** $\mathrm{DL}_2$, in decibels per distance doubling.
@@ -742,14 +754,15 @@ number of decibels per doubling.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For inputs that do not match position for position, fewer than two positions, or positions that are all at one distance. |
+| TypeError | if `distances` or `distribution_levels` holds a text or a value that is not a real number. |
 
 ## SpatialDecayResult
 
 ```python
 SpatialDecayResult(
     distances: NDArray[np.float64],
-    distribution_values_db: NDArray[np.float64],
-    reference_values_db: NDArray[np.float64],
+    distribution_levels: NDArray[np.float64],
+    reference_distribution_levels: NDArray[np.float64],
     level_excess: NDArray[np.float64],
     decay_rate_db: float,
     mean_level_excess: float,
@@ -765,8 +778,8 @@ A spatial sound distribution curve and what clause 6 reads off it.
 | Name | Description |
 | :--- | :--- |
 | `distances` | The distance of each microphone position from the acoustical centre of the source, in metres. |
-| `distribution_values_db` | $D$ at each position, in decibels. |
-| `reference_values_db` | $D_\mathrm{ref}$ at each position, in decibels. |
+| `distribution_levels` | $D$ at each position, in decibels. |
+| `reference_distribution_levels` | $D_\mathrm{ref}$ at each position, in decibels. |
 | `level_excess` | $\mathrm{DL}_\mathrm{f}$ at each position, in decibels. |
 | `decay_rate_db` | $\mathrm{DL}_2$ over the range, in decibels per distance doubling. |
 | `mean_level_excess` | $\mathrm{DL}_\mathrm{f}(r_n, r_m)$ over the range, in decibels. |
@@ -798,7 +811,7 @@ The measurement is outside a condition ISO 14257 states.
 
 ```python
 spectrum_distribution_value(
-    distribution_values_db: ArrayLike,
+    distribution_levels: ArrayLike,
     machine_power_levels: ArrayLike,
 ) -> float
 ```
@@ -817,7 +830,7 @@ decision is made on.
 
 | Name | Description |
 | :--- | :--- |
-| `distribution_values_db` | $D_j(r)$ in each band, in decibels. |
+| `distribution_levels` | $D_j(r)$ in each band, in decibels. |
 | `machine_power_levels` | $L_{W\mathrm{mach}\,j}$ of the machine in the same bands, in decibels. |
 
 **Returns:** $D_S(r)$, in decibels.
@@ -827,6 +840,7 @@ decision is made on.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For inputs that do not match band for band. |
+| TypeError | if `distribution_levels` or `machine_power_levels` holds a text or a value that is not a real number. |
 
 ## STABILITY_TOLERANCE_DB
 

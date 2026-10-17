@@ -325,6 +325,7 @@ def equivalent_absorption_length(
     :return: Equivalent absorption length ``aj``, in m, per band.
     :raises ValueError: If any input is not positive/finite or the band counts
         are incompatible.
+    :raises TypeError: if ``area`` or ``speed_of_sound`` is not a single number.
     """
     s = _positive(area, "area")
     c0 = _positive(speed_of_sound, "speed_of_sound")
@@ -405,6 +406,8 @@ class VibrationReductionResult(OwnsArrays):
 
         :raises ValueError: if the frequencies, ``Kij`` and the bracketing mask
             do not agree on how many bands there are.
+        :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
+            float).
         """
         require_ranks(self, frequencies=1, k_ij=1, modal_overlap=1)
         require_same_length(self, "frequencies", "k_ij", "modal_overlap")
@@ -639,6 +642,8 @@ def vibration_reduction_index(
     :return: A :class:`VibrationReductionResult`.
     :raises ValueError: On incompatible band counts, non-positive geometry, or
         if only one of the two structural reverberation times is supplied.
+    :raises TypeError: if ``area_i``, ``area_j`` or ``junction_length`` is not a single
+        number.
     """
     dv = _as_1d(velocity_level_difference, "velocity_level_difference")
     lij = _positive(junction_length, "junction_length")
@@ -736,6 +741,8 @@ def vibration_reduction_index_from_flanking(
     :param reference_area: ``A0``, in m² (default 10 m²).
     :return: ``Kij`` per band, in dB.
     :raises ValueError: On incompatible band counts or non-positive geometry.
+    :raises TypeError: if ``area_i``, ``area_j``, ``junction_length`` or
+        ``reference_area`` is not a single number.
     """
     dn_f = _as_1d(
         normalized_flanking_level_difference, "normalized_flanking_level_difference"
@@ -963,6 +970,7 @@ def normalized_flanking_level_difference(
     :return: A :class:`FlankingLevelDifferenceResult`; the single-number
         rating is formed only for 16 (one-third-octave) or 5 (octave) bands.
     :raises ValueError: On incompatible band counts or non-positive areas.
+    :raises TypeError: if ``reference_area`` is not a single number.
     """
     l1 = _as_1d(source_level, "source_level")
     l2 = _as_1d(receive_level, "receive_level")
@@ -1006,6 +1014,7 @@ def normalized_flanking_impact_level(
     :return: A :class:`FlankingImpactLevelResult`; the single-number rating is
         formed only for 16 (one-third-octave) or 5 (octave) bands.
     :raises ValueError: On incompatible band counts or non-positive areas.
+    :raises TypeError: if ``reference_area`` is not a single number.
     """
     l2 = _as_1d(receive_level, "receive_level")
     area = _positive_array(absorption_area, "absorption_area")
@@ -1064,6 +1073,8 @@ def critical_frequency(
     :param speed_of_sound: Speed of sound in air ``c0``, in m/s.
     :return: Critical frequency ``fc``, in Hz.
     :raises ValueError: If any input is not positive/finite.
+    :raises TypeError: if ``longitudinal_wave_speed``, ``speed_of_sound`` or
+        ``thickness_m`` is not a single number.
     """
     c0 = _positive(speed_of_sound, "speed_of_sound")
     c_l = _positive(longitudinal_wave_speed, "longitudinal_wave_speed")
@@ -1075,7 +1086,9 @@ def critical_frequency(
 class StrongCouplingCheck(OwnsArrays):
     r"""The strong-coupling condition of Part 1, Formula (15), band by band.
 
-    ``Kij`` is relevant only where the elements couple strongly,
+    Where the elements are so strongly coupled that they cannot be taken as
+    separate SEA subsystems, the measured ``Kij`` may not be relevant (Part
+    1, 4.3.1 a) and 4.3.3); the coupling is weak enough for it only where
 
     .. math::
 
@@ -1098,6 +1111,8 @@ class StrongCouplingCheck(OwnsArrays):
         in Hz.
     :ivar critical_frequency_j: Critical frequency ``fcj`` of element ``j``,
         in Hz.
+    :ivar frequencies: The band centre frequencies of the differences, in Hz,
+        or ``None`` where the bands were not named; only the plot reads them.
     """
 
     velocity_level_difference: NDArray[np.float64]
@@ -1106,20 +1121,17 @@ class StrongCouplingCheck(OwnsArrays):
     mass_j: float
     critical_frequency_i: float
     critical_frequency_j: float
+    frequencies: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         """Reject differences or elements the formula cannot judge.
 
-        :raises ValueError: For differences that are not a finite 1-D array
-            or an element quantity that is not positive and finite.
+        :raises ValueError: For differences that are not a finite 1-D array,
+            an element quantity that is not positive and finite, or band
+            frequencies that are not one positive value per band.
         """
-        object.__setattr__(
-            self,
-            "velocity_level_difference",
-            read_only(
-                _as_1d(self.velocity_level_difference, "velocity_level_difference")
-            ),
-        )
+        difference = _as_1d(self.velocity_level_difference, "velocity_level_difference")
+        object.__setattr__(self, "velocity_level_difference", read_only(difference))
         for name in (
             "mass_i",
             "mass_j",
@@ -1127,9 +1139,19 @@ class StrongCouplingCheck(OwnsArrays):
             "critical_frequency_j",
         ):
             _positive(getattr(self, name), name)
+        if self.frequencies is not None:
+            freqs = _as_1d(self.frequencies, "frequencies")
+            if freqs.size != difference.size or np.any(freqs <= 0.0):
+                msg = (
+                    "'frequencies' must be one positive centre frequency per "
+                    f"band of 'velocity_level_difference', {difference.size} of "
+                    f"them; got {freqs.size}."
+                )
+                raise ValueError(msg)
+            object.__setattr__(self, "frequencies", read_only(freqs))
 
     @property
-    def threshold_db(self) -> float:
+    def min_velocity_level_difference(self) -> float:
         r"""The least ``Dv,ij``, :math:`3 - 10 \lg (m_i f_{\mathrm{c}j} / (m_j f_{\mathrm{c}i}))`, in dB."""
         ratio = (self.mass_i * self.critical_frequency_j) / (
             self.mass_j * self.critical_frequency_i
@@ -1145,12 +1167,16 @@ class StrongCouplingCheck(OwnsArrays):
         """
         difference = np.asarray(self.velocity_level_difference, dtype=np.float64)
         return np.asarray(
-            settled(difference - self.threshold_db) >= 0.0, dtype=np.bool_
+            settled(difference - self.min_velocity_level_difference) >= 0.0,
+            dtype=np.bool_,
         )
 
     @property
     def passes(self) -> bool:
-        """The verdict: the elements couple strongly in every band given."""
+        """The verdict: the inequality holds in every band given.
+
+        In none of them, then, does strong coupling put ``Kij`` in doubt.
+        """
         return bool(np.all(self.holds))
 
     def __bool__(self) -> bool:
@@ -1162,6 +1188,29 @@ class StrongCouplingCheck(OwnsArrays):
         msg = "a StrongCouplingCheck has no truth value; read its '.passes' or '.holds'"
         raise TypeError(msg)
 
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        r"""Plot ``Dv,ij`` band by band against the bound of Formula (15).
+
+        The bound :math:`3 - 10 \lg (m_i f_{\mathrm{c}j} / (m_j
+        f_{\mathrm{c}i}))` is drawn across the bands with the side under it
+        shaded, where the elements are strongly coupled and ``Kij`` may not be
+        relevant, and a band where the inequality does not hold is marked.
+
+        Requires matplotlib (``pip install phonometry[plot]``).
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the ``Dv,ij`` curve.
+        :return: The axes.
+        """
+        from ..._i18n import check_language
+        from ..._plot.building import plot_strong_coupling_check
+
+        check_language(language)
+        return plot_strong_coupling_check(self, ax=ax, language=language, **kwargs)
+
 
 def check_strong_coupling(
     velocity_level_difference: Sequence[float] | np.ndarray,
@@ -1169,11 +1218,15 @@ def check_strong_coupling(
     mass_j: float,
     critical_frequency_i: float,
     critical_frequency_j: float,
+    *,
+    frequencies: Sequence[float] | np.ndarray | None = None,
 ) -> StrongCouplingCheck:
-    r"""Do the two elements couple strongly enough for ``Kij``? (Part 1, Formula (15)).
+    r"""Is the coupling of the two elements weak enough for ``Kij``? (Part 1, Formula (15)).
 
-    ``Kij`` is relevant only where
-    :math:`D_{\mathrm{v},ij} \ge 3 - 10 \log_{10}\frac{m_i f_{\mathrm{c}j}}{m_j f_{\mathrm{c}i}}`.
+    The measured ``Kij`` may not be relevant, the elements being strongly
+    coupled, in a band where
+    :math:`D_{\mathrm{v},ij} \ge 3 - 10 \log_{10}\frac{m_i f_{\mathrm{c}j}}{m_j f_{\mathrm{c}i}}`
+    does not hold (Part 1, 4.3.3).
 
     :param velocity_level_difference: Velocity level difference ``Dv,ij``
         per band from element ``i`` (excited) to element ``j``, in dB; one
@@ -1184,9 +1237,15 @@ def check_strong_coupling(
         in Hz.
     :param critical_frequency_j: Critical frequency ``fcj`` of element ``j``,
         in Hz.
+    :param frequencies: The band centre frequencies of the differences, in
+        Hz, for the plot to name the bands by; ``None`` (the default) numbers
+        them.
     :return: The verdict, as a :class:`StrongCouplingCheck`; band by band in
         its :attr:`~StrongCouplingCheck.holds`.
-    :raises ValueError: If any scalar input is not positive/finite.
+    :raises ValueError: If any scalar input is not positive/finite, or the
+        band frequencies are not one positive value per band.
+    :raises TypeError: if ``critical_frequency_i``, ``critical_frequency_j``, ``mass_i``
+        or ``mass_j`` is not a single number.
     """
     return StrongCouplingCheck(
         _as_1d(velocity_level_difference, "velocity_level_difference"),
@@ -1194,6 +1253,9 @@ def check_strong_coupling(
         mass_j=_positive(mass_j, "mass_j"),
         critical_frequency_i=_positive(critical_frequency_i, "critical_frequency_i"),
         critical_frequency_j=_positive(critical_frequency_j, "critical_frequency_j"),
+        frequencies=None
+        if frequencies is None
+        else np.asarray(frequencies, dtype=np.float64),
     )
 
 
@@ -1210,6 +1272,8 @@ def modal_density(
     :param speed_of_sound: Speed of sound in air ``c0``, in m/s.
     :return: Modal density ``n``, in modes per Hz.
     :raises ValueError: If any input is not positive/finite.
+    :raises TypeError: if ``area``, ``critical_frequency`` or ``speed_of_sound`` is not
+        a single number.
     """
     s = _positive(area, "area")
     fc = _positive(critical_frequency, "critical_frequency")

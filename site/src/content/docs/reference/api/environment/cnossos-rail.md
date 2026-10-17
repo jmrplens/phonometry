@@ -92,9 +92,9 @@ AERODYNAMIC_REFERENCE_SPEED_KMH = 300.0
 aerodynamic_sound_power(
     speed_kmh: float = 300.0,
     *,
-    reference: tuple[NDArray[np.float64], NDArray[np.float64]] | None = None,
+    reference: RailSourceSpectra | None = None,
     alpha: float = 50.0,
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]
+) -> RailSourceSpectra
 ```
 
 Aerodynamic sound power of (2.3.13) and (2.3.14), in dB.
@@ -108,15 +108,16 @@ At the reference speed the result is Table G-6 verbatim.
 | Name | Description |
 | :--- | :--- |
 | `speed_kmh` | Train speed `v`, in km/h. |
-| `reference` | `(source A, source B)` reference spectra at `v_0`, or `None` (the default) for Table G-6. |
+| `reference` | The reference spectra at `v_0` of the two source heights, as a [`RailSourceSpectra`](/phonometry/reference/api/environment/cnossos-rail/#railsourcespectra), or `None` (the default) for Table G-6. |
 | `alpha` | Speed exponent `alpha_h,i`; Table G-6 gives 50 in every band. |
 
-**Returns:** `(source A spectrum, source B spectrum)`, 24 values each.
+**Returns:** The 24 band levels at source height A and at source height B, as a [`RailSourceSpectra`](/phonometry/reference/api/environment/cnossos-rail/#railsourcespectra).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | If `reference` is not a [`RailSourceSpectra`](/phonometry/reference/api/environment/cnossos-rail/#railsourcespectra), or `speed_kmh` or `alpha` is not one number. |
 | ValueError | If the speed is not positive. |
 
 ## AERODYNAMIC_THRESHOLD_SPEED_KMH
@@ -170,7 +171,7 @@ Columns of Table G-7, labelled by the A-weighted bridge excess.
 ```python
 contact_filter(
     filter_: ContactFilter | tuple[float, float],
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]
+) -> WavelengthSpectrum
 ```
 
 Contact filter `A_3` of Table G-2.
@@ -181,7 +182,7 @@ Contact filter `A_3` of Table G-2.
 | :--- | :--- |
 | `filter_` | A [`ContactFilter`](/phonometry/reference/api/environment/cnossos-rail/#contactfilter) member or the `(wheel load in kN, wheel diameter in mm)` pair that labels the column. |
 
-**Returns:** `(wavelengths in mm, levels in dB)`.
+**Returns:** The wavelengths in mm and the levels in dB, as a [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum).
 
 **Raises**
 
@@ -236,6 +237,7 @@ frequencies.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the radius or the track length is not positive. |
+| TypeError | if `radius` or `track_length` is not a single number. |
 
 ## DirectivityEdition
 
@@ -280,6 +282,7 @@ here to every source, as the Commission's reference module does.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the angle is not finite. |
+| TypeError | if `phi` is not a single number. |
 
 ## impact_roughness
 
@@ -309,11 +312,12 @@ tabulated density of one joint per 100 m the table is returned verbatim.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the joint density is negative or not finite. |
+| TypeError | if `joint_density` is not a single number. |
 
 ## impact_roughness_single
 
 ```python
-impact_roughness_single() -> tuple[NDArray[np.float64], NDArray[np.float64]]
+impact_roughness_single() -> WavelengthSpectrum
 ```
 
 Impact roughness `L_R,IMPACT-SINGLE` of Table G-4.
@@ -322,7 +326,7 @@ The table is given for a joint density $n_l = 0.01$ m^-1, that is one
 switch, joint or crossing per 100 m, which is also the default the
 Directive prescribes for jointed track.
 
-**Returns:** `(wavelengths in mm, levels in dB)`.
+**Returns:** The wavelengths in mm and the levels in dB, as a [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum).
 
 ## octave_bands_from_third_octaves
 
@@ -354,9 +358,7 @@ band".
 ## rail_roughness
 
 ```python
-rail_roughness(
-    roughness: RailRoughnessClass | str,
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]
+rail_roughness(roughness: RailRoughnessClass | str) -> WavelengthSpectrum
 ```
 
 Rail roughness `L_r,TR` of Table G-1b.
@@ -371,7 +373,7 @@ to be supplied by the Member State.
 | :--- | :--- |
 | `roughness` | The [`RailRoughnessClass`](/phonometry/reference/api/environment/cnossos-rail/#railroughnessclass) of digit 2 of the track descriptor. |
 
-**Returns:** `(wavelengths in mm, levels in dB)`.
+**Returns:** The wavelengths in mm and the levels in dB, as a [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum).
 
 **Raises**
 
@@ -406,6 +408,29 @@ RailRoughnessClass(*values)
 ```
 
 Digit 2 of the track descriptor, Table [2.3.b].
+
+## RailSourceSpectra
+
+```python
+RailSourceSpectra(
+    source_a: NDArray[np.float64],
+    source_b: NDArray[np.float64],
+)
+```
+
+The sound power spectra of the two source heights of a railway source.
+
+What [`traction_sound_power`](/phonometry/reference/api/environment/cnossos-rail/#traction_sound_power) and [`aerodynamic_sound_power`](/phonometry/reference/api/environment/cnossos-rail/#aerodynamic_sound_power)
+return: the spectrum at source height A and at source height B (2.3.1,
+Figure [2.3.a], [`RAILWAY_SOURCE_HEIGHTS_M`](/phonometry/reference/api/environment/cnossos-rail/#railway_source_heights_m)), named, where a
+`(source A, source B)` tuple used to be unpacked by position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `source_a` | The 24 band sound power levels at source height A, in dB. |
+| `source_b` | The 24 band sound power levels at source height B, in dB. |
 
 ## RAILWAY_MIN_SPEED_KMH
 
@@ -481,6 +506,7 @@ below the minimum speed nor while idling.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the traffic is empty or an input is invalid. |
+| TypeError | if `min_speed_kmh` or `reference_time` is not a single number. |
 
 ## RAILWAY_THIRD_OCTAVE_BANDS_HZ
 
@@ -535,9 +561,9 @@ Plot the per-metre line power of the two equivalent source heights.
 
 ```python
 RailwayTrack(
-    rail_roughness: tuple[Any, Any],
+    rail_roughness: WavelengthSpectrum,
     track_transfer: Any,
-    impact_roughness: tuple[Any, Any] | None = None,
+    impact_roughness: WavelengthSpectrum | None = None,
     joint_density: float = 0.01,
     bridge_transfer: Any | None = None,
     squeal_excess: float = 0.0,
@@ -551,9 +577,9 @@ The Appendix G data of one track section.
 
 | Name | Description |
 | :--- | :--- |
-| `rail_roughness` | `(wavelengths in mm, levels in dB)` of Table G-1b. |
+| `rail_roughness` | The [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum) of Table G-1b. |
 | `track_transfer` | `L_H,TR,i` of Table G-3a, 24 values in dB. |
-| `impact_roughness` | `(wavelengths in mm, levels in dB)` of Table G-4, or `None` where there is no joint, switch or crossing. |
+| `impact_roughness` | The [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum) of Table G-4, or `None` where there is no joint, switch or crossing. |
 | `joint_density` | Joint density `n_l`, in m^-1. |
 | `bridge_transfer` | `L_H,bridge,i` of Table G-7 where the section is on a bridge, or `None`. |
 | `squeal_excess` | Curve-squeal excess in dB, from [`curve_squeal_excess`](/phonometry/reference/api/environment/cnossos-rail/#curve_squeal_excess). |
@@ -624,18 +650,19 @@ function. All three sit at source A.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `n_axles` is not a positive number. |
+| TypeError | if `n_axles` is not a single number. |
 
 ## RollingStock
 
 ```python
 RollingStock(
     n_axles: int,
-    wheel_roughness: tuple[Any, Any],
-    contact_filter: tuple[Any, Any],
+    wheel_roughness: WavelengthSpectrum,
+    contact_filter: WavelengthSpectrum,
     wheel_transfer: Any,
     superstructure_transfer: Any | None = None,
-    traction: tuple[Any, Any] | None = None,
-    aerodynamic: tuple[Any, Any] | None = None,
+    traction: RailSourceSpectra | None = None,
+    aerodynamic: RailSourceSpectra | None = None,
     aerodynamic_alpha: float = 50.0,
     *,
     tram: bool = False,
@@ -653,12 +680,12 @@ than from the [`cnossos_rail`](/phonometry/reference/api/environment/cnossos-rai
 | Name | Description |
 | :--- | :--- |
 | `n_axles` | Number of axles per vehicle `N_a`. |
-| `wheel_roughness` | `(wavelengths in mm, levels in dB)` of Table G-1a. |
-| `contact_filter` | `(wavelengths in mm, levels in dB)` of Table G-2. |
+| `wheel_roughness` | The [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum) of Table G-1a. |
+| `contact_filter` | The [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum) of Table G-2. |
 | `wheel_transfer` | `L_H,VEH,i` of Table G-3b, 24 values in dB. |
 | `superstructure_transfer` | `L_H,VEH,SUP,i` of Table G-3c for a freight wagon, or `None` for any other vehicle type. |
-| `traction` | `(source A, source B)` spectra of Table G-5, or `None` for an unpowered vehicle. |
-| `aerodynamic` | `(source A, source B)` reference spectra of Table G-6 at `v_0`, or `None` to leave aerodynamic noise out. |
+| `traction` | The [`RailSourceSpectra`](/phonometry/reference/api/environment/cnossos-rail/#railsourcespectra) of Table G-5, or `None` for an unpowered vehicle. |
+| `aerodynamic` | The [`RailSourceSpectra`](/phonometry/reference/api/environment/cnossos-rail/#railsourcespectra) of Table G-6 at `v_0`, or `None` to leave aerodynamic noise out. |
 | `aerodynamic_alpha` | Speed exponent of (2.3.13) and (2.3.14). |
 | `tram` | `True` for a tram or light metro, which uses the lower minimum speed and the tram squeal rule. |
 
@@ -667,9 +694,9 @@ than from the [`cnossos_rail`](/phonometry/reference/api/environment/cnossos-rai
 ```python
 roughness_to_frequency(
     levels: ArrayLike,
+    *,
     wavelengths_mm: ArrayLike,
     speed_kmh: float,
-    *,
     frequencies: ArrayLike = (50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0, 10000.0),
     interpolation: RoughnessInterpolation = ...,
 ) -> NDArray[np.float64]
@@ -702,6 +729,7 @@ is held.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
+| TypeError | if `speed_kmh` is not a single number. |
 
 ## RoughnessInterpolation
 
@@ -888,9 +916,7 @@ Columns of Table G-3a, `track base / rail pad` of the track descriptor.
 ## traction_sound_power
 
 ```python
-traction_sound_power(
-    vehicle: TractionVehicle | str,
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]
+traction_sound_power(vehicle: TractionVehicle | str) -> RailSourceSpectra
 ```
 
 Traction sound power per vehicle of Table G-5, in dB.
@@ -906,7 +932,7 @@ one table serves both running conditions.
 | :--- | :--- |
 | `vehicle` | A [`TractionVehicle`](/phonometry/reference/api/environment/cnossos-rail/#tractionvehicle) member or its description. |
 
-**Returns:** `(source A spectrum, source B spectrum)`, 24 values each.
+**Returns:** The 24 band levels at source height A and at source height B, as a [`RailSourceSpectra`](/phonometry/reference/api/environment/cnossos-rail/#railsourcespectra).
 
 **Raises**
 
@@ -1033,13 +1059,59 @@ other source.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the angle is not finite or the height is not 1 or 2. |
+| TypeError | if `height` or `psi` is not a single number. |
+
+## WavelengthSpectrum
+
+```python
+WavelengthSpectrum(
+    *,
+    wavelengths_mm: NDArray[np.float64],
+    levels: NDArray[np.float64],
+)
+```
+
+A roughness or contact-filter spectrum over wavelength (Appendix G).
+
+What [`wheel_roughness`](/phonometry/reference/api/environment/cnossos-rail/#wheel_roughness), [`rail_roughness`](/phonometry/reference/api/environment/cnossos-rail/#rail_roughness),
+[`contact_filter`](/phonometry/reference/api/environment/cnossos-rail/#contact_filter) and [`impact_roughness_single`](/phonometry/reference/api/environment/cnossos-rail/#impact_roughness_single) return: the
+wavelengths and the levels, named, where a `(wavelengths, levels)` tuple
+used to be unpacked by position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `wavelengths_mm` | The wavelengths of the table, in mm, longest first as Appendix G prints them. |
+| `levels` | The level at each wavelength, in dB. |
+
+### WavelengthSpectrum.plot()
+
+```python
+WavelengthSpectrum.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the levels against wavelength, on a logarithmic wavelength axis.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the spectrum curve. |
+
+**Returns:** The axes.
 
 ## wheel_roughness
 
 ```python
-wheel_roughness(
-    brake: BrakeType | str,
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]
+wheel_roughness(brake: BrakeType | str) -> WavelengthSpectrum
 ```
 
 Wheel roughness `L_r,VEH` of Table G-1a.
@@ -1050,7 +1122,7 @@ Wheel roughness `L_r,VEH` of Table G-1a.
 | :--- | :--- |
 | `brake` | The [`BrakeType`](/phonometry/reference/api/environment/cnossos-rail/#braketype) of digit 3 of the vehicle descriptor. |
 
-**Returns:** `(wavelengths in mm, levels in dB)`.
+**Returns:** The wavelengths in mm and the levels in dB, as a [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum).
 
 **Raises**
 

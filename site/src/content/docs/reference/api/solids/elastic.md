@@ -78,6 +78,7 @@ appear.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
+| TypeError | if `density_kg_m3` or `youngs_modulus_pa` is not a single number. |
 
 ## bulk_longitudinal_speed
 
@@ -112,6 +113,7 @@ speed an elastic solver integrates.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or a ratio out of range. |
+| TypeError | if `density_kg_m3`, `poisson_ratio` or `youngs_modulus_pa` is not a single number. |
 
 ## DEFAULT_SPEED_OF_SOUND_M_S
 
@@ -156,6 +158,7 @@ critical frequency of a wall or floor is computed from.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or a ratio out of range. |
+| TypeError | if `density_kg_m3`, `poisson_ratio` or `youngs_modulus_pa` is not a single number. |
 
 ## thickness_critical_frequency_product
 
@@ -202,6 +205,7 @@ because there it is the standard's own arithmetic and not the material's.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
+| TypeError | if `plate_speed_m_s` or `speed_of_sound` is not a single number. |
 
 ## youngs_modulus_from_beam_speed
 
@@ -231,6 +235,7 @@ $E = \rho\, c_\mathrm{L,b}^2$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
+| TypeError | if `density_kg_m3` or `longitudinal_speed_m_s` is not a single number. |
 
 ## youngs_modulus_from_bulk_speed
 
@@ -262,6 +267,7 @@ $E = \rho\, c'^2_\mathrm{L} (1 + \nu)(1 - 2\nu) / (1 - \nu)$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or a ratio out of range. |
+| TypeError | if `density_kg_m3`, `longitudinal_speed_m_s` or `poisson_ratio` is not a single number. |
 
 ## youngs_modulus_from_plate_speed
 
@@ -295,3 +301,4 @@ into one that can be compared with a table that prints the modulus.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or a ratio out of range. |
+| TypeError | if `density_kg_m3`, `longitudinal_speed_m_s` or `poisson_ratio` is not a single number. |

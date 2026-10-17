@@ -1034,6 +1034,7 @@ def time_weighting(
         :class:`TimeWeightedEnvelope`, which stands in for that array
         everywhere it was used and adds the rate and a level plot. It is not
         a Signal, because a mean square is not a pressure record.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     require_scalar(fs, "fs")
     fs = resolve_fs(x, fs)
@@ -1089,6 +1090,7 @@ class TimeWeighting:
     def __init__(self, fs: int, mode: str = "fast") -> None:
         """:param fs: Sample rate in Hz.
         :param mode: 'fast' (125 ms), 'slow' (1000 ms) or 'impulse' (35 ms / 1.5 s).
+        :raises TypeError: if ``fs`` is not a single number.
         """
         require_scalar(fs, "fs")
         if fs <= 0:
@@ -1169,6 +1171,7 @@ def linkwitz_riley(
         signature that lies about what the call needs.
     :param order: Total order (must be even, typically 2 or 4).
     :return: (low_pass_signal, high_pass_signal)
+    :raises TypeError: if ``frequency``, ``fs`` or ``order`` is not a single number.
     """
     require_scalar(fs, "fs")
     require_scalar(order, "order")

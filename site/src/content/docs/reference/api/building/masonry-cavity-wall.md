@@ -126,19 +126,20 @@ area cancels and only the tie density `n` enters.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or an unknown tie name. |
+| TypeError | if `mass1`, `mass2`, `tie` or `ties_per_area` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## WALL_TIE_STIFFNESS
 
 *Constant* (`mapping`).
 
 ```python
-WALL_TIE_STIFFNESS = {'butterfly': (0.05, 1700000.0), 'double_triangle': (0.05, 16100000.0), 'vertical_twist': (0.05, 94000000.0), 'vertical_twist_100mm': (0.1, 43400000.0)}
+WALL_TIE_STIFFNESS = {'butterfly': WallTieStiffness(cavity_width_m=0.05, stiffness=1700000.0), 'double_triangle': WallTieStiffness(cavity_width_m=0.05, stiffness=16100000.0), 'vertical_twist': WallTieStiffness(cavity_width_m=0.05, stiffness=94000000.0), 'vertical_twist_100mm': WallTieStiffness(cavity_width_m=0.1, stiffness=43400000.0)}
 ```
 
 ## wall_tie_stiffness
 
 ```python
-wall_tie_stiffness(tie: str) -> tuple[float, float]
+wall_tie_stiffness(tie: str) -> WallTieStiffness
 ```
 
 Look up a wall tie in Hopkins Table A4.
@@ -149,7 +150,7 @@ Look up a wall tie in Hopkins Table A4.
 | :--- | :--- |
 | `tie` | One of `"butterfly"`, `"double_triangle"`, `"vertical_twist"` (all at a 50 mm cavity) or `"vertical_twist_100mm"`. |
 
-**Returns:** `(cavity_width, stiffness)`: the cavity width in m at which the tie was measured, and its dynamic stiffness `sX mm` in N/m.
+**Returns:** The row, as a [`WallTieStiffness`](/phonometry/reference/api/building/masonry-cavity-wall/#walltiestiffness): the cavity width in m at which the tie was measured (`cavity_width_m`) and its dynamic stiffness `sX mm` in N/m (`stiffness`).
 
 **Raises**
 
@@ -186,6 +187,7 @@ mass-spring-mass resonance. Feed it to
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or an unknown tie name. |
+| TypeError | if `tie` or `ties_per_area` is not a single number. |
 
 ## WallTieCouplingResult
 
@@ -232,3 +234,22 @@ Plot `eta_ij(f)` against the rigid-connection ceiling.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+## WallTieStiffness
+
+```python
+WallTieStiffness(cavity_width_m: float, stiffness: float)
+```
+
+The dynamic stiffness of a wall tie and the cavity it was measured at.
+
+A row of [`WALL_TIE_STIFFNESS`](/phonometry/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness) (Hopkins Table A4), and what
+[`wall_tie_stiffness`](/phonometry/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness-1) returns, named, where a `(cavity width,
+stiffness)` tuple used to be unpacked by position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `cavity_width_m` | The cavity width the tie was measured at, in m. |
+| `stiffness` | Its dynamic stiffness `sX mm`, in N/m. |

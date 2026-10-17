@@ -134,15 +134,15 @@ class ProgramSpectrumBand(RichDisplay):
 
     :ivar relative_level: The relative level of the one-third-octave band,
         in dB.
-    :ivar tolerance_plus_db: The upper tolerance, in dB, as printed (a
+    :ivar upper_tolerance_db: The upper tolerance, in dB, as printed (a
         positive number).
-    :ivar tolerance_minus_db: The lower tolerance, in dB, as printed (a
+    :ivar lower_tolerance_db: The lower tolerance, in dB, as printed (a
         positive number).
     """
 
     relative_level: float
-    tolerance_plus_db: float
-    tolerance_minus_db: float
+    upper_tolerance_db: float
+    lower_tolerance_db: float
 
 
 #: IEC 60268-1:1985 Table II, "Power spectrum of simulated programme signal"
@@ -388,6 +388,8 @@ def simulated_program_signal(
     :return: The signal, ``round(fs * duration_s)`` samples.
     :raises ValueError: If an input is invalid, or ``peak_to_rms`` is not
         below the ratio of the unclipped record.
+    :raises TypeError: if ``duration_s``, ``peak_to_rms`` or ``rms`` is not a single
+        number, or ``fs`` is a flag, a text or an array where a count goes.
     """
     if spectrum not in {"table", "figure_2"}:
         msg = f"'spectrum' must be 'table' or 'figure_2'; got {spectrum!r}."
@@ -511,14 +513,14 @@ class ProgramSignalCheck(OwnsArrays):
         return np.array([row.relative_level for row in self._rows()])
 
     @property
-    def tolerance_plus_db(self) -> NDArray[np.float64]:
+    def upper_tolerance_db(self) -> NDArray[np.float64]:
         """The upper tolerances of Table II at the bands, in dB."""
-        return np.array([row.tolerance_plus_db for row in self._rows()])
+        return np.array([row.upper_tolerance_db for row in self._rows()])
 
     @property
-    def tolerance_minus_db(self) -> NDArray[np.float64]:
+    def lower_tolerance_db(self) -> NDArray[np.float64]:
         """The lower tolerances of Table II at the bands, in dB."""
-        return np.array([row.tolerance_minus_db for row in self._rows()])
+        return np.array([row.lower_tolerance_db for row in self._rows()])
 
     @property
     def offset_db(self) -> float:
@@ -530,8 +532,8 @@ class ProgramSignalCheck(OwnsArrays):
         """
         table = self.relative_levels
         levels = np.asarray(self.band_levels, dtype=np.float64)
-        lowest = float(np.max(table - self.tolerance_minus_db - levels))
-        highest = float(np.min(table + self.tolerance_plus_db - levels))
+        lowest = float(np.max(table - self.lower_tolerance_db - levels))
+        highest = float(np.min(table + self.upper_tolerance_db - levels))
         return 0.5 * (lowest + highest)
 
     @property
@@ -553,8 +555,8 @@ class ProgramSignalCheck(OwnsArrays):
         return float(
             np.min(
                 np.minimum(
-                    self.tolerance_plus_db - deviation,
-                    self.tolerance_minus_db + deviation,
+                    self.upper_tolerance_db - deviation,
+                    self.lower_tolerance_db + deviation,
                 )
             )
         )
@@ -570,7 +572,7 @@ class ProgramSignalCheck(OwnsArrays):
         """
         deviation = self.deviations_db
         margins = np.minimum(
-            self.tolerance_plus_db - deviation, self.tolerance_minus_db + deviation
+            self.upper_tolerance_db - deviation, self.lower_tolerance_db + deviation
         )
         binding = margins <= float(np.min(margins)) + _BINDING_SLACK_DB
         return tuple(float(value) for value in self.frequencies[binding])

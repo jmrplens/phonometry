@@ -218,6 +218,7 @@ of 8.3.4 with the level of the whole signal
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the e.m.f. is not positive or the level not finite. |
+| TypeError | if `sound_pressure_level` or `source_emf_v` is not a single number. |
 
 ## check_limiting_test_signal
 
@@ -428,7 +429,7 @@ The crosstalk attenuation of a multi-channel headphone (IEC 60268-7 8.12).
 
 The difference of the two levels at each frequency, in dB.
 
-### CrosstalkAttenuation.min_db
+### CrosstalkAttenuation.min_attenuation
 
 *property*
 
@@ -536,24 +537,13 @@ For each person, whether the fittings agree within 2,5 dB in every band.
 8.6.5.2 f): "if there is a difference exceeding 2,5 dB [...] in any 1/3
 octave band, the whole procedure is repeated."
 
-### EarCanalFrequencyResponse.level_match_db
-
-*property*
-
-The first fitting's level in the reference band minus the sound field's, in dB.
-
-8.6.5.2 c): the level is adjusted "using the 1/3 octave band of noise
-centred on 500 Hz, so that the filtered microphone output signal level
-is within 3 dB of that due to the sound field in the same frequency
-band".
-
 ### EarCanalFrequencyResponse.levels_matched
 
 *property*
 
-For each person, whether `level_match_db` is within 3 dB.
+For each person, whether `reference_band_level_difference` is within 3 dB.
 
-### EarCanalFrequencyResponse.mean_db
+### EarCanalFrequencyResponse.mean_response_db
 
 *property*
 
@@ -611,6 +601,17 @@ Whether the panel is large enough to calibrate a reference (16 persons).
 headphone, previously calibrated by the method of 8.6.4.2, using at
 least 16 test persons"; the method meant is the direct ear-canal
 measurement of 8.6.5.2 (see `docs/ERRATA.md`).
+
+### EarCanalFrequencyResponse.reference_band_level_difference
+
+*property*
+
+The first fitting's level in the reference band minus the sound field's, in dB.
+
+8.6.5.2 c): the level is adjusted "using the 1/3 octave band of noise
+centred on 500 Hz, so that the filtered microphone output signal level
+is within 3 dB of that due to the sound field in the same frequency
+band".
 
 ### EarCanalFrequencyResponse.response_db
 
@@ -772,7 +773,7 @@ A free-field or diffuse-field comparison frequency response (IEC 60268-7 8.6.3, 
 | `response_db` | Each test person's response, one row per person, in dB relative to the reference band. |
 | `reference_frequency_hz` | The band the response is referred to, in Hz. |
 
-### FieldComparisonResponse.mean_db
+### FieldComparisonResponse.mean_response_db
 
 *property*
 
@@ -875,6 +876,7 @@ the rated voltage. Read the products with
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is out of range. |
+| TypeError | if `duration_s`, `rated_source_emf_v` or `upper_frequency_hz` is not a single number, or `fs` is a flag, a text or an array where a count goes. |
 
 ## headphone_input_power
 
@@ -915,6 +917,7 @@ $$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is out of range. |
+| TypeError | if `rated_impedance_ohm`, `rated_source_impedance_ohm` or `source_emf_v` is not a single number. |
 
 ## headphone_modulation_signal
 
@@ -955,6 +958,7 @@ third at 460 Hz and 740 Hz.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is out of range. |
+| TypeError | if `duration_s` or `rated_source_emf_v` is not a single number, or `fs` is a flag, a text or an array where a count goes. |
 
 ## headphone_source_emf
 
@@ -988,6 +992,7 @@ of the working sound pressure level of 8.5.2 b) to d).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is out of range. |
+| TypeError | if `input_power_w`, `rated_impedance_ohm` or `rated_source_impedance_ohm` is not a single number. |
 
 ## HeadphoneClassification
 
@@ -1053,6 +1058,7 @@ example fixes (`06R2`, not `60R1`).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the impedance is not a positive whole number of ohms or does not fit the form: `4.7` ohm is not whole, and `123` ohm needs a mantissa of three digits. |
+| TypeError | if `impedance_ohm` is not a single number. |
 
 ## LimitingTestSignalCheck
 
@@ -1172,6 +1178,7 @@ measurements".
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the shapes disagree, a value is out of range or `weighting` is neither `"A"` nor `"Z"`. |
+| TypeError | if `weighting` is not a text. |
 
 ## program_signal_level
 
@@ -1216,6 +1223,7 @@ $$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs differ in length or are not finite, or `weighting` is neither `"A"` nor `"Z"`. |
+| TypeError | if `weighting` is not a text. |
 
 ## ProgramCharacteristicVoltage
 
@@ -1544,6 +1552,7 @@ certificate, are not numbers.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is out of range or the level arrays disagree in length. |
+| TypeError | if `canal_section_area_mm2`, `ear_canal_area_mm2`, `entrance_area_mm2` or `volume_mm3` is not a single number. |
 
 ## verify_rated_impedance
 
@@ -1581,6 +1590,7 @@ measurement covered 20 Hz to 20 kHz as 8.2.2.2 c) requires.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs differ in length, are not positive and finite, or no measurement frequency falls in the rated range. |
+| TypeError | if `rated_impedance_ohm` is not a single number. |
 
 ## working_sound_pressure_level
 
@@ -1633,3 +1643,4 @@ since a noise signal has no single impedance to divide by.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is out of range. |
+| TypeError | if `rated_impedance_ohm`, `rated_source_impedance_ohm`, `sound_pressure_level` or `source_emf_v` is not a single number. |

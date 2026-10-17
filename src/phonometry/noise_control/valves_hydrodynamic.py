@@ -293,6 +293,8 @@ def differential_pressure_ratio(
     :raises ValueError: If a pressure is not positive and finite, if the
         valve does not drop pressure, or if the inlet is already at the
         vapour pressure.
+    :raises TypeError: if ``inlet_pressure_pa``, ``outlet_pressure_pa`` or
+        ``vapor_pressure_pa`` is not a single number.
     """
     p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
     p2 = require_positive(outlet_pressure_pa, "outlet_pressure_pa")
@@ -343,6 +345,8 @@ def cavitation_differential(
     :raises ValueError: If a pressure is not positive and finite, if the
         valve does not drop pressure, or if the recovery factor is outside
         the range a recovery factor lives in.
+    :raises TypeError: if ``inlet_pressure_pa``, ``outlet_pressure_pa``,
+        ``pressure_recovery`` or ``vapor_pressure_pa`` is not a single number.
     """
     p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
     p2 = require_positive(outlet_pressure_pa, "outlet_pressure_pa")
@@ -398,6 +402,8 @@ def incipient_cavitation_ratio(
         dimensionless.
     :raises ValueError: If a value is not positive and finite, or the
         coefficient is not one Table 1 prints a constant for.
+    :raises TypeError: if ``coefficient`` is not a text, or ``flow_coefficient``,
+        ``pressure_recovery`` or ``style_modifier`` is not a single number.
     """
     kind = require_choice(coefficient, "coefficient", tuple(CAPACITY_SCALE_CONSTANTS))
     capacity = require_positive(flow_coefficient, "flow_coefficient")
@@ -433,6 +439,8 @@ def multihole_incipient_cavitation_ratio(
         dimensionless.
     :raises ValueError: If the passage count is not a whole number of one or
         more, or another value is not positive and finite.
+    :raises TypeError: if ``hole_diameter_m`` or ``pressure_recovery`` is not a single
+        number, or ``n_passages`` is a flag, a text or an array where a count goes.
     """
     count = require_count(n_passages, "n_passages")
     diameter_m = require_positive(hole_diameter_m, "hole_diameter_m")
@@ -473,6 +481,8 @@ def corrected_incipient_ratio(
     :raises ValueError: If a value is not positive and finite, if
         :math:`x_{Fz}` is at or above 1, or if the correction to this inlet
         pressure carries the threshold to or above 1.
+    :raises TypeError: if ``incipient_ratio`` or ``inlet_pressure_pa`` is not a single
+        number.
     """
     ratio = _require_threshold(incipient_ratio, "incipient_ratio")
     p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
@@ -509,6 +519,8 @@ def vena_contracta_velocity(
     :return: :math:`U_\mathrm{vc}`, in m/s.
     :raises ValueError: If a value is not positive and finite, or the
         recovery factor is outside its range.
+    :raises TypeError: if ``density``, ``differential`` or ``pressure_recovery`` is not
+        a single number.
     """
     drop = require_positive(differential, "differential")
     rho = require_positive(density, "density")
@@ -537,6 +549,8 @@ def mechanical_stream_power(
     :return: :math:`W_m`, in W.
     :raises ValueError: If a value is not positive and finite, or the
         recovery factor is outside its range.
+    :raises TypeError: if ``mass_flow``, ``pressure_recovery`` or ``velocity`` is not a
+        single number.
     """
     flow = require_positive(mass_flow, "mass_flow")
     speed = require_positive(velocity, "velocity")
@@ -567,6 +581,7 @@ def turbulent_efficiency(velocity: float, speed_of_sound: float) -> float:
     :param speed_of_sound: :math:`c_L` in the liquid, in m/s.
     :return: :math:`\eta_\mathrm{turb}`, dimensionless.
     :raises ValueError: If a value is not positive and finite.
+    :raises TypeError: if ``speed_of_sound`` or ``velocity`` is not a single number.
     """
     speed = require_positive(velocity, "velocity")
     sonic = require_positive(speed_of_sound, "speed_of_sound")
@@ -619,6 +634,8 @@ def cavitation_efficiency(
     :raises ValueError: If a value is not positive and finite, if the
         operating point is below the threshold, or if it is at or past
         flashing, where the equation has no value.
+    :raises TypeError: if ``choked_differential``, ``corrected_ratio``,
+        ``differential``, ``pressure_ratio`` or ``turbulent`` is not a single number.
     """
     efficiency = require_positive(turbulent, "turbulent")
     drop = require_positive(differential, "differential")
@@ -682,6 +699,8 @@ def internal_sound_pressure_level(
     :param internal_diameter_m: :math:`D_i` of the downstream pipe, in m.
     :return: :math:`L_{pi}`, in dB re 2 × 10⁻⁵ Pa.
     :raises ValueError: If a value is not positive and finite.
+    :raises TypeError: if ``density``, ``internal_diameter_m``, ``sound_power`` or
+        ``speed_of_sound`` is not a single number.
     """
     power = require_positive(sound_power, "sound_power")
     rho = require_positive(density, "density")
@@ -740,6 +759,10 @@ def jet_strouhal_number(  # noqa: PLR0913
     :raises ValueError: If a value is not positive and finite, if the inlet
         is at or below the vapour pressure, or if a choice is not one the
         standard prints.
+    :raises TypeError: if ``coefficient`` or ``form`` is not a text, or
+        ``corrected_ratio``, ``flow_coefficient``, ``inlet_pressure_pa``,
+        ``pressure_recovery``, ``seat_diameter_m``, ``style_modifier``,
+        ``valve_diameter_m`` or ``vapor_pressure_pa`` is not a single number.
     """
     kind = require_choice(coefficient, "coefficient", tuple(CAPACITY_SCALE_CONSTANTS))
     printing = require_choice(form, "form", tuple(STROUHAL_CONSTANTS))
@@ -782,6 +805,8 @@ def turbulent_peak_frequency(
     :param jet: :math:`D_j` of Equation (4), in m.
     :return: :math:`f_\mathrm{p,turb}`, in Hz.
     :raises ValueError: If a value is not positive and finite.
+    :raises TypeError: if ``jet``, ``strouhal_number`` or ``velocity`` is not a single
+        number.
     """
     strouhal = require_positive(strouhal_number, "strouhal_number")
     speed = require_positive(velocity, "velocity")
@@ -815,6 +840,8 @@ def cavitation_peak_frequency(
     :return: :math:`f_\mathrm{p,cav}`, in Hz.
     :raises ValueError: If a value is not positive and finite, or the
         operating point is at or past flashing.
+    :raises TypeError: if ``corrected_ratio``, ``pressure_ratio`` or ``turbulent_peak``
+        is not a single number.
     """
     peak = require_positive(turbulent_peak, "turbulent_peak")
     ratio = require_positive(pressure_ratio, "pressure_ratio")
@@ -855,6 +882,8 @@ def pipe_ring_frequency(
     :param pipe_sound_speed: :math:`c_p`, 5 000 m/s for steel, in m/s.
     :return: :math:`f_r`, in Hz.
     :raises ValueError: If a value is not positive and finite.
+    :raises TypeError: if ``internal_diameter_m`` or ``pipe_sound_speed`` is not a
+        single number.
     """
     bore = require_positive(internal_diameter_m, "internal_diameter_m")
     wall = require_positive(pipe_sound_speed, "pipe_sound_speed")
@@ -892,6 +921,9 @@ def reference_transmission_loss(  # noqa: PLR0913
     :param air_sound_speed: :math:`c_o` outside the pipe, in m/s.
     :return: :math:`TL_{fr}`, in dB, negative.
     :raises ValueError: If a value is not positive and finite.
+    :raises TypeError: if ``air_density``, ``air_sound_speed``, ``internal_diameter_m``,
+        ``pipe_density``, ``pipe_sound_speed`` or ``wall_thickness_m`` is not a single
+        number.
     """
     bore = require_positive(internal_diameter_m, "internal_diameter_m")
     thickness = require_positive(wall_thickness_m, "wall_thickness_m")
@@ -931,6 +963,8 @@ def transmission_loss_correction(
         negative: the correction is worth at least 5,85 dB even where it is
         smallest.
     :raises ValueError: If a value is not positive and finite.
+    :raises TypeError: if ``ring`` is not a single number, or ``frequency`` holds a text
+        or a value that is not a real number.
     """
     bands = require_positive_array(frequency, "frequency")
     anchor = require_positive(ring, "ring")
@@ -980,6 +1014,9 @@ def cavitation_transmission_loss(
     :return: :math:`TL_{cav}`, in dB, negative.
     :raises ValueError: If a value is not positive and finite, or only one of
         the two ratios the floor needs was given.
+    :raises TypeError: if ``cavitation_peak``, ``corrected_ratio``,
+        ``efficiency_ratio``, ``pressure_ratio``, ``turbulent_loss`` or
+        ``turbulent_peak`` is not a single number.
     """
     require_scalar(turbulent_loss, "turbulent_loss")
     if not math.isfinite(turbulent_loss):
@@ -1045,6 +1082,8 @@ def turbulent_distribution(frequency: ArrayLike, peak: float) -> NDArray[np.floa
     :param peak: :math:`f_\mathrm{p,turb}` from :func:`turbulent_peak_frequency`, in Hz.
     :return: :math:`F_{turb}(f_i)`, in dB.
     :raises ValueError: If a value is not positive and finite.
+    :raises TypeError: if ``peak`` is not a single number, or ``frequency`` holds a text
+        or a value that is not a real number.
     """
     return _distribution(frequency, peak, _TURBULENT_DISTRIBUTION)
 
@@ -1072,6 +1111,8 @@ def cavitation_distribution(frequency: ArrayLike, peak: float) -> NDArray[np.flo
         in Hz.
     :return: :math:`F_{cav}(f_i)`, in dB.
     :raises ValueError: If a value is not positive and finite.
+    :raises TypeError: if ``peak`` is not a single number, or ``frequency`` holds a text
+        or a value that is not a real number.
     """
     return _distribution(frequency, peak, _CAVITATION_DISTRIBUTION)
 
@@ -1114,6 +1155,8 @@ def band_internal_levels(
     :return: :math:`L_{pi}(f_i)`, in dB, one value per band.
     :raises ValueError: If a value is out of range, or the cavitating branch
         was asked for without its peak frequency.
+    :raises TypeError: if ``cavitation_fraction`` or ``internal_level`` is not a single
+        number.
     """
     require_scalar(cavitation_fraction, "cavitation_fraction")
     if not 0.0 <= cavitation_fraction <= 1.0 or not math.isfinite(cavitation_fraction):
@@ -1257,6 +1300,8 @@ class HydrodynamicValveNoise(OwnsArrays):
             ``pressure_ratio`` or ``corrected_ratio`` is not what Equation
             (1) or (3c) gives from the fields beside it, or the cavitation
             fields disagree with the regime.
+        :raises TypeError: if ``differential``, ``inlet_pressure_pa`` or
+            ``vapor_pressure_pa`` is not a single number.
         """
         p1 = require_positive(self.inlet_pressure_pa, "inlet_pressure_pa")
         pv = require_positive(self.vapor_pressure_pa, "vapor_pressure_pa")
@@ -1472,6 +1517,8 @@ def valve_hydrodynamic_noise(
     :raises ValueError: If a value is outside the range its equation is
         written for, or if the operating point is at or past flashing, where
         Equations (9) and (13) divide by zero.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     mass_flow = stream.mass_flow
     inlet_pressure_pa = stream.inlet_pressure_pa
@@ -1702,6 +1749,9 @@ def stage_conditions(
     :raises ValueError: If a value is not positive and finite, if fewer than
         two stages were given, or if the stages between them would take more
         than the differential the valve has.
+    :raises TypeError: if ``flow_coefficient``, ``inlet_pressure_pa``,
+        ``outlet_pressure_pa`` or ``vapor_pressure_pa`` is not a single number, or
+        ``stage_coefficients`` holds a text or a value that is not a real number.
     :warns ValveNoiseWarning: If the stage coefficients miss the series law
         by more than 5 %, which leaves the last stage carrying a differential
         nobody chose.
@@ -1784,6 +1834,7 @@ def combined_stage_level(levels: ArrayLike) -> float:
     :return: Their energy sum, in dB.
     :raises ValueError: If ``levels`` is not one sequence of at least two
         levels, or one is not finite.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     values = require_finite_array(levels, "levels")
     if values.size < _MINIMUM_STAGES:
@@ -1823,6 +1874,8 @@ def last_stage_differential(
     :return: :math:`\Delta p_c`, in Pa.
     :raises ValueError: If a value is not positive and finite, or the last
         stage does not drop pressure.
+    :raises TypeError: if ``corrected_ratio``, ``inlet_pressure_pa``,
+        ``outlet_pressure_pa`` or ``vapor_pressure_pa`` is not a single number.
     """
     p1n = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
     p2 = require_positive(outlet_pressure_pa, "outlet_pressure_pa")
@@ -1863,6 +1916,8 @@ def uniform_passage_style_modifier(n_passages: int) -> float:
         last stage.
     :return: :math:`F_d`, dimensionless.
     :raises ValueError: If the count is not a whole number of one or more.
+    :raises TypeError: if ``n_passages`` is a flag, a text or an array where a count
+        goes.
     """
     count = require_count(n_passages, "n_passages")
     return float(math.sqrt(1.0 / count))
@@ -1889,6 +1944,8 @@ def last_stage_seat_diameter_mm(
     :return: :math:`d_o`, in **millimetres**.
     :raises ValueError: If the coefficient is not positive and finite, or is
         not one Table 1 prints a constant for.
+    :raises TypeError: if ``coefficient`` is not a text, or ``flow_coefficient`` is not
+        a single number.
     """
     kind = require_choice(coefficient, "coefficient", tuple(CAPACITY_SCALE_CONSTANTS))
     capacity = require_positive(flow_coefficient, "flow_coefficient")

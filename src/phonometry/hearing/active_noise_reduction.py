@@ -208,10 +208,10 @@ class ActiveInsertionLossResult(OwnsArrays):
 
     :ivar insertion_loss: :math:`\alpha` per subject and band, the ear with
         the lower value in each band (5.5 b)), in dB.
-    :ivar per_ear_db: The value of each ear, a ``(subjects, 2, bands)`` grid
+    :ivar per_ear_insertion_loss: The value of each ear, a ``(subjects, 2, bands)`` grid
         with the left ear first, in dB, or ``None`` when only the lower-ear
         values were given.
-    :ivar mean_db: The mean over the subjects per band, in dB.
+    :ivar mean_insertion_loss: The mean over the subjects per band, in dB.
     :ivar standard_deviation_db: The sample standard deviation per band, in dB.
     :ivar standard_uncertainty_db: :math:`u = s/\sqrt{N}` (A.2), in dB.
     :ivar expanded_uncertainty_db: :math:`U_{95} = 2u` (A.1), in dB.
@@ -220,8 +220,8 @@ class ActiveInsertionLossResult(OwnsArrays):
     """
 
     insertion_loss: np.ndarray
-    per_ear_db: np.ndarray | None
-    mean_db: np.ndarray
+    per_ear_insertion_loss: np.ndarray | None
+    mean_insertion_loss: np.ndarray
     standard_deviation_db: np.ndarray
     standard_uncertainty_db: np.ndarray
     expanded_uncertainty_db: np.ndarray
@@ -398,8 +398,8 @@ def active_insertion_loss(
     standard = spread / math.sqrt(n_subjects)
     return ActiveInsertionLossResult(
         insertion_loss=lower,
-        per_ear_db=per_ear,
-        mean_db=mean,
+        per_ear_insertion_loss=per_ear,
+        mean_insertion_loss=mean,
         standard_deviation_db=spread,
         standard_uncertainty_db=standard,
         expanded_uncertainty_db=_COVERAGE_FACTOR * standard,
@@ -412,11 +412,11 @@ def active_insertion_loss(
 class ANRTotalAttenuationResult(OwnsArrays):
     r"""The total attenuation of an ANR earmuff and its ISO 4869-2 ratings (5.5).
 
-    :ivar total_octave_db: :math:`A_{\mathrm{total,oct},j}` per subject and
+    :ivar total_octave_attenuation: :math:`A_{\mathrm{total,oct},j}` per subject and
         octave band, Formula (1), in dB. This is the grid of 5.5 e).
-    :ivar total_third_octave_db: :math:`A_{\mathrm{total},f,j}` per subject
+    :ivar total_third_octave_attenuation: :math:`A_{\mathrm{total},f,j}` per subject
         and one-third-octave band, 5.5 c), in dB.
-    :ivar reat_third_octave_db: The passive attenuation interpolated and
+    :ivar reat_third_octave_attenuation: The passive attenuation interpolated and
         extrapolated into the one-third-octave bands, 5.5 a), in dB.
     :ivar insertion_loss: The lower-ear active insertion loss in the same
         bands, 5.5 b), in dB.
@@ -427,9 +427,9 @@ class ANRTotalAttenuationResult(OwnsArrays):
     :ivar snr: The SNR at 84 %.
     """
 
-    total_octave_db: np.ndarray
-    total_third_octave_db: np.ndarray
-    reat_third_octave_db: np.ndarray
+    total_octave_attenuation: np.ndarray
+    total_third_octave_attenuation: np.ndarray
+    reat_third_octave_attenuation: np.ndarray
     insertion_loss: np.ndarray
     frequencies: np.ndarray
     third_octave_frequencies: np.ndarray
@@ -619,9 +619,9 @@ def anr_total_attenuation(
     grouped = total_thirds.reshape(total_thirds.shape[0], kept.size, _THIRDS_PER_OCTAVE)
     total_octaves = -10.0 * np.log10(np.mean(10.0 ** (-0.1 * grouped), axis=2))
     return ANRTotalAttenuationResult(
-        total_octave_db=total_octaves,
-        total_third_octave_db=total_thirds,
-        reat_third_octave_db=interpolated,
+        total_octave_attenuation=total_octaves,
+        total_third_octave_attenuation=total_thirds,
+        reat_third_octave_attenuation=interpolated,
         insertion_loss=active,
         frequencies=np.asarray(kept, dtype=np.float64),
         third_octave_frequencies=np.asarray(thirds, dtype=np.float64),

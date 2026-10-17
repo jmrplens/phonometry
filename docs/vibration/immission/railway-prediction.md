@@ -48,7 +48,7 @@ ground = np.array([0.9, 0.9, 0.9, 1.1, 1.1, 1.2, 1.3, 1.3, 1.4, 1.6,
 floor = np.array([1.9, 2.3, 3.1, 3.5, 5.0, 6.9, 11.5, 17.3, 10.0, 5.4,
                   1.9, 1.5, -0.8, -2.3, -3.8, -5.4, -6.5, -8.1, -9.6])
 
-on_floor = vibration.predict_floor_spectrum(emission, ground_db=ground, floor_db=floor)
+on_floor = vibration.predict_floor_spectrum(emission, ground_level_difference=ground, floor_level_difference=floor)
 print(np.round(on_floor[:4], 1))  # [28.8 30.2 41.  58.6]
 print(f"{vibration.band_sum_level(on_floor):.1f} dB")  # 78.1 dB
 ```
@@ -69,7 +69,7 @@ ground = np.array([0.9, 0.9, 0.9, 1.1, 1.1, 1.2, 1.3, 1.3, 1.4, 1.6,
                    1.7, 2.0, 2.2, 2.6, 3.0, 3.5, 3.1, 2.8, 2.4])
 floor = np.array([1.9, 2.3, 3.1, 3.5, 5.0, 6.9, 11.5, 17.3, 10.0, 5.4,
                   1.9, 1.5, -0.8, -2.3, -3.8, -5.4, -6.5, -8.1, -9.6])
-prediction = vibration.predict_train_category(emission, ground_db=ground, floor_db=floor)
+prediction = vibration.predict_train_category(emission, ground_level_difference=ground, floor_level_difference=floor)
 ax = prediction.plot()
 ```
 
@@ -166,7 +166,7 @@ axes[1].legend()
 **The mitigation** (Clause 5.5) is the spectral insertion loss of a track
 measure from DIN SPEC 45673-2 or -3, or of any other measure determined
 suitably, and it enters Formula (1) as printed, added, so as a negative
-number: the argument is `mitigation_db` and not an insertion loss, because
+number: the argument is `mitigation_level_difference` and not an insertion loss, because
 an insertion loss in the sense of DIN 45672-2 Annex B is positive for a
 reduction and goes in with its sign changed.
 
@@ -195,7 +195,7 @@ ground = np.array([0.9, 0.9, 0.9, 1.1, 1.1, 1.2, 1.3, 1.3, 1.4, 1.6,
                    1.7, 2.0, 2.2, 2.6, 3.0, 3.5, 3.1, 2.8, 2.4])
 floor = np.array([1.9, 2.3, 3.1, 3.5, 5.0, 6.9, 11.5, 17.3, 10.0, 5.4,
                   1.9, 1.5, -0.8, -2.3, -3.8, -5.4, -6.5, -8.1, -9.6])
-prediction = vibration.predict_train_category(emission, ground_db=ground, floor_db=floor)
+prediction = vibration.predict_train_category(emission, ground_level_difference=ground, floor_level_difference=floor)
 print(f"{prediction.sum_level:.1f} dB")  # 77.7 dB
 print(f"KB_FTm = {prediction.kb_ftm:.3f}")  # 0.385
 print(f"KB_Fmax = {prediction.kb_fmax:.3f}")  # 0.577
@@ -222,7 +222,7 @@ ground = np.array([0.9, 0.9, 0.9, 1.1, 1.1, 1.2, 1.3, 1.3, 1.4, 1.6,
                    1.7, 2.0, 2.2, 2.6, 3.0, 3.5, 3.1, 2.8, 2.4])
 floor = np.array([1.9, 2.3, 3.1, 3.5, 5.0, 6.9, 11.5, 17.3, 10.0, 5.4,
                   1.9, 1.5, -0.8, -2.3, -3.8, -5.4, -6.5, -8.1, -9.6])
-prediction = vibration.predict_train_category(emission, ground_db=ground, floor_db=floor)
+prediction = vibration.predict_train_category(emission, ground_level_difference=ground, floor_level_difference=floor)
 
 alpha = vibration.train_weighting_factor("tram_metro", alignment="surface")
 day = vibration.train_assessment_severity([prediction.kb_ftm], [200], alpha=alpha)

@@ -179,6 +179,7 @@ to 5.2 says only an anechoic room does.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a position is missing or unknown, if the bands do not match, or if the distance is not larger than 0,15 m. |
+| TypeError | if `loudspeaker_distance_m` is not a single number. |
 
 ## check_quasi_free_sound_field
 
@@ -232,6 +233,7 @@ which [`FreeSoundFieldCheck.usable_frequencies`](/phonometry/reference/api/heari
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a position is missing or unknown, if the bands do not match, or if the distance is not larger than 0,10 m. |
+| TypeError | if `loudspeaker_distance_m` is not a single number. |
 
 ## DIFFUSE_FIELD_VARIATION_LIMITS
 

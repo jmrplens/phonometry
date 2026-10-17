@@ -553,7 +553,8 @@ $i$, numbered from $k = 1$ at 50 Hz, which `octave_band_levels` applies to any
 band spectrum whose thirds come in complete triplets:
 
 ```python
-octaves, lj_octave = emission.octave_band_levels(slam_lj.sound_energy_level, frequencies=thirds)
+bands = emission.octave_band_levels(slam_lj.sound_energy_level, frequencies=thirds)
+octaves, lj_octave = bands.frequencies, bands.levels
 print(octaves)                        # [ 125.  250.  500. 1000. 2000. 4000. 8000.]
 print(np.round(lj_octave, 1))         # 99.8 dB down to 87.7 dB, three thirds summed per octave
 ```

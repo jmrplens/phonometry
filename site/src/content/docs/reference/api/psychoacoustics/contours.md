@@ -16,7 +16,7 @@ parameters at the 29 preferred third-octave frequencies of ISO 266.
 ## equal_loudness_contour
 
 ```python
-equal_loudness_contour(phon: float) -> tuple[np.ndarray, np.ndarray]
+equal_loudness_contour(phon: float) -> LoudnessContour
 ```
 
 Normal equal-loudness-level contour (ISO 226:2023 Formula 1).
@@ -35,7 +35,13 @@ contour therefore stops at 4 kHz.
 | :--- | :--- |
 | `phon` | Loudness level in phons (20 to 90). |
 
-**Returns:** Tuple `(frequencies, spl)` in Hz and dB re 20 uPa.
+**Returns:** The frequencies in Hz and the levels in dB re 20 uPa, as a [`LoudnessContour`](/phonometry/reference/api/psychoacoustics/contours/#loudnesscontour).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `phon` is not a single number. |
 
 ## equal_loudness_contours
 
@@ -121,12 +127,12 @@ returns the `Axes`.
 ## hearing_threshold
 
 ```python
-hearing_threshold() -> tuple[np.ndarray, np.ndarray]
+hearing_threshold() -> LoudnessContour
 ```
 
 Threshold of hearing T_f (ISO 226:2023 Table 1).
 
-**Returns:** Tuple `(frequencies, threshold)` in Hz and dB re 20 uPa.
+**Returns:** The frequencies in Hz and the threshold levels in dB re 20 uPa, as a [`LoudnessContour`](/phonometry/reference/api/psychoacoustics/contours/#loudnesscontour).
 
 ## loudness_level
 
@@ -144,3 +150,56 @@ Loudness level of a pure tone (ISO 226:2023 Formula 2).
 | `frequency` | Tone frequency in Hz; must be one of the 29 preferred third-octave frequencies of Table 1 (the standard specifies no interpolation between them). |
 
 **Returns:** Loudness level in phons. Values outside 20-90 phon (80 above 4 kHz) are extrapolations the standard labels as informative only.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequency` or `spl` is not a single number. |
+
+## LoudnessContour
+
+```python
+LoudnessContour(
+    frequencies: np.ndarray,
+    levels: np.ndarray,
+    phon: float | None,
+)
+```
+
+A curve of pure-tone levels over the ISO 226 frequencies.
+
+What [`equal_loudness_contour`](/phonometry/reference/api/psychoacoustics/contours/#equal_loudness_contour) and [`hearing_threshold`](/phonometry/reference/api/psychoacoustics/contours/#hearing_threshold) return:
+the frequencies and the levels, named, where a `(frequencies, spl)`
+tuple used to be unpacked by position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | The preferred third-octave frequencies of Table 1, in Hz. |
+| `levels` | The sound pressure level of the tone at each, in dB re 20 uPa. |
+| `phon` | The loudness level of the contour, in phon, or `None` for the threshold of hearing $T_f$, which is not a contour of Formula (1). |
+
+### LoudnessContour.plot()
+
+```python
+LoudnessContour.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the levels against frequency on a logarithmic axis.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the contour curve. |
+
+**Returns:** The axes.

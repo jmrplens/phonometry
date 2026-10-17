@@ -93,6 +93,7 @@ wavelength that matters. Figure A.19 prints 0,005 for a damping ratio of
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative damping ratio or a non-positive wavelength. |
+| TypeError | if `damping_ratio` or `wavelength_m` is not a single number. |
 
 ## blast_peak_velocity_mm_s
 
@@ -133,6 +134,7 @@ the distance in millimetres, which the reference metre says is a slip.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive charge, distance or coefficient, or a negative exponent. |
+| TypeError | if `charge_exponent`, `charge_kg`, `coefficient_mm_s` or `distance_exponent` is not a single number, or `distance_m` holds a text or a value that is not a real number. |
 
 ## BLASTING_RELEVANT_DISTANCE_M
 
@@ -167,6 +169,7 @@ kilojoules, the unit Formula (6) wants.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive weight or height. |
+| TypeError | if `drop_height_m` or `weight_kn` is not a single number. |
 
 ## far_field_velocity_mm_s
 
@@ -205,6 +208,7 @@ amplitude at the reference distance, spread with the exponent of Figure
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative amplitude, exponent or attenuation, a non-positive reference distance, or a distance in the near field. |
+| TypeError | if `attenuation_per_m`, `exponent`, `reference_distance_m` or `reference_velocity_mm_s` is not a single number, or `distance_m` holds a text or a value that is not a real number. |
 
 ## FLOOR_DAMPING_RATIO_RANGE
 
@@ -241,6 +245,7 @@ foundation on loose ground raise the damping.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive damping ratio. |
+| TypeError | if `floor_damping_ratio` is not a single number. |
 
 ## FOUNDATION_TRANSFER_ABOVE_RESONANCE
 
@@ -276,6 +281,7 @@ on rock there is no reduction.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive damping ratio. |
+| TypeError | if `system_damping_ratio` is not a single number. |
 
 ## geometric_exponent
 
@@ -336,6 +342,7 @@ usually the smaller source; the impact is this one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive energy, distance or coefficient, or a negative exponent. |
+| TypeError | if `coefficient_mm_s`, `distance_exponent` or `fall_energy_kj` is not a single number, or `distance_m` holds a text or a value that is not a real number. |
 
 ## LOOSE_GROUND_DAMPING_RATIO
 
@@ -400,6 +407,7 @@ five-hundredth and interpolated linearly between the readings.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a count outside the figure or a reference the figure has no curve for. |
+| TypeError | if `n_machines` holds a text or a value that is not a real number. |
 
 ## MACHINE_FREQUENCY_BANDS_HZ
 
@@ -443,6 +451,7 @@ sixty, the nearest group; beyond that the added groups are further off.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative velocity, or a count or reference outside Figure 3. |
+| TypeError | if `reference_velocity_mm_s` is not a single number, or `n_machines` holds a text or a value that is not a real number. |
 
 ## material_damping_factor
 
@@ -479,6 +488,7 @@ the amplitude at 10 Hz and 79 % at 50 Hz.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative distance or damping ratio, or a non-positive frequency or wave speed. |
+| TypeError | if `frequency_hz` or `wave_speed_m_s` is not a single number, or `distance_m` holds a text or a value that is not a real number. |
 
 ## MEDIUM_SOIL_SHEAR_WAVE_SPEED_M_S
 
@@ -534,6 +544,7 @@ than it Formula (2) does not hold.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative extent or a non-positive wavelength. |
+| TypeError | if `rayleigh_wavelength_m` or `source_extent_m` is not a single number. |
 
 ## soil_building_frequency_guide
 
@@ -561,6 +572,7 @@ building gets the union, 8 Hz to 15 Hz.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For fewer than one storey or a count that is not whole. |
+| TypeError | if `n_stories` is a flag, a text or an array where a count goes. |
 
 ## soil_building_natural_frequency
 
@@ -588,6 +600,7 @@ and predominantly harmonic vibration in the lower frequency range.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive stiffness or mass. |
+| TypeError | if `mass` or `stiffness` is not a single number. |
 
 ## SOURCE_EXPONENTS
 
@@ -630,6 +643,7 @@ frequencies of the vehicle itself do not move with the speed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive speed or spacing, or fewer than one harmonic. |
+| TypeError | if `spacing_m` or `train_speed_m_s` is not a single number, or `n_harmonics` is a flag, a text or an array where a count goes. |
 
 ## TRACK_TRANSMITTED_BANDS_HZ
 

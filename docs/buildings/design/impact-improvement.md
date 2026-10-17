@@ -35,6 +35,34 @@ The improvement is the position-averaged difference
 $\Delta L = L_0 - L_1$ (Formulae (3)/(4)); octaves follow
 $\Delta L_\mathrm{oct} = -10\log_{10}[\tfrac{1}{3}\sum 10^{-\Delta L_j/10}]$ (Formula (5)).
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/background_corrected_level_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/background_corrected_level.svg" alt="ISO 16251-1 background correction of a textile carpet on the mock-up: the margin of the reading above a 20 dB accelerometer background in each one-third-octave band from 100 Hz to 3150 Hz, over the three shaded regimes of Formula (2), clear above 15 dB up to 630 Hz, background subtracted at 800 Hz and 1 kHz, and held at the 1.3 dB limit of measurement in the five highest bands" width="80%"></picture>
+
+*The textile carpet of this page, read with the covering on over an accelerometer background of 20 dB re 1 µm/s². Up to 630 Hz the reading clears the background by 15 dB or more and is used as it is; at 800 Hz and 1 kHz the background is subtracted in energy; from 1250 Hz up the margin is under 6 dB, and the correction is held at 1.3 dB. Those five bands are reported as $> \Delta L$: the covering improves them by at least that much, and the mock-up cannot say by how much more.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500,
+         630, 800, 1000, 1250, 1600, 2000, 2500, 3150]
+bare = np.array([72, 73, 74, 74, 75, 75, 76, 76, 77, 77, 78, 78, 79, 79, 80, 80])
+covering = bare - np.array([5, 8, 10, 14, 18, 23, 30, 31,
+                            39, 49, 53, 57, 60, 67, 68, 71])
+background = np.full(16, 20.0)   # dB re 1 um/s^2
+# What the accelerometer reads with the carpet on: the covering plus the background.
+reading = 10 * np.log10(10 ** (covering / 10) + 10 ** (background / 10))
+res = building.background_corrected_level(reading, background, frequencies=freqs)
+print(int(res.limited.sum()))    # 5 bands at the 1.3 dB limit
+res.plot()
+plt.show()
+```
+
+</details>
+
 **Weighted improvement.** $\Delta L_\mathrm{w}$ is the ISO 717-2 weighted reduction: the
 improvement is applied to the heavyweight **reference floor** $L_\mathrm{n,r,0}$
 (ISO 717-2 Table 4), $L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L$, and

@@ -1089,6 +1089,7 @@ def weighted_exposure(
         metric.
     :return: A :class:`WeightedExposureResult`.
     :raises ValueError: If an input is invalid.
+    :raises TypeError: if ``n_events`` or ``peak_spl`` is not a single number.
     """
     f = _positive_frequencies(frequencies_hz, "frequencies_hz")
     sel = np.array(band_sel, dtype=np.float64, copy=True, ndmin=1)

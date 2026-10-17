@@ -214,8 +214,8 @@ def require_positive(value: float, name: str) -> float:
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
     :return: The validated value as a ``float``.
-    :raises TypeError: for an array, a text, or something else that is not a
-        number.
+    :raises TypeError: for a ``value`` that is an array, a text, or something
+        else that is not a number.
     :raises ValueError: for a non-finite or non-positive value.
     """
     number = _one_number(value, name)
@@ -247,8 +247,8 @@ def require_above_absolute_zero(value: float, name: str) -> float:
     :param value: The temperature to validate, in degrees Celsius.
     :param name: Parameter name used in the error message.
     :return: The validated temperature as a ``float``.
-    :raises TypeError: for an array, a text, or something else that is not a
-        number.
+    :raises TypeError: for a ``value`` that is an array, a text, or something
+        else that is not a number.
     :raises ValueError: for a non-finite temperature, or one at or below
         -273,15 degC.
     """
@@ -288,8 +288,8 @@ def require_non_negative(value: float, name: str) -> float:
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
     :return: The validated value as a ``float``.
-    :raises TypeError: for an array, a text, or something else that is not a
-        number.
+    :raises TypeError: for a ``value`` that is an array, a text, or something
+        else that is not a number.
     :raises ValueError: for a non-finite or negative value.
     """
     number = _one_number(value, name)
@@ -310,8 +310,8 @@ def require_finite(value: float, name: str) -> float:
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
     :return: The validated value as a ``float``.
-    :raises TypeError: for an array, a text, or something else that is not a
-        number.
+    :raises TypeError: for a ``value`` that is an array, a text, or something
+        else that is not a number.
     :raises ValueError: for a non-finite value.
     """
     number = _one_number(value, name)
@@ -327,8 +327,8 @@ def require_fraction(value: float, name: str) -> float:
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
     :return: The validated value as a ``float``.
-    :raises TypeError: for an array, a text, or something else that is not a
-        number.
+    :raises TypeError: for a ``value`` that is an array, a text, or something
+        else that is not a number.
     :raises ValueError: for a non-finite value, or one outside ``[0, 1)``.
     """
     number = _one_number(value, name)
@@ -661,6 +661,7 @@ def require_axis_rank(value: object, owner: str, name: str, rank: int) -> None:
     :param name: Field name used in the error message.
     :param rank: The number of axes the field must have.
     :raises ValueError: if *value* has a different number of axes.
+    :raises TypeError: if ``rank`` is not a single number.
     """
     require_scalar(rank, "rank")
     actual = _rank(value)

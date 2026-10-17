@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 __all__ = [
     "EqualLoudnessContours",
     "equal_loudness_contour",
+    "LoudnessContour",
     "equal_loudness_contours",
     "hearing_threshold",
     "loudness_level",
@@ -111,7 +112,45 @@ def _spl_from_phon(frequency: float, phon: float) -> float:
     return float(10 / alpha_f * np.log10(term) - l_u)
 
 
-def equal_loudness_contour(phon: float) -> tuple[np.ndarray, np.ndarray]:
+@dataclass(frozen=True)
+class LoudnessContour(OwnsArrays):
+    """A curve of pure-tone levels over the ISO 226 frequencies.
+
+    What :func:`equal_loudness_contour` and :func:`hearing_threshold` return:
+    the frequencies and the levels, named, where a ``(frequencies, spl)``
+    tuple used to be unpacked by position.
+
+    :ivar frequencies: The preferred third-octave frequencies of Table 1, in
+        Hz.
+    :ivar levels: The sound pressure level of the tone at each, in dB re
+        20 uPa.
+    :ivar phon: The loudness level of the contour, in phon, or ``None`` for
+        the threshold of hearing :math:`T_f`, which is not a contour of
+        Formula (1).
+    """
+
+    frequencies: np.ndarray
+    levels: np.ndarray
+    phon: float | None
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Plot the levels against frequency on a logarithmic axis.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the contour curve.
+        :return: The axes.
+        """
+        from ..._i18n import check_language
+        from ..._plot.psychoacoustics import plot_loudness_contour
+
+        check_language(language)
+        return plot_loudness_contour(self, ax=ax, language=language, **kwargs)
+
+
+def equal_loudness_contour(phon: float) -> LoudnessContour:
     """Normal equal-loudness-level contour (ISO 226:2023 Formula 1).
 
     Returns the sound pressure levels of pure tones judged equally loud as
@@ -123,7 +162,9 @@ def equal_loudness_contour(phon: float) -> tuple[np.ndarray, np.ndarray]:
     contour therefore stops at 4 kHz.
 
     :param phon: Loudness level in phons (20 to 90).
-    :return: Tuple ``(frequencies, spl)`` in Hz and dB re 20 uPa.
+    :return: The frequencies in Hz and the levels in dB re 20 uPa, as a
+        :class:`LoudnessContour`.
+    :raises TypeError: if ``phon`` is not a single number.
     """
     require_scalar(phon, "phon")
     if not _PHON_MIN <= phon <= _PHON_MAX:
@@ -138,7 +179,7 @@ def equal_loudness_contour(phon: float) -> tuple[np.ndarray, np.ndarray]:
         else _FREQUENCIES[_FREQUENCIES <= _F_MAX_ABOVE_80_PHON]
     )
     spl = np.array([_spl_from_phon(f, phon) for f in freqs])
-    return freqs.copy(), spl
+    return LoudnessContour(frequencies=freqs, levels=spl, phon=float(phon))
 
 
 def loudness_level(spl: float, frequency: float) -> float:
@@ -150,6 +191,7 @@ def loudness_level(spl: float, frequency: float) -> float:
         interpolation between them).
     :return: Loudness level in phons. Values outside 20-90 phon (80 above
         4 kHz) are extrapolations the standard labels as informative only.
+    :raises TypeError: if ``frequency`` or ``spl`` is not a single number.
     """
     require_scalar(spl, "spl")
     alpha_f, l_u, t_f = _params(frequency)
@@ -159,13 +201,14 @@ def loudness_level(spl: float, frequency: float) -> float:
     return float(100.0 / 3.0 * np.log10(b))
 
 
-def hearing_threshold() -> tuple[np.ndarray, np.ndarray]:
+def hearing_threshold() -> LoudnessContour:
     """Threshold of hearing T_f (ISO 226:2023 Table 1).
 
-    :return: Tuple ``(frequencies, threshold)`` in Hz and dB re 20 uPa.
+    :return: The frequencies in Hz and the threshold levels in dB re 20 uPa,
+        as a :class:`LoudnessContour`.
     """
     tf = np.array([_TABLE1[f][2] for f in _FREQUENCIES])
-    return _FREQUENCIES.copy(), tf
+    return LoudnessContour(frequencies=_FREQUENCIES, levels=tf, phon=None)
 
 
 #: Default loudness levels of the classic ISO 226:2023 contour family: the
@@ -286,13 +329,15 @@ def equal_loudness_contours(
     phon_tuple = tuple(float(p) for p in phons)
     contours = np.full((len(phon_tuple), grid.size), np.nan)
     for i, phon in enumerate(phon_tuple):
-        freqs_p, spl_p = equal_loudness_contour(phon)
+        contour = equal_loudness_contour(phon)
+        freqs_p, spl_p = contour.frequencies, contour.levels
         for f, s in zip(freqs_p, spl_p, strict=True):
             j = np.flatnonzero(np.isclose(grid, f, rtol=1e-6))
             if j.size:
                 contours[i, j[0]] = s
 
-    tf_freqs, tf_vals = hearing_threshold()
+    tf_curve = hearing_threshold()
+    tf_freqs, tf_vals = tf_curve.frequencies, tf_curve.levels
     threshold = np.array(
         [
             tf_vals[int(np.flatnonzero(np.isclose(tf_freqs, f, rtol=1e-6))[0])]

@@ -51,7 +51,9 @@ def test_annex_c_formula_1_band_by_band() -> None:
     """Every printed L_v is the sum of its printed terms, three of them a
     tenth off from rounding the terms after summing.
     """
-    levels = im.predict_floor_spectrum(EMISSION, ground_db=GROUND, floor_db=FLOOR)
+    levels = im.predict_floor_spectrum(
+        EMISSION, ground_level_difference=GROUND, floor_level_difference=FLOOR
+    )
     assert np.all(np.abs(levels - PRINTED) <= 0.1 + 1e-9)
     assert np.count_nonzero(np.abs(levels - PRINTED) > 0.01) == 3
     assert list(FREQS) == list(im.PREDICTION_BAND_CENTERS_HZ)
@@ -79,9 +81,11 @@ def test_annex_c_run_as_clause_7_prints_it() -> None:
     gets 77,7 dB, 0,39 and 1,73 mm/s. Both are held: the printed chain above,
     the standard's own here.
     """
-    prediction = im.predict_train_category(EMISSION, ground_db=GROUND, floor_db=FLOOR)
-    assert np.allclose(prediction.floor_db, EMISSION + GROUND + FLOOR)
-    assert len(prediction.weighted_db) == 14
+    prediction = im.predict_train_category(
+        EMISSION, ground_level_difference=GROUND, floor_level_difference=FLOOR
+    )
+    assert np.allclose(prediction.floor_levels, EMISSION + GROUND + FLOOR)
+    assert len(prediction.weighted_levels) == 14
     assert list(prediction.weighted_frequencies_hz) == list(FREQS[:14])
     assert prediction.sum_level == pytest.approx(77.73, abs=0.02)
     assert prediction.kb_ftm == pytest.approx(0.385, abs=0.002)
@@ -114,16 +118,16 @@ def test_table_2_is_the_kb_weighting_rounded_to_a_tenth() -> None:
     """Printed page 22: the 14 corrections equal 20 lg of the DIN 45669-1
     response at the nominal centres, rounded.
     """
-    freqs = np.array(list(im.KB_WEIGHTING_TABLE_DB))
+    freqs = np.array(list(im.KB_WEIGHTING_CORRECTIONS))
     response = 10.0 * np.log10(1.0 / (1.0 + (im.KB_CORNER_HZ / freqs) ** 2))
     assert [round(float(v), 1) for v in response] == list(
-        im.KB_WEIGHTING_TABLE_DB.values()
+        im.KB_WEIGHTING_CORRECTIONS.values()
     )
     # Without the band limitation of the meter, which would take 1,5 dB off at 80 Hz.
     limited = 20.0 * np.log10(np.abs(im.kb_weighting_response(freqs)))
     assert limited[-1] < response[-1] - 1.0
     weighted = im.kb_weighted_levels(np.zeros(14), frequencies=freqs)
-    assert list(weighted) == list(im.KB_WEIGHTING_TABLE_DB.values())
+    assert list(weighted) == list(im.KB_WEIGHTING_CORRECTIONS.values())
     with pytest.raises(ValueError, match="nominal third-octave centre"):
         im.kb_weighted_levels([0.0], frequencies=[100.0])
     with pytest.raises(ValueError, match="14 bands"):
@@ -372,7 +376,9 @@ def test_table_1_distances_and_the_plot() -> None:
     assert im.RECOMMENDED_DISTANCES_M["urban"] == {"tunnel": 20.0, "surface": 25.0}
     assert im.RECOMMENDED_DISTANCES_M["freight_soft_soil"]["tunnel"] is None
     assert im.RECOMMENDED_DISTANCES_M["mainline"]["surface"] == 60.0
-    prediction = im.predict_train_category(EMISSION, ground_db=GROUND, floor_db=FLOOR)
+    prediction = im.predict_train_category(
+        EMISSION, ground_level_difference=GROUND, floor_level_difference=FLOOR
+    )
     pytest.importorskip("matplotlib")
     ax = prediction.plot()
     assert len(ax.get_lines()) == 3

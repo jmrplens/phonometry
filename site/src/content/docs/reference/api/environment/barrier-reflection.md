@@ -137,6 +137,7 @@ millihertz.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the length does not exceed the 0,5 ms leading edge. |
+| TypeError | if `window_length_s` is not a single number. |
 
 ## adrienne_reflection_window
 
@@ -179,6 +180,7 @@ the formula EN 1793-5 prints.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `fs` is not positive, the length does not exceed the 0,5 ms leading edge, or the flat part is shorter than a sample. |
+| TypeError | if `fs` or `window_length_s` is not a single number. |
 
 ## ADRIENNE_SHORT_LENGTH_S
 
@@ -241,6 +243,7 @@ $\pm 25$ mm of Table 3.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If there are not nine finite delays, the speed is not positive or the check is unknown. |
+| TypeError | if `check` is not a text, or `speed_of_sound` is not a single number. |
 
 ## DirectSoundSubtraction
 
@@ -379,6 +382,7 @@ decimals (1,25 m and 1,75 m at microphone 5).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a distance is not positive or the grid does not stand between the loudspeaker and the plane. |
+| TypeError | if `grid_spacing_m`, `microphone_distance_m` or `source_distance_m` is not a single number. |
 
 ## REFLECTION_GRID_SPACING_M
 
@@ -445,6 +449,7 @@ within 5 % of 1; the value computed is always used here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the records are not shaped as above, the rate is missing or disagrees, a window does not fit its record, or a parameter is out of range. |
+| TypeError | if `speed_of_sound` is not a single number. |
 
 **Warns**
 
@@ -485,6 +490,7 @@ depends on the column and the factor alone: one call serves every
 | Exception | When |
 | :--- | :--- |
 | ValueError | On an unknown column or a non-positive factor. |
+| TypeError | if `estimate` is not a text, or `coverage_factor` is not a single number. |
 
 ## reflection_index_from_positions
 
@@ -579,6 +585,7 @@ curves.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a dimension is not positive, the grid does not fit between the ground and the top edge, the sample is narrower than the grid, or at some microphone the ground reflection or an edge arrives no later than the reflection itself (a device below about 1,7 m). |
+| TypeError | if `device_height_m`, `device_length_m`, `source_height_m` or `speed_of_sound` is not a single number. |
 
 ## REFLECTION_MICROPHONE_DISTANCE_M
 
@@ -645,6 +652,7 @@ NOTE 1 of 5.6.1 gives 1,96 m for the 7,9 ms window at 340 m/s.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the window length or the speed is not positive. |
+| TypeError | if `speed_of_sound` or `window_length_s` is not a single number. |
 
 ## REFLECTION_SOURCE_DISTANCE_M
 
@@ -843,7 +851,7 @@ Requires matplotlib (`pip install phonometry[plot]`).
 ReflectionIndexUncertainty(
     frequencies: NDArray[np.float64],
     expanded_uncertainty: NDArray[np.float64],
-    rating_db: float,
+    rating_expanded_uncertainty_db: float,
     estimate: Literal['median', 'low', 'high'],
     coverage_factor: float,
 )
@@ -860,7 +868,7 @@ deviation of Table A.1 taken as the combined standard uncertainty.
 | :--- | :--- |
 | `frequencies` | The eighteen band centres, 100 Hz to 5 kHz, the bands of [`ReflectionIndexResult.frequencies`](/phonometry/reference/api/environment/barrier-reflection/#reflectionindexresult). |
 | `expanded_uncertainty` | $U_j$ per band, aligned with `frequencies`, in units of the index itself: $RI$ is a ratio, and Table B.2 prints its $U_j$ beside it as one (0,62 at 100 Hz against an $RI$ of 0,58). |
-| `rating_db` | $U$ of the single-number rating $DL_{RI}$, in decibels, the one row of Table A.1 that is a level. |
+| `rating_expanded_uncertainty_db` | $U$ of the single-number rating $DL_{RI}$, in decibels, the one row of Table A.1 that is a level. |
 | `estimate` | The column of Table A.1 read: `"median"`, `"low"` or `"high"`. |
 | `coverage_factor` | $k_p$. |
 

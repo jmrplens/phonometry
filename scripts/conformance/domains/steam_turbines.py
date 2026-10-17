@@ -252,7 +252,7 @@ def _chk_arithmetic_note() -> Outcome:
             background_levels=None,
             environmental_correction=0.0,
         )
-        worst = max(worst, result.surface_pressure_level - result.arithmetic_mean_db)
+        worst = max(worst, result.surface_pressure_level - result.arithmetic_mean_level)
     return numeric(
         oracle.IEC61063_ARITHMETIC_DEVIATION_DB, worst, 0.05, unit="dB", places=3
     )
@@ -323,8 +323,10 @@ def _chk_printed_limits() -> Outcome:
         ).wind_ok,
         "A.3.3 at 7 dB": check(environmental_correction=k).passes,
         "A.3.3 above 7 dB": not check(environmental_correction=k + tiny).passes,
-        "7.2.2 at 1,0 dB": exact.overhead_effect_db is not None
-        and math.isclose(exact.overhead_effect_db, effect, rel_tol=0.0, abs_tol=1e-12)
+        "7.2.2 at 1,0 dB": exact.overhead_level_difference is not None
+        and math.isclose(
+            exact.overhead_level_difference, effect, rel_tol=0.0, abs_tol=1e-12
+        )
         and bool(exact.overhead_may_be_deleted),
         "7.2.2 above 1,0 dB": not beyond.overhead_may_be_deleted,
     }

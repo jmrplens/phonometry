@@ -83,6 +83,7 @@ refracting-sediment branch of [`reflection_loss_gradient`](/phonometry/reference
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the ratio is not positive and finite. |
+| TypeError | if `sound_speed_ratio` is not a single number. |
 
 ## effective_depth
 
@@ -118,6 +119,7 @@ seabed. Only meaningful for a seabed with a critical angle.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the seabed has no critical angle or an input is invalid. |
+| TypeError | if `frequency_hz`, `speed_of_sound` or `water_depth` is not a single number. |
 
 ## loss_parameter
 
@@ -142,6 +144,7 @@ $\varepsilon = \beta_{\mathrm{sed}}/(40 \pi \log_{10} e)$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the attenuation is negative or non-finite. |
+| TypeError | if `attenuation_db_per_wavelength` is not a single number. |
 
 ## reflection_loss_gradient
 
@@ -179,6 +182,7 @@ Eq. 9.45). Two branches:
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the frequency is missing or invalid for a refracting seabed. |
+| TypeError | if `frequency_hz` is not a single number. |
 
 ## waveguide_cutoff_frequency
 
@@ -212,6 +216,7 @@ and ducted propagation does not occur.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the seabed has no critical angle or an input is invalid. |
+| TypeError | if `speed_of_sound` or `water_depth` is not a single number. |
 
 ## weston_propagation_loss
 
@@ -258,6 +263,7 @@ whole range grid so the transitions can be drawn.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
+| TypeError | if `frequency_hz`, `speed_of_sound` or `water_depth` is not a single number. |
 
 ## weston_regime_boundaries
 
@@ -293,6 +299,7 @@ Regime boundaries of a shallow-water waveguide (Ainslie §9.1.1.2).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
+| TypeError | if `critical_angle_deg`, `frequency_hz`, `reflection_loss_gradient_value_np_per_rad`, `speed_of_sound` or `water_depth` is not a single number. |
 
 :::note
 The two overrides are independent: overriding `critical_angle_deg`

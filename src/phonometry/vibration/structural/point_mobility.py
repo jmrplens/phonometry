@@ -111,6 +111,8 @@ def plate_bending_stiffness(
     :return: The bending stiffness per unit width ``B'``, in N.m.
     :raises ValueError: for a non-positive modulus/thickness or
         :math:`\lvert\nu\rvert \ge 1`.
+    :raises TypeError: if ``poisson_ratio``, ``thickness_m`` or ``youngs_modulus`` is
+        not a single number.
     """
     require_scalar(poisson_ratio, "poisson_ratio")
     e = require_positive(youngs_modulus, "youngs_modulus")
@@ -132,6 +134,8 @@ def beam_bending_wave_speed(
     :param mass_per_length: Mass per unit length ``m'``, in kg/m.
     :return: The bending phase speed ``cB``, in m/s.
     :raises ValueError: for a non-positive stiffness, mass or frequency.
+    :raises TypeError: if ``bending_stiffness`` or ``mass_per_length`` is not a single
+        number.
     """
     b = require_positive(bending_stiffness, "bending_stiffness")
     m1 = require_positive(mass_per_length, "mass_per_length")
@@ -151,6 +155,8 @@ def plate_bending_wave_speed(
     :param mass_per_area: Mass per unit area ``m''``, in kg/m^2.
     :return: The bending phase speed ``cB``, in m/s.
     :raises ValueError: for a non-positive stiffness, mass or frequency.
+    :raises TypeError: if ``bending_stiffness`` or ``mass_per_area`` is not a single
+        number.
     """
     b = require_positive(bending_stiffness, "bending_stiffness")
     m2 = require_positive(mass_per_area, "mass_per_area")
@@ -190,6 +196,8 @@ def infinite_plate_impedance(
         (:math:`C = 3.5`).
     :return: The point impedance ``Z``, in N.s/m.
     :raises ValueError: for a non-positive stiffness/mass or unknown location.
+    :raises TypeError: if ``bending_stiffness`` or ``mass_per_area`` is not a single
+        number.
     """
     b = require_positive(bending_stiffness, "bending_stiffness")
     m2 = require_positive(mass_per_area, "mass_per_area")
@@ -246,6 +254,7 @@ def infinite_beam_impedance(
     :param location: ``"center"`` or ``"end"``.
     :return: The complex point impedance ``Z``, in N.s/m.
     :raises ValueError: for a non-positive input or unknown location.
+    :raises TypeError: if ``mass_per_length`` is not a single number.
     """
     if location not in _BEAM_CONSTANT:
         msg = "'location' must be 'center' or 'end'."
@@ -297,6 +306,8 @@ def infinite_beam_moment_mobility(
     :param mass_per_length: Mass per unit length ``m'``, in kg/m.
     :return: The complex moment mobility ``Y_M``, in rad/(N.m.s).
     :raises ValueError: for a non-positive input.
+    :raises TypeError: if ``bending_stiffness`` or ``mass_per_length`` is not a single
+        number.
     """
     b = require_positive(bending_stiffness, "bending_stiffness")
     m1 = require_positive(mass_per_length, "mass_per_length")
@@ -324,6 +335,8 @@ def longitudinal_rod_impedance(
     :param cross_section_area: Cross-section area ``S``, in m^2.
     :return: The point impedance ``Z``, in N.s/m.
     :raises ValueError: for a non-positive input.
+    :raises TypeError: if ``cross_section_area``, ``density`` or
+        ``longitudinal_wave_speed`` is not a single number.
     """
     rho = require_positive(density, "density")
     c_l = require_positive(longitudinal_wave_speed, "longitudinal_wave_speed")

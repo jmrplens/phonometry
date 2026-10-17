@@ -60,6 +60,7 @@ $\rho = 1.290 \, \frac{P}{101.325} \, \frac{273.15}{273.15 + T}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if any temperature is at or below -273.15 degC, or any pressure is not positive. |
+| TypeError | if `temperature_c` holds a text or a value that is not a real number. |
 
 ## air_layer_transfer_matrix
 
@@ -91,6 +92,12 @@ $T_{11} = T_{22}$).
 
 **Returns:** The air-layer [`TransferMatrix`](/phonometry/reference/api/materials/four-microphone/#transfermatrix).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `characteristic_impedance` or `thickness_m` is not a single number. |
+
 ## face_quantities
 
 ```python
@@ -103,7 +110,7 @@ face_quantities(
     wavenumber: ArrayLike,
     thickness_m: float,
     characteristic_impedance: float,
-) -> tuple[NDArray[np.complex128], NDArray[np.complex128], NDArray[np.complex128], NDArray[np.complex128]]
+) -> FaceQuantities
 ```
 
 Face pressures and particle velocities (ASTM E2611-19, Eq. (21)).
@@ -128,7 +135,39 @@ $$
 | `thickness_m` | Specimen thickness `d`, in metres. |
 | `characteristic_impedance` | Characteristic impedance `rho c`, in rayls. |
 
-**Returns:** Tuple `(p0, pd, u0, ud)` of face pressures and velocities.
+**Returns:** The face pressures and velocities, as a [`FaceQuantities`](/phonometry/reference/api/materials/four-microphone/#facequantities).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `characteristic_impedance` or `thickness_m` is not a single number. |
+
+## FaceQuantities
+
+```python
+FaceQuantities(
+    p0: NDArray[np.complex128],
+    pd: NDArray[np.complex128],
+    u0: NDArray[np.complex128],
+    ud: NDArray[np.complex128],
+)
+```
+
+The pressures and particle velocities on the two faces of a specimen.
+
+What [`face_quantities`](/phonometry/reference/api/materials/four-microphone/#face_quantities) returns (ASTM E2611-19 Eq. (21)): named as
+the standard prints them, where a `(p0, pd, u0, ud)` tuple used to be
+unpacked by position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `p0` | The sound pressure on the upstream face, `x = 0`. |
+| `pd` | The sound pressure on the downstream face, `x = d`. |
+| `u0` | The particle velocity on the upstream face. |
+| `ud` | The particle velocity on the downstream face. |
 
 ## plane_wave_frequency_range_astm
 
@@ -168,6 +207,12 @@ binding for every microphone pair).
 
 **Returns:** Tuple `(f_l, f_u)` of the lower and upper frequency limits, in Hz.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `spacing_m` is not a single number. |
+
 ## speed_of_sound_astm
 
 ```python
@@ -191,6 +236,7 @@ $c = 20.047 \sqrt{273.15 + T}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if any temperature is at or below -273.15 degC. |
+| TypeError | if `temperature_c` holds a text or a value that is not a real number. |
 
 ## transfer_matrix_one_load
 
@@ -238,6 +284,12 @@ $$
 | `shape` | Tube cross-section, `"circular"`, `"rectangular"` or `"square"`. |
 
 **Returns:** The specimen [`TransferMatrix`](/phonometry/reference/api/materials/four-microphone/#transfermatrix) (measurement context retained on the result).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `diameter_m`, `s1` or `s2` is not a single number. |
 
 ## transfer_matrix_two_load
 
@@ -287,6 +339,12 @@ $$
 | `shape` | Tube cross-section, `"circular"`, `"rectangular"` or `"square"`. |
 
 **Returns:** The specimen [`TransferMatrix`](/phonometry/reference/api/materials/four-microphone/#transfermatrix) (measurement context retained on the result).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `diameter_m`, `s1` or `s2` is not a single number. |
 
 ## TransferMatrix
 
@@ -384,6 +442,12 @@ $k' = \arccos(T_{11}) / d$ (complex `arccos`).
 
 **Returns:** Complex material wavenumber `k'`, in reciprocal metres.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `thickness_m` is not a single number. |
+
 ### TransferMatrix.plot()
 
 ```python
@@ -474,6 +538,12 @@ $R = (T_{11} - \rho c T_{21}) / (T_{11} + \rho c T_{21})$.
 
 **Returns:** Complex reflection coefficient `R`.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `characteristic_impedance` is not a single number. |
+
 ### TransferMatrix.transmission_loss()
 
 ```python
@@ -505,6 +575,12 @@ a real wavenumber).
 
 **Returns:** Transmission loss `TLn`, in decibels.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `characteristic_impedance` is not a single number. |
+
 ## wave_decomposition
 
 ```python
@@ -521,7 +597,7 @@ wave_decomposition(
     wavenumber: ArrayLike,
     diameter_m: float | None = None,
     shape: str = 'circular',
-) -> tuple[NDArray[np.complex128], NDArray[np.complex128], NDArray[np.complex128], NDArray[np.complex128]]
+) -> WaveAmplitudes
 ```
 
 Decompose the wave field into `(A, B, C, D)` (ASTM E2611-19, Eqs. (17)-(20)).
@@ -571,4 +647,36 @@ air-layer transfer matrix (see [`air_layer_transfer_matrix`](/phonometry/referen
 | `diameter_m` | Optional tube diameter (circular) or largest section dimension (rectangular/square), in metres, that activates the plane-wave working-range check (6.2.3-6.2.5, 6.5.4). |
 | `shape` | Tube cross-section, `"circular"`, `"rectangular"` or `"square"`. |
 
-**Returns:** Tuple `(A, B, C, D)` of complex amplitudes.
+**Returns:** The four complex amplitudes, as a [`WaveAmplitudes`](/phonometry/reference/api/materials/four-microphone/#waveamplitudes).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `diameter_m`, `s1` or `s2` is not a single number. |
+
+## WaveAmplitudes
+
+```python
+WaveAmplitudes(
+    a: NDArray[np.complex128],
+    b: NDArray[np.complex128],
+    c: NDArray[np.complex128],
+    d: NDArray[np.complex128],
+)
+```
+
+The four plane-wave amplitudes of a four-microphone tube (ASTM E2611-19 Eqs. (17)-(20)).
+
+What [`wave_decomposition`](/phonometry/reference/api/materials/four-microphone/#wave_decomposition) returns: the amplitudes, named as the
+standard prints them, where an `(A, B, C, D)` tuple used to be unpacked
+by position. They are what [`face_quantities`](/phonometry/reference/api/materials/four-microphone/#face_quantities) takes.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `a` | `A`, the forward wave upstream of the specimen. |
+| `b` | `B`, the backward wave upstream. |
+| `c` | `C`, the forward wave downstream. |
+| `d` | `D`, the backward wave downstream. |

@@ -37,7 +37,7 @@ coherence(
     *,
     nperseg: int | None = None,
     overlap: float = 0.5,
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]
+) -> CoherenceResult
 ```
 
 Ordinary coherence $\gamma^2(f)$ between `x` and `y`
@@ -58,13 +58,59 @@ Averaging over several segments is required for a meaningful estimate
 | `nperseg` | Welch segment length; `None` picks a default. |
 | `overlap` | Segment overlap fraction (default 0.5). |
 
-**Returns:** `(frequencies, gamma_squared)`.
+**Returns:** The bins and the coherence at each, as a [`CoherenceResult`](/phonometry/reference/api/electroacoustics/frequency-response/#coherenceresult).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `nperseg` is a flag, a text or an array where a count goes. |
+
+## CoherenceResult
+
+```python
+CoherenceResult(
+    frequencies: NDArray[np.float64],
+    coherence: NDArray[np.float64],
+)
+```
+
+The ordinary coherence of two records, frequency by frequency.
+
+What [`coherence`](/phonometry/reference/api/electroacoustics/frequency-response/#coherence) returns: the frequency axis and the coherence,
+named, where a `(frequencies, gamma_squared)` tuple used to be unpacked
+by position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | The Welch frequency bins, in Hz. |
+| `coherence` | $\gamma^2(f) \in [0, 1]$ at each bin. |
+
+### CoherenceResult.plot()
+
+```python
+CoherenceResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the coherence against frequency, on 0 to 1.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the coherence curve. |
+
+**Returns:** The axes.
 
 ## FrequencyResponseResult
 
@@ -152,3 +198,4 @@ returned alongside as a data-quality indicator.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `nperseg` is a flag, a text or an array where a count goes. |

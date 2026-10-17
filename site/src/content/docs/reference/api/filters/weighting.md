@@ -123,6 +123,12 @@ Splits signal into low and high bands with flat sum response.
 
 **Returns:** (low_pass_signal, high_pass_signal)
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequency`, `fs` or `order` is not a single number. |
+
 ## time_weighting
 
 ```python
@@ -153,6 +159,12 @@ Apply time weighting to a signal (Exponential averaging).
 | `initial_state` | Previous mean-square output state `y[-1]`. Use None/'zero' for zero initialization (default), 'first' to initialize from the first input energy, or a scalar/array broadcastable to the input shape without the time axis. |
 
 **Returns:** The time-weighted mean square. A bare array in gives a bare array back; a [`Signal`](/phonometry/reference/api/io/io/#signal) gives a [`TimeWeightedEnvelope`](/phonometry/reference/api/filters/weighting/#timeweightedenvelope), which stands in for that array everywhere it was used and adds the rate and a level plot. It is not a Signal, because a mean square is not a pressure record.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fs` is not a single number. |
 
 ## TimeWeightedEnvelope
 
@@ -258,6 +270,12 @@ across blocks, so concatenated block outputs equal a single continuous call.
 | :--- | :--- |
 | `fs` | Sample rate in Hz. |
 | `mode` | 'fast' (125 ms), 'slow' (1000 ms) or 'impulse' (35 ms / 1.5 s). |
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fs` is not a single number. |
 
 ### TimeWeighting.process()
 

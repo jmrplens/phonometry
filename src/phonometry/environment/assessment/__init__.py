@@ -114,7 +114,7 @@ from .spain import (
 )
 from .wind_turbine_modulation import (
     AM_BLOCK_SAMPLES,
-    AM_EXCEEDANCE_THRESHOLDS_DB,
+    AM_EXCEEDANCE_DEPTHS_DB,
     AM_FREQUENCY_BANDS_HZ,
     AM_MIN_VALID_BLOCKS,
     AM_MODULATION_FREQUENCY_LIMITS_HZ,
@@ -131,6 +131,7 @@ from .wind_turbine_modulation import (
     bin_amplitude_modulation,
 )
 from .wind_turbine_receptor import (
+    EXAMPLE_TYPE_B_UNCERTAINTIES_DB,
     LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM,
     LOW_FREQUENCY_BANDS_HZ,
     LOW_FREQUENCY_FACADE_INSULATION,
@@ -142,7 +143,6 @@ from .wind_turbine_receptor import (
     ROUGHNESS_LENGTHS_M,
     SWEDISH_LOW_FREQUENCY_LIMITS_DB,
     TONE_SEARCH_BANDS_HZ,
-    TYPE_B_UNCERTAINTY_EXAMPLES_DB,
     TYPICAL_WIND_SHEAR_EXPONENT_RANGE,
     BackgroundCorrectionRegime,
     BinnedSoundLevels,
@@ -173,7 +173,7 @@ from .wind_turbine_receptor import (
 __all__ = [
     "ACOUSTIC_AREA_TYPES",
     "AM_BLOCK_SAMPLES",
-    "AM_EXCEEDANCE_THRESHOLDS_DB",
+    "AM_EXCEEDANCE_DEPTHS_DB",
     "AM_FREQUENCY_BANDS_HZ",
     "AM_MIN_VALID_BLOCKS",
     "AM_MODULATION_FREQUENCY_LIMITS_HZ",
@@ -203,7 +203,7 @@ __all__ = [
     "ROUGHNESS_LENGTHS_M",
     "SWEDISH_LOW_FREQUENCY_LIMITS_DB",
     "TONE_SEARCH_BANDS_HZ",
-    "TYPE_B_UNCERTAINTY_EXAMPLES_DB",
+    "EXAMPLE_TYPE_B_UNCERTAINTIES_DB",
     "TYPICAL_WIND_SHEAR_EXPONENT_RANGE",
     "ActivityAssessment",
     "BackgroundCorrectionRegime",

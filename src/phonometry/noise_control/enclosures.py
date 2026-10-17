@@ -156,6 +156,8 @@ class EnclosureInsertionLossResult(OwnsArrays):
         :raises ValueError: if the per-band quantities disagree, one of them
             carries an extra axis, or ``external_area`` or ``internal_area``
             is not positive and finite.
+        :raises TypeError: if ``external_area`` or ``internal_area`` is not a single
+            number.
         """
         require_ranks(
             self,
@@ -416,7 +418,8 @@ def enclosure_insertion_loss(
         Equation (4.115).
     :return: An :class:`EnclosureInsertionLossResult`.
     :raises TypeError: if ``panel_transmission_loss`` is none of the forms
-        above.
+        above, ``model`` is not a text, or ``internal_area`` or
+        ``external_area`` is not one number.
     :raises ValueError: if an area is not positive, ``internal_absorption`` is
         not in ``(0, 1)`` or does not carry one value per band, a callable is
         given without ``frequencies``, or ``model`` is unknown.
@@ -503,6 +506,8 @@ def enclosure_required_transmission_loss(
     :return: An :class:`EnclosureInsertionLossResult` whose ``panel_transmission_loss`` is
         the **required** ``R`` and whose ``insertion_loss`` is the requested
         target, so it plots and reports like a forward calculation.
+    :raises TypeError: if ``model`` is not a text, or ``external_area`` or
+        ``internal_area`` is not a single number.
     """
     freqs, il_b, correction, r_i_b, s_e, s_i = _resolve_interior(
         insertion_loss,

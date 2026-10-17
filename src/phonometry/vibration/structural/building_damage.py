@@ -78,6 +78,7 @@ import numpy as np
 
 from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
+from ..._internal.frozen import OwnsArrays
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     require_choice,
@@ -111,6 +112,7 @@ __all__ = [
     "assess_building_vibration",
     "bending_stress",
     "foundation_guideline_curve",
+    "GuidelineCurve",
     "guideline_velocity",
     "pipeline_guideline_velocity",
     "STORY_FREQUENCY_NUMERATOR_HZ",
@@ -299,6 +301,8 @@ def guideline_velocity(
         frequency is given for a case that does not read one, if a frequency
         is not positive and finite, or if *massive_structure* is asked for
         outside row 1 of Table 1.
+    :raises TypeError: if ``building_class``, ``duration`` or ``location`` is not a
+        text.
     """
     cls = require_choice(building_class, "building_class", BUILDING_CLASSES)
     where = require_choice(location, "location", _LOCATIONS)
@@ -367,6 +371,7 @@ def pipeline_guideline_velocity(
     :param duration: ``"short_term"`` (default) or ``"long_term"``.
     :return: The guideline peak velocity, in millimetres per second.
     :raises ValueError: If a name is not one of its choices.
+    :raises TypeError: if ``duration`` or ``material`` is not a text.
     """
     pipe = require_choice(material, "material", PIPELINE_MATERIALS)
     when = require_choice(duration, "duration", _DURATIONS)
@@ -408,6 +413,7 @@ class DamageAssessment(RichDisplay):
 
         :raises ValueError: For a negative or non-finite velocity, or for any
             reason :func:`guideline_velocity` raises.
+        :raises TypeError: if ``velocity_mm_s`` is not a single number.
         """
         require_non_negative(self.velocity_mm_s, "velocity_mm_s")
         _ = self.guideline_mm_s
@@ -499,6 +505,7 @@ def assess_building_vibration(
     :return: The comparison, as a :class:`DamageAssessment`.
     :raises ValueError: If the velocity is negative or not finite, or for any
         reason :func:`guideline_velocity` raises.
+    :raises TypeError: if ``velocity_mm_s`` is not a single number.
     """
     # Non-negative rather than positive: a foundation that did not move is a
     # measurement like any other, and it keeps to every guideline value there
@@ -528,7 +535,8 @@ def story_fundamental_frequency(n_stories: int) -> float:
 
     :param n_stories: The number of storeys ``n``.
     :return: The estimated lowest horizontal natural frequency, in hertz.
-    :raises TypeError: If the storey count is not a number.
+    :raises TypeError: If ``n_stories`` is a bool, a text or an array rather
+        than a number.
     :raises ValueError: If the storey count is not a whole number of at
         least 1.
     :warns BuildingDamageWarning: Below
@@ -593,6 +601,8 @@ def bending_stress(
         was an array.
     :raises ValueError: If a material property, the load ratio or the mode
         factor is not positive and finite, or a velocity is negative.
+    :raises TypeError: if ``density``, ``dynamic_modulus_pa``, ``load_ratio`` or
+        ``mode_factor`` is not a single number.
     """
     e_dyn = require_positive(dynamic_modulus_pa, "dynamic_modulus_pa")
     rho = require_positive(density, "density")
@@ -606,10 +616,26 @@ def bending_stress(
     return as_float_or_array(sigma)
 
 
+@dataclass(frozen=True)
+class GuidelineCurve(OwnsArrays):
+    """A guideline velocity polyline of DIN 4150-3 Bild 1, sampled.
+
+    What :func:`foundation_guideline_curve` returns: the frequencies and the
+    guideline velocities, named, where a ``(frequency_hz, guideline_mm_s)``
+    tuple used to be unpacked by position.
+
+    :ivar frequencies: The frequencies, in hertz.
+    :ivar velocities_mm_s: The guideline velocity at each, in mm/s.
+    """
+
+    frequencies: NDArray[np.float64]
+    velocities_mm_s: NDArray[np.float64]
+
+
 def foundation_guideline_curve(
     building_class: BuildingClass,
     frequency: ArrayLike | None = None,
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+) -> GuidelineCurve:
     """Bild 1 as two arrays: frequency and guideline velocity.
 
     The corner points of Table 1 by default, which is the polyline Bild 1
@@ -618,9 +644,11 @@ def foundation_guideline_curve(
     :param building_class: One of :data:`BUILDING_CLASSES`.
     :param frequency: Frequency or frequencies to sample at, in hertz, or ``None`` for the
         four corners of Table 1.
-    :return: ``(frequency_hz, guideline_mm_s)``.
+    :return: The frequencies and the guideline velocities, as a
+        :class:`GuidelineCurve`.
     :raises ValueError: If the class is not one of the three, or a frequency
         is not positive and finite.
+    :raises TypeError: if ``building_class`` is not a text.
     """
     cls = require_choice(building_class, "building_class", BUILDING_CLASSES)
     if frequency is None:
@@ -630,4 +658,4 @@ def foundation_guideline_curve(
     values = np.atleast_1d(
         np.asarray(guideline_velocity(cls, f, location="foundation"), dtype=np.float64)
     )
-    return f, values
+    return GuidelineCurve(frequencies=f, velocities_mm_s=values)

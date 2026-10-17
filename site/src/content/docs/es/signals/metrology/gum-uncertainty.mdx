@@ -149,7 +149,8 @@ print(round(result.combined_uncertainty, 3))  # 0.407 dB
 print(result.contributions.round(3))          # [0.    0.115 0.173 0.35 ]
 print(round(result.effective_dof, 1))         # 16.5
 
-k, U = result.expanded(0.95)
+expanded = result.expanded(0.95)
+k, U = expanded.coverage_factor, expanded.expanded_uncertainty
 print(round(k, 2), round(U, 2))               # 2.11 0.86  ->  Y = 74.0 ± 0.9 dB
 ```
 
@@ -263,7 +264,7 @@ correlated = metrology.uncertainty_propagation(  # avisa: aquí no hay Welch-Sat
     lambda a, b, c, d: a + b + c + d, quantities, correlation=correlation)
 print(round(correlated.combined_uncertainty, 3))            # 0.454 dB (era 0.407)
 print(correlated.effective_dof)                             # nan
-print(round(correlated.expanded(0.95, coverage_factor_override=2.0)[1], 2))  # 0.91
+print(round(correlated.expanded(0.95, coverage_factor_override=2.0).expanded_uncertainty, 2))  # 0.91
 ```
 
 Contar una sola vez el calibrador compartido, en lugar de dos, cuesta aquí
@@ -380,7 +381,8 @@ model = lambda a, b, c, d: a + b + c + d
 result = metrology.uncertainty_propagation(model, quantities)
 mc = metrology.monte_carlo(model, quantities, n_trials=1_000_000, coverage=0.95, seed=1,
                     keep_samples=True)
-k, U = result.expanded(0.95)
+expanded = result.expanded(0.95)
+k, U = expanded.coverage_factor, expanded.expanded_uncertainty
 
 # Una línea por panel: las barras del balance, y el histograma de Monte
 # Carlo con su intervalo (la figura del repositorio superpone además la
@@ -412,7 +414,8 @@ plt.show()
 
 El `UncertaintyResult` lleva el `value`, la `combined_uncertainty`, las
 `sensitivities`, las `contributions` por entrada y los `effective_dof`; su
-`.plot()` dibuja el balance y `.expanded(coverage)` devuelve el par $(k, U)$. El
+`.plot()` dibuja el balance y `.expanded(coverage)` devuelve   un
+`ExpandedUncertainty` (`coverage_factor`, `expanded_uncertainty`). El
 `MonteCarloResult` lleva el `value`, la `standard_uncertainty`, el `interval` de
 cobertura y su `coverage`; con `keep_samples=True` conserva además las
 muestras de salida (`samples`), y su `.plot()` dibuja el histograma de salida

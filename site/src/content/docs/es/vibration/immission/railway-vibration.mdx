@@ -224,9 +224,10 @@ ax = passage.plot_spectrum(language="es")
 
 t2 = slice(round(6.75 * fs), round(23.25 * fs))
 spectrum = vibration.narrowband_psd(passage.velocity_mm_s[t2], fs)
-centres, rms = vibration.third_octaves_from_narrowband(
+bands = vibration.third_octaves_from_narrowband(
     spectrum.psd, frequencies=spectrum.frequencies
 )
+centres, rms = bands.frequencies, bands.velocities_mm_s
 narrow = 20 * np.log10(rms / vibration.VELOCITY_LEVEL_REFERENCE_MM_S)
 positions = [list(centres).index(band) for band in passage.frequencies]
 ax.plot(range(len(positions)), narrow[positions], "x", label="T2 desde la banda estrecha")
@@ -311,9 +312,10 @@ passage = vibration.evaluate_train_passage(record, fs, t2_s=(6.75, 23.25))
 t2 = slice(round(6.75 * fs), round(23.25 * fs))
 spectrum = vibration.narrowband_psd(passage.velocity_mm_s[t2], fs)
 print(f"bloque {spectrum.nperseg / fs:.2f} s")  # 0.80 s
-centres, rms = vibration.third_octaves_from_narrowband(
+bands = vibration.third_octaves_from_narrowband(
     spectrum.psd, frequencies=spectrum.frequencies
 )
+centres, rms = bands.frequencies, bands.velocities_mm_s
 levels = 20 * np.log10(rms / vibration.VELOCITY_LEVEL_REFERENCE_MM_S)
 for band in (40.0, 50.0, 63.0):
     print(f"{band:g} Hz desde banda estrecha: {levels[list(centres).index(band)]:.1f} dB")

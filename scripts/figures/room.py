@@ -1698,7 +1698,7 @@ def generate_room_noise_criteria(output_dir: str) -> None:
     """ANSI S12.2-2019: NC tangency rating and RC Mark II classification."""
     print("Generating room_noise_criteria.png...")
     from phonometry import room
-    from phonometry.room import NC_CURVES_DB, NC_OCTAVE_BANDS_HZ, NC_RATINGS
+    from phonometry.room import NC_CURVE_LEVELS, NC_OCTAVE_BANDS_HZ, NC_RATINGS
 
     # A ventilation-dominated room spectrum: the low-frequency bands rise well
     # above the sloped RC reference (a rumble tag under RC Mark II) while the
@@ -1725,7 +1725,7 @@ def generate_room_noise_criteria(output_dir: str) -> None:
     }
 
     # --- Left: NC curves + tangency rating. ---
-    for row, idx in zip(NC_CURVES_DB, NC_RATINGS, strict=True):
+    for row, idx in zip(NC_CURVE_LEVELS, NC_RATINGS, strict=True):
         ax_nc.plot(NC_OCTAVE_BANDS_HZ, row, color=COLOR_GRID, lw=0.8, zorder=1)
         ax_nc.annotate(
             f"{idx:.0f}",
@@ -1839,7 +1839,7 @@ def generate_nc_blind_spot(output_dir: str) -> None:
     """Two rooms with the same NC rating and opposite spectral character."""
     print("Generating nc_blind_spot...")
     from phonometry import room
-    from phonometry.room import NC_CURVES_DB, NC_OCTAVE_BANDS_HZ, NC_RATINGS
+    from phonometry.room import NC_CURVE_LEVELS, NC_OCTAVE_BANDS_HZ, NC_RATINGS
 
     # Two ANSI/ASA S12.2 spectra built to touch the NC-40 curve at one band
     # each: a duct-rumble room tangent at 125 Hz, and a diffuser-hiss room
@@ -1856,7 +1856,7 @@ def generate_nc_blind_spot(output_dir: str) -> None:
     _fig, (ax_nc, ax_rc) = plt.subplots(1, 2, figsize=(12.5, 5.6))
 
     # --- Left: one NC label for two spectra. ---
-    for row, idx in zip(NC_CURVES_DB, NC_RATINGS, strict=True):
+    for row, idx in zip(NC_CURVE_LEVELS, NC_RATINGS, strict=True):
         ax_nc.plot(NC_OCTAVE_BANDS_HZ, row, color=COLOR_GRID, lw=0.8, zorder=1)
         ax_nc.annotate(
             f"{idx:.0f}",

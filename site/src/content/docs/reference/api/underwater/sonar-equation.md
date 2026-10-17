@@ -89,6 +89,7 @@ $\mathrm{SE} = \mathrm{SL} - 2\,\mathrm{PL} + \mathrm{TS} - \mathrm{RL} - \mathr
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not finite. |
+| TypeError | if `detection_threshold`, `directivity_index`, `noise_level`, `reverberation_level`, `source_level` or `target_strength` is not a single number. |
 
 ## array_directivity_index
 
@@ -145,6 +146,7 @@ underflows, and the value there is 0 dB rather than an error.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive or non-finite length or wavelength, or a non-finite steer angle. |
+| TypeError | if `array_length_m`, `steer_angle_rad` or `wavelength_m` is not a single number. |
 
 ## detection_range
 
@@ -197,6 +199,7 @@ merit works for both sonar modes: the active figure of merit returned by
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
+| TypeError | if `figure_of_merit`, `max_range` or `ph` is not a single number, or `n_points` is a flag, a text or an array where a count goes. |
 
 ## detection_range_from_curve
 
@@ -232,6 +235,7 @@ linearly between the two bracketing samples. Real waveguides oscillate, so
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `figure_of_merit` is not a single number. |
 
 ## detection_threshold
 
@@ -270,6 +274,7 @@ stable signal or a fully Rayleigh one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-finite `p_fa`, or one outside (0, 1/2). At $p_\mathrm{fa} = 1/2$ the inner logarithm is zero and the threshold diverges: half the empty beams are already called detections. |
+| TypeError | if `false_alarm_probability` is not a single number. |
 
 ## DetectionRangeResult
 
@@ -346,6 +351,7 @@ Passive sonar equation $\mathrm{SE} = \mathrm{SL} - \mathrm{PL} - (\mathrm{NL} -
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not finite. |
+| TypeError | if `detection_threshold`, `directivity_index`, `noise_level` or `source_level` is not a single number. |
 
 ## SonarEquationResult
 

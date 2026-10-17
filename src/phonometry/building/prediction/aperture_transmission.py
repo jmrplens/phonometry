@@ -164,7 +164,7 @@ class ApertureTransmissionResult(OwnsArrays):
             neither ``"slit"`` nor ``"circular"``, the result carries both a
             slit width and a circular radius, the shape it carries is not the
             one ``kind`` names, or it carries no shape at all.
-        :raises TypeError: if ``depth`` is ``None``.
+        :raises TypeError: if ``depth`` is ``None``, or ``kind`` is not a text.
         """
         require_present(self, "depth")
         require_ranks(self, frequencies=1, transmission_coefficient=1)
@@ -257,6 +257,8 @@ def slit_transmission_coefficient(
     :param speed_of_sound: Speed of sound in air ``c0`` (Default: 343 m/s).
     :return: An :class:`ApertureTransmissionResult` (kind ``"slit"``).
     :raises ValueError: for a non-positive input or unknown field/position.
+    :raises TypeError: if ``field`` or ``position`` is not a text, or ``depth``,
+        ``speed_of_sound`` or ``width_m`` is not a single number.
     """
     w = require_positive(width_m, "width_m")
     d = require_positive(depth, "depth")
@@ -327,6 +329,8 @@ def slit_resonance_frequencies(
         wide relative to its depth that the effective depth :math:`d + 2e` is
         non-positive (no resonance exists; ``width_m`` must be much less than the
         wavelength).
+    :raises TypeError: if ``depth``, ``n_orders``, ``speed_of_sound`` or ``width_m`` is
+        not a single number.
     """
     require_scalar(n_orders, "n_orders")
     d = require_positive(depth, "depth")
@@ -375,6 +379,8 @@ def circular_aperture_transmission_coefficient(
     :param speed_of_sound: Speed of sound in air ``c0`` (Default: 343 m/s).
     :return: An :class:`ApertureTransmissionResult` (kind ``"circular"``).
     :raises ValueError: for a non-positive input.
+    :raises TypeError: if ``depth``, ``radius`` or ``speed_of_sound`` is not a single
+        number.
     """
     a = require_positive(radius, "radius")
     d = require_positive(depth, "depth")

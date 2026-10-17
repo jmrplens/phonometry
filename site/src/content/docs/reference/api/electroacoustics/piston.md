@@ -277,6 +277,7 @@ normalised far-field lobe is overlaid on the radiation side.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive radius, only one of the lobe pair, a lobe whose two arrays disagree, or a non-finite value in either of them. |
+| TypeError | if `radius` is not a single number. |
 
 ## radiating_piston
 
@@ -312,6 +313,12 @@ the far-field directivity pattern $D(\theta)$.
 | `angles_rad` | Optional polar angles `theta` from the axis, rad, at which to sample the directivity pattern. |
 
 **Returns:** A [`RadiatingPistonResult`](/phonometry/reference/api/electroacoustics/piston/#radiatingpistonresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `density`, `radius` or `speed_of_sound` is not a single number. |
 
 ## RadiatingPistonResult
 

@@ -142,6 +142,7 @@ def mean_of_test_runs(
         two are given, if any is not positive and finite, if the tolerance is
         not positive, or if any value lies outside the tolerance band around
         the mean.
+    :raises TypeError: if ``relative_tolerance`` is not a single number.
     """
     tol = require_positive(relative_tolerance, "relative_tolerance")
     runs = np.atleast_1d(np.asarray(values, dtype=np.float64))
@@ -177,6 +178,8 @@ def seat_factor(seat_acceleration: float, platform_acceleration: float) -> float
         :math:`a_\mathrm{wP}`.
     :return: :math:`a_\mathrm{wS}/a_\mathrm{wP}`; below 1 the seat attenuates.
     :raises ValueError: If either acceleration is not positive and finite.
+    :raises TypeError: if ``platform_acceleration`` or ``seat_acceleration`` is not a
+        single number.
     """
     seat = require_positive(seat_acceleration, "seat_acceleration")
     platform = require_positive(platform_acceleration, "platform_acceleration")
@@ -204,6 +207,7 @@ def corrected_seat_acceleration(
     :return: The corrected magnitude on the seat, in the unit the
         accelerations were given in.
     :raises ValueError: If any acceleration is not positive and finite.
+    :raises TypeError: if ``intended_platform_acceleration`` is not a single number.
     """
     intended = require_positive(
         intended_platform_acceleration, "intended_platform_acceleration"
@@ -229,6 +233,8 @@ def resonance_transmissibility(
         on the platform.
     :return: :math:`a_\mathrm{S}(f_\mathrm{r})/a_\mathrm{P}(f_\mathrm{r})`.
     :raises ValueError: If either acceleration is not positive and finite.
+    :raises TypeError: if ``platform_acceleration`` or ``seat_acceleration`` is not a
+        single number.
     """
     seat = require_positive(seat_acceleration, "seat_acceleration")
     platform = require_positive(platform_acceleration, "platform_acceleration")

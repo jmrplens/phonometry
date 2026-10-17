@@ -256,6 +256,7 @@ to 25 m³ here and does **not** trigger, where Python's built-in
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `volume` is not a positive, finite number. |
+| TypeError | if `volume` is not a single number. |
 
 ## LOW_FREQUENCY_PROCEDURE_BANDS_HZ
 

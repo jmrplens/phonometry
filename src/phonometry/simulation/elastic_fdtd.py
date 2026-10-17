@@ -555,6 +555,8 @@ class ElasticFDTD2D:
         every face adjacent to a masked cell is closed (zero normal
         velocity) and every touching corner shear stress is zeroed, i.e. a
         shear-free rigid inclusion, rasterising arbitrary interior geometry.
+    :raises TypeError: if ``cfl`` is not a single number, or ``sponge_width`` is a flag,
+        a text or an array where a count goes.
     """
 
     def __init__(

@@ -106,6 +106,7 @@ $n(f) = 2 L / c_\mathrm{L}$, independent of frequency.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
+| TypeError | if `length` or `longitudinal_wave_speed` is not a single number. |
 
 ## beam_modal_density
 
@@ -139,6 +140,7 @@ other subsystem here, it *decreases* with frequency.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
+| TypeError | if `bending_stiffness`, `length` or `mass_per_length` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## cylindrical_shell_modal_density
 
@@ -196,6 +198,7 @@ frequency, which for long thin shells can be substantial.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or a band set other than 1 or 3. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), `area`, `longitudinal_wave_speed` or `thickness_m` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## flat_plate_modal_density
 
@@ -228,6 +231,7 @@ $c_\mathrm{L} = \sqrt{E / (\rho (1 - \nu^2))}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
+| TypeError | if `area`, `longitudinal_wave_speed` or `thickness_m` is not a single number. |
 
 ## power_injection_clf
 
@@ -285,6 +289,7 @@ time-averaged mean-square velocity in the band.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input, mismatched band lengths, or a measurement with $E_1/n_1 \le E_2/n_2$ (the receiving subsystem holds at least as much modal energy as the driven one, so no two-subsystem SEA model fits it). |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## power_injection_matrix
 
@@ -320,6 +325,7 @@ independent check on the measurement.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a bad shape, a non-positive value, or a singular energy matrix in some band. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## PowerInjectionResult
 
@@ -465,3 +471,4 @@ density is no longer a simple function of frequency.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
+| TypeError | if `longitudinal_wave_speed` or `mean_radius` is not a single number. |

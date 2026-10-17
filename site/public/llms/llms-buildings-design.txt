@@ -1410,9 +1410,10 @@ from phonometry import building, vibration
 # nu = 0.3, m'' = 7.8 kg/m2, corrugated into a sinusoid 20 mm deep
 # (amplitude H = 10 mm) at a 100 mm pitch.
 flat_b = vibration.plate_bending_stiffness(2.1e11, 1.0e-3, 0.3)
-b_x, b_z, b_xz = building.corrugated_plate_stiffness(
+stiffness = building.corrugated_plate_stiffness(
     1.0e-3, 0.010, 0.100, youngs_modulus=2.1e11, poisson_ratio=0.3,
 )
+b_x, b_z, b_xz = stiffness.b_x_n_m, stiffness.b_z_n_m, stiffness.b_xz_n_m
 mass = 7.8 * building.corrugated_plate_mass_factor(0.010, 0.100)
 print(round(flat_b, 1), round(b_x, 1), round(b_z))     # 19.2 17.5 2202
 print(round(mass, 2))                                  # 8.52 kg/m2 (+9 %)
@@ -1461,9 +1462,10 @@ bands = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000,
                   10000, 12500, 16000], dtype=float)
 eta = 0.011
 flat_b = vibration.plate_bending_stiffness(2.1e11, 1.0e-3, 0.3)
-b_x, b_z, _ = building.corrugated_plate_stiffness(
+stiffness = building.corrugated_plate_stiffness(
     1.0e-3, 0.010, 0.100, youngs_modulus=2.1e11, poisson_ratio=0.3,
 )
+b_x, b_z = stiffness.b_x_n_m, stiffness.b_z_n_m
 mass = 7.8 * building.corrugated_plate_mass_factor(0.010, 0.100)
 fc1, fc2 = building.orthotropic_critical_frequencies(mass, b_x, b_z)
 
@@ -1611,7 +1613,8 @@ Hall & Hopkins (2001).
 ```python
 from phonometry import building
 
-print(building.wall_tie_stiffness("butterfly"))        # (0.05 m, 1.7e6 N/m)
+tie = building.wall_tie_stiffness("butterfly")
+print(tie.cavity_width_m, tie.stiffness)       # 0.05 1700000.0
 
 # Hopkins Fig. 4.35: two 140 kg/m2 leaves across an empty 75 mm cavity.
 print(round(building.mass_spring_mass_resonance(140.0, 140.0, 0.075)))          # 26 Hz
@@ -1988,6 +1991,34 @@ for 6 ≤ margin < 15 dB; the 1.3 dB limit below 6 dB, flagged as $> \Delta L$).
 The improvement is the position-averaged difference
 $\Delta L = L_0 - L_1$ (Formulae (3)/(4)); octaves follow
 $\Delta L_\mathrm{oct} = -10\log_{10}[\tfrac{1}{3}\sum 10^{-\Delta L_j/10}]$ (Formula (5)).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/background_corrected_level_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/background_corrected_level.svg" alt="ISO 16251-1 background correction of a textile carpet on the mock-up: the margin of the reading above a 20 dB accelerometer background in each one-third-octave band from 100 Hz to 3150 Hz, over the three shaded regimes of Formula (2), clear above 15 dB up to 630 Hz, background subtracted at 800 Hz and 1 kHz, and held at the 1.3 dB limit of measurement in the five highest bands" width="80%"></picture>
+
+*The textile carpet of this page, read with the covering on over an accelerometer background of 20 dB re 1 µm/s². Up to 630 Hz the reading clears the background by 15 dB or more and is used as it is; at 800 Hz and 1 kHz the background is subtracted in energy; from 1250 Hz up the margin is under 6 dB, and the correction is held at 1.3 dB. Those five bands are reported as $> \Delta L$: the covering improves them by at least that much, and the mock-up cannot say by how much more.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500,
+         630, 800, 1000, 1250, 1600, 2000, 2500, 3150]
+bare = np.array([72, 73, 74, 74, 75, 75, 76, 76, 77, 77, 78, 78, 79, 79, 80, 80])
+covering = bare - np.array([5, 8, 10, 14, 18, 23, 30, 31,
+                            39, 49, 53, 57, 60, 67, 68, 71])
+background = np.full(16, 20.0)   # dB re 1 um/s^2
+# What the accelerometer reads with the carpet on: the covering plus the background.
+reading = 10 * np.log10(10 ** (covering / 10) + 10 ** (background / 10))
+res = building.background_corrected_level(reading, background, frequencies=freqs)
+print(int(res.limited.sum()))    # 5 bands at the 1.3 dB limit
+res.plot()
+plt.show()
+```
+
+</details>
 
 **Weighted improvement.** $\Delta L_\mathrm{w}$ is the ISO 717-2 weighted reduction: the
 improvement is applied to the heavyweight **reference floor** $L_\mathrm{n,r,0}$

@@ -103,6 +103,8 @@ def hydrophone_depths(
     :param angles_deg: Depression angles, in degrees (default 15°, 30°, 45°).
     :return: The hydrophone depths, in m.
     :raises ValueError: If the distance or any angle is out of range.
+    :raises TypeError: if ``angles_deg`` holds a text or a value that is not a real
+        number.
     """
     cpa = _positive(cpa_distance, "cpa_distance")
     # The shared guard also pins the shape: a nested pair of pairs used to
@@ -244,6 +246,8 @@ def monopole_source_level(
     :param speed_of_sound: Speed of sound in sea water, in m/s (default 1500).
     :return: A :class:`ShipSourceLevelResult`.
     :raises ValueError: If the inputs are invalid or the shapes mismatch.
+    :raises TypeError: if ``frequency`` or ``rnl`` holds a text or a value that is not a
+        real number.
     """
     d = _positive(draft_m, "draft_m")
     speed = _positive(speed_of_sound, "speed_of_sound")

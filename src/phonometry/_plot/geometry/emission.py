@@ -176,6 +176,7 @@ def plot_microphone_positions(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the microphone ``scatter``.
     :return: The 3-D axes.
+    :raises TypeError: if ``radius`` is not a single number.
     """
     from ..._i18n import localize_axes
 
@@ -292,6 +293,7 @@ def plot_pp_probe_geometry(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the spacer rectangle.
     :return: The axes.
+    :raises TypeError: if ``spacing_m`` is not a single number.
     """
     from matplotlib.patches import Circle, Rectangle
 

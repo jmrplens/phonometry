@@ -347,7 +347,7 @@ def _rolling_stock_roughness(
     limit = ph.environment.REFERENCE_TRACK_ROUGHNESS_LIMIT_DB
     wavelengths = sorted(limit, reverse=True)
     return ph.environment.AcousticRoughnessSpectrum(
-        wavelengths, [limit[w] + offset_db for w in wavelengths]
+        wavelengths_m=wavelengths, levels=[limit[w] + offset_db for w in wavelengths]
     )
 
 
@@ -414,7 +414,9 @@ def _small_roughness_deviation() -> ph.environment.SmallRoughnessDeviation:
     base = _rolling_stock_roughness()
     levels = np.array(base.levels)
     levels[base.bands.index(14)] += 3.0
-    roughness = ph.environment.AcousticRoughnessSpectrum(base.wavelengths_m, levels)
+    roughness = ph.environment.AcousticRoughnessSpectrum(
+        wavelengths_m=base.wavelengths_m, levels=levels
+    )
     frequencies = [
         100.0,
         125.0,
@@ -445,7 +447,9 @@ def _roughness_comparability() -> ph.environment.RoughnessComparability:
     one = _rolling_stock_roughness(-2.0)
     levels = np.array(one.levels)
     levels[8:11] += 3.0
-    two = ph.environment.AcousticRoughnessSpectrum(one.wavelengths_m, levels)
+    two = ph.environment.AcousticRoughnessSpectrum(
+        wavelengths_m=one.wavelengths_m, levels=levels
+    )
     frequencies = [250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0]
     noise = np.full(len(frequencies), 75.0)
     return ph.environment.roughness_comparability(
@@ -458,7 +462,9 @@ def _reference_track() -> ph.environment.ReferenceTrackCheck:
     limits = ph.environment.REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M
     rates = [
         ph.environment.TrackDecayRate(
-            d, list(limits[d]), [1.1 * v for v in limits[d].values()]
+            direction=d,
+            frequencies=list(limits[d]),
+            decay_rates_db_per_m=[1.1 * v for v in limits[d].values()],
         )
         for d in ("vertical", "lateral")
     ]
@@ -592,7 +598,7 @@ def _service_equipment() -> ph.building.ServiceEquipmentResult:
         readings,
         frequencies=freqs,
         quantity="eq",
-        background_db=background,
+        background_levels=background,
         reverberation_time=t,
         volume=32.0,
     )
@@ -773,7 +779,7 @@ def _adjustment_value() -> ph.metrology.AdjustmentValue:
     return ph.metrology.adjustment_value(
         frequencies=[125.0, 1000.0, 8000.0],
         free_field_indicated_level=[94.2, 94.1, 93.4],
-        calibrator_reading_db=94.3,
+        calibrator_indicated_level_before=94.3,
         calibrator_level=94.0,
         tolerance_db=[1.0, 0.7, 1.5],
     )

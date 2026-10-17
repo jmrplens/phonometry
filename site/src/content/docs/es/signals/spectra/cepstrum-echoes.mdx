@@ -320,7 +320,7 @@ x = s + 0.5 * np.roll(s, 384)                # el mismo eco de 8 ms
 
 low = signals.lifter(x, fs, cutoff=0.004, mode="lowpass")    # envolvente de ln|X|
 high = signals.lifter(x, fs, cutoff=0.004, mode="highpass")  # el rizado del eco
-print(np.allclose(low.liftered_db + high.liftered_db, low.spectrum_db))
+print(np.allclose(low.liftered_spectrum_db + high.liftered_spectrum_db, low.spectrum_db))
 low.plot(language="es")
 ```
 
@@ -360,9 +360,9 @@ band = (low.frequencies >= 500) & (low.frequencies <= 2000)
 fig, axes = plt.subplots(2, 1, sharex=True)
 axes[0].semilogx(low.frequencies[band], low.spectrum_db[band], "0.6",
                  lw=0.7, label="Espectro logarítmico")
-axes[0].semilogx(low.frequencies[band], low.liftered_db[band], lw=2,
+axes[0].semilogx(low.frequencies[band], low.liftered_spectrum_db[band], lw=2,
                  label="Lifter paso bajo: envolvente")
-axes[1].semilogx(high.frequencies[band], high.liftered_db[band], "r",
+axes[1].semilogx(high.frequencies[band], high.liftered_spectrum_db[band], "r",
                  label="Lifter paso alto: rizado")
 for bound in (20 * np.log10(1.5), 20 * np.log10(0.5)):
     axes[1].axhline(bound, color="g", linestyle="--")

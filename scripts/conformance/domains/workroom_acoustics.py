@@ -932,7 +932,7 @@ def _annex_b_level(
     station: tuple[float, float, float],
     machines: tuple[_Machine, ...],
     *,
-    background_db: float | None = None,
+    background_levels: float | None = None,
 ) -> float:
     """What Annex B hears at one position once *machines* are running.
 
@@ -964,7 +964,7 @@ def _annex_b_level(
                     )
                 )
             )
-    return ph.room.total_workstation_level(parts, existing_level=background_db)
+    return ph.room.total_workstation_level(parts, existing_level=background_levels)
 
 
 def _annex_b_case_a() -> dict[str, float]:
@@ -980,7 +980,7 @@ def _annex_b_case_a() -> dict[str, float]:
         "beside M2": _annex_b_level(
             prediction.ANNEX_B_BESIDE_M2,
             (_B_M1, _B_M2),
-            background_db=prediction.ANNEX_B_BACKGROUND_DB,
+            background_levels=prediction.ANNEX_B_BACKGROUND_DB,
         ),
         "far corner": _annex_b_level(prediction.ANNEX_B_FAR_CORNER, (_B_M1, _B_M2)),
     }
@@ -993,7 +993,7 @@ def _annex_b_case_b(new_machine: _Machine) -> dict[str, float]:
         "beside M2": _annex_b_level(
             prediction.ANNEX_B_BESIDE_M2,
             machines,
-            background_db=prediction.ANNEX_B_BACKGROUND_DB,
+            background_levels=prediction.ANNEX_B_BACKGROUND_DB,
         ),
         "far corner": _annex_b_level(prediction.ANNEX_B_FAR_CORNER, machines),
         "beside the new machine": _annex_b_level(

@@ -95,6 +95,9 @@ def plot_barrier_geometry(
     :raises ValueError: for a height that is not finite and non-negative, a
         distance that is not finite and positive, a receiver no further than
         the barrier, or a non-positive thickness.
+    :raises TypeError: if ``barrier_distance``, ``barrier_height_m``,
+        ``receiver_distance``, ``receiver_height_m``, ``source_height_m`` or
+        ``thickness_m`` is not a single number.
     """
     _check_language(language)
     # Named and finite, one parameter at a time. Every comparison against a

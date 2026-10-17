@@ -110,7 +110,7 @@ def _metric_rows(result: EPNLResult, language: str = "en") -> list[tuple[str, st
     if abs(result.bandsharing_adjustment) > _DB_EPS:
         rows.append(
             (
-                t("Bandsharing adjustment [dB]", language),
+                t("Bandsharing adjustment [TPNdB]", language),
                 fmt_num(result.bandsharing_adjustment, language),
             )
         )

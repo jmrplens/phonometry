@@ -155,6 +155,7 @@ both are independent of which race turns (Norton's Eqs. 8.8 and 8.14, and
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive or inconsistent geometry. |
+| TypeError | if `rotating_race` is not a text, `contact_angle_deg`, `element_diameter` or `pitch_diameter` is not a single number, or `n_elements` is a flag, a text or an array where a count goes. |
 
 ## blade_pass_frequencies
 
@@ -205,6 +206,7 @@ pattern turning at a different speed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive or non-integer input. |
+| TypeError | if `n_blades`, `n_harmonics`, `n_lobe_orders` or `n_vanes` is a flag, a text or an array where a count goes. |
 
 ## combine_fault_lines
 
@@ -294,6 +296,7 @@ The first *n_harmonics* integer harmonics of the line called *name*.
 | :--- | :--- |
 | KeyError | If no line carries that name. |
 | ValueError | If *n_harmonics* is not a positive integer. |
+| TypeError | if `n_harmonics` is a flag, a text or an array where a count goes. |
 
 ### FaultFrequencyResult.names
 
@@ -361,6 +364,7 @@ much narrower than the highest predicted harmonic.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the edges are invalid. |
+| TypeError | if `high` or `low` is not a single number. |
 
 ## FaultLine
 
@@ -430,6 +434,7 @@ Only positive sideband frequencies are returned.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive or non-integer input. |
+| TypeError | if `sideband_rate` is not a single number, or `n_harmonics`, `n_sidebands` or `n_teeth` is a flag, a text or an array where a count goes. |
 
 ## induction_motor_frequencies
 
@@ -493,6 +498,7 @@ it by the pole count.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive, non-integer or inconsistent input. |
+| TypeError | if `slip` or `supply_frequency` is not a single number, or `n_poles`, `n_rotor_bars`, `n_sidebands` or `n_slot_harmonics` is a flag, a text or an array where a count goes. |
 
 ## shaft_rate
 
@@ -515,3 +521,4 @@ Shaft rotational frequency $f_\mathrm{s} = N/60$ (Norton Eq. 8.4).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive speed. |
+| TypeError | if `speed_rpm` is not a single number. |

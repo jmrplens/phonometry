@@ -162,6 +162,7 @@ __all__ = [
     "directivity_factor",
     "equal_area_directivity_factor",
     "equal_area_incidence_angles",
+    "IncidenceAngles",
     "largest_element_fraction",
     "random_incidence_sensitivity",
 ]
@@ -421,6 +422,8 @@ def adjustment_factors(step_deg: float, *, n_planes: int = 2) -> NDArray[np.floa
     :return: The ``360 / step_deg`` factors, read-only, the first at 0°.
     :raises ValueError: for a step that does not divide 180°, or a number of
         planes that is not a whole number of at least one.
+    :raises TypeError: if ``step_deg`` is not a single number, or ``n_planes`` is a
+        flag, a text or an array where a count goes.
     :warns SphereDivisionWarning: when the largest element is more than 3 %
         of the sphere (A.1.6), which the 15° step, and every coarser one that
         divides 180°, gives in two planes.
@@ -448,13 +451,33 @@ def largest_element_fraction(step_deg: float, *, n_planes: int = 2) -> float:
     :param n_planes: The number of n_planes (Default: 2).
     :return: The fraction, between 0 and 1.
     :raises ValueError: as :func:`adjustment_factors`.
+    :raises TypeError: if ``step_deg`` is not a single number, or ``n_planes`` is a
+        flag, a text or an array where a count goes.
     """
     return _largest_element(
         _half_circle_steps(step_deg), require_count(n_planes, "n_planes")
     )
 
 
-def equal_area_incidence_angles() -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+@dataclass(frozen=True)
+class IncidenceAngles(OwnsArrays):
+    """The directions of the 38 equal-area elements of IEC 61183, by plane.
+
+    What :func:`equal_area_incidence_angles` returns: the angles of the two
+    planes, named, where a ``(horizontal, vertical)`` tuple used to be
+    unpacked by position.
+
+    :ivar horizontal_deg: The 20 directions of the horizontal (X-Y) plane, in
+        degrees, poles included, in the order the note prints them.
+    :ivar vertical_deg: The 18 directions of the vertical (X-Z) plane, in
+        degrees, without the poles.
+    """
+
+    horizontal_deg: NDArray[np.float64]
+    vertical_deg: NDArray[np.float64]
+
+
+def equal_area_incidence_angles() -> IncidenceAngles:
     r"""The 38 directions of equal-area elements (IEC 61183:1994, note to
     A.1.8).
 
@@ -473,8 +496,8 @@ def equal_area_incidence_angles() -> tuple[NDArray[np.float64], NDArray[np.float
     note prints the same angles to 0,1°, except 77,9° and its mirror 282,1°,
     which are errata (see the module notes).
 
-    :return: ``(horizontal, vertical)`` in degrees, read-only. The horizontal
-        plane holds both poles and runs 0°, :math:`\phi_1, \ldots, \phi_9`,
+    :return: The two planes, in degrees, read-only, as an
+        :class:`IncidenceAngles`. The horizontal plane holds both poles and runs 0°, :math:`\phi_1, \ldots, \phi_9`,
         180°, :math:`360° - \phi_9, \ldots, 360° - \phi_1`: 20 directions in
         the order the note prints them. The vertical plane holds the same
         without the poles: 18.
@@ -485,7 +508,9 @@ def equal_area_incidence_angles() -> tuple[NDArray[np.float64], NDArray[np.float
     mirror = 360.0 - rings[::-1]
     horizontal = np.concatenate(([0.0], rings, [180.0], mirror))
     vertical = np.concatenate((rings, mirror))
-    return read_only(horizontal), read_only(vertical)
+    return IncidenceAngles(
+        horizontal_deg=read_only(horizontal), vertical_deg=read_only(vertical)
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -544,6 +569,7 @@ class DirectivityFactor(OwnsArrays):
             value is not finite, :math:`\gamma` is not positive, the largest
             element is not a fraction of the sphere, or the formula is not one
             of the three.
+        :raises TypeError: if ``gamma`` or ``reference_level`` is not a single number.
         """
         if self.formula not in _FORMULAS:
             msg = (
@@ -754,6 +780,8 @@ def directivity_factor(
     :return: The :class:`DirectivityFactor`.
     :raises ValueError: for fewer than two planes, an odd number of readings
         in a plane or fewer than four, or a value that is not finite.
+    :raises TypeError: if ``reference_level`` is not a single number, or ``levels``
+        holds a text or a value that is not a real number.
     :warns SphereDivisionWarning: when the step leaves an element larger than
         3 % of the sphere (A.1.6).
     """
@@ -793,6 +821,8 @@ def axisymmetric_directivity_factor(
     :return: The :class:`DirectivityFactor`.
     :raises ValueError: for readings in more than one plane, an odd number of
         readings or fewer than four, or a value that is not finite.
+    :raises TypeError: if ``reference_level`` is not a single number, or ``levels``
+        holds a text or a value that is not a real number.
     :warns SphereDivisionWarning: when the step leaves an element larger than
         3 % of the sphere in the two-plane division the one plane stands for.
     """
@@ -834,6 +864,9 @@ def equal_area_directivity_factor(
     :return: The :class:`DirectivityFactor`.
     :raises ValueError: for readings not 20 and 18, or a value that is not
         finite.
+    :raises TypeError: if ``reference_level`` is not a single number, or
+        ``horizontal_levels`` or ``vertical_levels`` holds a text or a value that is not
+        a real number.
     """
     horizontal = require_finite_array(horizontal_levels, "horizontal_levels")
     vertical = require_finite_array(vertical_levels, "vertical_levels")
@@ -845,7 +878,8 @@ def equal_area_directivity_factor(
             f"{horizontal.size} and {vertical.size}."
         )
         raise ValueError(msg)
-    h_angles, v_angles = equal_area_incidence_angles()
+    angles = equal_area_incidence_angles()
+    h_angles, v_angles = angles.horizontal_deg, angles.vertical_deg
     levels = np.concatenate((horizontal, vertical))
     weights = np.full(levels.size, 1.0 / _EQUAL_AREA_ELEMENTS)
     lrd = _reference_level(reference_level, float(horizontal[0]))
@@ -924,6 +958,8 @@ class RandomIncidenceSensitivity(OwnsArrays):
 
         :raises ValueError: if the columns differ in length, a value is not
             finite, or the frequencies are not positive and increasing.
+        :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+            number.
         """
         columns = (
             "frequencies",
@@ -1009,6 +1045,8 @@ def random_incidence_sensitivity(
     :return: The :class:`RandomIncidenceSensitivity`.
     :raises ValueError: for columns of different lengths, a value that is not
         finite, or frequencies that are not positive and increasing.
+    :raises TypeError: if ``directivity_index``, ``free_field_level`` or ``frequencies``
+        holds a text or a value that is not a real number.
     """
     frequencies = _frequency_axis(frequencies)
     free_field = _band_column(free_field_level, "free_field_level", frequencies)
@@ -1097,6 +1135,8 @@ class DiffuseFieldSensitivity(OwnsArrays):
         :raises ValueError: if the columns differ in length, a value is not
             finite, the frequencies are not positive and increasing, or the
             route is not one of the three.
+        :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+            number.
         """
         if self.route not in _ROUTES:
             msg = (
@@ -1232,6 +1272,9 @@ def diffuse_field_sensitivity(
         correction is given for a formula that does not take it, a column does
         not hold one value per band (or a single value), or a default is asked
         of Table B.1 at a frequency it does not print.
+    :raises TypeError: if ``frequencies``, ``indicated_level``,
+        ``reference_diffuse_pressure_difference_db``, ``reference_directivity_index`` or
+        ``reference_indicated_level`` holds a text or a value that is not a real number.
     """
     frequencies = _frequency_axis(frequencies)
     given = {

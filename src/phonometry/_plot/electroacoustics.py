@@ -30,7 +30,10 @@ if TYPE_CHECKING:
     from matplotlib.projections.polar import PolarAxes
 
     from ..electroacoustics.distortion import HarmonicDistortionResult
-    from ..electroacoustics.frequency_response import FrequencyResponseResult
+    from ..electroacoustics.frequency_response import (
+        CoherenceResult,
+        FrequencyResponseResult,
+    )
     from ..electroacoustics.intermodulation import ModulationDistortionResult
     from ..electroacoustics.loudspeaker import LoudspeakerCharacteristics
     from ..electroacoustics.microphone import MicrophoneCharacteristics
@@ -96,6 +99,7 @@ _STRINGS: dict[str, str] = {
     "Harmonics": "Armónicos",
     "Frequency response": "Respuesta en frecuencia",
     " and coherence": " y coherencia",
+    "Ordinary coherence": "Coherencia ordinaria",
     _THD_LABEL: "THD [%]",
     _EXCITATION_FREQ_LABEL: "Frecuencia de excitación [Hz]",
     "Swept-sine THD (Farina / Novak)": "THD de barrido sinusoidal (Farina / Novak)",
@@ -754,7 +758,7 @@ def _draw_datasheet_polar(
     """Polar directivity to the IEC 60263 clause 3 25 dB reference-circle scale."""
     angles = np.asarray(result.polar_angles_deg, dtype=np.float64)
     levels = np.clip(
-        np.asarray(result.polar_db, dtype=np.float64), -_POLAR_SPAN_DB, 0.0
+        np.asarray(result.polar_response_db, dtype=np.float64), -_POLAR_SPAN_DB, 0.0
     )
     # Mirror a one-sided pattern about the reference axis for a full rose.
     if float(np.min(angles)) >= 0.0:
@@ -1112,5 +1116,46 @@ def plot_feedback_stability(
     )
     ax.grid(visible=True, axis="y", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_coherence(
+    result: CoherenceResult,
+    *,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The ordinary coherence :math:`\gamma^2(f)` of two records, on 0 to 1.
+
+    The 0 Hz bin has no place on the logarithmic frequency axis and is left
+    out.
+
+    :param result: A
+        :class:`~phonometry.electroacoustics.frequency_response.CoherenceResult`.
+    :param ax: Existing axes to draw on, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the coherence ``semilogx`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    coh = np.asarray(result.coherence, dtype=np.float64)
+    pos = freqs > 0.0
+    style_default(kwargs, "color", _C_TERTIARY)
+    ax.semilogx(freqs[pos], coh[pos], **kwargs)
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t(r"Coherence $\gamma^2$", language))
+    ax.set_title(_t("Ordinary coherence", language))
+    ax.set_ylim(0.0, 1.05)
+    ax.grid(visible=True, which="both", alpha=0.3)
+    format_frequency_axis(
+        ax, float(freqs[pos].min()), float(freqs[pos].max()), language=language
+    )
+    if "label" in kwargs:
+        ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax

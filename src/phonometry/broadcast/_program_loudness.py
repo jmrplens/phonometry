@@ -212,6 +212,7 @@ def k_weighting_coefficients(
     :param fs: Sample rate, Hz (16 kHz or higher).
     :return: ``(stage1, stage2)``, each a ``(b, a)`` coefficient pair: the
         spherical-head shelving filter and the RLB high-pass filter.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     fs = require_positive(fs, "fs")
     if fs < _MIN_REDESIGN_RATE:
@@ -281,15 +282,15 @@ class KWeightingResponse(OwnsArrays):
     :ivar magnitude_db: Combined K-weighting magnitude response, in dB (the
         product of the two stages). It tends to the +4 dB shelf plateau at high
         frequency and rolls off below a few hundred hertz.
-    :ivar shelf_db: Stage 1 (spherical-head shelf) magnitude response, in dB.
-    :ivar highpass_db: Stage 2 (RLB high-pass) magnitude response, in dB.
+    :ivar shelf_magnitude_db: Stage 1 (spherical-head shelf) magnitude response, in dB.
+    :ivar highpass_magnitude_db: Stage 2 (RLB high-pass) magnitude response, in dB.
     :ivar fs: Sample rate the response was evaluated at, in Hz.
     """
 
     frequencies: np.ndarray
     magnitude_db: np.ndarray
-    shelf_db: np.ndarray
-    highpass_db: np.ndarray
+    shelf_magnitude_db: np.ndarray
+    highpass_magnitude_db: np.ndarray
     fs: float
 
     def __post_init__(self) -> None:
@@ -312,15 +313,15 @@ class KWeightingResponse(OwnsArrays):
             self,
             frequencies=1,
             magnitude_db=1,
-            shelf_db=1,
-            highpass_db=1,
+            shelf_magnitude_db=1,
+            highpass_magnitude_db=1,
         )
         require_same_length(
             self,
             "frequencies",
             "magnitude_db",
-            "shelf_db",
-            "highpass_db",
+            "shelf_magnitude_db",
+            "highpass_magnitude_db",
             axis="frequency",
         )
 
@@ -379,6 +380,8 @@ def k_weighting_response(
     :return: A frozen :class:`KWeightingResponse`.
     :raises ValueError: If ``fs`` is below 16 kHz, ``n`` is not positive, or a
         supplied frequency is outside ``(0, fs/2]``.
+    :raises TypeError: if ``fs`` is not a single number, or ``n`` is a flag, a text or
+        an array where a count goes.
     """
     fs = require_positive(fs, "fs")
     (b1, a1), (b2, a2) = k_weighting_coefficients(fs)
@@ -399,13 +402,17 @@ def k_weighting_response(
         if np.any(freqs <= 0.0) or np.any(freqs > nyquist):
             msg = f"every frequency must lie in (0, fs/2] = (0, {nyquist:g}] Hz."
             raise ValueError(msg)
-    shelf_db = 20.0 * np.log10(np.abs(signal.freqz(b1, a1, worN=freqs, fs=fs)[1]))
-    highpass_db = 20.0 * np.log10(np.abs(signal.freqz(b2, a2, worN=freqs, fs=fs)[1]))
+    shelf_magnitude_db = 20.0 * np.log10(
+        np.abs(signal.freqz(b1, a1, worN=freqs, fs=fs)[1])
+    )
+    highpass_magnitude_db = 20.0 * np.log10(
+        np.abs(signal.freqz(b2, a2, worN=freqs, fs=fs)[1])
+    )
     return KWeightingResponse(
         frequencies=freqs,
-        magnitude_db=shelf_db + highpass_db,
-        shelf_db=shelf_db,
-        highpass_db=highpass_db,
+        magnitude_db=shelf_magnitude_db + highpass_magnitude_db,
+        shelf_magnitude_db=shelf_magnitude_db,
+        highpass_magnitude_db=highpass_magnitude_db,
         fs=fs,
     )
 
@@ -621,6 +628,8 @@ def true_peak_level(
         less oversampling).
     :return: The true-peak level in dBTP: a float for 1D input, an array of
         shape ``(channels,)`` for 2D input.
+    :raises TypeError: if ``oversample`` is a flag, a text or an array where a count
+        goes.
     """
     fs = require_positive(resolve_fs(x, fs), "fs")
     if oversample is None:
@@ -973,6 +982,8 @@ def program_loudness(
     :param oversample: True-peak oversampling factor; ``None`` picks the
         smallest factor reaching 192 kHz (4 at 48 kHz).
     :return: The frozen :class:`ProgramLoudnessResult`.
+    :raises TypeError: if ``fs``, ``momentary_step`` or ``short_term_step`` is not a
+        single number.
     """
     fs = resolve_fs(x, fs)
     x_proc, w = _prepare_signal(x, weights)

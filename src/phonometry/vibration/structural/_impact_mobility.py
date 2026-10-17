@@ -283,9 +283,43 @@ def _one_sided_factor(n_samples: int, n_bins: int) -> NDArray[np.float64]:
     return factor
 
 
+@dataclass(frozen=True)
+class EnergySpectralDensity(OwnsArrays):
+    """The one-sided energy spectral density of a transient record (3.3, 3.4).
+
+    What :func:`energy_spectral_density` returns: the bins and the density,
+    named, where a ``(frequencies, esd)`` tuple used to be unpacked by
+    position.
+
+    :ivar frequencies: The DFT bin frequencies from 0 Hz to the Nyquist
+        frequency, in hertz.
+    :ivar density: The energy spectral density at each, in the record's unit
+        squared times s/Hz.
+    """
+
+    frequencies: np.ndarray
+    density: np.ndarray
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Plot the density in dB re its highest bin against frequency.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the density curve.
+        :return: The axes.
+        """
+        from ..._i18n import check_language
+        from ..._plot.vibration import plot_energy_spectral_density
+
+        check_language(language)
+        return plot_energy_spectral_density(self, ax=ax, language=language, **kwargs)
+
+
 def energy_spectral_density(
     record: SignalInput, fs: float | None = None
-) -> tuple[np.ndarray, np.ndarray]:
+) -> EnergySpectralDensity:
     r"""One-sided energy spectral density of a transient record (3.3, 3.4).
 
     :math:`G = 2 \lvert X(f) \rvert^2`, with :math:`X(f)` the discrete Fourier
@@ -300,9 +334,9 @@ def energy_spectral_density(
     :param fs: Sample rate, in Hz. Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises instead of silently winning.
-    :return: ``(frequencies, esd)``: the DFT bin frequencies from 0 Hz to the
-        Nyquist frequency, in hertz, and the density at each, in the record's
-        unit squared times s/Hz.
+    :return: The DFT bin frequencies from 0 Hz to the Nyquist frequency, in
+        hertz, and the density at each, in the record's unit squared times
+        s/Hz, as an :class:`EnergySpectralDensity`.
     :raises ValueError: for a record that is not 1-D and finite, or a
         non-positive sample rate.
     """
@@ -311,7 +345,9 @@ def energy_spectral_density(
     freqs, spectrum = _spectrum(x[np.newaxis, :], rate)
     factor = _one_sided_factor(x.size, freqs.size)
     esd = factor * np.abs(spectrum[0]) ** 2
-    return freqs, np.asarray(esd, dtype=np.float64)
+    return EnergySpectralDensity(
+        frequencies=freqs, density=np.asarray(esd, dtype=np.float64)
+    )
 
 
 def force_window(
@@ -351,6 +387,9 @@ def force_window(
         or width, a negative start or taper, or a window, its falling ramp
         included, that is still open at the last sample of the record, at
         :math:`(N - 1)/f_s`.
+    :raises TypeError: if ``fs``, ``start_s``, ``taper_s`` or ``width_s`` is not a
+        single number, or ``n_samples`` is a flag, a text or an array where a count
+        goes.
     """
     n = _sample_count(n_samples)
     fs = require_positive(fs, "fs")
@@ -401,6 +440,8 @@ def exponential_window(
     :return: The window, one value per sample, :math:`\mathrm{e}^{-a n / f_s}`.
     :raises ValueError: for fewer than 16 samples, a non-positive sample rate
         or a negative decay rate.
+    :raises TypeError: if ``decay_rate_per_s`` or ``fs`` is not a single number, or
+        ``n_samples`` is a flag, a text or an array where a count goes.
     """
     n = _sample_count(n_samples)
     fs = require_positive(fs, "fs")
@@ -425,6 +466,8 @@ def exponential_decay_rate(n_samples: int, fs: float, *, final_value: float) -> 
     :return: The decay rate ``a``, in 1/s.
     :raises ValueError: for fewer than 16 samples, a non-positive sample rate
         or a final value outside (0, 1].
+    :raises TypeError: if ``final_value`` or ``fs`` is not a single number, or
+        ``n_samples`` is a flag, a text or an array where a count goes.
     """
     n = _sample_count(n_samples)
     fs = require_positive(fs, "fs")
@@ -528,6 +571,7 @@ class DoubleHitCheck(OwnsArrays):
 
         :raises ValueError: if the record is not 1-D, the sample rate is not
             positive, no impact is listed, or an index falls outside the record.
+        :raises TypeError: if ``fs`` is not a single number.
         """
         require_ranks(self, force=1, impact_indices=1)
         require_positive(self.fs, "fs")
@@ -692,6 +736,7 @@ def check_double_hit(
     :raises ValueError: for a record that is not 1-D and finite, a
         non-positive sample rate, a threshold outside (0, 1), or a record with
         no force in it.
+    :raises TypeError: if ``threshold_ratio`` is not a single number.
     """
     rate = require_positive(resolve_fs(force, fs, name="force"), "fs")
     record = _record(force, "force")
@@ -756,6 +801,8 @@ class ImpactMobilityResult(OwnsArrays):
             frequency is not positive and finite, the mobility is not finite, a
             coherence lies outside [0, 1], fewer than one impact is recorded, the
             decay rate is negative, or the response quantity is unknown.
+        :raises TypeError: if ``exponential_decay_rate_per_s`` is not a single number,
+            or ``n_impacts`` is a flag, a text or an array where a count goes.
         """
         require_ranks(
             self,
@@ -1131,6 +1178,7 @@ class ExponentialWindowCorrection(OwnsArrays):
             :math:`a/\omega_r` reaches the apparent damping of a mode, which no
             real structure allows: the damping estimate or the decay rate is
             wrong.
+        :raises TypeError: if ``exponential_decay_rate_per_s`` is not a single number.
         """
         require_ranks(self, damped_natural_frequency_hz=1, apparent_damping_ratio=1)
         require_same_length(
@@ -1296,6 +1344,7 @@ class SingleModeFitResult(OwnsArrays):
         :raises ValueError: if the data differ in rank or length, the kind is
             not a motion-per-force FRF, the pole is not a decaying oscillation,
             or the decay rate is negative.
+        :raises TypeError: if ``exponential_decay_rate_per_s`` is not a single number.
         """
         require_ranks(self, frequencies=1, frf=1)
         require_same_length(self, "frequencies", "frf", axis="frequency")
@@ -1485,6 +1534,7 @@ def single_mode_fit(
     :raises ValueError: for mismatched or non-finite data, a band that is not
         a pair of positive numbers or holds fewer than three frequencies, an
         unknown kind, or a band whose data hold no lightly damped mode.
+    :raises TypeError: if ``exponential_decay_rate_per_s`` is not a single number.
     """
     freqs = np.asarray(frequencies, dtype=np.float64)
     values = np.asarray(frf, dtype=np.complex128)
@@ -1633,6 +1683,7 @@ class ForceSpectrumCheck(OwnsArrays):
 
         :raises ValueError: if the arrays differ in rank or length, the range
             holds fewer than two frequencies, or the limit is not positive.
+        :raises TypeError: if ``max_drop_db`` is not a single number.
         """
         require_ranks(self, frequencies=1, energy_spectral_density=1)
         require_same_length(
@@ -1739,7 +1790,8 @@ def check_force_spectrum(
     :raises ValueError: for an invalid record, sample rate, range or limit.
     """
     rate = require_positive(resolve_fs(force, fs, name="force"), "fs")
-    freqs, esd = energy_spectral_density(force, rate)
+    spectrum = energy_spectral_density(force, rate)
+    freqs, esd = spectrum.frequencies, spectrum.density
     low, high = _frequency_range(frequency_range_hz, nyquist=rate / 2.0)
     return ForceSpectrumCheck(
         frequencies=freqs[1:],
@@ -1779,6 +1831,7 @@ class OverloadCheck(OwnsArrays):
 
         :raises ValueError: if the record is not 1-D or the full scale or the
             sample rate is not positive.
+        :raises TypeError: if ``fs`` or ``full_scale`` is not a single number.
         """
         require_ranks(self, record=1)
         require_positive(self.fs, "fs")
@@ -1852,6 +1905,7 @@ def check_overload(
     :return: An :class:`OverloadCheck`, which passes when every sample stays
         strictly below the full scale.
     :raises ValueError: for an invalid record, sample rate or full scale.
+    :raises TypeError: if ``full_scale`` is not a single number.
     """
     rate = require_positive(resolve_fs(record, fs, name="record"), "fs")
     x = _record(record, "record")
@@ -1922,6 +1976,8 @@ class ResponseDecayCheck(OwnsArrays):
             rate or the segment is not positive, the segment is longer than
             half the record, the start is negative or reaches the midpoint, or
             the record is zero at every sample from the start on.
+        :raises TypeError: if ``fs``, ``segment_s`` or ``start_s`` is not a single
+            number.
         """
         require_ranks(self, record=1)
         require_positive(self.fs, "fs")
@@ -2111,6 +2167,7 @@ def check_response_decay(
         start on (a dead channel has measured nothing, so it has not decayed
         either), or a force record of another length, without force or whose
         pulse does not end inside the record.
+    :raises TypeError: if ``segment_s`` or ``start_s`` is not a single number.
     """
     if force is None:
         rate = require_positive(resolve_fs(response, fs, name="response"), "fs")
@@ -2184,6 +2241,9 @@ class CoherenceCheck(OwnsArrays):
             frequency is judged, a coherence lies outside [0, 1], the minimum
             coherence outside (0, 1), or a count is not a whole number of at
             least 1 (a bool is refused).
+        :raises TypeError: if ``min_coherence`` is not a single number, or
+            ``min_n_records`` or ``n_impacts`` is a flag, a text or an array where a
+            count goes.
         """
         require_scalar(self.min_coherence, "min_coherence")
         require_ranks(self, frequencies=1, coherence=1, judged=1)
@@ -2299,6 +2359,8 @@ def check_coherence(
     :raises ValueError: for an invalid range, exclusion or limit, a
         ``min_n_records`` that is not a whole number of at least 1, or
         exclusions that leave no frequency of the range to judge.
+    :raises TypeError: if ``min_coherence`` is not a single number, or ``min_n_records``
+        is a flag, a text or an array where a count goes.
     """
     low, high = _frequency_range(frequency_range_hz)
     records = require_count(min_n_records, "min_n_records")

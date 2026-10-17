@@ -80,6 +80,7 @@ envelopes, and compared over 384 ms segments.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the signals are not equal-length finite 1-D arrays, `fs` is not positive, or fewer than 30 short-time frames survive the silent-frame removal (too little speech to score). |
+| TypeError | if `fs` is a flag, a text or an array where a count goes. |
 
 ## STOIResult
 

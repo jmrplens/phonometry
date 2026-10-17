@@ -143,8 +143,8 @@ y = broadcast.k_weighting(np.random.default_rng(0).standard_normal(48000),
 
 `k_weighting_response` evalúa esos mismos biquads como función de
 transferencia y devuelve un `KWeightingResponse` inmutable que lleva la
-magnitud combinada (`magnitude_db`) y las dos etapas (`shelf_db`,
-`highpass_db`) sobre una rejilla de frecuencia logarítmica; su `.plot()`
+magnitud combinada (`magnitude_db`) y las dos etapas (`shelf_magnitude_db`,
+`highpass_magnitude_db`) sobre una rejilla de frecuencia logarítmica; su `.plot()`
 dibuja la respuesta, con el realce de cabeza esférica de +4 dB y la caída
 del paso alto RLB:
 

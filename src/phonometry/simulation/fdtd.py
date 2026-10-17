@@ -148,7 +148,11 @@ class GaussianPulse(RichDisplay):
     amplitude: float = 1.0
 
     def __post_init__(self) -> None:
-        """Require a positive ``half_width_s`` and finite ``amplitude`` and ``t0``."""
+        """Require a positive ``half_width_s`` and finite ``amplitude`` and ``t0``.
+
+        :raises TypeError: if ``amplitude``, ``half_width_s`` or ``t0`` is not a single
+            number.
+        """
         _positive_finite("half_width_s", self.half_width_s)
         _finite("amplitude", self.amplitude)
         if self.t0 is not None:
@@ -181,7 +185,11 @@ class CWSource(RichDisplay):
     ramp_cycles: float = 3.0
 
     def __post_init__(self) -> None:
-        """Require a positive ``frequency`` and a non-negative ``ramp_cycles``."""
+        """Require a positive ``frequency`` and a non-negative ``ramp_cycles``.
+
+        :raises TypeError: if ``amplitude``, ``frequency`` or ``ramp_cycles`` is not a
+            single number.
+        """
         require_scalar(self.ramp_cycles, "ramp_cycles")
         _positive_finite("frequency", self.frequency)
         _finite("amplitude", self.amplitude)
@@ -226,7 +234,10 @@ class SignalSource(OwnsArrays):
     amplitude: float = 1.0
 
     def __post_init__(self) -> None:
-        """Require a positive ``fs`` and freeze finite 1D ``samples``."""
+        """Require a positive ``fs`` and freeze finite 1D ``samples``.
+
+        :raises TypeError: if ``amplitude`` or ``fs`` is not a single number.
+        """
         _positive_finite("fs", self.fs)
         _finite("amplitude", self.amplitude)
         arr = np.asarray(self.samples, dtype=np.float64)
@@ -291,7 +302,8 @@ class PlaneWaveSource(RichDisplay):
         ``direction`` and ``offset`` are checked against the grid in
         :meth:`FDTD2D.add_source`, which is the first place a grid exists.
 
-        :raises TypeError: if ``waveform`` is not callable.
+        :raises TypeError: if ``waveform`` is not callable, or ``amplitude`` is
+            not one number.
         :raises ValueError: if ``amplitude`` is not finite.
         """
         if not callable(self.waveform):
@@ -633,6 +645,8 @@ class ContourProbe:
     :ivar normals: Outward unit normals of each sample, same shape.
     :ivar frequencies: The tracked frequencies [Hz].
     :ivar samples: Number of steps accumulated since the last reset.
+    :raises TypeError: if ``ix0``, ``ix1``, ``iy0`` or ``iy1`` is a flag, a text or an
+        array where a count goes.
     """
 
     def __init__(
@@ -839,6 +853,8 @@ class FDTD2D:
     :param obstacle_mask: Boolean map, shape ``(ny, nx)``, of rigid cells:
         every face adjacent to a masked cell is closed (zero normal
         velocity, Eq. 4.32), rasterising arbitrary interior geometry.
+    :raises TypeError: if ``cfl``, ``dx`` or ``sponge_reflection`` is not a single
+        number, or ``sponge_width`` is a flag, a text or an array where a count goes.
     """
 
     def __init__(
@@ -1033,6 +1049,8 @@ class FDTD2D:
         :raises ValueError: For an unknown direction, a non-positive or
             non-finite ``width``/``wavelength``, or a non-finite
             ``center``/``amplitude``.
+        :raises TypeError: if ``amplitude``, ``center``, ``wavelength`` or ``width`` is
+            not a single number.
         """
         if direction not in _SIDE_TRAVEL:
             msg = "'direction' must be 'down', 'up', 'left' or 'right'."
@@ -1269,6 +1287,9 @@ class FDTD2D:
         straight into a ``FuncAnimation`` ``imshow`` update. Without
         ``record_every`` an empty array is returned and only the final state
         is kept (read it from ``self.p``).
+
+        :raises TypeError: if ``decimate``, ``n_steps`` or ``record_every`` is a flag, a
+            text or an array where a count goes.
         """
         return _run_recording(self, n_steps, record_every, decimate)
 
@@ -1580,9 +1601,10 @@ def fdtd_simulation(
     :param snapshot_every: Record a full pressure-field snapshot every this
         many steps (and at :math:`t = 0`); ``None`` records none.
     :return: A :class:`FDTDResult`.
-    :raises TypeError: If an input is of the wrong type: a count that is not
-        a number, a ``shape`` that is not a pair, a complex medium, or an
-        ``obstacle_mask`` that is not boolean.
+    :raises TypeError: If an input is of the wrong type: a ``duration`` that
+        is not one number, an ``absorbing_layer_cells`` or ``snapshot_every``
+        that is not a number, a ``shape`` that is not a pair, a complex
+        medium, or an ``obstacle_mask`` that is not boolean.
     :raises ValueError: If the inputs are invalid.
     """
     require_scalar(absorbing_layer_cells, "absorbing_layer_cells")

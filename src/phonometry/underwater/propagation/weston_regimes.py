@@ -176,6 +176,7 @@ def critical_grazing_angle(sound_speed_ratio: float) -> float:
         positive.
     :return: The critical grazing angle, in radians (``0`` if none exists).
     :raises ValueError: If the ratio is not positive and finite.
+    :raises TypeError: if ``sound_speed_ratio`` is not a single number.
     """
     ratio = require_positive(sound_speed_ratio, "sound_speed_ratio")
     if ratio <= 1.0:
@@ -192,6 +193,7 @@ def loss_parameter(attenuation_db_per_wavelength: float) -> float:
         per wavelength.
     :return: The dimensionless loss parameter :math:`\varepsilon`.
     :raises ValueError: If the attenuation is negative or non-finite.
+    :raises TypeError: if ``attenuation_db_per_wavelength`` is not a single number.
     """
     require_scalar(attenuation_db_per_wavelength, "attenuation_db_per_wavelength")
     beta = float(attenuation_db_per_wavelength)
@@ -223,6 +225,7 @@ def reflection_loss_gradient(
     :return: The reflection loss gradient :math:`\eta`, in Np/rad.
     :raises ValueError: If the frequency is missing or invalid for a refracting
         seabed.
+    :raises TypeError: if ``frequency_hz`` is not a single number.
     """
     bed = _seabed(seabed)
     psi_c = critical_grazing_angle(bed.sound_speed_ratio)
@@ -270,6 +273,8 @@ def effective_depth(
     :return: The effective depth ``He``, in metres.
     :raises ValueError: If the seabed has no critical angle or an input is
         invalid.
+    :raises TypeError: if ``frequency_hz``, ``speed_of_sound`` or ``water_depth`` is not
+        a single number.
     """
     h = require_positive(water_depth, "water_depth")
     f = require_positive(frequency_hz, "frequency_hz")
@@ -305,6 +310,7 @@ def waveguide_cutoff_frequency(
     :return: The cut-off frequency, in Hz.
     :raises ValueError: If the seabed has no critical angle or an input is
         invalid.
+    :raises TypeError: if ``speed_of_sound`` or ``water_depth`` is not a single number.
     """
     h = require_positive(water_depth, "water_depth")
     c = require_positive(speed_of_sound, "speed_of_sound")
@@ -373,6 +379,9 @@ def weston_regime_boundaries(
         regime).
     :return: A :class:`WestonRegimeBoundaries`.
     :raises ValueError: If an input is invalid.
+    :raises TypeError: if ``critical_angle_deg``, ``frequency_hz``,
+        ``reflection_loss_gradient_value_np_per_rad``, ``speed_of_sound`` or
+        ``water_depth`` is not a single number.
 
     .. note::
         The two overrides are independent: overriding ``critical_angle_deg``
@@ -675,6 +684,8 @@ def weston_propagation_loss(
         regime).
     :return: A :class:`WestonPropagationResult`.
     :raises ValueError: If an input is invalid.
+    :raises TypeError: if ``frequency_hz``, ``speed_of_sound`` or ``water_depth`` is not
+        a single number.
     """
     f = require_positive(frequency_hz, "frequency_hz")
     h = require_positive(water_depth, "water_depth")

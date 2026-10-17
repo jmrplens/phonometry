@@ -87,7 +87,7 @@ def test_highest_sidelobe_matches_classic_values(
     window: str, sidelobe_db: float, tol: float
 ) -> None:
     res = ph.signals.window_metrics(window, N)
-    assert res.highest_sidelobe_db == pytest.approx(sidelobe_db, abs=tol)
+    assert res.highest_sidelobe_level == pytest.approx(sidelobe_db, abs=tol)
 
 
 @pytest.mark.parametrize(
@@ -121,7 +121,7 @@ def test_enbw_hz_matches_welch_resolution_bandwidth() -> None:
 def test_parametric_windows_are_accepted() -> None:
     res = ph.signals.window_metrics(("kaiser", 8.6), 512)
     assert res.enbw_bins > 1.5
-    assert res.highest_sidelobe_db < -60.0
+    assert res.highest_sidelobe_level < -60.0
     assert res.n == 512
     assert res.taps.size == 512
 

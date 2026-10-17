@@ -97,7 +97,7 @@ is in `docs/ERRATA.md`.
 ```python
 adjustment_value(
     free_field_indicated_level: ArrayLike,
-    calibrator_reading_db: float,
+    calibrator_indicated_level_before: float,
     *,
     frequencies: ArrayLike,
     calibrator_level: float,
@@ -136,7 +136,7 @@ text asks for.
 | :--- | :--- |
 | `frequencies` | The frequencies of the free-field response, in Hz, increasing, the calibration check frequency among them. |
 | `free_field_indicated_level` | What the meter indicates in the free field at each frequency, in dB, before the adjustment. |
-| `calibrator_reading_db` | $L_4'$, what the meter indicates on the recommended calibrator at the same sensitivity, in dB. |
+| `calibrator_indicated_level_before` | $L_4'$, what the meter indicates on the recommended calibrator at the same sensitivity, in dB. |
 | `calibrator_level` | $L_1$, the level stated for the calibrator at the calibration check frequency, in dB. |
 | `incident_level` | The incident free-field level at each frequency, in dB, one value or one per frequency (Default: None, the calibrator's $L_1$ at every frequency). |
 | `tolerance_db` | The tolerance the deviation is judged against at each frequency, in dB, such as the narrower side of the IEC 61672-1 acceptance limits for the class; one value or one per frequency, and infinite where a frequency should not pull the fit (Default: None, equal weights). |
@@ -150,6 +150,7 @@ text asks for.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for columns that do not hold one value per frequency, a value that is not finite, a tolerance that is not positive or finite nowhere, or a check frequency that is not among the frequencies. |
+| TypeError | if `calibrator_indicated_level_before` or `calibrator_level` is not a single number, or `free_field_indicated_level`, `frequencies`, `incident_level` or `pressure_indicated_level` holds a text or a value that is not a real number. |
 
 ## AdjustmentValue
 
@@ -158,7 +159,7 @@ AdjustmentValue(
     frequencies: NDArray[np.float64],
     free_field_deviation_db: NDArray[np.float64],
     calibrator_level: float,
-    calibrator_reading_db: float,
+    calibrator_indicated_level_before: float,
     check_frequency_hz: float = 1000.0,
     tolerance_db: NDArray[np.float64] | None = None,
     pressure_deviation_db: NDArray[np.float64] | None = None,
@@ -187,7 +188,7 @@ number, without an uncertainty (clause 8).
 | `frequencies` | the frequencies of the free-field response, in Hz. |
 | `free_field_deviation_db` | $d$, the indication in the free field less the incident level at each frequency, before the adjustment, in dB. |
 | `calibrator_level` | $L_1$, the level stated for the sound calibrator, in dB. |
-| `calibrator_reading_db` | $L_4'$, what the meter indicates on the calibrator before the adjustment, at the sensitivity the free-field readings were taken at, in dB. |
+| `calibrator_indicated_level_before` | $L_4'$, what the meter indicates on the calibrator before the adjustment, at the sensitivity the free-field readings were taken at, in dB. |
 | `check_frequency_hz` | $f_\mathrm{R}$, the calibration check frequency, in Hz: one of `frequencies`. |
 | `tolerance_db` | $t$ at each frequency, in dB, infinite where a frequency does not pull the fit; `None` for equal weights. |
 | `pressure_deviation_db` | the indication in a pressure field of level $L_1$ less $L_1$ at each frequency, before the adjustment, in dB; `None` when the pressure response was not given. |
@@ -343,12 +344,13 @@ correction is their mean.
 | Exception | When |
 | :--- | :--- |
 | ValueError | as [`sound_calibrator_correction`](/phonometry/reference/api/metrology/free-field-corrections/#sound_calibrator_correction). |
+| TypeError | if `frequencies` or `reference_free_field_correction` holds a text or a value that is not a real number. |
 
 ## correction_uncertainty_budget
 
 ```python
 correction_uncertainty_budget(
-    values_db: Mapping[str, float],
+    stated_uncertainties_db: Mapping[str, float],
     *,
     repeatability_dof: float,
     frequency_hz: float,
@@ -389,7 +391,7 @@ adds its own, which `additional_components` carries.
 
 | Name | Description |
 | :--- | :--- |
-| `values_db` | The value of each of the 15 components, in dB, keyed by the descriptor of Table I.1, `"a1"` to `"a15"`. A component taken as negligible is given as 0, as Table I.2 gives a6 and a13. |
+| `stated_uncertainties_db` | The value of each of the 15 components, in dB, keyed by the descriptor of Table I.1, `"a1"` to `"a15"`. A component taken as negligible is given as 0, as Table I.2 gives a6 and a13. |
 | `repeatability_dof` | The degrees of freedom of the repeatability (a15), from the number of repeat measurements: 2 in Tables I.2 and I.3. |
 | `frequency_hz` | The frequency, in Hz, which sets the clause 6 component and the maximum the budget is judged against. |
 | `correction` | The correction the budget is for, in dB (Default: 0). |
@@ -404,6 +406,7 @@ adds its own, which `additional_components` carries.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a set of components that is not the 15 of Table I.1, a value that is negative or not finite, degrees of freedom that are not positive, or a static pressure outside clause 6. |
+| TypeError | if `correction`, `frequency_hz`, `repeatability_dof` or `static_pressure_kpa` is not a single number. |
 
 ## CorrectionUncertaintyBudget
 
@@ -412,7 +415,7 @@ CorrectionUncertaintyBudget(
     frequency_hz: float,
     descriptors: tuple[str, ...],
     symbols: tuple[str, ...],
-    values_db: NDArray[np.float64],
+    stated_uncertainties_db: NDArray[np.float64],
     divisors: NDArray[np.float64],
     dofs: NDArray[np.float64],
     uncertainty: UncertaintyResult,
@@ -438,7 +441,7 @@ effective degrees of freedom at the stated level of confidence.
 | `frequency_hz` | the frequency, in Hz. |
 | `descriptors` | `"a1"` to `"a15"`, then `"static pressure"` when clause 6 adds it, then the names of any further components. |
 | `symbols` | the symbol or name of each component. |
-| `values_db` | the value each component is stated as, in dB: a half-width, an expanded uncertainty or a standard uncertainty, as its divisor says. |
+| `stated_uncertainties_db` | the value each component is stated as, in dB: a half-width, an expanded uncertainty or a standard uncertainty, as its divisor says. |
 | `divisors` | the divisor of each component. |
 | `dofs` | the degrees of freedom of each component (`inf` for a Type B estimate). |
 | `uncertainty` | the [`UncertaintyResult`](/phonometry/reference/api/metrology/uncertainty/#uncertaintyresult) of the combination, which has to be the combination of the components the other columns state. |
@@ -726,6 +729,7 @@ actuator clause 7 asks for.
 | Exception | When |
 | :--- | :--- |
 | ValueError | as [`sound_calibrator_correction`](/phonometry/reference/api/metrology/free-field-corrections/#sound_calibrator_correction), or for an $f_0$ that is not among the frequencies. |
+| TypeError | if `check_frequency_hz` is not a single number, or `frequencies`, `reference_channel_gain_db` or `reference_sensitivity_level` holds a text or a value that is not a real number. |
 
 ## exact_frequencies
 
@@ -771,6 +775,7 @@ the one-third-octave ones.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a limit that is not positive and finite, limits in the wrong order, or a designator that is not a whole number of at least one. |
+| TypeError | if `highest_hz` or `lowest_hz` is not a single number, or `fraction` is a flag, a text or an array where a count goes. |
 
 ## FreeFieldCorrection
 
@@ -930,6 +935,7 @@ ones do.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for another clause, a frequency that is not positive and finite, or, for clause 10, a frequency below 63 Hz. |
+| TypeError | if `clause` is a flag, a text or an array where a count goes, or `frequencies` holds a text or a value that is not a real number. |
 
 ## sound_calibrator_correction
 
@@ -990,6 +996,7 @@ taken over the three microphones and not over the calibrators as well.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a reading that is not finite, a column count that is not the number of frequencies, readings with different numbers of determinations, or microphones that are not one label per determination. |
+| TypeError | if `frequencies` or `reference_free_field_correction` holds a text or a value that is not a real number. |
 
 ## UncertaintyComponentRow
 
@@ -1061,3 +1068,4 @@ through floating-point arithmetic is on it, not above it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown clause, columns that do not hold one value per frequency, a negative uncertainty or range, a range for clauses 9 to 11, or a frequency below 63 Hz for clause 10. |
+| TypeError | if `clause` is a flag, a text or an array where a count goes, or `correction`, `correction_range_db`, `coverage_factor`, `expanded_uncertainty_db` or `frequencies` holds a text or a value that is not a real number. |

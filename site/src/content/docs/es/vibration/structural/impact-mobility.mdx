@@ -146,8 +146,9 @@ _, accel, _ = signal.lsim(accelerance, force, t)
 rng = np.random.default_rng(7626)
 noisy = force + 0.3 * rng.standard_normal(n)
 window = vibration.force_window(n, fs, width_s=0.015)
-f, whole = vibration.energy_spectral_density(noisy, fs)
-_, kept = vibration.energy_spectral_density(noisy * window, fs)
+esd = vibration.energy_spectral_density(noisy, fs)
+f, whole = esd.frequencies, esd.density
+kept = vibration.energy_spectral_density(noisy * window, fs).density
 above = f > 1500.0                        # donde ya no queda impulso
 print(round(10 * np.log10(whole[above].mean() / kept[above].mean()), 1))  # 18.4 dB
 print(round(10 * np.log10(1.0 / 0.015), 1))    # 18.2 dB, 10 lg(T / anchura)
@@ -194,7 +195,7 @@ left.plot(1e3 * t[shown], 110.0 * window[shown], "--",
           label="ventana de fuerza (unidad durante 15 ms)")
 left.set_xlabel("Tiempo [ms]"); left.set_ylabel("Fuerza [N]"); left.legend()
 
-_, clean = vibration.energy_spectral_density(force, fs)
+clean = vibration.energy_spectral_density(force, fs).density
 band = (f > 0.0) & (f <= 2000.0)
 right.semilogy(f[band], whole[band], color="0.6", label="registro entero")
 right.semilogy(f[band], kept[band], label="ventana de fuerza")
@@ -596,8 +597,8 @@ left.plot(1e3 * hit.impact_times_s, hit.impact_peaks, "o",
           label="dos impactos, separados 60 ms")
 left.set_xlabel("Tiempo [ms]"); left.set_ylabel("Fuerza [N]"); left.legend()
 
-_, one = vibration.energy_spectral_density(force, fs)
-_, both = vibration.energy_spectral_density(double, fs)
+one = vibration.energy_spectral_density(force, fs).density
+both = vibration.energy_spectral_density(double, fs).density
 band = (f > 0.0) & (f <= 400.0)
 right.semilogy(f[band], one[band], "--", color="0.6", label="un impacto")
 right.semilogy(f[band], both[band], label="los dos: valles cada 16,7 Hz")

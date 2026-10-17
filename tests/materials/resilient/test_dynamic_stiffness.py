@@ -536,7 +536,7 @@ class TestResilientLayerStiffness:
             layer.dynamic_stiffness_n_m3
             for layer in materials.PUBLISHED_RESILIENT_LAYERS.values()
         }
-        a4 = {stiffness for _, stiffness in building.WALL_TIE_STIFFNESS.values()}
+        a4 = {tie.stiffness for tie in building.WALL_TIE_STIFFNESS.values()}
         assert not (a3 & a4)
 
 

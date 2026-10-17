@@ -149,6 +149,12 @@ autocorrelation of an MLS.
 
 **Returns:** The pair `(a, b)` as bipolar float arrays (values `+1/-1`).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `order` is not a single number. |
+
 ## impulse_response
 
 ```python
@@ -368,6 +374,12 @@ autocorrelation is a near-perfect periodic delta
 
 **Returns:** The bipolar MLS samples (values in `{-1.0, +1.0}`).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `order` is not a single number. |
+
 ## plot_excitation
 
 ```python
@@ -408,6 +420,7 @@ bipolar sequence and its (flat) magnitude spectrum.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown `kind`, or an empty signal. |
+| TypeError | if `kind` is not a text. |
 
 ## shaped_sweep_signal
 
@@ -470,6 +483,12 @@ measurement's noise floor (that is its purpose: SNR shaping).
 | `fade` | Half-Hann fade-in/out length as a fraction of the returned signal, applied to pin the ends to zero (Sec. 4.2). Default 0.01; 0.0 disables. |
 
 **Returns:** A [`ShapedSweepResult`](/phonometry/reference/api/rooms/impulse-response/#shapedsweepresult) wrapping the sweep samples and the synthesis metadata (grid, imposed magnitude, group delay, crest factor).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `amplitude`, `duration_s`, `f1`, `f2`, `fade` or `fs` is not a single number. |
 
 ## ShapedSweepResult
 
@@ -574,3 +593,9 @@ $2 \pi f(t)$ (Farina, AES 108th Conv., 2000; ISO 18233 Bibliography
 | `fade` | Half-Hann fade-in/out length as a fraction of the sweep duration, applied to suppress start/stop transients (B.3.3). Default 0.01. Set to 0.0 to disable. Because the sweep frequency is logarithmic in time, the fades consume roughly `fade*log2(f2/f1)` octaves at each band edge (the fade-out lands on the highest frequencies): with the default 0.01 the top ~29 dB of the highest band is unusable, so choose `f1`/`f2` with margin beyond the analysis range (ISO 18233 B.3.1) rather than relying on a smaller fade. |
 
 **Returns:** The sweep samples, length `round(duration_s*fs)`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `f1`, `f2`, `fade` or `fs` is not a single number. |

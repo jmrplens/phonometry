@@ -28,8 +28,10 @@ def test_masks_match_reference_data() -> None:
 
 
 def test_weighting_class_limits_shape_and_known_values() -> None:
-    freqs, lower1, upper1 = filters.weighting_class_limits(1)
-    _, lower2, upper2 = filters.weighting_class_limits(2)
+    limits = filters.weighting_class_limits(1)
+    freqs, lower1, upper1 = limits.frequencies, limits.lower, limits.upper
+    limits = filters.weighting_class_limits(2)
+    lower2, upper2 = limits.lower, limits.upper
     assert len(freqs) == 34
     i1k = freqs.tolist().index(1000.0)
     # 1 kHz reference point: +-0.7 (class 1), +-1.0 (class 2).

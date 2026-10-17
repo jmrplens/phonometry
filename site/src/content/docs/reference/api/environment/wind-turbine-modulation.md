@@ -91,12 +91,12 @@ its rounding lines would decide its status by their last bits.
 AM_BLOCK_SAMPLES = 100
 ```
 
-## AM_EXCEEDANCE_THRESHOLDS_DB
+## AM_EXCEEDANCE_DEPTHS_DB
 
 *Constant* (`tuple`).
 
 ```python
-AM_EXCEEDANCE_THRESHOLDS_DB = (3.0, 6.0, 9.0)
+AM_EXCEEDANCE_DEPTHS_DB = (3.0, 6.0, 9.0)
 ```
 
 ## AM_FREQUENCY_BANDS_HZ
@@ -183,6 +183,7 @@ value at each nominal centre frequency.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the band is not one of the band numbers (`1.5` and `True` are not), a band centre is missing or duplicated, the weighting is neither `"A"` nor `"Z"`, or the levels are not finite. |
+| TypeError | if `band` is a flag, a text or an array where a count goes, or `band_levels` or `frequencies` holds a text or a value that is not a real number. |
 
 ## amplitude_modulation_block
 
@@ -227,6 +228,7 @@ Equation (12) gives it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the block does not hold 100 finite values or the range is outside 0.3 Hz to 1.6 Hz or holds no spectrum line. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## amplitude_modulation_period
 
@@ -263,7 +265,7 @@ its bin by [`bin_amplitude_modulation`](/phonometry/reference/api/environment/wi
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If the exclusion flags are neither booleans nor integers. |
+| TypeError | If the exclusion flags are neither booleans nor integers, or `levels` holds a text or a value that is not a number. |
 | ValueError | If the period does not hold 6 000 finite values or the exclusion flags are not sixty booleans (or 0 and 1). |
 
 ## bin_amplitude_modulation
@@ -308,7 +310,7 @@ highest mean.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If `bands` is a text rather than a sequence of band numbers, or the exclusion flags are neither booleans nor integers. |
+| TypeError | If `bands` is a text rather than a sequence of band numbers, the exclusion flags are neither booleans nor integers, or `ratings_db` holds a text or a value that is not a number. |
 | ValueError | If the shapes disagree, a value is not finite, a wind speed is negative, a band is not a band number or is repeated, an integer exclusion flag is other than 0 and 1, or the sector width does not divide 360 degrees. |
 
 ## BinnedModulation
@@ -345,7 +347,7 @@ speed; one column per band in `bands`.
 | `nonzero_counts` | Number of those with a non-zero rating, per band. |
 | `mean_ratings_db` | Mean 10 min rating per bin and band, the zeros of unrated periods included (13.6.4), in dB. |
 | `type_a_uncertainty_db` | Standard deviation of that mean, Equation (9) of 10.3.3 (13.6.5); NaN for a bin of one data point. |
-| `exceedance_percent` | Percentage of the bin's data points rated above 3 dB, 6 dB and 9 dB ([`AM_EXCEEDANCE_THRESHOLDS_DB`](/phonometry/reference/api/environment/wind-turbine-modulation/#am_exceedance_thresholds_db)), shape `(bins, bands, 3)`. |
+| `exceedance_percent` | Percentage of the bin's data points rated above 3 dB, 6 dB and 9 dB ([`AM_EXCEEDANCE_DEPTHS_DB`](/phonometry/reference/api/environment/wind-turbine-modulation/#am_exceedance_depths_db)), shape `(bins, bands, 3)`. |
 | `selected_bands` | The band with the highest mean rating in each bin, the lowest-numbered of equally high ones. |
 | `selected_ratings_db` | The mean rating of that band, in dB. |
 
@@ -382,7 +384,7 @@ narrower sectors past the twelfth take them again, in the same order.
 ```python
 ModulationBlock(
     levels: NDArray[np.float64],
-    detrended_db: NDArray[np.float64],
+    detrended_levels: NDArray[np.float64],
     frequencies: NDArray[np.float64],
     power_spectrum: NDArray[np.float64],
     modulation_frequency_range_hz: tuple[float, float],
@@ -390,7 +392,7 @@ ModulationBlock(
     fundamental_frequency_hz: float | None,
     prominence: float | None,
     harmonic_frequencies_hz: tuple[float, ...],
-    reconstructed_db: NDArray[np.float64],
+    reconstructed_levels: NDArray[np.float64],
     modulation_depth_db: float | None,
     excluded: bool = False,
 )
@@ -403,14 +405,14 @@ The analysis of one 10 s block (IEC TS 61400-11-2:2024, 13.6.2.3).
 | Name | Description |
 | :--- | :--- |
 | `levels` | The 100 band-limited `LAeq,100ms` values analysed, in dB. |
-| `detrended_db` | `levels` minus its cubic least-squares fit, in dB. |
+| `detrended_levels` | `levels` minus its cubic least-squares fit, in dB. |
 | `frequencies` | The spectrum lines, 0.1 Hz to 4.9 Hz. |
 | `power_spectrum` | $S_{xx}$ of Equation (12) at those lines, from the positive frequencies (the half magnitude the TS allows). |
 | `modulation_frequency_range_hz` | The user's range of fundamental modulation frequencies, in Hz. |
 | `fundamental_frequency_hz` | The fundamental modulation frequency, the highest local maximum in the range, in Hz; `None` for `NO_PEAK`. |
 | `prominence` | The prominence ratio $p_\mathrm{AM}$ of Equation (13); `None` for `NO_PEAK`, infinite for a peak whose masking lines hold nothing above rounding. |
 | `harmonic_frequencies_hz` | The frequencies of the harmonics kept in the reconstruction, second before third; empty when none is. |
-| `reconstructed_db` | The reconstructed series, in dB about zero; empty for a prominence-failed block. |
+| `reconstructed_levels` | The reconstructed series, in dB about zero; empty for a prominence-failed block. |
 | `modulation_depth_db` | `L5 - L95` of the reconstructed series, in dB; `None` unless the block is valid. |
 | `excluded` | Whether the practitioner excluded the block by hand (13.6.2.2, third bullet). |
 

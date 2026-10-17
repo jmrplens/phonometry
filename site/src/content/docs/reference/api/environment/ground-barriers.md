@@ -174,6 +174,7 @@ at `(receiver_distance, receiver_height)`. Three models are available:
 | Exception | When |
 | :--- | :--- |
 | ValueError | On a non-positive/ordered geometry, or if a ground is requested with `method="kurze_anderson"`. |
+| TypeError | if `barrier_distance`, `barrier_height_m`, `receiver_distance` or `thickness_m` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## BarrierInsertionLoss
 
@@ -328,6 +329,7 @@ in the bright zone.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a distance is not positive. |
+| TypeError | if `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## ground_effect
 
@@ -391,6 +393,7 @@ of the materials domain. Exactly one of the two must be given.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If neither or both of `impedance`/`flow_resistivity_pa_s_m2` are given, a height is negative, or the distance is not positive. |
+| TypeError | if `distance`, `flow_resistivity_pa_s_m2`, `receiver_height_m` or `source_height_m` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## kurze_anderson_attenuation
 
@@ -475,6 +478,7 @@ difference annotated. Distances follow
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a height that is not finite and non-negative, a distance that is not finite and positive, a receiver no further than the barrier, or a non-positive thickness. |
+| TypeError | if `barrier_distance`, `barrier_height_m`, `receiver_distance`, `receiver_height_m`, `source_height_m` or `thickness_m` is not a single number. |
 
 ## spherical_reflection_coefficient
 
@@ -518,6 +522,7 @@ $w = \sqrt{i k R_2 / 2} \, (\cos\theta + 1/Z)$ (Eq. (D.57)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a height is negative, the distance is not positive, the impedance is zero, or its shape does not match the frequencies. |
+| TypeError | if `distance`, `receiver_height_m`, `source_height_m` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## SphericalGroundResult
 

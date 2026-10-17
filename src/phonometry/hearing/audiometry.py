@@ -485,6 +485,8 @@ def ambient_noise_limits(
     :raises ValueError: for an unknown presentation, lowest test frequency,
         earphone or threshold shift, or an earphone with bone conduction or
         sound field.
+    :raises TypeError: if ``allowed_threshold_shift_db``, ``lowest_hearing_level`` or
+        ``lowest_test_frequency_hz`` is not a single number.
     """
     require_scalar(allowed_threshold_shift_db, "allowed_threshold_shift_db")
     require_scalar(lowest_test_frequency_hz, "lowest_test_frequency_hz")
@@ -568,7 +570,7 @@ class AmbientNoiseCheck(OwnsArrays):
     :ivar lowest_test_frequency_hz: The lowest test tone frequency, in hertz.
     :ivar lowest_hearing_level: The lowest hearing threshold level to be
         measured the limits were raised for, in dB.
-    :ivar noise_floor_db: The measuring chain's noise floor per band, in dB,
+    :ivar noise_floor_levels: The measuring chain's noise floor per band, in dB,
         or ``None`` when not given.
     :ivar earphone: For air conduction, the earphone the limits were written
         for: a column of Table 3, or ``"own attenuation"`` for an attenuation
@@ -588,7 +590,7 @@ class AmbientNoiseCheck(OwnsArrays):
     levels: np.ndarray
     lowest_test_frequency_hz: float
     lowest_hearing_level: float
-    noise_floor_db: np.ndarray | None = None
+    noise_floor_levels: np.ndarray | None = None
     earphone: str | None = None
     earphone_attenuation: np.ndarray | None = None
     allowed_threshold_shift_db: float = _BASE_THRESHOLD_SHIFT_DB
@@ -616,9 +618,11 @@ class AmbientNoiseCheck(OwnsArrays):
         if np.asarray(self.levels).shape != rows.shape:
             msg = "AmbientNoiseCheck: 'levels' must hold one level per band."
             raise ValueError(msg)
-        floor = self.noise_floor_db
+        floor = self.noise_floor_levels
         if floor is not None and np.asarray(floor).shape != rows.shape:
-            msg = "AmbientNoiseCheck: 'noise_floor_db' must hold one level per band."
+            msg = (
+                "AmbientNoiseCheck: 'noise_floor_levels' must hold one level per band."
+            )
             raise ValueError(msg)
         if self.limits_db.shape != rows.shape:  # reading them validates the choices
             msg = "AmbientNoiseCheck: the tables give no limit for these bands."
@@ -690,9 +694,9 @@ class AmbientNoiseCheck(OwnsArrays):
 
         :return: One boolean per band, all ``False`` without a floor.
         """
-        if self.noise_floor_db is None:
+        if self.noise_floor_levels is None:
             return np.zeros(self.frequencies.size, dtype=bool)
-        return ~_at_least(self.levels - self.noise_floor_db, _NOISE_FLOOR_MARGIN_DB)
+        return ~_at_least(self.levels - self.noise_floor_levels, _NOISE_FLOOR_MARGIN_DB)
 
     @property
     def lowest_measurable_hearing_level(self) -> float:
@@ -751,7 +755,7 @@ def check_audiometric_ambient_noise(
     lowest_hearing_level: float = 0.0,
     allowed_threshold_shift_db: float = 2.0,
     frequencies: ArrayLike | None = None,
-    noise_floor_db: ArrayLike | None = None,
+    noise_floor_levels: ArrayLike | None = None,
 ) -> AmbientNoiseCheck:
     """Is the test room quiet enough for the audiometry? (ISO 8253-1 Clause 11).
 
@@ -783,7 +787,7 @@ def check_audiometric_ambient_noise(
     :param frequencies: The mid-frequencies of the measured bands, in hertz,
         each one of the table's, or ``None`` for all of them. A measurement
         that leaves bands out is judged on those it has, and does not pass.
-    :param noise_floor_db: The measuring chain's noise floor per measured
+    :param noise_floor_levels: The measuring chain's noise floor per measured
         band, in dB, to flag the bands where 11.1's 6 dB margin is missed.
     :return: :class:`AmbientNoiseCheck`.
     :raises ValueError: for the reasons :func:`ambient_noise_limits` gives, a
@@ -811,11 +815,11 @@ def check_audiometric_ambient_noise(
         msg = f"'levels' must hold one level per band; got {levels.size} for {freqs.size}."
         raise ValueError(msg)
     floor = None
-    if noise_floor_db is not None:
-        floor = _levels(noise_floor_db, "noise_floor_db")
+    if noise_floor_levels is not None:
+        floor = _levels(noise_floor_levels, "noise_floor_levels")
         if floor.size != freqs.size:
             msg = (
-                "'noise_floor_db' must hold one level per band; got "
+                "'noise_floor_levels' must hold one level per band; got "
                 f"{floor.size} for {freqs.size}."
             )
             raise ValueError(msg)
@@ -825,7 +829,7 @@ def check_audiometric_ambient_noise(
         levels=levels,
         lowest_test_frequency_hz=float(lowest_test_frequency_hz),
         lowest_hearing_level=float(lowest_hearing_level),
-        noise_floor_db=floor,
+        noise_floor_levels=floor,
         earphone=_earphone_name(presentation, earphone, earphone_attenuation),
         earphone_attenuation=(
             None
@@ -887,7 +891,7 @@ class AscendingThresholdResult(OwnsArrays):
         )
 
     @property
-    def threshold_db(self) -> float:
+    def threshold_level(self) -> float:
         """The hearing threshold level, in dB.
 
         The lowest level at which responses occur in more than half of the
@@ -943,7 +947,9 @@ class AscendingThresholdResult(OwnsArrays):
             return 0
         return int(
             np.sum(
-                np.isclose(self.ascent_levels, self.threshold_db, atol=_LEVEL_ATOL_DB)
+                np.isclose(
+                    self.ascent_levels, self.threshold_level, atol=_LEVEL_ATOL_DB
+                )
             )
         )
 
@@ -1237,18 +1243,18 @@ class BracketingThresholdResult(OwnsArrays):
 
     :ivar ascent_levels: The lowest response level of each ascent, in dB.
     :ivar descent_levels: The lowest response level of each descent, in dB.
-    :ivar mean_db: The mean of the two averages, unrounded, in dB.
-    :ivar threshold_db: That mean rounded to the nearest 5 dB step, in dB; a
+    :ivar mean_level: The mean of the two averages, unrounded, in dB.
+    :ivar threshold_level: That mean rounded to the nearest 5 dB step, in dB; a
         mean halfway between two steps goes to the higher one.
     """
 
     ascent_levels: np.ndarray
     descent_levels: np.ndarray
-    mean_db: float
-    threshold_db: float
+    mean_level: float
+    threshold_level: float
 
     @property
-    def ascent_mean_db(self) -> float:
+    def ascent_mean_level(self) -> float:
         """The average of the ascents' lowest response levels, in dB.
 
         :return: The mean.
@@ -1256,7 +1262,7 @@ class BracketingThresholdResult(OwnsArrays):
         return float(np.mean(self.ascent_levels))
 
     @property
-    def descent_mean_db(self) -> float:
+    def descent_mean_level(self) -> float:
         """The average of the descents' lowest response levels, in dB.
 
         :return: The mean.
@@ -1348,8 +1354,8 @@ def bracketing_method_threshold(
     return BracketingThresholdResult(
         ascent_levels=ups,
         descent_levels=downs,
-        mean_db=mean,
-        threshold_db=_round_half_up(mean, _BRACKETING_STEP_DB),
+        mean_level=mean,
+        threshold_level=_round_half_up(mean, _BRACKETING_STEP_DB),
     )
 
 
@@ -1425,16 +1431,16 @@ class AutomaticThresholdResult(OwnsArrays):
 
     :ivar reversal_levels: The levels at the reversals of the tracing at
         one frequency, in order, in dB.
-    :ivar mean_db: The mean of the average peak and the average valley, in dB.
-    :ivar threshold_db: That mean rounded up to the next whole decibel, in dB.
+    :ivar mean_level: The mean of the average peak and the average valley, in dB.
+    :ivar threshold_level: That mean rounded up to the next whole decibel, in dB.
 
     Which reversals are peaks (:attr:`is_peak`) and which 6.3.5 a) keeps
     (:attr:`retained`) are read from the levels, so they are not fields.
     """
 
     reversal_levels: np.ndarray
-    mean_db: float
-    threshold_db: float
+    mean_level: float
+    threshold_level: float
 
     def __post_init__(self) -> None:
         """Reject a tracing whose reversals or whose threshold disagree.
@@ -1452,8 +1458,8 @@ class AutomaticThresholdResult(OwnsArrays):
         levels = _levels(self.reversal_levels, "reversal_levels", minimum=3)
         mean = _tracing_mean(levels)
         expected = (
-            ("mean_db", mean),
-            ("threshold_db", float(math.ceil(float(settled(mean))))),
+            ("mean_level", mean),
+            ("threshold_level", float(math.ceil(float(settled(mean))))),
         )
         for name, value in expected:
             if not math.isclose(
@@ -1492,7 +1498,7 @@ class AutomaticThresholdResult(OwnsArrays):
         return _retained_reversals(np.asarray(self.reversal_levels, dtype=np.float64))
 
     @property
-    def peaks_db(self) -> np.ndarray:
+    def peak_levels(self) -> np.ndarray:
         """The retained peaks, in dB.
 
         :return: Their levels, in order.
@@ -1502,7 +1508,7 @@ class AutomaticThresholdResult(OwnsArrays):
         )
 
     @property
-    def valleys_db(self) -> np.ndarray:
+    def valley_levels(self) -> np.ndarray:
         """The retained valleys, in dB.
 
         :return: Their levels, in order.
@@ -1520,8 +1526,8 @@ class AutomaticThresholdResult(OwnsArrays):
         """
         limit = _SPREAD_LIMIT_DB + _BOUNDARY_SLACK_DB
         return bool(
-            np.ptp(self.peaks_db) > limit
-            or np.ptp(self.valleys_db) > limit
+            np.ptp(self.peak_levels) > limit
+            or np.ptp(self.valley_levels) > limit
             or int(np.sum(self.retained)) < _MINIMUM_REVERSALS
         )
 
@@ -1572,10 +1578,10 @@ def automatic_audiometry_threshold(
     mean = _tracing_mean(levels)
     return AutomaticThresholdResult(
         reversal_levels=levels,
-        mean_db=mean,
+        mean_level=mean,
         # Settled first, so a mean such as 12,000 000 000 000 002 dB is not
         # taken up to 13 dB by a last-bit excess.
-        threshold_db=float(math.ceil(float(settled(mean)))),
+        threshold_level=float(math.ceil(float(settled(mean)))),
     )
 
 
@@ -1667,14 +1673,14 @@ class SweepThresholdResult(OwnsArrays):
     :ivar reversal_levels: The hearing level of each reversal, in dB.
     :ivar frequencies: The frequencies the threshold was determined at, in
         hertz.
-    :ivar mean_db: At each, the mean of the average of the three nearest peaks
+    :ivar mean_level: At each, the mean of the average of the three nearest peaks
         and the average of the three nearest valleys, in dB.
-    :ivar threshold_db: That mean rounded to the nearest whole decibel, in dB.
+    :ivar threshold_level: That mean rounded to the nearest whole decibel, in dB.
     :ivar spread_db: At each, the larger spread of the three peaks and of the
         three valleys it averaged, in dB.
     :ivar running_frequencies: The geometric mean frequency of each run of six
         consecutive reversals, in hertz.
-    :ivar running_threshold_db: The arithmetic mean level of each run, in dB,
+    :ivar running_threshold_levels: The arithmetic mean level of each run, in dB,
         the semicontinuous threshold of 7.5.
 
     Which reversals are peaks (:attr:`is_peak`) is read from the levels, so
@@ -1684,11 +1690,11 @@ class SweepThresholdResult(OwnsArrays):
     reversal_frequencies: np.ndarray
     reversal_levels: np.ndarray
     frequencies: np.ndarray
-    mean_db: np.ndarray
-    threshold_db: np.ndarray
+    mean_level: np.ndarray
+    threshold_level: np.ndarray
     spread_db: np.ndarray
     running_frequencies: np.ndarray
-    running_threshold_db: np.ndarray
+    running_threshold_levels: np.ndarray
 
     def __post_init__(self) -> None:
         """Reject a tracing whose reversals or whose thresholds disagree.
@@ -1711,11 +1717,11 @@ class SweepThresholdResult(OwnsArrays):
         means, spreads = _sweep_means(freqs, levels, targets)
         running_f, running_l = _running_threshold(freqs, levels)
         expected = (
-            ("mean_db", means),
-            ("threshold_db", np.array([_round_half_up(m, 1.0) for m in means])),
+            ("mean_level", means),
+            ("threshold_level", np.array([_round_half_up(m, 1.0) for m in means])),
             ("spread_db", spreads),
             ("running_frequencies", running_f),
-            ("running_threshold_db", running_l),
+            ("running_threshold_levels", running_l),
         )
         for name, value in expected:
             held = np.asarray(getattr(self, name), dtype=np.float64)
@@ -1829,11 +1835,11 @@ def sweep_audiometry_threshold(
         reversal_frequencies=freqs,
         reversal_levels=levels,
         frequencies=np.asarray(targets, dtype=np.float64),
-        mean_db=means,
-        threshold_db=np.array([_round_half_up(m, 1.0) for m in means]),
+        mean_level=means,
+        threshold_level=np.array([_round_half_up(m, 1.0) for m in means]),
         spread_db=spreads,
         running_frequencies=running_f,
-        running_threshold_db=running_l,
+        running_threshold_levels=running_l,
     )
 
 
@@ -1846,15 +1852,15 @@ def sweep_audiometry_threshold(
 class RetestAgreementCheck(RichDisplay):
     """Whether a repeat measurement confirms the first one (6.2.3.2 Step 3).
 
-    :ivar first_db: The hearing threshold level measured first, in dB.
-    :ivar repeat_db: The hearing threshold level of the repeat measurement, in
+    :ivar first_threshold_level: The hearing threshold level measured first, in dB.
+    :ivar repeat_threshold_level: The hearing threshold level of the repeat measurement, in
         dB.
     :ivar frequency_hz: The frequency of both, in hertz: 1 kHz for the repeat
         Step 3 asks for, another for a further frequency retested after it.
     """
 
-    first_db: float
-    repeat_db: float
+    first_threshold_level: float
+    repeat_threshold_level: float
     frequency_hz: float
 
     @property
@@ -1863,7 +1869,7 @@ class RetestAgreementCheck(RichDisplay):
 
         :return: Positive for a worsening, negative for an improvement.
         """
-        return float(self.repeat_db - self.first_db)
+        return float(self.repeat_threshold_level - self.first_threshold_level)
 
     @property
     def passes(self) -> bool:
@@ -1908,7 +1914,10 @@ class RetestAgreementCheck(RichDisplay):
 
 
 def check_retest_agreement(
-    first_db: float, repeat_db: float, *, frequency_hz: float = 1000.0
+    first_threshold_level: float,
+    repeat_threshold_level: float,
+    *,
+    frequency_hz: float = 1000.0,
 ) -> RetestAgreementCheck:
     """Does the repeat measurement confirm the first? (6.2.3.2 Step 3).
 
@@ -1926,25 +1935,29 @@ def check_retest_agreement(
     does not pass, and the text names no action for it, so
     :attr:`RetestAgreementCheck.retest_further_frequencies` is ``False`` too.
 
-    :param first_db: The hearing threshold level measured first, in dB.
-    :param repeat_db: The hearing threshold level of the repeat, in dB.
+    :param first_threshold_level: The hearing threshold level measured first, in dB.
+    :param repeat_threshold_level: The hearing threshold level of the repeat, in dB.
     :param frequency_hz: The frequency of both, in hertz; 1 kHz by default.
     :return: :class:`RetestAgreementCheck`.
     :raises ValueError: for a level that is not finite or a frequency that is
         not positive.
+    :raises TypeError: if ``first_threshold_level``, ``frequency_hz`` or
+        ``repeat_threshold_level`` is not a single number.
     """
-    require_scalar(first_db, "first_db")
-    require_scalar(repeat_db, "repeat_db")
-    first, repeat = float(first_db), float(repeat_db)
+    require_scalar(first_threshold_level, "first_threshold_level")
+    require_scalar(repeat_threshold_level, "repeat_threshold_level")
+    first, repeat = float(first_threshold_level), float(repeat_threshold_level)
     if not (math.isfinite(first) and math.isfinite(repeat)):
-        msg = "'first_db' and 'repeat_db' must be finite hearing levels, in dB."
+        msg = "'first_threshold_level' and 'repeat_threshold_level' must be finite hearing levels, in dB."
         raise ValueError(msg)
     require_scalar(frequency_hz, "frequency_hz")
     f = float(frequency_hz)
     if not math.isfinite(f) or f <= 0.0:
         msg = f"'frequency_hz' must be a positive frequency in hertz; got {f:g}."
         raise ValueError(msg)
-    return RetestAgreementCheck(first_db=first, repeat_db=repeat, frequency_hz=f)
+    return RetestAgreementCheck(
+        first_threshold_level=first, repeat_threshold_level=repeat, frequency_hz=f
+    )
 
 
 @dataclass(frozen=True)
@@ -1952,17 +1965,17 @@ class AudiogramCautions(OwnsArrays):
     """The levels of an audiogram that call for caution (6.2.3.2, 8.4).
 
     :ivar frequencies: The test frequencies, in hertz.
-    :ivar air_conduction_db: The air-conduction hearing threshold levels of one
+    :ivar air_conduction_threshold_levels: The air-conduction hearing threshold levels of one
         ear, in dB, one per frequency, or ``None``.
-    :ivar bone_conduction_db: The bone-conduction hearing threshold levels, in
+    :ivar bone_conduction_threshold_levels: The bone-conduction hearing threshold levels, in
         dB, one per frequency, or ``None``.
     :ivar vibrator_placement: ``"mastoid"`` or ``"forehead"``, the placement
         the audiometer's bone conduction is calibrated for.
     """
 
     frequencies: np.ndarray
-    air_conduction_db: np.ndarray | None
-    bone_conduction_db: np.ndarray | None
+    air_conduction_threshold_levels: np.ndarray | None
+    bone_conduction_threshold_levels: np.ndarray | None
     vibrator_placement: str
 
     @property
@@ -1990,10 +2003,11 @@ class AudiogramCautions(OwnsArrays):
         :return: One boolean per frequency, all ``False`` without air
             conduction levels.
         """
-        if self.air_conduction_db is None:
+        if self.air_conduction_threshold_levels is None:
             return np.zeros(self.frequencies.size, dtype=bool)
         return np.asarray(
-            self.air_conduction_db >= _CROSS_HEARING_LEVEL_DB - _BOUNDARY_SLACK_DB,
+            self.air_conduction_threshold_levels
+            >= _CROSS_HEARING_LEVEL_DB - _BOUNDARY_SLACK_DB,
             dtype=bool,
         )
 
@@ -2008,9 +2022,11 @@ class AudiogramCautions(OwnsArrays):
         :return: One boolean per frequency, ``False`` where 8.4 gives no level
             or without bone conduction levels.
         """
-        if self.bone_conduction_db is None:
+        if self.bone_conduction_threshold_levels is None:
             return np.zeros(self.frequencies.size, dtype=bool)
-        return _at_least(self.bone_conduction_db, self.vibrotactile_levels)
+        return _at_least(
+            self.bone_conduction_threshold_levels, self.vibrotactile_levels
+        )
 
     @property
     def any_caution(self) -> bool:
@@ -2038,8 +2054,8 @@ class AudiogramCautions(OwnsArrays):
 def audiogram_cautions(
     frequencies: ArrayLike,
     *,
-    air_conduction_db: ArrayLike | None = None,
-    bone_conduction_db: ArrayLike | None = None,
+    air_conduction_threshold_levels: ArrayLike | None = None,
+    bone_conduction_threshold_levels: ArrayLike | None = None,
     vibrator_placement: str = "mastoid",
 ) -> AudiogramCautions:
     """Flag the levels of an audiogram that call for caution (6.2.3.2, 8.4).
@@ -2064,9 +2080,9 @@ def audiogram_cautions(
     levels are averages about which individuals vary widely.
 
     :param frequencies: The test frequencies, in hertz.
-    :param air_conduction_db: The air-conduction hearing threshold levels, in
+    :param air_conduction_threshold_levels: The air-conduction hearing threshold levels, in
         dB, one per frequency.
-    :param bone_conduction_db: The bone-conduction hearing threshold levels,
+    :param bone_conduction_threshold_levels: The bone-conduction hearing threshold levels,
         in dB, one per frequency.
     :param vibrator_placement: ``"mastoid"`` (default) or ``"forehead"``, the
         placement the bone conduction is calibrated for.
@@ -2085,13 +2101,16 @@ def audiogram_cautions(
             f"{vibrator_placement!r}."
         )
         raise ValueError(msg)
-    if air_conduction_db is None and bone_conduction_db is None:
-        msg = "give 'air_conduction_db', 'bone_conduction_db' or both."
+    if (
+        air_conduction_threshold_levels is None
+        and bone_conduction_threshold_levels is None
+    ):
+        msg = "give 'air_conduction_threshold_levels', 'bone_conduction_threshold_levels' or both."
         raise ValueError(msg)
     sets: dict[str, np.ndarray | None] = {}
     for name, values in (
-        ("air_conduction_db", air_conduction_db),
-        ("bone_conduction_db", bone_conduction_db),
+        ("air_conduction_threshold_levels", air_conduction_threshold_levels),
+        ("bone_conduction_threshold_levels", bone_conduction_threshold_levels),
     ):
         if values is None:
             sets[name] = None
@@ -2106,8 +2125,8 @@ def audiogram_cautions(
         sets[name] = levels
     return AudiogramCautions(
         frequencies=freqs,
-        air_conduction_db=sets["air_conduction_db"],
-        bone_conduction_db=sets["bone_conduction_db"],
+        air_conduction_threshold_levels=sets["air_conduction_threshold_levels"],
+        bone_conduction_threshold_levels=sets["bone_conduction_threshold_levels"],
         vibrator_placement=vibrator_placement,
     )
 
@@ -2128,34 +2147,36 @@ class AudiometricUncertaintyBudget(RichDisplay):
 
     :ivar repeatability_db: :math:`u_1`, repeated determinations of
         :math:`L'_\mathrm{HT}` (A.3.2), in dB.
-    :ivar equipment_db: :math:`u_2`, the audiometer (A.3.3), in dB; its
+    :ivar equipment_uncertainty_db: :math:`u_2`, the audiometer (A.3.3), in dB; its
         distribution is rectangular, the others normal.
-    :ivar transducer_db: :math:`u_3`, the transducer and its fitting (A.3.4),
+    :ivar transducer_uncertainty_db: :math:`u_3`, the transducer and its fitting (A.3.4),
         in dB.
-    :ivar environment_db: :math:`u_4`, the ambient noise (A.3.5), in dB.
-    :ivar masking_db: :math:`u_5`, a non-optimized masking noise (A.3.6), in
+    :ivar environment_uncertainty_db: :math:`u_4`, the ambient noise (A.3.5), in dB.
+    :ivar masking_uncertainty_db: :math:`u_5`, a non-optimized masking noise (A.3.6), in
         dB.
-    :ivar tester_db: :math:`u_6`, the tester's experience (A.3.7), in dB.
-    :ivar subject_db: :math:`u_7`, the subject's responses (A.3.8), in dB.
-    :ivar special_db: :math:`u_8`, an unusually difficult measurement (A.3.9),
+    :ivar tester_uncertainty_db: :math:`u_6`, the tester's experience (A.3.7), in dB.
+    :ivar subject_uncertainty_db: :math:`u_7`, the subject's responses (A.3.8), in dB.
+    :ivar special_uncertainty_db: :math:`u_8`, an unusually difficult measurement (A.3.9),
         in dB.
     """
 
     repeatability_db: float
-    equipment_db: float
-    transducer_db: float
-    environment_db: float
-    masking_db: float = 0.0
-    tester_db: float = 0.0
-    subject_db: float = 0.0
-    special_db: float = 0.0
+    equipment_uncertainty_db: float
+    transducer_uncertainty_db: float
+    environment_uncertainty_db: float
+    masking_uncertainty_db: float = 0.0
+    tester_uncertainty_db: float = 0.0
+    subject_uncertainty_db: float = 0.0
+    special_uncertainty_db: float = 0.0
 
     def __post_init__(self) -> None:
         """Refuse a component that is negative or not finite.
 
         :raises ValueError: for such a component.
         """
-        for name, value in zip(self.labels, self.components_db, strict=True):
+        for name, value in zip(
+            self.labels, self.standard_uncertainties_db, strict=True
+        ):
             if not math.isfinite(value) or value < 0.0:
                 msg = f"the {name} component must be finite and not negative, in dB."
                 raise ValueError(msg)
@@ -2178,38 +2199,38 @@ class AudiometricUncertaintyBudget(RichDisplay):
         )
 
     @property
-    def components_db(self) -> tuple[float, ...]:
+    def standard_uncertainties_db(self) -> tuple[float, ...]:
         """The eight standard uncertainties in the order of Table A.1, in dB.
 
         :return: :math:`u_1` to :math:`u_8`.
         """
         return (
             float(self.repeatability_db),
-            float(self.equipment_db),
-            float(self.transducer_db),
-            float(self.environment_db),
-            float(self.masking_db),
-            float(self.tester_db),
-            float(self.subject_db),
-            float(self.special_db),
+            float(self.equipment_uncertainty_db),
+            float(self.transducer_uncertainty_db),
+            float(self.environment_uncertainty_db),
+            float(self.masking_uncertainty_db),
+            float(self.tester_uncertainty_db),
+            float(self.subject_uncertainty_db),
+            float(self.special_uncertainty_db),
         )
 
     @property
-    def combined_db(self) -> float:
+    def combined_uncertainty_db(self) -> float:
         r""":math:`u = \sqrt{\sum u_i^2}` (Formula (A.2)), in dB.
 
         :return: The combined standard uncertainty, unrounded.
         """
-        return math.hypot(*self.components_db)
+        return math.hypot(*self.standard_uncertainties_db)
 
     @property
-    def expanded_db(self) -> float:
+    def expanded_uncertainty_db(self) -> float:
         """:math:`U = 2u` for a coverage probability of 95 % (A.5), in dB.
 
         :return: The expanded uncertainty, unrounded; A.6 reports it rounded
             to the nearest full decibel.
         """
-        return _COVERAGE_FACTOR * self.combined_db
+        return _COVERAGE_FACTOR * self.combined_uncertainty_db
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -2232,10 +2253,10 @@ def audiometric_uncertainty(
     conduction: str = "air",
     masked: bool = False,
     level_step_db: float = 5.0,
-    environment_db: float = _ENVIRONMENT_DB,
-    tester_db: float = 0.0,
-    subject_db: float = 0.0,
-    special_db: float = 0.0,
+    environment_uncertainty_db: float = _ENVIRONMENT_DB,
+    tester_uncertainty_db: float = 0.0,
+    subject_uncertainty_db: float = 0.0,
+    special_uncertainty_db: float = 0.0,
 ) -> AudiometricUncertaintyBudget:
     r"""The typical uncertainty budget of a hearing threshold level (A.3).
 
@@ -2260,7 +2281,7 @@ def audiometric_uncertainty(
     - :math:`u_4` (A.3.5): 2 dB when the ambient noise meets Clause 11 and the
       subject's threshold is near 0 dB. It may be negligible for thresholds
       well above 0 dB and is considerably larger in a room that exceeds the
-      limits; give it with ``environment_db``;
+      limits; give it with ``environment_uncertainty_db``;
     - :math:`u_5` (A.3.6): 2 dB when masking noise is applied;
     - :math:`u_6` to :math:`u_8` (A.3.7 to A.3.9): zero in usual situations,
       where the repeatability already covers them; give them when an
@@ -2274,18 +2295,21 @@ def audiometric_uncertainty(
     :param masked: Whether masking noise was applied (A.3.6).
     :param level_step_db: The step of the hearing level control, in dB; 5 by
         default, 0 for a control fine enough not to count.
-    :param environment_db: :math:`u_4`, in dB; 2 by default (A.3.5).
-    :param tester_db: :math:`u_6`, in dB.
-    :param subject_db: :math:`u_7`, in dB.
-    :param special_db: :math:`u_8`, in dB.
+    :param environment_uncertainty_db: :math:`u_4`, in dB; 2 by default (A.3.5).
+    :param tester_uncertainty_db: :math:`u_6`, in dB.
+    :param subject_uncertainty_db: :math:`u_7`, in dB.
+    :param special_uncertainty_db: :math:`u_8`, in dB.
     :return: :class:`AudiometricUncertaintyBudget`.
     :raises ValueError: for an unknown conduction, a frequency that is not
         positive, or a component or step that is negative or not finite.
+    :raises TypeError: if ``environment_uncertainty_db``, ``frequency``,
+        ``level_step_db``, ``special_uncertainty_db``, ``subject_uncertainty_db`` or
+        ``tester_uncertainty_db`` is not a single number.
     """
-    require_scalar(environment_db, "environment_db")
-    require_scalar(special_db, "special_db")
-    require_scalar(subject_db, "subject_db")
-    require_scalar(tester_db, "tester_db")
+    require_scalar(environment_uncertainty_db, "environment_uncertainty_db")
+    require_scalar(special_uncertainty_db, "special_uncertainty_db")
+    require_scalar(subject_uncertainty_db, "subject_uncertainty_db")
+    require_scalar(tester_uncertainty_db, "tester_uncertainty_db")
     if conduction not in _CONDUCTIONS:
         msg = f"'conduction' must be one of {_CONDUCTIONS}; got {conduction!r}."
         raise ValueError(msg)
@@ -2304,13 +2328,13 @@ def audiometric_uncertainty(
     root3 = math.sqrt(3.0)
     return AudiometricUncertaintyBudget(
         repeatability_db=_REPEATABILITY_DB[conduction][high],
-        equipment_db=math.hypot(deviation / root3, step / (2.0 * root3)),
-        transducer_db=math.hypot(
+        equipment_uncertainty_db=math.hypot(deviation / root3, step / (2.0 * root3)),
+        transducer_uncertainty_db=math.hypot(
             _TRANSDUCER_TYPE_DB[high], _TRANSDUCER_FITTING_DB[high]
         ),
-        environment_db=float(environment_db),
-        masking_db=_MASKING_DB if masked else 0.0,
-        tester_db=float(tester_db),
-        subject_db=float(subject_db),
-        special_db=float(special_db),
+        environment_uncertainty_db=float(environment_uncertainty_db),
+        masking_uncertainty_db=_MASKING_DB if masked else 0.0,
+        tester_uncertainty_db=float(tester_uncertainty_db),
+        subject_uncertainty_db=float(subject_uncertainty_db),
+        special_uncertainty_db=float(special_uncertainty_db),
     )

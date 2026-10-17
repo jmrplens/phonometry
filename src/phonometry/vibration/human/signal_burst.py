@@ -519,7 +519,8 @@ def sawtooth_burst(
     :raises ValueError: If the application, the burst length or the sampling
         rate is not one this clause defines, or the amplitude is not finite
         and positive.
-    :raises TypeError: If ``n_cycles`` is neither an integer nor ``None``.
+    :raises TypeError: If ``n_cycles`` is neither an integer nor ``None``, or
+        ``amplitude_m_s2`` or ``fs`` is not one number.
     """
     test = _require_application(application)
     burst_cycles = _require_cycles(test, n_cycles)
@@ -648,7 +649,8 @@ def signal_burst_indications(
         the units of each quantity.
     :raises ValueError: As for :func:`sawtooth_burst`, and if the weighting
         belongs to another application.
-    :raises TypeError: If ``n_cycles`` is neither an integer nor ``None``.
+    :raises TypeError: If ``n_cycles`` is neither an integer nor ``None``, or
+        ``fs`` is not one number.
     """
     test = _require_application(application)
     row = _require_row(test, name)
@@ -720,6 +722,7 @@ class SignalBurstVerification(OwnsArrays):
             the application and row, the amplitude is not positive, or the
             indications are not one row per burst length and one column per
             quantity.
+        :raises TypeError: if ``amplitude_m_s2`` is not a single number.
         """
         require_positive(self.amplitude_m_s2, "amplitude_m_s2")
         for n_cycles in self.cycle_counts:
@@ -858,7 +861,8 @@ def verify_signal_burst_response(
         application, if the rows disagree about which columns they report, if
         ``measured`` is empty, if an indication is negative or not finite, or
         if the amplitude is not finite and positive.
-    :raises TypeError: If a burst length is neither an integer nor ``None``.
+    :raises TypeError: If a burst length is neither an integer nor ``None``,
+        or ``amplitude_m_s2`` is not one number.
     """
     test = _require_application(application)
     row = _require_row(test, name)

@@ -162,11 +162,13 @@ def test_k_weighting_response_matches_coefficients() -> None:
     res = k_weighting_response(48000.0, frequencies=[25.0, 997.0, 10000.0, 20000.0])
     assert isinstance(res, KWeightingResponse)
     # The stages sum to the combined magnitude, and reproduce the freqz oracle.
-    np.testing.assert_allclose(res.magnitude_db, res.shelf_db + res.highpass_db)
+    np.testing.assert_allclose(
+        res.magnitude_db, res.shelf_magnitude_db + res.highpass_magnitude_db
+    )
     np.testing.assert_allclose(
         res.magnitude_db, _k_response_db(48000.0, res.frequencies), rtol=0, atol=1e-12
     )
-    assert res.shelf_db[3] == pytest.approx(4.0, abs=0.01)  # HF shelf plateau
+    assert res.shelf_magnitude_db[3] == pytest.approx(4.0, abs=0.01)  # HF shelf plateau
     assert res.magnitude_db[1] == pytest.approx(0.691, abs=0.05)  # Formula 2 gain
     assert res.magnitude_db[0] < -9.0  # RLB high-pass attenuates the lows
     assert res.fs == 48000.0
@@ -194,11 +196,11 @@ def test_k_weighting_response_rejects_bad_input() -> None:
 def test_k_weighting_response_rejects_curve_off_the_grid() -> None:
     """A curve of another length is refused where the response is built."""
     res = k_weighting_response(48000.0, n=64)
-    short = res.shelf_db[:-1]
+    short = res.shelf_magnitude_db[:-1]
     with pytest.raises(
-        ValueError, match=r"'shelf_db' \(63\).*must each carry one value"
+        ValueError, match=r"'shelf_magnitude_db' \(63\).*must each carry one value"
     ):
-        replace(res, shelf_db=short)
+        replace(res, shelf_magnitude_db=short)
 
 
 def test_k_weighting_response_plot() -> None:

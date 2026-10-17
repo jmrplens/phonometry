@@ -640,6 +640,7 @@ class SoundCalibratorMeasurements(RichDisplay):
         :param requirement: One of :data:`CALIBRATOR_REQUIREMENTS`.
         :return: One pair per measurement, empty when it was not measured.
         :raises ValueError: for an unknown requirement.
+        :raises TypeError: if ``requirement`` is not a text.
         """
         name = require_choice(requirement, "requirement", CALIBRATOR_REQUIREMENTS)
         deviation, uncertainty = _FIELDS[name]
@@ -958,6 +959,7 @@ def verify_sound_calibrator(
         frequency the class has no acceptance limit at, a static-pressure
         correction given for a class that is not an /M pistonphone, or one
         missing for an /M pistonphone whose level is given.
+    :raises TypeError: if ``nominal_frequency_hz`` is not a single number.
     """
     designation = _designation(calibrator_class)
     base = designation.split("/", 1)[0]

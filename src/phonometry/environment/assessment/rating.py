@@ -84,6 +84,7 @@ def lden(
         each period in hours, summing to 24. Default (12, 4, 8); countries
         may define the periods differently (3.6.4 Note 1).
     :return: Lden in dB.
+    :raises TypeError: if ``lday``, ``levening`` or ``lnight`` is not a single number.
     """
     require_scalar(lday, "lday")
     require_scalar(levening, "levening")
@@ -112,6 +113,7 @@ def ldn(
     :param period_hours: ``(t_day, t_night)``, the duration of each period
         in hours, summing to 24. Default (15, 9).
     :return: Ldn in dB.
+    :raises TypeError: if ``lday`` or ``lnight`` is not a single number.
     """
     require_scalar(lday, "lday")
     require_scalar(lnight, "lnight")

@@ -307,7 +307,7 @@ def _chk_static_pressure() -> Outcome:
             static_pressure_kpa=ref.IEC62585_STATIC_PRESSURE_LIMIT_KPA - 1.0,
         )
         matching += budget.descriptors[-1] == "static pressure" and math.isclose(
-            float(budget.values_db[-1]), expanded, abs_tol=1e-12
+            float(budget.stated_uncertainties_db[-1]), expanded, abs_tol=1e-12
         )
     return count(
         matching,
@@ -406,7 +406,7 @@ def _chk_annex_a() -> Outcome:
     result = metrology.adjustment_value(
         frequencies=[125.0, 1000.0, 8000.0],
         free_field_indicated_level=[94.2, 94.1, 93.4],
-        calibrator_reading_db=93.7,
+        calibrator_indicated_level_before=93.7,
         calibrator_level=94.0,
     )
     return numeric(

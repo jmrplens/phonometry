@@ -154,6 +154,7 @@ class FacadeElement(OwnsArrays):
 
         :raises ValueError: if ``area`` is given and is not positive and
             finite.
+        :raises TypeError: if ``area`` is not a single number.
         """
         if self.area is not None:
             require_positive(self.area, "area")
@@ -170,7 +171,10 @@ class FacadeElement(OwnsArrays):
         return given[0]
 
     def tau(self, total_area: float, n_bands: int) -> np.ndarray:
-        """Transmission factor ``τ`` of this element for the whole façade area."""
+        """Transmission factor ``τ`` of this element for the whole façade area.
+
+        :raises TypeError: if ``n_bands`` or ``total_area`` is not a single number.
+        """
         require_scalar(n_bands, "n_bands")
         require_scalar(total_area, "total_area")
         if total_area <= 0:
@@ -273,7 +277,8 @@ class FacadePredictionResult(OwnsArrays):
         :raises ValueError: if the per-band quantities disagree, if an element
             partial index does not run over the predicted bands, or if the
             retained geometry holds a different number of elements.
-        :raises TypeError: if ``elements`` is ``None``.
+        :raises TypeError: if ``elements`` is ``None``, or ``r_prime`` is a
+            single number rather than one value per band.
         """
         require_present(self, "elements")
         require_ranks(self, r_prime=1, r_45=1, r_tr_s=1, d_2m_nt=1, frequencies=1)
@@ -500,6 +505,7 @@ def facade_sound_reduction(
     :param frequencies: Optional band centre frequencies (Hz), stored on the
         result for plotting; must match the element band count.
     :return: A :class:`FacadePredictionResult`.
+    :raises TypeError: if ``area`` or ``volume`` is not a single number.
     """
     delta = float(delta_l_fs)
     require_scalar(volume, "volume")
@@ -568,6 +574,7 @@ def radiated_sound_power(
     :param octave_bands: Optional octave-band centre frequencies (Hz) matching
         the per-band data; enables the A-weighted single number.
     :return: A :class:`RadiatedPowerResult`.
+    :raises TypeError: if ``area`` is not a single number.
     """
     r_prime, _ = _apparent_reduction(elements, float(area), "radiated_sound_power")
     if r_prime_cap is not None:
@@ -616,6 +623,8 @@ def outdoor_attenuation(width_m: float, height_m: float, distance: float) -> flo
     :param height_m: Side height ``H``, in m.
     :param distance: Perpendicular distance ``d`` to the reception point, in m.
     :return: ``Atot`` in dB (subtract from ``LW`` to get the exterior ``Lp``).
+    :raises TypeError: if ``distance``, ``height_m`` or ``width_m`` is not a single
+        number.
     """
     require_scalar(distance, "distance")
     require_scalar(height_m, "height_m")
@@ -688,6 +697,7 @@ def facade_shape_level_difference(
     :return: ``ΔLfs``, in dB.
     :raises ValueError: For an unknown shape, a negative height/absorption, or
         a shape/height combination the figure marks "does not apply".
+    :raises TypeError: if ``absorption`` or ``line_of_sight`` is not a single number.
     """
     try:
         rows = _DELTA_LFS[shape]

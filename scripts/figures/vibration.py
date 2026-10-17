@@ -6314,9 +6314,10 @@ def generate_railway_spectra(output_dir: str) -> None:
     )
     t2 = slice(round(_RAILWAY_T2_S[0] * fs), round(_RAILWAY_T2_S[1] * fs))
     spectrum = vibration.narrowband_psd(passage.velocity_mm_s[t2], fs)
-    centres, rms = vibration.third_octaves_from_narrowband(
+    narrowband = vibration.third_octaves_from_narrowband(
         frequencies=spectrum.frequencies, psd=spectrum.psd
     )
+    centres, rms = narrowband.frequencies, narrowband.velocities_mm_s
     narrow = dict(
         zip(
             centres,
@@ -6594,7 +6595,7 @@ def generate_railway_prediction_chain(output_dir: str) -> None:
          -3.8, -5.4, -6.5, -8.1, -9.6]
     )  # fmt: skip
     prediction = vibration.predict_train_category(
-        emission, ground_db=ground, floor_db=floor
+        emission, ground_level_difference=ground, floor_level_difference=floor
     )
     bands = prediction.frequencies
     positions = np.arange(bands.size)
@@ -6603,7 +6604,7 @@ def generate_railway_prediction_chain(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.plot(
         positions,
-        prediction.emission_db,
+        prediction.emission_levels,
         color=COLOR_TERTIARY,
         linewidth=1.6,
         linestyle="--",
@@ -6613,7 +6614,7 @@ def generate_railway_prediction_chain(output_dir: str) -> None:
     )
     ax.plot(
         positions,
-        prediction.floor_db,
+        prediction.floor_levels,
         color=COLOR_PRIMARY,
         linewidth=1.8,
         marker="o",
@@ -6622,7 +6623,7 @@ def generate_railway_prediction_chain(output_dir: str) -> None:
     )
     ax.plot(
         positions[weighted],
-        prediction.weighted_db,
+        prediction.weighted_levels,
         color=COLOR_SECONDARY,
         linewidth=1.6,
         linestyle=":",
@@ -6630,11 +6631,11 @@ def generate_railway_prediction_chain(output_dir: str) -> None:
         markersize=5,
         label="KB-weighted $L_{v,KB}$, Formula (8), 4 Hz to 80 Hz",
     )
-    peak = int(np.argmax(prediction.floor_db))
+    peak = int(np.argmax(prediction.floor_levels))
     ax.annotate(
         "the floor's 20 Hz resonance,\n+17.3 dB from Annex A",
-        xy=(positions[peak], prediction.floor_db[peak]),
-        xytext=(positions[peak] - 6.8, prediction.floor_db[peak] + 3.0),
+        xy=(positions[peak], prediction.floor_levels[peak]),
+        xytext=(positions[peak] - 6.8, prediction.floor_levels[peak] + 3.0),
         fontsize=9,
         color=COLOR_FG,
         arrowprops={"arrowstyle": "->", "color": COLOR_FG, "lw": 0.9},
@@ -7021,9 +7022,10 @@ def generate_impact_force_window(output_dir: str) -> None:
     ax_t.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax_t.legend(loc="upper right", fontsize=9)
 
-    freqs, bare = vibration.energy_spectral_density(noisy, _IMPACT_FS)
-    _, windowed = vibration.energy_spectral_density(noisy * window, _IMPACT_FS)
-    _, clean = vibration.energy_spectral_density(force, _IMPACT_FS)
+    esd = vibration.energy_spectral_density(noisy, _IMPACT_FS)
+    freqs, bare = esd.frequencies, esd.density
+    windowed = vibration.energy_spectral_density(noisy * window, _IMPACT_FS).density
+    clean = vibration.energy_spectral_density(force, _IMPACT_FS).density
     band = (freqs > 0.0) & (freqs <= 2000.0)
     ax_f.semilogy(
         freqs[band],
@@ -7203,8 +7205,9 @@ def generate_impact_double_hit(output_dir: str) -> None:
     ax_t.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax_t.legend(loc="upper right", fontsize=9)
 
-    freqs, single = vibration.energy_spectral_density(force, _IMPACT_FS)
-    _, esd = vibration.energy_spectral_density(double, _IMPACT_FS)
+    one = vibration.energy_spectral_density(force, _IMPACT_FS)
+    freqs, single = one.frequencies, one.density
+    esd = vibration.energy_spectral_density(double, _IMPACT_FS).density
     band = (freqs > 0.0) & (freqs <= 400.0)
     ax_f.semilogy(
         freqs[band],

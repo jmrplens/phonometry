@@ -88,11 +88,13 @@ __all__ = [
     "air_density_astm",
     "air_layer_transfer_matrix",
     "face_quantities",
+    "FaceQuantities",
     "plane_wave_frequency_range_astm",
     "speed_of_sound_astm",
     "transfer_matrix_one_load",
     "transfer_matrix_two_load",
     "wave_decomposition",
+    "WaveAmplitudes",
 ]
 
 
@@ -108,6 +110,8 @@ def speed_of_sound_astm(*, temperature_c: ArrayLike) -> Real:
     :param temperature_c: Room temperature, in **degrees Celsius**.
     :return: Speed of sound ``c``, in metres per second.
     :raises ValueError: if any temperature is at or below -273.15 degC.
+    :raises TypeError: if ``temperature_c`` holds a text or a value that is not a real
+        number.
     """
     t = require_above_absolute_zero_array(temperature_c, "temperature_c")
     return np.asarray(_ASTM_C_CONST * np.sqrt(_ASTM_T0 + t), dtype=np.float64)
@@ -128,6 +132,8 @@ def air_density_astm(
     :return: Air density ``rho``, in kilograms per cubic metre.
     :raises ValueError: if any temperature is at or below -273.15 degC, or any
         pressure is not positive.
+    :raises TypeError: if ``temperature_c`` holds a text or a value that is not a real
+        number.
     """
     t = require_above_absolute_zero_array(temperature_c, "temperature_c")
     p = np.asarray(static_pressure_kpa, dtype=np.float64)
@@ -172,6 +178,7 @@ def plane_wave_frequency_range_astm(
         spacing bound.
     :param shape: ``"circular"``, ``"rectangular"`` or ``"square"``.
     :return: Tuple ``(f_l, f_u)`` of the lower and upper frequency limits, in Hz.
+    :raises TypeError: if ``spacing_m`` is not a single number.
     """
     require_scalar(spacing_m, "spacing_m")
     return _frequency_range(
@@ -231,6 +238,46 @@ def _warn_astm_plane_wave(
         )
 
 
+@dataclass(frozen=True)
+class WaveAmplitudes(OwnsArrays):
+    """The four plane-wave amplitudes of a four-microphone tube (ASTM E2611-19 Eqs. (17)-(20)).
+
+    What :func:`wave_decomposition` returns: the amplitudes, named as the
+    standard prints them, where an ``(A, B, C, D)`` tuple used to be unpacked
+    by position. They are what :func:`face_quantities` takes.
+
+    :ivar a: ``A``, the forward wave upstream of the specimen.
+    :ivar b: ``B``, the backward wave upstream.
+    :ivar c: ``C``, the forward wave downstream.
+    :ivar d: ``D``, the backward wave downstream.
+    """
+
+    a: Complex
+    b: Complex
+    c: Complex
+    d: Complex
+
+
+@dataclass(frozen=True)
+class FaceQuantities(OwnsArrays):
+    """The pressures and particle velocities on the two faces of a specimen.
+
+    What :func:`face_quantities` returns (ASTM E2611-19 Eq. (21)): named as
+    the standard prints them, where a ``(p0, pd, u0, ud)`` tuple used to be
+    unpacked by position.
+
+    :ivar p0: The sound pressure on the upstream face, ``x = 0``.
+    :ivar pd: The sound pressure on the downstream face, ``x = d``.
+    :ivar u0: The particle velocity on the upstream face.
+    :ivar ud: The particle velocity on the downstream face.
+    """
+
+    p0: Complex
+    pd: Complex
+    u0: Complex
+    ud: Complex
+
+
 def wave_decomposition(
     h1: ArrayLike,
     h2: ArrayLike,
@@ -244,7 +291,7 @@ def wave_decomposition(
     wavenumber: ArrayLike,
     diameter_m: float | None = None,
     shape: str = "circular",
-) -> tuple[Complex, Complex, Complex, Complex]:
+) -> WaveAmplitudes:
     r"""Decompose the wave field into ``(A, B, C, D)`` (ASTM E2611-19, Eqs. (17)-(20)).
 
     The exponents are implemented exactly as printed:
@@ -288,7 +335,8 @@ def wave_decomposition(
         plane-wave working-range check (6.2.3-6.2.5, 6.5.4).
     :param shape: Tube cross-section, ``"circular"``, ``"rectangular"`` or
         ``"square"``.
-    :return: Tuple ``(A, B, C, D)`` of complex amplitudes.
+    :return: The four complex amplitudes, as a :class:`WaveAmplitudes`.
+    :raises TypeError: if ``diameter_m``, ``s1`` or ``s2`` is not a single number.
     """
     require_scalar(s1, "s1")
     require_scalar(s2, "s2")
@@ -316,11 +364,11 @@ def wave_decomposition(
     b = 1j * (hb * np.exp(1j * k * (l1 + s1)) - ha * np.exp(1j * k * l1)) / two_sin1
     c = 1j * (hc * np.exp(1j * k * (l2 + s2)) - hd * np.exp(1j * k * l2)) / two_sin2
     d = 1j * (hd * np.exp(-1j * k * l2) - hc * np.exp(-1j * k * (l2 + s2))) / two_sin2
-    return (
-        np.asarray(a, dtype=np.complex128),
-        np.asarray(b, dtype=np.complex128),
-        np.asarray(c, dtype=np.complex128),
-        np.asarray(d, dtype=np.complex128),
+    return WaveAmplitudes(
+        a=np.asarray(a, dtype=np.complex128),
+        b=np.asarray(b, dtype=np.complex128),
+        c=np.asarray(c, dtype=np.complex128),
+        d=np.asarray(d, dtype=np.complex128),
     )
 
 
@@ -333,7 +381,7 @@ def face_quantities(
     wavenumber: ArrayLike,
     thickness_m: float,
     characteristic_impedance: float,
-) -> tuple[Complex, Complex, Complex, Complex]:
+) -> FaceQuantities:
     r"""Face pressures and particle velocities (ASTM E2611-19, Eq. (21)).
 
     .. math::
@@ -351,7 +399,9 @@ def face_quantities(
     :param wavenumber: Air wavenumber ``k``.
     :param thickness_m: Specimen thickness ``d``, in metres.
     :param characteristic_impedance: Characteristic impedance ``rho c``, in rayls.
-    :return: Tuple ``(p0, pd, u0, ud)`` of face pressures and velocities.
+    :return: The face pressures and velocities, as a :class:`FaceQuantities`.
+    :raises TypeError: if ``characteristic_impedance`` or ``thickness_m`` is not a
+        single number.
     """
     require_positive(characteristic_impedance, "characteristic_impedance")
     thickness_m = require_positive(thickness_m, "thickness_m")
@@ -366,11 +416,11 @@ def face_quantities(
     pd = cv * ep + dv * em
     u0 = (av - bv) / characteristic_impedance
     ud = (cv * ep - dv * em) / characteristic_impedance
-    return (
-        np.asarray(p0, dtype=np.complex128),
-        np.asarray(pd, dtype=np.complex128),
-        np.asarray(u0, dtype=np.complex128),
-        np.asarray(ud, dtype=np.complex128),
+    return FaceQuantities(
+        p0=np.asarray(p0, dtype=np.complex128),
+        pd=np.asarray(pd, dtype=np.complex128),
+        u0=np.asarray(u0, dtype=np.complex128),
+        ud=np.asarray(ud, dtype=np.complex128),
     )
 
 
@@ -441,6 +491,7 @@ class TransferMatrix(OwnsArrays):
 
         :param characteristic_impedance: Characteristic impedance ``rho c``.
         :return: Transmission loss ``TLn``, in decibels.
+        :raises TypeError: if ``characteristic_impedance`` is not a single number.
         """
         require_positive(characteristic_impedance, "characteristic_impedance")
         rc = characteristic_impedance
@@ -454,6 +505,7 @@ class TransferMatrix(OwnsArrays):
 
         :param characteristic_impedance: Characteristic impedance ``rho c``.
         :return: Complex reflection coefficient ``R``.
+        :raises TypeError: if ``characteristic_impedance`` is not a single number.
         """
         require_positive(characteristic_impedance, "characteristic_impedance")
         rc = characteristic_impedance
@@ -480,6 +532,7 @@ class TransferMatrix(OwnsArrays):
 
         :param thickness_m: Specimen thickness ``d``, in metres.
         :return: Complex material wavenumber ``k'``, in reciprocal metres.
+        :raises TypeError: if ``thickness_m`` is not a single number.
         """
         require_scalar(thickness_m, "thickness_m")
         if thickness_m <= 0.0:
@@ -596,6 +649,8 @@ def air_layer_transfer_matrix(
     :param thickness_m: Layer thickness ``d``, in metres.
     :param characteristic_impedance: Characteristic impedance ``rho c``, in rayls.
     :return: The air-layer :class:`TransferMatrix`.
+    :raises TypeError: if ``characteristic_impedance`` or ``thickness_m`` is not a
+        single number.
     """
     require_scalar(thickness_m, "thickness_m")
     require_positive(characteristic_impedance, "characteristic_impedance")
@@ -640,7 +695,7 @@ def _face_from_loads(
             f"(H1, H2, H3, H4); got {len(load)}."
         )
         raise ValueError(msg)
-    a, b, c, d = wave_decomposition(
+    waves = wave_decomposition(
         load[0],
         load[1],
         load[2],
@@ -651,15 +706,16 @@ def _face_from_loads(
         s2=s2,
         wavenumber=wavenumber,
     )
-    return face_quantities(
-        a,
-        b,
-        c,
-        d,
+    faces = face_quantities(
+        waves.a,
+        waves.b,
+        waves.c,
+        waves.d,
         wavenumber=wavenumber,
         thickness_m=thickness,
         characteristic_impedance=characteristic_impedance,
     )
+    return faces.p0, faces.pd, faces.u0, faces.ud
 
 
 #: Relative floor below which a two-/one-load solve denominator is treated as
@@ -765,6 +821,7 @@ def transfer_matrix_two_load(
         ``"square"``.
     :return: The specimen :class:`TransferMatrix` (measurement context
         retained on the result).
+    :raises TypeError: if ``diameter_m``, ``s1`` or ``s2`` is not a single number.
     """
     canonical = _canonical_shape(shape)
     if diameter_m is not None:
@@ -870,6 +927,7 @@ def transfer_matrix_one_load(
         ``"square"``.
     :return: The specimen :class:`TransferMatrix` (measurement context
         retained on the result).
+    :raises TypeError: if ``diameter_m``, ``s1`` or ``s2`` is not a single number.
     """
     canonical = _canonical_shape(shape)
     if diameter_m is not None:

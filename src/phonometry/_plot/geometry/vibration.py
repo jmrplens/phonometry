@@ -79,6 +79,7 @@ def plot_junction_geometry(
     :return: The axes.
     :raises ValueError: for an unknown junction type, or a thickness that is
         not positive and finite.
+    :raises TypeError: if ``thickness1_m`` or ``thickness2_m`` is not a single number.
     """
     _check_language(language)
     if junction not in ("L", "T1", "T2", "X"):
@@ -127,13 +128,7 @@ def plot_junction_result_geometry(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    """Junction drawing for a result that retained its thicknesses."""
-    if result.thickness1_m is None or result.thickness2_m is None:
-        msg = (
-            "This result does not retain the plate thicknesses; call "
-            "plot_junction_geometry(junction, thickness1_m, thickness2_m)."
-        )
-        raise ValueError(msg)
+    """Junction drawing at the plate thicknesses a result was computed for."""
     return plot_junction_geometry(
         result.junction,
         result.thickness1_m,
@@ -168,6 +163,7 @@ def plot_plate_geometry(
     :param kwargs: Forwarded to the plate rectangle.
     :return: The axes.
     :raises ValueError: for a side that is not positive and finite.
+    :raises TypeError: if ``length_x`` or ``length_y`` is not a single number.
     """
     _check_language(language)
     # Same reason as the junction thicknesses: a NaN side slipped past the

@@ -158,7 +158,7 @@ fewer than the sample has values.
 
 ```python
 CalculationVerification(
-    results_db: NDArray[np.float64],
+    computed_levels: NDArray[np.float64],
     lower_limits_db: NDArray[np.float64],
     upper_limits_db: NDArray[np.float64],
     labels: tuple[str, ...],
@@ -178,7 +178,7 @@ exceed" it.
 
 | Name | Description |
 | :--- | :--- |
-| `results_db` | The program's results, in dB, in the reference configuration. |
+| `computed_levels` | The program's results, in dB, in the reference configuration. |
 | `lower_limits_db` | The lower limit of each certified result, in dB. |
 | `upper_limits_db` | The upper limit of each certified result, in dB. |
 | `labels` | A name for each row (`"63 Hz"`, `"Total"`, `"T03 500 Hz"`). |
@@ -295,7 +295,7 @@ place, and the differences go to [`level_difference_quantiles`](/phonometry/refe
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a length that is a text, a bool or anything else that is not a number, or a sample size that is not a whole number's type. |
+| TypeError | for a length that is a text, a bool or anything else that is not a number, or a `sample_size` that is a bool, a text or an array. |
 | ValueError | for a sample smaller than 20, a length that is not a finite, positive number, or contours so short that two points would fall on the same whole metre, which happens only below `M` metres. |
 
 ## level_difference_quantiles
@@ -335,6 +335,7 @@ $q_{0,1} = -1$ dB and $q_{0,9} = 3$ dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for fewer than 20 values, a non-finite value or an input that is not one-dimensional. |
+| TypeError | if `level_differences` holds a text or a value that is not a real number. |
 
 ## LevelDifferenceQuantiles
 
@@ -361,7 +362,7 @@ standard deviation are read from it, so they cannot disagree with it.
 
 Whether the ranks were read from Table C.1 rather than (C.1), (C.2).
 
-### LevelDifferenceQuantiles.mean_db
+### LevelDifferenceQuantiles.mean_level_difference
 
 *property*
 
@@ -397,7 +398,7 @@ shaded.
 
 **Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
 
-### LevelDifferenceQuantiles.q01_db
+### LevelDifferenceQuantiles.q01_level_difference
 
 *property*
 
@@ -405,7 +406,7 @@ $q_{0,1}$, the value at rank $R(q_{0,1})$, in dB.
 
 C.2, NOTE 2: 10 % of all the differences are expected below it.
 
-### LevelDifferenceQuantiles.q09_db
+### LevelDifferenceQuantiles.q09_level_difference
 
 *property*
 
@@ -497,6 +498,7 @@ function applies the print.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a sample smaller than 20, which C.2 does not allow and Table C.1 does not cover, or a count that is not a whole number. |
+| TypeError | if `sample_size` is a flag, a text or an array where a count goes. |
 
 ## RECOMMENDED_SAMPLE_RATIO
 
@@ -521,13 +523,14 @@ The precision of a method from a round robin of programs
 | :--- | :--- |
 | `levels` | $L_{n,m}$, the level each of `M` participants calculated at each of `N` receivers, in dB: shape `(N, M)`, at least 20 receivers and two participants. |
 
-**Returns:** A [`RoundRobinPrecision`](/phonometry/reference/api/environment/software-quality/#roundrobinprecision); its `q09_db` is the result of the round robin.
+**Returns:** A [`RoundRobinPrecision`](/phonometry/reference/api/environment/software-quality/#roundrobinprecision); its `q09_level_difference` is the result of the round robin.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a matrix of the wrong shape, one that is not numeric, or one with a complex or a non-finite level. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## RoundRobinPrecision
 
@@ -613,7 +616,7 @@ so on) that draws the widest deviation in at most 25 classes.
 
 **Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
 
-### RoundRobinPrecision.q09_db
+### RoundRobinPrecision.q09_level_difference
 
 *property*
 
@@ -686,12 +689,13 @@ than one point in a hundred is returned with a
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a sample smaller than 20 or larger than the points that remain, or clearances that are not one finite, non-negative value per point. |
+| TypeError | if `n_points` or `sample_size` is a flag, a text or an array where a count goes, or `horizontal_clearances_m` holds a text or a value that is not a real number. |
 
 ## verify_calculation_results
 
 ```python
 verify_calculation_results(
-    results_db: ArrayLike,
+    computed_levels: ArrayLike,
     lower_limits_db: ArrayLike,
     upper_limits_db: ArrayLike,
     *,
@@ -717,7 +721,7 @@ inside.
 
 | Name | Description |
 | :--- | :--- |
-| `results_db` | The program's results, in dB, one per row. |
+| `computed_levels` | The program's results, in dB, one per row. |
 | `lower_limits_db` | The lower limit of each certified result, in dB. |
 | `upper_limits_db` | The upper limit of each certified result, in dB. |
 | `labels` | A name for each row; by default `"1"`, `"2"`, and so on. |
@@ -729,3 +733,4 @@ inside.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for columns of different lengths, a non-finite value or a lower limit above its upper limit. |
+| TypeError | if `computed_levels`, `lower_limits_db` or `upper_limits_db` holds a text or a value that is not a real number. |

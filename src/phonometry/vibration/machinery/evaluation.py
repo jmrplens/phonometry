@@ -187,6 +187,7 @@ class ZoneBoundaries(RichDisplay):
 
         :raises ValueError: if a boundary is not positive and finite, or the
             three do not increase.
+        :raises TypeError: if ``a_b``, ``b_c`` or ``c_d`` is not a single number.
         """
         require_scalar(self.a_b, "a_b")
         require_scalar(self.b_c, "b_c")
@@ -290,6 +291,8 @@ def allowable_velocity(
         for a scalar frequency, otherwise an array.
     :raises ValueError: If a frequency is not positive, a velocity or corner
         is not positive and finite, or the corners are not in order.
+    :raises TypeError: if ``constant_velocity_mm_s``, ``corner_high_hz``,
+        ``corner_low_hz`` or ``zone_factor`` is not a single number.
     """
     v_a = require_positive(constant_velocity_mm_s, "constant_velocity_mm_s")
     z = require_positive(zone_factor, "zone_factor")
@@ -387,6 +390,8 @@ def vibration_vector_change(
     :param final_phase_deg: Phase of the later state, in degrees.
     :return: The :class:`VectorChangeResult`.
     :raises ValueError: If a magnitude is negative or a value is not finite.
+    :raises TypeError: if ``final_magnitude``, ``final_phase_deg``,
+        ``initial_magnitude`` or ``initial_phase_deg`` is not a single number.
     """
     require_scalar(final_magnitude, "final_magnitude")
     require_scalar(final_phase_deg, "final_phase_deg")
@@ -516,6 +521,7 @@ def industrial_machine_zone(
         over the two if both are arrays.
     :raises ValueError: If the group or support class is unknown, or neither
         measured quantity is given.
+    :raises TypeError: if ``group`` or ``support`` is not a text.
     """
     key = (
         require_choice(group, "group", ("group_1", "group_2")),
@@ -563,6 +569,7 @@ class OperationalChange(RichDisplay):
 
         :raises ValueError: If the change is not finite or the limit is not
             positive.
+        :raises TypeError: if ``change`` or ``zone_b_upper`` is not a single number.
         """
         require_scalar(self.change, "change")
         if not math.isfinite(self.change):
@@ -608,6 +615,7 @@ def assess_operational_change(change: float, zone_b_upper: float) -> Operational
     :return: The answer, as an :class:`OperationalChange`.
     :raises ValueError: If the change is not finite or the limit is not
         positive.
+    :raises TypeError: if ``change`` or ``zone_b_upper`` is not a single number.
     """
     require_scalar(change, "change")
     return OperationalChange(
@@ -632,6 +640,7 @@ def alarm_limit(baseline: float, zone_b_upper: float) -> float:
     :return: The ALARM setting.
     :raises ValueError: If the baseline is negative or the limit is not
         positive.
+    :raises TypeError: if ``baseline`` or ``zone_b_upper`` is not a single number.
     """
     base = require_non_negative(baseline, "baseline")
     upper = require_positive(zone_b_upper, "zone_b_upper")
@@ -652,6 +661,7 @@ def trip_limit(zone_c_upper: float) -> float:
     :param zone_c_upper: The upper limit of zone C, which is the C/D boundary.
     :return: The recommended maximum TRIP setting.
     :raises ValueError: If the limit is not positive.
+    :raises TypeError: if ``zone_c_upper`` is not a single number.
     """
     return OPERATIONAL_LIMIT_HEADROOM * require_positive(zone_c_upper, "zone_c_upper")
 
@@ -777,6 +787,8 @@ def gear_unit_zone_boundaries(quantity: str, rating: float) -> ZoneBoundaries:
     :return: The A/B, B/C and C/D boundaries of that row.
     :raises ValueError: If the quantity is unknown or the table prints no row
         for that rating.
+    :raises TypeError: if ``quantity`` is not a text, or ``rating`` is not a single
+        number.
     """
     table = GEAR_UNIT_ZONES[
         require_choice(quantity, "quantity", tuple(GEAR_UNIT_ZONES))
@@ -813,6 +825,7 @@ def gear_shaft_displacement_limit(
     :return: The allowable peak-to-peak displacement, in micrometres; a float
         for a scalar frequency, otherwise an array.
     :raises ValueError: If a frequency or the rating is not positive.
+    :raises TypeError: if ``rating`` is not a single number.
     """
     value = require_positive(rating, "rating")
     freq = np.asarray(frequency, dtype=np.float64)
@@ -841,6 +854,7 @@ def gear_housing_velocity_limit(
     :return: The allowable r.m.s. velocity, in millimetres per second; a float
         for a scalar frequency, otherwise an array.
     :raises ValueError: If a frequency or the rating is not positive.
+    :raises TypeError: if ``rating`` is not a single number.
     """
     # Validated here rather than in the delegate, so a bad rating is reported
     # under the name this signature has: allowable_velocity would name its own

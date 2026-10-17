@@ -143,7 +143,7 @@ def test_the_gate_blocks_harmonic_passes_its_own_condition(
     block = env.amplitude_modulation_block(
         np.asarray(case[2]) / 10.0, modulation_frequency_range_hz=case[1]
     )
-    transform = np.fft.fft(block.detrended_db)
+    transform = np.fft.fft(block.detrended_levels)
     fundamental = wtm._swing(wtm._reconstruct(transform, [4, 5, 6]))
     harmonic = wtm._swing(wtm._reconstruct(transform, [9, 10, 11]))
     assert fundamental == pytest.approx(swing_db, abs=5e-5)
@@ -303,13 +303,15 @@ def test_all_lines_transformed_back_give_the_detrended_series() -> None:
     """Footnote 6 of 13.6.2.3: the full inverse transform is the input."""
     x = _sample(2)
     block = env.amplitude_modulation_block(x, modulation_frequency_range_hz=(0.4, 0.9))
-    spectrum = np.fft.fft(block.detrended_db)
+    spectrum = np.fft.fft(block.detrended_levels)
     restored = wtm._reconstruct(spectrum, list(range(1, 50)))
     # The zero-frequency and Nyquist lines are not among 1..49; the detrended
     # series has no mean, and its Nyquist line is restored separately.
     nyquist = np.real(spectrum[50]) / 100.0 * np.cos(np.pi * np.arange(100))
     np.testing.assert_allclose(
-        restored + nyquist + np.mean(block.detrended_db), block.detrended_db, atol=1e-9
+        restored + nyquist + np.mean(block.detrended_levels),
+        block.detrended_levels,
+        atol=1e-9,
     )
 
 
@@ -522,7 +524,7 @@ def test_bins_average_the_zeros_and_pick_the_worst_band() -> None:
 
 def test_the_exceedance_thresholds_are_those_of_13_7() -> None:
     """13.7 a) iii) (folio 55): data points above 3 dB, 6 dB and 9 dB."""
-    assert env.AM_EXCEEDANCE_THRESHOLDS_DB == (3.0, 6.0, 9.0)
+    assert env.AM_EXCEEDANCE_DEPTHS_DB == (3.0, 6.0, 9.0)
 
 
 def test_exceedance_counts_ratings_strictly_above_each_threshold() -> None:
@@ -566,7 +568,7 @@ def test_block_and_period_plots_draw_what_they_say() -> None:
     assert "44,64" in block.plot(language="es").get_title()
     ax = block.plot(kind="series")
     assert any(
-        np.allclose(line.get_ydata(), block.reconstructed_db) for line in ax.lines
+        np.allclose(line.get_ydata(), block.reconstructed_levels) for line in ax.lines
     )
     plt.close("all")
     series = np.concatenate(

@@ -481,7 +481,7 @@ def generate_lifter_split(output_dir: str) -> None:
     )
     axes[0].semilogx(
         low.frequencies[band],
-        low.liftered_db[band],
+        low.liftered_spectrum_db[band],
         color=COLOR_PRIMARY,
         linewidth=2.0,
         label="Lowpass lifter: spectral envelope",
@@ -491,7 +491,7 @@ def generate_lifter_split(output_dir: str) -> None:
 
     axes[1].semilogx(
         high.frequencies[band],
-        high.liftered_db[band],
+        high.liftered_spectrum_db[band],
         color=COLOR_SECONDARY,
         linewidth=1.1,
         label="Highpass lifter: the echo ripple alone",

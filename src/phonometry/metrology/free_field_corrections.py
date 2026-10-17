@@ -540,6 +540,8 @@ def exact_frequencies(
     :raises ValueError: for a limit that is not positive and finite, limits in
         the wrong order, or a designator that is not a whole number of at
         least one.
+    :raises TypeError: if ``highest_hz`` or ``lowest_hz`` is not a single number, or
+        ``fraction`` is a flag, a text or an array where a count goes.
     """
     lowest = require_positive(lowest_hz, "lowest_hz")
     highest = require_positive(highest_hz, "highest_hz")
@@ -615,7 +617,7 @@ class AdjustmentValue(OwnsArrays):
         dB.
     :ivar calibrator_level: :math:`L_1`, the level stated for the sound
         calibrator, in dB.
-    :ivar calibrator_reading_db: :math:`L_4'`, what the meter indicates on the
+    :ivar calibrator_indicated_level_before: :math:`L_4'`, what the meter indicates on the
         calibrator before the adjustment, at the sensitivity the free-field
         readings were taken at, in dB.
     :ivar check_frequency_hz: :math:`f_\mathrm{R}`, the calibration check
@@ -630,7 +632,7 @@ class AdjustmentValue(OwnsArrays):
     frequencies: NDArray[np.float64]
     free_field_deviation_db: NDArray[np.float64]
     calibrator_level: float
-    calibrator_reading_db: float
+    calibrator_indicated_level_before: float
     check_frequency_hz: float = _CHECK_FREQUENCY_HZ
     tolerance_db: NDArray[np.float64] | None = None
     pressure_deviation_db: NDArray[np.float64] | None = None
@@ -642,6 +644,8 @@ class AdjustmentValue(OwnsArrays):
             a value is not finite (a tolerance may be infinite), a tolerance
             is not positive, or the check frequency is not among the
             frequencies.
+        :raises TypeError: if ``check_frequency_hz`` is not a single number, or
+            ``frequencies`` holds a text or a value that is not a real number.
         """
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
@@ -660,7 +664,7 @@ class AdjustmentValue(OwnsArrays):
         tolerance = _tolerance_column(self.tolerance_db, frequencies.size)
         if tolerance is not None:
             object.__setattr__(self, "tolerance_db", read_only(tolerance))
-        for name in ("calibrator_level", "calibrator_reading_db"):
+        for name in ("calibrator_level", "calibrator_indicated_level_before"):
             require_finite(getattr(self, name), name)
         _index_of(frequencies, self.check_frequency_hz, "check_frequency_hz")
 
@@ -688,7 +692,7 @@ class AdjustmentValue(OwnsArrays):
         r""":math:`L_4 = L_4' + s`, what the adjusted meter indicates on the
         calibrator, in dB.
         """
-        return self.calibrator_reading_db + self.sensitivity_adjustment
+        return self.calibrator_indicated_level_before + self.sensitivity_adjustment
 
     @property
     def adjusted_deviation_db(self) -> NDArray[np.float64]:
@@ -769,7 +773,7 @@ class AdjustmentValue(OwnsArrays):
 
 def adjustment_value(
     free_field_indicated_level: ArrayLike,
-    calibrator_reading_db: float,
+    calibrator_indicated_level_before: float,
     *,
     frequencies: ArrayLike,
     calibrator_level: float,
@@ -806,7 +810,7 @@ def adjustment_value(
         increasing, the calibration check frequency among them.
     :param free_field_indicated_level: What the meter indicates in the free
         field at each frequency, in dB, before the adjustment.
-    :param calibrator_reading_db: :math:`L_4'`, what the meter indicates on
+    :param calibrator_indicated_level_before: :math:`L_4'`, what the meter indicates on
         the recommended calibrator at the same sensitivity, in dB.
     :param calibrator_level: :math:`L_1`, the level stated for the
         calibrator at the calibration check frequency, in dB.
@@ -827,6 +831,10 @@ def adjustment_value(
     :raises ValueError: for columns that do not hold one value per frequency,
         a value that is not finite, a tolerance that is not positive or finite
         nowhere, or a check frequency that is not among the frequencies.
+    :raises TypeError: if ``calibrator_indicated_level_before`` or ``calibrator_level``
+        is not a single number, or ``free_field_indicated_level``, ``frequencies``,
+        ``incident_level`` or ``pressure_indicated_level`` holds a text or a value that
+        is not a real number.
     """
     frequencies = _frequency_axis(frequencies)
     count = frequencies.size
@@ -849,8 +857,8 @@ def adjustment_value(
         frequencies=frequencies,
         free_field_deviation_db=indicated - incident,
         calibrator_level=level,
-        calibrator_reading_db=require_finite(
-            calibrator_reading_db, "calibrator_reading_db"
+        calibrator_indicated_level_before=require_finite(
+            calibrator_indicated_level_before, "calibrator_indicated_level_before"
         ),
         check_frequency_hz=float(check_frequency_hz),
         tolerance_db=_tolerance_column(tolerance_db, count),
@@ -913,6 +921,9 @@ class FreeFieldCorrection(OwnsArrays):
             finite, the normalisation frequency is missing for an actuator,
             given for another source, or not among the frequencies, or the
             microphones are not one label per determination.
+        :raises TypeError: if ``check_frequency_hz`` is not a single number, or
+            ``frequencies`` or ``reference_correction`` holds a text or a value that is
+            not a real number.
         """
         if self.source not in _SOURCES:
             msg = (
@@ -1163,6 +1174,8 @@ def sound_calibrator_correction(
         is not the number of frequencies, readings with different numbers of
         determinations, or microphones that are not one label per
         determination.
+    :raises TypeError: if ``frequencies`` or ``reference_free_field_correction`` holds a
+        text or a value that is not a real number.
     """
     return _substitution(
         frequencies,
@@ -1237,6 +1250,8 @@ def comparison_coupler_correction(
         row (Default: None, every determination a microphone of its own).
     :return: The :class:`FreeFieldCorrection`.
     :raises ValueError: as :func:`sound_calibrator_correction`.
+    :raises TypeError: if ``frequencies`` or ``reference_free_field_correction`` holds a
+        text or a value that is not a real number.
     """
     return _substitution(
         frequencies,
@@ -1317,6 +1332,10 @@ def electrostatic_actuator_correction(
     :return: The :class:`FreeFieldCorrection`, zero at :math:`f_0`.
     :raises ValueError: as :func:`sound_calibrator_correction`, or for an
         :math:`f_0` that is not among the frequencies.
+    :raises TypeError: if ``check_frequency_hz`` is not a single number, or
+        ``frequencies``, ``reference_channel_gain_db`` or
+        ``reference_sensitivity_level`` holds a text or a value that is not a real
+        number.
     """
     frequencies = _frequency_axis(frequencies)
     count = frequencies.size
@@ -1386,7 +1405,7 @@ class CorrectionUncertaintyBudget(OwnsArrays):
     :ivar descriptors: ``"a1"`` to ``"a15"``, then ``"static pressure"`` when
         clause 6 adds it, then the names of any further components.
     :ivar symbols: the symbol or name of each component.
-    :ivar values_db: the value each component is stated as, in dB: a
+    :ivar stated_uncertainties_db: the value each component is stated as, in dB: a
         half-width, an expanded uncertainty or a standard uncertainty, as its
         divisor says.
     :ivar divisors: the divisor of each component.
@@ -1401,7 +1420,7 @@ class CorrectionUncertaintyBudget(OwnsArrays):
     frequency_hz: float
     descriptors: tuple[str, ...]
     symbols: tuple[str, ...]
-    values_db: NDArray[np.float64]
+    stated_uncertainties_db: NDArray[np.float64]
     divisors: NDArray[np.float64]
     dofs: NDArray[np.float64]
     uncertainty: UncertaintyResult
@@ -1415,6 +1434,7 @@ class CorrectionUncertaintyBudget(OwnsArrays):
             are not positive, the coverage is not a probability, or
             :attr:`uncertainty` is not the combination of the components the
             columns state.
+        :raises TypeError: if ``coverage`` or ``frequency_hz`` is not a single number.
         """
         require_scalar(self.coverage, "coverage")
         require_positive(self.frequency_hz, "frequency_hz")
@@ -1422,7 +1442,7 @@ class CorrectionUncertaintyBudget(OwnsArrays):
         if len(self.symbols) != count:
             msg = "CorrectionUncertaintyBudget: 'symbols' must hold one per component."
             raise ValueError(msg)
-        for name in ("values_db", "divisors", "dofs"):
+        for name in ("stated_uncertainties_db", "divisors", "dofs"):
             column = np.array(getattr(self, name), dtype=np.float64, ndmin=1, copy=None)
             if column.shape != (count,):
                 msg = (
@@ -1431,8 +1451,10 @@ class CorrectionUncertaintyBudget(OwnsArrays):
                 )
                 raise ValueError(msg)
             object.__setattr__(self, name, read_only(column))
-        if np.any(np.isnan(self.values_db)) or np.any(self.values_db < 0.0):
-            msg = "CorrectionUncertaintyBudget: 'values_db' must be non-negative."
+        if np.any(np.isnan(self.stated_uncertainties_db)) or np.any(
+            self.stated_uncertainties_db < 0.0
+        ):
+            msg = "CorrectionUncertaintyBudget: 'stated_uncertainties_db' must be non-negative."
             raise ValueError(msg)
         if not np.all(np.isfinite(self.divisors)) or np.any(self.divisors <= 0.0):
             msg = "CorrectionUncertaintyBudget: 'divisors' must be positive."
@@ -1457,7 +1479,7 @@ class CorrectionUncertaintyBudget(OwnsArrays):
             of freedom or the component names differ from what the columns
             give.
         """
-        standard = self.values_db / self.divisors
+        standard = self.stated_uncertainties_db / self.divisors
         combined = math.sqrt(float(np.sum(standard**2)))
         names = tuple(self.uncertainty.names)
         consistent = (not names or names == self.descriptors) and math.isclose(
@@ -1480,7 +1502,7 @@ class CorrectionUncertaintyBudget(OwnsArrays):
         if not consistent:
             msg = (
                 "CorrectionUncertaintyBudget: 'uncertainty' must be the combination "
-                "of the components 'values_db', 'divisors' and 'dofs' state; build "
+                "of the components 'stated_uncertainties_db', 'divisors' and 'dofs' state; build "
                 "the budget with correction_uncertainty_budget()."
             )
             raise ValueError(msg)
@@ -1488,7 +1510,7 @@ class CorrectionUncertaintyBudget(OwnsArrays):
     @property
     def standard_uncertainties_db(self) -> NDArray[np.float64]:
         r""":math:`u_i`, each value over its divisor, in dB."""
-        return self.values_db / self.divisors
+        return self.stated_uncertainties_db / self.divisors
 
     @property
     def correction(self) -> float:
@@ -1587,7 +1609,7 @@ def _repeatability_dof(value: float) -> float:
 
 
 def correction_uncertainty_budget(
-    values_db: Mapping[str, float],
+    stated_uncertainties_db: Mapping[str, float],
     *,
     repeatability_dof: float,
     frequency_hz: float,
@@ -1623,7 +1645,7 @@ def correction_uncertainty_budget(
     calibrator in place of those in the coupler; one of an actuator (Annex F)
     adds its own, which ``additional_components`` carries.
 
-    :param values_db: The value of each of the 15 components, in dB, keyed by
+    :param stated_uncertainties_db: The value of each of the 15 components, in dB, keyed by
         the descriptor of Table I.1, ``"a1"`` to ``"a15"``. A component taken
         as negligible is given as 0, as Table I.2 gives a6 and a13.
     :param repeatability_dof: The degrees of freedom of the repeatability
@@ -1645,14 +1667,16 @@ def correction_uncertainty_budget(
     :raises ValueError: for a set of components that is not the 15 of Table
         I.1, a value that is negative or not finite, degrees of freedom that
         are not positive, or a static pressure outside clause 6.
+    :raises TypeError: if ``correction``, ``frequency_hz``, ``repeatability_dof`` or
+        ``static_pressure_kpa`` is not a single number.
     """
     expected = tuple(IEC62585_TABLE_I1)
-    given = tuple(values_db)
-    missing = [key for key in expected if key not in values_db]
+    given = tuple(stated_uncertainties_db)
+    missing = [key for key in expected if key not in stated_uncertainties_db]
     extra = [key for key in given if key not in IEC62585_TABLE_I1]
     if missing or extra:
         msg = (
-            "'values_db' must hold the 15 components of IEC 62585 Table I.1, keyed "
+            "'stated_uncertainties_db' must hold the 15 components of IEC 62585 Table I.1, keyed "
             f"'a1' to 'a15'; missing {missing}, unknown {extra}."
         )
         raise ValueError(msg)
@@ -1665,11 +1689,9 @@ def correction_uncertainty_budget(
     divisors: list[float] = []
     signs: list[float] = []
     for key, row in IEC62585_TABLE_I1.items():
-        value = float(values_db[key])
+        value = float(stated_uncertainties_db[key])
         if not (math.isfinite(value) and value >= 0.0):
-            msg = (
-                f"'values_db[{key!r}]' must be finite and non-negative; got {value!r}."
-            )
+            msg = f"'stated_uncertainties_db[{key!r}]' must be finite and non-negative; got {value!r}."
             raise ValueError(msg)
         distribution = (
             "rectangular" if row.distribution == "rectangular" else "gaussian"
@@ -1730,7 +1752,7 @@ def correction_uncertainty_budget(
         frequency_hz=frequency,
         descriptors=tuple(descriptors),
         symbols=tuple(symbols),
-        values_db=np.asarray(values),
+        stated_uncertainties_db=np.asarray(values),
         divisors=np.asarray(divisors),
         dofs=np.array([quantity.dof for quantity in quantities]),
         uncertainty=result,
@@ -1822,6 +1844,8 @@ def max_expanded_uncertainty(
     :return: The maximum at each frequency, in dB, read-only.
     :raises ValueError: for another clause, a frequency that is not positive
         and finite, or, for clause 10, a frequency below 63 Hz.
+    :raises TypeError: if ``clause`` is a flag, a text or an array where a count goes,
+        or ``frequencies`` holds a text or a value that is not a real number.
     """
     number = _clause(clause)
     frequencies = require_positive_array(frequencies, "frequencies")
@@ -1880,6 +1904,8 @@ class CorrectionUncertaintyVerification(OwnsArrays):
             one value per frequency, a value that is not finite, a negative
             uncertainty or range, a range for a clause other than 12 to 14, or
             a frequency below 63 Hz for clause 10.
+        :raises TypeError: if ``clause`` is a flag, a text or an array where a count
+            goes, or ``frequencies`` holds a text or a value that is not a real number.
         """
         _clause(self.clause)
         frequencies = _frequency_axis(self.frequencies)
@@ -2092,6 +2118,10 @@ def verify_correction_uncertainty(
     :raises ValueError: for an unknown clause, columns that do not hold one
         value per frequency, a negative uncertainty or range, a range for
         clauses 9 to 11, or a frequency below 63 Hz for clause 10.
+    :raises TypeError: if ``clause`` is a flag, a text or an array where a count goes,
+        or ``correction``, ``correction_range_db``, ``coverage_factor``,
+        ``expanded_uncertainty_db`` or ``frequencies`` holds a text or a value that is
+        not a real number.
     """
     number = _clause(clause)
     frequencies = _frequency_axis(frequencies)

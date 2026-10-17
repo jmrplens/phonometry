@@ -99,6 +99,12 @@ $\ln(1 - \alpha_i)$, so each must be below 1.
 
 **Returns:** The reverberation time `T`, s.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `speed_of_sound` is not a single number. |
+
 ## eyring_reverberation_time
 
 ```python
@@ -137,6 +143,12 @@ coefficient stays within the shared unit-error ceiling of 2.
 
 **Returns:** The reverberation time `T`, s.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `speed_of_sound` or `volume` is not a single number. |
+
 ## fitzroy_reverberation_time
 
 ```python
@@ -170,6 +182,12 @@ must be below 1.
 | `speed_of_sound` | Speed of sound `c0`, m/s. |
 
 **Returns:** The reverberation time `T`, s.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `speed_of_sound` is not a single number. |
 
 ## mean_absorption
 
@@ -227,6 +245,12 @@ this model's domain (use Sabine, or Eyring while the mean stays below 1).
 | `speed_of_sound` | Speed of sound `c0`, m/s. |
 
 **Returns:** The reverberation time `T`, s.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `speed_of_sound` or `volume` is not a single number. |
 
 ## reverberation_time_models
 
@@ -398,3 +422,9 @@ error (a percentage passed instead of a fraction).
 | `speed_of_sound` | Speed of sound `c0`, m/s (default 343 m/s, dry air at 20 °C, giving the factor `0.161`). |
 
 **Returns:** The reverberation time `T`, s; a float for scalar inputs, otherwise a per-band array.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `speed_of_sound` or `volume` is not a single number. |

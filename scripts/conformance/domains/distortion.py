@@ -410,7 +410,8 @@ def _chk_coherence_unity() -> Outcome:
     x = rng.standard_normal(200000)
     b, a = sg.butter(1, 2000.0 / (fs / 2.0), btype="low")
     y = sg.lfilter(b, a, x)
-    f, g = ph.electroacoustics.coherence(x, y, fs)
+    coh = ph.electroacoustics.coherence(x, y, fs)
+    f, g = coh.frequencies, coh.coherence
     band = (f > 100.0) & (f < 5000.0)
     return numeric(1.0, float(np.mean(g[band])), 1e-3, places=6)
 

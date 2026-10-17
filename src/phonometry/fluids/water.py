@@ -97,6 +97,7 @@ def depth_to_gauge_pressure_mpa(*, depth_m: float, latitude_deg: float = 45.0) -
     :param latitude_deg: Latitude :math:`\varphi`, in degrees (default 45).
     :return: Gauge pressure, in megapascals.
     :raises ValueError: If the depth is negative or non-finite.
+    :raises TypeError: if ``depth_m`` or ``latitude_deg`` is not a single number.
     """
     z = _finite(depth_m, "depth_m")
     if z < 0.0:
@@ -289,6 +290,9 @@ def sea_water_sound_speed(
         (used by ``"unesco"`` and ``"del_grosso"``; default 45°).
     :return: The sound speed ``c``, in m/s.
     :raises ValueError: If ``model`` is unknown or an input is non-finite.
+    :raises TypeError: if ``latitude_deg`` is not a single number, or ``depth_m``,
+        ``salinity_psu`` or ``temperature_c`` holds a text or a value that is not a real
+        number.
 
     .. note::
         Each equation is a fit over a bounded oceanographic domain and
@@ -390,6 +394,7 @@ def depth_to_absolute_pressure_pa(
     :param latitude_deg: Latitude :math:`\varphi`, in degrees (default 45).
     :return: Absolute static pressure, in pascals.
     :raises ValueError: If the depth is negative or non-finite.
+    :raises TypeError: if ``depth_m`` or ``latitude_deg`` is not a single number.
     """
     z = _finite(depth_m, "depth_m")
     if z < 0.0:
@@ -429,6 +434,8 @@ def sea_water_density(
     :return: Density ``rho``, in kg/m3.
     :raises ValueError: For a temperature at or below absolute zero, a negative
         salinity, or a non-positive pressure.
+    :raises TypeError: if ``salinity_psu``, ``static_pressure_pa`` or ``temperature_c``
+        is not a single number.
     """
     t = require_above_absolute_zero(
         _finite(temperature_c, "temperature_c"), "temperature_c"

@@ -59,6 +59,7 @@ if TYPE_CHECKING:
 __all__ = [
     "FrequencyResponseResult",
     "coherence",
+    "CoherenceResult",
     "transfer_function",
 ]
 
@@ -263,6 +264,7 @@ def transfer_function(
     :param overlap: Segment overlap fraction (default 0.5).
     :return: A :class:`FrequencyResponseResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``nperseg`` is a flag, a text or an array where a count goes.
     """
     fs = resolve_pair_fs(x, y, fs)
     xa, ya = _validate_pair(x, y, "transfer_function")
@@ -303,6 +305,38 @@ def transfer_function(
     )
 
 
+@dataclass(frozen=True)
+class CoherenceResult(OwnsArrays):
+    r"""The ordinary coherence of two records, frequency by frequency.
+
+    What :func:`coherence` returns: the frequency axis and the coherence,
+    named, where a ``(frequencies, gamma_squared)`` tuple used to be unpacked
+    by position.
+
+    :ivar frequencies: The Welch frequency bins, in Hz.
+    :ivar coherence: :math:`\gamma^2(f) \in [0, 1]` at each bin.
+    """
+
+    frequencies: NDArray[np.float64]
+    coherence: NDArray[np.float64]
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Plot the coherence against frequency, on 0 to 1.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the coherence curve.
+        :return: The axes.
+        """
+        from .._i18n import check_language
+        from .._plot.electroacoustics import plot_coherence
+
+        check_language(language)
+        return plot_coherence(self, ax=ax, language=language, **kwargs)
+
+
 def coherence(
     x: Signal | NDArray[np.float64] | list[float],
     y: Signal | NDArray[np.float64] | list[float],
@@ -310,7 +344,7 @@ def coherence(
     *,
     nperseg: int | None = None,
     overlap: float = _DEFAULT_OVERLAP,
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+) -> CoherenceResult:
     r"""Ordinary coherence :math:`\gamma^2(f)` between ``x`` and ``y``
     (Bendat & Piersol).
 
@@ -332,8 +366,10 @@ def coherence(
         arbitrated.
     :param nperseg: Welch segment length; ``None`` picks a default.
     :param overlap: Segment overlap fraction (default 0.5).
-    :return: ``(frequencies, gamma_squared)``.
+    :return: The bins and the coherence at each, as a
+        :class:`CoherenceResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``nperseg`` is a flag, a text or an array where a count goes.
     """
     fs = resolve_pair_fs(x, y, fs)
     xa, ya = _validate_pair(x, y, "coherence")
@@ -342,4 +378,4 @@ def coherence(
     freqs, gxy, gxx, gyy = _spectra(xa, ya, fs_v, seg, ovl)
     denom = gxx * gyy
     coh = np.divide(np.abs(gxy) ** 2, denom, out=np.zeros_like(gxx), where=denom > 0.0)
-    return freqs, np.clip(coh, 0.0, 1.0)
+    return CoherenceResult(frequencies=freqs, coherence=np.clip(coh, 0.0, 1.0))

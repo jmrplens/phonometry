@@ -100,6 +100,8 @@ def plot_image_source_geometry(
     :param kwargs: Forwarded to the room-outline rectangle.
     :return: The axes.
     :raises ValueError: for a negative ``max_order``.
+    :raises TypeError: if ``max_order`` is a flag, a text or an array where a count
+        goes.
     """
     from matplotlib.patches import Rectangle
 
@@ -227,6 +229,8 @@ def plot_open_plan_geometry(
     :raises ValueError: for an input that is not one-dimensional, for fewer
         than two positions, or for a position that is not a finite, strictly
         positive distance.
+    :raises TypeError: if ``positions`` holds a text or a value that is not a real
+        number.
     """
     _check_language(language)
     # Through the shared array guard rather than a bare ``pos <= 0.0``: every
@@ -320,13 +324,7 @@ def plot_open_plan_result_geometry(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    """Measurement-line drawing for a result that retained its positions."""
-    if result.positions_m is None:
-        msg = (
-            "This result does not retain its microphone positions; call "
-            "plot_open_plan_geometry(positions)."
-        )
-        raise ValueError(msg)
+    """Measurement-line drawing of the positions a result was fitted on."""
     return plot_open_plan_geometry(
         result.positions_m,
         ax=ax,

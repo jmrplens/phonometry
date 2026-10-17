@@ -86,7 +86,7 @@ class WindowMetricsResult(OwnsArrays):
         processing loss :math:`10 \log_{10}(\mathrm{ENBW})`, in dB: the
         worst-case reduction
         in output signal-to-noise ratio for a tone in white noise.
-    :ivar highest_sidelobe_db: Level of the highest sidelobe relative to
+    :ivar highest_sidelobe_level: Level of the highest sidelobe relative to
         the main lobe, in dB (negative; -13.3 rectangular, -31.5 Hann).
     :ivar mainlobe_width_3db_bins: Two-sided -3 dB width of the main
         lobe, in bins.
@@ -99,7 +99,7 @@ class WindowMetricsResult(OwnsArrays):
     enbw_bins: float
     scalloping_loss: float
     worst_case_processing_loss: float
-    highest_sidelobe_db: float
+    highest_sidelobe_level: float
     mainlobe_width_3db_bins: float
 
     def __post_init__(self) -> None:
@@ -117,6 +117,7 @@ class WindowMetricsResult(OwnsArrays):
 
         :raises ValueError: if the taps span a different number of samples
             than the declared length.
+        :raises TypeError: if ``taps`` is a single number where an array goes.
         """
         require_ranks(self, taps=1)
         owner = type(self).__name__
@@ -265,6 +266,6 @@ def window_metrics(
         enbw_bins=enbw,
         scalloping_loss=scalloping,
         worst_case_processing_loss=scalloping + 10.0 * np.log10(enbw),
-        highest_sidelobe_db=highest_sidelobe,
+        highest_sidelobe_level=highest_sidelobe,
         mainlobe_width_3db_bins=_width_3db_bins(level, _WINDOW_OVERSAMPLE),
     )

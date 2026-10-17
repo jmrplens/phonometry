@@ -67,7 +67,7 @@ def test_all_type_b_gives_infinite_dof() -> None:
     qs = [u.rectangular(0.0, 1.0), u.triangular(0.0, 1.0)]
     result = u.uncertainty_propagation(lambda a, b: a + b, qs)
     assert math.isinf(result.effective_dof)
-    _, big = result.expanded(0.95)
+    big = result.expanded(0.95).expanded_uncertainty
     assert big == pytest.approx(1.960 * result.combined_uncertainty, rel=1e-3)
 
 
@@ -131,7 +131,8 @@ def test_zero_uncertainty_input() -> None:
 def test_expanded_uncertainty_of_a_result() -> None:
     qs = [u.Quantity(0.0, 1.0) for _ in range(4)]
     result = u.uncertainty_propagation(_add4, qs)
-    k, big = result.expanded(0.95)
+    expanded = result.expanded(0.95)
+    k, big = expanded.coverage_factor, expanded.expanded_uncertainty
     assert k == pytest.approx(1.960, abs=1e-3)
     assert big == pytest.approx(k * 2.0, abs=1e-6)
 
@@ -244,7 +245,8 @@ def test_correlated_budget_requires_explicit_coverage_factor() -> None:
         ),
     ):
         result.expanded(0.95)
-    k, big = result.expanded(coverage_factor_override=2.0)
+    expanded = result.expanded(coverage_factor_override=2.0)
+    k, big = expanded.coverage_factor, expanded.expanded_uncertainty
     assert k == 2.0
     assert big < 0.02
 
@@ -257,7 +259,7 @@ def test_correlated_budget_with_infinite_dof_stays_normal() -> None:
     r = np.array([[1.0, 0.5], [0.5, 1.0]])
     result = u.uncertainty_propagation(lambda a, b: a + b, qs, correlation=r)
     assert math.isinf(result.effective_dof)
-    k, _ = result.expanded(0.95)
+    k = result.expanded(0.95).coverage_factor
     assert k == pytest.approx(1.960, abs=1e-3)
 
 
@@ -362,7 +364,8 @@ def test_gum_h1_expanded_uncertainty_99() -> None:
     from reference_data import GUM_H1_U99
 
     result = _h1_budget()
-    _k, big = result.expanded(0.99)
+    expanded = result.expanded(0.99)
+    _k, big = expanded.coverage_factor, expanded.expanded_uncertainty
     assert big == pytest.approx(GUM_H1_U99, abs=0.1)
     # The printed route: truncate veff to 16 and use Table G.2's k = 2.92.
     k16 = u.coverage_factor(0.99, 16.0)
@@ -508,7 +511,8 @@ def test_undefined_effective_dof_is_not_a_non_finite_number() -> None:
             _add2, pair, correlation=np.array([[1.0, 0.5], [0.5, 1.0]])
         )
     assert math.isnan(correlated.effective_dof)
-    k, big = correlated.expanded(coverage_factor_override=2.0)
+    expanded = correlated.expanded(coverage_factor_override=2.0)
+    k, big = expanded.coverage_factor, expanded.expanded_uncertainty
     assert (k, big) == (2.0, 2.0 * correlated.combined_uncertainty)
 
 

@@ -319,6 +319,7 @@ def long_term_sel(
     :raises ValueError: if the shapes differ, a probability is negative, the
         probabilities do not sum to one, every probability is zero, or a value
         is not finite.
+    :raises TypeError: if ``rating_adjustment`` is not a single number.
     """
     levels, probs = _levels_and_probabilities(levels, probabilities)
     k_db = require_finite(rating_adjustment, "rating_adjustment")
@@ -343,6 +344,7 @@ def turbulence_level_shift(sigma_db: float) -> float:
         spread, in dB.
     :return: :math:`\Delta\mu`, in dB.
     :raises ValueError: for a non-positive or non-finite ``sigma_db``.
+    :raises TypeError: if ``sigma_db`` is not a single number.
     """
     sigma = require_positive(sigma_db, "sigma_db")
     return sigma * sigma * math.log(10.0) / 20.0
@@ -420,7 +422,7 @@ class SELDistribution(OwnsArrays):
         (13)).
     :ivar class_densities_per_db: :math:`\rho_m`, the constant density of each
         class, in 1/dB (Equation (15)).
-    :ivar subclass_centers_db: :math:`\mu_{m,j}`, shape ``(M, subclasses)``, in
+    :ivar subclass_center_levels: :math:`\mu_{m,j}`, shape ``(M, subclasses)``, in
         dB (Equation (18)).
     :ivar sigma_db: :math:`\sigma` of the turbulent spread, in dB.
     :ivar level_shift: :math:`\Delta\mu`, in dB (Equation (22)).
@@ -441,7 +443,7 @@ class SELDistribution(OwnsArrays):
     lower_bounds_db: NDArray[np.float64]
     upper_bounds_db: NDArray[np.float64]
     class_densities_per_db: NDArray[np.float64]
-    subclass_centers_db: NDArray[np.float64]
+    subclass_center_levels: NDArray[np.float64]
     sigma_db: float
     level_shift: float
     n_subclasses: int
@@ -459,6 +461,7 @@ class SELDistribution(OwnsArrays):
 
         :raises ValueError: if the columns disagree, a class has no width, or a
             value is not finite.
+        :raises TypeError: if ``sigma_db`` is not a single number.
         """
         per_class = (
             "levels",
@@ -475,17 +478,17 @@ class SELDistribution(OwnsArrays):
                 f"the same length, at least two classes; got {sizes}."
             )
             raise ValueError(msg)
-        if np.shape(self.subclass_centers_db) != (count, self.n_subclasses):
+        if np.shape(self.subclass_center_levels) != (count, self.n_subclasses):
             msg = (
-                "SELDistribution: 'subclass_centers_db' must have one row of "
+                "SELDistribution: 'subclass_center_levels' must have one row of "
                 f"'n_subclasses' ({self.n_subclasses}) centres per class; got "
-                f"{np.shape(self.subclass_centers_db)}."
+                f"{np.shape(self.subclass_center_levels)}."
             )
             raise ValueError(msg)
         if len(self.replicas) != count:
             msg = "SELDistribution: 'replicas' must name the replicas of every class."
             raise ValueError(msg)
-        for name in (*per_class, "subclass_centers_db"):
+        for name in (*per_class, "subclass_center_levels"):
             if not np.all(np.isfinite(getattr(self, name))):
                 msg = f"SELDistribution: '{name}' must contain only finite values."
                 raise ValueError(msg)
@@ -494,7 +497,7 @@ class SELDistribution(OwnsArrays):
             raise ValueError(msg)
         require_positive(self.sigma_db, "sigma_db")
 
-    def class_density(self, x_db: ArrayLike) -> float | NDArray[np.float64]:
+    def class_density(self, levels: ArrayLike) -> float | NDArray[np.float64]:
         r"""The class density :math:`\rho(x)` before the turbulent spread
         (Equations (15), (16)), in 1/dB.
 
@@ -502,10 +505,10 @@ class SELDistribution(OwnsArrays):
         classes; at a boundary itself, where Equation (15) defines neither
         neighbour, it is zero.
 
-        :param x_db: Level or levels ``x``, in dB.
+        :param levels: Level or levels ``x``, in dB.
         :return: :math:`\rho(x)`, a float for a scalar ``x``.
         """
-        x = np.asarray(x_db, dtype=np.float64)
+        x = np.asarray(levels, dtype=np.float64)
         inside = (x[..., None] > self.lower_bounds_db) & (
             x[..., None] < self.upper_bounds_db
         )
@@ -518,25 +521,25 @@ class SELDistribution(OwnsArrays):
         The weight of subclass ``{m, j}`` is :math:`b_m\rho_m = \wp_m/N_\mathrm{sub}`
         (Equation (21)) and its mean :math:`\mu_{m,j} - \Delta\mu`.
         """
-        means = (self.subclass_centers_db - self.level_shift).ravel()
+        means = (self.subclass_center_levels - self.level_shift).ravel()
         weights = np.repeat(self.probabilities / self.n_subclasses, self.n_subclasses)
         return means, weights
 
-    def density(self, x_db: ArrayLike) -> float | NDArray[np.float64]:
+    def density(self, levels: ArrayLike) -> float | NDArray[np.float64]:
         r"""The continuous density :math:`\rho^{*}(x)` (Equations (21), (23)), in 1/dB.
 
-        :param x_db: Level or levels ``x``, in dB.
+        :param levels: Level or levels ``x``, in dB.
         :return: :math:`\rho^{*}(x)`, a float for a scalar ``x``.
         """
         means, weights = self._spread()
-        x = np.asarray(x_db, dtype=np.float64)
+        x = np.asarray(levels, dtype=np.float64)
         z = (x[..., None] - means) / self.sigma_db
         value = np.sum(weights * np.exp(-0.5 * z * z), axis=-1) / (
             self.sigma_db * math.sqrt(2.0 * math.pi)
         )
         return float(value) if value.ndim == 0 else value
 
-    def exceedance(self, x_db: ArrayLike) -> float | NDArray[np.float64]:
+    def exceedance(self, levels: ArrayLike) -> float | NDArray[np.float64]:
         r"""Probability that the level exceeds ``x`` (Equation (24)).
 
         .. math::
@@ -548,13 +551,13 @@ class SELDistribution(OwnsArrays):
         tends to the sum of the probabilities of the classes, one, as ``x``
         falls.
 
-        :param x_db: Level or levels ``x``, in dB.
+        :param levels: Level or levels ``x``, in dB.
         :return: The probability, a float for a scalar ``x``.
         """
         from scipy.special import ndtr
 
         means, weights = self._spread()
-        x = np.asarray(x_db, dtype=np.float64)
+        x = np.asarray(levels, dtype=np.float64)
         value = np.sum(weights * ndtr((means - x[..., None]) / self.sigma_db), axis=-1)
         return float(value) if value.ndim == 0 else value
 
@@ -686,6 +689,8 @@ def sel_distribution(
         probability is zero, fewer than two distinct levels remain once equal
         levels are combined, ``sigma_db`` is not positive, or ``n_subclasses``
         is not a whole number of at least one.
+    :raises TypeError: if ``sigma_db`` is not a single number, or ``n_subclasses`` is a
+        flag, a text or an array where a count goes.
     """
     levels, probs = _levels_and_probabilities(levels, probabilities)
     sigma = require_positive(sigma_db, "sigma_db")
@@ -725,7 +730,7 @@ def sel_distribution(
         lower_bounds_db=read_only(lower),
         upper_bounds_db=read_only(upper),
         class_densities_per_db=read_only(densities),
-        subclass_centers_db=read_only(centres),
+        subclass_center_levels=read_only(centres),
         sigma_db=sigma,
         level_shift=shift,
         n_subclasses=n_sub,

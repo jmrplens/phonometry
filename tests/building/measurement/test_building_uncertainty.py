@@ -560,7 +560,11 @@ def test_a_conformity_record_carries_its_margin() -> None:
     # Yrequired - (y + U) = 53 - (52,5 + 1) = -0,5 dB.
     lower = assess_requirement_conformity(54.0, 1.5, 52.0, bound="minimum")
     upper = assess_requirement_conformity(52.5, 1.0, 53.0, bound="maximum")
-    assert (lower.value_db, lower.expanded_uncertainty_db, lower.requirement_db) == (
+    assert (
+        lower.rating,
+        lower.expanded_uncertainty_db,
+        lower.required_rating,
+    ) == (
         54.0,
         1.5,
         52.0,
@@ -588,9 +592,9 @@ def test_a_conformity_refuses_a_negative_uncertainty() -> None:
 @pytest.mark.parametrize(
     ("values", "name"),
     [
-        ((math.nan, 1.5, 50.0), "value_db"),
+        ((math.nan, 1.5, 50.0), "rating"),
         ((52.0, math.inf, 50.0), "expanded_uncertainty_db"),
-        ((52.0, 1.5, -math.inf), "requirement_db"),
+        ((52.0, 1.5, -math.inf), "required_rating"),
     ],
 )
 def test_a_conformity_refuses_a_number_that_is_not_finite(
@@ -629,7 +633,8 @@ def test_unknown_situation_single_number() -> None:
 
 def test_band_uncertainty_to_arrays_roundtrip() -> None:
     result = band_uncertainty("airborne", "A")
-    freqs, u = result.to_arrays()
+    freqs = np.asarray(result.frequencies, dtype=float)
+    u = np.asarray(result.uncertainties, dtype=float)
     assert isinstance(freqs, np.ndarray)
     assert isinstance(u, np.ndarray)
     assert freqs.shape == u.shape == (21,)

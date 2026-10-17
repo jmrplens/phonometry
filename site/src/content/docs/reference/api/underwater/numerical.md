@@ -264,6 +264,7 @@ it to keep everything the fan bracketed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `receiver_depth` or `receiver_range` is not a single number, or `max_n_arrivals` or `n_steps` is a flag, a text or an array where a count goes. |
 
 ## FluidSeabed
 
@@ -549,6 +550,7 @@ direct way to trade resolution for time.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `frequency_hz`, `max_range`, `range_step` or `source_depth` is not a single number, or `n_depth_points` is a flag, a text or an array where a count goes. |
 
 **Warns**
 
@@ -678,6 +680,7 @@ to resolve it).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `density`, `frequency_hz`, `receiver_depth` or `source_depth` is not a single number, or `n_depth_points` is a flag, a text or an array where a count goes. |
 
 ## NormalModeResult
 
@@ -784,6 +787,7 @@ calibration itself is exact to ~1e-4 dB at the default `range_step`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `frequency_hz`, `max_range`, `range_step` or `source_depth` is not a single number, or `n_depth_points` is a flag, a text or an array where a count goes. |
 
 ## ParabolicEquationResult
 
@@ -911,6 +915,7 @@ per ray, are the entire per-bounce record a downstream amplitude needs.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `max_range` or `source_depth` is not a single number, or `n_steps` is a flag, a text or an array where a count goes. |
 
 ## RayTraceResult
 

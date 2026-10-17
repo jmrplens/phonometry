@@ -108,6 +108,7 @@ refers it to the actual receiver).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive characteristic mobility. |
+| TypeError | if `characteristic_mobility` is not a single number. |
 
 ## equivalent_blocked_force_level
 
@@ -270,6 +271,7 @@ quantities.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if neither `loss_factor` nor `reverberation_time` is given, or if `velocity_level` or `loss_factor` is neither a scalar nor one value per band. |
+| TypeError | if `loss_factor` or `velocity_level` holds a text or a value that is not a real number. |
 
 ## source_mobility_from_levels
 
@@ -327,6 +329,7 @@ per-position velocity levels.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an empty, multi-dimensional or non-finite input. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## structure_borne_power_level
 
@@ -382,6 +385,7 @@ the EN 12354-5 Annex I mobility correction
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive mass, area or reference, a frequency or loss factor that is not positive and finite, a non-finite velocity level, or per-band inputs whose shapes do not broadcast together. |
+| TypeError | if `area`, `mass_per_area` or `reference_velocity` is not a single number. |
 
 ## StructureBornePowerResult
 

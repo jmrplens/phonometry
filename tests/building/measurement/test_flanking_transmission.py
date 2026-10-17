@@ -388,8 +388,10 @@ def test_strong_coupling_threshold_of_unlike_elements() -> None:
     under 0 dB. One band on either side of it: the verdict needs every band.
     """
     check = building.check_strong_coupling([0.0, -0.1], 10.0, 20.0, 100.0, 400.0)
-    assert check.threshold_db == pytest.approx(3.0 - 10.0 * np.log10(2.0), abs=1e-12)
-    assert check.threshold_db == pytest.approx(-0.0103, abs=5e-5)
+    assert check.min_velocity_level_difference == pytest.approx(
+        3.0 - 10.0 * np.log10(2.0), abs=1e-12
+    )
+    assert check.min_velocity_level_difference == pytest.approx(-0.0103, abs=5e-5)
     assert list(check.holds) == [True, False]
     assert check.passes is False
 
@@ -404,7 +406,9 @@ def test_strong_coupling_threshold_depends_on_the_direction() -> None:
     """Dv,ij is one way: swapping i and j turns the ratio 2 into 1/2."""
     forward = building.check_strong_coupling([3.0], 10.0, 20.0, 100.0, 400.0)
     backward = building.check_strong_coupling([3.0], 20.0, 10.0, 400.0, 100.0)
-    assert backward.threshold_db == pytest.approx(3.0 + 10.0 * np.log10(2.0), abs=1e-12)
+    assert backward.min_velocity_level_difference == pytest.approx(
+        3.0 + 10.0 * np.log10(2.0), abs=1e-12
+    )
     assert forward.passes is True
     assert backward.passes is False
 

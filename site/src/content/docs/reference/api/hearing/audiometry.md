@@ -158,6 +158,7 @@ conservative reading.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown presentation, lowest test frequency, earphone or threshold shift, or an earphone with bone conduction or sound field. |
+| TypeError | if `allowed_threshold_shift_db`, `lowest_hearing_level` or `lowest_test_frequency_hz` is not a single number. |
 
 ## AmbientNoiseCheck
 
@@ -168,7 +169,7 @@ AmbientNoiseCheck(
     levels: np.ndarray,
     lowest_test_frequency_hz: float,
     lowest_hearing_level: float,
-    noise_floor_db: np.ndarray | None = None,
+    noise_floor_levels: np.ndarray | None = None,
     earphone: str | None = None,
     earphone_attenuation: np.ndarray | None = None,
     allowed_threshold_shift_db: float = 2.0,
@@ -192,7 +193,7 @@ choices, so a check cannot be built against another table.
 | `levels` | The measured ambient sound pressure level per band, in dB. |
 | `lowest_test_frequency_hz` | The lowest test tone frequency, in hertz. |
 | `lowest_hearing_level` | The lowest hearing threshold level to be measured the limits were raised for, in dB. |
-| `noise_floor_db` | The measuring chain's noise floor per band, in dB, or `None` when not given. |
+| `noise_floor_levels` | The measuring chain's noise floor per band, in dB, or `None` when not given. |
 | `earphone` | For air conduction, the earphone the limits were written for: a column of Table 3, or `"own attenuation"` for an attenuation given band by band; `None` for bone conduction and sound field. |
 | `earphone_attenuation` | The earphone's own attenuation per band of [`AMBIENT_NOISE_BANDS_HZ`](/phonometry/reference/api/hearing/audiometry/#ambient_noise_bands_hz), in dB, when `earphone` is `"own attenuation"`; `None` otherwise. |
 | `allowed_threshold_shift_db` | The threshold shift accepted from the ambient noise, 2 (default) or 5, in dB. |
@@ -448,7 +449,7 @@ The spread of the ascents' response levels, in dB.
 
 **Returns:** The largest less the smallest, 0 for fewer than two ascents.
 
-### AscendingThresholdResult.threshold_db
+### AscendingThresholdResult.threshold_level
 
 *property*
 
@@ -463,8 +464,8 @@ ascents, once the stopping rule of 6.2.3.2 is met; NaN until then.
 audiogram_cautions(
     frequencies: ArrayLike,
     *,
-    air_conduction_db: ArrayLike | None = None,
-    bone_conduction_db: ArrayLike | None = None,
+    air_conduction_threshold_levels: ArrayLike | None = None,
+    bone_conduction_threshold_levels: ArrayLike | None = None,
     vibrator_placement: str = 'mastoid',
 ) -> AudiogramCautions
 ```
@@ -495,8 +496,8 @@ levels are averages about which individuals vary widely.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The test frequencies, in hertz. |
-| `air_conduction_db` | The air-conduction hearing threshold levels, in dB, one per frequency. |
-| `bone_conduction_db` | The bone-conduction hearing threshold levels, in dB, one per frequency. |
+| `air_conduction_threshold_levels` | The air-conduction hearing threshold levels, in dB, one per frequency. |
+| `bone_conduction_threshold_levels` | The bone-conduction hearing threshold levels, in dB, one per frequency. |
 | `vibrator_placement` | `"mastoid"` (default) or `"forehead"`, the placement the bone conduction is calibrated for. |
 
 **Returns:** [`AudiogramCautions`](/phonometry/reference/api/hearing/audiometry/#audiogramcautions).
@@ -512,8 +513,8 @@ levels are averages about which individuals vary widely.
 ```python
 AudiogramCautions(
     frequencies: np.ndarray,
-    air_conduction_db: np.ndarray | None,
-    bone_conduction_db: np.ndarray | None,
+    air_conduction_threshold_levels: np.ndarray | None,
+    bone_conduction_threshold_levels: np.ndarray | None,
     vibrator_placement: str,
 )
 ```
@@ -525,8 +526,8 @@ The levels of an audiogram that call for caution (6.2.3.2, 8.4).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The test frequencies, in hertz. |
-| `air_conduction_db` | The air-conduction hearing threshold levels of one ear, in dB, one per frequency, or `None`. |
-| `bone_conduction_db` | The bone-conduction hearing threshold levels, in dB, one per frequency, or `None`. |
+| `air_conduction_threshold_levels` | The air-conduction hearing threshold levels of one ear, in dB, one per frequency, or `None`. |
+| `bone_conduction_threshold_levels` | The bone-conduction hearing threshold levels, in dB, one per frequency, or `None`. |
 | `vibrator_placement` | `"mastoid"` or `"forehead"`, the placement the audiometer's bone conduction is calibrated for. |
 
 ### AudiogramCautions.any_caution
@@ -601,10 +602,10 @@ audiometric_uncertainty(
     conduction: str = 'air',
     masked: bool = False,
     level_step_db: float = 5.0,
-    environment_db: float = 2.0,
-    tester_db: float = 0.0,
-    subject_db: float = 0.0,
-    special_db: float = 0.0,
+    environment_uncertainty_db: float = 2.0,
+    tester_uncertainty_db: float = 0.0,
+    subject_uncertainty_db: float = 0.0,
+    special_uncertainty_db: float = 0.0,
 ) -> AudiometricUncertaintyBudget
 ```
 
@@ -630,7 +631,7 @@ Fills Table A.1 with the values A.3 gives, which differ up to and above
 - $u_4$ (A.3.5): 2 dB when the ambient noise meets Clause 11 and the
   subject's threshold is near 0 dB. It may be negligible for thresholds
   well above 0 dB and is considerably larger in a room that exceeds the
-  limits; give it with `environment_db`;
+  limits; give it with `environment_uncertainty_db`;
 - $u_5$ (A.3.6): 2 dB when masking noise is applied;
 - $u_6$ to $u_8$ (A.3.7 to A.3.9): zero in usual situations,
   where the repeatability already covers them; give them when an
@@ -647,10 +648,10 @@ Table A.2: $u$ = 4,9 dB and $U$ = 10 dB.
 | `conduction` | `"air"` (default) or `"bone"`. |
 | `masked` | Whether masking noise was applied (A.3.6). |
 | `level_step_db` | The step of the hearing level control, in dB; 5 by default, 0 for a control fine enough not to count. |
-| `environment_db` | $u_4$, in dB; 2 by default (A.3.5). |
-| `tester_db` | $u_6$, in dB. |
-| `subject_db` | $u_7$, in dB. |
-| `special_db` | $u_8$, in dB. |
+| `environment_uncertainty_db` | $u_4$, in dB; 2 by default (A.3.5). |
+| `tester_uncertainty_db` | $u_6$, in dB. |
+| `subject_uncertainty_db` | $u_7$, in dB. |
+| `special_uncertainty_db` | $u_8$, in dB. |
 
 **Returns:** [`AudiometricUncertaintyBudget`](/phonometry/reference/api/hearing/audiometry/#audiometricuncertaintybudget).
 
@@ -659,19 +660,20 @@ Table A.2: $u$ = 4,9 dB and $U$ = 10 dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown conduction, a frequency that is not positive, or a component or step that is negative or not finite. |
+| TypeError | if `environment_uncertainty_db`, `frequency`, `level_step_db`, `special_uncertainty_db`, `subject_uncertainty_db` or `tester_uncertainty_db` is not a single number. |
 
 ## AudiometricUncertaintyBudget
 
 ```python
 AudiometricUncertaintyBudget(
     repeatability_db: float,
-    equipment_db: float,
-    transducer_db: float,
-    environment_db: float,
-    masking_db: float = 0.0,
-    tester_db: float = 0.0,
-    subject_db: float = 0.0,
-    special_db: float = 0.0,
+    equipment_uncertainty_db: float,
+    transducer_uncertainty_db: float,
+    environment_uncertainty_db: float,
+    masking_uncertainty_db: float = 0.0,
+    tester_uncertainty_db: float = 0.0,
+    subject_uncertainty_db: float = 0.0,
+    special_uncertainty_db: float = 0.0,
 )
 ```
 
@@ -687,15 +689,15 @@ expanded one is $U = k u$ with $k$ = 2 (A.5).
 | Name | Description |
 | :--- | :--- |
 | `repeatability_db` | $u_1$, repeated determinations of $L'_\mathrm{HT}$ (A.3.2), in dB. |
-| `equipment_db` | $u_2$, the audiometer (A.3.3), in dB; its distribution is rectangular, the others normal. |
-| `transducer_db` | $u_3$, the transducer and its fitting (A.3.4), in dB. |
-| `environment_db` | $u_4$, the ambient noise (A.3.5), in dB. |
-| `masking_db` | $u_5$, a non-optimized masking noise (A.3.6), in dB. |
-| `tester_db` | $u_6$, the tester's experience (A.3.7), in dB. |
-| `subject_db` | $u_7$, the subject's responses (A.3.8), in dB. |
-| `special_db` | $u_8$, an unusually difficult measurement (A.3.9), in dB. |
+| `equipment_uncertainty_db` | $u_2$, the audiometer (A.3.3), in dB; its distribution is rectangular, the others normal. |
+| `transducer_uncertainty_db` | $u_3$, the transducer and its fitting (A.3.4), in dB. |
+| `environment_uncertainty_db` | $u_4$, the ambient noise (A.3.5), in dB. |
+| `masking_uncertainty_db` | $u_5$, a non-optimized masking noise (A.3.6), in dB. |
+| `tester_uncertainty_db` | $u_6$, the tester's experience (A.3.7), in dB. |
+| `subject_uncertainty_db` | $u_7$, the subject's responses (A.3.8), in dB. |
+| `special_uncertainty_db` | $u_8$, an unusually difficult measurement (A.3.9), in dB. |
 
-### AudiometricUncertaintyBudget.combined_db
+### AudiometricUncertaintyBudget.combined_uncertainty_db
 
 *property*
 
@@ -703,15 +705,7 @@ $u = \sqrt{\sum u_i^2}$ (Formula (A.2)), in dB.
 
 **Returns:** The combined standard uncertainty, unrounded.
 
-### AudiometricUncertaintyBudget.components_db
-
-*property*
-
-The eight standard uncertainties in the order of Table A.1, in dB.
-
-**Returns:** $u_1$ to $u_8$.
-
-### AudiometricUncertaintyBudget.expanded_db
+### AudiometricUncertaintyBudget.expanded_uncertainty_db
 
 *property*
 
@@ -749,6 +743,14 @@ Draw the eight contributions as bars, with the combined value.
 | `kwargs` | Forwarded to the contribution bars. |
 
 **Returns:** The axes.
+
+### AudiometricUncertaintyBudget.standard_uncertainties_db
+
+*property*
+
+The eight standard uncertainties in the order of Table A.1, in dB.
+
+**Returns:** $u_1$ to $u_8$.
 
 ## automatic_audiometry_threshold
 
@@ -795,8 +797,8 @@ is a property of the method, and nothing here corrects for it.
 ```python
 AutomaticThresholdResult(
     reversal_levels: np.ndarray,
-    mean_db: float,
-    threshold_db: float,
+    mean_level: float,
+    threshold_level: float,
 )
 ```
 
@@ -807,8 +809,8 @@ The hearing threshold level from an automatic recording (6.3.5).
 | Name | Description |
 | :--- | :--- |
 | `reversal_levels` | The levels at the reversals of the tracing at one frequency, in order, in dB. |
-| `mean_db` | The mean of the average peak and the average valley, in dB. |
-| `threshold_db` | That mean rounded up to the next whole decibel, in dB. |
+| `mean_level` | The mean of the average peak and the average valley, in dB. |
+| `threshold_level` | That mean rounded up to the next whole decibel, in dB. |
 
 Which reversals are peaks (`is_peak`) and which 6.3.5 a) keeps
 (`retained`) are read from the levels, so they are not fields.
@@ -832,7 +834,7 @@ each reversal.
 
 **Returns:** One boolean per reversal.
 
-### AutomaticThresholdResult.peaks_db
+### AutomaticThresholdResult.peak_levels
 
 *property*
 
@@ -874,7 +876,7 @@ The first is ignored, and so are both ends of every excursion of
 
 **Returns:** One boolean per reversal.
 
-### AutomaticThresholdResult.valleys_db
+### AutomaticThresholdResult.valley_levels
 
 *property*
 
@@ -939,8 +941,8 @@ the tie.
 BracketingThresholdResult(
     ascent_levels: np.ndarray,
     descent_levels: np.ndarray,
-    mean_db: float,
-    threshold_db: float,
+    mean_level: float,
+    threshold_level: float,
 )
 ```
 
@@ -952,10 +954,10 @@ The hearing threshold level by the bracketing method (6.2.4.3).
 | :--- | :--- |
 | `ascent_levels` | The lowest response level of each ascent, in dB. |
 | `descent_levels` | The lowest response level of each descent, in dB. |
-| `mean_db` | The mean of the two averages, unrounded, in dB. |
-| `threshold_db` | That mean rounded to the nearest 5 dB step, in dB; a mean halfway between two steps goes to the higher one. |
+| `mean_level` | The mean of the two averages, unrounded, in dB. |
+| `threshold_level` | That mean rounded to the nearest 5 dB step, in dB; a mean halfway between two steps goes to the higher one. |
 
-### BracketingThresholdResult.ascent_mean_db
+### BracketingThresholdResult.ascent_mean_level
 
 *property*
 
@@ -971,7 +973,7 @@ Whether the series is long enough (6.2.3.2 Step 2).
 
 **Returns:** `True` for three ascents and three descents, or for two of each whose four levels differ by no more than 5 dB (the shortened version).
 
-### BracketingThresholdResult.descent_mean_db
+### BracketingThresholdResult.descent_mean_level
 
 *property*
 
@@ -1025,7 +1027,7 @@ check_audiometric_ambient_noise(
     lowest_hearing_level: float = 0.0,
     allowed_threshold_shift_db: float = 2.0,
     frequencies: ArrayLike | None = None,
-    noise_floor_db: ArrayLike | None = None,
+    noise_floor_levels: ArrayLike | None = None,
 ) -> AmbientNoiseCheck
 ```
 
@@ -1056,7 +1058,7 @@ a narrow-band noise signal.
 | `lowest_hearing_level` | The lowest hearing threshold level to be measured, in dB; 0 by default. |
 | `allowed_threshold_shift_db` | The threshold shift accepted from the ambient noise, 2 (default) or 5, in dB. |
 | `frequencies` | The mid-frequencies of the measured bands, in hertz, each one of the table's, or `None` for all of them. A measurement that leaves bands out is judged on those it has, and does not pass. |
-| `noise_floor_db` | The measuring chain's noise floor per measured band, in dB, to flag the bands where 11.1's 6 dB margin is missed. |
+| `noise_floor_levels` | The measuring chain's noise floor per measured band, in dB, to flag the bands where 11.1's 6 dB margin is missed. |
 
 **Returns:** [`AmbientNoiseCheck`](/phonometry/reference/api/hearing/audiometry/#ambientnoisecheck).
 
@@ -1070,8 +1072,8 @@ a narrow-band noise signal.
 
 ```python
 check_retest_agreement(
-    first_db: float,
-    repeat_db: float,
+    first_threshold_level: float,
+    repeat_threshold_level: float,
     *,
     frequency_hz: float = 1000.0,
 ) -> RetestAgreementCheck
@@ -1097,8 +1099,8 @@ does not pass, and the text names no action for it, so
 
 | Name | Description |
 | :--- | :--- |
-| `first_db` | The hearing threshold level measured first, in dB. |
-| `repeat_db` | The hearing threshold level of the repeat, in dB. |
+| `first_threshold_level` | The hearing threshold level measured first, in dB. |
+| `repeat_threshold_level` | The hearing threshold level of the repeat, in dB. |
 | `frequency_hz` | The frequency of both, in hertz; 1 kHz by default. |
 
 **Returns:** [`RetestAgreementCheck`](/phonometry/reference/api/hearing/audiometry/#retestagreementcheck).
@@ -1108,6 +1110,7 @@ does not pass, and the text names no action for it, so
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a level that is not finite or a frequency that is not positive. |
+| TypeError | if `first_threshold_level`, `frequency_hz` or `repeat_threshold_level` is not a single number. |
 
 ## EARPHONE_ATTENUATION
 
@@ -1123,7 +1126,11 @@ EARPHONE_ATTENUATION = {'supra-aural': array([ 0.,  0.,  0.,  1.,  1.,  2.,  3.,
 ## RetestAgreementCheck
 
 ```python
-RetestAgreementCheck(first_db: float, repeat_db: float, frequency_hz: float)
+RetestAgreementCheck(
+    first_threshold_level: float,
+    repeat_threshold_level: float,
+    frequency_hz: float,
+)
 ```
 
 Whether a repeat measurement confirms the first one (6.2.3.2 Step 3).
@@ -1132,8 +1139,8 @@ Whether a repeat measurement confirms the first one (6.2.3.2 Step 3).
 
 | Name | Description |
 | :--- | :--- |
-| `first_db` | The hearing threshold level measured first, in dB. |
-| `repeat_db` | The hearing threshold level of the repeat measurement, in dB. |
+| `first_threshold_level` | The hearing threshold level measured first, in dB. |
+| `repeat_threshold_level` | The hearing threshold level of the repeat measurement, in dB. |
 | `frequency_hz` | The frequency of both, in hertz: 1 kHz for the repeat Step 3 asks for, another for a further frequency retested after it. |
 
 ### RetestAgreementCheck.difference
@@ -1238,11 +1245,11 @@ SweepThresholdResult(
     reversal_frequencies: np.ndarray,
     reversal_levels: np.ndarray,
     frequencies: np.ndarray,
-    mean_db: np.ndarray,
-    threshold_db: np.ndarray,
+    mean_level: np.ndarray,
+    threshold_level: np.ndarray,
     spread_db: np.ndarray,
     running_frequencies: np.ndarray,
-    running_threshold_db: np.ndarray,
+    running_threshold_levels: np.ndarray,
 )
 ```
 
@@ -1255,11 +1262,11 @@ Hearing threshold levels from a sweep-frequency tracing (7.5).
 | `reversal_frequencies` | The frequency of each reversal, in hertz. |
 | `reversal_levels` | The hearing level of each reversal, in dB. |
 | `frequencies` | The frequencies the threshold was determined at, in hertz. |
-| `mean_db` | At each, the mean of the average of the three nearest peaks and the average of the three nearest valleys, in dB. |
-| `threshold_db` | That mean rounded to the nearest whole decibel, in dB. |
+| `mean_level` | At each, the mean of the average of the three nearest peaks and the average of the three nearest valleys, in dB. |
+| `threshold_level` | That mean rounded to the nearest whole decibel, in dB. |
 | `spread_db` | At each, the larger spread of the three peaks and of the three valleys it averaged, in dB. |
 | `running_frequencies` | The geometric mean frequency of each run of six consecutive reversals, in hertz. |
-| `running_threshold_db` | The arithmetic mean level of each run, in dB, the semicontinuous threshold of 7.5. |
+| `running_threshold_levels` | The arithmetic mean level of each run, in dB, the semicontinuous threshold of 7.5. |
 
 Which reversals are peaks (`is_peak`) is read from the levels, so
 it is not a field.

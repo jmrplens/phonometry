@@ -238,6 +238,7 @@ $\varepsilon \approx 0.35$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the bandwidth or duration is not positive, or the coefficient is outside [-1, 1]. |
+| TypeError | if `coefficient` is not a single number. |
 
 ## CorrelationResult
 
@@ -374,6 +375,7 @@ default `upsample=8`).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `upsample` is a flag, a text or an array where a count goes. |
 
 ## time_delay
 
@@ -462,6 +464,7 @@ interval (Eq. 8.130).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `upsample` is a flag, a text or an array where a count goes. |
 
 ## TimeDelayResult
 

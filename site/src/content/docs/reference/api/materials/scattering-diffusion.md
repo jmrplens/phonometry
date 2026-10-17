@@ -433,6 +433,7 @@ resolution (37 microphones).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a distance, radius or width that is not finite and positive, or an angular step outside `(0, 90]` degrees. |
+| TypeError | if `angular_step`, `receiver_radius`, `sample_width` or `source_distance` is not a single number. |
 
 ## random_incidence_diffusion
 

@@ -168,7 +168,11 @@ class Barrier(RichDisplay):
     line_of_sight_clear: bool = False
 
     def __post_init__(self) -> None:
-        """Reject negative ``dss``/``dsr``/``a`` and a non-positive spacing ``e``."""
+        """Reject negative ``dss``/``dsr``/``a`` and a non-positive spacing ``e``.
+
+        :raises TypeError: if ``edge_separation``, ``edge_to_receiver``,
+            ``parallel_distance`` or ``source_to_edge`` is not a single number.
+        """
         require_scalar(self.edge_separation, "edge_separation")
         require_scalar(self.edge_to_receiver, "edge_to_receiver")
         require_scalar(self.parallel_distance, "parallel_distance")
@@ -310,6 +314,8 @@ class SourceEmission(OwnsArrays):
         anonymous "cannot convert float NaN to integer".
 
         :raises ValueError: if any term is not finite.
+        :raises TypeError: if ``sound_power_level`` holds a text or a value that is not
+            a real number.
         """
         require_finite_array(self.sound_power_level, "sound_power_level")
         for name in ("directivity_index", "d_omega", "cmet"):
@@ -499,6 +505,7 @@ def geometric_divergence(distance: float) -> float:
     :param distance: Straight-line source-to-receiver distance ``d``, in metres.
     :return: ``Adiv``, in decibels (51 dB at 100 m, 11 dB at 1 m).
     :raises ValueError: If ``distance`` is not positive.
+    :raises TypeError: if ``distance`` is not a single number.
     """
     require_scalar(distance, "distance")
     if distance <= 0.0:
@@ -536,6 +543,7 @@ def atmospheric_absorption(
     :param relative_humidity_percent: Relative humidity, in percent (default 70).
     :param static_pressure_kpa: Atmospheric pressure, in kilopascals.
     :return: ``Aatm`` per band, in decibels.
+    :raises TypeError: if ``distance`` is not a single number.
     """
     require_scalar(distance, "distance")
     relative_humidity_percent = (
@@ -643,6 +651,9 @@ def ground_attenuation(
     :return: ``Agr`` per band, in decibels (negative denotes a net gain).
     :raises ValueError: If a ground factor is outside ``[0, 1]``, ``distance``
         is not positive, a height is negative, or a frequency is not positive.
+    :raises TypeError: if ``distance``, ``ground_middle``, ``ground_receiver``,
+        ``ground_source``, ``receiver_height_m`` or ``source_height_m`` is not a single
+        number.
     """
     require_scalar(ground_middle, "ground_middle")
     require_scalar(ground_receiver, "ground_receiver")
@@ -708,6 +719,7 @@ def ground_attenuation_alternative(
         ground (:math:`h_\mathrm{m} = F/d`, figure 3), in metres.
     :return: ``Agr``, in decibels (>= 0).
     :raises ValueError: If ``distance`` is not positive.
+    :raises TypeError: if ``distance`` or ``mean_height_m`` is not a single number.
     """
     require_scalar(mean_height_m, "mean_height_m")
     require_scalar(distance, "distance")
@@ -737,6 +749,8 @@ def directivity_omega(
     :param receiver_height_m: Receiver height ``hr``, in metres.
     :param projected_distance: Ground-plane projected distance ``dp``, in metres.
     :return: ``DOmega``, in decibels (0 to ~3 dB).
+    :raises TypeError: if ``projected_distance``, ``receiver_height_m`` or
+        ``source_height_m`` is not a single number.
     """
     require_scalar(projected_distance, "projected_distance")
     require_scalar(receiver_height_m, "receiver_height_m")
@@ -805,6 +819,9 @@ def region_ground_factors(
     :raises ValueError: If the two sequences disagree in length or are empty, a
         length is not positive, a factor is outside ``[0, 1]``, or a height is
         negative or not finite.
+    :raises TypeError: if ``receiver_height_m`` or ``source_height_m`` is not a single
+        number, or ``segment_ground_factors`` or ``segment_lengths`` holds a text or a
+        value that is not a real number.
 
     .. note::
 
@@ -891,6 +908,9 @@ def mean_path_height(
         ``distance`` is not positive and finite. The profile heights themselves
         are unrestricted: they are read on any datum, so a ground below it is a
         negative number rather than a mistake.
+    :raises TypeError: if ``receiver_height_m`` or ``source_height_m`` is not a single
+        number, or ``profile_distances`` or ``profile_heights_m`` holds a text or a
+        value that is not a real number.
 
     .. note::
 
@@ -974,6 +994,7 @@ def barrier_attenuation(
     :param frequencies: Octave-band midband frequencies, in hertz.
     :return: ``Dz`` per band, in decibels (>= 0).
     :raises ValueError: If ``distance`` or any frequency is not positive.
+    :raises TypeError: if ``distance`` is not a single number.
     """
     require_scalar(distance, "distance")
     if distance <= 0.0:
@@ -1046,6 +1067,8 @@ def meteorological_correction(
     :param receiver_height_m: Receiver height ``hr``, in metres.
     :param c0: Meteorological factor ``C0``, in decibels.
     :return: ``Cmet``, in decibels (>= 0 for :math:`C_0 \ge 0`).
+    :raises TypeError: if ``c0``, ``projected_distance``, ``receiver_height_m`` or
+        ``source_height_m`` is not a single number.
     """
     require_scalar(c0, "c0")
     require_scalar(projected_distance, "projected_distance")
@@ -1140,6 +1163,8 @@ def outdoor_propagation_attenuation(
         defaults to :math:`\sqrt{d^2 - (h_\mathrm{s} - h_\mathrm{r})^2}`.
     :return: :class:`OutdoorAttenuation` with the per-band term breakdown.
     :raises ValueError: If ``distance`` is not positive.
+    :raises TypeError: if ``distance``, ``ground_middle``, ``ground_receiver`` or
+        ``ground_source`` is not a single number.
     """
     require_scalar(ground_middle, "ground_middle")
     require_scalar(ground_receiver, "ground_receiver")

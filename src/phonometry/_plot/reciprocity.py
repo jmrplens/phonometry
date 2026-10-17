@@ -756,12 +756,12 @@ def plot_parameter_uncertainty(
     """
     ax = ax if ax is not None else _new_axes()
     frequencies = result.frequencies
-    names = list(result.components_db)
+    names = list(result.component_uncertainties_db)
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 1.6)
     if names:
         kwargs.setdefault("label", _component_label(names[0], language))
-    for index, (name, values) in enumerate(result.components_db.items()):
+    for index, (name, values) in enumerate(result.component_uncertainties_db.items()):
         colour = (_C_PRIMARY, *_CYCLE)[index % (len(_CYCLE) + 1)]
         style = ("-", "--", "-.", ":")[index // (len(_CYCLE) + 1) % 4]
         if index == 0:

@@ -161,6 +161,7 @@ def apparent_dynamic_stiffness(
         :math:`m'_\mathrm{t} = 8~\text{kg} / 0.04~\text{m}^2 = 200` kg/m2).
     :return: The apparent dynamic stiffness per unit area ``s't``, in N/m3
         (numerically MN/m3 when divided by 1e6).
+    :raises TypeError: if ``total_mass_per_area_kg_m2`` is not a single number.
     """
     total_mass_per_area_kg_m2 = require_positive(
         total_mass_per_area_kg_m2, "total_mass_per_area_kg_m2"
@@ -189,6 +190,7 @@ def enclosed_gas_stiffness(
     :param static_pressure_pa: Atmospheric pressure ``p0``, in pascals
         (default the standard's 0,1 MPa).
     :return: The enclosed-gas dynamic stiffness per unit area ``s'a``, in N/m3.
+    :raises TypeError: if ``porosity`` or ``static_pressure_pa`` is not a single number.
 
     .. note::
         With the standard's :math:`p_0 = 0.1` MPa and :math:`\epsilon = 0.9`
@@ -248,6 +250,8 @@ def installed_dynamic_stiffness(
     :raises ValueError: for a non-positive ``s't`` or ``r``, a negative
         ``s'a``, or no ``s'a`` below 100 kPa.s/m2, where an absent gas term
         is not a zero one.
+    :raises TypeError: if ``airflow_resistivity_kpa_s_m2``, ``apparent_stiffness_n_m3``
+        or ``gas_stiffness_n_m3`` is not a single number.
     """
     require_scalar(airflow_resistivity_kpa_s_m2, "airflow_resistivity_kpa_s_m2")
     apparent_stiffness_n_m3 = require_positive(
@@ -311,6 +315,7 @@ def natural_frequency(
     :param mass_per_area_kg_m2: Mass per unit area of the supported floor
         ``m'``, in kg/m2.
     :return: The natural frequency ``f0``, in hertz.
+    :raises TypeError: if ``mass_per_area_kg_m2`` is not a single number.
     """
     mass_per_area_kg_m2 = require_positive(mass_per_area_kg_m2, "mass_per_area_kg_m2")
     s = np.asarray(dynamic_stiffness_n_m3, dtype=np.float64)
@@ -475,6 +480,7 @@ class ResilientLayer(CatalogueRow):
             with no ``s'a``; and for a non-positive mass or resistivity. A
             cell the computation needs and the row does not hold is refused
             as :meth:`~phonometry.io.CatalogueRow.printed` refuses it.
+        :raises TypeError: if ``mass_per_area_kg_m2`` is not a single number.
         """
         mass_per_area_kg_m2 = require_positive(
             mass_per_area_kg_m2, "mass_per_area_kg_m2"
@@ -689,6 +695,9 @@ class DynamicStiffnessResult(RichDisplay):
 
         :raises ValueError: if a determined quantity is not positive and
             finite (the enclosed-gas term may be zero).
+        :raises TypeError: if ``apparent_stiffness_n_m3``,
+            ``floor_mass_per_area_kg_m2``, ``gas_stiffness_n_m3`` or
+            ``resonant_frequency_hz`` is not a single number.
         """
         require_positive(self.apparent_stiffness_n_m3, "apparent_stiffness_n_m3")
         require_non_negative(self.gas_stiffness_n_m3, "gas_stiffness_n_m3")
@@ -807,6 +816,9 @@ def floating_floor_resonance(
         ``thickness_m`` (see above).
     :param static_pressure_pa: Atmospheric pressure ``p0``, in pascals.
     :return: The :class:`DynamicStiffnessResult`.
+    :raises TypeError: if ``airflow_resistivity_kpa_s_m2``,
+        ``floor_mass_per_area_kg_m2``, ``resonant_frequency_hz`` or
+        ``static_pressure_pa`` is not a single number.
     """
     require_scalar(floor_mass_per_area_kg_m2, "floor_mass_per_area_kg_m2")
     require_scalar(resonant_frequency_hz, "resonant_frequency_hz")

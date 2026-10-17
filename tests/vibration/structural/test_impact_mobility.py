@@ -95,7 +95,8 @@ def test_energy_spectral_density_of_a_gaussian_pulse_is_twice_its_squared_transf
 ):
     """3.3 and 3.4: G = 2|F|^2 with F the continuous transform of the pulse."""
     force, _ = _sdof_impact(0.1)
-    freqs, esd = vibration.energy_spectral_density(force, FS)
+    spectrum = vibration.energy_spectral_density(force, FS)
+    freqs, esd = spectrum.frequencies, spectrum.density
     analytic = (
         PEAK_N
         * PULSE_SIGMA_S
@@ -111,7 +112,8 @@ def test_energy_spectral_density_keeps_the_energy_of_the_record() -> None:
     """Parseval: the one-sided density, DC and Nyquist bins single, sums to the energy."""
     rng = np.random.default_rng(7626)
     record = rng.standard_normal(N)
-    freqs, esd = vibration.energy_spectral_density(record, FS)
+    spectrum = vibration.energy_spectral_density(record, FS)
+    freqs, esd = spectrum.frequencies, spectrum.density
     assert freqs[-1] == pytest.approx(FS / 2.0)
     energy = float(np.sum(record**2)) / FS
     assert float(np.sum(esd)) * FS / N == pytest.approx(energy, rel=1e-12)
@@ -757,8 +759,8 @@ def test_two_equal_impacts_cut_notches_every_one_over_their_delay() -> None:
     force, _ = _sdof_impact(0.1)
     shift = 256  # tau = 62.5 ms: the notches land on DFT bins 8, 24, 40, ...
     double = force + np.roll(force, shift)
-    freqs, esd = vibration.energy_spectral_density(double, FS)
-    _, single = vibration.energy_spectral_density(force, FS)
+    esd = vibration.energy_spectral_density(double, FS).density
+    single = vibration.energy_spectral_density(force, FS).density
     notches = (2 * np.arange(6) + 1) * (N // (2 * shift))
     assert np.all(esd[notches] <= 1e-20 * single[notches])
     peaks = 2 * np.arange(1, 6) * (N // (2 * shift))
@@ -836,8 +838,9 @@ def test_a_softer_rebound_ripples_more_than_its_peak_says() -> None:
     check = vibration.check_double_hit(first + rebound, FS)
     assert check.passes
     same_shape_bound = 20.0 * math.log10(1.1 / 0.9)
-    _, both = vibration.energy_spectral_density(first + rebound, FS)
-    freqs, one = vibration.energy_spectral_density(first, FS)
+    both = vibration.energy_spectral_density(first + rebound, FS).density
+    esd = vibration.energy_spectral_density(first, FS)
+    freqs, one = esd.frequencies, esd.density
     low = (freqs > 0.0) & (freqs <= 60.0)
     ratio_db = 10.0 * np.log10(both[low] / one[low])
     assert float(np.ptp(ratio_db)) > 2.0 * same_shape_bound

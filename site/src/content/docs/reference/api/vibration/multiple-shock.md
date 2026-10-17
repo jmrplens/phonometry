@@ -109,6 +109,12 @@ Daily compressive stress $S_\mathrm{d}$ (Annex C, Formula C.1).
 
 **Returns:** The daily compressive stress $S_\mathrm{d} = m_\mathrm{z} D_\mathrm{zd}$, MPa.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `daily_dose_value` or `mz` is not a single number. |
+
 ## daily_dose
 
 ```python
@@ -130,6 +136,12 @@ Daily acceleration dose $D_\mathrm{zd}$ (clause 5.3, Formula 4).
 | `measurement_time` | Period $t_\mathrm{m}$ over which $D_\mathrm{z}$ was measured (same unit as `exposure_time`). |
 
 **Returns:** The daily dose $D_\mathrm{zd} = D_\mathrm{z} (t_\mathrm{d}/t_\mathrm{m})^{1/6}$, m/s2.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `dose`, `exposure_time` or `measurement_time` is not a single number. |
 
 ## daily_dose_multi
 
@@ -191,6 +203,12 @@ Probability of lumbar injury $P(R)$ (Annex C, Formula C.5).
 
 **Returns:** The injury probability $P = 1 - \exp(-(R/\alpha)^\beta)$ in 0-1; a float for a scalar input, otherwise an array. Negative $R$ gives 0.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `sex` is not a text. |
+
 ## injury_risk
 
 ```python
@@ -228,6 +246,7 @@ weighted by the reducing ultimate strength of the ageing spine.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `exposure_duration_years` is not positive or the spine strength is exhausted ($S_\mathrm{u} - S_\text{stat} \le 0$) within the exposure period. |
+| TypeError | if `sex` is not a text, or `daily_compression`, `days_per_year`, `exposure_duration_years` or `start_age` is not a single number. |
 
 ## multiple_shock_assessment
 
@@ -286,6 +305,12 @@ horizontal whole-body exposure use the ISO 2631-1 metrics in this domain
 | `mz` | Stress conversion $m_\mathrm{z}$ (MPa per m/s2); defaults to the sex-specific value. |
 
 **Returns:** The [`MultipleShockResult`](/phonometry/reference/api/vibration/multiple-shock/#multipleshockresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `sex` is not a text. |
 
 ## MultipleShockResult
 
@@ -418,6 +443,12 @@ crossings; only positive peaks are counted.
 
 **Returns:** The positive peak values, in the order they occur.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `response` holds a text or a value that is not a real number. |
+
 ## seat_to_spine_transfer
 
 ```python
@@ -484,6 +515,12 @@ static_stress(mz: float = 0.029) -> float
 Static compressive stress $S_\text{stat} = m_\mathrm{z} \cdot 9.81$
 (Annex C), MPa.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `mz` is not a single number. |
+
 ## ultimate_strength
 
 ```python
@@ -505,3 +542,9 @@ Formula C.4).
 | `sex` | `"male"` or `"female"` (sets the age slope $S_\text{age}$). |
 
 **Returns:** The ultimate strength $S_\mathrm{u} = 6.75 - S_\text{age} (b+i)$, MPa.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `sex` is not a text. |

@@ -239,6 +239,7 @@ zero.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive duration, a fractile outside (0, 1), or an unknown frequency. |
+| TypeError | if `exposure_duration_years`, `fractile` or `l_ex` is not a single number. |
 
 Outside the standard's validated domain (durations of 1 to 40 years,
 fractiles of 0.05 to 0.95, exposure levels up to 100 dB) the computation still

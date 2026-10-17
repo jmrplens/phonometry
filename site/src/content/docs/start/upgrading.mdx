@@ -501,6 +501,23 @@ A positional value that came after the axis stays positional and moves up one
 place: `convert_frf(value, f, "mobility", "impedance")` is
 `convert_frf(value, "mobility", "impedance", frequency=f)`.
 
+A wavelength axis is written by name in the same way.
+`environment.roughness_to_frequency(levels, wavelengths, speed)` is
+`roughness_to_frequency(levels, wavelengths_mm=wavelengths, speed_kmh=speed)`:
+the levels of the roughness table stay positional, and its wavelengths are
+written by name with the speed after them, so the km/h of the speed is on the
+line as well. `materials.standing_wave_reflection(swr, x_min1, lam)` and
+`standing_wave_normalized_impedance(swr, x_min1, lam)` take the wavelength of
+each tone by name, `wavelength=lam`: it is a length of the same shape as the
+distance to the first minimum beside it, and the two bind either way round.
+
+A record you build and hand to a function is written by name the same way:
+`aircraft.RotorcraftHemisphere(freqs, az, po, levels)` is
+`RotorcraftHemisphere(frequencies=freqs, azimuth_deg=az, polar_deg=po,
+levels=levels)`, and a positional call raises `TypeError`. A result the
+library builds and another function takes whole keeps its fields where they
+are, since no caller writes it field by field.
+
 ## One spelling per concept
 
 The public names had drifted into several spellings of the same quantity, and
@@ -791,6 +808,36 @@ print(round(metrics.scalloping_loss, 2), round(metrics.worst_case_processing_los
 # 1.42 3.18
 ```
 
+## A name says the quantity it holds
+
+A name that put `_db` after words that only qualify it (`corrected_db`,
+`floor_db`, `threshold_db`, `mean_db`) said the unit of a number and never
+what the number is. Each now carries the noun of what it holds. A level takes
+`level` or `levels` and then loses its `_db` by the rule of the section above
+(`threshold_level`, `corrected_levels`, `emission_levels`), a level
+difference takes its own noun (`floor_level_difference`, `mean_attenuation`,
+`min_isolation`), and any other quantity keeps `_db` after its noun
+(`fixture_uncertainty_db`, `lower_tolerance_db`, `prominence_limit_db`). Most
+of these names are newer than 4.0.0rc1; the ones that shipped are these.
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `psychoacoustics.ToneAssessment.criterion_db` | `prominence_limit_db` |
+| `signals.WindowMetricsResult.highest_sidelobe_db` | `highest_sidelobe_level` |
+| `broadcast.KWeightingResponse.shelf_db` and `highpass_db` | `shelf_magnitude_db` and `highpass_magnitude_db`, beside `magnitude_db` |
+| `signals.LifterResult.liftered_db` | `liftered_spectrum_db`, beside `spectrum_db` |
+| `operating_db=` on `emission.total_standard_deviation` | `sigma_omc_db=`, the name every sound power function gives the standard deviation of the operating and mounting conditions |
+| `polar_db` of `electroacoustics.MicrophoneCharacteristics` and `electroacoustics.LoudspeakerCharacteristics` | `polar_response_db` |
+
+```python
+from phonometry import emission, signals
+
+print(round(signals.window_metrics("hann").highest_sidelobe_level, 1))
+# -31.5
+print(emission.total_standard_deviation(1.5, sigma_omc_db=2.0))
+# 2.5
+```
+
 ## A module is never hidden behind a function of its own name
 
 Twenty-three modules of 4.0.0rc1 shared their name with the function their
@@ -845,7 +892,7 @@ way in 3.3.0 or 4.0.0rc1 and are not any more:
 
 | 3.3.0 or 4.0.0rc1 | 4.0 |
 | --- | --- |
-| `OCTAVE_BANDS`, `NC_INDICES` and `NC_CURVES` of `room.noise_criteria` (`room.room_noise` in 3.3.0) | `room.NC_OCTAVE_BANDS_HZ`, `room.NC_RATINGS` and `room.NC_CURVES_DB`, published with their unit: the ten bands of ANSI/ASA S12.2 Table 1, its twelve designations and their band levels |
+| `OCTAVE_BANDS`, `NC_INDICES` and `NC_CURVES` of `room.noise_criteria` (`room.room_noise` in 3.3.0) | `room.NC_OCTAVE_BANDS_HZ`, `room.NC_RATINGS` and `room.NC_CURVE_LEVELS`, published with their unit: the ten bands of ANSI/ASA S12.2 Table 1, its twelve designations and their band levels |
 | `BAND_CENTERS`, `BAND_IMPORTANCE`, `REFERENCE_INTERNAL_NOISE` and `VOCAL_EFFORTS` of `speech.sii` (`hearing.sii` in 3.3.0) | `speech.sii_procedure("one-third-octave")`, whose `frequencies`, `band_importance` and `internal_noise` are the same arrays, and `speech.standard_speech_spectra().vocal_efforts` |
 | `NIPTS_FREQUENCIES` of `hearing.noise_induced_hearing_loss` | the `frequencies` of the `hearing.nipts(...)` result |
 | `VALIDATED_YEARS`, `VALIDATED_FRACTILES` and `VALIDATED_L_EX_MAX` of the same module | not published. `nipts` and `htlan` warn outside the 1 to 40 years, the 0.05 to 0.95 fractiles and the 100 dB ISO 1999 validates |
@@ -875,7 +922,7 @@ are not listed either, by the rule above, and stay importable as annotations.
 ```python
 from phonometry import hearing, room, speech
 
-print(room.NC_CURVES_DB[room.NC_RATINGS == 40][0][:3])
+print(room.NC_CURVE_LEVELS[room.NC_RATINGS == 40][0][:3])
 print(round(speech.sii_procedure("one-third-octave").band_importance.sum(), 6))
 print(hearing.nipts(95.0, 40.0, 0.9).frequencies[:3])
 # [84. 74. 64.]
@@ -1039,10 +1086,12 @@ ax = result.plot()
 
 ## Other answers that were tuples are records
 
-Four more answers came back as a tuple to be unpacked by position. Each is a
-record with named fields now, and none of them unpacks: a line that still
-does raises `TypeError: cannot unpack non-iterable ...` instead of handing
-back the wrong column.
+Every other answer that came back as a tuple of different quantities, to be
+unpacked by position, is a record with named fields now, and none of them
+unpacks: a line that still does raises `TypeError: cannot unpack
+non-iterable ...` instead of handing back the wrong column. A tuple is left
+only where its items are alike, such as the two ends of a range, lower
+first.
 
 | 3.3.0 or 4.0.0rc1 | 4.0 |
 | --- | --- |
@@ -1050,6 +1099,26 @@ back the wrong column.
 | `epnl, pnltm, kf, kl = aircraft.epnl_from_pnlt(pnlt)` | `r = aircraft.epnl_from_pnlt(pnlt)`, then `r.epnl`, `r.pnltm`, `r.band_limits` (the pair `(kF, kL)`), `r.bandsharing_adjustment` and `r.duration_correction` (an `EPNLIntegration`) |
 | `freqs, delta_l = building.improvement_octave_bands(dl, f)` | `s = building.improvement_octave_bands(dl, frequencies=f)`, then `s.frequencies` and `s.values` (an `OctaveBandSpectrum`, whose `quantity` says what the values are) |
 | `freqs, values = result.octave_bands()` on a `building.FloorCoveringImprovementResult` | `result.octave_bands().frequencies` and `.values`, the same `OctaveBandSpectrum` |
+| `l_in, s_m = building.combine_subareas(l_in, areas)` | `r = building.subarea_intensity_level(l_in, areas)`, then `r.levels` and `r.measurement_area` (a `SubareaIntensityLevel`) |
+| `freqs, u = band_uncertainty.to_arrays()` on a `building.BandUncertainty` | `band_uncertainty.frequencies` and `band_uncertainty.uncertainties`, the fields it was read from |
+| `bx, bz, bxz = building.corrugated_plate_stiffness(...)` | `b = building.corrugated_plate_stiffness(...)`, then `b.b_x_n_m`, `b.b_z_n_m` and `b.b_xz_n_m` (a `CorrugatedPlateStiffness`) |
+| `f, lower, upper = building.heavy_impact_source_limits(source)` | `lim = building.heavy_impact_source_limits(source)`, then `lim.frequencies`, `lim.lower` and `lim.upper` (a `HeavyImpactSourceLimits`) |
+| `width, k = building.wall_tie_stiffness(tie)`, `building.WALL_TIE_STIFFNESS[tie][1]` | `t = building.wall_tie_stiffness(tie)`, then `t.cavity_width_m` and `t.stiffness` (a `WallTieStiffness`, which is also what each row of `WALL_TIE_STIFFNESS` holds) |
+| `result.ratings` on a `building.LiningImprovementResult` | `result.delta_rw`, `result.delta_ra` and `result.delta_ratr`, the fields the tuple was read from |
+| `f, gamma2 = electroacoustics.coherence(x, y, fs)` | `c = electroacoustics.coherence(x, y, fs)`, then `c.frequencies` and `c.coherence` (a `CoherenceResult`, with `.plot()`) |
+| `f, levels = emission.octave_band_levels(levels, f)` | `o = emission.octave_band_levels(levels, frequencies=f)`, then `o.frequencies` and `o.levels` (an `OctaveBandLevels`, with `.plot()`) |
+| `f, class_1, class_2 = emission.residual_index_limits(device)` | `lim = emission.residual_index_limits(device)`, then `lim.frequencies`, `lim.class_1` and `lim.class_2` (a `ResidualIndexLimits`) |
+| `wavelengths, levels = environment.wheel_roughness(brake)`, and the same of `rail_roughness`, `contact_filter` and `impact_roughness_single` | `w = environment.wheel_roughness(brake)`, then `w.wavelengths_mm` and `w.levels` (a `WavelengthSpectrum`, with `.plot()`) |
+| `source_a, source_b = environment.traction_sound_power(vehicle)`, and the same of `aerodynamic_sound_power` | `p = environment.traction_sound_power(vehicle)`, then `p.source_a` and `p.source_b` (a `RailSourceSpectra`) |
+| `RollingStock(wheel_roughness=(wavelengths, levels), traction=(a, b), ...)`, `RailwayTrack(rail_roughness=(wavelengths, levels), ...)` | the same fields given a `WavelengthSpectrum(wavelengths_mm=..., levels=...)` or a `RailSourceSpectra(source_a=..., source_b=...)`; a bare pair raises `TypeError` naming the field |
+| `f, lower, upper = filters.weighting_class_limits(1)` | `lim = filters.weighting_class_limits(1)`, then `lim.frequencies`, `lim.lower` and `lim.upper` (a `WeightingClassLimits`) |
+| `rho, kappa = materials.slit_effective_properties(f, ...)`, and the same of `rectangular_duct_properties` | `p = materials.slit_effective_properties(f, ...)`, then `p.effective_density` and `p.bulk_modulus` (an `EffectiveFluidProperties`) |
+| `fc, alpha = materials.one_third_octave_absorption(alpha, f)` | `b = materials.one_third_octave_absorption(alpha, frequencies=f)`, then `b.frequencies` and `b.absorption` (a `OneThirdOctaveAbsorption`, with `.plot()`) |
+| `a, b, c, d = materials.wave_decomposition(...)`, `p0, pd, u0, ud = materials.face_quantities(...)` | `w = materials.wave_decomposition(...)` with `w.a` to `w.d` (a `WaveAmplitudes`), `q = materials.face_quantities(...)` with `q.p0`, `q.pd`, `q.u0` and `q.ud` (a `FaceQuantities`) |
+| `k, U = result.expanded(0.95)` on a `metrology.UncertaintyResult` | `e = result.expanded(0.95)`, then `e.coverage_factor` and `e.expanded_uncertainty` (an `ExpandedUncertainty`) |
+| `f, spl = psychoacoustics.equal_loudness_contour(40.0)`, `f, tf = psychoacoustics.hearing_threshold()` | `c = psychoacoustics.equal_loudness_contour(40.0)`, then `c.frequencies`, `c.levels` and `c.phon`, which is `None` for the threshold (a `LoudnessContour`, with `.plot()`) |
+| `f, v = vibration.foundation_guideline_curve(building_class)` | `g = vibration.foundation_guideline_curve(building_class)`, then `g.frequencies` and `g.velocities_mm_s` (a `GuidelineCurve`) |
+| `chi, psi = vibration.junction_wave_parameters(...)` | `w = vibration.junction_wave_parameters(...)`, then `w.chi` and `w.psi` (a `JunctionWaveParameters`) |
 
 ```python
 import numpy as np
@@ -1115,6 +1184,15 @@ included), raises `TypeError` naming it.
 | `emission.IntensityResult` | `spacing_m`, keyword-only |
 | `environment.BarrierInsertionLoss` | `source_height_m`, `barrier_distance`, `barrier_height_m`, `receiver_distance`, `receiver_height_m`, keyword-only |
 | `psychoacoustics.ZwickerLoudness` | `field` (`"free"` or `"diffuse"`), now the fourth field, before `n5` |
+| `room.OpenPlanResult` | `positions_m`, the distances the metrics were fitted on |
+| `materials.LayeredAbsorberResult` | `layers`, the stack the prediction was solved for |
+| `materials.DiffuserPolarResponse` | `well_width` and `n_repetitions`, keyword-only; `depths` stays optional, because a response predicted from an explicit `reflection` has none |
+| `materials.MetadiffuserResult` | `wells`, `depth_m` and `period_m`, the panel the reflection was solved for, keyword-only |
+| `materials.SlitResonatorAbsorberResult` | `resonators`, `slit_height_m`, `lattice_step_m` and `period_m`, the panel the prediction was solved for, keyword-only |
+| `materials.ImpedanceTubeResult` | `spacing_m` and `x1`, the microphone spacing and the distance from the sample to the farther microphone, which the reduction cannot run without, keyword-only; `diameter_m` stays optional, because it need not be supplied |
+| `materials.InSituAbsorptionResult` | `source_height_m` and `microphone_height_m`, the set-up the absorption was measured with, keyword-only |
+| `vibration.JunctionTransmissionResult` | `thickness1_m` and `thickness2_m`, the plates of the junction, keyword-only |
+| `noise_control.ReactiveSilencerResult` | `plane_wave_limit`, and exactly one of `geometry` (a named device) and `chain` (a `SilencerChain`); `resonances`, `geometry`, `plane_wave_limit` and `chain` are keyword-only |
 
 `filters.WeightingFilter(..., high_accuracy=None)` used to select the
 default. `high_accuracy` is a plain `bool` now, `True` by default, and `None`
@@ -1178,9 +1256,9 @@ from phonometry.materials.absorbers import REFERENCE_CURVE
 
 curve = dict(REFERENCE_CURVE)
 curve[4000] = 1.0
-curves = room.NC_CURVES_DB.copy()
+curves = room.NC_CURVE_LEVELS.copy()
 curves[0, 0] = 0.0
-print(REFERENCE_CURVE[4000], curve[4000], curves[0, 0], room.NC_CURVES_DB[0, 0])
+print(REFERENCE_CURVE[4000], curve[4000], curves[0, 0], room.NC_CURVE_LEVELS[0, 0])
 # 0.9 1.0 0.0 78.0
 ```
 
@@ -1417,13 +1495,13 @@ says where each verdict first shipped.
 | `emission.IntensityInstrumentComplianceResult` | `limit_class1`, `limit_class2`, `spacing_offset_db` | `device`, `spacing_m`; the band rows are read from them, see the next section | 4.0.0rc1 |
 | `emission.InverseSquareLawResult`, `emission.SourceDirectionalityResult` | `tolerance_db` | `room` selects it; the qualified radii must be the ones the levels reach | after 4.0.0rc1 |
 | `hearing.AmbientNoiseCheck` | `limits_db`, `table_bands_hz` | gains `earphone_attenuation` and `allowed_threshold_shift_db` | after 4.0.0rc1 |
-| `hearing.FixtureIsolationVerification` | `required_db` | the bands | after 4.0.0rc1 |
+| `hearing.FixtureIsolationVerification` | `min_isolation` | the bands | after 4.0.0rc1 |
 | `hearing.REATSoundFieldCheck` | `allowable_variation_db` | gains `free_field_rejection` | after 4.0.0rc1 |
 | `hearing.DiffuseSoundFieldCheck` | `allowable_variation_db` | gains `front_to_random_index` | after 4.0.0rc1 |
 | `hearing.FreeSoundFieldCheck` | `axis_offset_m`, `inverse_distance_difference` | `field` and `loudspeaker_distance_m` select them | after 4.0.0rc1 |
-| `electroacoustics.ProgramSignalCheck` | `offset_db`, `relative_levels`, `tolerance_plus_db`, `tolerance_minus_db` | `frequencies`, `band_levels` | after 4.0.0rc1 |
+| `electroacoustics.ProgramSignalCheck` | `offset_db`, `relative_levels`, `upper_tolerance_db`, `lower_tolerance_db` | `frequencies`, `band_levels` | after 4.0.0rc1 |
 | `electroacoustics.NeckLoopVerification` | `limits` | `neck_loop_type` selects it | after 4.0.0rc1 |
-| `psychoacoustics.ToneAssessment` | `criterion_db`, `prominent` | gains `method`, `"tone_to_noise_ratio"` or `"prominence_ratio"` | 3.3.0 |
+| `psychoacoustics.ToneAssessment` | `prominence_limit_db`, `prominent` | gains `method`, `"tone_to_noise_ratio"` or `"prominence_ratio"` | 3.3.0 |
 | `underwater.WeightedExposureResult` | `criteria` | gains `impulsive` | 4.0.0rc1 |
 | `vibration.ExposureAssessment` | `action_value`, `limit_value`, `exceeds_action`, `exceeds_limit`, `zone` | `value`, `kind`, `metric` | 3.3.0 |
 | `vibration.PhaseVerification`, `vibration.WeightingVerification` | `tolerance_deg` (phase), `within_tolerance` | the weighting and the frequencies | 4.0.0rc1 |
@@ -1524,10 +1602,10 @@ that is keyword-only.
 | `environment.WindTurbineTonalityResult` | `is_audible` | `tonal_audibility`, `has_identified_tone`, itself read-only (next section) | 3.3.0 |
 | `filters.FilterComplianceResult` | `bands`, `overall_class`, `range_limited` | gains `band_margins`, the rows without their class | 3.3.0 |
 | `filters.WeightingComplianceResult` | `bands`, `overall_class`, `range_limited` | gains `band_margins`, the rows without their class | 4.0.0rc1 |
-| `hearing.AscendingThresholdResult` | `threshold_db`, `determined`, `series_exhausted` | `ascent_levels`, `shortened` | after 4.0.0rc1 |
+| `hearing.AscendingThresholdResult` | `threshold_level`, `determined`, `series_exhausted` | `ascent_levels`, `shortened` | after 4.0.0rc1 |
 | `hearing.TaskContribution` | `spread_advisory` | `n_samples`, `sample_range_db` | 3.3.0 |
 | `hearing.ExposureResult` | `sampling_advisory` | gains `sample_range_db`, `n_workers`, `sample_duration_hours`, by name only | 3.3.0 |
-| `hearing.AttenuationDifferenceResult` | `difference`, `criterion_db`, `significant` | the two means and their expanded uncertainties | after 4.0.0rc1 |
+| `hearing.AttenuationDifferenceResult` | `difference`, `significance_limit_db`, `significant` | the two means and their expanded uncertainties | after 4.0.0rc1 |
 | `materials.CeilingSpecimenCheck` | `area_error_m2`, `deflection_ok`, `substructure_ok`, `fixture_ok`, `supports_ok`, `humidity_ok`, `ce_marking_depth`, `passes` | gains the measured figures: `deflection_mm`, `substructure_width_mm`, `substructure_height_mm`, `fixture_density_kg_m2`, `support_width_mm`, `support_height_mm`, `support_center_distance_m`, `lowest_relative_humidity_percent` | after 4.0.0rc1 |
 | `metrology.TrendTestResult` | `trend_free`, `bounds` | `statistic`, against the region `values`, `method`, `alpha` and `median` give | 3.3.0 |
 | `metrology.StationarityTestResult` | `stationary`, `bounds` | `trend_statistic`, against the region `segment_values`, `method` and `alpha` give | 3.3.0 |
@@ -1546,7 +1624,7 @@ that is keyword-only.
 | `broadcast.QuasiPeakDynamicsResult` | `passes`, `worst_margin_db`, `worst_deviation_db`, `stimuli` | gains `readings_percent`, the eleven readings in the order of Tables 2 and 3 | 4.0.0rc1 |
 | `building.FloorCoveringImprovementResult` | `limited` | gains `background_margin_db`, the smallest margin over the positions and both floors | 3.1.0 |
 | `building.VibrationReductionResult` | `single_number`, `bracketed` | `frequencies`, `k_ij`; gains `modal_overlap`, `fraction` | 3.1.0 |
-| `building.ServiceEquipmentBackgroundResult` | `difference`, `correction`, `corrected_db`, `regime` | `measured_db`, `background_db` | after 4.0.0rc1 |
+| `building.ServiceEquipmentBackgroundResult` | `difference`, `correction`, `corrected_levels`, `regime` | `measured_levels`, `background_levels` | after 4.0.0rc1 |
 | `building.ServiceEquipmentResult` | `standardizable` | `frequencies`, `fraction` | after 4.0.0rc1 |
 | `emission.SoundPowerIntensityResult` | `partial_power_level`, `sound_power`, `sound_power_level`, `negative_band`, `negative_partial_power_index`, `dynamic_capability_index`, `achieved_grade`, `a_weighting_omitted_bands`, `sound_power_level_a` | `partial_power` and the indicators; gains `pressure_residual_index`, `fraction`, `repeatability_limit_db` | 3.1.0 |
 | `emission.PrecisionIntensityResult` | `sound_power`, `sound_power_level`, `sound_power_level_normalized`, `not_applicable_band`, `sound_power_level_a` | `partial_power`; gains `temperature_c`, `static_pressure_pa`, by name only | 3.1.0 |
@@ -1846,9 +1924,9 @@ Everything else moved. These seventy-four exist in no public module:
 | `EnclosureResult` | `noise_control.EnclosureInsertionLossResult`, what `enclosure_insertion_loss` returns, beside `EnclosureInsulationResult` |
 | `maximum_repeatability_standard_deviation`, `minimum_cumulative_duration_hours`, `minimum_phase` | `building.max_repeatability_standard_deviation`, `hearing.min_cumulative_duration_hours`, `signals.min_phase`: `max` and `min` in every public name |
 | `rigid_mass_calibration_check` | `vibration.verify_rigid_mass_calibration`, with the same arguments and the same `RigidMassCalibrationResult`: it judges a measuring chain, so its verb is `verify_` |
-| `satisfies_lower_requirement`, `satisfies_upper_requirement` | `building.assess_requirement_conformity(value_db, expanded_uncertainty_db, requirement_db, bound="minimum")` or `bound="maximum"`. The bool is its `.passes`, beside the `.margin_db` it was read from, and both formulae stay strict |
+| `satisfies_lower_requirement`, `satisfies_upper_requirement` | `building.assess_requirement_conformity(rating, expanded_uncertainty_db, required_rating, bound="minimum")` or `bound="maximum"`. The bool is its `.passes`, beside the `.margin_db` it was read from, and both formulae stay strict |
 | `strong_coupling_satisfied` | `building.check_strong_coupling`, with the same arguments. The boolean array is its `.holds`, and `.passes` is every band |
-| `tonal_seeking_survey` | `environment.assess_tonal_survey(levels, frequencies=frequencies)`. The boolean array is its `.prominent`, beside the `.thresholds_db` and `.level_differences` it was read from |
+| `tonal_seeking_survey` | `environment.assess_tonal_survey(levels, frequencies=frequencies)`. The boolean array is its `.prominent`, beside the `.min_level_differences` and `.level_differences` it was read from |
 
 ## What did not change
 

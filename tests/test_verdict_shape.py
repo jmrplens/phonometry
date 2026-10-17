@@ -575,7 +575,8 @@ def _band_flatness() -> object:
 def _intensity_class() -> object:
     from phonometry import emission
 
-    frequencies, class1, _ = emission.residual_index_limits("probe")
+    limits = emission.residual_index_limits("probe")
+    frequencies, class1 = limits.frequencies, limits.class_1
     return emission.verify_intensity_class(
         class1 + 1.0, frequencies=frequencies, device="probe"
     )

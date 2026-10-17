@@ -202,6 +202,7 @@ is the same thing.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive radius or the atmospheric inputs [`air_absorption_np_per_m`](/phonometry/reference/api/power/sound-power-high-frequency/#air_absorption_np_per_m) refuses. |
+| TypeError | if `radius` is not a single number. |
 
 ## high_frequency_levels_to_determine
 
@@ -252,6 +253,7 @@ standard applies and no A-weighted level is asked for.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a noise type the table does not name, or for a combination it has no row for: no significant noise in either range, or broadband noise in the 16 kHz octave with none below it. |
+| TypeError | if `noise_125_hz_to_8_khz` or `noise_16_khz_octave` is not a text. |
 
 ## high_frequency_sound_power
 
@@ -296,6 +298,7 @@ clause 7).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for non-finite levels, a room constant that is not positive, frequencies that do not match the bands, or a temperature or static pressure ISO 3741 cannot correct from. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## high_frequency_sound_power_comparison
 
@@ -341,7 +344,7 @@ comparison method.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a band calibration given as the reference when `noise_bandwidth_hz` asks for a tonal comparison, which needs levels. |
+| TypeError | for a band calibration given as the reference when `noise_bandwidth_hz` asks for a tonal comparison, which needs levels, a `noise_bandwidth_hz` that is not one number, or `frequencies` that hold a text or a value that is not a number. |
 | ValueError | for non-finite levels, reference levels that do not span the same bands, a non-positive bandwidth, or a temperature or static pressure ISO 3741 cannot correct from. |
 
 ## HighFrequencySoundPowerResult
@@ -457,6 +460,7 @@ summed with [`tone_level_from_sidebands`](/phonometry/reference/api/power/sound-
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive or non-finite input. |
+| TypeError | if `microphone_speed_m_s` or `speed_of_sound` is not a single number, or `tone_frequency_hz` holds a text or a value that is not a real number. |
 
 ## room_absorption_coefficient
 
@@ -492,6 +496,7 @@ constant is the 0,16 the formula prints.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive or non-finite time, volume or surface. |
+| TypeError | if `surface_area` or `volume` is not a single number, or `reverberation_time` holds a text or a value that is not a real number. |
 
 ## room_constant_from_air_absorption
 
@@ -536,6 +541,7 @@ longer negligible there and the measured reverberation time of
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive or non-finite volume or surface, for the atmospheric inputs [`air_absorption_np_per_m`](/phonometry/reference/api/power/sound-power-high-frequency/#air_absorption_np_per_m) refuses, or where $8 \alpha V / S \ge 1$: the air alone would then absorb more than the room surface can, and Formula (7) has no finite room constant. |
+| TypeError | if `surface_area` or `volume` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## room_constant_from_reverberation_time
 
@@ -597,3 +603,4 @@ its energy when the analyser is narrower than
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an empty or non-finite input. |
+| TypeError | if `sideband_levels` holds a text or a value that is not a real number. |

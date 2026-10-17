@@ -317,11 +317,12 @@ l_in_sub = np.array([
     np.full(16, 39.0),    # 5.5 m2, outward
     np.full(16, 33.0),    # 1.5 m2, INWARD -> negative area
 ])
-l_in_comb, s_m = building.subarea_intensity_level(l_in_sub, [5.0, 5.5, -1.5])
+combined = building.subarea_intensity_level(l_in_sub, [5.0, 5.5, -1.5])
+l_in_comb, s_m = combined.levels, combined.measurement_area
 print(round(float(l_in_comb[0]), 2), s_m)     # 39.36 12.0
 
 # Ignoring the sign inflates the transmitted power, i.e. lowers RI:
-l_in_naive, _ = building.subarea_intensity_level(l_in_sub, [5.0, 5.5, 1.5])
+l_in_naive = building.subarea_intensity_level(l_in_sub, [5.0, 5.5, 1.5]).levels
 print(round(float(l_in_naive[0] - l_in_comb[0]), 2))   # 0.24
 ```
 
@@ -350,7 +351,7 @@ is what the $10\log_{10}(S_\mathrm{m}/S)$ term of $R_I$ needs.
 `intensity_element_normalized_difference()` an
 `IntensityElementNormalizedResult` (`d_i_n_e`, `rating`);
 `surface_pressure_intensity_indicator()` returns an array and
-`subarea_intensity_level()` a `(LIn, Sm)` pair. The `rating` fields are formed only
+`subarea_intensity_level()` a `SubareaIntensityLevel` (`levels`, `measurement_area`). The `rating` fields are formed only
 for exactly 16 one-third-octave or 5 octave values and are `None` otherwise,
 so a scan taken over the full ISO 15186-1 range of 100 Hz to 5000 Hz
 (Clause 6.6, 18 bands) must be trimmed to the ISO 717-1 range before it can be

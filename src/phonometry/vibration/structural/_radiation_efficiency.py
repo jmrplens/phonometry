@@ -113,6 +113,8 @@ def coincidence_frequency(
     :param speed_of_sound: Speed of sound in air ``c0`` (Default: 343 m/s).
     :return: The coincidence frequency ``fc``, in hertz.
     :raises ValueError: for a non-positive input.
+    :raises TypeError: if ``bending_stiffness``, ``mass_per_area`` or ``speed_of_sound``
+        is not a single number.
     """
     m2 = require_positive(mass_per_area, "mass_per_area")
     b = require_positive(bending_stiffness, "bending_stiffness")
@@ -243,6 +245,9 @@ def radiation_efficiency(
     :param speed_of_sound: Speed of sound in air ``c0`` (Default: 343 m/s).
     :return: A :class:`RadiationEfficiencyResult`.
     :raises ValueError: for a non-positive input or unknown boundary/baffle.
+    :raises TypeError: if ``baffle`` or ``boundary`` is not a text, or
+        ``critical_frequency``, ``length_x``, ``length_y`` or ``speed_of_sound`` is not
+        a single number.
     """
     freq = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
     if freq.ndim != 1 or freq.size == 0:

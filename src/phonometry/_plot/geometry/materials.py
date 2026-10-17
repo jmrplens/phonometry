@@ -428,6 +428,8 @@ def plot_slit_absorber_geometry(
     :return: The axes.
     :raises ValueError: naming the first of the three lengths that is not
         finite and positive, or for an empty resonator chain.
+    :raises TypeError: if ``lattice_step_m``, ``period_m`` or ``slit_height_m`` is not a
+        single number.
     """
     _check_language(language)
     require_positive(slit_height_m, "slit_height_m")
@@ -531,6 +533,8 @@ def plot_qrd_geometry(
     :raises ValueError: for an empty or non-1-D depth sequence, a depth that
         is not finite and non-negative, a non-positive well width, fewer than
         one period, or a negative fin width.
+    :raises TypeError: if ``fin_width``, ``n_repetitions`` or ``well_width`` is not a
+        single number.
     """
     require_scalar(n_repetitions, "n_repetitions")
     _check_language(language)
@@ -770,6 +774,8 @@ def plot_impedance_tube_geometry(
     :raises ValueError: for a spacing, distance, diameter or sample
         thickness that is not finite and positive, or an ``x1`` no greater
         than the spacing.
+    :raises TypeError: if ``diameter_m``, ``sample_thickness_m``, ``spacing_m`` or
+        ``x1`` is not a single number.
     """
     from ...materials.absorbers.impedance_tube import plane_wave_frequency_range
 
@@ -889,6 +895,8 @@ def plot_transmission_tube_geometry(
     :return: The axes.
     :raises ValueError: naming the first length or diameter that is not
         finite and positive, or an ``l2`` no greater than the thickness.
+    :raises TypeError: if ``diameter_m``, ``l2`` or ``thickness_m`` is not a single
+        number.
     """
     require_scalar(l2, "l2")
     require_scalar(thickness_m, "thickness_m")
@@ -1007,13 +1015,7 @@ def plot_layered_absorber_geometry(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    """Stack drawing for a result that retained its ``layers``."""
-    if result.layers is None:
-        msg = (
-            "This result does not retain its layers; call "
-            "plot_absorber_stack(layers) with the original layer sequence."
-        )
-        raise ValueError(msg)
+    """Stack drawing of the ``layers`` a result was solved for."""
     return plot_absorber_stack(result.layers, ax=ax, language=language, **kwargs)
 
 
@@ -1024,18 +1026,7 @@ def plot_slit_absorber_result_geometry(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    """Slit-panel drawing for a result that retained its geometry."""
-    if (
-        result.resonators is None
-        or result.slit_height_m is None
-        or result.lattice_step_m is None
-        or result.period_m is None
-    ):
-        msg = (
-            "This result does not retain its geometry; call "
-            "plot_slit_absorber_geometry(...) with the original arguments."
-        )
-        raise ValueError(msg)
+    """Slit-panel drawing of the geometry a result was predicted for."""
     return plot_slit_absorber_geometry(
         result.resonators,
         ax=ax,
@@ -1119,6 +1110,7 @@ def plot_metadiffuser_panel_geometry(
     :raises ValueError: for a depth or period that is not finite and
         positive, fewer than two wells, or a slit height that is not
         smaller than the period.
+    :raises TypeError: if ``depth_m`` or ``period_m`` is not a single number.
     """
     _check_language(language)
     require_positive(depth_m, "depth_m")
@@ -1221,14 +1213,7 @@ def plot_metadiffuser_geometry(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    """Panel drawing for a metadiffuser result that retained its geometry."""
-    if result.wells is None or result.depth_m is None or result.period_m is None:
-        msg = (
-            "This result does not retain its geometry; call "
-            "plot_metadiffuser_panel_geometry(...) with the original "
-            "arguments."
-        )
-        raise ValueError(msg)
+    """Panel drawing of the geometry a metadiffuser result was predicted for."""
     return plot_metadiffuser_panel_geometry(
         result.wells,
         ax=ax,
@@ -1247,17 +1232,18 @@ def plot_diffuser_geometry(
     **kwargs: Any,
 ) -> Axes:
     """QRD well profile for a polar response that retained its geometry."""
-    if result.depths is None or result.well_width is None:
+    if result.depths is None:
         msg = (
-            "This response does not retain its well geometry; call "
-            "plot_qrd_geometry(depths, well_width) instead."
+            "This response was predicted from an explicit reflection sequence "
+            "and has no well profile to draw; call plot_qrd_geometry(depths, "
+            "well_width) with the depths of the surface."
         )
         raise ValueError(msg)
     return plot_qrd_geometry(
         result.depths,
         result.well_width,
         ax=ax,
-        n_repetitions=result.n_repetitions if result.n_repetitions is not None else 1,
+        n_repetitions=result.n_repetitions,
         language=language,
         **kwargs,
     )
@@ -1270,13 +1256,7 @@ def plot_impedance_tube_result_geometry(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    """Tube drawing for an ISO 10534-2 result that retained its geometry."""
-    if result.spacing_m is None or result.x1 is None:
-        msg = (
-            "This result does not retain its tube geometry; call "
-            "plot_impedance_tube_geometry(...) with the original arguments."
-        )
-        raise ValueError(msg)
+    """Tube drawing at the geometry an ISO 10534-2 result was reduced with."""
     return plot_impedance_tube_geometry(
         ax=ax,
         spacing_m=result.spacing_m,
@@ -1352,6 +1332,8 @@ def plot_in_situ_geometry(
     :return: The axes.
     :raises ValueError: for a height or sampled radius that is not finite
         and positive, or a source no higher than the microphone.
+    :raises TypeError: if ``microphone_height_m``, ``sampled_radius`` or
+        ``source_height_m`` is not a single number.
     """
     _check_language(language)
     require_positive(microphone_height_m, "microphone_height_m")
@@ -1452,13 +1434,7 @@ def plot_in_situ_result_geometry(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    """Set-up drawing for a result that retained its geometry."""
-    if result.source_height_m is None or result.microphone_height_m is None:
-        msg = (
-            "This result does not retain its set-up heights; call "
-            "plot_in_situ_geometry(source_height_m=..., microphone_height_m=...)."
-        )
-        raise ValueError(msg)
+    """Set-up drawing at the heights a result was reduced with."""
     return plot_in_situ_geometry(
         ax=ax,
         source_height_m=result.source_height_m,
@@ -1496,6 +1472,8 @@ def plot_dynamic_stiffness_rig(
     :return: The axes.
     :raises ValueError: naming the first of the three that is not finite and
         positive.
+    :raises TypeError: if ``load_mass``, ``specimen_side`` or ``specimen_thickness_m``
+        is not a single number.
     """
     _check_language(language)
     require_positive(specimen_side, "specimen_side")
@@ -1592,6 +1570,8 @@ def plot_goniometer_geometry(
     :return: The axes.
     :raises ValueError: for a distance, radius or width that is not finite
         and positive, or an angular step outside ``(0, 90]`` degrees.
+    :raises TypeError: if ``angular_step``, ``receiver_radius``, ``sample_width`` or
+        ``source_distance`` is not a single number.
     """
     require_scalar(angular_step, "angular_step")
     _check_language(language)

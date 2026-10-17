@@ -113,6 +113,7 @@ def object_fraction(object_volumes: ArrayLike, volume: float) -> float:
     :param volume: Volume of the empty enclosed space ``V``, m3.
     :return: The object fraction
         :math:`\psi = \sum V_{\text{obj}} / V`.
+    :raises TypeError: if ``volume`` is not a single number.
     """
     volume = require_positive(volume, "volume")
     vols = np.asarray(object_volumes, dtype=np.float64)
@@ -154,6 +155,7 @@ def air_absorption_area(
     :param object_fraction: Object fraction ``psi`` (0-1).
     :return: The air absorption area
         :math:`A_{\text{air}} = 4 m V (1 - \psi)`, m2.
+    :raises TypeError: if ``object_fraction`` or ``volume`` is not a single number.
     """
     volume = require_positive(volume, "volume")
     object_fraction = require_fraction(object_fraction, "object_fraction")
@@ -229,6 +231,8 @@ def reverberation_time(
     :return: The reverberation time
         :math:`T = \frac{55.3}{c_0} \frac{V (1 - \psi)}{A}`, s.
     :raises ValueError: if ``absorption_area`` is not positive and finite.
+    :raises TypeError: if ``object_fraction``, ``speed_of_sound`` or ``volume`` is not a
+        single number.
     """
     volume = require_positive(volume, "volume")
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")

@@ -130,8 +130,8 @@ earmuffs commonly do above 1 kHz; it is kept as it is.
 ```python
 ActiveInsertionLossResult(
     insertion_loss: np.ndarray,
-    per_ear_db: np.ndarray | None,
-    mean_db: np.ndarray,
+    per_ear_insertion_loss: np.ndarray | None,
+    mean_insertion_loss: np.ndarray,
     standard_deviation_db: np.ndarray,
     standard_uncertainty_db: np.ndarray,
     expanded_uncertainty_db: np.ndarray,
@@ -147,8 +147,8 @@ The active insertion loss of an ANR earmuff on a panel of subjects.
 | Name | Description |
 | :--- | :--- |
 | `insertion_loss` | $\alpha$ per subject and band, the ear with the lower value in each band (5.5 b)), in dB. |
-| `per_ear_db` | The value of each ear, a `(subjects, 2, bands)` grid with the left ear first, in dB, or `None` when only the lower-ear values were given. |
-| `mean_db` | The mean over the subjects per band, in dB. |
+| `per_ear_insertion_loss` | The value of each ear, a `(subjects, 2, bands)` grid with the left ear first, in dB, or `None` when only the lower-ear values were given. |
+| `mean_insertion_loss` | The mean over the subjects per band, in dB. |
 | `standard_deviation_db` | The sample standard deviation per band, in dB. |
 | `standard_uncertainty_db` | $u = s/\sqrt{N}$ (A.2), in dB. |
 | `expanded_uncertainty_db` | $U_{95} = 2u$ (A.1), in dB. |
@@ -310,9 +310,9 @@ Draw every step at the ear against the 5 dB ± 1 dB it should be.
 
 ```python
 ANRTotalAttenuationResult(
-    total_octave_db: np.ndarray,
-    total_third_octave_db: np.ndarray,
-    reat_third_octave_db: np.ndarray,
+    total_octave_attenuation: np.ndarray,
+    total_third_octave_attenuation: np.ndarray,
+    reat_third_octave_attenuation: np.ndarray,
     insertion_loss: np.ndarray,
     frequencies: np.ndarray,
     third_octave_frequencies: np.ndarray,
@@ -328,9 +328,9 @@ The total attenuation of an ANR earmuff and its ISO 4869-2 ratings (5.5).
 
 | Name | Description |
 | :--- | :--- |
-| `total_octave_db` | $A_{\mathrm{total,oct},j}$ per subject and octave band, Formula (1), in dB. This is the grid of 5.5 e). |
-| `total_third_octave_db` | $A_{\mathrm{total},f,j}$ per subject and one-third-octave band, 5.5 c), in dB. |
-| `reat_third_octave_db` | The passive attenuation interpolated and extrapolated into the one-third-octave bands, 5.5 a), in dB. |
+| `total_octave_attenuation` | $A_{\mathrm{total,oct},j}$ per subject and octave band, Formula (1), in dB. This is the grid of 5.5 e). |
+| `total_third_octave_attenuation` | $A_{\mathrm{total},f,j}$ per subject and one-third-octave band, 5.5 c), in dB. |
+| `reat_third_octave_attenuation` | The passive attenuation interpolated and extrapolated into the one-third-octave bands, 5.5 a), in dB. |
 | `insertion_loss` | The lower-ear active insertion loss in the same bands, 5.5 b), in dB. |
 | `frequencies` | The octave bands, in hertz. |
 | `third_octave_frequencies` | The one-third-octave bands, in hertz. |

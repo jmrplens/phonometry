@@ -336,6 +336,8 @@ class Aerodrome(RichDisplay):
 
         :raises ValueError: if a field is not finite, the sea-level pressure is
             not positive, or the runway gradient is not below 1 in magnitude.
+        :raises TypeError: if ``runway_gradient_ratio`` or ``sea_level_pressure_inhg``
+            is not a single number.
         """
         require_scalar(self.runway_gradient_ratio, "runway_gradient_ratio")
         require_scalar(self.sea_level_pressure_inhg, "sea_level_pressure_inhg")
@@ -566,6 +568,7 @@ class PropellerEngineCoefficients(RichDisplay):
             speed", which at the take-off Point1 is the Point2 true airspeed.
         :param pressure_ratio: ``delta`` of Eq. B-4 at the point's altitude.
         :raises ValueError: if the true airspeed is not positive.
+        :raises TypeError: if ``true_airspeed_kt`` is not a single number.
         """
         # Spelled out rather than as ``not v > 0``: the two differ only on NaN,
         # which the negated comparison happens to catch, and a guard should say
@@ -675,6 +678,7 @@ class PerformanceAircraft(RichDisplay):
 
         :raises ValueError: if the engine count is below one, or a weight or
             thrust is not finite and positive.
+        :raises TypeError: if ``n_engines`` is not a single number.
         """
         require_scalar(self.n_engines, "n_engines")
         require_finite_fields(self, "max_static_thrust_lb", "max_landing_weight_lb")
@@ -918,6 +922,7 @@ class ApproachStep(RichDisplay):
 
         :raises ValueError: if the step type is not one of the eight of B7.1, or
             the parameters that type is solved from are missing.
+        :raises TypeError: if ``distance_ft`` is not a single number.
         """
         require_scalar(self.distance_ft, "distance_ft")
         kind = self.kind
@@ -1965,6 +1970,7 @@ def departure_profile(
     :return: A :class:`FlightProfile` with ``operation="D"``.
     :raises ValueError: if the procedure does not start with a Take-off step,
         or a step cannot be flown as specified.
+    :raises TypeError: if ``weight_lb`` is not a single number.
     """
     if not steps or steps[0].kind != "takeoff":
         first = steps[0].step_type if steps else None

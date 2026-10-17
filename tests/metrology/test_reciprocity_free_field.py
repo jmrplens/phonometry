@@ -446,7 +446,9 @@ def test_distance_component_is_the_closed_form() -> None:
         for sign, d in zip((1.0, -1.0, 1.0), _DISTANCES, strict=True)
     ]
     expected = np.sqrt(sum(t**2 for t in terms))
-    np.testing.assert_allclose(result.components_db["distance"], expected, rtol=1e-9)
+    np.testing.assert_allclose(
+        result.component_uncertainties_db["distance"], expected, rtol=1e-9
+    )
 
 
 def test_free_field_components_are_named_by_table_1() -> None:
@@ -463,17 +465,17 @@ def test_free_field_components_are_named_by_table_1() -> None:
         acoustic_centers_m=_CENTRES,
         **_CONDITIONS,
     )
-    assert set(result.components_db) == {
+    assert set(result.component_uncertainties_db) == {
         "acoustic_centers",
         "temperature",
         "static_pressure",
         "relative_humidity",
         "air_attenuation",
     }
-    assert set(result.components_db) <= set(metrology.IEC61094_3_TABLE_1)
+    assert set(result.component_uncertainties_db) <= set(metrology.IEC61094_3_TABLE_1)
     budget = metrology.reciprocity_uncertainty_budget(
         frequencies=_F,
-        standard_uncertainties_db=result.components_db,
+        standard_uncertainties_db=result.component_uncertainties_db,
         field="free",
     )
     assert np.all(budget.expanded_uncertainty_db > 0.0)
@@ -510,7 +512,7 @@ def test_acoustic_centre_uncertainty_is_held_read_only_and_per_frequency() -> No
         acoustic_centers_m=_CENTRES,
         **_CONDITIONS,
     )
-    assert result.components_db["acoustic_centers"].shape == (3,)
+    assert result.component_uncertainties_db["acoustic_centers"].shape == (3,)
     with pytest.raises(ValueError, match="one value per frequency"):
         metrology.free_field_parameter_uncertainty(
             _F[:2],

@@ -156,6 +156,7 @@ atmospheric-absorption class of probability 1.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the shapes differ, a probability is negative, the probabilities do not sum to one, every probability is zero, or a value is not finite. |
+| TypeError | if `rating_adjustment` is not a single number. |
 
 ## replica_probabilities
 
@@ -237,6 +238,7 @@ width, in which case the run is combined (see the module documentation).
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the shapes differ, a value is not finite, a probability is negative, the probabilities do not sum to one, every probability is zero, fewer than two distinct levels remain once equal levels are combined, `sigma_db` is not positive, or `n_subclasses` is not a whole number of at least one. |
+| TypeError | if `sigma_db` is not a single number, or `n_subclasses` is a flag, a text or an array where a count goes. |
 
 ## SELDistribution
 
@@ -247,7 +249,7 @@ SELDistribution(
     lower_bounds_db: NDArray[np.float64],
     upper_bounds_db: NDArray[np.float64],
     class_densities_per_db: NDArray[np.float64],
-    subclass_centers_db: NDArray[np.float64],
+    subclass_center_levels: NDArray[np.float64],
     sigma_db: float,
     level_shift: float,
     n_subclasses: int,
@@ -275,7 +277,7 @@ normal distribution of standard deviation `sigma_db` centred
 | `lower_bounds_db` | $g_{\mathrm{L},m}$, in dB (Equations (11), (12)). |
 | `upper_bounds_db` | $g_{\mathrm{U},m}$, in dB (Equations (11), (13)). |
 | `class_densities_per_db` | $\rho_m$, the constant density of each class, in 1/dB (Equation (15)). |
-| `subclass_centers_db` | $\mu_{m,j}$, shape `(M, subclasses)`, in dB (Equation (18)). |
+| `subclass_center_levels` | $\mu_{m,j}$, shape `(M, subclasses)`, in dB (Equation (18)). |
 | `sigma_db` | $\sigma$ of the turbulent spread, in dB. |
 | `level_shift` | $\Delta\mu$, in dB (Equation (22)). |
 | `n_subclasses` | $N_\mathrm{sub}$, the subclasses per class. |
@@ -287,7 +289,7 @@ normal distribution of standard deviation `sigma_db` centred
 
 ```python
 SELDistribution.class_density(
-    x_db: ArrayLike,
+    levels: ArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -302,14 +304,14 @@ neighbour, it is zero.
 
 | Name | Description |
 | :--- | :--- |
-| `x_db` | Level or levels `x`, in dB. |
+| `levels` | Level or levels `x`, in dB. |
 
 **Returns:** $\rho(x)$, a float for a scalar `x`.
 
 ### SELDistribution.density()
 
 ```python
-SELDistribution.density(x_db: ArrayLike) -> float | NDArray[np.float64]
+SELDistribution.density(levels: ArrayLike) -> float | NDArray[np.float64]
 ```
 
 The continuous density $\rho^{*}(x)$ (Equations (21), (23)), in 1/dB.
@@ -318,14 +320,14 @@ The continuous density $\rho^{*}(x)$ (Equations (21), (23)), in 1/dB.
 
 | Name | Description |
 | :--- | :--- |
-| `x_db` | Level or levels `x`, in dB. |
+| `levels` | Level or levels `x`, in dB. |
 
 **Returns:** $\rho^{*}(x)$, a float for a scalar `x`.
 
 ### SELDistribution.exceedance()
 
 ```python
-SELDistribution.exceedance(x_db: ArrayLike) -> float | NDArray[np.float64]
+SELDistribution.exceedance(levels: ArrayLike) -> float | NDArray[np.float64]
 ```
 
 Probability that the level exceeds `x` (Equation (24)).
@@ -342,7 +344,7 @@ falls.
 
 | Name | Description |
 | :--- | :--- |
-| `x_db` | Level or levels `x`, in dB. |
+| `levels` | Level or levels `x`, in dB. |
 
 **Returns:** The probability, a float for a scalar `x`.
 
@@ -438,3 +440,4 @@ $$
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive or non-finite `sigma_db`. |
+| TypeError | if `sigma_db` is not a single number. |

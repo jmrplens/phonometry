@@ -306,6 +306,7 @@ def impedance_code(impedance_ohm: float) -> str:
     :raises ValueError: If the impedance is not a positive whole number of
         ohms or does not fit the form: ``4.7`` ohm is not whole, and ``123``
         ohm needs a mantissa of three digits.
+    :raises TypeError: if ``impedance_ohm`` is not a single number.
     """
     value = require_positive(impedance_ohm, "impedance_ohm")
     whole = round(value)
@@ -363,6 +364,8 @@ class HeadphoneClassification(RichDisplay):
 
         :raises ValueError: If a letter is not in its table, the impedance
             does not fit the NNRN form or the channels are not 1 to 9.
+        :raises TypeError: if ``n_channels`` is a flag, a text or an array where a count
+            goes.
         """
         _require_letter(self.principle, "principle", TRANSDUCER_PRINCIPLES)
         _require_letter(self.earphone_type, "earphone_type", EARPHONE_TYPES)
@@ -683,6 +686,7 @@ def verify_rated_impedance(
     :return: A :class:`RatedImpedanceVerification`.
     :raises ValueError: If the inputs differ in length, are not positive and
         finite, or no measurement frequency falls in the rated range.
+    :raises TypeError: if ``rated_impedance_ohm`` is not a single number.
     """
     f = _frequencies(frequencies)
     z = np.abs(np.atleast_1d(np.asarray(impedance_ohm, dtype=np.complex128)))
@@ -732,6 +736,8 @@ def characteristic_voltage(source_emf_v: float, sound_pressure_level: float) -> 
         simulator, in dB re 20 µPa.
     :return: The characteristic voltage, in volts (RMS).
     :raises ValueError: If the e.m.f. is not positive or the level not finite.
+    :raises TypeError: if ``sound_pressure_level`` or ``source_emf_v`` is not a single
+        number.
     """
     emf = require_positive(source_emf_v, "source_emf_v")
     require_scalar(sound_pressure_level, "sound_pressure_level")
@@ -780,6 +786,8 @@ def headphone_input_power(
         (IEC 61938 specifies 120 ohm for a headphone output, 7.1 NOTE).
     :return: The input power, in watts.
     :raises ValueError: If an input is out of range.
+    :raises TypeError: if ``rated_impedance_ohm``, ``rated_source_impedance_ohm`` or
+        ``source_emf_v`` is not a single number.
     """
     emf = require_positive(source_emf_v, "source_emf_v")
     rated, source = _impedances(rated_impedance_ohm, rated_source_impedance_ohm)
@@ -803,6 +811,8 @@ def headphone_source_emf(
     :param rated_source_impedance_ohm: The rated source impedance, in ohms.
     :return: The source e.m.f., in volts (RMS).
     :raises ValueError: If an input is out of range.
+    :raises TypeError: if ``input_power_w``, ``rated_impedance_ohm`` or
+        ``rated_source_impedance_ohm`` is not a single number.
     """
     power = require_positive(input_power_w, "input_power_w")
     rated, source = _impedances(rated_impedance_ohm, rated_source_impedance_ohm)
@@ -849,6 +859,8 @@ def working_sound_pressure_level(
         8.5.2 b) to d).
     :return: The working sound pressure level, in dB re 20 µPa.
     :raises ValueError: If an input is out of range.
+    :raises TypeError: if ``rated_impedance_ohm``, ``rated_source_impedance_ohm``,
+        ``sound_pressure_level`` or ``source_emf_v`` is not a single number.
     """
     emf = require_positive(source_emf_v, "source_emf_v")
     require_scalar(sound_pressure_level, "sound_pressure_level")
@@ -927,6 +939,7 @@ def program_signal_level(
     :return: The level of the whole signal, in dB re 20 µPa.
     :raises ValueError: If the inputs differ in length or are not finite, or
         ``weighting`` is neither ``"A"`` nor ``"Z"``.
+    :raises TypeError: if ``weighting`` is not a text.
     """
     weighting = require_choice(weighting, "weighting", A_OR_Z_WEIGHTINGS)
     f = _frequencies(frequencies)
@@ -968,6 +981,7 @@ class ProgramCharacteristicVoltage(OwnsArrays):
         """Refuse a weighting 8.3.5 does not apply.
 
         :raises ValueError: if ``weighting`` is neither ``"A"`` nor ``"Z"``.
+        :raises TypeError: if ``weighting`` is not a text.
         """
         require_choice(self.weighting, "weighting", A_OR_Z_WEIGHTINGS)
 
@@ -1068,6 +1082,7 @@ def program_characteristic_voltage(
     :return: A :class:`ProgramCharacteristicVoltage`.
     :raises ValueError: If the shapes disagree, a value is out of range or
         ``weighting`` is neither ``"A"`` nor ``"Z"``.
+    :raises TypeError: if ``weighting`` is not a text.
     """
     weighting = require_choice(weighting, "weighting", A_OR_Z_WEIGHTINGS)
     f = _frequencies(frequencies)
@@ -1453,7 +1468,7 @@ class CrosstalkAttenuation(OwnsArrays):
         return np.asarray(self.driven_level - self.other_level, dtype=np.float64)
 
     @property
-    def min_db(self) -> float:
+    def min_attenuation(self) -> float:
         """The smallest attenuation over the frequencies, in dB."""
         return float(np.min(self.attenuation))
 
@@ -1534,7 +1549,7 @@ class FieldComparisonResponse(OwnsArrays):
         return int(self.response_db.shape[0])
 
     @property
-    def mean_db(self) -> NDArray[np.float64]:
+    def mean_response_db(self) -> NDArray[np.float64]:
         """The response averaged over the persons in each band, in dB."""
         return np.asarray(np.mean(self.response_db, axis=0), dtype=np.float64)
 
@@ -1705,7 +1720,7 @@ class EarCanalFrequencyResponse(OwnsArrays):
         )
 
     @property
-    def mean_db(self) -> NDArray[np.float64]:
+    def mean_response_db(self) -> NDArray[np.float64]:
         """Formula (1) averaged arithmetically over the persons, in dB (8.6.5.2 h)."""
         return np.asarray(np.mean(self.response_db, axis=0), dtype=np.float64)
 
@@ -1734,7 +1749,7 @@ class EarCanalFrequencyResponse(OwnsArrays):
         )
 
     @property
-    def level_match_db(self) -> NDArray[np.float64]:
+    def reference_band_level_difference(self) -> NDArray[np.float64]:
         """The first fitting's level in the reference band minus the sound field's, in dB.
 
         8.6.5.2 c): the level is adjusted "using the 1/3 octave band of noise
@@ -1751,9 +1766,10 @@ class EarCanalFrequencyResponse(OwnsArrays):
 
     @property
     def levels_matched(self) -> NDArray[np.bool_]:
-        """For each person, whether :attr:`level_match_db` is within 3 dB."""
+        """For each person, whether :attr:`reference_band_level_difference` is within 3 dB."""
         return np.asarray(
-            np.abs(self.level_match_db) <= _LEVEL_MATCH_DB * (1.0 + _LIMIT_SLACK)
+            np.abs(self.reference_band_level_difference)
+            <= _LEVEL_MATCH_DB * (1.0 + _LIMIT_SLACK)
         )
 
     @property
@@ -1989,6 +2005,8 @@ def verify_ear_canal_microphone(
     :return: An :class:`EarCanalMicrophoneVerification`.
     :raises ValueError: If a value is out of range or the level arrays
         disagree in length.
+    :raises TypeError: if ``canal_section_area_mm2``, ``ear_canal_area_mm2``,
+        ``entrance_area_mm2`` or ``volume_mm3`` is not a single number.
     """
     entrance = require_positive(entrance_area_mm2, "entrance_area_mm2")
     section = require_positive(canal_section_area_mm2, "canal_section_area_mm2")
@@ -2051,6 +2069,8 @@ def headphone_modulation_signal(
         e.m.f. of 8.3.1, in volts (RMS).
     :return: The signal, in volts.
     :raises ValueError: If an input is out of range.
+    :raises TypeError: if ``duration_s`` or ``rated_source_emf_v`` is not a single
+        number, or ``fs`` is a flag, a text or an array where a count goes.
     """
     t = _time_axis(fs, duration_s)
     peak = math.sqrt(2.0) * require_positive(rated_source_emf_v, "rated_source_emf_v")
@@ -2081,6 +2101,9 @@ def headphone_difference_frequency_signal(
     :param rated_source_emf_v: The rated input voltage, in volts (RMS).
     :return: The signal, in volts.
     :raises ValueError: If an input is out of range.
+    :raises TypeError: if ``duration_s``, ``rated_source_emf_v`` or
+        ``upper_frequency_hz`` is not a single number, or ``fs`` is a flag, a text or an
+        array where a count goes.
     """
     t = _time_axis(fs, duration_s)
     upper = require_positive(upper_frequency_hz, "upper_frequency_hz")

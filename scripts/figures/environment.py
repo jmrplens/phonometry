@@ -541,7 +541,7 @@ def _statistical_pass_by_site() -> StatisticalPassByResult:
         speeds,
         levels,
         road_speed_category="medium",
-        reference_db=environment.SPB_NORMALIZED_REFERENCE_DB,
+        reference_levels=environment.SPB_NORMALIZED_REFERENCE_LEVELS,
     )
 
 
@@ -1508,9 +1508,15 @@ def generate_cnossos_rail_roughness_shift(output_dir: str) -> None:
         (300.0, COLOR_SECONDARY, "D"),
     ):
         total = environment.total_effective_roughness(
-            environment.roughness_to_frequency(rail[1], rail[0], speed),
-            environment.roughness_to_frequency(wheel[1], wheel[0], speed),
-            environment.roughness_to_frequency(filt[1], filt[0], speed),
+            environment.roughness_to_frequency(
+                rail.levels, wavelengths_mm=rail.wavelengths_mm, speed_kmh=speed
+            ),
+            environment.roughness_to_frequency(
+                wheel.levels, wavelengths_mm=wheel.wavelengths_mm, speed_kmh=speed
+            ),
+            environment.roughness_to_frequency(
+                filt.levels, wavelengths_mm=filt.wavelengths_mm, speed_kmh=speed
+            ),
         )
         ax.semilogx(
             freqs,

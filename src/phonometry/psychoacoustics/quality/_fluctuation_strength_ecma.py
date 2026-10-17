@@ -944,6 +944,7 @@ def fluctuation_strength_ecma(
         (Formula 169).
     :raises ValueError: for an empty, multichannel or non-finite signal, a
         non-finite or non-positive ``fs``, or an unknown ``field``.
+    :raises TypeError: if ``fs`` is not a single number.
 
     A 1 kHz carrier 100 %-amplitude-modulated at 4 Hz with an overall level
     of 60 dB SPL yields 1 vacil_HMS (Clause 9 calibration; reproduced to

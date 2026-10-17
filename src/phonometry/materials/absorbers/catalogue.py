@@ -77,6 +77,7 @@ from ..._internal.catalogue import (
     search_text,
     take,
 )
+from ..._internal.frozen import OwnsArrays
 from .porous import (
     ABSORBER_AIR,
     delany_bazley,
@@ -96,6 +97,7 @@ if TYPE_CHECKING:
 __all__ = [
     "PUBLISHED_POROUS_MATERIALS",
     "PorousMaterial",
+    "FrameConstants",
     "porous_materials_named",
 ]
 
@@ -115,6 +117,23 @@ _MICROMETRES_PER_METRE = 1e6
 #: when they are not all one.
 _FROM_E_NU = "from the Young's modulus and the Poisson ratio"
 _FROM_N_NU = "from the shear modulus and the Poisson ratio"
+
+
+@dataclass(frozen=True)
+class FrameConstants(OwnsArrays):
+    r"""The in-vacuo frame constants of a porous material, as its source prints them.
+
+    What :meth:`PorousMaterial.frame_constants` returns: the shear modulus and
+    the Poisson ratio, named, where an ``(N, nu)`` tuple used to be unpacked
+    by position.
+
+    :ivar shear_modulus_pa: The complex shear modulus :math:`N(1 + j
+        \eta_s)`, in Pa.
+    :ivar poisson_ratio: The Poisson ratio :math:`\nu`.
+    """
+
+    shear_modulus_pa: complex
+    poisson_ratio: float
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -243,7 +262,7 @@ class PorousMaterial(CatalogueRow):
                 inputs=("shear_modulus_pa", "poisson_ratio"),
             )
 
-    def frame_constants(self) -> tuple[complex, float]:
+    def frame_constants(self) -> FrameConstants:
         """The in-vacuo frame constants ``(N, nu)`` the source prints.
 
         The complex shear modulus and the Poisson ratio are what
@@ -267,7 +286,8 @@ class PorousMaterial(CatalogueRow):
         material, and a cell the page left empty is not a zero. Every
         published row that prints both moduli prints the loss factor too.
 
-        :return: ``(shear_modulus_pa, poisson_ratio)``, the first complex.
+        :return: The complex shear modulus and the Poisson ratio, as a
+            :class:`FrameConstants`.
         :raises ValueError: when the source prints no elastic constants, or
             prints them without a structural loss factor, in which case the
             message says what the page had in that cell instead.
@@ -280,9 +300,12 @@ class PorousMaterial(CatalogueRow):
             )
             raise ValueError(msg)
         loss = self.printed("structural_loss_factor", wanted_by="frame_constants")
-        return complex(
-            self.shear_modulus_pa, self.shear_modulus_pa * loss
-        ), self.poisson_ratio
+        return FrameConstants(
+            shear_modulus_pa=complex(
+                self.shear_modulus_pa, self.shear_modulus_pa * loss
+            ),
+            poisson_ratio=self.poisson_ratio,
+        )
 
     def medium(
         self,

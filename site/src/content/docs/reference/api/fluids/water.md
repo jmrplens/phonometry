@@ -73,6 +73,7 @@ and an offset of an atmosphere.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the depth is negative or non-finite. |
+| TypeError | if `depth_m` or `latitude_deg` is not a single number. |
 
 ## depth_to_gauge_pressure_mpa
 
@@ -109,6 +110,7 @@ million and an offset of an atmosphere.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the depth is negative or non-finite. |
+| TypeError | if `depth_m` or `latitude_deg` is not a single number. |
 
 ## sea_water
 
@@ -181,6 +183,7 @@ a depth.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a temperature at or below absolute zero, a negative salinity, or a non-positive pressure. |
+| TypeError | if `salinity_psu`, `static_pressure_pa` or `temperature_c` is not a single number. |
 
 ## sea_water_sound_speed
 
@@ -223,6 +226,7 @@ Speed of sound in sea water, in metres per second.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `model` is unknown or an input is non-finite. |
+| TypeError | if `latitude_deg` is not a single number, or `depth_m`, `salinity_psu` or `temperature_c` holds a text or a value that is not a real number. |
 
 :::note
 Each equation is a fit over a bounded oceanographic domain and

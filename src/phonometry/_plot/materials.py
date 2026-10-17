@@ -55,7 +55,10 @@ if TYPE_CHECKING:
         DiffusionSpectrum,
     )
     from ..materials.resilient.dynamic_stiffness import DynamicStiffnessResult
-    from ..materials.surfaces.road_absorption import InSituAbsorptionResult
+    from ..materials.surfaces.road_absorption import (
+        InSituAbsorptionResult,
+        OneThirdOctaveAbsorption,
+    )
 
 _FREQ_LABEL = "Frequency [Hz]"
 _SCATTERING_TITLE = "Random-incidence scattering coefficient (ISO 17497-1)"
@@ -146,6 +149,7 @@ _STRINGS: dict[str, str] = {
     r"Transmission loss $TL_\mathrm{n}$ [dB]": r"Pérdida de transmisión $TL_\mathrm{n}$ [dB]",
     _HARD_BACKED_ALPHA_LABEL: r"Absorción con respaldo rígido $\alpha$",
     "ASTM E2611 transfer-matrix quantities": "Magnitudes de la matriz de transferencia ASTM E2611",
+    "Road-surface absorption in one-third-octave bands": "Absorción del pavimento en bandas de tercio de octava",
 }
 
 
@@ -568,30 +572,13 @@ def plot_in_situ_absorption(
     :param kwargs: Forwarded to the absorption :meth:`~matplotlib.axes.Axes.bar`.
     :return: The axes.
     """
-    ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequencies, dtype=np.float64)
-    alpha = np.asarray(result.absorption, dtype=np.float64)
-    positions = _band_axis(
-        ax, freqs, xlabel=_t(_FREQ_LABEL, language), language=language
+    return _plot_band_absorption(
+        result,
+        ax,
+        language,
+        _t("In-situ road-surface absorption (ISO 13472-1)", language),
+        **kwargs,
     )
-    style_default(kwargs, "color", _C_PRIMARY)
-    measured = np.isfinite(alpha)
-    ax.bar(positions[measured], alpha[measured], **kwargs)
-    for position in positions[~measured]:
-        ax.text(
-            float(position),
-            _IN_SITU_NO_DATA_Y,
-            _NO_DATA_MARK,
-            ha="center",
-            va="center",
-            color=_C_MUTED,
-        )
-    ax.set_ylabel(_t("Absorption coefficient", language))
-    ax.set_ylim(0.0, 1.0)
-    ax.set_title(_t("In-situ road-surface absorption (ISO 13472-1)", language))
-    ax.grid(visible=True, axis="y", alpha=0.3)
-    _localize_band_axes(ax, language)
-    return ax
 
 
 def plot_dynamic_stiffness(
@@ -1271,3 +1258,70 @@ def plot_metadiffuser_absorption(
         ax.semilogx(freqs, alpha_n, lw=0.9, alpha=0.6, color=_C_MUTED, label=label)
     ax.legend(loc="best", fontsize="small")
     return ax
+
+
+def _plot_band_absorption(
+    result: InSituAbsorptionResult | OneThirdOctaveAbsorption,
+    ax: Axes | None,
+    language: str,
+    title: str,
+    **kwargs: Any,
+) -> Axes:
+    """One bar of absorption per band, and a mark where a band has no data."""
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    alpha = np.asarray(result.absorption, dtype=np.float64)
+    positions = _band_axis(
+        ax, freqs, xlabel=_t(_FREQ_LABEL, language), language=language
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    measured = np.isfinite(alpha)
+    ax.bar(positions[measured], alpha[measured], **kwargs)
+    # A band with no data draws no bar, so the limits are set from the band
+    # axis: autoscaling to the bars would leave an empty end band, with its
+    # mark and its label, outside the axes.
+    ax.set_xlim(-0.6, positions.size - 0.4)
+    for position in positions[~measured]:
+        ax.text(
+            float(position),
+            _IN_SITU_NO_DATA_Y,
+            _NO_DATA_MARK,
+            ha="center",
+            va="center",
+            color=_C_MUTED,
+        )
+    ax.set_ylabel(_t("Absorption coefficient", language))
+    ax.set_ylim(0.0, 1.0)
+    ax.set_title(title)
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    _localize_band_axes(ax, language)
+    return ax
+
+
+def plot_one_third_octave_absorption(
+    result: OneThirdOctaveAbsorption,
+    *,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Narrow-band absorption averaged into one-third-octave bands.
+
+    One bar per band, as :func:`plot_in_situ_absorption` draws them, and the
+    same mark for a band no narrow-band sample fell in, whose absorption is
+    ``nan``.
+
+    :param result: A
+        :class:`~phonometry.materials.surfaces.road_absorption.OneThirdOctaveAbsorption`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the absorption :meth:`~matplotlib.axes.Axes.bar`.
+    :return: The axes.
+    """
+    return _plot_band_absorption(
+        result,
+        ax,
+        language,
+        _t("Road-surface absorption in one-third-octave bands", language),
+        **kwargs,
+    )

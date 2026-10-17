@@ -154,6 +154,12 @@ Four-pole matrix of a straight duct (Bies Eq. (8.143), no flow).
 
 **Returns:** A `(n_freq, 2, 2)` complex transfer-matrix array.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `area`, `density`, `length` or `speed_of_sound` is not a single number. |
+
 ## expansion_chamber
 
 ```python
@@ -186,6 +192,12 @@ Simple expansion-chamber silencer (Bies Eq. (8.111) / four-pole).
 | `radiation_impedance` | Optional radiation impedance `Z_r` for the insertion loss, Pa s/m3. |
 
 **Returns:** A [`ReactiveSilencerResult`](/phonometry/reference/api/noise_control/silencers/#reactivesilencerresult) (its `transmission_loss` equals the closed form $10 \log_{10}[1 + (1/4)(m - 1/m)^2 \sin^2(kL)]$).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `chamber_area`, `density`, `pipe_area` or `speed_of_sound` is not a single number. |
 
 ## extended_tube_chamber
 
@@ -243,6 +255,12 @@ limit of the cascade; extensions that would overlap are rejected.
 
 **Returns:** A [`ReactiveSilencerResult`](/phonometry/reference/api/noise_control/silencers/#reactivesilencerresult).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `chamber_area`, `density`, `inlet_extension`, `length`, `outlet_extension`, `pipe_area` or `speed_of_sound` is not a single number. |
+
 ## helmholtz_impedance
 
 ```python
@@ -283,6 +301,12 @@ its resistance instead, which is what bounds the peak attenuation.
 
 **Returns:** The complex branch impedance per frequency, Pa s/m3.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `cavity_volume`, `density`, `neck_area`, `neck_length`, `resistance` or `speed_of_sound` is not a single number. |
+
 ## helmholtz_resonator
 
 ```python
@@ -319,6 +343,12 @@ Side-branch Helmholtz resonator on a duct (Bies Eqs. (8.144), (8.152)).
 | `radiation_impedance` | Optional radiation impedance `Z_r`, Pa s/m3. |
 
 **Returns:** A [`ReactiveSilencerResult`](/phonometry/reference/api/noise_control/silencers/#reactivesilencerresult); `resonances` holds $f_0 = (c / 2 \pi) \sqrt{S_{\mathrm{neck}} / (l_\mathrm{e} V)}$.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `density`, `duct_area` or `speed_of_sound` is not a single number. |
 
 ## insertion_loss
 
@@ -408,6 +438,12 @@ with its volume annotated.
 
 **Returns:** The axes.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `branch_area`, `cavity_volume`, `chamber_area`, `duct_area`, `inlet_extension`, `length`, `neck_area`, `neck_length`, `outlet_extension` or `pipe_area` is not a single number. |
+
 ## quarter_wave_impedance
 
 ```python
@@ -439,6 +475,12 @@ pressure node and shorts the duct.
 | `density` | Air density `rho`, kg/m3. |
 
 **Returns:** The complex branch impedance per frequency, Pa s/m3.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `area`, `density`, `length` or `speed_of_sound` is not a single number. |
 
 ## quarter_wave_resonator
 
@@ -473,6 +515,12 @@ Closed quarter-wave side-branch tube on a duct (Bies Eqs. (8.144), (8.146)).
 
 **Returns:** A [`ReactiveSilencerResult`](/phonometry/reference/api/noise_control/silencers/#reactivesilencerresult); `resonances` holds the odd multiples of $f = c / (4 l_\mathrm{e})$ within the frequency range.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `density`, `duct_area`, `length` or `speed_of_sound` is not a single number. |
+
 ## ReactiveSilencerResult
 
 ```python
@@ -482,10 +530,11 @@ ReactiveSilencerResult(
     insertion_loss: np.ndarray | None,
     transfer_matrix: np.ndarray,
     kind: str,
-    resonances: np.ndarray | None = None,
-    geometry: dict[str, float] | None = None,
-    plane_wave_limit: float | None = None,
-    chain: SilencerChain | None = None,
+    *,
+    resonances: np.ndarray | None,
+    geometry: dict[str, float] | None,
+    plane_wave_limit: float,
+    chain: SilencerChain | None,
 )
 ```
 
@@ -501,9 +550,9 @@ Transmission and insertion loss of a reactive silencer over frequency.
 | `transfer_matrix` | The compound `(n_freq, 2, 2)` four-pole matrix. |
 | `kind` | A short label of the device (e.g. `"expansion chamber"`). |
 | `resonances` | Notable resonance frequencies, Hz (e.g. the resonator tuning frequency), or `None`. |
-| `geometry` | The defining geometry the constructor was called with (keys matching its keyword names, e.g. `length`/`chamber_area`/ `pipe_area` for a chamber), retained so `plot_geometry` can draw the device; appended after the original fields and `None` for hand-built results that were not assembled by a [`SilencerChain`](/phonometry/reference/api/noise_control/silencers/#silencerchain). |
-| `plane_wave_limit` | The first higher-order-mode cut-on frequency of the widest cross section of the device, Hz (Norton & Karczub Eq. 7.6, [`phonometry.noise_control.duct_modes.plane_wave_limit`](/phonometry/reference/api/noise_control/duct-modes/#plane_wave_limit)). The four-pole algebra of this module is one-dimensional and is valid below it; above it several modes propagate at once and the result describes the plane-wave mode only, which is why a [`PlaneWaveWarning`](/phonometry/reference/api/noise_control/duct-modes/#planewavewarning) is raised when the analysis reaches past it. `None` for hand-built results that do not retain their geometry. |
-| `chain` | The [`SilencerChain`](/phonometry/reference/api/noise_control/silencers/#silencerchain) that assembled this result, for a result built by [`SilencerChain.result`](/phonometry/reference/api/noise_control/silencers/#silencerchainresult), and `None` otherwise. A chain is a list of four-pole elements rather than a named device, so it carries its geometry element by element instead of in `geometry`; `plot_geometry` draws whichever of the two is present. |
+| `geometry` | The defining geometry the constructor was called with (keys matching its keyword names, e.g. `length`/`chamber_area`/ `pipe_area` for a chamber), retained so `plot_geometry` can draw the device, or `None` for a result assembled by a [`SilencerChain`](/phonometry/reference/api/noise_control/silencers/#silencerchain), which carries its geometry in `chain`. |
+| `plane_wave_limit` | The first higher-order-mode cut-on frequency of the widest cross section of the device, Hz (Norton & Karczub Eq. 7.6, [`phonometry.noise_control.duct_modes.plane_wave_limit`](/phonometry/reference/api/noise_control/duct-modes/#plane_wave_limit)). The four-pole algebra of this module is one-dimensional and is valid below it; above it several modes propagate at once and the result describes the plane-wave mode only, which is why a [`PlaneWaveWarning`](/phonometry/reference/api/noise_control/duct-modes/#planewavewarning) is raised when the analysis reaches past it. |
+| `chain` | The [`SilencerChain`](/phonometry/reference/api/noise_control/silencers/#silencerchain) that assembled this result, for a result built by [`SilencerChain.result`](/phonometry/reference/api/noise_control/silencers/#silencerchainresult), and `None` for a named device. A chain is a list of four-pole elements rather than a named device, so it carries its geometry element by element instead of in `geometry`; exactly one of the two is present, and `plot_geometry` draws it. |
 
 ### ReactiveSilencerResult.plot()
 
@@ -552,7 +601,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the result retains neither its `geometry` nor the `chain` that built it. |
+| ValueError | If `language` is not one the labels are written in, or the retained `geometry` cannot be drawn: an expansion chamber no wider than its pipe, or inlet and outlet extensions that together exceed its length. |
 
 ### ReactiveSilencerResult.report()
 
@@ -666,6 +715,12 @@ invented (see `plot_geometry`).
 | `speed_of_sound` | Speed of sound `c`, m/s. |
 | `density` | Air density `rho`, kg/m3. |
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `density` or `speed_of_sound` is not a single number. |
+
 ### SilencerChain.duct()
 
 ```python
@@ -682,6 +737,12 @@ Append a straight duct of length `L` and area `S`.
 | `area` | Cross-sectional area `S`, m2. |
 
 **Returns:** The chain, so the calls can be written one after another.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `area` or `length` is not a single number. |
 
 ### SilencerChain.elements
 
@@ -890,3 +951,9 @@ sudden-expansion limit for unequal port areas (see `docs/ERRATA.md`).
 | `density` | Air density `rho`, kg/m3. |
 
 **Returns:** The transmission loss per frequency, dB.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `density`, `inlet_area`, `outlet_area` or `speed_of_sound` is not a single number. |

@@ -447,7 +447,8 @@ def test_the_equal_area_directions_are_the_printed_ones() -> None:
     the 38 directions. The other four are the two errata, printed in both
     planes.
     """
-    horizontal, vertical = metrology.equal_area_incidence_angles()
+    angles = metrology.equal_area_incidence_angles()
+    horizontal, vertical = angles.horizontal_deg, angles.vertical_deg
     printed = np.array(ref.IEC61183_EQUAL_AREA_HORIZONTAL_DEG)
     errata = np.isin(printed, list(ref.IEC61183_EQUAL_AREA_ERRATA_DEG))
     np.testing.assert_allclose(np.round(horizontal[~errata], 1), printed[~errata])
@@ -464,7 +465,7 @@ def test_the_equal_area_directions_are_the_printed_ones() -> None:
 
 
 def test_the_two_misprinted_angles_are_the_corrected_ones() -> None:
-    horizontal, _ = metrology.equal_area_incidence_angles()
+    horizontal = metrology.equal_area_incidence_angles().horizontal_deg
     printed = list(ref.IEC61183_EQUAL_AREA_HORIZONTAL_DEG)
     for wrong, right in ref.IEC61183_EQUAL_AREA_ERRATA_DEG.items():
         assert round(float(horizontal[printed.index(wrong)]), 1) == pytest.approx(right)
@@ -480,7 +481,7 @@ def test_the_printed_list_breaks_its_own_symmetry_at_one_ring() -> None:
 
 def test_the_equal_area_directions_halve_their_elements() -> None:
     """Each ring direction splits the ring's 4/38 of the sphere in two."""
-    horizontal, _ = metrology.equal_area_incidence_angles()
+    horizontal = metrology.equal_area_incidence_angles().horizontal_deg
     rings = horizontal[1:10]
     below = (1.0 - np.cos(np.radians(rings))) / 2.0
     np.testing.assert_allclose(below, (4.0 * np.arange(1, 10) - 1.0) / 38.0)
@@ -510,7 +511,8 @@ def test_equal_area_is_formula_a5() -> None:
 
 def test_equal_area_converges_on_the_cardioid() -> None:
     """Formula (A.5) on the cardioid lands near the exact 3 of Formula (3)."""
-    horizontal, vertical = metrology.equal_area_incidence_angles()
+    angles = metrology.equal_area_incidence_angles()
+    horizontal, vertical = angles.horizontal_deg, angles.vertical_deg
 
     def level(angle: np.ndarray) -> np.ndarray:
         return 94.0 + 20.0 * np.log10((1.0 + np.cos(np.radians(angle))) / 2.0 + 1e-15)
@@ -538,7 +540,8 @@ def test_equal_area_readings_keep_their_planes() -> None:
     )
     np.testing.assert_array_equal(result.plane_angles_deg[:20], np.zeros(20))
     np.testing.assert_array_equal(result.plane_angles_deg[20:], np.full(18, 90.0))
-    horizontal, vertical = metrology.equal_area_incidence_angles()
+    angles = metrology.equal_area_incidence_angles()
+    horizontal, vertical = angles.horizontal_deg, angles.vertical_deg
     np.testing.assert_array_equal(
         result.incidence_angles_deg, np.concatenate((horizontal, vertical))
     )
@@ -824,7 +827,8 @@ def test_the_equal_area_vertical_curve_runs_through_the_poles() -> None:
     """Formula (A.5) reads the poles in the horizontal plane only; the vertical
     curve borrows them rather than cutting a chord across each pole.
     """
-    horizontal, vertical = metrology.equal_area_incidence_angles()
+    angles = metrology.equal_area_incidence_angles()
+    horizontal, vertical = angles.horizontal_deg, angles.vertical_deg
 
     def level(angle: np.ndarray) -> np.ndarray:
         return 94.0 + 20.0 * np.log10(0.55 + 0.45 * np.cos(np.radians(angle)))

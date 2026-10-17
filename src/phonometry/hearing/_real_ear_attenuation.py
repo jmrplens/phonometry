@@ -124,34 +124,38 @@ class ProtectorUncertaintyBudget(RichDisplay):
     one is twice that. ISO 4869-6:2019 Annex A uses the same model for the
     active insertion loss of an active noise reduction earmuff.
 
-    :ivar method_db: :math:`u_\mathrm{meth}`, the uncertainty of the mean of
+    :ivar method_uncertainty_db: :math:`u_\mathrm{meth}`, the uncertainty of the mean of
         the individual attenuations of 16 test subjects: subject group,
         fitting, threshold determination, tester and specimen, in dB.
-    :ivar equipment_db: :math:`u_\mathrm{eq}`, the uncertainty of the test
+    :ivar equipment_uncertainty_db: :math:`u_\mathrm{eq}`, the uncertainty of the test
         signal generation equipment, in dB.
-    :ivar environment_db: :math:`u_\mathrm{env}`, the uncertainty of the
+    :ivar environment_uncertainty_db: :math:`u_\mathrm{env}`, the uncertainty of the
         deviations from the ideal test environment, in dB.
     """
 
-    method_db: float
-    equipment_db: float
-    environment_db: float
+    method_uncertainty_db: float
+    equipment_uncertainty_db: float
+    environment_uncertainty_db: float
 
     @property
-    def combined_db(self) -> float:
+    def combined_uncertainty_db(self) -> float:
         r""":math:`u = \sqrt{u_\mathrm{meth}^2 + u_\mathrm{eq}^2 + u_\mathrm{env}^2}`, in dB.
 
         :return: The combined standard uncertainty, unrounded.
         """
-        return math.hypot(self.method_db, self.equipment_db, self.environment_db)
+        return math.hypot(
+            self.method_uncertainty_db,
+            self.equipment_uncertainty_db,
+            self.environment_uncertainty_db,
+        )
 
     @property
-    def expanded_db(self) -> float:
+    def expanded_uncertainty_db(self) -> float:
         """:math:`U_{95} = 2u`, in dB.
 
         :return: The expanded uncertainty for a 95 % coverage, unrounded.
         """
-        return _COVERAGE_FACTOR * self.combined_db
+        return _COVERAGE_FACTOR * self.combined_uncertainty_db
 
 
 #: The three frequency ranges Tables A.2 and B.2 print a column for, lowest
@@ -171,8 +175,8 @@ _RANGE_UPPER_EDGE_HZ = 4000.0
 #: Table A.2: typical uncertainty components within one laboratory, keyed by
 #: protector type (``"earplug"``, ``"earmuff"``) and then by frequency range
 #: (:data:`REAT_FREQUENCY_RANGES`). The combined and expanded rows of the table
-#: are :attr:`ProtectorUncertaintyBudget.combined_db` and
-#: :attr:`ProtectorUncertaintyBudget.expanded_db`; the table rounds them to
+#: are :attr:`ProtectorUncertaintyBudget.combined_uncertainty_db` and
+#: :attr:`ProtectorUncertaintyBudget.expanded_uncertainty_db`; the table rounds them to
 #: one decimal after computing them at full precision (its NOTE).
 REAT_WITHIN_LABORATORY_UNCERTAINTY: Mapping[
     str, Mapping[str, ProtectorUncertaintyBudget]
@@ -293,7 +297,7 @@ class RealEarAttenuationResult(OwnsArrays):
         :func:`phonometry.hearing.assumed_protection_value`,
         :func:`phonometry.hearing.hml_rating` and
         :func:`phonometry.hearing.snr_rating` take, unchanged.
-    :ivar mean_db: The mean attenuation :math:`m` per test signal, in dB.
+    :ivar mean_attenuation: The mean attenuation :math:`m` per test signal, in dB.
     :ivar standard_deviation_db: The standard deviation :math:`s` per test
         signal over the subjects, the sample one over :math:`N - 1`, in dB.
     :ivar standard_uncertainty_db: :math:`u = s/\sqrt{N}`, the standard
@@ -304,7 +308,7 @@ class RealEarAttenuationResult(OwnsArrays):
     """
 
     attenuation: np.ndarray
-    mean_db: np.ndarray
+    mean_attenuation: np.ndarray
     standard_deviation_db: np.ndarray
     standard_uncertainty_db: np.ndarray
     expanded_uncertainty_db: np.ndarray
@@ -334,8 +338,8 @@ class RealEarAttenuationResult(OwnsArrays):
 def real_ear_attenuation(
     attenuation: ArrayLike | None = None,
     *,
-    open_threshold_db: ArrayLike | None = None,
-    occluded_threshold_db: ArrayLike | None = None,
+    open_threshold_levels: ArrayLike | None = None,
+    occluded_threshold_levels: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
 ) -> RealEarAttenuationResult:
     r"""The attenuation of a protector, its spread and its uncertainty (4.6, A.2).
@@ -362,10 +366,10 @@ def real_ear_attenuation(
 
     :param attenuation: A ``(subjects, bands)`` grid of individual
         attenuations, in dB.
-    :param open_threshold_db: The thresholds of hearing with open ears, a
+    :param open_threshold_levels: The thresholds of hearing with open ears, a
         ``(subjects, bands)`` grid in dB, given together with
-        ``occluded_threshold_db`` instead of ``attenuation``.
-    :param occluded_threshold_db: The thresholds with the protector in place,
+        ``occluded_threshold_levels`` instead of ``attenuation``.
+    :param occluded_threshold_levels: The thresholds with the protector in place,
         in dB, on the same grid.
     :param frequencies: The centre frequencies of the test signals, in hertz,
         or ``None`` for the seven of 4.1 (125 Hz to 8 kHz) when the grid has
@@ -377,19 +381,21 @@ def real_ear_attenuation(
         finite, if the two thresholds differ in shape, or if ``frequencies``
         does not match the grid.
     """
-    thresholds = open_threshold_db is not None or occluded_threshold_db is not None
+    thresholds = (
+        open_threshold_levels is not None or occluded_threshold_levels is not None
+    )
     if attenuation is not None and not thresholds:
         grid = _subject_grid(attenuation, "attenuation")
     elif (
         attenuation is None
-        and open_threshold_db is not None
-        and occluded_threshold_db is not None
+        and open_threshold_levels is not None
+        and occluded_threshold_levels is not None
     ):
-        open_ears = _subject_grid(open_threshold_db, "open_threshold_db")
-        occluded = _subject_grid(occluded_threshold_db, "occluded_threshold_db")
+        open_ears = _subject_grid(open_threshold_levels, "open_threshold_levels")
+        occluded = _subject_grid(occluded_threshold_levels, "occluded_threshold_levels")
         if open_ears.shape != occluded.shape:
             msg = (
-                "'open_threshold_db' and 'occluded_threshold_db' must be the "
+                "'open_threshold_levels' and 'occluded_threshold_levels' must be the "
                 f"same subjects and bands; got {open_ears.shape} and "
                 f"{occluded.shape}."
             )
@@ -397,8 +403,8 @@ def real_ear_attenuation(
         grid = occluded - open_ears
     else:
         msg = (
-            "give either 'attenuation', or both 'open_threshold_db' and "
-            "'occluded_threshold_db' (4.6.2), and not both forms."
+            "give either 'attenuation', or both 'open_threshold_levels' and "
+            "'occluded_threshold_levels' (4.6.2), and not both forms."
         )
         raise ValueError(msg)
     freqs = _band_axis(frequencies, grid.shape[1], "real_ear_attenuation")
@@ -408,7 +414,7 @@ def real_ear_attenuation(
     standard = spread / math.sqrt(n_subjects)
     return RealEarAttenuationResult(
         attenuation=np.asarray(grid, dtype=np.float64),
-        mean_db=mean,
+        mean_attenuation=mean,
         standard_deviation_db=spread,
         standard_uncertainty_db=standard,
         expanded_uncertainty_db=_COVERAGE_FACTOR * standard,
@@ -469,7 +475,7 @@ def reat_expanded_uncertainty(
         raise ValueError(msg)
     column = table[protector]
     return np.array(
-        [column[_frequency_range(float(f))].expanded_db for f in freqs],
+        [column[_frequency_range(float(f))].expanded_uncertainty_db for f in freqs],
         dtype=np.float64,
     )
 
@@ -514,15 +520,15 @@ class AttenuationDifferenceResult(OwnsArrays):
     and their uncertainties, so they are not fields: a comparison cannot be
     built to call significant a difference its uncertainties cover.
 
-    :ivar first_mean_db: :math:`m_1` per band, in dB.
-    :ivar second_mean_db: :math:`m_2` per band, in dB.
+    :ivar first_mean_attenuation: :math:`m_1` per band, in dB.
+    :ivar second_mean_attenuation: :math:`m_2` per band, in dB.
     :ivar first_expanded_uncertainty_db: :math:`U_{95,1}` per band, in dB.
     :ivar second_expanded_uncertainty_db: :math:`U_{95,2}` per band, in dB.
     :ivar frequencies: The centre frequencies of the test signals, in hertz.
     """
 
-    first_mean_db: np.ndarray
-    second_mean_db: np.ndarray
+    first_mean_attenuation: np.ndarray
+    second_mean_attenuation: np.ndarray
     first_expanded_uncertainty_db: np.ndarray
     second_expanded_uncertainty_db: np.ndarray
     frequencies: np.ndarray
@@ -531,11 +537,12 @@ class AttenuationDifferenceResult(OwnsArrays):
     def difference(self) -> np.ndarray:
         """:math:`|m_1 - m_2|` per band, in dB."""
         return np.asarray(
-            np.abs(self.first_mean_db - self.second_mean_db), dtype=np.float64
+            np.abs(self.first_mean_attenuation - self.second_mean_attenuation),
+            dtype=np.float64,
         )
 
     @property
-    def criterion_db(self) -> np.ndarray:
+    def significance_limit_db(self) -> np.ndarray:
         r""":math:`\sqrt{U_{95,1}^2 + U_{95,2}^2}` per band, in dB.
 
         A difference larger than this is significant at the 5 % level.
@@ -552,7 +559,7 @@ class AttenuationDifferenceResult(OwnsArrays):
     def significant(self) -> np.ndarray:
         """Whether each band's difference exceeds its criterion, judged settled."""
         return np.asarray(
-            settled(self.difference - self.criterion_db) > 0.0, dtype=bool
+            settled(self.difference - self.significance_limit_db) > 0.0, dtype=bool
         )
 
     @property
@@ -650,7 +657,7 @@ def _mean_and_uncertainty(
             )
             raise ValueError(msg)
         return (
-            np.array(measurement.mean_db, dtype=np.float64),
+            np.array(measurement.mean_attenuation, dtype=np.float64),
             np.array(measurement.expanded_uncertainty_db, dtype=np.float64),
             np.array(measurement.frequencies, dtype=np.float64),
         )
@@ -730,8 +737,8 @@ def assess_attenuation_difference(
             )
             raise ValueError(msg)
     return AttenuationDifferenceResult(
-        first_mean_db=m1,
-        second_mean_db=m2,
+        first_mean_attenuation=m1,
+        second_mean_attenuation=m2,
         first_expanded_uncertainty_db=u1,
         second_expanded_uncertainty_db=u2,
         frequencies=np.asarray(freqs, dtype=np.float64),
@@ -747,6 +754,7 @@ def allowable_field_variation(free_field_rejection: float) -> float:
     :return: The allowable variation of the sound-field level, in dB.
     :raises ValueError: for a rejection below 10 dB, for which Table 1 says the
         microphone is not suitable, or one that is not finite.
+    :raises TypeError: if ``free_field_rejection`` is not a single number.
     """
     require_scalar(free_field_rejection, "free_field_rejection")
     rejection = float(free_field_rejection)

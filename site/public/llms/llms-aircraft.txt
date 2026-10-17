@@ -242,7 +242,9 @@ $\mathrm{PNLT}$ history with non-uniform durations) is reproduced as
 $\mathrm{EPNL} = 92.6\ \text{EPNdB}$. `epnl_from_pnlt` exposes the
 duration/limit machinery directly from a $\mathrm{PNLT}$ series, as an
 `EPNLIntegration` record that names `epnl`, `pnltm`, `bandsharing_adjustment`,
-`band_limits` and `duration_correction`.
+`band_limits` and `duration_correction`. The bandsharing adjustment is in TPNdB,
+the unit Annex 16 prints for it (Nomenclature, I-7), since it is added to the
+maximum PNLT.
 
 <details>
 <summary>Show the code for this figure</summary>

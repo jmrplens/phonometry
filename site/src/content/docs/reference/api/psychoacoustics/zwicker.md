@@ -79,6 +79,12 @@ with `ref` scaled to +-1 full scale as well.
 
 **Returns:** [`ZwickerLoudness`](/phonometry/reference/api/psychoacoustics/zwicker/#zwickerloudness).  Stationary: as in [`loudness_zwicker_from_spectrum`](/phonometry/reference/api/psychoacoustics/zwicker/#loudness_zwicker_from_spectrum).  Time-varying: `loudness` is the maximum loudness Nmax, `loudness_level` its phon mapping, `specific` the pattern at the loudness maximum, `n5`/`n10` the percentile values and `times` / `loudness_vs_time` the loudness trace at 500 Hz.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `time_skip` is not a single number, or `fs` is a flag, a text or an array where a count goes. |
+
 ## loudness_zwicker_from_spectrum
 
 ```python

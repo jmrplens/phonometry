@@ -74,6 +74,7 @@ conventions), THD+N and SINAD into a plottable result.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `fs` is not a single number. |
 
 ## harmonic_distortion
 
@@ -112,6 +113,7 @@ amplitude relative to the total RMS.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `order` is not an integer, `order` \< 2 or the inputs are invalid. |
+| TypeError | if `fs` or `fundamental` is not a single number, or `order` is a flag, a text or an array where a count goes. |
 
 ## HarmonicDistortionResult
 
@@ -306,6 +308,7 @@ datasheets; the two agree to first order for small distortion.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the signal/parameters are invalid, `kind` is unknown, or no harmonic of the fundamental lies below Nyquist. |
+| TypeError | if `fs` is not a single number. |
 
 ## thd_plus_noise
 
@@ -352,6 +355,7 @@ and out-of-band noise do not inflate the result.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid or `notch_q` out of range. |
+| TypeError | if `bandwidth`, `fs`, `fundamental` or `notch_q` is not a single number. |
 
 ## weighted_thd
 
@@ -400,3 +404,4 @@ between 31,5 Hz and 400 Hz.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `fs`, `fundamental` or `notch_q` is not a single number. |

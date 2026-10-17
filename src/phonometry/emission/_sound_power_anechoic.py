@@ -462,6 +462,7 @@ def precision_positions(
         ignored for a sphere (only Table D.1 exists).
     :param n_positions: ``20`` (primary array) or ``40`` (full array).
     :return: ``(n_positions, 3)`` microphone coordinates, in metres.
+    :raises TypeError: if ``radius`` is not a single number.
     """
     require_scalar(radius, "radius")
     if surface not in ("sphere", "hemisphere"):
@@ -583,6 +584,8 @@ def meteorological_corrections(
     :param radius: Measurement radius ``r`` (m), used only in
         :math:`A_0 = \alpha(f)\,r`.
     :return: :class:`MeteorologicalCorrection`.
+    :raises TypeError: if ``radius``, ``static_pressure_kpa`` or ``temperature_c`` is
+        not a single number.
     """
     require_scalar(radius, "radius")
     require_scalar(static_pressure_kpa, "static_pressure_kpa")
@@ -648,6 +651,8 @@ def precision_uncertainty(
     :param sigma_omc_db: Operating/mounting standard deviation ``sigma_omc_db``, dB.
     :param coverage_factor: ``k`` (typically 2 or 1.6).
     :return: ``U`` in decibels, scalar or per band matching ``sigma_r0``.
+    :raises TypeError: if ``coverage_factor`` or ``sigma_omc_db`` is not a single
+        number.
     """
     require_scalar(coverage_factor, "coverage_factor")
     require_scalar(sigma_omc_db, "sigma_omc_db")
@@ -893,6 +898,7 @@ def sound_power_anechoic(
         radius, or when a band lies outside the qualified frequency range.
     :return: :class:`PrecisionSoundPowerResult`.
     :raises ValueError: for a room qualification of the other room type.
+    :raises TypeError: if ``radius`` is not a single number.
     """
     require_scalar(radius, "radius")
     if surface not in ("sphere", "hemisphere"):

@@ -52,6 +52,7 @@ $\alpha = 4s/(s + 1)^2$.
 standing_wave_normalized_impedance(
     swr: ArrayLike,
     first_min_distance: ArrayLike,
+    *,
     wavelength: ArrayLike,
 ) -> NDArray[np.complex128]
 ```
@@ -98,6 +99,7 @@ $\Delta L = L_{\max} - L_{\min}$ in decibels.
 standing_wave_reflection(
     swr: ArrayLike,
     first_min_distance: ArrayLike,
+    *,
     wavelength: ArrayLike,
 ) -> NDArray[np.complex128]
 ```

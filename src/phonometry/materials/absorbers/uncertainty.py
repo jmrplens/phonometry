@@ -178,6 +178,7 @@ def absorption_coverage_factor(coverage: float = 0.95) -> float:
     :param coverage: Coverage probability as a fraction; one of
         ``0.68, 0.80, 0.90, 0.95, 0.99, 0.999`` (Table 3, Gaussian measurand).
     :raises ValueError: Coverage probability not tabulated in Table 3.
+    :raises TypeError: if ``coverage`` is not a single number.
     """
     require_scalar(coverage, "coverage")
     for level, k in _COVERAGE_FACTORS.items():
@@ -494,6 +495,7 @@ def weighted_coefficient_uncertainty(
     :param condition: ``"reproducibility"`` (default) or ``"repeatability"``.
     :param coverage: Coverage probability for the coverage factor ``k`` (Table 3).
     :raises ValueError: Unknown ``condition`` or an untabulated ``coverage``.
+    :raises TypeError: if ``alpha_w`` is not a single number.
     """
     require_scalar(alpha_w, "alpha_w")
     cond = _condition(condition)
@@ -523,6 +525,7 @@ def single_number_rating_uncertainty(
     :param coverage: Coverage probability for the coverage factor ``k`` (Table 3).
     :raises ValueError: Negative ``dl_alpha``, unknown ``condition`` or an
         untabulated ``coverage``.
+    :raises TypeError: if ``dl_alpha`` is not a single number.
     """
     require_scalar(dl_alpha, "dl_alpha")
     value = float(dl_alpha)

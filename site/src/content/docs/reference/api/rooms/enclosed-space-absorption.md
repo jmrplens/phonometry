@@ -54,6 +54,12 @@ Equivalent absorption area of the air (Formula 2).
 
 **Returns:** The air absorption area $A_{\text{air}} = 4 m V (1 - \psi)$, m2.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `object_fraction` or `volume` is not a single number. |
+
 ## enclosed_space_reverberation
 
 ```python
@@ -148,6 +154,12 @@ Object fraction `psi` of an enclosed space (Formula 3).
 
 **Returns:** The object fraction $\psi = \sum V_{\text{obj}} / V$.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `volume` is not a single number. |
+
 ## reverberation_time
 
 ```python
@@ -178,6 +190,7 @@ Reverberation time from the equivalent absorption area (Formula 5).
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `absorption_area` is not positive and finite. |
+| TypeError | if `object_fraction`, `speed_of_sound` or `volume` is not a single number. |
 
 ## ReverberationResult
 

@@ -230,6 +230,12 @@ interfaces converge to the physical traction continuity.
 | `free_sides` | Sides carrying a traction-free surface (stress imaging, Moczo et al. Eq. 9.9): the surface plane runs through the boundary row/column of cell centres, the normal stress is pinned to zero there and the shear stress is imaged antisymmetrically above it. A side cannot be both free and absorbing. |
 | `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells: every face adjacent to a masked cell is closed (zero normal velocity) and every touching corner shear stress is zeroed, i.e. a shear-free rigid inclusion, rasterising arbitrary interior geometry. |
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `cfl` is not a single number, or `sponge_width` is a flag, a text or an array where a count goes. |
+
 ### ElasticFDTD2D.add_source()
 
 ```python

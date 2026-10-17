@@ -200,7 +200,7 @@ def test_the_mean_attenuation_points_downwards_on_the_iec_60263_grid() -> None:
     result = _reat()
     ax = result.plot()
     mean_line = next(line for line in ax.lines if line.get_marker() == "o")
-    np.testing.assert_allclose(mean_line.get_ydata(), result.mean_db)
+    np.testing.assert_allclose(mean_line.get_ydata(), result.mean_attenuation)
     bottom, top = ax.get_ylim()
     assert bottom > top, "attenuation is not drawn increasing downwards"
     left, right = ax.get_xlim()
@@ -317,7 +317,7 @@ def test_the_insertion_loss_figure_draws_the_mean_and_the_zero_line() -> None:
     result = hearing.active_insertion_loss(ref.ISO4869_6_TABLE_A3)
     ax = result.plot()
     mean_line = next(line for line in ax.lines if line.get_marker() == "o")
-    np.testing.assert_allclose(mean_line.get_ydata(), result.mean_db)
+    np.testing.assert_allclose(mean_line.get_ydata(), result.mean_insertion_loss)
     # A band where the circuit adds sound reads as below the zero line.
     assert any(
         np.allclose(line.get_ydata(), 0.0)

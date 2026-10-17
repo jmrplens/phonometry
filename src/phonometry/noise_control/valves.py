@@ -358,6 +358,8 @@ def pressure_ratio_boundaries(
     :return: The four boundaries and the recovery factor behind two of them.
     :raises ValueError: If either argument is not positive and finite, or if
         the specific heat ratio is not above one.
+    :raises TypeError: if ``pressure_recovery`` or ``specific_heat_ratio`` is not a
+        single number.
     """
     gamma = require_positive(specific_heat_ratio, "specific_heat_ratio")
     if not math.isfinite(gamma) or gamma <= 1.0:
@@ -404,6 +406,7 @@ def flow_regime(pressure_ratio: float, boundaries: RegimeBoundaries) -> int:
     :return: The regime number, 1 to 5.
     :raises ValueError: If the pressure ratio is not a finite number in
         (0, 1).
+    :raises TypeError: if ``pressure_ratio`` is not a single number.
     """
     require_scalar(pressure_ratio, "pressure_ratio")
     x = float(pressure_ratio)
@@ -446,6 +449,8 @@ def valve_style_modifier(
     :return: :math:`F_d`, dimensionless.
     :raises ValueError: If an argument is not positive and finite, or if the
         passage count is not a whole number.
+    :raises TypeError: if ``passage_area`` or ``wetted_perimeter`` is not a single
+        number, or ``n_passages`` is a flag, a text or an array where a count goes.
     """
     area = require_positive(passage_area, "passage_area")
     perimeter = require_positive(wetted_perimeter, "wetted_perimeter")
@@ -488,6 +493,8 @@ def jet_diameter_m(
     :return: :math:`D_j`, in m.
     :raises ValueError: If a value is not positive and finite, or the
         coefficient is not one Table 1 prints a constant for.
+    :raises TypeError: if ``coefficient`` is not a text, or ``flow_coefficient``,
+        ``pressure_recovery`` or ``style_modifier`` is not a single number.
     """
     kind = require_choice(coefficient, "coefficient", tuple(FLOW_COEFFICIENT_CONSTANTS))
     capacity = require_positive(flow_coefficient, "flow_coefficient")
@@ -632,6 +639,7 @@ def internal_spectrum(
     :return: The internal level in each band, in dB.
     :raises ValueError: If the peak frequency is not positive and finite, or
         a band centre is not.
+    :raises TypeError: if ``peak_frequency`` is not a single number.
     """
     peak = require_positive(peak_frequency, "peak_frequency")
     bands = np.asarray(frequencies, dtype=np.float64)
@@ -689,6 +697,9 @@ def coincidence_frequencies(
     :param air_sound_speed: :math:`c_a`, 343 m/s by NOTE 3.
     :return: The three frequencies, in Hz.
     :raises ValueError: If any argument is not positive and finite.
+    :raises TypeError: if ``air_sound_speed``, ``downstream_sound_speed``,
+        ``internal_diameter_m``, ``pipe_sound_speed`` or ``wall_thickness_m`` is not a
+        single number.
     """
     diameter_m = require_positive(internal_diameter_m, "internal_diameter_m")
     thickness = require_positive(wall_thickness_m, "wall_thickness_m")
@@ -794,6 +805,9 @@ def pipe_transmission_loss(
     :param standard_pressure_pa: :math:`p_s`, in Pa.
     :return: The transmission loss in each band, in dB, negative.
     :raises ValueError: If an argument is not positive and finite.
+    :raises TypeError: if ``atmospheric_pressure_pa``, ``downstream_density``,
+        ``downstream_sound_speed``, ``pipe_density``, ``standard_pressure_pa``,
+        ``valve_outlet_diameter_m`` or ``wall_thickness_m`` is not a single number.
     """
     bands = np.asarray(frequencies, dtype=np.float64)
     if bands.ndim != 1 or bands.size == 0:
@@ -846,6 +860,8 @@ def last_stage_flow_coefficient(total_area: float, *, coefficient: str = "Cv") -
     :return: :math:`C_n`.
     :raises ValueError: If the area is not positive and finite, or the
         coefficient is not one Table 1 prints a constant for.
+    :raises TypeError: if ``coefficient`` is not a text, or ``total_area`` is not a
+        single number.
     """
     kind = require_choice(coefficient, "coefficient", tuple(LAST_STAGE_AREA_CONSTANTS))
     area = require_positive(total_area, "total_area")
@@ -922,6 +938,9 @@ def multistage_trim_conditions(
         :class:`ValveTrim` in place of :math:`C`.
     :raises ValueError: If a value is not positive and finite, or the outlet
         pressure is not below the inlet.
+    :raises TypeError: if ``flow_coefficient``, ``inlet_density``,
+        ``inlet_pressure_pa``, ``last_stage_coefficient`` or ``outlet_pressure_pa`` is
+        not a single number.
     """
     p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
     p2 = require_positive(outlet_pressure_pa, "outlet_pressure_pa")
@@ -990,6 +1009,9 @@ def multiple_passage_jet_diameter(
     :return: :math:`D_j`, in m.
     :raises ValueError: If a value is not positive and finite, or the
         coefficient is not one Table 1 prints a constant for.
+    :raises TypeError: if ``coefficient`` is not a text, or ``flow_coefficient``,
+        ``passage_diameter_m``, ``passage_length`` or ``style_modifier`` is not a single
+        number.
     """
     kind = require_choice(coefficient, "coefficient", tuple(FLOW_COEFFICIENT_CONSTANTS))
     capacity = require_positive(flow_coefficient, "flow_coefficient")
@@ -1034,6 +1056,9 @@ def stage_level_correction(
     :return: :math:`L_{pi}` for the whole trim, in dB.
     :raises ValueError: If the stage count is below two, or a pressure is not
         positive and finite, or the stagnation pressure exceeds the inlet.
+    :raises TypeError: if ``inlet_pressure_pa``, ``last_stage_level`` or
+        ``stagnation_pressure_pa`` is not a single number, or ``n_stages`` is a flag, a
+        text or an array where a count goes.
     """
     require_scalar(last_stage_level, "last_stage_level")
     require_scalar(n_stages, "n_stages")
@@ -1173,6 +1198,9 @@ def expander_noise(  # noqa: PLR0913
         wider than the pipe. The efficiency correction of Table 4 and the
         velocity correction of Equation (16) are both signed, and the
         expander's own row prints :math:`A_\eta = -3{,}0`.
+    :raises TypeError: if ``downstream_density``, ``downstream_sound_speed``,
+        ``internal_diameter_m``, ``mass_flow`` or ``throat_diameter_m`` is not a single
+        number.
     """
     bands = np.asarray(frequencies, dtype=np.float64)
     flow = require_positive(mass_flow, "mass_flow")

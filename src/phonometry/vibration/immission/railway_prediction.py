@@ -113,7 +113,7 @@ __all__ = [
     "GROUND_TO_FLOOR_LEVEL_DIFFERENCES",
     "GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES",
     "KB_ASSESSMENT_BANDS_HZ",
-    "KB_WEIGHTING_TABLE_DB",
+    "KB_WEIGHTING_CORRECTIONS",
     "LINE_SOURCE_EXPONENT_CORRECTION",
     "PEAK_VELOCITY_FACTOR",
     "PREDICTION_BAND_CENTERS_HZ",
@@ -156,7 +156,7 @@ KB_ASSESSMENT_BANDS_HZ: tuple[float, float] = (4.0, 80.0)
 #: :math:`10 \lg (1 / (1 + (5{,}6\ \mathrm{Hz} / f)^2))` rounded to a tenth:
 #: the weighting alone, without the band limitation of the meter, whose
 #: place the draft's limit of the sum to the bands from 4 Hz to 80 Hz takes.
-KB_WEIGHTING_TABLE_DB: Mapping[float, float] = MappingProxyType(
+KB_WEIGHTING_CORRECTIONS: Mapping[float, float] = MappingProxyType(
     {
         4.0: -4.7,
         5.0: -3.5,
@@ -422,7 +422,7 @@ _FITS = tuple(LINE_SOURCE_EXPONENT_CORRECTION)
 #: taken to be a nominal centre.
 _BAND_TOLERANCE = 2.0 ** (1.0 / 12.0)
 #: The bands the KB assessment sums: Table 2 has 14 of them.
-_KB_BAND_COUNT = len(KB_WEIGHTING_TABLE_DB)
+_KB_BAND_COUNT = len(KB_WEIGHTING_CORRECTIONS)
 #: The micrometres in a millimetre, for Formula (13).
 _UM_PER_MM = 1000.0
 
@@ -448,12 +448,12 @@ def _nominal(frequencies: ArrayLike, table: tuple[float, ...]) -> NDArray[np.int
 
 
 def predict_floor_spectrum(
-    emission_db: ArrayLike,
+    emission_levels: ArrayLike,
     *,
-    ground_db: ArrayLike = 0.0,
-    foundation_db: ArrayLike = 0.0,
-    floor_db: ArrayLike = 0.0,
-    mitigation_db: ArrayLike = 0.0,
+    ground_level_difference: ArrayLike = 0.0,
+    foundation_level_difference: ArrayLike = 0.0,
+    floor_level_difference: ArrayLike = 0.0,
+    mitigation_level_difference: ArrayLike = 0.0,
 ) -> NDArray[np.float64]:
     r"""The predicted spectrum on a floor, Formula (1).
 
@@ -469,23 +469,25 @@ def predict_floor_spectrum(
     sign changed. An emission spectrum measured at the foundation makes the
     foundation term zero (Annex C does exactly that).
 
-    :param emission_db: :math:`L_{v,\mathrm{E}}`, one level per band, in decibels.
-    :param ground_db: :math:`\Delta L_{v,\mathrm{BB}}`, per band or one value.
-    :param foundation_db: :math:`\Delta L_{v,\mathrm{FB}}`, per band or one value.
-    :param floor_db: :math:`\Delta L_{v,\mathrm{DF}}`, per band or one value.
-    :param mitigation_db: :math:`D_\mathrm{e}`, per band or one value, added as
+    :param emission_levels: :math:`L_{v,\mathrm{E}}`, one level per band, in decibels.
+    :param ground_level_difference: :math:`\Delta L_{v,\mathrm{BB}}`, per band or one value.
+    :param foundation_level_difference: :math:`\Delta L_{v,\mathrm{FB}}`, per band or one value.
+    :param floor_level_difference: :math:`\Delta L_{v,\mathrm{DF}}`, per band or one value.
+    :param mitigation_level_difference: :math:`D_\mathrm{e}`, per band or one value, added as
         printed, so negative for a mitigation.
     :return: :math:`L_v`, one level per band.
     :raises ValueError: For a non-finite input or a term that does not
         broadcast to the emission spectrum.
+    :raises TypeError: if ``emission_levels`` holds a text or a value that is not a real
+        number.
     """
-    levels = _levels(emission_db, "emission_db")
+    levels = _levels(emission_levels, "emission_levels")
     total = levels.copy()
     for name, term in (
-        ("ground_db", ground_db),
-        ("foundation_db", foundation_db),
-        ("floor_db", floor_db),
-        ("mitigation_db", mitigation_db),
+        ("ground_level_difference", ground_level_difference),
+        ("foundation_level_difference", foundation_level_difference),
+        ("floor_level_difference", floor_level_difference),
+        ("mitigation_level_difference", mitigation_level_difference),
     ):
         values = np.asarray(term, dtype=np.float64)
         if not np.all(np.isfinite(values)):
@@ -494,7 +496,7 @@ def predict_floor_spectrum(
         try:
             total = total + np.broadcast_to(values, levels.shape)
         except ValueError as error:
-            msg = f"'{name}' must be one value or one per band of 'emission_db'."
+            msg = f"'{name}' must be one value or one per band of 'emission_levels'."
             raise ValueError(msg) from error
     return total
 
@@ -518,6 +520,8 @@ def rescale_emission_for_speed(
     :return: :math:`L_{v,\mathrm{E2}}`.
     :raises ValueError: For a non-positive speed, a change of more than 30 %,
         or a non-finite spectrum.
+    :raises TypeError: if ``speed_from_kmh`` or ``speed_to_kmh`` is not a single number,
+        or ``levels`` holds a text or a value that is not a real number.
     """
     levels = _levels(levels, "levels")
     v_1 = require_positive(speed_from_kmh, "speed_from_kmh")
@@ -550,6 +554,8 @@ def ground_attenuation_coefficient_per_m(
     :return: :math:`\alpha_R`, in reciprocal metres, one per band.
     :raises ValueError: For a negative damping ratio, a non-positive speed
         or a non-positive frequency.
+    :raises TypeError: if ``damping_ratio`` or ``shear_wave_speed_m_s`` is not a single
+        number, or ``frequencies`` holds a text or a value that is not a real number.
     """
     freqs = require_positive_array(frequencies, "frequencies")
     damping = require_non_negative(damping_ratio, "damping_ratio")
@@ -593,6 +599,9 @@ def ground_transmission(
     :raises ValueError: For a non-positive distance, a negative exponent or
         damping, a damping ratio without a wave speed, or an exponent that
         does not broadcast to the bands.
+    :raises TypeError: if ``damping_ratio``, ``distance_m`` or ``reference_distance_m``
+        is not a single number, or ``frequencies`` holds a text or a value that is not a
+        real number.
     """
     freqs = require_finite_array(frequencies, "frequencies")
     distance = require_positive(distance_m, "distance_m")
@@ -695,6 +704,8 @@ def foundation_to_floor_level_difference(
         outside the table.
     :raises ValueError: For an unknown floor or statistic, a non-positive
         frequency, or a non-finite input.
+    :raises TypeError: if ``floor_natural_frequency_hz`` is not a single number, or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     freqs = require_positive_array(frequencies, "frequencies")
     natural = require_positive(floor_natural_frequency_hz, "floor_natural_frequency_hz")
@@ -732,13 +743,15 @@ def kb_weighted_levels(
     :param frequencies: The band centres, nominal, 4 Hz to 80 Hz.
     :return: :math:`L_{v,KB}`, one per band.
     :raises ValueError: For a band outside Table 2, or mismatched inputs.
+    :raises TypeError: if ``frequencies`` or ``levels`` holds a text or a value that is
+        not a real number.
     """
     levels = _levels(levels, "levels")
-    index = _nominal(frequencies, tuple(KB_WEIGHTING_TABLE_DB))
+    index = _nominal(frequencies, tuple(KB_WEIGHTING_CORRECTIONS))
     if index.shape != levels.shape:
         msg = "'levels' and 'frequencies' must match, one level per band."
         raise ValueError(msg)
-    weights = np.asarray(list(KB_WEIGHTING_TABLE_DB.values()))[index]
+    weights = np.asarray(list(KB_WEIGHTING_CORRECTIONS.values()))[index]
     return levels + weights
 
 
@@ -757,6 +770,8 @@ def takt_max_kb(weighted_levels: ArrayLike) -> float:
         :func:`kb_weighted_levels` gives them, one per band.
     :return: :math:`KB_\mathrm{FTm,Zug}`, dimensionless.
     :raises ValueError: For an empty or non-finite input.
+    :raises TypeError: if ``weighted_levels`` holds a text or a value that is not a real
+        number.
     """
     levels = _levels(weighted_levels, "weighted_levels")
     total = band_sum_level(levels)
@@ -774,6 +789,7 @@ def peak_velocity_from_kb_mm_s(kb_fmax_zug: float) -> float:
     :param kb_fmax_zug: :math:`KB_\mathrm{Fmax,Zug}` of Formula (10).
     :return: :math:`v_{\max}`, in millimetres per second.
     :raises ValueError: For a negative input.
+    :raises TypeError: if ``kb_fmax_zug`` is not a single number.
     """
     return PEAK_VELOCITY_FACTOR * require_non_negative(kb_fmax_zug, "kb_fmax_zug")
 
@@ -788,6 +804,7 @@ def velocity_spectrum_um_s(levels: ArrayLike) -> NDArray[np.float64]:
     :param levels: :math:`L_v`, one level per band, in decibels.
     :return: :math:`v_\mathrm{RMS}`, one per band, in micrometres per second.
     :raises ValueError: For a non-finite input.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     levels = _levels(levels, "levels")
     return _UM_PER_MM * VELOCITY_LEVEL_REFERENCE_MM_S * 10.0 ** (levels / 20.0)
@@ -798,11 +815,11 @@ class TrainCategoryPrediction(OwnsArrays):
     r"""The prediction for one category of train, Clauses 5 and 7.
 
     :ivar frequencies: The band centres.
-    :ivar emission_db: :math:`L_{v,\mathrm{E}}` the prediction started from.
-    :ivar floor_db: :math:`L_v` of Formula (1), the spectrum on the floor.
+    :ivar emission_levels: :math:`L_{v,\mathrm{E}}` the prediction started from.
+    :ivar floor_levels: :math:`L_v` of Formula (1), the spectrum on the floor.
     :ivar weighted_frequencies_hz: The band centres from 4 Hz to 80 Hz the
         KB assessment sums.
-    :ivar weighted_db: :math:`L_{v,KB}` of Formula (8) over those bands.
+    :ivar weighted_levels: :math:`L_{v,KB}` of Formula (8) over those bands.
     :ivar sum_level: :math:`L_{v,\mathrm{ges}}` of Formula (9), the energy sum of
         the weighted bands.
     :ivar kb_ftm: :math:`KB_\mathrm{FTm,Zug}` of Formula (9).
@@ -811,10 +828,10 @@ class TrainCategoryPrediction(OwnsArrays):
     """
 
     frequencies: NDArray[np.float64]
-    emission_db: NDArray[np.float64]
-    floor_db: NDArray[np.float64]
+    emission_levels: NDArray[np.float64]
+    floor_levels: NDArray[np.float64]
     weighted_frequencies_hz: NDArray[np.float64]
-    weighted_db: NDArray[np.float64]
+    weighted_levels: NDArray[np.float64]
     sum_level: float
     kb_ftm: float
     kb_fmax: float
@@ -841,13 +858,13 @@ class TrainCategoryPrediction(OwnsArrays):
 
 
 def predict_train_category(
-    emission_db: ArrayLike,
+    emission_levels: ArrayLike,
     *,
     frequencies: ArrayLike = PREDICTION_BAND_CENTERS_HZ,
-    ground_db: ArrayLike = 0.0,
-    foundation_db: ArrayLike = 0.0,
-    floor_db: ArrayLike = 0.0,
-    mitigation_db: ArrayLike = 0.0,
+    ground_level_difference: ArrayLike = 0.0,
+    foundation_level_difference: ArrayLike = 0.0,
+    floor_level_difference: ArrayLike = 0.0,
+    mitigation_level_difference: ArrayLike = 0.0,
 ) -> TrainCategoryPrediction:
     r"""Run the chain from an emission spectrum to the assessment quantities.
 
@@ -860,29 +877,31 @@ def predict_train_category(
     applies the rule of E DIN 4150-2:2023-08 that Formula (11) leaves out, a
     category at or below 0,1 counting as zero.
 
-    :param emission_db: :math:`L_{v,\mathrm{E}}`, one level per band, in decibels.
+    :param emission_levels: :math:`L_{v,\mathrm{E}}`, one level per band, in decibels.
     :param frequencies: The band centres, nominal; the 19 bands from 4 Hz
         to 250 Hz by default, and at least the 14 from 4 Hz to 80 Hz.
-    :param ground_db: :math:`\Delta L_{v,\mathrm{BB}}`, per band or one value.
-    :param foundation_db: :math:`\Delta L_{v,\mathrm{FB}}`, per band or one value.
-    :param floor_db: :math:`\Delta L_{v,\mathrm{DF}}`, per band or one value.
-    :param mitigation_db: :math:`D_\mathrm{e}`, per band or one value, added as
+    :param ground_level_difference: :math:`\Delta L_{v,\mathrm{BB}}`, per band or one value.
+    :param foundation_level_difference: :math:`\Delta L_{v,\mathrm{FB}}`, per band or one value.
+    :param floor_level_difference: :math:`\Delta L_{v,\mathrm{DF}}`, per band or one value.
+    :param mitigation_level_difference: :math:`D_\mathrm{e}`, per band or one value, added as
         printed, so negative for a mitigation.
     :return: The chain, as a :class:`TrainCategoryPrediction`.
     :raises ValueError: For a spectrum that does not hold the 14 bands of
         the KB assessment, or a bad term.
+    :raises TypeError: if ``emission_levels`` or ``frequencies`` holds a text or a value
+        that is not a real number.
     """
     freqs = require_finite_array(frequencies, "frequencies")
-    levels = _levels(emission_db, "emission_db")
+    levels = _levels(emission_levels, "emission_levels")
     if freqs.shape != levels.shape:
-        msg = "'emission_db' and 'frequencies' must match, one level per band."
+        msg = "'emission_levels' and 'frequencies' must match, one level per band."
         raise ValueError(msg)
     floor = predict_floor_spectrum(
         levels,
-        ground_db=ground_db,
-        foundation_db=foundation_db,
-        floor_db=floor_db,
-        mitigation_db=mitigation_db,
+        ground_level_difference=ground_level_difference,
+        foundation_level_difference=foundation_level_difference,
+        floor_level_difference=floor_level_difference,
+        mitigation_level_difference=mitigation_level_difference,
     )
     low, high = KB_ASSESSMENT_BANDS_HZ
     inside = (freqs >= low / _BAND_TOLERANCE) & (freqs <= high * _BAND_TOLERANCE)
@@ -897,10 +916,10 @@ def predict_train_category(
     kb_fmax = TRAIN_KB_FMAX_FACTOR * kb_ftm
     return TrainCategoryPrediction(
         frequencies=freqs,
-        emission_db=levels,
-        floor_db=floor,
+        emission_levels=levels,
+        floor_levels=floor,
         weighted_frequencies_hz=freqs[inside],
-        weighted_db=weighted,
+        weighted_levels=weighted,
         sum_level=band_sum_level(weighted),
         kb_ftm=kb_ftm,
         kb_fmax=kb_fmax,
@@ -922,6 +941,7 @@ def point_to_line_transition_distance_m(
     :param wavelength_m: :math:`\lambda` at the band of interest, in metres.
     :return: :math:`R_0`, in metres.
     :raises ValueError: For a non-positive length or wavelength.
+    :raises TypeError: if ``train_length_m`` or ``wavelength_m`` is not a single number.
     """
     length = require_positive(train_length_m, "train_length_m")
     wavelength = require_positive(wavelength_m, "wavelength_m")
@@ -944,6 +964,8 @@ def line_source_correction(
     :return: :math:`\Delta L_{v,\mathrm{Korr}}`, in decibels.
     :raises ValueError: For a non-positive distance or a correction outside
         0,3 to 0,5.
+    :raises TypeError: if ``distance_m``, ``exponent_correction`` or
+        ``reference_distance_m`` is not a single number.
     """
     distance = require_positive(distance_m, "distance_m")
     reference = require_positive(reference_distance_m, "reference_distance_m")
@@ -972,6 +994,7 @@ def train_decay_exponent(
     :param fitted_with: ``"power_and_damping"`` (default) or ``"power_law"``.
     :return: :math:`n_\mathrm{Zug}`.
     :raises ValueError: For a negative exponent or an unknown fit.
+    :raises TypeError: if ``point_exponent`` is not a single number.
     """
     exponent = require_non_negative(point_exponent, "point_exponent")
     correction = LINE_SOURCE_EXPONENT_CORRECTION[
@@ -1005,6 +1028,9 @@ def train_velocity_ratio(
     :return: :math:`v(r) / v(r_0)`, one per distance.
     :raises ValueError: For a non-positive distance, a reference beyond the
         transition, a negative exponent or a correction outside Annex B.
+    :raises TypeError: if ``exponent_correction``, ``point_exponent``,
+        ``reference_distance_m`` or ``transition_distance_m`` is not a single number, or
+        ``distance_m`` holds a text or a value that is not a real number.
     """
     distances = require_finite_array(distance_m, "distance_m")
     if np.any(distances <= 0.0):

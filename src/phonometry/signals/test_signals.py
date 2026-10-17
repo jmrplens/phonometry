@@ -157,6 +157,7 @@ def noise_signal(
         reproduces the same record. ``None`` draws fresh entropy.
     :return: The noise record, ``round(fs * duration_s)`` samples.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``duration_s``, ``fs`` or ``rms`` is not a single number.
     """
     require_scalar(fs, "fs")
     fs_v = float(fs)
@@ -422,6 +423,8 @@ def tone_burst(
         repetition period), in seconds.
     :return: A :class:`ToneBurstResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``n_cycles`` or ``n_repetitions`` is a flag, a text or an
+        array where a count goes.
     :warns ToneBurstWarning: If ``fs`` and ``frequency`` are incommensurate.
     """
     fs_v, f_v, cycles_v, amplitude_v, repetitions_v = _tone_burst_scalars(
@@ -642,6 +645,9 @@ def resample_signal(
         rate ratio is not rational within ``max_denominator``, or if ``x`` is
         a Signal and ``fs_new`` is not a whole number of hertz, which is the
         only kind of rate a Signal carries.
+    :raises TypeError: if ``stopband_attenuation`` or ``transition_width`` is not a
+        single number, or ``max_denominator`` is a flag, a text or an array where a
+        count goes.
     """
     from fractions import Fraction
 
@@ -812,6 +818,7 @@ def fractional_delay(
     :param mode: Boundary convention, ``'linear'`` or ``'circular'``.
     :return: The delayed record, same length as ``x``.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``delay`` is not a single number.
     """
     xa = _validate_1d_finite(x, "x")
     require_scalar(delay, "delay")

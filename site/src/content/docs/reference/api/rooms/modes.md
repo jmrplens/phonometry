@@ -100,6 +100,12 @@ between adjacent eigenfrequencies.
 
 **Returns:** The modal density, modes/Hz.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `speed_of_sound` is not a single number. |
+
 ## room_mode_count
 
 ```python
@@ -132,6 +138,12 @@ fit below `f`; the exact enumeration is [`room_modes`](/phonometry/reference/api
 
 **Returns:** The (non-integer) mode count.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `speed_of_sound` is not a single number. |
+
 ## room_mode_frequency
 
 ```python
@@ -158,6 +170,12 @@ $$
 | `speed_of_sound` | Speed of sound `c0`, m/s (default 343 m/s, dry air at 20 °C). |
 
 **Returns:** The modal frequency in Hz; a float for a single triple, otherwise one frequency per row.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `speed_of_sound` is not a single number. |
 
 ## room_modes
 
@@ -190,6 +208,12 @@ solution) is excluded.
 | `reverberation_time` | Optional reverberation time `T`, s. When given, the Schroeder frequency $2000 \sqrt{T/V}$ is computed and carried in the result (and marked by [`RoomModesResult.plot`](/phonometry/reference/api/rooms/modes/#roommodesresultplot)). |
 
 **Returns:** A [`RoomModesResult`](/phonometry/reference/api/rooms/modes/#roommodesresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `max_frequency` or `speed_of_sound` is not a single number. |
 
 ## RoomModesResult
 

@@ -274,6 +274,8 @@ class SoundPowerIntensityResult(OwnsArrays):
         :raises ValueError: if any per-band quantity disagrees with the rest,
             ``surface_area`` is not finite, the grade is unknown, ``fraction``
             is not 1 or 3, or the grade needs a limit ``s`` nothing gives.
+        :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
+            float).
         """
         _check_grade(self.grade)
         require_band_fraction(self.fraction, "fraction")
@@ -601,6 +603,8 @@ def sound_power_intensity(
         for ``'engineering'``. For ``'survey'`` the default is the A-weighted
         4 dB reused per band (extrapolated -- non-normative).
     :return: :class:`SoundPowerIntensityResult`.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     grade = _check_grade(grade)
     intensity, seg = _validate_scan(normal_intensity, areas, frequencies, fraction)
@@ -1218,6 +1222,7 @@ class PrecisionIntensityResult(OwnsArrays):
 
         :raises ValueError: if any per-band quantity disagrees with the rest,
             or ``surface_area`` is not finite.
+        :raises TypeError: if ``temperature_c`` is not a single number.
         """
         require_ranks(self, frequencies=1, partial_power=2)
         require_same_length(self, "frequencies", ("partial_power", 1))
@@ -1559,6 +1564,8 @@ def precision_qualification(
         the criterion-1 limit ``s`` from Table 1.
     :param repeatability_limit: Override for ``s`` (dB), scalar or per band.
     :return: :class:`PrecisionCriteria`.
+    :raises TypeError: if ``frequencies``, ``scan_intensity_level_1`` or
+        ``scan_intensity_level_2`` holds a text or a value that is not a real number.
     """
     f_pi_signed = indicators.f_pi_signed
     n_bands = f_pi_signed.shape[0]
@@ -1667,6 +1674,8 @@ def sound_power_intensity_precision(
     :param temperature_c: Air temperature ``theta`` (deg C), for LW0 (Eq. 10).
     :param static_pressure_pa: Barometric pressure ``B`` (Pa), for LW0.
     :return: :class:`PrecisionIntensityResult`.
+    :raises TypeError: if ``static_pressure_pa`` or ``temperature_c`` is not a single
+        number.
     """
     raw_intensity = np.asarray(partial_intensity, dtype=np.float64)
     seg = np.asarray(areas, dtype=np.float64)

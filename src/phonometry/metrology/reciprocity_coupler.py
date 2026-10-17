@@ -362,6 +362,8 @@ def temperature_transfer_function(
     :return: :math:`E_V`, complex, with the shape of ``x``.
     :raises ValueError: for a ratio or an :math:`X` that is not positive and
         finite, or an unknown method.
+    :raises TypeError: if ``method`` is not a text, or ``length_to_diameter_ratio`` is
+        not a single number.
     """
     method = require_choice(method, "method", _HEAT_CONDUCTION_METHODS)
     ratio = require_positive(length_to_diameter_ratio, "length_to_diameter_ratio")
@@ -474,6 +476,7 @@ def heat_conduction_correction(
     :return: The :class:`HeatConductionCorrection`.
     :raises ValueError: for a volume, surface or ratio that is not positive,
         or frequencies that are not positive and increasing.
+    :raises TypeError: if ``surface_area_m2`` or ``volume_m3`` is not a single number.
     """
     frequencies = _frequency_axis(frequencies)
     volume = require_positive(volume_m3, "volume_m3")
@@ -564,6 +567,8 @@ class CapillaryTube(RichDisplay):
         """Refuse a length or radius that is not positive, or no tube.
 
         :raises ValueError: for either.
+        :raises TypeError: if ``length_m`` or ``radius_m`` is not a single number, or
+            ``n_tubes`` is a flag, a text or an array where a count goes.
         """
         require_positive(self.length_m, "length_m")
         require_positive(self.radius_m, "radius_m")
@@ -675,6 +680,7 @@ def capillary_tube_impedance(
     :return: The :class:`CapillaryTubeImpedance`.
     :raises ValueError: for a length or radius that is not positive, or
         frequencies that are not positive and increasing.
+    :raises TypeError: if ``length_m`` or ``radius_m`` is not a single number.
     """
     frequencies = _frequency_axis(frequencies)
     length = require_positive(length_m, "length_m")
@@ -756,6 +762,8 @@ class ReciprocityMicrophone(RichDisplay):
 
         :raises ValueError: for a volume, frequency, depth or diameter that is
             not positive, or a loss factor or thread area that is negative.
+        :raises TypeError: if ``loss_factor`` or ``thread_area_m2`` is not a single
+            number.
         """
         for name in (
             "equivalent_volume_m3",
@@ -887,6 +895,7 @@ class PlaneWaveCoupler(RichDisplay):
         """Refuse a length or diameter that is not positive.
 
         :raises ValueError: for either.
+        :raises TypeError: if ``diameter_m`` or ``length_m`` is not a single number.
         """
         require_positive(self.length_m, "length_m")
         require_positive(self.diameter_m, "diameter_m")
@@ -933,6 +942,8 @@ class LargeVolumeCoupler(RichDisplay):
         """Refuse dimensions that are not positive, or a negative port length.
 
         :raises ValueError: for any.
+        :raises TypeError: if ``diameter_m``, ``length_m`` or ``port_length_m`` is not a
+            single number.
         """
         require_positive(self.length_m, "length_m")
         require_positive(self.diameter_m, "diameter_m")
@@ -1128,6 +1139,7 @@ class CouplerTransferImpedance(OwnsArrays):
 
         :raises ValueError: for an unknown coupler, frequencies that are not
             positive and increasing, or columns of another length.
+        :raises TypeError: if ``coupler`` is not a text.
         """
         require_choice(self.coupler, "coupler", _COUPLER_KINDS)
         frequencies = _frequency_axis(self.frequencies)
@@ -1359,7 +1371,9 @@ def coupler_transfer_impedance(
         (:func:`temperature_transfer_function`).
     :return: The :class:`CouplerTransferImpedance`.
     :raises TypeError: for a ``coupler`` that is neither a
-        :class:`PlaneWaveCoupler` nor a :class:`LargeVolumeCoupler`.
+        :class:`PlaneWaveCoupler` nor a :class:`LargeVolumeCoupler`, a
+        ``static_pressure_pa`` that is not one number, or a
+        ``heat_conduction_method`` that is not a text.
     :raises ValueError: for frequencies that are not positive and increasing,
         a static pressure that is not positive, or an unknown method.
     """
@@ -1584,6 +1598,7 @@ class WaveMotionCorrection(OwnsArrays):
             is not positive, a frequency whose air equivalent is above the
             last row of Table C.3, 2 500 Hz, or a correction that is not the
             one Table C.3 gives at its frequency.
+        :raises TypeError: if ``speed_of_sound_ratio`` is not a single number.
         """
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
@@ -1690,6 +1705,7 @@ def large_volume_wave_motion_correction(
     :return: The :class:`WaveMotionCorrection`.
     :raises ValueError: for a frequency whose air equivalent is above 2 500 Hz,
         or a ratio that is not positive.
+    :raises TypeError: if ``speed_of_sound_ratio`` is not a single number.
     """
     frequencies = _frequency_axis(frequencies)
     ratio = require_positive(speed_of_sound_ratio, "speed_of_sound_ratio")
@@ -1917,6 +1933,7 @@ def check_coupler(
     :return: The :class:`CouplerCheck`.
     :raises ValueError: for frequencies that are not positive and increasing,
         fewer than two microphones, or an unknown method.
+    :raises TypeError: if ``heat_conduction_method`` is not a text.
     """
     frequencies = _frequency_axis(frequencies)
     method = require_choice(
@@ -1994,14 +2011,14 @@ class CouplerParameterUncertainty(OwnsArrays):
     :func:`~phonometry.metrology.reciprocity_uncertainty_budget`.
 
     :ivar frequencies: The frequencies, in Hz.
-    :ivar components_db: The component of each parameter, keyed by its name in
+    :ivar component_uncertainties_db: The component of each parameter, keyed by its name in
         :data:`~phonometry.metrology.IEC61094_2_TABLE_1`, in dB at each
         frequency.
     :ivar microphone: The microphone whose level they are for, 1, 2 or 3.
     """
 
     frequencies: NDArray[np.float64]
-    components_db: Mapping[str, NDArray[np.float64]]
+    component_uncertainties_db: Mapping[str, NDArray[np.float64]]
     microphone: int
 
     def __post_init__(self) -> None:
@@ -2014,7 +2031,7 @@ class CouplerParameterUncertainty(OwnsArrays):
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
         components = {}
-        for name, value in self.components_db.items():
+        for name, value in self.component_uncertainties_db.items():
             column = np.asarray(value, dtype=np.float64).reshape(-1)
             if (
                 column.size != frequencies.size
@@ -2022,12 +2039,14 @@ class CouplerParameterUncertainty(OwnsArrays):
                 or np.any(column < 0.0)
             ):
                 msg = (
-                    f"CouplerParameterUncertainty: 'components_db[{name!r}]' must be "
+                    f"CouplerParameterUncertainty: 'component_uncertainties_db[{name!r}]' must be "
                     "one finite, non-negative value per frequency."
                 )
                 raise ValueError(msg)
             components[str(name)] = read_only(column)
-        object.__setattr__(self, "components_db", MappingProxyType(components))
+        object.__setattr__(
+            self, "component_uncertainties_db", MappingProxyType(components)
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -2205,6 +2224,7 @@ def coupler_parameter_uncertainty(
         on capillary tubes the coupler does not have, or one on the static
         pressure, the temperature or the humidity of a coupler filled with a
         given gas.
+    :raises TypeError: if ``heat_conduction_method`` is not a text.
     """
     frequencies = _frequency_axis(frequencies)
     if len(microphones) != len(_TRIAD_PAIRS):
@@ -2289,7 +2309,9 @@ def coupler_parameter_uncertainty(
                 )
             )
     return CouplerParameterUncertainty(
-        frequencies=frequencies, components_db=components, microphone=microphone
+        frequencies=frequencies,
+        component_uncertainties_db=components,
+        microphone=microphone,
     )
 
 

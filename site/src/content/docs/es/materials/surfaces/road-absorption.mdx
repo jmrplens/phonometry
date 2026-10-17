@@ -131,7 +131,8 @@ hr = kr * 0.4 * np.roll(hi, 96)
 # Absorción de banda estrecha, luego reducida a tercios de octava en 250-4000 Hz.
 alpha = materials.in_situ_absorption_coefficient(hi, hr)   # 1 - (1/Kr^2)|Hr/Hi|^2
 freq = np.fft.rfftfreq(n, 1.0 / fs)
-centres, band = materials.one_third_octave_absorption(alpha, frequencies=freq)
+bands = materials.one_third_octave_absorption(alpha, frequencies=freq)
+centres, band = bands.frequencies, bands.absorption
 print(round(kr, 4))                # 0.6667
 print(round(float(band[2]), 3))    # 0.84  (alpha = 1 - 0.4^2 = 0.84)
 ```

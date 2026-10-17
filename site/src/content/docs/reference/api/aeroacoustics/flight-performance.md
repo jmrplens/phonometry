@@ -317,6 +317,7 @@ by an inserted transition point (B6.1.6).
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the procedure does not start with a Take-off step, or a step cannot be flown as specified. |
+| TypeError | if `weight_lb` is not a single number. |
 
 ## DepartureStep
 
@@ -633,3 +634,4 @@ Corrected net thrust per engine, lb (Eq. B-12).
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the true airspeed is not positive. |
+| TypeError | if `true_airspeed_kt` is not a single number. |

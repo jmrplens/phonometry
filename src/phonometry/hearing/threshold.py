@@ -342,6 +342,7 @@ def age_threshold(
     :return: An :class:`AgeThresholdResult` with the distribution and ``.plot()``.
     :raises ValueError: for an age below 18, an unknown sex, a fractile outside
         (0, 1), or an unknown frequency.
+    :raises TypeError: if ``age`` or ``fractile`` is not a single number.
     """
     require_scalar(age, "age")
     if age < _REFERENCE_AGE:
@@ -396,6 +397,7 @@ def reference_threshold(
         hertz; ``None`` uses all eleven (125 Hz - 8000 Hz).
     :return: The reference threshold, in dB, aligned with the frequencies.
     :raises ValueError: for an unknown field or frequency.
+    :raises TypeError: if ``field`` is not a text.
     """
     chosen = require_choice(field, "field", FIELDS)
     return _select(_REFERENCE[chosen], frequencies)

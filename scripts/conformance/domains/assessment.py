@@ -244,7 +244,7 @@ def _chk_gum_h1_uc() -> Outcome:
 )
 def _chk_gum_h1_u99() -> Outcome:
     result = _gum_h1_result()
-    _, big = result.expanded(0.99)
+    big = result.expanded(0.99).expanded_uncertainty
     return numeric(ref.GUM_H1_U99, big, 0.1, unit="nm", places=1)
 
 
@@ -402,11 +402,11 @@ def _reat_budget_mismatches(
         ):
             budget = library[protector][name]
             pairs = (
-                (budget.method_db, meth),
-                (budget.equipment_db, eq),
-                (budget.environment_db, env),
-                (round(budget.combined_db, 1), u),
-                (round(budget.expanded_db, 1), u95),
+                (budget.method_uncertainty_db, meth),
+                (budget.equipment_uncertainty_db, eq),
+                (budget.environment_uncertainty_db, env),
+                (round(budget.combined_uncertainty_db, 1), u),
+                (round(budget.expanded_uncertainty_db, 1), u95),
             )
             cells += len(pairs)
             mismatches += sum(abs(got - want) > 1e-9 for got, want in pairs)
@@ -448,7 +448,7 @@ def _chk_reat_table_a3() -> Outcome:
     """All 28 derived cells, at full precision and rounded last (NOTE 2)."""
     result = ph.hearing.real_ear_attenuation(ref.ISO4869_1_TABLE_A3)
     rows = (
-        (result.mean_db, ref.ISO4869_1_TABLE_A3_MEAN),
+        (result.mean_attenuation, ref.ISO4869_1_TABLE_A3_MEAN),
         (result.standard_deviation_db, ref.ISO4869_1_TABLE_A3_SIGMA),
         (result.standard_uncertainty_db, ref.ISO4869_1_TABLE_A3_U),
         (result.expanded_uncertainty_db, ref.ISO4869_1_TABLE_A3_U95),
@@ -495,7 +495,7 @@ def _chk_reat_table_b1() -> Outcome:
     worst = float(
         np.max(
             np.abs(
-                np.round(result.criterion_db, 1)
+                np.round(result.significance_limit_db, 1)
                 - np.asarray(ref.ISO4869_1_TABLE_B1_CRITERION)
             )
         )
@@ -760,11 +760,11 @@ def _chk_anr_table_a2() -> Outcome:
     matching = sum(
         abs(got - want) <= 1e-9
         for got, want in (
-            (budget.method_db, meth),
-            (budget.equipment_db, eq),
-            (budget.environment_db, env),
-            (round(budget.combined_db, 2), u),
-            (round(budget.expanded_db, 1), u95),
+            (budget.method_uncertainty_db, meth),
+            (budget.equipment_uncertainty_db, eq),
+            (budget.environment_uncertainty_db, env),
+            (round(budget.combined_uncertainty_db, 2), u),
+            (round(budget.expanded_uncertainty_db, 1), u95),
         )
     )
     return count(matching, 5, subject="cells of Table A.2")
@@ -779,7 +779,10 @@ def _chk_anr_table_a3_spread() -> Outcome:
     """The mean and sigma rows, at full precision and rounded once."""
     result = ph.hearing.active_insertion_loss(ref.ISO4869_6_TABLE_A3)
     matching = int(
-        np.sum(_half_up(result.mean_db) == np.asarray(ref.ISO4869_6_TABLE_A3_MEAN))
+        np.sum(
+            _half_up(result.mean_insertion_loss)
+            == np.asarray(ref.ISO4869_6_TABLE_A3_MEAN)
+        )
         + np.sum(
             _half_up(result.standard_deviation_db)
             == np.asarray(ref.ISO4869_6_TABLE_A3_SIGMA)
@@ -847,7 +850,7 @@ def _chk_anr_workbook_interpolation() -> Outcome:
     """Rows 182-197, once rounded to 0,1 dB the way the workbook rounds them."""
     result = _anr_workbook_total()
     workbook = np.asarray(ref.ISO4869_6_WORKBOOK_REAT_THIRDS)
-    matching = int(np.sum(_half_up(result.reat_third_octave_db) == workbook))
+    matching = int(np.sum(_half_up(result.reat_third_octave_attenuation) == workbook))
     return count(matching, workbook.size, subject="cells of rows 182-197")
 
 
@@ -872,7 +875,7 @@ def _chk_anr_workbook_thirds() -> Outcome:
     """
     result = _anr_workbook_total()
     workbook = np.asarray(ref.ISO4869_6_WORKBOOK_TOTAL_THIRDS)
-    worst = float(np.max(np.abs(result.total_third_octave_db - workbook)))
+    worst = float(np.max(np.abs(result.total_third_octave_attenuation - workbook)))
     return Outcome(
         expected="384 cells of rows 206-221, within 0.05 dB",
         computed=f"max deviation {worst:.3f} dB",
@@ -894,7 +897,7 @@ def _chk_anr_workbook_octaves() -> Outcome:
     """
     result = _anr_workbook_total()
     workbook = np.asarray(ref.ISO4869_6_WORKBOOK_TOTAL_OCTAVES)
-    worst = float(np.max(np.abs(result.total_octave_db - workbook)))
+    worst = float(np.max(np.abs(result.total_octave_attenuation - workbook)))
     return Outcome(
         expected="128 cells of rows 230-245, within 0.1 dB",
         computed=f"max deviation {worst:.3f} dB",

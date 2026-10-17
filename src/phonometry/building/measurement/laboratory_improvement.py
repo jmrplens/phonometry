@@ -204,6 +204,7 @@ class LaboratoryLiningImprovementResult(OwnsArrays):
 
         :raises ValueError: if the per-band columns disagree, or
             ``basic_element`` is neither a standard element nor ``None``.
+        :raises TypeError: if ``basic_element`` is not a text.
         """
         require_ranks(self, frequencies=1, r_without=1, r_with=1, delta_r=1)
         require_same_length(self, "frequencies", "r_without", "r_with", "delta_r")
@@ -281,6 +282,8 @@ def laboratory_lining_improvement(
     :return: A :class:`LaboratoryLiningImprovementResult`.
     :raises ValueError: If the three inputs disagree in length, a value is not
         finite, a frequency is not positive, or ``basic_element`` is unknown.
+    :raises TypeError: if ``basic_element`` is not a text, or ``frequencies`` holds a
+        text or a value that is not a real number.
     """
     freqs, without, with_ = _paired_spectra(
         "laboratory_lining_improvement",
@@ -437,6 +440,8 @@ def check_lining_curing(
     :return: A :class:`LiningCuringCheck`.
     :raises ValueError: If a time is negative or not finite, or the required
         curing period is not positive.
+    :raises TypeError: if ``curing_time_days``, ``required_curing_days`` or
+        ``time_lag_days`` is not a single number.
     """
     curing = require_non_negative(curing_time_days, "curing_time_days")
     lag = require_non_negative(time_lag_days, "time_lag_days")
@@ -497,6 +502,7 @@ class LaboratoryFloorCoveringImprovementResult(OwnsArrays):
 
         :raises ValueError: if the per-band columns disagree, or the floor is
             not one of the four reference floors.
+        :raises TypeError: if ``reference_floor`` is not a text.
         """
         require_ranks(self, frequencies=1, l_n0=1, l_n=1, improvement=1)
         require_same_length(self, "frequencies", "l_n0", "l_n", "improvement")
@@ -650,6 +656,8 @@ def laboratory_floor_covering_improvement(
     :raises ValueError: If the three inputs disagree in length, a value is not
         finite, a frequency is not positive, or ``reference_floor`` is not one
         of the four floors.
+    :raises TypeError: if ``reference_floor`` is not a text, or ``frequencies`` holds a
+        text or a value that is not a real number.
     """
     freqs, bare, covered = _paired_spectra(
         "laboratory_floor_covering_improvement",
@@ -755,6 +763,8 @@ def heavy_impact_improvement(
     :return: A :class:`HeavyImpactImprovementResult`.
     :raises ValueError: If the inputs disagree in length, a value is not finite
         or a frequency is not positive.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     freqs, bare, covered = _paired_spectra(
         "heavy_impact_improvement",

@@ -77,6 +77,7 @@ out.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or a temperature at or below absolute zero. |
+| TypeError | if `heat_capacity_ratio`, `molar_mass_kg_mol`, `static_pressure_pa` or `temperature_c` is not a single number. |
 
 ## IDEAL_GAS_VALIDITY
 

@@ -149,10 +149,9 @@ def test_every_public_record_shows_itself_through_the_mechanism() -> None:
         if cls._repr_html_ is not RichDisplay._repr_html_  # type: ignore[attr-defined]
         or cls._repr_pretty_ is not RichDisplay._repr_pretty_  # type: ignore[attr-defined]
     ] == []
-    assert {cls.__name__ for cls in named_tuples} == {
-        "FiberCharacteristicLengths",
-        "FiberResistivityFit",
-    }
+    # A named tuple unpacks by position, the hazard a record is there to
+    # close, so no public record is one.
+    assert [cls.__name__ for cls in named_tuples] == []
 
 
 def _ipython_prints_with(cls: type) -> str:
@@ -183,7 +182,7 @@ def test_ipython_prints_every_public_record_with_the_table() -> None:
     ] == []
 
 
-def test_a_named_tuple_shows_the_same_table() -> None:
+def test_the_fibre_records_show_the_same_table() -> None:
     from phonometry import materials
 
     fit = materials.FiberResistivityFit(

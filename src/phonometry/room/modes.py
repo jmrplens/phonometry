@@ -146,6 +146,7 @@ def room_mode_frequency(
         343 m/s, dry air at 20 °C).
     :return: The modal frequency in Hz; a float for a single triple, otherwise
         one frequency per row.
+    :raises TypeError: if ``speed_of_sound`` is not a single number.
     """
     dims = _require_dimensions(dimensions)
     c0 = require_positive(speed_of_sound, "speed_of_sound")
@@ -188,6 +189,7 @@ def room_mode_count(
     :param dimensions: Room dimensions ``(lx, ly, lz)``, m.
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The (non-integer) mode count.
+    :raises TypeError: if ``speed_of_sound`` is not a single number.
     """
     dims = _require_dimensions(dimensions)
     c0 = require_positive(speed_of_sound, "speed_of_sound")
@@ -226,6 +228,7 @@ def room_modal_density(
     :param dimensions: Room dimensions ``(lx, ly, lz)``, m.
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The modal density, modes/Hz.
+    :raises TypeError: if ``speed_of_sound`` is not a single number.
     """
     dims = _require_dimensions(dimensions)
     c0 = require_positive(speed_of_sound, "speed_of_sound")
@@ -402,6 +405,8 @@ def room_modes(
         given, the Schroeder frequency :math:`2000 \sqrt{T/V}` is computed and
         carried in the result (and marked by :meth:`RoomModesResult.plot`).
     :return: A :class:`RoomModesResult`.
+    :raises TypeError: if ``max_frequency`` or ``speed_of_sound`` is not a single
+        number.
     """
     dims = _require_dimensions(dimensions)
     c0 = require_positive(speed_of_sound, "speed_of_sound")

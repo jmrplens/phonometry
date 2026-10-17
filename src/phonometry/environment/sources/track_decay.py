@@ -146,6 +146,7 @@ def track_decay_excitation_positions(
     :return: The 29 distances of :data:`TRACK_DECAY_EXCITATION_INDICES`
         times the sleeper spacing, read-only.
     :raises ValueError: For a spacing that is not positive.
+    :raises TypeError: if ``sleeper_spacing_m`` is not a single number.
     """
     spacing = require_positive(sleeper_spacing_m, "sleeper_spacing_m")
     return read_only(np.asarray(TRACK_DECAY_EXCITATION_INDICES) * spacing)
@@ -233,7 +234,7 @@ def _measurement(
     return distances, matrix
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class TrackDecayRate(OwnsArrays):
     r"""The decay rates of a rail in one direction, by one-third octave band (EN 15461).
 
@@ -269,6 +270,8 @@ class TrackDecayRate(OwnsArrays):
             :func:`track_decay_rate` refuses: a grid that is not finite, has
             fewer than two positions, does not start at 0 m or does not
             strictly increase, or responses that are not positive and finite.
+        :raises TypeError: if ``direction`` is not a text, or ``decay_rates_db_per_m``
+            or ``frequencies`` holds a text or a value that is not a real number.
         """
         require_choice(self.direction, "direction", TRACK_DECAY_DIRECTIONS)
         frequencies = require_positive_array(self.frequencies, "frequencies")
@@ -342,6 +345,7 @@ class TrackDecayRate(OwnsArrays):
         :return: The rate of that band.
         :raises ValueError: If the spectrum has no band at that frequency: a
             number outside what the result covers, not a missing key.
+        :raises TypeError: if ``frequency_hz`` is not a single number.
         """
         band = round(10.0 * np.log10(require_positive(frequency_hz, "frequency_hz")))
         bands = np.round(10.0 * np.log10(self.frequencies)).astype(int)
@@ -418,6 +422,8 @@ def track_decay_rate(
         grid that is not finite, has fewer than two positions, does not start
         at 0 or does not strictly increase, frequencies that do not name
         distinct bands in increasing order, or shapes that do not agree.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     frequencies = require_positive_array(frequencies, "frequencies")
     grid: ArrayLike = (

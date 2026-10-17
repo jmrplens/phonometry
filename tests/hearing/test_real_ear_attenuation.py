@@ -37,7 +37,7 @@ def test_table_a3_derived_rows() -> None:
     result = _table_a3()
     assert result.n_subjects == 16
     assert result.frequencies.tolist() == ref.ISO4869_1_FREQUENCIES
-    assert np.round(result.mean_db, 1).tolist() == ref.ISO4869_1_TABLE_A3_MEAN
+    assert np.round(result.mean_attenuation, 1).tolist() == ref.ISO4869_1_TABLE_A3_MEAN
     assert (
         np.round(result.standard_deviation_db, 1).tolist()
         == ref.ISO4869_1_TABLE_A3_SIGMA
@@ -70,10 +70,12 @@ def test_attenuation_is_occluded_minus_open_threshold() -> None:
     rng = np.random.default_rng(4869)
     open_ears = rng.uniform(-5.0, 15.0, size=_A3.shape)
     from_thresholds = hearing.real_ear_attenuation(
-        open_threshold_db=open_ears, occluded_threshold_db=open_ears + _A3
+        open_threshold_levels=open_ears, occluded_threshold_levels=open_ears + _A3
     )
     np.testing.assert_allclose(from_thresholds.attenuation, _A3)
-    np.testing.assert_allclose(from_thresholds.mean_db, _table_a3().mean_db)
+    np.testing.assert_allclose(
+        from_thresholds.mean_attenuation, _table_a3().mean_attenuation
+    )
 
 
 def test_the_grid_feeds_iso_4869_2_unchanged() -> None:
@@ -81,7 +83,7 @@ def test_the_grid_feeds_iso_4869_2_unchanged() -> None:
     grid = _table_a3().attenuation
     apv = hearing.assumed_protection_value(grid)
     assert apv.frequencies.tolist() == ref.ISO4869_1_FREQUENCIES
-    np.testing.assert_allclose(apv.mean_attenuation, _table_a3().mean_db)
+    np.testing.assert_allclose(apv.mean_attenuation, _table_a3().mean_attenuation)
     # HML and SNR read 125 Hz to 8 kHz, which is exactly what 4.1 measures.
     assert hearing.hml_rating(grid).subject_high.shape == (16,)
     assert hearing.snr_rating(grid).subject_snr.shape == (16,)
@@ -112,20 +114,20 @@ def test_both_input_forms_at_once_is_refused() -> None:
     open_ears = np.zeros_like(_A3)
     with pytest.raises(ValueError, match="not both forms"):
         hearing.real_ear_attenuation(
-            _A3, open_threshold_db=open_ears, occluded_threshold_db=_A3
+            _A3, open_threshold_levels=open_ears, occluded_threshold_levels=_A3
         )
 
 
 def test_one_threshold_alone_is_refused() -> None:
     with pytest.raises(ValueError, match="not both forms"):
-        hearing.real_ear_attenuation(open_threshold_db=_A3)
+        hearing.real_ear_attenuation(open_threshold_levels=_A3)
 
 
 def test_thresholds_of_different_shapes_are_refused() -> None:
     occluded = _A3[:, :6]
     with pytest.raises(ValueError, match="same subjects and bands"):
         hearing.real_ear_attenuation(
-            open_threshold_db=_A3, occluded_threshold_db=occluded
+            open_threshold_levels=_A3, occluded_threshold_levels=occluded
         )
 
 
@@ -170,13 +172,17 @@ def test_typical_budgets_reproduce_the_printed_tables(
     for protector, columns in printed.items():
         budgets = [library[protector][name] for name in hearing.REAT_FREQUENCY_RANGES]
         for budget, (meth, eq, env, u, u95) in zip(budgets, columns, strict=True):
-            assert (budget.method_db, budget.equipment_db, budget.environment_db) == (
+            assert (
+                budget.method_uncertainty_db,
+                budget.equipment_uncertainty_db,
+                budget.environment_uncertainty_db,
+            ) == (
                 meth,
                 eq,
                 env,
             )
-            assert round(budget.combined_db, 1) == u
-            assert round(budget.expanded_db, 1) == u95
+            assert round(budget.combined_uncertainty_db, 1) == u
+            assert round(budget.expanded_uncertainty_db, 1) == u95
 
 
 def test_budgets_are_read_only() -> None:
@@ -222,7 +228,10 @@ def _table_b1() -> hearing.AttenuationDifferenceResult:
 def test_table_b1_criterion_row_and_verdict() -> None:
     """The root-sum-of-squares row, all seven cells, and 'significant at 8 kHz'."""
     result = _table_b1()
-    assert np.round(result.criterion_db, 1).tolist() == ref.ISO4869_1_TABLE_B1_CRITERION
+    assert (
+        np.round(result.significance_limit_db, 1).tolist()
+        == ref.ISO4869_1_TABLE_B1_CRITERION
+    )
     assert result.significant_frequencies.tolist() == ref.ISO4869_1_TABLE_B1_SIGNIFICANT
     assert result.any_significant
 
@@ -234,9 +243,9 @@ def test_the_comparison_holds_its_own_copies() -> None:
     result = hearing.assess_attenuation_difference(
         first, means, second_expanded_uncertainty_db=ref.ISO4869_1_TABLE_B1_U95_2
     )
-    assert not np.shares_memory(result.first_mean_db, first.mean_db)
+    assert not np.shares_memory(result.first_mean_attenuation, first.mean_attenuation)
     assert not np.shares_memory(result.frequencies, first.frequencies)
-    assert not np.shares_memory(result.second_mean_db, means)
+    assert not np.shares_memory(result.second_mean_attenuation, means)
 
 
 def test_table_b1_difference_row_within_the_rounding_of_test_2() -> None:
@@ -284,7 +293,7 @@ def test_a_difference_equal_to_the_criterion_is_not_significant() -> None:
         second_expanded_uncertainty_db=0.0,
         frequencies=[1000.0],
     )
-    assert result.criterion_db[0] == pytest.approx(3.0)
+    assert result.significance_limit_db[0] == pytest.approx(3.0)
     assert not result.significant[0]
 
 
@@ -309,18 +318,18 @@ def test_minimum_difference_from_the_unrounded_budget() -> None:
     within = hearing.REAT_WITHIN_LABORATORY_UNCERTAINTY
     between = hearing.REAT_BETWEEN_LABORATORY_UNCERTAINTY
     plug_within = hearing.min_significant_difference(
-        within["earplug"][middle].expanded_db
+        within["earplug"][middle].expanded_uncertainty_db
     )
     plug_between = hearing.min_significant_difference(
-        between["earplug"][middle].expanded_db
+        between["earplug"][middle].expanded_uncertainty_db
     )
     assert plug_within == pytest.approx(3.2125, abs=5e-5)
     assert plug_between == pytest.approx(9.3680, abs=5e-5)
     muff_within = hearing.min_significant_difference(
-        within["earmuff"][middle].expanded_db
+        within["earmuff"][middle].expanded_uncertainty_db
     )
     muff_between = hearing.min_significant_difference(
-        between["earmuff"][middle].expanded_db
+        between["earmuff"][middle].expanded_uncertainty_db
     )
     assert (round(muff_within, 1), round(muff_between, 1)) == (2.3, 6.9)
 
@@ -335,7 +344,7 @@ def test_minimum_difference_is_the_criterion_for_two_equal_uncertainties() -> No
         frequencies=[250.0, 1000.0],
     )
     np.testing.assert_allclose(
-        result.criterion_db, hearing.min_significant_difference([2.3, 1.6])
+        result.significance_limit_db, hearing.min_significant_difference([2.3, 1.6])
     )
 
 
@@ -529,4 +538,4 @@ def test_the_sound_field_check_has_no_truth_value() -> None:
 
 def test_the_coverage_factor_is_two() -> None:
     budget = hearing.ProtectorUncertaintyBudget(0.6, 0.3, 0.4)
-    assert budget.expanded_db == pytest.approx(2.0 * math.sqrt(0.61))
+    assert budget.expanded_uncertainty_db == pytest.approx(2.0 * math.sqrt(0.61))

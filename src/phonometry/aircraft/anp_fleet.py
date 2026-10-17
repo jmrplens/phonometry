@@ -392,6 +392,8 @@ class ANPProfile(OwnsArrays):
 
         :raises ValueError: if a mask does not carry one entry per path
             segment, or ``path`` does not carry the five documented columns.
+        :raises TypeError: if ``ground_roll`` or ``landing_roll`` is a single number
+            where an array goes.
         """
         require_ranks(self, path=2, ground_roll=1, landing_roll=1)
         path_columns = 5
@@ -429,7 +431,7 @@ class ANPProfile(OwnsArrays):
         )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class SpectralClass(OwnsArrays):
     """One ANP spectral class: the reference spectrum of a group of aircraft.
 
@@ -1295,6 +1297,7 @@ class ANPDatabase:
         :param absorption: The Appendix D absorption route, ``"arp5534"``
             (default) or ``"arp866a"``; read only with a humidity.
         :return: A :class:`~phonometry.aircraft.airport_noise.FlyoverResult`.
+        :raises TypeError: if ``absorption`` is not a text.
         """
         atmosphere = _impedance_atmosphere(
             aerodrome, temperature_c, static_pressure_kpa
@@ -1364,6 +1367,7 @@ class ANPDatabase:
         :param absorption: The Appendix D absorption route, ``"arp5534"``
             (default) or ``"arp866a"``; read only with a humidity.
         :return: A :class:`~phonometry.aircraft.airport_noise.NoiseContourResult`.
+        :raises TypeError: if ``absorption`` is not a text.
         """
         atmosphere = _impedance_atmosphere(
             aerodrome, temperature_c, static_pressure_kpa

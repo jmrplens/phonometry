@@ -213,6 +213,12 @@ sampling advisory. The uncertainty is the job-based budget (Eq C.9, Table C.4).
 
 **Returns:** An [`ExposureResult`](/phonometry/reference/api/hearing/occupational-exposure/#exposureresult).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `effective_duration_hours` or `u3` is not a single number. |
+
 ## INSTRUMENT_U2
 
 *Constant* (`mapping`).
@@ -258,6 +264,12 @@ $c_2 = c_3 = 1$.
 
 **Returns:** An [`ExposureResult`](/phonometry/reference/api/hearing/occupational-exposure/#exposureresult).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `effective_duration_hours`, `sample_duration_hours` or `u3` is not a single number. |
+
 ## min_cumulative_duration_hours
 
 ```python
@@ -273,6 +285,12 @@ Minimum cumulative measurement duration (h) for a homogeneous exposure group (Ta
 | `n_workers` | Number of workers `n_G` in the homogeneous exposure group. |
 
 **Returns:** The minimum cumulative measurement duration in hours. For `n_G > 40` the standard advises splitting the group; the returned 17 h is the tabulated fallback.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `n_workers` is not a single number. |
 
 ## OccupationalExposureWarning
 
@@ -301,6 +319,12 @@ uncertainty `u1`. The `u1` axis is anchored at the origin (`u1 = 0` gives
 | `u1` | Standard uncertainty of the samples, dB (>= 0). |
 
 **Returns:** The contribution $c_1 u_1$ in dB.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `n_samples` or `u1` is not a single number. |
 
 ## Task
 
@@ -359,6 +383,12 @@ follows Eq C.3 with sampling `u1a` (Eq C.6), optional duration `u1b`
 | `warn` | Emit [`OccupationalExposureWarning`](/phonometry/reference/api/hearing/occupational-exposure/#occupationalexposurewarning) when a task triggers the 3 dB spread rule (Clause 9.3). |
 
 **Returns:** An [`ExposureResult`](/phonometry/reference/api/hearing/occupational-exposure/#exposureresult) with per-task contributions.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `u3` is not a single number. |
 
 ## TaskContribution
 

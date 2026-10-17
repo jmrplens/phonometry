@@ -21,7 +21,7 @@ from ._core import _anim_speaker, _fit_text_x
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-    from phonometry.materials import CriticalCouplingResult
+    from phonometry.materials import CriticalCouplingResult, EffectiveFluidProperties
 
 _SLIT_ABS_F0 = 300.0  # critical-coupling design frequency
 _SLIT_ABS_TUBE = 0.60  # air column before the panel face
@@ -44,6 +44,11 @@ def _slit_absorber_design() -> CriticalCouplingResult:
     return materials.critical_coupling_design(
         _SLIT_ABS_F0, base, lattice_step_m=_SLIT_ABS_LATTICE, period_m=_SLIT_ABS_PERIOD
     )
+
+
+def _fluid_items(fluid: EffectiveFluidProperties) -> tuple[complex, complex]:
+    """The density and bulk modulus of a one-frequency effective fluid."""
+    return complex(fluid.effective_density.item()), complex(fluid.bulk_modulus.item())
 
 
 def _lossy_fluid_params(rho_c: complex, kappa_c: complex) -> tuple[float, float, float]:
@@ -132,10 +137,10 @@ def _slit_absorber_fields(
     )
     freq = np.array([_SLIT_ABS_F0])
     neck_f = _lossy_fluid_params(
-        *(p.item() for p in rectangular_duct_properties(freq, side_m=res.neck_side_m))
+        *_fluid_items(rectangular_duct_properties(freq, side_m=res.neck_side_m))
     )
     cav_f = _lossy_fluid_params(
-        *(p.item() for p in rectangular_duct_properties(freq, side_m=res.cavity_side_m))
+        *_fluid_items(rectangular_duct_properties(freq, side_m=res.cavity_side_m))
     )
     # 2D-slice calibration: the meshed cell's slot-shaped mouths carry
     # smaller end-correction masses than the square ducts of the 3D
@@ -181,7 +186,7 @@ def _slit_absorber_fields(
     times = np.zeros(0)
     for h in (h0, _SLIT_ABS_DETUNE * h0):
         slit_f = _lossy_fluid_params(
-            *(p.item() for p in slit_effective_properties(freq, slit_height_m=h))
+            *_fluid_items(slit_effective_properties(freq, slit_height_m=h))
         )
         rows = _slit_absorber_cell_rows(dx, round(h / dx), ny)
         mask = np.zeros((ny, nx), dtype=bool)

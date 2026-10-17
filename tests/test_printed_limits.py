@@ -114,17 +114,17 @@ _CHOSEN_LIMITS = {
         "the CTE DB-HR requirement the user looked up for the building"
     ),
     "phonometry.building.measurement.uncertainty.RequirementConformity."
-    "requirement_db": (
+    "required_rating": (
         "ISO 12999-1 Clause 8: the requirement the building code sets, taken as given"
     ),
     "phonometry.building.regulation.spain.DBHRRequirement.limit": (
         "the requirement object is the looked-up limit itself"
     ),
-    "phonometry.electroacoustics.induction_loop.LoopRequirement.lower_db": (
+    "phonometry.electroacoustics.induction_loop.LoopRequirement.lower_limits_db": (
         "one row of a generic requirement record, its limit mixing printed tolerances"
         " with the specified field strength and the measured noise"
     ),
-    "phonometry.electroacoustics.induction_loop.LoopRequirement.upper_db": (
+    "phonometry.electroacoustics.induction_loop.LoopRequirement.upper_limits_db": (
         "one row of a generic requirement record"
     ),
     "phonometry.emission.sound_power_plant.PlantRequirement.limit": (
@@ -209,6 +209,12 @@ _CHOSEN_LIMITS = {
 #: Fields named like a limit that hold no limit: a measured or computed value,
 #: a verdict flag, the words of a requirement.
 _NOT_LIMITS = {
+    "phonometry.hearing.audiometry.RetestAgreementCheck.first_threshold_level": (
+        "the hearing threshold level measured first, a measurement"
+    ),
+    "phonometry.hearing.audiometry.RetestAgreementCheck.repeat_threshold_level": (
+        "the hearing threshold level measured again, a measurement"
+    ),
     "phonometry.building.measurement.service_equipment.MeasurementDisturbanceCheck."
     "max_levels": "the measured maximum levels",
     "phonometry.building.measurement.service_equipment.VaryingBackgroundCheck."
@@ -260,8 +266,8 @@ _DERIVED_LIMITS = {
     ),
     "phonometry.electroacoustics.program_signal.ProgramSignalCheck": (
         "relative_levels",
-        "tolerance_plus_db",
-        "tolerance_minus_db",
+        "upper_tolerance_db",
+        "lower_tolerance_db",
     ),
     "phonometry.emission.free_field_qualification.InverseSquareLawResult": (
         "tolerance_db",
@@ -303,7 +309,7 @@ _DERIVED_LIMITS = {
         "table_bands_hz",
     ),
     "phonometry.hearing._earmuff_insertion_loss.FixtureIsolationVerification": (
-        "required_db",
+        "min_isolation",
     ),
     "phonometry.environment.propagation.barrier_reflection.ReflectionGridCheck": (
         "nominal_m",
@@ -337,7 +343,7 @@ _DERIVED_LIMITS = {
         "passes",
     ),
     "phonometry.psychoacoustics.quality.tonality.ToneAssessment": (
-        "criterion_db",
+        "prominence_limit_db",
         "prominent",
     ),
     "phonometry.underwater.bioacoustics.weighting.WeightedExposureResult": (
@@ -975,7 +981,7 @@ _DERIVED_FLAGS = {
         "difference",
         "regime",
         "correction",
-        "corrected_db",
+        "corrected_levels",
     ),
     "phonometry.building.measurement.service_equipment.ServiceEquipmentResult": (
         "standardizable",
@@ -1188,7 +1194,7 @@ _DERIVED_FLAGS = {
         "range_limited",
     ),
     "phonometry.hearing.audiometry.AscendingThresholdResult": (
-        "threshold_db",
+        "threshold_level",
         "determined",
         "series_exhausted",
     ),
@@ -1201,7 +1207,7 @@ _DERIVED_FLAGS = {
     "phonometry.hearing.occupational_exposure.TaskContribution": ("spread_advisory",),
     "phonometry.hearing._real_ear_attenuation.AttenuationDifferenceResult": (
         "difference",
-        "criterion_db",
+        "significance_limit_db",
         "significant",
     ),
     "phonometry.materials.absorbers.suspended_ceilings.CeilingSpecimenCheck": (

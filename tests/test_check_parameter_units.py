@@ -22,6 +22,7 @@ fails bare as it did before.
 
 from __future__ import annotations
 
+import dataclasses
 import functools
 import inspect
 import pathlib
@@ -41,6 +42,7 @@ import check_parameter_units as cpu
 
 import phonometry.aircraft
 import phonometry.building
+import phonometry.electroacoustics
 import phonometry.environment
 import phonometry.io
 import phonometry.noise_control
@@ -1172,7 +1174,7 @@ def test_a_frequency_axis_beside_its_values_is_written_by_name(
         yield "phonometry.stub", stub
 
     monkeypatch.setattr(cpu, "public_modules", modules)
-    found, stale = cpu.positional_frequency_axes()
+    found, stale = cpu.positional_function_axes()
     assert sorted((entry.qualname, axis, values) for entry, axis, values in found) == [
         ("_Contour.sound_power", "frequencies", ("levels",)),
         ("criterion", "frequencies", ("levels",)),
@@ -1182,17 +1184,80 @@ def test_a_frequency_axis_beside_its_values_is_written_by_name(
     assert stale == []
 
 
-def test_a_frequency_axis_exemption_nothing_needs_is_stale(
+def _resample(
+    levels: np.ndarray, wavelengths_mm: np.ndarray, speed_kmh: float
+) -> float:
+    return speed_kmh
+
+
+def _resample_by_name(
+    levels: np.ndarray, *, wavelengths_mm: np.ndarray, speed_kmh: float
+) -> float:
+    return speed_kmh
+
+
+def _reflection(
+    swr: np.ndarray, first_min_distance: np.ndarray, wavelength: np.ndarray
+) -> float:
+    return 0.0
+
+
+def _reading_at(level: np.ndarray, wavelength_m: float) -> float:
+    return wavelength_m
+
+
+def test_a_wavelength_axis_beside_its_values_is_written_by_name(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A roughness tabulated over wavelength binds its two arrays either way
+    round as a spectrum over frequency does, and so does the wavelength of
+    each band of a standing-wave reading beside the distance read in it: both
+    are axes, written by name. The axis already behind the ``*`` and a single
+    wavelength typed as a number pass.
+    """
+    functions = (_resample, _resample_by_name, _reflection, _reading_at)
+    stub = types.ModuleType("phonometry.stub")
+    names = ["resample", "resample_by_name", "reflection", "reading_at"]
+    stub.__all__ = names  # type: ignore[attr-defined]
+    for name, function in zip(names, functions, strict=True):
+        function.__module__ = "phonometry.environment.stub"
+        setattr(stub, name, function)
+
+    def modules() -> Iterator[tuple[str, types.ModuleType]]:
+        yield "phonometry.stub", stub
+
+    monkeypatch.setattr(cpu, "public_modules", modules)
+    found, stale = cpu.positional_function_axes()
+    assert sorted((entry.qualname, axis, values) for entry, axis, values in found) == [
+        ("reflection", "wavelength", ("swr", "first_min_distance")),
+        ("resample", "wavelengths_mm", ("levels",)),
+    ]
+    assert stale == []
+
+
+@pytest.mark.parametrize(
+    "name", ["frequencies", "tone_frequencies", "wavelengths_mm", "wavelength"]
+)
+def test_a_frequency_or_a_wavelength_name_is_an_axis(name: str) -> None:
+    assert cpu.is_axis(name)
+
+
+@pytest.mark.parametrize("name", ["levels", "first_min_distance", "speed_kmh"])
+def test_a_value_name_is_not_an_axis(name: str) -> None:
+    assert not cpu.is_axis(name)
+
+
+def test_a_function_axis_exemption_nothing_needs_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     key = ("phonometry.room.stub", "criterion_gone")
-    monkeypatch.setitem(cpu.FREQUENCY_AXIS_EXEMPT, key, "a reason")
-    _, stale = cpu.positional_frequency_axes()
+    monkeypatch.setitem(cpu.FUNCTION_AXIS_EXEMPT, key, "a reason")
+    _, stale = cpu.positional_function_axes()
     assert key in stale
 
 
-def test_the_tree_writes_every_frequency_axis_by_name() -> None:
-    assert cpu.positional_frequency_axes() == ([], [])
+def test_the_tree_writes_every_function_axis_by_name() -> None:
+    assert cpu.positional_function_axes() == ([], [])
 
 
 @pytest.mark.parametrize(
@@ -1221,6 +1286,291 @@ def test_a_number_a_pair_or_a_sequence_of_records_is_not(annotation: object) -> 
     assert not cpu.holds_an_array(annotation)
 
 
+def _stiffness_and_damping() -> tuple[float, float]:
+    return 0.0, 0.0
+
+
+def _spectrum_or_nothing() -> tuple[np.ndarray, float] | None:
+    return None
+
+
+def _band_levels() -> tuple[float, ...]:
+    return ()
+
+
+def _one_record() -> _Record:
+    return _Record(0.0, 0.0)
+
+
+def _range_m() -> tuple[float, float]:
+    return 0.0, 1.0
+
+
+class _Coupling:
+    """A stub result whose method and property answer with tuples."""
+
+    def wave_parameters(self) -> tuple[float, float]:
+        return 0.0, 0.0
+
+    @property
+    def ratings(self) -> tuple[float, float, float]:
+        return 0.0, 0.0, 0.0
+
+    @property
+    def level(self) -> float:
+        return 0.0
+
+
+def test_an_answer_of_several_values_is_a_record(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A tuple of several quantities is read by position, and the order is what
+    a reader gets wrong: a function, a method or a property that returns a
+    fixed-length tuple or a named tuple is reported, the item types alike or
+    not, unless it is exempt with its reason. A tuple of any length,
+    ``tuple[float, ...]``, is a sequence of like items and passes.
+    """
+    for function in (
+        _stiffness_and_damping,
+        _spectrum_or_nothing,
+        _band_levels,
+        _one_record,
+        _range_m,
+    ):
+        function.__module__ = "phonometry.room.stub"
+    _Coupling.__module__ = "phonometry.room.stub"
+    stub = types.ModuleType("phonometry.stub")
+    stub.__all__ = [  # type: ignore[attr-defined]
+        "stiffness_and_damping",
+        "spectrum_or_nothing",
+        "band_levels",
+        "one_record",
+        "range_m",
+        "Coupling",
+    ]
+    stub.stiffness_and_damping = _stiffness_and_damping  # type: ignore[attr-defined]
+    stub.spectrum_or_nothing = _spectrum_or_nothing  # type: ignore[attr-defined]
+    stub.band_levels = _band_levels  # type: ignore[attr-defined]
+    stub.one_record = _one_record  # type: ignore[attr-defined]
+    stub.range_m = _range_m  # type: ignore[attr-defined]
+    stub.Coupling = _Coupling  # type: ignore[attr-defined]
+
+    def modules() -> Iterator[tuple[str, types.ModuleType]]:
+        yield "phonometry.stub", stub
+
+    monkeypatch.setattr(cpu, "public_modules", modules)
+    monkeypatch.setattr(
+        cpu,
+        "TUPLE_RETURN_EXEMPT",
+        {("phonometry.room.stub", "range_m"): "the two ends of one range"},
+    )
+    found, stale = cpu.tuple_returns()
+    assert sorted((entry.qualname, items) for entry, items in found) == [
+        ("_Coupling.ratings", ("float", "float", "float")),
+        ("_Coupling.wave_parameters", ("float", "float")),
+        ("one_record", ("_Record",)),
+        ("spectrum_or_nothing", ("np.ndarray", "float")),
+        ("stiffness_and_damping", ("float", "float")),
+    ]
+    assert stale == []
+
+
+def test_a_tuple_return_exemption_nothing_needs_is_stale(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    key = ("phonometry.room.stub", "pair_gone")
+    monkeypatch.setitem(cpu.TUPLE_RETURN_EXEMPT, key, "a reason")
+    _, stale = cpu.tuple_returns()
+    assert key in stale
+
+
+@pytest.mark.parametrize(
+    ("annotation", "items"),
+    [
+        ("tuple[float, float]", ("float", "float")),
+        ("tuple[np.ndarray, float] | None", ("np.ndarray", "float")),
+        ("Optional[tuple[int, str]]", ("int", "str")),
+        ("None | tuple[Signal, Signal]", ("Signal", "Signal")),
+        ("tuple[float, ...]", None),
+        ("tuple[float]", None),
+        ("list[tuple[float, float]]", None),
+        ("float", None),
+        (inspect.Signature.empty, None),
+    ],
+)
+def test_a_fixed_tuple_is_read_off_the_return_annotation(
+    annotation: object, items: tuple[str, ...] | None
+) -> None:
+    assert cpu.fixed_tuple_items(annotation) == items
+
+
+def test_the_tree_answers_several_quantities_as_records() -> None:
+    assert cpu.tuple_returns() == ([], [])
+
+
+@dataclasses.dataclass(frozen=True)
+class _Hemisphere:
+    """A stub input record whose axis binds by position."""
+
+    frequencies: np.ndarray
+    levels: np.ndarray
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class _Impedance:
+    """A stub input record written by name."""
+
+    frequencies: np.ndarray
+    impedance_ohm: np.ndarray
+
+
+@dataclasses.dataclass(frozen=True)
+class _Spectrum:
+    """A stub result no function takes: its fields are read, not written."""
+
+    frequencies: np.ndarray
+    levels: np.ndarray
+
+
+def _source_level(hemisphere: _Hemisphere, impedance: _Impedance) -> float:
+    return 0.0
+
+
+def test_an_input_record_takes_its_frequency_axis_by_name(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A record another public function takes is built field by field, as a
+    call is, so its axis beside its values is written by name; a record
+    nothing takes is a result, read by name, and passes.
+    """
+    for obj in (_Hemisphere, _Impedance, _Spectrum, _source_level):
+        obj.__module__ = "phonometry.room.stub"
+    stub = types.ModuleType("phonometry.stub")
+    stub.__all__ = [  # type: ignore[attr-defined]
+        "Hemisphere",
+        "Impedance",
+        "Spectrum",
+        "source_level",
+    ]
+    stub.Hemisphere = _Hemisphere  # type: ignore[attr-defined]
+    stub.Impedance = _Impedance  # type: ignore[attr-defined]
+    stub.Spectrum = _Spectrum  # type: ignore[attr-defined]
+    stub.source_level = _source_level  # type: ignore[attr-defined]
+
+    def modules() -> Iterator[tuple[str, types.ModuleType]]:
+        yield "phonometry.stub", stub
+
+    monkeypatch.setattr(cpu, "public_modules", modules)
+    monkeypatch.setattr(cpu, "RECORD_AXIS_EXEMPT", {})
+    found, stale = cpu.positional_record_axes()
+    assert [(entry.qualname, axis, values) for entry, axis, values in found] == [
+        ("_Hemisphere", "frequencies", ("levels",))
+    ]
+    assert stale == []
+
+
+@dataclasses.dataclass(frozen=True)
+class _Roughness:
+    """A stub record a caller builds inside another, its wavelengths by position."""
+
+    wavelengths_mm: np.ndarray
+    levels: np.ndarray
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class _Track:
+    """A stub input record that holds a spectrum the caller builds too."""
+
+    roughness: _Roughness
+
+
+@dataclasses.dataclass(frozen=True)
+class _Held:
+    """A stub result a handed-on result holds: no caller writes it."""
+
+    frequencies: np.ndarray
+    levels: np.ndarray
+
+
+@dataclasses.dataclass(frozen=True)
+class _Handed:
+    """A stub result one function builds and another takes whole."""
+
+    frequencies: np.ndarray
+    levels: np.ndarray
+    held: _Held
+
+
+def _track_level(track: _Track, handed: _Handed) -> float:
+    return 0.0
+
+
+def test_a_record_held_by_an_input_record_takes_its_axis_by_name(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The spectrum a track holds is built by the caller as the track is, so
+    its wavelength axis beside its levels is written by name; a record held by
+    a result one function hands whole to another is never written, and passes.
+    """
+    for obj in (_Roughness, _Track, _Held, _Handed, _track_level):
+        obj.__module__ = "phonometry.room.stub"
+    stub = types.ModuleType("phonometry.stub")
+    names = ["Roughness", "Track", "Held", "Handed", "track_level"]
+    stub.__all__ = names  # type: ignore[attr-defined]
+    for name, obj in zip(
+        names, (_Roughness, _Track, _Held, _Handed, _track_level), strict=True
+    ):
+        setattr(stub, name, obj)
+
+    def modules() -> Iterator[tuple[str, types.ModuleType]]:
+        yield "phonometry.stub", stub
+
+    monkeypatch.setattr(cpu, "public_modules", modules)
+    monkeypatch.setattr(
+        cpu, "RECORD_AXIS_EXEMPT", {("phonometry.room.stub", "_Handed"): "a reason"}
+    )
+    found, stale = cpu.positional_record_axes()
+    assert [(entry.qualname, axis, values) for entry, axis, values in found] == [
+        ("_Roughness", "wavelengths_mm", ("levels",))
+    ]
+    assert stale == []
+
+
+def test_a_record_axis_exemption_nothing_needs_is_stale(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    key = ("phonometry.room.stub", "RecordGone")
+    monkeypatch.setitem(cpu.RECORD_AXIS_EXEMPT, key, "a reason")
+    _, stale = cpu.positional_record_axes()
+    assert key in stale
+
+
+def test_the_tree_writes_every_input_record_axis_by_name() -> None:
+    assert cpu.positional_record_axes() == ([], [])
+
+
+@pytest.mark.parametrize(
+    "build",
+    [
+        lambda: phonometry.aircraft.RotorcraftHemisphere(
+            np.array([100.0]), np.array([0.0]), np.array([90.0]), np.zeros((1, 1, 1))
+        ),
+        lambda: phonometry.electroacoustics.LoopImpedance(
+            np.array([100.0]), np.array([1.0])
+        ),
+        lambda: phonometry.environment.TrackDecayRate(
+            "vertical", np.array([100.0]), np.array([1.0])
+        ),
+    ],
+    ids=["rotorcraft_hemisphere", "loop_impedance", "track_decay_rate"],
+)
+def test_an_input_record_built_by_position_is_refused(
+    build: Callable[[], object],
+) -> None:
+    with pytest.raises(TypeError, match="positional argument"):
+        build()
+
+
 def test_every_condition_on_the_tree_is_written_by_name() -> None:
     _, loose, _ = cpu.offenders()
     assert loose == []
@@ -1239,14 +1589,112 @@ _OCTAVES = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
         (phonometry.room.noise_criterion, (np.full(8, 40.0), _OCTAVES)),
         (phonometry.underwater.FluidSeabed, (1800.0, 1700.0, 1025.0)),
         (phonometry.psychoacoustics.assess_tones, ([200.0], [40.0], [50.0], 2.7)),
+        (
+            phonometry.environment.roughness_to_frequency,
+            ([0.0, 12.0, -6.0], [100.0, 10.0, 1.0], 80.0),
+        ),
+        (
+            phonometry.materials.standing_wave_reflection,
+            ([4.0, 3.0], [0.05, 0.03], [0.686, 0.343]),
+        ),
+        (
+            phonometry.materials.standing_wave_normalized_impedance,
+            ([4.0, 3.0], [0.05, 0.03], [0.686, 0.343]),
+        ),
     ],
 )
 def test_a_condition_or_an_axis_passed_by_position_is_refused(
     function: Callable[..., object], args: tuple[object, ...]
 ) -> None:
     """The keyword rule holds at the call, not only in the guard's walk: a
-    condition or a frequency axis written by position raises instead of
-    binding to the next parameter.
+    condition, a frequency axis or a wavelength axis written by position
+    raises instead of binding to the next parameter.
     """
     with pytest.raises(TypeError, match=rf"{function.__name__}.*takes .*positional"):
         function(*args)
+
+
+@pytest.mark.parametrize(
+    ("name", "head"),
+    [
+        ("corrected_db", "corrected"),
+        ("floor_db", "floor"),
+        ("threshold_db", "threshold"),
+        ("mean_db", "mean"),
+        ("first_db", "first"),
+        ("EMISSION_DB", "emission"),
+        ("equipment_db", "equipment"),
+        ("tolerance_minus_db", "minus"),
+    ],
+)
+def test_a_name_made_of_qualifiers_and_db_names_no_quantity(
+    name: str, head: str
+) -> None:
+    assert cpu.decibel_quantity_head(name) == head
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "tolerance_db",
+        "lower_tolerance_db",
+        "expanded_uncertainty_db",
+        "fixture_uncertainty_db",
+        "signal_to_noise_ratio_db",
+        "front_to_back_ratio_db",
+        "acoustic_weighting_uncertainties_without_correction_data_db",
+        "sigma_omc_db",
+        "magnitude_db",
+        "background_margin_a_db",
+        "attenuation_db_per_m",
+        "threshold_level",
+        "corrected_levels",
+        "insertion_loss_db",
+        "diffuse_pressure_difference_db",
+    ],
+)
+def test_a_name_that_says_its_quantity_passes(name: str) -> None:
+    """A noun of a quantity in decibels, a level, a rate or no ``_db`` at all.
+
+    ``insertion_loss_db`` passes this rule because it names its quantity; the
+    level rule is the one that refuses its ``_db``.
+    """
+    assert cpu.decibel_quantity_head(name) is None
+
+
+def test_every_name_in_decibels_says_its_quantity() -> None:
+    found, stale = cpu.qualifier_only_decibels()
+    assert found == []
+    assert stale == []
+
+
+def _fitting(corrected_db: float, *, background_levels: float) -> float:
+    return corrected_db - background_levels
+
+
+def test_a_name_made_of_qualifiers_put_back_is_reported(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A parameter ``corrected_db`` and a constant ``FLOOR_DB`` fail again."""
+    _fitting.__module__ = "phonometry.signals"
+    monkeypatch.setattr(phonometry.signals, "fitting", _fitting, raising=False)
+    monkeypatch.setattr(phonometry.signals, "FLOOR_DB", 30.0, raising=False)
+    monkeypatch.setattr(
+        phonometry.signals,
+        "__all__",
+        [*phonometry.signals.__all__, "fitting", "FLOOR_DB"],
+    )
+    found, _ = cpu.qualifier_only_decibels()
+    assert sorted((entry.qualname, entry.name, head) for entry, head in found) == [
+        ("", "FLOOR_DB", "floor"),
+        ("fitting", "corrected_db", "corrected"),
+    ]
+
+
+def test_a_qualifier_exemption_nothing_needs_is_stale(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    key = ("phonometry.signals", "nothing_here", "mean_db")
+    monkeypatch.setitem(cpu.QUALIFIER_ONLY_EXEMPT, key, "a reason for nothing")
+    _, stale = cpu.qualifier_only_decibels()
+    assert key in stale

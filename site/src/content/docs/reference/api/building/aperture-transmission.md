@@ -148,6 +148,7 @@ Transmission coefficient of a circular aperture (Hopkins Eq. 4.102).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
+| TypeError | if `depth`, `radius` or `speed_of_sound` is not a single number. |
 
 ## composite_transmission_loss
 
@@ -234,6 +235,7 @@ Give exactly one of `width_m`/`radius`, matching
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a `depth`, `width_m` or `radius` that is not finite and positive, or for anything other than exactly one of `width_m`/`radius`. |
+| TypeError | if `depth`, `radius` or `width_m` is not a single number. |
 
 ## slit_resonance_frequencies
 
@@ -270,6 +272,7 @@ because the end correction `e` depends weakly on frequency.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input, `n_orders < 1`, or a slit so wide relative to its depth that the effective depth $d + 2e$ is non-positive (no resonance exists; `width_m` must be much less than the wavelength). |
+| TypeError | if `depth`, `n_orders`, `speed_of_sound` or `width_m` is not a single number. |
 
 ## slit_transmission_coefficient
 
@@ -305,6 +308,7 @@ Transmission coefficient of a straight-edged slit (Hopkins Eq. 4.99).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or unknown field/position. |
+| TypeError | if `field` or `position` is not a text, or `depth`, `speed_of_sound` or `width_m` is not a single number. |
 
 ## transmission_loss_from_coefficient
 

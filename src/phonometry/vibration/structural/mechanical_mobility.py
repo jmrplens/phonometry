@@ -243,6 +243,7 @@ def sdof_receptance(
     :param stiffness: Stiffness ``k``, in N/m.
     :param damping: Viscous damping coefficient ``c``, in N.s/m (>= 0).
     :return: The complex receptance ``H``, in m/N.
+    :raises TypeError: if ``damping``, ``mass`` or ``stiffness`` is not a single number.
     """
     mass = require_positive(mass, "mass")
     stiffness = require_positive(stiffness, "stiffness")
@@ -291,6 +292,7 @@ def resonance_frequency(mass: float, stiffness: float) -> float:
     :param mass: Mass ``m``, in kg.
     :param stiffness: Stiffness ``k``, in N/m.
     :return: The natural frequency ``f0``, in hertz.
+    :raises TypeError: if ``mass`` or ``stiffness`` is not a single number.
     """
     mass = require_positive(mass, "mass")
     stiffness = require_positive(stiffness, "stiffness")
@@ -336,6 +338,7 @@ class RigidMassCalibrationResult(OwnsArrays):
         :raises ValueError: for an unknown quantity, a mass or a frequency
             that is not positive, or a measurement that does not carry one
             value per frequency.
+        :raises TypeError: if ``mass`` is not a single number.
         """
         if self.quantity not in _RIGID_MASS_QUANTITIES:
             msg = "'quantity' must be 'accelerance' or 'mobility'."
@@ -446,6 +449,7 @@ def verify_rigid_mass_calibration(
     :return: A :class:`RigidMassCalibrationResult` with per-band pass flags.
     :raises ValueError: for an unknown quantity, non-positive mass or
         frequency, or mismatched shapes.
+    :raises TypeError: if ``mass`` is not a single number.
     """
     if quantity not in _RIGID_MASS_QUANTITIES:
         msg = "'quantity' must be 'accelerance' or 'mobility'."
@@ -485,6 +489,8 @@ def random_error_percent(coherence: ArrayLike, n_averages: int) -> np.ndarray:
     :param n_averages: Number of averaged spectra ``n`` (>= 1).
     :return: The normalized random error, in percent (same shape as input).
     :raises ValueError: for a coherence outside (0, 1] or ``n_averages < 1``.
+    :raises TypeError: if ``n_averages`` is a flag, a text or an array where a count
+        goes.
     """
     require_scalar(n_averages, "n_averages")
     n = require_count(n_averages, "n_averages", at_least=None)

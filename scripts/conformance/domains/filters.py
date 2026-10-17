@@ -138,8 +138,8 @@ def _summation_check(fraction: int) -> Outcome:
     result = ph.filters.verify_filter_class(_bank_1995(fraction), edition="1995")
     # Rounded before printing, plus zero, so a sum a hair under the input does
     # not print as -0.000.
-    low = round(min(b["summation_min_db"] for b in result.bands), 3) + 0.0
-    high = round(max(b["summation_max_db"] for b in result.bands), 3) + 0.0
+    low = round(min(b["summation_difference_lower"] for b in result.bands), 3) + 0.0
+    high = round(max(b["summation_difference_upper"] for b in result.bands), 3) + 0.0
     achieved = result.requirement_class("summation")
     margin = result.binding_margin("summation", 0)
     return Outcome(

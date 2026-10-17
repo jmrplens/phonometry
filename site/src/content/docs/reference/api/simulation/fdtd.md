@@ -87,6 +87,12 @@ the number of periods).
 | `frequencies` | The tracked frequencies [Hz]. |
 | `samples` | Number of steps accumulated since the last reset. |
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `ix0`, `ix1`, `iy0` or `iy1` is a flag, a text or an array where a count goes. |
+
 ### ContourProbe.phasors()
 
 ```python
@@ -198,6 +204,12 @@ sides into absorbing or locally reacting boundaries. Sources are soft
 | `edge_impedance` | Locally reacting boundary sides: a mapping from side name to a real specific acoustic impedance [Pa s/m], either a scalar or a per-edge-cell 1D array (length `ny` for `left`/ `right`, `nx` for `top`/`bottom`). Implements Eqs. (4.33)-(4.35); $Z = \rho c$ is a normal-incidence matched (anechoic) edge. A side cannot be both a sponge and an impedance boundary. |
 | `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells: every face adjacent to a masked cell is closed (zero normal velocity, Eq. 4.32), rasterising arbitrary interior geometry. |
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `cfl`, `dx` or `sponge_reflection` is not a single number, or `sponge_width` is a flag, a text or an array where a count goes. |
+
 ### FDTD2D.add_contour_probe()
 
 ```python
@@ -291,6 +303,7 @@ cells), as a physical incident wave would be.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown direction, a non-positive or non-finite `width`/`wavelength`, or a non-finite `center`/`amplitude`. |
+| TypeError | if `amplitude`, `center`, `wavelength` or `width` is not a single number. |
 
 ### FDTD2D.add_source()
 
@@ -362,6 +375,12 @@ With `record_every = k` a snapshot of `p` is stored after every
 straight into a `FuncAnimation` `imshow` update. Without
 `record_every` an empty array is returned and only the final state
 is kept (read it from `self.p`).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `decimate`, `n_steps` or `record_every` is a flag, a text or an array where a count goes. |
 
 ### FDTD2D.step()
 
@@ -446,7 +465,7 @@ spreading rather than the 3D spherical $1/r$.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If an input is of the wrong type: a count that is not a number, a `shape` that is not a pair, a complex medium, or an `obstacle_mask` that is not boolean. |
+| TypeError | If an input is of the wrong type: a `duration` that is not one number, an `absorbing_layer_cells` or `snapshot_every` that is not a number, a `shape` that is not a pair, a complex medium, or an `obstacle_mask` that is not boolean. |
 | ValueError | If the inputs are invalid. |
 
 ## FDTDResult

@@ -123,7 +123,7 @@ _BARYCENTRIC_TOL = -1e-9
 _MIN_SECTION_SPAN = 1e-6
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RotorcraftHemisphere(OwnsArrays):
     """A rotorcraft noise hemisphere (ECAC Doc 32 §A.3.2).
 
@@ -151,7 +151,6 @@ class RotorcraftHemisphere(OwnsArrays):
     azimuth_deg: NDArray[np.float64]
     polar_deg: NDArray[np.float64]
     levels: NDArray[np.float64]
-    _: KW_ONLY
     distance_m: float = _RH
 
     def __post_init__(self) -> None:
@@ -469,6 +468,9 @@ def hover_ring_hemisphere(
         (NORAH2 reference implementation), see above.
     :return: A :class:`RotorcraftHemisphere` on the requested grid.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``mapping`` is not a text, ``azimuth_step``, ``distance_m`` or
+        ``polar_step`` is not a single number, or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     freqs = require_positive_array(frequencies, "frequencies")
     brg = np.atleast_1d(np.asarray(bearings, dtype=np.float64))
@@ -554,6 +556,7 @@ def hover_derived_hemisphere(
         reference distance, every measured bin shifted by the offset
         (``NaN`` bins stay ``NaN``).
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``condition`` is not a text.
     """
     key = require_choice(condition, "condition", tuple(_TABLE3_OFFSETS_DB))
     if offset_db is None:
@@ -630,6 +633,7 @@ def flight_condition_weights(
         reproduces the reference implementation bin for bin.
     :return: The ``(index, weight)`` pairs, weights summing to 1.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``scaling_factor`` is not a single number.
     """
     v = np.atleast_1d(np.asarray(airspeeds, dtype=np.float64))
     g = np.atleast_1d(np.asarray(path_angles_deg, dtype=np.float64))
@@ -920,6 +924,7 @@ def flight_path_kinematics(
     :param gravity: Acceleration of gravity ``g`` in m/s² (default 9.80665).
     :return: A :class:`FlightPathKinematics`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``gravity`` is not a single number.
     """
     t, p = _validated_track(times, positions)
     g0 = require_positive(gravity, "gravity")
@@ -1044,7 +1049,7 @@ class RotorcraftEventResult(OwnsArrays):
         in EPNdB; ``NaN`` if no step has a defined ``PNLT``.
     """
 
-    #: The units ICAO Annex 16 Vol. I prints in its Nomenclature (I-6):
+    #: The units ICAO Annex 16 Vol. I prints in its Nomenclature (I-5, I-6):
     #: TPNdB for a tone-corrected perceived noise level, EPNdB for the EPNL.
     _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
         {"pnlt": "TPNdB", "pnltm": "TPNdB", "epnl": "EPNdB"}
@@ -1197,6 +1202,7 @@ class RotorcraftNoiseContourResult(OwnsArrays):
 
         :raises ValueError: if the level grid disagrees with ``x`` or ``y``,
             or ``metric`` is not ``"exposure"`` or ``"maximum"``.
+        :raises TypeError: if ``metric`` is not a text.
         """
         require_ranks(self, x=1, y=1, levels=2)
         require_same_length(self, "y", ("levels", 0), axis="grid row")
@@ -2102,6 +2108,7 @@ def rotorcraft_noise_contour(
         hemispheres, a :class:`FlightConditionInterpolation`.
     :return: A :class:`RotorcraftNoiseContourResult`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``metric`` is not a text.
     """
     setup = _event_setup(
         hemispheres,

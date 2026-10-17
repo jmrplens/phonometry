@@ -86,7 +86,7 @@ def test_table_d1_standard_uncertainties_follow_from_their_stated_values() -> No
     assert len(ref.IEC61094_5_TABLE_D1_STATED) == 7
     for key, (stated, divisor) in ref.IEC61094_5_TABLE_D1_STATED.items():
         row = table[key]
-        assert row.stated_db == pytest.approx(stated, rel=1e-12)
+        assert row.stated_uncertainty_db == pytest.approx(stated, rel=1e-12)
         assert row.divisor == pytest.approx(divisor, rel=1e-12)
         printed = ref.IEC61094_5_TABLE_D1_STANDARD_DB[key]
         assert row.standard_uncertainty_db == pytest.approx(printed, abs=1e-12)
@@ -98,7 +98,7 @@ def test_table_d1_repeatability_is_printed_as_a_standard_uncertainty() -> None:
     its column.
     """
     row = metrology.IEC61094_5_TABLE_D1["repeatability"]
-    assert row.stated_db is None
+    assert row.stated_uncertainty_db is None
     assert row.divisor is None
     printed = ref.IEC61094_5_TABLE_D1_STANDARD_DB["repeatability"]
     assert row.standard_uncertainty_db == pytest.approx(printed, abs=1e-12)
@@ -136,7 +136,7 @@ def test_published_tables_are_immutable() -> None:
         assert isinstance(table, types.MappingProxyType)
     row = metrology.IEC61094_5_TABLE_D1["drift"]
     with pytest.raises(dataclasses.FrozenInstanceError):
-        row.stated_db = 0.0  # type: ignore[misc]
+        row.stated_uncertainty_db = 0.0  # type: ignore[misc]
 
 
 # --------------------------------------------------------------------------

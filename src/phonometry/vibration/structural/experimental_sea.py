@@ -165,7 +165,7 @@ def beam_modal_density(
 
 
 def flat_plate_modal_density(
-    area: float, thickness: float, longitudinal_wave_speed: float
+    area: float, thickness_m: float, longitudinal_wave_speed: float
 ) -> float:
     r"""Modal density of a flat plate in flexure (Norton Eq. 6.25).
 
@@ -174,13 +174,13 @@ def flat_plate_modal_density(
     :math:`c_\mathrm{L} = \sqrt{E / (\rho (1 - \nu^2))}`.
 
     :param area: Plate surface area ``S``, in m^2 (> 0).
-    :param thickness: Plate thickness ``t``, in m (> 0).
+    :param thickness_m: Plate thickness ``t``, in m (> 0).
     :param longitudinal_wave_speed: Plate wave speed ``cL``, in m/s (> 0).
     :return: The modal density ``n(f)``, in modes per hertz.
     :raises ValueError: for a non-positive input.
     """
     s = require_positive(area, "area")
-    t = require_positive(thickness, "thickness")
+    t = require_positive(thickness_m, "thickness_m")
     c_l = require_positive(longitudinal_wave_speed, "longitudinal_wave_speed")
     return s * math.sqrt(12.0) / (2.0 * c_l * t)
 
@@ -206,7 +206,7 @@ def ring_frequency(mean_radius: float, longitudinal_wave_speed: float) -> float:
 def cylindrical_shell_modal_density(
     frequency: ArrayLike,
     area: float,
-    thickness: float,
+    thickness_m: float,
     mean_radius: float,
     longitudinal_wave_speed: float,
     *,
@@ -240,7 +240,7 @@ def cylindrical_shell_modal_density(
     :param frequency: Band centre frequency ``f``, in hertz (scalar or array,
         > 0).
     :param area: Shell surface area ``S``, in m^2 (> 0).
-    :param thickness: Wall thickness ``t``, in m (> 0).
+    :param thickness_m: Wall thickness ``t``, in m (> 0).
     :param mean_radius: Mean shell radius ``a_m``, in m (> 0).
     :param longitudinal_wave_speed: Plate wave speed ``cL``, in m/s (> 0).
     :param band: Analysis bandwidth, ``"octave"`` (Default,
@@ -250,7 +250,7 @@ def cylindrical_shell_modal_density(
     """
     f = require_positive_array(frequency, "frequency")
     s = require_positive(area, "area")
-    t = require_positive(thickness, "thickness")
+    t = require_positive(thickness_m, "thickness_m")
     c_l = require_positive(longitudinal_wave_speed, "longitudinal_wave_speed")
     f_r = ring_frequency(mean_radius, longitudinal_wave_speed)
     factor = _BANDWIDTH_FACTOR[require_choice(band, "band", ("octave", "third"))]

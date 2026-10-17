@@ -196,6 +196,7 @@ DEFAULT_SOURCE_HEIGHT_M = 1.25
 
 ```python
 geometric_spreading_factor(
+    *,
     source_height_m: float = 1.25,
     microphone_height_m: float = 0.25,
 ) -> float
@@ -229,6 +230,7 @@ $d_\mathrm{m} = 0.25$ m gives $K_\mathrm{r} = 2/3$ (Clause 4.2).
 ```python
 geometric_spreading_factor_angle(
     incidence_angle_rad: float,
+    *,
     source_height_m: float = 1.25,
     microphone_height_m: float = 0.25,
 ) -> float
@@ -415,6 +417,7 @@ Annex C; the frequency-dependent form of Annex G).
 InsituAbsorptionResult(
     frequencies: NDArray[np.float64],
     absorption: NDArray[np.float64],
+    *,
     source_height_m: float | None = None,
     microphone_height_m: float | None = None,
 )

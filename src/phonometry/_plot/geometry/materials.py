@@ -138,15 +138,15 @@ def _layer_kind_and_thickness(layer: Layer, total: float) -> tuple[str, float, s
     )
 
     if isinstance(layer, AirLayer):
-        return "air", float(layer.thickness), "Air"
+        return "air", float(layer.thickness_m), "Air"
     if isinstance(layer, PoroelasticLayer):
-        return "porous", float(layer.thickness), "Poroelastic"
+        return "porous", float(layer.thickness_m), "Poroelastic"
     if isinstance(layer, PorousLayer):
-        return "porous", float(layer.thickness), "Porous"
+        return "porous", float(layer.thickness_m), "Porous"
     if isinstance(layer, MicroperforatedPlateLayer):
-        return "plate", float(layer.thickness), "Microperforated plate"
+        return "plate", float(layer.thickness_m), "Microperforated plate"
     if isinstance(layer, PerforatedPlateLayer):
-        return "plate", float(layer.thickness), "Perforated plate"
+        return "plate", float(layer.thickness_m), "Perforated plate"
     if isinstance(layer, MembraneLayer):
         return "membrane", _MEMBRANE_DRAW_FRACTION * total, "Membrane"
     msg = f"Unsupported layer type: {type(layer).__name__!r}."
@@ -155,7 +155,7 @@ def _layer_kind_and_thickness(layer: Layer, total: float) -> tuple[str, float, s
 
 def _stack_total_depth(layers: Sequence[Any]) -> float:
     """Physical depth of the stack (membranes contribute zero)."""
-    return float(sum(getattr(layer, "thickness", 0.0) for layer in layers))
+    return float(sum(getattr(layer, "thickness_m", 0.0) for layer in layers))
 
 
 def _draw_plate_holes(
@@ -243,7 +243,7 @@ def plot_absorber_stack(
         if isinstance(layer, (MicroperforatedPlateLayer, PerforatedPlateLayer)):
             _draw_plate_holes(ax, layer, x, drawn, height)
         label = _t(label_key, language)
-        physical = float(getattr(layer, "thickness", 0.0))
+        physical = float(getattr(layer, "thickness_m", 0.0))
         if physical > 0.0 and drawn >= thin:
             _dim(
                 ax,
@@ -399,7 +399,7 @@ def plot_slit_absorber_geometry(
     resonators: Sequence[HelmholtzResonator] | HelmholtzResonator,
     ax: Axes | None = None,
     *,
-    slit_height: float,
+    slit_height_m: float,
     lattice_step: float,
     period_m: float,
     language: str = "en",
@@ -416,7 +416,7 @@ def plot_slit_absorber_geometry(
         :func:`~phonometry.materials.slit_helmholtz_absorber` (one per
         lattice step, or a single resonator reused for all steps).
     :param ax: Existing axes, or ``None`` to create a figure.
-    :param slit_height: Slit height ``h``, in metres.
+    :param slit_height_m: Slit height ``h``, in metres.
     :param lattice_step: Lattice step ``a``, in metres.
     :param period_m: Panel period ``d``, in metres.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -426,7 +426,7 @@ def plot_slit_absorber_geometry(
         finite and positive, or for an empty resonator chain.
     """
     _check_language(language)
-    require_positive(slit_height, "slit_height")
+    require_positive(slit_height_m, "slit_height_m")
     require_positive(lattice_step, "lattice_step")
     require_positive(period_m, "period_m")
     chain = list(resonators) if isinstance(resonators, Sequence) else [resonators]
@@ -437,7 +437,7 @@ def plot_slit_absorber_geometry(
         ax = _new_axes()
     n = len(chain)
     depth = n * lattice_step
-    h = slit_height
+    h = slit_height_m
     d = period_m
     wall = 0.05 * h
     # Panel slab (one period tall): slit at the top of the cell.
@@ -731,11 +731,11 @@ def _nominal_bore(diameter_m: float | None, fallback: float) -> float:
 def plot_impedance_tube_geometry(
     ax: Axes | None = None,
     *,
-    spacing: float,
+    spacing_m: float,
     x1: float,
     diameter_m: float | None = None,
     shape: str | None = "circular",
-    sample_thickness: float | None = None,
+    sample_thickness_m: float | None = None,
     speed_of_sound: float = 343.2,
     language: str = "en",
     **kwargs: Any,
@@ -749,14 +749,14 @@ def plot_impedance_tube_geometry(
     working range of :func:`~phonometry.materials.plane_wave_frequency_range`.
 
     :param ax: Existing axes, or ``None`` to create a figure.
-    :param spacing: Microphone spacing ``s``, in metres.
+    :param spacing_m: Microphone spacing ``s``, in metres.
     :param x1: Distance from the sample face to the farther microphone, in
         metres.
     :param diameter_m: Inner diameter (circular) or lateral dimension
         (rectangular/square), in metres; ``None`` draws a nominal bore and
         omits the bore dimension and the cut-on bound.
     :param shape: ``"circular"``, ``"rectangular"``, ``"square"`` or ``None``.
-    :param sample_thickness: Drawn sample thickness, in metres; ``None``
+    :param sample_thickness_m: Drawn sample thickness, in metres; ``None``
         draws a 50 mm nominal sample.
     :param speed_of_sound: Speed of sound for the working range, in m/s.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -769,22 +769,22 @@ def plot_impedance_tube_geometry(
     from ...materials.absorbers.impedance_tube import plane_wave_frequency_range
 
     _check_language(language)
-    require_positive(spacing, "spacing")
+    require_positive(spacing_m, "spacing_m")
     require_positive(x1, "x1")
-    if x1 <= spacing:
-        msg = "'x1' must exceed 'spacing'."
+    if x1 <= spacing_m:
+        msg = "'x1' must exceed 'spacing_m'."
         raise ValueError(msg)
     if diameter_m is not None:
         require_positive(diameter_m, "diameter_m")
-    if sample_thickness is not None:
-        require_positive(sample_thickness, "sample_thickness")
+    if sample_thickness_m is not None:
+        require_positive(sample_thickness_m, "sample_thickness_m")
     if ax is None:
         ax = _new_axes()
-    bore = _nominal_bore(diameter_m, 1.5 * spacing)
+    bore = _nominal_bore(diameter_m, 1.5 * spacing_m)
     thickness = (
         _NOMINAL_SAMPLE_THICKNESS
-        if sample_thickness is None
-        else float(sample_thickness)
+        if sample_thickness_m is None
+        else float(sample_thickness_m)
     )
     lead_in = _SOURCE_MARGIN_DIAMETERS * bore
     x_left = -(x1 + lead_in)
@@ -814,15 +814,15 @@ def plot_impedance_tube_geometry(
     _loudspeaker(ax, x_left + 0.1 * bore, 0.5 * bore, bore, language)
     wall = max(0.06 * bore, 0.004)
     _microphone(ax, -x1, bore + wall, 0.5 * bore, "1")
-    _microphone(ax, -(x1 - spacing), bore + wall, 0.5 * bore, "2")
+    _microphone(ax, -(x1 - spacing_m), bore + wall, 0.5 * bore, "2")
     off = 0.3 * bore
     y_dim = -0.5 * bore
     _dim(
         ax,
         (-x1, y_dim),
-        (-(x1 - spacing), y_dim),
-        "s = " + _mm(spacing, language),
-        tight=spacing < 0.12 * (x_right - x_left),
+        (-(x1 - spacing_m), y_dim),
+        "s = " + _mm(spacing_m, language),
+        tight=spacing_m < 0.12 * (x_right - x_left),
     )
     _dim(
         ax,
@@ -831,7 +831,7 @@ def plot_impedance_tube_geometry(
         "x1 = " + _mm(x1, language),
     )
     f_range = plane_wave_frequency_range(
-        spacing,
+        spacing_m,
         speed_of_sound,
         diameter_m=diameter_m,
         shape=shape if shape is not None else "circular",
@@ -850,7 +850,7 @@ def plot_transmission_tube_geometry(
     s1: float,
     l2: float,
     s2: float,
-    thickness: float,
+    thickness_m: float,
     diameter_m: float | None = None,
     shape: str | None = "circular",
     speed_of_sound: float = 343.2,
@@ -872,7 +872,7 @@ def plot_transmission_tube_geometry(
     :param s1: Upstream microphone spacing, in metres.
     :param l2: Front face to the nearer downstream microphone, in metres.
     :param s2: Downstream microphone spacing, in metres.
-    :param thickness: Specimen thickness, in metres; must be smaller than
+    :param thickness_m: Specimen thickness, in metres; must be smaller than
         ``l2`` (the downstream microphones sit past the back face).
     :param diameter_m: Inner diameter (circular) or largest section dimension
         (rectangular/square), in metres; ``None`` draws a nominal bore and
@@ -893,13 +893,13 @@ def plot_transmission_tube_geometry(
         ("s1", s1),
         ("l2", l2),
         ("s2", s2),
-        ("thickness", thickness),
+        ("thickness_m", thickness_m),
     ):
         require_positive(value, name)
     if diameter_m is not None:
         require_positive(diameter_m, "diameter_m")
-    if l2 <= thickness:
-        msg = "'l2' is measured from the front face and must exceed 'thickness'."
+    if l2 <= thickness_m:
+        msg = "'l2' is measured from the front face and must exceed 'thickness_m'."
         raise ValueError(msg)
     if ax is None:
         ax = _new_axes()
@@ -919,9 +919,9 @@ def plot_transmission_tube_geometry(
         diameter_known=diameter_m is not None,
         **kwargs,
     )
-    _material_rect(ax, 0.0, 0.0, thickness, bore, "porous")
+    _material_rect(ax, 0.0, 0.0, thickness_m, bore, "porous")
     ax.text(
-        0.5 * thickness,
+        0.5 * thickness_m,
         bore + 0.22 * bore,
         _t("Sample", language),
         fontsize=8,
@@ -1020,7 +1020,7 @@ def plot_slit_absorber_result_geometry(
     """Slit-panel drawing for a result that retained its geometry."""
     if (
         result.resonators is None
-        or result.slit_height is None
+        or result.slit_height_m is None
         or result.lattice_step is None
         or result.period_m is None
     ):
@@ -1032,7 +1032,7 @@ def plot_slit_absorber_result_geometry(
     return plot_slit_absorber_geometry(
         result.resonators,
         ax=ax,
-        slit_height=result.slit_height,
+        slit_height_m=result.slit_height_m,
         lattice_step=result.lattice_step,
         period_m=result.period_m,
         language=language,
@@ -1048,7 +1048,7 @@ def _draw_metadiffuser_well(
     kwargs: dict[str, Any],
 ) -> None:
     """One slit with its sideways resonator shelves, panel coordinates."""
-    h = float(well.slit_height)
+    h = float(well.slit_height_m)
     _material_rect(ax, x_slit, 0.0, h, depth, "cavity", **kwargs)
     chain = list(well.resonators)
     step = depth / len(chain)
@@ -1121,7 +1121,7 @@ def plot_metadiffuser_panel_geometry(
         msg = "'wells' must contain at least two wells."
         raise ValueError(msg)
     for well in cells:
-        if well is not None and well.slit_height >= period_m:
+        if well is not None and well.slit_height_m >= period_m:
             msg = "every slit height must be smaller than the period."
             raise ValueError(msg)
     if ax is None:
@@ -1152,7 +1152,7 @@ def plot_metadiffuser_panel_geometry(
     for index, well in enumerate(cells):
         if well is None:
             continue
-        x_mark = index * d + 0.12 * d + 0.5 * float(well.slit_height)
+        x_mark = index * d + 0.12 * d + 0.5 * float(well.slit_height_m)
         ax.text(
             x_mark,
             depth - 0.012 * total,
@@ -1194,7 +1194,7 @@ def plot_metadiffuser_panel_geometry(
     if first is not None:
         index = cells.index(first)
         x_slit = index * d + 0.12 * d
-        h = float(first.slit_height)
+        h = float(first.slit_height_m)
         _dim(
             ax,
             (x_slit, depth),
@@ -1264,7 +1264,7 @@ def plot_impedance_tube_result_geometry(
     **kwargs: Any,
 ) -> Axes:
     """Tube drawing for an ISO 10534-2 result that retained its geometry."""
-    if result.spacing is None or result.x1 is None:
+    if result.spacing_m is None or result.x1 is None:
         msg = (
             "This result does not retain its tube geometry; call "
             "plot_impedance_tube_geometry(...) with the original arguments."
@@ -1272,7 +1272,7 @@ def plot_impedance_tube_result_geometry(
         raise ValueError(msg)
     return plot_impedance_tube_geometry(
         ax=ax,
-        spacing=result.spacing,
+        spacing_m=result.spacing_m,
         x1=result.x1,
         diameter_m=result.diameter_m,
         shape=result.shape,
@@ -1294,7 +1294,7 @@ def plot_transfer_matrix_geometry(
         or result.s1 is None
         or result.l2 is None
         or result.s2 is None
-        or result.thickness is None
+        or result.thickness_m is None
     ):
         msg = (
             "This matrix does not retain its tube geometry; call "
@@ -1308,7 +1308,7 @@ def plot_transfer_matrix_geometry(
         s1=result.s1,
         l2=result.l2,
         s2=result.s2,
-        thickness=result.thickness,
+        thickness_m=result.thickness_m,
         diameter_m=result.diameter_m,
         shape=result.shape,
         language=language,
@@ -1468,7 +1468,7 @@ def plot_dynamic_stiffness_rig(
     ax: Axes | None = None,
     *,
     specimen_side: float = 0.2,
-    specimen_thickness: float = 0.02,
+    specimen_thickness_m: float = 0.02,
     load_mass: float = 8.0,
     language: str = "en",
     **kwargs: Any,
@@ -1482,7 +1482,7 @@ def plot_dynamic_stiffness_rig(
 
     :param ax: Existing axes, or ``None`` to create a figure.
     :param specimen_side: Specimen side length, in metres.
-    :param specimen_thickness: Specimen thickness, in metres.
+    :param specimen_thickness_m: Specimen thickness, in metres.
     :param load_mass: Load-plate mass, in kilograms (annotation).
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the specimen rectangle.
@@ -1492,12 +1492,12 @@ def plot_dynamic_stiffness_rig(
     """
     _check_language(language)
     require_positive(specimen_side, "specimen_side")
-    require_positive(specimen_thickness, "specimen_thickness")
+    require_positive(specimen_thickness_m, "specimen_thickness_m")
     require_positive(load_mass, "load_mass")
     if ax is None:
         ax = _new_axes()
     side = float(specimen_side)
-    t = float(specimen_thickness)
+    t = float(specimen_thickness_m)
     plate_t = 0.125 * side
     from ..._i18n import format_number
 

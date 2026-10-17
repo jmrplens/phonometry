@@ -116,7 +116,7 @@ def _metadata_pairs(
     specs.append(
         (
             t("Analysis line spacing &#916;f [Hz]", language),
-            _fmt(result.line_spacing, language),
+            _fmt(result.line_spacing_hz, language),
         )
     )
     return [(label, value) for label, value in specs if value]
@@ -262,7 +262,7 @@ def _statement(
             f=_fmt(result.decisive_frequency, language)
         ),
         t("Analysis line spacing &#916;f = {df} Hz", language).format(
-            df=_fmt(result.line_spacing, language)
+            df=_fmt(result.line_spacing_hz, language)
         ),
     ]
     if result.extended_uncertainties is not None:

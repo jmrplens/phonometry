@@ -359,6 +359,12 @@ def test_far_field_point_source() -> None:
     assert a == pytest.approx(10.0 * np.log10(np.pi * 200.0**2), abs=1e-6)
 
 
+def test_outdoor_attenuation_names_the_parameters_the_caller_typed() -> None:
+    """A side of no height is refused under the keyword the caller writes."""
+    with pytest.raises(ValueError, match=r"'height_m' and 'distance' must be positive"):
+        building.outdoor_attenuation(10.0, 0.0, 5.0)
+
+
 # ---------------------------------------------------------------------------
 # Input validation & broadcasting
 # ---------------------------------------------------------------------------

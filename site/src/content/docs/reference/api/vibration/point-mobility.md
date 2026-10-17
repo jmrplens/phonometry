@@ -406,7 +406,7 @@ Point mobility of an infinite rod $Y = 1 / (\rho c_\mathrm{L} S)$
 ```python
 plate_bending_stiffness(
     youngs_modulus: float,
-    thickness: float,
+    thickness_m: float,
     poisson_ratio: float = 0.0,
 ) -> float
 ```
@@ -422,7 +422,7 @@ in N.m used throughout this module and by the coincidence frequency of
 | Name | Description |
 | :--- | :--- |
 | `youngs_modulus` | Young's modulus `E` of the plate material, in Pa. |
-| `thickness` | Plate thickness `h`, in m. |
+| `thickness_m` | Plate thickness `h`, in m. |
 | `poisson_ratio` | Poisson's ratio `nu` (Default: 0.0). |
 
 **Returns:** The bending stiffness per unit width `B'`, in N.m.

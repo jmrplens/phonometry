@@ -108,7 +108,7 @@ devices.
 ```python
 covering_contact_stiffness(
     youngs_modulus: float,
-    thickness: float,
+    thickness_m: float,
     *,
     radius: float = 0.015,
 ) -> float
@@ -127,7 +127,7 @@ quoted there as 7 cm² against the 7.07 cm² of a 15 mm radius.
 | Name | Description |
 | :--- | :--- |
 | `youngs_modulus` | Young's modulus `E` of the covering, in Pa. |
-| `thickness` | Covering thickness `d`, in m. |
+| `thickness_m` | Covering thickness `d`, in m. |
 | `radius` | Contact radius `r`, in m (Default: 0,015). |
 
 **Returns:** The contact stiffness `K`, in N/m.
@@ -519,7 +519,7 @@ impacts rather than one that overflows partway through it.
 
 ```python
 hammer_impact_velocity(
-    drop_height: float = 0.04,
+    drop_height_m: float = 0.04,
     *,
     gravity: float = 9.81,
 ) -> float
@@ -535,7 +535,7 @@ $v_0 = 0.886$ m/s.
 
 | Name | Description |
 | :--- | :--- |
-| `drop_height` | Drop height `h`, in m (Default: 0,04). |
+| `drop_height_m` | Drop height `h`, in m (Default: 0,04). |
 | `gravity` | Acceleration of free fall `g`, in m/s² (Default: 9,81). |
 
 **Returns:** The impact velocity `vo`, in m/s.

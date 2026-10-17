@@ -91,7 +91,8 @@ def test_module_exports_match_all() -> None:
 # --------------------------------------------------------------------------- #
 def test_default_kr_is_two_thirds() -> None:
     kr = geometric_spreading_factor(
-        DEFAULT_SOURCE_HEIGHT_M, DEFAULT_MICROPHONE_HEIGHT_M
+        source_height_m=DEFAULT_SOURCE_HEIGHT_M,
+        microphone_height_m=DEFAULT_MICROPHONE_HEIGHT_M,
     )
     assert kr == pytest.approx(2.0 / 3.0)
     assert kr == pytest.approx(0.6666666666, abs=1e-9)
@@ -120,11 +121,11 @@ def test_geometry_guards() -> None:
     with pytest.raises(
         ValueError, match="'source_height_m' and 'microphone_height_m' must be positive"
     ):
-        geometric_spreading_factor(0.0, 0.25)
+        geometric_spreading_factor(source_height_m=0.0, microphone_height_m=0.25)
     with pytest.raises(
         ValueError, match="'source_height_m' must exceed 'microphone_height_m'"
     ):
-        geometric_spreading_factor(0.25, 1.25)  # source must exceed mic
+        geometric_spreading_factor(source_height_m=0.25, microphone_height_m=1.25)
 
 
 # --------------------------------------------------------------------------- #

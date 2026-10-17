@@ -132,7 +132,7 @@ from phonometry import materials
 area = np.pi * 0.05**2                      # celda de 100 mm de diámetro [m^2]
 u = np.array([0.5, 1, 2, 4, 8, 12]) * 1e-3  # velocidad lineal [m/s]
 dp = 1.6e4 * u + 4.0e5 * u**2               # caída de presión medida [Pa]
-r = materials.static_airflow_resistance(u, dp, area=area, thickness=0.05)
+r = materials.static_airflow_resistance(u, dp, area=area, thickness_m=0.05)
 
 u_fit = np.linspace(0.0, 13e-3, 200)
 dp_fit = r.linear_coefficient * u_fit + r.quadratic_coefficient * u_fit**2
@@ -164,7 +164,7 @@ u = np.array([materials.linear_airflow_velocity(q, area) for q in q_v])
 print(np.round(u * 1e3, 2))       # [ 0.5  1.   2.   4.   8.  12. ] mm/s
 dp = 1.6e4 * u + 4.0e5 * u**2                    # caída de presión medida [Pa]
 
-r = materials.static_airflow_resistance(u, dp, area=area, thickness=0.05)
+r = materials.static_airflow_resistance(u, dp, area=area, thickness_m=0.05)
 print(round(r.specific_resistance))   # 16200   R_s [Pa*s/m]
 print(round(r.resistivity))           # 324000  sigma [Pa*s/m^2]
 print(round(r.linear_coefficient))    # 16000   a = R_s cuando u -> 0
@@ -270,7 +270,7 @@ material, por lo que la ficha no lleva veredicto de conformidad.
 
 Usa el mismo contenedor `ReportMetadata` y el mismo motor de renderizado que las
 demás fichas. Los campos descriptivos que aplican aquí son `client`,
-`manufacturer`, `specimen`, `thickness` (el espesor de la probeta $d$, en metros,
+`manufacturer`, `specimen`, `thickness_m` (el espesor de la probeta $d$, en metros,
 mostrado en milímetros), `test_room`, `test_date`, `temperature_c`,
 `relative_humidity_percent`, `measurement_standard`, `laboratory`, `operator`,
 `report_id` y `notes`. El campo `requirement` se ignora (la ISO 9053-1 no tiene
@@ -283,12 +283,12 @@ español (cadenas fijas traducidas y coma como separador decimal).
 ```python
 from phonometry import materials, ReportMetadata
 
-r = materials.static_airflow_resistance(u, dp, area=area, thickness=0.05)
+r = materials.static_airflow_resistance(u, dp, area=area, thickness_m=0.05)
 r.report(
     "airflow_fiche.pdf",
     metadata=ReportMetadata(
         specimen="Absorbente poroso de 50 mm (célula abierta)",
-        thickness=0.050,
+        thickness_m=0.050,
         measurement_standard="ISO 9053-1",
         test_room="Banco de flujo estático, celda de 100 mm",
         laboratory="Laboratorio de referencia Phonometry",

@@ -991,7 +991,7 @@ def generate_ceiling_plenum_flanking(output_dir: str) -> None:
             ceiling,
             ceiling,
             ceiling_length=4.75,
-            plenum_height=depth,
+            plenum_height_m=depth,
             frequencies=freqs,
         )
         ax_path.plot(

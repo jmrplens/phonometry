@@ -174,7 +174,7 @@ frequencies are shown to 0,1 Hz.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `mass_per_area` (the total mass per unit area `m't`), `thickness` (the loaded specimen thickness `d`, in metres, shown in millimetres), `test_room`, `test_date`, `temperature_c`, `relative_humidity_percent`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (EN 29052-1 has no verdict). |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `mass_per_area` (the total mass per unit area `m't`), `thickness_m` (the loaded specimen thickness `d`, in metres, shown in millimetres), `test_room`, `test_date`, `temperature_c`, `relative_humidity_percent`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (EN 29052-1 has no verdict). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform `.report()` signature; the dynamic-stiffness fiche has a single body layout, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English, decimal point) or `"es"` (Spanish, decimal comma). |
@@ -338,7 +338,7 @@ plot_dynamic_stiffness_rig(
     ax: Axes | None = None,
     *,
     specimen_side: float = 0.2,
-    specimen_thickness: float = 0.02,
+    specimen_thickness_m: float = 0.02,
     load_mass: float = 8.0,
     language: str = 'en',
     **kwargs: Any,
@@ -358,7 +358,7 @@ plate.
 | :--- | :--- |
 | `ax` | Existing axes, or `None` to create a figure. |
 | `specimen_side` | Specimen side length, in metres. |
-| `specimen_thickness` | Specimen thickness, in metres. |
+| `specimen_thickness_m` | Specimen thickness, in metres. |
 | `load_mass` | Load-plate mass, in kilograms (annotation). |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the specimen rectangle. |

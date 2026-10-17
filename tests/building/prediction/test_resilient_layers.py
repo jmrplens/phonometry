@@ -1246,7 +1246,7 @@ def test_octave_bandwidth_factor() -> None:
     [
         (
             lambda: building.hammer_impact_velocity(-1.0),
-            "'drop_height' must be positive",
+            "'drop_height_m' must be positive",
         ),
         (
             lambda: building.plate_contact_stiffness(1e9, poisson_ratio=1.5),
@@ -1254,7 +1254,7 @@ def test_octave_bandwidth_factor() -> None:
         ),
         (
             lambda: building.covering_contact_stiffness(1e9, 0.0),
-            "'thickness' must be positive",
+            "'thickness_m' must be positive",
         ),
         (
             lambda: building.tapping_force_spectrum([100.0], 1e6, 1e3, band="half"),

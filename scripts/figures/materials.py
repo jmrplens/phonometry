@@ -636,7 +636,7 @@ def generate_airflow_resistance(output_dir: str) -> None:
     r_s_true, curvature = 1.6e4, 4.0e5  # Pa*s/m, Pa*s2/m2
     u = np.array([0.5, 1.0, 2.0, 4.0, 8.0, 12.0]) * 1e-3  # m/s
     dp = r_s_true * u + curvature * u**2
-    result = materials.static_airflow_resistance(u, dp, area=area, thickness=0.05)
+    result = materials.static_airflow_resistance(u, dp, area=area, thickness_m=0.05)
 
     u_fit = np.linspace(0.0, 13e-3, 200)
     dp_fit = result.linear_coefficient * u_fit + result.quadratic_coefficient * u_fit**2
@@ -861,7 +861,7 @@ def generate_porous_absorber_designs(output_dir: str) -> None:
     # Closed-form resonance anchors of the two classical designs.
     f_helm = materials.helmholtz_resonance_frequency(
         cavity_depth=0.044,
-        plate_thickness=0.006,
+        plate_thickness_m=0.006,
         hole_radius=0.0025,
         open_area=0.05,
     )
@@ -1183,7 +1183,7 @@ def generate_slow_sound_absorber(output_dir: str) -> None:
         lattice_step=lattice_step,
         period_m=period_m,
     )
-    h0 = design.slit_height
+    h0 = design.slit_height_m
     f = np.linspace(150.0, 500.0, 700)
     cases = [
         (h0, COLOR_SECONDARY, "-", "Critically coupled (perfect)"),
@@ -1195,7 +1195,7 @@ def generate_slow_sound_absorber(output_dir: str) -> None:
         res = materials.slit_helmholtz_absorber(
             f,
             design.resonator,
-            slit_height=height,
+            slit_height_m=height,
             lattice_step=lattice_step,
             period_m=period_m,
         )
@@ -1288,7 +1288,7 @@ def generate_slit_absorber_geometry(output_dir: str) -> None:
     materials.plot_slit_absorber_geometry(
         [design.resonator],
         ax=ax,
-        slit_height=design.slit_height,
+        slit_height_m=design.slit_height_m,
         lattice_step=3.0e-2,
         period_m=5.0e-2,
         language=_LANG,
@@ -1725,7 +1725,7 @@ def generate_impedance_tube_geometry(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 6.2))
     materials.plot_impedance_tube_geometry(
         ax=ax,
-        spacing=0.05,
+        spacing_m=0.05,
         x1=0.15,
         diameter_m=0.10,
         shape="circular",
@@ -1754,7 +1754,7 @@ def generate_transmission_tube_geometry(output_dir: str) -> None:
         s1=0.05,
         l2=0.20,
         s2=0.05,
-        thickness=0.05,
+        thickness_m=0.05,
         diameter_m=0.10,
         shape="circular",
         language=_LANG,
@@ -2968,7 +2968,7 @@ def generate_impedance_tube_result(output_dir: str) -> None:
     result = materials.two_microphone_impedance(
         h12,
         frequency=f,
-        spacing=spacing,
+        spacing_m=spacing,
         x1=x1,
         speed_of_sound=c0,
         characteristic_impedance=407.0,
@@ -4045,7 +4045,7 @@ def generate_sheet_transfer_impedance(output_dir: str) -> None:
 
     z = (
         materials.microperforated_plate_impedance(
-            freq, thickness=0.2e-3, hole_radius=0.1e-3, open_area=open_area
+            freq, thickness_m=0.2e-3, hole_radius=0.1e-3, open_area=open_area
         )
         / rho_c
     )
@@ -4144,7 +4144,7 @@ def generate_critical_coupling_impedance(output_dir: str) -> None:
     from phonometry import materials
 
     design = _slit_design()
-    h0 = design.slit_height
+    h0 = design.slit_height_m
     _fig, (ax_h, ax_l) = plt.subplots(1, 2, figsize=(12.4, 5.8))
 
     # Left: both matching conditions against the slit height, at 300 Hz.
@@ -4156,7 +4156,7 @@ def generate_critical_coupling_impedance(output_dir: str) -> None:
                 materials.slit_helmholtz_absorber(
                     one,
                     design.resonator,
-                    slit_height=float(h),
+                    slit_height_m=float(h),
                     lattice_step=3.0e-2,
                     period_m=5.0e-2,
                 ).normalized_impedance[0]
@@ -4216,7 +4216,7 @@ def generate_critical_coupling_impedance(output_dir: str) -> None:
         loc = materials.slit_helmholtz_absorber(
             freq,
             design.resonator,
-            slit_height=factor * h0,
+            slit_height_m=factor * h0,
             lattice_step=3.0e-2,
             period_m=5.0e-2,
         ).normalized_impedance
@@ -4270,7 +4270,7 @@ def generate_slow_sound_dispersion(output_dir: str) -> None:
     res = materials.slit_helmholtz_absorber(
         freq,
         design.resonator,
-        slit_height=design.slit_height,
+        slit_height_m=design.slit_height_m,
         lattice_step=3.0e-2,
         period_m=5.0e-2,
     )
@@ -4278,7 +4278,7 @@ def generate_slow_sound_dispersion(output_dir: str) -> None:
 
     # The resonator's own resonance: where its shunt reactance changes sign.
     z_hr = materials.helmholtz_resonator_impedance(
-        freq, design.resonator, slit_height=design.slit_height, lattice_step=3.0e-2
+        freq, design.resonator, slit_height_m=design.slit_height_m, lattice_step=3.0e-2
     )
     crossing = freq[np.flatnonzero(np.diff(np.sign(z_hr.imag)))]
     f_res = float(crossing[0]) if crossing.size else float("nan")
@@ -4361,7 +4361,7 @@ def generate_graded_slit_absorber(output_dir: str) -> None:
         (
             "one cell, $L$ = 30 mm",
             single.resonator,
-            single.slit_height,
+            single.slit_height_m,
             COLOR_PRIMARY,
             "-",
         ),
@@ -4371,7 +4371,7 @@ def generate_graded_slit_absorber(output_dir: str) -> None:
     step = float(freq[1] - freq[0])
     for i, (label, resonators, height, color, style) in enumerate(curves):
         alpha = materials.slit_helmholtz_absorber(
-            freq, resonators, slit_height=height, lattice_step=3.0e-2, period_m=5.0e-2
+            freq, resonators, slit_height_m=height, lattice_step=3.0e-2, period_m=5.0e-2
         ).absorption
         ax.plot(freq, alpha, color=color, linewidth=2.2, linestyle=style, label=label)
         # The band above 0.8 is not one interval for a chain, so shade where

@@ -107,8 +107,8 @@ def test_a_barrier_takes_the_row_as_its_ground() -> None:
 
 
 def test_the_parabolic_equation_takes_the_row_at_its_frequency() -> None:
-    profile = linear_sound_speed_profile(1e-12, ground_speed=343.0, max_height=60.0)
-    kwargs = {"source_height": 2.0, "max_range": 120.0, "max_height": 30.0}
+    profile = linear_sound_speed_profile(1e-12, ground_speed=343.0, max_height_m=60.0)
+    kwargs = {"source_height_m": 2.0, "max_range": 120.0, "max_height_m": 30.0}
     by_row = environment.atmospheric_parabolic_equation(
         500.0, profile, impedance=CLASS_D.medium([500.0]), **kwargs
     )

@@ -286,10 +286,10 @@ transmits fully).
 ```python
 junction_transmission(
     junction: str,
-    thickness1: float,
+    thickness1_m: float,
     wave_speed1: float,
     surface_density1: float,
-    thickness2: float,
+    thickness2_m: float,
     wave_speed2: float,
     surface_density2: float,
     *,
@@ -312,10 +312,10 @@ used by the Eq. 5.116 vibration reduction index. For the in-line junction
 | Name | Description |
 | :--- | :--- |
 | `junction` | `"X"`, `"T1"`, `"T2"` or `"L"`. |
-| `thickness1` | Thickness `h1` of the source plate, in m (> 0). |
+| `thickness1_m` | Thickness `h1` of the source plate, in m (> 0). |
 | `wave_speed1` | Quasi-longitudinal wave speed `cL1` of the source plate, in m/s (> 0). |
 | `surface_density1` | Surface density `rho_s1` of the source plate, in kg/m^2 (> 0). |
-| `thickness2` | Thickness `h2` of the receiving plate, in m (> 0). |
+| `thickness2_m` | Thickness `h2` of the receiving plate, in m (> 0). |
 | `wave_speed2` | Quasi-longitudinal wave speed `cL2` of the receiving plate, in m/s (> 0). |
 | `surface_density2` | Surface density `rho_s2` of the receiving plate, in kg/m^2 (> 0). |
 | `angles_deg` | Incidence-angle grid in degrees (Default: 0 to 90 in 91 one-degree steps). |
@@ -332,10 +332,10 @@ used by the Eq. 5.116 vibration reduction index. For the in-line junction
 
 ```python
 junction_wave_parameters(
-    thickness1: float,
+    thickness1_m: float,
     wave_speed1: float,
     surface_density1: float,
-    thickness2: float,
+    thickness2_m: float,
     wave_speed2: float,
     surface_density2: float,
 ) -> tuple[float, float]
@@ -351,10 +351,10 @@ $\psi = (h_2 c_{\mathrm{L}2} \rho_{\mathrm{s}2}) / (h_1 c_{\mathrm{L}1} \rho_{\m
 
 | Name | Description |
 | :--- | :--- |
-| `thickness1` | Thickness `h1` of plate 1, in m (> 0). |
+| `thickness1_m` | Thickness `h1` of plate 1, in m (> 0). |
 | `wave_speed1` | Quasi-longitudinal wave speed `cL1` of plate 1, in m/s (> 0). |
 | `surface_density1` | Surface density `rho_s1` of plate 1, in kg/m^2 (> 0). |
-| `thickness2` | Thickness `h2` of plate 2, in m (> 0). |
+| `thickness2_m` | Thickness `h2` of plate 2, in m (> 0). |
 | `wave_speed2` | Quasi-longitudinal wave speed `cL2` of plate 2, in m/s (> 0). |
 | `surface_density2` | Surface density `rho_s2` of plate 2, in kg/m^2 (> 0). |
 
@@ -380,8 +380,9 @@ JunctionTransmissionResult(
     straight: np.ndarray | None,
     corner_average: float,
     straight_average: float | None,
-    thickness1: float | None = None,
-    thickness2: float | None = None,
+    *,
+    thickness1_m: float | None = None,
+    thickness2_m: float | None = None,
 )
 ```
 
@@ -401,8 +402,8 @@ Bending-wave transmission across a rigid plate junction (Hopkins 5.2.1.3).
 | `straight` | Straight-section coefficient `tau13(theta)` on the grid, or `None` when the junction has no straight section. |
 | `corner_average` | Diffuse-field angular average `tau_bar_12` (Eq. 5.6). |
 | `straight_average` | Angular average `tau_bar_13`, or `None`. |
-| `thickness1` | Plate 1 thickness, in metres, retained (with `thickness2`) so `plot_geometry` can draw the junction; appended after the original fields and `None` for hand-built results. |
-| `thickness2` | Plate 2 thickness, in metres, or `None`. |
+| `thickness1_m` | Plate 1 thickness, in metres, retained (with `thickness2_m`) so `plot_geometry` can draw the junction; appended after the original fields and `None` for hand-built results. |
+| `thickness2_m` | Plate 2 thickness, in metres, or `None`. |
 
 ### JunctionTransmissionResult.corner_reduction_index
 
@@ -459,8 +460,8 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ```python
 plot_junction_geometry(
     junction: str,
-    thickness1: float,
-    thickness2: float,
+    thickness1_m: float,
+    thickness2_m: float,
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -480,8 +481,8 @@ the junction type follows
 | Name | Description |
 | :--- | :--- |
 | `junction` | `"L"`, `"T1"`, `"T2"` or `"X"`. |
-| `thickness1` | Plate 1 thickness, in metres. |
-| `thickness2` | Plate 2 thickness, in metres. |
+| `thickness1_m` | Plate 1 thickness, in metres. |
+| `thickness2_m` | Plate 2 thickness, in metres. |
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the plate-1 rectangle. |
@@ -501,8 +502,8 @@ point_connection_coupling_loss_factor(
     frequency: ArrayLike,
     n_connections: int,
     *,
-    thickness1: float,
-    thickness2: float,
+    thickness1_m: float,
+    thickness2_m: float,
     surface_density1: float,
     surface_density2: float,
     wave_speed1: float,
@@ -543,8 +544,8 @@ is the one that reproduces the book's own answer to problem 6.13; see
 | :--- | :--- |
 | `frequency` | Band centre frequency `f`, in hertz (scalar/array, >0). |
 | `n_connections` | Number of point connections `N` (integer >= 1). |
-| `thickness1` | Thickness `h1` of the source plate, in m (> 0). |
-| `thickness2` | Thickness `h2` of the receiving plate, in m (> 0). |
+| `thickness1_m` | Thickness `h1` of the source plate, in m (> 0). |
+| `thickness2_m` | Thickness `h2` of the receiving plate, in m (> 0). |
 | `surface_density1` | `rho_s1`, in kg/m^2 (> 0). |
 | `surface_density2` | `rho_s2`, in kg/m^2 (> 0). |
 | `wave_speed1` | Quasi-longitudinal wave speed `cL1`, in m/s (> 0). |
@@ -563,8 +564,8 @@ is the one that reproduces the book's own answer to problem 6.13; see
 
 ```python
 right_angle_transmission_coefficient(
-    thickness1: float,
-    thickness2: float,
+    thickness1_m: float,
+    thickness2_m: float,
     *,
     density1: float,
     density2: float,
@@ -604,8 +605,8 @@ of [`junction_wave_parameters`](/phonometry/reference/api/vibration/junction-tra
 
 | Name | Description |
 | :--- | :--- |
-| `thickness1` | Thickness `h1` of the source plate, in m (> 0). |
-| `thickness2` | Thickness `h2` of the receiving plate, in m (> 0). |
+| `thickness1_m` | Thickness `h1` of the source plate, in m (> 0). |
+| `thickness2_m` | Thickness `h2` of the receiving plate, in m (> 0). |
 | `density1` | Density `rho1` of the source plate, in kg/m^3 (> 0). |
 | `density2` | Density `rho2` of the receiving plate, in kg/m^3 (> 0). |
 | `wave_speed1` | Quasi-longitudinal wave speed `cL1`, in m/s (> 0). |

@@ -60,7 +60,7 @@ from phonometry import materials
 area = np.pi * 0.05**2                      # 100 mm diameter cell [m^2]
 u = np.array([0.5, 1, 2, 4, 8, 12]) * 1e-3  # linear velocity [m/s]
 dp = 1.6e4 * u + 4.0e5 * u**2               # measured pressure drop [Pa]
-r = materials.static_airflow_resistance(u, dp, area=area, thickness=0.05)
+r = materials.static_airflow_resistance(u, dp, area=area, thickness_m=0.05)
 
 u_fit = np.linspace(0.0, 13e-3, 200)
 dp_fit = r.linear_coefficient * u_fit + r.quadratic_coefficient * u_fit**2
@@ -86,7 +86,7 @@ area = np.pi * 0.05**2            # 100 mm diameter cell [m^2]
 u = np.array([0.5, 1, 2, 4, 8, 12]) * 1e-3      # linear velocity [m/s]
 dp = 1.6e4 * u + 4.0e5 * u**2                    # measured pressure drop [Pa]
 
-r = materials.static_airflow_resistance(u, dp, area=area, thickness=0.05)
+r = materials.static_airflow_resistance(u, dp, area=area, thickness_m=0.05)
 print(round(r.specific_resistance))   # 16200   R_s [Pa*s/m]
 print(round(r.resistivity))           # 324000  sigma [Pa*s/m^2]
 print(round(r.linear_coefficient))    # 16000   a = R_s at u -> 0
@@ -109,7 +109,7 @@ material characterisation, so the fiche carries no pass/fail verdict.
 
 It uses the same `ReportMetadata` container and rendering engine as the other
 fiches. The descriptive fields that apply here are `client`, `manufacturer`,
-`specimen`, `thickness` (the specimen thickness $d$, in metres, shown in
+`specimen`, `thickness_m` (the specimen thickness $d$, in metres, shown in
 millimetres), `test_room`, `test_date`, `temperature_c`,
 `relative_humidity_percent`, `measurement_standard`, `laboratory`, `operator`,
 `report_id` and `notes`. The `requirement` field is ignored (ISO 9053-1 has no
@@ -122,12 +122,12 @@ decimal separator).
 ```python
 from phonometry import materials, ReportMetadata
 
-r = materials.static_airflow_resistance(u, dp, area=area, thickness=0.05)
+r = materials.static_airflow_resistance(u, dp, area=area, thickness_m=0.05)
 r.report(
     "airflow_fiche.pdf",
     metadata=ReportMetadata(
         specimen="50 mm porous absorber (open-cell)",
-        thickness=0.050,
+        thickness_m=0.050,
         measurement_standard="ISO 9053-1",
         test_room="Static airflow rig, 100 mm cell",
         laboratory="Phonometry Reference Laboratory",

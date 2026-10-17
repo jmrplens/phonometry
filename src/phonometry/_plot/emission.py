@@ -1057,9 +1057,9 @@ def plot_intensity_class(
             # ``:g`` prints the separation exactly as the chain was verified
             # with (a 6.35 mm quarter-inch spacer stays 6.35, which a fixed
             # one-decimal format would round away); only its decimal separator
-            # needs localising, and ``spacing`` is validated positive, so the
+            # needs localising, and ``spacing_m`` is validated positive, so the
             # sign never enters.
-            spacing=decimal_comma(f"{result.spacing * 1000.0:g}", language),
+            spacing=decimal_comma(f"{result.spacing_m * 1000.0:g}", language),
         )
     )
     ax.legend(loc=_LEGEND_LOWER_RIGHT, fontsize="small")

@@ -1000,11 +1000,11 @@ computes the resonance and the peak absorption for a hole twice the real size.
 
 | Class | Parameter | Units | Notes |
 | :--- | :--- | :--- | :--- |
-| `PerforatedPlateLayer` | `thickness` | m | Plate thickness $t$ |
+| `PerforatedPlateLayer` | `thickness_m` | m | Plate thickness $t$ |
 | | `hole_radius` | m | Hole **radius** $a$, half the drilled diameter |
 | | `open_area` | — | Perforation ratio $\varepsilon$ = hole area / panel area |
 | | `end_correction` | — | $\delta$ per orifice end; `None` uses the Fok interaction fit |
-| `MicroperforatedPlateLayer` | `thickness` | m | Plate thickness $t$ |
+| `MicroperforatedPlateLayer` | `thickness_m` | m | Plate thickness $t$ |
 | | `hole_radius` | m | Hole **radius** $a$ |
 | | `open_area` | — | Perforation ratio $\varepsilon$ |
 | | `end_correction` | — | Default `0.85`, Maa's piston reactance |
@@ -1114,7 +1114,7 @@ the peak height $4r/(1+r)^2$ and the bandwidth:
 rho_c = 1.205 * 343.0
 f_peak = np.array([677.5])
 z_mpp = materials.microperforated_plate_impedance(
-    f_peak, thickness=0.2e-3, hole_radius=0.1e-3, open_area=eps
+    f_peak, thickness_m=0.2e-3, hole_radius=0.1e-3, open_area=eps
 )
 r_mpp = float(z_mpp.real[0]) / rho_c
 print(round(r_mpp, 3), round(float(z_mpp.imag[0]) / rho_c, 3))   # 1.531 1.077
@@ -1123,7 +1123,7 @@ print(round(4 * r_mpp / (1 + r_mpp) ** 2, 3))    # 0.956 = the peak alpha above
 # The same panel with millimetre holes instead: an order of magnitude less
 # resistance, hence the narrow peak that needs porous backing.
 z_perf = materials.perforated_plate_impedance(
-    f_peak, thickness=0.006, hole_radius=0.0025, open_area=0.05
+    f_peak, thickness_m=0.006, hole_radius=0.0025, open_area=0.05
 )
 print(round(float(z_perf.real[0]) / rho_c, 4))   # 0.0925, 16x lower
 
@@ -1152,7 +1152,7 @@ either sub-millimetre holes or porous backing.*
 ```python
 f_sheet = np.geomspace(100.0, 4000.0, 400)
 z_sheet = materials.microperforated_plate_impedance(
-    f_sheet, thickness=0.2e-3, hole_radius=0.1e-3, open_area=eps
+    f_sheet, thickness_m=0.2e-3, hole_radius=0.1e-3, open_area=eps
 ) / rho_c
 cavity = -1.0 / np.tan(2.0 * np.pi * f_sheet * 0.06 / 343.0)
 print(round(float(z_sheet.real[0]), 2), round(float(cavity[0]), 2))

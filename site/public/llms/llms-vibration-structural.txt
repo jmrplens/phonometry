@@ -1555,7 +1555,7 @@ cb = plate_bending_wave_speed(bands, vibration.plate_bending_stiffness(young, h1
 welded = [float(vibration.coupling_loss_factor(tau, 2.0 * c, length, f, area1))
           for c, f in zip(cb, bands, strict=True)]
 bolted = vibration.point_connection_coupling_loss_factor(
-    bands, 12, thickness1=h1, thickness2=h2, surface_density1=rho * h1,
+    bands, 12, thickness1_m=h1, thickness2_m=h2, surface_density1=rho * h1,
     surface_density2=rho * h2, wave_speed1=cl, wave_speed2=cl,
     plate_area1=area1)
 

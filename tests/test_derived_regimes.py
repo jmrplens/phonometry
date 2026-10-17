@@ -120,7 +120,7 @@ def _liquid(outlet_pressure_pa: float) -> noise_control.HydrodynamicValveNoise:
             seat_diameter_m=0.08,
         ),
         noise_control.LiquidPipe(
-            internal_diameter_m=0.1071, wall_thickness=0.0036, density=7800.0
+            internal_diameter_m=0.1071, wall_thickness_m=0.0036, density=7800.0
         ),
     )
 
@@ -227,7 +227,7 @@ def _gas(outlet_pressure_pa: float) -> noise_control.AerodynamicValveNoise:
                 strouhal_number=0.2,
             ),
             noise_control.DownstreamPipe(
-                internal_diameter_m=0.2031, wall_thickness=0.008, density=8000.0
+                internal_diameter_m=0.2031, wall_thickness_m=0.008, density=8000.0
             ),
         )
 
@@ -317,10 +317,10 @@ def test_terrain_on_the_line_of_sight_does_not_screen() -> None:
 
 def test_a_screening_section_needs_its_diffracting_path() -> None:
     clear = _section(2.0)
-    heights = np.asarray(clear.heights).copy()
+    heights = np.asarray(clear.heights_m).copy()
     heights[20] = 40.0
     with pytest.raises(ValueError, match="path_difference"):
-        dataclasses.replace(clear, heights=heights)
+        dataclasses.replace(clear, heights_m=heights)
 
 
 def test_the_diffracting_edges_are_the_rubber_bands() -> None:
@@ -336,7 +336,9 @@ def test_a_section_runs_from_the_source_to_the_receiver() -> None:
     ridge = _ridge()
     with pytest.raises(ValueError, match="distances"):
         dataclasses.replace(
-            ridge, distances=[0.0, 500.0, 1200.0, 1300.0], heights=[0.0, 0.0, 30.0, 0.0]
+            ridge,
+            distances_m=[0.0, 500.0, 1200.0, 1300.0],
+            heights_m=[0.0, 0.0, 30.0, 0.0],
         )
 
 
@@ -344,10 +346,10 @@ def test_a_section_starts_at_the_source() -> None:
     # A source 100 m before the section would leave a 50 m crest at the first
     # vertex out of the line-of-sight test.
     clear = _section(2.0)
-    heights = np.asarray(clear.heights).copy()
+    heights = np.asarray(clear.heights_m).copy()
     heights[0] = 50.0
     with pytest.raises(ValueError, match="distances"):
-        dataclasses.replace(clear, source=(-100.0, 10.0), heights=heights)
+        dataclasses.replace(clear, source=(-100.0, 10.0), heights_m=heights)
 
 
 @pytest.mark.parametrize(
@@ -679,7 +681,7 @@ def test_a_converged_design_reached_perfect_absorption() -> None:
             target_frequency=300.0,
             angle_rad=0.0,
             resonator=resonator,
-            slit_height=1.0e-3,
+            slit_height_m=1.0e-3,
             absorption=0.2,
             normalized_impedance=3.0 + 0.0j,
             converged=True,

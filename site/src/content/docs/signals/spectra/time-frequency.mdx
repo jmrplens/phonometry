@@ -233,7 +233,7 @@ x = (0.8 * np.cos(2.0 * np.pi * 997.0 * t)
      + 0.5 * np.cos(2.0 * np.pi * 1000.0 * t))
 
 res = signals.zoom_fft(x, fs, f_min=980.0, f_max=1016.0)     # grid at the record resolution
-print(res.bin_spacing)                   # 1.0 (fs/N by default)
+print(res.bin_spacing_hz)                   # 1.0 (fs/N by default)
 print(res.resolution_bandwidth)          # 1.5 (Be of the tapered record)
 peak = res.amplitude.argmax()
 print(res.frequencies[peak], res.amplitude[peak])   # 997.0 0.8, the stronger tone

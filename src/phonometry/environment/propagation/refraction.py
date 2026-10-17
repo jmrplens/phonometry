@@ -33,7 +33,7 @@ profile has a closed-form :func:`shadow_zone_distance`; both anchor the ray
 model. The PE is anchored against the exact spherical-wave ground effect
 (:func:`phonometry.environment.ground_effect`) in the homogeneous limit
 (gradient zero), which it reproduces to a few tenths of a dB on the default
-grid (finer ``height_step`` converges it further).
+grid (finer ``height_step_m`` converges it further).
 
 The ground impedance is taken in the :math:`\mathrm{e}^{-i \omega t}` convention of
 Salomons (a passive ground has :math:`\operatorname{Im}(Z) > 0`), shared with
@@ -98,13 +98,13 @@ class EffectiveSoundSpeedProfile(OwnsArrays):
     ground (:math:`z = 0`); intermediate heights are taken as piecewise linear,
     so a two-point profile represents an exact linear gradient.
 
-    :ivar heights: Heights ``z`` above the ground, in metres (from
+    :ivar heights_m: Heights ``z`` above the ground, in metres (from
         :math:`z = 0`).
     :ivar speeds_of_sound: Effective sound speed at each height, in m/s.
     :ivar description: Short human-readable label (e.g. ``"linear, +0.1 s^-1"``).
     """
 
-    heights: NDArray[np.float64]
+    heights_m: NDArray[np.float64]
     speeds_of_sound: NDArray[np.float64]
     description: str = ""
 
@@ -119,16 +119,16 @@ class EffectiveSoundSpeedProfile(OwnsArrays):
         that reaches them, and the one a reader plots or samples with
         :meth:`speed_at`, was already a polyline when it was built.
 
-        :raises ValueError: if ``heights`` and ``speeds_of_sound`` disagree.
+        :raises ValueError: if ``heights_m`` and ``speeds_of_sound`` disagree.
         """
-        require_ranks(self, heights=1, speeds_of_sound=1)
-        require_same_length(self, "heights", "speeds_of_sound", axis="profile node")
+        require_ranks(self, heights_m=1, speeds_of_sound=1)
+        require_same_length(self, "heights_m", "speeds_of_sound", axis="profile node")
 
-    def speed_at(self, height: ArrayLike) -> NDArray[np.float64]:
+    def speed_at(self, height_m: ArrayLike) -> NDArray[np.float64]:
         """Piecewise-linear effective sound speed at one or more heights."""
-        z = np.asarray(height, dtype=np.float64)
+        z = np.asarray(height_m, dtype=np.float64)
         return np.asarray(
-            np.interp(z, self.heights, self.speeds_of_sound), dtype=np.float64
+            np.interp(z, self.heights_m, self.speeds_of_sound), dtype=np.float64
         )
 
     def plot(
@@ -147,7 +147,7 @@ def linear_sound_speed_profile(
     gradient_per_s: float,
     *,
     ground_speed: float = _C_SOUND,
-    max_height: float = 100.0,
+    max_height_m: float = 100.0,
 ) -> EffectiveSoundSpeedProfile:
     r"""Linear effective sound-speed profile (constant vertical gradient).
 
@@ -158,13 +158,13 @@ def linear_sound_speed_profile(
 
     :param gradient_per_s: Vertical gradient ``dc/dz``, in s^-1 (m/s per m).
     :param ground_speed: Sound speed ``c0`` at the ground, in m/s.
-    :param max_height: Top of the sampled profile, in metres.
+    :param max_height_m: Top of the sampled profile, in metres.
     :return: A two-point :class:`EffectiveSoundSpeedProfile`.
-    :raises ValueError: If ``max_height`` or ``ground_speed`` is not positive, or
+    :raises ValueError: If ``max_height_m`` or ``ground_speed`` is not positive, or
         the profile turns non-positive within ``[0, max_height]``.
     """
     c0 = require_positive(ground_speed, "ground_speed")
-    h = require_positive(max_height, "max_height")
+    h = require_positive(max_height_m, "max_height_m")
     if not np.isfinite(gradient_per_s):
         msg = "'gradient_per_s' must be finite."
         raise ValueError(msg)
@@ -172,12 +172,12 @@ def linear_sound_speed_profile(
     if top <= 0.0:
         msg = (
             "the linear profile reaches a non-positive sound speed within "
-            "'max_height'; reduce 'max_height' or the gradient magnitude."
+            "'max_height_m'; reduce 'max_height_m' or the gradient magnitude."
         )
         raise ValueError(msg)
     sign = "+" if gradient_per_s >= 0 else "-"
     return EffectiveSoundSpeedProfile(
-        heights=np.array([0.0, h], dtype=np.float64),
+        heights_m=np.array([0.0, h], dtype=np.float64),
         speeds_of_sound=np.array([c0, top], dtype=np.float64),
         description=f"linear, {sign}{abs(gradient_per_s):g} s^-1",
     )
@@ -188,7 +188,7 @@ def log_linear_sound_speed_profile(
     *,
     ground_speed: float = 340.0,
     roughness_length: float = 0.1,
-    max_height: float = 100.0,
+    max_height_m: float = 100.0,
     n_points: int = 128,
 ) -> EffectiveSoundSpeedProfile:
     r"""Logarithmic effective sound-speed profile (surface layer).
@@ -203,15 +203,15 @@ def log_linear_sound_speed_profile(
     :param b: Profile strength ``b``, in m/s (positive: downward refraction).
     :param ground_speed: Sound speed ``c0`` at the ground, in m/s.
     :param roughness_length: Aerodynamic roughness length ``z0``, in metres.
-    :param max_height: Top of the sampled profile, in metres.
+    :param max_height_m: Top of the sampled profile, in metres.
     :param n_points: Number of samples of the height grid (>= 2).
     :return: An :class:`EffectiveSoundSpeedProfile`.
-    :raises ValueError: On non-positive ``c0``, ``z0`` or ``max_height``, fewer
+    :raises ValueError: On non-positive ``c0``, ``z0`` or ``max_height_m``, fewer
         than two points, or a profile that turns non-positive.
     """
     c0 = require_positive(ground_speed, "ground_speed")
     z0 = require_positive(roughness_length, "roughness_length")
-    h = require_positive(max_height, "max_height")
+    h = require_positive(max_height_m, "max_height_m")
     if not np.isfinite(b):
         msg = "'b' must be finite."
         raise ValueError(msg)
@@ -231,12 +231,12 @@ def log_linear_sound_speed_profile(
     if np.any(c <= 0.0):
         msg = (
             "the logarithmic profile reaches a non-positive sound speed within "
-            "'max_height'; reduce 'max_height' or |b|."
+            "'max_height_m'; reduce 'max_height_m' or |b|."
         )
         raise ValueError(msg)
     sign = "+" if b >= 0 else "-"
     return EffectiveSoundSpeedProfile(
-        heights=np.asarray(z, dtype=np.float64),
+        heights_m=np.asarray(z, dtype=np.float64),
         speeds_of_sound=np.asarray(c, dtype=np.float64),
         description=f"log-linear, b={sign}{abs(b):g} m/s, z0={z0:g} m",
     )
@@ -246,14 +246,14 @@ def _clean_profile(
     profile: EffectiveSoundSpeedProfile,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Validate and return the height/speed arrays of a profile."""
-    z = np.asarray(profile.heights, dtype=np.float64)
+    z = np.asarray(profile.heights_m, dtype=np.float64)
     c = np.asarray(profile.speeds_of_sound, dtype=np.float64)
     if z.ndim != 1 or z.size < _MIN_POLYLINE_NODES:
         msg = "the profile must have at least two height samples."
         raise ValueError(msg)
     require_equal_shapes(
         "EffectiveSoundSpeedProfile",
-        {"heights": z.shape, "speeds_of_sound": c.shape},
+        {"heights_m": z.shape, "speeds_of_sound": c.shape},
         "profile node",
     )
     if not (np.all(np.isfinite(z)) and np.all(np.isfinite(c))):
@@ -308,8 +308,8 @@ def ray_curvature_radius(
 
 def shadow_zone_distance(
     gradient_per_s: float,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     *,
     ground_speed: float = _C_SOUND,
 ) -> float:
@@ -330,8 +330,8 @@ def shadow_zone_distance(
 
     :param gradient_per_s: Vertical gradient ``dc/dz``, in s^-1 (must be negative for a
         shadow zone to exist).
-    :param source_height: Source height ``hs``, in metres (>= 0).
-    :param receiver_height: Receiver height ``hr``, in metres (>= 0).
+    :param source_height_m: Source height ``hs``, in metres (>= 0).
+    :param receiver_height_m: Receiver height ``hr``, in metres (>= 0).
     :param ground_speed: Sound speed ``c0`` at the ground, in m/s.
     :return: The horizontal shadow-boundary distance, in metres.
     :raises ValueError: If the gradient is not negative, or a height is negative.
@@ -343,12 +343,12 @@ def shadow_zone_distance(
             "acoustic shadow zone to exist."
         )
         raise ValueError(msg)
-    if source_height < 0.0 or receiver_height < 0.0:
+    if source_height_m < 0.0 or receiver_height_m < 0.0:
         msg = "Source and receiver heights must be non-negative."
         raise ValueError(msg)
     rc = c0 / abs(gradient_per_s)
     return float(
-        np.sqrt(2.0 * rc) * (np.sqrt(source_height) + np.sqrt(receiver_height))
+        np.sqrt(2.0 * rc) * (np.sqrt(source_height_m) + np.sqrt(receiver_height_m))
     )
 
 
@@ -362,21 +362,21 @@ class AtmosphericRayResult(OwnsArrays):
     :ivar launch_angles_deg: Launch angles from the horizontal, in degrees.
     :ivar ranges: Per-ray horizontal ranges, in metres, shape
         ``(n_rays, n_steps)``.
-    :ivar heights: Per-ray heights, in metres, shape ``(n_rays, n_steps)``.
+    :ivar heights_m: Per-ray heights, in metres, shape ``(n_rays, n_steps)``.
     :ivar travel_times: Per-ray cumulative travel times, in seconds, shape
         ``(n_rays, n_steps)``.
     :ivar turning_points: Number of turning points (height extrema) per ray.
     :ivar ground_reflections: Number of ground reflections per ray.
-    :ivar source_height: Source height, in metres.
+    :ivar source_height_m: Source height, in metres.
     """
 
     launch_angles_deg: NDArray[np.float64]
     ranges: NDArray[np.float64]
-    heights: NDArray[np.float64]
+    heights_m: NDArray[np.float64]
     travel_times: NDArray[np.float64]
     turning_points: NDArray[np.int_]
     ground_reflections: NDArray[np.int_]
-    source_height: float
+    source_height_m: float
 
     def __post_init__(self) -> None:
         """Reject a solution whose rays and marched paths do not line up.
@@ -402,7 +402,7 @@ class AtmosphericRayResult(OwnsArrays):
             self,
             launch_angles_deg=1,
             ranges=2,
-            heights=2,
+            heights_m=2,
             travel_times=2,
             turning_points=1,
             ground_reflections=1,
@@ -411,7 +411,7 @@ class AtmosphericRayResult(OwnsArrays):
             self,
             "launch_angles_deg",
             "ranges",
-            "heights",
+            "heights_m",
             "travel_times",
             "turning_points",
             "ground_reflections",
@@ -420,7 +420,7 @@ class AtmosphericRayResult(OwnsArrays):
         require_same_length(
             self,
             ("ranges", 1),
-            ("heights", 1),
+            ("heights_m", 1),
             ("travel_times", 1),
             axis="range sample",
         )
@@ -440,7 +440,7 @@ class AtmosphericRayResult(OwnsArrays):
 def atmospheric_ray_paths(
     profile: EffectiveSoundSpeedProfile,
     *,
-    source_height: float,
+    source_height_m: float,
     launch_angles_deg: ArrayLike,
     max_range: float = 1000.0,
     n_steps: int = 2000,
@@ -464,7 +464,7 @@ def atmospheric_ray_paths(
     :param profile: The effective sound-speed profile (see
         :func:`linear_sound_speed_profile` /
         :func:`log_linear_sound_speed_profile`).
-    :param source_height: Source height ``zs``, in metres (>= 0).
+    :param source_height_m: Source height ``zs``, in metres (>= 0).
     :param launch_angles_deg: Launch angles from the horizontal, in degrees
         (positive upward), within ``(-90, 90)``.
     :param max_range: Maximum horizontal range to trace, in metres.
@@ -474,10 +474,10 @@ def atmospheric_ray_paths(
     """
     z_prof, c_prof = _clean_profile(profile)
     top = float(z_prof[-1])
-    require_scalar(source_height, "source_height")
-    zs = float(source_height)
+    require_scalar(source_height_m, "source_height_m")
+    zs = float(source_height_m)
     if zs < 0.0:
-        msg = "'source_height' must be non-negative."
+        msg = "'source_height_m' must be non-negative."
         raise ValueError(msg)
     rmax = require_positive(max_range, "max_range")
     require_scalar(n_steps, "n_steps")
@@ -567,11 +567,11 @@ def atmospheric_ray_paths(
     return AtmosphericRayResult(
         launch_angles_deg=angles,
         ranges=ray_r,
-        heights=ray_z,
+        heights_m=ray_z,
         travel_times=ray_t,
         turning_points=turns,
         ground_reflections=bounces,
-        source_height=zs,
+        source_height_m=zs,
     )
 
 
@@ -584,18 +584,18 @@ class AtmosphericPEResult(OwnsArrays):
 
     :ivar frequency: Source frequency, in Hz.
     :ivar ranges: Range grid, in metres.
-    :ivar heights: Height grid of the output field, in metres.
+    :ivar heights_m: Height grid of the output field, in metres.
     :ivar relative_level: Relative sound level :math:`\Delta L(z, r)` (dB re
         free field), shape ``(n_heights, n_ranges)``.
-    :ivar source_height: Source height, in metres.
+    :ivar source_height_m: Source height, in metres.
     :ivar normalized_impedance: Normalized ground impedance used (complex).
     """
 
     frequency: float
     ranges: NDArray[np.float64]
-    heights: NDArray[np.float64]
+    heights_m: NDArray[np.float64]
     relative_level: NDArray[np.float64]
-    source_height: float
+    source_height_m: float
     normalized_impedance: complex
 
     def __post_init__(self) -> None:
@@ -606,19 +606,19 @@ class AtmosphericPEResult(OwnsArrays):
         last, so a field of the wrong shape draws without complaint and every
         level in the picture is read off at a range and a height that are not
         its own. :meth:`level_at_height` fails the same quiet way: it picks a
-        row by searching ``heights`` and returns that row of the field, which
+        row by searching ``heights_m`` and returns that row of the field, which
         for a mismatched pair is an ordinary-looking level-versus-range curve
         taken at some other height than the one asked for.
 
         :raises ValueError: if the field disagrees with either grid.
         """
-        require_ranks(self, ranges=1, heights=1, relative_level=2)
-        require_same_length(self, "heights", "relative_level", axis="height")
+        require_ranks(self, ranges=1, heights_m=1, relative_level=2)
+        require_same_length(self, "heights_m", "relative_level", axis="height")
         require_same_length(self, "ranges", ("relative_level", 1), axis="range")
 
-    def level_at_height(self, height: float) -> NDArray[np.float64]:
-        """Relative sound level versus range at the grid height nearest ``height``."""
-        i = int(np.argmin(np.abs(self.heights - float(height))))
+    def level_at_height(self, height_m: float) -> NDArray[np.float64]:
+        """Relative sound level versus range at the grid height nearest ``height_m``."""
+        i = int(np.argmin(np.abs(self.heights_m - float(height_m))))
         return np.asarray(self.relative_level[i], dtype=np.float64)
 
     def plot(
@@ -652,14 +652,14 @@ def atmospheric_parabolic_equation(
     frequency_hz: float,
     profile: EffectiveSoundSpeedProfile,
     *,
-    source_height: float,
+    source_height_m: float,
     impedance: ArrayLike | PorousMediumResult | None = None,
     flow_resistivity: float | None = None,
     model: Literal["delany_bazley", "miki"] = "delany_bazley",
     max_range: float = 1000.0,
-    max_height: float = 100.0,
+    max_height_m: float = 100.0,
     range_step: float | None = None,
-    height_step: float | None = None,
+    height_step_m: float | None = None,
     fluid: Fluid = PUBLISHED_AIR,
 ) -> AtmosphericPEResult:
     r"""Relative-level field from the Green's Function Parabolic Equation (GFPE).
@@ -697,17 +697,17 @@ def atmospheric_parabolic_equation(
 
     :param frequency_hz: Source frequency, in Hz.
     :param profile: The effective sound-speed profile.
-    :param source_height: Source height ``zs``, in metres (> 0).
+    :param source_height_m: Source height ``zs``, in metres (> 0).
     :param impedance: Normalized ground impedance, or a ``PorousMediumResult``.
     :param flow_resistivity: Effective flow resistivity ``sigma`` (Pa s/m2), as
         an alternative to ``impedance``.
     :param model: Porous model for ``flow_resistivity``.
     :param max_range: Maximum range, in metres.
-    :param max_height: Top of the output height grid, in metres (the receiver
+    :param max_height_m: Top of the output height grid, in metres (the receiver
         region of interest; an absorbing layer is added above it).
     :param range_step: Range marching step ``dr``, in metres. Default
         (``None``): one wavelength.
-    :param height_step: Vertical grid spacing ``dz``, in metres. Default
+    :param height_step_m: Vertical grid spacing ``dz``, in metres. Default
         (``None``): a tenth of a wavelength (Salomons Sec. G.2).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
         (Default: :data:`PUBLISHED_AIR`, the air this model was published
@@ -718,18 +718,18 @@ def atmospheric_parabolic_equation(
     """
     f = require_positive(frequency_hz, "frequency_hz")
     z_prof, c_prof = _clean_profile(profile)
-    require_scalar(source_height, "source_height")
-    zs = float(source_height)
+    require_scalar(source_height_m, "source_height_m")
+    zs = float(source_height_m)
     if zs <= 0.0:
-        msg = "'source_height' must be positive."
+        msg = "'source_height_m' must be positive."
         raise ValueError(msg)
     rmax = require_positive(max_range, "max_range")
-    zmax = require_positive(max_height, "max_height")
+    zmax = require_positive(max_height_m, "max_height_m")
     c_ref = float(c_prof[0])  # reference speed at the ground (ka = k0)
     lam = c_ref / f
     dz = (
-        require_positive(height_step, "height_step")
-        if height_step is not None
+        require_positive(height_step_m, "height_step_m")
+        if height_step_m is not None
         else lam / 10.0
     )
     # The vertical grid samples midpoints z = (j + 0.5) dz, so the first node
@@ -738,7 +738,7 @@ def atmospheric_parabolic_equation(
     # in whatever read it, with a message naming neither parameter.
     if dz >= 2.0 * zmax:
         msg = (
-            "'height_step' must be less than twice 'max_height' "
+            "'height_step_m' must be less than twice 'max_height_m' "
             "(the first grid node lies at half a step above the ground)."
         )
         raise ValueError(msg)
@@ -854,10 +854,10 @@ def atmospheric_parabolic_equation(
     return AtmosphericPEResult(
         frequency=f,
         ranges=np.asarray(ranges, dtype=np.float64),
-        heights=np.asarray(out_heights, dtype=np.float64),
+        heights_m=np.asarray(out_heights, dtype=np.float64),
         # The field is most of the result; the record keeps it as it is.
         relative_level=handed_over(field),
-        source_height=zs,
+        source_height_m=zs,
         normalized_impedance=z_imp,
     )
 

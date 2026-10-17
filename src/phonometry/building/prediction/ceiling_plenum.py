@@ -494,7 +494,7 @@ class PlenumFlankingResult(OwnsArrays):
         what the plenum takes off the sum of the two ceilings.
     :ivar model: ``"undamped"`` (Eq. (9.20)) or ``"attenuated"`` (Eq. (9.18)).
     :ivar epsilon: The sidewall constant ``eps`` (1 absorbing, 2 reflecting).
-    :ivar plenum_height: Plenum height ``h``, in m.
+    :ivar plenum_height_m: Plenum height ``h``, in m.
     :ivar ceiling_length: Receiving-side ceiling length ``LR``, in m.
     """
 
@@ -507,7 +507,7 @@ class PlenumFlankingResult(OwnsArrays):
     penalty: np.ndarray
     model: str
     epsilon: float
-    plenum_height: float
+    plenum_height_m: float
     ceiling_length: float
 
     def __post_init__(self) -> None:
@@ -563,7 +563,7 @@ def plenum_flanking_reduction_index(
     reduction_index_receiving: ArrayLike,
     *,
     ceiling_length: float,
-    plenum_height: float,
+    plenum_height_m: float,
     sidewalls: str = ...,
     frequencies: ArrayLike | None = ...,
     attenuation_source: ArrayLike,
@@ -580,7 +580,7 @@ def plenum_flanking_reduction_index(
     reduction_index_receiving: ArrayLike,
     *,
     ceiling_length: float,
-    plenum_height: float,
+    plenum_height_m: float,
     sidewalls: str = ...,
     frequencies: ArrayLike | None = ...,
     source_length: float | None = ...,
@@ -594,7 +594,7 @@ def plenum_flanking_reduction_index(
     reduction_index_receiving: ArrayLike,
     *,
     ceiling_length: float,
-    plenum_height: float,
+    plenum_height_m: float,
     sidewalls: str = "reflecting",
     frequencies: ArrayLike | None = None,
     attenuation_source: ArrayLike | None = None,
@@ -626,7 +626,7 @@ def plenum_flanking_reduction_index(
         (the ceiling plates and any plenum absorber together, Eq. (9.14)).
     :param reduction_index_receiving: Receiving-side ceiling ``RR`` per band, in dB.
     :param ceiling_length: Receiving-side ceiling length ``LR``, in m (> 0).
-    :param plenum_height: Plenum height ``h``, in m (> 0).
+    :param plenum_height_m: Plenum height ``h``, in m (> 0).
     :param sidewalls: ``"reflecting"`` (:math:`\epsilon = 2`, Default) or
         ``"absorbing"`` (:math:`\epsilon = 1`); :math:`\epsilon` scales both
         the geometry penalty of Eq. (9.20) and the exponents of Eq. (9.18).
@@ -656,7 +656,7 @@ def plenum_flanking_reduction_index(
         "band",
     )
     lr = require_positive(ceiling_length, "ceiling_length")
-    h = require_positive(plenum_height, "plenum_height")
+    h = require_positive(plenum_height_m, "plenum_height_m")
     ls = (
         lr
         if source_length is None
@@ -695,7 +695,7 @@ def plenum_flanking_reduction_index(
             penalty=np.full(rs.shape, geometry),
             model="undamped",
             epsilon=eps,
-            plenum_height=h,
+            plenum_height_m=h,
             ceiling_length=lr,
         )
 
@@ -745,13 +745,13 @@ def plenum_flanking_reduction_index(
         penalty=np.asarray(rs + rr - rcl, dtype=np.float64),
         model="attenuated",
         epsilon=eps,
-        plenum_height=h,
+        plenum_height_m=h,
         ceiling_length=lr,
     )
 
 
 def partition_referenced_reduction_index(
-    reduction_index: ArrayLike, room_height: float, room_length: float
+    reduction_index: ArrayLike, room_height_m: float, room_length: float
 ) -> np.ndarray:
     r"""Refer ``Rcl`` to the partition area instead of the ceiling
     (Eq. (9.13)).
@@ -762,12 +762,12 @@ def partition_referenced_reduction_index(
     path as transmission factors.
 
     :param reduction_index: Ceiling/plenum path ``Rcl`` per band, in dB.
-    :param room_height: Sending-room height ``HS``, in m (> 0).
+    :param room_height_m: Sending-room height ``HS``, in m (> 0).
     :param room_length: Sending-room length ``LS``, in m (> 0).
     :return: The partition-referenced ``Rcl,p`` per band, in dB.
     :raises ValueError: for a non-positive dimension.
     """
     rcl = require_finite_array(reduction_index, "reduction_index")
-    hs = require_positive(room_height, "room_height")
+    hs = require_positive(room_height_m, "room_height_m")
     ls = require_positive(room_length, "room_length")
     return np.asarray(rcl + 10.0 * np.log10(hs / ls), dtype=np.float64)

@@ -480,7 +480,7 @@ def _chk_slow_sound_perfect_absorption() -> Outcome:
     out = ph.materials.slit_helmholtz_absorber(
         np.array([300.0]),
         design.resonator,
-        slit_height=design.slit_height,
+        slit_height_m=design.slit_height_m,
         lattice_step=3.0e-2,
         period_m=5.0e-2,
         fluid=air,
@@ -504,7 +504,7 @@ def _chk_slow_sound_slit_resistivity() -> Outcome:
     f = np.array([1.0e-2])
     rho_s, _ = ph.materials.slit_effective_properties(
         f,
-        slit_height=h,
+        slit_height_m=h,
         fluid=air,
     )
     sigma = float((1j * 2.0 * math.pi * f * rho_s)[0].real)

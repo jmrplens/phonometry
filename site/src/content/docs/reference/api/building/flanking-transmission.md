@@ -117,7 +117,7 @@ band is
 ```python
 critical_frequency(
     longitudinal_wave_speed: float,
-    thickness: float,
+    thickness_m: float,
     *,
     speed_of_sound: float = 343.0,
 ) -> float
@@ -148,7 +148,7 @@ Hopkins Eq. 2.201 derives. See `docs/ERRATA.md`.
 | Name | Description |
 | :--- | :--- |
 | `longitudinal_wave_speed` | Longitudinal wave speed `cL`, in m/s. |
-| `thickness` | Element thickness `h`, in m. |
+| `thickness_m` | Element thickness `h`, in m. |
 | `speed_of_sound` | Speed of sound in air `c0`, in m/s. |
 
 **Returns:** Critical frequency `fc`, in Hz.

@@ -223,7 +223,7 @@ def test_ceiling_attenuation_plot_forwards_kwargs() -> None:
 def _plenum(**kwargs: list[float]) -> ph.building.PlenumFlankingResult:
     ceiling = [17.0, 21.0, 25.0, 29.0, 32.0]
     return ph.building.plenum_flanking_reduction_index(
-        ceiling, ceiling, ceiling_length=4.75, plenum_height=0.43, **kwargs
+        ceiling, ceiling, ceiling_length=4.75, plenum_height_m=0.43, **kwargs
     )
 
 

@@ -233,7 +233,7 @@ ZoomFFTResult(
     spectrum: NDArray[np.complex128],
     amplitude: NDArray[np.float64],
     power: NDArray[np.float64],
-    bin_spacing: float,
+    bin_spacing_hz: float,
     resolution_bandwidth: float,
     window: str,
     n_points: int,
@@ -250,7 +250,7 @@ Narrow-band zoom spectrum on a fine frequency grid (B&P 11.5.4).
 | `spectrum` | Complex amplitude-calibrated coefficients: a sine of peak amplitude `A` on an analysis frequency reads $\lvert \text{spectrum} \rvert = A$ (calibration $2 X(f) / \sum w$; no one-sided doubling at exactly 0 Hz or the Nyquist frequency). |
 | `amplitude` | $\lvert \text{spectrum} \rvert$ - peak-amplitude spectrum. |
 | `power` | Mean-square spectrum $\text{amplitude}^2/2$ ($\text{amplitude}^2$ at DC/Nyquist), consistent with the `'spectrum'` scaling of the Welch module: a tone reads its mean square $A^2/2$. |
-| `bin_spacing` | Grid spacing, in Hz - freely chosen, finer than $f_\mathrm{s}/N$ if requested (the zoom gain of Eq. 11.127). |
+| `bin_spacing_hz` | Grid spacing, in Hz - freely chosen, finer than $f_\mathrm{s}/N$ if requested (the zoom gain of Eq. 11.127). |
 | `resolution_bandwidth` | Effective noise bandwidth $B_\mathrm{e} = f_\mathrm{s} \sum w^2 / \left( \sum w \right)^2$ of the tapered record, in Hz - the true resolution, set by the record length and taper, that no grid refinement improves. |
 | `window` | Taper name. |
 | `n_points` | Number of grid points. |

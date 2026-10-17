@@ -104,7 +104,7 @@ reading, matching its executable Annex J reference program; the ISO/PAS
 analyze_spectrum(
     levels: ArrayLike,
     frequencies: ArrayLike,
-    line_spacing: float,
+    line_spacing_hz: float,
     *,
     effective_bandwidth_factor: float = 1.5,
 ) -> ToneAudibilityResult
@@ -139,7 +139,7 @@ the wrong mean narrow-band level for tones near its edges.
 | :--- | :--- |
 | `levels` | Narrow-band levels `Li` of the spectrum, in dB. |
 | `frequencies` | The line frequencies, in Hz (strictly increasing). |
-| `line_spacing` | Line spacing (frequency resolution) `Δf`, in Hz. |
+| `line_spacing_hz` | Line spacing (frequency resolution) `Δf`, in Hz. |
 | `effective_bandwidth_factor` | $\Delta f_\mathrm{e}/\Delta f$; 1.5 for a Hanning window (the default), 1.0 for a rectangular window. |
 
 **Returns:** A [`ToneAudibilityResult`](/phonometry/reference/api/psychoacoustics/tone-audibility/#toneaudibilityresult) of the detected audible tones and their same-band FG combinations.
@@ -157,7 +157,7 @@ assess_tones(
     tone_frequencies: ArrayLike,
     tone_levels: ArrayLike,
     mean_narrowband_levels: ArrayLike,
-    line_spacing: float,
+    line_spacing_hz: float,
     *,
     extended_uncertainties: ArrayLike | None = None,
 ) -> ToneAudibilityResult
@@ -176,7 +176,7 @@ to every tone and bundles them into a plottable [`ToneAudibilityResult`](/phonom
 | `tone_frequencies` | Tone frequencies `fT`, in Hz. |
 | `tone_levels` | Tone levels `LT`, in dB (Formula (8)). |
 | `mean_narrowband_levels` | Mean narrow-band levels `LS` of the masking noise, in dB (Formula (6)). |
-| `line_spacing` | Line spacing (frequency resolution) `Δf`, in Hz. |
+| `line_spacing_hz` | Line spacing (frequency resolution) `Δf`, in Hz. |
 | `extended_uncertainties` | Optional per-tone extended uncertainties `U`, in dB (see [`audibility_uncertainty`](/phonometry/reference/api/psychoacoustics/tone-audibility/#audibility_uncertainty); computed automatically by [`analyze_spectrum`](/phonometry/reference/api/psychoacoustics/tone-audibility/#analyze_spectrum), which has the per-line levels this level-based entry point lacks). |
 
 **Returns:** A [`ToneAudibilityResult`](/phonometry/reference/api/psychoacoustics/tone-audibility/#toneaudibilityresult).
@@ -224,7 +224,7 @@ audibility_uncertainty(
     tone_line_levels: ArrayLike,
     noise_line_levels: ArrayLike,
     tone_frequency: float,
-    line_spacing: float,
+    line_spacing_hz: float,
     *,
     sigma_level_db: float = 3.0,
     coverage_factor: float = 1.645,
@@ -267,7 +267,7 @@ consideration; see [`mean_audibility_uncertainty`](/phonometry/reference/api/psy
 | `tone_line_levels` | Levels of the `K` tone-containing lines, dB. |
 | `noise_line_levels` | Levels of the `M` masking-noise lines kept by the final Formula (6) iteration, dB. |
 | `tone_frequency` | Tone frequency `fT`, in Hz. |
-| `line_spacing` | Line spacing `df`, in Hz. |
+| `line_spacing_hz` | Line spacing `df`, in Hz. |
 | `sigma_level_db` | Standard uncertainty of each narrow-band level (Clause 6 assumes a uniform 3 dB). |
 | `coverage_factor` | Coverage factor `k` (1.645 for 90 % bilateral). |
 
@@ -351,7 +351,7 @@ $f_2 - f_1 = \Delta f_\mathrm{c}$.
 critical_band_level(
     mean_narrowband_level: float,
     tone_frequency: float,
-    line_spacing: float,
+    line_spacing_hz: float,
 ) -> float
 ```
 
@@ -367,7 +367,7 @@ over the critical bandwidth `Δfc` relative to the line spacing `Δf`.
 | :--- | :--- |
 | `mean_narrowband_level` | Mean narrow-band level `LS`, in dB (Formula (6)). |
 | `tone_frequency` | Tone frequency `fT`, in Hz. |
-| `line_spacing` | Line spacing (frequency resolution) `Δf`, in Hz. |
+| `line_spacing_hz` | Line spacing (frequency resolution) `Δf`, in Hz. |
 
 **Returns:** Critical-band level `LG`, in dB.
 
@@ -647,7 +647,7 @@ tone_audibility(
     tone_level: float,
     mean_narrowband_level: float,
     tone_frequency: float,
-    line_spacing: float,
+    line_spacing_hz: float,
 ) -> float
 ```
 
@@ -665,7 +665,7 @@ $\Delta L = L_\mathrm{T} - L_\mathrm{G} - a_\mathrm{v}$
 | `tone_level` | Tone level `LT`, in dB (Formula (8)). |
 | `mean_narrowband_level` | Mean narrow-band level `LS` of the masking noise, in dB (Formula (6)). |
 | `tone_frequency` | Tone frequency `fT`, in Hz. |
-| `line_spacing` | Line spacing (frequency resolution) `Δf`, in Hz. |
+| `line_spacing_hz` | Line spacing (frequency resolution) `Δf`, in Hz. |
 
 **Returns:** Audibility `ΔL`, in dB.
 
@@ -721,7 +721,7 @@ ToneAudibilityResult(
     tone_frequencies: NDArray[np.float64],
     tone_levels: NDArray[np.float64],
     mean_narrowband_levels: NDArray[np.float64],
-    line_spacing: float,
+    line_spacing_hz: float,
     critical_bandwidths: NDArray[np.float64],
     lower_corners: NDArray[np.float64],
     upper_corners: NDArray[np.float64],
@@ -742,7 +742,7 @@ Audibility of the tones of a narrow-band spectrum (ISO/PAS 20065).
 | `tone_frequencies` | Tone frequencies `fT`, in Hz. |
 | `tone_levels` | Tone levels `LT`, in dB (Formula (8)). |
 | `mean_narrowband_levels` | Mean narrow-band levels `LS` of the masking noise, in dB (Formula (6)). |
-| `line_spacing` | Line spacing (frequency resolution) `Δf`, in Hz. |
+| `line_spacing_hz` | Line spacing (frequency resolution) `Δf`, in Hz. |
 | `critical_bandwidths` | Critical bandwidths `Δfc`, in Hz (Formula (2)). |
 | `lower_corners` | Lower corner frequencies `f1`, in Hz (Formula (4)). |
 | `upper_corners` | Upper corner frequencies `f2`, in Hz (Formula (5)). |

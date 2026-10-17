@@ -171,13 +171,13 @@ def generate_airport_noise(output_dir: str) -> None:
     for p, color in ((20000.0, COLOR_PRIMARY), (12000.0, COLOR_SECONDARY)):
         res = aircraft.npd_curve(powers, distances, levels, p)
         ax.plot(
-            res.distances,
+            res.distances_m,
             res.levels,
             color=color,
             linewidth=2.0,
             label=f"$P$ = {p:.0f} N",
         )
-        ax.plot(res.table_distances, res.table_levels, "o", color=color, markersize=4)
+        ax.plot(res.table_distances_m, res.table_levels, "o", color=color, markersize=4)
     ax.set_xscale("log")
     ax.set_xlabel("Slant distance [m]")
     ax.set_ylabel("Event level [dB]")
@@ -560,7 +560,7 @@ def generate_rotorcraft_insertion_loss(output_dir: str) -> None:
     delta = np.linspace(-0.4, 1.5, 441)
     ld = np.array(
         [
-            aircraft.diffraction_attenuation(bands, float(d), edge_height=h0)
+            aircraft.diffraction_attenuation(bands, float(d), edge_height_m=h0)
             for d in delta
         ]
     )  # (len(delta), len(bands))
@@ -1348,7 +1348,7 @@ def generate_rotorcraft_hover_ring(output_dir: str) -> None:
         -((bearings - 120.0) ** 2) / (2.0 * 40.0**2)
     )
     ring = spectrum[None, :] + directivity[:, None]
-    hige = aircraft.hover_ring_hemisphere(freqs, bearings, ring, distance=70.0)
+    hige = aircraft.hover_ring_hemisphere(freqs, bearings, ring, distance_m=70.0)
 
     k = int(np.argmin(np.abs(np.asarray(freqs) - 315.0)))
     _fig, (ax, ax2) = plt.subplots(1, 2, figsize=(12, 5.2))

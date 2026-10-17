@@ -300,8 +300,9 @@ class StaticAirflowResult(RichDisplay):
         :param path: Destination path of the PDF file.
         :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
             produces a body-and-disclaimer fiche. The applicable descriptive
-            fields are ``client``, ``manufacturer``, ``specimen``, ``thickness``
-            (the specimen thickness ``d``, in metres, shown in millimetres),
+            fields are ``client``, ``manufacturer``, ``specimen``,
+            ``thickness_m`` (the specimen thickness ``d``, in metres, shown in
+            millimetres),
             ``test_room``, ``test_date``, ``temperature_c``, ``relative_humidity_percent``,
             ``measurement_standard``, ``laboratory``, ``operator``, ``report_id``
             and ``notes``. The ``requirement`` field is ignored (ISO 9053-1 has
@@ -410,19 +411,19 @@ def specific_airflow_resistance(
     )
 
 
-def airflow_resistivity(specific_resistance: float, thickness: float) -> float:
+def airflow_resistivity(specific_resistance: float, thickness_m: float) -> float:
     r"""Airflow resistivity :math:`\sigma = R_\mathrm{s} / d` (ISO 9053-1:2018, 3.3).
 
-    ``specific_resistance`` is ``R_s`` (Pa*s/m) and ``thickness`` is ``d`` (m),
+    ``specific_resistance`` is ``R_s`` (Pa*s/m) and ``thickness_m`` is ``d`` (m),
     the specimen thickness in the flow direction. Returns ``sigma`` in Pa*s/m2.
     """
     if specific_resistance < 0.0:
         msg = "'specific_resistance' must be non-negative."
         raise ValueError(msg)
-    if thickness <= 0.0:
-        msg = "'thickness' must be positive."
+    if thickness_m <= 0.0:
+        msg = "'thickness_m' must be positive."
         raise ValueError(msg)
-    return specific_resistance / thickness
+    return specific_resistance / thickness_m
 
 
 def _warn_static_velocity_range(
@@ -444,8 +445,8 @@ def static_airflow_resistance(
     velocities: ArrayLike,
     pressure_drops_pa: ArrayLike,
     area: float,
-    thickness: float | None = None,
     *,
+    thickness_m: float | None = None,
     evaluation_velocity: float = _STATIC_REFERENCE_VELOCITY,
 ) -> StaticAirflowResult:
     r"""Stepwise static-method airflow resistance (ISO 9053-1:2018, clause 7.5).
@@ -458,7 +459,7 @@ def static_airflow_resistance(
     ``velocities`` are the linear airflow velocities ``u`` (m/s) and
     ``pressure_drops_pa`` the matching pressure differences :math:`\Delta p` (Pa)
     of at least two measurement steps; ``area`` is the cross-section ``A`` (m2)
-    and ``thickness`` the specimen thickness ``d`` (m, optional, enabling
+    and ``thickness_m`` the specimen thickness ``d`` (m, optional, enabling
     ``sigma``).
 
     Because :math:`R_\mathrm{s} = \Delta p / u = a + b u`, the returned
@@ -490,8 +491,8 @@ def static_airflow_resistance(
         raise ValueError(msg)
     if area <= 0.0:
         raise ValueError(_AREA_POSITIVE_MSG)
-    if thickness is not None and thickness <= 0.0:
-        msg = "'thickness' must be positive."
+    if thickness_m is not None and thickness_m <= 0.0:
+        msg = "'thickness_m' must be positive."
         raise ValueError(msg)
     if evaluation_velocity <= 0.0:
         msg = "'evaluation_velocity' must be positive."
@@ -510,7 +511,7 @@ def static_airflow_resistance(
     # a + b*u; and since R_s = R*A, dividing it by the area gives R.
     specific = dp_eval / evaluation_velocity
     resistance = specific / area
-    resistivity = None if thickness is None else specific / thickness
+    resistivity = None if thickness_m is None else specific / thickness_m
 
     return StaticAirflowResult(
         resistance=resistance,

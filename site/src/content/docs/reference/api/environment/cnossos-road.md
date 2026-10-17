@@ -395,7 +395,8 @@ RoadEmissionResult(
     vehicle_power: NDArray[np.float64],
     line_power: NDArray[np.float64],
     total_line_power: NDArray[np.float64],
-    source_height: float = 0.05,
+    *,
+    source_height_m: float = 0.05,
 )
 ```
 
@@ -412,7 +413,7 @@ Directional sound power per metre of a CNOSSOS-EU road source line.
 | `vehicle_power` | `L_W,i,m` per category and band (2.2.2)/(2.2.3), in dB re 1 pW. |
 | `line_power` | `L'_W,eq,line,i,m` per category and band (2.2.1), in dB re 1 pW per metre. |
 | `total_line_power` | The energy sum of `line_power` over the categories, in dB re 1 pW per metre: the source strength of the line. |
-| `source_height` | Height of the equivalent point source above the road surface, in m (0,05 m, fixed by 2.2.1). |
+| `source_height_m` | Height of the equivalent point source above the road surface, in m (0,05 m, fixed by 2.2.1). |
 
 ### RoadEmissionResult.a_weighted_line_power
 

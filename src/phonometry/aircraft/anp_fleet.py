@@ -273,10 +273,10 @@ class AnpNpdCurves(OwnsArrays):
     :ivar operation: ``"A"`` (arrival) or ``"D"`` (departure).
     :ivar power_parameter: Name/unit of the power setting (e.g. corrected net thrust).
     :ivar powers: Tabulated engine power settings (1-D, strictly increasing).
-    :ivar distances: Tabulated slant distances, in metres (1-D, strictly increasing).
+    :ivar distances_m: Tabulated slant distances, in metres (1-D, strictly increasing).
     :ivar levels: Tabulated event levels, shape ``(len(powers), len(distances))``, in dB.
 
-    The ``powers``, ``distances`` and ``levels`` arrays are read-only views shared
+    The ``powers``, ``distances_m`` and ``levels`` arrays are read-only views shared
     with the parent database; copy them before mutating.
     """
 
@@ -286,7 +286,7 @@ class AnpNpdCurves(OwnsArrays):
     operation: str
     power_parameter: str
     powers: NDArray[np.float64]
-    distances: NDArray[np.float64]
+    distances_m: NDArray[np.float64]
     levels: NDArray[np.float64]
 
     def __post_init__(self) -> None:
@@ -308,22 +308,22 @@ class AnpNpdCurves(OwnsArrays):
         :raises ValueError: if the level table disagrees with the powers or the
             distances.
         """
-        require_ranks(self, powers=1, distances=1, levels=2)
+        require_ranks(self, powers=1, distances_m=1, levels=2)
         require_same_length(self, "powers", "levels", axis="power setting")
-        require_same_length(self, "distances", ("levels", 1), axis="slant distance")
+        require_same_length(self, "distances_m", ("levels", 1), axis="slant distance")
 
     def level(
-        self, power: float, distance: NDArray[np.float64] | list[float] | float
+        self, power: float, distance_m: NDArray[np.float64] | list[float] | float
     ) -> NDArray[np.float64]:
         """Interpolated NPD level ``L(P, d)`` (Doc 29 Eq. 4-3/4-4).
 
         :param power: Query engine power setting.
-        :param distance: Query slant distance(s), in metres.
+        :param distance_m: Query slant distance(s), in metres.
         :return: The interpolated level per query distance, in dB.
         """
         from .airport_noise import npd_level
 
-        return npd_level(self.powers, self.distances, self.levels, power, distance)
+        return npd_level(self.powers, self.distances_m, self.levels, power, distance_m)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -642,7 +642,7 @@ class AnpDatabase:
         npd: Mapping[
             tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]
         ],
-        distances: NDArray[np.float64],
+        distances_m: NDArray[np.float64],
         profiles: Mapping[tuple[str, str, str, int], NDArray[np.float64]],
         spectral_classes: Mapping[str, SpectralClass] | None = None,
     ) -> None:
@@ -654,7 +654,7 @@ class AnpDatabase:
             key: (read_only_copy(powers), read_only_copy(levels))
             for key, (powers, levels) in npd.items()
         }
-        self._distances = read_only_copy(distances)
+        self._distances = read_only_copy(distances_m)
         self._profiles = {key: read_only_copy(path) for key, path in profiles.items()}
         # Only an export carries the performance tables, and only
         # load_anp_database reads one (through _from_export); a database built
@@ -669,7 +669,7 @@ class AnpDatabase:
         npd: Mapping[
             tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]
         ],
-        distances: NDArray[np.float64],
+        distances_m: NDArray[np.float64],
         profiles: Mapping[tuple[str, str, str, int], NDArray[np.float64]],
         *,
         performance: _PerformanceTables,
@@ -680,7 +680,7 @@ class AnpDatabase:
         The tables are the parser's own record, not something a caller builds,
         so they enter here rather than through the public constructor.
         """
-        database = cls(aircraft, npd, distances, profiles, spectral_classes)
+        database = cls(aircraft, npd, distances_m, profiles, spectral_classes)
         database._performance = performance
         return database
 
@@ -822,7 +822,7 @@ class AnpDatabase:
             operation=op,
             power_parameter=m.get("Power Parameter", ""),
             powers=powers,
-            distances=self._distances,
+            distances_m=self._distances,
             levels=levels,
         )
 
@@ -1225,7 +1225,7 @@ class AnpDatabase:
             )
             raise ValueError(msg)
         if npd_air is None:
-            return acft, prof, sel.powers, sel.distances, sel.levels, lmax.levels
+            return acft, prof, sel.powers, sel.distances_m, sel.levels, lmax.levels
         from .npd_atmosphere import npd_atmosphere_increment
 
         increment = npd_atmosphere_increment(
@@ -1234,13 +1234,13 @@ class AnpDatabase:
             relative_humidity_percent=npd_air.relative_humidity_percent,
             atmospheric_pressure_kpa=npd_air.atmosphere.atmospheric_pressure_kpa,
             absorption=npd_air.absorption,
-            distances_m=sel.distances,
+            distances_m=sel.distances_m,
         ).increment_db
         return (
             acft,
             prof,
             sel.powers,
-            sel.distances,
+            sel.distances_m,
             sel.levels + increment[None, :],
             lmax.levels + increment[None, :],
         )
@@ -1810,7 +1810,7 @@ def load_anp_database(path: Path | str | None = None) -> AnpDatabase:
     return AnpDatabase._from_export(
         aircraft=aircraft,
         npd=npd,
-        distances=distances,
+        distances_m=distances,
         profiles=profiles,
         performance=_parse_performance(tables),
         spectral_classes=_parse_spectral_classes(spectral) if spectral else None,

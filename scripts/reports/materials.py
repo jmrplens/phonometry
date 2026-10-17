@@ -227,7 +227,7 @@ def _impedance_tube_example() -> tuple[object, ReportMetadata, str]:
     result = ph.materials.two_microphone_impedance(
         h12,
         frequency=freqs,
-        spacing=spacing,
+        spacing_m=spacing,
         x1=x1,
         speed_of_sound=c0,
         characteristic_impedance=rc,
@@ -239,7 +239,7 @@ def _impedance_tube_example() -> tuple[object, ReportMetadata, str]:
         client="Example client",
         manufacturer="Example acoustics",
         tube_diameter_m=diameter_m,
-        mic_spacing=spacing,
+        microphone_spacing_m=spacing,
         mounting="Deliberate 86 mm backing air cavity, rigid termination",
         test_room="Impedance tube B&K 4206 (example)",
         measurement_standard="ISO 10534-2",
@@ -502,7 +502,7 @@ def _dynamic_stiffness_example() -> tuple[object, ReportMetadata, str]:
         client="Example client",
         manufacturer="Example insulation works",
         mass_per_area=200.0,
-        thickness=0.020,
+        thickness_m=0.020,
         test_room="Dynamic-stiffness rig (example), 8 kg load plate",
         measurement_standard="EN 29052-1",
         temperature_c=21.0,
@@ -531,12 +531,12 @@ def _airflow_resistance_example() -> tuple[object, ReportMetadata, str]:
     area = np.pi * 0.05**2
     u = np.array([0.5, 1.0, 2.0, 4.0, 8.0, 12.0]) * 1e-3
     dp = 1.6e4 * u + 4.0e5 * u**2
-    result = ph.materials.static_airflow_resistance(u, dp, area=area, thickness=0.05)
+    result = ph.materials.static_airflow_resistance(u, dp, area=area, thickness_m=0.05)
     metadata = ReportMetadata(
         specimen="50 mm porous absorber (open-cell)",
         client="Example client",
         manufacturer="Example insulation works",
-        thickness=0.050,
+        thickness_m=0.050,
         test_room="Static airflow rig (example), 100 mm cell",
         measurement_standard="ISO 9053-1",
         temperature_c=23.0,

@@ -39,7 +39,7 @@ profile has a closed-form [`shadow_zone_distance`](/phonometry/reference/api/env
 model. The PE is anchored against the exact spherical-wave ground effect
 ([`phonometry.environment.ground_effect`](/phonometry/reference/api/environment/ground-barriers/#ground_effect)) in the homogeneous limit
 (gradient zero), which it reproduces to a few tenths of a dB on the default
-grid (finer `height_step` converges it further).
+grid (finer `height_step_m` converges it further).
 
 The ground impedance is taken in the $\mathrm{e}^{-i \omega t}$ convention of
 Salomons (a passive ground has $\operatorname{Im}(Z) > 0$), shared with
@@ -60,14 +60,14 @@ atmospheric_parabolic_equation(
     frequency_hz: float,
     profile: EffectiveSoundSpeedProfile,
     *,
-    source_height: float,
+    source_height_m: float,
     impedance: ArrayLike | PorousMediumResult | None = None,
     flow_resistivity: float | None = None,
     model: Literal['delany_bazley', 'miki'] = 'delany_bazley',
     max_range: float = 1000.0,
-    max_height: float = 100.0,
+    max_height_m: float = 100.0,
     range_step: float | None = None,
-    height_step: float | None = None,
+    height_step_m: float | None = None,
     fluid: Fluid = ...,
 ) -> AtmosphericPEResult
 ```
@@ -110,14 +110,14 @@ convention.
 | :--- | :--- |
 | `frequency_hz` | Source frequency, in Hz. |
 | `profile` | The effective sound-speed profile. |
-| `source_height` | Source height `zs`, in metres (> 0). |
+| `source_height_m` | Source height `zs`, in metres (> 0). |
 | `impedance` | Normalized ground impedance, or a `PorousMediumResult`. |
 | `flow_resistivity` | Effective flow resistivity `sigma` (Pa s/m2), as an alternative to `impedance`. |
 | `model` | Porous model for `flow_resistivity`. |
 | `max_range` | Maximum range, in metres. |
-| `max_height` | Top of the output height grid, in metres (the receiver region of interest; an absorbing layer is added above it). |
+| `max_height_m` | Top of the output height grid, in metres (the receiver region of interest; an absorbing layer is added above it). |
 | `range_step` | Range marching step `dr`, in metres. Default (`None`): one wavelength. |
-| `height_step` | Vertical grid spacing `dz`, in metres. Default (`None`): a tenth of a wavelength (Salomons Sec. G.2). |
+| `height_step_m` | Vertical grid spacing `dz`, in metres. Default (`None`): a tenth of a wavelength (Salomons Sec. G.2). |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** An [`AtmosphericPEResult`](/phonometry/reference/api/environment/refraction/#atmosphericperesult).
@@ -134,7 +134,7 @@ convention.
 atmospheric_ray_paths(
     profile: EffectiveSoundSpeedProfile,
     *,
-    source_height: float,
+    source_height_m: float,
     launch_angles_deg: ArrayLike,
     max_range: float = 1000.0,
     n_steps: int = 2000,
@@ -162,7 +162,7 @@ path; a ground reflection is instantaneous and leaves it continuous.
 | Name | Description |
 | :--- | :--- |
 | `profile` | The effective sound-speed profile (see [`linear_sound_speed_profile`](/phonometry/reference/api/environment/refraction/#linear_sound_speed_profile) / [`log_linear_sound_speed_profile`](/phonometry/reference/api/environment/refraction/#log_linear_sound_speed_profile)). |
-| `source_height` | Source height `zs`, in metres (>= 0). |
+| `source_height_m` | Source height `zs`, in metres (>= 0). |
 | `launch_angles_deg` | Launch angles from the horizontal, in degrees (positive upward), within `(-90, 90)`. |
 | `max_range` | Maximum horizontal range to trace, in metres. |
 | `n_steps` | Number of range steps per ray (>= 2). |
@@ -181,9 +181,9 @@ path; a ground reflection is instantaneous and leaves it continuous.
 AtmosphericPEResult(
     frequency: float,
     ranges: NDArray[np.float64],
-    heights: NDArray[np.float64],
+    heights_m: NDArray[np.float64],
     relative_level: NDArray[np.float64],
-    source_height: float,
+    source_height_m: float,
     normalized_impedance: complex,
 )
 ```
@@ -196,18 +196,18 @@ Parabolic-equation relative-level field in a refracting atmosphere.
 | :--- | :--- |
 | `frequency` | Source frequency, in Hz. |
 | `ranges` | Range grid, in metres. |
-| `heights` | Height grid of the output field, in metres. |
+| `heights_m` | Height grid of the output field, in metres. |
 | `relative_level` | Relative sound level $\Delta L(z, r)$ (dB re free field), shape `(n_heights, n_ranges)`. |
-| `source_height` | Source height, in metres. |
+| `source_height_m` | Source height, in metres. |
 | `normalized_impedance` | Normalized ground impedance used (complex). |
 
 ### AtmosphericPEResult.level_at_height()
 
 ```python
-AtmosphericPEResult.level_at_height(height: float) -> NDArray[np.float64]
+AtmosphericPEResult.level_at_height(height_m: float) -> NDArray[np.float64]
 ```
 
-Relative sound level versus range at the grid height nearest `height`.
+Relative sound level versus range at the grid height nearest `height_m`.
 
 ### AtmosphericPEResult.plot()
 
@@ -228,11 +228,11 @@ Plot the relative-level field over the range-height plane.
 AtmosphericRayResult(
     launch_angles_deg: NDArray[np.float64],
     ranges: NDArray[np.float64],
-    heights: NDArray[np.float64],
+    heights_m: NDArray[np.float64],
     travel_times: NDArray[np.float64],
     turning_points: NDArray[np.int_],
     ground_reflections: NDArray[np.int_],
-    source_height: float,
+    source_height_m: float,
 )
 ```
 
@@ -244,11 +244,11 @@ Ray-tracing solution through an effective sound-speed profile.
 | :--- | :--- |
 | `launch_angles_deg` | Launch angles from the horizontal, in degrees. |
 | `ranges` | Per-ray horizontal ranges, in metres, shape `(n_rays, n_steps)`. |
-| `heights` | Per-ray heights, in metres, shape `(n_rays, n_steps)`. |
+| `heights_m` | Per-ray heights, in metres, shape `(n_rays, n_steps)`. |
 | `travel_times` | Per-ray cumulative travel times, in seconds, shape `(n_rays, n_steps)`. |
 | `turning_points` | Number of turning points (height extrema) per ray. |
 | `ground_reflections` | Number of ground reflections per ray. |
-| `source_height` | Source height, in metres. |
+| `source_height_m` | Source height, in metres. |
 
 ### AtmosphericRayResult.plot()
 
@@ -267,7 +267,7 @@ Plot the curved ray paths (height on the vertical axis).
 
 ```python
 EffectiveSoundSpeedProfile(
-    heights: NDArray[np.float64],
+    heights_m: NDArray[np.float64],
     speeds_of_sound: NDArray[np.float64],
     description: str = '',
 )
@@ -283,7 +283,7 @@ so a two-point profile represents an exact linear gradient.
 
 | Name | Description |
 | :--- | :--- |
-| `heights` | Heights `z` above the ground, in metres (from $z = 0$). |
+| `heights_m` | Heights `z` above the ground, in metres (from $z = 0$). |
 | `speeds_of_sound` | Effective sound speed at each height, in m/s. |
 | `description` | Short human-readable label (e.g. `"linear, +0.1 s^-1"`). |
 
@@ -304,7 +304,7 @@ Plot the effective sound-speed profile (height on the vertical axis).
 
 ```python
 EffectiveSoundSpeedProfile.speed_at(
-    height: ArrayLike,
+    height_m: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -317,7 +317,7 @@ linear_sound_speed_profile(
     gradient_per_s: float,
     *,
     ground_speed: float = 343.0,
-    max_height: float = 100.0,
+    max_height_m: float = 100.0,
 ) -> EffectiveSoundSpeedProfile
 ```
 
@@ -334,7 +334,7 @@ and creates an acoustic shadow near the ground (Salomons Sec. 4.2).
 | :--- | :--- |
 | `gradient_per_s` | Vertical gradient `dc/dz`, in s^-1 (m/s per m). |
 | `ground_speed` | Sound speed `c0` at the ground, in m/s. |
-| `max_height` | Top of the sampled profile, in metres. |
+| `max_height_m` | Top of the sampled profile, in metres. |
 
 **Returns:** A two-point [`EffectiveSoundSpeedProfile`](/phonometry/reference/api/environment/refraction/#effectivesoundspeedprofile).
 
@@ -342,7 +342,7 @@ and creates an acoustic shadow near the ground (Salomons Sec. 4.2).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `max_height` or `ground_speed` is not positive, or the profile turns non-positive within `[0, max_height]`. |
+| ValueError | If `max_height_m` or `ground_speed` is not positive, or the profile turns non-positive within `[0, max_height]`. |
 
 ## log_linear_sound_speed_profile
 
@@ -352,7 +352,7 @@ log_linear_sound_speed_profile(
     *,
     ground_speed: float = 340.0,
     roughness_length: float = 0.1,
-    max_height: float = 100.0,
+    max_height_m: float = 100.0,
     n_points: int = 128,
 ) -> EffectiveSoundSpeedProfile
 ```
@@ -373,7 +373,7 @@ near the ground is resolved by sampling the height grid logarithmically.
 | `b` | Profile strength `b`, in m/s (positive: downward refraction). |
 | `ground_speed` | Sound speed `c0` at the ground, in m/s. |
 | `roughness_length` | Aerodynamic roughness length `z0`, in metres. |
-| `max_height` | Top of the sampled profile, in metres. |
+| `max_height_m` | Top of the sampled profile, in metres. |
 | `n_points` | Number of samples of the height grid (>= 2). |
 
 **Returns:** An [`EffectiveSoundSpeedProfile`](/phonometry/reference/api/environment/refraction/#effectivesoundspeedprofile).
@@ -382,7 +382,7 @@ near the ground is resolved by sampling the height grid logarithmically.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | On non-positive `c0`, `z0` or `max_height`, fewer than two points, or a profile that turns non-positive. |
+| ValueError | On non-positive `c0`, `z0` or `max_height_m`, fewer than two points, or a profile that turns non-positive. |
 
 ## ray_curvature_radius
 
@@ -425,8 +425,8 @@ $R_\mathrm{c} = c_0 / (|\text{gradient}| \cos\theta_0)$.
 ```python
 shadow_zone_distance(
     gradient_per_s: float,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     *,
     ground_speed: float = 343.0,
 ) -> float
@@ -452,8 +452,8 @@ compared with $R_\mathrm{c}$.
 | Name | Description |
 | :--- | :--- |
 | `gradient_per_s` | Vertical gradient `dc/dz`, in s^-1 (must be negative for a shadow zone to exist). |
-| `source_height` | Source height `hs`, in metres (>= 0). |
-| `receiver_height` | Receiver height `hr`, in metres (>= 0). |
+| `source_height_m` | Source height `hs`, in metres (>= 0). |
+| `receiver_height_m` | Receiver height `hr`, in metres (>= 0). |
 | `ground_speed` | Sound speed `c0` at the ground, in m/s. |
 
 **Returns:** The horizontal shadow-boundary distance, in metres.

@@ -609,7 +609,7 @@ def test_undamped_geometry_term_of_the_vigran_example() -> None:
     against the sum of the two ceiling reduction indices.
     """
     res = building.plenum_flanking_reduction_index(
-        [30.0, 35.0], [30.0, 35.0], ceiling_length=4.75, plenum_height=0.43
+        [30.0, 35.0], [30.0, 35.0], ceiling_length=4.75, plenum_height_m=0.43
     )
     assert res.geometry_term == pytest.approx(10.4, abs=0.05)
     np.testing.assert_allclose(
@@ -619,7 +619,7 @@ def test_undamped_geometry_term_of_the_vigran_example() -> None:
 
 def test_absorbing_sidewalls_gain_six_decibels() -> None:
     """Eq. (9.19): eps goes from 2 to 1, so the penalty drops by 20 lg 2 = 6,02 dB."""
-    kwargs = {"ceiling_length": 4.75, "plenum_height": 0.43}
+    kwargs = {"ceiling_length": 4.75, "plenum_height_m": 0.43}
     reflecting = building.plenum_flanking_reduction_index([30.0], [30.0], **kwargs)
     absorbing = building.plenum_flanking_reduction_index(
         [30.0], [30.0], sidewalls="absorbing", **kwargs
@@ -632,10 +632,10 @@ def test_absorbing_sidewalls_gain_six_decibels() -> None:
 def test_deeper_plenum_helps_by_ten_lg_of_the_depth_ratio() -> None:
     """Eq. (9.20): the penalty carries 1/h, so doubling h gains 3,01 dB."""
     shallow = building.plenum_flanking_reduction_index(
-        [30.0], [30.0], ceiling_length=4.75, plenum_height=0.4
+        [30.0], [30.0], ceiling_length=4.75, plenum_height_m=0.4
     )
     deep = building.plenum_flanking_reduction_index(
-        [30.0], [30.0], ceiling_length=4.75, plenum_height=0.8
+        [30.0], [30.0], ceiling_length=4.75, plenum_height_m=0.8
     )
     assert float(deep.reduction_index[0] - shallow.reduction_index[0]) == pytest.approx(
         10.0 * np.log10(2.0)
@@ -648,7 +648,7 @@ def test_transmission_factor_matches_the_reduction_index() -> None:
         [30.0, 35.0, 40.0],
         [28.0, 33.0, 38.0],
         ceiling_length=4.75,
-        plenum_height=0.43,
+        plenum_height_m=0.43,
     )
     np.testing.assert_allclose(
         res.reduction_index, -10.0 * np.log10(res.transmission_factor)
@@ -663,13 +663,13 @@ def test_attenuated_model_converges_to_the_undamped_limit() -> None:
     needs an insulating ceiling as well as a small mR. Here tauR = 1e-10.
     """
     undamped = building.plenum_flanking_reduction_index(
-        [50.0], [100.0], ceiling_length=4.75, plenum_height=0.43
+        [50.0], [100.0], ceiling_length=4.75, plenum_height_m=0.43
     )
     attenuated = building.plenum_flanking_reduction_index(
         [50.0],
         [100.0],
         ceiling_length=4.75,
-        plenum_height=0.43,
+        plenum_height_m=0.43,
         attenuation_source=[1e-5],
         attenuation_receiving=[1e-5],
     )
@@ -691,13 +691,13 @@ def test_leakage_term_bites_at_a_realistic_ceiling() -> None:
     move this number.
     """
     undamped = building.plenum_flanking_reduction_index(
-        [20.0], [20.0], ceiling_length=4.75, plenum_height=0.43
+        [20.0], [20.0], ceiling_length=4.75, plenum_height_m=0.43
     )
     attenuated = building.plenum_flanking_reduction_index(
         [20.0],
         [20.0],
         ceiling_length=4.75,
-        plenum_height=0.43,
+        plenum_height_m=0.43,
         attenuation_source=[1e-6],
         attenuation_receiving=[1e-6],
     )
@@ -720,7 +720,7 @@ def test_attenuated_model_is_monotonic_in_the_plenum_damping() -> None:
                 [25.0],
                 [25.0],
                 ceiling_length=5.0,
-                plenum_height=0.6,
+                plenum_height_m=0.6,
                 attenuation_source=[m],
                 attenuation_receiving=[m],
             ).reduction_index[0]
@@ -737,14 +737,14 @@ def test_attenuated_model_never_exceeds_the_undamped_path() -> None:
     undamped value over a wide range of realistic damping.
     """
     undamped = building.plenum_flanking_reduction_index(
-        [25.0], [25.0], ceiling_length=5.0, plenum_height=0.6
+        [25.0], [25.0], ceiling_length=5.0, plenum_height_m=0.6
     )
     for m in (1e-6, 1e-4, 1e-2, 1.0):
         attenuated = building.plenum_flanking_reduction_index(
             [25.0],
             [25.0],
             ceiling_length=5.0,
-            plenum_height=0.6,
+            plenum_height_m=0.6,
             attenuation_source=[m],
             attenuation_receiving=[m],
         )
@@ -763,7 +763,7 @@ def test_undamped_transmission_factor_above_unity_is_rejected() -> None:
     """
     with pytest.raises(ValueError, match=r"transmission factor reaches .+ above unity"):
         building.plenum_flanking_reduction_index(
-            [0.0], [0.0], ceiling_length=5.0, plenum_height=0.6
+            [0.0], [0.0], ceiling_length=5.0, plenum_height_m=0.6
         )
 
 
@@ -781,7 +781,7 @@ def test_attenuated_transmission_factor_stays_below_unity() -> None:
                 [0.0],
                 [0.0],
                 ceiling_length=5.0,
-                plenum_height=h,
+                plenum_height_m=h,
                 attenuation_source=[m],
                 attenuation_receiving=[m],
             )
@@ -797,7 +797,7 @@ def test_plenum_attenuation_increases_the_reduction_index() -> None:
                 [30.0],
                 [30.0],
                 ceiling_length=4.75,
-                plenum_height=0.43,
+                plenum_height_m=0.43,
                 attenuation_source=[m],
                 attenuation_receiving=[m],
             ).reduction_index[0]
@@ -816,7 +816,7 @@ def test_attenuated_model_carries_the_sidewall_factor_in_its_exponents() -> None
     exponent doubled, which for a fixed geometry is the same as halving the
     attenuation coefficients.
     """
-    kwargs = {"ceiling_length": 4.75, "plenum_height": 0.43}
+    kwargs = {"ceiling_length": 4.75, "plenum_height_m": 0.43}
     reflecting = building.plenum_flanking_reduction_index(
         [50.0],
         [100.0],
@@ -843,7 +843,7 @@ def test_attenuated_model_carries_the_sidewall_factor_in_its_exponents() -> None
 
 def test_absorbing_sidewalls_converge_to_their_own_undamped_limit() -> None:
     """The eps = 1 attenuated form collapses to the eps = 1 compact form."""
-    kwargs = {"ceiling_length": 4.75, "plenum_height": 0.43, "sidewalls": "absorbing"}
+    kwargs = {"ceiling_length": 4.75, "plenum_height_m": 0.43, "sidewalls": "absorbing"}
     undamped = building.plenum_flanking_reduction_index([50.0], [100.0], **kwargs)
     attenuated = building.plenum_flanking_reduction_index(
         [50.0],
@@ -865,7 +865,7 @@ def test_power_split_must_be_a_fraction(name: str) -> None:
             [30.0],
             [30.0],
             ceiling_length=4.75,
-            plenum_height=0.43,
+            plenum_height_m=0.43,
             **{name: 1.2},
         )
 
@@ -879,7 +879,7 @@ def test_attenuation_coefficients_must_come_in_pairs() -> None:
             [30.0],
             [30.0],
             ceiling_length=4.75,
-            plenum_height=0.43,
+            plenum_height_m=0.43,
             attenuation_source=[0.1],
         )
 
@@ -891,9 +891,9 @@ def test_partition_reference_shifts_by_the_room_aspect_ratio() -> None:
 
 
 def test_plenum_model_rejects_a_non_positive_height() -> None:
-    with pytest.raises(ValueError, match=r"'plenum_height' must be positive"):
+    with pytest.raises(ValueError, match=r"'plenum_height_m' must be positive"):
         building.plenum_flanking_reduction_index(
-            [30.0], [30.0], ceiling_length=4.75, plenum_height=0.0
+            [30.0], [30.0], ceiling_length=4.75, plenum_height_m=0.0
         )
 
 
@@ -907,7 +907,7 @@ def test_plenum_model_rejects_ceilings_over_different_bands() -> None:
             [30.0, 35.0, 40.0],
             [28.0, 33.0],
             ceiling_length=4.75,
-            plenum_height=0.43,
+            plenum_height_m=0.43,
         )
 
 
@@ -920,7 +920,7 @@ def test_plenum_model_rejects_frequencies_of_another_length() -> None:
             [30.0, 35.0, 40.0],
             [28.0, 33.0, 38.0],
             ceiling_length=4.75,
-            plenum_height=0.43,
+            plenum_height_m=0.43,
             frequencies=[125.0, 250.0],
         )
 
@@ -940,7 +940,7 @@ def test_plenum_model_names_which_attenuation_coefficient_disagrees() -> None:
             [30.0, 35.0, 40.0],
             [28.0, 33.0, 38.0],
             ceiling_length=4.75,
-            plenum_height=0.43,
+            plenum_height_m=0.43,
             attenuation_source=[0.5, 0.5],
             attenuation_receiving=[0.5, 0.5, 0.5],
         )
@@ -957,7 +957,7 @@ def test_plenum_result_rejects_a_ceiling_evaluated_in_one_band() -> None:
         [30.0, 35.0, 40.0],
         [28.0, 33.0, 38.0],
         ceiling_length=4.75,
-        plenum_height=0.43,
+        plenum_height_m=0.43,
     )
     one_band = res.reduction_index_source[:1]
     with pytest.raises(ValueError, match=r"'reduction_index_source' \(1\)"):

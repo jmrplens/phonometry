@@ -2283,13 +2283,13 @@ def _chk_vigran_plenum_convergence() -> Outcome:
     # limit, Eq. (9.20). That fails outright on the printed reading of the
     # receiving-side coefficient (see docs/ERRATA.md).
     undamped = ph.building.plenum_flanking_reduction_index(
-        [50.0], [100.0], ceiling_length=4.75, plenum_height=0.43
+        [50.0], [100.0], ceiling_length=4.75, plenum_height_m=0.43
     )
     attenuated = ph.building.plenum_flanking_reduction_index(
         [50.0],
         [100.0],
         ceiling_length=4.75,
-        plenum_height=0.43,
+        plenum_height_m=0.43,
         attenuation_source=[1e-5],
         attenuation_receiving=[1e-5],
     )

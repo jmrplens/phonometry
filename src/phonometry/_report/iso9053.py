@@ -75,14 +75,14 @@ def _metadata_pairs(
 
     Only fields that are set are returned. The applicable fields are the generic
     identity fields plus the specimen thickness ``d`` in the flow direction
-    (``thickness``, stored in metres and printed in millimetres) and the
+    (``thickness_m``, stored in metres and printed in millimetres) and the
     environmental conditions.
     """
     middle: list[tuple[str, str | None]] = [
         (
             t("Thickness d [mm]", language),
-            fmt_meta(metadata.thickness * 1e3, language)
-            if metadata.thickness is not None
+            fmt_meta(metadata.thickness_m * 1e3, language)
+            if metadata.thickness_m is not None
             else None,
         ),
     ]

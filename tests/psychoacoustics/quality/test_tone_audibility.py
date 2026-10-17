@@ -606,7 +606,7 @@ def test_assess_tones_fields_consistent() -> None:
     assert result.lower_corners.shape == result.tone_frequencies.shape
     # LG = LS + 10 lg(Δfc/Δf) elementwise.
     expected_lg = result.mean_narrowband_levels + 10.0 * np.log10(
-        result.critical_bandwidths / result.line_spacing
+        result.critical_bandwidths / result.line_spacing_hz
     )
     assert np.allclose(result.critical_band_levels, expected_lg)
     # ΔL = LT − LG − av elementwise.
@@ -653,7 +653,7 @@ def test_critical_bandwidth_rejects_bad_frequency(bad: float) -> None:
 
 
 def test_critical_band_level_rejects_bad_spacing() -> None:
-    with pytest.raises(ValueError, match="'line_spacing' must be a positive"):
+    with pytest.raises(ValueError, match="'line_spacing_hz' must be a positive"):
         psychoacoustics.critical_band_level(50.0, 137.3, 0.0)
 
 
@@ -775,9 +775,9 @@ def test_result_rejects_a_line_spacing_that_is_not_a_resolution(bad: float) -> N
     good = _annex_e_result()
     with pytest.raises(
         ValueError,
-        match=r"ToneAudibilityResult: 'line_spacing' must be a positive, finite",
+        match=r"ToneAudibilityResult: 'line_spacing_hz' must be a positive, finite",
     ):
-        dataclasses.replace(good, line_spacing=bad)
+        dataclasses.replace(good, line_spacing_hz=bad)
 
 
 @pytest.mark.parametrize(
@@ -796,9 +796,9 @@ def test_result_rejects_a_line_spacing_that_is_not_numeric(bad: object) -> None:
     """
     good = _annex_e_result()
     with pytest.raises(
-        ValueError, match=r"ToneAudibilityResult: 'line_spacing' must be numeric\."
+        ValueError, match=r"ToneAudibilityResult: 'line_spacing_hz' must be numeric\."
     ):
-        dataclasses.replace(good, line_spacing=bad)
+        dataclasses.replace(good, line_spacing_hz=bad)
 
 
 @pytest.mark.parametrize(

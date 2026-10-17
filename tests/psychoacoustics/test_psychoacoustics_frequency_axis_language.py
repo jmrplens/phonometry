@@ -57,7 +57,7 @@ def _tone_audibility_levels(language: str) -> Axes:
         tone_frequencies=one(60.0),
         tone_levels=one(60.0),
         mean_narrowband_levels=one(40.0),
-        line_spacing=1.0,
+        line_spacing_hz=1.0,
         critical_bandwidths=one(100.0),
         lower_corners=one(10.0),
         upper_corners=one(110.0),

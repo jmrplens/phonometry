@@ -79,7 +79,7 @@ critical_coupling_design(
     lattice_step: float,
     period_m: float,
     angle_rad: float = 0.0,
-    slit_height_bounds: tuple[float, float] = (0.0002, 0.005),
+    slit_height_bounds_m: tuple[float, float] = (0.0002, 0.005),
     cavity_length_bounds: tuple[float, float] = (0.002, 0.2),
     end_correction: bool = True,
     slit_radiation: bool = True,
@@ -109,7 +109,7 @@ point.
 | `lattice_step` | Resonator lattice step `a`, in metres. |
 | `period_m` | Slit array period `d`, in metres. |
 | `angle_rad` | Design angle of incidence `theta`, in radians. |
-| `slit_height_bounds` | Search bounds for the slit height, in metres. |
+| `slit_height_bounds_m` | Search bounds for the slit height, in metres. |
 | `cavity_length_bounds` | Search bounds for the cavity length, in metres. |
 | `end_correction` | Include the resonator radiation end corrections. |
 | `slit_radiation` | Include the slit-to-free-air radiation correction. |
@@ -124,7 +124,7 @@ CriticalCouplingResult(
     target_frequency: float,
     angle_rad: float,
     resonator: HelmholtzResonator,
-    slit_height: float,
+    slit_height_m: float,
     absorption: float,
     normalized_impedance: complex,
     *,
@@ -134,7 +134,7 @@ CriticalCouplingResult(
 
 Outcome of a critical-coupling (perfect-absorption) design.
 
-`resonator` and `slit_height` are the solved geometry that places the
+`resonator` and `slit_height_m` are the solved geometry that places the
 reflection zero on the real-frequency axis at `target_frequency` and
 `angle_rad`; `absorption` is the modelled coefficient there (`~1`) and
 `normalized_impedance` the achieved `Z cos(theta) / Z0` (`~1`).
@@ -152,7 +152,7 @@ helmholtz_resonator_impedance(
     frequency: ArrayLike,
     resonator: HelmholtzResonator,
     *,
-    slit_height: float | None = None,
+    slit_height_m: float | None = None,
     lattice_step: float | None = None,
     end_correction: bool = True,
     geometry: str = 'square',
@@ -167,7 +167,7 @@ With the default `geometry="square"` the neck and cavity are square
 ducts using the effective parameters of
 [`rectangular_duct_properties`](/phonometry/reference/api/materials/slow-sound/#rectangular_duct_properties); the impedance is Appl. Phys. Lett. 2016
 Eq. (A23) with the neck-to-cavity radiation correction of Eq. (A24) and,
-when `slit_height` and `lattice_step` are supplied, the neck-to-slit
+when `slit_height_m` and `lattice_step` are supplied, the neck-to-slit
 correction of Eqs. (A25)-(A26) added to the total neck length correction:
 
 $$
@@ -183,7 +183,7 @@ cavity are slit-like ducts spanning the lattice step): the effective
 parameters come from [`slit_effective_properties`](/phonometry/reference/api/materials/slow-sound/#slit_effective_properties) with the neck and
 cavity widths, the duct sections are `w_n a` and `w_c a`, and the end
 corrections are the 2-D fits of Sci. Rep. 7:5389 Eqs. (11)-(12); both
-`slit_height` and `lattice_step` are then required.
+`slit_height_m` and `lattice_step` are then required.
 
 **Parameters**
 
@@ -191,7 +191,7 @@ corrections are the 2-D fits of Sci. Rep. 7:5389 Eqs. (11)-(12); both
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `resonator` | The [`HelmholtzResonator`](/phonometry/reference/api/materials/slow-sound/#helmholtzresonator) geometry. |
-| `slit_height` | Slit height `h` for the neck-to-slit correction; if `None` that correction is omitted (`"square"` only). |
+| `slit_height_m` | Slit height `h` for the neck-to-slit correction; if `None` that correction is omitted (`"square"` only). |
 | `lattice_step` | Lattice step `a` for the neck-to-slit correction. |
 | `end_correction` | Include the radiation end corrections (default True). |
 | `geometry` | `"square"` (default) for square-duct necks and cavities, `"slit"` for the two-dimensional resonator model. |
@@ -268,7 +268,7 @@ plot_slit_absorber_geometry(
     resonators: Sequence[HelmholtzResonator] | HelmholtzResonator,
     ax: Axes | None = None,
     *,
-    slit_height: float,
+    slit_height_m: float,
     lattice_step: float,
     period_m: float,
     language: str = 'en',
@@ -289,7 +289,7 @@ with `period_m` `d`; rigid back wall at the right.
 | :--- | :--- |
 | `resonators` | The resonator chain of [`slit_helmholtz_absorber`](/phonometry/reference/api/materials/slow-sound/#slit_helmholtz_absorber) (one per lattice step, or a single resonator reused for all steps). |
 | `ax` | Existing axes, or `None` to create a figure. |
-| `slit_height` | Slit height `h`, in metres. |
+| `slit_height_m` | Slit height `h`, in metres. |
 | `lattice_step` | Lattice step `a`, in metres. |
 | `period_m` | Panel period `d`, in metres. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
@@ -357,7 +357,7 @@ $28.454\,\eta/\text{side}^2$ as $\omega \to 0$.
 slit_effective_properties(
     frequency: ArrayLike,
     *,
-    slit_height: float,
+    slit_height_m: float,
     fluid: Fluid = ...,
 ) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]
 ```
@@ -382,7 +382,7 @@ $\kappa_0 = \gamma P_0$.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
-| `slit_height` | Slit height `h`, in metres. |
+| `slit_height_m` | Slit height `h`, in metres. |
 | `fluid` | State of the air in the slit ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)); the density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0` are read from it. |
 
 **Returns:** `(rho_s, kappa_s)` complex arrays shaped like `frequency`.
@@ -394,7 +394,7 @@ slit_helmholtz_absorber(
     frequency: ArrayLike,
     resonators: HelmholtzResonator | list[HelmholtzResonator] | tuple[HelmholtzResonator, ...],
     *,
-    slit_height: float,
+    slit_height_m: float,
     lattice_step: float,
     period_m: float,
     angle_rad: float = 0.0,
@@ -426,7 +426,7 @@ only the front air impedance carries `cos(theta)`.
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `resonators` | One [`HelmholtzResonator`](/phonometry/reference/api/materials/slow-sound/#helmholtzresonator) or a sequence of them, ordered from the panel face towards the rigid backing. |
-| `slit_height` | Slit height `h`, in metres. |
+| `slit_height_m` | Slit height `h`, in metres. |
 | `lattice_step` | Resonator lattice step `a` along the slit, in metres; the slit depth is $L = N a$. |
 | `period_m` | Slit array period `d` along the face, in metres ($d \ge h$). |
 | `angle_rad` | Polar angle of incidence `theta`, in radians ($0 \le \theta < \pi/2 - 10^{-6}$). |
@@ -451,7 +451,7 @@ SlitResonatorAbsorberResult(
     transfer_matrix: NDArray[np.complex128],
     *,
     resonators: tuple[HelmholtzResonator, ...] | None = None,
-    slit_height: float | None = None,
+    slit_height_m: float | None = None,
     lattice_step: float | None = None,
     period_m: float | None = None,
 )
@@ -470,7 +470,7 @@ $\alpha = 1 - \lvert R \rvert^2$, `effective_wavenumber` and
 matrix with shape `(2, 2, len(frequency))`.
 
 The trailing fields retain the panel geometry the prediction was run
-with (`resonators`, `slit_height`, `lattice_step`, `period_m`) so
+with (`resonators`, `slit_height_m`, `lattice_step`, `period_m`) so
 `plot_geometry` can draw the cross-section; they are appended after
 the original fields and default to `None` for hand-built results.
 

@@ -271,9 +271,9 @@ def plot_npd_level(
     from .._i18n import decimal_comma, fmt_minus, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    d = np.asarray(result.distances, dtype=np.float64)
+    d = np.asarray(result.distances_m, dtype=np.float64)
     lvl = np.asarray(result.levels, dtype=np.float64)
-    td = np.asarray(result.table_distances, dtype=np.float64)
+    td = np.asarray(result.table_distances_m, dtype=np.float64)
     tl = np.asarray(result.table_levels, dtype=np.float64)
     label = f"NPD ($P$ = {decimal_comma(fmt_minus(result.power, 'g'), language)})"
     ax.plot(d, lvl, **styled(kwargs, color=_C_PRIMARY, lw=1.6, label=label))
@@ -383,7 +383,7 @@ def plot_rotorcraft_hemisphere(
         _t(
             "Source level at {distance} m [dB]",
             language,
-            distance=format_number(result.distance, language, decimals=1, trim=True),
+            distance=format_number(result.distance_m, language, decimals=1, trim=True),
         )
     )
     ax.set_title(_t("Rotorcraft noise hemisphere directivity (ECAC Doc 32)", language))
@@ -634,8 +634,8 @@ def plot_mean_ground_plane(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    d = np.asarray(result.distances, dtype=np.float64)
-    z = np.asarray(result.heights, dtype=np.float64)
+    d = np.asarray(result.distances_m, dtype=np.float64)
+    z = np.asarray(result.heights_m, dtype=np.float64)
     ax.plot(
         d,
         z,
@@ -682,8 +682,8 @@ def plot_terrain_screening(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    d = np.asarray(result.distances, dtype=np.float64)
-    z = np.asarray(result.heights, dtype=np.float64)
+    d = np.asarray(result.distances_m, dtype=np.float64)
+    z = np.asarray(result.heights_m, dtype=np.float64)
     src, rcv = result.source, result.receiver
     ax.plot(
         d,
@@ -758,14 +758,16 @@ def plot_anp_npd(
 
     ax = ax if ax is not None else _new_axes()
     for i, power in enumerate(result.powers):
-        curve = npd_curve(result.powers, result.distances, result.levels, float(power))
+        curve = npd_curve(
+            result.powers, result.distances_m, result.levels, float(power)
+        )
         reading = decimal_comma(fmt_minus(float(power), "g"), language)
         ax.plot(
-            curve.distances,
+            curve.distances_m,
             curve.levels,
             **styled(kwargs, lw=1.5, label=f"$P$ = {reading}"),
         )
-        ax.plot(result.distances, result.levels[i], "o", ms=3, color=_C_MUTED)
+        ax.plot(result.distances_m, result.levels[i], "o", ms=3, color=_C_MUTED)
     ax.set_xscale("log")
     ax.set_xlabel(_t(_SLANT_DISTANCE_LABEL, language))
     ax.set_ylabel(_t(_EVENT_LEVEL_LABEL, language))
@@ -1129,7 +1131,7 @@ def plot_revised_npd_curves(
 
     ax = ax if ax is not None else _new_axes()
     original = result.original
-    d = np.asarray(original.distances, dtype=np.float64)
+    d = np.asarray(original.distances_m, dtype=np.float64)
     for i, power in enumerate(original.powers):
         reading = decimal_comma(fmt_minus(float(power), "g"), language)
         (line,) = ax.plot(

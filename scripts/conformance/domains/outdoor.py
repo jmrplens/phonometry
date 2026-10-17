@@ -397,7 +397,7 @@ def _chk_iso10534_2_roundtrip() -> Outcome:
     h12 = (np.exp(1j * k0 * x2) + r_true * np.exp(-1j * k0 * x2)) / (
         np.exp(1j * k0 * x1) + r_true * np.exp(-1j * k0 * x1)
     )
-    r = reflection_factor(h12, spacing=spacing, x1=x1, wavenumber=k0)
+    r = reflection_factor(h12, spacing_m=spacing, x1=x1, wavenumber=k0)
     err = float(np.max(np.abs(np.asarray(r) - r_true)))
     # NOTE: no pipe characters in the label (it lands in a Markdown table cell).
     return numeric(

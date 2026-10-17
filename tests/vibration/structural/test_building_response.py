@@ -112,7 +112,7 @@ def test_the_fit_takes_an_array_of_heights() -> None:
 
 @pytest.mark.parametrize("bad", [0.0, -10.0, math.inf, math.nan])
 def test_the_fit_refuses_a_height_that_is_not_one(bad: float) -> None:
-    with pytest.raises(ValueError, match=r"'height' must be positive and finite"):
+    with pytest.raises(ValueError, match=r"'height_m' must be positive and finite"):
         br.height_fundamental_frequency(bad)
 
 

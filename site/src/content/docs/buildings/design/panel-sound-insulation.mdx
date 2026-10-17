@@ -353,7 +353,7 @@ physical = building.single_panel_transmission_loss(bands, 2.47 * 6.0,
                                                    loss_factor=0.02)
 
 print(round(quick.plateau_start), round(quick.plateau_end))   # 374 3742
-print(quick.plateau_height)                                   # 27.0
+print(quick.plateau_height_db)                                   # 27.0
 quick.plot()          # shades the plateau between points A and B
 plt.show()
 ```
@@ -394,7 +394,7 @@ read from a data sheet ([Your own catalogues](/phonometry/io/material-catalogues
 A row gives its three numbers only through
 `printed()`, so a sheet that declares its plateau height as a bound ("no
 more than 30 dB") is refused with what it prints rather than drawn at
-30 dB, and a `plateau_height` you give replaces the row's without reading
+30 dB, and a `plateau_height_db` you give replaces the row's without reading
 it.
 
 ```python

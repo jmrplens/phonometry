@@ -109,14 +109,14 @@ Fresnel number $N = (2/\lambda)(A + B + e - d)$ (Bies Eq. (5.157)).
 ```python
 barrier_insertion_loss(
     frequencies: ArrayLike,
-    source_height: float,
+    source_height_m: float,
     barrier_distance: float,
-    barrier_height: float,
+    barrier_height_m: float,
     receiver_distance: float,
-    receiver_height: float,
+    receiver_height_m: float,
     *,
     method: Literal['kurze_anderson', 'exact'] = 'exact',
-    thickness: float | None = None,
+    thickness_m: float | None = None,
     ground_impedance: ArrayLike | PorousMediumResult | None = None,
     ground_flow_resistivity: float | None = None,
     ground_model: Literal['delany_bazley', 'miki'] = 'delany_bazley',
@@ -132,7 +132,7 @@ at `(receiver_distance, receiver_height)`. Three models are available:
 
 * `method="kurze_anderson"`: the closed form
   [`kurze_anderson_attenuation`](/phonometry/reference/api/environment/ground-barriers/#kurze_anderson_attenuation) of the Fresnel number
-  [`fresnel_number`](/phonometry/reference/api/environment/ground-barriers/#fresnel_number) (Bies Eqs. (5.134)/(5.138)); with `thickness` the
+  [`fresnel_number`](/phonometry/reference/api/environment/ground-barriers/#fresnel_number) (Bies Eqs. (5.134)/(5.138)); with `thickness_m` the
   double-edge Fresnel number $N = (2/\lambda)(A + B + e - d)$ of
   Bies Eq. (5.157) is used, `e` being the top width.
 * `method="exact"` without ground: the wave-theoretic insertion loss of the
@@ -155,13 +155,13 @@ at `(receiver_distance, receiver_height)`. Three models are available:
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz. |
-| `source_height` | Source height, in metres. |
+| `source_height_m` | Source height, in metres. |
 | `barrier_distance` | Horizontal source-to-barrier distance, in metres. |
-| `barrier_height` | Barrier (edge) height, in metres. |
+| `barrier_height_m` | Barrier (edge) height, in metres. |
 | `receiver_distance` | Horizontal source-to-receiver distance, in metres (`> barrier_distance`). |
-| `receiver_height` | Receiver height, in metres. |
+| `receiver_height_m` | Receiver height, in metres. |
 | `method` | `"kurze_anderson"` or `"exact"`. |
-| `thickness` | Top width `e` of a thick barrier (double diffraction), in metres; `None` for a thin screen. |
+| `thickness_m` | Top width `e` of a thick barrier (double diffraction), in metres; `None` for a thin screen. |
 | `ground_impedance` | Normalized ground impedance for the coherent ground model (`"exact"` only), in the $\mathrm{e}^{-i \omega t}$ convention ($\operatorname{Im}(Z) > 0$ for a passive ground); a `PorousMediumResult` is conjugated internally from the materials' $\mathrm{e}^{+j \omega t}$ convention. |
 | `ground_flow_resistivity` | Effective flow resistivity `sigma` (Pa s/m2) for the ground model, as an alternative to `ground_impedance`. |
 | `ground_model` | Porous model for `ground_flow_resistivity`. |
@@ -185,12 +185,12 @@ BarrierInsertionLoss(
     method: str,
     *,
     ground: bool,
-    source_height: float | None = None,
+    source_height_m: float | None = None,
     barrier_distance: float | None = None,
-    barrier_height: float | None = None,
+    barrier_height_m: float | None = None,
     receiver_distance: float | None = None,
-    receiver_height: float | None = None,
-    thickness: float | None = None,
+    receiver_height_m: float | None = None,
+    thickness_m: float | None = None,
 )
 ```
 
@@ -205,12 +205,12 @@ Per-frequency barrier insertion loss (IL vs frequency).
 | `fresnel_number` | Fresnel number `N` per frequency (single-edge geometry; the double-edge `N` for a thick barrier). |
 | `method` | Diffraction model used, and the tag the fiche and the plot name it by: `"kurze_anderson"` or `"exact"`, the two models the library implements. Any other tag is refused at construction. |
 | `ground` | Whether the coherent four-path ground model was applied. |
-| `source_height` | Source height the loss was computed for, in metres, retained (with the other five geometry fields) so `plot_geometry` can draw the section; appended after the original fields and `None` for hand-built results. |
+| `source_height_m` | Source height the loss was computed for, in metres, retained (with the other five geometry fields) so `plot_geometry` can draw the section; appended after the original fields and `None` for hand-built results. |
 | `barrier_distance` | Source-to-barrier horizontal distance, in metres. |
-| `barrier_height` | Barrier height, in metres. |
+| `barrier_height_m` | Barrier height, in metres. |
 | `receiver_distance` | Source-to-receiver horizontal distance, in metres. |
-| `receiver_height` | Receiver height, in metres. |
-| `thickness` | Thick-barrier top width, in metres, or `None`. |
+| `receiver_height_m` | Receiver height, in metres. |
+| `thickness_m` | Thick-barrier top width, in metres, or `None`. |
 
 ### BarrierInsertionLoss.plot()
 
@@ -339,8 +339,8 @@ in the bright zone.
 ```python
 ground_effect(
     frequencies: ArrayLike,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     distance: float,
     *,
     impedance: ArrayLike | PorousMediumResult,
@@ -350,8 +350,8 @@ ground_effect(
 
 ground_effect(
     frequencies: ArrayLike,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     distance: float,
     *,
     flow_resistivity: float,
@@ -381,8 +381,8 @@ of the materials domain. Exactly one of the two must be given.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz. |
-| `source_height` | Source height `hs`, in metres. |
-| `receiver_height` | Receiver height `hr`, in metres. |
+| `source_height_m` | Source height `hs`, in metres. |
+| `receiver_height_m` | Receiver height `hr`, in metres. |
 | `distance` | Horizontal source-receiver distance, in metres. |
 | `impedance` | Normalized ground impedance ($\mathrm{e}^{-i \omega t}$ convention, $\operatorname{Im}(Z) > 0$ for a passive ground), or a `PorousMediumResult` (which is conjugated internally from the materials' $\mathrm{e}^{+j \omega t}$ convention). |
 | `flow_resistivity` | Effective flow resistivity `sigma` (Pa s/m2); grassland is about `2e5` (Salomons Sec. 3.1). The porous model raises a [`PorousAbsorberWarning`](/phonometry/reference/api/materials/porous/#porousabsorberwarning) when the lowest bands fall below its published fit range $0.01 < \rho f / \sigma < 1$ (it still extrapolates a value there). |
@@ -439,12 +439,12 @@ at 0 dB (a barrier never amplifies).
 plot_barrier_geometry(
     ax: Axes | None = None,
     *,
-    source_height: float,
+    source_height_m: float,
     barrier_distance: float,
-    barrier_height: float,
+    barrier_height_m: float,
     receiver_distance: float,
-    receiver_height: float,
-    thickness: float | None = None,
+    receiver_height_m: float,
+    thickness_m: float | None = None,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -463,12 +463,12 @@ difference annotated. Distances follow
 | Name | Description |
 | :--- | :--- |
 | `ax` | Existing axes, or `None` to create a figure. |
-| `source_height` | Source height above ground, in metres. |
+| `source_height_m` | Source height above ground, in metres. |
 | `barrier_distance` | Source-to-barrier horizontal distance, in metres. |
-| `barrier_height` | Barrier height, in metres. |
+| `barrier_height_m` | Barrier height, in metres. |
 | `receiver_distance` | Source-to-receiver horizontal distance, in metres (> `barrier_distance`). |
-| `receiver_height` | Receiver height above ground, in metres. |
-| `thickness` | Barrier top width, in metres; `None` draws a thin screen. |
+| `receiver_height_m` | Receiver height above ground, in metres. |
+| `thickness_m` | Barrier top width, in metres; `None` draws a thin screen. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the barrier rectangle. |
 
@@ -486,8 +486,8 @@ difference annotated. Distances follow
 spherical_reflection_coefficient(
     frequencies: ArrayLike,
     normalized_impedance: ArrayLike,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     distance: float,
     speed_of_sound: float = 343.0,
 ) -> NDArray[np.complex128]
@@ -509,8 +509,8 @@ $w = \sqrt{i k R_2 / 2} \, (\cos\theta + 1/Z)$ (Eq. (D.57)).
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz. |
 | `normalized_impedance` | Ground surface impedance normalized by `rho c` (complex, per frequency or scalar), in the $\mathrm{e}^{-i \omega t}$ time convention (a passive ground has $\operatorname{Im}(Z) > 0$). |
-| `source_height` | Source height `hs` above the ground, in metres. |
-| `receiver_height` | Receiver height `hr` above the ground, in metres. |
+| `source_height_m` | Source height `hs` above the ground, in metres. |
+| `receiver_height_m` | Receiver height `hr` above the ground, in metres. |
 | `distance` | Horizontal source-receiver distance, in metres. |
 | `speed_of_sound` | Speed of sound `c`, in m/s. |
 

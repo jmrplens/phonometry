@@ -37,8 +37,8 @@ def _class1_chain(
     offset: float = 1.5, spacing: float = 0.025
 ) -> emission.IntensityInstrumentComplianceResult:
     """A complete instrument that clears the class 1 minima by ``offset`` dB."""
-    freqs, class1, _ = emission.residual_index_limits("instrument", spacing=spacing)
-    return emission.verify_intensity_class(class1 + offset, freqs, spacing=spacing)
+    freqs, class1, _ = emission.residual_index_limits("instrument", spacing_m=spacing)
+    return emission.verify_intensity_class(class1 + offset, freqs, spacing_m=spacing)
 
 
 def _metadata(**kwargs: object) -> ReportMetadata:

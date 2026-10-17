@@ -240,7 +240,7 @@ SoundAbsorptionMeasurement(
     temperature_c: float,
     relative_humidity_percent: float | None,
     speed_of_sound: float,
-    air_attenuation: NDArray[np.float64],
+    air_attenuation_per_m: NDArray[np.float64],
     absorption_area_empty: NDArray[np.float64],
     absorption_area_with_specimen: NDArray[np.float64],
     alpha_s: NDArray[np.float64],
@@ -275,7 +275,7 @@ is therefore not produced here; pass `alpha_s` to
 | `temperature_c` | Air temperature during the test, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity during the test, in %, or `None` when not recorded. It is informational: humidity enters ISO 354 only through the air attenuation coefficient `m` (via ISO 9613-1), never directly. |
 | `speed_of_sound` | Propagation speed of sound `c` used in the Sabine inversion, in m/s (from Eq. (6) unless it was given explicitly). |
-| `air_attenuation` | Power attenuation coefficient of air `m`, per band, in 1/m (`0` when no air correction was applied). |
+| `air_attenuation_per_m` | Power attenuation coefficient of air `m`, per band, in 1/m (`0` when no air correction was applied). |
 | `absorption_area_empty` | Equivalent sound absorption area of the empty room `A1` (Eq. (5)), per band, in square metres. |
 | `absorption_area_with_specimen` | Equivalent sound absorption area of the room containing the specimen `A2` (Eq. (7)), per band, in square metres. |
 | `alpha_s` | Sound absorption coefficient `alpha_s` (Eq. (8)/(9)), per band. It may exceed 1,0 (Clause 3.7 NOTE 2) and is never clamped. |

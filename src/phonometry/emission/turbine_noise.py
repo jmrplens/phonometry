@@ -111,7 +111,7 @@ from __future__ import annotations
 
 import math
 import warnings
-from dataclasses import dataclass, field
+from dataclasses import KW_ONLY, dataclass, field
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final, Literal
 
@@ -317,7 +317,7 @@ class TurbineMeasurementSurface(OwnsArrays):
         surface, in metres.
     :ivar widths_m: :math:`b_i`, in metres.
     :ivar heights_m: :math:`h_i`, in metres.
-    :ivar area_m2: :math:`S` of Equation (1), in square metres.
+    :ivar area: :math:`S` of Equation (1), in square metres.
     :ivar measurement_distance_m: :math:`d`, 1 m (7.1).
     """
 
@@ -325,7 +325,7 @@ class TurbineMeasurementSurface(OwnsArrays):
     lengths_m: np.ndarray
     widths_m: np.ndarray
     heights_m: np.ndarray
-    area_m2: float
+    area: float
     measurement_distance_m: float = _MEASUREMENT_DISTANCE_M
 
     def __post_init__(self) -> None:
@@ -349,7 +349,7 @@ class TurbineMeasurementSurface(OwnsArrays):
                     f"TurbineMeasurementSurface: '{name}' must be positive and finite."
                 )
                 raise ValueError(msg)
-        require_positive(self.area_m2, "area_m2")
+        require_positive(self.area, "area")
 
     @property
     def x_edges_m(self) -> np.ndarray:
@@ -471,7 +471,7 @@ def turbine_measurement_surface(
         lengths_m=read_only(lengths),
         widths_m=read_only(widths),
         heights_m=read_only(heights),
-        area_m2=area,
+        area=area,
     )
 
 
@@ -922,8 +922,8 @@ class TurbineEnvironmentalCorrection(OwnsArrays):
 
     :ivar environmental_correction_db: :math:`K`, in dB.
     :ivar method: ``"absorption"`` (A.3.1) or ``"reference source"`` (A.3.2).
-    :ivar surface_area_m2: :math:`S` (A.3.1), in square metres, or ``None``.
-    :ivar absorption_area_m2: :math:`A` (A.3.1), in square metres, or ``None``.
+    :ivar surface_area: :math:`S` (A.3.1), in square metres, or ``None``.
+    :ivar absorption_area: :math:`A` (A.3.1), in square metres, or ``None``.
     :ivar reference_levels_db: The determinations of the reference source's
         sound power level :math:`L_W` (A.3.2), in dB, or ``None``.
     :ivar calibrated_level_db: :math:`L_{W\mathrm{r}}` (A.3.2), in dB, or ``None``.
@@ -931,8 +931,8 @@ class TurbineEnvironmentalCorrection(OwnsArrays):
 
     environmental_correction_db: float
     method: Literal["absorption", "reference source"]
-    surface_area_m2: float | None = None
-    absorption_area_m2: float | None = None
+    surface_area: float | None = None
+    absorption_area: float | None = None
     reference_levels_db: np.ndarray | None = None
     calibrated_level_db: float | None = None
 
@@ -949,11 +949,11 @@ class TurbineEnvironmentalCorrection(OwnsArrays):
             )
             raise ValueError(msg)
         if self.method == "absorption" and (
-            self.surface_area_m2 is None or self.absorption_area_m2 is None
+            self.surface_area is None or self.absorption_area is None
         ):
             msg = (
                 "TurbineEnvironmentalCorrection: the absorption route needs "
-                "'surface_area_m2' and 'absorption_area_m2'."
+                "'surface_area' and 'absorption_area'."
             )
             raise ValueError(msg)
         if self.method == _REFERENCE_SOURCE and (
@@ -967,8 +967,8 @@ class TurbineEnvironmentalCorrection(OwnsArrays):
         require_finite_fields(
             self,
             "environmental_correction_db",
-            "surface_area_m2",
-            "absorption_area_m2",
+            "surface_area",
+            "absorption_area",
             "reference_levels_db",
             "calibrated_level_db",
         )
@@ -976,9 +976,9 @@ class TurbineEnvironmentalCorrection(OwnsArrays):
     @property
     def ratio(self) -> float | None:
         """:math:`A/S`, the abscissa of Figure A.3, or ``None`` (A.3.2)."""
-        if self.surface_area_m2 is None or self.absorption_area_m2 is None:
+        if self.surface_area is None or self.absorption_area is None:
             return None
-        return self.absorption_area_m2 / self.surface_area_m2
+        return self.absorption_area / self.surface_area
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1005,11 +1005,11 @@ class TurbineEnvironmentalCorrection(OwnsArrays):
 
 
 def turbine_environmental_correction(
-    surface_area_m2: float,
+    surface_area: float,
     *,
-    absorption_area_m2: float | None = None,
-    volume_m3: float | None = None,
-    reverberation_time_s: float | None = None,
+    absorption_area: float | None = None,
+    volume: float | None = None,
+    reverberation_time: float | None = None,
 ) -> TurbineEnvironmentalCorrection:
     r"""Environmental correction :math:`K` from the room absorption (A.3.1).
 
@@ -1026,42 +1026,42 @@ def turbine_environmental_correction(
     the 7 dB the standard allows; :func:`check_turbine_test_environment` is
     the judgement, and :func:`turbine_sound_power` warns.
 
-    :param surface_area_m2: :math:`S`, in square metres.
-    :param absorption_area_m2: :math:`A`, in square metres; or give
-        ``volume_m3`` and ``reverberation_time_s`` instead.
-    :param volume_m3: :math:`V` of the test room, in cubic metres.
-    :param reverberation_time_s: :math:`T` of the test room with A-weighting
+    :param surface_area: :math:`S`, in square metres.
+    :param absorption_area: :math:`A`, in square metres; or give
+        ``volume`` and ``reverberation_time`` instead.
+    :param volume: :math:`V` of the test room, in cubic metres.
+    :param reverberation_time: :math:`T` of the test room with A-weighting
         on the receiving system, in seconds.
     :return: The correction and the room data it came from.
     :raises ValueError: unless exactly one of the two routes to :math:`A` is
         given whole, or for a non-positive input.
     """
-    area = require_positive(surface_area_m2, "surface_area_m2")
-    by_room = (volume_m3, reverberation_time_s)
-    if absorption_area_m2 is not None and any(v is not None for v in by_room):
+    area = require_positive(surface_area, "surface_area")
+    by_room = (volume, reverberation_time)
+    if absorption_area is not None and any(v is not None for v in by_room):
         msg = (
-            "turbine_environmental_correction: give 'absorption_area_m2' or "
-            "'volume_m3' with 'reverberation_time_s', not both."
+            "turbine_environmental_correction: give 'absorption_area' or "
+            "'volume' with 'reverberation_time', not both."
         )
         raise ValueError(msg)
-    if absorption_area_m2 is not None:
-        absorption = require_positive(absorption_area_m2, "absorption_area_m2")
-    elif volume_m3 is not None and reverberation_time_s is not None:
-        volume = require_positive(volume_m3, "volume_m3")
-        time = require_positive(reverberation_time_s, "reverberation_time_s")
+    if absorption_area is not None:
+        absorption = require_positive(absorption_area, "absorption_area")
+    elif volume is not None and reverberation_time is not None:
+        volume = require_positive(volume, "volume")
+        time = require_positive(reverberation_time, "reverberation_time")
         absorption = _SABINE * volume / time
     else:
         msg = (
-            "turbine_environmental_correction: give 'absorption_area_m2', or "
-            "'volume_m3' and 'reverberation_time_s' together (A.3.1)."
+            "turbine_environmental_correction: give 'absorption_area', or "
+            "'volume' and 'reverberation_time' together (A.3.1)."
         )
         raise ValueError(msg)
     k = 10.0 * math.log10(1.0 + _FOUR / (absorption / area))
     return TurbineEnvironmentalCorrection(
         environmental_correction_db=k,
         method="absorption",
-        surface_area_m2=area,
-        absorption_area_m2=absorption,
+        surface_area=area,
+        absorption_area=absorption,
     )
 
 
@@ -1133,6 +1133,7 @@ class TurbineTestEnvironmentCheck(RichDisplay):
 
     environmental_correction_db: float
     ratio: float | None
+    _: KW_ONLY
     wind_speed_m_s: float | None = None
 
     @property
@@ -1267,15 +1268,15 @@ class TurbineSoundPowerResult(OwnsArrays):
 
     Built by :func:`turbine_sound_power`.
 
-    :ivar pressure_levels_db: :math:`L_{p\mathrm{A}i}` measured with the
+    :ivar pressure_levels: :math:`L_{p\mathrm{A}i}` measured with the
         turbine set operating, one per position, in dB re 20 µPa.
-    :ivar background_levels_db: The background level at each position, in
+    :ivar background_levels: The background level at each position, in
         dB, or ``None`` when it was not determined.
     :ivar background_corrections_db: The correction of Table 2 at each
         position, in dB (zero where no background was given).
     :ivar corrected_levels_db: The levels after 8.1, in dB.
     :ivar environmental_correction_db: :math:`K`, in dB.
-    :ivar surface_area_m2: :math:`S`, in square metres.
+    :ivar surface_area: :math:`S`, in square metres.
     :ivar surface_pressure_level_db: :math:`\overline{L_{p\mathrm{A}}}` of
         Equation (2), :math:`K` subtracted, in dB re 20 µPa.
     :ivar sound_power_level_db: :math:`L_{W\mathrm{A}}` of Equation (3), in
@@ -1283,12 +1284,12 @@ class TurbineSoundPowerResult(OwnsArrays):
     :ivar overhead_mask: Which positions are overhead, or ``None``.
     """
 
-    pressure_levels_db: np.ndarray
-    background_levels_db: np.ndarray | None
+    pressure_levels: np.ndarray
+    background_levels: np.ndarray | None
     background_corrections_db: np.ndarray
     corrected_levels_db: np.ndarray
     environmental_correction_db: float
-    surface_area_m2: float
+    surface_area: float
     surface_pressure_level_db: float
     sound_power_level_db: float
     overhead_mask: np.ndarray | None = field(default=None)
@@ -1297,12 +1298,12 @@ class TurbineSoundPowerResult(OwnsArrays):
         """Refuse per-position arrays that disagree and values that are not finite.
 
         :raises ValueError: if a per-position array has another length than
-            ``pressure_levels_db``, or a level, the correction or the area is
+            ``pressure_levels``, or a level, the correction or the area is
             not finite.
         """
-        count = np.asarray(self.pressure_levels_db).shape
+        count = np.asarray(self.pressure_levels).shape
         for name in (
-            "background_levels_db",
+            "background_levels",
             "background_corrections_db",
             "corrected_levels_db",
             "overhead_mask",
@@ -1316,12 +1317,12 @@ class TurbineSoundPowerResult(OwnsArrays):
                 raise ValueError(msg)
         require_finite_fields(
             self,
-            "pressure_levels_db",
-            "background_levels_db",
+            "pressure_levels",
+            "background_levels",
             "background_corrections_db",
             "corrected_levels_db",
             "environmental_correction_db",
-            "surface_area_m2",
+            "surface_area",
             "surface_pressure_level_db",
             "sound_power_level_db",
         )
@@ -1329,10 +1330,10 @@ class TurbineSoundPowerResult(OwnsArrays):
     @property
     def level_differences_db(self) -> np.ndarray | None:
         """The level with the source operating less the background, per position."""
-        if self.background_levels_db is None:
+        if self.background_levels is None:
             return None
-        difference = np.asarray(self.pressure_levels_db, dtype=np.float64) - np.asarray(
-            self.background_levels_db, dtype=np.float64
+        difference = np.asarray(self.pressure_levels, dtype=np.float64) - np.asarray(
+            self.background_levels, dtype=np.float64
         )
         return np.asarray(difference, dtype=np.float64)
 
@@ -1459,10 +1460,10 @@ class TurbineSoundPowerResult(OwnsArrays):
 
 
 def turbine_sound_power(
-    pressure_levels_db: ArrayLike,
+    pressure_levels: ArrayLike,
     *,
-    surface_area_m2: float,
-    background_levels_db: ArrayLike | None,
+    surface_area: float,
+    background_levels: ArrayLike | None,
     environmental_correction_db: float,
     overhead_mask: ArrayLike | None = None,
 ) -> TurbineSoundPowerResult:
@@ -1485,12 +1486,12 @@ def turbine_sound_power(
     standard (8.3); both emit a :class:`~phonometry.emission.SoundPowerWarning`
     and leave :attr:`TurbineSoundPowerResult.conforms` ``False``.
 
-    :param pressure_levels_db: :math:`L_{p\mathrm{A}i}` with the turbine set
+    :param pressure_levels: :math:`L_{p\mathrm{A}i}` with the turbine set
         operating, one per position, in dB re 20 µPa: at least the four key
         positions that remain once the overhead one is deleted.
-    :param surface_area_m2: :math:`S`, from :func:`turbine_measurement_surface`,
+    :param surface_area: :math:`S`, from :func:`turbine_measurement_surface`,
         in square metres.
-    :param background_levels_db: The A-weighted background level at each
+    :param background_levels: The A-weighted background level at each
         position, in dB. It is often impossible to measure with the turbine
         stopped, and NOTE 1 of 8.1 allows it to be evaluated by computation
         instead. ``None`` states that no background was determined, and no
@@ -1507,23 +1508,23 @@ def turbine_sound_power(
     :raises ValueError: for fewer than four positions, arrays of different
         lengths or non-finite values.
     """
-    levels = require_finite_array(pressure_levels_db, "pressure_levels_db")
+    levels = require_finite_array(pressure_levels, "pressure_levels")
     if levels.ndim != 1 or levels.size < _MIN_POSITIONS:
         msg = (
-            "turbine_sound_power: 'pressure_levels_db' must hold one level per "
+            "turbine_sound_power: 'pressure_levels' must hold one level per "
             f"position, at least {_MIN_POSITIONS} (the key positions of Figure 2 "
             f"less the overhead one); got shape {levels.shape}."
         )
         raise ValueError(msg)
-    area = require_positive(surface_area_m2, "surface_area_m2")
+    area = require_positive(surface_area, "surface_area")
     k = require_finite(environmental_correction_db, "environmental_correction_db")
     background: np.ndarray | None = None
     corrections = np.zeros_like(levels)
-    if background_levels_db is not None:
-        background = require_finite_array(background_levels_db, "background_levels_db")
+    if background_levels is not None:
+        background = require_finite_array(background_levels, "background_levels")
         if background.shape != levels.shape:
             msg = (
-                "turbine_sound_power: 'background_levels_db' must have one level "
+                "turbine_sound_power: 'background_levels' must have one level "
                 f"per position ({levels.size}); got shape {background.shape}."
             )
             raise ValueError(msg)
@@ -1557,12 +1558,12 @@ def turbine_sound_power(
     surface_level = energy_mean(corrected) - k
     power = surface_level + 10.0 * math.log10(area / _S0)
     return TurbineSoundPowerResult(
-        pressure_levels_db=levels,
-        background_levels_db=None if background is None else background,
+        pressure_levels=levels,
+        background_levels=None if background is None else background,
         background_corrections_db=read_only(corrections),
         corrected_levels_db=read_only(corrected),
         environmental_correction_db=k,
-        surface_area_m2=area,
+        surface_area=area,
         surface_pressure_level_db=float(surface_level),
         sound_power_level_db=float(power),
         overhead_mask=mask,

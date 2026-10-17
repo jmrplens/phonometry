@@ -61,7 +61,7 @@ y = x + 0.12 * x**2 + 0.08 * x**3     # a memoryless cubic stands in for the rec
 res = electroacoustics.swept_sine_distortion(y, fs, f1=f1, f2=f2, seconds=seconds, n_harmonics=3)
 
 res.harmonic_responses    # complex H1..H3 on res.frequencies
-res.thd, res.thd_frequencies
+res.thd_ratio, res.thd_frequencies
 res.distortion_ratios     # |Hn(n f)| / |H1(f)| per order
 res.plot()                # |Hn| magnitudes + THD(f)
 ```
@@ -86,7 +86,7 @@ res = electroacoustics.swept_sine_distortion(y, fs, f1=f1, f2=f2, seconds=second
 
 h1 = 1.0 + 3.0 * a3 / 4.0                              # Chebyshev gain
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.loglog(res.thd_frequencies, 100.0 * res.thd, label="Total THD(f)")
+ax.loglog(res.thd_frequencies, 100.0 * res.thd_ratio, label="Total THD(f)")
 ax.loglog(res.thd_frequencies, 100.0 * res.distortion_ratios[0],
           ls="--", label="2nd harmonic d2(f)")
 ax.loglog(res.thd_frequencies, 100.0 * res.distortion_ratios[1],
@@ -275,7 +275,7 @@ grids.
 - [`impulse_response`](../../buildings/rooms/room-acoustics.md) recovers the *linear* IR from the
   same sweep recording and simply discards the negative-time distortion
   products; `swept_sine_distortion` is the tool that reads them.
-- [`thd` / `harmonic_analysis`](electroacoustics.md) measure distortion
+- [`thd_ratio` / `harmonic_analysis`](electroacoustics.md) measure distortion
   from a steady tone at one frequency; the sweep separator returns the same
   ratios as a continuous function of frequency, from one measurement.
 - The phase utilities operate on any one-sided *complex* response: an

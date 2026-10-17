@@ -110,7 +110,7 @@ def test_formula_j1_refuses_a_zero_length() -> None:
 
 
 def test_formula_j1_refuses_a_zero_absorption() -> None:
-    with pytest.raises(ValueError, match="absorption_m2"):
+    with pytest.raises(ValueError, match="absorption_area"):
         building.joint_sound_reduction_index([90.0], [50.0], [0.0], joint_length_m=5.0)
 
 

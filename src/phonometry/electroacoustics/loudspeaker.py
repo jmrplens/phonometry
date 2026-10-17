@@ -373,9 +373,9 @@ class LoudspeakerCharacteristics(OwnsArrays):
 
     :ivar frequencies: On-axis response frequency axis, in Hz.
     :ivar spl_db: On-axis sound pressure level (re 20 uPa), in dB, measured at
-        :attr:`input_voltage` and :attr:`distance`.
-    :ivar rated_impedance: Rated impedance ``R``, in ohm (16.1).
-    :ivar input_voltage: Constant drive voltage of the response, in V.
+        :attr:`input_voltage_v` and :attr:`distance`.
+    :ivar rated_impedance_ohm: Rated impedance ``R``, in ohm (16.1).
+    :ivar input_voltage_v: Constant drive voltage of the response, in V.
     :ivar distance: Measuring distance of the response, in m.
     :ivar sensitivity_band: Stated band ``(lo, hi)`` for the characteristic
         sensitivity, in Hz.
@@ -385,7 +385,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
     :ivar sensitivity_level_db: Characteristic sensitivity level referred to
         1 W into ``R`` at 1 m (20.3/20.4), in dB.
     :ivar effective_range: Computed effective frequency range ``(lo, hi)``, Hz.
-    :ivar rated_frequency_range: Manufacturer-stated rated frequency range
+    :ivar rated_frequency_range_hz: Manufacturer-stated rated frequency range
         ``(lo, hi)`` in Hz (19.1), or ``None``.
     :ivar rated_noise_power: Rated noise power, in W (18.1), or ``None``.
     :ivar rated_sinusoidal_power: Rated sinusoidal power, in W (18.4), or
@@ -393,7 +393,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
     :ivar resonance_frequency: Resonance frequency, in Hz (19.2), or ``None``.
     :ivar impedance_frequencies: Impedance-curve frequency axis, Hz, or
         ``None``.
-    :ivar impedance_modulus: Impedance modulus ``|Z|``, ohm, or ``None``.
+    :ivar impedance_modulus_ohm: Impedance modulus ``|Z|``, ohm, or ``None``.
     :ivar thd_frequencies: THD-curve frequency axis, Hz, or ``None``.
     :ivar thd_percent: Total harmonic distortion, in %, or ``None``.
     :ivar polar_angles_deg: Polar-response angles, in degrees, or ``None``.
@@ -406,20 +406,20 @@ class LoudspeakerCharacteristics(OwnsArrays):
 
     frequencies: NDArray[np.float64]
     spl_db: NDArray[np.float64]
-    rated_impedance: float
-    input_voltage: float
+    rated_impedance_ohm: float
+    input_voltage_v: float
     distance: float
     sensitivity_band: tuple[float, float]
     tolerance_db: float
     reference_level_db: float
     sensitivity_level_db: float
     effective_range: tuple[float, float]
-    rated_frequency_range: tuple[float, float] | None
+    rated_frequency_range_hz: tuple[float, float] | None
     rated_noise_power: float | None
     rated_sinusoidal_power: float | None
     resonance_frequency: float | None
     impedance_frequencies: NDArray[np.float64] | None
-    impedance_modulus: NDArray[np.float64] | None
+    impedance_modulus_ohm: NDArray[np.float64] | None
     thd_frequencies: NDArray[np.float64] | None
     thd_percent: NDArray[np.float64] | None
     polar_angles_deg: NDArray[np.float64] | None
@@ -442,7 +442,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
 
         Nothing downstream re-establishes the pairing. The fiche decides
         whether to print a panel from the presence of the frequency array
-        alone, and :attr:`minimum_impedance` scans the modulus through a mask
+        alone, and :attr:`minimum_impedance_ohm` scans the modulus through a mask
         cut from the impedance frequencies, so a half-length curve surfaces
         as an index error from inside a renderer rather than at the point the
         result was assembled.
@@ -479,7 +479,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
             frequencies=1,
             spl_db=1,
             impedance_frequencies=1,
-            impedance_modulus=1,
+            impedance_modulus_ohm=1,
             thd_frequencies=1,
             thd_percent=1,
             polar_angles_deg=1,
@@ -487,7 +487,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
         )
         require_same_length(self, "frequencies", "spl_db", axis="frequency")
         require_same_length(
-            self, "impedance_frequencies", "impedance_modulus", axis="frequency"
+            self, "impedance_frequencies", "impedance_modulus_ohm", axis="frequency"
         )
         require_same_length(self, "thd_frequencies", "thd_percent", axis="frequency")
         require_same_length(self, "polar_angles_deg", "polar_db", axis="angle")
@@ -496,13 +496,13 @@ class LoudspeakerCharacteristics(OwnsArrays):
             "frequencies",
             "spl_db",
             "impedance_frequencies",
-            "impedance_modulus",
+            "impedance_modulus_ohm",
             "thd_frequencies",
             "thd_percent",
             "polar_angles_deg",
             "polar_db",
-            "rated_impedance",
-            "input_voltage",
+            "rated_impedance_ohm",
+            "input_voltage_v",
             "distance",
             "tolerance_db",
             "reference_level_db",
@@ -515,7 +515,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
         )
         _require_frequency_pair(self, "sensitivity_band")
         _require_frequency_pair(self, "effective_range")
-        _require_frequency_pair(self, "rated_frequency_range")
+        _require_frequency_pair(self, "rated_frequency_range_hz")
 
     @property
     def characteristic_sensitivity_pa(self) -> float:
@@ -527,31 +527,31 @@ class LoudspeakerCharacteristics(OwnsArrays):
         return float(_P_REF * 10.0 ** (self.sensitivity_level_db / 20.0))
 
     @property
-    def minimum_impedance(self) -> float | None:
+    def minimum_impedance_ohm(self) -> float | None:
         """Lowest impedance modulus over the rated range, ohm (16.1), or ``None``.
 
         IEC 60268-5 16.1 requires the lowest value of the impedance modulus
         *in the rated frequency range* to be not less than 80 % of the rated
-        impedance, so the scan uses :attr:`rated_frequency_range` when it is
+        impedance, so the scan uses :attr:`rated_frequency_range_hz` when it is
         supplied. When no rated range is stated, the computed
         :attr:`effective_range` stands in for it; note that the two ranges may
         differ (19.1 NOTE 2), particularly for tweeters or woofers, so an
         impedance dip outside the effective range is only caught when the
         rated range is given.
         """
-        if self.impedance_frequencies is None or self.impedance_modulus is None:
+        if self.impedance_frequencies is None or self.impedance_modulus_ohm is None:
             return None
         lo, hi = (
-            self.rated_frequency_range
-            if self.rated_frequency_range is not None
+            self.rated_frequency_range_hz
+            if self.rated_frequency_range_hz is not None
             else self.effective_range
         )
         in_range = (self.impedance_frequencies >= lo) & (
             self.impedance_frequencies <= hi
         )
-        band = self.impedance_modulus[in_range]
+        band = self.impedance_modulus_ohm[in_range]
         if band.size == 0:
-            band = self.impedance_modulus
+            band = self.impedance_modulus_ohm
         return float(np.min(band))
 
     def report(
@@ -725,7 +725,7 @@ def _resolve_distortion(
         thd_f, thd_p = _as_curve(distortion[0], distortion[1], "distortion")
     else:
         thd_f = np.asarray(distortion.thd_frequencies, dtype=np.float64)
-        thd_p = np.asarray(distortion.thd, dtype=np.float64) * 100.0
+        thd_p = np.asarray(distortion.thd_ratio, dtype=np.float64) * 100.0
     if np.any(thd_p < 0.0):
         msg = "'distortion' THD values must be non-negative."
         raise ValueError(msg)
@@ -763,9 +763,9 @@ def _resolve_polar(
 def loudspeaker_characteristics(
     frequencies: ArrayLike,
     spl_db: ArrayLike,
-    rated_impedance: float,
+    rated_impedance_ohm: float,
     *,
-    input_voltage: float | None = None,
+    input_voltage_v: float | None = None,
     distance: float = 1.0,
     sensitivity_band: tuple[float, float] | None = None,
     tolerance_db: float = 3.0,
@@ -787,8 +787,8 @@ def loudspeaker_characteristics(
         reference weight each sample equally, so a linearly spaced grid
         over-weights the high-frequency end of every band.
     :param spl_db: On-axis sound pressure level, in dB re 20 uPa.
-    :param rated_impedance: Rated impedance ``R``, in ohm (16.1).
-    :param input_voltage: Constant drive voltage of the response, in V;
+    :param rated_impedance_ohm: Rated impedance ``R``, in ohm (16.1).
+    :param input_voltage_v: Constant drive voltage of the response, in V;
         defaults to :math:`\sqrt{R}` (1 W into ``R``, the 2.83 V @ 8 ohm
         convention).
     :param distance: Measuring distance of the response, in m (default 1).
@@ -801,7 +801,7 @@ def loudspeaker_characteristics(
         ``(Hz, ohm)`` (16.2).
     :param distortion: THD against frequency, either as a
         :class:`~phonometry.electroacoustics.SweptSineDistortionResult` (its
-        ``thd`` ratio is converted to %) or a ``(frequencies, thd_percent)``
+        ``thd_ratio`` is converted to %) or a ``(frequencies, thd_percent)``
         pair (24.1).
     :param directivity: Directional characteristics of Clause 23 as a
         :class:`LoudspeakerDirectivity`: the pattern (measured or from a
@@ -813,10 +813,10 @@ def loudspeaker_characteristics(
     :raises ValueError: If the inputs are invalid.
     """
     f, spl = _as_curve(frequencies, spl_db, "on-axis response")
-    r = require_positive(rated_impedance, "rated_impedance")
+    r = require_positive(rated_impedance_ohm, "rated_impedance_ohm")
     u = (
-        require_positive(input_voltage, "input_voltage")
-        if input_voltage is not None
+        require_positive(input_voltage_v, "input_voltage_v")
+        if input_voltage_v is not None
         else float(np.sqrt(r))
     )
     d = require_positive(distance, "distance")
@@ -838,15 +838,15 @@ def loudspeaker_characteristics(
     return LoudspeakerCharacteristics(
         frequencies=f,
         spl_db=spl,
-        rated_impedance=r,
-        input_voltage=u,
+        rated_impedance_ohm=r,
+        input_voltage_v=u,
         distance=d,
         sensitivity_band=band,
         tolerance_db=tol,
         reference_level_db=reference,
         sensitivity_level_db=sensitivity_level,
         effective_range=effective,
-        rated_frequency_range=rated_range,
+        rated_frequency_range_hz=rated_range,
         rated_noise_power=_optional_positive(
             ratings.noise_power, "ratings.noise_power"
         ),
@@ -857,7 +857,7 @@ def loudspeaker_characteristics(
             ratings.resonance_frequency, "ratings.resonance_frequency"
         ),
         impedance_frequencies=imp_f,
-        impedance_modulus=imp_z,
+        impedance_modulus_ohm=imp_z,
         thd_frequencies=thd_f,
         thd_percent=thd_p,
         polar_angles_deg=p_ang,

@@ -221,7 +221,7 @@ def test_increment_does_not_depend_on_the_spectrum_level() -> None:
 
 def test_arp866a_route_ignores_pressure_and_arp5534_does_not() -> None:
     sc = _DB.spectral_class(205)
-    low = {"atmospheric_pressure_kpa": 80.0}
+    low = {"static_pressure_kpa": 80.0}
     a = npd_atmosphere_increment(sc, absorption="arp866a", **_AIR, **low)
     b = npd_atmosphere_increment(sc, absorption="arp866a", **_AIR)
     assert np.array_equal(a.increment_db, b.increment_db)
@@ -324,10 +324,10 @@ def test_event_level_with_humidity_reads_the_field_pressure() -> None:
     # pressure it is given, not at the standard one.
     observer = [6000.0, 0.0, 0.0]
     air = {"temperature_c": 10.0, "relative_humidity_percent": 80.0}
-    got = _DB.event_level("747100", observer, "D", atmospheric_pressure_kpa=80.0, **air)
+    got = _DB.event_level("747100", observer, "D", static_pressure_kpa=80.0, **air)
     sel, lmax = (
         _DB.revised_npd_curves(
-            "747100", "D", metric, atmospheric_pressure_kpa=80.0, **air
+            "747100", "D", metric, static_pressure_kpa=80.0, **air
         ).revised
         for metric in ("SEL", "LAmax")
     )
@@ -340,9 +340,7 @@ def test_event_level_with_humidity_reads_the_field_pressure() -> None:
         sel.levels,
         lmax.levels,
         mounting="wing",
-        atmosphere=AerodromeAtmosphere(
-            temperature_c=10.0, atmospheric_pressure_kpa=80.0
-        ),
+        atmosphere=AerodromeAtmosphere(temperature_c=10.0, static_pressure_kpa=80.0),
         segments=FlightSegmentState(
             ground_roll=profile.ground_roll, landing_roll=profile.landing_roll
         ),

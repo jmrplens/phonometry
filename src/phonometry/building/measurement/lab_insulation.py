@@ -107,7 +107,7 @@ class LabAirborneInsulationResult(OwnsArrays):
 
     :ivar r: Sound reduction index :math:`R = L_1 - L_2 + 10 \log_{10}(S/A)` per
         band, in dB (Clause 3.1, Formula (2)).
-    :ivar absorption: Equivalent sound absorption area :math:`A = 0.16\,V/T`
+    :ivar absorption_area: Equivalent sound absorption area :math:`A = 0.16\,V/T`
         per band, in m² (ISO 10140-4:2010, Formula (5)).
     :ivar rating: Single-number weighted rating ``Rw`` with ``C`` / ``Ctr``
         (ISO 717-1), or ``None`` when the number of bands is neither 16
@@ -115,7 +115,7 @@ class LabAirborneInsulationResult(OwnsArrays):
     """
 
     r: np.ndarray
-    absorption: np.ndarray
+    absorption_area: np.ndarray
     rating: WeightedRatingResult | None
 
     def __post_init__(self) -> None:
@@ -123,14 +123,14 @@ class LabAirborneInsulationResult(OwnsArrays):
 
         The verbose ISO 10140-2 fiche prints ``A`` beside ``R`` in one band
         table, and the renderer checks the reported curve against the rating
-        but never ``absorption``: the table walks the band centres and reads
+        but never ``absorption_area``: the table walks the band centres and reads
         each column at that band, so an absorption area one entry too long
         simply loses its tail with nothing said, while one entry too short
         reaches the reader as an ``IndexError`` from inside the table
         builder. Either way the sheet that documents how ``R`` was formed
         from ``A`` is the last place the mismatch could have been caught.
 
-        An ``absorption`` of shape ``(bands, n)`` counts the right number of
+        An ``absorption_area`` of shape ``(bands, n)`` counts the right number of
         bands and so passes the length check; it is refused for its rank
         instead, before the cell formatter meets an array where it expects a
         number and answers with a ``TypeError`` about zero-dimensional
@@ -143,12 +143,12 @@ class LabAirborneInsulationResult(OwnsArrays):
         as a measured value in the band table, with the boxed rating beside
         it looking untouched.
 
-        :raises ValueError: if ``r`` and ``absorption`` disagree, or either
+        :raises ValueError: if ``r`` and ``absorption_area`` disagree, or either
             carries a non-finite value.
         """
-        require_ranks(self, r=1, absorption=1)
-        require_same_length(self, "r", "absorption")
-        for name in ("r", "absorption"):
+        require_ranks(self, r=1, absorption_area=1)
+        require_same_length(self, "r", "absorption_area")
+        for name in ("r", "absorption_area"):
             if not np.all(np.isfinite(np.asarray(getattr(self, name)))):
                 msg = (
                     f"{type(self).__name__}: '{name}' must contain only finite values."
@@ -232,7 +232,7 @@ class LabImpactInsulationResult(OwnsArrays):
     :ivar l_n: Normalized impact sound pressure level
         :math:`L_\mathrm{n} = L_\mathrm{i} + 10 \log_{10}(A/A_0)` per band, in dB (Clause 3.2,
         Formula (1)).
-    :ivar absorption: Equivalent sound absorption area :math:`A = 0.16\,V/T`
+    :ivar absorption_area: Equivalent sound absorption area :math:`A = 0.16\,V/T`
         per band, in m² (ISO 10140-4:2010, Formula (5)).
     :ivar rating: Single-number weighted rating ``Ln,w`` with ``CI``
         (ISO 717-2), or ``None`` when the number of bands is neither 16
@@ -240,7 +240,7 @@ class LabImpactInsulationResult(OwnsArrays):
     """
 
     l_n: np.ndarray
-    absorption: np.ndarray
+    absorption_area: np.ndarray
     rating: ImpactRatingResult | None
 
     def __post_init__(self) -> None:
@@ -250,11 +250,11 @@ class LabImpactInsulationResult(OwnsArrays):
         ISO 10140-3 fiche prints the two side by side so a reader can follow
         that step band by band. Nothing downstream keeps them aligned: the
         renderer validates the reported curve against the rating and leaves
-        ``absorption`` alone, and the table indexes each column at the band
+        ``absorption_area`` alone, and the table indexes each column at the band
         centre it is on, quietly dropping a surplus entry and raising an
         ``IndexError`` from the table builder for a missing one.
 
-        An ``absorption`` of shape ``(bands, n)`` counts the right number of
+        An ``absorption_area`` of shape ``(bands, n)`` counts the right number of
         bands and so passes the length check; it is refused for its rank
         instead, before the cell formatter meets an array where it expects a
         number and answers with a ``TypeError`` about zero-dimensional
@@ -267,12 +267,12 @@ class LabImpactInsulationResult(OwnsArrays):
         as a measured value in the band table, with the boxed rating beside
         it looking untouched.
 
-        :raises ValueError: if ``l_n`` and ``absorption`` disagree, or either
+        :raises ValueError: if ``l_n`` and ``absorption_area`` disagree, or either
             carries a non-finite value.
         """
-        require_ranks(self, l_n=1, absorption=1)
-        require_same_length(self, "l_n", "absorption")
-        for name in ("l_n", "absorption"):
+        require_ranks(self, l_n=1, absorption_area=1)
+        require_same_length(self, "l_n", "absorption_area")
+        for name in ("l_n", "absorption_area"):
             if not np.all(np.isfinite(np.asarray(getattr(self, name)))):
                 msg = (
                     f"{type(self).__name__}: '{name}' must contain only finite values."
@@ -523,8 +523,8 @@ def lab_airborne_insulation(
     :param t2: Receiving-room reverberation time per band, in seconds.
     :param area: Area ``S`` of the free test opening, in m².
     :param volume: Receiving-room volume ``V``, in m³.
-    :return: :class:`LabAirborneInsulationResult` with ``r``, ``absorption``
-        and ``rating``.
+    :return: :class:`LabAirborneInsulationResult` with ``r``,
+        ``absorption_area`` and ``rating``.
     :raises ValueError: If the band counts of ``l1``, ``l2`` and ``t2``
         differ, if ``area``/``volume``/``t2`` are not positive, or if inputs
         are non-finite.
@@ -546,7 +546,7 @@ def lab_airborne_insulation(
     rating: WeightedRatingResult | None = None
     if r.size in (16, 5):
         rating = weighted_rating(r)
-    return LabAirborneInsulationResult(r=r, absorption=absorption, rating=rating)
+    return LabAirborneInsulationResult(r=r, absorption_area=absorption, rating=rating)
 
 
 def lab_impact_insulation(
@@ -576,8 +576,8 @@ def lab_impact_insulation(
     :param li: Energy-average impact sound pressure levels, in dB.
     :param t2: Receiving-room reverberation time per band, in seconds.
     :param volume: Receiving-room volume ``V``, in m³.
-    :return: :class:`LabImpactInsulationResult` with ``l_n``, ``absorption``
-        and ``rating``.
+    :return: :class:`LabImpactInsulationResult` with ``l_n``,
+        ``absorption_area`` and ``rating``.
     :raises ValueError: If the band counts of ``li`` and ``t2`` differ, if
         ``volume``/``t2`` are not positive, or if inputs are non-finite.
     """
@@ -588,4 +588,4 @@ def lab_impact_insulation(
     rating: ImpactRatingResult | None = None
     if l_n.size in (16, 5):
         rating = weighted_impact_rating(l_n)
-    return LabImpactInsulationResult(l_n=l_n, absorption=absorption, rating=rating)
+    return LabImpactInsulationResult(l_n=l_n, absorption_area=absorption, rating=rating)

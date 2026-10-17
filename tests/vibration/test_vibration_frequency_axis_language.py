@@ -98,7 +98,7 @@ def _effective_blocking_mass() -> EffectiveBlockingMass:
     ones = np.ones(f.size, dtype=complex)
     m_eff = 20.0 * (1.0 + (f / 3000.0) ** 2)
     return vibration.effective_blocking_mass(
-        f, m_eff * ones, ones, ones, blocking_mass_kg=20.0
+        f, m_eff * ones, ones, ones, blocking_mass=20.0
     )
 
 

@@ -138,7 +138,7 @@ def _determination(
         np.full(_N_SEG, _SEG_AREA),
         frequencies=freqs,
         temperature_c=_TEMPERATURE,
-        barometric_pressure_pa=_PRESSURE_PA,
+        static_pressure_pa=_PRESSURE_PA,
     )
 
 
@@ -411,7 +411,7 @@ def test_not_applicable_band_named_with_clause_9_2(tmp_path: Path) -> None:
             np.full(_N_SEG, _SEG_AREA),
             frequencies=_FREQS,
             temperature_c=_TEMPERATURE,
-            barometric_pressure_pa=_PRESSURE_PA,
+            static_pressure_pa=_PRESSURE_PA,
         )
     indicators, criteria = _qualification(np.full(_FREQS.size, 2.0))
     out = tmp_path / "not_applicable.pdf"
@@ -448,7 +448,7 @@ def test_clause_9_2_band_is_named_without_any_qualification(tmp_path: Path) -> N
             np.full(_N_SEG, _SEG_AREA),
             frequencies=_FREQS,
             temperature_c=_TEMPERATURE,
-            barometric_pressure_pa=_PRESSURE_PA,
+            static_pressure_pa=_PRESSURE_PA,
         )
     out = tmp_path / "unqualified_negative.pdf"
     res.report(str(out))
@@ -674,7 +674,7 @@ def test_frequencies_none_falls_back_to_the_band_total(tmp_path: Path) -> None:
         scan,
         np.full(_N_SEG, _SEG_AREA),
         temperature_c=_TEMPERATURE,
-        barometric_pressure_pa=_PRESSURE_PA,
+        static_pressure_pa=_PRESSURE_PA,
     )
     out = tmp_path / "unbanded.pdf"
     res.report(str(out))

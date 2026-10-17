@@ -67,14 +67,18 @@ def test_characteristic_sensitivity_is_band_mean_at_1w_1m() -> None:
     )
     assert result.sensitivity_level_db == pytest.approx(_L0, abs=1e-9)
     # Default drive is sqrt(R): 1 W into R (the 2,83 V @ 8 ohm convention).
-    assert result.input_voltage == pytest.approx(math.sqrt(_R))
+    assert result.input_voltage_v == pytest.approx(math.sqrt(_R))
 
 
 def test_sensitivity_drive_voltage_correction() -> None:
     """Doubling the drive voltage lowers the 1 W sensitivity by 20 lg 2 dB."""
     f, spl = _flat_response()
     result = electroacoustics.loudspeaker_characteristics(
-        f, spl, _R, input_voltage=2.0 * math.sqrt(_R), sensitivity_band=(200.0, 4000.0)
+        f,
+        spl,
+        _R,
+        input_voltage_v=2.0 * math.sqrt(_R),
+        sensitivity_band=(200.0, 4000.0),
     )
     assert result.sensitivity_level_db == pytest.approx(
         _L0 - 20.0 * math.log10(2.0), abs=1e-9
@@ -88,7 +92,7 @@ def test_sensitivity_distance_correction_cancels() -> None:
         f,
         spl,
         _R,
-        input_voltage=2.0 * math.sqrt(_R),
+        input_voltage_v=2.0 * math.sqrt(_R),
         distance=2.0,
         sensitivity_band=(200.0, 4000.0),
     )
@@ -143,8 +147,8 @@ def test_minimum_impedance_over_effective_range() -> None:
         f, spl, _R, sensitivity_band=(200.0, 4000.0), impedance=(fz, z)
     )
     # Within [50, 18000] Hz the modulus floor is ~7 ohm (>= 80 % of 8 = 6.4).
-    assert result.minimum_impedance == pytest.approx(7.0, abs=0.2)
-    assert result.minimum_impedance >= 0.8 * _R
+    assert result.minimum_impedance_ohm == pytest.approx(7.0, abs=0.2)
+    assert result.minimum_impedance_ohm >= 0.8 * _R
 
 
 def _dip_below_effective_range() -> tuple[np.ndarray, np.ndarray]:
@@ -172,8 +176,8 @@ def test_minimum_impedance_uses_rated_range_when_supplied() -> None:
     )
     lo_eff, _ = result.effective_range
     assert lo_eff > 40.0  # the dip sits outside the computed effective range
-    assert result.minimum_impedance == pytest.approx(4.0, abs=1e-9)
-    assert result.minimum_impedance < 0.8 * _R  # the 16.1 check must fail here
+    assert result.minimum_impedance_ohm == pytest.approx(4.0, abs=1e-9)
+    assert result.minimum_impedance_ohm < 0.8 * _R  # the 16.1 check must fail here
 
 
 def test_minimum_impedance_without_rated_range_misses_out_of_band_dip() -> None:
@@ -183,8 +187,8 @@ def test_minimum_impedance_without_rated_range_misses_out_of_band_dip() -> None:
     result = electroacoustics.loudspeaker_characteristics(
         f, spl, _R, sensitivity_band=(200.0, 4000.0), impedance=(fz, z)
     )
-    assert result.minimum_impedance == pytest.approx(7.0, abs=0.2)
-    assert result.minimum_impedance >= 0.8 * _R
+    assert result.minimum_impedance_ohm == pytest.approx(7.0, abs=0.2)
+    assert result.minimum_impedance_ohm >= 0.8 * _R
 
 
 # --- model validation --------------------------------------------------------
@@ -192,7 +196,7 @@ def test_minimum_impedance_without_rated_range_misses_out_of_band_dip() -> None:
 
 def test_rated_impedance_must_be_positive() -> None:
     f, spl = _flat_response()
-    with pytest.raises(ValueError, match=r"'rated_impedance' must be positive"):
+    with pytest.raises(ValueError, match=r"'rated_impedance_ohm' must be positive"):
         electroacoustics.loudspeaker_characteristics(f, spl, 0.0)
 
 
@@ -454,7 +458,7 @@ def test_a_response_span_too_narrow_to_draw_is_refused(tmp_path: Path) -> None:
     """
     frequencies = np.linspace(1000.0, 1000.001, 10)
     result = electroacoustics.loudspeaker_characteristics(
-        frequencies, np.full(frequencies.size, 90.0), rated_impedance=8.0
+        frequencies, np.full(frequencies.size, 90.0), rated_impedance_ohm=8.0
     )
     out = tmp_path / "degenerate.pdf"
     with pytest.raises(ValueError, match="the fiche cannot draw"):
@@ -473,7 +477,7 @@ def test_a_narrow_curve_is_still_fine_where_no_panel_scales_by_it() -> None:
     result = electroacoustics.loudspeaker_characteristics(
         np.logspace(np.log10(50.0), np.log10(20000.0), 50),
         np.full(50, 90.0),
-        rated_impedance=8.0,
+        rated_impedance_ohm=8.0,
         distortion=(frequencies, np.full(3, 0.5)),
     )
     assert result.thd_frequencies is not None
@@ -489,7 +493,7 @@ def test_a_narrow_curve_is_still_fine_where_no_panel_scales_by_it() -> None:
         ("frequencies", float("nan")),
         ("frequencies", float("inf")),
         ("spl_db", float("nan")),
-        ("impedance_modulus", float("nan")),
+        ("impedance_modulus_ohm", float("nan")),
         ("thd_percent", float("nan")),
         ("polar_db", float("nan")),
     ],
@@ -548,7 +552,7 @@ def test_a_non_finite_response_axis_no_longer_reaches_the_fiche(
     [
         "sensitivity_level_db",
         "reference_level_db",
-        "rated_impedance",
+        "rated_impedance_ohm",
         "resonance_frequency",
         "polar_frequency",
     ],
@@ -607,7 +611,7 @@ def test_a_non_finite_resonance_frequency_no_longer_reaches_the_fiche(
 # A band edge that is not a pair of frequencies
 # --------------------------------------------------------------------------
 @pytest.mark.parametrize(
-    "field", ["effective_range", "sensitivity_band", "rated_frequency_range"]
+    "field", ["effective_range", "sensitivity_band", "rated_frequency_range_hz"]
 )
 def test_a_band_edge_that_is_not_a_pair_is_refused(field: str) -> None:
     """The fiche unpacks each range positionally into its range text.
@@ -625,7 +629,7 @@ def test_a_band_edge_that_is_not_a_pair_is_refused(field: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "field", ["effective_range", "sensitivity_band", "rated_frequency_range"]
+    "field", ["effective_range", "sensitivity_band", "rated_frequency_range_hz"]
 )
 @pytest.mark.parametrize("pair", [("low", "high"), (object(), object())])
 def test_a_band_edge_that_is_not_numeric_is_refused(

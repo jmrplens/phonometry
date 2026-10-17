@@ -253,7 +253,7 @@ def circular_duct_cut_on(
 
 
 def rectangular_duct_cut_on(
-    width: float,
+    width_m: float,
     height_m: float,
     *,
     flow_velocity: float = 0.0,
@@ -276,7 +276,7 @@ def rectangular_duct_cut_on(
     returned in ascending cut-on order, so the first is always the half
     wavelength across the wider side.
 
-    :param width: Cross-sectional dimension ``a``, m.
+    :param width_m: Cross-sectional dimension ``a``, m.
     :param height_m: Cross-sectional dimension ``b``, m.
     :param flow_velocity: Mean axial flow speed ``U``, m/s.
     :param speed_of_sound: Speed of sound ``c`` in the duct fluid, m/s.
@@ -285,7 +285,7 @@ def rectangular_duct_cut_on(
     :raises ValueError: For non-positive dimensions, a sonic or supersonic
         flow, or a non-positive ``count``.
     """
-    a = require_positive(width, "width")
+    a = require_positive(width_m, "width_m")
     b = require_positive(height_m, "height_m")
     mach, beta = _mach(flow_velocity, speed_of_sound)
     if count < 1:
@@ -316,7 +316,7 @@ def rectangular_duct_cut_on(
 def plane_wave_limit(
     *,
     diameter_m: float | None = None,
-    width: float | None = None,
+    width_m: float | None = None,
     height_m: float | None = None,
     area: float | None = None,
     flow_velocity: float = 0.0,
@@ -326,12 +326,12 @@ def plane_wave_limit(
 
     A convenience over :func:`circular_duct_cut_on` and
     :func:`rectangular_duct_cut_on` that takes whichever description of the
-    cross section is at hand. Give either ``diameter_m``, or both ``width`` and
+    cross section is at hand. Give either ``diameter_m``, or both ``width_m`` and
     ``height_m``, or ``area`` (treated as a circular duct of the equivalent
     diameter :math:`\sqrt{4S/\pi}`).
 
     :param diameter_m: Internal diameter of a circular duct, m.
-    :param width: Cross-sectional dimension ``a`` of a rectangular duct, m.
+    :param width_m: Cross-sectional dimension ``a`` of a rectangular duct, m.
     :param height_m: Cross-sectional dimension ``b`` of a rectangular duct, m.
     :param area: Cross-sectional area, m2, for a duct described by its area.
     :param flow_velocity: Mean axial flow speed ``U``, m/s.
@@ -339,9 +339,9 @@ def plane_wave_limit(
     :return: The lowest cut-on frequency, Hz.
     :raises ValueError: If the cross section is not described exactly once.
     """
-    if width is not None and height_m is not None:
+    if width_m is not None and height_m is not None:
         return rectangular_duct_cut_on(
-            width,
+            width_m,
             height_m,
             flow_velocity=flow_velocity,
             speed_of_sound=speed_of_sound,
@@ -350,7 +350,7 @@ def plane_wave_limit(
     if diameter_m is None and area is not None:
         diameter_m = float(np.sqrt(4.0 * require_positive(area, "area") / np.pi))
     if diameter_m is None:
-        msg = "give 'diameter_m', or both 'width' and 'height_m', or 'area'."
+        msg = "give 'diameter_m', or both 'width_m' and 'height_m', or 'area'."
         raise ValueError(msg)
     return circular_duct_cut_on(
         diameter_m,

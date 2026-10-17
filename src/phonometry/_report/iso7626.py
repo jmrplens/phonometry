@@ -93,7 +93,7 @@ def _metric_rows(result: MobilityResult, language: str = "en") -> list[tuple[str
     mobility is real).
     """
     index, peak_mag, peak_freq = _peak(result)
-    phase = float(np.asarray(result.phase, dtype=np.float64)[index])
+    phase = float(np.asarray(result.phase_rad, dtype=np.float64)[index])
     return [
         (t("FRF type", language), _kind(result, language)),
         (
@@ -125,7 +125,7 @@ def _statement(result: MobilityResult, language: str = "en") -> str:
 def _extended_terms(result: MobilityResult, language: str = "en") -> list[str]:
     """The FRF type, the frequency range and the peak phase shown beside the box."""
     index, _, _ = _peak(result)
-    phase = float(np.asarray(result.phase, dtype=np.float64)[index])
+    phase = float(np.asarray(result.phase_rad, dtype=np.float64)[index])
     return [
         t("FRF type: {kind}", language).format(kind=_kind(result, language)),
         t("Frequency range: {range} Hz", language).format(

@@ -70,10 +70,10 @@ def _element(label: str) -> building.HomogeneousElement:
         _row(material),
         thickness_m=thickness,
         internal_loss_factor=eta_int,
-        area_m2=area,
-        length1_m=length1,
-        length2_m=length2,
-        perimeter_absorption_m=iso12354_building.perimeter_sums()[label],
+        area=area,
+        length1=length1,
+        length2=length2,
+        perimeter_absorption=iso12354_building.perimeter_sums()[label],
         label=label,
     )
 
@@ -113,9 +113,9 @@ def test_the_air_sets_the_critical_frequency() -> None:
         _row("Concrete"),
         thickness_m=0.22,
         internal_loss_factor=0.005,
-        area_m2=20.0,
-        length1_m=5.0,
-        length2_m=4.0,
+        area=20.0,
+        length1=5.0,
+        length2=4.0,
         fluid=materials.PUBLISHED_AIR,
     )
     ratio = faster.critical_frequency / _element("floor").critical_frequency
@@ -138,9 +138,9 @@ def test_no_loss_factor_the_row_holds_is_ever_read() -> None:
         row,
         thickness_m=0.22,
         internal_loss_factor=0.005,
-        area_m2=20.0,
-        length1_m=5.0,
-        length2_m=4.0,
+        area=20.0,
+        length1=5.0,
+        length2=4.0,
     )
     assert element.internal_loss_factor == 0.005
     assert element.label == "Concrete"
@@ -152,9 +152,9 @@ def test_the_loss_factor_has_no_default() -> None:
         building.HomogeneousElement.from_solid(  # type: ignore[call-arg]
             concrete,
             thickness_m=0.22,
-            area_m2=20.0,
-            length1_m=5.0,
-            length2_m=4.0,
+            area=20.0,
+            length1=5.0,
+            length2=4.0,
         )
 
 
@@ -166,9 +166,9 @@ def test_a_plate_speed_worked_out_from_the_constants_is_taken() -> None:
         row,
         thickness_m=0.2,
         internal_loss_factor=0.005,
-        area_m2=10.0,
-        length1_m=3.0,
-        length2_m=3.33,
+        area=10.0,
+        length1=3.0,
+        length2=3.33,
     )
     assert element.longitudinal_velocity == row.plate_longitudinal_speed_m_s
     assert element.mass_per_area == pytest.approx(0.2 * 2400.0)
@@ -185,9 +185,9 @@ def test_a_density_the_page_prints_as_a_range_is_refused() -> None:
             aircrete,
             thickness_m=0.1,
             internal_loss_factor=0.0125,
-            area_m2=10.0,
-            length1_m=3.0,
-            length2_m=3.33,
+            area=10.0,
+            length1=3.0,
+            length2=3.33,
         )
 
 
@@ -198,9 +198,9 @@ def test_a_row_of_another_class_is_a_type_error() -> None:
             wood,
             thickness_m=0.02,
             internal_loss_factor=0.01,
-            area_m2=10.0,
-            length1_m=3.0,
-            length2_m=3.33,
+            area=10.0,
+            length1=3.0,
+            length2=3.33,
         )
 
 
@@ -213,9 +213,9 @@ def test_a_thickness_or_loss_factor_that_is_not_positive_is_refused(
     arguments = {
         "thickness_m": 0.22,
         "internal_loss_factor": 0.005,
-        "area_m2": 20.0,
-        "length1_m": 5.0,
-        "length2_m": 4.0,
+        "area": 20.0,
+        "length1": 5.0,
+        "length2": 4.0,
         name: value,
     }
     row = _row("Concrete")
@@ -254,9 +254,9 @@ def test_a_wall_of_your_own_goes_into_the_detailed_model() -> None:
         walls["blocks/block"],
         thickness_m=0.2,
         internal_loss_factor=0.01,
-        area_m2=13.75,
-        length1_m=5.0,
-        length2_m=2.75,
+        area=13.75,
+        length1=5.0,
+        length2=2.75,
     )
     assert round(element.critical_frequency, 1) == 128.4
     light = walls["blocks/light"]
@@ -269,7 +269,7 @@ def test_a_wall_of_your_own_goes_into_the_detailed_model() -> None:
             light,
             thickness_m=0.2,
             internal_loss_factor=0.01,
-            area_m2=13.75,
-            length1_m=5.0,
-            length2_m=2.75,
+            area=13.75,
+            length1=5.0,
+            length2=2.75,
         )

@@ -208,7 +208,7 @@ def _chk_standardization() -> Outcome:
             freqs,
             quantity="eq",
             band=band,
-            reverberation_time_s=np.full(freqs.size, 1.0),
+            reverberation_time=np.full(freqs.size, 1.0),
         )
         assert res.standardized_db is not None
         low, high = (50.0, 5000.0) if band == "third" else (63.0, 4000.0)
@@ -231,8 +231,8 @@ def _chk_normalization() -> Outcome:
         _flat(40.0),
         _THIRD,
         quantity="eq",
-        reverberation_time_s=np.full(_THIRD.size, 0.5),
-        volume_m3=50.0,
+        reverberation_time=np.full(_THIRD.size, 0.5),
+        volume=50.0,
     )
     assert res.normalized_db is not None
     at_1_khz = float(res.normalized_db[_THIRD == 1000.0][0])

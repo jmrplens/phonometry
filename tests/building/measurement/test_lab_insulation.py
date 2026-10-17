@@ -52,7 +52,7 @@ def test_r_reduces_to_level_difference_when_s_equals_a() -> None:
     l2 = np.full(16, 40.0)
     t2 = np.full(16, 0.8)
     res = building.lab_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
-    assert np.allclose(res.absorption, 10.0)
+    assert np.allclose(res.absorption_area, 10.0)
     assert np.allclose(res.r, 50.0)
 
 
@@ -70,7 +70,7 @@ def test_r_absorption_follows_sabine_per_band() -> None:
     res = building.lab_airborne_insulation(
         np.full(16, 80.0), np.full(16, 30.0), t2, area=12.0, volume=60.0
     )
-    assert np.allclose(res.absorption, 0.16 * 60.0 / t2)
+    assert np.allclose(res.absorption_area, 0.16 * 60.0 / t2)
 
 
 def test_r_energy_averages_positions() -> None:
@@ -130,7 +130,7 @@ def test_ln_reduces_to_li_when_a_equals_a0() -> None:
     li = np.full(16, 60.0)
     t2 = np.full(16, 0.8)
     res = building.lab_impact_insulation(li, t2, volume=50.0)
-    assert np.allclose(res.absorption, 10.0)
+    assert np.allclose(res.absorption_area, 10.0)
     assert np.allclose(res.l_n, 60.0)
 
 
@@ -320,13 +320,13 @@ def test_airborne_absorption_of_another_band_count_is_refused() -> None:
     at that band, so an absorption area one entry too long is printed only as
     far as the sixteenth band: the surplus 99,9 m² lands beside the 100 Hz
     ``R`` and the tail is dropped with nothing said. The renderer checks the
-    reported curve against the rating and never looks at ``absorption``, so
+    reported curve against the rating and never looks at ``absorption_area``, so
     construction is the last place the mismatch can be caught.
     """
     res = _airborne_result()
-    long_absorption = np.insert(res.absorption, 0, 99.9)
-    with pytest.raises(ValueError, match=r"'absorption' \(17\).*per band"):
-        dataclasses.replace(res, absorption=long_absorption)
+    long_absorption = np.insert(res.absorption_area, 0, 99.9)
+    with pytest.raises(ValueError, match=r"'absorption_area' \(17\).*per band"):
+        dataclasses.replace(res, absorption_area=long_absorption)
 
 
 def test_impact_absorption_of_another_band_count_is_refused() -> None:
@@ -338,9 +338,9 @@ def test_impact_absorption_of_another_band_count_is_refused() -> None:
     downstream recomputes one from the other.
     """
     res = _impact_result()
-    long_absorption = np.insert(res.absorption, 0, 99.9)
-    with pytest.raises(ValueError, match=r"'absorption' \(17\).*per band"):
-        dataclasses.replace(res, absorption=long_absorption)
+    long_absorption = np.insert(res.absorption_area, 0, 99.9)
+    with pytest.raises(ValueError, match=r"'absorption_area' \(17\).*per band"):
+        dataclasses.replace(res, absorption_area=long_absorption)
 
 
 @pytest.mark.parametrize(
@@ -355,12 +355,12 @@ def test_absorption_with_an_extra_axis_is_refused(build: Callable[[], Any]) -> N
     converted to Python scalars``, naming neither the field nor the result.
     """
     res = build()
-    stacked = np.column_stack([res.absorption, res.absorption])
-    with pytest.raises(ValueError, match="'absorption' must have one axis"):
-        dataclasses.replace(res, absorption=stacked)
+    stacked = np.column_stack([res.absorption_area, res.absorption_area])
+    with pytest.raises(ValueError, match="'absorption_area' must have one axis"):
+        dataclasses.replace(res, absorption_area=stacked)
 
 
-@pytest.mark.parametrize("field", ["r", "absorption"])
+@pytest.mark.parametrize("field", ["r", "absorption_area"])
 def test_airborne_non_finite_band_is_refused(field: str) -> None:
     """A NaN band cannot exist on a result the fiche will print as measured.
 
@@ -380,7 +380,7 @@ def test_airborne_non_finite_band_is_refused(field: str) -> None:
         dataclasses.replace(res, **{field: bad})
 
 
-@pytest.mark.parametrize("field", ["l_n", "absorption"])
+@pytest.mark.parametrize("field", ["l_n", "absorption_area"])
 def test_impact_non_finite_band_is_refused(field: str) -> None:
     """The ISO 10140-3 sheet gets the same finiteness pin as the airborne one."""
     res = _impact_result()

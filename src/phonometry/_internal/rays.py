@@ -382,13 +382,13 @@ class DynamicRays(NamedTuple):
         already says. So a node that ends the profile away from a reflecting
         boundary is an interface like any other, and the ``deriv`` has to hold
         its gradient flat past it for the two to agree.
-    :ivar profile_speeds: Sound speed at each node, in m/s.
+    :ivar profile_speeds_of_sound: Sound speed at each node, in m/s.
     """
 
     spreading: DynamicArray
     slope: DynamicArray
     profile_depths: NDArray[np.float64]
-    profile_speeds: NDArray[np.float64]
+    profile_speeds_of_sound: NDArray[np.float64]
 
 
 class RayMarch(NamedTuple):
@@ -578,7 +578,7 @@ def _prepare_impulses(
     silently, and in proportion to the gradient the profile ends on.
     """
     z_prof = np.asarray(dynamic.profile_depths, dtype=np.float64).ravel()
-    c_prof = np.asarray(dynamic.profile_speeds, dtype=np.float64).ravel()
+    c_prof = np.asarray(dynamic.profile_speeds_of_sound, dtype=np.float64).ravel()
     grad = _gradients_with_half_spaces(z_prof, c_prof)
     jumps = np.diff(grad)  # per node: segment below minus segment above
     # A jump of exactly zero is a node the profile runs straight through, and
@@ -1231,7 +1231,9 @@ def march_rays(
         slopes[:, 0] = dyn.slope
         if sloping is not None:
             z_prof = np.asarray(dynamic.profile_depths, dtype=np.float64).ravel()
-            c_prof = np.asarray(dynamic.profile_speeds, dtype=np.float64).ravel()
+            c_prof = np.asarray(
+                dynamic.profile_speeds_of_sound, dtype=np.float64
+            ).ravel()
             profile = (z_prof, c_prof, _gradients_with_half_spaces(z_prof, c_prof))
 
     for s in range(1, ns):

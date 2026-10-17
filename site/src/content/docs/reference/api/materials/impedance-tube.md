@@ -60,7 +60,7 @@ ASTM E2611-19 Eq. (28).
 air_density_iso10534(
     *,
     temperature_c: ArrayLike,
-    atmospheric_pressure_kpa: ArrayLike = 101.325,
+    static_pressure_kpa: ArrayLike = 101.325,
 ) -> NDArray[np.float64]
 ```
 
@@ -75,7 +75,7 @@ kelvin.
 | Name | Description |
 | :--- | :--- |
 | `temperature_c` | Air temperature, in **degrees Celsius**. |
-| `atmospheric_pressure_kpa` | Atmospheric pressure `pa`, in **kilopascals** (default 101.325 kPa). |
+| `static_pressure_kpa` | Atmospheric pressure `pa`, in **kilopascals** (default 101.325 kPa). |
 
 **Returns:** Air density `rho`, in kilograms per cubic metre.
 
@@ -110,7 +110,7 @@ $H_{12} = H_{12,\text{uncorrected}} / H_\mathrm{c}$.
 ## hydraulic_diameter
 
 ```python
-hydraulic_diameter(width: float, height_m: float) -> float
+hydraulic_diameter(width_m: float, height_m: float) -> float
 ```
 
 Hydraulic diameter of a rectangular tube, $4A/P$ (ISO 10534-2, A.2.1.5).
@@ -125,7 +125,7 @@ rectangular tubes (see [`tube_attenuation_constant`](/phonometry/reference/api/m
 
 | Name | Description |
 | :--- | :--- |
-| `width` | Inner side length `w`, in metres. |
+| `width_m` | Inner side length `w`, in metres. |
 | `height_m` | Inner side length `h`, in metres. |
 
 **Returns:** Hydraulic diameter $d_\mathrm{h} = 4A/P$, in metres.
@@ -562,7 +562,7 @@ tube_wavenumber(
     frequency: ArrayLike,
     speed_of_sound: float,
     *,
-    attenuation: ArrayLike | None = None,
+    attenuation_np_per_m: ArrayLike | None = None,
 ) -> NDArray[np.complex128]
 ```
 
@@ -578,7 +578,7 @@ constant `k0''` enters with a **minus** sign on the imaginary part
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or per band). |
 | `speed_of_sound` | Speed of sound `c0`, in metres per second. |
-| `attenuation` | Attenuation constant `k0''`, in nepers per metre (scalar or matching `frequency`); `None` gives the lossless real wavenumber. Obtain a lower-bound estimate from [`tube_attenuation_constant`](/phonometry/reference/api/materials/impedance-tube/#tube_attenuation_constant). |
+| `attenuation_np_per_m` | Attenuation constant `k0''`, in nepers per metre (scalar or matching `frequency`); `None` gives the lossless real wavenumber. Obtain a lower-bound estimate from [`tube_attenuation_constant`](/phonometry/reference/api/materials/impedance-tube/#tube_attenuation_constant). |
 
 **Returns:** Complex wavenumber `k0`, in reciprocal metres.
 
@@ -593,7 +593,7 @@ two_microphone_impedance(
     x1: float,
     speed_of_sound: float,
     characteristic_impedance: float,
-    attenuation: ArrayLike | None = None,
+    attenuation_np_per_m: ArrayLike | None = None,
     diameter_m: float | None = None,
     shape: str = 'circular',
 ) -> ImpedanceTubeResult
@@ -617,7 +617,7 @@ supplied, frequencies outside the plane-wave range (Eqs. (1)-(4)) raise an
 | `x1` | Distance from the sample to the farther microphone, in metres. |
 | `speed_of_sound` | Speed of sound `c0`, in m/s (see [`speed_of_sound_iso10534`](/phonometry/reference/api/materials/impedance-tube/#speed_of_sound_iso10534)). |
 | `characteristic_impedance` | Characteristic impedance `rho c0`, in rayls. |
-| `attenuation` | Optional tube attenuation constant `k0''`, in nepers/m (see [`tube_attenuation_constant`](/phonometry/reference/api/materials/impedance-tube/#tube_attenuation_constant)). |
+| `attenuation_np_per_m` | Optional tube attenuation constant `k0''`, in nepers/m (see [`tube_attenuation_constant`](/phonometry/reference/api/materials/impedance-tube/#tube_attenuation_constant)). |
 | `diameter_m` | Optional tube diameter/lateral dimension, in metres, that activates the plane-wave range check. |
 | `shape` | Tube cross-section, `"circular"`, `"rectangular"` or `"square"`. |
 

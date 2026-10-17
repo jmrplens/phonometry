@@ -372,9 +372,9 @@ def _assert_geometry(rows: np.ndarray, res: object) -> None:
     """Emission angles, distances and retarded times against the .his rows."""
     ref_trec, ref_dist = rows[:, 4], rows[:, 5]
     ref_theta, ref_phi = rows[:, 6], rows[:, 7]
-    assert np.max(np.abs(res.polar - ref_theta)) < 0.01
+    assert np.max(np.abs(res.polar_deg - ref_theta)) < 0.01
     # The prototype clamps the printed azimuth to the +-90 deg hemisphere span.
-    assert np.max(np.abs(np.clip(res.azimuth, -90.0, 90.0) - ref_phi)) < 0.01
+    assert np.max(np.abs(np.clip(res.azimuth_deg, -90.0, 90.0) - ref_phi)) < 0.01
     assert np.max(np.abs(res.distances_m - ref_dist)) < 0.05
     # 346.1 m/s (Doc 32) vs the prototype's temperature-derived 346.19 m/s.
     assert np.max(np.abs(res.times - ref_trec)) < 0.02
@@ -503,8 +503,8 @@ def test_case4_hover_ogh_event(norah_root: pathlib.Path) -> None:
     # convention rather than the event chain.
     assert nadir is not None
     assert nadir.distances_m[0] == pytest.approx(rows[0, 5], abs=0.05)  # DOBS
-    assert nadir.polar[0] == pytest.approx(rows[0, 6], abs=0.01)  # THETAOBS
-    assert nadir.azimuth[0] == pytest.approx(rows[0, 7], abs=0.01)  # PHIOBSAC
+    assert nadir.polar_deg[0] == pytest.approx(rows[0, 6], abs=0.01)  # THETAOBS
+    assert nadir.azimuth_deg[0] == pytest.approx(rows[0, 7], abs=0.01)  # PHIOBSAC
     assert nadir.times[0] - nadir.emission_times[0] == pytest.approx(
         rows[0, 4], abs=0.01
     )  # trec

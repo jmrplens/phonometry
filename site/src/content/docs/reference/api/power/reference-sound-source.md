@@ -186,7 +186,7 @@ reference_source_calibration(
     *,
     frequencies: ArrayLike,
     arrangement: Literal['paths', 'fixed'],
-    background_levels_db: ArrayLike | None = None,
+    background_levels: ArrayLike | None = None,
     maximum_levels_db: ArrayLike | None = None,
     conditions: CalibrationConditions | None = None,
     radiation: Literal['monopole', 'dipole', 'unknown'] = 'unknown',
@@ -222,7 +222,7 @@ marks the bands whose level was replaced, as B.2 asks the report to.
 | `levels` | `(positions, bands)` time-averaged levels at the fixed positions or along the traverses of 8.2, in dB. |
 | `frequencies` | Nominal one-third octave mid-band frequencies, in hertz, ascending, from 50 Hz to 20 kHz. |
 | `arrangement` | `"paths"` (meridional or spiral paths) or `"fixed"` (the 20 fixed positions or coaxial circular paths), which selects the column of Table 2. |
-| `background_levels_db` | Background levels, per position or one spectrum, for the ISO 3745 correction; `None` applies none. |
+| `background_levels` | Background levels, per position or one spectrum, for the ISO 3745 correction; `None` applies none. |
 | `maximum_levels_db` | For traverses, the highest level recorded on each (8.3.2), same shape as `levels`. |
 | `conditions` | The [`CalibrationConditions`](/phonometry/reference/api/power/reference-sound-source/#calibrationconditions) of the air during the calibration, whose temperature and static pressure enter $C_1$ and the Annex A $C_2$ and whose $a(f)$ enters $C_3$; `None` (default) takes the reference meteorological conditions of clause 4 with no air absorption. |
 | `radiation` | Radiation character for the Annex A $C_2$. |

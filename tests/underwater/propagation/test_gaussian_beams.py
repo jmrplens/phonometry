@@ -364,7 +364,7 @@ def test_absorption_multiplies_the_free_field_by_exp_minus_alpha_R() -> None:
         assert res.absorption_model == model
         # The recorded coefficient is the same published number, digit for
         # digit, which pins the solver's model wiring as well as its arithmetic.
-        assert res.absorption_coefficient == pytest.approx(alpha, rel=1e-12)
+        assert res.absorption_db_per_km == pytest.approx(alpha, rel=1e-12)
         slant = np.hypot(r[None, :], dz[:, None])
         oracle = 20.0 * np.log10(slant) + alpha * slant / 1000.0
         worst = np.abs(res.propagation_loss - oracle).max()
@@ -433,12 +433,12 @@ def test_absorption_is_off_by_default_and_bit_for_bit_identical() -> None:
     default = gaussian_beams(f, [0.0, depth], [_C, _C], **kwargs)
     explicit = gaussian_beams(f, [0.0, depth], [_C, _C], **kwargs, absorption=None)
     assert default.absorption_model is None
-    assert default.absorption_coefficient == 0.0
+    assert default.absorption_db_per_km == 0.0
     assert np.array_equal(default.pressure, explicit.pressure)
     withit = gaussian_beams(
         f, [0.0, depth], [_C, _C], **kwargs, absorption="francois-garrison"
     )
-    assert withit.absorption_coefficient > 0.0
+    assert withit.absorption_db_per_km > 0.0
     assert not np.array_equal(default.pressure, withit.pressure)
 
 
@@ -481,7 +481,7 @@ def test_absorption_defaults_route_to_francois_garrison_at_the_source() -> None:
             model="francois-garrison",
         )[0]
     )
-    assert res.absorption_coefficient == expected
+    assert res.absorption_db_per_km == expected
     off = gaussian_beams(
         f,
         [0.0, depth],

@@ -80,7 +80,7 @@ er = hvac.end_reflection_loss(bands, diameter_m=0.30, termination="flush")
 er.plot()   # the band attenuation (or regenerated Lw) in one line (needs matplotlib)
 
 # Insertion loss of a lined square 90-degree elbow (ASHRAE Table 8.11).
-el = hvac.elbow_insertion_loss(bands, width=0.3, bend_type="square", lined=True)
+el = hvac.elbow_insertion_loss(bands, width_m=0.3, bend_type="square", lined=True)
 print(np.round(el.values, 1))                    # [0. 0. 1. 6. 11. 10.] dB
 
 # Plenum-chamber TL by Wells' method (closed form).
@@ -154,7 +154,7 @@ import numpy as np                    # hvac: imported in the snippet above
 bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
 
 # One line for one element: the HvacSpectrumResult of the lined square bend.
-hvac.elbow_insertion_loss(bands, width=0.3, bend_type="square",
+hvac.elbow_insertion_loss(bands, width_m=0.3, bend_type="square",
                           lined=True).plot()
 plt.show()
 
@@ -164,7 +164,7 @@ for label, kwargs in (("Square, lined", {"bend_type": "square", "lined": True}),
                       ("Square, bare", {"bend_type": "square"}),
                       ("Square, vanes", {"bend_type": "square", "vanes": True}),
                       ("Round, bare", {"bend_type": "round"})):
-    el = hvac.elbow_insertion_loss(bands, width=0.3, **kwargs)
+    el = hvac.elbow_insertion_loss(bands, width_m=0.3, **kwargs)
     ax.semilogx(el.frequencies, el.values, "o-", label=label)
 ax.set_xlabel("Frequency [Hz]"); ax.set_ylabel("Insertion loss [dB per bend]")
 ax.legend()

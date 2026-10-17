@@ -613,7 +613,7 @@ the mean-flow correction this equation does not have.
 ```python
 normal_air_density(
     static_gauge_pressure_pa: float,
-    ambient_pressure_pa: float,
+    atmospheric_pressure_pa: float,
     temperature_c: float,
 ) -> float
 ```
@@ -650,7 +650,7 @@ carry them as printed.
 | Name | Description |
 | :--- | :--- |
 | `static_gauge_pressure_pa` | $p_{s1}$, the duct static pressure relative to the ambient, in Pa. |
-| `ambient_pressure_pa` | $p_a$, the absolute ambient pressure, in Pa. |
+| `atmospheric_pressure_pa` | $p_a$, the absolute ambient pressure, in Pa. |
 | `temperature_c` | $\theta_1$, in °C. |
 
 **Returns:** $\rho_{1n}$, in kg/m³.

@@ -731,7 +731,7 @@ def test_the_running_rms_itself_decays_the_way_the_tables_print(
         measured = int(np.argmax(after < 0.1 * after[0])) / fs
         assert abs(measured - printed) <= tolerance, (method, tau)
         assert ins.verify_running_rms_decay(
-            measured, integration_time_s=tau, method=method
+            measured, integration_time=tau, method=method
         ).passes
 
 
@@ -755,7 +755,7 @@ def test_the_decay_verdict_is_the_printed_interval_and_nothing_wider() -> None:
 
     def passes(measured: float) -> bool:
         return ins.verify_running_rms_decay(
-            measured, integration_time_s=1.0, method="linear"
+            measured, integration_time=1.0, method="linear"
         ).passes
 
     assert passes(1.039)
@@ -779,10 +779,10 @@ def test_the_decay_verdict_keeps_the_row_it_was_judged_against(
     for tau, printed, tolerance in table:
         measured = printed + 0.5 * tolerance
         result = ins.verify_running_rms_decay(
-            measured, integration_time_s=tau, method=method
+            measured, integration_time=tau, method=method
         )
         assert result.method == method
-        assert result.integration_time_s == tau
+        assert result.integration_time == tau
         assert result.measured_time_s == measured
         assert result.printed_time_s == printed
         assert result.tolerance_s == tolerance
@@ -799,14 +799,14 @@ def test_the_decay_verdict_has_no_truth_value_of_its_own() -> None:
     true, so the old spelling is refused rather than silently inverted for
     the failures.
     """
-    result = ins.verify_running_rms_decay(2.0, integration_time_s=1.0, method="linear")
+    result = ins.verify_running_rms_decay(2.0, integration_time=1.0, method="linear")
     assert not result.passes
     with pytest.raises(TypeError, match=r"'\.passes'"):
         bool(result)
 
 
 def test_the_decay_verdict_is_frozen_and_keyword_only() -> None:
-    result = ins.verify_running_rms_decay(0.99, integration_time_s=1.0, method="linear")
+    result = ins.verify_running_rms_decay(0.99, integration_time=1.0, method="linear")
     with pytest.raises(
         AttributeError, match=r"cannot assign to field 'measured_time_s'"
     ):
@@ -822,8 +822,8 @@ def test_a_time_constant_the_tables_do_not_print_is_refused() -> None:
     that has nothing printed to be taken against.
     """
     assert ins.running_rms_decay_time(2.0, method="linear") == pytest.approx(1.98)
-    with pytest.raises(ValueError, match=r"'integration_time_s'"):
-        ins.verify_running_rms_decay(1.98, integration_time_s=2.0, method="linear")
+    with pytest.raises(ValueError, match=r"'integration_time'"):
+        ins.verify_running_rms_decay(1.98, integration_time=2.0, method="linear")
 
 
 @pytest.mark.parametrize(
@@ -831,28 +831,28 @@ def test_a_time_constant_the_tables_do_not_print_is_refused() -> None:
     [
         (
             lambda: ins.running_rms_decay_time(0.0, method="linear"),
-            r"'integration_time_s'",
+            r"'integration_time'",
         ),
         (
             lambda: ins.running_rms_decay_time(math.inf, method="linear"),
-            r"'integration_time_s'",
+            r"'integration_time'",
         ),
         (lambda: ins.running_rms_decay_time(1.0, method="rms"), r"'method'"),
         (
             lambda: ins.verify_running_rms_decay(
-                0.0, integration_time_s=1.0, method="linear"
+                0.0, integration_time=1.0, method="linear"
             ),
             r"'measured_time_s'",
         ),
         (
             lambda: ins.verify_running_rms_decay(
-                math.nan, integration_time_s=1.0, method="linear"
+                math.nan, integration_time=1.0, method="linear"
             ),
             r"'measured_time_s'",
         ),
         (
             lambda: ins.verify_running_rms_decay(
-                1.0, integration_time_s=1.0, method="Linear"
+                1.0, integration_time=1.0, method="Linear"
             ),
             r"'method'",
         ),
@@ -915,7 +915,7 @@ def test_the_decay_plot_draws_the_printed_span_and_the_reading_on_the_rule(
 
     mpl.use("Agg")
     result = ins.verify_running_rms_decay(
-        measured, integration_time_s=1.0, method="linear"
+        measured, integration_time=1.0, method="linear"
     )
     ax = result.plot()
     points = [line for line in ax.get_lines() if line.get_marker() not in ("", "None")]
@@ -939,7 +939,7 @@ def test_the_decay_plot_speaks_spanish_when_asked() -> None:
 
     mpl.use("Agg")
     ax = ins.verify_running_rms_decay(
-        0.1237, integration_time_s=0.125, method="linear"
+        0.1237, integration_time=0.125, method="linear"
     ).plot(language="es")
     title = ax.get_title()
     assert "CUMPLE" in title

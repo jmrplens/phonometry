@@ -564,9 +564,9 @@ building gets the union, 8 Hz to 15 Hz.
 
 ```python
 soil_building_natural_frequency_hz(
-    stiffness_n_per_m: float,
+    stiffness: float,
     *,
-    mass_kg: float,
+    mass: float,
 ) -> float
 ```
 
@@ -580,8 +580,8 @@ and predominantly harmonic vibration in the lower frequency range.
 
 | Name | Description |
 | :--- | :--- |
-| `stiffness_n_per_m` | $k_B$, the spring stiffness of the ground, in newtons per metre. |
-| `mass_kg` | $m_B$, in kilograms. |
+| `stiffness` | $k_B$, the spring stiffness of the ground, in newtons per metre. |
+| `mass` | $m_B$, in kilograms. |
 
 **Returns:** $f_B$, in hertz.
 

@@ -664,7 +664,7 @@ temperature or pressure argument, and the sum is added by hand. ISO 3745
 defines no sound energy level of its own, so a burst in the precision anechoic
 room has no route here. The
 $C_3$ meteorological correction of ISO 3745 needs an air-absorption coefficient
-the caller supplies through `air_absorption_coefficient=`; this module does not
+the caller supplies through `air_absorption_db_per_m=`; this module does not
 compute it from **ISO 9613-1** itself.
 
 ---
@@ -881,7 +881,7 @@ for name, towards, aims in paths:
     unit = np.asarray(towards) / np.linalg.norm(towards)
     traverses.append(emission.MicrophoneTraverse.along(
         towards, d, measured(d[:, None] * unit), name=name, targets=aims,
-        background_levels_db=np.full(grid.size, 25.0)))
+        background_levels=np.full(grid.size, 25.0)))
 
 room = emission.inverse_square_law_deviations(
     traverses, frequencies=grid, room="hemi-anechoic",
@@ -944,7 +944,7 @@ plt.show()
 
 | Function | Clause | Returns | Notes |
 | :--- | :--- | :--- | :--- |
-| `MicrophoneTraverse(positions_m, levels, monitor_levels_db=None, background_levels_db=None, name="", targets=())` | 5.1.3.2, A.3.3 | one traverse | `nan` marks a point not measured at a frequency, which is how a spacing that changes with frequency is written; `targets` names what the path is selected towards among `"dihedral corner"`, `"trihedral corner"`, `"boundary centre"`, `"closest boundary"` and `"unique features"` |
+| `MicrophoneTraverse(positions_m, levels, monitor_levels_db=None, background_levels=None, name="", targets=())` | 5.1.3.2, A.3.3 | one traverse | `nan` marks a point not measured at a frequency, which is how a spacing that changes with frequency is written; `targets` names what the path is selected towards among `"dihedral corner"`, `"trihedral corner"`, `"boundary centre"`, `"closest boundary"` and `"unique features"` |
 | `MicrophoneTraverse.along(direction, distances, levels, *, start_m=(0, 0, 0), ...)` | 5.1.3.2 | one traverse | Laid out along a straight line |
 | `inverse_square_law_deviations(traverses, *, frequencies, room, origin_m=None, source_box_m=None)` | Formulae (1) to (4) | `InverseSquareLawResult` | One call per test source; `origin_m` or `source_box_m`, not both |
 | `inverse_square_law_tolerance_db(frequencies, *, room)` | Table A.1 | limit per band [dB] | A tone is read in the one-third octave band that contains it |
@@ -1063,7 +1063,7 @@ a reduced range:
 ```python
 coarse = [emission.MicrophoneTraverse(
               positions_m=t.positions_m[::4], levels=t.levels[::4],
-              background_levels_db=t.background_levels_db[::4], name=t.name,
+              background_levels=t.background_levels[::4], name=t.name,
               targets=t.targets)
           for t in traverses]
 room100 = emission.inverse_square_law_deviations(
@@ -1110,7 +1110,7 @@ print(caught[0].message)
 | :--- | :--- | :--- | :--- |
 | `check_free_field(results, *, bandwidth, source_directionality=None, measurement_radius_m=None, reflecting_plane_absorption_coefficient=None, reflecting_plane_margin_m=None, paths_in_working_area=None, speed_of_sound=343.0)` | Annex A as amended | `FreeFieldCheck` | One result per test source, their frequencies disjoint; what was not given is in `not_judged` |
 | `verify_source_directionality(levels, *, frequencies, room)` | ISO 26101 Annex B | `SourceDirectionalityResult` | 32 or 64 positions, one column per band |
-| `directionality_positions(room, *, radius_m=1.5)` | ISO 26101 B.3.2 | positions [m] | Elevation from the vertical, azimuth in 45° steps |
+| `directionality_positions(room, *, radius=1.5)` | ISO 26101 B.3.2 | positions [m] | Elevation from the vertical, azimuth in 45° steps |
 | `directionality_tolerance_db(frequencies, *, room)` | Table B.1 | limit per band [dB] | 5 dB above 10 kHz |
 
 ## 5. A reference sound source (ISO 6926)
@@ -1163,7 +1163,7 @@ upward = positions[:, 2:3] / 2.0 - 0.5
 pattern = 4.0 * upward * np.sqrt(thirds / 10000.0)[None, :]
 alpha = environment.air_attenuation(
     thirds, temperature_c=20.0, relative_humidity_percent=45.0,
-    atmospheric_pressure_kpa=98.6)
+    static_pressure_kpa=98.6)
 levels = (source_lw[None, :] - 10.0 * np.log10(2.0 * np.pi * 2.0**2)
           + pattern - 2.0 * alpha[None, :])
 
@@ -1303,7 +1303,7 @@ $C_2$, 0.13 dB, carries the result of the source under test back to them.
 
 | Function | Clause | Returns | Notes |
 | :--- | :--- | :--- | :--- |
-| `reference_source_calibration(levels, *, frequencies, arrangement, background_levels_db=None, maximum_levels_db=None, conditions=None, radiation="unknown", knee_frequency_hz=None, c2_db=None, intensity_sound_power_level_db=None, room_qualification=None, coverage_factor=1.96)` | 8, Formula (2) | `ReferenceSourceCalibration` | `arrangement` is `"paths"` or `"fixed"`, the column of Table 2; `room_qualification` warns when the room does not cover the bands at 2 m (8.1) |
+| `reference_source_calibration(levels, *, frequencies, arrangement, background_levels=None, maximum_levels_db=None, conditions=None, radiation="unknown", knee_frequency_hz=None, c2_db=None, intensity_sound_power_level_db=None, room_qualification=None, coverage_factor=1.96)` | 8, Formula (2) | `ReferenceSourceCalibration` | `arrangement` is `"paths"` or `"fixed"`, the column of Table 2; `room_qualification` warns when the room does not cover the bands at 2 m (8.1) |
 | `CalibrationConditions(*, temperature_c=23.0, static_pressure_kpa=101.325, air_absorption_db_per_m=None)` | 4, 8.4 | the air of Formula (2) | Temperature and static pressure for $C_1$ and $C_2$, $a(f)$ per band for $C_3$ |
 | `ReferenceSourceCalibration.sound_power_level_at(frequencies, *, bandwidth="one-third-octave", temperature_c=None, static_pressure_kpa=None)` | 8.4 | $L_W$ per band [dB] | With the conditions of a test, $L_W - C_2$ there |
 | `verify_reference_sound_source(calibration, *, frequencies=None, repeated_levels_db=None, supply_variation_db=None, directivity_index_db=None, reverberation_rooms_only=False)` | 5.2, 5.4, 5.5 | `ReferenceSoundSourceVerdict` | Three sound power or five sound pressure repetitions; the largest change over the declared supply range |
@@ -1524,7 +1524,7 @@ boxes = [                      # length, width, height above the floor [m]
 surface = emission.turbine_measurement_surface(boxes)
 print(surface.lengths_m, surface.widths_m, surface.heights_m)
 # [7. 5. 7. 4.] [6.  7.  5.5 4.5] [4.5 5.5 4.  3.2]
-print(round(surface.area_m2, 1), round(surface.enveloping_area_m2, 1))   # 410.1 410.1
+print(round(surface.area, 1), round(surface.enveloping_area_m2, 1))   # 410.1 410.1
 ```
 
 ## 3. The microphone positions
@@ -1672,8 +1672,8 @@ to stay below 6 m/s, with a windscreen above 1 m/s (4.3).
 
 ```python
 room = emission.turbine_environmental_correction(
-    surface.area_m2, volume_m3=60_000.0, reverberation_time_s=3.2)
-print(room.absorption_area_m2, round(room.ratio, 2),
+    surface.area, volume=60_000.0, reverberation_time=3.2)
+print(room.absorption_area, round(room.ratio, 2),
       round(room.environmental_correction_db, 2))           # 3000.0 7.32 1.89
 print(emission.check_turbine_test_environment(room).passes)  # True
 
@@ -1711,7 +1711,7 @@ background = np.array([     # computed from the auxiliary plant (8.1, NOTE 1)
     84.0, 84.2, 84.5, 84.8, 85.0, 83.2, 82.5, 81.4, 80.6, 81.3, 82.9, 83.4,
     85.0, 84.8, 84.5, 84.2, 83.0, 83.0, 83.0, 83.0, 83.0, 82.0, 81.0])
 full = emission.turbine_sound_power(
-    levels, surface_area_m2=surface.area_m2, background_levels_db=background,
+    levels, surface_area=surface.area, background_levels=background,
     environmental_correction_db=room.environmental_correction_db,
     overhead_mask=array.overhead_mask)
 print(round(full.surface_pressure_level_db, 2),
@@ -1746,8 +1746,8 @@ import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", emission.SoundPowerWarning)
     quarter = emission.turbine_sound_power(
-        levels - 4.5, surface_area_m2=surface.area_m2,
-        background_levels_db=background,
+        levels - 4.5, surface_area=surface.area,
+        background_levels=background,
         environmental_correction_db=room.environmental_correction_db)
 print(quarter.upper_limit, quarter.conforms)                 # True False
 ```
@@ -1777,7 +1777,7 @@ refused with a `ValueError`.
 
 ```python
 half = emission.turbine_sound_power(
-    levels - 1.5, surface_area_m2=surface.area_m2, background_levels_db=background,
+    levels - 1.5, surface_area=surface.area, background_levels=background,
     environmental_correction_db=room.environmental_correction_db,
     overhead_mask=array.overhead_mask)
 report = emission.turbine_noise_declaration(
@@ -1796,9 +1796,9 @@ report.plot()
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `pressure_levels_db` | 1D array | dB | at least 4 positions | $L_{p\mathrm{A}i}$ with the set operating |
-| `surface_area_m2` | float | m² | positive | $S$ of Equation (1) |
-| `background_levels_db` | 1D array or `None` | dB | required | One per position; `None` states that none was determined |
+| `pressure_levels` | 1D array | dB | at least 4 positions | $L_{p\mathrm{A}i}$ with the set operating |
+| `surface_area` | float | m² | positive | $S$ of Equation (1) |
+| `background_levels` | 1D array or `None` | dB | required | One per position; `None` states that none was determined |
 | `environmental_correction_db` | float | dB | required | $K$; 0 outdoors; a value above 7 dB warns |
 | `overhead_mask` | bool array | | `None` | For `overhead_effect_db` (NOTE of 7.2.2) |
 

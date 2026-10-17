@@ -230,8 +230,8 @@ def test_the_band_ranges_are_the_printed_ones() -> None:
 
 
 def test_the_result_carries_the_distance_for_the_spread() -> None:
-    res = noise_control.screen_attenuation([78.0], [70.0], distance_m=4.0)
-    assert res.distance_m == pytest.approx(4.0)
+    res = noise_control.screen_attenuation([78.0], [70.0], distance=4.0)
+    assert res.distance == pytest.approx(4.0)
 
 
 def test_the_plot_draws_three_series() -> None:
@@ -272,8 +272,8 @@ def test_a_band_centre_at_zero_is_refused() -> None:
 
 
 def test_a_non_positive_distance_is_refused() -> None:
-    with pytest.raises(ValueError, match="distance_m"):
-        noise_control.screen_attenuation([78.0], [70.0], distance_m=0.0)
+    with pytest.raises(ValueError, match="distance"):
+        noise_control.screen_attenuation([78.0], [70.0], distance=0.0)
 
 
 # ---------------------------------------------------------------------------
@@ -290,7 +290,7 @@ def test_barrons_level_pair_gives_the_two_printed_band_reductions() -> None:
         oracle.BARRON_TABLE_7_6_UNSCREENED_DB,
         oracle.BARRON_TABLE_7_6_SCREENED_DB,
         frequencies=oracle.BARRON_TABLE_7_6_BANDS_HZ,
-        distance_m=oracle.BARRON_EXAMPLE_7_9_SCREEN_DISTANCE_M,
+        distance=oracle.BARRON_EXAMPLE_7_9_SCREEN_DISTANCE_M,
     )
     # Barron (2003) Table 7-6, folio 316, a concrete barrier around an outdoor
     # transformer station, which ISO 11821 sends to ISO 10847: what it pins
@@ -318,7 +318,7 @@ def test_barrons_a_weighted_pair_gives_the_printed_reduction() -> None:
         source_kind="actual",
         a_weighted_unscreened_level_db=unscreened,
         a_weighted_screened_level_db=screened,
-        distance_m=oracle.BARRON_EXAMPLE_7_9_SCREEN_DISTANCE_M,
+        distance=oracle.BARRON_EXAMPLE_7_9_SCREEN_DISTANCE_M,
     )
     assert res.a_weighted_attenuation_db == pytest.approx(
         oracle.BARRON_EXAMPLE_7_9_A_REDUCTION_DB
@@ -362,7 +362,7 @@ def test_the_indoor_worked_example_gives_its_printed_reduction() -> None:
         [unscreened],
         [screened],
         frequencies=[1000.0],
-        distance_m=oracle.BARRON_EXAMPLE_7_10_SCREEN_DISTANCE_M,
+        distance=oracle.BARRON_EXAMPLE_7_10_SCREEN_DISTANCE_M,
     )
     assert res.attenuation_db[0] == pytest.approx(printed)
 
@@ -374,7 +374,7 @@ def test_the_office_screen_example_rounds_to_the_printed_integers() -> None:
         oracle.HANSEN_EXAMPLE_6_23_UNSCREENED_DB,
         oracle.HANSEN_EXAMPLE_6_23_SCREENED_DB,
         frequencies=oracle.HANSEN_EXAMPLE_6_23_BANDS_HZ,
-        distance_m=2.0,
+        distance=2.0,
     )
     assert res.attenuation_db.tolist() == pytest.approx([9.8, 15.2, 19.6])
     # Clause 7.4 c) reports D_p rounded to the nearest integer, which is the

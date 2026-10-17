@@ -590,9 +590,9 @@ wall = building.HomogeneousElement.from_solid(
     blocks["blocks/block"],
     thickness_m=0.2,
     internal_loss_factor=0.01,
-    area_m2=13.75,
-    length1_m=5.0,
-    length2_m=2.75,
+    area=13.75,
+    length1=5.0,
+    length2=2.75,
 )
 print(round(wall.mass_per_area, 1), round(wall.critical_frequency, 1))   # 360.0 128.4
 print(wall.internal_loss_factor)   # 0.01, not the row's flexural 0.012

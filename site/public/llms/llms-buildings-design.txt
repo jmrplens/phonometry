@@ -733,10 +733,10 @@ same_floor = building.HomogeneousElement.from_solid(
     concrete,
     thickness_m=0.22,
     internal_loss_factor=0.005,
-    area_m2=20.0,
-    length1_m=5.0,
-    length2_m=4.0,
-    perimeter_absorption_m=floor_perimeter,
+    area=20.0,
+    length1=5.0,
+    length2=4.0,
+    perimeter_absorption=floor_perimeter,
     label="floor",
 )
 print(round(same_floor.mass_per_area, 1), round(same_floor.critical_frequency, 2))   # 484.0 76.82
@@ -1836,9 +1836,9 @@ range:
 | `loss_factor` | float | — | > 0; default `0.01` single panel, `0.1` double wall | Total loss factor $\eta$ |
 | `band` | str | — | `'third'` (−5.5 dB) / `'octave'` (−4.0 dB) | Field-incidence correction width |
 | `mass1` / `mass2` | float | kg/m² | > 0 | Double-wall leaf surface densities |
-| `gap` | float | m | > 0 | Cavity depth $d$ |
+| `gap_m` | float | m | > 0 | Cavity depth $d$ |
 | `cavity_medium` | `PorousMediumResult` | — | default `None` | Porous fill; lowers $f_0$ |
-| `width` (slit) | float | m | > 0 | Slit width $w$. **Second** positional argument of both `slit_transmission_coefficient` and `slit_resonance_frequencies` |
+| `width_m` (slit) | float | m | > 0 | Slit width $w$. **Second** positional argument of both `slit_transmission_coefficient` and `slit_resonance_frequencies` |
 | `depth` (slit) | float | m | > 0 | Slit depth $d$ (the wall thickness). **Third** positional argument of `slit_transmission_coefficient`, **first** of `slit_resonance_frequencies`: the two functions take the pair in opposite orders |
 | `field` / `position` (slit) | str | — | `'diffuse'`/`'normal'`, `'mid'`/`'edge'` | Incident field and slit location |
 | `radius` / `depth` (hole) | float | m | > 0 | Circular-aperture radius $a$ / depth $d$ |

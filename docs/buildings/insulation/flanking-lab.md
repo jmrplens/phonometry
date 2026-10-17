@@ -220,7 +220,7 @@ res.plot()                            # Rcl against the two ceilings
 # A lined plenum attenuates the sideways path (Eq. (9.18) instead of (9.20)):
 damped = building.plenum_flanking_reduction_index(
     ceiling, ceiling, ceiling_length=4.75, plenum_height_m=0.43,
-    attenuation_source=[0.5] * 7, attenuation_receiving=[0.5] * 7,
+    attenuation_source_per_m=[0.5] * 7, attenuation_receiving_per_m=[0.5] * 7,
 )
 
 # Referred to the partition instead of the ceiling (Eq. (9.13)):

@@ -48,7 +48,7 @@ from phonometry.noise_control import hvac
 
 bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0]
 er = hvac.end_reflection_loss(bands, diameter_m=0.30, termination="flush")
-el = hvac.elbow_insertion_loss(bands, width=0.3, bend_type="square", lined=True)
+el = hvac.elbow_insertion_loss(bands, width_m=0.3, bend_type="square", lined=True)
 er.plot()   # the band attenuation (or regenerated Lw) in one line (needs matplotlib)
 tl = hvac.plenum_attenuation(0.1, 1.0, 20.0, 0.2)      # Wells' method, dB
 fn = hvac.flow_noise_straight_duct(bands, flow_velocity=10.0, area=0.04)

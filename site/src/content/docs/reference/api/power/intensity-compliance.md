@@ -203,10 +203,10 @@ The strictest class every band meets (1 or 2), or `None`.
 `None` when at least one band meets neither. It is the *largest*
 per-band class, because a band meeting class 1 meets class 2 as well.
 
-### IntensityInstrumentComplianceResult.phase_mismatch()
+### IntensityInstrumentComplianceResult.phase_mismatch_deg()
 
 ```python
-IntensityInstrumentComplianceResult.phase_mismatch(
+IntensityInstrumentComplianceResult.phase_mismatch_deg(
     speed_of_sound: float = 343.0,
 ) -> np.ndarray
 ```
@@ -367,7 +367,7 @@ angular unit $k d$ is expressed in; degrees are used here.
 
 ```python
 residual_index_from_phase_mismatch(
-    phase_mismatch: float | list[float] | np.ndarray,
+    phase_mismatch_deg: float | list[float] | np.ndarray,
     frequency: float | list[float] | np.ndarray,
     spacing_m: float,
     speed_of_sound: float = 343.0,
@@ -396,8 +396,8 @@ table requires.
 
 | Name | Description |
 | :--- | :--- |
-| `phase_mismatch` | $\phi_s$ in degrees (scalar or array, > 0). |
-| `frequency` | Frequency in Hz (scalar or array, broadcast against `phase_mismatch`). |
+| `phase_mismatch_deg` | $\phi_s$ in degrees (scalar or array, > 0). |
+| `frequency` | Frequency in Hz (scalar or array, broadcast against `phase_mismatch_deg`). |
 | `spacing_m` | Microphone separation in metres. |
 | `speed_of_sound` | Speed of sound in m/s (default 343.0). |
 
@@ -407,7 +407,7 @@ table requires.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `phase_mismatch` is not positive and finite, or if `spacing_m`, `speed_of_sound` or `frequency` are not positive and finite. |
+| ValueError | If `phase_mismatch_deg` is not positive and finite, or if `spacing_m`, `speed_of_sound` or `frequency` are not positive and finite. |
 
 ## residual_index_limits
 

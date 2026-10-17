@@ -82,7 +82,7 @@ er = hvac.end_reflection_loss(bands, diameter_m=0.30, termination="flush")
 er.plot()   # la atenuación por banda (o la Lw regenerada) en una línea (necesita matplotlib)
 
 # Pérdida por inserción de un codo cuadrado a 90 grados con revestimiento (Tabla 8.11).
-el = hvac.elbow_insertion_loss(bands, width=0.3, bend_type="square", lined=True)
+el = hvac.elbow_insertion_loss(bands, width_m=0.3, bend_type="square", lined=True)
 print(np.round(el.values, 1))                    # [0. 0. 1. 6. 11. 10.] dB
 
 # TL de plenum por el método de Wells (forma cerrada).
@@ -159,7 +159,7 @@ import numpy as np                    # hvac: importado en el fragmento anterior
 bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
 
 # Una línea para un elemento: el HvacSpectrumResult del codo cuadrado revestido.
-hvac.elbow_insertion_loss(bands, width=0.3, bend_type="square",
+hvac.elbow_insertion_loss(bands, width_m=0.3, bend_type="square",
                           lined=True).plot(language="es")
 plt.show()
 
@@ -169,7 +169,7 @@ for label, kwargs in (("Cuadrado, revestido", {"bend_type": "square", "lined": T
                       ("Cuadrado, desnudo", {"bend_type": "square"}),
                       ("Cuadrado, con álabes", {"bend_type": "square", "vanes": True}),
                       ("Circular, desnudo", {"bend_type": "round"})):
-    el = hvac.elbow_insertion_loss(bands, width=0.3, **kwargs)
+    el = hvac.elbow_insertion_loss(bands, width_m=0.3, **kwargs)
     ax.semilogx(el.frequencies, el.values, "o-", label=label)
 ax.set_xlabel("Frecuencia [Hz]")
 ax.set_ylabel("Pérdida por inserción [dB por codo]")

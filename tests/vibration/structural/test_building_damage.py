@@ -243,12 +243,12 @@ def test_bending_stress_is_formula_1() -> None:
     the system dimensions never appear.
     """
     e_dyn, rho = 3.0e10, 2400.0
-    sigma = bd.bending_stress(0.01, dynamic_modulus_pa=e_dyn, density_kg_m3=rho)
+    sigma = bd.bending_stress(0.01, dynamic_modulus_pa=e_dyn, density=rho)
     assert sigma == pytest.approx(1.73 * math.sqrt(e_dyn * rho) * 0.01)
 
 
 def test_bending_stress_scales_with_the_load_and_the_mode() -> None:
-    kw = {"dynamic_modulus_pa": 3.0e10, "density_kg_m3": 2400.0}
+    kw = {"dynamic_modulus_pa": 3.0e10, "density": 2400.0}
     base = bd.bending_stress(0.01, **kw)
     assert bd.bending_stress(0.01, load_ratio=4.0, **kw) == pytest.approx(2.0 * base)
     assert bd.bending_stress(0.01, mode_factor=1.3, **kw) == pytest.approx(1.3 * base)
@@ -256,7 +256,7 @@ def test_bending_stress_scales_with_the_load_and_the_mode() -> None:
 
 
 def test_bending_stress_takes_an_array_of_velocities() -> None:
-    kw = {"dynamic_modulus_pa": 3.0e10, "density_kg_m3": 2400.0}
+    kw = {"dynamic_modulus_pa": 3.0e10, "density": 2400.0}
     got = bd.bending_stress([0.0, 0.01, 0.02], **kw)
     assert isinstance(got, np.ndarray)
     assert got[0] == pytest.approx(0.0)
@@ -267,7 +267,7 @@ def test_bending_stress_takes_an_array_of_velocities() -> None:
     ("kwargs", "match"),
     [
         ({"dynamic_modulus_pa": 0.0}, r"'dynamic_modulus_pa'"),
-        ({"density_kg_m3": -1.0}, r"'density_kg_m3'"),
+        ({"density": -1.0}, r"'density'"),
         ({"load_ratio": 0.0}, r"'load_ratio'"),
         ({"mode_factor": math.nan}, r"'mode_factor'"),
     ],
@@ -275,13 +275,13 @@ def test_bending_stress_takes_an_array_of_velocities() -> None:
 def test_bending_stress_refuses_an_impossible_material(
     kwargs: dict, match: str
 ) -> None:
-    full = {"dynamic_modulus_pa": 3.0e10, "density_kg_m3": 2400.0, **kwargs}
+    full = {"dynamic_modulus_pa": 3.0e10, "density": 2400.0, **kwargs}
     with pytest.raises(ValueError, match=match):
         bd.bending_stress(0.01, **full)
 
 
 def test_bending_stress_refuses_a_negative_velocity() -> None:
-    kw = {"dynamic_modulus_pa": 3.0e10, "density_kg_m3": 2400.0}
+    kw = {"dynamic_modulus_pa": 3.0e10, "density": 2400.0}
     with pytest.raises(ValueError, match=r"'peak_velocity_m_s' must be non-negative"):
         bd.bending_stress(-0.01, **kw)
 

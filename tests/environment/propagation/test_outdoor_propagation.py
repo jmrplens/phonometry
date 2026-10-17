@@ -70,7 +70,7 @@ class TestAtmosphericAbsorption:
             BANDS,
             temperature_c=15.0,
             relative_humidity_percent=70.0,
-            atmospheric_pressure_kpa=101.325,
+            static_pressure_kpa=101.325,
             exact_midband=True,
         )
         got = environment.atmospheric_absorption(
@@ -78,7 +78,7 @@ class TestAtmosphericAbsorption:
             frequencies=BANDS,
             temperature_c=15.0,
             relative_humidity_percent=70.0,
-            atmospheric_pressure_kpa=101.325,
+            static_pressure_kpa=101.325,
         )
         assert np.allclose(got, alpha * d)
 
@@ -90,20 +90,20 @@ class TestAtmosphericAbsorption:
             frequencies=[8000.0],
             temperature_c=20.0,
             relative_humidity_percent=70.0,
-            atmospheric_pressure_kpa=101.325,
+            static_pressure_kpa=101.325,
         )
         exact = environment.air_attenuation(
             [8000.0],
             temperature_c=20.0,
             relative_humidity_percent=70.0,
-            atmospheric_pressure_kpa=101.325,
+            static_pressure_kpa=101.325,
             exact_midband=True,
         )
         nominal = environment.air_attenuation(
             [8000.0],
             temperature_c=20.0,
             relative_humidity_percent=70.0,
-            atmospheric_pressure_kpa=101.325,
+            static_pressure_kpa=101.325,
         )
         assert got[0] == pytest.approx(float(exact[0]) * 1000.0)
         assert got[0] < float(nominal[0]) * 1000.0

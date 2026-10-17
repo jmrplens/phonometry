@@ -548,7 +548,7 @@ def generate_rigid_mass_calibration(output_dir: str) -> None:
     measured = expected * (1.0 + ripple + drift)
     res = vibration.rigid_mass_calibration_check(measured, freq, mass=m)
     within = res.within_tolerance
-    tol = res.tolerance
+    tol = res.relative_tolerance
 
     _fig, (ax_top, ax_bot) = plt.subplots(
         2,
@@ -595,10 +595,12 @@ def generate_rigid_mass_calibration(output_dir: str) -> None:
     # the few-percent tolerance is actually readable.
     ax_bot.axhspan(-100.0 * tol, 100.0 * tol, color=COLOR_SECONDARY, alpha=0.15)
     ax_bot.axhline(0.0, color=COLOR_GRID, linestyle=":", linewidth=1.0)
-    ax_bot.semilogx(freq, 100.0 * res.deviation, color=COLOR_PRIMARY, linewidth=2.0)
+    ax_bot.semilogx(
+        freq, 100.0 * res.relative_deviation, color=COLOR_PRIMARY, linewidth=2.0
+    )
     ax_bot.semilogx(
         freq[~within],
-        100.0 * res.deviation[~within],
+        100.0 * res.relative_deviation[~within],
         linestyle="none",
         marker="o",
         markersize=4,
@@ -1915,7 +1917,7 @@ def generate_mobility_result_lines(output_dir: str) -> None:
 
     # The phase is the other half of the reading, and the one the +-90 deg
     # bound of ISO 7626-2 A.4 turns into a validity check on the setup.
-    phase = np.degrees(np.asarray(res.phase, dtype=np.float64))
+    phase = np.degrees(np.asarray(res.phase_rad, dtype=np.float64))
     low.axhspan(-90.0, 90.0, color=theme_fill(COLOR_PRIMARY, low), zorder=0)
     low.semilogx(f, phase, color=COLOR_PRIMARY, linewidth=2.2, label="phase of $Y(f)$")
     low.axhline(0.0, color=COLOR_GRID, linestyle="--", linewidth=1.2)
@@ -2289,21 +2291,21 @@ def generate_infinite_mobilities(output_dir: str) -> None:
     curves = (
         (
             sdof.magnitude,
-            np.degrees(np.asarray(sdof.phase)),
+            np.degrees(np.asarray(sdof.phase_rad)),
             COLOR_MUTED,
             "SDOF resonator (section 2)",
             "--",
         ),
         (
             plate.magnitude,
-            np.degrees(np.asarray(plate.phase)),
+            np.degrees(np.asarray(plate.phase_rad)),
             COLOR_PRIMARY,
             "infinite plate, 140 mm concrete",
             "-",
         ),
         (
             beam.magnitude,
-            np.degrees(np.asarray(beam.phase)),
+            np.degrees(np.asarray(beam.phase_rad)),
             COLOR_SECONDARY,
             "infinite beam, 100 × 200 mm steel",
             "-",
@@ -6356,7 +6358,7 @@ def generate_ground_wave_speeds(output_dir: str) -> None:
     nu = np.linspace(0.0, 0.49, 400)
     continuum = np.array(
         [
-            vibration.compression_wave_speed(1.0, poisson_ratio=n, density_kg_m3=1.0)
+            vibration.compression_wave_speed(1.0, poisson_ratio=n, density=1.0)
             for n in nu
         ]
     )

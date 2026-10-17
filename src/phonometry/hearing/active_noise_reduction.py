@@ -550,7 +550,7 @@ def _lower_ear_thirds(
 
 def anr_total_attenuation(
     reat: ArrayLike | RealEarAttenuationResult,
-    insertion_loss: ArrayLike | ActiveInsertionLossResult,
+    insertion_loss_db: ArrayLike | ActiveInsertionLossResult,
 ) -> AnrTotalAttenuationResult:
     r"""The total attenuation of an ANR earmuff, subject by subject (5.5).
 
@@ -578,7 +578,7 @@ def anr_total_attenuation(
         :class:`~phonometry.hearing.RealEarAttenuationResult` or its
         ``(subjects, octaves)`` grid in dB on the octave bands 63 Hz or 125 Hz
         to 8 kHz.
-    :param insertion_loss: The active insertion loss, an
+    :param insertion_loss_db: The active insertion loss, an
         :class:`ActiveInsertionLossResult` or a grid
         :func:`active_insertion_loss` accepts, on the one-third-octave bands of
         5.3.1.
@@ -589,9 +589,9 @@ def anr_total_attenuation(
     """
     passive, octaves = _passive_octaves(reat)
     result = (
-        insertion_loss
-        if isinstance(insertion_loss, ActiveInsertionLossResult)
-        else active_insertion_loss(insertion_loss)
+        insertion_loss_db
+        if isinstance(insertion_loss_db, ActiveInsertionLossResult)
+        else active_insertion_loss(insertion_loss_db)
     )
     thirds_all = np.asarray(_THIRD_OCTAVE_BANDS_HZ, dtype=np.float64)
     start = _THIRD_OCTAVE_BANDS_HZ.index(float(octaves[0])) - 1

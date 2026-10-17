@@ -1139,7 +1139,7 @@ The FRF kind the response channel gives: accelerance, mobility or receptance.
 
 The estimate as a [`.MobilityResult`](/phonometry/reference/api/vibration/mechanical-mobility/#mobilityresult) (ISO 7626-1 vocabulary).
 
-### ImpactMobilityResult.phase
+### ImpactMobilityResult.phase_rad
 
 *property*
 

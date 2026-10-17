@@ -117,7 +117,7 @@ ROAD_OCTAVE_BANDS_HZ = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.
 ```python
 road_propulsion_noise(
     category: RoadVehicleCategory | str,
-    speed: float,
+    speed_kmh: float,
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = ...,
     road_slope_percent: float = 0.0,
@@ -141,7 +141,7 @@ propulsion noise, a noisy one does not increase it.
 | Name | Description |
 | :--- | :--- |
 | `category` | Vehicle category (Table [2.2.a]). |
-| `speed` | Average speed `v_m`, in km/h; values below 20 km/h are raised to 20 km/h (2.2.1). |
+| `speed_kmh` | Average speed `v_m`, in km/h; values below 20 km/h are raised to 20 km/h (2.2.1). |
 | `surface` | Road surface, as a [`RoadSurface`](/phonometry/reference/api/environment/cnossos-road/#roadsurface), its description or an explicit [`RoadSurfaceCoefficients`](/phonometry/reference/api/environment/cnossos-road/#roadsurfacecoefficients). |
 | `road_slope_percent` | Road slope `s`, in per cent, positive uphill in the direction of travel. For a bidirectional flow, split the flow in two and correct one half uphill and the other downhill. |
 | `junction_distance` | Distance `x` to the junction, in m. |
@@ -177,7 +177,7 @@ ROAD_REFERENCE_TEMPERATURE_C = 20.0
 ```python
 road_rolling_noise(
     category: RoadVehicleCategory | str,
-    speed: float,
+    speed_kmh: float,
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = ...,
     temperature_c: float = 20.0,
@@ -202,7 +202,7 @@ and their total power is the propulsion term alone (2.2.3).
 | Name | Description |
 | :--- | :--- |
 | `category` | Vehicle category (Table [2.2.a]). |
-| `speed` | Average speed `v_m`, in km/h; values below 20 km/h are raised to 20 km/h (2.2.1). |
+| `speed_kmh` | Average speed `v_m`, in km/h; values below 20 km/h are raised to 20 km/h (2.2.1). |
 | `surface` | Road surface, as a [`RoadSurface`](/phonometry/reference/api/environment/cnossos-road/#roadsurface), its description or an explicit [`RoadSurfaceCoefficients`](/phonometry/reference/api/environment/cnossos-road/#roadsurfacecoefficients). |
 | `temperature_c` | Air temperature `tau`, in degrees Celsius. |
 | `studded_fraction` | `Q_stud,ratio` of (2.2.7). |
@@ -305,7 +305,7 @@ Look up a Table F-4 row.
 ```python
 road_vehicle_sound_power(
     category: RoadVehicleCategory | str,
-    speed: float,
+    speed_kmh: float,
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = ...,
     temperature_c: float = 20.0,
@@ -329,7 +329,7 @@ propulsion term is the whole of it (2.2.3).
 | Name | Description |
 | :--- | :--- |
 | `category` | Vehicle category (Table [2.2.a]). |
-| `speed` | Average speed `v_m`, in km/h. |
+| `speed_kmh` | Average speed `v_m`, in km/h. |
 | `surface` | Road surface (Table F-4). |
 | `temperature_c` | Air temperature `tau`, in degrees Celsius. |
 | `road_slope_percent` | Road slope `s`, in per cent. |
@@ -452,7 +452,7 @@ RoadSurfaceCoefficients(
     name: str,
     alpha: dict[str, tuple[float, ...]],
     beta: dict[str, float],
-    speed_range: tuple[float, float] | None,
+    speed_range_kmh: tuple[float, float] | None,
 )
 ```
 
@@ -465,7 +465,7 @@ One row of Table F-4: the acoustic signature of a road surface.
 | `name` | The surface description as printed in Table F-4. |
 | `alpha` | `alpha_i,m` per category, eight octave bands, in dB. |
 | `beta` | `beta_m` per category (dimensionless speed coefficient). |
-| `speed_range` | `(v_min, v_max)` over which the row is declared valid, in km/h, or `None` for the reference surface, which carries no range. Carried for the reader, not enforced: Table F-4 prints these columns without attaching a consequence to them, so refusing a speed outside the range would be stricter than the method itself. |
+| `speed_range_kmh` | `(v_min, v_max)` over which the row is declared valid, in km/h, or `None` for the reference surface, which carries no range. Carried for the reader, not enforced: Table F-4 prints these columns without attaching a consequence to them, so refusing a speed outside the range would be stricter than the method itself. |
 
 ## RoadTraffic
 
@@ -473,7 +473,7 @@ One row of Table F-4: the acoustic signature of a road surface.
 RoadTraffic(
     category: RoadVehicleCategory,
     flow_rate: float,
-    speed: float,
+    speed_kmh: float,
     studded_fraction: float = 0.0,
 )
 ```
@@ -486,7 +486,7 @@ The traffic of one vehicle category on a source line.
 | :--- | :--- |
 | `category` | The [`RoadVehicleCategory`](/phonometry/reference/api/environment/cnossos-road/#roadvehiclecategory) of the flow. |
 | `flow_rate` | Hourly flow `Q_m`, in vehicles per hour. |
-| `speed` | Average speed `v_m`, in km/h. Sound powers are frozen at 20 km/h below that speed (2.2.1); the flow term still uses the true speed. |
+| `speed_kmh` | Average speed `v_m`, in km/h. Sound powers are frozen at 20 km/h below that speed (2.2.1); the flow term still uses the true speed. |
 | `studded_fraction` | `Q_stud,ratio` of (2.2.7), the fraction of the light-vehicle flow fitted with studded tyres over the studded period. Ignored for every category other than category 1 (2.2.9). |
 
 ## RoadVehicleCategory

@@ -263,7 +263,7 @@ coherence down to $\mathrm{SNR}/(1+\mathrm{SNR})$.
 from phonometry import electroacoustics
 
 res = electroacoustics.transfer_function(x, y, fs, estimator="H1")
-print(res.magnitude_db, res.phase, res.coherence)
+print(res.magnitude_db, res.phase_rad, res.coherence)
 res.plot()   # Bode magnitude/phase + coherence (needs matplotlib)
 
 freqs, gamma2 = electroacoustics.coherence(x, y, fs)

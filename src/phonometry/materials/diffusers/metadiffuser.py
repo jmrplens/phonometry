@@ -103,7 +103,7 @@ class MetadiffuserResult(OwnsArrays):
     :math:`\alpha(f) = 1 - \operatorname{mean}_n \lvert R_n \rvert^2` and
     ``well_absorption`` the per-well
     :math:`\alpha_n = 1 - \lvert R_n \rvert^2`. The trailing fields retain the geometry the
-    prediction was run with (``wells``, ``depth``, ``period_m``) so
+    prediction was run with (``wells``, ``depth_m``, ``period_m``) so
     :meth:`plot_geometry` can draw the panel section; they default to
     ``None`` for hand-built results.
     """
@@ -114,7 +114,7 @@ class MetadiffuserResult(OwnsArrays):
     well_absorption: Real
     _: KW_ONLY
     wells: tuple[MetadiffuserWell | None, ...] | None = None
-    depth: float | None = None
+    depth_m: float | None = None
     period_m: float | None = None
 
     def plot(
@@ -149,10 +149,10 @@ class MetadiffuserResult(OwnsArrays):
 
 
 def _check_panel(
-    wells: Sequence[MetadiffuserWell | None], depth: float, period_m: float
+    wells: Sequence[MetadiffuserWell | None], depth_m: float, period_m: float
 ) -> tuple[MetadiffuserWell | None, ...]:
     """Validate the well sequence against the panel depth and period."""
-    require_positive(depth, "depth")
+    require_positive(depth_m, "depth_m")
     require_positive(period_m, "period_m")
     cells = tuple(wells)
     if len(cells) < _MIN_WELLS:
@@ -177,7 +177,7 @@ def metadiffuser_reflection(
     frequency: ArrayLike,
     wells: Sequence[MetadiffuserWell | None],
     *,
-    depth: float,
+    depth_m: float,
     period_m: float,
     angle_rad: float = 0.0,
     resonator_geometry: str = "slit",
@@ -198,7 +198,7 @@ def metadiffuser_reflection(
     :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param wells: Sequence of :class:`MetadiffuserWell` (or ``None`` for a
         flat rigid strip) describing one period of the panel face.
-    :param depth: Panel depth ``L`` common to all slits, in metres.
+    :param depth_m: Panel depth ``L`` common to all slits, in metres.
     :param period_m: Well pitch ``d`` along the panel face, in metres.
     :param angle_rad: Polar angle of incidence ``theta``, in radians.
     :param resonator_geometry: ``"slit"`` (default) for the paper's
@@ -213,7 +213,7 @@ def metadiffuser_reflection(
     :return: A :class:`MetadiffuserResult` with one reflection row per well.
     """
     f = require_positive_array(frequency, "frequency")
-    cells = _check_panel(wells, depth, period_m)
+    cells = _check_panel(wells, depth_m, period_m)
     rows = np.empty((len(cells), f.size), dtype=np.complex128)
     for i, well in enumerate(cells):
         if well is None:
@@ -223,7 +223,7 @@ def metadiffuser_reflection(
             f,
             well.resonators,
             slit_height_m=well.slit_height_m,
-            lattice_step=depth / len(well.resonators),
+            lattice_step_m=depth_m / len(well.resonators),
             period_m=period_m,
             angle_rad=angle_rad,
             resonator_geometry=resonator_geometry,
@@ -237,7 +237,7 @@ def metadiffuser_reflection(
         absorption=np.asarray(well_alpha.mean(axis=0), dtype=np.float64),
         well_absorption=np.asarray(well_alpha, dtype=np.float64),
         wells=cells,
-        depth=float(depth),
+        depth_m=float(depth_m),
         period_m=float(period_m),
     )
 
@@ -246,7 +246,7 @@ def metadiffuser_polar_response(
     frequency: float,
     wells: Sequence[MetadiffuserWell | None],
     *,
-    depth: float,
+    depth_m: float,
     period_m: float,
     angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
@@ -266,7 +266,7 @@ def metadiffuser_polar_response(
     :param frequency: Frequency of the prediction ``f``, in hertz.
     :param wells: Sequence of :class:`MetadiffuserWell` (or ``None`` for a
         flat rigid strip) describing one period of the panel face.
-    :param depth: Panel depth ``L`` common to all slits, in metres.
+    :param depth_m: Panel depth ``L`` common to all slits, in metres.
     :param period_m: Well pitch ``d`` along the panel face, in metres; it is
         the ``well_width`` of the far-field model.
     :param angles_deg: Receiver reflection angles ``theta``, in degrees.
@@ -288,7 +288,7 @@ def metadiffuser_polar_response(
     result = metadiffuser_reflection(
         np.asarray([f]),
         wells,
-        depth=depth,
+        depth_m=depth_m,
         period_m=period_m,
         angle_rad=float(np.radians(source_angle_deg)),
         resonator_geometry=resonator_geometry,
@@ -313,7 +313,7 @@ def metadiffuser_diffusion_spectrum(
     frequencies: ArrayLike,
     wells: Sequence[MetadiffuserWell | None],
     *,
-    depth: float,
+    depth_m: float,
     period_m: float,
     angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
@@ -333,7 +333,7 @@ def metadiffuser_diffusion_spectrum(
     :param frequencies: Frequencies of the spectrum, in hertz (1-D).
     :param wells: Sequence of :class:`MetadiffuserWell` (or ``None`` for a
         flat rigid strip) describing one period of the panel face.
-    :param depth: Panel depth ``L`` common to all slits, in metres.
+    :param depth_m: Panel depth ``L`` common to all slits, in metres.
     :param period_m: Well pitch ``d`` along the panel face, in metres.
     :param angles_deg: Receiver reflection angles ``theta``, in degrees.
     :param source_angle_deg: Angle of incidence ``psi``, in degrees.
@@ -354,12 +354,12 @@ def metadiffuser_diffusion_spectrum(
         msg = "'frequencies' must be a non-empty 1-D sequence."
         raise ValueError(msg)
     freqs = require_positive_array(freqs, "frequencies")
-    cells = _check_panel(wells, depth, period_m)
+    cells = _check_panel(wells, depth_m, period_m)
     flat = np.ones(len(cells), dtype=np.complex128)
     result = metadiffuser_reflection(
         freqs,
         cells,
-        depth=depth,
+        depth_m=depth_m,
         period_m=period_m,
         angle_rad=float(np.radians(source_angle_deg)),
         resonator_geometry=resonator_geometry,

@@ -224,7 +224,7 @@ def test_double_wall_degenerate_f0_above_fl_is_partitioned() -> None:
 
 
 def test_double_wall_rejects_bad_input() -> None:
-    with pytest.raises(ValueError, match=r"'gap' must be positive"):
+    with pytest.raises(ValueError, match=r"'gap_m' must be positive"):
         building.double_wall_transmission_loss(BANDS, 10.0, 10.0, -0.1)
 
 

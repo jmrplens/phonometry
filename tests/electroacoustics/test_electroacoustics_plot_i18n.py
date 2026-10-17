@@ -161,7 +161,7 @@ def _microphone() -> ph.electroacoustics.MicrophoneCharacteristics:
         12.5,
         tolerance_db=3.0,
         noise=ph.electroacoustics.MicrophoneNoise(
-            voltage=1.25e-6,
+            voltage_v=1.25e-6,
             spectrum=(np.geomspace(20.0, 20000.0, 31), np.full(31, 10.0)),
         ),
         overload=ph.electroacoustics.MicrophoneOverload(

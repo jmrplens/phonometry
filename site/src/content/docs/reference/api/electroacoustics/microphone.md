@@ -74,7 +74,7 @@ microphone_characteristics(
     response_db: ArrayLike,
     sensitivity_mv_per_pa: float,
     *,
-    reference_frequency: float = 1000.0,
+    reference_frequency_hz: float = 1000.0,
     tolerance_db: float = 2.0,
     directivity: MicrophoneDirectivity = ...,
     noise: MicrophoneNoise = ...,
@@ -99,9 +99,9 @@ them, one bundle per clause, so each may be omitted whole.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Free-field response frequency axis, in Hz (1-D, > 0). |
-| `response_db` | Free-field frequency response, in dB, relative to the output at a stated frequency (12.1.1); it is re-normalized to 0 dB at `reference_frequency`. |
+| `response_db` | Free-field frequency response, in dB, relative to the output at a stated frequency (12.1.1); it is re-normalized to 0 dB at `reference_frequency_hz`. |
 | `sensitivity_mv_per_pa` | Rated free-field sensitivity `M` at the reference frequency, in mV/Pa (11.2.1/11.3). |
-| `reference_frequency` | Stated reference frequency, in Hz; the 11.3 standard reference frequency of 1 000 Hz by default. |
+| `reference_frequency_hz` | Stated reference frequency, in Hz; the 11.3 standard reference frequency of 1 000 Hz by default. |
 | `tolerance_db` | Half-width of the response tolerance, in dB (default 2), defining the effective frequency range (12.2). |
 | `directivity` | Directional characteristics of Clause 13 as a [`MicrophoneDirectivity`](/phonometry/reference/api/electroacoustics/microphone/#microphonedirectivity): the directional pattern, its stated frequency and the directivity index. |
 | `noise` | Inherent noise of Clause 17 as a [`MicrophoneNoise`](/phonometry/reference/api/electroacoustics/microphone/#microphonenoise): the weighted noise voltage or the stated equivalent noise level, its weighting and the noise spectrum. |
@@ -122,13 +122,13 @@ them, one bundle per clause, so each may be omitted whole.
 MicrophoneCharacteristics(
     frequencies: NDArray[np.float64],
     response_db: NDArray[np.float64],
-    reference_frequency: float,
+    reference_frequency_hz: float,
     sensitivity_mv_per_pa: float,
     sensitivity_level_db: float,
     tolerance_db: float,
     effective_range: tuple[float, float],
-    rated_impedance: float | None,
-    minimum_load_impedance: float | None,
+    rated_impedance_ohm: float | None,
+    minimum_load_impedance_ohm: float | None,
     equivalent_noise_level_db: float | None,
     noise_weighting: str,
     max_spl_db: float | None,
@@ -160,14 +160,14 @@ standard's definitions (see the module docstring).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Free-field response frequency axis, in Hz. |
-| `response_db` | Free-field frequency response relative to the level at `reference_frequency` (0 dB there), in dB (12.1.1). |
-| `reference_frequency` | Stated reference frequency of the rated sensitivity and the response normalization, in Hz (11.3). |
+| `response_db` | Free-field frequency response relative to the level at `reference_frequency_hz` (0 dB there), in dB (12.1.1). |
+| `reference_frequency_hz` | Stated reference frequency of the rated sensitivity and the response normalization, in Hz (11.3). |
 | `sensitivity_mv_per_pa` | Rated free-field sensitivity `M` at the reference frequency, in mV/Pa (11.2.1/11.3). |
 | `sensitivity_level_db` | Sensitivity level $20 \log_{10}(M / 1\,\mathrm{V/Pa})$, in dB re 1 V/Pa (11.1). |
 | `tolerance_db` | Half-width of the response tolerance, in dB (12.1.1). |
 | `effective_range` | Computed effective frequency range `(lo, hi)` against the tolerance limits, in Hz (12.2). |
-| `rated_impedance` | Rated (internal) impedance, in ohm (10.2), or `None`. |
-| `minimum_load_impedance` | Rated minimum permitted load impedance, in ohm (10.3), or `None`. |
+| `rated_impedance_ohm` | Rated (internal) impedance, in ohm (10.2), or `None`. |
+| `minimum_load_impedance_ohm` | Rated minimum permitted load impedance, in ohm (10.3), or `None`. |
 | `equivalent_noise_level_db` | Equivalent sound pressure level due to inherent noise, in dB SPL with `noise_weighting` weighting (17), or `None`. |
 | `noise_weighting` | Weighting of the inherent-noise measurement (IEC 60268-1), `"A"` by default or `"468"`. |
 | `max_spl_db` | Overload sound pressure level at `max_spl_thd_percent` total harmonic distortion, in dB SPL (15.2), or `None`. |
@@ -320,8 +320,8 @@ incidence for a stated frequency, and the directivity index read from it
 
 ```python
 MicrophoneElectrical(
-    rated_impedance: float | None = None,
-    minimum_load_impedance: float | None = None,
+    rated_impedance_ohm: float | None = None,
+    minimum_load_impedance_ohm: float | None = None,
     powering: str | None = None,
     supply_current_ma: float | None = None,
 )
@@ -337,8 +337,8 @@ the rated power supply of Clause 9.
 
 | Name | Description |
 | :--- | :--- |
-| `rated_impedance` | Rated (internal) impedance, in ohm (10.2). |
-| `minimum_load_impedance` | Rated minimum permitted load impedance, in ohm (10.3). |
+| `rated_impedance_ohm` | Rated (internal) impedance, in ohm (10.2). |
+| `minimum_load_impedance_ohm` | Rated minimum permitted load impedance, in ohm (10.3). |
 | `powering` | Rated power supply description (9.1), e.g. the IEC 61938 phantom-powering designation and voltage. |
 | `supply_current_ma` | Current drawn from the power supply, in mA (9.1). |
 
@@ -346,7 +346,7 @@ the rated power supply of Clause 9.
 
 ```python
 MicrophoneNoise(
-    voltage: float | None = None,
+    voltage_v: float | None = None,
     equivalent_level_db: float | None = None,
     weighting: str = 'A',
     spectrum: tuple[ArrayLike, ArrayLike] | None = None,
@@ -363,8 +363,8 @@ output voltage, and the band spectrum that voltage was measured over.
 
 | Name | Description |
 | :--- | :--- |
-| `voltage` | Weighted r.m.s. output voltage due to inherent noise, in V (17.2 b); the equivalent noise level is computed from it. |
-| `equivalent_level_db` | Stated equivalent sound pressure level due to inherent noise, in dB SPL (17.1), when not computed from `voltage`. |
+| `voltage_v` | Weighted r.m.s. output voltage due to inherent noise, in V (17.2 b); the equivalent noise level is computed from it. |
+| `equivalent_level_db` | Stated equivalent sound pressure level due to inherent noise, in dB SPL (17.1), when not computed from `voltage_v`. |
 | `weighting` | Weighting of the inherent-noise measurement: `"A"` (default, the IEC 60268-1 6.2.1 A-weighted r.m.s. recommendation) or `"468"` (the 6.2.2 psophometric quasi-peak measurement to ITU-R BS.468-4, which IEC 60268-1 still cites by its earlier name, CCIR Recommendation 468, and which older datasheets quote as dB(CCIR)). These are the two weighted wide-band noise measurements IEC 60268-1 defines; the unweighted band spectrum of 6.2.3 travels in `spectrum` instead. `"468"` is the spelling [`weighting_filter`](/phonometry/reference/api/filters/weighting/#weighting_filter) and [`weighted_thd`](/phonometry/reference/api/electroacoustics/distortion/#weighted_thd) use for the same curve. |
 | `spectrum` | Inherent-noise spectrum as `(frequencies, band_levels_db)` in (Hz, dB SPL) (17.2 b). |
 

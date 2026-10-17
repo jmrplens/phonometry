@@ -36,13 +36,13 @@ def _slit_absorber_design() -> CriticalCouplingResult:
     from phonometry import materials
 
     base = materials.HelmholtzResonator(
-        neck_length=1.0e-3,
-        neck_side=3.0e-3,
-        cavity_length=30.0e-3,
-        cavity_side=27.0e-3,
+        neck_length_m=1.0e-3,
+        neck_side_m=3.0e-3,
+        cavity_length_m=30.0e-3,
+        cavity_side_m=27.0e-3,
     )
     return materials.critical_coupling_design(
-        _SLIT_ABS_F0, base, lattice_step=_SLIT_ABS_LATTICE, period_m=_SLIT_ABS_PERIOD
+        _SLIT_ABS_F0, base, lattice_step_m=_SLIT_ABS_LATTICE, period_m=_SLIT_ABS_PERIOD
     )
 
 
@@ -69,8 +69,8 @@ def _slit_absorber_cell_rows(
     neck and cavity below it, mirroring ``plot_slit_absorber_geometry``).
     """
     res = _slit_absorber_design().resonator
-    neck_cells = round(res.neck_length / dx)
-    cav_cells = round(res.cavity_length / dx)
+    neck_cells = round(res.neck_length_m / dx)
+    cav_cells = round(res.cavity_length_m / dx)
     slit0 = ny - slit_cells
     neck0 = slit0 - neck_cells
     return {
@@ -123,19 +123,19 @@ def _slit_absorber_fields(
     zoom0 = round((_SLIT_ABS_TUBE - 0.015) / dx)
     x_mouth = _SLIT_ABS_TUBE + 0.5 * _SLIT_ABS_LATTICE
     neck_c = (
-        round((x_mouth - 0.5 * res.neck_side) / dx),
-        round((x_mouth + 0.5 * res.neck_side) / dx),
+        round((x_mouth - 0.5 * res.neck_side_m) / dx),
+        round((x_mouth + 0.5 * res.neck_side_m) / dx),
     )
     cav_c = (
-        round((x_mouth - 0.5 * res.cavity_side) / dx),
-        round((x_mouth + 0.5 * res.cavity_side) / dx),
+        round((x_mouth - 0.5 * res.cavity_side_m) / dx),
+        round((x_mouth + 0.5 * res.cavity_side_m) / dx),
     )
     freq = np.array([_SLIT_ABS_F0])
     neck_f = _lossy_fluid_params(
-        *(p.item() for p in rectangular_duct_properties(freq, side=res.neck_side))
+        *(p.item() for p in rectangular_duct_properties(freq, side_m=res.neck_side_m))
     )
     cav_f = _lossy_fluid_params(
-        *(p.item() for p in rectangular_duct_properties(freq, side=res.cavity_side))
+        *(p.item() for p in rectangular_duct_properties(freq, side_m=res.cavity_side_m))
     )
     # 2D-slice calibration: the meshed cell's slot-shaped mouths carry
     # smaller end-correction masses than the square ducts of the 3D
@@ -152,8 +152,8 @@ def _slit_absorber_fields(
     # message are the correct ones, and the alpha pill quotes the
     # library model's value.
     cav_f = (0.90 * cav_f[0], cav_f[1], cav_f[2])
-    scale_neck = _SLIT_ABS_LATTICE / res.neck_side
-    scale_cav = _SLIT_ABS_LATTICE / res.cavity_side
+    scale_neck = _SLIT_ABS_LATTICE / res.neck_side_m
+    scale_cav = _SLIT_ABS_LATTICE / res.cavity_side_m
 
     alphas = (
         float(design.absorption),
@@ -162,7 +162,7 @@ def _slit_absorber_fields(
                 freq,
                 res,
                 slit_height_m=_SLIT_ABS_DETUNE * h0,
-                lattice_step=_SLIT_ABS_LATTICE,
+                lattice_step_m=_SLIT_ABS_LATTICE,
                 period_m=_SLIT_ABS_PERIOD,
             ).absorption[0]
         ),
@@ -291,8 +291,8 @@ def animate_fdtd_slit_absorber(output_dir: str) -> None:
         y_cav = tuple(r * dx for r in rows["cavity"])
         x_face = _SLIT_ABS_TUBE
         x_mouth = _SLIT_ABS_TUBE + 0.5 * _SLIT_ABS_LATTICE
-        x_neck = (x_mouth - 0.5 * res.neck_side, x_mouth + 0.5 * res.neck_side)
-        x_cav = (x_mouth - 0.5 * res.cavity_side, x_mouth + 0.5 * res.cavity_side)
+        x_neck = (x_mouth - 0.5 * res.neck_side_m, x_mouth + 0.5 * res.neck_side_m)
+        x_cav = (x_mouth - 0.5 * res.cavity_side_m, x_mouth + 0.5 * res.cavity_side_m)
         body = [
             (x_face, 0.0, x_end - x_face, y_cav[0]),
             (x_face, y_cav[0], x_cav[0] - x_face, y_cav[1] - y_cav[0]),

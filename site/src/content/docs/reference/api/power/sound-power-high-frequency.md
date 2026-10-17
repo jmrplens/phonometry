@@ -166,7 +166,7 @@ of the 16 kHz octave band, so no advisory is raised between 10 kHz and
 free_field_absorption_correction(
     frequencies: ArrayLike,
     *,
-    radius_m: float,
+    radius: float,
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
@@ -190,7 +190,7 @@ is the same thing.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Band centre or tone frequencies, in hertz. |
-| `radius_m` | Radius `r` of the measurement hemisphere, in metres. |
+| `radius` | Radius `r` of the measurement hemisphere, in metres. |
 | `temperature_c` | Air temperature, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity, in percent. |
 | `static_pressure_kpa` | Static pressure, in kilopascals (default 101,325 kPa). |
@@ -260,7 +260,7 @@ high_frequency_sound_power(
     pressure_levels: ArrayLike,
     *,
     frequencies: ArrayLike,
-    room_constant_m2: ArrayLike,
+    room_constant: ArrayLike,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     tonal: bool = False,
@@ -284,7 +284,7 @@ clause 7).
 | :--- | :--- |
 | `pressure_levels` | $\overline{L_{p(\mathrm{ST})}}$ per band, in dB re 20 µPa, or an `(N, bands)` array of the time-averaged levels of the four orientations ($N = 4$) or three boom revolutions ($N = 3$), energy-averaged by Formula (1). |
 | `frequencies` | Band centre or tone frequencies, in hertz, one per band. A frequency outside 11,2 kHz to 22,4 kHz emits a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning). |
-| `room_constant_m2` | Room constant `R`, in square metres, a scalar or one value per band. |
+| `room_constant` | Room constant `R`, in square metres, a scalar or one value per band. |
 | `temperature_c` | Air temperature in the room, in degrees Celsius (default 23,0 °C, the reference temperature). |
 | `static_pressure_kpa` | Static pressure in the room, in kilopascals (default 101,325 kPa, the reference pressure). |
 | `tonal` | `True` when the bands are the narrow bands of discrete tones (clause 6.5), which changes how the result is drawn and read. |
@@ -461,10 +461,10 @@ summed with [`tone_level_from_sidebands`](/phonometry/reference/api/power/sound-
 
 ```python
 room_absorption_coefficient(
-    reverberation_time_s: ArrayLike,
+    reverberation_time: ArrayLike,
     *,
     volume: float,
-    surface_area_m2: float,
+    surface_area: float,
 ) -> NDArray[np.float64]
 ```
 
@@ -480,9 +480,9 @@ constant is the 0,16 the formula prints.
 
 | Name | Description |
 | :--- | :--- |
-| `reverberation_time_s` | Mean measured reverberation time `T` per band, in seconds (scalar or one value per band); clause 6.2 averages three or four points of the microphone path. |
+| `reverberation_time` | Mean measured reverberation time `T` per band, in seconds (scalar or one value per band); clause 6.2 averages three or four points of the microphone path. |
 | `volume` | Room volume `V`, in cubic metres. |
-| `surface_area_m2` | Total room surface `S`, in square metres. |
+| `surface_area` | Total room surface `S`, in square metres. |
 
 **Returns:** $\alpha_\mathrm{room}$ per band, in (0, 1).
 
@@ -499,7 +499,7 @@ room_constant_from_air_absorption(
     frequencies: ArrayLike,
     *,
     volume: float,
-    surface_area_m2: float,
+    surface_area: float,
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
@@ -523,7 +523,7 @@ longer negligible there and the measured reverberation time of
 | :--- | :--- |
 | `frequencies` | Band centre or tone frequencies, in hertz. |
 | `volume` | Room volume `V`, in cubic metres. |
-| `surface_area_m2` | Total room surface `S`, in square metres. |
+| `surface_area` | Total room surface `S`, in square metres. |
 | `temperature_c` | Air temperature in the room, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity in the room, in percent. |
 | `static_pressure_kpa` | Static pressure in the room, in kilopascals (default 101,325 kPa). |
@@ -540,10 +540,10 @@ longer negligible there and the measured reverberation time of
 
 ```python
 room_constant_from_reverberation_time(
-    reverberation_time_s: ArrayLike,
+    reverberation_time: ArrayLike,
     *,
     volume: float,
-    surface_area_m2: float,
+    surface_area: float,
 ) -> NDArray[np.float64]
 ```
 
@@ -552,15 +552,15 @@ Room constant from the measured reverberation time (ISO 9295 Formulae (4), (5)).
 $R = S \alpha_\mathrm{room} / (1 - \alpha_\mathrm{room})$ with
 $\alpha_\mathrm{room}$ from [`room_absorption_coefficient`](/phonometry/reference/api/power/sound-power-high-frequency/#room_absorption_coefficient),
 the room constant of the method of clause 6. It goes into
-[`high_frequency_sound_power`](/phonometry/reference/api/power/sound-power-high-frequency/#high_frequency_sound_power) as `room_constant_m2`.
+[`high_frequency_sound_power`](/phonometry/reference/api/power/sound-power-high-frequency/#high_frequency_sound_power) as `room_constant`.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `reverberation_time_s` | Mean measured reverberation time `T` per band, in seconds (scalar or one value per band). |
+| `reverberation_time` | Mean measured reverberation time `T` per band, in seconds (scalar or one value per band). |
 | `volume` | Room volume `V`, in cubic metres. |
-| `surface_area_m2` | Total room surface `S`, in square metres. |
+| `surface_area` | Total room surface `S`, in square metres. |
 
 **Returns:** `R` per band, in square metres.
 

@@ -303,7 +303,7 @@ t = np.array([np.nan, np.nan, np.nan, 0.82, 0.78, 0.74, 0.70, 0.66, 0.63,
               0.48, 0.47, 0.46, 0.45, 0.44, np.nan, np.nan, np.nan])
 res = building.service_equipment_level(
     readings, freqs, quantity="eq",
-    background_db=background, reverberation_time_s=t, volume_m3=35.7,
+    background_db=background, reverberation_time=t, volume=35.7,
 )
 print(res.ratings["LA,eq"], res.ratings["LA,eq,nT"], res.ratings["LC,eq,nT"])
 # 45 45 51
@@ -334,8 +334,8 @@ están las seis bandas grises.*
 | `quantity` | str | | obligatorio | `"Smax"`, `"Fmax"` o `"eq"`, la magnitud de la tabla 1; da nombre a los valores únicos |
 | `band` | str | | `"third"` | `"third"` u `"octave"`; el capítulo 6 pide tercios de octava, las octavas son opcionales |
 | `background_db` | array | dB | `None` | Un nivel por banda, o una fila por posición, promediada energéticamente |
-| `reverberation_time_s` | array | s | `None` | Por banda; solo se lee de 50 Hz a 5 kHz (octavas de 63 Hz a 4 kHz), el resto puede ser `nan` |
-| `volume_m3` | float | m³ | `None` | Volumen del recinto para los niveles normalizados; necesita el tiempo de reverberación |
+| `reverberation_time` | array | s | `None` | Por banda; solo se lee de 50 Hz a 5 kHz (octavas de 63 Hz a 4 kHz), el resto puede ser `nan` |
+| `volume` | float | m³ | `None` | Volumen del recinto para los niveles normalizados; necesita el tiempo de reverberación |
 | `reference_reverberation_time_s` | float | s | `0.5` | $T_0$ de la fórmula (5) |
 | `a_weighting_range` | str | | `"restricted"` | `"restricted"` (50 Hz a 5 kHz; octavas de 63 Hz a 4 kHz) o `"extended"` (25 Hz a 10 kHz; octavas de 31,5 Hz a 8 kHz) |
 

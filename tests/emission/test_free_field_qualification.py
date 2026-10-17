@@ -84,7 +84,7 @@ def _free_field_traverses(
             u,
             distances,
             grid,
-            background_levels_db=None
+            background_levels=None
             if background is None
             else np.full(len(freqs), background),
             name=f"path {i + 1}",
@@ -766,7 +766,7 @@ def test_the_path_targets_of_a33_are_read_from_the_traverses() -> None:
         emission.MicrophoneTraverse(
             positions_m=t.positions_m,
             levels=t.levels,
-            background_levels_db=t.background_levels_db,
+            background_levels=t.background_levels,
         )
         for t in _free_field_traverses(_SPACING)
     ]
@@ -778,7 +778,7 @@ def test_the_path_targets_of_a33_are_read_from_the_traverses() -> None:
         emission.MicrophoneTraverse(
             positions_m=t.positions_m,
             levels=t.levels,
-            background_levels_db=t.background_levels_db,
+            background_levels=t.background_levels,
             targets=tuple(x for x in t.targets if x != "unique features"),
         )
         for t in _free_field_traverses(_SPACING)
@@ -894,9 +894,9 @@ def test_a_background_is_needed_wherever_a_level_is() -> None:
     levels = _L1M - 20.0 * np.log10(d)
     background = np.full(d.size, 20.0)
     background[3] = np.nan
-    with pytest.raises(ValueError, match="'background_levels_db' must be finite"):
+    with pytest.raises(ValueError, match="'background_levels' must be finite"):
         emission.MicrophoneTraverse.along(
-            (1, 0, 0), d, levels, background_levels_db=background
+            (1, 0, 0), d, levels, background_levels=background
         )
 
 
@@ -1143,7 +1143,7 @@ def test_a_failing_low_band_leaves_a_reduced_range() -> None:
             emission.MicrophoneTraverse(
                 positions_m=traverse.positions_m,
                 levels=levels,
-                background_levels_db=traverse.background_levels_db,
+                background_levels=traverse.background_levels,
                 targets=traverse.targets,
             )
         )
@@ -1389,7 +1389,7 @@ def test_the_check_plot_marks_the_reduced_range() -> None:
             emission.MicrophoneTraverse(
                 positions_m=traverse.positions_m,
                 levels=levels,
-                background_levels_db=traverse.background_levels_db,
+                background_levels=traverse.background_levels,
                 targets=traverse.targets,
             )
         )

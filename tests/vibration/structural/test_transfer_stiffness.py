@@ -709,7 +709,7 @@ def test_a_rigid_block_has_its_own_mass_and_no_upper_limit() -> None:
     m2 = 25.0
     force = np.full(f.size, 10.0 + 0j)
     a = force / m2
-    em = vibration.effective_blocking_mass(f, force, a, a, blocking_mass_kg=m2)
+    em = vibration.effective_blocking_mass(f, force, a, a, blocking_mass=m2)
     assert em.effective_mass_kg == pytest.approx(np.full(f.size, m2), rel=1e-15)
     assert em.upper_frequency_limit_hz is None
     assert bool(np.all(em.valid))
@@ -719,7 +719,7 @@ def test_formula_6_divides_twice_the_force_by_the_sum_of_the_two_accelerations()
     None
 ):
     em = vibration.effective_blocking_mass(
-        [100.0], [3.0 + 0j], [0.1 + 0.02j], [0.2 - 0.02j], blocking_mass_kg=20.0
+        [100.0], [3.0 + 0j], [0.1 + 0.02j], [0.2 - 0.02j], blocking_mass=20.0
     )
     assert float(em.effective_mass_kg[0]) == pytest.approx(20.0)
 
@@ -731,7 +731,7 @@ def test_f3_is_where_the_effective_mass_leaves_1_db() -> None:
     m_eff = m2 * (1.0 + (f / fc) ** 2)
     ones = np.ones(f.size, dtype=complex)
     em = vibration.effective_blocking_mass(
-        f, m_eff * ones, ones, ones, blocking_mass_kg=m2
+        f, m_eff * ones, ones, ones, blocking_mass=m2
     )
     expected = fc * math.sqrt(10.0**0.05 - 1.0)
     assert em.upper_frequency_limit_hz == pytest.approx(expected, rel=1e-5)
@@ -751,7 +751,7 @@ def test_f3_is_interpolated_in_log_frequency_and_the_mask_ends_before_it() -> No
     m_eff = m2 * (1.0 + (f / fc) ** 2)
     ones = np.ones(f.size, dtype=complex)
     em = vibration.effective_blocking_mass(
-        f, m_eff * ones, ones, ones, blocking_mass_kg=m2
+        f, m_eff * ones, ones, ones, blocking_mass=m2
     )
     deviation = 20.0 * np.log10(m_eff / m2)
     first = int(np.flatnonzero(np.abs(deviation) > 1.0)[0])
@@ -772,7 +772,7 @@ def test_a_deviation_below_40_hz_does_not_set_f3() -> None:
     m_eff = np.array([30.0, 25.0, 20.0, 20.0, 20.0])
     ones = np.ones(f.size, dtype=complex)
     em = vibration.effective_blocking_mass(
-        f, m_eff * ones, ones, ones, blocking_mass_kg=20.0
+        f, m_eff * ones, ones, ones, blocking_mass=20.0
     )
     assert em.upper_frequency_limit_hz is None
     assert em.ignored_below_hz == pytest.approx(40.0)
@@ -782,7 +782,7 @@ def test_effective_mass_refuses_accelerations_that_cancel() -> None:
     ones = np.ones(2, dtype=complex)
     with pytest.raises(ValueError, match="sum to zero"):
         vibration.effective_blocking_mass(
-            [100.0, 200.0], ones, ones, -ones, blocking_mass_kg=20.0
+            [100.0, 200.0], ones, ones, -ones, blocking_mass=20.0
         )
 
 
@@ -790,7 +790,7 @@ def test_effective_mass_refuses_an_unsorted_sweep() -> None:
     ones = np.ones(2, dtype=complex)
     with pytest.raises(ValueError, match="must increase strictly"):
         vibration.effective_blocking_mass(
-            [200.0, 100.0], ones, ones, ones, blocking_mass_kg=20.0
+            [200.0, 100.0], ones, ones, ones, blocking_mass=20.0
         )
 
 

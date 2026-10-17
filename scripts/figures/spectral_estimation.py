@@ -744,15 +744,15 @@ def generate_cross_spectral_density_delay(output_dir: str) -> None:
 
     ax_p.semilogx(
         freqs,
-        res.phase[band],
+        res.phase_rad[band],
         color=COLOR_PRIMARY,
         linewidth=1.1,
         label="Unwrapped phase",
     )
     ax_p.fill_between(
         freqs,
-        res.phase[band] - res.phase_std[band],
-        res.phase[band] + res.phase_std[band],
+        res.phase_rad[band] - res.phase_standard_deviation_rad[band],
+        res.phase_rad[band] + res.phase_standard_deviation_rad[band],
         color=COLOR_PRIMARY,
         alpha=0.25,
         label=r"$\pm 1$ s.d. band (Eq. 9.52)",

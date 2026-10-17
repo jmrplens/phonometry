@@ -108,7 +108,7 @@ atmospheric conditions straight into `absorption_area` /
 | `frequencies` | scalar or 1D array | Hz | > 0 | Vectorized; 50–10 000 Hz tabulated |
 | `temperature_c` | float | °C | default `20.0` | −20…+50 tabulated; outside warns |
 | `relative_humidity_percent` | float | % | default `50.0` | 10…100 tabulated; `[0, 100]` allowed |
-| `atmospheric_pressure_kpa` | float | kPa | default `101.325` | ≤ 200 valid (Clause 7); above warns |
+| `static_pressure_kpa` | float | kPa | default `101.325` | ≤ 200 valid (Clause 7); above warns |
 | `exact_midband` | bool | — | default `False` | Snap to $f_\mathrm{m} = 1000\cdot10^{k/10}$ (reproduces Table 1) |
 
 `air_attenuation` returns $\alpha$ in dB/m; `air_attenuation_m` returns
@@ -446,7 +446,7 @@ works when the wavelength is short next to the path difference.
 | `frequencies` | 1D array | Hz | default 8 octaves 63–8000 | `DEFAULT_FREQUENCIES_HZ` |
 | `ground_source` / `ground_middle` / `ground_receiver` | float | — | `[0, 1]`, default `0.0` | Ground factor $G$ (0 hard, 1 porous) |
 | `barrier` | `Barrier` or None | — | default `None` | Screening obstacle |
-| `temperature_c` / `relative_humidity_percent` / `atmospheric_pressure_kpa` | float | °C / % / kPa | 20 / 70 / 101.325 | Passed to $A_\mathrm{atm}$ |
+| `temperature_c` / `relative_humidity_percent` / `static_pressure_kpa` | float | °C / % / kPa | 20 / 70 / 101.325 | Passed to $A_\mathrm{atm}$ |
 | `projected_distance` | float or None | m | default $\sqrt{d^2-(h_\mathrm{s}-h_\mathrm{r})^2}$ | Ground-plane $d_\mathrm{p}$ |
 
 Returns an `OutdoorAttenuation` with `a_div`, `a_atm`, `a_gr`, `a_bar`,

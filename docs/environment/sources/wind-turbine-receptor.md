@@ -98,7 +98,7 @@ such as the Danish rows of Table C.3.
 power = 118.0 - np.arange(environment.LOW_FREQUENCY_BANDS_HZ.size, dtype=float)
 low = environment.wind_turbine_low_frequency_level(
     np.vstack([power, power, power - 1.0]),
-    distance_m=[650.0, 820.0, 1100.0],
+    distance=[650.0, 820.0, 1100.0],
     hub_height_m=120.0,
     facade_insulation_db=environment.LOW_FREQUENCY_FACADE_INSULATION_DB[
         "Denmark brick or similar"

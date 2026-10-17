@@ -1044,10 +1044,10 @@ HomogeneousElement.from_solid(
     *,
     thickness_m: float,
     internal_loss_factor: float,
-    area_m2: float,
-    length1_m: float,
-    length2_m: float,
-    perimeter_absorption_m: float = 0.0,
+    area: float,
+    length1: float,
+    length2: float,
+    perimeter_absorption: float = 0.0,
     label: str = '',
     fluid: Fluid = ...,
 ) -> HomogeneousElement
@@ -1082,10 +1082,10 @@ measured one.
 | `row` | A [`SolidMaterial`](/phonometry/reference/api/solids/catalogue/#solidmaterial), one of [`PUBLISHED_SOLIDS`](/phonometry/reference/api/solids/catalogue/#published_solids) or one read from a catalogue file of your own. |
 | `thickness_m` | Element thickness `t`, in metres. |
 | `internal_loss_factor` | Internal loss factor `ηint`. |
-| `area_m2` | Element area `S`, in m². |
-| `length1_m` | One side length of the rectangular element, in m. |
-| `length2_m` | The other side length, in m. |
-| `perimeter_absorption_m` | $\sum l_k \alpha_k$ over the element's perimeter, in m (Default: 0). |
+| `area` | Element area `S`, in m². |
+| `length1` | One side length of the rectangular element, in m. |
+| `length2` | The other side length, in m. |
+| `perimeter_absorption` | $\sum l_k \alpha_k$ over the element's perimeter, in m (Default: 0). |
 | `label` | The element's name (Default: the row's [`name`](/phonometry/reference/api/io/io/#cataloguerow)). |
 | `fluid` | The air whose speed of sound `co` enters `fc` (Default: [`EN_12354_AIR`](/phonometry/reference/api/building/detailed-model/#en_12354_air), the 340 m/s of Annex A). |
 

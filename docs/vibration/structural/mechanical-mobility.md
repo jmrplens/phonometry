@@ -211,8 +211,8 @@ top.semilogx(f[bad], res.measured[bad], "o", color="C1", label="out of tolerance
 top.set_ylabel("Accelerance |A| [1/kg]"); top.legend()
 
 bot.axhspan(-5.0, 5.0, color="C1", alpha=0.15)
-bot.semilogx(f, 100.0 * res.deviation, color="C0")
-bot.semilogx(f[bad], 100.0 * res.deviation[bad], "o", color="C1")
+bot.semilogx(f, 100.0 * res.relative_deviation, color="C0")
+bot.semilogx(f[bad], 100.0 * res.relative_deviation[bad], "o", color="C1")
 bot.set_xlabel("Frequency [Hz]"); bot.set_ylabel("Deviation [%]")
 plt.show()
 ```
@@ -222,7 +222,7 @@ plt.show()
 ## 4. The `MobilityResult` bundle
 
 `sdof_mobility_result` bundles the FRF over frequency into a `MobilityResult`,
-which exposes `.magnitude`, `.phase`, `.to(target)` (any Table-1 kind) and a
+which exposes `.magnitude`, `.phase_rad`, `.to(target)` (any Table-1 kind) and a
 `.plot()` of $|Y(f)|$ with the resonance marked:
 
 ```python

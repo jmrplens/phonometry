@@ -101,17 +101,17 @@ def _speeds(
 
 
 def shear_modulus_from_wave_speed(
-    shear_wave_speed_m_s: float, *, density_kg_m3: float
+    shear_wave_speed_m_s: float, *, density: float
 ) -> float:
     r"""The shear modulus :math:`G = \mathrm{v}_\mathrm{s}^2 \rho`, Formula (5), in pascals.
 
     :param shear_wave_speed_m_s: :math:`\mathrm{v}_\mathrm{s}`, in metres per second.
-    :param density_kg_m3: :math:`\rho`, in kilograms per cubic metre.
+    :param density: :math:`\rho`, in kilograms per cubic metre.
     :return: :math:`G`, in pascals.
     :raises ValueError: For a non-positive speed or density.
     """
     v_s = require_positive(shear_wave_speed_m_s, "shear_wave_speed_m_s")
-    rho = require_positive(density_kg_m3, "density_kg_m3")
+    rho = require_positive(density, "density")
     return v_s**2 * rho
 
 
@@ -142,7 +142,7 @@ def youngs_modulus_from_wave_speeds(
     compression_wave_speed_m_s: float,
     shear_wave_speed_m_s: float,
     *,
-    density_kg_m3: float,
+    density: float,
 ) -> float:
     r"""The elastic modulus from the two wave speeds, in pascals.
 
@@ -154,7 +154,7 @@ def youngs_modulus_from_wave_speeds(
 
     :param compression_wave_speed_m_s: :math:`\mathrm{v}_\mathrm{p}`, in metres per second.
     :param shear_wave_speed_m_s: :math:`\mathrm{v}_\mathrm{s}`, in metres per second.
-    :param density_kg_m3: :math:`\rho`, in kilograms per cubic metre.
+    :param density: :math:`\rho`, in kilograms per cubic metre.
     :return: :math:`E`, in pascals.
     :raises ValueError: As :func:`poisson_ratio_from_wave_speeds`, or for a
         non-positive density.
@@ -162,12 +162,12 @@ def youngs_modulus_from_wave_speeds(
     nu = poisson_ratio_from_wave_speeds(
         compression_wave_speed_m_s, shear_wave_speed_m_s
     )
-    g = shear_modulus_from_wave_speed(shear_wave_speed_m_s, density_kg_m3=density_kg_m3)
+    g = shear_modulus_from_wave_speed(shear_wave_speed_m_s, density=density)
     return 2.0 * g * (1.0 + nu)
 
 
 def compression_wave_speed(
-    shear_modulus_pa: float, *, poisson_ratio: float, density_kg_m3: float
+    shear_modulus_pa: float, *, poisson_ratio: float, density: float
 ) -> float:
     r"""The compression-wave speed of a continuum, Formula (1) corrected, in m/s.
 
@@ -178,13 +178,13 @@ def compression_wave_speed(
 
     :param shear_modulus_pa: :math:`G`, in pascals.
     :param poisson_ratio: :math:`\nu`, above -1 and below 0,5.
-    :param density_kg_m3: :math:`\rho`, in kilograms per cubic metre.
+    :param density: :math:`\rho`, in kilograms per cubic metre.
     :return: :math:`\mathrm{v}_\mathrm{p}`, in metres per second.
     :raises ValueError: For a non-positive modulus or density, or a ratio
         outside ``(-1, 0.5)``, where the continuum would not be stable.
     """
     g = require_positive(shear_modulus_pa, "shear_modulus_pa")
-    rho = require_positive(density_kg_m3, "density_kg_m3")
+    rho = require_positive(density, "density")
     require_scalar(poisson_ratio, "poisson_ratio")
     nu = float(poisson_ratio)
     if not _POISSON_LIMITS[0] < nu < _POISSON_LIMITS[1]:

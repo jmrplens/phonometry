@@ -90,7 +90,7 @@ AERODYNAMIC_REFERENCE_SPEED_KMH = 300.0
 
 ```python
 aerodynamic_sound_power(
-    speed: float = 300.0,
+    speed_kmh: float = 300.0,
     *,
     reference: tuple[NDArray[np.float64], NDArray[np.float64]] | None = None,
     alpha: float = 50.0,
@@ -107,7 +107,7 @@ At the reference speed the result is Table G-6 verbatim.
 
 | Name | Description |
 | :--- | :--- |
-| `speed` | Train speed `v`, in km/h. |
+| `speed_kmh` | Train speed `v`, in km/h. |
 | `reference` | `(source A, source B)` reference spectra at `v_0`, or `None` (the default) for Table G-6. |
 | `alpha` | Speed exponent `alpha_h,i`; Table G-6 gives 50 in every band. |
 
@@ -441,7 +441,7 @@ railway_source_power(
     psi: float = 0.0,
     phi: float = 90.0,
     reference_time: float = 12.0,
-    minimum_speed: float | None = None,
+    minimum_speed_kmh: float | None = None,
     interpolation: RoughnessInterpolation = ...,
     directivity_edition: DirectivityEdition = ...,
 ) -> RailwayEmissionResult
@@ -470,7 +470,7 @@ below the minimum speed nor while idling.
 | `psi` | Vertical angle `psi` to the receiver, in degrees. |
 | `phi` | Horizontal angle `phi` to the receiver, in degrees; the default 90 deg is broadside, where the dipole correction is 0 dB. |
 | `reference_time` | Reference period `T_ref` of (2.3.4), in the same unit as `idling_time`. |
-| `minimum_speed` | Speed floor used to determine the total effective roughness, in km/h; `None` (the default) selects 50 km/h, or 30 km/h for a tram. Pass `0` to switch the floor off, which also switches off the exclusion of impact noise below it. |
+| `minimum_speed_kmh` | Speed floor used to determine the total effective roughness, in km/h; `None` (the default) selects 50 km/h, or 30 km/h for a tram. Pass `0` to switch the floor off, which also switches off the exclusion of impact noise below it. |
 | `interpolation` | The [`RoughnessInterpolation`](/phonometry/reference/api/environment/cnossos-rail/#roughnessinterpolation) rule. |
 | `directivity_edition` | Which text of (2.3.16) to evaluate. |
 
@@ -565,7 +565,8 @@ The Appendix G data of one track section.
 RailwayVehicle(
     stock: RollingStock,
     flow_rate: float = 0.0,
-    speed: float = 0.0,
+    *,
+    speed_kmh: float = 0.0,
     condition: RunningCondition = ...,
     idling_time: float = 0.0,
 )
@@ -579,7 +580,7 @@ One vehicle of the traffic on a track section.
 | :--- | :--- |
 | `stock` | The [`RollingStock`](/phonometry/reference/api/environment/cnossos-rail/#rollingstock) data of the vehicle type. |
 | `flow_rate` | Average number of vehicles per hour `Q`. |
-| `speed` | Their speed `v` on the track section, in km/h. |
+| `speed_kmh` | Their speed `v` on the track section, in km/h. |
 | `condition` | The [`RunningCondition`](/phonometry/reference/api/environment/cnossos-rail/#runningcondition) `c`. |
 | `idling_time` | Total idling time `T_idle` within `T_ref`, in the same unit as `T_ref`; used only when `condition` is idling. |
 
@@ -666,8 +667,8 @@ than from the [`cnossos_rail`](/phonometry/reference/api/environment/cnossos-rai
 ```python
 roughness_to_frequency(
     levels: ArrayLike,
-    wavelengths: ArrayLike,
-    speed: float,
+    wavelengths_mm: ArrayLike,
+    speed_kmh: float,
     *,
     frequencies: ArrayLike = (50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0, 10000.0),
     interpolation: RoughnessInterpolation = ...,
@@ -689,8 +690,8 @@ is held.
 | Name | Description |
 | :--- | :--- |
 | `levels` | Roughness levels of the table, in dB. |
-| `wavelengths` | Wavelengths of the table, in mm, in any monotonic order. |
-| `speed` | Train speed `v`, in km/h. |
+| `wavelengths_mm` | Wavelengths of the table, in mm, in any monotonic order. |
+| `speed_kmh` | Train speed `v`, in km/h. |
 | `frequencies` | Target midband frequencies, in Hz. |
 | `interpolation` | The [`RoughnessInterpolation`](/phonometry/reference/api/environment/cnossos-rail/#roughnessinterpolation) rule. |
 

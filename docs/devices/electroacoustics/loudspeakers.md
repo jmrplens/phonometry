@@ -200,7 +200,7 @@ spl -= 10 * np.log10(1 + (50.0 / freqs) ** 6)       # low-frequency roll-off
 spl -= 10 * np.log10(1 + (freqs / 16000.0) ** 7)    # high-frequency roll-off
 
 result = electroacoustics.loudspeaker_characteristics(
-    freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
+    freqs, spl, rated_impedance_ohm=8.0, sensitivity_band=(200.0, 4000.0),
     impedance=(np.geomspace(20, 20000, 260),
                6.6 + 24 * np.exp(-(np.log2(np.geomspace(20, 20000, 260) / 52.0) ** 2) / 0.12)),
     distortion=(np.geomspace(50, 5000, 140),
@@ -219,7 +219,7 @@ result.report("loudspeaker.pdf", metadata=ReportMetadata(measurement_standard="I
 
 `loudspeaker_characteristics` returns a `LoudspeakerCharacteristics` with the
 computed `sensitivity_level_db`, `effective_range`, `reference_level_db`,
-`characteristic_sensitivity_pa` and `minimum_impedance`, and a `.report()` that
+`characteristic_sensitivity_pa` and `minimum_impedance_ohm`, and a `.report()` that
 writes the fiche. The on-axis response is drawn with its tolerance band and the
 effective-range markers to the IEC 60263 proportion (one frequency decade equal
 to 25 dB), and the polar directivity on the IEC 60263 25 dB reference circle.
@@ -260,7 +260,7 @@ spl = 87.0 + 1.2 * np.sin(2 * np.log2(freqs / 900.0))
 spl -= 10 * np.log10(1 + (50.0 / freqs) ** 6)       # low-frequency roll-off
 spl -= 10 * np.log10(1 + (freqs / 16000.0) ** 7)    # high-frequency roll-off
 
-result = electroacoustics.loudspeaker_characteristics(freqs, spl, rated_impedance=8.0,
+result = electroacoustics.loudspeaker_characteristics(freqs, spl, rated_impedance_ohm=8.0,
                                                       sensitivity_band=(200.0, 4000.0))
 result.plot()   # quantity="response" (the default)
 plt.show()
@@ -283,7 +283,7 @@ spl = 87.0 - 10 * np.log10(1 + (50.0 / freqs) ** 6)
 fz = np.geomspace(20, 20000, 260)
 
 result = electroacoustics.loudspeaker_characteristics(
-    freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
+    freqs, spl, rated_impedance_ohm=8.0, sensitivity_band=(200.0, 4000.0),
     impedance=(fz, 6.6 + 24 * np.exp(-(np.log2(fz / 52.0) ** 2) / 0.12)),
 )
 result.plot(quantity="impedance")
@@ -307,7 +307,7 @@ spl = 87.0 - 10 * np.log10(1 + (50.0 / freqs) ** 6)
 thd_f = np.geomspace(50, 5000, 140)
 
 result = electroacoustics.loudspeaker_characteristics(
-    freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
+    freqs, spl, rated_impedance_ohm=8.0, sensitivity_band=(200.0, 4000.0),
     distortion=(thd_f, 0.3 + 2.6 * np.exp(-(np.log2(thd_f / 70.0) ** 2) / 0.45)),
 )
 result.plot(quantity="thd")
@@ -330,7 +330,7 @@ freqs = np.geomspace(30, 24000, 320)
 spl = 87.0 - 10 * np.log10(1 + (50.0 / freqs) ** 6)
 
 result = electroacoustics.loudspeaker_characteristics(
-    freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
+    freqs, spl, rated_impedance_ohm=8.0, sensitivity_band=(200.0, 4000.0),
     directivity=electroacoustics.LoudspeakerDirectivity(
         piston=electroacoustics.radiating_piston(0.075, np.array([1000.0, 2000.0, 4000.0]),
                                                  angles_rad=np.radians(np.linspace(0, 90, 46))),

@@ -104,7 +104,7 @@ UNITY_TRANSMISSION: float = 1.0
 
 
 def mean_of_test_runs(
-    values: ArrayLike, *, tolerance: float = RUN_AGREEMENT_TOLERANCE
+    values: ArrayLike, *, relative_tolerance: float = RUN_AGREEMENT_TOLERANCE
 ) -> float:
     """The arithmetic mean of the runs of one test (10.2.1, 10.3).
 
@@ -120,7 +120,7 @@ def mean_of_test_runs(
         first reading of each series, which leaves a laboratory holding a
         different number of them. Two is the floor: a spread needs two
         readings to exist.
-    :param tolerance: The permitted spread as a fraction of the mean;
+    :param relative_tolerance: The permitted spread as a fraction of the mean;
         :data:`RUN_AGREEMENT_TOLERANCE` by default.
     :return: The arithmetic mean, in the unit the values were given in.
     :raises ValueError: If the values are not one-dimensional, if fewer than
@@ -128,7 +128,7 @@ def mean_of_test_runs(
         not positive, or if any value lies outside the tolerance band around
         the mean.
     """
-    tol = require_positive(tolerance, "tolerance")
+    tol = require_positive(relative_tolerance, "relative_tolerance")
     runs = np.atleast_1d(np.asarray(values, dtype=np.float64))
     if runs.ndim != 1:
         # A nested shape passes the size check and then fails deep inside the
@@ -290,7 +290,7 @@ def seat_transmission(
     seat_runs: ArrayLike,
     platform_runs: ArrayLike,
     *,
-    tolerance: float = RUN_AGREEMENT_TOLERANCE,
+    relative_tolerance: float = RUN_AGREEMENT_TOLERANCE,
 ) -> SeatTransmissionResult:
     """One simulated input vibration test, from its runs (10.2).
 
@@ -302,7 +302,7 @@ def seat_transmission(
     :param seat_runs: The frequency-weighted r.m.s. accelerations measured at
         the seat, one per run, in metres per second squared.
     :param platform_runs: The same at the platform, one per run.
-    :param tolerance: The permitted spread of each set, as a fraction of its
+    :param relative_tolerance: The permitted spread of each set, as a fraction of its
         mean.
     :return: The test, as a :class:`SeatTransmissionResult`.
     :raises ValueError: For anything :func:`mean_of_test_runs` refuses, or if
@@ -317,8 +317,12 @@ def seat_transmission(
         )
         raise ValueError(msg)
     return SeatTransmissionResult(
-        seat_acceleration=mean_of_test_runs(seat, tolerance=tolerance),
-        platform_acceleration=mean_of_test_runs(platform, tolerance=tolerance),
+        seat_acceleration=mean_of_test_runs(
+            seat, relative_tolerance=relative_tolerance
+        ),
+        platform_acceleration=mean_of_test_runs(
+            platform, relative_tolerance=relative_tolerance
+        ),
         seat_runs=tuple(float(v) for v in seat),
         platform_runs=tuple(float(v) for v in platform),
     )

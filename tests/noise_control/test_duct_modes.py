@@ -100,7 +100,7 @@ def test_plane_wave_limit_accepts_area_and_rectangle() -> None:
     from_area = duct_modes.plane_wave_limit(area=np.pi * 0.4**2 / 4.0)
     assert from_area == pytest.approx(from_diameter)
     # Eq. 7.10 with p = 1, q = 0: c / (2 a) for the wider side.
-    assert duct_modes.plane_wave_limit(width=0.65, height_m=0.4) == pytest.approx(
+    assert duct_modes.plane_wave_limit(width_m=0.65, height_m=0.4) == pytest.approx(
         343.0 / (2.0 * 0.65)
     )
 
@@ -108,7 +108,7 @@ def test_plane_wave_limit_accepts_area_and_rectangle() -> None:
 def test_plane_wave_limit_requires_a_cross_section() -> None:
     with pytest.raises(
         ValueError,
-        match=r"give 'diameter_m', or both 'width' and 'height_m', or 'area'",
+        match=r"give 'diameter_m', or both 'width_m' and 'height_m', or 'area'",
     ):
         duct_modes.plane_wave_limit()
 
@@ -155,11 +155,11 @@ def test_circular_validation(kwargs: dict[str, float], match: str) -> None:
 @pytest.mark.parametrize(
     ("kwargs", "match"),
     [
-        ({"width": 0.0, "height_m": 0.4}, r"'width' must be positive"),
-        ({"width": 0.65, "height_m": -0.4}, r"'height_m' must be positive"),
-        ({"width": 0.65, "height_m": 0.4, "count": 0}, r"'count' must be at least"),
+        ({"width_m": 0.0, "height_m": 0.4}, r"'width_m' must be positive"),
+        ({"width_m": 0.65, "height_m": -0.4}, r"'height_m' must be positive"),
+        ({"width_m": 0.65, "height_m": 0.4, "count": 0}, r"'count' must be at least"),
         (
-            {"width": 0.65, "height_m": 0.4, "flow_velocity": 400.0},
+            {"width_m": 0.65, "height_m": 0.4, "flow_velocity": 400.0},
             r"'flow_velocity' must be subsonic",
         ),
     ],

@@ -229,7 +229,7 @@ import numpy as np
 from phonometry import aircraft
 
 freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # 50 Hz–10 kHz thirds
-att = aircraft.sae_band_attenuation(freqs, path_length=7620.0,
+att = aircraft.sae_band_attenuation(freqs, path_length_m=7620.0,
                               temperature_c=25.0, relative_humidity_percent=70.0)
 print(att.band_attenuation)   # δ_B per band, dB
 att.plot()                    # band vs pure-tone mid-band (needs matplotlib)
@@ -237,7 +237,7 @@ att.plot()                    # band vs pure-tone mid-band (needs matplotlib)
 
 `sae_band_attenuation` returns an `AircraftBandAttenuation` with `band_attenuation`
 ($\delta_\mathrm{B}$), `midband_attenuation` ($\delta_\mathrm{t} = \alpha\,s$) and the pure-tone
-`coefficient` ($\alpha$, dB/m). The SAE Method is valid roughly 6–32 °C and 20–95 % RH (the 14 CFR
+`coefficient_db_per_m` ($\alpha$, dB/m). The SAE Method is valid roughly 6–32 °C and 20–95 % RH (the 14 CFR
 Part 36 test window), over path lengths to 7620 m, and is reciprocal
 (source↔receiver).
 

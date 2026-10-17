@@ -353,7 +353,7 @@ def plot_frequency_response(
 
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     mag = np.asarray(result.magnitude_db, dtype=np.float64)
-    phase_deg = np.degrees(np.asarray(result.phase, dtype=np.float64))
+    phase_deg = np.degrees(np.asarray(result.phase_rad, dtype=np.float64))
     coh = np.asarray(result.coherence, dtype=np.float64)
     pos = freqs > 0.0
     color = style_pop(kwargs, "color", _C_PRIMARY)
@@ -427,7 +427,7 @@ def plot_swept_sine_distortion(
         kwargs.setdefault("label", r"$\mathrm{THD}(f)$")
         axt.loglog(
             result.thd_frequencies,
-            100.0 * np.maximum(result.thd, tiny),
+            100.0 * np.maximum(result.thd_ratio, tiny),
             **kwargs,
         )
         axt.set_ylabel(_t(_THD_LABEL, language))
@@ -704,17 +704,20 @@ def _draw_impedance(
 ) -> None:
     """Impedance modulus with the rated and 80 %-of-rated reference lines (16)."""
     ax.semilogx(
-        result.impedance_frequencies, result.impedance_modulus, color=_C_PRIMARY, lw=1.3
+        result.impedance_frequencies,
+        result.impedance_modulus_ohm,
+        color=_C_PRIMARY,
+        lw=1.3,
     )
     ax.axhline(
-        result.rated_impedance,
+        result.rated_impedance_ohm,
         color=_C_EDGE,
         lw=0.8,
         ls="--",
         label=_t("Rated impedance", language),
     )
     ax.axhline(
-        0.8 * result.rated_impedance,
+        0.8 * result.rated_impedance_ohm,
         color=_C_REFERENCE,
         lw=0.8,
         ls=":",
@@ -796,7 +799,7 @@ def _draw_microphone_response(
     )
     ax.axhline(0.0, color=_C_EDGE, lw=0.8, ls="--")
     ax.axvline(
-        result.reference_frequency,
+        result.reference_frequency_hz,
         color=_C_SECONDARY,
         lw=0.8,
         ls=":",

@@ -123,7 +123,7 @@ def render_iso10140_report(
         from reportlab.lib.units import mm
 
         if verbose:
-            absorption = np.asarray(result.absorption, dtype=np.float64)
+            absorption = np.asarray(result.absorption_area, dtype=np.float64)
             columns: list[Column] = [
                 (t("A [m<super>2</super>]", language), absorption, 1),
                 (value_header, curve, 1),

@@ -24,7 +24,7 @@ says that this is the depth the data for CE marking is compiled at.
 ```python
 from phonometry import materials
 
-check = materials.check_ceiling_specimen(area_m2=10.8, mounting="E", depth_mm=200.0)
+check = materials.check_ceiling_specimen(area=10.8, mounting="E", depth_mm=200.0)
 print(check.satisfied)            # True
 print(check.ce_marking_depth)     # True
 print(materials.mounting_type("E"))
@@ -46,7 +46,7 @@ clause asks to be aimed at, published as constants to build to and not judged.
 
 ```python
 dry = materials.check_ceiling_specimen(
-    area_m2=10.8, mounting="E", depth_mm=200.0,
+    area=10.8, mounting="E", depth_mm=200.0,
     support_width_mm=40.0, support_height_mm=40.0, support_centre_distance_m=1.2,
     relative_humidity_percent=[41.0, 44.0],
 )
@@ -79,10 +79,10 @@ least 50 % relative humidity.
 
 ```python
 correction = materials.air_absorption_correction(
-    volume_m3=200.0,
+    volume=200.0,
     specimen_area_m2=10.8,
-    attenuation_with=[0.0011, 0.0013, 0.0018, 0.0028, 0.0055, 0.0170],
-    attenuation_empty=[0.0010, 0.0012, 0.0016, 0.0025, 0.0050, 0.0160],
+    attenuation_with_per_m=[0.0011, 0.0013, 0.0018, 0.0028, 0.0055, 0.0170],
+    attenuation_empty_per_m=[0.0010, 0.0012, 0.0016, 0.0025, 0.0050, 0.0160],
 )
 print(correction.round(3))     # [0.007 0.007 0.015 0.022 0.037 0.074]
 ```

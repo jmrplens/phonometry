@@ -252,7 +252,7 @@ class PropagationLossResult(OwnsArrays):
     :ivar spreading: Geometrical-spreading contribution per range, in dB.
     :ivar absorption: Volume-absorption contribution per range, in dB.
     :ivar frequency: The acoustic frequency, in Hz.
-    :ivar absorption_coefficient: The absorption coefficient :math:`\alpha`,
+    :ivar absorption_db_per_km: The absorption coefficient :math:`\alpha`,
         in dB/km.
     :ivar law: The spreading law used.
     :ivar model: The absorption model used.
@@ -263,7 +263,7 @@ class PropagationLossResult(OwnsArrays):
     spreading: NDArray[np.float64]
     absorption: NDArray[np.float64]
     frequency: float
-    absorption_coefficient: float
+    absorption_db_per_km: float
     law: str
     model: str
 
@@ -367,7 +367,7 @@ def propagation_loss(
         spreading=spreading,
         absorption=absorption,
         frequency=f,
-        absorption_coefficient=alpha,
+        absorption_db_per_km=alpha,
         law=law.strip().lower(),
         model=model.strip().lower(),
     )

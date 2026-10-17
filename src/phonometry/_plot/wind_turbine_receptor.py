@@ -651,7 +651,7 @@ def _draw_turbine_levels(
     )
     ax.plot(
         x,
-        result.background_levels_db,
+        result.background_levels,
         color=_C_MUTED,
         marker="v",
         lw=1.0,
@@ -683,7 +683,7 @@ def _draw_turbine_levels_by_sector(
     from matplotlib.lines import Line2D
 
     total = np.asarray(result.total_levels_db)
-    background = np.asarray(result.background_levels_db)
+    background = np.asarray(result.background_levels)
     turbine = np.asarray(result.turbine_levels_db)
     for name, members, sector_colour in _direction_groups(
         result.wind_directions_deg, x.size, language
@@ -975,7 +975,7 @@ def plot_tone_search_limit(
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Attenuation over the distance [dB]", language))
     ax.set_title(
-        f"{_num(result.distance_m, language, 0)} m, {_num(result.temperature_c, language, 0)} °C, "
+        f"{_num(result.distance, language, 0)} m, {_num(result.temperature_c, language, 0)} °C, "
         f"{_num(result.relative_humidity_percent, language, 0)} %"
     )
     ax.grid(visible=True, which="both", alpha=0.3)

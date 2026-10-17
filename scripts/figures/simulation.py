@@ -56,7 +56,7 @@ def generate_metadiffuser_ntff_polar(output_dir: str) -> None:
     model = materials.metadiffuser_polar_response(
         2000.0,
         wells,
-        depth=depth,
+        depth_m=depth,
         period_m=period_m,
         repetitions=1,
     )
@@ -640,7 +640,7 @@ def generate_metadiffuser_meshed_panel(output_dir: str) -> None:
     ax_z = fig.add_subplot(gs[2])
 
     plot_metadiffuser_panel_geometry(
-        wells, ax=ax_m, depth=depth, period_m=period_m, language=_LANG
+        wells, ax=ax_m, depth_m=depth, period_m=period_m, language=_LANG
     )
     ax_m.set_title(
         "What the transfer matrix homogenises: five slit "

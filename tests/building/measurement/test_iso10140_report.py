@@ -74,7 +74,7 @@ def test_r_equals_level_difference_at_unity_absorption() -> None:
     """With S = A the 10 lg(S/A) term vanishes: R = L1 - L2 exactly."""
     result = _airborne_result()
     assert np.allclose(result.r, _AIRBORNE_R)
-    assert np.allclose(result.absorption, 10.0)
+    assert np.allclose(result.absorption_area, 10.0)
 
 
 def test_airborne_fiche_rating_pinned_to_iso717_1_annex_c(tmp_path: Path) -> None:
@@ -96,7 +96,7 @@ def test_ln_equals_impact_level_at_reference_absorption() -> None:
     """With A = A0 the 10 lg(A/A0) term vanishes: Ln = Li exactly."""
     result = _impact_result()
     assert np.allclose(result.l_n, _IMPACT_LN)
-    assert np.allclose(result.absorption, 10.0)
+    assert np.allclose(result.absorption_area, 10.0)
 
 
 def test_impact_fiche_rating_pinned_to_iso717_2_annex_c(tmp_path: Path) -> None:
@@ -238,7 +238,7 @@ def test_rating_without_per_band_data_rejected(tmp_path: Path) -> None:
     )
     result = building.LabAirborneInsulationResult(
         r=np.asarray(_AIRBORNE_R, dtype=np.float64),
-        absorption=np.full(16, 10.0),
+        absorption_area=np.full(16, 10.0),
         rating=bare_rating,
     )
     out = str(tmp_path / "x.pdf")
@@ -252,7 +252,7 @@ def test_manual_impact_result_renders(tmp_path: Path) -> None:
     """A manually built lab impact result reports its Ln fiche."""
     result = _impact_result()
     bare = building.LabImpactInsulationResult(
-        l_n=result.l_n, absorption=result.absorption, rating=result.rating
+        l_n=result.l_n, absorption_area=result.absorption_area, rating=result.rating
     )
     out = tmp_path / "bare.pdf"
     bare.report(str(out))

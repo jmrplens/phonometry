@@ -130,7 +130,7 @@ def test_profile_refuses_a_temperature_column_that_is_not_finite() -> None:
 def test_three_models_agree_in_common_domain() -> None:
     # UNESCO, Del Grosso and Mackenzie must agree within ~1 m/s at a mid-ocean
     # point inside all three domains (10 C, 35 ppt, 1000 m).
-    kw = {"latitude": 45.0}
+    kw = {"latitude_deg": 45.0}
     c_u = sea_water_sound_speed(10.0, 35.0, 1000.0, model="unesco", **kw)
     c_d = sea_water_sound_speed(10.0, 35.0, 1000.0, model="del_grosso", **kw)
     c_m = sea_water_sound_speed(10.0, 35.0, 1000.0, model="mackenzie", **kw)
@@ -223,7 +223,7 @@ def test_unknown_model_rejected() -> None:
 
 
 def test_negative_depth_rejected() -> None:
-    with pytest.raises(ValueError, match=r"'depth' must be non-negative"):
+    with pytest.raises(ValueError, match=r"'depth_m' must be non-negative"):
         sea_water_sound_speed(10.0, 35.0, -5.0)
 
 
@@ -248,7 +248,7 @@ def test_profile_requires_increasing_depths() -> None:
 def test_profile_columns_must_run_over_one_depth_grid() -> None:
     """Columns off the depth grid are refused when built, not when read.
 
-    The figure draws ``speed_of_sound`` against ``depth``, so that half of a
+    The figure draws ``speeds_of_sound`` against ``depths``, so that half of a
     mismatch surfaces only as matplotlib's "x and y must have same first
     dimension" and two bare shapes, naming neither column. ``gradient_per_s``
     reaches no figure at all and is silent in both directions, yet the depth

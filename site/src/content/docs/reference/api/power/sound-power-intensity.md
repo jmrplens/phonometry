@@ -326,7 +326,7 @@ PrecisionIntensityResult(
     surface_area: float,
     *,
     temperature_c: float = 23.0,
-    barometric_pressure_pa: float = 101325.0,
+    static_pressure_pa: float = 101325.0,
 )
 ```
 
@@ -339,7 +339,7 @@ $L_W = 10 \log_{10}(P/P_0)$ (Eq. 9), `NaN`
 where $P \le 0$ (`not_applicable_band` True, clause 9.2).
 `sound_power_level_normalized` is `LW0` normalized to 23 deg C /
 101 325 Pa (Eq. 10) from the air temperature `temperature_c` and the
-barometric pressure `barometric_pressure_pa` of the measurement.
+barometric pressure `static_pressure_pa` of the measurement.
 `sound_power_level_a` is the A-weighted total over applicable bands
 (`NaN` without `frequencies` and more than one band). Everything read
 from the partial powers is a read-only property, so the totals, the levels
@@ -531,7 +531,7 @@ sound_power_intensity_precision(
     *,
     frequencies: np.ndarray | None = None,
     temperature_c: float = 23.0,
-    barometric_pressure_pa: float = 101325.0,
+    static_pressure_pa: float = 101325.0,
 ) -> PrecisionIntensityResult
 ```
 
@@ -558,7 +558,7 @@ $$
 | `areas` | `(N,)` partial surface areas `Si`, m^2. |
 | `frequencies` | `(NB,)` nominal mid-band frequencies (Hz), for LWA. |
 | `temperature_c` | Air temperature `theta` (deg C), for LW0 (Eq. 10). |
-| `barometric_pressure_pa` | Barometric pressure `B` (Pa), for LW0. |
+| `static_pressure_pa` | Barometric pressure `B` (Pa), for LW0. |
 
 **Returns:** [`PrecisionIntensityResult`](/phonometry/reference/api/power/sound-power-intensity/#precisionintensityresult).
 

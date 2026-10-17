@@ -169,7 +169,7 @@ class CorrelationResult(OwnsArrays):
     :ivar kind: ``'autocorrelation'`` or ``'cross-correlation'``.
     :ivar fs: Sample rate, in Hz.
     :ivar n_samples: Record length ``N``, in samples.
-    :ivar duration: Record length :math:`T = N/f_\mathrm{s}`, in seconds.
+    :ivar duration_s: Record length :math:`T = N/f_\mathrm{s}`, in seconds.
     """
 
     lags: NDArray[np.float64]
@@ -179,7 +179,7 @@ class CorrelationResult(OwnsArrays):
     kind: str
     fs: float
     n_samples: int
-    duration: float
+    duration_s: float
 
     def __post_init__(self) -> None:
         """Reject an estimate whose three curves do not share one lag axis.
@@ -230,7 +230,7 @@ class CorrelationResult(OwnsArrays):
             where=rho2 > 0.0,
         )
         return np.asarray(
-            np.sqrt(1.0 + ratio) / np.sqrt(2.0 * b * self.duration),
+            np.sqrt(1.0 + ratio) / np.sqrt(2.0 * b * self.duration_s),
             dtype=np.float64,
         )
 
@@ -338,12 +338,12 @@ def correlation(
         kind="autocorrelation" if is_auto else "cross-correlation",
         fs=fs_v,
         n_samples=n,
-        duration=n / fs_v,
+        duration_s=n / fs_v,
     )
 
 
 def correlation_random_error(
-    coefficient: float, signal_bandwidth: float, duration: float
+    coefficient: float, signal_bandwidth: float, duration_s: float
 ) -> float:
     r"""Normalized random error of a correlation estimate.
 
@@ -369,14 +369,14 @@ def correlation_random_error(
     :param coefficient: Correlation coefficient :math:`\rho_{xy}(\tau)`
         at the lag.
     :param signal_bandwidth: Signal bandwidth ``B``, in Hz.
-    :param duration: Record length ``T``, in seconds.
+    :param duration_s: Record length ``T``, in seconds.
     :return: Normalized random error (dimensionless; ``inf`` at
         :math:`\rho = 0`).
     :raises ValueError: If the bandwidth or duration is not positive, or
         the coefficient is outside [-1, 1].
     """
     b = _positive(signal_bandwidth, "signal_bandwidth")
-    t = _positive(duration, "duration")
+    t = _positive(duration_s, "duration_s")
     require_scalar(coefficient, "coefficient")
     rho = float(coefficient)
     if not np.isfinite(rho) or abs(rho) > 1.0:

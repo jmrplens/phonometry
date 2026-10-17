@@ -108,40 +108,40 @@ def _metric_rows(
     em dash and the natural frequency is omitted when the method cannot resolve
     ``s'`` (a non-finite result, Clause 8.2 c)).
     """
-    resolved = bool(np.isfinite(result.dynamic_stiffness))
+    resolved = bool(np.isfinite(result.dynamic_stiffness_n_m3))
     rows: list[tuple[str, str]] = [
         (
             t("Resonant frequency f<sub>r</sub> [Hz]", language),
-            _hz(result.resonant_frequency, language),
+            _hz(result.resonant_frequency_hz, language),
         ),
         (
             t(
                 "Apparent dynamic stiffness s&#8242;<sub>t</sub> [MN/m<super>3</super>]",
                 language,
             ),
-            _mn(result.apparent_stiffness, language),
+            _mn(result.apparent_stiffness_n_m3, language),
         ),
     ]
-    if result.gas_stiffness > 0.0:
+    if result.gas_stiffness_n_m3 > 0.0:
         rows.append(
             (
                 t(
                     "Enclosed-gas stiffness s&#8242;<sub>a</sub> [MN/m<super>3</super>]",
                     language,
                 ),
-                _mn(result.gas_stiffness, language),
+                _mn(result.gas_stiffness_n_m3, language),
             )
         )
     rows.append(
         (
             t("Dynamic stiffness s&#8242; [MN/m<super>3</super>]", language),
-            _mn(result.dynamic_stiffness, language) if resolved else "&#8212;",
+            _mn(result.dynamic_stiffness_n_m3, language) if resolved else "&#8212;",
         )
     )
     rows.append(
         (
             t("Supported-floor mass m&#8242; [kg/m<super>2</super>]", language),
-            fmt_num(result.floor_mass_per_area, language),
+            fmt_num(result.floor_mass_per_area_kg_m2, language),
         )
     )
     if resolved and np.isfinite(result.natural_frequency):
@@ -160,21 +160,21 @@ def _statement(result: DynamicStiffnessResult, language: str = "en") -> str:
         "Apparent dynamic stiffness s&#8242;<sub>t</sub> = "
         "<b>{value} MN/m<super>3</super></b>",
         language,
-    ).format(value=_mn(result.apparent_stiffness, language))
+    ).format(value=_mn(result.apparent_stiffness_n_m3, language))
 
 
 def _extended_terms(result: DynamicStiffnessResult, language: str = "en") -> list[str]:
     """The installed ``s'`` and the test resonance ``fr`` shown beside the box."""
-    resolved = bool(np.isfinite(result.dynamic_stiffness))
+    resolved = bool(np.isfinite(result.dynamic_stiffness_n_m3))
     s_installed = (
-        f"{_mn(result.dynamic_stiffness, language)} MN/m<super>3</super>"
+        f"{_mn(result.dynamic_stiffness_n_m3, language)} MN/m<super>3</super>"
         if resolved
         else "&#8212;"
     )
     terms = [
         t("Dynamic stiffness s&#8242; = {value}", language).format(value=s_installed),
         t("Resonant frequency f<sub>r</sub> = {value} Hz", language).format(
-            value=_hz(result.resonant_frequency, language)
+            value=_hz(result.resonant_frequency_hz, language)
         ),
     ]
     if resolved and np.isfinite(result.natural_frequency):

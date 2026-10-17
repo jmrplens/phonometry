@@ -87,7 +87,7 @@ class EnvelopeResult(OwnsArrays):
     :ivar times: Time axis of the outputs, in seconds.
     :ivar envelope: Envelope :math:`A(t) = \lvert z(t) \rvert`
         (Eq. 13.17).
-    :ivar phase: Unwrapped instantaneous phase :math:`\theta(t)`, in
+    :ivar phase_rad: Unwrapped instantaneous phase :math:`\theta(t)`, in
         radians (Eq. 13.18).
     :ivar instantaneous_frequency:
         :math:`f(t) = (1/2\pi) \, d\theta/dt`, in Hz
@@ -106,7 +106,7 @@ class EnvelopeResult(OwnsArrays):
 
     times: NDArray[np.float64]
     envelope: NDArray[np.float64]
-    phase: NDArray[np.float64]
+    phase_rad: NDArray[np.float64]
     instantaneous_frequency: NDArray[np.float64]
     fs: float
     signal: Signal | NDArray[np.float64]
@@ -140,7 +140,7 @@ class EnvelopeResult(OwnsArrays):
             self,
             times=1,
             envelope=1,
-            phase=1,
+            phase_rad=1,
             instantaneous_frequency=1,
             signal=1,
         )
@@ -148,7 +148,7 @@ class EnvelopeResult(OwnsArrays):
             self,
             "times",
             "envelope",
-            "phase",
+            "phase_rad",
             "instantaneous_frequency",
             axis="output sample",
         )
@@ -251,7 +251,7 @@ def envelope(
     return EnvelopeResult(
         times=times,
         envelope=env,
-        phase=phase,
+        phase_rad=phase,
         instantaneous_frequency=inst_freq,
         fs=out_fs,
         signal=like_input(x, xa),

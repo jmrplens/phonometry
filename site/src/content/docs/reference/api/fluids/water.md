@@ -149,7 +149,7 @@ sea_water_density(
     *,
     temperature_c: float,
     salinity_psu: float,
-    absolute_pressure_pa: float,
+    static_pressure_pa: float,
 ) -> float
 ```
 
@@ -172,7 +172,7 @@ a depth.
 | :--- | :--- |
 | `temperature_c` | Temperature `T`, in degrees Celsius. |
 | `salinity_psu` | Practical salinity `S`, dimensionless. |
-| `absolute_pressure_pa` | Absolute static pressure `P_w`, in pascals. |
+| `static_pressure_pa` | Absolute static pressure `P_w`, in pascals. |
 
 **Returns:** Density `rho`, in kg/m3.
 
@@ -187,20 +187,20 @@ a depth.
 ```python
 sea_water_sound_speed(
     temperature_c: float,
-    salinity: float,
-    depth: float,
+    salinity_psu: float,
+    depth_m: float,
     *,
     model: str = ...,
-    latitude: float = ...,
+    latitude_deg: float = ...,
 ) -> float
 
 sea_water_sound_speed(
     temperature_c: ArrayLike,
-    salinity: ArrayLike,
-    depth: ArrayLike,
+    salinity_psu: ArrayLike,
+    depth_m: ArrayLike,
     *,
     model: str = ...,
-    latitude: float = ...,
+    latitude_deg: float = ...,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -211,10 +211,10 @@ Speed of sound in sea water, in metres per second.
 | Name | Description |
 | :--- | :--- |
 | `temperature_c` | Temperature `T`, in degrees Celsius. |
-| `salinity` | Salinity `S`, in parts per thousand (PSU). |
-| `depth` | Depth below the surface, in metres (`>= 0`). |
+| `salinity_psu` | Salinity `S`, in parts per thousand (PSU). |
+| `depth_m` | Depth below the surface, in metres (`>= 0`). |
 | `model` | `"unesco"` (default), `"del_grosso"`, `"mackenzie"` or `"medwin"`. |
-| `latitude` | Latitude for the depth→pressure conversion, in degrees (used by `"unesco"` and `"del_grosso"`; default 45°). |
+| `latitude_deg` | Latitude for the depth→pressure conversion, in degrees (used by `"unesco"` and `"del_grosso"`; default 45°). |
 
 **Returns:** The sound speed `c`, in m/s.
 

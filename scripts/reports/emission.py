@@ -314,7 +314,7 @@ def _precision_intensity_example() -> tuple[
         areas,
         frequencies=freqs,
         temperature_c=28.0,
-        barometric_pressure_pa=94_000.0,
+        static_pressure_pa=94_000.0,
     )
     indicators = ph.emission.precision_field_indicators(
         segments, pressure_levels, time_window_intensity=windows

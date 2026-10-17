@@ -170,7 +170,7 @@ decibels. This is where each of them is read from.
 | Argument | What it means | Where it is read from | The trap |
 | :--- | :--- | :--- | :--- |
 | `RoadTraffic.flow_rate` ($Q_m$) | Vehicles of category $m$ per hour | Yearly average per hour, per time period (day / evening / night), per vehicle class and **per source line**, from traffic counting or a traffic model (2.2.1) | A peak-hour count. $Q$ is an annual average for the period, which is what makes the result an $L_\mathrm{den}$ ingredient |
-| `RoadTraffic.speed` ($v_m$) | Representative speed of category $m$ | In most cases the **lower** of the legal maximum for the road section and the legal maximum for the vehicle category; where local measurement data is unavailable, the legal maximum for the category (2.2.1) | Assuming a measured average is required. It is not: the standard's default *is* the legal limit, and heavy vehicles usually take a lower one than the section |
+| `RoadTraffic.speed_kmh` ($v_m$) | Representative speed of category $m$ | In most cases the **lower** of the legal maximum for the road section and the legal maximum for the vehicle category; where local measurement data is unavailable, the legal maximum for the category (2.2.1) | Assuming a measured average is required. It is not: the standard's default *is* the legal limit, and heavy vehicles usually take a lower one than the section |
 | `temperature_c` ($\tau$) | Air temperature | The **yearly average** air temperature of the period, from long-term meteorological data (2.2.10) | The survey-day value. At $K_1 = 0{,}08$ dB/°C, a 12 °C annual mean against a 20 °C afternoon is 0,6 dB on the light-vehicle rolling term |
 | `RoadTraffic.studded_fraction`, `studded_months` ($Q_{\mathrm{stud,ratio}}$, $T_\mathrm{s}$) | Fleet share and season | The average ratio of light vehicles per hour fitted with studded tyres **during** the months they are fitted, and the number of those months; the method forms $p_\mathrm{s} = Q_{\mathrm{stud,ratio}}\,T_\mathrm{s}/12$ itself (2.2.7) | Passing the year-averaged share, which applies $T_\mathrm{s}/12$ twice |
 | `junction_distance` ($x$) | Distance to the junction | Measured along the road from the point source to the nearest **intersection of this source line with another source line** (2.2.5) | Measuring to the stop line or the kerb. It is the line crossing, and only the last 100 m is affected |
@@ -428,7 +428,7 @@ already the rolling term.
 from phonometry import environment
 
 row = environment.road_surface_coefficients(environment.RoadSurface.TWO_LAYER_ZOAB_FINE)
-row.speed_range          # (80.0, 130.0) km/h, the printed validity range
+row.speed_range_kmh          # (80.0, 130.0) km/h, the printed validity range
 row.alpha["1"]           # alpha per octave band for light vehicles
 row.beta["1"]            # -0.1, the speed coefficient
 ```
@@ -458,8 +458,8 @@ for surface in (environment.RoadSurface.REFERENCE, environment.RoadSurface.TWO_L
                 environment.RoadSurface.SMA_NL8, environment.RoadSurface.HARD_ELEMENTS_NOT_HERRINGBONE):
     row = environment.road_surface_coefficients(surface)
     # The reference row carries no speed range: it is valid by definition.
-    span = ("all speeds" if row.speed_range is None
-            else "{:g}-{:g} km/h".format(*row.speed_range))
+    span = ("all speeds" if row.speed_range_kmh is None
+            else "{:g}-{:g} km/h".format(*row.speed_range_kmh))
     ax.semilogx(bands, row.alpha["1"], label=f"{surface.value} ({span})")
 ax.axhline(0.0, color="k", lw=0.8)
 ax.set_xlabel("Octave-band centre frequency [Hz]")

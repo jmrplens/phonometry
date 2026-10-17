@@ -1957,8 +1957,8 @@ def plot_heavy_impact_source(
 
     ax = ax if ax is not None else _new_axes()
     positions = _band_axis(ax, result.frequencies, language=language)
-    lower = result.nominal - result.tolerance
-    upper = result.nominal + result.tolerance
+    lower = result.nominal - result.tolerance_db
+    upper = result.nominal + result.tolerance_db
     ax.fill_between(
         positions,
         lower,

@@ -55,14 +55,14 @@ def coefficients_2015() -> environment.RoadEmissionCoefficients:
 def surfaces_2015() -> dict[str, environment.RoadSurfaceCoefficients]:
     """Table F-4 as published in (EU) 2015/996, keyed by the workbook's ID.
 
-    ``speed_range`` is ``None`` because the 2015 table printed no validity
+    ``speed_range_kmh`` is ``None`` because the 2015 table printed no validity
     range for these rows; the ranges arrived with the 2021 amendment.
     """
     from phonometry import environment
 
     return {
         surface: environment.RoadSurfaceCoefficients(
-            name=name, alpha=alpha, beta=beta, speed_range=None
+            name=name, alpha=alpha, beta=beta, speed_range_kmh=None
         )
         for surface, (name, alpha, beta) in ref.cnossos_road_2015_surfaces().items()
     }

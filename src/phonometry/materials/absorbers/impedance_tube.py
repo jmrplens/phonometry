@@ -141,7 +141,7 @@ def speed_of_sound_iso10534(*, temperature_c: ArrayLike) -> Real:
 def air_density_iso10534(
     *,
     temperature_c: ArrayLike,
-    atmospheric_pressure_kpa: ArrayLike = _ISO_P_REF,
+    static_pressure_kpa: ArrayLike = _ISO_P_REF,
 ) -> Real:
     r"""Air density (ISO 10534-2:2001, Eq. (7)).
 
@@ -150,7 +150,7 @@ def air_density_iso10534(
     kelvin.
 
     :param temperature_c: Air temperature, in **degrees Celsius**.
-    :param atmospheric_pressure_kpa: Atmospheric pressure ``pa``, in
+    :param static_pressure_kpa: Atmospheric pressure ``pa``, in
         **kilopascals** (default 101.325 kPa).
     :return: Air density ``rho``, in kilograms per cubic metre.
     :raises ValueError: if any temperature is at or below -273.15 degC, or any
@@ -159,15 +159,15 @@ def air_density_iso10534(
     kelvin = _ABSOLUTE_ZERO_C_OFFSET + require_above_absolute_zero_array(
         temperature_c, "temperature_c"
     )
-    pa = np.asarray(atmospheric_pressure_kpa, dtype=np.float64)
+    pa = np.asarray(static_pressure_kpa, dtype=np.float64)
     if kelvin.ndim != 0 and pa.ndim != 0:
         require_equal_shapes(
             "air_density_iso10534",
-            {"temperature_c": kelvin.shape, "atmospheric_pressure_kpa": pa.shape},
+            {"temperature_c": kelvin.shape, "static_pressure_kpa": pa.shape},
             "measurement",
         )
     if np.any(pa <= 0.0):
-        msg = "'atmospheric_pressure_kpa' must be positive (kPa)."
+        msg = "'static_pressure_kpa' must be positive (kPa)."
         raise ValueError(msg)
     return np.asarray(
         _ISO_RHO_REF * (pa * _ISO_T_REF) / (_ISO_P_REF * kelvin), dtype=np.float64
@@ -186,7 +186,7 @@ def _canonical_shape(shape: str) -> str:
         raise ValueError(msg) from None
 
 
-def hydraulic_diameter(width: float, height_m: float) -> float:
+def hydraulic_diameter(width_m: float, height_m: float) -> float:
     r"""Hydraulic diameter of a rectangular tube, :math:`4A/P` (ISO 10534-2, A.2.1.5).
 
     For a rectangular cross-section of side lengths ``w`` and ``h`` the ratio
@@ -195,14 +195,14 @@ def hydraulic_diameter(width: float, height_m: float) -> float:
     length. This is the ``d`` the Eq. (A.18) attenuation estimate expects for
     rectangular tubes (see :func:`tube_attenuation_constant`).
 
-    :param width: Inner side length ``w``, in metres.
+    :param width_m: Inner side length ``w``, in metres.
     :param height_m: Inner side length ``h``, in metres.
     :return: Hydraulic diameter :math:`d_\mathrm{h} = 4A/P`, in metres.
     """
-    if width <= 0.0 or height_m <= 0.0:
-        msg = "'width' and 'height_m' must be positive."
+    if width_m <= 0.0 or height_m <= 0.0:
+        msg = "'width_m' and 'height_m' must be positive."
         raise ValueError(msg)
-    return float(2.0 * width * height_m / (width + height_m))
+    return float(2.0 * width_m * height_m / (width_m + height_m))
 
 
 def tube_attenuation_constant(
@@ -239,7 +239,7 @@ def tube_wavenumber(
     frequency: ArrayLike,
     speed_of_sound: float,
     *,
-    attenuation: ArrayLike | None = None,
+    attenuation_np_per_m: ArrayLike | None = None,
 ) -> Complex:
     r"""Complex wavenumber :math:`k_0 = k_0' - jk_0''` (ISO 10534-2, Clause 2.6).
 
@@ -249,7 +249,7 @@ def tube_wavenumber(
 
     :param frequency: Frequency ``f``, in hertz (scalar or per band).
     :param speed_of_sound: Speed of sound ``c0``, in metres per second.
-    :param attenuation: Attenuation constant ``k0''``, in nepers per metre
+    :param attenuation_np_per_m: Attenuation constant ``k0''``, in nepers per metre
         (scalar or matching ``frequency``); ``None`` gives the lossless real
         wavenumber. Obtain a lower-bound estimate from
         :func:`tube_attenuation_constant`.
@@ -262,11 +262,11 @@ def tube_wavenumber(
         msg = "'frequency' must be non-negative."
         raise ValueError(msg)
     k_real = 2.0 * np.pi * f / speed_of_sound
-    if attenuation is None:
+    if attenuation_np_per_m is None:
         k_imag: NDArray[np.float64] = np.zeros_like(k_real)
     else:
         k_imag = require_per_band(
-            attenuation, "attenuation", k_real, bands_name="frequency"
+            attenuation_np_per_m, "attenuation_np_per_m", k_real, bands_name="frequency"
         )
     return np.asarray(k_real - 1j * k_imag, dtype=np.complex128)
 
@@ -703,7 +703,7 @@ def two_microphone_impedance(
     x1: float,
     speed_of_sound: float,
     characteristic_impedance: float,
-    attenuation: ArrayLike | None = None,
+    attenuation_np_per_m: ArrayLike | None = None,
     diameter_m: float | None = None,
     shape: str = "circular",
 ) -> ImpedanceTubeResult:
@@ -723,7 +723,7 @@ def two_microphone_impedance(
         :func:`speed_of_sound_iso10534`).
     :param characteristic_impedance: Characteristic impedance ``rho c0``, in
         rayls.
-    :param attenuation: Optional tube attenuation constant ``k0''``, in
+    :param attenuation_np_per_m: Optional tube attenuation constant ``k0''``, in
         nepers/m (see :func:`tube_attenuation_constant`).
     :param diameter_m: Optional tube diameter/lateral dimension, in metres, that
         activates the plane-wave range check.
@@ -737,7 +737,7 @@ def two_microphone_impedance(
     # figure can always walk it.
     f = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
     h = _require_h12_per_band(h12, f, "frequency")
-    k0 = tube_wavenumber(f, speed_of_sound, attenuation=attenuation)
+    k0 = tube_wavenumber(f, speed_of_sound, attenuation_np_per_m=attenuation_np_per_m)
     r = reflection_factor(h, spacing_m=spacing_m, x1=x1, wavenumber=k0)
     canonical = _canonical_shape(shape)
     if diameter_m is not None:

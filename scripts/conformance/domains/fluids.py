@@ -137,7 +137,7 @@ def _chk_ainslie_standard_ocean() -> Outcome:
     rho = ph.fluids.sea_water_density(
         temperature_c=10.0,
         salinity_psu=35.0,
-        absolute_pressure_pa=_SURFACE_ABSOLUTE_PA,
+        static_pressure_pa=_SURFACE_ABSOLUTE_PA,
     )
     # Folio 28 prints 1027 kg/m3 for these conditions, to four figures, so half
     # a unit in the last place is what reproducing it means.
@@ -167,10 +167,10 @@ def _chk_ainslie_surface_pressure() -> Outcome:
 )
 def _chk_ainslie_folio_177_gap() -> Outcome:
     with_pressure = ph.fluids.sea_water_density(
-        temperature_c=23.0, salinity_psu=35.0, absolute_pressure_pa=_SURFACE_ABSOLUTE_PA
+        temperature_c=23.0, salinity_psu=35.0, static_pressure_pa=_SURFACE_ABSOLUTE_PA
     )
     without_pressure = ph.fluids.sea_water_density(
-        temperature_c=23.0, salinity_psu=35.0, absolute_pressure_pa=1.0
+        temperature_c=23.0, salinity_psu=35.0, static_pressure_pa=1.0
     )
     # 4,3e-7 per pascal over the atmosphere Eq. (4.11) puts at the surface. The
     # expected value is that product rather than a rounded quotation of it, so

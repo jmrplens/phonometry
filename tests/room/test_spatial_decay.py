@@ -340,10 +340,10 @@ def test_a_frequency_that_names_no_third_octave_is_refused() -> None:
 def test_a_curve_carries_its_region_and_its_two_descriptors() -> None:
     keep = _select(*oracle.ANNEX_C_RANGES_M["middle"])
     res = room.spatial_decay_curve(
-        _corrected(1000)[keep], DISTANCES_M[keep], region="whole", band_hz=1000.0
+        _corrected(1000)[keep], DISTANCES_M[keep], region="whole", band=1000.0
     )
     assert res.region == "whole"
-    assert res.band_hz == 1000.0
+    assert res.band == 1000.0
     assert res.decay_rate_db == pytest.approx(4.4, abs=0.05)
     assert res.level_excess_db.size == res.distances.size
 
@@ -666,7 +666,7 @@ def test_the_probst_fitting_densities_reproduce(table: str) -> None:
     factor 4 rather than a tight tolerance.
     """
     room_data, _fittings, surface_m2, printed = oracle.PROBST_ROOMS[table]
-    got = room.fitting_density(surface_area_m2=surface_m2, volume_m3=room_data[3])
+    got = room.fitting_density(surface_area=surface_m2, volume=room_data[3])
     assert got == pytest.approx(printed, abs=0.0005)
 
 

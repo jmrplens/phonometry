@@ -991,8 +991,8 @@ service_equipment_level(
     quantity: Literal['Smax', 'Fmax', 'eq'],
     band: Literal['third', 'octave'] = 'third',
     background_db: ArrayLike | None = None,
-    reverberation_time_s: ArrayLike | None = None,
-    volume_m3: float | None = None,
+    reverberation_time: ArrayLike | None = None,
+    volume: float | None = None,
     reference_reverberation_time_s: float = 0.5,
     a_weighting_range: Literal['restricted', 'extended'] = 'restricted',
 ) -> ServiceEquipmentResult
@@ -1022,8 +1022,8 @@ over the integration time of Annex B for an equivalent level.
 | `quantity` | The Table 1 quantity measured: `"Smax"`, `"Fmax"` or `"eq"`. It names the single numbers and nothing else. |
 | `band` | `"third"` (default) or `"octave"`. 6 asks for the weighted values from one-third-octave bands; octave results are optional. |
 | `background_db` | Background band levels, in dB, one per band or one row per microphone position (energy-averaged over the positions, as the 2004 edition says in so many words and the draft leaves implicit). |
-| `reverberation_time_s` | Reverberation time of each band, in s, measured by ISO 3382-2 (Clause 8). Only the bands of the standardization range are read; the others may be `nan`. |
-| `volume_m3` | Room volume, in m³, for the normalized levels. |
+| `reverberation_time` | Reverberation time of each band, in s, measured by ISO 3382-2 (Clause 8). Only the bands of the standardization range are read; the others may be `nan`. |
+| `volume` | Room volume, in m³, for the normalized levels. |
 | `reference_reverberation_time_s` | $T_0$ of Formula (5), in s (0,5 s unless a regulation specifies another value). |
 | `a_weighting_range` | `"restricted"` (default: 50 Hz to 5 000 Hz, octave 63 Hz to 4 000 Hz) or `"extended"` (25 Hz to 10 000 Hz, octave 31,5 Hz to 8 000 Hz) for the A-weighted values; the report must say which. The C-weighted values always use the extended range. |
 
@@ -1033,7 +1033,7 @@ over the integration time of Annex B for an equivalent level.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a centre is not a nominal band, the bands do not cover the A-weighting range, the shapes disagree, a level is not a finite real number, a reverberation time in the standardization range is not positive, `volume_m3` or `reference_reverberation_time_s` is not one positive number, or `volume_m3` is given without a reverberation time. |
+| ValueError | If a centre is not a nominal band, the bands do not cover the A-weighting range, the shapes disagree, a level is not a finite real number, a reverberation time in the standardization range is not positive, `volume` or `reference_reverberation_time_s` is not one positive number, or `volume` is given without a reverberation time. |
 
 ## SERVICE_EQUIPMENT_OPERATING_CONDITIONS
 

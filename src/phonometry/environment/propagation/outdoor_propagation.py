@@ -213,12 +213,12 @@ class AtmosphericConditions(RichDisplay):
 
     :param temperature_c: Air temperature, in degrees Celsius.
     :param relative_humidity_percent: Relative humidity, in percent; ``None`` uses 70.
-    :param atmospheric_pressure_kpa: Atmospheric pressure, in kilopascals.
+    :param static_pressure_kpa: Atmospheric pressure, in kilopascals.
     """
 
     temperature_c: float = 20.0
     relative_humidity_percent: float | None = None
-    atmospheric_pressure_kpa: float = 101.325
+    static_pressure_kpa: float = 101.325
 
 
 @dataclass(frozen=True)
@@ -417,7 +417,7 @@ class OutdoorAttenuation(OwnsArrays):
         :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
             the header identity (``specimen`` the source/situation, ``client``,
             ``test_room`` the receiver position), the ``temperature_c`` /
-            ``relative_humidity_percent`` / ``atmospheric_pressure_kpa`` conditions and the footer
+            ``relative_humidity_percent`` / ``static_pressure_kpa`` conditions and the footer
             identity. A supplied ``requirement`` is read as the maximum
             acceptable A-weighted downwind level in dB (used only when a
             ``source_emission`` is given).
@@ -484,7 +484,7 @@ def atmospheric_absorption(
     frequencies: ArrayLike = DEFAULT_FREQUENCIES_HZ,
     temperature_c: float = 20.0,
     relative_humidity_percent: float | None = None,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
 ) -> NDArray[np.float64]:
     r"""Attenuation due to atmospheric absorption (ISO 9613-2:1996, Eq. (8)).
 
@@ -506,7 +506,7 @@ def atmospheric_absorption(
     :param frequencies: Octave-band midband frequencies, in hertz.
     :param temperature_c: Air temperature, in degrees Celsius.
     :param relative_humidity_percent: Relative humidity, in percent (default 70).
-    :param atmospheric_pressure_kpa: Atmospheric pressure, in kilopascals.
+    :param static_pressure_kpa: Atmospheric pressure, in kilopascals.
     :return: ``Aatm`` per band, in decibels.
     """
     relative_humidity_percent = (
@@ -516,7 +516,7 @@ def atmospheric_absorption(
         frequencies,
         temperature_c=temperature_c,
         relative_humidity_percent=relative_humidity_percent,
-        atmospheric_pressure_kpa=atmospheric_pressure_kpa,
+        static_pressure_kpa=static_pressure_kpa,
         exact_midband=True,
     )
     return np.asarray(alpha * distance, dtype=np.float64)
@@ -1063,7 +1063,7 @@ def outdoor_propagation_attenuation(
     barrier: Barrier | None = None,
     temperature_c: float = 20.0,
     relative_humidity_percent: float | None = None,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
     projected_distance: float | None = None,
 ) -> OutdoorAttenuation:
     r"""Total octave-band outdoor attenuation (ISO 9613-2:1996, Eq. (4)).
@@ -1091,7 +1091,7 @@ def outdoor_propagation_attenuation(
     :param barrier: Optional screening obstacle (:class:`Barrier`).
     :param temperature_c: Air temperature, in degrees Celsius.
     :param relative_humidity_percent: Relative humidity, in percent (default 70).
-    :param atmospheric_pressure_kpa: Atmospheric pressure, in kilopascals.
+    :param static_pressure_kpa: Atmospheric pressure, in kilopascals.
     :param projected_distance: Ground-plane projected distance ``dp``, in metres;
         defaults to :math:`\sqrt{d^2 - (h_\mathrm{s} - h_\mathrm{r})^2}`.
     :return: :class:`OutdoorAttenuation` with the per-band term breakdown.
@@ -1110,7 +1110,7 @@ def outdoor_propagation_attenuation(
         frequencies=freqs,
         temperature_c=temperature_c,
         relative_humidity_percent=relative_humidity_percent,
-        atmospheric_pressure_kpa=atmospheric_pressure_kpa,
+        static_pressure_kpa=static_pressure_kpa,
     )
     a_gr = ground_attenuation(
         distance,
@@ -1205,7 +1205,7 @@ def predicted_receiver_level(
         barrier=barrier,
         temperature_c=atmosphere.temperature_c,
         relative_humidity_percent=humidity,
-        atmospheric_pressure_kpa=atmosphere.atmospheric_pressure_kpa,
+        static_pressure_kpa=atmosphere.static_pressure_kpa,
         projected_distance=geometry.projected_distance,
     )
     cmet: float | None = None

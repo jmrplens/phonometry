@@ -156,7 +156,7 @@ Requires matplotlib (`pip install phonometry[plot]`).
 plane_wave_limit(
     *,
     diameter_m: float | None = None,
-    width: float | None = None,
+    width_m: float | None = None,
     height_m: float | None = None,
     area: float | None = None,
     flow_velocity: float = 0.0,
@@ -168,7 +168,7 @@ The first cut-on frequency of a duct: plane waves only below it.
 
 A convenience over [`circular_duct_cut_on`](/phonometry/reference/api/noise_control/duct-modes/#circular_duct_cut_on) and
 [`rectangular_duct_cut_on`](/phonometry/reference/api/noise_control/duct-modes/#rectangular_duct_cut_on) that takes whichever description of the
-cross section is at hand. Give either `diameter_m`, or both `width` and
+cross section is at hand. Give either `diameter_m`, or both `width_m` and
 `height_m`, or `area` (treated as a circular duct of the equivalent
 diameter $\sqrt{4S/\pi}$).
 
@@ -177,7 +177,7 @@ diameter $\sqrt{4S/\pi}$).
 | Name | Description |
 | :--- | :--- |
 | `diameter_m` | Internal diameter of a circular duct, m. |
-| `width` | Cross-sectional dimension `a` of a rectangular duct, m. |
+| `width_m` | Cross-sectional dimension `a` of a rectangular duct, m. |
 | `height_m` | Cross-sectional dimension `b` of a rectangular duct, m. |
 | `area` | Cross-sectional area, m2, for a duct described by its area. |
 | `flow_velocity` | Mean axial flow speed `U`, m/s. |
@@ -205,7 +205,7 @@ and a measurement will show the extra modes.
 
 ```python
 rectangular_duct_cut_on(
-    width: float,
+    width_m: float,
     height_m: float,
     *,
     flow_velocity: float = 0.0,
@@ -232,7 +232,7 @@ wavelength across the wider side.
 
 | Name | Description |
 | :--- | :--- |
-| `width` | Cross-sectional dimension `a`, m. |
+| `width_m` | Cross-sectional dimension `a`, m. |
 | `height_m` | Cross-sectional dimension `b`, m. |
 | `flow_velocity` | Mean axial flow speed `U`, m/s. |
 | `speed_of_sound` | Speed of sound `c` in the duct fluid, m/s. |

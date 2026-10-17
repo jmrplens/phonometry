@@ -305,7 +305,7 @@ def _relevant_turbines() -> ph.environment.SoundRelevantTurbines:
 def _low_frequency() -> ph.environment.LowFrequencyLevel:
     return ph.environment.wind_turbine_low_frequency_level(
         np.full(14, 100.0),
-        distance_m=600.0,
+        distance=600.0,
         hub_height_m=120.0,
         facade_insulation_db=ph.environment.LOW_FREQUENCY_FACADE_INSULATION_DB[
             "Denmark brick or similar"
@@ -584,8 +584,8 @@ def _service_equipment() -> ph.building.ServiceEquipmentResult:
         freqs,
         quantity="eq",
         background_db=background,
-        reverberation_time_s=t,
-        volume_m3=32.0,
+        reverberation_time=t,
+        volume=32.0,
     )
 
 
@@ -1248,7 +1248,7 @@ def _rainfall_sound() -> ph.building.RainfallSoundResult:
         np.linspace(48.0, 60.0, 18),
         np.linspace(1.9, 0.85, 18),
         _LAB_BANDS,
-        volume_m3=62.0,
+        volume=62.0,
         excited_area_m2=1.875,
         reference_correction=_rainfall_reference_correction(),
     )
@@ -1439,7 +1439,7 @@ def _effective_blocking_mass() -> ph.vibration.EffectiveBlockingMass:
     m_eff = 20.0 * (1.0 + (f / 3000.0) ** 2)
     ones = np.ones(f.size, dtype=complex)
     return ph.vibration.effective_blocking_mass(
-        f, m_eff * ones, ones, ones, blocking_mass_kg=20.0
+        f, m_eff * ones, ones, ones, blocking_mass=20.0
     )
 
 
@@ -1604,7 +1604,7 @@ def _high_frequency_power() -> ph.emission.HighFrequencySoundPowerResult:
     room = ph.emission.room_constant_from_air_absorption(
         freqs,
         volume=200.0,
-        surface_area_m2=210.0,
+        surface_area=210.0,
         temperature_c=23.0,
         relative_humidity_percent=50.0,
     )
@@ -1617,7 +1617,7 @@ def _high_frequency_power() -> ph.emission.HighFrequencySoundPowerResult:
         ]
     )
     return ph.emission.high_frequency_sound_power(
-        orientations, frequencies=freqs, room_constant_m2=room
+        orientations, frequencies=freqs, room_constant=room
     )
 
 
@@ -1653,7 +1653,7 @@ def _inverse_square_law() -> ph.emission.InverseSquareLawResult:
                 direction,
                 d,
                 grid,
-                background_levels_db=np.full(freqs.size, 30.0),
+                background_levels=np.full(freqs.size, 30.0),
                 name=f"path {index + 1}",
                 targets=_FREE_FIELD_TARGETS[index],
             )
@@ -1880,8 +1880,8 @@ def _turbine_power() -> ph.emission.TurbineSoundPowerResult:
     levels = np.array([88.0, 90.5, 91.0, 89.0, 92.5, 90.0])
     return ph.emission.turbine_sound_power(
         levels,
-        surface_area_m2=_turbine_surface().area_m2,
-        background_levels_db=levels - np.array([9.0, 12.0, 6.0, 15.0, 4.0, 11.0]),
+        surface_area=_turbine_surface().area,
+        background_levels=levels - np.array([9.0, 12.0, 6.0, 15.0, 4.0, 11.0]),
         environmental_correction_db=1.8,
         overhead_mask=np.array([False, False, False, False, True, False]),
     )

@@ -384,10 +384,10 @@ def test_an_air_correction_of_exactly_0_05_does_not_warn(
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         correction = materials.air_absorption_correction(
-            volume_m3=200.0,
+            volume=200.0,
             specimen_area_m2=16.0,
-            attenuation_with=[with_specimen],
-            attenuation_empty=[empty],
+            attenuation_with_per_m=[with_specimen],
+            attenuation_empty_per_m=[empty],
         )
     assert correction[0] == pytest.approx(0.05, abs=1e-12)
 
@@ -1350,7 +1350,7 @@ def test_a_decay_time_on_the_edge_of_its_interval_passes(
 ) -> None:
     # ISO 8041-1 Tables 10 and 11: the printed time plus or minus its tolerance.
     verdict = vibration.verify_running_rms_decay(
-        measured, integration_time_s=tau, method=method
+        measured, integration_time=tau, method=method
     )
     assert verdict.passes
 

@@ -153,12 +153,12 @@ def test_random_error_method_matches_the_closed_form() -> None:
     res = ph.signals.correlation(x, fs=FS, normalization="coefficient", max_lag=0.01)
     eps = res.random_error(2000.0)
     expected = np.sqrt(1.0 + res.coefficient**-2.0) / np.sqrt(
-        2.0 * 2000.0 * res.duration
+        2.0 * 2000.0 * res.duration_s
     )
     ok = res.coefficient != 0.0
     np.testing.assert_allclose(eps[ok], expected[ok], rtol=1e-12)
     zero = int(np.argmin(np.abs(res.lags)))
-    assert eps[zero] == pytest.approx(1.0 / np.sqrt(2000.0 * res.duration), rel=1e-6)
+    assert eps[zero] == pytest.approx(1.0 / np.sqrt(2000.0 * res.duration_s), rel=1e-6)
 
 
 def test_correlation_random_error_reproduces_example_8_5() -> None:
@@ -174,7 +174,7 @@ def test_correlation_random_error_validation() -> None:
         ph.signals.correlation_random_error(1.5, 100.0, 5.0)
     with pytest.raises(ValueError, match=r"'signal_bandwidth' must be a positive"):
         ph.signals.correlation_random_error(0.5, 0.0, 5.0)
-    with pytest.raises(ValueError, match=r"'duration' must be a positive"):
+    with pytest.raises(ValueError, match=r"'duration_s' must be a positive"):
         ph.signals.correlation_random_error(0.5, 100.0, -1.0)
 
 

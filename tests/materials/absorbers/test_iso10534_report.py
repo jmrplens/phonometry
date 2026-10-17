@@ -54,9 +54,7 @@ _FREQS = np.array([400, 500, 630, 800, 1000, 1250, 1600], dtype=float)
 def _result() -> ImpedanceTubeResult:
     c0 = float(speed_of_sound_iso10534(temperature_c=_TEMPERATURE_C))
     rho = float(
-        air_density_iso10534(
-            temperature_c=_TEMPERATURE_C, atmospheric_pressure_kpa=101.0
-        )
+        air_density_iso10534(temperature_c=_TEMPERATURE_C, static_pressure_kpa=101.0)
     )
     rc = characteristic_impedance(rho, c0)
     cavity = c0 / (4.0 * 1000.0)

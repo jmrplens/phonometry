@@ -158,7 +158,7 @@ The flight arrives as a path of points, and the method cuts it into segments.
 $N$ points make $N-1$ segments, so every per-segment mask carries $N-1$ entries.
 This is why the ground-roll masks below read `xs[:-1] < 1500.0` and not
 `xs < 1500.0`. Two defaults decide more than they look like they do. The speed
-column enters the duration correction relative to `reference_speed`, whose
+column enters the duration correction relative to `reference_speed_m_s`, whose
 default is 82.31 m/s, the Doc 29 160 kt reference, so a path flown at exactly
 that speed carries no duration correction at all, which is the case in every
 example on this page, and varying the column is how you see the term work. And

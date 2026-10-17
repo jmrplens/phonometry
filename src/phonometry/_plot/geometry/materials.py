@@ -300,10 +300,10 @@ def _draw_resonator(
     sits below the neck. Returns the total (width, depth) drawn, wall
     included, for autoscaling by the caller.
     """
-    w_n = float(resonator.neck_side)
-    l_n = float(resonator.neck_length)
-    w_c = float(resonator.cavity_side)
-    l_c = float(resonator.cavity_length)
+    w_n = float(resonator.neck_side_m)
+    l_n = float(resonator.neck_length_m)
+    w_c = float(resonator.cavity_side_m)
+    l_c = float(resonator.cavity_length_m)
     # Solid body around the air volume.
     body_w = w_c + 2.0 * wall
     body_d = l_n + l_c + wall
@@ -360,10 +360,10 @@ def plot_helmholtz_resonator_geometry(
     _check_language(language)
     if ax is None:
         ax = _new_axes()
-    w_n = float(resonator.neck_side)
-    l_n = float(resonator.neck_length)
-    w_c = float(resonator.cavity_side)
-    l_c = float(resonator.cavity_length)
+    w_n = float(resonator.neck_side_m)
+    l_n = float(resonator.neck_length_m)
+    w_c = float(resonator.cavity_side_m)
+    l_c = float(resonator.cavity_length_m)
     wall = 0.06 * max(w_c, l_n + l_c)
     _draw_resonator(ax, 0.0, 0.0, resonator, wall=wall)
     if kwargs:
@@ -400,7 +400,7 @@ def plot_slit_absorber_geometry(
     ax: Axes | None = None,
     *,
     slit_height_m: float,
-    lattice_step: float,
+    lattice_step_m: float,
     period_m: float,
     language: str = "en",
     **kwargs: Any,
@@ -417,7 +417,7 @@ def plot_slit_absorber_geometry(
         lattice step, or a single resonator reused for all steps).
     :param ax: Existing axes, or ``None`` to create a figure.
     :param slit_height_m: Slit height ``h``, in metres.
-    :param lattice_step: Lattice step ``a``, in metres.
+    :param lattice_step_m: Lattice step ``a``, in metres.
     :param period_m: Panel period ``d``, in metres.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the slit rectangle.
@@ -427,7 +427,7 @@ def plot_slit_absorber_geometry(
     """
     _check_language(language)
     require_positive(slit_height_m, "slit_height_m")
-    require_positive(lattice_step, "lattice_step")
+    require_positive(lattice_step_m, "lattice_step_m")
     require_positive(period_m, "period_m")
     chain = list(resonators) if isinstance(resonators, Sequence) else [resonators]
     if not chain:
@@ -436,7 +436,7 @@ def plot_slit_absorber_geometry(
     if ax is None:
         ax = _new_axes()
     n = len(chain)
-    depth = n * lattice_step
+    depth = n * lattice_step_m
     h = slit_height_m
     d = period_m
     wall = 0.05 * h
@@ -464,7 +464,7 @@ def plot_slit_absorber_geometry(
         zorder=4,
     )
     for index, resonator in enumerate(chain):
-        x_mouth = (index + 0.5) * lattice_step
+        x_mouth = (index + 0.5) * lattice_step_m
         _draw_resonator(ax, x_mouth, y_slit, resonator, wall=wall)
     # Rigid back wall.
     back = 0.08 * depth
@@ -484,8 +484,8 @@ def plot_slit_absorber_geometry(
         _dim(
             ax,
             (0.0, 0.0),
-            (lattice_step, 0.0),
-            _mm(lattice_step, language),
+            (lattice_step_m, 0.0),
+            _mm(lattice_step_m, language),
             offset=-off,
         )
     _finish_geometry_axes(
@@ -1021,7 +1021,7 @@ def plot_slit_absorber_result_geometry(
     if (
         result.resonators is None
         or result.slit_height_m is None
-        or result.lattice_step is None
+        or result.lattice_step_m is None
         or result.period_m is None
     ):
         msg = (
@@ -1033,7 +1033,7 @@ def plot_slit_absorber_result_geometry(
         result.resonators,
         ax=ax,
         slit_height_m=result.slit_height_m,
-        lattice_step=result.lattice_step,
+        lattice_step_m=result.lattice_step_m,
         period_m=result.period_m,
         language=language,
         **kwargs,
@@ -1053,10 +1053,10 @@ def _draw_metadiffuser_well(
     chain = list(well.resonators)
     step = depth / len(chain)
     for m, resonator in enumerate(chain):
-        w_n = float(resonator.neck_side)
-        l_n = float(resonator.neck_length)
-        w_c = float(resonator.cavity_side)
-        l_c = float(resonator.cavity_length)
+        w_n = float(resonator.neck_side_m)
+        l_n = float(resonator.neck_length_m)
+        w_c = float(resonator.cavity_side_m)
+        l_c = float(resonator.cavity_length_m)
         y_m = depth - (m + 0.5) * step
         x_neck = x_slit + h
         _material_rect(
@@ -1085,7 +1085,7 @@ def plot_metadiffuser_panel_geometry(
     wells: Sequence[Any],
     ax: Axes | None = None,
     *,
-    depth: float,
+    depth_m: float,
     period_m: float,
     language: str = "en",
     **kwargs: Any,
@@ -1104,7 +1104,7 @@ def plot_metadiffuser_panel_geometry(
         (:class:`~phonometry.materials.diffusers.metadiffuser.MetadiffuserWell` or
         ``None`` per well).
     :param ax: Existing axes, or ``None`` to create a figure.
-    :param depth: Panel depth ``L``, in metres.
+    :param depth_m: Panel depth ``L``, in metres.
     :param period_m: Well pitch ``d``, in metres.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the slit rectangles.
@@ -1114,7 +1114,7 @@ def plot_metadiffuser_panel_geometry(
         smaller than the period.
     """
     _check_language(language)
-    require_positive(depth, "depth")
+    require_positive(depth_m, "depth_m")
     require_positive(period_m, "period_m")
     cells = list(wells)
     if len(cells) < 2:  # noqa: PLR2004
@@ -1138,24 +1138,24 @@ def plot_metadiffuser_panel_geometry(
         0.0,
         0.0,
         total,
-        depth,
+        depth_m,
         "plate",
         linewidth=0.7,
         alpha=0.45,
     )
-    back = 0.4 * depth
+    back = 0.4 * depth_m
     _material_rect(ax, -0.01 * total, -back, 1.02 * total, back, "rigid")
     style_default(kwargs, "linewidth", 0.5)
     for index, well in enumerate(cells):
         if well is not None:
-            _draw_metadiffuser_well(ax, well, index * d + 0.12 * d, depth, kwargs)
+            _draw_metadiffuser_well(ax, well, index * d + 0.12 * d, depth_m, kwargs)
     for index, well in enumerate(cells):
         if well is None:
             continue
         x_mark = index * d + 0.12 * d + 0.5 * float(well.slit_height_m)
         ax.text(
             x_mark,
-            depth - 0.012 * total,
+            depth_m - 0.012 * total,
             str(index + 1),
             fontsize=6,
             ha="center",
@@ -1165,7 +1165,7 @@ def plot_metadiffuser_panel_geometry(
     _incidence_arrow(
         ax,
         1.5 * d,
-        depth + 0.5 * total * 0.16,
+        depth_m + 0.5 * total * 0.16,
         0.4 * total * 0.16,
         language,
         downward=True,
@@ -1175,15 +1175,15 @@ def plot_metadiffuser_panel_geometry(
     _dim(
         ax,
         (total, 0.0),
-        (total, depth),
-        _mm(depth, language),
+        (total, depth_m),
+        _mm(depth_m, language),
         offset=-1.3 * off,
         tight=True,
     )
     _dim(
         ax,
-        ((n_wells - 1) * d, depth),
-        (total, depth),
+        ((n_wells - 1) * d, depth_m),
+        (total, depth_m),
         _mm(d, language),
         offset=0.6 * off,
     )
@@ -1197,8 +1197,8 @@ def plot_metadiffuser_panel_geometry(
         h = float(first.slit_height_m)
         _dim(
             ax,
-            (x_slit, depth),
-            (x_slit + h, depth),
+            (x_slit, depth_m),
+            (x_slit + h, depth_m),
             _mm(h, language),
             offset=0.6 * off,
             tight=True,
@@ -1215,7 +1215,7 @@ def plot_metadiffuser_geometry(
     **kwargs: Any,
 ) -> Axes:
     """Panel drawing for a metadiffuser result that retained its geometry."""
-    if result.wells is None or result.depth is None or result.period_m is None:
+    if result.wells is None or result.depth_m is None or result.period_m is None:
         msg = (
             "This result does not retain its geometry; call "
             "plot_metadiffuser_panel_geometry(...) with the original "
@@ -1225,7 +1225,7 @@ def plot_metadiffuser_geometry(
     return plot_metadiffuser_panel_geometry(
         result.wells,
         ax=ax,
-        depth=result.depth,
+        depth_m=result.depth_m,
         period_m=result.period_m,
         language=language,
         **kwargs,

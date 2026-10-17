@@ -84,7 +84,7 @@ def _calibration(uncertainty: object = None) -> metrology.ReciprocityCalibration
 def test_calibration_draws_each_level_and_says_how_wide_the_band_is(ax: Axes) -> None:
     result = _calibration([0.015, 0.02, 0.064])
     result.plot(ax)
-    for line, level in zip(ax.get_lines(), result.sensitivity_level_db, strict=True):
+    for line, level in zip(ax.get_lines(), result.sensitivity_level, strict=True):
         np.testing.assert_allclose(line.get_ydata(), level)
     assert len(ax.collections) == 3
     assert _legend(ax)[0] == r"$\pm U$, expanded uncertainty, 0.015 dB to 0.064 dB"
@@ -122,7 +122,7 @@ def test_heat_conduction_draws_the_correction_with_r_and_l(ax: Axes) -> None:
         gas=fluids.air(**_CONDITIONS),
     )
     heat.plot(ax, language="es")
-    np.testing.assert_allclose(ax.get_lines()[0].get_ydata(), heat.correction_db)
+    np.testing.assert_allclose(ax.get_lines()[0].get_ydata(), heat.correction)
     assert "$R$ = 0,290" in ax.get_title()
     assert "$l$ = 4,174 mm" in ax.get_title()
 
@@ -165,11 +165,11 @@ def test_transfer_impedance_draws_the_two_corrections_and_their_sum(
     )
     z.plot(ax, language="es")
     lines = ax.get_lines()
-    np.testing.assert_allclose(lines[1].get_ydata(), z.heat_conduction_correction_db)
+    np.testing.assert_allclose(lines[1].get_ydata(), z.heat_conduction_correction)
     np.testing.assert_allclose(lines[2].get_ydata(), z.capillary_correction_db)
     np.testing.assert_allclose(
         lines[3].get_ydata(),
-        z.heat_conduction_correction_db + z.capillary_correction_db,
+        z.heat_conduction_correction + z.capillary_correction_db,
     )
     assert ax.get_title() == title
 
@@ -184,7 +184,7 @@ def test_wave_motion_draws_table_c3_on_the_scaled_frequencies(ax: Axes) -> None:
         rows.get_xdata(),
         3.78 * np.array([800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0]),
     )
-    np.testing.assert_allclose(ax.get_lines()[1].get_ydata(), correction.correction_db)
+    np.testing.assert_allclose(ax.get_lines()[1].get_ydata(), correction.correction)
 
 
 def _bars(ax: Axes) -> tuple[list[float], list[str]]:

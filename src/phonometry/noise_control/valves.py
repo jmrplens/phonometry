@@ -60,7 +60,7 @@ import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 import numpy as np
 
@@ -1056,6 +1056,15 @@ def stage_level_correction(
     )
 
 
+#: :math:`A_\eta` is the exponent of a decimal factor on the acoustical
+#: efficiency (``10**efficiency_correction``), dimensionless in Clause 4 of
+#: IEC 60534-8-3:2010, not a level: the notebook table of every record that
+#: holds it shows it with no unit.
+_EFFICIENCY_CORRECTION_UNITS: Mapping[str, str] = MappingProxyType(
+    {"efficiency_correction": ""}
+)
+
+
 @dataclass(frozen=True)
 class Expander(RichDisplay):
     r"""The transition piece downstream of the valve (Clause 7).
@@ -1072,6 +1081,8 @@ class Expander(RichDisplay):
         own row of Table 4 and not the valve's: the table prints -3,0.
     :ivar strouhal_number: :math:`St_p` for the expander, 0,2 in Table 4.
     """
+
+    _display_units: ClassVar[Mapping[str, str]] = _EFFICIENCY_CORRECTION_UNITS
 
     contraction: float = GLOBE_CONTRACTION_COEFFICIENT
     efficiency_correction: float = -3.0
@@ -1308,6 +1319,8 @@ class AerodynamicValveNoise(OwnsArrays):
     acoustical efficiency beside it are the ones Table 3 gives in that regime.
     """
 
+    _display_units: ClassVar[Mapping[str, str]] = _EFFICIENCY_CORRECTION_UNITS
+
     boundaries: RegimeBoundaries
     pressure_ratio: float
     vena_contracta_pressure_pa: float
@@ -1450,6 +1463,8 @@ class ValveTrim(RichDisplay):
     :ivar coefficient: Which flow coefficient :attr:`flow_coefficient` is,
         ``"Cv"`` or ``"Kv"``, which selects :math:`N_{14}` from Table 1.
     """
+
+    _display_units: ClassVar[Mapping[str, str]] = _EFFICIENCY_CORRECTION_UNITS
 
     flow_coefficient: float
     style_modifier: float

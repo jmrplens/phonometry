@@ -467,9 +467,9 @@ def _checked_traverse_levels(value: ArrayLike, n_points: int) -> np.ndarray:
 
 def _checked_monitor(value: ArrayLike, levels: np.ndarray) -> np.ndarray:
     """The monitor readings, finite wherever Formula (1) reads them."""
-    monitor = _as_levels(value, levels.shape[0], "monitor_levels_db")
+    monitor = _as_levels(value, levels.shape[0], "monitor_levels")
     if monitor.shape != levels.shape:
-        msg = "'monitor_levels_db' must have the shape of 'levels'."
+        msg = "'monitor_levels' must have the shape of 'levels'."
         raise ValueError(msg)
     # Formula (1) corrects every point to the reading of point 0.
     measured = np.isfinite(levels)
@@ -477,7 +477,7 @@ def _checked_monitor(value: ArrayLike, levels: np.ndarray) -> np.ndarray:
     needed[0] |= measured.any(axis=0)
     if np.any(needed & ~np.isfinite(monitor)):
         msg = (
-            "'monitor_levels_db' must be finite at every measured point "
+            "'monitor_levels' must be finite at every measured point "
             "and in its first row, the reading every point is corrected "
             "to (ISO 26101:2017, Formula (1))."
         )
@@ -518,7 +518,7 @@ class MicrophoneTraverse(OwnsArrays):
         spacing that changes with frequency is written (ISO 3745 A.4.3 asks
         for equally spaced points *at each frequency*). Every other level is
         finite.
-    :ivar monitor_levels_db: The monitor microphone level
+    :ivar monitor_levels: The monitor microphone level
         :math:`L_{p,\mathrm{ref},i}` recorded with each point, same shape; the
         first row is the level for the initial point 0, which every point is
         corrected to. It is finite wherever a level was measured and in the
@@ -541,7 +541,7 @@ class MicrophoneTraverse(OwnsArrays):
 
     positions_m: np.ndarray
     levels: np.ndarray
-    monitor_levels_db: np.ndarray | None = None
+    monitor_levels: np.ndarray | None = None
     background_levels: np.ndarray | None = None
     name: str = ""
     targets: tuple[str, ...] = ()
@@ -560,9 +560,9 @@ class MicrophoneTraverse(OwnsArrays):
         levels = _checked_traverse_levels(self.levels, positions.shape[0])
         object.__setattr__(self, "positions_m", read_only(positions))
         object.__setattr__(self, "levels", read_only(levels))
-        if self.monitor_levels_db is not None:
-            monitor = _checked_monitor(self.monitor_levels_db, levels)
-            object.__setattr__(self, "monitor_levels_db", read_only(monitor))
+        if self.monitor_levels is not None:
+            monitor = _checked_monitor(self.monitor_levels, levels)
+            object.__setattr__(self, "monitor_levels", read_only(monitor))
         if self.background_levels is not None:
             background = _checked_background(self.background_levels, levels)
             object.__setattr__(self, "background_levels", read_only(background))
@@ -575,7 +575,7 @@ class MicrophoneTraverse(OwnsArrays):
         levels: ArrayLike,
         *,
         start_m: ArrayLike = (0.0, 0.0, 0.0),
-        monitor_levels_db: ArrayLike | None = None,
+        monitor_levels: ArrayLike | None = None,
         background_levels: ArrayLike | None = None,
         name: str = "",
         targets: Sequence[str] = (),
@@ -588,7 +588,7 @@ class MicrophoneTraverse(OwnsArrays):
         :param levels: One row per point, one column per frequency, in dB.
         :param start_m: The point the distances are counted from, in metres;
             the room frame's origin by default.
-        :param monitor_levels_db: As for the class.
+        :param monitor_levels: As for the class.
         :param background_levels: As for the class.
         :param name: As for the class.
         :param targets: As for the class.
@@ -606,10 +606,10 @@ class MicrophoneTraverse(OwnsArrays):
         return cls(
             positions_m=start[np.newaxis, :] + s[:, np.newaxis] * unit[np.newaxis, :],
             levels=np.asarray(levels, dtype=np.float64),
-            monitor_levels_db=(
+            monitor_levels=(
                 None
-                if monitor_levels_db is None
-                else np.asarray(monitor_levels_db, dtype=np.float64)
+                if monitor_levels is None
+                else np.asarray(monitor_levels, dtype=np.float64)
             ),
             background_levels=(
                 None
@@ -629,9 +629,9 @@ class MicrophoneTraverse(OwnsArrays):
 def _stability_corrected(traverse: MicrophoneTraverse) -> tuple[np.ndarray, np.ndarray]:
     """Formula (1) and the largest monitor excursion per frequency."""
     levels = traverse.levels
-    if traverse.monitor_levels_db is None:
+    if traverse.monitor_levels is None:
         return levels.copy(), np.full(levels.shape[1], np.nan)
-    monitor = traverse.monitor_levels_db
+    monitor = traverse.monitor_levels
     drift = monitor - monitor[0][np.newaxis, :]
     excursion = np.nanmax(np.abs(drift), axis=0)
     return levels - drift, np.asarray(excursion, dtype=np.float64)
@@ -1245,7 +1245,7 @@ class SourceDirectionalityResult(OwnsArrays):
 
     :ivar frequencies: The one-third octave mid-band frequencies, in hertz.
     :ivar room: The room type the source is to qualify.
-    :ivar mean_level_db: The arithmetic mean of the decibel levels per band.
+    :ivar mean_level: The arithmetic mean of the decibel levels per band.
     :ivar max_positive_deviation_db: The largest level above the mean.
     :ivar max_negative_deviation_db: The largest level below the mean, a
         negative number.
@@ -1253,7 +1253,7 @@ class SourceDirectionalityResult(OwnsArrays):
 
     frequencies: np.ndarray
     room: str
-    mean_level_db: np.ndarray
+    mean_level: np.ndarray
     max_positive_deviation_db: np.ndarray
     max_negative_deviation_db: np.ndarray
 
@@ -1369,7 +1369,7 @@ def verify_source_directionality(
     return SourceDirectionalityResult(
         frequencies=freqs,
         room=room,
-        mean_level_db=mean,
+        mean_level=mean,
         max_positive_deviation_db=deviation.max(axis=0),
         max_negative_deviation_db=deviation.min(axis=0),
     )

@@ -55,7 +55,7 @@ from phonometry.room.spatial_decay import (
     DECADE_TO_DOUBLING,
     EVALUATION_DISTANCES_M,
     FREE_FIELD_OFFSET_DB,
-    MAX_DIRECTIVITY_INDEX_DB,
+    MAX_DIRECTIVITY_INDEX,
     NORMALIZED_OFFSET_DB,
     OMNIDIRECTIONAL_RAMP_HZ,
     OMNIDIRECTIONAL_TOLERANCE_DB,
@@ -427,7 +427,7 @@ def _chk_annex_a_limits() -> Outcome:
         "Lw stability 200 Hz to 5 kHz, dB": 0.5,
     }
     computed = {
-        "max |DI|, dB": MAX_DIRECTIVITY_INDEX_DB,
+        "max |DI|, dB": MAX_DIRECTIVITY_INDEX,
         "DI tolerance to 630 Hz, dB": OMNIDIRECTIONAL_TOLERANCE_DB[0],
         "DI tolerance from 1 kHz, dB": OMNIDIRECTIONAL_TOLERANCE_DB[1],
         "ramp starts, Hz": OMNIDIRECTIONAL_RAMP_HZ[0],
@@ -452,7 +452,7 @@ def _chk_annex_c_source_qualifies() -> Outcome:
     # the ramp of A.1, only about the 8 dB cap.
     declared = spatial.ANNEX_C_SOURCE_DECLARATION_DB
     limits = {
-        "directivity index": MAX_DIRECTIVITY_INDEX_DB,
+        "directivity index": MAX_DIRECTIVITY_INDEX,
         "adjacent band step": ADJACENT_BAND_LIMIT_DB,
     }
     inside = sum(int(value <= limits[name]) for name, value in declared.items())
@@ -786,8 +786,8 @@ def _chk_annex_c_of_11690() -> Outcome:
     matching = 0
     for power, emission, want, _ in printed.values():
         got = ph.room.workstation_level_increase(
-            sound_power_level_db=power,
-            emission_level_db=emission,
+            sound_power_level=power,
+            emission_level=emission,
             absorption_area=prediction.ANNEX_C_ABSORPTION_M2,
         )
         if abs(got - want) <= 0.45:
@@ -810,8 +810,8 @@ def _chk_annex_c_of_11690() -> Outcome:
 def _chk_m8_off_the_chart() -> Outcome:
     power, emission, _, _ = prediction.ANNEX_C_M8_DB
     got = ph.room.workstation_level_increase(
-        sound_power_level_db=power,
-        emission_level_db=emission,
+        sound_power_level=power,
+        emission_level=emission,
         absorption_area=prediction.ANNEX_C_ABSORPTION_M2,
     )
     return numeric(
@@ -948,8 +948,8 @@ def _annex_b_level(
         if own_station == station:
             parts.append(
                 ph.room.workstation_level(
-                    sound_power_level_db=power,
-                    emission_level_db=emission,
+                    sound_power_level=power,
+                    emission_level=emission,
                     absorption_area=absorption,
                 )
             )
@@ -964,7 +964,7 @@ def _annex_b_level(
                     )
                 )
             )
-    return ph.room.total_workstation_level(parts, existing_level_db=background_db)
+    return ph.room.total_workstation_level(parts, existing_level=background_db)
 
 
 def _annex_b_case_a() -> dict[str, float]:
@@ -1126,8 +1126,8 @@ def _chk_annex_c_level_of_11690() -> Outcome:
         name: float(
             round(
                 ph.room.workstation_level(
-                    sound_power_level_db=power,
-                    emission_level_db=emission,
+                    sound_power_level=power,
+                    emission_level=emission,
                     absorption_area=prediction.ANNEX_C_ABSORPTION_M2,
                 )
             )

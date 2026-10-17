@@ -623,7 +623,7 @@ for panel in (top, bottom):
     panel.grid(True, which="both", alpha=0.3)
 top.semilogx(f, res.levels, label="rigidez en el punto de excitación $L_{k_{1,1}}$")
 top.axhline(l21, color="C2", linestyle="--", label="rigidez de transferencia $L_{k_{2,1}}$")
-top.axhline(res.threshold_level_db, color="k", linestyle=":",
+top.axhline(res.threshold_level, color="k", linestyle=":",
             label="2 dB por debajo del valor de 1 Hz a 20 Hz")
 top.plot(centres, band_levels, "o", color="C1",
          label="media en banda $L_{k,\\mathrm{av}}$, Fórmula (6)")

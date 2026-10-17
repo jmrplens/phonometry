@@ -609,7 +609,7 @@ def test_the_loudest_unwanted_direction_decides() -> None:
     unwanted = np.array([[80.0, 90.0], [84.0, 70.0]])
     with pytest.warns(vibration.TransferStiffnessWarning, match="Inequality \\(2\\)"):
         check = vibration.check_unwanted_input(f, [100.0, 100.0], unwanted)
-    assert check.difference_db.tolist() == [16.0, 10.0]
+    assert check.difference.tolist() == [16.0, 10.0]
     assert check.holds.tolist() == [True, False]
 
 
@@ -820,7 +820,7 @@ def test_a_massless_spring_has_a_flat_stiffness_and_no_upper_limit() -> None:
     """The closed-form anchor: |k1,1| = |k2,1| everywhere, so f_UL is never reached."""
     force, accel = _driven(np.full(_SWEEP_HZ.size, 1.0e6 + 0j))
     res = vibration.driving_point_stiffness(_SWEEP_HZ, force, accel)
-    assert res.low_frequency_level_db == pytest.approx(120.0)
+    assert res.low_frequency_level == pytest.approx(120.0)
     assert res.upper_limiting_frequency_hz is None
     assert bool(np.all(res.valid))
     bands = res.band_average()
@@ -834,7 +834,7 @@ def test_f_ul_of_a_mass_loaded_spring_is_its_closed_form() -> None:
     res = vibration.driving_point_stiffness(_SWEEP_HZ, force, accel)
     lines = (_SWEEP_HZ >= 1.0) & (_SWEEP_HZ <= 20.0)
     low = 10.0 * math.log10(float(np.mean((k - _OMEGA[lines] ** 2 * m0) ** 2)))
-    assert res.low_frequency_level_db == pytest.approx(low, abs=1e-12)
+    assert res.low_frequency_level == pytest.approx(low, abs=1e-12)
     target = 10.0 ** ((low - 2.0) / 20.0)
     expected = math.sqrt((k - target) / m0) / (2.0 * math.pi)
     assert res.upper_limiting_frequency_hz == pytest.approx(expected, abs=0.01)
@@ -898,7 +898,7 @@ def test_a_line_exactly_on_the_threshold_is_f_ul_and_is_kept() -> None:
     k = 10.0 ** (np.array([120.0, 120.0, 120.0, 120.0, 118.0, 117.0]) / 20.0)
     w = 2.0 * np.pi * f
     res = vibration.driving_point_stiffness(f, k * 1.0e-6, -(w**2) * 1.0e-6)
-    assert res.threshold_level_db == pytest.approx(118.0, abs=1e-12)
+    assert res.threshold_level == pytest.approx(118.0, abs=1e-12)
     assert res.upper_limiting_frequency_hz == pytest.approx(30.0, abs=1e-12)
     assert res.valid.tolist() == [True, True, True, True, True, False]
 
@@ -932,7 +932,7 @@ def test_a_line_must_pass_both_inequalities_and_counts_nowhere_if_it_fails() -> 
     assert res.adequate is not None
     assert res.adequate.tolist() == (~dip & ~loud).tolist()
     assert res.upper_limiting_frequency_hz is None
-    assert res.low_frequency_level_db == pytest.approx(120.0, abs=1e-9)
+    assert res.low_frequency_level == pytest.approx(120.0, abs=1e-9)
 
 
 def test_lines_below_1_hz_neither_set_f_ul_nor_enter_the_result() -> None:
@@ -944,7 +944,7 @@ def test_lines_below_1_hz_neither_set_f_ul_nor_enter_the_result() -> None:
     k[below] *= 10.0 ** (-3.0 / 20.0)
     res = vibration.driving_point_stiffness(f, k * 1.0e-6, -(w**2) * 1.0e-6)
     assert res.upper_limiting_frequency_hz is None
-    assert res.low_frequency_level_db == pytest.approx(120.0, abs=1e-9)
+    assert res.low_frequency_level == pytest.approx(120.0, abs=1e-9)
     assert not bool(np.any(res.valid[below]))
     assert bool(np.all(res.valid[~below]))
 
@@ -1016,7 +1016,7 @@ def test_the_annex_b_defaults_are_the_expressions_b3_prints() -> None:
     assert u.combined_uncertainty_db == pytest.approx(1.3943, abs=5e-5)
     assert u.coverage_factor == pytest.approx(2.0)
     assert u.expanded_uncertainty_db == pytest.approx(2.0 * combined, abs=1e-12)
-    assert u.band_level_db == pytest.approx(120.0)
+    assert u.band_level == pytest.approx(120.0)
 
 
 def test_the_table_b1_values_are_the_three_rectangular_terms_rounded_up() -> None:
@@ -1077,7 +1077,7 @@ def test_the_driving_point_figure_marks_f_ul_and_the_threshold() -> None:
         for line in ax.lines
         if len(set(line.get_ydata())) == 1
     ]
-    assert any(y == pytest.approx(res.threshold_level_db) for y in horizontal)
+    assert any(y == pytest.approx(res.threshold_level) for y in horizontal)
     assert "f_\\mathrm{UL}" in " ".join(ax.get_legend_handles_labels()[1])
     plt.close("all")
 

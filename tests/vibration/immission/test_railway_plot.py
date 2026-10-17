@@ -66,10 +66,10 @@ def test_the_passage_figure_draws_the_running_rms_and_its_maximum(
 def test_the_spectrum_figure_is_figure_6(passage: im.TrainPassage) -> None:
     ax = passage.plot_spectrum(linewidth=2.5, label="mine")
     first, second = ax.lines[:2]
-    assert np.allclose(first.get_ydata(), passage.band_max_levels_db)
+    assert np.allclose(first.get_ydata(), passage.band_max_levels)
     assert first.get_linewidth() == pytest.approx(2.5)
     assert first.get_label() == "mine"
-    assert np.allclose(second.get_ydata(), passage.band_interval_levels_db[1])
+    assert np.allclose(second.get_ydata(), passage.band_interval_levels[1])
     ticks = [tick.get_text() for tick in ax.get_xticklabels()]
     assert ticks[:3] == ["4", "5", "6.3"]
     plt.close("all")

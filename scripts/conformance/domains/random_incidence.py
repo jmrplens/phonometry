@@ -117,7 +117,7 @@ def _chk_factor_sum() -> Outcome:
 def _chk_omnidirectional() -> Outcome:
     """72 equal readings at 10° steps in two planes."""
     result = metrology.directivity_factor(np.full((2, 36), 94.0))
-    return numeric(0.0, result.directivity_index_db, 1e-9, unit="dB", places=6)
+    return numeric(0.0, result.directivity_index, 1e-9, unit="dB", places=6)
 
 
 @register(
@@ -186,21 +186,21 @@ def _chk_table_b1_defaults() -> Outcome:
     frequencies = np.array(sorted(metrology.IEC61183_TABLE_B1))
     zero = np.zeros(frequencies.size)
     free_field = -metrology.diffuse_field_sensitivity(
-        frequencies, zero, zero, reference_free_field_level_db=0.0
-    ).diffuse_field_level_db
+        frequencies, zero, zero, reference_free_field_level=0.0
+    ).diffuse_field_level
     pressure = metrology.diffuse_field_sensitivity(
-        frequencies, zero, zero, reference_pressure_level_db=0.0
-    ).diffuse_field_level_db
+        frequencies, zero, zero, reference_pressure_level=0.0
+    ).diffuse_field_level
     matching = 0
     for (
         _label,
         lowest,
         highest,
-        index_db,
-        difference_db,
+        index,
+        difference,
     ) in ref.IEC61183_TABLE_B1_PRINTED:
         covered = (frequencies >= lowest) & (frequencies <= highest)
-        for column, printed in ((free_field, index_db), (pressure, difference_db)):
+        for column, printed in ((free_field, index), (pressure, difference)):
             matching += bool(
                 np.any(covered)
                 and np.allclose(column[covered], printed, rtol=0.0, atol=1e-12)

@@ -14,6 +14,7 @@ import math
 
 import numpy as np
 import pytest
+from reference_data import din45672_3_annex_a as annex_a
 
 from phonometry.vibration import immission as im
 
@@ -82,7 +83,7 @@ def test_annex_c_run_as_clause_7_prints_it() -> None:
     assert np.allclose(prediction.floor_db, EMISSION + GROUND + FLOOR)
     assert len(prediction.weighted_db) == 14
     assert list(prediction.weighted_frequencies_hz) == list(FREQS[:14])
-    assert prediction.sum_level_db == pytest.approx(77.73, abs=0.02)
+    assert prediction.sum_level == pytest.approx(77.73, abs=0.02)
     assert prediction.kb_ftm == pytest.approx(0.385, abs=0.002)
     assert round(prediction.kb_fmax, 1) == 0.6
     assert prediction.peak_velocity_mm_s == pytest.approx(1.73, abs=0.01)
@@ -129,37 +130,130 @@ def test_table_2_is_the_kb_weighting_rounded_to_a_tenth() -> None:
         im.predict_train_category(np.zeros(10), frequencies=FREQS[:10])
 
 
+def _printed(cell: str | None) -> float:
+    """A cell of Annex A as a number: decimal comma, and NaN where it is empty."""
+    return math.nan if cell is None else float(cell.replace(",", "."))
+
+
+def _same(value: float, cell: str | None) -> bool:
+    printed = _printed(cell)
+    return math.isnan(value) if math.isnan(printed) else value == printed
+
+
+@pytest.mark.parametrize(
+    ("floor", "table"),
+    [
+        ("concrete", annex_a.DIN45672_3_TABLE_A1),
+        ("timber", annex_a.DIN45672_3_TABLE_A2),
+    ],
+)
+def test_every_cell_of_the_ground_to_floor_tables_is_the_printed_one(
+    floor: str, table: tuple[tuple[str | None, ...], ...]
+) -> None:
+    """Tables A.1 and A.2, all 209 cells each, against the page."""
+    columns = im.GROUND_TO_FLOOR_LEVEL_DIFFERENCES[floor]
+    assert len(table) == len(im.PREDICTION_BAND_CENTERS_HZ)
+    keys = list(columns)
+    assert [_printed(f) for f in annex_a.TABLE_A1_A2_FLOOR_FREQUENCIES] == [
+        62.5 if key == 63.0 else key for key in keys
+    ]
+    wrong = [
+        (row[0], keys[column], columns[keys[column]][band], row[column + 1])
+        for band, row in enumerate(table)
+        for column in range(len(keys))
+        if not _same(columns[keys[column]][band], row[column + 1])
+    ]
+    assert wrong == []
+
+
+@pytest.mark.parametrize(
+    ("mapping", "kind", "table", "start"),
+    [
+        ("foundation", "basement", annex_a.DIN45672_3_TABLE_A3, 0),
+        ("foundation", "ground_floor", annex_a.DIN45672_3_TABLE_A4, 0),
+        ("floor", "concrete", annex_a.DIN45672_3_TABLE_A5, 0),
+        ("floor", "timber", annex_a.DIN45672_3_TABLE_A6, 2),
+    ],
+)
+def test_every_cell_of_the_foundation_tables_is_the_printed_one(
+    mapping: str, kind: str, table: tuple[tuple[str | None, ...], ...], start: int
+) -> None:
+    """Tables A.3 to A.6, every lower, mean and upper cell, against the page.
+
+    The foundation tables run along the bands from 4 Hz; the floor tables
+    along the ratios of the band to the floor's natural frequency, the timber
+    one from 0,08. A cell the page leaves empty is NaN.
+    """
+    if mapping == "foundation":
+        statistics = im.GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES[kind]
+        axis = im.PREDICTION_BAND_CENTERS_HZ
+        tolerance = 0.5  # the print writes 12,5 Hz as 12
+    else:
+        statistics = im.FOUNDATION_TO_FLOOR_LEVEL_DIFFERENCES[kind]
+        axis = im.FOUNDATION_TO_FLOOR_RATIOS
+        tolerance = 0.051  # the print writes 3,15 as 3,10
+    wrong = []
+    for offset, row in enumerate(table):
+        index = start + offset
+        assert abs(_printed(row[0]) - axis[index]) <= tolerance
+        for column, statistic in enumerate(("lower", "mean", "upper"), start=1):
+            if not _same(statistics[statistic][index], row[column]):
+                wrong.append(
+                    (row[0], statistic, statistics[statistic][index], row[column])
+                )
+    assert wrong == []
+    for values in statistics.values():
+        assert all(math.isnan(value) for value in values[:start])
+        assert all(math.isnan(value) for value in values[start + len(table) :])
+
+
 def test_annex_a_tables_as_printed() -> None:
     """Spot cells of the six tables, and their shapes."""
-    concrete = im.ground_to_floor_transfer("concrete", floor_natural_frequency_hz=8.0)
+    concrete = im.ground_to_floor_level_difference(
+        "concrete", floor_natural_frequency_hz=8.0
+    )
     assert list(concrete[:6]) == [-0.51, 1.42, 6.88, 15.0, 5.87, 0.17]
     assert (
-        im.ground_to_floor_transfer("concrete", floor_natural_frequency_hz=20.0)[7]
+        im.ground_to_floor_level_difference(
+            "concrete", floor_natural_frequency_hz=20.0
+        )[7]
         == 13.12
     )
     assert (
-        im.ground_to_floor_transfer("concrete", floor_natural_frequency_hz=63.0)[12]
+        im.ground_to_floor_level_difference(
+            "concrete", floor_natural_frequency_hz=63.0
+        )[12]
         == 9.5
     )
-    timber = im.ground_to_floor_transfer("timber", floor_natural_frequency_hz=8.0)
+    timber = im.ground_to_floor_level_difference(
+        "timber", floor_natural_frequency_hz=8.0
+    )
     assert list(timber[:4]) == [5.14, 7.55, 12.59, 20.0]
     assert (
-        im.ground_to_floor_transfer("timber", floor_natural_frequency_hz=80.0)[-1]
+        im.ground_to_floor_level_difference("timber", floor_natural_frequency_hz=80.0)[
+            -1
+        ]
         == -1.35
     )
-    for floor in im.GROUND_TO_FLOOR_DB.values():
+    for floor in im.GROUND_TO_FLOOR_LEVEL_DIFFERENCES.values():
         assert all(len(column) == 19 for column in floor.values())
     # The columns 8 to 16 Hz of the concrete table are one template shifted band by band.
-    columns = im.GROUND_TO_FLOOR_DB["concrete"]
+    columns = im.GROUND_TO_FLOOR_LEVEL_DIFFERENCES["concrete"]
     assert columns[10.0][1:] == columns[8.0][:-1]
     assert columns[16.0][3:] == columns[8.0][:-3]
-    basement = im.ground_to_foundation_transfer("basement")
+    basement = im.ground_to_foundation_level_difference("basement")
     assert basement[9] == -9.3
-    assert im.ground_to_foundation_transfer("basement", statistic="lower")[9] == -15.6
-    assert im.ground_to_foundation_transfer("basement", statistic="upper")[9] == -2.7
-    assert im.ground_to_foundation_transfer("ground_floor")[5] == -1.9
+    assert (
+        im.ground_to_foundation_level_difference("basement", statistic="lower")[9]
+        == -15.6
+    )
+    assert (
+        im.ground_to_foundation_level_difference("basement", statistic="upper")[9]
+        == -2.7
+    )
+    assert im.ground_to_foundation_level_difference("ground_floor")[5] == -1.9
     with pytest.raises(ValueError, match="nominal third-octave centre"):
-        im.ground_to_floor_transfer("concrete", floor_natural_frequency_hz=15.0)
+        im.ground_to_floor_level_difference("concrete", floor_natural_frequency_hz=15.0)
 
 
 def test_foundation_to_floor_at_the_tabulated_ratios_and_between() -> None:
@@ -167,14 +261,14 @@ def test_foundation_to_floor_at_the_tabulated_ratios_and_between() -> None:
     for timber at the natural frequency, the mean of 1,60 at a ratio of 0,2,
     and nan where the table prints none.
     """
-    at_20 = im.foundation_to_floor_transfer(
+    at_20 = im.foundation_to_floor_level_difference(
         [4.0, 20.0, 100.0, 160.0], floor="concrete", floor_natural_frequency_hz=20.0
     )
     assert at_20[0] == pytest.approx(1.60)
     assert at_20[1] == pytest.approx(17.26)
     assert at_20[2] == pytest.approx(2.83)
     assert math.isnan(at_20[3])
-    timber = im.foundation_to_floor_transfer(
+    timber = im.foundation_to_floor_level_difference(
         [20.0, 126.0, 160.0, 1.6, 2.0],
         floor="timber",
         floor_natural_frequency_hz=20.0,
@@ -184,13 +278,13 @@ def test_foundation_to_floor_at_the_tabulated_ratios_and_between() -> None:
     assert timber[2] == pytest.approx(1.85)
     assert math.isnan(timber[3])  # ratio 0,08: the timber mean starts at 0,125
     assert math.isnan(timber[4])
-    upper = im.foundation_to_floor_transfer(
+    upper = im.foundation_to_floor_level_difference(
         [4.0, 5.0], floor="timber", floor_natural_frequency_hz=20.0, statistic="upper"
     )
     assert math.isnan(upper[0])  # ratio 0,2, printed as a dash
     assert upper[1] == pytest.approx(8.1)
     # Between two tabulated ratios: linear in decibels over the logarithm.
-    between = im.foundation_to_floor_transfer(
+    between = im.foundation_to_floor_level_difference(
         [math.sqrt(0.8 * 1.0) * 20.0], floor="concrete", floor_natural_frequency_hz=20.0
     )
     assert between[0] == pytest.approx((9.94 + 17.26) / 2)

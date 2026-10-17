@@ -80,7 +80,7 @@ def test_each_row_holds_what_the_second_reader_read(
         if _plain(row.name) == _plain(name) and row.thickness_mm == thickness
     ]
     held = [
-        [getattr(row, f"transmission_loss_{band}_db") for band in ref.BIES_7_6_BANDS_HZ]
+        [getattr(row, f"transmission_loss_{band}") for band in ref.BIES_7_6_BANDS_HZ]
         for row in matches
     ]
     assert list(values) in held, f"{name!r} at {thickness} mm: {values} not in {held}"
@@ -116,7 +116,7 @@ def test_a_row_reads_back_as_a_spectrum_over_the_bands_it_prints() -> None:
     row = PUBLISHED_TRANSMISSION_LOSS[f"{BIES}/1_5_mm_lead_sheet_1.5mm"]
     assert row.bands() == TRANSMISSION_LOSS_BANDS_HZ
     assert row.spectrum()[500] == 33
-    assert row.transmission_loss_db(500) == 33
+    assert row.transmission_loss(500) == 33
 
 
 def test_a_band_the_page_did_not_print_is_refused_by_name() -> None:
@@ -127,16 +127,16 @@ def test_a_band_the_page_did_not_print_is_refused_by_name() -> None:
     the opposite of what the page says.
     """
     row = PUBLISHED_TRANSMISSION_LOSS[f"{BIES}/6_mm_steel_plate_6mm"]
-    assert row.transmission_loss_63_db is None
+    assert row.transmission_loss_63 is None
     with pytest.raises(ValueError, match="63 Hz band"):
-        row.transmission_loss_db(63)
-    assert row.why_missing("transmission_loss_63_db")
+        row.transmission_loss(63)
+    assert row.why_missing("transmission_loss_63")
 
 
 def test_a_frequency_no_table_prints_is_refused_as_such() -> None:
     row = PUBLISHED_TRANSMISSION_LOSS[f"{BIES}/6_mm_steel_plate_6mm"]
     with pytest.raises(ValueError, match="not an octave band"):
-        row.transmission_loss_db(700)
+        row.transmission_loss(700)
 
 
 def test_every_value_is_a_plausible_transmission_loss() -> None:
@@ -258,7 +258,7 @@ def test_each_machine_room_row_holds_what_the_second_reader_read(
     row = next(row for row in _ashrae() if row.name == name)
     assert row.sound_transmission_class == float(rating)
     held = [
-        getattr(row, f"transmission_loss_{band}_db")
+        getattr(row, f"transmission_loss_{band}")
         for band in ref.ASHRAE_49_TABLE_40_BANDS_HZ
     ]
     assert held == [float(text) for text in values]
@@ -268,9 +268,9 @@ def test_the_machine_room_rows_print_no_eight_kilohertz_band() -> None:
     """The table stops at 4 kHz, and the missing column is not a zero."""
     for row in _ashrae():
         assert row.bands() == ref.ASHRAE_49_TABLE_40_BANDS_HZ
-        assert row.transmission_loss_8000_db is None
+        assert row.transmission_loss_8000 is None
         with pytest.raises(ValueError, match="8000 Hz band"):
-            row.transmission_loss_db(8000)
+            row.transmission_loss(8000)
 
 
 def test_the_rating_is_kept_because_the_bands_do_not_give_it_back() -> None:
@@ -288,7 +288,7 @@ def test_the_rating_is_kept_because_the_bands_do_not_give_it_back() -> None:
     assert [row.sound_transmission_class for row in _rows()[:3]] == [None] * 3
     best = max(_ashrae(), key=lambda row: row.sound_transmission_class or 0)
     assert "spring isolators" in best.name
-    assert best.transmission_loss_db(500) == 84
+    assert best.transmission_loss(500) == 84
 
 
 def test_adding_a_leaf_never_makes_a_machine_room_wall_worse() -> None:
@@ -304,7 +304,7 @@ def test_adding_a_leaf_never_makes_a_machine_room_wall_worse() -> None:
     studs = [row for row in _ashrae() if "metal studs" in row.name]
     assert len(studs) == 4
     ratings = [row.sound_transmission_class for row in studs]
-    at_500 = [row.transmission_loss_db(500) for row in studs]
+    at_500 = [row.transmission_loss(500) for row in studs]
     assert ratings == sorted(ratings)
     assert at_500 == sorted(at_500)
     assert ratings[-1] - ratings[0] == 26

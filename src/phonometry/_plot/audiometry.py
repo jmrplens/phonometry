@@ -359,8 +359,8 @@ def plot_ascending_threshold(
     line = dict(kwargs)
     style_default(line, "color", _C_PRIMARY)
     style_default(line, "linewidth", 1.4)
-    if result.presentation_levels_db is not None and result.responses is not None:
-        levels = np.asarray(result.presentation_levels_db, dtype=np.float64)
+    if result.presentation_levels is not None and result.responses is not None:
+        levels = np.asarray(result.presentation_levels, dtype=np.float64)
         heard = np.asarray(result.responses, dtype=bool)
         steps = np.arange(1, levels.size + 1)
         line.setdefault("label", _t("presentations", language))
@@ -400,7 +400,7 @@ def plot_ascending_threshold(
         ax.set_xlabel(_t(_PRESENTATION_LABEL, language))
         span = steps
     else:
-        ascents = np.asarray(result.ascent_levels_db, dtype=np.float64)
+        ascents = np.asarray(result.ascent_levels, dtype=np.float64)
         span = np.arange(1, ascents.size + 1)
         line.setdefault("label", _t("ascent response level", language))
         ax.plot(span, ascents, "-o", zorder=3, **line)
@@ -448,8 +448,8 @@ def plot_bracketing_threshold(
 
     check_language(language)
     ax = ax if ax is not None else _new_axes()
-    ups = np.asarray(result.ascent_levels_db, dtype=np.float64)
-    downs = np.asarray(result.descent_levels_db, dtype=np.float64)
+    ups = np.asarray(result.ascent_levels, dtype=np.float64)
+    downs = np.asarray(result.descent_levels, dtype=np.float64)
     ascent = dict(kwargs)
     style_default(ascent, "color", _C_PRIMARY)
     style_default(ascent, "linewidth", 1.6)
@@ -519,7 +519,7 @@ def plot_automatic_threshold(
 
     check_language(language)
     ax = ax if ax is not None else _new_axes()
-    levels = np.asarray(result.reversal_levels_db, dtype=np.float64)
+    levels = np.asarray(result.reversal_levels, dtype=np.float64)
     kept = np.asarray(result.retained, dtype=bool)
     steps = np.arange(1, levels.size + 1)
     trace = dict(kwargs)
@@ -591,7 +591,7 @@ def plot_sweep_threshold(
     reversal_f = np.asarray(result.reversal_frequencies, dtype=np.float64)
     ax.plot(
         reversal_f,
-        np.asarray(result.reversal_levels_db, dtype=np.float64),
+        np.asarray(result.reversal_levels, dtype=np.float64),
         "-",
         color=_C_MUTED,
         lw=1.0,
@@ -744,7 +744,7 @@ def plot_audiogram_cautions(
             zorder=3,
             label=_t("bone conduction level", language),
         )
-        tactile = np.asarray(result.vibrotactile_levels_db, dtype=np.float64)
+        tactile = np.asarray(result.vibrotactile_levels, dtype=np.float64)
         given = np.isfinite(tactile)
         if np.any(given):
             ax.plot(
@@ -956,7 +956,7 @@ def plot_diffuse_sound_field(
         )
     ax.plot(
         freqs,
-        np.asarray(result.left_right_difference_db, dtype=np.float64),
+        np.asarray(result.left_right_difference, dtype=np.float64),
         "-s",
         color=_C_SECONDARY,
         ms=4,
@@ -1088,7 +1088,7 @@ def plot_free_sound_field(
             label=_t(r"$\pm$1 dB limit", language) if limit > 0 else None,
         )
     axial = np.asarray(result.inverse_distance_deviation_db, dtype=np.float64)
-    difference = np.asarray(result.left_right_difference_db, dtype=np.float64)
+    difference = np.asarray(result.left_right_difference, dtype=np.float64)
     if result.field == "free":
         high = freqs > _FREE_FIELD_SPLIT_HZ
         if np.any(high):
@@ -1199,7 +1199,7 @@ def plot_earmuff_insertion_loss(
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     for index, row in enumerate(
-        np.asarray(result.repetition_insertion_loss_db, dtype=np.float64)
+        np.asarray(result.repetition_insertion_loss, dtype=np.float64)
     ):
         ax.plot(
             freqs,
@@ -1211,7 +1211,7 @@ def plot_earmuff_insertion_loss(
             zorder=1,
             label=_t("insertion loss per fitting", language) if index == 0 else None,
         )
-    mean = np.asarray(result.insertion_loss_db, dtype=np.float64)
+    mean = np.asarray(result.insertion_loss, dtype=np.float64)
     ax.errorbar(
         freqs,
         mean,
@@ -1268,7 +1268,7 @@ def plot_plane_progressive_wave(
     faces.setdefault("label", _t("difference between the end faces", language))
     ax.plot(
         freqs,
-        np.asarray(result.end_face_difference_db, dtype=np.float64),
+        np.asarray(result.end_face_difference, dtype=np.float64),
         "-o",
         ms=4,
         zorder=3,
@@ -1347,7 +1347,7 @@ def plot_fixture_isolation(
     style_default(curve, "color", _C_PRIMARY)
     style_default(curve, "linewidth", 2.0)
     curve.setdefault("label", _t("acoustic isolation", language))
-    isolation = np.asarray(result.isolation_db, dtype=np.float64)
+    isolation = np.asarray(result.isolation, dtype=np.float64)
     ax.plot(freqs, isolation, "-o", ms=4, zorder=3, **curve)
     short = ~np.asarray(result.sufficient, dtype=bool)
     if np.any(short):

@@ -102,7 +102,7 @@ burst = signals.tone_burst(fs, 5000.0, 25, amplitude=0.285,
                            post_silence=0.5)
 result = broadcast.quasi_peak_meter(burst.signal, fs)
 print(round(result.reading, 4))                            # 0.5872   volts
-print(round(result.level_db, 2), result.level_unit)        # -2.41 dBqps
+print(round(result.level, 2), result.level_unit)        # -2.41 dBqps
 ```
 
 <ThemeImage

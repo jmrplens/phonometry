@@ -301,7 +301,7 @@ place, and the differences go to [`level_difference_quantiles`](/phonometry/refe
 
 ```python
 level_difference_quantiles(
-    level_differences_db: ArrayLike,
+    level_differences: ArrayLike,
 ) -> LevelDifferenceQuantiles
 ```
 
@@ -325,7 +325,7 @@ $q_{0,1} = -1$ dB and $q_{0,9} = 3$ dB.
 
 | Name | Description |
 | :--- | :--- |
-| `level_differences_db` | The sample of level differences, in dB, in any order; at least [`MIN_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#min_sample_size) values. |
+| `level_differences` | The sample of level differences, in dB, in any order; at least [`MIN_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#min_sample_size) values. |
 
 **Returns:** A [`LevelDifferenceQuantiles`](/phonometry/reference/api/environment/software-quality/#leveldifferencequantiles).
 
@@ -338,7 +338,7 @@ $q_{0,1} = -1$ dB and $q_{0,9} = 3$ dB.
 ## LevelDifferenceQuantiles
 
 ```python
-LevelDifferenceQuantiles(sorted_differences_db: NDArray[np.float64])
+LevelDifferenceQuantiles(sorted_differences: NDArray[np.float64])
 ```
 
 The characteristic values of a sample of level differences
@@ -352,7 +352,7 @@ standard deviation are read from it, so they cannot disagree with it.
 
 | Name | Description |
 | :--- | :--- |
-| `sorted_differences_db` | The sample of level differences, sorted in ascending order as C.4 sorts it, in dB. At least [`MIN_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#min_sample_size) values. |
+| `sorted_differences` | The sample of level differences, sorted in ascending order as C.4 sorts it, in dB. At least [`MIN_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#min_sample_size) values. |
 
 ### LevelDifferenceQuantiles.from_table
 
@@ -566,7 +566,7 @@ $dL_{n,m} = L_{n,m} - \bar L_n$, shape `(N, M)`, in dB.
 
 $|dL_n|_{\max}$, the largest absolute deviation at each receiver, in dB.
 
-### RoundRobinPrecision.mean_levels_db
+### RoundRobinPrecision.mean_levels
 
 *property*
 

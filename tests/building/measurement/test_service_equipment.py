@@ -220,7 +220,7 @@ def test_operating_condition_freezes_a_dict_of_parameters() -> None:
 def test_a_4_db_difference_gives_the_printed_2_2_db() -> None:
     difference, printed = ref.ISO16032_BACKGROUND_LIMIT_DB
     res = building.service_equipment_background_correction([50.0], [50.0 - difference])
-    assert round(float(res.correction_db[0]), 1) == printed
+    assert round(float(res.correction[0]), 1) == printed
     assert res.regime == ("corrected",)
 
 
@@ -228,7 +228,7 @@ def test_below_4_db_the_correction_is_held_at_2_2_db() -> None:
     res = building.service_equipment_background_correction(
         [50.0, 50.0, 50.0], [47.0, 50.0, 55.0]
     )
-    np.testing.assert_allclose(res.correction_db, 2.2)
+    np.testing.assert_allclose(res.correction, 2.2)
     assert res.regime == ("limited", "limited", "limited")
     assert res.influenced
     np.testing.assert_array_equal(res.limited, [True, True, True])
@@ -236,7 +236,7 @@ def test_below_4_db_the_correction_is_held_at_2_2_db() -> None:
 
 def test_ten_db_or_more_is_left_uncorrected() -> None:
     res = building.service_equipment_background_correction([50.0, 50.0], [40.0, 30.0])
-    np.testing.assert_array_equal(res.correction_db, [0.0, 0.0])
+    np.testing.assert_array_equal(res.correction, [0.0, 0.0])
     np.testing.assert_array_equal(res.corrected_db, [50.0, 50.0])
     assert res.regime == ("none", "none")
     assert not res.influenced
@@ -256,9 +256,9 @@ def test_the_clause_9_thresholds_hold_for_decimal_levels(
     assert res.regime == (regime,)
     assert not res.influenced
     if regime == "none":
-        np.testing.assert_array_equal(res.correction_db, [0.0])
+        np.testing.assert_array_equal(res.correction, [0.0])
     else:
-        assert float(res.correction_db[0]) == pytest.approx(2.2, abs=0.05)
+        assert float(res.correction[0]) == pytest.approx(2.2, abs=0.05)
 
 
 def test_a_4_db_margin_in_decimal_levels_is_not_an_upper_limit() -> None:
@@ -277,7 +277,7 @@ def test_formula_8_is_the_energy_subtraction() -> None:
     res = building.service_equipment_background_correction(l1, l2)
     expected = 10.0 * np.log10(10.0 ** (0.1 * l1) - 10.0 ** (0.1 * l2))
     np.testing.assert_allclose(res.corrected_db, expected, atol=1e-12)
-    np.testing.assert_allclose(res.difference_db, l1 - l2)
+    np.testing.assert_allclose(res.difference, l1 - l2)
 
 
 def test_background_correction_refuses_mismatched_bands() -> None:
@@ -1348,26 +1348,24 @@ def test_each_calibration_is_held_to_every_earlier_one() -> None:
     # calibration of the same instrumentation: it "deviates from previous
     # calibrations by more than 0,5 dB".
     check = building.verify_calibration_deviation(
-        [94.0, 94.2], previous_levels_db=[93.6, 93.9]
+        [94.0, 94.2], previous_levels=[93.6, 93.9]
     )
     np.testing.assert_allclose(check.deviations_db, [0.4, 0.6])
     assert not check.passes
-    np.testing.assert_array_equal(check.previous_levels_db, [93.6, 93.9])
+    np.testing.assert_array_equal(check.previous_levels, [93.6, 93.9])
 
 
 def test_the_end_is_held_to_the_beginning_as_well_as_to_earlier_calibrations() -> None:
     # The end is 0,25 dB from the earlier calibration but 0,55 dB from the
     # beginning of the same measurement, also a previous calibration.
-    check = building.verify_calibration_deviation(
-        [93.7, 94.25], previous_levels_db=[94.0]
-    )
+    check = building.verify_calibration_deviation([93.7, 94.25], previous_levels=[94.0])
     np.testing.assert_allclose(check.deviations_db, [0.3, 0.55])
     assert not check.passes
 
 
 def test_the_beginning_alone_is_judged_against_earlier_calibrations() -> None:
     check = building.verify_calibration_deviation(
-        94.0, previous_levels_db=[94.1, 93.9, 94.2]
+        94.0, previous_levels=[94.1, 93.9, 94.2]
     )
     np.testing.assert_allclose(check.deviations_db, [0.2])
     assert check.passes
@@ -1381,13 +1379,13 @@ def test_one_calibration_alone_has_nothing_to_be_compared_with() -> None:
 @pytest.mark.parametrize(
     ("kwargs", "blamed"),
     [
-        ({"calibration_levels_db": [94.0, math.inf]}, "'calibration_levels_db'"),
-        ({"calibration_levels_db": [[94.0, 94.1]]}, "'calibration_levels_db'"),
+        ({"calibration_levels": [94.0, math.inf]}, "'calibration_levels'"),
+        ({"calibration_levels": [[94.0, 94.1]]}, "'calibration_levels'"),
         (
-            {"calibration_levels_db": [94.0], "previous_levels_db": [math.nan]},
-            "'previous_levels_db'",
+            {"calibration_levels": [94.0], "previous_levels": [math.nan]},
+            "'previous_levels'",
         ),
-        ({"calibration_levels_db": ["94.0", "94.1"]}, "'calibration_levels_db'"),
+        ({"calibration_levels": ["94.0", "94.1"]}, "'calibration_levels'"),
     ],
     ids=["infinite", "two-dimensional", "nan earlier", "text"],
 )
@@ -1402,7 +1400,7 @@ def test_calibration_result_checks_its_deviations() -> None:
     with pytest.raises(ValueError, match="one value per reading"):
         building.CalibrationDeviationResult(
             levels=np.array([94.0, 94.1]),
-            previous_levels_db=np.empty(0),
+            previous_levels=np.empty(0),
             deviations_db=np.array([0.1]),
         )
 
@@ -1537,8 +1535,8 @@ def test_varying_background_centres_need_one_per_band() -> None:
 def test_varying_background_check_checks_its_bands() -> None:
     with pytest.raises(ValueError, match="one value per band"):
         building.VaryingBackgroundCheck(
-            background_max_level_db=np.array([30.0, 31.0]),
-            equipment_levels_db=np.array([45.0]),
+            background_max_level=np.array([30.0, 31.0]),
+            equipment_levels=np.array([45.0]),
             observation_time_s=600.0,
         )
 
@@ -1550,8 +1548,8 @@ def test_a_maximum_5_db_above_the_equivalent_marks_the_period() -> None:
     check = building.check_measurement_disturbance(
         [45.3, 44.0, 52.1, 43.9, 35.01], [40.3, 41.5, 42.0, 39.0, 30.01]
     )
-    np.testing.assert_allclose(check.differences_db, [5.0, 2.5, 10.1, 4.9, 5.0])
-    assert check.differences_db[4] < 5.0
+    np.testing.assert_allclose(check.differences, [5.0, 2.5, 10.1, 4.9, 5.0])
+    assert check.differences[4] < 5.0
     np.testing.assert_array_equal(check.undisturbed, [False, True, False, True, False])
     assert check.disturbed_periods == (0, 2, 4)
     assert not check.passes
@@ -1571,8 +1569,8 @@ def test_disturbance_check_needs_one_pair_per_period() -> None:
 def test_disturbance_check_checks_its_periods() -> None:
     with pytest.raises(ValueError, match="one maximum and one equivalent"):
         building.MeasurementDisturbanceCheck(
-            max_levels_db=np.array([44.0, 43.0]),
-            equivalent_levels_db=np.array([40.0]),
+            max_levels=np.array([44.0, 43.0]),
+            equivalent_levels=np.array([40.0]),
         )
 
 
@@ -1585,7 +1583,7 @@ def test_the_calculation_within_2_db_of_the_instrument_agrees() -> None:
         res, {"LA,eq": la - 2.0, "LC,eq": lc + 2.1}
     )
     assert check.calculated_db == {"LA,eq": float(la), "LC,eq": float(lc)}
-    assert check.differences_db["LA,eq"] == pytest.approx(2.0)
+    assert check.differences["LA,eq"] == pytest.approx(2.0)
     assert check.disagreeing == ("LC,eq",)
     assert not check.passes
 
@@ -1598,8 +1596,8 @@ def test_a_calculation_above_the_instrument_is_held_to_2_db_too() -> None:
     check = building.check_instrument_agreement(
         res, {"LA,eq": la - 2.1, "LC,eq": lc - 2.0}
     )
-    assert check.differences_db["LA,eq"] == pytest.approx(2.1)
-    assert check.differences_db["LC,eq"] == pytest.approx(2.0)
+    assert check.differences["LA,eq"] == pytest.approx(2.1)
+    assert check.differences["LC,eq"] == pytest.approx(2.0)
     assert check.disagreeing == ("LA,eq",)
     assert not check.passes
 
@@ -1644,7 +1642,7 @@ def test_instrument_agreement_mappings_refuse_writes() -> None:
     with pytest.raises(TypeError, match="does not support item assignment"):
         check.instrument_db["LA,eq"] = 0.0  # type: ignore[index]
     with pytest.raises(TypeError, match="does not support item assignment"):
-        check.differences_db["LA,eq"] = 0.0  # type: ignore[index]
+        check.differences["LA,eq"] = 0.0  # type: ignore[index]
 
 
 def test_instrument_agreement_pairs_its_single_numbers() -> None:
@@ -1716,7 +1714,7 @@ def test_the_printed_limits_are_not_constructor_fields(
 def test_calibration_figure_names_beginning_and_end() -> None:
     fig, ax = plt.subplots()
     building.verify_calibration_deviation(
-        [93.9, 94.1], previous_levels_db=[94.0, 93.8]
+        [93.9, 94.1], previous_levels=[94.0, 93.8]
     ).plot(ax=ax)
     names = [t.get_text() for t in ax.get_xticklabels()]
     assert names == ["earlier 1", "earlier 2", "beginning", "end"]

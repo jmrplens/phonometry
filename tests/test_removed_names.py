@@ -640,9 +640,9 @@ _RENAMED_4_0_KEYWORDS = [
         "building",
         "check_varying_background",
         "background_maximum_db",
-        "background_max_level_db",
+        "background_max_level",
     ),
-    ("emission", "plant_steady_reading", "maximum_db", "max_level_db"),
+    ("emission", "plant_steady_reading", "maximum_db", "max_level"),
     ("emission", "sound_energy_pressure", "events", "n_events"),
     ("emission", "measurement_positions", "reflecting_planes", "n_reflecting_planes"),
     ("signals", "tone_burst", "cycles", "n_cycles"),
@@ -822,3 +822,33 @@ def test_the_nc_curves_are_published_with_their_unit() -> None:
     np.testing.assert_allclose(
         ph.room.nc_curve(40.0), ph.room.NC_CURVES_DB[ph.room.NC_RATINGS == 40.0][0]
     )
+
+
+# --------------------------------------------------------------------------- #
+# 4.0 a level or a level difference carries no unit suffix: the names that
+# shipped with ``_db`` on a level, a loss, a correction or an index are gone
+# under that spelling. A sample of each kind: a constant, a field and a
+# keyword.
+# --------------------------------------------------------------------------- #
+_REMOVED_4_0_DECIBEL_KEYWORDS = [
+    ("electroacoustics", "MicrophoneCharacteristics", "sensitivity_level_db"),
+    ("electroacoustics", "LoudspeakerCharacteristics", "spl_db"),
+    ("emission", "emission_sound_pressure_level", "background_correction_db"),
+    ("signals", "resample_signal", "stopband_attenuation_db"),
+]
+
+
+@pytest.mark.parametrize(("package", "owner", "name"), _REMOVED_4_0_DECIBEL_KEYWORDS)
+def test_a_level_spelled_with_its_decibels_is_gone(
+    package: str, owner: str, name: str
+) -> None:
+    parameters = inspect.signature(getattr(getattr(ph, package), owner)).parameters
+    assert name not in parameters
+    assert name.removesuffix("_db") in parameters
+
+
+def test_a_level_constant_spelled_with_its_decibels_is_gone() -> None:
+    assert not hasattr(ph.noise_control, "MODAL_FILTER_ATTENUATION_DB")
+    assert ph.noise_control.MODAL_FILTER_ATTENUATION == (3.0, 5.0)
+    assert not hasattr(ph.emission, "MAX_K3_DB")
+    assert ph.emission.MAX_K3 == pytest.approx(7.0)

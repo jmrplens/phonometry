@@ -196,7 +196,7 @@ def _draw_programme_check(
     from .._i18n import localize_axes
 
     f = check.frequencies
-    table = check.relative_levels_db
+    table = check.relative_levels
     ax.fill_between(
         f,
         table - check.tolerance_minus_db,
@@ -209,7 +209,7 @@ def _draw_programme_check(
     ax.plot(f, table, color=_C_EDGE, lw=1.0, ls="--", label=_t("Table II", language))
     ax.plot(
         f,
-        check.band_levels_db + check.offset_db,
+        check.band_levels + check.offset_db,
         **styled(
             kwargs,
             color=_C_SECONDARY,
@@ -387,7 +387,7 @@ def plot_programme_characteristic_voltage(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    levels = result.band_levels_at_characteristic_db
+    levels = result.band_levels_at_characteristic
     positions = np.arange(levels.size)
     floor = 10.0 * math.floor((float(np.min(levels)) - 5.0) / 10.0)
     # One correction alone gives an e.m.f. for 94 dB that the standard does
@@ -577,7 +577,7 @@ def plot_coupler_frequency_response(
             )
     ax.plot(
         f,
-        result.sound_pressure_level_db,
+        result.sound_pressure_level,
         **styled(
             kwargs, color=_C_PRIMARY, lw=1.6, label=_t("Coupler response", language)
         ),
@@ -592,7 +592,7 @@ def plot_coupler_frequency_response(
     ax.set_xlim(lo, hi)
     # Room above the curve for the legend, and at least 60 dB of axis so the
     # box of 50 dB to a decade does not flatten to a strip.
-    levels = result.sound_pressure_level_db
+    levels = result.sound_pressure_level
     top = 10.0 * math.ceil((float(np.max(levels)) + 15.0) / 10.0)
     bottom = top - max(60.0, 10.0 * math.ceil((top - float(np.min(levels))) / 10.0))
     ax.set_ylim(bottom, top)
@@ -631,7 +631,7 @@ def plot_crosstalk_attenuation(
     f = result.frequencies
     ax.plot(
         f,
-        result.attenuation_db,
+        result.attenuation,
         **styled(
             kwargs,
             color=_C_PRIMARY,
@@ -868,8 +868,8 @@ def plot_ear_canal_microphone(
         100.0 * result.entrance_area_mm2 / hp._MAX_ENTRANCE_AREA_MM2,
         100.0 * result.area_ratio / hp._MAX_CANAL_AREA_RATIO,
         100.0 * result.volume_mm3 / hp._MAX_VOLUME_MM3,
-        100.0 * result.neighbor_difference_db / hp._MAX_NEIGHBOUR_DIFFERENCE_DB,
-        100.0 * result.sealed_attenuation_db / hp._MIN_SEALED_ATTENUATION_DB,
+        100.0 * result.neighbor_difference / hp._MAX_NEIGHBOUR_DIFFERENCE_DB,
+        100.0 * result.sealed_attenuation / hp._MIN_SEALED_ATTENUATION_DB,
     ]
     verdicts = result.requirements
     colours = [_C_TERTIARY if verdicts[key] else _C_REFERENCE for key in "abcde"]

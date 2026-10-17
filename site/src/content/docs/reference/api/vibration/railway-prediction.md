@@ -89,26 +89,10 @@ itself the entry is in `docs/ERRATA.md`.
 FLOOR_NATURAL_FREQUENCIES_HZ = (8.0, 10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 50.0, 63.0, 80.0)
 ```
 
-## FOUNDATION_TO_FLOOR_DB
-
-*Constant* (`mapping`).
+## foundation_to_floor_level_difference
 
 ```python
-FOUNDATION_TO_FLOOR_DB = {'concrete': {'lower': (-1.52, -1.53, -1.74, -2.42, -2.63, -1.89, -1.81, -1.73, -1.27, -0.72, 0.02, 1.43, 6.05, 9.78, 4.52, 0.12, -3.27, -4.14, -5.29, -1.96, -1.38, nan, nan), 'mean': (0.29, 0.93, 0.72, 1.09, 0.98, 1.62, 1.6, 2.06, 2.52, 3.26, 4.19, 6.35, 9.94, 17.26, 9.85, 4.41, 3.27, 3.25, 1.42, 3.89, 2.83, nan, nan), 'upper': (2.37, 4.16, 3.85, 5.17, 5.15, 5.51, 5.49, 6.42, 6.88, 7.24, 8.74, 11.76, 17.46, 24.23, 17.07, 11.11, 10.23, 10.21, 8.38, 10.25, 7.9, nan, nan)}, 'timber': {'lower': (nan, nan, 0.64, 1.05, 0.52, 1.87, 2.37, 2.45, 2.6, 2.76, 3.43, 5.98, 8.62, 15.29, 9.88, 6.26, 5.13, 5.28, 5.26, 5.42, 7.63, nan, nan), 'mean': (nan, nan, nan, nan, 3.14, 3.06, 2.19, 4.87, 6.55, 7.74, 8.29, 10.47, 17.4, 21.93, 14.81, 11.54, 9.54, 5.4, 3.55, 3.24, 3.01, 3.35, 1.85), 'upper': (nan, nan, nan, nan, nan, nan, nan, 8.1, 11.09, 14.84, 15.68, 16.61, 23.36, 28.84, 22.39, 18.26, 15.24, 14.03, 10.07, 6.88, 5.4, nan, nan)}}
-```
-
-## FOUNDATION_TO_FLOOR_RATIOS
-
-*Constant* (`tuple`).
-
-```python
-FOUNDATION_TO_FLOOR_RATIOS = (0.05, 0.063, 0.08, 0.1, 0.125, 0.16, 0.2, 0.25, 0.315, 0.4, 0.5, 0.63, 0.8, 1.0, 1.25, 1.6, 2.0, 2.5, 3.15, 4.0, 5.0, 6.3, 8.0)
-```
-
-## foundation_to_floor_transfer
-
-```python
-foundation_to_floor_transfer(
+foundation_to_floor_level_difference(
     frequencies: ArrayLike,
     *,
     floor: str,
@@ -142,6 +126,22 @@ table has no value for gives `nan`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown floor or statistic, a non-positive frequency, or a non-finite input. |
+
+## FOUNDATION_TO_FLOOR_LEVEL_DIFFERENCES
+
+*Constant* (`mapping`).
+
+```python
+FOUNDATION_TO_FLOOR_LEVEL_DIFFERENCES = {'concrete': {'lower': (-1.52, -1.53, -1.74, -2.42, -2.63, -1.89, -1.81, -1.73, -1.27, -0.72, 0.02, 1.43, 6.05, 9.78, 4.52, 0.12, -3.27, -4.14, -5.29, -1.96, -1.38, nan, nan), 'mean': (0.29, 0.93, 0.72, 1.09, 0.98, 1.62, 1.6, 2.06, 2.52, 3.26, 4.19, 6.35, 9.94, 17.26, 9.85, 4.41, 3.27, 3.25, 1.42, 3.89, 2.83, nan, nan), 'upper': (2.37, 4.16, 3.85, 5.17, 5.15, 5.51, 5.49, 6.42, 6.88, 7.24, 8.74, 11.76, 17.46, 24.23, 17.07, 11.11, 10.23, 10.21, 8.38, 10.25, 7.9, nan, nan)}, 'timber': {'lower': (nan, nan, 0.64, 1.05, 0.52, 1.87, 2.37, 2.45, 2.6, 2.76, 3.43, 5.98, 8.62, 15.29, 9.88, 6.26, 5.13, 5.28, 5.26, 5.42, 7.63, nan, nan), 'mean': (nan, nan, nan, nan, 3.14, 3.06, 2.19, 4.87, 6.55, 7.74, 8.29, 10.47, 17.4, 21.93, 14.81, 11.54, 9.54, 5.4, 3.55, 3.24, 3.01, 3.35, 1.85), 'upper': (nan, nan, nan, nan, nan, nan, nan, 8.1, 11.09, 14.84, 15.68, 16.61, 23.36, 28.84, 22.39, 18.26, 15.24, 14.03, 10.07, 6.88, 5.4, nan, nan)}}
+```
+
+## FOUNDATION_TO_FLOOR_RATIOS
+
+*Constant* (`tuple`).
+
+```python
+FOUNDATION_TO_FLOOR_RATIOS = (0.05, 0.063, 0.08, 0.1, 0.125, 0.16, 0.2, 0.25, 0.315, 0.4, 0.5, 0.63, 0.8, 1.0, 1.25, 1.6, 2.0, 2.5, 3.15, 4.0, 5.0, 6.3, 8.0)
+```
 
 ## GEOMETRIC_DECAY_EXPONENT_RANGE
 
@@ -185,14 +185,10 @@ how it is computed here.
 | :--- | :--- |
 | ValueError | For a negative damping ratio, a non-positive speed or a non-positive frequency. |
 
-## GROUND_TO_FLOOR_DB
-
-*Constant* (`mapping`).
-
-## ground_to_floor_transfer
+## ground_to_floor_level_difference
 
 ```python
-ground_to_floor_transfer(
+ground_to_floor_level_difference(
     floor: str,
     *,
     floor_natural_frequency_hz: float,
@@ -225,18 +221,14 @@ considerably.
 | :--- | :--- |
 | ValueError | For an unknown floor or a frequency the tables have no column for. |
 
-## GROUND_TO_FOUNDATION_DB
+## GROUND_TO_FLOOR_LEVEL_DIFFERENCES
 
 *Constant* (`mapping`).
 
-```python
-GROUND_TO_FOUNDATION_DB = {'basement': {'lower': (-9.1, -8.2, -8.3, -8.7, -8.2, -8.3, -9.5, -12.5, -14.7, -15.6, -14.5, -13.1, -12.4, -11.6), 'mean': (-4.0, -3.5, -3.6, -4.2, -4.2, -3.8, -4.6, -6.0, -8.2, -9.3, -7.4, -5.1, -4.4, -4.2), 'upper': (1.0, 1.5, 1.1, 0.3, 0.1, 0.4, 0.3, -0.4, -2.1, -2.7, -0.1, 3.0, 3.4, 3.1)}, 'ground_floor': {'lower': (-8.3, -7.0, -7.5, -6.4, -4.6, -4.3, -6.3, -7.0, -9.1, -10.7, -11.3, -10.0, -11.2, -9.8), 'mean': (-3.2, -3.0, -3.9, -3.0, -2.2, -1.9, -3.1, -4.2, -5.8, -6.4, -5.7, -4.9, -5.3, -4.7), 'upper': (1.7, 1.1, 0.0, 0.3, -0.5, 0.4, -0.4, -1.4, -1.8, -2.5, -0.7, 0.3, 0.4, 0.8)}}
-```
-
-## ground_to_foundation_transfer
+## ground_to_foundation_level_difference
 
 ```python
-ground_to_foundation_transfer(
+ground_to_foundation_level_difference(
     level: str,
     *,
     statistic: str = 'mean',
@@ -266,6 +258,14 @@ same 14 bands, or padded with zeros above them by the caller.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown level or statistic. |
+
+## GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES
+
+*Constant* (`mapping`).
+
+```python
+GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES = {'basement': {'lower': (-9.1, -8.2, -8.3, -8.7, -8.2, -8.3, -9.5, -12.5, -14.7, -15.6, -14.5, -13.1, -12.4, -11.6), 'mean': (-4.0, -3.5, -3.6, -4.2, -4.2, -3.8, -4.6, -6.0, -8.2, -9.3, -7.4, -5.1, -4.4, -4.2), 'upper': (1.0, 1.5, 1.1, 0.3, 0.1, 0.4, 0.3, -0.4, -2.1, -2.7, -0.1, 3.0, 3.4, 3.1)}, 'ground_floor': {'lower': (-8.3, -7.0, -7.5, -6.4, -4.6, -4.3, -6.3, -7.0, -9.1, -10.7, -11.3, -10.0, -11.2, -9.8), 'mean': (-3.2, -3.0, -3.9, -3.0, -2.2, -1.9, -3.1, -4.2, -5.8, -6.4, -5.7, -4.9, -5.3, -4.7), 'upper': (1.7, 1.1, 0.0, 0.3, -0.5, 0.4, -0.4, -1.4, -1.8, -2.5, -0.7, 0.3, 0.4, 0.8)}}
+```
 
 ## ground_transmission
 
@@ -627,7 +627,7 @@ TAKT_MAX_FACTOR = 1.0
 ## takt_max_kb
 
 ```python
-takt_max_kb(weighted_levels_db: ArrayLike) -> float
+takt_max_kb(weighted_levels: ArrayLike) -> float
 ```
 
 The clock maximum r.m.s. of a category from its spectrum, Formula (9).
@@ -642,7 +642,7 @@ prints 0,4 for a sum level of 78,1 dB.
 
 | Name | Description |
 | :--- | :--- |
-| `weighted_levels_db` | $L_{v,KB}$, as [`kb_weighted_levels`](/phonometry/reference/api/vibration/railway-prediction/#kb_weighted_levels) gives them, one per band. |
+| `weighted_levels` | $L_{v,KB}$, as [`kb_weighted_levels`](/phonometry/reference/api/vibration/railway-prediction/#kb_weighted_levels) gives them, one per band. |
 
 **Returns:** $KB_\mathrm{FTm,Zug}$, dimensionless.
 
@@ -734,7 +734,7 @@ TrainCategoryPrediction(
     floor_db: NDArray[np.float64],
     weighted_frequencies_hz: NDArray[np.float64],
     weighted_db: NDArray[np.float64],
-    sum_level_db: float,
+    sum_level: float,
     kb_ftm: float,
     kb_fmax: float,
     peak_velocity_mm_s: float,
@@ -752,7 +752,7 @@ The prediction for one category of train, Clauses 5 and 7.
 | `floor_db` | $L_v$ of Formula (1), the spectrum on the floor. |
 | `weighted_frequencies_hz` | The band centres from 4 Hz to 80 Hz the KB assessment sums. |
 | `weighted_db` | $L_{v,KB}$ of Formula (8) over those bands. |
-| `sum_level_db` | $L_{v,\mathrm{ges}}$ of Formula (9), the energy sum of the weighted bands. |
+| `sum_level` | $L_{v,\mathrm{ges}}$ of Formula (9), the energy sum of the weighted bands. |
 | `kb_ftm` | $KB_\mathrm{FTm,Zug}$ of Formula (9). |
 | `kb_fmax` | $KB_\mathrm{Fmax,Zug}$ of Formula (10). |
 | `peak_velocity_mm_s` | $v_{\max}$ of Formula (12). |

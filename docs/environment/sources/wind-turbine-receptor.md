@@ -48,7 +48,7 @@ v_bin = environment.logarithmic_wind_speed(8.0, height_m=10.0, reference_height_
 print(round(v10, 2), round(alpha, 2), round(v_bin, 2))   # 3.8 0.19 5.45
 
 relevant = environment.sound_relevant_turbines([33.5, 38.2, 29.4, 36.9, 25.1, 31.8, 27.0])
-print(relevant.indices, round(relevant.total_level_db, 1))   # (1, 3, 0) 42.3
+print(relevant.indices, round(relevant.total_level, 1))   # (1, 3, 0) 42.3
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_shear_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_shear.svg" alt="Left: the power-law profile with a shear exponent of 0.26 through 4.5 m/s at 10 m and 8.6 m/s at 120 m, and the logarithmic profile with a roughness length of 0.05 m through the lower point. Right: the predicted levels of seven turbines at a dwelling, numbered from 1, the three loudest sound relevant, the total of 42.3 dB, the total less 1 dB and the energy sum of the loudest turbines together, which first reaches the total less 1 dB at the third" width="96%"></picture>
@@ -77,7 +77,7 @@ off_levels = np.round(15.0 + 3.4 * off_speeds + rng.normal(0.0, 1.5, 240), 1)
 on = environment.bin_sound_levels(total_levels, speeds, type_b_uncertainty_db=0.5)
 off = environment.bin_sound_levels(off_levels, off_speeds, type_b_uncertainty_db=0.5)
 corrected = on.background_corrected(off)
-print(np.round(corrected.turbine_levels_db[-3:], 1), corrected.regimes[-1].value)
+print(np.round(corrected.turbine_levels[-3:], 1), corrected.regimes[-1].value)
 # [50.8 50.4 52.2] three_db
 
 prediction = environment.predicted_receptor_level([36.9, 38.2, 33.5], 1.5)
@@ -100,11 +100,11 @@ low = environment.wind_turbine_low_frequency_level(
     np.vstack([power, power, power - 1.0]),
     distance=[650.0, 820.0, 1100.0],
     hub_height_m=120.0,
-    facade_insulation_db=environment.LOW_FREQUENCY_FACADE_INSULATION_DB[
+    facade_insulation=environment.LOW_FREQUENCY_FACADE_INSULATION[
         "Denmark brick or similar"
     ],
 )
-print(round(low.outdoor_level_db, 1), round(low.indoor_level_db, 1))   # 35.1 16.5
+print(round(low.outdoor_level, 1), round(low.indoor_level, 1))   # 35.1 16.5
 ```
 
 **Why Table C.2 sits under ISO 9613-1.** Its caption says 70 % relative
@@ -134,7 +134,7 @@ running less the background criterion with them stopped, per wind speed class.
 emergence = environment.sound_emergence(
     [38.5, 41.0, 43.5], [33.0, 37.5, 41.5], wind_speeds_m_s=[5.0, 6.0, 7.0]
 )
-print(emergence.emergence_db)   # [5.5 3.5 2. ]
+print(emergence.emergence)   # [5.5 3.5 2. ]
 ```
 
 ## Amplitude modulation (clause 13)
@@ -210,9 +210,9 @@ the distance to the nearest turbine (Table 7).
 ```python
 k_am = environment.amplitude_modulation_adjustment(5.84)
 rating = environment.wind_turbine_rating_level(
-    41.0, tonal_adjustment_db=2.0, amplitude_modulation_adjustment_db=k_am
+    41.0, tonal_adjustment=2.0, amplitude_modulation_adjustment=k_am
 )
-print(round(k_am, 2), rating.governing, round(rating.rating_level_db, 1))   # 3.81 amplitude_modulation 44.8
+print(round(k_am, 2), rating.governing, round(rating.rating_level, 1))   # 3.81 amplitude_modulation 44.8
 
 search = environment.upper_tone_search_frequency(
     600.0, temperature_c=10.0, relative_humidity_percent=50.0

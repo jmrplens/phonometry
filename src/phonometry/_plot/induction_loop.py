@@ -243,7 +243,7 @@ def plot_loop_field(
 
     ax = ax if ax is not None else _new_axes()
     position, axis_name = _position_axis(result)
-    level = np.ravel(result.level_db(component))
+    level = np.ravel(result.level(component))
     order = np.argsort(position)
     label = (
         _t("Magnitude", language)
@@ -411,7 +411,7 @@ def plot_agc_characteristic(
     ax = ax if ax is not None else _new_axes()
     ax.plot(
         result.source_emf_db,
-        result.output_level_db,
+        result.output_level,
         **styled(
             kwargs,
             color=_C_PRIMARY,
@@ -422,7 +422,7 @@ def plot_agc_characteristic(
         ),
     )
     top = float(
-        np.interp(result.agc_range_end_db, result.source_emf_db, result.output_level_db)
+        np.interp(result.agc_range_end_db, result.source_emf_db, result.output_level)
     )
     ax.axvspan(
         result.agc_range_start_db,
@@ -668,7 +668,7 @@ def plot_field_strength_reading(
     peak = int(np.argmax(np.where(finite, result.levels, -np.inf)))
     ax.plot(
         [result.times[peak]],
-        [result.max_level_db],
+        [result.max_level],
         ls="none",
         marker="D",
         ms=6,
@@ -677,7 +677,7 @@ def plot_field_strength_reading(
         label=_t(
             "Maximum {level} dB",
             language,
-            level=_num(result.max_level_db, language),
+            level=_num(result.max_level, language),
         ),
     )
     ax.set_xlabel(_t("Time [s]", language))
@@ -713,10 +713,10 @@ def plot_background_noise(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    points = np.arange(1, result.noise_levels_db.size + 1)
+    points = np.arange(1, result.noise_levels.size + 1)
     ax.plot(
         points,
-        result.noise_levels_db,
+        result.noise_levels,
         **styled(
             kwargs,
             color=_C_PRIMARY,
@@ -734,8 +734,8 @@ def plot_background_noise(
         ax.axhline(level, color=colour, lw=1.0, ls=style, label=_t(text, language))
     # Room above the 22 dB line for the legend, and below the 47 dB one.
     ax.set_ylim(
-        min(float(np.min(result.noise_levels_db)), -47.0) - _NOISE_PAD_BELOW_DB,
-        max(float(np.max(result.noise_levels_db)), -22.0) + _NOISE_PAD_ABOVE_DB,
+        min(float(np.min(result.noise_levels)), -47.0) - _NOISE_PAD_BELOW_DB,
+        max(float(np.max(result.noise_levels)), -22.0) + _NOISE_PAD_ABOVE_DB,
     )
     ax.set_xticks(points)
     ax.set_xlabel(_t("Measurement point", language))

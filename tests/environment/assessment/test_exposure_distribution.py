@@ -113,7 +113,7 @@ def test_equal_levels_keep_their_classes_in_input_order() -> None:
 def test_lt1_is_equation_7() -> None:
     dist = _annex_a()
     lt1 = sd.long_term_sel(_LEVELS, _PERIOD)
-    assert lt1 == pytest.approx(dist.long_term_level_db, abs=1e-12)
+    assert lt1 == pytest.approx(dist.long_term_level, abs=1e-12)
     assert lt1 == pytest.approx(
         10.0 * math.log10(np.sum(_PERIOD * 10 ** (0.1 * _LEVELS)))
     )
@@ -130,10 +130,10 @@ def test_lt2_matches_quadrature_of_equation_a4() -> None:
         epsabs=0.0,
         epsrel=1e-12,
     )
-    assert dist.distribution_long_term_level_db == pytest.approx(
+    assert dist.distribution_long_term_level == pytest.approx(
         10.0 * math.log10(energy), abs=1e-9
     )
-    assert round(dist.distribution_long_term_level_db, 1) == ISO13474_FIGURE_A3_LT2_DB
+    assert round(dist.distribution_long_term_level, 1) == ISO13474_FIGURE_A3_LT2_DB
 
 
 def test_lt2_with_one_subclass_is_the_energy_mean_of_the_class_centres() -> None:
@@ -151,13 +151,13 @@ def test_lt2_with_one_subclass_is_the_energy_mean_of_the_class_centres() -> None
     expected = 10.0 * math.log10(
         float(np.sum(_PERIOD[order] * 10.0 ** (0.1 * centres)))
     )
-    assert dist.distribution_long_term_level_db == pytest.approx(expected, abs=1e-9)
+    assert dist.distribution_long_term_level == pytest.approx(expected, abs=1e-9)
 
 
 def test_lt2_sits_below_lt1_in_the_annex_example() -> None:
     """Spread over their widths, the classes lose energy against their levels."""
     dist = _annex_a()
-    assert dist.distribution_long_term_level_db < dist.long_term_level_db
+    assert dist.distribution_long_term_level < dist.long_term_level
 
 
 def test_fifty_percent_level_matches_figure_a3() -> None:
@@ -250,7 +250,7 @@ def test_printed_level_shift_is_not_equation_22_at_5_db() -> None:
     shift = sd.turbulence_level_shift(ISO13474_ANNEX_A_SIGMA_DB)
     assert shift == pytest.approx(2.878231366, abs=1e-9)
     dist = _annex_a()
-    with_printed_shift = dist.distribution_long_term_level_db + (
+    with_printed_shift = dist.distribution_long_term_level + (
         shift - ISO13474_ANNEX_A_PRINTED_SHIFT_DB
     )
     assert round(with_printed_shift, 1) == pytest.approx(38.8)
@@ -302,7 +302,7 @@ def test_each_subclass_keeps_its_energy_after_the_shift() -> None:
     """The reason for Equation (22): the spread subclass averages to its centre."""
     dist = sd.sel_distribution([40.0, 50.0], [0.5, 0.5], sigma_db=4.0, n_subclasses=1)
     mean = float(dist.subclass_centers_db[0, 0])
-    shift = dist.level_shift_db
+    shift = dist.level_shift
 
     def integrand(x: float) -> float:
         z = (x - (mean - shift)) / 4.0
@@ -469,7 +469,7 @@ def test_rating_level_adds_k_inside_the_sum() -> None:
     expected = 10.0 * math.log10(
         sum(p * 10 ** (0.1 * (lv + k)) for lv, p in zip(levels, probs, strict=True))
     )
-    assert sd.long_term_sel(levels, probs, rating_adjustment_db=k) == pytest.approx(
+    assert sd.long_term_sel(levels, probs, rating_adjustment=k) == pytest.approx(
         expected
     )
     assert sd.long_term_sel(levels, probs) == pytest.approx(expected - k)
@@ -585,8 +585,8 @@ def test_refuses_zero_subclasses() -> None:
 
 
 def test_refuses_a_non_finite_rating_adjustment() -> None:
-    with pytest.raises(ValueError, match="'rating_adjustment_db' must be finite"):
-        sd.long_term_sel([40.0, 44.0], [0.5, 0.5], rating_adjustment_db=float("nan"))
+    with pytest.raises(ValueError, match="'rating_adjustment' must be finite"):
+        sd.long_term_sel([40.0, 44.0], [0.5, 0.5], rating_adjustment=float("nan"))
 
 
 @pytest.mark.parametrize("percent", [0.0, 100.0, -1.0, float("nan")])
@@ -675,7 +675,7 @@ def test_density_view_draws_the_continuous_density_and_lt2() -> None:
     ax = dist.plot()
     curve, marker = ax.lines
     np.testing.assert_allclose(curve.get_ydata(), dist.density(curve.get_xdata()))
-    assert marker.get_xdata()[0] == pytest.approx(dist.distribution_long_term_level_db)
+    assert marker.get_xdata()[0] == pytest.approx(dist.distribution_long_term_level)
     assert marker.get_label() == "LT2 (long-term level) 37.0 dB"
     plt.close("all")
 

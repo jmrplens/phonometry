@@ -370,11 +370,11 @@ def test_none_and_numbers_go_through_untouched() -> None:
     @dataclasses.dataclass(frozen=True)
     class Optional(OwnsArrays):
         levels: np.ndarray | None = None
-        level_db: float | np.ndarray = 0.0
+        level: float | np.ndarray = 0.0
 
     record = Optional()
     assert record.levels is None
-    assert record.level_db == 0.0
+    assert record.level == 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -712,15 +712,15 @@ def _built_by_hand() -> dict[str, tuple[Callable[[np.ndarray], object], str]]:
         ),
         "EmissionPressureResult": (
             lambda a: emission.EmissionPressureResult(
-                level_db=a,
-                measured_level_db=a,
-                background_correction_db=0.0,
-                local_correction_db=0.0,
+                level=a,
+                measured_level=a,
+                background_correction=0.0,
+                local_correction=0.0,
                 grade="engineering",
                 background_margin_db=15.0,
                 standard="ISO 11201",
             ),
-            "level_db",
+            "level",
         ),
         "RailwayTrack": (
             lambda a: environment.RailwayTrack(
@@ -780,14 +780,14 @@ def _calibration_with(corrections: Mapping[str, np.ndarray]) -> dict[str, object
             products_v2_per_pa2=np.ones((3, 3)),
             field="pressure",
             method="three_microphones",
-            corrections_db=corrections,
+            corrections=corrections,
         ),
         "ComparisonCalibration": metrology.ComparisonCalibration(
             frequencies=frequencies,
-            reference_sensitivity_level_db=np.full(3, -38.0),
-            output_level_differences_db=np.zeros(3),
-            pressure_level_difference_db=np.zeros(3),
-            corrections_db=corrections,
+            reference_sensitivity_level=np.full(3, -38.0),
+            output_level_differences=np.zeros(3),
+            pressure_level_difference=np.zeros(3),
+            corrections=corrections,
             field="pressure",
             excitation="sequential",
         ),
@@ -808,7 +808,7 @@ def test_a_calibration_built_by_hand_copies_the_corrections_of_any_mapping(
 ) -> None:
     mine = _writeable([0.1, 0.2, 0.3])
     record = _calibration_with(kind({"wave_motion": mine}))[record_name]
-    kept = record.corrections_db["wave_motion"]  # type: ignore[attr-defined]
+    kept = record.corrections["wave_motion"]  # type: ignore[attr-defined]
     assert mine.flags.writeable
     assert not np.shares_memory(kept, mine)
     mine[0] = 99.0
@@ -834,7 +834,7 @@ def test_a_signal_a_record_is_handed_is_held_whole() -> None:
             filter_taps=np.ones(5),
             passband_edge_hz=7000.0,
             stopband_edge_hz=8000.0,
-            stopband_attenuation_db=60.0,
+            stopband_attenuation=60.0,
             transition_width=0.1,
         )
 
@@ -876,12 +876,12 @@ def test_a_signal_handed_to_an_array_field_keeps_its_samples_writeable() -> None
         levels=np.zeros(3),
         start_s=0.0,
         end_s=1.0,
-        equivalent_level_db=0.0,
-        max_level_db=0.0,
-        front_level_db=0.0,
-        rear_level_db=0.0,
-        record_start_level_db=0.0,
-        record_end_level_db=0.0,
+        equivalent_level=0.0,
+        max_level=0.0,
+        front_level=0.0,
+        rear_level=0.0,
+        record_start_level=0.0,
+        record_end_level=0.0,
     )
     assert signal.data.flags.writeable
     assert not np.shares_memory(record.times, signal.data)

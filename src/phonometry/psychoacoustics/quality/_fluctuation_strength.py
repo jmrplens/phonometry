@@ -83,7 +83,7 @@ _BBN_DENOM_OFFSET = 1.5
 
 
 def fluctuation_strength_am_noise(
-    level_db: float, modulation_factor: float, mod_frequency: float
+    level: float, modulation_factor: float, mod_frequency: float
 ) -> float:
     r"""Fluctuation strength of AM broadband noise (Fastl & Zwicker Eq. 10.2).
 
@@ -98,7 +98,7 @@ def fluctuation_strength_am_noise(
     goes negative below ~20 dB or :math:`m < 0.2` where the sensation
     vanishes).
 
-    :param level_db: Broadband-noise level ``L``, in dB.
+    :param level: Broadband-noise level ``L``, in dB.
     :param modulation_factor: Modulation factor ``m`` (0..1).
     :param mod_frequency: Modulation frequency ``fmod``, in Hz.
     :return: Fluctuation strength, in vacil (>= 0).
@@ -109,8 +109,8 @@ def fluctuation_strength_am_noise(
     m = float(modulation_factor)
     require_scalar(mod_frequency, "mod_frequency")
     fmod = float(mod_frequency)
-    require_scalar(level_db, "level_db")
-    lvl = float(level_db)
+    require_scalar(level, "level")
+    lvl = float(level)
     if not np.isfinite(m) or not 0.0 <= m <= 1.0:
         msg = "'modulation_factor' must be in [0, 1]."
         raise ValueError(msg)
@@ -118,7 +118,7 @@ def fluctuation_strength_am_noise(
         msg = "'mod_frequency' must be positive and finite."
         raise ValueError(msg)
     if not np.isfinite(lvl):
-        msg = "'level_db' must be finite."
+        msg = "'level' must be finite."
         raise ValueError(msg)
     numerator = (
         _BBN_SCALE

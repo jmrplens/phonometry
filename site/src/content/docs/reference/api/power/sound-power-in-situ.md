@@ -169,7 +169,7 @@ InSituSoundPowerResult(
     background_margin_db: np.ndarray,
     background_margin_ref_db: np.ndarray,
     c2: float,
-    excess_levels_db: np.ndarray | None,
+    excess_levels: np.ndarray | None,
     directivity_range_db: float | None,
     sigma_omc_db: float,
     coverage_factor: float,
@@ -225,7 +225,7 @@ leaves the level too high. A band where the reference source's margin is
 short is not one, since its capped correction pulls the level down; it
 is flagged by `background_requirement_met` alone.
 
-`excess_levels_db` and `directivity_range_db` are the two indicators
+`excess_levels` and `directivity_range_db` are the two indicators
 Table 2 grades the determination by, the A-weighted excess
 $\Delta L_{f\mathrm{A}}$ at each microphone position and the
 directivity range of the source, `None` where they were not determined.

@@ -62,15 +62,15 @@ def test_rectangular_scalloping_exact_discrete_form() -> None:
     # |W(1/2)| / |W(0)| = 1 / (N·sin(π/2N)) exactly (Dirichlet kernel).
     res = ph.signals.window_metrics("boxcar", N)
     exact = 20.0 * np.log10(N * np.sin(np.pi / (2.0 * N)))
-    assert res.scalloping_loss_db == pytest.approx(exact, rel=1e-9)
+    assert res.scalloping_loss == pytest.approx(exact, rel=1e-9)
     # Large-N limit: 20·lg(π/2) = 3.9224 dB.
-    assert res.scalloping_loss_db == pytest.approx(3.9224, abs=1e-3)
+    assert res.scalloping_loss == pytest.approx(3.9224, abs=1e-3)
 
 
 def test_hann_scalloping_matches_continuous_limit() -> None:
     # W(1/2)/W(0) -> (2/π)/(1 - 1/4) = 8/3π for the continuous Hann kernel.
     res = ph.signals.window_metrics("hann", N)
-    assert res.scalloping_loss_db == pytest.approx(
+    assert res.scalloping_loss == pytest.approx(
         -20.0 * np.log10(8.0 / (3.0 * np.pi)), abs=1e-3
     )
 
@@ -103,9 +103,9 @@ def test_worst_case_processing_loss() -> None:
     # WCPL = scalloping loss + 10·lg(ENBW): 3.92 dB rectangular (no ENBW
     # term), 3.18 dB Hann (Harris Table 1).
     rect = ph.signals.window_metrics("boxcar", N)
-    assert rect.worst_case_processing_loss_db == pytest.approx(rect.scalloping_loss_db)
+    assert rect.worst_case_processing_loss == pytest.approx(rect.scalloping_loss)
     hann = ph.signals.window_metrics("hann", N)
-    assert hann.worst_case_processing_loss_db == pytest.approx(3.18, abs=0.01)
+    assert hann.worst_case_processing_loss == pytest.approx(3.18, abs=0.01)
 
 
 def test_enbw_hz_matches_welch_resolution_bandwidth() -> None:

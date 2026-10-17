@@ -18,14 +18,14 @@
       "sheet_metal_gauge": "24",
       "first_side_mm": 305,
       "second_side_mm": 305,
-      "transmission_loss_63_db": 21,
-      "transmission_loss_125_db": 24,
-      "transmission_loss_250_db": 27,
-      "transmission_loss_500_db": 30,
-      "transmission_loss_1000_db": 33,
-      "transmission_loss_2000_db": 36,
-      "transmission_loss_4000_db": 41,
-      "transmission_loss_8000_db": 45,
+      "transmission_loss_63": 21,
+      "transmission_loss_125": 24,
+      "transmission_loss_250": 27,
+      "transmission_loss_500": 30,
+      "transmission_loss_1000": 33,
+      "transmission_loss_2000": 36,
+      "transmission_loss_4000": 41,
+      "transmission_loss_8000": 45,
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
       }
@@ -39,14 +39,14 @@
       "sheet_metal_gauge": "24",
       "first_side_mm": 305,
       "second_side_mm": 610,
-      "transmission_loss_63_db": 19,
-      "transmission_loss_125_db": 22,
-      "transmission_loss_250_db": 25,
-      "transmission_loss_500_db": 28,
-      "transmission_loss_1000_db": 31,
-      "transmission_loss_2000_db": 35,
-      "transmission_loss_4000_db": 41,
-      "transmission_loss_8000_db": 45,
+      "transmission_loss_63": 19,
+      "transmission_loss_125": 22,
+      "transmission_loss_250": 25,
+      "transmission_loss_500": 28,
+      "transmission_loss_1000": 31,
+      "transmission_loss_2000": 35,
+      "transmission_loss_4000": 41,
+      "transmission_loss_8000": 45,
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
       }
@@ -60,14 +60,14 @@
       "sheet_metal_gauge": "22",
       "first_side_mm": 305,
       "second_side_mm": 1220,
-      "transmission_loss_63_db": 19,
-      "transmission_loss_125_db": 22,
-      "transmission_loss_250_db": 25,
-      "transmission_loss_500_db": 28,
-      "transmission_loss_1000_db": 31,
-      "transmission_loss_2000_db": 37,
-      "transmission_loss_4000_db": 43,
-      "transmission_loss_8000_db": 45,
+      "transmission_loss_63": 19,
+      "transmission_loss_125": 22,
+      "transmission_loss_250": 25,
+      "transmission_loss_500": 28,
+      "transmission_loss_1000": 31,
+      "transmission_loss_2000": 37,
+      "transmission_loss_4000": 43,
+      "transmission_loss_8000": 45,
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
       }
@@ -81,14 +81,14 @@
       "sheet_metal_gauge": "22",
       "first_side_mm": 610,
       "second_side_mm": 610,
-      "transmission_loss_63_db": 20,
-      "transmission_loss_125_db": 23,
-      "transmission_loss_250_db": 26,
-      "transmission_loss_500_db": 29,
-      "transmission_loss_1000_db": 32,
-      "transmission_loss_2000_db": 37,
-      "transmission_loss_4000_db": 43,
-      "transmission_loss_8000_db": 45,
+      "transmission_loss_63": 20,
+      "transmission_loss_125": 23,
+      "transmission_loss_250": 26,
+      "transmission_loss_500": 29,
+      "transmission_loss_1000": 32,
+      "transmission_loss_2000": 37,
+      "transmission_loss_4000": 43,
+      "transmission_loss_8000": 45,
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
       }
@@ -102,14 +102,14 @@
       "sheet_metal_gauge": "20",
       "first_side_mm": 610,
       "second_side_mm": 1220,
-      "transmission_loss_63_db": 20,
-      "transmission_loss_125_db": 23,
-      "transmission_loss_250_db": 26,
-      "transmission_loss_500_db": 29,
-      "transmission_loss_1000_db": 31,
-      "transmission_loss_2000_db": 39,
-      "transmission_loss_4000_db": 45,
-      "transmission_loss_8000_db": 45,
+      "transmission_loss_63": 20,
+      "transmission_loss_125": 23,
+      "transmission_loss_250": 26,
+      "transmission_loss_500": 29,
+      "transmission_loss_1000": 31,
+      "transmission_loss_2000": 39,
+      "transmission_loss_4000": 45,
+      "transmission_loss_8000": 45,
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
       }
@@ -123,14 +123,14 @@
       "sheet_metal_gauge": "18",
       "first_side_mm": 1220,
       "second_side_mm": 1220,
-      "transmission_loss_63_db": 21,
-      "transmission_loss_125_db": 24,
-      "transmission_loss_250_db": 27,
-      "transmission_loss_500_db": 30,
-      "transmission_loss_1000_db": 35,
-      "transmission_loss_2000_db": 41,
-      "transmission_loss_4000_db": 45,
-      "transmission_loss_8000_db": 45,
+      "transmission_loss_63": 21,
+      "transmission_loss_125": 24,
+      "transmission_loss_250": 27,
+      "transmission_loss_500": 30,
+      "transmission_loss_1000": 35,
+      "transmission_loss_2000": 41,
+      "transmission_loss_4000": 45,
+      "transmission_loss_8000": 45,
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
       }
@@ -144,14 +144,14 @@
       "sheet_metal_gauge": "18",
       "first_side_mm": 1220,
       "second_side_mm": 2440,
-      "transmission_loss_63_db": 19,
-      "transmission_loss_125_db": 22,
-      "transmission_loss_250_db": 25,
-      "transmission_loss_500_db": 29,
-      "transmission_loss_1000_db": 35,
-      "transmission_loss_2000_db": 41,
-      "transmission_loss_4000_db": 45,
-      "transmission_loss_8000_db": 45,
+      "transmission_loss_63": 19,
+      "transmission_loss_125": 22,
+      "transmission_loss_250": 25,
+      "transmission_loss_500": 29,
+      "transmission_loss_1000": 35,
+      "transmission_loss_2000": 41,
+      "transmission_loss_4000": 45,
+      "transmission_loss_8000": 45,
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
       }
@@ -165,21 +165,21 @@
       "sheet_metal_gauge": "26",
       "diameter_mm": 200,
       "duct_length_m": 4.6,
-      "transmission_loss_125_db": 53,
-      "transmission_loss_250_db": 55,
-      "transmission_loss_500_db": 52,
-      "transmission_loss_1000_db": 44,
-      "transmission_loss_2000_db": 35,
-      "transmission_loss_4000_db": 34,
+      "transmission_loss_125": 53,
+      "transmission_loss_250": 55,
+      "transmission_loss_500": 52,
+      "transmission_loss_1000": 44,
+      "transmission_loss_2000": 35,
+      "transmission_loss_4000": 34,
       "group": "Long Seam Ducts",
       "ranges": {
-        "transmission_loss_63_db": [
+        "transmission_loss_63": [
           45,
           null
         ]
       },
       "bounded_below": [
-        "transmission_loss_63_db"
+        "transmission_loss_63"
       ],
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
@@ -195,21 +195,21 @@
       "sheet_metal_gauge": "24",
       "diameter_mm": 350,
       "duct_length_m": 4.6,
-      "transmission_loss_125_db": 60,
-      "transmission_loss_250_db": 54,
-      "transmission_loss_500_db": 36,
-      "transmission_loss_1000_db": 34,
-      "transmission_loss_2000_db": 31,
-      "transmission_loss_4000_db": 25,
+      "transmission_loss_125": 60,
+      "transmission_loss_250": 54,
+      "transmission_loss_500": 36,
+      "transmission_loss_1000": 34,
+      "transmission_loss_2000": 31,
+      "transmission_loss_4000": 25,
       "group": "Long Seam Ducts",
       "ranges": {
-        "transmission_loss_63_db": [
+        "transmission_loss_63": [
           50,
           null
         ]
       },
       "bounded_below": [
-        "transmission_loss_63_db"
+        "transmission_loss_63"
       ],
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
@@ -225,21 +225,21 @@
       "sheet_metal_gauge": "22",
       "diameter_mm": 560,
       "duct_length_m": 4.6,
-      "transmission_loss_125_db": 53,
-      "transmission_loss_250_db": 37,
-      "transmission_loss_500_db": 33,
-      "transmission_loss_1000_db": 33,
-      "transmission_loss_2000_db": 27,
-      "transmission_loss_4000_db": 25,
+      "transmission_loss_125": 53,
+      "transmission_loss_250": 37,
+      "transmission_loss_500": 33,
+      "transmission_loss_1000": 33,
+      "transmission_loss_2000": 27,
+      "transmission_loss_4000": 25,
       "group": "Long Seam Ducts",
       "ranges": {
-        "transmission_loss_63_db": [
+        "transmission_loss_63": [
           47,
           null
         ]
       },
       "bounded_below": [
-        "transmission_loss_63_db"
+        "transmission_loss_63"
       ],
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
@@ -255,13 +255,13 @@
       "sheet_metal_gauge": "22",
       "diameter_mm": 810,
       "duct_length_m": 4.6,
-      "transmission_loss_63_db": 51,
-      "transmission_loss_125_db": 46,
-      "transmission_loss_250_db": 26,
-      "transmission_loss_500_db": 26,
-      "transmission_loss_1000_db": 24,
-      "transmission_loss_2000_db": 22,
-      "transmission_loss_4000_db": 38,
+      "transmission_loss_63": 51,
+      "transmission_loss_125": 46,
+      "transmission_loss_250": 26,
+      "transmission_loss_500": 26,
+      "transmission_loss_1000": 24,
+      "transmission_loss_2000": 22,
+      "transmission_loss_4000": 38,
       "group": "Long Seam Ducts",
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
@@ -277,13 +277,13 @@
       "sheet_metal_gauge": "26*",
       "diameter_mm": 300,
       "duct_length_m": 3.6,
-      "transmission_loss_63_db": 52,
-      "transmission_loss_125_db": 51,
-      "transmission_loss_250_db": 53,
-      "transmission_loss_500_db": 51,
-      "transmission_loss_1000_db": 50,
-      "transmission_loss_2000_db": 46,
-      "transmission_loss_4000_db": 36,
+      "transmission_loss_63": 52,
+      "transmission_loss_125": 51,
+      "transmission_loss_250": 53,
+      "transmission_loss_500": 51,
+      "transmission_loss_1000": 50,
+      "transmission_loss_2000": 46,
+      "transmission_loss_4000": 36,
       "group": "Spiral Wound Ducts",
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
@@ -299,13 +299,13 @@
       "sheet_metal_gauge": "24",
       "diameter_mm": 610,
       "duct_length_m": 7.3,
-      "transmission_loss_63_db": 51,
-      "transmission_loss_125_db": 53,
-      "transmission_loss_250_db": 51,
-      "transmission_loss_500_db": 44,
-      "transmission_loss_1000_db": 36,
-      "transmission_loss_2000_db": 26,
-      "transmission_loss_4000_db": 29,
+      "transmission_loss_63": 51,
+      "transmission_loss_125": 53,
+      "transmission_loss_250": 51,
+      "transmission_loss_500": 44,
+      "transmission_loss_1000": 36,
+      "transmission_loss_2000": 26,
+      "transmission_loss_4000": 29,
       "group": "Spiral Wound Ducts",
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
@@ -320,13 +320,13 @@
       "sheet_metal_gauge": "24*",
       "diameter_mm": 610,
       "duct_length_m": 7.3,
-      "transmission_loss_63_db": 51,
-      "transmission_loss_125_db": 51,
-      "transmission_loss_250_db": 54,
-      "transmission_loss_500_db": 44,
-      "transmission_loss_1000_db": 39,
-      "transmission_loss_2000_db": 33,
-      "transmission_loss_4000_db": 47,
+      "transmission_loss_63": 51,
+      "transmission_loss_125": 51,
+      "transmission_loss_250": 54,
+      "transmission_loss_500": 44,
+      "transmission_loss_1000": 39,
+      "transmission_loss_2000": 33,
+      "transmission_loss_4000": 47,
       "carried": {
         "diameter_mm": "carried down from the 610 mm printed one row above it. The page prints the diameter once for that part of the Spiral Wound Ducts block of Table 30 and leaves the cell blank on the two rows below it, which print their own length and gauge."
       },
@@ -345,24 +345,24 @@
       "sheet_metal_gauge": "16",
       "diameter_mm": 610,
       "duct_length_m": 3,
-      "transmission_loss_125_db": 53,
-      "transmission_loss_250_db": 36,
-      "transmission_loss_500_db": 32,
-      "transmission_loss_1000_db": 32,
-      "transmission_loss_2000_db": 28,
-      "transmission_loss_4000_db": 41,
+      "transmission_loss_125": 53,
+      "transmission_loss_250": 36,
+      "transmission_loss_500": 32,
+      "transmission_loss_1000": 32,
+      "transmission_loss_2000": 28,
+      "transmission_loss_4000": 41,
       "carried": {
         "diameter_mm": "carried down from the 610 mm printed two rows above it. The page prints the diameter once for that part of the Spiral Wound Ducts block of Table 30 and leaves the cell blank on the two rows below it, which print their own length and gauge."
       },
       "group": "Spiral Wound Ducts",
       "ranges": {
-        "transmission_loss_63_db": [
+        "transmission_loss_63": [
           48,
           null
         ]
       },
       "bounded_below": [
-        "transmission_loss_63_db"
+        "transmission_loss_63"
       ],
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
@@ -378,13 +378,13 @@
       "sheet_metal_gauge": "20",
       "diameter_mm": 915,
       "duct_length_m": 7.3,
-      "transmission_loss_63_db": 51,
-      "transmission_loss_125_db": 51,
-      "transmission_loss_250_db": 52,
-      "transmission_loss_500_db": 46,
-      "transmission_loss_1000_db": 36,
-      "transmission_loss_2000_db": 32,
-      "transmission_loss_4000_db": 55,
+      "transmission_loss_63": 51,
+      "transmission_loss_125": 51,
+      "transmission_loss_250": 52,
+      "transmission_loss_500": 46,
+      "transmission_loss_1000": 36,
+      "transmission_loss_2000": 32,
+      "transmission_loss_4000": 55,
       "group": "Spiral Wound Ducts",
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
@@ -399,14 +399,14 @@
       "sheet_metal_gauge": "24",
       "first_side_mm": 305,
       "second_side_mm": 152,
-      "transmission_loss_63_db": 31,
-      "transmission_loss_125_db": 34,
-      "transmission_loss_250_db": 37,
-      "transmission_loss_500_db": 40,
-      "transmission_loss_1000_db": 43,
+      "transmission_loss_63": 31,
+      "transmission_loss_125": 34,
+      "transmission_loss_250": 37,
+      "transmission_loss_500": 40,
+      "transmission_loss_1000": 43,
       "unquantified": {
-        "transmission_loss_2000_db": "—",
-        "transmission_loss_4000_db": "—"
+        "transmission_loss_2000": "—",
+        "transmission_loss_4000": "—"
       },
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
@@ -421,14 +421,14 @@
       "sheet_metal_gauge": "24",
       "first_side_mm": 610,
       "second_side_mm": 152,
-      "transmission_loss_63_db": 24,
-      "transmission_loss_125_db": 27,
-      "transmission_loss_250_db": 30,
-      "transmission_loss_500_db": 33,
-      "transmission_loss_1000_db": 36,
+      "transmission_loss_63": 24,
+      "transmission_loss_125": 27,
+      "transmission_loss_250": 30,
+      "transmission_loss_500": 33,
+      "transmission_loss_1000": 36,
       "unquantified": {
-        "transmission_loss_2000_db": "—",
-        "transmission_loss_4000_db": "—"
+        "transmission_loss_2000": "—",
+        "transmission_loss_4000": "—"
       },
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
@@ -443,14 +443,14 @@
       "sheet_metal_gauge": "24",
       "first_side_mm": 610,
       "second_side_mm": 305,
-      "transmission_loss_63_db": 28,
-      "transmission_loss_125_db": 31,
-      "transmission_loss_250_db": 34,
-      "transmission_loss_500_db": 37,
+      "transmission_loss_63": 28,
+      "transmission_loss_125": 31,
+      "transmission_loss_250": 34,
+      "transmission_loss_500": 37,
       "unquantified": {
-        "transmission_loss_1000_db": "—",
-        "transmission_loss_2000_db": "—",
-        "transmission_loss_4000_db": "—"
+        "transmission_loss_1000": "—",
+        "transmission_loss_2000": "—",
+        "transmission_loss_4000": "—"
       },
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
@@ -465,14 +465,14 @@
       "sheet_metal_gauge": "22",
       "first_side_mm": 1220,
       "second_side_mm": 305,
-      "transmission_loss_63_db": 23,
-      "transmission_loss_125_db": 26,
-      "transmission_loss_250_db": 29,
-      "transmission_loss_500_db": 32,
+      "transmission_loss_63": 23,
+      "transmission_loss_125": 26,
+      "transmission_loss_250": 29,
+      "transmission_loss_500": 32,
       "unquantified": {
-        "transmission_loss_1000_db": "—",
-        "transmission_loss_2000_db": "—",
-        "transmission_loss_4000_db": "—"
+        "transmission_loss_1000": "—",
+        "transmission_loss_2000": "—",
+        "transmission_loss_4000": "—"
       },
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
@@ -487,14 +487,14 @@
       "sheet_metal_gauge": "22",
       "first_side_mm": 1220,
       "second_side_mm": 610,
-      "transmission_loss_63_db": 27,
-      "transmission_loss_125_db": 30,
-      "transmission_loss_250_db": 33,
+      "transmission_loss_63": 27,
+      "transmission_loss_125": 30,
+      "transmission_loss_250": 33,
       "unquantified": {
-        "transmission_loss_500_db": "—",
-        "transmission_loss_1000_db": "—",
-        "transmission_loss_2000_db": "—",
-        "transmission_loss_4000_db": "—"
+        "transmission_loss_500": "—",
+        "transmission_loss_1000": "—",
+        "transmission_loss_2000": "—",
+        "transmission_loss_4000": "—"
       },
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
@@ -509,14 +509,14 @@
       "sheet_metal_gauge": "20",
       "first_side_mm": 2440,
       "second_side_mm": 610,
-      "transmission_loss_63_db": 22,
-      "transmission_loss_125_db": 25,
-      "transmission_loss_250_db": 28,
+      "transmission_loss_63": 22,
+      "transmission_loss_125": 25,
+      "transmission_loss_250": 28,
       "unquantified": {
-        "transmission_loss_500_db": "—",
-        "transmission_loss_1000_db": "—",
-        "transmission_loss_2000_db": "—",
-        "transmission_loss_4000_db": "—"
+        "transmission_loss_500": "—",
+        "transmission_loss_1000": "—",
+        "transmission_loss_2000": "—",
+        "transmission_loss_4000": "—"
       },
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
@@ -531,14 +531,14 @@
       "sheet_metal_gauge": "18",
       "first_side_mm": 2440,
       "second_side_mm": 1220,
-      "transmission_loss_63_db": 28,
-      "transmission_loss_125_db": 31,
+      "transmission_loss_63": 28,
+      "transmission_loss_125": 31,
       "unquantified": {
-        "transmission_loss_250_db": "—",
-        "transmission_loss_500_db": "—",
-        "transmission_loss_1000_db": "—",
-        "transmission_loss_2000_db": "—",
-        "transmission_loss_4000_db": "—"
+        "transmission_loss_250": "—",
+        "transmission_loss_500": "—",
+        "transmission_loss_1000": "—",
+        "transmission_loss_2000": "—",
+        "transmission_loss_4000": "—"
       },
       "attributed_to": {
         "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
@@ -553,21 +553,21 @@
       "sheet_metal_gauge": "26",
       "diameter_mm": 203,
       "duct_length_m": 4.57,
-      "transmission_loss_125_db": 31,
-      "transmission_loss_250_db": 39,
-      "transmission_loss_500_db": 42,
-      "transmission_loss_1000_db": 41,
-      "transmission_loss_2000_db": 32,
-      "transmission_loss_4000_db": 31,
+      "transmission_loss_125": 31,
+      "transmission_loss_250": 39,
+      "transmission_loss_500": 42,
+      "transmission_loss_1000": 41,
+      "transmission_loss_2000": 32,
+      "transmission_loss_4000": 31,
       "group": "Long Seam Ducts",
       "ranges": {
-        "transmission_loss_63_db": [
+        "transmission_loss_63": [
           17,
           null
         ]
       },
       "bounded_below": [
-        "transmission_loss_63_db"
+        "transmission_loss_63"
       ],
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
@@ -583,21 +583,21 @@
       "sheet_metal_gauge": "24",
       "diameter_mm": 356,
       "duct_length_m": 4.57,
-      "transmission_loss_125_db": 43,
-      "transmission_loss_250_db": 43,
-      "transmission_loss_500_db": 31,
-      "transmission_loss_1000_db": 31,
-      "transmission_loss_2000_db": 28,
-      "transmission_loss_4000_db": 22,
+      "transmission_loss_125": 43,
+      "transmission_loss_250": 43,
+      "transmission_loss_500": 31,
+      "transmission_loss_1000": 31,
+      "transmission_loss_2000": 28,
+      "transmission_loss_4000": 22,
       "group": "Long Seam Ducts",
       "ranges": {
-        "transmission_loss_63_db": [
+        "transmission_loss_63": [
           27,
           null
         ]
       },
       "bounded_below": [
-        "transmission_loss_63_db"
+        "transmission_loss_63"
       ],
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
@@ -613,21 +613,21 @@
       "sheet_metal_gauge": "22",
       "diameter_mm": 559,
       "duct_length_m": 4.57,
-      "transmission_loss_125_db": 40,
-      "transmission_loss_250_db": 30,
-      "transmission_loss_500_db": 30,
-      "transmission_loss_1000_db": 30,
-      "transmission_loss_2000_db": 24,
-      "transmission_loss_4000_db": 22,
+      "transmission_loss_125": 40,
+      "transmission_loss_250": 30,
+      "transmission_loss_500": 30,
+      "transmission_loss_1000": 30,
+      "transmission_loss_2000": 24,
+      "transmission_loss_4000": 22,
       "group": "Long Seam Ducts",
       "ranges": {
-        "transmission_loss_63_db": [
+        "transmission_loss_63": [
           28,
           null
         ]
       },
       "bounded_below": [
-        "transmission_loss_63_db"
+        "transmission_loss_63"
       ],
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
@@ -643,13 +643,13 @@
       "sheet_metal_gauge": "22",
       "diameter_mm": 813,
       "duct_length_m": 4.57,
-      "transmission_loss_63_db": 35,
-      "transmission_loss_125_db": 36,
-      "transmission_loss_250_db": 23,
-      "transmission_loss_500_db": 23,
-      "transmission_loss_1000_db": 21,
-      "transmission_loss_2000_db": 19,
-      "transmission_loss_4000_db": 35,
+      "transmission_loss_63": 35,
+      "transmission_loss_125": 36,
+      "transmission_loss_250": 23,
+      "transmission_loss_500": 23,
+      "transmission_loss_1000": 21,
+      "transmission_loss_2000": 19,
+      "transmission_loss_4000": 35,
       "group": "Long Seam Ducts",
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
@@ -665,33 +665,33 @@
       "sheet_metal_gauge": "26",
       "diameter_mm": 203,
       "duct_length_m": 3.05,
-      "transmission_loss_1000_db": 53,
-      "transmission_loss_2000_db": 43,
-      "transmission_loss_4000_db": 26,
+      "transmission_loss_1000": 53,
+      "transmission_loss_2000": 43,
+      "transmission_loss_4000": 26,
       "group": "Spiral Wound Ducts",
       "ranges": {
-        "transmission_loss_63_db": [
+        "transmission_loss_63": [
           20,
           null
         ],
-        "transmission_loss_125_db": [
+        "transmission_loss_125": [
           42,
           null
         ],
-        "transmission_loss_250_db": [
+        "transmission_loss_250": [
           59,
           null
         ],
-        "transmission_loss_500_db": [
+        "transmission_loss_500": [
           62,
           null
         ]
       },
       "bounded_below": [
-        "transmission_loss_63_db",
-        "transmission_loss_125_db",
-        "transmission_loss_250_db",
-        "transmission_loss_500_db"
+        "transmission_loss_63",
+        "transmission_loss_125",
+        "transmission_loss_250",
+        "transmission_loss_500"
       ],
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
@@ -707,25 +707,25 @@
       "sheet_metal_gauge": "26",
       "diameter_mm": 356,
       "duct_length_m": 3.05,
-      "transmission_loss_250_db": 44,
-      "transmission_loss_500_db": 28,
-      "transmission_loss_1000_db": 31,
-      "transmission_loss_2000_db": 32,
-      "transmission_loss_4000_db": 22,
+      "transmission_loss_250": 44,
+      "transmission_loss_500": 28,
+      "transmission_loss_1000": 31,
+      "transmission_loss_2000": 32,
+      "transmission_loss_4000": 22,
       "group": "Spiral Wound Ducts",
       "ranges": {
-        "transmission_loss_63_db": [
+        "transmission_loss_63": [
           20,
           null
         ],
-        "transmission_loss_125_db": [
+        "transmission_loss_125": [
           36,
           null
         ]
       },
       "bounded_below": [
-        "transmission_loss_63_db",
-        "transmission_loss_125_db"
+        "transmission_loss_63",
+        "transmission_loss_125"
       ],
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
@@ -741,21 +741,21 @@
       "sheet_metal_gauge": "24",
       "diameter_mm": 660,
       "duct_length_m": 3.05,
-      "transmission_loss_125_db": 38,
-      "transmission_loss_250_db": 20,
-      "transmission_loss_500_db": 23,
-      "transmission_loss_1000_db": 22,
-      "transmission_loss_2000_db": 19,
-      "transmission_loss_4000_db": 33,
+      "transmission_loss_125": 38,
+      "transmission_loss_250": 20,
+      "transmission_loss_500": 23,
+      "transmission_loss_1000": 22,
+      "transmission_loss_2000": 19,
+      "transmission_loss_4000": 33,
       "group": "Spiral Wound Ducts",
       "ranges": {
-        "transmission_loss_63_db": [
+        "transmission_loss_63": [
           27,
           null
         ]
       },
       "bounded_below": [
-        "transmission_loss_63_db"
+        "transmission_loss_63"
       ],
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
@@ -771,25 +771,25 @@
       "sheet_metal_gauge": "16",
       "diameter_mm": 660,
       "duct_length_m": 3.05,
-      "transmission_loss_250_db": 30,
-      "transmission_loss_500_db": 29,
-      "transmission_loss_1000_db": 29,
-      "transmission_loss_2000_db": 25,
-      "transmission_loss_4000_db": 38,
+      "transmission_loss_250": 30,
+      "transmission_loss_500": 29,
+      "transmission_loss_1000": 29,
+      "transmission_loss_2000": 25,
+      "transmission_loss_4000": 38,
       "group": "Spiral Wound Ducts",
       "ranges": {
-        "transmission_loss_63_db": [
+        "transmission_loss_63": [
           30,
           null
         ],
-        "transmission_loss_125_db": [
+        "transmission_loss_125": [
           41,
           null
         ]
       },
       "bounded_below": [
-        "transmission_loss_63_db",
-        "transmission_loss_125_db"
+        "transmission_loss_63",
+        "transmission_loss_125"
       ],
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
@@ -805,21 +805,21 @@
       "sheet_metal_gauge": "22",
       "diameter_mm": 813,
       "duct_length_m": 3.05,
-      "transmission_loss_125_db": 32,
-      "transmission_loss_250_db": 25,
-      "transmission_loss_500_db": 22,
-      "transmission_loss_1000_db": 23,
-      "transmission_loss_2000_db": 21,
-      "transmission_loss_4000_db": 37,
+      "transmission_loss_125": 32,
+      "transmission_loss_250": 25,
+      "transmission_loss_500": 22,
+      "transmission_loss_1000": 23,
+      "transmission_loss_2000": 21,
+      "transmission_loss_4000": 37,
       "group": "Spiral Wound Ducts",
       "ranges": {
-        "transmission_loss_63_db": [
+        "transmission_loss_63": [
           27,
           null
         ]
       },
       "bounded_below": [
-        "transmission_loss_63_db"
+        "transmission_loss_63"
       ],
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
@@ -835,14 +835,14 @@
       "sheet_metal_gauge": "24",
       "first_side_mm": 305,
       "second_side_mm": 305,
-      "transmission_loss_63_db": 16,
-      "transmission_loss_125_db": 16,
-      "transmission_loss_250_db": 16,
-      "transmission_loss_500_db": 25,
-      "transmission_loss_1000_db": 30,
-      "transmission_loss_2000_db": 33,
-      "transmission_loss_4000_db": 38,
-      "transmission_loss_8000_db": 42,
+      "transmission_loss_63": 16,
+      "transmission_loss_125": 16,
+      "transmission_loss_250": 16,
+      "transmission_loss_500": 25,
+      "transmission_loss_1000": 30,
+      "transmission_loss_2000": 33,
+      "transmission_loss_4000": 38,
+      "transmission_loss_8000": 42,
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
       }
@@ -856,14 +856,14 @@
       "sheet_metal_gauge": "24",
       "first_side_mm": 305,
       "second_side_mm": 610,
-      "transmission_loss_63_db": 15,
-      "transmission_loss_125_db": 15,
-      "transmission_loss_250_db": 17,
-      "transmission_loss_500_db": 25,
-      "transmission_loss_1000_db": 28,
-      "transmission_loss_2000_db": 32,
-      "transmission_loss_4000_db": 38,
-      "transmission_loss_8000_db": 42,
+      "transmission_loss_63": 15,
+      "transmission_loss_125": 15,
+      "transmission_loss_250": 17,
+      "transmission_loss_500": 25,
+      "transmission_loss_1000": 28,
+      "transmission_loss_2000": 32,
+      "transmission_loss_4000": 38,
+      "transmission_loss_8000": 42,
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
       }
@@ -877,14 +877,14 @@
       "sheet_metal_gauge": "22",
       "first_side_mm": 305,
       "second_side_mm": 1220,
-      "transmission_loss_63_db": 14,
-      "transmission_loss_125_db": 14,
-      "transmission_loss_250_db": 22,
-      "transmission_loss_500_db": 25,
-      "transmission_loss_1000_db": 28,
-      "transmission_loss_2000_db": 34,
-      "transmission_loss_4000_db": 40,
-      "transmission_loss_8000_db": 42,
+      "transmission_loss_63": 14,
+      "transmission_loss_125": 14,
+      "transmission_loss_250": 22,
+      "transmission_loss_500": 25,
+      "transmission_loss_1000": 28,
+      "transmission_loss_2000": 34,
+      "transmission_loss_4000": 40,
+      "transmission_loss_8000": 42,
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
       }
@@ -898,14 +898,14 @@
       "sheet_metal_gauge": "22",
       "first_side_mm": 610,
       "second_side_mm": 610,
-      "transmission_loss_63_db": 13,
-      "transmission_loss_125_db": 13,
-      "transmission_loss_250_db": 21,
-      "transmission_loss_500_db": 26,
-      "transmission_loss_1000_db": 29,
-      "transmission_loss_2000_db": 34,
-      "transmission_loss_4000_db": 40,
-      "transmission_loss_8000_db": 42,
+      "transmission_loss_63": 13,
+      "transmission_loss_125": 13,
+      "transmission_loss_250": 21,
+      "transmission_loss_500": 26,
+      "transmission_loss_1000": 29,
+      "transmission_loss_2000": 34,
+      "transmission_loss_4000": 40,
+      "transmission_loss_8000": 42,
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
       }
@@ -919,14 +919,14 @@
       "sheet_metal_gauge": "20",
       "first_side_mm": 610,
       "second_side_mm": 1220,
-      "transmission_loss_63_db": 12,
-      "transmission_loss_125_db": 15,
-      "transmission_loss_250_db": 23,
-      "transmission_loss_500_db": 26,
-      "transmission_loss_1000_db": 28,
-      "transmission_loss_2000_db": 36,
-      "transmission_loss_4000_db": 42,
-      "transmission_loss_8000_db": 42,
+      "transmission_loss_63": 12,
+      "transmission_loss_125": 15,
+      "transmission_loss_250": 23,
+      "transmission_loss_500": 26,
+      "transmission_loss_1000": 28,
+      "transmission_loss_2000": 36,
+      "transmission_loss_4000": 42,
+      "transmission_loss_8000": 42,
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
       }
@@ -940,14 +940,14 @@
       "sheet_metal_gauge": "18",
       "first_side_mm": 1220,
       "second_side_mm": 1220,
-      "transmission_loss_63_db": 10,
-      "transmission_loss_125_db": 19,
-      "transmission_loss_250_db": 24,
-      "transmission_loss_500_db": 27,
-      "transmission_loss_1000_db": 32,
-      "transmission_loss_2000_db": 38,
-      "transmission_loss_4000_db": 42,
-      "transmission_loss_8000_db": 42,
+      "transmission_loss_63": 10,
+      "transmission_loss_125": 19,
+      "transmission_loss_250": 24,
+      "transmission_loss_500": 27,
+      "transmission_loss_1000": 32,
+      "transmission_loss_2000": 38,
+      "transmission_loss_4000": 42,
+      "transmission_loss_8000": 42,
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
       }
@@ -961,14 +961,14 @@
       "sheet_metal_gauge": "18",
       "first_side_mm": 1220,
       "second_side_mm": 2440,
-      "transmission_loss_63_db": 11,
-      "transmission_loss_125_db": 19,
-      "transmission_loss_250_db": 22,
-      "transmission_loss_500_db": 26,
-      "transmission_loss_1000_db": 32,
-      "transmission_loss_2000_db": 38,
-      "transmission_loss_4000_db": 42,
-      "transmission_loss_8000_db": 42,
+      "transmission_loss_63": 11,
+      "transmission_loss_125": 19,
+      "transmission_loss_250": 22,
+      "transmission_loss_500": 26,
+      "transmission_loss_1000": 32,
+      "transmission_loss_2000": 38,
+      "transmission_loss_4000": 42,
+      "transmission_loss_8000": 42,
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
       }
@@ -982,14 +982,14 @@
       "sheet_metal_gauge": "24",
       "first_side_mm": 305,
       "second_side_mm": 152,
-      "transmission_loss_63_db": 18,
-      "transmission_loss_125_db": 18,
-      "transmission_loss_250_db": 22,
-      "transmission_loss_500_db": 31,
-      "transmission_loss_1000_db": 40,
+      "transmission_loss_63": 18,
+      "transmission_loss_125": 18,
+      "transmission_loss_250": 22,
+      "transmission_loss_500": 31,
+      "transmission_loss_1000": 40,
       "unquantified": {
-        "transmission_loss_2000_db": "—",
-        "transmission_loss_4000_db": "—"
+        "transmission_loss_2000": "—",
+        "transmission_loss_4000": "—"
       },
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
@@ -1005,14 +1005,14 @@
       "sheet_metal_gauge": "24",
       "first_side_mm": 610,
       "second_side_mm": 152,
-      "transmission_loss_63_db": 17,
-      "transmission_loss_125_db": 17,
-      "transmission_loss_250_db": 18,
-      "transmission_loss_500_db": 30,
-      "transmission_loss_1000_db": 33,
+      "transmission_loss_63": 17,
+      "transmission_loss_125": 17,
+      "transmission_loss_250": 18,
+      "transmission_loss_500": 30,
+      "transmission_loss_1000": 33,
       "unquantified": {
-        "transmission_loss_2000_db": "—",
-        "transmission_loss_4000_db": "—"
+        "transmission_loss_2000": "—",
+        "transmission_loss_4000": "—"
       },
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
@@ -1028,14 +1028,14 @@
       "sheet_metal_gauge": "24",
       "first_side_mm": 610,
       "second_side_mm": 305,
-      "transmission_loss_63_db": 15,
-      "transmission_loss_125_db": 16,
-      "transmission_loss_250_db": 25,
-      "transmission_loss_500_db": 34,
+      "transmission_loss_63": 15,
+      "transmission_loss_125": 16,
+      "transmission_loss_250": 25,
+      "transmission_loss_500": 34,
       "unquantified": {
-        "transmission_loss_1000_db": "—",
-        "transmission_loss_2000_db": "—",
-        "transmission_loss_4000_db": "—"
+        "transmission_loss_1000": "—",
+        "transmission_loss_2000": "—",
+        "transmission_loss_4000": "—"
       },
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
@@ -1051,14 +1051,14 @@
       "sheet_metal_gauge": "22",
       "first_side_mm": 1220,
       "second_side_mm": 305,
-      "transmission_loss_63_db": 14,
-      "transmission_loss_125_db": 14,
-      "transmission_loss_250_db": 26,
-      "transmission_loss_500_db": 29,
+      "transmission_loss_63": 14,
+      "transmission_loss_125": 14,
+      "transmission_loss_250": 26,
+      "transmission_loss_500": 29,
       "unquantified": {
-        "transmission_loss_1000_db": "—",
-        "transmission_loss_2000_db": "—",
-        "transmission_loss_4000_db": "—"
+        "transmission_loss_1000": "—",
+        "transmission_loss_2000": "—",
+        "transmission_loss_4000": "—"
       },
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
@@ -1074,14 +1074,14 @@
       "sheet_metal_gauge": "22",
       "first_side_mm": 1220,
       "second_side_mm": 610,
-      "transmission_loss_63_db": 12,
-      "transmission_loss_125_db": 21,
-      "transmission_loss_250_db": 30,
+      "transmission_loss_63": 12,
+      "transmission_loss_125": 21,
+      "transmission_loss_250": 30,
       "unquantified": {
-        "transmission_loss_500_db": "—",
-        "transmission_loss_1000_db": "—",
-        "transmission_loss_2000_db": "—",
-        "transmission_loss_4000_db": "—"
+        "transmission_loss_500": "—",
+        "transmission_loss_1000": "—",
+        "transmission_loss_2000": "—",
+        "transmission_loss_4000": "—"
       },
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
@@ -1097,14 +1097,14 @@
       "sheet_metal_gauge": "20",
       "first_side_mm": 2440,
       "second_side_mm": 610,
-      "transmission_loss_63_db": 11,
-      "transmission_loss_125_db": 22,
-      "transmission_loss_250_db": 25,
+      "transmission_loss_63": 11,
+      "transmission_loss_125": 22,
+      "transmission_loss_250": 25,
       "unquantified": {
-        "transmission_loss_500_db": "—",
-        "transmission_loss_1000_db": "—",
-        "transmission_loss_2000_db": "—",
-        "transmission_loss_4000_db": "—"
+        "transmission_loss_500": "—",
+        "transmission_loss_1000": "—",
+        "transmission_loss_2000": "—",
+        "transmission_loss_4000": "—"
       },
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
@@ -1120,14 +1120,14 @@
       "sheet_metal_gauge": "18",
       "first_side_mm": 2440,
       "second_side_mm": 1220,
-      "transmission_loss_63_db": 19,
-      "transmission_loss_125_db": 28,
+      "transmission_loss_63": 19,
+      "transmission_loss_125": 28,
       "unquantified": {
-        "transmission_loss_250_db": "—",
-        "transmission_loss_500_db": "—",
-        "transmission_loss_1000_db": "—",
-        "transmission_loss_2000_db": "—",
-        "transmission_loss_4000_db": "—"
+        "transmission_loss_250": "—",
+        "transmission_loss_500": "—",
+        "transmission_loss_1000": "—",
+        "transmission_loss_2000": "—",
+        "transmission_loss_4000": "—"
       },
       "attributed_to": {
         "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."

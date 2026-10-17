@@ -712,7 +712,7 @@ def plot_real_ear_attenuation(
     created = ax is None
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
-    grid = np.asarray(result.attenuation_db, dtype=np.float64)
+    grid = np.asarray(result.attenuation, dtype=np.float64)
     mean = np.asarray(result.mean_db, dtype=np.float64)
     expanded = np.asarray(result.expanded_uncertainty_db, dtype=np.float64)
     for index, row in enumerate(grid):
@@ -793,7 +793,7 @@ def plot_attenuation_difference(
     )
     bars = ax.bar(
         positions,
-        np.asarray(result.difference_db, dtype=np.float64),
+        np.asarray(result.difference, dtype=np.float64),
         width=0.6,
         zorder=2,
         **bar_kwargs,
@@ -884,7 +884,7 @@ def plot_reat_sound_field(
         )
     ax.plot(
         freqs,
-        np.asarray(result.left_right_difference_db, dtype=np.float64),
+        np.asarray(result.left_right_difference, dtype=np.float64),
         "-s",
         color=_C_SECONDARY,
         ms=4,
@@ -959,7 +959,7 @@ def plot_active_insertion_loss(
 
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
-    grid = np.asarray(result.insertion_loss_db, dtype=np.float64)
+    grid = np.asarray(result.insertion_loss, dtype=np.float64)
     mean = np.asarray(result.mean_db, dtype=np.float64)
     for index, row in enumerate(grid):
         ax.plot(
@@ -1035,7 +1035,7 @@ def plot_anr_total_attenuation(
     )
     ax.plot(
         thirds,
-        np.mean(result.insertion_loss_db, axis=0),
+        np.mean(result.insertion_loss, axis=0),
         ":",
         color=_C_SECONDARY,
         lw=1.8,
@@ -1110,7 +1110,7 @@ def plot_anr_linearity(
     from .._i18n import decimal_comma, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    external = np.asarray(result.external_levels_db, dtype=np.float64)
+    external = np.asarray(result.external_levels, dtype=np.float64)
     upper_ends = external[1:]
     steps = np.diff(external)
     increments = np.asarray(result.increments_db, dtype=np.float64)
@@ -1140,7 +1140,7 @@ def plot_anr_linearity(
         upper_ends, np.median(increments, axis=0), "-o", ms=4, zorder=3, **median_kwargs
     )
     ax.axvline(
-        result.max_linear_level_db,
+        result.max_linear_level,
         color=_C_REFERENCE,
         ls="--",
         lw=1.4,
@@ -1151,7 +1151,7 @@ def plot_anr_linearity(
     ax.set_ylabel(_t(_STEP_LABEL, language))
     ax.set_title(
         _t(_LINEARITY_TITLE, language).format(
-            level=decimal_comma(f"{result.max_linear_level_db:g}", language)
+            level=decimal_comma(f"{result.max_linear_level:g}", language)
         )
     )
     ax.legend(loc="best", fontsize="small")

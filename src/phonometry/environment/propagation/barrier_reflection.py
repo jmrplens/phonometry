@@ -102,7 +102,7 @@ import warnings
 from collections.abc import Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 from scipy.fft import next_fast_len
@@ -644,11 +644,14 @@ class DirectSoundSubtraction(OwnsArrays):
         samples, positive for a delay: a whole number of the 1/50 sample
         moving steps, within the +/- 2 samples 5.5.4 allows.
     :ivar amplitude_factor: The factor that made the two main peaks equal.
-    :ivar reduction_db: :math:`R_\mathrm{sub}`, Formula (6): the energy of the
+    :ivar reduction: :math:`R_\mathrm{sub}`, Formula (6): the energy of the
         free-field record within 0,5 ms of the peak over that of the residual
         in the same interval, in decibels. Below 10 dB the subtraction is not
         perfect; ``inf`` when nothing is left at all.
     """
+
+    #: The peak index is a sample position, not a level.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"peak_index": ""})
 
     in_front: Signal | NDArray[np.float64]
     aligned_free_field: Signal | NDArray[np.float64]
@@ -657,7 +660,7 @@ class DirectSoundSubtraction(OwnsArrays):
     peak_index: int
     shift_samples: float
     amplitude_factor: float
-    reduction_db: float
+    reduction: float
 
     def __post_init__(self) -> None:
         """Refuse three records that cannot be read sample against sample.
@@ -765,16 +768,16 @@ def _subtract(
         peak_index=peak,
         shift_samples=best_shift,
         amplitude_factor=factor,
-        reduction_db=reduction,
+        reduction=reduction,
     )
 
 
-def _warn_reduction(reduction_db: float, where: str) -> None:
+def _warn_reduction(reduction: float, where: str) -> None:
     """The 10 dB warning of 5.5.4."""
-    if reduction_db < _REDUCTION_WARNING_DB:
+    if reduction < _REDUCTION_WARNING_DB:
         msg = (
             f"the reduction factor R_sub of the subtraction is "
-            f"{reduction_db:.1f} dB{where}, below the 10 dB under which EN 1793-5 "
+            f"{reduction:.1f} dB{where}, below the 10 dB under which EN 1793-5 "
             f"5.5.4 warns that the direct sound was not fully removed."
         )
         warnings.warn(msg, BarrierReflectionWarning, stacklevel=3)
@@ -828,7 +831,7 @@ def subtract_direct_sound(
         )
         raise ValueError(msg)
     result = _subtract(in_front, free_field, rate)
-    _warn_reduction(result.reduction_db, "")
+    _warn_reduction(result.reduction, "")
     return DirectSoundSubtraction(
         in_front=like_input(in_front_ir, np.asarray(result.in_front)),
         aligned_free_field=like_input(
@@ -839,7 +842,7 @@ def subtract_direct_sound(
         peak_index=result.peak_index,
         shift_samples=result.shift_samples,
         amplitude_factor=result.amplitude_factor,
-        reduction_db=result.reduction_db,
+        reduction=result.reduction,
     )
 
 
@@ -1117,9 +1120,16 @@ class ReflectionIndexResult(OwnsArrays):
         200 Hz by default); ``None`` for a result built from position values.
     :ivar gain_corrections: ``(positions, 9)``: :math:`C_{\mathrm{gain},k}` of
         Formula (4), or ``None``.
-    :ivar subtraction_reductions_db: ``(positions, 9)``: :math:`R_\mathrm{sub}` of
+    :ivar subtraction_reductions: ``(positions, 9)``: :math:`R_\mathrm{sub}` of
         each subtraction, in decibels, or ``None``.
     """
+
+    #: The reflection index and the gain correction are ratios of energies
+    #: (Formula (1) and Formula (4); EN 1793-5:2016, Table 1 prints no unit
+    #: for :math:`RI_j` and "-" for :math:`C_{\mathrm{gain},k}`), not levels.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"reflection_index": "", "gain_corrections": ""}
+    )
 
     frequencies: NDArray[np.float64]
     reflection_index: NDArray[np.float64]
@@ -1128,7 +1138,7 @@ class ReflectionIndexResult(OwnsArrays):
     rating: RoadDeviceRating
     microphone_values: NDArray[np.float64] | None = None
     gain_corrections: NDArray[np.float64] | None = None
-    subtraction_reductions_db: NDArray[np.float64] | None = None
+    subtraction_reductions: NDArray[np.float64] | None = None
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1260,7 +1270,7 @@ def _result(
         rating=rating,
         microphone_values=None if microphone_values is None else microphone_values,
         gain_corrections=None if gain_corrections is None else gain_corrections,
-        subtraction_reductions_db=None if reductions_db is None else reductions_db,
+        subtraction_reductions=None if reductions_db is None else reductions_db,
     )
 
 
@@ -1393,8 +1403,8 @@ def reflection_index(
         for k in range(_MICROPHONES):
             where = f" at microphone {k + 1} of grid position {p + 1}"
             sub = _subtract(in_front[p][k], free_field[p][k], rate)
-            _warn_reduction(sub.reduction_db, where)
-            reductions[p, k] = sub.reduction_db
+            _warn_reduction(sub.reduction, where)
+            reductions[p, k] = sub.reduction
             direct_peak = float(sub.peak_index)
             free_peak = float(np.argmax(np.abs(free_field[p][k])))
             gain = float(

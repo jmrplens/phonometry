@@ -15,7 +15,9 @@ rules, run them over the real tree, where they have to be silent, and put an
 old name back, where they have to speak. They also fix that the one
 exemption of a length word still names a parameter that exists, since an
 exemption that outlives its parameter would excuse the next one to take the
-name.
+name. A level or a level difference carries no ``_db``, because its head noun
+already says decibels, while a decibel value under another noun keeps it and
+fails bare as it did before.
 """
 
 from __future__ import annotations
@@ -796,3 +798,243 @@ def test_the_tree_holds_every_closing_rule() -> None:
     assert cpu.misnamed_rates(parameters) == ([], [])
     assert cpu.ambient_pressure_names(parameters) == ([], [])
     assert cpu.bare_and_suffixed(parameters) == ([], [])
+
+
+@pytest.mark.parametrize(
+    ("name", "module"),
+    [
+        ("insertion_loss_db", ""),
+        ("band_levels_db", ""),
+        ("sound_power_level_a_db", ""),
+        ("sound_reduction_index_1000_db", ""),
+        ("levels_before_db", ""),
+        ("receiver_correction_after_db", ""),
+        ("band_levels_at_characteristic_db", ""),
+        ("linearity_levels_below_upper_db", ""),
+        ("front_to_random_index_db", ""),
+        ("pressure_level_difference_db", ""),
+        ("spectrum_adaptation_term_50_3150_db", ""),
+        ("max_spl_db", ""),
+        ("l_i_fmax_0_db", ""),
+        ("delta_rw_c_direct_db", ""),
+        ("r_s_w_ctr_db", "phonometry.building.measurement.joint_insulation"),
+        ("c_100_5000_db", "phonometry.building.measurement.joint_insulation"),
+        ("level_db_at", ""),
+        ("EARPHONE_ATTENUATION_DB", ""),
+        ("VIBROTACTILE_HEARING_LEVELS_DB", ""),
+        ("emergence_db", ""),
+        ("c2_db", "phonometry.emission.reference_sound_source"),
+        ("MAX_K3_DB", "phonometry.emission.workstation"),
+        ("MIN_MULTI_JUNCTION_KIJ_DB", "phonometry.building.prediction"),
+        ("k_ff_db", "phonometry.building.prediction.simplified_model"),
+        ("tonal_adjustment_db", ""),
+        ("adjustments_db", ""),
+        ("isolation_db", ""),
+        ("free_field_rejection_db", ""),
+        ("level_shift_db", ""),
+        ("level_increase_db", ""),
+        ("level_excess_db", ""),
+        ("l1_db", "phonometry.building.measurement.insulation"),
+    ],
+)
+def test_a_level_or_a_level_difference_carries_no_db(name: str, module: str) -> None:
+    """The head noun says decibel, so ``_db`` says it a second time."""
+    assert cpu.decibel_suffix(name, module) is not None
+
+
+@pytest.mark.parametrize(
+    ("name", "module"),
+    [
+        ("tolerance_db", ""),
+        ("background_margin_a_db", ""),
+        ("a_weighted_limit_db", ""),
+        ("expanded_uncertainty_1khz_db", ""),
+        ("level_standard_deviation_db", ""),
+        ("level_step_db", ""),
+        ("slope_db_per_decade", ""),
+        ("attenuation_db_per_m", ""),
+        ("class_densities_per_db", ""),
+        ("within_10_db_of_max", ""),
+        ("sigma_level_db", ""),
+        ("signal_to_noise_ratio_db", ""),
+        ("diffuse_pressure_difference_db", ""),
+        ("phase_difference_db", ""),
+        ("c_db", "phonometry.underwater.bioacoustics.weighting"),
+        ("r_direct_db", "phonometry.environment.propagation.ground_barriers"),
+        ("MAX_K3_DB", "phonometry.vibration.machinery"),
+        ("c1_db", "phonometry.underwater.propagation"),
+        ("shift_db", ""),
+        ("allowed_threshold_shift_db", ""),
+        ("drop_db", ""),
+        ("sensitivity_change_db", ""),
+        ("temperature_adjustment_db", ""),
+        ("l1_db", "phonometry.materials.absorbers.four_microphone"),
+    ],
+)
+def test_a_name_whose_head_noun_does_not_say_decibel_keeps_db(
+    name: str, module: str
+) -> None:
+    """A tolerance, a margin, a statistic, a rate or a difference of another
+    quantity says nothing of decibels, so its unit stays in the name.
+    """
+    assert cpu.decibel_suffix(name, module) is None
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "insertion_loss",
+        "pressure_level_difference",
+        "sound_pressure_level",
+        "pressure_residual_index",
+        "emergence",
+        "rating_adjustment",
+        "free_field_rejection",
+        "level_shift",
+    ],
+)
+def test_the_head_noun_of_a_level_declares_the_decibel(name: str) -> None:
+    """A level and a level difference say their unit by the noun."""
+    assert cpu.declares_its_unit(name)
+
+
+@pytest.mark.parametrize(
+    ("name", "module"),
+    [
+        ("MAX_K3", "phonometry.emission.workstation"),
+        ("GRADE_2_MAX_K3", "phonometry.emission.workstation"),
+        ("MIN_MULTI_JUNCTION_KIJ", "phonometry.building.prediction"),
+        ("c1", "phonometry.emission.sound_power"),
+    ],
+)
+def test_the_symbol_of_a_correction_declares_the_decibel_in_its_package(
+    name: str, module: str
+) -> None:
+    """:math:`K_3`, :math:`K_{ij}` and :math:`C_1` are corrections and an
+    index in decibels where their standards print them, so the constant rule
+    reads the cap on :math:`K_3` as declaring its unit there and nowhere else.
+    """
+    assert cpu.constant_declares_its_unit(name, module)
+    assert not cpu.constant_declares_its_unit(name, "phonometry.signals")
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "plateau_height",
+        "phase_difference",
+        "pressure_loss",
+        "temperature_reduction",
+        "shift",
+        "drop_height",
+    ],
+)
+def test_another_head_noun_declares_nothing(name: str) -> None:
+    """A height, a phase difference, a pressure loss or a temperature
+    reduction does not say decibel, so a decibel value under one of those
+    still needs its ``_db``.
+    """
+    assert not cpu.declares_its_unit(name)
+
+
+def test_no_level_carries_a_unit_suffix() -> None:
+    found, stale = cpu.decibel_suffixed()
+    assert found == []
+    assert stale == []
+
+
+def test_a_level_named_with_its_decibels_put_back_is_reported(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A parameter ``insertion_loss_db`` and a constant ``..._LEVEL_DB`` fail again."""
+
+    def insertion_loss_again(insertion_loss_db: float, *, margin_db: float) -> float:
+        return insertion_loss_db + margin_db
+
+    insertion_loss_again.__module__ = "phonometry.signals"
+    monkeypatch.setattr(
+        phonometry.signals, "insertion_loss_again", insertion_loss_again, raising=False
+    )
+    monkeypatch.setattr(phonometry.signals, "REFERENCE_LEVEL_DB", 94.0, raising=False)
+    monkeypatch.setattr(
+        phonometry.signals,
+        "__all__",
+        [*phonometry.signals.__all__, "insertion_loss_again", "REFERENCE_LEVEL_DB"],
+    )
+    found, _ = cpu.decibel_suffixed()
+    assert sorted((entry.qualname, entry.name) for entry, _ in found) == [
+        ("", "REFERENCE_LEVEL_DB"),
+        ("insertion_loss_again", "insertion_loss_db"),
+    ]
+
+
+def _plateau(
+    plateau_height: float, phase_difference: float, pressure_loss: float
+) -> float:
+    return plateau_height + phase_difference + pressure_loss
+
+
+def _plateau_db(
+    plateau_height_db: float, phase_difference_db: float, insertion_loss: float
+) -> float:
+    return plateau_height_db + phase_difference_db + insertion_loss
+
+
+def test_a_decibel_value_under_another_head_noun_still_needs_db(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Dropping ``_db`` is only for a level or a level difference.
+
+    A plateau height in decibels, a phase difference and a pressure loss
+    named bare are reported as quantities without their unit, as they were
+    before the level rule; with ``_db`` they pass both rules, and a bare
+    ``insertion_loss`` passes the unit rule because its noun says decibel.
+    """
+    _plateau.__module__ = "phonometry.building.stub"
+    _plateau_db.__module__ = "phonometry.building.stub"
+    stub = types.ModuleType("phonometry.stub")
+    stub.__all__ = ["plateau", "plateau_db"]  # type: ignore[attr-defined]
+    stub.plateau = _plateau  # type: ignore[attr-defined]
+    stub.plateau_db = _plateau_db  # type: ignore[attr-defined]
+
+    def modules() -> Iterator[tuple[str, types.ModuleType]]:
+        yield "phonometry.stub", stub
+
+    monkeypatch.setattr(cpu, "public_modules", modules)
+    unnamed, _, _ = cpu.offenders()
+    assert {(p.qualname, p.name) for p in unnamed} == {
+        ("plateau", "plateau_height"),
+        ("plateau", "phase_difference"),
+        ("plateau", "pressure_loss"),
+    }
+    found, _ = cpu.decibel_suffixed()
+    assert found == []
+
+
+def test_a_level_exemption_nothing_needs_is_stale(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    key = ("phonometry.signals", "nothing_here", "level_db")
+    monkeypatch.setitem(cpu.LEVEL_SUFFIX_EXEMPT, key, "a reason for nothing")
+    _, stale = cpu.decibel_suffixed()
+    assert key in stale
+
+
+def test_the_notebook_table_reads_a_level_the_way_the_rule_does() -> None:
+    """The table shows dB for exactly the names the rule reads as a level.
+
+    The two disagree only where a difference noun follows another quantity
+    (a pressure loss, a sound pressure insulation), which the rule leaves to
+    the unit rule and the table never meets bare on a field.
+    """
+    from phonometry._internal import display
+
+    disagreements = {
+        (entry.module, entry.name)
+        for entry in cpu.public_names()
+        if entry.name not in display._NAMED_UNITS
+        and not display._suffix_unit(entry.name)
+        and display.says_decibels(entry.name, entry.module)
+        != cpu.decibel_head(entry.name, entry.module)
+    }
+    assert all(cpu.names_a_quantity(name, module) for module, name in disagreements)

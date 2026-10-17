@@ -115,7 +115,7 @@ IMPULSE_INVALID_DEVIATION_DB = 5.0
 ## impulse_mean_level
 
 ```python
-impulse_mean_level(repeat_levels_db: ArrayLike) -> float
+impulse_mean_level(repeat_levels: ArrayLike) -> float
 ```
 
 The level of an impulsive measurement, 5.6.2.1.
@@ -134,7 +134,7 @@ refused.
 
 | Name | Description |
 | :--- | :--- |
-| `repeat_levels_db` | The levels of the repeats, in decibels. |
+| `repeat_levels` | The levels of the repeats, in decibels. |
 
 **Returns:** The arithmetic mean, in decibels.
 
@@ -264,13 +264,13 @@ OUTDOOR_RANGE_M = 25.0
 
 ```python
 screen_attenuation(
-    unscreened_levels_db: ArrayLike,
-    screened_levels_db: ArrayLike,
+    unscreened_levels: ArrayLike,
+    screened_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
     source_kind: Literal['actual', 'artificial'] = 'actual',
-    a_weighted_unscreened_level_db: float | None = None,
-    a_weighted_screened_level_db: float | None = None,
+    a_weighted_unscreened_level: float | None = None,
+    a_weighted_screened_level: float | None = None,
     distance: float | None = None,
 ) -> ScreenInSituResult
 ```
@@ -295,12 +295,12 @@ machine's, so the pair is refused rather than computed under
 
 | Name | Description |
 | :--- | :--- |
-| `unscreened_levels_db` | $L_{p1}$ per band, in decibels. |
-| `screened_levels_db` | $L_{p2}$ per band, in decibels. |
+| `unscreened_levels` | $L_{p1}$ per band, in decibels. |
+| `screened_levels` | $L_{p2}$ per band, in decibels. |
 | `frequencies` | Nominal band centres, in hertz. |
 | `source_kind` | `"actual"` (default) or `"artificial"`. |
-| `a_weighted_unscreened_level_db` | $L_{p\mathrm{A}1}$, in decibels. |
-| `a_weighted_screened_level_db` | $L_{p\mathrm{A}2}$, in decibels. |
+| `a_weighted_unscreened_level` | $L_{p\mathrm{A}1}$, in decibels. |
+| `a_weighted_screened_level` | $L_{p\mathrm{A}2}$, in decibels. |
 | `distance` | How far this position stands from the screen, in metres, carried into the result because 5.5.2 reports the spread over the line rather than one number. |
 
 **Returns:** The attenuation, as a [`ScreenInSituResult`](/phonometry/reference/api/noise_control/screen-in-situ/#screeninsituresult).
@@ -399,10 +399,10 @@ much of a shadow the source casts on itself.
 ```python
 ScreenInSituResult(
     frequencies: NDArray[np.float64] | None,
-    unscreened_levels_db: NDArray[np.float64],
-    screened_levels_db: NDArray[np.float64],
-    attenuation_db: NDArray[np.float64],
-    a_weighted_attenuation_db: float | None,
+    unscreened_levels: NDArray[np.float64],
+    screened_levels: NDArray[np.float64],
+    attenuation: NDArray[np.float64],
+    a_weighted_attenuation: float | None,
     source_kind: str,
     distance: float | None,
 )
@@ -415,10 +415,10 @@ The in-situ attenuation of a removable screen, ISO 11821 clause 5.8.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Nominal band centres, in hertz, or `None`. |
-| `unscreened_levels_db` | $L_{p1}$, the level with the screen removed, per band. |
-| `screened_levels_db` | $L_{p2}$, the level with it in place, per band. |
-| `attenuation_db` | $D_p$ per band, in decibels. |
-| `a_weighted_attenuation_db` | $D_{p\mathrm{A}}$, in decibels, or `None`. Clause 5.9 allows it only with the actual source. |
+| `unscreened_levels` | $L_{p1}$, the level with the screen removed, per band. |
+| `screened_levels` | $L_{p2}$, the level with it in place, per band. |
+| `attenuation` | $D_p$ per band, in decibels. |
+| `a_weighted_attenuation` | $D_{p\mathrm{A}}$, in decibels, or `None`. Clause 5.9 allows it only with the actual source. |
 | `source_kind` | `"actual"` or `"artificial"`. |
 | `distance` | How far the position stands from the screen, in metres, or `None`. |
 
@@ -455,7 +455,7 @@ ScreenInSituResult.rounded() -> NDArray[np.int_]
 
 The band values as 7.4 c) reports them, to the nearest integer.
 
-`attenuation_db` keeps the unrounded difference. A tie goes to
+`attenuation` keeps the unrounded difference. A tie goes to
 the even decibel, Rule A of ISO 80000-1:2009 Annex B, as in the other
 in-situ standards of this library.
 

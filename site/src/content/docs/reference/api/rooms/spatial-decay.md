@@ -417,12 +417,12 @@ the errata registry records it.
 | :--- | :--- |
 | ValueError | For inputs that do not match, fewer than two positions, or a non-positive distance. |
 
-## MAX_DIRECTIVITY_INDEX_DB
+## MAX_DIRECTIVITY_INDEX
 
 *Constant* (`float`).
 
 ```python
-MAX_DIRECTIVITY_INDEX_DB = 8.0
+MAX_DIRECTIVITY_INDEX = 8.0
 ```
 
 ## mean_level_excess
@@ -625,7 +625,7 @@ used here, because it is the curve the standard draws in its own figures.
 ```python
 sound_distribution_value(
     levels: ArrayLike,
-    sound_power_levels_db: ArrayLike,
+    sound_power_levels: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -644,7 +644,7 @@ back the same.
 | Name | Description |
 | :--- | :--- |
 | `levels` | $L_{pj}(r)$ at each position, in decibels. |
-| `sound_power_levels_db` | $L_{Wj}$ of the source, in decibels, as a scalar or one value per position. |
+| `sound_power_levels` | $L_{Wj}$ of the source, in decibels, as a scalar or one value per position. |
 
 **Returns:** $D_j(r)$, in decibels.
 
@@ -750,9 +750,9 @@ SpatialDecayResult(
     distances: NDArray[np.float64],
     distribution_values_db: NDArray[np.float64],
     reference_values_db: NDArray[np.float64],
-    level_excess_db: NDArray[np.float64],
+    level_excess: NDArray[np.float64],
     decay_rate_db: float,
-    mean_excess_db: float,
+    mean_level_excess: float,
     region: str,
     band: float | None = None,
 )
@@ -767,9 +767,9 @@ A spatial sound distribution curve and what clause 6 reads off it.
 | `distances` | The distance of each microphone position from the acoustical centre of the source, in metres. |
 | `distribution_values_db` | $D$ at each position, in decibels. |
 | `reference_values_db` | $D_\mathrm{ref}$ at each position, in decibels. |
-| `level_excess_db` | $\mathrm{DL}_\mathrm{f}$ at each position, in decibels. |
+| `level_excess` | $\mathrm{DL}_\mathrm{f}$ at each position, in decibels. |
 | `decay_rate_db` | $\mathrm{DL}_2$ over the range, in decibels per distance doubling. |
-| `mean_excess_db` | $\mathrm{DL}_\mathrm{f}(r_n, r_m)$ over the range, in decibels. |
+| `mean_level_excess` | $\mathrm{DL}_\mathrm{f}(r_n, r_m)$ over the range, in decibels. |
 | `region` | `"near"`, `"middle"`, `"far"` or `"whole"`. |
 | `band` | The nominal octave centre the curve belongs to, in hertz, or `None` for a curve that stands for a spectrum. |
 
@@ -799,7 +799,7 @@ The measurement is outside a condition ISO 14257 states.
 ```python
 spectrum_distribution_value(
     distribution_values_db: ArrayLike,
-    machine_power_levels_db: ArrayLike,
+    machine_power_levels: ArrayLike,
 ) -> float
 ```
 
@@ -818,7 +818,7 @@ decision is made on.
 | Name | Description |
 | :--- | :--- |
 | `distribution_values_db` | $D_j(r)$ in each band, in decibels. |
-| `machine_power_levels_db` | $L_{W\mathrm{mach}\,j}$ of the machine in the same bands, in decibels. |
+| `machine_power_levels` | $L_{W\mathrm{mach}\,j}$ of the machine in the same bands, in decibels. |
 
 **Returns:** $D_S(r)$, in decibels.
 

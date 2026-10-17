@@ -162,7 +162,7 @@ def test_the_order_of_the_sample_does_not_matter() -> None:
     values = np.array(ref.ISO17534_1_EXAMPLE_DIFFERENCES_DB)
     shuffled = np.random.default_rng(17534).permutation(values)
     result = environment.level_difference_quantiles(shuffled)
-    np.testing.assert_array_equal(result.sorted_differences_db, values)
+    np.testing.assert_array_equal(result.sorted_differences, values)
     assert result.q01_db == pytest.approx(-1.0, abs=1e-12)
     assert result.q09_db == pytest.approx(3.0, abs=1e-12)
 
@@ -194,8 +194,8 @@ def test_the_sample_is_a_read_only_copy() -> None:
     values = np.array(ref.ISO17534_1_EXAMPLE_DIFFERENCES_DB)
     result = environment.level_difference_quantiles(values)
     values[0] = 99.0
-    assert result.sorted_differences_db[0] == pytest.approx(-1.4)
-    assert not result.sorted_differences_db.flags.writeable
+    assert result.sorted_differences[0] == pytest.approx(-1.4)
+    assert not result.sorted_differences.flags.writeable
 
 
 def test_fewer_than_twenty_differences_are_refused() -> None:
@@ -206,26 +206,26 @@ def test_fewer_than_twenty_differences_are_refused() -> None:
 
 def test_a_non_finite_difference_is_refused() -> None:
     values = [*ref.ISO17534_1_EXAMPLE_DIFFERENCES_DB[:24], math.nan]
-    with pytest.raises(ValueError, match="level_differences_db"):
+    with pytest.raises(ValueError, match="level_differences"):
         environment.level_difference_quantiles(values)
 
 
 def test_a_matrix_of_differences_is_refused() -> None:
     values = np.zeros((5, 5))
-    with pytest.raises(ValueError, match="level_differences_db"):
+    with pytest.raises(ValueError, match="level_differences"):
         environment.level_difference_quantiles(values)
 
 
 def test_the_result_refuses_fewer_than_twenty_differences() -> None:
     """The result keeps its own guard, which the function never reaches."""
     with pytest.raises(ValueError, match="at least 20"):
-        environment.LevelDifferenceQuantiles(sorted_differences_db=np.arange(19.0))
+        environment.LevelDifferenceQuantiles(sorted_differences=np.arange(19.0))
 
 
 def test_an_unsorted_sample_is_refused_by_the_result() -> None:
     values = np.array(ref.ISO17534_1_EXAMPLE_DIFFERENCES_DB)[::-1]
     with pytest.raises(ValueError, match="ascending"):
-        environment.LevelDifferenceQuantiles(sorted_differences_db=values)
+        environment.LevelDifferenceQuantiles(sorted_differences=values)
 
 
 # --------------------------------------------------------------------------- #
@@ -427,7 +427,7 @@ def _round_robin_levels() -> np.ndarray:
 def test_round_robin_deviations_are_from_the_arithmetic_mean() -> None:
     levels = _round_robin_levels()
     result = environment.round_robin_precision(levels)
-    np.testing.assert_allclose(result.mean_levels_db, np.linspace(40.0, 70.0, 40))
+    np.testing.assert_allclose(result.mean_levels, np.linspace(40.0, 70.0, 40))
     np.testing.assert_allclose(
         result.deviations_db, levels - levels.mean(axis=1)[:, None]
     )
@@ -446,7 +446,7 @@ def test_round_robin_result_is_the_q09_of_the_largest_deviations() -> None:
 def test_the_mean_is_not_an_energetic_average() -> None:
     levels = np.tile([50.0, 60.0], (20, 1))
     result = environment.round_robin_precision(levels)
-    np.testing.assert_allclose(result.mean_levels_db, 55.0)
+    np.testing.assert_allclose(result.mean_levels, 55.0)
     assert result.q09_db == pytest.approx(5.0)
 
 
@@ -460,7 +460,7 @@ def test_the_largest_deviation_is_absolute_and_from_the_arithmetic_mean() -> Non
     """
     levels = np.tile([50.0, 54.0, 54.0, 54.0], (20, 1))
     result = environment.round_robin_precision(levels)
-    np.testing.assert_allclose(result.mean_levels_db, 53.0)
+    np.testing.assert_allclose(result.mean_levels, 53.0)
     np.testing.assert_allclose(result.max_abs_deviations_db, 3.0)
     assert result.q09_db == pytest.approx(3.0)
 

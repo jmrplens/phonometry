@@ -137,7 +137,7 @@ def _rated_rows(
         ),
         (
             t("Characteristic sensitivity", language),
-            f"{format_number(result.sensitivity_level_db, language, decimals=1)} dB",
+            f"{format_number(result.sensitivity_level, language, decimals=1)} dB",
         ),
         (
             t("Effective frequency range", language),
@@ -180,7 +180,7 @@ def _rated_rows(
                 f"{fmt_num(min_z, language)} {_OHM}",
             )
         )
-    if result.directivity_index_db is not None:
+    if result.directivity_index is not None:
         label = t("Directivity index", language)
         if result.polar_frequency is not None:
             label = t("Directivity index at {freq} Hz", language).format(
@@ -189,7 +189,7 @@ def _rated_rows(
         rows.append(
             (
                 label,
-                f"{format_number(result.directivity_index_db, language, decimals=1)} dB",
+                f"{format_number(result.directivity_index, language, decimals=1)} dB",
             )
         )
     return rows
@@ -349,7 +349,7 @@ def _statement(result: LoudspeakerCharacteristics, language: str = "en") -> str:
         "effective frequency range <b>{range}</b>",
         language,
     ).format(
-        level=format_number(result.sensitivity_level_db, language, decimals=1),
+        level=format_number(result.sensitivity_level, language, decimals=1),
         range=_range_text(*result.effective_range, language=language),
     )
 
@@ -358,7 +358,7 @@ def _verdict(
     result: LoudspeakerCharacteristics, requirement: float, language: str = "en"
 ) -> tuple[str, bool]:
     """Sensitivity verdict: the characteristic sensitivity level must reach it."""
-    level = result.sensitivity_level_db
+    level = result.sensitivity_level
     passed = level >= requirement
     text = t(
         "Characteristic sensitivity {level} dB, required &#8805; {req} dB",

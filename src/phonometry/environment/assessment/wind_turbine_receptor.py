@@ -86,8 +86,8 @@ if TYPE_CHECKING:
 __all__ = [
     "LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM",
     "LOW_FREQUENCY_BANDS_HZ",
-    "LOW_FREQUENCY_FACADE_INSULATION_DB",
-    "LOW_FREQUENCY_GROUND_CORRECTION_DB",
+    "LOW_FREQUENCY_FACADE_INSULATION",
+    "LOW_FREQUENCY_GROUND_CORRECTION",
     "LOW_FREQUENCY_GROUND_IMPEDANCE_CLASSES",
     "MODELING_UNCERTAINTY_DB",
     "PREDICTION_MODEL_UNCERTAINTY_DB",
@@ -192,7 +192,7 @@ LOW_FREQUENCY_BANDS_HZ: NDArray[np.float64] = read_only(
 #: Low frequency ground correction :math:`\Delta L_\mathrm{g,LF}` for onshore
 #: turbines over ground of impedance class D, in dB, at
 #: :data:`LOW_FREQUENCY_BANDS_HZ` (Table C.2).
-LOW_FREQUENCY_GROUND_CORRECTION_DB: NDArray[np.float64] = read_only(
+LOW_FREQUENCY_GROUND_CORRECTION: NDArray[np.float64] = read_only(
     np.array([6.0, 6.0, 5.8, 5.6, 5.4, 5.2, 5.0, 4.7, 4.3, 3.7, 3.0, 1.8, 0.0, 0.0])
 )
 
@@ -213,51 +213,49 @@ LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM: NDArray[np.float64] = read_only(
 #: :data:`LOW_FREQUENCY_BANDS_HZ` (Table C.3), given at a 67 % confidence
 #: level for typical northern European facades. The lightweight row is the
 #: one the Danish order gives for summer-house areas.
-LOW_FREQUENCY_FACADE_INSULATION_DB: Mapping[str, NDArray[np.float64]] = (
-    MappingProxyType(
-        {
-            "Denmark brick or similar": read_only(
-                np.array(
-                    [
-                        4.9,
-                        5.9,
-                        4.6,
-                        6.6,
-                        8.4,
-                        10.8,
-                        11.4,
-                        13.0,
-                        16.6,
-                        19.7,
-                        21.2,
-                        20.2,
-                        21.2,
-                        21.0,
-                    ]
-                )
-            ),
-            "Denmark lightweight": read_only(
-                np.array(
-                    [
-                        6.8,
-                        3.9,
-                        0.4,
-                        -0.2,
-                        4.8,
-                        6.2,
-                        8.4,
-                        10.5,
-                        11.9,
-                        11.9,
-                        16.0,
-                        17.5,
-                        17.9,
-                        17.0,
-                    ]
-                )
-            ),
-        }
-    )
+LOW_FREQUENCY_FACADE_INSULATION: Mapping[str, NDArray[np.float64]] = MappingProxyType(
+    {
+        "Denmark brick or similar": read_only(
+            np.array(
+                [
+                    4.9,
+                    5.9,
+                    4.6,
+                    6.6,
+                    8.4,
+                    10.8,
+                    11.4,
+                    13.0,
+                    16.6,
+                    19.7,
+                    21.2,
+                    20.2,
+                    21.2,
+                    21.0,
+                ]
+            )
+        ),
+        "Denmark lightweight": read_only(
+            np.array(
+                [
+                    6.8,
+                    3.9,
+                    0.4,
+                    -0.2,
+                    4.8,
+                    6.2,
+                    8.4,
+                    10.5,
+                    11.9,
+                    11.9,
+                    16.0,
+                    17.5,
+                    17.9,
+                    17.0,
+                ]
+            )
+        ),
+    }
 )
 
 #: The Swedish criterion curve of Table C.5: Z-weighted sound pressure level
@@ -797,7 +795,7 @@ class BinnedSoundLevels(OwnsArrays):
     :ivar wind_directions_deg: Centre of each bin's direction sector, in
         degrees, or ``None`` when binned by wind speed alone.
     :ivar counts: Number of intervals :math:`N` in each bin.
-    :ivar mean_levels_db: The bin average, Equation (1) (energy) or
+    :ivar mean_levels: The bin average, Equation (1) (energy) or
         Equation (8) (arithmetic), in dB.
     :ivar type_a_uncertainty_db: Equation (2) or (9), in dB; NaN for a bin of
         one interval, whose spread the equation cannot give.
@@ -805,7 +803,7 @@ class BinnedSoundLevels(OwnsArrays):
     :ivar combined_uncertainty_db: Equation (5), in dB; NaN where the type A
         part is.
     :ivar averaging: ``"energy"`` or ``"arithmetic"``.
-    :ivar interval_levels_db: The interval levels binned, in dB.
+    :ivar interval_levels: The interval levels binned, in dB.
     :ivar interval_wind_speeds_m_s: Their wind speeds, in m/s.
     :ivar bin_width_m_s: Width of the wind speed bins, in m/s.
     :ivar sector_width_deg: Width of the direction sectors, in degrees (also
@@ -815,13 +813,13 @@ class BinnedSoundLevels(OwnsArrays):
     wind_speeds_m_s: NDArray[np.float64]
     wind_directions_deg: NDArray[np.float64] | None
     counts: NDArray[np.int64]
-    mean_levels_db: NDArray[np.float64]
+    mean_levels: NDArray[np.float64]
     type_a_uncertainty_db: NDArray[np.float64]
     type_b_uncertainty_db: NDArray[np.float64]
     combined_uncertainty_db: NDArray[np.float64]
     _: KW_ONLY
     averaging: str
-    interval_levels_db: NDArray[np.float64]
+    interval_levels: NDArray[np.float64]
     interval_wind_speeds_m_s: NDArray[np.float64]
     bin_width_m_s: float
     sector_width_deg: float
@@ -884,8 +882,8 @@ class BinnedSoundLevels(OwnsArrays):
         rows = [mine[k] for k in shared]
         other = [theirs[k] for k in shared]
         return turbine_sound_levels(
-            self.mean_levels_db[rows],
-            background.mean_levels_db[other],
+            self.mean_levels[rows],
+            background.mean_levels[other],
             total_uncertainty_db=self.combined_uncertainty_db[rows],
             background_uncertainty_db=background.combined_uncertainty_db[other],
             wind_speeds_m_s=self.wind_speeds_m_s[rows],
@@ -1007,12 +1005,12 @@ def bin_sound_levels(
             np.array([c[0] for c in centres]) if bins.by_direction else None
         ),
         counts=read_only(counts),
-        mean_levels_db=read_only(means),
+        mean_levels=read_only(means),
         type_a_uncertainty_db=read_only(type_a),
         type_b_uncertainty_db=read_only(u_b),
         combined_uncertainty_db=read_only(combined),
         averaging=mode.value,
-        interval_levels_db=levels,
+        interval_levels=levels,
         interval_wind_speeds_m_s=bins.speeds_m_s,
         bin_width_m_s=bins.bin_width_m_s,
         sector_width_deg=bins.sector_width_deg,
@@ -1039,10 +1037,10 @@ class BackgroundCorrectionRegime(StrEnum):
 class TurbineSoundLevels(OwnsArrays):
     """Background-corrected wind turbine levels per bin (10.3.2, 11.7).
 
-    :ivar total_levels_db: The total (turbines on) bin levels, in dB.
+    :ivar total_levels: The total (turbines on) bin levels, in dB.
     :ivar background_levels: The background (turbines off) bin levels.
-    :ivar level_differences_db: Total minus background, in dB.
-    :ivar turbine_levels_db: The turbine level :math:`L_{c,k}`, in dB:
+    :ivar level_differences: Total minus background, in dB.
+    :ivar turbine_levels: The turbine level :math:`L_{c,k}`, in dB:
         Equation (6) where the difference is at least 3 dB, the total minus
         3 dB where it is at least 0 dB but less than 3 dB, NaN where it is
         negative.
@@ -1058,10 +1056,10 @@ class TurbineSoundLevels(OwnsArrays):
     total and the background levels, so it is not a field.
     """
 
-    total_levels_db: NDArray[np.float64]
+    total_levels: NDArray[np.float64]
     background_levels: NDArray[np.float64]
-    level_differences_db: NDArray[np.float64]
-    turbine_levels_db: NDArray[np.float64]
+    level_differences: NDArray[np.float64]
+    turbine_levels: NDArray[np.float64]
     turbine_uncertainty_db: NDArray[np.float64]
     _: KW_ONLY
     wind_speeds_m_s: NDArray[np.float64] | None
@@ -1084,32 +1082,32 @@ class TurbineSoundLevels(OwnsArrays):
         """
         require_ranks(
             self,
-            total_levels_db=1,
+            total_levels=1,
             background_levels=1,
-            level_differences_db=1,
-            turbine_levels_db=1,
+            level_differences=1,
+            turbine_levels=1,
             turbine_uncertainty_db=1,
         )
         require_same_length(
             self,
-            "total_levels_db",
+            "total_levels",
             "background_levels",
-            "level_differences_db",
-            "turbine_levels_db",
+            "level_differences",
+            "turbine_levels",
             "turbine_uncertainty_db",
             axis="bin",
         )
-        total = np.asarray(self.total_levels_db, dtype=np.float64)
+        total = np.asarray(self.total_levels, dtype=np.float64)
         background = np.asarray(self.background_levels, dtype=np.float64)
         levels = _turbine_levels(total, background)
         for name, expected, rule in (
             (
-                "level_differences_db",
+                "level_differences",
                 total - background,
                 "the total less the background",
             ),
             (
-                "turbine_levels_db",
+                "turbine_levels",
                 levels,
                 "the level the rule of 11.7 of each bin gives",
             ),
@@ -1135,15 +1133,13 @@ class TurbineSoundLevels(OwnsArrays):
     def regimes(self) -> tuple[BackgroundCorrectionRegime, ...]:
         """The :class:`BackgroundCorrectionRegime` of each bin (11.7).
 
-        Read from :attr:`total_levels_db` and :attr:`background_levels`:
+        Read from :attr:`total_levels` and :attr:`background_levels`:
         the logarithmic subtraction where the total is at least 3 dB above the
         background, the 3 dB correction where it is at least 0 dB but less
         than 3 dB above, and undetermined where the background is louder. A
         difference within a nanodecibel of 3 dB or of 0 dB is on that limit.
         """
-        difference = np.asarray(self.total_levels_db) - np.asarray(
-            self.background_levels
-        )
+        difference = np.asarray(self.total_levels) - np.asarray(self.background_levels)
         return tuple(_correction_regime(float(delta)) for delta in difference)
 
     def plot(
@@ -1209,7 +1205,7 @@ def _turbine_levels(
 
 
 def turbine_sound_levels(
-    total_levels_db: ArrayLike,
+    total_levels: ArrayLike,
     background_levels: ArrayLike,
     *,
     total_uncertainty_db: ArrayLike = 0.0,
@@ -1230,7 +1226,7 @@ def turbine_sound_levels(
     the rounding of two energy means cannot move a bin from one rule to the
     other.
 
-    :param total_levels_db: Bin levels with the turbines operating, in dB.
+    :param total_levels: Bin levels with the turbines operating, in dB.
     :param background_levels: Bin levels with the turbines off, in dB.
     :param total_uncertainty_db: Combined standard uncertainty of each total
         level, Equation (5), in dB; NaN for a bin of one interval, whose
@@ -1245,10 +1241,10 @@ def turbine_sound_levels(
     :raises ValueError: If the inputs disagree in length or are not finite,
         or an uncertainty is infinite or negative.
     """
-    total = require_finite_array(total_levels_db, "total_levels_db")
+    total = require_finite_array(total_levels, "total_levels")
     background = require_finite_array(background_levels, "background_levels")
     if total.size != background.size:
-        msg = "'total_levels_db' and 'background_levels' must pair bin by bin."
+        msg = "'total_levels' and 'background_levels' must pair bin by bin."
         raise ValueError(msg)
     u_t = np.broadcast_to(
         np.asarray(total_uncertainty_db, dtype=np.float64), total.shape
@@ -1281,10 +1277,10 @@ def turbine_sound_levels(
         elif regime is BackgroundCorrectionRegime.THREE_DB:
             uncertainty[i] = u_t[i]
     return TurbineSoundLevels(
-        total_levels_db=total,
+        total_levels=total,
         background_levels=background,
-        level_differences_db=read_only(difference),
-        turbine_levels_db=read_only(corrected),
+        level_differences=read_only(difference),
+        turbine_levels=read_only(corrected),
         turbine_uncertainty_db=read_only(uncertainty),
         wind_speeds_m_s=_optional_per_bin(
             wind_speeds_m_s, total.size, "wind_speeds_m_s"
@@ -1312,10 +1308,10 @@ def _optional_per_bin(
 class PredictedReceptorLevel(OwnsArrays):
     """A predicted receptor level and its uncertainty (10.3.4).
 
-    :ivar turbine_levels_db: The predicted level from each turbine, in dB.
+    :ivar turbine_levels: The predicted level from each turbine, in dB.
     :ivar sound_power_uncertainty_db: The sound power level uncertainty of
         each turbine, in dB.
-    :ivar level_db: The energy sum of the turbines' levels, in dB.
+    :ivar level: The energy sum of the turbines' levels, in dB.
     :ivar propagated_uncertainty_db: Equation (10), the level-weighted mean of
         the turbines' sound power uncertainties, in dB.
     :ivar combined_uncertainty_db: Equation (11), in dB.
@@ -1323,9 +1319,9 @@ class PredictedReceptorLevel(OwnsArrays):
     :ivar modeling_uncertainty_db: The modelling uncertainty used, in dB.
     """
 
-    turbine_levels_db: NDArray[np.float64]
+    turbine_levels: NDArray[np.float64]
     sound_power_uncertainty_db: NDArray[np.float64]
-    level_db: float
+    level: float
     propagated_uncertainty_db: float
     combined_uncertainty_db: float
     _: KW_ONLY
@@ -1351,7 +1347,7 @@ class PredictedReceptorLevel(OwnsArrays):
 
 
 def predicted_receptor_level(
-    turbine_levels_db: ArrayLike,
+    turbine_levels: ArrayLike,
     sound_power_uncertainty_db: ArrayLike,
     *,
     prediction_model_uncertainty_db: float = PREDICTION_MODEL_UNCERTAINTY_DB,
@@ -1371,7 +1367,7 @@ def predicted_receptor_level(
     (a linear, fully correlated combination), and Equation (11) adds the
     prediction model and the modelling in quadrature.
 
-    :param turbine_levels_db: Predicted level at the receptor from each
+    :param turbine_levels: Predicted level at the receptor from each
         turbine, in dB.
     :param sound_power_uncertainty_db: Uncertainty of each turbine's sound
         power level, from IEC 61400-11, in dB (one value for all or one each).
@@ -1383,7 +1379,7 @@ def predicted_receptor_level(
     :raises ValueError: If a value is not finite or an uncertainty is
         negative.
     """
-    levels = require_finite_array(turbine_levels_db, "turbine_levels_db")
+    levels = require_finite_array(turbine_levels, "turbine_levels")
     u_w = np.broadcast_to(
         np.asarray(sound_power_uncertainty_db, dtype=np.float64), levels.shape
     )
@@ -1400,9 +1396,9 @@ def predicted_receptor_level(
     weights = 10.0 ** (levels / 10.0)
     propagated = float(np.sum(u_w * weights) / np.sum(weights))
     return PredictedReceptorLevel(
-        turbine_levels_db=levels,
+        turbine_levels=levels,
         sound_power_uncertainty_db=u_w,
-        level_db=energy_sum(levels),
+        level=energy_sum(levels),
         propagated_uncertainty_db=propagated,
         combined_uncertainty_db=math.sqrt(propagated**2 + u_model**2 + u_modelling**2),
         prediction_model_uncertainty_db=u_model,
@@ -1417,11 +1413,11 @@ class SoundRelevantTurbines(OwnsArrays):
     Which turbines are relevant is read from the predicted levels and the
     1.0 dB of 9.3.2.3, so it is not a field.
 
-    :ivar predicted_levels_db: Each turbine's predicted level at the
+    :ivar predicted_levels: Each turbine's predicted level at the
         receptor, in dB, in the order given.
     """
 
-    predicted_levels_db: NDArray[np.float64]
+    predicted_levels: NDArray[np.float64]
 
     @property
     def relevant(self) -> NDArray[np.bool_]:
@@ -1432,7 +1428,7 @@ class SoundRelevantTurbines(OwnsArrays):
         from the total of all ("reduced by more than 1,0 dB", 9.3.2.3: 1.0 dB
         itself is not more, and a drop within a nanodecibel of it is 1.0 dB).
         """
-        levels = np.asarray(self.predicted_levels_db, dtype=np.float64)
+        levels = np.asarray(self.predicted_levels, dtype=np.float64)
         total = energy_sum(levels)
         relevant = np.ones(levels.size, dtype=np.bool_)
         for index in np.argsort(levels, kind="stable")[:-1]:
@@ -1447,19 +1443,19 @@ class SoundRelevantTurbines(OwnsArrays):
         return relevant
 
     @property
-    def total_level_db(self) -> float:
+    def total_level(self) -> float:
         """The predicted level of all turbines, in dB."""
-        return energy_sum(self.predicted_levels_db)
+        return energy_sum(self.predicted_levels)
 
     @property
-    def relevant_level_db(self) -> float:
+    def relevant_level(self) -> float:
         """The predicted level of the relevant ones, in dB."""
-        return energy_sum(np.asarray(self.predicted_levels_db)[self.relevant])
+        return energy_sum(np.asarray(self.predicted_levels)[self.relevant])
 
     @property
     def indices(self) -> tuple[int, ...]:
         """Positions of the sound relevant turbines, loudest first."""
-        order = np.argsort(-self.predicted_levels_db, kind="stable")
+        order = np.argsort(-self.predicted_levels, kind="stable")
         return tuple(int(i) for i in order if self.relevant[i])
 
     def binning_wind_speed_m_s(self, turbine_wind_speeds_m_s: ArrayLike) -> float:
@@ -1467,7 +1463,7 @@ class SoundRelevantTurbines(OwnsArrays):
 
         :param turbine_wind_speeds_m_s: The wind speed derived from each
             turbine (power curve or nacelle, recalculated to 10 m), in m/s,
-            in the order of :attr:`predicted_levels_db`.
+            in the order of :attr:`predicted_levels`.
         :return: The mean of the relevant turbines' wind speeds, in m/s.
         :raises ValueError: If the speeds are not one per turbine or not
             finite.
@@ -1475,7 +1471,7 @@ class SoundRelevantTurbines(OwnsArrays):
         speeds = require_finite_array(
             turbine_wind_speeds_m_s, "turbine_wind_speeds_m_s"
         )
-        if speeds.size != self.predicted_levels_db.size:
+        if speeds.size != self.predicted_levels.size:
             msg = "'turbine_wind_speeds_m_s' must hold one value per turbine."
             raise ValueError(msg)
         return float(np.mean(speeds[self.relevant]))
@@ -1498,7 +1494,7 @@ class SoundRelevantTurbines(OwnsArrays):
         )
 
 
-def sound_relevant_turbines(predicted_levels_db: ArrayLike) -> SoundRelevantTurbines:
+def sound_relevant_turbines(predicted_levels: ArrayLike) -> SoundRelevantTurbines:
     """Select the sound relevant turbines of a wind farm (9.3.2.3).
 
     The turbines are sorted by their predicted contribution at the receptor.
@@ -1510,13 +1506,13 @@ def sound_relevant_turbines(predicted_levels_db: ArrayLike) -> SoundRelevantTurb
     1.0 dB, not more, so the rounding of the energy sums cannot keep a
     turbine the TS leaves out.
 
-    :param predicted_levels_db: Each turbine's predicted level at the
+    :param predicted_levels: Each turbine's predicted level at the
         receptor, in dB.
     :return: A :class:`SoundRelevantTurbines`.
     :raises ValueError: If the levels are empty or not finite.
     """
-    levels = require_finite_array(predicted_levels_db, "predicted_levels_db")
-    return SoundRelevantTurbines(predicted_levels_db=levels)
+    levels = require_finite_array(predicted_levels, "predicted_levels")
+    return SoundRelevantTurbines(predicted_levels=levels)
 
 
 # ---------------------------------------------------------------------------
@@ -1530,32 +1526,32 @@ class LowFrequencyLevel(OwnsArrays):
     band; the band arrays are summed over the turbines.
 
     :ivar frequencies: The one-third-octave centres, in Hz.
-    :ivar sound_power_levels_db: The turbines' band sound power levels.
+    :ivar sound_power_levels: The turbines' band sound power levels.
     :ivar a_weighting_db: The A-weighting added to each band (zero when the
         result is unweighted).
     :ivar distance_terms_db: :math:`10 \lg(l^2 + h^2)` of each turbine, in dB.
-    :ivar ground_correction_db: :math:`\Delta L_\mathrm{g,LF}` per band.
-    :ivar air_attenuation_db: :math:`\Delta L_\mathrm{a}` per turbine and band.
-    :ivar facade_insulation_db: :math:`\Delta L_\sigma` per band, or ``None``
+    :ivar ground_correction: :math:`\Delta L_\mathrm{g,LF}` per band.
+    :ivar air_attenuation: :math:`\Delta L_\mathrm{a}` per turbine and band.
+    :ivar facade_insulation: :math:`\Delta L_\sigma` per band, or ``None``
         for an outdoor result.
-    :ivar outdoor_levels_db: Outdoor band levels summed over the turbines.
-    :ivar indoor_levels_db: Indoor band levels, or ``None``.
-    :ivar outdoor_level_db: Energy sum of the outdoor bands, in dB.
-    :ivar indoor_level_db: Energy sum of the indoor bands, or ``None``.
+    :ivar outdoor_levels: Outdoor band levels summed over the turbines.
+    :ivar indoor_levels: Indoor band levels, or ``None``.
+    :ivar outdoor_level: Energy sum of the outdoor bands, in dB.
+    :ivar indoor_level: Energy sum of the indoor bands, or ``None``.
     :ivar a_weighted: Whether the levels are A-weighted.
     """
 
     frequencies: NDArray[np.float64]
-    sound_power_levels_db: NDArray[np.float64]
+    sound_power_levels: NDArray[np.float64]
     a_weighting_db: NDArray[np.float64]
     distance_terms_db: NDArray[np.float64]
-    ground_correction_db: NDArray[np.float64]
-    air_attenuation_db: NDArray[np.float64]
-    facade_insulation_db: NDArray[np.float64] | None
-    outdoor_levels_db: NDArray[np.float64]
-    indoor_levels_db: NDArray[np.float64] | None
-    outdoor_level_db: float
-    indoor_level_db: float | None
+    ground_correction: NDArray[np.float64]
+    air_attenuation: NDArray[np.float64]
+    facade_insulation: NDArray[np.float64] | None
+    outdoor_levels: NDArray[np.float64]
+    indoor_levels: NDArray[np.float64] | None
+    outdoor_level: float
+    indoor_level: float | None
     _: KW_ONLY
     a_weighted: bool
 
@@ -1578,14 +1574,14 @@ class LowFrequencyLevel(OwnsArrays):
 
 
 def wind_turbine_low_frequency_level(
-    sound_power_levels_db: ArrayLike,
+    sound_power_levels: ArrayLike,
     *,
     distance: ArrayLike,
     hub_height_m: ArrayLike,
     frequencies: ArrayLike = LOW_FREQUENCY_BANDS_HZ,
-    ground_correction_db: ArrayLike | None = None,
+    ground_correction: ArrayLike | None = None,
     air_attenuation_db_per_km: ArrayLike | None = None,
-    facade_insulation_db: ArrayLike | None = None,
+    facade_insulation: ArrayLike | None = None,
     a_weighted: bool = True,
 ) -> LowFrequencyLevel:
     r"""Low frequency sound level at a receptor (Annex C, Equation (C.1)).
@@ -1603,22 +1599,22 @@ def wind_turbine_low_frequency_level(
     equivalent level is the energy sum of the bands (C.3, C.5); the Danish
     criterion of C.6.1 sums 10 Hz to 160 Hz, so pass those bands for it.
 
-    :param sound_power_levels_db: Band sound power levels from IEC 61400-11,
+    :param sound_power_levels: Band sound power levels from IEC 61400-11,
         in dB: one row per turbine, or one row for a single turbine.
     :param distance: Horizontal distance :math:`l` from each tower to the
         receptor, in m (scalar or one per turbine).
     :param hub_height_m: Hub height :math:`h` of each turbine, in m.
     :param frequencies: Nominal centre of each column, in Hz (10 Hz to
         200 Hz by default, :data:`LOW_FREQUENCY_BANDS_HZ`).
-    :param ground_correction_db: :math:`\Delta L_\mathrm{g,LF}` per band;
+    :param ground_correction: :math:`\Delta L_\mathrm{g,LF}` per band;
         ``None`` for Table C.2 (onshore, impedance class D).
     :param air_attenuation_db_per_km: :math:`\alpha` per band, in dB/km,
         zero or positive (the ISO 9613-1 absorption coefficient, C.2);
         ``None`` for Table C.2, as printed (see
         :data:`LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM`).
-    :param facade_insulation_db: :math:`\Delta L_\sigma` per band, for an
+    :param facade_insulation: :math:`\Delta L_\sigma` per band, for an
         indoor level (for instance a row of
-        :data:`LOW_FREQUENCY_FACADE_INSULATION_DB`); ``None`` for the outdoor
+        :data:`LOW_FREQUENCY_FACADE_INSULATION`); ``None`` for the outdoor
         level alone.
     :param a_weighted: Add the A-weighting of Table C.4 (IEC 61672-1) to each
         band (the default), or give unweighted levels.
@@ -1634,10 +1630,10 @@ def wind_turbine_low_frequency_level(
         )
         raise ValueError(msg)
     freqs = require_finite_array(frequencies, "frequencies")
-    power = require_finite_matrix(sound_power_levels_db, "sound_power_levels_db")
+    power = require_finite_matrix(sound_power_levels, "sound_power_levels")
     if power.shape[1] != freqs.size:
         msg = (
-            "'sound_power_levels_db' must hold one row per turbine and one "
+            "'sound_power_levels' must hold one row per turbine and one "
             f"column per band ({freqs.size}); got {power.shape[1]} columns."
         )
         raise ValueError(msg)
@@ -1648,11 +1644,11 @@ def wind_turbine_low_frequency_level(
         if not np.all(np.isfinite(values)) or np.any(values <= 0.0):
             msg = f"'{name}' must be finite and positive."
             raise ValueError(msg)
-    table_bands = (LOW_FREQUENCY_BANDS_HZ, LOW_FREQUENCY_GROUND_CORRECTION_DB)
+    table_bands = (LOW_FREQUENCY_BANDS_HZ, LOW_FREQUENCY_GROUND_CORRECTION)
     ground = (
         _nominal_lookup(freqs, table_bands, "Table C.2")
-        if ground_correction_db is None
-        else _per_band(ground_correction_db, freqs.size, "ground_correction_db")
+        if ground_correction is None
+        else _per_band(ground_correction, freqs.size, "ground_correction")
     )
     alpha = (
         _nominal_lookup(
@@ -1670,8 +1666,8 @@ def wind_turbine_low_frequency_level(
     )
     facade = (
         None
-        if facade_insulation_db is None
-        else _per_band(facade_insulation_db, freqs.size, "facade_insulation_db")
+        if facade_insulation is None
+        else _per_band(facade_insulation, freqs.size, "facade_insulation")
     )
     weighting = (
         _nominal_lookup(freqs, _A_WEIGHTING_DB, "The A-weighting of IEC 61672-1")
@@ -1693,16 +1689,16 @@ def wind_turbine_low_frequency_level(
     indoor = None if facade is None else outdoor - facade
     return LowFrequencyLevel(
         frequencies=freqs,
-        sound_power_levels_db=power,
+        sound_power_levels=power,
         a_weighting_db=read_only(weighting),
         distance_terms_db=read_only(distance_terms),
-        ground_correction_db=ground,
-        air_attenuation_db=read_only(air),
-        facade_insulation_db=facade,
-        outdoor_levels_db=read_only(outdoor),
-        indoor_levels_db=None if indoor is None else read_only(indoor),
-        outdoor_level_db=energy_sum(outdoor),
-        indoor_level_db=None if indoor is None else energy_sum(indoor),
+        ground_correction=ground,
+        air_attenuation=read_only(air),
+        facade_insulation=facade,
+        outdoor_levels=read_only(outdoor),
+        indoor_levels=None if indoor is None else read_only(indoor),
+        outdoor_level=energy_sum(outdoor),
+        indoor_level=None if indoor is None else energy_sum(indoor),
         a_weighted=bool(a_weighted),
     )
 
@@ -1734,15 +1730,15 @@ def _per_band(
 class SoundEmergence(OwnsArrays):
     r"""The emergence criterion per wind speed class (Annex J, Equation (J.1)).
 
-    :ivar ambient_levels_db: The ambient sound criterion per class, in dB.
+    :ivar ambient_levels: The ambient sound criterion per class, in dB.
     :ivar background_levels: The background sound criterion per class.
-    :ivar emergence_db: :math:`E(j) = L_\mathrm{Amb}(j) - L_\mathrm{Res}(j)`.
+    :ivar emergence: :math:`E(j) = L_\mathrm{Amb}(j) - L_\mathrm{Res}(j)`.
     :ivar wind_speeds_m_s: The wind speed classes, in m/s, when given.
     """
 
-    ambient_levels_db: NDArray[np.float64]
+    ambient_levels: NDArray[np.float64]
     background_levels: NDArray[np.float64]
-    emergence_db: NDArray[np.float64]
+    emergence: NDArray[np.float64]
     _: KW_ONLY
     wind_speeds_m_s: NDArray[np.float64] | None
 
@@ -1765,7 +1761,7 @@ class SoundEmergence(OwnsArrays):
 
 
 def sound_emergence(
-    ambient_levels_db: ArrayLike,
+    ambient_levels: ArrayLike,
     background_levels: ArrayLike,
     *,
     wind_speeds_m_s: ArrayLike | None = None,
@@ -1779,16 +1775,16 @@ def sound_emergence(
     confused with limits on the difference between the turbine sound and the
     background.
 
-    :param ambient_levels_db: The ambient sound criterion of each class, in dB.
+    :param ambient_levels: The ambient sound criterion of each class, in dB.
     :param background_levels: The background sound criterion of each class.
     :param wind_speeds_m_s: Optional wind speed of each class, in m/s.
     :return: A :class:`SoundEmergence`.
     :raises ValueError: If the inputs disagree in length or are not finite.
     """
-    ambient = require_finite_array(ambient_levels_db, "ambient_levels_db")
+    ambient = require_finite_array(ambient_levels, "ambient_levels")
     background = require_finite_array(background_levels, "background_levels")
     if ambient.size != background.size:
-        msg = "'ambient_levels_db' and 'background_levels' must pair class by class."
+        msg = "'ambient_levels' and 'background_levels' must pair class by class."
         raise ValueError(msg)
     speeds = None
     if wind_speeds_m_s is not None:
@@ -1797,9 +1793,9 @@ def sound_emergence(
             msg = "'wind_speeds_m_s' must hold one value per class."
             raise ValueError(msg)
     return SoundEmergence(
-        ambient_levels_db=ambient,
+        ambient_levels=ambient,
         background_levels=background,
-        emergence_db=read_only(ambient - background),
+        emergence=read_only(ambient - background),
         wind_speeds_m_s=speeds,
     )
 
@@ -1838,19 +1834,19 @@ def amplitude_modulation_adjustment(
 class WindTurbineRatingLevel(RichDisplay):
     r"""The rating level of wind turbine sound (Annex A, A.1).
 
-    :ivar equivalent_level_db: The equivalent continuous level
+    :ivar equivalent_level: The equivalent continuous level
         :math:`L_\mathrm{eq}`, in dB.
-    :ivar adjustments_db: The three candidate adjustments, keyed
+    :ivar adjustments: The three candidate adjustments, keyed
         ``"tonal"``, ``"amplitude_modulation"`` and ``"impulsive"``, in dB.
     :ivar governing: The adjustment applied, the most severe of the three, or
         ``None`` when all three are zero.
-    :ivar rating_level_db: :math:`L_\mathrm{r} = L_\mathrm{eq} + K`, in dB.
+    :ivar rating_level: :math:`L_\mathrm{r} = L_\mathrm{eq} + K`, in dB.
     """
 
-    equivalent_level_db: float
-    adjustments_db: Mapping[str, float]
+    equivalent_level: float
+    adjustments: Mapping[str, float]
     governing: str | None
-    rating_level_db: float
+    rating_level: float
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1871,11 +1867,11 @@ class WindTurbineRatingLevel(RichDisplay):
 
 
 def wind_turbine_rating_level(
-    equivalent_level_db: float,
+    equivalent_level: float,
     *,
-    tonal_adjustment_db: float = 0.0,
-    amplitude_modulation_adjustment_db: float = 0.0,
-    impulsive_adjustment_db: float = 0.0,
+    tonal_adjustment: float = 0.0,
+    amplitude_modulation_adjustment: float = 0.0,
+    impulsive_adjustment: float = 0.0,
 ) -> WindTurbineRatingLevel:
     r"""Rating level of wind turbine sound (Annex A, A.1).
 
@@ -1891,20 +1887,20 @@ def wind_turbine_rating_level(
     ISO/PAS 1996-3 for :math:`K_\mathrm{I}`
     (:func:`~phonometry.environment.assessment.impulsive_sound.impulse_adjustment`).
 
-    :param equivalent_level_db: The equivalent continuous level, in dB.
-    :param tonal_adjustment_db: :math:`K_\mathrm{T}`, in dB.
-    :param amplitude_modulation_adjustment_db: :math:`K_\mathrm{am}`, in dB.
-    :param impulsive_adjustment_db: :math:`K_\mathrm{I}`, in dB.
+    :param equivalent_level: The equivalent continuous level, in dB.
+    :param tonal_adjustment: :math:`K_\mathrm{T}`, in dB.
+    :param amplitude_modulation_adjustment: :math:`K_\mathrm{am}`, in dB.
+    :param impulsive_adjustment: :math:`K_\mathrm{I}`, in dB.
     :return: A :class:`WindTurbineRatingLevel`.
     :raises ValueError: If a value is not finite or an adjustment is negative.
     """
-    leq = require_finite(equivalent_level_db, "equivalent_level_db")
+    leq = require_finite(equivalent_level, "equivalent_level")
     adjustments = {
-        "tonal": require_finite(tonal_adjustment_db, "tonal_adjustment_db"),
+        "tonal": require_finite(tonal_adjustment, "tonal_adjustment"),
         "amplitude_modulation": require_finite(
-            amplitude_modulation_adjustment_db, "amplitude_modulation_adjustment_db"
+            amplitude_modulation_adjustment, "amplitude_modulation_adjustment"
         ),
-        "impulsive": require_finite(impulsive_adjustment_db, "impulsive_adjustment_db"),
+        "impulsive": require_finite(impulsive_adjustment, "impulsive_adjustment"),
     }
     if any(value < 0.0 for value in adjustments.values()):
         msg = "The adjustments must not be negative."
@@ -1912,10 +1908,10 @@ def wind_turbine_rating_level(
     governing = max(adjustments, key=lambda name: adjustments[name])
     applied = adjustments[governing]
     return WindTurbineRatingLevel(
-        equivalent_level_db=leq,
-        adjustments_db=MappingProxyType(adjustments),
+        equivalent_level=leq,
+        adjustments=MappingProxyType(adjustments),
         governing=governing if applied > 0.0 else None,
-        rating_level_db=leq + applied,
+        rating_level=leq + applied,
     )
 
 
@@ -1928,7 +1924,7 @@ class ToneSearchLimit(OwnsArrays):
 
     :ivar distance: Distance from the nearest turbine, in m.
     :ivar frequencies: The nominal one-third-octave centres searched.
-    :ivar attenuation_db: ISO 9613-1 attenuation of each band over the
+    :ivar attenuation: ISO 9613-1 attenuation of each band over the
         distance, at the exact mid-band frequency, in dB.
     :ivar upper_frequency_hz: The nominal centre of the lowest band
         attenuated by at least 20 dB, or 10 kHz when none is.
@@ -1939,7 +1935,7 @@ class ToneSearchLimit(OwnsArrays):
 
     distance: float
     frequencies: NDArray[np.float64]
-    attenuation_db: NDArray[np.float64]
+    attenuation: NDArray[np.float64]
     upper_frequency_hz: float
     _: KW_ONLY
     temperature_c: float
@@ -2012,7 +2008,7 @@ def upper_tone_search_frequency(
     return ToneSearchLimit(
         distance=distance,
         frequencies=TONE_SEARCH_BANDS_HZ,
-        attenuation_db=read_only(attenuation),
+        attenuation=read_only(attenuation),
         upper_frequency_hz=upper,
         temperature_c=float(temperature_c),
         relative_humidity_percent=float(relative_humidity_percent),

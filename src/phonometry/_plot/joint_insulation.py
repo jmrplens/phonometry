@@ -196,7 +196,7 @@ def plot_lab_joint_insulation(
     ink = ax.xaxis.label.get_color()
     ax.plot(
         positions,
-        result.r_s_max_db,
+        result.r_s_max,
         "s--",
         color=theme_line(ink, ax, quiet=_INK_QUIET_FIRM),
         lw=1.2,
@@ -205,7 +205,7 @@ def plot_lab_joint_insulation(
     )
     ax.plot(
         positions,
-        result.r_s_measured_db,
+        result.r_s_prime,
         ":",
         color=theme_line(ink, ax, quiet=_INK_QUIET_SOFT),
         lw=1.4,
@@ -227,12 +227,12 @@ def plot_lab_joint_insulation(
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("label", rf"$R_\mathrm{{s}}$ ({_t('corrected', language)})")
-    ax.plot(positions, result.r_s_db, **kwargs)
+    ax.plot(positions, result.r_s, **kwargs)
     minimum = np.asarray(result.min_value, dtype=bool)
     if bool(np.any(minimum)):
         ax.plot(
             positions[minimum],
-            np.asarray(result.r_s_db)[minimum],
+            np.asarray(result.r_s)[minimum],
             "^",
             ls="",
             ms=10,
@@ -274,11 +274,11 @@ def plot_joint_open_band_rating(
 
     ax = ax if ax is not None else _new_axes()
     terms = (
-        (r"$R_\mathrm{s,w}$", result.r_s_w_db),
-        (r"$C$", result.c_db),
-        (r"$C_\mathrm{tr}$", result.ctr_db),
-        (r"$C_{100-5000}$", result.c_100_5000_db),
-        (r"$C_\mathrm{tr,100-5000}$", result.ctr_100_5000_db),
+        (r"$R_\mathrm{s,w}$", result.r_s_w),
+        (r"$C$", result.c),
+        (r"$C_\mathrm{tr}$", result.ctr),
+        (r"$C_{100-5000}$", result.c_100_5000),
+        (r"$C_\mathrm{tr,100-5000}$", result.ctr_100_5000),
     )
     labels = [
         name if value is not None else f"{name}\n({_t('unbounded', language)})"
@@ -547,7 +547,7 @@ def plot_joint_gap_octaves(
     ax.set_xlabel(_t(_OCTAVE_LABEL, language))
     sealed: list[np.ndarray] = []
     for r in result.results:
-        maximum = np.asarray(r.r_s_max_db, dtype=np.float64)
+        maximum = np.asarray(r.r_s_max, dtype=np.float64)
         if not any(np.array_equal(maximum, seen) for seen in sealed):
             sealed.append(maximum)
     ink = theme_line(ax.xaxis.label.get_color(), ax, quiet=1.0)

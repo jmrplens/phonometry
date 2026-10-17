@@ -131,7 +131,7 @@ def _energetic_mean_db(levels: NDArray[np.float64]) -> float:
 
 
 def _reference_level(
-    frequencies: NDArray[np.float64], spl_db: NDArray[np.float64]
+    frequencies: NDArray[np.float64], spl: NDArray[np.float64]
 ) -> float:
     r"""Level averaged over a one-octave band in the region of maximum
     sensitivity.
@@ -154,7 +154,7 @@ def _reference_level(
             frequencies <= f_c * _OCTAVE_HALF
         )
         if np.any(in_band):
-            best = max(best, _energetic_mean_db(spl_db[in_band]))
+            best = max(best, _energetic_mean_db(spl[in_band]))
     return float(best)
 
 
@@ -179,7 +179,7 @@ def _threshold_crossing(
 def _fill_narrow_troughs(
     above: NDArray[np.bool_],
     frequencies: NDArray[np.float64],
-    spl_db: NDArray[np.float64],
+    spl: NDArray[np.float64],
     threshold: float,
 ) -> None:
     """Mark below-threshold runs narrower than 1/9 octave as in-band (21.2).
@@ -199,10 +199,10 @@ def _fill_narrow_troughs(
             j += 1
         if 0 < i and j < n:
             lo_f = _threshold_crossing(
-                frequencies[i - 1], spl_db[i - 1], frequencies[i], spl_db[i], threshold
+                frequencies[i - 1], spl[i - 1], frequencies[i], spl[i], threshold
             )
             hi_f = _threshold_crossing(
-                frequencies[j - 1], spl_db[j - 1], frequencies[j], spl_db[j], threshold
+                frequencies[j - 1], spl[j - 1], frequencies[j], spl[j], threshold
             )
             if _log2(hi_f / lo_f) < _MIN_TROUGH_OCTAVES:
                 above[i:j] = True
@@ -211,7 +211,7 @@ def _fill_narrow_troughs(
 
 def _band_edge(
     frequencies: NDArray[np.float64],
-    spl_db: NDArray[np.float64],
+    spl: NDArray[np.float64],
     threshold: float,
     edge: int,
     neighbour: int,
@@ -225,15 +225,15 @@ def _band_edge(
         return float(frequencies[edge])
     return _threshold_crossing(
         frequencies[edge],
-        spl_db[edge],
+        spl[edge],
         frequencies[neighbour],
-        spl_db[neighbour],
+        spl[neighbour],
         threshold,
     )
 
 
 def _effective_range(
-    frequencies: NDArray[np.float64], spl_db: NDArray[np.float64], reference: float
+    frequencies: NDArray[np.float64], spl: NDArray[np.float64], reference: float
 ) -> tuple[float, float]:
     """Effective frequency range against the ``reference - 10 dB`` band (21.2).
 
@@ -242,11 +242,11 @@ def _effective_range(
     side of the peak, or the measured band edge where the response never drops.
     """
     threshold = reference - _EFFECTIVE_DROP_DB
-    above = np.asarray(spl_db >= threshold)
-    _fill_narrow_troughs(above, frequencies, spl_db, threshold)
+    above = np.asarray(spl >= threshold)
+    _fill_narrow_troughs(above, frequencies, spl, threshold)
 
     n = above.size
-    peak = int(np.argmax(spl_db))
+    peak = int(np.argmax(spl))
     if not above[peak]:  # pragma: no cover - the peak is always >= threshold
         return float(frequencies[peak]), float(frequencies[peak])
     lo_idx = peak
@@ -255,8 +255,8 @@ def _effective_range(
     hi_idx = peak
     while hi_idx < n - 1 and above[hi_idx + 1]:
         hi_idx += 1
-    lower = _band_edge(frequencies, spl_db, threshold, lo_idx, lo_idx - 1)
-    upper = _band_edge(frequencies, spl_db, threshold, hi_idx, hi_idx + 1)
+    lower = _band_edge(frequencies, spl, threshold, lo_idx, lo_idx - 1)
+    upper = _band_edge(frequencies, spl, threshold, hi_idx, hi_idx + 1)
     return lower, upper
 
 
@@ -279,14 +279,14 @@ class LoudspeakerDirectivity(OwnsArrays):
         :attr:`piston` (23.1).
     :ivar frequency: Stated frequency of the directional pattern, in Hz; it
         also selects which of :attr:`piston`'s frequencies is drawn.
-    :ivar index_db: Directivity index at :attr:`frequency`, in dB (23.3), when
+    :ivar index: Directivity index at :attr:`frequency`, in dB (23.3), when
         not taken from :attr:`piston`.
     """
 
     piston: RadiatingPistonResult | None = None
     polar: tuple[ArrayLike, ArrayLike] | None = None
     frequency: float | None = None
-    index_db: float | None = None
+    index: float | None = None
 
 
 #: No directional characteristics supplied: the Clause 23 default.
@@ -379,7 +379,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
     computed from the on-axis response (see the module docstring).
 
     :ivar frequencies: On-axis response frequency axis, in Hz.
-    :ivar spl_db: On-axis sound pressure level (re 20 uPa), in dB, measured at
+    :ivar spl: On-axis sound pressure level (re 20 uPa), in dB, measured at
         :attr:`input_voltage_v` and :attr:`distance`.
     :ivar rated_impedance_ohm: Rated impedance ``R``, in ohm (16.1).
     :ivar input_voltage_v: Constant drive voltage of the response, in V.
@@ -387,9 +387,9 @@ class LoudspeakerCharacteristics(OwnsArrays):
     :ivar sensitivity_band: Stated band ``(lo, hi)`` for the characteristic
         sensitivity, in Hz.
     :ivar tolerance_db: Half-width of the response tolerance band, in dB.
-    :ivar reference_level_db: Level averaged over a one-octave band in the
+    :ivar reference_level: Level averaged over a one-octave band in the
         region of maximum sensitivity (the effective-range reference), in dB.
-    :ivar sensitivity_level_db: Characteristic sensitivity level referred to
+    :ivar sensitivity_level: Characteristic sensitivity level referred to
         1 W into ``R`` at 1 m (20.3/20.4), in dB.
     :ivar effective_range: Computed effective frequency range ``(lo, hi)``, Hz.
     :ivar rated_frequency_range_hz: Manufacturer-stated rated frequency range
@@ -407,19 +407,19 @@ class LoudspeakerCharacteristics(OwnsArrays):
     :ivar polar_db: Polar response relative to the on-axis level, in dB, or
         ``None``.
     :ivar polar_frequency: Frequency of the polar response, in Hz, or ``None``.
-    :ivar directivity_index_db: Directivity index at :attr:`polar_frequency`,
+    :ivar directivity_index: Directivity index at :attr:`polar_frequency`,
         in dB (23.3), or ``None``.
     """
 
     frequencies: NDArray[np.float64]
-    spl_db: NDArray[np.float64]
+    spl: NDArray[np.float64]
     rated_impedance_ohm: float
     input_voltage_v: float
     distance: float
     sensitivity_band: tuple[float, float]
     tolerance_db: float
-    reference_level_db: float
-    sensitivity_level_db: float
+    reference_level: float
+    sensitivity_level: float
     effective_range: tuple[float, float]
     rated_frequency_range_hz: tuple[float, float] | None
     rated_noise_power: float | None
@@ -432,7 +432,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
     polar_angles_deg: NDArray[np.float64] | None
     polar_db: NDArray[np.float64] | None
     polar_frequency: float | None
-    directivity_index_db: float | None
+    directivity_index: float | None
 
     def __post_init__(self) -> None:
         """Reject a data sheet whose curves do not each pair up.
@@ -484,7 +484,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
         require_ranks(
             self,
             frequencies=1,
-            spl_db=1,
+            spl=1,
             impedance_frequencies=1,
             impedance_modulus_ohm=1,
             thd_frequencies=1,
@@ -492,7 +492,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
             polar_angles_deg=1,
             polar_db=1,
         )
-        require_same_length(self, "frequencies", "spl_db", axis="frequency")
+        require_same_length(self, "frequencies", "spl", axis="frequency")
         require_same_length(
             self, "impedance_frequencies", "impedance_modulus_ohm", axis="frequency"
         )
@@ -501,7 +501,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
         require_finite_fields(
             self,
             "frequencies",
-            "spl_db",
+            "spl",
             "impedance_frequencies",
             "impedance_modulus_ohm",
             "thd_frequencies",
@@ -512,13 +512,13 @@ class LoudspeakerCharacteristics(OwnsArrays):
             "input_voltage_v",
             "distance",
             "tolerance_db",
-            "reference_level_db",
-            "sensitivity_level_db",
+            "reference_level",
+            "sensitivity_level",
             "rated_noise_power",
             "rated_sinusoidal_power",
             "resonance_frequency",
             "polar_frequency",
-            "directivity_index_db",
+            "directivity_index",
         )
         _require_frequency_pair(self, "sensitivity_band")
         _require_frequency_pair(self, "effective_range")
@@ -531,7 +531,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
         The sound pressure at 1 m for 1 W into the rated impedance:
         :math:`p_M = p_\text{ref} \cdot 10^{L_M / 20}`.
         """
-        return float(_P_REF * 10.0 ** (self.sensitivity_level_db / 20.0))
+        return float(_P_REF * 10.0 ** (self.sensitivity_level / 20.0))
 
     @property
     def min_impedance_ohm(self) -> float | None:
@@ -750,7 +750,7 @@ def _resolve_polar(
         return _polar_from_piston(directivity.piston, polar_frequency)
     polar = directivity.polar
     if polar is None:
-        return None, None, polar_frequency, directivity.index_db
+        return None, None, polar_frequency, directivity.index
     p_ang = np.atleast_1d(np.asarray(polar[0], dtype=np.float64))
     p_db = np.atleast_1d(np.asarray(polar[1], dtype=np.float64))
     require_equal_shapes(
@@ -764,12 +764,12 @@ def _resolve_polar(
     if not (np.all(np.isfinite(p_ang)) and np.all(np.isfinite(p_db))):
         msg = "'polar' angles and levels must be finite."
         raise ValueError(msg)
-    return p_ang, p_db, polar_frequency, directivity.index_db
+    return p_ang, p_db, polar_frequency, directivity.index
 
 
 def loudspeaker_characteristics(
     frequencies: ArrayLike,
-    spl_db: ArrayLike,
+    spl: ArrayLike,
     rated_impedance_ohm: float,
     *,
     input_voltage_v: float | None = None,
@@ -793,7 +793,7 @@ def loudspeaker_characteristics(
         averages behind the sensitivity level and the effective-range
         reference weight each sample equally, so a linearly spaced grid
         over-weights the high-frequency end of every band.
-    :param spl_db: On-axis sound pressure level, in dB re 20 uPa.
+    :param spl: On-axis sound pressure level, in dB re 20 uPa.
     :param rated_impedance_ohm: Rated impedance ``R``, in ohm (16.1).
     :param input_voltage_v: Constant drive voltage of the response, in V;
         defaults to :math:`\sqrt{R}` (1 W into ``R``, the 2.83 V @ 8 ohm
@@ -819,7 +819,7 @@ def loudspeaker_characteristics(
     :return: A :class:`LoudspeakerCharacteristics`.
     :raises ValueError: If the inputs are invalid.
     """
-    f, spl = _as_curve(frequencies, spl_db, "on-axis response")
+    f, spl = _as_curve(frequencies, spl, "on-axis response")
     r = require_positive(rated_impedance_ohm, "rated_impedance_ohm")
     u = (
         require_positive(input_voltage_v, "input_voltage_v")
@@ -844,14 +844,14 @@ def loudspeaker_characteristics(
 
     return LoudspeakerCharacteristics(
         frequencies=f,
-        spl_db=spl,
+        spl=spl,
         rated_impedance_ohm=r,
         input_voltage_v=u,
         distance=d,
         sensitivity_band=band,
         tolerance_db=tol,
-        reference_level_db=reference,
-        sensitivity_level_db=sensitivity_level,
+        reference_level=reference,
+        sensitivity_level=sensitivity_level,
         effective_range=effective,
         rated_frequency_range_hz=rated_range,
         rated_noise_power=_optional_positive(
@@ -870,5 +870,5 @@ def loudspeaker_characteristics(
         polar_angles_deg=p_ang,
         polar_db=p_db,
         polar_frequency=p_freq,
-        directivity_index_db=di,
+        directivity_index=di,
     )

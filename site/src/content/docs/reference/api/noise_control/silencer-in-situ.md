@@ -88,7 +88,7 @@ DOWNSTREAM_DISTANCE_COEFFICIENTS = (12.0, 10.0)
 ```python
 extraneous_corrected_mean_level(
     levels: ArrayLike,
-    extraneous_levels_db: ArrayLike,
+    extraneous_levels: ArrayLike,
 ) -> tuple[float, bool]
 ```
 
@@ -132,7 +132,7 @@ level itself is returned either way.
 | Name | Description |
 | :--- | :--- |
 | `levels` | The levels with everything running, in decibels. |
-| `extraneous_levels_db` | The extraneous levels at the same positions, in decibels. |
+| `extraneous_levels` | The extraneous levels at the same positions, in decibels. |
 
 **Returns:** The corrected mean level in decibels, and whether the correction reached the cap, which is a margin under 3 dB.
 
@@ -217,13 +217,13 @@ Equation (29) prints it and admits any gas through its molar mass.
 
 ```python
 in_situ_insertion_loss(
-    levels_without_db: ArrayLike,
-    levels_with_db: ArrayLike,
+    levels_without: ArrayLike,
+    levels_with: ArrayLike,
     *,
     area_without_m2: ArrayLike,
     area_with_m2: ArrayLike,
     frequencies: ArrayLike | None = None,
-    field_correction_difference_db: ArrayLike = 0.0,
+    field_correction_difference: ArrayLike = 0.0,
     case: int | None = None,
 ) -> SilencerInSituResult
 ```
@@ -256,12 +256,12 @@ value per band.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_without_db` | $\overline{L_{p\mathrm{II}}}$ per band, in decibels. |
-| `levels_with_db` | $\overline{L_{p\mathrm{I}}}$ per band, in decibels. |
+| `levels_without` | $\overline{L_{p\mathrm{II}}}$ per band, in decibels. |
+| `levels_with` | $\overline{L_{p\mathrm{I}}}$ per band, in decibels. |
 | `area_without_m2` | $S_\mathrm{II}$, one value or one per band, in square metres. |
 | `area_with_m2` | $S_\mathrm{I}$, one value or one per band, in square metres. |
 | `frequencies` | Nominal band centres, in hertz. |
-| `field_correction_difference_db` | $K_\mathrm{II} - K_\mathrm{I}$, one value or one per band, in decibels. |
+| `field_correction_difference` | $K_\mathrm{II} - K_\mathrm{I}$, one value or one per band, in decibels. |
 | `case` | The installation of Figure 1, 17 to 20, carried into the result. |
 
 **Returns:** The loss, as a [`SilencerInSituResult`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencerinsituresult).
@@ -276,13 +276,13 @@ value per band.
 
 ```python
 in_situ_transmission_loss(
-    source_levels_db: ArrayLike,
-    receiver_levels_db: ArrayLike,
+    source_levels: ArrayLike,
+    receiver_levels: ArrayLike,
     *,
     source_area_m2: ArrayLike,
     receiver_area_m2: ArrayLike,
     frequencies: ArrayLike | None = None,
-    field_correction_difference_db: ArrayLike = 0.0,
+    field_correction_difference: ArrayLike = 0.0,
     case: int | None = None,
 ) -> SilencerInSituResult
 ```
@@ -311,12 +311,12 @@ band, or one value per band.
 
 | Name | Description |
 | :--- | :--- |
-| `source_levels_db` | $\overline{L_{p2}}$ per band, in decibels. |
-| `receiver_levels_db` | $\overline{L_{p1}}$ per band, in decibels. |
+| `source_levels` | $\overline{L_{p2}}$ per band, in decibels. |
+| `receiver_levels` | $\overline{L_{p1}}$ per band, in decibels. |
 | `source_area_m2` | $S_2$, one value or one per band, in square metres. |
 | `receiver_area_m2` | $S_1$, one value or one per band, in square metres. |
 | `frequencies` | Nominal band centres, in hertz. |
-| `field_correction_difference_db` | $K_2 - K_1$, one value or one per band, in decibels. |
+| `field_correction_difference` | $K_2 - K_1$, one value or one per band, in decibels. |
 | `case` | The installation of Figure 1, 1 to 16, carried into the result. |
 
 **Returns:** The loss, as a [`SilencerInSituResult`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencerinsituresult).
@@ -331,8 +331,8 @@ band, or one value per band.
 
 ```python
 insertion_level_difference(
-    levels_without_db: ArrayLike,
-    levels_with_db: ArrayLike,
+    levels_without: ArrayLike,
+    levels_with: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -347,8 +347,8 @@ which run they are.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_without_db` | $L_{p\mathrm{II}}$ per band, in decibels. |
-| `levels_with_db` | $L_{p\mathrm{I}}$ per band, in decibels. |
+| `levels_without` | $L_{p\mathrm{II}}$ per band, in decibels. |
+| `levels_with` | $L_{p\mathrm{I}}$ per band, in decibels. |
 
 **Returns:** $D_{\mathrm{i}p\mathrm{s}}$ per band, in decibels.
 
@@ -432,12 +432,12 @@ ISO11820_AIR_GAS_CONSTANT_J_KG_K = 287.0
 ISO11820_ATMOSPHERIC_PRESSURE_PA = 100000.0
 ```
 
-## ISO11820_BACKGROUND_CORRECTIONS_DB
+## ISO11820_BACKGROUND_CORRECTIONS
 
 *Constant* (`mapping`).
 
 ```python
-ISO11820_BACKGROUND_CORRECTIONS_DB = {3: 3.0, 4: 2.0, 5: 2.0, 6: 1.0, 7: 1.0, 8: 1.0, 9: 0.5, 10: 0.5}
+ISO11820_BACKGROUND_CORRECTIONS = {3: 3.0, 4: 2.0, 5: 2.0, 6: 1.0, 7: 1.0, 8: 1.0, 9: 0.5, 10: 0.5}
 ```
 
 ## ISO11820_MIN_BACKGROUND_MARGIN_DB
@@ -504,12 +504,12 @@ ISO11820_THIRD_OCTAVE_BAND_EXTENDED_RANGE_HZ = (25.0, 10000.0)
 ISO11820_THIRD_OCTAVE_BAND_RANGE_HZ = (50.0, 5000.0)
 ```
 
-## MAX_EXTRANEOUS_CORRECTION_DB
+## MAX_EXTRANEOUS_CORRECTION
 
 *Constant* (`float`).
 
 ```python
-MAX_EXTRANEOUS_CORRECTION_DB = 3.0
+MAX_EXTRANEOUS_CORRECTION = 3.0
 ```
 
 ## measurement_distance_downstream_m
@@ -662,7 +662,7 @@ SABINE_AREA_COEFFICIENT = 13.815510557964275
 
 ```python
 silencer_background_correction(
-    level_difference_db: ArrayLike,
+    level_difference: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -687,7 +687,7 @@ the 10 dB row.
 
 | Name | Description |
 | :--- | :--- |
-| `level_difference_db` | The difference between the level measured with the source running and the background level alone, in decibels. |
+| `level_difference` | The difference between the level measured with the source running and the background level alone, in decibels. |
 
 **Returns:** The correction to subtract, in decibels.
 
@@ -764,10 +764,10 @@ sound pressure level".
 
 ```python
 silencer_sound_power_level(
-    mean_level_db: ArrayLike,
+    mean_level: ArrayLike,
     *,
     area: ArrayLike,
-    field_correction_db: ArrayLike = 0.0,
+    field_correction: ArrayLike = 0.0,
 ) -> NDArray[np.float64]
 ```
 
@@ -788,9 +788,9 @@ have been chosen as 3.3 and 3.4 define them.
 
 | Name | Description |
 | :--- | :--- |
-| `mean_level_db` | $\overline{L_p}$ per band, in decibels. |
+| `mean_level` | $\overline{L_p}$ per band, in decibels. |
 | `area` | $S$, in square metres. |
-| `field_correction_db` | $K$, in decibels. |
+| `field_correction` | $K$, in decibels. |
 
 **Returns:** $L_W$ per band, in decibels.
 
@@ -805,10 +805,10 @@ have been chosen as 3.3 and 3.4 define them.
 ```python
 SilencerInSituResult(
     frequencies: NDArray[np.float64] | None,
-    level_difference_db: NDArray[np.float64],
+    level_difference: NDArray[np.float64],
     area_term_db: NDArray[np.float64],
-    field_correction_difference_db: NDArray[np.float64],
-    loss_db: NDArray[np.float64],
+    field_correction_difference: NDArray[np.float64],
+    loss: NDArray[np.float64],
     quantity: str,
     case: InstallationCase | None,
 )
@@ -821,10 +821,10 @@ A silencer measured where it stands, ISO 11820 Equation (19) or (21).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Nominal band centres, in hertz, or `None`. |
-| `level_difference_db` | $D_{\mathrm{t}p\mathrm{s}}$ or $D_{\mathrm{i}p\mathrm{s}}$, the sound pressure level difference the loss is built on, per band. |
+| `level_difference` | $D_{\mathrm{t}p\mathrm{s}}$ or $D_{\mathrm{i}p\mathrm{s}}$, the sound pressure level difference the loss is built on, per band. |
 | `area_term_db` | $10 \lg(S_2/S_1)$ or $10 \lg(S_\mathrm{II}/S_\mathrm{I})$ per band, in decibels. Always one value per band, even where both areas were given as single values, because the area of a diffuse room moves with the reverberation time from band to band. |
-| `field_correction_difference_db` | $K_2 - K_1$ or $K_\mathrm{II} - K_\mathrm{I}$ per band, in decibels, on the same shape. |
-| `loss_db` | $D_\mathrm{ts}$ or $D_\mathrm{is}$ per band, in decibels. |
+| `field_correction_difference` | $K_2 - K_1$ or $K_\mathrm{II} - K_\mathrm{I}$ per band, in decibels, on the same shape. |
+| `loss` | $D_\mathrm{ts}$ or $D_\mathrm{is}$ per band, in decibels. |
 | `quantity` | `"transmission"` or `"insertion"`. |
 | `case` | The installation of Figure 1 the measurement was made in, or `None` where the caller did not name one. |
 
@@ -988,8 +988,8 @@ also the static pressure difference.
 
 ```python
 transmission_level_difference(
-    source_levels_db: ArrayLike,
-    receiver_levels_db: ArrayLike,
+    source_levels: ArrayLike,
+    receiver_levels: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -1008,8 +1008,8 @@ turns into a transmission loss.
 
 | Name | Description |
 | :--- | :--- |
-| `source_levels_db` | $\overline{L_{p2}}$ per band, in decibels. |
-| `receiver_levels_db` | $\overline{L_{p1}}$ per band, in decibels. |
+| `source_levels` | $\overline{L_{p2}}$ per band, in decibels. |
+| `receiver_levels` | $\overline{L_{p1}}$ per band, in decibels. |
 
 **Returns:** $D_{\mathrm{t}p\mathrm{s}}$ per band, in decibels.
 

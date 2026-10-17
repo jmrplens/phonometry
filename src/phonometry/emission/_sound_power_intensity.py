@@ -212,7 +212,7 @@ class SoundPowerIntensityResult(OwnsArrays):
     a second scan; it is :math:`+\infty` where the two sweeps reverse the flow
     direction on a segment (opposite-sign partial powers), a gross
     non-repeatability that criterion 3 must reject even when the magnitudes
-    happen to match. ``pressure_residual_index_db`` is the
+    happen to match. ``pressure_residual_index`` is the
     :math:`\delta_{pI0}` of the instrument per band, ``None`` when it was not
     given, and ``dynamic_capability_index`` the ``Ld`` it gives for the
     requested grade. ``repeatability_limit_db`` is the criterion-3 limit ``s``
@@ -238,7 +238,7 @@ class SoundPowerIntensityResult(OwnsArrays):
     partial_power: np.ndarray
     surface_pressure_intensity_index: np.ndarray | None
     repeatability: np.ndarray | None
-    pressure_residual_index_db: np.ndarray | None
+    pressure_residual_index: np.ndarray | None
     surface_area: float
     band_type: str
     grade: str
@@ -283,7 +283,7 @@ class SoundPowerIntensityResult(OwnsArrays):
             partial_power=2,
             surface_pressure_intensity_index=1,
             repeatability=2,
-            pressure_residual_index_db=1,
+            pressure_residual_index=1,
             repeatability_limit_db=1,
         )
         require_same_length(
@@ -292,7 +292,7 @@ class SoundPowerIntensityResult(OwnsArrays):
             ("partial_power", 1),
             "surface_pressure_intensity_index",
             ("repeatability", 1),
-            "pressure_residual_index_db",
+            "pressure_residual_index",
             "repeatability_limit_db",
         )
         require_same_length(
@@ -346,19 +346,19 @@ class SoundPowerIntensityResult(OwnsArrays):
     @property
     def dynamic_capability_index(self) -> np.ndarray | None:
         r""":math:`L_\mathrm{d} = \delta_{pI0} - K` per band at the requested grade, or ``None``."""
-        if self.pressure_residual_index_db is None:
+        if self.pressure_residual_index is None:
             return None
         return np.array(
             [
                 dynamic_capability_index(float(d), _K[self.grade])
-                for d in self.pressure_residual_index_db
+                for d in self.pressure_residual_index
             ],
             dtype=np.float64,
         )
 
     def _grade_per_band(self) -> np.ndarray | None:
         fpi = self.surface_pressure_intensity_index
-        dpi0 = self.pressure_residual_index_db
+        dpi0 = self.pressure_residual_index
         if fpi is None or dpi0 is None or self.repeatability is None:
             return None
         return _classify(
@@ -697,7 +697,7 @@ def sound_power_intensity(
         partial_power=np.asarray(partial_power, dtype=np.float64),
         surface_pressure_intensity_index=fpi,
         repeatability=repeatability,
-        pressure_residual_index_db=dpi0_arr,
+        pressure_residual_index=dpi0_arr,
         surface_area=s_total,
         band_type=band_type,
         grade=grade,
@@ -926,7 +926,7 @@ class PrecisionCriteria(OwnsArrays):
         which Table 1 gives the criterion-1 limit ``s``, or ``None``.
     :ivar repeatability_limit_db: The caller's own ``s`` per band, in dB, in
         place of Table 1, or ``None`` to read Table 1.
-    :ivar pressure_residual_index_db: ``delta_pI0`` per band, in dB, or
+    :ivar pressure_residual_index: ``delta_pI0`` per band, in dB, or
         ``None``.
     :ivar field_nonuniformity_1: ``FS(1)`` per band, or ``None``.
     :ivar field_nonuniformity_2: ``FS(2)`` per band, or ``None``.
@@ -937,7 +937,7 @@ class PrecisionCriteria(OwnsArrays):
     scan_intensity_level_2: np.ndarray | None = None
     frequencies: np.ndarray | None = None
     repeatability_limit_db: np.ndarray | None = None
-    pressure_residual_index_db: np.ndarray | None = None
+    pressure_residual_index: np.ndarray | None = None
     field_nonuniformity_1: np.ndarray | None = None
     field_nonuniformity_2: np.ndarray | None = None
 
@@ -961,7 +961,7 @@ class PrecisionCriteria(OwnsArrays):
             "scan_intensity_level_2",
             "frequencies",
             "repeatability_limit_db",
-            "pressure_residual_index_db",
+            "pressure_residual_index",
             "field_nonuniformity_1",
             "field_nonuniformity_2",
         )
@@ -1037,9 +1037,9 @@ class PrecisionCriteria(OwnsArrays):
     @property
     def criterion_2(self) -> np.ndarray | None:
         r"""Dynamic capability :math:`L_\mathrm{d} = \delta_{pI0} - K \ge F_{pI_\mathrm{n}}^{\mathrm{signed}}` (Eq. C.2)."""
-        if self.pressure_residual_index_db is None:
+        if self.pressure_residual_index is None:
             return None
-        ld = self.pressure_residual_index_db - _K_9614_3
+        ld = self.pressure_residual_index - _K_9614_3
         return np.asarray(ld >= self.indicators.f_pi_signed, dtype=bool)
 
     @property
@@ -1602,7 +1602,7 @@ def precision_qualification(
         scan_intensity_level_2=l2,
         frequencies=freqs,
         repeatability_limit_db=s,
-        pressure_residual_index_db=dpi0,
+        pressure_residual_index=dpi0,
         field_nonuniformity_1=fs1,
         field_nonuniformity_2=fs2,
     )

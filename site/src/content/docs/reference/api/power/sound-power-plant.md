@@ -240,7 +240,7 @@ plant (item m) of clause 12); they are not summed in here.
 PartialPlantContributions(
     names: tuple[str, ...],
     frequencies: NDArray[np.float64],
-    part_levels_db: NDArray[np.float64],
+    part_levels: NDArray[np.float64],
 )
 ```
 
@@ -253,7 +253,7 @@ own contours, and each part's share of it (0.2 b, c).
 | :--- | :--- |
 | `names` | A name per part. |
 | `frequencies` | Nominal octave-band centres, in Hz. |
-| `part_levels_db` | $L_W$ of each part, `(parts, bands)`, in dB re 1 pW. |
+| `part_levels` | $L_W$ of each part, `(parts, bands)`, in dB re 1 pW. |
 
 ### PartialPlantContributions.a_weighted_contribution_db
 
@@ -261,7 +261,7 @@ own contours, and each part's share of it (0.2 b, c).
 
 Each part's $L_{W\mathrm{A}}$ less the total, in decibels.
 
-### PartialPlantContributions.a_weighted_part_levels_db
+### PartialPlantContributions.a_weighted_part_levels
 
 *property*
 
@@ -302,7 +302,7 @@ Plot each part's $L_W$ and their total, band by band.
 
 **Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
 
-### PartialPlantContributions.total_level_db
+### PartialPlantContributions.total_level
 
 *property*
 
@@ -365,11 +365,19 @@ standard sets no number for "markedly".
 | :--- | :--- |
 | ValueError | for a band outside the method, only one of the two weather values, or a humidity outside 0 % to 100 %. |
 
+## PLANT_BACKGROUND_CORRECTION
+
+*Constant* (`mapping`).
+
+```python
+PLANT_BACKGROUND_CORRECTION = {6: 1.0, 7: 1.0, 8: 1.0, 9: 0.5, 10: 0.5}
+```
+
 ## plant_background_correction
 
 ```python
 plant_background_correction(
-    level_difference_db: ArrayLike,
+    level_difference: ArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -387,7 +395,7 @@ binary, is the 6 dB it is, and 64,1 - 55,6 dB the 8,5 dB that rounds up.
 
 | Name | Description |
 | :--- | :--- |
-| `level_difference_db` | The level with the plant operating less the background level alone, in decibels: one value or an array. |
+| `level_difference` | The level with the plant operating less the background level alone, in decibels: one value or an array. |
 
 **Returns:** The correction, in decibels, a `float` for one difference and an array of the same shape otherwise.
 
@@ -396,14 +404,6 @@ binary, is the 6 dB it is, and 64,1 - 55,6 dB the 8,5 dB that rounds up.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-finite difference or one below 6 dB, which the table calls an invalid measurement. |
-
-## PLANT_BACKGROUND_CORRECTION_DB
-
-*Constant* (`mapping`).
-
-```python
-PLANT_BACKGROUND_CORRECTION_DB = {6: 1.0, 7: 1.0, 8: 1.0, 9: 0.5, 10: 0.5}
-```
 
 ## plant_characteristic_height_m
 
@@ -645,7 +645,7 @@ The geometry is the one 9.2 measures on the plot plan, to within ±5 %;
 ## plant_steady_reading
 
 ```python
-plant_steady_reading(max_level_db: float, min_level_db: float) -> float
+plant_steady_reading(max_level: float, min_level: float) -> float
 ```
 
 The level read on a sound level meter from a steady noise, 9.5.2.
@@ -662,8 +662,8 @@ judges that one.
 
 | Name | Description |
 | :--- | :--- |
-| `max_level_db` | The highest level read, in decibels. |
-| `min_level_db` | The lowest level read, in decibels. |
+| `max_level` | The highest level read, in decibels. |
+| `min_level` | The lowest level read, in decibels. |
 
 **Returns:** The level, in decibels.
 
@@ -1032,7 +1032,7 @@ The bands summed into $L_{W\mathrm{A}}$: those the octave table
 of ISO 3744:2010 Annex E weights, 63 Hz to 8 kHz. A 31,5 Hz band, which
 NOTE 8 makes optional, is left out.
 
-### PlantSoundPowerResult.a_weighted_sound_power_level_db
+### PlantSoundPowerResult.a_weighted_sound_power_level
 
 *property*
 
@@ -1059,7 +1059,7 @@ band, in decibels (10.7).
 $\Delta L_\mathrm{S} = 10 \lg[(2S_\mathrm{m} + hl)/S_0]$, in
 decibels (10.4).
 
-### PlantSoundPowerResult.background_correction_db
+### PlantSoundPowerResult.background_correction
 
 *property*
 
@@ -1085,7 +1085,7 @@ energy mean comes out of the arithmetic a unit or two of the last
 place of the levels either side of 5, which side depending on the
 machine, and is not replaced.
 
-### PlantSoundPowerResult.corrected_mean_level_db
+### PlantSoundPowerResult.corrected_mean_level
 
 *property*
 
@@ -1106,7 +1106,7 @@ $\bar{d}/\sqrt{S_\mathrm{p}}$, the argument of Table 1.
 $L_{pi}$, the levels corrected for the background (9.5.4),
 `(N, bands)`, in decibels.
 
-### PlantSoundPowerResult.mean_level_db
+### PlantSoundPowerResult.mean_level
 
 *property*
 
@@ -1151,7 +1151,7 @@ built from, with $L_{W\mathrm{A}}$ in the title.
 
 **Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
 
-### PlantSoundPowerResult.sound_power_level_db
+### PlantSoundPowerResult.sound_power_level
 
 *property*
 

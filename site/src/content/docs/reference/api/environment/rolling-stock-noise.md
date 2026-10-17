@@ -123,10 +123,7 @@ and 17 m and 44 m behind its front).
 ## AdjacentVehicleNeutrality
 
 ```python
-AdjacentVehicleNeutrality(
-    with_adjacent_level_db: float,
-    unit_level_db: float,
-)
+AdjacentVehicleNeutrality(with_adjacent_level: float, unit_level: float)
 ```
 
 Whether a vehicle next to the unit under test is acoustically neutral, 6.3.4.
@@ -135,10 +132,10 @@ Whether a vehicle next to the unit under test is acoustically neutral, 6.3.4.
 
 | Name | Description |
 | :--- | :--- |
-| `with_adjacent_level_db` | $L_{p\mathrm{Aeq},T_{p1}}$, over the units under test and the adjacent vehicle together, in dB. |
-| `unit_level_db` | $L_{p\mathrm{Aeq},T_p}$, over the units under test alone, in dB. |
+| `with_adjacent_level` | $L_{p\mathrm{Aeq},T_{p1}}$, over the units under test and the adjacent vehicle together, in dB. |
+| `unit_level` | $L_{p\mathrm{Aeq},T_p}$, over the units under test alone, in dB. |
 
-### AdjacentVehicleNeutrality.difference_db
+### AdjacentVehicleNeutrality.difference
 
 *property*
 
@@ -177,8 +174,8 @@ Draw the two levels and the 2 dB the adjacent vehicle may add.
 
 ```python
 background_level_increase(
-    measured_level_db: ArrayLike,
-    background_level_db: ArrayLike,
+    measured_level: ArrayLike,
+    background_level: ArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -197,8 +194,8 @@ spectrum.
 
 | Name | Description |
 | :--- | :--- |
-| `measured_level_db` | $L_\mathrm{meas}$, the level measured with the unit, in dB; one value or one per band. |
-| `background_level_db` | $L_\mathrm{bg}$, the background alone, in dB. |
+| `measured_level` | $L_\mathrm{meas}$, the level measured with the unit, in dB; one value or one per band. |
+| `background_level` | $L_\mathrm{bg}$, the background alone, in dB. |
 
 **Returns:** $\Delta L$, in dB, as one value or one per band.
 
@@ -212,8 +209,8 @@ spectrum.
 
 ```python
 check_adjacent_vehicle_neutrality(
-    with_adjacent_level_db: float,
-    unit_level_db: float,
+    with_adjacent_level: float,
+    unit_level: float,
 ) -> AdjacentVehicleNeutrality
 ```
 
@@ -230,8 +227,8 @@ made at least once for each tested speed.
 
 | Name | Description |
 | :--- | :--- |
-| `with_adjacent_level_db` | $L_{p\mathrm{Aeq},T_{p1}}$, in dB. |
-| `unit_level_db` | $L_{p\mathrm{Aeq},T_p}$, in dB. |
+| `with_adjacent_level` | $L_{p\mathrm{Aeq},T_{p1}}$, in dB. |
+| `unit_level` | $L_{p\mathrm{Aeq},T_p}$, in dB. |
 
 **Returns:** The verdict.
 
@@ -308,7 +305,7 @@ direct one.
 ```python
 check_small_roughness_deviations(
     roughness: AcousticRoughnessSpectrum,
-    noise_levels_db: ArrayLike,
+    noise_levels: ArrayLike,
     *,
     frequencies: ArrayLike,
     speed_kmh: float,
@@ -340,7 +337,7 @@ speed.
 | Name | Description |
 | :--- | :--- |
 | `roughness` | The measured roughness of the test section, the spectra of its rails quadratically averaged ([`average_roughness_spectra`](/phonometry/reference/api/environment/acoustic-roughness/#average_roughness_spectra)). |
-| `noise_levels_db` | The A-weighted one-third octave spectrum of the pass-by, $L_{p\mathrm{Aeq},T_p}(f)$, in dB. |
+| `noise_levels` | The A-weighted one-third octave spectrum of the pass-by, $L_{p\mathrm{Aeq},T_p}(f)$, in dB. |
 | `frequencies` | Its nominal band frequencies, in hertz. |
 | `speed_kmh` | The train speed, in km/h. |
 | `limit_db` | The upper limit, nominal wavelength in metres to level; Figure 2 by default. The verdict records it, and [`check_reference_track`](/phonometry/reference/api/environment/rolling-stock-noise/#check_reference_track) takes the verdict only when it judges the track against the same limit (6.2.5 and C.2.1). |
@@ -452,7 +449,7 @@ weighting F, whose integrator starts from the mean square of the first
 within the interval is $L_{p\mathrm{AFmax}}$ (3.13). Given the
 pass-by time $T_p$, the result also carries the energy of the
 interval spread over it, the transit exposure level of ISO 3095:2005
-([`PassByMeasurement.normalized_level_db`](/phonometry/reference/api/environment/rolling-stock-noise/#passbymeasurementnormalized_level_db)).
+([`PassByMeasurement.normalized_level`](/phonometry/reference/api/environment/rolling-stock-noise/#passbymeasurementnormalized_level)).
 
 6.6.3 asks that the record start at least 10 dB below the level when the
 front of the train is opposite the microphone and end 10 dB below the
@@ -555,12 +552,12 @@ PassByMeasurement(
     levels: NDArray[np.float64],
     start_s: float,
     end_s: float,
-    equivalent_level_db: float,
-    max_level_db: float,
-    front_level_db: float,
-    rear_level_db: float,
-    record_start_level_db: float,
-    record_end_level_db: float,
+    equivalent_level: float,
+    max_level: float,
+    front_level: float,
+    rear_level: float,
+    record_start_level: float,
+    record_end_level: float,
     pass_by_time_s: float | None = None,
 )
 ```
@@ -575,12 +572,12 @@ The levels of one pass-by record, 6.5 and 6.6.3.
 | `levels` | $L_{p\mathrm{AF}}(t)$, the A-weighted level with time weighting F, at `times`, in dB. |
 | `start_s` | $T_1$, the start of the measurement time interval. |
 | `end_s` | $T_2$, its end, in seconds. |
-| `equivalent_level_db` | $L_{p\mathrm{Aeq},T}$ over $T_1$ to $T_2$, in dB; the pass-by level $L_{p\mathrm{Aeq},T_p}$ when the interval is the pass-by time. |
-| `max_level_db` | $L_{p\mathrm{AFmax}}$ within the interval, in dB. |
-| `front_level_db` | $L_{p\mathrm{AF}}$ when the front of the train is opposite the microphone, in dB. |
-| `rear_level_db` | $L_{p\mathrm{AF}}$ when its rear is, in dB. |
-| `record_start_level_db` | $L_{p\mathrm{AF}}$ at the start of the record, in dB. |
-| `record_end_level_db` | $L_{p\mathrm{AF}}$ at its end, in dB. |
+| `equivalent_level` | $L_{p\mathrm{Aeq},T}$ over $T_1$ to $T_2$, in dB; the pass-by level $L_{p\mathrm{Aeq},T_p}$ when the interval is the pass-by time. |
+| `max_level` | $L_{p\mathrm{AFmax}}$ within the interval, in dB. |
+| `front_level` | $L_{p\mathrm{AF}}$ when the front of the train is opposite the microphone, in dB. |
+| `rear_level` | $L_{p\mathrm{AF}}$ when its rear is, in dB. |
+| `record_start_level` | $L_{p\mathrm{AF}}$ at the start of the record, in dB. |
+| `record_end_level` | $L_{p\mathrm{AF}}$ at its end, in dB. |
 | `pass_by_time_s` | $T_p$, in seconds, when given. |
 
 ### PassByMeasurement.end_margin_db
@@ -589,7 +586,7 @@ The levels of one pass-by record, 6.5 and 6.6.3.
 
 How far the record ends below the level at the rear, in dB (6.6.3).
 
-### PassByMeasurement.exposure_level_db
+### PassByMeasurement.exposure_level
 
 *property*
 
@@ -601,7 +598,7 @@ The single event level $L_{p\mathrm{Aeq},T} + 10 \lg (T/T_0)$, $T_0 = 1$ s (2005
 
 $T = T_2 - T_1$, in seconds.
 
-### PassByMeasurement.normalized_level_db
+### PassByMeasurement.normalized_level
 
 *property*
 
@@ -652,7 +649,7 @@ How far the record starts below the level at the front, in dB (6.6.3).
 PassByUncertainty(
     reading_db: float,
     names: tuple[str, ...],
-    corrections_db: tuple[float, ...],
+    corrections: tuple[float, ...],
     standard_uncertainties_db: tuple[float, ...],
     coverage_factor: float = 2.0,
 )
@@ -670,7 +667,7 @@ $Y = \sum X_i$ (Formula G.1), so every sensitivity coefficient is 1
 | :--- | :--- |
 | `reading_db` | The reading $L_p$, in dB. |
 | `names` | The name of each input quantity. |
-| `corrections_db` | The mean value correction $\Delta L_p$ of each input, in dB (0 for a symmetric interval). |
+| `corrections` | The mean value correction $\Delta L_p$ of each input, in dB (0 for a symmetric interval). |
 | `standard_uncertainties_db` | Its standard uncertainty $u(x_i)$, in dB. |
 | `coverage_factor` | $k$, 2 by G.5. |
 
@@ -686,7 +683,7 @@ $u_\mathrm{c}(y) = \sqrt{\sum u^2(x_i)}$, Formula G.5, in dB.
 
 $U = k\,u_\mathrm{c}(y)$, Formula G.6, in dB.
 
-### PassByUncertainty.level_db
+### PassByUncertainty.level
 
 *property*
 
@@ -940,7 +937,7 @@ A test decided by the highest rounded mean of three runs per position.
 | `method` | One of [`ROLLING_STOCK_TEST_METHODS`](/phonometry/reference/api/environment/rolling-stock-noise/#rolling_stock_test_methods). |
 | `samples_db` | The runs of each position, in dB, keyed by the position's name: $L_{p\mathrm{Aeq},T_p}$ at constant speed, $L_{p\mathrm{AFmax}}$ when starting (maximum level method) and braking, $L_{p\mathrm{Aeq},T}$ when starting (averaged level method). |
 
-### RollingStockTestResult.final_level_db
+### RollingStockTestResult.final_level
 
 *property*
 
@@ -952,7 +949,7 @@ The test result: the highest rounded mean (6.7.1, 7.5.4, 7.6.4, 8.7).
 
 The position whose rounded mean is the result, the first on a tie.
 
-### RollingStockTestResult.mean_levels_db
+### RollingStockTestResult.mean_levels
 
 *property*
 
@@ -987,7 +984,7 @@ Draw every run, each position's rounded mean and the result.
 
 The positions, in the order given.
 
-### RollingStockTestResult.reported_levels_db
+### RollingStockTestResult.reported_levels
 
 *property*
 
@@ -1014,8 +1011,8 @@ not get there, and 8.7 NOTE 1 then reports the runs without a mean.
 roughness_comparability(
     roughness_1: AcousticRoughnessSpectrum,
     roughness_2: AcousticRoughnessSpectrum,
-    noise_levels_1_db: ArrayLike,
-    noise_levels_2_db: ArrayLike,
+    noise_levels_1: ArrayLike,
+    noise_levels_2: ArrayLike,
     *,
     frequencies: ArrayLike,
     speed_kmh: float,
@@ -1042,8 +1039,8 @@ for roughness alone, not a prediction (E.1).
 | :--- | :--- |
 | `roughness_1` | The measured roughness of test situation 1. |
 | `roughness_2` | That of test situation 2. |
-| `noise_levels_1_db` | The A-weighted pass-by spectrum measured in situation 1, in dB. |
-| `noise_levels_2_db` | That of situation 2, in dB. |
+| `noise_levels_1` | The A-weighted pass-by spectrum measured in situation 1, in dB. |
+| `noise_levels_2` | That of situation 2, in dB. |
 | `frequencies` | The nominal bands of both noise spectra, in hertz. |
 | `speed_kmh` | The train speed of both pass-bys, in km/h. |
 
@@ -1063,9 +1060,9 @@ RoughnessComparability(
     roughness_1: AcousticRoughnessSpectrum,
     roughness_2: AcousticRoughnessSpectrum,
     frequencies: NDArray[np.float64],
-    noise_levels_1_db: NDArray[np.float64],
-    noise_levels_2_db: NDArray[np.float64],
-    level_differences_db: tuple[float, float, float, float],
+    noise_levels_1: NDArray[np.float64],
+    noise_levels_2: NDArray[np.float64],
+    level_differences: tuple[float, float, float, float],
 )
 ```
 
@@ -1079,9 +1076,9 @@ How much two tracks' roughness could change a pass-by level, Annex E.
 | `roughness_1` | The measured roughness of test situation 1. |
 | `roughness_2` | That of test situation 2. |
 | `frequencies` | The nominal bands of the two noise spectra, in hertz. |
-| `noise_levels_1_db` | The A-weighted pass-by spectrum of situation 1, in dB. |
-| `noise_levels_2_db` | That of situation 2, in dB. |
-| `level_differences_db` | $\Delta L^{\mathrm{min},1}$, $\Delta L^{\mathrm{max},1}$, $\Delta L^{\mathrm{min},2}$ and $\Delta L^{\mathrm{max},2}$ of Formula E.4, in dB, in that order. |
+| `noise_levels_1` | The A-weighted pass-by spectrum of situation 1, in dB. |
+| `noise_levels_2` | That of situation 2, in dB. |
+| `level_differences` | $\Delta L^{\mathrm{min},1}$, $\Delta L^{\mathrm{max},1}$, $\Delta L^{\mathrm{min},2}$ and $\Delta L^{\mathrm{max},2}$ of Formula E.4, in dB, in that order. |
 
 ### RoughnessComparability.bound_db
 
@@ -1134,10 +1131,10 @@ SmallRoughnessDeviation(
     speed_kmh: float,
     roughness: AcousticRoughnessSpectrum,
     limit_db: Mapping[float, float],
-    corrected_roughness_levels_db: NDArray[np.float64],
+    corrected_roughness_levels: NDArray[np.float64],
     frequencies: NDArray[np.float64],
-    roughness_correction_db: NDArray[np.float64],
-    noise_levels_db: NDArray[np.float64],
+    roughness_correction: NDArray[np.float64],
+    noise_levels: NDArray[np.float64],
 )
 ```
 
@@ -1150,10 +1147,10 @@ The acceptance of small roughness exceedances by their effect on the noise, Anne
 | `speed_kmh` | The train speed of the pass-by, in km/h. |
 | `roughness` | The quadratically averaged measured roughness. |
 | `limit_db` | The upper limit the roughness was held down to, nominal wavelength in metres to level, held as a read-only copy. |
-| `corrected_roughness_levels_db` | The just-compliant spectrum of Formula C.1, band by band with `roughness`, in dB re 1 µm. |
+| `corrected_roughness_levels` | The just-compliant spectrum of Formula C.1, band by band with `roughness`, in dB re 1 µm. |
 | `frequencies` | The nominal one-third octave bands of the noise spectrum, in hertz. |
-| `roughness_correction_db` | $\Delta L_{r,\mathrm{rail}}(f)$ of Formula C.2, in dB. |
-| `noise_levels_db` | The measured A-weighted spectrum $L^\mathrm{measured}_{p\mathrm{Aeq},T_p}(f)$, in dB. |
+| `roughness_correction` | $\Delta L_{r,\mathrm{rail}}(f)$ of Formula C.2, in dB. |
+| `noise_levels` | The measured A-weighted spectrum $L^\mathrm{measured}_{p\mathrm{Aeq},T_p}(f)$, in dB. |
 
 ### SmallRoughnessDeviation.exceeded
 
@@ -1199,7 +1196,7 @@ Draw the measured and revised noise spectra and the correction.
 
 **Returns:** The axes drawn on.
 
-### SmallRoughnessDeviation.revised_noise_levels_db
+### SmallRoughnessDeviation.revised_noise_levels
 
 *property*
 
@@ -1226,7 +1223,7 @@ The stationary test of a unit from its measured mesh, 5.7 and 5.8.1.
 
 Each set gives the unit level of Formula 1, and the result is the mean of
 the sets rounded to the nearest integer decibel
-([`StationaryTestResult.reported_level_db`](/phonometry/reference/api/environment/rolling-stock-noise/#stationarytestresultreported_level_db)). The samples of a
+([`StationaryTestResult.reported_level`](/phonometry/reference/api/environment/rolling-stock-noise/#stationarytestresultreported_level)). The samples of a
 position are valid when they are no more than 3 dB apart (9.3).
 
 **Parameters**
@@ -1294,7 +1291,7 @@ The stationary test of a unit, 5.8.1.
 | `levels` | $L^i_{p\mathrm{Aeq},T}$, one row per set of measurements (one sample at every position) and one column per position, in dB. |
 | `lengths_m` | The length each position stands for, in metres. |
 
-### StationaryTestResult.mean_level_db
+### StationaryTestResult.mean_level
 
 *property*
 
@@ -1329,13 +1326,13 @@ Draw the level of every position and the unit level.
 
 The spread of the samples of each position across the sets, in dB (9.3).
 
-### StationaryTestResult.reported_level_db
+### StationaryTestResult.reported_level
 
 *property*
 
 The test result: the mean rounded to the nearest integer decibel (5.8.1).
 
-### StationaryTestResult.set_levels_db
+### StationaryTestResult.set_levels
 
 *property*
 
@@ -1376,7 +1373,7 @@ it holds each time it is read; no verdict reads a row built elsewhere.
 
 ```python
 transit_exposure_level(
-    equivalent_level_db: float,
+    equivalent_level: float,
     *,
     measurement_time_s: float,
     pass_by_time_s: float,
@@ -1399,7 +1396,7 @@ equivalent level.
 
 | Name | Description |
 | :--- | :--- |
-| `equivalent_level_db` | $L_{p\mathrm{Aeq},T}$ over the measurement time, in dB. |
+| `equivalent_level` | $L_{p\mathrm{Aeq},T}$ over the measurement time, in dB. |
 | `measurement_time_s` | $T$, in seconds. |
 | `pass_by_time_s` | $T_p$, in seconds ([`pass_by_time`](/phonometry/reference/api/environment/rolling-stock-noise/#pass_by_time)). |
 

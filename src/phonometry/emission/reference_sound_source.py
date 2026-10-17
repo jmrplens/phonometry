@@ -429,13 +429,13 @@ class ReferenceSourceCalibration(OwnsArrays):
 
     :ivar frequencies: Nominal one-third octave mid-band frequencies, in
         hertz, ascending.
-    :ivar surface_pressure_level_db: :math:`\overline{L_p}` over the 2 m
+    :ivar surface_pressure_level: :math:`\overline{L_p}` over the 2 m
         hemisphere after the background correction, per band.
-    :ivar directivity_index_db: :math:`D_{\mathrm{I}i}` per position or
+    :ivar directivity_index: :math:`D_{\mathrm{I}i}` per position or
         traverse and band (3.9), ``(positions, bands)``.
-    :ivar c1_db: :math:`C_1`, in dB.
-    :ivar c2_db: :math:`C_2` per band, in dB.
-    :ivar c3_db: :math:`C_3` per band, in dB.
+    :ivar c1: :math:`C_1`, in dB.
+    :ivar c2: :math:`C_2` per band, in dB.
+    :ivar c3: :math:`C_3` per band, in dB.
     :ivar expanded_uncertainty_db: :math:`k \sigma_R` of Table 2 per band.
     :ivar coverage_factor: :math:`k`.
     :ivar arrangement: ``"paths"`` or ``"fixed"``.
@@ -443,24 +443,24 @@ class ReferenceSourceCalibration(OwnsArrays):
         calibration used, or ``None`` when it used the manufacturer's value.
     :ivar knee_frequency_hz: The knee frequency of that :math:`C_2`, or
         ``None``.
-    :ivar intensity_sound_power_level_db: The sound power level determined
+    :ivar intensity_sound_power_level: The sound power level determined
         by sound intensity per band (Annex B), or ``None``.
     :ivar room_qualification: The :class:`FreeFieldCheck` of the room, or
         ``None`` when none was given.
     """
 
     frequencies: np.ndarray
-    surface_pressure_level_db: np.ndarray
-    directivity_index_db: np.ndarray
-    c1_db: float
-    c2_db: np.ndarray
-    c3_db: np.ndarray
+    surface_pressure_level: np.ndarray
+    directivity_index: np.ndarray
+    c1: float
+    c2: np.ndarray
+    c3: np.ndarray
     expanded_uncertainty_db: np.ndarray
     coverage_factor: float
     arrangement: str
     radiation: str | None
     knee_frequency_hz: float | None
-    intensity_sound_power_level_db: np.ndarray | None = None
+    intensity_sound_power_level: np.ndarray | None = None
     room_qualification: FreeFieldCheck | None = None
 
     def __post_init__(self) -> None:
@@ -470,7 +470,7 @@ class ReferenceSourceCalibration(OwnsArrays):
             per band, or are not finite from 50 Hz to 315 Hz, or no band lies
             there.
         """
-        if self.intensity_sound_power_level_db is not None:
+        if self.intensity_sound_power_level is not None:
             self._annex_b()
 
     def _bands(self) -> np.ndarray:
@@ -481,22 +481,22 @@ class ReferenceSourceCalibration(OwnsArrays):
     def _pressure_level_db(self) -> np.ndarray:
         area = 2.0 * math.pi * _RADIUS_M**2
         return np.asarray(
-            self.surface_pressure_level_db
+            self.surface_pressure_level
             + 10.0 * math.log10(area / _S0)
-            + self.c1_db
-            + self.c2_db
-            + self.c3_db,
+            + self.c1
+            + self.c2
+            + self.c3,
             dtype=np.float64,
         )
 
     def _annex_b(self) -> tuple[np.ndarray, bool | None]:
-        intensity = self.intensity_sound_power_level_db
+        intensity = self.intensity_sound_power_level
         ks = self._bands()
         if intensity is None:
             return np.zeros(ks.size, dtype=bool), None
         values = np.asarray(intensity, dtype=np.float64)
         if values.shape != ks.shape:
-            msg = "'intensity_sound_power_level_db' needs one value per band."
+            msg = "'intensity_sound_power_level' needs one value per band."
             raise ValueError(msg)
         return _annex_b(ks, self._pressure_level_db(), values)
 
@@ -514,7 +514,7 @@ class ReferenceSourceCalibration(OwnsArrays):
         return self._annex_b()[1]
 
     @property
-    def sound_power_level_db(self) -> np.ndarray:
+    def sound_power_level(self) -> np.ndarray:
         """:math:`L_W` under the reference meteorological conditions, per band, in dB re 1 pW.
 
         Formula (2) from the surface levels and the three corrections; the
@@ -524,7 +524,7 @@ class ReferenceSourceCalibration(OwnsArrays):
         bands = self.intensity_bands
         if not np.any(bands):
             return self._pressure_level_db()
-        intensity = np.asarray(self.intensity_sound_power_level_db, dtype=np.float64)
+        intensity = np.asarray(self.intensity_sound_power_level, dtype=np.float64)
         return np.asarray(
             np.where(bands, intensity, self._pressure_level_db()), dtype=np.float64
         )
@@ -541,16 +541,16 @@ class ReferenceSourceCalibration(OwnsArrays):
         return _room_qualified(self.room_qualification, freqs)
 
     @property
-    def max_directivity_index_db(self) -> np.ndarray:
+    def max_directivity_index(self) -> np.ndarray:
         """The highest directivity index over the positions, per band (5.5).
 
         :return: One value per band, in dB.
         """
-        return np.asarray(np.max(self.directivity_index_db, axis=0), dtype=np.float64)
+        return np.asarray(np.max(self.directivity_index, axis=0), dtype=np.float64)
 
     @property
     def a_weighted_expanded_uncertainty_db(self) -> float:
-        r"""The expanded uncertainty of :attr:`sound_power_level_a_db` (Table 2).
+        r"""The expanded uncertainty of :attr:`sound_power_level_a` (Table 2).
 
         :return: :math:`k \sigma_R` of the A-weighted row, in dB.
         """
@@ -569,7 +569,7 @@ class ReferenceSourceCalibration(OwnsArrays):
         return float(self.frequencies[inside][0]), float(self.frequencies[inside][-1])
 
     @property
-    def sound_power_level_a_db(self) -> float:
+    def sound_power_level_a(self) -> float:
         """A-weighted sound power level over :attr:`a_weighted_range_hz` (5.3).
 
         :return: :math:`L_{WA}`, in dB re 1 pW.
@@ -577,9 +577,7 @@ class ReferenceSourceCalibration(OwnsArrays):
         inside = self._a_weighted_bands()
         freqs = self.frequencies[inside]
         return float(
-            energy_sum(
-                self.sound_power_level_db[inside] + _a_weighting_corrections(freqs)
-            )
+            energy_sum(self.sound_power_level[inside] + _a_weighting_corrections(freqs))
         )
 
     def _a_weighted_bands(self) -> np.ndarray:
@@ -624,7 +622,7 @@ class ReferenceSourceCalibration(OwnsArrays):
             that used the manufacturer's :math:`C_2`, whose value at the test
             only the manufacturer gives.
         """
-        levels = np.asarray(self.sound_power_level_db, dtype=np.float64)
+        levels = np.asarray(self.sound_power_level, dtype=np.float64)
         if (temperature_c is None) != (static_pressure_kpa is None):
             msg = (
                 "give 'temperature_c' and 'static_pressure_kpa' together, or "
@@ -634,7 +632,7 @@ class ReferenceSourceCalibration(OwnsArrays):
         if temperature_c is not None and static_pressure_kpa is not None:
             if self.radiation is None:
                 msg = (
-                    "the calibration used the manufacturer's C2 ('c2_db'), whose "
+                    "the calibration used the manufacturer's C2 ('c2'), whose "
                     "value at the test only the manufacturer gives (ISO 6926:2016, "
                     "8.4); subtract it from the calibrated levels and pass those."
                 )
@@ -725,16 +723,14 @@ def _annex_b(
     """Annex B: agreement from 50 Hz to 315 Hz and the bands it replaces."""
     compared = (ks >= _K_50) & (ks <= _K_315)
     if not np.any(compared):
-        msg = "'intensity_sound_power_level_db' needs bands from 50 Hz to 315 Hz."
+        msg = "'intensity_sound_power_level' needs bands from 50 Hz to 315 Hz."
         raise ValueError(msg)
     agree = True
     for k, p, i in zip(
         ks[compared], pressure[compared], intensity[compared], strict=True
     ):
         if not math.isfinite(float(i)):
-            msg = (
-                "'intensity_sound_power_level_db' must be finite from 50 Hz to 315 Hz."
-            )
+            msg = "'intensity_sound_power_level' must be finite from 50 Hz to 315 Hz."
             raise ValueError(msg)
         tolerance = float(_stepped(int(k), _TABLE_B1_DB, _K_50, "ISO 6926 Table B.1"))
         agree &= abs(float(i) - float(p)) <= tolerance + 1e-9
@@ -762,7 +758,7 @@ def _hemisphere_levels(
     levels: ArrayLike,
     freqs: np.ndarray,
     background_levels: ArrayLike | None,
-    max_levels_db: ArrayLike | None,
+    max_levels: ArrayLike | None,
 ) -> PrecisionSoundPowerResult:
     """The surface level over the 2 m hemisphere, refusing levels that are not finite.
 
@@ -775,7 +771,7 @@ def _hemisphere_levels(
         raise ValueError(msg)
     for name, extra in (
         ("background_levels", background_levels),
-        ("max_levels_db", max_levels_db),
+        ("max_levels", max_levels),
     ):
         if extra is not None and not np.all(
             np.isfinite(np.asarray(extra, dtype=np.float64))
@@ -815,7 +811,7 @@ def _c3_correction(
 
 
 def _with_annex_b(
-    lw: np.ndarray, ks: np.ndarray, intensity_sound_power_level_db: ArrayLike | None
+    lw: np.ndarray, ks: np.ndarray, intensity_sound_power_level: ArrayLike | None
 ) -> tuple[np.ndarray, np.ndarray, bool | None]:
     """The levels with Annex B applied, the bands it replaced and the agreement.
 
@@ -823,25 +819,25 @@ def _with_annex_b(
         whether the two methods agree within Table B.1 (``None`` without
         intensity levels).
     """
-    if intensity_sound_power_level_db is None:
+    if intensity_sound_power_level is None:
         return lw, np.zeros(ks.size, dtype=bool), None
-    intensity = np.asarray(intensity_sound_power_level_db, dtype=np.float64)
+    intensity = np.asarray(intensity_sound_power_level, dtype=np.float64)
     if intensity.shape != ks.shape:
-        msg = "'intensity_sound_power_level_db' needs one value per band."
+        msg = "'intensity_sound_power_level' needs one value per band."
         raise ValueError(msg)
     intensity_bands, agreement = _annex_b(ks, lw, intensity)
     return np.where(intensity_bands, intensity, lw), intensity_bands, agreement
 
 
 def _calibration_directivity(
-    precision: PrecisionSoundPowerResult, max_levels_db: ArrayLike | None
+    precision: PrecisionSoundPowerResult, max_levels: ArrayLike | None
 ) -> np.ndarray:
     """The directivity index of each position, from the traverse maxima if given (8.3.2)."""
-    if max_levels_db is None:
+    if max_levels is None:
         return precision.directivity_index
-    maxima = np.asarray(max_levels_db, dtype=np.float64)
+    maxima = np.asarray(max_levels, dtype=np.float64)
     if maxima.shape != precision.directivity_index.shape:
-        msg = "'max_levels_db' must have the shape of 'levels'."
+        msg = "'max_levels' must have the shape of 'levels'."
         raise ValueError(msg)
     return np.asarray(
         maxima - precision.surface_pressure_level[np.newaxis, :], dtype=np.float64
@@ -871,12 +867,12 @@ def reference_source_calibration(
     frequencies: ArrayLike,
     arrangement: MicrophoneArrangement,
     background_levels: ArrayLike | None = None,
-    max_levels_db: ArrayLike | None = None,
+    max_levels: ArrayLike | None = None,
     conditions: CalibrationConditions | None = None,
     radiation: RadiationCharacter = "unknown",
     knee_frequency_hz: float | None = None,
-    c2_db: ArrayLike | None = None,
-    intensity_sound_power_level_db: ArrayLike | None = None,
+    c2: ArrayLike | None = None,
+    intensity_sound_power_level: ArrayLike | None = None,
     room_qualification: FreeFieldCheck | None = None,
     coverage_factor: float = _COVERAGE_FACTOR,
 ) -> ReferenceSourceCalibration:
@@ -889,7 +885,7 @@ def reference_source_calibration(
     meteorological conditions with the :math:`C_1`, :math:`C_2` and
     :math:`C_3` of 8.4. The directivity index of each position (3.9) is its
     level less the surface level; for traversing microphones 8.3.2 takes the
-    highest level seen on the traverse instead, which ``max_levels_db``
+    highest level seen on the traverse instead, which ``max_levels``
     carries. Annex B, the alternative at low frequencies, replaces the 50 Hz
     to 80 Hz bands by the intensity levels when both agree within Table B.1
     from 50 Hz to 315 Hz. B.2 asks for the directivity index of those three
@@ -906,7 +902,7 @@ def reference_source_calibration(
         selects the column of Table 2.
     :param background_levels: Background levels, per position or one
         spectrum, for the ISO 3745 correction; ``None`` applies none.
-    :param max_levels_db: For traverses, the highest level recorded on
+    :param max_levels: For traverses, the highest level recorded on
         each (8.3.2), same shape as ``levels``.
     :param conditions: The :class:`CalibrationConditions` of the air during
         the calibration, whose temperature and static pressure enter
@@ -915,12 +911,12 @@ def reference_source_calibration(
         conditions of clause 4 with no air absorption.
     :param radiation: Radiation character for the Annex A :math:`C_2`.
     :param knee_frequency_hz: Knee frequency for a monopole or a dipole.
-    :param c2_db: The manufacturer's :math:`C_2`, scalar or per band, which
+    :param c2: The manufacturer's :math:`C_2`, scalar or per band, which
         8.4 prefers to Annex A; overrides ``radiation``. A calibration made
         with it cannot be read at the conditions of a test, since only the
         manufacturer gives :math:`C_2` there (see
         :meth:`ReferenceSourceCalibration.sound_power_level_at`).
-    :param intensity_sound_power_level_db: Sound power levels from sound
+    :param intensity_sound_power_level: Sound power levels from sound
         intensity per band (ISO 9614-3, Annex B), ``nan`` outside 50 Hz to
         315 Hz; ``None`` applies no Annex B.
     :param room_qualification: The :func:`~phonometry.emission.check_free_field`
@@ -940,17 +936,17 @@ def reference_source_calibration(
     _column("hemi-anechoic", arrangement)
     air = CalibrationConditions() if conditions is None else conditions
     k = require_positive(coverage_factor, "coverage_factor")
-    precision = _hemisphere_levels(levels, freqs, background_levels, max_levels_db)
+    precision = _hemisphere_levels(levels, freqs, background_levels, max_levels)
     lp_bar = precision.surface_pressure_level
     area = 2.0 * math.pi * _RADIUS_M**2
     c1 = _c1_correction(air.temperature_c, air.static_pressure_kpa)
-    if c2_db is not None:
-        c2 = np.broadcast_to(np.asarray(c2_db, dtype=np.float64), freqs.shape).copy()
-        if not np.all(np.isfinite(c2)):
-            msg = "'c2_db' must be finite, one value or one per band."
+    if c2 is not None:
+        c2_bands = np.broadcast_to(np.asarray(c2, dtype=np.float64), freqs.shape).copy()
+        if not np.all(np.isfinite(c2_bands)):
+            msg = "'c2' must be finite, one value or one per band."
             raise ValueError(msg)
     else:
-        c2 = radiation_impedance_correction(
+        c2_bands = radiation_impedance_correction(
             temperature_c=air.temperature_c,
             static_pressure_kpa=air.static_pressure_kpa,
             radiation=radiation,
@@ -959,35 +955,35 @@ def reference_source_calibration(
         )
     c3 = _c3_correction(air.air_absorption_db_per_m, freqs)
     _, intensity_bands, _ = _with_annex_b(
-        lp_bar + 10.0 * math.log10(area / _S0) + c1 + c2 + c3,
+        lp_bar + 10.0 * math.log10(area / _S0) + c1 + c2_bands + c3,
         ks,
-        intensity_sound_power_level_db,
+        intensity_sound_power_level,
     )
-    directivity = _calibration_directivity(precision, max_levels_db)
+    directivity = _calibration_directivity(precision, max_levels)
     _calibration_room_qualified(room_qualification, freqs[~intensity_bands])
     uncertainty = k * reference_source_reproducibility(
         freqs, environment="hemi-anechoic", arrangement=arrangement
     )
     return ReferenceSourceCalibration(
         frequencies=freqs,
-        surface_pressure_level_db=np.asarray(lp_bar, dtype=np.float64),
-        directivity_index_db=np.asarray(directivity, dtype=np.float64),
-        c1_db=float(c1),
-        c2_db=np.asarray(c2, dtype=np.float64),
-        c3_db=np.asarray(c3, dtype=np.float64),
+        surface_pressure_level=np.asarray(lp_bar, dtype=np.float64),
+        directivity_index=np.asarray(directivity, dtype=np.float64),
+        c1=float(c1),
+        c2=np.asarray(c2_bands, dtype=np.float64),
+        c3=np.asarray(c3, dtype=np.float64),
         expanded_uncertainty_db=np.asarray(uncertainty, dtype=np.float64),
         coverage_factor=k,
         arrangement=arrangement,
-        radiation=None if c2_db is not None else radiation,
+        radiation=None if c2 is not None else radiation,
         knee_frequency_hz=(
             None
-            if c2_db is not None or knee_frequency_hz is None
+            if c2 is not None or knee_frequency_hz is None
             else float(knee_frequency_hz)
         ),
-        intensity_sound_power_level_db=(
+        intensity_sound_power_level=(
             None
-            if intensity_sound_power_level_db is None
-            else np.asarray(intensity_sound_power_level_db, dtype=np.float64)
+            if intensity_sound_power_level is None
+            else np.asarray(intensity_sound_power_level, dtype=np.float64)
         ),
         room_qualification=room_qualification,
     )
@@ -1005,13 +1001,13 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
 
     :ivar frequencies: The one-third octave bands, contiguous and
         ascending, in hertz.
-    :ivar sound_power_level_db: The calibrated :math:`L_W` per band.
+    :ivar sound_power_level: The calibrated :math:`L_W` per band.
     :ivar repeatability_db: :math:`\sigma_r` of Formula (1) per band, or
         ``None`` when no repetitions were given.
     :ivar supply_variation_db: The largest change of :math:`L_W` per band over
         the declared range of the electrical or mechanical supply (5.2), or
         ``None`` when not given.
-    :ivar directivity_index_db: The highest directivity index per band, or
+    :ivar directivity_index: The highest directivity index per band, or
         ``None`` when not given.
     :ivar reverberation_rooms_only: Whether the source is labelled "For use as
         a reference sound source in reverberation test rooms complying with
@@ -1019,10 +1015,10 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
     """
 
     frequencies: np.ndarray
-    sound_power_level_db: np.ndarray
+    sound_power_level: np.ndarray
     repeatability_db: np.ndarray | None
     supply_variation_db: np.ndarray | None
-    directivity_index_db: np.ndarray | None
+    directivity_index: np.ndarray | None
     reverberation_rooms_only: bool
 
     def __post_init__(self) -> None:
@@ -1033,14 +1029,14 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
             a per-band figure of another length.
         """
         freqs = np.atleast_1d(np.asarray(self.frequencies, dtype=np.float64))
-        lw = np.atleast_1d(np.asarray(self.sound_power_level_db, dtype=np.float64))
+        lw = np.atleast_1d(np.asarray(self.sound_power_level, dtype=np.float64))
         if lw.shape != freqs.shape or not np.all(np.isfinite(lw)):
             msg = "the sound power levels must be finite, one per band."
             raise ValueError(msg)
         if np.any(np.diff(self._band_indices) != 1):
             msg = "the bands must be contiguous one-third octaves, ascending."
             raise ValueError(msg)
-        for name in ("repeatability_db", "supply_variation_db", "directivity_index_db"):
+        for name in ("repeatability_db", "supply_variation_db", "directivity_index"):
             value = getattr(self, name)
             if value is not None and np.asarray(value).shape != freqs.shape:
                 msg = f"'{name}' must hold one value per band."
@@ -1078,7 +1074,7 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
     def adjacent_step_db(self) -> np.ndarray:
         """The largest difference from a neighbouring band, per band (5.4), in dB."""
         return _spectrum_steps(
-            self._band_indices, np.asarray(self.sound_power_level_db, np.float64)
+            self._band_indices, np.asarray(self.sound_power_level, np.float64)
         )[0]
 
     @property
@@ -1090,13 +1086,13 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
             limit.
         """
         return _spectrum_steps(
-            self._band_indices, np.asarray(self.sound_power_level_db, np.float64)
+            self._band_indices, np.asarray(self.sound_power_level, np.float64)
         )[1]
 
     @property
     def core_range_db(self) -> float:
         """The spread of :math:`L_W` from 100 Hz to 10 000 Hz, in dB."""
-        core = np.asarray(self.sound_power_level_db, dtype=np.float64)[self._core]
+        core = np.asarray(self.sound_power_level, dtype=np.float64)[self._core]
         return float(np.ptp(core)) if core.size else float("nan")
 
     @property
@@ -1109,7 +1105,7 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
         """The spread over every band when the range is extended, else ``nan``."""
         if not bool(np.any(~self._core)):
             return float("nan")
-        return float(np.ptp(np.asarray(self.sound_power_level_db, dtype=np.float64)))
+        return float(np.ptp(np.asarray(self.sound_power_level, dtype=np.float64)))
 
     @property
     def extended_range_limit_db(self) -> float:
@@ -1134,7 +1130,7 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
             ("supply variation", self.supply_variation_db is None),
             (
                 "directivity",
-                self.directivity_index_db is None and not self.reverberation_rooms_only,
+                self.directivity_index is None and not self.reverberation_rooms_only,
             ),
         )
         return tuple(name for name, missing in unjudged if missing)
@@ -1183,12 +1179,12 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
         """
         if self.reverberation_rooms_only:
             return True
-        if self.directivity_index_db is None:
+        if self.directivity_index is None:
             return None
         ks = np.array([_band_index(float(f)) for f in self.frequencies])
         core = (ks >= _K_100) & (ks <= _K_10000)
         return bool(
-            np.all(self.directivity_index_db[core] <= self.directivity_limit_db + 1e-9)
+            np.all(self.directivity_index[core] <= self.directivity_limit_db + 1e-9)
         )
 
     @property
@@ -1253,7 +1249,7 @@ def _spectrum_steps(ks: np.ndarray, lw: np.ndarray) -> tuple[np.ndarray, np.ndar
 def _clause5_levels(
     calibration: ReferenceSourceCalibration | ArrayLike,
     frequencies: ArrayLike | None,
-    directivity_index_db: ArrayLike | None,
+    directivity_index: ArrayLike | None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
     """The bands, levels and directivity a clause 5 verdict reads.
 
@@ -1266,8 +1262,8 @@ def _clause5_levels(
             msg = "a calibration brings its own bands; omit 'frequencies'."
             raise ValueError(msg)
         freqs = calibration.frequencies
-        lw = calibration.sound_power_level_db
-        fallback = calibration.max_directivity_index_db
+        lw = calibration.sound_power_level
+        fallback = calibration.max_directivity_index
     else:
         if frequencies is None:
             msg = "'frequencies' is required with a plain level array."
@@ -1277,8 +1273,8 @@ def _clause5_levels(
         fallback = None
     directivity = (
         fallback
-        if directivity_index_db is None
-        else np.asarray(directivity_index_db, dtype=np.float64)
+        if directivity_index is None
+        else np.asarray(directivity_index, dtype=np.float64)
     )
     return freqs, lw, directivity
 
@@ -1292,23 +1288,23 @@ def _highest_directivity(
     if directivity.ndim == _GRID_RANK:
         directivity = directivity.max(axis=0)
     if directivity.shape != freqs.shape:
-        msg = "'directivity_index_db' must span the same bands."
+        msg = "'directivity_index' must span the same bands."
         raise ValueError(msg)
     return directivity
 
 
 def _repeatability_of(
-    repeated_levels_db: ArrayLike | None, n_bands: int
+    repeated_levels: ArrayLike | None, n_bands: int
 ) -> np.ndarray | None:
     r""":math:`\sigma_r` of Formula (1) from three or five repetitions, if given."""
-    if repeated_levels_db is None:
+    if repeated_levels is None:
         return None
-    repeated = np.asarray(repeated_levels_db, dtype=np.float64)
+    repeated = np.asarray(repeated_levels, dtype=np.float64)
     if repeated.ndim == 1:
         repeated = repeated[:, np.newaxis]
     if repeated.shape[0] not in _REPETITIONS or repeated.shape[1] != n_bands:
         msg = (
-            "'repeated_levels_db' must be (3, bands) sound power levels or "
+            "'repeated_levels' must be (3, bands) sound power levels or "
             "(5, bands) sound pressure levels (8.3.3)."
         )
         raise ValueError(msg)
@@ -1334,9 +1330,9 @@ def verify_reference_sound_source(
     calibration: ReferenceSourceCalibration | ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-    repeated_levels_db: ArrayLike | None = None,
+    repeated_levels: ArrayLike | None = None,
     supply_variation_db: ArrayLike | None = None,
-    directivity_index_db: ArrayLike | None = None,
+    directivity_index: ArrayLike | None = None,
     reverberation_rooms_only: bool = False,
 ) -> ReferenceSoundSourceVerdict:
     """May this source be declared a reference sound source? (ISO 6926 clause 5).
@@ -1352,14 +1348,14 @@ def verify_reference_sound_source(
         calibrated :math:`L_W` per band, in dB re 1 pW.
     :param frequencies: The bands of a plain level array, ascending
         one-third octave mid-bands, in hertz; omitted with a calibration.
-    :param repeated_levels_db: ``(3, bands)`` sound power levels or
+    :param repeated_levels: ``(3, bands)`` sound power levels or
         ``(5, bands)`` sound pressure levels measured in succession (8.3.3,
         9.3.2); ``None`` leaves the steadiness of 5.2 unjudged.
     :param supply_variation_db: The largest change of the sound power level
         in each band over the declared range of the electrical or mechanical
         supply, the line voltage for instance (5.2), per band or one value for
         every band, in dB; ``None`` leaves that requirement unjudged.
-    :param directivity_index_db: The directivity index per position and band,
+    :param directivity_index: The directivity index per position and band,
         or the highest per band, for a plain level array (a calibration brings
         its own).
     :param reverberation_rooms_only: The source is labelled for reverberation
@@ -1370,20 +1366,20 @@ def verify_reference_sound_source(
         match.
     """
     freqs, lw, directivity = _clause5_levels(
-        calibration, frequencies, directivity_index_db
+        calibration, frequencies, directivity_index
     )
     if lw.shape != freqs.shape:
         msg = "the sound power levels must be finite, one per band."
         raise ValueError(msg)
     directivity = _highest_directivity(directivity, freqs)
-    repeat = _repeatability_of(repeated_levels_db, freqs.size)
+    repeat = _repeatability_of(repeated_levels, freqs.size)
     supply = _supply_variation_of(supply_variation_db, freqs)
     return ReferenceSoundSourceVerdict(
         frequencies=freqs,
-        sound_power_level_db=lw,
+        sound_power_level=lw,
         repeatability_db=repeat,
         supply_variation_db=supply,
-        directivity_index_db=directivity,
+        directivity_index=directivity,
         reverberation_rooms_only=reverberation_rooms_only,
     )
 
@@ -1472,8 +1468,8 @@ class ReferenceSourceDriftResult(OwnsArrays):
 
 
 def verify_reference_source_drift(
-    reference_levels_db: ArrayLike,
-    latest_levels_db: ArrayLike,
+    reference_levels: ArrayLike,
+    latest_levels: ArrayLike,
     *,
     frequencies: ArrayLike,
 ) -> ReferenceSourceDriftResult:
@@ -1484,9 +1480,9 @@ def verify_reference_source_drift(
     surface levels of a source kept in one place): a change larger than 2,83
     times Table 1 in any band calls for recalibration.
 
-    :param reference_levels_db: The levels of the earlier check, per band, in
+    :param reference_levels: The levels of the earlier check, per band, in
         dB.
-    :param latest_levels_db: The levels of the latest check, same bands.
+    :param latest_levels: The levels of the latest check, same bands.
     :param frequencies: Nominal one-third octave mid-bands, 50 Hz to
         20 kHz, in hertz.
     :return: :class:`ReferenceSourceDriftResult`.
@@ -1494,8 +1490,8 @@ def verify_reference_source_drift(
         finite.
     """
     freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-    reference = np.atleast_1d(np.asarray(reference_levels_db, dtype=np.float64))
-    latest = np.atleast_1d(np.asarray(latest_levels_db, dtype=np.float64))
+    reference = np.atleast_1d(np.asarray(reference_levels, dtype=np.float64))
+    latest = np.atleast_1d(np.asarray(latest_levels, dtype=np.float64))
     if reference.shape != freqs.shape or latest.shape != freqs.shape:
         msg = "both level arrays must hold one value per band."
         raise ValueError(msg)

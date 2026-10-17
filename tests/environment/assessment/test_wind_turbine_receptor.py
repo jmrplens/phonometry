@@ -117,7 +117,7 @@ def test_equations_1_2_4_and_5() -> None:
     mean = 10.0 * math.log10(np.mean(10.0 ** (members / 10.0)))
     s = math.sqrt(np.sum((members - mean) ** 2) / (3 * 2))
     u = math.sqrt(np.mean(np.array([0.3, 0.4, 0.5]) ** 2))
-    assert binned.mean_levels_db[1] == pytest.approx(mean)
+    assert binned.mean_levels[1] == pytest.approx(mean)
     assert binned.type_a_uncertainty_db[1] == pytest.approx(s)
     assert binned.type_b_uncertainty_db[1] == pytest.approx(u)
     assert binned.combined_uncertainty_db[1] == pytest.approx(math.hypot(s, u))
@@ -127,7 +127,7 @@ def test_equations_1_2_4_and_5() -> None:
 def test_equations_8_and_9_for_statistical_levels() -> None:
     binned = env.bin_sound_levels(_LEVELS, _SPEEDS, averaging="arithmetic")
     members = _LEVELS[0:3]
-    assert binned.mean_levels_db[1] == pytest.approx(np.mean(members))
+    assert binned.mean_levels[1] == pytest.approx(np.mean(members))
     assert binned.type_a_uncertainty_db[1] == pytest.approx(
         np.std(members, ddof=1) / math.sqrt(3)
     )
@@ -157,7 +157,7 @@ def test_equations_6_and_7() -> None:
         [45.0], [40.0], total_uncertainty_db=[0.8], background_uncertainty_db=[0.6]
     )
     e_t, e_b = 10.0**4.5, 10.0**4.0
-    assert result.turbine_levels_db[0] == pytest.approx(10.0 * math.log10(e_t - e_b))
+    assert result.turbine_levels[0] == pytest.approx(10.0 * math.log10(e_t - e_b))
     assert result.turbine_uncertainty_db[0] == pytest.approx(
         math.hypot(0.8 * e_t, 0.6 * e_b) / (e_t - e_b)
     )
@@ -171,12 +171,12 @@ def test_within_3_db_the_suggested_correction_is_3_db() -> None:
         total_uncertainty_db=0.5,
         background_uncertainty_db=0.4,
     )
-    assert result.turbine_levels_db[0] == pytest.approx(39.0)
+    assert result.turbine_levels[0] == pytest.approx(39.0)
     # A fixed 3 dB offset carries the total's uncertainty, not the background's.
     assert result.turbine_uncertainty_db[0] == pytest.approx(0.5)
     assert result.regimes[0] is env.BackgroundCorrectionRegime.THREE_DB
     assert result.regimes[1] is env.BackgroundCorrectionRegime.UNDETERMINED
-    assert math.isnan(result.turbine_levels_db[1])
+    assert math.isnan(result.turbine_levels[1])
 
 
 def test_exactly_3_db_is_subtracted_logarithmically() -> None:
@@ -187,7 +187,7 @@ def test_exactly_3_db_is_subtracted_logarithmically() -> None:
 def test_3_db_in_decimal_is_3_db_whatever_the_binary_says() -> None:
     """33.3 dB less 30.3 dB is 2.9999999999999964 dB in binary: "at least 3 dB"."""
     result = env.turbine_sound_levels([33.3], [30.3])
-    assert result.level_differences_db[0] < 3.0
+    assert result.level_differences[0] < 3.0
     assert result.regimes[0] is env.BackgroundCorrectionRegime.LOGARITHMIC
 
 
@@ -196,7 +196,7 @@ def test_bin_means_3_db_apart_are_subtracted_logarithmically() -> None:
     total = env.bin_sound_levels([41.0, 43.7], [5.0, 5.2])
     background = env.bin_sound_levels([38.0, 40.7], [5.1, 4.9])
     corrected = total.background_corrected(background)
-    assert corrected.level_differences_db[0] < 3.0
+    assert corrected.level_differences[0] < 3.0
     assert corrected.regimes[0] is env.BackgroundCorrectionRegime.LOGARITHMIC
 
 
@@ -212,11 +212,9 @@ def test_a_background_as_loud_as_the_total_takes_the_3_db_correction() -> None:
     total = env.bin_sound_levels([38.0, 38.6, 39.6], [5.0, 5.2, 4.8])
     background = env.bin_sound_levels([38.0, 39.6, 38.6], [5.0, 5.2, 4.8])
     corrected = total.background_corrected(background)
-    assert abs(corrected.level_differences_db[0]) < 1e-12
+    assert abs(corrected.level_differences[0]) < 1e-12
     assert corrected.regimes[0] is env.BackgroundCorrectionRegime.THREE_DB
-    assert corrected.turbine_levels_db[0] == pytest.approx(
-        total.mean_levels_db[0] - 3.0
-    )
+    assert corrected.turbine_levels[0] == pytest.approx(total.mean_levels[0] - 3.0)
 
 
 def test_the_limits_of_11_7_hold_a_microdecibel_away() -> None:
@@ -232,7 +230,7 @@ def test_bins_are_corrected_where_total_and_background_share_them() -> None:
     background = env.bin_sound_levels([38.0, 39.0, 36.0], [5.1, 4.9, 8.0])
     corrected = total.background_corrected(background)
     np.testing.assert_array_equal(corrected.wind_speeds_m_s, [5.0])
-    assert corrected.total_levels_db[0] == pytest.approx(total.mean_levels_db[0])
+    assert corrected.total_levels[0] == pytest.approx(total.mean_levels[0])
 
 
 def test_bins_pair_by_class_and_sector() -> None:
@@ -268,14 +266,14 @@ def test_one_wind_speed_class_pairs_sector_by_sector() -> None:
     background = env.bin_sound_levels([44.0, 38.0], [5.0, 5.0], [90.0, 0.0])
     corrected = total.background_corrected(background)
     np.testing.assert_allclose(corrected.wind_speeds_m_s, [5.0, 5.0])
-    np.testing.assert_allclose(corrected.total_levels_db, [45.0, 50.0])
+    np.testing.assert_allclose(corrected.total_levels, [45.0, 50.0])
     np.testing.assert_allclose(corrected.background_levels, [38.0, 44.0])
     expected = [
         10.0 * math.log10(10.0**4.5 - 10.0**3.8),
         10.0 * math.log10(10.0**5.0 - 10.0**4.4),
     ]
-    np.testing.assert_allclose(corrected.turbine_levels_db, expected)
-    assert corrected.turbine_levels_db == pytest.approx([44.03, 48.74], abs=0.005)
+    np.testing.assert_allclose(corrected.turbine_levels, expected)
+    assert corrected.turbine_levels == pytest.approx([44.03, 48.74], abs=0.005)
     # Bins of one interval carry no type A uncertainty (NaN), and pass.
     assert np.all(np.isnan(corrected.turbine_uncertainty_db))
 
@@ -345,9 +343,9 @@ def test_the_corrected_plot_draws_each_sector_apart(
         for key, levels in zip(
             keys,
             (
-                corrected.total_levels_db,
+                corrected.total_levels,
                 corrected.background_levels,
-                corrected.turbine_levels_db,
+                corrected.turbine_levels,
             ),
             strict=True,
         ):
@@ -374,7 +372,7 @@ def test_a_sector_s_bins_are_joined_in_wind_speed_order() -> None:
     np.testing.assert_array_equal(by_label["Sector 0°"].get_xdata(), [3.0, 4.0, 5.0])
     np.testing.assert_allclose(
         by_label["Sector 0°"].get_ydata(),
-        result.turbine_levels_db[[1, 2, 0]],
+        result.turbine_levels[[1, 2, 0]],
     )
     np.testing.assert_array_equal(by_label["Sector 90°"].get_xdata(), [3.0, 5.0])
     plt.close("all")
@@ -453,7 +451,7 @@ def test_equations_10_and_11() -> None:
     result = env.predicted_receptor_level(levels, u_w)
     weights = 10.0 ** (levels / 10.0)
     propagated = float(np.sum(u_w * weights) / np.sum(weights))
-    assert result.level_db == pytest.approx(10.0 * math.log10(np.sum(weights)))
+    assert result.level == pytest.approx(10.0 * math.log10(np.sum(weights)))
     assert result.propagated_uncertainty_db == pytest.approx(propagated)
     assert result.combined_uncertainty_db == pytest.approx(
         math.sqrt(propagated**2 + 2.0**2 + 0.5**2)
@@ -467,7 +465,7 @@ def test_quietest_turbines_leave_while_the_total_drops_1_db_or_less() -> None:
         result.relevant, [True, True, True, False, False, False]
     )
     assert result.indices == (0, 1, 2)
-    assert result.total_level_db - result.relevant_level_db <= 1.0
+    assert result.total_level - result.relevant_level <= 1.0
     assert result.binning_wind_speed_m_s(
         [7.0, 8.0, 6.0, 5.0, 4.0, 3.0]
     ) == pytest.approx(7.0)
@@ -515,13 +513,13 @@ def test_table_c1_impedance_classes_are_transcribed() -> None:
 def test_tables_c2_to_c5_are_transcribed() -> None:
     np.testing.assert_array_equal(env.LOW_FREQUENCY_BANDS_HZ, ref.WT_C_BANDS_HZ)
     np.testing.assert_array_equal(
-        env.LOW_FREQUENCY_GROUND_CORRECTION_DB, ref.WT_C2_GROUND_DB
+        env.LOW_FREQUENCY_GROUND_CORRECTION, ref.WT_C2_GROUND_DB
     )
     np.testing.assert_array_equal(
         env.LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM, ref.WT_C2_ALPHA_DB_PER_KM
     )
     for name, row in ref.WT_C3_FACADE_DB.items():
-        np.testing.assert_array_equal(env.LOW_FREQUENCY_FACADE_INSULATION_DB[name], row)
+        np.testing.assert_array_equal(env.LOW_FREQUENCY_FACADE_INSULATION[name], row)
     assert tuple(env.SWEDISH_LOW_FREQUENCY_LIMITS_DB.values()) == ref.WT_C5_SWEDEN_DB
 
 
@@ -580,7 +578,7 @@ def test_equation_c1_band_by_band() -> None:
         distance=500.0,
         hub_height_m=100.0,
         frequencies=[63.0, 125.0],
-        facade_insulation_db=[16.6, 20.2],
+        facade_insulation=[16.6, 20.2],
     )
     slant = math.hypot(500.0, 100.0)
     expected = (
@@ -591,11 +589,9 @@ def test_equation_c1_band_by_band() -> None:
         + np.array([4.3, 1.8])
         - np.array([0.11, 0.41]) * slant / 1000.0
     )
-    np.testing.assert_allclose(result.outdoor_levels_db, expected)
-    np.testing.assert_allclose(
-        result.indoor_levels_db, expected - np.array([16.6, 20.2])
-    )
-    assert result.outdoor_level_db == pytest.approx(
+    np.testing.assert_allclose(result.outdoor_levels, expected)
+    np.testing.assert_allclose(result.indoor_levels, expected - np.array([16.6, 20.2]))
+    assert result.outdoor_level == pytest.approx(
         10.0 * math.log10(np.sum(10.0 ** (expected / 10.0)))
     )
 
@@ -608,7 +604,7 @@ def test_turbines_sum_energetically_per_band() -> None:
         np.full((2, 14), 100.0), distance=[600.0, 600.0], hub_height_m=120.0
     )
     np.testing.assert_allclose(
-        two.outdoor_levels_db, one.outdoor_levels_db + 10.0 * math.log10(2.0)
+        two.outdoor_levels, one.outdoor_levels + 10.0 * math.log10(2.0)
     )
 
 
@@ -624,10 +620,10 @@ def test_a_zero_air_attenuation_takes_nothing_off() -> None:
         frequencies=[50.0],
         air_attenuation_db_per_km=[0.0],
     )
-    np.testing.assert_array_equal(result.air_attenuation_db, [[0.0]])
+    np.testing.assert_array_equal(result.air_attenuation, [[0.0]])
     slant = math.hypot(2000.0, 100.0)
     expected = 95.0 - 30.2 - 10.0 * math.log10(slant**2) - 11.0 + 4.7
-    assert result.outdoor_level_db == pytest.approx(expected)
+    assert result.outdoor_level == pytest.approx(expected)
 
 
 def test_a_band_without_a_table_value_needs_its_own() -> None:
@@ -642,7 +638,7 @@ def test_a_band_without_a_table_value_needs_its_own() -> None:
 # ---------------------------------------------------------------------------
 def test_equation_j1() -> None:
     result = env.sound_emergence([40.0, 44.5], [36.0, 41.0], wind_speeds_m_s=[5.0, 6.0])
-    np.testing.assert_allclose(result.emergence_db, [4.0, 3.5])
+    np.testing.assert_allclose(result.emergence, [4.0, 3.5])
 
 
 def test_figure_a1_points() -> None:
@@ -667,18 +663,18 @@ def test_table_a1_is_iso_1996_2_table_j1() -> None:
 def test_the_most_severe_adjustment_alone_is_applied() -> None:
     result = env.wind_turbine_rating_level(
         40.0,
-        tonal_adjustment_db=2.0,
-        amplitude_modulation_adjustment_db=env.amplitude_modulation_adjustment(6.5),
-        impulsive_adjustment_db=1.8,
+        tonal_adjustment=2.0,
+        amplitude_modulation_adjustment=env.amplitude_modulation_adjustment(6.5),
+        impulsive_adjustment=1.8,
     )
     assert result.governing == "amplitude_modulation"
-    assert result.rating_level_db == pytest.approx(44.0)
+    assert result.rating_level == pytest.approx(44.0)
 
 
 def test_no_adjustment_governs_when_all_are_zero() -> None:
     result = env.wind_turbine_rating_level(40.0)
     assert result.governing is None
-    assert result.rating_level_db == pytest.approx(40.0)
+    assert result.rating_level == pytest.approx(40.0)
 
 
 @pytest.mark.parametrize(
@@ -723,7 +719,7 @@ def test_table_7_fourth_row_is_minus_10_degrees() -> None:
 def test_published_arrays_are_read_only() -> None:
     for array in (
         env.LOW_FREQUENCY_BANDS_HZ,
-        env.LOW_FREQUENCY_GROUND_CORRECTION_DB,
+        env.LOW_FREQUENCY_GROUND_CORRECTION,
         env.LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM,
         env.TONE_SEARCH_BANDS_HZ,
     ):
@@ -742,15 +738,15 @@ def test_plots_draw_their_numbers() -> None:
         np.full(14, 100.0),
         distance=600.0,
         hub_height_m=120.0,
-        facade_insulation_db=env.LOW_FREQUENCY_FACADE_INSULATION_DB[
+        facade_insulation=env.LOW_FREQUENCY_FACADE_INSULATION[
             "Denmark brick or similar"
         ],
     )
     ax = lf.plot()
-    np.testing.assert_allclose(ax.lines[0].get_ydata(), lf.outdoor_levels_db)
-    np.testing.assert_allclose(ax.lines[1].get_ydata(), lf.indoor_levels_db)
+    np.testing.assert_allclose(ax.lines[0].get_ydata(), lf.outdoor_levels)
+    np.testing.assert_allclose(ax.lines[1].get_ydata(), lf.indoor_levels)
     plt.close("all")
-    rating = env.wind_turbine_rating_level(40.0, tonal_adjustment_db=3.0)
+    rating = env.wind_turbine_rating_level(40.0, tonal_adjustment=3.0)
     ax = rating.plot(language="es")
     assert "43,0" in ax.get_title()
     heights = [p.get_height() for p in ax.patches]
@@ -760,7 +756,7 @@ def test_plots_draw_their_numbers() -> None:
         300.0, temperature_c=10.0, relative_humidity_percent=50.0
     )
     ax = limit.plot()
-    np.testing.assert_allclose(ax.lines[0].get_ydata(), limit.attenuation_db)
+    np.testing.assert_allclose(ax.lines[0].get_ydata(), limit.attenuation)
     plt.close("all")
 
 
@@ -772,14 +768,14 @@ def test_the_plots_say_what_their_marks_are() -> None:
         line for line in ax.lines if line.get_label() == "Energy sum of the loudest"
     )
     ydata = np.asarray(running.get_ydata())
-    assert ydata[-1] == pytest.approx(relevant.total_level_db)
+    assert ydata[-1] == pytest.approx(relevant.total_level)
     # It first reaches the total less 1 dB at the last relevant turbine.
-    first = int(np.argmax(ydata >= relevant.total_level_db - 1.0))
+    first = int(np.argmax(ydata >= relevant.total_level - 1.0))
     assert first == len(relevant.indices) - 1
-    assert ydata[first] == pytest.approx(relevant.relevant_level_db)
+    assert ydata[first] == pytest.approx(relevant.relevant_level)
     plt.close("all")
     ax = env.wind_turbine_rating_level(
-        41.0, tonal_adjustment_db=2.0, amplitude_modulation_adjustment_db=3.8
+        41.0, tonal_adjustment=2.0, amplitude_modulation_adjustment=3.8
     ).plot()
     assert [t.get_text() for t in ax.get_legend().get_texts()] == [
         "Applied (the most severe, A.1)"
@@ -986,9 +982,9 @@ def _refusal_cases() -> list[tuple[str, object, str]]:
         (
             "facade of two bands for one",
             lambda: env.wind_turbine_low_frequency_level(
-                [95.0], distance=500.0, facade_insulation_db=[1.0, 2.0], **one_band
+                [95.0], distance=500.0, facade_insulation=[1.0, 2.0], **one_band
             ),
-            r"'facade_insulation_db' must hold one value per band \(1\)",
+            r"'facade_insulation' must hold one value per band \(1\)",
         ),
         (
             "ambient and background of other lengths",
@@ -1007,7 +1003,7 @@ def _refusal_cases() -> list[tuple[str, object, str]]:
         ),
         (
             "negative adjustment",
-            lambda: env.wind_turbine_rating_level(40.0, tonal_adjustment_db=-1.0),
+            lambda: env.wind_turbine_rating_level(40.0, tonal_adjustment=-1.0),
             r"The adjustments must not be negative",
         ),
     ]

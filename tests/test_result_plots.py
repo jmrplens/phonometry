@@ -328,7 +328,7 @@ _KWARG_PLOT_CASES = [
             name="Covering",
             source="A test",
             **{
-                f"impact_improvement_{band}_db": 2.0 * index
+                f"impact_improvement_{band}": 2.0 * index
                 for index, band in enumerate(
                     (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000)
                     + (1250, 1600, 2000, 2500, 3150)
@@ -369,7 +369,7 @@ _KWARG_PLOT_CASES = [
     (
         "turbine_correction",
         lambda: ph.emission.turbine_reference_source_correction(
-            [95.0, 96.0], calibrated_level_db=93.0, machine_length_m=8.0
+            [95.0, 96.0], calibrated_level=93.0, machine_length_m=8.0
         ),
         "line",
     ),
@@ -593,7 +593,7 @@ _KWARG_PLOT_CASES = [
     (
         "ascending_method",
         lambda: ph.hearing.ascending_method_threshold(
-            presentation_levels_db=[20, 25, 30, 20, 25, 30],
+            presentation_levels=[20, 25, 30, 20, 25, 30],
             responses=[False, False, True, False, False, True],
         ),
         "line",
@@ -649,8 +649,8 @@ _KWARG_PLOT_CASES = [
         lambda: ph.hearing.check_free_sound_field(
             dict.fromkeys(("left", "right", "up", "down"), [0.5] * 11),
             [0.0] * 11,
-            front_levels_db=[1.0] * 11,
-            back_levels_db=[0.0] * 11,
+            front_levels=[1.0] * 11,
+            back_levels=[0.0] * 11,
             loudspeaker_distance_m=2.0,
         ),
         "line",

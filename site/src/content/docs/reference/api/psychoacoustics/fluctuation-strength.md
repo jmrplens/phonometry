@@ -125,7 +125,7 @@ the reference method itself overestimates it above 4 Hz.
 
 ```python
 fluctuation_strength_am_noise(
-    level_db: float,
+    level: float,
     modulation_factor: float,
     mod_frequency: float,
 ) -> float
@@ -147,7 +147,7 @@ vanishes).
 
 | Name | Description |
 | :--- | :--- |
-| `level_db` | Broadband-noise level `L`, in dB. |
+| `level` | Broadband-noise level `L`, in dB. |
 | `modulation_factor` | Modulation factor `m` (0..1). |
 | `mod_frequency` | Modulation frequency `fmod`, in Hz. |
 

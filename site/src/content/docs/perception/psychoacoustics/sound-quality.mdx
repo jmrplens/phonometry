@@ -196,12 +196,12 @@ from scipy import signal as sp_signal
 
 # `psychoacoustics` is imported by the snippets above.
 # One DIN 45692 Table A.1 critical band of noise, at a chosen band level.
-def critical_band_noise(f_low, f_high, level_db):
+def critical_band_noise(f_low, f_high, level):
     rng = np.random.default_rng(7)
     sos = sp_signal.butter(8, [f_low, f_high], btype="band", fs=48000, output="sos")
     band = sp_signal.sosfilt(sos, rng.standard_normal(48000 * 2))
     band /= np.sqrt(np.mean(band**2))
-    return band * 2e-5 * 10 ** (level_db / 20)
+    return band * 2e-5 * 10 ** (level / 20)
 
 # Table A.2 compares signals of equal loudness, so set each band to 4 sone.
 def level_for_four_sone(f_low, f_high):

@@ -597,7 +597,7 @@ for panel in (top, bottom):
     panel.grid(True, which="both", alpha=0.3)
 top.semilogx(f, res.levels, label="driving-point stiffness $L_{k_{1,1}}$")
 top.axhline(l21, color="C2", linestyle="--", label="transfer stiffness $L_{k_{2,1}}$")
-top.axhline(res.threshold_level_db, color="k", linestyle=":",
+top.axhline(res.threshold_level, color="k", linestyle=":",
             label="2 dB below the 1 Hz to 20 Hz value")
 top.plot(centres, band_levels, "o", color="C1",
          label="band average $L_{k,\\mathrm{av}}$, Formula (6)")

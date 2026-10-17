@@ -132,7 +132,7 @@ ReciprocityCalibration(
     products_v2_per_pa2: NDArray[np.complex128],
     field: str,
     method: str,
-    corrections_db: Mapping[str, NDArray[np.float64]],
+    corrections: Mapping[str, NDArray[np.float64]],
     expanded_uncertainty_db: NDArray[np.float64] | None = None,
 )
 ```
@@ -154,10 +154,10 @@ Built by [`pressure_reciprocity`](/phonometry/reference/api/metrology/reciprocit
 | `products_v2_per_pa2` | The product of the two sensitivities of each pair, one row per pair (12, 23, 31 in the three-microphone method, 12 alone with an auxiliary source), in V²/Pa². |
 | `field` | `"pressure"` (IEC 61094-2) or `"free_field"` (IEC 61094-3). |
 | `method` | `"three_microphones"` or `"auxiliary_source"`. |
-| `corrections_db` | Corrections added to every microphone's sensitivity level, by name, in dB at each frequency: the wave-motion correction of IEC 61094-2 Table C.3 for a large-volume coupler, say. |
+| `corrections` | Corrections added to every microphone's sensitivity level, by name, in dB at each frequency: the wave-motion correction of IEC 61094-2 Table C.3 for a large-volume coupler, say. |
 | `expanded_uncertainty_db` | The expanded uncertainty of the sensitivity level at each frequency, in dB, or `None`. |
 
-### ReciprocityCalibration.correction_db
+### ReciprocityCalibration.correction
 
 *property*
 
@@ -200,7 +200,7 @@ with the expanded uncertainty as a band when it is known.
 
 **Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
 
-### ReciprocityCalibration.sensitivity_level_db
+### ReciprocityCalibration.sensitivity_level
 
 *property*
 

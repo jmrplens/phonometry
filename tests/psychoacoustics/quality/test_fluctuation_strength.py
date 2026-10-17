@@ -26,11 +26,11 @@ _P_REF = 2e-5
 
 
 def _am_tone(
-    fc: float, level_db: float, m: float, fmod: float, dur: float = 4.0
+    fc: float, level: float, m: float, fmod: float, dur: float = 4.0
 ) -> np.ndarray:
     t = np.arange(int(_FS * dur)) / _FS
     x = (1.0 + m * np.sin(2 * np.pi * fmod * t)) * np.sin(2 * np.pi * fc * t)
-    return np.asarray(x / np.sqrt(np.mean(x**2)) * _P_REF * 10 ** (level_db / 20))
+    return np.asarray(x / np.sqrt(np.mean(x**2)) * _P_REF * 10 ** (level / 20))
 
 
 # ---------------------------------------------------------------------------
@@ -165,7 +165,7 @@ def test_signal_carrier_sweep_tracks_fig_10_5() -> None:
 
 
 def _am_bbn(
-    level_db: float,
+    level: float,
     m: float,
     fmod: float,
     dur: float = 4.0,
@@ -181,7 +181,7 @@ def _am_bbn(
     x = np.fft.irfft(spec, n=n)
     t = np.arange(n) / _FS
     x = (1.0 + m * np.sin(2 * np.pi * fmod * t)) * x
-    return np.asarray(x / np.sqrt(np.mean(x**2)) * _P_REF * 10 ** (level_db / 20))
+    return np.asarray(x / np.sqrt(np.mean(x**2)) * _P_REF * 10 ** (level / 20))
 
 
 def test_signal_am_bbn_sweep_tracks_literature_trend() -> None:

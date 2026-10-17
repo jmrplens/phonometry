@@ -710,8 +710,12 @@ def test_a_published_field_type_is_published_too() -> None:
             obj = getattr(package, owner, None)
             if not dataclasses.is_dataclass(obj):
                 continue
+            # A published instance (``DEFAULT_EXPANDER``) is read through its
+            # class: an instance carries no module globals, so its annotations
+            # could only resolve from ``localns``.
+            record = obj if isinstance(obj, type) else type(obj)
             try:
-                hints = typing.get_type_hints(obj, localns=localns)
+                hints = typing.get_type_hints(record, localns=localns)
             except NameError as error:
                 unresolved.append(f"phonometry.{domain}.{owner}: {error}")
                 continue

@@ -78,10 +78,10 @@ class WindowMetricsResult(OwnsArrays):
         :math:`n \sum w^2 / \left( \sum w \right)^2`, in bins:
         the width of the ideal rectangular filter that would pass the same
         white-noise power (1 rectangular, 1.5 Hann, 1987/1458 Hamming).
-    :ivar scalloping_loss_db: Attenuation of a tone midway between two
+    :ivar scalloping_loss: Attenuation of a tone midway between two
         bins, :math:`-20 \log_{10} \lvert W(1/2)/W(0) \rvert`, in dB
         (positive).
-    :ivar worst_case_processing_loss_db: Scalloping loss plus the ENBW
+    :ivar worst_case_processing_loss: Scalloping loss plus the ENBW
         processing loss :math:`10 \log_{10}(\mathrm{ENBW})`, in dB: the
         worst-case reduction
         in output signal-to-noise ratio for a tone in white noise.
@@ -96,8 +96,8 @@ class WindowMetricsResult(OwnsArrays):
     taps: NDArray[np.float64]
     coherent_gain: float
     enbw_bins: float
-    scalloping_loss_db: float
-    worst_case_processing_loss_db: float
+    scalloping_loss: float
+    worst_case_processing_loss: float
     highest_sidelobe_db: float
     mainlobe_width_3db_bins: float
 
@@ -179,9 +179,9 @@ def _window_spectrum_db(w: NDArray[np.float64], oversample: int) -> NDArray[np.f
     return np.asarray(level, dtype=np.float64)
 
 
-def _mainlobe_edge(level_db: NDArray[np.float64]) -> int:
+def _mainlobe_edge(level: NDArray[np.float64]) -> int:
     """Index of the first local minimum (the edge of the main lobe)."""
-    falling = np.diff(level_db) < 0.0
+    falling = np.diff(level) < 0.0
     edges = np.flatnonzero(~falling[1:] & falling[:-1]) + 1
     if edges.size == 0:  # pragma: no cover - every proper taper has a null
         msg = "The window spectrum has no sidelobe structure."
@@ -189,11 +189,11 @@ def _mainlobe_edge(level_db: NDArray[np.float64]) -> int:
     return int(edges[0])
 
 
-def _width_3db_bins(level_db: NDArray[np.float64], oversample: int) -> float:
+def _width_3db_bins(level: NDArray[np.float64], oversample: int) -> float:
     """Two-sided -3 dB main-lobe width in bins (linear dB interpolation)."""
-    below = np.flatnonzero(level_db <= _HALF_POWER_DB)
+    below = np.flatnonzero(level <= _HALF_POWER_DB)
     i = int(below[0])
-    d0, d1 = float(level_db[i - 1]), float(level_db[i])
+    d0, d1 = float(level[i - 1]), float(level[i])
     frac = (_HALF_POWER_DB - d0) / (d1 - d0)
     return 2.0 * (i - 1 + frac) / oversample
 
@@ -243,20 +243,20 @@ def window_metrics(
     coherent_gain = wsum / n_v
     enbw = n_v * float(np.sum(w * w)) / (wsum * wsum)
 
-    level_db = _window_spectrum_db(w, _WINDOW_OVERSAMPLE)
+    level = _window_spectrum_db(w, _WINDOW_OVERSAMPLE)
     # Bin k/oversample of the padded DFT is exactly W(k/oversample), so
     # index oversample/2 evaluates the spectrum at the half-bin offset.
-    scalloping = -float(level_db[_WINDOW_OVERSAMPLE // 2])
-    edge = _mainlobe_edge(level_db)
-    highest_sidelobe = float(np.max(level_db[edge:]))
+    scalloping = -float(level[_WINDOW_OVERSAMPLE // 2])
+    edge = _mainlobe_edge(level)
+    highest_sidelobe = float(np.max(level[edge:]))
     return WindowMetricsResult(
         window=_own_window(window),
         n=n_v,
         taps=w,
         coherent_gain=coherent_gain,
         enbw_bins=enbw,
-        scalloping_loss_db=scalloping,
-        worst_case_processing_loss_db=scalloping + 10.0 * np.log10(enbw),
+        scalloping_loss=scalloping,
+        worst_case_processing_loss=scalloping + 10.0 * np.log10(enbw),
         highest_sidelobe_db=highest_sidelobe,
-        mainlobe_width_3db_bins=_width_3db_bins(level_db, _WINDOW_OVERSAMPLE),
+        mainlobe_width_3db_bins=_width_3db_bins(level, _WINDOW_OVERSAMPLE),
     )

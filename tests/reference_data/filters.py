@@ -176,13 +176,13 @@ IEC61260_A35_PRINTED = {
 # filters, L_in = 127 dB re 1 uV, A_ref = 0 dB, T_sweep = T_avg = 30 s, sweep
 # 0,01 Hz to 1 MHz. Formula (B.5): L_c = 127 dB - 19,03 dB = 107,97 dB.
 IEC61260_B5 = {
-    "input_level_db": 127.0,
+    "input_level": 127.0,
     "fraction": 3,
     "sweep_duration_s": 30.0,
     "averaging_time_s": 30.0,
     "start_frequency_hz": 0.01,
     "end_frequency_hz": 1.0e6,
-    "correction_db": -19.03,
+    "correction": -19.03,
     "expected_level_db": 107.97,
 }
 # IEC 61260-1:2014 Table C.1 (printed p. 31, PDF page 33): example number,

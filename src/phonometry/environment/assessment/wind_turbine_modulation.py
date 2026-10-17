@@ -224,7 +224,7 @@ def _nominal_index(frequencies: NDArray[np.float64], centre: float) -> int:
 
 
 def amplitude_modulation_band_levels(
-    band_levels_db: ArrayLike,
+    band_levels: ArrayLike,
     frequencies: ArrayLike,
     *,
     band: int,
@@ -238,7 +238,7 @@ def amplitude_modulation_band_levels(
     10 s analysis takes. The A-weighting is the IEC 61672-1:2013 Table 3
     value at each nominal centre frequency.
 
-    :param band_levels_db: The logged band levels, in dB: one row per 100 ms
+    :param band_levels: The logged band levels, in dB: one row per 100 ms
         sample and one column per one-third-octave band (a single sample may
         be given as one row).
     :param frequencies: Nominal centre frequency of each column, in Hz; it
@@ -263,11 +263,11 @@ def amplitude_modulation_band_levels(
     if weighting not in ("A", "Z"):
         msg = f"'weighting' must be 'A' or 'Z'; got {weighting!r}."
         raise ValueError(msg)
-    levels = require_finite_matrix(band_levels_db, "band_levels_db")
+    levels = require_finite_matrix(band_levels, "band_levels")
     freqs = require_finite_array(frequencies, "frequencies")
     if freqs.size != levels.shape[1]:
         msg = (
-            f"'frequencies' has {freqs.size} centres but 'band_levels_db' "
+            f"'frequencies' has {freqs.size} centres but 'band_levels' "
             f"has {levels.shape[1]} columns."
         )
         raise ValueError(msg)

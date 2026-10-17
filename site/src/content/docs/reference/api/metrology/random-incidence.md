@@ -178,7 +178,7 @@ the two planes of Annex A), so the pole readings enter every plane's sum
 axisymmetric_directivity_factor(
     levels: ArrayLike,
     *,
-    reference_level_db: float | None = None,
+    reference_level: float | None = None,
 ) -> DirectivityFactor
 ```
 
@@ -200,7 +200,7 @@ one plane.
 | Name | Description |
 | :--- | :--- |
 | `levels` | $L(\phi,\mathrm{h})$ in dB, one plane at $\phi = 0, \Delta\phi, \ldots, 360° - \Delta\phi$: 36 readings for Annex A. |
-| `reference_level_db` | $L_\mathrm{rd}$ in dB (Default: None, the reading at 0°). |
+| `reference_level` | $L_\mathrm{rd}$ in dB (Default: None, the reading at 0°). |
 
 **Returns:** The [`DirectivityFactor`](/phonometry/reference/api/metrology/random-incidence/#directivityfactor).
 
@@ -221,13 +221,13 @@ one plane.
 ```python
 diffuse_field_sensitivity(
     frequencies: ArrayLike,
-    indicated_level_db: ArrayLike,
-    reference_indicated_level_db: ArrayLike,
+    indicated_level: ArrayLike,
+    reference_indicated_level: ArrayLike,
     *,
-    reference_random_incidence_level_db: ArrayLike | None = None,
-    reference_free_field_level_db: ArrayLike | None = None,
-    reference_directivity_index_db: ArrayLike | None = None,
-    reference_pressure_level_db: ArrayLike | None = None,
+    reference_random_incidence_level: ArrayLike | None = None,
+    reference_free_field_level: ArrayLike | None = None,
+    reference_directivity_index: ArrayLike | None = None,
+    reference_pressure_level: ArrayLike | None = None,
     reference_diffuse_pressure_difference_db: ArrayLike | None = None,
 ) -> DiffuseFieldSensitivity
 ```
@@ -253,8 +253,8 @@ $$
 G_\mathrm{D} = \Delta G_\mathrm{D} + (G_\mathrm{P,ref} + \Delta_\mathrm{DP}) \tag{11}
 $$
 
-Exactly one of `reference_random_incidence_level_db`,
-`reference_free_field_level_db` and `reference_pressure_level_db`
+Exactly one of `reference_random_incidence_level`,
+`reference_free_field_level` and `reference_pressure_level`
 selects the formula. For Formulas (10) and (11), the directivity factor
 and the diffuse-to-pressure difference of the reference default to Table
 B.1, the type LS2aP/LS2F microphone, one of the two types Annex B
@@ -266,12 +266,12 @@ frequency from 25 Hz to 20 kHz.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The band centres, in Hz, increasing. |
-| `indicated_level_db` | $L_\mathrm{D}$, what the instrument under test indicates in the diffuse field, in dB, one per band. |
-| `reference_indicated_level_db` | $L_\mathrm{D,ref}$, what the reference instrument indicates at the same positions, in dB. |
-| `reference_random_incidence_level_db` | $G_\mathrm{RI,ref}$ in dB, for a reference calibrated by clause 4 (Formula (9)). |
-| `reference_free_field_level_db` | $G_\mathrm{F,ref}$ in dB, for a reference calibrated in a free field (Formula (10)). |
-| `reference_directivity_index_db` | $10\lg\gamma_\mathrm{ref}$ in dB, with Formula (10) only (Default: None, Table B.1). |
-| `reference_pressure_level_db` | $G_\mathrm{P,ref}$ in dB, for a reference calibrated in a pressure field (Formula (11)). |
+| `indicated_level` | $L_\mathrm{D}$, what the instrument under test indicates in the diffuse field, in dB, one per band. |
+| `reference_indicated_level` | $L_\mathrm{D,ref}$, what the reference instrument indicates at the same positions, in dB. |
+| `reference_random_incidence_level` | $G_\mathrm{RI,ref}$ in dB, for a reference calibrated by clause 4 (Formula (9)). |
+| `reference_free_field_level` | $G_\mathrm{F,ref}$ in dB, for a reference calibrated in a free field (Formula (10)). |
+| `reference_directivity_index` | $10\lg\gamma_\mathrm{ref}$ in dB, with Formula (10) only (Default: None, Table B.1). |
+| `reference_pressure_level` | $G_\mathrm{P,ref}$ in dB, for a reference calibrated in a pressure field (Formula (11)). |
 | `reference_diffuse_pressure_difference_db` | $\Delta_\mathrm{DP}$ in dB, with Formula (11) only (Default: None, Table B.1). |
 
 **Returns:** The [`DiffuseFieldSensitivity`](/phonometry/reference/api/metrology/random-incidence/#diffusefieldsensitivity).
@@ -287,10 +287,10 @@ frequency from 25 Hz to 20 kHz.
 ```python
 DiffuseFieldSensitivity(
     frequencies: NDArray[np.float64],
-    indicated_level_db: NDArray[np.float64],
-    reference_indicated_level_db: NDArray[np.float64],
-    reference_sensitivity_level_db: NDArray[np.float64],
-    reference_correction_db: NDArray[np.float64],
+    indicated_level: NDArray[np.float64],
+    reference_indicated_level: NDArray[np.float64],
+    reference_sensitivity_level: NDArray[np.float64],
+    reference_correction: NDArray[np.float64],
     route: str,
 )
 ```
@@ -314,20 +314,20 @@ for a pressure calibration, Formula (11).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | the band centres, in Hz. |
-| `indicated_level_db` | $L_\mathrm{D}$, what the instrument under test indicates, in dB. |
-| `reference_indicated_level_db` | $L_\mathrm{D,ref}$, what the reference instrument indicates at the same positions, in dB. |
-| `reference_sensitivity_level_db` | the reference's calibrated sensitivity level, in dB: $G_\mathrm{RI,ref}$, $G_\mathrm{F,ref}$ or $G_\mathrm{P,ref}$. |
-| `reference_correction_db` | what turns that into the reference's diffuse-field sensitivity level, in dB: 0, $-10\lg \gamma_\mathrm{ref}$ or $\Delta_\mathrm{DP}$. |
+| `indicated_level` | $L_\mathrm{D}$, what the instrument under test indicates, in dB. |
+| `reference_indicated_level` | $L_\mathrm{D,ref}$, what the reference instrument indicates at the same positions, in dB. |
+| `reference_sensitivity_level` | the reference's calibrated sensitivity level, in dB: $G_\mathrm{RI,ref}$, $G_\mathrm{F,ref}$ or $G_\mathrm{P,ref}$. |
+| `reference_correction` | what turns that into the reference's diffuse-field sensitivity level, in dB: 0, $-10\lg \gamma_\mathrm{ref}$ or $\Delta_\mathrm{DP}$. |
 | `route` | `"random_incidence"` (Formula (9)), `"free_field"` (Formula (10)) or `"pressure"` (Formula (11)). |
 
-### DiffuseFieldSensitivity.diffuse_field_level_db
+### DiffuseFieldSensitivity.diffuse_field_level
 
 *property*
 
 $G_\mathrm{D}$, the diffuse-field sensitivity level of the
 instrument under test, in dB (Formulas (9) to (11)).
 
-### DiffuseFieldSensitivity.level_difference_db
+### DiffuseFieldSensitivity.level_difference
 
 *property*
 
@@ -358,7 +358,7 @@ $G_\mathrm{D,ref}$ against frequency.
 
 **Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
 
-### DiffuseFieldSensitivity.reference_diffuse_field_level_db
+### DiffuseFieldSensitivity.reference_diffuse_field_level
 
 *property*
 
@@ -371,7 +371,7 @@ reference instrument, in dB.
 directivity_factor(
     levels: ArrayLike,
     *,
-    reference_level_db: float | None = None,
+    reference_level: float | None = None,
 ) -> DirectivityFactor
 ```
 
@@ -401,7 +401,7 @@ instrument and more for a directional one (see the module notes).
 | Name | Description |
 | :--- | :--- |
 | `levels` | $L(\phi)$ in dB, one row per plane (the first the X-Y plane, `h`; the second the X-Z plane, `v`), each at $\phi = 0, \Delta\phi, \ldots, 360° - \Delta\phi$ from the reference direction: shape `(2, 36)` for Annex A. An instrument measured in one plane under rotational symmetry goes to [`axisymmetric_directivity_factor`](/phonometry/reference/api/metrology/random-incidence/#axisymmetric_directivity_factor). |
-| `reference_level_db` | $L_\mathrm{rd}$ in dB (Default: None, the reading at 0° in the first plane, which A.4.4 takes in the same position). |
+| `reference_level` | $L_\mathrm{rd}$ in dB (Default: None, the reading at 0° in the first plane, which A.4.4 takes in the same position). |
 
 **Returns:** The [`DirectivityFactor`](/phonometry/reference/api/metrology/random-incidence/#directivityfactor).
 
@@ -425,7 +425,7 @@ DirectivityFactor(
     plane_angles_deg: NDArray[np.float64],
     levels: NDArray[np.float64],
     weights: NDArray[np.float64],
-    reference_level_db: float,
+    reference_level: float,
     gamma: float,
     largest_element_fraction: float,
     formula: str,
@@ -451,12 +451,12 @@ each was taken in.
 | `plane_angles_deg` | $\alpha$ of the plane of each reading, in degrees: 0 for the X-Y plane (`h` in Annex A), 90 for the X-Z plane (`v`), and $180°\,j/n$ for plane $j = 0, \ldots, n - 1$ of `n`. |
 | `levels` | $L(\phi)$, the level the instrument indicates for each direction, in dB. |
 | `weights` | $K$ of each reading, dimensionless; they sum to one. |
-| `reference_level_db` | $L_\mathrm{rd}$, in dB. |
+| `reference_level` | $L_\mathrm{rd}$, in dB. |
 | `gamma` | $\gamma$, dimensionless. |
 | `largest_element_fraction` | the largest element of the division, as a fraction of the sphere between 0 and 1 (A.1.6). For one plane under rotational symmetry it is the largest element of the two-plane division that plane stands for, each of whose readings weighs two elements. |
 | `formula` | the formula applied: `"A.3"` (planes), `"A.4"` (one plane, rotational symmetry) or `"A.5"` (38 equal-area elements). |
 
-### DirectivityFactor.directivity_index_db
+### DirectivityFactor.directivity_index
 
 *property*
 
@@ -494,7 +494,7 @@ Plot the directional response or the weight of each reading.
 | :--- | :--- |
 | ValueError | if `view` is not one of the two names above, or `ax` is not polar for the response. |
 
-### DirectivityFactor.relative_levels_db
+### DirectivityFactor.relative_levels
 
 *property*
 
@@ -504,10 +504,10 @@ $L(\phi) - L_\mathrm{rd}$ of each reading, in dB.
 
 ```python
 equal_area_directivity_factor(
-    horizontal_levels_db: ArrayLike,
-    vertical_levels_db: ArrayLike,
+    horizontal_levels: ArrayLike,
+    vertical_levels: ArrayLike,
     *,
-    reference_level_db: float | None = None,
+    reference_level: float | None = None,
 ) -> DirectivityFactor
 ```
 
@@ -525,9 +525,9 @@ is 1/38 of the sphere (2,6 %) and every reading weighs the same.
 
 | Name | Description |
 | :--- | :--- |
-| `horizontal_levels_db` | $L(n)$ in the horizontal (X-Y) plane, in dB, 20 readings at the directions of [`equal_area_incidence_angles`](/phonometry/reference/api/metrology/random-incidence/#equal_area_incidence_angles), in the order the note prints them (0°, 32,6°, ..., 180°, ..., 327,4°). |
-| `vertical_levels_db` | $L(n)$ in the vertical (X-Z) plane, in dB, 18 readings at the same directions without 0° and 180°. |
-| `reference_level_db` | $L_\mathrm{rd}$ in dB (Default: None, the horizontal reading at 0°). |
+| `horizontal_levels` | $L(n)$ in the horizontal (X-Y) plane, in dB, 20 readings at the directions of [`equal_area_incidence_angles`](/phonometry/reference/api/metrology/random-incidence/#equal_area_incidence_angles), in the order the note prints them (0°, 32,6°, ..., 180°, ..., 327,4°). |
+| `vertical_levels` | $L(n)$ in the vertical (X-Z) plane, in dB, 18 readings at the same directions without 0° and 180°. |
+| `reference_level` | $L_\mathrm{rd}$ in dB (Default: None, the horizontal reading at 0°). |
 
 **Returns:** The [`DirectivityFactor`](/phonometry/reference/api/metrology/random-incidence/#directivityfactor).
 
@@ -603,8 +603,8 @@ symmetry stands for the same two planes and is judged on their division.
 ```python
 random_incidence_sensitivity(
     frequencies: ArrayLike,
-    free_field_level_db: ArrayLike,
-    directivity_index_db: ArrayLike,
+    free_field_level: ArrayLike,
+    directivity_index: ArrayLike,
 ) -> RandomIncidenceSensitivity
 ```
 
@@ -625,8 +625,8 @@ instrument of that model (4.2).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The preferred frequencies, in Hz, increasing. |
-| `free_field_level_db` | $G_\mathrm{F}$ at each frequency, in dB (A.3). |
-| `directivity_index_db` | $10\lg\gamma$ at each frequency, in dB: [`DirectivityFactor.directivity_index_db`](/phonometry/reference/api/metrology/random-incidence/#directivityfactordirectivity_index_db) of the readings at that frequency. |
+| `free_field_level` | $G_\mathrm{F}$ at each frequency, in dB (A.3). |
+| `directivity_index` | $10\lg\gamma$ at each frequency, in dB: [`DirectivityFactor.directivity_index`](/phonometry/reference/api/metrology/random-incidence/#directivityfactordirectivity_index) of the readings at that frequency. |
 
 **Returns:** The [`RandomIncidenceSensitivity`](/phonometry/reference/api/metrology/random-incidence/#randomincidencesensitivity).
 
@@ -641,9 +641,9 @@ instrument of that model (4.2).
 ```python
 RandomIncidenceSensitivity(
     frequencies: NDArray[np.float64],
-    free_field_level_db: NDArray[np.float64],
-    directivity_index_db: NDArray[np.float64],
-    random_incidence_level_db: NDArray[np.float64],
+    free_field_level: NDArray[np.float64],
+    directivity_index: NDArray[np.float64],
+    random_incidence_level: NDArray[np.float64],
 )
 ```
 
@@ -657,11 +657,11 @@ $G_\mathrm{RI} = G_\mathrm{F} - 10\lg\gamma$ at each frequency.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | the preferred frequencies, in Hz. |
-| `free_field_level_db` | $G_\mathrm{F} = L_\mathrm{rd} - L_\mathrm{o}$, the free-field sensitivity level for the reference direction, in dB. |
-| `directivity_index_db` | $10\lg\gamma$, in dB. |
-| `random_incidence_level_db` | $G_\mathrm{RI}$, in dB. |
+| `free_field_level` | $G_\mathrm{F} = L_\mathrm{rd} - L_\mathrm{o}$, the free-field sensitivity level for the reference direction, in dB. |
+| `directivity_index` | $10\lg\gamma$, in dB. |
+| `random_incidence_level` | $G_\mathrm{RI}$, in dB. |
 
-### RandomIncidenceSensitivity.correction_db
+### RandomIncidenceSensitivity.correction
 
 *property*
 
@@ -704,7 +704,7 @@ Plot the sensitivity levels or the correction against frequency.
 
 ```python
 ReferenceMicrophoneRow(
-    directivity_index_db: float,
+    directivity_index: float,
     diffuse_pressure_difference_db: float,
 )
 ```
@@ -721,7 +721,7 @@ measurement uncertainty of ±0,03 dB (B.5).
 
 | Name | Description |
 | :--- | :--- |
-| `directivity_index_db` | $10\lg\gamma$ of the microphone, in dB: the directivity factor Formula (10) takes as $\gamma_\mathrm{ref}$. |
+| `directivity_index` | $10\lg\gamma$ of the microphone, in dB: the directivity factor Formula (10) takes as $\gamma_\mathrm{ref}$. |
 | `diffuse_pressure_difference_db` | $\Delta_\mathrm{DP}$, its diffuse-field sensitivity level less its pressure sensitivity level, in dB, which Formula (11) adds to a pressure calibration. |
 
 ## SphereDivisionWarning

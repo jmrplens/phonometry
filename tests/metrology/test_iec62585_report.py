@@ -45,7 +45,7 @@ def _verdict(
         _THIRDS,
         expanded,
         clause=12,
-        correction_db=-0.1 * x**1.5,
+        correction=-0.1 * x**1.5,
         coverage_factor=np.full(_THIRDS.size, 2.04),
         correction_range_db=0.02 * x**0.8 if with_range else None,
     )

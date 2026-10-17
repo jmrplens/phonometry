@@ -2748,7 +2748,7 @@ def _wt_low_frequency() -> "LowFrequencyLevel":
         np.vstack([power, power, power - 1.0]),
         distance=[650.0, 820.0, 1100.0],
         hub_height_m=120.0,
-        facade_insulation_db=environment.LOW_FREQUENCY_FACADE_INSULATION_DB[
+        facade_insulation=environment.LOW_FREQUENCY_FACADE_INSULATION[
             "Denmark brick or similar"
         ],
     )
@@ -3008,8 +3008,8 @@ def generate_wind_turbine_receptor_rating(output_dir: str) -> None:
     left.legend(loc="lower right", fontsize=9)
     environment.wind_turbine_rating_level(
         41.0,
-        tonal_adjustment_db=2.0,
-        amplitude_modulation_adjustment_db=k_am,
+        tonal_adjustment=2.0,
+        amplitude_modulation_adjustment=k_am,
     ).plot(right, language=_LANG)
     fig.tight_layout()
     save_figure(output_dir, "wind_turbine_receptor_rating.svg")

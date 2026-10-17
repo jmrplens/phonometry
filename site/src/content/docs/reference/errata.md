@@ -2047,8 +2047,8 @@ in the same order.
   (printed pp. 25 and 26) and PDF page 39 (printed p. 37) of BS EN 62585:2012,
   the English text of EN 62585:2012, which is IEC 62585:2012 unchanged.
 - **Library behaviour:** `metrology.comparison_coupler_correction` names its
-  inputs by what each reading is of, `slm_coupler_level_db` and
-  `reference_coupler_level_db`, so neither labelling reaches it; the
+  inputs by what each reading is of, `slm_coupler_level` and
+  `reference_coupler_level`, so neither labelling reaches it; the
   conformance row on Annex E builds the readings with Figure E.1's labels and
   the tests pin the size of the discrepancy
   ([`tests/metrology/test_free_field_corrections.py`](https://github.com/jmrplens/phonometry/blob/main/tests/metrology/test_free_field_corrections.py)).
@@ -2359,7 +2359,7 @@ in the same order.
   EN 62489-1:2010+A1:2015, which is IEC 62489-1:2010 with its Amendment 1:2014
   unchanged.
 - **Library behaviour:** `electroacoustics.QuadraturePhaseError` states the
-  rise and the fall apart, as `level_increase_db` and `level_decrease_db`;
+  rise and the fall apart, as `level_increase` and `level_decrease`;
   the conformance rows on 5.4.14.1 pin the rise to the printed 0,72 dB and the
   fall to $20\lg(1 - \cos 85°) = -0{,}792$ dB, naming the print as the
   erratum.
@@ -7994,7 +7994,7 @@ in the same order.
   input.
 - **Library behaviour:** the conformance rows of Table C.1 take the printed
   column as an input of Formula (1) and hold the sum;
-  [`foundation_to_floor_transfer`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/railway_prediction.py)
+  [`foundation_to_floor_level_difference`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/railway_prediction.py)
   reads Table A.5 as printed.
 - **Status:** not reported; the document is a draft under comment.
 
@@ -8020,7 +8020,7 @@ in the same order.
   lower deviation as the safe side of a timber floor's transfer is above
   the mean at those ratios.
 - **Library behaviour:**
-  [`FOUNDATION_TO_FLOOR_DB`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/railway_prediction.py)
+  [`FOUNDATION_TO_FLOOR_LEVEL_DIFFERENCES`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/railway_prediction.py)
   carries the table as printed, its docstring says where the order fails,
   and no order between the three statistics is enforced.
 - **Status:** not reported; the document is a draft under comment.
@@ -8555,7 +8555,7 @@ in the same order.
   [`measured_insertion_loss_indirect`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/propagation/barrier_in_situ.py)
   takes `receiver_type_before` and `receiver_type_after`, each of them
   'hemi_free_field' or 'reflecting_surface' and each defaulting to the former,
-  and reads its correction out of `RECEIVER_CORRECTIONS_DB`, which holds the
+  and reads its correction out of `RECEIVER_CORRECTIONS`, which holds the
   printed 0 dB and 6 dB. The result carries both corrections so that a report
   shows which was applied to which campaign.
 - **Status:** not reported.
@@ -10147,7 +10147,7 @@ in the same order.
   column headings. Verified on PDF page 26 (printed p. 18) of BS EN ISO
   8253-1:2010.
 - **Library behaviour:** none needed. The attenuation values of
-  [`EARPHONE_ATTENUATION_DB`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/hearing/audiometry.py) are the
+  [`EARPHONE_ATTENUATION`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/hearing/audiometry.py) are the
   table's cells and do not depend on the footnote marks.
 - **Status:** unreported (editorial, no numerical consequence).
 
@@ -10184,7 +10184,7 @@ in the same order.
 - **Evidence:** the sentence read against the rows it introduces. Verified on
   PDF page 21 (printed p. 15) of ISO 8253-2:2009.
 - **Library behaviour:**
-  [`INCIDENCE_CORRECTIONS_DB`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/hearing/sound_field_audiometry.py)
+  [`INCIDENCE_CORRECTIONS`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/hearing/sound_field_audiometry.py)
   carries every printed row, 125 Hz to 12 500 Hz, and
   [`incidence_correction`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/hearing/sound_field_audiometry.py)
   reads them. The conformance check "ISO 8253-2:2009 Table B.1" counts all 48
@@ -11040,7 +11040,7 @@ published sources:
   11546-1:1995 as published in BS EN ISO 11546-1:2009. Not registered as an
   erratum because the standard discloses the difference itself; registered
   here so that
-  [`ARTIFICIAL_SOURCE_EXAMPLE_LWA_DB`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/enclosure_insulation.py)
+  [`ARTIFICIAL_SOURCE_EXAMPLE_LWA`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/enclosure_insulation.py)
   is not read as a property of an Annex A source.
 
 - **ISO 7235:2003, Equations (10), (21) and (22):** the ideal gas law is

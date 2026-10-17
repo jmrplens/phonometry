@@ -94,7 +94,7 @@ def _chk_table_one() -> Outcome:
         levels,
         surface_area=100.0,
         background_levels=None,
-        environmental_correction_db=0.0,
+        environmental_correction=0.0,
     )
     computed = {
         kind: emission.turbine_noise_declaration(
@@ -183,7 +183,7 @@ def _chk_figure_a3() -> Outcome:
         abs(
             emission.turbine_environmental_correction(
                 surface, absorption_area=ratio * surface
-            ).environmental_correction_db
+            ).environmental_correction
             - 10.0 * math.log10(1.0 + 4.0 / ratio)
         )
         for ratio in ratios
@@ -219,7 +219,7 @@ def _chk_ratio_at_limit() -> Outcome:
         middle = 0.5 * (low + high)
         k = emission.turbine_environmental_correction(
             surface, absorption_area=middle * surface
-        ).environmental_correction_db
+        ).environmental_correction
         if k > oracle.IEC61063_K_LIMIT_DB:
             low = middle
         else:
@@ -250,9 +250,9 @@ def _chk_arithmetic_note() -> Outcome:
             levels,
             surface_area=100.0,
             background_levels=None,
-            environmental_correction_db=0.0,
+            environmental_correction=0.0,
         )
-        worst = max(worst, result.surface_pressure_level_db - result.arithmetic_mean_db)
+        worst = max(worst, result.surface_pressure_level - result.arithmetic_mean_db)
     return numeric(
         oracle.IEC61063_ARITHMETIC_DEVIATION_DB, worst, 0.05, unit="dB", places=3
     )
@@ -287,16 +287,16 @@ def _chk_printed_limits() -> Outcome:
                 levels,
                 surface_area=100.0,
                 background_levels=levels - margin_db,
-                environmental_correction_db=0.0,
+                environmental_correction=0.0,
             ).upper_limit
 
-    def overhead(level_db: float) -> emission.TurbineSoundPowerResult:
+    def overhead(level: float) -> emission.TurbineSoundPowerResult:
         # Four positions at 80 dB and one overhead position.
         return emission.turbine_sound_power(
-            np.array([80.0, 80.0, 80.0, 80.0, level_db]),
+            np.array([80.0, 80.0, 80.0, 80.0, level]),
             surface_area=100.0,
             background_levels=None,
-            environmental_correction_db=0.0,
+            environmental_correction=0.0,
             overhead_mask=np.array([False, False, False, False, True]),
         )
 
@@ -316,13 +316,13 @@ def _chk_printed_limits() -> Outcome:
         "4.2 at 3 dB": not upper(criterion),
         "4.2 below 3 dB": upper(criterion - 0.01),
         "4.3 below 6 m/s": bool(
-            check(environmental_correction_db=0.0, wind_speed_m_s=wind - 0.01).wind_ok
+            check(environmental_correction=0.0, wind_speed_m_s=wind - 0.01).wind_ok
         ),
         "4.3 at 6 m/s": not check(
-            environmental_correction_db=0.0, wind_speed_m_s=wind
+            environmental_correction=0.0, wind_speed_m_s=wind
         ).wind_ok,
-        "A.3.3 at 7 dB": check(environmental_correction_db=k).passes,
-        "A.3.3 above 7 dB": not check(environmental_correction_db=k + tiny).passes,
+        "A.3.3 at 7 dB": check(environmental_correction=k).passes,
+        "A.3.3 above 7 dB": not check(environmental_correction=k + tiny).passes,
         "7.2.2 at 1,0 dB": exact.overhead_effect_db is not None
         and math.isclose(exact.overhead_effect_db, effect, rel_tol=0.0, abs_tol=1e-12)
         and bool(exact.overhead_may_be_deleted),

@@ -189,7 +189,7 @@ con la impedancia de entrada de un tubo abierto de las Fórmulas (B.1) a (B.3).
 ```python
 pairs = ((0, 1), (1, 2), (2, 0))
 za = [metrology.coupler_transfer_impedance(f, coupler, mics[i], mics[j], **conditions) for i, j in pairs]
-print(za[0].heat_conduction_correction_db[[1, 16, 25]].round(3))   # [-0.287 -0.051  0.004]
+print(za[0].heat_conduction_correction[[1, 16, 25]].round(3))   # [-0.287 -0.051  0.004]
 print(za[0].capillary_correction_db[[1, 16, 25]].round(3))         # [-0.213  0.011 -0.   ]
 ```
 
@@ -232,7 +232,7 @@ hidrógeno, el C.3 escala la frecuencia por la razón de las velocidades del
 sonido:
 
 ```python
-print(metrology.large_volume_wave_motion_correction([1000.0, 2000.0]).correction_db)   # [-0.002 -0.06 ]
+print(metrology.large_volume_wave_motion_correction([1000.0, 2000.0]).correction)   # [-0.002 -0.06 ]
 ```
 
 ## 4. Las sensibilidades en presión
@@ -252,7 +252,7 @@ true = [m0 * m.complex_equivalent_volume_m3(f) / m.equivalent_volume_m3 for m0, 
 ze = [true[i] * true[j] * z.transfer_impedance_pa_s_m3 for (i, j), z in zip(pairs, za)]   # Fórmula (2)
 
 c = metrology.pressure_reciprocity(f, ze, za)
-print(c.sensitivity_level_db[:, 16].round(2))    # [-26.03 -26.44 -25.76]
+print(c.sensitivity_level[:, 16].round(2))    # [-26.03 -26.44 -25.76]
 print(c.sensitivity_mv_per_pa[:, 16].round(2))   # [49.93 47.64 51.51]
 print(np.abs(c.sensitivity_v_per_pa - true).max() < 1e-15)   # True
 ```
@@ -269,7 +269,7 @@ medida frente a la fuente sustituye al tercer par, Fórmula (8):
 
 ```python
 pair = metrology.pressure_reciprocity_pair(f, ze[0], za[0], true[0] / true[1])
-print(pair.sensitivity_level_db[:, 16].round(2))   # [-26.03 -26.44]
+print(pair.sensitivity_level[:, 16].round(2))   # [-26.03 -26.44]
 ```
 
 ## 5. Una calibración en campo libre
@@ -315,7 +315,7 @@ ze_ff = [
 cf = metrology.free_field_reciprocity(
     ff, ze_ff, diaphragm_distances_m=(0.25, 0.25, 0.25), acoustic_centers_m=(centre, centre, centre), **ffc
 )
-print(cf.sensitivity_level_db[:, 10].round(2))   # [-37.76 -38.03 -37.55]
+print(cf.sensitivity_level[:, 10].round(2))   # [-37.76 -38.03 -37.55]
 print(np.abs(cf.sensitivity_v_per_pa - true_ff).max() < 1e-15)   # True
 ```
 

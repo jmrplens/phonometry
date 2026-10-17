@@ -77,7 +77,7 @@ def generate_datasheet_sound_reduction_rating(output_dir: str) -> None:
     from phonometry import building
 
     cells: dict[str, Any] = {
-        f"sound_reduction_index_{band}_db": r
+        f"sound_reduction_index_{band}": r
         for band, r in zip(_REDUCTION_BANDS_HZ, _R_DB, strict=True)
     }
     partition = building.SoundReductionSpectrum(
@@ -98,7 +98,7 @@ def generate_datasheet_impact_improvement_rating(output_dir: str) -> None:
     from phonometry import building
 
     cells: dict[str, Any] = {
-        f"impact_improvement_{band}_db": delta_l
+        f"impact_improvement_{band}": delta_l
         for band, delta_l in zip(_IMPROVEMENT_BANDS_HZ, _DELTA_L_DB, strict=True)
     }
     covering = building.ImpactImprovementSpectrum(

@@ -651,7 +651,7 @@ def test_a_packaged_row_class_is_held_to_its_limits(
     [
         (GroundSurface, {"water_content_percent": 150.0}),
         (DampingTreatment, {"temperature_c": -40.0}),
-        (DuctWallSpectrum, {"transmission_loss_63_db": -3.0}),
+        (DuctWallSpectrum, {"transmission_loss_63": -3.0}),
         (NonlinearityParameter, {"b_over_a": -1.0}),
         (PorousMaterial, {"porosity": 1.0}),
     ],

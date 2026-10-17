@@ -1474,8 +1474,8 @@ def plot_direct_sound_subtraction(
     ax.set_ylabel(_t("Impulse response [a.u.]", language))
     reduction = (
         "∞"
-        if not math.isfinite(result.reduction_db)
-        else format_number(result.reduction_db, language, decimals=1)
+        if not math.isfinite(result.reduction)
+        else format_number(result.reduction, language, decimals=1)
     )
     ax.set_title(f"{_t('Signal subtraction', language)}: $R_{{sub}}$ = {reduction} dB")
     ax.grid(visible=True, alpha=0.3)
@@ -1661,7 +1661,7 @@ def plot_barrier_in_situ(
         None if result.frequencies is None else np.asarray(result.frequencies),
         np.asarray(result.receiver_before_db, dtype=np.float64),
         np.asarray(result.receiver_after_db, dtype=np.float64),
-        np.asarray(result.insertion_loss_db, dtype=np.float64),
+        np.asarray(result.insertion_loss, dtype=np.float64),
         labels=(
             _t("Receiver level before the barrier", language),
             _t("Receiver level after the barrier", language),
@@ -1762,7 +1762,7 @@ def plot_pass_by_regression(
     ax = ax if ax is not None else _new_axes()
     color, marker = _SPB_CATEGORY_STYLE[result.vehicle_category]
     speeds = np.asarray(result.speeds_kmh, dtype=np.float64)
-    levels = np.asarray(result.max_levels_db, dtype=np.float64)
+    levels = np.asarray(result.max_levels, dtype=np.float64)
     low, high = result.speed_window_kmh
     ax.axvspan(
         low,
@@ -1794,7 +1794,7 @@ def plot_pass_by_regression(
     )
     ax.plot(
         [result.reference_speed_kmh],
-        [result.vehicle_sound_level_db],
+        [result.vehicle_sound_level],
         linestyle="none",
         marker="D",
         ms=8,
@@ -1802,7 +1802,7 @@ def plot_pass_by_regression(
         zorder=5,
         label=(
             r"$L_\mathrm{veh}$ = "
-            f"{format_number(result.reported_vehicle_sound_level_db, language)} dB, "
+            f"{format_number(result.reported_vehicle_sound_level, language)} dB, "
             f"{format_number(result.reference_speed_kmh, language, decimals=0)} km/h"
         ),
     )
@@ -1846,7 +1846,7 @@ def plot_statistical_pass_by(
     for category, regression in result.regressions.items():
         color, marker = _SPB_CATEGORY_STYLE[category]
         speeds = np.asarray(regression.speeds_kmh, dtype=np.float64)
-        levels = np.asarray(regression.max_levels_db, dtype=np.float64)
+        levels = np.asarray(regression.max_levels, dtype=np.float64)
         ax.plot(
             speeds,
             levels,
@@ -1868,12 +1868,12 @@ def plot_statistical_pass_by(
             "label",
             f"{_t(_SPB_CATEGORY_LABELS[category], language)}: "
             r"$L_\mathrm{veh}$ = "
-            f"{format_number(regression.reported_vehicle_sound_level_db, language)} dB",
+            f"{format_number(regression.reported_vehicle_sound_level, language)} dB",
         )
         ax.plot(line_x, line_y, **line_kwargs)
         ax.plot(
             [regression.reference_speed_kmh],
-            [regression.vehicle_sound_level_db],
+            [regression.vehicle_sound_level],
             linestyle="none",
             marker="D",
             ms=8,
@@ -1884,7 +1884,7 @@ def plot_statistical_pass_by(
     _spb_speed_axis(ax, extent, language)
     ax.set_title(
         f"{_t('ISO 11819-1 statistical pass-by', language)}: SPBI = "
-        f"{format_number(result.reported_index_db, language)} dB"
+        f"{format_number(result.reported_index, language)} dB"
     )
     ax.grid(visible=True, which="major", alpha=0.3)
     place_legend_clear(ax.legend(fontsize="small"))
@@ -1943,11 +1943,11 @@ def plot_sel_distribution(
     else:
         margin = _SEL_SPREAD_MARGIN * result.sigma_db
         x = np.linspace(
-            float(lower[0]) - result.level_shift_db - margin,
+            float(lower[0]) - result.level_shift - margin,
             float(upper[-1]) + margin,
             801,
         )
-        long_term = result.distribution_long_term_level_db
+        long_term = result.distribution_long_term_level
         # The long-term level is a reference on the level axis, not a series:
         # drawn in the page's own ink, dimmed, so it reads on both themes and
         # does not compete with the curve for colour. It is the level taken
@@ -2769,7 +2769,7 @@ def plot_level_difference_quantiles(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    values = np.asarray(result.sorted_differences_db, dtype=np.float64)
+    values = np.asarray(result.sorted_differences, dtype=np.float64)
     ranks = np.arange(1, values.size + 1)
     ax.axhspan(
         result.q01_db,

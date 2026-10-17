@@ -178,10 +178,10 @@ def test_a_sound_reduction_report_notes_a_printed_rw_that_does_not_follow() -> N
     row: dict[str, Any] = {
         "key": "w",
         "name": "Wall",
-        "weighted_sound_reduction_index_db": 31,
+        "weighted_sound_reduction_index": 31,
     }
     row |= {
-        f"sound_reduction_index_{band}_db": value
+        f"sound_reduction_index_{band}": value
         for band, value in zip(bands, ref.ISO717_1_ANNEX_C_R, strict=True)
     }
     document = _document("SoundReductionSpectrum", row)
@@ -190,7 +190,7 @@ def test_a_sound_reduction_report_notes_a_printed_rw_that_does_not_follow() -> N
             document, row_type=building.SoundReductionSpectrum
         )
     assert catalogue["lab-report/w"].rating().rating == 30
-    assert catalogue["lab-report/w"].weighted_sound_reduction_index_db == 31.0
+    assert catalogue["lab-report/w"].weighted_sound_reduction_index == 31.0
 
 
 def test_an_impact_report_holds_a_declared_bound_and_rates_nothing_it_lacks() -> None:
@@ -199,8 +199,8 @@ def test_an_impact_report_holds_a_declared_bound_and_rates_nothing_it_lacks() ->
         {
             "key": "m",
             "name": "Floor mat",
-            "ranges": {"weighted_impact_improvement_db": [26, None]},
-            "bounded_below": ["weighted_impact_improvement_db"],
+            "ranges": {"weighted_impact_improvement": [26, None]},
+            "bounded_below": ["weighted_impact_improvement"],
             "basis": {"row": "declared"},
         },
     )
@@ -209,10 +209,10 @@ def test_an_impact_report_holds_a_declared_bound_and_rates_nothing_it_lacks() ->
     )
     row = catalogue["lab-report/m"]
     assert catalogue.notes == ()
-    assert row.why_missing("weighted_impact_improvement_db") == (
+    assert row.why_missing("weighted_impact_improvement") == (
         "the datasheet prints a lower bound of 26 and no value"
     )
-    with pytest.raises(ValueError, match="impact_improvement_100_db"):
+    with pytest.raises(ValueError, match="impact_improvement_100"):
         row.rating()
 
 

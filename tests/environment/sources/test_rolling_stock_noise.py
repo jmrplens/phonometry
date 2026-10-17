@@ -166,7 +166,7 @@ def test_table_g2_is_reproduced() -> None:
         ref.TABLE_G2_READING_DB,
         [metrology.Quantity(v, u, name=n) for n, v, u in ref.TABLE_G2_ROWS],
     )
-    assert budget.level_db == pytest.approx(ref.TABLE_G2_LEVEL_DB, abs=1e-12)
+    assert budget.level == pytest.approx(ref.TABLE_G2_LEVEL_DB, abs=1e-12)
     assert (
         round(budget.combined_uncertainty_db, 2) == ref.TABLE_G2_COMBINED_UNCERTAINTY_DB
     )
@@ -191,11 +191,11 @@ def test_figure_g1_draws_the_shares_largest_first() -> None:
 def test_a_budget_built_from_lists_holds_tuples() -> None:
     """Direct construction with lists cannot leave the budget open to appends."""
     budget = environment.PassByUncertainty(
-        reading_db=55.0, names=["tripod"], corrections_db=[0.0],
+        reading_db=55.0, names=["tripod"], corrections=[0.0],
         standard_uncertainties_db=[0.35],
     )  # fmt: skip
     assert budget.names == ("tripod",)
-    assert budget.corrections_db == (0.0,)
+    assert budget.corrections == (0.0,)
     assert budget.standard_uncertainties_db == (0.35,)
 
 
@@ -275,13 +275,13 @@ def test_a_steady_1_khz_tone_reads_its_own_level() -> None:
     amplitude = 1.0
     record = pass_by_measurement(_tone(amplitude), _FS, start_s=2.0, end_s=8.0)
     expected = 10.0 * math.log10(amplitude**2 / 2.0 / _P0**2)
-    assert record.equivalent_level_db == pytest.approx(expected, abs=0.02)
-    assert record.max_level_db == pytest.approx(expected, abs=0.05)
+    assert record.equivalent_level == pytest.approx(expected, abs=0.02)
+    assert record.max_level == pytest.approx(expected, abs=0.05)
     assert record.measurement_time_s == pytest.approx(6.0)
-    assert record.exposure_level_db == pytest.approx(
-        record.equivalent_level_db + 10.0 * math.log10(6.0)
+    assert record.exposure_level == pytest.approx(
+        record.equivalent_level + 10.0 * math.log10(6.0)
     )
-    assert record.normalized_level_db is None
+    assert record.normalized_level is None
 
 
 def test_the_interval_spread_over_tp_is_the_transit_exposure_level() -> None:
@@ -289,8 +289,8 @@ def test_the_interval_spread_over_tp_is_the_transit_exposure_level() -> None:
     record = pass_by_measurement(
         _tone(0.5), _FS, start_s=2.0, end_s=8.0, pass_by_time_s=3.0
     )
-    assert record.normalized_level_db == pytest.approx(
-        record.equivalent_level_db + 10.0 * math.log10(2.0)
+    assert record.normalized_level == pytest.approx(
+        record.equivalent_level + 10.0 * math.log10(2.0)
     )
 
 
@@ -360,7 +360,7 @@ def test_the_maximum_is_taken_within_the_interval() -> None:
     p[burst] *= 10.0
     record = pass_by_measurement(p, _FS, start_s=2.0, end_s=8.0)
     steady = 10.0 * math.log10(0.1**2 / 2.0 / _P0**2)
-    assert record.max_level_db == pytest.approx(steady, abs=0.05)
+    assert record.max_level == pytest.approx(steady, abs=0.05)
     assert float(np.max(record.levels)) > steady + 15.0
 
 
@@ -378,7 +378,7 @@ def test_the_equivalent_level_is_the_mean_square_of_the_pressure() -> None:
     record = pass_by_measurement(p, _FS, start_s=2.0, end_s=8.0)
     first, last = 2 * _FS, 8 * _FS
     expected = 10.0 * math.log10(float(np.mean(p[first:last] ** 2)) / _P0**2)
-    assert record.equivalent_level_db == pytest.approx(expected, abs=0.05)
+    assert record.equivalent_level == pytest.approx(expected, abs=0.05)
 
 
 def test_a_signal_is_read_in_pascals() -> None:
@@ -388,7 +388,7 @@ def test_a_signal_is_read_in_pascals() -> None:
         Signal(samples, _FS, calibration_factor=4.0), start_s=0.5, end_s=1.5
     )
     from_array = pass_by_measurement(4.0 * samples, _FS, start_s=0.5, end_s=1.5)
-    assert from_signal.equivalent_level_db == from_array.equivalent_level_db
+    assert from_signal.equivalent_level == from_array.equivalent_level
 
 
 def test_the_interval_has_to_lie_inside_the_record() -> None:
@@ -450,10 +450,10 @@ def test_the_stationary_result_is_the_rounded_mean_of_the_sets() -> None:
     lengths = [4.0, 4.0]
     result = stationary_test([[62.0, 63.0], [62.0, 63.0], [62.0, 63.0]], lengths)
     unit = stationary_unit_level([62.0, 63.0], lengths)
-    np.testing.assert_allclose(result.set_levels_db, [unit] * 3)
-    assert result.reported_level_db == float(round(unit))
+    np.testing.assert_allclose(result.set_levels, [unit] * 3)
+    assert result.reported_level == float(round(unit))
     half = stationary_test([[62.5, 62.5]] * 3, lengths)
-    assert half.reported_level_db == 63.0
+    assert half.reported_level == 63.0
     assert half.valid is True
 
 
@@ -484,8 +484,8 @@ def test_the_result_is_the_highest_rounded_mean() -> None:
     result = rolling_stock_test(
         {"left": [80.2, 80.9, 81.4], "right": [81.6, 82.4, 81.9]}
     )
-    assert dict(result.reported_levels_db) == {"left": 81.0, "right": 82.0}
-    assert result.final_level_db == 82.0
+    assert dict(result.reported_levels) == {"left": 81.0, "right": 82.0}
+    assert result.final_level == 82.0
     assert result.governing_position == "right"
     assert result.valid is True
 
@@ -502,7 +502,7 @@ def test_a_mean_on_the_half_goes_up(
     runs: tuple[float, float, float], expected: float
 ) -> None:
     """Means of 70,5 dB and 71,5 dB round up, though binary arithmetic lands them a hair under."""
-    assert rolling_stock_test({"p": runs}).final_level_db == expected
+    assert rolling_stock_test({"p": runs}).final_level == expected
 
 
 def test_every_mean_of_runs_in_tenths_on_a_half_goes_up() -> None:
@@ -519,7 +519,7 @@ def test_every_mean_of_runs_in_tenths_on_a_half_goes_up() -> None:
             continue
         halves += 1
         result = rolling_stock_test({"p": [t / 10.0 for t in tenths]})
-        assert result.final_level_db == (total + 15) // 30, tenths
+        assert result.final_level == (total + 15) // 30, tenths
     assert halves > 100
 
 
@@ -650,7 +650,7 @@ def test_neutrality_is_judged_on_levels_rounded_to_a_decimal(
 ) -> None:
     """6.3.4: no more than 2,0 dB, both levels rounded to one decimal first."""
     verdict = check_adjacent_vehicle_neutrality(with_adjacent, unit)
-    assert verdict.difference_db == pytest.approx(difference)
+    assert verdict.difference == pytest.approx(difference)
     assert verdict.passes is neutral
 
 
@@ -728,7 +728,7 @@ def test_roughness_below_the_limit_changes_nothing() -> None:
         speed_kmh=80.0,
     )
     assert verdict.exceeded is False
-    np.testing.assert_allclose(verdict.roughness_correction_db, 0.0, atol=1e-12)
+    np.testing.assert_allclose(verdict.roughness_correction, 0.0, atol=1e-12)
     assert verdict.impact_db == pytest.approx(0.0, abs=1e-12)
     assert verdict.passes is True
 
@@ -771,7 +771,7 @@ def test_one_band_over_the_limit_at_36_kmh_corrects_one_noise_band() -> None:
     )
     correction = np.zeros(len(_NOISE_BANDS_HZ))
     correction[_NOISE_BANDS_HZ.index(250.0)] = 3.0
-    np.testing.assert_allclose(verdict.roughness_correction_db, correction, atol=1e-9)
+    np.testing.assert_allclose(verdict.roughness_correction, correction, atol=1e-9)
     count = len(_NOISE_BANDS_HZ)
     expected = 10.0 * math.log10(count) - 10.0 * math.log10(count - 1 + 10**-0.3)
     assert verdict.impact_db == pytest.approx(expected, abs=1e-9)
@@ -863,7 +863,7 @@ def test_annex_e_bounds_a_one_band_difference() -> None:
     count = len(_NOISE_BANDS_HZ)
     up = 10.0 * math.log10(count) - 10.0 * math.log10(count - 1 + 10**0.5)
     down = 10.0 * math.log10(count) - 10.0 * math.log10(count - 1 + 10**-0.5)
-    min_1, max_1, min_2, max_2 = result.level_differences_db
+    min_1, max_1, min_2, max_2 = result.level_differences
     assert min_1 == pytest.approx(0.0, abs=1e-9)
     assert max_1 == pytest.approx(up, abs=1e-9)
     assert min_2 == pytest.approx(down, abs=1e-9)
@@ -1277,7 +1277,7 @@ def test_an_annex_c_verdict_records_the_limit_it_was_judged_against() -> None:
         annex_c.limit_db[0.04] = 0.0  # type: ignore[index]
     stricter = _stricter_limit()
     with pytest.raises(
-        ValueError, match="'corrected_roughness_levels_db' is not Formula C.1"
+        ValueError, match="'corrected_roughness_levels' is not Formula C.1"
     ):
         dataclasses.replace(annex_c, limit_db=stricter)
 

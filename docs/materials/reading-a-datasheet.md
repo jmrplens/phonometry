@@ -306,13 +306,13 @@ wall = {
     "key": "partition",
     "name": "Glazed partition",
     "construction": "single 4 mm glass pane",
-    "weighted_sound_reduction_index_db": 30,
-    "spectrum_adaptation_term_db": -2,
-    "traffic_spectrum_adaptation_term_db": -3,
-    "spectrum_adaptation_term_50_5000_db": -2,
-    "traffic_spectrum_adaptation_term_50_5000_db": -4,
+    "weighted_sound_reduction_index": 30,
+    "spectrum_adaptation_term": -2,
+    "traffic_spectrum_adaptation_term": -3,
+    "spectrum_adaptation_term_50_5000": -2,
+    "traffic_spectrum_adaptation_term_50_5000": -4,
 }
-wall |= {f"sound_reduction_index_{b}_db": r for b, r in zip(bands, r_db, strict=True)}
+wall |= {f"sound_reduction_index_{b}": r for b, r in zip(bands, r_db, strict=True)}
 provenance = {
     "kind": "test_report",
     "document": "Airborne sound insulation test report 26-021",
@@ -367,7 +367,7 @@ r_db = (18.7, 19.2, 20.0, 20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
 partition = building.SoundReductionSpectrum(
     name="Glazed partition",
     source="Airborne sound insulation test report 26-021",
-    **{f"sound_reduction_index_{b}_db": r for b, r in zip(bands, r_db, strict=True)},
+    **{f"sound_reduction_index_{b}": r for b, r in zip(bands, r_db, strict=True)},
 )
 partition.rating().plot()
 plt.show()
@@ -395,10 +395,10 @@ delta_l_db = (3.0, 3.7, 1.9, 3.0, 3.2, 3.5, 4.0, 6.1, 6.7, 7.0, 7.7, 10.8,
 covering = {
     "key": "covering",
     "name": "Floor covering",
-    "weighted_impact_improvement_db": 15,
-    "reference_floor_adaptation_term_db": -2,
+    "weighted_impact_improvement": 15,
+    "reference_floor_adaptation_term": -2,
 }
-covering |= {f"impact_improvement_{b}_db": d for b, d in zip(bands, delta_l_db, strict=True)}
+covering |= {f"impact_improvement_{b}": d for b, d in zip(bands, delta_l_db, strict=True)}
 coverings = io.parse_catalogue(
     {
         "schema": "phonometry-catalogue",
@@ -451,7 +451,7 @@ delta_l_db = (3.0, 3.7, 1.9, 3.0, 3.2, 3.5, 4.0, 6.1, 6.7, 7.0, 7.7, 10.8,
 covering = building.ImpactImprovementSpectrum(
     name="Floor covering",
     source="Impact sound insulation test report 26-022",
-    **{f"impact_improvement_{b}_db": d for b, d in zip(bands, delta_l_db, strict=True)},
+    **{f"impact_improvement_{b}": d for b, d in zip(bands, delta_l_db, strict=True)},
 )
 covering.rating().plot()
 plt.show()
@@ -484,8 +484,8 @@ sheet = io.parse_catalogue(
             {
                 "key": "mat-33",
                 "name": "Floor mat 33 under a 50 mm screed",
-                "ranges": {"weighted_impact_improvement_db": [26, None]},
-                "bounded_below": ["weighted_impact_improvement_db"],
+                "ranges": {"weighted_impact_improvement": [26, None]},
+                "bounded_below": ["weighted_impact_improvement"],
             }
         ],
     },
@@ -496,12 +496,12 @@ try:
     building.predicted_impact_insulation(
         ln_w_eq=78.0,
         delta_l_w=mat.printed(
-            "weighted_impact_improvement_db", wanted_by="EN 12354-2 Formula 21"
+            "weighted_impact_improvement", wanted_by="EN 12354-2 Formula 21"
         ),
     )
 except ValueError as error:
     print(error)
-# 'Floor mat 33 under a 50 mm screed' has no weighted_impact_improvement_db,
+# 'Floor mat 33 under a 50 mm screed' has no weighted_impact_improvement,
 # which 'EN 12354-2 Formula 21' needs: the datasheet prints a lower bound of
 # 26 and no value (...)
 ```

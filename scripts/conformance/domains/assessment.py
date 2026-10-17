@@ -500,7 +500,7 @@ def _chk_reat_table_b1() -> Outcome:
     )
     difference = float(
         np.max(
-            np.abs(result.difference_db - np.asarray(ref.ISO4869_1_TABLE_B1_DIFFERENCE))
+            np.abs(result.difference - np.asarray(ref.ISO4869_1_TABLE_B1_DIFFERENCE))
         )
     )
     significant = result.significant_frequencies.tolist()
@@ -735,8 +735,8 @@ def _half_up(values: np.ndarray) -> np.ndarray:
 
 def _anr_workbook_insertion_loss() -> ph.hearing.ActiveInsertionLossResult:
     return ph.hearing.active_insertion_loss(
-        passive_levels_db=ref.ISO4869_6_WORKBOOK_PASSIVE_LEVELS,
-        active_levels_db=ref.ISO4869_6_WORKBOOK_ACTIVE_LEVELS,
+        passive_levels=ref.ISO4869_6_WORKBOOK_PASSIVE_LEVELS,
+        active_levels=ref.ISO4869_6_WORKBOOK_ACTIVE_LEVELS,
     )
 
 
@@ -832,7 +832,7 @@ def _chk_anr_workbook_lower_ear() -> Outcome:
     """Passive minus active per ear, and the lower ear per band (rows 134-149)."""
     result = _anr_workbook_insertion_loss()
     workbook = np.asarray(ref.ISO4869_6_WORKBOOK_LOWER_EAR)
-    matching = int(np.sum(np.abs(result.insertion_loss_db - workbook) <= 1e-9))
+    matching = int(np.sum(np.abs(result.insertion_loss - workbook) <= 1e-9))
     return count(matching, workbook.size, subject="cells of rows 134-149")
 
 

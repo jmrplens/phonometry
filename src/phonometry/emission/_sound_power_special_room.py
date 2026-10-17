@@ -941,17 +941,17 @@ def check_special_room_surfaces(
 class SpecialRoomSuitabilityCheck(OwnsArrays):
     """The suitability evaluation of ISO 3743-2:2018, 6.7 (Table 1).
 
-    Per octave band, ``measured_power_level_db`` is the sound power level of
+    Per octave band, ``measured_power_level`` is the sound power level of
     a calibrated broad-band reference source determined in the room by this
-    standard (step 2), ``calibrated_power_level_db`` its calibration as the
+    standard (step 2), ``calibrated_power_level`` its calibration as the
     evaluation read it, under the meteorological conditions of the test
     (step 1), and :attr:`limit_db` the Table 1 bound on the magnitude of their
     difference (step 4), read from the bands: the standard's, not a field.
     """
 
     frequencies: np.ndarray
-    measured_power_level_db: np.ndarray
-    calibrated_power_level_db: np.ndarray
+    measured_power_level: np.ndarray
+    calibrated_power_level: np.ndarray
 
     def __post_init__(self) -> None:
         """Reject a check whose per-band arrays disagree or leave Table 1.
@@ -962,14 +962,14 @@ class SpecialRoomSuitabilityCheck(OwnsArrays):
         require_ranks(
             self,
             frequencies=1,
-            measured_power_level_db=1,
-            calibrated_power_level_db=1,
+            measured_power_level=1,
+            calibrated_power_level=1,
         )
         require_same_length(
             self,
             "frequencies",
-            "measured_power_level_db",
-            "calibrated_power_level_db",
+            "measured_power_level",
+            "calibrated_power_level",
         )
         if any(round(float(f)) not in _TABLE1_DB for f in self.frequencies):
             msg = (
@@ -986,19 +986,17 @@ class SpecialRoomSuitabilityCheck(OwnsArrays):
         )
 
     @property
-    def difference_db(self) -> np.ndarray:
+    def difference(self) -> np.ndarray:
         """Per band, the level determined in the room less the calibration (step 3)."""
         return np.asarray(
-            self.measured_power_level_db - self.calibrated_power_level_db,
+            self.measured_power_level - self.calibrated_power_level,
             dtype=np.float64,
         )
 
     @property
     def band_within(self) -> np.ndarray:
         """Per band, whether the difference stays within Table 1."""
-        return np.asarray(
-            settled(np.abs(self.difference_db)) <= self.limit_db, dtype=bool
-        )
+        return np.asarray(settled(np.abs(self.difference)) <= self.limit_db, dtype=bool)
 
     @property
     def passes(self) -> bool:
@@ -1117,8 +1115,8 @@ def check_special_room_suitability(
         raise ValueError(msg)
     return SpecialRoomSuitabilityCheck(
         frequencies=freqs,
-        measured_power_level_db=measured,
-        calibrated_power_level_db=np.asarray(calibrated, dtype=np.float64),
+        measured_power_level=measured,
+        calibrated_power_level=np.asarray(calibrated, dtype=np.float64),
     )
 
 

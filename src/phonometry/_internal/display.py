@@ -22,10 +22,13 @@ The table reads the record's fields and, on a verdict, ``passes``, which is a
 property and may read others of the record; the display itself calls no other
 property, draws no plot and runs no other computation of the record's own. A
 scalar is printed; the unit of a field is read from the end of its name
-(``band_levels_db`` is in decibels, ``wind_speed_m_s`` in metres per second),
-an axis the API names by the bare concept has the one unit it is always in
-(``frequencies`` in hertz, ``levels`` in decibels, ``times`` in seconds),
-and any other name that ends in no unit gets none; a record whose field of
+(``wind_speed_m_s`` is in metres per second), an axis the API names by the
+bare concept has the one unit it is always in (``frequencies`` in hertz,
+``levels`` in decibels, ``times`` in seconds), a level or a level
+difference is in decibels by its head noun (``band_levels``,
+``insertion_loss``; a loudness level in phon), and any other name gets
+none; a value that holds no number (a truth value, a text, a complex
+factor, a record) is no level whatever its name, and a record whose field of
 one of those names holds another quantity says so in a ``_display_units``
 mapping of its own; an array is one line, its shape, its
 type and the range of its values, never the values; a record held in a field
@@ -48,6 +51,7 @@ import enum
 import html
 import itertools
 import os
+import re
 from collections.abc import Mapping, Sequence
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Protocol
@@ -287,7 +291,184 @@ class _Row:
     nested: object = None
 
 
-def unit_of(name: str) -> str:
+#: The head nouns of a level and of a level difference: a level, a loss, an
+#: insulation, an isolation, a reduction, a rejection, a difference, an
+#: improvement, a single-value attenuation, a correction, an adjustment
+#: (ISO 1996-1:2016, 3.3.1: a quantity added to a level), an index or an
+#: emergence. Each is in decibels by definition, so a field named for one
+#: carries no unit in its name and shows dB.
+_DECIBEL_NOUNS = frozenset(
+    {
+        "level",
+        "levels",
+        "spl",
+        "lw",
+        "lwa",
+        "leq",
+        "index",
+        "indices",
+        "correction",
+        "corrections",
+        "difference",
+        "differences",
+        "loss",
+        "losses",
+        "insulation",
+        "reduction",
+        "reductions",
+        "improvement",
+        "improvements",
+        "attenuation",
+        "attenuations",
+        "emergence",
+        "emergences",
+        "adjustment",
+        "adjustments",
+        "isolation",
+        "rejection",
+        "rejections",
+    }
+)
+
+#: The head nouns of a level itself, which a change noun after them makes a
+#: level difference.
+_LEVEL_WORDS = frozenset({"level", "levels", "spl", "lw", "lwa", "leq"})
+
+#: The head nouns of a change that is a level difference only when the name
+#: says which level changes: a ``level_shift``, a ``level_increase`` or a
+#: ``level_excess`` is in decibels, the ``shift`` of a rating curve is not.
+_LEVEL_CHANGE_NOUNS = frozenset(
+    {
+        "shift",
+        "shifts",
+        "increase",
+        "increases",
+        "decrease",
+        "decreases",
+        "excess",
+        "drop",
+        "drops",
+        "rise",
+        "rises",
+        "change",
+        "changes",
+        "increment",
+        "increments",
+    }
+)
+
+#: The words before ``level`` that name a level in another unit than the
+#: decibel: a loudness level is in phon (ISO 532-1:2017, 3.16, Note 1).
+_LEVEL_UNITS: Mapping[str, str] = MappingProxyType({"loudness": "phon"})
+
+#: A field spelled as the printed symbol of a level, read by its first word:
+#: :math:`L` and its subscripts, and a :math:`\Delta L` or :math:`\Delta R`.
+_DECIBEL_SYMBOL = re.compile(r"l\d*|lw|lwa|lp|spl")
+
+#: An :math:`\ell` with a number is a length in ``materials``: the distances
+#: :math:`\ell_1` and :math:`\ell_2` from the specimen to the nearest
+#: microphones of ASTM E2611 (``TransferMatrix.l1``), not the :math:`L` of a
+#: level.
+_LENGTH_SYMBOL = re.compile(r"l\d*")
+_LENGTH_SYMBOL_PACKAGES = ("phonometry.materials",)
+
+#: The symbols that say decibel in one package only, as the first word of a
+#: field or as its head: in ``building`` the sound reduction index :math:`R`, a
+#: level difference :math:`D`, the C, Ctr and CI of ISO 717 and the vibration
+#: reduction indices :math:`K_{ij}`, :math:`K_{Ff}`, :math:`K_{Fd}` and
+#: :math:`K_{Df}`; in ``emission`` the corrections :math:`C_1` to :math:`C_3`
+#: and :math:`K_1` to :math:`K_3` of the sound power standards. Elsewhere an
+#: ``r`` is a distance and a ``c`` a gain.
+_PACKAGE_DECIBEL_SYMBOLS: Mapping[str, frozenset[str]] = MappingProxyType(
+    {
+        "phonometry.building": frozenset({"r", "d", "c", "ctr", "ci", "k", "kij"}),
+        "phonometry.emission": frozenset({"c1", "c2", "c3", "k1", "k2", "k3"}),
+    }
+)
+
+#: The words that qualify a level from behind: a band, a frequency weighting,
+#: the state it was read in, a reference or an extreme.
+_TRAILING_QUALIFIER = re.compile(
+    r"\d+(?:khz|hz)?|[acz]|before|after|with|without|direct|measured|ref|norm"
+    r"|max|min"
+)
+
+#: The words that open a phrase after the head noun (``band_levels_at_x``).
+_PREPOSITIONS = frozenset({"at", "below", "above", "to", "of", "from", "over"})
+
+
+def _package_symbol(word: str, module: str) -> bool:
+    """Whether ``word`` is a symbol that says decibel in the package of ``module``."""
+    return any(
+        module == package or module.startswith(package + ".")
+        for package, symbols in _PACKAGE_DECIBEL_SYMBOLS.items()
+        if word in symbols
+    )
+
+
+def _in_package(module: str, packages: Sequence[str]) -> bool:
+    """Whether ``module`` is one of ``packages`` or one of their submodules."""
+    return any(
+        module == package or module.startswith(package + ".") for package in packages
+    )
+
+
+def _level_symbol(word: str, module: str) -> bool:
+    """Whether ``word`` is the printed symbol of a level in the package of ``module``."""
+    if not _DECIBEL_SYMBOL.fullmatch(word):
+        return False
+    return not (
+        _LENGTH_SYMBOL.fullmatch(word) and _in_package(module, _LENGTH_SYMBOL_PACKAGES)
+    )
+
+
+def _head(words: list[str]) -> list[str]:
+    """``words`` without the words that qualify the head noun from behind."""
+    words = list(words)
+    while len(words) > 1 and _TRAILING_QUALIFIER.fullmatch(words[-1]):
+        words.pop()
+    return words
+
+
+def _head_says_decibels(words: list[str], module: str) -> bool:
+    """Whether the last word of ``words``, past its qualifiers, says decibel."""
+    words = _head(words)
+    head = words[-1]
+    return (
+        words[-2:] == ["adaptation", "term"]
+        or head in _DECIBEL_NOUNS
+        or (head in _LEVEL_CHANGE_NOUNS and bool(_LEVEL_WORDS.intersection(words[:-1])))
+        or _package_symbol(head, module)
+    )
+
+
+def says_decibels(name: str, module: str = "") -> bool:
+    """Whether a name's head noun is a level or a level difference.
+
+    The head noun is the last word once the words that qualify it from
+    behind are set aside, or the word before a prepositional phrase; a name
+    spelled as a printed symbol is read by its first word, and the standard
+    deviation of a level (``sigma_level``) is not a level.
+
+    :param name: The name of a field.
+    :param module: The module of the record that holds it.
+    :return: ``True`` for a level or a level difference.
+    """
+    words = [word for word in name.lower().split("_") if word]
+    if not words or words[0] in {"sigma", "u"}:
+        return False
+    first = words[0]
+    if _level_symbol(first, module) or (
+        first == "delta" and len(words) > 1 and words[1][:1] in {"l", "r"}
+    ):
+        return True
+    if _package_symbol(first, module) or _head_says_decibels(words, module):
+        return True
+    cut = next((i for i, word in enumerate(words) if i and word in _PREPOSITIONS), 0)
+    return bool(cut) and _head_says_decibels(words[:cut], module)
+
+
+def unit_of(name: str, module: str = "") -> str:
     """The unit a field's name ends in, or ``""`` when it ends in none.
 
     The longest suffix in :data:`_UNITS` that leaves at least one word before
@@ -297,13 +478,38 @@ def unit_of(name: str) -> str:
     letter nor a Greek letter: a name such as ``alpha_s``, ``c_s`` or
     ``r_tr_s`` is a symbol and its subscript, not a quantity in seconds.
     Four more letters are a unit only where the name says their quantity
-    (:data:`_QUALIFIED_UNITS`).
+    (:data:`_QUALIFIED_UNITS`). A name that ends in no unit and whose head
+    noun is a level or a level difference is in decibels
+    (:func:`says_decibels`): ``insertion_loss`` and ``r_tr_s`` show dB.
 
     :param name: The name of a field.
+    :param module: The module of the record that holds it, for the symbols
+        that say decibel in one package only.
     :return: The unit's symbol, or an empty string.
     """
-    if name in _NAMED_UNITS:
-        return _NAMED_UNITS[name]
+    unit = _spelled_unit(name)
+    if unit or not says_decibels(name, module):
+        return unit
+    return _level_unit(name)
+
+
+def _spelled_unit(name: str) -> str:
+    """The unit a name spells, as an axis of the vocabulary or at its end."""
+    return _NAMED_UNITS[name] if name in _NAMED_UNITS else _suffix_unit(name)
+
+
+def _level_unit(name: str) -> str:
+    """The unit of a level or a level difference: dB, or phon for a loudness level."""
+    words = _head([word for word in name.lower().split("_") if word])
+    if words[-1] in {"level", "levels"}:
+        for word in words[:-1]:
+            if word in _LEVEL_UNITS:
+                return _LEVEL_UNITS[word]
+    return _UNITS["db"]
+
+
+def _suffix_unit(name: str) -> str:
+    """The unit the end of a name spells, or ``""``: the rule of :func:`unit_of`."""
     words = name.lower().split("_")
     if len(words) == 1:  # a unit needs a word before it
         return ""
@@ -323,16 +529,68 @@ def unit_of(name: str) -> str:
     return _UNITS.get(last, "")
 
 
-def _unit_in(record: object, name: str) -> str:
-    """The unit of field *name* of *record*: its own word for it, or its name's.
+def _unit_in(record: object, name: str, value: object) -> str:
+    r"""The unit of field *name* of *record*: its own word for it, or its name's.
 
-    A record whose field carries one of the bare names of
-    :data:`_NAMED_UNITS` but holds another quantity (crossing levels in the
-    units of the signal, not in decibels) maps the name to its unit, or to
-    ``""``, in a ``_display_units`` class attribute.
+    A record whose field carries a name the table reads a unit from but holds
+    another quantity (crossing levels in the units of the signal, a reflection
+    index that is a ratio of energies, a length written as the :math:`\ell`
+    of a standard) maps the name to its unit, or to ``""``, in a
+    ``_display_units`` class attribute. Otherwise the name decides: the unit
+    it spells, or, for a level or a level difference, the decibel its head
+    noun says, which only a *value* that holds a real number can be in
+    (:func:`holds_a_quantity`): a truth value, a text, a complex factor or a
+    record named for a level is in no unit.
     """
+    if value is None:
+        return ""
     own: Mapping[str, str] = getattr(type(record), "_display_units", {})
-    return own[name] if name in own else unit_of(name)
+    if name in own:
+        return own[name]
+    unit = _spelled_unit(name)
+    if unit or not holds_a_quantity(value):
+        return unit
+    return unit_of(name, type(record).__module__)
+
+
+#: The kinds of numpy array that hold a real number: integers and floats.
+_REAL_KINDS = frozenset("iuf")
+
+#: The items of a tuple, a list or a mapping read to tell whether it holds a
+#: quantity: the first few say it, and a long one is not read through.
+_ITEMS_READ = 64
+
+
+def holds_a_quantity(value: object) -> bool:
+    """Whether *value* can be a level: a real number, or real numbers held.
+
+    A truth value, a text, a complex factor (the boundary-loss factor
+    :math:`F(w)`), a member of an enumeration and a record are not, and
+    neither is an array of them; a tuple, a list or a mapping holds one when
+    one of its items does. A value of any other kind, which the table only
+    names, is taken at its field's name.
+
+    :param value: The value of a field.
+    :return: ``True`` when the decibel a field's head noun says can be shown
+        beside it.
+    """
+    if value is None or isinstance(
+        value, bool | np.bool_ | str | bytes | enum.Enum | complex | np.complexfloating
+    ):
+        return False
+    if isinstance(value, int | float | np.integer | np.floating):
+        return True
+    if isinstance(value, np.ndarray):
+        return value.dtype.kind in _REAL_KINDS or value.dtype.kind == "O"
+    if _is_record(value):
+        return False
+    if isinstance(value, Mapping):
+        items = list(itertools.islice(value.values(), _ITEMS_READ))
+    elif isinstance(value, tuple | list):
+        items = list(value[:_ITEMS_READ])
+    else:
+        return True
+    return not items or any(holds_a_quantity(item) for item in items)
 
 
 def _is_symbol(stem: list[str]) -> bool:
@@ -579,7 +837,7 @@ def _rows(record: object, *, depth: int) -> tuple[list[_Row], int]:
         if _is_record(value) and depth < MAX_DEPTH and expanded < MAX_NESTED:
             nested = value
             expanded += 1
-        unit = "" if value is None else _unit_in(record, name)
+        unit = _unit_in(record, name, value)
         rows.append(_Row(name, _cut(_value(value), MAX_VALUE), unit, nested))
     return rows, max(0, len(fields) - MAX_ROWS)
 

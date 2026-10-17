@@ -22,7 +22,7 @@ would be adding a difference to an absolute with nothing in the arithmetic to
 say so. Both are dimensionless.
 
 The first edition of the handbook, in its Spanish translation of 1977, prints
-a third: :attr:`ImpactInsulation.impact_sound_improvement_db`, the average
+a third: :attr:`ImpactInsulation.impact_sound_improvement`, the average
 improvement in impact sound insulation a finish, a floating screed or a timber
 floor gives over a bare concrete slab, in decibels. It predates the IIC and is
 not one: it is a level difference averaged over frequency, and nothing on the
@@ -104,7 +104,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from .._internal.catalogue import (
     CatalogueRow,
@@ -142,7 +142,7 @@ class ImpactInsulation(CatalogueRow):
         never on a row that gives an improvement. Two rows print no class at
         all and leave it empty, which
         :meth:`~phonometry.io.CatalogueRow.why_missing` says.
-    :ivar impact_sound_improvement_db: The average improvement in impact
+    :ivar impact_sound_improvement: The average improvement in impact
         sound insulation a floor treatment gives over a bare concrete floor, in
         decibels, as Harris (1977) Tables 19.2 to 19.4 print it. It is a level
         difference averaged over frequency and not a rating, so it is not
@@ -186,9 +186,14 @@ class ImpactInsulation(CatalogueRow):
         back both.
     """
 
+    #: The delta-IIC is a difference of class numbers, which are dimensionless.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"impact_insulation_class_improvement": ""}
+    )
+
     impact_insulation_class: float | None = None
     impact_insulation_class_improvement: float | None = None
-    impact_sound_improvement_db: float | None = None
+    impact_sound_improvement: float | None = None
     added_load_pa: float | None = None
     refers_to_row: str = ""
     has_section_drawing: bool = False

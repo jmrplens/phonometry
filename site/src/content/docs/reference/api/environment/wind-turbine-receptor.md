@@ -166,13 +166,13 @@ BinnedSoundLevels(
     wind_speeds_m_s: NDArray[np.float64],
     wind_directions_deg: NDArray[np.float64] | None,
     counts: NDArray[np.int64],
-    mean_levels_db: NDArray[np.float64],
+    mean_levels: NDArray[np.float64],
     type_a_uncertainty_db: NDArray[np.float64],
     type_b_uncertainty_db: NDArray[np.float64],
     combined_uncertainty_db: NDArray[np.float64],
     *,
     averaging: str,
-    interval_levels_db: NDArray[np.float64],
+    interval_levels: NDArray[np.float64],
     interval_wind_speeds_m_s: NDArray[np.float64],
     bin_width_m_s: float,
     sector_width_deg: float,
@@ -190,12 +190,12 @@ One row per occupied bin, sorted by sector and then wind speed.
 | `wind_speeds_m_s` | Centre of each bin's wind speed class, in m/s. |
 | `wind_directions_deg` | Centre of each bin's direction sector, in degrees, or `None` when binned by wind speed alone. |
 | `counts` | Number of intervals $N$ in each bin. |
-| `mean_levels_db` | The bin average, Equation (1) (energy) or Equation (8) (arithmetic), in dB. |
+| `mean_levels` | The bin average, Equation (1) (energy) or Equation (8) (arithmetic), in dB. |
 | `type_a_uncertainty_db` | Equation (2) or (9), in dB; NaN for a bin of one interval, whose spread the equation cannot give. |
 | `type_b_uncertainty_db` | Equation (4), in dB. |
 | `combined_uncertainty_db` | Equation (5), in dB; NaN where the type A part is. |
 | `averaging` | `"energy"` or `"arithmetic"`. |
-| `interval_levels_db` | The interval levels binned, in dB. |
+| `interval_levels` | The interval levels binned, in dB. |
 | `interval_wind_speeds_m_s` | Their wind speeds, in m/s. |
 | `bin_width_m_s` | Width of the wind speed bins, in m/s. |
 | `sector_width_deg` | Width of the direction sectors, in degrees (also kept when binned by wind speed alone). |
@@ -320,17 +320,17 @@ brought to 10 m is the binning wind speed $V_\mathrm{bin}$ of
 
 *Constant* (`numpy.ndarray, shape (14,)`).
 
-## LOW_FREQUENCY_FACADE_INSULATION_DB
+## LOW_FREQUENCY_FACADE_INSULATION
 
 *Constant* (`mapping`).
 
 ```python
-LOW_FREQUENCY_FACADE_INSULATION_DB = {'Denmark brick or similar': array([ 4.9,  5.9,  4.6,  6.6,  8.4, 10.8, 11.4, 13. , 16.6, 19.7, 21.2,
+LOW_FREQUENCY_FACADE_INSULATION = {'Denmark brick or similar': array([ 4.9,  5.9,  4.6,  6.6,  8.4, 10.8, 11.4, 13. , 16.6, 19.7, 21.2,
        20.2, 21.2, 21. ]), 'Denmark lightweight': array([ 6.8,  3.9,  0.4, -0.2,  4.8,  6.2,  8.4, 10.5, 11.9, 11.9, 16. ,
        17.5, 17.9, 17. ])}
 ```
 
-## LOW_FREQUENCY_GROUND_CORRECTION_DB
+## LOW_FREQUENCY_GROUND_CORRECTION
 
 *Constant* (`numpy.ndarray, shape (14,)`).
 
@@ -347,16 +347,16 @@ LOW_FREQUENCY_GROUND_IMPEDANCE_CLASSES = {'A': GroundImpedanceClass(flow_resisti
 ```python
 LowFrequencyLevel(
     frequencies: NDArray[np.float64],
-    sound_power_levels_db: NDArray[np.float64],
+    sound_power_levels: NDArray[np.float64],
     a_weighting_db: NDArray[np.float64],
     distance_terms_db: NDArray[np.float64],
-    ground_correction_db: NDArray[np.float64],
-    air_attenuation_db: NDArray[np.float64],
-    facade_insulation_db: NDArray[np.float64] | None,
-    outdoor_levels_db: NDArray[np.float64],
-    indoor_levels_db: NDArray[np.float64] | None,
-    outdoor_level_db: float,
-    indoor_level_db: float | None,
+    ground_correction: NDArray[np.float64],
+    air_attenuation: NDArray[np.float64],
+    facade_insulation: NDArray[np.float64] | None,
+    outdoor_levels: NDArray[np.float64],
+    indoor_levels: NDArray[np.float64] | None,
+    outdoor_level: float,
+    indoor_level: float | None,
     *,
     a_weighted: bool,
 )
@@ -372,16 +372,16 @@ band; the band arrays are summed over the turbines.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The one-third-octave centres, in Hz. |
-| `sound_power_levels_db` | The turbines' band sound power levels. |
+| `sound_power_levels` | The turbines' band sound power levels. |
 | `a_weighting_db` | The A-weighting added to each band (zero when the result is unweighted). |
 | `distance_terms_db` | $10 \lg(l^2 + h^2)$ of each turbine, in dB. |
-| `ground_correction_db` | $\Delta L_\mathrm{g,LF}$ per band. |
-| `air_attenuation_db` | $\Delta L_\mathrm{a}$ per turbine and band. |
-| `facade_insulation_db` | $\Delta L_\sigma$ per band, or `None` for an outdoor result. |
-| `outdoor_levels_db` | Outdoor band levels summed over the turbines. |
-| `indoor_levels_db` | Indoor band levels, or `None`. |
-| `outdoor_level_db` | Energy sum of the outdoor bands, in dB. |
-| `indoor_level_db` | Energy sum of the indoor bands, or `None`. |
+| `ground_correction` | $\Delta L_\mathrm{g,LF}$ per band. |
+| `air_attenuation` | $\Delta L_\mathrm{a}$ per turbine and band. |
+| `facade_insulation` | $\Delta L_\sigma$ per band, or `None` for an outdoor result. |
+| `outdoor_levels` | Outdoor band levels summed over the turbines. |
+| `indoor_levels` | Indoor band levels, or `None`. |
+| `outdoor_level` | Energy sum of the outdoor bands, in dB. |
+| `indoor_level` | Energy sum of the indoor bands, or `None`. |
 | `a_weighted` | Whether the levels are A-weighted. |
 
 ### LowFrequencyLevel.plot()
@@ -454,7 +454,7 @@ profile of IEC 61400-11:2012 D.3 that Table K.1 evaluates for 120 m and
 
 ```python
 predicted_receptor_level(
-    turbine_levels_db: ArrayLike,
+    turbine_levels: ArrayLike,
     sound_power_uncertainty_db: ArrayLike,
     *,
     prediction_model_uncertainty_db: float = 2.0,
@@ -479,7 +479,7 @@ prediction model and the modelling in quadrature.
 
 | Name | Description |
 | :--- | :--- |
-| `turbine_levels_db` | Predicted level at the receptor from each turbine, in dB. |
+| `turbine_levels` | Predicted level at the receptor from each turbine, in dB. |
 | `sound_power_uncertainty_db` | Uncertainty of each turbine's sound power level, from IEC 61400-11, in dB (one value for all or one each). |
 | `prediction_model_uncertainty_db` | Standard uncertainty of the prediction model, in dB (2 dB by default, 10.3.4 NOTE). |
 | `modeling_uncertainty_db` | Uncertainty of the propagation modelling, in dB (0.5 dB by default). |
@@ -496,9 +496,9 @@ prediction model and the modelling in quadrature.
 
 ```python
 PredictedReceptorLevel(
-    turbine_levels_db: NDArray[np.float64],
+    turbine_levels: NDArray[np.float64],
     sound_power_uncertainty_db: NDArray[np.float64],
-    level_db: float,
+    level: float,
     propagated_uncertainty_db: float,
     combined_uncertainty_db: float,
     *,
@@ -513,9 +513,9 @@ A predicted receptor level and its uncertainty (10.3.4).
 
 | Name | Description |
 | :--- | :--- |
-| `turbine_levels_db` | The predicted level from each turbine, in dB. |
+| `turbine_levels` | The predicted level from each turbine, in dB. |
 | `sound_power_uncertainty_db` | The sound power level uncertainty of each turbine, in dB. |
-| `level_db` | The energy sum of the turbines' levels, in dB. |
+| `level` | The energy sum of the turbines' levels, in dB. |
 | `propagated_uncertainty_db` | Equation (10), the level-weighted mean of the turbines' sound power uncertainties, in dB. |
 | `combined_uncertainty_db` | Equation (11), in dB. |
 | `prediction_model_uncertainty_db` | The model's uncertainty used, in dB. |
@@ -572,7 +572,7 @@ ROUGHNESS_LENGTHS_M = {'Water, snow or sand surfaces': 0.0001, 'Open, flat land,
 
 ```python
 sound_emergence(
-    ambient_levels_db: ArrayLike,
+    ambient_levels: ArrayLike,
     background_levels: ArrayLike,
     *,
     wind_speeds_m_s: ArrayLike | None = None,
@@ -592,7 +592,7 @@ background.
 
 | Name | Description |
 | :--- | :--- |
-| `ambient_levels_db` | The ambient sound criterion of each class, in dB. |
+| `ambient_levels` | The ambient sound criterion of each class, in dB. |
 | `background_levels` | The background sound criterion of each class. |
 | `wind_speeds_m_s` | Optional wind speed of each class, in m/s. |
 
@@ -608,7 +608,7 @@ background.
 
 ```python
 sound_relevant_turbines(
-    predicted_levels_db: ArrayLike,
+    predicted_levels: ArrayLike,
 ) -> SoundRelevantTurbines
 ```
 
@@ -627,7 +627,7 @@ turbine the TS leaves out.
 
 | Name | Description |
 | :--- | :--- |
-| `predicted_levels_db` | Each turbine's predicted level at the receptor, in dB. |
+| `predicted_levels` | Each turbine's predicted level at the receptor, in dB. |
 
 **Returns:** A [`SoundRelevantTurbines`](/phonometry/reference/api/environment/wind-turbine-receptor/#soundrelevantturbines).
 
@@ -641,9 +641,9 @@ turbine the TS leaves out.
 
 ```python
 SoundEmergence(
-    ambient_levels_db: NDArray[np.float64],
+    ambient_levels: NDArray[np.float64],
     background_levels: NDArray[np.float64],
-    emergence_db: NDArray[np.float64],
+    emergence: NDArray[np.float64],
     *,
     wind_speeds_m_s: NDArray[np.float64] | None,
 )
@@ -655,9 +655,9 @@ The emergence criterion per wind speed class (Annex J, Equation (J.1)).
 
 | Name | Description |
 | :--- | :--- |
-| `ambient_levels_db` | The ambient sound criterion per class, in dB. |
+| `ambient_levels` | The ambient sound criterion per class, in dB. |
 | `background_levels` | The background sound criterion per class. |
-| `emergence_db` | $E(j) = L_\mathrm{Amb}(j) - L_\mathrm{Res}(j)$. |
+| `emergence` | $E(j) = L_\mathrm{Amb}(j) - L_\mathrm{Res}(j)$. |
 | `wind_speeds_m_s` | The wind speed classes, in m/s, when given. |
 
 ### SoundEmergence.plot()
@@ -686,7 +686,7 @@ Plot the emergence of each wind speed class.
 ## SoundRelevantTurbines
 
 ```python
-SoundRelevantTurbines(predicted_levels_db: NDArray[np.float64])
+SoundRelevantTurbines(predicted_levels: NDArray[np.float64])
 ```
 
 The turbines that set the binning wind speed at a receptor (9.3.2.3).
@@ -698,7 +698,7 @@ Which turbines are relevant is read from the predicted levels and the
 
 | Name | Description |
 | :--- | :--- |
-| `predicted_levels_db` | Each turbine's predicted level at the receptor, in dB, in the order given. |
+| `predicted_levels` | Each turbine's predicted level at the receptor, in dB, in the order given. |
 
 ### SoundRelevantTurbines.binning_wind_speed_m_s()
 
@@ -714,7 +714,7 @@ The binning wind speed: the arithmetic mean over the relevant turbines.
 
 | Name | Description |
 | :--- | :--- |
-| `turbine_wind_speeds_m_s` | The wind speed derived from each turbine (power curve or nacelle, recalculated to 10 m), in m/s, in the order of `predicted_levels_db`. |
+| `turbine_wind_speeds_m_s` | The wind speed derived from each turbine (power curve or nacelle, recalculated to 10 m), in m/s, in the order of `predicted_levels`. |
 
 **Returns:** The mean of the relevant turbines' wind speeds, in m/s.
 
@@ -764,13 +764,13 @@ as the total of those that remain has dropped by no more than 1.0 dB
 from the total of all ("reduced by more than 1,0 dB", 9.3.2.3: 1.0 dB
 itself is not more, and a drop within a nanodecibel of it is 1.0 dB).
 
-### SoundRelevantTurbines.relevant_level_db
+### SoundRelevantTurbines.relevant_level
 
 *property*
 
 The predicted level of the relevant ones, in dB.
 
-### SoundRelevantTurbines.total_level_db
+### SoundRelevantTurbines.total_level
 
 *property*
 
@@ -794,7 +794,7 @@ SWEDISH_LOW_FREQUENCY_LIMITS_DB = {31.5: 56.0, 40.0: 49.0, 50.0: 43.0, 63.0: 42.
 ToneSearchLimit(
     distance: float,
     frequencies: NDArray[np.float64],
-    attenuation_db: NDArray[np.float64],
+    attenuation: NDArray[np.float64],
     upper_frequency_hz: float,
     *,
     temperature_c: float,
@@ -811,7 +811,7 @@ The upper frequency of the tonal search range (12.5.2.4).
 | :--- | :--- |
 | `distance` | Distance from the nearest turbine, in m. |
 | `frequencies` | The nominal one-third-octave centres searched. |
-| `attenuation_db` | ISO 9613-1 attenuation of each band over the distance, at the exact mid-band frequency, in dB. |
+| `attenuation` | ISO 9613-1 attenuation of each band over the distance, at the exact mid-band frequency, in dB. |
 | `upper_frequency_hz` | The nominal centre of the lowest band attenuated by at least 20 dB, or 10 kHz when none is. |
 | `temperature_c` | Air temperature, in degrees C. |
 | `relative_humidity_percent` | Relative humidity, in %. |
@@ -844,7 +844,7 @@ Plot the band attenuation over the distance and the 20 dB line.
 
 ```python
 turbine_sound_levels(
-    total_levels_db: ArrayLike,
+    total_levels: ArrayLike,
     background_levels: ArrayLike,
     *,
     total_uncertainty_db: ArrayLike = 0.0,
@@ -871,7 +871,7 @@ other.
 
 | Name | Description |
 | :--- | :--- |
-| `total_levels_db` | Bin levels with the turbines operating, in dB. |
+| `total_levels` | Bin levels with the turbines operating, in dB. |
 | `background_levels` | Bin levels with the turbines off, in dB. |
 | `total_uncertainty_db` | Combined standard uncertainty of each total level, Equation (5), in dB; NaN for a bin of one interval, whose uncertainty Equation (2) cannot give. |
 | `background_uncertainty_db` | That of each background level, in dB. |
@@ -890,10 +890,10 @@ other.
 
 ```python
 TurbineSoundLevels(
-    total_levels_db: NDArray[np.float64],
+    total_levels: NDArray[np.float64],
     background_levels: NDArray[np.float64],
-    level_differences_db: NDArray[np.float64],
-    turbine_levels_db: NDArray[np.float64],
+    level_differences: NDArray[np.float64],
+    turbine_levels: NDArray[np.float64],
     turbine_uncertainty_db: NDArray[np.float64],
     *,
     wind_speeds_m_s: NDArray[np.float64] | None,
@@ -907,10 +907,10 @@ Background-corrected wind turbine levels per bin (10.3.2, 11.7).
 
 | Name | Description |
 | :--- | :--- |
-| `total_levels_db` | The total (turbines on) bin levels, in dB. |
+| `total_levels` | The total (turbines on) bin levels, in dB. |
 | `background_levels` | The background (turbines off) bin levels. |
-| `level_differences_db` | Total minus background, in dB. |
-| `turbine_levels_db` | The turbine level $L_{c,k}$, in dB: Equation (6) where the difference is at least 3 dB, the total minus 3 dB where it is at least 0 dB but less than 3 dB, NaN where it is negative. |
+| `level_differences` | Total minus background, in dB. |
+| `turbine_levels` | The turbine level $L_{c,k}$, in dB: Equation (6) where the difference is at least 3 dB, the total minus 3 dB where it is at least 0 dB but less than 3 dB, NaN where it is negative. |
 | `turbine_uncertainty_db` | Its standard uncertainty, in dB: Equation (7) for the logarithmic subtraction, the total's own uncertainty for the fixed 3 dB correction (a constant offset), NaN where undetermined. |
 | `wind_speeds_m_s` | The bins' wind speeds, in m/s, when known. |
 | `wind_directions_deg` | Centre of each bin's direction sector, in degrees, when binned by direction; `None` otherwise. Two bins of one wind speed class in different sectors are told apart by it. |
@@ -952,7 +952,7 @@ past the twelfth take them again, in the same order.
 
 The [`BackgroundCorrectionRegime`](/phonometry/reference/api/environment/wind-turbine-receptor/#backgroundcorrectionregime) of each bin (11.7).
 
-Read from `total_levels_db` and `background_levels`:
+Read from `total_levels` and `background_levels`:
 the logarithmic subtraction where the total is at least 3 dB above the
 background, the 3 dB correction where it is at least 0 dB but less
 than 3 dB above, and undetermined where the background is louder. A
@@ -1088,14 +1088,14 @@ speed at any height by Equation (K.1).
 
 ```python
 wind_turbine_low_frequency_level(
-    sound_power_levels_db: ArrayLike,
+    sound_power_levels: ArrayLike,
     *,
     distance: ArrayLike,
     hub_height_m: ArrayLike,
     frequencies: ArrayLike = ...,
-    ground_correction_db: ArrayLike | None = None,
+    ground_correction: ArrayLike | None = None,
     air_attenuation_db_per_km: ArrayLike | None = None,
-    facade_insulation_db: ArrayLike | None = None,
+    facade_insulation: ArrayLike | None = None,
     a_weighted: bool = True,
 ) -> LowFrequencyLevel
 ```
@@ -1117,13 +1117,13 @@ criterion of C.6.1 sums 10 Hz to 160 Hz, so pass those bands for it.
 
 | Name | Description |
 | :--- | :--- |
-| `sound_power_levels_db` | Band sound power levels from IEC 61400-11, in dB: one row per turbine, or one row for a single turbine. |
+| `sound_power_levels` | Band sound power levels from IEC 61400-11, in dB: one row per turbine, or one row for a single turbine. |
 | `distance` | Horizontal distance $l$ from each tower to the receptor, in m (scalar or one per turbine). |
 | `hub_height_m` | Hub height $h$ of each turbine, in m. |
 | `frequencies` | Nominal centre of each column, in Hz (10 Hz to 200 Hz by default, [`LOW_FREQUENCY_BANDS_HZ`](/phonometry/reference/api/environment/wind-turbine-receptor/#low_frequency_bands_hz)). |
-| `ground_correction_db` | $\Delta L_\mathrm{g,LF}$ per band; `None` for Table C.2 (onshore, impedance class D). |
+| `ground_correction` | $\Delta L_\mathrm{g,LF}$ per band; `None` for Table C.2 (onshore, impedance class D). |
 | `air_attenuation_db_per_km` | $\alpha$ per band, in dB/km, zero or positive (the ISO 9613-1 absorption coefficient, C.2); `None` for Table C.2, as printed (see [`LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM`](/phonometry/reference/api/environment/wind-turbine-receptor/#low_frequency_air_attenuation_db_per_km)). |
-| `facade_insulation_db` | $\Delta L_\sigma$ per band, for an indoor level (for instance a row of [`LOW_FREQUENCY_FACADE_INSULATION_DB`](/phonometry/reference/api/environment/wind-turbine-receptor/#low_frequency_facade_insulation_db)); `None` for the outdoor level alone. |
+| `facade_insulation` | $\Delta L_\sigma$ per band, for an indoor level (for instance a row of [`LOW_FREQUENCY_FACADE_INSULATION`](/phonometry/reference/api/environment/wind-turbine-receptor/#low_frequency_facade_insulation)); `None` for the outdoor level alone. |
 | `a_weighted` | Add the A-weighting of Table C.4 (IEC 61672-1) to each band (the default), or give unweighted levels. |
 
 **Returns:** A [`LowFrequencyLevel`](/phonometry/reference/api/environment/wind-turbine-receptor/#lowfrequencylevel).
@@ -1138,11 +1138,11 @@ criterion of C.6.1 sums 10 Hz to 160 Hz, so pass those bands for it.
 
 ```python
 wind_turbine_rating_level(
-    equivalent_level_db: float,
+    equivalent_level: float,
     *,
-    tonal_adjustment_db: float = 0.0,
-    amplitude_modulation_adjustment_db: float = 0.0,
-    impulsive_adjustment_db: float = 0.0,
+    tonal_adjustment: float = 0.0,
+    amplitude_modulation_adjustment: float = 0.0,
+    impulsive_adjustment: float = 0.0,
 ) -> WindTurbineRatingLevel
 ```
 
@@ -1164,10 +1164,10 @@ ISO/PAS 1996-3 for $K_\mathrm{I}$
 
 | Name | Description |
 | :--- | :--- |
-| `equivalent_level_db` | The equivalent continuous level, in dB. |
-| `tonal_adjustment_db` | $K_\mathrm{T}$, in dB. |
-| `amplitude_modulation_adjustment_db` | $K_\mathrm{am}$, in dB. |
-| `impulsive_adjustment_db` | $K_\mathrm{I}$, in dB. |
+| `equivalent_level` | The equivalent continuous level, in dB. |
+| `tonal_adjustment` | $K_\mathrm{T}$, in dB. |
+| `amplitude_modulation_adjustment` | $K_\mathrm{am}$, in dB. |
+| `impulsive_adjustment` | $K_\mathrm{I}$, in dB. |
 
 **Returns:** A [`WindTurbineRatingLevel`](/phonometry/reference/api/environment/wind-turbine-receptor/#windturbineratinglevel).
 
@@ -1246,10 +1246,10 @@ The range is [`TYPICAL_WIND_SHEAR_EXPONENT_RANGE`](/phonometry/reference/api/env
 
 ```python
 WindTurbineRatingLevel(
-    equivalent_level_db: float,
-    adjustments_db: Mapping[str, float],
+    equivalent_level: float,
+    adjustments: Mapping[str, float],
     governing: str | None,
-    rating_level_db: float,
+    rating_level: float,
 )
 ```
 
@@ -1259,10 +1259,10 @@ The rating level of wind turbine sound (Annex A, A.1).
 
 | Name | Description |
 | :--- | :--- |
-| `equivalent_level_db` | The equivalent continuous level $L_\mathrm{eq}$, in dB. |
-| `adjustments_db` | The three candidate adjustments, keyed `"tonal"`, `"amplitude_modulation"` and `"impulsive"`, in dB. |
+| `equivalent_level` | The equivalent continuous level $L_\mathrm{eq}$, in dB. |
+| `adjustments` | The three candidate adjustments, keyed `"tonal"`, `"amplitude_modulation"` and `"impulsive"`, in dB. |
 | `governing` | The adjustment applied, the most severe of the three, or `None` when all three are zero. |
-| `rating_level_db` | $L_\mathrm{r} = L_\mathrm{eq} + K$, in dB. |
+| `rating_level` | $L_\mathrm{r} = L_\mathrm{eq} + K$, in dB. |
 
 ### WindTurbineRatingLevel.plot()
 

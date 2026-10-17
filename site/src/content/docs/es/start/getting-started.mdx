@@ -471,8 +471,9 @@ poco sobre las bandas de 12,5 o 16 Hz por muchos dígitos que devuelva.
 
 Jupyter, JupyterLab, VS Code y Colab muestran el valor de la última línea de
 una celda, y un resultado se muestra como una tabla de sus campos: cada uno con
-su unidad cuando su nombre la lleva (`_db`, `_hz`, `_m`...) o es un eje que la
-API nombra por el concepto a secas (`frequencies` en hercios, `levels` en
+su unidad cuando su nombre la lleva (`_db`, `_hz`, `_m`...), nombra un nivel o
+una diferencia de niveles (`insertion_loss` y `band_levels` están en
+decibelios) o es un eje que la API nombra por el concepto a secas (`frequencies` en hercios, `levels` en
 decibelios, `times` en segundos), cada array en una línea con su forma y el
 intervalo de sus valores, nunca los valores, así que los fotogramas de una
 simulación ocupan una sola fila. Un veredicto muestra su

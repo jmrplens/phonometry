@@ -253,7 +253,7 @@ DirectSoundSubtraction(
     peak_index: int,
     shift_samples: float,
     amplitude_factor: float,
-    reduction_db: float,
+    reduction: float,
 )
 ```
 
@@ -270,7 +270,7 @@ The direct sound taken out of an impulse response, 5.5.4.
 | `peak_index` | The sample of the first and main peak of the in-front record, the direct sound. |
 | `shift_samples` | The shift applied to the free-field record, in samples, positive for a delay: a whole number of the 1/50 sample moving steps, within the +/- 2 samples 5.5.4 allows. |
 | `amplitude_factor` | The factor that made the two main peaks equal. |
-| `reduction_db` | $R_\mathrm{sub}$, Formula (6): the energy of the free-field record within 0,5 ms of the peak over that of the residual in the same interval, in decibels. Below 10 dB the subtraction is not perfect; `inf` when nothing is left at all. |
+| `reduction` | $R_\mathrm{sub}$, Formula (6): the energy of the free-field record within 0,5 ms of the peak over that of the residual in the same interval, in decibels. Below 10 dB the subtraction is not perfect; `inf` when nothing is left at all. |
 
 The three records come back in the type they arrived as: a
 [`Signal`](/phonometry/reference/api/io/io/#signal) when the record was one (in pascals and
@@ -793,7 +793,7 @@ ReflectionIndexResult(
     rating: RoadDeviceRating,
     microphone_values: NDArray[np.float64] | None = None,
     gain_corrections: NDArray[np.float64] | None = None,
-    subtraction_reductions_db: NDArray[np.float64] | None = None,
+    subtraction_reductions: NDArray[np.float64] | None = None,
 )
 ```
 
@@ -810,7 +810,7 @@ The sound reflection index of a device, per one-third octave band.
 | `rating` | $DL_{RI}$ over the bands from `lowest_band_hz`, a [`RoadDeviceRating`](/phonometry/reference/api/environment/noise-reducing-devices/#roaddevicerating). |
 | `microphone_values` | `(positions, 9, 18)`: the index of each microphone, `nan` where 5.5.5 leaves it out (microphones 7 to 9 below 200 Hz by default); `None` for a result built from position values. |
 | `gain_corrections` | `(positions, 9)`: $C_{\mathrm{gain},k}$ of Formula (4), or `None`. |
-| `subtraction_reductions_db` | `(positions, 9)`: $R_\mathrm{sub}$ of each subtraction, in decibels, or `None`. |
+| `subtraction_reductions` | `(positions, 9)`: $R_\mathrm{sub}$ of each subtraction, in decibels, or `None`. |
 
 ### ReflectionIndexResult.plot()
 

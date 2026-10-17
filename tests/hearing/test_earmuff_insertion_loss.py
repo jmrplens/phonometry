@@ -24,7 +24,7 @@ _SIX = ("front", "back", "left", "right", "up", "down")
 
 def test_the_published_tables_are_the_printed_ones() -> None:
     assert hearing.RANDOM_INCIDENCE_VARIATION_LIMITS == ISO4869_3_TABLE_1
-    assert dict(hearing.ATF_FRONT_TO_RANDOM_INDEX_DB) == ISO4869_3_TABLE_A1
+    assert dict(hearing.ATF_FRONT_TO_RANDOM_INDEX) == ISO4869_3_TABLE_A1
     budget = hearing.EARMUFF_INSERTION_LOSS_UNCERTAINTY
     assert budget.components_db == ISO4869_3_TABLE_B1_COMPONENTS_DB
 
@@ -66,9 +66,9 @@ def _fittings() -> tuple[np.ndarray, np.ndarray]:
 def test_the_insertion_loss_is_the_open_level_less_the_occluded_one() -> None:
     open_level, occluded = _fittings()
     result = hearing.earmuff_insertion_loss(open_level, occluded)
-    np.testing.assert_allclose(result.insertion_loss_db, np.linspace(8.0, 38.0, _BANDS))
+    np.testing.assert_allclose(result.insertion_loss, np.linspace(8.0, 38.0, _BANDS))
     np.testing.assert_allclose(
-        result.repetition_insertion_loss_db[0] - result.repetition_insertion_loss_db[2],
+        result.repetition_insertion_loss[0] - result.repetition_insertion_loss[2],
         0.8,
     )
     assert result.n_repetitions == 3
@@ -112,7 +112,7 @@ def test_the_isolation_cup_must_read_ten_decibels_lower() -> None:
     cup[0] = occluded.mean(axis=0)[0] - 10.0
     cup[-1] = occluded.mean(axis=0)[-1] - 9.9
     result = hearing.earmuff_insertion_loss(
-        open_level, occluded, isolation_cup_levels_db=cup
+        open_level, occluded, isolation_cup_levels=cup
     )
     assert result.floor_adequate is not None
     assert np.all(result.floor_adequate[:-1])
@@ -139,12 +139,12 @@ def test_the_signal_must_stay_steady_and_its_response_smooth() -> None:
     [
         (np.full(5, 85.0), np.full((3, 6), 60.0), {}, "share their bands"),
         (np.full(5, 85.0), np.full((3, 5), 60.0), {}, "needs 'frequencies'"),
-        (np.full(22, math.nan), np.full(22, 60.0), {}, "open_levels_db"),
+        (np.full(22, math.nan), np.full(22, 60.0), {}, "open_levels"),
         (
             np.full(22, 85.0),
             np.full(22, 60.0),
-            {"isolation_cup_levels_db": np.zeros(3)},
-            "isolation_cup_levels_db",
+            {"isolation_cup_levels": np.zeros(3)},
+            "isolation_cup_levels",
         ),
         (
             np.full(22, 85.0),
@@ -183,8 +183,8 @@ def test_the_random_incidence_field_uses_its_own_table_1() -> None:
     here = hearing.check_random_incidence_field(
         _positions(),
         [0.0] * _BANDS,
-        directional_levels_db=directional,
-        front_to_random_index_db=4.5,
+        directional_levels=directional,
+        front_to_random_index=4.5,
     )
     assert not here.passes
     np.testing.assert_array_equal(here.allowable_variation_db[9:], 4.0)
@@ -196,8 +196,8 @@ def test_an_index_of_exactly_five_decibels_allows_five() -> None:
     check = hearing.check_random_incidence_field(
         _positions(),
         [0.0] * _BANDS,
-        directional_levels_db=[[0.0] * _BANDS, [5.0] * _BANDS],
-        front_to_random_index_db=5.0,
+        directional_levels=[[0.0] * _BANDS, [5.0] * _BANDS],
+        front_to_random_index=5.0,
     )
     assert check.passes
 
@@ -205,12 +205,12 @@ def test_an_index_of_exactly_five_decibels_allows_five() -> None:
 def test_the_fixture_serves_as_the_microphone_where_its_index_allows() -> None:
     """Annex A: the ATF reaches 4 dB at 1,25 kHz to 3,15 kHz and above 6 kHz."""
     freqs = hearing.EARMUFF_TEST_BANDS_HZ
-    index = [hearing.ATF_FRONT_TO_RANDOM_INDEX_DB.get(f, math.nan) for f in freqs]
+    index = [hearing.ATF_FRONT_TO_RANDOM_INDEX.get(f, math.nan) for f in freqs]
     check = hearing.check_random_incidence_field(
         _positions(),
         [0.0] * _BANDS,
-        directional_levels_db=[[0.0] * _BANDS, [3.0] * _BANDS],
-        front_to_random_index_db=index,
+        directional_levels=[[0.0] * _BANDS, [3.0] * _BANDS],
+        front_to_random_index=index,
     )
     judged = [
         f
@@ -225,12 +225,12 @@ def test_the_plane_wave_needs_matched_end_faces_and_a_directional_margin() -> No
     faces = [[80.0] * _BANDS, [81.5] * _BANDS]
     check = hearing.check_plane_progressive_wave(
         faces,
-        facing_levels_db=[80.0] * _BANDS,
-        facing_away_levels_db=[68.0] * _BANDS,
-        front_to_rear_index_db=18.0,
+        facing_levels=[80.0] * _BANDS,
+        facing_away_levels=[68.0] * _BANDS,
+        front_to_rear_index=18.0,
     )
     assert check.passes
-    np.testing.assert_allclose(check.end_face_difference_db, 1.5)
+    np.testing.assert_allclose(check.end_face_difference, 1.5)
     assert math.isnan(check.front_to_back_db[0])
 
 
@@ -238,9 +238,9 @@ def test_a_plane_wave_read_with_a_poor_microphone_is_not_judged() -> None:
     faces = [[80.0] * _BANDS, [80.0] * _BANDS]
     check = hearing.check_plane_progressive_wave(
         faces,
-        facing_levels_db=[80.0] * _BANDS,
-        facing_away_levels_db=[68.0] * _BANDS,
-        front_to_rear_index_db=15.0,
+        facing_levels=[80.0] * _BANDS,
+        facing_away_levels=[68.0] * _BANDS,
+        front_to_rear_index=15.0,
     )
     assert not check.directionality_judged
     assert not check.passes
@@ -252,9 +252,9 @@ def test_a_plane_wave_that_folds_back_fails() -> None:
     faces = [[80.0] * _BANDS, [83.0] * _BANDS]
     check = hearing.check_plane_progressive_wave(
         faces,
-        facing_levels_db=[80.0] * _BANDS,
-        facing_away_levels_db=[75.0] * _BANDS,
-        front_to_rear_index_db=20.0,
+        facing_levels=[80.0] * _BANDS,
+        facing_away_levels=[75.0] * _BANDS,
+        front_to_rear_index=20.0,
     )
     assert not np.any(check.end_faces_matched)
     assert not np.any(check.progressive[9:])
@@ -264,13 +264,13 @@ def test_a_plane_wave_that_folds_back_fails() -> None:
     ("faces", "kwargs", "match"),
     [
         ([[80.0] * _BANDS] * 3, {}, r"\(2, bands\)"),
-        ([[80.0] * _BANDS] * 2, {"facing_levels_db": [80.0] * _BANDS}, "together"),
+        ([[80.0] * _BANDS] * 2, {"facing_levels": [80.0] * _BANDS}, "together"),
         (
             [[80.0] * _BANDS] * 2,
             {
-                "facing_levels_db": [80.0] * 3,
-                "facing_away_levels_db": [70.0] * 3,
-                "front_to_rear_index_db": 20.0,
+                "facing_levels": [80.0] * 3,
+                "facing_away_levels": [70.0] * 3,
+                "front_to_rear_index": 20.0,
             },
             "one value per band",
         ),
@@ -293,6 +293,21 @@ def test_the_fixture_isolation_follows_the_three_ranges_of_5_1_4() -> None:
         np.testing.assert_array_equal(check.required_db[band], least)
     assert not check.passes
     np.testing.assert_array_equal(check.sufficient, check.required_db <= 60.0)
+
+
+def test_the_fixture_isolation_is_the_open_level_less_the_cup_level() -> None:
+    """3.7: the isolation is the level without the cup less the level with it.
+
+    A band isolated by 62 dB falls between the 55 dB the top range asks for
+    and the 65 dB of the middle one, so an isolation read 3 dB high or low
+    moves its verdict.
+    """
+    freqs = [125.0, 1000.0, 8000.0]
+    open_levels = [121.5, 118.0, 117.0]
+    cup_levels = [70.0, 56.0, 55.0]
+    check = hearing.verify_fixture_isolation(open_levels, cup_levels, frequencies=freqs)
+    np.testing.assert_array_equal(check.isolation, [51.5, 62.0, 62.0])
+    np.testing.assert_array_equal(check.sufficient, [True, False, True])
 
 
 def test_the_fixture_isolation_asks_nothing_below_63_hz() -> None:

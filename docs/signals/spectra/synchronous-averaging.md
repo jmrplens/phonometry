@@ -112,12 +112,12 @@ Asynchronous noise of variance $\sigma^2$ averaged over $N$ periods has
 residual variance $\sigma^2/N$: the residual standard deviation falls as
 $1/\sqrt{N}$, and the amplitude signal-to-noise ratio improves by $\sqrt{N}$.
 That is a power reduction of $10\log_{10} N$ dB, reported as
-`noise_reduction_db`, with the amplitude gain $\sqrt{N}$ as
+`noise_reduction`, with the amplitude gain $\sqrt{N}$ as
 `amplitude_snr_gain`:
 
 ```python
 res = signals.time_synchronous_average(recording, fs, period_s=period_s, n_averages=100)
-res.noise_reduction_db      # 20.0 dB = 10*log10(100)
+res.noise_reduction      # 20.0 dB = 10*log10(100)
 res.amplitude_snr_gain      # 10.0   = sqrt(100)
 res.plot()                  # averaged waveform + the comb it applied
 ```
@@ -267,7 +267,7 @@ the strong gear components no longer mask the modulation.
 **Covered.** McFadden's revised model for time domain averaging (*Mechanical
 Systems and Signal Processing*, 1987): the comb-filter description of the
 average (Eq. 8, magnitude Eq. 9) in `comb_filter_response`, the square-root
-noise-reduction law reported as `noise_reduction_db` and `amplitude_snr_gain`,
+noise-reduction law reported as `noise_reduction` and `amplitude_snr_gain`,
 and the choice of $N$ that places a comb node on an interfering order,
 following the paper's own 32.05-order example. `time_synchronous_average` also
 implements the band-limited fractional-delay alignment used when $f_\mathrm{s} T$ is not

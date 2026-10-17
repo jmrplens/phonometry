@@ -74,12 +74,12 @@ A3_CASES = [
 ]
 
 
-def _narrowband(f_lo: float, f_hi: float, level_db: float, seed: int = 7) -> np.ndarray:
+def _narrowband(f_lo: float, f_hi: float, level: float, seed: int = 7) -> np.ndarray:
     rng = np.random.default_rng(seed)
     white = rng.standard_normal(FS * 2)
     sos = sp_signal.butter(8, [f_lo, f_hi], btype="band", fs=FS, output="sos")
     nb = sp_signal.sosfilt(sos, white)
-    return np.asarray(nb / np.sqrt(np.mean(nb**2)) * 2e-5 * 10 ** (level_db / 20))
+    return np.asarray(nb / np.sqrt(np.mean(nb**2)) * 2e-5 * 10 ** (level / 20))
 
 
 def _level_for_4_sone(f_lo: float, f_hi: float) -> float:

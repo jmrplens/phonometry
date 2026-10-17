@@ -41,7 +41,7 @@ def test_the_room_tables_are_the_printed_ones() -> None:
             hearing.BONE_CONDUCTION_AMBIENT_LIMITS_DB[lowest], column
         )
     for earphone, column in ISO8253_1_TABLE_3.items():
-        np.testing.assert_array_equal(hearing.EARPHONE_ATTENUATION_DB[earphone], column)
+        np.testing.assert_array_equal(hearing.EARPHONE_ATTENUATION[earphone], column)
     assert set(hearing.AIR_CONDUCTION_AMBIENT_LIMITS_DB) == set(ISO8253_1_TABLE_2)
     assert set(hearing.BONE_CONDUCTION_AMBIENT_LIMITS_DB) == set(ISO8253_1_TABLE_4)
 
@@ -65,7 +65,7 @@ def test_the_limits_take_every_adjustment_of_clause_11() -> None:
         "air",
         lowest_test_frequency_hz=250.0,
         allowed_threshold_shift_db=5.0,
-        lowest_hearing_level_db=10.0,
+        lowest_hearing_level=10.0,
     )
     np.testing.assert_allclose(raised - base, 10.0 + ISO8253_1_RELAXED_ALLOWANCE_DB)
 
@@ -87,7 +87,7 @@ def test_the_hda200_gets_no_allowance_where_table_3_prints_none() -> None:
 
 def test_another_earphone_is_given_by_its_attenuation() -> None:
     own = np.full(25, 20.0)
-    limits = hearing.ambient_noise_limits("air", earphone_attenuation_db=own)
+    limits = hearing.ambient_noise_limits("air", earphone_attenuation=own)
     expected = np.add(
         ISO8253_1_TABLE_2[125.0], 20.0 - np.asarray(ISO8253_1_TABLE_3["supra-aural"])
     )
@@ -114,11 +114,11 @@ def test_bone_conduction_and_sound_field_use_their_own_tables() -> None:
         ({"earphone": "TDH 39"}, "earphone"),
         ({"presentation": "bone", "earphone": "ER-3A"}, "air conduction"),
         (
-            {"earphone": "ER-3A", "earphone_attenuation_db": np.zeros(25)},
+            {"earphone": "ER-3A", "earphone_attenuation": np.zeros(25)},
             "not both",
         ),
-        ({"earphone_attenuation_db": np.zeros(7)}, "earphone_attenuation_db"),
-        ({"lowest_hearing_level_db": math.nan}, "lowest_hearing_level_db"),
+        ({"earphone_attenuation": np.zeros(7)}, "earphone_attenuation"),
+        ({"lowest_hearing_level": math.nan}, "lowest_hearing_level"),
     ],
 )
 def test_the_limits_refuse_what_the_tables_do_not_cover(
@@ -132,13 +132,13 @@ def test_a_quiet_room_passes_and_a_loud_band_fails() -> None:
     quiet = np.asarray(ISO8253_1_TABLE_2[125.0], dtype=float) - 2.0
     check = hearing.check_audiometric_ambient_noise(quiet)
     assert check.passes
-    assert check.lowest_measurable_hearing_level_db == pytest.approx(-2.0)
+    assert check.lowest_measurable_hearing_level == pytest.approx(-2.0)
     loud = quiet.copy()
     loud[ISO8253_1_BANDS_HZ.index(250.0)] += 5.0
     failed = hearing.check_audiometric_ambient_noise(loud)
     assert not failed.passes
     assert failed.exceedance_db[ISO8253_1_BANDS_HZ.index(250.0)] == pytest.approx(3.0)
-    assert failed.lowest_measurable_hearing_level_db == pytest.approx(3.0)
+    assert failed.lowest_measurable_hearing_level == pytest.approx(3.0)
 
 
 def test_the_room_check_judges_against_the_testers_choices() -> None:
@@ -256,39 +256,39 @@ _THREE_AT_30 = ([20, 25, 30, 20, 25, 30, 20, 25, 30], [0, 0, 1, 0, 0, 1, 0, 0, 1
 def test_three_responses_at_one_level_set_the_threshold() -> None:
     levels, heard = _THREE_AT_30
     result = hearing.ascending_method_threshold(
-        presentation_levels_db=levels, responses=heard, familiarization_level_db=30.0
+        presentation_levels=levels, responses=heard, familiarization_level=30.0
     )
     assert result.determined
     assert result.threshold_db == 30.0
     assert result.n_responses_at_threshold == 3
-    np.testing.assert_array_equal(result.ascent_levels_db, [30.0, 30.0, 30.0])
-    assert math.isnan(result.next_level_db)
+    np.testing.assert_array_equal(result.ascent_levels, [30.0, 30.0, 30.0])
+    assert math.isnan(result.next_level)
     assert not result.doubtful
 
 
 def test_the_sequence_says_what_to_present_next() -> None:
     """Step 1 starts 10 dB below familiarization; a response drops 10 dB."""
     empty = hearing.ascending_method_threshold(
-        presentation_levels_db=[], responses=[], familiarization_level_db=40.0
+        presentation_levels=[], responses=[], familiarization_level=40.0
     )
-    assert empty.next_level_db == 30.0
+    assert empty.next_level == 30.0
     after_miss = hearing.ascending_method_threshold(
-        presentation_levels_db=[30.0], responses=[False]
+        presentation_levels=[30.0], responses=[False]
     )
-    assert after_miss.next_level_db == 35.0
+    assert after_miss.next_level == 35.0
     after_hit = hearing.ascending_method_threshold(
-        presentation_levels_db=[30.0, 35.0], responses=[False, True]
+        presentation_levels=[30.0, 35.0], responses=[False, True]
     )
-    assert after_hit.next_level_db == 25.0
+    assert after_hit.next_level == 25.0
     assert not after_hit.determined
 
 
 def test_a_descent_that_is_still_heard_is_not_an_ascent() -> None:
     result = hearing.ascending_method_threshold(
-        presentation_levels_db=[40, 30, 20, 25, 30],
+        presentation_levels=[40, 30, 20, 25, 30],
         responses=[True, True, False, False, True],
     )
-    np.testing.assert_array_equal(result.ascent_levels_db, [30.0])
+    np.testing.assert_array_equal(result.ascent_levels, [30.0])
 
 
 def test_five_ascents_without_three_at_one_level_start_a_new_series() -> None:
@@ -296,11 +296,11 @@ def test_five_ascents_without_three_at_one_level_start_a_new_series() -> None:
     levels = [20, 25, 30, 20, 25, 30, 35, 25, 30, 20, 25, 30, 35, 25, 30, 35, 40]
     heard = [0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
     result = hearing.ascending_method_threshold(
-        presentation_levels_db=levels, responses=heard
+        presentation_levels=levels, responses=heard
     )
     assert result.series_exhausted
     assert not result.determined
-    assert result.next_level_db == 50.0
+    assert result.next_level == 50.0
 
 
 def test_the_shortened_version_needs_two_out_of_three() -> None:
@@ -328,25 +328,25 @@ def test_a_span_over_ten_decibels_is_doubtful() -> None:
 @pytest.mark.parametrize(
     ("kwargs", "match"),
     [
-        ({"presentation_levels_db": [20, 30], "responses": [0, 0]}, "presents 25 dB"),
-        ({"presentation_levels_db": [30, 25], "responses": [1, 0]}, "presents 20 dB"),
+        ({"presentation_levels": [20, 30], "responses": [0, 0]}, "presents 25 dB"),
+        ({"presentation_levels": [30, 25], "responses": [1, 0]}, "presents 20 dB"),
         (
             {
-                "presentation_levels_db": [25],
+                "presentation_levels": [25],
                 "responses": [0],
-                "familiarization_level_db": 40.0,
+                "familiarization_level": 40.0,
             },
             "first tone must be 30 dB",
         ),
         (
             {
-                "presentation_levels_db": [*_THREE_AT_30[0], 20],
+                "presentation_levels": [*_THREE_AT_30[0], 20],
                 "responses": [*_THREE_AT_30[1], 0],
             },
             "after the series ended",
         ),
-        ({"presentation_levels_db": [20, 25], "responses": [0]}, "responses"),
-        ({"presentation_levels_db": [20]}, "either"),
+        ({"presentation_levels": [20, 25], "responses": [0]}, "responses"),
+        ({"presentation_levels": [20]}, "either"),
     ],
 )
 def test_the_replay_refuses_a_step_the_method_does_not_take(
@@ -410,7 +410,7 @@ def test_a_bracketing_spread_over_ten_decibels_asks_for_a_repeat() -> None:
 
 
 def test_the_bracketing_method_refuses_no_levels() -> None:
-    with pytest.raises(ValueError, match="descent_levels_db"):
+    with pytest.raises(ValueError, match="descent_levels"):
         hearing.bracketing_method_threshold([30.0], [])
 
 
@@ -666,7 +666,7 @@ def test_the_budget_refuses_what_annex_a_does_not_cover(
 def test_a_repeat_within_five_decibels_agrees() -> None:
     check = hearing.check_retest_agreement(25.0, 30.0)
     assert check.passes
-    assert check.difference_db == 5.0
+    assert check.difference == 5.0
     assert not check.retest_further_frequencies
     assert check.frequency_hz == 1000.0
 
@@ -676,7 +676,7 @@ def test_a_change_of_ten_decibels_sends_the_test_back() -> None:
     assert not worse.passes
     assert worse.retest_further_frequencies
     better = hearing.check_retest_agreement(25.0, 15.0, frequency_hz=2000.0)
-    assert better.difference_db == -10.0
+    assert better.difference == -10.0
     assert better.retest_further_frequencies
 
 
@@ -709,12 +709,12 @@ def test_the_retest_check_refuses_what_it_cannot_judge(
 
 def test_the_vibrotactile_levels_are_the_printed_ones() -> None:
     """8.4 (folio 13): 40 dB at 250 Hz, 60 dB at 500 Hz, 70 dB at 1 kHz."""
-    assert dict(hearing.VIBROTACTILE_HEARING_LEVELS_DB) == ISO8253_1_VIBROTACTILE_DB
+    assert dict(hearing.VIBROTACTILE_HEARING_LEVELS) == ISO8253_1_VIBROTACTILE_DB
 
 
 def test_the_vibrotactile_levels_cannot_be_changed() -> None:
     with pytest.raises(TypeError):
-        hearing.VIBROTACTILE_HEARING_LEVELS_DB[250.0] = 30.0  # type: ignore[index]
+        hearing.VIBROTACTILE_HEARING_LEVELS[250.0] = 30.0  # type: ignore[index]
 
 
 def test_forty_decibels_by_air_conduction_calls_for_caution() -> None:
@@ -733,7 +733,7 @@ def test_a_bone_level_at_the_vibrotactile_threshold_may_be_felt() -> None:
         bone_conduction_db=[60.0, 40.0, 59.5, 70.0, 70.0],
     )
     np.testing.assert_array_equal(
-        cautions.vibrotactile_levels_db, [math.nan, 40.0, 60.0, 70.0, math.nan]
+        cautions.vibrotactile_levels, [math.nan, 40.0, 60.0, 70.0, math.nan]
     )
     np.testing.assert_array_equal(
         cautions.vibrotactile, [False, True, False, True, False]
@@ -747,7 +747,7 @@ def test_forehead_placement_lowers_the_vibrotactile_levels_ten_decibels() -> Non
         bone_conduction_db=[30.0, 49.0, 60.0],
         vibrator_placement="forehead",
     )
-    np.testing.assert_array_equal(cautions.vibrotactile_levels_db, [30.0, 50.0, 60.0])
+    np.testing.assert_array_equal(cautions.vibrotactile_levels, [30.0, 50.0, 60.0])
     np.testing.assert_array_equal(cautions.vibrotactile, [True, False, True])
 
 

@@ -73,7 +73,7 @@ burst = signals.tone_burst(fs, 5000.0, 25, amplitude=0.285,
                            post_silence=0.5)
 result = broadcast.quasi_peak_meter(burst.signal, fs)
 print(round(result.reading, 4))                            # 0.5872   volts
-print(round(result.level_db, 2), result.level_unit)        # -2.41 dBqps
+print(round(result.level, 2), result.level_unit)        # -2.41 dBqps
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/quasi_peak_meter_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/quasi_peak_meter.svg" alt="Quasi-peak detector reading a train of sixteen 5 millisecond bursts of 5 kilohertz tone at 10 per second. Grey vertical bars mark the rectified 468-weighted bursts, reaching 1.10 volts. The blue detector output climbs from zero over the first half second, then ripples gently along 0.58 volts for the rest of the train, and decays smoothly after the last burst at 1.55 seconds, falling to 0.16 volts by 2.1 seconds. A red dashed line marks the reading of 0.5872 volts, minus 2.41 dBqps, and a green dotted line above it marks the 0.775 volts the same tone would read steadily, 0 dBqps" width="96%"></picture>

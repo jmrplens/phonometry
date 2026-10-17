@@ -263,7 +263,7 @@ def _chk_formula_1() -> Outcome:
         (1, 0, 0),
         d,
         90.0 - 20.0 * np.log10(d) + drift,
-        monitor_levels_db=70.0 + drift,
+        monitor_levels=70.0 + drift,
     )
     fit = emission.inverse_square_law_deviations(
         [traverse], frequencies=[1000.0], room="anechoic"
@@ -282,13 +282,13 @@ def _chk_6926_table_1() -> Outcome:
     freqs = (80.0, 160.0, 200.0)
     lw = np.full(len(_THIRDS), 90.0)
     verdict = emission.verify_reference_sound_source(
-        lw, frequencies=_THIRDS, repeated_levels_db=np.vstack([lw, lw, lw]),
-        directivity_index_db=np.zeros(len(_THIRDS)),
+        lw, frequencies=_THIRDS, repeated_levels=np.vstack([lw, lw, lw]),
+        directivity_index=np.zeros(len(_THIRDS)),
     )  # fmt: skip
     limits = dict(zip(_THIRDS, verdict.repeatability_limit_db, strict=True))
     extended = emission.verify_reference_sound_source(
         np.full(3, 90.0), frequencies=(50.0, 63.0, 80.0),
-        repeated_levels_db=np.full((3, 3), 90.0), directivity_index_db=np.zeros(3),
+        repeated_levels=np.full((3, 3), 90.0), directivity_index=np.zeros(3),
     )  # fmt: skip
     computed = {
         "80 Hz": float(extended.repeatability_limit_db[-1]),
@@ -402,15 +402,15 @@ def _chk_6926_formula_2() -> Outcome:
         + 7.5 * math.log10(296.15 / 296.0)
         + a0 * (1.0053 - 0.0012 * a0) ** 1.6
     )
-    got = float(calibration.sound_power_level_db[_THIRDS.index(1000.0)])
+    got = float(calibration.sound_power_level[_THIRDS.index(1000.0)])
     return numeric(expected, got, 1e-9, unit="dB", places=4)
 
 
 def _spectrum_verdict(lw: np.ndarray, freqs: tuple[float, ...]) -> bool:
     return bool(
         emission.verify_reference_sound_source(
-            lw, frequencies=freqs, repeated_levels_db=np.vstack([lw, lw, lw]),
-            directivity_index_db=np.zeros(len(freqs)),
+            lw, frequencies=freqs, repeated_levels=np.vstack([lw, lw, lw]),
+            directivity_index=np.zeros(len(freqs)),
         ).spectrum_met
     )  # fmt: skip
 
@@ -502,8 +502,8 @@ def _steady_enough(bands: tuple[float, ...], band: float, sigma_db: float) -> fl
     verdict = emission.verify_reference_sound_source(
         levels,
         frequencies=bands,
-        repeated_levels_db=repeated,
-        directivity_index_db=np.zeros(len(bands)),
+        repeated_levels=repeated,
+        directivity_index=np.zeros(len(bands)),
     )
     return float(bool(verdict.stability_met))
 
@@ -898,7 +898,7 @@ def _chk_6926_table_b1() -> Outcome:
     levels = np.full((20, len(freqs)), 80.0)
     pressure = emission.reference_source_calibration(
         levels, frequencies=freqs, arrangement="fixed"
-    ).sound_power_level_db
+    ).sound_power_level
 
     def agrees(band: float, difference: float) -> float:
         intensity = np.where(np.asarray(freqs) <= 315.0, pressure, np.nan)
@@ -907,7 +907,7 @@ def _chk_6926_table_b1() -> Outcome:
             levels,
             frequencies=freqs,
             arrangement="fixed",
-            intensity_sound_power_level_db=intensity,
+            intensity_sound_power_level=intensity,
         )
         return float(bool(calibration.intensity_agreement))
 
@@ -938,7 +938,7 @@ def _chk_6926_supply_and_directivity() -> Outcome:
             lw,
             frequencies=_THIRDS,
             supply_variation_db=supply,
-            directivity_index_db=np.full(len(_THIRDS), directivity),
+            directivity_index=np.full(len(_THIRDS), directivity),
         )
 
     expected = {"0,30 dB": 1.0, "0,31 dB": 0.0, "6,0 dB": 1.0, "6,1 dB": 0.0}
@@ -976,7 +976,7 @@ def _chk_6926_formula_2_meteorology() -> Outcome:
         + pressure
         + 7.5 * math.log10(303.15 / 296.0)
     )
-    got = float(calibration.sound_power_level_db[_THIRDS.index(1000.0)])
+    got = float(calibration.sound_power_level[_THIRDS.index(1000.0)])
     return numeric(expected, got, 1e-9, unit="dB", places=4)
 
 
@@ -1004,7 +1004,7 @@ def _chk_6926_calibration_at_the_test() -> Outcome:
     ratio = math.log10(293.15 / 296.0)
     at = _THIRDS.index(1000.0)
     expected = (
-        float(calibration.sound_power_level_db[at])
+        float(calibration.sound_power_level[at])
         - (pressure + 7.5 * ratio)
         + 4.0
         + (pressure + 15.0 * ratio)

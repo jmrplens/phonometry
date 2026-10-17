@@ -383,7 +383,7 @@ def _chk_spb_annex_e_vehicle_levels() -> Outcome:
     result = _spb_annex_e()
     return record(
         spb.ANNEX_E_VEHICLE_SOUND_LEVELS_DB,
-        dict(result.reported_vehicle_sound_levels_db),
+        dict(result.reported_vehicle_sound_levels),
         unit="dB",
     )
 
@@ -396,7 +396,7 @@ def _chk_spb_annex_e_vehicle_levels() -> Outcome:
 )
 def _chk_spb_annex_e_index() -> Outcome:
     return numeric(
-        spb.ANNEX_E_INDEX_DB, _spb_annex_e().index_db, 0.05, unit="dB", places=3
+        spb.ANNEX_E_INDEX_DB, _spb_annex_e().index, 0.05, unit="dB", places=3
     )
 
 
@@ -407,11 +407,11 @@ def _chk_spb_annex_e_index() -> Outcome:
 )
 def _chk_spb_annex_e_corrected_index() -> Outcome:
     result = _spb_annex_e(
-        corrected_vehicle_sound_levels_db=spb.ANNEX_E_CORRECTED_VEHICLE_SOUND_LEVELS_DB
+        corrected_vehicle_sound_levels=spb.ANNEX_E_CORRECTED_VEHICLE_SOUND_LEVELS_DB
     )
     return numeric(
         spb.ANNEX_E_CORRECTED_INDEX_DB,
-        _given(result.corrected_index_db),
+        _given(result.corrected_index),
         0.05,
         unit="dB",
         places=3,
@@ -426,12 +426,12 @@ def _chk_spb_annex_e_corrected_index() -> Outcome:
 )
 def _chk_spb_annex_e_difference() -> Outcome:
     result = _spb_annex_e(
-        corrected_vehicle_sound_levels_db=spb.ANNEX_E_CORRECTED_VEHICLE_SOUND_LEVELS_DB,
+        corrected_vehicle_sound_levels=spb.ANNEX_E_CORRECTED_VEHICLE_SOUND_LEVELS_DB,
         reference_db=spb.ANNEX_E_REFERENCE_INDEX_DB,
     )
     return numeric(
         spb.ANNEX_E_DIFFERENCE_DB,
-        _given(result.corrected_difference_db),
+        _given(result.corrected_difference),
         0.05,
         unit="dB",
         places=3,

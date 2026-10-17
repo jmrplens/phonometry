@@ -709,31 +709,29 @@ def verify_rated_impedance(
 # ---------------------------------------------------------------------------
 
 
-def characteristic_voltage(
-    source_emf_v: float, sound_pressure_level_db: float
-) -> float:
+def characteristic_voltage(source_emf_v: float, sound_pressure_level: float) -> float:
     r"""The source e.m.f. that produces 94 dB in the coupler (IEC 60268-7 8.3.3).
 
     The characteristic voltage is "the sinusoidal source e.m.f. at 500 Hz
     which, when applied to the headphone through the rated source impedance,
     produces a sound pressure level in the coupler or ear simulator of 94 dB".
     The headphone is linear at that level, so a reading of
-    ``sound_pressure_level_db`` at ``source_emf_v`` scales to it:
+    ``sound_pressure_level`` at ``source_emf_v`` scales to it:
     :math:`E\,10^{(94 - L)/20}`. The same scaling serves the programme signal
     of 8.3.4 with the level of the whole signal
     (:func:`program_signal_level`).
 
     :param source_emf_v: The source e.m.f. of the reading, in volts (RMS).
-    :param sound_pressure_level_db: The level it produced in the coupler or ear
+    :param sound_pressure_level: The level it produced in the coupler or ear
         simulator, in dB re 20 µPa.
     :return: The characteristic voltage, in volts (RMS).
     :raises ValueError: If the e.m.f. is not positive or the level not finite.
     """
     emf = require_positive(source_emf_v, "source_emf_v")
-    require_scalar(sound_pressure_level_db, "sound_pressure_level_db")
-    level = float(sound_pressure_level_db)
+    require_scalar(sound_pressure_level, "sound_pressure_level")
+    level = float(sound_pressure_level)
     if not math.isfinite(level):
-        msg = "'sound_pressure_level_db' must be finite."
+        msg = "'sound_pressure_level' must be finite."
         raise ValueError(msg)
     return float(emf * 10.0 ** ((_STANDARD_LEVEL_DB - level) / 20.0))
 
@@ -806,7 +804,7 @@ def headphone_source_emf(
 
 
 def working_sound_pressure_level(
-    sound_pressure_level_db: float,
+    sound_pressure_level: float,
     source_emf_v: float,
     *,
     rated_impedance_ohm: float,
@@ -834,7 +832,7 @@ def working_sound_pressure_level(
     (see ``docs/ERRATA.md``); it applies to the 500 Hz sine of 8.5.2 b),
     since a noise signal has no single impedance to divide by.
 
-    :param sound_pressure_level_db: The level read in the coupler or ear
+    :param sound_pressure_level: The level read in the coupler or ear
         simulator, in dB re 20 µPa.
     :param source_emf_v: The source e.m.f. of the reading, in volts (RMS).
     :param rated_impedance_ohm: The rated impedance, in ohms.
@@ -847,10 +845,10 @@ def working_sound_pressure_level(
     :raises ValueError: If an input is out of range.
     """
     emf = require_positive(source_emf_v, "source_emf_v")
-    require_scalar(sound_pressure_level_db, "sound_pressure_level_db")
-    level = float(sound_pressure_level_db)
+    require_scalar(sound_pressure_level, "sound_pressure_level")
+    level = float(sound_pressure_level)
     if not math.isfinite(level):
-        msg = "'sound_pressure_level_db' must be finite."
+        msg = "'sound_pressure_level' must be finite."
         raise ValueError(msg)
     if headphone_impedance_ohm is None:
         working = headphone_source_emf(
@@ -892,7 +890,7 @@ def _band_corrections(
 
 def program_signal_level(
     frequencies: ArrayLike,
-    band_levels_db: ArrayLike,
+    band_levels: ArrayLike,
     *,
     a_weighted: bool = False,
     free_field_response_db: ArrayLike | None = None,
@@ -913,7 +911,7 @@ def program_signal_level(
        L = 10\lg \sum_k 10^{(L_k + A_k - F_k)/10}.
 
     :param frequencies: The band centre frequencies, in Hz, ascending.
-    :param band_levels_db: The band levels read in the coupler or ear
+    :param band_levels: The band levels read in the coupler or ear
         simulator, in dB re 20 µPa.
     :param a_weighted: Apply the A-weighting (8.3.5, 8.5.2 d).
     :param free_field_response_db: The free-field response of the head and
@@ -923,9 +921,9 @@ def program_signal_level(
     :raises ValueError: If the inputs differ in length or are not finite.
     """
     f = _frequencies(frequencies)
-    levels = _levels(band_levels_db, "band_levels_db")
+    levels = _levels(band_levels, "band_levels")
     if levels.shape != f.shape:
-        msg = "'frequencies' and 'band_levels_db' must have the same length."
+        msg = "'frequencies' and 'band_levels' must have the same length."
         raise ValueError(msg)
     corrections = _band_corrections(
         f, a_weighted=a_weighted, free_field_response_db=free_field_response_db
@@ -938,11 +936,11 @@ class ProgramCharacteristicVoltage(OwnsArrays):
     """The simulated programme signal characteristic voltage (IEC 60268-7 8.3.4, 8.3.5).
 
     :ivar frequencies: The band centre frequencies, in Hz.
-    :ivar band_levels_db: The band levels read in the coupler or ear
+    :ivar band_levels: The band levels read in the coupler or ear
         simulator, one row per fitting, in dB re 20 µPa.
     :ivar source_emf_v: The source e.m.f. of each fitting's reading, in volts
         (RMS).
-    :ivar corrections_db: The correction added to each band, in dB: the
+    :ivar corrections: The correction added to each band, in dB: the
         A-weighting minus the free-field response, zero when neither applies.
     :ivar a_weighted: Whether the A-weighting was applied.
     :ivar free_field_compensated: Whether the free-field response was
@@ -950,16 +948,16 @@ class ProgramCharacteristicVoltage(OwnsArrays):
     """
 
     frequencies: NDArray[np.float64]
-    band_levels_db: NDArray[np.float64]
+    band_levels: NDArray[np.float64]
     source_emf_v: NDArray[np.float64]
-    corrections_db: NDArray[np.float64]
+    corrections: NDArray[np.float64]
     a_weighted: bool
     free_field_compensated: bool
 
     @property
     def levels(self) -> NDArray[np.float64]:
         """The corrected level of the whole signal in each fitting, in dB re 20 µPa."""
-        corrected = self.band_levels_db + self.corrections_db
+        corrected = self.band_levels + self.corrections
         return np.asarray(
             10.0 * np.log10(np.sum(10.0 ** (corrected / 10.0), axis=1)),
             dtype=np.float64,
@@ -985,14 +983,14 @@ class ProgramCharacteristicVoltage(OwnsArrays):
         return lowest <= self.voltages_v.size <= highest
 
     @property
-    def band_levels_at_characteristic_db(self) -> NDArray[np.float64]:
+    def band_levels_at_characteristic(self) -> NDArray[np.float64]:
         """The corrected band levels at the characteristic voltage, in dB re 20 µPa.
 
         The mean of the fittings' corrected bands, each scaled to the
         characteristic voltage; their power sum is 94 dB when the fittings
         agree.
         """
-        corrected = self.band_levels_db + self.corrections_db
+        corrected = self.band_levels + self.corrections
         scale = _db20(self.characteristic_voltage_v / self.source_emf_v)
         scaled = corrected + scale[:, None]
         return np.asarray(
@@ -1024,7 +1022,7 @@ class ProgramCharacteristicVoltage(OwnsArrays):
 def program_characteristic_voltage(
     source_emf_v: ArrayLike,
     frequencies: ArrayLike,
-    band_levels_db: ArrayLike,
+    band_levels: ArrayLike,
     *,
     a_weighted: bool = False,
     free_field_response_db: ArrayLike | None = None,
@@ -1043,7 +1041,7 @@ def program_characteristic_voltage(
     :param source_emf_v: The source e.m.f. of each fitting's reading, in volts
         (RMS): one value for all, or one per fitting.
     :param frequencies: The band centre frequencies, in Hz, ascending.
-    :param band_levels_db: The band levels, in dB re 20 µPa, shape
+    :param band_levels: The band levels, in dB re 20 µPa, shape
         ``(bands,)`` for one fitting or ``(fittings, bands)``.
     :param a_weighted: Apply the A-weighting (8.3.5).
     :param free_field_response_db: The free-field response of the head and
@@ -1053,11 +1051,9 @@ def program_characteristic_voltage(
     :raises ValueError: If the shapes disagree or a value is out of range.
     """
     f = _frequencies(frequencies)
-    levels = np.atleast_2d(_levels(band_levels_db, "band_levels_db"))
+    levels = np.atleast_2d(_levels(band_levels, "band_levels"))
     if levels.ndim != _MATRIX_NDIM or levels.shape[1] != f.size:
-        msg = (
-            "'band_levels_db' must be (bands,) or (fittings, bands) over 'frequencies'."
-        )
+        msg = "'band_levels' must be (bands,) or (fittings, bands) over 'frequencies'."
         raise ValueError(msg)
     emf = np.broadcast_to(
         np.atleast_1d(np.asarray(source_emf_v, dtype=np.float64)), (levels.shape[0],)
@@ -1070,9 +1066,9 @@ def program_characteristic_voltage(
     )
     return ProgramCharacteristicVoltage(
         frequencies=f,
-        band_levels_db=levels,
+        band_levels=levels,
         source_emf_v=emf,
-        corrections_db=read_only(corrections),
+        corrections=read_only(corrections),
         a_weighted=bool(a_weighted),
         free_field_compensated=free_field_response_db is not None,
     )
@@ -1204,20 +1200,20 @@ class ProtectionVoltage(OwnsArrays):
 
     :ivar source_emf_v: The source e.m.f. of each step, in volts (RMS),
         ascending.
-    :ivar sound_pressure_level_db: The level at each step, in dB re 20 µPa.
+    :ivar sound_pressure_level: The level at each step, in dB re 20 µPa.
     :ivar protection_voltage_v: The e.m.f. at which the sensitivity has
         changed by 1 dB from the first step, interpolated, in volts; ``None``
         when the sweep never reaches that change.
     """
 
     source_emf_v: NDArray[np.float64]
-    sound_pressure_level_db: NDArray[np.float64]
+    sound_pressure_level: NDArray[np.float64]
     protection_voltage_v: float | None
 
     @property
     def sensitivity_change_db(self) -> NDArray[np.float64]:
         """The sensitivity at each step relative to the first, in dB."""
-        sensitivity = self.sound_pressure_level_db - _db20(self.source_emf_v)
+        sensitivity = self.sound_pressure_level - _db20(self.source_emf_v)
         return np.asarray(sensitivity - sensitivity[0], dtype=np.float64)
 
     @property
@@ -1253,7 +1249,7 @@ class ProtectionVoltage(OwnsArrays):
 
 
 def protection_voltage(
-    source_emf_v: ArrayLike, sound_pressure_level_db: ArrayLike
+    source_emf_v: ArrayLike, sound_pressure_level: ArrayLike
 ) -> ProtectionVoltage:
     r"""The protection voltage of a headphone's protective device (IEC 60268-7 8.3.6).
 
@@ -1267,7 +1263,7 @@ def protection_voltage(
 
     :param source_emf_v: The source e.m.f. of each step, in volts (RMS),
         strictly ascending.
-    :param sound_pressure_level_db: The level at each step, in dB re 20 µPa.
+    :param sound_pressure_level: The level at each step, in dB re 20 µPa.
     :return: A :class:`ProtectionVoltage`.
     :raises ValueError: If the inputs differ in length, are not finite, the
         e.m.f.s are not positive and ascending, or there are fewer than two.
@@ -1276,9 +1272,9 @@ def protection_voltage(
     if emf.size < _FEWEST_POINTS:
         msg = "At least two steps are needed to see a change of sensitivity."
         raise ValueError(msg)
-    levels = _levels(sound_pressure_level_db, "sound_pressure_level_db")
+    levels = _levels(sound_pressure_level, "sound_pressure_level")
     if levels.shape != emf.shape:
-        msg = "'source_emf_v' and 'sound_pressure_level_db' must have the same length."
+        msg = "'source_emf_v' and 'sound_pressure_level' must have the same length."
         raise ValueError(msg)
     change = np.abs(levels - _db20(emf) - (levels[0] - _db20(emf[0])))
     reached = np.flatnonzero(change >= _PROTECTION_STEP_DB * (1.0 - _LIMIT_SLACK))
@@ -1291,7 +1287,7 @@ def protection_voltage(
         voltage = 10.0 ** ((x0 + min(max(fraction, 0.0), 1.0) * (x1 - x0)) / 20.0)
     return ProtectionVoltage(
         source_emf_v=emf,
-        sound_pressure_level_db=levels,
+        sound_pressure_level=levels,
         protection_voltage_v=voltage,
     )
 
@@ -1306,14 +1302,14 @@ class CouplerFrequencyResponse(OwnsArrays):
     """The coupler or ear simulator frequency response (IEC 60268-7 8.6.2).
 
     :ivar frequencies: The frequencies, in Hz, ascending.
-    :ivar sound_pressure_level_db: The level in the coupler or ear simulator at
+    :ivar sound_pressure_level: The level in the coupler or ear simulator at
         each frequency, in dB re 20 µPa.
     :ivar rated_frequency_range_hz: The rated frequency range, (lower, upper),
         in Hz, or ``None`` when not stated.
     """
 
     frequencies: NDArray[np.float64]
-    sound_pressure_level_db: NDArray[np.float64]
+    sound_pressure_level: NDArray[np.float64]
     rated_frequency_range_hz: tuple[float, float] | None
 
     @property
@@ -1342,7 +1338,7 @@ class CouplerFrequencyResponse(OwnsArrays):
         """
         index = _band_index(self.frequencies, float(reference_frequency_hz))
         return np.asarray(
-            self.sound_pressure_level_db - self.sound_pressure_level_db[index],
+            self.sound_pressure_level - self.sound_pressure_level[index],
             dtype=np.float64,
         )
 
@@ -1378,7 +1374,7 @@ class CouplerFrequencyResponse(OwnsArrays):
 
 def coupler_frequency_response(
     frequencies: ArrayLike,
-    sound_pressure_level_db: ArrayLike,
+    sound_pressure_level: ArrayLike,
     *,
     rated_frequency_range_hz: tuple[float, float] | None = None,
 ) -> CouplerFrequencyResponse:
@@ -1389,16 +1385,16 @@ def coupler_frequency_response(
     the rated source impedance, over "at least the rated frequency range".
 
     :param frequencies: Frequencies, in Hz, strictly ascending.
-    :param sound_pressure_level_db: The level at each, in dB re 20 µPa.
+    :param sound_pressure_level: The level at each, in dB re 20 µPa.
     :param rated_frequency_range_hz: The rated frequency range (8.6.6), as
         (lower, upper), in Hz, to judge the coverage; ``None`` if not stated.
     :return: A :class:`CouplerFrequencyResponse`.
     :raises ValueError: If the inputs differ in length or are not finite.
     """
     f = _frequencies(frequencies)
-    levels = _levels(sound_pressure_level_db, "sound_pressure_level_db")
+    levels = _levels(sound_pressure_level, "sound_pressure_level")
     if levels.shape != f.shape:
-        msg = "'frequencies' and 'sound_pressure_level_db' must have the same length."
+        msg = "'frequencies' and 'sound_pressure_level' must have the same length."
         raise ValueError(msg)
     rated: tuple[float, float] | None = None
     if rated_frequency_range_hz is not None:
@@ -1409,7 +1405,7 @@ def coupler_frequency_response(
         rated = (lower, upper)
     return CouplerFrequencyResponse(
         frequencies=f,
-        sound_pressure_level_db=levels,
+        sound_pressure_level=levels,
         rated_frequency_range_hz=rated,
     )
 
@@ -1419,25 +1415,25 @@ class CrosstalkAttenuation(OwnsArrays):
     """The crosstalk attenuation of a multi-channel headphone (IEC 60268-7 8.12).
 
     :ivar frequencies: The frequencies, in Hz, ascending.
-    :ivar driven_level_db: The level in the coupler of the channel under test
+    :ivar driven_level: The level in the coupler of the channel under test
         with the rated e.m.f. on that channel, in dB re 20 µPa.
-    :ivar other_level_db: The level in the same coupler with the rated e.m.f.
+    :ivar other_level: The level in the same coupler with the rated e.m.f.
         on the other, stated channel, in dB re 20 µPa.
     """
 
     frequencies: NDArray[np.float64]
-    driven_level_db: NDArray[np.float64]
-    other_level_db: NDArray[np.float64]
+    driven_level: NDArray[np.float64]
+    other_level: NDArray[np.float64]
 
     @property
-    def attenuation_db(self) -> NDArray[np.float64]:
+    def attenuation(self) -> NDArray[np.float64]:
         """The difference of the two levels at each frequency, in dB."""
-        return np.asarray(self.driven_level_db - self.other_level_db, dtype=np.float64)
+        return np.asarray(self.driven_level - self.other_level, dtype=np.float64)
 
     @property
     def min_db(self) -> float:
         """The smallest attenuation over the frequencies, in dB."""
-        return float(np.min(self.attenuation_db))
+        return float(np.min(self.attenuation))
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1459,7 +1455,7 @@ class CrosstalkAttenuation(OwnsArrays):
 
 
 def crosstalk_attenuation(
-    frequencies: ArrayLike, driven_level_db: ArrayLike, other_level_db: ArrayLike
+    frequencies: ArrayLike, driven_level: ArrayLike, other_level: ArrayLike
 ) -> CrosstalkAttenuation:
     """The crosstalk attenuation of IEC 60268-7 8.12.
 
@@ -1469,23 +1465,23 @@ def crosstalk_attenuation(
     channel", expressed as the difference of the two levels against frequency.
 
     :param frequencies: Frequencies, in Hz, strictly ascending.
-    :param driven_level_db: The level with the channel under test driven, in
+    :param driven_level: The level with the channel under test driven, in
         dB re 20 µPa.
-    :param other_level_db: The level with the other channel driven, in dB re
+    :param other_level: The level with the other channel driven, in dB re
         20 µPa.
     :return: A :class:`CrosstalkAttenuation`.
     :raises ValueError: If the inputs differ in length or are not finite.
     """
     f = _frequencies(frequencies)
-    driven = _levels(driven_level_db, "driven_level_db")
-    other = _levels(other_level_db, "other_level_db")
+    driven = _levels(driven_level, "driven_level")
+    other = _levels(other_level, "other_level")
     if driven.shape != f.shape or other.shape != f.shape:
         msg = "The levels must have one value per frequency."
         raise ValueError(msg)
     return CrosstalkAttenuation(
         frequencies=f,
-        driven_level_db=driven,
-        other_level_db=other,
+        driven_level=driven,
+        other_level=other,
     )
 
 
@@ -1579,7 +1575,7 @@ class FieldComparisonResponse(OwnsArrays):
 
 def field_comparison_response(
     frequencies: ArrayLike,
-    field_level_db: ArrayLike,
+    field_level: ArrayLike,
     source_emf_v: ArrayLike,
     *,
     field: Literal["free", "diffuse"],
@@ -1606,7 +1602,7 @@ def field_comparison_response(
 
     :param frequencies: The one-third-octave band centres, in Hz,
         ascending, including the reference band.
-    :param field_level_db: The level of the reference field at the reference
+    :param field_level: The level of the reference field at the reference
         point, without the person, in dB re 20 µPa: one value per band, or one
         row per person.
     :param source_emf_v: The e.m.f. that made the headphone equally loud, in
@@ -1633,11 +1629,11 @@ def field_comparison_response(
     if not (np.all(np.isfinite(emf)) and np.all(emf > 0.0)):
         msg = "'source_emf_v' must be positive and finite."
         raise ValueError(msg)
-    levels = _levels(field_level_db, "field_level_db")
+    levels = _levels(field_level, "field_level")
     try:
         levels = np.broadcast_to(levels, emf.shape)
     except ValueError:
-        msg = "'field_level_db' must be one value per band or one row per person."
+        msg = "'field_level' must be one value per band or one row per person."
         raise ValueError(msg) from None
     reference = _band_index(f, float(reference_frequency_hz))
     quotient = levels - _db20(emf)
@@ -1655,16 +1651,16 @@ class EarCanalFrequencyResponse(OwnsArrays):
     """The ear canal sound pressure level frequency response (IEC 60268-7 8.6.5).
 
     :ivar frequencies: The one-third-octave band centres, in Hz.
-    :ivar earphone_levels_db: The probe microphone's band levels with the
+    :ivar earphone_levels: The probe microphone's band levels with the
         headphone, items c) and d), shape (persons, 2, bands), in dB.
-    :ivar sound_field_levels_db: The probe microphone's band levels in the
+    :ivar sound_field_levels: The probe microphone's band levels in the
         sound field, items b) and e), shape (persons, 2, bands), in dB.
     :ivar reference_frequency_hz: The band of Formula (1), in Hz.
     """
 
     frequencies: NDArray[np.float64]
-    earphone_levels_db: NDArray[np.float64]
-    sound_field_levels_db: NDArray[np.float64]
+    earphone_levels: NDArray[np.float64]
+    sound_field_levels: NDArray[np.float64]
     reference_frequency_hz: float
 
     def _reference(self) -> int:
@@ -1673,13 +1669,13 @@ class EarCanalFrequencyResponse(OwnsArrays):
     @property
     def n_persons(self) -> int:
         """The number of test persons."""
-        return int(self.earphone_levels_db.shape[0])
+        return int(self.earphone_levels.shape[0])
 
     @property
     def response_db(self) -> NDArray[np.float64]:
         """Formula (1) for each person, one row per person, in dB."""
-        earphone = np.mean(self.earphone_levels_db, axis=1)
-        field = np.mean(self.sound_field_levels_db, axis=1)
+        earphone = np.mean(self.earphone_levels, axis=1)
+        field = np.mean(self.sound_field_levels, axis=1)
         difference = earphone - field
         reference = self._reference()
         return np.asarray(
@@ -1699,9 +1695,9 @@ class EarCanalFrequencyResponse(OwnsArrays):
         return np.asarray(np.std(self.response_db, axis=0, ddof=1), dtype=np.float64)
 
     @property
-    def fitting_difference_db(self) -> NDArray[np.float64]:
+    def fitting_difference(self) -> NDArray[np.float64]:
         """The largest difference between the two fittings of each person, in dB."""
-        first, second = self.earphone_levels_db[:, 0], self.earphone_levels_db[:, 1]
+        first, second = self.earphone_levels[:, 0], self.earphone_levels[:, 1]
         return np.asarray(np.max(np.abs(first - second), axis=1), dtype=np.float64)
 
     @property
@@ -1712,8 +1708,7 @@ class EarCanalFrequencyResponse(OwnsArrays):
         octave band, the whole procedure is repeated."
         """
         return np.asarray(
-            self.fitting_difference_db
-            <= _MAX_FITTING_DIFFERENCE_DB * (1.0 + _LIMIT_SLACK)
+            self.fitting_difference <= _MAX_FITTING_DIFFERENCE_DB * (1.0 + _LIMIT_SLACK)
         )
 
     @property
@@ -1727,8 +1722,8 @@ class EarCanalFrequencyResponse(OwnsArrays):
         """
         reference = self._reference()
         return np.asarray(
-            self.earphone_levels_db[:, 0, reference]
-            - self.sound_field_levels_db[:, 0, reference],
+            self.earphone_levels[:, 0, reference]
+            - self.sound_field_levels[:, 0, reference],
             dtype=np.float64,
         )
 
@@ -1788,8 +1783,8 @@ class EarCanalFrequencyResponse(OwnsArrays):
 
 def ear_canal_frequency_response(
     frequencies: ArrayLike,
-    earphone_levels_db: ArrayLike,
-    sound_field_levels_db: ArrayLike,
+    earphone_levels: ArrayLike,
+    sound_field_levels: ArrayLike,
     *,
     reference_frequency_hz: float = _MEASURING_FREQUENCY_HZ,
 ) -> EarCanalFrequencyResponse:
@@ -1807,9 +1802,9 @@ def ear_canal_frequency_response(
 
     :param frequencies: The band centres, in Hz, ascending, including the
         reference band.
-    :param earphone_levels_db: The levels with the headphone, in dB, shape
+    :param earphone_levels: The levels with the headphone, in dB, shape
         (persons, 2, bands), or (2, bands) for one person.
-    :param sound_field_levels_db: The levels in the sound field, in dB, the
+    :param sound_field_levels: The levels in the sound field, in dB, the
         same shape.
     :param reference_frequency_hz: The reference band of Formula (1), in Hz
         (500 Hz, as the formula prints it).
@@ -1820,8 +1815,8 @@ def ear_canal_frequency_response(
     f = _frequencies(frequencies)
     shaped = []
     for name, values in (
-        ("earphone_levels_db", earphone_levels_db),
-        ("sound_field_levels_db", sound_field_levels_db),
+        ("earphone_levels", earphone_levels),
+        ("sound_field_levels", sound_field_levels),
     ):
         levels = _levels(values, name)
         if levels.ndim == _MATRIX_NDIM:
@@ -1832,15 +1827,13 @@ def ear_canal_frequency_response(
         shaped.append(levels)
     earphone, field = shaped
     if earphone.shape != field.shape:
-        msg = (
-            "'earphone_levels_db' and 'sound_field_levels_db' must have the same shape."
-        )
+        msg = "'earphone_levels' and 'sound_field_levels' must have the same shape."
         raise ValueError(msg)
     reference = _band_index(f, float(reference_frequency_hz))
     return EarCanalFrequencyResponse(
         frequencies=f,
-        earphone_levels_db=earphone,
-        sound_field_levels_db=field,
+        earphone_levels=earphone,
+        sound_field_levels=field,
         reference_frequency_hz=float(f[reference]),
     )
 
@@ -1862,10 +1855,10 @@ class EarCanalMicrophoneVerification(RichDisplay):
         mm² (b; 45 mm² for an average adult).
     :ivar volume_mm3: The microphone's volume with its mounting parts, in mm³
         (c).
-    :ivar neighbor_difference_db: The largest difference between the
+    :ivar neighbor_difference: The largest difference between the
         responses to neighbouring one-third-octave bands of pink noise, in dB
         (d).
-    :ivar sealed_attenuation_db: The smallest drop of the output level when
+    :ivar sealed_attenuation: The smallest drop of the output level when
         the sound entrance is sealed, over the measuring frequencies, in dB (e).
     """
 
@@ -1873,8 +1866,8 @@ class EarCanalMicrophoneVerification(RichDisplay):
     canal_section_area_mm2: float
     ear_canal_area_mm2: float
     volume_mm3: float
-    neighbor_difference_db: float
-    sealed_attenuation_db: float
+    neighbor_difference: float
+    sealed_attenuation: float
 
     @property
     def area_ratio(self) -> float:
@@ -1892,9 +1885,9 @@ class EarCanalMicrophoneVerification(RichDisplay):
                 # out either side of it in binary; settled, it is 0,6.
                 "b": float(settled(self.area_ratio)) < _MAX_CANAL_AREA_RATIO,
                 "c": self.volume_mm3 < _MAX_VOLUME_MM3,
-                "d": self.neighbor_difference_db
+                "d": self.neighbor_difference
                 <= _MAX_NEIGHBOUR_DIFFERENCE_DB * (1.0 + _LIMIT_SLACK),
-                "e": self.sealed_attenuation_db
+                "e": self.sealed_attenuation
                 >= _MIN_SEALED_ATTENUATION_DB * (1.0 - _LIMIT_SLACK),
             }
         )
@@ -1939,9 +1932,9 @@ def verify_ear_canal_microphone(
     entrance_area_mm2: float,
     canal_section_area_mm2: float,
     volume_mm3: float,
-    pink_noise_band_levels_db: ArrayLike,
-    open_levels_db: ArrayLike,
-    sealed_levels_db: ArrayLike,
+    pink_noise_band_levels: ArrayLike,
+    open_levels: ArrayLike,
+    sealed_levels: ArrayLike,
     ear_canal_area_mm2: float = _ADULT_EAR_CANAL_AREA_MM2,
 ) -> EarCanalMicrophoneVerification:
     """May this microphone measure inside the ear canal by IEC 60268-7 Annex B?
@@ -1962,12 +1955,12 @@ def verify_ear_canal_microphone(
     :param canal_section_area_mm2: Cross-sectional area in the rest of the
         canal, in mm².
     :param volume_mm3: Volume with the mounting parts, in mm³.
-    :param pink_noise_band_levels_db: The microphone's output levels for
+    :param pink_noise_band_levels: The microphone's output levels for
         consecutive one-third-octave bands of pink noise of equal level, in
         dB, ascending in frequency.
-    :param open_levels_db: The output level with the entrance open at each
+    :param open_levels: The output level with the entrance open at each
         measuring frequency, in dB.
-    :param sealed_levels_db: The output level with the entrance sealed at the
+    :param sealed_levels: The output level with the entrance sealed at the
         same frequencies, in dB.
     :param ear_canal_area_mm2: The canal's cross-sectional area, in mm²; the
         adult average of item b) by default.
@@ -1979,24 +1972,22 @@ def verify_ear_canal_microphone(
     section = require_positive(canal_section_area_mm2, "canal_section_area_mm2")
     canal = require_positive(ear_canal_area_mm2, "ear_canal_area_mm2")
     volume = require_positive(volume_mm3, "volume_mm3")
-    bands = np.atleast_1d(
-        _levels(pink_noise_band_levels_db, "pink_noise_band_levels_db")
-    )
+    bands = np.atleast_1d(_levels(pink_noise_band_levels, "pink_noise_band_levels"))
     if bands.ndim != 1 or bands.size < _FEWEST_POINTS:
-        msg = "'pink_noise_band_levels_db' must hold at least two bands."
+        msg = "'pink_noise_band_levels' must hold at least two bands."
         raise ValueError(msg)
-    opened = np.atleast_1d(_levels(open_levels_db, "open_levels_db"))
-    sealed = np.atleast_1d(_levels(sealed_levels_db, "sealed_levels_db"))
+    opened = np.atleast_1d(_levels(open_levels, "open_levels"))
+    sealed = np.atleast_1d(_levels(sealed_levels, "sealed_levels"))
     if opened.ndim != 1 or opened.shape != sealed.shape or opened.size == 0:
-        msg = "'open_levels_db' and 'sealed_levels_db' must be 1-D and of equal length."
+        msg = "'open_levels' and 'sealed_levels' must be 1-D and of equal length."
         raise ValueError(msg)
     return EarCanalMicrophoneVerification(
         entrance_area_mm2=entrance,
         canal_section_area_mm2=section,
         ear_canal_area_mm2=canal,
         volume_mm3=volume,
-        neighbor_difference_db=float(np.max(np.abs(np.diff(bands)))),
-        sealed_attenuation_db=float(np.min(opened - sealed)),
+        neighbor_difference=float(np.max(np.abs(np.diff(bands)))),
+        sealed_attenuation=float(np.min(opened - sealed)),
     )
 
 

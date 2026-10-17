@@ -350,19 +350,19 @@ def field_strength_level(field_strength_a_per_m: ArrayLike) -> np.ndarray:
     return 20.0 * np.log10(h / REFERENCE_FIELD_STRENGTH_A_PER_M)
 
 
-def field_strength(level_db: ArrayLike) -> np.ndarray:
+def field_strength(level: ArrayLike) -> np.ndarray:
     r"""The magnetic field strength of a level in dB re 400 mA/m, in A/m.
 
     The inverse of :func:`field_strength_level`: -12 dB is the 100 mA/m of
     4.3, and plus or minus 3 dB span 283 mA/m to 565 mA/m (10.2 as amended
     prints 566 mA/m, which is :math:`400\sqrt{2}`).
 
-    :param level_db: Level, in dB re 400 mA/m (scalar or array).
+    :param level: Level, in dB re 400 mA/m (scalar or array).
     :return: The RMS field strength, in A/m.
     """
-    level = _as_float64(level_db, "level_db")
+    level = _as_float64(level, "level")
     if not np.all(np.isfinite(level)):
-        msg = "'level_db' must be finite."
+        msg = "'level' must be finite."
         raise ValueError(msg)
     return REFERENCE_FIELD_STRENGTH_A_PER_M * 10.0 ** (level / 20.0)
 
@@ -429,7 +429,7 @@ class FieldStrengthReading(OwnsArrays):
     :ivar times: The time of each reading, in seconds.
     :ivar levels: The time-weighted level, 125 ms exponential averaging, in
         dB re 400 mA/m.
-    :ivar max_level_db: The maximum indication over the record, the "maximum
+    :ivar max_level: The maximum indication over the record, the "maximum
         value of the magnetic field" that 8.2.7 sets to 400 mA/m, in dB re
         400 mA/m.
     :ivar equivalent_db: The level of the mean square over the whole record,
@@ -440,7 +440,7 @@ class FieldStrengthReading(OwnsArrays):
     weighting: str
     times: np.ndarray
     levels: np.ndarray
-    max_level_db: float
+    max_level: float
     equivalent_db: float
 
     def plot(
@@ -502,7 +502,7 @@ def field_strength_meter(
         weighting=curve,
         times=read_only(np.arange(record.size, dtype=np.float64) / rate),
         levels=read_only(levels),
-        max_level_db=float(np.max(levels)),
+        max_level=float(np.max(levels)),
         equivalent_db=10.0 * math.log10(equivalent / reference_square),
     )
 
@@ -740,13 +740,13 @@ class BackgroundNoiseAssessment(OwnsArrays):
     fields: an assessment cannot be built to place a site in a class its
     noise does not reach.
 
-    :ivar noise_levels_db: The A-weighted noise level at each point with the
+    :ivar noise_levels: The A-weighted noise level at each point with the
         loop switched off, in dB re 400 mA/m.
     :ivar noise_is_tonal: Whether the noise was declared tonal and not mostly
         at low frequencies, which withholds the 22 dB relaxation.
     """
 
-    noise_levels_db: np.ndarray
+    noise_levels: np.ndarray
     noise_is_tonal: bool
 
     @property
@@ -757,7 +757,7 @@ class BackgroundNoiseAssessment(OwnsArrays):
         400 mA/m, the reference level, so the ratio is the loudest level with
         its sign changed.
         """
-        return -float(np.max(self.noise_levels_db))
+        return -float(np.max(self.noise_levels))
 
     @property
     def category(self) -> str:
@@ -806,7 +806,7 @@ class BackgroundNoiseAssessment(OwnsArrays):
 
 
 def assess_background_noise(
-    noise_levels_db: ArrayLike, *, noise_is_tonal: bool = False
+    noise_levels: ArrayLike, *, noise_is_tonal: bool = False
 ) -> BackgroundNoiseAssessment:
     """How quiet is the site magnetically? (IEC 60118-4:2014 7.2).
 
@@ -825,15 +825,15 @@ def assess_background_noise(
     or is mostly at low frequencies"; ``noise_is_tonal=True`` declares that it
     does not, and withholds that relaxation.
 
-    :param noise_levels_db: A-weighted noise level at each point, in dB re
+    :param noise_levels: A-weighted noise level at each point, in dB re
         400 mA/m.
     :param noise_is_tonal: The noise has a significant undesirable tonal
         quality and is not mostly at low frequencies.
     :return: A :class:`BackgroundNoiseAssessment`.
     """
-    levels = require_finite_array(noise_levels_db, "noise_levels_db")
+    levels = require_finite_array(noise_levels, "noise_levels")
     return BackgroundNoiseAssessment(
-        noise_levels_db=levels, noise_is_tonal=bool(noise_is_tonal)
+        noise_levels=levels, noise_is_tonal=bool(noise_is_tonal)
     )
 
 
@@ -1060,13 +1060,13 @@ def _frequency_response_requirement(
 
 
 def verify_induction_loop_system(
-    field_strength_levels_db: ArrayLike,
+    field_strength_levels: ArrayLike,
     *,
-    specified_level_db: float = 0.0,
+    specified_level: float = 0.0,
     frequencies: ArrayLike | None = None,
     response_db: ArrayLike | None = None,
-    background_noise_levels_db: ArrayLike | None = None,
-    system_noise_levels_db: ArrayLike | None = None,
+    background_noise_levels: ArrayLike | None = None,
+    system_noise_levels: ArrayLike | None = None,
     noise_is_tonal: bool = False,
 ) -> InductionLoopVerification:
     """Does an installed loop meet IEC 60118-4:2014 over its useful volume?
@@ -1080,7 +1080,7 @@ def verify_induction_loop_system(
       1 kHz sine or the combi signal and the true-RMS meter. Measured with
       another signal or meter, the specified level is the reading the
       manufacturer states for 400 mA/m (Table 3 gives -6 dB for pink noise on
-      the RMS meter), passed as ``specified_level_db``;
+      the RMS meter), passed as ``specified_level``;
     * ``"field_strength_reached"`` (8.2.7): the maximum value of the field is
       400 mA/m "at one point, at least, within the useful magnetic field
       volume" (8.2.1), so the highest level reaches the specified one. A
@@ -1105,25 +1105,25 @@ def verify_induction_loop_system(
     off is also assessed against the recommendations of 7.2
     (:func:`assess_background_noise`), which are not requirements.
 
-    :param field_strength_levels_db: The field strength level at each
+    :param field_strength_levels: The field strength level at each
         selected point, in dB re 400 mA/m.
-    :param specified_level_db: The level specified according to 8.2.7 for the
+    :param specified_level: The level specified according to 8.2.7 for the
         signal and meter used, in dB re 400 mA/m.
     :param frequencies: The frequencies of the response, in hertz,
         including 100 Hz, 1 kHz and 5 kHz.
     :param response_db: The response at each frequency, in dB on any fixed
         reference, for one point or one row per point.
-    :param background_noise_levels_db: The A-weighted level at each point with
+    :param background_noise_levels: The A-weighted level at each point with
         the loop switched off, in dB re 400 mA/m.
-    :param system_noise_levels_db: The A-weighted level at the same points
+    :param system_noise_levels: The A-weighted level at the same points
         with the system on and every input muted, in dB re 400 mA/m.
     :param noise_is_tonal: The background noise has a significant undesirable
         tonal quality and is not mostly at low frequencies, which withholds
         the 22 dB relaxation of 7.2 (:func:`assess_background_noise`).
     :return: An :class:`InductionLoopVerification`.
     """
-    levels = _levels(field_strength_levels_db, "field_strength_levels_db")
-    specified = require_finite(specified_level_db, "specified_level_db")
+    levels = _levels(field_strength_levels, "field_strength_levels")
+    specified = require_finite(specified_level, "specified_level")
     requirements = [
         _band_requirement(
             "field_strength",
@@ -1146,22 +1146,22 @@ def verify_induction_loop_system(
     if frequencies is not None and response_db is not None:
         requirements.append(_frequency_response_requirement(frequencies, response_db))
     background = None
-    if background_noise_levels_db is not None:
+    if background_noise_levels is not None:
         background = assess_background_noise(
-            background_noise_levels_db, noise_is_tonal=noise_is_tonal
+            background_noise_levels, noise_is_tonal=noise_is_tonal
         )
-    if system_noise_levels_db is not None:
+    if system_noise_levels is not None:
         if background is None:
             msg = (
-                "'system_noise_levels_db' is judged against the noise with the "
-                "system off (10.4.7); give 'background_noise_levels_db' too."
+                "'system_noise_levels' is judged against the noise with the "
+                "system off (10.4.7); give 'background_noise_levels' too."
             )
             raise ValueError(msg)
-        on = require_finite_array(system_noise_levels_db, "system_noise_levels_db")
-        off = background.noise_levels_db
+        on = require_finite_array(system_noise_levels, "system_noise_levels")
+        off = background.noise_levels
         if on.size != off.size:
             msg = (
-                "'system_noise_levels_db' and 'background_noise_levels_db' are "
+                "'system_noise_levels' and 'background_noise_levels' are "
                 "paired point by point and must have the same length."
             )
             raise ValueError(msg)
@@ -1209,7 +1209,7 @@ def _height_coverage(
     if heights.shape != levels.shape:
         msg = (
             f"'heights_m' holds the height of each point and must have the shape "
-            f"of 'field_strength_levels_db', {levels.shape}; got {heights.shape}."
+            f"of 'field_strength_levels', {levels.shape}; got {heights.shape}."
         )
         raise ValueError(msg)
     required = _USEFUL_VOLUME_HEIGHTS[name]
@@ -1227,11 +1227,11 @@ def _height_coverage(
 
 
 def verify_small_volume_system(
-    field_strength_levels_db: ArrayLike,
+    field_strength_levels: ArrayLike,
     *,
     layout: str,
     heights_m: ArrayLike | None = None,
-    standing_area_levels_db: ArrayLike | None = None,
+    standing_area_levels: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
     response_db: ArrayLike | None = None,
 ) -> InductionLoopVerification:
@@ -1247,7 +1247,7 @@ def verify_small_volume_system(
     * ``"field_strength_reached"``: at one point at least, 0 dB or more;
     * ``"standing_area"``: nowhere in the area where people are expected to
       stand above +8 dB, judged on the measurement points and on any survey
-      of that area given as ``standing_area_levels_db``;
+      of that area given as ``standing_area_levels``;
     * ``"frequency_response"``: 8.3.7 at every point.
 
     A useful volume replaces the points of 9.2 (``"refuge_useful_volume"``)
@@ -1261,7 +1261,7 @@ def verify_small_volume_system(
     The informative Annex A.4 allows up to +12 dB at 1,45 m for a counter;
     9.5 does not, and 9.5 is what is applied (see ``docs/ERRATA.md``).
 
-    :param field_strength_levels_db: The level at each measurement point, in
+    :param field_strength_levels: The level at each measurement point, in
         dB re 400 mA/m: shape ``(heights, points)`` for a layout of Figures 2
         and 3, ``(2, 6)`` for a refuge and ``(3, 3)`` for a counter, in the
         order of :func:`small_volume_measurement_points`; any shape for a
@@ -1270,10 +1270,10 @@ def verify_small_volume_system(
         for the points of Figures 2 and 3; ``"refuge_useful_volume"`` or
         ``"counter_useful_volume"`` for a useful volume of 9.4 in their place.
     :param heights_m: The height of each point of a useful volume above the
-        floor, in metres, in the shape of ``field_strength_levels_db``;
+        floor, in metres, in the shape of ``field_strength_levels``;
         required for a useful volume, and refused for the fixed layouts,
         whose heights are those of Figures 2 and 3.
-    :param standing_area_levels_db: Levels surveyed elsewhere in the area
+    :param standing_area_levels: Levels surveyed elsewhere in the area
         where people are expected to stand, in dB re 400 mA/m.
     :param frequencies: The frequencies of the response, in hertz,
         including 100 Hz, 1 kHz and 5 kHz.
@@ -1283,7 +1283,7 @@ def verify_small_volume_system(
         useful volume without a point at a height of 9.2 or 9.3.
     """
     name = require_choice(layout, "layout", _SMALL_VOLUME_LAYOUTS)
-    levels = _levels(field_strength_levels_db, "field_strength_levels_db")
+    levels = _levels(field_strength_levels, "field_strength_levels")
     if name in _LAYOUT_HEIGHTS:
         if heights_m is not None:
             msg = (
@@ -1295,7 +1295,7 @@ def verify_small_volume_system(
         if levels.shape != expected:
             msg = (
                 f"the '{name}' layout is measured at {expected[1]} points at each of "
-                f"{expected[0]} heights: 'field_strength_levels_db' must have shape "
+                f"{expected[0]} heights: 'field_strength_levels' must have shape "
                 f"{expected}, got {levels.shape}."
             )
             raise ValueError(msg)
@@ -1314,11 +1314,11 @@ def verify_small_volume_system(
         ),
     ]
     standing = levels.ravel()
-    if standing_area_levels_db is not None:
+    if standing_area_levels is not None:
         standing = np.concatenate(
             [
                 standing,
-                _levels(standing_area_levels_db, "standing_area_levels_db").ravel(),
+                _levels(standing_area_levels, "standing_area_levels").ravel(),
             ]
         )
     requirements.append(

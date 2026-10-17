@@ -986,7 +986,7 @@ def _chk_doc29_table_d2() -> Outcome:
 )
 def _chk_doc29_table_d3a() -> Outcome:
     printed = np.asarray(_appendix_d_tables().TABLE_D3A)
-    got = _appendix_d_increment(103, "arp5534").reference_attenuation_db
+    got = _appendix_d_increment(103, "arp5534").reference_attenuation
     matching = _cells_within(got, printed, _HALF_MILLI_DB)
     return count(matching, printed.size, subject="cells of Table D-3a")
 
@@ -1006,7 +1006,7 @@ def _chk_doc29_table_d3b() -> Outcome:
     # the absorption model; SAE ARP 866A itself is not available to settle it,
     # so the tolerance is widened by 7 ppm of the printed value and says so.
     printed = np.asarray(_appendix_d_tables().TABLE_D3B)
-    got = _appendix_d_increment(103, "arp866a").specified_attenuation_db
+    got = _appendix_d_increment(103, "arp866a").specified_attenuation
     matching = _cells_within(got, printed, _HALF_MILLI_DB + 7e-6 * printed)
     return count(
         matching,
@@ -1029,7 +1029,7 @@ def _chk_doc29_table_d3c() -> Outcome:
     # of ARP 5534 Eqs. 5-6: the ISO 9613-1 Annex B form leaves 57 cells up to
     # 0.036 dB off.
     printed = np.asarray(_appendix_d_tables().TABLE_D3C)
-    got = _appendix_d_increment(103, "arp5534").specified_attenuation_db
+    got = _appendix_d_increment(103, "arp5534").specified_attenuation
     matching = _cells_within(got, printed, _HALF_MILLI_DB)
     return count(matching, printed.size, subject="cells of Table D-3c")
 

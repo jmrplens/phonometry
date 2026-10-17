@@ -837,8 +837,7 @@ def generate_quasi_peak_meter(output_dir: str) -> None:
         linestyle="--",
         linewidth=1.4,
         label=(
-            f"Reading: {result.reading:.4f} V, "
-            f"{_fmt_minus(result.level_db, '.2f')} dBqps"
+            f"Reading: {result.reading:.4f} V, {_fmt_minus(result.level, '.2f')} dBqps"
         ),
     )
     ax.axhline(
@@ -5088,8 +5087,8 @@ def generate_microphone_patterns(output_dir: str) -> None:
                 polar=(angles, polar_db), frequency=1000.0
             ),
         )
-        assert res.directivity_index_db is not None, "polar input gives a DI"
-        di = float(res.directivity_index_db)
+        assert res.directivity_index is not None, "polar input gives a DI"
+        di = float(res.directivity_index)
         mag = np.maximum(np.abs((1.0 - b) + b * np.cos(theta)), 10 ** (-30.0 / 20.0))
         radius = np.maximum(20.0 * np.log10(mag), -30.0)
         ax.plot(
@@ -6006,7 +6005,7 @@ def generate_reference_source_calibration(output_dir: str) -> None:
     supply = 0.12 + 0.06 * np.cos(np.arange(_RSS_THIRDS.size) / 3.0)
     verdict = emission.verify_reference_sound_source(
         calibration,
-        repeated_levels_db=calibration.sound_power_level_db[None, :] + jitter,
+        repeated_levels=calibration.sound_power_level[None, :] + jitter,
         supply_variation_db=supply,
     )
     fig, (left, right) = plt.subplots(1, 2, figsize=(12.5, 5.6))
@@ -6646,14 +6645,14 @@ def generate_workstation_emission(output_dir: str) -> None:
 
     # The 4 dB boundary: at or below it the determination is grade 2.
     ax.axhline(
-        emission.GRADE_2_MAX_K3_DB,
+        emission.GRADE_2_MAX_K3,
         color=COLOR_SECONDARY,
         ls="--",
         lw=1.4,
         zorder=3,
         label="grade 2 boundary: 4 dB",
     )
-    z_grade2 = 10.0 ** (-emission.GRADE_2_MAX_K3_DB / 10.0)
+    z_grade2 = 10.0 ** (-emission.GRADE_2_MAX_K3 / 10.0)
     ax.axvspan(z_grade2, 3.0, color=theme_fill(COLOR_TERTIARY, ax), zorder=0)
     ax.axvspan(0.05, z_grade2, color=theme_fill(COLOR_SECONDARY, ax), zorder=0)
 
@@ -6666,7 +6665,7 @@ def generate_workstation_emission(output_dir: str) -> None:
     ax.set_axisbelow(True)
     ax.annotate(
         "capped at 7 dB, which is\n$-10\\,\\lg 0.2$ to a tenth of a decibel",
-        xy=(0.2, emission.MAX_K3_DB),
+        xy=(0.2, emission.MAX_K3),
         xytext=(0.30, 6.4),
         textcoords="data",
         fontsize=8.5,
@@ -6695,7 +6694,7 @@ def generate_workstation_emission(output_dir: str) -> None:
     readings = np.array([77.5, 76.0, 77.2, 77.7, 75.9])
     measured = float(10.0 * np.log10(np.mean(np.power(10.0, readings / 10.0))))
     level = float(
-        emission.emission_sound_pressure_level(measured, local_correction_db=correction)
+        emission.emission_sound_pressure_level(measured, local_correction=correction)
     )
 
     bars = ax2.bar(
@@ -8345,7 +8344,7 @@ def generate_turbine_sound_power(output_dir: str) -> None:
             levels - drop_db,
             surface_area=surface.area,
             background_levels=background,
-            environmental_correction_db=room.environmental_correction_db,
+            environmental_correction=room.environmental_correction,
             overhead_mask=array.overhead_mask,
         )
 
@@ -8407,7 +8406,7 @@ def _worship_loop_levels() -> NDArray[np.float64]:
         [
             electroacoustics.rectangular_loop_field(
                 current, 10.0, 20.0, x, y, height
-            ).level_db("z")
+            ).level("z")
             for height in (1.2, 1.7)
         ]
     )
@@ -8454,8 +8453,8 @@ def generate_induction_loop_verification(output_dir: str) -> None:
         _worship_loop_levels(),
         frequencies=[100.0, 1000.0, 5000.0],
         response_db=[[-0.4, 0.0, -1.8], [-0.3, 0.0, -2.4], [-0.6, 0.0, -3.4]],
-        background_noise_levels_db=_LOOP_NOISE_OFF_DB,
-        system_noise_levels_db=_LOOP_NOISE_ON_DB,
+        background_noise_levels=_LOOP_NOISE_OFF_DB,
+        system_noise_levels=_LOOP_NOISE_ON_DB,
     )
     fig, (ax_noise, ax_verdict) = plt.subplots(1, 2, figsize=(13.5, 5.6))
     if verdict.background_noise is not None:
@@ -8474,7 +8473,7 @@ def generate_induction_loop_counter(output_dir: str) -> None:
     verdict = electroacoustics.verify_small_volume_system(
         [[5.1, 4.2, 5.3], [2.0, 1.1, 2.2], [-2.9, -3.8, -2.7]],
         layout="counter",
-        standing_area_levels_db=[6.5, 7.9, 9.2],
+        standing_area_levels=[6.5, 7.9, 9.2],
     )
     fig, (ax_area, ax_verdict) = plt.subplots(1, 2, figsize=(13.5, 5.6))
     verdict.requirement("standing_area").plot(ax_area, language=_LANG)
@@ -8698,7 +8697,7 @@ def generate_plant_sound_power(output_dir: str) -> None:
     result.plot(ax=axl, language=_LANG)
 
     lower, upper = result.uncertainty_db
-    lw = result.sound_power_level_db
+    lw = result.sound_power_level
     x = np.arange(_PLANT_BANDS.size, dtype=float)
     axr.errorbar(
         x,
@@ -8958,7 +8957,7 @@ def _ear_simulator_bands() -> NDArray[np.float64]:
 
     table = electroacoustics.SIMULATED_PROGRAM_SPECTRUM
     f = np.array(list(table))
-    levels = np.array([band.relative_level_db for band in table.values()])
+    levels = np.array([band.relative_level for band in table.values()])
     keep = (f >= 100.0) & (f <= 10000.0)
     resonance = 9.0 / (1.0 + ((f[keep] / 3000.0 - 3000.0 / f[keep]) / 0.8) ** 2)
     return np.asarray(72.0 + levels[keep] + resonance)
@@ -9105,9 +9104,9 @@ def generate_headphones_protection_microphone(output_dir: str) -> None:
         entrance_area_mm2=3.8,
         canal_section_area_mm2=19.0,
         volume_mm3=95.0,
-        pink_noise_band_levels_db=[61.0, 62.2, 63.1, 62.5, 61.4],
-        open_levels_db=[62.0, 63.0, 62.5],
-        sealed_levels_db=[41.0, 44.0, 45.5],
+        pink_noise_band_levels=[61.0, 62.2, 63.1, 62.5, 61.4],
+        open_levels=[62.0, 63.0, 62.5],
+        sealed_levels=[41.0, 44.0, 45.5],
     )
     fig, (ax_protection, ax_microphone) = plt.subplots(1, 2, figsize=(13.5, 5.4))
     protection.plot(ax_protection, language=_LANG)

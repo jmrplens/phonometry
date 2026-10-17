@@ -43,7 +43,8 @@ layers evaluate come from
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, cast
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 import numpy as np
 
@@ -64,6 +65,8 @@ from .porous import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -164,6 +167,11 @@ class PorousLayer(_DrawableLayer):
 class PerforatedPlateLayer(_DrawableLayer):
     """A rigid perforated plate (see :func:`perforated_plate_impedance`)."""
 
+    #: The end correction is the factor delta per end of a hole, a pure number.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"end_correction": ""}
+    )
+
     thickness_m: float
     hole_radius: float
     open_area: float
@@ -173,6 +181,11 @@ class PerforatedPlateLayer(_DrawableLayer):
 @dataclass(frozen=True)
 class MicroperforatedPlateLayer(_DrawableLayer):
     """A microperforated plate (see :func:`microperforated_plate_impedance`)."""
+
+    #: The end correction is the factor delta per end of a hole, a pure number.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"end_correction": ""}
+    )
 
     thickness_m: float
     hole_radius: float

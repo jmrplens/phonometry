@@ -3423,7 +3423,7 @@ def generate_service_equipment_calibration(output_dir: str) -> None:
     from phonometry import building
 
     check = building.verify_calibration_deviation(
-        [94.0, 94.2], previous_levels_db=[93.9, 94.0]
+        [94.0, 94.2], previous_levels=[93.9, 94.0]
     )
     _fig, ax = plt.subplots(figsize=(9, 5.6))
     check.plot(ax=ax, language=_LANG)

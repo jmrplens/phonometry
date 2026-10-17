@@ -247,7 +247,7 @@ def test_budget_refuses_a_combination_its_columns_do_not_give() -> None:
 def test_interchange_cancels_channel_gains_source_drift_and_asymmetry() -> None:
     first, second = _interchange_readings()
     result = metrology.simultaneous_comparison(_F, _L_REF, first, second)
-    np.testing.assert_allclose(result.sensitivity_level_db, _L_TEST, atol=1e-12)
+    np.testing.assert_allclose(result.sensitivity_level, _L_TEST, atol=1e-12)
     assert result.excitation == "simultaneous"
     assert result.standard == "IEC 61094-5:2016"
 
@@ -264,7 +264,7 @@ def test_d2_in_linear_form_is_the_level_form() -> None:
         _L_REF,
         first,
         second,
-        pressure_level_difference_db=20.0 * np.log10(r_p),
+        pressure_level_difference=20.0 * np.log10(r_p),
     )
     np.testing.assert_allclose(
         result.sensitivity_mv_per_pa, 1000.0 * m_ref * r_v / r_p, rtol=1e-12
@@ -278,7 +278,7 @@ def test_repeats_are_averaged_and_counted() -> None:
         _F, _L_REF, first + noise, second - noise
     )
     assert result.n_determinations == 3
-    np.testing.assert_allclose(result.sensitivity_level_db, _L_TEST, atol=1e-12)
+    np.testing.assert_allclose(result.sensitivity_level, _L_TEST, atol=1e-12)
 
 
 def test_pressure_calibration_refuses_to_skip_the_interchange() -> None:
@@ -292,7 +292,7 @@ def test_free_field_simultaneous_without_interchange_reads_the_difference() -> N
     result = metrology.simultaneous_comparison(
         _F, _L_REF, difference, field="free_field"
     )
-    np.testing.assert_allclose(result.sensitivity_level_db, _L_TEST, atol=1e-12)
+    np.testing.assert_allclose(result.sensitivity_level, _L_TEST, atol=1e-12)
     assert result.standard == "IEC 61094-8:2012"
 
 
@@ -318,24 +318,24 @@ def test_monitor_ratio_cancels_a_drifting_source() -> None:
         _L_REF + field_ref,
         _L_TEST + field_test,
         monitor=metrology.MonitorReadings(
-            reference_level_db=monitor_gain + field_ref,
-            test_level_db=monitor_gain + field_test,
+            reference_level=monitor_gain + field_ref,
+            test_level=monitor_gain + field_test,
         ),
         field="free_field",
     )
-    np.testing.assert_allclose(result.sensitivity_level_db, _L_TEST, atol=1e-12)
+    np.testing.assert_allclose(result.sensitivity_level, _L_TEST, atol=1e-12)
     assert result.excitation == "sequential"
 
 
 def test_without_a_monitor_the_readings_are_differenced() -> None:
     result = metrology.sequential_comparison(_F, _L_REF, _L_REF + 90.0, _L_TEST + 90.0)
-    np.testing.assert_allclose(result.sensitivity_level_db, _L_TEST, atol=1e-12)
+    np.testing.assert_allclose(result.sensitivity_level, _L_TEST, atol=1e-12)
 
 
 def test_monitor_levels_disagreeing_in_determinations_are_refused() -> None:
     monitor = metrology.MonitorReadings(
-        reference_level_db=np.full((2, _F.size), 80.0),
-        test_level_db=np.full((3, _F.size), 80.0),
+        reference_level=np.full((2, _F.size), 80.0),
+        test_level=np.full((3, _F.size), 80.0),
     )
     with pytest.raises(ValueError, match=r"same number of determinations"):
         metrology.sequential_comparison(
@@ -364,7 +364,7 @@ def test_environmental_correction_is_first_order_in_each_condition() -> None:
     np.testing.assert_allclose(env.static_pressure_term_db, pressure, rtol=1e-12)
     np.testing.assert_allclose(env.temperature_term_db, 0.009, rtol=1e-12)
     np.testing.assert_allclose(env.humidity_term_db, -0.001, rtol=1e-12)
-    np.testing.assert_allclose(env.correction_db, pressure + 0.008, rtol=1e-12)
+    np.testing.assert_allclose(env.correction, pressure + 0.008, rtol=1e-12)
     temperature, pressure_kpa, humidity = ref.IEC61094_REFERENCE_CONDITIONS
     assert env.reference_temperature_c == temperature
     assert env.reference_static_pressure_kpa == pressure_kpa
@@ -397,9 +397,9 @@ def test_environmental_corrections_go_on_the_reference_and_off_the_result() -> N
         reference_environment=reference_env,
         test_environment=test_env,
     )
-    expected = _L_TEST + reference_env.correction_db - test_env.correction_db
-    np.testing.assert_allclose(result.sensitivity_level_db, expected, atol=1e-12)
-    assert tuple(result.corrections_db) == (
+    expected = _L_TEST + reference_env.correction - test_env.correction
+    np.testing.assert_allclose(result.sensitivity_level, expected, atol=1e-12)
+    assert tuple(result.corrections) == (
         "reference environment",
         "reference conditions",
     )
@@ -475,7 +475,7 @@ def test_environmental_correction_at_the_same_frequencies_is_taken() -> None:
     )
     result = _compare("sequential", reference_environment=env)
     np.testing.assert_allclose(
-        result.sensitivity_level_db, _L_TEST + env.correction_db, atol=1e-12
+        result.sensitivity_level, _L_TEST + env.correction, atol=1e-12
     )
 
 
@@ -569,7 +569,7 @@ def test_environmental_correction_off_by_rounding_alone_is_taken() -> None:
     env = _environment_at(_EXACT_THIRDS * (1.0 + 1e-12))
     result = _compare_on_thirds(env)
     np.testing.assert_allclose(
-        result.sensitivity_level_db, -26.0 + env.correction_db, atol=1e-12
+        result.sensitivity_level, -26.0 + env.correction, atol=1e-12
     )
 
 
@@ -635,7 +635,7 @@ def test_environmental_correction_takes_dry_and_saturated_air() -> None:
         temperature_coefficient_db_per_k=0.0,
         humidity_coefficient_db_per_percent=0.001,
     )
-    np.testing.assert_allclose(env.correction_db, 0.1, rtol=1e-12)
+    np.testing.assert_allclose(env.correction, 0.1, rtol=1e-12)
 
 
 @pytest.mark.parametrize("excitation", ["simultaneous", "sequential"])
@@ -643,7 +643,7 @@ def test_an_unknown_field_is_named_before_the_free_field_difference(
     excitation: str,
 ) -> None:
     with pytest.raises(ValueError, match=r"'field' must be one of"):
-        _compare(excitation, field="freefield", reference_free_field_difference_db=0.1)
+        _compare(excitation, field="freefield", reference_free_field_difference=0.1)
 
 
 def test_free_field_difference_is_added_to_a_pressure_calibrated_reference() -> None:
@@ -654,16 +654,16 @@ def test_free_field_difference_is_added_to_a_pressure_calibrated_reference() -> 
         _L_REF + difference + 94.0,
         _L_TEST + 94.0,
         field="free_field",
-        reference_free_field_difference_db=difference,
+        reference_free_field_difference=difference,
     )
-    np.testing.assert_allclose(result.sensitivity_level_db, _L_TEST, atol=1e-12)
+    np.testing.assert_allclose(result.sensitivity_level, _L_TEST, atol=1e-12)
 
 
 def test_free_field_difference_on_a_pressure_calibration_is_refused() -> None:
     first, second = _interchange_readings()
     with pytest.raises(ValueError, match=r"IEC 61094-8 Table 1"):
         metrology.simultaneous_comparison(
-            _F, _L_REF, first, second, reference_free_field_difference_db=0.1
+            _F, _L_REF, first, second, reference_free_field_difference=0.1
         )
 
 
@@ -685,14 +685,14 @@ def test_a_correction_named_twice_is_refused() -> None:
             first,
             second,
             reference_environment=env,
-            corrections_db=named,
+            corrections=named,
         )
 
 
 def test_jig_correction_reads_table_a1_at_exact_frequencies() -> None:
     exact = 1000.0 * 10.0 ** (np.array([3, 6, 9, 12]) / 10.0)  # 1995 Hz ... 15849 Hz
     jig = metrology.jig_diameter_correction(exact)
-    np.testing.assert_allclose(jig.correction_db, [-0.015, -0.059, -0.235, -0.933])
+    np.testing.assert_allclose(jig.correction, [-0.015, -0.059, -0.235, -0.933])
     np.testing.assert_allclose(
         jig.expanded_uncertainty_db,
         ref.IEC61094_5_TABLE_A1_RELATIVE_EXPANDED
@@ -706,7 +706,7 @@ def test_jig_correction_reads_table_a1_at_exact_frequencies() -> None:
 def test_jig_correction_defaults_to_the_fourteen_rows() -> None:
     jig = metrology.jig_diameter_correction()
     assert jig.frequencies.size == 14
-    assert jig.correction_db[-1] == pytest.approx(-1.443, abs=1e-12)
+    assert jig.correction[-1] == pytest.approx(-1.443, abs=1e-12)
 
 
 def test_jig_correction_refuses_a_frequency_it_does_not_print() -> None:
@@ -725,10 +725,10 @@ def test_jig_correction_enters_as_a_named_correction() -> None:
         _L_REF[keep],
         first[keep],
         second[keep],
-        corrections_db={"WS3 in the jig (Table A.1)": jig.correction_db},
+        corrections={"WS3 in the jig (Table A.1)": jig.correction},
     )
     np.testing.assert_allclose(
-        result.sensitivity_level_db, _L_TEST[keep] + jig.correction_db, atol=1e-12
+        result.sensitivity_level, _L_TEST[keep] + jig.correction, atol=1e-12
     )
 
 
@@ -772,15 +772,15 @@ def test_results_publish_read_only_columns() -> None:
     )
     for column in (
         result.frequencies,
-        result.reference_sensitivity_level_db,
-        result.output_level_differences_db,
+        result.reference_sensitivity_level,
+        result.output_level_differences,
         result.expanded_uncertainty_db,
     ):
         assert column is not None
         assert not column.flags.writeable
-    assert isinstance(result.corrections_db, types.MappingProxyType)
+    assert isinstance(result.corrections, types.MappingProxyType)
     jig = metrology.jig_diameter_correction()
-    assert not jig.correction_db.flags.writeable
+    assert not jig.correction.flags.writeable
 
 
 def test_calibration_refuses_a_negative_uncertainty() -> None:
@@ -822,13 +822,13 @@ def test_iec61183_diffuse_field_comparison_uses_the_shared_model() -> None:
         [1000.0, 2000.0],
         [94.3, 94.6],
         [94.0, 94.1],
-        reference_random_incidence_level_db=[-26.0, -26.2],
+        reference_random_incidence_level=[-26.0, -26.2],
     )
     expected = metrology.sequential_comparison(
         [1000.0, 2000.0], [-26.0, -26.2], [94.0, 94.1], [94.3, 94.6]
     )
     np.testing.assert_allclose(
-        result.diffuse_field_level_db, expected.sensitivity_level_db, atol=1e-12
+        result.diffuse_field_level, expected.sensitivity_level, atol=1e-12
     )
 
 
@@ -872,7 +872,7 @@ def test_free_field_plot_draws_the_reference_free_field_level() -> None:
         _L_REF + difference + 74.0,
         _L_TEST + 74.0,
         field="free_field",
-        reference_free_field_difference_db=difference,
+        reference_free_field_difference=difference,
     )
     fig, ax = plt.subplots()
     result.plot(ax)
@@ -918,7 +918,7 @@ def test_environmental_plot_draws_three_terms_and_the_total() -> None:
     assert labels[-1] == r"$C_\mathrm{env}$, total"
     assert len(labels) == 4
     assert "97.000 kPa" in ax.get_title()
-    np.testing.assert_allclose(ax.get_lines()[-1].get_ydata(), env.correction_db)
+    np.testing.assert_allclose(ax.get_lines()[-1].get_ydata(), env.correction)
     plt.close(fig)
 
 

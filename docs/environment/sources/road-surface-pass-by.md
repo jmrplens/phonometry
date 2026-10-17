@@ -71,9 +71,9 @@ result = environment.statistical_pass_by(
     road_speed_category="medium",
     reference_db=environment.SPB_NORMALIZED_REFERENCE_DB,
 )
-print(dict(result.reported_vehicle_sound_levels_db))  # {'1': 78.9, '2a': 81.0, '2b': 83.7}
-print(result.reported_index_db)                       # 80.1 dB
-print(round(result.difference_db, 2))                 # 1.22 dB above Annex D
+print(dict(result.reported_vehicle_sound_levels))  # {'1': 78.9, '2a': 81.0, '2b': 83.7}
+print(result.reported_index)                       # 80.1 dB
+print(round(result.difference, 2))                 # 1.22 dB above Annex D
 ```
 
 Each regression reports what clause 13 item 29 asks for (the slope, the
@@ -101,7 +101,7 @@ It adds the vehicle sound levels as 9.2 reports them, to one decimal: 9.5
 defines its $L_1$, $L_{2a}$ and $L_{2b}$ as the vehicle sound levels "according
 to 9.2", which has every level "calculated to two decimal places and rounded to
 one decimal place". The index of the unrounded levels stays on the result as
-`full_precision_index_db` (80,153 dB for the site above). The index compares
+`full_precision_index` (80,153 dB for the site above). The index compares
 surfaces under a standard mix and is not an equivalent level of any traffic
 (9.5 NOTE). In many cases it is used as a difference from a reference surface
 (clause 10): a real dense asphalt concrete (10.1), a normalized case set by
@@ -109,7 +109,7 @@ convention (10.2, with the Annex D example of seven dense bituminous surfaces as
 `SPB_ANNEX_D_SURFACES_DB` and its average `SPB_NORMALIZED_REFERENCE_DB`), the
 same surface at the same age (10.3) or any surface chosen (10.4). The standard
 gives no temperature correction (9.4): corrected levels are an input,
-`corrected_vehicle_sound_levels_db`, and the index is computed for them too,
+`corrected_vehicle_sound_levels`, and the index is computed for them too,
 from the levels rounded to one decimal. Clause 13 lists the corrected levels and
 index as optional report items (26 and 28).
 
@@ -128,10 +128,10 @@ sensitivity of the index to each level, taking the categories as independent.
 Annex E prints $L_\mathrm{veh}$ = 78,5, 81,1 and 83,8 dB and an index of 79,9 dB,
 which is the index of those three levels, 79,946 dB, rounded once. That is the
 chain 9.2 and 9.5 require, and the one the library runs: from pass-bys placed on
-the printed regression lines, `index_db` is 79,946 dB and `reported_index_db`
+the printed regression lines, `index` is 79,946 dB and `reported_index`
 79,9 dB, and the conformance row pins that value. Carried unrounded from the
 printed lines, the levels would be 78,546, 81,114 and 83,838 dB and their index
-79,985 dB (`full_precision_index_db`), which would print 80,0. The printed
+79,985 dB (`full_precision_index`), which would print 80,0. The printed
 coefficients are themselves rounded, so the lines alone do not decide between
 the two: over every line consistent with the printed intercept, slope, mean
 level, mean speed and vehicle sound level, the unrounded index spans 79,948 dB

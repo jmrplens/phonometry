@@ -162,7 +162,7 @@ def test_volume_factor_runs_from_isothermal_to_adiabatic() -> None:
     kappa = _air().heat_capacity_ratio
     assert abs(heat.volume_factor[0]) == pytest.approx(kappa, rel=2e-2)
     assert abs(heat.volume_factor[1]) == pytest.approx(1.0, abs=1e-3)
-    assert np.all(np.diff(heat.correction_db) < 0.0)
+    assert np.all(np.diff(heat.correction) < 0.0)
 
 
 @pytest.mark.parametrize("x", [0.0, -1.0, float("nan")])
@@ -287,16 +287,16 @@ def test_wave_motion_correction_reads_table_c3() -> None:
     frequencies = np.array(sorted(ref.IEC61094_2_TABLE_C3_DB))
     correction = metrology.large_volume_wave_motion_correction(frequencies)
     np.testing.assert_array_equal(
-        correction.correction_db, [ref.IEC61094_2_TABLE_C3_DB[f] for f in frequencies]
+        correction.correction, [ref.IEC61094_2_TABLE_C3_DB[f] for f in frequencies]
     )
     assert not np.any(correction.interpolated)
 
 
 def test_wave_motion_correction_is_nil_up_to_800_hz_and_interpolates() -> None:
     correction = metrology.large_volume_wave_motion_correction([100.0, 500.0, 1100.0])
-    assert correction.correction_db[0] == pytest.approx(0.0)
-    assert correction.correction_db[1] == pytest.approx(0.0)
-    assert -0.013 < correction.correction_db[2] < -0.002
+    assert correction.correction[0] == pytest.approx(0.0)
+    assert correction.correction[1] == pytest.approx(0.0)
+    assert -0.013 < correction.correction[2] < -0.002
     assert correction.interpolated.tolist() == [False, False, True]
 
 
@@ -305,7 +305,7 @@ def test_wave_motion_correction_scales_the_frequency_for_another_gas() -> None:
     correction = metrology.large_volume_wave_motion_correction(
         [3780.0, 9450.0], speed_of_sound_ratio=3.78
     )
-    np.testing.assert_allclose(correction.correction_db, [-0.002, -0.087])
+    np.testing.assert_allclose(correction.correction, [-0.002, -0.087])
 
 
 def test_wave_motion_correction_refuses_above_the_table() -> None:
@@ -391,7 +391,7 @@ def test_large_volume_coupler_is_formula_3_at_low_frequency() -> None:
         1.0 / admittance, rel=1e-12
     )
     assert z.heat_conduction is not None
-    assert z.heat_conduction_correction_db[0] < 0.0
+    assert z.heat_conduction_correction[0] < 0.0
 
 
 def test_plane_wave_coupler_is_a_compliance_at_low_frequency() -> None:
@@ -655,11 +655,11 @@ def test_wave_motion_correction_is_added_to_every_level() -> None:
         frequencies,
         electrical,
         acoustic,
-        corrections_db={"wave motion": correction.correction_db},
+        corrections={"wave motion": correction.correction},
     )
     np.testing.assert_allclose(
-        corrected.sensitivity_level_db - plain.sensitivity_level_db,
-        np.tile(correction.correction_db, (3, 1)),
+        corrected.sensitivity_level - plain.sensitivity_level,
+        np.tile(correction.correction, (3, 1)),
     )
 
 
@@ -932,7 +932,7 @@ def test_parameter_uncertainty_of_the_length_is_the_level_change() -> None:
     changed = metrology.pressure_reciprocity(_F, electrical, moved)
     np.testing.assert_allclose(
         result.components_db["coupler_length"],
-        np.abs(changed.sensitivity_level_db[0] - nominal.sensitivity_level_db[0]),
+        np.abs(changed.sensitivity_level[0] - nominal.sensitivity_level[0]),
         atol=1e-12,
     )
 

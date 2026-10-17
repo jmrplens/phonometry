@@ -97,13 +97,13 @@ is in `docs/ERRATA.md`.
 ```python
 adjustment_value(
     frequencies: ArrayLike,
-    free_field_indicated_level_db: ArrayLike,
+    free_field_indicated_level: ArrayLike,
     calibrator_reading_db: float,
     *,
-    calibrator_level_db: float,
-    incident_level_db: ArrayLike | None = None,
+    calibrator_level: float,
+    incident_level: ArrayLike | None = None,
     tolerance_db: ArrayLike | None = None,
-    pressure_indicated_level_db: ArrayLike | None = None,
+    pressure_indicated_level: ArrayLike | None = None,
     check_frequency_hz: float = 1000.0,
 ) -> AdjustmentValue
 ```
@@ -127,7 +127,7 @@ weights), and $L_4'$ the indication on the calibrator at the
 sensitivity the free-field readings were taken at. The least-squares
 weighting is this module's reading of a text that prints no formula (see
 the module notes). Where the achievable free-field level differs from
-$L_1$, `incident_level_db` carries it, which is the allowance the
+$L_1$, `incident_level` carries it, which is the allowance the
 text asks for.
 
 **Parameters**
@@ -135,12 +135,12 @@ text asks for.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies of the free-field response, in Hz, increasing, the calibration check frequency among them. |
-| `free_field_indicated_level_db` | What the meter indicates in the free field at each frequency, in dB, before the adjustment. |
+| `free_field_indicated_level` | What the meter indicates in the free field at each frequency, in dB, before the adjustment. |
 | `calibrator_reading_db` | $L_4'$, what the meter indicates on the recommended calibrator at the same sensitivity, in dB. |
-| `calibrator_level_db` | $L_1$, the level stated for the calibrator at the calibration check frequency, in dB. |
-| `incident_level_db` | The incident free-field level at each frequency, in dB, one value or one per frequency (Default: None, the calibrator's $L_1$ at every frequency). |
+| `calibrator_level` | $L_1$, the level stated for the calibrator at the calibration check frequency, in dB. |
+| `incident_level` | The incident free-field level at each frequency, in dB, one value or one per frequency (Default: None, the calibrator's $L_1$ at every frequency). |
 | `tolerance_db` | The tolerance the deviation is judged against at each frequency, in dB, such as the narrower side of the IEC 61672-1 acceptance limits for the class; one value or one per frequency, and infinite where a frequency should not pull the fit (Default: None, equal weights). |
-| `pressure_indicated_level_db` | What the meter indicates in a pressure field of level $L_1$ at each frequency, in dB, before the adjustment, for the pressure-to-free-field correction and $L_3$ (Default: None). |
+| `pressure_indicated_level` | What the meter indicates in a pressure field of level $L_1$ at each frequency, in dB, before the adjustment, for the pressure-to-free-field correction and $L_3$ (Default: None). |
 | `check_frequency_hz` | $f_\mathrm{R}$, in Hz (Default: 1000). |
 
 **Returns:** The [`AdjustmentValue`](/phonometry/reference/api/metrology/free-field-corrections/#adjustmentvalue).
@@ -157,7 +157,7 @@ text asks for.
 AdjustmentValue(
     frequencies: NDArray[np.float64],
     free_field_deviation_db: NDArray[np.float64],
-    calibrator_level_db: float,
+    calibrator_level: float,
     calibrator_reading_db: float,
     check_frequency_hz: float = 1000.0,
     tolerance_db: NDArray[np.float64] | None = None,
@@ -186,7 +186,7 @@ number, without an uncertainty (clause 8).
 | :--- | :--- |
 | `frequencies` | the frequencies of the free-field response, in Hz. |
 | `free_field_deviation_db` | $d$, the indication in the free field less the incident level at each frequency, before the adjustment, in dB. |
-| `calibrator_level_db` | $L_1$, the level stated for the sound calibrator, in dB. |
+| `calibrator_level` | $L_1$, the level stated for the sound calibrator, in dB. |
 | `calibrator_reading_db` | $L_4'$, what the meter indicates on the calibrator before the adjustment, at the sensitivity the free-field readings were taken at, in dB. |
 | `check_frequency_hz` | $f_\mathrm{R}$, the calibration check frequency, in Hz: one of `frequencies`. |
 | `tolerance_db` | $t$ at each frequency, in dB, infinite where a frequency does not pull the fit; `None` for equal weights. |
@@ -199,14 +199,14 @@ number, without an uncertainty (clause 8).
 The deviation of the free-field response after the adjustment,
 $d + s$, in dB: curve (2) less curve (1) of Figure A.1.
 
-### AdjustmentValue.adjustment_db
+### AdjustmentValue.adjustment
 
 *property*
 
 $\Delta L = L_1 - L_4$, in dB: the value the manual states,
 added to the indication on the calibrator to obtain its stated level.
 
-### AdjustmentValue.calibrator_indicated_level_db
+### AdjustmentValue.calibrator_indicated_level
 
 *property*
 
@@ -221,7 +221,7 @@ $L_2 - L_1$, in dB: the deliberate "offset" NOTE 1 of clause
 8 allows at the calibration check frequency, which the fit over the
 whole range leaves in the free-field response there.
 
-### AdjustmentValue.free_field_indicated_level_db
+### AdjustmentValue.free_field_indicated_level
 
 *property*
 
@@ -252,7 +252,7 @@ with the tolerances it was weighed against.
 
 **Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
 
-### AdjustmentValue.pressure_indicated_level_db
+### AdjustmentValue.pressure_indicated_level
 
 *property*
 
@@ -261,7 +261,7 @@ the calibration check frequency, after the adjustment, in dB; `None`
 without the pressure response. $L_3 - L_4$ is what the loading
 of the calibrator by the microphone makes of it (NOTE to Figure A.1).
 
-### AdjustmentValue.pressure_to_free_field_correction_db
+### AdjustmentValue.pressure_to_free_field_correction
 
 *property*
 
@@ -270,7 +270,7 @@ frequency, in dB: the free-field level (1) less the indication in the
 pressure field (3), after the adjustment. `None` without the pressure
 response.
 
-### AdjustmentValue.sensitivity_adjustment_db
+### AdjustmentValue.sensitivity_adjustment
 
 *property*
 
@@ -289,14 +289,14 @@ normalised to sum to one; equal without tolerances.
 ```python
 comparison_coupler_correction(
     frequencies: ArrayLike,
-    slm_free_field_level_db: ArrayLike,
-    reference_free_field_level_db: ArrayLike,
-    slm_coupler_level_db: ArrayLike,
-    reference_coupler_level_db: ArrayLike,
+    slm_free_field_level: ArrayLike,
+    reference_free_field_level: ArrayLike,
+    slm_coupler_level: ArrayLike,
+    reference_coupler_level: ArrayLike,
     *,
-    reference_free_field_correction_db: ArrayLike,
-    free_field_level_difference_db: ArrayLike = 0.0,
-    coupler_level_difference_db: ArrayLike = 0.0,
+    reference_free_field_correction: ArrayLike,
+    free_field_level_difference: ArrayLike = 0.0,
+    coupler_level_difference: ArrayLike = 0.0,
     microphones: Sequence[Hashable] | None = None,
 ) -> FreeFieldCorrection
 ```
@@ -327,13 +327,13 @@ correction is their mean.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, increasing. |
-| `slm_free_field_level_db` | $L_\mathrm{ind1}$, the meter in the free field, in dB. |
-| `reference_free_field_level_db` | $L_\mathrm{ind2}$, the reference microphone in the same field, in dB. |
-| `slm_coupler_level_db` | the meter in the coupler, in dB ($L_\mathrm{ind3b}$ of Figure E.1). |
-| `reference_coupler_level_db` | the reference microphone in the coupler, in dB ($L_\mathrm{ind3a}$ of Figure E.1). |
-| `reference_free_field_correction_db` | $C_\mathrm{FF,RM}$ from IEC/TS 61094-7, in dB, one per frequency or one for all. |
-| `free_field_level_difference_db` | $L_{p,\mathrm{F1}} - L_{p,\mathrm{F2}}$, the free-field level during measurement 1 less that during measurement 2, in dB (Default: 0; NOTE 2). |
-| `coupler_level_difference_db` | the sound pressure level at the meter less that at the reference in the coupler, in dB (Default: 0). |
+| `slm_free_field_level` | $L_\mathrm{ind1}$, the meter in the free field, in dB. |
+| `reference_free_field_level` | $L_\mathrm{ind2}$, the reference microphone in the same field, in dB. |
+| `slm_coupler_level` | the meter in the coupler, in dB ($L_\mathrm{ind3b}$ of Figure E.1). |
+| `reference_coupler_level` | the reference microphone in the coupler, in dB ($L_\mathrm{ind3a}$ of Figure E.1). |
+| `reference_free_field_correction` | $C_\mathrm{FF,RM}$ from IEC/TS 61094-7, in dB, one per frequency or one for all. |
+| `free_field_level_difference` | $L_{p,\mathrm{F1}} - L_{p,\mathrm{F2}}$, the free-field level during measurement 1 less that during measurement 2, in dB (Default: 0; NOTE 2). |
+| `coupler_level_difference` | the sound pressure level at the meter less that at the reference in the coupler, in dB (Default: 0). |
 | `microphones` | The microphone of each determination, one label per row (Default: None, every determination a microphone of its own). |
 
 **Returns:** The [`FreeFieldCorrection`](/phonometry/reference/api/metrology/free-field-corrections/#freefieldcorrection).
@@ -352,7 +352,7 @@ correction_uncertainty_budget(
     *,
     repeatability_dof: float,
     frequency_hz: float,
-    correction_db: float = 0.0,
+    correction: float = 0.0,
     static_pressure_kpa: float | None = None,
     additional_components: Sequence[Quantity] = (),
     coverage: float = 0.95,
@@ -392,7 +392,7 @@ adds its own, which `additional_components` carries.
 | `values_db` | The value of each of the 15 components, in dB, keyed by the descriptor of Table I.1, `"a1"` to `"a15"`. A component taken as negligible is given as 0, as Table I.2 gives a6 and a13. |
 | `repeatability_dof` | The degrees of freedom of the repeatability (a15), from the number of repeat measurements: 2 in Tables I.2 and I.3. |
 | `frequency_hz` | The frequency, in Hz, which sets the clause 6 component and the maximum the budget is judged against. |
-| `correction_db` | The correction the budget is for, in dB (Default: 0). |
+| `correction` | The correction the budget is for, in dB (Default: 0). |
 | `static_pressure_kpa` | The static pressure the measurements were made at, in kPa (Default: None). Below 97 kPa clause 6 adds a component of expanded uncertainty 0,15 dB up to 3 kHz and 0,25 dB above ($k = 2$); outside 80 kPa to 105 kPa it refuses. |
 | `additional_components` | Further components the laboratory's own method needs, as [`Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity) objects of estimate 0 and sensitivity 1, named (Default: none). |
 | `coverage` | The level of confidence (Default: 0,95, clause 5). |
@@ -451,7 +451,7 @@ effective degrees of freedom at the stated level of confidence.
 $u(C_\mathrm{FF,SLM})$, the combined standard uncertainty,
 in dB.
 
-### CorrectionUncertaintyBudget.correction_db
+### CorrectionUncertaintyBudget.correction
 
 *property*
 
@@ -514,7 +514,7 @@ CorrectionUncertaintyVerification(
     clause: int,
     frequencies: NDArray[np.float64],
     expanded_uncertainty_db: NDArray[np.float64],
-    correction_db: NDArray[np.float64] | None = None,
+    correction: NDArray[np.float64] | None = None,
     coverage_factor: NDArray[np.float64] | None = None,
     correction_range_db: NDArray[np.float64] | None = None,
 )
@@ -545,7 +545,7 @@ maximum its clause does not give.
 | `clause` | the clause, 9 to 14. |
 | `frequencies` | the frequencies, in Hz. |
 | `expanded_uncertainty_db` | the actual expanded uncertainty at each frequency, in dB. |
-| `correction_db` | the corrections, in dB, which the documentation of clause 15 states with their uncertainty; `None` if not given. |
+| `correction` | the corrections, in dB, which the documentation of clause 15 states with their uncertainty; `None` if not given. |
 | `coverage_factor` | the coverage factor of each expanded uncertainty, which clause 15 asks to be stated; `None` if not given. |
 | `correction_range_db` | the range of the corrections over the microphones at each frequency, in dB (clauses 12 to 14), such as [`FreeFieldCorrection.range_db`](/phonometry/reference/api/metrology/free-field-corrections/#freefieldcorrectionrange_db); `None` if not given. |
 
@@ -670,14 +670,14 @@ by frequency.
 ```python
 electrostatic_actuator_correction(
     frequencies: ArrayLike,
-    slm_free_field_level_db: ArrayLike,
-    reference_free_field_level_db: ArrayLike,
-    slm_actuator_level_db: ArrayLike,
+    slm_free_field_level: ArrayLike,
+    reference_free_field_level: ArrayLike,
+    slm_actuator_level: ArrayLike,
     *,
-    reference_sensitivity_level_db: ArrayLike,
+    reference_sensitivity_level: ArrayLike,
     reference_channel_gain_db: ArrayLike = 0.0,
-    actuator_level_db: ArrayLike = 0.0,
-    free_field_level_difference_db: ArrayLike = 0.0,
+    actuator_level: ArrayLike = 0.0,
+    free_field_level_difference: ArrayLike = 0.0,
     check_frequency_hz: float = 1000.0,
     microphones: Sequence[Hashable] | None = None,
 ) -> FreeFieldCorrection
@@ -709,13 +709,13 @@ actuator clause 7 asks for.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, increasing, $f_0$ among them. |
-| `slm_free_field_level_db` | $L_\mathrm{ind1}(f)$, the meter in the free field, in dB. |
-| `reference_free_field_level_db` | $L_\mathrm{ind2}(f)$, the reference channel in the same field, in dB. |
-| `slm_actuator_level_db` | $L_\mathrm{ind3}(f)$, the meter on the actuator, in dB. |
-| `reference_sensitivity_level_db` | $S_\mathrm{RM}(f)$, the free-field (open-circuit) sensitivity level of the reference microphone, in dB re 1 V/Pa, one per frequency. |
+| `slm_free_field_level` | $L_\mathrm{ind1}(f)$, the meter in the free field, in dB. |
+| `reference_free_field_level` | $L_\mathrm{ind2}(f)$, the reference channel in the same field, in dB. |
+| `slm_actuator_level` | $L_\mathrm{ind3}(f)$, the meter on the actuator, in dB. |
+| `reference_sensitivity_level` | $S_\mathrm{RM}(f)$, the free-field (open-circuit) sensitivity level of the reference microphone, in dB re 1 V/Pa, one per frequency. |
 | `reference_channel_gain_db` | $G_\mathrm{RC}(f)$, the gain of the reference channel, in dB (Default: 0, a flat channel). Its frequency response has to be known; its absolute gain does not. |
-| `actuator_level_db` | $L_\mathrm{EA}(f)$, the level the actuator simulates, in dB (Default: 0 at every frequency: the same at $f$ and $f_0$ for a drive voltage independent of frequency, NOTE 4). |
-| `free_field_level_difference_db` | $L_{p,\mathrm{F1}} - L_{p,\mathrm{F2}}$ at each frequency, in dB (Default: 0; NOTE 3). |
+| `actuator_level` | $L_\mathrm{EA}(f)$, the level the actuator simulates, in dB (Default: 0 at every frequency: the same at $f$ and $f_0$ for a drive voltage independent of frequency, NOTE 4). |
+| `free_field_level_difference` | $L_{p,\mathrm{F1}} - L_{p,\mathrm{F2}}$ at each frequency, in dB (Default: 0; NOTE 3). |
 | `check_frequency_hz` | $f_0$, in Hz (Default: 1000). |
 | `microphones` | The microphone of each determination, one label per row (Default: None, every determination a microphone of its own). |
 
@@ -777,8 +777,8 @@ the one-third-octave ones.
 ```python
 FreeFieldCorrection(
     frequencies: NDArray[np.float64],
-    corrections_db: NDArray[np.float64],
-    reference_correction_db: NDArray[np.float64],
+    corrections: NDArray[np.float64],
+    reference_correction: NDArray[np.float64],
     source: str,
     check_frequency_hz: float | None = None,
     microphones: tuple[Hashable, ...] | None = None,
@@ -788,7 +788,7 @@ FreeFieldCorrection(
 The corrections that bring a meter on a source to its free-field
 response (IEC 62585:2012, Formulas (D.7), (E.6) and (F.13)).
 
-One row of `corrections_db` per determination, one combination of
+One row of `corrections` per determination, one combination of
 microphone and source, and one column per frequency. The correction the
 manual states is their mean at each frequency (D.2 step 6, E.2 step 5,
 F.2 step 5). Clauses 12 to 14 judge "the range of correction values at
@@ -804,11 +804,11 @@ determinations share a microphone.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | the frequencies, in Hz. |
-| `corrections_db` | $C_\mathrm{FF,SLM}$, or $C_\mathrm{N,FF,SLM}$ for an actuator, of each determination, in dB, shape `(determinations, frequencies)`. |
-| `reference_correction_db` | what the reference microphone contributes at each frequency, in dB: $C_\mathrm{FF,RM}$ for a calibrator or a coupler, $S_\mathrm{N,RM} + G_\mathrm{N,RC}$ for an actuator. |
+| `corrections` | $C_\mathrm{FF,SLM}$, or $C_\mathrm{N,FF,SLM}$ for an actuator, of each determination, in dB, shape `(determinations, frequencies)`. |
+| `reference_correction` | what the reference microphone contributes at each frequency, in dB: $C_\mathrm{FF,RM}$ for a calibrator or a coupler, $S_\mathrm{N,RM} + G_\mathrm{N,RC}$ for an actuator. |
 | `source` | `"sound_calibrator"` (Annex D), `"comparison_coupler"` (Annex E) or `"electrostatic_actuator"` (Annex F). |
 | `check_frequency_hz` | the normalisation frequency $f_0$ of an actuator's corrections, in Hz; `None` for the other two sources, whose corrections are absolute. |
-| `microphones` | the microphone each determination was made with, one label per row of `corrections_db` (a serial number or an index), rows with the same label being the same microphone; `None` when every determination is a microphone of its own. |
+| `microphones` | the microphone each determination was made with, one label per row of `corrections` (a serial number or an index), rows with the same label being the same microphone; `None` when every determination is a microphone of its own. |
 
 ### FreeFieldCorrection.clause
 
@@ -817,7 +817,7 @@ determinations share a microphone.
 The clause whose maximum uncertainty the correction is judged
 against: 12, 13 or 14.
 
-### FreeFieldCorrection.correction_db
+### FreeFieldCorrection.correction
 
 *property*
 
@@ -830,7 +830,7 @@ dB: the value the manual states.
 
 The formula applied: `"D.7"`, `"E.6"` or `"F.13"`.
 
-### FreeFieldCorrection.microphone_corrections_db
+### FreeFieldCorrection.microphone_corrections
 
 *property*
 
@@ -879,7 +879,7 @@ and the range between them.
 
 The range of the corrections over the microphones at each
 frequency, the largest less the smallest of
-`microphone_corrections_db`, in dB: the range clauses 12 to 14
+`microphone_corrections`, in dB: the range clauses 12 to 14
 judge. Zero for a single microphone.
 
 ## IEC62585_TABLE_I1
@@ -936,14 +936,14 @@ ones do.
 ```python
 sound_calibrator_correction(
     frequencies: ArrayLike,
-    slm_free_field_level_db: ArrayLike,
-    reference_free_field_level_db: ArrayLike,
-    slm_calibrator_level_db: ArrayLike,
-    reference_calibrator_level_db: ArrayLike,
+    slm_free_field_level: ArrayLike,
+    reference_free_field_level: ArrayLike,
+    slm_calibrator_level: ArrayLike,
+    reference_calibrator_level: ArrayLike,
     *,
-    reference_free_field_correction_db: ArrayLike,
-    free_field_level_difference_db: ArrayLike = 0.0,
-    calibrator_level_difference_db: ArrayLike = 0.0,
+    reference_free_field_correction: ArrayLike,
+    free_field_level_difference: ArrayLike = 0.0,
+    calibrator_level_difference: ArrayLike = 0.0,
     microphones: Sequence[Hashable] | None = None,
 ) -> FreeFieldCorrection
 ```
@@ -974,13 +974,13 @@ taken over the three microphones and not over the calibrators as well.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, increasing. |
-| `slm_free_field_level_db` | $L_\mathrm{ind1}$, the meter in the free field, in dB. |
-| `reference_free_field_level_db` | $L_\mathrm{ind2}$, the reference microphone in the same field, in dB. |
-| `slm_calibrator_level_db` | $L_\mathrm{ind3}$, the meter on the calibrator, in dB. |
-| `reference_calibrator_level_db` | $L_\mathrm{ind4}$, the reference microphone on the calibrator, in dB. |
-| `reference_free_field_correction_db` | $C_\mathrm{FF,RM}$, the free-field correction of the reference microphone from IEC/TS 61094-7, in dB, one per frequency or one for all. |
-| `free_field_level_difference_db` | $L_{p,\mathrm{F1}} - L_{p,\mathrm{F2}}$, the free-field level during measurement 1 less that during measurement 2, from a monitor microphone, in dB (Default: 0, a stable source; NOTE 2). |
-| `calibrator_level_difference_db` | $L_{p,\mathrm{P1}} - L_{p,\mathrm{P2}}$, the calibrator's level on the meter less that on the reference, in dB (Default: 0, a stable calibrator; NOTE 3). |
+| `slm_free_field_level` | $L_\mathrm{ind1}$, the meter in the free field, in dB. |
+| `reference_free_field_level` | $L_\mathrm{ind2}$, the reference microphone in the same field, in dB. |
+| `slm_calibrator_level` | $L_\mathrm{ind3}$, the meter on the calibrator, in dB. |
+| `reference_calibrator_level` | $L_\mathrm{ind4}$, the reference microphone on the calibrator, in dB. |
+| `reference_free_field_correction` | $C_\mathrm{FF,RM}$, the free-field correction of the reference microphone from IEC/TS 61094-7, in dB, one per frequency or one for all. |
+| `free_field_level_difference` | $L_{p,\mathrm{F1}} - L_{p,\mathrm{F2}}$, the free-field level during measurement 1 less that during measurement 2, from a monitor microphone, in dB (Default: 0, a stable source; NOTE 2). |
+| `calibrator_level_difference` | $L_{p,\mathrm{P1}} - L_{p,\mathrm{P2}}$, the calibrator's level on the meter less that on the reference, in dB (Default: 0, a stable calibrator; NOTE 3). |
 | `microphones` | The microphone of each determination, one label per row, such as `[1, 1, 1, 2, 2, 2, 3, 3, 3]` for three microphones each on three calibrators (Default: None, every determination a microphone of its own). |
 
 **Returns:** The [`FreeFieldCorrection`](/phonometry/reference/api/metrology/free-field-corrections/#freefieldcorrection).
@@ -1022,7 +1022,7 @@ verify_correction_uncertainty(
     expanded_uncertainty_db: ArrayLike,
     *,
     clause: int,
-    correction_db: ArrayLike | None = None,
+    correction: ArrayLike | None = None,
     coverage_factor: ArrayLike | None = None,
     correction_range_db: ArrayLike | None = None,
 ) -> CorrectionUncertaintyVerification
@@ -1050,7 +1050,7 @@ through floating-point arithmetic is on it, not above it.
 | `frequencies` | The frequencies, in Hz, increasing. |
 | `expanded_uncertainty_db` | The actual expanded uncertainty at each frequency, in dB, one value or one per frequency. |
 | `clause` | The clause the corrections belong to: 9 (case and diffraction), 10 (microphone response), 11 (windscreens and accessories), 12 (sound calibrator), 13 (comparison coupler) or 14 (electrostatic actuator). |
-| `correction_db` | The corrections, in dB, for the documentation of clause 15 (Default: None). |
+| `correction` | The corrections, in dB, for the documentation of clause 15 (Default: None). |
 | `coverage_factor` | The coverage factor of each expanded uncertainty, for the same documentation (Default: None). |
 | `correction_range_db` | The range of the corrections over the microphones at each frequency, in dB, such as [`FreeFieldCorrection.range_db`](/phonometry/reference/api/metrology/free-field-corrections/#freefieldcorrectionrange_db); clauses 12 to 14 only (Default: None, not judged). |
 

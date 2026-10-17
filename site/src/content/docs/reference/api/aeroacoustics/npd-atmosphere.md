@@ -124,8 +124,8 @@ NPDAtmosphereIncrement(
     distances_m: NDArray[np.float64],
     spectrum_db: NDArray[np.float64],
     source_spectrum_db: NDArray[np.float64],
-    reference_attenuation_db: NDArray[np.float64],
-    specified_attenuation_db: NDArray[np.float64],
+    reference_attenuation: NDArray[np.float64],
+    specified_attenuation: NDArray[np.float64],
     reference_levels_dba: NDArray[np.float64],
     specified_levels_dba: NDArray[np.float64],
     increment_db: NDArray[np.float64],
@@ -150,8 +150,8 @@ tables are `(bands, distances)`.
 | `distances_m` | The NPD slant distances $d_i$, in metres. |
 | `spectrum_db` | The spectral class as given, $L_{n,\mathrm{ref}}(d_\mathrm{ref})$ at 1 000 ft in the AIR-1845 atmosphere, in dB. |
 | `source_spectrum_db` | $L_n(d_\mathrm{ref})$, the same spectrum with the AIR-1845 attenuation added back (Eq. D-1), in dB. |
-| `reference_attenuation_db` | $\alpha_{n,\mathrm{ref}} \, d_i / (100\,\mathrm{m})$, the AIR-1845 attenuation at each distance (Table D-3a), in dB. |
-| `specified_attenuation_db` | $\delta_n(d_i) \, d_i / (100\,\mathrm{m})$, the attenuation of the specified atmosphere (Tables D-3b and D-3c), in dB. |
+| `reference_attenuation` | $\alpha_{n,\mathrm{ref}} \, d_i / (100\,\mathrm{m})$, the AIR-1845 attenuation at each distance (Table D-3a), in dB. |
+| `specified_attenuation` | $\delta_n(d_i) \, d_i / (100\,\mathrm{m})$, the attenuation of the specified atmosphere (Tables D-3b and D-3c), in dB. |
 | `reference_levels_dba` | $L_{A,\mathrm{ref}}(d_i)$, in dB. |
 | `specified_levels_dba` | $L_{A,\mathrm{atm}}(d_i)$, in dB. |
 | `increment_db` | $\Delta L(d_i) = L_{A,\mathrm{atm}} - L_{A,\mathrm{ref}}$ (Eq. D-4), in dB, to add to the NPD levels at the same distances. |

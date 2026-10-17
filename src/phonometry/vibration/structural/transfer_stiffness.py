@@ -327,10 +327,10 @@ def transfer_stiffness_direct(
 
 
 def transfer_stiffness_indirect(
-    frequency: ArrayLike,
     transmissibility: ArrayLike,
     blocking_mass: float,
     *,
+    frequency: ArrayLike,
     flange_mass: float = 0.0,
 ) -> np.ndarray:
     r"""Dynamic transfer stiffness by the indirect method (ISO 10846-3, Eq. 1).
@@ -590,7 +590,10 @@ class TransferStiffnessResult(OwnsArrays):
         :func:`phonometry.vibration.convert_frf`.
         """
         return convert_frf(
-            self.transfer_stiffness, self.frequencies, "dynamic_stiffness", target
+            self.transfer_stiffness,
+            frequency=self.frequencies,
+            source="dynamic_stiffness",
+            target=target,
         )
 
     def band_average(self) -> BandAveragedStiffness:
@@ -691,10 +694,10 @@ class TransferStiffnessResult(OwnsArrays):
 
 
 def indirect_transfer_stiffness_result(
-    frequencies: ArrayLike,
     transmissibility: ArrayLike,
     blocking_mass: float,
     *,
+    frequencies: ArrayLike,
     flange_mass: float = 0.0,
 ) -> TransferStiffnessResult:
     r"""Indirect-method transfer stiffness bundled as a :class:`TransferStiffnessResult`.
@@ -910,10 +913,7 @@ class BandAveragedStiffness(OwnsArrays):
 
 
 def band_averaged_stiffness(
-    frequencies: ArrayLike,
-    stiffness: ArrayLike,
-    *,
-    valid: ArrayLike | None = None,
+    stiffness: ArrayLike, *, frequencies: ArrayLike, valid: ArrayLike | None = None
 ) -> BandAveragedStiffness:
     r"""One-third-octave-band averages of a narrow-band stiffness (ISO 10846).
 
@@ -1197,9 +1197,10 @@ def _warn_level_difference(
 
 
 def check_blocked_output(
-    frequencies: ArrayLike,
     input_acceleration_level: ArrayLike,
     output_acceleration_level: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> LevelDifferenceCheck:
     r"""Is the output side blocked well enough for the stiffness to mean anything?
 
@@ -1256,9 +1257,10 @@ def check_blocked_output(
 
 
 def check_unwanted_input(
-    frequencies: ArrayLike,
     excitation_level: ArrayLike,
     unwanted_level: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> LevelDifferenceCheck:
     r"""Does the input move in the excitation direction alone, by 15 dB?
 
@@ -1455,10 +1457,11 @@ class OutputMassCheck(OwnsArrays):
 
 
 def check_output_mass(
-    frequencies: ArrayLike,
     output_mass_kg: float,
     output_force_level: ArrayLike,
     output_acceleration_level: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> OutputMassCheck:
     r"""Is the mass in front of the output force transducers light enough?
 
@@ -1693,11 +1696,11 @@ class EffectiveBlockingMass(OwnsArrays):
 
 
 def effective_blocking_mass(
-    frequencies: ArrayLike,
     force: ArrayLike,
     first_acceleration_m_s2: ArrayLike,
     second_acceleration_m_s2: ArrayLike,
     *,
+    frequencies: ArrayLike,
     blocking_mass: float,
 ) -> EffectiveBlockingMass:
     r"""Effective mass of a blocking mass from one force and two accelerations.
@@ -2032,10 +2035,10 @@ def _acceleration_level(
 
 
 def driving_point_stiffness(
-    frequencies: ArrayLike,
     input_force_n: ArrayLike,
     input_acceleration_m_s2: ArrayLike,
     *,
+    frequencies: ArrayLike,
     output_acceleration_m_s2: ArrayLike | None = None,
     unwanted_acceleration_m_s2: ArrayLike | None = None,
 ) -> DrivingPointStiffnessResult:
@@ -2100,7 +2103,11 @@ def driving_point_stiffness(
             )
             raise ValueError(msg)
         blocked = np.asarray(
-            check_blocked_output(freq, input_level, output_level).difference,
+            check_blocked_output(
+                frequencies=freq,
+                input_acceleration_level=input_level,
+                output_acceleration_level=output_level,
+            ).difference,
             dtype=np.float64,
         )
     if unwanted_acceleration_m_s2 is not None:
@@ -2108,7 +2115,11 @@ def driving_point_stiffness(
             unwanted_acceleration_m_s2, freq.shape, owner, "unwanted_acceleration_m_s2"
         )
         unwanted = np.asarray(
-            check_unwanted_input(freq, input_level, unwanted_level).difference,
+            check_unwanted_input(
+                frequencies=freq,
+                excitation_level=input_level,
+                unwanted_level=unwanted_level,
+            ).difference,
             dtype=np.float64,
         )
     return DrivingPointStiffnessResult(

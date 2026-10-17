@@ -571,7 +571,10 @@ def _chk_band_sums() -> Outcome:
     matching = total = 0
     for band in (1, 2, 3):
         summed = env.amplitude_modulation_band_levels(
-            levels, oracle.IOA_BAND_EXAMPLE_FREQUENCIES_HZ, band=band, weighting="Z"
+            levels,
+            frequencies=oracle.IOA_BAND_EXAMPLE_FREQUENCIES_HZ,
+            band=band,
+            weighting="Z",
         )
         tenths = np.rint(summed * 10.0).astype(int)
         matching += int(

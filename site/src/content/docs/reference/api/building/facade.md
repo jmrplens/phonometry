@@ -368,8 +368,8 @@ scalar broadcasts against an array (e.g. several sides, one common `Atot`).
 ```python
 plot_facade_elements(
     elements: Sequence[FacadeElement],
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes

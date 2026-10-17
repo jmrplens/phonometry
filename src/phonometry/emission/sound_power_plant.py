@@ -1244,8 +1244,8 @@ class PlantMeasurementContour(OwnsArrays):
     def sound_power(
         self,
         levels: ArrayLike,
-        frequencies: ArrayLike,
         *,
+        frequencies: ArrayLike,
         microphone_height_m: float | None = None,
         background_levels: ArrayLike | None = None,
         directional_microphone_angle_deg: float | ArrayLike | None = None,
@@ -1287,7 +1287,7 @@ class PlantMeasurementContour(OwnsArrays):
         )
         return plant_sound_power(
             levels,
-            frequencies,
+            frequencies=frequencies,
             measurement_area_m2=self.measurement_area_m2,
             contour_length_m=self.contour_length_m,
             microphone_height_m=height,
@@ -1708,8 +1708,8 @@ class PlantSoundPowerResult(OwnsArrays):
 
 def plant_sound_power(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     measurement_area_m2: float,
     contour_length_m: float,
     microphone_height_m: float,

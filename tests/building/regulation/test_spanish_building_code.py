@@ -227,14 +227,14 @@ def test_direct_route_and_iso717_route_agree_on_both_published_spectra() -> None
     """
     frequencies = list(hr.DB_HR_FREQUENCIES_HZ)
 
-    wall = weighted_rating_extended(list(_R_PRIME), frequencies)
+    wall = weighted_rating_extended(list(_R_PRIME), frequencies=frequencies)
     assert wall.rating == 52
     assert wall.c == -1
     assert wall.ctr == -5
     assert wall.c_100_5000 == -1
     assert hr.ra(_R_PRIME).reported == wall.rating + wall.c_100_5000 == 51
 
-    facade = weighted_rating_extended(list(_D2M_NT), frequencies)
+    facade = weighted_rating_extended(list(_D2M_NT), frequencies=frequencies)
     assert facade.rating == 38
     assert facade.ctr_100_5000 == -5
     assert hr.d2m_nt_atr(_D2M_NT).reported == facade.rating + facade.ctr_100_5000 == 33
@@ -246,7 +246,9 @@ def test_plain_c_differs_from_the_enlarged_range_term_on_the_facade() -> None:
     On the Ejercicio 7.1 facade the core-range C is -2 while C100-5000 is -1,
     so reading "C" as the ISO 717-1 core term would give 36 instead of 37.
     """
-    facade = weighted_rating_extended(list(_D2M_NT), list(hr.DB_HR_FREQUENCIES_HZ))
+    facade = weighted_rating_extended(
+        list(_D2M_NT), frequencies=list(hr.DB_HR_FREQUENCIES_HZ)
+    )
     assert facade.c == -2
     assert facade.c_100_5000 == -1
     assert facade.rating + facade.c != facade.rating + facade.c_100_5000

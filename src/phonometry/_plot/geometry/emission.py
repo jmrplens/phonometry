@@ -152,8 +152,8 @@ def _number_points(
 
 def plot_microphone_positions(
     positions: ArrayLike,
-    ax: Axes3D | None = None,
     *,
+    ax: Axes3D | None = None,
     radius: float | None = None,
     language: str = "en",
     **kwargs: Any,
@@ -277,8 +277,8 @@ def plot_microphone_positions(
 # ---------------------------------------------------------------------------
 def plot_pp_probe_geometry(
     spacing_m: float = 0.012,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:

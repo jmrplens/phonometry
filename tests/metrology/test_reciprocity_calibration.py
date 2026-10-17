@@ -95,8 +95,11 @@ def test_calibration_levels_phases_and_read_only_columns() -> None:
 
 def test_budget_combines_in_quadrature_with_k_2() -> None:
     budget = metrology.reciprocity_uncertainty_budget(
-        _F,
-        {"voltage_ratio": 0.003, "coupler_length": [0.004, 0.004, 0.012]},
+        frequencies=_F,
+        standard_uncertainties_db={
+            "voltage_ratio": 0.003,
+            "coupler_length": [0.004, 0.004, 0.012],
+        },
         additional_components_db={"leakage check": 0.0},
     )
     np.testing.assert_allclose(
@@ -117,25 +120,33 @@ def test_budget_combines_in_quadrature_with_k_2() -> None:
 def test_budget_refuses_a_component_of_the_other_part() -> None:
     with pytest.raises(ValueError, match="are not components of Table 1"):
         metrology.reciprocity_uncertainty_budget(
-            _F, {"coupler_length": 0.01}, field="free"
+            frequencies=_F,
+            standard_uncertainties_db={"coupler_length": 0.01},
+            field="free",
         )
 
 
 def test_budget_refuses_an_additional_component_named_like_a_row() -> None:
     with pytest.raises(ValueError, match="name of a component"):
         metrology.reciprocity_uncertainty_budget(
-            _F, {}, additional_components_db={"rounding": 0.001}
+            frequencies=_F,
+            standard_uncertainties_db={},
+            additional_components_db={"rounding": 0.001},
         )
 
 
 def test_budget_refuses_no_component() -> None:
     with pytest.raises(ValueError, match="at least one"):
-        metrology.reciprocity_uncertainty_budget(_F, {})
+        metrology.reciprocity_uncertainty_budget(
+            frequencies=_F, standard_uncertainties_db={}
+        )
 
 
 def test_budget_refuses_a_negative_uncertainty() -> None:
     with pytest.raises(ValueError, match="'standard_uncertainties_db' must be"):
-        metrology.reciprocity_uncertainty_budget(_F, {"rounding": -0.001})
+        metrology.reciprocity_uncertainty_budget(
+            frequencies=_F, standard_uncertainties_db={"rounding": -0.001}
+        )
 
 
 def test_tables_are_read_only() -> None:

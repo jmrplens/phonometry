@@ -496,7 +496,9 @@ def _floor_covering_example() -> tuple[object, ReportMetadata, str]:
         [5, 8, 10, 14, 18, 23, 30, 31, 39, 49, 53, 57, 60, 67, 68, 71],
         dtype=float,
     )
-    result = ph.building.impact_improvement(bare, bare - delta_l, _RATING_FREQS)
+    result = ph.building.impact_improvement(
+        bare, bare - delta_l, frequencies=_RATING_FREQS
+    )
     metadata = ReportMetadata(
         specimen="Textile floor covering (carpet), laid loose",
         client="Example client",
@@ -541,7 +543,7 @@ def _floor_covering_form_example() -> tuple[object, ReportMetadata, str]:
         + [6.7, 7.0, 7.7, 10.8, 15.2, 20.3, 25.4, 23.2]
     )
     result = ph.building.laboratory_floor_covering_improvement(
-        bare, bare - delta_l, _RATING_FREQS
+        bare, bare - delta_l, frequencies=_RATING_FREQS
     )
     metadata = ReportMetadata(
         manufacturer="Example floorings",
@@ -585,7 +587,7 @@ def _joint_form_example() -> tuple[object, ReportMetadata, str]:
         + [46.2, 45.1, 46.9, 49.8, 52.6, 55.4, 58.9, 63.1, 66.2]
     )
     result = ph.building.laboratory_joint_insulation(
-        seal, maximum, _FLANKING_FREQS, joint_length_m=5.4
+        seal, maximum, frequencies=_FLANKING_FREQS, joint_length_m=5.4
     )
     metadata = ReportMetadata(
         client="Example client",

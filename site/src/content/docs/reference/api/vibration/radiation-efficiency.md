@@ -101,8 +101,8 @@ $f_\mathrm{c} = (c_0^2 / 2\pi) \sqrt{m'' / B'}$ (identical to Bies Eq. 7.3).
 plot_plate_geometry(
     length_x: float,
     length_y: float,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     boundary: str = 'simply_supported',
     language: str = 'en',
     **kwargs: Any,

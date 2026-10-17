@@ -226,8 +226,8 @@ def _nominal_index(frequencies: NDArray[np.float64], centre: float) -> int:
 
 def amplitude_modulation_band_levels(
     band_levels: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     band: int,
     weighting: Literal["A", "Z"],
 ) -> NDArray[np.float64]:

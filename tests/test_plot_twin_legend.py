@@ -427,10 +427,10 @@ def _room_to_room() -> Axes:
     operator = [(25.0, [0.08, 0.24, 0.57, 0.69, 0.71, 0.73]), (25.0, ceiling),
                 (60.0, walls)]  # fmt: skip
     result = ph.noise_control.room_to_room_transmission(
-        [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0],
-        [39.0, 42.0, 50.0, 58.0, 63.0, 67.0],
-        5.0 * 3.0,
-        ph.room.equivalent_absorption_area(operator),
+        frequencies=[125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0],
+        transmission_loss=[39.0, 42.0, 50.0, 58.0, 63.0, 67.0],
+        partition_area=5.0 * 3.0,
+        receiving_absorption=ph.room.equivalent_absorption_area(operator),
         source=ph.noise_control.SourceRoom(
             power_level=[105.0, 103.0, 98.0, 108.0, 107.0, 109.0],
             room_constant=ph.room.room_constant(268.0, ph.room.mean_absorption(plant)),
@@ -482,14 +482,14 @@ def _field_indicators() -> Axes:
     spread = np.linspace(0.05, 0.6, bands.size)
     intensity = mean[None, :] * (1.0 + spread[None, :] * pattern[:, None])
     levels = np.full((pattern.size, bands.size), 74.0)
-    return ph.emission.field_indicators(levels, intensity, bands).plot()
+    return ph.emission.field_indicators(levels, intensity, frequencies=bands).plot()
 
 
 def _ship_source_level() -> Axes:
     """A radiated level rising with frequency over the full ISO 17208-2 span."""
     f = np.array([10.0, 20.0, 50.0, 100.0, 200.0, 500.0, 1e3, 2e3, 5e3, 1e4])
     rnl = np.linspace(150.0, 175.0, f.size)
-    return ph.underwater.monopole_source_level(rnl, f, 5.0).plot()
+    return ph.underwater.monopole_source_level(rnl, frequency=f, draft_m=5.0).plot()
 
 
 #: Two runs falling with frequency, the quieter one faster, so their

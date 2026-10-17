@@ -65,27 +65,27 @@ def test_mobility_and_accelerance_are_jomega_powers_of_receptance() -> None:
     f = 37.0
     w = 2.0 * math.pi * f
     h = vibration.sdof_receptance(f, M, K, C)
-    assert vibration.convert_frf(h, f, "receptance", "mobility") == pytest.approx(
-        1j * w * h
-    )
-    assert vibration.convert_frf(h, f, "receptance", "accelerance") == pytest.approx(
-        -(w**2) * h
-    )
+    assert vibration.convert_frf(
+        h, frequency=f, source="receptance", target="mobility"
+    ) == pytest.approx(1j * w * h)
+    assert vibration.convert_frf(
+        h, frequency=f, source="receptance", target="accelerance"
+    ) == pytest.approx(-(w**2) * h)
 
 
 def test_reciprocals_multiply_to_one() -> None:
     f = 37.0
     h = vibration.sdof_receptance(f, M, K, C)
-    y = vibration.convert_frf(h, f, "receptance", "mobility")
-    a = vibration.convert_frf(h, f, "receptance", "accelerance")
-    assert vibration.convert_frf(y, f, "mobility", "impedance") * y == pytest.approx(
-        1.0
-    )
+    y = vibration.convert_frf(h, frequency=f, source="receptance", target="mobility")
+    a = vibration.convert_frf(h, frequency=f, source="receptance", target="accelerance")
     assert vibration.convert_frf(
-        a, f, "accelerance", "apparent_mass"
+        y, frequency=f, source="mobility", target="impedance"
+    ) * y == pytest.approx(1.0)
+    assert vibration.convert_frf(
+        a, frequency=f, source="accelerance", target="apparent_mass"
     ) * a == pytest.approx(1.0)
     assert vibration.convert_frf(
-        h, f, "receptance", "dynamic_stiffness"
+        h, frequency=f, source="receptance", target="dynamic_stiffness"
     ) * h == pytest.approx(1.0)
 
 
@@ -94,9 +94,15 @@ def test_rigid_mass_decade_identity_at_1000_rad_s() -> None:
     accelerance 1 1/kg <-> mobility 1e-3 m/(N.s) <-> compliance 1e-6 m/N.
     """
     f = 1000.0 / (2.0 * math.pi)
-    y = vibration.convert_frf(1.0, f, "apparent_mass", "mobility")
-    h = vibration.convert_frf(1.0, f, "apparent_mass", "receptance")
-    a = vibration.convert_frf(1.0, f, "apparent_mass", "accelerance")
+    y = vibration.convert_frf(
+        1.0, frequency=f, source="apparent_mass", target="mobility"
+    )
+    h = vibration.convert_frf(
+        1.0, frequency=f, source="apparent_mass", target="receptance"
+    )
+    a = vibration.convert_frf(
+        1.0, frequency=f, source="apparent_mass", target="accelerance"
+    )
     assert abs(complex(y)) == pytest.approx(1.0e-3, rel=1e-12)
     assert abs(complex(h)) == pytest.approx(1.0e-6, rel=1e-12)
     assert abs(complex(a)) == pytest.approx(1.0, rel=1e-12)
@@ -107,14 +113,16 @@ def test_conversion_round_trip() -> None:
     y = vibration.sdof_mobility(f, M, K, C)
     back = vibration.convert_frf(
         vibration.convert_frf(
-            vibration.convert_frf(y, f, "mobility", "receptance"),
-            f,
-            "receptance",
-            "accelerance",
+            vibration.convert_frf(
+                y, frequency=f, source="mobility", target="receptance"
+            ),
+            frequency=f,
+            source="receptance",
+            target="accelerance",
         ),
-        f,
-        "accelerance",
-        "mobility",
+        frequency=f,
+        source="accelerance",
+        target="mobility",
     )
     assert np.allclose(back, y)
 
@@ -122,7 +130,9 @@ def test_conversion_round_trip() -> None:
 def test_accelerance_matches_impedance_route() -> None:
     """Apparent mass at high frequency approaches the rigid mass m."""
     a = vibration.sdof_accelerance(5000.0, M, K, C)  # well above resonance
-    apparent_mass = vibration.convert_frf(a, 5000.0, "accelerance", "apparent_mass")
+    apparent_mass = vibration.convert_frf(
+        a, frequency=5000.0, source="accelerance", target="apparent_mass"
+    )
     assert complex(apparent_mass).real == pytest.approx(M, rel=1e-2)
 
 
@@ -131,9 +141,13 @@ def test_accelerance_matches_impedance_route() -> None:
 # ---------------------------------------------------------------------------
 def test_unknown_frf_raises() -> None:
     with pytest.raises(ValueError, match="unknown source FRF"):
-        vibration.convert_frf(1.0, 100.0, "velocity", "mobility")
+        vibration.convert_frf(
+            1.0, frequency=100.0, source="velocity", target="mobility"
+        )
     with pytest.raises(ValueError, match="unknown target FRF"):
-        vibration.convert_frf(1.0, 100.0, "mobility", "velocity")
+        vibration.convert_frf(
+            1.0, frequency=100.0, source="mobility", target="velocity"
+        )
 
 
 def test_zero_value_reciprocal_conversion_raises() -> None:
@@ -143,15 +157,21 @@ def test_zero_value_reciprocal_conversion_raises() -> None:
         match=r"'value' contains zeros \(dead channel\); converting 'mobility' to "
         r"'impedance'",
     ):
-        vibration.convert_frf(0.0, 100.0, "mobility", "impedance")
+        vibration.convert_frf(
+            0.0, frequency=100.0, source="mobility", target="impedance"
+        )
     with pytest.raises(
         ValueError,
         match=r"'value' contains zeros \(dead channel\); converting 'impedance' to "
         r"'mobility'",
     ):
-        vibration.convert_frf([1e-3, 0.0], 100.0, "impedance", "mobility")
+        vibration.convert_frf(
+            [1e-3, 0.0], frequency=100.0, source="impedance", target="mobility"
+        )
     # Motion-per-force to motion-per-force tolerates zeros (0 maps to 0).
-    out = vibration.convert_frf(0.0, 100.0, "mobility", "accelerance")
+    out = vibration.convert_frf(
+        0.0, frequency=100.0, source="mobility", target="accelerance"
+    )
     assert complex(out) == 0.0
 
 
@@ -160,7 +180,9 @@ def test_non_positive_frequency_raises() -> None:
         ValueError,
         match=r"'frequency' must be positive \(mobility conversions divide by omega\)",
     ):
-        vibration.convert_frf(1.0, 0.0, "receptance", "mobility")
+        vibration.convert_frf(
+            1.0, frequency=0.0, source="receptance", target="mobility"
+        )
     with pytest.raises(ValueError, match=r"'mass' must be positive"):
         vibration.sdof_receptance(100.0, 0.0, K, C)
     with pytest.raises(ValueError, match=r"'damping' must be non-negative"):
@@ -173,7 +195,9 @@ def test_non_positive_frequency_raises() -> None:
 def test_rigid_mass_calibration_accelerance_passes() -> None:
     """A 10 kg rigid block has |A| = 1/m = 0.100 1/kg at every frequency."""
     f = np.array([10.0, 100.0, 1000.0])
-    res = vibration.verify_rigid_mass_calibration(np.full(3, 0.1), f, 10.0)
+    res = vibration.verify_rigid_mass_calibration(
+        np.full(3, 0.1), frequencies=f, mass=10.0
+    )
     assert isinstance(res, vibration.RigidMassCalibrationResult)
     assert res.passes
     assert np.allclose(res.expected, 0.100)
@@ -184,7 +208,7 @@ def test_rigid_mass_calibration_mobility_expected_value() -> None:
     """|Y| = 1/(2 pi f m): 1.59155e-4 m/(N.s) at 100 Hz for m = 10 kg."""
     y = 1.0 / (2.0 * math.pi * 100.0 * 10.0)
     res = vibration.verify_rigid_mass_calibration(
-        [y], [100.0], 10.0, quantity="mobility"
+        [y], frequencies=[100.0], mass=10.0, quantity="mobility"
     )
     assert res.expected[0] == pytest.approx(1.59155e-4, rel=1e-5)
     assert res.passes
@@ -194,7 +218,7 @@ def test_rigid_mass_calibration_flags_out_of_tolerance_bands() -> None:
     # +4 % passes the +/-5 % criterion; -7 % fails, only in its band.
     f = np.array([50.0, 500.0])
     frf = np.array([0.104, 0.093])
-    res = vibration.verify_rigid_mass_calibration(frf, f, 10.0)
+    res = vibration.verify_rigid_mass_calibration(frf, frequencies=f, mass=10.0)
     assert res.within_tolerance.tolist() == [True, False]
     assert not res.passes
     assert res.relative_deviation[0] == pytest.approx(0.04)
@@ -203,27 +227,31 @@ def test_rigid_mass_calibration_flags_out_of_tolerance_bands() -> None:
 def test_rigid_mass_calibration_accepts_complex_frf() -> None:
     # The criterion applies to the magnitude; phase is irrelevant.
     frf = 0.1 * np.exp(1j * np.linspace(0.0, 1.0, 4))
-    res = vibration.verify_rigid_mass_calibration(frf, [10.0, 20.0, 40.0, 80.0], 10.0)
+    res = vibration.verify_rigid_mass_calibration(
+        frf, frequencies=[10.0, 20.0, 40.0, 80.0], mass=10.0
+    )
     assert res.passes
 
 
 def test_rigid_mass_calibration_validation() -> None:
     with pytest.raises(ValueError, match=r"'quantity' must be 'accelerance'"):
         vibration.verify_rigid_mass_calibration(
-            [0.1], [100.0], 10.0, quantity="receptance"
+            [0.1], frequencies=[100.0], mass=10.0, quantity="receptance"
         )
     with pytest.raises(ValueError, match=r"'mass' must be positive"):
-        vibration.verify_rigid_mass_calibration([0.1], [100.0], 0.0)
+        vibration.verify_rigid_mass_calibration([0.1], frequencies=[100.0], mass=0.0)
     with pytest.raises(
         ValueError,
         match=r"verify_rigid_mass_calibration: 'frf'.*'frequencies'.*same shape",
     ):
-        vibration.verify_rigid_mass_calibration([0.1, 0.1], [100.0], 10.0)
+        vibration.verify_rigid_mass_calibration(
+            [0.1, 0.1], frequencies=[100.0], mass=10.0
+        )
     with pytest.raises(
         ValueError,
         match=r"'frequencies' must be positive \(mobility conversions divide by omega\)",
     ):
-        vibration.verify_rigid_mass_calibration([0.1], [0.0], 10.0)
+        vibration.verify_rigid_mass_calibration([0.1], frequencies=[0.0], mass=10.0)
 
 
 def test_a_rigid_mass_record_names_its_frequency_axis() -> None:
@@ -237,7 +265,9 @@ def test_a_rigid_mass_record_names_its_frequency_axis() -> None:
 def test_a_measurement_short_of_its_frequencies_is_refused() -> None:
     """A measurement that stops early would leave a pass over the rest."""
     f = np.geomspace(20.0, 2000.0, 12)
-    res = vibration.verify_rigid_mass_calibration(np.full(12, 0.1), f, mass=10.0)
+    res = vibration.verify_rigid_mass_calibration(
+        np.full(12, 0.1), frequencies=f, mass=10.0
+    )
     short = res.measured[:8]
     with pytest.raises(
         ValueError, match=r"'measured' \(8\).*must each carry one value"
@@ -247,7 +277,7 @@ def test_a_measurement_short_of_its_frequencies_is_refused() -> None:
 
 def test_the_five_percent_of_7_5_2_is_not_a_constructor_field() -> None:
     """ISO 7626-2:2015 7.5.2 prints +/-5 %, so no check holds another one."""
-    res = vibration.verify_rigid_mass_calibration([0.1], [100.0], mass=10.0)
+    res = vibration.verify_rigid_mass_calibration([0.1], frequencies=[100.0], mass=10.0)
     names = {field.name for field in dataclasses.fields(res)}
     assert names == {"frequencies", "measured", "mass", "quantity"}
     assert res.relative_tolerance == pytest.approx(0.05)
@@ -383,7 +413,7 @@ def test_rigid_mass_plot_two_panels_and_external_ax() -> None:
     f = np.logspace(np.log10(20.0), np.log10(2000.0), 40)
     # A calibration that drifts out of the +/-5 % band above ~1.2 kHz.
     meas = (1.0 / 10.0) * (1.0 + 0.02 * np.sin(f / 200.0) + 0.06 * (f > 1200.0))
-    res = vibration.verify_rigid_mass_calibration(meas, f, mass=10.0)
+    res = vibration.verify_rigid_mass_calibration(meas, frequencies=f, mass=10.0)
     axes = res.plot()
     assert len(axes) == 2  # magnitude + deviation panels
     _fig, ext = plt.subplots()
@@ -396,7 +426,7 @@ def test_rigid_mass_plot_rejects_unknown_language() -> None:
     import matplotlib as mpl
 
     mpl.use("Agg")
-    res = vibration.verify_rigid_mass_calibration([0.1], [100.0], 10.0)
+    res = vibration.verify_rigid_mass_calibration([0.1], frequencies=[100.0], mass=10.0)
     with pytest.raises(ValueError, match="Unknown language"):
         res.plot(language="xx")
 

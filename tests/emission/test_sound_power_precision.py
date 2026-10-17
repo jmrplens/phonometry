@@ -112,7 +112,7 @@ def test_precision_positions_bad_count_raises() -> None:
 def test_k1_floor_edge_band_6db() -> None:
     """dLpi = 6 dB in a <=200 Hz band -> K1 = -10*lg(1-10^-0,6) = 1,256 dB."""
     k1 = precision_background_correction(
-        np.array([[56.0]]), np.array([[50.0]]), np.array([200.0])
+        np.array([[56.0]]), np.array([[50.0]]), frequencies=np.array([200.0])
     )
     assert k1[0, 0] == pytest.approx(1.25628, abs=1e-4)
 
@@ -120,7 +120,7 @@ def test_k1_floor_edge_band_6db() -> None:
 def test_k1_floor_mid_band_10db() -> None:
     """dLpi = 10 dB in a 250-5000 Hz band -> K1 = -10*lg(1-10^-1) = 0,458 dB."""
     k1 = precision_background_correction(
-        np.array([[60.0]]), np.array([[50.0]]), np.array([1000.0])
+        np.array([[60.0]]), np.array([[50.0]]), frequencies=np.array([1000.0])
     )
     assert k1[0, 0] == pytest.approx(0.45757, abs=1e-4)
 
@@ -128,7 +128,7 @@ def test_k1_floor_mid_band_10db() -> None:
 def test_k1_zero_above_15db() -> None:
     """dLpi >= 15 dB -> background negligible -> K1 = 0."""
     k1 = precision_background_correction(
-        np.array([[80.0]]), np.array([[60.0]]), np.array([1000.0])
+        np.array([[80.0]]), np.array([[60.0]]), frequencies=np.array([1000.0])
     )
     assert k1[0, 0] == 0.0
 
@@ -137,7 +137,7 @@ def test_k1_edge_band_below_6db_clamps_and_warns() -> None:
     """dLpi < 6 dB in an edge band clamps to the 6 dB value (1,26 dB), warns."""
     with pytest.warns(SoundPowerWarning):
         k1 = precision_background_correction(
-            np.array([[53.0]]), np.array([[50.0]]), np.array([6300.0])
+            np.array([[53.0]]), np.array([[50.0]]), frequencies=np.array([6300.0])
         )
     assert k1[0, 0] == pytest.approx(1.25628, abs=1e-4)
 
@@ -146,7 +146,7 @@ def test_k1_mid_band_below_10db_clamps_to_0_46() -> None:
     """dLpi < 10 dB in a mid band clamps to the 10 dB value (0,46 dB), warns."""
     with pytest.warns(SoundPowerWarning):
         k1 = precision_background_correction(
-            np.array([[57.0]]), np.array([[50.0]]), np.array([1000.0])
+            np.array([[57.0]]), np.array([[50.0]]), frequencies=np.array([1000.0])
         )
     assert k1[0, 0] == pytest.approx(0.45757, abs=1e-4)
 
@@ -155,7 +155,7 @@ def test_k1_is_per_position() -> None:
     """K1 is applied per microphone position, not to the energy mean."""
     src = np.array([[80.0, 63.0], [70.0, 62.0]])  # 2 positions, 2 bands
     bg = np.array([[60.0, 55.0], [60.0, 55.0]])  # band-1 dLpi = 8/7 dB (>= 6)
-    k1 = precision_background_correction(src, bg, np.array([1000.0, 200.0]))
+    k1 = precision_background_correction(src, bg, frequencies=np.array([1000.0, 200.0]))
     assert k1.shape == (2, 2)
     # position 0 band 0 dLpi = 20 dB -> 0; position 1 band 0 dLpi = 10 dB -> 0,458
     assert k1[0, 0] == 0.0
@@ -168,7 +168,7 @@ def test_k1_frequency_length_mismatch_raises() -> None:
     one_frequency = np.array([200.0])
     with pytest.raises(ValueError, match="must match the number of 'frequencies'"):
         precision_background_correction(
-            source_2_bands, background_2_bands, one_frequency
+            source_2_bands, background_2_bands, frequencies=one_frequency
         )
 
 
@@ -362,7 +362,7 @@ def test_anechoic_full_chain_with_k1() -> None:
     res = sound_power_anechoic(
         src, "hemisphere", radius=r, background_levels=bg, frequencies=freqs
     )
-    k1 = precision_background_correction(src, bg, freqs)
+    k1 = precision_background_correction(src, bg, frequencies=freqs)
     lp_bar = 80.0 - k1[0, 0]
     mc = meteorological_corrections(temperature_c=23.0, static_pressure_kpa=101.325)
     expected = lp_bar + 10.0 * np.log10(2.0 * np.pi * r**2) + mc.c1 + mc.c2

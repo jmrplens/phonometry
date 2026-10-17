@@ -522,8 +522,8 @@ encima de 1 kHz para compensar la pérdida metálica de la sección 6:
 
 ```python
 lift = electroacoustics.amplifier_frequency_response(
-    [100.0, 1000.0, 2000.0, 3150.0, 4000.0, 5000.0, 8000.0],
-    [2.0, 2.0, 2.4, 2.9, 3.2, 3.5, 3.6],       # corriente de salida, A
+    [2.0, 2.0, 2.4, 2.9, 3.2, 3.5, 3.6],
+    frequencies=[100.0, 1000.0, 2000.0, 3150.0, 4000.0, 5000.0, 8000.0],       # corriente de salida, A
 )
 print(lift.response_db.round(2))                # [0.   0.   1.58 3.23 4.08 4.86 5.11] dB ref. 1 kHz
 speech = electroacoustics.verify_amplifier_overload(current, z, 11.0, current_response=lift)
@@ -615,7 +615,7 @@ print(round(agc.agc_range_db, 1), agc.recommended_range_db)        # 40.5 32.0 d
 f = np.array([100.0, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000]
              + [1250, 1600, 2000, 2500, 3150, 4000, 5000])
 phase = 90.0 - 4.0 * np.log2(f / 700.0) ** 2 / 3.0                 # grados entre las corrientes
-quadrature = electroacoustics.quadrature_phase_error(f, phase)
+quadrature = electroacoustics.quadrature_phase_error(phase, frequencies=f)
 print(round(quadrature.max_deviation_deg, 2), quadrature.max_deviation_frequency_hz)  # 10.73 5000.0
 print(round(quadrature.level_increase, 2), round(quadrature.level_decrease, 2))  # 1.48 -1.79 dB
 ```
@@ -672,7 +672,7 @@ dos alcanzan 400 mA/m en el maniquí con **1,06 V como máximo** en la entrada.
 f = np.array([100.0, 200, 500, 1000, 2000, 5000, 8000, 10000])
 z_in = np.abs(32.2 + 2j * np.pi * f * 0.53e-3)     # 32,2 ohmios y 0,53 mH, unas 25 espiras
 level = -6.0 + 20 * np.log10(z_in[3] / z_in)       # -6 dB a 1 kHz con 0,5 V aplicados
-neck = electroacoustics.neck_loop_characteristics(f, level, z_in, input_voltage_v=0.5)
+neck = electroacoustics.neck_loop_characteristics(level, z_in, frequencies=f, input_voltage_v=0.5)
 print(round(neck.reference_input_voltage_v, 3), neck.min_impedance_ohm)  # 0.998 V 32.0 ohmios
 print([round(v) for v in neck.frequencies_3db_hz])                           # [9723] Hz
 draft = electroacoustics.verify_neck_loop(32.4, neck.reference_input_voltage_v, neck_loop_type=1)

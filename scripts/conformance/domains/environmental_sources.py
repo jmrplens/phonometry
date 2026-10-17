@@ -294,7 +294,7 @@ def _chk_wt_tonal_audibility() -> Outcome:
     freqs = np.arange(440.0, 560.0 + df, df)
     levels = np.full(freqs.size, 30.0)
     levels[int(np.argmin(np.abs(freqs - 500.0)))] = 60.0
-    res = ph.environment.wind_turbine_tonality(levels, freqs)
+    res = ph.environment.wind_turbine_tonality(levels, frequencies=freqs)
     return numeric(16.38, res.tonal_audibility, 6e-2, unit="dB", places=2)
 
 

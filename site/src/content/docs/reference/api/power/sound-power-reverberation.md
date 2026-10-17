@@ -91,6 +91,7 @@ alike for the two quantities.
 ```python
 octave_band_levels(
     levels: np.ndarray,
+    *,
     frequencies: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]
 ```
@@ -133,6 +134,7 @@ octave is the 50, 63 and 80 Hz thirds and the 8 kHz octave the 6,3, 8 and
 reverberation_background_correction(
     levels: ArrayLike,
     background_levels: ArrayLike,
+    *,
     frequencies: ArrayLike,
 ) -> NDArray[np.float64]
 ```
@@ -399,8 +401,8 @@ sound_energy_reverberation(
     t60: float | np.ndarray,
     volume: float,
     surface_area: float,
-    frequencies: np.ndarray,
     *,
+    frequencies: np.ndarray,
     n_events: int | None = None,
     background_levels: np.ndarray | None = None,
     integration_time: float | None = None,
@@ -515,8 +517,8 @@ sound_power_reverberation(
     t60: float | np.ndarray,
     volume: float,
     surface_area: float,
-    frequencies: np.ndarray,
     *,
+    frequencies: np.ndarray,
     background_levels: np.ndarray | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,

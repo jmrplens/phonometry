@@ -188,7 +188,7 @@ def _chk_kb_ftr_night() -> Outcome:
 
 
 def _chk_table_2(band_hz: float) -> Outcome:
-    computed = float(ph.vibration.kb_weighted_levels([0.0], [band_hz])[0])
+    computed = float(ph.vibration.kb_weighted_levels([0.0], frequencies=[band_hz])[0])
     return numeric(_TABLE_2[band_hz], computed, 1e-9, unit="dB", places=1)
 
 

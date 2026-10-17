@@ -136,7 +136,7 @@ def test_tonal_correction_thresholds_per_band_range(
     ):
         # Neighbours both at 60 dB, so Ls = 60 dB and Lt = level - 60.
         levels = [60.0, 60.0 + emergence, 60.0]
-        result = rd.tonal_correction(levels, freqs)
+        result = rd.tonal_correction(levels, frequencies=freqs)
         assert result.correction == expected
         assert result.differences[1] == pytest.approx(emergence, abs=1e-12)
 
@@ -147,7 +147,9 @@ def test_tonal_correction_uses_arithmetic_mean_of_neighbours() -> None:
     With neighbours at 50 dB and 70 dB the mean is 60 dB, so a 66 dB band in
     the 500 Hz-10 kHz range emerges by 6 dB and earns the 6 dB Kt.
     """
-    result = rd.tonal_correction([50.0, 66.0, 70.0], [800.0, 1000.0, 1250.0])
+    result = rd.tonal_correction(
+        [50.0, 66.0, 70.0], frequencies=[800.0, 1000.0, 1250.0]
+    )
     assert result.differences[1] == pytest.approx(6.0)
     assert result.correction == 6.0
     assert result.governing_frequency == 1000.0
@@ -159,7 +161,7 @@ def test_tonal_correction_takes_the_largest_of_several_tones() -> None:
     # 500 Hz emerges by 4 dB (3 dB row), 1000 Hz is an end band and ignored;
     # 800 Hz emerges by 9 dB, above the 5 dB upper threshold, so 6 dB governs.
     levels = [60.0, 64.0, 60.0, 69.0, 60.0]
-    result = rd.tonal_correction(levels, freqs)
+    result = rd.tonal_correction(levels, frequencies=freqs)
     assert result.band_corrections[1] == 3.0
     assert result.band_corrections[3] == 6.0
     assert result.correction == 6.0
@@ -168,7 +170,9 @@ def test_tonal_correction_takes_the_largest_of_several_tones() -> None:
 
 def test_tonal_correction_ignores_bands_outside_the_table() -> None:
     """The Kt table only covers 20 Hz to 10 kHz; bands outside it get no Kt."""
-    result = rd.tonal_correction([60.0, 90.0, 60.0], [10000.0, 12500.0, 16000.0])
+    result = rd.tonal_correction(
+        [60.0, 90.0, 60.0], frequencies=[10000.0, 12500.0, 16000.0]
+    )
     assert result.correction == 0.0
     assert result.governing_frequency is None
     assert math.isnan(float(result.differences[1]))
@@ -176,7 +180,7 @@ def test_tonal_correction_ignores_bands_outside_the_table() -> None:
 
 def test_tonal_correction_end_bands_are_not_evaluated() -> None:
     """The first and last band have no pair of neighbours, so they carry NaN."""
-    result = rd.tonal_correction([90.0, 60.0, 90.0], [500.0, 630.0, 800.0])
+    result = rd.tonal_correction([90.0, 60.0, 90.0], frequencies=[500.0, 630.0, 800.0])
     assert math.isnan(float(result.differences[0]))
     assert math.isnan(float(result.differences[-1]))
 
@@ -625,7 +629,7 @@ def test_tonal_result_does_not_alias_the_caller_s_arrays() -> None:
     """Mutating the input spectrum afterwards must not rewrite the result."""
     levels = np.array([50.0, 66.0, 70.0])
     freqs = np.array([800.0, 1000.0, 1250.0])
-    result = rd.tonal_correction(levels, freqs)
+    result = rd.tonal_correction(levels, frequencies=freqs)
     levels[1] = 0.0
     freqs[1] = 1.0
     assert result.levels[1] == pytest.approx(66.0)
@@ -637,22 +641,22 @@ def test_tonal_correction_validation() -> None:
     with pytest.raises(
         ValueError, match=r"tonal_correction: 'levels' .*'frequencies' .*same shape"
     ):
-        rd.tonal_correction([60.0, 60.0], [100.0, 125.0, 160.0])
+        rd.tonal_correction([60.0, 60.0], frequencies=[100.0, 125.0, 160.0])
     with pytest.raises(ValueError, match="At least three"):
-        rd.tonal_correction([60.0, 60.0], [100.0, 125.0])
+        rd.tonal_correction([60.0, 60.0], frequencies=[100.0, 125.0])
     with pytest.raises(ValueError, match=r"'levels' must contain finite values"):
-        rd.tonal_correction([60.0, math.nan, 60.0], [100.0, 125.0, 160.0])
+        rd.tonal_correction([60.0, math.nan, 60.0], frequencies=[100.0, 125.0, 160.0])
     with pytest.raises(ValueError, match=r"'frequencies' must be strictly ascending"):
-        rd.tonal_correction([60.0, 60.0, 60.0], [160.0, 125.0, 100.0])
+        rd.tonal_correction([60.0, 60.0, 60.0], frequencies=[160.0, 125.0, 100.0])
     with pytest.raises(
         ValueError, match=r"'frequencies' must contain positive, finite values"
     ):
-        rd.tonal_correction([60.0, 60.0, 60.0], [0.0, 125.0, 160.0])
+        rd.tonal_correction([60.0, 60.0, 60.0], frequencies=[0.0, 125.0, 160.0])
     two_dimensional = np.zeros((2, 3))
     with pytest.raises(
         ValueError, match=r"'levels' and 'frequencies' must be one-dimensional"
     ):
-        rd.tonal_correction(two_dimensional, two_dimensional)
+        rd.tonal_correction(two_dimensional, frequencies=two_dimensional)
 
 
 def test_limit_lookup_validation() -> None:
@@ -796,7 +800,9 @@ def test_a_tonal_correction_refuses_per_band_columns_that_disagree() -> None:
     import dataclasses
 
     frequencies = np.array([100.0, 125.0, 160.0, 200.0, 250.0])
-    result = rd.tonal_correction(np.array([50.0, 62.0, 51.0, 50.0, 49.0]), frequencies)
+    result = rd.tonal_correction(
+        np.array([50.0, 62.0, 51.0, 50.0, 49.0]), frequencies=frequencies
+    )
     with pytest.raises(ValueError, match=r"'levels' \(4\)"):
         dataclasses.replace(result, levels=result.levels[:-1])
 

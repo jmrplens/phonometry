@@ -660,9 +660,9 @@ class RatedImpedanceVerification(OwnsArrays):
 
 
 def verify_rated_impedance(
-    frequencies: ArrayLike,
     impedance_ohm: ArrayLike,
     *,
+    frequencies: ArrayLike,
     rated_impedance_ohm: float,
     rated_frequency_range_hz: tuple[float, float],
 ) -> RatedImpedanceVerification:
@@ -895,9 +895,9 @@ def _band_corrections(
 
 
 def program_signal_level(
-    frequencies: ArrayLike,
     band_levels: ArrayLike,
     *,
+    frequencies: ArrayLike,
     weighting: AOrZWeighting = "Z",
     free_field_response_db: ArrayLike | None = None,
 ) -> float:
@@ -1038,9 +1038,9 @@ class ProgramCharacteristicVoltage(OwnsArrays):
 
 def program_characteristic_voltage(
     source_emf_v: ArrayLike,
-    frequencies: ArrayLike,
     band_levels: ArrayLike,
     *,
+    frequencies: ArrayLike,
     weighting: AOrZWeighting = "Z",
     free_field_response_db: ArrayLike | None = None,
 ) -> ProgramCharacteristicVoltage:
@@ -1205,7 +1205,9 @@ def check_limiting_test_signal(
     if analysis.levels is None:  # pragma: no cover - the bank always returns levels
         msg = "The one-third-octave analysis returned no band levels."
         raise RuntimeError(msg)
-    spectrum = check_program_signal(analysis.frequencies, analysis.levels)
+    spectrum = check_program_signal(
+        frequencies=analysis.frequencies, band_levels=analysis.levels
+    )
     return LimitingTestSignalCheck(peak_to_rms=peak_to_rms, spectrum=spectrum)
 
 
@@ -1393,9 +1395,9 @@ class CouplerFrequencyResponse(OwnsArrays):
 
 
 def coupler_frequency_response(
-    frequencies: ArrayLike,
     sound_pressure_level: ArrayLike,
     *,
+    frequencies: ArrayLike,
     rated_frequency_range_hz: tuple[float, float] | None = None,
 ) -> CouplerFrequencyResponse:
     """The coupler or ear simulator frequency response of IEC 60268-7 8.6.2.
@@ -1475,7 +1477,7 @@ class CrosstalkAttenuation(OwnsArrays):
 
 
 def crosstalk_attenuation(
-    frequencies: ArrayLike, driven_level: ArrayLike, other_level: ArrayLike
+    driven_level: ArrayLike, other_level: ArrayLike, *, frequencies: ArrayLike
 ) -> CrosstalkAttenuation:
     """The crosstalk attenuation of IEC 60268-7 8.12.
 
@@ -1594,10 +1596,10 @@ class FieldComparisonResponse(OwnsArrays):
 
 
 def field_comparison_response(
-    frequencies: ArrayLike,
     field_level: ArrayLike,
     source_emf_v: ArrayLike,
     *,
+    frequencies: ArrayLike,
     field: Literal["free", "diffuse"],
     reference_frequency_hz: float = _STANDARD_REFERENCE_FREQUENCY_HZ,
 ) -> FieldComparisonResponse:
@@ -1802,10 +1804,10 @@ class EarCanalFrequencyResponse(OwnsArrays):
 
 
 def ear_canal_frequency_response(
-    frequencies: ArrayLike,
     earphone_levels: ArrayLike,
     sound_field_levels: ArrayLike,
     *,
+    frequencies: ArrayLike,
     reference_frequency_hz: float = _MEASURING_FREQUENCY_HZ,
 ) -> EarCanalFrequencyResponse:
     r"""The ear canal sound pressure level frequency response of IEC 60268-7 8.6.5.

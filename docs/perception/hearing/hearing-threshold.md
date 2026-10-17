@@ -202,7 +202,7 @@ print(hearing.earphone_reference_level("TDH 39", bands))
 # An audiogram is measured from that zero, so the level in the coupler is
 # the audiogram plus the reference: nothing else is involved.
 audiogram = [15.0, 20.0, 35.0, 55.0]   # dB HL
-print(hearing.hearing_level_to_coupler_spl(audiogram, "TDH 39", bands))
+print(hearing.hearing_level_to_coupler_spl(audiogram, "TDH 39", frequencies=bands))
 # [26.5 27.  44.  64.5]
 
 print(hearing.EARPHONE_COUPLERS["TDH 39"])   # IEC 60303 acoustic coupler

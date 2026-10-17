@@ -90,7 +90,7 @@ freqs = np.array([250, 315, 400, 500, 630, 800, 1000,
 alpha_s = np.full_like(freqs, 0.10)
 alpha_spec = 0.11 + 0.75 * (np.log10(freqs / 250) / np.log10(4000 / 250))
 
-result = materials.scattering_coefficient_spectrum(freqs, alpha_spec, alpha_s)
+result = materials.scattering_coefficient_spectrum(alpha_spec, alpha_s, frequencies=freqs)
 print(np.round(result.scattering[[0, 6, 12]], 3))   # [0.011 0.428 0.844]
 result.plot()   # s(f) on a log-frequency axis, 0 to 1 (needs matplotlib)
 ```
@@ -117,7 +117,7 @@ freqs = np.array([250, 315, 400, 500, 630, 800, 1000,
                   1250, 1600, 2000, 2500, 3150, 4000], float)
 alpha_s = np.full_like(freqs, 0.10)
 alpha_spec = 0.11 + 0.75 * (np.log10(freqs / 250) / np.log10(4000 / 250))
-result = materials.scattering_coefficient_spectrum(freqs, alpha_spec, alpha_s)
+result = materials.scattering_coefficient_spectrum(alpha_spec, alpha_s, frequencies=freqs)
 
 # result is the ScatteringResult computed above. One line:
 result.plot()
@@ -382,7 +382,7 @@ plt.show()
 
 **Test-report fiche.** Collected across the one-third-octave bands, the
 diffusion coefficient $d(f)$ forms a `DiffusionSpectrum`
-(`materials.diffusion_spectrum(freqs, d, ...)`), whose `report(path)` renders a
+(`materials.diffusion_spectrum(d, frequencies=freqs, ...)`), whose `report(path)` renders a
 one-page diffusion test report (ISO 17497-2, Clause 8.5): the per-band table of
 $d$ beside the $d(f)$ band-axis curve, with a boxed characterisation headline.
 Per Clause 8.4 the random-incidence coefficient is itself a per-band quantity,
@@ -400,7 +400,7 @@ from phonometry import materials
 # over the source positions with random_incidence_diffusion (Clause 8.4).
 freqs = np.array([250, 500, 1000, 2000, 4000], float)
 d = np.array([0.30, 0.45, 0.60, 0.75, 0.88])
-spectrum = materials.diffusion_spectrum(freqs, d)
+spectrum = materials.diffusion_spectrum(d, frequencies=freqs)
 spectrum.plot()    # d(f) on the band axis (needs matplotlib)
 spectrum.report("diffusion.pdf")   # one-page fiche (needs phonometry[report])
 ```

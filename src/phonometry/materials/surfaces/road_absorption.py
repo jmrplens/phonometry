@@ -232,6 +232,7 @@ def geometric_spreading_factor_angle(
 
 def reflected_path_delay(
     microphone_height_m: float = DEFAULT_MICROPHONE_HEIGHT_M,
+    *,
     speed_of_sound: float = ISO13472_SPEED_OF_SOUND_M_S,
 ) -> float:
     r"""Reflected-path arrival delay ``dtau`` (ISO 13472-1:2002, Annex C).
@@ -610,9 +611,9 @@ def absorption_reference_corrected(
 # One-third-octave presentation (ISO 13472-1 Clause 4.1 / ISO 13472-2 6.6)
 # --------------------------------------------------------------------------- #
 def one_third_octave_absorption(
-    frequencies: ArrayLike,
     absorption: ArrayLike,
     *,
+    frequencies: ArrayLike,
     f_min: float = PART1_FREQUENCY_RANGE_HZ[0],
     f_max: float = PART1_FREQUENCY_RANGE_HZ[1],
     clip_negative: bool = True,
@@ -784,7 +785,11 @@ def in_situ_absorption_spectrum(
     )
     freq = np.fft.rfftfreq(length, d=1.0 / fs)
     centres, band = one_third_octave_absorption(
-        freq, alpha, f_min=f_min, f_max=f_max, clip_negative=clip_negative
+        frequencies=freq,
+        absorption=alpha,
+        f_min=f_min,
+        f_max=f_max,
+        clip_negative=clip_negative,
     )
     return InSituAbsorptionResult(
         frequencies=centres,
@@ -892,7 +897,7 @@ def msa_major_axis(
 # phonometry.materials.absorbers.impedance_tube.two_microphone_impedance (ISO 10534-2, Clause 7).
 # --------------------------------------------------------------------------- #
 def spot_tube_upper_frequency(
-    diameter_m: float, speed_of_sound: float = ISO13472_SPEED_OF_SOUND_M_S
+    diameter_m: float, *, speed_of_sound: float = ISO13472_SPEED_OF_SOUND_M_S
 ) -> float:
     r"""Upper usable frequency of the spot tube (ISO 13472-2:2010, 5.4.1).
 
@@ -917,8 +922,8 @@ def spot_tube_upper_frequency(
 
 
 def spot_microphone_spacing_bounds(
-    speed_of_sound: float = ISO13472_SPEED_OF_SOUND_M_S,
     *,
+    speed_of_sound: float = ISO13472_SPEED_OF_SOUND_M_S,
     f_min: float = SPOT_NARROW_BAND_RANGE_HZ[0],
     f_max: float = SPOT_NARROW_BAND_RANGE_HZ[1],
 ) -> tuple[float, float]:

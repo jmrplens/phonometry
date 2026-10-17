@@ -35,11 +35,11 @@ f = np.logspace(np.log10(f0 / 5.0), np.log10(f0 * 40.0), 600)
 
 k_true = k + 1j * 2.0 * np.pi * f * c
 t = vibration.base_transmissibility(f, m2, k, c)
-k_indirect = vibration.transfer_stiffness_indirect(f, t, m2)  # warns where T is not small
+k_indirect = vibration.transfer_stiffness_indirect(t, m2, frequency=f)  # warns where T is not small
 
 # One line: the indirect determination bundled as a result draws its own
 # Lk(f) level spectrum:
-res = vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=m2)
+res = vibration.indirect_transfer_stiffness_result(t, frequencies=f, blocking_mass=m2)
 res.plot()
 plt.show()
 
@@ -112,13 +112,13 @@ import numpy as np
 from phonometry import vibration
 
 # Indirect method: a 10 kg blocking mass, transmissibility 0.01 at 500 Hz.
-k = vibration.transfer_stiffness_indirect(500.0, 0.01, blocking_mass=10.0)
+k = vibration.transfer_stiffness_indirect(0.01, frequency=500.0, blocking_mass=10.0)
 print(f"{abs(complex(k)):.3e}")            # 9.870e+05  N/m
 
 # Bundle a swept measurement into a result carrying its level and loss factor:
 f = np.logspace(1.5, 3.3, 200)
 t = vibration.base_transmissibility(f, mass=8.0, stiffness=1e6, damping=120.0)
-res = vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
+res = vibration.indirect_transfer_stiffness_result(t, frequencies=f, blocking_mass=8.0)
 print(round(float(res.levels[-1]), 1))      # 125.1  dB re 1 N/m (high-f)
 
 res.plot()   # the Lk(f) level spectrum, as in the figure above (needs matplotlib)
@@ -197,7 +197,7 @@ from phonometry import vibration
 # |T| = 0.5 violates Inequality (2): the indirect result is flagged.
 with warnings.catch_warnings(record=True) as caught:
     warnings.simplefilter("always")
-    vibration.transfer_stiffness_indirect(50.0, 0.5, blocking_mass=10.0)
+    vibration.transfer_stiffness_indirect(0.5, frequency=50.0, blocking_mass=10.0)
 print(caught[0].category.__name__)                     # TransferStiffnessWarning
 
 # Blocking-force approximation at the 10 % limit (ISO 10846-1, Eq. 6):
@@ -248,7 +248,7 @@ print(round(float(bands.levels[-1]), 2))                               # 120.99 
 t = vibration.base_transmissibility(f, mass=8.0, stiffness=1.0e6, damping=120.0)
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", vibration.TransferStiffnessWarning)
-    indirect = vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
+    indirect = vibration.indirect_transfer_stiffness_result(t, frequencies=f, blocking_mass=8.0)
 bands = indirect.band_average()
 print(bands.nominal_frequencies[0], bands.line_counts[0])  # 200.0 18
 bands.plot()   # the band levels, the undetermined bands marked (needs matplotlib)
@@ -291,17 +291,17 @@ import numpy as np
 from phonometry import vibration
 
 f = [63.0, 125.0, 250.0]
-check = vibration.check_blocked_output(f, [110.0, 110.0, 110.0], [85.0, 88.0, 86.0])
+check = vibration.check_blocked_output([110.0, 110.0, 110.0], [85.0, 88.0, 86.0], frequencies=f)
 print(check.holds, check.passes)                        # [ True  True  True] True
 
 # m0 = 0.4 kg (output flange, force distribution plate, half the transducers):
-mass = vibration.check_output_mass([125.0], 0.4, [120.0], [100.0])
+mass = vibration.check_output_mass(0.4, [120.0], [100.0], frequencies=[125.0])
 print(mass.mass_limit_kg, mass.passes, mass.bias_bound_db.round(3))   # [0.6] True [0.355]
 
 fe = np.geomspace(20.0, 5000.0, 400)
 m_eff = 20.0 * (1.0 + (fe / 3000.0) ** 2)
 ones = np.ones(fe.size, dtype=complex)
-block = vibration.effective_blocking_mass(fe, m_eff * ones, ones, ones, blocking_mass=20.0)
+block = vibration.effective_blocking_mass(m_eff * ones, ones, ones, frequencies=fe, blocking_mass=20.0)
 print(round(block.upper_frequency_limit_hz, 1))         # 1047.9  Hz
 ```
 
@@ -331,7 +331,7 @@ from phonometry import vibration
 f = np.arange(1.0, 200.0, 0.2)          # the 0.2 Hz lines of 7.5
 w = 2.0 * np.pi * f
 k21 = 1.0e6 * (1.0 + 0.05j)
-res = vibration.driving_point_stiffness(f, (k21 - w**2 * 2.0) * 1e-6, -(w**2) * 1e-6)
+res = vibration.driving_point_stiffness((k21 - w**2 * 2.0) * 1e-6, -(w**2) * 1e-6, frequencies=f)
 print(round(res.upper_limiting_frequency_hz, 1))    # 52.2  Hz
 
 # Annex B: u from signal 0.3, instrumentation 0.5, repeatability p/sqrt(3),
@@ -360,8 +360,8 @@ $k = j\omega Z = -\omega^2 m_\text{eff}$. These conversions are the same as the
 from phonometry import vibration
 
 k = 1e6 + 5e4j                                  # N/m, at 250 Hz
-Z = vibration.convert_frf(k, 250.0, "dynamic_stiffness", "impedance")
-print(abs(complex(vibration.convert_frf(Z, 250.0, "impedance", "dynamic_stiffness"))))  # 1.0012e6
+Z = vibration.convert_frf(k, "dynamic_stiffness", "impedance", frequency=250.0)
+print(abs(complex(vibration.convert_frf(Z, "impedance", "dynamic_stiffness", frequency=250.0))))  # 1.0012e6
 ```
 
 ## 8. Test-report fiche

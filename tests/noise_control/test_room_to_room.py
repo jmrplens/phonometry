@@ -46,10 +46,10 @@ def _chain(**kwargs: object) -> RoomToRoomResult:
     }
     defaults.update(kwargs)
     return noise_control.room_to_room_transmission(
-        _BANDS,
-        40.0,
-        20.0,
-        _ABSORPTION,
+        frequencies=_BANDS,
+        transmission_loss=40.0,
+        partition_area=20.0,
+        receiving_absorption=_ABSORPTION,
         **defaults,  # type: ignore[arg-type]
     )
 
@@ -62,10 +62,10 @@ def _powered_chain() -> RoomToRoomResult:
     so the rows that have to agree are all present here at once.
     """
     return noise_control.room_to_room_transmission(
-        _BANDS,
-        40.0,
-        20.0,
-        _ABSORPTION,
+        frequencies=_BANDS,
+        transmission_loss=40.0,
+        partition_area=20.0,
+        receiving_absorption=_ABSORPTION,
         source=noise_control.SourceRoom(
             power_level=np.full(6, 100.0), room_constant=50.0
         ),
@@ -85,10 +85,10 @@ def test_noise_reduction_closed_form() -> None:
     absorption = np.array([5.0, 10.0, 20.0, 40.0, 60.0, 80.0])
     tl = np.array([20.0, 25.0, 30.0, 35.0, 40.0, 45.0])
     result = noise_control.room_to_room_transmission(
-        _BANDS,
-        tl,
-        12.0,
-        absorption,
+        frequencies=_BANDS,
+        transmission_loss=tl,
+        partition_area=12.0,
+        receiving_absorption=absorption,
         source=noise_control.SourceRoom(level=100.0),
     )
     expected = [
@@ -130,10 +130,10 @@ def test_flanking_penalty_is_a_straight_debit() -> None:
 def test_source_power_models_scale_by_ten_lg_q(model: str, expected: float) -> None:
     """Norton Table 4.5: the radiated power goes as ``Q^0``, ``Q^1``, ``Q^-1``."""
     result = noise_control.room_to_room_transmission(
-        _BANDS,
-        40.0,
-        20.0,
-        _ABSORPTION,
+        frequencies=_BANDS,
+        transmission_loss=40.0,
+        partition_area=20.0,
+        receiving_absorption=_ABSORPTION,
         source=noise_control.SourceRoom(
             power_level=100.0, room_constant=50.0, directivity=4.0, model=model
         ),
@@ -154,10 +154,10 @@ def test_required_transmission_loss_closes_the_gap() -> None:
     assert np.allclose(required - result.transmission_loss, excess)
     # Re-running with that TL lands exactly on the criterion curve.
     tightened = noise_control.room_to_room_transmission(
-        _BANDS,
-        required,
-        20.0,
-        _ABSORPTION,
+        frequencies=_BANDS,
+        transmission_loss=required,
+        partition_area=20.0,
+        receiving_absorption=_ABSORPTION,
         source=noise_control.SourceRoom(level=result.source_level),
         criterion=noise_control.DesignCriterion(target=45.0),
     )
@@ -191,10 +191,10 @@ def test_rc_criterion_family() -> None:
 def test_nc_rating_of_the_received_spectrum() -> None:
     """``rating`` is the ANSI S12.2 rating of the received spectrum."""
     result = noise_control.room_to_room_transmission(
-        _BANDS,
-        [50.0, 55.0, 60.0, 62.0, 62.0, 62.0],
-        20.0,
-        _ABSORPTION,
+        frequencies=_BANDS,
+        transmission_loss=[50.0, 55.0, 60.0, 62.0, 62.0, 62.0],
+        partition_area=20.0,
+        receiving_absorption=_ABSORPTION,
         source=noise_control.SourceRoom(level=_FLAT_SOURCE),
         criterion=noise_control.DesignCriterion(target=30.0),
     )
@@ -213,7 +213,12 @@ def test_source_description_is_exclusive() -> None:
     with pytest.raises(
         ValueError, match=r"give exactly one of 'level'.*or 'power_level'"
     ):
-        noise_control.room_to_room_transmission(_BANDS, 40.0, 20.0, _ABSORPTION)
+        noise_control.room_to_room_transmission(
+            frequencies=_BANDS,
+            transmission_loss=40.0,
+            partition_area=20.0,
+            receiving_absorption=_ABSORPTION,
+        )
     with pytest.raises(
         ValueError, match=r"give exactly one of 'level'.*or 'power_level'"
     ):
@@ -230,25 +235,47 @@ def test_validation() -> None:
     with pytest.raises(
         ValueError, match=r"'frequencies' must be a non-empty 1-D array"
     ):
-        noise_control.room_to_room_transmission([], 40.0, 20.0, 20.0, source=source)
+        noise_control.room_to_room_transmission(
+            frequencies=[],
+            transmission_loss=40.0,
+            partition_area=20.0,
+            receiving_absorption=20.0,
+            source=source,
+        )
     with pytest.raises(
         ValueError,
         match=r"'transmission_loss' must be a scalar or have one value per band",
     ):
         noise_control.room_to_room_transmission(
-            _BANDS, [40.0, 41.0], 20.0, _ABSORPTION, source=source
+            frequencies=_BANDS,
+            transmission_loss=[40.0, 41.0],
+            partition_area=20.0,
+            receiving_absorption=_ABSORPTION,
+            source=source,
         )
     with pytest.raises(ValueError, match=r"'transmission_loss' must be finite"):
         noise_control.room_to_room_transmission(
-            _BANDS, _NAN_SPECTRUM, 20.0, _ABSORPTION, source=source
+            frequencies=_BANDS,
+            transmission_loss=_NAN_SPECTRUM,
+            partition_area=20.0,
+            receiving_absorption=_ABSORPTION,
+            source=source,
         )
     with pytest.raises(ValueError, match=r"'partition_area' must be positive"):
         noise_control.room_to_room_transmission(
-            _BANDS, 40.0, 0.0, _ABSORPTION, source=source
+            frequencies=_BANDS,
+            transmission_loss=40.0,
+            partition_area=0.0,
+            receiving_absorption=_ABSORPTION,
+            source=source,
         )
     with pytest.raises(ValueError, match=r"'receiving_absorption' must be positive"):
         noise_control.room_to_room_transmission(
-            _BANDS, 40.0, 20.0, _NO_ABSORPTION, source=source
+            frequencies=_BANDS,
+            transmission_loss=40.0,
+            partition_area=20.0,
+            receiving_absorption=_NO_ABSORPTION,
+            source=source,
         )
     negative_flanking = noise_control.DesignCriterion(flanking_penalty=-1.0)
     with pytest.raises(
@@ -324,10 +351,10 @@ def test_a_single_absorption_number_is_refused() -> None:
     """
     graded = np.array([5.0, 10.0, 20.0, 40.0, 60.0, 80.0])
     result = noise_control.room_to_room_transmission(
-        _BANDS,
-        40.0,
-        20.0,
-        graded,
+        frequencies=_BANDS,
+        transmission_loss=40.0,
+        partition_area=20.0,
+        receiving_absorption=graded,
         source=noise_control.SourceRoom(level=_SOURCE),
         criterion=noise_control.DesignCriterion(target=45.0),
     )
@@ -414,10 +441,10 @@ def test_barron_example_7_6_operator_near_the_wall() -> None:
         directivity=_BARRON_DIRECTIVITY,
     )
     result = noise_control.room_to_room_transmission(
-        _BARRON_BAND,
-        _BARRON_TL_DB,
-        _BARRON_WALL_M2,
-        r2,
+        frequencies=_BARRON_BAND,
+        transmission_loss=_BARRON_TL_DB,
+        partition_area=_BARRON_WALL_M2,
+        receiving_absorption=r2,
         source=source,
         receiver_distance_m=_BARRON_OPERATOR_DISTANCE_M,
     )
@@ -427,7 +454,11 @@ def test_barron_example_7_6_operator_near_the_wall() -> None:
         barron.BARRON_EXAMPLE_7_6_OPERATOR_LEVEL_DB, abs=0.05
     )
     reverberant = noise_control.room_to_room_transmission(
-        _BARRON_BAND, _BARRON_TL_DB, _BARRON_WALL_M2, r2, source=source
+        frequencies=_BARRON_BAND,
+        transmission_loss=_BARRON_TL_DB,
+        partition_area=_BARRON_WALL_M2,
+        receiving_absorption=r2,
+        source=source,
     )
     far_field = reverberant.received_level[0] + _BARRON_IMPEDANCE_TERM_DB
     assert far_field == pytest.approx(59.1, abs=0.05)
@@ -446,10 +477,10 @@ def test_near_wall_branch_closed_form(fraction: float) -> None:
     """Equation (7-71) over Norton's variables: ``NR = TL - 10 lg(S_w/A + 1/4)``."""
     absorption = np.array([5.0, 10.0, 20.0, 40.0, 60.0, 80.0])
     result = noise_control.room_to_room_transmission(
-        _BANDS,
-        40.0,
-        20.0,
-        absorption,
+        frequencies=_BANDS,
+        transmission_loss=40.0,
+        partition_area=20.0,
+        receiving_absorption=absorption,
         source=noise_control.SourceRoom(level=_SOURCE),
         receiver_distance_m=fraction * _near_wall_threshold_m(20.0),
     )
@@ -533,10 +564,10 @@ def test_required_transmission_loss_with_a_receiver_distance(distance: float) ->
     assert reverberant is not None
     assert np.all(required > reverberant)
     tightened = noise_control.room_to_room_transmission(
-        _BANDS,
-        required,
-        20.0,
-        _ABSORPTION,
+        frequencies=_BANDS,
+        transmission_loss=required,
+        partition_area=20.0,
+        receiving_absorption=_ABSORPTION,
         source=noise_control.SourceRoom(level=result.source_level),
         criterion=noise_control.DesignCriterion(target=45.0, flanking_penalty=2.0),
         receiver_distance_m=distance,

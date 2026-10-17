@@ -358,7 +358,7 @@ bands in Annex G.3 for smaller turbines whose swish lies above 800 Hz.
 freqs = [50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800]
 rng = np.random.default_rng(7)
 logged = 40.0 + rng.normal(0.0, 1.0, (1000, len(freqs)))    # 100 s, unweighted bands
-band_2 = environment.amplitude_modulation_band_levels(logged, freqs, band=2, weighting="Z")
+band_2 = environment.amplitude_modulation_band_levels(logged, frequencies=freqs, band=2, weighting="Z")
 print(band_2.shape)   # (1000,)
 ```
 

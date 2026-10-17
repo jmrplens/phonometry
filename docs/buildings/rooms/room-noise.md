@@ -48,7 +48,7 @@ continuous number: an NC rating of $42.5$ sits half-way between NC-40 and
 NC-45 (a SIL designation is always an integer). The tangency rating is kept
 on `tangency_rating` even when the SIL designation applies. A subset of the
 octave bands may be supplied together with their centre frequencies
-(`room.noise_criterion(levels, frequencies)`); without the four SIL bands the
+(`room.noise_criterion(levels, frequencies=frequencies)`); without the four SIL bands the
 tangency rating alone sets the designation.
 
 The Table 1 family ends at NC-70 and NC-15, and the standard defines no

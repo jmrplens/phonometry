@@ -299,6 +299,7 @@ fresnel_number(
     edge_to_receiver: float,
     direct_distance: float,
     frequencies: ArrayLike,
+    *,
     speed_of_sound: float = 343.0,
 ) -> NDArray[np.float64]
 ```
@@ -432,8 +433,8 @@ at 0 dB (a barrier never amplifies).
 
 ```python
 plot_barrier_geometry(
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     source_height_m: float,
     barrier_distance: float,
     barrier_height_m: float,
@@ -479,11 +480,12 @@ difference annotated. Distances follow
 
 ```python
 spherical_reflection_coefficient(
-    frequencies: ArrayLike,
     normalized_impedance: ArrayLike,
     source_height_m: float,
     receiver_height_m: float,
     distance: float,
+    *,
+    frequencies: ArrayLike,
     speed_of_sound: float = 343.0,
 ) -> NDArray[np.complex128]
 ```

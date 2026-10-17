@@ -645,7 +645,7 @@ import numpy as np
 dims, reverberation = (7.0, 5.0, 3.0), 0.9
 bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
 edge = np.sqrt(2.0)
-counts = [room.room_mode_count(f * edge, dims) - room.room_mode_count(f / edge, dims)
+counts = [room.room_mode_count(dims, frequency=f * edge) - room.room_mode_count(dims, frequency=f / edge)
           for f in bands]
 print([round(c) for c in counts])
 # [13, 77, 514, 3735, 28412, 221512, 1749162]

@@ -413,10 +413,10 @@ def _ring_levels(
 
 
 def hover_ring_hemisphere(
-    frequencies: NDArray[np.float64] | list[float],
     bearings: NDArray[np.float64] | list[float],
     levels: NDArray[np.float64] | list[list[float]],
     *,
+    frequencies: NDArray[np.float64] | list[float],
     distance_m: float = 70.0,
     azimuth_step: float = 10.0,
     polar_step: float = 10.0,

@@ -286,13 +286,17 @@ def test_identical_x_energy_bound() -> None:
 def test_coupling_loss_factor_closed_form() -> None:
     cg, lij, f, area, tau = 200.0, 4.0, 500.0, 10.0, 1.0 / 12.0
     expected = cg * lij * tau / (2.0 * math.pi**2 * f * area)
-    got = float(vibration.coupling_loss_factor(tau, cg, lij, f, area))
+    got = float(
+        vibration.coupling_loss_factor(tau, cg, lij, frequency=f, plate_area=area)
+    )
     assert got == pytest.approx(expected)
 
 
 def test_coupling_loss_factor_broadcasts_over_frequency() -> None:
     freqs = np.array([250.0, 500.0, 1000.0])
-    eta = vibration.coupling_loss_factor(0.1, 300.0, 3.0, freqs, 8.0)
+    eta = vibration.coupling_loss_factor(
+        0.1, 300.0, 3.0, frequency=freqs, plate_area=8.0
+    )
     assert eta.shape == freqs.shape
     # eta ~ 1/f, so doubling the frequency halves the coupling loss factor.
     assert eta[1] == pytest.approx(eta[0] / 2.0)
@@ -468,7 +472,11 @@ def test_coupling_loss_factor_rejects_unreconcilable_shapes() -> None:
         match="'transmission_coefficient' and 'frequency' must be broadcastable",
     ):
         vibration.coupling_loss_factor(
-            [0.1, 0.2, 0.3], 100.0, 1.0, [125.0, 250.0, 500.0, 1000.0], 5.0
+            [0.1, 0.2, 0.3],
+            100.0,
+            1.0,
+            frequency=[125.0, 250.0, 500.0, 1000.0],
+            plate_area=5.0,
         )
 
 
@@ -585,7 +593,11 @@ def test_norton_problem_613_welded_line_junction() -> None:
     c_b = plate_bending_wave_speed(_P613_BANDS, stiffness, _AL_RHO * _H1)
     eta = np.array(
         [
-            float(vibration.coupling_loss_factor(tau, 2.0 * c, _L, f, _S1))
+            float(
+                vibration.coupling_loss_factor(
+                    tau, 2.0 * c, _L, frequency=f, plate_area=_S1
+                )
+            )
             for c, f in zip(c_b, _P613_BANDS, strict=True)
         ]
     )

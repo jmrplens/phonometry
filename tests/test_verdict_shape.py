@@ -576,7 +576,9 @@ def _intensity_class() -> object:
     from phonometry import emission
 
     frequencies, class1, _ = emission.residual_index_limits("probe")
-    return emission.verify_intensity_class(class1 + 1.0, frequencies, device="probe")
+    return emission.verify_intensity_class(
+        class1 + 1.0, frequencies=frequencies, device="probe"
+    )
 
 
 #: Real instances of the verdicts and judging results this module holds,
@@ -667,16 +669,16 @@ _BUILT: dict[str, Callable[[], object]] = {
         54.1, 45.2, 430.0
     ),
     "TonalSurveyAssessment": lambda: phonometry.environment.assess_tonal_survey(
-        [40.0, 60.0, 40.0], [100.0, 125.0, 160.0]
+        [40.0, 60.0, 40.0], frequencies=[100.0, 125.0, 160.0]
     ),
     "ToneAudibilityResult": lambda: phonometry.psychoacoustics.assess_tones(
-        [200.0], [40.0], [50.0], 2.7
+        [40.0], [50.0], 2.7, tone_frequencies=[200.0]
     ),
     "WeightingComplianceResult": lambda: phonometry.filters.verify_weighting_class(
         phonometry.filters.WeightingFilter(48000, "B")
     ),
     "WeightingVerification": lambda: phonometry.vibration.verify_weighting(
-        "Wk", [4.0, 8.0, 16.0], [1.0, 1.0, 1.0]
+        "Wk", [1.0, 1.0, 1.0], frequencies=[4.0, 8.0, 16.0]
     ),
 }
 

@@ -553,7 +553,7 @@ def plot_joint_gap_octaves(
     ink = theme_line(ax.xaxis.label.get_color(), ax, quiet=1.0)
     for k, maximum in enumerate(sealed):
         sealed_octaves = improvement_octave_bands(
-            maximum, result.results[0].frequencies, quantity="Rs"
+            maximum, frequencies=result.results[0].frequencies, quantity="Rs"
         )
         index = [
             int(np.argmin(np.abs(centres - f))) for f in sealed_octaves.frequencies

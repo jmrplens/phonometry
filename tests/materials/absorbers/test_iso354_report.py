@@ -104,9 +104,9 @@ _T2 = np.array(
 
 def _result() -> SoundAbsorptionMeasurement:
     return measure_sound_absorption(
-        _FREQS,
-        _T1,
-        _T2,
+        frequencies=_FREQS,
+        t_empty=_T1,
+        t_specimen=_T2,
         volume=200.0,
         area=10.8,
         temperature_c=20.0,
@@ -247,7 +247,12 @@ def test_non_evaluable_band_prints_the_em_dash(tmp_path: Path) -> None:
     t2 = _T2.copy()
     t2[5] = np.nan  # 315 Hz band
     result = measure_sound_absorption(
-        _FREQS, _T1, t2, volume=200.0, area=10.8, temperature_c=20.0
+        frequencies=_FREQS,
+        t_empty=_T1,
+        t_specimen=t2,
+        volume=200.0,
+        area=10.8,
+        temperature_c=20.0,
     )
     assert not np.isfinite(result.alpha_s[5])
     plain = tmp_path / "iso354_nan.pdf"

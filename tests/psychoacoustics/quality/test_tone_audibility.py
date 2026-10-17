@@ -128,17 +128,24 @@ def test_hanning_factor_constant() -> None:
 # ---------------------------------------------------------------------------
 def test_mean_narrowband_level_matches_annex_e() -> None:
     ls = psychoacoustics.mean_narrowband_level(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, 137.3
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        tone_frequency=137.3,
     )
     assert ls == pytest.approx(ref.ISO20065_E1_LS, abs=0.02)
 
 
 def test_tone_level_matches_annex_e() -> None:
     ls = psychoacoustics.mean_narrowband_level(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, 137.3
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        tone_frequency=137.3,
     )
     lt = psychoacoustics.tone_level(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, 137.3, ls
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        tone_frequency=137.3,
+        mean_narrowband_level=ls,
     )
     assert lt == pytest.approx(ref.ISO20065_E1_LT, abs=0.02)
 
@@ -146,10 +153,15 @@ def test_tone_level_matches_annex_e() -> None:
 def test_from_spectrum_full_chain_matches_annex_e() -> None:
     # Spectrum -> LS -> LT -> ΔL reproduces the 137.3 Hz tone (ΔL ≈ 4.99 dB).
     ls = psychoacoustics.mean_narrowband_level(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, 137.3
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        tone_frequency=137.3,
     )
     lt = psychoacoustics.tone_level(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, 137.3, ls
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        tone_frequency=137.3,
+        mean_narrowband_level=ls,
     )
     assert psychoacoustics.tone_audibility(lt, ls, 137.3, 2.7) == pytest.approx(
         4.99, abs=0.03
@@ -161,12 +173,14 @@ def test_mean_narrowband_level_rectangular_higher() -> None:
     # 1.76 dB correction; the iterative exclusion also then keeps more lines,
     # so the gap is not a constant offset.
     ls_h = psychoacoustics.mean_narrowband_level(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, 137.3
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        tone_frequency=137.3,
     )
     ls_r = psychoacoustics.mean_narrowband_level(
         ref.ISO20065_E1_LEVELS,
-        ref.ISO20065_E1_FREQUENCIES,
-        137.3,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        tone_frequency=137.3,
         effective_bandwidth_factor=1.0,
     )
     assert ls_r > ls_h + 10.0 * math.log10(1.5) - 1e-6
@@ -179,7 +193,9 @@ def test_tone_level_single_line_when_isolated() -> None:
     freqs = [100.0, 102.7, 105.4, 108.1, 110.8]
     levels = [40.0, 41.0, 70.0, 41.0, 40.0]
     ls = 45.0
-    lt = psychoacoustics.tone_level(levels, freqs, 105.4, ls)
+    lt = psychoacoustics.tone_level(
+        levels, frequencies=freqs, tone_frequency=105.4, mean_narrowband_level=ls
+    )
     assert lt == pytest.approx(70.0, abs=1e-9)
 
 
@@ -202,7 +218,9 @@ def test_single_line_tone_audibility_flip_regression() -> None:
     levels = np.full(freqs.size, 40.0)
     tone_index = int(np.argmin(np.abs(freqs - 301.5)))
     levels[tone_index] = 53.0
-    result = psychoacoustics.analyze_spectrum(levels, freqs, df)
+    result = psychoacoustics.analyze_spectrum(
+        levels, frequencies=freqs, line_spacing_hz=df
+    )
     assert result.tone_frequencies.size == 1
     assert result.tone_frequencies[0] == pytest.approx(freqs[tone_index])
     assert result.tone_levels[0] == pytest.approx(53.0, abs=1e-9)
@@ -216,7 +234,7 @@ def test_mean_narrowband_level_empty_critical_band_raises() -> None:
         ValueError, match=r"No spectral lines fall in the critical band"
     ):
         psychoacoustics.mean_narrowband_level(
-            [50.0, 51.0, 52.0], [100.0, 110.0, 120.0], 1000.0
+            [50.0, 51.0, 52.0], frequencies=[100.0, 110.0, 120.0], tone_frequency=1000.0
         )
 
 
@@ -225,7 +243,9 @@ def test_mean_narrowband_level_few_lines_returns_unpruned_mean() -> None:
     # first pass and returns the pre-prune mean (Annex D fallback).
     freqs = [930.0, 950.0, 970.0, 990.0, 1010.0, 1030.0, 1050.0, 1070.0]
     levels = [50.0, 50.0, 50.0, 50.0, 60.0, 50.0, 50.0, 50.0]
-    ls = psychoacoustics.mean_narrowband_level(levels, freqs, 1000.0)
+    ls = psychoacoustics.mean_narrowband_level(
+        levels, frequencies=freqs, tone_frequency=1000.0
+    )
     # Line under investigation = nearest to 1000 Hz (990 Hz); only three lines
     # sit below it, so no pruning happens and LS is the raw mean of the rest.
     band = [50.0, 50.0, 50.0, 60.0, 50.0, 50.0, 50.0]
@@ -243,20 +263,25 @@ def test_mean_narrowband_level_rejects_length_mismatch() -> None:
             r".* must each carry one value per spectral line"
         ),
     ):
-        psychoacoustics.mean_narrowband_level([50.0, 51.0], [100.0], 100.0)
+        psychoacoustics.mean_narrowband_level(
+            [50.0, 51.0], frequencies=[100.0], tone_frequency=100.0
+        )
 
 
 def test_mean_narrowband_level_rejects_unsorted_frequencies() -> None:
     with pytest.raises(ValueError, match=r"'frequencies' must be strictly increasing"):
         psychoacoustics.mean_narrowband_level(
-            [50.0, 51.0, 52.0], [100.0, 99.0, 101.0], 100.0
+            [50.0, 51.0, 52.0], frequencies=[100.0, 99.0, 101.0], tone_frequency=100.0
         )
 
 
 def test_tone_level_rejects_non_finite_ls() -> None:
     with pytest.raises(ValueError, match="'mean_narrowband_level' must be finite"):
         psychoacoustics.tone_level(
-            [50.0, 60.0, 50.0], [100.0, 102.7, 105.4], 102.7, float("nan")
+            [50.0, 60.0, 50.0],
+            frequencies=[100.0, 102.7, 105.4],
+            tone_frequency=102.7,
+            mean_narrowband_level=float("nan"),
         )
 
 
@@ -265,7 +290,9 @@ def test_tone_level_rejects_non_finite_ls() -> None:
 # ---------------------------------------------------------------------------
 def test_analyze_spectrum_detects_annex_e_tones() -> None:
     result = psychoacoustics.analyze_spectrum(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        line_spacing_hz=ref.ISO20065_LINE_SPACING,
     )
     assert result.group_sizes is not None
     singles = result.group_sizes == 1
@@ -278,7 +305,9 @@ def test_analyze_spectrum_step3_combines_annex_e_band() -> None:
     # critical band, so a combined FG entry appears with the Table E.2 "2 FG"
     # tone level LT = 72.15 dB (Formula (17), shared lines counted once).
     result = psychoacoustics.analyze_spectrum(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        line_spacing_hz=ref.ISO20065_LINE_SPACING,
     )
     assert result.group_sizes is not None
     fg = result.group_sizes > 1
@@ -298,7 +327,9 @@ def test_analyze_spectrum_137hz_tone_audibility() -> None:
     # The 137.3 Hz tone's critical band is fully inside Table E.1, so its
     # detected audibility matches the oracle (ΔL ≈ 4.99 dB).
     result = psychoacoustics.analyze_spectrum(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        line_spacing_hz=ref.ISO20065_LINE_SPACING,
     )
     i = int(np.argmin(np.abs(result.tone_frequencies - 137.3)))
     assert result.audibilities[i] == pytest.approx(4.99, abs=0.03)
@@ -323,15 +354,15 @@ def test_analyze_spectrum_rejects_inaudible_peak() -> None:
     levels = [50.0] * len(freqs)
     levels[len(freqs) // 2] = 52.0
     with pytest.raises(ValueError, match="No audible tone"):
-        psychoacoustics.analyze_spectrum(levels, freqs, 2.7)
+        psychoacoustics.analyze_spectrum(levels, frequencies=freqs, line_spacing_hz=2.7)
 
 
 def test_combined_tone_level_matches_annex_e() -> None:
     value = psychoacoustics.combined_tone_level(
         ref.ISO20065_E1_LEVELS,
-        ref.ISO20065_E1_FREQUENCIES,
-        ref.ISO20065_E1_TONE_FREQUENCIES,
-        ref.ISO20065_E1_TONE_LS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        tone_frequencies=ref.ISO20065_E1_TONE_FREQUENCIES,
+        mean_narrowband_levels=ref.ISO20065_E1_TONE_LS,
     )
     assert value == pytest.approx(ref.ISO20065_E1_LT_FG, abs=0.02)
 
@@ -339,10 +370,16 @@ def test_combined_tone_level_matches_annex_e() -> None:
 def test_combined_tone_level_single_tone_equals_tone_level() -> None:
     # With one tone the FG combination reduces to that tone's level.
     fg = psychoacoustics.combined_tone_level(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, [137.3], [49.22]
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        tone_frequencies=[137.3],
+        mean_narrowband_levels=[49.22],
     )
     lt = psychoacoustics.tone_level(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, 137.3, 49.22
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        tone_frequency=137.3,
+        mean_narrowband_level=49.22,
     )
     assert fg == pytest.approx(lt)
 
@@ -380,15 +417,26 @@ def test_combined_tone_level_counts_a_shared_line_once() -> None:
     # the combined level must equal the single-tone level of Formula (8)
     # exactly -- not approximately, since the same lines are summed.
     same_run = _e1_line_energy([12, 13, 14, 15, 16])
-    fg_same = psychoacoustics.combined_tone_level(lev, freq, [134.6, 137.3], [ls, ls])
+    fg_same = psychoacoustics.combined_tone_level(
+        lev,
+        frequencies=freq,
+        tone_frequencies=[134.6, 137.3],
+        mean_narrowband_levels=[ls, ls],
+    )
     assert fg_same == pytest.approx(same_run, abs=1e-12)
-    assert fg_same == psychoacoustics.tone_level(lev, freq, 137.3, ls)
+    assert fg_same == psychoacoustics.tone_level(
+        lev, frequencies=freq, tone_frequency=137.3, mean_narrowband_level=ls
+    )
     # An implementation that summed the two tone levels instead would land
     # 10 lg 2 = 3.01 dB higher; assert that the gap is real and its exact size.
     naive_same = psychoacoustics.energy_sum_level(
         [
-            psychoacoustics.tone_level(lev, freq, 134.6, ls),
-            psychoacoustics.tone_level(lev, freq, 137.3, ls),
+            psychoacoustics.tone_level(
+                lev, frequencies=freq, tone_frequency=134.6, mean_narrowband_level=ls
+            ),
+            psychoacoustics.tone_level(
+                lev, frequencies=freq, tone_frequency=137.3, mean_narrowband_level=ls
+            ),
         ],
         effective_bandwidth_factor=1.0,
     )
@@ -398,13 +446,24 @@ def test_combined_tone_level_counts_a_shared_line_once() -> None:
     # and at 158.8 Hz it is 156.1-161.5 Hz (indices 22-24), the second strictly
     # inside the first, so the union is the wider run alone.
     nested = _e1_line_energy([22, 23, 24, 25])
-    fg_nested = psychoacoustics.combined_tone_level(lev, freq, [156.1, 158.8], [ls, ls])
+    fg_nested = psychoacoustics.combined_tone_level(
+        lev,
+        frequencies=freq,
+        tone_frequencies=[156.1, 158.8],
+        mean_narrowband_levels=[ls, ls],
+    )
     assert fg_nested == pytest.approx(nested, abs=1e-12)
-    assert fg_nested == psychoacoustics.tone_level(lev, freq, 156.1, ls)
+    assert fg_nested == psychoacoustics.tone_level(
+        lev, frequencies=freq, tone_frequency=156.1, mean_narrowband_level=ls
+    )
     naive_nested = psychoacoustics.energy_sum_level(
         [
-            psychoacoustics.tone_level(lev, freq, 156.1, ls),
-            psychoacoustics.tone_level(lev, freq, 158.8, ls),
+            psychoacoustics.tone_level(
+                lev, frequencies=freq, tone_frequency=156.1, mean_narrowband_level=ls
+            ),
+            psychoacoustics.tone_level(
+                lev, frequencies=freq, tone_frequency=158.8, mean_narrowband_level=ls
+            ),
         ],
         effective_bandwidth_factor=1.0,
     )
@@ -418,13 +477,16 @@ def test_combined_tone_level_no_double_counting() -> None:
     # two tone levels, and can never fall below the louder of them.
     fg = psychoacoustics.combined_tone_level(
         ref.ISO20065_E1_LEVELS,
-        ref.ISO20065_E1_FREQUENCIES,
-        [134.6, 137.3],  # adjacent tones sharing lines
-        [49.22, 49.22],
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        tone_frequencies=[134.6, 137.3],  # adjacent tones sharing lines
+        mean_narrowband_levels=[49.22, 49.22],
     )
     singles = [
         psychoacoustics.tone_level(
-            ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, f, 49.22
+            ref.ISO20065_E1_LEVELS,
+            frequencies=ref.ISO20065_E1_FREQUENCIES,
+            tone_frequency=f,
+            mean_narrowband_level=49.22,
         )
         for f in (134.6, 137.3)
     ]
@@ -445,7 +507,10 @@ def test_combined_tone_level_rejects_length_mismatch() -> None:
         ),
     ):
         psychoacoustics.combined_tone_level(
-            ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, [137.3], [49.0, 50.0]
+            ref.ISO20065_E1_LEVELS,
+            frequencies=ref.ISO20065_E1_FREQUENCIES,
+            tone_frequencies=[137.3],
+            mean_narrowband_levels=[49.0, 50.0],
         )
 
 
@@ -456,20 +521,23 @@ def test_combined_tone_level_rejects_non_finite_values() -> None:
     with pytest.raises(ValueError, match="'tone_frequencies' must be positive"):
         psychoacoustics.combined_tone_level(
             ref.ISO20065_E1_LEVELS,
-            ref.ISO20065_E1_FREQUENCIES,
-            [float("nan")],
-            [49.22],
+            frequencies=ref.ISO20065_E1_FREQUENCIES,
+            tone_frequencies=[float("nan")],
+            mean_narrowband_levels=[49.22],
         )
     with pytest.raises(ValueError, match="'tone_frequencies' must be positive"):
         psychoacoustics.combined_tone_level(
-            ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, [-137.3], [49.22]
+            ref.ISO20065_E1_LEVELS,
+            frequencies=ref.ISO20065_E1_FREQUENCIES,
+            tone_frequencies=[-137.3],
+            mean_narrowband_levels=[49.22],
         )
     with pytest.raises(ValueError, match="'mean_narrowband_levels' must be finite"):
         psychoacoustics.combined_tone_level(
             ref.ISO20065_E1_LEVELS,
-            ref.ISO20065_E1_FREQUENCIES,
-            [137.3],
-            [float("nan")],
+            frequencies=ref.ISO20065_E1_FREQUENCIES,
+            tone_frequencies=[137.3],
+            mean_narrowband_levels=[float("nan")],
         )
 
 
@@ -577,7 +645,9 @@ def _annex_e_result() -> psychoacoustics.ToneAudibilityResult:
     freqs = [t[0] for t in ref.ISO20065_ANNEX_E_TONES]
     ls = [t[1] for t in ref.ISO20065_ANNEX_E_TONES]
     lt = [t[2] for t in ref.ISO20065_ANNEX_E_TONES]
-    return psychoacoustics.assess_tones(freqs, lt, ls, ref.ISO20065_LINE_SPACING)
+    return psychoacoustics.assess_tones(
+        lt, ls, ref.ISO20065_LINE_SPACING, tone_frequencies=freqs
+    )
 
 
 def test_assess_tones_reproduces_annex_e_column() -> None:
@@ -597,7 +667,7 @@ def test_assess_tones_decisive() -> None:
 def test_assess_tones_audible_mask() -> None:
     result = _annex_e_result()
     assert result.audible.all()  # all nine Annex E tones have ΔL > 0
-    quiet = psychoacoustics.assess_tones([200.0], [40.0], [50.0], 2.7)
+    quiet = psychoacoustics.assess_tones([40.0], [50.0], 2.7, tone_frequencies=[200.0])
     assert not quiet.audible.any()
 
 
@@ -682,7 +752,9 @@ def test_assess_tones_rejects_length_mismatch() -> None:
             r"'mean_narrowband_levels' .* must each carry one value per tone"
         ),
     ):
-        psychoacoustics.assess_tones([100.0, 200.0], [60.0], [50.0], 2.7)
+        psychoacoustics.assess_tones(
+            [60.0], [50.0], 2.7, tone_frequencies=[100.0, 200.0]
+        )
 
 
 def test_assess_tones_rejects_uncertainty_mismatch() -> None:
@@ -694,24 +766,24 @@ def test_assess_tones_rejects_uncertainty_mismatch() -> None:
         ),
     ):
         psychoacoustics.assess_tones(
-            [100.0, 200.0],
             [60.0, 61.0],
             [50.0, 51.0],
             2.7,
+            tone_frequencies=[100.0, 200.0],
             extended_uncertainties=[1.0],
         )
 
 
 def test_assess_tones_rejects_empty() -> None:
     with pytest.raises(ValueError, match="At least one tone is required"):
-        psychoacoustics.assess_tones([], [], [], 2.7)
+        psychoacoustics.assess_tones([], [], 2.7, tone_frequencies=[])
 
 
 def test_assess_tones_rejects_non_positive_frequency() -> None:
     with pytest.raises(
         ValueError, match=r"'tone_frequencies' must be positive and finite"
     ):
-        psychoacoustics.assess_tones([0.0], [60.0], [50.0], 2.7)
+        psychoacoustics.assess_tones([60.0], [50.0], 2.7, tone_frequencies=[0.0])
 
 
 @pytest.mark.parametrize(
@@ -915,7 +987,9 @@ def test_table_e2_uncertainty_of_the_137hz_tone() -> None:
     truncated E.1 table, so their U reproduces within 0.1 dB only.
     """
     res = psychoacoustics.analyze_spectrum(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        line_spacing_hz=ref.ISO20065_LINE_SPACING,
     )
     assert res.extended_uncertainties is not None
     assert res.group_sizes is not None
@@ -1040,10 +1114,15 @@ def test_din_anhang_i_decisive_tone_from_spectrum() -> None:
     ft, dl_p, ls_p, lt_p, lg_p, av_p, _u = ref.DIN45681_I10_DECISIVE
     df = ref.DIN45681_LINE_SPACING
     ls = psychoacoustics.mean_narrowband_level(
-        ref.DIN45681_I9_LEVELS, ref.DIN45681_I9_FREQUENCIES, ft
+        ref.DIN45681_I9_LEVELS,
+        frequencies=ref.DIN45681_I9_FREQUENCIES,
+        tone_frequency=ft,
     )
     lt = psychoacoustics.tone_level(
-        ref.DIN45681_I9_LEVELS, ref.DIN45681_I9_FREQUENCIES, ft, ls
+        ref.DIN45681_I9_LEVELS,
+        frequencies=ref.DIN45681_I9_FREQUENCIES,
+        tone_frequency=ft,
+        mean_narrowband_level=ls,
     )
     assert ls == pytest.approx(ls_p, abs=0.02)
     assert lt == pytest.approx(lt_p, abs=0.02)
@@ -1082,8 +1161,8 @@ def test_din_anhang_i_analyze_spectrum_end_to_end() -> None:
     """
     res = psychoacoustics.analyze_spectrum(
         ref.DIN45681_I9_LEVELS,
-        ref.DIN45681_I9_FREQUENCIES,
-        ref.DIN45681_LINE_SPACING,
+        frequencies=ref.DIN45681_I9_FREQUENCIES,
+        line_spacing_hz=ref.DIN45681_LINE_SPACING,
     )
     assert res.tone_frequencies.size == 1
     assert res.decisive_frequency == pytest.approx(298.8, abs=0.05)
@@ -1194,7 +1273,7 @@ def test_analyze_spectrum_step3_merges_chained_clusters() -> None:
     lev = np.full(freq.size, 40.0)
     for ft in (900.0, 950.0, 1000.0):
         lev[int(np.argmin(np.abs(freq - ft)))] = 65.0
-    result = psychoacoustics.analyze_spectrum(lev, freq, df)
+    result = psychoacoustics.analyze_spectrum(lev, frequencies=freq, line_spacing_hz=df)
     assert result.group_sizes is not None
     fg = result.group_sizes > 1
     assert int(np.sum(fg)) == 1

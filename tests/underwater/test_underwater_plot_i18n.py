@@ -107,7 +107,12 @@ def test_marine_mammal_plot_labels() -> None:
     assert ax_w.get_ylabel() == "Ponderación $W(f)$ [dB]"
 
     bands = np.array([125.0, 250.0, 500.0, 1000.0])
-    res = weighted_exposure(bands, np.full(bands.size, 180.0), "LF", peak_spl=210.0)
+    res = weighted_exposure(
+        frequencies_hz=bands,
+        band_sel=np.full(bands.size, 180.0),
+        group="LF",
+        peak_spl=210.0,
+    )
     ax_e = res.plot(language="es")
     labels = [t.get_text() for t in ax_e.get_legend().get_texts()]
     assert ax_e.get_title() == "Exposición ponderada frente a criterios"

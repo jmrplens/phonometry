@@ -39,9 +39,9 @@ def _interpolated_nc_at_31_5() -> noise_criteria.NCResult:
 
 def _path(source_level: np.ndarray) -> DuctPathResult:
     return duct_path(
-        _BANDS,
-        source_level,
-        [DuctElement("Duct, 6 m, 25 mm lining", 3.0, code="2")],
+        frequencies=_BANDS,
+        source_level=source_level,
+        elements=[DuctElement("Duct, 6 m, 25 mm lining", 3.0, code="2")],
         room_effect=0.0,
         source_label="Fan",
         criterion="NC",

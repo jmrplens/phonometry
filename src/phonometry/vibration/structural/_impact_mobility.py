@@ -814,7 +814,9 @@ class ImpactMobilityResult(OwnsArrays):
 
     def to(self, target: str) -> np.ndarray:
         """Convert the mobility to another FRF kind (see :func:`.convert_frf`)."""
-        return convert_frf(self.mobility, self.frequencies, "mobility", target)
+        return convert_frf(
+            self.mobility, frequency=self.frequencies, source="mobility", target=target
+        )
 
     @property
     def mobility_result(self) -> MobilityResult:
@@ -837,8 +839,8 @@ class ImpactMobilityResult(OwnsArrays):
         :return: A :class:`SingleModeFitResult`.
         """
         return single_mode_fit(
-            self.frequencies,
-            self.to(self.measured_frf),
+            frequencies=self.frequencies,
+            frf=self.to(self.measured_frf),
             band_hz=band_hz,
             kind=self.measured_frf,
             exponential_decay_rate_per_s=self.exponential_decay_rate_per_s,
@@ -1077,7 +1079,10 @@ def impact_mobility(
     return ImpactMobilityResult(
         frequencies=np.asarray(freqs[band], dtype=np.float64),
         mobility=convert_frf(
-            frf, freqs[band], _FRF_OF_RESPONSE[response_quantity], "mobility"
+            frf,
+            frequency=freqs[band],
+            source=_FRF_OF_RESPONSE[response_quantity],
+            target="mobility",
         ),
         coherence=np.asarray(np.clip(coherence, 0.0, 1.0), dtype=np.float64),
         force_energy_spectral_density=np.asarray(
@@ -1221,9 +1226,9 @@ class ExponentialWindowCorrection(OwnsArrays):
 
 
 def exponential_window_correction(
-    damped_natural_frequency_hz: ArrayLike,
     apparent_damping_ratio: ArrayLike,
     *,
+    damped_natural_frequency_hz: ArrayLike,
     exponential_decay_rate_per_s: float,
 ) -> ExponentialWindowCorrection:
     r"""Remove an exponential window's damping from estimated modes (Formula (A.3)).
@@ -1233,10 +1238,10 @@ def exponential_window_correction(
     :math:`\hat\zeta_r` from the windowed data with any curve fitter (Annex A
     leaves the method open; :func:`single_mode_fit` is one).
 
-    :param damped_natural_frequency_hz: Damped natural frequency of each mode,
-        in hertz (scalar or 1-D).
     :param apparent_damping_ratio: Damping ratio estimated from the windowed
         data, per mode, in (0, 1).
+    :param damped_natural_frequency_hz: Damped natural frequency of each mode,
+        in hertz (scalar or 1-D, the shape of ``apparent_damping_ratio``).
     :param exponential_decay_rate_per_s: Decay rate ``a`` of the window, in 1/s.
     :return: An :class:`ExponentialWindowCorrection`.
     :raises ValueError: for mismatched or invalid inputs, or a window whose
@@ -1328,8 +1333,8 @@ class SingleModeFitResult(OwnsArrays):
     def correction(self) -> ExponentialWindowCorrection:
         """The Annex A correction of this mode for the window its data carry."""
         return exponential_window_correction(
-            self.damped_natural_frequency_hz,
             self.apparent_damping_ratio,
+            damped_natural_frequency_hz=self.damped_natural_frequency_hz,
             exponential_decay_rate_per_s=self.exponential_decay_rate_per_s,
         )
 
@@ -1372,7 +1377,10 @@ class SingleModeFitResult(OwnsArrays):
         :return: The complex mobility.
         """
         return convert_frf(
-            self.corrected_frf(frequencies), frequencies, self.kind, "mobility"
+            self.corrected_frf(frequencies),
+            frequency=frequencies,
+            source=self.kind,
+            target="mobility",
         )
 
     def plot(
@@ -1433,9 +1441,9 @@ def _solve_mode(
 
 
 def single_mode_fit(
-    frequencies: ArrayLike,
     frf: ArrayLike,
     *,
+    frequencies: ArrayLike,
     band_hz: tuple[float, float],
     kind: str = "mobility",
     exponential_decay_rate_per_s: float = 0.0,
@@ -2440,9 +2448,9 @@ class ChannelMatchVerification(OwnsArrays):
 
 
 def verify_channel_match(
-    frequencies: ArrayLike,
     response: ArrayLike,
     *,
+    frequencies: ArrayLike,
     frequency_range_hz: tuple[float, float],
 ) -> ChannelMatchVerification:
     """Is the analyser's channel-to-channel match inside 8.1's tolerances?

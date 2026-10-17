@@ -153,8 +153,9 @@ CENTRAL_TOLERANCE_PERCENT = (-11.0, 12.0, 6.0)
 
 ```python
 characteristic_phase_deviation(
-    frequencies: ArrayLike,
     phase_deviation_deg: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -699,8 +700,9 @@ UNCONSTRAINED_BELOW_PERCENT = -100.0
 ```python
 verify_phase_response(
     name: str,
-    frequencies: ArrayLike,
     measured_phase_deg: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> PhaseVerification
 ```
 
@@ -809,9 +811,9 @@ against a band the standard does not give.
 ```python
 verify_weighting(
     name: str,
-    frequencies: ArrayLike,
     measured_factors: ArrayLike,
     *,
+    frequencies: ArrayLike,
     expanded_uncertainty_percent: float | None = None,
 ) -> WeightingVerification
 ```

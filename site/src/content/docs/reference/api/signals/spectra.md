@@ -302,10 +302,10 @@ Plot the magnitude, phase (with ±σ band) and coherence.
 
 ```python
 fractional_octave_smoothing(
-    frequencies: NDArray[np.float64] | list[float],
     values: NDArray[np.float64] | list[float],
-    fraction: float = 3.0,
     *,
+    frequencies: NDArray[np.float64] | list[float],
+    fraction: float = 3.0,
     domain: Literal['power', 'amplitude', 'db'] = 'power',
 ) -> NDArray[np.float64]
 ```

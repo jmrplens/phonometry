@@ -1004,8 +1004,8 @@ plot_plenum_geometry(
     exit_area: float,
     line_of_sight: float,
     wall_area: float,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     angle_rad: float = 0.0,
     language: str = 'en',
     **kwargs: Any,
@@ -1291,11 +1291,12 @@ records.
 
 ```python
 splitter_silencer_insertion_loss(
-    frequencies: ArrayLike | None,
     height_m: float,
     length: float,
     airway_widths: ArrayLike,
     splitter_thickness_m: float,
+    *,
+    frequencies: ArrayLike | None,
 ) -> HVACSpectrumResult
 ```
 

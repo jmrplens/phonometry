@@ -447,8 +447,9 @@ def coupling_loss_factor(
     transmission_coefficient: ArrayLike,
     group_velocity: float,
     junction_length: float,
-    frequency: ArrayLike,
     plate_area: float,
+    *,
+    frequency: ArrayLike,
 ) -> NDArray[np.float64]:
     r"""Coupling loss factor from a transmission coefficient (Hopkins Eq. 2.154).
 

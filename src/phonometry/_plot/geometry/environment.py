@@ -61,8 +61,8 @@ def _t(text: str, language: str = "en") -> str:
 # Barrier section (source, screen, receiver over ground).
 # ---------------------------------------------------------------------------
 def plot_barrier_geometry(
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     source_height_m: float,
     barrier_distance: float,
     barrier_height_m: float,

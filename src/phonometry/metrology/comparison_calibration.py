@@ -2101,11 +2101,11 @@ def _sequential_phases(
 
 
 def simultaneous_comparison(
-    frequencies: ArrayLike,
     reference_sensitivity_level: ArrayLike,
     channel_difference: ArrayLike,
     interchanged_channel_difference: ArrayLike | None = None,
     *,
+    frequencies: ArrayLike,
     field: CalibrationField = "pressure",
     pressure_level_difference: ArrayLike = 0.0,
     corrections: Mapping[str, ArrayLike] | None = None,
@@ -2262,11 +2262,11 @@ def simultaneous_comparison(
 
 
 def sequential_comparison(
-    frequencies: ArrayLike,
     reference_sensitivity_level: ArrayLike,
     reference_output_level: ArrayLike,
     test_output_level: ArrayLike,
     *,
+    frequencies: ArrayLike,
     monitor: MonitorReadings | None = None,
     field: CalibrationField = "pressure",
     pressure_level_difference: ArrayLike = 0.0,
@@ -4279,7 +4279,7 @@ class SteppedSineImpulseResponse(OwnsArrays):
 
 
 def stepped_sine_impulse_response(
-    frequencies: ArrayLike, response: ArrayLike
+    response: ArrayLike, *, frequencies: ArrayLike
 ) -> SteppedSineImpulseResponse:
     r"""The impulse response of a frequency response measured at linearly
     spaced frequencies (IEC 61094-8:2012 B.2, Formula (B.3)).

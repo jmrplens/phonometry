@@ -415,7 +415,9 @@ def _chk_doc32_hover_ring() -> Outcome:
     # bin at theta = 150 reads the ring at +150 deg. Ring level = 60 +
     # bearing/10 dB -> 75 dB by hand.
     brg = np.arange(-180.0, 151.0, 30.0)
-    h = ph.aircraft.hover_ring_hemisphere([500.0], brg, (60.0 + brg / 10.0)[:, None])
+    h = ph.aircraft.hover_ring_hemisphere(
+        frequencies=[500.0], bearings=brg, levels=(60.0 + brg / 10.0)[:, None]
+    )
     got = float(ph.aircraft.hemisphere_source_level(h, 90.0, 150.0)[0])
     return numeric(75.0, got, 1e-9, unit="dB", places=3)
 
@@ -430,7 +432,9 @@ def _chk_doc32_hover_offset() -> Outcome:
     # in-ground-hover disk. A uniform 80 dB ring derives to 92 dB everywhere;
     # the bin under the aircraft is compared.
     hige = ph.aircraft.hover_ring_hemisphere(
-        [500.0], np.arange(-180.0, 151.0, 30.0), np.full((12, 1), 80.0)
+        frequencies=[500.0],
+        bearings=np.arange(-180.0, 151.0, 30.0),
+        levels=np.full((12, 1), 80.0),
     )
     hoge = ph.aircraft.hover_derived_hemisphere(hige, "out_of_ground_hover")
     got = float(
@@ -588,11 +592,11 @@ def _chk_doc32_screening_delta() -> Outcome:
     # delta = SO + OR - SR = sqrt(200^2+20^2) + sqrt(200^2+38.8^2)
     #         - sqrt(400^2+18.8^2) = 4.28480 m by hand.
     res = ph.aircraft.terrain_screening_adjustment(
-        [500.0],
-        (0.0, 20.0),
-        (400.0, 1.2),
-        [0.0, 190.0, 200.0, 210.0, 400.0],
-        [0.0, 0.0, 40.0, 0.0, 0.0],
+        frequencies=[500.0],
+        source=(0.0, 20.0),
+        receiver=(400.0, 1.2),
+        distances_m=[0.0, 190.0, 200.0, 210.0, 400.0],
+        heights_m=[0.0, 0.0, 40.0, 0.0, 0.0],
     )
     expected = np.hypot(200.0, 20.0) + np.hypot(200.0, 38.8) - np.hypot(400.0, 18.8)
     return numeric(float(expected), res.path_difference, 1e-9, unit="m", places=5)

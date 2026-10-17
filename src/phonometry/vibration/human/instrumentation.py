@@ -590,9 +590,9 @@ class WeightingVerification(OwnsArrays):
 
 def verify_weighting(
     name: str,
-    frequencies: ArrayLike,
     measured_factors: ArrayLike,
     *,
+    frequencies: ArrayLike,
     expanded_uncertainty_percent: float | None = None,
 ) -> WeightingVerification:
     """Verify a measured weighting response against ISO 8041-1 Tables 4 and 5.
@@ -737,7 +737,7 @@ def _require_a_third_octave_grid(frequencies: NDArray[np.float64], owner: str) -
 
 
 def characteristic_phase_deviation(
-    frequencies: ArrayLike, phase_deviation_deg: ArrayLike
+    phase_deviation_deg: ArrayLike, *, frequencies: ArrayLike
 ) -> NDArray[np.float64]:
     r"""The characteristic phase deviation of ISO 8041-1 Formula (6).
 
@@ -1055,7 +1055,7 @@ class PhaseVerification(OwnsArrays):
 
 
 def verify_phase_response(
-    name: str, frequencies: ArrayLike, measured_phase_deg: ArrayLike
+    name: str, measured_phase_deg: ArrayLike, *, frequencies: ArrayLike
 ) -> PhaseVerification:
     """Verify a measured phase response against the ISO 8041-1 Table 5 band.
 
@@ -1124,7 +1124,9 @@ def verify_phase_response(
     design = _design_phase_deg(weighting, f)
     deviation = np.asarray(measured - design, dtype=np.float64)
     _warn_if_inverted(deviation)
-    characteristic = characteristic_phase_deviation(f, deviation)
+    characteristic = characteristic_phase_deviation(
+        frequencies=f, phase_deviation_deg=deviation
+    )
     return PhaseVerification(
         weighting=weighting,
         frequencies=f,

@@ -232,7 +232,10 @@ def test_band_filtering_workbook_sums_to_the_sample_series() -> None:
     levels = np.asarray(ref.IOA_BAND_EXAMPLE_UNWEIGHTED_TENTHS_DB) / 10.0
     for band in (1, 2, 3):
         summed = env.amplitude_modulation_band_levels(
-            levels, ref.IOA_BAND_EXAMPLE_FREQUENCIES_HZ, band=band, weighting="Z"
+            levels,
+            frequencies=ref.IOA_BAND_EXAMPLE_FREQUENCIES_HZ,
+            band=band,
+            weighting="Z",
         )
         np.testing.assert_array_equal(
             np.rint(summed * 10.0).astype(int), ref.IOA_SAMPLE_SERIES_TENTHS_DB[band]
@@ -242,7 +245,7 @@ def test_band_filtering_workbook_sums_to_the_sample_series() -> None:
 def test_already_weighted_bands_are_summed_without_weighting_again() -> None:
     levels = np.full((3, 7), 30.0)
     out = env.amplitude_modulation_band_levels(
-        levels, wtm.AM_FREQUENCY_BANDS_HZ[2], band=2, weighting="A"
+        levels, frequencies=wtm.AM_FREQUENCY_BANDS_HZ[2], band=2, weighting="A"
     )
     np.testing.assert_allclose(out, 30.0 + 10.0 * np.log10(7.0))
 
@@ -257,20 +260,25 @@ def test_band_levels_need_every_band_of_the_range() -> None:
     levels = np.zeros((2, 6))
     with pytest.raises(ValueError, match=r"centred at 400 Hz"):
         env.amplitude_modulation_band_levels(
-            levels, (100.0, 125.0, 160.0, 200.0, 250.0, 315.0), band=2, weighting="A"
+            levels,
+            frequencies=(100.0, 125.0, 160.0, 200.0, 250.0, 315.0),
+            band=2,
+            weighting="A",
         )
 
 
 def test_an_unknown_band_is_refused() -> None:
     with pytest.raises(ValueError, match=r"'band' must be one of the band numbers"):
-        env.amplitude_modulation_band_levels([[0.0]], [50.0], band=7, weighting="A")
+        env.amplitude_modulation_band_levels(
+            [[0.0]], frequencies=[50.0], band=7, weighting="A"
+        )
 
 
 def test_the_weighting_has_to_be_said() -> None:
     levels = np.zeros((1, 7))
     with pytest.raises(ValueError, match=r"'weighting' must be 'A' or 'Z'"):
         env.amplitude_modulation_band_levels(
-            levels, wtm.AM_FREQUENCY_BANDS_HZ[1], band=1, weighting="C"
+            levels, frequencies=wtm.AM_FREQUENCY_BANDS_HZ[1], band=1, weighting="C"
         )
 
 
@@ -657,7 +665,7 @@ def _refusal_cases() -> list[tuple[str, object, str]]:
             "columns without centres",
             lambda: env.amplitude_modulation_band_levels(
                 np.zeros((2, 7)),
-                wtm.AM_FREQUENCY_BANDS_HZ[1][:6],
+                frequencies=wtm.AM_FREQUENCY_BANDS_HZ[1][:6],
                 band=1,
                 weighting="A",
             ),
@@ -714,14 +722,20 @@ def _refusal_cases() -> list[tuple[str, object, str]]:
         (
             "True as the band of the band levels",
             lambda: env.amplitude_modulation_band_levels(
-                np.zeros((2, 7)), wtm.AM_FREQUENCY_BANDS_HZ[1], band=True, weighting="A"
+                np.zeros((2, 7)),
+                frequencies=wtm.AM_FREQUENCY_BANDS_HZ[1],
+                band=True,
+                weighting="A",
             ),
             r"'band' must be one of the band numbers .*; got True",
         ),
         (
             "1.0 as the band of the band levels",
             lambda: env.amplitude_modulation_band_levels(
-                np.zeros((2, 7)), wtm.AM_FREQUENCY_BANDS_HZ[1], band=1.0, weighting="A"
+                np.zeros((2, 7)),
+                frequencies=wtm.AM_FREQUENCY_BANDS_HZ[1],
+                band=1.0,
+                weighting="A",
             ),
             r"'band' must be one of the band numbers .*; got 1.0",
         ),

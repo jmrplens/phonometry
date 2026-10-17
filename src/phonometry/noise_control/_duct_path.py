@@ -461,10 +461,10 @@ class DuctPathResult(OwnsArrays):
 
 
 def duct_path(
-    frequencies: ArrayLike,
     source_level: ArrayLike,
     elements: list[DuctElement] | tuple[DuctElement, ...],
     *,
+    frequencies: ArrayLike,
     room_effect: ArrayLike | None = None,
     source_label: str = "Fan",
     criterion: str = "NC",

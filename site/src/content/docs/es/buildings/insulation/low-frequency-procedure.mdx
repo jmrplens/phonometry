@@ -424,8 +424,8 @@ print(np.round(plain.dnt[:3], 1))       # [35.6 33.9 36.9]  solo por defecto
 print(np.round(field.dnt[:3], 1))       # [31.7 29.7 33.3]  como exige ISO 16283
 
 # La valoración base no ve estas bandas; el término de rango ampliado sí.
-before = building.weighted_rating_extended(plain.dnt, freqs)
-after = building.weighted_rating_extended(field.dnt, freqs)
+before = building.weighted_rating_extended(plain.dnt, frequencies=freqs)
+after = building.weighted_rating_extended(field.dnt, frequencies=freqs)
 print(before.rating, before.c_50_3150)  # 56 -1
 print(after.rating, after.c_50_3150)    # 56 -2
 ```

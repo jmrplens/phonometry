@@ -1101,10 +1101,10 @@ def _position_levels(levels: ArrayLike, n_bands: int) -> np.ndarray:
 
 def sound_power_in_duct(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     duct_diameter_m: float,
     flow_velocity: float,
     *,
+    frequencies: ArrayLike,
     shield: MicrophoneShield = "sampling-tube",
     microphone_correction: ArrayLike = 0.0,
     shield_correction: ArrayLike = 0.0,

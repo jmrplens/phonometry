@@ -1767,9 +1767,9 @@ class SweepThresholdResult(OwnsArrays):
 
 
 def sweep_audiometry_threshold(
-    reversal_frequencies: ArrayLike,
     reversal_levels: ArrayLike,
     *,
+    reversal_frequencies: ArrayLike,
     frequencies: ArrayLike | None = None,
 ) -> SweepThresholdResult:
     r"""Hearing threshold levels from a sweep-frequency tracing (7.5).
@@ -1794,9 +1794,9 @@ def sweep_audiometry_threshold(
 
     and the run advances one reversal at a time.
 
+    :param reversal_levels: The hearing level at each reversal, in dB.
     :param reversal_frequencies: The frequency at each reversal, in hertz, in
         the order traced; the sweep may run upwards or downwards.
-    :param reversal_levels: The hearing level at each reversal, in dB.
     :param frequencies: The frequencies to determine the threshold at, in
         hertz, or ``None`` for the audiometric frequencies from 125 Hz to
         8 kHz that the tracing spans.

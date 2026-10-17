@@ -1053,10 +1053,10 @@ A plane-wave coupler: a cylinder of the diameter of the front cavities
 
 ```python
 pressure_reciprocity(
-    frequencies: ArrayLike,
     electrical_transfer_impedances_ohm: Sequence[ArrayLike],
     acoustic_transfer_impedances: Sequence[ArrayLike | CouplerTransferImpedance],
     *,
+    frequencies: ArrayLike,
     corrections: Mapping[str, ArrayLike] | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
 ) -> ReciprocityCalibration
@@ -1100,11 +1100,11 @@ complex products together, on the branch described in
 
 ```python
 pressure_reciprocity_pair(
-    frequencies: ArrayLike,
     electrical_transfer_impedance_ohm: ArrayLike,
     acoustic_transfer_impedance: ArrayLike | CouplerTransferImpedance,
     sensitivity_ratio: ArrayLike,
     *,
+    frequencies: ArrayLike,
     corrections: Mapping[str, ArrayLike] | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
 ) -> ReciprocityCalibration

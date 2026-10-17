@@ -42,8 +42,8 @@ def _verdict(
     if exceed:
         expanded[-2] = 0.55
     return metrology.verify_correction_uncertainty(
-        _THIRDS,
-        expanded,
+        frequencies=_THIRDS,
+        expanded_uncertainty_db=expanded,
         clause=12,
         correction=-0.1 * x**1.5,
         coverage_factor=np.full(_THIRDS.size, 2.04),

@@ -236,6 +236,52 @@ def test_silencer_geometry_refuses_a_nan_cavity_volume() -> None:
         )
 
 
+@pytest.mark.parametrize(
+    ("kind", "geometry"),
+    [
+        ("expansion chamber", {"length": 0.3, "chamber_area": 0.1, "pipe_area": 0.01}),
+        (
+            "extended-tube chamber",
+            {
+                "length": 0.3,
+                "chamber_area": 0.1,
+                "pipe_area": 0.01,
+                "inlet_extension": 0.05,
+                "outlet_extension": 0.05,
+            },
+        ),
+        (
+            "Helmholtz resonator",
+            {
+                "duct_area": 0.01,
+                "neck_area": 0.0005,
+                "neck_length": 0.02,
+                "cavity_volume": 0.002,
+            },
+        ),
+        (
+            "quarter-wave resonator",
+            {"duct_area": 0.01, "length": 0.4, "branch_area": 0.002},
+        ),
+    ],
+)
+def test_silencer_geometry_forwards_style_keywords_to_the_bore(
+    kind: str, geometry: dict[str, float]
+) -> None:
+    """The style keywords reach the outline of the main bore, and only it.
+
+    ``plot_silencer_geometry`` was the one geometry helper that took no style
+    keywords; it now forwards them as the others do, to the chamber shell of a
+    chamber and to the duct of a side branch. A helper that accepted
+    ``**kwargs`` and dropped them would draw every outline in its own grey.
+    """
+    from matplotlib.colors import to_hex
+
+    ax = pm.noise_control.plot_silencer_geometry(kind, edgecolor="red", **geometry)
+    edges = [to_hex(patch.get_edgecolor()) for patch in ax.patches]
+    assert edges.count("#ff0000") == 1, edges
+
+
 # ---------------------------------------------------------------------------
 # Image-source plan.
 # ---------------------------------------------------------------------------

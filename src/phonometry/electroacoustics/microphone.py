@@ -763,10 +763,10 @@ def _resolve_polar(
 
 
 def microphone_characteristics(
-    frequencies: ArrayLike,
     response_db: ArrayLike,
     sensitivity_mv_per_pa: float,
     *,
+    frequencies: ArrayLike,
     reference_frequency_hz: float = _REFERENCE_FREQUENCY,
     tolerance_db: float = 2.0,
     directivity: MicrophoneDirectivity = _DEFAULT_DIRECTIVITY,

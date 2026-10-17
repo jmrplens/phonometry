@@ -180,7 +180,14 @@ def test_hard_ground_gives_back_the_three_decibels_it_reflects() -> None:
     whole spectrum of T01 is the free field shifted by one number.
     """
     agr = environment.ground_attenuation(
-        D3_FLAT, SOURCE[2], RECEIVER[2], BANDS, 0.0, 0.0, 0.0, projected_distance=DP
+        D3_FLAT,
+        SOURCE[2],
+        RECEIVER[2],
+        frequencies=BANDS,
+        ground_source=0.0,
+        ground_middle=0.0,
+        ground_receiver=0.0,
+        projected_distance=DP,
     )
     q = 1.0 - 30.0 * (SOURCE[2] + RECEIVER[2]) / DP
     assert agr == pytest.approx(np.full(BANDS.size, -3.0 - 3.0 * q), abs=0.005)
@@ -376,10 +383,22 @@ def test_regions_that_meet_leave_no_middle_one() -> None:
     regions = environment.region_ground_factors(lengths, factors, 3.0, 3.0)
     assert regions.middle == pytest.approx(0.6)
     agr = environment.ground_attenuation(
-        100.0, 3.0, 3.0, BANDS, regions.source, 1.0, regions.receiver
+        100.0,
+        3.0,
+        3.0,
+        frequencies=BANDS,
+        ground_source=regions.source,
+        ground_middle=1.0,
+        ground_receiver=regions.receiver,
     )
     other = environment.ground_attenuation(
-        100.0, 3.0, 3.0, BANDS, regions.source, 0.0, regions.receiver
+        100.0,
+        3.0,
+        3.0,
+        frequencies=BANDS,
+        ground_source=regions.source,
+        ground_middle=0.0,
+        ground_receiver=regions.receiver,
     )
     assert agr == pytest.approx(other)
 

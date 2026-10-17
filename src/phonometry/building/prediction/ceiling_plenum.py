@@ -420,7 +420,7 @@ class CeilingAttenuationResult(OwnsArrays):
 
 
 def ceiling_attenuation_class(
-    attenuation: ArrayLike, frequencies: ArrayLike | None = None
+    attenuation: ArrayLike, *, frequencies: ArrayLike | None = None
 ) -> CeilingAttenuationResult:
     """Ceiling attenuation class CAC (ASTM E413-22 clause 5, via ASTM E1414).
 

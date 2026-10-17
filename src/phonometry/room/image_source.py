@@ -722,7 +722,7 @@ def audible_image_count(max_order: int) -> int:
 
 
 def reflection_density(
-    time: ArrayLike, volume: float, speed_of_sound: float = _SPEED_OF_SOUND_M_S
+    time: ArrayLike, volume: float, *, speed_of_sound: float = _SPEED_OF_SOUND_M_S
 ) -> np.ndarray | float:
     r"""Temporal density of reflections :math:`dN/dt = 4 \pi c^3 t^2 / V`.
 

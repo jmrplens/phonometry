@@ -326,6 +326,7 @@ KB_ASSESSMENT_BANDS_HZ = (4.0, 80.0)
 ```python
 kb_weighted_levels(
     levels: ArrayLike,
+    *,
     frequencies: ArrayLike,
 ) -> NDArray[np.float64]
 ```

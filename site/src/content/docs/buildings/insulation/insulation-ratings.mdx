@@ -438,11 +438,11 @@ R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
 freqs = [50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
 r_ext = [18.7, 19.2, 20.0, *R, 26.8, 29.2]     # ISO 717-1 Annex C, Table C.2
-ext = building.weighted_rating_extended(r_ext, freqs)
+ext = building.weighted_rating_extended(r_ext, frequencies=freqs)
 print(ext.rating, ext.c, ext.ctr, ext.c_50_5000, ext.ctr_50_5000)
 # 30 -2 -3 -2 -4   ->  Rw(C;Ctr;C50-5000;Ctr,50-5000) = 30(-2;-3;-2;-4)
 
-one_dp = building.weighted_rating_extended(r_ext, freqs, one_decimal=True)
+one_dp = building.weighted_rating_extended(r_ext, frequencies=freqs, one_decimal=True)
 print(one_dp.rating)   # 30.0, the 0.1 dB-step rating for uncertainty statements
 
 ext.plot()   # enlarged-range curve vs the shifted core reference, Annex B terms in the title (needs matplotlib)
@@ -468,7 +468,7 @@ R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
 freqs = [50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
 r_ext = [18.7, 19.2, 20.0, *R, 26.8, 29.2]     # ISO 717-1 Annex C, Table C.2
-ext = building.weighted_rating_extended(r_ext, freqs)
+ext = building.weighted_rating_extended(r_ext, frequencies=freqs)
 
 # One line — the enlarged-range curve vs the shifted core reference:
 ext.plot()

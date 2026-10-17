@@ -105,7 +105,10 @@ def _pressure_example() -> (
     ]
     budget = _pressure_budget(f, coupler, mics)
     calibration = metrology.pressure_reciprocity(
-        f, ze, za, expanded_uncertainty_db=budget.expanded_uncertainty_db
+        frequencies=f,
+        electrical_transfer_impedances_ohm=ze,
+        acoustic_transfer_impedances=za,
+        expanded_uncertainty_db=budget.expanded_uncertainty_db,
     )
     return calibration, za
 
@@ -137,8 +140,8 @@ def _pressure_budget(
     )
     x = f / 10000.0
     return metrology.reciprocity_uncertainty_budget(
-        f,
-        {
+        frequencies=f,
+        standard_uncertainties_db={
             **parameters.components_db,
             "series_impedance": 0.002,
             "voltage_ratio": 0.003,
@@ -163,9 +166,9 @@ def _free_field_example() -> "ReciprocityCalibration":
     distances = (0.25, 0.25, 0.25)
     ze = [
         metrology.free_field_transfer_impedance(
-            f,
-            true[i],
-            true[j],
+            frequencies=f,
+            sensitivity_1_v_per_pa=true[i],
+            sensitivity_2_v_per_pa=true[j],
             diaphragm_distance_m=d,
             acoustic_centers_m=(centre, centre),
             **_FREE_FIELD_CONDITIONS,
@@ -174,8 +177,8 @@ def _free_field_example() -> "ReciprocityCalibration":
     ]
     budget = _free_field_budget(f, distances, centre)
     return metrology.free_field_reciprocity(
-        f,
-        ze,
+        frequencies=f,
+        electrical_transfer_impedances_ohm=ze,
         diaphragm_distances_m=distances,
         acoustic_centers_m=(centre, centre, centre),
         expanded_uncertainty_db=budget.expanded_uncertainty_db,
@@ -205,8 +208,8 @@ def _free_field_budget(
     )
     x = f / 40000.0
     return metrology.reciprocity_uncertainty_budget(
-        f,
-        {
+        frequencies=f,
+        standard_uncertainties_db={
             **parameters.components_db,
             "series_impedance": 0.002,
             "voltage_ratio": 0.003,

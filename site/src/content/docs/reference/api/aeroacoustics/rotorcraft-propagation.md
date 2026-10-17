@@ -385,12 +385,12 @@ adjustment is $\Delta L_\mathrm{s} = -20 \cdot \log_{10}(r/r_\mathrm{h})$.
 
 ```python
 terrain_screening_adjustment(
-    frequencies: NDArray[np.float64] | list[float],
     source: tuple[float, float],
     receiver: tuple[float, float],
     distances_m: NDArray[np.float64] | list[float],
     heights_m: NDArray[np.float64] | list[float],
     *,
+    frequencies: NDArray[np.float64] | list[float],
     flow_resistivity: float | str | NDArray[np.float64] | list[float] = 'G',
 ) -> TerrainScreeningResult
 ```

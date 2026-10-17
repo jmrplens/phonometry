@@ -71,8 +71,8 @@ f0 = vibration.resonance_frequency(m, k)
 f = np.logspace(np.log10(f0 / 20.0), np.log10(f0 * 20.0), 600)
 w0 = 2.0 * np.pi * f0
 h = vibration.sdof_receptance(f, m, k, c)
-y = vibration.convert_frf(h, f, "receptance", "mobility")
-a = vibration.convert_frf(h, f, "receptance", "accelerance")
+y = vibration.convert_frf(h, "receptance", "mobility", frequency=f)
+a = vibration.convert_frf(h, "receptance", "accelerance", frequency=f)
 
 # Escaladas por una constante cada una, no normalizadas por su propio máximo:
 # la gracia está en que las tres difieren en pendiente, y dividir por el
@@ -119,8 +119,8 @@ from phonometry import vibration
 
 # Una movilidad de 2e-3 m/(N.s) a 80 Hz, expresada como las demás FRF:
 Y = 2e-3
-print(round(abs(vibration.convert_frf(Y, 80.0, "mobility", "impedance")), 1))     # 500.0  N.s/m
-print(f"{abs(vibration.convert_frf(Y, 80.0, 'mobility', 'accelerance')):.3f}")    # 1.005  1/kg
+print(round(abs(vibration.convert_frf(Y, "mobility", "impedance", frequency=80.0)), 1))     # 500.0  N.s/m
+print(f"{abs(vibration.convert_frf(Y, 'mobility', 'accelerance', frequency=80.0)):.3f}")    # 1.005  1/kg
 ```
 
 La elección entre las tres FRF de movimiento es de conveniencia, no de
@@ -268,7 +268,7 @@ print(round(y_structure, 3))                                      # 0.2 = 1/c
 # La suspensión vista en el mismo punto, desconectada de la estructura:
 # un cordón elástico de 31,6 N/m, cuya movilidad propia es omega / k.
 y_suspension = abs(complex(
-    vibration.convert_frf(31.6, f0, "dynamic_stiffness", "mobility")))
+    vibration.convert_frf(31.6, "dynamic_stiffness", "mobility", frequency=f0)))
 print(round(y_suspension / y_structure, 1))       # 10.0 -> apartado 5.3 cumplido
 ```
 
@@ -422,7 +422,7 @@ from phonometry import vibration
 
 # Un bloque de calibración de 10 kg: |A| debe ser 1/m = 0,100 1/kg en toda frecuencia.
 f = np.array([20.0, 100.0, 500.0])
-res = vibration.verify_rigid_mass_calibration([0.100, 0.102, 0.097], f, mass=10.0)
+res = vibration.verify_rigid_mass_calibration([0.100, 0.102, 0.097], frequencies=f, mass=10.0)
 print(res.passes, res.within_tolerance.tolist())   # True [True, True, True]
 
 # El ejemplo del Anexo A: coherencia 0,8 necesita unos 75 promedios para < 5 %.
@@ -509,7 +509,7 @@ m = 10.0                                                  # masa del bloque de c
 f = np.logspace(np.log10(20.0), np.log10(5000.0), 400)
 drift = 0.05 * (f / 2500.0) ** 2                          # deriva en alta frecuencia
 measured = (1.0 / m) * (1.0 + 0.015 * np.sin(2 * np.pi * np.log10(f)) + drift)
-res = vibration.verify_rigid_mass_calibration(measured, f, mass=m)
+res = vibration.verify_rigid_mass_calibration(measured, frequencies=f, mass=m)
 print(res.passes)                                         # False (la deriva supera el 5 %)
 res.plot()
 ```
@@ -528,7 +528,7 @@ m = 10.0
 f = np.logspace(np.log10(20.0), np.log10(5000.0), 400)
 drift = 0.05 * (f / 2500.0) ** 2
 measured = (1.0 / m) * (1.0 + 0.015 * np.sin(2 * np.pi * np.log10(f)) + drift)
-res = vibration.verify_rigid_mass_calibration(measured, f, mass=m)
+res = vibration.verify_rigid_mass_calibration(measured, frequencies=f, mass=m)
 bad = ~res.within_tolerance
 
 fig, (top, bot) = plt.subplots(2, 1, sharex=True, figsize=(10, 7),

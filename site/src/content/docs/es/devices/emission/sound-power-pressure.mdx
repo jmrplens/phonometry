@@ -627,7 +627,7 @@ from phonometry import emission
 # K1 para una diferencia señal-fondo de 6 dB en una banda de borde <=200 Hz: el
 # límite es 1.26 dB (Ec. 11). Los niveles de fuente y fondo son [posiciones, bandas].
 k1 = emission.precision_background_correction(
-    np.array([[56.0]]), np.array([[50.0]]), np.array([200.0]))
+    np.array([[56.0]]), np.array([[50.0]]), frequencies=np.array([200.0]))
 print(round(float(k1[0, 0]), 4))      # 1.2563
 
 # Correcciones meteorológicas en la referencia de 23 C, 101.325 kPa (Ec. 16):

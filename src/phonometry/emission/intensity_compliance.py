@@ -305,8 +305,8 @@ def _band_verdicts(
 
 def verify_intensity_class(
     residual_index: list[float] | np.ndarray,
-    frequencies: list[float] | np.ndarray,
     *,
+    frequencies: list[float] | np.ndarray,
     device: str = "instrument",
     spacing_m: float = _REFERENCE_SPACING_M,
 ) -> IntensityInstrumentComplianceResult:
@@ -572,7 +572,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         key = f"margin_class{cls}_db"
         return [float(b["frequency"]) for b in self.bands if float(b[key]) < 0.0]
 
-    def phase_mismatch_deg(self, speed_of_sound: float = 343.0) -> np.ndarray:
+    def phase_mismatch_deg(self, *, speed_of_sound: float = 343.0) -> np.ndarray:
         """Equivalent channel phase mismatch per band, in degrees.
 
         Converts the measured ``delta_pI0`` spectrum with
@@ -584,8 +584,8 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         """
         return phase_mismatch_from_residual_index(
             self.residual_index,
-            self.frequencies,
-            self.spacing_m,
+            frequency=self.frequencies,
+            spacing_m=self.spacing_m,
             speed_of_sound=speed_of_sound,
         )
 
@@ -676,8 +676,9 @@ def _plane_wave_phase_deg(
 
 def phase_mismatch_from_residual_index(
     residual_index: float | list[float] | np.ndarray,
-    frequency: float | list[float] | np.ndarray,
     spacing_m: float,
+    *,
+    frequency: float | list[float] | np.ndarray,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray:
     r"""Channel phase mismatch equivalent to a pressure-residual intensity index.
@@ -718,8 +719,9 @@ def phase_mismatch_from_residual_index(
 
 def residual_index_from_phase_mismatch(
     phase_mismatch_deg: float | list[float] | np.ndarray,
-    frequency: float | list[float] | np.ndarray,
     spacing_m: float,
+    *,
+    frequency: float | list[float] | np.ndarray,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray:
     r"""Pressure-residual intensity index of a given channel phase mismatch.

@@ -805,6 +805,7 @@ LiquidPipe(
     internal_diameter_m: float,
     wall_thickness_m: float,
     density: float,
+    *,
     speed_of_sound: float = 5000.0,
     air_density: float = 1.293,
     air_sound_speed: float = 343.0,

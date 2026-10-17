@@ -1019,8 +1019,8 @@ def _temporal_indicator_for(
 def field_indicators(
     pressure_levels: list[float] | np.ndarray,
     normal_intensity: list[float] | np.ndarray,
-    frequencies: list[float] | np.ndarray | None = None,
     *,
+    frequencies: list[float] | np.ndarray | None = None,
     temporal_intensity: list[float] | np.ndarray | None = None,
 ) -> FieldIndicators:
     r"""ISO 9614-1:1993 Annex A field indicators F1 to F4.

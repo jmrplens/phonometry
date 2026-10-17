@@ -29,9 +29,9 @@ from phonometry import building
 bands = np.array([50.0, 100.0, 200.0, 400.0, 800.0, 1600.0, 3150.0])
 lv_low = np.array([88.0, 90.0, 87.0, 84.0, 80.0, 76.0, 71.0])
 
-low = building.reception_plate_power(lv_low, bands, mass_per_area=600.0,
+low = building.reception_plate_power(lv_low, frequency=bands, mass_per_area=600.0,
                                      area=2.0, reverberation_time=0.8)
-high = building.reception_plate_power(lv_low + 6.0, bands, mass_per_area=150.0,
+high = building.reception_plate_power(lv_low + 6.0, frequency=bands, mass_per_area=150.0,
                                       area=2.0, reverberation_time=0.5)
 
 # One line — the L_Ws(f) bars of one determination with its band-summed total:
@@ -208,7 +208,7 @@ from phonometry import ReportMetadata, building
 freqs = np.array([125, 250, 500, 1000, 2000, 4000], float)
 lv = np.array([88.0, 90, 86, 82, 78, 73])   # spatial mean plate velocity level [dB]
 res = building.reception_plate_power(
-    lv, freqs, mass_per_area=25.0, area=1.2, reverberation_time=0.3,
+    lv, frequency=freqs, mass_per_area=25.0, area=1.2, reverberation_time=0.3,
 )
 res.report(
     "structure_borne_power.pdf",

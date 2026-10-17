@@ -70,10 +70,10 @@ so the report never merely repeats a manufacturer number:
 
 ```python
 microphone_characteristics(
-    frequencies: ArrayLike,
     response_db: ArrayLike,
     sensitivity_mv_per_pa: float,
     *,
+    frequencies: ArrayLike,
     reference_frequency_hz: float = 1000.0,
     tolerance_db: float = 2.0,
     directivity: MicrophoneDirectivity = ...,

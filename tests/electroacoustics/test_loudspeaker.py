@@ -63,7 +63,10 @@ def test_characteristic_sensitivity_is_band_mean_at_1w_1m() -> None:
     """A flat L0 driven at sqrt(R) volts at 1 m gives sensitivity level L0 (20.3)."""
     f, spl = _flat_response()
     result = electroacoustics.loudspeaker_characteristics(
-        f, spl, _R, sensitivity_band=(200.0, 4000.0)
+        frequencies=f,
+        spl=spl,
+        rated_impedance_ohm=_R,
+        sensitivity_band=(200.0, 4000.0),
     )
     assert result.sensitivity_level == pytest.approx(_L0, abs=1e-9)
     # Default drive is sqrt(R): 1 W into R (the 2,83 V @ 8 ohm convention).
@@ -74,9 +77,9 @@ def test_sensitivity_drive_voltage_correction() -> None:
     """Doubling the drive voltage lowers the 1 W sensitivity by 20 lg 2 dB."""
     f, spl = _flat_response()
     result = electroacoustics.loudspeaker_characteristics(
-        f,
-        spl,
-        _R,
+        frequencies=f,
+        spl=spl,
+        rated_impedance_ohm=_R,
         input_voltage_v=2.0 * math.sqrt(_R),
         sensitivity_band=(200.0, 4000.0),
     )
@@ -89,9 +92,9 @@ def test_sensitivity_distance_correction_cancels() -> None:
     """A 2 m distance with a doubled voltage cancels back to L0 (20.3.2)."""
     f, spl = _flat_response()
     result = electroacoustics.loudspeaker_characteristics(
-        f,
-        spl,
-        _R,
+        frequencies=f,
+        spl=spl,
+        rated_impedance_ohm=_R,
         input_voltage_v=2.0 * math.sqrt(_R),
         distance=2.0,
         sensitivity_band=(200.0, 4000.0),
@@ -103,7 +106,10 @@ def test_characteristic_sensitivity_pressure() -> None:
     """The characteristic sensitivity in Pa is 20 uPa * 10 ** (L/20)."""
     f, spl = _flat_response()
     result = electroacoustics.loudspeaker_characteristics(
-        f, spl, _R, sensitivity_band=(200.0, 4000.0)
+        frequencies=f,
+        spl=spl,
+        rated_impedance_ohm=_R,
+        sensitivity_band=(200.0, 4000.0),
     )
     assert result.characteristic_sensitivity_pa == pytest.approx(
         20e-6 * 10.0 ** (_L0 / 20.0), rel=1e-9
@@ -117,7 +123,10 @@ def test_effective_range_crosses_threshold_at_known_points() -> None:
     """The band edges are the frequencies where the response crosses ref - 10 dB."""
     f, spl = _flat_response()
     result = electroacoustics.loudspeaker_characteristics(
-        f, spl, _R, sensitivity_band=(200.0, 4000.0)
+        frequencies=f,
+        spl=spl,
+        rated_impedance_ohm=_R,
+        sensitivity_band=(200.0, 4000.0),
     )
     assert result.reference_level == pytest.approx(_L0, abs=1e-9)
     lo, hi = result.effective_range
@@ -131,7 +140,10 @@ def test_narrow_trough_is_neglected() -> None:
     spl = spl.copy()
     spl[int(np.argmin(np.abs(f - 1000.0)))] = _L0 - 15.0
     result = electroacoustics.loudspeaker_characteristics(
-        f, spl, _R, sensitivity_band=(200.0, 4000.0)
+        frequencies=f,
+        spl=spl,
+        rated_impedance_ohm=_R,
+        sensitivity_band=(200.0, 4000.0),
     )
     lo, hi = result.effective_range
     assert lo == pytest.approx(50.0, rel=1e-6)
@@ -144,7 +156,11 @@ def test_minimum_impedance_over_effective_range() -> None:
     fz = np.geomspace(20.0, 20000.0, 200)
     z = 7.0 + 20.0 * np.exp(-((np.log2(fz / 40.0)) ** 2) / 0.1)  # peak below the range
     result = electroacoustics.loudspeaker_characteristics(
-        f, spl, _R, sensitivity_band=(200.0, 4000.0), impedance=(fz, z)
+        frequencies=f,
+        spl=spl,
+        rated_impedance_ohm=_R,
+        sensitivity_band=(200.0, 4000.0),
+        impedance=(fz, z),
     )
     # Within [50, 18000] Hz the modulus floor is ~7 ohm (>= 80 % of 8 = 6.4).
     assert result.min_impedance_ohm == pytest.approx(7.0, abs=0.2)
@@ -167,9 +183,9 @@ def test_minimum_impedance_uses_rated_range_when_supplied() -> None:
     f, spl = _flat_response()
     fz, z = _dip_below_effective_range()
     result = electroacoustics.loudspeaker_characteristics(
-        f,
-        spl,
-        _R,
+        frequencies=f,
+        spl=spl,
+        rated_impedance_ohm=_R,
         sensitivity_band=(200.0, 4000.0),
         impedance=(fz, z),
         ratings=electroacoustics.LoudspeakerRatings(frequency_range=(30.0, 20000.0)),
@@ -185,7 +201,11 @@ def test_minimum_impedance_without_rated_range_misses_out_of_band_dip() -> None:
     f, spl = _flat_response()
     fz, z = _dip_below_effective_range()
     result = electroacoustics.loudspeaker_characteristics(
-        f, spl, _R, sensitivity_band=(200.0, 4000.0), impedance=(fz, z)
+        frequencies=f,
+        spl=spl,
+        rated_impedance_ohm=_R,
+        sensitivity_band=(200.0, 4000.0),
+        impedance=(fz, z),
     )
     assert result.min_impedance_ohm == pytest.approx(7.0, abs=0.2)
     assert result.min_impedance_ohm >= 0.8 * _R
@@ -197,7 +217,9 @@ def test_minimum_impedance_without_rated_range_misses_out_of_band_dip() -> None:
 def test_rated_impedance_must_be_positive() -> None:
     f, spl = _flat_response()
     with pytest.raises(ValueError, match=r"'rated_impedance_ohm' must be positive"):
-        electroacoustics.loudspeaker_characteristics(f, spl, 0.0)
+        electroacoustics.loudspeaker_characteristics(
+            frequencies=f, spl=spl, rated_impedance_ohm=0.0
+        )
 
 
 def test_mismatched_response_lengths_rejected() -> None:
@@ -206,7 +228,9 @@ def test_mismatched_response_lengths_rejected() -> None:
         match=r"'on-axis response' frequencies and values must be 1-D and equal length",
     ):
         electroacoustics.loudspeaker_characteristics(
-            [100.0, 200.0, 400.0], [90.0, 90.0], _R
+            frequencies=[100.0, 200.0, 400.0],
+            spl=[90.0, 90.0],
+            rated_impedance_ohm=_R,
         )
 
 
@@ -218,7 +242,7 @@ def test_mismatched_polar_pair_rejected() -> None:
     )
     with pytest.raises(ValueError, match="'polar angles'.*same shape"):
         electroacoustics.loudspeaker_characteristics(
-            f, spl, _R, directivity=ragged_polar
+            frequencies=f, spl=spl, rated_impedance_ohm=_R, directivity=ragged_polar
         )
 
 
@@ -230,14 +254,19 @@ def test_two_dimensional_polar_rejected() -> None:
         frequency=1000.0,
     )
     with pytest.raises(ValueError, match="'polar' angles and levels must be 1-D"):
-        electroacoustics.loudspeaker_characteristics(f, spl, _R, directivity=grid_polar)
+        electroacoustics.loudspeaker_characteristics(
+            frequencies=f, spl=spl, rated_impedance_ohm=_R, directivity=grid_polar
+        )
 
 
 def test_sensitivity_band_out_of_range_rejected() -> None:
     f, spl = _flat_response()
     with pytest.raises(ValueError, match="no on-axis response samples"):
         electroacoustics.loudspeaker_characteristics(
-            f, spl, _R, sensitivity_band=(30000.0, 40000.0)
+            frequencies=f,
+            spl=spl,
+            rated_impedance_ohm=_R,
+            sensitivity_band=(30000.0, 40000.0),
         )
 
 
@@ -254,7 +283,11 @@ def test_distortion_from_swept_sine_result() -> None:
     )
     f, spl = _flat_response()
     result = electroacoustics.loudspeaker_characteristics(
-        f, spl, _R, sensitivity_band=(200.0, 4000.0), distortion=swept
+        frequencies=f,
+        spl=spl,
+        rated_impedance_ohm=_R,
+        sensitivity_band=(200.0, 4000.0),
+        distortion=swept,
     )
     assert result.thd_percent is not None
     assert np.all(result.thd_percent >= 0.0)
@@ -274,9 +307,9 @@ def _example_result() -> electroacoustics.LoudspeakerCharacteristics:
     ft = np.geomspace(50.0, 5000.0, 100)
     thd = 0.4 + 2.0 * np.exp(-((np.log2(ft / 70.0)) ** 2) / 0.4)
     return electroacoustics.loudspeaker_characteristics(
-        f,
-        spl,
-        _R,
+        frequencies=f,
+        spl=spl,
+        rated_impedance_ohm=_R,
         sensitivity_band=(200.0, 4000.0),
         impedance=(fz, z),
         distortion=(ft, thd),
@@ -344,7 +377,10 @@ def test_report_without_optional_panels(tmp_path: Path) -> None:
     pytest.importorskip("matplotlib")
     f, spl = _flat_response()
     result = electroacoustics.loudspeaker_characteristics(
-        f, spl, _R, sensitivity_band=(200.0, 4000.0)
+        frequencies=f,
+        spl=spl,
+        rated_impedance_ohm=_R,
+        sensitivity_band=(200.0, 4000.0),
     )
     out = tmp_path / "loudspeaker_min.pdf"
     result.report(str(out))
@@ -405,7 +441,10 @@ def test_plot_rejects_unknown_quantity_and_missing_data() -> None:
         result.plot(quantity="bogus")
     f, spl = _flat_response()
     bare = electroacoustics.loudspeaker_characteristics(
-        f, spl, _R, sensitivity_band=(200.0, 4000.0)
+        frequencies=f,
+        spl=spl,
+        rated_impedance_ohm=_R,
+        sensitivity_band=(200.0, 4000.0),
     )
     with pytest.raises(
         ValueError, match=r"this result carries no impedance curve to plot"
@@ -458,7 +497,9 @@ def test_a_response_span_too_narrow_to_draw_is_refused(tmp_path: Path) -> None:
     """
     frequencies = np.linspace(1000.0, 1000.001, 10)
     result = electroacoustics.loudspeaker_characteristics(
-        frequencies, np.full(frequencies.size, 90.0), rated_impedance_ohm=8.0
+        frequencies=frequencies,
+        spl=np.full(frequencies.size, 90.0),
+        rated_impedance_ohm=8.0,
     )
     out = tmp_path / "degenerate.pdf"
     with pytest.raises(ValueError, match="the fiche cannot draw"):
@@ -475,8 +516,8 @@ def test_a_narrow_curve_is_still_fine_where_no_panel_scales_by_it() -> None:
     """
     frequencies = np.array([100.0, 110.0, 120.0])
     result = electroacoustics.loudspeaker_characteristics(
-        np.logspace(np.log10(50.0), np.log10(20000.0), 50),
-        np.full(50, 90.0),
+        frequencies=np.logspace(np.log10(50.0), np.log10(20000.0), 50),
+        spl=np.full(50, 90.0),
         rated_impedance_ohm=8.0,
         distortion=(frequencies, np.full(3, 0.5)),
     )

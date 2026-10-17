@@ -153,10 +153,10 @@ Advisory for out-of-range or non-physical ISO 354 absorption inputs.
 
 ```python
 measure_sound_absorption(
-    frequencies: ArrayLike,
     t_empty: ArrayLike,
     t_specimen: ArrayLike,
     *,
+    frequencies: ArrayLike,
     volume: float,
     area: float,
     temperature_c: float = 20.0,

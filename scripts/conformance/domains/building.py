@@ -451,8 +451,12 @@ def _chk_iso3382_1_single_number_bands() -> Outcome:
     return record(
         {"G_m": 0.45, "J_LFm": 0.35},
         {
-            "G_m": round(ph.room.single_number_average("G", values, freqs), 12),
-            "J_LFm": round(ph.room.single_number_average("J_LF", values, freqs), 12),
+            "G_m": round(
+                ph.room.single_number_average("G", values, frequencies=freqs), 12
+            ),
+            "J_LFm": round(
+                ph.room.single_number_average("J_LF", values, frequencies=freqs), 12
+            ),
         },
     )
 
@@ -468,7 +472,7 @@ def _chk_iso3382_1_energy_average_exception() -> Outcome:
     # nearly 3 dB apart, so the exception is not cosmetic.
     freqs = np.array([125.0, 250.0, 500.0, 1000.0])
     values = np.array([-14.0, -8.0, -5.0, 1.0])
-    energetic = ph.room.single_number_average("L_J", values, freqs)
+    energetic = ph.room.single_number_average("L_J", values, frequencies=freqs)
     return numeric(
         10.0 * math.log10(0.25 * float(np.sum(10.0 ** (values / 10.0)))),
         energetic,
@@ -653,7 +657,9 @@ def _chk_iso717_1_extended() -> Outcome:
         4000,
         5000,
     ]
-    res = ph.building.weighted_rating_extended(ref.ISO717_1_ANNEX_C2_R_50_5000, freqs)
+    res = ph.building.weighted_rating_extended(
+        ref.ISO717_1_ANNEX_C2_R_50_5000, frequencies=freqs
+    )
     ok = (
         res.rating == exp["rw"]
         and res.c == exp["c"]
@@ -986,8 +992,8 @@ def _chk_iso16283_63_hz_octave_substitution() -> Outcome:
     levels = [*ref.ISO16283_LF_DEFAULT_LEVELS, 45.0, 44.0]
     result = ph.building.apply_low_frequency_procedure(
         levels,
-        freqs,
-        ph.building.LowFrequencyProcedure(
+        frequencies=freqs,
+        procedure=ph.building.LowFrequencyProcedure(
             volume=18.0,
             corner_levels=ref.ISO16283_LF_CORNER_LEVELS,
             reverberation_63_octave=ref.ISO16283_LF_T63_OCTAVE_S,
@@ -1079,7 +1085,7 @@ def _table_e1_matches(*, one_decimal: bool) -> tuple[int, int]:
         table = ph.building.LINING_REFERENCE_ELEMENTS[element]
         curve = np.asarray([table[f] for f in _TABLE_E1_BANDS])
         rated = ph.building.weighted_rating_extended(
-            curve, _TABLE_E1_BANDS, one_decimal=one_decimal
+            curve, frequencies=_TABLE_E1_BANDS, one_decimal=one_decimal
         )
         for term, values in printed.items():
             total += 1
@@ -1265,7 +1271,7 @@ def _chk_iso717_1_sloped_lining() -> Outcome:
         for element, expected in table.items():
             rating = ph.building.weighted_reduction_improvement(
                 delta_r,
-                ref.ISO717_1_TABLE_E1_BANDS,
+                frequencies=ref.ISO717_1_TABLE_E1_BANDS,
                 basic_element=element,
             )
             for term, value in zip(terms, expected, strict=True):
@@ -1285,7 +1291,7 @@ def _chk_iso717_1_direct_difference() -> Outcome:
     res = ph.building.laboratory_lining_improvement(
         without,
         without + np.asarray(ref.ISO717_1_SLOPED_DELTA_R, dtype=float),
-        ref.ISO717_1_TABLE_E1_BANDS,
+        frequencies=ref.ISO717_1_TABLE_E1_BANDS,
         basic_element=None,
     )
     got = (res.delta_rw_direct, res.delta_rw_c_direct, res.delta_rw_ctr_direct)
@@ -1308,7 +1314,7 @@ def _chk_iso10140_1_annex_h() -> Outcome:
     dl = np.asarray(ref.ISO717_2_ANNEX_C2_DELTA_L, dtype=float)
     bare = np.full(16, 75.0)
     res = ph.building.laboratory_floor_covering_improvement(
-        bare, bare - dl, _CORE_BANDS
+        bare, bare - dl, frequencies=_CORE_BANDS
     )
     expected = (ref.ISO717_2_ANNEX_C2_DELTA_LW, ref.ISO717_2_ANNEX_C2_CI_DELTA)
     got = (res.delta_lw, res.ci_delta)
@@ -1375,7 +1381,10 @@ def _chk_iso10140_1_formula_k2() -> Outcome:
     expected = 50.0 + 10.0 * math.log10(float(np.sum(10.0 ** (0.1 * printed))))
     bands = list(ph.building.RAINFALL_A_WEIGHTING)
     res = ph.building.rainfall_sound_from_intensity(
-        np.full(len(bands), 50.0), bands, measuring_area_m2=1.0, excited_area_m2=1.0
+        np.full(len(bands), 50.0),
+        frequencies=bands,
+        measuring_area_m2=1.0,
+        excited_area_m2=1.0,
     )
     if res.l_ia is None:
         return Outcome(
@@ -1400,7 +1409,7 @@ def _chk_iso10140_1_formula_k1() -> Outcome:
         60.0 - 10.0 * math.log10(2.0) + 10.0 * math.log10(100.0) - 14.0
     ) - 10.0 * math.log10(4.0)
     res = ph.building.rainfall_sound(
-        [60.0], [2.0], [1000.0], volume=100.0, excited_area_m2=4.0
+        [60.0], [2.0], frequencies=[1000.0], volume=100.0, excited_area_m2=4.0
     )
     return numeric(expected, float(res.l_i[0]), 1e-12, unit="dB", places=6)
 
@@ -1412,7 +1421,7 @@ def _chk_iso10140_1_formula_k1() -> Outcome:
 )
 def _chk_iso10140_1_formula_k4() -> Outcome:
     res = ph.building.rainfall_sound_from_intensity(
-        [50.0], [1000.0], measuring_area_m2=4.0, excited_area_m2=1.0
+        [50.0], frequencies=[1000.0], measuring_area_m2=4.0, excited_area_m2=1.0
     )
     return numeric(
         50.0 + 10.0 * math.log10(4.0), float(res.l_i[0]), 1e-12, unit="dB", places=6
@@ -1445,9 +1454,11 @@ def _chk_iso10140_1_formula_j2_limit() -> Outcome:
     # Formula (J.2) at that margin has to round to the printed value, and the
     # library has to apply exactly the printed value just below it.
     margin = ref.ISO10140_1_J1_LIMIT_MARGIN_DB
-    at_six = ph.building.laboratory_joint_insulation([50.0], [50.0 + margin], [1000.0])
+    at_six = ph.building.laboratory_joint_insulation(
+        [50.0], [50.0 + margin], frequencies=[1000.0]
+    )
     below = ph.building.laboratory_joint_insulation(
-        [50.0], [50.0 + margin - 0.1], [1000.0]
+        [50.0], [50.0 + margin - 0.1], frequencies=[1000.0]
     )
     formula = round(float(at_six.r_s[0]) - 50.0, 1)
     applied = float(below.r_s[0]) - 50.0
@@ -1468,7 +1479,9 @@ def _chk_iso10140_1_formula_j2_limit() -> Outcome:
 )
 def _chk_iso10140_1_j1_lower_limit() -> Outcome:
     maximum = ref.ISO10140_1_J1_EXAMPLE_MINIMUM_DB
-    res = ph.building.laboratory_joint_insulation([maximum - 2.5], [maximum], [1000.0])
+    res = ph.building.laboratory_joint_insulation(
+        [maximum - 2.5], [maximum], frequencies=[1000.0]
+    )
     got = float(res.r_s[0])
     ok = res.regime == ("maximum",) and math.isclose(got, maximum)
     return Outcome(
@@ -1502,7 +1515,9 @@ def _chk_iso10140_1_j1_open_bands() -> Outcome:
     maximum[6:10] = 44.0
     measured = maximum - 12.0
     measured[6:10] = 42.0
-    res = ph.building.laboratory_joint_insulation(measured, maximum, _LAB_BANDS_18)
+    res = ph.building.laboratory_joint_insulation(
+        measured, maximum, frequencies=_LAB_BANDS_18
+    )
     direct = None if res.rating is None else res.rating.rating
     opened = res.open_band_rating
     open_rw = None if opened is None else opened.r_s_w
@@ -1528,7 +1543,7 @@ def _chk_iso10140_1_j1_open_bands() -> Outcome:
 def _chk_iso10140_2_table_a1() -> Outcome:
     measured = np.asarray(ref.ISO10140_2_TABLE_A1_R_F, dtype=float)
     res = ph.building.laboratory_joint_insulation(
-        measured, measured + 20.0, _LAB_BANDS_18
+        measured, measured + 20.0, frequencies=_LAB_BANDS_18
     )
     rating = res.rating
     expected = dict(
@@ -1585,7 +1600,7 @@ def _chk_iso10140_1_j4_widths() -> Outcome:
     # widths the series names are judged.
     maximum = np.full(18, 60.0)
     rated = ph.building.laboratory_joint_insulation(
-        maximum - 12.0, maximum, _LAB_BANDS_18
+        maximum - 12.0, maximum, frequencies=_LAB_BANDS_18
     )
 
     def passes(widths: list[float], **kwargs: float) -> bool:
@@ -1635,7 +1650,7 @@ def _chk_iso10140_5_reference_pane() -> Outcome:
     eta_ref = 10.0 ** (np.asarray([row[1] for row in ref.ISO10140_5_TABLE_I1]) / 10.0)
     level = np.asarray([row[2] for row in ref.ISO10140_5_TABLE_I1])
     res = ph.building.rainfall_reference_correction(
-        level, 2.2 / (bands * 2.0 * eta_ref), bands
+        level, 2.2 / (bands * 2.0 * eta_ref), frequencies=bands
     )
     target = 10.0 * math.log10(2.0)
     matching = int(np.sum(np.abs(res.correction - target) <= 1e-9))
@@ -1966,7 +1981,7 @@ def _chk_iso16251_carpet_foret2011() -> Outcome:
     bare = np.full(len(ref.FORET2011_CARPET_FREQ), 100.0)
     delta_l = np.asarray(ref.FORET2011_CARPET_ISO16251_DELTA_L, dtype=float)
     res = ph.building.impact_improvement(
-        bare, bare - delta_l, ref.FORET2011_CARPET_FREQ
+        bare, bare - delta_l, frequencies=ref.FORET2011_CARPET_FREQ
     )
     dlw = res.delta_lw
     return Outcome(
@@ -2012,7 +2027,7 @@ def _chk_iso10848_absorption_length() -> Outcome:
     a = ph.building.equivalent_absorption_length(
         ref.ISO10848_ABS_AREA,
         ref.ISO10848_ABS_TS,
-        [1000.0],
+        frequencies=[1000.0],
         speed_of_sound=ref.ISO10848_ABS_C0,
     )
     computed = float(a[0])
@@ -2037,7 +2052,9 @@ def _chk_iso10848_absorption_length() -> Outcome:
     "Flanking total loss factor η = 2,2/(f·Ts)",
 )
 def _chk_iso10848_loss_factor() -> Outcome:
-    eta = ph.building.total_loss_factor([1000.0], [0.5])
+    eta = ph.building.total_loss_factor(
+        frequencies=[1000.0], structural_reverberation_time=[0.5]
+    )
     computed = float(eta[0])
     expected = 2.2 / (1000.0 * 0.5)
     return Outcome(
@@ -2137,7 +2154,11 @@ def _chk_iso7626_static_receptance() -> Outcome:
 )
 def _chk_iso7626_reciprocity() -> Outcome:
     y = complex(ph.vibration.sdof_mobility(37.0, _MOB_M, _MOB_K, _MOB_C))
-    z = complex(ph.vibration.convert_frf(y, 37.0, "mobility", "impedance"))
+    z = complex(
+        ph.vibration.convert_frf(
+            y, frequency=37.0, source="mobility", target="impedance"
+        )
+    )
     return numeric(1.0, abs(z * y), 1e-9, expected_label="1 (= Z·Y)")
 
 
@@ -2378,7 +2399,11 @@ def _chk_iso10846_level() -> Outcome:
 def _chk_iso10846_indirect() -> Outcome:
     f, m2, t = 500.0, 10.0, 0.01
     expected = -((2.0 * math.pi * f) ** 2) * m2 * t
-    computed = complex(ph.vibration.transfer_stiffness_indirect(f, t + 0j, m2)).real
+    computed = complex(
+        ph.vibration.transfer_stiffness_indirect(
+            frequency=f, transmissibility=t + 0j, blocking_mass=m2
+        )
+    ).real
     return numeric(expected, computed, 1e-3, rel=True, unit="N/m", places=1)
 
 
@@ -2391,7 +2416,11 @@ def _chk_iso10846_stiffness_impedance() -> Outcome:
     f = 250.0
     w = 2.0 * math.pi * f
     k = 1.0e6 + 1j * 5.0e4
-    z = complex(ph.vibration.convert_frf(k, f, "dynamic_stiffness", "impedance"))
+    z = complex(
+        ph.vibration.convert_frf(
+            k, frequency=f, source="dynamic_stiffness", target="impedance"
+        )
+    )
     return numeric(abs(k), abs(1j * w * z), 1e-6, rel=True, unit="N/m", places=1)
 
 
@@ -2402,7 +2431,9 @@ def _chk_iso10846_stiffness_impedance() -> Outcome:
 )
 def _chk_iso7626_2_rigid_mass_accelerance() -> Outcome:
     res = ph.vibration.verify_rigid_mass_calibration(
-        [ref.ISO7626_2_CAL_ACCELERANCE], [100.0], ref.ISO7626_2_CAL_MASS_KG
+        [ref.ISO7626_2_CAL_ACCELERANCE],
+        frequencies=[100.0],
+        mass=ref.ISO7626_2_CAL_MASS_KG,
     )
     value = float(res.expected[0]) if res.passes else math.nan
     return numeric(ref.ISO7626_2_CAL_ACCELERANCE, value, 1e-9, unit="1/kg", places=3)
@@ -2416,8 +2447,8 @@ def _chk_iso7626_2_rigid_mass_accelerance() -> Outcome:
 def _chk_iso7626_2_rigid_mass_mobility() -> Outcome:
     res = ph.vibration.verify_rigid_mass_calibration(
         [ref.ISO7626_2_CAL_MOBILITY_100HZ],
-        [100.0],
-        ref.ISO7626_2_CAL_MASS_KG,
+        frequencies=[100.0],
+        mass=ref.ISO7626_2_CAL_MASS_KG,
         quantity="mobility",
     )
     value = float(res.expected[0]) if res.passes else math.nan
@@ -2448,8 +2479,20 @@ def _chk_iso7626_2_random_error() -> Outcome:
 )
 def _chk_iso7626_decade_identity() -> Outcome:
     f = ref.ISO7626_1_DECADE_FREQ_HZ
-    y = abs(complex(ph.vibration.convert_frf(1.0, f, "apparent_mass", "mobility")))
-    h = abs(complex(ph.vibration.convert_frf(1.0, f, "apparent_mass", "receptance")))
+    y = abs(
+        complex(
+            ph.vibration.convert_frf(
+                1.0, frequency=f, source="apparent_mass", target="mobility"
+            )
+        )
+    )
+    h = abs(
+        complex(
+            ph.vibration.convert_frf(
+                1.0, frequency=f, source="apparent_mass", target="receptance"
+            )
+        )
+    )
     ok = abs(h - ref.ISO7626_1_DECADE_COMPLIANCE) <= 1e-15
     return numeric(
         ref.ISO7626_1_DECADE_MOBILITY,
@@ -2668,7 +2711,7 @@ def _chk_iso7626_5_rigid_block() -> Outcome:
     band = res.frequencies <= 500.0
     accelerance = np.abs(res.to("accelerance")[band])
     check = ph.vibration.verify_rigid_mass_calibration(
-        accelerance, res.frequencies[band], block_kg
+        accelerance, frequencies=res.frequencies[band], mass=block_kg
     )
     worst = float(accelerance[int(np.argmax(np.abs(accelerance - 1.0 / block_kg)))])
     return numeric(
@@ -2814,7 +2857,13 @@ def _chk_iso10846_3_validity_bias() -> Outcome:
     k, m = 1.0e6, 1.0
     f = math.sqrt(11.0 * k / m) / (2.0 * math.pi)
     t = complex(ph.vibration.base_transmissibility(f, m, k))
-    k_ind = abs(complex(ph.vibration.transfer_stiffness_indirect(f, t, m)))
+    k_ind = abs(
+        complex(
+            ph.vibration.transfer_stiffness_indirect(
+                frequency=f, transmissibility=t, blocking_mass=m
+            )
+        )
+    )
     ratio = k_ind / k
     bias_ok = (
         20.0 * math.log10(ratio) <= ref.ISO10846_3_ACCURACY_DB
@@ -2882,7 +2931,11 @@ def _iso10846_5_driven(
     u1 = 1.0e-6
     force = np.asarray(stiffness, dtype=np.complex128) * u1
     accel = -(_ISO10846_5_OMEGA**2) * u1 * np.ones(_ISO10846_5_SWEEP_HZ.size)
-    return ph.vibration.driving_point_stiffness(_ISO10846_5_SWEEP_HZ, force, accel)
+    return ph.vibration.driving_point_stiffness(
+        frequencies=_ISO10846_5_SWEEP_HZ,
+        input_force_n=force,
+        input_acceleration_m_s2=accel,
+    )
 
 
 def _iso10846_5_mass_loaded() -> ph.vibration.DrivingPointStiffnessResult:
@@ -2897,7 +2950,9 @@ def _iso10846_5_mass_loaded() -> ph.vibration.DrivingPointStiffnessResult:
 )
 def _chk_iso10846_band_average_identity() -> Outcome:
     f = np.array([900.0, 950.0, 1000.0, 1050.0, 1100.0])
-    bands = ph.vibration.band_averaged_stiffness(f, np.full(f.size, _ISO10846_K + 0j))
+    bands = ph.vibration.band_averaged_stiffness(
+        frequencies=f, stiffness=np.full(f.size, _ISO10846_K + 0j)
+    )
     return numeric(
         _ISO10846_K, float(bands.stiffness[0]), 1e-9, rel=True, unit="N/m", places=1
     )
@@ -2911,7 +2966,7 @@ def _chk_iso10846_band_average_identity() -> Outcome:
 def _chk_iso10846_band_average_rms() -> Outcome:
     f = np.array([900.0, 950.0, 1000.0, 1050.0, 1100.0])
     k = 1.0e6 * np.array([1.0, 2.0j, -3.0, 4.0, 5.0]) * np.exp(0.3j)
-    bands = ph.vibration.band_averaged_stiffness(f, k)
+    bands = ph.vibration.band_averaged_stiffness(frequencies=f, stiffness=k)
     return numeric(
         math.sqrt(11.0) * 1.0e6,
         float(bands.stiffness[0]),
@@ -2931,7 +2986,9 @@ def _chk_iso10846_band_minimum_lines() -> Outcome:
     f = np.array([900.0, 950.0, 1000.0, 1050.0])
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", ph.vibration.TransferStiffnessWarning)
-        bands = ph.vibration.band_averaged_stiffness(f, np.full(f.size, _ISO10846_K))
+        bands = ph.vibration.band_averaged_stiffness(
+            frequencies=f, stiffness=np.full(f.size, _ISO10846_K)
+        )
     undetermined = int(not bool(bands.determined[0]))
     ok = ph.vibration.MIN_FREQUENCIES_PER_BAND == ref.ISO10846_MIN_FREQUENCIES_PER_BAND
     return count(
@@ -3006,7 +3063,12 @@ def _chk_iso10846_5_formula_7() -> Outcome:
     "Output mass limit 0,06·|F2|/|a2|: LF2 = 120 dB, La2 = 100 dB gives 0,6 kg",
 )
 def _chk_iso10846_4_output_mass_limit() -> Outcome:
-    check = ph.vibration.check_output_mass([100.0], 0.0, [120.0], [100.0])
+    check = ph.vibration.check_output_mass(
+        frequencies=[100.0],
+        output_mass_kg=0.0,
+        output_force_level=[120.0],
+        output_acceleration_level=[100.0],
+    )
     expected = ref.ISO10846_4_OUTPUT_MASS_FACTOR * 10.0 ** ((120.0 - 100.0) / 20.0)
     return numeric(
         expected, float(check.mass_limit_kg[0]), 1e-12, rel=True, unit="kg", places=3
@@ -3024,7 +3086,12 @@ def _chk_iso10846_4_output_mass_bias() -> Outcome:
     # with the half unit of that decimal: the exact worst case, with the
     # inertia force opposing the measured one, is -20 lg(1 - 0,06) = 0,537 dB.
     limit = ref.ISO10846_4_OUTPUT_MASS_FACTOR * 10.0
-    check = ph.vibration.check_output_mass([100.0], limit, [120.0], [100.0])
+    check = ph.vibration.check_output_mass(
+        frequencies=[100.0],
+        output_mass_kg=limit,
+        output_force_level=[120.0],
+        output_acceleration_level=[100.0],
+    )
     bias = float(check.bias_bound_db[0])
     return numeric(
         ref.ISO10846_4_NOTE1_BIAS_DB,
@@ -3045,7 +3112,13 @@ def _chk_iso10846_4_rigid_block() -> Outcome:
     f = np.geomspace(10.0, 5000.0, 50)
     force = np.full(f.size, 10.0 + 0j)
     a = force / 25.0
-    em = ph.vibration.effective_blocking_mass(f, force, a, a, blocking_mass=25.0)
+    em = ph.vibration.effective_blocking_mass(
+        frequencies=f,
+        force=force,
+        first_acceleration_m_s2=a,
+        second_acceleration_m_s2=a,
+        blocking_mass=25.0,
+    )
     worst = float(np.max(np.abs(em.effective_mass_kg - 25.0)))
     return numeric(0.0, worst, 1e-12, unit="kg", places=6)
 
@@ -3061,7 +3134,11 @@ def _chk_iso10846_4_f3() -> Outcome:
     ones = np.ones(f.size, dtype=complex)
     m_eff = m2 * (1.0 + (f / fc) ** 2)
     em = ph.vibration.effective_blocking_mass(
-        f, m_eff * ones, ones, ones, blocking_mass=m2
+        frequencies=f,
+        force=m_eff * ones,
+        first_acceleration_m_s2=ones,
+        second_acceleration_m_s2=ones,
+        blocking_mass=m2,
     )
     expected = fc * math.sqrt(
         10.0 ** (ref.ISO10846_4_EFFECTIVE_MASS_TOL_DB / 20.0) - 1.0
@@ -3080,10 +3157,17 @@ def _chk_iso10846_5_inequalities() -> Outcome:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", ph.vibration.TransferStiffnessWarning)
         blocked = ph.vibration.check_blocked_output(
-            f, [100.0, 100.0], [100.0 - ref.ISO10846_5_BLOCKED_OUTPUT_DB, 80.1]
+            frequencies=f,
+            input_acceleration_level=[100.0, 100.0],
+            output_acceleration_level=[
+                100.0 - ref.ISO10846_5_BLOCKED_OUTPUT_DB,
+                80.1,
+            ],
         )
         unwanted = ph.vibration.check_unwanted_input(
-            f, [100.0, 100.0], [100.0 - ref.ISO10846_5_UNWANTED_INPUT_DB, 85.1]
+            frequencies=f,
+            excitation_level=[100.0, 100.0],
+            unwanted_level=[100.0 - ref.ISO10846_5_UNWANTED_INPUT_DB, 85.1],
         )
     verdicts = [*blocked.holds.tolist(), *unwanted.holds.tolist()]
     right = sum(
@@ -3137,7 +3221,7 @@ def _chk_iso10846_5_table_b1() -> Outcome:
     "Calibration L_v from â = 9,81 m/s² at 100 Hz  (standard's EXAMPLE)",
 )
 def _chk_iso7849_calibration() -> Outcome:
-    lv = float(ph.emission.velocity_level_from_acceleration(9.81, 100.0))
+    lv = float(ph.emission.velocity_level_from_acceleration(9.81, frequency=100.0))
     return numeric(106.9, lv, 0.05, unit="dB", places=1)
 
 
@@ -3172,7 +3256,11 @@ def _chk_iso7849_impedance_term() -> Outcome:
 )
 def _chk_en15657_power_balance() -> Outcome:
     lv, f, m, s, eta = 82.0, 800.0, 15.0, 1.5, 0.02
-    lw = float(ph.building.structure_borne_power_level(lv, f, m, s, eta))
+    lw = float(
+        ph.building.structure_borne_power_level(
+            lv, frequency=f, mass_per_area=m, area=s, loss_factor=eta
+        )
+    )
     v2 = (1e-9) ** 2 * 10.0 ** (0.1 * lv)
     p = 2.0 * math.pi * f * eta * (m * s) * v2
     return numeric(10.0 * math.log10(p / 1e-12), lw, 1e-6, unit="dB", places=3)
@@ -3184,7 +3272,9 @@ def _chk_en15657_power_balance() -> Outcome:
     "Plate loss factor η = 2,2/(f·Ts) at 1 kHz, Ts = 0,3 s",
 )
 def _chk_en15657_loss_factor() -> Outcome:
-    eta = float(ph.building.plate_loss_factor([1000.0], 0.3)[0])
+    eta = float(
+        ph.building.plate_loss_factor(frequency=[1000.0], reverberation_time=0.3)[0]
+    )
     return numeric(2.2 / (1000.0 * 0.3), eta, 1e-9)
 
 

@@ -601,10 +601,10 @@ class SoundAbsorptionMeasurement(OwnsArrays):
 
 
 def measure_sound_absorption(
-    frequencies: ArrayLike,
     t_empty: ArrayLike,
     t_specimen: ArrayLike,
     *,
+    frequencies: ArrayLike,
     volume: float,
     area: float,
     temperature_c: float = 20.0,

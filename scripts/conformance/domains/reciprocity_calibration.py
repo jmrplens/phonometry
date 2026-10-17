@@ -435,7 +435,11 @@ def _chk_formula_7() -> Outcome:
     plane-wave coupler, 31,5 Hz to 10 kHz.
     """
     electrical, acoustic, true = _pressure_triad(_plane_wave())
-    result = metrology.pressure_reciprocity(_F, electrical, acoustic)
+    result = metrology.pressure_reciprocity(
+        frequencies=_F,
+        electrical_transfer_impedances_ohm=electrical,
+        acoustic_transfer_impedances=acoustic,
+    )
     worst = _worst_relative(result.sensitivity_v_per_pa, true)
     return numeric(
         0.0,
@@ -458,7 +462,10 @@ def _chk_formula_8() -> Outcome:
     """
     electrical, acoustic, true = _pressure_triad(_large_volume())
     result = metrology.pressure_reciprocity_pair(
-        _F, electrical[0], acoustic[0], true[0] / true[1]
+        frequencies=_F,
+        electrical_transfer_impedance_ohm=electrical[0],
+        acoustic_transfer_impedance=acoustic[0],
+        sensitivity_ratio=true[0] / true[1],
     )
     worst = _worst_relative(result.sensitivity_v_per_pa, true[:2])
     return numeric(
@@ -824,8 +831,8 @@ def _chk_formula_8_free_field() -> Outcome:
     """
     true = _free_field_true()
     result = metrology.free_field_reciprocity(
-        _FF,
-        _free_field_electrical(true),
+        frequencies=_FF,
+        electrical_transfer_impedances_ohm=_free_field_electrical(true),
         diaphragm_distances_m=_DISTANCES,
         acoustic_centers_m=_CENTRES,
         dispersion=False,
@@ -851,9 +858,9 @@ def _chk_formula_9_free_field() -> Outcome:
     """COR1 makes Formula (9) the complex sensitivity."""
     true = _free_field_true()
     result = metrology.free_field_reciprocity_pair(
-        _FF,
-        _free_field_electrical(true)[0],
-        true[0] / true[1],
+        frequencies=_FF,
+        electrical_transfer_impedance_ohm=_free_field_electrical(true)[0],
+        sensitivity_ratio=true[0] / true[1],
         diaphragm_distance_m=_DISTANCES[0],
         acoustic_centers_m=_CENTRES[:2],
         dispersion=False,

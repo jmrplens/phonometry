@@ -277,7 +277,7 @@ df = 2.0
 freqs = np.arange(50.0, 400.0 + df, df)
 levels = 42.0 - 6.0 * np.log10(freqs / 100.0)
 levels[int(np.argmin(np.abs(freqs - 200.0)))] += 22.0   # blade-passing-style tone
-environment.wind_turbine_tonality(levels, freqs, tone_frequency=200.0).plot()
+environment.wind_turbine_tonality(levels, frequencies=freqs, tone_frequency=200.0).plot()
 ```
 
 </details>
@@ -292,7 +292,7 @@ frequencies = np.arange(440.0, 562.0, 2.0)
 levels = np.full(frequencies.size, 30.0)
 levels[np.argmin(np.abs(frequencies - 500.0))] = 60.0
 
-res = environment.wind_turbine_tonality(levels, frequencies)
+res = environment.wind_turbine_tonality(levels, frequencies=frequencies)
 print(res.tone_frequency, res.tonality, res.tonal_audibility, res.is_audible)
 res.plot()   # spectrum + critical band + masking level (needs matplotlib)
 ```
@@ -351,7 +351,7 @@ renders in English by default; pass `language="es"` for a Spanish fiche
 from phonometry import environment, ReportMetadata
 
 # The 500 Hz gearbox tone over the flat 30 dB floor of the snippet above.
-res = environment.wind_turbine_tonality(levels, frequencies)
+res = environment.wind_turbine_tonality(levels, frequencies=frequencies)
 res.report(
     "tonality_fiche.pdf",
     metadata=ReportMetadata(

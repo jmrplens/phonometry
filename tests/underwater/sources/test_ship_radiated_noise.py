@@ -64,7 +64,9 @@ def test_surface_correction_matches_formula() -> None:
     draught, c, f = 10.0, 1500.0, 200.0
     ds = 0.7 * draught
     u = 2 * np.pi * f / c * ds
-    res = underwater.monopole_source_level(120.0, f, draught, speed_of_sound=c)
+    res = underwater.monopole_source_level(
+        120.0, frequency=f, draft_m=draught, speed_of_sound=c
+    )
     assert res.source_depth == pytest.approx(ds)
     assert float(res.surface_correction[0]) == pytest.approx(_delta_l(u), rel=1e-9)
     assert float(res.source_level[0]) == pytest.approx(120.0 + _delta_l(u), rel=1e-9)
@@ -72,14 +74,16 @@ def test_surface_correction_matches_formula() -> None:
 
 def test_surface_correction_high_frequency_limit() -> None:
     # As u -> infinity, ratio -> 2, so ΔL -> -10 lg(2) = -3.0103 dB.
-    res = underwater.monopole_source_level(100.0, 1e6, 20.0, speed_of_sound=1500.0)
+    res = underwater.monopole_source_level(
+        100.0, frequency=1e6, draft_m=20.0, speed_of_sound=1500.0
+    )
     assert float(res.surface_correction[0]) == pytest.approx(-3.010299957, abs=1e-3)
 
 
 def test_monopole_source_level_array_broadcast() -> None:
     freqs = np.array([100.0, 500.0, 2000.0])
     rnl = np.array([150.0, 145.0, 140.0])
-    res = underwater.monopole_source_level(rnl, freqs, 8.0)
+    res = underwater.monopole_source_level(rnl, frequency=freqs, draft_m=8.0)
     assert isinstance(res, underwater.ShipSourceLevelResult)
     assert res.source_level.shape == freqs.shape
     assert np.allclose(res.source_level, rnl + res.surface_correction)
@@ -87,7 +91,7 @@ def test_monopole_source_level_array_broadcast() -> None:
 
 def test_scalar_rnl_broadcasts_over_frequencies() -> None:
     freqs = np.array([100.0, 1000.0])
-    res = underwater.monopole_source_level(130.0, freqs, 6.0)
+    res = underwater.monopole_source_level(130.0, frequency=freqs, draft_m=6.0)
     assert res.radiated_noise_level.shape == freqs.shape
     assert np.all(res.radiated_noise_level == 130.0)
 
@@ -143,7 +147,7 @@ def test_source_level_uncertainty_bands() -> None:
 
 def test_result_plot_smoke() -> None:
     res = underwater.monopole_source_level(
-        np.array([140.0, 135.0]), np.array([125.0, 500.0]), 9.0
+        np.array([140.0, 135.0]), frequency=np.array([125.0, 500.0]), draft_m=9.0
     )
     ax = res.plot()
     assert ax is not None
@@ -156,26 +160,30 @@ def test_rejects_shape_mismatch() -> None:
         ValueError,
         match=r"monopole_source_level: 'rnl'.*must all have the same shape",
     ):
-        underwater.monopole_source_level(levels_2_bands, frequencies_3_bands, 8.0)
+        underwater.monopole_source_level(
+            levels_2_bands, frequency=frequencies_3_bands, draft_m=8.0
+        )
 
 
 def test_monopole_source_level_rejects_empty_frequencies() -> None:
     # An empty array used to pass the sign and finiteness predicates vacuously
     # and come back as a zero-band result whose .plot() died inside numpy.
     with pytest.raises(ValueError, match="'frequency' must be a non-empty 1-D array"):
-        underwater.monopole_source_level(np.array([]), np.array([]), 8.0)
+        underwater.monopole_source_level(
+            np.array([]), frequency=np.array([]), draft_m=8.0
+        )
 
 
 def test_monopole_source_level_rejects_a_two_dimensional_frequency_grid() -> None:
     grid = np.array([[100.0, 200.0], [300.0, 400.0]])
     with pytest.raises(ValueError, match="'frequency' must be a non-empty 1-D array"):
-        underwater.monopole_source_level(grid, grid, 8.0)
+        underwater.monopole_source_level(grid, frequency=grid, draft_m=8.0)
 
 
 def test_monopole_source_level_rejects_non_numeric_inputs() -> None:
     # Both shared array guards name the parameter a conversion failure sits
     # in, instead of letting numpy's anonymous error escape.
     with pytest.raises(TypeError, match="'frequency' must be numbers, not text"):
-        underwater.monopole_source_level(140.0, ("bad",), 8.0)  # type: ignore[arg-type]
+        underwater.monopole_source_level(140.0, frequency=("bad",), draft_m=8.0)  # type: ignore[arg-type]
     with pytest.raises(TypeError, match="'rnl' must be numbers, not text"):
-        underwater.monopole_source_level(("bad",), 125.0, 8.0)  # type: ignore[arg-type]
+        underwater.monopole_source_level(("bad",), frequency=125.0, draft_m=8.0)  # type: ignore[arg-type]

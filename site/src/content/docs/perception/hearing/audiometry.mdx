@@ -235,7 +235,8 @@ their frequencies:
 reversal_frequencies = np.geomspace(500.0, 4000.0, 18)
 reversal_levels = [34, 24, 33, 23, 35, 25, 36, 24, 38, 27, 40, 29,
                    43, 31, 46, 34, 48, 37]
-sweep = hearing.sweep_audiometry_threshold(reversal_frequencies, reversal_levels)
+sweep = hearing.sweep_audiometry_threshold(reversal_levels,
+                                           reversal_frequencies=reversal_frequencies)
 print(sweep.frequencies)     # [ 500.  750. 1000. 1500. 2000. 3000. 4000.]
 print(sweep.threshold_db)    # [29. 29. 30. 32. 36. 40. 40.]
 print(np.round(sweep.running_frequencies[:2]))  # [679. 767.]

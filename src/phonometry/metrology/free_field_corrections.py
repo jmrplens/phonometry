@@ -768,10 +768,10 @@ class AdjustmentValue(OwnsArrays):
 
 
 def adjustment_value(
-    frequencies: ArrayLike,
     free_field_indicated_level: ArrayLike,
     calibrator_reading_db: float,
     *,
+    frequencies: ArrayLike,
     calibrator_level: float,
     incident_level: ArrayLike | None = None,
     tolerance_db: ArrayLike | None = None,
@@ -1100,12 +1100,12 @@ def _substitution(
 
 
 def sound_calibrator_correction(
-    frequencies: ArrayLike,
     slm_free_field_level: ArrayLike,
     reference_free_field_level: ArrayLike,
     slm_calibrator_level: ArrayLike,
     reference_calibrator_level: ArrayLike,
     *,
+    frequencies: ArrayLike,
     reference_free_field_correction: ArrayLike,
     free_field_level_difference: ArrayLike = 0.0,
     calibrator_level_difference: ArrayLike = 0.0,
@@ -1182,12 +1182,12 @@ def sound_calibrator_correction(
 
 
 def comparison_coupler_correction(
-    frequencies: ArrayLike,
     slm_free_field_level: ArrayLike,
     reference_free_field_level: ArrayLike,
     slm_coupler_level: ArrayLike,
     reference_coupler_level: ArrayLike,
     *,
+    frequencies: ArrayLike,
     reference_free_field_correction: ArrayLike,
     free_field_level_difference: ArrayLike = 0.0,
     coupler_level_difference: ArrayLike = 0.0,
@@ -1256,11 +1256,11 @@ def comparison_coupler_correction(
 
 
 def electrostatic_actuator_correction(
-    frequencies: ArrayLike,
     slm_free_field_level: ArrayLike,
     reference_free_field_level: ArrayLike,
     slm_actuator_level: ArrayLike,
     *,
+    frequencies: ArrayLike,
     reference_sensitivity_level: ArrayLike,
     reference_channel_gain_db: ArrayLike = 0.0,
     actuator_level: ArrayLike = 0.0,
@@ -2050,9 +2050,9 @@ def _optional_column(
 
 
 def verify_correction_uncertainty(
-    frequencies: ArrayLike,
     expanded_uncertainty_db: ArrayLike,
     *,
+    frequencies: ArrayLike,
     clause: int,
     correction: ArrayLike | None = None,
     coverage_factor: ArrayLike | None = None,

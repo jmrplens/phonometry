@@ -136,7 +136,9 @@ def _figure_2_band_levels() -> np.ndarray:
 )
 def _chk_figure_2() -> Outcome:
     frequencies, _ = _table_ii()
-    check = ea.check_program_signal(frequencies, _figure_2_band_levels())
+    check = ea.check_program_signal(
+        frequencies=frequencies, band_levels=_figure_2_band_levels()
+    )
     bands = " Hz and ".join(f"{f:g}" for f in check.binding_bands_hz)
     return mask(
         expected="one level puts all 31 bands inside Table II",
@@ -191,7 +193,9 @@ def _chk_generator_nodes() -> Outcome:
 def _chk_generator_record() -> Outcome:
     x = ea.simulated_program_signal(_FS, 60.0, seed=1)
     bands = octave_filter(x, _FS, fraction=3, limits=[19.95, 19952.6])
-    check = ea.check_program_signal(bands.frequencies, np.asarray(bands.levels))
+    check = ea.check_program_signal(
+        frequencies=bands.frequencies, band_levels=np.asarray(bands.levels)
+    )
     return mask(
         expected="all 31 bands inside Table II",
         computed=f"smallest margin {check.margin_db:.3f} dB",
@@ -245,7 +249,10 @@ def _chk_rated_impedance() -> Outcome:
     for share in (ref.IEC60268_7_RATED_IMPEDANCE_FRACTION, 0.799):
         z = np.array([40.0, rated * share, 33.0, 36.0])
         verdict = ea.verify_rated_impedance(
-            f, z, rated_impedance_ohm=rated, rated_frequency_range_hz=(20.0, 20000.0)
+            frequencies=f,
+            impedance_ohm=z,
+            rated_impedance_ohm=rated,
+            rated_frequency_range_hz=(20.0, 20000.0),
         )
         verdicts[f"{100 * share:g} %"] = _flag(verdict.passes)
     return record(
@@ -336,7 +343,11 @@ def _chk_a_weighting_coefficients() -> Outcome:
     matching = sum(
         1
         for f in frequencies
-        if round(ea.program_signal_level([f], [0.0], weighting="A"), 1) == table3[f]
+        if round(
+            ea.program_signal_level(frequencies=[f], band_levels=[0.0], weighting="A"),
+            1,
+        )
+        == table3[f]
     )
     return count(matching, frequencies.size, subject="bands matching Table 3")
 
@@ -347,7 +358,9 @@ def _chk_a_weighting_coefficients() -> Outcome:
     "Programme characteristic voltage of a flat headphone, 21 bands at 80 dB from 0,1 V",
 )
 def _chk_programme_voltage() -> Outcome:
-    result = ea.program_characteristic_voltage(0.1, _BANDS, np.full(_BANDS.size, 80.0))
+    result = ea.program_characteristic_voltage(
+        0.1, frequencies=_BANDS, band_levels=np.full(_BANDS.size, 80.0)
+    )
     total = 80.0 + 10.0 * math.log10(_BANDS.size)
     expected = 0.1 * 10.0 ** ((94.0 - total) / 20.0)
     return numeric(expected, result.characteristic_voltage_v, 1e-12, unit="V", places=6)
@@ -361,7 +374,9 @@ def _chk_programme_voltage() -> Outcome:
 def _chk_fittings_mean() -> Outcome:
     offsets = np.array([0.0, 1.0, -1.0])
     levels = 80.0 + offsets[:, None] + np.zeros(_BANDS.size)
-    result = ea.program_characteristic_voltage(0.1, _BANDS, levels)
+    result = ea.program_characteristic_voltage(
+        0.1, frequencies=_BANDS, band_levels=levels
+    )
     total = 80.0 + 10.0 * math.log10(_BANDS.size) + offsets
     expected = float(np.mean(0.1 * 10.0 ** ((94.0 - total) / 20.0)))
     return numeric(expected, result.characteristic_voltage_v, 1e-12, unit="V", places=6)
@@ -417,7 +432,9 @@ def _chk_panel_sizes() -> Outcome:
     flags = {}
     for persons in (7, 8, 15, 16):
         emf = np.full((persons, _BANDS.size), 0.05)
-        result = ea.field_comparison_response(_BANDS, 70.0, emf, field="free")
+        result = ea.field_comparison_response(
+            frequencies=_BANDS, field_level=70.0, source_emf_v=emf, field="free"
+        )
         flags[f"{persons} measure"] = _flag(result.meets_panel_size)
         flags[f"{persons} reference"] = _flag(result.qualifies_as_reference)
     expected = {
@@ -441,7 +458,10 @@ def _chk_panel_sizes() -> Outcome:
 def _chk_standard_reference_frequency() -> Outcome:
     emf = 0.05 * 10.0 ** (-np.linspace(0.0, 4.0, _BANDS.size)[None, :] / 20.0)
     result = ea.field_comparison_response(
-        _BANDS, 70.0, np.repeat(emf, 8, 0), field="free"
+        frequencies=_BANDS,
+        field_level=70.0,
+        source_emf_v=np.repeat(emf, 8, 0),
+        field="free",
     )
     band = list(_BANDS).index(ref.IEC60268_1_STANDARD_REFERENCE_FREQUENCY_HZ)
     computed = {
@@ -467,7 +487,9 @@ def _chk_ear_canal_panel() -> Outcome:
     flags = {}
     for persons in (7, 8, 15, 16):
         levels = np.full((persons, 2, _BANDS.size), 70.0)
-        result = ea.ear_canal_frequency_response(_BANDS, levels, levels)
+        result = ea.ear_canal_frequency_response(
+            frequencies=_BANDS, earphone_levels=levels, sound_field_levels=levels
+        )
         flags[f"{persons} measure"] = _flag(result.meets_panel_size)
         flags[f"{persons} reference"] = _flag(result.qualifies_as_reference)
     expected = {
@@ -492,7 +514,9 @@ def _chk_formula_1() -> Outcome:
     field = np.full((1, 2, _BANDS.size), 70.0)
     earphone = np.full((1, 2, _BANDS.size), 74.0)
     earphone[0, :, list(_BANDS).index(2000.0)] += 3.0
-    result = ea.ear_canal_frequency_response(_BANDS, earphone, field)
+    result = ea.ear_canal_frequency_response(
+        frequencies=_BANDS, earphone_levels=earphone, sound_field_levels=field
+    )
     return numeric(
         3.0, float(result.mean_db[list(_BANDS).index(2000.0)]), 1e-12, unit="dB"
     )
@@ -513,7 +537,9 @@ def _chk_ear_canal_limits() -> Outcome:
     earphone[1, 1, 3] += 2.6
     earphone[2, :, reference] += ref.IEC60268_7_LEVEL_MATCH_DB
     earphone[3, :, reference] += 3.1
-    result = ea.ear_canal_frequency_response(_BANDS, earphone, field)
+    result = ea.ear_canal_frequency_response(
+        frequencies=_BANDS, earphone_levels=earphone, sound_field_levels=field
+    )
     computed = {
         "2.5 dB apart": _flag(bool(result.fittings_consistent[0])),
         "2.6 dB apart": _flag(bool(result.fittings_consistent[1])),

@@ -41,13 +41,16 @@ def test_spatial_mean_uniform_levels() -> None:
 # ---------------------------------------------------------------------------
 def test_loss_factor_formula() -> None:
     f, ts = np.array([500.0, 1000.0]), 0.3
-    assert np.allclose(building.plate_loss_factor(f, ts), 2.2 / (f * ts))
+    assert np.allclose(
+        building.plate_loss_factor(frequency=f, reverberation_time=ts), 2.2 / (f * ts)
+    )
 
 
 def test_loss_factor_matches_iso10848() -> None:
     f, ts = np.array([250.0, 500.0, 1000.0]), 0.4
     assert np.allclose(
-        building.plate_loss_factor(f, ts), building.total_loss_factor(f, ts)
+        building.plate_loss_factor(frequency=f, reverberation_time=ts),
+        building.total_loss_factor(frequencies=f, structural_reverberation_time=ts),
     )
 
 
@@ -55,14 +58,22 @@ def test_loss_factor_matches_iso10848() -> None:
 # Power level (Formula 14) and the resonant-plate power balance
 # ---------------------------------------------------------------------------
 def test_power_level_hand_value() -> None:
-    lw = float(building.structure_borne_power_level(80.0, 1000.0, 10.0, 1.0, 0.01))
+    lw = float(
+        building.structure_borne_power_level(
+            80.0, frequency=1000.0, mass_per_area=10.0, area=1.0, loss_factor=0.01
+        )
+    )
     assert lw == pytest.approx(47.982, abs=1e-3)
 
 
 def test_power_level_equals_dissipated_power() -> None:
     """L_Ws equals the level of P = omega eta (m S) <v^2>."""
     lv, f, m, s, eta = 82.0, 800.0, 15.0, 1.5, 0.02
-    lw = float(building.structure_borne_power_level(lv, f, m, s, eta))
+    lw = float(
+        building.structure_borne_power_level(
+            lv, frequency=f, mass_per_area=m, area=s, loss_factor=eta
+        )
+    )
     v2 = V0**2 * 10.0 ** (0.1 * lv)
     p = 2.0 * math.pi * f * eta * (m * s) * v2
     assert lw == pytest.approx(10.0 * math.log10(p / P0))
@@ -72,20 +83,30 @@ def test_power_level_offset_is_minus_60() -> None:
     # With v0 = 1e-9 and P0 = 1e-12 the reference term is exactly -60 dB.
     # L_Ws - L_v - 10 lg(2 pi f eta m S) = -60
     f, m, s, eta = 1000.0, 10.0, 1.0, 0.01
-    lw = float(building.structure_borne_power_level(0.0, f, m, s, eta))
+    lw = float(
+        building.structure_borne_power_level(
+            0.0, frequency=f, mass_per_area=m, area=s, loss_factor=eta
+        )
+    )
     log_term = 10.0 * math.log10(2.0 * math.pi * f * eta * m * s)
     assert lw - log_term == pytest.approx(-60.0)
 
 
 def test_power_level_rejects_bad_inputs() -> None:
     with pytest.raises(ValueError, match=r"'mass_per_area' must be positive"):
-        building.structure_borne_power_level(80.0, 1000.0, 0.0, 1.0, 0.01)
+        building.structure_borne_power_level(
+            80.0, frequency=1000.0, mass_per_area=0.0, area=1.0, loss_factor=0.01
+        )
     with pytest.raises(ValueError, match=r"'area' must be positive"):
-        building.structure_borne_power_level(80.0, 1000.0, 10.0, 0.0, 0.01)
+        building.structure_borne_power_level(
+            80.0, frequency=1000.0, mass_per_area=10.0, area=0.0, loss_factor=0.01
+        )
     with pytest.raises(
         ValueError, match=r"'frequency' must contain positive, finite values"
     ):
-        building.structure_borne_power_level(80.0, 0.0, 10.0, 1.0, 0.01)
+        building.structure_borne_power_level(
+            80.0, frequency=0.0, mass_per_area=10.0, area=1.0, loss_factor=0.01
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -95,7 +116,7 @@ def test_reception_plate_from_reverberation_time() -> None:
     f = np.array([500.0, 1000.0, 2000.0])
     res = building.reception_plate_power(
         np.array([80.0, 82.0, 79.0]),
-        f,
+        frequency=f,
         mass_per_area=25.0,
         area=1.2,
         reverberation_time=0.4,
@@ -105,7 +126,11 @@ def test_reception_plate_from_reverberation_time() -> None:
     assert np.allclose(
         res.power_level,
         building.structure_borne_power_level(
-            res.velocity_level, f, 25.0, 1.2, res.loss_factor
+            res.velocity_level,
+            frequency=f,
+            mass_per_area=25.0,
+            area=1.2,
+            loss_factor=res.loss_factor,
         ),
     )
 
@@ -113,7 +138,7 @@ def test_reception_plate_from_reverberation_time() -> None:
 def test_reception_plate_explicit_loss_factor_broadcasts() -> None:
     f = np.array([500.0, 1000.0, 2000.0])
     res = building.reception_plate_power(
-        80.0, f, mass_per_area=25.0, area=1.2, loss_factor=0.02
+        80.0, frequency=f, mass_per_area=25.0, area=1.2, loss_factor=0.02
     )
     assert res.loss_factor.shape == (3,)
     assert np.all(res.loss_factor == 0.02)
@@ -123,7 +148,7 @@ def test_reception_plate_explicit_loss_factor_broadcasts() -> None:
 def test_reception_plate_total_level() -> None:
     res = building.reception_plate_power(
         np.array([80.0, 82.0, 79.0]),
-        np.array([500.0, 1000.0, 2000.0]),
+        frequency=np.array([500.0, 1000.0, 2000.0]),
         mass_per_area=25.0,
         area=1.2,
         loss_factor=0.01,
@@ -136,7 +161,9 @@ def test_reception_plate_requires_eta_or_ts() -> None:
     with pytest.raises(
         ValueError, match=r"either 'loss_factor' or 'reverberation_time'"
     ):
-        building.reception_plate_power(80.0, 1000.0, 25.0, 1.2)
+        building.reception_plate_power(
+            80.0, frequency=1000.0, mass_per_area=25.0, area=1.2
+        )
 
 
 @pytest.mark.parametrize(
@@ -165,7 +192,7 @@ def test_reception_plate_rejects_a_per_band_input_of_the_wrong_length(
     with pytest.raises(ValueError, match=f"'{name}' must be a scalar or carry"):
         building.reception_plate_power(
             velocity,
-            [500.0, 1000.0, 2000.0, 4000.0],
+            frequency=[500.0, 1000.0, 2000.0, 4000.0],
             mass_per_area=25.0,
             area=1.2,
             **kwargs,
@@ -176,7 +203,7 @@ def test_reception_plate_still_takes_a_scalar_for_every_band() -> None:
     """A true scalar is the supported way to say "the same for all bands"."""
     result = building.reception_plate_power(
         80.0,
-        [500.0, 1000.0, 2000.0, 4000.0],
+        frequency=[500.0, 1000.0, 2000.0, 4000.0],
         mass_per_area=25.0,
         area=1.2,
         loss_factor=0.01,
@@ -200,7 +227,7 @@ def test_reception_plate_result_refuses_a_column_one_band_too_long(
     """
     result = building.reception_plate_power(
         np.array([80.0, 82.0, 79.0]),
-        np.array([500.0, 1000.0, 2000.0]),
+        frequency=np.array([500.0, 1000.0, 2000.0]),
         mass_per_area=25.0,
         area=1.2,
         loss_factor=0.01,
@@ -221,7 +248,7 @@ def test_reception_plate_result_refuses_a_non_finite_plate_scalar(field: str) ->
     """
     result = building.reception_plate_power(
         np.array([80.0, 82.0, 79.0]),
-        np.array([500.0, 1000.0, 2000.0]),
+        frequency=np.array([500.0, 1000.0, 2000.0]),
         mass_per_area=25.0,
         area=1.2,
         loss_factor=0.01,
@@ -237,7 +264,7 @@ def test_plot_returns_axes() -> None:
     mpl.use("Agg")
     res = building.reception_plate_power(
         np.array([80.0, 82.0, 79.0]),
-        np.array([500.0, 1000.0, 2000.0]),
+        frequency=np.array([500.0, 1000.0, 2000.0]),
         mass_per_area=25.0,
         area=1.2,
         loss_factor=0.01,
@@ -365,11 +392,19 @@ def test_power_level_rejects_nonpositive_loss_factor() -> None:
     with pytest.raises(
         ValueError, match=r"'loss_factor' must contain positive, finite values"
     ):
-        building.structure_borne_power_level(80.0, 1000.0, 10.0, 1.0, 0.0)
+        building.structure_borne_power_level(
+            80.0, frequency=1000.0, mass_per_area=10.0, area=1.0, loss_factor=0.0
+        )
     with pytest.raises(
         ValueError, match=r"'loss_factor' must contain positive, finite values"
     ):
-        building.structure_borne_power_level(80.0, 1000.0, 10.0, 1.0, [0.01, -0.01])
+        building.structure_borne_power_level(
+            80.0,
+            frequency=1000.0,
+            mass_per_area=10.0,
+            area=1.0,
+            loss_factor=[0.01, -0.01],
+        )
 
 
 def test_power_level_rejects_non_finite_frequency_and_velocity() -> None:
@@ -377,16 +412,24 @@ def test_power_level_rejects_non_finite_frequency_and_velocity() -> None:
     with pytest.raises(
         ValueError, match="'frequency' must contain positive, finite values"
     ):
-        building.structure_borne_power_level(80.0, float("nan"), 10.0, 1.0, 0.01)
+        building.structure_borne_power_level(
+            80.0, frequency=float("nan"), mass_per_area=10.0, area=1.0, loss_factor=0.01
+        )
     with pytest.raises(
         ValueError, match="'frequency' must contain positive, finite values"
     ):
-        building.structure_borne_power_level(80.0, float("inf"), 10.0, 1.0, 0.01)
+        building.structure_borne_power_level(
+            80.0, frequency=float("inf"), mass_per_area=10.0, area=1.0, loss_factor=0.01
+        )
     with pytest.raises(
         ValueError, match="'velocity_level' must contain only finite values"
     ):
         building.structure_borne_power_level(
-            [80.0, float("nan")], [500.0, 1000.0], 10.0, 1.0, 0.01
+            [80.0, float("nan")],
+            frequency=[500.0, 1000.0],
+            mass_per_area=10.0,
+            area=1.0,
+            loss_factor=0.01,
         )
 
 
@@ -423,7 +466,11 @@ def test_power_level_rejects_mismatched_band_axes() -> None:
         match="'velocity_level', 'frequency' and 'loss_factor' must broadcast",
     ):
         building.structure_borne_power_level(
-            [80.0, 82.0], [500.0, 1000.0, 2000.0], 10.0, 1.0, 0.01
+            [80.0, 82.0],
+            frequency=[500.0, 1000.0, 2000.0],
+            mass_per_area=10.0,
+            area=1.0,
+            loss_factor=0.01,
         )
 
 

@@ -900,7 +900,8 @@ def test_current_response_scales_the_loop_voltage_in_decibels() -> None:
     # read log-linearly between the measured frequencies.
     impedance = ea.loop_impedance(0.69, 109e-6)
     response = ea.amplifier_frequency_response(
-        [50.0, 1000.0, 2000.0, 20000.0], [1.0, 1.0, 2.0, 2.0]
+        frequencies=[50.0, 1000.0, 2000.0, 20000.0],
+        output_current_a=[1.0, 1.0, 2.0, 2.0],
     )
     result = ea.verify_amplifier_overload(
         3.0, impedance, 100.0, current_response=response
@@ -922,7 +923,8 @@ def test_current_response_scales_the_loop_voltage_in_decibels() -> None:
 def test_current_boost_for_metal_loss_raises_the_voltage() -> None:
     impedance = ea.loop_impedance(0.69, 109e-6)
     response = ea.amplifier_frequency_response(
-        [50.0, 1000.0, 2000.0, 4000.0, 8000.0], [1.0, 1.0, 1.26, 1.58, 2.0]
+        frequencies=[50.0, 1000.0, 2000.0, 4000.0, 8000.0],
+        output_current_a=[1.0, 1.0, 1.26, 1.58, 2.0],
     )
     flat = ea.verify_amplifier_overload(3.0, impedance, 100.0)
     boosted = ea.verify_amplifier_overload(
@@ -934,7 +936,9 @@ def test_current_boost_for_metal_loss_raises_the_voltage() -> None:
 
 def test_current_response_has_to_reach_the_table_frequency() -> None:
     impedance = ea.loop_impedance(0.69, 109e-6)
-    response = ea.amplifier_frequency_response([100.0, 1000.0, 2000.0], [1.0, 1.0, 1.0])
+    response = ea.amplifier_frequency_response(
+        frequencies=[100.0, 1000.0, 2000.0], output_current_a=[1.0, 1.0, 1.0]
+    )
     with pytest.raises(ValueError, match="Table 4"):
         ea.verify_amplifier_overload(3.0, impedance, 10.0, current_response=response)
 
@@ -991,7 +995,9 @@ def test_overload_sweep_stops_at_the_first_doubling_of_a_peaked_response() -> No
         10000.0,
     ]
     currents = [1.0, 1.0, 1.2, 1.5, 1.8, 2.6, 1.5, 0.6, 0.3]
-    response = ea.amplifier_frequency_response(frequencies, currents)
+    response = ea.amplifier_frequency_response(
+        frequencies=frequencies, output_current_a=currents
+    )
     result = ea.verify_amplifier_overload(
         1.0, impedance, 10.0, program="music", current_response=response
     )
@@ -1011,7 +1017,9 @@ def test_overload_sweep_takes_the_first_of_several_doublings() -> None:
     frequencies = [1000.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0]
     frequencies += [10000.0, 20000.0]
     currents = [1.0, 1.5, 2.4, 1.2, 1.0, 1.0, 1.1, 1.5, 2.0, 3.0]
-    response = ea.amplifier_frequency_response(frequencies, currents)
+    response = ea.amplifier_frequency_response(
+        frequencies=frequencies, output_current_a=currents
+    )
     result = ea.verify_amplifier_overload(
         1.0, impedance, 10.0, current_response=response
     )

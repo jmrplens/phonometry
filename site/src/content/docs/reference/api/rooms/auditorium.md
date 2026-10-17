@@ -795,6 +795,7 @@ MIN_REFERENCE_DISTANCE_M = 3.0
 ```python
 octave_pair_averages(
     values: ArrayLike,
+    *,
     frequencies: ArrayLike,
 ) -> dict[str, float]
 ```
@@ -956,6 +957,7 @@ reproduces the method rather than quietly improving it.
 single_number_average(
     symbol: str,
     values: ArrayLike,
+    *,
     frequencies: ArrayLike,
 ) -> float
 ```

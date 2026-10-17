@@ -298,7 +298,7 @@ x = signals.noise_signal(fs, 20.0, color="pink", seed=11)
 res = signals.power_spectral_density(x, fs, nperseg=4096)
 band = (res.frequencies >= 20.0) & (res.frequencies <= 20000.0)
 freqs = res.frequencies[band]
-smooth = signals.fractional_octave_smoothing(res.frequencies, res.psd, 3.0)[band]
+smooth = signals.fractional_octave_smoothing(res.psd, frequencies=res.frequencies, fraction=3.0)[band]
 
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.fill_between(freqs, 10 * np.log10(res.confidence_lower[band]),
@@ -512,12 +512,12 @@ from phonometry import signals
 
 res = signals.power_spectral_density(record, fs)   # the section 1 estimate
 freqs = res.frequencies
-smooth_psd = signals.fractional_octave_smoothing(freqs, res.psd, 3.0)
+smooth_psd = signals.fractional_octave_smoothing(res.psd, frequencies=freqs, fraction=3.0)
 magnitude = np.sqrt(res.psd)               # any linear |H| would do here
-smooth_mag = signals.fractional_octave_smoothing(freqs, magnitude, 6.0,
+smooth_mag = signals.fractional_octave_smoothing(magnitude, frequencies=freqs, fraction=6.0,
                                                  domain="amplitude")  # an FRF |H|
 levels = 10.0 * np.log10(res.psd)          # any dB curve would do here
-smooth_db = signals.fractional_octave_smoothing(freqs, levels, 3.0, domain="db")
+smooth_db = signals.fractional_octave_smoothing(levels, frequencies=freqs, fraction=3.0, domain="db")
 ```
 
 A single spectral line with PSD ordinate $P$ (units²/Hz) in a bin of width

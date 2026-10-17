@@ -1477,7 +1477,9 @@ def _meter_sensitivity() -> "RandomIncidenceSensitivity":
     bands = sorted(metrology.IEC61183_TABLE_B1)
     index = [_meter(f).directivity_index for f in bands]
     g_f = -10.0 * np.log10(1.0 + (np.array(bands) / _METER_ROLL_OFF_HZ) ** 4)
-    return metrology.random_incidence_sensitivity(bands, g_f, index)
+    return metrology.random_incidence_sensitivity(
+        frequencies=bands, free_field_level=g_f, directivity_index=index
+    )
 
 
 def generate_random_incidence_directivity(output_dir: str) -> None:
@@ -1526,9 +1528,9 @@ def generate_diffuse_field_sensitivity(output_dir: str) -> None:
     # its random-incidence level (1.2) and the reference's its pressure level
     # of 0 dB plus Delta_DP.
     result = metrology.diffuse_field_sensitivity(
-        bands,
-        _DIFFUSE_FIELD_DB + np.asarray(meter.random_incidence_level),
-        _DIFFUSE_FIELD_DB + delta_dp,
+        frequencies=bands,
+        indicated_level=_DIFFUSE_FIELD_DB + np.asarray(meter.random_incidence_level),
+        reference_indicated_level=_DIFFUSE_FIELD_DB + delta_dp,
         reference_pressure_level=0.0,
     )
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -1608,11 +1610,11 @@ def _calibrator_correction() -> "FreeFieldCorrection":
 
     m = _meter_octaves()
     return metrology.sound_calibrator_correction(
-        m["f"],
-        94.0 + m["free"] + m["spread"],
-        94.0 + m["c_ff_rm"],
-        94.0 + m["pressure"] + m["spread"] / 2,
-        94.0,
+        frequencies=m["f"],
+        slm_free_field_level=94.0 + m["free"] + m["spread"],
+        reference_free_field_level=94.0 + m["c_ff_rm"],
+        slm_calibrator_level=94.0 + m["pressure"] + m["spread"] / 2,
+        reference_calibrator_level=94.0,
         reference_free_field_correction=m["c_ff_rm"],
     )
 
@@ -1629,9 +1631,9 @@ def generate_free_field_adjustment(output_dir: str) -> None:
     x = f3 / 1000
     response = 0.4 + 0.12 * np.cos(3 * np.log(x)) - 0.3 * (x / 8) ** 2
     result = metrology.adjustment_value(
-        f3,
-        94.0 + response,
-        94.35,
+        frequencies=f3,
+        free_field_indicated_level=94.0 + response,
+        calibrator_reading_db=94.35,
         calibrator_level=94.0,
         tolerance_db=tolerance,
     )
@@ -1650,10 +1652,10 @@ def generate_free_field_correction(output_dir: str) -> None:
     m = _meter_octaves()
     calibrator = _calibrator_correction()
     actuator = metrology.electrostatic_actuator_correction(
-        m["f"],
-        94.0 + m["free"] + m["spread"],
-        94.0 - 26.0 + m["c_ff_rm"],
-        94.0 - 0.08 * m["x"] ** 1.7 + m["spread"] / 2,
+        frequencies=m["f"],
+        slm_free_field_level=94.0 + m["free"] + m["spread"],
+        reference_free_field_level=94.0 - 26.0 + m["c_ff_rm"],
+        slm_actuator_level=94.0 - 0.08 * m["x"] ** 1.7 + m["spread"] / 2,
         reference_sensitivity_level=-26.0 + m["c_ff_rm"],
     )
     fig, (ax_calibrator, ax_actuator) = plt.subplots(1, 2, figsize=(13.5, 5.6))
@@ -1706,8 +1708,8 @@ def generate_free_field_verification(output_dir: str) -> None:
         )
     ]
     verdict = metrology.verify_correction_uncertainty(
-        correction.frequencies,
-        [b.expanded_uncertainty_db for b in budgets],
+        frequencies=correction.frequencies,
+        expanded_uncertainty_db=[b.expanded_uncertainty_db for b in budgets],
         clause=correction.clause,
         correction=correction.correction,
         coverage_factor=[b.coverage_factor for b in budgets],
@@ -1783,10 +1785,10 @@ def _pressure_comparison() -> "ComparisonCalibration":
         temperature_coefficient_db_per_k=0.002,
     )
     return metrology.simultaneous_comparison(
-        f,
-        readings["l_ref"],
-        readings["l_c12"],
-        readings["l_c21"],
+        frequencies=f,
+        reference_sensitivity_level=readings["l_ref"],
+        channel_difference=readings["l_c12"],
+        interchanged_channel_difference=readings["l_c21"],
         reference_environment=env,
         expanded_uncertainty_db=readings["u"],
     )
@@ -1826,10 +1828,10 @@ def _free_field_comparison() -> "ComparisonCalibration":
     field_2 = field_1 + 0.25
     monitor = -40.0
     return metrology.sequential_comparison(
-        f,
-        l_ref_p,
-        l_ref_p + c_ff + field_1,
-        l_ws2f + field_2,
+        frequencies=f,
+        reference_sensitivity_level=l_ref_p,
+        reference_output_level=l_ref_p + c_ff + field_1,
+        test_output_level=l_ws2f + field_2,
         monitor=metrology.MonitorReadings(
             reference_level=monitor + field_1,
             test_level=monitor + field_2,
@@ -1987,13 +1989,17 @@ def _jig_validation() -> "JigCouplerVerification":
         + jitter[1]
     )
     jig = metrology.simultaneous_comparison(
-        fj, l_ref[6:], j12, j21, expanded_uncertainty_db=r["u"][6:]
+        frequencies=fj,
+        reference_sensitivity_level=l_ref[6:],
+        channel_difference=j12,
+        interchanged_channel_difference=j21,
+        expanded_uncertainty_db=r["u"][6:],
     )
     coupler = metrology.simultaneous_comparison(
-        f[:17],
-        l_ref[:17],
-        r["l_c12"][:, :17],
-        r["l_c21"][:, :17],
+        frequencies=f[:17],
+        reference_sensitivity_level=l_ref[:17],
+        channel_difference=r["l_c12"][:, :17],
+        interchanged_channel_difference=r["l_c21"][:, :17],
         expanded_uncertainty_db=r["u"][:17],
     )
     return metrology.verify_jig_or_coupler(
@@ -2043,11 +2049,12 @@ def _stepped_sine_pair() -> tuple[Any, Any, float]:
         return np.asarray(response * field, dtype=np.complex128)
 
     ir_ref = metrology.stepped_sine_impulse_response(
-        f_step, heard(_lumped_microphone(f_step, -38.0, 22000, 1.1), 1.0)
+        frequencies=f_step,
+        response=heard(_lumped_microphone(f_step, -38.0, 22000, 1.1), 1.0),
     )
     ir_ws2f = metrology.stepped_sine_impulse_response(
-        f_step,
-        heard(
+        frequencies=f_step,
+        response=heard(
             _lumped_microphone(f_step, -26.4, 18000, 0.9),
             1 / (1 + 1j * f_step / 6000),
         ),
@@ -2090,10 +2097,10 @@ def _time_selective_calibration() -> "ComparisonCalibration":
     fw = metrology.exact_frequencies(1900, 20000, fraction=3)
     m_ref = _lumped_microphone(fw, -38.0, 22000, 1.1)
     return metrology.sequential_comparison(
-        fw,
-        20 * np.log10(np.abs(m_ref)),
-        ref.level_at(fw),
-        ws2f.level_at(fw),
+        frequencies=fw,
+        reference_sensitivity_level=20 * np.log10(np.abs(m_ref)),
+        reference_output_level=ref.level_at(fw),
+        test_output_level=ws2f.level_at(fw),
         field="free",
         phase=metrology.SequentialComparisonPhase(
             reference_sensitivity_phase_deg=np.degrees(np.angle(m_ref)),
@@ -2127,10 +2134,10 @@ def _pressure_phase_comparison() -> "ComparisonCalibration":
     p12 = (phi_ref + shift_1) - (phi_true + shift_2) + late_a + jitter[0]
     p21 = (phi_true + shift_1) - (phi_ref + shift_2) + late_a + jitter[1]
     return metrology.simultaneous_comparison(
-        f,
-        l_ref,
-        l_c12,
-        l_c21,
+        frequencies=f,
+        reference_sensitivity_level=l_ref,
+        channel_difference=l_c12,
+        interchanged_channel_difference=l_c21,
         phase=metrology.SimultaneousComparisonPhase(
             reference_sensitivity_phase_deg=phi_ref,
             channel_phase_difference_deg=p12,

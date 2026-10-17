@@ -71,7 +71,7 @@ fT = [118.4, 137.3, 158.8, 314.9, 433.4, 592.2, 629.8, 643.3, 1582.7]
 LT = [64.56, 67.96, 68.63, 68.50, 73.17, 78.31, 75.00, 79.75, 71.07]
 LS = [48.91, 49.22, 50.50, 52.85, 58.29, 59.53, 59.71, 61.98, 54.16]
 
-res = psychoacoustics.assess_tones(fT, LT, LS, 2.7)
+res = psychoacoustics.assess_tones(LT, LS, 2.7, tone_frequencies=fT)
 print(round(res.decisive_audibility, 2), res.decisive_frequency)  # 5.01 137.3
 res.plot(language="es")   # barras de audibilidad por tono, con el tono decisivo resaltado
 plt.show()
@@ -91,8 +91,8 @@ IEC 61672-1 con una frecuencia límite inferior de 20 Hz o menos, un filtro
 antialiasing antes de la digitalización y una resolución de amplitud de al
 menos 0,1 dB. La separación constante entre líneas $\Delta f$ debe estar entre
 1,9 Hz y 4,0 Hz, ambas incluidas: los 2,7 Hz del ejemplo del Anexo E caen en
-mitad de esa ventana, que es lo que lleva `assess_tones(..., 2.7)` en su último
-argumento. La ventana de Hanning es *obligatoria*, y de ahí sale la corrección
+mitad de esa ventana, que es lo que lleva `assess_tones(LT, LS, 2.7, ...)` como
+separación entre líneas. La ventana de Hanning es *obligatoria*, y de ahí sale la corrección
 de ancho de banda de −1,76 dB del §2: otra ventana tiene otro ancho de banda
 efectivo, así que esa constante, y con ella todos los niveles de la cadena,
 quedarían mal.
@@ -237,7 +237,7 @@ from phonometry import psychoacoustics
 fT = [118.4, 137.3, 158.8, 314.9, 433.4, 592.2, 629.8, 643.3, 1582.7]
 LT = [64.56, 67.96, 68.63, 68.50, 73.17, 78.31, 75.00, 79.75, 71.07]
 LS = [48.91, 49.22, 50.50, 52.85, 58.29, 59.53, 59.71, 61.98, 54.16]
-res = psychoacoustics.assess_tones(fT, LT, LS, 2.7)
+res = psychoacoustics.assess_tones(LT, LS, 2.7, tone_frequencies=fT)
 print(round(res.decisive_audibility, 2), res.decisive_frequency)  # 5.01 137.3
 
 # Los cinco espectros de la campaña del Anexo E, valorados con el Paso 3
@@ -284,7 +284,7 @@ from phonometry import psychoacoustics
 fT = [118.4, 137.3, 158.8, 314.9, 433.4, 592.2, 629.8, 643.3, 1582.7]
 LT = [64.56, 67.96, 68.63, 68.50, 73.17, 78.31, 75.00, 79.75, 71.07]
 LS = [48.91, 49.22, 50.50, 52.85, 58.29, 59.53, 59.71, 61.98, 54.16]
-res = psychoacoustics.assess_tones(fT, LT, LS, 2.7)
+res = psychoacoustics.assess_tones(LT, LS, 2.7, tone_frequencies=fT)
 
 # En una línea: la vista de niveles, la misma que incrusta la ficha .report().
 res.plot(view="levels", language="es")
@@ -385,8 +385,8 @@ levels = [49.40, 50.68, 50.09, 53.37, 44.47, 50.91, 51.41, 59.40, 64.54, 57.57,
           52.58, 53.15, 67.04, 67.27, 57.40, 57.17, 52.56, 51.39, 52.49, 47.68,
           51.26, 49.03, 61.42, 59.52, 48.43, 50.84, 48.20, 55.95]
 
-ls = psychoacoustics.mean_narrowband_level(levels, freqs, 137.3)
-lt = psychoacoustics.tone_level(levels, freqs, 137.3, ls)
+ls = psychoacoustics.mean_narrowband_level(levels, 137.3, frequencies=freqs)
+lt = psychoacoustics.tone_level(levels, 137.3, ls, frequencies=freqs)
 print(round(ls, 2), round(lt, 2))                         # 49.22 67.96
 print(round(psychoacoustics.tone_audibility(lt, ls, 137.3, 2.7), 2))   # 5.01 dB
 ```
@@ -422,7 +422,7 @@ levels = [49.40, 50.68, 50.09, 53.37, 44.47, 50.91, 51.41, 59.40, 64.54, 57.57,
           51.26, 49.03, 61.42, 59.52, 48.43, 50.84, 48.20, 55.95]
 
 # El mismo espectro de la Tabla E.1 de arriba.
-res = psychoacoustics.analyze_spectrum(levels, freqs, 2.7)
+res = psychoacoustics.analyze_spectrum(levels, 2.7, frequencies=freqs)
 singles = res.group_sizes == 1
 print([round(f, 1) for f in res.tone_frequencies[singles]])  # [118.4, 137.3, 158.8]
 
@@ -431,8 +431,8 @@ fg = res.group_sizes > 1
 print(int(res.group_sizes[fg][0]), round(float(res.tone_levels[fg][0]), 2))  # 3 72.15
 
 # La misma combinación de la Fórmula 17, llamada directamente (LS de la Tabla E.2):
-lt_fg = psychoacoustics.combined_tone_level(levels, freqs, [118.4, 137.3, 158.8],
-                               [48.91, 49.22, 50.50])
+lt_fg = psychoacoustics.combined_tone_level(levels, [48.91, 49.22, 50.50], frequencies=freqs,
+                                            tone_frequencies=[118.4, 137.3, 158.8])
 print(round(lt_fg, 2))                                # 72.15
 
 res.plot()   # las entradas detectadas, grupos FG incluidos, como barras de audibilidad
@@ -549,7 +549,7 @@ decimal de coma), p. ej. `res.report("tone_fiche_es.pdf", language="es")`.
 from phonometry import psychoacoustics, ReportMetadata
 
 # El espectro del motor de combustión del §4/§5 (analyze_spectrum).
-res = psychoacoustics.analyze_spectrum(levels, freqs, 2.7)
+res = psychoacoustics.analyze_spectrum(levels, 2.7, frequencies=freqs)
 res.report(
     "tone_fiche.pdf",
     metadata=ReportMetadata(

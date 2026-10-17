@@ -611,7 +611,7 @@ def _check_resolution(frequencies: NDArray[np.float64]) -> float:
 
 
 def third_octaves_from_narrowband(
-    frequencies: ArrayLike, psd: ArrayLike
+    psd: ArrayLike, *, frequencies: ArrayLike
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     r"""Add a narrow-band spectrum back into third octaves, Formula (23).
 

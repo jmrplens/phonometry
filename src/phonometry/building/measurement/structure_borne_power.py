@@ -147,7 +147,7 @@ def spatial_mean_velocity_level(levels: ArrayLike) -> float:
 
 
 def plate_loss_factor(
-    frequency: ArrayLike, reverberation_time: ArrayLike
+    reverberation_time: ArrayLike, *, frequency: ArrayLike
 ) -> np.ndarray:
     r"""Plate loss factor :math:`\eta = 2.2 / (f\, T_\mathrm{s})` (EN 15657, Formula 13).
 
@@ -160,16 +160,16 @@ def plate_loss_factor(
     """
     f = np.asarray(frequency, dtype=np.float64)
     ts = np.asarray(reverberation_time, dtype=np.float64)
-    return total_loss_factor(f, ts)
+    return total_loss_factor(frequencies=f, structural_reverberation_time=ts)
 
 
 def structure_borne_power_level(
     velocity_level: ArrayLike,
-    frequency: ArrayLike,
     mass_per_area: float,
     area: float,
     loss_factor: ArrayLike,
     *,
+    frequency: ArrayLike,
     reference_velocity: float = _REFERENCE_VELOCITY,
 ) -> np.ndarray:
     r"""Structure-borne power injected into the reception plate (EN 15657, Formula 14).
@@ -377,10 +377,10 @@ class StructureBornePowerResult(OwnsArrays):
 
 def reception_plate_power(
     velocity_level: ArrayLike,
-    frequency: ArrayLike,
     mass_per_area: float,
     area: float,
     *,
+    frequency: ArrayLike,
     loss_factor: ArrayLike | None = None,
     reverberation_time: ArrayLike | None = None,
 ) -> StructureBornePowerResult:
@@ -412,11 +412,16 @@ def reception_plate_power(
     if loss_factor is not None:
         eta = require_per_band(loss_factor, "loss_factor", freq, "frequency")
     elif reverberation_time is not None:
-        eta = np.asarray(plate_loss_factor(freq, reverberation_time), dtype=np.float64)
+        eta = np.asarray(
+            plate_loss_factor(frequency=freq, reverberation_time=reverberation_time),
+            dtype=np.float64,
+        )
     else:
         msg = "provide either 'loss_factor' or 'reverberation_time'."
         raise ValueError(msg)
-    lw = structure_borne_power_level(lv, freq, mass_per_area, area, eta)
+    lw = structure_borne_power_level(
+        lv, frequency=freq, mass_per_area=mass_per_area, area=area, loss_factor=eta
+    )
     return StructureBornePowerResult(
         power_level=np.asarray(lw, dtype=np.float64),
         velocity_level=lv,

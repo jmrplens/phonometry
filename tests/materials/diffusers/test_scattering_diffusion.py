@@ -715,7 +715,9 @@ def test_scattering_spectrum_recomputes_s_per_band() -> None:
     freqs = np.array([250.0, 500.0, 1000.0, 2000.0, 4000.0])
     alpha_spec = np.array([0.12, 0.25, 0.40, 0.60, 0.80])
     alpha_s = np.array([0.10, 0.11, 0.12, 0.13, 0.14])
-    result = scattering_coefficient_spectrum(freqs, alpha_spec, alpha_s)
+    result = scattering_coefficient_spectrum(
+        frequencies=freqs, specular_absorption=alpha_spec, random_absorption=alpha_s
+    )
 
     # Independent re-derivation of Eq. (5) per band.
     expected = (alpha_spec - alpha_s) / (1.0 - alpha_s)
@@ -734,19 +736,27 @@ def test_scattering_spectrum_shape_mismatch_raises() -> None:
             r".*'specular_absorption' .*same shape"
         ),
     ):
-        scattering_coefficient_spectrum([250.0, 500.0], [0.2], [0.1])
+        scattering_coefficient_spectrum(
+            frequencies=[250.0, 500.0],
+            specular_absorption=[0.2],
+            random_absorption=[0.1],
+        )
 
 
 def test_scattering_spectrum_empty_raises() -> None:
     with pytest.raises(ValueError, match="'frequencies' must be a non-empty 1-D"):
-        scattering_coefficient_spectrum([], [], [])
+        scattering_coefficient_spectrum(
+            frequencies=[], specular_absorption=[], random_absorption=[]
+        )
 
 
 def test_scattering_spectrum_rejects_2d_input() -> None:
     # frequencies is documented 1-D; equal-shaped 2-D arrays must be rejected.
     two_d = [[250.0, 500.0], [1000.0, 2000.0]]
     with pytest.raises(ValueError, match="'frequencies' must be a non-empty 1-D"):
-        scattering_coefficient_spectrum(two_d, two_d, two_d)
+        scattering_coefficient_spectrum(
+            frequencies=two_d, specular_absorption=two_d, random_absorption=two_d
+        )
 
 
 def test_scattering_result_rejects_an_empty_spectrum() -> None:
@@ -801,7 +811,9 @@ def test_scattering_spectrum_plot_returns_axes() -> None:
     import matplotlib.pyplot as plt
 
     result = scattering_coefficient_spectrum(
-        [250.0, 500.0, 1000.0], [0.2, 0.3, 0.5], [0.1, 0.1, 0.1]
+        frequencies=[250.0, 500.0, 1000.0],
+        specular_absorption=[0.2, 0.3, 0.5],
+        random_absorption=[0.1, 0.1, 0.1],
     )
     ax = result.plot()
     assert isinstance(ax, plt.Axes)
@@ -912,7 +924,7 @@ def test_diffusion_spectrum_builds_and_carries_fields() -> None:
     freqs = [250.0, 500.0, 1000.0]
     d = [0.3, 0.5, 0.7]
     d_n = [0.2, 0.4, 0.6]
-    result = diffusion_spectrum(freqs, d, normalized=d_n)
+    result = diffusion_spectrum(frequencies=freqs, diffusion=d, normalized=d_n)
     assert isinstance(result, DiffusionSpectrum)
     np.testing.assert_allclose(result.frequencies, freqs)
     np.testing.assert_allclose(result.diffusion, d)
@@ -920,30 +932,32 @@ def test_diffusion_spectrum_builds_and_carries_fields() -> None:
 
 
 def test_diffusion_spectrum_optional_fields_default_none() -> None:
-    result = diffusion_spectrum([250.0, 500.0], [0.3, 0.5])
+    result = diffusion_spectrum(frequencies=[250.0, 500.0], diffusion=[0.3, 0.5])
     assert result.normalized is None
 
 
 def test_diffusion_spectrum_length_mismatch_raises() -> None:
     with pytest.raises(ValueError, match=r"diffusion_spectrum: .*'diffusion'.*shape"):
-        diffusion_spectrum([250.0, 500.0], [0.3])
+        diffusion_spectrum(frequencies=[250.0, 500.0], diffusion=[0.3])
 
 
 def test_diffusion_spectrum_empty_raises() -> None:
     with pytest.raises(ValueError, match="'frequencies' must be a non-empty 1-D"):
-        diffusion_spectrum([], [])
+        diffusion_spectrum(frequencies=[], diffusion=[])
 
 
 def test_diffusion_spectrum_rejects_2d_input() -> None:
     # frequencies is documented 1-D; equal-shaped 2-D arrays must be rejected.
     two_d = [[250.0, 500.0], [1000.0, 2000.0]]
     with pytest.raises(ValueError, match="'frequencies' must be a non-empty 1-D"):
-        diffusion_spectrum(two_d, two_d)
+        diffusion_spectrum(frequencies=two_d, diffusion=two_d)
 
 
 def test_diffusion_spectrum_normalized_mismatch_raises() -> None:
     with pytest.raises(ValueError, match=r"diffusion_spectrum: .*'normalized'.*shape"):
-        diffusion_spectrum([250.0, 500.0], [0.3, 0.5], normalized=[0.2])
+        diffusion_spectrum(
+            frequencies=[250.0, 500.0], diffusion=[0.3, 0.5], normalized=[0.2]
+        )
 
 
 def test_diffusion_spectrum_rejects_an_empty_spectrum() -> None:
@@ -1007,7 +1021,9 @@ def test_diffusion_spectrum_plot_returns_axes() -> None:
     import matplotlib.pyplot as plt
 
     result = diffusion_spectrum(
-        [250.0, 500.0, 1000.0], [0.3, 0.5, 0.7], normalized=[0.2, 0.4, 0.6]
+        frequencies=[250.0, 500.0, 1000.0],
+        diffusion=[0.3, 0.5, 0.7],
+        normalized=[0.2, 0.4, 0.6],
     )
     ax = result.plot()
     assert isinstance(ax, plt.Axes)

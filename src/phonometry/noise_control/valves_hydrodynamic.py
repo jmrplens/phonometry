@@ -64,7 +64,7 @@ from __future__ import annotations
 
 import math
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
@@ -1429,6 +1429,7 @@ class LiquidPipe(RichDisplay):
     internal_diameter_m: float
     wall_thickness_m: float
     density: float
+    _: KW_ONLY
     speed_of_sound: float = PIPE_SPEED_OF_SOUND_M_S
     air_density: float = AIR_DENSITY_KG_M3
     air_sound_speed: float = AIR_SPEED_OF_SOUND_M_S

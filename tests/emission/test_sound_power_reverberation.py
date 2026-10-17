@@ -72,7 +72,7 @@ def test_direct_method_exact_inversion() -> None:
         t60,
         volume,
         surface,
-        freqs,
+        frequencies=freqs,
         temperature_c=theta,
         static_pressure_kpa=ps,
     )
@@ -89,7 +89,9 @@ def test_direct_method_multi_position_energy_average() -> None:
     levels = np.array([[80.0], [86.0]])
     with warnings.catch_warnings():  # 2 positions trip the qualification advisories
         warnings.simplefilter("ignore", emission.SoundPowerWarning)
-        res = emission.sound_power_reverberation(levels, t60, volume, surface, freqs)
+        res = emission.sound_power_reverberation(
+            levels, t60, volume, surface, frequencies=freqs
+        )
     mean = 10.0 * np.log10((10**8.0 + 10**8.6) / 2.0)
     assert np.isclose(res.mean_pressure_level[0], mean)
 
@@ -103,7 +105,9 @@ def test_waterhouse_term_vanishes_at_high_frequency() -> None:
     freqs = np.array([100.0, 1000.0, 10000.0, 1.0e7])
     t60 = np.full(freqs.shape, 1.5)
     lp = np.full(freqs.shape, 80.0)
-    res = emission.sound_power_reverberation(lp, t60, volume, surface, freqs)
+    res = emission.sound_power_reverberation(
+        lp, t60, volume, surface, frequencies=freqs
+    )
     w = res.waterhouse_correction
     assert np.all(np.diff(w) < 0.0)  # strictly decreasing with frequency
     assert w[0] > w[-1]
@@ -202,7 +206,9 @@ def test_synergy_room_parameters_feeds_direct_method() -> None:
     assert np.all(np.isfinite(t60_bands))
 
     lp = np.full(freqs.shape, 80.0)
-    res = emission.sound_power_reverberation(lp, t60_bands, 200.0, 210.0, freqs)
+    res = emission.sound_power_reverberation(
+        lp, t60_bands, 200.0, 210.0, frequencies=freqs
+    )
     assert res.sound_power_level.shape == freqs.shape
     assert np.all(np.isfinite(res.sound_power_level))
 
@@ -222,7 +228,7 @@ def test_background_correction_reduces_level_and_warns_below_criterion() -> None
             t60,
             200.0,
             210.0,
-            freqs,
+            frequencies=freqs,
             background_levels=background,
         )
     assert res.background_correction[0] > 0.0
@@ -254,7 +260,7 @@ def test_background_correction_is_per_position_eq14_to_16() -> None:
             t60,
             200.0,
             210.0,
-            freqs,
+            frequencies=freqs,
             background_levels=background,
         )
     assert res.mean_pressure_level[0] == pytest.approx(69.3887156232, abs=1e-9)
@@ -274,7 +280,7 @@ def test_background_single_spectrum_broadcasts_to_positions() -> None:
             t60,
             200.0,
             210.0,
-            freqs,
+            frequencies=freqs,
             background_levels=np.array([60.0]),
         )
     with pytest.warns(emission.SoundPowerWarning):
@@ -283,7 +289,7 @@ def test_background_single_spectrum_broadcasts_to_positions() -> None:
             t60,
             200.0,
             210.0,
-            freqs,
+            frequencies=freqs,
             background_levels=np.full((6, 1), 60.0),
         )
     assert res_1d.mean_pressure_level[0] == pytest.approx(
@@ -306,7 +312,7 @@ def test_background_shape_mismatch_raises() -> None:
             t60,
             200.0,
             210.0,
-            freqs,
+            frequencies=freqs,
             background_levels=mismatched_background,
         )
 
@@ -325,7 +331,7 @@ def test_background_band_mismatch_1d_levels_raises() -> None:
             1.0,
             200.0,
             210.0,
-            freqs,
+            frequencies=freqs,
             background_levels=np.zeros(3),
         )
 
@@ -341,7 +347,7 @@ def test_preaveraged_1d_levels_keep_single_k1_path() -> None:
         t60,
         200.0,
         210.0,
-        freqs,
+        frequencies=freqs,
         background_levels=np.array([70.0]),  # margin 10 dB, no clamp
     )
     k1 = -10.0 * np.log10(1.0 - 10.0 ** (-0.1 * 10.0))
@@ -393,7 +399,7 @@ def test_a_weighted_total_from_bands() -> None:
     freqs = np.array([500.0, 1000.0, 2000.0])
     t60 = np.full(freqs.shape, 1.5)
     lp = np.full(freqs.shape, 80.0)
-    res = emission.sound_power_reverberation(lp, t60, 200.0, 210.0, freqs)
+    res = emission.sound_power_reverberation(lp, t60, 200.0, 210.0, frequencies=freqs)
     assert np.isfinite(res.sound_power_level_a)
     # A-weighted total is an energy sum >= the largest single weighted band.
     assert res.sound_power_level_a > np.max(res.sound_power_level) - 10.0
@@ -407,7 +413,7 @@ def test_invalid_volume_raises() -> None:
     with pytest.raises(
         ValueError, match=r"'volume' and 'surface_area' must be positive"
     ):
-        emission.sound_power_reverberation(lp, t60, -1.0, 210.0, freqs)
+        emission.sound_power_reverberation(lp, t60, -1.0, 210.0, frequencies=freqs)
 
 
 def test_non_finite_room_and_band_inputs_are_refused() -> None:
@@ -425,22 +431,24 @@ def test_non_finite_room_and_band_inputs_are_refused() -> None:
     with pytest.raises(
         ValueError, match=r"'volume' and 'surface_area' must be positive"
     ):
-        emission.sound_power_reverberation(lp, t60, not_a_number, 210.0, freqs)
+        emission.sound_power_reverberation(
+            lp, t60, not_a_number, 210.0, frequencies=freqs
+        )
     with pytest.raises(
         ValueError, match=r"'volume' and 'surface_area' must be positive"
     ):
-        emission.sound_power_reverberation(lp, t60, 200.0, infinity, freqs)
+        emission.sound_power_reverberation(lp, t60, 200.0, infinity, frequencies=freqs)
     with pytest.raises(ValueError, match=r"'t60' values must be positive"):
         emission.sound_power_reverberation(
-            lp, np.array([infinity]), 200.0, 210.0, freqs
+            lp, np.array([infinity]), 200.0, 210.0, frequencies=freqs
         )
     with pytest.raises(ValueError, match=r"'t60' values must be positive"):
         emission.sound_power_reverberation(
-            lp, np.array([not_a_number]), 200.0, 210.0, freqs
+            lp, np.array([not_a_number]), 200.0, 210.0, frequencies=freqs
         )
     with pytest.raises(ValueError, match=r"'frequencies' must contain only finite"):
         emission.sound_power_reverberation(
-            lp, t60, 200.0, 210.0, np.array([not_a_number])
+            lp, t60, 200.0, 210.0, frequencies=np.array([not_a_number])
         )
 
 
@@ -451,14 +459,16 @@ def test_octave_band_levels_refuses_a_non_finite_frequency() -> None:
     infinity = float("inf")
     thirds = np.array([infinity, 1000.0, 1250.0])
     with pytest.raises(ValueError, match=r"'frequencies' must contain only finite"):
-        emission.octave_band_levels(np.full(3, 80.0), thirds)
+        emission.octave_band_levels(np.full(3, 80.0), frequencies=thirds)
 
 
 def test_mismatched_shapes_raise() -> None:
     two_bands = np.array([80.0, 81.0])  # 2 levels against 1 band of T60/freq
     t60, freqs = np.array([1.5]), np.array([1000.0])
     with pytest.raises(ValueError, match="'frequencies' length must match"):
-        emission.sound_power_reverberation(two_bands, t60, 200.0, 210.0, freqs)
+        emission.sound_power_reverberation(
+            two_bands, t60, 200.0, 210.0, frequencies=freqs
+        )
 
 
 # --------------------------------------------------------------------------
@@ -475,7 +485,7 @@ def test_direct_method_invalid_temperature_raises(theta: float) -> None:
             t60,
             200.0,
             210.0,
-            freqs,
+            frequencies=freqs,
             temperature_c=theta,
         )
 
@@ -491,7 +501,7 @@ def test_direct_method_invalid_pressure_raises(ps: float) -> None:
             t60,
             200.0,
             210.0,
-            freqs,
+            frequencies=freqs,
             static_pressure_kpa=ps,
         )
 
@@ -528,7 +538,7 @@ def test_volume_below_table1_minimum_warns() -> None:
         emission.SoundPowerWarning,
         match=r"Room volume .+ is below the ISO 3741 Table 1 minimum",
     ):
-        emission.sound_power_reverberation(lp, t60, 150.0, 210.0, freqs)
+        emission.sound_power_reverberation(lp, t60, 150.0, 210.0, frequencies=freqs)
 
 
 def test_t60_below_v_over_s_floor_warns() -> None:
@@ -538,7 +548,7 @@ def test_t60_below_v_over_s_floor_warns() -> None:
     t60 = np.array([0.5])
     lp = np.array([80.0])
     with pytest.warns(emission.SoundPowerWarning, match="V/S floor"):
-        emission.sound_power_reverberation(lp, t60, 200.0, 210.0, freqs)
+        emission.sound_power_reverberation(lp, t60, 200.0, 210.0, frequencies=freqs)
 
 
 def test_fewer_than_six_positions_warns() -> None:
@@ -550,7 +560,7 @@ def test_fewer_than_six_positions_warns() -> None:
         emission.SoundPowerWarning,
         match=r"microphone position\(s\) were supplied; an unqualified reverberation room requires",
     ):
-        emission.sound_power_reverberation(levels, t60, 200.0, 210.0, freqs)
+        emission.sound_power_reverberation(levels, t60, 200.0, 210.0, frequencies=freqs)
 
 
 def test_interposition_std_above_criterion_warns() -> None:
@@ -563,7 +573,7 @@ def test_interposition_std_above_criterion_warns() -> None:
         emission.SoundPowerWarning,
         match=r"Inter-position standard deviation exceeds the ISO 3741 sM criterion",
     ):
-        emission.sound_power_reverberation(levels, t60, 200.0, 210.0, freqs)
+        emission.sound_power_reverberation(levels, t60, 200.0, 210.0, frequencies=freqs)
 
 
 def test_qualified_room_emits_no_warning() -> None:
@@ -576,7 +586,7 @@ def test_qualified_room_emits_no_warning() -> None:
     )
     with warnings.catch_warnings():
         warnings.simplefilter("error", emission.SoundPowerWarning)
-        emission.sound_power_reverberation(levels, t60, 200.0, 210.0, freqs)
+        emission.sound_power_reverberation(levels, t60, 200.0, 210.0, frequencies=freqs)
 
 
 # --------------------------------------------------------------------------
@@ -678,7 +688,7 @@ def test_background_levels_of_the_wrong_shape_name_themselves(
             np.full(6, 1.5),
             200.0,
             220.0,
-            frequencies,
+            frequencies=frequencies,
             background_levels=background,
         )
 
@@ -717,7 +727,7 @@ def test_per_band_columns_must_share_one_band_axis(field: str) -> None:
         [1.6, 1.5, 1.4, 1.1],
         200.0,
         220.0,
-        [250.0, 500.0, 1000.0, 2000.0],
+        frequencies=[250.0, 500.0, 1000.0, 2000.0],
     )
     column = np.asarray(getattr(good, field), dtype=np.float64)
     surplus = np.append(column, column[-1])

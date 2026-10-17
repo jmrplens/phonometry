@@ -251,7 +251,7 @@ frequencies = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0, 80.0])
 measured = np.abs(vibration.kb_weighting_response(frequencies))
 measured[5] *= 1.15  # un vibrómetro un 15 % alto en 31,5 Hz
 
-result = vibration.verify_vibration_meter(frequencies, measured)
+result = vibration.verify_vibration_meter(measured, frequencies=frequencies)
 print(f"cumple: {result.passes}")                          # False
 print(f"peor frecuencia: {result.worst_frequency_hz} Hz")  # 31.5 Hz
 ```

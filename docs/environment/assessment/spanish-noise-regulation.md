@@ -45,7 +45,7 @@ from phonometry import environment
 freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000]
 levels = [58.0, 60.0, 59.0, 61.0, 72.0, 62.0, 60.0, 58.0, 56.0, 54.0, 52.0]
 
-kt = environment.tonal_correction(levels, freqs)
+kt = environment.tonal_correction(levels, frequencies=freqs)
 kt.correction              # 6 dB
 kt.governing_frequency     # 250.0 Hz
 kt.differences[4]          # Lt = 10.5 dB above the mean of the neighbours

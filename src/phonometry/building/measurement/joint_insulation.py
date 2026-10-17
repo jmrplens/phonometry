@@ -493,7 +493,9 @@ class LaboratoryJointInsulationResult(OwnsArrays):
         against the octave band, and the form is that of ISO 717-1:2020
         Formula (D.1).
         """
-        return improvement_octave_bands(self.r_s, self.frequencies, quantity="Rs")
+        return improvement_octave_bands(
+            self.r_s, frequencies=self.frequencies, quantity="Rs"
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -618,8 +620,8 @@ def _correct(
 def laboratory_joint_insulation(
     r_s_prime: ArrayLike,
     r_s_max: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     joint_length_m: float | None = None,
     limit_at_max: bool = True,
 ) -> LaboratoryJointInsulationResult:
@@ -697,7 +699,7 @@ def laboratory_joint_insulation(
     if core is not None:
         rating = weighted_rating(r_s[core])
         max_rating = weighted_rating(maximum[core])
-        extended = weighted_rating_extended(r_s, freqs)
+        extended = weighted_rating_extended(r_s, frequencies=freqs)
         c_wide = None if extended.c_100_5000 is None else int(extended.c_100_5000)
         ctr_wide = None if extended.ctr_100_5000 is None else int(extended.ctr_100_5000)
         open_mask = _indicative_bands(measured, maximum)

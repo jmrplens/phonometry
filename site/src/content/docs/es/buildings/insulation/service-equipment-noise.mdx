@@ -302,7 +302,7 @@ t = np.array([np.nan, np.nan, np.nan, 0.82, 0.78, 0.74, 0.70, 0.66, 0.63,
               0.60, 0.58, 0.56, 0.55, 0.54, 0.53, 0.52, 0.51, 0.50, 0.49,
               0.48, 0.47, 0.46, 0.45, 0.44, np.nan, np.nan, np.nan])
 res = building.service_equipment_level(
-    readings, freqs, quantity="eq",
+    readings, frequencies=freqs, quantity="eq",
     background_db=background, reverberation_time=t, volume=35.7,
 )
 print(res.ratings["LA,eq"], res.ratings["LA,eq,nT"], res.ratings["LC,eq,nT"])

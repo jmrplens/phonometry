@@ -168,7 +168,9 @@ def _chk_smoothing_line_level() -> Outcome:
     power = np.zeros_like(f)
     i0 = 999  # 1000 Hz
     power[i0] = 5.0
-    out = ph.signals.fractional_octave_smoothing(f, power, 3.0)
+    out = ph.signals.fractional_octave_smoothing(
+        frequencies=f, values=power, fraction=3.0
+    )
     width = 1000.0 * (2.0 ** (1.0 / 6.0) - 2.0 ** (-1.0 / 6.0))
     return numeric(5.0 / width, float(out[i0]), 1e-9, rel=True, places=6)
 

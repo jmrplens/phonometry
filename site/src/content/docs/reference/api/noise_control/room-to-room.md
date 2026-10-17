@@ -125,11 +125,11 @@ not model.
 
 ```python
 room_to_room_transmission(
-    frequencies: ArrayLike,
     transmission_loss: ArrayLike,
     partition_area: float,
     receiving_absorption: ArrayLike,
     *,
+    frequencies: ArrayLike,
     source: SourceRoom | None = None,
     include_partition_transmission: bool = False,
     criterion: DesignCriterion | None = None,

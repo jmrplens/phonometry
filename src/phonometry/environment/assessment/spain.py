@@ -501,8 +501,7 @@ def _band_tonal_corrections(
 
 
 def tonal_correction(
-    levels: Sequence[float] | np.ndarray,
-    frequencies: Sequence[float] | np.ndarray,
+    levels: Sequence[float] | np.ndarray, *, frequencies: Sequence[float] | np.ndarray
 ) -> TonalCorrectionResult:
     r"""Tonal correction ``Kt`` from a one-third-octave spectrum (Annex IV A.3.3).
 

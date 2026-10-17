@@ -122,7 +122,7 @@ def test_indirect_method_labels_blocking_mass(tmp_path: Path) -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error", PhonometryWarning)
         res = vibration.indirect_transfer_stiffness_result(
-            freqs, transmissibility, blocking_mass=50.0
+            frequencies=freqs, transmissibility=transmissibility, blocking_mass=50.0
         )
     out = tmp_path / "indirect.pdf"
     res.report(str(out))
@@ -155,8 +155,8 @@ def test_non_finite_transfer_stiffness_is_refused(bad: float) -> None:
             ValueError, match=r"'transfer_stiffness' must contain only finite"
         ):
             vibration.indirect_transfer_stiffness_result(
-                np.array([10.0, 20.0, 40.0]),
-                transmissibility,
+                frequencies=np.array([10.0, 20.0, 40.0]),
+                transmissibility=transmissibility,
                 blocking_mass=50.0,
             )
 
@@ -279,7 +279,9 @@ def test_the_headline_is_read_at_the_lowest_valid_line(tmp_path: Path) -> None:
     t = vibration.base_transmissibility(f, mass=8.0, stiffness=_K, damping=120.0)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", vibration.TransferStiffnessWarning)
-        res = vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
+        res = vibration.indirect_transfer_stiffness_result(
+            frequencies=f, transmissibility=t, blocking_mass=8.0
+        )
     assert res.valid is not None
     first = int(np.flatnonzero(res.valid)[0])
     assert float(f[first]) == pytest.approx(188.0)

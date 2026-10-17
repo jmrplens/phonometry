@@ -152,8 +152,8 @@ AM_SAMPLE_INTERVAL_S = 0.1
 ```python
 amplitude_modulation_band_levels(
     band_levels: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     band: int,
     weighting: Literal['A', 'Z'],
 ) -> NDArray[np.float64]

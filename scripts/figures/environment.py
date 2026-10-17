@@ -166,7 +166,9 @@ def generate_wind_turbine_tonality(output_dir: str) -> None:
     tone_bin = int(np.argmin(np.abs(freqs - 200.0)))
     levels = floor.copy()
     levels[tone_bin] += 22.0
-    res = environment.wind_turbine_tonality(levels, freqs, tone_frequency=200.0)
+    res = environment.wind_turbine_tonality(
+        levels, frequencies=freqs, tone_frequency=200.0
+    )
 
     _fig, ax = plt.subplots(figsize=(10, 6))
     band_lo, band_hi = _critical_band_edges(res.tone_frequency)
@@ -3037,7 +3039,7 @@ def generate_rd1367_tonal_correction(output_dir: str) -> None:
 
     freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000]
     levels = [58.0, 60.0, 59.0, 61.0, 72.0, 62.0, 60.0, 58.0, 56.0, 54.0, 52.0]
-    result = environment.tonal_correction(levels, freqs)
+    result = environment.tonal_correction(levels, frequencies=freqs)
     _fig, ax = plt.subplots(figsize=(11, 6.4))
     result.plot(ax=ax, language=_LANG)
     plt.tight_layout()
@@ -3133,8 +3135,10 @@ def generate_rd1367_vs_iso_tonal(output_dir: str) -> None:
         (axes[0], deep, r"$L_{\mathrm{t}}$ = 10.5 dB: both methods agree"),
         (axes[1], shallow, r"$L_{\mathrm{t}}$ = 7.5 dB: the verdicts split"),
     ):
-        rd = environment.tonal_correction(spectrum, freqs)
-        flags = np.asarray(environment.assess_tonal_survey(spectrum, freqs).prominent)
+        rd = environment.tonal_correction(spectrum, frequencies=freqs)
+        flags = np.asarray(
+            environment.assess_tonal_survey(spectrum, frequencies=freqs).prominent
+        )
         colors = [
             COLOR_SECONDARY if i == 4 else COLOR_PRIMARY for i in range(spectrum.size)
         ]

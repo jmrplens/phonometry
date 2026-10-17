@@ -77,9 +77,9 @@ be dimensionally consistent with the $4 \pi$ factor.
 
 ```python
 diffusion_spectrum(
-    frequencies: ArrayLike,
     diffusion: ArrayLike,
     *,
+    frequencies: ArrayLike,
     normalized: ArrayLike | None = None,
 ) -> DiffusionSpectrum
 ```
@@ -396,8 +396,8 @@ to 0 and $d_\theta = 1$ to 1.
 
 ```python
 plot_goniometer_geometry(
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     source_distance: float = 10.0,
     receiver_radius: float = 5.0,
     angular_step: float = 5.0,

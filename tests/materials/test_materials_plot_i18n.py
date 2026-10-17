@@ -81,13 +81,20 @@ def _measurement() -> materials.SoundAbsorptionMeasurement:
     t1 = np.array([7.8, 7.4, 6.9, 5.8, 4.6])
     t2 = np.array([6.5, 4.2, 2.85, 2.5, 2.7])
     return measure_sound_absorption(
-        freqs, t1, t2, volume=200.0, area=10.8, temperature_c=20.0
+        frequencies=freqs,
+        t_empty=t1,
+        t_specimen=t2,
+        volume=200.0,
+        area=10.8,
+        temperature_c=20.0,
     )
 
 
 def _scattering() -> materials.ScatteringResult:
     return scattering_coefficient_spectrum(
-        [250.0, 500.0, 1000.0], [0.2, 0.3, 0.5], [0.1, 0.1, 0.1]
+        frequencies=[250.0, 500.0, 1000.0],
+        specular_absorption=[0.2, 0.3, 0.5],
+        random_absorption=[0.1, 0.1, 0.1],
     )
 
 
@@ -129,7 +136,7 @@ def _static_airflow() -> materials.StaticAirflowResult:
 def _uncertainty() -> materials.AbsorptionUncertaintyResult:
     freqs = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
     alpha = [0.15, 0.35, 0.55, 0.70, 0.80, 0.85]
-    return materials.sound_absorption_coefficient_uncertainty(alpha, freqs)
+    return materials.sound_absorption_coefficient_uncertainty(alpha, frequencies=freqs)
 
 
 def _porous_medium() -> materials.PorousMediumResult:

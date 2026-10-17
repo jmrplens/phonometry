@@ -114,6 +114,7 @@ Equivalent continuous sound level (Leq) over the whole signal.
 lex_8h(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
+    *,
     duration_hours: float | None = None,
     calibration_factor: float | None = None,
 ) -> float | np.ndarray
@@ -210,6 +211,7 @@ reference responses, Equation 8, in the test suite).
 sound_exposure(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
+    *,
     duration_hours: float | None = None,
     calibration_factor: float | None = None,
 ) -> float | np.ndarray

@@ -450,8 +450,8 @@ def _validate_branch_geometry(
 
 def plot_silencer_geometry(
     kind: str,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     length: float | None = None,
     chamber_area: float | None = None,
     pipe_area: float | None = None,
@@ -463,6 +463,7 @@ def plot_silencer_geometry(
     cavity_volume: float | None = None,
     branch_area: float | None = None,
     language: str = "en",
+    **kwargs: Any,
 ) -> Axes:
     """Draw a reactive silencer cross-section to scale.
 
@@ -487,6 +488,8 @@ def plot_silencer_geometry(
     :param cavity_volume: Cavity volume, in m3 (Helmholtz).
     :param branch_area: Branch tube cross-section, in m2 (quarter-wave).
     :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the outline of the main bore: the chamber
+        shell of a chamber, the duct of a side branch.
     :return: The axes.
     """
     _check_language(language)
@@ -523,6 +526,7 @@ def plot_silencer_geometry(
             language,
             inlet_extension=inlet_extension,
             outlet_extension=outlet_extension,
+            **kwargs,
         )
     else:
         _draw_branch_silencer(
@@ -535,6 +539,7 @@ def plot_silencer_geometry(
             cavity_volume=cavity_volume,
             length=length,
             branch_area=branch_area,
+            **kwargs,
         )
     _finish_geometry_axes(
         ax,
@@ -850,8 +855,8 @@ def plot_plenum_geometry(
     exit_area: float,
     line_of_sight: float,
     wall_area: float,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     angle_rad: float = 0.0,
     language: str = "en",
     **kwargs: Any,

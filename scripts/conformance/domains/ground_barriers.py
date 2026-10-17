@@ -29,7 +29,13 @@ _GROUND_BARRIERS = "Spherical ground & barriers (Attenborough / Salomons / Bies)
     "abs(Q) as Z grows large (Rp -> 1 so (1 - Rp) -> 0 and Q -> 1)",
 )
 def _chk_hard_ground_q_unity() -> Outcome:
-    q = ph.environment.spherical_reflection_coefficient([500.0], 1e12, 1.0, 1.5, 50.0)
+    q = ph.environment.spherical_reflection_coefficient(
+        frequencies=[500.0],
+        normalized_impedance=1e12,
+        source_height_m=1.0,
+        receiver_height_m=1.5,
+        distance=50.0,
+    )
     return numeric(1.0, float(abs(q[0])), 1e-6, places=6)
 
 

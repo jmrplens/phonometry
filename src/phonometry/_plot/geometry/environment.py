@@ -63,12 +63,12 @@ def _t(text: str, language: str = "en") -> str:
 def plot_barrier_geometry(
     ax: Axes | None = None,
     *,
-    source_height: float,
+    source_height_m: float,
     barrier_distance: float,
-    barrier_height: float,
+    barrier_height_m: float,
     receiver_distance: float,
-    receiver_height: float,
-    thickness: float | None = None,
+    receiver_height_m: float,
+    thickness_m: float | None = None,
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
@@ -81,13 +81,13 @@ def plot_barrier_geometry(
     ``receiver_distance`` is horizontal from the source.
 
     :param ax: Existing axes, or ``None`` to create a figure.
-    :param source_height: Source height above ground, in metres.
+    :param source_height_m: Source height above ground, in metres.
     :param barrier_distance: Source-to-barrier horizontal distance, in metres.
-    :param barrier_height: Barrier height, in metres.
+    :param barrier_height_m: Barrier height, in metres.
     :param receiver_distance: Source-to-receiver horizontal distance, in
         metres (> ``barrier_distance``).
-    :param receiver_height: Receiver height above ground, in metres.
-    :param thickness: Barrier top width, in metres; ``None`` draws a thin
+    :param receiver_height_m: Receiver height above ground, in metres.
+    :param thickness_m: Barrier top width, in metres; ``None`` draws a thin
         screen.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the barrier rectangle.
@@ -104,23 +104,23 @@ def plot_barrier_geometry(
     # are a measured set-up, and :func:`~phonometry.environment.barrier_insertion_loss`,
     # the only producer that retains them on a result, validates each one
     # before it computes, so no library output is refused here.
-    require_non_negative(source_height, "source_height")
-    require_non_negative(barrier_height, "barrier_height")
-    require_non_negative(receiver_height, "receiver_height")
+    require_non_negative(source_height_m, "source_height_m")
+    require_non_negative(barrier_height_m, "barrier_height_m")
+    require_non_negative(receiver_height_m, "receiver_height_m")
     require_positive(barrier_distance, "barrier_distance")
     require_positive(receiver_distance, "receiver_distance")
     if receiver_distance <= barrier_distance:
         msg = "'receiver_distance' must be greater than 'barrier_distance'."
         raise ValueError(msg)
-    if thickness is not None:
-        require_positive(thickness, "thickness")
+    if thickness_m is not None:
+        require_positive(thickness_m, "thickness_m")
     if ax is None:
         ax = _new_axes()
-    e = 0.0 if thickness is None else float(thickness)
+    e = 0.0 if thickness_m is None else float(thickness_m)
     drawn_e = e if e > 0.0 else 0.012 * receiver_distance
-    top = barrier_height
-    src = (0.0, source_height)
-    rcv = (receiver_distance, receiver_height)
+    top = barrier_height_m
+    src = (0.0, source_height_m)
+    rcv = (receiver_distance, receiver_height_m)
     near = (barrier_distance, top)
     far = (barrier_distance + e, top)
     # Ground.
@@ -237,11 +237,11 @@ def plot_barrier_result_geometry(
 ) -> Axes:
     """Barrier section for a result that retained its geometry."""
     if (
-        result.source_height is None
+        result.source_height_m is None
         or result.barrier_distance is None
-        or result.barrier_height is None
+        or result.barrier_height_m is None
         or result.receiver_distance is None
-        or result.receiver_height is None
+        or result.receiver_height_m is None
     ):
         msg = (
             "This result does not retain its geometry; call "
@@ -250,12 +250,12 @@ def plot_barrier_result_geometry(
         raise ValueError(msg)
     return plot_barrier_geometry(
         ax=ax,
-        source_height=result.source_height,
+        source_height_m=result.source_height_m,
         barrier_distance=result.barrier_distance,
-        barrier_height=result.barrier_height,
+        barrier_height_m=result.barrier_height_m,
         receiver_distance=result.receiver_distance,
-        receiver_height=result.receiver_height,
-        thickness=result.thickness,
+        receiver_height_m=result.receiver_height_m,
+        thickness_m=result.thickness_m,
         language=language,
         **kwargs,
     )

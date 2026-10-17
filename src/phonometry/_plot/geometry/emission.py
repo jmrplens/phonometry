@@ -276,7 +276,7 @@ def plot_microphone_positions(
 # p-p intensity probe.
 # ---------------------------------------------------------------------------
 def plot_pp_probe_geometry(
-    spacing: float = 0.012,
+    spacing_m: float = 0.012,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -287,7 +287,7 @@ def plot_pp_probe_geometry(
     Two phase-matched microphones separated by the solid spacer, with the
     intensity axis through both; default is the classic 12 mm spacer.
 
-    :param spacing: Microphone separation ``dr``, in metres.
+    :param spacing_m: Microphone separation ``dr``, in metres.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the spacer rectangle.
@@ -296,13 +296,13 @@ def plot_pp_probe_geometry(
     from matplotlib.patches import Circle, Rectangle
 
     _check_language(language)
-    require_scalar(spacing, "spacing")
-    if spacing <= 0.0:
-        msg = "'spacing' must be positive."
+    require_scalar(spacing_m, "spacing_m")
+    if spacing_m <= 0.0:
+        msg = "'spacing_m' must be positive."
         raise ValueError(msg)
     if ax is None:
         ax = _new_axes()
-    dr = float(spacing)
+    dr = float(spacing_m)
     d_mic = 0.55 * dr  # half-inch capsule vs 12 mm
     body = 2.2 * dr
     # Spacer between the two face-to-face capsules.
@@ -377,10 +377,10 @@ def plot_intensity_result_geometry(
     **kwargs: Any,
 ) -> Axes:
     """Probe drawing for a result that retained its spacer."""
-    if result.spacing is None:
+    if result.spacing_m is None:
         msg = (
             "This result does not retain its microphone spacing; call "
             "plot_pp_probe_geometry(spacing)."
         )
         raise ValueError(msg)
-    return plot_pp_probe_geometry(result.spacing, ax=ax, language=language, **kwargs)
+    return plot_pp_probe_geometry(result.spacing_m, ax=ax, language=language, **kwargs)

@@ -8,7 +8,7 @@ sidebar:
 Two-microphone (p-p) sound intensity per IEC 61043:1993 and the
 ISO 9614-1:1993 field indicators.
 
-A p-p probe holds two pressure microphones a fixed distance `spacing`
+A p-p probe holds two pressure microphones a fixed distance `spacing_m`
 ($\Delta r$) apart. The mean of the two pressures is taken as the
 sound pressure at the probe reference point, while the pressure
 differential is used to derive the particle velocity component along
@@ -262,7 +262,8 @@ IntensityResult(
     total_pressure_intensity_index: float,
     total_direction: int,
     max_valid_frequency: float,
-    spacing: float | None = None,
+    *,
+    spacing_m: float | None = None,
 )
 ```
 
@@ -283,7 +284,7 @@ at and beyond the first null $k \Delta r \ge \pi$.
 `max_valid_frequency`
 is the usable-bandwidth bound $0.1 \, c / \Delta r$
 (bias \< ~0.3 dB).
-`spacing` retains the microphone separation the measurement was
+`spacing_m` retains the microphone separation the measurement was
 reduced with so `plot_geometry` can draw the probe; it is
 appended after the original fields and `None` for hand-built
 results.
@@ -331,7 +332,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 ```python
 plot_pp_probe_geometry(
-    spacing: float = 0.012,
+    spacing_m: float = 0.012,
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -348,7 +349,7 @@ intensity axis through both; default is the classic 12 mm spacer.
 
 | Name | Description |
 | :--- | :--- |
-| `spacing` | Microphone separation `dr`, in metres. |
+| `spacing_m` | Microphone separation `dr`, in metres. |
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the spacer rectangle. |
@@ -363,7 +364,7 @@ sound_intensity(
     p2: Signal | Sequence[float] | np.ndarray,
     fs: int | None = None,
     *,
-    spacing: float,
+    spacing_m: float,
     density: float = 1.204,
     speed_of_sound: float = 343.0,
     fraction: int | None = None,
@@ -378,7 +379,7 @@ The one-sided cross spectrum `G12` of the two microphone pressures
 is estimated with Welch-averaged, Hann-windowed segments
 (`scipy.signal.csd`) and converted to the intensity spectral
 density along the probe axis, with $\Delta r$ the microphone
-`spacing` (definition 3.2 of IEC 61043:1993 gives the underlying
+`spacing_m` (definition 3.2 of IEC 61043:1993 gives the underlying
 p-p formulation):
 
 $$
@@ -413,7 +414,7 @@ by the factor $\sin(k \Delta r)/(k \Delta r)$ (IEC 61043:1993,
 | `p1` | Pressure signal of microphone 1, in pascals (1D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, which is what puts them in pascals; the intensity goes as the product of the two pressures, so a factor on both scales it by the square of that factor. |
 | `p2` | Pressure signal of microphone 2, in pascals (1D). Same treatment as `p1`. |
 | `fs` | Sample rate in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
-| `spacing` | Microphone separation $\Delta r$, in metres. |
+| `spacing_m` | Microphone separation $\Delta r$, in metres. |
 | `density` | Air density, in kg/m^3. Default 1.204 (20 degC). |
 | `speed_of_sound` | Speed of sound, in m/s. Default 343.0. |
 | `fraction` | `None` (broadband only), 1 (octave bands) or 3 (one-third octave bands). |

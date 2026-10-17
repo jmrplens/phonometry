@@ -223,7 +223,7 @@ def masking_index(frequency: float) -> float:
 
 
 def critical_band_level(
-    mean_narrowband_level: float, tone_frequency: float, line_spacing: float
+    mean_narrowband_level: float, tone_frequency: float, line_spacing_hz: float
 ) -> float:
     r"""Critical-band level ``LG`` of the masking noise (Formula (12)).
 
@@ -234,13 +234,13 @@ def critical_band_level(
     :param mean_narrowband_level: Mean narrow-band level ``LS``, in dB
         (Formula (6)).
     :param tone_frequency: Tone frequency ``fT``, in Hz.
-    :param line_spacing: Line spacing (frequency resolution) ``Δf``, in Hz.
+    :param line_spacing_hz: Line spacing (frequency resolution) ``Δf``, in Hz.
     :return: Critical-band level ``LG``, in dB.
     :raises ValueError: If the level is not finite or a frequency is not
         positive/finite.
     """
     ls = _finite(mean_narrowband_level, "mean_narrowband_level")
-    df = _positive(line_spacing, "line_spacing")
+    df = _positive(line_spacing_hz, "line_spacing_hz")
     dfc = critical_bandwidth_engineering(tone_frequency)
     return float(ls + 10.0 * np.log10(dfc / df))
 
@@ -676,7 +676,7 @@ def _step3_groups(
 def analyze_spectrum(
     levels: ArrayLike,
     frequencies: ArrayLike,
-    line_spacing: float,
+    line_spacing_hz: float,
     *,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
 ) -> ToneAudibilityResult:
@@ -705,7 +705,7 @@ def analyze_spectrum(
 
     :param levels: Narrow-band levels ``Li`` of the spectrum, in dB.
     :param frequencies: The line frequencies, in Hz (strictly increasing).
-    :param line_spacing: Line spacing (frequency resolution) ``Δf``, in Hz.
+    :param line_spacing_hz: Line spacing (frequency resolution) ``Δf``, in Hz.
     :param effective_bandwidth_factor: :math:`\Delta f_\mathrm{e}/\Delta f`; 1.5
         for a Hanning window
         (the default), 1.0 for a rectangular window.
@@ -714,7 +714,7 @@ def analyze_spectrum(
     :raises ValueError: If the spectrum is invalid or no audible tone is found.
     """
     lev, freq = _validate_spectrum(levels, frequencies, "analyze_spectrum")
-    df = _positive(line_spacing, "line_spacing")
+    df = _positive(line_spacing_hz, "line_spacing_hz")
     factor = _positive(effective_bandwidth_factor, "effective_bandwidth_factor")
     detected = _detect_tones(lev, freq, df, factor)
 
@@ -773,7 +773,7 @@ def analyze_spectrum(
         tone_frequencies=result.tone_frequencies,
         tone_levels=result.tone_levels,
         mean_narrowband_levels=result.mean_narrowband_levels,
-        line_spacing=result.line_spacing,
+        line_spacing_hz=result.line_spacing_hz,
         critical_bandwidths=result.critical_bandwidths,
         lower_corners=result.lower_corners,
         upper_corners=result.upper_corners,
@@ -972,7 +972,7 @@ def audibility_uncertainty(
     tone_line_levels: ArrayLike,
     noise_line_levels: ArrayLike,
     tone_frequency: float,
-    line_spacing: float,
+    line_spacing_hz: float,
     *,
     sigma_level_db: float = SIGMA_NARROWBAND_LEVEL,
     coverage_factor: float = COVERAGE_FACTOR_90,
@@ -1012,7 +1012,7 @@ def audibility_uncertainty(
     :param noise_line_levels: Levels of the ``M`` masking-noise lines kept by
         the final Formula (6) iteration, dB.
     :param tone_frequency: Tone frequency ``fT``, in Hz.
-    :param line_spacing: Line spacing ``df``, in Hz.
+    :param line_spacing_hz: Line spacing ``df``, in Hz.
     :param sigma_level_db: Standard uncertainty of each narrow-band level
         (Clause 6 assumes a uniform 3 dB).
     :param coverage_factor: Coverage factor ``k`` (1.645 for 90 % bilateral).
@@ -1029,7 +1029,7 @@ def audibility_uncertainty(
         msg = "Line levels must be finite."
         raise ValueError(msg)
     ft = _positive(tone_frequency, "tone_frequency")
-    df = _positive(line_spacing, "line_spacing")
+    df = _positive(line_spacing_hz, "line_spacing_hz")
     sigma = _positive(sigma_level_db, "sigma_level_db")
     k = _positive(coverage_factor, "coverage_factor")
 
@@ -1152,7 +1152,7 @@ def _require_group_counts(counts: NDArray[np.int_] | None) -> None:
 
 
 def _require_line_spacing(spacing: float) -> None:
-    """Require ``line_spacing`` to be the frequency resolution it names.
+    """Require ``line_spacing_hz`` to be the frequency resolution it names.
 
     ``Δf`` is the bin width of the narrow-band analysis the assessment was
     read from, and the accredited sheet prints it twice: once in the header
@@ -1178,17 +1178,17 @@ def _require_line_spacing(spacing: float) -> None:
     wording the shared
     :func:`~phonometry._internal.validation.require_finite_fields` uses.
 
-    :param spacing: The ``line_spacing`` field, in Hz.
+    :param spacing: The ``line_spacing_hz`` field, in Hz.
     :raises ValueError: if the field is not numeric, or is not a positive,
         finite resolution.
     """
     value = require_real(
-        spacing, "ToneAudibilityResult: 'line_spacing' must be numeric."
+        spacing, "ToneAudibilityResult: 'line_spacing_hz' must be numeric."
     )
     if math.isfinite(value) and value > 0.0:
         return
     msg = (
-        "ToneAudibilityResult: 'line_spacing' must be a positive, finite "
+        "ToneAudibilityResult: 'line_spacing_hz' must be a positive, finite "
         f"frequency resolution; got {spacing!r}."
     )
     raise ValueError(msg)
@@ -1202,7 +1202,7 @@ class ToneAudibilityResult(OwnsArrays):
     :ivar tone_levels: Tone levels ``LT``, in dB (Formula (8)).
     :ivar mean_narrowband_levels: Mean narrow-band levels ``LS`` of the masking
         noise, in dB (Formula (6)).
-    :ivar line_spacing: Line spacing (frequency resolution) ``Δf``, in Hz.
+    :ivar line_spacing_hz: Line spacing (frequency resolution) ``Δf``, in Hz.
     :ivar critical_bandwidths: Critical bandwidths ``Δfc``, in Hz (Formula (2)).
     :ivar lower_corners: Lower corner frequencies ``f1``, in Hz (Formula (4)).
     :ivar upper_corners: Upper corner frequencies ``f2``, in Hz (Formula (5)).
@@ -1227,7 +1227,7 @@ class ToneAudibilityResult(OwnsArrays):
     tone_frequencies: NDArray[np.float64]
     tone_levels: NDArray[np.float64]
     mean_narrowband_levels: NDArray[np.float64]
-    line_spacing: float
+    line_spacing_hz: float
     critical_bandwidths: NDArray[np.float64]
     lower_corners: NDArray[np.float64]
     upper_corners: NDArray[np.float64]
@@ -1285,7 +1285,7 @@ class ToneAudibilityResult(OwnsArrays):
         Two of them are held to more than finite, because neither is a
         measured quantity: ``group_sizes`` is a tally of tones, where a count
         that is fractional or below one is as impossible as one that is
-        ``NaN``, and ``line_spacing`` is the bin width of the analysis, where
+        ``NaN``, and ``line_spacing_hz`` is the bin width of the analysis, where
         zero and negative are as impossible as ``NaN``. Each gets its own
         guard, :func:`_require_group_counts` and
         :func:`_require_line_spacing`, which say what every refusal catches
@@ -1325,7 +1325,7 @@ class ToneAudibilityResult(OwnsArrays):
             "group_sizes",
             axis="tone entry",
         )
-        _require_line_spacing(self.line_spacing)
+        _require_line_spacing(self.line_spacing_hz)
         for name in (
             "tone_frequencies",
             "tone_levels",
@@ -1460,7 +1460,7 @@ def tone_audibility(
     tone_level: float,
     mean_narrowband_level: float,
     tone_frequency: float,
-    line_spacing: float,
+    line_spacing_hz: float,
 ) -> float:
     r"""Audibility ``ΔL`` of one tone from its levels (Formulae (12)-(14)).
 
@@ -1473,12 +1473,12 @@ def tone_audibility(
     :param mean_narrowband_level: Mean narrow-band level ``LS`` of the masking
         noise, in dB (Formula (6)).
     :param tone_frequency: Tone frequency ``fT``, in Hz.
-    :param line_spacing: Line spacing (frequency resolution) ``Δf``, in Hz.
+    :param line_spacing_hz: Line spacing (frequency resolution) ``Δf``, in Hz.
     :return: Audibility ``ΔL``, in dB.
     :raises ValueError: If the levels are not finite or a frequency/spacing is
         not positive/finite.
     """
-    lg = critical_band_level(mean_narrowband_level, tone_frequency, line_spacing)
+    lg = critical_band_level(mean_narrowband_level, tone_frequency, line_spacing_hz)
     av = masking_index(tone_frequency)
     return audibility_from_levels(tone_level, lg, av)
 
@@ -1487,7 +1487,7 @@ def assess_tones(
     tone_frequencies: ArrayLike,
     tone_levels: ArrayLike,
     mean_narrowband_levels: ArrayLike,
-    line_spacing: float,
+    line_spacing_hz: float,
     *,
     extended_uncertainties: ArrayLike | None = None,
 ) -> ToneAudibilityResult:
@@ -1501,7 +1501,7 @@ def assess_tones(
     :param tone_levels: Tone levels ``LT``, in dB (Formula (8)).
     :param mean_narrowband_levels: Mean narrow-band levels ``LS`` of the masking
         noise, in dB (Formula (6)).
-    :param line_spacing: Line spacing (frequency resolution) ``Δf``, in Hz.
+    :param line_spacing_hz: Line spacing (frequency resolution) ``Δf``, in Hz.
     :param extended_uncertainties: Optional per-tone extended uncertainties
         ``U``, in dB (see :func:`audibility_uncertainty`; computed
         automatically by :func:`analyze_spectrum`, which has the per-line
@@ -1513,7 +1513,7 @@ def assess_tones(
     freqs = np.asarray(tone_frequencies, dtype=np.float64)
     lt = np.asarray(tone_levels, dtype=np.float64)
     ls = np.asarray(mean_narrowband_levels, dtype=np.float64)
-    df = _positive(line_spacing, "line_spacing")
+    df = _positive(line_spacing_hz, "line_spacing_hz")
     if freqs.ndim != 1 or lt.ndim != 1 or ls.ndim != 1:
         msg = (
             "'tone_frequencies', 'tone_levels' and 'mean_narrowband_levels' "
@@ -1566,7 +1566,7 @@ def assess_tones(
         tone_frequencies=freqs,
         tone_levels=lt,
         mean_narrowband_levels=ls,
-        line_spacing=df,
+        line_spacing_hz=df,
         critical_bandwidths=dfc,
         lower_corners=f1,
         upper_corners=f2,

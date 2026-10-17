@@ -41,7 +41,7 @@ def _refraction_profiles() -> tuple[Any, ...]:
 
     return tuple(
         environment.log_linear_sound_speed_profile(
-            sign * _REFR_B, ground_speed=_REFR_C0, max_height=140.0
+            sign * _REFR_B, ground_speed=_REFR_C0, max_height_m=140.0
         )
         for sign in (1.0, -1.0)
     )
@@ -96,7 +96,7 @@ def _refraction_fields(
     rays = [
         environment.atmospheric_ray_paths(
             prof,
-            source_height=_REFR_SRC[1],
+            source_height_m=_REFR_SRC[1],
             launch_angles_deg=angles,
             max_range=430.0,
             n_steps=900,
@@ -274,10 +274,10 @@ def animate_fdtd_refraction(output_dir: str) -> None:
         # wavefront has drawn the geometry it explains.
         lines_row = []
         result = rays[row]
-        for i in range(result.heights.shape[0]):
+        for i in range(result.heights_m.shape[0]):
             (ln,) = ax_f.plot(
                 src_x + result.ranges[i],
-                result.heights[i],
+                result.heights_m[i],
                 color="white",
                 lw=0.8,
                 alpha=0.0,

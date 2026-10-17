@@ -176,7 +176,7 @@ for velocity in (5.0, 10.0, 20.0):
     fn = hvac.flow_noise_straight_duct(bands, flow_velocity=velocity, area=0.04)
     ax.semilogx(fn.frequencies, fn.values, "o-", label=f"U = {velocity:.0f} m/s")
 ax.semilogx(bands, hvac.flow_noise_bend(bands, flow_velocity=10.0, area=0.04,
-                                        height=0.2).values, "s--",
+                                        height_m=0.2).values, "s--",
             label="Mitred bend, 10 m/s")
 ax.set_xlabel("Frequency [Hz]"); ax.set_ylabel("Regenerated $L_W$ [dB re 1 pW]")
 ax.legend()

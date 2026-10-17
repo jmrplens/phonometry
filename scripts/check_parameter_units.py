@@ -12,12 +12,14 @@ can see it.
 
 The rule is one line: a public parameter whose name says one of the quantities
 this tree has written in two units (:data:`QUANTITIES` and
-:data:`WORD_QUANTITIES`) ends either in a unit (:data:`UNITS`) or in a suffix
-that says the quantity carries no unit of its own (:data:`DIMENSIONLESS`, which
-covers the decibel levels, the ratios and the indicators). Anything else keeps
-its unit in the docstring, which is not where the mistake is made. A parameter
-typed ``bool`` is outside the rule whatever its name says: a verdict such as
-``humidity_ok`` holds no number of the quantity it names.
+:data:`WORD_QUANTITIES`, and inside one package the words of
+:data:`PACKAGE_WORD_QUANTITIES`) ends either in a unit (:data:`UNITS`) or in a
+suffix that says the quantity carries no unit of its own
+(:data:`DIMENSIONLESS`, which covers the decibel levels, the ratios and the
+indicators). Anything else keeps its unit in the docstring, which is not where
+the mistake is made. A parameter typed ``bool`` is outside the rule whatever
+its name says: a verdict such as ``humidity_ok`` holds no number of the
+quantity it names.
 
 The surface is the one a caller reaches: every name in the ``__all__`` of every
 public module, the public methods and properties of the classes among them, and
@@ -87,22 +89,50 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 #: and ``duct_diameter`` are held to the rule and ``triangles`` is not.
 QUANTITIES = ("pressure", "temperature", "humid")
 
-#: Matched as a word of the name, split on underscores, or as a run of
-#: words: the molar mass of a gas is written per mole by the fluids catalogue
-#: and per kilomole by the clauses of IEC 60534-8-3 and ISO 11820, a factor of
-#: a thousand under one name.
+#: Matched as a word of the name or as a run of words, split on underscores
+#: and before a trailing digit, so the ``thickness1`` of a plate pair is held
+#: to the rule like its ``thickness``. Each word is listed with its plural.
+#: The molar mass of a gas is written per mole by the fluids catalogue and
+#: per kilomole by the clauses of IEC 60534-8-3 and ISO 11820, a factor of a
+#: thousand under one name. A thickness is in metres on a layer and in
+#: millimetres on the catalogue row it comes from, a spacing is a distance
+#: between two microphones or the hertz between two spectral lines, and a
+#: height is in metres beside a plateau height in decibels: each of them has
+#: had two units under one name in this tree.
 WORD_QUANTITIES = frozenset(
     {
         "diameter",
+        "diameters",
         "angle",
         "angles",
         "period",
         "periods",
         "gradient",
+        "gradients",
         "molar_mass",
         "molecular_mass",
+        "thickness",
+        "thicknesses",
+        "spacing",
+        "spacings",
+        "height",
+        "heights",
     }
 )
+
+#: Where a name breaks into words: at an underscore, and between a letter and
+#: the digit that numbers it (``thickness1`` is the word ``thickness`` of
+#: plate 1, so a split on underscores alone would let it through bare).
+_WORD_BREAK = re.compile(r"_|(?<=[a-z])(?=\d)")
+
+#: Words held to the rule inside one package only, because only there does a
+#: second unit compete for them. A distance is in metres everywhere in this
+#: tree except aircraft, where the ANP database prints its noise-power-distance
+#: tables in feet and the propagation beside them is computed in metres;
+#: elsewhere the bare ``distances`` is the vocabulary.
+PACKAGE_WORD_QUANTITIES: dict[str, frozenset[str]] = {
+    "phonometry.aircraft": frozenset({"distance", "distances"}),
+}
 
 #: The unit suffixes the tree uses. Every one of them is already in the
 #: published API. ``_ft`` is here because a pressure altitude is a length: the
@@ -115,9 +145,11 @@ WORD_QUANTITIES = frozenset(
 #: constant per mole are three figures 29 and 1000 apart under one word.
 #: The compound units read as the display of a record reads them: a unit
 #: after the first is a factor (``_pa_s_m`` is Pa s/m, ``_pa2_s`` is
-#: Pa² s) unless ``per`` puts it under the line, and the
-#: last one is the denominator of a speed, a density or a stiffness
-#: (``_m_s2``, ``_kg_m3``, ``_n_m``).
+#: Pa² s, ``_m_hz`` is the product of a plate's thickness and its critical
+#: frequency that the rows of the solids catalogue print) unless ``per``
+#: puts it under the line, and the last one is the denominator of a speed, a
+#: density or a stiffness (``_m_s2``, ``_kg_m3``, ``_n_m``). ``_hz`` is also
+#: the other unit a spacing is written in, the spacing of spectral lines.
 UNITS = (
     "_kpa",
     "_pa",
@@ -138,6 +170,7 @@ UNITS = (
     "_min",
     "_hours",
     "_hz",
+    "_m_hz",
     "_khz",
     "_kmh",
     "_kt",
@@ -654,6 +687,15 @@ EXEMPT: dict[tuple[str, str, str], str] = {
         "ToneBurstResult",
         "period_samples",
     ): "a count of samples, which is what the name already says",
+    # A selector that names the source line by its height, not a height.
+    (
+        "phonometry.environment.sources.cnossos_rail",
+        "vertical_directivity",
+        "height",
+    ): (
+        "the label 1 (source A, 0.5 m) or 2 (source B, 4.0 m) that picks "
+        "formula (2.3.16) or (2.3.17), a choice of source line and not a length"
+    ),
     # The bearing formulae use the two diameters as a ratio d/D, so the unit
     # cancels and the docstring asks only that both be the same one.
     (
@@ -817,16 +859,30 @@ def public_parameters() -> Iterator[Parameter]:
 
 
 def _says(lowered: str, words: frozenset[str]) -> bool:
-    """Whether a lowercase name holds one of ``words`` as a word or a run of words."""
-    padded = f"_{lowered}_"
+    """Whether a lowercase name holds one of ``words`` as a word or a run of words.
+
+    The name is broken into words at its underscores and before a trailing
+    digit (:data:`_WORD_BREAK`), so ``thickness1`` says ``thickness``.
+    """
+    padded = "_" + "_".join(_WORD_BREAK.split(lowered)) + "_"
     return any(f"_{word}_" in padded for word in words)
 
 
-def names_a_quantity(name: str) -> bool:
-    """Whether the parameter name says one of the quantities under the rule."""
+def names_a_quantity(name: str, module: str = "") -> bool:
+    """Whether the parameter name says one of the quantities under the rule.
+
+    ``module`` is where the parameter is defined, so the words of
+    :data:`PACKAGE_WORD_QUANTITIES` are held to the rule in their own package
+    and nowhere else.
+    """
     lowered = name.lower()
     if _says(lowered, WORD_QUANTITIES):
         return True
+    for package, scoped in PACKAGE_WORD_QUANTITIES.items():
+        if (module == package or module.startswith(package + ".")) and _says(
+            lowered, scoped
+        ):
+            return True
     return any(quantity in lowered for quantity in QUANTITIES)
 
 
@@ -867,7 +923,7 @@ def offenders(
     loose: list[Parameter] = []
     used: set[tuple[str, str, str]] = set()
     for parameter in public_parameters() if parameters is None else parameters:
-        if not names_a_quantity(parameter.name):
+        if not names_a_quantity(parameter.name, parameter.module):
             continue
         if holds_a_truth_value(parameter.annotation):
             continue

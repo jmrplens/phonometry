@@ -104,9 +104,9 @@ _SINGLE_DIFFRACTION_MAX_SPAN = 0.3
 
 
 def spherical_spreading_adjustment(
-    distance: float,
+    distance_m: float,
     *,
-    reference_distance: float = _RH,
+    reference_distance_m: float = _RH,
 ) -> float:
     r"""Spherical-spreading adjustment ``ΔLs`` of the hemisphere level (Eq. 24).
 
@@ -114,27 +114,27 @@ def spherical_spreading_adjustment(
     the standard database), so at slant distance ``r`` the geometric spreading
     adjustment is :math:`\Delta L_\mathrm{s} = -20 \cdot \log_{10}(r/r_\mathrm{h})`.
 
-    :param distance: Slant distance ``r`` from the rotorcraft to the observer, in
+    :param distance_m: Slant distance ``r`` from the rotorcraft to the observer, in
         metres (``> 0``).
-    :param reference_distance: Hemisphere reference distance ``rh``, in metres
-        (default 60). Pass :attr:`RotorcraftHemisphere.distance` when the data
+    :param reference_distance_m: Hemisphere reference distance ``rh``, in metres
+        (default 60). Pass :attr:`RotorcraftHemisphere.distance_m` when the data
         uses a non-standard polar distance (e.g. 70 m hover rings).
     :return: The spreading adjustment ``ΔLs``, in dB (added to the level).
     :raises ValueError: If a distance is not strictly positive.
     """
-    r = require_positive(distance, "distance")
-    rh = require_positive(reference_distance, "reference_distance")
+    r = require_positive(distance_m, "distance_m")
+    rh = require_positive(reference_distance_m, "reference_distance_m")
     return float(-20.0 * np.log10(r / rh))
 
 
 def atmospheric_adjustment(
     frequencies: NDArray[np.float64] | list[float],
-    distance: float,
+    distance_m: float,
     *,
     temperature_c: float = 25.0,
     relative_humidity_percent: float = 70.0,
     atmospheric_pressure_kpa: float = 101.325,
-    reference_distance: float = _RH,
+    reference_distance_m: float = _RH,
 ) -> NDArray[np.float64]:
     r"""Atmospheric-absorption adjustment ``ΔLa`` of the hemisphere level (Eq. 26/27).
 
@@ -166,22 +166,22 @@ def atmospheric_adjustment(
     advisory warning propagates, since ``α`` is large and extrapolated.
 
     :param frequencies: One-third-octave-band centre frequencies, in Hz.
-    :param distance: Slant distance ``r``, in metres (``> 0``; below ``rh``
+    :param distance_m: Slant distance ``r``, in metres (``> 0``; below ``rh``
         the adjustment is a small positive value, i.e. less absorption than the
         reference path).
     :param temperature_c: Air temperature, in °C (default 25 °C, ICAO reference).
     :param relative_humidity_percent: Relative humidity, in % (default 70 %).
     :param atmospheric_pressure_kpa: Ambient pressure, in kPa (default 101.325).
-    :param reference_distance: Hemisphere reference distance ``rh``, in metres
-        (default 60). Pass :attr:`RotorcraftHemisphere.distance` when the data
+    :param reference_distance_m: Hemisphere reference distance ``rh``, in metres
+        (default 60). Pass :attr:`RotorcraftHemisphere.distance_m` when the data
         uses a non-standard polar distance.
     :return: The adjustment ``ΔLa`` per band, in dB (added to the level,
         :math:`\le 0` for :math:`r \ge r_\mathrm{h}`).
     :raises ValueError: If a distance is not strictly positive.
     """
     f = require_positive_array(frequencies, "frequencies")
-    r = require_positive(distance, "distance")
-    rh = require_positive(reference_distance, "reference_distance")
+    r = require_positive(distance_m, "distance_m")
+    rh = require_positive(reference_distance_m, "reference_distance_m")
     alpha = _absorption_coefficient(
         f, temperature_c, relative_humidity_percent, atmospheric_pressure_kpa
     )
@@ -238,9 +238,9 @@ def _delany_bazley_impedance(
 
 def ground_effect_adjustment(
     frequencies: NDArray[np.float64] | list[float],
-    source_height: float,
-    receiver_height: float,
-    horizontal_distance: float,
+    source_height_m: float,
+    receiver_height_m: float,
+    horizontal_distance_m: float,
     *,
     flow_resistivity: float | str = "G",
 ) -> NDArray[np.float64]:
@@ -254,11 +254,11 @@ def ground_effect_adjustment(
     (Eq. 30) is the in-band interference factor.
 
     :param frequencies: One-third-octave-band centre frequencies, in Hz.
-    :param source_height: Source height above the ground ``hs``, in metres
+    :param source_height_m: Source height above the ground ``hs``, in metres
         (clamped to ``>= 0.1``).
-    :param receiver_height: Receiver height above the ground ``hr``, in metres
+    :param receiver_height_m: Receiver height above the ground ``hr``, in metres
         (clamped to ``>= 0.1``).
-    :param horizontal_distance: Horizontal source-receiver distance ``dp``, in
+    :param horizontal_distance_m: Horizontal source-receiver distance ``dp``, in
         metres (``> 0``).
     :param flow_resistivity: Ground flow resistivity ``σ`` in Pa·s/m², or a
         CNOSSOS class letter ``"A"``-``"H"``. The default ``"G"`` (20e6, hard
@@ -271,9 +271,9 @@ def ground_effect_adjustment(
     :raises ValueError: If the inputs are invalid.
     """
     f = require_positive_array(frequencies, "frequencies")
-    hs = require_non_negative(source_height, "source_height")
-    hr = require_non_negative(receiver_height, "receiver_height")
-    dp = require_positive(horizontal_distance, "horizontal_distance")
+    hs = require_non_negative(source_height_m, "source_height_m")
+    hr = require_non_negative(receiver_height_m, "receiver_height_m")
+    dp = require_positive(horizontal_distance_m, "horizontal_distance_m")
     sigma = _resolve_flow_resistivity(flow_resistivity)
     grid = _ground_effect(f, hs, hr, np.asarray([dp], dtype=np.float64), sigma)
     return np.asarray(grid[0], dtype=np.float64)
@@ -371,14 +371,14 @@ class MeanGroundPlaneResult(OwnsArrays):
 
     :ivar slope: The fitted slope ``a`` (Eq. 37).
     :ivar intercept: The fitted intercept ``b``, in metres (Eq. 38).
-    :ivar distances: The section distances ``d``, in metres, shape ``(M,)``.
-    :ivar heights: The terrain heights ``z(d)``, in metres, shape ``(M,)``.
+    :ivar distances_m: The section distances ``d``, in metres, shape ``(M,)``.
+    :ivar heights_m: The terrain heights ``z(d)``, in metres, shape ``(M,)``.
     """
 
     slope: float
     intercept: float
-    distances: NDArray[np.float64]
-    heights: NDArray[np.float64]
+    distances_m: NDArray[np.float64]
+    heights_m: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a section whose vertices do not pair up.
@@ -389,24 +389,24 @@ class MeanGroundPlaneResult(OwnsArrays):
         reported fit was never taken over, and the section plot pairs the two
         arrays vertex by vertex to draw that profile against that same line.
 
-        :raises ValueError: if ``distances`` and ``heights`` disagree.
+        :raises ValueError: if ``distances_m`` and ``heights_m`` disagree.
         """
-        require_ranks(self, distances=1, heights=1)
-        require_same_length(self, "distances", "heights", axis="section vertex")
+        require_ranks(self, distances_m=1, heights_m=1)
+        require_same_length(self, "distances_m", "heights_m", axis="section vertex")
 
-    def height(self, distance: float | NDArray[np.float64]) -> NDArray[np.float64]:
-        r"""The plane height :math:`a\,d + b` at ``distance``, in metres.
+    def height(self, distance_m: float | NDArray[np.float64]) -> NDArray[np.float64]:
+        r"""The plane height :math:`a\,d + b` at ``distance_m``, in metres.
 
-        :param distance: Distance :math:`d` along the section, in metres
+        :param distance_m: Distance :math:`d` along the section, in metres
             (scalar or array).
         :return: The height of the plane at each distance, in metres.
         """
         return np.asarray(
-            self.slope * np.asarray(distance, dtype=np.float64) + self.intercept,
+            self.slope * np.asarray(distance_m, dtype=np.float64) + self.intercept,
             dtype=np.float64,
         )
 
-    def equivalent_height(self, distance: float, height: float) -> float:
+    def equivalent_height(self, distance_m: float, height_m: float) -> float:
         """The orthogonal (equivalent) height of a point above the plane.
 
         Positive above the plane; the guidance substitutes these equivalent
@@ -414,7 +414,7 @@ class MeanGroundPlaneResult(OwnsArrays):
         flat-ground equations (§A.4.4).
         """
         return float(
-            (height - self.slope * distance - self.intercept)
+            (height_m - self.slope * distance_m - self.intercept)
             / math.hypot(1.0, self.slope)
         )
 
@@ -431,8 +431,8 @@ class MeanGroundPlaneResult(OwnsArrays):
 
 
 def mean_ground_plane(
-    distances: NDArray[np.float64] | list[float],
-    heights: NDArray[np.float64] | list[float],
+    distances_m: NDArray[np.float64] | list[float],
+    heights_m: NDArray[np.float64] | list[float],
 ) -> MeanGroundPlaneResult:
     r"""The mean ground plane of a terrain section (guidance Eq. 36-40).
 
@@ -442,32 +442,32 @@ def mean_ground_plane(
     along ``d``, not summed over the vertices), using the closed forms of
     Eq. 37/38 with the segment integrals ``A`` and ``B`` of Eq. 39/40.
 
-    :param distances: Section distances ``d``, in metres, strictly
+    :param distances_m: Section distances ``d``, in metres, strictly
         increasing, shape ``(M,)`` with :math:`M \ge 2` (arbitrary spacing).
-    :param heights: Terrain heights ``z(d)``, in metres, shape ``(M,)``.
+    :param heights_m: Terrain heights ``z(d)``, in metres, shape ``(M,)``.
     :return: A :class:`MeanGroundPlaneResult`.
     :raises ValueError: If the inputs are invalid.
     """
-    d, z = _validated_section(distances, heights)
+    d, z = _validated_section(distances_m, heights_m)
     a, b = _mean_plane_coefficients(d, z)
-    return MeanGroundPlaneResult(slope=a, intercept=b, distances=d, heights=z)
+    return MeanGroundPlaneResult(slope=a, intercept=b, distances_m=d, heights_m=z)
 
 
 def _validated_section(
-    distances: NDArray[np.float64] | list[float],
-    heights: NDArray[np.float64] | list[float],
+    distances_m: NDArray[np.float64] | list[float],
+    heights_m: NDArray[np.float64] | list[float],
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The validated ``(d, z)`` arrays of a terrain section."""
-    d = np.atleast_1d(np.asarray(distances, dtype=np.float64))
-    z = np.atleast_1d(np.asarray(heights, dtype=np.float64))
+    d = np.atleast_1d(np.asarray(distances_m, dtype=np.float64))
+    z = np.atleast_1d(np.asarray(heights_m, dtype=np.float64))
     if d.ndim != 1 or d.shape != z.shape or d.size < _MIN_SECTION_VERTICES:
-        msg = "'distances' and 'heights' must be 1-D of equal size >= 2."
+        msg = "'distances_m' and 'heights_m' must be 1-D of equal size >= 2."
         raise ValueError(msg)
     if not (np.all(np.isfinite(d)) and np.all(np.isfinite(z))):
-        msg = "'distances' and 'heights' must be finite."
+        msg = "'distances_m' and 'heights_m' must be finite."
         raise ValueError(msg)
     if np.any(np.diff(d) <= 0.0):
-        msg = "'distances' must be strictly increasing."
+        msg = "'distances_m' must be strictly increasing."
         raise ValueError(msg)
     return d, z
 
@@ -522,7 +522,7 @@ def diffraction_attenuation(
     frequencies: NDArray[np.float64] | list[float],
     path_difference: float,
     *,
-    edge_height: float,
+    edge_height_m: float,
     edge_span: float = 0.0,
     capped: bool = True,
 ) -> NDArray[np.float64]:
@@ -553,7 +553,7 @@ def diffraction_attenuation(
     :param path_difference: Path difference ``δ`` between the diffracted and
         the direct path, in metres (negative when the edge lies below the
         line of sight).
-    :param edge_height: Edge height ``h0`` above the mean ground plane(s), in
+    :param edge_height_m: Edge height ``h0`` above the mean ground plane(s), in
         metres (the greatest of the two side values for a terrain edge;
         ``≥ 0``).
     :param edge_span: Distance ``e`` between the first and last diffraction
@@ -568,7 +568,7 @@ def diffraction_attenuation(
     if not np.isfinite(path_difference):
         msg = "'path_difference' must be finite."
         raise ValueError(msg)
-    h0 = require_non_negative(edge_height, "edge_height")
+    h0 = require_non_negative(edge_height_m, "edge_height_m")
     e = require_non_negative(edge_span, "edge_span")
     lam = _C / f
     c2 = np.ones_like(f)
@@ -599,8 +599,8 @@ class TerrainScreeningResult(OwnsArrays):
         propagation path, shape ``(n, 2)`` (empty when unscreened).
     :ivar source: The source ``(d, z)``, in metres.
     :ivar receiver: The receiver ``(d, z)``, in metres.
-    :ivar distances: The section distances, in metres, shape ``(M,)``.
-    :ivar heights: The section terrain heights, in metres, shape ``(M,)``.
+    :ivar distances_m: The section distances, in metres, shape ``(M,)``.
+    :ivar heights_m: The section terrain heights, in metres, shape ``(M,)``.
 
     Whether the terrain blocks the line of sight (:attr:`screened`) is read
     from the section, the source and the receiver, so it is not a field.
@@ -613,8 +613,8 @@ class TerrainScreeningResult(OwnsArrays):
     diffraction_points: NDArray[np.float64]
     source: tuple[float, float]
     receiver: tuple[float, float]
-    distances: NDArray[np.float64]
-    heights: NDArray[np.float64]
+    distances_m: NDArray[np.float64]
+    heights_m: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a section whose spectrum or profile does not line up.
@@ -623,7 +623,7 @@ class TerrainScreeningResult(OwnsArrays):
         received level band by band in the Doc 32 Eq. 23 chain, where a
         spectrum one entry short or long shifts every band against the
         frequency its attenuation was computed at, and the shifted chain still
-        sums to a perfectly ordinary level. ``distances`` and ``heights`` are
+        sums to a perfectly ordinary level. ``distances_m`` and ``heights_m`` are
         the section the screening regime was decided on, which the geometry
         plot pairs vertex by vertex to draw the terrain the line of sight was
         tested against.
@@ -646,19 +646,19 @@ class TerrainScreeningResult(OwnsArrays):
             frequencies=1,
             adjustment=1,
             diffraction_points=2,
-            distances=1,
-            heights=1,
+            distances_m=1,
+            heights_m=1,
         )
         require_same_length(self, "frequencies", "adjustment")
-        require_same_length(self, "distances", "heights", axis="section vertex")
+        require_same_length(self, "distances_m", "heights_m", axis="section vertex")
         src, rcv = _section_ends(self.source, self.receiver)
-        d, z = _validated_section(self.distances, self.heights)
+        d, z = _validated_section(self.distances_m, self.heights_m)
         if not (
             math.isclose(float(d[0]), src[0], rel_tol=0.0, abs_tol=_COVER_SLACK_M)
             and math.isclose(float(d[-1]), rcv[0], rel_tol=0.0, abs_tol=_COVER_SLACK_M)
         ):
             msg = (
-                "TerrainScreeningResult: 'distances' must run from the source "
+                "TerrainScreeningResult: 'distances_m' must run from the source "
                 "to the receiver, the section the line of sight is tested over; "
                 f"got {float(d[0])!r} m to {float(d[-1])!r} m for a source at "
                 f"{src[0]!r} m and a receiver at {rcv[0]!r} m."
@@ -699,7 +699,7 @@ class TerrainScreeningResult(OwnsArrays):
         path over them has a diffracting edge.
         """
         return (
-            _convex_path(self.source, self.receiver, self.distances, self.heights)
+            _convex_path(self.source, self.receiver, self.distances_m, self.heights_m)
             is not None
         )
 
@@ -719,8 +719,8 @@ def terrain_screening_adjustment(
     frequencies: NDArray[np.float64] | list[float],
     source: tuple[float, float],
     receiver: tuple[float, float],
-    distances: NDArray[np.float64] | list[float],
-    heights: NDArray[np.float64] | list[float],
+    distances_m: NDArray[np.float64] | list[float],
+    heights_m: NDArray[np.float64] | list[float],
     *,
     flow_resistivity: float | str | NDArray[np.float64] | list[float] = "G",
 ) -> TerrainScreeningResult:
@@ -758,9 +758,9 @@ def terrain_screening_adjustment(
     :param source: Source ``(d, z)`` in the section, in metres.
     :param receiver: Receiver ``(d, z)`` in the section, in metres (the
         microphone point, i.e. ground plus microphone height).
-    :param distances: Terrain section distances ``d``, in metres, strictly
+    :param distances_m: Terrain section distances ``d``, in metres, strictly
         increasing, covering ``[source d, receiver d]``.
-    :param heights: Terrain heights ``z(d)``, in metres.
+    :param heights_m: Terrain heights ``z(d)``, in metres.
     :param flow_resistivity: Ground flow resistivity: a value in Pa·s/m², a
         CNOSSOS class letter, or one value per profile segment (shape
         ``(M−1,)``) averaged per sub-path by Eq. 41.
@@ -768,7 +768,7 @@ def terrain_screening_adjustment(
     :raises ValueError: If the inputs are invalid.
     """
     f = require_positive_array(frequencies, "frequencies")
-    d, z = _validated_section(distances, heights)
+    d, z = _validated_section(distances_m, heights_m)
     src, rcv = _section_ends(source, receiver)
     if d[0] > src[0] + _COVER_SLACK_M or d[-1] < rcv[0] - _COVER_SLACK_M:
         msg = "The terrain section must cover [source d, receiver d]."
@@ -783,8 +783,8 @@ def terrain_screening_adjustment(
         diffraction_points=points,
         source=src,
         receiver=rcv,
-        distances=d,
-        heights=z,
+        distances_m=d,
+        heights_m=z,
     )
 
 
@@ -999,15 +999,15 @@ def _screening_core(
     delta_img_r = _image_path_difference(
         hull, _mirrored_point(rcv, zr, a_r), side="receiver"
     )
-    ld = diffraction_attenuation(f, delta, edge_height=h0, edge_span=span)
+    ld = diffraction_attenuation(f, delta, edge_height_m=h0, edge_span=span)
     ld_free = diffraction_attenuation(
-        f, delta, edge_height=h0, edge_span=span, capped=False
+        f, delta, edge_height_m=h0, edge_span=span, capped=False
     )
     ld_s = diffraction_attenuation(
-        f, delta_img_s, edge_height=h0, edge_span=span, capped=False
+        f, delta_img_s, edge_height_m=h0, edge_span=span, capped=False
     )
     ld_r = diffraction_attenuation(
-        f, delta_img_r, edge_height=h0, edge_span=span, capped=False
+        f, delta_img_r, edge_height_m=h0, edge_span=span, capped=False
     )
     # Eq. 46/47: the side ground attenuations, weighted by their image-path
     # diffractions (A = −ΔLg maps the Eq. 23 adjustments onto attenuations).

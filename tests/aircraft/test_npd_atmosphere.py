@@ -79,7 +79,7 @@ def _curves(operation: str, table: tuple) -> AnpNpdCurves:
         operation=operation,
         power_parameter="CNT (lb)",
         powers=np.array([r[1] for r in rows]),
-        distances=_DISTANCES_M,
+        distances_m=_DISTANCES_M,
         levels=np.array([r[2] for r in rows]),
     )
 
@@ -177,9 +177,9 @@ def test_revised_curves_keep_axes_of_their_own() -> None:
     """
     curves = _curves("A", TABLE_D6A)
     rev = revise_npd_curves(curves, _DB.spectral_class(205), **_AIR)
-    assert not np.shares_memory(rev.revised.distances, curves.distances)
+    assert not np.shares_memory(rev.revised.distances_m, curves.distances_m)
     assert not np.shares_memory(rev.revised.powers, curves.powers)
-    np.testing.assert_array_equal(rev.revised.distances, curves.distances)
+    np.testing.assert_array_equal(rev.revised.distances_m, curves.distances_m)
     np.testing.assert_array_equal(rev.revised.powers, curves.powers)
 
 
@@ -304,7 +304,7 @@ def test_event_level_with_humidity_reads_the_revised_tables() -> None:
         profile.path,
         observer,
         sel.powers,
-        sel.distances,
+        sel.distances_m,
         sel.levels,
         lmax.levels,
         mounting="wing",
@@ -336,7 +336,7 @@ def test_event_level_with_humidity_reads_the_field_pressure() -> None:
         profile.path,
         observer,
         sel.powers,
-        sel.distances,
+        sel.distances_m,
         sel.levels,
         lmax.levels,
         mounting="wing",
@@ -364,7 +364,7 @@ def test_aircraft_carries_its_two_spectral_classes() -> None:
 def test_unknown_spectral_class_names_what_there_is() -> None:
     with pytest.raises(KeyError, match="spectral class '999'"):
         _DB.spectral_class(999)
-    bare = AnpDatabase(aircraft={}, npd={}, distances=_DISTANCES_M, profiles={})
+    bare = AnpDatabase(aircraft={}, npd={}, distances_m=_DISTANCES_M, profiles={})
     with pytest.raises(KeyError, match="no spectral-class table"):
         bare.spectral_class(103)
 

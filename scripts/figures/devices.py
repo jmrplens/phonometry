@@ -96,7 +96,7 @@ def generate_intensity_demo(output_dir: str) -> None:
     p1_plane = noise
     p2_plane = np.fft.irfft(spectrum * np.exp(-2j * np.pi * freqs * dr / c), n)
     plane = emission.sound_intensity(
-        p1_plane, p2_plane, fs, spacing=dr, fraction=3, limits=[100.0, 5000.0]
+        p1_plane, p2_plane, fs, spacing_m=dr, fraction=3, limits=[100.0, 5000.0]
     )
 
     # Standing wave: equal counter-propagating waves, probe centred at x0.
@@ -109,7 +109,7 @@ def generate_intensity_demo(output_dir: str) -> None:
         standing_pressure(x0 - dr / 2),
         standing_pressure(x0 + dr / 2),
         fs,
-        spacing=dr,
+        spacing_m=dr,
         fraction=3,
         limits=[100.0, 5000.0],
     )
@@ -3093,7 +3093,7 @@ def generate_spacer_bandwidth(output_dir: str) -> None:
     for dr, colour in zip((0.006, 0.012, 0.050), colours, strict=True):
         p2 = np.fft.irfft(spectrum * np.exp(-2j * np.pi * freqs * dr / c), n)
         res = emission.sound_intensity(
-            noise, p2, fs, spacing=dr, fraction=3, limits=[20.0, 12500.0]
+            noise, p2, fs, spacing_m=dr, fraction=3, limits=[20.0, 12500.0]
         )
         # bias_correction is the compensating factor (k dr)/sin(k dr); the bias
         # itself is its reciprocal in decibels. Drop the bands the library
@@ -3525,7 +3525,7 @@ def generate_intensity_class(output_dir: str) -> None:
     # chain grows with frequency instead of staying put, so the index levels
     # off where the requirement does.
     spacing = 0.012
-    freqs, _, _ = emission.residual_index_limits("instrument", spacing=spacing)
+    freqs, _, _ = emission.residual_index_limits("instrument", spacing_m=spacing)
     phase_mismatch = 0.05 * np.maximum(1.0, freqs / 1000.0)  # degrees
     measured = emission.residual_index_from_phase_mismatch(
         phase_mismatch, freqs, spacing
@@ -3534,7 +3534,7 @@ def generate_intensity_class(output_dir: str) -> None:
     # that drops out of class 1 and drags the whole verdict down to class 2.
     measured = measured - 4.0 * np.exp(-(((np.log(freqs / 100.0)) / 0.25) ** 2))
 
-    result = emission.verify_intensity_class(measured, freqs, spacing=spacing)
+    result = emission.verify_intensity_class(measured, freqs, spacing_m=spacing)
     _fig, ax = plt.subplots(figsize=(10, 6))
     # The result's own .plot() shades the pass region of the achieved class and
     # rings the bands that cost the chain the next class up.
@@ -3739,10 +3739,10 @@ def generate_duct_attenuation_elements(output_dir: str) -> None:
     ax = axes[1][1]
     sil = hvac.splitter_silencer_insertion_loss(
         bands,
-        height=24 * inch,
+        height_m=24 * inch,
         length=5 * foot,
         airway_widths=[0.10] * 5,
-        splitter_thickness=0.10,
+        splitter_thickness_m=0.10,
     )
     ax.semilogx(
         bands,
@@ -3901,7 +3901,7 @@ def generate_duct_regenerated_noise(output_dir: str) -> None:
         (40.0, COLOR_FG),
     ):
         res = hvac.silencer_self_noise(
-            bands, airway_velocity=velocity, passages=5, height=24 * inch
+            bands, airway_velocity=velocity, passages=5, height_m=24 * inch
         )
         ax.semilogx(
             bands,
@@ -4172,7 +4172,7 @@ def generate_hvac_elbow_flow_noise(output_dir: str) -> None:
             ms=4,
             label=f"Straight duct, $U$ = {velocity:.0f} m/s",
         )
-    bend = hvac.flow_noise_bend(bands, flow_velocity=10.0, area=0.04, height=0.2)
+    bend = hvac.flow_noise_bend(bands, flow_velocity=10.0, area=0.04, height_m=0.2)
     ax.semilogx(
         np.asarray(bend.frequencies),
         np.asarray(bend.values),
@@ -6774,7 +6774,7 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
         "seat_diameter_m": 0.1,
     }
     water_pipe = noise_control.LiquidPipe(
-        internal_diameter_m=0.1071, wall_thickness=0.0036, density=7800.0
+        internal_diameter_m=0.1071, wall_thickness_m=0.0036, density=7800.0
     )
     inlet, vapour = 1.0e6, 2.32e3
     threshold = noise_control.incipient_cavitation_ratio(90.0, 0.42, 0.92)
@@ -7030,7 +7030,7 @@ def generate_control_valve_noise(output_dir: str) -> None:
         strouhal_number=0.2,
     )
     pipe = noise_control.DownstreamPipe(
-        internal_diameter_m=0.2031, wall_thickness=0.008, density=8000.0
+        internal_diameter_m=0.2031, wall_thickness_m=0.008, density=8000.0
     )
     bounds = noise_control.pressure_ratio_boundaries(1.22, 0.792 / 0.984)
 

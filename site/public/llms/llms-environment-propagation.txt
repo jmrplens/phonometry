@@ -385,7 +385,7 @@ from phonometry import environment
 bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
 barrier = environment.Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
 att = environment.outdoor_propagation_attenuation(
-    200.0, source_height=1.5, receiver_height=1.5, frequencies=bands,
+    200.0, source_height_m=1.5, receiver_height_m=1.5, frequencies=bands,
     ground_source=1.0, ground_middle=1.0, ground_receiver=1.0,
     barrier=barrier, temperature_c=15.0, relative_humidity_percent=70.0,
 )
@@ -430,7 +430,7 @@ bands = [63, 125, 250, 500, 1000, 2000, 4000, 8000]   # octave-band centres [Hz]
 # (dss = dsr ~ 101 m). Geometry feeds the pathlength-difference equations.
 barrier = environment.Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
 att = environment.outdoor_propagation_attenuation(
-    200.0, source_height=1.5, receiver_height=1.5, frequencies=bands,
+    200.0, source_height_m=1.5, receiver_height_m=1.5, frequencies=bands,
     ground_source=1.0, ground_middle=1.0, ground_receiver=1.0,
     barrier=barrier, temperature_c=15.0, relative_humidity_percent=70.0,
 )
@@ -586,7 +586,7 @@ works when the wavelength is short next to the path difference.
 | Parameter | Type / shape | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `distance` | float | m | > 0 | Straight-line source–receiver distance $d$ |
-| `source_height` / `receiver_height` | float | m | ≥ 0 | $h_\mathrm{s}$, $h_\mathrm{r}$ above ground |
+| `source_height_m` / `receiver_height_m` | float | m | ≥ 0 | $h_\mathrm{s}$, $h_\mathrm{r}$ above ground |
 | `frequencies` | 1D array | Hz | default 8 octaves 63–8000 | `DEFAULT_FREQUENCIES_HZ` |
 | `ground_source` / `ground_middle` / `ground_receiver` | float | — | `[0, 1]`, default `0.0` | Ground factor $G$ (0 hard, 1 porous) |
 | `barrier` | `Barrier` or None | — | default `None` | Screening obstacle |
@@ -791,7 +791,7 @@ from phonometry import ReportMetadata, environment
 freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
 lw = np.array([95, 100, 103, 105, 104, 101, 95, 88], dtype=float)
 result = environment.outdoor_propagation_attenuation(
-    200.0, source_height=4.0, receiver_height=2.0, frequencies=freqs,
+    200.0, source_height_m=4.0, receiver_height_m=2.0, frequencies=freqs,
     ground_source=1.0, ground_middle=1.0, ground_receiver=1.0,
     barrier=environment.Barrier(source_to_edge=105.0, edge_to_receiver=105.0),
     temperature_c=10.0, relative_humidity_percent=70.0,
@@ -1145,7 +1145,7 @@ the auxiliary Fresnel functions. It gives 6 dB at the shadow boundary (the
 field is exactly halved, the flat-wedge limit) and tracks Kurze-Anderson through
 the shadow zone.
 
-**Thick barriers.** A `thickness` (top width $e$) lengthens the diffracted
+**Thick barriers.** A `thickness_m` (top width $e$) lengthens the diffracted
 path to $A + e + B$, the double-edge Fresnel number
 $N = (2/\lambda)(A + B + e - d)$ of
 Bies Eq. 5.157, so a thick barrier or a soil mound attenuates monotonically more
@@ -1472,15 +1472,15 @@ import numpy as np
 from phonometry import environment
 
 c0 = 340.0
-profile = environment.log_linear_sound_speed_profile(-1.0, ground_speed=c0, max_height=60.0)
+profile = environment.log_linear_sound_speed_profile(-1.0, ground_speed=c0, max_height_m=60.0)
 zs = 2.0
 fig, axes = plt.subplots(2, 1, figsize=(11, 8.2), sharex=True)
 
-rays = environment.atmospheric_ray_paths(profile, source_height=zs,
+rays = environment.atmospheric_ray_paths(profile, source_height_m=zs,
                                          launch_angles_deg=np.linspace(-8.0, 8.0, 17),
                                          max_range=600.0, n_steps=3000)
-for i in range(rays.heights.shape[0]):
-    axes[0].plot(rays.ranges[i], rays.heights[i], color="#1f77b4", lw=0.8, alpha=0.7)
+for i in range(rays.heights_m.shape[0]):
+    axes[0].plot(rays.ranges[i], rays.heights_m[i], color="#1f77b4", lw=0.8, alpha=0.7)
 axes[0].plot([0.0], [zs], "o", color="#d62728", label="Source")
 grad = (profile.speed_at(10.0) - c0) / 10.0
 x_sh = environment.shadow_zone_distance(float(grad), zs, zs, ground_speed=c0)
@@ -1490,12 +1490,12 @@ axes[0].legend()
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
-    pe = environment.atmospheric_parabolic_equation(400.0, profile, source_height=zs,
+    pe = environment.atmospheric_parabolic_equation(400.0, profile, source_height_m=zs,
                                                     flow_resistivity=200e3,
-                                                    max_range=600.0, max_height=40.0)
+                                                    max_range=600.0, max_height_m=40.0)
 img = axes[1].imshow(pe.relative_level, cmap="RdBu_r", vmin=-30, vmax=6,
                      aspect="auto", origin="lower", interpolation="bilinear",
-                     extent=(pe.ranges[0], pe.ranges[-1], pe.heights[0], pe.heights[-1]))
+                     extent=(pe.ranges[0], pe.ranges[-1], pe.heights_m[0], pe.heights_m[-1]))
 axes[1].axvline(x_sh, color="k", ls="--")
 axes[1].set(ylabel="Height [m]", xlabel="Range [m]", ylim=(0, 40),
             title="GFPE relative sound level")
@@ -1546,8 +1546,8 @@ import matplotlib.pyplot as plt
 from phonometry import environment
 
 # The two canonical surface layers of Salomons Eq. 4.5 over grassland.
-down = environment.log_linear_sound_speed_profile(+1.0, ground_speed=340.0, max_height=60.0)
-up = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0, max_height=60.0)
+down = environment.log_linear_sound_speed_profile(+1.0, ground_speed=340.0, max_height_m=60.0)
+up = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0, max_height_m=60.0)
 ax = down.plot(color="#1f77b4")
 up.plot(ax=ax, color="#d62728")
 plt.show()
@@ -1568,7 +1568,7 @@ import numpy as np
 from phonometry import environment
 
 profile = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0)
-rays = environment.atmospheric_ray_paths(profile, source_height=2.0,
+rays = environment.atmospheric_ray_paths(profile, source_height_m=2.0,
                                          launch_angles_deg=np.linspace(-8.0, 8.0, 17),
                                          max_range=600.0)
 rays.plot()   # curved ray fan with the acoustic shadow near the ground
@@ -1591,7 +1591,7 @@ from phonometry import environment
 
 # Downward refraction: the favourable-propagation mirror of the shadow case.
 profile = environment.log_linear_sound_speed_profile(+1.0, ground_speed=340.0)
-rays = environment.atmospheric_ray_paths(profile, source_height=2.0,
+rays = environment.atmospheric_ray_paths(profile, source_height_m=2.0,
                                          launch_angles_deg=np.linspace(-8.0, 8.0, 17),
                                          max_range=600.0, n_steps=600)
 rays.plot()   # shallow rays return to the ground and bounce on down-range
@@ -1657,9 +1657,9 @@ the whole range-height plane.
 from phonometry import environment
 
 profile = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0)  # upward
-pe = environment.atmospheric_parabolic_equation(400.0, profile, source_height=2.0,
+pe = environment.atmospheric_parabolic_equation(400.0, profile, source_height_m=2.0,
                                                 flow_resistivity=200e3,  # grassland
-                                                max_range=600.0, max_height=40.0)
+                                                max_range=600.0, max_height_m=40.0)
 pe.level_at_height(2.0)   # relative level vs range at 2 m
 pe.plot()                 # the range-height relative-level field
 ```
@@ -1689,9 +1689,9 @@ fig, ax = plt.subplots(figsize=(11, 6.2))
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     for profile, label in cases:
-        pe = environment.atmospheric_parabolic_equation(400.0, profile, source_height=2.0,
+        pe = environment.atmospheric_parabolic_equation(400.0, profile, source_height_m=2.0,
                                                         flow_resistivity=200e3,
-                                                        max_range=600.0, max_height=40.0)
+                                                        max_range=600.0, max_height_m=40.0)
         ax.plot(pe.ranges, pe.level_at_height(2.0), label=label)
 # The closed-form boundary of the equivalent linear upward gradient_per_s (its
 # 10 m mean), the dotted line of the figure.

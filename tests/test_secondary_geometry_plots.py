@@ -151,7 +151,7 @@ def test_junction_result_retains_thicknesses_and_draws() -> None:
     res = pm.vibration.junction_transmission(
         "T1", 0.14, 3500.0, 320.0, 0.2, 3500.0, 460.0
     )
-    assert res.thickness1 == pytest.approx(0.14)
+    assert res.thickness1_m == pytest.approx(0.14)
     assert res.plot_geometry() is not None
     for junction in ("L", "T1", "T2", "X"):
         assert pm.building.plot_junction_geometry(junction, 0.14, 0.2) is not None
@@ -161,12 +161,12 @@ def test_junction_result_retains_thicknesses_and_draws() -> None:
 
 def test_junction_geometry_rejects_nan_thickness() -> None:
     """A NaN thickness would draw collapsed plates under a 'nan mm' label."""
-    with pytest.raises(ValueError, match=r"'thickness1' must be positive"):
+    with pytest.raises(ValueError, match=r"'thickness1_m' must be positive"):
         pm.building.plot_junction_geometry("L", float("nan"), 0.1)
 
 
 def test_junction_geometry_rejects_nan_second_thickness() -> None:
-    with pytest.raises(ValueError, match=r"'thickness2' must be positive"):
+    with pytest.raises(ValueError, match=r"'thickness2_m' must be positive"):
         pm.building.plot_junction_geometry("L", 0.14, float("nan"))
 
 
@@ -293,11 +293,11 @@ def test_intensity_result_retains_spacing_and_draws() -> None:
     t = np.arange(fs // 4) / fs
     p1 = np.sin(2.0 * np.pi * 500.0 * t)
     p2 = np.sin(2.0 * np.pi * 500.0 * t - 0.05)
-    res = pm.emission.sound_intensity(p1, p2, fs, spacing=0.012)
-    assert res.spacing == pytest.approx(0.012)
+    res = pm.emission.sound_intensity(p1, p2, fs, spacing_m=0.012)
+    assert res.spacing_m == pytest.approx(0.012)
     assert res.plot_geometry() is not None
     assert pm.emission.plot_pp_probe_geometry() is not None
-    with pytest.raises(ValueError, match=r"'spacing' must be positive"):
+    with pytest.raises(ValueError, match=r"'spacing_m' must be positive"):
         pm.emission.plot_pp_probe_geometry(0.0)
 
 

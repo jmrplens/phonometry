@@ -606,7 +606,7 @@ flow_noise_bend(
     frequencies: ArrayLike,
     flow_velocity: float,
     area: float,
-    height: float,
+    height_m: float,
     *,
     density: float = 1.206,
     model: str = 'ashrae',
@@ -660,7 +660,7 @@ $\lg St$ is not real below one.
 | `frequencies` | Octave-band centre frequencies `f`, Hz (1-D array). |
 | `flow_velocity` | Mean flow speed `U`, m/s. |
 | `area` | Duct cross-sectional area `S`, m2. |
-| `height` | Duct height `H` in the plane of the bend, m. |
+| `height_m` | Duct height `H` in the plane of the bend, m. |
 | `density` | Air density `rho`, kg/m3. |
 | `model` | `"ashrae"` (default, Bies) or `"vdi2081"`. |
 | `branch_diameter_m` | **VDI 2081 only.** Diameter of the branch duct `d_a`, m; for a bend, the duct's own diameter. |
@@ -852,7 +852,7 @@ lined_circular_duct_attenuation(
     frequencies: ArrayLike | None,
     diameter_m: float,
     length: float,
-    lining_thickness: float,
+    lining_thickness_m: float,
 ) -> HvacSpectrumResult
 ```
 
@@ -875,7 +875,7 @@ ignores it.
 | `frequencies` | Octave-band centres, Hz; `None` uses `OCTAVE_BANDS`. |
 | `diameter_m` | Internal diameter `d`, m. |
 | `length` | Duct run length `l`, m. |
-| `lining_thickness` | Lining thickness `t`, m. |
+| `lining_thickness_m` | Lining thickness `t`, m. |
 
 **Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
 
@@ -885,9 +885,9 @@ ignores it.
 lined_rectangular_duct_attenuation(
     frequencies: ArrayLike | None,
     width: float,
-    height: float,
+    height_m: float,
     length: float,
-    lining_thickness: float,
+    lining_thickness_m: float,
     *,
     include_unlined: bool = False,
 ) -> HvacSpectrumResult
@@ -911,9 +911,9 @@ ducts). Flanking limits the total to 40 dB.
 | :--- | :--- |
 | `frequencies` | Octave-band centres, Hz; `None` uses `OCTAVE_BANDS`. |
 | `width` | Duct width, m. |
-| `height` | Duct height, m. |
+| `height_m` | Duct height, m. |
 | `length` | Duct run length `l`, m. |
-| `lining_thickness` | Lining thickness `t`, m. |
+| `lining_thickness_m` | Lining thickness `t`, m. |
 | `include_unlined` | Add the unlined-duct attenuation of [`unlined_rectangular_duct_attenuation`](/phonometry/reference/api/noise_control/hvac/#unlined_rectangular_duct_attenuation), the side-wall contribution the insertion-loss measurement subtracts out. |
 
 **Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
@@ -1169,7 +1169,7 @@ silencer_self_noise(
     frequencies: ArrayLike | None,
     airway_velocity: float,
     passages: int,
-    height: float,
+    height_m: float,
     *,
     model: str = 'ashrae',
     pressure_drop_pa: float | None = None,
@@ -1209,7 +1209,7 @@ correction because the face size enters through `N` and `H`.
 | `frequencies` | Octave-band centres, Hz; `None` uses `OCTAVE_BANDS`. |
 | `airway_velocity` | Velocity `V` in the splitter airway, m/s. |
 | `passages` | Number of air passages `N` between the splitters. |
-| `height` | Silencer height `H` (or circumference, if round), m. |
+| `height_m` | Silencer height `H` (or circumference, if round), m. |
 | `model` | `"ashrae"` (default, Long Eq. 14.31) or `"vdi2081"` (Section 7.2.4.2). |
 | `pressure_drop_pa` | **VDI 2081 only.** Total pressure drop across the silencer, Pa, which Equation (49) takes. |
 | `approach_area` | **VDI 2081 only.** Frontal area the silencer is approached over `S`, m2. That is the duct's whole section, not the clear area between the splitters. |
@@ -1292,10 +1292,10 @@ records.
 ```python
 splitter_silencer_insertion_loss(
     frequencies: ArrayLike | None,
-    height: float,
+    height_m: float,
     length: float,
     airway_widths: ArrayLike,
-    splitter_thickness: float,
+    splitter_thickness_m: float,
 ) -> HvacSpectrumResult
 ```
 
@@ -1330,10 +1330,10 @@ noise is a separate quantity, [`silencer_self_noise`](/phonometry/reference/api/
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Octave-band centres, Hz; `None` (default) uses `OCTAVE_BANDS`. |
-| `height` | Height of the silencer face, m (the airway dimension the splitters do not divide). |
+| `height_m` | Height of the silencer face, m (the airway dimension the splitters do not divide). |
 | `length` | Length of the silencer in the flow direction, m. |
 | `airway_widths` | Free width of each airway between splitters, m (a scalar is taken as a single airway; give one value per airway when they differ). |
-| `splitter_thickness` | Full thickness of a splitter baffle, m; the equivalent liner thickness of an airway is half of it. |
+| `splitter_thickness_m` | Full thickness of a splitter baffle, m; the equivalent liner thickness of an airway is half of it. |
 
 **Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the insertion loss, dB.
 
@@ -1386,7 +1386,7 @@ of this element, and it is why `diameter_m` is required there and not here.
 unlined_rectangular_duct_attenuation(
     frequencies: ArrayLike,
     width: float,
-    height: float,
+    height_m: float,
     length: float,
     *,
     wrapped: bool = False,
@@ -1421,7 +1421,7 @@ and is refused.
 | :--- | :--- |
 | `frequencies` | Octave-band centre frequencies `f`, Hz (1-D array). |
 | `width` | Duct width, m. |
-| `height` | Duct height, m. |
+| `height_m` | Duct height, m. |
 | `length` | Duct run length `l`, m. |
 | `wrapped` | The duct is externally wrapped with a fibreglass blanket, which doubles the 63 Hz to 250 Hz attenuation. |
 | `model` | `"ashrae"` (default, Reynolds) or `"vdi2081"` (Table 5, the largest side length selecting the row). |

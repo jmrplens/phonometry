@@ -241,7 +241,7 @@ def test_reflection_factor_round_trip(reflection: complex) -> None:
     x1, spacing = 0.12, 0.03
     k0 = tube_wavenumber(f, C0)
     h12 = _synth_h12(reflection, np.asarray(k0), x1, spacing)
-    r = reflection_factor(h12, spacing=spacing, x1=x1, wavenumber=k0)
+    r = reflection_factor(h12, spacing_m=spacing, x1=x1, wavenumber=k0)
     assert np.allclose(r, reflection, atol=1e-12)
 
 
@@ -252,7 +252,7 @@ def test_reflection_factor_round_trip_with_attenuation() -> None:
     k0 = tube_wavenumber(f, C0, attenuation=att)
     reflection = 0.6 - 0.2j
     h12 = _synth_h12(reflection, np.asarray(k0), x1, spacing)
-    r = reflection_factor(h12, spacing=spacing, x1=x1, wavenumber=k0)
+    r = reflection_factor(h12, spacing_m=spacing, x1=x1, wavenumber=k0)
     assert np.allclose(r, reflection, atol=1e-12)
 
 
@@ -277,7 +277,7 @@ def test_reflection_factor_rejects_mismatched_h12() -> None:
     with pytest.raises(ValueError, match="'h12' must be a scalar or carry"):
         reflection_factor(
             np.array([0.5 + 0.1j, 0.4 + 0.2j]),
-            spacing=0.03,
+            spacing_m=0.03,
             x1=0.12,
             wavenumber=np.array([1.0, 2.0, 3.0]),
         )
@@ -290,7 +290,7 @@ def test_two_microphone_rejects_mismatched_h12() -> None:
         two_microphone_impedance(
             np.array([0.5 + 0.1j, 0.4 + 0.2j]),
             frequency=np.array([500.0, 1000.0, 1500.0]),
-            spacing=0.03,
+            spacing_m=0.03,
             x1=0.12,
             speed_of_sound=C0,
             characteristic_impedance=RC,
@@ -303,7 +303,7 @@ def test_two_microphone_rejects_nan_frequency() -> None:
         two_microphone_impedance(
             np.array([0.5 + 0.1j, 0.4 + 0.2j]),
             frequency=np.array([-1000.0, np.nan]),
-            spacing=0.03,
+            spacing_m=0.03,
             x1=0.12,
             speed_of_sound=C0,
             characteristic_impedance=RC,
@@ -319,7 +319,7 @@ def test_two_microphone_impedance_result() -> None:
     res = two_microphone_impedance(
         h12,
         frequency=f,
-        spacing=spacing,
+        spacing_m=spacing,
         x1=x1,
         speed_of_sound=C0,
         characteristic_impedance=RC,
@@ -334,7 +334,7 @@ def test_result_is_frozen() -> None:
     res = two_microphone_impedance(
         np.array([0.5 + 0.1j]),
         frequency=np.array([1000.0]),
-        spacing=0.03,
+        spacing_m=0.03,
         x1=0.12,
         speed_of_sound=C0,
         characteristic_impedance=RC,
@@ -385,7 +385,7 @@ def test_frequency_range_warning_fires() -> None:
         two_microphone_impedance(
             h12,
             frequency=f,
-            spacing=0.03,
+            spacing_m=0.03,
             x1=0.12,
             speed_of_sound=C0,
             characteristic_impedance=RC,
@@ -441,7 +441,7 @@ def test_hydraulic_diameter_values() -> None:
     assert hydraulic_diameter(0.08, 0.04) == pytest.approx(
         4.0 * (0.08 * 0.04) / (2.0 * (0.08 + 0.04))
     )
-    with pytest.raises(ValueError, match=r"'width' and 'height' must be positive"):
+    with pytest.raises(ValueError, match=r"'width' and 'height_m' must be positive"):
         hydraulic_diameter(0.0, 0.05)
 
 
@@ -451,14 +451,14 @@ def test_result_retains_tube_geometry() -> None:
     res = two_microphone_impedance(
         h12,
         frequency=f,
-        spacing=0.03,
+        spacing_m=0.03,
         x1=0.12,
         speed_of_sound=C0,
         characteristic_impedance=RC,
         diameter_m=0.05,
         shape="square",
     )
-    assert res.spacing == pytest.approx(0.03)
+    assert res.spacing_m == pytest.approx(0.03)
     assert res.x1 == pytest.approx(0.12)
     assert res.diameter_m == pytest.approx(0.05)
     # "square" is stored canonically as the rectangular case.
@@ -467,7 +467,7 @@ def test_result_retains_tube_geometry() -> None:
     res_no_d = two_microphone_impedance(
         h12,
         frequency=f,
-        spacing=0.03,
+        spacing_m=0.03,
         x1=0.12,
         speed_of_sound=C0,
         characteristic_impedance=RC,
@@ -486,7 +486,7 @@ def test_frequency_range_no_warning_in_band() -> None:
         two_microphone_impedance(
             h12,
             frequency=f,
-            spacing=0.03,
+            spacing_m=0.03,
             x1=0.12,
             speed_of_sound=C0,
             characteristic_impedance=RC,
@@ -661,7 +661,7 @@ def test_face_quantities_progressive_wave_impedance() -> None:
         1.0,
         0.0,
         wavenumber=k,
-        thickness=THICKNESS,
+        thickness_m=THICKNESS,
         characteristic_impedance=RC,
     )
     assert np.allclose(p0 / u0, RC, atol=1e-9)
@@ -678,7 +678,7 @@ def test_face_quantities_backward_wave_impedance() -> None:
         0.0,
         1.0,
         wavenumber=k,
-        thickness=THICKNESS,
+        thickness_m=THICKNESS,
         characteristic_impedance=RC,
     )
     assert np.allclose(p0 / u0, -RC, atol=1e-9)
@@ -698,7 +698,7 @@ def test_two_load_warns_on_singular_load_pair() -> None:
         transfer_matrix_two_load(
             load,
             load,
-            thickness=THICKNESS,
+            thickness_m=THICKNESS,
             wavenumber=k,
             characteristic_impedance=RC,
             **GEOM,
@@ -713,7 +713,7 @@ def test_two_load_rejects_short_load() -> None:
         transfer_matrix_two_load(
             load[:3],
             load,
-            thickness=THICKNESS,
+            thickness_m=THICKNESS,
             wavenumber=np.array([10.0]),
             characteristic_impedance=RC,
             **GEOM,
@@ -727,7 +727,7 @@ def test_one_load_rejects_long_load() -> None:
     with pytest.raises(ValueError, match="'load' must be the four transfer"):
         transfer_matrix_one_load(
             load,
-            thickness=THICKNESS,
+            thickness_m=THICKNESS,
             wavenumber=np.array([10.0]),
             characteristic_impedance=RC,
             **GEOM,
@@ -735,16 +735,16 @@ def test_one_load_rejects_long_load() -> None:
 
 
 def test_face_quantities_rejects_non_positive_thickness() -> None:
-    # The same rule the module already applies to 'thickness' elsewhere;
+    # The same rule the module already applies to 'thickness_m' elsewhere;
     # a zero-depth specimen was accepted silently.
-    with pytest.raises(ValueError, match="'thickness' must be positive"):
+    with pytest.raises(ValueError, match="'thickness_m' must be positive"):
         face_quantities(
             1.0,
             0.5,
             0.7,
             0.2,
             wavenumber=10.0,
-            thickness=0.0,
+            thickness_m=0.0,
             characteristic_impedance=RC,
         )
 
@@ -752,10 +752,10 @@ def test_face_quantities_rejects_non_positive_thickness() -> None:
 def test_one_load_rejects_zero_thickness() -> None:
     # Both public solvers inherit the face_quantities guard.
     load = (1.0 + 0j, 0.9 + 0j, 0.8 + 0j, 0.7 + 0j)
-    with pytest.raises(ValueError, match="'thickness' must be positive"):
+    with pytest.raises(ValueError, match="'thickness_m' must be positive"):
         transfer_matrix_one_load(
             load,
-            thickness=0.0,
+            thickness_m=0.0,
             wavenumber=np.array([10.0]),
             characteristic_impedance=RC,
             **GEOM,
@@ -776,7 +776,7 @@ def test_two_load_no_warning_when_well_conditioned() -> None:
         transfer_matrix_two_load(
             h_a,
             h_b,
-            thickness=THICKNESS,
+            thickness_m=THICKNESS,
             wavenumber=k,
             characteristic_impedance=RC,
             **GEOM,
@@ -793,7 +793,7 @@ def test_two_load_recovers_air_layer_matrix() -> None:
     rec = transfer_matrix_two_load(
         load_a,
         load_b,
-        thickness=THICKNESS,
+        thickness_m=THICKNESS,
         wavenumber=k,
         characteristic_impedance=RC,
         **GEOM,
@@ -822,7 +822,7 @@ def test_two_load_recovers_asymmetric_specimen() -> None:
     rec = transfer_matrix_two_load(
         load_a,
         load_b,
-        thickness=THICKNESS,
+        thickness_m=THICKNESS,
         wavenumber=k,
         characteristic_impedance=RC,
         **GEOM,
@@ -842,7 +842,7 @@ def test_one_load_recovers_symmetric_specimen() -> None:
     load = _synth_four_mics(tm, np.asarray(k), 1.0 + 0.0j, 0.25 + 0.1j)
     rec = transfer_matrix_one_load(
         load,
-        thickness=THICKNESS,
+        thickness_m=THICKNESS,
         wavenumber=k,
         characteristic_impedance=RC,
         **GEOM,
@@ -869,7 +869,7 @@ def test_astm_solvers_warn_outside_plane_wave_range() -> None:
         transfer_matrix_two_load(
             load_a,
             load_b,
-            thickness=THICKNESS,
+            thickness_m=THICKNESS,
             wavenumber=k,
             characteristic_impedance=RC,
             diameter_m=0.10,
@@ -878,7 +878,7 @@ def test_astm_solvers_warn_outside_plane_wave_range() -> None:
     with pytest.warns(ImpedanceTubeWarning, match=_OUTSIDE_ASTM_RANGE):
         transfer_matrix_one_load(
             load_a,
-            thickness=THICKNESS,
+            thickness_m=THICKNESS,
             wavenumber=k,
             characteristic_impedance=RC,
             diameter_m=0.10,
@@ -918,7 +918,7 @@ def test_astm_solvers_silent_in_band_and_without_diameter() -> None:
         transfer_matrix_two_load(
             load_a,
             load_b,
-            thickness=THICKNESS,
+            thickness_m=THICKNESS,
             wavenumber=k,
             characteristic_impedance=RC,
             diameter_m=0.10,
@@ -934,7 +934,7 @@ def test_astm_solvers_silent_in_band_and_without_diameter() -> None:
         transfer_matrix_two_load(
             wide_a,
             wide_b,
-            thickness=THICKNESS,
+            thickness_m=THICKNESS,
             wavenumber=k_wide,
             characteristic_impedance=RC,
             **GEOM,
@@ -951,7 +951,7 @@ def test_transfer_matrix_retains_measurement_context() -> None:
     rec = transfer_matrix_two_load(
         load_a,
         load_b,
-        thickness=THICKNESS,
+        thickness_m=THICKNESS,
         wavenumber=k,
         characteristic_impedance=RC,
         frequencies=f,
@@ -963,7 +963,7 @@ def test_transfer_matrix_retains_measurement_context() -> None:
     assert rec.s1 == pytest.approx(GEOM["s1"])
     assert rec.l2 == pytest.approx(GEOM["l2"])
     assert rec.s2 == pytest.approx(GEOM["s2"])
-    assert rec.thickness == pytest.approx(THICKNESS)
+    assert rec.thickness_m == pytest.approx(THICKNESS)
     assert rec.diameter_m == pytest.approx(0.10)
     assert rec.shape == "rectangular"
     assert rec.frequencies is not None

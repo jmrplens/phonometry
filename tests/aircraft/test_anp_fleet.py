@@ -83,7 +83,7 @@ def test_npd_round_trip_is_exact() -> None:
 def test_npd_log_midpoint_interpolation() -> None:
     """Between two nodes the level is log-linear in distance (Doc 29 Eq. 4-4)."""
     curves = _DB.npd_curves("747100", "departure", "SEL")
-    d0, d1 = curves.distances[0], curves.distances[1]
+    d0, d1 = curves.distances_m[0], curves.distances_m[1]
     mid = float(curves.level(curves.powers[0], np.sqrt(d0 * d1))[0])
     assert mid == pytest.approx(
         0.5 * (curves.levels[0, 0] + curves.levels[0, 1]), abs=1e-9
@@ -174,7 +174,7 @@ def test_an_aerodrome_runs_the_chain_for_an_aircraft_with_no_fixed_point_profile
         profile.path,
         observer,
         sel.powers,
-        sel.distances,
+        sel.distances_m,
         sel.levels,
         lmax.levels,
         mounting=_DB.aircraft("A320-211").mounting,
@@ -267,7 +267,7 @@ def test_profile_unknown_aircraft_reports_missing_aircraft() -> None:
 def test_parsed_arrays_are_read_only() -> None:
     """NPD and profile arrays are exposed as read-only views."""
     curves = _DB.npd_curves("747100", "departure", "SEL")
-    for arr in (curves.powers, curves.distances, curves.levels):
+    for arr in (curves.powers, curves.distances_m, curves.levels):
         assert not arr.flags.writeable
         with pytest.raises(ValueError, match="read-only"):
             arr[0] = 0.0
@@ -419,7 +419,9 @@ def test_mismatched_sel_lamax_powers_raise() -> None:
     npd = {("NX", "SEL", "D"): sel, ("NX", "LAmax", "D"): lmax}
     path = np.array([[0.0, 0.0, 0.0, 8000.0, 20.0], [1000.0, 0.0, 300.0, 8000.0, 80.0]])
     profiles = {("X", "D", "DEFAULT", 1): path}
-    db = AnpDatabase(aircraft=aircraft, npd=npd, distances=distances, profiles=profiles)
+    db = AnpDatabase(
+        aircraft=aircraft, npd=npd, distances_m=distances, profiles=profiles
+    )
     with pytest.raises(ValueError, match="power settings differ"):
         db.event_level("X", [100.0, 100.0, 0.0], "departure")
 
@@ -633,7 +635,7 @@ def test_procedural_profile_feeds_the_doc29_chain() -> None:
         prof.path,
         [4000.0, 500.0, 0.0],
         sel.powers,
-        sel.distances,
+        sel.distances_m,
         sel.levels,
         lmax.levels,
         mounting=_DB.aircraft("A320-211").mounting,
@@ -951,7 +953,7 @@ def test_a_database_built_by_hand_keeps_arrays_of_its_own() -> None:
     db = AnpDatabase(
         aircraft={"X": {"ACFT_ID": "X", "NPD_ID": "NX", "Power Parameter": "CNT"}},
         npd={("NX", "SEL", "D"): (powers, levels)},
-        distances=distances,
+        distances_m=distances,
         profiles={("X", "D", "DEFAULT", 1): path},
     )
     curves = db.npd_curves("X", "departure", "SEL")
@@ -960,11 +962,11 @@ def test_a_database_built_by_hand_keeps_arrays_of_its_own() -> None:
     powers[0] = 1.0
     levels[0, 0] = 0.0
     path[1, 2] = 0.0
-    np.testing.assert_array_equal(curves.distances, [60.0, 120.0, 240.0])
+    np.testing.assert_array_equal(curves.distances_m, [60.0, 120.0, 240.0])
     np.testing.assert_array_equal(curves.powers, [8000.0, 12000.0])
     assert curves.levels[0, 0] == 95.0
     assert profile.path[1, 2] == 300.0
-    for kept in (curves.distances, curves.powers, curves.levels, profile.path):
+    for kept in (curves.distances_m, curves.powers, curves.levels, profile.path):
         assert not kept.flags.writeable
 
 
@@ -978,7 +980,7 @@ def _hand_built_database() -> AnpDatabase:
                 np.array([[95.0, 90.0, 85.0], [99.0, 94.0, 89.0]]),
             )
         },
-        distances=np.array([60.0, 120.0, 240.0]),
+        distances_m=np.array([60.0, 120.0, 240.0]),
         profiles={("X", "D", "DEFAULT", 1): path},
     )
 
@@ -999,7 +1001,7 @@ def test_a_database_built_by_hand_takes_no_performance_tables() -> None:
     assert list(parameters) == [
         "aircraft",
         "npd",
-        "distances",
+        "distances_m",
         "profiles",
         "spectral_classes",
     ]

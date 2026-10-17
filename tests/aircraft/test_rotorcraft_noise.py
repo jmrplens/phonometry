@@ -89,7 +89,7 @@ def test_spherical_spreading_matches_inverse_square() -> None:
     assert spherical_spreading_adjustment(60.0) == pytest.approx(0.0)
     assert spherical_spreading_adjustment(600.0) == pytest.approx(-20.0)
     assert spherical_spreading_adjustment(120.0) == pytest.approx(-20.0 * np.log10(2.0))
-    with pytest.raises(ValueError, match=r"'distance' must be positive"):
+    with pytest.raises(ValueError, match=r"'distance_m' must be positive"):
         spherical_spreading_adjustment(0.0)
 
 
@@ -121,14 +121,14 @@ def test_atmospheric_low_bands_do_not_warn() -> None:
 
 def test_adjustments_honour_reference_distance() -> None:
     # Hemispheres recorded at a non-standard polar distance (e.g. 70 m hover
-    # rings) pass their distance through 'reference_distance'.
+    # rings) pass their distance through 'reference_distance_m'.
     assert spherical_spreading_adjustment(
-        70.0, reference_distance=70.0
+        70.0, reference_distance_m=70.0
     ) == pytest.approx(0.0)
     assert spherical_spreading_adjustment(
-        700.0, reference_distance=70.0
+        700.0, reference_distance_m=70.0
     ) == pytest.approx(-20.0)
-    la = atmospheric_adjustment([1000.0], 70.0, reference_distance=70.0)
+    la = atmospheric_adjustment([1000.0], 70.0, reference_distance_m=70.0)
     assert la[0] == pytest.approx(0.0)
 
 
@@ -160,7 +160,7 @@ def test_ground_effect_class_letters_and_values_agree() -> None:
 
 
 def test_ground_effect_invalid_inputs() -> None:
-    with pytest.raises(ValueError, match=r"'horizontal_distance' must be positive"):
+    with pytest.raises(ValueError, match=r"'horizontal_distance_m' must be positive"):
         ground_effect_adjustment([500.0], 100.0, 1.5, 0.0)
     with pytest.raises(ValueError, match=r"'flow_resistivity' class must be one of"):
         ground_effect_adjustment([500.0], 100.0, 1.5, 300.0, flow_resistivity="Z")
@@ -878,7 +878,7 @@ def _ring(levels_per_bearing: np.ndarray, bands: int = 2) -> np.ndarray:
 
 def test_hover_ring_uniform_ring_gives_uniform_hemisphere() -> None:
     h = hover_ring_hemisphere([500.0, 1000.0], _RING_BEARINGS, _ring(np.full(12, 80.0)))
-    assert h.distance == 70.0
+    assert h.distance_m == 70.0
     assert h.azimuth.size == 19
     assert h.polar.size == 19
     assert np.allclose(h.levels, 80.0)
@@ -975,7 +975,7 @@ def test_hover_derived_offsets_are_the_published_constants() -> None:
     po = np.arange(0.0, 181.0, 10.0)
     levels = np.random.default_rng(7).uniform(60.0, 90.0, (19, 19, 2))
     levels[3, 4, 0] = np.nan
-    hige = RotorcraftHemisphere(freqs, az, po, levels.copy(), distance=70.0)
+    hige = RotorcraftHemisphere(freqs, az, po, levels.copy(), distance_m=70.0)
     for condition, offset in (
         ("out_of_ground_hover", 12.0),
         ("reduced_rpm_idle", -12.0),
@@ -985,7 +985,7 @@ def test_hover_derived_offsets_are_the_published_constants() -> None:
         finite = np.isfinite(levels)
         assert np.allclose(got.levels[finite], levels[finite] + offset)
         assert np.isnan(got.levels[3, 4, 0])
-        assert got.distance == 70.0
+        assert got.distance_m == 70.0
         assert np.array_equal(got.frequencies, freqs)
         assert np.array_equal(got.azimuth, az)
         assert np.array_equal(got.polar, po)
@@ -1026,8 +1026,8 @@ def test_hover_helpers_validation() -> None:
     with_nan = np.where(ring > 0.0, np.nan, ring)
     with pytest.raises(ValueError, match=r"'levels' must be finite"):
         hover_ring_hemisphere(freqs, _RING_BEARINGS, with_nan)
-    with pytest.raises(ValueError, match=r"'distance' must be positive"):
-        hover_ring_hemisphere(freqs, _RING_BEARINGS, ring, distance=0.0)
+    with pytest.raises(ValueError, match=r"'distance_m' must be positive"):
+        hover_ring_hemisphere(freqs, _RING_BEARINGS, ring, distance_m=0.0)
     with pytest.raises(ValueError, match=r"'azimuth_step' must divide"):
         hover_ring_hemisphere(freqs, _RING_BEARINGS, ring, azimuth_step=7.0)
     with pytest.raises(ValueError, match=r"'polar_step' must divide"):
@@ -1075,7 +1075,7 @@ from phonometry.aircraft.rotorcraft_noise import (
 )
 
 #: The hard-ground, 0.1 m microphone site the flyover helper measures on.
-_HARD_SITE = RotorcraftGround(receiver_height=0.1, flow_resistivity="H")
+_HARD_SITE = RotorcraftGround(receiver_height_m=0.1, flow_resistivity="H")
 
 
 def _uniform_hemisphere(
@@ -1328,12 +1328,12 @@ def _flyover(
 
 def test_event_geometry_overhead() -> None:
     _t, _pos, res = _flyover(bands=[31.5])
-    k = int(np.argmin(res.distances))
-    assert res.distances[k] == pytest.approx(100.0, abs=1e-9)
+    k = int(np.argmin(res.distances_m))
+    assert res.distances_m[k] == pytest.approx(100.0, abs=1e-9)
     assert res.polar[k] == pytest.approx(90.0, abs=1e-6)
     assert abs(res.azimuth[k]) == pytest.approx(0.0, abs=1e-6)
     # Retarded time (Eq. 22) with c = 346.1 m/s, at every step.
-    assert np.allclose(res.times, res.emission_times + res.distances / 346.1)
+    assert np.allclose(res.times, res.emission_times + res.distances_m / 346.1)
     # Approaching rows look forward (theta < 90), receding rows rearward.
     assert np.all(res.polar[:k] < 90.0)
     assert np.all(res.polar[k + 1 :] > 90.0)
@@ -1346,7 +1346,7 @@ def test_event_bank_tilt_moves_azimuth() -> None:
     _, _, banked = _flyover(
         bands=[31.5], track_state=RotorcraftTrackState(bank_angle_deg=25.0)
     )
-    k = int(np.argmin(level_res.distances))
+    k = int(np.argmin(level_res.distances_m))
     assert level_res.azimuth[k] == pytest.approx(0.0, abs=1e-6)
     assert banked.azimuth[k] == pytest.approx(25.0, abs=1e-6)
 
@@ -1363,7 +1363,7 @@ def test_event_lamax_assembles_the_propagation_chain() -> None:
     # At the closest approach the received level is the source level plus
     # dLs + dLa + dLg + A, each from the public primitives.
     _, _, res = _flyover(bands=[31.5])
-    k = int(np.argmin(res.distances))
+    k = int(np.argmin(res.distances_m))
     freqs = np.array([31.5])
     expected = (
         100.0
@@ -1443,7 +1443,7 @@ def test_event_epnl_on_the_standard_grid() -> None:
     assert np.isfinite(res.epnl)
     assert np.isfinite(res.pnltm)
     assert res.pnltm >= np.nanmax(res.pnlt) - 1e-9
-    k = int(np.argmin(res.distances))
+    k = int(np.argmin(res.distances_m))
     assert np.isfinite(res.pnlt[k])
 
 
@@ -1506,9 +1506,9 @@ def test_event_history_and_spectrum_must_line_up() -> None:
     # that takes the step of LASmax reads the geometry back out at that index;
     # the band axis of `band_levels` is pinned by `frequencies` the same way.
     _t, _pos, res = _flyover(bands=[31.5], span=1000.0)
-    short_distance = res.distances[:-1]
-    with pytest.raises(ValueError, match=r"'distances'.*per emission step"):
-        dataclasses.replace(res, distances=short_distance)
+    short_distance = res.distances_m[:-1]
+    with pytest.raises(ValueError, match=r"'distances_m'.*per emission step"):
+        dataclasses.replace(res, distances_m=short_distance)
     extra_band = np.append(res.frequencies, 63.0)
     with pytest.raises(ValueError, match=r"'frequencies'.*per band"):
         dataclasses.replace(res, frequencies=extra_band)
@@ -1542,7 +1542,7 @@ def test_an_empty_history_keeps_its_undetermined_peak() -> None:
         frequencies=empty,
         emission_times=empty,
         times=empty,
-        distances=empty,
+        distances_m=empty,
         azimuth=empty,
         polar=empty,
         band_levels=np.zeros((0, 0)),

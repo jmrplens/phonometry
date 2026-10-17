@@ -383,7 +383,7 @@ from phonometry import environment
 bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
 barrier = environment.Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
 att = environment.outdoor_propagation_attenuation(
-    200.0, source_height=1.5, receiver_height=1.5, frequencies=bands,
+    200.0, source_height_m=1.5, receiver_height_m=1.5, frequencies=bands,
     ground_source=1.0, ground_middle=1.0, ground_receiver=1.0,
     barrier=barrier, temperature_c=15.0, relative_humidity_percent=70.0,
 )
@@ -428,7 +428,7 @@ bands = [63, 125, 250, 500, 1000, 2000, 4000, 8000]   # octave-band centres [Hz]
 # (dss = dsr ~ 101 m). Geometry feeds the pathlength-difference equations.
 barrier = environment.Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
 att = environment.outdoor_propagation_attenuation(
-    200.0, source_height=1.5, receiver_height=1.5, frequencies=bands,
+    200.0, source_height_m=1.5, receiver_height_m=1.5, frequencies=bands,
     ground_source=1.0, ground_middle=1.0, ground_receiver=1.0,
     barrier=barrier, temperature_c=15.0, relative_humidity_percent=70.0,
 )
@@ -657,7 +657,7 @@ works when the wavelength is short next to the path difference.
 | Parameter | Type / shape | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `distance` | float | m | > 0 | Straight-line source–receiver distance $d$ |
-| `source_height` / `receiver_height` | float | m | ≥ 0 | $h_\mathrm{s}$, $h_\mathrm{r}$ above ground |
+| `source_height_m` / `receiver_height_m` | float | m | ≥ 0 | $h_\mathrm{s}$, $h_\mathrm{r}$ above ground |
 | `frequencies` | 1D array | Hz | default 8 octaves 63–8000 | `DEFAULT_FREQUENCIES_HZ` |
 | `ground_source` / `ground_middle` / `ground_receiver` | float | — | `[0, 1]`, default `0.0` | Ground factor $G$ (0 hard, 1 porous) |
 | `barrier` | `Barrier` or None | — | default `None` | Screening obstacle |
@@ -941,7 +941,7 @@ from phonometry import ReportMetadata, environment
 freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
 lw = np.array([95, 100, 103, 105, 104, 101, 95, 88], dtype=float)
 result = environment.outdoor_propagation_attenuation(
-    200.0, source_height=4.0, receiver_height=2.0, frequencies=freqs,
+    200.0, source_height_m=4.0, receiver_height_m=2.0, frequencies=freqs,
     ground_source=1.0, ground_middle=1.0, ground_receiver=1.0,
     barrier=environment.Barrier(source_to_edge=105.0, edge_to_receiver=105.0),
     temperature_c=10.0, relative_humidity_percent=70.0,

@@ -260,7 +260,7 @@ res.report(
     "dynamic_stiffness.pdf",
     metadata=ReportMetadata(
         specimen="20 mm mineral-wool resilient layer",
-        mass_per_area=200.0, thickness=0.020,   # thickness d in metres (20 mm)
+        mass_per_area=200.0, thickness_m=0.020,   # thickness d (20 mm)
         measurement_standard="EN 29052-1",
     ),
 )   # one-page fiche (needs phonometry[report,plot])

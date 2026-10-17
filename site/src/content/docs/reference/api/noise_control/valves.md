@@ -158,7 +158,7 @@ AIR_SPEED_OF_SOUND_M_S = 343.0
 ```python
 coincidence_frequencies(
     internal_diameter_m: float,
-    wall_thickness: float,
+    wall_thickness_m: float,
     downstream_sound_speed: float,
     *,
     pipe_sound_speed: float = 5000.0,
@@ -177,7 +177,7 @@ $$
 | Name | Description |
 | :--- | :--- |
 | `internal_diameter_m` | $D_i$ of the downstream pipe, in m. |
-| `wall_thickness` | $t_S$ of the pipe wall, in m. |
+| `wall_thickness_m` | $t_S$ of the pipe wall, in m. |
 | `downstream_sound_speed` | $c_2$ in the fluid downstream of the valve, in m/s. |
 | `pipe_sound_speed` | $c_s$, 5 000 m/s for steel by NOTE 4. |
 | `air_sound_speed` | $c_a$, 343 m/s by NOTE 3. |
@@ -229,7 +229,7 @@ takes through the wall.
 ```python
 DownstreamPipe(
     internal_diameter_m: float,
-    wall_thickness: float,
+    wall_thickness_m: float,
     density: float,
     *,
     speed_of_sound: float = 5000.0,
@@ -250,7 +250,7 @@ not settings anyone is expected to change.
 | Name | Description |
 | :--- | :--- |
 | `internal_diameter_m` | $D_i$, in m. |
-| `wall_thickness` | $t_S$, in m. |
+| `wall_thickness_m` | $t_S$, in m. |
 | `density` | $\rho_s$ of the pipe material, in kg/m³. |
 | `speed_of_sound` | $c_s$ in the pipe wall, in m/s. |
 | `air_sound_speed` | $c_a$ outside the pipe, in m/s. |
@@ -728,7 +728,7 @@ pipe_transmission_loss(
     frequencies: NDArray[np.float64],
     *,
     internal_diameter_m: float,
-    wall_thickness: float,
+    wall_thickness_m: float,
     valve_outlet_diameter_m: float,
     downstream_density: float,
     downstream_sound_speed: float,
@@ -755,7 +755,7 @@ internal level, so the sign is not a convention this module chose.
 | :--- | :--- |
 | `frequencies` | The band centre frequencies, in Hz. |
 | `internal_diameter_m` | $D_i$, in m. |
-| `wall_thickness` | $t_S$, in m. |
+| `wall_thickness_m` | $t_S$, in m. |
 | `valve_outlet_diameter_m` | $D$, in m, which selects the damping factor of Equation (20b) and is the valve outlet and not the pipe. |
 | `downstream_density` | $\rho_2$, in kg/m³. |
 | `downstream_sound_speed` | $c_2$, in m/s. |

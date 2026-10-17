@@ -232,7 +232,7 @@ ASTM value about 0.79 dB higher for the same rooms.
 ```python
 partition_referenced_reduction_index(
     reduction_index: ArrayLike,
-    room_height: float,
+    room_height_m: float,
     room_length: float,
 ) -> np.ndarray
 ```
@@ -250,7 +250,7 @@ path as transmission factors.
 | Name | Description |
 | :--- | :--- |
 | `reduction_index` | Ceiling/plenum path `Rcl` per band, in dB. |
-| `room_height` | Sending-room height `HS`, in m (> 0). |
+| `room_height_m` | Sending-room height `HS`, in m (> 0). |
 | `room_length` | Sending-room length `LS`, in m (> 0). |
 
 **Returns:** The partition-referenced `Rcl,p` per band, in dB.
@@ -269,7 +269,7 @@ plenum_flanking_reduction_index(
     reduction_index_receiving: ArrayLike,
     *,
     ceiling_length: float,
-    plenum_height: float,
+    plenum_height_m: float,
     sidewalls: str = ...,
     frequencies: ArrayLike | None = ...,
     attenuation_source: ArrayLike,
@@ -284,7 +284,7 @@ plenum_flanking_reduction_index(
     reduction_index_receiving: ArrayLike,
     *,
     ceiling_length: float,
-    plenum_height: float,
+    plenum_height_m: float,
     sidewalls: str = ...,
     frequencies: ArrayLike | None = ...,
     source_length: float | None = ...,
@@ -319,7 +319,7 @@ about 0.24 dB.
 | `reduction_index_source` | Source-side ceiling `RS` per band, in dB (the ceiling plates and any plenum absorber together, Eq. (9.14)). |
 | `reduction_index_receiving` | Receiving-side ceiling `RR` per band, in dB. |
 | `ceiling_length` | Receiving-side ceiling length `LR`, in m (> 0). |
-| `plenum_height` | Plenum height `h`, in m (> 0). |
+| `plenum_height_m` | Plenum height `h`, in m (> 0). |
 | `sidewalls` | `"reflecting"` ($\epsilon = 2$, Default) or `"absorbing"` ($\epsilon = 1$); $\epsilon$ scales both the geometry penalty of Eq. (9.20) and the exponents of Eq. (9.18). |
 | `frequencies` | Optional band centre frequencies, in Hz. |
 | `attenuation_source` | Optional plenum power attenuation coefficient `mS` per band, in 1/m (> 0); switches to Eq. (9.18). |
@@ -349,7 +349,7 @@ PlenumFlankingResult(
     penalty: np.ndarray,
     model: str,
     epsilon: float,
-    plenum_height: float,
+    plenum_height_m: float,
     ceiling_length: float,
 )
 ```
@@ -369,7 +369,7 @@ Ceiling/plenum flanking path of a suspended ceiling (Vigran 9.2.3).
 | `penalty` | The per-band difference $R_\mathrm{S} + R_\mathrm{R} - R_\mathrm{cl}$, in dB: what the plenum takes off the sum of the two ceilings. |
 | `model` | `"undamped"` (Eq. (9.20)) or `"attenuated"` (Eq. (9.18)). |
 | `epsilon` | The sidewall constant `eps` (1 absorbing, 2 reflecting). |
-| `plenum_height` | Plenum height `h`, in m. |
+| `plenum_height_m` | Plenum height `h`, in m. |
 | `ceiling_length` | Receiving-side ceiling length `LR`, in m. |
 
 ### PlenumFlankingResult.plot()

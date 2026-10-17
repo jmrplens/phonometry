@@ -146,7 +146,7 @@ other subsystem here, it *decreases* with frequency.
 cylindrical_shell_modal_density(
     frequency: ArrayLike,
     area: float,
-    thickness: float,
+    thickness_m: float,
     mean_radius: float,
     longitudinal_wave_speed: float,
     *,
@@ -184,7 +184,7 @@ frequency, which for long thin shells can be substantial.
 | :--- | :--- |
 | `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `area` | Shell surface area `S`, in m^2 (> 0). |
-| `thickness` | Wall thickness `t`, in m (> 0). |
+| `thickness_m` | Wall thickness `t`, in m (> 0). |
 | `mean_radius` | Mean shell radius `a_m`, in m (> 0). |
 | `longitudinal_wave_speed` | Plate wave speed `cL`, in m/s (> 0). |
 | `band` | Analysis bandwidth, `"octave"` (Default, $F = 1.414$) or `"third"` ($F = 1.122$). |
@@ -202,7 +202,7 @@ frequency, which for long thin shells can be substantial.
 ```python
 flat_plate_modal_density(
     area: float,
-    thickness: float,
+    thickness_m: float,
     longitudinal_wave_speed: float,
 ) -> float
 ```
@@ -218,7 +218,7 @@ $c_\mathrm{L} = \sqrt{E / (\rho (1 - \nu^2))}$.
 | Name | Description |
 | :--- | :--- |
 | `area` | Plate surface area `S`, in m^2 (> 0). |
-| `thickness` | Plate thickness `t`, in m (> 0). |
+| `thickness_m` | Plate thickness `t`, in m (> 0). |
 | `longitudinal_wave_speed` | Plate wave speed `cL`, in m/s (> 0). |
 
 **Returns:** The modal density `n(f)`, in modes per hertz.

@@ -85,7 +85,7 @@ printed 0.82, and `docs/ERRATA.md` records why. See
 ```python
 biot_surface_impedance(
     waves: BiotWavesResult,
-    thickness: float,
+    thickness_m: float,
 ) -> NDArray[np.complex128]
 ```
 
@@ -122,7 +122,7 @@ single layer and to a glued rigid backing.
 | Name | Description |
 | :--- | :--- |
 | `waves` | The [`BiotWavesResult`](/phonometry/reference/api/materials/biot/#biotwavesresult) of the material. |
-| `thickness` | Layer thickness `l`, in metres (> 0). |
+| `thickness_m` | Layer thickness `l`, in metres (> 0). |
 
 **Returns:** The complex surface impedance `Z`, in Pa s/m.
 
@@ -379,7 +379,7 @@ frame resonance of [`frame_quarter_wave_resonance`](/phonometry/reference/api/ma
 
 ```python
 frame_quarter_wave_resonance(
-    thickness: float,
+    thickness_m: float,
     *,
     shear_modulus: complex,
     poisson_ratio: float,
@@ -410,7 +410,7 @@ few per cent above `fr`.
 
 | Name | Description |
 | :--- | :--- |
-| `thickness` | Layer thickness `l`, in metres (> 0). |
+| `thickness_m` | Layer thickness `l`, in metres (> 0). |
 | `shear_modulus` | Complex shear modulus `N` of the frame, in Pa. |
 | `poisson_ratio` | Poisson coefficient `nu` of the frame. |
 | `frame_density` | Bulk density of the frame `rho1`, in kg/m3 (> 0): the mass of solid per unit volume of material. |
@@ -428,7 +428,7 @@ few per cent above `fr`.
 ```python
 poroelastic_transfer_matrix(
     waves: BiotWavesResult,
-    thickness: float,
+    thickness_m: float,
     *,
     transverse_wavenumber: ArrayLike = 0.0,
 ) -> NDArray[np.complex128]
@@ -457,7 +457,7 @@ is written around and the one an external multilayer chain expects.
 | Name | Description |
 | :--- | :--- |
 | `waves` | The [`BiotWavesResult`](/phonometry/reference/api/materials/biot/#biotwavesresult) of the material. |
-| `thickness` | Layer thickness `h`, in metres (> 0). |
+| `thickness_m` | Layer thickness `h`, in metres (> 0). |
 | `transverse_wavenumber` | In-plane wavenumber $k_\mathrm{t} = k \sin(\theta)$, in rad/m (Default: 0, normal incidence). Scalar or one value per frequency. |
 
 **Returns:** The transfer matrix with shape `(len(frequency), 6, 6)`.

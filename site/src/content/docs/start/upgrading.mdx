@@ -267,6 +267,38 @@ both heights in metres, and two temperatures say which scale they are on:
 | `GasStream.inlet_temperature_k`, in kelvin | `inlet_temperature_c`, in degrees Celsius: convert the number, as the section above shows |
 | `RoadEmissionCoefficients.temperature_k`, the CNOSSOS-EU $K_m$ in dB per degree Celsius, whose `_k` read as kelvin | `temperature_coefficient_db_per_c` |
 
+Lengths take their unit where a second unit competes for the word. A
+thickness is in metres on a layer and in millimetres on the catalogue row it
+is read from, a spacing is metres between two microphones or hertz between two
+spectral lines, a height is metres above the ground and decibels on a
+coincidence plateau, and the aircraft package reads its noise-power-distance
+tables in feet and computes in metres:
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `thickness=` on `PorousLayer`, `AirLayer`, `PerforatedPlateLayer`, `MicroperforatedPlateLayer`, `PoroelasticLayer`, `TransferMatrix`, `BarrierInsertionLoss` and every function that took one: the Biot, four-microphone, perforated-plate, airflow-resistance, resilient-layer, floor-covering, panel, flanking, structure-borne, SEA and point-mobility functions and the geometry plot helpers; `thickness1=` and `thickness2=` on `junction_transmission`, `junction_wave_parameters`, `right_angle_transmission_coefficient`, `point_connection_coupling_loss_factor`, `JunctionTransmissionResult` and `plot_junction_geometry`; `wall_thickness=`, `lining_thickness=`, `plate_thickness=`, `splitter_thickness=`; `specimen_thickness=` on `plot_dynamic_stiffness_rig` and `sample_thickness=` on `plot_impedance_tube_geometry` | `thickness_m=`, `thickness1_m=`, `thickness2_m=`, `wall_thickness_m=`, `lining_thickness_m=`, `plate_thickness_m=`, `splitter_thickness_m=`, `specimen_thickness_m=`, `sample_thickness_m=` |
+| `spacing=` on `sound_intensity` and `IntensityResult`, the IEC 61043 functions and `IntensityInstrumentComplianceResult`, and the impedance-tube functions and `ImpedanceTubeResult` | `spacing_m=` |
+| `line_spacing=` on the ISO/PAS 20065 tone functions and `ToneAudibilityResult`; `ZoomFFTResult.bin_spacing` | `line_spacing_hz=`; `.bin_spacing_hz` |
+| `height=`, `heights=`, `source_height=`, `receiver_height=`, `barrier_height=`, `max_height=`, `height_step=`, `slit_height=`, `plenum_height=`, `drop_height=` and the other heights in metres, `height_fundamental_frequency(height=)` among them | the same name ending in `_m` |
+| `plateau_height=` on `plateau_transmission_loss` and `SoundReductionResult` | `plateau_height_db=` |
+| `distance=`, `distances=` and their compounds in `aircraft`: `npd_level`, `npd_curve`, `event_level`, `noise_contour`, `noise_fraction`, `AnpNpdCurves`, `AnpDatabase`, `RotorcraftHemisphere`, `hover_ring_hemisphere`, the rotorcraft propagation functions and their results | `distance_m=`, `distances_m=`, `reference_distance_m=`, `horizontal_distance_m=`, `scaled_distance_m=`, `query_distances_m=`, `table_distances_m` |
+| `ReportMetadata(mic_spacing=, thickness=)` | `microphone_spacing_m=`, `thickness_m=` |
+
+Thirteen lengths are written by name now as well, because they carry a default
+and the name is the only place the unit shows: `npd_curve(query_distances_m=)`,
+`static_airflow_resistance(thickness_m=)`, the `distance_m`, `spacing_m` and
+`source_height_m` fields of `RotorcraftHemisphere`, `IntensityResult` and
+`RoadEmissionResult`, the `thickness1_m` and `thickness2_m` that
+`JunctionTransmissionResult` keeps for its drawing, and the ISO 13472-1
+`source_height_m` and `microphone_height_m` of `geometric_spreading_factor`,
+`geometric_spreading_factor_angle` and `InsituAbsorptionResult`. The duct
+`section` that `duct_path` reads is `{"width": a, "height_m": b}`, and
+`TABLE_D1_QUANTITIES` names `thickness_m` among the quantities a Table D.1 row
+is described by. The catalogue rows keep `thickness_mm`, the unit the catalogue
+holds every row in whatever unit its source prints, and
+`vertical_directivity(height=1)` keeps its name, because 1 or 2 picks a source
+line and is not a length.
+
 A published constant follows the same rule, and it needs it more, because a
 number on its own has nothing but its name to say what it is in: `10.0` is
 hertz, decibels or a count. A constant that holds one number ends in its unit,
@@ -362,7 +394,7 @@ hertz, `levels` in decibels and the sample rate is `fs` on every function.
 | `frequency_hz=` holding an array on `weighted_exposure` and `ocean_ambient_noise` | `frequencies_hz=`; the unit stays because the formulas they evaluate are printed in kHz |
 | `.time` on `ZwickerLoudness`, `EcmaLoudness`, `MooreGlasbergTimeVaryingLoudness`, the ECMA-418-2 tonality, roughness and fluctuation-strength results, `DecayCurve`, `QuasiPeakResult` | `.times` |
 | `.level` on `DecayCurve`, `NpdLevelResult`, `NoiseContourResult`, `RotorcraftNoiseContourResult`, `LowFrequencyResult`, `DuctPathStage`, `LateLateralResult`, `TransferStiffnessResult` | `.levels` |
-| `.distance` on `NpdLevelResult` and `RotorcraftEventResult` | `.distances` |
+| `.distance` on `NpdLevelResult` and `RotorcraftEventResult` | `.distances_m` |
 | `frequencies_hz` on the human-vibration instrument checks (`WeightingVerification`, `PhaseVerification`, `characteristic_phase_deviation`, `verify_phase_response`), `levels_db=` on `operating_standard_deviation` and `subinterval_level` | `frequencies`, `levels` |
 | `sound_speeds` on `EffectiveSoundSpeedProfile` and `sound_speeds=` on `normal_modes`, `ray_trace`, `gaussian_beams` and `parabolic_equation` | `speeds_of_sound` |
 | `SoundSpeedProfile.sound_speed` and `.depth` | `.speeds_of_sound` and `.depths` |
@@ -795,7 +827,7 @@ says where each verdict first shipped.
 | `emission.ReferenceSoundSourceVerdict` | every `*_limit_db`, `adjacent_step_db`, `core_range_db`, `extended_range_db`, `frequency_range_met`, `not_judged` | the bands, the levels and the measured figures | after 4.0.0rc1 |
 | `emission.ReferenceSourceDriftResult`, `emission.SpecialRoomSuitabilityCheck` | `limit_db` | the bands | after 4.0.0rc1 |
 | `emission.SpecialRoomReverberationCheck` | `lower_limit`, `upper_limit` | the bands | after 4.0.0rc1 |
-| `emission.IntensityInstrumentComplianceResult` | `limit_class1`, `limit_class2`, `spacing_offset_db` | `device`, `spacing`; the band rows are read from them, see the next section | 4.0.0rc1 |
+| `emission.IntensityInstrumentComplianceResult` | `limit_class1`, `limit_class2`, `spacing_offset_db` | `device`, `spacing_m`; the band rows are read from them, see the next section | 4.0.0rc1 |
 | `emission.InverseSquareLawResult`, `emission.SourceDirectionalityResult` | `tolerance_db` | `room` selects it; the qualified radii must be the ones the levels reach | after 4.0.0rc1 |
 | `hearing.AmbientNoiseCheck` | `limits_db`, `table_bands_hz` | gains `earphone_attenuation_db` and `allowed_threshold_shift_db` | after 4.0.0rc1 |
 | `hearing.FixtureIsolationCheck` | `required_db` | the bands | after 4.0.0rc1 |
@@ -886,7 +918,7 @@ that is keyword-only.
 | `electroacoustics.BackgroundNoiseAssessment` | `reference_signal_to_noise_ratio_db`, `category`, `report_required` | `noise_levels_db`, `noise_is_tonal` | after 4.0.0rc1 |
 | `electroacoustics.FeedbackStabilityResult` | `is_stable` | `loop_gain`, `stability_margin` | 4.0.0rc1 |
 | `emission.FreeFieldCheck` | `room`, `frequencies`, `band_radius_m`, `maximum_qualified_radius_m`, every `*_met`, `full_frequency_range`, `conforming_range_hz`, `conforming_radius_m`, `not_judged` | the arguments of `check_free_field`: gains `source_directionality`, `reflecting_plane_absorption_coefficient`, `reflecting_plane_margin_m`, `paths_in_working_area`, `speed_of_sound` | after 4.0.0rc1 |
-| `emission.IntensityInstrumentComplianceResult` | `bands`, `overall_class`, `range_limited` | `frequencies`, `residual_index`, `device`, `spacing` | 4.0.0rc1 |
+| `emission.IntensityInstrumentComplianceResult` | `bands`, `overall_class`, `range_limited` | `frequencies`, `residual_index`, `device`, `spacing_m` | 4.0.0rc1 |
 | `emission.ReferenceSourceCalibration` | `sound_power_level_db`, `intensity_bands`, `intensity_agreement`, `room_qualified` | gains `intensity_sound_power_level_db` and `room_qualification` | after 4.0.0rc1 |
 | `emission.HardWalledSoundPowerResult` | `background_requirement_met`, `upper_bound` | gains `background_margin_db`, `background_margin_ref_db` | after 4.0.0rc1 |
 | `emission.InSituSoundPowerResult` | `background_requirement_met`, `upper_bound`, `grade`, `sigma_r0`, `sigma_tot`, `expanded_uncertainty` | gains `background_margin_db`, `background_margin_ref_db`, the smallest over the positions, and `excess_levels_db`, `directivity_range_db`, the two indicators Table 2 grades by | 4.0.0rc1 |
@@ -1030,7 +1062,7 @@ is read from, has to change, and so does code that reads `band_type` from
 | `building.TappingForceResult` | `over_critical`, K m ≥ 4 Zdp² (Hopkins Eq. 3.95) | `contact_stiffness`, `impedance`; gains `mass_kg`, by name only | 4.0.0rc1 |
 | `noise_control.HydrodynamicValveNoise` | `regime`, cavitating when Δp exceeds x_Fzp1 (p1 - pv) (IEC 60534-8-4 5.1) | `differential`, `corrected_ratio`; gains `inlet_pressure_pa`, `vapour_pressure_pa` | 4.0.0rc1 |
 | `noise_control.AerodynamicValveNoise` | `regime`, the five intervals of IEC 60534-8-3 5.2 | `pressure_ratio`, `boundaries`; gains `specific_heat_ratio`, `pressure_recovery`, `efficiency_correction`, by name only | 4.0.0rc1 |
-| `aircraft.TerrainScreeningResult` | `screened`, terrain strictly above the line of sight | `source`, `receiver`, `distances`, `heights` | 3.3.0 |
+| `aircraft.TerrainScreeningResult` | `screened`, terrain strictly above the line of sight | `source`, `receiver`, `distances_m`, `heights_m` | 3.3.0 |
 | `hearing.AutomaticThresholdResult` | `is_peak`, `retained` (ISO 8253-1 6.3.5 a)) | `reversal_levels_db` | after 4.0.0rc1 |
 | `hearing.SweepThresholdResult` | `is_peak` | `reversal_levels_db` | after 4.0.0rc1 |
 | `metrology.WaveMotionCorrection` | `interpolated` | `frequencies`, `speed_of_sound_ratio` | after 4.0.0rc1 |

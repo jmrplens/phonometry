@@ -201,8 +201,8 @@ def test_rubber_ball_construction_example() -> None:
     pulse of 20 +/- 2 ms (JIS A.2 b) 2)).
     """
     spec = building.heavy_impact_source_specification("rubber_ball")
-    assert spec.drop_height == pytest.approx(1.00)
-    assert spec.drop_height_tolerance == pytest.approx(0.01)
+    assert spec.drop_height_m == pytest.approx(1.00)
+    assert spec.drop_height_tolerance_m == pytest.approx(0.01)
     assert spec.effective_mass == pytest.approx(2.5)
     assert spec.effective_mass_tolerance == pytest.approx(0.1)
     assert spec.restitution == pytest.approx(0.8)
@@ -213,7 +213,7 @@ def test_rubber_ball_construction_example() -> None:
 def test_bang_machine_construction_example() -> None:
     """JIS A 1418-2:2019 B.2: tyre dropped from 85 cm, effective mass 7,3 +/- 0,2 kg."""
     spec = building.heavy_impact_source_specification("bang_machine")
-    assert spec.drop_height == pytest.approx(0.85)
+    assert spec.drop_height_m == pytest.approx(0.85)
     assert spec.effective_mass == pytest.approx(7.3)
     assert spec.effective_mass_tolerance == pytest.approx(0.2)
 

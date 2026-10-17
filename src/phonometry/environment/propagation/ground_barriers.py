@@ -266,8 +266,8 @@ class SphericalGroundResult(OwnsArrays):
 def spherical_reflection_coefficient(
     frequencies: ArrayLike,
     normalized_impedance: ArrayLike,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     distance: float,
     speed_of_sound: float = PUBLISHED_AIR.speed_of_sound,
 ) -> Complex:
@@ -286,15 +286,15 @@ def spherical_reflection_coefficient(
         ``rho c`` (complex, per frequency or scalar), in the
         :math:`\mathrm{e}^{-i \omega t}` time convention (a passive ground has
         :math:`\operatorname{Im}(Z) > 0`).
-    :param source_height: Source height ``hs`` above the ground, in metres.
-    :param receiver_height: Receiver height ``hr`` above the ground, in metres.
+    :param source_height_m: Source height ``hs`` above the ground, in metres.
+    :param receiver_height_m: Receiver height ``hr`` above the ground, in metres.
     :param distance: Horizontal source-receiver distance, in metres.
     :param speed_of_sound: Speed of sound ``c``, in m/s.
     :return: Complex ``Q`` per frequency.
     :raises ValueError: If a height is negative, the distance is not positive,
         the impedance is zero, or its shape does not match the frequencies.
     """
-    if source_height < 0.0 or receiver_height < 0.0:
+    if source_height_m < 0.0 or receiver_height_m < 0.0:
         msg = "Source and receiver heights must be non-negative."
         raise ValueError(msg)
     if distance <= 0.0:
@@ -304,8 +304,8 @@ def spherical_reflection_coefficient(
     f = require_positive_array(frequencies, "frequencies")
     z = _resolve_impedance_array(normalized_impedance, f)
     k = 2.0 * np.pi * f / speed_of_sound
-    r2 = float(np.hypot(distance, source_height + receiver_height))
-    cos_theta = (source_height + receiver_height) / r2
+    r2 = float(np.hypot(distance, source_height_m + receiver_height_m))
+    cos_theta = (source_height_m + receiver_height_m) / r2
     rp = (z * cos_theta - 1.0) / (z * cos_theta + 1.0)
     w = np.sqrt(0.5j * k * r2) * (cos_theta + 1.0 / z)
     f_w = 1.0 + 1j * np.sqrt(np.pi) * w * wofz(w)
@@ -315,8 +315,8 @@ def spherical_reflection_coefficient(
 @overload
 def ground_effect(
     frequencies: ArrayLike,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     distance: float,
     *,
     impedance: ArrayLike | PorousMediumResult,
@@ -328,8 +328,8 @@ def ground_effect(
 @overload
 def ground_effect(
     frequencies: ArrayLike,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     distance: float,
     *,
     flow_resistivity: float,
@@ -340,8 +340,8 @@ def ground_effect(
 
 def ground_effect(
     frequencies: ArrayLike,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     distance: float,
     *,
     impedance: ArrayLike | PorousMediumResult | None = None,
@@ -367,8 +367,8 @@ def ground_effect(
     of the materials domain. Exactly one of the two must be given.
 
     :param frequencies: Frequencies, in hertz.
-    :param source_height: Source height ``hs``, in metres.
-    :param receiver_height: Receiver height ``hr``, in metres.
+    :param source_height_m: Source height ``hs``, in metres.
+    :param receiver_height_m: Receiver height ``hr``, in metres.
     :param distance: Horizontal source-receiver distance, in metres.
     :param impedance: Normalized ground impedance (:math:`\mathrm{e}^{-i \omega t}`
         convention, :math:`\operatorname{Im}(Z) > 0` for a passive ground), or
@@ -390,7 +390,7 @@ def ground_effect(
     :raises ValueError: If neither or both of ``impedance``/``flow_resistivity``
         are given, a height is negative, or the distance is not positive.
     """
-    if source_height < 0.0 or receiver_height < 0.0:
+    if source_height_m < 0.0 or receiver_height_m < 0.0:
         msg = "Source and receiver heights must be non-negative."
         raise ValueError(msg)
     if distance <= 0.0:
@@ -400,9 +400,9 @@ def ground_effect(
     f = require_positive_array(frequencies, "frequencies")
     z = _normalized_ground_impedance(f, impedance, flow_resistivity, model, fluid)
     k = 2.0 * np.pi * f / speed_of_sound
-    r1 = float(np.hypot(distance, source_height - receiver_height))
-    r2 = float(np.hypot(distance, source_height + receiver_height))
-    cos_theta = (source_height + receiver_height) / r2
+    r1 = float(np.hypot(distance, source_height_m - receiver_height_m))
+    r2 = float(np.hypot(distance, source_height_m + receiver_height_m))
+    cos_theta = (source_height_m + receiver_height_m) / r2
     rp = (z * cos_theta - 1.0) / (z * cos_theta + 1.0)
     w = np.sqrt(0.5j * k * r2) * (cos_theta + 1.0 / z)
     f_w = 1.0 + 1j * np.sqrt(np.pi) * w * wofz(w)
@@ -614,16 +614,16 @@ class BarrierInsertionLoss(OwnsArrays):
         name it by: ``"kurze_anderson"`` or ``"exact"``, the two models the
         library implements. Any other tag is refused at construction.
     :ivar ground: Whether the coherent four-path ground model was applied.
-    :ivar source_height: Source height the loss was computed for, in metres,
+    :ivar source_height_m: Source height the loss was computed for, in metres,
         retained (with the other five geometry fields) so
         :meth:`plot_geometry` can draw the section; appended after the
         original fields and ``None`` for hand-built results.
     :ivar barrier_distance: Source-to-barrier horizontal distance, in metres.
-    :ivar barrier_height: Barrier height, in metres.
+    :ivar barrier_height_m: Barrier height, in metres.
     :ivar receiver_distance: Source-to-receiver horizontal distance, in
         metres.
-    :ivar receiver_height: Receiver height, in metres.
-    :ivar thickness: Thick-barrier top width, in metres, or ``None``.
+    :ivar receiver_height_m: Receiver height, in metres.
+    :ivar thickness_m: Thick-barrier top width, in metres, or ``None``.
     """
 
     frequencies: Real
@@ -632,12 +632,12 @@ class BarrierInsertionLoss(OwnsArrays):
     method: str
     _: KW_ONLY
     ground: bool
-    source_height: float | None = None
+    source_height_m: float | None = None
     barrier_distance: float | None = None
-    barrier_height: float | None = None
+    barrier_height_m: float | None = None
     receiver_distance: float | None = None
-    receiver_height: float | None = None
-    thickness: float | None = None
+    receiver_height_m: float | None = None
+    thickness_m: float | None = None
 
     def __post_init__(self) -> None:
         """Pin the model tag, and the loss finite on its frequency axis.
@@ -790,8 +790,8 @@ def _validate_barrier_geometry(
 ) -> float | None:
     """Validate the barrier geometry and return the checked top width.
 
-    :return: The validated ``thickness`` (positive and finite) or ``None`` for a
-        thin screen.
+    :return: The validated ``thickness_m`` (positive and finite) or ``None``
+        for a thin screen.
     :raises ValueError: on a non-positive or non-finite distance, a non-finite
         height, a mis-ordered geometry, a barrier below the line of sight, or a
         thick barrier whose far edge reaches the receiver.
@@ -803,9 +803,9 @@ def _validate_barrier_geometry(
     require_positive(barrier_distance, "barrier_distance")
     require_positive(receiver_distance, "receiver_distance")
     for name, height in (
-        ("source_height", source_height),
-        ("barrier_height", barrier_height),
-        ("receiver_height", receiver_height),
+        ("source_height_m", source_height),
+        ("barrier_height_m", barrier_height),
+        ("receiver_height_m", receiver_height),
     ):
         if not np.isfinite(height):
             msg = f"'{name}' must be finite."
@@ -815,17 +815,17 @@ def _validate_barrier_geometry(
         raise ValueError(msg)
     if barrier_height <= max(source_height, receiver_height):
         msg = (
-            "'barrier_height' must exceed the source and receiver heights "
+            "'barrier_height_m' must exceed the source and receiver heights "
             "(the receiver must be in the geometric shadow)."
         )
         raise ValueError(msg)
     if thickness is None:
         return None
     # require_positive rejects NaN/inf as well as non-positive widths.
-    thickness = require_positive(thickness, "thickness")
+    thickness = require_positive(thickness, "thickness_m")
     if barrier_distance + thickness >= receiver_distance:
         msg = (
-            "'receiver_distance' must exceed 'barrier_distance + thickness' "
+            "'receiver_distance' must exceed 'barrier_distance + thickness_m' "
             "(the receiver must lie beyond the barrier's far edge)."
         )
         raise ValueError(msg)
@@ -834,14 +834,14 @@ def _validate_barrier_geometry(
 
 def barrier_insertion_loss(
     frequencies: ArrayLike,
-    source_height: float,
+    source_height_m: float,
     barrier_distance: float,
-    barrier_height: float,
+    barrier_height_m: float,
     receiver_distance: float,
-    receiver_height: float,
+    receiver_height_m: float,
     *,
     method: Literal["kurze_anderson", "exact"] = "exact",
-    thickness: float | None = None,
+    thickness_m: float | None = None,
     ground_impedance: ArrayLike | PorousMediumResult | None = None,
     ground_flow_resistivity: float | None = None,
     ground_model: Literal["delany_bazley", "miki"] = "delany_bazley",
@@ -855,7 +855,7 @@ def barrier_insertion_loss(
 
     * ``method="kurze_anderson"``: the closed form
       :func:`kurze_anderson_attenuation` of the Fresnel number
-      :func:`fresnel_number` (Bies Eqs. (5.134)/(5.138)); with ``thickness`` the
+      :func:`fresnel_number` (Bies Eqs. (5.134)/(5.138)); with ``thickness_m`` the
       double-edge Fresnel number :math:`N = (2/\lambda)(A + B + e - d)` of
       Bies Eq. (5.157) is used, ``e`` being the top width.
     * ``method="exact"`` without ground: the wave-theoretic insertion loss of the
@@ -874,14 +874,14 @@ def barrier_insertion_loss(
       a full boundary-element solution.
 
     :param frequencies: Frequencies, in hertz.
-    :param source_height: Source height, in metres.
+    :param source_height_m: Source height, in metres.
     :param barrier_distance: Horizontal source-to-barrier distance, in metres.
-    :param barrier_height: Barrier (edge) height, in metres.
+    :param barrier_height_m: Barrier (edge) height, in metres.
     :param receiver_distance: Horizontal source-to-receiver distance, in metres
         (``> barrier_distance``).
-    :param receiver_height: Receiver height, in metres.
+    :param receiver_height_m: Receiver height, in metres.
     :param method: ``"kurze_anderson"`` or ``"exact"``.
-    :param thickness: Top width ``e`` of a thick barrier (double diffraction),
+    :param thickness_m: Top width ``e`` of a thick barrier (double diffraction),
         in metres; ``None`` for a thin screen.
     :param ground_impedance: Normalized ground impedance for the coherent ground
         model (``"exact"`` only), in the :math:`\mathrm{e}^{-i \omega t}` convention
@@ -899,29 +899,29 @@ def barrier_insertion_loss(
     :raises ValueError: On a non-positive/ordered geometry, or if a ground is
         requested with ``method="kurze_anderson"``.
     """
-    thickness = _validate_barrier_geometry(
-        source_height,
+    thickness_m = _validate_barrier_geometry(
+        source_height_m,
         barrier_distance,
-        barrier_height,
+        barrier_height_m,
         receiver_distance,
-        receiver_height,
-        thickness,
+        receiver_height_m,
+        thickness_m,
     )
     has_ground = ground_impedance is not None or ground_flow_resistivity is not None
     speed_of_sound = fluid.speed_of_sound
     f = require_positive_array(frequencies, "frequencies")
     k = 2.0 * np.pi * f / speed_of_sound
 
-    source = (0.0, source_height)
-    edge = (barrier_distance, barrier_height)
-    receiver = (receiver_distance, receiver_height)
+    source = (0.0, source_height_m)
+    edge = (barrier_distance, barrier_height_m)
+    receiver = (receiver_distance, receiver_height_m)
     # Single-edge geometry (near edge). A thick barrier adds the far edge at the
     # same height, separated by the top width e.
     a_seg = float(np.hypot(source[0] - edge[0], source[1] - edge[1]))
-    far_edge = (barrier_distance + (thickness or 0.0), barrier_height)
+    far_edge = (barrier_distance + (thickness_m or 0.0), barrier_height_m)
     b_seg = float(np.hypot(receiver[0] - far_edge[0], receiver[1] - far_edge[1]))
     d_seg = float(np.hypot(receiver[0] - source[0], receiver[1] - source[1]))
-    delta = a_seg + b_seg + (thickness or 0.0) - d_seg
+    delta = a_seg + b_seg + (thickness_m or 0.0) - d_seg
     n = np.asarray(2.0 * delta / (speed_of_sound / f), dtype=np.float64)
 
     if method == "kurze_anderson":
@@ -938,7 +938,7 @@ def barrier_insertion_loss(
                 near_edge=edge,
                 far_edge=far_edge,
                 receiver=receiver,
-                thickness=thickness,
+                thickness=thickness_m,
                 receiver_distance=receiver_distance,
                 fluid=fluid,
                 ground_impedance=ground_impedance,
@@ -955,12 +955,12 @@ def barrier_insertion_loss(
         fresnel_number=n,
         method=method,
         ground=has_ground,
-        source_height=float(source_height),
+        source_height_m=float(source_height_m),
         barrier_distance=float(barrier_distance),
-        barrier_height=float(barrier_height),
+        barrier_height_m=float(barrier_height_m),
         receiver_distance=float(receiver_distance),
-        receiver_height=float(receiver_height),
-        thickness=float(thickness) if thickness is not None else None,
+        receiver_height_m=float(receiver_height_m),
+        thickness_m=float(thickness_m) if thickness_m is not None else None,
     )
 
 

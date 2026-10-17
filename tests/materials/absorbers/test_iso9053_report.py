@@ -52,7 +52,9 @@ _SIGMA = _RS / _THICKNESS  # 324000 Pa*s/m^2
 def _result() -> materials.StaticAirflowResult:
     u = np.array([0.5, 1.0, 2.0, 4.0, 8.0, 12.0]) * 1e-3
     dp = _A_COEFF * u + _B_COEFF * u**2
-    return materials.static_airflow_resistance(u, dp, area=_AREA, thickness=_THICKNESS)
+    return materials.static_airflow_resistance(
+        u, dp, area=_AREA, thickness_m=_THICKNESS
+    )
 
 
 def _metadata(**overrides: object) -> ReportMetadata:
@@ -60,7 +62,7 @@ def _metadata(**overrides: object) -> ReportMetadata:
         "specimen": "50 mm porous absorber (open-cell)",
         "client": "Acoustic Test Client Ltd.",
         "manufacturer": "Acoustics Works Inc.",
-        "thickness": 0.050,
+        "thickness_m": 0.050,
         "test_room": "Static airflow rig, 100 mm cell",
         "measurement_standard": "ISO 9053-1",
         "temperature_c": 23.0,

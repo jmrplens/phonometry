@@ -334,7 +334,7 @@ _OWN_SIGNATURES: list[tuple[str, str, Callable[[object], tuple[object, ...]], st
         lambda v: (v, None),
         "reflecting_plane",
     ),
-    ("emission.intensity_compliance", "_spacing_offset", lambda v: (v,), "spacing"),
+    ("emission.intensity_compliance", "_spacing_offset", lambda v: (v,), "spacing_m"),
     (
         "emission.sound_power",
         "_static_pressure_at_altitude",
@@ -412,7 +412,7 @@ _OWN_SIGNATURES: list[tuple[str, str, Callable[[object], tuple[object, ...]], st
         "psychoacoustics.quality.tone_audibility",
         "_require_line_spacing",
         lambda v: (v,),
-        "line_spacing",
+        "line_spacing_hz",
     ),
     ("signals.phase", "_validate_oversample", lambda v: (v,), "oversample"),
     ("signals.spectra", "_validate_confidence", lambda v: (v,), "confidence"),

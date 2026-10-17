@@ -135,7 +135,7 @@ reproduces his published eigenfrequencies.
 
 ```python
 corrugated_plate_stiffness(
-    thickness: float,
+    thickness_m: float,
     corrugation_amplitude: float,
     corrugation_wavelength: float,
     *,
@@ -178,7 +178,7 @@ the eigenfrequencies. Remember to scale the surface density by
 
 | Name | Description |
 | :--- | :--- |
-| `thickness` | Sheet thickness `h`, in m (> 0). |
+| `thickness_m` | Sheet thickness `h`, in m (> 0). |
 | `corrugation_amplitude` | Corrugation amplitude `H`, in m (> 0). |
 | `corrugation_wavelength` | Corrugation wavelength `L`, in m (> 0). |
 | `youngs_modulus` | Young's modulus `E`, in Pa (> 0). |
@@ -559,7 +559,7 @@ plateau_transmission_loss(
     *,
     material: str | PlateauMaterial,
     thickness_mm: float,
-    plateau_height: float | None = ...,
+    plateau_height_db: float | None = ...,
     frequency_ratio: float | None = ...,
     field_correction: float = ...,
     fluid: Fluid = ...,
@@ -571,7 +571,7 @@ plateau_transmission_loss(
     material: str | PlateauMaterial,
     mass_per_area: float,
     thickness_mm: float | None = ...,
-    plateau_height: float | None = ...,
+    plateau_height_db: float | None = ...,
     frequency_ratio: float | None = ...,
     field_correction: float = ...,
     fluid: Fluid = ...,
@@ -581,7 +581,7 @@ plateau_transmission_loss(
     frequency: ArrayLike,
     *,
     mass_per_area: float,
-    plateau_height: float,
+    plateau_height_db: float,
     frequency_ratio: float,
     field_correction: float = ...,
     fluid: Fluid = ...,
@@ -629,12 +629,12 @@ and the material's own is then not read at all.
 | `material` | A key into [`PLATEAU_MATERIALS`](/phonometry/reference/api/building/panel-transmission/#plateau_materials), or a [`PlateauMaterial`](/phonometry/reference/api/solids/plateau/#plateaumaterial) row (Default: `None`). |
 | `thickness_mm` | Panel thickness, in **millimetres** (> 0), used with *material* to get the surface density. |
 | `mass_per_area` | Mass per unit area `m''`, in kg/m^2 (> 0). |
-| `plateau_height` | Coincidence plateau height, in dB (> 0). |
+| `plateau_height_db` | Coincidence plateau height, in dB (> 0). |
 | `frequency_ratio` | Ratio $B/A$ locating the 10 dB/octave recovery (> 1). |
 | `field_correction` | Field-incidence correction of the mass-law line, in dB (Default: 5.0, Norton Eq. 3.106). |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air these models are published with). |
 
-**Returns:** A [`SoundReductionResult`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) (model `"plateau"`) carrying [`plateau_height`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult), [`plateau_start`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) (point A) and [`plateau_end`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) (point B).
+**Returns:** A [`SoundReductionResult`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) (model `"plateau"`) carrying [`plateau_height_db`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult), [`plateau_start`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) (point A) and [`plateau_end`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) (point B).
 
 **Raises**
 
@@ -766,7 +766,7 @@ SoundReductionResult(
     mass1: float | None = None,
     mass2: float | None = None,
     gap: float | None = None,
-    plateau_height: float | None = None,
+    plateau_height_db: float | None = None,
     plateau_start: float | None = None,
     plateau_end: float | None = None,
     critical_frequency_upper: float | None = None,
@@ -787,7 +787,7 @@ Predicted airborne sound reduction index `R(f)` of a construction.
 | `mass1` | First-leaf surface density, in kg/m2, retained (with `mass2` and `gap`) by the double-wall constructor so `plot_geometry` can draw the section; `None` otherwise. |
 | `mass2` | Second-leaf surface density, in kg/m2, or `None`. |
 | `gap` | Cavity depth, in metres, or `None`. |
-| `plateau_height` | Height of the coincidence plateau, in dB, or `None` (only the plateau model sets these three). |
+| `plateau_height_db` | Height of the coincidence plateau, in dB, or `None` (only the plateau model sets these three). |
 | `plateau_start` | Frequency of point A, where the mass-law line meets the plateau, in hertz, or `None`. |
 | `plateau_end` | Frequency of point B, where the 10 dB/octave recovery starts, in hertz, or `None`. |
 | `critical_frequency_upper` | Upper coincidence frequency `fc2` of an orthotropic panel, in hertz, or `None`; `critical_frequency` then carries the lower bound `fc1` and the pair spans the flattened coincidence range. |

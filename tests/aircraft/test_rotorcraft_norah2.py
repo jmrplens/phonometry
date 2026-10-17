@@ -352,7 +352,7 @@ def _run_event(case: pathlib.Path, r22: dict) -> tuple[dict, np.ndarray, object]
             (header["XMICM"], header["YMICM"]),
             level_offset=inp["ddb"],
             ground=RotorcraftGround(
-                receiver_height=header["HMIC"],
+                receiver_height_m=header["HMIC"],
                 ground_elevation=header["ZMIC"],
                 flow_resistivity=header["SIGMA"],
             ),
@@ -375,7 +375,7 @@ def _assert_geometry(rows: np.ndarray, res: object) -> None:
     assert np.max(np.abs(res.polar - ref_theta)) < 0.01
     # The prototype clamps the printed azimuth to the +-90 deg hemisphere span.
     assert np.max(np.abs(np.clip(res.azimuth, -90.0, 90.0) - ref_phi)) < 0.01
-    assert np.max(np.abs(res.distances - ref_dist)) < 0.05
+    assert np.max(np.abs(res.distances_m - ref_dist)) < 0.05
     # 346.1 m/s (Doc 32) vs the prototype's temperature-derived 346.19 m/s.
     assert np.max(np.abs(res.times - ref_trec)) < 0.02
 
@@ -412,8 +412,8 @@ def test_hover_ring_rim_reproduces_ring_rows(norah_root: pathlib.Path) -> None:
     assert dist == 70.0
     assert bearings.size == 13
     assert freqs.size == 31
-    hige = hover_ring_hemisphere(freqs, bearings, levels, distance=dist)
-    assert hige.distance == 70.0
+    hige = hover_ring_hemisphere(freqs, bearings, levels, distance_m=dist)
+    assert hige.distance_m == 70.0
     for bearing in (150.0, -120.0):
         k = int(np.nonzero(bearings == bearing)[0][0])
         side = 90.0 if bearing > 0 else -90.0
@@ -448,7 +448,7 @@ def test_case4_hover_ogh_event(norah_root: pathlib.Path) -> None:
         norah_root / "Hemispheres" / "R22_Ingroundhover_0kts_0deg_test.hem"
     )
     hige = hover_ring_hemisphere(
-        freqs, bearings, levels, distance=dist, mapping="bearing"
+        freqs, bearings, levels, distance_m=dist, mapping="bearing"
     )
     hoge = hover_derived_hemisphere(hige, "out_of_ground_hover", offset_db=8.0)
     case = norah_root / "ARP" / "Case4" / "SE" / "R22_DEP_RT2"
@@ -478,7 +478,7 @@ def test_case4_hover_ogh_event(norah_root: pathlib.Path) -> None:
                 pos,
                 (mic[0], mic[1]),
                 ground=RotorcraftGround(
-                    receiver_height=mic[3],
+                    receiver_height_m=mic[3],
                     ground_elevation=mic[2],
                     flow_resistivity=mic[4],
                 ),
@@ -502,7 +502,7 @@ def test_case4_hover_ogh_event(norah_root: pathlib.Path) -> None:
     # 10*lg(0.5/10) duration correction, which measures its printing
     # convention rather than the event chain.
     assert nadir is not None
-    assert nadir.distances[0] == pytest.approx(rows[0, 5], abs=0.05)  # DOBS
+    assert nadir.distances_m[0] == pytest.approx(rows[0, 5], abs=0.05)  # DOBS
     assert nadir.polar[0] == pytest.approx(rows[0, 6], abs=0.01)  # THETAOBS
     assert nadir.azimuth[0] == pytest.approx(rows[0, 7], abs=0.01)  # PHIOBSAC
     assert nadir.times[0] - nadir.emission_times[0] == pytest.approx(
@@ -597,7 +597,7 @@ def test_case2_contour_grid(norah_root: pathlib.Path, r22_set: dict) -> None:
     }
     for sigma, tol_sel, tol_max in ((2.0e5, 0.7, 0.7), (8.0e5, 0.15, 0.7)):
         ground = RotorcraftGround(
-            receiver_height=1.2,
+            receiver_height_m=1.2,
             ground_elevation=float(mics[0, 2]),
             flow_resistivity=sigma,
         )
@@ -699,7 +699,7 @@ def test_case3_contour_with_elevation_grid(
         "y": ys,
         "level_offset": inp["ddb"],
         "ground": RotorcraftGround(
-            receiver_height=1.2, ground_elevation=elevation, flow_resistivity=1.0e5
+            receiver_height_m=1.2, ground_elevation=elevation, flow_resistivity=1.0e5
         ),
         "track_state": RotorcraftTrackState(
             airspeed=inp["speed"],
@@ -761,7 +761,7 @@ def test_case2_contour_single_call_with_sigma_map(
         "y": ys,
         "level_offset": inp["ddb"],
         "ground": RotorcraftGround(
-            receiver_height=1.2,
+            receiver_height_m=1.2,
             ground_elevation=float(mics[0, 2]),
             flow_resistivity=sigma,
         ),

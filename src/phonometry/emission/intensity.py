@@ -2,7 +2,7 @@
 r"""Two-microphone (p-p) sound intensity per IEC 61043:1993 and the
 ISO 9614-1:1993 field indicators.
 
-A p-p probe holds two pressure microphones a fixed distance ``spacing``
+A p-p probe holds two pressure microphones a fixed distance ``spacing_m``
 (:math:`\Delta r`) apart. The mean of the two pressures is taken as the
 sound pressure at the probe reference point, while the pressure
 differential is used to derive the particle velocity component along
@@ -57,7 +57,7 @@ IEC 61043:1993 Table 2 by
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -203,7 +203,7 @@ class IntensityResult(OwnsArrays):
     ``max_valid_frequency``
     is the usable-bandwidth bound :math:`0.1 \, c / \Delta r`
     (bias < ~0.3 dB).
-    ``spacing`` retains the microphone separation the measurement was
+    ``spacing_m`` retains the microphone separation the measurement was
     reduced with so :meth:`plot_geometry` can draw the probe; it is
     appended after the original fields and ``None`` for hand-built
     results.
@@ -222,7 +222,8 @@ class IntensityResult(OwnsArrays):
     total_pressure_intensity_index: float
     total_direction: int
     max_valid_frequency: float
-    spacing: float | None = None
+    _: KW_ONLY
+    spacing_m: float | None = None
 
     def __post_init__(self) -> None:
         r"""Reject a measurement whose own fields contradict one another.
@@ -556,7 +557,7 @@ def _validate_probe_medium(fs: int, spacing: float, rho: float, c: float) -> Non
         msg = "Sample rate 'fs' must be positive."
         raise ValueError(msg)
     if spacing <= 0:
-        msg = "Microphone 'spacing' must be positive."
+        msg = "Microphone 'spacing_m' must be positive."
         raise ValueError(msg)
     if rho <= 0:
         msg = "Air 'density' must be positive."
@@ -588,7 +589,7 @@ def sound_intensity(
     p2: SignalInput,
     fs: int | None = None,
     *,
-    spacing: float,
+    spacing_m: float,
     density: float = 1.204,
     speed_of_sound: float = 343.0,
     fraction: int | None = None,
@@ -601,7 +602,7 @@ def sound_intensity(
     is estimated with Welch-averaged, Hann-windowed segments
     (:func:`scipy.signal.csd`) and converted to the intensity spectral
     density along the probe axis, with :math:`\Delta r` the microphone
-    ``spacing`` (definition 3.2 of IEC 61043:1993 gives the underlying
+    ``spacing_m`` (definition 3.2 of IEC 61043:1993 gives the underlying
     p-p formulation):
 
     .. math::
@@ -641,7 +642,7 @@ def sound_intensity(
         arrays; either may be a :class:`~phonometry.io.Signal` and supply
         it, and two Signals recorded at different rates are refused rather
         than arbitrated.
-    :param spacing: Microphone separation :math:`\Delta r`, in metres.
+    :param spacing_m: Microphone separation :math:`\Delta r`, in metres.
     :param density: Air density, in kg/m^3. Default 1.204 (20 degC).
     :param speed_of_sound: Speed of sound, in m/s. Default 343.0.
     :param fraction: ``None`` (broadband only), 1 (octave bands) or
@@ -669,7 +670,7 @@ def sound_intensity(
     x1 = apply_calibration(p1, _typesignal(p1, name="p1"))
     x2 = apply_calibration(p2, _typesignal(p2, name="p2"))
     _validate_probe_signals(x1, x2)
-    _validate_probe_medium(fs, spacing, density, speed_of_sound)
+    _validate_probe_medium(fs, spacing_m, density, speed_of_sound)
     _validate_band_options(fraction, limits)
     if x1.size < _MIN_SAMPLES:
         msg = f"Signals too short for a spectral estimate: {x1.size} samples."
@@ -685,7 +686,7 @@ def sound_intensity(
     pos = f > 0
     fpos = f[pos]
     # I(f) = -Im{G12(f)} / (2*pi*f*rho*dr) per frequency bin (W/m^2/Hz).
-    i_density = -np.imag(g12[pos]) / (2.0 * np.pi * fpos * density * spacing)
+    i_density = -np.imag(g12[pos]) / (2.0 * np.pi * fpos * density * spacing_m)
     p_density = spp[pos]
 
     if bias_correct:
@@ -693,7 +694,7 @@ def sound_intensity(
         # sin(k*dr)/(k*dr) per bin. The reciprocal is clamped at k*dr = pi/2
         # (see _finite_difference_correction) so bins near the first null do
         # not diverge and dominate the totals.
-        k_dr_full = 2.0 * np.pi * fpos * spacing / speed_of_sound
+        k_dr_full = 2.0 * np.pi * fpos * spacing_m / speed_of_sound
         i_density = i_density * _finite_difference_correction(k_dr_full)
 
     if limits is not None:
@@ -728,7 +729,7 @@ def sound_intensity(
         # with k*dr = 2*pi*f*dr/c; the reported correction is its reciprocal,
         # clamped at k*dr = pi/2 to match the applied bias_correct path and to
         # avoid diverging near the first null (_finite_difference_correction).
-        k_dr = 2.0 * np.pi * frequency * spacing / speed_of_sound
+        k_dr = 2.0 * np.pi * frequency * spacing_m / speed_of_sound
         bias_correction = _finite_difference_correction(k_dr)
 
     return IntensityResult(
@@ -744,8 +745,8 @@ def sound_intensity(
         total_pressure_level=total_lp,
         total_pressure_intensity_index=total_lp - total_li,
         total_direction=1 if total_i >= 0.0 else -1,
-        max_valid_frequency=0.1 * speed_of_sound / spacing,
-        spacing=float(spacing),
+        max_valid_frequency=0.1 * speed_of_sound / spacing_m,
+        spacing_m=float(spacing_m),
     )
 
 

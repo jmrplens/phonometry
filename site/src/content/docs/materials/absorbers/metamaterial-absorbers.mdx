@@ -134,7 +134,7 @@ design = materials.critical_coupling_design(300.0, base, lattice_step=3.0e-2, pe
 
 f = np.array([300.0])
 res = materials.slit_helmholtz_absorber(
-    f, design.resonator, slit_height=design.slit_height,
+    f, design.resonator, slit_height_m=design.slit_height_m,
     lattice_step=3.0e-2, period_m=5.0e-2,
 )
 z = res.normalized_impedance[0]
@@ -161,7 +161,7 @@ says which side you are on; the absorption curve alone does not.*
 # The impedance at 300 Hz as a function of slit height, in one line each.
 for factor in (0.6, 1.0, 1.7):
     z_h = materials.slit_helmholtz_absorber(
-        np.array([300.0]), design.resonator, slit_height=factor * design.slit_height,
+        np.array([300.0]), design.resonator, slit_height_m=factor * design.slit_height_m,
         lattice_step=3.0e-2, period_m=5.0e-2,
     ).normalized_impedance[0]
     print(factor, round(z_h.real, 2), round(z_h.imag, 2))
@@ -243,11 +243,11 @@ design = materials.critical_coupling_design(
     300.0, base, lattice_step=3.0e-2, period_m=5.0e-2,
 )
 print(round(design.absorption, 4))          # ~1.0 (perfect absorption)
-print(round(design.slit_height * 1e3, 3))    # solved slit height, mm
+print(round(design.slit_height_m * 1e3, 3))    # solved slit height, mm
 
 f = np.linspace(150.0, 500.0, 700)
 res = materials.slit_helmholtz_absorber(
-    f, design.resonator, slit_height=design.slit_height,
+    f, design.resonator, slit_height_m=design.slit_height_m,
     lattice_step=3.0e-2, period_m=5.0e-2,
 )
 res.plot()   # alpha(f) with |R| overlaid; peak = 1 at 300 Hz
@@ -306,7 +306,7 @@ design = materials.critical_coupling_design(
 # The free function draws any resonator list; a slit_helmholtz_absorber
 # result retains its geometry, so res.plot_geometry() draws the same period_m.
 materials.plot_slit_absorber_geometry(
-    [design.resonator], slit_height=design.slit_height,
+    [design.resonator], slit_height_m=design.slit_height_m,
     lattice_step=3.0e-2, period_m=5.0e-2,
 )
 plt.show()
@@ -332,14 +332,14 @@ from phonometry import materials
 a, d, f0 = 3.0e-2, 5.0e-2, 300.0
 base = materials.HelmholtzResonator(1.0e-3, 3.0e-3, 30.0e-3, 27.0e-3)
 design = materials.critical_coupling_design(f0, base, lattice_step=a, period_m=d)
-h0 = design.slit_height
+h0 = design.slit_height_m
 
 f = np.linspace(150.0, 500.0, 700)
 fig, ax = plt.subplots()
 for factor, label in [(1.0, "critically coupled"),
                       (0.6, "narrow slit"), (1.7, "wide slit")]:
     res = materials.slit_helmholtz_absorber(
-        f, design.resonator, slit_height=factor * h0,
+        f, design.resonator, slit_height_m=factor * h0,
         lattice_step=a, period_m=d,
     )
     ax.plot(f, res.absorption, label=label)
@@ -380,7 +380,7 @@ algebra suggests:
 # evaluator take `angle_rad` in radians.
 for degrees in (0.0, 15.0, 30.0, 45.0, 60.0):
     off = materials.slit_helmholtz_absorber(
-        np.array([300.0]), design.resonator, slit_height=design.slit_height,
+        np.array([300.0]), design.resonator, slit_height_m=design.slit_height_m,
         lattice_step=3.0e-2, period_m=5.0e-2, angle_rad=np.radians(degrees),
     )
     print(degrees, round(float(off.absorption[0]), 3))
@@ -414,7 +414,7 @@ base = materials.HelmholtzResonator(
 )
 design = materials.critical_coupling_design(300.0, base, lattice_step=3.0e-2, period_m=5.0e-2)
 res = materials.slit_helmholtz_absorber(
-    np.array([300.0]), design.resonator, slit_height=design.slit_height,
+    np.array([300.0]), design.resonator, slit_height_m=design.slit_height_m,
     lattice_step=3.0e-2, period_m=5.0e-2,
 )
 
@@ -457,7 +457,7 @@ metadiffuser panel of the
 ```python
 f_sweep = np.geomspace(50.0, 3000.0, 400)
 swept = materials.slit_helmholtz_absorber(
-    f_sweep, design.resonator, slit_height=design.slit_height,
+    f_sweep, design.resonator, slit_height_m=design.slit_height_m,
     lattice_step=3.0e-2, period_m=5.0e-2,
 )
 c_ratio = 2 * np.pi * f_sweep / swept.effective_wavenumber.real / 343.0
@@ -478,7 +478,7 @@ with it.
 ```python
 # The empty slit, at the design frequency and slit height.
 rho_e, k_e = materials.slit_effective_properties(
-    np.array([300.0]), slit_height=design.slit_height
+    np.array([300.0]), slit_height_m=design.slit_height_m
 )
 print(np.round(rho_e, 3))      # [1.355-0.203j]  against free air 1.205 kg/m^3
 print(f"{k_e[0]:.3e}")         # 1.332e+05+7.725e+03j  against adiabatic 1.419e+05 Pa
@@ -486,7 +486,7 @@ print(f"{k_e[0]:.3e}")         # 1.332e+05+7.725e+03j  against adiabatic 1.419e+
 # One resonator's shunt impedance, either side of its own resonance at 484 Hz.
 z_hr = materials.helmholtz_resonator_impedance(
     np.array([300.0, 484.0, 800.0]), design.resonator,
-    slit_height=design.slit_height, lattice_step=3.0e-2,
+    slit_height_m=design.slit_height_m, lattice_step=3.0e-2,
 )
 print(np.sign(z_hr.imag))      # [-1. -1.  1.]  compliance below, mass above
 ```
@@ -559,7 +559,7 @@ f_chain = np.linspace(120.0, 700.0, 700)
 graded = [materials.critical_coupling_design(target, base, lattice_step=3.0e-2,
                                              period_m=5.0e-2).resonator
           for target in (250.0, 320.0, 410.0, 520.0)]
-chain = materials.slit_helmholtz_absorber(f_chain, graded, slit_height=1.20e-3,
+chain = materials.slit_helmholtz_absorber(f_chain, graded, slit_height_m=1.20e-3,
                                           lattice_step=3.0e-2, period_m=5.0e-2)
 step = float(f_chain[1] - f_chain[0])
 print(round(float(chain.absorption.max()), 3),

@@ -237,8 +237,8 @@ class HeavyImpactSourceSpec(RichDisplay):
     :ivar frequencies: Octave-band centre frequencies, in Hz.
     :ivar force_exposure_level: Nominal ``LFE`` per band, in dB re 1 N.
     :ivar tolerance: Tolerance on ``LFE`` per band, in dB.
-    :ivar drop_height: Free-fall drop height, in m.
-    :ivar drop_height_tolerance: Tolerance on the drop height, in m.
+    :ivar drop_height_m: Free-fall drop height, in m.
+    :ivar drop_height_tolerance_m: Tolerance on the drop height, in m.
     :ivar effective_mass: Effective (equivalent) mass of the source, in kg.
     :ivar effective_mass_tolerance: Tolerance on the effective mass, in kg.
     :ivar restitution: Coefficient of restitution.
@@ -253,8 +253,8 @@ class HeavyImpactSourceSpec(RichDisplay):
     frequencies: tuple[float, ...]
     force_exposure_level: tuple[float, ...]
     tolerance: tuple[float, ...]
-    drop_height: float
-    drop_height_tolerance: float
+    drop_height_m: float
+    drop_height_tolerance_m: float
     effective_mass: float
     effective_mass_tolerance: float
     restitution: float
@@ -274,8 +274,8 @@ _SPECS: dict[str, HeavyImpactSourceSpec] = {
         frequencies=HEAVY_IMPACT_OCTAVE_BANDS_HZ,
         force_exposure_level=tuple(v for v, _ in HEAVY_IMPACT_SOURCES["rubber_ball"]),
         tolerance=tuple(t for _, t in HEAVY_IMPACT_SOURCES["rubber_ball"]),
-        drop_height=1.00,
-        drop_height_tolerance=0.01,
+        drop_height_m=1.00,
+        drop_height_tolerance_m=0.01,
         effective_mass=2.5,
         effective_mass_tolerance=0.1,
         restitution=0.8,
@@ -292,8 +292,8 @@ _SPECS: dict[str, HeavyImpactSourceSpec] = {
         frequencies=HEAVY_IMPACT_OCTAVE_BANDS_HZ,
         force_exposure_level=tuple(v for v, _ in HEAVY_IMPACT_SOURCES["bang_machine"]),
         tolerance=tuple(t for _, t in HEAVY_IMPACT_SOURCES["bang_machine"]),
-        drop_height=0.85,
-        drop_height_tolerance=0.0,
+        drop_height_m=0.85,
+        drop_height_tolerance_m=0.0,
         effective_mass=7.3,
         effective_mass_tolerance=0.2,
         restitution=0.8,

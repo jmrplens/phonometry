@@ -62,7 +62,7 @@ def _metadata(**overrides: object) -> ReportMetadata:
         "client": "Acoustic Test Client Ltd.",
         "manufacturer": "Acoustics Works Inc.",
         "mass_per_area": 200.0,
-        "thickness": 0.020,
+        "thickness_m": 0.020,
         "test_room": "Dynamic-stiffness rig, 8 kg load plate",
         "measurement_standard": "EN 29052-1",
         "temperature_c": 21.0,

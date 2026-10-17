@@ -665,7 +665,7 @@ class PipeFrequencies(RichDisplay):
 
 def coincidence_frequencies(
     internal_diameter_m: float,
-    wall_thickness: float,
+    wall_thickness_m: float,
     downstream_sound_speed: float,
     *,
     pipe_sound_speed: float = PIPE_SPEED_OF_SOUND_M_S,
@@ -680,7 +680,7 @@ def coincidence_frequencies(
        f_g = \frac{\sqrt{3}}{\pi t_S}\frac{c_a^2}{c_s}
 
     :param internal_diameter_m: :math:`D_i` of the downstream pipe, in m.
-    :param wall_thickness: :math:`t_S` of the pipe wall, in m.
+    :param wall_thickness_m: :math:`t_S` of the pipe wall, in m.
     :param downstream_sound_speed: :math:`c_2` in the fluid downstream of the
         valve, in m/s.
     :param pipe_sound_speed: :math:`c_s`, 5 000 m/s for steel by NOTE 4.
@@ -689,7 +689,7 @@ def coincidence_frequencies(
     :raises ValueError: If any argument is not positive and finite.
     """
     diameter_m = require_positive(internal_diameter_m, "internal_diameter_m")
-    thickness = require_positive(wall_thickness, "wall_thickness")
+    thickness = require_positive(wall_thickness_m, "wall_thickness_m")
     downstream = require_positive(downstream_sound_speed, "downstream_sound_speed")
     wall = require_positive(pipe_sound_speed, "pipe_sound_speed")
     air = require_positive(air_sound_speed, "air_sound_speed")
@@ -753,7 +753,7 @@ def pipe_transmission_loss(
     frequencies: NDArray[np.float64],
     *,
     internal_diameter_m: float,
-    wall_thickness: float,
+    wall_thickness_m: float,
     valve_outlet_diameter_m: float,
     downstream_density: float,
     downstream_sound_speed: float,
@@ -780,7 +780,7 @@ def pipe_transmission_loss(
 
     :param frequencies: The band centre frequencies, in Hz.
     :param internal_diameter_m: :math:`D_i`, in m.
-    :param wall_thickness: :math:`t_S`, in m.
+    :param wall_thickness_m: :math:`t_S`, in m.
     :param valve_outlet_diameter_m: :math:`D`, in m, which selects the damping
         factor of Equation (20b) and is the valve outlet and not the pipe.
     :param downstream_density: :math:`\rho_2`, in kg/m³.
@@ -800,7 +800,7 @@ def pipe_transmission_loss(
     if not np.all(np.isfinite(bands)) or np.any(bands <= 0.0):
         msg = "'frequencies' must carry positive, finite band centres in Hz."
         raise ValueError(msg)
-    thickness = require_positive(wall_thickness, "wall_thickness")
+    thickness = require_positive(wall_thickness_m, "wall_thickness_m")
     outlet = require_positive(valve_outlet_diameter_m, "valve_outlet_diameter_m")
     density = require_positive(downstream_density, "downstream_density")
     speed_of_sound = require_positive(downstream_sound_speed, "downstream_sound_speed")
@@ -1459,7 +1459,7 @@ class DownstreamPipe(RichDisplay):
     not settings anyone is expected to change.
 
     :ivar internal_diameter_m: :math:`D_i`, in m.
-    :ivar wall_thickness: :math:`t_S`, in m.
+    :ivar wall_thickness_m: :math:`t_S`, in m.
     :ivar density: :math:`\rho_s` of the pipe material, in kg/m³.
     :ivar speed_of_sound: :math:`c_s` in the pipe wall, in m/s.
     :ivar air_sound_speed: :math:`c_a` outside the pipe, in m/s.
@@ -1468,7 +1468,7 @@ class DownstreamPipe(RichDisplay):
     """
 
     internal_diameter_m: float
-    wall_thickness: float
+    wall_thickness_m: float
     density: float
     _: KW_ONLY
     speed_of_sound: float = PIPE_SPEED_OF_SOUND_M_S
@@ -1523,7 +1523,7 @@ def valve_aerodynamic_noise(
     strouhal_number = valve.strouhal_number
     coefficient = valve.coefficient
     internal_diameter_m = pipe.internal_diameter_m
-    wall_thickness = pipe.wall_thickness
+    wall_thickness = pipe.wall_thickness_m
     pipe_density = pipe.density
     pipe_sound_speed = pipe.speed_of_sound
     air_sound_speed = pipe.air_sound_speed
@@ -1627,7 +1627,7 @@ def valve_aerodynamic_noise(
     band_loss = pipe_transmission_loss(
         bands,
         internal_diameter_m=bore,
-        wall_thickness=wall_thickness,
+        wall_thickness_m=wall_thickness,
         valve_outlet_diameter_m=outlet,
         downstream_density=rho2,
         downstream_sound_speed=c2,

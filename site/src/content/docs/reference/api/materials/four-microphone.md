@@ -66,7 +66,7 @@ $\rho = 1.290 \, \frac{P}{101.325} \, \frac{273.15}{273.15 + T}$.
 ```python
 air_layer_transfer_matrix(
     wavenumber: ArrayLike,
-    thickness: float,
+    thickness_m: float,
     characteristic_impedance: float,
 ) -> TransferMatrix
 ```
@@ -86,7 +86,7 @@ $T_{11} = T_{22}$).
 | Name | Description |
 | :--- | :--- |
 | `wavenumber` | Air wavenumber `k`. |
-| `thickness` | Layer thickness `d`, in metres. |
+| `thickness_m` | Layer thickness `d`, in metres. |
 | `characteristic_impedance` | Characteristic impedance `rho c`, in rayls. |
 
 **Returns:** The air-layer [`TransferMatrix`](/phonometry/reference/api/materials/four-microphone/#transfermatrix).
@@ -101,7 +101,7 @@ face_quantities(
     d: ArrayLike,
     *,
     wavenumber: ArrayLike,
-    thickness: float,
+    thickness_m: float,
     characteristic_impedance: float,
 ) -> tuple[NDArray[np.complex128], NDArray[np.complex128], NDArray[np.complex128], NDArray[np.complex128]]
 ```
@@ -125,7 +125,7 @@ $$
 | `c` | Downstream forward amplitude `C`. |
 | `d` | Downstream backward amplitude `D`. |
 | `wavenumber` | Air wavenumber `k`. |
-| `thickness` | Specimen thickness `d`, in metres. |
+| `thickness_m` | Specimen thickness `d`, in metres. |
 | `characteristic_impedance` | Characteristic impedance `rho c`, in rayls. |
 
 **Returns:** Tuple `(p0, pd, u0, ud)` of face pressures and velocities.
@@ -134,7 +134,7 @@ $$
 
 ```python
 plane_wave_frequency_range_astm(
-    spacing: float,
+    spacing_m: float,
     speed_of_sound: float,
     *,
     diameter_m: float | None = None,
@@ -161,7 +161,7 @@ binding for every microphone pair).
 
 | Name | Description |
 | :--- | :--- |
-| `spacing` | Microphone spacing `s`, in metres. |
+| `spacing_m` | Microphone spacing `s`, in metres. |
 | `speed_of_sound` | Speed of sound `c`, in metres per second. |
 | `diameter_m` | Tube diameter (circular) or largest section dimension (rectangular/square) `d`, in metres; `None` applies only the spacing bound. |
 | `shape` | `"circular"`, `"rectangular"` or `"square"`. |
@@ -202,7 +202,7 @@ transfer_matrix_one_load(
     s1: float,
     l2: float,
     s2: float,
-    thickness: float,
+    thickness_m: float,
     wavenumber: ArrayLike,
     characteristic_impedance: float,
     frequencies: ArrayLike | None = None,
@@ -230,7 +230,7 @@ $$
 | `s1` | Upstream microphone spacing `s1`, in metres. |
 | `l2` | Downstream reference distance `l2`, in metres. |
 | `s2` | Downstream microphone spacing `s2`, in metres. |
-| `thickness` | Specimen thickness `d`, in metres. |
+| `thickness_m` | Specimen thickness `d`, in metres. |
 | `wavenumber` | Air wavenumber `k`. |
 | `characteristic_impedance` | Characteristic impedance `rho c`. |
 | `frequencies` | Optional frequency vector `f`, in hertz, retained on the result so [`TransferMatrix.plot`](/phonometry/reference/api/materials/four-microphone/#transfermatrixplot) needs no arguments. |
@@ -250,7 +250,7 @@ transfer_matrix_two_load(
     s1: float,
     l2: float,
     s2: float,
-    thickness: float,
+    thickness_m: float,
     wavenumber: ArrayLike,
     characteristic_impedance: float,
     frequencies: ArrayLike | None = None,
@@ -279,7 +279,7 @@ $$
 | `s1` | Upstream microphone spacing `s1`, in metres. |
 | `l2` | Downstream reference distance `l2`, in metres. |
 | `s2` | Downstream microphone spacing `s2`, in metres. |
-| `thickness` | Specimen thickness `d`, in metres. |
+| `thickness_m` | Specimen thickness `d`, in metres. |
 | `wavenumber` | Air wavenumber `k`. |
 | `characteristic_impedance` | Characteristic impedance `rho c`. |
 | `frequencies` | Optional frequency vector `f`, in hertz, retained on the result so [`TransferMatrix.plot`](/phonometry/reference/api/materials/four-microphone/#transfermatrixplot) needs no arguments. |
@@ -301,7 +301,7 @@ TransferMatrix(
     s1: float | None = None,
     l2: float | None = None,
     s2: float | None = None,
-    thickness: float | None = None,
+    thickness_m: float | None = None,
     diameter_m: float | None = None,
     shape: str | None = None,
     frequencies: NDArray[np.float64] | None = None,
@@ -317,7 +317,7 @@ may be scalar or a per-frequency array of matching shape.
 
 The trailing fields retain the measurement context when the matrix comes
 out of [`transfer_matrix_two_load`](/phonometry/reference/api/materials/four-microphone/#transfer_matrix_two_load) / [`transfer_matrix_one_load`](/phonometry/reference/api/materials/four-microphone/#transfer_matrix_one_load)
-(tube geometry `l1`/`s1`/`l2`/`s2`, specimen `thickness`, tube
+(tube geometry `l1`/`s1`/`l2`/`s2`, specimen `thickness_m`, tube
 `diameter_m` and canonical cross-section `shape`, the `frequencies`
 vector when supplied to the solver, and the air
 `air_characteristic_impedance` `rho c`); all default to `None` so a
@@ -368,7 +368,7 @@ Determinant $T_{11} T_{22} - T_{12} T_{21}$ (unity for a reciprocal specimen).
 
 ```python
 TransferMatrix.material_wavenumber(
-    thickness: float,
+    thickness_m: float,
 ) -> NDArray[np.complex128]
 ```
 
@@ -380,7 +380,7 @@ $k' = \arccos(T_{11}) / d$ (complex `arccos`).
 
 | Name | Description |
 | :--- | :--- |
-| `thickness` | Specimen thickness `d`, in metres. |
+| `thickness_m` | Specimen thickness `d`, in metres. |
 
 **Returns:** Complex material wavenumber `k'`, in reciprocal metres.
 
@@ -452,7 +452,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the matrix does not retain its tube geometry (`l1`/`s1`/`l2`/`s2`/`thickness`). |
+| ValueError | If the matrix does not retain its tube geometry (`l1`/`s1`/`l2`/`s2`/`thickness_m`). |
 
 ### TransferMatrix.reflection_hard_backed()
 

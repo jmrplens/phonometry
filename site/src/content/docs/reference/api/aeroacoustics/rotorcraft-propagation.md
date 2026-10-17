@@ -61,12 +61,12 @@ the ARP verification cases.
 ```python
 atmospheric_adjustment(
     frequencies: NDArray[np.float64] | list[float],
-    distance: float,
+    distance_m: float,
     *,
     temperature_c: float = 25.0,
     relative_humidity_percent: float = 70.0,
     atmospheric_pressure_kpa: float = 101.325,
-    reference_distance: float = 60.0,
+    reference_distance_m: float = 60.0,
 ) -> NDArray[np.float64]
 ```
 
@@ -105,11 +105,11 @@ advisory warning propagates, since `α` is large and extrapolated.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | One-third-octave-band centre frequencies, in Hz. |
-| `distance` | Slant distance `r`, in metres (`> 0`; below `rh` the adjustment is a small positive value, i.e. less absorption than the reference path). |
+| `distance_m` | Slant distance `r`, in metres (`> 0`; below `rh` the adjustment is a small positive value, i.e. less absorption than the reference path). |
 | `temperature_c` | Air temperature, in °C (default 25 °C, ICAO reference). |
 | `relative_humidity_percent` | Relative humidity, in % (default 70 %). |
 | `atmospheric_pressure_kpa` | Ambient pressure, in kPa (default 101.325). |
-| `reference_distance` | Hemisphere reference distance `rh`, in metres (default 60). Pass [`RotorcraftHemisphere.distance`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) when the data uses a non-standard polar distance. |
+| `reference_distance_m` | Hemisphere reference distance `rh`, in metres (default 60). Pass [`RotorcraftHemisphere.distance_m`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) when the data uses a non-standard polar distance. |
 
 **Returns:** The adjustment `ΔLa` per band, in dB (added to the level, $\le 0$ for $r \ge r_\mathrm{h}$).
 
@@ -126,7 +126,7 @@ diffraction_attenuation(
     frequencies: NDArray[np.float64] | list[float],
     path_difference: float,
     *,
-    edge_height: float,
+    edge_height_m: float,
     edge_span: float = 0.0,
     capped: bool = True,
 ) -> NDArray[np.float64]
@@ -160,7 +160,7 @@ $c = 346.1$ m/s.
 | :--- | :--- |
 | `frequencies` | One-third-octave-band centre frequencies, in Hz. |
 | `path_difference` | Path difference `δ` between the diffracted and the direct path, in metres (negative when the edge lies below the line of sight). |
-| `edge_height` | Edge height `h0` above the mean ground plane(s), in metres (the greatest of the two side values for a terrain edge; `≥ 0`). |
+| `edge_height_m` | Edge height `h0` above the mean ground plane(s), in metres (the greatest of the two side values for a terrain edge; `≥ 0`). |
 | `edge_span` | Distance `e` between the first and last diffraction edges, in metres (default 0: single diffraction). |
 | `capped` | Apply the 25 dB upper bound of §A.4.5 (default). The image-path terms inside the ground-diffraction weighting (Eq. 46/47) are evaluated unbounded. |
 
@@ -177,9 +177,9 @@ $c = 346.1$ m/s.
 ```python
 ground_effect_adjustment(
     frequencies: NDArray[np.float64] | list[float],
-    source_height: float,
-    receiver_height: float,
-    horizontal_distance: float,
+    source_height_m: float,
+    receiver_height_m: float,
+    horizontal_distance_m: float,
     *,
     flow_resistivity: float | str = 'G',
 ) -> NDArray[np.float64]
@@ -198,9 +198,9 @@ $\Delta L_\mathrm{g} = 10 \cdot \log_{10}\{1 + (r_1/r_2)^2 \lvert Q \rvert^2 + 2
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | One-third-octave-band centre frequencies, in Hz. |
-| `source_height` | Source height above the ground `hs`, in metres (clamped to `>= 0.1`). |
-| `receiver_height` | Receiver height above the ground `hr`, in metres (clamped to `>= 0.1`). |
-| `horizontal_distance` | Horizontal source-receiver distance `dp`, in metres (`> 0`). |
+| `source_height_m` | Source height above the ground `hs`, in metres (clamped to `>= 0.1`). |
+| `receiver_height_m` | Receiver height above the ground `hr`, in metres (clamped to `>= 0.1`). |
+| `horizontal_distance_m` | Horizontal source-receiver distance `dp`, in metres (`> 0`). |
 | `flow_resistivity` | Ground flow resistivity `σ` in Pa·s/m², or a CNOSSOS class letter `"A"`-`"H"`. The default `"G"` (20e6, hard surfaces) is the CNOSSOS class covering the paved surroundings typical of heliports; the guidance's own suggestions, concrete $\sigma = 65 \times 10^6$ for city areas and grass $\sigma = 200 \times 10^3$ for rural areas (§A.4.3), can be passed as numeric values. |
 
 **Returns:** The adjustment `ΔLg` per band, in dB (added to the level).
@@ -246,8 +246,8 @@ $\bar{\sigma} = 10^{\sum d_i \cdot \log_{10}(\sigma_i) / \sum d_i}$.
 
 ```python
 mean_ground_plane(
-    distances: NDArray[np.float64] | list[float],
-    heights: NDArray[np.float64] | list[float],
+    distances_m: NDArray[np.float64] | list[float],
+    heights_m: NDArray[np.float64] | list[float],
 ) -> MeanGroundPlaneResult
 ```
 
@@ -263,8 +263,8 @@ Eq. 37/38 with the segment integrals `A` and `B` of Eq. 39/40.
 
 | Name | Description |
 | :--- | :--- |
-| `distances` | Section distances `d`, in metres, strictly increasing, shape `(M,)` with $M \ge 2$ (arbitrary spacing). |
-| `heights` | Terrain heights `z(d)`, in metres, shape `(M,)`. |
+| `distances_m` | Section distances `d`, in metres, strictly increasing, shape `(M,)` with $M \ge 2$ (arbitrary spacing). |
+| `heights_m` | Terrain heights `z(d)`, in metres, shape `(M,)`. |
 
 **Returns:** A [`MeanGroundPlaneResult`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#meangroundplaneresult).
 
@@ -280,8 +280,8 @@ Eq. 37/38 with the segment integrals `A` and `B` of Eq. 39/40.
 MeanGroundPlaneResult(
     slope: float,
     intercept: float,
-    distances: NDArray[np.float64],
-    heights: NDArray[np.float64],
+    distances_m: NDArray[np.float64],
+    heights_m: NDArray[np.float64],
 )
 ```
 
@@ -301,15 +301,15 @@ substituted into the flat-ground equations.
 | :--- | :--- |
 | `slope` | The fitted slope `a` (Eq. 37). |
 | `intercept` | The fitted intercept `b`, in metres (Eq. 38). |
-| `distances` | The section distances `d`, in metres, shape `(M,)`. |
-| `heights` | The terrain heights `z(d)`, in metres, shape `(M,)`. |
+| `distances_m` | The section distances `d`, in metres, shape `(M,)`. |
+| `heights_m` | The terrain heights `z(d)`, in metres, shape `(M,)`. |
 
 ### MeanGroundPlaneResult.equivalent_height()
 
 ```python
 MeanGroundPlaneResult.equivalent_height(
-    distance: float,
-    height: float,
+    distance_m: float,
+    height_m: float,
 ) -> float
 ```
 
@@ -323,17 +323,17 @@ flat-ground equations (§A.4.4).
 
 ```python
 MeanGroundPlaneResult.height(
-    distance: float | NDArray[np.float64],
+    distance_m: float | NDArray[np.float64],
 ) -> NDArray[np.float64]
 ```
 
-The plane height $a\,d + b$ at `distance`, in metres.
+The plane height $a\,d + b$ at `distance_m`, in metres.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `distance` | Distance $d$ along the section, in metres (scalar or array). |
+| `distance_m` | Distance $d$ along the section, in metres (scalar or array). |
 
 **Returns:** The height of the plane at each distance, in metres.
 
@@ -354,9 +354,9 @@ Plot the terrain section and the fitted mean ground plane.
 
 ```python
 spherical_spreading_adjustment(
-    distance: float,
+    distance_m: float,
     *,
-    reference_distance: float = 60.0,
+    reference_distance_m: float = 60.0,
 ) -> float
 ```
 
@@ -370,8 +370,8 @@ adjustment is $\Delta L_\mathrm{s} = -20 \cdot \log_{10}(r/r_\mathrm{h})$.
 
 | Name | Description |
 | :--- | :--- |
-| `distance` | Slant distance `r` from the rotorcraft to the observer, in metres (`> 0`). |
-| `reference_distance` | Hemisphere reference distance `rh`, in metres (default 60). Pass [`RotorcraftHemisphere.distance`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) when the data uses a non-standard polar distance (e.g. 70 m hover rings). |
+| `distance_m` | Slant distance `r` from the rotorcraft to the observer, in metres (`> 0`). |
+| `reference_distance_m` | Hemisphere reference distance `rh`, in metres (default 60). Pass [`RotorcraftHemisphere.distance_m`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) when the data uses a non-standard polar distance (e.g. 70 m hover rings). |
 
 **Returns:** The spreading adjustment `ΔLs`, in dB (added to the level).
 
@@ -388,8 +388,8 @@ terrain_screening_adjustment(
     frequencies: NDArray[np.float64] | list[float],
     source: tuple[float, float],
     receiver: tuple[float, float],
-    distances: NDArray[np.float64] | list[float],
-    heights: NDArray[np.float64] | list[float],
+    distances_m: NDArray[np.float64] | list[float],
+    heights_m: NDArray[np.float64] | list[float],
     *,
     flow_resistivity: float | str | NDArray[np.float64] | list[float] = 'G',
 ) -> TerrainScreeningResult
@@ -432,8 +432,8 @@ whose diffraction equations follow CNOSSOS-EU.
 | `frequencies` | One-third-octave-band centre frequencies, in Hz. |
 | `source` | Source `(d, z)` in the section, in metres. |
 | `receiver` | Receiver `(d, z)` in the section, in metres (the microphone point, i.e. ground plus microphone height). |
-| `distances` | Terrain section distances `d`, in metres, strictly increasing, covering `[source d, receiver d]`. |
-| `heights` | Terrain heights `z(d)`, in metres. |
+| `distances_m` | Terrain section distances `d`, in metres, strictly increasing, covering `[source d, receiver d]`. |
+| `heights_m` | Terrain heights `z(d)`, in metres. |
 | `flow_resistivity` | Ground flow resistivity: a value in Pa·s/m², a CNOSSOS class letter, or one value per profile segment (shape `(M−1,)`) averaged per sub-path by Eq. 41. |
 
 **Returns:** A [`TerrainScreeningResult`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#terrainscreeningresult).
@@ -455,8 +455,8 @@ TerrainScreeningResult(
     diffraction_points: NDArray[np.float64],
     source: tuple[float, float],
     receiver: tuple[float, float],
-    distances: NDArray[np.float64],
-    heights: NDArray[np.float64],
+    distances_m: NDArray[np.float64],
+    heights_m: NDArray[np.float64],
 )
 ```
 
@@ -472,8 +472,8 @@ Ground and screening over a terrain section (guidance §A.4.4-A.4.5).
 | `diffraction_points` | The diffracting edges `(d, z)` on the convex propagation path, shape `(n, 2)` (empty when unscreened). |
 | `source` | The source `(d, z)`, in metres. |
 | `receiver` | The receiver `(d, z)`, in metres. |
-| `distances` | The section distances, in metres, shape `(M,)`. |
-| `heights` | The section terrain heights, in metres, shape `(M,)`. |
+| `distances_m` | The section distances, in metres, shape `(M,)`. |
+| `heights_m` | The section terrain heights, in metres, shape `(M,)`. |
 
 Whether the terrain blocks the line of sight (`screened`) is read
 from the section, the source and the receiver, so it is not a field.

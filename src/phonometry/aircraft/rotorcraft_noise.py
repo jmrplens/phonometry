@@ -118,9 +118,9 @@ class RotorcraftHemisphere(OwnsArrays):
     :ivar polar: Polar angles ``θ``, in degrees, shape ``(P,)`` (``0`` forward …
         ``180`` rearward).
     :ivar levels: Band levels, in dB, shape ``(A, P, F)``.
-    :ivar distance: Reference distance, in metres (default 60). The standard
+    :ivar distance_m: Reference distance, in metres (default 60). The standard
         NORAH database uses 60 m; when the data uses another polar distance
-        (e.g. 70 m hover rings), pass this value as ``reference_distance`` to
+        (e.g. 70 m hover rings), pass this value as ``reference_distance_m`` to
         :func:`~phonometry.aircraft.rotorcraft_propagation.spherical_spreading_adjustment`
         and
         :func:`~phonometry.aircraft.rotorcraft_propagation.atmospheric_adjustment`
@@ -131,7 +131,8 @@ class RotorcraftHemisphere(OwnsArrays):
     azimuth: NDArray[np.float64]
     polar: NDArray[np.float64]
     levels: NDArray[np.float64]
-    distance: float = _RH
+    _: KW_ONLY
+    distance_m: float = _RH
 
     def __post_init__(self) -> None:
         """Reject a hemisphere whose grid does not span its own axes.
@@ -186,7 +187,7 @@ class RotorcraftHemisphere(OwnsArrays):
             azimuth=-az[::-1],
             polar=np.asarray(self.polar, dtype=np.float64),
             levels=lv[::-1, :, :],
-            distance=self.distance,
+            distance_m=self.distance_m,
         )
 
     def _filled(self) -> NDArray[np.float64]:
@@ -394,7 +395,7 @@ def hover_ring_hemisphere(
     bearings: NDArray[np.float64] | list[float],
     levels: NDArray[np.float64] | list[list[float]],
     *,
-    distance: float = 70.0,
+    distance_m: float = 70.0,
     azimuth_step: float = 10.0,
     polar_step: float = 10.0,
     mapping: str = "constant_phi",
@@ -426,7 +427,7 @@ def hover_ring_hemisphere(
       two readings part).
 
     Ring lookups interpolate periodically in the energy domain. The returned
-    hemisphere carries ``distance`` (hover rings are commonly reduced to
+    hemisphere carries ``distance_m`` (hover rings are commonly reduced to
     70 m rather than the 60 m of the flyover database), which the event chain
     and the propagation adjustments honour as the reference distance.
 
@@ -437,7 +438,7 @@ def hover_ring_hemisphere(
         endpoint pair is accepted.
     :param levels: Ring band levels, in dB at the ring's polar distance,
         shape ``(B, F)``.
-    :param distance: Polar distance of the ring, in metres (default 70).
+    :param distance_m: Polar distance of the ring, in metres (default 70).
     :param azimuth_step: Azimuth grid step, in degrees; must divide the
         180° span (default 10, the NORAH grid).
     :param polar_step: Polar grid step, in degrees; must divide the 180°
@@ -465,7 +466,7 @@ def hover_ring_hemisphere(
     if not np.all(np.isfinite(lv)):
         msg = "'levels' must be finite."
         raise ValueError(msg)
-    dist = require_positive(distance, "distance")
+    dist = require_positive(distance_m, "distance_m")
     key = require_choice(mapping, "mapping", ("constant_phi", "bearing"))
     az = _grid_axis(-90.0, 90.0, azimuth_step, "azimuth_step")
     po = _grid_axis(0.0, 180.0, polar_step, "polar_step")
@@ -492,7 +493,7 @@ def hover_ring_hemisphere(
             energy = 0.5 * (10.0 ** (starboard / 10.0) + 10.0 ** (port / 10.0))
             grid[cells // 2] = 10.0 * np.log10(energy)
     return RotorcraftHemisphere(
-        frequencies=freqs, azimuth=az, polar=po, levels=grid, distance=dist
+        frequencies=freqs, azimuth=az, polar=po, levels=grid, distance_m=dist
     )
 
 
@@ -545,7 +546,7 @@ def hover_derived_hemisphere(
         azimuth=np.asarray(hemisphere.azimuth, dtype=np.float64),
         polar=np.asarray(hemisphere.polar, dtype=np.float64),
         levels=np.asarray(hemisphere.levels, dtype=np.float64) + offset,
-        distance=hemisphere.distance,
+        distance_m=hemisphere.distance_m,
     )
 
 
@@ -997,7 +998,7 @@ class RotorcraftEventResult(OwnsArrays):
     :ivar emission_times: Emission times ``t_e``, in s, shape ``(K,)``.
     :ivar times: Recorded times :math:`t_\mathrm{r} = t_\mathrm{e} + r/c` (Eq. 22), in s, shape
         ``(K,)``.
-    :ivar distances: Slant distance ``r`` per step, in metres, shape ``(K,)``.
+    :ivar distances_m: Slant distance ``r`` per step, in metres, shape ``(K,)``.
     :ivar azimuth: Emission azimuth ``φ`` per step, in degrees, shape ``(K,)``.
     :ivar polar: Emission polar angle ``θ`` per step, in degrees, shape ``(K,)``.
     :ivar band_levels: Received (unweighted) band levels, in dB, shape
@@ -1023,7 +1024,7 @@ class RotorcraftEventResult(OwnsArrays):
     frequencies: NDArray[np.float64]
     emission_times: NDArray[np.float64]
     times: NDArray[np.float64]
-    distances: NDArray[np.float64]
+    distances_m: NDArray[np.float64]
     azimuth: NDArray[np.float64]
     polar: NDArray[np.float64]
     band_levels: NDArray[np.float64]
@@ -1079,7 +1080,7 @@ class RotorcraftEventResult(OwnsArrays):
             frequencies=1,
             emission_times=1,
             times=1,
-            distances=1,
+            distances_m=1,
             azimuth=1,
             polar=1,
             band_levels=2,
@@ -1091,7 +1092,7 @@ class RotorcraftEventResult(OwnsArrays):
             self,
             "emission_times",
             "times",
-            "distances",
+            "distances_m",
             "azimuth",
             "polar",
             "band_levels",
@@ -1229,9 +1230,9 @@ def _validated_track(
 
 def _reference_distance(hemispheres: Sequence[RotorcraftHemisphere]) -> float:
     """The shared hemisphere reference distance (validated)."""
-    rref = float(hemispheres[0].distance)
+    rref = float(hemispheres[0].distance_m)
     for h in hemispheres[1:]:
-        if float(h.distance) != rref:
+        if float(h.distance_m) != rref:
             msg = "All hemispheres must share one reference distance."
             raise ValueError(msg)
     return require_positive(rref, "hemisphere distance")
@@ -1272,7 +1273,7 @@ class RotorcraftGround(OwnsArrays):
     elevation of the site and the ground type feed the two-ray ground effect,
     and an optional elevation model replaces the flat plane with real terrain.
 
-    :ivar receiver_height: Microphone height above local ground, in metres
+    :ivar receiver_height_m: Microphone height above local ground, in metres
         (default 1.2).
     :ivar ground_elevation: Ground elevation ``z`` at the receivers, in metres
         on the track datum (default 0); source and receiver heights above
@@ -1299,7 +1300,7 @@ class RotorcraftGround(OwnsArrays):
         at 20000 sampling intervals).
     """
 
-    receiver_height: float = 1.2
+    receiver_height_m: float = 1.2
     ground_elevation: float | NDArray[np.float64] | list[float] | list[list[float]] = (
         0.0
     )
@@ -1480,7 +1481,7 @@ def _event_setup(
     freqs = _common_frequencies(hemispheres, airspeeds)
     rref = _reference_distance(hemispheres)
     t, p = _validated_track(times, positions)
-    hr = require_positive(ground.receiver_height, "receiver_height")
+    hr = require_positive(ground.receiver_height_m, "receiver_height_m")
     dem = _validated_terrain(ground.terrain)
     if dem is not None:
         _require_dem_coverage(dem, p[:, 0], p[:, 1], "track")
@@ -1990,7 +1991,7 @@ def rotorcraft_event_level(
         frequencies=setup.frequencies,
         emission_times=setup.times,
         times=trec[:, 0],
-        distances=dist,
+        distances_m=dist,
         azimuth=phi,
         polar=theta,
         band_levels=spectra,

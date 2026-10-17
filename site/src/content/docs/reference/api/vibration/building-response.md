@@ -272,7 +272,7 @@ HEIGHT_FREQUENCY_CONSTANT_HZ_M = 46.0
 ## height_fundamental_frequency
 
 ```python
-height_fundamental_frequency(height: ArrayLike) -> np.ndarray | float
+height_fundamental_frequency(height_m: ArrayLike) -> np.ndarray | float
 ```
 
 The `f = 46/h` fit D.2 closes with, in hertz.
@@ -285,7 +285,7 @@ frequencies correlate with measurement *worse* than this line does.
 
 | Name | Description |
 | :--- | :--- |
-| `height` | Height `h` above the base, in metres (scalar or array). |
+| `height_m` | Height `h` above the base, in metres (scalar or array). |
 
 **Returns:** The predicted fundamental frequency, in hertz.
 

@@ -64,7 +64,7 @@ pressure doubling; $S_0 = 1$ m².
 
 ```python
 slant_distance(
-    hub_height: float,
+    hub_height_m: float,
     rotor_diameter_m: float,
     *,
     rotor_axis: str = 'horizontal',
@@ -84,7 +84,7 @@ $R_0 = H + D/2$
 
 | Name | Description |
 | :--- | :--- |
-| `hub_height` | Hub height `H` (ground to rotor centre; for a vertical-axis turbine, to the rotor equator), in m. |
+| `hub_height_m` | Hub height `H` (ground to rotor centre; for a vertical-axis turbine, to the rotor equator), in m. |
 | `rotor_diameter_m` | Rotor diameter `D`, in m. |
 | `rotor_axis` | `"horizontal"` (Formula 1, the default) or `"vertical"` (Formula 2). |
 

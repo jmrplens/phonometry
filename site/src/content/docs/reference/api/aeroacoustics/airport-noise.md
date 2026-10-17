@@ -124,7 +124,7 @@ event_level(
     path: NDArray[np.float64] | list[list[float]],
     observer: NDArray[np.float64] | list[float],
     powers: NDArray[np.float64] | list[float],
-    distances: NDArray[np.float64] | list[float],
+    distances_m: NDArray[np.float64] | list[float],
     exposure_levels: NDArray[np.float64] | list[list[float]],
     maximum_levels: NDArray[np.float64] | list[list[float]],
     *,
@@ -151,7 +151,7 @@ ground-roll segments, and combines them into the exposure level `SEL`
 | `path` | Flight-path points, shape `(N, 5)`: columns `x, y, z` (m), engine power setting and speed (m/s). `N-1` segments are formed. |
 | `observer` | Receiver position `(x, y, z)`, in metres. |
 | `powers` | NPD tabulated power settings. |
-| `distances` | NPD tabulated slant distances, in metres. |
+| `distances_m` | NPD tabulated slant distances, in metres. |
 | `exposure_levels` | NPD exposure (SEL) levels, shape `(P, D)`. |
 | `maximum_levels` | NPD maximum levels, shape `(P, D)`. |
 | `reference_speed` | NPD reference speed, in m/s (default 160 kt). |
@@ -291,7 +291,7 @@ Excess lateral attenuation `Λ(β, ℓ)` over soft ground (Eq. 4-18/4-19).
 noise_contour(
     path: NDArray[np.float64] | list[list[float]],
     powers: NDArray[np.float64] | list[float],
-    distances: NDArray[np.float64] | list[float],
+    distances_m: NDArray[np.float64] | list[float],
     exposure_levels: NDArray[np.float64] | list[list[float]],
     maximum_levels: NDArray[np.float64] | list[list[float]],
     *,
@@ -315,7 +315,7 @@ Evaluates [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/
 | :--- | :--- |
 | `path` | Flight-path points, shape `(N, 5)` (see [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/#event_level)). |
 | `powers` | NPD tabulated power settings. |
-| `distances` | NPD tabulated slant distances, in metres. |
+| `distances_m` | NPD tabulated slant distances, in metres. |
 | `exposure_levels` | NPD exposure (SEL) levels, shape `(P, D)`. |
 | `maximum_levels` | NPD maximum levels, shape `(P, D)`. |
 | `x` | Grid x coordinates, in metres. |
@@ -340,7 +340,7 @@ Evaluates [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/
 noise_fraction(
     q: float,
     segment_length: float,
-    scaled_distance: float,
+    scaled_distance_m: float,
 ) -> float
 ```
 
@@ -352,7 +352,7 @@ Finite-segment correction (noise fraction) `ΔF` (Eq. 4-20, exposure only).
 | :--- | :--- |
 | `q` | Signed distance from the segment start `S1` to the perpendicular foot `Sp`, in metres (negative behind the segment). |
 | `segment_length` | Segment length `λ`, in metres (`> 0`). |
-| `scaled_distance` | The scaled distance `dλ` (Appendix E), in metres (`> 0`). |
+| `scaled_distance_m` | The scaled distance `dλ` (Appendix E), in metres (`> 0`). |
 
 **Returns:** The finite-segment correction `ΔF`, in dB (`<= 0`, floored at −150 dB).
 
@@ -360,7 +360,7 @@ Finite-segment correction (noise fraction) `ΔF` (Eq. 4-20, exposure only).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `segment_length` or `scaled_distance` is not positive. |
+| ValueError | If `segment_length` or `scaled_distance_m` is not positive. |
 
 ## NoiseContourResult
 
@@ -402,10 +402,11 @@ Plot filled noise contours over the ground plane.
 ```python
 npd_curve(
     powers: NDArray[np.float64] | list[float],
-    distances: NDArray[np.float64] | list[float],
+    distances_m: NDArray[np.float64] | list[float],
     levels: NDArray[np.float64] | list[list[float]],
     power: float,
-    query_distances: NDArray[np.float64] | list[float] | None = None,
+    *,
+    query_distances_m: NDArray[np.float64] | list[float] | None = None,
 ) -> NpdLevelResult
 ```
 
@@ -416,10 +417,10 @@ NPD event level over a distance sweep at one power setting.
 | Name | Description |
 | :--- | :--- |
 | `powers` | Tabulated engine power settings. |
-| `distances` | Tabulated slant distances, in metres. |
+| `distances_m` | Tabulated slant distances, in metres. |
 | `levels` | Tabulated event levels, shape `(len(powers), len(distances))`. |
 | `power` | Query engine power setting. |
-| `query_distances` | Distances to evaluate, in metres; defaults to a log sweep across the tabulated envelope. |
+| `query_distances_m` | Distances to evaluate, in metres; defaults to a log sweep across the tabulated envelope. |
 
 **Returns:** An [`NpdLevelResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#npdlevelresult).
 
@@ -434,10 +435,10 @@ NPD event level over a distance sweep at one power setting.
 ```python
 npd_level(
     powers: NDArray[np.float64] | list[float],
-    distances: NDArray[np.float64] | list[float],
+    distances_m: NDArray[np.float64] | list[float],
     levels: NDArray[np.float64] | list[list[float]],
     power: float,
-    distance: NDArray[np.float64] | list[float] | float,
+    distance_m: NDArray[np.float64] | list[float] | float,
 ) -> NDArray[np.float64]
 ```
 
@@ -452,10 +453,10 @@ tabulated envelope are extrapolated from the terminal segments.
 | Name | Description |
 | :--- | :--- |
 | `powers` | Tabulated engine power settings (1-D, strictly increasing). |
-| `distances` | Tabulated slant distances, in metres (1-D, strictly increasing, positive). |
+| `distances_m` | Tabulated slant distances, in metres (1-D, strictly increasing, positive). |
 | `levels` | Tabulated event levels, shape `(len(powers), len(distances))`, in dB. |
 | `power` | Query engine power setting `P`. |
-| `distance` | Query slant distance(s) `d`, in metres. |
+| `distance_m` | Query slant distance(s) `d`, in metres. |
 
 **Returns:** The interpolated event level per query distance, in dB.
 
@@ -469,10 +470,10 @@ tabulated envelope are extrapolated from the terminal segments.
 
 ```python
 NpdLevelResult(
-    distances: NDArray[np.float64],
+    distances_m: NDArray[np.float64],
     levels: NDArray[np.float64],
     power: float,
-    table_distances: NDArray[np.float64],
+    table_distances_m: NDArray[np.float64],
     table_levels: NDArray[np.float64],
 )
 ```
@@ -483,10 +484,10 @@ NPD event level over a distance sweep at one power (ECAC Doc 29).
 
 | Name | Description |
 | :--- | :--- |
-| `distances` | Slant distances, in metres. |
+| `distances_m` | Slant distances, in metres. |
 | `levels` | Interpolated event level per distance, in dB. |
 | `power` | The engine power setting queried. |
-| `table_distances` | The tabulated slant distances, in metres. |
+| `table_distances_m` | The tabulated slant distances, in metres. |
 | `table_levels` | The tabulated levels at the queried power, in dB. |
 
 ### NpdLevelResult.plot()

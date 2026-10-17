@@ -297,13 +297,13 @@ def test_image_source_plan_refuses_a_negative_order_cap() -> None:
 # ---------------------------------------------------------------------------
 def test_barrier_result_retains_geometry_and_draws() -> None:
     res = pm.environment.barrier_insertion_loss(FREQ, 1.5, 5.0, 3.0, 20.0, 1.5)
-    assert res.barrier_height == pytest.approx(3.0)
-    assert res.thickness is None
+    assert res.barrier_height_m == pytest.approx(3.0)
+    assert res.thickness_m is None
     assert res.plot_geometry() is not None
     thick = pm.environment.barrier_insertion_loss(
-        FREQ, 1.5, 5.0, 3.0, 20.0, 1.5, thickness=0.4
+        FREQ, 1.5, 5.0, 3.0, 20.0, 1.5, thickness_m=0.4
     )
-    assert thick.thickness == pytest.approx(0.4)
+    assert thick.thickness_m == pytest.approx(0.4)
     assert thick.plot_geometry() is not None
 
 
@@ -313,11 +313,11 @@ def test_barrier_free_function_validation() -> None:
         match=r"'receiver_distance' must be greater than 'barrier_distance'",
     ):
         pm.environment.plot_barrier_geometry(
-            source_height=1.5,
+            source_height_m=1.5,
             barrier_distance=5.0,
-            barrier_height=3.0,
+            barrier_height_m=3.0,
             receiver_distance=4.0,
-            receiver_height=1.5,
+            receiver_height_m=1.5,
         )
 
 
@@ -325,25 +325,25 @@ def test_barrier_geometry_refuses_a_nan_source_height() -> None:
     """NaN fails every comparison, so a bare guard would draw a complete,
     plausible section annotated 'Path difference nan m'.
     """
-    with pytest.raises(ValueError, match="'source_height' must be non-negative"):
+    with pytest.raises(ValueError, match="'source_height_m' must be non-negative"):
         pm.environment.plot_barrier_geometry(
-            source_height=float("nan"),
+            source_height_m=float("nan"),
             barrier_distance=10.0,
-            barrier_height=3.0,
+            barrier_height_m=3.0,
             receiver_distance=50.0,
-            receiver_height=1.5,
+            receiver_height_m=1.5,
         )
 
 
 def test_barrier_geometry_refuses_a_nan_thickness() -> None:
-    with pytest.raises(ValueError, match="'thickness' must be positive"):
+    with pytest.raises(ValueError, match="'thickness_m' must be positive"):
         pm.environment.plot_barrier_geometry(
-            source_height=1.5,
+            source_height_m=1.5,
             barrier_distance=10.0,
-            barrier_height=3.0,
+            barrier_height_m=3.0,
             receiver_distance=50.0,
-            receiver_height=1.5,
-            thickness=float("nan"),
+            receiver_height_m=1.5,
+            thickness_m=float("nan"),
         )
 
 
@@ -559,11 +559,11 @@ def test_device_geometry_language_validation() -> None:
         pm.noise_control.plot_plenum_geometry(0.09, 1.2, 6.0, language="fr")
     with pytest.raises(ValueError, match="Unknown language"):
         pm.environment.plot_barrier_geometry(
-            source_height=1.5,
+            source_height_m=1.5,
             barrier_distance=5.0,
-            barrier_height=3.0,
+            barrier_height_m=3.0,
             receiver_distance=20.0,
-            receiver_height=1.5,
+            receiver_height_m=1.5,
             language="pt",
         )
 

@@ -116,10 +116,10 @@ received = (lv
 ```
 
 The standard database is recorded at 60 m, the default. If a hemisphere uses a
-different polar distance (`h.distance`, e.g. 70 m hover rings), pass it to both
+different polar distance (`h.distance_m`, e.g. 70 m hover rings), pass it to both
 distance-dependent adjustments:
-`spherical_spreading_adjustment(r, reference_distance=h.distance)` and
-`atmospheric_adjustment(freqs, r, reference_distance=h.distance)`. The three
+`spherical_spreading_adjustment(r, reference_distance_m=h.distance_m)` and
+`atmospheric_adjustment(freqs, r, reference_distance_m=h.distance_m)`. The three
 adjustments assume straight rays: refraction by atmospheric gradients is
 outside Doc 32 itself and is not modelled.
 
@@ -210,7 +210,7 @@ freqs = 1000.0 * 10.0 ** (np.arange(-20, 11) / 10.0)    # 10 Hz-10 kHz thirds
 bearings = np.arange(-180.0, 151.0, 30.0)               # the ring closes at ±180°
 ring_levels = (86.0 - 10.0 * np.log10(freqs / 160.0) ** 2
                + 3.5 * np.cos(np.radians(bearings))[:, None])
-hige = aircraft.hover_ring_hemisphere(freqs, bearings, ring_levels, distance=70.0)
+hige = aircraft.hover_ring_hemisphere(freqs, bearings, ring_levels, distance_m=70.0)
 hoge = aircraft.hover_derived_hemisphere(hige, "out_of_ground_hover")   # +12 dB
 full_rpm_idle = aircraft.hover_derived_hemisphere(hige, "full_rpm_idle")  # -2.5 dB
 ```
@@ -234,7 +234,7 @@ spectrum = 86.0 - 10.0 * np.log10(freqs / 160.0) ** 2
 directivity = (3.5 * np.cos(np.radians(bearings))
                + 3.0 * np.exp(-((bearings - 120.0) ** 2) / (2.0 * 40.0**2)))
 ring = spectrum[None, :] + directivity[:, None]
-hige = aircraft.hover_ring_hemisphere(freqs, bearings, ring, distance=70.0)
+hige = aircraft.hover_ring_hemisphere(freqs, bearings, ring, distance_m=70.0)
 
 k = int(np.argmin(np.abs(freqs - 315.0)))
 theta = np.linspace(0.0, 180.0, 361)
@@ -273,7 +273,7 @@ taxi = full_rpm_idle if wheeled else hige     # guidance p. 19 (see caveat)
 
 A hover or idle **event** is the standard single event with a stationary
 track: one hemisphere, a fixed position, the receiver of interest. The
-derived hemisphere carries the ring's `distance`, which the whole chain
+derived hemisphere carries the ring's `distance_m`, which the whole chain
 honours as the reference distance; hover and flyover hemispheres recorded at
 different distances run as separate events, which is also how the reference
 implementation switches source by operating mode.
@@ -416,8 +416,8 @@ evaluated separately in that regime.
 from phonometry import aircraft
 
 bands = [63.0, 250.0, 1000.0, 4000.0]
-aircraft.diffraction_attenuation(bands, 0.0, edge_height=2.5)   # grazing incidence
-aircraft.diffraction_attenuation(bands, 1.0, edge_height=2.5)   # 1 m into the shadow
+aircraft.diffraction_attenuation(bands, 0.0, edge_height_m=2.5)   # grazing incidence
+aircraft.diffraction_attenuation(bands, 1.0, edge_height_m=2.5)   # 1 m into the shadow
 ```
 
 <picture>
@@ -435,7 +435,7 @@ from phonometry import aircraft
 
 bands = np.array([63.0, 250.0, 1000.0, 4000.0])
 delta = np.linspace(-0.4, 1.5, 441)
-ld = np.array([aircraft.diffraction_attenuation(bands, float(d), edge_height=2.5)
+ld = np.array([aircraft.diffraction_attenuation(bands, float(d), edge_height_m=2.5)
               for d in delta])
 
 fig, ax = plt.subplots(figsize=(9, 6))
@@ -471,7 +471,7 @@ d = [0.0, 150.0, 260.0, 300.0, 340.0, 420.0, 600.0]     # section distances
 z = [0.0, 4.0, 48.0, 62.0, 40.0, 8.0, 2.0]              # terrain heights
 freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)
 res = aircraft.terrain_screening_adjustment(
-    freqs, source=(0.0, 90.0), receiver=(600.0, 3.2), distances=d, heights=z,
+    freqs, source=(0.0, 90.0), receiver=(600.0, 3.2), distances_m=d, heights_m=z,
     flow_resistivity="D")
 res.screened, res.path_difference      # True, the rubber-band delta
 res.adjustment                         # per band, replaces the flat-ground ΔLg

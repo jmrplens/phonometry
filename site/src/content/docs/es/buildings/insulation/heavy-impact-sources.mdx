@@ -161,7 +161,7 @@ from phonometry import building
 # imports del bloque de figura de arriba.
 
 spec = building.heavy_impact_source_specification("rubber_ball")
-print(spec.drop_height, spec.effective_mass)      # 1.0 m, 2.5 kg
+print(spec.drop_height_m, spec.effective_mass)      # 1.0 m, 2.5 kg
 print(spec.contact_time, spec.contact_time_tolerance)   # 0.02 s +/- 0.002 s
 
 freqs, lower, upper = building.heavy_impact_source_limits("bang_machine")

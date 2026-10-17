@@ -234,20 +234,20 @@ def fundamental_frequency(
     )
 
 
-def height_fundamental_frequency(height: ArrayLike) -> np.ndarray | float:
+def height_fundamental_frequency(height_m: ArrayLike) -> np.ndarray | float:
     """The ``f = 46/h`` fit D.2 closes with, in hertz.
 
     Fitted to 163 rectangular-plan buildings rather than taken from a code,
     which is why it is here on its own: D.3 goes on to report that computed
     frequencies correlate with measurement *worse* than this line does.
 
-    :param height: Height ``h`` above the base, in metres (scalar or array).
+    :param height_m: Height ``h`` above the base, in metres (scalar or array).
     :return: The predicted fundamental frequency, in hertz.
     :raises ValueError: If a height is not positive and finite.
     """
-    h = np.asarray(height, dtype=np.float64)
+    h = np.asarray(height_m, dtype=np.float64)
     if np.any(h <= 0.0) or not np.all(np.isfinite(h)):
-        msg = "'height' must be positive and finite."
+        msg = "'height_m' must be positive and finite."
         raise ValueError(msg)
     return as_float_or_array(HEIGHT_FREQUENCY_CONSTANT_HZ_M / h)
 

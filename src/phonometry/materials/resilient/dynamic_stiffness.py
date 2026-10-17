@@ -726,8 +726,8 @@ class DynamicStiffnessResult(RichDisplay):
             produces a body-and-disclaimer fiche. The applicable descriptive
             fields are ``client``, ``manufacturer``, ``specimen``,
             ``mass_per_area`` (the total mass per unit area ``m't``),
-            ``thickness`` (the loaded specimen thickness ``d``, in metres, shown
-            in millimetres), ``test_room``,
+            ``thickness_m`` (the loaded specimen thickness ``d``, in metres,
+            shown in millimetres), ``test_room``,
             ``test_date``, ``temperature_c``, ``relative_humidity_percent``,
             ``measurement_standard``, ``laboratory``, ``operator``,
             ``report_id`` and ``notes``. The ``requirement`` field is ignored

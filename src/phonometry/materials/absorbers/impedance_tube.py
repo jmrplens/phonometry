@@ -186,7 +186,7 @@ def _canonical_shape(shape: str) -> str:
         raise ValueError(msg) from None
 
 
-def hydraulic_diameter(width: float, height: float) -> float:
+def hydraulic_diameter(width: float, height_m: float) -> float:
     r"""Hydraulic diameter of a rectangular tube, :math:`4A/P` (ISO 10534-2, A.2.1.5).
 
     For a rectangular cross-section of side lengths ``w`` and ``h`` the ratio
@@ -196,13 +196,13 @@ def hydraulic_diameter(width: float, height: float) -> float:
     rectangular tubes (see :func:`tube_attenuation_constant`).
 
     :param width: Inner side length ``w``, in metres.
-    :param height: Inner side length ``h``, in metres.
+    :param height_m: Inner side length ``h``, in metres.
     :return: Hydraulic diameter :math:`d_\mathrm{h} = 4A/P`, in metres.
     """
-    if width <= 0.0 or height <= 0.0:
-        msg = "'width' and 'height' must be positive."
+    if width <= 0.0 or height_m <= 0.0:
+        msg = "'width' and 'height_m' must be positive."
         raise ValueError(msg)
-    return float(2.0 * width * height / (width + height))
+    return float(2.0 * width * height_m / (width + height_m))
 
 
 def tube_attenuation_constant(
@@ -297,7 +297,7 @@ def _require_h12_per_band(
 def reflection_factor(
     h12: ArrayLike,
     *,
-    spacing: float,
+    spacing_m: float,
     x1: float,
     wavenumber: ArrayLike,
 ) -> Complex:
@@ -316,23 +316,23 @@ def reflection_factor(
         positions 1 and 2 (Clause 7.6, Eq. (14)); complex, scalar or per band.
         It must already be corrected for microphone mismatch (see
         :func:`apply_mic_calibration`).
-    :param spacing: Microphone spacing :math:`s = x_1 - x_2`, in metres.
+    :param spacing_m: Microphone spacing :math:`s = x_1 - x_2`, in metres.
     :param x1: Distance from the sample surface to the farther microphone
         (position 1), in metres.
     :param wavenumber: Complex wavenumber ``k0`` (from :func:`tube_wavenumber`),
         scalar or per band.
     :return: Complex reflection factor ``r`` at the reference plane.
     """
-    if spacing <= 0.0:
-        msg = "'spacing' must be positive."
+    if spacing_m <= 0.0:
+        msg = "'spacing_m' must be positive."
         raise ValueError(msg)
     if x1 <= 0.0:
         msg = "'x1' must be positive."
         raise ValueError(msg)
     k0 = np.asarray(wavenumber, dtype=np.complex128)
     h = _require_h12_per_band(h12, k0, "wavenumber")
-    h_i = np.exp(-1j * k0 * spacing)
-    h_r = np.exp(1j * k0 * spacing)
+    h_i = np.exp(-1j * k0 * spacing_m)
+    h_r = np.exp(1j * k0 * spacing_m)
     r = (h - h_i) / (h_r - h) * np.exp(2j * k0 * x1)
     return np.asarray(r, dtype=np.complex128)
 
@@ -430,7 +430,7 @@ def apply_mic_calibration(
 
 
 def plane_wave_frequency_range(
-    spacing: float,
+    spacing_m: float,
     speed_of_sound: float,
     *,
     diameter_m: float | None = None,
@@ -445,7 +445,7 @@ def plane_wave_frequency_range(
     The lower limit uses the Clause 4.2 guideline that the spacing exceed
     5 % of the wavelength, i.e. :math:`f_\mathrm{l} = c_0 / (20 s)`.
 
-    :param spacing: Microphone spacing ``s``, in metres.
+    :param spacing_m: Microphone spacing ``s``, in metres.
     :param speed_of_sound: Speed of sound ``c0``, in metres per second.
     :param diameter_m: Tube diameter (circular) or maximum lateral dimension
         (rectangular/square) ``d``, in metres; ``None`` applies only the
@@ -455,7 +455,7 @@ def plane_wave_frequency_range(
     :return: Tuple ``(f_l, f_u)`` of the lower and upper frequency limits, in Hz.
     """
     return _frequency_range(
-        spacing,
+        spacing_m,
         speed_of_sound,
         diameter_m=diameter_m,
         shape=shape,
@@ -479,7 +479,7 @@ def _frequency_range(
 ) -> tuple[float, float]:
     """Shared ISO/ASTM plane-wave frequency-range arithmetic."""
     if spacing <= 0.0:
-        msg = "'spacing' must be positive."
+        msg = "'spacing_m' must be positive."
         raise ValueError(msg)
     if speed_of_sound <= 0.0:
         raise ValueError(_SPEED_OF_SOUND_POSITIVE)
@@ -524,7 +524,7 @@ class ImpedanceTubeResult(OwnsArrays):
     :math:`\alpha = 1 - \lvert r\rvert^2` (Eq. (18)).
 
     The trailing fields retain the tube geometry the reduction was run with
-    (microphone ``spacing`` ``s``, distance ``x1`` from the sample to the
+    (microphone ``spacing_m`` ``s``, distance ``x1`` from the sample to the
     farther microphone, tube ``diameter_m`` and cross-section ``shape``, stored
     canonically as ``"circular"``/``"rectangular"`` - a ``"square"`` input is
     kept as ``"rectangular"``); they default to ``None`` when not supplied to
@@ -537,7 +537,7 @@ class ImpedanceTubeResult(OwnsArrays):
     normalized_impedance: Complex
     absorption: Real
     _: KW_ONLY
-    spacing: float | None = None
+    spacing_m: float | None = None
     x1: float | None = None
     diameter_m: float | None = None
     shape: str | None = None
@@ -628,7 +628,7 @@ class ImpedanceTubeResult(OwnsArrays):
         :class:`~matplotlib.axes.Axes`.
 
         :raises ValueError: If the result does not retain its tube geometry
-            (``spacing``/``x1``).
+            (``spacing_m``/``x1``).
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_impedance_tube_result_geometry
@@ -667,9 +667,9 @@ class ImpedanceTubeResult(OwnsArrays):
             produces a body-and-disclaimer fiche whose header shows only the
             measured frequency range. The applicable descriptive/geometric
             fields are ``client``, ``manufacturer``, ``specimen``,
-            ``tube_diameter_m``, ``tube_shape``, ``mic_spacing``, ``mounting``,
-            ``test_room``,
-            ``test_date``, ``temperature_c``, ``pressure``,
+            ``tube_diameter_m``, ``tube_shape``, ``microphone_spacing_m``,
+            ``mounting``, ``test_room``, ``test_date``, ``temperature_c``,
+            ``static_pressure_kpa``,
             ``measurement_standard``, ``laboratory``, ``operator``,
             ``report_id`` and ``notes``. The ``requirement`` field is ignored
             (ISO 10534-2 has no verdict).
@@ -699,7 +699,7 @@ def two_microphone_impedance(
     h12: ArrayLike,
     *,
     frequency: ArrayLike,
-    spacing: float,
+    spacing_m: float,
     x1: float,
     speed_of_sound: float,
     characteristic_impedance: float,
@@ -717,7 +717,7 @@ def two_microphone_impedance(
 
     :param h12: Measured (mismatch-corrected) transfer function ``H12``.
     :param frequency: Frequency ``f``, in hertz (scalar or array).
-    :param spacing: Microphone spacing ``s``, in metres.
+    :param spacing_m: Microphone spacing ``s``, in metres.
     :param x1: Distance from the sample to the farther microphone, in metres.
     :param speed_of_sound: Speed of sound ``c0``, in m/s (see
         :func:`speed_of_sound_iso10534`).
@@ -738,11 +738,11 @@ def two_microphone_impedance(
     f = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
     h = _require_h12_per_band(h12, f, "frequency")
     k0 = tube_wavenumber(f, speed_of_sound, attenuation=attenuation)
-    r = reflection_factor(h, spacing=spacing, x1=x1, wavenumber=k0)
+    r = reflection_factor(h, spacing_m=spacing_m, x1=x1, wavenumber=k0)
     canonical = _canonical_shape(shape)
     if diameter_m is not None:
         f_lower, f_upper = plane_wave_frequency_range(
-            spacing, speed_of_sound, diameter_m=diameter_m, shape=canonical
+            spacing_m, speed_of_sound, diameter_m=diameter_m, shape=canonical
         )
         _warn_frequency_range(f, f_lower, f_upper, stacklevel=2)
     return ImpedanceTubeResult(
@@ -751,7 +751,7 @@ def two_microphone_impedance(
         surface_impedance=surface_impedance(r, characteristic_impedance),
         normalized_impedance=normalized_surface_impedance(r),
         absorption=absorption_from_reflection(r),
-        spacing=spacing,
+        spacing_m=spacing_m,
         x1=x1,
         diameter_m=diameter_m,
         shape=canonical if diameter_m is not None else None,

@@ -456,7 +456,7 @@ def test_unknown_junction_rejected() -> None:
 def test_negative_parameters_rejected() -> None:
     with pytest.raises(ValueError, match="'chi' must be positive"):
         vibration.corner_transmission_coefficient(0.0, -1.0, 1.0, "X")
-    with pytest.raises(ValueError, match="'thickness1' must be positive"):
+    with pytest.raises(ValueError, match="'thickness1_m' must be positive"):
         vibration.junction_wave_parameters(-0.1, 3200.0, 240.0, 0.1, 3200.0, 240.0)
 
 
@@ -606,8 +606,8 @@ def test_norton_problem_613_bolted_point_connections() -> None:
     eta = vibration.point_connection_coupling_loss_factor(
         _P613_BANDS,
         _NBOLTS,
-        thickness1=_H1,
-        thickness2=_H2,
+        thickness1_m=_H1,
+        thickness2_m=_H2,
         surface_density1=_AL_RHO * _H1,
         surface_density2=_AL_RHO * _H2,
         wave_speed1=_AL_CL,
@@ -625,8 +625,8 @@ def test_norton_point_junction_falls_as_inverse_frequency() -> None:
 
 def test_norton_point_junction_scales_with_the_bolt_count() -> None:
     kwargs = {
-        "thickness1": _H1,
-        "thickness2": _H2,
+        "thickness1_m": _H1,
+        "thickness2_m": _H2,
         "surface_density1": _AL_RHO * _H1,
         "surface_density2": _AL_RHO * _H2,
         "wave_speed1": _AL_CL,
@@ -652,8 +652,8 @@ def test_norton_reciprocity_needs_the_plate_areas() -> None:
 @pytest.mark.parametrize(
     ("kwargs", "match"),
     [
-        ({"thickness1": 0.0}, "'thickness1' must be positive"),
-        ({"thickness2": -1.0}, "'thickness2' must be positive"),
+        ({"thickness1_m": 0.0}, "'thickness1_m' must be positive"),
+        ({"thickness2_m": -1.0}, "'thickness2_m' must be positive"),
         ({"density1": 0.0}, "'density1' must be positive"),
         ({"density2": 0.0}, "'density2' must be positive"),
         ({"wave_speed1": 0.0}, "'wave_speed1' must be positive"),
@@ -663,25 +663,25 @@ def test_norton_reciprocity_needs_the_plate_areas() -> None:
 )
 def test_right_angle_validation(kwargs: dict[str, object], match: str) -> None:
     base: dict[str, object] = {
-        "thickness1": _H1,
-        "thickness2": _H2,
+        "thickness1_m": _H1,
+        "thickness2_m": _H2,
         "density1": _AL_RHO,
         "density2": _AL_RHO,
         "wave_speed1": _AL_CL,
         "wave_speed2": _AL_CL,
     }
     base.update(kwargs)
-    thickness1 = base.pop("thickness1")
-    thickness2 = base.pop("thickness2")
+    h1 = base.pop("thickness1_m")
+    h2 = base.pop("thickness2_m")
     with pytest.raises(ValueError, match=match):
-        vibration.right_angle_transmission_coefficient(thickness1, thickness2, **base)  # type: ignore[arg-type]
+        vibration.right_angle_transmission_coefficient(h1, h2, **base)  # type: ignore[arg-type]
 
 
 @pytest.mark.parametrize(
     ("kwargs", "match"),
     [
         ({"n_connections": 0}, "'n_connections' must be a positive integer"),
-        ({"thickness1": 0.0}, "'thickness1' must be positive"),
+        ({"thickness1_m": 0.0}, "'thickness1_m' must be positive"),
         ({"surface_density1": 0.0}, "'surface_density1' must be positive"),
         ({"wave_speed2": -1.0}, "'wave_speed2' must be positive"),
         ({"plate_area1": 0.0}, "'plate_area1' must be positive"),
@@ -690,8 +690,8 @@ def test_right_angle_validation(kwargs: dict[str, object], match: str) -> None:
 def test_point_connection_validation(kwargs: dict[str, object], match: str) -> None:
     base: dict[str, object] = {
         "n_connections": 12,
-        "thickness1": _H1,
-        "thickness2": _H2,
+        "thickness1_m": _H1,
+        "thickness2_m": _H2,
         "surface_density1": _AL_RHO * _H1,
         "surface_density2": _AL_RHO * _H2,
         "wave_speed1": _AL_CL,
@@ -709,8 +709,8 @@ def test_point_connection_rejects_non_positive_frequency() -> None:
         vibration.point_connection_coupling_loss_factor(
             [500.0, 0.0],
             12,
-            thickness1=_H1,
-            thickness2=_H2,
+            thickness1_m=_H1,
+            thickness2_m=_H2,
             surface_density1=_AL_RHO * _H1,
             surface_density2=_AL_RHO * _H2,
             wave_speed1=_AL_CL,

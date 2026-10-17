@@ -96,7 +96,7 @@ def _metadata_pairs(
     manufacturer = md.manufacturer
     specimen = md.specimen
     tube_diameter_m = md.tube_diameter_m
-    mic_spacing = md.mic_spacing
+    microphone_spacing_m = md.microphone_spacing_m
     tube_shape = md.tube_shape
     mounting = md.mounting
     test_room = md.test_room
@@ -127,7 +127,9 @@ def _metadata_pairs(
         ),
         (
             t("Microphone spacing s [mm]", language),
-            fmt_meta(mic_spacing * 1e3, language) if mic_spacing is not None else None,
+            fmt_meta(microphone_spacing_m * 1e3, language)
+            if microphone_spacing_m is not None
+            else None,
         ),
         (t("Frequency range [Hz]", language), freq_range),
         (t("Mounting", language), mounting),

@@ -312,7 +312,7 @@ hover_ring_hemisphere(
     bearings: NDArray[np.float64] | list[float],
     levels: NDArray[np.float64] | list[list[float]],
     *,
-    distance: float = 70.0,
+    distance_m: float = 70.0,
     azimuth_step: float = 10.0,
     polar_step: float = 10.0,
     mapping: str = 'constant_phi',
@@ -346,7 +346,7 @@ provided and documented here:
   two readings part).
 
 Ring lookups interpolate periodically in the energy domain. The returned
-hemisphere carries `distance` (hover rings are commonly reduced to
+hemisphere carries `distance_m` (hover rings are commonly reduced to
 70 m rather than the 60 m of the flyover database), which the event chain
 and the propagation adjustments honour as the reference distance.
 
@@ -357,7 +357,7 @@ and the propagation adjustments honour as the reference distance.
 | `frequencies` | Band centre frequencies, in Hz, shape `(F,)`. |
 | `bearings` | Ring bearings, in degrees within `[-180, 180]`, strictly increasing, shape `(B,)` (`0` at the nose, positive starboard). The ring closes periodically; a duplicated `±180°` endpoint pair is accepted. |
 | `levels` | Ring band levels, in dB at the ring's polar distance, shape `(B, F)`. |
-| `distance` | Polar distance of the ring, in metres (default 70). |
+| `distance_m` | Polar distance of the ring, in metres (default 70). |
 | `azimuth_step` | Azimuth grid step, in degrees; must divide the 180° span (default 10, the NORAH grid). |
 | `polar_step` | Polar grid step, in degrees; must divide the 180° span (default 10). |
 | `mapping` | `"constant_phi"` (guidance text) or `"bearing"` (NORAH2 reference implementation), see above. |
@@ -570,7 +570,7 @@ RotorcraftEventResult(
     frequencies: NDArray[np.float64],
     emission_times: NDArray[np.float64],
     times: NDArray[np.float64],
-    distances: NDArray[np.float64],
+    distances_m: NDArray[np.float64],
     azimuth: NDArray[np.float64],
     polar: NDArray[np.float64],
     band_levels: NDArray[np.float64],
@@ -593,7 +593,7 @@ A rotorcraft single-event time history at a receiver (Doc 32 §6.1).
 | `frequencies` | Band centre frequencies, in Hz, shape `(F,)`. |
 | `emission_times` | Emission times `t_e`, in s, shape `(K,)`. |
 | `times` | Recorded times $t_\mathrm{r} = t_\mathrm{e} + r/c$ (Eq. 22), in s, shape `(K,)`. |
-| `distances` | Slant distance `r` per step, in metres, shape `(K,)`. |
+| `distances_m` | Slant distance `r` per step, in metres, shape `(K,)`. |
 | `azimuth` | Emission azimuth `φ` per step, in degrees, shape `(K,)`. |
 | `polar` | Emission polar angle `θ` per step, in degrees, shape `(K,)`. |
 | `band_levels` | Received (unweighted) band levels, in dB, shape `(K, F)`. |
@@ -622,7 +622,7 @@ Plot the A-weighted level time history with its event metrics.
 
 ```python
 RotorcraftGround(
-    receiver_height: float = 1.2,
+    receiver_height_m: float = 1.2,
     ground_elevation: float | NDArray[np.float64] | list[float] | list[list[float]] = 0.0,
     flow_resistivity: float | str | np.floating[Any] | np.integer[Any] | NDArray[np.float64] | list[float] | list[list[float]] = 'G',
     terrain: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | Sequence[NDArray[np.float64]] | None = None,
@@ -640,7 +640,7 @@ and an optional elevation model replaces the flat plane with real terrain.
 
 | Name | Description |
 | :--- | :--- |
-| `receiver_height` | Microphone height above local ground, in metres (default 1.2). |
+| `receiver_height_m` | Microphone height above local ground, in metres (default 1.2). |
 | `ground_elevation` | Ground elevation `z` at the receivers, in metres on the track datum (default 0); source and receiver heights above ground follow from it. A contour grid also accepts one value per grid point (shape `(len(y), len(x))`) for receivers on uneven sites without a full elevation model. |
 | `flow_resistivity` | Ground flow resistivity `σ` in Pa·s/m², or a CNOSSOS class letter (see [`ground_effect_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#ground_effect_adjustment)). A contour grid also accepts one value per grid point (shape `(len(y), len(x))`) for heterogeneous ground across the receivers (each receiver's two-ray model uses its local value). |
 | `terrain` | Optional digital elevation model `(x, y, z)` on the track frame (`x` and `y` strictly increasing, `z` of shape `(len(y), len(x))`, all in metres on the track datum). When given, every emission-receiver pair is evaluated over its sampled vertical section (guidance §A.4.4/A.4.5): mean-ground-plane ground effect with equivalent heights, and rubber-band diffraction where terrain blocks the line of sight; `ground_elevation` is then taken from the model. The model must cover the whole track and every receiver (fabricating terrain beyond its edges is refused). |
@@ -654,7 +654,8 @@ RotorcraftHemisphere(
     azimuth: NDArray[np.float64],
     polar: NDArray[np.float64],
     levels: NDArray[np.float64],
-    distance: float = 60.0,
+    *,
+    distance_m: float = 60.0,
 )
 ```
 
@@ -673,7 +674,7 @@ lookup.
 | `azimuth` | Azimuth angles `φ`, in degrees, shape `(A,)` (`-90` port … `+90` starboard). |
 | `polar` | Polar angles `θ`, in degrees, shape `(P,)` (`0` forward … `180` rearward). |
 | `levels` | Band levels, in dB, shape `(A, P, F)`. |
-| `distance` | Reference distance, in metres (default 60). The standard NORAH database uses 60 m; when the data uses another polar distance (e.g. 70 m hover rings), pass this value as `reference_distance` to [`spherical_spreading_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#spherical_spreading_adjustment) and [`atmospheric_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#atmospheric_adjustment) so the propagation chain honours it. |
+| `distance_m` | Reference distance, in metres (default 60). The standard NORAH database uses 60 m; when the data uses another polar distance (e.g. 70 m hover rings), pass this value as `reference_distance_m` to [`spherical_spreading_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#spherical_spreading_adjustment) and [`atmospheric_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#atmospheric_adjustment) so the propagation chain honours it. |
 
 ### RotorcraftHemisphere.mirrored()
 

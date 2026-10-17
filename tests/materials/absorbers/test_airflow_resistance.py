@@ -100,7 +100,7 @@ def test_specific_resistance_requires_exactly_one_route() -> None:
             "'pressure_drop_pa' must be non-negative",
         ),
         (lambda: airflow_resistance(20.0, 0.0), "'volume_flow_rate' must be positive"),
-        (lambda: airflow_resistivity(160.0, 0.0), "'thickness' must be positive"),
+        (lambda: airflow_resistivity(160.0, 0.0), "'thickness_m' must be positive"),
         (lambda: linear_airflow_velocity(0.001, 0.0), "'area' must be positive"),
         (
             lambda: specific_airflow_resistance(-1.0, 0.008),
@@ -130,7 +130,7 @@ def test_static_regression_recovers_zero_velocity_intercept() -> None:
 
     with warnings.catch_warnings():
         warnings.simplefilter("error")  # no range warning below 15 mm/s
-        result = static_airflow_resistance(u, dp, area, thickness)
+        result = static_airflow_resistance(u, dp, area, thickness_m=thickness)
 
     assert isinstance(result, StaticAirflowResult)
     # Zero-velocity specific resistance = linear coefficient a.
@@ -171,7 +171,7 @@ def test_a_non_finite_determination_quantity_is_refused(field_name: str) -> None
     import dataclasses
 
     u = np.array([0.5e-3, 1.0e-3, 2.0e-3, 4.0e-3])
-    result = static_airflow_resistance(u, 12000.0 * u, 0.008, 0.05)
+    result = static_airflow_resistance(u, 12000.0 * u, 0.008, thickness_m=0.05)
     with pytest.raises(
         ValueError, match=f"StaticAirflowResult: '{field_name}' must be finite"
     ):
@@ -202,7 +202,7 @@ def test_an_absent_required_determination_quantity_is_refused(field_name: str) -
     import dataclasses
 
     u = np.array([0.5e-3, 1.0e-3, 2.0e-3, 4.0e-3])
-    result = static_airflow_resistance(u, 12000.0 * u, 0.008, 0.05)
+    result = static_airflow_resistance(u, 12000.0 * u, 0.008, thickness_m=0.05)
     with pytest.raises(
         ValueError, match=f"StaticAirflowResult: '{field_name}' must not be None"
     ):
@@ -219,7 +219,7 @@ def test_an_absent_resistivity_is_accepted() -> None:
     import dataclasses
 
     u = np.array([0.5e-3, 1.0e-3, 2.0e-3, 4.0e-3])
-    result = static_airflow_resistance(u, 12000.0 * u, 0.008, 0.05)
+    result = static_airflow_resistance(u, 12000.0 * u, 0.008, thickness_m=0.05)
     assert dataclasses.replace(result, resistivity=None).resistivity is None
 
 

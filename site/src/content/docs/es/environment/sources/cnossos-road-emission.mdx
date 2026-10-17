@@ -517,7 +517,7 @@ segment = environment.line_source_segment_power(result.total_line_power, 20.0)  
 # Un tramo, el que queda justo enfrente de un receptor a 100 m de la carretera.
 levels = environment.predicted_receiver_level(
     segment,
-    environment.PropagationGeometry(100.0, result.source_height, 4.0),
+    environment.PropagationGeometry(100.0, result.source_height_m, 4.0),
     frequencies=result.frequencies,
 )
 
@@ -526,7 +526,7 @@ energy = np.zeros_like(levels)
 for x in np.arange(-990.0, 1000.0, 20.0):        # centros de tramo a lo largo de la vía
     energy += 10 ** (environment.predicted_receiver_level(
         segment,
-        environment.PropagationGeometry(float(np.hypot(100.0, x)), result.source_height, 4.0),
+        environment.PropagationGeometry(float(np.hypot(100.0, x)), result.source_height_m, 4.0),
         frequencies=result.frequencies,
     ) / 10)
 road = 10 * np.log10(energy)

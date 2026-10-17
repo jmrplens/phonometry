@@ -1202,11 +1202,11 @@ def test_layer_rejects_a_medium_on_another_grid() -> None:
 def test_surface_impedance_and_transfer_matrix_reject_bad_thickness() -> None:
     frequency = np.geomspace(100.0, 1000.0, 4)
     waves = _glass_wool_waves(frequency)
-    with pytest.raises(ValueError, match=r"'thickness' must be positive"):
+    with pytest.raises(ValueError, match=r"'thickness_m' must be positive"):
         materials.biot_surface_impedance(waves, 0.0)
-    with pytest.raises(ValueError, match=r"'thickness' must be positive"):
+    with pytest.raises(ValueError, match=r"'thickness_m' must be positive"):
         materials.poroelastic_transfer_matrix(waves, -0.01)
-    with pytest.raises(ValueError, match=r"'thickness' must be positive"):
+    with pytest.raises(ValueError, match=r"'thickness_m' must be positive"):
         materials.frame_quarter_wave_resonance(
             0.0, shear_modulus=1.0, poisson_ratio=0.0, frame_density=30.0
         )

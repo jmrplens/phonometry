@@ -127,16 +127,16 @@ def test_an_uncalibrated_signal_computes_the_bare_array_result(
 def test_the_two_microphone_probe_takes_the_rate_from_either_side() -> None:
     """An intensity probe is a pair, and the two records are one measurement."""
     p1, p2 = _record(seed=1), _record(seed=2)
-    reference = sound_intensity(p1, p2, FS, spacing=0.012)
-    assert_same(sound_intensity(Signal(p1, FS), p2, spacing=0.012), reference)
-    assert_same(sound_intensity(p1, Signal(p2, FS), spacing=0.012), reference)
+    reference = sound_intensity(p1, p2, FS, spacing_m=0.012)
+    assert_same(sound_intensity(Signal(p1, FS), p2, spacing_m=0.012), reference)
+    assert_same(sound_intensity(p1, Signal(p2, FS), spacing_m=0.012), reference)
     first, second = Signal(p1, FS), Signal(p2, FS // 2)
     with pytest.raises(
         ValueError, match="'p1' and 'p2' are Signals recorded at different rates"
     ):
-        sound_intensity(first, second, spacing=0.012)
+        sound_intensity(first, second, spacing_m=0.012)
     with pytest.raises(ValueError, match=r"fs is required when 'p1' is a bare array"):
-        sound_intensity(p1, p2, spacing=0.012)
+        sound_intensity(p1, p2, spacing_m=0.012)
 
 
 def test_the_probe_intensity_goes_as_the_product_of_the_two_pressures() -> None:
@@ -146,9 +146,9 @@ def test_the_probe_intensity_goes_as_the_product_of_the_two_pressures() -> None:
         sound_intensity(
             Signal(p1, FS, calibration_factor=CAL),
             Signal(p2, FS, calibration_factor=CAL),
-            spacing=0.012,
+            spacing_m=0.012,
         ),
-        sound_intensity(CAL * p1, CAL * p2, FS, spacing=0.012),
+        sound_intensity(CAL * p1, CAL * p2, FS, spacing_m=0.012),
     )
 
 

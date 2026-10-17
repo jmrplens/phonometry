@@ -56,8 +56,8 @@ def _t(text: str, language: str = "en") -> str:
 # ---------------------------------------------------------------------------
 def plot_junction_geometry(
     junction: str,
-    thickness1: float,
-    thickness2: float,
+    thickness1_m: float,
+    thickness2_m: float,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -71,8 +71,8 @@ def plot_junction_geometry(
     :func:`~phonometry.vibration.structural.junction_transmission`.
 
     :param junction: ``"L"``, ``"T1"``, ``"T2"`` or ``"X"``.
-    :param thickness1: Plate 1 thickness, in metres.
-    :param thickness2: Plate 2 thickness, in metres.
+    :param thickness1_m: Plate 1 thickness, in metres.
+    :param thickness2_m: Plate 2 thickness, in metres.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the plate-1 rectangle.
@@ -88,8 +88,8 @@ def plot_junction_geometry(
     # against every bound, so a NaN thickness used to pass and draw plates
     # collapsed to nothing under a dimension label reading "nan mm". Each
     # thickness is named separately because the caller passed two.
-    h1 = require_positive(thickness1, "thickness1")
-    h2 = require_positive(thickness2, "thickness2")
+    h1 = require_positive(thickness1_m, "thickness1_m")
+    h2 = require_positive(thickness2_m, "thickness2_m")
     if ax is None:
         ax = _new_axes()
     arm = 5.0 * max(h1, h2)
@@ -128,16 +128,16 @@ def plot_junction_result_geometry(
     **kwargs: Any,
 ) -> Axes:
     """Junction drawing for a result that retained its thicknesses."""
-    if result.thickness1 is None or result.thickness2 is None:
+    if result.thickness1_m is None or result.thickness2_m is None:
         msg = (
             "This result does not retain the plate thicknesses; call "
-            "plot_junction_geometry(junction, thickness1, thickness2)."
+            "plot_junction_geometry(junction, thickness1_m, thickness2_m)."
         )
         raise ValueError(msg)
     return plot_junction_geometry(
         result.junction,
-        result.thickness1,
-        result.thickness2,
+        result.thickness1_m,
+        result.thickness2_m,
         ax=ax,
         language=language,
         **kwargs,

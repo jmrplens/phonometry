@@ -381,7 +381,7 @@ en integrales de Fresnel de la solución de MacDonald / Hadden y Pierce
 auxiliares. Da 6 dB en el límite de sombra (el campo se reduce a la mitad, el
 límite de cuña plana) y sigue a Kurze-Anderson en la zona de sombra.
 
-**Barreras gruesas.** Un `thickness` (ancho superior $e$) desplaza aguas abajo el
+**Barreras gruesas.** Un `thickness_m` (ancho superior $e$) desplaza aguas abajo el
 segundo borde de difracción y alarga el camino difractado a $A + e + B$, el
 número de Fresnel de doble borde $N = (2/\lambda)(A + B + e - d)$ de Bies
 Ec. 5.157. La mejora es monótona, pero es pequeña, y la razón es geométrica: $B$
@@ -415,7 +415,7 @@ for freq in (250.0, 500.0, 1000.0):
         [freq], 1.0, 50.0, 4.0, 100.0, 1.5, method="exact").insertion_loss[0])
     ganancia = [0.0 if e == 0.0 else float(environment.barrier_insertion_loss(
         [freq], 1.0, 50.0, 4.0, 100.0, 1.5, method="exact",
-        thickness=e).insertion_loss[0]) - delgada for e in anchos]
+        thickness_m=e).insertion_loss[0]) - delgada for e in anchos]
     ax.plot(anchos, ganancia, label=f"{freq:g} Hz")
 ax.set_xlabel("Ancho superior e [m]")
 ax.set_ylabel("Ganancia sobre la pantalla delgada [dB]")
@@ -537,8 +537,8 @@ dos llamadas posicionales de esta página no son paralelas.
 | Parámetro de `ground_effect` | Tipo / forma | Unidades | Rango / def. | Notas |
 | :--- | :--- | :--- | :--- | :--- |
 | `frequencies` | escalar o array 1D | Hz | > 0 | Banda estrecha: sin suavizado por bandas |
-| `source_height` | float | m | ≥ 0 | $h_\mathrm{s}$ |
-| `receiver_height` | float | m | ≥ 0 | $h_\mathrm{r}$ (**antes** de la distancia) |
+| `source_height_m` | float | m | ≥ 0 | $h_\mathrm{s}$ |
+| `receiver_height_m` | float | m | ≥ 0 | $h_\mathrm{r}$ (**antes** de la distancia) |
 | `distance` | float | m | > 0 | Distancia horizontal fuente-receptor |
 | `impedance` | array, `PorousMediumResult` o None | — | `None` | $Z$ normalizada en el convenio $\mathrm{e}^{-i\omega t}$ |
 | `flow_resistivity` | float o None | Pa·s/m² | `None` | $\sigma$ efectiva; alimenta el modelo poroso |
@@ -548,13 +548,13 @@ dos llamadas posicionales de esta página no son paralelas.
 | Parámetro de `barrier_insertion_loss` | Tipo / forma | Unidades | Rango / def. | Notas |
 | :--- | :--- | :--- | :--- | :--- |
 | `frequencies` | escalar o array 1D | Hz | > 0 | |
-| `source_height` | float | m | ≥ 0 | $h_\mathrm{s}$ |
+| `source_height_m` | float | m | ≥ 0 | $h_\mathrm{s}$ |
 | `barrier_distance` | float | m | > 0 | De la fuente al borde (cercano), sobre el suelo |
-| `barrier_height` | float | m | > 0 | Altura del borde sobre el suelo |
-| `receiver_distance` | float | m | > `barrier_distance` (+ `thickness`) | Medida **desde la fuente** |
-| `receiver_height` | float | m | ≥ 0 | $h_\mathrm{r}$ (**después** de la distancia) |
+| `barrier_height_m` | float | m | > 0 | Altura del borde sobre el suelo |
+| `receiver_distance` | float | m | > `barrier_distance` (+ `thickness_m`) | Medida **desde la fuente** |
+| `receiver_height_m` | float | m | ≥ 0 | $h_\mathrm{r}$ (**después** de la distancia) |
 | `method` | `"kurze_anderson"` \| `"exact"` | — | `"exact"` | `"exact"` es el semiplano rígido |
-| `thickness` | float o None | m | `None` | Ancho superior $e$; doble borde |
+| `thickness_m` | float o None | m | `None` | Ancho superior $e$; doble borde |
 | `ground_impedance` | array, `PorousMediumResult` o None | — | `None` | Selecciona el modelo coherente de cuatro caminos |
 | `ground_flow_resistivity` | float o None | Pa·s/m² | `None` | Lo mismo, a partir de una $\sigma$ efectiva |
 | `ground_model` | `"delany_bazley"` \| `"miki"` | — | `"delany_bazley"` | Ojo al nombre: no es `model=` |

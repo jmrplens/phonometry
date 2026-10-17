@@ -136,7 +136,7 @@ acimut/polar.
 | `azimuth` $\varphi$ | `(A,)` | grados alrededor del eje del morro: $0$ recto hacia abajo, $+90$ a estribor, $-90$ a babor; 19 valores cada 10° |
 | `polar` $\theta$ | `(P,)` | grados desde el morro: $0$ hacia delante, $90$ al través de la aeronave, $180$ hacia atrás; 19 valores cada 10° |
 | `levels` | `(A, P, F)` | niveles de presión acústica de banda en dB a la distancia de referencia; `NaN` en los bins que la medida no cubrió |
-| `distance` | escalar | distancia de referencia en metros, 60 por defecto |
+| `distance_m` | escalar | distancia de referencia en metros, 60 por defecto |
 
 Los dos ángulos son las coordenadas esféricas de la Ec. 3 de la Doc 32,
 $x = r\cos\theta$, $y = r\sin\theta\sin\varphi$, $z = r\sin\theta\cos\varphi$
@@ -286,9 +286,9 @@ recibido = (lv
 ```
 
 La base de datos estándar está registrada a 60 m, el valor por defecto. Si un
-hemisferio usa otra distancia polar (`h.distance`, p. ej. anillos en vuelo
+hemisferio usa otra distancia polar (`h.distance_m`, p. ej. anillos en vuelo
 estacionario a 70 m), pásala a los dos ajustes dependientes de la distancia
-como `reference_distance=h.distance`.
+como `reference_distance_m=h.distance_m`.
 
 La curva de suelo se lee en tres regiones. A baja frecuencia el rayo directo y su
 reflexión en el suelo llegan casi en fase, así que el nivel se acerca a 6 dB por
@@ -312,7 +312,7 @@ defecto no es el que quiere un emplazamiento con hierba:
 
 | Campo | Por defecto | A qué ponerlo |
 |---|---|---|
-| `receiver_height` | 1,2 m | la altura de micrófono del Anexo 16; la figura de arriba usa 1,5 m para que el mínimo se vea |
+| `receiver_height_m` | 1,2 m | la altura de micrófono del Anexo 16; la figura de arriba usa 1,5 m para que el mínimo se vea |
 | `ground_elevation` | 0,0 m | por receptor en emplazamientos desiguales, o un valor por punto de malla |
 | `flow_resistivity` | `"G"` | **suelo duro.** Un emplazamiento de hierba o pasto tiene que pasar `"C"` o `"D"` |
 
@@ -465,7 +465,7 @@ freqs = 1000.0 * 10.0 ** (np.arange(-20, 11) / 10.0)    # tercios de 10 Hz a 10 
 bearings = np.arange(-180.0, 151.0, 30.0)               # el anillo se cierra en ±180°
 niveles_anillo = (86.0 - 10.0 * np.log10(freqs / 160.0) ** 2
                   + 3.5 * np.cos(np.radians(bearings))[:, None])
-hige = aircraft.hover_ring_hemisphere(freqs, bearings, niveles_anillo, distance=70.0)
+hige = aircraft.hover_ring_hemisphere(freqs, bearings, niveles_anillo, distance_m=70.0)
 hoge = aircraft.hover_derived_hemisphere(hige, "out_of_ground_hover")   # +12 dB
 ralenti_pleno = aircraft.hover_derived_hemisphere(hige, "full_rpm_idle")  # -2,5 dB
 ```
@@ -492,7 +492,7 @@ spectrum = 86.0 - 10.0 * np.log10(freqs / 160.0) ** 2
 directivity = (3.5 * np.cos(np.radians(bearings))
                + 3.0 * np.exp(-((bearings - 120.0) ** 2) / (2.0 * 40.0**2)))
 ring = spectrum[None, :] + directivity[:, None]
-hige = aircraft.hover_ring_hemisphere(freqs, bearings, ring, distance=70.0)
+hige = aircraft.hover_ring_hemisphere(freqs, bearings, ring, distance_m=70.0)
 
 k = int(np.argmin(np.abs(freqs - 315.0)))
 theta = np.linspace(0.0, 180.0, 361)
@@ -544,7 +544,7 @@ taxi = ralenti_pleno if con_ruedas else hige  # guía p. 19 (véase la salvedad)
 
 Un **evento** de estacionario o ralentí es el evento único estándar con una
 trayectoria inmóvil: un hemisferio, una posición fija, el receptor de
-interés. El hemisferio derivado lleva la `distance` del anillo, que toda la
+interés. El hemisferio derivado lleva la `distance_m` del anillo, que toda la
 cadena respeta como distancia de referencia; los hemisferios de estacionario
 y de sobrevuelo registrados a distancias distintas se ejecutan como eventos
 separados, que es también como la implementación de referencia cambia de
@@ -859,8 +859,8 @@ elevaciones completo solo si esa sección resulta estar apantallada.
 from phonometry import aircraft
 
 bandas = [63.0, 250.0, 1000.0, 4000.0]
-aircraft.diffraction_attenuation(bandas, 0.0, edge_height=2.5)   # incidencia rasante
-aircraft.diffraction_attenuation(bandas, 1.0, edge_height=2.5)   # 1 m dentro de la sombra
+aircraft.diffraction_attenuation(bandas, 0.0, edge_height_m=2.5)   # incidencia rasante
+aircraft.diffraction_attenuation(bandas, 1.0, edge_height_m=2.5)   # 1 m dentro de la sombra
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_insertion_loss.svg" alt="Atenuación por difracción frente a la diferencia de camino para cuatro bandas de 63 Hz a 4 kHz, sobre una arista de 2,5 m: cada curva vale cero a la izquierda de su propio umbral dependiente de la banda cerca de la línea de visión, las tres bandas con C_h = 1 cruzan unos 4,8 dB en incidencia rasante mientras que la de 63 Hz cruza en 3,0 dB, y solo la curva de 4 kHz alcanza el tope de 25 dB dentro del rango representado" width="82%" />
@@ -884,7 +884,7 @@ from phonometry import aircraft
 
 bandas = np.array([63.0, 250.0, 1000.0, 4000.0])
 delta = np.linspace(-0.4, 1.5, 441)
-ld = np.array([aircraft.diffraction_attenuation(bandas, float(d), edge_height=2.5)
+ld = np.array([aircraft.diffraction_attenuation(bandas, float(d), edge_height_m=2.5)
               for d in delta])
 
 fig, ax = plt.subplots(figsize=(9, 6))
@@ -912,7 +912,7 @@ d = [0.0, 150.0, 260.0, 300.0, 340.0, 420.0, 600.0]     # distancias de sección
 z = [0.0, 4.0, 48.0, 62.0, 40.0, 8.0, 2.0]              # alturas del terreno
 freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)
 res = aircraft.terrain_screening_adjustment(
-    freqs, source=(0.0, 90.0), receiver=(600.0, 3.2), distances=d, heights=z,
+    freqs, source=(0.0, 90.0), receiver=(600.0, 3.2), distances_m=d, heights_m=z,
     flow_resistivity="D")
 res.screened, res.path_difference      # True, la delta de la goma elástica
 res.adjustment                         # por banda, sustituye al ΔLg plano

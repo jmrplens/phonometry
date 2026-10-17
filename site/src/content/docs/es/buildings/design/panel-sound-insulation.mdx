@@ -363,7 +363,7 @@ physical = building.single_panel_transmission_loss(bands, 2.47 * 6.0,
                                                    loss_factor=0.02)
 
 print(round(quick.plateau_start), round(quick.plateau_end))   # 374 3742
-print(quick.plateau_height)                                   # 27.0
+print(quick.plateau_height_db)                                   # 27.0
 quick.plot(language="es")   # sombrea la meseta entre los puntos A y B
 plt.show()
 ```
@@ -405,7 +405,7 @@ de una hoja de características
 ([Tus propios catálogos](/phonometry/es/io/material-catalogues/)). Una fila
 entrega sus tres números solo a través de `printed()`, así que una hoja que declara la altura de la meseta
 como una cota («no más de 30 dB») se rechaza con lo que imprime en lugar de
-dibujarse a 30 dB, y un `plateau_height` que pases sustituye al de la fila
+dibujarse a 30 dB, y un `plateau_height_db` que pases sustituye al de la fila
 sin llegar a leerlo.
 
 ```python

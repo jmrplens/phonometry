@@ -405,8 +405,8 @@ import numpy as np
 
 IN, FT = 0.0254, 0.3048
 sil = noise_control.splitter_silencer_insertion_loss(
-    None, height=24 * IN, length=5 * FT,      # None -> las bandas de octava por omisión
-    airway_widths=[0.10] * 5, splitter_thickness=0.10,
+    None, height_m=24 * IN, length=5 * FT,      # None -> las bandas de octava por omisión
+    airway_widths=[0.10] * 5, splitter_thickness_m=0.10,
 )
 print(np.round(sil.values, 1))
 # [ 5.8  8.6 14.1 28.2 34.5 33.5 18.4 12.1]
@@ -501,9 +501,9 @@ import numpy as np
 
 IN = 0.0254
 lento = noise_control.silencer_self_noise(None, airway_velocity=10.0, passages=5,
-                                          height=24 * IN)
+                                          height_m=24 * IN)
 rapido = noise_control.silencer_self_noise(None, airway_velocity=20.0, passages=5,
-                                           height=24 * IN)
+                                           height_m=24 * IN)
 print(np.round(lento.values, 1))
 # [40.8 40.8 38.8 36.8 31.8 26.8 21.8 16.8]
 print(round(float(rapido.values[0] - lento.values[0]), 1))     # 16.6 dB
@@ -606,13 +606,13 @@ bandas = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
 
 # Una línea para un elemento:
 noise_control.silencer_self_noise(bandas, airway_velocity=20.0, passages=5,
-                                  height=24 * IN).plot(language="es")
+                                  height_m=24 * IN).plot(language="es")
 plt.show()
 
 fig, ax = plt.subplots()
 for velocidad in (5.0, 10.0, 20.0, 40.0):
     res = noise_control.silencer_self_noise(bandas, airway_velocity=velocidad, passages=5,
-                                            height=24 * IN)
+                                            height_m=24 * IN)
     ax.semilogx(res.frequencies, res.values, "o-", label=f"{velocidad:.0f} m/s")
 ax.set_xlabel("Frecuencia [Hz]")
 ax.set_ylabel("$L_W$ regenerada [dB re 1 pW]")
@@ -1040,7 +1040,7 @@ print(np.round(modos.cut_on_no_flow[:3], 1))    # [263.8 428.8 503.4] Hz
 print(round(modos.plane_wave_limit, 1))         # 263.6 Hz
 
 IN = 0.0254
-print(round(noise_control.plane_wave_limit(width=36 * IN, height=24 * IN), 1))   # 187.6 Hz
+print(round(noise_control.plane_wave_limit(width=36 * IN, height_m=24 * IN), 1))   # 187.6 Hz
 print(round(noise_control.plane_wave_limit(diameter_m=12 * IN), 1))                # 659.5 Hz
 ```
 
@@ -1155,7 +1155,7 @@ bandas = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
 with warnings.catch_warnings(record=True) as avisos:
     warnings.simplefilter("always")
     noise_control.duct_path(bandas, [90.0] * 8, [noise_control.DuctElement("Tramo recto", 3.0)],
-                            section={"width": 36 * IN, "height": 24 * IN},
+                            section={"width": 36 * IN, "height_m": 24 * IN},
                             flow_velocity=6.0, label="Impulsión")
 print(avisos[0].category is noise_control.PlaneWaveWarning)
 print(str(avisos[0].message))

@@ -50,7 +50,7 @@ _PA_C0 = 343.0
 )
 def _chk_porous_db_real() -> Outcome:
     f = np.array([0.1 * _PA_SIGMA / _PA_RHO0])
-    res = ph.materials.delany_bazley(f, _PA_SIGMA, fluid=ph.materials.PUBLISHED_AIR)
+    res = ph.materials.delany_bazley(f, _PA_SIGMA, fluid=ph.materials.ABSORBER_AIR)
     return numeric(
         ref.POROUS_DB_ZC_EXPECTED.real,
         float(res.normalized_impedance[0].real),
@@ -65,7 +65,7 @@ def _chk_porous_db_real() -> Outcome:
 )
 def _chk_porous_db_imag() -> Outcome:
     f = np.array([0.1 * _PA_SIGMA / _PA_RHO0])
-    res = ph.materials.delany_bazley(f, _PA_SIGMA, fluid=ph.materials.PUBLISHED_AIR)
+    res = ph.materials.delany_bazley(f, _PA_SIGMA, fluid=ph.materials.ABSORBER_AIR)
     return numeric(
         ref.POROUS_DB_ZC_EXPECTED.imag,
         float(res.normalized_impedance[0].imag),
@@ -80,7 +80,7 @@ def _chk_porous_db_imag() -> Outcome:
 )
 def _chk_porous_miki() -> Outcome:
     f = np.array([0.1 * _PA_SIGMA])
-    res = ph.materials.miki(f, _PA_SIGMA, fluid=ph.materials.PUBLISHED_AIR)
+    res = ph.materials.miki(f, _PA_SIGMA, fluid=ph.materials.ABSORBER_AIR)
     return numeric(
         ref.POROUS_MIKI_K_EXPECTED.real,
         float(res.normalized_wavenumber[0].real),
@@ -102,7 +102,7 @@ def _chk_porous_jca_dc() -> Outcome:
         tortuosity=1.3,
         viscous_length_m=6e-5,
         thermal_length_m=1.2e-4,
-        fluid=ph.materials.PUBLISHED_AIR,
+        fluid=ph.materials.ABSORBER_AIR,
     )
     value = float((1j * 2.0 * math.pi * f * res.effective_density)[0].real)
     return numeric(_PA_SIGMA, value, 1e-4, rel=True, unit="Pa s/m2", places=1)
@@ -115,11 +115,11 @@ def _chk_porous_jca_dc() -> Outcome:
 )
 def _chk_porous_rigid_backed() -> Outcome:
     f = np.linspace(200.0, 4000.0, 200)
-    med = ph.materials.delany_bazley(f, _PA_SIGMA, fluid=ph.materials.PUBLISHED_AIR)
+    med = ph.materials.delany_bazley(f, _PA_SIGMA, fluid=ph.materials.ABSORBER_AIR)
     res = ph.materials.layered_absorber(
         f,
         [ph.materials.PorousLayer(0.05, med)],
-        fluid=ph.materials.PUBLISHED_AIR,
+        fluid=ph.materials.ABSORBER_AIR,
     )
     zs_ref = -1j * med.characteristic_impedance / np.tan(med.wavenumber * 0.05)
     dev = float(np.max(np.abs(res.surface_impedance - zs_ref) / np.abs(zs_ref)))
@@ -137,7 +137,7 @@ def _chk_porous_air_cavity() -> Outcome:
     res = ph.materials.layered_absorber(
         f,
         [ph.materials.AirLayer(d)],
-        fluid=ph.materials.PUBLISHED_AIR,
+        fluid=ph.materials.ABSORBER_AIR,
     )
     return numeric(0.0, float(res.absorption[0]), 1e-12, places=4)
 
@@ -162,7 +162,7 @@ def _chk_porous_membrane_resonance() -> Outcome:
     value = ph.materials.membrane_resonance_frequency(
         surface_density=5.0,
         cavity_depth=0.05,
-        fluid=ph.materials.PUBLISHED_AIR,
+        fluid=ph.materials.ABSORBER_AIR,
     )
     return numeric(
         60.0 / math.sqrt(5.0 * 0.05), value, 0.02, rel=True, unit="Hz", places=2
@@ -185,7 +185,7 @@ def _chk_porous_mpp_peak() -> Outcome:
             ),
             ph.materials.AirLayer(ref.MAA_FIG5_CAVITY),
         ],
-        fluid=ph.materials.PUBLISHED_AIR,
+        fluid=ph.materials.ABSORBER_AIR,
     )
     return numeric(0.95, float(np.max(res.absorption)), 0.05, places=3)
 
@@ -212,7 +212,7 @@ def _chk_porous_maa_peak_closed_form() -> Outcome:
             ph.materials.MicroperforatedPlateLayer(t, d / 2.0, eps),
             ph.materials.AirLayer(ref.MAA_FIG5_CAVITY),
         ],
-        fluid=ph.materials.PUBLISHED_AIR,
+        fluid=ph.materials.ABSORBER_AIR,
     )
     i = int(np.argmax(res.absorption))
     omega = 2.0 * math.pi * float(f[i])
@@ -240,8 +240,12 @@ def _chk_porous_maa_peak_closed_form() -> Outcome:
 #
 # Both specimens are read from the published objects, which carry the page they
 # came off; nothing here retypes a printed number.
-_SOFT_FIBROUS = ph.materials.PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
-_GLASS_WOOL = ph.materials.PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
+_SOFT_FIBROUS = ph.materials.PUBLISHED_POROUS_MATERIALS[
+    "allard-2009-table-11-2/soft_fibrous"
+]
+_GLASS_WOOL = ph.materials.PUBLISHED_POROUS_MATERIALS[
+    "allard-2009-table-6-1/domisol_coffrage"
+]
 _GLASS_WOOL_SHEAR, _GLASS_WOOL_POISSON = _GLASS_WOOL.frame_constants()
 # Every quantity of a catalogue row is optional, because the pages print
 # different columns, so the four these rows take part with are narrowed
@@ -469,7 +473,7 @@ def _chk_slow_sound_perfect_absorption() -> Outcome:
         cavity_length_m=30.0e-3,
         cavity_side_m=27.0e-3,
     )
-    air = ph.materials.PUBLISHED_AIR
+    air = ph.materials.ABSORBER_AIR
     design = ph.materials.critical_coupling_design(
         300.0,
         res,
@@ -498,7 +502,7 @@ def _chk_slow_sound_perfect_absorption() -> Outcome:
     "Slit: j w rho_s -> 12 eta / h^2 as w -> 0 (h = 1.2 mm)",
 )
 def _chk_slow_sound_slit_resistivity() -> Outcome:
-    air = ph.materials.PUBLISHED_AIR
+    air = ph.materials.ABSORBER_AIR
     eta = air.viscosity
     h = 1.2e-3
     f = np.array([1.0e-2])
@@ -517,7 +521,7 @@ def _chk_slow_sound_slit_resistivity() -> Outcome:
     "Square duct: j w rho -> 28.454 eta / w^2 as w -> 0 (w = 3 mm)",
 )
 def _chk_slow_sound_duct_resistivity() -> Outcome:
-    air = ph.materials.PUBLISHED_AIR
+    air = ph.materials.ABSORBER_AIR
     eta = air.viscosity
     side = 3.0e-3
     f = np.array([1.0e-2])

@@ -843,6 +843,39 @@ def decay_rate_spelled_once(
     return out
 
 
+#: The three catalogues whose name did not match their lookup, before and
+#: after: ``<x>_named`` searches ``PUBLISHED_<X>``.
+CATALOGUES_RENAMED = (
+    ("PUBLISHED_GROUND", "PUBLISHED_GROUND_SURFACES"),
+    ("PUBLISHED_POROUS", "PUBLISHED_POROUS_MATERIALS"),
+    ("PUBLISHED_FLOW_RESISTANCE", "PUBLISHED_RESISTIVE_SHEETS"),
+)
+
+
+def catalogues_named_as_their_lookups(
+    catalogues: Mapping[str, Mapping[str, Row]],
+) -> dict[str, dict[str, Row]]:
+    """The dump taken through the renames that match a catalogue to its lookup.
+
+    ``ground_surfaces_named`` searched ``PUBLISHED_GROUND``,
+    ``porous_materials_named`` searched ``PUBLISHED_POROUS`` and
+    ``resistive_sheets_named`` searched ``PUBLISHED_FLOW_RESISTANCE``. Only
+    the names of those three mappings moved: every row keeps its key, its
+    place and every field, as :data:`CATALOGUES_RENAMED` lists.
+
+    :raises ValueError: when a name to rename is missing or its new name is
+        already taken, so that the step can never claim a rename it did not
+        make.
+    """
+    out = {name: dict(rows) for name, rows in catalogues.items()}
+    for old, new in CATALOGUES_RENAMED:
+        if old not in out or new in out:
+            msg = f"cannot rename {old} to {new}"
+            raise ValueError(msg)
+        out[new] = out.pop(old)
+    return dict(sorted(out.items()))
+
+
 #: Every change since the baseline, oldest first.
 CHANGES: tuple[Change, ...] = (
     one_row_shape,
@@ -855,6 +888,7 @@ CHANGES: tuple[Change, ...] = (
     nonlinearity_credits_by_scope,
     wet_sands_fit_in_words,
     decay_rate_spelled_once,
+    catalogues_named_as_their_lookups,
 )
 
 

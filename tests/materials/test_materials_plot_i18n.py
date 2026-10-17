@@ -32,7 +32,7 @@ from phonometry.materials.absorbers.layered import (
     layered_absorber,
 )
 from phonometry.materials.absorbers.porous import (
-    PUBLISHED_AIR,
+    ABSORBER_AIR,
     delany_bazley,
 )
 from phonometry.materials.absorbers.rating import weighted_absorption
@@ -136,14 +136,14 @@ def _porous_medium() -> materials.PorousMediumResult:
     f = np.geomspace(100.0, 5000.0, 24)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        return delany_bazley(f, 20000.0, fluid=PUBLISHED_AIR)
+        return delany_bazley(f, 20000.0, fluid=ABSORBER_AIR)
 
 
 def _layered() -> materials.LayeredAbsorberResult:
     f = np.geomspace(100.0, 5000.0, 24)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        med = delany_bazley(f, 20000.0, fluid=PUBLISHED_AIR)
+        med = delany_bazley(f, 20000.0, fluid=ABSORBER_AIR)
         return layered_absorber(f, [PorousLayer(0.05, med)])
 
 
@@ -151,7 +151,7 @@ def _diffuse() -> materials.DiffuseFieldAbsorptionResult:
     f = np.geomspace(100.0, 5000.0, 24)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        med = delany_bazley(f, 20000.0, fluid=PUBLISHED_AIR)
+        med = delany_bazley(f, 20000.0, fluid=ABSORBER_AIR)
         return diffuse_field_absorption(f, [PorousLayer(0.05, med)])
 
 

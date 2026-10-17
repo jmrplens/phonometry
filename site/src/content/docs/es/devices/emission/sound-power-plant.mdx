@@ -238,7 +238,7 @@ promedio: 1 dB para una diferencia de 6, 7 u 8 dB, 0,5 dB para 9 o 10 dB,
 nada por encima de 10 dB y «Measurement invalid» por debajo de 6 dB. Una
 diferencia entre dos filas se redondea al decibelio entero más próximo, con
 las mitades hacia arriba; los dos extremos se toman tal como se imprimen, así que 5,9 dB es una medición no válida y 10,2 dB
-no se corrige. `plant_background_correction_db()` lee la tabla por sí sola, y
+no se corrige. `plant_background_correction()` lee la tabla por sí sola, y
 `plant_sound_power()` rechaza una determinación con un nivel a menos de 6 dB
 de su ruido de fondo, porque la tabla no tiene corrección que darle. Si la
 planta no puede pararse, los niveles quedan sin corregir, el informe lo dice,
@@ -559,7 +559,7 @@ procede de la dispersión de los niveles alrededor del contorno que causa un
 reparto irregular de las fuentes; un contorno más alejado ve la planta de
 forma más uniforme. No incluye un cambio de la emisión en el tiempo, y si no se
 pudo corregir el ruido de fondo la NOTA 1 dice que puede ser mayor.
-`plant_method_uncertainty_db()` lee la tabla, y cada resultado la lleva como
+`plant_method_uncertainty()` lee la tabla, y cada resultado la lleva como
 `uncertainty_db`.
 
 ## Qué cubre esta guía

@@ -81,7 +81,7 @@ def _chk_table_a1_anechoic() -> Outcome:
     freqs = (630.0, 800.0, 5000.0, 6300.0)
     return record(
         _cells(freqs, np.array([1.5, 1.0, 1.0, 1.5])),
-        _cells(freqs, emission.inverse_square_law_tolerance_db(freqs, room="anechoic")),
+        _cells(freqs, emission.inverse_square_law_tolerance(freqs, room="anechoic")),
         unit="dB",
     )
 
@@ -97,7 +97,7 @@ def _chk_table_a1_hemi() -> Outcome:
     return record(
         _cells(freqs, np.array([2.5, 2.0, 2.0, 3.0])),
         _cells(
-            freqs, emission.inverse_square_law_tolerance_db(freqs, room="hemi-anechoic")
+            freqs, emission.inverse_square_law_tolerance(freqs, room="hemi-anechoic")
         ),
         unit="dB",
     )
@@ -111,8 +111,8 @@ def _chk_table_a1_hemi() -> Outcome:
 )
 def _chk_table_b1() -> Outcome:
     freqs = (630.0, 800.0, 6300.0, 12500.0)
-    anechoic = emission.directionality_tolerance_db(freqs, room="anechoic")
-    hemi = emission.directionality_tolerance_db(freqs, room="hemi-anechoic")
+    anechoic = emission.directionality_tolerance(freqs, room="anechoic")
+    hemi = emission.directionality_tolerance(freqs, room="hemi-anechoic")
     computed = {f"anechoic {k}": v for k, v in _cells(freqs, anechoic).items()}
     computed |= {f"hemi-anechoic {k}": v for k, v in _cells(freqs, hemi).items()}
     expected = {
@@ -133,7 +133,7 @@ def _chk_table_b1() -> Outcome:
     "125 Hz and above 4\u202f000 Hz, octave mid-bands between",
 )
 def _chk_a23_frequencies() -> Outcome:
-    got = emission.qualification_frequencies_hz()
+    got = emission.qualification_frequencies()
     matching = sum(
         1 for a, b in zip(_GRID, got, strict=False) if math.isclose(a, float(b))
     )
@@ -330,13 +330,13 @@ def _chk_6926_table_2() -> Outcome:
     matching = 0
     for frequency, (paths, fixed, reverberation) in printed.items():
         got = (
-            emission.reference_source_reproducibility_db(
+            emission.reference_source_reproducibility(
                 [frequency], environment="hemi-anechoic", arrangement="paths"
             )[0],
-            emission.reference_source_reproducibility_db(
+            emission.reference_source_reproducibility(
                 [frequency], environment="hemi-anechoic", arrangement="fixed"
             )[0],
-            emission.reference_source_reproducibility_db(
+            emission.reference_source_reproducibility(
                 [frequency], environment="reverberation-room"
             )[0],
         )

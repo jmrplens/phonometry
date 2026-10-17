@@ -1165,7 +1165,7 @@ average: 1 dB for a difference of 6, 7 or 8 dB, 0.5 dB for 9 or 10 dB,
 nothing above 10 dB, and "Measurement invalid" below 6 dB. A difference
 between two rows is rounded to the nearest whole decibel, a half going up; the
 two ends are taken as printed, so 5.9 dB is invalid and 10.2 dB is not
-corrected. `plant_background_correction_db()` reads the table
+corrected. `plant_background_correction()` reads the table
 on its own, and `plant_sound_power()` refuses a determination with a level
 less than 6 dB above its background, since the table has no correction to
 give it. Where the plant cannot be stopped, the levels go uncorrected, the
@@ -1478,7 +1478,7 @@ symmetric, and it narrows as the contour moves out, because it comes from the
 spread of the levels round the contour that an uneven distribution of sources
 causes; a contour further out sees the plant more evenly. It does not include
 a change of the emission over time, and where the background could not be
-corrected NOTE 1 says it may be larger. `plant_method_uncertainty_db()`
+corrected NOTE 1 says it may be larger. `plant_method_uncertainty()`
 reads the table, and every result carries it as `uncertainty_db`.
 
 ## What this guide covers

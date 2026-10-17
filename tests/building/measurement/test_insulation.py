@@ -259,6 +259,13 @@ def test_energy_average_level_formula9() -> None:
     assert building.energy_average_level([60.0, 70.0]) == pytest.approx(expected)
 
 
+def test_energy_average_level_takes_its_axis_by_name() -> None:
+    """A bare integer after the levels would read as one more level to a reader."""
+    levels = np.array([[60.0, 70.0], [60.0, 70.0]])
+    with pytest.raises(TypeError, match="positional argument"):
+        building.energy_average_level(levels, 0)  # type: ignore[misc]
+
+
 def test_dnt_equals_d_when_t_is_half_second() -> None:
     """Formula (2): T = T0 = 0,5 s => DnT = D exactly."""
     l1 = np.array([80.0, 82.0, 85.0])

@@ -524,7 +524,7 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # A Fluid instance reports its class's module, so the published air of
     # the Johnson-Champoux-Allard model is credited to fluids unless said
     # otherwise. It belongs to the model that publishes those constants.
-    "PUBLISHED_AIR": "phonometry.materials.absorbers.porous",
+    "ABSORBER_AIR": "phonometry.materials.absorbers.porous",
     "ANNEX_A_AIR": "phonometry.materials.absorbers.airflow_resistance",
     "EN_12354_AIR": "phonometry.building.prediction.detailed_model",
     "SIMULATION_AIR": "phonometry.simulation.ntff",
@@ -556,9 +556,9 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "PUBLISHED_DUCT_TRANSMISSION_LOSS": "phonometry.noise_control.duct_walls",
     "DUCT_WALL_BANDS_HZ": "phonometry.noise_control.duct_walls",
     "PUBLISHED_SOLIDS": "phonometry.solids.catalogue",
-    "PUBLISHED_GROUND": "phonometry.environment.propagation.ground_surfaces",
-    "PUBLISHED_POROUS": "phonometry.materials.absorbers.catalogue",
-    "PUBLISHED_FLOW_RESISTANCE": "phonometry.materials.absorbers.resistive_sheets",
+    "PUBLISHED_GROUND_SURFACES": "phonometry.environment.propagation.ground_surfaces",
+    "PUBLISHED_POROUS_MATERIALS": "phonometry.materials.absorbers.catalogue",
+    "PUBLISHED_RESISTIVE_SHEETS": "phonometry.materials.absorbers.resistive_sheets",
     "PUBLISHED_ABSORPTION": "phonometry.materials.absorbers.measured",
     "PUBLISHED_TRANSMISSION_LOSS": "phonometry.building.catalogue",
     "TRANSMISSION_LOSS_BANDS_HZ": "phonometry.building.catalogue",

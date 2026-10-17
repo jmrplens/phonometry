@@ -46,14 +46,14 @@ def test_table_one_reproduces_its_printed_rows() -> None:
     printed = {3: 3.0, 4: 2.0, 5: 2.0, 6: 1.0, 7: 1.0, 8: 1.0, 9: 0.5, 10: 0.5}
     assert ISO11820_BACKGROUND_CORRECTIONS_DB == printed
     margins = np.arange(3, 16, dtype=float)
-    corrections = noise_control.silencer_background_correction_db(margins)
+    corrections = noise_control.silencer_background_correction(margins)
     assert corrections[:8].tolist() == [3.0, 2.0, 2.0, 1.0, 1.0, 1.0, 0.5, 0.5]
     assert np.all(corrections[8:] == 0.0)
 
 
 def test_the_table_is_not_the_logarithmic_subtraction() -> None:
     margins = np.arange(3, 11, dtype=float)
-    table = noise_control.silencer_background_correction_db(margins)
+    table = noise_control.silencer_background_correction(margins)
     exact = -10.0 * np.log10(1.0 - 10.0 ** (-0.1 * margins))
     # The table is a rounded version of the formula and it departs from it in
     # both directions: at 5 dB it takes off 2,0 where the formula takes off
@@ -67,17 +67,17 @@ def test_the_table_is_not_the_logarithmic_subtraction() -> None:
 
 def test_a_margin_under_three_decibels_is_refused() -> None:
     with pytest.raises(ValueError, match="invalid"):
-        noise_control.silencer_background_correction_db([2.9])
+        noise_control.silencer_background_correction([2.9])
 
 
 def test_a_difference_between_two_rows_reads_the_lower_one() -> None:
-    assert noise_control.silencer_background_correction_db([4.9]).tolist() == [2.0]
-    assert noise_control.silencer_background_correction_db([5.0]).tolist() == [2.0]
+    assert noise_control.silencer_background_correction([4.9]).tolist() == [2.0]
+    assert noise_control.silencer_background_correction([5.0]).tolist() == [2.0]
 
 
 def test_a_fraction_over_the_last_row_takes_nothing_off() -> None:
     """10 dB is the last row Table 1 prints; over it the correction is zero."""
-    got = noise_control.silencer_background_correction_db([10.0, 10.0001, 10.5])
+    got = noise_control.silencer_background_correction([10.0, 10.0001, 10.5])
     assert got.tolist() == [0.5, 0.0, 0.0]
 
 
@@ -86,23 +86,25 @@ def test_equation_two_is_the_energy_mean() -> None:
     expected = 10.0 * math.log10(
         sum(10.0 ** (0.1 * value) for value in levels) / len(levels)
     )
-    assert noise_control.mean_sound_pressure_level_db(levels) == pytest.approx(expected)
+    assert noise_control.silencer_mean_sound_pressure_level(levels) == pytest.approx(
+        expected
+    )
 
 
 def test_equation_one_names_its_sides() -> None:
     source = np.array([95.0, 96.0, 94.0])
     receiver = np.array([70.0, 68.0, 63.0])
-    difference = noise_control.transmission_level_difference_db(source, receiver)
+    difference = noise_control.transmission_level_difference(source, receiver)
     assert difference.tolist() == [25.0, 28.0, 31.0]
 
 
 def test_equation_three_names_its_runs() -> None:
-    difference = noise_control.insertion_level_difference_db([90.0], [72.0])
+    difference = noise_control.insertion_level_difference([90.0], [72.0])
     assert difference.tolist() == [18.0]
 
 
 def test_the_extraneous_route_subtracts_energy() -> None:
-    corrected, capped = noise_control.extraneous_corrected_mean_level_db(
+    corrected, capped = noise_control.extraneous_corrected_mean_level(
         [80.0, 80.0], [70.0, 70.0]
     )
     expected = 10.0 * math.log10(10.0**8.0 - 10.0**7.0)
@@ -112,7 +114,7 @@ def test_the_extraneous_route_subtracts_energy() -> None:
 
 def test_the_extraneous_correction_is_capped_at_three_decibels() -> None:
     with pytest.warns(SilencerInSituWarning, match="3 dB"):
-        corrected, capped = noise_control.extraneous_corrected_mean_level_db(
+        corrected, capped = noise_control.extraneous_corrected_mean_level(
             [80.0, 80.0], [78.0, 78.0]
         )
     assert capped is True
@@ -121,7 +123,7 @@ def test_the_extraneous_correction_is_capped_at_three_decibels() -> None:
 
 def test_an_extraneous_level_above_the_measurement_is_refused() -> None:
     with pytest.raises(ValueError, match="invalid"):
-        noise_control.extraneous_corrected_mean_level_db([70.0], [70.0])
+        noise_control.extraneous_corrected_mean_level([70.0], [70.0])
 
 
 def test_the_reverberant_area_is_a_quarter_of_the_absorption() -> None:
@@ -137,7 +139,7 @@ def test_a_non_positive_reverberation_time_is_refused() -> None:
 
 
 def test_the_sound_power_level_adds_the_area_and_the_field_correction() -> None:
-    levels = noise_control.sound_power_level_db(
+    levels = noise_control.silencer_sound_power_level(
         [80.0], area=[10.0], field_correction_db=[1.0]
     )
     assert levels[0] == pytest.approx(80.0 + 10.0 * math.log10(10.0) + 1.0)
@@ -145,19 +147,19 @@ def test_the_sound_power_level_adds_the_area_and_the_field_correction() -> None:
 
 def test_a_field_correction_past_three_decibels_is_reported() -> None:
     with pytest.warns(SilencerInSituWarning, match="NOTE 4"):
-        noise_control.sound_power_level_db(
+        noise_control.silencer_sound_power_level(
             [80.0], area=[10.0], field_correction_db=[4.0]
         )
 
 
 def test_equal_temperatures_make_no_field_correction() -> None:
-    assert noise_control.temperature_field_correction_db(
+    assert noise_control.temperature_field_correction(
         receiver_temperature_c=20.0, source_temperature_c=20.0
     ) == pytest.approx(0.0)
 
 
 def test_a_hot_source_makes_a_negative_correction() -> None:
-    correction = noise_control.temperature_field_correction_db(
+    correction = noise_control.temperature_field_correction(
         receiver_temperature_c=20.0, source_temperature_c=200.0
     )
     assert correction == pytest.approx(5.0 * math.log10(293.0 / 473.0))
@@ -166,7 +168,7 @@ def test_a_hot_source_makes_a_negative_correction() -> None:
 
 def test_the_equation_uses_the_printed_273() -> None:
     with pytest.raises(ValueError, match="273"):
-        noise_control.temperature_field_correction_db(
+        noise_control.temperature_field_correction(
             receiver_temperature_c=-300.0, source_temperature_c=20.0
         )
 
@@ -374,7 +376,7 @@ def test_a_case_outside_the_figure_is_refused() -> None:
 
 
 def test_the_octave_fold_is_the_energy_sum_of_three() -> None:
-    octaves = noise_control.octave_levels_from_third_octave_db(
+    octaves = noise_control.octave_levels_from_third_octave(
         [70.0, 70.0, 70.0, 80.0, 80.0, 80.0]
     )
     assert octaves[0] == pytest.approx(70.0 + 10.0 * math.log10(3.0))
@@ -383,7 +385,7 @@ def test_the_octave_fold_is_the_energy_sum_of_three() -> None:
 
 def test_the_octave_fold_needs_whole_octaves() -> None:
     with pytest.raises(ValueError, match="multiple of 3"):
-        noise_control.octave_levels_from_third_octave_db([70.0, 70.0])
+        noise_control.octave_levels_from_third_octave([70.0, 70.0])
 
 
 def test_the_permitted_fold_is_not_the_forbidden_one() -> None:
@@ -391,7 +393,7 @@ def test_the_permitted_fold_is_not_the_forbidden_one() -> None:
     # The library does perform the forbidden one for ISO 11691, and the two
     # give different answers on the same three numbers, which is the point.
     thirds = [30.0, 30.0, 5.0]
-    permitted = noise_control.octave_levels_from_third_octave_db(thirds)
+    permitted = noise_control.octave_levels_from_third_octave(thirds)
     forbidden = noise_control.octave_insertion_loss(thirds)
     assert not np.isclose(permitted[0], forbidden[0])
 
@@ -543,7 +545,7 @@ def test_a_non_finite_field_correction_is_refused() -> None:
 
 def test_a_non_finite_temperature_is_refused() -> None:
     with pytest.raises(ValueError, match="source_temperature_c"):
-        noise_control.temperature_field_correction_db(
+        noise_control.temperature_field_correction(
             receiver_temperature_c=20.0, source_temperature_c=math.nan
         )
 
@@ -565,7 +567,7 @@ SABINE_QUARTERS = 4.0
 
 def folded_octave_level(third_octave_db: tuple[float, ...]) -> float:
     """One octave level out of its three one-third octaves, 9.1.5."""
-    return float(noise_control.octave_levels_from_third_octave_db(third_octave_db)[0])
+    return float(noise_control.octave_levels_from_third_octave(third_octave_db)[0])
 
 
 def background_correction_db(margin_db: float) -> float:
@@ -576,7 +578,7 @@ def background_correction_db(margin_db: float) -> float:
         # tested on its own below; this helper is about the arithmetic under
         # it, which the module returns uncapped either way.
         warnings.simplefilter("ignore", SilencerInSituWarning)
-        corrected, _ = noise_control.extraneous_corrected_mean_level_db(
+        corrected, _ = noise_control.extraneous_corrected_mean_level(
             [CARRIER_DB], [CARRIER_DB - margin_db]
         )
     return CARRIER_DB - corrected
@@ -627,7 +629,7 @@ def test_iso14163_table_b1_octave_attenuation_follows_the_spectrum() -> None:
 def test_the_thesis_position_means_reproduce_its_printed_column() -> None:
     """Holgado Palacios (2014), Tabla XL: six positions, twenty-one bands."""
     for positions, printed in oracle.HOLGADO_TABLE_XL.values():
-        mean = noise_control.mean_sound_pressure_level_db(positions)
+        mean = noise_control.silencer_mean_sound_pressure_level(positions)
         assert mean == pytest.approx(printed, abs=0.05)
         assert round(mean, 1) == printed
 
@@ -725,7 +727,7 @@ def test_the_printed_table_of_iso11820_is_not_that_subtraction() -> None:
     are two rules and the library keeps them apart.
     """
     for margin, table_value in ((5.0, 2.0), (8.0, 1.0)):
-        stepped = noise_control.silencer_background_correction_db([margin])
+        stepped = noise_control.silencer_background_correction([margin])
         assert float(stepped[0]) == table_value
         assert oracle.BARRON_TABLE_3_4_DB[margin] != table_value
 
@@ -745,10 +747,10 @@ def test_the_two_routes_agree_at_the_three_decibel_margin() -> None:
     for dL_pA = 3 dB)". Barron's own table prints 3,0 dB there, rounded.
     """
     assert oracle.BARRON_TABLE_3_4_DB[3.0] == 3.0
-    assert float(noise_control.silencer_background_correction_db([3.0])[0]) == 3.0
+    assert float(noise_control.silencer_background_correction([3.0])[0]) == 3.0
     with warnings.catch_warnings():
         warnings.simplefilter("error", SilencerInSituWarning)
-        corrected, capped = noise_control.extraneous_corrected_mean_level_db(
+        corrected, capped = noise_control.extraneous_corrected_mean_level(
             [CARRIER_DB], [CARRIER_DB - 3.0]
         )
     assert capped is False
@@ -758,7 +760,7 @@ def test_the_two_routes_agree_at_the_three_decibel_margin() -> None:
 def test_a_margin_under_three_decibels_trips_the_extraneous_cap() -> None:
     """A tenth under the row Table 1 still accepts is past the cap."""
     with pytest.warns(SilencerInSituWarning, match="3 dB"):
-        corrected, capped = noise_control.extraneous_corrected_mean_level_db(
+        corrected, capped = noise_control.extraneous_corrected_mean_level(
             [CARRIER_DB], [CARRIER_DB - 2.9]
         )
     assert capped is True
@@ -776,7 +778,7 @@ def test_no_printed_three_decibel_margin_trips_the_cap() -> None:
         warnings.simplefilter("error", SilencerInSituWarning)
         for step in range(901):
             level = round(40.0 + 0.1 * step, 10)
-            _, capped = noise_control.extraneous_corrected_mean_level_db(
+            _, capped = noise_control.extraneous_corrected_mean_level(
                 [level], [level - 3.0]
             )
             assert capped is False
@@ -793,7 +795,7 @@ def test_the_margin_window_is_the_declared_thousandth_of_a_nanodecibel() -> None
     for deficit, expected in ((5e-10, False), (2e-9, True), (1e-8, True)):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", SilencerInSituWarning)
-            _, capped = noise_control.extraneous_corrected_mean_level_db(
+            _, capped = noise_control.extraneous_corrected_mean_level(
                 [CARRIER_DB], [CARRIER_DB - (3.0 - deficit)]
             )
         assert capped is expected
@@ -805,7 +807,7 @@ def test_two_worked_background_subtractions() -> None:
         oracle.BIES_EXAMPLE_1_4_DB,
         oracle.BARRON_EXAMPLE_3_6_DB,
     ):
-        corrected, capped = noise_control.extraneous_corrected_mean_level_db(
+        corrected, capped = noise_control.extraneous_corrected_mean_level(
             [level], [background]
         )
         assert round(corrected, 1) == printed
@@ -824,11 +826,11 @@ def test_barron_example_3_6_agrees_with_its_own_tabulated_correction() -> None:
 
 def test_barron_example_3_4_mean_and_area_term() -> None:
     """Nine levels on a measurement surface, and the 10 lg (S/S0) of its area."""
-    mean = noise_control.mean_sound_pressure_level_db(
+    mean = noise_control.silencer_mean_sound_pressure_level(
         oracle.BARRON_EXAMPLE_3_4_LEVELS_DB
     )
     assert round(mean, 1) == oracle.BARRON_EXAMPLE_3_4_MEAN_DB
-    term = noise_control.sound_power_level_db(
+    term = noise_control.silencer_sound_power_level(
         [0.0], area=[oracle.BARRON_EXAMPLE_3_4_AREA_M2]
     )
     assert round(float(term[0]), 2) == oracle.BARRON_EXAMPLE_3_4_AREA_TERM_DB
@@ -847,17 +849,17 @@ def test_barron_example_3_3_sound_power_needs_its_field_correction() -> None:
     Left out, the answer reads 90,5 dB and misses the printed 90,4 dB, so the
     example does exercise the term.
     """
-    mean = noise_control.mean_sound_pressure_level_db(
+    mean = noise_control.silencer_mean_sound_pressure_level(
         oracle.BARRON_EXAMPLE_3_3_LEVELS_DB
     )
     correction = -10.0 * math.log10(oracle.BARRON_EXAMPLE_3_3_IMPEDANCE_RAYL / 400.0)
-    level = noise_control.sound_power_level_db(
+    level = noise_control.silencer_sound_power_level(
         [mean],
         area=[oracle.BARRON_EXAMPLE_3_3_AREA_M2],
         field_correction_db=[correction],
     )
     assert round(float(level[0]), 1) == oracle.BARRON_EXAMPLE_3_3_SOUND_POWER_DB
-    without = noise_control.sound_power_level_db(
+    without = noise_control.silencer_sound_power_level(
         [mean], area=[oracle.BARRON_EXAMPLE_3_3_AREA_M2]
     )
     assert round(float(without[0]), 1) != oracle.BARRON_EXAMPLE_3_3_SOUND_POWER_DB
@@ -871,7 +873,7 @@ def test_ver_beranek_absorption_area_and_its_decibel_term() -> None:
         oracle.VER_BERANEK_EXAMPLE_4_2_SPEED_M_S,
     )
     assert round(absorption, 1) == oracle.VER_BERANEK_EXAMPLE_4_2_ABSORPTION_M2
-    term = noise_control.sound_power_level_db([0.0], area=[absorption])
+    term = noise_control.silencer_sound_power_level([0.0], area=[absorption])
     assert round(float(term[0]), 1) == oracle.VER_BERANEK_EXAMPLE_4_2_AREA_TERM_DB
 
 

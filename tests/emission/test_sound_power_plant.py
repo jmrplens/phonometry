@@ -225,13 +225,13 @@ def test_exact_centres_name_the_nominal_bands() -> None:
 def test_uncertainty_takes_the_row_at_or_below_the_ratio(
     ratio: float, expected: tuple[float, float]
 ) -> None:
-    assert emission.plant_method_uncertainty_db(ratio) == expected
+    assert emission.plant_method_uncertainty(ratio) == expected
 
 
 @pytest.mark.parametrize("ratio", [0.049, 0.51])
 def test_uncertainty_outside_table_1_is_refused(ratio: float) -> None:
     with pytest.raises(ValueError, match="Table 1 covers"):
-        emission.plant_method_uncertainty_db(ratio)
+        emission.plant_method_uncertainty(ratio)
 
 
 @pytest.mark.parametrize(
@@ -251,17 +251,17 @@ def test_uncertainty_outside_table_1_is_refused(ratio: float) -> None:
 def test_background_correction_follows_table_2(
     difference: float, correction: float
 ) -> None:
-    assert emission.plant_background_correction_db(difference) == correction
+    assert emission.plant_background_correction(difference) == correction
 
 
 def test_background_correction_is_vectorised() -> None:
-    out = emission.plant_background_correction_db([[6.0, 9.2], [12.0, 7.4]])
+    out = emission.plant_background_correction([[6.0, 9.2], [12.0, 7.4]])
     np.testing.assert_array_equal(out, [[1.0, 0.5], [0.0, 1.0]])
 
 
 def test_background_under_6_db_is_an_invalid_measurement() -> None:
     with pytest.raises(ValueError, match="Table 2 calls a measurement invalid"):
-        emission.plant_background_correction_db([7.0, 5.99])
+        emission.plant_background_correction([7.0, 5.99])
 
 
 @pytest.mark.parametrize(
@@ -282,9 +282,7 @@ def test_background_correction_reads_decimal_readings_as_their_difference(
     64,1 - 55,6 dB, 8,499 999 999 999 993, is the half that goes up to 9; and
     64,4 - 54,4 dB, 10,000 000 000 000 007, is the 10 dB row, not above it.
     """
-    assert emission.plant_background_correction_db(operating - background) == (
-        correction
-    )
+    assert emission.plant_background_correction(operating - background) == (correction)
 
 
 # --------------------------------------------------------------------------- #
@@ -354,7 +352,7 @@ def test_mean_distance_window_is_empty_at_its_two_ends(
 
 
 def test_steady_reading_is_the_arithmetic_mean() -> None:
-    assert emission.plant_steady_reading_db(72.0, 68.4) == pytest.approx(70.2)
+    assert emission.plant_steady_reading(72.0, 68.4) == pytest.approx(70.2)
 
 
 @pytest.mark.parametrize(("maximum", "minimum"), [(75.0, 70.0), (64.1, 59.1)])
@@ -363,7 +361,7 @@ def test_a_swing_of_5_db_is_not_steady(maximum: float, minimum: float) -> None:
     5 dB, though 4,999 999 999 999 993 in binary.
     """
     with pytest.raises(ValueError, match="integrating instrument"):
-        emission.plant_steady_reading_db(maximum, minimum)
+        emission.plant_steady_reading(maximum, minimum)
 
 
 # --------------------------------------------------------------------------- #
@@ -854,9 +852,7 @@ def test_weather_changes_only_the_air_term() -> None:
 
 def test_uncertainty_follows_the_distance_ratio() -> None:
     res = _contour().sound_power(_levels(_contour().positions_m.shape[0]), OCTAVES)
-    assert res.uncertainty_db == emission.plant_method_uncertainty_db(
-        res.distance_ratio
-    )
+    assert res.uncertainty_db == emission.plant_method_uncertainty(res.distance_ratio)
     outside = dataclasses.replace(res, mean_distance_m=1.0)
     assert outside.uncertainty_db is None
 

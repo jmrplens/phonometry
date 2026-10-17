@@ -76,7 +76,7 @@ where $K_\mathrm{c}$ is largest), so an intensity measurement reproduces the ISO
 pressure result. The automatic rating is formed only for exactly 16
 one-third-octave or 5 octave values (`rating`/`rating_modified` are `None`
 otherwise). Subareas scanned separately are combined first with
-`combine_subareas` (Formulas (11)-(12)); a subarea whose net energy flows back
+`subarea_intensity_level` (Formulas (11)-(12)); a subarea whose net energy flows back
 towards the specimen enters with a negative area, applying the minus-sign rule
 of Clause 6.4.6 while $S_\mathrm{m}$ keeps the unsigned area sum.*
 
@@ -151,7 +151,7 @@ background by 10 dB.
 `r_i_modified`, `rating`, `rating_modified`);
 `intensity_element_normalized_difference()` an
 `IntensityElementNormalizedResult` (`d_i_n_e`, `rating`);
-`surface_pressure_intensity_indicator()` and `combine_subareas()` return
+`surface_pressure_intensity_indicator()` and `subarea_intensity_level()` return
 arrays.
 
 ## ISO 15186-1 intensity test report (`.report()`)

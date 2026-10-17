@@ -190,10 +190,10 @@ $$
 | :--- | :--- |
 | ValueError | If any argument is not positive and finite. |
 
-## combine_internal_levels
+## combined_internal_levels
 
 ```python
-combine_internal_levels(*levels: NDArray[np.float64]) -> NDArray[np.float64]
+combined_internal_levels(levels: Sequence[ArrayLike]) -> NDArray[np.float64]
 ```
 
 Equation (43): two internal spectra at the same pipe wall, added.
@@ -210,7 +210,7 @@ takes through the wall.
 
 | Name | Description |
 | :--- | :--- |
-| `levels` | Two or more band level arrays of the same shape, in dB. |
+| `levels` | One sequence of two or more band level arrays of the same shape, in dB, one per source. |
 
 **Returns:** Their energy sum, in dB.
 
@@ -218,7 +218,7 @@ takes through the wall.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If fewer than two are given, or they disagree in shape. |
+| ValueError | If an entry is a single level rather than a band array (one spectrum passed where the sequence of spectra belongs), if fewer than two are given, or if they disagree in shape. |
 
 ## DEFAULT_EXPANDER
 

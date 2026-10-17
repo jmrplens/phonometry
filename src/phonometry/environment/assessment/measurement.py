@@ -479,43 +479,8 @@ def gaussian_residual_level(
 # --------------------------------------------------------------------------- #
 # Measurement uncertainty (Clause 4, Annex F)
 # --------------------------------------------------------------------------- #
-def combined_standard_uncertainty(
-    contributions: Sequence[float] | Sequence[tuple[float, float]] | np.ndarray,
-) -> float:
-    r"""Combined standard uncertainty (Formula (2)).
-
-    :math:`u = \sqrt{\sum (c_j \cdot u_j)^2}`.
-
-    :param contributions: Either the per-component products
-        :math:`c_j \cdot u_j` (dB), or
-        ``(uⱼ, cⱼ)`` pairs whose product is formed. Independent inputs are
-        assumed (no covariance term).
-    :return: The combined standard uncertainty, in dB.
-    :raises ValueError: If ``contributions`` is empty or non-finite.
-    """
-    items = list(contributions)
-    if not items:
-        msg = "'contributions' must not be empty."
-        raise ValueError(msg)
-    products = []
-    for item in items:
-        if isinstance(item, (tuple, list, np.ndarray)):
-            pair = np.asarray(item, dtype=np.float64)
-            if pair.shape != (2,):
-                msg = "Each pair must be (uncertainty, sensitivity)."
-                raise ValueError(msg)
-            products.append(pair[0] * pair[1])
-        else:
-            products.append(float(item))
-    arr = np.asarray(products, dtype=np.float64)
-    if not np.all(np.isfinite(arr)):
-        msg = "'contributions' must be finite."
-        raise ValueError(msg)
-    return float(np.sqrt(np.sum(arr**2)))
-
-
 def environmental_expanded_uncertainty(
-    standard_uncertainty: float, *, confidence: float = 0.95
+    standard_uncertainty: float, *, coverage: float = 0.95
 ) -> float:
     r"""Expanded uncertainty :math:`U = k \cdot u` (Clause 4).
 
@@ -537,19 +502,19 @@ def environmental_expanded_uncertainty(
        the other two had to be qualified.
 
     :param standard_uncertainty: Combined standard uncertainty ``u``, in dB.
-    :param confidence: Coverage probability (0.95 or 0.80).
+    :param coverage: Coverage probability (0.95 or 0.80).
     :return: The expanded uncertainty ``U``, in dB.
-    :raises ValueError: If ``u`` is negative/non-finite or ``confidence`` is
+    :raises ValueError: If ``u`` is negative/non-finite or ``coverage`` is
         not one of the tabulated values.
     """
     u = _finite(standard_uncertainty, "standard_uncertainty")
     if u < 0.0:
         msg = "'standard_uncertainty' must be non-negative."
         raise ValueError(msg)
-    if confidence not in _COVERAGE_FACTORS:
-        msg = f"'confidence' must be one of {sorted(_COVERAGE_FACTORS)}."
+    if coverage not in _COVERAGE_FACTORS:
+        msg = f"'coverage' must be one of {sorted(_COVERAGE_FACTORS)}."
         raise ValueError(msg)
-    return float(_COVERAGE_FACTORS[confidence] * u)
+    return float(_COVERAGE_FACTORS[coverage] * u)
 
 
 def residual_correction_uncertainty(

@@ -249,7 +249,7 @@ def test_exact_midband_snaps_nominal_to_midband() -> None:
     assert snapped == pytest.approx(direct, rel=1e-12)
 
 
-# --- ISO 354 synergy: air_attenuation_m -------------------------------------
+# --- ISO 354 synergy: air_power_attenuation_per_m -------------------------------------
 
 
 def test_air_attenuation_m_is_alpha_over_10_lg_e() -> None:
@@ -257,10 +257,12 @@ def test_air_attenuation_m_is_alpha_over_10_lg_e() -> None:
     alpha = environment.air_attenuation(
         freqs, temperature_c=20.0, relative_humidity_percent=50.0
     )
-    m = environment.air_attenuation_m(
+    m = environment.air_power_attenuation_per_m(
         freqs, temperature_c=20.0, relative_humidity_percent=50.0
     )
-    np.testing.assert_allclose(m, materials.attenuation_from_alpha(alpha), rtol=1e-12)
+    np.testing.assert_allclose(
+        m, materials.power_attenuation_from_alpha(alpha), rtol=1e-12
+    )
     # m = alpha / (10 lg e) ~ alpha / 4.3429.
     np.testing.assert_allclose(m, alpha / (10.0 * math.log10(math.e)), rtol=1e-12)
     assert np.all(m > 0.0)

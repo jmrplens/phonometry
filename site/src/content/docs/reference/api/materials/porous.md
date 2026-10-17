@@ -59,7 +59,8 @@ passive medium has $\operatorname{Im}(k) < 0$):
 The air all of them propagate through is described by [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid),
 which carries the six quantities a visco-thermal model can need (speed of
 sound, density, viscosity, Prandtl number, ratio of specific heats and static
-pressure) with the values these models were published with. The narrow-channel
+pressure), by default the fixed 20 degC values of [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air). The
+narrow-channel
 models of [`slow_sound`](/phonometry/reference/api/materials/slow-sound/) and
 [`metadiffuser`](/phonometry/reference/api/materials/metadiffuser/) take it as a single
 argument.
@@ -69,6 +70,10 @@ stack of them and solving it with the transfer matrix is the subject of
 [`layered`](/phonometry/reference/api/materials/layered/).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
+
+## ABSORBER_AIR
+
+*Constant* (`phonometry.fluids.Fluid`).
 
 ## airflow_resistivity_from_bulk_density
 
@@ -174,7 +179,7 @@ are still returned.
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `flow_resistivity_pa_s_m2` | Airflow resistivity `sigma`, in Pa s/m2. |
 | `coefficients` | Preset name from [`DELANY_BAZLEY_COEFFICIENTS`](/phonometry/reference/api/materials/porous/#delany_bazley_coefficients) (`"delany_bazley"` rockwool/fibreglass default, `"garai_pompoli"` polyester, `"dunn_davern"` / `"wu"` foams) or an explicit `(C1..C8)` tuple. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult).
 
@@ -368,7 +373,7 @@ $\omega \to \infty$ (Johnson et al. 1987), pinned in the tests.
 | `tortuosity` | High-frequency tortuosity $T = \alpha_\infty$ (>= 1). |
 | `viscous_length_m` | Viscous characteristic length `L`, in metres. |
 | `thermal_length_m` | Thermal characteristic length `L'`, in metres (physically $L' \ge L$). |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult).
 
@@ -553,7 +558,7 @@ the porous-filled cavity case below about 500 Hz.
 | `surface_density` | Membrane mass per unit area `m`, in kg/m2. |
 | `cavity_depth` | Cavity depth `d`, in metres. |
 | `isothermal` | Use the isothermal air-spring stiffness. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** Resonance frequency `f0`, in hertz.
 
@@ -599,7 +604,7 @@ transfer impedance (Cox & D'Antonio Eq. (7.35)).
 | `hole_radius` | Hole radius `a`, in metres (submillimetre for a genuine microperforated design). |
 | `open_area` | Fractional open area `eps` (0..1). |
 | `end_correction` | End-correction factor `delta` per end (default 0.85, the isolated-orifice value used by Maa). |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** Complex transfer impedance `z`, in Pa s/m.
 
@@ -633,7 +638,7 @@ Sect. 4.1).
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `flow_resistivity_pa_s_m2` | Airflow resistivity `sigma`, in Pa s/m2. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult).
 
@@ -688,7 +693,7 @@ holes.
 | `hole_radius` | Hole radius `a`, in metres. |
 | `open_area` | Fractional open area `eps` (0..1). |
 | `end_correction` | End-correction factor `delta` per end; default [`perforation_end_correction`](/phonometry/reference/api/materials/porous/#perforation_end_correction) of `eps`. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** Complex transfer impedance `z`, in Pa s/m.
 
@@ -842,10 +847,6 @@ Plot the normalised `Zc` and `k` components against frequency.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
-
-## PUBLISHED_AIR
-
-*Constant* (`phonometry.fluids.Fluid`).
 
 ## ROCK_WOOL_FIBRE_DENSITY_KG_M3
 

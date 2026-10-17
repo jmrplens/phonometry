@@ -271,7 +271,7 @@ the expanded uncertainty of $C_\mathrm{FF,RM}$ from IEC/TS 61094-7 over 2, and
 the repeatability from repeat measurements over 1, with its degrees of freedom.
 Tables I.2 and I.3 fill it in at 1 kHz and 8 kHz.
 `metrology.correction_uncertainty_budget` builds the budget on
-`metrology.combine_uncertainty`, every component a correction entering
+`metrology.uncertainty_propagation`, every component a correction entering
 Formula (E.6) with a sensitivity of $\pm 1$, and takes the coverage factor
 from the Welch-Satterthwaite effective degrees of freedom at a level of
 confidence of 95 % (clause 5):

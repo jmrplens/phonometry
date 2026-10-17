@@ -11,8 +11,11 @@ scattering coefficient
 (Clause 8.1.3, Eq. (5)). The turntable base plate is qualified through its
 own scattering coefficient (Clause 8.1.4, Eq. (6)) against the Table 1
 limits (Clause 6.2). Air properties come from the speed-of-sound and
-energy-attenuation relations of Clause 8 (Eqs. (2)/(3), after ISO 9613-1),
-and measurement accuracy from Annex A (Eqs. (A.1)-(A.5)).
+energy-attenuation relations of Clause 8 (Eqs. (2)/(3), after ISO 9613-1;
+Eq. (3) is the conversion ISO 354 makes too, so it is
+:func:`~phonometry.materials.power_attenuation_from_alpha`, shared with the
+absorption measurement), and measurement accuracy from Annex A
+(Eqs. (A.1)-(A.5)).
 
 One subject: everything the reverberation-room method needs, from the four
 measured decay times to the scattering coefficient and its uncertainty. Part 2
@@ -59,7 +62,6 @@ __all__ = [
     "ScatteringResult",
     "ScatteringUncertainty",
     "absorption_coefficient_uncertainty",
-    "air_attenuation_coefficient",
     "base_plate_scattering",
     "check_base_plate_scattering",
     "random_incidence_absorption",
@@ -86,11 +88,6 @@ _T_REF_K = 293.15
 
 #: Celsius-to-kelvin offset used by ISO 17497-1 Eq. (2) (273,15).
 _T0 = 273.15
-
-#: Decibels per neper, ``10 * lg(e)`` (approx. 4,343), converting the
-#: ISO 9613-1 pressure attenuation coefficient (dB/m) to the energy
-#: attenuation coefficient ``m`` (1/m) of ISO 17497-1 Eq. (3).
-_DB_PER_NEPER = 10.0 * math.log10(math.e)
 
 #: Minimum number ``N`` of spatially-averaged reverberation-time measurements
 #: for the standard error of the mean of ISO 17497-1 Eq. (A.1); the
@@ -189,7 +186,7 @@ def _nonneg_array(value: ArrayLike, name: str) -> Real:
 
 
 # ---------------------------------------------------------------------------
-# ISO 17497-1: air properties (Clause 8, Eqs. (2)/(3), after ISO 9613-1).
+# ISO 17497-1: speed of sound in air (Clause 8, Eq. (2)).
 # ---------------------------------------------------------------------------
 def speed_of_sound_iso17497(*, temperature_c: ArrayLike) -> Real:
     r"""Speed of sound in air (ISO 17497-1:2004, Clause 8, Eq. (2)).
@@ -203,25 +200,6 @@ def speed_of_sound_iso17497(*, temperature_c: ArrayLike) -> Real:
     """
     kelvin = _T0 + require_above_absolute_zero_array(temperature_c, "temperature_c")
     return np.asarray(_C_REF * np.sqrt(kelvin / _T_REF_K), dtype=np.float64)
-
-
-def air_attenuation_coefficient(pressure_attenuation_db_per_m: ArrayLike) -> Real:
-    r"""Energy attenuation coefficient ``m`` (ISO 17497-1, Clause 8, Eq. (3)).
-
-    :math:`m = \alpha / (10 \log_{10}(e)) \approx \alpha / 4.343` (1/m), where
-    ``alpha`` is
-    the sound-*pressure* attenuation coefficient in dB/m obtained from
-    ISO 9613-1 using the measured temperature and relative humidity.
-
-    :param pressure_attenuation_db_per_m: Pressure attenuation coefficient
-        ``alpha`` from ISO 9613-1, in decibels per metre (scalar or per band).
-    :return: Energy (power) attenuation coefficient ``m``, in reciprocal metres.
-    :raises ValueError: if any value is negative or non-finite.
-    """
-    alpha = _nonneg_array(
-        pressure_attenuation_db_per_m, "pressure_attenuation_db_per_m"
-    )
-    return np.asarray(alpha / _DB_PER_NEPER, dtype=np.float64)
 
 
 # ---------------------------------------------------------------------------
@@ -293,7 +271,8 @@ def random_incidence_absorption(
     :param c2: Speed of sound during ``t2``, in m/s.
     :param t2: Reverberation time with the test sample, in seconds.
     :param m1: Energy attenuation coefficient during ``t1``, in 1/m
-        (see :func:`air_attenuation_coefficient`); defaults to 0.
+        (see
+        :func:`~phonometry.materials.power_attenuation_from_alpha`); defaults to 0.
     :param m2: Energy attenuation coefficient during ``t2``, in 1/m; defaults to 0.
     :return: Random-incidence absorption coefficient ``alpha_s`` (per band).
     :raises ValueError: for non-positive ``V``, ``S``, ``c`` or ``T``.

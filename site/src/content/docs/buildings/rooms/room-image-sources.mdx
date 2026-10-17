@@ -232,7 +232,7 @@ plt.show()
 per-wall array, a per-band vector or a `frequencies` list) to synthesise one
 decay per octave band; a length-6 vector sets each wall separately (order
 `x0, xL, y0, yL, z0, zL`); and `air_attenuation_per_m` (the intensity coefficient `m`
-from `air_attenuation_m`) adds the `exp(-m r / 2)` air loss that eats the
+from `air_power_attenuation_per_m`) adds the `exp(-m r / 2)` air loss that eats the
 high-frequency tail.
 
 ```python
@@ -267,7 +267,7 @@ argument takes tens of per cent off the top band.*
 import matplotlib.pyplot as plt
 # `np`, `room`, `freqs` and `alpha` come from the per-band block above.
 
-# environment.air_attenuation_m(freqs, temperature_c=20.0, relative_humidity_percent=50.0), Np/m at 20 C / 50 % RH
+# environment.air_power_attenuation_per_m(freqs, temperature_c=20.0, relative_humidity_percent=50.0), 1/m at 20 C / 50 % RH
 m = [3.02e-4, 6.28e-4, 1.074e-3, 2.277e-3, 6.831e-3]
 
 fig, ax = plt.subplots()

@@ -320,7 +320,7 @@ def plot_uncertainty_budget(
 
     ax = ax if ax is not None else _new_axes()
     contributions = np.asarray(result.contributions, dtype=np.float64)
-    # The fallback must read exactly like the names combine_uncertainty
+    # The fallback must read exactly like the names uncertainty_propagation
     # fills in (``x1``, ``x2``, ...), so a hand-built result and a library
     # one label the same bars the same way.
     names = list(result.names) or [f"x{i + 1}" for i in range(contributions.size)]

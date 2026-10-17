@@ -63,10 +63,10 @@ they are three separate implementations here and share nothing.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## barrier_background_correction_db
+## barrier_background_correction
 
 ```python
-barrier_background_correction_db(
+barrier_background_correction(
     level_difference_db: ArrayLike,
 ) -> NDArray[np.float64]
 ```

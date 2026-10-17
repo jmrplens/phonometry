@@ -36,6 +36,7 @@ from reference_data import (
     ISO17497_2_QRD_LEVELS,
 )
 
+from phonometry.materials import power_attenuation_from_alpha
 from phonometry.materials.diffusers.reverberation_room_scattering import (
     BASE_PLATE_BANDS_HZ,
     BASE_PLATE_MAX_SCATTERING,
@@ -43,7 +44,6 @@ from phonometry.materials.diffusers.reverberation_room_scattering import (
     ScatteringResult,
     ScatteringUncertainty,
     absorption_coefficient_uncertainty,
-    air_attenuation_coefficient,
     base_plate_scattering,
     check_base_plate_scattering,
     random_incidence_absorption,
@@ -91,7 +91,7 @@ def test_speed_of_sound_monotonic_and_array() -> None:
 def test_air_attenuation_uses_ten_lg_e() -> None:
     # Eq. (3): m = alpha / (10 lg e).
     alpha = 4.343
-    assert float(air_attenuation_coefficient(alpha)) == pytest.approx(
+    assert float(power_attenuation_from_alpha(alpha)) == pytest.approx(
         alpha / (10.0 * math.log10(math.e))
     )
 

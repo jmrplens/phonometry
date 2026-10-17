@@ -403,7 +403,7 @@ def npd_atmosphere_increment(
             temperature_c=temperature_c,
             relative_humidity_percent=relative_humidity_percent,
             eta_interpolation="linear",
-        ).path_attenuation_db(d)
+        ).path_attenuation(d)
     spread = source[:, None] - 20.0 * np.log10(d / _REFERENCE_DISTANCE_M)[None, :]
     reference_levels = _a_weighted_sum(spread - reference_attenuation)
     specified_levels = _a_weighted_sum(spread - specified_attenuation)

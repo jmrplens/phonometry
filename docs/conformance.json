@@ -10650,7 +10650,7 @@
       "verdict": "pass"
     },
     {
-      "id": "intensity-sound-power/iso-8297-1994-table-2/background-correction-at-differences-of-6-to-10-db-and-at-12-db-read-through-plant-background-correction-db",
+      "id": "intensity-sound-power/iso-8297-1994-table-2/background-correction-at-differences-of-6-to-10-db-and-at-12-db-read-through-plant-background-correction",
       "domain": "intensity-sound-power",
       "reference": {
         "cite": "ISO 8297:1994 Table 2",
@@ -10663,7 +10663,7 @@
           }
         ]
       },
-      "quantity": "Background correction at differences of 6 to 10 dB and at 12 dB, read through plant_background_correction_db",
+      "quantity": "Background correction at differences of 6 to 10 dB and at 12 dB, read through plant_background_correction",
       "kind": "record",
       "expected": {
         "label": "6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; 12 dB = 0 dB",

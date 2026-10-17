@@ -164,27 +164,27 @@ def test_table_three_reproduces_its_two_rows() -> None:
         9: -1.0,
     }
     margins = np.arange(4, 14, dtype=float)
-    corrections = environment.barrier_background_correction_db(margins)
+    corrections = environment.barrier_background_correction(margins)
     assert corrections[:6].tolist() == [-2.0, -2.0, -1.0, -1.0, -1.0, -1.0]
     assert np.all(corrections[6:] == 0.0)
 
 
 def test_the_correction_is_added_rather_than_subtracted() -> None:
-    assert np.all(environment.barrier_background_correction_db([4.0, 9.0]) < 0.0)
+    assert np.all(environment.barrier_background_correction([4.0, 9.0]) < 0.0)
 
 
 def test_a_margin_under_four_decibels_is_refused() -> None:
     with pytest.raises(ValueError, match="invalid"):
-        environment.barrier_background_correction_db([3.9])
+        environment.barrier_background_correction([3.9])
     assert ISO10847_MINIMUM_BACKGROUND_MARGIN_DB == 4.0
 
 
 def test_this_table_is_not_the_one_the_silencer_standard_prints() -> None:
-    from phonometry.noise_control import silencer_background_correction_db
+    from phonometry.noise_control import silencer_background_correction
 
     # At a 9 dB margin ISO 11820 takes off 0,5 dB and ISO 10847 takes off 1.
-    assert silencer_background_correction_db([9.0])[0] == 0.5
-    assert environment.barrier_background_correction_db([9.0])[0] == -1.0
+    assert silencer_background_correction([9.0])[0] == 0.5
+    assert environment.barrier_background_correction([9.0])[0] == -1.0
 
 
 def test_the_short_distance_predicate_is_the_printed_pair() -> None:
@@ -635,7 +635,7 @@ def test_the_background_table_is_reprinted_by_a_second_committee() -> None:
     # -2 dB and "6, 7, 8, 9" against -1 dB, with the same prose asking for a
     # 10 dB margin and calling a margin under 4 dB invalid.
     for margins, printed in oracle.CEN_TS_16272_7_TABLE_4_DB:
-        corrections = environment.barrier_background_correction_db(list(margins))
+        corrections = environment.barrier_background_correction(list(margins))
         assert corrections.tolist() == [printed] * len(margins)
     assert (
         ISO10847_MINIMUM_BACKGROUND_MARGIN_DB == oracle.CEN_TS_16272_7_MINIMUM_MARGIN_DB
@@ -645,7 +645,7 @@ def test_the_background_table_is_reprinted_by_a_second_committee() -> None:
         == oracle.CEN_TS_16272_7_PREFERRED_MARGIN_DB
     )
     with pytest.raises(ValueError, match="invalid"):
-        environment.barrier_background_correction_db([3.9])
+        environment.barrier_background_correction([3.9])
 
 
 def test_the_jagniatinskis_campaign_uses_only_the_printed_difference() -> None:

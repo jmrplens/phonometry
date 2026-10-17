@@ -28,7 +28,7 @@ from .biot import (
 )
 from .carpets import PUBLISHED_CARPETS, Carpet, carpets_named
 from .catalogue import (
-    PUBLISHED_POROUS,
+    PUBLISHED_POROUS_MATERIALS,
     PorousMaterial,
     porous_materials_named,
 )
@@ -84,11 +84,11 @@ from .measured import (
     absorption_named,
 )
 from .porous import (
+    ABSORBER_AIR,
     DELANY_BAZLEY_COEFFICIENTS,
     DELANY_BAZLEY_VALIDITY,
     LIMP_FRAME_CRITERIA,
     MIKI_VALIDITY,
-    PUBLISHED_AIR,
     ROCK_WOOL_FIBRE_DENSITY_KG_M3,
     ROCK_WOOL_LATERAL_FIT,
     ROCK_WOOL_LONGITUDINAL_FIT,
@@ -124,9 +124,9 @@ from .rating import (
     weighted_absorption_from_third_octave,
 )
 from .resistive_sheets import (
-    PUBLISHED_FLOW_RESISTANCE,
+    PUBLISHED_RESISTIVE_SHEETS,
     ResistiveSheet,
-    resistive_sheet_named,
+    resistive_sheets_named,
 )
 from .slow_sound import (
     CriticalCouplingResult,
@@ -144,8 +144,8 @@ from .sound_absorption import (
     SoundAbsorptionMeasurement,
     absorption_area,
     absorption_coefficient,
-    attenuation_from_alpha,
     measure_sound_absorption,
+    power_attenuation_from_alpha,
 )
 from .standing_wave import (
     standing_wave_absorption,
@@ -231,9 +231,9 @@ __all__ = [
     "RATING_OCTAVE_BANDS_HZ",
     "PUBLISHED_ABSORPTION",
     "PUBLISHED_ABSORPTION_AREAS",
-    "PUBLISHED_AIR",
-    "PUBLISHED_FLOW_RESISTANCE",
-    "PUBLISHED_POROUS",
+    "ABSORBER_AIR",
+    "PUBLISHED_RESISTIVE_SHEETS",
+    "PUBLISHED_POROUS_MATERIALS",
     "PerforatedPlateLayer",
     "PoroelasticLayer",
     "PorousAbsorberWarning",
@@ -274,7 +274,7 @@ __all__ = [
     "airflow_resistivity_from_bulk_density",
     "alternating_airflow_resistance",
     "apply_mic_calibration",
-    "attenuation_from_alpha",
+    "power_attenuation_from_alpha",
     "biot_surface_impedance",
     "biot_waves",
     "check_ceiling_specimen",
@@ -319,7 +319,7 @@ __all__ = [
     "rectangular_duct_properties",
     "reflection_factor",
     "reproducibility_uncertainty",
-    "resistive_sheet_named",
+    "resistive_sheets_named",
     "single_number_rating_uncertainty",
     "slit_effective_properties",
     "slit_helmholtz_absorber",

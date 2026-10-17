@@ -30,7 +30,7 @@ from phonometry.materials.absorbers.layered import (
     PorousLayer,
     diffuse_field_absorption,
 )
-from phonometry.materials.absorbers.porous import PUBLISHED_AIR, delany_bazley
+from phonometry.materials.absorbers.porous import ABSORBER_AIR, delany_bazley
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
@@ -59,7 +59,7 @@ def _medium() -> materials.PorousMediumResult:
     # subject here, only the axis the result is drawn on.
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        return delany_bazley(_FREQUENCIES, 20000.0, fluid=PUBLISHED_AIR)
+        return delany_bazley(_FREQUENCIES, 20000.0, fluid=ABSORBER_AIR)
 
 
 def _impedance_tube(language: str) -> Axes:
@@ -88,7 +88,9 @@ def _diffuse_field(language: str) -> Axes:
 
 
 def _biot_waves(language: str) -> Axes:
-    glass_wool = materials.PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
+    glass_wool = materials.PUBLISHED_POROUS_MATERIALS[
+        "allard-2009-table-6-1/domisol_coffrage"
+    ]
     shear, poisson = glass_wool.frame_constants()
     result = materials.biot_waves(
         glass_wool.medium(_FREQUENCIES),

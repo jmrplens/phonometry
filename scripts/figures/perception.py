@@ -2817,7 +2817,7 @@ def generate_htlan_compression(output_dir: str) -> None:
 
     grid = np.linspace(0.0, 60.0, 121)
     hh, nn = np.meshgrid(grid, grid)
-    removed = hh + nn - hearing.combine_age_and_noise(hh, nn)
+    removed = hh + nn - hearing.age_and_noise_threshold(hh, nn)
 
     # The plotting area is a light colormap in both themes, so everything
     # drawn on top of it is pinned dark rather than following the theme.

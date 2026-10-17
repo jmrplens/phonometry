@@ -136,14 +136,14 @@ def test_table_d3b_reads_eta_linearly_in_table_1() -> None:
     assert 2.30 < delta < 2.50
     linear = 0.495 + (delta - 2.30) / 0.20 * (0.450 - 0.495)
     assert float(res.eta[0]) == pytest.approx(linear, abs=1e-12)
-    assert float(res.path_attenuation_db(25000.0 * _FT_M)[0]) == pytest.approx(
+    assert float(res.path_attenuation(25000.0 * _FT_M)[0]) == pytest.approx(
         744.810, abs=0.005
     )
     # The quadratic of ISO 3891's own tables misses Table D-3b by more than a
     # decibel in the 4 kHz band at 25000 ft (204.355 dB printed).
     quadratic = arp866a_attenuation([4000.0], **_AIR)
     assert quadratic.eta_interpolation == "quadratic"
-    far = float(quadratic.path_attenuation_db(25000.0 * _FT_M)[0])
+    far = float(quadratic.path_attenuation(25000.0 * _FT_M)[0])
     assert abs(far - TABLE_D3B[19][-1]) > 1.0
 
 

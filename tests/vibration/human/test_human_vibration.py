@@ -594,7 +594,7 @@ def test_iso5349_2_example_e3_forestry_multi_tool() -> None:
     assert partials[0] == pytest.approx(2.3, abs=0.05)
     assert partials[1] == pytest.approx(2.1, abs=0.05)
     assert partials[2] == pytest.approx(1.8, abs=0.05)
-    assert hv.combine_partial_exposures(partials) == pytest.approx(3.6, abs=0.05)
+    assert hv.combined_daily_exposure(partials) == pytest.approx(3.6, abs=0.05)
 
 
 def test_iso5349_1_example_multi_operation() -> None:
@@ -608,7 +608,7 @@ def test_hav_daily_exposure_matches_partial_combination() -> None:
     durations = [2 * 3600.0, 1 * 3600.0]
     direct = hv.hav_daily_exposure(values, durations)
     partials = [hv.daily_exposure(v, d) for v, d in zip(values, durations, strict=True)]
-    assert direct == pytest.approx(hv.combine_partial_exposures(partials))
+    assert direct == pytest.approx(hv.combined_daily_exposure(partials))
 
 
 def test_energy_equivalent_acceleration() -> None:
@@ -739,9 +739,9 @@ def test_daily_exposure_rejects_negative() -> None:
         hv.daily_exposure(-1.0, 3600.0)
 
 
-def test_combine_partial_exposures_rejects_empty() -> None:
+def test_combined_daily_exposure_rejects_empty() -> None:
     with pytest.raises(ValueError, match=r"'partials' must be a non-empty"):
-        hv.combine_partial_exposures([])
+        hv.combined_daily_exposure([])
 
 
 def test_hav_daily_exposure_validates() -> None:

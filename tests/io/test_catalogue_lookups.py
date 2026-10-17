@@ -12,7 +12,9 @@ the answer under the very name asked for.
 
 The table below names every lookup with the catalogue it searches by
 default, and a guard walks what the packages publish, so a new lookup that
-does not take ``catalogue=``, or that the table does not list, fails here.
+does not take ``catalogue=``, or that the table does not list, fails here, and
+so does a lookup whose name is not its catalogue's: ``<x>_named`` searches
+``PUBLISHED_<X>``.
 
 The manufacturer here is fictitious, as in every example of the repository.
 """
@@ -55,19 +57,19 @@ LOOKUPS: dict[str, tuple[Lookup, Mapping[str, io.CatalogueRow]]] = {
     ),
     "ground_surfaces_named": (
         environment.ground_surfaces_named,
-        environment.PUBLISHED_GROUND,
+        environment.PUBLISHED_GROUND_SURFACES,
     ),
     "gases_named": (fluids.gases_named, fluids.PUBLISHED_GASES),
     "nonlinearity_named": (fluids.nonlinearity_named, fluids.PUBLISHED_NONLINEARITY),
     "carpets_named": (materials.carpets_named, materials.PUBLISHED_CARPETS),
     "porous_materials_named": (
         materials.porous_materials_named,
-        materials.PUBLISHED_POROUS,
+        materials.PUBLISHED_POROUS_MATERIALS,
     ),
     "absorption_named": (materials.absorption_named, materials.PUBLISHED_ABSORPTION),
-    "resistive_sheet_named": (
-        materials.resistive_sheet_named,
-        materials.PUBLISHED_FLOW_RESISTANCE,
+    "resistive_sheets_named": (
+        materials.resistive_sheets_named,
+        materials.PUBLISHED_RESISTIVE_SHEETS,
     ),
     "scattering_named": (materials.scattering_named, materials.PUBLISHED_SCATTERING),
     "diffusion_named": (materials.diffusion_named, materials.PUBLISHED_DIFFUSION),
@@ -79,8 +81,8 @@ LOOKUPS: dict[str, tuple[Lookup, Mapping[str, io.CatalogueRow]]] = {
         materials.resilient_moduli_named,
         materials.PUBLISHED_RESILIENT_MODULI,
     ),
-    "duct_wall_named": (
-        noise_control.duct_wall_named,
+    "duct_transmission_loss_named": (
+        noise_control.duct_transmission_loss_named,
         noise_control.PUBLISHED_DUCT_TRANSMISSION_LOSS,
     ),
     "solids_named": (solids.solids_named, solids.PUBLISHED_SOLIDS),
@@ -97,8 +99,8 @@ LOOKUPS: dict[str, tuple[Lookup, Mapping[str, io.CatalogueRow]]] = {
         solids.orthotropic_wood_named,
         solids.PUBLISHED_ORTHOTROPIC_WOOD,
     ),
-    "plateau_material_named": (
-        solids.plateau_material_named,
+    "plateau_data_named": (
+        solids.plateau_data_named,
         solids.PUBLISHED_PLATEAU_DATA,
     ),
 }
@@ -151,7 +153,7 @@ def _stranger(row_type: type[io.CatalogueRow]) -> io.CatalogueRow:
     """A published row of a class that is not *row_type*."""
     for candidate in (
         _first(solids.PUBLISHED_SOLIDS),
-        _first(materials.PUBLISHED_POROUS),
+        _first(materials.PUBLISHED_POROUS_MATERIALS),
     ):
         if not isinstance(candidate, row_type):
             return candidate
@@ -187,6 +189,39 @@ def test_the_table_here_lists_every_lookup_the_packages_publish() -> None:
     assert set(published) == set(LOOKUPS)
     for name, (lookup, _) in LOOKUPS.items():
         assert published[name] is lookup, name
+
+
+def _published_names_of(mapping: object) -> set[str]:
+    """Every name a public package publishes *mapping* under, by identity."""
+    names: set[str] = set()
+    for module in pkgutil.walk_packages(phonometry.__path__, "phonometry."):
+        if not module.ispkg or any(
+            part.startswith("_") for part in module.name.split(".")
+        ):
+            continue
+        package = importlib.import_module(module.name)
+        for name in getattr(package, "__all__", ()):
+            if getattr(package, name) is mapping:
+                names.add(name)
+    return names
+
+
+@pytest.mark.parametrize("name", NAMES)
+def test_a_lookup_is_named_after_the_catalogue_it_searches(name: str) -> None:
+    """Guard (c): ``<x>_named`` searches ``PUBLISHED_<X>`` and no other name.
+
+    The catalogue is found by identity among the names the packages publish,
+    so a lookup whose name drifts from its catalogue's, or a catalogue
+    renamed without its lookup, fails here.
+    """
+    _, published = LOOKUPS[name]
+    (catalogue,) = _published_names_of(published)
+    assert catalogue.startswith("PUBLISHED_"), catalogue
+    expected = catalogue.removeprefix("PUBLISHED_").lower() + "_named"
+    assert name == expected, (
+        f"{name} searches {catalogue}; a lookup is named after its catalogue, "
+        f"so it is {expected}"
+    )
 
 
 @pytest.mark.parametrize("name", NAMES)
@@ -374,11 +409,11 @@ def test_the_published_catalogue_and_yours_are_searched_as_one() -> None:
     mine = _mine()
     published = materials.porous_materials_named("Foam")
     both = materials.porous_materials_named(
-        "Foam", catalogue=materials.PUBLISHED_POROUS | mine
+        "Foam", catalogue=materials.PUBLISHED_POROUS_MATERIALS | mine
     )
     assert both == (*published, *mine.values())
     reversed_join = materials.porous_materials_named(
-        "Foam", catalogue=mine | materials.PUBLISHED_POROUS
+        "Foam", catalogue=mine | materials.PUBLISHED_POROUS_MATERIALS
     )
     assert reversed_join == (*mine.values(), *published)
 

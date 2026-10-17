@@ -375,7 +375,7 @@ _ALIASES: dict[str, str] = {
 _SITUATION_INDEX: dict[str, int] = {"A": 0, "B": 1, "C": 2}
 
 # --------------------------------------------------------------------------- #
-# Table 8: Coverage factors (Clause 8). Keyed by confidence level (fraction).
+# Table 8: Coverage factors (Clause 8). Keyed by coverage probability (fraction).
 # --------------------------------------------------------------------------- #
 _COVERAGE_TWO_SIDED: dict[float, float] = {
     0.68: 1.00,
@@ -394,10 +394,10 @@ _COVERAGE_ONE_SIDED: dict[float, float] = {
     0.9995: 3.29,
 }
 
-#: Tolerance for float-matching a confidence fraction against the tabulated
+#: Tolerance for float-matching a coverage probability against the tabulated
 #: Table 8 levels (Clause 8): absorbs decimal-representation noise in
 #: fractions like 0.95 while staying far below the gap between adjacent levels.
-_CONFIDENCE_MATCH_TOL = 1e-9
+_COVERAGE_MATCH_TOL = 1e-9
 
 
 # --------------------------------------------------------------------------- #
@@ -451,7 +451,8 @@ class UncertainValue(RichDisplay):
     :ivar standard_uncertainty: Standard uncertainty ``u``, in dB.
     :ivar coverage_factor: Coverage factor ``k`` (Table 8).
     :ivar expanded_uncertainty: :math:`U = k\,u`, in dB.
-    :ivar confidence: Confidence level as a fraction (e.g. ``0.95``).
+    :ivar coverage: The coverage probability of ``expanded_uncertainty``, as
+        a fraction (e.g. ``0.95``).
     :ivar one_sided: ``True`` for a one-sided interval (conformity checks).
     """
 
@@ -459,7 +460,7 @@ class UncertainValue(RichDisplay):
     standard_uncertainty: float
     coverage_factor: float
     expanded_uncertainty: float
-    confidence: float
+    coverage: float
     _: KW_ONLY
     one_sided: bool
 
@@ -594,24 +595,24 @@ def maximum_repeatability_standard_deviation() -> BandUncertainty:
 # Coverage factors and expansion (Clause 8, Table 8).
 # --------------------------------------------------------------------------- #
 def insulation_coverage_factor(
-    confidence: float = 0.95, *, one_sided: bool = False
+    coverage: float = 0.95, *, one_sided: bool = False
 ) -> float:
-    """Return the coverage factor ``k`` for a confidence level (Table 8).
+    """Return the coverage factor ``k`` for a coverage probability (Table 8).
 
-    :param confidence: Confidence level as a fraction. Two-sided values are
+    :param coverage: Coverage probability as a fraction. Two-sided values are
         ``0.68, 0.80, 0.90, 0.95, 0.99, 0.999``; one-sided values are
         ``0.84, 0.90, 0.95, 0.975, 0.995, 0.9995``.
     :param one_sided: Use the one-sided column (conformity checks, Formulae 4/5).
-    :raises ValueError: Confidence level not tabulated in Table 8.
+    :raises ValueError: Coverage probability not tabulated in Table 8.
     """
     table = _COVERAGE_ONE_SIDED if one_sided else _COVERAGE_TWO_SIDED
     for level, k in table.items():
-        if abs(level - confidence) < _CONFIDENCE_MATCH_TOL:
+        if abs(level - coverage) < _COVERAGE_MATCH_TOL:
             return k
     kind = "one-sided" if one_sided else "two-sided"
     valid = ", ".join(f"{level:g}" for level in table)
     msg = (
-        f"Confidence level {confidence!r} is not tabulated for the {kind} test. "
+        f"Coverage probability {coverage!r} is not tabulated for the {kind} test. "
         f"Valid: {valid}."
     )
     raise ValueError(msg)
@@ -625,13 +626,14 @@ def insulation_expanded_uncertainty(
 ) -> float:
     r"""Return the expanded uncertainty :math:`U = k\,u` (Formula 2, Clause 8).
 
-    The coverage factor ``k`` is taken from Table 8 for the requested confidence
-    level; a minimum of :math:`k = 1` is enforced (Clause 8).
+    The coverage factor ``k`` is taken from Table 8 for the requested coverage
+    probability; a minimum of :math:`k = 1` is enforced (Clause 8).
 
     :param u: Standard uncertainty ``u``, in dB (must be non-negative).
-    :param coverage: Confidence level as a fraction (see :func:`insulation_coverage_factor`).
+    :param coverage: Coverage probability as a fraction (see
+        :func:`insulation_coverage_factor`).
     :param one_sided: Use the one-sided coverage factor (conformity checks).
-    :raises ValueError: Negative ``u`` or an untabulated confidence level.
+    :raises ValueError: Negative ``u`` or an untabulated coverage probability.
     """
     if u < 0:
         msg = "Standard uncertainty u must be non-negative."
@@ -660,7 +662,7 @@ def uncertain_value(
     :param value: Best estimate ``y`` (e.g. ``Rw`` in dB).
     :param quantity: Rating descriptor (see :func:`single_number_uncertainty`).
     :param situation: Measurement situation ``"A"``, ``"B"`` or ``"C"`` (Clause 5.2).
-    :param coverage: Confidence level as a fraction.
+    :param coverage: Coverage probability as a fraction.
     :param one_sided: Use the one-sided coverage factor.
     :param upper_limit: Use the ``σR95`` upper limit (airborne, situation A).
     """
@@ -671,7 +673,7 @@ def uncertain_value(
         standard_uncertainty=u,
         coverage_factor=k,
         expanded_uncertainty=k * u,
-        confidence=coverage,
+        coverage=coverage,
         one_sided=one_sided,
     )
 
@@ -679,25 +681,6 @@ def uncertain_value(
 # --------------------------------------------------------------------------- #
 # Combination of uncertainties (Clause 6, Annexes A/B/C).
 # --------------------------------------------------------------------------- #
-def combine_uncertainties(*components: float) -> float:
-    r"""Combine independent standard uncertainties in quadrature (Formula C.2).
-
-    :math:`u_\mathrm{c} = \sqrt{\sum u_i^2}` for uncorrelated contributions with unit
-    sensitivity
-    coefficients, also the model/reality combination of Formula (A.2).
-
-    :param components: Standard-uncertainty contributions, in dB (non-negative).
-    :raises ValueError: No components, or a negative component.
-    """
-    if not components:
-        msg = "At least one uncertainty component is required."
-        raise ValueError(msg)
-    if any(c < 0 for c in components):
-        msg = "Uncertainty components must be non-negative."
-        raise ValueError(msg)
-    return sqrt(sum(c * c for c in components))
-
-
 def prediction_input_uncertainty(
     sigma_reproducibility: float,
     sigma_product: float,
@@ -845,7 +828,7 @@ def satisfies_upper_requirement(
     return bool(settled(value + expanded_uncertainty_value - requirement) < 0.0)
 
 
-#: Coverage factors of Table 8 keyed by ``(confidence, one_sided)`` (read-only view).
+#: Coverage factors of Table 8 keyed by ``(coverage, one_sided)`` (read-only view).
 COVERAGE_FACTORS: Mapping[tuple[float, bool], float] = MappingProxyType(
     {
         **{(level, False): k for level, k in _COVERAGE_TWO_SIDED.items()},

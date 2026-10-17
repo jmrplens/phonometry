@@ -388,9 +388,9 @@ and refusing anything narrower, because the background it names includes
 wind-generated noise and the remedy for that is a quieter day.
 
 ```python
-print(noise_control.silencer_background_correction_db([9.0]))   # [0.5] dB off
-print(environment.barrier_background_correction_db([9.0]))      # [-1.] dB added
-print(round(80.0 - noise_control.background_corrected_level_db(
+print(noise_control.silencer_background_correction([9.0]))   # [0.5] dB off
+print(environment.barrier_background_correction([9.0]))      # [-1.] dB added
+print(round(80.0 - noise_control.screen_background_corrected_level(
     [80.0], [71.0])[0], 2))                                     # 0.58 dB off
 ```
 
@@ -404,7 +404,7 @@ ISO 11820 offers a second route around extraneous sound, for the case where the
 sources it works on can be switched off and measured on their own: the energy
 subtraction of Equations (17) and (18), capped at 3 dB. Past the cap the quantity
 is not determined, and what may be stated instead is the inequality of clause 4.
-`extraneous_corrected_mean_level_db` returns the corrected level and whether the
+`extraneous_corrected_mean_level` returns the corrected level and whether the
 cap was reached, so that a capped number cannot be written down as a
 determination. The cap is judged on the margin, where Table 1 draws it. At a
 margin of exactly 3 dB the subtraction takes off 3,02 dB, which is the printed

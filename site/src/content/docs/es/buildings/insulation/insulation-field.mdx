@@ -656,7 +656,7 @@ Las magnitudes a impactos ofrecen solo las situaciones B/C (Tabla 4, sin banda d
 500 Hz en la edición de 2020), y $\Delta L$ solo la situación A. Los descriptores
 son insensibles a mayúsculas y con alias (`rprime_w`/`dnt_w`→`r_w`,
 `lprime_n_w`→`ln_w`); combina componentes independientes en cuadratura con
-`combine_uncertainties`, y redúcelas por $m$ mediciones independientes con
+`metrology.combined_standard_uncertainty`, y redúcelas por $m$ mediciones independientes con
 `reduce_by_independent_measurements` ($u/\sqrt{m}$).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo.svg" alt="Un índice ponderado informado con su incertidumbre expandida bilateral al 95 % en las situaciones A, B y C, con la incertidumbre de reproducibilidad más ancha y la de repetibilidad más estrecha" width="80%" />
@@ -703,15 +703,15 @@ plt.show()
 | `quantity` | str | — | `'r_w'`, `'ln_w'`, `'delta_lw'` (+ alias, variantes `+c`/`+ctr`) | Descriptor de un solo número |
 | `situation` | str | — | `'A'` / `'B'` / `'C'` | Situación de medición (apartado 5.2) |
 | `value` | float | dB | — | Mejor estimación $y$ a la que adjuntar $U$ |
-| `coverage` | float | — | por defecto `0.95` | Nivel de confianza (Tabla 8) |
+| `coverage` | float | — | por defecto `0.95` | Probabilidad de cobertura (Tabla 8) |
 | `one_sided` | bool | — | por defecto `False` | Factor unilateral para verificaciones de conformidad |
 | `upper_limit` | bool | — | por defecto `False` | Selecciona el límite superior $\sigma_\mathrm{R95}$ (ruido aéreo, situación A) |
 
 `band_uncertainty()` devuelve una `BandUncertainty` (`frequencies`,
 `uncertainties`, `.to_arrays()`); `single_number_uncertainty()` un float;
 `uncertain_value()` un `UncertainValue` (`value`, `standard_uncertainty`,
-`coverage_factor`, `expanded_uncertainty`, `.lower`, `.upper`). El mapa de solo
-lectura `COVERAGE_FACTORS` expone la Tabla 8 indexada por `(confidence, one_sided)`.
+`coverage_factor`, `expanded_uncertainty`, `coverage`, `.lower`, `.upper`). El mapa de solo
+lectura `COVERAGE_FACTORS` expone la Tabla 8 indexada por `(coverage, one_sided)`.
 
 ## Más allá de la medición entre dos recintos
 

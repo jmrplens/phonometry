@@ -7664,7 +7664,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   en la página 49 del PDF (p. 47 impresa) de la BS EN 1793-5:2016. Lo demás es
   un recálculo a partir de las celdas impresas.
 - **Comportamiento de la biblioteca:**
-  [`ReflectionIndexResult.expanded_uncertainty`](../src/phonometry/environment/propagation/barrier_reflection.py)
+  [`environment.reflection_index_expanded_uncertainty`](../src/phonometry/environment/propagation/barrier_reflection.py)
   multiplica los valores de la tabla A.1 tal como están impresos. La fila de
   conformidad «EN 1793-5:2016 Table B.2 (expanded uncertainty per band)»
   comprueba las once celdas que se siguen de ellos, y un test fija las otras
@@ -8469,7 +8469,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   transmisión es una entrada.
 - **Comportamiento de la biblioteca:** las filas de conformidad de la tabla
   C.1 toman la columna impresa como entrada de la fórmula (1) y fijan la suma;
-  [`foundation_to_floor_transfer_db`](../src/phonometry/vibration/immission/railway_prediction.py)
+  [`foundation_to_floor_transfer`](../src/phonometry/vibration/immission/railway_prediction.py)
   lee la tabla A.5 tal como está impresa.
 - **Estado:** sin comunicar; el documento es un borrador en consulta.
 
@@ -8711,7 +8711,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Consecuencia para las tablas de la propia norma:** ninguna; la ecuación (2)
   está impresa correctamente donde le toca.
 - **Comportamiento de la biblioteca:**
-  [`sound_power_insulation`](../src/phonometry/noise_control/enclosure_insulation.py)
+  [`enclosure_sound_power_insulation`](../src/phonometry/noise_control/enclosure_insulation.py)
   devuelve $D_{W\mathrm{A}}$ de la ecuación (2) y cita el apartado 6.2 para ella.
 - **Estado:** sin comunicar.
 
@@ -8786,7 +8786,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Consecuencia para las tablas de la propia norma:** ninguna; la fórmula es
   la misma en las dos partes.
 - **Comportamiento de la biblioteca:**
-  [`estimated_a_weighted_insulation`](../src/phonometry/noise_control/enclosure_insulation.py)
+  [`estimated_a_weighted_enclosure_insulation`](../src/phonometry/noise_control/enclosure_insulation.py)
   cita el anexo C de la parte 1 y el anexo D de la parte 2, que es donde cada
   una la imprime.
 - **Estado:** sin comunicar.
@@ -8988,7 +8988,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   modo que tanto la pérdida por transmisión de la ecuación (19) como la pérdida
   por inserción de la ecuación (21) salen 2,08 dB bajas.
 - **Comportamiento de la biblioteca:**
-  [`temperature_field_correction_db`](../src/phonometry/noise_control/silencer_in_situ.py)
+  [`temperature_field_correction`](../src/phonometry/noise_control/silencer_in_situ.py)
   devuelve la ecuación tal como está impresa, porque quien tenga delante la
   ISO 11820 tiene que encontrar el número de la norma, y su docstring nombra
   esta entrada. La fila de conformidad "ISO 11820:1996 Eqs. (20) and (22)" fija
@@ -9705,7 +9705,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   Absorbers and Diffusers*, tercera edición: el encabezado no imprime unidad,
   y las seis celdas imprimen los valores citados, la cuarta como «48 ± 4».
 - **Comportamiento de la biblioteca:** en
-  [`PUBLISHED_GROUND`](../src/phonometry/environment/propagation/ground_surfaces.py)
+  [`PUBLISHED_GROUND_SURFACES`](../src/phonometry/environment/propagation/ground_surfaces.py)
   las seis filas dejan vacío `GroundSurface.porosity`, que es una fracción de 0
   a 1, y guardan la celda como `misprinted`: `why_missing("porosity")` y el
   rechazo de `printed("porosity")` citan la cifra que imprime la página, con el
@@ -9838,7 +9838,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   celda y de la impresión.
 - **Qué hace la biblioteca:** este catálogo publica la columna en SI de cada
   par, así que la celda defectuosa no llega a ningún valor servido desde
-  [`PUBLISHED_FLOW_RESISTANCE`](../src/phonometry/materials/absorbers/resistive_sheets.py).
+  [`PUBLISHED_RESISTIVE_SHEETS`](../src/phonometry/materials/absorbers/resistive_sheets.py).
   La fila guarda los 0.31 kg/m2 impresos, que la columna y el tejido
   respaldan, y su `note` cita la celda en libras y apunta aquí, de modo que
   quien reproduzca el libro vea lo que el libro dice sin que eso entre en
@@ -9882,7 +9882,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Qué hace la biblioteca:** guarda los gramos por metro cuadrado que
   imprime la página, tal como los imprime, en `surface_density_g_m2`. Todas
   las filas de esta tabla en
-  [`PUBLISHED_FLOW_RESISTANCE`](../src/phonometry/materials/absorbers/resistive_sheets.py)
+  [`PUBLISHED_RESISTIVE_SHEETS`](../src/phonometry/materials/absorbers/resistive_sheets.py)
   llevan una `note` que cita los dos valores impresos y el factor exacto entre
   sus unidades y apunta aquí, de modo que la contradicción le llega al lector
   con el número y no en su lugar. La biblioteca ni elige entre las dos
@@ -11851,9 +11851,9 @@ concordancia con las fuentes publicadas:
   la página 13 del PDF (página impresa 5) de la EN ISO 11820:1996 y en la
   página 11 del PDF (página impresa 7) de la ISO 10847:1997. La biblioteca las
   mantiene separadas como
-  [`silencer_background_correction_db`](../src/phonometry/noise_control/silencer_in_situ.py)
+  [`silencer_background_correction`](../src/phonometry/noise_control/silencer_in_situ.py)
   y
-  [`barrier_background_correction_db`](../src/phonometry/environment/propagation/barrier_in_situ.py),
+  [`barrier_background_correction`](../src/phonometry/environment/propagation/barrier_in_situ.py),
   cada una con su convenio de signo y su propio rechazo, y una comprobación de
   conformidad las enfrenta en el margen en el que se separan. No hay que
   fundirlas en un único auxiliar.

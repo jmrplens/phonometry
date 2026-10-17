@@ -16,7 +16,7 @@ import pytest
 from phonometry.building.prediction.detailed_model import EN_12354_AIR
 from phonometry.fluids import PUBLISHED_FLUIDS, Fluid
 from phonometry.materials.absorbers.airflow_resistance import ANNEX_A_AIR
-from phonometry.materials.absorbers.porous import PUBLISHED_AIR
+from phonometry.materials.absorbers.porous import ABSORBER_AIR
 from phonometry.simulation.ntff import SIMULATION_AIR
 
 #: Bies 5e Table C.1, PDF page 746 (printed p. 717), the three rows it prints
@@ -104,7 +104,7 @@ def test_the_catalogue_holds_only_what_it_read_from_a_page() -> None:
         "bies-2017-table-c1-fluids/fresh_water",
         "bies-2017-table-c1-fluids/sea_water",
     }
-    airs = (ANNEX_A_AIR, EN_12354_AIR, PUBLISHED_AIR, SIMULATION_AIR)
+    airs = (ANNEX_A_AIR, EN_12354_AIR, ABSORBER_AIR, SIMULATION_AIR)
     assert not any(state is air for state in PUBLISHED_FLUIDS.values() for air in airs)
 
 
@@ -118,11 +118,10 @@ def test_the_four_airs_of_the_tree_still_disagree_the_way_their_documents_do() -
     """
     assert ANNEX_A_AIR.speed_of_sound == 345.86652
     assert EN_12354_AIR.speed_of_sound == 340.0
-    assert PUBLISHED_AIR.speed_of_sound == 343.0
+    assert ABSORBER_AIR.speed_of_sound == 343.0
     assert SIMULATION_AIR.speed_of_sound == 343.0
     densities = {
-        air.density
-        for air in (ANNEX_A_AIR, EN_12354_AIR, PUBLISHED_AIR, SIMULATION_AIR)
+        air.density for air in (ANNEX_A_AIR, EN_12354_AIR, ABSORBER_AIR, SIMULATION_AIR)
     }
     assert len(densities) == 4
 
@@ -137,8 +136,8 @@ def test_the_two_books_that_print_air_at_twenty_degrees_agree_to_a_tenth() -> No
     """
     bies = PUBLISHED_FLUIDS["bies-2017-table-c1-fluids/air"]
     assert bies.temperature_c == 20.0
-    assert bies.density == pytest.approx(PUBLISHED_AIR.density, rel=1e-3)
-    assert bies.speed_of_sound == PUBLISHED_AIR.speed_of_sound
+    assert bies.density == pytest.approx(ABSORBER_AIR.density, rel=1e-3)
+    assert bies.speed_of_sound == ABSORBER_AIR.speed_of_sound
 
     gap = abs(ANNEX_A_AIR.speed_of_sound - EN_12354_AIR.speed_of_sound)
     assert gap / EN_12354_AIR.speed_of_sound > 1.5e-2

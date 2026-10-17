@@ -36,7 +36,7 @@ def _add2(a: float, b: float) -> float:
 def test_additive_model_combined_uncertainty() -> None:
     # Supplement 1 clause 9.2: y = x1+x2+x3+x4, u(xi)=1 -> uc = 2.0.
     qs = [u.Quantity(0.0, 1.0) for _ in range(4)]
-    result = u.combine_uncertainty(_add4, qs)
+    result = u.uncertainty_propagation(_add4, qs)
     assert result.value == pytest.approx(0.0)
     assert result.combined_uncertainty == pytest.approx(GUM_ADDITIVE_UC, abs=1e-6)
     np.testing.assert_allclose(result.sensitivities, 1.0, atol=1e-6)
@@ -59,13 +59,13 @@ def test_end_gauge_expanded_uncertainty() -> None:
 def test_welch_satterthwaite_effective_dof() -> None:
     # Equal contributions each with dof v -> v_eff = N*v (Annex G.4).
     qs = [u.Quantity(0.0, 1.0, dof=10) for _ in range(4)]
-    result = u.combine_uncertainty(_add4, qs)
+    result = u.uncertainty_propagation(_add4, qs)
     assert result.effective_dof == pytest.approx(GUM_WELCH_VEFF, abs=1e-6)
 
 
 def test_all_type_b_gives_infinite_dof() -> None:
     qs = [u.rectangular(0.0, 1.0), u.triangular(0.0, 1.0)]
-    result = u.combine_uncertainty(lambda a, b: a + b, qs)
+    result = u.uncertainty_propagation(lambda a, b: a + b, qs)
     assert math.isinf(result.effective_dof)
     _, big = result.expanded(0.95)
     assert big == pytest.approx(1.960 * result.combined_uncertainty, rel=1e-3)
@@ -81,10 +81,10 @@ def test_correlation_matrix() -> None:
     # Fully correlated sum: uc = u1 + u2 (not the quadrature sum).
     qs = [u.Quantity(0.0, 1.0), u.Quantity(0.0, 1.0)]
     r = np.array([[1.0, 1.0], [1.0, 1.0]])
-    result = u.combine_uncertainty(lambda a, b: a + b, qs, correlation=r)
+    result = u.uncertainty_propagation(lambda a, b: a + b, qs, correlation=r)
     assert result.combined_uncertainty == pytest.approx(2.0, abs=1e-6)
     # Uncorrelated for comparison: sqrt(2).
-    plain = u.combine_uncertainty(lambda a, b: a + b, qs)
+    plain = u.uncertainty_propagation(lambda a, b: a + b, qs)
     assert plain.combined_uncertainty == pytest.approx(math.sqrt(2.0), abs=1e-6)
 
 
@@ -101,7 +101,7 @@ def test_monte_carlo_matches_supplement1_table3() -> None:
 
 def test_monte_carlo_agrees_with_gum_for_linear_gaussian() -> None:
     qs = [u.Quantity(10.0, 0.5), u.Quantity(5.0, 0.3)]
-    gum = u.combine_uncertainty(lambda a, b: a - b, qs)
+    gum = u.uncertainty_propagation(lambda a, b: a - b, qs)
     mc = u.monte_carlo(lambda a, b: a - b, qs, trials=1_000_000, coverage=0.95, seed=1)
     assert mc.value == pytest.approx(gum.value, abs=0.01)
     assert mc.standard_uncertainty == pytest.approx(gum.combined_uncertainty, rel=0.02)
@@ -110,7 +110,7 @@ def test_monte_carlo_agrees_with_gum_for_linear_gaussian() -> None:
 def test_nonlinear_model_sensitivities() -> None:
     # y = a * b: dy/da = b, dy/db = a at the estimates.
     qs = [u.Quantity(3.0, 0.1), u.Quantity(4.0, 0.2)]
-    result = u.combine_uncertainty(lambda a, b: a * b, qs)
+    result = u.uncertainty_propagation(lambda a, b: a * b, qs)
     assert result.value == pytest.approx(12.0)
     np.testing.assert_allclose(result.sensitivities, [4.0, 3.0], atol=1e-4)
     # uc = sqrt((4*0.1)^2 + (3*0.2)^2) = sqrt(0.16+0.36) = sqrt(0.52).
@@ -120,16 +120,16 @@ def test_nonlinear_model_sensitivities() -> None:
 def test_zero_uncertainty_input() -> None:
     # A constant (zero-uncertainty) input contributes nothing but is handled.
     qs = [u.Quantity(2.0, 0.0), u.Quantity(3.0, 0.5)]
-    result = u.combine_uncertainty(lambda a, b: a + b, qs)
+    result = u.uncertainty_propagation(lambda a, b: a + b, qs)
     assert result.value == pytest.approx(5.0)
     assert result.contributions[0] == pytest.approx(0.0)
     assert result.combined_uncertainty == pytest.approx(0.5, abs=1e-6)
 
 
-def test_expanded_uncertainty_function() -> None:
+def test_expanded_uncertainty_of_a_result() -> None:
     qs = [u.Quantity(0.0, 1.0) for _ in range(4)]
-    result = u.combine_uncertainty(_add4, qs)
-    k, big = u.expanded_uncertainty(result, 0.95)
+    result = u.uncertainty_propagation(_add4, qs)
+    k, big = result.expanded(0.95)
     assert k == pytest.approx(1.960, abs=1e-3)
     assert big == pytest.approx(k * 2.0, abs=1e-6)
 
@@ -170,7 +170,7 @@ def test_invalid_inputs_raise() -> None:
     with pytest.raises(ValueError, match="dof must be positive"):
         u.Quantity(0.0, 1.0, dof=0.0)
     with pytest.raises(ValueError, match="at least one input quantity is required"):
-        u.combine_uncertainty(lambda: 0.0, [])
+        u.uncertainty_propagation(lambda: 0.0, [])
     with pytest.raises(ValueError, match=r"coverage must be in \(0, 1\)"):
         u.coverage_factor(1.5)
     pair = [u.Quantity(0, 1)] * 2
@@ -180,13 +180,13 @@ def test_invalid_inputs_raise() -> None:
     # Symmetric, unit diagonal, but indefinite (|r| > 1).
     indefinite = np.array([[1.0, 1.5], [1.5, 1.0]])
     with pytest.raises(ValueError, match=r"correlation must have shape"):
-        u.combine_uncertainty(_add4, pair, correlation=wrong_shape)
+        u.uncertainty_propagation(_add4, pair, correlation=wrong_shape)
     with pytest.raises(ValueError, match=r"correlation matrix must be symmetric"):
-        u.combine_uncertainty(_add2, pair, correlation=asymmetric)
+        u.uncertainty_propagation(_add2, pair, correlation=asymmetric)
     with pytest.raises(ValueError, match=r"correlation matrix diagonal must be 1\.0"):
-        u.combine_uncertainty(_add2, pair, correlation=non_unit_diagonal)
+        u.uncertainty_propagation(_add2, pair, correlation=non_unit_diagonal)
     with pytest.raises(ValueError, match="positive semi-definite"):
-        u.combine_uncertainty(_add2, pair, correlation=indefinite)
+        u.uncertainty_propagation(_add2, pair, correlation=indefinite)
     quantities = [u.Quantity(0, 1)]
     with pytest.raises(ValueError, match=r"trials must be at least 2"):
         u.monte_carlo(_add4, quantities, trials=0)
@@ -206,7 +206,7 @@ def test_result_fields_and_plot() -> None:
     import matplotlib.pyplot as plt
 
     qs = [u.Quantity(3.0, 0.1, name="a"), u.Quantity(4.0, 0.2, name="b")]
-    result = u.combine_uncertainty(lambda a, b: a * b, qs)
+    result = u.uncertainty_propagation(lambda a, b: a * b, qs)
     assert result.names == ("a", "b")
     assert result.contributions.shape == (2,)
     ax = result.plot()
@@ -227,7 +227,7 @@ def test_correlated_budget_requires_explicit_coverage_factor() -> None:
         u.UncertaintyWarning,
         match=r"Welch-Satterthwaite.*is defined for independent inputs",
     ):
-        result = u.combine_uncertainty(lambda a, b: a - b, qs, correlation=r)
+        result = u.uncertainty_propagation(lambda a, b: a - b, qs, correlation=r)
     assert math.isnan(result.effective_dof)
     # uc = sqrt(2*(1-r)) * 0.1 ~ 0.00447; sane (was ~1e149 via the
     # Welch-Satterthwaite pathology).
@@ -253,7 +253,7 @@ def test_correlated_budget_with_infinite_dof_stays_normal() -> None:
     """
     qs = [u.Quantity(10.0, 0.1), u.Quantity(10.0, 0.1)]
     r = np.array([[1.0, 0.5], [0.5, 1.0]])
-    result = u.combine_uncertainty(lambda a, b: a + b, qs, correlation=r)
+    result = u.uncertainty_propagation(lambda a, b: a + b, qs, correlation=r)
     assert math.isinf(result.effective_dof)
     k, _ = result.expanded(0.95)
     assert k == pytest.approx(1.960, abs=1e-3)
@@ -270,7 +270,7 @@ def test_sensitivity_step_stays_local_on_nonlinear_model() -> None:
     def model(x: float) -> float:
         return math.sin((x - 1.0e9) / 1.0e-2)
 
-    result = u.combine_uncertainty(model, [u.Quantity(x0, ux)])
+    result = u.uncertainty_propagation(model, [u.Quantity(x0, ux)])
     # d/dx sin((x-x0)/1e-2) at x0 = 100; sensitivity must be ~100, not the
     # aliased near-zero value a 15-unit step returns.
     assert abs(result.sensitivities[0]) == pytest.approx(100.0, rel=0.05)
@@ -281,7 +281,7 @@ def test_identity_correlation_keeps_welch_satterthwaite() -> None:
     dof still propagate (no fallback, no warning).
     """
     qs = [u.Quantity(0.0, 1.0, dof=10) for _ in range(4)]
-    result = u.combine_uncertainty(_add4, qs, correlation=np.eye(4))
+    result = u.uncertainty_propagation(_add4, qs, correlation=np.eye(4))
     assert result.effective_dof == pytest.approx(40.0, abs=1e-6)
 
 
@@ -292,7 +292,7 @@ def test_sensitivity_step_survives_tiny_relative_uncertainty() -> None:
     uc = sqrt(2) * 1e-6.
     """
     qs = [u.Quantity(1e9, 1e-6), u.Quantity(1e9, 1e-6)]
-    result = u.combine_uncertainty(lambda a, b: a + b, qs)
+    result = u.uncertainty_propagation(lambda a, b: a + b, qs)
     np.testing.assert_allclose(result.sensitivities, 1.0, rtol=1e-6)
     assert result.combined_uncertainty == pytest.approx(math.sqrt(2.0) * 1e-6, rel=1e-6)
 
@@ -304,7 +304,7 @@ def test_flat_direction_warns_but_computes() -> None:
     """
     qs = [u.Quantity(3.0, 0.1), u.Quantity(4.0, 0.2)]
     with pytest.warns(u.UncertaintyWarning, match="does not change"):
-        result = u.combine_uncertainty(lambda a, b: a + 0.0 * b, qs)
+        result = u.uncertainty_propagation(lambda a, b: a + 0.0 * b, qs)
     assert result.contributions[1] == pytest.approx(0.0)
     assert result.combined_uncertainty == pytest.approx(0.1, rel=1e-9)
 
@@ -331,7 +331,7 @@ def _h1_budget() -> u.UncertaintyResult:
     # (their sensitivities vanish because dtheta = dalpha = 0): the
     # zero-response warning is expected and documented.
     with pytest.warns(u.UncertaintyWarning, match="does not change"):
-        return u.combine_uncertainty(model, qs)
+        return u.uncertainty_propagation(model, qs)
 
 
 def test_gum_h1_end_to_end_combined_uncertainty() -> None:
@@ -396,9 +396,9 @@ def test_gum_h2_correlated_measurement() -> None:
         if name == "Z":
             # Z = V/I ignores phi: the zero-sensitivity warning is expected.
             with pytest.warns(u.UncertaintyWarning, match="does not change"):
-                result = u.combine_uncertainty(model, qs, correlation=r)
+                result = u.uncertainty_propagation(model, qs, correlation=r)
         else:
-            result = u.combine_uncertainty(model, qs, correlation=r)
+            result = u.uncertainty_propagation(model, qs, correlation=r)
         assert result.value == pytest.approx(expected_value, abs=5e-3), name
         assert result.combined_uncertainty == pytest.approx(expected_uc, abs=1e-3), name
 
@@ -439,14 +439,18 @@ def test_budget_rows_must_line_up(field: str, value: object, match: str) -> None
     coefficients at all, so an extra or missing coefficient reaches the chart
     unremarked.
     """
-    good = u.combine_uncertainty(_add2, [u.Quantity(1.0, 0.1), u.Quantity(2.0, 0.2)])
+    good = u.uncertainty_propagation(
+        _add2, [u.Quantity(1.0, 0.1), u.Quantity(2.0, 0.2)]
+    )
     with pytest.raises(ValueError, match=match):
         dataclasses.replace(good, **{field: value})
 
 
 def test_unlabelled_budget_is_not_a_disagreement() -> None:
     """An empty ``names`` is the budget the plot labels ``x1``, ``x2``, ... itself."""
-    good = u.combine_uncertainty(_add2, [u.Quantity(1.0, 0.1), u.Quantity(2.0, 0.2)])
+    good = u.uncertainty_propagation(
+        _add2, [u.Quantity(1.0, 0.1), u.Quantity(2.0, 0.2)]
+    )
     assert dataclasses.replace(good, names=()).names == ()
 
 
@@ -479,7 +483,9 @@ def test_budget_numbers_must_be_finite(field: str, value: object, match: str) ->
     combined-uncertainty line goes the same way, under a legend printing
     "u_c = nan".
     """
-    good = u.combine_uncertainty(_add2, [u.Quantity(1.0, 0.1), u.Quantity(2.0, 0.2)])
+    good = u.uncertainty_propagation(
+        _add2, [u.Quantity(1.0, 0.1), u.Quantity(2.0, 0.2)]
+    )
     with pytest.raises(ValueError, match=match):
         dataclasses.replace(good, **{field: value})
 
@@ -496,7 +502,7 @@ def test_undefined_effective_dof_is_not_a_non_finite_number() -> None:
         u.UncertaintyWarning,
         match=r"Welch-Satterthwaite.*is defined for independent inputs",
     ):
-        correlated = u.combine_uncertainty(
+        correlated = u.uncertainty_propagation(
             _add2, pair, correlation=np.array([[1.0, 0.5], [0.5, 1.0]])
         )
     assert math.isnan(correlated.effective_dof)
@@ -511,7 +517,7 @@ def test_quantity_rejects_nan_uncertainty() -> None:
         u.Quantity(2.0, float("nan"), name="length")
 
 
-def test_combine_uncertainty_rejects_model_undefined_at_the_estimates() -> None:
+def test_uncertainty_propagation_rejects_model_undefined_at_the_estimates() -> None:
     """The other producer of the NaN contribution the budget bar hides.
 
     Pinning ``Quantity.uncertainty`` finite closes only one route: a model
@@ -526,10 +532,10 @@ def test_combine_uncertainty_rejects_model_undefined_at_the_estimates() -> None:
     with pytest.raises(
         ValueError, match=r"'model' returned a non-finite output at the input estimates"
     ):
-        u.combine_uncertainty(outside_domain, inputs)
+        u.uncertainty_propagation(outside_domain, inputs)
 
 
-def test_combine_uncertainty_rejects_model_undefined_one_step_away() -> None:
+def test_uncertainty_propagation_rejects_model_undefined_one_step_away() -> None:
     """A model finite at the estimate but not where clause 5.1 probes it.
 
     ``sqrt`` at an input estimated at zero is finite at the estimate and NaN
@@ -544,7 +550,7 @@ def test_combine_uncertainty_rejects_model_undefined_one_step_away() -> None:
 
     inputs = [u.Quantity(0.0, 1.0, name="a"), u.Quantity(2.0, 0.1, name="b")]
     with pytest.raises(ValueError, match=r"non-finite output when probing a by"):
-        u.combine_uncertainty(half_domain, inputs)
+        u.uncertainty_propagation(half_domain, inputs)
 
 
 def test_monte_carlo_rejects_model_with_non_finite_output() -> None:
@@ -563,3 +569,44 @@ def test_monte_carlo_rejects_model_with_non_finite_output() -> None:
         match=r"'model' returned a non-finite output for \d+ of \d+ trials",
     ):
         u.monte_carlo(partial_model, inputs, trials=2000, seed=1)
+
+
+# ---------------------------------------------------------------------------
+# The one root-sum-square: GUM 5.1.2, ISO 1996-2 Formula (2), ISO 12999-1 C.2
+# ---------------------------------------------------------------------------
+def test_combined_standard_uncertainty_adds_products_in_quadrature() -> None:
+    # A negative product is a negative sensitivity coefficient; it adds the
+    # same variance as the positive one.
+    assert u.combined_standard_uncertainty([3.0, -4.0]) == pytest.approx(5.0)
+    assert u.combined_standard_uncertainty(np.array([0.5])) == pytest.approx(0.5)
+
+
+def test_combined_standard_uncertainty_forms_the_products_of_pairs() -> None:
+    pairs = [(1.0, 2.0), (3.0, -1.0)]
+    assert u.combined_standard_uncertainty(pairs) == pytest.approx(np.hypot(2.0, 3.0))
+
+
+def test_combined_standard_uncertainty_matches_the_gum_propagation() -> None:
+    """Independent inputs with unit sensitivity give what the full budget gives."""
+    qs = [u.Quantity(0.0, value) for value in (0.3, 0.4, 1.2)]
+    budget = u.uncertainty_propagation(lambda a, b, c: a + b - c, qs)
+    assert u.combined_standard_uncertainty([0.3, 0.4, 1.2]) == pytest.approx(
+        budget.combined_uncertainty, rel=1e-9
+    )
+
+
+@pytest.mark.parametrize(
+    ("contributions", "match"),
+    [
+        ([], "'contributions' must not be empty"),
+        ([1.0, float("nan")], "'contributions' must be finite"),
+        ([(1.0, float("inf"))], "'contributions' must be finite"),
+        ([(1.0, 2.0, 3.0)], r"Each pair must be \(uncertainty, sensitivity\)"),
+        ([(-1.0, 2.0)], "The uncertainty of each pair must be non-negative"),
+    ],
+)
+def test_combined_standard_uncertainty_refuses_what_it_cannot_combine(
+    contributions: list[object], match: str
+) -> None:
+    with pytest.raises(ValueError, match=match):
+        u.combined_standard_uncertainty(contributions)  # type: ignore[arg-type]

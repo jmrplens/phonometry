@@ -114,6 +114,7 @@ DIRECTIVITY_ARC_DEG = 30.0
 ```python
 directivity_energy_average(
     levels: ArrayLike,
+    *,
     axis: int = -1,
 ) -> NDArray[np.float64] | float
 ```

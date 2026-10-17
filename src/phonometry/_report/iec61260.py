@@ -62,7 +62,7 @@ _HZ_PER_KHZ = 1000.0
 
 def _binding_margin(result: FilterComplianceResult, cls: int) -> float:
     """Smallest margin to class ``cls`` over every band and requirement."""
-    return min(result.binding_margin_db(req, cls) for req in result.requirements)
+    return min(result.binding_margin(req, cls) for req in result.requirements)
 
 
 def _band_margin(band: dict[str, Any], cls: int) -> float:
@@ -128,7 +128,7 @@ def _requirement_rows(
         cls = result.requirement_class(name)
         reference = cls if cls is not None else max(result.available_classes())
         margin = decimal_comma(
-            f"{result.binding_margin_db(name, reference):+.2f}", language
+            f"{result.binding_margin(name, reference):+.2f}", language
         )
         class_text = (
             t("none", language)

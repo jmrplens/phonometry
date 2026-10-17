@@ -62,7 +62,7 @@ $$
 u_\mathrm{c}^2(y) = \sum_{i=1}^{N} \left(\frac{\partial f}{\partial x_i}\right)^2 u^2(x_i).
 $$
 
-`combine_uncertainty` evaluates the sensitivities by central differences, so
+`uncertainty_propagation` evaluates the sensitivities by central differences, so
 almost any callable model works, with no hand-derived partials. Input quantities
 are described by a `Quantity` (best estimate, standard uncertainty, PDF, degrees
 of freedom).
@@ -139,7 +139,7 @@ quantities = [
     metrology.rectangular(0.0, 0.30, name="Instrument"),
     metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
 ]
-result = metrology.combine_uncertainty(lambda a, b, c, d: a + b + c + d, quantities)
+result = metrology.uncertainty_propagation(lambda a, b, c, d: a + b + c + d, quantities)
 
 print(round(result.value, 2))                 # 74.0
 print(round(result.combined_uncertainty, 3))  # 0.407 dB
@@ -223,7 +223,7 @@ the bias points the other way, and a fully correlated pair can cancel exactly.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_correlation.svg" alt="Left: the combined standard uncertainty of two 0.3 dB terms against their correlation coefficient, rising from zero at minus one through the quadrature value 0.424 at zero to 0.600 at plus one for same-sign sensitivities, and the mirrored curve for opposite signs. Right: the same budget as two bars, 0.424 dB assumed independent against 0.600 dB traceable to the same calibrator, annotated as 41 percent understated" width="92%" />
 
-*Two terms of 0.3 dB each, combined by `combine_uncertainty` with a correlation
+*Two terms of 0.3 dB each, combined by `uncertainty_propagation` with a correlation
 matrix. Treating a fully correlated pair as independent understates $u_\mathrm{c}$ by
 41 % (0.424 dB instead of 0.600 dB) and the error grows with the number of
 terms that share a source. Reading the same curve backwards: a pair with
@@ -249,7 +249,7 @@ correlation = [
     [0.0, 1.0, 1.0, 0.0],
     [0.0, 0.0, 0.0, 1.0],
 ]
-correlated = metrology.combine_uncertainty(  # warns: no Welch-Satterthwaite here
+correlated = metrology.uncertainty_propagation(  # warns: no Welch-Satterthwaite here
     lambda a, b, c, d: a + b + c + d, quantities, correlation=correlation)
 print(round(correlated.combined_uncertainty, 3))            # 0.454 dB (was 0.407)
 print(correlated.effective_dof)                             # nan
@@ -270,7 +270,7 @@ and reports the mean, the standard deviation and the **probabilistically
 symmetric coverage interval** (equal probability in each tail, clause 7.7).
 The inputs are sampled independently; the Supplement's multivariate-Gaussian
 path for non-independent quantities (6.4.8) is not implemented, so correlated
-budgets belong to `combine_uncertainty`. The number of trials is fixed (no
+budgets belong to `uncertainty_propagation`. The number of trials is fixed (no
 adaptive 7.9 procedure, at least 2 trials) and the interval is the symmetric
 one, not the 5.3.4 shortest interval.
 
@@ -321,7 +321,7 @@ a budget of their own:
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_gum_vs_mc.svg" alt="Three stacked panels, each a Monte Carlo histogram with the GUM Gaussian overlaid, the Monte Carlo coverage interval shaded and the GUM Y plus or minus U interval drawn as dashed rules. Top: a dominant rectangular input gives a nearly rectangular output that the Gaussian interval overcovers. Middle: the energy sum of two levels gives a skewed distribution whose mean is offset from the GUM value. Bottom: an absorption coefficient clamped at one gives an asymmetric interval that no symmetric statement can represent" width="88%" />
 
-*The three regimes, each computed with `combine_uncertainty` and
+*The three regimes, each computed with `uncertainty_propagation` and
 `monte_carlo` on the same inputs. **Top**, one dominant rectangular term
 ($a = 1$ dB) beside a small Gaussian one: the output is nearly rectangular, and
 the GUM interval $\pm 1.15$ dB overcovers the Monte Carlo $[-0.98, 0.98]$ by
@@ -361,7 +361,7 @@ quantities = [
     metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
 ]
 model = lambda a, b, c, d: a + b + c + d
-result = metrology.combine_uncertainty(model, quantities)
+result = metrology.uncertainty_propagation(model, quantities)
 mc = metrology.monte_carlo(model, quantities, trials=1_000_000, coverage=0.95, seed=1,
                     keep_samples=True)
 k, U = result.expanded(0.95)
@@ -459,7 +459,7 @@ coverage interval, checked against the clause 9.2 worked examples.
 The adaptive trial-count procedure of Supplement 1 clause 7.9 (the number of
 trials is fixed, with a minimum of 2), the shortest coverage interval of
 clause 5.3.4, and the multivariate-Gaussian sampling of clause 6.4.8 are not
-implemented: correlated budgets stay with `combine_uncertainty`. Supplement 2 (multiple
+implemented: correlated budgets stay with `uncertainty_propagation`. Supplement 2 (multiple
 output quantities) is not implemented at all. The clause 8 validation of the
 GUM framework against the Monte Carlo result is a comparison you make by
 reading the two results, not an automated verdict. Domain budgets prescribed

@@ -26,7 +26,7 @@ the probabilistically symmetric interval only -- the adaptive procedure of
 Supplement 1 clause 7.9 and the shortest coverage interval of 5.3.4 are not
 implemented; its inputs are sampled independently (the multivariate-Gaussian
 path of 6.4.8 for non-independent quantities is not implemented -- use
-:func:`combine_uncertainty` with ``correlation`` for correlated budgets).
+:func:`uncertainty_propagation` with ``correlation`` for correlated budgets).
 """
 
 from __future__ import annotations
@@ -100,7 +100,7 @@ class Quantity(RichDisplay):
 
         The uncertainty must be finite and non-negative: a bare ``< 0.0``
         would pass NaN, which no propagation recovers from:
-        it flows through :func:`combine_uncertainty` into a NaN contribution
+        it flows through :func:`uncertainty_propagation` into a NaN contribution
         the budget plot draws as an invisible bar -- indistinguishable from a
         zero contribution -- under a legend reading ``u_c = nan``.
         """
@@ -200,7 +200,7 @@ class UncertaintyResult(OwnsArrays):
 
         The numbers of the budget must also be finite. The estimate, the
         combined uncertainty and the per-input contributions come from
-        :func:`combine_uncertainty`, which refuses a model that is not finite
+        :func:`uncertainty_propagation`, which refuses a model that is not finite
         where clause 5.1 evaluates it, so NaN here is never the library's own
         output; unrefused, a NaN contribution reaches the chart as a bar of
         width NaN -- drawn nowhere, and so indistinguishable from an input
@@ -431,7 +431,8 @@ def _effective_dof(
             "Welch-Satterthwaite (GUM G.4.1) is defined for independent "
             "inputs only and the GUM defines no correlated form: the "
             "effective degrees of freedom are undefined (NaN) for this "
-            "budget, and expanded() requires an explicit coverage_factor.",
+            "budget, and expanded() requires an explicit "
+            "coverage_factor_override.",
             UncertaintyWarning,
             stacklevel=3,
         )
@@ -445,7 +446,7 @@ def _effective_dof(
     return math.inf
 
 
-def combine_uncertainty(
+def uncertainty_propagation(
     model: Model,
     quantities: Sequence[Quantity],
     correlation: ArrayLike | None = None,
@@ -536,6 +537,60 @@ def combine_uncertainty(
     )
 
 
+def combined_standard_uncertainty(
+    contributions: Sequence[float] | Sequence[tuple[float, float]] | np.ndarray,
+) -> float:
+    r"""Combined standard uncertainty of independent contributions, root-sum-square.
+
+    :math:`u_\mathrm{c} = \sqrt{\sum_j (c_j u_j)^2}`: the law of
+    propagation of uncertainty for uncorrelated input quantities
+    (ISO/IEC Guide 98-3:2008, 5.1.2, Equation (10), written with
+    :math:`c_j u(x_j)` as in 5.1.3), the same sum ISO 1996-2:2017 prints as
+    Formula (2) for an environmental noise level and ISO 12999-1:2020 as
+    Formula (C.2) for building acoustics, where Formula (A.2) adds the
+    model-to-reality term to a predicted value the same way. Every domain
+    that adds independent contributions in quadrature calls this one
+    function; :func:`uncertainty_propagation` is the full budget, with
+    sensitivity coefficients from a model, correlations and degrees of
+    freedom.
+
+    :param contributions: Either the products :math:`c_j u_j`, one per
+        contribution, in the unit of the result (decibels for a level), or
+        ``(u_j, c_j)`` pairs whose product is formed here, with ``u_j``
+        non-negative. Independent inputs are assumed, so there is no
+        covariance term.
+    :return: :math:`u_\mathrm{c}`, in the unit of the contributions.
+    :raises ValueError: If ``contributions`` is empty, holds a value that is
+        not finite, a pair that is not ``(uncertainty, sensitivity)``, or a
+        pair whose uncertainty is negative.
+    """
+    items = list(contributions)
+    if not items:
+        msg = "'contributions' must not be empty."
+        raise ValueError(msg)
+    products = []
+    for item in items:
+        if isinstance(item, (tuple, list, np.ndarray)):
+            pair = np.asarray(item, dtype=np.float64)
+            if pair.shape != (2,):
+                msg = "Each pair must be (uncertainty, sensitivity)."
+                raise ValueError(msg)
+            if pair[0] < 0.0:
+                msg = (
+                    "The uncertainty of each pair must be non-negative; "
+                    f"got {float(pair[0])!r}."
+                )
+                raise ValueError(msg)
+            products.append(pair[0] * pair[1])
+        else:
+            products.append(float(item))
+    arr = np.asarray(products, dtype=np.float64)
+    if not np.all(np.isfinite(arr)):
+        msg = "'contributions' must be finite."
+        raise ValueError(msg)
+    return float(np.sqrt(np.sum(arr**2)))
+
+
 def coverage_factor(coverage: float = 0.95, dof: float = math.inf) -> float:
     r"""Coverage factor ``k`` from the t-distribution (GUM clause 6, Annex G).
 
@@ -556,16 +611,6 @@ def coverage_factor(coverage: float = 0.95, dof: float = math.inf) -> float:
     from scipy.stats import t
 
     return float(t.ppf(p, dof))
-
-
-def expanded_uncertainty(
-    result: UncertaintyResult, coverage: float = 0.95
-) -> tuple[float, float]:
-    """Coverage factor and expanded uncertainty of a GUM result (clause 6).
-
-    Convenience wrapper for :meth:`UncertaintyResult.expanded`.
-    """
-    return result.expanded(coverage)
 
 
 def _sample(q: Quantity, size: int, rng: np.random.Generator) -> np.ndarray:
@@ -611,7 +656,7 @@ def monte_carlo(
 
     The inputs are sampled **independently**: the Supplement's
     multivariate-Gaussian path for non-independent quantities (6.4.8) is not
-    implemented (use :func:`combine_uncertainty` with ``correlation`` for a
+    implemented (use :func:`uncertainty_propagation` with ``correlation`` for a
     correlated budget). The number of trials is fixed (the adaptive procedure
     of clause 7.9 is not implemented) and the reported interval is the
     probabilistically symmetric one (not the 5.3.4 shortest interval).

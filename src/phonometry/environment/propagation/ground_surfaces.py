@@ -72,7 +72,7 @@ from ..._internal.catalogue import (
     search_text,
     take,
 )
-from ...materials.absorbers.porous import PUBLISHED_AIR, delany_bazley, miki
+from ...materials.absorbers.porous import ABSORBER_AIR, delany_bazley, miki
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -83,7 +83,7 @@ if TYPE_CHECKING:
     from ...materials.absorbers.porous import PorousMediumResult
 
 __all__ = [
-    "PUBLISHED_GROUND",
+    "PUBLISHED_GROUND_SURFACES",
     "GroundSurface",
     "ground_surfaces_named",
 ]
@@ -137,7 +137,7 @@ class GroundSurface(CatalogueRow):
         frequency: ArrayLike,
         *,
         model: Literal["delany_bazley", "miki"] = "delany_bazley",
-        fluid: Fluid = PUBLISHED_AIR,
+        fluid: Fluid = ABSORBER_AIR,
     ) -> PorousMediumResult:
         """The ground as a semi-infinite porous half-space.
 
@@ -173,8 +173,8 @@ class GroundSurface(CatalogueRow):
             ground models the outdoor functions take.
         :param fluid: The air above the ground, a
             :class:`~phonometry.fluids.Fluid` (Default:
-            :data:`~phonometry.materials.absorbers.PUBLISHED_AIR`, the air
-            the two models were published with, as the outdoor functions
+            :data:`~phonometry.materials.absorbers.ABSORBER_AIR`, dry air
+            at 20 degC at textbook values, as the outdoor functions
             default to).
         :return: A
             :class:`~phonometry.materials.absorbers.PorousMediumResult`, in
@@ -312,7 +312,9 @@ def _transcribed() -> dict[str, GroundSurface]:
 #: them with more than one number, and the difference is the model each was
 #: fitted with rather than the ground. Use :func:`ground_surfaces_named` to
 #: gather every reading of one name.
-PUBLISHED_GROUND: Mapping[str, GroundSurface] = MappingProxyType(_transcribed())
+PUBLISHED_GROUND_SURFACES: Mapping[str, GroundSurface] = MappingProxyType(
+    _transcribed()
+)
 
 
 def ground_surfaces_named(
@@ -322,11 +324,11 @@ def ground_surfaces_named(
 
     :param name: The surface as a table prints it, matched without regard to
         case.
-    :param catalogue: The rows to search in place of :data:`PUBLISHED_GROUND`:
+    :param catalogue: The rows to search in place of :data:`PUBLISHED_GROUND_SURFACES`:
         a catalogue of your own that :func:`phonometry.io.read_catalogue`
-        returns, ``PUBLISHED_GROUND | mine`` to search both at once, or any
+        returns, ``PUBLISHED_GROUND_SURFACES | mine`` to search both at once, or any
         mapping of key to row (Default: ``None``, which searches
-        :data:`PUBLISHED_GROUND`).
+        :data:`PUBLISHED_GROUND_SURFACES`).
     :return: The rows whose :attr:`GroundSurface.name` matches, in catalogue
         order, which is empty when no row names it.
     :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
@@ -336,7 +338,7 @@ def ground_surfaces_named(
     return tuple(
         row
         for row in rows_to_search(
-            catalogue, PUBLISHED_GROUND, GroundSurface, "ground_surfaces_named"
+            catalogue, PUBLISHED_GROUND_SURFACES, GroundSurface, "ground_surfaces_named"
         )
         if search_text(row.name) == wanted
     )

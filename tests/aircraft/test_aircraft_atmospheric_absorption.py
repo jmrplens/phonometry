@@ -247,7 +247,7 @@ def test_arp866a_formula_at_1_khz() -> None:
     expected = _iso3891_a2(1000.0, 10.0, 80.0, 0.200)
     assert float(res.coefficient_db_per_100m[0]) == pytest.approx(expected, rel=1e-12)
     # ECAC Doc 29 Table D-3b, 1000 Hz at 1000 ft: 1.337 dB.
-    assert float(res.path_attenuation_db(304.8)[0]) == pytest.approx(1.337, abs=5e-4)
+    assert float(res.path_attenuation(304.8)[0]) == pytest.approx(1.337, abs=5e-4)
 
 
 def test_arp866a_evaluates_table_2_frequencies() -> None:
@@ -286,16 +286,16 @@ def test_arp866a_path_attenuation_shapes() -> None:
     res = arp866a_attenuation(
         [500.0, 4000.0], temperature_c=10.0, relative_humidity_percent=80.0
     )
-    one = res.path_attenuation_db(1000.0)
+    one = res.path_attenuation(1000.0)
     assert one.shape == (2,)
     assert np.allclose(one, res.coefficient_db_per_100m * 10.0)
-    many = res.path_attenuation_db([100.0, 1000.0, 5000.0])
+    many = res.path_attenuation([100.0, 1000.0, 5000.0])
     assert many.shape == (2, 3)
     with pytest.raises(ValueError, match="'path_length_m' must be one"):
-        res.path_attenuation_db(-1.0)
+        res.path_attenuation(-1.0)
     grid = [[1.0, 2.0]]
     with pytest.raises(ValueError, match="'path_length_m' must be one"):
-        res.path_attenuation_db(grid)
+        res.path_attenuation(grid)
 
 
 def test_arp866a_refuses_what_the_formula_cannot_take() -> None:

@@ -377,6 +377,11 @@ class TestDirectivityEnergyAverage:
             [10.0 * np.log10(0.5), 10.0 * np.log10(0.5) + 10.0], abs=1e-12
         )
 
+    def test_the_axis_is_written_by_name(self) -> None:
+        levels = np.zeros((2, 29))
+        with pytest.raises(TypeError, match="positional argument"):
+            room.directivity_energy_average(levels, 1)  # type: ignore[misc]
+
     @pytest.mark.parametrize("bearings", [29, 30, 36, 72])
     def test_a_cosine_pattern_averages_to_exactly_half_its_on_axis_energy(
         self, bearings: int

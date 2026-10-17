@@ -78,7 +78,7 @@ from ..._internal.catalogue import (
     take,
 )
 from .porous import (
-    PUBLISHED_AIR,
+    ABSORBER_AIR,
     delany_bazley,
     johnson_champoux_allard,
     miki,
@@ -94,7 +94,7 @@ if TYPE_CHECKING:
     from .porous import PorousMediumResult
 
 __all__ = [
-    "PUBLISHED_POROUS",
+    "PUBLISHED_POROUS_MATERIALS",
     "PorousMaterial",
     "porous_materials_named",
 ]
@@ -289,7 +289,7 @@ class PorousMaterial(CatalogueRow):
         frequency: ArrayLike,
         *,
         model: str = "johnson_champoux_allard",
-        fluid: Fluid = PUBLISHED_AIR,
+        fluid: Fluid = ABSORBER_AIR,
     ) -> PorousMediumResult:
         """The equivalent fluid of this specimen.
 
@@ -303,7 +303,7 @@ class PorousMaterial(CatalogueRow):
             resistivity alone, so they describe a coarser specimen than the
             one the other four parameters pin.
         :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
-            (Default: :data:`~phonometry.materials.absorbers.PUBLISHED_AIR`).
+            (Default: :data:`~phonometry.materials.absorbers.ABSORBER_AIR`).
         :return: A
             :class:`~phonometry.materials.absorbers.PorousMediumResult`.
         :raises ValueError: for an unknown model name, or when the page does
@@ -440,7 +440,7 @@ def _load() -> dict[str, PorousMaterial]:
 #: shear modulus and a thickness the other page does not give. One file per
 #: published table in ``materials/absorbers/data/``, each citing its own page.
 #: Use :func:`porous_materials_named` to gather every reading of one name.
-PUBLISHED_POROUS: Mapping[str, PorousMaterial] = MappingProxyType(_load())
+PUBLISHED_POROUS_MATERIALS: Mapping[str, PorousMaterial] = MappingProxyType(_load())
 
 
 def porous_materials_named(
@@ -458,11 +458,11 @@ def porous_materials_named(
 
     :param name: The specimen name as a table prints it, matched without
         regard to case: ``"Foam"``, ``"foam"``.
-    :param catalogue: The rows to search in place of :data:`PUBLISHED_POROUS`:
+    :param catalogue: The rows to search in place of :data:`PUBLISHED_POROUS_MATERIALS`:
         a catalogue of your own that :func:`phonometry.io.read_catalogue`
-        returns, ``PUBLISHED_POROUS | mine`` to search both at once, or any
+        returns, ``PUBLISHED_POROUS_MATERIALS | mine`` to search both at once, or any
         mapping of key to row (Default: ``None``, which searches
-        :data:`PUBLISHED_POROUS`).
+        :data:`PUBLISHED_POROUS_MATERIALS`).
     :return: The rows whose :attr:`PorousMaterial.name` matches, in catalogue
         order, which is empty when no row names it.
     :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
@@ -472,7 +472,10 @@ def porous_materials_named(
     return tuple(
         row
         for row in rows_to_search(
-            catalogue, PUBLISHED_POROUS, PorousMaterial, "porous_materials_named"
+            catalogue,
+            PUBLISHED_POROUS_MATERIALS,
+            PorousMaterial,
+            "porous_materials_named",
         )
         if search_text(row.name) == wanted
     )

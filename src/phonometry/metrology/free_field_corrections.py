@@ -41,7 +41,7 @@ the microphones, the quantity clauses 12 to 14 judge.
 
 **The uncertainty, Annex I and clauses 9 to 14.**
 :func:`correction_uncertainty_budget` builds the budget of Table I.1 on
-:func:`~phonometry.metrology.combine_uncertainty`: its 15 components, each
+:func:`~phonometry.metrology.uncertainty_propagation`: its 15 components, each
 divided by the divisor its distribution sets, and the effective degrees of
 freedom by Welch-Satterthwaite, which choose the coverage factor for a level of
 confidence of 95 %. :func:`verify_correction_uncertainty` judges the expanded
@@ -112,8 +112,8 @@ from .conformance import _at_most
 from .uncertainty import (
     Quantity,
     UncertaintyResult,
-    combine_uncertainty,
     coverage_factor,
+    uncertainty_propagation,
 )
 
 if TYPE_CHECKING:
@@ -1616,7 +1616,7 @@ def correction_uncertainty_budget(
     from repeated measurements for the repeatability (a15). The divisors of
     Table I.1, :math:`\sqrt{3}`, 2 and 1, turn them into standard
     uncertainties; the combination is
-    :func:`~phonometry.metrology.combine_uncertainty` on Formula (E.6), every
+    :func:`~phonometry.metrology.uncertainty_propagation` on Formula (E.6), every
     component a correction with a sensitivity of :math:`\pm 1`; the effective
     degrees of freedom are Welch-Satterthwaite's, with only the repeatability
     finite; and the coverage factor is the Student factor for them at a level
@@ -1735,7 +1735,7 @@ def correction_uncertainty_budget(
     def model(*components: float) -> float:
         return offset + float(np.dot(weights, np.asarray(components, dtype=np.float64)))
 
-    result = combine_uncertainty(model, quantities)
+    result = uncertainty_propagation(model, quantities)
     return CorrectionUncertaintyBudget(
         frequency_hz=frequency,
         descriptors=tuple(descriptors),

@@ -578,7 +578,7 @@ def nipts(
     )
 
 
-def combine_age_and_noise(htla: ArrayLike, nipts_value: ArrayLike) -> np.ndarray:
+def age_and_noise_threshold(htla: ArrayLike, nipts_value: ArrayLike) -> np.ndarray:
     r"""Combine the age and noise components by Formula (1) (clause 6.1).
 
     :math:`H' = H + N - H N / 120`, the hearing threshold level associated
@@ -640,7 +640,7 @@ def htlan(
     freqs = _select(NIPTS_FREQUENCIES, frequencies)
     htla = age_threshold(age, sex, fractile, frequencies=freqs).threshold
     noise = nipts(l_ex, years, fractile, frequencies=freqs).value
-    threshold = combine_age_and_noise(htla, noise)
+    threshold = age_and_noise_threshold(htla, noise)
 
     return HtlanResult(
         age=float(age),

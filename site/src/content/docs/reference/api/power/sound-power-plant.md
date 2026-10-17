@@ -185,7 +185,7 @@ of clause 6 a) and c), which the standard states without a number.
 | `contour` | The contour, from [`plant_measurement_contour`](/phonometry/reference/api/power/sound-power-plant/#plant_measurement_contour). |
 | `sound_power` | The determination made on it, or `None` to judge the arrangement alone. Its geometry must be the contour's. |
 | `measurement_time_s` | The measurement time at each position, in seconds, one value or one per measured position; `None` to leave 9.5.1 unjudged. |
-| `leq_range_db` | With an integrating instrument, the range (highest less lowest) over which the $L_{\mathrm{eq},T}$ reading still moved when it was taken, in decibels: one value, or one per measured position (or per position and band); `None` to leave 9.5.3 unjudged. A sound level meter's reading is judged by [`plant_steady_reading_db`](/phonometry/reference/api/power/sound-power-plant/#plant_steady_reading_db) instead (9.5.2). |
+| `leq_range_db` | With an integrating instrument, the range (highest less lowest) over which the $L_{\mathrm{eq},T}$ reading still moved when it was taken, in decibels: one value, or one per measured position (or per position and band); `None` to leave 9.5.3 unjudged. A sound level meter's reading is judged by [`plant_steady_reading`](/phonometry/reference/api/power/sound-power-plant/#plant_steady_reading) instead (9.5.2). |
 
 **Returns:** A [`PlantMeasurementCheck`](/phonometry/reference/api/power/sound-power-plant/#plantmeasurementcheck).
 
@@ -365,18 +365,10 @@ standard sets no number for "markedly".
 | :--- | :--- |
 | ValueError | for a band outside the method, only one of the two weather values, or a humidity outside 0 % to 100 %. |
 
-## PLANT_BACKGROUND_CORRECTION_DB
-
-*Constant* (`mapping`).
+## plant_background_correction
 
 ```python
-PLANT_BACKGROUND_CORRECTION_DB = {6: 1.0, 7: 1.0, 8: 1.0, 9: 0.5, 10: 0.5}
-```
-
-## plant_background_correction_db
-
-```python
-plant_background_correction_db(
+plant_background_correction(
     level_difference_db: ArrayLike,
 ) -> float | NDArray[np.float64]
 ```
@@ -404,6 +396,14 @@ binary, is the 6 dB it is, and 64,1 - 55,6 dB the 8,5 dB that rounds up.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-finite difference or one below 6 dB, which the table calls an invalid measurement. |
+
+## PLANT_BACKGROUND_CORRECTION_DB
+
+*Constant* (`mapping`).
+
+```python
+PLANT_BACKGROUND_CORRECTION_DB = {6: 1.0, 7: 1.0, 8: 1.0, 9: 0.5, 10: 0.5}
+```
 
 ## plant_characteristic_height_m
 
@@ -512,18 +512,10 @@ the plan and found wanting is how the procedure starts (9.1.2.3, NOTE 6).
 | :--- | :--- |
 | ValueError | for polygons that do not form a contour round the plant area, or omitted positions without a layout to refer to. |
 
-## PLANT_METHOD_UNCERTAINTY_DB
-
-*Constant* (`mapping`).
+## plant_method_uncertainty
 
 ```python
-PLANT_METHOD_UNCERTAINTY_DB = {0.05: (-3.5, 3.0), 0.1: (-2.5, 2.5), 0.2: (-2.5, 2.0), 0.5: (-2.0, 1.5)}
-```
-
-## plant_method_uncertainty_db
-
-```python
-plant_method_uncertainty_db(distance_ratio: float) -> tuple[float, float]
+plant_method_uncertainty(distance_ratio: float) -> tuple[float, float]
 ```
 
 The uncertainty inherent in the method, Table 1: a 95 % confidence
@@ -551,6 +543,14 @@ applied, the uncertainty may be greater than the table's.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a ratio outside 0,05 to 0,5. |
+
+## PLANT_METHOD_UNCERTAINTY_DB
+
+*Constant* (`mapping`).
+
+```python
+PLANT_METHOD_UNCERTAINTY_DB = {0.05: (-3.5, 3.0), 0.1: (-2.5, 2.5), 0.2: (-2.5, 2.0), 0.5: (-2.0, 1.5)}
+```
 
 ## plant_microphone_height_m
 
@@ -642,10 +642,10 @@ The geometry is the one 9.2 measures on the plot plan, to within ±5 %;
 | :--- | :--- |
 | ValueError | for levels that do not match the bands, a background less than 6 dB below a level, a non-positive geometry, a microphone angle outside (0°, 90°], or half a weather. |
 
-## plant_steady_reading_db
+## plant_steady_reading
 
 ```python
-plant_steady_reading_db(maximum_db: float, minimum_db: float) -> float
+plant_steady_reading(maximum_db: float, minimum_db: float) -> float
 ```
 
 The level read on a sound level meter from a steady noise, 9.5.2.

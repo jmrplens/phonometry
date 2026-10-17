@@ -393,7 +393,7 @@ def _chk_iso12999_expanded() -> Outcome:
 )
 def _chk_iso12999_2_table4() -> Outcome:
     res = ph.materials.sound_absorption_coefficient_uncertainty(
-        ref.ISO12999_2_TABLE4_ALPHA_S, ref.ISO12999_2_TABLE4_FREQ, confidence=0.95
+        ref.ISO12999_2_TABLE4_ALPHA_S, ref.ISO12999_2_TABLE4_FREQ, coverage=0.95
     )
     got = res.reported_expanded_uncertainty
     expected = np.asarray(ref.ISO12999_2_TABLE4_U_K2, dtype=float)

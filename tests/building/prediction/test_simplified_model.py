@@ -228,13 +228,13 @@ def test_kij_min_formula_29() -> None:
 # --------------------------------------------------------------------------
 
 
-def test_combine_linings() -> None:
+def test_combined_lining_improvement() -> None:
     # Two layers: larger + half the smaller. Annex H second example uses
     # 14 + 0.5*14 = 21 for a floating floor on both sides.
-    assert building.combine_linings(14.0, 14.0) == pytest.approx(21.0)
-    assert building.combine_linings(10.0, 4.0) == pytest.approx(12.0)
+    assert building.combined_lining_improvement(14.0, 14.0) == pytest.approx(21.0)
+    assert building.combined_lining_improvement(10.0, 4.0) == pytest.approx(12.0)
     # single lining
-    assert building.combine_linings(8.0, 0.0) == pytest.approx(8.0)
+    assert building.combined_lining_improvement(8.0, 0.0) == pytest.approx(8.0)
 
 
 # --------------------------------------------------------------------------
@@ -458,7 +458,7 @@ def test_airborne_second_example_floating_floor() -> None:
             12.4,
             8.9,
             4.5,
-            building.combine_linings(14.0, 14.0),
+            building.combined_lining_improvement(14.0, 14.0),
             14.0,
         ),
         ("ceiling", 46.0, 14.4, 9.2, 4.5, 0.0, 0.0),

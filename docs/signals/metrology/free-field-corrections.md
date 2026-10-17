@@ -106,7 +106,7 @@ zero.
 `metrology.correction_uncertainty_budget` takes the fifteen components of
 Table I.1 as Table I.2 states them, divides each by its divisor (`√3`, 2 for
 `C_FF,RM`, 1 for the repeatability), combines them on
-`metrology.combine_uncertainty` and takes the coverage factor from the
+`metrology.uncertainty_propagation` and takes the coverage factor from the
 Welch-Satterthwaite effective degrees of freedom at 95 %:
 
 ```python

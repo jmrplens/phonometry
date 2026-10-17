@@ -82,7 +82,7 @@ from ..._internal.validation import (
     require_scalar,
 )
 from ..._internal.warnings import PhonometryWarning
-from .porous import PUBLISHED_AIR, Complex
+from .porous import ABSORBER_AIR, Complex
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -168,7 +168,7 @@ def slit_effective_properties(
     frequency: ArrayLike,
     *,
     slit_height_m: float,
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> tuple[Complex, Complex]:
     r"""Effective density and bulk modulus of a narrow slit of height ``h``.
 
@@ -214,7 +214,7 @@ def rectangular_duct_properties(
     frequency: ArrayLike,
     *,
     side_m: float,
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
     sum_terms: int = _DUCT_TERMS,
 ) -> tuple[Complex, Complex]:
     r"""Effective density and bulk modulus of a square duct of the given side.
@@ -406,7 +406,7 @@ def helmholtz_resonator_impedance(
     lattice_step_m: float | None = None,
     end_correction: bool = True,
     geometry: str = "square",
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
     sum_terms: int = _DUCT_TERMS,
 ) -> Complex:
     r"""Acoustic impedance of a Helmholtz resonator with visco-thermal losses.
@@ -659,7 +659,7 @@ def slit_helmholtz_absorber(
     end_correction: bool = True,
     slit_radiation: bool = True,
     resonator_geometry: str = "square",
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> SlitResonatorAbsorberResult:
     r"""Transfer-matrix prediction of a slit panel loaded with resonators.
 
@@ -849,7 +849,7 @@ def critical_coupling_design(
     cavity_length_bounds_m: tuple[float, float] = (2.0e-3, 200.0e-3),
     end_correction: bool = True,
     slit_radiation: bool = True,
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> CriticalCouplingResult:
     r"""Solve resonator/slit geometry for perfect absorption at a frequency.
 

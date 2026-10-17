@@ -48,7 +48,7 @@ The two guards worth knowing
 Clause 5.7 corrects for the background with the ordinary energy subtraction,
 not with a table, and it draws two hard lines: under 6 dB "the environmental
 conditions are not acceptable", and over 10 dB there is nothing to correct.
-:func:`background_corrected_level_db` refuses the first and skips the second.
+:func:`screen_background_corrected_level` refuses the first and skips the second.
 
 Clause 5.9 is the other: the A-weighted attenuation :math:`D_{p\mathrm{A}}` **shall not
 be determined when an artificial sound source is used**, because an A-weighted
@@ -104,9 +104,9 @@ __all__ = [
     "SCREEN_DISTANCE_FACTORS",
     "ScreenInSituResult",
     "ScreenInSituWarning",
-    "background_corrected_level_db",
-    "directivity_index_db",
-    "impulse_mean_level_db",
+    "screen_background_corrected_level",
+    "screen_source_directivity_index",
+    "impulse_mean_level",
     "microphone_distances_m",
     "screen_attenuation",
 ]
@@ -176,7 +176,7 @@ class ScreenInSituWarning(PhonometryWarning):
     """The measurement is outside a condition ISO 11821 states."""
 
 
-def background_corrected_level_db(
+def screen_background_corrected_level(
     levels: ArrayLike, background_levels: ArrayLike
 ) -> NDArray[np.float64]:
     r"""The level with the background taken off, clause 5.7.
@@ -221,7 +221,7 @@ def background_corrected_level_db(
     return np.asarray(np.where(judged > upper, levels, corrected), dtype=np.float64)
 
 
-def directivity_index_db(levels: ArrayLike) -> NDArray[np.float64]:
+def screen_source_directivity_index(levels: ArrayLike) -> NDArray[np.float64]:
     r"""The directivity index of a source, definition 3.10.
 
     :math:`DI_i = L_{360} - L_{30,i}`, where :math:`L_{360}` is the
@@ -286,7 +286,7 @@ def microphone_distances_m(screen_height_m: float) -> NDArray[np.float64]:
     return np.maximum(factors * height, MINIMUM_MICROPHONE_DISTANCE_M)
 
 
-def impulse_mean_level_db(repeat_levels_db: ArrayLike) -> float:
+def impulse_mean_level(repeat_levels_db: ArrayLike) -> float:
     r"""The level of an impulsive measurement, 5.6.2.1.
 
     A single-impulse source is measured at least three times with the S time
@@ -409,7 +409,7 @@ def screen_attenuation(
     at the same position, band by band. Clause 5.8 adds the condition that
     makes the subtraction mean anything: either both levels are time-averaged,
     or both are arithmetic means of several :math:`L_{S\text{max}}` values.
-    The two kinds are not mixed, and :func:`impulse_mean_level_db` is the
+    The two kinds are not mixed, and :func:`impulse_mean_level` is the
     second of them.
 
     :math:`D_{p\mathrm{A}} = L_{p\mathrm{A}1} - L_{p\mathrm{A}2}` is clause 5.9, and it carries the

@@ -51,7 +51,7 @@ bands = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
 without = [96.0, 98.0, 99.0, 97.0, 94.0, 89.0]   # dB, machine alone
 with_box = [88.0, 86.0, 81.0, 74.0, 68.0, 63.0]  # dB, enclosure fitted
 
-res = noise_control.sound_power_insulation(
+res = noise_control.enclosure_sound_power_insulation(
     without, with_box, frequencies=bands, band_fraction=1,
 )
 print(res.rounded())                    # [ 8 12 18 23 26 26] dB
@@ -61,7 +61,7 @@ print(round(res.a_weighted_insulation, 1))   # 19.3 dB
 The A-weighted number is the single figure a declaration carries. Clause 9.4
 reports every band value rounded to the nearest decibel. Both parts also
 measure a sound pressure insulation at a stated position, Equations (3) and
-(4), through `sound_pressure_insulation`: a different quantity with the same
+(4), through `enclosure_sound_pressure_insulation`: a different quantity with the same
 arithmetic, belonging to one microphone position, which is why the standard
 makes the position reportable.
 

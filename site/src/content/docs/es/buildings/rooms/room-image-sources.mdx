@@ -238,7 +238,7 @@ plt.show()
 pared `(6, n_bandas)`, un vector por banda o una lista `frequencies`) para
 sintetizar un decaimiento por banda de octava; un vector de longitud 6 fija cada
 pared por separado (orden `x0, xL, y0, yL, z0, zL`); y `air_attenuation_per_m` (el
-coeficiente de intensidad `m` de `air_attenuation_m`) añade la pérdida de aire
+coeficiente de intensidad `m` de `air_power_attenuation_per_m`) añade la pérdida de aire
 `exp(-m r / 2)` que se come la cola de altas frecuencias.
 
 ```python
@@ -274,7 +274,7 @@ el mismo argumento le quita decenas de por ciento a la banda más alta.*
 import matplotlib.pyplot as plt
 # `np`, `room`, `freqs` y `alpha` vienen del bloque por bandas de arriba.
 
-# environment.air_attenuation_m(freqs, temperature_c=20.0, relative_humidity_percent=50.0), Np/m a 20 C y 50 % de HR
+# environment.air_power_attenuation_per_m(freqs, temperature_c=20.0, relative_humidity_percent=50.0), 1/m a 20 C y 50 % de HR
 m = [3.02e-4, 6.28e-4, 1.074e-3, 2.277e-3, 6.831e-3]
 
 fig, ax = plt.subplots()

@@ -192,7 +192,7 @@ def test_annex_c_worked_example() -> None:
 
     h = np.array(ISO1999_ANNEX_C_H)
     n = np.array(ISO1999_ANNEX_C_N)
-    compressed = m.combine_age_and_noise(h, n) - h
+    compressed = m.age_and_noise_threshold(h, n) - h
     # C.5: 19 - 36 x 19 / 120 = 13,3 dB at 4 kHz.
     assert compressed[2] == pytest.approx(ISO1999_ANNEX_C_N_4K_COMPRESSED, abs=1e-9)
 
@@ -204,10 +204,10 @@ def test_annex_c_worked_example() -> None:
     assert h.mean() + noise.mean() == pytest.approx(ISO1999_ANNEX_C_HTLAN, abs=0.05)
 
 
-def test_combine_age_and_noise_matches_htlan() -> None:
+def test_age_and_noise_threshold_matches_htlan() -> None:
     """Formula (1) exposed on its own agrees with the ``htlan`` composition."""
     r = m.htlan(55, "female", 92.0, 25.0, 0.75)
-    np.testing.assert_allclose(m.combine_age_and_noise(r.htla, r.nipts), r.threshold)
+    np.testing.assert_allclose(m.age_and_noise_threshold(r.htla, r.nipts), r.threshold)
 
 
 def test_outside_validated_domain_warns() -> None:

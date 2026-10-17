@@ -279,7 +279,7 @@ EN 29053 del mismo material.
 
 ### Un suelo de un catálogo
 
-Una fila de `environment.PUBLISHED_GROUND`, o de [un catálogo propio](/phonometry/es/io/material-catalogues/),
+Una fila de `environment.PUBLISHED_GROUND_SURFACES`, o de [un catálogo propio](/phonometry/es/io/material-catalogues/),
 da la impedancia por sí misma: `GroundSurface.medium` es el semiespacio
 poroso de su resistividad al flujo efectiva, por el modelo de Delany y
 Bazley o por el de Miki, que `ground_effect` recibe como `impedance`,
@@ -293,12 +293,12 @@ Miki del caso anterior:
 
 ```python
 octaves = [125.0, 250.0, 500.0, 1000.0]
-pasture = environment.PUBLISHED_GROUND["bies-2017-table-5-2/normal_uncompacted_ground"]
+pasture = environment.PUBLISHED_GROUND_SURFACES["bies-2017-table-5-2/normal_uncompacted_ground"]
 ground = pasture.medium(octaves, model="miki")
 over_pasture = environment.ground_effect(octaves, 1.0, 1.5, 50.0, impedance=ground)
 print(over_pasture.excess_attenuation.round(2))   # [  3.84  -3.18 -13.19  -2.96]
 
-field = environment.PUBLISHED_GROUND["cox-2017-table-6-7/sports_field_delany_bazley"]
+field = environment.PUBLISHED_GROUND_SURFACES["cox-2017-table-6-7/sports_field_delany_bazley"]
 try:
     field.medium(octaves, model="miki")
 except ValueError as error:

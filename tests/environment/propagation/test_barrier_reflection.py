@@ -211,12 +211,12 @@ class TestAdrienneWindow:
 
     def test_the_notch_of_the_standard_window_is_about_160_hz(self) -> None:
         # Garai and Guidorzi (2000), III.D.4: about 160 Hz for 7,9 ms.
-        notch = prop.adrienne_low_frequency_limit_hz(7.9e-3)
+        notch = prop.adrienne_low_frequency_limit(7.9e-3)
         assert notch == pytest.approx(162.55, abs=0.05)
 
     def test_the_notch_rises_as_the_window_shortens(self) -> None:
         notches = [
-            prop.adrienne_low_frequency_limit_hz(t) for t in (7.9e-3, 6.0e-3, 1.3e-3)
+            prop.adrienne_low_frequency_limit(t) for t in (7.9e-3, 6.0e-3, 1.3e-3)
         ]
         assert notches[0] < notches[1] < notches[2]
         assert notches[1] == pytest.approx(216.52, abs=0.05)
@@ -231,7 +231,7 @@ class TestAdrienneWindow:
         band = (freqs > 100.0) & (freqs < 250.0)
         sampled = float(freqs[band][np.argmin(spectrum[band])])
         assert sampled == pytest.approx(
-            prop.adrienne_low_frequency_limit_hz(7.9e-3), abs=0.5
+            prop.adrienne_low_frequency_limit(7.9e-3), abs=0.5
         )
 
 
@@ -623,8 +623,11 @@ class TestAnnexB:
         assert result.lowest_band_hz == pytest.approx(200.0)
 
     def test_table_b2_from_table_a1(self) -> None:
+        uncertainty = prop.reflection_index_expanded_uncertainty()
+        per_band, rating = uncertainty.expanded_uncertainty, uncertainty.rating_db
         result = prop.reflection_index_from_positions(self._positions())
-        per_band, rating = result.expanded_uncertainty()
+        np.testing.assert_array_equal(uncertainty.frequencies, result.frequencies)
+        assert (uncertainty.estimate, uncertainty.coverage_factor) == ("high", 1.96)
         high = [
             prop.REFLECTION_INDEX_PRECISION[band]["reproducibility"][2]
             for band in prop.TRAFFIC_NOISE_BANDS_HZ
@@ -648,17 +651,20 @@ class TestAnnexB:
         assert round(oracle.TABLE_B2_RATING_DB + rating, 2) == pytest.approx(high_end)
 
     def test_the_other_columns_of_table_a1(self) -> None:
-        result = prop.reflection_index_from_positions(self._positions())
-        median, rating = result.expanded_uncertainty(
+        median = prop.reflection_index_expanded_uncertainty(
             estimate="median", coverage_factor=2.0
         )
-        assert median[0] == pytest.approx(2.0 * 0.27)
-        assert rating == pytest.approx(2.0 * 0.68)
+        assert median.expanded_uncertainty[0] == pytest.approx(2.0 * 0.27)
+        assert median.rating_db == pytest.approx(2.0 * 0.68)
+
+    def test_the_uncertainty_is_read_only(self) -> None:
+        uncertainty = prop.reflection_index_expanded_uncertainty()
+        with pytest.raises(ValueError, match="read-only"):
+            uncertainty.expanded_uncertainty[0] = 0.0
 
     def test_an_unknown_column_is_refused(self) -> None:
-        result = prop.reflection_index_from_positions(self._positions())
         with pytest.raises(ValueError, match="'estimate' must be one of"):
-            result.expanded_uncertainty(estimate="mean")  # type: ignore[arg-type]
+            prop.reflection_index_expanded_uncertainty(estimate="mean")  # type: ignore[arg-type]
 
     def test_a_band_left_unmeasured_is_left_out(self) -> None:
         values = self._positions().copy()

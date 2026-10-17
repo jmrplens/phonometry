@@ -202,12 +202,12 @@ suelo, a través del coeficiente de reflexión de presión de sus cuñas, 0,30 a
 100 Hz, que baja hasta 0,05 a 10 kHz. Seis recorridos salen del pie de la
 fuente con pasos de 25 mm, uno por cada trayectoria que pide A.3.3, cada uno
 con su objetivo, y otro más hacia el techo, y se miden a las once
-frecuencias de A.2.3, que enumera `qualification_frequencies_hz`: las bandas
+frecuencias de A.2.3, que enumera `qualification_frequencies`: las bandas
 de tercio de octava por debajo de 125 Hz y por encima de 4 000 Hz y las
 frecuencias centrales de octava entre ambas.
 
 ```python
-grid = emission.qualification_frequencies_hz()
+grid = emission.qualification_frequencies()
 print(grid)   # [100. 125. 250. 500. 1000. 2000. 4000. 5000. 6300. 8000. 10000.]
 
 walls = [(0, -4.0), (0, 4.0), (1, -3.0), (1, 3.0), (2, 5.0)]   # las puntas de las cuñas
@@ -312,8 +312,8 @@ plt.show()
 | `MicrophoneTraverse(positions_m, levels, monitor_levels_db=None, background_levels=None, name="", targets=())` | 5.1.3.2, A.3.3 | un recorrido | `nan` marca un punto no medido a una frecuencia, que es como se escribe un paso que cambia con la frecuencia; `targets` nombra hacia qué se elige la trayectoria entre `"dihedral corner"`, `"trihedral corner"`, `"boundary centre"`, `"closest boundary"` y `"unique features"` |
 | `MicrophoneTraverse.along(direction, distances, levels, *, start_m=(0, 0, 0), ...)` | 5.1.3.2 | un recorrido | Trazado a lo largo de una recta |
 | `inverse_square_law_deviations(traverses, *, frequencies, room, origin_m=None, source_box_m=None)` | Fórmulas (1) a (4) | `InverseSquareLawResult` | Una llamada por fuente de ensayo; `origin_m` o `source_box_m`, no las dos |
-| `inverse_square_law_tolerance_db(frequencies, *, room)` | Tabla A.1 | límite por banda [dB] | Un tono se lee en la banda de tercio de octava que lo contiene |
-| `qualification_frequencies_hz(low_hz=100.0, high_hz=10000.0)` | A.2.3 | frecuencias [Hz] | Once en el intervalo mínimo |
+| `inverse_square_law_tolerance(frequencies, *, room)` | Tabla A.1 | límite por banda [dB] | Un tono se lee en la banda de tercio de octava que lo contiene |
+| `qualification_frequencies(low_hz=100.0, high_hz=10000.0)` | A.2.3 | frecuencias [Hz] | Once en el intervalo mínimo |
 
 El resultado lleva las distancias, los niveles corregidos, $b$ por recorrido y
 frecuencia junto al valor inicial de la fórmula (3), las desviaciones, la
@@ -484,7 +484,7 @@ print(caught[0].message)
 | `check_free_field(results, *, bandwidth, source_directionality=None, measurement_radius_m=None, reflecting_plane_absorption_coefficient=None, reflecting_plane_margin_m=None, paths_in_working_area=None, speed_of_sound=343.0)` | Anexo A modificado | `FreeFieldCheck` | Un resultado por fuente de ensayo, con frecuencias disjuntas; lo que no se dio queda en `not_judged` |
 | `verify_source_directionality(levels, *, frequencies, room)` | Anexo B de ISO 26101 | `SourceDirectionalityResult` | 32 o 64 posiciones, una columna por banda |
 | `directionality_positions(room, *, radius=1.5)` | B.3.2 de ISO 26101 | posiciones [m] | Elevación desde la vertical, acimut de 45° en 45° |
-| `directionality_tolerance_db(frequencies, *, room)` | Tabla B.1 | límite por banda [dB] | 5 dB por encima de 10 kHz |
+| `directionality_tolerance(frequencies, *, room)` | Tabla B.1 | límite por banda [dB] | 5 dB por encima de 10 kHz |
 
 ## 5. Una fuente sonora de referencia (ISO 6926)
 
@@ -690,7 +690,7 @@ ensayo.
 | `repeatability_standard_deviation(levels)` | Fórmula (1) | $\sigma_r$ por banda [dB] | Respecto a la media energética |
 | `radiation_impedance_correction(*, temperature_c=23.0, static_pressure_kpa=101.325, radiation="unknown", frequencies=None, knee_frequency_hz=None)` | Anexo A | $C_2$ [dB] | Monopolo, dipolo aerodinámico o desconocida |
 | `knee_frequency(d0_m, *, speed_of_sound=343.0)` | Fórmula (A.1) | $f_\mathrm{k}$ [Hz] | $c/(2\pi d_0)$ |
-| `reference_source_reproducibility_db(frequencies, *, environment, arrangement=None, bandwidth="one-third-octave")` | Tabla 2 | $\sigma_R$ por banda [dB] | Las columnas de tercio de octava y de octava se leen por separado |
+| `reference_source_reproducibility(frequencies, *, environment, arrangement=None, bandwidth="one-third-octave")` | Tabla 2 | $\sigma_R$ por banda [dB] | Las columnas de tercio de octava y de octava se leen por separado |
 
 La fórmula (A.1) tiene un defecto propio: el anexo A define su $d_0$ como la
 mitad de la dimensión característica de la fuente de ISO 3745, que el

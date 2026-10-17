@@ -362,7 +362,7 @@ def room_constant_from_air_absorption(
 # --- Formulae (2) and (3): tones under a moving microphone -------------------
 
 
-def minimum_analyzer_bandwidth_hz(
+def minimum_analyzer_bandwidth(
     tone_frequency_hz: ArrayLike,
     *,
     microphone_speed_m_s: float,
@@ -395,7 +395,7 @@ def tone_level_from_sidebands(sideband_levels_db: ArrayLike) -> float:
     :math:`L_\mathrm{tot} = 10 \lg \sum_{i=1}^{N_\mathrm{sb}} 10^{0{,}1 L_i}`,
     the energy sum of the bands adjacent to the tone frequency that carry
     its energy when the analyser is narrower than
-    :func:`minimum_analyzer_bandwidth_hz`.
+    :func:`minimum_analyzer_bandwidth`.
 
     :param sideband_levels_db: The :math:`N_\mathrm{sb}` sideband levels
         :math:`L_i`, in decibels re 20 µPa.

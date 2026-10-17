@@ -418,7 +418,7 @@ def _library_m(
     """The same ``m``, through the library's own EN ISO 354 conversion."""
     column = oracle.ISO9613_1_TABLE_1_DB_PER_KM[(temperature_c, humidity)]
     alpha = np.array([column[band] for band in bands], dtype=float)
-    return np.asarray(materials.attenuation_from_alpha(alpha / 1000.0))
+    return np.asarray(materials.power_attenuation_from_alpha(alpha / 1000.0))
 
 
 def test_the_weighted_row_of_table_one_is_printed_too() -> None:
@@ -477,7 +477,7 @@ def test_the_conversion_factor_between_alpha_and_m_is_the_printed_one() -> None:
     EN ISO 354:2003 8.1.2.1 gives ``m = alpha / (10 lg(e))`` and never works
     the factor out; Vigran prints it as 4,343.
     """
-    assert 1.0 / float(materials.attenuation_from_alpha(1.0)) == pytest.approx(
+    assert 1.0 / float(materials.power_attenuation_from_alpha(1.0)) == pytest.approx(
         oracle.VIGRAN_EQ_4_41_TEN_LG_E, abs=5e-4
     )
 
@@ -515,7 +515,7 @@ def test_the_printed_air_absorption_constant_of_cox_table_four_two() -> None:
     """
     for humidity, row in oracle.COX_TABLE_4_2_M_MILLI.items():
         computed = (
-            environment.air_attenuation_m(
+            environment.air_power_attenuation_per_m(
                 oracle.COX_TABLE_4_2_BANDS_HZ,
                 temperature_c=20.0,
                 relative_humidity_percent=humidity,
@@ -628,13 +628,13 @@ def test_an_accredited_certificate_reproduces_from_its_printed_inputs() -> None:
         oracle.SRL_13441_AREA_M2,
         temperature1_c=empty_temperature_c,
         temperature2_c=temperature_c,
-        m1=environment.air_attenuation_m(
+        m1=environment.air_power_attenuation_per_m(
             oracle.SRL_13441_BANDS_HZ,
             temperature_c=empty_temperature_c,
             relative_humidity_percent=empty_humidity,
             static_pressure_kpa=empty_pressure_mbar / 10.0,
         ),
-        m2=environment.air_attenuation_m(
+        m2=environment.air_power_attenuation_per_m(
             oracle.SRL_13441_BANDS_HZ,
             temperature_c=temperature_c,
             relative_humidity_percent=humidity,

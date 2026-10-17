@@ -148,7 +148,7 @@ def test_table_i3_reproduces() -> None:
         )
 
 
-def test_budget_is_combine_uncertainty_with_unit_sensitivities() -> None:
+def test_budget_is_uncertainty_propagation_with_unit_sensitivities() -> None:
     budget = _budget_i2(correction_db=0.42)
     assert budget.correction_db == pytest.approx(0.42)
     assert np.allclose(np.abs(budget.uncertainty.sensitivities), 1.0, atol=1e-9)

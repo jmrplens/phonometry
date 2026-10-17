@@ -281,6 +281,7 @@ verdict row and a footer with the identity block and disclaimer.
 ```python
 energy_average_level(
     levels: Sequence[float] | np.ndarray,
+    *,
     axis: int = -1,
 ) -> np.ndarray | float
 ```
@@ -296,7 +297,7 @@ $L = 10 \log_{10}\left( \frac{1}{n} \sum_j 10^{L_j/10} \right)$.
 | Name | Description |
 | :--- | :--- |
 | `levels` | Sound pressure levels, in dB, at the `n` positions to be averaged along `axis`. |
-| `axis` | Axis over which to average (default the last axis). |
+| `axis` | Axis over which to average (default the last axis), by name, as every function of the library that reduces along an axis takes it. |
 
 **Returns:** The energy-average level, in dB; a scalar `float` when the result is zero-dimensional, otherwise an array.
 

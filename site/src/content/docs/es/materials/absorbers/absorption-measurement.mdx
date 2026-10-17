@@ -103,7 +103,7 @@ atenuación $\alpha$ de ISO 9613-1 en dB/m
 (`environment.air_attenuation(freqs, temperature_c=21.4,
 relative_humidity_percent=54.0, static_pressure_kpa=101.325)`) convertida
 con
-`materials.attenuation_from_alpha(alpha)`, que es la propia
+`materials.power_attenuation_from_alpha(alpha)`, que es la propia
 $m = \alpha/(10 \lg e)$ de ISO 354.
 
 La ISO 354 es una caracterización: produce el espectro de $\alpha_\mathrm{s}$, no un
@@ -494,7 +494,7 @@ genera un `AbsorptionWarning` de aviso; el resultado se devuelve igualmente.
 
 `absorption_area()` devuelve el área de absorción acústica equivalente $A$ (m²)
 con la forma de `t60`; `absorption_coefficient()` devuelve $\alpha_\mathrm{s}$;
-`attenuation_from_alpha(alpha)` convierte un $\alpha$ de ISO 9613-1 (dB/m) a $m$.
+`power_attenuation_from_alpha(alpha)` convierte un $\alpha$ de ISO 9613-1 (dB/m) a $m$.
 
 
 ## 3. Valoración ponderada y clase de absorción (ISO 11654)
@@ -738,7 +738,7 @@ valor ($\sigma_\mathrm{R} = 0{,}10\,DL_\alpha$, $\sigma_\mathrm{r} = 0{,}02\,DL_
 
 **Declaración (apartado 8).** La incertidumbre expandida es $U = k\,u$
 (fórmula (10)) con el factor de cobertura $k$ de la Tabla 3 ($k = 2{,}0$ al 95 %,
-gaussiano; para otra confianza, léela de esa misma tabla con
+gaussiano; para otra probabilidad de cobertura, léela de esa misma tabla con
 `absorption_coverage_factor`, que devuelve 2,6 al 99 %). El $U$ declarado se
 redondea a dos decimales para los coeficientes de absorción y a un decimal para
 el área equivalente y $DL_{\alpha,\text{NRD}}$.
@@ -767,7 +767,7 @@ freqs = [63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
 alpha_s = [0.33, 0.35, 0.39, 0.38, 0.37, 0.36, 0.36, 0.36, 0.43, 0.49,
            0.58, 0.63, 0.68, 0.71, 0.73, 0.75, 0.77, 0.79, 0.81, 0.81]
-result = materials.sound_absorption_coefficient_uncertainty(alpha_s, freqs, confidence=0.95)
+result = materials.sound_absorption_coefficient_uncertainty(alpha_s, freqs, coverage=0.95)
 result.plot(language="es")   # alpha_s con la banda +/-U (k = 2) de reproducibilidad
 plt.show()
 ```
@@ -777,7 +777,7 @@ plt.show()
 from phonometry import materials
 
 # Incertidumbre de reproducibilidad de alpha_s a 1000 Hz (Tabla 1: m=0,040, n=0,015).
-r = materials.sound_absorption_coefficient_uncertainty([0.68], [1000], confidence=0.95)
+r = materials.sound_absorption_coefficient_uncertainty([0.68], [1000], coverage=0.95)
 print(round(float(r.standard_uncertainty[0]), 4))            # 0.0422 (sigma_R)
 print(float(r.reported_expanded_uncertainty[0]))             # 0.08  (U, k=2)
 r.plot()   # la figura de arriba: alpha_s con su banda +/-U (k = 2)
@@ -790,7 +790,7 @@ rr = materials.sound_absorption_coefficient_uncertainty(
 print(round(float(rr.standard_uncertainty[0]), 5))           # 0.02532 = 0.6 x 0.0422
 
 # Las otras dos magnitudes que produce esta página, fórmula (2) y apartado 6.
-at = materials.equivalent_area_uncertainty([12.4], [1000], confidence=0.95)
+at = materials.equivalent_area_uncertainty([12.4], [1000], coverage=0.95)
 print(float(at.reported_expanded_uncertainty[0]))            # 1.3 m^2 sobre A_T = 12.4 m^2
 ap = materials.practical_coefficient_uncertainty(
     [0.35, 1.00, 0.65, 0.60, 0.55], [250, 500, 1000, 2000, 4000]
@@ -942,7 +942,7 @@ Sabine o de EN 12354-6 subestima sistemáticamente la absorción instalada.
 La inversión de Sabine de ISO 354:2003 (Ecs. (5)-(9)) en
 `measure_sound_absorption`, y la conversión (apartados 4/8.1) de una pareja
 $T_1$/$T_2$ ya medida en `absorption_area` y `absorption_coefficient` (con
-`attenuation_from_alpha` para el término del aire). La valoración ponderada de
+`power_attenuation_from_alpha` para el término del aire). La valoración ponderada de
 absorción de ISO 11654:1997: el coeficiente práctico del apartado 4.1, el
 desplazamiento de la curva de referencia del apartado 4.2, los indicadores de
 forma del apartado 4.3 y la clase de absorción de la Tabla B.1, construidos

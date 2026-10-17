@@ -122,50 +122,6 @@ $R_{I,\mathrm{M}} = R_I + K_\mathrm{c}$ (Clause 3.10). Two forms are available:
 | :--- | :--- |
 | ValueError | If `frequencies` is not positive/finite, if only one of `boundary_area` / `volume` is supplied, or if either is not positive. |
 
-## combine_subareas
-
-```python
-combine_subareas(
-    l_in: Sequence[Sequence[float]] | np.ndarray,
-    measurement_area: Sequence[float] | np.ndarray,
-) -> tuple[np.ndarray, float]
-```
-
-Combine per-subarea intensity levels (ISO 15186-1, Formulas (11)-(12)).
-
-When the measurement surface is divided into subareas `Smi` each scanned
-individually, the normal sound intensity level over the whole surface is
-the area-weighted energy average, in dB,
-
-$$
-L_{I\mathrm{n}} = 10 \log_{10}\!\left[ \frac{1}{S_\mathrm{m}} \sum_i S_{\mathrm{m}i}\, 10^{0.1 L_{I\mathrm{n}i}} \right]
-$$
-
-with the total measured area $S_\mathrm{m} = \sum_i |S_{\mathrm{m}i}|$
-(Formula (12)).
-
-**Negative-direction subareas (Clause 6.4.6).** When the sound intensity
-of a subarea has a negative direction (net energy flowing back towards
-the specimen), the standard requires a minus sign before that `Smi` in
-Formula (11). Express this by passing the subarea's area as a *negative*
-number: its energy is subtracted in the numerator while `Sm` keeps the
-unsigned area sum.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `l_in` | Per-subarea intensity levels as a `(subareas, bands)` array (one row per subarea), in dB (magnitude of the intensity). |
-| `measurement_area` | Subarea areas `Smi`, in m² (one per row). Negative values mark reverse-flow subareas per Clause 6.4.6; zero is invalid. |
-
-**Returns:** A tuple `(LIn, Sm)` with the combined level per band, in dB, and the total measured area $S_\mathrm{m} = \sum \lvert S_{\mathrm{m}i} \rvert$, in m².
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | If the shapes are inconsistent or values non-finite, if any subarea area is zero, or if the signed energy sum of Formula (11) is not positive in some band (the reverse flows cancel or exceed the forward flow, so no level exists). |
-
 ## intensity_element_normalized_difference
 
 ```python
@@ -260,7 +216,7 @@ supplied.
 `lp1` and `l_in` may be one value per band (already averaged) or a
 two-dimensional `(positions, bands)` array, in which case the positions
 are energy-averaged. Subareas scanned separately should first be combined
-with [`combine_subareas`](/phonometry/reference/api/building/intensity-insulation/#combine_subareas).
+with [`subarea_intensity_level`](/phonometry/reference/api/building/intensity-insulation/#subarea_intensity_level).
 
 **Parameters**
 
@@ -667,12 +623,12 @@ guessed.
 
 Clause 6.4.2 refuses a negative measured intensity for the same reason,
 which a level cannot carry: pass the signed sub-area intensities through
-[`combine_subareas`](/phonometry/reference/api/building/intensity-insulation/#combine_subareas) first, which is where the sign lives.
+[`subarea_intensity_level`](/phonometry/reference/api/building/intensity-insulation/#subarea_intensity_level) first, which is where the sign lives.
 
 `lp_surface` and `l_in` may be one value per band or a
 `(positions, bands)` array, in which case the positions are
 energy-averaged. Sub-areas scanned separately are combined first with
-[`combine_subareas`](/phonometry/reference/api/building/intensity-insulation/#combine_subareas), which is Formulas (9) and (10) here.
+[`subarea_intensity_level`](/phonometry/reference/api/building/intensity-insulation/#subarea_intensity_level), which is Formulas (9) and (10) here.
 
 **Parameters**
 
@@ -841,6 +797,50 @@ The Clause 6.4.2 verdict per band, read from the indicator.
 `False` where the measurement surface is not qualified and the index
 is not a result the standard admits, and `None` throughout when the
 indicator itself is `None`.
+
+## subarea_intensity_level
+
+```python
+subarea_intensity_level(
+    l_in: Sequence[Sequence[float]] | np.ndarray,
+    measurement_area: Sequence[float] | np.ndarray,
+) -> tuple[np.ndarray, float]
+```
+
+Combine per-subarea intensity levels (ISO 15186-1, Formulas (11)-(12)).
+
+When the measurement surface is divided into subareas `Smi` each scanned
+individually, the normal sound intensity level over the whole surface is
+the area-weighted energy average, in dB,
+
+$$
+L_{I\mathrm{n}} = 10 \log_{10}\!\left[ \frac{1}{S_\mathrm{m}} \sum_i S_{\mathrm{m}i}\, 10^{0.1 L_{I\mathrm{n}i}} \right]
+$$
+
+with the total measured area $S_\mathrm{m} = \sum_i |S_{\mathrm{m}i}|$
+(Formula (12)).
+
+**Negative-direction subareas (Clause 6.4.6).** When the sound intensity
+of a subarea has a negative direction (net energy flowing back towards
+the specimen), the standard requires a minus sign before that `Smi` in
+Formula (11). Express this by passing the subarea's area as a *negative*
+number: its energy is subtracted in the numerator while `Sm` keeps the
+unsigned area sum.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `l_in` | Per-subarea intensity levels as a `(subareas, bands)` array (one row per subarea), in dB (magnitude of the intensity). |
+| `measurement_area` | Subarea areas `Smi`, in m² (one per row). Negative values mark reverse-flow subareas per Clause 6.4.6; zero is invalid. |
+
+**Returns:** A tuple `(LIn, Sm)` with the combined level per band, in dB, and the total measured area $S_\mathrm{m} = \sum \lvert S_{\mathrm{m}i} \rvert$, in m².
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the shapes are inconsistent or values non-finite, if any subarea area is zero, or if the signed energy sum of Formula (11) is not positive in some band (the reverse flows cancel or exceed the forward flow, so no level exists). |
 
 ## surface_pressure_intensity_indicator
 

@@ -15,6 +15,7 @@ rounding (AT to 0,1 m2; alpha_s to 0,01; clause 8.3).
 
 from __future__ import annotations
 
+import math
 import warnings
 
 import numpy as np
@@ -91,17 +92,37 @@ def test_air_correction_per_band_array() -> None:
 # --- m from ISO 9613-1 alpha (dB/m) -----------------------------------------
 
 
-def test_attenuation_from_alpha_conversion() -> None:
+def test_power_attenuation_from_alpha_conversion() -> None:
     # m = alpha / (10 lg e); 10*lg(e) = 4,342944819...
     alpha = 4.342944819032518
-    assert materials.attenuation_from_alpha(alpha) == pytest.approx(1.0, rel=1e-9)
-    assert materials.attenuation_from_alpha(0.0) == 0.0
+    assert materials.power_attenuation_from_alpha(alpha) == pytest.approx(1.0, rel=1e-9)
+    assert materials.power_attenuation_from_alpha(0.0) == 0.0
 
 
-def test_attenuation_from_alpha_array() -> None:
+def test_power_attenuation_from_alpha_array() -> None:
     alpha = np.array([0.0, 4.342944819032518, 8.685889638065036])
-    m = materials.attenuation_from_alpha(alpha)
+    m = materials.power_attenuation_from_alpha(alpha)
     np.testing.assert_allclose(np.asarray(m), [0.0, 1.0, 2.0], atol=1e-9)
+
+
+@pytest.mark.parametrize("bad", [math.nan, math.inf, [0.01, math.nan]])
+def test_power_attenuation_from_alpha_refuses_a_value_that_is_not_finite(
+    bad: object,
+) -> None:
+    # The ISO 354 conversion used to pass NaN and infinity through to the
+    # absorption area; the ISO 17497-1 one refused them. The one function
+    # left keeps the stricter check, so neither measurement takes them.
+    with pytest.raises(
+        ValueError, match="'attenuation_db_per_m' values must be finite"
+    ):
+        materials.power_attenuation_from_alpha(bad)
+
+
+def test_power_attenuation_from_alpha_refuses_a_negative_value() -> None:
+    with pytest.raises(
+        ValueError, match="'attenuation_db_per_m' values must be non-negative"
+    ):
+        materials.power_attenuation_from_alpha([0.01, -0.01])
 
 
 # --- Eq. (8)/(9): absorption coefficient of a synthetic sample --------------

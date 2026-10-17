@@ -117,7 +117,7 @@ def test_a_range_the_page_prints_is_refused_in_its_terms() -> None:
 
 
 def test_a_row_of_a_class_without_the_three_cells_is_a_type_error() -> None:
-    porous = next(iter(materials.PUBLISHED_POROUS.values()))
+    porous = next(iter(materials.PUBLISHED_POROUS_MATERIALS.values()))
     with pytest.raises(
         TypeError,
         match=r"solid is a PorousMaterial row, which has no "

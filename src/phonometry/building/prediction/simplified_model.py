@@ -679,7 +679,7 @@ def junction_min_vibration_reduction(
     return 10.0 * log10(lf * _L0 * (1.0 / si + 1.0 / sj))
 
 
-def combine_linings(delta_a: float, delta_b: float) -> float:
+def combined_lining_improvement(delta_a: float, delta_b: float) -> float:
     r"""Combine two lining improvements (EN 12354-1 Formulas 30/31).
 
     For two linings the total improvement is the larger value plus half the

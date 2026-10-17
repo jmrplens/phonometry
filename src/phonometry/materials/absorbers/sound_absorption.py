@@ -47,7 +47,7 @@ conversion from the ISO 9613-1 attenuation coefficient ``alpha`` (in dB/m)
 ISO 354 otherwise defers the calculation of ``alpha`` entirely to ISO 9613-1.
 ``m`` is therefore a user-supplied per-band parameter here (default 0, i.e. no air
 correction); a caller holding ISO 9613-1 ``alpha`` values can convert them with
-:func:`attenuation_from_alpha`.
+:func:`power_attenuation_from_alpha`.
 """
 
 from __future__ import annotations
@@ -176,25 +176,37 @@ def _resolve_speed(temperature_c: float, speed_of_sound: float | None) -> float:
     return _speed_of_sound(temperature_c)
 
 
-def attenuation_from_alpha(alpha: ArrayLike) -> NDArray[np.float64]:
-    r"""Air power attenuation coefficient ``m`` from ISO 9613-1 ``alpha``.
+def power_attenuation_from_alpha(
+    attenuation_db_per_m: ArrayLike,
+) -> NDArray[np.float64]:
+    r"""Air power attenuation coefficient ``m`` from the ISO 9613-1 ``alpha``.
 
-    Applies the ISO 354:2003 (8.1.2.1) conversion
-    :math:`m = \alpha / (10 \log_{10} e)`,
-    where ``alpha`` is the attenuation coefficient in decibels per metre used by
-    ISO 9613-1 and ``m`` is the power attenuation coefficient in reciprocal
-    metres entering Eq. (5)/(7)/(8). ISO 354 itself provides no ``alpha`` table
-    or formula (it defers to ISO 9613-1); this helper only performs the unit
-    conversion for a caller who already holds ``alpha`` values.
+    The one conversion both reverberation-room standards make, ISO 354:2003
+    (8.1.2.1) and ISO 17497-1:2004 (Clause 8, Eq. (3)):
+    :math:`m = \alpha / (10 \log_{10} e) \approx \alpha / 4.343`, where
+    ``alpha`` is the attenuation coefficient in decibels per metre of
+    ISO 9613-1, a sound-*pressure* level per metre, and ``m`` is the *power*
+    attenuation coefficient in reciprocal metres that ISO 354 Eqs. (5), (7)
+    and (8) and ISO 17497-1 Eqs. (1), (4) and (6) take. Neither standard
+    tabulates ``alpha``: both defer it to ISO 9613-1, so this only converts a
+    value the caller already holds (from
+    :func:`~phonometry.environment.air_attenuation`, for example, or in one
+    step with :func:`~phonometry.environment.air_power_attenuation_per_m`).
 
-    :param alpha: Attenuation coefficient, in dB/m (scalar or per band).
-    :return: Power attenuation coefficient ``m``, in 1/m.
+    :param attenuation_db_per_m: Attenuation coefficient ``alpha`` of
+        ISO 9613-1, in dB/m (scalar or per band).
+    :return: Power attenuation coefficient ``m``, in 1/m, with the shape of
+        ``attenuation_db_per_m``.
+    :raises ValueError: if any value is negative or not finite.
     """
-    a = np.asarray(alpha, dtype=np.float64)
-    if np.any(a < 0.0):
-        msg = "'alpha' must be non-negative."
+    alpha = np.asarray(attenuation_db_per_m, dtype=np.float64)
+    if not np.all(np.isfinite(alpha)):
+        msg = "'attenuation_db_per_m' values must be finite."
         raise ValueError(msg)
-    return a / _TEN_LG_E
+    if np.any(alpha < 0.0):
+        msg = "'attenuation_db_per_m' values must be non-negative."
+        raise ValueError(msg)
+    return alpha / _TEN_LG_E
 
 
 def _validate_area_inputs(
@@ -289,7 +301,7 @@ def absorption_area(
         array matching the shape of ``t60``; default 0, i.e. no air correction).
         A per-band ``m`` whose shape differs from ``t60`` raises ``ValueError``.
         Obtain it from an ISO 9613-1 attenuation coefficient with
-        :func:`attenuation_from_alpha`.
+        :func:`power_attenuation_from_alpha`.
     :return: Equivalent sound absorption area ``A``, in square metres, with the
         shape of ``t60``.
     """
@@ -630,7 +642,7 @@ def measure_sound_absorption(
     :param m: Power attenuation coefficient of air ``m``, in 1/m (a scalar or a
         per-band array matching ``frequencies``; default 0, i.e. no air
         correction). Obtain it from an ISO 9613-1 attenuation coefficient with
-        :func:`attenuation_from_alpha`.
+        :func:`power_attenuation_from_alpha`.
     :return: A frozen :class:`SoundAbsorptionMeasurement`.
     :raises ValueError: If the frequency and reverberation-time arrays do not
         share one shape, ``relative_humidity_percent`` is not within ``[0, 100]`` %, or an

@@ -5874,7 +5874,7 @@ def _free_field_room() -> tuple[Any, Any, Any]:
     """The guide's qualification: the fit, the verdict and the source directionality."""
     from phonometry import emission
 
-    grid = emission.qualification_frequencies_hz()
+    grid = emission.qualification_frequencies()
     wedge = np.interp(
         np.log10(grid), np.log10([100.0, 125.0, 250.0, 500.0, 10000.0]), _FF_WEDGE_R
     )
@@ -7434,7 +7434,7 @@ def generate_enclosure_cabin_insulation(output_dir: str) -> None:
     bands = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
     without = np.array([96.0, 98.0, 99.0, 97.0, 94.0, 89.0])
     with_enclosure = np.array([88.0, 86.0, 81.0, 74.0, 68.0, 63.0])
-    res = noise_control.sound_power_insulation(
+    res = noise_control.enclosure_sound_power_insulation(
         without, with_enclosure, frequencies=bands, band_fraction=1
     )
     ax.fill_between(
@@ -7628,16 +7628,17 @@ def generate_in_situ_noise_control(output_dir: str) -> None:
     # 10 is still 10.
     table_margins = np.concatenate([np.arange(3.0, 11.0, 1.0), [10.0 + 1e-6, 12.4]])
     silencer = np.array(
-        [noise_control.silencer_background_correction_db([m])[0] for m in table_margins]
+        [noise_control.silencer_background_correction([m])[0] for m in table_margins]
     )
     barrier_margins = np.arange(4.0, 13.0, 1.0)
     barrier = np.array(
-        [-environment.barrier_background_correction_db([m])[0] for m in barrier_margins]
+        [-environment.barrier_background_correction([m])[0] for m in barrier_margins]
     )
     formula_margins = np.linspace(6.0, 12.0, 400)
     formula = np.array(
         [
-            100.0 - noise_control.background_corrected_level_db([100.0], [100.0 - m])[0]
+            100.0
+            - noise_control.screen_background_corrected_level([100.0], [100.0 - m])[0]
             for m in formula_margins
         ]
     )

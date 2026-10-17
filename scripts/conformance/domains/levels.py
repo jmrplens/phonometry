@@ -102,7 +102,7 @@ def _chk_iso1996_2_tonal_adjustment() -> Outcome:
     "Combined measurement uncertainty u = √(Σ(cj·uj)²)",
 )
 def _chk_iso1996_2_uncertainty() -> Outcome:
-    computed = ph.environment.combined_standard_uncertainty(
+    computed = ph.metrology.combined_standard_uncertainty(
         ref.ISO1996_2_G2_CONTRIBUTIONS
     )
     return numeric(ref.ISO1996_2_G2_COMBINED, computed, 0.01, unit="dB", places=2)

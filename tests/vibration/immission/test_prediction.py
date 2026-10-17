@@ -15,6 +15,7 @@ import math
 import numpy as np
 import pytest
 
+from phonometry import vibration
 from phonometry.vibration import immission as im
 
 # Figure A.19 (printed page 34): 0,44 mm/s at 13 m, alpha 0,005, drawn for n = 0, 0,5, 1.
@@ -130,31 +131,33 @@ def test_clause_4_3_the_building_on_its_ground() -> None:
     """Formula (3), the guide frequencies, V_F = 1/(2 D_0) = 2 for loose
     ground, V_D from 25 to 10 for a concrete floor, and the storey formula.
     """
-    assert im.soil_building_natural_frequency_hz(
+    assert im.soil_building_natural_frequency(
         4.0 * math.pi**2 * 1e8, mass=1e6
     ) == pytest.approx(10.0)
-    assert im.soil_building_frequency_guide_hz(1) == (15.0, 15.0)
-    assert im.soil_building_frequency_guide_hz(2) == (8.0, 15.0)
-    assert im.soil_building_frequency_guide_hz(4) == (8.0, 12.0)
-    assert im.soil_building_frequency_guide_hz(9) == (0.0, 8.0)
+    assert im.soil_building_frequency_guide(1) == (15.0, 15.0)
+    assert im.soil_building_frequency_guide(2) == (8.0, 15.0)
+    assert im.soil_building_frequency_guide(4) == (8.0, 12.0)
+    assert im.soil_building_frequency_guide(9) == (0.0, 8.0)
     assert im.foundation_transfer_max() == 2.0
     assert im.foundation_transfer_max(0.5) == 1.0
     assert im.floor_transfer_max(0.02) == 25.0
     assert im.floor_transfer_max(0.05) == 10.0
     assert im.FLOOR_DAMPING_RATIO_RANGE == (0.02, 0.05)
     assert im.FOUNDATION_TRANSFER_ABOVE_RESONANCE == 0.5
-    assert im.storey_frequency_hz(5) == 2.0
-    assert im.storey_frequency_hz(10) == 1.0
-    with pytest.raises(ValueError, match="5 storeys"):
-        im.storey_frequency_hz(3)
+    # Formula (4) is the storey estimate DIN 4150-3 6.4 prints too, and one
+    # function answers for both.
+    assert vibration.storey_fundamental_frequency(5) == 2.0
+    assert vibration.storey_fundamental_frequency(10) == 1.0
+    with pytest.warns(vibration.BuildingDamageWarning, match="from about 5 storeys"):
+        vibration.storey_fundamental_frequency(3)
     with pytest.raises(ValueError, match="storeys"):
-        im.soil_building_frequency_guide_hz(0)
+        im.soil_building_frequency_guide(0)
     with pytest.raises(ValueError, match="storeys"):
-        im.soil_building_frequency_guide_hz(float("inf"))
+        im.soil_building_frequency_guide(float("inf"))
     with pytest.raises(ValueError, match="storeys"):
-        im.soil_building_frequency_guide_hz("3")  # type: ignore[arg-type]
+        im.soil_building_frequency_guide("3")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="harmonics"):
-        im.track_excitation_frequency_hz(20.0, spacing_m=0.6, harmonics=2.9)  # type: ignore[arg-type]
+        im.track_excitation_frequency(20.0, spacing_m=0.6, harmonics=2.9)  # type: ignore[arg-type]
 
 
 def test_formulae_5_and_6_the_single_events() -> None:
@@ -197,7 +200,7 @@ def test_formulae_5_and_6_the_single_events() -> None:
 
 def test_clause_5_3_2_what_a_track_excites() -> None:
     """f_A = v_Z / d and its multiples: 20 m/s over 0,6 m sleepers is 33,3 Hz."""
-    freqs = im.track_excitation_frequency_hz(20.0, spacing_m=0.6, harmonics=3)
+    freqs = im.track_excitation_frequency(20.0, spacing_m=0.6, harmonics=3)
     assert freqs == pytest.approx([33.333, 66.667, 100.0], abs=0.001)
     assert im.RAIL_SUPPORT_SPACING_M == (0.6, 0.9)
     assert im.VEHICLE_NATURAL_FREQUENCIES_HZ == {
@@ -208,7 +211,7 @@ def test_clause_5_3_2_what_a_track_excites() -> None:
     assert im.RAIL_INFLUENCE_RANGE_M == 80.0
     assert im.MACHINE_FREQUENCY_BANDS_HZ["frame_saw"] == (4.0, 8.0)
     with pytest.raises(ValueError, match="harmonics"):
-        im.track_excitation_frequency_hz(20.0, spacing_m=0.6, harmonics=0)
+        im.track_excitation_frequency(20.0, spacing_m=0.6, harmonics=0)
 
 
 def test_figure_a18_formula_7_against_the_drawn_curve() -> None:

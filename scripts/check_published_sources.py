@@ -170,6 +170,13 @@ SOURCED: dict[tuple[str, str], str] = {
     ): "Hopkins (2007) Eq. (3.91), the two band-width factors B",
     (
         "materials/absorbers/porous.py",
+        "ABSORBER_AIR",
+    ): (
+        "Bies 5e Table C.1 and App. D, Allard & Atalla 2e Ch. 4, "
+        "the six values of the absorber models' air"
+    ),
+    (
+        "materials/absorbers/porous.py",
         "DELANY_BAZLEY_COEFFICIENTS",
     ): "Bies 5e Table D.1, four coefficient sets C1..C8",
     (
@@ -186,7 +193,7 @@ SOURCED: dict[tuple[str, str], str] = {
     ): "Miki (1990) Sect. 4.1, the lower limit of the fit range",
     (
         "environment/propagation/ground_surfaces.py",
-        "PUBLISHED_GROUND",
+        "PUBLISHED_GROUND_SURFACES",
     ): (
         "Bies 5e Table 5.1, thirty-four measured ground surfaces; "
         "Bies 5e Table 5.2, the eight ground classes A to H with the ISO "
@@ -363,14 +370,14 @@ SOURCED: dict[tuple[str, str], str] = {
     ),
     (
         "materials/absorbers/catalogue.py",
-        "PUBLISHED_POROUS",
+        "PUBLISHED_POROUS_MATERIALS",
     ): (
         "Allard & Atalla 2e, the porous rows of nineteen parameter tables "
         "spread over eight chapters"
     ),
     (
         "materials/absorbers/resistive_sheets.py",
-        "PUBLISHED_FLOW_RESISTANCE",
+        "PUBLISHED_RESISTIVE_SHEETS",
     ): (
         "Vér & Beranek 2e TABLE 8.5, five wire mesh cloths; "
         "Vér & Beranek 2e TABLE 8.6, thirteen glass fibre cloths; "

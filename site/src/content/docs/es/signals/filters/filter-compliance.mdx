@@ -336,7 +336,7 @@ octave = filters.verify_filter_class(
 print(octave.requirement_class("relative_attenuation"))     # 1
 print(octave.requirement_class("effective_bandwidth"))      # 1
 print(octave.requirement_class("summation"))                # 1
-print(round(octave.binding_margin_db("summation", 1), 2))   # 0.64
+print(round(octave.binding_margin("summation", 1), 2))   # 0.64
 print(octave.overall_class)                                 # 1
 ```
 

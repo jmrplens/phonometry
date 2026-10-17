@@ -53,7 +53,8 @@ passive medium has :math:`\operatorname{Im}(k) < 0`):
 The air all of them propagate through is described by :class:`Fluid`,
 which carries the six quantities a visco-thermal model can need (speed of
 sound, density, viscosity, Prandtl number, ratio of specific heats and static
-pressure) with the values these models were published with. The narrow-channel
+pressure), by default the fixed 20 degC values of :data:`ABSORBER_AIR`. The
+narrow-channel
 models of :mod:`~phonometry.materials.absorbers.slow_sound` and
 :mod:`~phonometry.materials.diffusers.metadiffuser` take it as a single
 argument.
@@ -164,7 +165,7 @@ __all__ = [
     "DELANY_BAZLEY_VALIDITY",
     "LIMP_FRAME_CRITERIA",
     "MIKI_VALIDITY",
-    "PUBLISHED_AIR",
+    "ABSORBER_AIR",
     "ROCK_WOOL_FIBRE_DENSITY_KG_M3",
     "ROCK_WOOL_LATERAL_FIT",
     "ROCK_WOOL_LONGITUDINAL_FIT",
@@ -198,30 +199,44 @@ class PorousAbsorberWarning(PhonometryWarning):
 # ---------------------------------------------------------------------------
 # The air the models propagate through
 # ---------------------------------------------------------------------------
-#: The air the visco-thermal models were **published** with, not a measurement
-#: of anyone's fluid. Johnson, Champoux and Allard fitted their closed forms
-#: against these six values, so they are constants of the model in the same way
-#: its exponents are: substituting better physics does not correct an error, it
-#: changes the model. Most visibly, the Prandtl number here is 0,71 while air at
-#: this state has 0,728, and that alone moves the characteristic impedance and
-#: the wavenumber by 1,5 parts in a thousand.
+#: The air the absorber models of this package default to: dry air at 20 degC,
+#: held at fixed textbook values rather than computed. It is not the air any one
+#: book prints whole, and each value says where it was read:
 #:
-#: Frozen, shared by every model rather than rebuilt, and it stays in this
-#: module because it belongs to these models and to nothing else.
-PUBLISHED_AIR = Fluid(
+#: - 343,0 m/s, the speed of sound of air at 20 degC in Bies, Hansen and
+#:   Howard 5e Table C.1, PDF page 746 (printed p. 717);
+#: - 1,205 kg/m3 and gamma = 1,40, the air Bies, Hansen and Howard 5e give the
+#:   porous-media models of Appendix D, PDF page 756 (printed p. 727);
+#: - 1,84 x 10^-5 Pa s, the viscosity Allard and Atalla 2e state for standard
+#:   conditions, PDF page 56 (printed p. 46), and Cox and D'Antonio 3e Eq. (7.13);
+#: - the Prandtl number B^2 = 0,71, gamma = 1,4 and the static pressure
+#:   1,0132 x 10^5 Pa (held as 101 325 Pa) that Allard and Atalla 2e take from
+#:   Gray, PDF page 62 (printed p. 52).
+#:
+#: Allard and Atalla state their own air at 18 degC, 1,213 kg/m3 and 342 m/s
+#: (Sect. 2.2.2, PDF page 28, printed p. 16), so the Johnson-Champoux-Allard
+#: model is not tied to these numbers: they are the library's choice, kept fixed
+#: so that every model defaults to the same medium. The Prandtl number is carried
+#: rather than closed from ``eta / (rho alpha_t)``: air at this state has 0,728,
+#: and closing it would move the characteristic impedance and the wavenumber of
+#: every default by 1,5 parts in a thousand.
+#:
+#: Frozen, shared by every model rather than rebuilt. Pass a computed
+#: :class:`~phonometry.fluids.Fluid`, such as ``fluids.air(temperature_c=30.0)``,
+#: to predict in the air of the room instead.
+ABSORBER_AIR = Fluid(
     temperature_c=20.0,
     static_pressure_pa=_ATMOSPHERIC_PRESSURE,
     composition={},
-    model="Johnson-Champoux-Allard published constants (dry air at 20 degC)",
+    model="textbook dry air at 20 degC, the absorber models' default medium",
     validity="",
     properties={
         "speed_of_sound": _SPEED_OF_SOUND,
         "density": _AIR_DENSITY,
         "viscosity": _AIR_VISCOSITY,
         "heat_capacity_ratio": _HEAT_CAPACITY_RATIO,
-        # Carried rather than derived: this is the model's fitted constant, and
-        # Fluid.prandtl_number would close eta/(rho alpha_t) from an air that
-        # does not have it.
+        # Carried rather than derived: Allard and Atalla's B^2 = 0,71, which
+        # Fluid.prandtl_number would close from eta/(rho alpha_t) as 0,728.
         "prandtl_number": _PRANDTL_NUMBER,
     },
 )
@@ -328,7 +343,7 @@ def delany_bazley(
     flow_resistivity_pa_s_m2: float,
     *,
     coefficients: str | tuple[float, ...] = "delany_bazley",
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> PorousMediumResult:
     r"""Delany-Bazley one-parameter porous model (power laws in ``X``).
 
@@ -348,8 +363,8 @@ def delany_bazley(
         polyester, ``"dunn_davern"`` / ``"wu"`` foams) or an explicit
         ``(C1..C8)`` tuple.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
-        (Default: :data:`PUBLISHED_AIR`, the air this model was published
-        with). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
+        (Default: :data:`ABSORBER_AIR`, dry air at 20 degC at textbook
+        values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`PorousMediumResult`.
     """
@@ -391,7 +406,7 @@ def miki(
     frequency: ArrayLike,
     flow_resistivity_pa_s_m2: float,
     *,
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> PorousMediumResult:
     r"""Miki (1990) positive-real modification of the Delany-Bazley model.
 
@@ -409,8 +424,8 @@ def miki(
     :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param flow_resistivity_pa_s_m2: Airflow resistivity ``sigma``, in Pa s/m2.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
-        (Default: :data:`PUBLISHED_AIR`, the air this model was published
-        with). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
+        (Default: :data:`ABSORBER_AIR`, dry air at 20 degC at textbook
+        values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`PorousMediumResult`.
     """
@@ -441,7 +456,7 @@ def johnson_champoux_allard(
     tortuosity: float,
     viscous_length_m: float,
     thermal_length_m: float,
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> PorousMediumResult:
     r"""Johnson-Champoux-Allard five-parameter rigid-frame model.
 
@@ -481,8 +496,8 @@ def johnson_champoux_allard(
     :param thermal_length_m: Thermal characteristic length ``L'``, in metres
         (physically :math:`L' \ge L`).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
-        (Default: :data:`PUBLISHED_AIR`, the air this model was published
-        with). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
+        (Default: :data:`ABSORBER_AIR`, dry air at 20 degC at textbook
+        values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`PorousMediumResult`.
     """
@@ -839,7 +854,7 @@ def viscous_characteristic_length(
     *,
     porosity: float,
     tortuosity: float,
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
     shape_factor: float = 1.0,
 ) -> float:
     r"""The viscous characteristic length from the three measured parameters.
@@ -986,7 +1001,7 @@ def perforated_plate_impedance(
     hole_radius: float,
     open_area: float,
     end_correction: float | None = None,
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> Complex:
     r"""Transfer impedance of a rigid perforated plate with circular holes.
 
@@ -1017,8 +1032,8 @@ def perforated_plate_impedance(
     :param end_correction: End-correction factor ``delta`` per end; default
         :func:`perforation_end_correction` of ``eps``.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
-        (Default: :data:`PUBLISHED_AIR`, the air this model was published
-        with). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
+        (Default: :data:`ABSORBER_AIR`, dry air at 20 degC at textbook
+        values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: Complex transfer impedance ``z``, in Pa s/m.
     """
@@ -1050,7 +1065,7 @@ def microperforated_plate_impedance(
     hole_radius: float,
     open_area: float,
     end_correction: float = 0.85,
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> Complex:
     r"""Transfer impedance of a microperforated plate (Maa's exact model).
 
@@ -1080,8 +1095,8 @@ def microperforated_plate_impedance(
     :param end_correction: End-correction factor ``delta`` per end
         (default 0.85, the isolated-orifice value used by Maa).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
-        (Default: :data:`PUBLISHED_AIR`, the air this model was published
-        with). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
+        (Default: :data:`ABSORBER_AIR`, dry air at 20 degC at textbook
+        values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: Complex transfer impedance ``z``, in Pa s/m.
     """
@@ -1174,7 +1189,7 @@ def membrane_resonance_frequency(
     surface_density: float,
     cavity_depth: float,
     isothermal: bool = False,
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> float:
     r"""Mass-spring resonance of a membrane over a shallow cavity.
 
@@ -1188,8 +1203,8 @@ def membrane_resonance_frequency(
     :param cavity_depth: Cavity depth ``d``, in metres.
     :param isothermal: Use the isothermal air-spring stiffness.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
-        (Default: :data:`PUBLISHED_AIR`, the air this model was published
-        with). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
+        (Default: :data:`ABSORBER_AIR`, dry air at 20 degC at textbook
+        values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: Resonance frequency ``f0``, in hertz.
     """

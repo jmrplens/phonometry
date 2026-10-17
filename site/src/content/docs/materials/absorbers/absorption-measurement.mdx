@@ -98,7 +98,7 @@ value per measurement as `m1`/`m2` (with `temperature1_c`/`temperature2_c`);
 an ISO 9613-1 attenuation $\alpha$ in dB/m:
 `environment.air_attenuation(freqs, temperature_c=21.4,
 relative_humidity_percent=54.0, static_pressure_kpa=101.325)`, converted
-with `materials.attenuation_from_alpha(alpha)`,
+with `materials.power_attenuation_from_alpha(alpha)`,
 which is ISO 354's own $m = \alpha/(10 \lg e)$.
 
 ISO 354 is a characterisation: it produces the $\alpha_\mathrm{s}$ spectrum, not a
@@ -479,7 +479,7 @@ still returns.
 
 `absorption_area()` returns the equivalent absorption area $A$ (m²) with the
 shape of `t60`; `absorption_coefficient()` returns $\alpha_\mathrm{s}$;
-`attenuation_from_alpha(alpha)` converts an ISO 9613-1 $\alpha$ (dB/m) to $m$.
+`power_attenuation_from_alpha(alpha)` converts an ISO 9613-1 $\alpha$ (dB/m) to $m$.
 
 
 ## 3. Weighted rating and absorption class (ISO 11654)
@@ -711,7 +711,7 @@ single-number rating $DL_{\alpha,\text{NRD}}$ scales with the value
 
 **Reporting (Clause 8).** The expanded uncertainty is $U = k\,u$ (Formula (10))
 with the Table 3 coverage factor $k$ ($k = 2.0$ at 95 %, Gaussian; read another
-confidence off the same table with `absorption_coverage_factor`, which returns
+coverage probability off the same table with `absorption_coverage_factor`, which returns
 2.6 at 99 %). The reported $U$ is rounded to two decimals for absorption
 coefficients and one decimal for the equivalent area and
 $DL_{\alpha,\text{NRD}}$.
@@ -739,7 +739,7 @@ freqs = [63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
 alpha_s = [0.33, 0.35, 0.39, 0.38, 0.37, 0.36, 0.36, 0.36, 0.43, 0.49,
            0.58, 0.63, 0.68, 0.71, 0.73, 0.75, 0.77, 0.79, 0.81, 0.81]
-result = materials.sound_absorption_coefficient_uncertainty(alpha_s, freqs, confidence=0.95)
+result = materials.sound_absorption_coefficient_uncertainty(alpha_s, freqs, coverage=0.95)
 result.plot()   # alpha_s with the +/-U (k = 2) reproducibility ribbon
 plt.show()
 ```
@@ -749,7 +749,7 @@ plt.show()
 from phonometry import materials
 
 # Reproducibility uncertainty of alpha_s at 1000 Hz (Table 1: m=0.040, n=0.015).
-r = materials.sound_absorption_coefficient_uncertainty([0.68], [1000], confidence=0.95)
+r = materials.sound_absorption_coefficient_uncertainty([0.68], [1000], coverage=0.95)
 print(round(float(r.standard_uncertainty[0]), 4))            # 0.0422 (sigma_R)
 print(float(r.reported_expanded_uncertainty[0]))             # 0.08  (U, k=2)
 r.plot()   # the figure above: alpha_s with its +/-U (k = 2) ribbon
@@ -762,7 +762,7 @@ rr = materials.sound_absorption_coefficient_uncertainty(
 print(round(float(rr.standard_uncertainty[0]), 5))           # 0.02532 = 0.6 x 0.0422
 
 # The other two quantities this page produces, Formula (2) and Clause 6.
-at = materials.equivalent_area_uncertainty([12.4], [1000], confidence=0.95)
+at = materials.equivalent_area_uncertainty([12.4], [1000], coverage=0.95)
 print(float(at.reported_expanded_uncertainty[0]))            # 1.3 m^2 on A_T = 12.4 m^2
 ap = materials.practical_coefficient_uncertainty(
     [0.35, 1.00, 0.65, 0.60, 0.55], [250, 500, 1000, 2000, 4000]
@@ -905,7 +905,7 @@ EN 12354-6 budget systematically underpredicts the installed absorption.
 The ISO 354:2003 Sabine inversion (Eqs. (5)-(9)) in
 `measure_sound_absorption`, and the Clause 4/8.1 conversion of an
 already-measured $T_1$/$T_2$ pair in `absorption_area` and
-`absorption_coefficient` (with `attenuation_from_alpha` for the air term). ISO
+`absorption_coefficient` (with `power_attenuation_from_alpha` for the air term). ISO
 11654:1997's weighted absorption rating: the practical coefficient of Clause
 4.1, the reference-curve shift of Clause 4.2, the shape indicators of Clause
 4.3, and the Table B.1 absorption class, built by `weighted_absorption` and

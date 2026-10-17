@@ -589,7 +589,7 @@ A caller's catalogue: rows of one class, keyed as the packaged ones are.
 What [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) and [`parse_catalogue`](/phonometry/reference/api/io/io/#parse_catalogue) return. It is a
 read-only mapping from `"<name>/<key>"` to a row, so it goes wherever a
 `PUBLISHED_*` catalogue goes, and a row's [`CatalogueRow.table`](/phonometry/reference/api/io/io/#cataloguerow) is
-the catalogue's name. `PUBLISHED_POROUS | mine` reads both as one and
+the catalogue's name. `PUBLISHED_POROUS_MATERIALS | mine` reads both as one and
 refuses a key both hold rather than letting one row replace the other;
 a caller's catalogue can never take a name of the packaged form, so the
 keys of the two never meet.

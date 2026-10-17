@@ -105,7 +105,7 @@ Pass per-band coefficients (a `(6, n_bands)` per-wall array, a per-band vector,
 or a `frequencies` list) to synthesise one decay per octave band; pass a
 length-6 vector to set each wall separately (order
 `x0, xL, y0, yL, z0, zL`); and pass `air_attenuation_per_m` (the intensity
-coefficient `m` from `air_attenuation_m`) to add the `exp(−m r / 2)` air loss.
+coefficient `m` from `air_power_attenuation_per_m`) to add the `exp(−m r / 2)` air loss.
 
 ```python
 import numpy as np
@@ -192,7 +192,7 @@ plt.show()
 | `fs` | int | Hz | > 0 | Sample rate |
 | `max_order` | int | -- | >= 0, default 20 | Reflection-order cut-off |
 | `speed_of_sound` | float | m/s | > 0, default 343 | Speed of sound `c` |
-| `air_attenuation_per_m` | float or (n,) | Np/m | >= 0, default 0 | Air power (intensity) attenuation coefficient `m` |
+| `air_attenuation_per_m` | float or (n,) | 1/m | >= 0, default 0 | Air power (intensity) attenuation coefficient `m` |
 | `duration` | float, optional | s | > 0 | RIR length (default: last image arrival) |
 | `frequencies` | (n,), optional | Hz | -- | Band centres labelling a per-band result |
 

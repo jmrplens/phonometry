@@ -298,11 +298,20 @@ def test_an_omitted_humidity_is_not_judged() -> None:
 
 
 @pytest.mark.parametrize(
-    "humidity",
-    [[62.0, float("nan")], [], [[60.0, 60.0]], [-1.0], [101.0], "humid"],
+    ("humidity", "refusal"),
+    [
+        ([62.0, float("nan")], ValueError),
+        ([], ValueError),
+        ([[60.0, 60.0]], ValueError),
+        ([-1.0], ValueError),
+        ([101.0], ValueError),
+        ("humid", TypeError),
+    ],
 )
-def test_a_humidity_that_is_not_one_is_refused(humidity: object) -> None:
-    with pytest.raises(ValueError, match="relative_humidity_percent"):
+def test_a_humidity_that_is_not_one_is_refused(
+    humidity: object, refusal: type[Exception]
+) -> None:
+    with pytest.raises(refusal, match="relative_humidity_percent"):
         materials.check_ceiling_specimen(
             area=10.8,
             depth_mm=200.0,

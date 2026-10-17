@@ -62,7 +62,10 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from ..._internal.validation import require_positive
+from ..._internal.validation import (
+    require_positive,
+    require_scalar,
+)
 from .mechanical_mobility import MobilityResult
 
 if TYPE_CHECKING:
@@ -109,6 +112,7 @@ def plate_bending_stiffness(
     :raises ValueError: for a non-positive modulus/thickness or
         :math:`\lvert\nu\rvert \ge 1`.
     """
+    require_scalar(poisson_ratio, "poisson_ratio")
     e = require_positive(youngs_modulus, "youngs_modulus")
     h = require_positive(thickness_m, "thickness_m")
     if not -1.0 < poisson_ratio < 1.0:

@@ -180,6 +180,12 @@ function implements the corrected per-unit form and warns when
 | :--- | :--- |
 | ValueError | If the band counts differ, if `measurement_area` is not positive, if `n` is not a positive integer, or if inputs are non-finite. |
 
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| LaboratoryInsulationWarning | If `n > 1`, where the result departs from the printed sign of Formula (8). |
+
 ## intensity_sound_reduction
 
 ```python

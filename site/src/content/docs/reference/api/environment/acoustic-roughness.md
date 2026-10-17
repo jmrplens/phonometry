@@ -189,7 +189,7 @@ The level of the band a nominal wavelength names, dB re 1 µm.
 
 | Exception | When |
 | :--- | :--- |
-| KeyError | If the spectrum has no such band. |
+| ValueError | If the spectrum has no band at that wavelength: a number outside what the result covers, not a missing key. |
 
 ### AcousticRoughnessSpectrum.plot()
 

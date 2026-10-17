@@ -406,9 +406,17 @@ micrófono **y** banda de frecuencia, forma `(NM, NB)`; ISO 3744 apartado 8.4),
 (expandida, 95 %) y `grade`. `measurement_positions('hemisphere', radius=…,
 n_reflecting_planes=…, tones=…, grade=…)` devuelve las coordenadas normativas
 `(N, 3)` de micrófono (Tabla B.1 para fuentes tonales, B.2 para banda ancha).
-Esas coordenadas se dibujan directamente con `plot_microphone_positions`, que
-representa el array sobre su superficie de medición en 3-D, numerado como en
-la norma.
+El grado de inspección toma los conjuntos reducidos del apartado 8.2.1 de
+ISO 3746, uno solo sea cual sea la emisión de la fuente: las posiciones 4, 5, 6
+y 10 de la Tabla B.1 de ISO 3746 sobre un plano (las posiciones de banda ancha
+con esos números de la Tabla B.2 de ISO 3744), y las posiciones 14, 15 y 18
+(dos planos) o 14, 21 y 22 (tres planos) de la Tabla B.2 de ISO 3746. Junto a
+dos o tres planos reflectantes, ambas normas piden un radio de al menos 3 m
+(apartados B.2 y B.3 del anexo B), que la función no comprueba. Esas
+coordenadas se dibujan directamente con `plot_microphone_positions`, que
+representa el array sobre su superficie de medición en 3-D y numera los puntos
+de 1 a N en el orden dado, de modo que un conjunto reducido como el de
+inspección se numera desde 1 y no con los números de posición de la norma.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/microphone_positions_hemisphere.svg" alt="Vista tridimensional del array de micrófonos de ISO 3744: diez micrófonos numerados sobre un hemisferio de alambre de 2 m apoyado en un plano reflectante circular sombreado, con las posiciones 1 y 2 cerca del plano, las demás escalonadas en altura hasta las posiciones 9 y 10 cerca de la cúspide, y los ejes x, y y z graduados en metros" width="88%" />
 

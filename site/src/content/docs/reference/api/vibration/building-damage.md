@@ -478,7 +478,8 @@ at which the topmost floor plane will answer.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the storey count is not a positive integer. |
+| TypeError | If the storey count is not a number. |
+| ValueError | If the storey count is not a whole number of at least 1. |
 
 **Warns**
 

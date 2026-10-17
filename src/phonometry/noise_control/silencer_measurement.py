@@ -97,6 +97,7 @@ from .._internal.validation import (
     require_finite_array,
     require_positive,
     require_positive_array,
+    require_scalar,
 )
 from .._internal.warnings import PhonometryWarning
 
@@ -355,17 +356,11 @@ def _require_finite_scalar(value: float, name: str) -> float:
     ``require_finite_array`` accepts a scalar and a sequence alike, and
     taking ``[0]`` of the result reads the first element of a sequence and
     drops the rest without a word. A static pressure or a temperature is one
-    measurement in one plane, so a sequence is a mistake and is said to be
-    one.
+    measurement in one plane, so a sequence, of one element or more, is the
+    wrong type and is refused with :class:`TypeError`.
     """
-    values = require_finite_array(value, name)
-    if values.size != 1:
-        msg = (
-            f"'{name}' is one measurement in one plane, so one number is "
-            f"expected; got {values.size}."
-        )
-        raise ValueError(msg)
-    return float(values[0])
+    require_scalar(value, name)
+    return float(require_finite_array(value, name)[0])
 
 
 def _require_matching_bands(

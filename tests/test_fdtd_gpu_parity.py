@@ -421,15 +421,15 @@ def test_build_job_validation() -> None:
         )
     with pytest.raises(ValueError, match=r"sample_stride must be >= 1"):
         fdtd_gpu_remote.build_job(343.0, _DX, sample_stride=0, **ok)
-    with pytest.raises(ValueError, match=r"sample_stride must be an integer"):
+    with pytest.raises(TypeError, match=r"sample_stride must be an integer"):
         fdtd_gpu_remote.build_job(343.0, _DX, sample_stride=2.0, **ok)
     with pytest.raises(ValueError, match=r"sample_dtype must be"):
         fdtd_gpu_remote.build_job(343.0, _DX, sample_dtype="int16", **ok)
-    with pytest.raises(ValueError, match=r"sponge_width must be an integer"):
+    with pytest.raises(TypeError, match=r"sponge_width must be an integer"):
         fdtd_gpu_remote.build_job(343.0, _DX, sponge_width=True, **ok)
-    with pytest.raises(ValueError, match=r"sponge_width must be an integer"):
+    with pytest.raises(TypeError, match=r"sponge_width must be an integer"):
         fdtd_gpu_remote.build_job(343.0, _DX, sponge_width=3.5, **ok)
-    with pytest.raises(ValueError, match=r"sponge_width must be an integer"):
+    with pytest.raises(TypeError, match=r"sponge_width must be an integer"):
         fdtd_gpu.GpuFDTD2D(343.0, _DX, shape=(_NY, _NX), sponge_width=2.5)
     too_wide = min(_NY, _NX)
     with pytest.raises(ValueError, match="smallest grid side"):
@@ -731,14 +731,14 @@ def test_reduction_bounds_must_be_integers() -> None:
     from parsed text has to be refused (or normalised) at packing time.
     """
     ok: dict[str, Any] = {"shape": (_NY, _NX), "steps": 100, "sample_steps": [50]}
-    with pytest.raises(ValueError, match=r"mean_squares\[0\].start must be an integer"):
+    with pytest.raises(TypeError, match=r"mean_squares\[0\].start must be an integer"):
         fdtd_gpu_remote.build_job(
             343.0, _DX, mean_squares=[{"name": "s", "start": "0", "stop": 100}], **ok
         )
     line = {"name": "axis", "row": 0, "from": 0, "to": _NX, "start": 0, "stop": 100}
-    with pytest.raises(ValueError, match=r"envelopes\[0\].row must be an integer"):
+    with pytest.raises(TypeError, match=r"envelopes\[0\].row must be an integer"):
         fdtd_gpu_remote.build_job(343.0, _DX, envelopes=[{**line, "row": 1.5}], **ok)
-    with pytest.raises(ValueError, match=r"envelopes\[0\].to must be an integer"):
+    with pytest.raises(TypeError, match=r"envelopes\[0\].to must be an integer"):
         fdtd_gpu_remote.build_job(343.0, _DX, envelopes=[{**line, "to": "80"}], **ok)
     packed = fdtd_gpu_remote.build_job(
         343.0,
@@ -755,7 +755,7 @@ def test_reduction_bounds_must_be_integers() -> None:
 def test_build_job_rejects_a_malformed_source() -> None:
     """A source off the grid, or with no waveform, fails at packing time."""
     ok: dict[str, Any] = {"shape": (_NY, _NX), "steps": 100, "sample_steps": [50]}
-    with pytest.raises(ValueError, match=r"sources\[0\] needs a 'waveform' dict"):
+    with pytest.raises(TypeError, match=r"sources\[0\] needs a 'waveform' dict"):
         fdtd_gpu_remote.build_job(
             343.0, _DX, sources=[{"kind": "point", "ix": 1, "iy": 1}], **ok
         )
@@ -781,7 +781,7 @@ def test_packed_sources_are_the_records_the_engine_takes() -> None:
     """
     ok: dict[str, Any] = {"shape": (_NY, _NX), "steps": 100, "sample_steps": [50]}
     wave = fdtd_dispatch.cw(_SOURCE_F)
-    with pytest.raises(ValueError, match=r"sources\[0\] ix must be an integer"):
+    with pytest.raises(TypeError, match=r"sources\[0\] ix must be an integer"):
         fdtd_gpu_remote.build_job(
             343.0,
             _DX,

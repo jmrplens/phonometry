@@ -63,6 +63,7 @@ from ..._internal.validation import (
     require_equal_shapes,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 from .ratings import impact_improvement_adaptation_term, weighted_impact_improvement
@@ -138,6 +139,7 @@ def acceleration_level(
     :raises ValueError: Non-finite or non-positive acceleration, or a
         non-positive reference.
     """
+    require_scalar(reference, "reference")
     a = _finite(acceleration, "acceleration")
     if np.any(a <= 0.0):
         msg = "'acceleration' must be positive."
@@ -309,11 +311,11 @@ class FloorCoveringImprovementResult(OwnsArrays):
         anywhere on the sheet, under a standard-basis line still promising that
         the statement of results carries it.
 
+        :raises TypeError: if ``delta_lw`` / ``ci_delta`` is not an integer (or
+            ``None``); a bool is not one.
         :raises ValueError: if the frequencies, the improvement and the
             limit-of-measurement mask do not agree on how many bands there
-            are, if ``delta_lw`` / ``ci_delta`` is not an integer (or
-            ``None``), or if ``ci_delta`` is given while ``delta_lw`` is
-            ``None``.
+            are, or if ``ci_delta`` is given while ``delta_lw`` is ``None``.
         """
         require_ranks(self, frequencies=1, improvement=1, background_margin_db=1)
         require_same_length(self, "frequencies", "improvement", "background_margin_db")
@@ -328,7 +330,7 @@ class FloorCoveringImprovementResult(OwnsArrays):
                     f"integer number of decibels (ISO 717-2 ratings are "
                     f"rounded to whole dB) or None; got {value!r}."
                 )
-                raise ValueError(msg)
+                raise TypeError(msg)
         if self.delta_lw is None and self.ci_delta is not None:
             msg = (
                 f"FloorCoveringImprovementResult: 'ci_delta' is the adaptation "

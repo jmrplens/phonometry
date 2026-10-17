@@ -367,7 +367,7 @@ def test_binding_margin_reads_the_requirement_and_refuses_a_foreign_class() -> N
     result = filters.verify_filter_class(bank)
     expected = min(b["bandwidth_margin_class1_db"] for b in result.bands)
     assert result.binding_margin("effective_bandwidth", 1) == expected
-    with pytest.raises(KeyError, match="class 0 is not one of"):
+    with pytest.raises(ValueError, match="class 0 is not one of"):
         result.binding_margin("effective_bandwidth", 0)
 
 

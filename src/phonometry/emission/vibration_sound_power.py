@@ -66,6 +66,7 @@ from .._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 __all__ = [
@@ -273,6 +274,7 @@ def extraneous_velocity_correction(level_difference: float) -> float:
     :param level_difference: Level difference :math:`\Delta L_v`, in dB.
     :return: The correction ``K1A`` to subtract, in dB.
     """
+    require_scalar(level_difference, "level_difference")
     if level_difference >= _K1A_ZERO_ABOVE_DB:
         return 0.0
     if level_difference < _K1A_CLAMPED_BELOW_DB:

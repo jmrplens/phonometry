@@ -188,6 +188,9 @@ class ZoneBoundaries(RichDisplay):
         :raises ValueError: if a boundary is not positive and finite, or the
             three do not increase.
         """
+        require_scalar(self.a_b, "a_b")
+        require_scalar(self.b_c, "b_c")
+        require_scalar(self.c_d, "c_d")
         require_finite_fields(self, "a_b", "b_c", "c_d")
         for name in ("a_b", "b_c", "c_d"):
             require_positive(getattr(self, name), name)
@@ -385,6 +388,10 @@ def vibration_vector_change(
     :return: The :class:`VectorChangeResult`.
     :raises ValueError: If a magnitude is negative or a value is not finite.
     """
+    require_scalar(final_magnitude, "final_magnitude")
+    require_scalar(final_phase_deg, "final_phase_deg")
+    require_scalar(initial_magnitude, "initial_magnitude")
+    require_scalar(initial_phase_deg, "initial_phase_deg")
     for name, value in (
         ("initial_magnitude", initial_magnitude),
         ("final_magnitude", final_magnitude),

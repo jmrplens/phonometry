@@ -251,6 +251,7 @@ Median and range of the rank of each recognised sound source per site
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | for `rankings`, or a participant's list in it, that is a text or not a sequence. |
 | ValueError | for a list longer than eight, a source listed twice by one participant, an empty source name, no participants, or sites that do not match the participants. |
 
 ## method_b_summary

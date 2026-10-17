@@ -263,6 +263,7 @@ its bin by [`bin_amplitude_modulation`](/phonometry/reference/api/environment/wi
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | If the exclusion flags are neither booleans nor integers. |
 | ValueError | If the period does not hold 6 000 finite values or the exclusion flags are not sixty booleans (or 0 and 1). |
 
 ## bin_amplitude_modulation
@@ -307,7 +308,8 @@ highest mean.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the shapes disagree, a value is not finite, a wind speed is negative, a band is not a band number or is repeated, the exclusion flags are not booleans (or 0 and 1), or the sector width does not divide 360 degrees. |
+| TypeError | If `bands` is a text rather than a sequence of band numbers, or the exclusion flags are neither booleans nor integers. |
+| ValueError | If the shapes disagree, a value is not finite, a wind speed is negative, a band is not a band number or is repeated, an integer exclusion flag is other than 0 and 1, or the sector width does not divide 360 degrees. |
 
 ## BinnedModulation
 

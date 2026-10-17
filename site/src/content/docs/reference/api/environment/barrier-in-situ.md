@@ -101,7 +101,13 @@ one takes off 1. They are two tables and they stay two tables.
 
 ## BarrierInSituWarning
 
-The measurement is outside a condition ISO 10847 states.
+A NOTE of ISO 10847 the measurement cannot follow.
+
+Emitted when [`reference_microphone_height_m`](/phonometry/reference/api/environment/barrier-in-situ/#reference_microphone_height_m) cannot raise the
+reference microphone to the 10 degrees of the NOTE to 7.2.2, and when
+[`measured_insertion_loss_indirect`](/phonometry/reference/api/environment/barrier-in-situ/#measured_insertion_loss_indirect) is given receiver types that
+differ between the two campaigns, against the NOTE to 8.2.2. The clause
+each NOTE hangs from is still applied.
 
 ## check_short_distance
 

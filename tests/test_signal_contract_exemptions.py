@@ -54,7 +54,7 @@ from phonometry.environment import (
 )
 from phonometry.io import Signal
 from phonometry.materials import in_situ_absorption_spectrum
-from phonometry.metrology import sensitivity
+from phonometry.metrology import CalibrationWarning, sensitivity
 from phonometry.underwater import (
     pile_strike_metrics,
     single_strike_sel,
@@ -321,7 +321,7 @@ def test_the_calibrator_take_gets_its_validation_from_the_object() -> None:
     """
     short = _record(seconds=0.5)
     take = Signal(short, FS)
-    with pytest.warns(UserWarning, match="too short to validate"):
+    with pytest.warns(CalibrationWarning, match="too short to validate"):
         from_object = sensitivity(take)
     with warnings.catch_warnings():
         warnings.simplefilter("error")

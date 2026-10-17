@@ -90,6 +90,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
+    require_count,
     require_equal_shapes,
     require_ranks,
     require_same_length,
@@ -332,8 +333,7 @@ def _normalise(value: str, aliases: Mapping[str, str], name: str) -> str:
     """Lower-case ``value``, replace spaces by underscores and resolve aliases."""
     if not isinstance(value, str):
         msg = f"'{name}' must be a string; got {value!r}."
-        # ValueError keeps the module validation errors uniform.
-        raise ValueError(msg)  # noqa: TRY004
+        raise TypeError(msg)
     key = value.strip().lower().replace(" ", "_").replace("-", "_")
     return aliases.get(key, key)
 
@@ -828,8 +828,27 @@ class RegulationLimits(RichDisplay):
     description: str
 
     def __getitem__(self, period: str) -> float:
-        """The limit of one evaluation period, in dB."""
-        return float(getattr(self, _check_period(period)))
+        """The limit of one evaluation period, in dB.
+
+        Read like a mapping keyed by :data:`RD1367_EVALUATION_PERIODS`, so a
+        key it does not hold raises :class:`KeyError`, as ``dict`` does, and
+        the key is matched exactly, as a ``dict`` key is: ``"Day"`` or
+        ``" night "`` is a key it does not hold. The period of a
+        :class:`PeriodAssessment`, a choice among the same three names,
+        refuses an unknown one with :class:`ValueError`.
+
+        :param period: ``"day"``, ``"evening"`` or ``"night"``, spelled so.
+        :return: The limit of that period, in dB.
+        :raises KeyError: for any other key, another spelling of the three
+            included.
+        """
+        if period not in RD1367_EVALUATION_PERIODS:
+            msg = (
+                f"RegulationLimits holds the periods {RD1367_EVALUATION_PERIODS}; "
+                f"got {period!r}."
+            )
+            raise KeyError(msg)
+        return float(getattr(self, period))
 
     def as_dict(self) -> dict[str, float]:
         """The three limits keyed by evaluation period."""
@@ -1316,21 +1335,17 @@ def _validate_annual_inputs(
     :param operating_days: Days a year the activity operates, or ``None``.
     :param year_days: Days in the year considered.
     :param closed_level: Level representing a day with no operation, dB.
+    :raises TypeError: For a count of days given as a bool, a text or an array.
     :raises ValueError: For a fractional or out-of-range count of days.
     """
-    require_scalar(year_days, "year_days")
-    if int(year_days) != year_days or int(year_days) <= 0:
+    year = require_count(year_days, "year_days", at_least=None)
+    if year <= 0:
         msg = f"'year_days' must be a positive whole number; got {year_days!r}."
         raise ValueError(msg)
     if operating_days is None:
         return
-    require_scalar(operating_days, "operating_days")
-    if int(operating_days) != operating_days:
-        msg = (
-            f"'operating_days' must be a whole number of days; got {operating_days!r}."
-        )
-        raise ValueError(msg)
-    if not 0 < int(operating_days) <= int(year_days):
+    operating = require_count(operating_days, "operating_days", at_least=None)
+    if not 0 < operating <= year:
         msg = (
             "'operating_days' must be a positive integer no larger than "
             f"'year_days'; got {operating_days!r} of {year_days!r}."
@@ -1362,7 +1377,9 @@ def _annual_index(
         return _finite(long_term_levels[period], "long_term_levels")
     if operating_days is None:
         return None
-    closed = int(year_days) - int(operating_days)
+    closed = require_count(year_days, "year_days", at_least=None) - require_count(
+        operating_days, "operating_days", at_least=None
+    )
     weights = [float(operating_days)] + ([float(closed)] if closed else [])
     values = [float(reported)] + ([closed_level] if closed else [])
     return long_term_corrected_level(values, weights=weights)

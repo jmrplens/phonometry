@@ -39,6 +39,7 @@ import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.validation import require_choice, require_positive, require_scalar
+from .simplified_model import BuildingPredictionWarning
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -284,6 +285,8 @@ def weighted_lining_improvement(
     :return: The weighted improvement ``ΔRw``, in dB.
     :raises ValueError: If ``fo`` is outside the tabulated range or an input is
         not finite.
+    :warns BuildingPredictionWarning: If ``base_rating`` lies outside the
+        range Clause D.2.2 states Table D.1 for.
     """
     f0 = require_positive(resonance_frequency, "resonance_frequency")
     require_scalar(base_rating, "base_rating")
@@ -305,7 +308,7 @@ def weighted_lining_improvement(
             f"{rw_low:g} dB <= Rw <= {rw_high:g} dB range Clause D.2.2 states "
             "Table D.1 for; the result is an extrapolation of "
             "74,4 - 20 lg(fo) - Rw/2 and is not covered by the standard.",
-            UserWarning,
+            BuildingPredictionWarning,
             stacklevel=2,
         )
     nominal = _round_to_third_octave(f0)
@@ -420,6 +423,8 @@ def lining_improvement(
     :raises ValueError: If an input is not positive and finite, ``system`` is
         unknown, or ``glued_area`` is out of range or combined with
         ``system="studs"``.
+    :warns BuildingPredictionWarning: If ``resonance_frequency`` lies outside
+        the range Annex D puts lining resonances on.
     """
     f0 = require_positive(resonance_frequency, "resonance_frequency")
     require_choice(system, "system", tuple(_ANNEX_D_SYSTEMS))
@@ -430,7 +435,7 @@ def lining_improvement(
             f"{low:g} Hz to {high:g} Hz range Annex D puts lining resonances "
             "on; the fits are monotonic in lg(fo) and unbounded below it, so "
             "the result is an extrapolation.",
-            UserWarning,
+            BuildingPredictionWarning,
             stacklevel=2,
         )
     ratings = [

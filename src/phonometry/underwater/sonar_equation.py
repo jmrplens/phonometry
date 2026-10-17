@@ -56,6 +56,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_axis_rank,
+    require_count,
     require_equal_shapes,
     require_positive,
     require_same_shape,
@@ -399,6 +400,7 @@ def detection_range(
     :return: A :class:`DetectionRangeResult`.
     :raises ValueError: If an input is invalid.
     """
+    require_scalar(ph, "ph")
     from scipy.optimize import brentq
 
     from .propagation.closed_form import propagation_loss
@@ -409,7 +411,7 @@ def detection_range(
         msg = "'max_range' must exceed 1 m."
         raise ValueError(msg)
     require_scalar(n_points, "n_points")
-    if int(n_points) < _MIN_CURVE_POINTS:
+    if require_count(n_points, "n_points", at_least=None) < _MIN_CURVE_POINTS:
         msg = "'n_points' must be at least 2."
         raise ValueError(msg)
     options = {
@@ -433,7 +435,11 @@ def detection_range(
     else:
         root = float(brentq(lambda r: _loss(r) - fom, lo, rmax, xtol=1e-6, rtol=1e-12))
     upper = rmax if not np.isfinite(root) else min(rmax, max(2.0 * root, 10.0))
-    grid = np.linspace(max(1.0, upper / 1000.0), upper, int(n_points))
+    grid = np.linspace(
+        max(1.0, upper / 1000.0),
+        upper,
+        require_count(n_points, "n_points", at_least=None),
+    )
     curve = propagation_loss(grid, frequency_hz, **options)  # type: ignore[arg-type]
     return DetectionRangeResult(
         detection_range=root,

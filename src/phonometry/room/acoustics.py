@@ -517,6 +517,8 @@ def decay_curve(
         truncation point. It unpacks as ``times, levels = decay_curve(...)``
         for backward compatibility and exposes :meth:`DecayCurve.plot`.
     """
+    require_scalar(band, "band")
+    require_scalar(fraction, "fraction")
     fs = resolve_fs(ir, fs, name="ir")
     x = validate_ir(ir, fs)
     if band is not None:

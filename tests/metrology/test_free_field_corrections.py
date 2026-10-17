@@ -335,9 +335,20 @@ def test_clause_10_states_no_maximum_below_63_hz() -> None:
         metrology.max_expanded_uncertainty([50.0], clause=10)
 
 
-@pytest.mark.parametrize("clause", [8, 15, "12", True, 12.5])
-def test_only_clauses_9_to_14_state_a_maximum(clause: object) -> None:
-    with pytest.raises(ValueError, match="clause"):
+@pytest.mark.parametrize(
+    ("clause", "refusal"),
+    [
+        (8, ValueError),
+        (15, ValueError),
+        ("12", TypeError),
+        (True, TypeError),
+        (12.5, ValueError),
+    ],
+)
+def test_only_clauses_9_to_14_state_a_maximum(
+    clause: object, refusal: type[Exception]
+) -> None:
+    with pytest.raises(refusal, match="clause"):
         metrology.max_expanded_uncertainty([1000.0], clause=clause)  # type: ignore[arg-type]
 
 
@@ -751,7 +762,7 @@ def test_microphones_need_one_label_per_determination() -> None:
 
 
 def test_microphones_are_labels_not_a_string() -> None:
-    with pytest.raises(ValueError, match="single string"):
+    with pytest.raises(TypeError, match="single string"):
         _three_microphones_on_three_calibrators(microphones="111222333")
 
 

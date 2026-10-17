@@ -156,6 +156,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     _as_float64,
+    refuse_text,
     require_choice,
     require_count,
     require_finite,
@@ -1616,12 +1617,21 @@ def neck_loop_characteristics(
     :param input_voltage_v: The input voltage the field was measured with, in
         volts.
     :return: A :class:`NeckLoopCharacteristics`.
+    :raises TypeError: If ``impedance_ohm`` holds an element that is not a
+        number.
+    :raises ValueError: If the frequencies are not positive and ascending or
+        miss 1000 Hz, the arrays differ in length, a level is not finite, or
+        a real impedance is not positive.
     """
     f = require_positive_array(frequencies, "frequencies")
     level = require_finite_array(field_strength_level, "field_strength_level")
+    refuse_text(impedance_ohm, "'impedance_ohm' must be numbers, not text.")
     try:
         complex_input = np.iscomplexobj(impedance_ohm)
-    except (TypeError, ValueError) as exc:
+    except TypeError as exc:
+        msg = "'impedance_ohm' must be numeric."
+        raise TypeError(msg) from exc
+    except ValueError as exc:
         msg = "'impedance_ohm' must be numeric."
         raise ValueError(msg) from exc
     z = require_positive_array(
@@ -1799,12 +1809,16 @@ def verify_neck_loop(
         jig, in volts (:attr:`NeckLoopCharacteristics.reference_input_voltage_v`).
     :param neck_loop_type: 1 or 2.
     :return: A :class:`NeckLoopVerification`.
+    :raises TypeError: if ``neck_loop_type`` is not a number, a bool included.
+    :raises ValueError: if ``neck_loop_type`` is a number but not 1 or 2.
     """
     resistance = require_positive(dc_resistance_ohm, "dc_resistance_ohm")
     voltage = require_positive(input_voltage_v, "input_voltage_v")
     msg = f"'neck_loop_type' must be one of {tuple(NECK_LOOP_TYPES)}; got {neck_loop_type!r}."
     try:
         kind = require_count(neck_loop_type, "neck_loop_type")
+    except TypeError:
+        raise TypeError(msg) from None
     except ValueError:
         raise ValueError(msg) from None
     if kind not in NECK_LOOP_TYPES:

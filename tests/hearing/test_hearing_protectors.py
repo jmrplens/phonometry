@@ -76,10 +76,22 @@ def test_alpha_comes_from_table_1() -> None:
     assert lenient.apv == pytest.approx(lenient.mean_attenuation)
 
 
-@pytest.mark.parametrize("bad", [85, 0, -1, "84", None, 84.5])
-def test_a_performance_outside_table_1_is_refused(bad: object) -> None:
+@pytest.mark.parametrize(
+    ("bad", "refusal"),
+    [
+        (85, ValueError),
+        (0, ValueError),
+        (-1, ValueError),
+        ("84", TypeError),
+        (None, TypeError),
+        (84.5, ValueError),
+    ],
+)
+def test_a_performance_outside_table_1_is_refused(
+    bad: object, refusal: type[Exception]
+) -> None:
     """The seven rows of Table 1 are the whole of the choice."""
-    with pytest.raises(ValueError, match="protection performances Table 1"):
+    with pytest.raises(refusal, match="protection performances Table 1"):
         hearing.assumed_protection_value(ref.ISO4869_2_ATTENUATION, performance=bad)
 
 

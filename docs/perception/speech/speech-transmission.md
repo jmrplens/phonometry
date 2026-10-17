@@ -158,7 +158,7 @@ modulation analysis that yields the index.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain.svg" alt="STI measurement chain: STIPA source signal through the room to the microphone and the MTF analysis" width="92%"></picture>
 
-`stipa` emits a `UserWarning` when the recording is shorter than the
+`stipa` emits a `speech.STIWarning` when the recording is shorter than the
 recommended 15 s (IEC 60268-16 STIPA practice, 15 s to 25 s): below that the
 slow modulation components are averaged over too few periods and the STI is
 biased low (an ideal loopback gives STI ≈ 0.956 at 5 s vs ≈ 0.998 at 18 s).
@@ -218,7 +218,7 @@ Each route has failure modes the standard is explicit about:
   direct measurements scatter by up to about 0.03 STI even in steady
   conditions (and more in fluctuating noise); repeat and compare rather than
   trusting a single run, and respect the minimum duration flagged by the
-  `UserWarning` above.
+  `speech.STIWarning` above.
 
 ### `sti_from_impulse_response()` / `stipa()` parameters
 

@@ -1,6 +1,8 @@
 import numpy as np
 import pytest
 
+from phonometry.filters import FilterBankWarning
+
 
 @pytest.mark.parametrize("block_size", [8, 256, 1024])
 def test_block_processing_matches_full_signal(block_size: int) -> None:
@@ -94,7 +96,6 @@ def test_stateful_steady_ic_initialization() -> None:
     test_signal = rng.standard_normal(1024)
     # steady_ic implies detrending, whose block-processing advisory is
     # expected here: assert it rather than leak it to the run summary.
-    from phonometry.filters.core import FilterBankWarning
 
     with pytest.warns(
         FilterBankWarning,
@@ -171,6 +172,7 @@ def test_detrend_stateful_warning() -> None:
         block_processing=BlockProcessing(stateful=True),
     )
     with pytest.warns(
-        UserWarning, match=r"Detrending is not recommended during block processing"
+        FilterBankWarning,
+        match=r"Detrending is not recommended during block processing",
     ):
         bank.filter(signal, detrend=True)

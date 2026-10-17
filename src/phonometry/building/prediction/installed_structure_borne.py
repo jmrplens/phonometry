@@ -97,6 +97,7 @@ from ..._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 from .resilient_layers import TAPPING_HAMMER_MASS_KG
@@ -858,6 +859,7 @@ def multi_junction_adjustment(n_junctions: int) -> float:
     :return: The adjustment ``dK``, in dB (0,0 for a single junction).
     :raises ValueError: for fewer than one junction.
     """
+    require_scalar(n_junctions, "n_junctions")
     if n_junctions < 1:
         msg = "'n_junctions' must be at least 1."
         raise ValueError(msg)

@@ -77,7 +77,12 @@ from scipy.optimize import brentq
 from .._internal.catalogue import CatalogueRow
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, handed_over, read_only_copy
-from .._internal.validation import require_ranks, require_same_length
+from .._internal.validation import (
+    require_count,
+    require_ranks,
+    require_same_length,
+    require_scalar,
+)
 from .fdtd import (
     _SIDES,
     Field2D,
@@ -374,7 +379,7 @@ def _as_material(name: str, value: object) -> Material:
         f"{name} must be a Material, a solid's catalogue row or a "
         "(c_p, c_s, rho) triple"
     )
-    raise ValueError(msg)
+    raise TypeError(msg)
 
 
 def scholte_speed(
@@ -568,6 +573,7 @@ class ElasticFDTD2D:
         free_sides: str | Iterable[str] | None = None,
         obstacle_mask: NDArray[np.bool_] | None = None,
     ) -> None:
+        require_scalar(cfl, "cfl")
         cp_map = _resolve_speed_map("c_p", c_p, shape)
         _positive_map("c_p", cp_map)
         ny, nx = cp_map.shape
@@ -653,7 +659,7 @@ class ElasticFDTD2D:
 
         sides = _resolve_sponge_sides(sponge_sides)
         #: Sponge-layer width in cells (read-only configuration record).
-        self.sponge_width = int(sponge_width)
+        self.sponge_width = require_count(sponge_width, "sponge_width", at_least=None)
         #: Sides carrying a sponge layer when ``sponge_width > 0``.
         self.sponge_sides: tuple[str, ...] = sides if sponge_width > 0 else ()
         #: Sides carrying a traction-free surface (immutable record).
@@ -711,8 +717,9 @@ class ElasticFDTD2D:
         :return: The configured stepping engine.
         :raises ValueError: If a mask does not match ``shape`` or a
             material spec is invalid, a catalogue row's refusal among them.
-        :raises TypeError: For a catalogue row of a class that lacks any of
-            the bulk longitudinal speed, the transverse speed and the density.
+        :raises TypeError: For a mask array that is not boolean, or a
+            catalogue row of a class that lacks any of the bulk longitudinal
+            speed, the transverse speed and the density.
         """
         ny = _integer("shape[0]", shape[0])
         nx = _integer("shape[1]", shape[1])
@@ -726,11 +733,12 @@ class ElasticFDTD2D:
         for k, (where, material) in enumerate(regions):
             mat = _as_material(f"regions[{k}]", material)
             index = where
-            if isinstance(index, np.ndarray) and (
-                index.dtype != np.bool_ or index.shape != (ny, nx)
-            ):
+            if isinstance(index, np.ndarray):
                 msg = f"regions[{k}] mask must be a boolean array of shape {(ny, nx)}"
-                raise ValueError(msg)
+                if index.dtype != np.bool_:
+                    raise TypeError(msg)
+                if index.shape != (ny, nx):
+                    raise ValueError(msg)
             c_p[index] = mat.c_p
             c_s[index] = mat.c_s
             rho[index] = mat.rho
@@ -840,6 +848,8 @@ class ElasticFDTD2D:
 
     def _validate_explosion_position(self, ix: int, iy: int) -> None:
         """Check an explosion cell against the grid and the obstacle mask."""
+        require_scalar(ix, "ix")
+        require_scalar(iy, "iy")
         ny, nx = self.txx.shape
         if not (0 <= ix < nx and 0 <= iy < ny):
             msg = "source position lies outside the grid"
@@ -850,6 +860,8 @@ class ElasticFDTD2D:
 
     def _validate_force_position(self, source: ForceSource, ix: int, iy: int) -> None:
         """Check a force velocity node against the grid and the obstacle."""
+        require_scalar(ix, "ix")
+        require_scalar(iy, "iy")
         ny, nx = self.txx.shape
         open_map = self._vx_open if source.direction == "x" else self._vy_open
         limit = (ny, nx - 1) if source.direction == "x" else (ny - 1, nx)

@@ -23,7 +23,7 @@ from reference_data import (
 )
 
 from phonometry import psychoacoustics
-from phonometry.psychoacoustics import ToneAssessment
+from phonometry.psychoacoustics import TonalityWarning, ToneAssessment
 from phonometry.psychoacoustics.quality.tonality import (
     _critical_band,
     _proximity_spacing,
@@ -231,11 +231,11 @@ def test_coarse_resolution_warns_at_low_frequency() -> None:
     """
     x = _tone_in_noise(250.0, 0.2, 0.02)
     coarse = r"Frequency resolution .* is coarse for the tone at"
-    with pytest.warns(UserWarning, match=coarse):
+    with pytest.warns(TonalityWarning, match=coarse):
         psychoacoustics.tone_to_noise_ratio(
             x, FS, tone_frequency=250.0, resolution_hz=4.0
         )
-    with pytest.warns(UserWarning, match=coarse):
+    with pytest.warns(TonalityWarning, match=coarse):
         psychoacoustics.prominence_ratio(x, FS, tone_frequency=250.0, resolution_hz=4.0)
 
 
@@ -245,7 +245,7 @@ def test_range_edge_warns() -> None:
     verdict despite a huge ratio; the function warns about the edge.
     """
     x = _tone_in_noise(89.1, 0.2, 0.002)
-    with pytest.warns(UserWarning, match="range-of-interest edge"):
+    with pytest.warns(TonalityWarning, match="range-of-interest edge"):
         res = psychoacoustics.tone_to_noise_ratio(x, FS, tone_frequency=89.1)
     assert res.ratio_db > 20.0  # the ratio itself is clearly tonal
 
@@ -256,10 +256,10 @@ def test_numeric_noise_power_warns() -> None:
     """
     numeric_noise = r"critical-band power is at numeric-noise level"
     silence = np.zeros(FS * 2)
-    with pytest.warns(UserWarning, match=numeric_noise):
+    with pytest.warns(TonalityWarning, match=numeric_noise):
         psychoacoustics.tone_to_noise_ratio(silence, FS, tone_frequency=1000.0)
     dc = np.full(FS * 2, 0.5)
-    with pytest.warns(UserWarning, match=numeric_noise):
+    with pytest.warns(TonalityWarning, match=numeric_noise):
         psychoacoustics.prominence_ratio(dc, FS, tone_frequency=1000.0)
 
 

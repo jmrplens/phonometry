@@ -486,11 +486,20 @@ def test_an_odd_record_reaches_the_nyquist_frequency_itself() -> None:
     ],
 )
 def test_a_malformed_pair_is_refused_by_name(
-    call: Callable[[NDArray[np.float64], NDArray[np.float64]], object], name: str
+    request: pytest.FixtureRequest,
+    call: Callable[[NDArray[np.float64], NDArray[np.float64]], object],
+    name: str,
 ) -> None:
-    """A one-number range, a bare number or a bare band says which argument."""
+    """A one-number range, a bare number or a bare band says which argument.
+
+    A number where a pair belongs, or a pair where a list of pairs does, is
+    the wrong type; a sequence of the wrong length is the right type with a
+    wrong value.
+    """
+    case = request.node.callspec.id
+    refusal = TypeError if case in {"bare-number-range", "bare-band"} else ValueError
     force, response = _sdof_impact(0.1)
-    with pytest.raises(ValueError, match=f"'{name}' must be a"):
+    with pytest.raises(refusal, match=f"'{name}' must be a"):
         call(force, response)
 
 
@@ -1064,8 +1073,13 @@ def test_exclusions_that_leave_nothing_to_judge_are_refused() -> None:
         )
 
 
-@pytest.mark.parametrize("min_records", [5.9, True, 0, "5"])
-def test_minimum_records_is_a_whole_number(min_records: object) -> None:
+@pytest.mark.parametrize(
+    ("min_records", "refusal"),
+    [(5.9, ValueError), (True, TypeError), (0, ValueError), ("5", TypeError)],
+)
+def test_minimum_records_is_a_whole_number(
+    min_records: object, refusal: type[Exception]
+) -> None:
     """int() would read 5.9 as 5 and True as 1, and loosen the verdict."""
     force, response = _sdof_impact(0.1)
     records = vibration.impact_mobility(
@@ -1074,7 +1088,7 @@ def test_minimum_records_is_a_whole_number(min_records: object) -> None:
         FS,
     )
     minimum = cast("Any", min_records)
-    with pytest.raises(ValueError, match="min_n_records"):
+    with pytest.raises(refusal, match="min_n_records"):
         vibration.check_coherence(
             records, frequency_range_hz=(10.0, 400.0), min_n_records=minimum
         )
@@ -1093,7 +1107,7 @@ def test_a_whole_float_minimum_is_a_count() -> None:
     assert check.min_n_records == COHERENCE_RECORDS
     assert isinstance(check.min_n_records, int)
     not_a_count: Any = True
-    with pytest.raises(ValueError, match="impacts"):
+    with pytest.raises(TypeError, match="impacts"):
         vibration.CoherenceCheck(
             frequencies=check.frequencies,
             coherence=check.coherence,

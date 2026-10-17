@@ -39,6 +39,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_above_absolute_zero_array,
     require_positive,
+    require_scalar,
 )
 from .impedance_tube import (
     _DIAMETER_POSITIVE,
@@ -172,6 +173,7 @@ def plane_wave_frequency_range_astm(
     :param shape: ``"circular"``, ``"rectangular"`` or ``"square"``.
     :return: Tuple ``(f_l, f_u)`` of the lower and upper frequency limits, in Hz.
     """
+    require_scalar(spacing_m, "spacing_m")
     return _frequency_range(
         spacing_m,
         speed_of_sound,
@@ -202,6 +204,9 @@ def _warn_astm_plane_wave(
     :math:`k s > 0.02 \pi` (6.2.3). The upper spacing bound binds
     every microphone pair (largest spacing), the lower one the smallest.
     """
+    require_scalar(diameter_m, "diameter_m")
+    require_scalar(s1, "s1")
+    require_scalar(s2, "s2")
     if s1 <= 0.0 or s2 <= 0.0:
         msg = "'s1' and 's2' must be positive."
         raise ValueError(msg)
@@ -285,6 +290,8 @@ def wave_decomposition(
         ``"square"``.
     :return: Tuple ``(A, B, C, D)`` of complex amplitudes.
     """
+    require_scalar(s1, "s1")
+    require_scalar(s2, "s2")
     if s1 <= 0.0 or s2 <= 0.0:
         msg = "'s1' and 's2' must be positive."
         raise ValueError(msg)
@@ -474,6 +481,7 @@ class TransferMatrix(OwnsArrays):
         :param thickness_m: Specimen thickness ``d``, in metres.
         :return: Complex material wavenumber ``k'``, in reciprocal metres.
         """
+        require_scalar(thickness_m, "thickness_m")
         if thickness_m <= 0.0:
             msg = "'thickness_m' must be positive."
             raise ValueError(msg)
@@ -589,6 +597,7 @@ def air_layer_transfer_matrix(
     :param characteristic_impedance: Characteristic impedance ``rho c``, in rayls.
     :return: The air-layer :class:`TransferMatrix`.
     """
+    require_scalar(thickness_m, "thickness_m")
     require_positive(characteristic_impedance, "characteristic_impedance")
     if thickness_m <= 0.0:
         msg = "'thickness_m' must be positive."

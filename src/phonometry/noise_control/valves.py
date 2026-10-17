@@ -70,6 +70,7 @@ from .._internal.validation import (
     ABSOLUTE_ZERO_C,
     require_above_absolute_zero,
     require_choice,
+    require_count,
     require_positive,
     require_scalar,
 )
@@ -449,7 +450,7 @@ def valve_style_modifier(
     area = require_positive(passage_area, "passage_area")
     perimeter = require_positive(wetted_perimeter, "wetted_perimeter")
     require_scalar(n_passages, "n_passages")
-    count = int(n_passages)
+    count = require_count(n_passages, "n_passages", at_least=None)
     if count != n_passages or count < 1:
         msg = (
             "'n_passages' counts the independent flow passages, so it must be "
@@ -1034,8 +1035,9 @@ def stage_level_correction(
     :raises ValueError: If the stage count is below two, or a pressure is not
         positive and finite, or the stagnation pressure exceeds the inlet.
     """
+    require_scalar(last_stage_level, "last_stage_level")
     require_scalar(n_stages, "n_stages")
-    count = int(n_stages)
+    count = require_count(n_stages, "n_stages", at_least=None)
     if count != n_stages or count < _MINIMUM_SOURCES:
         msg = (
             "Equation (31) puts back the stages before the last one, so "

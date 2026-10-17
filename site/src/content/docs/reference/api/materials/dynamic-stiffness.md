@@ -642,8 +642,7 @@ resistivity passed picks.
 
 | Exception | When |
 | :--- | :--- |
-| CatalogueError | for a row that gives only `s't` when no resistivity is passed, saying that `s't` is not `s'` and what to pass; and for a row with no value of either stiffness whose `s't` cell holds something else, such as a declared bound, which it names. |
-| ValueError | for a row that gives neither stiffness, naming what its source had in the `s'` cell; for a row that gives `s'` when either keyword is passed; for a resistivity below 100 kPa.s/m2 with no `s'a`; and for a non-positive mass or resistivity. |
+| ValueError | for a row that gives only `s't` when no resistivity is passed, saying that `s't` is not `s'` and what to pass; for a row with no value of either stiffness whose `s't` cell holds something else, such as a declared bound, which it names; for a row that gives neither stiffness, naming what its source had in the `s'` cell; for a row that gives `s'` when either keyword is passed; for a resistivity below 100 kPa.s/m2 with no `s'a`; and for a non-positive mass or resistivity. A cell the computation needs and the row does not hold is refused as [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted) refuses it. |
 
 ### ResilientLayer.printed()
 

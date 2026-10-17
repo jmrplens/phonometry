@@ -75,6 +75,7 @@ from ..._internal.validation import (
     require_equal_shapes,
     require_positive,
     require_ranks,
+    require_scalar,
 )
 from ...hearing.threshold import SEXES as _SEXES
 from ...io._resolve import SignalInput, resolve_fs, resolve_samples
@@ -299,6 +300,7 @@ def daily_dose(dose: float, exposure_time: float, measurement_time: float) -> fl
         was measured (same unit as ``exposure_time``).
     :return: The daily dose :math:`D_\mathrm{zd} = D_\mathrm{z} (t_\mathrm{d}/t_\mathrm{m})^{1/6}`, m/s2.
     """
+    require_scalar(dose, "dose")
     exposure_time = require_positive(exposure_time, "exposure_time")
     measurement_time = require_positive(measurement_time, "measurement_time")
     return float(dose * (exposure_time / measurement_time) ** (1.0 / _DOSE_EXPONENT))
@@ -356,6 +358,8 @@ def compression_dose(daily_dose_value: float, *, mz: float = _MZ_MALE) -> float:
         female.
     :return: The daily compressive stress :math:`S_\mathrm{d} = m_\mathrm{z} D_\mathrm{zd}`, MPa.
     """
+    require_scalar(daily_dose_value, "daily_dose_value")
+    require_scalar(mz, "mz")
     return mz * daily_dose_value
 
 
@@ -363,6 +367,7 @@ def static_stress(mz: float = _MZ_MALE) -> float:
     r"""Static compressive stress :math:`S_\text{stat} = m_\mathrm{z} \cdot 9.81`
     (Annex C), MPa.
     """
+    require_scalar(mz, "mz")
     return mz * _GRAVITY
 
 
@@ -413,6 +418,9 @@ def injury_risk(
         is exhausted (:math:`S_\mathrm{u} - S_\text{stat} \le 0`) within the
         exposure period.
     """
+    require_scalar(daily_compression, "daily_compression")
+    require_scalar(start_age, "start_age")
+    require_scalar(exposure_duration_years, "exposure_duration_years")
     require_choice(sex, "sex", _SEXES)
     if exposure_duration_years <= 0:
         msg = "'exposure_duration_years' must be a positive integer."

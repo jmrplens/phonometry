@@ -172,11 +172,14 @@ def test_a_step_that_does_not_divide_the_half_circle_is_refused(
         metrology.adjustment_factors(step_deg)
 
 
-@pytest.mark.parametrize("planes", [0, 1.5, True, "2"])
+@pytest.mark.parametrize(
+    ("planes", "refusal"),
+    [(0, ValueError), (1.5, ValueError), (True, TypeError), ("2", TypeError)],
+)
 def test_a_number_of_planes_that_is_not_a_whole_number_is_refused(
-    planes: object,
+    planes: object, refusal: type[Exception]
 ) -> None:
-    with pytest.raises(ValueError, match="'n_planes' must be a whole number"):
+    with pytest.raises(refusal, match="'n_planes' must be a whole number"):
         metrology.adjustment_factors(10.0, n_planes=planes)  # type: ignore[arg-type]
 
 

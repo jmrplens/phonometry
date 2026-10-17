@@ -23,8 +23,8 @@ from .._internal.validation import (
     require_choice,
     require_positive,
     require_real,
+    require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
 from ..io._resolve import (
     like_input,
     refuse_foreign_rate,
@@ -33,6 +33,7 @@ from ..io._resolve import (
 )
 from ..io._signal import Signal
 from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ._warnings import FilterBankWarning
 from .design import _cheby2_headroom, _design_sos_filter
 from .frequencies import _genfreqs
 
@@ -42,7 +43,6 @@ if TYPE_CHECKING:
 
 __all__ = [
     "BlockProcessing",
-    "FilterBankWarning",
     "FilterDesign",
     "LevelCalibration",
     "OctaveFilterBank",
@@ -54,10 +54,6 @@ __all__ = [
 
 #: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
 _P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
-
-
-class FilterBankWarning(PhonometryWarning):
-    """Warns about fractional-octave filter-bank processing pitfalls."""
 
 
 #: Filter families the bank knows how to design (see ``OctaveFilterBank``).
@@ -295,8 +291,11 @@ class OctaveSpectrogramResult(OwnsArrays):
             one takes ``None`` or ``0``.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to ``imshow``.
+        :raises TypeError: for a ``channel`` that is not a number, or is a
+            bool.
         :raises ValueError: for a multichannel result drawn without
-            ``channel``, or a ``channel`` the result does not hold.
+            ``channel``, a ``channel`` that is not a whole number, or one the
+            result does not hold.
         """
         from .._i18n import check_language
         from .._plot.filters import plot_octave_spectrogram
@@ -418,6 +417,9 @@ def _validate_bank_design(
     limits actually used, filling in the default ``[12, 20000]`` Hz span when
     none was given.
     """
+    require_scalar(fraction, "fraction")
+    require_scalar(fs, "fs")
+    require_scalar(order, "order")
     if fs <= 0:
         msg = "Sample rate 'fs' must be positive."
         raise ValueError(msg)
@@ -432,8 +434,10 @@ def _validate_bank_design(
     # Two frequencies, each one number: a one-element array would pass the
     # comparisons below on every numpy and reach float() in the band
     # generator, which numpy 2.0 to 2.3 answer with its element.
-    if len(limits) != 2 or not all(is_scalar(f) for f in limits):  # noqa: PLR2004
-        msg = "Limits must be a list of two frequencies [f_min, f_max]."
+    msg = "Limits must be a list of two frequencies [f_min, f_max]."
+    if not all(is_scalar(f) for f in limits):
+        raise TypeError(msg)
+    if len(limits) != 2:  # noqa: PLR2004
         raise ValueError(msg)
     if limits[0] <= 0 or limits[1] <= 0:
         msg = "Limit frequencies must be positive."
@@ -506,7 +510,9 @@ def _resolve_limits(limits: list[float] | None) -> list[float] | None:
 
     :param limits: The requested frequency limits, or ``None`` for the default.
     :return: The limits as a list of floats, or ``None``.
-    :raises ValueError: for a non-sequence or a non-numeric entry.
+    :raises TypeError: for a non-sequence, or an entry that is a text or not a
+        number.
+    :raises ValueError: for an entry too large for a float.
     """
     if limits is None:
         return None
@@ -514,7 +520,7 @@ def _resolve_limits(limits: list[float] | None) -> list[float] | None:
     try:
         return [require_real(f, msg) for f in limits]
     except TypeError:
-        raise ValueError(msg) from None
+        raise TypeError(msg) from None
 
 
 class OctaveFilterBank:
@@ -810,6 +816,7 @@ class OctaveFilterBank:
             the exact mid-band frequencies and ``times`` each window's centre
             in seconds.
         """
+        require_scalar(overlap, "overlap")
         if self.stateful:
             msg = "spectrogram() is not supported on stateful banks."
             raise ValueError(msg)

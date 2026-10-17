@@ -290,6 +290,8 @@ def plot_emission_pressure(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to :meth:`~matplotlib.axes.Axes.bar`.
     :return: The axes.
+    :raises TypeError: If ``kwargs`` sets ``x``, ``height`` or ``bottom``,
+        which this figure positions itself.
     :raises ValueError: If the result carries per-band arrays rather than the
         single overall level this figure draws.
     """

@@ -66,7 +66,6 @@ def test_field_strength_refuses_a_nan_level() -> None:
             lambda: ea.field_strength_level(np.array([0.4 + 0.1j])),
             "field_strength_a_per_m",
         ),
-        (lambda: ea.field_strength_level("a"), "field_strength_a_per_m"),
         (lambda: ea.field_strength(np.array([1.0j])), "level"),
         (lambda: ea.magnetic_flux_density(np.array([1.0j])), "field_strength_a_per_m"),
         (lambda: ea.telecoil_response(np.array([45.0 + 1.0j])), "angle_deg"),
@@ -106,13 +105,21 @@ def test_field_strength_refuses_a_nan_level() -> None:
         ),
     ],
 )
-def test_complex_or_text_input_is_refused_by_name(
+def test_complex_input_is_refused_by_name(
     call: Callable[[], object], name: str
 ) -> None:
     # A complex array converted to float64 would drop its imaginary part with
-    # only a warning and go on to a verdict.
-    with pytest.raises(ValueError, match=f"'{name}' must be (real|numeric)"):
+    # only a warning and go on to a verdict. A complex value where a real one
+    # belongs is the wrong type.
+    with pytest.raises(TypeError, match=f"'{name}' must be real"):
         call()
+
+
+@pytest.mark.parametrize("text", ["a", "1.0"], ids=["word", "numeric"])
+def test_text_input_is_refused_by_name(text: str) -> None:
+    # A text is the wrong type where a number belongs, whatever it reads as.
+    with pytest.raises(TypeError, match="'field_strength_a_per_m' must be numbers"):
+        ea.field_strength_level(text)
 
 
 def test_flux_density_of_one_ampere_per_metre() -> None:

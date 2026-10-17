@@ -334,4 +334,5 @@ excess `F` above the smoothed background, with the 1.5 dB threshold, the
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | If `start_band` is not a number. |
 | ValueError | If the spectrum is not 24 finite levels, or `start_band` is not an integer between 0 and 3. |

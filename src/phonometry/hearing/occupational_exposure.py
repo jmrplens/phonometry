@@ -60,6 +60,7 @@ from .._internal.validation import (
     require_choice,
     require_finite_array,
     require_positive,
+    require_scalar,
 )
 from .._internal.warnings import PhonometryWarning
 
@@ -218,6 +219,8 @@ def table_c4_contribution(n_samples: int, u1: float) -> float:
     :param u1: Standard uncertainty of the samples, dB (>= 0).
     :return: The contribution :math:`c_1 u_1` in dB.
     """
+    require_scalar(n_samples, "n_samples")
+    require_scalar(u1, "u1")
     if n_samples < _MIN_SAMPLES_FOR_SPREAD:
         msg = "Table C.4 needs at least 2 samples."
         raise ValueError(msg)
@@ -250,6 +253,7 @@ def min_cumulative_duration_hours(n_workers: int) -> float:
         ``n_G > 40`` the standard advises splitting the group; the returned 17 h
         is the tabulated fallback.
     """
+    require_scalar(n_workers, "n_workers")
     if n_workers < 1:
         msg = "'n_workers' must be a positive integer."
         raise ValueError(msg)
@@ -765,6 +769,7 @@ def task_based_exposure(
         spread rule (Clause 9.3).
     :return: An :class:`ExposureResult` with per-task contributions.
     """
+    require_scalar(u3, "u3")
     if not tasks:
         msg = "At least one task is required."
         raise ValueError(msg)
@@ -814,6 +819,8 @@ def _sampled_exposure(
     warn: bool,
 ) -> ExposureResult:
     """Shared engine for job-based and full-day strategies (Eq 11-13, Eq C.9)."""
+    require_scalar(effective_duration_hours, "effective_duration_hours")
+    require_scalar(u3, "u3")
     arr = np.asarray(samples, dtype=float)
     n = int(arr.size)
     if n < _MIN_SAMPLES_FOR_SPREAD:
@@ -894,6 +901,7 @@ def job_based_exposure(
     :param warn: Emit :class:`OccupationalExposureWarning` for the Table C.4 / Table 1 advisories.
     :return: An :class:`ExposureResult`.
     """
+    require_scalar(sample_duration_hours, "sample_duration_hours")
     if sample_duration_hours is not None and sample_duration_hours <= 0.0:
         msg = "'sample_duration_hours' must be positive."
         raise ValueError(msg)

@@ -77,7 +77,7 @@ from typing import TYPE_CHECKING, Literal, overload
 import numpy as np
 from scipy.io import wavfile
 
-from .._internal.validation import require_scalar
+from .._internal.validation import require_count, require_scalar
 from .._internal.warnings import PhonometryWarning
 from ._bext import (
     coding_history_line,
@@ -148,7 +148,7 @@ def _resolve_input(
     """
     if isinstance(x, Signal):
         require_scalar(fs, "fs")
-        if fs is not None and int(fs) != x.fs:
+        if fs is not None and require_count(fs, "fs", at_least=None) != x.fs:
             msg = (
                 f"fs={fs} conflicts with the Signal's own fs={x.fs}; "
                 "pass one or the other, not a disagreement"
@@ -159,7 +159,7 @@ def _resolve_input(
     if fs is None:
         msg = "fs is required when writing a bare array"
         raise ValueError(msg)
-    if int(fs) <= 0:
+    if require_count(fs, "fs", at_least=None) <= 0:
         msg = "fs must be positive"
         raise ValueError(msg)
     if data.dtype not in _PASSTHROUGH_SUBTYPES:
@@ -168,7 +168,7 @@ def _resolve_input(
     if data.ndim != 2:  # noqa: PLR2004
         msg = f"x must be 1-D or (channels, samples); got {data.ndim}-D"
         raise ValueError(msg)
-    return data, int(fs)
+    return data, require_count(fs, "fs", at_least=None)
 
 
 def _resolve_subtype(data: np.ndarray, subtype: str | None) -> str:
@@ -197,7 +197,7 @@ def _resolve_subtype(data: np.ndarray, subtype: str | None) -> str:
             f"unsupported input dtype {data.dtype}: pass float data, or "
             "int16/int32 codes for bit-exact pass-through"
         )
-        raise ValueError(msg)
+        raise TypeError(msg)
     if subtype is None:
         return "FLOAT"
     if subtype not in _SUBTYPE_SPEC:
@@ -493,6 +493,7 @@ def _reconcile_streamed_header(
     the layout only changes across the RF64 promotion boundary, where a
     discrepancy this large is no codec quirk and refusing is honest.
     """
+    require_scalar(header_len, "header_len")
     patched = build_wav_header(
         fs=fs,
         channels=channels,
@@ -543,6 +544,7 @@ def write_wav_stream(
         promised that length, so a mismatch is a corrupt file, not a
         rounding detail.
     """
+    require_scalar(frames, "frames")
     header = build_wav_header(
         fs=fs,
         channels=channels,
@@ -628,12 +630,14 @@ def _sidecar_request(
     """
     if not sidecar:
         return None
-    if not isinstance(x, Signal) or x.calibration_factor is None:
-        msg = (
-            "sidecar=True needs a Signal with a calibration_factor: the "
-            "sidecar exists to carry a calibration, and inventing one "
-            "is the single thing this library must never do"
-        )
+    msg = (
+        "sidecar=True needs a Signal with a calibration_factor: the "
+        "sidecar exists to carry a calibration, and inventing one "
+        "is the single thing this library must never do"
+    )
+    if not isinstance(x, Signal):
+        raise TypeError(msg)
+    if x.calibration_factor is None:
         raise ValueError(msg)
     return sidecar_file(x.calibration_factor, channel_labels=x.channel_labels)
 
@@ -890,7 +894,7 @@ def _flac_quantised_codes(
             f"unsupported input dtype {data.dtype}: pass float data, "
             "or int16 codes for bit-exact pass-through"
         )
-        raise ValueError(msg)
+        raise TypeError(msg)
     resolved = "PCM_24" if subtype is None else subtype
     if resolved not in ("PCM_16", "PCM_24"):
         msg = (

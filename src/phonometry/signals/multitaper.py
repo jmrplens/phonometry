@@ -31,7 +31,12 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_ranks, require_same_length
+from .._internal.validation import (
+    require_count,
+    require_ranks,
+    require_same_length,
+    require_scalar,
+)
 from ..io._resolve import resolve_fs
 from .spectra import (
     _positive,
@@ -229,12 +234,17 @@ def _validate_multitaper_params(
     :math:`2NW`: beyond it the taper concentrations collapse (P&W
     Section 7.1) and the extra eigenspectra are pure leakage.
     """
+    require_scalar(n, "n")
     nw = _positive(time_half_bandwidth, "time_half_bandwidth")
     if nw < 1.0 or nw >= n / 2.0:
         msg = f"'time_half_bandwidth' must be in [1, n/2) (got {nw:g} for {n} samples)."
         raise ValueError(msg)
     shannon = int(2.0 * nw)
-    k = shannon - 1 if n_tapers is None else int(n_tapers)
+    k = (
+        shannon - 1
+        if n_tapers is None
+        else require_count(n_tapers, "n_tapers", at_least=None)
+    )
     if not 1 <= k <= shannon:
         msg = (
             "'n_tapers' must be between 1 and the Shannon number "

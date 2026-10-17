@@ -21,7 +21,11 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.validation import require_non_negative, require_positive
+from ..._internal.validation import (
+    require_non_negative,
+    require_positive,
+    require_scalar,
+)
 from ..common import (
     _C_EDGE,
     _C_MUTED,
@@ -528,6 +532,7 @@ def plot_qrd_geometry(
         is not finite and non-negative, a non-positive well width, fewer than
         one period, or a negative fin width.
     """
+    require_scalar(n_repetitions, "n_repetitions")
     _check_language(language)
     d = np.asarray(depths, dtype=np.float64)
     if d.ndim != 1 or d.size == 0:
@@ -885,6 +890,8 @@ def plot_transmission_tube_geometry(
     :raises ValueError: naming the first length or diameter that is not
         finite and positive, or an ``l2`` no greater than the thickness.
     """
+    require_scalar(l2, "l2")
+    require_scalar(thickness_m, "thickness_m")
     from ...materials.absorbers.four_microphone import plane_wave_frequency_range_astm
 
     _check_language(language)
@@ -1586,6 +1593,7 @@ def plot_goniometer_geometry(
     :raises ValueError: for a distance, radius or width that is not finite
         and positive, or an angular step outside ``(0, 90]`` degrees.
     """
+    require_scalar(angular_step, "angular_step")
     _check_language(language)
     require_positive(source_distance, "source_distance")
     require_positive(receiver_radius, "receiver_radius")

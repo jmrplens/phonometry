@@ -32,12 +32,13 @@ from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
-    is_scalar,
+    require_count,
     require_equal_shapes,
     require_finite,
     require_non_negative,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -400,6 +401,7 @@ def tone_correction(
         Step 1). The default 2 (80 Hz) is the aeroplane procedure; helicopters
         and tilt-rotors use 0 (50 Hz).
     :return: The tone-correction factor ``C``, in dB (0 if no tones qualify).
+    :raises TypeError: If ``start_band`` is not a number.
     :raises ValueError: If the spectrum is not 24 finite levels, or
         ``start_band`` is not an integer between 0 and 3.
     """
@@ -407,15 +409,14 @@ def tone_correction(
     # anything the index cannot be (2.9, "airplane", None) is refused by name
     # rather than left to fail inside int(), and so is an array, by its rank:
     # numpy before 2.4 converts a one-element array instead of refusing it.
-    start, integral = -1, False
-    if is_scalar(start_band):
-        try:
-            start = int(start_band)
-            integral = start == start_band
-        except (TypeError, ValueError, OverflowError):
-            start, integral = -1, False
-    if not integral or not 0 <= start <= _MAX_TONE_START_BAND:
-        msg = "'start_band' must be an integer between 0 (50 Hz) and 3 (100 Hz)."
+    msg = "'start_band' must be an integer between 0 (50 Hz) and 3 (100 Hz)."
+    try:
+        start = require_count(start_band, "start_band", at_least=0)
+    except TypeError:
+        raise TypeError(msg) from None
+    except ValueError:
+        raise ValueError(msg) from None
+    if start > _MAX_TONE_START_BAND:
         raise ValueError(msg)
     _, excess = _tone_background(spl, start=start)
     factors = [
@@ -501,23 +502,27 @@ class EPNLIntegration(OwnsArrays):
     def __post_init__(self) -> None:
         """Reject a non-finite level or a window that is not a pair of indices.
 
-        :raises ValueError: if a level is not one finite number, the
-            bandsharing adjustment is negative, or ``band_limits`` is not a
-            pair of record indices with ``0 <= kF <= kL``.
+        :raises TypeError: if a level is not one number, or ``band_limits``
+            holds something other than whole record indices.
+        :raises ValueError: if a level is not finite, the bandsharing
+            adjustment is negative, or ``band_limits`` is not a pair of record
+            indices with ``0 <= kF <= kL``.
         """
         require_finite(self.epnl, "epnl")
         require_finite(self.pnltm, "pnltm")
         # ΔB is an addition to PNLTM (App. 2 §4.4.2), zero or positive.
         require_non_negative(self.bandsharing_adjustment, "bandsharing_adjustment")
         limits = tuple(self.band_limits)
-        pair = 2
-        if len(limits) != pair or not all(
+        msg = (
+            "EPNLIntegration: 'band_limits' must be a pair of 0-based "
+            f"record indices (kF, kL); got {self.band_limits!r}."
+        )
+        if not all(
             isinstance(k, (int, np.integer)) and not isinstance(k, bool) for k in limits
         ):
-            msg = (
-                "EPNLIntegration: 'band_limits' must be a pair of 0-based "
-                f"record indices (kF, kL); got {self.band_limits!r}."
-            )
+            raise TypeError(msg)
+        pair = 2
+        if len(limits) != pair:
             raise ValueError(msg)
         kf, kl = int(limits[0]), int(limits[1])
         if not 0 <= kf <= kl:
@@ -575,6 +580,7 @@ def epnl_from_pnlt(
         correction as ``.duration_correction``.
     :raises ValueError: If the inputs are invalid.
     """
+    require_scalar(reference_time, "reference_time")
     p = np.atleast_1d(np.asarray(pnlt, dtype=np.float64))
     if p.ndim != 1 or p.size < 1 or not np.all(np.isfinite(p)):
         msg = "'pnlt' must be a non-empty finite 1-D sequence."
@@ -702,9 +708,11 @@ class EPNLResult(OwnsArrays):
         integration never touched, with PNLTM and EPNL printed confidently
         beside it.
 
+        :raises TypeError: if ``band_limits`` holds something other than whole
+            record indices.
         :raises ValueError: if the per-record arrays disagree, an array or a
             scalar determination carries a non-finite value, or
-            ``band_limits`` does not index the records.
+            ``band_limits`` is not a pair that indexes the records.
         """
         require_ranks(self, frequencies=1, times=1, pnl=1, tone_correction=1, pnlt=1)
         require_same_length(
@@ -728,13 +736,15 @@ class EPNLResult(OwnsArrays):
         limits = tuple(self.band_limits)
         pair = 2
         records = int(np.size(self.times))
-        if len(limits) != pair or not all(
-            isinstance(k, (int, np.integer)) for k in limits
+        msg = (
+            "EPNLResult: 'band_limits' must be a pair of 0-based record "
+            f"indices (kF, kL); got {self.band_limits!r}."
+        )
+        if not all(
+            isinstance(k, (int, np.integer)) and not isinstance(k, bool) for k in limits
         ):
-            msg = (
-                "EPNLResult: 'band_limits' must be a pair of 0-based record "
-                f"indices (kF, kL); got {self.band_limits!r}."
-            )
+            raise TypeError(msg)
+        if len(limits) != pair:
             raise ValueError(msg)
         kf, kl = (int(limits[0]), int(limits[1]))
         if not 0 <= kf <= kl < records:

@@ -388,7 +388,7 @@ def test_a_retained_geometry_with_a_string_dimension_is_refused() -> None:
     res = sl.expansion_chamber(np.linspace(50.0, 400.0, 8), 0.3, 0.1, 0.01)
     assert res.geometry is not None
     geometry = {**res.geometry, "length": "0.3"}
-    with pytest.raises(ValueError, match=r"'geometry\['length'\]' must be numeric"):
+    with pytest.raises(TypeError, match=r"'geometry\['length'\]' must be numeric"):
         dataclasses.replace(res, geometry=geometry)
 
 

@@ -388,6 +388,7 @@ not change the result.
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | for a `coupler` that is neither a [`PlaneWaveCoupler`](/phonometry/reference/api/metrology/reciprocity-coupler/#planewavecoupler) nor a [`LargeVolumeCoupler`](/phonometry/reference/api/metrology/reciprocity-coupler/#largevolumecoupler). |
 | ValueError | for frequencies that are not positive and increasing, a static pressure that is not positive, or an unknown method. |
 
 ## CouplerCheck

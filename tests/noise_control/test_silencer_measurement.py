@@ -562,14 +562,20 @@ class TestFlowQuantities:
         with pytest.raises(ValueError, match="area"):
             sm.dynamic_pressure(1.0, bad, 1.2)
 
-    def test_a_pressure_measured_in_one_plane_is_one_number(self) -> None:
+    @pytest.mark.parametrize(
+        "static", [[200.0, 300.0], [200.0]], ids=["two values", "one value"]
+    )
+    def test_a_pressure_measured_in_one_plane_is_one_number(
+        self, static: list[float]
+    ) -> None:
         # Taking the first element of a sequence and dropping the rest is
-        # how a run of five test points quietly becomes one.
-        with pytest.raises(ValueError, match="one number"):
-            sm.total_pressure([200.0, 300.0], 1.0, 0.0962, 1.2)
+        # how a run of five test points quietly becomes one; a sequence of
+        # one is refused too, as the wrong type.
+        with pytest.raises(TypeError, match="one number"):
+            sm.total_pressure(static, 1.0, 0.0962, 1.2)
 
     def test_a_temperature_measured_in_one_plane_is_one_number_too(self) -> None:
-        with pytest.raises(ValueError, match="one number"):
+        with pytest.raises(TypeError, match="one number"):
             sm.normal_air_density(200.0, 101325.0, [20.0, 21.0])
 
 
@@ -668,7 +674,7 @@ class TestPressureLossCoefficient:
         assert found == pytest.approx(45.0 / 64.0)
 
     def test_a_loss_that_is_a_vector_is_refused(self) -> None:
-        with pytest.raises(ValueError, match="one number"):
+        with pytest.raises(TypeError, match="one number"):
             sm.pressure_loss_coefficient([45.0, 50.0], 64.0)
 
 

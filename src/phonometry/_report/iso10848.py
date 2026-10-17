@@ -45,7 +45,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.validation import require_scalar
+from .._internal.validation import require_count, require_scalar
 from ._i18n import format_number, t
 from ._insulation_fiche import iso717_columns_builder, render_insulation_fiche
 from ._layout import (
@@ -104,7 +104,7 @@ def _part_designation(part: int) -> str:
     """The designation of ISO 10848 part ``part``, or raise."""
     require_scalar(part, "part")
     try:
-        return _PART_DESIGNATIONS[int(part)]
+        return _PART_DESIGNATIONS[require_count(part, "part", at_least=None)]
     except (KeyError, ValueError) as exc:
         msg = (
             "'part' must be 2, 3 or 4 (the ISO 10848 part governing the "

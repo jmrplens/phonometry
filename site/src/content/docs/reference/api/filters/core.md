@@ -26,7 +26,11 @@ How the bank carries its filter state from one block to the next.
 
 ## FilterBankWarning
 
-Warns about fractional-octave filter-bank processing pitfalls.
+A fractional-octave filter bank asked for something it cannot honour.
+
+Emitted when a band lies above the Nyquist frequency of the sample rate
+and is dropped from the bank, and when a stateful bank is asked to detrend
+its blocks, which introduces a step between them.
 
 ## FilterDesign
 
@@ -383,7 +387,8 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a multichannel result drawn without `channel`, or a `channel` the result does not hold. |
+| TypeError | for a `channel` that is not a number, or is a bool. |
+| ValueError | for a multichannel result drawn without `channel`, a `channel` that is not a whole number, or one the result does not hold. |
 
 ## ResponsePlot
 

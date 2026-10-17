@@ -96,6 +96,7 @@ from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
     require_choice,
+    require_count,
     require_finite_array,
     require_positive,
     require_positive_array,
@@ -975,7 +976,11 @@ class ReverberationSoundEnergyResult(OwnsArrays):
             ``n_events`` is below one or ``integration_time`` is not positive.
         """
         require_choice(self.method, "method", ("direct", "comparison"))
-        _validate_event_count(self.n_events, "ReverberationSoundEnergyResult")
+        object.__setattr__(
+            self,
+            "n_events",
+            _validate_event_count(self.n_events, "ReverberationSoundEnergyResult"),
+        )
         if self.integration_time is not None:
             require_positive(self.integration_time, "integration_time")
         require_ranks(
@@ -1052,7 +1057,9 @@ def _room_event_levels(
             msg = "'levels' must contain only finite values."
             raise ValueError(msg)
         return arr, None
-    return _single_event_mean(arr, n_events, name="levels", stacklevel=4), int(n_events)
+    return _single_event_mean(
+        arr, n_events, name="levels", stacklevel=4
+    ), require_count(n_events, "n_events", at_least=None)
 
 
 def sound_energy_reverberation(

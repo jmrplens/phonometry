@@ -83,7 +83,12 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays, read_only
-from ..._internal.validation import require_count, require_finite, require_positive
+from ..._internal.validation import (
+    _as_float64,
+    require_count,
+    require_finite,
+    require_positive,
+)
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -135,16 +140,11 @@ _EQUAL_PAIR = 2
 def _real_array(values: ArrayLike, name: str) -> NDArray[np.float64]:
     """A non-empty array of finite real numbers, any shape.
 
-    :raises ValueError: for a complex, non-numeric, empty or non-finite input.
+    :raises TypeError: for a complex or non-numeric input.
+    :raises ValueError: for a text that reads as no number, an empty or a
+        non-finite input.
     """
-    if np.iscomplexobj(values):
-        msg = f"'{name}' must be real, not complex."
-        raise ValueError(msg)
-    try:
-        array = np.asarray(values, dtype=np.float64)
-    except (TypeError, ValueError) as exc:
-        msg = f"'{name}' must be numeric."
-        raise ValueError(msg) from exc
+    array = _as_float64(values, name)
     if array.size == 0:
         msg = f"'{name}' must not be empty."
         raise ValueError(msg)

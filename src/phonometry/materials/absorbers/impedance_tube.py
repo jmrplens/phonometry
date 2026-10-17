@@ -45,6 +45,7 @@ from ..._internal.validation import (
     require_per_band,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ..._internal.warnings import PhonometryWarning
 
@@ -199,6 +200,8 @@ def hydraulic_diameter(width_m: float, height_m: float) -> float:
     :param height_m: Inner side length ``h``, in metres.
     :return: Hydraulic diameter :math:`d_\mathrm{h} = 4A/P`, in metres.
     """
+    require_scalar(height_m, "height_m")
+    require_scalar(width_m, "width_m")
     if width_m <= 0.0 or height_m <= 0.0:
         msg = "'width_m' and 'height_m' must be positive."
         raise ValueError(msg)
@@ -221,6 +224,8 @@ def tube_attenuation_constant(
         :func:`hydraulic_diameter`).
     :return: Attenuation constant ``k0''``, in nepers per metre.
     """
+    require_scalar(diameter_m, "diameter_m")
+    require_scalar(speed_of_sound, "speed_of_sound")
     if speed_of_sound <= 0.0:
         raise ValueError(_SPEED_OF_SOUND_POSITIVE)
     if diameter_m <= 0.0:
@@ -255,6 +260,7 @@ def tube_wavenumber(
         :func:`tube_attenuation_constant`.
     :return: Complex wavenumber ``k0``, in reciprocal metres.
     """
+    require_scalar(speed_of_sound, "speed_of_sound")
     if speed_of_sound <= 0.0:
         raise ValueError(_SPEED_OF_SOUND_POSITIVE)
     f = np.asarray(frequency, dtype=np.float64)
@@ -323,6 +329,8 @@ def reflection_factor(
         scalar or per band.
     :return: Complex reflection factor ``r`` at the reference plane.
     """
+    require_scalar(spacing_m, "spacing_m")
+    require_scalar(x1, "x1")
     if spacing_m <= 0.0:
         msg = "'spacing_m' must be positive."
         raise ValueError(msg)
@@ -361,6 +369,7 @@ def surface_impedance(
         ``rho c0``, in rayls (``rho`` and ``c0`` from the Clause 7.2 helpers).
     :return: Surface impedance ``Z``, in rayls (complex).
     """
+    require_scalar(characteristic_impedance, "characteristic_impedance")
     if characteristic_impedance <= 0.0:
         msg = "'characteristic_impedance' must be positive."
         raise ValueError(msg)
@@ -456,6 +465,7 @@ def plane_wave_frequency_range(
         tube is the rectangular bound with ``d`` the side length).
     :return: Tuple ``(f_l, f_u)`` of the lower and upper frequency limits, in Hz.
     """
+    require_scalar(spacing_m, "spacing_m")
     return _frequency_range(
         spacing_m,
         speed_of_sound,
@@ -480,6 +490,9 @@ def _frequency_range(
     lower_fraction: float,
 ) -> tuple[float, float]:
     """Shared ISO/ASTM plane-wave frequency-range arithmetic."""
+    require_scalar(diameter_m, "diameter_m")
+    require_scalar(spacing, "spacing")
+    require_scalar(speed_of_sound, "speed_of_sound")
     if spacing <= 0.0:
         msg = "'spacing_m' must be positive."
         raise ValueError(msg)

@@ -244,6 +244,8 @@ from typing import TYPE_CHECKING, NamedTuple, Protocol
 
 import numpy as np
 
+from .validation import require_count
+
 if TYPE_CHECKING:
     from collections.abc import Callable
 
@@ -1185,7 +1187,7 @@ def march_rays(
         docstring).
     :return: A :class:`RayMarch`.
     """
-    ns = int(n_steps)
+    ns = require_count(n_steps, "n_steps", at_least=None)
     zeta = np.array(zeta0, dtype=np.float64)
     z = np.array(np.broadcast_to(np.asarray(z0, dtype=np.float64), zeta.shape))
     xi_state = np.array(np.broadcast_to(np.asarray(xi, dtype=np.float64), zeta.shape))

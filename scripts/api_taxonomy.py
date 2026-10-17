@@ -519,12 +519,17 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # spectral-class and Doc 29 Appendix D modules import them to name the
     # same 50 Hz to 10 kHz bands.
     "NOY_BANDS_HZ": "phonometry.aircraft.certification",
+    # The filter bank's warning is emitted by the bank and by the band-centre
+    # calculation the bank imports, so it is defined in the private
+    # phonometry/filters/_warnings.py that both can import, and documented with
+    # the bank.
+    "FilterBankWarning": "phonometry.filters.core",
     # The fluid state type and its diagnostics are defined in the private
     # phonometry/fluids/_state.py and published by the package, which is where
     # they are documented.
     "Fluid": "phonometry.fluids",
     "FluidAssumptionWarning": "phonometry.fluids",
-    "FluidPropertyUnavailable": "phonometry.fluids",
+    "FluidPropertyUnavailableError": "phonometry.fluids",
     "FluidWarning": "phonometry.fluids",
     "characteristic_impedance": "phonometry.fluids",
     # A Fluid instance reports its class's module, so the published air of

@@ -387,6 +387,7 @@ def _directional_angles(
 
     :raises ValueError: for an angle that is not in (0°, 90°].
     """
+    require_scalar(bands, "bands")
     if angle_deg is None:
         return None
     theta = np.atleast_1d(np.asarray(angle_deg, dtype=np.float64))

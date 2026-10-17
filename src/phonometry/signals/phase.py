@@ -49,7 +49,12 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_ranks, require_same_length, require_scalar
+from .._internal.validation import (
+    require_count,
+    require_ranks,
+    require_same_length,
+    require_scalar,
+)
 from ._cepstrum import _fold_causal
 
 if TYPE_CHECKING:
@@ -97,7 +102,7 @@ def _validate_response(
 
 def _validate_oversample(oversample: int) -> int:
     require_scalar(oversample, "oversample")
-    factor = int(oversample)
+    factor = require_count(oversample, "oversample", at_least=None)
     if factor < 1:
         msg = "'oversample' must be a positive integer."
         raise ValueError(msg)

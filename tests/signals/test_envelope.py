@@ -368,10 +368,12 @@ def test_envelope_spectrum_band_validation() -> None:
             ValueError, match=r"'band' must satisfy 0 < low < high < fs/2"
         ):
             ph.signals.envelope_spectrum(x, FS, band=band)
-    # Malformed shapes: not exactly two numeric edges.
-    for bad in ((700.0,), (700.0, 900.0, 1300.0), (700.0, None)):
+    # Malformed shapes: not exactly two edges, or an edge that is no number.
+    for bad in ((700.0,), (700.0, 900.0, 1300.0)):
         with pytest.raises(ValueError, match=r"'band' must be a pair of numeric"):
             ph.signals.envelope_spectrum(x, FS, band=bad)  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match=r"'band' must be a pair of numeric"):
+        ph.signals.envelope_spectrum(x, FS, band=(700.0, None))  # type: ignore[arg-type]
     # A record shorter than the zero-phase padding fails informatively.
     with pytest.raises(ValueError, match=r"Signal too short for an envelope spectrum"):
         ph.signals.envelope_spectrum(x[:20], FS, band=(700.0, 1300.0))

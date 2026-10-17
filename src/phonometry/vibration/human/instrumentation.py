@@ -840,8 +840,8 @@ def peak_deviation_percent(characteristic_phase_deviation_deg: ArrayLike) -> flo
         prints the quantity inside absolute-value bars, so a negative one is
         not a characteristic phase deviation and is refused rather than
         folded.
-    :raises UserWarning: :class:`~phonometry.vibration.HumanVibrationWarning`
-        when a value exceeds the 30 degrees NOTE 2 limits the approximation to.
+    :warns HumanVibrationWarning: When a value exceeds the 30 degrees NOTE 2
+        limits the approximation to.
     """
     deviations = require_finite_array(
         characteristic_phase_deviation_deg, "characteristic_phase_deviation_deg"
@@ -929,8 +929,7 @@ def _warn_if_inverted(deviation_deg: NDArray[np.float64]) -> None:
     criterion is invariant to, are the same jump.
 
     :param deviation_deg: The phase error at each frequency, in degrees.
-    :raises UserWarning: :class:`~phonometry.vibration.HumanVibrationWarning`
-        when every one of them is half a turn.
+    :warns HumanVibrationWarning: When every one of them is half a turn.
     """
     if np.allclose(
         np.abs(deviation_deg), 180.0, atol=_INVERSION_TOLERANCE_DEG, rtol=0.0
@@ -1107,9 +1106,9 @@ def verify_phase_response(
         arrays do not have the same shape, if a frequency is not positive and
         finite, if a phase is not finite, or if there are fewer than two
         frequencies or they do not strictly ascend.
-    :raises UserWarning: :class:`~phonometry.vibration.HumanVibrationWarning`
-        when every phase error is a half turn, which is an inverted signal
-        rather than a phase response the criterion can grade.
+    :warns HumanVibrationWarning: When every phase error is a half turn,
+        which is an inverted signal rather than a phase response the
+        criterion can grade.
     """
     weighting = require_choice(str(name), "name", WEIGHTING_NAMES)
     f = require_positive_array(frequencies, "frequencies")

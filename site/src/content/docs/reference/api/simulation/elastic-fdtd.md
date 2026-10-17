@@ -319,7 +319,7 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a mask does not match `shape` or a material spec is invalid, a catalogue row's refusal among them. |
-| TypeError | For a catalogue row of a class that lacks any of the bulk longitudinal speed, the transverse speed and the density. |
+| TypeError | For a mask array that is not boolean, or a catalogue row of a class that lacks any of the bulk longitudinal speed, the transverse speed and the density. |
 
 ### ElasticFDTD2D.p
 

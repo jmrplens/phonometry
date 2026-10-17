@@ -263,7 +263,8 @@ The smallest margin, in dB, of any band to one class on one requirement.
 
 | Exception | When |
 | :--- | :--- |
-| KeyError | for a requirement this verdict did not grade, or a class it carries no margins for. |
+| KeyError | for a requirement this verdict did not grade, a name it does not hold. |
+| ValueError | for a class it carries no margins for, a number outside the classes the edition defines. |
 
 ### FilterComplianceResult.overall_class
 

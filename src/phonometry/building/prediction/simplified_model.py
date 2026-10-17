@@ -62,6 +62,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from ..._internal.display import RichDisplay
 from ..._internal.validation import check_engine, require_scalar
+from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
@@ -72,6 +73,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "AirbornePredictionResult",
+    "BuildingPredictionWarning",
     "FlankingPath",
     "ImpactPredictionResult",
     "PathContribution",
@@ -87,6 +89,19 @@ __all__ = [
     "standardized_impact_level",
     "standardized_level_difference",
 ]
+
+
+class BuildingPredictionWarning(PhonometryWarning):
+    """A building prediction read outside the range its relation is stated for.
+
+    Emitted when the bare-floor equivalent impact level of EN 12354-2 Annex B
+    is asked for a mass per unit area outside 100 kg/m² to 600 kg/m², and when
+    a lining of ISO 12354-1:2017 Annex D is rated at a resonance frequency or
+    on a base rating outside the ranges Table D.1 and Clause D.2.2 state. The
+    number is still returned: it is the printed relation extrapolated, which
+    the standard does not cover.
+    """
+
 
 #: Reference coupling length ``l0`` in Formula (28a), in metres (Clause 4.4.1).
 _L0 = 1.0
@@ -959,12 +974,14 @@ def equivalent_impact_level(mass_per_area: float) -> float:
     used in the Annex E worked example for a homogeneous concrete floor. The
     Annex B relation is stated for homogeneous floors of 100 kg/m² to
     600 kg/m²; outside that envelope the value is an extrapolation and a
-    :class:`UserWarning` is emitted.
+    :class:`BuildingPredictionWarning` is emitted.
 
     :param mass_per_area: Mass per unit area ``m'`` of the bare floor, in kg/m²
         (must be positive; the Annex B relation covers 100-600 kg/m²).
     :return: ``Ln,w,eq``, in dB.
     :raises ValueError: If ``mass_per_area`` is not positive.
+    :warns BuildingPredictionWarning: If ``mass_per_area`` lies outside the
+        100-600 kg/m² the relation is stated for.
     """
     m = _check_finite(mass_per_area, "mass_per_area")
     if m <= 0.0:
@@ -975,7 +992,7 @@ def equivalent_impact_level(mass_per_area: float) -> float:
             f"mass_per_area = {m:g} kg/m² lies outside the 100-600 kg/m² "
             "envelope of the EN 12354-2 Annex B relation "
             "Ln,w,eq = 164 - 35 lg(m'); the result is an extrapolation.",
-            UserWarning,
+            BuildingPredictionWarning,
             stacklevel=2,
         )
     return _LN_EQ_A - _LN_EQ_B * log10(m / _M0)

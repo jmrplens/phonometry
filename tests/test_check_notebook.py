@@ -59,7 +59,7 @@ _GOOD: dict[str, list[dict[str, Any]]] = {
     ],
     "report": [_result(**{"text/plain": "b'%PDF-'"})],
     "warning": [
-        _stderr("phonometry/x.py:1: PhonometryWarning: below the floor\n"),
+        _stderr("phonometry/filters/core.py:1: FilterBankWarning: Low sampling rate\n"),
         _result(**{"text/plain": "41.0"}),
     ],
 }
@@ -161,7 +161,12 @@ def test_a_notebook_that_showed_everything_passes_every_check() -> None:
             [_result(**{"text/plain": "b'<html'"})],
             "the fiche does not open as a PDF",
         ),
-        ("warning", [_result(**{"text/plain": "41.0"})], "no PhonometryWarning"),
+        ("warning", [_result(**{"text/plain": "41.0"})], "no FilterBankWarning"),
+        (
+            "warning",
+            [_stderr("phonometry/x.py:1: PhonometryWarning: below the floor\n")],
+            "no FilterBankWarning",
+        ),
     ],
 )
 def test_each_check_refuses_an_output_that_is_not_what_its_tag_asks_for(

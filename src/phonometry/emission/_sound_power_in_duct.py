@@ -97,6 +97,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
+    _as_float64,
     require_choice,
     require_finite_fields,
     require_per_band,
@@ -105,6 +106,7 @@ from .._internal.validation import (
     require_ranks,
     require_real,
     require_same_length,
+    require_scalar,
 )
 from ._shared import _S0, SoundPowerWarning
 from ._sound_power_reverberation import _speed_of_sound
@@ -869,6 +871,7 @@ def _check_informative_bands(frequencies: np.ndarray, flow_velocity: float) -> N
 
     :raises ValueError: if a band above 10 kHz is asked for at |U| > 40 m/s.
     """
+    require_scalar(flow_velocity, "flow_velocity")
     limit = _MAX_VELOCITY["sampling-tube"]
     if abs(flow_velocity) <= limit:
         return
@@ -1071,11 +1074,8 @@ def _position_levels(levels: ArrayLike, n_bands: int) -> np.ndarray:
     not refused: the arithmetic is the same and the shortfall is a matter of
     sampling the duct, which the caller may have done another way.
     """
-    try:
-        arr = np.asarray(levels, dtype=np.float64)
-    except (TypeError, ValueError) as exc:
-        msg = "'levels' must be numeric."
-        raise ValueError(msg) from exc
+    require_scalar(n_bands, "n_bands")
+    arr = _as_float64(levels, "levels")
     if arr.ndim not in (1, 2) or arr.size == 0:
         msg = "'levels' must be a (bands,) spectrum or a (positions, bands) array."
         raise ValueError(msg)

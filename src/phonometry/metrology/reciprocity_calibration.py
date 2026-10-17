@@ -70,7 +70,12 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.types import CALIBRATION_FIELDS, CalibrationField
-from .._internal.validation import require_choice, require_positive
+from .._internal.validation import (
+    refuse_text,
+    require_choice,
+    require_positive,
+    require_scalar,
+)
 from .free_field_corrections import _band_column, _frequency_axis
 
 if TYPE_CHECKING:
@@ -124,9 +129,14 @@ def _complex_column(values: ArrayLike, name: str, count: int) -> NDArray[np.comp
     :raises ValueError: for a value that is not numeric or not finite, or a
         size that is neither one nor the number of frequencies.
     """
+    require_scalar(count, "count")
+    refuse_text(values, f"'{name}' must be numbers, not text.")
     try:
         column = np.asarray(values, dtype=np.complex128).reshape(-1)
-    except (TypeError, ValueError) as exc:
+    except TypeError as exc:
+        msg = f"'{name}' must be numeric."
+        raise TypeError(msg) from exc
+    except ValueError as exc:
         msg = f"'{name}' must be numeric."
         raise ValueError(msg) from exc
     if column.size == 1:

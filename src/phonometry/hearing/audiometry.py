@@ -345,6 +345,7 @@ def _levels(values: ArrayLike, name: str, *, minimum: int = 1) -> np.ndarray:
     :raises ValueError: for another shape, too few values or a value that is
         not finite.
     """
+    require_scalar(minimum, "minimum")
     array = np.array(values, dtype=np.float64)
     if array.ndim != 1 or array.size < minimum or not np.all(np.isfinite(array)):
         msg = (
@@ -485,6 +486,8 @@ def ambient_noise_limits(
         earphone or threshold shift, or an earphone with bone conduction or
         sound field.
     """
+    require_scalar(allowed_threshold_shift_db, "allowed_threshold_shift_db")
+    require_scalar(lowest_test_frequency_hz, "lowest_test_frequency_hz")
     table, _bands = _table_for(presentation)
     lowest = float(lowest_test_frequency_hz)
     column = next(
@@ -1930,6 +1933,8 @@ def check_retest_agreement(
     :raises ValueError: for a level that is not finite or a frequency that is
         not positive.
     """
+    require_scalar(first_db, "first_db")
+    require_scalar(repeat_db, "repeat_db")
     first, repeat = float(first_db), float(repeat_db)
     if not (math.isfinite(first) and math.isfinite(repeat)):
         msg = "'first_db' and 'repeat_db' must be finite hearing levels, in dB."
@@ -2277,6 +2282,10 @@ def audiometric_uncertainty(
     :raises ValueError: for an unknown conduction, a frequency that is not
         positive, or a component or step that is negative or not finite.
     """
+    require_scalar(environment_db, "environment_db")
+    require_scalar(special_db, "special_db")
+    require_scalar(subject_db, "subject_db")
+    require_scalar(tester_db, "tester_db")
     if conduction not in _CONDUCTIONS:
         msg = f"'conduction' must be one of {_CONDUCTIONS}; got {conduction!r}."
         raise ValueError(msg)

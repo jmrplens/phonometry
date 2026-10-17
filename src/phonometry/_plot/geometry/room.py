@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.validation import require_positive_array
+from ..._internal.validation import require_count, require_positive_array
 from ..common import (
     _C_EDGE,
     _C_MUTED,
@@ -112,7 +112,11 @@ def plot_image_source_geometry(
     # result. Refusing it here blamed 'max_order' for a value the caller had
     # never passed; only a negative cap, which no result can carry, is
     # refused, and then the parameter named is one the caller did pass.
-    order_cap = min(int(result.max_order), 3) if max_order is None else int(max_order)
+    order_cap = (
+        min(int(result.max_order), 3)
+        if max_order is None
+        else require_count(max_order, "max_order", at_least=None)
+    )
     if order_cap < 0:
         msg = "'max_order' must be >= 0."
         raise ValueError(msg)

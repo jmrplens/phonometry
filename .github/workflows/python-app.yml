@@ -1313,7 +1313,8 @@ jobs:
   # package installed as a user installs it, and reads what each cell put
   # out: a filter bank result as its table, .plot() as an inline PNG, a
   # verdict as FAIL, a .report() PDF in a temporary directory and a
-  # PhonometryWarning.
+  # FilterBankWarning, the topic class under PhonometryWarning that the
+  # low sampling rate provokes.
   notebook:
     name: phonometry runs in a notebook kernel
     runs-on: ubuntu-latest

@@ -175,6 +175,8 @@ class ConformanceVerification(RichDisplay):
             if both limits are open, if the uncertainty is negative or if the
             maximum-permitted uncertainty is not positive.
         """
+        require_scalar(self.max_uncertainty, "max_uncertainty")
+        require_scalar(self.uncertainty, "uncertainty")
         for name in ("deviation", "uncertainty", "max_uncertainty"):
             object.__setattr__(self, name, require_finite(getattr(self, name), name))
         object.__setattr__(

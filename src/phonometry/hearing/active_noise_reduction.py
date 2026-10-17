@@ -79,6 +79,7 @@ import numpy as np
 
 from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays
+from .._internal.validation import require_scalar
 from ._real_ear_attenuation import ProtectorUncertaintyBudget, RealEarAttenuationResult
 from .hearing_protectors import (
     AssumedProtectionResult,
@@ -313,6 +314,7 @@ def _insertion_loss_from_levels(
 
 def _band_frequencies(frequencies: ArrayLike | None, count: int) -> np.ndarray:
     """The centre frequencies given, or the default grid for *count* bands."""
+    require_scalar(count, "count")
     if frequencies is None:
         return _default_bands(count, "active_insertion_loss")
     freqs = np.asarray(frequencies, dtype=np.float64)

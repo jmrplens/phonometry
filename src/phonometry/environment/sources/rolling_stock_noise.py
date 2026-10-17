@@ -108,6 +108,7 @@ from ..._internal.validation import (
     require_non_negative,
     require_positive,
     require_positive_array,
+    require_scalar,
 )
 from ...io._resolve import SignalInput, resolve_fs, resolve_samples
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
@@ -587,6 +588,7 @@ class PassByMeasurement(OwnsArrays):
 
 def _index(time_s: float, fs: float, size: int, name: str) -> int:
     """The sample of a time inside the record."""
+    require_scalar(size, "size")
     moment = require_non_negative(time_s, name)
     index = int(round(moment * fs))
     if index > size:
@@ -1219,6 +1221,8 @@ def check_adjacent_vehicle_neutrality(
     :return: The verdict.
     :raises ValueError: For a level that is not finite.
     """
+    require_scalar(unit_level, "unit_level")
+    require_scalar(with_adjacent_level, "with_adjacent_level")
     return AdjacentVehicleNeutrality(
         with_adjacent_level=float(with_adjacent_level),
         unit_level=float(unit_level),

@@ -734,6 +734,8 @@ def high_frequency_sound_power_comparison(
     :return: A :class:`HighFrequencySoundPowerResult` with
         ``method='comparison'``, ``tonal`` set when ``noise_bandwidth_hz`` is
         given.
+    :raises TypeError: for a band calibration given as the reference when
+        ``noise_bandwidth_hz`` asks for a tonal comparison, which needs levels.
     :raises ValueError: for non-finite levels, reference levels that do not
         span the same bands, a non-positive bandwidth, or a temperature or
         static pressure ISO 3741 cannot correct from.
@@ -761,7 +763,7 @@ def high_frequency_sound_power_comparison(
             "(clause 8.1); 'reference_sound_power_levels' must be given as "
             "levels, not as a band calibration."
         )
-        raise ValueError(msg)
+        raise TypeError(msg)
     reference_power = _per_band(
         _reference_power_levels(
             reference_sound_power_levels,

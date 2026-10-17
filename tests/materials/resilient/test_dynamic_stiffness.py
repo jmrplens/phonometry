@@ -582,7 +582,7 @@ class TestApparentStiffnessRow:
     def test_s_t_is_not_s_prime_and_the_refusal_says_what_to_pass(self) -> None:
         layer = _apparent_only()
         with pytest.raises(
-            CatalogueError,
+            ValueError,
             match=(
                 r"'Example layer 30' gives the apparent dynamic stiffness s't .*"
                 r"6 MN/m3.* pass airflow_resistivity_pa_s_m2 .*gas_stiffness_n_m3"
@@ -590,9 +590,18 @@ class TestApparentStiffnessRow:
         ):
             layer.natural_frequency(_FLOOR)
 
-    def test_the_refusal_is_a_value_error_too(self) -> None:
-        """A caller who catches ``ValueError`` around Formula 2 still catches it."""
-        assert issubclass(CatalogueError, ValueError)
+    def test_the_refusal_is_not_a_catalogue_error(self) -> None:
+        """The row is well formed; the call asks it for what it does not hold.
+
+        So the refusal is the plain ``ValueError`` that
+        :meth:`~phonometry.io.CatalogueRow.printed` raises for a cell it lacks,
+        not the :class:`~phonometry.io.CatalogueError` a malformed table
+        raises when it is read.
+        """
+        layer = _apparent_only()
+        with pytest.raises(ValueError, match="'Example layer 30'") as refusal:
+            layer.natural_frequency(_FLOOR)
+        assert not isinstance(refusal.value, CatalogueError)
 
     def test_high_resistivity_is_formula_5(self) -> None:
         """``r >= 100 kPa.s/m2``: ``s' = s't`` (Formula 5), no ``s'a`` needed."""
@@ -711,7 +720,9 @@ class TestApparentStiffnessRow:
 
         No value of either stiffness is on the row, so there is nothing for
         ``r`` and ``s'a`` to act on; the refusal names the ``s't`` cell and
-        its bound rather than saying the page gives no stiffness at all.
+        its bound rather than saying the page gives no stiffness at all. The
+        row is well formed, so the refusal is a plain ``ValueError`` and not
+        the :class:`~phonometry.io.CatalogueError` of a malformed table.
         """
         layer = materials.ResilientLayer(
             name="Example layer 25",
@@ -720,13 +731,14 @@ class TestApparentStiffnessRow:
             bounded_above=frozenset({"apparent_dynamic_stiffness_n_m3"}),
         )
         with pytest.raises(
-            CatalogueError,
+            ValueError,
             match=(
                 r"for apparent_dynamic_stiffness_n_m3, the page prints an upper "
                 r"bound of 9e\+06 and no value\. s't is not s'"
             ),
-        ):
+        ) as refusal:
             layer.natural_frequency(_FLOOR, **keyword)
+        assert not isinstance(refusal.value, CatalogueError)
 
     def test_a_bound_on_s_prime_is_named_before_one_on_s_t(self) -> None:
         """With both cells hedged, the refusal is the one for ``s'``, which Formula 2 takes."""

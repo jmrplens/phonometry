@@ -69,7 +69,10 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from ..._internal.frozen import OwnsArrays
-from ..._internal.validation import require_equal_shapes
+from ..._internal.validation import (
+    require_equal_shapes,
+    require_scalar,
+)
 from ..._internal.warnings import PhonometryWarning
 from ...io._resolve import (
     SignalInput,
@@ -219,6 +222,7 @@ def geometric_spreading_factor_angle(
     :param microphone_height_m: Microphone-to-reference-plane distance ``dm``, in metres.
     :return: Oblique factor ``Kr,theta`` (positive root, dimensionless).
     """
+    require_scalar(incidence_angle_rad, "incidence_angle_rad")
     kr = geometric_spreading_factor(
         source_height_m=source_height_m, microphone_height_m=microphone_height_m
     )
@@ -242,6 +246,8 @@ def reflected_path_delay(
     :return: Delay ``dtau``, in seconds.
     :raises ValueError: If ``dm`` or ``c`` is not positive.
     """
+    require_scalar(microphone_height_m, "microphone_height_m")
+    require_scalar(speed_of_sound, "speed_of_sound")
     if microphone_height_m <= 0.0:
         msg = "'microphone_height_m' must be positive."
         raise ValueError(msg)
@@ -328,6 +334,10 @@ def adrienne_window(
         negative, the flat duration is not positive, or an edge shape is
         unknown.
     """
+    require_scalar(flat_duration, "flat_duration")
+    require_scalar(fs, "fs")
+    require_scalar(leading_duration, "leading_duration")
+    require_scalar(trailing_duration, "trailing_duration")
     if fs <= 0.0:
         raise ValueError(_FS_POSITIVE)
     if flat_duration <= 0.0:
@@ -436,6 +446,7 @@ def in_situ_reflection_factor(
     :raises ValueError: On empty inputs, invalid geometry, or ``delay`` given
         without ``fs``.
     """
+    require_scalar(fs, "fs")
     kr = geometric_spreading_factor_angle(
         incidence_angle_rad,
         source_height_m=source_height_m,
@@ -748,6 +759,7 @@ def in_situ_absorption_spectrum(
     :raises ValueError: On empty inputs, invalid geometry, or a
         non-positive ``fs``.
     """
+    require_scalar(fs, "fs")
     fs = resolve_pair_fs(
         incident_ir, reflected_ir, fs, names=("incident_ir", "reflected_ir")
     )
@@ -814,6 +826,8 @@ def max_sampled_area_radius(
     :return: Maximum-sampled-area radius ``r``, in metres.
     :raises ValueError: On non-positive geometry or window width.
     """
+    require_scalar(speed_of_sound, "speed_of_sound")
+    require_scalar(window_width, "window_width")
     _check_geometry(source_height_m, microphone_height_m)
     if window_width <= 0.0:
         msg = "'window_width' must be positive."
@@ -850,6 +864,11 @@ def msa_major_axis(
     :return: Major axis ``a``, in metres.
     :raises ValueError: On non-positive window width, speed, or negative ``dp``.
     """
+    require_scalar(microphone_height_m, "microphone_height_m")
+    require_scalar(projected_distance, "projected_distance")
+    require_scalar(source_height_m, "source_height_m")
+    require_scalar(speed_of_sound, "speed_of_sound")
+    require_scalar(window_width, "window_width")
     if window_width <= 0.0:
         msg = "'window_width' must be positive."
         raise ValueError(msg)
@@ -887,6 +906,8 @@ def spot_tube_upper_frequency(
     :return: Upper usable frequency ``f_u``, in hertz.
     :raises ValueError: If ``d`` or ``c0`` is not positive.
     """
+    require_scalar(diameter_m, "diameter_m")
+    require_scalar(speed_of_sound, "speed_of_sound")
     if diameter_m <= 0.0:
         msg = "'diameter_m' must be positive."
         raise ValueError(msg)
@@ -919,6 +940,9 @@ def spot_microphone_spacing_bounds(
     :return: Tuple ``(s_min, s_max)`` of the lower and upper spacing limits, m.
     :raises ValueError: On non-positive speed or frequency, or ``f_min >= f_max``.
     """
+    require_scalar(f_max, "f_max")
+    require_scalar(f_min, "f_min")
+    require_scalar(speed_of_sound, "speed_of_sound")
     if speed_of_sound <= 0.0:
         raise ValueError(_SPEED_POSITIVE)
     if f_min <= 0.0 or f_max <= 0.0:
@@ -1012,6 +1036,8 @@ def spot_internal_loss_correction(
 
 def _check_geometry(source_height_m: float, microphone_height_m: float) -> None:
     """Validate the source/microphone heights of the extended-surface geometry."""
+    require_scalar(microphone_height_m, "microphone_height_m")
+    require_scalar(source_height_m, "source_height_m")
     if source_height_m <= 0.0 or microphone_height_m <= 0.0:
         msg = "'source_height_m' and 'microphone_height_m' must be positive."
         raise ValueError(msg)

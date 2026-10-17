@@ -191,7 +191,14 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 ## RoadDeviceWarning
 
-Raised when a rating is computed on data the standard bounds.
+A noise reducing device rated on a ratio the standard caps.
+
+Emitted when the weighted ratio of a single-number rating is limited to
+0,99, so the rating is that limit rather than the measurement: by
+[`sound_absorption_rating`](/phonometry/reference/api/environment/noise-reducing-devices/#sound_absorption_rating) when the absorption ratio of EN 1793-1
+Clause 5 and EN 16272-3-1 Clause 5 reaches 0,99, and by
+[`sound_reflection_rating`](/phonometry/reference/api/environment/noise-reducing-devices/#sound_reflection_rating) when the reflection ratio of EN 1793-5
+Clause 5.8 exceeds it (a reflection ratio of 0,99 itself is not limited).
 
 ## sound_absorption_rating
 

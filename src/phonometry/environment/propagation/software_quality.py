@@ -592,17 +592,19 @@ def contour_sample_chainages_m(
         always so from ``sample_size`` metres on.
     :param sample_size: ``M``, at least :data:`MIN_SAMPLE_SIZE`.
     :return: The ``M`` chainages, in metres, in increasing order.
+    :raises TypeError: for a length that is a text, a bool or anything else
+        that is not a number, or a sample size that is not a whole number's
+        type.
     :raises ValueError: for a sample smaller than 20, a length that is not a
-        finite, positive number (a string or a bool included), or contours so
-        short that two points would fall on the same whole metre, which
-        happens only below ``M`` metres.
+        finite, positive number, or contours so short that two points would
+        fall on the same whole metre, which happens only below ``M`` metres.
     """
     size = require_count(sample_size, "sample_size", at_least=MIN_SAMPLE_SIZE)
     # A string or a bool would convert through float() ("100" to 100.0, True
     # to 1.0) and be sampled as though it were a length.
     if isinstance(total_length_m, bool) or not isinstance(total_length_m, numbers.Real):
         msg = f"'total_length_m' must be a length in metres, got {total_length_m!r}."
-        raise ValueError(msg)
+        raise TypeError(msg)
     length = float(total_length_m)
     if not (math.isfinite(length) and length > 0.0):
         msg = f"'total_length_m' must be finite and positive, got {total_length_m!r}."

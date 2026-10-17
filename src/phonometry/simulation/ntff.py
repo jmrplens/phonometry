@@ -152,6 +152,8 @@ class ContourPhasors(OwnsArrays):
             for arrays that do not share one sample axis in the shapes above,
             or for a non-finite sample.
         """
+        require_scalar(self.frequency, "frequency")
+        require_scalar(self.segment, "segment")
         if not np.isfinite(self.frequency) or self.frequency <= 0.0:
             msg = "frequency must be positive and finite"
             raise ValueError(msg)
@@ -302,6 +304,8 @@ def far_field_from_contour(
         :data:`SIMULATION_AIR`, the air this package's solvers run in).
     :return: Complex array, one value per angle: the far-field pattern
         ``F(a)`` (units Pa sqrt(m)), or the pressure [Pa] at ``distance``.
+    :raises TypeError: For a ``contour`` that is not a
+        :class:`ContourPhasors`.
     :raises ValueError: For invalid angles, a non-positive ``distance``, or
         an observation circle that does not clear the contour.
     """

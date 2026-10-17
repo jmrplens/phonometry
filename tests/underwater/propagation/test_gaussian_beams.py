@@ -145,6 +145,7 @@ import pytest
 
 from phonometry import PhonometryWarning
 from phonometry._internal.rays import DynamicRays, march_rays
+from phonometry.underwater import NumericalPropagationWarning
 from phonometry.underwater.propagation.numerical import (
     BeamFan,
     FluidSeabed,
@@ -1740,7 +1741,7 @@ def test_the_default_width_is_the_optimum_raised_to_the_guides_need(
     edge: float,
 ) -> None:
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore", PhonometryWarning)
+        warnings.simplefilter("ignore", NumericalPropagationWarning)
         res = gaussian_beams(
             frequency,
             [0.0, water_depth],
@@ -1789,7 +1790,7 @@ def test_a_source_on_a_profile_kink_is_warned_about() -> None:
     r = np.array([1000.0])
     fan = BeamFan(max_angle_deg=30.0, n_beams=9)
     with pytest.warns(
-        PhonometryWarning,
+        NumericalPropagationWarning,
         match=r"'source_depth' sits on a gradient discontinuity of the profile",
     ):
         gaussian_beams(
@@ -1848,7 +1849,7 @@ def test_a_step_that_cannot_follow_the_steepest_beam_is_warned_about() -> None:
     r = np.array([2000.0])
     steep_fan = BeamFan(max_angle_deg=85.0, n_beams=9)
     with pytest.warns(
-        PhonometryWarning,
+        NumericalPropagationWarning,
         match=r"one marching step carries the steepest beam of the fan",
     ):
         gaussian_beams(
@@ -1880,7 +1881,7 @@ def test_every_warning_is_reported_against_the_line_that_caused_it() -> None:
     flat_fan = BeamFan(max_angle_deg=30.0, n_beams=9)
     far = np.array([2000.0])
     steep_fan = BeamFan(max_angle_deg=85.0, n_beams=9)
-    with pytest.warns(PhonometryWarning) as kink:
+    with pytest.warns(NumericalPropagationWarning) as kink:
         gaussian_beams(
             200.0,
             z,
@@ -1892,7 +1893,7 @@ def test_every_warning_is_reported_against_the_line_that_caused_it() -> None:
             fan=flat_fan,
             range_step=100.0,
         )
-    with pytest.warns(PhonometryWarning) as steep:
+    with pytest.warns(NumericalPropagationWarning) as steep:
         gaussian_beams(
             200.0,
             [0.0, 400.0],

@@ -37,7 +37,7 @@ What it does not give
 Viscosity, thermal conductivity and the Prandtl number are transport
 properties. Nothing in the ideal-gas closure determines them, so the returned
 fluid does not carry them and reading one raises
-[`FluidPropertyUnavailable`](/phonometry/reference/api/fluids/fluids/#fluidpropertyunavailable) naming the model, which is
+[`FluidPropertyUnavailableError`](/phonometry/reference/api/fluids/fluids/#fluidpropertyunavailableerror) naming the model, which is
 what every other fluid here does with a quantity its model did not fix.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.

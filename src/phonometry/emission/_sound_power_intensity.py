@@ -1514,6 +1514,7 @@ def _spread_over_bands(value: ArrayLike, n_bands: int) -> np.ndarray:
 
 def _sigma_r0_9614_3(nominal: int) -> float:
     """Per-band sigma_R0 (ISO 9614-3:2002 Table 1), in dB; also criterion-1 s."""
+    require_scalar(nominal, "nominal")
     if 50 <= nominal <= 160:  # noqa: PLR2004
         return 2.0
     if 200 <= nominal <= 315:  # noqa: PLR2004

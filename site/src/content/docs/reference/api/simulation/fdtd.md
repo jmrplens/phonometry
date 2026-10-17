@@ -446,6 +446,7 @@ spreading rather than the 3D spherical $1/r$.
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | If an input is of the wrong type: a count that is not a number, a `shape` that is not a pair, a complex medium, or an `obstacle_mask` that is not boolean. |
 | ValueError | If the inputs are invalid. |
 
 ## FDTDResult

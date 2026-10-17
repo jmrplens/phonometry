@@ -47,6 +47,7 @@ from .._internal.validation import (
     require_finite_fields,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from .._internal.warnings import PhonometryWarning
 from ..filters.core import OctaveFilterBank
@@ -778,6 +779,7 @@ def sti_from_impulse_response(
         (7 values); requires ``levels``.
     :return: :class:`STIResult` with ``mtf`` of shape (7, 14).
     """
+    require_scalar(fs, "fs")
     fs = resolve_fs(ir, fs, name="ir")
     ir_proc = apply_calibration(ir, _typesignal(ir, name="ir"))
     if ir_proc.ndim != 1:
@@ -974,6 +976,7 @@ def stipa(
         (7 values); requires ``levels``.
     :return: :class:`STIResult` with ``mtf`` of shape (7, 2).
     """
+    require_scalar(fs, "fs")
     # The reference is a second recording of the same test signal, so it has
     # to have been made at the same rate: measuring its modulation depths on
     # a rate that is not its own returns a perfect STI for a mismatch.
@@ -1059,6 +1062,8 @@ def stipa_signal(
     :param seed: Seed for the pink-noise generator (None: random).
     :return: Test signal, 1D array of ``round(duration_s * fs)`` samples.
     """
+    require_scalar(fs, "fs")
+    require_scalar(duration_s, "duration_s")
     if fs <= 0:
         raise ValueError(_FS_NOT_POSITIVE_MSG)
     if fs < _MIN_FS:

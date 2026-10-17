@@ -102,6 +102,7 @@ from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     _as_float64,
     require_choice,
+    require_count,
     require_equal_counts,
     require_positive,
     require_ranks,
@@ -418,13 +419,14 @@ def static_pressure_from_altitude(altitude: float) -> float:
     :param altitude: Altitude of the test site ``Ha``, in metres, one site at
         a time.
     :return: The static pressure ``ps``, in kilopascals.
-    :raises ValueError: if ``altitude`` is not a single finite number or
+    :raises TypeError: if ``altitude`` is an array: one site at a time.
+    :raises ValueError: if ``altitude`` is not a finite number or
         ``1 - a Ha`` is not positive.
     """
     height = _as_float64(altitude, "altitude")
     if height.ndim != 0:
         msg = "'altitude' must be a single value, the altitude of the test site."
-        raise ValueError(msg)
+        raise TypeError(msg)
     base = 1.0 - _ALTITUDE_A_PER_M * float(height)
     if not np.isfinite(height) or base <= 0.0:
         msg = (
@@ -678,6 +680,7 @@ def _check_grade_indicators(
     """Refuse an excess that is not one finite value per position, or a
     directivity range that is not finite and non-negative.
     """
+    require_scalar(directivity, "directivity")
     if excess is not None and (
         np.shape(excess) != (n_positions,) or not np.all(np.isfinite(excess))
     ):
@@ -795,19 +798,15 @@ def _event_shape(arr: np.ndarray, n_events: int | None) -> tuple[bool, int, int,
             raise ValueError(msg)
         n_positions, n_events, n_bands = arr.shape
         return True, n_positions, n_events, n_bands
-    if (
-        n_events is None
-        or isinstance(n_events, bool)
-        or not isinstance(n_events, (int, np.integer))
-        or n_events < 1
-    ):
+    if n_events is None:
         msg = (
-            "'n_events' must be a positive integer, the number N of events the "
-            "2D 'event_levels' measurement encompasses (ISO 3747:2010, Eq. 17)."
+            "'n_events' must be given, the number N of events the 2D "
+            "'event_levels' measurement encompasses (ISO 3747:2010, Eq. 17)."
         )
         raise ValueError(msg)
+    count = require_count(n_events, "n_events")
     n_positions, n_bands = arr.shape
-    return False, n_positions, int(n_events), n_bands
+    return False, n_positions, count, n_bands
 
 
 def _event_background(

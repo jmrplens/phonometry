@@ -39,6 +39,7 @@ from ..._internal.utils import _typesignal
 from ..._internal.validation import (
     check_engine,
     require_choice,
+    require_count,
     require_positive,
     require_present,
     require_ranks,
@@ -952,10 +953,10 @@ def loudness_zwicker(
     pressure = pressure * factor
 
     require_scalar(fs, "fs")
-    if int(fs) != fs:
+    if require_count(fs, "fs", at_least=None) != fs:
         msg = f"'fs' must be an integer sampling rate, got {fs!r}."
         raise ValueError(msg)
-    fs_int = int(fs)
+    fs_int = require_count(fs, "fs", at_least=None)
     if fs_int != _FS_REF:
         gcd = math.gcd(_FS_REF, fs_int)
         up, down = _FS_REF // gcd, fs_int // gcd

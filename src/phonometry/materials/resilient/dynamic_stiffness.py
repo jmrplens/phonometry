@@ -83,10 +83,15 @@ if TYPE_CHECKING:
 
 
 from ..._internal.boundary import settled
-from ..._internal.catalogue import CatalogueError, CatalogueRow, read_table, take
+from ..._internal.catalogue import CatalogueRow, read_table, take
 from ..._internal.display import RichDisplay
 from ..._internal.types import as_float_or_array
-from ..._internal.validation import check_engine, require_non_negative, require_positive
+from ..._internal.validation import (
+    check_engine,
+    require_non_negative,
+    require_positive,
+    require_scalar,
+)
 from ..._internal.warnings import PhonometryWarning
 
 __all__ = [
@@ -190,6 +195,7 @@ def enclosed_gas_stiffness(
         this reduces to :math:`s'_\mathrm{a} = 111/d` MN/m3 for ``d`` in millimetres
         (clause 8.2 NOTE).
     """
+    require_scalar(porosity, "porosity")
     static_pressure_pa = require_positive(static_pressure_pa, "static_pressure_pa")
     if not 0.0 < porosity <= 1.0:
         msg = "'porosity' must be in the range (0, 1]."
@@ -243,6 +249,7 @@ def installed_dynamic_stiffness(
         ``s'a``, or no ``s'a`` below 100 kPa.s/m2, where an absent gas term
         is not a zero one.
     """
+    require_scalar(airflow_resistivity_kpa_s_m2, "airflow_resistivity_kpa_s_m2")
     apparent_stiffness_n_m3 = require_positive(
         apparent_stiffness_n_m3, "apparent_stiffness_n_m3"
     )
@@ -458,16 +465,16 @@ class ResilientLayer(CatalogueRow):
             (Formula 7, :func:`enclosed_gas_stiffness`), in N/m3, for a row
             that gives only ``s't`` and a resistivity below 100 kPa.s/m2.
         :return: The natural frequency ``f0``, in hertz.
-        :raises CatalogueError: for a row that gives only ``s't`` when no
+        :raises ValueError: for a row that gives only ``s't`` when no
             resistivity is passed, saying that ``s't`` is not ``s'`` and what
-            to pass; and for a row with no value of either stiffness whose
-            ``s't`` cell holds something else, such as a declared bound, which
-            it names.
-        :raises ValueError: for a row that gives neither stiffness, naming
-            what its source had in the ``s'`` cell; for a row that gives
-            ``s'`` when either keyword is passed; for a resistivity below
-            100 kPa.s/m2 with no ``s'a``; and for a non-positive mass or
-            resistivity.
+            to pass; for a row with no value of either stiffness whose ``s't``
+            cell holds something else, such as a declared bound, which it
+            names; for a row that gives neither stiffness, naming what its
+            source had in the ``s'`` cell; for a row that gives ``s'`` when
+            either keyword is passed; for a resistivity below 100 kPa.s/m2
+            with no ``s'a``; and for a non-positive mass or resistivity. A
+            cell the computation needs and the row does not hold is refused
+            as :meth:`~phonometry.io.CatalogueRow.printed` refuses it.
         """
         mass_per_area_kg_m2 = require_positive(
             mass_per_area_kg_m2, "mass_per_area_kg_m2"
@@ -507,7 +514,7 @@ class ResilientLayer(CatalogueRow):
         no stiffness at all; this one names the ``s't`` cell and what it
         holds instead, and says why no keyword turns it into ``s'``.
 
-        :raises CatalogueError: for such a row.
+        :raises ValueError: for such a row.
         """
         installed = "dynamic_stiffness_n_m3"
         field_name = "apparent_dynamic_stiffness_n_m3"
@@ -521,7 +528,7 @@ class ResilientLayer(CatalogueRow):
             "holds is not a value of either, so no airflow_resistivity_pa_s_m2 "
             f"or gas_stiffness_n_m3 can turn it into s' ({self.source})."
         )
-        raise CatalogueError(msg)
+        raise ValueError(msg)
 
     def _holds_a_hedge(self, field_name: str) -> bool:
         """Whether the page has something other than a value in this cell."""
@@ -544,10 +551,10 @@ class ResilientLayer(CatalogueRow):
     ) -> float:
         """``s'`` from this row's ``s't`` by clause 8.2, or a refusal.
 
-        :raises CatalogueError: when no resistivity is passed.
-        :raises ValueError: for a non-positive resistivity, and from
-            :func:`installed_dynamic_stiffness`.
+        :raises ValueError: when no resistivity is passed, for a non-positive
+            one, and from :func:`installed_dynamic_stiffness`.
         """
+        require_scalar(airflow_resistivity_pa_s_m2, "airflow_resistivity_pa_s_m2")
         if airflow_resistivity_pa_s_m2 is None:
             msg = (
                 f"{self.name!r} gives the apparent dynamic stiffness s't of a "
@@ -559,7 +566,7 @@ class ResilientLayer(CatalogueRow):
                 "(100000 Pa.s/m2), gas_stiffness_n_m3, the enclosed-gas "
                 f"stiffness s'a of Formula 7 ({self.source})."
             )
-            raise CatalogueError(msg)
+            raise ValueError(msg)
         # Written so that a NaN fails it too.
         if not airflow_resistivity_pa_s_m2 > 0.0:
             msg = "'airflow_resistivity_pa_s_m2' must be positive."
@@ -801,6 +808,10 @@ def floating_floor_resonance(
     :param static_pressure_pa: Atmospheric pressure ``p0``, in pascals.
     :return: The :class:`DynamicStiffnessResult`.
     """
+    require_scalar(floor_mass_per_area_kg_m2, "floor_mass_per_area_kg_m2")
+    require_scalar(resonant_frequency_hz, "resonant_frequency_hz")
+    require_scalar(static_pressure_pa, "static_pressure_pa")
+    require_scalar(airflow_resistivity_kpa_s_m2, "airflow_resistivity_kpa_s_m2")
     s_apparent = float(
         apparent_dynamic_stiffness(resonant_frequency_hz, total_mass_per_area_kg_m2)
     )

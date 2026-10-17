@@ -84,7 +84,12 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_ranks, require_same_length, require_scalar
+from .._internal.validation import (
+    require_count,
+    require_ranks,
+    require_same_length,
+    require_scalar,
+)
 from ..io._resolve import like_input, require_signal_rate, resolve_fs
 from .spectra import _positive
 from .test_signals import _validate_1d_finite, fractional_delay
@@ -134,7 +139,7 @@ def comb_filter_response(
     """
     period_v = _positive(period_s, "period_s")
     require_scalar(n_averages, "n_averages")
-    n = int(n_averages)
+    n = require_count(n_averages, "n_averages", at_least=None)
     if n < 1:
         msg = "'n_averages' must be a positive integer."
         raise ValueError(msg)
@@ -259,6 +264,7 @@ class SynchronousAverageResult(OwnsArrays):
             than :attr:`fs`, or the period grid is not ``round(fs * T)``
             samples long.
         """
+        require_scalar(self.samples_per_period, "samples_per_period")
         require_ranks(
             self,
             period_waveform=1,
@@ -339,7 +345,7 @@ def _resolve_n_averages(
     if n_averages is None:
         return available
     require_scalar(n_averages, "n_averages")
-    requested = int(n_averages)
+    requested = require_count(n_averages, "n_averages", at_least=None)
     if requested < 1:
         msg = "'n_averages' must be a positive integer."
         raise ValueError(msg)
@@ -425,7 +431,7 @@ def time_synchronous_average(
     fs_v = _positive(resolve_fs(x, fs), "fs")
     period_v = _positive(period_s, "period_s")
     require_scalar(n_harmonics, "n_harmonics")
-    n_harmonics_v = int(n_harmonics)
+    n_harmonics_v = require_count(n_harmonics, "n_harmonics", at_least=None)
     if n_harmonics_v < 1:
         msg = "'n_harmonics' must be a positive integer."
         raise ValueError(msg)

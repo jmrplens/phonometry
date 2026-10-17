@@ -148,6 +148,7 @@ above 1 m/s (4.3).
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | for a `correction` that is not a [`TurbineEnvironmentalCorrection`](/phonometry/reference/api/power/turbine-noise/#turbineenvironmentalcorrection). |
 | ValueError | unless exactly one of `correction` and `environmental_correction` is given, for a non-finite correction or for a negative wind speed. |
 
 ## turbine_background_correction
@@ -278,7 +279,8 @@ $l b + 2 l h + 2 b h$.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if no box is given or an entry is not a [`TurbineReferenceBox`](/phonometry/reference/api/power/turbine-noise/#turbinereferencebox). |
+| ValueError | if no box is given. |
+| TypeError | if an entry is not a [`TurbineReferenceBox`](/phonometry/reference/api/power/turbine-noise/#turbinereferencebox). |
 
 ## turbine_microphone_positions
 
@@ -339,6 +341,7 @@ to lie on the sides of every parallelepiped.
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | for a `surface` that is not a [`TurbineMeasurementSurface`](/phonometry/reference/api/power/turbine-noise/#turbinemeasurementsurface). |
 | ValueError | for a height outside the sides, a non-positive spacing, or a `n_turbine_boxes` that leaves no driven machinery. |
 
 ## turbine_noise_declaration
@@ -388,6 +391,7 @@ $K$ above 7 dB) cannot carry the statement, and is refused.
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | for a determination that is not a [`TurbineSoundPowerResult`](/phonometry/reference/api/power/turbine-noise/#turbinesoundpowerresult), or a description that is not a text. |
 | ValueError | for no determination, a determination that does not conform, or an empty description. |
 
 ## turbine_reference_source_correction

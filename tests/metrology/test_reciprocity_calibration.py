@@ -149,18 +149,21 @@ def test_tables_are_read_only() -> None:
 
 
 @pytest.mark.parametrize(
-    ("values", "fragment"),
+    ("values", "refusal", "fragment"),
     [
-        ("abc", "'z' must be numeric"),
-        ([1.0, 2.0], "'z' must hold one value per frequency"),
-        ([1.0, np.nan, 1.0], "'z' must contain only finite values"),
-        ([1.0, 0.0, 1.0], "'z' must not be zero"),
+        ("abc", TypeError, "'z' must be numbers, not text"),
+        (["1", "2", "3"], TypeError, "'z' must be numbers, not text"),
+        ([1.0, 2.0], ValueError, "'z' must hold one value per frequency"),
+        ([1.0, np.nan, 1.0], ValueError, "'z' must contain only finite values"),
+        ([1.0, 0.0, 1.0], ValueError, "'z' must not be zero"),
     ],
-    ids=["not-numeric", "wrong-length", "not-finite", "zero"],
+    ids=["not-numeric", "numeric-text", "wrong-length", "not-finite", "zero"],
 )
-def test_a_complex_column_refuses(values: object, fragment: str) -> None:
+def test_a_complex_column_refuses(
+    values: object, refusal: type[Exception], fragment: str
+) -> None:
     """The column every impedance and ratio of a calibration goes through."""
-    with pytest.raises(ValueError, match=fragment):
+    with pytest.raises(refusal, match=fragment):
         rcal._complex_column(values, "z", 3)  # type: ignore[arg-type]
 
 

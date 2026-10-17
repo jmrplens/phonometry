@@ -242,6 +242,7 @@ def _validate_area_inputs(
         attenuation coefficient, or an *m* that is neither scalar nor of
         *t*'s shape.
     """
+    require_scalar(volume, "volume")
     if volume <= 0.0:
         msg = "'volume' must be positive."
         raise ValueError(msg)
@@ -380,6 +381,8 @@ def absorption_coefficient(
     :return: Sound absorption coefficient ``alpha_s`` with the broadcast shape of
         ``t1`` and ``t2``.
     """
+    require_scalar(sample_area, "sample_area")
+    require_scalar(volume, "volume")
     if sample_area <= 0.0:
         msg = "'sample_area' must be positive."
         raise ValueError(msg)

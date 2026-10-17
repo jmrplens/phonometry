@@ -77,6 +77,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
+    require_count,
     require_positive,
     require_positive_array,
     require_scalar,
@@ -259,7 +260,7 @@ def rectangular_duct_properties(
     gamma = fluid.heat_capacity_ratio
     p0 = fluid.static_pressure_pa
     require_scalar(n_sum_terms, "n_sum_terms")
-    n = int(n_sum_terms)
+    n = require_count(n_sum_terms, "n_sum_terms", at_least=None)
     if n < 1:
         msg = "'n_sum_terms' must be at least 1."
         raise ValueError(msg)

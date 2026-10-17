@@ -31,6 +31,7 @@ import numpy as np
 import pytest
 
 import phonometry as ph
+from phonometry.signals import ToneBurstWarning
 
 FS = 48000.0
 
@@ -125,7 +126,7 @@ def test_tone_burst_incommensurate_frequency_warns() -> None:
     residual step at the gate edge.
     """
     with pytest.warns(
-        ph.PhonometryWarning, match=r"'frequency' .* is incommensurate with fs"
+        ToneBurstWarning, match=r"'frequency' .* is incommensurate with fs"
     ) as record:
         res = ph.signals.tone_burst(FS, 997.0, 10)
     assert res.burst_samples == 481

@@ -107,6 +107,7 @@ from scipy.special import fresnel, wofz
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    _as_float64,
     check_engine,
     require_choice,
     require_positive,
@@ -114,6 +115,7 @@ from ..._internal.validation import (
     require_present,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ...materials.absorbers.porous import ABSORBER_AIR, delany_bazley, miki
 
@@ -305,6 +307,9 @@ def spherical_reflection_coefficient(
     :raises ValueError: If a height is negative, the distance is not positive,
         the impedance is zero, or its shape does not match the frequencies.
     """
+    require_scalar(distance, "distance")
+    require_scalar(receiver_height_m, "receiver_height_m")
+    require_scalar(source_height_m, "source_height_m")
     if source_height_m < 0.0 or receiver_height_m < 0.0:
         msg = "Source and receiver heights must be non-negative."
         raise ValueError(msg)
@@ -401,6 +406,9 @@ def ground_effect(
     :raises ValueError: If neither or both of ``impedance``/``flow_resistivity_pa_s_m2``
         are given, a height is negative, or the distance is not positive.
     """
+    require_scalar(distance, "distance")
+    require_scalar(receiver_height_m, "receiver_height_m")
+    require_scalar(source_height_m, "source_height_m")
     if source_height_m < 0.0 or receiver_height_m < 0.0:
         msg = "Source and receiver heights must be non-negative."
         raise ValueError(msg)
@@ -494,13 +502,11 @@ def kurze_anderson_attenuation(fresnel_number: ArrayLike) -> Real:
 
     :param fresnel_number: Fresnel number ``N`` (scalar or array).
     :return: Attenuation ``Delta``, in decibels (>= 0), matching the input shape.
-    :raises ValueError: for a non-numeric or non-finite ``fresnel_number``.
+    :raises TypeError: for a ``fresnel_number`` that is text, complex or
+        otherwise not a number.
+    :raises ValueError: for a non-finite or ragged ``fresnel_number``.
     """
-    try:
-        n = np.asarray(fresnel_number, dtype=np.float64)
-    except (TypeError, ValueError) as exc:
-        msg = "'fresnel_number' must be numeric."
-        raise ValueError(msg) from exc
+    n = _as_float64(fresnel_number, "fresnel_number")
     # A NaN would pass through the closed form and come back as a NaN
     # "attenuation", silently breaking the documented >= 0 dB contract.
     if not np.all(np.isfinite(n)):
@@ -815,6 +821,7 @@ def _validate_barrier_geometry(
         height, a mis-ordered geometry, a barrier below the line of sight, or a
         thick barrier whose far edge reaches the receiver.
     """
+    require_scalar(barrier_height, "barrier_height")
     # require_positive rejects NaN/inf as well as non-positive distances and
     # names the one that was wrong; a NaN height would sail through the
     # ordering comparisons below (every comparison against NaN is False) and

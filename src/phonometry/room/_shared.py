@@ -17,7 +17,10 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from .._internal.utils import _typesignal
-from .._internal.validation import require_finite_array
+from .._internal.validation import (
+    require_finite_array,
+    require_scalar,
+)
 from ..filters.core import OctaveFilterBank
 from ..io._resolve import apply_calibration
 
@@ -51,6 +54,7 @@ def validate_ir(
     :raises ValueError: If the response is not one-dimensional, is silent,
         or ``fs`` is not positive.
     """
+    require_scalar(fs, "fs")
     x = _typesignal(ir, name="ir")
     if x.ndim != 1:
         msg = "The impulse response must be one-dimensional."

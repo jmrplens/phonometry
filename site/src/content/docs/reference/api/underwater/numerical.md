@@ -243,7 +243,7 @@ arrivals. `max_n_arrivals` bounds what is returned: the earliest
 `max_n_arrivals` arrivals are kept, because the early paths are the flat,
 least-bounced, least-attenuated ones that carry the energy, and the tail
 being discarded is the part every physical seabed drains fastest. A
-[`PhonometryWarning`](/phonometry/reference/api/filters/phonometry/#phonometrywarning) says when the cap truncated; raise
+[`NumericalPropagationWarning`](/phonometry/reference/api/underwater/numerical/#numericalpropagationwarning) says when the cap truncated; raise
 it to keep everything the fan bracketed.
 
 **Parameters**
@@ -553,7 +553,7 @@ direct way to trade resolution for time.
 
 | Warning | When |
 | :--- | :--- |
-| PhonometryWarning | when the source sits on a kink of the profile (Sect. 3.7.4's spurious horizontal jet), and when one marching step carries the steepest beam of the fan across more than a quarter of the water column, which is the pairing between `fan.max_angle_deg` and `range_step` that is easiest to get wrong. |
+| NumericalPropagationWarning | when the source sits on a kink of the profile (Sect. 3.7.4's spurious horizontal jet), and when one marching step carries the steepest beam of the fan across more than a quarter of the water column, which is the pairing between `fan.max_angle_deg` and `range_step` that is easiest to get wrong. |
 
 ## GaussianBeamResult
 
@@ -652,7 +652,7 @@ grows with the mode's vertical wavenumber, so near-cutoff modes need a
 fine grid. Two guards apply: eigenvalues inside the scheme's error band
 ($k_r^2 \le \max(k^2)^2 \, dz^2 / 12$) are discarded as numerically
 indistinguishable from cutoff, and a
-[`PhonometryWarning`](/phonometry/reference/api/filters/phonometry/#phonometrywarning) is emitted when a
+[`NumericalPropagationWarning`](/phonometry/reference/api/underwater/numerical/#numericalpropagationwarning) is emitted when a
 retained mode sits within ten times that band (increase `n_depth_points`
 to resolve it).
 
@@ -720,6 +720,17 @@ NormalModeResult.plot(
 ```
 
 Plot the propagation loss versus range (loss increasing downward).
+
+## NumericalPropagationWarning
+
+A numerical propagation result the solver can only partly vouch for.
+
+Emitted by [`normal_modes`](/phonometry/reference/api/underwater/numerical/#normal_modes) when a retained mode sits near cutoff,
+inside ten times the finite-difference error band; by [`eigenrays`](/phonometry/reference/api/underwater/numerical/#eigenrays)
+when more eigenrays connect the receiver than `max_n_arrivals` keeps; and
+by [`gaussian_beams`](/phonometry/reference/api/underwater/numerical/#gaussian_beams) when the source sits on a kink of the profile,
+or a marching step carries the steepest beam across a large part of the
+water column.
 
 ## parabolic_equation
 

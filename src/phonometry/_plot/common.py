@@ -28,6 +28,8 @@ from typing import TYPE_CHECKING, Any, Final, cast
 
 import numpy as np
 
+from .._internal.validation import require_scalar
+
 if TYPE_CHECKING:
     from collections.abc import Sequence
     from types import ModuleType
@@ -528,6 +530,7 @@ def theme_line(
         2.2 non-text minimum of 3:1.
     :return: The stroke colour as an ``(r, g, b)`` triple in 0-1 sRGB.
     """
+    require_scalar(quiet, "quiet")
     from matplotlib.colors import to_rgb
 
     if not 0.0 <= quiet <= 1.0:

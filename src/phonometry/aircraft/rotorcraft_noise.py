@@ -64,6 +64,7 @@ from .._internal.validation import (
     require_positive_array,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from .rotorcraft_propagation import (
     _C,
@@ -379,6 +380,8 @@ def _grid_axis(
     name: str,
 ) -> NDArray[np.float64]:
     """A regular node axis from ``start`` to ``stop``; ``step`` must divide it."""
+    require_scalar(start, "start")
+    require_scalar(stop, "stop")
     s = require_positive(step, name)
     n = round((stop - start) / s)
     if n < 1 or abs((stop - start) / s - n) > _GRID_DIVISIBILITY_TOL:
@@ -702,6 +705,7 @@ def _simplex_from_table(
     triangles: NDArray[np.int_] | list[list[int]],
 ) -> NDArray[np.intp] | None:
     """The first triangle of a lookup table enveloping ``q``, or ``None``."""
+    require_scalar(n, "n")
     tri = np.asarray(triangles, dtype=np.intp)
     if tri.ndim != 2 or tri.shape[1] != 3 or tri.size == 0:  # noqa: PLR2004
         msg = "'triangles' must have shape (T, 3)."
@@ -1976,6 +1980,8 @@ def rotorcraft_event_level(
         hemispheres, a :class:`FlightConditionInterpolation` (default:
         ``F_fc = 2`` over the Delaunay triangulation).
     :return: A :class:`RotorcraftEventResult`.
+    :raises TypeError: If the ground holds an array of flow resistivities or
+        ground elevations, which are for the contour grid.
     :raises ValueError: If the inputs are invalid.
     """
     setup = _event_setup(
@@ -1999,7 +2005,7 @@ def rotorcraft_event_level(
             "A single receiver takes scalar 'flow_resistivity' and "
             "'ground_elevation'; arrays are for the contour grid."
         )
-        raise ValueError(msg)
+        raise TypeError(msg)
     if setup.terrain is not None:
         _require_dem_coverage(setup.terrain, rx[:1], rx[1:2], "receiver")
         local = float(_dem_height(setup.terrain, rx[:1], rx[1:2])[0])

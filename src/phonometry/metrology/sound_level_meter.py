@@ -161,7 +161,12 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.display import RichDisplay
-from .._internal.validation import is_class_designation, require_real
+from .._internal.validation import (
+    is_class_designation,
+    require_count,
+    require_real,
+    require_scalar,
+)
 from .conformance import ConformanceVerification, verify_conformance
 
 if TYPE_CHECKING:
@@ -209,7 +214,11 @@ def _limits_for(
     if not is_class_designation(meter_class, _CLASSES):
         msg = f"'meter_class' must be 1 or 2 (IEC 61672-1:2013); got {meter_class!r}."
         raise ValueError(msg)
-    return class_1 if int(meter_class) == 1 else class_2
+    return (
+        class_1
+        if require_count(meter_class, "meter_class", at_least=None) == 1
+        else class_2
+    )
 
 
 @dataclass(frozen=True)
@@ -819,7 +828,10 @@ def _row(
     """
     try:
         array = np.asarray(values, dtype=np.float64)
-    except (TypeError, ValueError):
+    except TypeError:
+        msg = f"'{name}' must be a sequence of numbers."
+        raise TypeError(msg) from None
+    except ValueError:
         msg = f"'{name}' must be a sequence of numbers."
         raise ValueError(msg) from None
     if array.ndim != 1 or array.size == 0:
@@ -845,7 +857,10 @@ def _keyed(
     """
     try:
         items = dict(values)
-    except (TypeError, ValueError):
+    except TypeError:
+        msg = f"'{name}' must be a mapping keyed by {', '.join(map(repr, keys))}."
+        raise TypeError(msg) from None
+    except ValueError:
         msg = f"'{name}' must be a mapping keyed by {', '.join(map(repr, keys))}."
         raise ValueError(msg) from None
     unknown = [k for k in items if k not in keys]
@@ -922,11 +937,19 @@ def _split_rows(
 ) -> list[tuple[str, tuple[float, ...], tuple[float, ...]]]:
     """``(where, part, whole)`` for each row a split of 4.4 pairs with its total.
 
+    :raises TypeError: for a keyed split beside a total that is not, or the
+        other way round.
     :raises ValueError: for a keyed split whose keys differ from its total's.
     """
     if isinstance(split, tuple) and isinstance(total, tuple):
         return [("", split, total)]
-    if isinstance(split, tuple) or isinstance(total, tuple) or set(split) != set(total):
+    if isinstance(split, tuple) or isinstance(total, tuple):
+        msg = (
+            f"'{split_name}' and '{total_name}' must both be keyed, or both "
+            "not; one is a tuple and the other a mapping."
+        )
+        raise TypeError(msg)
+    if set(split) != set(total):
         msg = (
             f"'{split_name}' and '{total_name}' must have the same "
             f"keys; got {sorted(split)} and {sorted(total)}."
@@ -1450,7 +1473,7 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
             return
         if not isinstance(value, bool | np.bool_):
             msg = f"'{name}' must be True or False."
-            raise ValueError(msg)
+            raise TypeError(msg)
         if getattr(self, companion) is None:
             msg = f"'{name}' is observed during the test of '{companion}', which is missing."
             raise ValueError(msg)
@@ -1668,12 +1691,13 @@ class SoundLevelMeterFeatures(RichDisplay):
     def __post_init__(self) -> None:
         """Hold each answer as ``True``, ``False`` or ``None``, a count as an int.
 
-        :raises ValueError: for an answer that is none of them, a number of
-            level ranges that is not a whole number from 1 up, or a meter
-            IEC 61672-1 rules out: C-weighted peak without frequency
-            weighting C (5.1.10), S without F (5.1.9), or none of the F time
-            weighting, a time-averaged display and sound exposure level, one
-            of which 5.1.9 asks of every sound level meter.
+        :raises TypeError: for an answer that is not ``True``, ``False`` or
+            ``None``, or a number of level ranges given as a bool or a text.
+        :raises ValueError: for a number of level ranges that is not a whole
+            number from 1 up, or a meter IEC 61672-1 rules out: C-weighted
+            peak without frequency weighting C (5.1.10), S without F (5.1.9),
+            or none of the F time weighting, a time-averaged display and sound
+            exposure level, one of which 5.1.9 asks of every sound level meter.
         """
         for name in _FEATURES:
             value = getattr(self, name)
@@ -1681,7 +1705,7 @@ class SoundLevelMeterFeatures(RichDisplay):
                 continue
             if not isinstance(value, bool | np.bool_):
                 msg = f"'{name}' must be True, False or None (not declared)."
-                raise ValueError(msg)
+                raise TypeError(msg)
             object.__setattr__(self, name, bool(value))
         self._hold_level_ranges()
         self._refuse_what_5_1_9_rules_out()
@@ -1691,17 +1715,9 @@ class SoundLevelMeterFeatures(RichDisplay):
         count = self.n_level_ranges
         if count is None:
             return
-        if (
-            isinstance(count, bool | np.bool_)
-            or not isinstance(count, int | np.integer)
-            or count < 1
-        ):
-            msg = (
-                "'n_level_ranges' must be the number of level ranges, a whole "
-                f"number from 1 up, or None (not declared); got {count!r}."
-            )
-            raise ValueError(msg)
-        object.__setattr__(self, "n_level_ranges", int(count))
+        object.__setattr__(
+            self, "n_level_ranges", require_count(count, "n_level_ranges")
+        )
 
     def _refuse_what_5_1_9_rules_out(self) -> None:
         """A feature without the one it needs, or a meter that indicates nothing."""
@@ -1953,6 +1969,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
             responses from a meter declared to neither measure sound
             exposure level nor display time-averaged sound level (18.2).
         """
+        require_scalar(self.meter_class, "meter_class")
         declared = self.features
         if self.meter_class == 1 and declared.c_weighting is False:
             msg = (
@@ -3378,7 +3395,7 @@ def verify_sound_level_meter_periodic(
     if not is_class_designation(meter_class, _CLASSES):
         msg = f"'meter_class' must be 1 or 2 (IEC 61672-1:2013); got {meter_class!r}."
         raise ValueError(msg)
-    cls = int(meter_class)
+    cls = require_count(meter_class, "meter_class", at_least=None)
     m = measurements
     acoustic = None
     if (

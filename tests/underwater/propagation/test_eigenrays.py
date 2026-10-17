@@ -52,7 +52,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 
-from phonometry import PhonometryWarning
+from phonometry.underwater import NumericalPropagationWarning
 from phonometry.underwater.propagation.numerical import (
     EigenrayResult,
     FluidSeabed,
@@ -280,7 +280,7 @@ def test_the_cap_keeps_the_earliest_arrivals_and_says_so() -> None:
     """
     trace, full = _guide_arrivals()
     with pytest.warns(
-        PhonometryWarning,
+        NumericalPropagationWarning,
         match=r"eigenrays connect the receiver within the traced fan"
         r".*Raise 'max_n_arrivals'",
     ):

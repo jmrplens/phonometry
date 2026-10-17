@@ -1583,6 +1583,7 @@ def _temporal_indicator(
     temporal_intensity: ArrayLike | None, n_bands: int
 ) -> np.ndarray | None:
     """F1 per band from the short-time samples of the initial test (A.2.1)."""
+    require_scalar(n_bands, "n_bands")
     if temporal_intensity is None:
         return None
     samples = np.asarray(temporal_intensity, dtype=np.float64)

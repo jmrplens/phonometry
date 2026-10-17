@@ -88,7 +88,11 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
-from .._internal.validation import require_band_fraction, require_positive
+from .._internal.validation import (
+    require_band_fraction,
+    require_positive,
+    require_scalar,
+)
 from ._shared import (
     _PS0,
     _S0,
@@ -209,6 +213,8 @@ def _column(environment: str, arrangement: str | None) -> int:
 
 
 def _stepped[T](k: int, rows: tuple[tuple[int, T], ...], low: int, what: str) -> T:
+    require_scalar(k, "k")
+    require_scalar(low, "low")
     if k < low or k > rows[-1][0]:
         msg = f"{_nominal(k):g} Hz lies outside the bands of {what}."
         raise ValueError(msg)
@@ -1293,6 +1299,7 @@ def _repeatability_of(
     repeated_levels: ArrayLike | None, n_bands: int
 ) -> np.ndarray | None:
     r""":math:`\sigma_r` of Formula (1) from three or five repetitions, if given."""
+    require_scalar(n_bands, "n_bands")
     if repeated_levels is None:
         return None
     repeated = np.asarray(repeated_levels, dtype=np.float64)

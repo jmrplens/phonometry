@@ -370,4 +370,9 @@ is rejected.
 
 ## LaboratoryInsulationWarning
 
-Warning for laboratory-insulation limit-of-measurement conditions.
+A laboratory insulation measurement at the limit of what it can show.
+
+Emitted at the limit-of-measurement conditions of ISO 10140-4, and by the
+ISO 15186-1 element-normalized intensity difference when it counts more
+than one element unit, where it departs from the printed sign of
+Formula (8) (see `docs/ERRATA.md`).

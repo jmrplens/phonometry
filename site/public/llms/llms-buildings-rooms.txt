@@ -2144,8 +2144,8 @@ $N$, $R$, $H$ or $RV$; when both the rumble and hiss deviations fire, the
 library reports the combined `RH` as a diagnostic extension. Each result
 exposes a `.plot()` that renders its panel above. Clause D.4 expects at
 least the 31.5 Hz to 4000 Hz octave bands: a spectrum missing any of them
-still rates, but emits a `UserWarning` because the absent bands are skipped
-by the tag deviation tests.
+still rates, but emits a `room.NoiseCriterionWarning` because the absent
+bands are skipped by the tag deviation tests.
 
 The balanced noise criteria (NCB), the room noise criterion for fluctuating
 low-frequency noise (RNC, which needs a time series rather than a single

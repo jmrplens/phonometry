@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.validation import require_scalar
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -62,6 +63,7 @@ def _iec61265_directional_limit(frequency: float, angle: float) -> float:
     Per subclause 4.4.2, an incidence angle between two tabulated angles takes
     the limit of the greater tabulated angle.
     """
+    require_scalar(angle, "angle")
     row = next(
         (lims for lo, hi, lims in _IEC61265_DIRECTIONAL if lo <= frequency <= hi),
         None,

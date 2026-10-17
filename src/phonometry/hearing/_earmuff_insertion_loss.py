@@ -71,6 +71,7 @@ import numpy as np
 from .._internal.boundary import round_half_up
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
+from .._internal.validation import require_scalar
 from .sound_field_audiometry import (
     _RANDOM_INCIDENCE_CLAUSE,
     DiffuseSoundFieldCheck,
@@ -248,6 +249,7 @@ def _band_axis(frequencies: ArrayLike | None, count: int, owner: str) -> np.ndar
     :raises ValueError: if the count does not match or the frequencies are not
         positive, finite and increasing.
     """
+    require_scalar(count, "count")
     if frequencies is None:
         if count != len(EARMUFF_TEST_BANDS_HZ):
             msg = (

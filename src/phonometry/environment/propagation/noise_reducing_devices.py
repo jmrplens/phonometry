@@ -81,7 +81,12 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays
-from ..._internal.validation import require_finite_array, require_positive
+from ..._internal.validation import (
+    require_finite_array,
+    require_positive,
+    require_scalar,
+)
+from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -226,8 +231,16 @@ INSULATION_CATEGORIES: tuple[tuple[str, int, int], ...] = (
 )
 
 
-class RoadDeviceWarning(UserWarning):
-    """Raised when a rating is computed on data the standard bounds."""
+class RoadDeviceWarning(PhonometryWarning):
+    """A noise reducing device rated on a ratio the standard caps.
+
+    Emitted when the weighted ratio of a single-number rating is limited to
+    0,99, so the rating is that limit rather than the measurement: by
+    :func:`sound_absorption_rating` when the absorption ratio of EN 1793-1
+    Clause 5 and EN 16272-3-1 Clause 5 reaches 0,99, and by
+    :func:`sound_reflection_rating` when the reflection ratio of EN 1793-5
+    Clause 5.8 exceeds it (a reflection ratio of 0,99 itself is not limited).
+    """
 
 
 @dataclass(frozen=True)
@@ -310,6 +323,7 @@ def _weighted(
 
 def _category(reported: int, ladder: tuple[tuple[str, int, int], ...]) -> str:
     """The Annex A category the reported integer falls in."""
+    require_scalar(reported, "reported")
     for name, low, high in ladder:
         if low <= reported <= high:
             return name

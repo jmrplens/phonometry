@@ -154,7 +154,7 @@ def test_clause_4_3_the_building_on_its_ground() -> None:
         im.soil_building_frequency_guide(0)
     with pytest.raises(ValueError, match="stories"):
         im.soil_building_frequency_guide(float("inf"))
-    with pytest.raises(ValueError, match="stories"):
+    with pytest.raises(TypeError, match="stories"):
         im.soil_building_frequency_guide("3")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="'n_harmonics'"):
         im.track_excitation_frequency(20.0, spacing_m=0.6, n_harmonics=2.9)  # type: ignore[arg-type]

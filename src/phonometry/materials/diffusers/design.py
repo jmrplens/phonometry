@@ -66,7 +66,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from ..._internal.frozen import OwnsArrays
-from ..._internal.validation import require_scalar
+from ..._internal.validation import require_count, require_scalar
 from .scattering_diffusion import (
     DiffusionSpectrum,
     diffusion_spectrum,
@@ -125,7 +125,7 @@ def _positive_scalar(value: float, name: str) -> float:
 def _prime_generator(prime: int) -> int:
     """Return ``prime`` as an odd prime >= 3 or raise ``ValueError``."""
     require_scalar(prime, "prime")
-    n = int(prime)
+    n = require_count(prime, "prime", at_least=None)
     if n != prime:
         msg = "'prime' must be an integer."
         raise ValueError(msg)
@@ -380,7 +380,7 @@ def _prepare_geometry(
         msg = "'source_angle_deg' must be finite."
         raise ValueError(msg)
     require_scalar(n_repetitions, "n_repetitions")
-    n_periods = int(n_repetitions)
+    n_periods = require_count(n_repetitions, "n_repetitions", at_least=None)
     if n_periods != n_repetitions or n_periods < 1:
         msg = "'n_repetitions' must be an integer of at least 1."
         raise ValueError(msg)

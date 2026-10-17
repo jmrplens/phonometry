@@ -61,9 +61,9 @@ def test_reference_conversion_round_trip() -> None:
 
 def test_reference_conversion_rejects_a_per_band_level_array() -> None:
     per_band = np.array([100.0, 110.0])
-    with pytest.raises(ValueError, match="'level' must be a finite number"):
+    with pytest.raises(TypeError, match="'level' must be a finite number"):
         underwater.underwater_to_in_air_spl(per_band)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="'level' must be a finite number"):
+    with pytest.raises(TypeError, match="'level' must be a finite number"):
         underwater.in_air_to_underwater_spl([74.0, 84.0])  # type: ignore[arg-type]
 
 

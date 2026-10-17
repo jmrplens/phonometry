@@ -26,7 +26,7 @@ Equation (4.4) as the atmosphere plus the water column above.
 
 Sea water has no ratio of specific heats or thermal diffusivity here: no source
 in this library prints them, so a :class:`~phonometry.fluids.Fluid` built from
-this module raises :class:`~phonometry.fluids.FluidPropertyUnavailable` for
+this module raises :class:`~phonometry.fluids.FluidPropertyUnavailableError` for
 them rather than inventing a number.
 """
 

@@ -60,7 +60,11 @@ import numpy as np
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
-from .._internal.validation import require_choice, require_finite_array
+from .._internal.validation import (
+    require_choice,
+    require_finite_array,
+    require_scalar,
+)
 from .._internal.warnings import PhonometryWarning
 from ..io._resolve import resolve_fs
 from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
@@ -413,6 +417,7 @@ def free_field_reference_level(
     :return: The level referred to 10 m, in dB, in the shape of ``level``.
     :raises ValueError: If ``distance`` is not a positive, finite length.
     """
+    require_scalar(distance, "distance")
     values = np.asarray(level, dtype=np.float64)
     if not np.isfinite(distance) or distance <= 0.0:
         msg = f"'distance' must be a positive, finite length in m, got {distance!r}."
@@ -1993,6 +1998,7 @@ def source_directivity_limit(center: float) -> float:
         125 Hz to 4 kHz, and a survey in the 63 Hz or 8 kHz octave has no
         printed limit to be held to rather than the nearest one.
     """
+    require_scalar(center, "center")
     if center not in MAX_SOURCE_DIRECTIVITY_DEVIATION_DB:
         printed = ", ".join(
             f"{band:g}" for band in sorted(MAX_SOURCE_DIRECTIVITY_DEVIATION_DB)

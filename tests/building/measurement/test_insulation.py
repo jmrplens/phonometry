@@ -470,7 +470,9 @@ def test_extended_annex_c2_enlarged_range() -> None:
         4000,
         5000,
     ]
-    res = building.weighted_rating_extended(ref.ISO717_1_ANNEX_C2_R_50_5000, freqs)
+    res = building.weighted_rating_extended(
+        ref.ISO717_1_ANNEX_C2_R_50_5000, frequencies=freqs
+    )
     exp = ref.ISO717_1_ANNEX_C2_EXPECTED
     assert res.rating == exp["rw"]
     assert res.c == exp["c"]
@@ -525,7 +527,7 @@ def test_extended_18_band_100_5000_range() -> None:
         5000,
     ]
     values = [*ref.ISO717_1_ANNEX_C_R, 26.8, 29.2]
-    res = building.weighted_rating_extended(values, freqs)
+    res = building.weighted_rating_extended(values, frequencies=freqs)
     assert res.rating == 30
     assert res.c_100_5000 is not None
     assert res.ctr_100_5000 is not None
@@ -539,7 +541,7 @@ def test_extended_requires_core_bands() -> None:
         ValueError, match=r"input must contain the \d+ core one-third-octave bands"
     ):
         building.weighted_rating_extended(
-            [40.0] * 10, [50, 63, 80, 100, 125, 160, 200, 250, 315, 400]
+            [40.0] * 10, frequencies=[50, 63, 80, 100, 125, 160, 200, 250, 315, 400]
         )
     with pytest.raises(
         ValueError,
@@ -555,12 +557,12 @@ def test_extended_mismatched_frequencies_name_the_entry_point() -> None:
         ValueError,
         match=r"weighted_rating_extended: 'values_by_band'.*'frequencies'.*same shape",
     ):
-        building.weighted_rating_extended([40.0] * 18, freqs)
+        building.weighted_rating_extended([40.0] * 18, frequencies=freqs)
     with pytest.raises(
         ValueError,
         match=r"weighted_impact_rating_extended: 'values_by_band'.*'frequencies'",
     ):
-        building.weighted_impact_rating_extended([40.0] * 18, freqs)
+        building.weighted_impact_rating_extended([40.0] * 18, frequencies=freqs)
 
 
 def test_one_decimal_rating_annex_b() -> None:
@@ -571,7 +573,7 @@ def test_one_decimal_rating_annex_b() -> None:
 
     res = building.weighted_rating_extended(
         ref.ISO12999_1_ANNEX_B_RI,
-        ref.ISO12999_1_ANNEX_B_FREQ,
+        frequencies=ref.ISO12999_1_ANNEX_B_FREQ,
         one_decimal=True,
     )
     assert res.rating == pytest.approx(ref.ISO12999_1_ANNEX_B_RW)
@@ -585,7 +587,7 @@ def test_one_decimal_rating_annex_b() -> None:
     )
     # The integer-mode rating of the same spectrum stays an integer.
     integer = building.weighted_rating_extended(
-        ref.ISO12999_1_ANNEX_B_RI, ref.ISO12999_1_ANNEX_B_FREQ
+        ref.ISO12999_1_ANNEX_B_RI, frequencies=ref.ISO12999_1_ANNEX_B_FREQ
     )
     assert integer.rating == 57
 
@@ -603,14 +605,14 @@ def test_impact_extended_ci_50_2500() -> None:
         *[int(f) for f in np.asarray(ref.ISO717_2_REFERENCE_FLOOR_FREQ, dtype=float)],
     ]
     ln = [30.0, 30.0, 30.0, *_HEAVY_FLOOR]
-    res = building.weighted_impact_rating_extended(ln, freqs)
+    res = building.weighted_impact_rating_extended(ln, frequencies=freqs)
     assert res.rating == 78
     assert res.ci == -11
     # 30 dB extension bands are ~40 dB below the sum: CI unchanged.
     assert res.ci_50_2500 == -11
     # Strong low-frequency content raises the enlarged-range term.
     ln_low = [75.0, 75.0, 75.0, *_HEAVY_FLOOR]
-    boosted = building.weighted_impact_rating_extended(ln_low, freqs)
+    boosted = building.weighted_impact_rating_extended(ln_low, frequencies=freqs)
     assert boosted.ci_50_2500 is not None
     assert boosted.ci_50_2500 > -11
 

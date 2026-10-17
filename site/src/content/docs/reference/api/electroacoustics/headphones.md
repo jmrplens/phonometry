@@ -259,9 +259,9 @@ peak over its RMS against the two limits.
 
 ```python
 coupler_frequency_response(
-    frequencies: ArrayLike,
     sound_pressure_level: ArrayLike,
     *,
+    frequencies: ArrayLike,
     rated_frequency_range_hz: tuple[float, float] | None = None,
 ) -> CouplerFrequencyResponse
 ```
@@ -372,9 +372,10 @@ The level relative to its value at a reference frequency, in dB.
 
 ```python
 crosstalk_attenuation(
-    frequencies: ArrayLike,
     driven_level: ArrayLike,
     other_level: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> CrosstalkAttenuation
 ```
 
@@ -462,10 +463,10 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 ```python
 ear_canal_frequency_response(
-    frequencies: ArrayLike,
     earphone_levels: ArrayLike,
     sound_field_levels: ArrayLike,
     *,
+    frequencies: ArrayLike,
     reference_frequency_hz: float = 500.0,
 ) -> EarCanalFrequencyResponse
 ```
@@ -704,10 +705,10 @@ EARPHONE_TYPES = {'C': 'circumaural', 'E': 'intra-concha', 'H': 'earshell', 'I':
 
 ```python
 field_comparison_response(
-    frequencies: ArrayLike,
     field_level: ArrayLike,
     source_emf_v: ArrayLike,
     *,
+    frequencies: ArrayLike,
     field: Literal['free', 'diffuse'],
     reference_frequency_hz: float = 1000.0,
 ) -> FieldComparisonResponse
@@ -1135,9 +1136,9 @@ Spaces around the hyphens are ignored, so the clause's own layout,
 ```python
 program_characteristic_voltage(
     source_emf_v: ArrayLike,
-    frequencies: ArrayLike,
     band_levels: ArrayLike,
     *,
+    frequencies: ArrayLike,
     weighting: Literal['A', 'Z'] = 'Z',
     free_field_response_db: ArrayLike | None = None,
 ) -> ProgramCharacteristicVoltage
@@ -1176,9 +1177,9 @@ measurements".
 
 ```python
 program_signal_level(
-    frequencies: ArrayLike,
     band_levels: ArrayLike,
     *,
+    frequencies: ArrayLike,
     weighting: Literal['A', 'Z'] = 'Z',
     free_field_response_db: ArrayLike | None = None,
 ) -> float
@@ -1548,9 +1549,9 @@ certificate, are not numbers.
 
 ```python
 verify_rated_impedance(
-    frequencies: ArrayLike,
     impedance_ohm: ArrayLike,
     *,
+    frequencies: ArrayLike,
     rated_impedance_ohm: float,
     rated_frequency_range_hz: tuple[float, float],
 ) -> RatedImpedanceVerification

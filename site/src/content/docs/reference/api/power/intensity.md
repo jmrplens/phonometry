@@ -98,8 +98,8 @@ $L_\mathrm{d} > F_2$ (criterion 1, Annex B equation (B.1)).
 field_indicators(
     pressure_levels: list[float] | np.ndarray,
     normal_intensity: list[float] | np.ndarray,
-    frequencies: list[float] | np.ndarray | None = None,
     *,
+    frequencies: list[float] | np.ndarray | None = None,
     temporal_intensity: list[float] | np.ndarray | None = None,
 ) -> FieldIndicators
 ```
@@ -363,8 +363,8 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ```python
 plot_pp_probe_geometry(
     spacing_m: float = 0.012,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes

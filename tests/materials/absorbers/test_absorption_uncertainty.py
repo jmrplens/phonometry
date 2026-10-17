@@ -38,7 +38,7 @@ def test_coverage_factors_differ_from_iso12999_1() -> None:
 def test_absorption_coefficient_reproduces_table4() -> None:
     res = materials.sound_absorption_coefficient_uncertainty(
         ref.ISO12999_2_TABLE4_ALPHA_S,
-        ref.ISO12999_2_TABLE4_FREQ,
+        frequencies=ref.ISO12999_2_TABLE4_FREQ,
         condition="reproducibility",
         coverage=0.95,
     )
@@ -50,27 +50,29 @@ def test_absorption_coefficient_reproduces_table4() -> None:
 
 def test_absorption_coefficient_formula_1() -> None:
     # 1000 Hz: m=0.040, n=0.015 => sigma_R = 0.040*0.68 + 0.015 = 0.0422.
-    res = materials.sound_absorption_coefficient_uncertainty([0.68], [1000])
+    res = materials.sound_absorption_coefficient_uncertainty([0.68], frequencies=[1000])
     np.testing.assert_allclose(res.standard_uncertainty, [0.0422])
     np.testing.assert_allclose(res.expanded_uncertainty, [0.0844])  # k=2, exact
 
 
 def test_scalar_inputs_are_promoted_to_one_band() -> None:
     # The type hints allow a bare scalar; it must behave like a 1-band array.
-    res = materials.sound_absorption_coefficient_uncertainty(0.68, 1000)
+    res = materials.sound_absorption_coefficient_uncertainty(0.68, frequencies=1000)
     np.testing.assert_allclose(res.standard_uncertainty, [0.0422])
     assert res.frequencies.shape == (1,)
     np.testing.assert_allclose(
-        materials.equivalent_area_uncertainty(8.0, 500).standard_uncertainty,
+        materials.equivalent_area_uncertainty(
+            8.0, frequencies=500
+        ).standard_uncertainty,
         [0.050 * 8.0 + 0.015 * 10.0],
     )
 
 
 def test_repeatability_is_0_6_of_reproducibility() -> None:
     rep = materials.sound_absorption_coefficient_uncertainty(
-        [0.5], [500], condition="repeatability"
+        [0.5], frequencies=[500], condition="repeatability"
     )
-    repro = materials.sound_absorption_coefficient_uncertainty([0.5], [500])
+    repro = materials.sound_absorption_coefficient_uncertainty([0.5], frequencies=[500])
     np.testing.assert_allclose(
         rep.standard_uncertainty, 0.6 * repro.standard_uncertainty
     )
@@ -78,12 +80,12 @@ def test_repeatability_is_0_6_of_reproducibility() -> None:
 
 def test_equivalent_area_formula_2() -> None:
     # sigma_R = m*A_T + n*S, S = 10 m². At 500 Hz: m=0.050, n=0.015.
-    res = materials.equivalent_area_uncertainty([8.0], [500])
+    res = materials.equivalent_area_uncertainty([8.0], frequencies=[500])
     np.testing.assert_allclose(res.standard_uncertainty, [0.050 * 8.0 + 0.015 * 10.0])
 
 
 def test_equivalent_area_ylabel_is_area() -> None:
-    res = materials.equivalent_area_uncertainty([5.0, 6.0], [500, 1000])
+    res = materials.equivalent_area_uncertainty([5.0, 6.0], frequencies=[500, 1000])
     assert res.quantity == "equivalent_area"
     # Reported to one decimal (not a coefficient).
     np.testing.assert_allclose(
@@ -96,7 +98,7 @@ def test_equivalent_area_ylabel_is_area() -> None:
 # ---------------------------------------------------------------------------
 def test_practical_coefficient_reproduces_table5() -> None:
     res = materials.practical_coefficient_uncertainty(
-        ref.ISO12999_2_TABLE5_ALPHA_P, ref.ISO12999_2_TABLE5_FREQ
+        ref.ISO12999_2_TABLE5_ALPHA_P, frequencies=ref.ISO12999_2_TABLE5_FREQ
     )
     np.testing.assert_allclose(
         res.reported_expanded_uncertainty, ref.ISO12999_2_TABLE5_U_K2
@@ -106,7 +108,7 @@ def test_practical_coefficient_reproduces_table5() -> None:
 def test_practical_coefficient_500hz_is_constant() -> None:
     # Table 2 at 500/1000/2000 Hz has m=0 => sigma_R = 0.040 regardless of alpha.
     for alpha in (0.1, 0.9):
-        res = materials.practical_coefficient_uncertainty([alpha], [500])
+        res = materials.practical_coefficient_uncertainty([alpha], frequencies=[500])
         np.testing.assert_allclose(res.standard_uncertainty, [0.040])
 
 
@@ -139,7 +141,7 @@ def test_single_number_rating_repeatability() -> None:
 # Result helpers
 # ---------------------------------------------------------------------------
 def test_interval_bounds() -> None:
-    res = materials.sound_absorption_coefficient_uncertainty([0.5], [1000])
+    res = materials.sound_absorption_coefficient_uncertainty([0.5], frequencies=[1000])
     u = res.expanded_uncertainty
     np.testing.assert_allclose(res.lower, res.values - u)
     np.testing.assert_allclose(res.upper, res.values + u)
@@ -147,7 +149,9 @@ def test_interval_bounds() -> None:
 
 def test_reported_rounding_rule() -> None:
     # Coefficients -> 2 decimals; area and DLalpha -> 1 decimal.
-    coeff = materials.sound_absorption_coefficient_uncertainty([0.33], [63])  # U~0.327
+    coeff = materials.sound_absorption_coefficient_uncertainty(
+        [0.33], frequencies=[63]
+    )  # U~0.327
     assert float(coeff.reported_expanded_uncertainty[0]) == 0.33
     rating = materials.single_number_rating_uncertainty(8.1)  # U=1.62 -> 1.6
     assert float(rating.reported_expanded_uncertainty[0]) == 1.6
@@ -158,24 +162,26 @@ def test_reported_rounding_rule() -> None:
 # ---------------------------------------------------------------------------
 def test_frequency_must_be_tabulated() -> None:
     with pytest.raises(ValueError, match="not a tabulated one-third-octave"):
-        materials.sound_absorption_coefficient_uncertainty([0.5], [440])
+        materials.sound_absorption_coefficient_uncertainty([0.5], frequencies=[440])
     with pytest.raises(ValueError, match="not a tabulated octave"):
-        materials.practical_coefficient_uncertainty([0.5], [630])
+        materials.practical_coefficient_uncertainty([0.5], frequencies=[630])
 
 
 def test_shape_mismatch_raises() -> None:
     with pytest.raises(ValueError, match=r"'alpha'.*must all have the same shape"):
-        materials.sound_absorption_coefficient_uncertainty([0.5, 0.6], [1000])
+        materials.sound_absorption_coefficient_uncertainty(
+            [0.5, 0.6], frequencies=[1000]
+        )
     with pytest.raises(ValueError, match=r"'alpha_p'.*must all have the same shape"):
-        materials.practical_coefficient_uncertainty([0.5, 0.6], [1000])
+        materials.practical_coefficient_uncertainty([0.5, 0.6], frequencies=[1000])
     with pytest.raises(ValueError, match=r"'area'.*must all have the same shape"):
-        materials.equivalent_area_uncertainty([5.0, 6.0], [500])
+        materials.equivalent_area_uncertainty([5.0, 6.0], frequencies=[500])
 
 
 def test_unknown_condition_raises() -> None:
     with pytest.raises(ValueError, match="'condition' must be one of"):
         materials.sound_absorption_coefficient_uncertainty(
-            [0.5], [1000], condition="typical"
+            [0.5], frequencies=[1000], condition="typical"
         )
 
 
@@ -186,7 +192,7 @@ def test_negative_rating_raises() -> None:
 
 def test_non_finite_raises() -> None:
     with pytest.raises(ValueError, match=r"'alpha' must contain only finite"):
-        materials.sound_absorption_coefficient_uncertainty([np.nan], [1000])
+        materials.sound_absorption_coefficient_uncertainty([np.nan], frequencies=[1000])
 
 
 @pytest.mark.parametrize(
@@ -201,7 +207,7 @@ def test_spectra_of_unequal_length_are_refused(field: str) -> None:
     that prints it, stating a coverage the measurement never had.
     """
     res = materials.sound_absorption_coefficient_uncertainty(
-        ref.ISO12999_2_TABLE4_ALPHA_S, ref.ISO12999_2_TABLE4_FREQ
+        ref.ISO12999_2_TABLE4_ALPHA_S, frequencies=ref.ISO12999_2_TABLE4_FREQ
     )
     one_short = getattr(res, field)[:-1]
     with pytest.raises(ValueError, match=rf"'{field}' \({len(one_short)}\)"):
@@ -240,7 +246,7 @@ def test_plot_band_returns_axes() -> None:
 
     mpl.use("Agg")
     res = materials.sound_absorption_coefficient_uncertainty(
-        ref.ISO12999_2_TABLE4_ALPHA_S, ref.ISO12999_2_TABLE4_FREQ
+        ref.ISO12999_2_TABLE4_ALPHA_S, frequencies=ref.ISO12999_2_TABLE4_FREQ
     )
     ax = res.plot()
     assert ax.get_title().startswith("ISO 12999-2")

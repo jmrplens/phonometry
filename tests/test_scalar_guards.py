@@ -276,9 +276,9 @@ _T = np.array([2.0, 2.1, 2.2])
 def test_iso354_humidity_refuses_an_array(humidity: np.ndarray) -> None:
     with pytest.raises(TypeError, match="'relative_humidity_percent'"):
         materials.measure_sound_absorption(
-            _FREQS,
-            _T,
-            _T - 0.5,
+            frequencies=_FREQS,
+            t_empty=_T,
+            t_specimen=_T - 0.5,
             volume=200.0,
             area=10.8,
             relative_humidity_percent=humidity,

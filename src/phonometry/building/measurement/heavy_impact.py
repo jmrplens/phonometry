@@ -832,8 +832,8 @@ def _round_half_up(value: float) -> int:
 
 def a_weighted_max_impact_level(
     levels: ArrayLike,
-    frequencies: ArrayLike | Sequence[float] | None = None,
     *,
+    frequencies: ArrayLike | Sequence[float] | None = None,
     fraction: BandFraction | None = None,
 ) -> AWeightedMaxImpactResult:
     r"""A-weighted maximum impact level ``XiA,Fmax`` (ISO 717-2:2020, (D.1)).

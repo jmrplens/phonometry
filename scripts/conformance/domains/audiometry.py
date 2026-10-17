@@ -282,7 +282,9 @@ def _chk_sweep() -> Outcome:
     """Peaks at 30,6 dB and valleys at 20 dB about 1 kHz: 25,3 dB, then 25 dB."""
     freqs = np.geomspace(250.0, 8000.0, 24)
     levels = np.where(np.arange(24) % 2 == 0, 30.6, 20.0)
-    result = hearing.sweep_audiometry_threshold(freqs, levels, frequencies=[1000.0])
+    result = hearing.sweep_audiometry_threshold(
+        levels, reversal_frequencies=freqs, frequencies=[1000.0]
+    )
     return record(
         {"mean": 25.3, "threshold": 25.0},
         {

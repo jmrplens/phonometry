@@ -79,8 +79,8 @@ the spectral character of 9.5.
 ```python
 check_special_room_reverberation(
     reverberation_time: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     volume: float,
     nominal_reverberation_time_s: float | None = None,
     surface_area: float | None = None,
@@ -164,8 +164,8 @@ but keeps it out of the verdict, the clause saying "should".
 check_special_room_suitability(
     measured_power_levels: ArrayLike,
     calibrated_power_levels: ArrayLike | ReferenceSourceCalibration,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
 ) -> SpecialRoomSuitabilityCheck
@@ -216,8 +216,8 @@ energy sum of its three one-third octave bands, exactly as
 check_special_room_surfaces(
     surface_absorption_coefficients: ArrayLike,
     floor_absorption_coefficients: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     surface_areas_m2: ArrayLike | None = None,
 ) -> SpecialRoomSurfaceCheck
 ```
@@ -306,8 +306,8 @@ that volume too and nothing is read off the figure.
 ```python
 sound_power_special_room(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     volume: float,
     nominal_reverberation_time_s: float,
     background_levels: ArrayLike | None = None,
@@ -367,8 +367,8 @@ sound_power_special_room_comparison(
     levels: ArrayLike,
     levels_ref: ArrayLike,
     lw_ref: ArrayLike | ReferenceSourceCalibration,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     background_levels: ArrayLike | None = None,
     background_levels_ref: ArrayLike | None = None,
     temperature_c: float = 23.0,
@@ -463,8 +463,8 @@ table, and that is what is applied.
 ```python
 special_room_source_locations(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     n_microphone_positions: int = 6,
     a_weighted_levels: ArrayLike | None = None,
 ) -> SourceLocationPlan

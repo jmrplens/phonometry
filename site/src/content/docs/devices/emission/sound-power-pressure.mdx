@@ -606,7 +606,7 @@ from phonometry import emission
 # K1 for a 6 dB signal-to-background difference in a <=200 Hz edge band: the
 # floor is 1.26 dB (Eq. 11). Source and background levels are [positions, bands].
 k1 = emission.precision_background_correction(
-    np.array([[56.0]]), np.array([[50.0]]), np.array([200.0]))
+    np.array([[56.0]]), np.array([[50.0]]), frequencies=np.array([200.0]))
 print(round(float(k1[0, 0]), 4))      # 1.2563
 
 # Meteorological corrections at the 23 C, 101.325 kPa reference (Eq. 16):

@@ -41,7 +41,9 @@ def test_rigid_mass_spanish_labels() -> None:
 
     mpl.use("Agg")
     f = np.array([20.0, 100.0, 500.0])
-    res = vibration.verify_rigid_mass_calibration([0.100, 0.102, 0.097], f, mass=10.0)
+    res = vibration.verify_rigid_mass_calibration(
+        [0.100, 0.102, 0.097], frequencies=f, mass=10.0
+    )
 
     axes_en = res.plot(language="en")
     assert axes_en[0].get_title() == "ISO 7626-2 rigid-mass calibration check (PASS)"
@@ -339,7 +341,15 @@ def test_power_injection_labels() -> None:
     mpl.use("Agg")
 
     f = np.array([250.0, 500.0, 1000.0])
-    res = vibration.power_injection_clf(f, 0.087, 0.013, 4.4e-3, 2.4e-3, 0.557, 0.606)
+    res = vibration.power_injection_clf(
+        frequencies=f,
+        energy1=0.087,
+        energy2=0.013,
+        internal_loss_factor1=4.4e-3,
+        internal_loss_factor2=2.4e-3,
+        modal_density1=0.557,
+        modal_density2=0.606,
+    )
 
     ax_en = res.plot()
     assert ax_en.get_xlabel() == "Frequency [Hz]"
@@ -623,7 +633,7 @@ def test_the_meter_verification_draws_the_band_it_was_judged_against() -> None:
 
     f = np.array([0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0, 80.0])
     design = np.asarray(vibration.weighting_factors("Wk", f))
-    res = vibration.verify_weighting("Wk", f, design)
+    res = vibration.verify_weighting("Wk", frequencies=f, measured_factors=design)
 
     ax = res.plot()
     assert ax.get_title() == "Wk weighting against ISO 8041-1: PASS"
@@ -656,7 +666,9 @@ def test_the_meter_verification_draws_the_band_it_was_judged_against() -> None:
     # A failing point is drawn apart from the ones inside.
     off = design.copy()
     off[5] *= 1.2
-    failing = vibration.verify_weighting("Wk", f, off).plot()
+    failing = vibration.verify_weighting(
+        "Wk", frequencies=f, measured_factors=off
+    ).plot()
     assert "FAIL" in failing.get_title()
     assert [t.get_text() for t in failing.get_legend().get_texts()][-1] == (
         "outside tolerance"
@@ -671,7 +683,7 @@ def test_the_meter_verification_speaks_spanish() -> None:
     mpl.use("Agg")
     f = np.array([1.0, 8.0, 80.0])
     design = np.asarray(vibration.weighting_factors("Wd", f))
-    res = vibration.verify_weighting("Wd", f, design)
+    res = vibration.verify_weighting("Wd", frequencies=f, measured_factors=design)
 
     ax = res.plot(language="es")
     assert ax.get_title() == "Ponderación Wd frente a ISO 8041-1: CUMPLE"
@@ -693,7 +705,9 @@ def _phase_verdict(weighting: str, offset_deg: float) -> PhaseVerification:
     f = np.array([10.0 ** (n / 10.0) for n in range(-10, 27)])
     response = vibration.frequency_weighting(weighting, f).response
     design = np.degrees(np.unwrap(np.angle(response)))
-    return vibration.verify_phase_response(weighting, f, design + offset_deg)
+    return vibration.verify_phase_response(
+        weighting, frequencies=f, measured_phase_deg=design + offset_deg
+    )
 
 
 def test_the_phase_verification_draws_the_band_it_was_judged_against() -> None:
@@ -770,7 +784,10 @@ def test_the_meter_figure_draws_the_band_the_verdict_actually_uses() -> None:
 
     design = float(np.asarray(vibration.weighting_factors("Wk", [16.0]))[0])
     result = vibration.verify_weighting(
-        "Wk", [16.0], [design * 1.115], expanded_uncertainty_percent=1.0
+        "Wk",
+        frequencies=[16.0],
+        measured_factors=[design * 1.115],
+        expanded_uncertainty_percent=1.0,
     )
     assert not result.passes
 
@@ -806,7 +823,7 @@ def test_the_meter_figure_draws_one_band_when_no_uncertainty_is_given() -> None:
 
     f = np.array([1.0, 8.0, 80.0])
     design = np.asarray(vibration.weighting_factors("Wk", f))
-    ax = vibration.verify_weighting("Wk", f, design).plot()
+    ax = vibration.verify_weighting("Wk", frequencies=f, measured_factors=design).plot()
     assert len(ax.collections) == 1
     assert "accepted with U" not in " ".join(
         t.get_text() for t in ax.get_legend().get_texts()

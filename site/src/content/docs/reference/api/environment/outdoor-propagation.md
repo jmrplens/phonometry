@@ -294,6 +294,7 @@ ground_attenuation(
     distance: float,
     source_height_m: float,
     receiver_height_m: float,
+    *,
     frequencies: ArrayLike = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0),
     ground_source: float = 0.0,
     ground_middle: float = 0.0,

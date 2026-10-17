@@ -161,8 +161,8 @@ def _chk_iec61043_spacing_rule() -> Outcome:
 def _chk_iec61043_phase_mismatch() -> Outcome:
     phi = ph.emission.phase_mismatch_from_residual_index(
         ref.IEC61043_PHASE_INDEX_DB,
-        ref.IEC61043_PHASE_FREQUENCY_HZ,
-        ref.IEC61043_PHASE_SPACING_M,
+        frequency=ref.IEC61043_PHASE_FREQUENCY_HZ,
+        spacing_m=ref.IEC61043_PHASE_SPACING_M,
     )
     return numeric(
         ref.IEC61043_PHASE_MISMATCH_DEG, float(phi), 0.005, unit="deg", places=4
@@ -264,7 +264,13 @@ def _chk_reverberation_lw() -> Outcome:
     lw_target = np.array([80.0, 85.0, 90.0, 82.0, 75.0])
     lp = lw_target - _reverb_bracket(t60, volume, surface, freqs, theta, ps)
     res = ph.emission.sound_power_reverberation(
-        lp, t60, volume, surface, freqs, temperature_c=theta, static_pressure_kpa=ps
+        lp,
+        t60,
+        volume,
+        surface,
+        frequencies=freqs,
+        temperature_c=theta,
+        static_pressure_kpa=ps,
     )
     worst = float(np.max(np.abs(np.asarray(res.sound_power_level) - lw_target)))
     return numeric(0.0, worst, 1e-9, unit="dB", places=9, expected_label="0 dB error")
@@ -339,7 +345,13 @@ def _chk_reverberation_lj() -> Outcome:
     lj_target = np.array([90.0, 95.0, 100.0, 92.0, 85.0])
     le = lj_target - _reverb_bracket(t60, volume, surface, freqs, theta, ps)
     res = ph.emission.sound_energy_reverberation(
-        le, t60, volume, surface, freqs, temperature_c=theta, static_pressure_kpa=ps
+        le,
+        t60,
+        volume,
+        surface,
+        frequencies=freqs,
+        temperature_c=theta,
+        static_pressure_kpa=ps,
     )
     worst = float(np.max(np.abs(np.asarray(res.sound_energy_level) - lj_target)))
     return numeric(0.0, worst, 1e-9, unit="dB", places=9, expected_label="0 dB error")
@@ -352,7 +364,7 @@ def _chk_reverberation_lj() -> Outcome:
 )
 def _chk_octave_band_levels_annex_f() -> Outcome:
     _, octave = ph.emission.octave_band_levels(
-        np.full(3, 90.0), np.array([800.0, 1000.0, 1250.0])
+        np.full(3, 90.0), frequencies=np.array([800.0, 1000.0, 1250.0])
     )
     return numeric(
         10.0 * math.log10(3.0), float(octave[0]) - 90.0, 1e-12, unit="dB", places=6
@@ -669,7 +681,7 @@ _ISO3747_DIRECTIVITY_GRADE2 = 3.0
 )
 def _chk_iso3747_example_uncertainty() -> Outcome:
     res = ph.emission.sound_power_in_situ(
-        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, _ISO3747_FREQS,
+        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
         sigma_omc_db=2.0,
         conditions=ph.emission.GradeConditions(excess_levels=_ISO3747_EXCESS_GRADE2, directivity_range=_ISO3747_DIRECTIVITY_GRADE2),
     )  # fmt: skip
@@ -683,12 +695,12 @@ def _chk_iso3747_example_uncertainty() -> Outcome:
 )
 def _chk_iso3747_table2_and_e1() -> Outcome:
     grade2 = ph.emission.sound_power_in_situ(
-        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, _ISO3747_FREQS,
+        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
         sigma_omc_db=4.0,
         conditions=ph.emission.GradeConditions(excess_levels=_ISO3747_EXCESS_GRADE2, directivity_range=_ISO3747_DIRECTIVITY_GRADE2),
     )  # fmt: skip
     grade3 = ph.emission.sound_power_in_situ(
-        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, _ISO3747_FREQS,
+        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
         conditions=ph.emission.GradeConditions(excess_levels=[8.0, 6.9, 7.2, 8.8], directivity_range=3.0)
     )  # fmt: skip
     # Table E.1, sigma_R0 = 1,5 dB row at sigma_omc = 4 dB: sqrt(18,25) = 4,27 -> 4,3.
@@ -713,7 +725,7 @@ def _chk_iso3747_k1_margin_and_cap() -> Outcome:
     background[1, 3] = _ISO3747_ST[1, 3] - 6.0  # exactly at the validity margin
     background[2, 5] = _ISO3747_ST[2, 5] - 2.0  # far below it: the cap
     res = ph.emission.sound_power_in_situ(
-        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, _ISO3747_FREQS,
+        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
         background_levels=background,
     )  # fmt: skip
     expected_edge = -10.0 * math.log10(1.0 - 10.0**-0.6)
@@ -747,7 +759,7 @@ def _chk_iso3747_eq11_vs_iso3741() -> Outcome:
             frequencies=_ISO3747_FREQS, temperature_c=20.0, static_pressure_kpa=100.0,
         )  # fmt: skip
     res = ph.emission.sound_power_in_situ(
-        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, _ISO3747_FREQS,
+        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
         temperature_c=20.0, static_pressure_kpa=100.0,
     )  # fmt: skip
     worst = float(np.max(np.abs(res.sound_power_level_ref - room.sound_power_level)))
@@ -763,20 +775,23 @@ def _chk_iso3747_eq11_vs_iso3741() -> Outcome:
 )
 def _chk_iso3747_locations_collapse() -> Outcome:
     one = ph.emission.sound_power_in_situ(
-        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, _ISO3747_FREQS
+        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS
     )
     three = ph.emission.sound_power_in_situ(
         _ISO3747_ST,
         np.stack([_ISO3747_RSS] * 3),
         np.stack([_ISO3747_LW_RSS] * 3),
-        _ISO3747_FREQS,
+        frequencies=_ISO3747_FREQS,
     )
     events = np.repeat(_ISO3747_ST[:, None, :], 5, axis=1)
     one_j = ph.emission.sound_energy_in_situ(
-        events, _ISO3747_RSS, _ISO3747_LW_RSS, _ISO3747_FREQS
+        events, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS
     )
     two_j = ph.emission.sound_energy_in_situ(
-        events, np.stack([_ISO3747_RSS] * 2), _ISO3747_LW_RSS, _ISO3747_FREQS
+        events,
+        np.stack([_ISO3747_RSS] * 2),
+        _ISO3747_LW_RSS,
+        frequencies=_ISO3747_FREQS,
     )
     worst = max(
         float(np.max(np.abs(three.sound_power_level - one.sound_power_level))),
@@ -796,11 +811,11 @@ def _chk_iso3747_event_forms() -> Outcome:
     n_events = 8
     one_at_a_time = ph.emission.sound_energy_in_situ(
         np.repeat(_ISO3747_ST[:, None, :], n_events, axis=1),
-        _ISO3747_RSS, _ISO3747_LW_RSS, _ISO3747_FREQS,
+        _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
     )  # fmt: skip
     encompassing = ph.emission.sound_energy_in_situ(
         _ISO3747_ST + 10.0 * math.log10(n_events),
-        _ISO3747_RSS, _ISO3747_LW_RSS, _ISO3747_FREQS, n_events=n_events,
+        _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS, n_events=n_events,
     )  # fmt: skip
     worst = float(
         np.max(
@@ -819,7 +834,7 @@ def _chk_iso3747_event_forms() -> Outcome:
 )
 def _chk_iso3747_c2_reference_conditions() -> Outcome:
     res = ph.emission.sound_power_in_situ(
-        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, _ISO3747_FREQS
+        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS
     )
     expected = 15.0 * math.log10(296.15 / 296.0)
     return numeric(expected, float(res.c2), 1e-9, unit="dB", places=6)
@@ -847,7 +862,7 @@ def _chk_iso3747_a_weighted_total() -> Outcome:
     flat = np.full((3, freqs.size), 80.0)
     lw_rss = np.full(freqs.size, 90.0)
     # Equal levels for both sources: LW = LW(RSS) = 90 dB in every band.
-    res = ph.emission.sound_power_in_situ(flat, flat, lw_rss, freqs)
+    res = ph.emission.sound_power_in_situ(flat, flat, lw_rss, frequencies=freqs)
     expected = 90.0 + 10.0 * math.log10(float(np.sum(10.0 ** (0.1 * ck))))
     return numeric(expected, float(res.sound_power_level_a), 1e-9, unit="dB", places=4)
 
@@ -1346,7 +1361,10 @@ def _chk_iso5136_eq12() -> Outcome:
     nothing more.
     """
     res = ph.emission.sound_power_in_duct(
-        np.full((3, 1), 80.0), [1000.0], ref.ISO5136_ANNEX_D_DIAMETER, 0.0
+        np.full((3, 1), 80.0),
+        frequencies=[1000.0],
+        duct_diameter_m=ref.ISO5136_ANNEX_D_DIAMETER,
+        flow_velocity=0.0,
     )
     area = math.pi * ref.ISO5136_ANNEX_D_DIAMETER**2 / 4.0
     rho = 101325.0 / (287.05 * 293.15)
@@ -1398,7 +1416,10 @@ def _chk_iso5136_table_c1() -> Outcome:
     worst = 0.0
     for band, cj in zip(ref.ISO5136_BANDS, ref.ISO5136_TABLE_C1, strict=True):
         res = ph.emission.sound_power_in_duct(
-            [80.0], [float(band)], ref.ISO5136_ANNEX_D_DIAMETER, 0.0
+            [80.0],
+            frequencies=[float(band)],
+            duct_diameter_m=ref.ISO5136_ANNEX_D_DIAMETER,
+            flow_velocity=0.0,
         )
         worst = max(
             worst, abs(res.sound_power_level_a - float(res.sound_power_level[0]) - cj)
@@ -1493,7 +1514,7 @@ def _chk_iso8297_note_11() -> Outcome:
     computed: dict[str, float] = {}
     for ratio in ref.ISO8297_NOTE_11_RATIOS:
         res = ph.emission.plant_sound_power(
-            [[70.0]], [1000.0], measurement_area_m2=4.0 * area,
+            [[70.0]], frequencies=[1000.0], measurement_area_m2=4.0 * area,
             contour_length_m=800.0, microphone_height_m=5.0,
             mean_distance_m=ratio * math.sqrt(area), plant_area_m2=area,
         )  # fmt: skip
@@ -1558,7 +1579,7 @@ def _chk_iso8297_point_source() -> Outcome:
     # d = 4 sqrt(Sp) sets the proximity term to 0 and alpha is 0 at 63 Hz, so
     # the area term alone carries the level on the rim to the power.
     res = ph.emission.plant_sound_power(
-        np.full((24, 1), lp), [63.0], measurement_area_m2=area,
+        np.full((24, 1), lp), frequencies=[63.0], measurement_area_m2=area,
         contour_length_m=length, microphone_height_m=height,
         mean_distance_m=40.0, plant_area_m2=100.0,
     )  # fmt: skip

@@ -186,10 +186,16 @@ def _chk_table_b1_defaults() -> Outcome:
     frequencies = np.array(sorted(metrology.IEC61183_TABLE_B1))
     zero = np.zeros(frequencies.size)
     free_field = -metrology.diffuse_field_sensitivity(
-        frequencies, zero, zero, reference_free_field_level=0.0
+        frequencies=frequencies,
+        indicated_level=zero,
+        reference_indicated_level=zero,
+        reference_free_field_level=0.0,
     ).diffuse_field_level
     pressure = metrology.diffuse_field_sensitivity(
-        frequencies, zero, zero, reference_pressure_level=0.0
+        frequencies=frequencies,
+        indicated_level=zero,
+        reference_indicated_level=zero,
+        reference_pressure_level=0.0,
     ).diffuse_field_level
     matching = 0
     for (

@@ -803,14 +803,14 @@ def test_iso_3747_reads_the_octave_bands() -> None:
     rss = np.full((4, 4), 82.0)
     background = np.full(4, 60.0)
     from_object = emission.sound_power_in_situ(
-        st, rss, cal, freqs, background_levels=background, temperature_c=20.0,
+        st, rss, cal, frequencies=freqs, background_levels=background, temperature_c=20.0,
         static_pressure_kpa=90.0,
     )  # fmt: skip
     from_levels = emission.sound_power_in_situ(
         st,
         rss,
         cal.sound_power_level_at(freqs, fraction=1),
-        freqs,
+        frequencies=freqs,
         background_levels=background,
         temperature_c=20.0,
         static_pressure_kpa=90.0,
@@ -827,13 +827,13 @@ def test_iso_3747_energy_reads_the_octave_bands() -> None:
     rss = np.full((4, 4), 82.0)
     background = np.full(4, 60.0)
     from_object = emission.sound_energy_in_situ(
-        events, rss, cal, freqs, background_levels=background
+        events, rss, cal, frequencies=freqs, background_levels=background
     )
     from_levels = emission.sound_energy_in_situ(
         events,
         rss,
         cal.sound_power_level_at(freqs, fraction=1),
-        freqs,
+        frequencies=freqs,
         background_levels=background,
     )
     np.testing.assert_allclose(
@@ -862,7 +862,7 @@ def test_iso_3743_1_reads_the_octave_bands_at_the_test_conditions() -> None:
     rss = np.full((6, 3), 70.0)
     background = np.full(3, 40.0)  # margins above 15 dB: K1 = K1(RSS) = 0
     got = emission.sound_power_hard_walled(
-        st, rss, cal, freqs, background_levels=background, temperature_c=20.0,
+        st, rss, cal, frequencies=freqs, background_levels=background, temperature_c=20.0,
         static_pressure_kpa=90.0,
     )  # fmt: skip
     c2_rss = _c2_at_20_degc_and_90_kpa(7.5)
@@ -879,7 +879,7 @@ def test_iso_3743_1_reads_the_octave_bands_at_the_test_conditions() -> None:
         freqs, fraction=1, temperature_c=20.0, static_pressure_kpa=90.0
     )
     from_levels = emission.sound_power_hard_walled(
-        st, rss, at_test, freqs, background_levels=background, temperature_c=20.0,
+        st, rss, at_test, frequencies=freqs, background_levels=background, temperature_c=20.0,
         static_pressure_kpa=90.0,
     )  # fmt: skip
     np.testing.assert_allclose(
@@ -894,14 +894,14 @@ def test_iso_3743_1_energy_reads_the_calibration() -> None:
     rss = np.full((6, 3), 72.0)
     background = np.full(3, 40.0)
     from_object = emission.sound_energy_hard_walled(
-        events, rss, cal, freqs, n_events=5, background_levels=background,
+        events, rss, cal, frequencies=freqs, n_events=5, background_levels=background,
         integration_time=10.0, temperature_c=20.0, static_pressure_kpa=90.0,
     )  # fmt: skip
     at_test = cal.sound_power_level_at(
         freqs, fraction=1, temperature_c=20.0, static_pressure_kpa=90.0
     )
     from_levels = emission.sound_energy_hard_walled(
-        events, rss, at_test, freqs, n_events=5, background_levels=background,
+        events, rss, at_test, frequencies=freqs, n_events=5, background_levels=background,
         integration_time=10.0, temperature_c=20.0, static_pressure_kpa=90.0,
     )  # fmt: skip
     np.testing.assert_allclose(
@@ -920,7 +920,7 @@ def test_iso_3743_2_comparison_reads_the_calibration() -> None:
     rss = np.full((6, 4), 71.0)
     background = np.full(4, 50.0)  # margins above 10 dB: no Table 4 correction
     got = emission.sound_power_special_room_comparison(
-        st, rss, cal, freqs, background_levels=background, temperature_c=20.0,
+        st, rss, cal, frequencies=freqs, background_levels=background, temperature_c=20.0,
         static_pressure_kpa=90.0,
     )  # fmt: skip
     octave = (
@@ -956,7 +956,11 @@ def test_iso_3743_2_suitability_reads_the_calibration_at_the_test() -> None:
     )
     measured = octave - _TABLE_1_DB  # every band on its Table 1 limit, low
     check = emission.check_special_room_suitability(
-        measured, cal, _SUITABILITY_FREQS, temperature_c=20.0, static_pressure_kpa=90.0
+        measured,
+        cal,
+        frequencies=_SUITABILITY_FREQS,
+        temperature_c=20.0,
+        static_pressure_kpa=90.0,
     )
     np.testing.assert_allclose(check.calibrated_power_level, octave, rtol=0, atol=1e-12)
     np.testing.assert_allclose(check.measured_power_level, measured, rtol=0, atol=0)
@@ -984,7 +988,7 @@ def test_iso_3743_2_suitability_sums_unequal_thirds_at_the_test() -> None:
     check = emission.check_special_room_suitability(
         octave + 1.0,
         cal,
-        _SUITABILITY_FREQS,
+        frequencies=_SUITABILITY_FREQS,
         temperature_c=20.0,
         static_pressure_kpa=90.0,
     )
@@ -1005,7 +1009,7 @@ def test_iso_3743_2_suitability_fails_against_the_calibration_left_at_23_degc() 
         static_pressure_kpa=90.0,
     )
     check = emission.check_special_room_suitability(
-        at_test - _TABLE_1_DB, cal, _SUITABILITY_FREQS
+        at_test - _TABLE_1_DB, cal, frequencies=_SUITABILITY_FREQS
     )
     shift = _c2_at_20_degc_and_90_kpa(7.5) - 7.5 * math.log10(296.15 / 296.0)
     np.testing.assert_allclose(
@@ -1028,17 +1032,21 @@ def test_iso_3743_2_suitability_from_the_levels_read_at_the_test() -> None:
     )
     measured = at_test + np.array([1.0, -0.5, 0.2, 0.0, 0.4, -1.1, 2.0])
     from_object = emission.check_special_room_suitability(
-        measured, cal, _SUITABILITY_FREQS, temperature_c=20.0, static_pressure_kpa=90.0
+        measured,
+        cal,
+        frequencies=_SUITABILITY_FREQS,
+        temperature_c=20.0,
+        static_pressure_kpa=90.0,
     )
     from_levels = emission.check_special_room_suitability(
         measured,
         at_test,
-        _SUITABILITY_FREQS,
+        frequencies=_SUITABILITY_FREQS,
         temperature_c=20.0,
         static_pressure_kpa=90.0,
     )
     at_default = emission.check_special_room_suitability(
-        measured, at_test, _SUITABILITY_FREQS
+        measured, at_test, frequencies=_SUITABILITY_FREQS
     )
     for other in (from_levels, at_default):
         np.testing.assert_array_equal(
@@ -1057,10 +1065,12 @@ def test_iso_3743_2_suitability_refuses_a_calibration_it_cannot_read() -> None:
     manufacturers = _calibration(c2=0.3)
     measured = np.full(_SUITABILITY_FREQS.size, 92.0)
     with pytest.raises(ValueError, match="does not cover the 100 Hz"):
-        emission.check_special_room_suitability(measured, above_200, _SUITABILITY_FREQS)
+        emission.check_special_room_suitability(
+            measured, above_200, frequencies=_SUITABILITY_FREQS
+        )
     with pytest.raises(ValueError, match="manufacturer"):
         emission.check_special_room_suitability(
-            measured, manufacturers, _SUITABILITY_FREQS
+            measured, manufacturers, frequencies=_SUITABILITY_FREQS
         )
 
 
@@ -1075,11 +1085,19 @@ def test_iso_3743_refuses_a_calibration_it_cannot_read() -> None:
     manufacturers = _calibration(c2=0.3)
     with pytest.raises(ValueError, match="does not cover the 50 Hz"):
         emission.sound_power_hard_walled(
-            st, rss, calibration, [63.0, 125.0], background_levels=background
+            st,
+            rss,
+            calibration,
+            frequencies=[63.0, 125.0],
+            background_levels=background,
         )
     with pytest.raises(ValueError, match="manufacturer"):
         emission.sound_power_special_room_comparison(
-            st, rss, manufacturers, [125.0, 250.0], background_levels=background
+            st,
+            rss,
+            manufacturers,
+            frequencies=[125.0, 250.0],
+            background_levels=background,
         )
 
 

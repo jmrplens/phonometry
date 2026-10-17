@@ -197,8 +197,8 @@ def _draw_plate_holes(
 
 def plot_absorber_stack(
     layers: Sequence[Layer] | Layer,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
@@ -344,8 +344,8 @@ def _draw_resonator(
 
 def plot_helmholtz_resonator_geometry(
     resonator: HelmholtzResonator,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
@@ -401,8 +401,8 @@ def plot_helmholtz_resonator_geometry(
 
 def plot_slit_absorber_geometry(
     resonators: Sequence[HelmholtzResonator] | HelmholtzResonator,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     slit_height_m: float,
     lattice_step_m: float,
     period_m: float,
@@ -505,8 +505,8 @@ def plot_slit_absorber_geometry(
 def plot_qrd_geometry(
     depths: ArrayLike,
     well_width: float,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     n_repetitions: int = 1,
     fin_width: float | None = None,
     language: str = "en",
@@ -734,8 +734,8 @@ def _nominal_bore(diameter_m: float | None, fallback: float) -> float:
 
 
 def plot_impedance_tube_geometry(
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     spacing_m: float,
     x1: float,
     diameter_m: float | None = None,
@@ -849,8 +849,8 @@ def plot_impedance_tube_geometry(
 
 
 def plot_transmission_tube_geometry(
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     l1: float,
     s1: float,
     l2: float,
@@ -1090,8 +1090,8 @@ def _draw_metadiffuser_well(
 
 def plot_metadiffuser_panel_geometry(
     wells: Sequence[Any],
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     depth_m: float,
     period_m: float,
     language: str = "en",
@@ -1327,8 +1327,8 @@ def plot_transfer_matrix_geometry(
 # In-situ absorption set-up (source over the road, microphone below).
 # ---------------------------------------------------------------------------
 def plot_in_situ_geometry(
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     source_height_m: float = 1.25,
     microphone_height_m: float = 0.25,
     sampled_radius: float | None = 1.34,
@@ -1472,8 +1472,8 @@ def plot_in_situ_result_geometry(
 # Dynamic stiffness rig (resonance method).
 # ---------------------------------------------------------------------------
 def plot_dynamic_stiffness_rig(
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     specimen_side: float = 0.2,
     specimen_thickness_m: float = 0.02,
     load_mass: float = 8.0,
@@ -1566,8 +1566,8 @@ _RECEIVER_ARC_HALF_SPAN_DEG = 90.0
 
 
 def plot_goniometer_geometry(
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     source_distance: float = 10.0,
     receiver_radius: float = 5.0,
     angular_step: float = 5.0,

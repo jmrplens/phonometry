@@ -255,7 +255,9 @@ def test_doubling_the_loss_factor_adds_three_decibels() -> None:
 
 def test_reference_correction_on_a_subset_of_bands() -> None:
     """At 500 Hz and 1 kHz the pane sits on LIc,ref, so only the loss factor moves it."""
-    res = building.rainfall_reference_correction([47.0, 44.0], [0.5, 0.2], [500, 1000])
+    res = building.rainfall_reference_correction(
+        [47.0, 44.0], [0.5, 0.2], frequencies=[500, 1000]
+    )
     eta = 2.2 / (np.array([500.0, 1000.0]) * np.array([0.5, 0.2]))
     eta_ref = 10.0 ** (np.array([-14.0, -16.0]) / 10.0)
     np.testing.assert_allclose(res.correction, 10.0 * np.log10(eta / eta_ref))
@@ -265,14 +267,14 @@ def test_correction_missing_a_measured_band_names_it() -> None:
     """A correction over five bands cannot normalize the sixth, which is a band."""
     t_s = 2.2 / (_I1_BANDS * _I1_ETA_REF)
     partial = building.rainfall_reference_correction(
-        _I1_LEVEL[:5], t_s[:5], _I1_BANDS[:5]
+        _I1_LEVEL[:5], t_s[:5], frequencies=_I1_BANDS[:5]
     )
     levels = np.full(18, 60.0)
     with pytest.raises(ValueError, match=r"carries no value at 315 Hz; compute it"):
         building.rainfall_sound(
             levels,
             np.ones(18),
-            _I1_BANDS,
+            frequencies=_I1_BANDS,
             volume=1.0,
             excited_area_m2=1.0,
             reference_correction=partial,
@@ -280,7 +282,7 @@ def test_correction_missing_a_measured_band_names_it() -> None:
     with pytest.raises(ValueError, match=r"carries no value at 315 Hz; compute it"):
         building.rainfall_sound_from_intensity(
             levels,
-            _I1_BANDS,
+            frequencies=_I1_BANDS,
             measuring_area_m2=1.0,
             excited_area_m2=1.0,
             reference_correction=partial,
@@ -289,12 +291,12 @@ def test_correction_missing_a_measured_band_names_it() -> None:
 
 def test_correction_at_a_band_outside_table_i1_says_why() -> None:
     t_s = 2.2 / (_I1_BANDS * _I1_ETA_REF)
-    full = building.rainfall_reference_correction(_I1_LEVEL, t_s, _I1_BANDS)
+    full = building.rainfall_reference_correction(_I1_LEVEL, t_s, frequencies=_I1_BANDS)
     with pytest.raises(ValueError, match=r"no value at 80 Hz, and Table I\.1 has none"):
         building.rainfall_sound(
             np.full(19, 60.0),
             np.ones(19),
-            np.r_[80.0, _I1_BANDS],
+            frequencies=np.r_[80.0, _I1_BANDS],
             volume=1.0,
             excited_area_m2=1.0,
             reference_correction=full,
@@ -305,7 +307,7 @@ def test_band_outside_table_i1_is_refused() -> None:
     level = [47.0]
     t_s = [0.5]
     with pytest.raises(ValueError, match=r"Table I\.1"):
-        building.rainfall_reference_correction(level, t_s, [63.0])
+        building.rainfall_reference_correction(level, t_s, frequencies=[63.0])
 
 
 # --- The level ---------------------------------------------------------------
@@ -313,7 +315,11 @@ def test_band_outside_table_i1_is_refused() -> None:
 
 def test_formula_k1_in_a_unit_room() -> None:
     res = building.rainfall_sound(
-        np.full(18, 60.0), np.ones(18), _BANDS, volume=1.0, excited_area_m2=1.0
+        np.full(18, 60.0),
+        np.ones(18),
+        frequencies=_BANDS,
+        volume=1.0,
+        excited_area_m2=1.0,
     )
     np.testing.assert_allclose(res.l_i, 46.0)
     assert res.method == "pressure"
@@ -324,7 +330,7 @@ def test_formula_k1_terms() -> None:
     res = building.rainfall_sound(
         np.full(18, 60.0),
         np.full(18, 2.0),
-        _BANDS,
+        frequencies=_BANDS,
         volume=100.0,
         excited_area_m2=4.0,
     )
@@ -333,17 +339,29 @@ def test_formula_k1_terms() -> None:
 
 def test_three_generator_positions_add_energetically() -> None:
     one = building.rainfall_sound(
-        np.full(18, 60.0), np.ones(18), _BANDS, volume=1.0, excited_area_m2=1.0
+        np.full(18, 60.0),
+        np.ones(18),
+        frequencies=_BANDS,
+        volume=1.0,
+        excited_area_m2=1.0,
     )
     three = building.rainfall_sound(
-        np.full((3, 18), 60.0), np.ones(18), _BANDS, volume=1.0, excited_area_m2=1.0
+        np.full((3, 18), 60.0),
+        np.ones(18),
+        frequencies=_BANDS,
+        volume=1.0,
+        excited_area_m2=1.0,
     )
     np.testing.assert_allclose(three.l_i - one.l_i, 10.0 * np.log10(3.0))
 
 
 def test_formula_k2_weights_each_band() -> None:
     res = building.rainfall_sound(
-        np.full(18, 60.0), np.ones(18), _BANDS, volume=1.0, excited_area_m2=1.0
+        np.full(18, 60.0),
+        np.ones(18),
+        frequencies=_BANDS,
+        volume=1.0,
+        excited_area_m2=1.0,
     )
     weights = np.fromiter(building.RAINFALL_A_WEIGHTING.values(), float)
     expected = 10.0 * np.log10(np.sum(10.0 ** ((46.0 + weights) / 10.0)))
@@ -352,14 +370,18 @@ def test_formula_k2_weights_each_band() -> None:
 
 def test_no_a_weighted_level_without_the_18_bands() -> None:
     res = building.rainfall_sound(
-        [60.0], [1.0], [1000.0], volume=1.0, excited_area_m2=1.0
+        [60.0], [1.0], frequencies=[1000.0], volume=1.0, excited_area_m2=1.0
     )
     assert res.l_ia is None
 
 
 def test_formula_k3_sums_three_bands() -> None:
     res = building.rainfall_sound(
-        np.full(18, 60.0), np.ones(18), _BANDS, volume=1.0, excited_area_m2=1.0
+        np.full(18, 60.0),
+        np.ones(18),
+        frequencies=_BANDS,
+        volume=1.0,
+        excited_area_m2=1.0,
     )
     octaves = res.octave_bands()
     assert octaves.quantity == "LI"
@@ -372,7 +394,7 @@ def test_background_is_removed_before_the_sum() -> None:
     res = building.rainfall_sound(
         np.full(18, 60.0),
         np.ones(18),
-        _BANDS,
+        frequencies=_BANDS,
         volume=1.0,
         excited_area_m2=1.0,
         background_db=background,
@@ -388,7 +410,7 @@ def test_normalization_formula_k5() -> None:
     res = building.rainfall_sound(
         np.full(18, 60.0),
         np.ones(18),
-        _BANDS,
+        frequencies=_BANDS,
         volume=1.0,
         excited_area_m2=1.0,
         reference_correction=correction,
@@ -398,7 +420,7 @@ def test_normalization_formula_k5() -> None:
     as_array = building.rainfall_sound(
         np.full(18, 60.0),
         np.ones(18),
-        _BANDS,
+        frequencies=_BANDS,
         volume=1.0,
         excited_area_m2=1.0,
         reference_correction=correction.correction,
@@ -411,7 +433,11 @@ def test_normalization_formula_k5() -> None:
 
 def test_octaves_of_levels_never_normalized_are_refused() -> None:
     res = building.rainfall_sound(
-        np.full(18, 60.0), np.ones(18), _BANDS, volume=1.0, excited_area_m2=1.0
+        np.full(18, 60.0),
+        np.ones(18),
+        frequencies=_BANDS,
+        volume=1.0,
+        excited_area_m2=1.0,
     )
     with pytest.raises(ValueError, match=r"LInorm"):
         res.octave_bands(normalized=True)
@@ -419,14 +445,21 @@ def test_octaves_of_levels_never_normalized_are_refused() -> None:
 
 def test_sound_power_of_the_whole_specimen() -> None:
     res = building.rainfall_sound(
-        np.full(18, 60.0), np.ones(18), _BANDS, volume=1.0, excited_area_m2=1.0
+        np.full(18, 60.0),
+        np.ones(18),
+        frequencies=_BANDS,
+        volume=1.0,
+        excited_area_m2=1.0,
     )
     np.testing.assert_allclose(res.sound_power_levels(10.0), 56.0)
 
 
 def test_formula_k4_direct_intensity() -> None:
     res = building.rainfall_sound_from_intensity(
-        np.full(18, 50.0), _BANDS, measuring_area_m2=4.0, excited_area_m2=1.0
+        np.full(18, 50.0),
+        frequencies=_BANDS,
+        measuring_area_m2=4.0,
+        excited_area_m2=1.0,
     )
     np.testing.assert_allclose(res.l_i, 50.0 + 10.0 * np.log10(4.0))
     assert res.method == "intensity"
@@ -436,7 +469,9 @@ def test_rainfall_sound_refuses_mismatched_bands() -> None:
     levels = np.full(18, 60.0)
     times = np.ones(17)
     with pytest.raises(ValueError, match=r"rainfall_sound"):
-        building.rainfall_sound(levels, times, _BANDS, volume=1.0, excited_area_m2=1.0)
+        building.rainfall_sound(
+            levels, times, frequencies=_BANDS, volume=1.0, excited_area_m2=1.0
+        )
 
 
 def test_result_refuses_an_unknown_method() -> None:
@@ -460,7 +495,7 @@ def test_every_rain_result_plots(language: str) -> None:
     sound = building.rainfall_sound(
         np.full(18, 62.0),
         np.ones(18),
-        _BANDS,
+        frequencies=_BANDS,
         volume=90.0,
         excited_area_m2=1.875,
         reference_correction=correction,
@@ -488,7 +523,7 @@ def test_rain_figure_draws_the_measured_and_normalized_levels() -> None:
     sound = building.rainfall_sound(
         np.linspace(50.0, 60.0, 18),
         np.ones(18),
-        _BANDS,
+        frequencies=_BANDS,
         volume=90.0,
         excited_area_m2=1.875,
         reference_correction=correction,

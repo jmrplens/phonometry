@@ -175,18 +175,20 @@ class TestHearingLevel:
         )
 
     def test_a_loss_is_a_decibel_for_a_decibel(self) -> None:
-        got = h.hearing_level_to_coupler_spl([40.0], "TDH 39", [4000.0])
+        got = h.hearing_level_to_coupler_spl([40.0], "TDH 39", frequencies=[4000.0])
         assert got[0] == pytest.approx(9.5 + 40.0)
 
     def test_an_audiogram_of_its_own_frequencies(self) -> None:
         freqs = [500.0, 1000.0, 2000.0, 4000.0]
         audiogram = [10.0, 15.0, 30.0, 55.0]
-        got = h.hearing_level_to_coupler_spl(audiogram, "DT 48", freqs)
+        got = h.hearing_level_to_coupler_spl(audiogram, "DT 48", frequencies=freqs)
         np.testing.assert_allclose(got, [24.5, 23.0, 38.0, 60.5])
 
     def test_a_mismatched_audiogram_is_refused(self) -> None:
         with pytest.raises(ValueError, match="covers 2 frequency"):
-            h.hearing_level_to_coupler_spl([10.0], "TDH 39", [500.0, 1000.0])
+            h.hearing_level_to_coupler_spl(
+                [10.0], "TDH 39", frequencies=[500.0, 1000.0]
+            )
 
 
 class TestRefusals:

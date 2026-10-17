@@ -105,8 +105,9 @@ Amendment 2 replaces 12.1, the three coils that make a uniform magnetic field.
 
 ```python
 check_program_signal(
-    frequencies: ArrayLike,
     band_levels: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> ProgramSignalCheck
 ```
 

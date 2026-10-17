@@ -736,12 +736,12 @@ class TerrainScreeningResult(OwnsArrays):
 
 
 def terrain_screening_adjustment(
-    frequencies: NDArray[np.float64] | list[float],
     source: tuple[float, float],
     receiver: tuple[float, float],
     distances_m: NDArray[np.float64] | list[float],
     heights_m: NDArray[np.float64] | list[float],
     *,
+    frequencies: NDArray[np.float64] | list[float],
     flow_resistivity: float | str | NDArray[np.float64] | list[float] = "G",
 ) -> TerrainScreeningResult:
     r"""Ground effect and terrain screening over a vertical section (§A.4.4-A.4.5).

@@ -47,7 +47,13 @@ _BANDS = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
 def test_hard_ground_reflection_coefficient_is_unity() -> None:
     # |Z| -> inf: Rp -> 1 so (1 - Rp) -> 0 and Q -> 1 regardless of the boundary
     # loss F (the ground wave vanishes) (Attenborough Eq. 2.40c).
-    q = environment.spherical_reflection_coefficient(_BANDS, 1e12, 1.0, 1.5, 50.0)
+    q = environment.spherical_reflection_coefficient(
+        frequencies=_BANDS,
+        normalized_impedance=1e12,
+        source_height_m=1.0,
+        receiver_height_m=1.5,
+        distance=50.0,
+    )
     assert np.allclose(np.abs(q), 1.0, atol=1e-6)
 
 
@@ -111,7 +117,11 @@ def test_grazing_incidence_plane_coefficient_tends_to_minus_one() -> None:
     # hs, hr -> 0 => cos(theta) -> 0 => Rp -> -1 (Salomons Eq. (D.59)).
     # Im(Z) > 0: a passive ground in the e^{-i omega t} convention.
     q = environment.spherical_reflection_coefficient(
-        _BANDS, 12.0 + 6.0j, 1e-4, 1e-4, 100.0
+        frequencies=_BANDS,
+        normalized_impedance=12.0 + 6.0j,
+        source_height_m=1e-4,
+        receiver_height_m=1e-4,
+        distance=100.0,
     )
     res = environment.ground_effect(_BANDS, 1e-4, 1e-4, 100.0, impedance=12.0 + 6.0j)
     assert np.all(np.real(res.plane_reflection_coefficient) < -0.9)
@@ -214,7 +224,13 @@ def test_ground_effect_rejects_non_finite_impedance() -> None:
         environment.ground_effect(_BANDS, 1.0, 1.0, 20.0, impedance=np.inf)
     inf_z = complex(np.inf, 0.0)
     with pytest.raises(ValueError, match=r"'impedance' must be finite"):
-        environment.spherical_reflection_coefficient(_BANDS, inf_z, 1.0, 1.5, 50.0)
+        environment.spherical_reflection_coefficient(
+            frequencies=_BANDS,
+            normalized_impedance=inf_z,
+            source_height_m=1.0,
+            receiver_height_m=1.5,
+            distance=50.0,
+        )
     with pytest.raises(ValueError, match=r"'impedance' must be non-zero"):
         environment.ground_effect(_BANDS, 1.0, 1.0, 20.0, impedance=0.0)
 
@@ -228,7 +244,11 @@ def test_impedance_is_a_scalar_or_one_value_per_frequency() -> None:
         environment.ground_effect(_BANDS, 1.0, 1.0, 20.0, impedance=_BANDS[:3] * 1j)
     with pytest.raises(ValueError, match=r"'impedance' must be a scalar or match"):
         environment.spherical_reflection_coefficient(
-            _BANDS, _BANDS[:3] * 1j, 1.0, 1.5, 50.0
+            frequencies=_BANDS,
+            normalized_impedance=_BANDS[:3] * 1j,
+            source_height_m=1.0,
+            receiver_height_m=1.5,
+            distance=50.0,
         )
 
 

@@ -68,7 +68,9 @@ def test_table_e1_curves_reproduce_every_printed_term(
     """ISO 717-1:2020 Table E.1: Rw and all eight adaptation terms, both forms."""
     printed = ref.ISO717_1_TABLE_E1_PRINTED[element]
     curve = _curve(building.LINING_REFERENCE_ELEMENTS[element], _TABLE_E1)
-    rated = building.weighted_rating_extended(curve, _TABLE_E1, one_decimal=one_decimal)
+    rated = building.weighted_rating_extended(
+        curve, frequencies=_TABLE_E1, one_decimal=one_decimal
+    )
     column = 1 if one_decimal else 0
     for term, values in printed.items():
         assert getattr(rated, term) == pytest.approx(values[column], abs=1e-9), term
@@ -168,7 +170,7 @@ def test_sloped_improvement_is_rated_on_each_floor(floor: str) -> None:
     )
     bare = np.full(16, 80.0)
     res = building.laboratory_floor_covering_improvement(
-        bare, bare - dl, _CORE, reference_floor=floor
+        bare, bare - dl, frequencies=_CORE, reference_floor=floor
     )
     assert (res.delta_lw, res.ci_delta) == (delta_lw, ci_delta)
     assert res.reference_rating is not None
@@ -231,7 +233,7 @@ def test_unknown_reference_floor_is_refused() -> None:
 @pytest.mark.parametrize("element", sorted(building.LINING_REFERENCE_ELEMENTS))
 def test_flat_lining_improvement_shifts_every_term(element: str) -> None:
     rating = building.weighted_reduction_improvement(
-        np.full(21, 10.0), _TABLE_E1, basic_element=element
+        np.full(21, 10.0), frequencies=_TABLE_E1, basic_element=element
     )
     terms = (
         rating.delta_rw,
@@ -251,7 +253,10 @@ def test_flat_lining_improvement_shifts_every_term(element: str) -> None:
 def test_flat_lining_improvement_to_one_decimal_is_exact(element: str) -> None:
     """Both curves rated with the 0,1 dB shift: every term of a flat 10 dB is 10,0."""
     rating = building.weighted_reduction_improvement(
-        np.full(21, 10.0), _TABLE_E1, basic_element=element, one_decimal=True
+        np.full(21, 10.0),
+        frequencies=_TABLE_E1,
+        basic_element=element,
+        one_decimal=True,
     )
     terms = (
         rating.delta_rw,
@@ -271,7 +276,7 @@ def test_flat_lining_improvement_to_one_decimal_is_exact(element: str) -> None:
 def test_sloped_lining_is_rated_on_each_element(element: str) -> None:
     """ISO 717-1 Annex D on a sloped ΔR over 21 bands, rated independently."""
     rating = building.weighted_reduction_improvement(
-        ref.ISO717_1_SLOPED_DELTA_R, _TABLE_E1, basic_element=element
+        ref.ISO717_1_SLOPED_DELTA_R, frequencies=_TABLE_E1, basic_element=element
     )
     terms = (
         rating.delta_rw,
@@ -309,7 +314,7 @@ def test_dipped_lining_tells_every_term_apart(element: str) -> None:
     gives a number the independent rater did not.
     """
     rating = building.weighted_reduction_improvement(
-        ref.ISO717_1_DIPPED_DELTA_R, _TABLE_E1, basic_element=element
+        ref.ISO717_1_DIPPED_DELTA_R, frequencies=_TABLE_E1, basic_element=element
     )
     terms = tuple(getattr(rating, name) for name in _NINE_TERMS)
     assert terms == ref.ISO717_1_DIPPED_EXPECTED[element]
@@ -333,7 +338,7 @@ def test_sloped_lining_direct_differences_formula_d2() -> None:
     without = np.asarray(ref.ISO717_1_MEASURED_WALL_R)
     with_ = without + np.asarray(ref.ISO717_1_SLOPED_DELTA_R)
     res = building.laboratory_lining_improvement(
-        without, with_, _TABLE_E1, basic_element=None
+        without, with_, frequencies=_TABLE_E1, basic_element=None
     )
     direct = (
         res.delta_rw_direct,
@@ -366,14 +371,14 @@ def test_lining_rating_refuses_bands_outside_table_e1() -> None:
     freqs = [*_CORE, 6300.0]
     delta = np.zeros(17)
     with pytest.raises(ValueError, match=r"Table E\.1"):
-        building.weighted_reduction_improvement(delta, freqs)
+        building.weighted_reduction_improvement(delta, frequencies=freqs)
 
 
 def test_lining_rating_refuses_a_band_given_twice() -> None:
     freqs = [*_CORE, 3150.0]
     delta = np.zeros(17)
     with pytest.raises(ValueError, match=r"each given once"):
-        building.weighted_reduction_improvement(delta, freqs)
+        building.weighted_reduction_improvement(delta, frequencies=freqs)
 
 
 def test_lining_rating_refuses_an_unknown_element() -> None:
@@ -389,7 +394,7 @@ def test_laboratory_lining_improvement_on_the_heavy_wall() -> None:
     freqs = [*_CORE, 4000.0, 5000.0]
     without = np.linspace(40.0, 65.0, 18)
     with_ = without + 10.0
-    res = building.laboratory_lining_improvement(without, with_, freqs)
+    res = building.laboratory_lining_improvement(without, with_, frequencies=freqs)
     np.testing.assert_allclose(res.delta_r, 10.0)
     assert res.rating is not None
     assert (res.rating.delta_rw, res.rating.delta_rw_c, res.rating.delta_rw_ctr) == (
@@ -410,21 +415,23 @@ def test_laboratory_lining_improvement_on_the_heavy_wall() -> None:
 
 def test_other_basic_element_keeps_only_the_direct_difference() -> None:
     res = building.laboratory_lining_improvement(
-        np.full(16, 40.0), np.full(16, 45.0), _CORE, basic_element=None
+        np.full(16, 40.0), np.full(16, 45.0), frequencies=_CORE, basic_element=None
     )
     assert res.rating is None
     assert res.delta_rw_direct == 5
 
 
 def test_lining_spectrum_without_rating_bands_has_no_rating() -> None:
-    res = building.laboratory_lining_improvement([40, 41], [45, 47], [500, 630])
+    res = building.laboratory_lining_improvement(
+        [40, 41], [45, 47], frequencies=[500, 630]
+    )
     assert (res.rating, res.delta_rw_direct) == (None, None)
 
 
 def test_octave_formula_d1_averages_energy_not_decibels() -> None:
     """(D.1): -10 lg((10^-0 + 10^-1 + 10^-2)/3) for 0, 10 and 20 dB."""
     res = building.laboratory_lining_improvement(
-        [40.0, 40.0, 40.0], [40.0, 50.0, 60.0], [100.0, 125.0, 160.0]
+        [40.0, 40.0, 40.0], [40.0, 50.0, 60.0], frequencies=[100.0, 125.0, 160.0]
     )
     octaves = res.octave_bands().values
     expected = -10.0 * np.log10((1.0 + 0.1 + 0.01) / 3.0)
@@ -453,7 +460,7 @@ def test_laboratory_lining_improvement_refuses_mismatched_inputs() -> None:
     three = [40.0, 41.0, 42.0]
     with pytest.raises(ValueError, match=r"laboratory_lining_improvement"):
         building.laboratory_lining_improvement(
-            three, [45.0, 46.0], [100.0, 125.0, 160.0]
+            three, [45.0, 46.0], frequencies=[100.0, 125.0, 160.0]
         )
 
 
@@ -527,7 +534,9 @@ def test_annex_c2_example_through_the_annex_h_front_end() -> None:
     """
     dl = np.asarray(ref.ISO717_2_ANNEX_C2_DELTA_L)
     bare = np.full(16, 75.0)
-    res = building.laboratory_floor_covering_improvement(bare, bare - dl, _CORE)
+    res = building.laboratory_floor_covering_improvement(
+        bare, bare - dl, frequencies=_CORE
+    )
     assert (res.delta_lw, res.ci_delta) == (
         ref.ISO717_2_ANNEX_C2_DELTA_LW,
         ref.ISO717_2_ANNEX_C2_CI_DELTA,
@@ -558,7 +567,7 @@ def test_lightweight_floors_are_rated_on_their_own_curve(
     bare = np.full(18, 70.0)
     freqs = [*_CORE, 4000.0, 5000.0]
     res = building.laboratory_floor_covering_improvement(
-        bare, bare - dl, freqs, reference_floor=floor
+        bare, bare - dl, frequencies=freqs, reference_floor=floor
     )
     assert res.designation == designation
     assert res.delta_lw == building.weighted_impact_improvement(
@@ -571,7 +580,7 @@ def test_lightweight_floors_are_rated_on_their_own_curve(
 
 def test_octave_formula_h2() -> None:
     res = building.laboratory_floor_covering_improvement(
-        [70.0, 70.0, 70.0], [70.0, 60.0, 50.0], [800.0, 1000.0, 1250.0]
+        [70.0, 70.0, 70.0], [70.0, 60.0, 50.0], frequencies=[800.0, 1000.0, 1250.0]
     )
     octaves = res.octave_bands()
     assert octaves.quantity == "ΔL"
@@ -601,7 +610,9 @@ def test_floor_covering_result_refuses_an_unknown_floor() -> None:
 
 def test_heavy_impact_improvement_is_formula_h3() -> None:
     res = building.heavy_impact_improvement(
-        [80.0, 75.0, 70.0, 65.0], [78.0, 70.0, 62.0, 55.0], [63, 125, 250, 500]
+        [80.0, 75.0, 70.0, 65.0],
+        [78.0, 70.0, 62.0, 55.0],
+        frequencies=[63, 125, 250, 500],
     )
     np.testing.assert_allclose(res.improvement, [2.0, 5.0, 8.0, 10.0])
 
@@ -609,7 +620,7 @@ def test_heavy_impact_improvement_is_formula_h3() -> None:
 def test_heavy_impact_improvement_refuses_mismatched_inputs() -> None:
     two = [80.0, 75.0]
     with pytest.raises(ValueError, match=r"heavy_impact_improvement"):
-        building.heavy_impact_improvement(two, [78.0], [63, 125])
+        building.heavy_impact_improvement(two, [78.0], frequencies=[63, 125])
 
 
 # --- Figures -----------------------------------------------------------------
@@ -622,12 +633,18 @@ def test_every_result_plots(language: str) -> None:
 
     freqs = [*_CORE, 4000.0, 5000.0]
     lining = building.laboratory_lining_improvement(
-        np.linspace(40.0, 65.0, 18), np.linspace(40.0, 65.0, 18) + 8.0, freqs
+        np.linspace(40.0, 65.0, 18),
+        np.linspace(40.0, 65.0, 18) + 8.0,
+        frequencies=freqs,
     )
     covering = building.laboratory_floor_covering_improvement(
-        np.full(18, 70.0), np.full(18, 70.0) - np.linspace(2.0, 30.0, 18), freqs
+        np.full(18, 70.0),
+        np.full(18, 70.0) - np.linspace(2.0, 30.0, 18),
+        frequencies=freqs,
     )
-    heavy = building.heavy_impact_improvement([80.0, 75.0], [78.0, 70.0], [63, 125])
+    heavy = building.heavy_impact_improvement(
+        [80.0, 75.0], [78.0, 70.0], frequencies=[63, 125]
+    )
     assert lining.rating is not None
     for result in (
         lining,
@@ -655,7 +672,7 @@ def test_covering_figure_draws_the_improvement_and_names_its_terms() -> None:
     dl = np.asarray(ref.ISO717_2_SLOPED_DELTA_L)
     bare = np.full(16, 80.0)
     res = building.laboratory_floor_covering_improvement(
-        bare, bare - dl, _CORE, reference_floor="lightweight_3"
+        bare, bare - dl, frequencies=_CORE, reference_floor="lightweight_3"
     )
     ax = res.plot()
     np.testing.assert_allclose(_line(ax, r"$\Delta L$"), res.improvement)
@@ -663,7 +680,9 @@ def test_covering_figure_draws_the_improvement_and_names_its_terms() -> None:
     assert r"$\Delta L_\mathrm{t,3,w}$ = 11 dB" in title
     assert r"$C_{\mathrm{I}\Delta,\mathrm{t3}}$ = −3 dB" in title
     plt.close(ax.figure)
-    heavy = building.laboratory_floor_covering_improvement(bare, bare - dl, _CORE)
+    heavy = building.laboratory_floor_covering_improvement(
+        bare, bare - dl, frequencies=_CORE
+    )
     ax = heavy.plot()
     assert r"$C_{\mathrm{I},\Delta}$ = −10 dB" in ax.get_title()
     plt.close(ax.figure)
@@ -674,7 +693,9 @@ def test_heavy_impact_figure_draws_formula_h3() -> None:
     import matplotlib.pyplot as plt
 
     res = building.heavy_impact_improvement(
-        [80.0, 75.0, 70.0, 65.0], [78.0, 70.0, 62.0, 55.0], [63, 125, 250, 500]
+        [80.0, 75.0, 70.0, 65.0],
+        [78.0, 70.0, 62.0, 55.0],
+        frequencies=[63, 125, 250, 500],
     )
     ax = res.plot()
     np.testing.assert_allclose(
@@ -688,7 +709,7 @@ def test_lining_rating_figure_draws_both_reference_curves() -> None:
     import matplotlib.pyplot as plt
 
     rating = building.weighted_reduction_improvement(
-        ref.ISO717_1_SLOPED_DELTA_R, _TABLE_E1, basic_element="heavy_wall"
+        ref.ISO717_1_SLOPED_DELTA_R, frequencies=_TABLE_E1, basic_element="heavy_wall"
     )
     ax = rating.plot()
     ydata = sorted((line.get_ydata() for line in ax.get_lines()), key=np.sum)
@@ -704,7 +725,10 @@ def test_lining_figure_names_the_rating_it_drew() -> None:
     import matplotlib.pyplot as plt
 
     res = building.laboratory_lining_improvement(
-        np.full(16, 40.0), np.full(16, 52.0), _CORE, basic_element="lightweight_wall"
+        np.full(16, 40.0),
+        np.full(16, 52.0),
+        frequencies=_CORE,
+        basic_element="lightweight_wall",
     )
     ax = res.plot()
     assert r"\Delta R_\mathrm{w,light}$ = 12 dB" in ax.get_title()

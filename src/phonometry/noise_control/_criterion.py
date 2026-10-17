@@ -137,8 +137,8 @@ def rating_of(result: CriterionCarrier) -> NCResult | RCResult:
 
     family = require_choice(result.criterion, "criterion", CRITERION_FAMILIES)
     if family == "NC":
-        return noise_criterion(result.received_level, result.frequencies)
-    return room_criterion(result.received_level, result.frequencies)
+        return noise_criterion(result.received_level, frequencies=result.frequencies)
+    return room_criterion(result.received_level, frequencies=result.frequencies)
 
 
 def curve_of(result: CriterionCarrier) -> np.ndarray | None:

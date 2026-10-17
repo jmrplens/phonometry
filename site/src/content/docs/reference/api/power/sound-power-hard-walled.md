@@ -100,8 +100,8 @@ deviation decides how many source locations the determination needs
 ```python
 check_hard_walled_room(
     orientation_levels: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     volume: float,
     reference_box_m: ArrayLike,
     absorption_coefficients: ArrayLike | None = None,
@@ -148,6 +148,7 @@ that meet it in words, and the coefficients are optional here.
 ```python
 hard_walled_source_locations(
     levels: ArrayLike,
+    *,
     frequencies: ArrayLike,
 ) -> SourceLocationPlan
 ```
@@ -587,8 +588,8 @@ sound_energy_hard_walled(
     event_levels: ArrayLike,
     levels_ref: ArrayLike,
     lw_ref: ArrayLike | ReferenceSourceCalibration,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     n_events: int | None = None,
     background_levels: ArrayLike | None = None,
     integration_time: float | None = None,
@@ -652,8 +653,8 @@ sound_power_hard_walled(
     levels: ArrayLike,
     levels_ref: ArrayLike,
     lw_ref: ArrayLike | ReferenceSourceCalibration,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     background_levels: ArrayLike | None = None,
     background_levels_ref: ArrayLike | None = None,
     temperature_c: float = 23.0,

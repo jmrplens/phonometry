@@ -46,7 +46,7 @@ def _synthetic_tone() -> tuple[np.ndarray, np.ndarray]:
 
 def _result() -> WindTurbineTonalityResult:
     levels, freqs = _synthetic_tone()
-    return wind_turbine_tonality(levels, freqs)
+    return wind_turbine_tonality(levels, frequencies=freqs)
 
 
 def _extract_text(path: str) -> str:
@@ -177,7 +177,7 @@ def test_decision_matches_displayed_audibility_at_boundary(tmp_path: Path) -> No
     levels, freqs = _synthetic_tone()
     peak = int(np.argmax(levels))
     levels[peak] -= _result().tonal_audibility - 0.03
-    result = wind_turbine_tonality(levels, freqs)
+    result = wind_turbine_tonality(levels, frequencies=freqs)
     assert result.tonal_audibility == pytest.approx(0.03, abs=1e-9)
     assert result.is_audible is True  # the raw value is audible
     out = tmp_path / "boundary.pdf"
@@ -199,7 +199,7 @@ def test_no_identified_tone_reports_exclusion(tmp_path: Path) -> None:
     freqs = np.arange(380.0, 620.0 + df, df)
     levels = np.full(freqs.size, 30.0)
     levels[np.abs(freqs - 500.0) <= 20.0] = 33.0
-    result = wind_turbine_tonality(levels, freqs, tone_frequency=500.0)
+    result = wind_turbine_tonality(levels, frequencies=freqs, tone_frequency=500.0)
     out = tmp_path / "notone.pdf"
     result.report(str(out))
     assert_one_page(str(out))

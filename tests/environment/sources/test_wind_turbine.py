@@ -67,7 +67,7 @@ def test_tonal_audibility_synthetic_tone() -> None:
     #   L_a = -2 - lg(1+(500/502)^2.5) = -2.299
     #   ΔL_a = 14.08 - (-2.299) = 16.38 dB
     levels, freqs = _synthetic_tone()
-    res = wind_turbine_tonality(levels, freqs)
+    res = wind_turbine_tonality(levels, frequencies=freqs)
     assert res.tone_frequency == pytest.approx(500.0)
     assert res.critical_bandwidth == pytest.approx(117.256, abs=0.02)
     assert res.tone_level == pytest.approx(60.0, abs=1e-6)
@@ -87,7 +87,7 @@ def test_low_frequency_fixed_critical_band() -> None:
     levels = np.full(freqs.size, 30.0)
     levels[freqs < 20.0] = 58.0  # excluded by the fixed 20-120 band
     levels[int(np.argmin(np.abs(freqs - 40.0)))] = 60.0
-    res = wind_turbine_tonality(levels, freqs, tone_frequency=40.0)
+    res = wind_turbine_tonality(levels, frequencies=freqs, tone_frequency=40.0)
     # Only the 40 Hz tone survives -> single tone line, masking noise = 30 dB.
     assert res.tone_level == pytest.approx(60.0, abs=0.05)
     assert res.masking_level == pytest.approx(
@@ -103,7 +103,7 @@ def test_non_contiguous_tone_lines_counted() -> None:
     levels = np.full(freqs.size, 30.0)
     levels[int(np.argmin(np.abs(freqs - 300.0)))] = 60.0
     levels[int(np.argmin(np.abs(freqs - 260.0)))] = 56.0  # isolated, within 10 dB
-    res = wind_turbine_tonality(levels, freqs)
+    res = wind_turbine_tonality(levels, frequencies=freqs)
     # Both separated tones (no Hanning: neither run has >= 2 adjacent lines).
     expected = 10.0 * np.log10(10.0**6.0 + 10.0**5.6)
     assert res.tone_level == pytest.approx(expected, abs=0.05)
@@ -118,14 +118,14 @@ def test_tonal_audibility_flat_spectrum_not_audible() -> None:
     with pytest.warns(
         WindTurbineNoiseWarning, match=r"does not cover the whole critical band"
     ):
-        res = wind_turbine_tonality(levels, freqs)
+        res = wind_turbine_tonality(levels, frequencies=freqs)
     assert res.is_audible is False
     assert res.has_identified_tone is False
 
 
 def test_tonal_audibility_rejects_short_input() -> None:
     with pytest.raises(ValueError, match=r"'levels' and 'frequencies' must carry"):
-        wind_turbine_tonality([1.0, 2.0], [10.0, 12.0])
+        wind_turbine_tonality([1.0, 2.0], frequencies=[10.0, 12.0])
 
 
 def test_tonal_audibility_rejects_two_dimensional_spectrum() -> None:
@@ -133,7 +133,7 @@ def test_tonal_audibility_rejects_two_dimensional_spectrum() -> None:
     freqs = np.tile(np.arange(100.0, 108.0, 2.0), (2, 1))
     levels = np.full_like(freqs, 30.0)
     with pytest.raises(ValueError, match=r"'levels' and 'frequencies' must be 1-D"):
-        wind_turbine_tonality(levels, freqs)
+        wind_turbine_tonality(levels, frequencies=freqs)
 
 
 def test_tonal_audibility_rejects_mismatched_spectrum() -> None:
@@ -142,13 +142,15 @@ def test_tonal_audibility_rejects_mismatched_spectrum() -> None:
         ValueError,
         match=r"wind_turbine_tonality: 'levels' .*'frequencies' .*same shape",
     ):
-        wind_turbine_tonality([30.0, 31.0, 32.0], [100.0, 102.0, 104.0, 106.0])
+        wind_turbine_tonality(
+            [30.0, 31.0, 32.0], frequencies=[100.0, 102.0, 104.0, 106.0]
+        )
 
 
 def test_tonal_audibility_rejects_non_monotonic_frequencies() -> None:
     # A non-increasing frequency axis is not a valid narrowband spectrum.
     with pytest.raises(ValueError, match=r"'frequencies' must be strictly increasing"):
-        wind_turbine_tonality([30.0, 30.0, 30.0], [100.0, 98.0, 104.0])
+        wind_turbine_tonality([30.0, 30.0, 30.0], frequencies=[100.0, 98.0, 104.0])
 
 
 def test_tonal_audibility_rejects_non_uniform_spacing() -> None:
@@ -156,14 +158,16 @@ def test_tonal_audibility_rejects_non_uniform_spacing() -> None:
     # (2, 2, 2.4 Hz) that a loose 25 % tolerance would accept — but which biases
     # df and the ENBW/masking level — must be rejected by the tight tolerance.
     with pytest.raises(ValueError, match=r"'frequencies' must be uniformly spaced"):
-        wind_turbine_tonality([30.0, 30.0, 30.0, 30.0], [100.0, 102.0, 104.0, 106.4])
+        wind_turbine_tonality(
+            [30.0, 30.0, 30.0, 30.0], frequencies=[100.0, 102.0, 104.0, 106.4]
+        )
 
 
 def test_tonal_audibility_plot_smoke_and_export() -> None:
     import phonometry
 
     levels, freqs = _synthetic_tone()
-    res = phonometry.environment.wind_turbine_tonality(levels, freqs)
+    res = phonometry.environment.wind_turbine_tonality(levels, frequencies=freqs)
     assert res.plot() is not None
     # Caller-supplied plot kwargs must override the defaults, not collide with
     # them (no duplicate-keyword TypeError).
@@ -188,7 +192,7 @@ def test_two_tone_band_anchors_to_highest_tone_line() -> None:
     levels[int(np.argmin(np.abs(freqs - 480.0)))] = 52.0
     levels[int(np.argmin(np.abs(freqs - 500.0)))] = 60.0
     levels[int(np.argmin(np.abs(freqs - 520.0)))] = 49.5
-    res = wind_turbine_tonality(levels, freqs, tone_frequency=480.0)
+    res = wind_turbine_tonality(levels, frequencies=freqs, tone_frequency=480.0)
     assert res.has_identified_tone is True
     assert res.tone_frequency == pytest.approx(500.0)
     assert res.tone_level == pytest.approx(60.639, abs=0.005)
@@ -206,7 +210,7 @@ def test_no_identified_tone_is_flagged() -> None:
     levels = np.full(freqs.size, 30.0)
     bump = np.abs(freqs - 500.0) <= 20.0
     levels[bump] = 33.0
-    res = wind_turbine_tonality(levels, freqs, tone_frequency=500.0)
+    res = wind_turbine_tonality(levels, frequencies=freqs, tone_frequency=500.0)
     assert res.has_identified_tone is False
     assert res.is_audible is False
 
@@ -221,7 +225,9 @@ def test_possible_tone_screen_rejects_non_local_maximum() -> None:
     i = int(np.argmin(np.abs(freqs - 500.0)))
     levels[i] = 60.0
     levels[i - 1] = 45.0  # candidate on the flank of the 500 Hz tone
-    res = wind_turbine_tonality(levels, freqs, tone_frequency=float(freqs[i - 1]))
+    res = wind_turbine_tonality(
+        levels, frequencies=freqs, tone_frequency=float(freqs[i - 1])
+    )
     assert res.has_identified_tone is False
     assert res.is_audible is False
 
@@ -234,7 +240,7 @@ def test_truncated_critical_band_warns() -> None:
     with pytest.warns(
         WindTurbineNoiseWarning, match=r"does not cover the whole critical band"
     ):
-        wind_turbine_tonality(levels, freqs, tone_frequency=500.0)
+        wind_turbine_tonality(levels, frequencies=freqs, tone_frequency=500.0)
 
 
 def test_candidate_below_20hz_rejected() -> None:
@@ -243,7 +249,7 @@ def test_candidate_below_20hz_rejected() -> None:
     levels = np.full(freqs.size, 30.0)
     levels[int(np.argmin(np.abs(freqs - 10.0)))] = 60.0
     with pytest.raises(ValueError, match=r"The candidate tone lies below 20 Hz"):
-        wind_turbine_tonality(levels, freqs, tone_frequency=10.0)
+        wind_turbine_tonality(levels, frequencies=freqs, tone_frequency=10.0)
 
 
 @pytest.mark.parametrize(
@@ -268,7 +274,8 @@ def test_tonality_result_refuses_a_non_finite_metric(field: str) -> None:
     """
     import dataclasses
 
-    res = wind_turbine_tonality(*_synthetic_tone())
+    levels, freqs = _synthetic_tone()
+    res = wind_turbine_tonality(levels, frequencies=freqs)
     with pytest.raises(ValueError, match=rf"'{field}' must be finite"):
         dataclasses.replace(res, **{field: float("nan")})
 
@@ -277,7 +284,8 @@ def test_tonality_result_refuses_an_infinite_metric() -> None:
     """Infinity is refused by the same guard: it overflows the same rounding."""
     import dataclasses
 
-    res = wind_turbine_tonality(*_synthetic_tone())
+    levels, freqs = _synthetic_tone()
+    res = wind_turbine_tonality(levels, frequencies=freqs)
     with pytest.raises(ValueError, match=r"'tonal_audibility' must be finite"):
         dataclasses.replace(res, tonal_audibility=float("inf"))
 

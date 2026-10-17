@@ -118,7 +118,7 @@ t_specimen = np.array([8.4, 8.2, 7.7, 7.2, 6.5, 5.7, 4.9, 4.2, 3.6, 3.15,
                        2.85, 2.65, 2.55, 2.5, 2.55, 2.6, 2.7, 2.85])
 
 meas = materials.measure_sound_absorption(
-    freqs, t_empty, t_specimen, volume=200.0, area=10.8, temperature_c=20.0
+    t_empty, t_specimen, frequencies=freqs, volume=200.0, area=10.8, temperature_c=20.0
 )
 print(meas.alpha_s[7])   # alpha_s at 500 Hz: 0.328...
 meas.plot()              # alpha_s versus one-third-octave frequency
@@ -147,7 +147,7 @@ t_empty = np.array([9.0, 9.0, 8.8, 8.6, 8.4, 8.2, 8.0, 7.8, 7.5, 7.2,
 t_specimen = np.array([8.4, 8.2, 7.7, 7.2, 6.5, 5.7, 4.9, 4.2, 3.6, 3.15,
                        2.85, 2.65, 2.55, 2.5, 2.55, 2.6, 2.7, 2.85])
 meas = materials.measure_sound_absorption(
-    freqs, t_empty, t_specimen, volume=200.0, area=10.8, temperature_c=20.0
+    t_empty, t_specimen, frequencies=freqs, volume=200.0, area=10.8, temperature_c=20.0
 )
 
 # One line: the alpha_s spectrum over the one-third-octave band axis.
@@ -340,7 +340,7 @@ a Spanish fiche (translated fixed strings and a comma decimal separator).
 from phonometry import materials, ReportMetadata
 
 meas = materials.measure_sound_absorption(
-    freqs, t_empty, t_specimen, volume=200.0, area=10.8,
+    t_empty, t_specimen, frequencies=freqs, volume=200.0, area=10.8,
     temperature_c=20.0, relative_humidity_percent=54.0,
 )
 meas.report(
@@ -739,7 +739,7 @@ freqs = [63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
 alpha_s = [0.33, 0.35, 0.39, 0.38, 0.37, 0.36, 0.36, 0.36, 0.43, 0.49,
            0.58, 0.63, 0.68, 0.71, 0.73, 0.75, 0.77, 0.79, 0.81, 0.81]
-result = materials.sound_absorption_coefficient_uncertainty(alpha_s, freqs, coverage=0.95)
+result = materials.sound_absorption_coefficient_uncertainty(alpha_s, frequencies=freqs, coverage=0.95)
 result.plot()   # alpha_s with the +/-U (k = 2) reproducibility ribbon
 plt.show()
 ```
@@ -749,7 +749,7 @@ plt.show()
 from phonometry import materials
 
 # Reproducibility uncertainty of alpha_s at 1000 Hz (Table 1: m=0.040, n=0.015).
-r = materials.sound_absorption_coefficient_uncertainty([0.68], [1000], coverage=0.95)
+r = materials.sound_absorption_coefficient_uncertainty([0.68], frequencies=[1000], coverage=0.95)
 print(round(float(r.standard_uncertainty[0]), 4))            # 0.0422 (sigma_R)
 print(float(r.reported_expanded_uncertainty[0]))             # 0.08  (U, k=2)
 r.plot()   # the figure above: alpha_s with its +/-U (k = 2) ribbon
@@ -757,15 +757,15 @@ r.plot()   # the figure above: alpha_s with its +/-U (k = 2) ribbon
 # Same band, same value, but a repeat on my own bench rather than another
 # laboratory: sigma_r = 0.6 sigma_R (Formula (3)).
 rr = materials.sound_absorption_coefficient_uncertainty(
-    [0.68], [1000], condition="repeatability"
+    [0.68], frequencies=[1000], condition="repeatability"
 )
 print(round(float(rr.standard_uncertainty[0]), 5))           # 0.02532 = 0.6 x 0.0422
 
 # The other two quantities this page produces, Formula (2) and Clause 6.
-at = materials.equivalent_area_uncertainty([12.4], [1000], coverage=0.95)
+at = materials.equivalent_area_uncertainty([12.4], frequencies=[1000], coverage=0.95)
 print(float(at.reported_expanded_uncertainty[0]))            # 1.3 m^2 on A_T = 12.4 m^2
 ap = materials.practical_coefficient_uncertainty(
-    [0.35, 1.00, 0.65, 0.60, 0.55], [250, 500, 1000, 2000, 4000]
+    [0.35, 1.00, 0.65, 0.60, 0.55], frequencies=[250, 500, 1000, 2000, 4000]
 )
 print(list(ap.reported_expanded_uncertainty))                # [0.07, 0.08, 0.08, 0.08, 0.1]
 

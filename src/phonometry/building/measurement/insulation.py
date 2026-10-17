@@ -1053,7 +1053,10 @@ def airborne_insulation(
         freqs = _require_frequencies(checked_frequencies, "airborne_insulation")
         if source_low_frequency is not None:
             source_lf = apply_low_frequency_procedure(
-                l1_bands, freqs, source_low_frequency, room="source"
+                l1_bands,
+                frequencies=freqs,
+                procedure=source_low_frequency,
+                room="source",
             )
             l1_bands = source_lf.levels
         if receiver_low_frequency is not None:
@@ -1062,8 +1065,8 @@ def airborne_insulation(
             )
             receiver_lf = apply_low_frequency_procedure(
                 l2_bands,
-                freqs,
-                receiver_low_frequency,
+                frequencies=freqs,
+                procedure=receiver_low_frequency,
                 reverberation_time=t,
                 room="receiving",
             )
@@ -1193,7 +1196,11 @@ def impact_insulation(
         freqs = _require_frequencies(checked_frequencies, "impact_insulation")
         _check_low_frequency_volume(low_frequency, volume, "impact_insulation")
         low_frequency_result = apply_low_frequency_procedure(
-            li_bands, freqs, low_frequency, reverberation_time=t, room="receiving"
+            li_bands,
+            frequencies=freqs,
+            procedure=low_frequency,
+            reverberation_time=t,
+            room="receiving",
         )
         li_bands = low_frequency_result.levels
         substituted = low_frequency_result.reverberation_time
@@ -1404,7 +1411,11 @@ def facade_insulation(
         freqs_lf = _require_frequencies(checked_frequencies, "facade_insulation")
         _check_low_frequency_volume(low_frequency, volume, "facade_insulation")
         low_frequency_result = apply_low_frequency_procedure(
-            l2_bands, freqs_lf, low_frequency, reverberation_time=t, room="receiving"
+            l2_bands,
+            frequencies=freqs_lf,
+            procedure=low_frequency,
+            reverberation_time=t,
+            room="receiving",
         )
         l2_bands = low_frequency_result.levels
         substituted = low_frequency_result.reverberation_time

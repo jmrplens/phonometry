@@ -829,6 +829,7 @@ for a negative level differs from Python's banker's `round`.
 ```python
 tonal_correction(
     levels: Sequence[float] | np.ndarray,
+    *,
     frequencies: Sequence[float] | np.ndarray,
 ) -> TonalCorrectionResult
 ```

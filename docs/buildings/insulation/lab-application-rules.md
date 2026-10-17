@@ -75,7 +75,7 @@ r_without = np.array([36.1, 37.0, 38.2, 39.5, 40.3, 41.2, 40.6, 41.8, 43.9,
 delta_r = np.array([-2.1, -5.4, -3.2, 1.5, 4.8, 7.9, 10.6, 12.9, 14.7, 16.2,
                     17.4, 18.3, 19.1, 19.6, 19.9, 19.5, 18.2, 16.4, 15.8,
                     17.1, 18.0])
-res = building.laboratory_lining_improvement(r_without, r_without + delta_r, freqs,
+res = building.laboratory_lining_improvement(r_without, r_without + delta_r, frequencies=freqs,
                                       basic_element="heavy_wall")
 rating = res.rating
 print(rating.index, rating.delta_rw, rating.delta_rw_c, rating.delta_rw_ctr)
@@ -100,7 +100,7 @@ two measured curves:
 ```python
 print(res.delta_rw_direct, res.delta_rw_c_direct, res.delta_rw_ctr_direct)
 # 13 12 9
-other = building.laboratory_lining_improvement(r_without, r_without + delta_r, freqs,
+other = building.laboratory_lining_improvement(r_without, r_without + delta_r, frequencies=freqs,
                                         basic_element=None)
 print(other.rating, other.delta_rw_direct)                   # None 13
 ```
@@ -156,7 +156,7 @@ r_without = np.array([36.1, 37.0, 38.2, 39.5, 40.3, 41.2, 40.6, 41.8, 43.9,
 delta_r = np.array([-2.1, -5.4, -3.2, 1.5, 4.8, 7.9, 10.6, 12.9, 14.7, 16.2,
                     17.4, 18.3, 19.1, 19.6, 19.9, 19.5, 18.2, 16.4, 15.8,
                     17.1, 18.0])
-res = building.laboratory_lining_improvement(r_without, r_without + delta_r, freqs)
+res = building.laboratory_lining_improvement(r_without, r_without + delta_r, frequencies=freqs)
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.6))
 res.plot(ax=ax1)
@@ -219,7 +219,7 @@ l_n0 = np.array([70.5, 73.4, 75.8, 77.2, 78.9, 78.1, 77.6, 78.3, 77.1, 75.4,
                  73.8, 71.2, 68.9, 65.7, 62.8, 59.6, 56.9, 53.8])
 delta_l = np.array([0.4, 0.8, 1.5, 2.3, 3.4, 4.9, 6.8, 9.1, 11.6, 14.2, 16.9,
                     19.8, 22.4, 25.1, 27.3, 29.4, 30.8, 31.9])
-cover = building.laboratory_floor_covering_improvement(l_n0, l_n0 - delta_l, freqs,
+cover = building.laboratory_floor_covering_improvement(l_n0, l_n0 - delta_l, frequencies=freqs,
                                                 reference_floor="lightweight_3")
 print(cover.designation, cover.delta_lw, cover.ci_delta)   # ΔLt,3,w 8 -3
 print(cover.reference_rating.rating, cover.bare_rating.rating)   # 67 75
@@ -272,7 +272,7 @@ maximum level, $\Delta L_\mathrm{r} = L_\mathrm{i,Fmax,0} - L_\mathrm{i,Fmax}$
 ```python
 ball = building.heavy_impact_improvement([79.2, 73.5, 66.1, 58.4],
                                          [78.6, 71.9, 62.3, 51.0],
-                                         [63, 125, 250, 500])
+                                         frequencies=[63, 125, 250, 500])
 print(ball.improvement)                    # [0.6 1.6 3.8 7.4]
 ```
 
@@ -305,7 +305,7 @@ l_n0 = np.array([70.5, 73.4, 75.8, 77.2, 78.9, 78.1, 77.6, 78.3, 77.1, 75.4,
                  73.8, 71.2, 68.9, 65.7, 62.8, 59.6, 56.9, 53.8])
 delta_l = np.array([0.4, 0.8, 1.5, 2.3, 3.4, 4.9, 6.8, 9.1, 11.6, 14.2, 16.9,
                     19.8, 22.4, 25.1, 27.3, 29.4, 30.8, 31.9])
-cover = building.laboratory_floor_covering_improvement(l_n0, l_n0 - delta_l, freqs,
+cover = building.laboratory_floor_covering_improvement(l_n0, l_n0 - delta_l, frequencies=freqs,
                                                 reference_floor="lightweight_3")
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.6))
@@ -425,7 +425,7 @@ r_max = np.array([40.2, 42.8, 45.1, 48.6, 51.9, 54.3, 56.8, 58.9, 60.7, 62.4,
                   63.8, 65.1, 66.2, 67.0, 67.6, 68.1, 68.5, 69.0])
 r_seal = np.array([33.4, 35.1, 37.9, 40.6, 43.0, 45.2, 46.1, 46.8, 47.0, 46.2,
                    45.1, 46.9, 49.8, 52.6, 55.4, 58.9, 63.1, 66.2])
-seal = building.laboratory_joint_insulation(r_seal, r_max, freqs, joint_length_m=5.4)
+seal = building.laboratory_joint_insulation(r_seal, r_max, frequencies=freqs, joint_length_m=5.4)
 print(seal.regime[-4:])
 # ('uncorrected', 'corrected', 'limit', 'maximum')
 print(np.round(seal.r_s[-4:], 1))           # [55.4 59.5 64.4 69. ]
@@ -491,7 +491,7 @@ loss = {3.0: -2.5, 4.0: -1.2, 5.0: 0.0, 6.0: 2.5, 8.0: 8.0, 10.0: 12.5,
         12.0: 13.0}                            # dB lost against 5 mm, mid band
 slope = np.linspace(0.6, 1.4, 18)              # and more at high frequency
 results = [building.laboratory_joint_insulation(
-               np.minimum(r_seal - db * slope, r_max - 0.5), r_max, freqs)
+               np.minimum(r_seal - db * slope, r_max - 0.5), r_max, frequencies=freqs)
            for db in loss.values()]
 series = building.joint_gap_series(list(loss), results, min_gap_mm=3.0)
 print(series.r_s_w_ctr)        # [48. 47. 45. 43. 38. 33. 33.]
@@ -542,12 +542,12 @@ r_max = np.array([40.2, 42.8, 45.1, 48.6, 51.9, 54.3, 56.8, 58.9, 60.7, 62.4,
                   63.8, 65.1, 66.2, 67.0, 67.6, 68.1, 68.5, 69.0])
 r_seal = np.array([33.4, 35.1, 37.9, 40.6, 43.0, 45.2, 46.1, 46.8, 47.0, 46.2,
                    45.1, 46.9, 49.8, 52.6, 55.4, 58.9, 63.1, 66.2])
-seal = building.laboratory_joint_insulation(r_seal, r_max, freqs, joint_length_m=5.4)
+seal = building.laboratory_joint_insulation(r_seal, r_max, frequencies=freqs, joint_length_m=5.4)
 loss = {3.0: -2.5, 4.0: -1.2, 5.0: 0.0, 6.0: 2.5, 8.0: 8.0, 10.0: 12.5,
         12.0: 13.0}
 slope = np.linspace(0.6, 1.4, 18)
 results = [building.laboratory_joint_insulation(
-               np.minimum(r_seal - db * slope, r_max - 0.5), r_max, freqs)
+               np.minimum(r_seal - db * slope, r_max - 0.5), r_max, frequencies=freqs)
            for db in loss.values()]
 series = building.joint_gap_series(list(loss), results, min_gap_mm=3.0)
 
@@ -686,7 +686,7 @@ l_pr = np.array([48.2, 51.0, 53.1, 55.4, 57.0, 58.3, 59.1, 59.8, 60.2, 60.4,
                  60.1, 59.4, 58.6, 57.5, 56.2, 54.4, 52.3, 49.8])
 t = np.array([1.9, 1.8, 1.7, 1.6, 1.5, 1.45, 1.4, 1.35, 1.3, 1.25, 1.2, 1.15,
               1.1, 1.05, 1.0, 0.95, 0.9, 0.85])
-rain = building.rainfall_sound(l_pr, t, freqs, volume=62.0,
+rain = building.rainfall_sound(l_pr, t, frequencies=freqs, volume=62.0,
                                excited_area_m2=1.875,
                                reference_correction=correction)
 print(round(rain.l_ia, 1), round(rain.l_ia_norm, 1))  # 69.3 67.5
@@ -727,7 +727,7 @@ l_pr = np.array([48.2, 51.0, 53.1, 55.4, 57.0, 58.3, 59.1, 59.8, 60.2, 60.4,
                  60.1, 59.4, 58.6, 57.5, 56.2, 54.4, 52.3, 49.8])
 t = np.array([1.9, 1.8, 1.7, 1.6, 1.5, 1.45, 1.4, 1.35, 1.3, 1.25, 1.2, 1.15,
               1.1, 1.05, 1.0, 0.95, 0.9, 0.85])
-rain = building.rainfall_sound(l_pr, t, freqs, volume=62.0,
+rain = building.rainfall_sound(l_pr, t, frequencies=freqs, volume=62.0,
                                excited_area_m2=1.875,
                                reference_correction=correction)
 

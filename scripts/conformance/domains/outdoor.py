@@ -136,7 +136,14 @@ def _chk_iso9613_2_ground_limit() -> Outcome:
     # the Table 3 limit b'(0) = 1,5 + 8,6 = 10,1, so Agr = 2(-1,5 + 10,1) = 17,2.
     big = 1.0e7
     agr = ph.environment.ground_attenuation(
-        big, 0.0, 0.0, [250.0], 1.0, 1.0, 1.0, projected_distance=big
+        big,
+        0.0,
+        0.0,
+        frequencies=[250.0],
+        ground_source=1.0,
+        ground_middle=1.0,
+        ground_receiver=1.0,
+        projected_distance=big,
     )
     return numeric(
         ref.ISO9613_2_GROUND_AGR_250_POROUS,
@@ -612,7 +619,7 @@ def _chk_iso13472_1_msa() -> Outcome:
 )
 def _chk_iso13472_2_fu() -> Outcome:
     fu = ph.materials.spot_tube_upper_frequency(
-        ref.ISO13472_2_SPOT_DIAMETER, ref.ISO13472_2_SPOT_SPEED
+        ref.ISO13472_2_SPOT_DIAMETER, speed_of_sound=ref.ISO13472_2_SPOT_SPEED
     )
     return numeric(ref.ISO13472_2_SPOT_FU, fu, 0.1, unit="Hz", places=1)
 
@@ -644,7 +651,7 @@ def _chk_iso3745_k1_floor() -> Outcome:
     k1 = ph.emission.precision_background_correction(
         np.array([[ref.ISO3745_K1_EDGE_LEVEL]]),
         np.array([[ref.ISO3745_K1_EDGE_BACKGROUND]]),
-        np.array([ref.ISO3745_K1_EDGE_FREQUENCY]),
+        frequencies=np.array([ref.ISO3745_K1_EDGE_FREQUENCY]),
     )
     return numeric(
         ref.ISO3745_K1_EDGE_FLOOR, float(k1[0, 0]), 1e-4, unit="dB", places=4

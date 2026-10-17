@@ -930,7 +930,7 @@ _CK_THIRD_DB = np.array(oracle.ISO3744_TABLE_E1_CK_DB)
 def _chk_printed_k1_clamps() -> Outcome:
     levels = np.full(_K1_CLAMP_BANDS_HZ.size, _K1_SIGNAL_DB)
     correction = ph.emission.reverberation_background_correction(
-        levels, levels - _K1_CLAMP_MARGIN_DB, _K1_CLAMP_BANDS_HZ
+        levels, levels - _K1_CLAMP_MARGIN_DB, frequencies=_K1_CLAMP_BANDS_HZ
     )
     worst = float(np.max(np.abs(correction - _PRINTED_K1_DB)))
     return numeric(

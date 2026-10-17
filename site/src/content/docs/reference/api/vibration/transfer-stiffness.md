@@ -81,9 +81,9 @@ source and building prediction standards (ISO 9611, EN 15657, EN 12354-5).
 
 ```python
 band_averaged_stiffness(
-    frequencies: ArrayLike,
     stiffness: ArrayLike,
     *,
+    frequencies: ArrayLike,
     valid: ArrayLike | None = None,
 ) -> BandAveragedStiffness
 ```
@@ -302,9 +302,10 @@ blocked transfer stiffness alone.
 
 ```python
 check_blocked_output(
-    frequencies: ArrayLike,
     input_acceleration_level: ArrayLike,
     output_acceleration_level: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> LevelDifferenceCheck
 ```
 
@@ -349,10 +350,11 @@ For the indirect method the same 20 dB is the $|T| \le 0.1$ of
 
 ```python
 check_output_mass(
-    frequencies: ArrayLike,
     output_mass_kg: float,
     output_force_level: ArrayLike,
     output_acceleration_level: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> OutputMassCheck
 ```
 
@@ -398,9 +400,10 @@ lighter `m0`, or stiffer (more, or larger) force transducers. See
 
 ```python
 check_unwanted_input(
-    frequencies: ArrayLike,
     excitation_level: ArrayLike,
     unwanted_level: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> LevelDifferenceCheck
 ```
 
@@ -450,10 +453,10 @@ errata register.)
 
 ```python
 driving_point_stiffness(
-    frequencies: ArrayLike,
     input_force_n: ArrayLike,
     input_acceleration_m_s2: ArrayLike,
     *,
+    frequencies: ArrayLike,
     output_acceleration_m_s2: ArrayLike | None = None,
     unwanted_acceleration_m_s2: ArrayLike | None = None,
 ) -> DrivingPointStiffnessResult
@@ -807,11 +810,11 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 ```python
 effective_blocking_mass(
-    frequencies: ArrayLike,
     force: ArrayLike,
     first_acceleration_m_s2: ArrayLike,
     second_acceleration_m_s2: ArrayLike,
     *,
+    frequencies: ArrayLike,
     blocking_mass: float,
 ) -> EffectiveBlockingMass
 ```
@@ -949,10 +952,10 @@ Per frequency, whether it lies below the first line outside 1 dB.
 
 ```python
 indirect_transfer_stiffness_result(
-    frequencies: ArrayLike,
     transmissibility: ArrayLike,
     blocking_mass: float,
     *,
+    frequencies: ArrayLike,
     flange_mass: float = 0.0,
 ) -> TransferStiffnessResult
 ```
@@ -1254,10 +1257,10 @@ the input displacement phasor.
 
 ```python
 transfer_stiffness_indirect(
-    frequency: ArrayLike,
     transmissibility: ArrayLike,
     blocking_mass: float,
     *,
+    frequency: ArrayLike,
     flange_mass: float = 0.0,
 ) -> np.ndarray
 ```

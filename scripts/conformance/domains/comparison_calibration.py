@@ -393,7 +393,12 @@ def _chk_annex_c() -> Outcome:
     gain_1, gain_2, at_a, at_b = 0.7, -1.3, 0.04, -0.02
     first = (_L_REF + gain_1 + level_1 + at_a) - (_L_TEST + gain_2 + level_1 + at_b)
     second = (_L_TEST + gain_1 + level_2 + at_a) - (_L_REF + gain_2 + level_2 + at_b)
-    result = metrology.simultaneous_comparison(_F, _L_REF, first, second)
+    result = metrology.simultaneous_comparison(
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=first,
+        interchanged_channel_difference=second,
+    )
     worst = float(np.max(np.abs(result.sensitivity_level - _L_TEST)))
     return numeric(
         0.0,
@@ -419,10 +424,10 @@ def _chk_d2() -> Outcome:
     r_v = np.array([3.9, 3.95, 4.0, 4.1, 4.3])
     r_p = np.array([1.001, 1.0, 0.999, 1.002, 1.01])
     result = metrology.simultaneous_comparison(
-        _F,
-        _L_REF,
-        np.zeros(_F.size),
-        2.0 * 20.0 * np.log10(r_v),
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=np.zeros(_F.size),
+        interchanged_channel_difference=2.0 * 20.0 * np.log10(r_v),
         pressure_level_difference=20.0 * np.log10(r_p),
     )
     expected = 1000.0 * m_ref * r_v / r_p
@@ -450,10 +455,10 @@ def _chk_monitor() -> Outcome:
     field_ref = 94.0 + np.array([0.0, 0.1, -0.1, 0.05, 0.2])
     field_test = field_ref + np.array([0.3, -0.2, 0.15, 0.4, -0.35])
     result = metrology.sequential_comparison(
-        _F,
-        _L_REF,
-        _L_REF + field_ref,
-        _L_TEST + field_test,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        reference_output_level=_L_REF + field_ref,
+        test_output_level=_L_TEST + field_test,
         monitor=metrology.MonitorReadings(
             reference_level=field_ref - 12.5,
             test_level=field_test - 12.5,
@@ -568,10 +573,10 @@ def _chk_annex_c_phase() -> Outcome:
             - (_PHI_REF + shift_2 + source_2 + at_b)
         )
         result = metrology.simultaneous_comparison(
-            _F,
-            _L_REF,
-            _L_REF - _L_TEST,
-            _L_TEST - _L_REF,
+            frequencies=_F,
+            reference_sensitivity_level=_L_REF,
+            channel_difference=_L_REF - _L_TEST,
+            interchanged_channel_difference=_L_TEST - _L_REF,
             phase=metrology.SimultaneousComparisonPhase(
                 reference_sensitivity_phase_deg=_PHI_REF,
                 channel_phase_difference_deg=first,
@@ -604,10 +609,10 @@ def _chk_monitor_phase() -> Outcome:
     field_1 = np.array([10.0, 20.0, -30.0, 45.0, 90.0])
     field_2 = field_1 + np.array([3.0, -5.0, 8.0, 12.0, -20.0])
     result = metrology.sequential_comparison(
-        _F,
-        _L_REF,
-        _L_REF + 94.0,
-        _L_TEST + 94.0,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        reference_output_level=_L_REF + 94.0,
+        test_output_level=_L_TEST + 94.0,
         monitor=metrology.MonitorReadings(
             reference_level=94.0 - 12.5,
             test_level=94.0 - 12.5,
@@ -994,7 +999,11 @@ def _chk_validation() -> Outcome:
     jig_level = _L_TEST + offsets
     half = _L_REF - jig_level
     jig = metrology.simultaneous_comparison(
-        _F, _L_REF, half, -half, expanded_uncertainty_db=0.08
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=half,
+        interchanged_channel_difference=-half,
+        expanded_uncertainty_db=0.08,
     )
     grid = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0])
     shared = np.isin(grid, _F)
@@ -1093,10 +1102,10 @@ def _chk_validation_shared_reference() -> Outcome:
     expected = 2.0 * math.sqrt(2.0) * own
     half = _L_REF - _L_TEST
     jig = metrology.simultaneous_comparison(
-        _F,
-        _L_REF,
-        half,
-        -half,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=half,
+        interchanged_channel_difference=-half,
         expanded_uncertainty_db=_budget_d1().expanded_uncertainty_db,
     )
     result = metrology.verify_jig_or_coupler(
@@ -1193,7 +1202,7 @@ def _chk_stepped_sine_small_room() -> Outcome:
     step, arrival = ref.IEC61094_8_B22_SMALL_ROOM
     frequencies = np.arange(0.0, 24000.0 + step / 2.0, step)
     impulse = metrology.stepped_sine_impulse_response(
-        frequencies, np.ones(frequencies.size)
+        frequencies=frequencies, response=np.ones(frequencies.size)
     )
     matching = int(math.isclose(impulse.duration_s, 1.0 / step, rel_tol=1e-12))
     matching += int(impulse.duration_s > arrival)
@@ -1217,7 +1226,7 @@ def _chk_stepped_sine_large_room() -> Outcome:
     step = ref.IEC61094_8_B22_LARGE_ROOM_STEP_HZ
     frequencies = np.arange(0.0, 24000.0 + step / 2.0, step)
     impulse = metrology.stepped_sine_impulse_response(
-        frequencies, np.ones(frequencies.size)
+        frequencies=frequencies, response=np.ones(frequencies.size)
     )
     return numeric(
         1000.0 / step, 1000.0 * impulse.duration_s, 1e-9, unit="ms", places=3
@@ -1245,7 +1254,9 @@ def _chk_time_selective() -> Outcome:
         response = np.exp(-2j * np.pi * frequencies * 0.00301) + gain * np.exp(
             -2j * np.pi * frequencies * 0.0065
         )
-        impulse = metrology.stepped_sine_impulse_response(frequencies, response)
+        impulse = metrology.stepped_sine_impulse_response(
+            frequencies=frequencies, response=response
+        )
         windowed = metrology.time_selective_response(
             impulse.impulse_response,
             impulse.fs,

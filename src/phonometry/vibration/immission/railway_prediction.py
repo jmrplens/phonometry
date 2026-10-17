@@ -718,7 +718,7 @@ def foundation_to_floor_level_difference(
 
 
 def kb_weighted_levels(
-    levels: ArrayLike, frequencies: ArrayLike
+    levels: ArrayLike, *, frequencies: ArrayLike
 ) -> NDArray[np.float64]:
     r"""The KB-weighted third-octave levels, Formula (8) with Table 2.
 
@@ -892,7 +892,7 @@ def predict_train_category(
             f"{high:g} Hz; the spectrum holds {int(np.count_nonzero(inside))} of them."
         )
         raise ValueError(msg)
-    weighted = kb_weighted_levels(floor[inside], freqs[inside])
+    weighted = kb_weighted_levels(floor[inside], frequencies=freqs[inside])
     kb_ftm = takt_max_kb(weighted)
     kb_fmax = TRAIN_KB_FMAX_FACTOR * kb_ftm
     return TrainCategoryPrediction(

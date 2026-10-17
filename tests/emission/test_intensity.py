@@ -356,7 +356,9 @@ def test_field_indicators_validation() -> None:
     three_band_lp = np.full((4, 3), 90.0)
     three_band_in = np.full((4, 3), 1e-3)
     with pytest.raises(ValueError, match="one entry per band"):
-        emission.field_indicators(three_band_lp, three_band_in, [125.0, 250.0])
+        emission.field_indicators(
+            three_band_lp, three_band_in, frequencies=[125.0, 250.0]
+        )
 
 
 def test_field_indicators_rejects_non_finite_pressure_levels() -> None:
@@ -383,7 +385,7 @@ def test_field_indicators_per_band_matches_per_column_scalars() -> None:
     freqs = np.array([125.0, 250.0, 500.0, 1000.0])
     lp = 74.0 + rng.normal(0.0, 0.8, (8, 4))
     i_n = 1.0e-5 * (1.0 + rng.normal(0.0, 0.2, (8, 4)))
-    ind = emission.field_indicators(lp, i_n, freqs)
+    ind = emission.field_indicators(lp, i_n, frequencies=freqs)
     assert isinstance(ind.f2, np.ndarray)
     assert ind.f2.shape == (4,)
     np.testing.assert_allclose(ind.frequencies, freqs)
@@ -401,7 +403,7 @@ def test_field_indicators_per_band_matches_per_column_scalars() -> None:
         match=r"algebraic mean normal intensity over the measurement surface "
         r"is not positive",
     ):
-        emission.field_indicators(lp, bad, freqs)
+        emission.field_indicators(lp, bad, frequencies=freqs)
 
 
 def test_field_indicators_plot_draws_indicators_and_ld() -> None:
@@ -414,7 +416,7 @@ def test_field_indicators_plot_draws_indicators_and_ld() -> None:
     freqs = np.array([250.0, 500.0, 1000.0, 2000.0])
     lp = 76.0 + rng.normal(0.0, 0.5, (10, 4))
     i_n = 2.0e-5 * (1.0 + rng.normal(0.0, 0.25, (10, 4)))
-    ind = emission.field_indicators(lp, i_n, freqs)
+    ind = emission.field_indicators(lp, i_n, frequencies=freqs)
     ld = emission.dynamic_capability_index(18.0)
     ax = ind.plot(dynamic_capability=ld)
     # F2 curve, F3 curve and the Ld criterion line on the main axes.
@@ -586,7 +588,7 @@ def test_f1_follows_the_shape_of_its_sibling_indicators() -> None:
     per_band = emission.field_indicators(
         np.full((4, 1), 80.0),
         np.full((4, 1), 1.0e-5),
-        [1000.0],
+        frequencies=[1000.0],
         temporal_intensity=samples_1d,
     )
     assert np.ndim(per_band.f1) == 1
@@ -669,7 +671,9 @@ def test_field_indicators_plot_draws_f1_and_its_limit() -> None:
     lp = 76.0 + rng.normal(0.0, 0.5, (10, 4))
     i_n = 2.0e-5 * (1.0 + rng.normal(0.0, 0.25, (10, 4)))
     samples = 2.0e-5 * (1.0 + rng.normal(0.0, 0.15, (10, 4)))
-    ind = emission.field_indicators(lp, i_n, freqs, temporal_intensity=samples)
+    ind = emission.field_indicators(
+        lp, i_n, frequencies=freqs, temporal_intensity=samples
+    )
     ax = ind.plot()
     twin = next(a for a in ax.figure.axes if a is not ax)
     ydata = [np.asarray(line.get_ydata(), dtype=float) for line in twin.lines]
@@ -690,7 +694,9 @@ def _per_band_indicators() -> emission.FieldIndicators:
     lp = 76.0 + rng.normal(0.0, 0.5, (10, 4))
     i_n = 2.0e-5 * (1.0 + rng.normal(0.0, 0.25, (10, 4)))
     samples = 2.0e-5 * (1.0 + rng.normal(0.0, 0.6, (10, 4)))
-    return emission.field_indicators(lp, i_n, freqs, temporal_intensity=samples)
+    return emission.field_indicators(
+        lp, i_n, frequencies=freqs, temporal_intensity=samples
+    )
 
 
 @pytest.mark.parametrize("kind", ["scalar", "short", "long"])

@@ -612,7 +612,11 @@ def test_three_microphones_give_their_sensitivities_back(
     sign that no reciprocity measurement can fix.
     """
     electrical, acoustic, true = _triad(coupler)
-    calibration = metrology.pressure_reciprocity(_F, electrical, acoustic)
+    calibration = metrology.pressure_reciprocity(
+        frequencies=_F,
+        electrical_transfer_impedances_ohm=electrical,
+        acoustic_transfer_impedances=acoustic,
+    )
     sign = np.sign((calibration.sensitivity_v_per_pa[0, 0] / true[0, 0]).real)
     np.testing.assert_allclose(
         calibration.sensitivity_v_per_pa, sign * true, rtol=1e-12
@@ -626,7 +630,10 @@ def test_two_microphones_and_a_source_give_their_sensitivities_back() -> None:
     """Formula (8), with the ratio measured against the auxiliary source."""
     electrical, acoustic, true = _triad(_PLANE)
     calibration = metrology.pressure_reciprocity_pair(
-        _F, electrical[0], acoustic[0], true[0] / true[1]
+        frequencies=_F,
+        electrical_transfer_impedance_ohm=electrical[0],
+        acoustic_transfer_impedance=acoustic[0],
+        sensitivity_ratio=true[0] / true[1],
     )
     sign = np.sign((calibration.sensitivity_v_per_pa[0, 0] / true[0, 0]).real)
     np.testing.assert_allclose(
@@ -637,9 +644,15 @@ def test_two_microphones_and_a_source_give_their_sensitivities_back() -> None:
 
 def test_numbers_and_results_give_the_same_calibration() -> None:
     electrical, acoustic, _ = _triad(_PLANE)
-    from_results = metrology.pressure_reciprocity(_F, electrical, acoustic)
+    from_results = metrology.pressure_reciprocity(
+        frequencies=_F,
+        electrical_transfer_impedances_ohm=electrical,
+        acoustic_transfer_impedances=acoustic,
+    )
     from_numbers = metrology.pressure_reciprocity(
-        _F, electrical, [z.transfer_impedance_pa_s_m3 for z in acoustic]
+        frequencies=_F,
+        electrical_transfer_impedances_ohm=electrical,
+        acoustic_transfer_impedances=[z.transfer_impedance_pa_s_m3 for z in acoustic],
     )
     np.testing.assert_array_equal(
         from_results.sensitivity_v_per_pa, from_numbers.sensitivity_v_per_pa
@@ -650,11 +663,15 @@ def test_wave_motion_correction_is_added_to_every_level() -> None:
     frequencies = np.array([500.0, 1000.0, 2000.0])
     electrical, acoustic, _ = _triad(_LARGE, frequencies)
     correction = metrology.large_volume_wave_motion_correction(frequencies)
-    plain = metrology.pressure_reciprocity(frequencies, electrical, acoustic)
+    plain = metrology.pressure_reciprocity(
+        frequencies=frequencies,
+        electrical_transfer_impedances_ohm=electrical,
+        acoustic_transfer_impedances=acoustic,
+    )
     corrected = metrology.pressure_reciprocity(
-        frequencies,
-        electrical,
-        acoustic,
+        frequencies=frequencies,
+        electrical_transfer_impedances_ohm=electrical,
+        acoustic_transfer_impedances=acoustic,
         corrections={"wave motion": correction.correction},
     )
     np.testing.assert_allclose(
@@ -666,7 +683,11 @@ def test_wave_motion_correction_is_added_to_every_level() -> None:
 def test_pressure_reciprocity_needs_three_pairs() -> None:
     electrical, acoustic, _ = _triad(_PLANE)
     with pytest.raises(ValueError, match="Three pairs"):
-        metrology.pressure_reciprocity(_F, electrical[:2], acoustic[:2])
+        metrology.pressure_reciprocity(
+            frequencies=_F,
+            electrical_transfer_impedances_ohm=electrical[:2],
+            acoustic_transfer_impedances=acoustic[:2],
+        )
 
 
 def test_pressure_reciprocity_refuses_a_result_at_other_frequencies() -> None:
@@ -677,7 +698,11 @@ def test_pressure_reciprocity_refuses_a_result_at_other_frequencies() -> None:
     with pytest.raises(
         ValueError, match=r"'acoustic_transfer_impedances\[12\]' was computed at"
     ):
-        metrology.pressure_reciprocity(_F, electrical, [other, *acoustic[1:]])
+        metrology.pressure_reciprocity(
+            frequencies=_F,
+            electrical_transfer_impedances_ohm=electrical,
+            acoustic_transfer_impedances=[other, *acoustic[1:]],
+        )
 
 
 def test_pressure_reciprocity_refuses_as_many_frequencies_that_are_others() -> None:
@@ -689,7 +714,11 @@ def test_pressure_reciprocity_refuses_as_many_frequencies_that_are_others() -> N
         _F * 1.5, _PLANE, _MICS[0], _MICS[1], **_CONDITIONS
     )
     with pytest.raises(ValueError, match="computed at other frequencies"):
-        metrology.pressure_reciprocity(_F, electrical, [other, *acoustic[1:]])
+        metrology.pressure_reciprocity(
+            frequencies=_F,
+            electrical_transfer_impedances_ohm=electrical,
+            acoustic_transfer_impedances=[other, *acoustic[1:]],
+        )
 
 
 def test_pressure_reciprocity_pair_refuses_as_many_frequencies_that_are_others() -> (
@@ -700,7 +729,12 @@ def test_pressure_reciprocity_pair_refuses_as_many_frequencies_that_are_others()
         _F * 1.5, _PLANE, _MICS[0], _MICS[1], **_CONDITIONS
     )
     with pytest.raises(ValueError, match="computed at other frequencies"):
-        metrology.pressure_reciprocity_pair(_F, electrical[0], other, 1.0)
+        metrology.pressure_reciprocity_pair(
+            frequencies=_F,
+            electrical_transfer_impedance_ohm=electrical[0],
+            acoustic_transfer_impedance=other,
+            sensitivity_ratio=1.0,
+        )
 
 
 def test_a_gas_at_another_static_pressure_is_refused() -> None:
@@ -928,8 +962,16 @@ def test_parameter_uncertainty_of_the_length_is_the_level_change() -> None:
         )
         for i, j in ((0, 1), (1, 2), (2, 0))
     ]
-    nominal = metrology.pressure_reciprocity(_F, electrical, acoustic)
-    changed = metrology.pressure_reciprocity(_F, electrical, moved)
+    nominal = metrology.pressure_reciprocity(
+        frequencies=_F,
+        electrical_transfer_impedances_ohm=electrical,
+        acoustic_transfer_impedances=acoustic,
+    )
+    changed = metrology.pressure_reciprocity(
+        frequencies=_F,
+        electrical_transfer_impedances_ohm=electrical,
+        acoustic_transfer_impedances=moved,
+    )
     np.testing.assert_allclose(
         result.components_db["coupler_length"],
         np.abs(changed.sensitivity_level[0] - nominal.sensitivity_level[0]),

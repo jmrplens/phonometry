@@ -263,7 +263,7 @@ class SoundReductionSpectrum(BandedRow):
         self.values_at(_RATING_BANDS_HZ)
         bands = self.bands()
         values = [self.printed(self._band_field(band)) for band in bands]
-        return weighted_rating_extended(values, bands)
+        return weighted_rating_extended(values, frequencies=bands)
 
     def _catalogue_notes(self) -> tuple[str, ...]:
         """Printed single numbers the bands do not give.

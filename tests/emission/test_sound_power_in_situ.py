@@ -73,7 +73,7 @@ def _k1(delta: float) -> float:
 
 
 def _power(**kwargs: object) -> emission.InSituSoundPowerResult:
-    return emission.sound_power_in_situ(ST, RSS, LW_RSS, FREQS, **kwargs)  # type: ignore[arg-type]
+    return emission.sound_power_in_situ(ST, RSS, LW_RSS, frequencies=FREQS, **kwargs)  # type: ignore[arg-type]
 
 
 # --------------------------------------------------------------------------
@@ -147,7 +147,7 @@ def test_reference_source_background_is_corrected_per_location_and_position() ->
     background[0, 5] = RSS[0, 5] - 8.0
     two = np.stack([RSS, RSS + 2.0])
     res = emission.sound_power_in_situ(
-        ST, two, LW_RSS, FREQS, background_levels=background
+        ST, two, LW_RSS, frequencies=FREQS, background_levels=background
     )
     assert res.background_correction_ref.shape == (2, 4, 7)
     assert res.background_correction_ref[0, 0, 5] == pytest.approx(_k1(8.0))
@@ -157,7 +157,7 @@ def test_reference_source_background_is_corrected_per_location_and_position() ->
         ST,
         two,
         LW_RSS,
-        FREQS,
+        frequencies=FREQS,
         background_levels=background,
         background_levels_ref=40.0 + np.zeros(7),
     )
@@ -192,7 +192,7 @@ def test_eq12_with_identical_locations_collapses_to_eq11() -> None:
         ST,
         np.stack([RSS, RSS, RSS]),
         np.stack([LW_RSS, LW_RSS, LW_RSS]),
-        FREQS,
+        frequencies=FREQS,
         background_levels=BACKGROUND,
     )
     np.testing.assert_allclose(
@@ -209,7 +209,10 @@ def test_eq12_energy_averages_the_locations_separately() -> None:
     of either location's arithmetic.
     """
     res = emission.sound_power_in_situ(
-        ST, np.stack([RSS, RSS + 6.0]), np.stack([LW_RSS, LW_RSS + 6.0]), FREQS
+        ST,
+        np.stack([RSS, RSS + 6.0]),
+        np.stack([LW_RSS, LW_RSS + 6.0]),
+        frequencies=FREQS,
     )
     one = _power()
     np.testing.assert_allclose(res.sound_power_level, one.sound_power_level, atol=1e-12)
@@ -252,7 +255,7 @@ def test_identical_events_one_at_a_time_give_their_own_level() -> None:
     positions and Eq. (19) is Eq. (11) with LE(ST) in place of Lp(ST).
     """
     events = np.repeat(ST[:, None, :], 5, axis=1)
-    res = emission.sound_energy_in_situ(events, RSS, LW_RSS, FREQS)
+    res = emission.sound_energy_in_situ(events, RSS, LW_RSS, frequencies=FREQS)
     lp_rss = _energy_mean(RSS, axis=0)
     np.testing.assert_allclose(
         res.mean_source_level, _energy_mean(ST, axis=0), atol=1e-12
@@ -270,10 +273,10 @@ def test_n_events_in_one_measurement_reduce_by_10_lg_n() -> None:
     position is the same determination as N events one at a time at L.
     """
     one_at_a_time = emission.sound_energy_in_situ(
-        np.repeat(ST[:, None, :], 8, axis=1), RSS, LW_RSS, FREQS
+        np.repeat(ST[:, None, :], 8, axis=1), RSS, LW_RSS, frequencies=FREQS
     )
     encompassing = emission.sound_energy_in_situ(
-        ST + 10.0 * np.log10(8.0), RSS, LW_RSS, FREQS, n_events=8
+        ST + 10.0 * np.log10(8.0), RSS, LW_RSS, frequencies=FREQS, n_events=8
     )
     np.testing.assert_allclose(
         encompassing.sound_energy_level, one_at_a_time.sound_energy_level, atol=1e-12
@@ -292,7 +295,7 @@ def test_event_levels_are_corrected_event_by_event() -> None:
     with warnings.catch_warnings():  # two events trip the N >= 5 advisory
         warnings.simplefilter("ignore", emission.SoundPowerWarning)
         res = emission.sound_energy_in_situ(
-            events, RSS, LW_RSS, FREQS, background_levels=background
+            events, RSS, LW_RSS, frequencies=FREQS, background_levels=background
         )
     corrected = np.stack([quiet - _k1(8.0), loud])  # 18 dB: no correction
     expected_mean = _energy_mean(corrected, axis=0)
@@ -309,13 +312,23 @@ def test_integration_time_carries_the_background_to_the_event_interval() -> None
     events = np.repeat(ST[:, None, :], 5, axis=1)
     background = ST - 16.0
     printed = emission.sound_energy_in_situ(
-        events, RSS, LW_RSS, FREQS, background_levels=background
+        events, RSS, LW_RSS, frequencies=FREQS, background_levels=background
     )
     unit = emission.sound_energy_in_situ(
-        events, RSS, LW_RSS, FREQS, background_levels=background, integration_time=1.0
+        events,
+        RSS,
+        LW_RSS,
+        frequencies=FREQS,
+        background_levels=background,
+        integration_time=1.0,
     )
     ten = emission.sound_energy_in_situ(
-        events, RSS, LW_RSS, FREQS, background_levels=background, integration_time=10.0
+        events,
+        RSS,
+        LW_RSS,
+        frequencies=FREQS,
+        background_levels=background,
+        integration_time=10.0,
     )
     assert np.all(printed.background_correction == 0.0)
     np.testing.assert_array_equal(
@@ -327,8 +340,10 @@ def test_integration_time_carries_the_background_to_the_event_interval() -> None
 
 def test_eq20_with_identical_locations_collapses_to_eq19() -> None:
     events = np.repeat(ST[:, None, :], 5, axis=1)
-    one = emission.sound_energy_in_situ(events, RSS, LW_RSS, FREQS)
-    two = emission.sound_energy_in_situ(events, np.stack([RSS, RSS]), LW_RSS, FREQS)
+    one = emission.sound_energy_in_situ(events, RSS, LW_RSS, frequencies=FREQS)
+    two = emission.sound_energy_in_situ(
+        events, np.stack([RSS, RSS]), LW_RSS, frequencies=FREQS
+    )
     np.testing.assert_allclose(
         two.sound_energy_level, one.sound_energy_level, atol=1e-12
     )
@@ -473,7 +488,7 @@ def test_a_weighted_total_uses_table_d1() -> None:
     )
     assert res.sound_power_level_a == pytest.approx(expected, abs=1e-12)
     events = np.repeat(ST[:, None, :], 5, axis=1)
-    energy = emission.sound_energy_in_situ(events, RSS, LW_RSS, FREQS)
+    energy = emission.sound_energy_in_situ(events, RSS, LW_RSS, frequencies=FREQS)
     expected_j = 10.0 * np.log10(
         np.sum(10.0 ** (0.1 * (energy.sound_energy_level + CK_TABLE_D1)))
     )
@@ -482,7 +497,9 @@ def test_a_weighted_total_uses_table_d1() -> None:
 
 def test_63_hz_row_of_table_d1_is_accepted() -> None:
     freqs = np.array([63.0, 125.0])
-    res = emission.sound_power_in_situ(ST[:, :2], RSS[:, :2], LW_RSS[:2], freqs)
+    res = emission.sound_power_in_situ(
+        ST[:, :2], RSS[:, :2], LW_RSS[:2], frequencies=freqs
+    )
     expected = 10.0 * np.log10(
         np.sum(10.0 ** (0.1 * (res.sound_power_level + np.array([-26.2, -16.1]))))
     )
@@ -500,7 +517,7 @@ def test_conforming_shapes_raise_no_warning() -> None:
             np.repeat(ST[:, None, :], 5, axis=1),
             RSS,
             LW_RSS,
-            FREQS,
+            frequencies=FREQS,
             background_levels=BACKGROUND,
         )
 
@@ -508,7 +525,7 @@ def test_conforming_shapes_raise_no_warning() -> None:
 def test_fewer_than_three_positions_warns() -> None:
     with pytest.warns(emission.SoundPowerWarning, match="7.4.1"):
         emission.sound_power_in_situ(
-            ST[:2], RSS[:2], LW_RSS, FREQS, background_levels=BACKGROUND
+            ST[:2], RSS[:2], LW_RSS, frequencies=FREQS, background_levels=BACKGROUND
         )
 
 
@@ -521,7 +538,7 @@ def test_more_than_four_positions_warns() -> None:
     six_ref = np.vstack([RSS, RSS[:2]])
     with pytest.warns(emission.SoundPowerWarning, match="7.4.1"):
         emission.sound_power_in_situ(
-            six, six_ref, LW_RSS, FREQS, background_levels=BACKGROUND
+            six, six_ref, LW_RSS, frequencies=FREQS, background_levels=BACKGROUND
         )
 
 
@@ -536,13 +553,15 @@ def test_no_background_warns_and_meets_nothing() -> None:
     assert not bool(np.any(res.background_requirement_met))
     five_events = np.repeat(ST[:, None, :], 5, axis=1)
     with pytest.warns(emission.SoundPowerWarning, match="7.5"):
-        energy = emission.sound_energy_in_situ(five_events, RSS, LW_RSS, FREQS)
+        energy = emission.sound_energy_in_situ(
+            five_events, RSS, LW_RSS, frequencies=FREQS
+        )
     assert not bool(np.any(energy.background_requirement_met))
 
 
 def test_fewer_than_five_events_warns() -> None:
     with pytest.warns(emission.SoundPowerWarning, match="7.6"):
-        emission.sound_energy_in_situ(ST, RSS, LW_RSS, FREQS, n_events=4)
+        emission.sound_energy_in_situ(ST, RSS, LW_RSS, frequencies=FREQS, n_events=4)
 
 
 # --------------------------------------------------------------------------
@@ -550,28 +569,28 @@ def test_fewer_than_five_events_warns() -> None:
 # --------------------------------------------------------------------------
 def test_levels_must_be_a_2d_grid() -> None:
     with pytest.raises(ValueError, match="'levels' must be a non-empty 2D"):
-        emission.sound_power_in_situ(ST[0], RSS, LW_RSS, FREQS)
+        emission.sound_power_in_situ(ST[0], RSS, LW_RSS, frequencies=FREQS)
 
 
 def test_levels_must_be_finite() -> None:
     bad = ST.copy()
     bad[1, 1] = np.nan
     with pytest.raises(ValueError, match="'levels' must be finite"):
-        emission.sound_power_in_situ(bad, RSS, LW_RSS, FREQS)
+        emission.sound_power_in_situ(bad, RSS, LW_RSS, frequencies=FREQS)
 
 
 def test_levels_ref_must_match_positions_and_bands() -> None:
     with pytest.raises(ValueError, match="'levels_ref' must be measured at the same"):
-        emission.sound_power_in_situ(ST, RSS[:3], LW_RSS, FREQS)
+        emission.sound_power_in_situ(ST, RSS[:3], LW_RSS, frequencies=FREQS)
 
 
 def test_lw_ref_must_match_bands_or_locations() -> None:
     with pytest.raises(ValueError, match="'lw_ref' must carry one value per band"):
-        emission.sound_power_in_situ(ST, RSS, LW_RSS[:5], FREQS)
+        emission.sound_power_in_situ(ST, RSS, LW_RSS[:5], frequencies=FREQS)
     two_locations = np.stack([RSS, RSS])
     three_powers = np.stack([LW_RSS] * 3)
     with pytest.raises(ValueError, match="'lw_ref' must be one spectrum, or one per"):
-        emission.sound_power_in_situ(ST, two_locations, three_powers, FREQS)
+        emission.sound_power_in_situ(ST, two_locations, three_powers, frequencies=FREQS)
 
 
 def test_frequencies_must_be_distinct_and_ascending() -> None:
@@ -581,18 +600,18 @@ def test_frequencies_must_be_distinct_and_ascending() -> None:
     """
     all_the_same = np.full(FREQS.size, 1000.0)
     with pytest.raises(ValueError, match="'frequencies' must be distinct"):
-        emission.sound_power_in_situ(ST, RSS, LW_RSS, all_the_same)
+        emission.sound_power_in_situ(ST, RSS, LW_RSS, frequencies=all_the_same)
     with pytest.raises(ValueError, match="'frequencies' must be distinct"):
-        emission.sound_power_in_situ(ST, RSS, LW_RSS, FREQS[::-1])
+        emission.sound_power_in_situ(ST, RSS, LW_RSS, frequencies=FREQS[::-1])
 
 
 def test_frequencies_must_be_table_d1_octaves() -> None:
     with pytest.raises(ValueError, match="'frequencies' must carry one value per band"):
-        emission.sound_power_in_situ(ST, RSS, LW_RSS, FREQS[:5])
+        emission.sound_power_in_situ(ST, RSS, LW_RSS, frequencies=FREQS[:5])
     thirds = FREQS.copy()
     thirds[2] = 630.0
     with pytest.raises(ValueError, match="'frequencies' must be nominal octave"):
-        emission.sound_power_in_situ(ST, RSS, LW_RSS, thirds)
+        emission.sound_power_in_situ(ST, RSS, LW_RSS, frequencies=thirds)
 
 
 def test_background_shapes_are_checked_by_name() -> None:
@@ -682,15 +701,17 @@ def test_uncertainty_inputs_are_validated() -> None:
 def test_events_argument_is_checked_against_the_form() -> None:
     three_d = np.repeat(ST[:, None, :], 5, axis=1)
     with pytest.raises(ValueError, match="'n_events' is counted from the second axis"):
-        emission.sound_energy_in_situ(three_d, RSS, LW_RSS, FREQS, n_events=5)
+        emission.sound_energy_in_situ(
+            three_d, RSS, LW_RSS, frequencies=FREQS, n_events=5
+        )
     with pytest.raises(ValueError, match="'n_events' must be given"):
-        emission.sound_energy_in_situ(ST, RSS, LW_RSS, FREQS)
+        emission.sound_energy_in_situ(ST, RSS, LW_RSS, frequencies=FREQS)
     with pytest.raises(ValueError, match="'n_events' must be a whole number"):
-        emission.sound_energy_in_situ(ST, RSS, LW_RSS, FREQS, n_events=0)
+        emission.sound_energy_in_situ(ST, RSS, LW_RSS, frequencies=FREQS, n_events=0)
     with pytest.raises(TypeError, match="'n_events' must be a whole number"):
-        emission.sound_energy_in_situ(ST, RSS, LW_RSS, FREQS, n_events="5")
+        emission.sound_energy_in_situ(ST, RSS, LW_RSS, frequencies=FREQS, n_events="5")
     with pytest.raises(ValueError, match="'event_levels' must be a non-empty 2D or 3D"):
-        emission.sound_energy_in_situ(ST[0], RSS, LW_RSS, FREQS, n_events=5)
+        emission.sound_energy_in_situ(ST[0], RSS, LW_RSS, frequencies=FREQS, n_events=5)
 
 
 def test_integration_time_must_be_positive() -> None:
@@ -700,7 +721,7 @@ def test_integration_time_must_be_positive() -> None:
             three_d,
             RSS,
             LW_RSS,
-            FREQS,
+            frequencies=FREQS,
             background_levels=BACKGROUND,
             integration_time=0.0,
         )
@@ -809,7 +830,7 @@ def test_plot_draws_one_bar_per_band_and_hatches_upper_bounds() -> None:
 def test_plot_of_an_energy_result_labels_lj_in_spanish() -> None:
     events = np.repeat(ST[:, None, :], 5, axis=1)
     res = emission.sound_energy_in_situ(
-        events, RSS, LW_RSS, FREQS, background_levels=BACKGROUND
+        events, RSS, LW_RSS, frequencies=FREQS, background_levels=BACKGROUND
     )
     ax = res.plot(language="es")
     assert "$L_J$" in ax.get_ylabel()
@@ -842,7 +863,7 @@ def test_one_quiet_event_takes_its_band_off_the_requirement() -> None:
         events,
         RSS,
         LW_RSS,
-        FREQS,
+        frequencies=FREQS,
         background_levels=background,
         background_levels_ref=RSS - 20.0,
     )
@@ -864,7 +885,7 @@ def test_one_quiet_position_over_n_events_takes_its_band_off_the_requirement() -
         measured,
         RSS,
         LW_RSS,
-        FREQS,
+        frequencies=FREQS,
         n_events=5,
         background_levels=background,
         background_levels_ref=RSS - 20.0,

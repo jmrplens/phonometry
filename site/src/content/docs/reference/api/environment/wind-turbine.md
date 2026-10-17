@@ -101,8 +101,8 @@ $R_0 = H + D/2$
 ```python
 wind_turbine_tonality(
     levels: NDArray[np.float64] | list[float],
-    frequencies: NDArray[np.float64] | list[float],
     *,
+    frequencies: NDArray[np.float64] | list[float],
     tone_frequency: float | None = None,
 ) -> WindTurbineTonalityResult
 ```

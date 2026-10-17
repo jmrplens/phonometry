@@ -103,7 +103,12 @@ def perimeter_sums(kij: dict[str, float] | None = None) -> dict[str, float]:
     external wall (which it sees on both sides of the junction).
     """
     k = junction_indices() if kij is None else kij
-    alpha = building.perimeter_absorption_coefficient
+
+    def alpha(critical_frequencies: list[float], indices: list[float]) -> float:
+        return building.perimeter_absorption_coefficient(
+            indices, critical_frequencies=critical_frequencies
+        )
+
     floor_at_ext = alpha([FC_EXT, FC_EXT], [k["floor-ext"]] * 2)
     floor_at_int = alpha(
         [FC_FLOOR, FC_INT, FC_INT],

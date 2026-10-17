@@ -1709,7 +1709,7 @@ def _band_positions(
 
 
 def single_number_average(
-    symbol: str, values: ArrayLike, frequencies: ArrayLike
+    symbol: str, values: ArrayLike, *, frequencies: ArrayLike
 ) -> float:
     r"""The Table A.1 single number of one auditorium quantity.
 
@@ -1755,7 +1755,9 @@ def single_number_average(
     return float(np.mean(readings[picked]))
 
 
-def octave_pair_averages(values: ArrayLike, frequencies: ArrayLike) -> dict[str, float]:
+def octave_pair_averages(
+    values: ArrayLike, *, frequencies: ArrayLike
+) -> dict[str, float]:
     """The low, mid and high pair averages of ISO 3382-1:2009, A.5.
 
     A more concise presentation than a full band table: the 125 Hz and

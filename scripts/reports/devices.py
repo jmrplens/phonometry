@@ -89,10 +89,12 @@ def _intensity_class_example() -> tuple[object, ReportMetadata, str]:
     freqs, _, _ = ph.emission.residual_index_limits("instrument", spacing_m=spacing)
     phase_mismatch = 0.05 * np.maximum(1.0, freqs / 1000.0)  # degrees
     measured = ph.emission.residual_index_from_phase_mismatch(
-        phase_mismatch, freqs, spacing
+        phase_mismatch, frequency=freqs, spacing_m=spacing
     )
     measured = measured - 4.0 * np.exp(-((np.log(freqs / 100.0) / 0.25) ** 2))
-    result = ph.emission.verify_intensity_class(measured, freqs, spacing_m=spacing)
+    result = ph.emission.verify_intensity_class(
+        measured, frequencies=freqs, spacing_m=spacing
+    )
     metadata = ReportMetadata(
         specimen="p-p sound intensity probe and analyser, 12 mm spacer",
         client="Example client",
@@ -142,9 +144,9 @@ def _loudspeaker_example() -> tuple[object, ReportMetadata, str]:
     )
 
     result = ph.electroacoustics.loudspeaker_characteristics(
-        freqs,
-        spl,
-        8.0,
+        frequencies=freqs,
+        spl=spl,
+        rated_impedance_ohm=8.0,
         sensitivity_band=(200.0, 4000.0),
         tolerance_db=3.0,
         impedance=(imp_freqs, impedance),
@@ -213,9 +215,9 @@ def _microphone_example() -> tuple[object, ReportMetadata, str]:
     )
 
     result = ph.electroacoustics.microphone_characteristics(
-        freqs,
-        response,
-        12.5,
+        frequencies=freqs,
+        response_db=response,
+        sensitivity_mv_per_pa=12.5,
         tolerance_db=3.0,
         directivity=ph.electroacoustics.MicrophoneDirectivity(
             polar=(angles, cardioid_db),
@@ -274,11 +276,11 @@ def _free_field_correction_example() -> tuple[object, ReportMetadata, str]:
     pressure = -0.1 * x**1.5
     spread = np.array([[0.0], [0.02], [-0.03]]) * x**0.8
     correction = ph.metrology.sound_calibrator_correction(
-        f,
-        94.0 + free + spread,
-        94.0 + c_ff_rm,
-        94.0 + pressure + spread / 2,
-        94.0,
+        frequencies=f,
+        slm_free_field_level=94.0 + free + spread,
+        reference_free_field_level=94.0 + c_ff_rm,
+        slm_calibrator_level=94.0 + pressure + spread / 2,
+        reference_calibrator_level=94.0,
         reference_free_field_correction=c_ff_rm,
     )
     table_i2 = {
@@ -313,8 +315,8 @@ def _free_field_correction_example() -> tuple[object, ReportMetadata, str]:
         )
     ]
     result = ph.metrology.verify_correction_uncertainty(
-        f,
-        [b.expanded_uncertainty_db for b in budgets],
+        frequencies=f,
+        expanded_uncertainty_db=[b.expanded_uncertainty_db for b in budgets],
         clause=correction.clause,
         correction=correction.correction,
         coverage_factor=[b.coverage_factor for b in budgets],

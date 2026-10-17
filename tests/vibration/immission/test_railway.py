@@ -268,7 +268,7 @@ def _lines(upper_hz: float = 600.0) -> np.ndarray:
 def test_each_band_takes_the_lines_table_1_gives_it() -> None:
     """A flat density of one: each band's mean square is K_n · 1,25."""
     f = _lines()
-    centres, rms = im.third_octaves_from_narrowband(f, np.ones_like(f))
+    centres, rms = im.third_octaves_from_narrowband(frequencies=f, psd=np.ones_like(f))
     assert list(centres) == list(im.THIRD_OCTAVE_LINES)
     counts = rms**2 / im.NARROWBAND_RESOLUTION_HZ
     assert np.allclose(counts, list(im.THIRD_OCTAVE_LINES.values()))
@@ -278,7 +278,7 @@ def _band_of(line_hz: float) -> list[float]:
     """The bands a single line of power lands in."""
     f = _lines()
     density = np.where(np.isclose(f, line_hz), 1.0, 0.0)
-    centres, rms = im.third_octaves_from_narrowband(f, density)
+    centres, rms = im.third_octaves_from_narrowband(frequencies=f, psd=density)
     return [float(c) for c, r in zip(centres, rms, strict=True) if r > 0.0]
 
 
@@ -314,16 +314,20 @@ def test_nominal_bands_leave_six_lines_out_and_share_five() -> None:
 
 def test_a_short_spectrum_stops_at_the_last_whole_band() -> None:
     f = _lines(100.0)
-    centres, _rms = im.third_octaves_from_narrowband(f, np.ones_like(f))
+    centres, _rms = im.third_octaves_from_narrowband(frequencies=f, psd=np.ones_like(f))
     assert centres[-1] == 80.0
 
 
 def test_a_late_spectrum_starts_at_the_first_whole_band() -> None:
     """A band short of a line is left out, not filled from its neighbour."""
     f = _lines()
-    from_line = im.third_octaves_from_narrowband(f[3:], np.ones(f.size - 3))
+    from_line = im.third_octaves_from_narrowband(
+        frequencies=f[3:], psd=np.ones(f.size - 3)
+    )
     assert from_line[0][0] == 4.0  # 3,75 Hz is the whole 4 Hz band
-    from_20 = im.third_octaves_from_narrowband(f[16:], np.ones(f.size - 16))
+    from_20 = im.third_octaves_from_narrowband(
+        frequencies=f[16:], psd=np.ones(f.size - 16)
+    )
     assert from_20[0][0] == 25.0  # the 20 Hz band needs 18,75 Hz
     assert np.allclose(from_20[1] ** 2 / 1.25, list(im.THIRD_OCTAVE_LINES.values())[8:])
 
@@ -331,13 +335,13 @@ def test_a_late_spectrum_starts_at_the_first_whole_band() -> None:
 def test_table_1_refuses_a_spectrum_of_another_resolution() -> None:
     f = np.arange(0.0, 600.0, 2.5)
     with pytest.raises(ValueError, match="Table 1 counts lines"):
-        im.third_octaves_from_narrowband(f, np.ones_like(f))
+        im.third_octaves_from_narrowband(frequencies=f, psd=np.ones_like(f))
     uneven = np.array([0.0, 1.25, 2.0, 3.75])
     with pytest.raises(ValueError, match="evenly spaced"):
-        im.third_octaves_from_narrowband(uneven, np.ones(4))
+        im.third_octaves_from_narrowband(frequencies=uneven, psd=np.ones(4))
     f = _lines()
     with pytest.raises(ValueError, match="negative"):
-        im.third_octaves_from_narrowband(f, -np.ones(f.size))
+        im.third_octaves_from_narrowband(frequencies=f, psd=-np.ones(f.size))
 
 
 # -- Annex B -----------------------------------------------------------------------

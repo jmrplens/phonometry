@@ -607,6 +607,7 @@ def earphone_reference_level(
 def hearing_level_to_coupler_spl(
     hearing_level: ArrayLike,
     earphone: str = _TDH39,
+    *,
     frequencies: ArrayLike | None = None,
 ) -> np.ndarray:
     """An audiogram in dB HL as the level the coupler has to see, in dB SPL.

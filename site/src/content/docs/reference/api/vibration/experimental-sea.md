@@ -233,13 +233,14 @@ $c_\mathrm{L} = \sqrt{E / (\rho (1 - \nu^2))}$.
 
 ```python
 power_injection_clf(
-    frequencies: ArrayLike,
     energy1: ArrayLike,
     energy2: ArrayLike,
     internal_loss_factor1: ArrayLike,
     internal_loss_factor2: ArrayLike,
     modal_density1: ArrayLike,
     modal_density2: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> PowerInjectionResult
 ```
 
@@ -289,9 +290,10 @@ time-averaged mean-square velocity in the band.
 
 ```python
 power_injection_matrix(
-    frequencies: ArrayLike,
     energies: ArrayLike,
     input_powers: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> PowerInjectionResult
 ```
 

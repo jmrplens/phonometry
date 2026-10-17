@@ -403,12 +403,16 @@ whole unit.
 
 ## Conditions and flags are written by name
 
-Two rules made 37 signatures keyword-only. A condition or an option that
-carries a default is written by name, and every public boolean flag is
-keyword-only. Both exist because the call site is where the meaning is lost:
-`air_attenuation(freqs, 20.0, 50.0, 101.325)` is a temperature, a humidity
-and a pressure in an order nobody remembers, and `bank.filter(x, True)` says
-nothing about which of five flags was thrown.
+An ambient or medium condition or a calibration factor that carries a default,
+and every public boolean flag, are keyword-only. The conditions are the
+temperature, the humidity and the static pressure, the speed of sound and the
+density of the medium, and the three ground factors of ISO 9613-2. The rule exists because the call site is
+where the meaning is lost: `air_attenuation(freqs, 20.0, 50.0, 101.325)` is a
+temperature, a humidity and a pressure in an order nobody remembers, and
+`bank.filter(x, True)` says nothing about which of five flags was thrown. A
+choice of method or of band set and a count (`mode`, `method`, `fraction`,
+`n`, `seed`) are options, not conditions, and the rule leaves them where they
+are.
 
 The failure is loud, which is the point:
 
@@ -433,6 +437,69 @@ Now it is a `TypeError`, which is what it always should have been.
 ```python
 print(round(float(leq(x, dbfs=True)), 3))
 ```
+
+These took a condition or a calibration factor by position until now:
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `signals.sound_exposure(x, fs, 8.0, cal)` and `lex_8h(x, fs, 8.0, cal)` | `sound_exposure(x, fs, duration_hours=8.0, calibration_factor=cal)` |
+| `psychoacoustics.sharpness_din(x, fs, "free", "din", cal)` | `sharpness_din(x, fs, "free", "din", calibration_factor=cal)` |
+| `environment.ground_attenuation(d, hs, hr, bands, gs, gm, gr)` | `ground_attenuation(d, hs, hr, frequencies=bands, ground_source=gs, ground_middle=gm, ground_receiver=gr)`, and `projected_distance=` by name |
+| the speed of sound by position on `IntensityInstrumentComplianceResult.phase_mismatch_deg`, `emission.phase_mismatch_from_residual_index`, `residual_index_from_phase_mismatch`, `environment.fresnel_number`, `spherical_reflection_coefficient`, `room.reflection_density`, `materials.reflected_path_delay`, `spot_tube_upper_frequency` and `spot_microphone_spacing_bounds` | `speed_of_sound=` |
+| `noise_control.LiquidPipe(d, t, rho, c, rho_air, c_air)` | `LiquidPipe(d, t, rho, speed_of_sound=c, air_density=rho_air, air_sound_speed=c_air)` |
+| `underwater.FluidSeabed(rho, c, rho_water)` | `FluidSeabed(rho, c, water_density=rho_water)` |
+| `io.Signal(data, fs, cal)` | `io.Signal(data, fs, calibration_factor=cal)`, and `channel_labels`, `provenance` and `source` by name |
+
+A frequency axis is written by name as well, wherever it sits beside the values
+it labels. Two arrays of one length bind either way round without a complaint,
+so a call that swaps them answers on the wrong axis instead of failing; the API
+reference itself carried `weighted_rating_extended(freqs, r)` and
+`weighted_impact_rating_extended(freqs, ln)` with the frequencies where the
+levels go. The values stay positional, in the order they
+had, and the axis goes behind the `*`:
+
+```python
+import numpy as np
+
+from phonometry import room, signals
+
+frequencies = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+levels = np.array([62.0, 56.0, 50.0, 45.0, 41.0, 38.0, 36.0, 35.0])
+
+print(room.noise_criterion(levels, frequencies=frequencies).rating)
+smoothed = signals.fractional_octave_smoothing(levels, frequencies=frequencies, domain="db")
+print(smoothed.shape)
+
+try:
+    room.noise_criterion(levels, frequencies)
+except TypeError as error:
+    print(error)      # noise_criterion() takes 1 positional argument but 2 were given
+```
+
+The axis is `frequencies`, `frequencies_hz` on the two underwater functions
+whose formulas are printed in kHz, and `frequency` where a function evaluates
+one frequency or many. An array whose name ends in one of them follows the same
+rule: the `tone_frequencies` beside the tone levels of ISO/PAS 20065, or the
+`critical_frequencies` beside the vibration reduction indices of ISO 12354-1.
+These functions took it by position until now:
+
+- `aircraft`: `hover_ring_hemisphere`, `terrain_screening_adjustment`.
+- `building`: `a_weighted_max_impact_level`, `apply_low_frequency_procedure`, `ceiling_attenuation_class`, `equivalent_absorption_length`, `impact_improvement`, `improvement_octave_bands`, `perimeter_absorption_coefficient`, `plate_loss_factor`, `reception_plate_power`, `reciprocity_impact_level`, `resonant_sound_reduction_index`, `structural_reverberation_time`, `structure_borne_power_level`, `tapping_machine_characteristic_power_level`, `tapping_machine_coupling_term`, `total_loss_factor`, `weighted_impact_rating_extended`, `weighted_rating_extended`.
+- `electroacoustics`: `loudspeaker_characteristics`, `microphone_characteristics`.
+- `emission`: `field_indicators`, `octave_band_levels`, `phase_mismatch_from_residual_index`, `precision_background_correction`, `residual_index_from_phase_mismatch`, `sound_energy_in_situ`, `sound_energy_reverberation`, `sound_power_in_duct`, `sound_power_in_situ`, `sound_power_reverberation`, `velocity_level_from_acceleration`, `verify_intensity_class`.
+- `environment`: `assess_tonal_survey`, `spherical_reflection_coefficient`, `tonal_correction`, `wind_turbine_tonality`.
+- `hearing`: `hearing_level_to_coupler_spl`.
+- `materials`: `diffusion_spectrum`, `equivalent_area_uncertainty`, `measure_sound_absorption`, `one_third_octave_absorption`, `practical_coefficient_uncertainty`, `scattering_coefficient_spectrum`, `sound_absorption_coefficient_uncertainty`.
+- `noise_control`: `duct_path`, `room_to_room_transmission`, `splitter_silencer_insertion_loss`.
+- `psychoacoustics`: `analyze_spectrum`, `assess_tones`, `combined_tone_level`, `equal_loudness_contours`, `mean_narrowband_level`, `tone_level`.
+- `room`: `noise_criterion`, `octave_pair_averages`, `room_criterion`, `room_modal_density`, `room_mode_count`, `single_number_average`.
+- `signals`: `fractional_octave_smoothing`, whose `fraction` is written by name now too.
+- `underwater`: `monopole_source_level`, `weighted_exposure`.
+- `vibration`: `characteristic_phase_deviation`, `convert_frf`, `coupling_loss_factor`, `indirect_transfer_stiffness_result`, `power_injection_clf`, `power_injection_matrix`, `transfer_stiffness_indirect`, `verify_phase_response`, `verify_rigid_mass_calibration`, `verify_weighting`, `weighted_acceleration`.
+
+A positional value that came after the axis stays positional and moves up one
+place: `convert_frf(value, f, "mobility", "impedance")` is
+`convert_frf(value, "mobility", "impedance", frequency=f)`.
 
 ## One spelling per concept
 
@@ -834,6 +901,16 @@ Six results that are newer than 3.3.0 took `language` by position in
 intensity results. `plot(ax, "es")` on those is `plot(ax, language="es")`
 now, as it is everywhere else.
 
+The public `plot_*` helpers, which draw a device or a geometry rather than a
+result, share one shape now as well: what they draw by position, and the
+axes, the language and the style keywords by name,
+`plot_x(<data>, *, ax=None, ..., language="en", **kwargs)`. Seventeen took the
+axes after their data and six took them first:
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `vibration.plot_plate_geometry(0.8, 0.6, ax)`, `environment.plot_barrier_geometry(ax, source_height=...)` and the other twenty-one public `plot_*` helpers | `plot_plate_geometry(0.8, 0.6, ax=ax)`, `plot_barrier_geometry(ax=ax, source_height_m=...)` |
+
 ## Verdicts are result objects, not dictionaries
 
 The five `verify_*` functions returned `dict[str, Any]` and now return a
@@ -971,7 +1048,7 @@ back the wrong column.
 | --- | --- |
 | `freq, lower, upper, labels = filters.nominal_frequencies(3)` | `b = filters.nominal_frequencies(3)`, then `b.frequencies`, `b.lower_edges`, `b.upper_edges` and `b.labels` (a `FractionalOctaveBands`) |
 | `epnl, pnltm, kf, kl = aircraft.epnl_from_pnlt(pnlt)` | `r = aircraft.epnl_from_pnlt(pnlt)`, then `r.epnl`, `r.pnltm`, `r.band_limits` (the pair `(kF, kL)`), `r.bandsharing_adjustment` and `r.duration_correction` (an `EPNLIntegration`) |
-| `freqs, delta_l = building.improvement_octave_bands(dl, f)` | `s = building.improvement_octave_bands(dl, f)`, then `s.frequencies` and `s.values` (an `OctaveBandSpectrum`, whose `quantity` says what the values are) |
+| `freqs, delta_l = building.improvement_octave_bands(dl, f)` | `s = building.improvement_octave_bands(dl, frequencies=f)`, then `s.frequencies` and `s.values` (an `OctaveBandSpectrum`, whose `quantity` says what the values are) |
 | `freqs, values = result.octave_bands()` on a `building.FloorCoveringImprovementResult` | `result.octave_bands().frequencies` and `.values`, the same `OctaveBandSpectrum` |
 
 ```python
@@ -1372,7 +1449,7 @@ import dataclasses
 
 from phonometry import vibration
 
-check = vibration.check_blocked_output([100.0, 200.0], [90.0, 95.0], [60.0, 70.0])
+check = vibration.check_blocked_output(frequencies=[100.0, 200.0], input_acceleration_level=[90.0, 95.0], output_acceleration_level=[60.0, 70.0])
 print(check.limit_db, check.passes)
 # 20.0 True
 try:
@@ -1380,7 +1457,7 @@ try:
 except TypeError as error:
     print(type(error).__name__)
 # TypeError
-calibration = vibration.verify_rigid_mass_calibration([0.104, 0.093], [50.0, 500.0], 10.0)
+calibration = vibration.verify_rigid_mass_calibration([0.104, 0.093], frequencies=[50.0, 500.0], mass=10.0)
 print(calibration.relative_tolerance, calibration.within_tolerance.tolist())
 # 0.05 [True, False]
 ```
@@ -1771,7 +1848,7 @@ Everything else moved. These seventy-four exist in no public module:
 | `rigid_mass_calibration_check` | `vibration.verify_rigid_mass_calibration`, with the same arguments and the same `RigidMassCalibrationResult`: it judges a measuring chain, so its verb is `verify_` |
 | `satisfies_lower_requirement`, `satisfies_upper_requirement` | `building.assess_requirement_conformity(value_db, expanded_uncertainty_db, requirement_db, bound="minimum")` or `bound="maximum"`. The bool is its `.passes`, beside the `.margin_db` it was read from, and both formulae stay strict |
 | `strong_coupling_satisfied` | `building.check_strong_coupling`, with the same arguments. The boolean array is its `.holds`, and `.passes` is every band |
-| `tonal_seeking_survey` | `environment.assess_tonal_survey(levels, frequencies)`. The boolean array is its `.prominent`, beside the `.thresholds_db` and `.level_differences` it was read from |
+| `tonal_seeking_survey` | `environment.assess_tonal_survey(levels, frequencies=frequencies)`. The boolean array is its `.prominent`, beside the `.thresholds_db` and `.level_differences` it was read from |
 
 ## What did not change
 

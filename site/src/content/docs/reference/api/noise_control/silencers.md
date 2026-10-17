@@ -362,8 +362,8 @@ $$
 ```python
 plot_silencer_geometry(
     kind: str,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     length: float | None = None,
     chamber_area: float | None = None,
     pipe_area: float | None = None,
@@ -375,6 +375,7 @@ plot_silencer_geometry(
     cavity_volume: float | None = None,
     branch_area: float | None = None,
     language: str = 'en',
+    **kwargs: Any,
 ) -> Axes
 ```
 
@@ -403,6 +404,7 @@ with its volume annotated.
 | `cavity_volume` | Cavity volume, in m3 (Helmholtz). |
 | `branch_area` | Branch tube cross-section, in m2 (quarter-wave). |
 | `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the outline of the main bore: the chamber shell of a chamber, the duct of a side branch. |
 
 **Returns:** The axes.
 

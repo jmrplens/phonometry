@@ -3518,6 +3518,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   an `AttributeError`, so `hasattr(fluid, "viscosity")` answers `False` and
   `getattr` with a default returns it, as before.
 
+- **A condition of the medium or a calibration factor that carries a default
+  is written by name, whatever its suffix.** A parameter that ends in its unit
+  and carries a default was already keyword-only; the speed of sound, the
+  density of air or of water, a calibration factor and the ground factors of
+  ISO 9613-2 carry no unit of their own, so they slipped past that rule and a
+  bare 343 or 0.5 bound to them by position. They are keyword-only now:
+  `signals.sound_exposure(x, fs, *, duration_hours=None,
+  calibration_factor=None)` and `lex_8h`, `sharpness_din`'s
+  `calibration_factor`, `environment.ground_attenuation(distance,
+  source_height_m, receiver_height_m, *, frequencies=..., ground_source=0.0,
+  ground_middle=0.0, ground_receiver=0.0, projected_distance=None)`, the
+  `speed_of_sound` of
+  `IntensityInstrumentComplianceResult.phase_mismatch_deg`,
+  `phase_mismatch_from_residual_index`, `residual_index_from_phase_mismatch`,
+  `fresnel_number`, `spherical_reflection_coefficient`, `reflection_density`,
+  `reflected_path_delay`, `spot_tube_upper_frequency` and
+  `spot_microphone_spacing_bounds`, the pipe wall and outside air of
+  `noise_control.LiquidPipe`, the water density above
+  `underwater.FluidSeabed`, and the calibration factor of `io.Signal`, whose
+  channel labels, provenance and source follow it behind the `*`.
+  `scripts/check_parameter_units.py` holds a named set of these conditions to
+  the rule whatever their suffix, and the migration guide lists the changed
+  signatures.
+
+- **A frequency axis beside the values it labels is written by name.** Two
+  arrays of one length bind either way round without a complaint, so a call
+  that swapped the frequencies and the levels answered on the wrong axis; the
+  API reference itself showed `weighted_rating_extended(freqs, r)` and
+  `weighted_impact_rating_extended(freqs, ln)` with the arrays the wrong way
+  round. In every public function and method that takes a frequency axis
+  beside another array, the axis (`frequencies`, `frequencies_hz` in
+  `underwater`, `frequency` where a function is vectorised) is keyword-only
+  and the values stay positional in their order:
+  `noise_criterion(levels, *, frequencies=None)`,
+  `fractional_octave_smoothing(values, *, frequencies, fraction=3.0,
+  domain="power")`, `program_signal_level(band_levels, *, frequencies,
+  ...)`, `kb_weighted_levels(levels, *, frequencies)`,
+  `third_octaves_from_narrowband(psd, *, frequencies)` and
+  `sequential_comparison(..., *, frequencies, ...)` among 139 signatures. An
+  array whose name ends in one of those words follows the same rule: the
+  `tone_frequencies` of `psychoacoustics.assess_tones` and
+  `combined_tone_level`, the `reversal_frequencies` of
+  `hearing.sweep_audiometry_threshold`, the `critical_frequencies` of
+  `building.perimeter_absorption_coefficient` and the
+  `damped_natural_frequency_hz` of `vibration.exponential_window_correction`.
+  A positional value that came after the axis moves up one place.
+  `scripts/check_parameter_units.py` fails on a public function that takes a
+  frequency array by position beside another array of numbers.
+
+- **Every public `plot_*` helper takes the axes and the language by name.**
+  The 23 geometry helpers drew from two shapes: seventeen took the axes after
+  their data (`plot_plate_geometry(0.8, 0.6, ax)`) and six took them first
+  (`plot_barrier_geometry(ax, ...)`). All of them now read
+  `plot_x(<data>, *, ax=None, ..., language="en", **kwargs)`, the `@overload`
+  stubs of `plot_aperture_geometry` and `plot_piston_geometry` included, and
+  `plot_silencer_geometry` forwards style keywords to the outline of the bore
+  as the others do. A test beside the one that holds every `.plot()` to the
+  axes first fails on a public `plot_*` function that takes `ax` or
+  `language` by position, or that declares `**kwargs` and never reads it.
+
 - **A function is named for what it returns, and a unit stays in the name only
   where the quantity has two.** A level, a correction, a difference, an index
   or a tolerance is in decibels and a frequency in hertz wherever the library

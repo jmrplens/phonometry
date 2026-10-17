@@ -75,7 +75,7 @@ def _direct(**kwargs: object) -> emission.SpecialRoomSoundPowerResult:
     kwargs.setdefault("background_levels", BACKGROUND)
     kwargs.setdefault("volume", 70.0)
     kwargs.setdefault("nominal_reverberation_time_s", 0.73)
-    return emission.sound_power_special_room(ST, FREQS, **kwargs)  # type: ignore[arg-type]
+    return emission.sound_power_special_room(ST, frequencies=FREQS, **kwargs)  # type: ignore[arg-type]
 
 
 # --------------------------------------------------------------------------
@@ -107,7 +107,9 @@ def test_a_room_that_follows_the_curve_centres_on_formula_b2() -> None:
     """If the specified curve is exactly obtained, Tnom = T1000 / R(1 000)."""
     r = emission.reverberation_parameter(THIRDS, 70.0)
     t = 0.8 * r / r[10]
-    check = emission.check_special_room_reverberation(t, THIRDS, volume=70.0)
+    check = emission.check_special_room_reverberation(
+        t, frequencies=THIRDS, volume=70.0
+    )
     assert check.centered
     assert check.nominal_reverberation_time_s == pytest.approx(0.8 / float(r[10]))
     np.testing.assert_allclose(check.normalized_ratio, 1.0, atol=1e-12)
@@ -121,7 +123,7 @@ def test_centring_balances_the_worst_bands_against_their_tolerances() -> None:
     r = emission.reverberation_parameter(THIRDS[:-2], 70.0)
     shape = np.linspace(0.95, 1.05, r.size) ** 2
     check = emission.check_special_room_reverberation(
-        0.7 * r * shape, THIRDS[:-2], volume=70.0
+        0.7 * r * shape, frequencies=THIRDS[:-2], volume=70.0
     )
     ratio = check.normalized_ratio
     assert float(ratio.max()) - 1.0 == pytest.approx(
@@ -140,7 +142,9 @@ def test_centring_weighs_each_band_by_its_own_tolerance() -> None:
     shape[0] = 0.96
     shape[-2:] = [1.16, 1.19]  # the 8 kHz and 10 kHz thirds run long
     t = 0.7 * r * shape
-    check = emission.check_special_room_reverberation(t, THIRDS, volume=70.0)
+    check = emission.check_special_room_reverberation(
+        t, frequencies=THIRDS, volume=70.0
+    )
     q = t / r
     width = np.where(THIRDS > 7000.0, 0.2, 0.1)
     scales = np.linspace(1.0, 2.0, 1_000_001)
@@ -154,7 +158,7 @@ def test_centring_weighs_each_band_by_its_own_tolerance() -> None:
 def test_bands_above_6_3_khz_take_the_wider_tolerance() -> None:
     check = emission.check_special_room_reverberation(
         np.full(THIRDS.size, 0.8),
-        THIRDS,
+        frequencies=THIRDS,
         volume=70.0,
         nominal_reverberation_time_s=0.8,
     )
@@ -165,7 +169,10 @@ def test_bands_above_6_3_khz_take_the_wider_tolerance() -> None:
 def test_a_supplied_nominal_time_is_checked_as_given() -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
     check = emission.check_special_room_reverberation(
-        0.73 * r * 1.15, THIRDS, volume=70.0, nominal_reverberation_time_s=0.73
+        0.73 * r * 1.15,
+        frequencies=THIRDS,
+        volume=70.0,
+        nominal_reverberation_time_s=0.73,
     )
     assert not check.centered
     assert not bool(np.any(check.band_within[:-2]))
@@ -177,7 +184,9 @@ def test_a_supplied_nominal_time_is_checked_as_given() -> None:
 )
 def test_nominal_time_between_0_5_and_1_0_s(tnom: float, *, ok: bool) -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
-    check = emission.check_special_room_reverberation(tnom * r, THIRDS, volume=70.0)
+    check = emission.check_special_room_reverberation(
+        tnom * r, frequencies=THIRDS, volume=70.0
+    )
     assert check.nominal_in_range is ok
 
 
@@ -197,7 +206,7 @@ def test_volume_criteria_of_6_2(
     r = emission.reverberation_parameter(THIRDS, volume)
     check = emission.check_special_room_reverberation(
         0.7 * r,
-        THIRDS,
+        frequencies=THIRDS,
         volume=volume,
         method=method,  # type: ignore[arg-type]
     )
@@ -208,7 +217,7 @@ def test_volume_criteria_of_6_2(
 def test_the_300_m3_ceiling_needs_the_8_khz_octave_in_range() -> None:
     r = emission.reverberation_parameter(THIRDS[:-3], 400.0)
     check = emission.check_special_room_reverberation(
-        0.7 * r, THIRDS[:-3], volume=400.0
+        0.7 * r, frequencies=THIRDS[:-3], volume=400.0
     )
     assert check.volume_small_enough
 
@@ -231,7 +240,7 @@ def test_climate_product_of_6_6(
 ) -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
     check = emission.check_special_room_reverberation(
-        0.7 * r, THIRDS, volume=70.0,
+        0.7 * r, frequencies=THIRDS, volume=70.0,
         relative_humidity_percent=humidity, temperature_c=temperature,
         reverberation_relative_humidity_percent=50.0, reverberation_temperature_c=20.0,
     )  # fmt: skip
@@ -242,27 +251,31 @@ def test_climate_given_in_part_is_refused() -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
     with pytest.raises(ValueError, match=r"6\.6"):
         emission.check_special_room_reverberation(
-            0.7 * r, THIRDS, volume=70.0, relative_humidity_percent=50.0
+            0.7 * r, frequencies=THIRDS, volume=70.0, relative_humidity_percent=50.0
         )
 
 
 def test_reverberation_check_has_no_truth_value() -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
-    check = emission.check_special_room_reverberation(0.7 * r, THIRDS, volume=70.0)
+    check = emission.check_special_room_reverberation(
+        0.7 * r, frequencies=THIRDS, volume=70.0
+    )
     with pytest.raises(TypeError, match="passes"):
         bool(check)
 
 
 def test_surface_check_has_no_truth_value() -> None:
     check = emission.check_special_room_surfaces(
-        np.full((5, 7), 0.15), [0.03] * 7, FREQS
+        np.full((5, 7), 0.15), [0.03] * 7, frequencies=FREQS
     )
     with pytest.raises(TypeError, match="passes"):
         bool(check)
 
 
 def test_suitability_check_has_no_truth_value() -> None:
-    check = emission.check_special_room_suitability(LW_RSS + 1.0, LW_RSS, FREQS)
+    check = emission.check_special_room_suitability(
+        LW_RSS + 1.0, LW_RSS, frequencies=FREQS
+    )
     with pytest.raises(TypeError, match="passes"):
         bool(check)
 
@@ -272,7 +285,7 @@ def test_suitability_check_has_no_truth_value() -> None:
 # --------------------------------------------------------------------------
 def test_surfaces_within_half_and_one_and_a_half_times_the_mean() -> None:
     walls = np.array([[0.2] * 7, [0.1] * 7, [0.3] * 7])  # mean 0,2: ratios 1, 0,5, 1,5
-    check = emission.check_special_room_surfaces(walls, [0.05] * 7, FREQS)
+    check = emission.check_special_room_surfaces(walls, [0.05] * 7, frequencies=FREQS)
     np.testing.assert_allclose(check.mean_absorption, 0.2)
     assert bool(np.all(check.surfaces_uniform))
     assert check.passes
@@ -281,7 +294,7 @@ def test_surfaces_within_half_and_one_and_a_half_times_the_mean() -> None:
 def test_surface_within_names_the_wall_and_the_band() -> None:
     walls = np.full((5, 7), 0.15)
     walls[1, 0] = 0.40  # mean 0,2 at 125 Hz: 0,4/0,2 = 2 and 0,15/0,2 = 0,75
-    check = emission.check_special_room_surfaces(walls, [0.03] * 7, FREQS)
+    check = emission.check_special_room_surfaces(walls, [0.03] * 7, frequencies=FREQS)
     expected = np.ones((5, 7), dtype=bool)
     expected[1, 0] = False
     np.testing.assert_array_equal(check.surface_within, expected)
@@ -290,16 +303,16 @@ def test_surface_within_names_the_wall_and_the_band() -> None:
 
 def test_a_floor_at_0_06_is_not_reflective_enough() -> None:
     walls = np.full((5, 7), 0.15)
-    check = emission.check_special_room_surfaces(walls, [0.06] * 7, FREQS)
+    check = emission.check_special_room_surfaces(walls, [0.06] * 7, frequencies=FREQS)
     assert not bool(np.any(check.floor_reflective))
     assert not check.passes
 
 
 def test_area_weighting_moves_the_mean() -> None:
     walls = np.array([[0.1] * 7, [0.4] * 7])
-    plain = emission.check_special_room_surfaces(walls, [0.02] * 7, FREQS)
+    plain = emission.check_special_room_surfaces(walls, [0.02] * 7, frequencies=FREQS)
     weighted = emission.check_special_room_surfaces(
-        walls, [0.02] * 7, FREQS, surface_areas_m2=[30.0, 10.0]
+        walls, [0.02] * 7, frequencies=FREQS, surface_areas_m2=[30.0, 10.0]
     )
     np.testing.assert_allclose(plain.mean_absorption, 0.25)
     np.testing.assert_allclose(weighted.mean_absorption, 0.175)
@@ -309,17 +322,21 @@ def test_area_weighting_moves_the_mean() -> None:
 
 def test_suitability_limits_of_table_1() -> None:
     measured = LW_RSS + np.array([5.0, 3.0, -3.0, 3.0, -3.0, 3.0, -4.0])
-    check = emission.check_special_room_suitability(measured, LW_RSS, FREQS)
+    check = emission.check_special_room_suitability(measured, LW_RSS, frequencies=FREQS)
     np.testing.assert_array_equal(check.limit_db, [5.0, 3.0, 3.0, 3.0, 3.0, 3.0, 4.0])
     assert check.passes
     worse = measured + np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.0])
-    assert not emission.check_special_room_suitability(worse, LW_RSS, FREQS).passes
+    assert not emission.check_special_room_suitability(
+        worse, LW_RSS, frequencies=FREQS
+    ).passes
 
 
 def test_suitability_refuses_63_hz() -> None:
     freqs = np.array([63.0, 125.0])
     with pytest.raises(ValueError, match="Table 1"):
-        emission.check_special_room_suitability([80.0, 80.0], [80.0, 80.0], freqs)
+        emission.check_special_room_suitability(
+            [80.0, 80.0], [80.0, 80.0], frequencies=freqs
+        )
 
 
 # --------------------------------------------------------------------------
@@ -368,7 +385,7 @@ def test_table3_cells(
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", emission.SoundPowerWarning)
         plan = emission.special_room_source_locations(
-            survey, [band], n_microphone_positions=(3, 6, 12)[column]
+            survey, frequencies=[band], n_microphone_positions=(3, 6, 12)[column]
         )
     assert plan.spectral_character == (cls,)
     assert int(plan.source_locations[0]) == row[column]
@@ -391,7 +408,7 @@ def test_table3_a_weighted_row(cls: str, row: tuple[int, int, int]) -> None:
     for column, mics in enumerate((3, 6, 12)):
         plan = emission.special_room_source_locations(
             _survey(1.0),
-            [1000.0],
+            frequencies=[1000.0],
             n_microphone_positions=mics,
             a_weighted_levels=a_levels,
         )
@@ -407,7 +424,7 @@ def test_9_5_lower_class_edge(s_m: float, cls: str) -> None:
     pattern = np.array([-1.0, 1.0, -1.0, 1.0, -1.0, 1.0])
     scale = s_m / float(np.std(pattern, ddof=1))
     survey = 70.0 + scale * pattern[:, None]
-    plan = emission.special_room_source_locations(survey, [1000.0])
+    plan = emission.special_room_source_locations(survey, frequencies=[1000.0])
     assert plan.spectral_character == (cls,)
 
 
@@ -435,12 +452,14 @@ def test_formula5_takes_over_above_a_5_db_range() -> None:
     and Formula (4) is taken about that mean.
     """
     levels = np.array([60.0, 66.0, 60.0, 60.0, 60.0, 60.0])
-    plan = emission.special_room_source_locations(levels[:, None], [500.0])
+    plan = emission.special_room_source_locations(levels[:, None], frequencies=[500.0])
     energy = float(_energy_mean(levels))
     expected = math.sqrt(float(np.sum((levels - energy) ** 2)) / 5.0)
     assert float(plan.standard_deviation_db[0]) == pytest.approx(expected, abs=1e-12)
     arithmetic = np.array([60.0, 65.0, 60.0, 60.0, 60.0, 60.0])
-    plan = emission.special_room_source_locations(arithmetic[:, None], [500.0])
+    plan = emission.special_room_source_locations(
+        arithmetic[:, None], frequencies=[500.0]
+    )
     assert float(plan.standard_deviation_db[0]) == pytest.approx(
         float(np.std(arithmetic, ddof=1)), abs=1e-12
     )
@@ -456,7 +475,7 @@ def test_a_5_db_range_read_in_decimal_keeps_the_arithmetic_mean() -> None:
     levels = np.array([64.4, 59.4, 61.0, 62.3, 63.1, 60.2])
     assert float(np.ptp(levels)) > 5.0  # noqa: PLR2004
     plan = emission.special_room_source_locations(
-        levels[:, None], [500.0], a_weighted_levels=levels
+        levels[:, None], frequencies=[500.0], a_weighted_levels=levels
     )
     arithmetic = float(np.std(levels, ddof=1))
     assert float(plan.standard_deviation_db[0]) == pytest.approx(arithmetic, abs=1e-12)
@@ -466,7 +485,9 @@ def test_a_5_db_range_read_in_decimal_keeps_the_arithmetic_mean() -> None:
 def test_table3_has_no_column_for_four_microphones() -> None:
     survey = _survey(1.0, FREQS.size)
     with pytest.raises(ValueError, match="n_microphone_positions"):
-        emission.special_room_source_locations(survey, FREQS, n_microphone_positions=4)
+        emission.special_room_source_locations(
+            survey, frequencies=FREQS, n_microphone_positions=4
+        )
 
 
 # --------------------------------------------------------------------------
@@ -526,7 +547,7 @@ def test_direct_method_corrects_each_position_by_table4() -> None:
 def test_source_locations_all_enter_formula8() -> None:
     locations = np.stack([ST, ST + 2.0])
     res = emission.sound_power_special_room(
-        locations, FREQS, volume=70.0, nominal_reverberation_time_s=0.73,
+        locations, frequencies=FREQS, volume=70.0, nominal_reverberation_time_s=0.73,
         background_levels=BACKGROUND,
     )  # fmt: skip
     np.testing.assert_allclose(
@@ -578,7 +599,7 @@ def test_nominal_time_outside_6_3_warns() -> None:
 
 def test_comparison_method_is_formula10() -> None:
     res = emission.sound_power_special_room_comparison(
-        ST, RSS, LW_RSS, FREQS, background_levels=BACKGROUND
+        ST, RSS, LW_RSS, frequencies=FREQS, background_levels=BACKGROUND
     )
     expected = _energy_mean(ST, 0) + (LW_RSS - _energy_mean(RSS, 0))
     np.testing.assert_allclose(res.sound_power_level, expected, atol=1e-12)
@@ -592,7 +613,7 @@ def test_comparison_a_weighted_total_is_annex_f() -> None:
     although F.1 names only 10.2: Formula (F.1) with Table F.1 applies.
     """
     res = emission.sound_power_special_room_comparison(
-        ST, RSS, LW_RSS, FREQS, background_levels=BACKGROUND
+        ST, RSS, LW_RSS, frequencies=FREQS, background_levels=BACKGROUND
     )
     total = 10.0 * np.log10(
         np.sum(10.0 ** (0.1 * (res.sound_power_level + CK_TABLE_F1)))
@@ -604,7 +625,7 @@ def test_comparison_a_weighted_total_is_annex_f() -> None:
 def test_comparison_reference_below_six_positions_warns() -> None:
     with pytest.warns(emission.SoundPowerWarning, match=r"10\.3"):
         emission.sound_power_special_room_comparison(
-            ST, RSS[:4], LW_RSS, FREQS, background_levels=BACKGROUND
+            ST, RSS[:4], LW_RSS, frequencies=FREQS, background_levels=BACKGROUND
         )
 
 
@@ -616,7 +637,7 @@ def test_comparison_background_margin_of_the_reference_counts() -> None:
             ST,
             RSS,
             LW_RSS,
-            FREQS,
+            frequencies=FREQS,
             background_levels=BACKGROUND,
             background_levels_ref=bg_ref,
         )
@@ -635,7 +656,7 @@ def test_comparison_corrects_the_reference_levels_by_table4() -> None:
         ST,
         RSS,
         LW_RSS,
-        FREQS,
+        frequencies=FREQS,
         background_levels=BACKGROUND,
         background_levels_ref=bg_ref,
     )
@@ -654,7 +675,7 @@ def test_comparison_reference_correction_moves_formula10_by_its_table4_row() -> 
         np.full((6, 1), 75.0),
         np.full((6, 1), 80.0),
         [90.0],
-        [1000.0],
+        frequencies=[1000.0],
         background_levels=[50.0],
         background_levels_ref=[75.0],
     )
@@ -679,7 +700,7 @@ def test_table_d1_row_of_the_grade_2_method(omc: float, printed: float) -> None:
 def test_annex_e_c2_matches_part_1() -> None:
     direct = _direct(temperature_c=15.0, static_pressure_kpa=95.0)
     part1 = emission.sound_power_hard_walled(
-        ST, RSS, LW_RSS, FREQS, background_levels=BACKGROUND, temperature_c=15.0,
+        ST, RSS, LW_RSS, frequencies=FREQS, background_levels=BACKGROUND, temperature_c=15.0,
         static_pressure_kpa=95.0,
     )  # fmt: skip
     assert direct.c2 == pytest.approx(part1.c2, abs=1e-15)
@@ -718,7 +739,7 @@ def test_plot_of_the_direct_method() -> None:
 
 def test_plot_of_the_comparison_method_in_spanish() -> None:
     res = emission.sound_power_special_room_comparison(
-        ST, RSS, LW_RSS, FREQS, background_levels=BACKGROUND
+        ST, RSS, LW_RSS, frequencies=FREQS, background_levels=BACKGROUND
     )
     ax = res.plot(language="es")
     assert "método de comparación" in ax.get_title()
@@ -730,7 +751,7 @@ def test_reverberation_plot_rings_bands_outside_the_limits() -> None:
     t = 0.7 * r
     t[3] *= 1.3
     check = emission.check_special_room_reverberation(
-        t, THIRDS, volume=70.0, nominal_reverberation_time_s=0.7
+        t, frequencies=THIRDS, volume=70.0, nominal_reverberation_time_s=0.7
     )
     ax = check.plot()
     labels = [line.get_label() for line in ax.lines]
@@ -741,13 +762,15 @@ def test_reverberation_plot_rings_bands_outside_the_limits() -> None:
 
 def test_surface_and_suitability_plots_draw() -> None:
     surfaces = emission.check_special_room_surfaces(
-        np.full((5, 7), 0.15), [0.03] * 7, FREQS
+        np.full((5, 7), 0.15), [0.03] * 7, frequencies=FREQS
     )
     ax = surfaces.plot()
     assert len([line for line in ax.lines if line.get_label().startswith("Wall")]) == 5
     assert ax.get_title().endswith(": complies")
     assert "Outside 6.4" not in [line.get_label() for line in ax.lines]
-    suitability = emission.check_special_room_suitability(LW_RSS + 1.0, LW_RSS, FREQS)
+    suitability = emission.check_special_room_suitability(
+        LW_RSS + 1.0, LW_RSS, frequencies=FREQS
+    )
     ax = suitability.plot(language="es")
     assert "idónea" in ax.get_title()
     plt.close("all")
@@ -757,7 +780,7 @@ def test_surface_plot_rings_what_fails_and_says_so() -> None:
     walls = np.full((5, 7), 0.15)
     walls[1, 0] = 0.40
     floor = np.array([0.03, 0.03, 0.03, 0.03, 0.03, 0.08, 0.08])
-    check = emission.check_special_room_surfaces(walls, floor, FREQS)
+    check = emission.check_special_room_surfaces(walls, floor, frequencies=FREQS)
     ax = check.plot(language="es")
     assert ax.get_title().endswith(": no cumple")
     (ring,) = [
@@ -770,15 +793,21 @@ def test_surface_plot_rings_what_fails_and_says_so() -> None:
 
 def test_reverberation_plot_states_the_verdict() -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
-    passing = emission.check_special_room_reverberation(0.7 * r, THIRDS, volume=70.0)
+    passing = emission.check_special_room_reverberation(
+        0.7 * r, frequencies=THIRDS, volume=70.0
+    )
     assert passing.plot().get_title().endswith(": qualified")
-    failing = emission.check_special_room_reverberation(0.7 * r, THIRDS, volume=60.0)
+    failing = emission.check_special_room_reverberation(
+        0.7 * r, frequencies=THIRDS, volume=60.0
+    )
     assert failing.plot().get_title().endswith(": not qualified")
     plt.close("all")
 
 
 def test_source_location_plot_names_each_limit_line() -> None:
-    plan = emission.special_room_source_locations(_survey(3.0, FREQS.size), FREQS)
+    plan = emission.special_room_source_locations(
+        _survey(3.0, FREQS.size), frequencies=FREQS
+    )
     labels = [t.get_text() for t in plan.plot().get_legend().get_texts()]
     assert "Table 3: 2.3 dB, narrow-band components (9.5)" in labels
     assert "Table 3: 4 dB, discrete tone (9.5)" in labels
@@ -787,7 +816,9 @@ def test_source_location_plot_names_each_limit_line() -> None:
 
 def test_source_location_plot_adds_the_a_weighted_bar() -> None:
     plan = emission.special_room_source_locations(
-        _survey(3.0, FREQS.size), FREQS, a_weighted_levels=_survey(1.0)[:, 0]
+        _survey(3.0, FREQS.size),
+        frequencies=FREQS,
+        a_weighted_levels=_survey(1.0)[:, 0],
     )
     ax = plan.plot()
     assert len(ax.patches) == FREQS.size + 1
@@ -813,7 +844,7 @@ def test_the_b5_example_centres_the_room_within_its_curves() -> None:
     the limiting curves, at T/Tnom = 1,05 at 1 kHz and Tnom = 0,76 s.
     """
     check = emission.check_special_room_reverberation(
-        0.8 * FIGURE_B4, THIRDS, volume=70.0
+        0.8 * FIGURE_B4, frequencies=THIRDS, volume=70.0
     )
     assert check.passes
     assert 0.8 / check.nominal_reverberation_time_s == pytest.approx(1.053, abs=0.012)
@@ -831,11 +862,13 @@ def test_the_printed_1_09_of_b5_is_the_narrow_midpoint_and_fails_250_hz() -> Non
     midpoint = 0.8 / (0.5 * float(q.max() + q.min()))
     assert midpoint == pytest.approx(1.09, abs=0.015)
     printed = emission.check_special_room_reverberation(
-        t, THIRDS, volume=70.0, nominal_reverberation_time_s=0.73
+        t, frequencies=THIRDS, volume=70.0, nominal_reverberation_time_s=0.73
     )
     assert not printed.passes
     assert float(printed.normalized_ratio[4]) > 1.1
-    centred = emission.check_special_room_reverberation(t, THIRDS, volume=70.0)
+    centred = emission.check_special_room_reverberation(
+        t, frequencies=THIRDS, volume=70.0
+    )
     shift = 10.0 * math.log10(centred.nominal_reverberation_time_s / 0.73)
     assert shift == pytest.approx(0.17, abs=0.05)
 
@@ -849,7 +882,7 @@ def test_source_of_1_percent_of_the_room_is_recommended() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error", emission.SoundPowerWarning)
         check = emission.check_special_room_reverberation(
-            0.7 * r, THIRDS, volume=70.0, source_volume_m3=0.7
+            0.7 * r, frequencies=THIRDS, volume=70.0, source_volume_m3=0.7
         )
     assert check.source_size_recommended is True
     assert check.source_volume_m3 == 0.7
@@ -862,7 +895,7 @@ def test_a_larger_source_warns_but_leaves_the_verdict() -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
     with pytest.warns(emission.SoundPowerWarning, match="clause 5"):
         check = emission.check_special_room_reverberation(
-            0.7 * r, THIRDS, volume=70.0, source_volume_m3=0.75
+            0.7 * r, frequencies=THIRDS, volume=70.0, source_volume_m3=0.75
         )
     assert check.source_size_recommended is False
     assert check.passes
@@ -870,7 +903,9 @@ def test_a_larger_source_warns_but_leaves_the_verdict() -> None:
 
 def test_no_source_volume_reads_nothing() -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
-    check = emission.check_special_room_reverberation(0.7 * r, THIRDS, volume=70.0)
+    check = emission.check_special_room_reverberation(
+        0.7 * r, frequencies=THIRDS, volume=70.0
+    )
     assert check.source_size_recommended is None
     assert math.isnan(check.source_volume_m3)
 
@@ -879,7 +914,7 @@ def test_a_source_volume_must_be_positive() -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
     with pytest.raises(ValueError, match="source_volume_m3"):
         emission.check_special_room_reverberation(
-            0.7 * r, THIRDS, volume=70.0, source_volume_m3=-0.1
+            0.7 * r, frequencies=THIRDS, volume=70.0, source_volume_m3=-0.1
         )
 
 
@@ -890,7 +925,7 @@ def test_a_wall_at_1_55_times_the_mean_is_not_uniform() -> None:
     """6.4: 1,5 times the mean is the last ratio allowed."""
     other = (4.0 * 0.2 - 0.31) / 3.0  # the mean of the four is 0,2
     walls = np.array([[0.31] * 7, [other] * 7, [other] * 7, [other] * 7])
-    check = emission.check_special_room_surfaces(walls, [0.03] * 7, FREQS)
+    check = emission.check_special_room_surfaces(walls, [0.03] * 7, frequencies=FREQS)
     np.testing.assert_allclose(check.surface_ratio[0], 1.55)
     assert not bool(np.any(check.surface_within[0]))
     assert bool(np.all(check.surface_within[1:]))
@@ -905,7 +940,7 @@ def test_suitability_fails_a_band_read_too_low(band: int, offset: float) -> None
     """
     measured = LW_RSS.copy()
     measured[band] += offset
-    check = emission.check_special_room_suitability(measured, LW_RSS, FREQS)
+    check = emission.check_special_room_suitability(measured, LW_RSS, frequencies=FREQS)
     expected = np.ones(FREQS.size, dtype=bool)
     expected[band] = False
     np.testing.assert_array_equal(check.band_within, expected)
@@ -919,7 +954,9 @@ def test_suitability_keeps_both_spectra_as_copies() -> None:
     measured = LW_RSS + np.array([1.0, -0.5, 0.2, 0.0, 0.4, -1.1, 2.0])
     calibrated = LW_RSS.copy()
     freqs = FREQS.copy()
-    check = emission.check_special_room_suitability(measured, calibrated, freqs)
+    check = emission.check_special_room_suitability(
+        measured, calibrated, frequencies=freqs
+    )
     measured[0] = 0.0
     calibrated[0] = 0.0
     freqs[0] = 63.0
@@ -942,15 +979,15 @@ def test_results_keep_frequencies_of_their_own() -> None:
     results = (
         emission.sound_power_special_room(
             ST,
-            freqs,
+            frequencies=freqs,
             volume=70.0,
             nominal_reverberation_time_s=0.73,
             background_levels=BACKGROUND,
         ),
         emission.sound_power_special_room_comparison(
-            ST, RSS, LW_RSS, freqs, background_levels=BACKGROUND
+            ST, RSS, LW_RSS, frequencies=freqs, background_levels=BACKGROUND
         ),
-        emission.special_room_source_locations(ST, freqs),
+        emission.special_room_source_locations(ST, frequencies=freqs),
     )
     freqs[0] = 63.0
     for result in results:
@@ -959,7 +996,9 @@ def test_results_keep_frequencies_of_their_own() -> None:
 
 def test_suitability_takes_the_conditions_of_the_test_by_keyword() -> None:
     with pytest.raises(TypeError, match="positional"):
-        emission.check_special_room_suitability(LW_RSS, LW_RSS, FREQS, 20.0, 90.0)  # type: ignore[misc]
+        emission.check_special_room_suitability(  # type: ignore[misc]
+            LW_RSS, LW_RSS, 20.0, 90.0, frequencies=FREQS
+        )
 
 
 @pytest.mark.parametrize(
@@ -973,7 +1012,7 @@ def test_suitability_refuses_a_climate_out_of_range(
         emission.check_special_room_suitability(
             LW_RSS,
             LW_RSS,
-            FREQS,
+            frequencies=FREQS,
             temperature_c=temperature_c,
             static_pressure_kpa=static_pressure_kpa,
         )
@@ -981,7 +1020,7 @@ def test_suitability_refuses_a_climate_out_of_range(
 
 def test_suitability_refuses_calibrated_levels_of_other_bands() -> None:
     with pytest.raises(ValueError, match="one value per band"):
-        emission.check_special_room_suitability(LW_RSS, LW_RSS[:-1], FREQS)
+        emission.check_special_room_suitability(LW_RSS, LW_RSS[:-1], frequencies=FREQS)
 
 
 def test_a_4_db_margin_meets_9_8_without_a_warning() -> None:
@@ -1004,7 +1043,7 @@ def test_comparison_reuses_the_background_for_the_reference() -> None:
         np.full((6, 1), 81.0),
         np.full((6, 1), 75.0),
         [90.0],
-        [1000.0],
+        frequencies=[1000.0],
         background_levels=[70.0],
     )
     assert res.mean_reference_level[0] == pytest.approx(73.0, abs=1e-12)
@@ -1019,7 +1058,7 @@ def test_reverberation_plot_draws_t_over_tnom_within_r_scaled_limits() -> None:
     t = 0.7 * r
     t[3] *= 1.3
     check = emission.check_special_room_reverberation(
-        t, THIRDS, volume=70.0, nominal_reverberation_time_s=0.7
+        t, frequencies=THIRDS, volume=70.0, nominal_reverberation_time_s=0.7
     )
     ax = check.plot()
     (measured,) = [
@@ -1034,7 +1073,7 @@ def test_reverberation_plot_draws_t_over_tnom_within_r_scaled_limits() -> None:
 
 def test_suitability_plot_draws_the_signed_difference() -> None:
     measured = LW_RSS + np.array([1.0, -2.0, 0.5, -3.5, 2.0, -1.0, 3.0])
-    check = emission.check_special_room_suitability(measured, LW_RSS, FREQS)
+    check = emission.check_special_room_suitability(measured, LW_RSS, frequencies=FREQS)
     ax = check.plot()
     heights = [p.get_height() for p in ax.patches[: FREQS.size]]
     np.testing.assert_allclose(heights, check.difference)
@@ -1047,7 +1086,7 @@ def test_suitability_plot_draws_the_signed_difference() -> None:
 def test_surface_plot_shades_half_to_one_and_a_half_times_the_mean() -> None:
     walls = np.full((5, 7), 0.15)
     walls[:, 3] = [0.10, 0.20, 0.15, 0.12, 0.18]
-    check = emission.check_special_room_surfaces(walls, [0.03] * 7, FREQS)
+    check = emission.check_special_room_surfaces(walls, [0.03] * 7, frequencies=FREQS)
     ax = check.plot()
     (band,) = [
         c for c in ax.collections if c.get_label() == "0.5 to 1.5 times the mean"
@@ -1066,9 +1105,9 @@ def test_source_location_plot_draws_each_class_line_where_its_table_does(
 ) -> None:
     survey = _survey(3.0, FREQS.size)
     plan = (
-        emission.hard_walled_source_locations(survey, FREQS)
+        emission.hard_walled_source_locations(survey, frequencies=FREQS)
         if part == "1"
-        else emission.special_room_source_locations(survey, FREQS)
+        else emission.special_room_source_locations(survey, frequencies=FREQS)
     )
     ax = plan.plot()
     levels = sorted(
@@ -1087,13 +1126,17 @@ def test_source_location_plot_draws_each_class_line_where_its_table_does(
 
 def test_source_location_plot_names_the_a_bar_on_its_axis() -> None:
     plan = emission.special_room_source_locations(
-        _survey(3.0, FREQS.size), FREQS, a_weighted_levels=_survey(1.0)[:, 0]
+        _survey(3.0, FREQS.size),
+        frequencies=FREQS,
+        a_weighted_levels=_survey(1.0)[:, 0],
     )
     assert plan.plot().get_xlabel() == "Frequency [Hz]; A: A-weighted level"
     assert (
         plan.plot(language="es").get_xlabel() == "Frecuencia [Hz]; A: nivel ponderado A"
     )
-    plain = emission.special_room_source_locations(_survey(3.0, FREQS.size), FREQS)
+    plain = emission.special_room_source_locations(
+        _survey(3.0, FREQS.size), frequencies=FREQS
+    )
     assert plain.plot().get_xlabel() == "Frequency [Hz]"
     plt.close("all")
 
@@ -1106,7 +1149,7 @@ def test_spectrum_title_fits_a_default_figure(method: str, language: str) -> Non
         _direct()
         if method == "direct"
         else emission.sound_power_special_room_comparison(
-            ST, RSS, LW_RSS, FREQS, background_levels=BACKGROUND
+            ST, RSS, LW_RSS, frequencies=FREQS, background_levels=BACKGROUND
         )
     )
     ax = res.plot(language=language)

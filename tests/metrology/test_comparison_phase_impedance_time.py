@@ -77,10 +77,10 @@ def _phase_calibration(
     first, second = _level_readings()
     phi_1, phi_2 = _interchange_phases()
     return metrology.simultaneous_comparison(
-        _F,
-        _L_REF,
-        first,
-        second,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=first,
+        interchanged_channel_difference=second,
         phase=metrology.SimultaneousComparisonPhase(
             reference_sensitivity_phase_deg=_PHI_REF,
             channel_phase_difference_deg=phi_1,
@@ -110,10 +110,10 @@ def test_phases_either_side_of_half_a_turn_are_taken_into_one_turn() -> None:
     phi_1, phi_2 = _interchange_phases(phi_ref, phi_test)
     first, second = _level_readings()
     result = metrology.simultaneous_comparison(
-        _F,
-        _L_REF,
-        first,
-        second,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=first,
+        interchanged_channel_difference=second,
         phase=metrology.SimultaneousComparisonPhase(
             reference_sensitivity_phase_deg=phi_ref,
             channel_phase_difference_deg=cc._wrapped_deg(phi_1),
@@ -135,10 +135,10 @@ def test_a_channel_that_inverts_the_phase_is_taken_through_one_turn() -> None:
     assert np.any(np.abs(first_phase - second_phase) > 180.0)
     first, second = _level_readings()
     result = metrology.simultaneous_comparison(
-        _F,
-        _L_REF,
-        first,
-        second,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=first,
+        interchanged_channel_difference=second,
         phase=metrology.SimultaneousComparisonPhase(
             reference_sensitivity_phase_deg=_PHI_REF,
             channel_phase_difference_deg=first_phase,
@@ -160,9 +160,9 @@ def test_determinations_either_side_of_half_a_turn_average_next_to_them() -> Non
     readings = np.vstack([_L_REF - _L_TEST, _L_REF - _L_TEST])
     phases = np.vstack([np.full(_F.size, -179.0), np.full(_F.size, 179.0)])
     result = metrology.simultaneous_comparison(
-        _F,
-        _L_REF,
-        readings,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=readings,
         field="free",
         phase=metrology.SimultaneousComparisonPhase(
             reference_sensitivity_phase_deg=0.0,
@@ -176,9 +176,9 @@ def test_determinations_either_side_of_half_a_turn_average_next_to_them() -> Non
 
 def test_free_field_without_interchange_reads_the_channel_phase() -> None:
     result = metrology.simultaneous_comparison(
-        _F,
-        _L_REF,
-        _L_REF - _L_TEST,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=_L_REF - _L_TEST,
         field="free",
         phase=metrology.SimultaneousComparisonPhase(
             reference_sensitivity_phase_deg=_PHI_REF,
@@ -195,7 +195,12 @@ def test_pressure_phase_is_subtracted() -> None:
 
 def test_a_calibration_without_phases_has_none() -> None:
     first, second = _level_readings()
-    result = metrology.simultaneous_comparison(_F, _L_REF, first, second)
+    result = metrology.simultaneous_comparison(
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=first,
+        interchanged_channel_difference=second,
+    )
     assert result.sensitivity_phase_deg is None
     assert result.output_phase_difference_deg is None
     assert result.pressure_phase_difference_deg is None
@@ -222,10 +227,10 @@ def test_phase_readings_follow_the_level_readings() -> None:
     )
     with pytest.raises(ValueError, match="interchanged_channel_phase_difference_deg"):
         metrology.simultaneous_comparison(
-            _F,
-            _L_REF,
-            first,
-            second,
+            frequencies=_F,
+            reference_sensitivity_level=_L_REF,
+            channel_difference=first,
+            interchanged_channel_difference=second,
             phase=phase,
         )
 
@@ -239,9 +244,9 @@ def test_an_interchanged_phase_without_the_interchanged_level_is_refused() -> No
     )
     with pytest.raises(ValueError, match="interchanged_channel_difference"):
         metrology.simultaneous_comparison(
-            _F,
-            _L_REF,
-            _L_REF - _L_TEST,
+            frequencies=_F,
+            reference_sensitivity_level=_L_REF,
+            channel_difference=_L_REF - _L_TEST,
             field="free",
             phase=phase,
         )
@@ -261,10 +266,10 @@ def test_phase_determinations_must_be_those_of_the_levels() -> None:
     )
     with pytest.raises(ValueError, match="determinations"):
         metrology.simultaneous_comparison(
-            _F,
-            _L_REF,
-            rows_1,
-            rows_2,
+            frequencies=_F,
+            reference_sensitivity_level=_L_REF,
+            channel_difference=rows_1,
+            interchanged_channel_difference=rows_2,
             phase=phase,
         )
 
@@ -274,10 +279,10 @@ def test_monitor_phases_cancel_a_source_that_drifts_in_phase() -> None:
     field_2 = field_1 + np.array([3.0, -5.0, 8.0, 12.0, -20.0])
     monitor = 50.0
     result = metrology.sequential_comparison(
-        _F,
-        _L_REF,
-        _L_REF + 94.0,
-        _L_TEST + 94.0,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        reference_output_level=_L_REF + 94.0,
+        test_output_level=_L_TEST + 94.0,
         monitor=metrology.MonitorReadings(
             reference_level=81.5,
             test_level=81.5,
@@ -297,10 +302,10 @@ def test_monitor_phases_cancel_a_source_that_drifts_in_phase() -> None:
 
 def test_without_a_monitor_the_output_phases_are_differenced() -> None:
     result = metrology.sequential_comparison(
-        _F,
-        _L_REF,
-        _L_REF + 94.0,
-        _L_TEST + 94.0,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        reference_output_level=_L_REF + 94.0,
+        test_output_level=_L_TEST + 94.0,
         phase=metrology.SequentialComparisonPhase(
             reference_sensitivity_phase_deg=_PHI_REF,
             reference_output_phase_deg=_PHI_REF + 33.0,
@@ -312,10 +317,10 @@ def test_without_a_monitor_the_output_phases_are_differenced() -> None:
 
 def test_a_monitor_read_in_level_alone_leaves_the_output_phases_as_read() -> None:
     result = metrology.sequential_comparison(
-        _F,
-        _L_REF,
-        _L_REF + 94.0,
-        _L_TEST + 94.0,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        reference_output_level=_L_REF + 94.0,
+        test_output_level=_L_TEST + 94.0,
         monitor=metrology.MonitorReadings(reference_level=80.0, test_level=80.0),
         phase=metrology.SequentialComparisonPhase(
             reference_sensitivity_phase_deg=_PHI_REF,
@@ -342,10 +347,10 @@ def test_monitor_phases_without_output_phases_are_refused() -> None:
     )
     with pytest.raises(ValueError, match="monitor phases"):
         metrology.sequential_comparison(
-            _F,
-            _L_REF,
-            _L_REF + 94.0,
-            _L_TEST + 94.0,
+            frequencies=_F,
+            reference_sensitivity_level=_L_REF,
+            reference_output_level=_L_REF + 94.0,
+            test_output_level=_L_TEST + 94.0,
             monitor=monitor,
         )
 
@@ -364,10 +369,10 @@ def test_monitor_phase_determinations_must_be_those_of_the_outputs() -> None:
     )
     with pytest.raises(ValueError, match="determinations"):
         metrology.sequential_comparison(
-            _F,
-            _L_REF,
-            _L_REF + 94.0,
-            _L_TEST + 94.0,
+            frequencies=_F,
+            reference_sensitivity_level=_L_REF,
+            reference_output_level=_L_REF + 94.0,
+            test_output_level=_L_TEST + 94.0,
             monitor=monitor,
             phase=phase,
         )
@@ -436,7 +441,12 @@ def test_phase_plot_draws_both_phases() -> None:
 
 def test_phase_plot_of_a_calibration_without_phases_is_refused() -> None:
     first, second = _level_readings()
-    result = metrology.simultaneous_comparison(_F, _L_REF, first, second)
+    result = metrology.simultaneous_comparison(
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=first,
+        interchanged_channel_difference=second,
+    )
     with pytest.raises(ValueError, match="carries no phase"):
         result.plot(quantity="phase")
 
@@ -597,10 +607,10 @@ def test_ratio_corrects_a_calibration_in_level_and_phase() -> None:
     )
     # The test microphone hears R_P times the reference's pressure.
     result = metrology.sequential_comparison(
-        _F,
-        _L_REF,
-        _L_REF + 94.0,
-        _L_TEST + 94.0 + ratio.level_difference,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        reference_output_level=_L_REF + 94.0,
+        test_output_level=_L_TEST + 94.0 + ratio.level_difference,
         pressure_level_difference=ratio.level_difference,
         phase=metrology.SequentialComparisonPhase(
             reference_sensitivity_phase_deg=_PHI_REF,
@@ -1124,7 +1134,9 @@ def test_formula_b3_and_b2_round_trip_through_the_window() -> None:
     pass.
     """
     frequencies, response = _stepped_sine(50.0, 100000.0)
-    impulse = metrology.stepped_sine_impulse_response(frequencies, response)
+    impulse = metrology.stepped_sine_impulse_response(
+        frequencies=frequencies, response=response
+    )
     result = metrology.time_selective_response(
         impulse.impulse_response,
         impulse.fs,
@@ -1138,7 +1150,7 @@ def test_formula_b3_and_b2_round_trip_through_the_window() -> None:
 def test_inverse_transform_of_a_flat_response_is_an_impulse_at_zero() -> None:
     frequencies = np.arange(0.0, 1000.0 + 1.0, 10.0)
     impulse = metrology.stepped_sine_impulse_response(
-        frequencies, np.ones(frequencies.size)
+        frequencies=frequencies, response=np.ones(frequencies.size)
     )
     assert impulse.impulse_response[0] == pytest.approx(impulse.fs)
     np.testing.assert_allclose(impulse.impulse_response[1:], 0.0, atol=1e-9)
@@ -1150,7 +1162,9 @@ def test_impulse_response_lasts_the_inverse_of_the_frequency_step() -> None:
     primary reflections all occur before 8 ms".
     """
     frequencies, response = _stepped_sine(120.0, 24000.0)
-    impulse = metrology.stepped_sine_impulse_response(frequencies, response)
+    impulse = metrology.stepped_sine_impulse_response(
+        frequencies=frequencies, response=response
+    )
     assert impulse.duration_s == pytest.approx(1.0 / 120.0)
     assert impulse.duration_s > 0.008
     assert impulse.impulse_response.size / impulse.fs == pytest.approx(
@@ -1163,21 +1177,27 @@ def test_stepped_sine_refuses_an_axis_that_does_not_start_at_zero() -> None:
     frequencies = np.arange(50.0, 1000.0, 50.0)
     response = np.ones(frequencies.size)
     with pytest.raises(ValueError, match="start at 0 Hz"):
-        metrology.stepped_sine_impulse_response(frequencies, response)
+        metrology.stepped_sine_impulse_response(
+            frequencies=frequencies, response=response
+        )
 
 
 def test_stepped_sine_refuses_an_unequal_step() -> None:
     frequencies = np.array([0.0, 50.0, 100.0, 160.0])
     response = np.ones(frequencies.size)
     with pytest.raises(ValueError, match="equally spaced"):
-        metrology.stepped_sine_impulse_response(frequencies, response)
+        metrology.stepped_sine_impulse_response(
+            frequencies=frequencies, response=response
+        )
 
 
 def test_stepped_sine_refuses_a_single_frequency() -> None:
     frequencies = np.array([0.0])
     response = np.ones(1)
     with pytest.raises(ValueError, match="at least two frequencies, from 0 Hz"):
-        metrology.stepped_sine_impulse_response(frequencies, response)
+        metrology.stepped_sine_impulse_response(
+            frequencies=frequencies, response=response
+        )
 
 
 def test_stepped_sine_response_of_one_sample_is_refused() -> None:
@@ -1192,12 +1212,16 @@ def test_stepped_sine_refuses_a_response_of_another_length() -> None:
     frequencies = np.arange(0.0, 500.0, 50.0)
     response = np.ones(frequencies.size + 1)
     with pytest.raises(ValueError, match="one value per frequency"):
-        metrology.stepped_sine_impulse_response(frequencies, response)
+        metrology.stepped_sine_impulse_response(
+            frequencies=frequencies, response=response
+        )
 
 
 def test_stepped_sine_plot_names_the_step_and_the_length() -> None:
     frequencies, response = _stepped_sine(120.0, 24000.0)
-    impulse = metrology.stepped_sine_impulse_response(frequencies, response)
+    impulse = metrology.stepped_sine_impulse_response(
+        frequencies=frequencies, response=response
+    )
     fig, ax = plt.subplots()
     impulse.plot(ax)
     assert "= 120 Hz" in ax.get_title()
@@ -1212,7 +1236,7 @@ def test_stepped_sine_plot_names_the_step_and_the_length() -> None:
 def test_stepped_sine_leaves_the_measured_response_as_it_was() -> None:
     frequencies = np.arange(0.0, 500.0, 50.0)
     response = np.full(frequencies.size, 1.0 + 0.5j)
-    metrology.stepped_sine_impulse_response(frequencies, response)
+    metrology.stepped_sine_impulse_response(frequencies=frequencies, response=response)
     assert response[0] == 1.0 + 0.5j
 
 

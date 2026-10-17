@@ -164,8 +164,7 @@ bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
 fan = [90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0]
 
 path = noise_control.duct_path(
-    bands, fan,
-    [
+    fan, [
         noise_control.DuctElement("Elbow, 36 x 24 in, unlined",
                                   attenuation=[0, 1, 2, 3, 3, 3, 3, 3],
                                   self_noise=[41, 39, 36, 29, 20, 6, 0, 0], code="2"),
@@ -173,6 +172,7 @@ path = noise_control.duct_path(
                                   attenuation=[7, 12, 16, 28, 35, 35, 28, 17],
                                   self_noise=[49, 43, 44, 42, 42, 45, 35, 24], code="3"),
     ],
+    frequencies=bands,
     source_label="Fan, centrifugal FC, 5000 cfm, 2 in w.g.",
 )
 
@@ -368,7 +368,7 @@ import numpy as np
 
 IN, FT = 0.0254, 0.3048
 sil = noise_control.splitter_silencer_insertion_loss(
-    None, height_m=24 * IN, length=5 * FT,
+    frequencies=None, height_m=24 * IN, length=5 * FT,
     airway_widths=[0.10] * 5, splitter_thickness_m=0.10,
 )
 print(np.round(sil.values, 1))
@@ -555,8 +555,7 @@ fan = [90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0]
 source = "Fan, centrifugal FC, 5000 cfm, 2 in w.g."
 
 supply = noise_control.duct_path(
-    bands, fan,
-    [
+    fan, [
         noise_control.DuctElement("Elbow, 36 x 24 in, unlined", [0, 1, 2, 3, 3, 3, 3, 3],
                                   [41, 39, 36, 29, 20, 6, 0, 0], code="2"),
         noise_control.DuctElement("Silencer, 3 ft, standard pressure drop",
@@ -572,13 +571,13 @@ supply = noise_control.duct_path(
         noise_control.DuctElement("Rectangular diffuser, 312 cfm", None,
                                   [33, 32, 29, 23, 15, 4, 0, 0], code="8"),
     ],
+    frequencies=bands,
     room_effect=[6, 6, 5, 5, 6, 7, 6, 6],
     source_label=source, target=30.0, label="Supply",
 )
 
 ret = noise_control.duct_path(
-    bands, fan,
-    [
+    fan, [
         noise_control.DuctElement("Elbow, 36 x 24 in, unlined", [0, 1, 2, 3, 3, 3, 3, 3],
                                   [43, 42, 39, 33, 24, 12, 0, 0], code="2"),
         noise_control.DuctElement("Silencer, 5 ft, low-frequency type",
@@ -591,6 +590,7 @@ ret = noise_control.duct_path(
         noise_control.DuctElement("Rectangular grille, 24 x 24 in, 563 cfm", None,
                                   [30, 29, 26, 20, 12, 1, 0, 0], code="6"),
     ],
+    frequencies=bands,
     room_effect=[9, 8, 6, 8, 8, 8, 9, 10],
     source_label=source, target=30.0, label="Return",
 )
@@ -846,7 +846,7 @@ bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
 
 with warnings.catch_warnings(record=True) as caught:
     warnings.simplefilter("always")
-    noise_control.duct_path(bands, [90.0] * 8, [noise_control.DuctElement("Straight run", 3.0)],
+    noise_control.duct_path([90.0] * 8, [noise_control.DuctElement("Straight run", 3.0)], frequencies=bands,
                             section={"width_m": 36 * IN, "height_m": 24 * IN},
                             flow_velocity=6.0, label="Supply")
 print(caught[0].category is noise_control.PlaneWaveWarning)
@@ -1041,7 +1041,7 @@ partitions = {
 }
 for name, tl in partitions.items():
     res = noise_control.room_to_room_transmission(
-        bands, tl, 8.0 * 3.0, receiving,
+        tl, 8.0 * 3.0, receiving, frequencies=bands,
         source=noise_control.SourceRoom(level=90.0), label=name,
     )
     print(f"{name:32s} {np.round(res.noise_reduction, 1)}")
@@ -1101,10 +1101,10 @@ operator = [(25.0, [0.08, 0.24, 0.57, 0.69, 0.71, 0.73]),
             (25.0, ceiling), (60.0, walls)]
 
 chain = noise_control.room_to_room_transmission(
-    bands,
-    [39.0, 42.0, 50.0, 58.0, 63.0, 67.0],       # TL of the separating wall
-    5.0 * 3.0,                                  # the wall is 5 m x 3 m
-    room.equivalent_absorption_area(operator),
+    [39.0, 42.0, 50.0, 58.0, 63.0, 67.0],
+    5.0 * 3.0,       # TL of the separating wall
+    room.equivalent_absorption_area(operator),                                  # the wall is 5 m x 3 m
+    frequencies=bands,
     source=noise_control.SourceRoom(
         power_level=[105.0, 103.0, 98.0, 108.0, 107.0, 109.0],
         room_constant=room.room_constant(268.0, room.mean_absorption(plant)),
@@ -1310,8 +1310,8 @@ transmission loss rather than get lost:
 ```python
 # The chain of section 3 again, with 3 dB allowed for flanking and leaks.
 honest = noise_control.room_to_room_transmission(
-    bands, [39.0, 42.0, 50.0, 58.0, 63.0, 67.0], 15.0,
-    room.equivalent_absorption_area(operator),
+    [39.0, 42.0, 50.0, 58.0, 63.0, 67.0], 15.0, room.equivalent_absorption_area(operator),
+    frequencies=bands,
     source=noise_control.SourceRoom(level=chain.source_level),
     criterion=noise_control.DesignCriterion(target=45.0, flanking_penalty=3.0),
 )
@@ -1350,7 +1350,7 @@ source = noise_control.SourceRoom(
     power_level=105.0, room_constant=room.room_constant(900.0, 0.05), directivity=2.0,
 )
 near = noise_control.room_to_room_transmission(
-    [1000.0], 30.0, 16.0, room.room_constant(100.0, 0.35),
+    30.0, 16.0, room.room_constant(100.0, 0.35), frequencies=[1000.0],
     source=source, receiver_distance_m=1.5,
 )
 print(np.round(near.received_level, 1))   # [61.6]

@@ -1195,7 +1195,7 @@ class AmplifierFrequencyResponse(OwnsArrays):
 
 
 def amplifier_frequency_response(
-    frequencies: ArrayLike, output_current_a: ArrayLike
+    output_current_a: ArrayLike, *, frequencies: ArrayLike
 ) -> AmplifierFrequencyResponse:
     """The frequency response of an amplifier into its rated load (5.4.12).
 
@@ -1479,7 +1479,7 @@ class QuadraturePhaseError(OwnsArrays):
 
 
 def quadrature_phase_error(
-    frequencies: ArrayLike, phase_difference_deg: ArrayLike
+    phase_difference_deg: ArrayLike, *, frequencies: ArrayLike
 ) -> QuadraturePhaseError:
     """The maximum deviation from 90 degrees between two loop currents (5.4.14).
 
@@ -1588,10 +1588,10 @@ class NeckLoopCharacteristics(OwnsArrays):
 
 
 def neck_loop_characteristics(
-    frequencies: ArrayLike,
     field_strength_level: ArrayLike,
     impedance_ohm: ArrayLike,
     *,
+    frequencies: ArrayLike,
     input_voltage_v: float,
 ) -> NeckLoopCharacteristics:
     r"""The input voltage, input impedance and frequency response of a neck loop.

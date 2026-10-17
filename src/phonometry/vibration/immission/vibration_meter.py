@@ -589,9 +589,9 @@ class VibrationMeterVerification(OwnsArrays):
 
 
 def verify_vibration_meter(
-    frequencies: ArrayLike,
     measured_response: ArrayLike,
     *,
+    frequencies: ArrayLike,
     weighting: MeterWeighting = "kb",
     working_range: WorkingRange = "building",
     reference_frequency_hz: float = KB_REFERENCE_FREQUENCY_HZ,

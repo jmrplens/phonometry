@@ -73,7 +73,7 @@ def generate_lab_lining_improvement(output_dir: str) -> None:
         + [18.3, 19.1, 19.6, 19.9, 19.5, 18.2, 16.4, 15.8, 17.1, 18.0]
     )
     res = building.laboratory_lining_improvement(
-        r_without, r_without + delta_r, _BANDS_50_5000
+        r_without, r_without + delta_r, frequencies=_BANDS_50_5000
     )
     assert res.rating is not None
 
@@ -103,7 +103,10 @@ def generate_lab_floor_covering_improvement(output_dir: str) -> None:
         + [14.2, 16.9, 19.8, 22.4, 25.1, 27.3, 29.4, 30.8, 31.9]
     )
     res = building.laboratory_floor_covering_improvement(
-        l_n0, l_n0 - delta_l, _BANDS_100_5000, reference_floor="lightweight_3"
+        l_n0,
+        l_n0 - delta_l,
+        frequencies=_BANDS_100_5000,
+        reference_floor="lightweight_3",
     )
 
     _fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13.0, 5.6))
@@ -163,7 +166,7 @@ def _rooflight_under_heavy_rain() -> tuple[
     res = building.rainfall_sound(
         l_pr,
         t,
-        _BANDS_100_5000,
+        frequencies=_BANDS_100_5000,
         volume=62.0,
         excited_area_m2=1.875,
         reference_correction=correction,
@@ -233,7 +236,7 @@ def generate_joint_insulation(output_dir: str) -> None:
     from phonometry import building
 
     seal = building.laboratory_joint_insulation(
-        _JOINT_SEAL, _JOINT_MAXIMUM, _BANDS_100_5000, joint_length_m=5.4
+        _JOINT_SEAL, _JOINT_MAXIMUM, frequencies=_BANDS_100_5000, joint_length_m=5.4
     )
     slope = np.linspace(0.6, 1.4, len(_BANDS_100_5000))
     widths = list(_JOINT_GAP_LOSS_DB)
@@ -243,7 +246,7 @@ def generate_joint_insulation(output_dir: str) -> None:
                 _JOINT_SEAL - _JOINT_GAP_LOSS_DB[w] * slope, _JOINT_MAXIMUM - 0.5
             ),
             _JOINT_MAXIMUM,
-            _BANDS_100_5000,
+            frequencies=_BANDS_100_5000,
         )
         for w in widths
     ]

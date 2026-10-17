@@ -57,7 +57,7 @@ def test_equivalent_absorption_length_at_reference_frequency() -> None:
     a = building.equivalent_absorption_length(
         ref.ISO10848_ABS_AREA,
         ref.ISO10848_ABS_TS,
-        [1000.0],
+        frequencies=[1000.0],
         speed_of_sound=ref.ISO10848_ABS_C0,
     )
     assert a[0] == pytest.approx(ref.ISO10848_ABS_LENGTH_AT_FREF)
@@ -65,13 +65,15 @@ def test_equivalent_absorption_length_at_reference_frequency() -> None:
 
 def test_absorption_length_frequency_scaling() -> None:
     """aj scales as sqrt(f_ref/f): quartering f doubles aj."""
-    a = building.equivalent_absorption_length(10.0, 0.5, [250.0, 1000.0])
+    a = building.equivalent_absorption_length(10.0, 0.5, frequencies=[250.0, 1000.0])
     assert a[0] == pytest.approx(2.0 * a[1])
 
 
 def test_total_loss_factor_closed_form() -> None:
     """η = 2.2/(f·Ts)."""
-    eta = building.total_loss_factor([1000.0], [0.5])
+    eta = building.total_loss_factor(
+        frequencies=[1000.0], structural_reverberation_time=[0.5]
+    )
     assert eta[0] == pytest.approx(ref.ISO10848_LOSS_FACTOR)
 
 
@@ -127,8 +129,8 @@ def test_full_formula_uses_absorption_length() -> None:
     # a_i, a_j from Formula (12) differ from S/l0, so Kij differs.
     assert not np.allclose(full.k_ij, simplified.k_ij)
     # and manually reproduce band 0
-    a_i = building.equivalent_absorption_length(10.0, 0.4, THIRD_OCTAVE)
-    a_j = building.equivalent_absorption_length(12.0, 0.5, THIRD_OCTAVE)
+    a_i = building.equivalent_absorption_length(10.0, 0.4, frequencies=THIRD_OCTAVE)
+    a_j = building.equivalent_absorption_length(12.0, 0.5, frequencies=THIRD_OCTAVE)
     manual0 = 8.0 + 10.0 * np.log10(2.0 / np.sqrt(a_i[0] * a_j[0]))
     assert full.k_ij[0] == pytest.approx(manual0)
 

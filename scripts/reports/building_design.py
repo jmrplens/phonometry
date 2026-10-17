@@ -193,7 +193,7 @@ def _structure_borne_power_example() -> tuple[object, ReportMetadata, str]:
     freqs = np.array([125, 250, 500, 1000, 2000, 4000], dtype=float)
     lv = np.array([70.0, 72.0, 68.0, 64.0, 60.0, 55.0])
     result = ph.building.reception_plate_power(
-        lv, freqs, mass_per_area=230.0, area=7.0, reverberation_time=0.25
+        lv, frequency=freqs, mass_per_area=230.0, area=7.0, reverberation_time=0.25
     )
     metadata = ReportMetadata(
         client="Example building services contractor",

@@ -879,8 +879,9 @@ vector total `a_hv` instead (Annex, Part A, point 1).
 ```python
 weighted_acceleration(
     band_accelerations: ArrayLike,
-    frequencies: ArrayLike,
     weighting: str,
+    *,
+    frequencies: ArrayLike,
 ) -> WeightedSpectrum
 ```
 

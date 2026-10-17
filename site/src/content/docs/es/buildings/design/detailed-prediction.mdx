@@ -224,7 +224,7 @@ ln_measured = ...   # Ln medido por banda, dB (informe de ensayo ISO 10140-3)
 
 eta_lab = building.laboratory_total_loss_factor(
     bands, mass_per_area=484.0, internal_loss_factor=0.005)   # (C.3)
-ts_lab = building.structural_reverberation_time(bands, eta_lab)  # (C.1)
+ts_lab = building.structural_reverberation_time(eta_lab, frequencies=bands)  # (C.1)
 print(np.round(ts_lab[[0, 10]], 3))                    # [0.301 0.089] s
 print(np.round(el.reverberation_time[[0, 10]], 3))     # [0.53  0.152] s, in situ
 
@@ -239,7 +239,7 @@ ln_situ = building.in_situ_impact_level(ln_measured, el.reverberation_time,
 
 # Una trayectoria por flancos toma la forma de transmisión resonante únicamente
 # de ese mismo índice medido; la directa, no.
-r_flanking = building.resonant_sound_reduction_index(r_situ, bands,
+r_flanking = building.resonant_sound_reduction_index(r_situ, frequencies=bands,
                                                      critical_frequency=76.8)
 ```
 
@@ -305,10 +305,12 @@ print(round(k_floor_int, 1), round(k_int_int, 1))     # 8.8 11.0  (tabla L.6)
 
 # Perímetro del forjado: topa contra una fachada arriba y abajo en cada uno de
 # sus dos bordes exteriores, y cruza las particiones interiores en los otros dos.
-a_at_ext = building.perimeter_absorption_coefficient([92.6, 92.6], [k_floor_ext] * 2)
+a_at_ext = building.perimeter_absorption_coefficient(
+    [k_floor_ext] * 2, critical_frequencies=[92.6, 92.6])
 a_at_int = building.perimeter_absorption_coefficient(
-    [76.8, 128.4, 128.4], [building.junction_vibration_reduction(
-        "rigid_cross", "through", 360.0 / 484.0), k_floor_int, k_floor_int])
+    [building.junction_vibration_reduction("rigid_cross", "through", 360.0 / 484.0),
+     k_floor_int, k_floor_int],
+    critical_frequencies=[76.8, 128.4, 128.4])
 floor_perimeter = 9.0 * (a_at_ext + a_at_int)         # 2,659 m (fórmula C.4)
 
 floor = building.HomogeneousElement("floor", 20.0, 5.0, 4.0, 484.0, 76.8, 0.005,
@@ -450,7 +452,10 @@ k = {
     "corner": building.junction_vibration_reduction("corner", "corner", 1.0),
     "int-int-x": building.junction_vibration_reduction("rigid_cross", "through", 1.0),
 }
-a = building.perimeter_absorption_coefficient
+def a(critical_frequencies, indices):
+    return building.perimeter_absorption_coefficient(
+        indices, critical_frequencies=critical_frequencies)
+
 floor_sum = 9.0 * (a([92.6, 92.6], [k["floor-ext"]] * 2)
                    + a([76.8, 128.4, 128.4],
                        [k["floor-floor"], k["floor-int"], k["floor-int"]]))
@@ -613,7 +618,7 @@ dv_n = ...          # dif. de niveles de velocidad de unión normalizada, dB (IS
 dnf_13 = ...        # dif. de niveles por flancos normalizada de laboratorio Dn,f, dB
 lnf_13 = ...        # nivel de impactos normalizado por flancos de laboratorio Ln,f, dB
 
-r_star = building.resonant_sound_reduction_index(r_wall_leaf, bands,
+r_star = building.resonant_sound_reduction_index(r_wall_leaf, frequencies=bands,
                                                  critical_frequency=2200.0)   # +8 dB bajo fc
 r_ff = building.flanking_reduction_index_from_normalized_difference(
     index_i=r_star, index_j=r_star, normalized_velocity_level_difference=dv_n,

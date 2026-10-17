@@ -303,7 +303,7 @@ def _chk_iso12999_table2_band() -> Outcome:
 def _chk_iso12999_annex_b_values() -> Outcome:
     res = ph.building.weighted_rating_extended(
         ref.ISO12999_1_ANNEX_B_RI,
-        ref.ISO12999_1_ANNEX_B_FREQ,
+        frequencies=ref.ISO12999_1_ANNEX_B_FREQ,
         one_decimal=True,
     )
     assert res.c_50_5000 is not None
@@ -351,10 +351,10 @@ def _chk_iso12999_annex_b_uncertainties() -> Outcome:
         )
     )
     up = ph.building.weighted_rating_extended(
-        ri + ui, ref.ISO12999_1_ANNEX_B_FREQ, one_decimal=True
+        ri + ui, frequencies=ref.ISO12999_1_ANNEX_B_FREQ, one_decimal=True
     ).rating
     down = ph.building.weighted_rating_extended(
-        ri - ui, ref.ISO12999_1_ANNEX_B_FREQ, one_decimal=True
+        ri - ui, frequencies=ref.ISO12999_1_ANNEX_B_FREQ, one_decimal=True
     ).rating
     u_rw = (float(up) - float(down)) / 2.0
     ok = (
@@ -393,7 +393,9 @@ def _chk_iso12999_expanded() -> Outcome:
 )
 def _chk_iso12999_2_table4() -> Outcome:
     res = ph.materials.sound_absorption_coefficient_uncertainty(
-        ref.ISO12999_2_TABLE4_ALPHA_S, ref.ISO12999_2_TABLE4_FREQ, coverage=0.95
+        ref.ISO12999_2_TABLE4_ALPHA_S,
+        frequencies=ref.ISO12999_2_TABLE4_FREQ,
+        coverage=0.95,
     )
     got = res.reported_expanded_uncertainty
     expected = np.asarray(ref.ISO12999_2_TABLE4_U_K2, dtype=float)
@@ -413,7 +415,7 @@ def _chk_iso12999_2_table4() -> Outcome:
 )
 def _chk_iso12999_2_table5() -> Outcome:
     res = ph.materials.practical_coefficient_uncertainty(
-        ref.ISO12999_2_TABLE5_ALPHA_P, ref.ISO12999_2_TABLE5_FREQ
+        ref.ISO12999_2_TABLE5_ALPHA_P, frequencies=ref.ISO12999_2_TABLE5_FREQ
     )
     got = res.reported_expanded_uncertainty
     expected = np.asarray(ref.ISO12999_2_TABLE5_U_K2, dtype=float)

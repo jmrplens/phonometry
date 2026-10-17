@@ -476,9 +476,9 @@ def _distances(diaphragm_distances_m: Sequence[float], count: int) -> list[float
 
 
 def free_field_reciprocity(
-    frequencies: ArrayLike,
     electrical_transfer_impedances_ohm: Sequence[ArrayLike],
     *,
+    frequencies: ArrayLike,
     diaphragm_distances_m: Sequence[float],
     temperature_c: float,
     static_pressure_pa: float,
@@ -573,10 +573,10 @@ def free_field_reciprocity(
 
 
 def free_field_reciprocity_pair(
-    frequencies: ArrayLike,
     electrical_transfer_impedance_ohm: ArrayLike,
     sensitivity_ratio: ArrayLike,
     *,
+    frequencies: ArrayLike,
     diaphragm_distance_m: float,
     temperature_c: float,
     static_pressure_pa: float,
@@ -654,10 +654,10 @@ def free_field_reciprocity_pair(
 
 
 def free_field_transfer_impedance(
-    frequencies: ArrayLike,
     sensitivity_1_v_per_pa: ArrayLike,
     sensitivity_2_v_per_pa: ArrayLike,
     *,
+    frequencies: ArrayLike,
     diaphragm_distance_m: float,
     temperature_c: float,
     static_pressure_pa: float,

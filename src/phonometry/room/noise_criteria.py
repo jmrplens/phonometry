@@ -627,7 +627,7 @@ def _align_levels(
 
 
 def noise_criterion(
-    levels: ArrayLike, frequencies: ArrayLike | None = None
+    levels: ArrayLike, *, frequencies: ArrayLike | None = None
 ) -> NCResult:
     """Noise Criteria (NC) rating of a spectrum (ANSI/ASA S12.2-2019, 5.2.2).
 
@@ -724,7 +724,9 @@ def noise_criterion(
     )
 
 
-def room_criterion(levels: ArrayLike, frequencies: ArrayLike | None = None) -> RCResult:
+def room_criterion(
+    levels: ArrayLike, *, frequencies: ArrayLike | None = None
+) -> RCResult:
     """Room Criteria Mark II rating (ANSI/ASA S12.2-2019, Annex D).
 
     The numerical rating is the mid-frequency average ``LMF`` of the 500,

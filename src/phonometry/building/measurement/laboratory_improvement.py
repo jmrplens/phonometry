@@ -217,7 +217,9 @@ class LaboratoryLiningImprovementResult(OwnsArrays):
         over the three one-third-octave bands of each octave, for every octave
         whose three bands are present.
         """
-        return improvement_octave_bands(self.delta_r, self.frequencies, quantity="ΔR")
+        return improvement_octave_bands(
+            self.delta_r, frequencies=self.frequencies, quantity="ΔR"
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -237,8 +239,8 @@ class LaboratoryLiningImprovementResult(OwnsArrays):
 def laboratory_lining_improvement(
     r_without: ArrayLike,
     r_with: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     basic_element: BasicElement | None = "heavy_wall",
 ) -> LaboratoryLiningImprovementResult:
     r"""Improvement of airborne sound insulation by a lining (ISO 10140-1:2021 G).
@@ -310,7 +312,7 @@ def laboratory_lining_improvement(
                 [bool(np.any(np.abs(table - f) <= 0.06 * f)) for f in freqs]
             )
             rating = weighted_reduction_improvement(
-                delta[inside], freqs[inside], basic_element=basic_element
+                delta[inside], frequencies=freqs[inside], basic_element=basic_element
             )
     return LaboratoryLiningImprovementResult(
         frequencies=freqs,
@@ -513,7 +515,7 @@ class LaboratoryFloorCoveringImprovementResult(OwnsArrays):
         :math:`\Delta L_\mathrm{oct} = -10 \log_{10}[(1/3) \sum 10^{-\Delta L_j/10}]`
         over the three one-third-octave bands of each octave present.
         """
-        return improvement_octave_bands(self.improvement, self.frequencies)
+        return improvement_octave_bands(self.improvement, frequencies=self.frequencies)
 
     def plot(
         self,
@@ -608,8 +610,8 @@ class LaboratoryFloorCoveringImprovementResult(OwnsArrays):
 def laboratory_floor_covering_improvement(
     l_n0: ArrayLike,
     l_n: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     reference_floor: ReferenceFloor = "heavyweight",
 ) -> LaboratoryFloorCoveringImprovementResult:
     r"""Improvement of impact sound insulation by a floor covering (ISO 10140-1 H).
@@ -733,9 +735,7 @@ class HeavyImpactImprovementResult(OwnsArrays):
 
 
 def heavy_impact_improvement(
-    l_i_fmax_0: ArrayLike,
-    l_i_fmax: ArrayLike,
-    frequencies: ArrayLike,
+    l_i_fmax_0: ArrayLike, l_i_fmax: ArrayLike, *, frequencies: ArrayLike
 ) -> HeavyImpactImprovementResult:
     r"""Improvement of a floor covering under the rubber ball (H.6.1).
 

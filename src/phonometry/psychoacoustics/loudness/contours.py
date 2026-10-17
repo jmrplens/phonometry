@@ -256,6 +256,7 @@ class EqualLoudnessContours(OwnsArrays):
 
 def equal_loudness_contours(
     phons: Sequence[float] = _DEFAULT_PHONS,
+    *,
     frequencies: Sequence[float] | np.ndarray | None = None,
 ) -> EqualLoudnessContours:
     """Build the ISO 226:2023 equal-loudness-level contour family.

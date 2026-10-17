@@ -251,7 +251,7 @@ $$
 true = [m0 * m.complex_equivalent_volume_m3(f) / m.equivalent_volume_m3 for m0, m in zip((0.0496, 0.0473, 0.0512), mics)]
 ze = [true[i] * true[j] * z.transfer_impedance_pa_s_m3 for (i, j), z in zip(pairs, za)]   # Fórmula (2)
 
-c = metrology.pressure_reciprocity(f, ze, za)
+c = metrology.pressure_reciprocity(ze, za, frequencies=f)
 print(c.sensitivity_level[:, 16].round(2))    # [-26.03 -26.44 -25.76]
 print(c.sensitivity_mv_per_pa[:, 16].round(2))   # [49.93 47.64 51.51]
 print(np.abs(c.sensitivity_v_per_pa - true).max() < 1e-15)   # True
@@ -268,7 +268,7 @@ Con dos micrófonos y una fuente auxiliar, la razón de sus sensibilidades
 medida frente a la fuente sustituye al tercer par, Fórmula (8):
 
 ```python
-pair = metrology.pressure_reciprocity_pair(f, ze[0], za[0], true[0] / true[1])
+pair = metrology.pressure_reciprocity_pair(ze[0], za[0], true[0] / true[1], frequencies=f)
 print(pair.sensitivity_level[:, 16].round(2))   # [-26.03 -26.44]
 ```
 
@@ -308,12 +308,12 @@ true_ff = [m0 / (1.0 - ratio**2 + 1.3j * ratio) for m0 in (0.0128, 0.0124, 0.013
 centre = 4.5e-3 / (1.0 + (ff / 30000.0) ** 2)
 ze_ff = [
     metrology.free_field_transfer_impedance(
-        ff, true_ff[i], true_ff[j], diaphragm_distance_m=0.25, acoustic_centers_m=(centre, centre), **ffc
+        true_ff[i], true_ff[j], frequencies=ff, diaphragm_distance_m=0.25, acoustic_centers_m=(centre, centre), **ffc
     )
     for i, j in pairs
 ]   # Fórmula (D.1)
 cf = metrology.free_field_reciprocity(
-    ff, ze_ff, diaphragm_distances_m=(0.25, 0.25, 0.25), acoustic_centers_m=(centre, centre, centre), **ffc
+    ze_ff, frequencies=ff, diaphragm_distances_m=(0.25, 0.25, 0.25), acoustic_centers_m=(centre, centre, centre), **ffc
 )
 print(cf.sensitivity_level[:, 10].round(2))   # [-37.76 -38.03 -37.55]
 print(np.abs(cf.sensitivity_v_per_pa - true_ff).max() < 1e-15)   # True
@@ -392,13 +392,13 @@ print(pu.components_db["capillary_tube_dimensions"][[1, 16]].round(4))   # [0.00
 
 x = f / 10000
 b = metrology.reciprocity_uncertainty_budget(
-    f,
     {
         **pu.components_db,
         "series_impedance": 0.002, "voltage_ratio": 0.003, "cross_talk": 0.001 + 0.004 * x**2,
         "polarizing_voltage": 0.0025, "radial_wave_motion": 0.03 * x**2,
         "heat_conduction_theory": 0.002, "repeatability": 0.004, "rounding": 0.0006,
     },
+    frequencies=f,
 )
 print(b.expanded_uncertainty_db[[1, 16, 25]].round(3))   # [0.023 0.015 0.041]
 
@@ -412,12 +412,12 @@ pf = metrology.free_field_parameter_uncertainty(
 )
 xf = ff / 40000
 bf = metrology.reciprocity_uncertainty_budget(
-    ff,
     {
         **pf.components_db,
         "series_impedance": 0.002, "voltage_ratio": 0.003, "cross_talk": 0.002 + 0.01 * xf,
         "noise": 0.005, "reflections": 0.01 + 0.02 * xf, "polarizing_voltage": 0.0025, "repeatability": 0.01,
     },
+    frequencies=ff,
     field="free",
 )
 print(bf.expanded_uncertainty_db[[0, 10, 15]].round(3))   # [0.049 0.054 0.072]
@@ -444,9 +444,9 @@ calibración, y su leyenda indica la anchura de la banda.
 import matplotlib.pyplot as plt
 
 # Las dos calibraciones otra vez, con sus balances como banda.
-c = metrology.pressure_reciprocity(f, ze, za, expanded_uncertainty_db=b.expanded_uncertainty_db)
+c = metrology.pressure_reciprocity(ze, za, frequencies=f, expanded_uncertainty_db=b.expanded_uncertainty_db)
 cf = metrology.free_field_reciprocity(
-    ff, ze_ff, diaphragm_distances_m=(0.25, 0.25, 0.25), acoustic_centers_m=(centre, centre, centre),
+    ze_ff, frequencies=ff, diaphragm_distances_m=(0.25, 0.25, 0.25), acoustic_centers_m=(centre, centre, centre),
     expanded_uncertainty_db=bf.expanded_uncertainty_db, **ffc,
 )
 

@@ -168,8 +168,10 @@ def generate_mechanical_mobility(output_dir: str) -> None:
     freq = np.logspace(np.log10(f0 / 20.0), np.log10(f0 * 20.0), 600)
     w0 = 2.0 * np.pi * f0
     h = vibration.sdof_receptance(freq, m, k, c)
-    y = vibration.convert_frf(h, freq, "receptance", "mobility")
-    a = vibration.convert_frf(h, freq, "receptance", "accelerance")
+    y = vibration.convert_frf(h, frequency=freq, source="receptance", target="mobility")
+    a = vibration.convert_frf(
+        h, frequency=freq, source="receptance", target="accelerance"
+    )
     # Normalise each FRF to O(1) near resonance so all three share one axis.
     curves = [
         (np.abs(h) * k, COLOR_PRIMARY, r"Receptance $|H|$ ($\times k$)"),
@@ -235,7 +237,7 @@ def generate_transfer_stiffness(output_dir: str) -> None:
     k_true = k + 1j * w * c  # exact transfer stiffness
     t = vibration.base_transmissibility(freq, m2, k, c)  # mass-loaded transmissibility
     k_indirect = vibration.transfer_stiffness_indirect(
-        freq, t, m2
+        frequency=freq, transmissibility=t, blocking_mass=m2
     )  # ISO 10846-3 Eq. (1)
 
     # Where the standard's own criterion starts holding: |T| <= 0.1
@@ -419,7 +421,9 @@ def generate_driving_point_stiffness(output_dir: str) -> None:
     k21 = k * (1.0 + 1j * eta)
     u1 = 1.0e-6
     res = vibration.driving_point_stiffness(
-        freq, (k21 - w**2 * plate) * u1, -(w**2) * u1 * np.ones(freq.size)
+        frequencies=freq,
+        input_force_n=(k21 - w**2 * plate) * u1,
+        input_acceleration_m_s2=-(w**2) * u1 * np.ones(freq.size),
     )
     bands = res.band_average()
     f_ul = res.upper_limiting_frequency_hz
@@ -550,7 +554,7 @@ def generate_rigid_mass_calibration(output_dir: str) -> None:
     ripple = 0.015 * np.sin(2.0 * np.pi * np.log10(freq))
     drift = 0.05 * (freq / 2500.0) ** 2
     measured = expected * (1.0 + ripple + drift)
-    res = vibration.verify_rigid_mass_calibration(measured, freq, mass=m)
+    res = vibration.verify_rigid_mass_calibration(measured, frequencies=freq, mass=m)
     within = res.within_tolerance
     tol = res.relative_tolerance
 
@@ -756,7 +760,7 @@ def generate_weighted_acceleration(output_dir: str) -> None:
             0.020,
         ]
     )
-    result = vibration.weighted_acceleration(accel, freqs, "Wk")
+    result = vibration.weighted_acceleration(accel, frequencies=freqs, weighting="Wk")
 
     positions = np.arange(freqs.size, dtype=float)
     width = 0.4
@@ -1717,7 +1721,11 @@ def generate_experimental_sea_clf(output_dir: str) -> None:
     )
     welded = np.array(
         [
-            float(vibration.coupling_loss_factor(tau, 2.0 * c, length, f, area1))
+            float(
+                vibration.coupling_loss_factor(
+                    tau, 2.0 * c, length, frequency=f, plate_area=area1
+                )
+            )
             for c, f in zip(c_b, bands, strict=True)
         ]
     )
@@ -1739,13 +1747,13 @@ def generate_experimental_sea_clf(output_dir: str) -> None:
     area_c = 2.0 * math.pi * radius * cyl_len
     area_p = 3.5 * 3.0 - math.pi * radius**2
     sea = vibration.power_injection_clf(
-        500.0,
-        rho * t_p * area_p * 0.0272**2,
-        rho * t_c * area_c * 0.0132**2,
-        4.4e-3,
-        2.4e-3,
-        vibration.flat_plate_modal_density(area_p, t_p, c_l),
-        float(
+        frequencies=500.0,
+        energy1=rho * t_p * area_p * 0.0272**2,
+        energy2=rho * t_c * area_c * 0.0132**2,
+        internal_loss_factor1=4.4e-3,
+        internal_loss_factor2=2.4e-3,
+        modal_density1=vibration.flat_plate_modal_density(area_p, t_p, c_l),
+        modal_density2=float(
             vibration.cylindrical_shell_modal_density(500.0, area_c, t_c, radius, c_l)[
                 0
             ]
@@ -3971,7 +3979,9 @@ def generate_meter_phase_verification(output_dir: str) -> None:
     pole_hz = 100.0
 
     zero = np.zeros_like(freqs)
-    design = vibration.verify_phase_response(name, freqs, zero).design_phase_deg
+    design = vibration.verify_phase_response(
+        name, frequencies=freqs, measured_phase_deg=zero
+    ).design_phase_deg
     delay_deg = -360.0 * freqs * delay_s
     pole_deg = -np.degrees(np.arctan(freqs / pole_hz))
 
@@ -4004,7 +4014,9 @@ def generate_meter_phase_verification(output_dir: str) -> None:
         ),
     )
     checks = [
-        vibration.verify_phase_response(name, freqs, design + error)
+        vibration.verify_phase_response(
+            name, frequencies=freqs, measured_phase_deg=design + error
+        )
         for _colour, _dashed, _hollow, _label, error in responses
     ]
     constant_check, delay_check, pole_check = checks
@@ -4445,8 +4457,12 @@ def generate_meter_weighting_verification(output_dir: str) -> None:
     moved = np.array(
         [0.4314, 0.4969, 0.5466, 0.9937, 1.068, 0.7897, 0.4112, 0.1894, 0.1138]
     )
-    refused = vibration.verify_weighting(name, swept, as_read)
-    accepted = vibration.verify_weighting(name, swept, moved)
+    refused = vibration.verify_weighting(
+        name, frequencies=swept, measured_factors=as_read
+    )
+    accepted = vibration.verify_weighting(
+        name, frequencies=swept, measured_factors=moved
+    )
 
     # Where each sweep reads low, read off the verdict rather than off the
     # index the array was typed at: the first is the frequency the standard
@@ -4793,7 +4809,10 @@ def generate_meter_uncertainty_allowance(output_dir: str) -> None:
     # than from the array above: the deviations are re-derived from the
     # measured factors exactly as a report would derive them.
     declared = vibration.verify_weighting(
-        name, freqs, measured, expanded_uncertainty_percent=uncertainty
+        name,
+        frequencies=freqs,
+        measured_factors=measured,
+        expanded_uncertainty_percent=uncertainty,
     )
     deviation = declared.deviation_percent
     kept = declared.within_tolerance
@@ -6296,7 +6315,7 @@ def generate_railway_spectra(output_dir: str) -> None:
     t2 = slice(round(_RAILWAY_T2_S[0] * fs), round(_RAILWAY_T2_S[1] * fs))
     spectrum = vibration.narrowband_psd(passage.velocity_mm_s[t2], fs)
     centres, rms = vibration.third_octaves_from_narrowband(
-        spectrum.frequencies, spectrum.psd
+        frequencies=spectrum.frequencies, psd=spectrum.psd
     )
     narrow = dict(
         zip(

@@ -452,7 +452,7 @@ spectrum = underwater.strike_sel_spectrum(strike, fs, fraction=3)
 peak = underwater.peak_sound_pressure_level(strike)
 
 res = underwater.weighted_exposure(
-    spectrum.frequencies, spectrum.band_sel, "LF",
+    spectrum.band_sel, "LF", frequencies_hz=spectrum.frequencies,
     guidance="nmfs-2024", impulsive=True, n_events=3000, peak_spl=peak,
 )
 print(res.unweighted_sel, res.weighted_sel, res.cumulative_sel)
@@ -498,7 +498,7 @@ fig, axes = plt.subplots(1, 3, figsize=(16.5, 5.4))
 spectrum.plot(ax=axes[0])
 for ax, group in zip(axes[1:], ("LF", "VHF"), strict=True):
     verdict = underwater.weighted_exposure(
-        spectrum.frequencies, spectrum.band_sel, group,
+        spectrum.band_sel, group, frequencies_hz=spectrum.frequencies,
         guidance="nmfs-2024", impulsive=True, n_events=3000, peak_spl=peak)
     verdict.plot(ax=ax)
     ax.set_title(f"{group}: cumulative {verdict.cumulative_sel:.1f} dB, "
@@ -531,7 +531,7 @@ counts = np.unique(np.round(np.logspace(0.0, 4.0, 90)).astype(int))
 fig, ax = plt.subplots(figsize=(11.5, 6.4))
 for group in ("LF", "HF", "VHF", "PW", "OW"):
     curve = [underwater.weighted_exposure(
-        spectrum.frequencies, spectrum.band_sel, group, guidance="nmfs-2024",
+        spectrum.band_sel, group, frequencies_hz=spectrum.frequencies, guidance="nmfs-2024",
         impulsive=True, n_events=int(n)).cumulative_sel for n in counts]
     line, = ax.semilogx(counts, curve, label=group)
     crit = underwater.exposure_criteria(group, guidance="nmfs-2024",
@@ -571,8 +571,8 @@ def band_loss(r):
 reference = band_loss(750.0)          # the range the strike was measured at
 for r in (750.0, 800.0, 1000.0, 3000.0):
     out = underwater.weighted_exposure(
-        spectrum.frequencies, spectrum.band_sel - (band_loss(r) - reference),
-        "LF", guidance="nmfs-2024", impulsive=True, n_events=3000,
+        spectrum.band_sel - (band_loss(r) - reference), "LF",
+        frequencies_hz=spectrum.frequencies, guidance="nmfs-2024", impulsive=True, n_events=3000,
         peak_spl=peak)
     print(int(r), round(out.cumulative_sel, 1), round(out.tts_margin, 2))
 # 750 168.3 0.27   <- exceeded

@@ -199,7 +199,7 @@ independiente:
 from phonometry import emission
 
 # El EJEMPLO de calibración de la norma: 9,81 m/s^2 a 100 Hz.
-print(round(float(emission.velocity_level_from_acceleration(9.81, 100.0)), 1))   # 106.9 dB
+print(round(float(emission.velocity_level_from_acceleration(9.81, frequency=100.0)), 1))   # 106.9 dB
 
 # Factor de radiación desde una potencia medida (ISO 9614): eps = P / (Zc <v^2> S).
 eps = emission.radiation_factor(3.0e-4, area=2.0, mean_square_velocity=(1e-3)**2)

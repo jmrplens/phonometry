@@ -227,8 +227,9 @@ coupling_loss_factor(
     transmission_coefficient: ArrayLike,
     group_velocity: float,
     junction_length: float,
-    frequency: ArrayLike,
     plate_area: float,
+    *,
+    frequency: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -464,8 +465,8 @@ plot_junction_geometry(
     junction: str,
     thickness1_m: float,
     thickness2_m: float,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes

@@ -588,8 +588,8 @@ reported; [`check_plant_measurement`](/phonometry/reference/api/power/sound-powe
 ```python
 plant_sound_power(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     measurement_area_m2: float,
     contour_length_m: float,
     microphone_height_m: float,
@@ -906,8 +906,8 @@ $h$ of 9.3 for this contour and plant, in metres.
 ```python
 PlantMeasurementContour.sound_power(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     microphone_height_m: float | None = None,
     background_levels: ArrayLike | None = None,
     directional_microphone_angle_deg: float | ArrayLike | None = None,

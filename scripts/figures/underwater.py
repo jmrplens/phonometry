@@ -79,7 +79,7 @@ def generate_ship_source_level(output_dir: str) -> None:
         dtype=float,
     )
     rnl = 175.0 - 12.0 * np.log10(freqs / 20.0)
-    res = underwater.monopole_source_level(rnl, freqs, draft_m=6.0)
+    res = underwater.monopole_source_level(rnl, frequency=freqs, draft_m=6.0)
 
     _fig, ax = plt.subplots(figsize=(10, 6.0))
     ax.semilogx(
@@ -2025,9 +2025,9 @@ def generate_marine_mammal_assessment(output_dir: str) -> None:
 
     for ax, group in zip(axes[1:], ("LF", "VHF"), strict=True):
         res = underwater.weighted_exposure(
-            spectrum.frequencies,
-            spectrum.band_sel,
-            group,
+            frequencies_hz=spectrum.frequencies,
+            band_sel=spectrum.band_sel,
+            group=group,
             guidance="nmfs-2024",
             impulsive=True,
             n_events=3000,
@@ -2177,9 +2177,9 @@ def generate_piling_campaign_accumulation(output_dir: str) -> None:
         curve = np.array(
             [
                 underwater.weighted_exposure(
-                    spectrum.frequencies,
-                    spectrum.band_sel,
-                    group,
+                    frequencies_hz=spectrum.frequencies,
+                    band_sel=spectrum.band_sel,
+                    group=group,
                     guidance="nmfs-2024",
                     impulsive=True,
                     n_events=int(n),
@@ -2190,9 +2190,9 @@ def generate_piling_campaign_accumulation(output_dir: str) -> None:
         )
         ax.semilogx(counts, curve, color=color, linewidth=1.9, label=group)
         crit = underwater.weighted_exposure(
-            spectrum.frequencies,
-            spectrum.band_sel,
-            group,
+            frequencies_hz=spectrum.frequencies,
+            band_sel=spectrum.band_sel,
+            group=group,
             guidance="nmfs-2024",
             impulsive=True,
             n_events=1,
@@ -2220,9 +2220,9 @@ def generate_piling_campaign_accumulation(output_dir: str) -> None:
                     va="top",
                 )
     vhf = underwater.weighted_exposure(
-        spectrum.frequencies,
-        spectrum.band_sel,
-        "VHF",
+        frequencies_hz=spectrum.frequencies,
+        band_sel=spectrum.band_sel,
+        group="VHF",
         guidance="nmfs-2024",
         impulsive=True,
         n_events=10_000,

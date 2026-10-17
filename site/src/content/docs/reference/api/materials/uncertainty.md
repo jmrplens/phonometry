@@ -141,8 +141,8 @@ Upper interval bound `value + U` (exact `U`).
 ```python
 equivalent_area_uncertainty(
     area: float | Sequence[float] | np.ndarray,
-    frequencies: float | Sequence[float] | np.ndarray,
     *,
+    frequencies: float | Sequence[float] | np.ndarray,
     condition: str = 'reproducibility',
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult
@@ -174,8 +174,8 @@ per one-third-octave band; $\sigma_\mathrm{r} = 0.6\,\sigma_\mathrm{R}$ (Formula
 ```python
 practical_coefficient_uncertainty(
     alpha_p: float | Sequence[float] | np.ndarray,
-    frequencies: float | Sequence[float] | np.ndarray,
     *,
+    frequencies: float | Sequence[float] | np.ndarray,
     condition: str = 'reproducibility',
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult
@@ -238,8 +238,8 @@ $\sigma_\mathrm{r} = 0.02\,D_{L\alpha,\mathrm{NRD}}$ (Formula (9)).
 ```python
 sound_absorption_coefficient_uncertainty(
     alpha: float | Sequence[float] | np.ndarray,
-    frequencies: float | Sequence[float] | np.ndarray,
     *,
+    frequencies: float | Sequence[float] | np.ndarray,
     condition: str = 'reproducibility',
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult

@@ -409,9 +409,9 @@ accurate and much cheaper.
 from phonometry import room
 
 room_dims = (7.0, 5.0, 3.0)
-print(round(float(room.room_mode_count(200.0, room_dims, speed_of_sound=344.0)), 1))
+print(round(float(room.room_mode_count(room_dims, frequency=200.0, speed_of_sound=344.0)), 1))
 # 128.5, against 128 modes actually enumerated below 200 Hz
-print(round(float(room.room_modal_density(1000.0, room_dims, speed_of_sound=344.0)), 1))
+print(round(float(room.room_modal_density(room_dims, frequency=1000.0, speed_of_sound=344.0)), 1))
 # 34.3 modes/Hz
 ```
 

@@ -116,7 +116,9 @@ def _tone_audibility_example() -> tuple[object, ReportMetadata, str]:
         ],
         dtype=float,
     )
-    result = ph.psychoacoustics.analyze_spectrum(levels, frequencies, 2.7)
+    result = ph.psychoacoustics.analyze_spectrum(
+        levels, frequencies=frequencies, line_spacing_hz=2.7
+    )
     metadata = ReportMetadata(
         specimen="Combustion engine, steady operation",
         client="Example client",
@@ -181,7 +183,7 @@ def _wind_turbine_tonality_example() -> tuple[object, ReportMetadata, str]:
     frequencies = np.arange(440.0, 560.0 + df, df)
     levels = np.full(frequencies.size, 30.0)
     levels[int(np.argmin(np.abs(frequencies - 500.0)))] = 60.0
-    result = ph.environment.wind_turbine_tonality(levels, frequencies)
+    result = ph.environment.wind_turbine_tonality(levels, frequencies=frequencies)
     metadata = ReportMetadata(
         specimen="Horizontal-axis wind turbine, gearbox tone",
         client="Example client",

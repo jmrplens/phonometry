@@ -370,11 +370,11 @@ from phonometry import building
 
 bands = np.array(building.TABLE_F1_OCTAVE_BANDS_HZ)
 lf = building.tapping_machine_force_level()            # Tabla F.1
-lw_c = building.tapping_machine_characteristic_power_level(bands, lf)
+lw_c = building.tapping_machine_characteristic_power_level(lf, frequency=bands)
 print(np.round(lw_c, 1))   # [119. 119. 119. 119. 119. 119. 118. 115.]
 
 # Sobre el forjado de hormigón de 220 mm del apartado anterior (Y_i = 1,07e-6).
-dc = building.tapping_machine_coupling_term(bands, 1.07e-6)
+dc = building.tapping_machine_coupling_term(1.07e-6, frequency=bands)
 print(np.round(lw_c - dc, 1))   # [79.3 82.3 85.3 88.3 91.3 94.3 96.3 96.3]
 ```
 

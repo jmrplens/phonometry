@@ -164,7 +164,7 @@ background = np.array([  # Lpi(B): the factory floor, loud at the low end
 ])
 
 res = emission.sound_power_in_situ(
-    st, rss, lw_rss, freqs, background_levels=background,
+    st, rss, lw_rss, frequencies=freqs, background_levels=background,
     conditions=emission.GradeConditions(
         excess_levels=[8.2, 7.6, 8.9, 8.0],   # dLfA at each position (Annex A)
         directivity_range=4.0,                # +/-4 dB round the machine (7.2)
@@ -249,7 +249,7 @@ the levels arrive as one grid per location:
 # along each long side; the second sits nearer a wall and reads 1.2 dB lower,
 # and was calibrated in a similar position 0.4 dB lower.
 two = emission.sound_power_in_situ(
-    st, np.stack([rss, rss - 1.2]), np.stack([lw_rss, lw_rss - 0.4]), freqs,
+    st, np.stack([rss, rss - 1.2]), np.stack([lw_rss, lw_rss - 0.4]), frequencies=freqs,
     background_levels=background,
 )
 print(two.reference_levels.shape)               # (2, 7): mean level per location (Eq. 10)
@@ -372,7 +372,7 @@ strokes = np.array([
 ])
 events = np.stack([strokes + d for d in (-0.3, 0.2, 0.0, 0.4, -0.2, 0.1)], axis=1)
 energy = emission.sound_energy_in_situ(
-    events, rss, lw_rss, freqs,                 # (4 positions, 6 events, 7 bands)
+    events, rss, lw_rss, frequencies=freqs,                 # (4 positions, 6 events, 7 bands)
     background_levels=background, integration_time=4.0,
     conditions=emission.GradeConditions(excess_levels=[8.2, 7.6, 8.9, 8.0], directivity_range=4.0), sigma_omc_db=2.0,
 )
@@ -470,7 +470,7 @@ library keeps it.
 ps = emission.static_pressure_from_altitude(640.0)
 print(round(ps, 2))                                 # 93.87 kPa (Eq. C.2)
 high = emission.sound_power_in_situ(
-    st, rss, lw_rss, freqs, background_levels=background,
+    st, rss, lw_rss, frequencies=freqs, background_levels=background,
     temperature_c=27.0, static_pressure_kpa=ps,
 )
 print(round(high.c2, 3))                            # 0.423 dB

@@ -324,11 +324,11 @@ def _chk_static_pressure() -> Outcome:
 def _chk_formula_d7() -> Outcome:
     """Formula (D.7) gives back the free-field less the pressure response."""
     result = metrology.sound_calibrator_correction(
-        _F,
-        _FIELD_1 + _SLM_FREE,
-        _FIELD_2 + _RM_FREE,
-        _ON_SLM + _SLM_PRESSURE,
-        _ON_RM + _RM_PRESSURE,
+        frequencies=_F,
+        slm_free_field_level=_FIELD_1 + _SLM_FREE,
+        reference_free_field_level=_FIELD_2 + _RM_FREE,
+        slm_calibrator_level=_ON_SLM + _SLM_PRESSURE,
+        reference_calibrator_level=_ON_RM + _RM_PRESSURE,
         reference_free_field_correction=_RM_FREE - _RM_PRESSURE,
         free_field_level_difference=_FIELD_1 - _FIELD_2,
         calibrator_level_difference=_ON_SLM - _ON_RM,
@@ -351,11 +351,11 @@ def _chk_formula_e6() -> Outcome:
     readings by what each is of.
     """
     result = metrology.comparison_coupler_correction(
-        _F,
-        _FIELD_1 + _SLM_FREE,
-        _FIELD_2 + _RM_FREE,
-        _ON_SLM + _SLM_PRESSURE,
-        _ON_RM + _RM_PRESSURE,
+        frequencies=_F,
+        slm_free_field_level=_FIELD_1 + _SLM_FREE,
+        reference_free_field_level=_FIELD_2 + _RM_FREE,
+        slm_coupler_level=_ON_SLM + _SLM_PRESSURE,
+        reference_coupler_level=_ON_RM + _RM_PRESSURE,
         reference_free_field_correction=_RM_FREE - _RM_PRESSURE,
         free_field_level_difference=_FIELD_1 - _FIELD_2,
         coupler_level_difference=_ON_SLM - _ON_RM,
@@ -376,10 +376,10 @@ def _chk_formula_f13() -> Outcome:
     actuator = 94.0 + np.array([0.0, 0.0, 0.01, 0.0])
     slm_actuator = np.array([0.1, 0.0, -0.7, -1.9])
     result = metrology.electrostatic_actuator_correction(
-        _F,
-        _FIELD_1 + _SLM_FREE,
-        _FIELD_2 + sensitivity + gain,
-        actuator + slm_actuator,
+        frequencies=_F,
+        slm_free_field_level=_FIELD_1 + _SLM_FREE,
+        reference_free_field_level=_FIELD_2 + sensitivity + gain,
+        slm_actuator_level=actuator + slm_actuator,
         reference_sensitivity_level=sensitivity,
         reference_channel_gain_db=gain,
         actuator_level=actuator,
@@ -404,9 +404,9 @@ def _chk_annex_a() -> Outcome:
     L4 = 93,8 dB after it, and Delta L = +0,2 dB.
     """
     result = metrology.adjustment_value(
-        [125.0, 1000.0, 8000.0],
-        [94.2, 94.1, 93.4],
-        93.7,
+        frequencies=[125.0, 1000.0, 8000.0],
+        free_field_indicated_level=[94.2, 94.1, 93.4],
+        calibrator_reading_db=93.7,
         calibrator_level=94.0,
     )
     return numeric(

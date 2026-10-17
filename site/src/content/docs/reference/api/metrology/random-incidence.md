@@ -220,10 +220,10 @@ one plane.
 
 ```python
 diffuse_field_sensitivity(
-    frequencies: ArrayLike,
     indicated_level: ArrayLike,
     reference_indicated_level: ArrayLike,
     *,
+    frequencies: ArrayLike,
     reference_random_incidence_level: ArrayLike | None = None,
     reference_free_field_level: ArrayLike | None = None,
     reference_directivity_index: ArrayLike | None = None,
@@ -602,9 +602,10 @@ symmetry stands for the same two planes and is judged on their division.
 
 ```python
 random_incidence_sensitivity(
-    frequencies: ArrayLike,
     free_field_level: ArrayLike,
     directivity_index: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> RandomIncidenceSensitivity
 ```
 

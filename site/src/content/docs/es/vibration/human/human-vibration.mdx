@@ -411,7 +411,7 @@ freqs = np.array([1.0, 1.25, 1.6, 2.0, 2.5, 3.15, 4.0, 5.0, 6.3, 8.0, 10.0,
 accel = np.array([0.18, 0.24, 0.33, 0.46, 0.52, 0.55, 0.48, 0.39, 0.31, 0.26,
                   0.21, 0.17, 0.13, 0.10, 0.078, 0.060, 0.045, 0.028, 0.020])
 
-result = vibration.weighted_acceleration(accel, freqs, "Wk")
+result = vibration.weighted_acceleration(accel, "Wk", frequencies=freqs)
 print(round(result.overall, 3))          # 1.026  m/s^2 (a_w)
 print(result.weighted.round(3))          # W_i * a_i por banda
 
@@ -447,7 +447,7 @@ freqs = np.array([1.0, 1.25, 1.6, 2.0, 2.5, 3.15, 4.0, 5.0, 6.3, 8.0, 10.0,
                   12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 63.0, 80.0])
 accel = np.array([0.18, 0.24, 0.33, 0.46, 0.52, 0.55, 0.48, 0.39, 0.31, 0.26,
                   0.21, 0.17, 0.13, 0.10, 0.078, 0.060, 0.045, 0.028, 0.020])
-result = vibration.weighted_acceleration(accel, freqs, "Wk")
+result = vibration.weighted_acceleration(accel, "Wk", frequencies=freqs)
 
 # En una línea:
 result.plot(language="es")

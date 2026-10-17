@@ -706,10 +706,10 @@ def test_annex_b_correlated_rw_uncertainty() -> None:
     ri = np.asarray(ref.ISO12999_1_ANNEX_B_RI)
     ui = np.asarray(ref.ISO12999_1_ANNEX_B_UI)
     up = building.weighted_rating_extended(
-        ri + ui, ref.ISO12999_1_ANNEX_B_FREQ, one_decimal=True
+        ri + ui, frequencies=ref.ISO12999_1_ANNEX_B_FREQ, one_decimal=True
     ).rating
     down = building.weighted_rating_extended(
-        ri - ui, ref.ISO12999_1_ANNEX_B_FREQ, one_decimal=True
+        ri - ui, frequencies=ref.ISO12999_1_ANNEX_B_FREQ, one_decimal=True
     ).rating
     assert (up - down) / 2.0 == pytest.approx(ref.ISO12999_1_ANNEX_B_U_CORR_RW)
 

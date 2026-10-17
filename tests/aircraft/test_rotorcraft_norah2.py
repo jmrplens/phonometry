@@ -412,7 +412,9 @@ def test_hover_ring_rim_reproduces_ring_rows(norah_root: pathlib.Path) -> None:
     assert dist == 70.0
     assert bearings.size == 13
     assert freqs.size == 31
-    hige = hover_ring_hemisphere(freqs, bearings, levels, distance_m=dist)
+    hige = hover_ring_hemisphere(
+        frequencies=freqs, bearings=bearings, levels=levels, distance_m=dist
+    )
     assert hige.distance_m == 70.0
     for bearing in (150.0, -120.0):
         k = int(np.nonzero(bearings == bearing)[0][0])
@@ -448,7 +450,11 @@ def test_case4_hover_ogh_event(norah_root: pathlib.Path) -> None:
         norah_root / "Hemispheres" / "R22_Ingroundhover_0kts_0deg_test.hem"
     )
     hige = hover_ring_hemisphere(
-        freqs, bearings, levels, distance_m=dist, mapping="bearing"
+        frequencies=freqs,
+        bearings=bearings,
+        levels=levels,
+        distance_m=dist,
+        mapping="bearing",
     )
     hoge = hover_derived_hemisphere(hige, "out_of_ground_hover", offset_db=8.0)
     case = norah_root / "ARP" / "Case4" / "SE" / "R22_DEP_RT2"

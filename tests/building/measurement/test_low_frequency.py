@@ -336,7 +336,10 @@ def test_combination_rejects_mismatched_band_axes() -> None:
 def test_only_the_three_low_frequency_bands_change() -> None:
     """100 Hz and up keep the default procedure, untouched."""
     result = apply_low_frequency_procedure(
-        _L2, _FREQS, _receiving_procedure(), reverberation_time=_T2
+        _L2,
+        frequencies=_FREQS,
+        procedure=_receiving_procedure(),
+        reverberation_time=_T2,
     )
     assert np.array_equal(result.levels[3:], _L2[3:])
     assert result.reverberation_time is not None
@@ -346,7 +349,10 @@ def test_only_the_three_low_frequency_bands_change() -> None:
 def test_the_63_hz_octave_value_replaces_all_three_bands() -> None:
     """Clause 10.4: one measured value stands for 50 Hz, 63 Hz and 80 Hz."""
     result = apply_low_frequency_procedure(
-        _L2, _FREQS, _receiving_procedure(), reverberation_time=_T2
+        _L2,
+        frequencies=_FREQS,
+        procedure=_receiving_procedure(),
+        reverberation_time=_T2,
     )
     assert result.reverberation_time is not None
     assert np.array_equal(result.reverberation_time[:3], np.full(3, _T63_OCTAVE))
@@ -356,10 +362,13 @@ def test_exact_band_centres_are_recognised_as_well_as_nominal_ones() -> None:
     """49,6 / 62,5 / 79,4 Hz is the same measurement as 50 / 63 / 80 Hz."""
     exact = np.array([49.6, 62.5, 79.4, 100.0, 125.0])
     nominal = apply_low_frequency_procedure(
-        _L2, _FREQS, _receiving_procedure(), reverberation_time=_T2
+        _L2,
+        frequencies=_FREQS,
+        procedure=_receiving_procedure(),
+        reverberation_time=_T2,
     )
     measured = apply_low_frequency_procedure(
-        _L2, exact, _receiving_procedure(), reverberation_time=_T2
+        _L2, frequencies=exact, procedure=_receiving_procedure(), reverberation_time=_T2
     )
     assert np.allclose(nominal.l_lf, measured.l_lf, rtol=0.0, atol=1e-12)
     assert np.allclose(measured.low_frequency_bands, exact[:3], rtol=0.0, atol=1e-12)
@@ -377,7 +386,10 @@ def test_the_three_bands_are_read_where_they_actually_sit() -> None:
     levels = np.array([62.0, 58.0, 50.0, 52.0, 49.0, 45.0])
     times = np.array([0.80, 0.70, 0.60, 0.55, 0.50, 0.45])
     result = apply_low_frequency_procedure(
-        levels, freqs, _receiving_procedure(), reverberation_time=times
+        levels,
+        frequencies=freqs,
+        procedure=_receiving_procedure(),
+        reverberation_time=times,
     )
     assert np.array_equal(result.low_frequency_bands, freqs[2:5])
     assert np.array_equal(result.l_default, levels[2:5])
@@ -417,7 +429,10 @@ def test_the_callers_own_arrays_come_back_unchanged() -> None:
     freqs = np.array([50.0, 63.0, 80.0, 100.0, 125.0])
     levels_before, times_before = levels.copy(), times.copy()
     apply_low_frequency_procedure(
-        levels, freqs, _receiving_procedure(), reverberation_time=times
+        levels,
+        frequencies=freqs,
+        procedure=_receiving_procedure(),
+        reverberation_time=times,
     )
     assert np.array_equal(levels, levels_before)
     assert np.array_equal(times, times_before)
@@ -441,7 +456,10 @@ def test_a_level_axis_with_more_than_one_dimension_is_refused() -> None:
     procedure = _receiving_procedure()
     with pytest.raises(ValueError, match="one-dimensional"):
         apply_low_frequency_procedure(
-            _L2[np.newaxis, :], _FREQS, procedure, reverberation_time=_T2
+            _L2[np.newaxis, :],
+            frequencies=_FREQS,
+            procedure=procedure,
+            reverberation_time=_T2,
         )
 
 
@@ -451,7 +469,7 @@ def test_a_missing_low_frequency_band_is_refused() -> None:
     procedure = _receiving_procedure()
     with pytest.raises(ValueError, match="missing 80 Hz"):
         apply_low_frequency_procedure(
-            _L2[:4], freqs, procedure, reverberation_time=_T2[:4]
+            _L2[:4], frequencies=freqs, procedure=procedure, reverberation_time=_T2[:4]
         )
 
 
@@ -461,7 +479,7 @@ def test_a_duplicated_band_centre_is_refused() -> None:
     procedure = _receiving_procedure()
     with pytest.raises(ValueError, match="cannot be identified"):
         apply_low_frequency_procedure(
-            _L2[:4], freqs, procedure, reverberation_time=_T2[:4]
+            _L2[:4], frequencies=freqs, procedure=procedure, reverberation_time=_T2[:4]
         )
 
 
@@ -470,7 +488,7 @@ def test_level_and_frequency_band_counts_must_agree() -> None:
     procedure = _receiving_procedure()
     with pytest.raises(ValueError, match="band"):
         apply_low_frequency_procedure(
-            _L2[:4], _FREQS, procedure, reverberation_time=_T2[:4]
+            _L2[:4], frequencies=_FREQS, procedure=procedure, reverberation_time=_T2[:4]
         )
 
 
@@ -479,7 +497,11 @@ def test_receiving_room_without_the_63_hz_octave_time_is_refused() -> None:
     partial = LowFrequencyProcedure(volume=_SMALL_VOLUME, corner_levels=_CORNERS)
     with pytest.raises(ValueError, match="63 Hz octave"):
         apply_low_frequency_procedure(
-            _L2, _FREQS, partial, reverberation_time=_T2, room="receiving"
+            _L2,
+            frequencies=_FREQS,
+            procedure=partial,
+            reverberation_time=_T2,
+            room="receiving",
         )
 
 
@@ -487,7 +509,9 @@ def test_source_room_carrying_a_63_hz_octave_time_is_refused() -> None:
     """Clause 10.4 speaks about the receiving room and about no other."""
     procedure = _receiving_procedure()
     with pytest.raises(ValueError, match="source-room call takes neither"):
-        apply_low_frequency_procedure(_L2, _FREQS, procedure, room="source")
+        apply_low_frequency_procedure(
+            _L2, frequencies=_FREQS, procedure=procedure, room="source"
+        )
 
 
 def test_reverberation_times_must_cover_the_same_bands_as_the_levels() -> None:
@@ -495,7 +519,7 @@ def test_reverberation_times_must_cover_the_same_bands_as_the_levels() -> None:
     procedure = _receiving_procedure()
     with pytest.raises(ValueError, match="they must match"):
         apply_low_frequency_procedure(
-            _L2, _FREQS, procedure, reverberation_time=_T2[:-1]
+            _L2, frequencies=_FREQS, procedure=procedure, reverberation_time=_T2[:-1]
         )
 
 
@@ -503,7 +527,7 @@ def test_receiving_room_without_the_measured_times_is_refused() -> None:
     """Clause 10.4 replaces three values and leaves the rest as measured."""
     procedure = _receiving_procedure()
     with pytest.raises(ValueError, match="needs 'reverberation_time'"):
-        apply_low_frequency_procedure(_L2, _FREQS, procedure)
+        apply_low_frequency_procedure(_L2, frequencies=_FREQS, procedure=procedure)
 
 
 def test_an_unknown_room_is_refused() -> None:
@@ -511,7 +535,11 @@ def test_an_unknown_room_is_refused() -> None:
     procedure = _receiving_procedure()
     with pytest.raises(ValueError, match="'room' must be"):
         apply_low_frequency_procedure(
-            _L2, _FREQS, procedure, reverberation_time=_T2, room="kitchen"
+            _L2,
+            frequencies=_FREQS,
+            procedure=procedure,
+            reverberation_time=_T2,
+            room="kitchen",
         )
 
 
@@ -872,8 +900,12 @@ def test_the_documented_bedroom_does_not_answer_the_three_bands_silently() -> No
     assert np.all(gap < 4.5)
     assert np.array_equal(plain.dnt[3:], field.dnt[3:])
 
-    plain_rating = building.weighted_rating_extended(plain.dnt, _BEDROOM_FREQS)
-    field_rating = building.weighted_rating_extended(field.dnt, _BEDROOM_FREQS)
+    plain_rating = building.weighted_rating_extended(
+        plain.dnt, frequencies=_BEDROOM_FREQS
+    )
+    field_rating = building.weighted_rating_extended(
+        field.dnt, frequencies=_BEDROOM_FREQS
+    )
     assert plain_rating.rating == field_rating.rating
     assert plain_rating.c_50_3150 == -1
     assert field_rating.c_50_3150 == -2
@@ -1227,7 +1259,10 @@ def test_63_hz_octave_recovers_a_known_decay_better_than_the_thirds() -> None:
 def test_result_carries_the_three_band_chain() -> None:
     """The record keeps what it was built from, not only what it produced."""
     result = apply_low_frequency_procedure(
-        _L2, _FREQS, _receiving_procedure(), reverberation_time=_T2
+        _L2,
+        frequencies=_FREQS,
+        procedure=_receiving_procedure(),
+        reverberation_time=_T2,
     )
     assert np.array_equal(result.l_default, _L2[:3])
     assert np.array_equal(result.l_corner, _CORNER_MAXIMA)
@@ -1239,7 +1274,10 @@ def test_result_carries_the_three_band_chain() -> None:
 def test_result_plots() -> None:
     """Every result class exposes ``.plot()``; this one draws three curves."""
     result = apply_low_frequency_procedure(
-        _L2, _FREQS, _receiving_procedure(), reverberation_time=_T2
+        _L2,
+        frequencies=_FREQS,
+        procedure=_receiving_procedure(),
+        reverberation_time=_T2,
     )
     ax = result.plot()
     assert len(ax.lines) == 3
@@ -1249,7 +1287,10 @@ def test_result_plots() -> None:
 def test_result_plots_in_spanish() -> None:
     """The Spanish twin is a peer, so the renderer answers to it too."""
     result = apply_low_frequency_procedure(
-        _L2, _FREQS, _receiving_procedure(), reverberation_time=_T2
+        _L2,
+        frequencies=_FREQS,
+        procedure=_receiving_procedure(),
+        reverberation_time=_T2,
     )
     ax = result.plot(language="es")
     assert "Nivel de presión" in ax.get_ylabel()

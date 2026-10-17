@@ -1762,7 +1762,7 @@ def meter(frequency_hz):
 
 index = [meter(f).directivity_index for f in bands]
 g_f = -10 * np.log10(1 + (np.array(bands) / 25000) ** 4)   # L_rd - L_o at each band
-r = metrology.random_incidence_sensitivity(bands, g_f, index)
+r = metrology.random_incidence_sensitivity(g_f, index, frequencies=bands)
 shown = np.isin(r.frequencies, [1000, 4000, 8000, 16000])
 print(r.correction[shown].round(2))              # [-0.06 -0.95 -2.66 -5.62]
 print(r.random_incidence_level[shown].round(2))  # [-0.06 -0.95 -2.71 -6.29]
@@ -1804,9 +1804,9 @@ print(metrology.IEC61183_TABLE_B1[8000.0])
 delta_dp = np.array([metrology.IEC61183_TABLE_B1[f].diffuse_pressure_difference_db
                      for f in bands])
 dd = metrology.diffuse_field_sensitivity(
-    bands,
-    80.0 + r.random_incidence_level,  # L_D, the meter under test
-    80.0 + delta_dp,                     # L_D,ref, a pressure-calibrated LS2aP
+    80.0 + r.random_incidence_level,
+    80.0 + delta_dp,  # L_D, the meter under test
+    frequencies=bands,                     # L_D,ref, a pressure-calibrated LS2aP
     reference_pressure_level=0.0,     # G_P,ref; Delta_DP from Table B.1
 )
 print(dd.reference_correction[shown])            # [0.   0.25 1.2  3.05]
@@ -1896,7 +1896,7 @@ tolerance = np.minimum(upper, -lower)[band]                # the narrower side a
 x3 = f3 / 1000
 response = 0.4 + 0.12 * np.cos(3 * np.log(x3)) - 0.3 * (x3 / 8) ** 2   # indication less field, dB
 a = metrology.adjustment_value(
-    f3, 94.0 + response, 94.35, calibrator_level=94.0, tolerance_db=tolerance
+    94.0 + response, 94.35, frequencies=f3, calibrator_level=94.0, tolerance_db=tolerance
 )
 print(round(a.sensitivity_adjustment, 2), round(a.adjustment, 2))  # -0.37 0.02
 print(round(a.check_frequency_offset_db, 2))                           # 0.15
@@ -1935,11 +1935,11 @@ pressure = -0.1 * x**1.5                        # the meter on the calibrator, r
 spread = np.array([[0.0], [0.02], [-0.03]]) * x**0.8   # three microphones of the model
 
 c = metrology.sound_calibrator_correction(
-    f,
-    94.0 + free + spread,          # L_ind1: the meter in the free field
-    94.0 + c_ff_rm,                # L_ind2: the reference in its place
-    94.0 + pressure + spread / 2,  # L_ind3: the calibrator on the meter
-    94.0,                          # L_ind4: the calibrator on the reference
+    94.0 + free + spread,
+    94.0 + c_ff_rm,          # L_ind1: the meter in the free field
+    94.0 + pressure + spread / 2,                # L_ind2: the reference in its place
+    94.0,  # L_ind3: the calibrator on the meter
+    frequencies=f,                          # L_ind4: the calibrator on the reference
     reference_free_field_correction=c_ff_rm,
 )
 print(c.correction.round(2))  # [-0.04 -0.09 -0.1  -0.05  0.05  0.23  0.63  1.72  4.95]
@@ -2002,7 +2002,7 @@ clause 15 n) and o) as a one-page fiche:
 
 ```python
 v = metrology.verify_correction_uncertainty(
-    f, 0.12 + 0.02 * x**0.8, clause=c.clause, correction=c.correction,
+    0.12 + 0.02 * x**0.8, frequencies=f, clause=c.clause, correction=c.correction,
     correction_range_db=c.range_db,
 )
 print(v.passes)   # True

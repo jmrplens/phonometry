@@ -77,7 +77,10 @@ def _calibration(uncertainty: object = None) -> metrology.ReciprocityCalibration
         for (i, j), z in zip(pairs, za, strict=True)
     ]
     return metrology.pressure_reciprocity(
-        _F, ze, za, expanded_uncertainty_db=uncertainty
+        frequencies=_F,
+        electrical_transfer_impedances_ohm=ze,
+        acoustic_transfer_impedances=za,
+        expanded_uncertainty_db=uncertainty,
     )
 
 
@@ -102,7 +105,11 @@ def test_calibration_without_uncertainty_draws_no_band_and_speaks_spanish(
 
 def test_budget_draws_its_components_and_the_expanded_uncertainty(ax: Axes) -> None:
     budget = metrology.reciprocity_uncertainty_budget(
-        _F, {"voltage_ratio": 0.003, "repeatability": [0.005, 0.004, 0.008]}
+        frequencies=_F,
+        standard_uncertainties_db={
+            "voltage_ratio": 0.003,
+            "repeatability": [0.005, 0.004, 0.008],
+        },
     )
     budget.plot(ax, language="es")
     lines = ax.get_lines()

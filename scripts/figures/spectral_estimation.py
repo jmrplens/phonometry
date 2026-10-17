@@ -46,7 +46,9 @@ def generate_psd_confidence_smoothing(output_dir: str) -> None:
     res = signals.power_spectral_density(x, fs, nperseg=4096)
     band = (res.frequencies >= 20.0) & (res.frequencies <= 20000.0)
     freqs = res.frequencies[band]
-    smooth = signals.fractional_octave_smoothing(res.frequencies, res.psd, 3.0)[band]
+    smooth = signals.fractional_octave_smoothing(
+        frequencies=res.frequencies, values=res.psd, fraction=3.0
+    )[band]
     # The exact -3.01 dB/oct power law through the level at 1 kHz.
     i0 = int(np.argmin(np.abs(freqs - 1000.0)))
     ref_db = 10.0 * np.log10(smooth[i0]) - 10.0 * np.log10(freqs / freqs[i0])

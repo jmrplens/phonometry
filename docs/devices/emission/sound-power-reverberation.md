@@ -313,7 +313,7 @@ slam_cmp = emission.sound_energy_comparison(
 print(round(float(slam_cmp.sound_energy_level[0]), 1), slam_cmp.method)   # 95.0 comparison
 
 # Annex F octave bands, and the identity with the steady chain (LJ = LW + 10 lg(T/T0)).
-octaves, lj_octave = emission.octave_band_levels(slam_lj.sound_energy_level, thirds)
+octaves, lj_octave = emission.octave_band_levels(slam_lj.sound_energy_level, frequencies=thirds)
 print(octaves)                        # [ 125.  250.  500. 1000. 2000. 4000. 8000.]
 lp_thirds = np.linspace(80.0, 70.0, thirds.size)     # the mean room SPL of section 1
 steady = emission.sound_power_reverberation(

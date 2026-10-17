@@ -537,8 +537,8 @@ def _tone_lines(
 
 def wind_turbine_tonality(
     levels: NDArray[np.float64] | list[float],
-    frequencies: NDArray[np.float64] | list[float],
     *,
+    frequencies: NDArray[np.float64] | list[float],
     tone_frequency: float | None = None,
 ) -> WindTurbineTonalityResult:
     r"""Tonal audibility of a narrowband spectrum (IEC 61400-11 Formulae 30-34).

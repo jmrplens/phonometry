@@ -93,9 +93,9 @@ def _loudspeaker() -> ph.electroacoustics.LoudspeakerCharacteristics:
     )
     fz = np.geomspace(20.0, 20000.0, 120)
     return ph.electroacoustics.loudspeaker_characteristics(
-        f,
-        spl,
-        8.0,
+        frequencies=f,
+        spl=spl,
+        rated_impedance_ohm=8.0,
         sensitivity_band=(200.0, 4000.0),
         impedance=(fz, 6.6 + 20 * np.exp(-(np.log2(fz / 52.0) ** 2) / 0.12)),
         distortion=(np.geomspace(25.0, 5000.0, 90), 0.4 + 2.0 * np.ones(90)),
@@ -108,9 +108,9 @@ def _microphone() -> ph.electroacoustics.MicrophoneCharacteristics:
         1 + (f / 19000.0) ** 8
     )
     return ph.electroacoustics.microphone_characteristics(
-        f,
-        response,
-        12.5,
+        frequencies=f,
+        response_db=response,
+        sensitivity_mv_per_pa=12.5,
         tolerance_db=3.0,
         noise=ph.electroacoustics.MicrophoneNoise(
             voltage_v=1.25e-6,

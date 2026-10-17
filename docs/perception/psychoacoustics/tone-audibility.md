@@ -28,7 +28,7 @@ fT = [118.4, 137.3, 158.8, 314.9, 433.4, 592.2, 629.8, 643.3, 1582.7]
 LT = [64.56, 67.96, 68.63, 68.50, 73.17, 78.31, 75.00, 79.75, 71.07]
 LS = [48.91, 49.22, 50.50, 52.85, 58.29, 59.53, 59.71, 61.98, 54.16]
 
-res = psychoacoustics.assess_tones(fT, LT, LS, 2.7)
+res = psychoacoustics.assess_tones(LT, LS, 2.7, tone_frequencies=fT)
 print(round(res.decisive_audibility, 2), res.decisive_frequency)  # 5.01 137.3
 res.plot()   # per-tone audibility bars, decisive tone highlighted
 plt.show()
@@ -123,7 +123,7 @@ from phonometry import psychoacoustics
 fT = [118.4, 137.3, 158.8, 314.9, 433.4, 592.2, 629.8, 643.3, 1582.7]
 LT = [64.56, 67.96, 68.63, 68.50, 73.17, 78.31, 75.00, 79.75, 71.07]
 LS = [48.91, 49.22, 50.50, 52.85, 58.29, 59.53, 59.71, 61.98, 54.16]
-res = psychoacoustics.assess_tones(fT, LT, LS, 2.7)
+res = psychoacoustics.assess_tones(LT, LS, 2.7, tone_frequencies=fT)
 print(round(res.decisive_audibility, 2), res.decisive_frequency)  # 5.01 137.3
 
 # Mean audibility of the five measured spectra (Table E.3 decisive values):
@@ -150,7 +150,7 @@ from phonometry import psychoacoustics
 fT = [118.4, 137.3, 158.8, 314.9, 433.4, 592.2, 629.8, 643.3, 1582.7]
 LT = [64.56, 67.96, 68.63, 68.50, 73.17, 78.31, 75.00, 79.75, 71.07]
 LS = [48.91, 49.22, 50.50, 52.85, 58.29, 59.53, 59.71, 61.98, 54.16]
-res = psychoacoustics.assess_tones(fT, LT, LS, 2.7)
+res = psychoacoustics.assess_tones(LT, LS, 2.7, tone_frequencies=fT)
 
 # One line: the levels view, the same one the .report() fiche embeds.
 res.plot(view="levels")
@@ -219,8 +219,8 @@ levels = [49.40, 50.68, 50.09, 53.37, 44.47, 50.91, 51.41, 59.40, 64.54, 57.57,
           52.58, 53.15, 67.04, 67.27, 57.40, 57.17, 52.56, 51.39, 52.49, 47.68,
           51.26, 49.03, 61.42, 59.52, 48.43, 50.84, 48.20, 55.95]
 
-ls = psychoacoustics.mean_narrowband_level(levels, freqs, 137.3)
-lt = psychoacoustics.tone_level(levels, freqs, 137.3, ls)
+ls = psychoacoustics.mean_narrowband_level(levels, 137.3, frequencies=freqs)
+lt = psychoacoustics.tone_level(levels, 137.3, ls, frequencies=freqs)
 print(round(ls, 2), round(lt, 2))                  # 49.22 67.96
 print(round(psychoacoustics.tone_audibility(lt, ls, 137.3, 2.7), 2))   # 5.01 dB
 ```
@@ -255,7 +255,7 @@ levels = [49.40, 50.68, 50.09, 53.37, 44.47, 50.91, 51.41, 59.40, 64.54, 57.57,
           51.26, 49.03, 61.42, 59.52, 48.43, 50.84, 48.20, 55.95]
 
 # Same Table E.1 spectrum as above.
-res = psychoacoustics.analyze_spectrum(levels, freqs, 2.7)
+res = psychoacoustics.analyze_spectrum(levels, 2.7, frequencies=freqs)
 singles = res.group_sizes == 1
 print([round(f, 1) for f in res.tone_frequencies[singles]])  # [118.4, 137.3, 158.8]
 
@@ -264,8 +264,8 @@ fg = res.group_sizes > 1
 print(int(res.group_sizes[fg][0]), round(float(res.tone_levels[fg][0]), 2))  # 3 72.15
 
 # The same Formula 17 combination, called directly (LS from Table E.2):
-lt_fg = psychoacoustics.combined_tone_level(levels, freqs, [118.4, 137.3, 158.8],
-                               [48.91, 49.22, 50.50])
+lt_fg = psychoacoustics.combined_tone_level(levels, [48.91, 49.22, 50.50], frequencies=freqs,
+                                            tone_frequencies=[118.4, 137.3, 158.8])
 print(round(lt_fg, 2))                                # 72.15
 
 res.plot()   # the detected entries, FG groups included, as audibility bars
@@ -341,7 +341,7 @@ decimal separator), e.g. `res.report("tone_fiche_es.pdf", language="es")`.
 from phonometry import psychoacoustics, ReportMetadata
 
 # The Annex E combustion-engine spectrum (analyze_spectrum).
-res = psychoacoustics.analyze_spectrum(levels, freqs, 2.7)
+res = psychoacoustics.analyze_spectrum(levels, 2.7, frequencies=freqs)
 res.report(
     "tone_fiche.pdf",
     metadata=ReportMetadata(

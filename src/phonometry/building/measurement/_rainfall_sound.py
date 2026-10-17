@@ -642,6 +642,7 @@ class RainfallReferenceCorrection(OwnsArrays):
 def rainfall_reference_correction(
     l_i_ref: ArrayLike,
     structural_reverberation_time: ArrayLike,
+    *,
     frequencies: ArrayLike | None = None,
 ) -> RainfallReferenceCorrection:
     r"""Correction :math:`\Delta L_{I\mathrm{c}}` of a laboratory (ISO 10140-5 I.2).
@@ -850,8 +851,8 @@ def _normalized(
 def rainfall_sound(
     l_pr: ArrayLike,
     reverberation_time: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     volume: float,
     excited_area_m2: float,
     background_db: ArrayLike | None = None,
@@ -952,8 +953,8 @@ def rainfall_sound(
 
 def rainfall_sound_from_intensity(
     l_im: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     measuring_area_m2: float,
     excited_area_m2: float,
     reference_correction: RainfallReferenceCorrection | ArrayLike | None = None,

@@ -595,4 +595,4 @@ def predicted_diffusion_spectrum(
                     surface.coefficient, reference.coefficient
                 )
             )
-    return diffusion_spectrum(freqs, raw, normalized=norm)
+    return diffusion_spectrum(frequencies=freqs, diffusion=raw, normalized=norm)

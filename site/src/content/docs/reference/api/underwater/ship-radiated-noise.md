@@ -65,9 +65,9 @@ $d = d_{\mathrm{CPA}} \tan(\mathrm{angle})$.
 ```python
 monopole_source_level(
     rnl: float | NDArray[np.float64] | list[float],
-    frequency: float | NDArray[np.float64] | list[float],
     draft_m: float,
     *,
+    frequency: float | NDArray[np.float64] | list[float],
     speed_of_sound: float = 1500.0,
 ) -> ShipSourceLevelResult
 ```

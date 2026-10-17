@@ -36,9 +36,9 @@ def _extract_text(path: str) -> str:
 def _supply() -> DuctPathResult:
     """The supply path of Long Table 14.9, from its published element rows."""
     return duct_path(
-        _OCTAVE_BANDS,
-        [90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0],
-        [
+        frequencies=_OCTAVE_BANDS,
+        source_level=[90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0],
+        elements=[
             DuctElement(
                 "Elbow, 36 x 24 in, unlined",
                 [0, 1, 2, 3, 3, 3, 3, 3],
@@ -195,9 +195,9 @@ def test_combined_paths_sheet_lists_its_contributions(tmp_path: Path) -> None:
 
     supply = _supply()
     other = duct_path(
-        _OCTAVE_BANDS,
-        [90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0],
-        [DuctElement("Return plenum", 30.0, code="R")],
+        frequencies=_OCTAVE_BANDS,
+        source_level=[90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0],
+        elements=[DuctElement("Return plenum", 30.0, code="R")],
         room_effect=8.0,
         criterion="NC",
         target=30.0,
@@ -219,9 +219,9 @@ def test_a_long_path_still_renders_on_one_page(
     """A fiche is one page: a path too long for it elides its middle rows."""
     _reportlab()
     res = duct_path(
-        _OCTAVE_BANDS,
-        [90.0] * 8,
-        [
+        frequencies=_OCTAVE_BANDS,
+        source_level=[90.0] * 8,
+        elements=[
             DuctElement(f"Duct element {i}", 3.0, [40.0 - i] * 8, code=str(i))
             for i in range(1, 26)
         ],

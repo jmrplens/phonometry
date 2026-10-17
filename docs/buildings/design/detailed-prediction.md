@@ -117,10 +117,12 @@ print(round(k_floor_int, 1), round(k_int_int, 1))     # 8.8 11.0  (Table L.6)
 
 # The floor's perimeter: it butts into an external wall above and below at each
 # of its two external edges, and crosses the internal walls at the other two.
-a_at_ext = building.perimeter_absorption_coefficient([92.6, 92.6], [k_floor_ext] * 2)
+a_at_ext = building.perimeter_absorption_coefficient(
+    [k_floor_ext] * 2, critical_frequencies=[92.6, 92.6])
 a_at_int = building.perimeter_absorption_coefficient(
-    [76.8, 128.4, 128.4], [building.junction_vibration_reduction(
-        "rigid_cross", "through", 360.0 / 484.0), k_floor_int, k_floor_int])
+    [building.junction_vibration_reduction("rigid_cross", "through", 360.0 / 484.0),
+     k_floor_int, k_floor_int],
+    critical_frequencies=[76.8, 128.4, 128.4])
 floor_perimeter = 9.0 * (a_at_ext + a_at_int)         # 2.659 m (Formula C.4)
 
 floor = building.HomogeneousElement("floor", 20.0, 5.0, 4.0, 484.0, 76.8, 0.005,
@@ -258,7 +260,10 @@ k = {
     "corner": building.junction_vibration_reduction("corner", "corner", 1.0),
     "int-int-x": building.junction_vibration_reduction("rigid_cross", "through", 1.0),
 }
-a = building.perimeter_absorption_coefficient
+def a(critical_frequencies, indices):
+    return building.perimeter_absorption_coefficient(
+        indices, critical_frequencies=critical_frequencies)
+
 floor_sum = 9.0 * (a([92.6, 92.6], [k["floor-ext"]] * 2)
                    + a([76.8, 128.4, 128.4],
                        [k["floor-floor"], k["floor-int"], k["floor-int"]]))
@@ -368,7 +373,7 @@ dv_n = ...          # normalized junction velocity level difference, dB (ISO 108
 dnf_13 = ...        # laboratory normalized flanking level difference Dn,f, dB
 lnf_13 = ...        # laboratory normalized flanking impact level Ln,f, dB
 
-r_star = building.resonant_sound_reduction_index(r_wall_leaf, bands,
+r_star = building.resonant_sound_reduction_index(r_wall_leaf, frequencies=bands,
                                                  critical_frequency=2200.0)   # +8 dB below fc
 r_ff = building.flanking_reduction_index_from_normalized_difference(
     index_i=r_star, index_j=r_star, normalized_velocity_level_difference=dv_n,

@@ -238,8 +238,8 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ```python
 plot_helmholtz_resonator_geometry(
     resonator: HelmholtzResonator,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -266,8 +266,8 @@ dimensions (neck side and length, cavity side and length) dimensioned.
 ```python
 plot_slit_absorber_geometry(
     resonators: Sequence[HelmholtzResonator] | HelmholtzResonator,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     slit_height_m: float,
     lattice_step_m: float,
     period_m: float,

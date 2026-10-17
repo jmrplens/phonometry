@@ -223,7 +223,7 @@ def meter(frequency_hz):
 
 index = [meter(f).directivity_index for f in bands]
 g_f = -10 * np.log10(1 + (np.array(bands) / 25000) ** 4)   # L_rd - L_o at each band
-r = metrology.random_incidence_sensitivity(bands, g_f, index)
+r = metrology.random_incidence_sensitivity(g_f, index, frequencies=bands)
 shown = np.isin(r.frequencies, [1000, 4000, 8000, 16000])
 print(r.correction[shown].round(2))              # [-0.06 -0.95 -2.66 -5.62]
 print(r.random_incidence_level[shown].round(2))  # [-0.06 -0.95 -2.71 -6.29]
@@ -283,9 +283,9 @@ print(metrology.IEC61183_TABLE_B1[8000.0])
 delta_dp = np.array([metrology.IEC61183_TABLE_B1[f].diffuse_pressure_difference_db
                      for f in bands])
 dd = metrology.diffuse_field_sensitivity(
-    bands,
-    80.0 + r.random_incidence_level,  # L_D, the meter under test
-    80.0 + delta_dp,                     # L_D,ref, a pressure-calibrated LS2aP
+    80.0 + r.random_incidence_level,
+    80.0 + delta_dp,  # L_D, the meter under test
+    frequencies=bands,                     # L_D,ref, a pressure-calibrated LS2aP
     reference_pressure_level=0.0,     # G_P,ref; Delta_DP from Table B.1
 )
 print(dd.reference_correction[shown])            # [0.   0.25 1.2  3.05]

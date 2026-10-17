@@ -266,8 +266,8 @@ rating bands 100-3150 Hz), an optional verdict row and a footer.
 impact_improvement(
     bare: float | Sequence[float] | np.ndarray,
     with_covering: float | Sequence[float] | np.ndarray,
-    frequencies: float | Sequence[float] | np.ndarray,
     *,
+    frequencies: float | Sequence[float] | np.ndarray,
     background: float | Sequence[float] | np.ndarray | None = None,
 ) -> FloorCoveringImprovementResult
 ```
@@ -311,8 +311,8 @@ over positions $\Delta L = \mathrm{mean}(\Delta L_{t,a})$
 ```python
 improvement_octave_bands(
     improvement: Sequence[float] | np.ndarray,
-    frequencies: Sequence[float] | np.ndarray,
     *,
+    frequencies: Sequence[float] | np.ndarray,
     quantity: str = 'ΔL',
 ) -> OctaveBandSpectrum
 ```

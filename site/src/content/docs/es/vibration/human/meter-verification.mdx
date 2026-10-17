@@ -274,7 +274,7 @@ frequencies = 10.0 ** (bands / 10.0)
 measured = np.array([0.4314, 0.4969, 0.5466, 0.9937, 1.068,
                      0.7897, 0.3427, 0.1894, 0.1366])
 
-check = vibration.verify_weighting("Wk", frequencies, measured)
+check = vibration.verify_weighting("Wk", measured, frequencies=frequencies)
 print(check.passes)                             # False
 print(check.deviation_percent.round(1))
 # [  3.   3.   3.   3.   3.   2. -15.   2.   2.]
@@ -293,7 +293,7 @@ entre $f_\mathrm{t3}$ y $f_\mathrm{t4}$, y el instrumento es conforme:
 ```python
 moved = np.array([0.4314, 0.4969, 0.5466, 0.9937, 1.068,
                   0.7897, 0.4112, 0.1894, 0.1138])
-print(vibration.verify_weighting("Wk", frequencies, moved).passes)   # True
+print(vibration.verify_weighting("Wk", moved, frequencies=frequencies).passes)   # True
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_weighting_verification.svg" alt="Dos paneles sobre un mismo eje logarítmico de frecuencia, de 0,2512 a 158,5 Hz. Arriba, el objetivo de diseño de Wk dentro de su banda de la Tabla 5, el barrido tal como se lee en círculos rojos rellenos y el mismo barrido, con su déficit desplazado, en anillos verdes huecos: en siete bandas un mismo punto lleva las dos marcas, y a 31,62 Hz el círculo rojo queda solo justo por debajo del borde inferior, con una nota que dice un 4,0 por ciento del objetivo de diseño por debajo del límite del menos 11 por ciento. Abajo, los mismos puntos en porcentaje frente al más 12 y menos 11 del centro y al más 26 y menos 21 de las faldas: el punto de 31,62 Hz está un 15 por ciento bajo, y una flecha lo lleva más allá del escalón de 63,1 Hz hasta 79,43 Hz, por encima del menos 21 y conforme" width="94%" />
@@ -306,7 +306,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import vibration
 
-check = vibration.verify_weighting("Wk", frequencies, measured)
+check = vibration.verify_weighting("Wk", measured, frequencies=frequencies)
 
 # En una línea:
 check.plot(language="es")
@@ -357,12 +357,12 @@ from phonometry import vibration
 print(vibration.weighting_factors("Wk", [0.1259]).round(5))   # [0.04932]
 
 # Un canal que ahí no lee nada en absoluto sigue siendo conforme.
-dead = vibration.verify_weighting("Wk", [0.1259], [0.0])
+dead = vibration.verify_weighting("Wk", [0.0], frequencies=[0.1259])
 print(dead.passes, dead.deviation_percent.round(1))   # True [-100.]
 
 # El límite superior es la mitad de la celda que sí puede fallar: +26 %,
 # sea cola o no.
-high = vibration.verify_weighting("Wk", [0.1259], [0.0626])
+high = vibration.verify_weighting("Wk", [0.0626], frequencies=[0.1259])
 print(high.passes, high.deviation_percent.round(1))   # False [26.9]
 ```
 
@@ -421,7 +421,7 @@ dentro del +12 % de la región central con tres puntos de sobra:
 frequency = [10 ** 0.8]
 measured = vibration.weighting_factors("Wk", frequency) * 1.09
 
-bare = vibration.verify_weighting("Wk", frequency, measured)
+bare = vibration.verify_weighting("Wk", measured, frequencies=frequency)
 print(bare.passes, bare.deviation_percent.round(1))    # True [9.]
 ```
 
@@ -430,7 +430,7 @@ instrumento ha cambiado, y la desviación informada tampoco cambia:
 
 ```python
 declared = vibration.verify_weighting(
-    "Wk", frequency, measured, expanded_uncertainty_percent=4.5
+    "Wk", measured, frequencies=frequency, expanded_uncertainty_percent=4.5
 )
 print(declared.passes, declared.deviation_percent.round(1))   # False [9.]
 print(declared.expanded_uncertainty_percent)                  # 4.5
@@ -477,9 +477,9 @@ sweep_measured = (vibration.weighting_factors("Wk", sweep_hz)
                   * (1 + sweep_deviations / 100))
 
 u = vibration.MAX_EXPANDED_UNCERTAINTY_PERCENT["12.11.2"]
-print(vibration.verify_weighting("Wk", sweep_hz, sweep_measured).passes)   # True
+print(vibration.verify_weighting("Wk", sweep_measured, frequencies=sweep_hz).passes)   # True
 graded = vibration.verify_weighting(
-    "Wk", sweep_hz, sweep_measured, expanded_uncertainty_percent=u
+    "Wk", sweep_measured, frequencies=sweep_hz, expanded_uncertainty_percent=u
 )
 print(graded.passes)                              # False
 print(graded.failing_frequencies_hz.round(2))     # [  6.31 125.89]
@@ -536,7 +536,7 @@ una regla extraña la que lo rechazara por el cuidado:
 
 ```python
 dead = vibration.verify_weighting(
-    "Wk", [0.1259], [0.0], expanded_uncertainty_percent=4.5
+    "Wk", [0.0], frequencies=[0.1259], expanded_uncertainty_percent=4.5
 )
 print(dead.passes, dead.deviation_percent.round(1))   # True [-100.]
 ```
@@ -782,7 +782,7 @@ frequencies = 10.0 ** (bands / 10.0)
 
 # Un error de fase constante se califica por su valor.
 constant = vibration.characteristic_phase_deviation(
-    frequencies, np.full(frequencies.shape, 4.0)
+    np.full(frequencies.shape, 4.0), frequencies=frequencies
 )
 print(round(float(constant.min()), 6), round(float(constant.max()), 6))
 # 4.0 4.0
@@ -793,7 +793,7 @@ print(round(float(constant.min()), 6), round(float(constant.max()), 6))
 delay_deg = -360.0 * frequencies * 2e-3
 print(round(float(delay_deg.min()), 1), round(float(delay_deg.max()), 1))
 # -286.6 -0.1
-ramp = vibration.characteristic_phase_deviation(frequencies, delay_deg)
+ramp = vibration.characteristic_phase_deviation(delay_deg, frequencies=frequencies)
 print(float(np.max(ramp)) < 1e-10)   # True
 ```
 
@@ -820,7 +820,7 @@ calculadas en vez de transcritas:
 ```python
 # frequencies es la malla de tercios de octava del bloque anterior.
 design = vibration.verify_phase_response(
-    "Wk", frequencies, np.zeros_like(frequencies)
+    "Wk", np.zeros_like(frequencies), frequencies=frequencies
 ).design_phase_deg
 
 for band in (-10, 0, 8, 18, 26):
@@ -859,13 +859,13 @@ print(round(float(frequencies[0]), 4), round(float(frequencies[-1]), 4))
 # 0.5012 79.4328
 
 design = vibration.verify_phase_response(
-    "Wk", frequencies, np.zeros_like(frequencies)
+    "Wk", np.zeros_like(frequencies), frequencies=frequencies
 ).design_phase_deg
 delay = -360.0 * frequencies * 2e-3
 spare_pole = -np.degrees(np.arctan(frequencies / 100.0))
 
 check = vibration.verify_phase_response(
-    "Wk", frequencies, design + delay + spare_pole
+    "Wk", design + delay + spare_pole, frequencies=frequencies
 )
 print(check.passes)                                                  # False
 print(check.failing_frequencies_hz.round(2))                         # [63.1]
@@ -879,7 +879,7 @@ Quita el polo y el retardo por sí solo es un error de fase de hasta 57 grados
 que el criterio califica como cero:
 
 ```python
-delayed = vibration.verify_phase_response("Wk", frequencies, design + delay)
+delayed = vibration.verify_phase_response("Wk", design + delay, frequencies=frequencies)
 print(round(float(delayed.deviation_deg.min()), 1),
       round(float(delayed.deviation_deg.max()), 1))
 # -57.2 -0.4
@@ -915,7 +915,7 @@ limit = vibration.phase_tolerance_deg("Wk", attributed)
 
 fig, (ax_error, ax_graded) = plt.subplots(2, 1, sharex=True, figsize=(9, 7))
 for label, error in errors.items():
-    graded = vibration.verify_phase_response("Wk", frequencies, design + error)
+    graded = vibration.verify_phase_response("Wk", design + error, frequencies=frequencies)
     ax_error.semilogx(frequencies, graded.deviation_deg, marker="o", label=label)
     ax_graded.semilogx(attributed, graded.characteristic_deviation_deg, marker="o")
 ax_graded.plot(attributed, limit, color="#1f77b4", ls="--", drawstyle="steps-post",
@@ -971,7 +971,7 @@ así que se rechaza en lugar de avisar de él:
 ```python
 octaves = 2.0 ** np.arange(0.0, 7.0)
 try:
-    vibration.verify_phase_response("Wk", octaves, np.zeros_like(octaves))
+    vibration.verify_phase_response("Wk", np.zeros_like(octaves), frequencies=octaves)
 except ValueError as error:
     print(error)
 # verify_phase_response: 'frequencies' steps by a ratio of up to 2, and
@@ -1547,7 +1547,7 @@ print(filters.verify_weighting_class(wf).overall_class)   # 1
 sweep = 10.0 ** (np.array([-3, 0, 3, 6, 9, 12, 15, 18, 19]) / 10.0)
 read = np.array([0.4314, 0.4969, 0.5466, 0.9937, 1.068,
                  0.7897, 0.3427, 0.1894, 0.1366])
-print(vibration.verify_weighting("Wk", sweep, read).passes)   # False
+print(vibration.verify_weighting("Wk", read, frequencies=sweep).passes)   # False
 ```
 
 Conviene nombrar tres diferencias, porque son las que hacen tropezar al lector

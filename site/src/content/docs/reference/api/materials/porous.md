@@ -775,8 +775,8 @@ $\delta \to 0.85$ for an isolated hole.
 ```python
 plot_absorber_stack(
     layers: Sequence[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer] | AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes

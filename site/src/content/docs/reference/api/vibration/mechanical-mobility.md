@@ -85,9 +85,10 @@ random error with its \< 5 % averaging criterion ([`random_error_percent`](/phon
 ```python
 convert_frf(
     value: ArrayLike,
-    frequency: ArrayLike,
     source: str,
     target: str,
+    *,
+    frequency: ArrayLike,
 ) -> np.ndarray
 ```
 
@@ -483,9 +484,9 @@ ISO 7626-1 (Table 1 / 3.1.2 definitions).
 ```python
 verify_rigid_mass_calibration(
     frf: ArrayLike,
-    frequencies: ArrayLike,
     mass: float,
     *,
+    frequencies: ArrayLike,
     quantity: str = 'accelerance',
 ) -> RigidMassCalibrationResult
 ```

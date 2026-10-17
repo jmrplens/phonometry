@@ -166,9 +166,9 @@ def room_mode_frequency(
 
 
 def room_mode_count(
-    frequency: ArrayLike,
     dimensions: ArrayLike,
     *,
+    frequency: ArrayLike,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> np.ndarray | float:
     r"""Integrated number of modes below ``frequency`` (Long Equation (8.45)).
@@ -206,9 +206,9 @@ def room_mode_count(
 
 
 def room_modal_density(
-    frequency: ArrayLike,
     dimensions: ArrayLike,
     *,
+    frequency: ArrayLike,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> np.ndarray | float:
     r"""Modal density :math:`dN/df` in modes per hertz (Long Equation (8.46)).
@@ -355,7 +355,9 @@ class RoomModesResult(OwnsArrays):
             *frequency*.
         """
         return room_modal_density(
-            frequency, self.dimensions, speed_of_sound=self.speed_of_sound
+            frequency=frequency,
+            dimensions=self.dimensions,
+            speed_of_sound=self.speed_of_sound,
         )
 
     def plot(

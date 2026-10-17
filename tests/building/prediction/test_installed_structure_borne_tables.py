@@ -345,8 +345,8 @@ def test_formula_d9a_is_flat_at_about_115_db_per_third_octave() -> None:
     """
     thirds = np.array([100.0, 200.0, 400.0, 800.0, 1600.0, 3150.0])
     lw = building.tapping_machine_characteristic_power_level(
-        thirds,
-        building.tapping_machine_force_level_estimate(thirds, fraction=3),
+        frequency=thirds,
+        force_level=building.tapping_machine_force_level_estimate(thirds, fraction=3),
     )
     assert np.ptp(lw) == pytest.approx(0.0, abs=1e-9)
     assert float(lw[0]) == pytest.approx(115.0, abs=1.0)
@@ -357,14 +357,20 @@ def test_formula_d9b_is_formula_19b_for_a_mass_like_source() -> None:
     bands = np.array([125.0, 250.0, 500.0, 1000.0])
     y_i = 2.5e-6  # a heavy concrete floor
     source = 1.0 / (1j * 2.0 * math.pi * bands * building.TAPPING_HAMMER_MASS_KG)
-    assert building.tapping_machine_coupling_term(bands, y_i) == pytest.approx(
+    assert building.tapping_machine_coupling_term(
+        frequency=bands, receiver_mobility=y_i
+    ) == pytest.approx(
         building.coupling_term(source, np.full(bands.shape, y_i, dtype=complex))
     )
 
 
 def test_tapping_machine_coupling_term_takes_a_hammer_mass() -> None:
-    doubled = building.tapping_machine_coupling_term(500.0, 2.5e-6, hammer_mass=1.0)
-    default = building.tapping_machine_coupling_term(500.0, 2.5e-6)
+    doubled = building.tapping_machine_coupling_term(
+        frequency=500.0, receiver_mobility=2.5e-6, hammer_mass=1.0
+    )
+    default = building.tapping_machine_coupling_term(
+        frequency=500.0, receiver_mobility=2.5e-6
+    )
     assert float(doubled) < float(default)
 
 

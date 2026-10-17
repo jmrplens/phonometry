@@ -115,7 +115,7 @@ def _hard_walled(
             _ST,
             _RSS,
             _LW_RSS,
-            _FREQS,
+            frequencies=_FREQS,
             background_levels=background_levels,
             sigma_omc_db=sigma_omc_db,
         )
@@ -125,7 +125,7 @@ def _special_direct() -> SpecialRoomSoundPowerResult:
     """A direct determination at six positions, background far below."""
     return sound_power_special_room(
         _ST - 20.0,
-        _FREQS,
+        frequencies=_FREQS,
         volume=_VOLUME,
         nominal_reverberation_time_s=_TNOM,
         background_levels=np.full(7, 30.0),
@@ -209,7 +209,7 @@ def test_hard_walled_short_reference_margin_is_no_upper_bound(
             _ST,
             _RSS,
             _LW_RSS,
-            _FREQS,
+            frequencies=_FREQS,
             background_levels=_BACKGROUND,
             background_levels_ref=bg_ref,
         )
@@ -228,7 +228,7 @@ def test_hard_walled_one_sided_coverage_is_named(tmp_path: Path) -> None:
             _ST,
             _RSS,
             _LW_RSS,
-            _FREQS,
+            frequencies=_FREQS,
             background_levels=_BACKGROUND,
             sigma_omc_db=1.0,
             coverage_factor=1.6,
@@ -273,7 +273,7 @@ def test_hard_walled_energy_fiche(tmp_path: Path) -> None:
         events,
         _RSS,
         _LW_RSS,
-        _FREQS,
+        frequencies=_FREQS,
         background_levels=np.full((4, 7), 30.0),
         integration_time=2.0,
         sigma_omc_db=2.0,
@@ -323,7 +323,7 @@ def test_special_room_comparison_fiche(tmp_path: Path) -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", SoundPowerWarning)
         res = sound_power_special_room_comparison(
-            _ST, np.vstack([_RSS, _RSS[:2]]), _LW_RSS, _FREQS
+            _ST, np.vstack([_RSS, _RSS[:2]]), _LW_RSS, frequencies=_FREQS
         )
     text = _render(res, tmp_path, "comparison.pdf")
     assert "comparison method using a reference sound source" in text

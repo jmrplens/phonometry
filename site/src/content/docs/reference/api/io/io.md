@@ -1521,6 +1521,7 @@ The sidecar filename of an audio file (see the module docstring).
 Signal(
     data: NDArray[np.float64],
     fs: int,
+    *,
     calibration_factor: float | None = None,
     channel_labels: tuple[str, ...] | None = None,
     provenance: BroadcastMetadata | None = None,

@@ -56,18 +56,18 @@ def _hvac_spectrum() -> HVACSpectrumResult:
 
 def _duct_path() -> DuctPathResult:
     return noise_control.duct_path(
-        _BANDS,
-        [92.0, 90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0],
-        [noise_control.DuctElement("Duct", 3.0)],
+        frequencies=_BANDS,
+        source_level=[92.0, 90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0],
+        elements=[noise_control.DuctElement("Duct", 3.0)],
     )
 
 
 def _room_to_room() -> RoomToRoomResult:
     return noise_control.room_to_room_transmission(
-        _BANDS,
-        40.0,
-        20.0,
-        np.full(_BANDS.size, 20.0),
+        frequencies=_BANDS,
+        transmission_loss=40.0,
+        partition_area=20.0,
+        receiving_absorption=np.full(_BANDS.size, 20.0),
         source=noise_control.SourceRoom(level=np.full(_BANDS.size, 90.0)),
     )
 

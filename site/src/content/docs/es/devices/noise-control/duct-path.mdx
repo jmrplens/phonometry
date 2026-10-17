@@ -93,8 +93,7 @@ bandas = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
 ventilador = [90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0]
 
 trayecto = noise_control.duct_path(
-    bandas, ventilador,
-    [
+    ventilador, [
         noise_control.DuctElement("Codo, 36 x 24 in, sin revestir",
                                   attenuation=[0, 1, 2, 3, 3, 3, 3, 3],
                                   self_noise=[41, 39, 36, 29, 20, 6, 0, 0], code="2"),
@@ -102,6 +101,7 @@ trayecto = noise_control.duct_path(
                                   attenuation=[7, 12, 16, 28, 35, 35, 28, 17],
                                   self_noise=[49, 43, 44, 42, 42, 45, 35, 24], code="3"),
     ],
+    frequencies=bandas,
     source_label="Ventilador centrífugo FC, 5000 cfm, 2 in c.a.",
 )
 
@@ -405,7 +405,7 @@ import numpy as np
 
 IN, FT = 0.0254, 0.3048
 sil = noise_control.splitter_silencer_insertion_loss(
-    None, height_m=24 * IN, length=5 * FT,      # None -> las bandas de octava por omisión
+    frequencies=None, height_m=24 * IN, length=5 * FT,      # None -> las bandas de octava por omisión
     airway_widths=[0.10] * 5, splitter_thickness_m=0.10,
 )
 print(np.round(sil.values, 1))
@@ -796,8 +796,7 @@ ventilador = [90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0]
 fuente = "Ventilador centrífugo FC, 5000 cfm, 2 in c.a."
 
 impulsion = noise_control.duct_path(
-    bandas, ventilador,
-    [
+    ventilador, [
         noise_control.DuctElement("Codo, 36 x 24 in, sin revestir", [0, 1, 2, 3, 3, 3, 3, 3],
                                   [41, 39, 36, 29, 20, 6, 0, 0], code="2"),
         noise_control.DuctElement("Silenciador, 3 ft, pérdida de carga estándar",
@@ -813,13 +812,13 @@ impulsion = noise_control.duct_path(
         noise_control.DuctElement("Difusor rectangular, 312 cfm", None,
                                   [33, 32, 29, 23, 15, 4, 0, 0], code="8"),
     ],
+    frequencies=bandas,
     room_effect=[6, 6, 5, 5, 6, 7, 6, 6],
     source_label=fuente, target=30.0, label="Impulsión",
 )
 
 retorno = noise_control.duct_path(
-    bandas, ventilador,
-    [
+    ventilador, [
         noise_control.DuctElement("Codo, 36 x 24 in, sin revestir", [0, 1, 2, 3, 3, 3, 3, 3],
                                                 [43, 42, 39, 33, 24, 12, 0, 0], code="2"),
         noise_control.DuctElement("Silenciador, 5 ft, tipo baja frecuencia",
@@ -832,6 +831,7 @@ retorno = noise_control.duct_path(
         noise_control.DuctElement("Rejilla rectangular, 24 x 24 in, 563 cfm", None,
                                                 [30, 29, 26, 20, 12, 1, 0, 0], code="6"),
     ],
+    frequencies=bandas,
     room_effect=[9, 8, 6, 8, 8, 8, 9, 10],
     source_label=fuente, target=30.0, label="Retorno",
 )
@@ -1154,7 +1154,7 @@ bandas = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
 
 with warnings.catch_warnings(record=True) as avisos:
     warnings.simplefilter("always")
-    noise_control.duct_path(bandas, [90.0] * 8, [noise_control.DuctElement("Tramo recto", 3.0)],
+    noise_control.duct_path([90.0] * 8, [noise_control.DuctElement("Tramo recto", 3.0)], frequencies=bandas,
                             section={"width_m": 36 * IN, "height_m": 24 * IN},
                             flow_velocity=6.0, label="Impulsión")
 print(avisos[0].category is noise_control.PlaneWaveWarning)

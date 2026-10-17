@@ -71,25 +71,32 @@ def _mobility() -> MobilityResult:
 
 def _rigid_mass_calibration() -> RigidMassCalibrationResult:
     return vibration.verify_rigid_mass_calibration(
-        [0.100, 0.102, 0.101, 0.097], [20.0, 50.0, 100.0, 500.0], mass=10.0
+        [0.100, 0.102, 0.101, 0.097], frequencies=[20.0, 50.0, 100.0, 500.0], mass=10.0
     )
 
 
 def _transfer_stiffness() -> TransferStiffnessResult:
     f = np.array([25.0, 50.0, 100.0, 200.0, 400.0])
     t = np.array([0.08, 0.05, 0.02, 0.008, 0.004]) * np.exp(1j * 0.1)
-    return vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
+    return vibration.indirect_transfer_stiffness_result(
+        frequencies=f, transmissibility=t, blocking_mass=8.0
+    )
 
 
 def _blocked_output() -> LevelDifferenceCheck:
     return vibration.check_blocked_output(
-        [20.0, 31.5, 63.0, 125.0], [100.0] * 4, [70.0, 72.0, 75.0, 78.0]
+        frequencies=[20.0, 31.5, 63.0, 125.0],
+        input_acceleration_level=[100.0] * 4,
+        output_acceleration_level=[70.0, 72.0, 75.0, 78.0],
     )
 
 
 def _output_mass() -> OutputMassCheck:
     return vibration.check_output_mass(
-        [20.0, 31.5, 63.0, 125.0], 0.1, [120.0] * 4, [100.0, 102.0, 104.0, 106.0]
+        frequencies=[20.0, 31.5, 63.0, 125.0],
+        output_mass_kg=0.1,
+        output_force_level=[120.0] * 4,
+        output_acceleration_level=[100.0, 102.0, 104.0, 106.0],
     )
 
 
@@ -98,7 +105,11 @@ def _effective_blocking_mass() -> EffectiveBlockingMass:
     ones = np.ones(f.size, dtype=complex)
     m_eff = 20.0 * (1.0 + (f / 3000.0) ** 2)
     return vibration.effective_blocking_mass(
-        f, m_eff * ones, ones, ones, blocking_mass=20.0
+        frequencies=f,
+        force=m_eff * ones,
+        first_acceleration_m_s2=ones,
+        second_acceleration_m_s2=ones,
+        blocking_mass=20.0,
     )
 
 
@@ -106,14 +117,18 @@ def _driving_point() -> DrivingPointStiffnessResult:
     f = np.arange(1.0, 200.0, 0.2)
     w = 2.0 * np.pi * f
     return vibration.driving_point_stiffness(
-        f, (1.0e6 - 2.0 * w**2) * 1.0e-6, -(w**2) * 1.0e-6
+        frequencies=f,
+        input_force_n=(1.0e6 - 2.0 * w**2) * 1.0e-6,
+        input_acceleration_m_s2=-(w**2) * 1.0e-6,
     )
 
 
 def _band_average() -> BandAveragedStiffness:
     """Lines every hertz from 18 Hz: five or more in every band from 20 Hz up."""
     f = np.arange(18.0, 500.0, 1.0)
-    return vibration.band_averaged_stiffness(f, np.full(f.size, 1.0e6 + 0j))
+    return vibration.band_averaged_stiffness(
+        frequencies=f, stiffness=np.full(f.size, 1.0e6 + 0j)
+    )
 
 
 def _radiation_efficiency() -> RadiationEfficiencyResult:
@@ -132,7 +147,15 @@ def _power_injection() -> PowerInjectionResult:
     eta_21 = eta_12 * n_1 / n_2
     ratio = eta_12 / (eta_2 + eta_21)
     e_1 = 1.0 / (2.0 * np.pi * f * ((eta_1 + eta_12) - ratio * eta_21))
-    return vibration.power_injection_clf(f, e_1, ratio * e_1, eta_1, eta_2, n_1, n_2)
+    return vibration.power_injection_clf(
+        frequencies=f,
+        energy1=e_1,
+        energy2=ratio * e_1,
+        internal_loss_factor1=eta_1,
+        internal_loss_factor2=eta_2,
+        modal_density1=n_1,
+        modal_density2=n_2,
+    )
 
 
 def _own_figure(build: Callable[[], _Plottable]) -> Callable[[str], Drawn]:

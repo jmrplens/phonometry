@@ -814,8 +814,8 @@ def generate_modal_count_per_band(output_dir: str) -> None:
     counts = np.array(
         [
             float(
-                room.room_mode_count(f * edges, dims)
-                - room.room_mode_count(f / edges, dims)
+                room.room_mode_count(frequency=f * edges, dimensions=dims)
+                - room.room_mode_count(frequency=f / edges, dimensions=dims)
             )
             for f in bands
         ]

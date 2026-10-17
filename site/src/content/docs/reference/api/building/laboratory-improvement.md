@@ -98,6 +98,7 @@ judged here.
 heavy_impact_improvement(
     l_i_fmax_0: ArrayLike,
     l_i_fmax: ArrayLike,
+    *,
     frequencies: ArrayLike,
 ) -> HeavyImpactImprovementResult
 ```
@@ -174,8 +175,8 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 laboratory_floor_covering_improvement(
     l_n0: ArrayLike,
     l_n: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = 'heavyweight',
 ) -> LaboratoryFloorCoveringImprovementResult
 ```
@@ -225,8 +226,8 @@ is the one of the `reference_floor` the caller names.
 laboratory_lining_improvement(
     r_without: ArrayLike,
     r_with: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     basic_element: Literal['heavy_wall', 'heavy_floor', 'lightweight_wall'] | None = 'heavy_wall',
 ) -> LaboratoryLiningImprovementResult
 ```

@@ -167,7 +167,7 @@ background = np.array([  # Lpi(B): la nave, ruidosa en el extremo grave
 ])
 
 res = emission.sound_power_in_situ(
-    st, rss, lw_rss, freqs, background_levels=background,
+    st, rss, lw_rss, frequencies=freqs, background_levels=background,
     conditions=emission.GradeConditions(
         excess_levels=[8.2, 7.6, 8.9, 8.0],   # dLfA en cada posición (Anexo A)
         directivity_range=4.0,                # +/-4 dB alrededor de la máquina (7.2)
@@ -255,7 +255,7 @@ los niveles llegan como una rejilla por ubicación:
 # lo largo de cada lado largo; la segunda queda más cerca de una pared y lee
 # 1,2 dB menos, y se calibró en una posición similar 0,4 dB más baja.
 two = emission.sound_power_in_situ(
-    st, np.stack([rss, rss - 1.2]), np.stack([lw_rss, lw_rss - 0.4]), freqs,
+    st, np.stack([rss, rss - 1.2]), np.stack([lw_rss, lw_rss - 0.4]), frequencies=freqs,
     background_levels=background,
 )
 print(two.reference_levels.shape)               # (2, 7): nivel medio por ubicación (Ec. 10)
@@ -381,7 +381,7 @@ strokes = np.array([
 ])
 events = np.stack([strokes + d for d in (-0.3, 0.2, 0.0, 0.4, -0.2, 0.1)], axis=1)
 energy = emission.sound_energy_in_situ(
-    events, rss, lw_rss, freqs,                 # (4 posiciones, 6 sucesos, 7 bandas)
+    events, rss, lw_rss, frequencies=freqs,                 # (4 posiciones, 6 sucesos, 7 bandas)
     background_levels=background, integration_time=4.0,
     conditions=emission.GradeConditions(excess_levels=[8.2, 7.6, 8.9, 8.0], directivity_range=4.0), sigma_omc_db=2.0,
 )
@@ -483,7 +483,7 @@ así que es el redondeo de la familia y la biblioteca lo conserva.
 ps = emission.static_pressure_from_altitude(640.0)
 print(round(ps, 2))                                 # 93.87 kPa (Ec. C.2)
 high = emission.sound_power_in_situ(
-    st, rss, lw_rss, freqs, background_levels=background,
+    st, rss, lw_rss, frequencies=freqs, background_levels=background,
     temperature_c=27.0, static_pressure_kpa=ps,
 )
 print(round(high.c2, 3))                            # 0.423 dB

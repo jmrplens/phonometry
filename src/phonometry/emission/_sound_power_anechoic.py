@@ -490,9 +490,7 @@ def _k1_lower_criterion(frequencies: np.ndarray) -> np.ndarray:
 
 
 def precision_background_correction(
-    source_levels: np.ndarray,
-    background_levels: np.ndarray,
-    frequencies: np.ndarray,
+    source_levels: np.ndarray, background_levels: np.ndarray, *, frequencies: np.ndarray
 ) -> np.ndarray:
     r"""Per-position background correction ``K1i`` (ISO 3745:2012 Eq. 11).
 
@@ -692,7 +690,7 @@ def _precision_k1(
             "a single spectrum of shape (NB,) or (1, NB)."
         )
         raise ValueError(msg)
-    return precision_background_correction(levels, bg, freqs)
+    return precision_background_correction(levels, bg, frequencies=freqs)
 
 
 def _precision_surface_level(

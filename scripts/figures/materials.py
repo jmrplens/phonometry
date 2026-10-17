@@ -453,7 +453,7 @@ def generate_absorption_uncertainty(output_dir: str) -> None:
         ]
     )
     res = materials.sound_absorption_coefficient_uncertainty(
-        alpha_s, freqs, coverage=0.95
+        alpha_s, frequencies=freqs, coverage=0.95
     )
     u = res.expanded_uncertainty
 
@@ -1861,7 +1861,9 @@ def generate_scattering_coefficient(output_dir: str) -> None:
     )
     alpha_s = np.full_like(freqs, 0.10)
     alpha_spec = 0.11 + 0.75 * (np.log10(freqs / 250.0) / np.log10(4000.0 / 250.0))
-    result = materials.scattering_coefficient_spectrum(freqs, alpha_spec, alpha_s)
+    result = materials.scattering_coefficient_spectrum(
+        frequencies=freqs, specular_absorption=alpha_spec, random_absorption=alpha_s
+    )
 
     fig, (ax_a, ax) = plt.subplots(
         2,
@@ -2850,7 +2852,10 @@ def generate_insitu_method_windows(output_dir: str) -> None:
     # enough to seal on a textured pavement.
     diameters = np.linspace(0.055, 0.155, 300)
     ceiling = np.array(
-        [float(materials.spot_tube_upper_frequency(d, c0)) for d in diameters]
+        [
+            float(materials.spot_tube_upper_frequency(d, speed_of_sound=c0))
+            for d in diameters
+        ]
     )
     ax_d.plot(
         diameters * 1e3,
@@ -2868,7 +2873,7 @@ def generate_insitu_method_windows(output_dir: str) -> None:
     )
     ax_d.scatter(
         [100.0],
-        [float(materials.spot_tube_upper_frequency(0.1, c0))],
+        [float(materials.spot_tube_upper_frequency(0.1, speed_of_sound=c0))],
         color=COLOR_FG,
         s=70,
         zorder=6,
@@ -2983,7 +2988,12 @@ def generate_sound_absorption_measurement(output_dir: str) -> None:
         ]
     )
     m = materials.measure_sound_absorption(
-        freqs, t_empty, t_specimen, volume=200.0, area=10.8, temperature_c=20.0
+        frequencies=freqs,
+        t_empty=t_empty,
+        t_specimen=t_specimen,
+        volume=200.0,
+        area=10.8,
+        temperature_c=20.0,
     )
     m.plot(language=_LANG)
     plt.gcf().set_size_inches(10, 6)
@@ -3195,7 +3205,12 @@ def generate_sound_absorption_inversion(output_dir: str) -> None:
     )
     area = 10.8
     meas = materials.measure_sound_absorption(
-        freqs, t_empty, t_specimen, volume=200.0, area=area, temperature_c=20.0
+        frequencies=freqs,
+        t_empty=t_empty,
+        t_specimen=t_specimen,
+        volume=200.0,
+        area=area,
+        temperature_c=20.0,
     )
 
     band = np.arange(freqs.size)

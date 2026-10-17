@@ -97,23 +97,25 @@ class TestSingleNumberAverage:
 
     def test_the_strength_averages_the_two_mid_octaves(self) -> None:
         values = np.array([2.0, 3.0, 4.0, 6.0, 5.0, 4.5])
-        assert room.single_number_average("G", values, OCTAVES) == pytest.approx(
-            5.0, abs=1e-12
-        )
+        assert room.single_number_average(
+            "G", values, frequencies=OCTAVES
+        ) == pytest.approx(5.0, abs=1e-12)
 
     def test_the_cosine_weighting_shares_the_row_it_is_printed_in(self) -> None:
         # Table A.1 prints one row, "J_LF or J_LFC", so the cosine-weighted
         # variant of (A.15) is averaged and judged by the same numbers.
         values = np.array([0.2, 0.3, 0.4, 0.5, 9.0, 9.0])
-        assert room.single_number_average("J_LFC", values, OCTAVES) == pytest.approx(
-            room.single_number_average("J_LF", values, OCTAVES)
+        assert room.single_number_average(
+            "J_LFC", values, frequencies=OCTAVES
+        ) == pytest.approx(
+            room.single_number_average("J_LF", values, frequencies=OCTAVES)
         )
         assert room.assess_perceptible_difference("J_LFC", 0.20, 0.26).different
         assert not room.assess_perceptible_difference("J_LFC", 0.20, 0.24).different
 
     def test_it_names_both_printed_symbols_when_it_refuses_one(self) -> None:
         with pytest.raises(ValueError, match="J_LFC"):
-            room.single_number_average("J_XX", np.zeros(6), OCTAVES)
+            room.single_number_average("J_XX", np.zeros(6), frequencies=OCTAVES)
 
     @pytest.mark.parametrize("bad", [np.nan, np.inf])
     def test_it_refuses_a_band_axis_that_is_not_finite(self, bad: float) -> None:
@@ -122,19 +124,19 @@ class TestSingleNumberAverage:
         axis = OCTAVES.copy()
         axis[0] = bad
         with pytest.raises(ValueError, match="finite centre frequencies"):
-            room.single_number_average("G", np.arange(6.0), axis)
+            room.single_number_average("G", np.arange(6.0), frequencies=axis)
 
     def test_the_lateral_fraction_averages_four_bands(self) -> None:
         # EXAMPLE 2 of A.5: J_LFm is averaged in the 125 Hz to 1 kHz bands,
         # so the two top octaves take no part in it.
         values = np.array([0.2, 0.3, 0.4, 0.5, 9.0, 9.0])
-        assert room.single_number_average("J_LF", values, OCTAVES) == pytest.approx(
-            0.35, abs=1e-12
-        )
+        assert room.single_number_average(
+            "J_LF", values, frequencies=OCTAVES
+        ) == pytest.approx(0.35, abs=1e-12)
 
     def test_the_late_lateral_level_takes_the_energy_route(self) -> None:
         values = np.array([-14.0, -8.0, -5.0, 1.0, 0.0, 0.0])
-        energetic = room.single_number_average("L_J", values, OCTAVES)
+        energetic = room.single_number_average("L_J", values, frequencies=OCTAVES)
         assert energetic == pytest.approx(
             room.late_lateral_average(values[:4]), abs=1e-12
         )
@@ -144,18 +146,20 @@ class TestSingleNumberAverage:
     def test_it_refuses_a_band_axis_that_lacks_a_band_it_averages(self) -> None:
         with pytest.raises(ValueError, match="does not carry the 125 Hz band"):
             room.single_number_average(
-                "J_LF", np.zeros(4), np.array([500.0, 1000.0, 2000.0, 4000.0])
+                "J_LF",
+                np.zeros(4),
+                frequencies=np.array([500.0, 1000.0, 2000.0, 4000.0]),
             )
 
     def test_it_refuses_a_quantity_the_table_does_not_print(self) -> None:
         with pytest.raises(ValueError, match="Table A.1 prints"):
-            room.single_number_average("C50", np.zeros(6), OCTAVES)
+            room.single_number_average("C50", np.zeros(6), frequencies=OCTAVES)
 
     def test_it_names_both_axes_when_their_lengths_differ(self) -> None:
         with pytest.raises(
             ValueError, match=r"'values' has 5 entries and 'frequencies' has 6"
         ):
-            room.single_number_average("G", np.zeros(5), OCTAVES)
+            room.single_number_average("G", np.zeros(5), frequencies=OCTAVES)
 
 
 class TestOctavePairAverages:
@@ -163,7 +167,7 @@ class TestOctavePairAverages:
 
     def test_each_pair_is_the_arithmetic_mean_of_two_octaves(self) -> None:
         values = np.array([2.0, 3.0, 4.0, 6.0, 5.0, 4.5])
-        pairs = room.octave_pair_averages(values, OCTAVES)
+        pairs = room.octave_pair_averages(values, frequencies=OCTAVES)
         assert pairs == pytest.approx({"low": 2.5, "mid": 5.0, "high": 4.75})
 
     def test_the_mid_pair_and_the_single_number_agree_only_sometimes(self) -> None:
@@ -171,19 +175,23 @@ class TestOctavePairAverages:
         # different band sets for the lateral ones, so they are two products
         # and not one.
         values = np.array([0.2, 0.3, 0.4, 0.5, 0.6, 0.7])
-        mid = room.octave_pair_averages(values, OCTAVES)["mid"]
-        assert mid == pytest.approx(room.single_number_average("G", values, OCTAVES))
-        assert mid != pytest.approx(room.single_number_average("J_LF", values, OCTAVES))
+        mid = room.octave_pair_averages(values, frequencies=OCTAVES)["mid"]
+        assert mid == pytest.approx(
+            room.single_number_average("G", values, frequencies=OCTAVES)
+        )
+        assert mid != pytest.approx(
+            room.single_number_average("J_LF", values, frequencies=OCTAVES)
+        )
 
     def test_it_refuses_a_band_axis_that_does_not_span_all_six(self) -> None:
         with pytest.raises(ValueError, match="does not carry the 4000 Hz band"):
-            room.octave_pair_averages(np.zeros(5), OCTAVES[:5])
+            room.octave_pair_averages(np.zeros(5), frequencies=OCTAVES[:5])
 
     def test_it_names_both_axes_when_their_lengths_differ(self) -> None:
         with pytest.raises(
             ValueError, match=r"'values' has 5 entries and 'frequencies' has 6"
         ):
-            room.octave_pair_averages(np.zeros(5), OCTAVES)
+            room.octave_pair_averages(np.zeros(5), frequencies=OCTAVES)
 
 
 class TestPerceptiblyDifferent:

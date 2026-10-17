@@ -938,7 +938,7 @@ class ReverberationSoundEnergyResult(OwnsArrays):
     its own ``K1i`` (Eq. 25/26). ``sound_energy_level_a`` is the A-weighted
     total ``LJA`` (Annex F Eq. F.5), computed only when ``frequencies`` are
     supplied (``NaN`` for several bands without them; equal to ``LJ`` for a
-    single band). ``method`` is ``'direct'`` or ``'comparison'``. ``events``
+    single band). ``method`` is ``'direct'`` or ``'comparison'``. ``n_events``
     is the number of single sound emission events :math:`N_\mathrm{e}` the
     levels were reduced from, or ``None`` when the caller supplied the mean
     single event level of one event; ``integration_time`` is the interval
@@ -957,7 +957,7 @@ class ReverberationSoundEnergyResult(OwnsArrays):
     speed_of_sound: float
     sound_energy_level_a: float
     method: str
-    events: int | None
+    n_events: int | None
     integration_time: float | None
 
     def __post_init__(self) -> None:
@@ -966,16 +966,16 @@ class ReverberationSoundEnergyResult(OwnsArrays):
         The pins are those of :class:`ReverberationSoundPowerResult`: the
         figure draws one bar per band of ``sound_energy_level`` and every
         other per-band column is read beside it, and ``method`` names the
-        equation the level came from. ``events`` and ``integration_time`` are
+        equation the level came from. ``n_events`` and ``integration_time`` are
         pinned as well, because a count of events below one or a
         non-positive interval describes no measurement the standard defines.
 
         :raises ValueError: if any per-band quantity disagrees with the rest,
             ``method`` is neither ``'direct'`` nor ``'comparison'``,
-            ``events`` is below one or ``integration_time`` is not positive.
+            ``n_events`` is below one or ``integration_time`` is not positive.
         """
         require_choice(self.method, "method", ("direct", "comparison"))
-        _validate_event_count(self.events, "ReverberationSoundEnergyResult")
+        _validate_event_count(self.n_events, "ReverberationSoundEnergyResult")
         if self.integration_time is not None:
             require_positive(self.integration_time, "integration_time")
         require_ranks(
@@ -1013,29 +1013,29 @@ class ReverberationSoundEnergyResult(OwnsArrays):
 
 
 def _room_event_levels(
-    levels: np.ndarray, events: int | None
+    levels: np.ndarray, n_events: int | None
 ) -> tuple[np.ndarray, int | None]:
     """The mean single event level of one event behind the three input forms.
 
     A 3-D ``(Ne, NM, NB)`` array holds one event per entry of its first axis
-    and is reduced by Eq. (22); a 1-D or 2-D array with ``events`` is one
+    and is reduced by Eq. (22); a 1-D or 2-D array with ``n_events`` is one
     measurement encompassing that many events and is reduced by Eq. (23); a
-    1-D or 2-D array without ``events`` is the mean single event level of one
+    1-D or 2-D array without ``n_events`` is the mean single event level of one
     event, already formed (per position, or already averaged over the room).
 
     :param levels: The levels, in decibels.
-    :param events: ``None``, or the number of events one measurement holds.
+    :param n_events: ``None``, or the number of events one measurement holds.
     :return: The 1-D or 2-D levels and the event count they rest on
         (``None`` when the caller supplied the means).
     :raises ValueError: for a rank other than 1 to 3, non-finite levels, or a
-        per-event array given together with ``events``.
+        per-event array given together with ``n_events``.
     """
     arr = np.asarray(levels, dtype=np.float64)
     if arr.ndim == 3:  # noqa: PLR2004
-        if events is not None:
+        if n_events is not None:
             msg = (
                 "'levels' already carries one entry per event on its first axis; "
-                "'events' applies to one measurement encompassing several events "
+                "'n_events' applies to one measurement encompassing several events "
                 "(ISO 3741:2010 Eq. 23), not to per-event levels."
             )
             raise ValueError(msg)
@@ -1047,12 +1047,12 @@ def _room_event_levels(
             "3D (events, positions, bands) array of single event levels."
         )
         raise ValueError(msg)
-    if events is None:
+    if n_events is None:
         if not np.all(np.isfinite(arr)):
             msg = "'levels' must contain only finite values."
             raise ValueError(msg)
         return arr, None
-    return _single_event_mean(arr, events, name="levels", stacklevel=4), int(events)
+    return _single_event_mean(arr, n_events, name="levels", stacklevel=4), int(n_events)
 
 
 def sound_energy_reverberation(
@@ -1062,7 +1062,7 @@ def sound_energy_reverberation(
     surface_area: float,
     frequencies: np.ndarray,
     *,
-    events: int | None = None,
+    n_events: int | None = None,
     background_levels: np.ndarray | None = None,
     integration_time: float | None = None,
     temperature_c: float = 23.0,
@@ -1078,7 +1078,7 @@ def sound_energy_reverberation(
     spectrum already averaged over the room, a 2D ``(NM, NB)`` array of one
     event's level at each position, a 3D ``(Ne, NM, NB)`` array of the
     :math:`N_\mathrm{e}` events measured one at a time (reduced by Eq. 22), or
-    a 1D/2D level of one measurement encompassing ``events`` successive events
+    a 1D/2D level of one measurement encompassing ``n_events`` successive events
     (reduced by Eq. 23). Each position is corrected for its background by
     :math:`K_{1i}` (Eq. 25/26, the frequency-dependent criterion of 9.1.2),
     the positions are energy-averaged (Eq. 27) and the sound energy level in
@@ -1107,7 +1107,7 @@ def sound_energy_reverberation(
     :param surface_area: Total room surface area ``S``, in square metres.
     :param frequencies: One-third-octave band mid-frequencies, Hz (required:
         the Waterhouse term and the ``K1`` criterion need them).
-    :param events: The number of events ``Ne`` one measurement encompasses
+    :param n_events: The number of events ``Ne`` one measurement encompasses
         (Eq. 23); ``None`` when ``levels`` is per event or already the mean
         of one event.
     :param background_levels: Time-averaged background levels for ``K1``:
@@ -1125,7 +1125,7 @@ def sound_energy_reverberation(
         ``integration_time``, or mismatched band counts.
     """
     _room_inputs(volume, surface_area, temperature_c, static_pressure_kpa)
-    event_levels, event_count = _room_event_levels(levels, events)
+    event_levels, event_count = _room_event_levels(levels, n_events)
     if integration_time is not None:
         integration_time = require_positive(integration_time, "integration_time")
     mean_level = _mean_level(event_levels)
@@ -1157,7 +1157,7 @@ def sound_energy_reverberation(
         speed_of_sound=terms.speed_of_sound,
         sound_energy_level_a=_a_weighted_total(lj, freqs),
         method="direct",
-        events=event_count,
+        n_events=event_count,
         integration_time=integration_time,
     )
 
@@ -1168,7 +1168,7 @@ def sound_energy_comparison(
     lw_ref: np.ndarray | ReferenceSourceCalibration,
     *,
     frequencies: np.ndarray | None = None,
-    events: int | None = None,
+    n_events: int | None = None,
     background_levels: np.ndarray | None = None,
     integration_time: float | None = None,
     background_levels_ref: np.ndarray | None = None,
@@ -1209,7 +1209,7 @@ def sound_energy_comparison(
         the reference conditions to those of the test by its own ``C2``.
     :param frequencies: Band mid-frequencies (Hz) for the ``K1`` criterion and
         the A-weighted total.
-    :param events: The number of events ``Ne`` one measurement encompasses
+    :param n_events: The number of events ``Ne`` one measurement encompasses
         (Eq. 23); ``None`` when ``levels`` is per event or already the mean
         of one event.
     :param background_levels: Time-averaged background levels for the ``K1``
@@ -1225,7 +1225,7 @@ def sound_energy_comparison(
         or without ``frequencies``, or mismatched band counts.
     """
     _validate_meteorology(temperature_c, static_pressure_kpa)
-    event_levels, event_count = _room_event_levels(levels, events)
+    event_levels, event_count = _room_event_levels(levels, n_events)
     if integration_time is not None:
         integration_time = require_positive(integration_time, "integration_time")
     le_st = _mean_level(event_levels)
@@ -1265,7 +1265,7 @@ def sound_energy_comparison(
         speed_of_sound=_speed_of_sound(temperature_c),
         sound_energy_level_a=_a_weighted_total(lj, freqs),
         method="comparison",
-        events=event_count,
+        n_events=event_count,
         integration_time=integration_time,
     )
 

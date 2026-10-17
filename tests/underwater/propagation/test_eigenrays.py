@@ -275,20 +275,20 @@ def test_a_lossy_seabed_charges_R_at_each_arrivals_own_angle_as_printed() -> Non
 
 
 def test_the_cap_keeps_the_earliest_arrivals_and_says_so() -> None:
-    """``max_arrivals`` truncates the sorted tail and warns, changing nothing
+    """``max_n_arrivals`` truncates the sorted tail and warns, changing nothing
     about the arrivals it keeps.
     """
     trace, full = _guide_arrivals()
     with pytest.warns(
         PhonometryWarning,
         match=r"eigenrays connect the receiver within the traced fan"
-        r".*Raise 'max_arrivals'",
+        r".*Raise 'max_n_arrivals'",
     ):
         capped = eigenrays(
             trace,
             receiver_range=_GUIDE["r"],
             receiver_depth=_GUIDE["zr"],
-            max_arrivals=6,
+            max_n_arrivals=6,
             n_steps=_GUIDE_STEPS,
         )
     assert capped.travel_times.size == 6
@@ -300,7 +300,7 @@ def test_the_cap_keeps_the_earliest_arrivals_and_says_so() -> None:
             trace,
             receiver_range=_GUIDE["r"],
             receiver_depth=_GUIDE["zr"],
-            max_arrivals=11,
+            max_n_arrivals=11,
             n_steps=_GUIDE_STEPS,
         )
     assert uncapped.travel_times.size == 11
@@ -495,8 +495,8 @@ def test_invalid_inputs_rejected() -> None:
         eigenrays(trace, receiver_range=700.0, receiver_depth=46.0)
     with pytest.raises(ValueError, match=r"'receiver_range' must be positive"):
         eigenrays(trace, receiver_range=0.0, receiver_depth=46.0)
-    with pytest.raises(ValueError, match=r"'max_arrivals' must be at least"):
-        eigenrays(trace, receiver_range=500.0, receiver_depth=46.0, max_arrivals=0)
+    with pytest.raises(ValueError, match=r"'max_n_arrivals' must be at least"):
+        eigenrays(trace, receiver_range=500.0, receiver_depth=46.0, max_n_arrivals=0)
     with pytest.raises(ValueError, match=r"'n_steps' must be at least"):
         eigenrays(trace, receiver_range=500.0, receiver_depth=46.0, n_steps=1)
     slow = FluidSeabed(density=1800.0, speed_of_sound=-1700.0)

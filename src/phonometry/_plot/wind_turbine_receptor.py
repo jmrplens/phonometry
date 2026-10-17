@@ -396,7 +396,7 @@ def plot_modulation_period(
     ax.set_ylim(-0.05 * top, 1.45 * top)
     ax.set_xlabel(_t(_TIME_LABEL, language))
     ax.set_ylabel(_t(_DEPTH_LABEL, language))
-    ax.set_title(f"n = {result.valid_blocks}/60")
+    ax.set_title(f"n = {result.n_valid_blocks}/60")
     ax.grid(visible=True, alpha=0.3)
     place_legend_clear(ax.legend(fontsize="small"))
     localize_axes(ax, language)

@@ -62,7 +62,7 @@ def test_qrd_depths_span_zero_to_half_wavelength() -> None:
 # --- Exact-by-physics: flat panel is specular and self-normalises to zero -----
 def test_flat_panel_normalizes_to_zero() -> None:
     spectrum = predicted_diffusion_spectrum(
-        0.10, [500.0, 1000.0, 2000.0], depths=np.zeros(7), repetitions=5
+        0.10, [500.0, 1000.0, 2000.0], depths=np.zeros(7), n_repetitions=5
     )
     assert spectrum.normalized is not None
     np.testing.assert_allclose(spectrum.normalized, 0.0, atol=1e-12)
@@ -71,7 +71,7 @@ def test_flat_panel_normalizes_to_zero() -> None:
 def test_flat_panel_raw_diffusion_is_low() -> None:
     # A flat rigid panel throws a single specular lobe: low autocorrelation d.
     surface = predict_diffuser_polar_response(
-        0.10, 2000.0, depths=np.zeros(7), repetitions=5
+        0.10, 2000.0, depths=np.zeros(7), n_repetitions=5
     )
     assert surface.coefficient < 0.05
 
@@ -80,8 +80,10 @@ def test_flat_panel_raw_diffusion_is_low() -> None:
 def test_qrd_diffusion_exceeds_flat_panel() -> None:
     freqs = [500.0, 1000.0, 2000.0]
     depths = qrd_well_depths(7, 500.0)
-    qrd = predicted_diffusion_spectrum(0.10, freqs, depths=depths, repetitions=5)
-    flat = predicted_diffusion_spectrum(0.10, freqs, depths=np.zeros(7), repetitions=5)
+    qrd = predicted_diffusion_spectrum(0.10, freqs, depths=depths, n_repetitions=5)
+    flat = predicted_diffusion_spectrum(
+        0.10, freqs, depths=np.zeros(7), n_repetitions=5
+    )
     # Markedly higher raw diffusion in every band, and clearly positive when
     # normalised against the flat reference.
     assert np.all(qrd.diffusion > flat.diffusion + 0.1)
@@ -92,7 +94,7 @@ def test_qrd_diffusion_exceeds_flat_panel() -> None:
 def test_qrd_normalized_diffusion_2k_value() -> None:
     depths = qrd_well_depths(7, 500.0, speed_of_sound=343.0)
     spectrum = predicted_diffusion_spectrum(
-        0.10, [2000.0], depths=depths, repetitions=5
+        0.10, [2000.0], depths=depths, n_repetitions=5
     )
     assert spectrum.normalized is not None
     assert float(spectrum.normalized[0]) == pytest.approx(0.208, abs=1e-3)
@@ -118,7 +120,7 @@ def test_obliquity_factor_is_symmetric_kirchhoff(psi: float) -> None:
     angles_deg = np.asarray(DEFAULT_POLAR_ANGLES_DEG, dtype=np.float64)
     common = {
         "source_angle_deg": psi,
-        "repetitions": 3,
+        "n_repetitions": 3,
         "speed_of_sound": c,
         "include_aperture": True,
     }
@@ -139,10 +141,10 @@ def test_reflection_path_matches_depths_path() -> None:
     k = 2.0 * np.pi * freq / c
     reflection = np.exp(-2j * k * depths)
     from_depths = predict_diffuser_polar_response(
-        0.10, freq, depths=depths, repetitions=4, speed_of_sound=c
+        0.10, freq, depths=depths, n_repetitions=4, speed_of_sound=c
     )
     from_reflection = predict_diffuser_polar_response(
-        0.10, freq, reflection=reflection, repetitions=4, speed_of_sound=c
+        0.10, freq, reflection=reflection, n_repetitions=4, speed_of_sound=c
     )
     assert from_reflection.coefficient == pytest.approx(from_depths.coefficient)
     np.testing.assert_allclose(from_reflection.levels, from_depths.levels)
@@ -150,7 +152,7 @@ def test_reflection_path_matches_depths_path() -> None:
 
 def test_polar_levels_peak_referenced_to_zero() -> None:
     surface = predict_diffuser_polar_response(
-        0.10, 1000.0, depths=qrd_well_depths(7, 500.0), repetitions=5
+        0.10, 1000.0, depths=qrd_well_depths(7, 500.0), n_repetitions=5
     )
     assert float(surface.levels.max()) == pytest.approx(0.0)
     assert surface.angles_deg.shape == surface.levels.shape
@@ -193,7 +195,7 @@ def test_polar_response_plot_returns_polar_axes() -> None:
     import matplotlib.pyplot as plt
 
     surface = predict_diffuser_polar_response(
-        0.10, 1000.0, depths=qrd_well_depths(7, 500.0), repetitions=5
+        0.10, 1000.0, depths=qrd_well_depths(7, 500.0), n_repetitions=5
     )
     ax = surface.plot()
     assert ax.name == "polar"
@@ -243,8 +245,8 @@ def test_non_positive_geometry_rejected() -> None:
         predict_diffuser_polar_response(0.0, 1000.0, depths=depths)
     with pytest.raises(ValueError, match=r"'frequency' must be a positive, finite"):
         predict_diffuser_polar_response(0.10, 0.0, depths=depths)
-    with pytest.raises(ValueError, match=r"'repetitions' must be an integer"):
-        predict_diffuser_polar_response(0.10, 1000.0, depths=depths, repetitions=0)
+    with pytest.raises(ValueError, match=r"'n_repetitions' must be an integer"):
+        predict_diffuser_polar_response(0.10, 1000.0, depths=depths, n_repetitions=0)
 
 
 def test_spectrum_requires_depths() -> None:

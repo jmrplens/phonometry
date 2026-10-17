@@ -126,7 +126,7 @@ _ONSET_RATE_LIMIT: float = 10.0
 #: impulse is taken: "The default assessment time interval is 30 min"
 #: (ISO/PAS 1996-3:2022, Clause 5). Another interval may be assessed, so it is
 #: a default rather than a fixed value.
-_DEFAULT_ASSESSMENT_PERIOD_MIN: float = 30.0
+_DEFAULT_ASSESSMENT_PERIOD_MINUTES: float = 30.0
 
 
 @dataclass(frozen=True)
@@ -140,14 +140,14 @@ class ImpulseProminenceResult(OwnsArrays):
 
     :ivar onset_rates: Onset rate of each impulse, in dB/s.
     :ivar level_differences: Level difference of each impulse, in dB.
-    :ivar assessment_period_min: The assessment time interval the impulses were
-        selected over, in minutes (Clause 5; 30 min by default).
+    :ivar assessment_period_minutes: The assessment time interval the impulses
+        were selected over, in minutes (Clause 5; 30 min by default).
     """
 
     onset_rates: np.ndarray
     level_differences: np.ndarray
     _: KW_ONLY
-    assessment_period_min: float = _DEFAULT_ASSESSMENT_PERIOD_MIN
+    assessment_period_minutes: float = _DEFAULT_ASSESSMENT_PERIOD_MINUTES
 
     def __post_init__(self) -> None:
         """Reject a set of impulses whose per-impulse columns disagree.
@@ -251,15 +251,16 @@ class ImpulseProminenceResult(OwnsArrays):
         """Render an impulsive-sound prominence assessment fiche to a PDF.
 
         Writes a one-page assessment report following NT ACOU 112:2002 (carried
-        into ISO/PAS 1996-3:2022): the standard-basis line, an optional metadata
-        header (source/situation, client, measurement position, instrumentation
-        and date, always followed by this result's ``assessment_period_min``), a
-        full-width per-impulse table (onset rate, level difference, predicted
-        prominence ``P`` and whether the onset qualifies as an impulse) above the
-        adjustment-curve plot ``KI(P)`` with the candidate impulses marked, the
-        boxed governing prominence ``P`` and the derived ``LAeq`` adjustment
-        ``KI`` (Formula 2), an optional verdict row and a prominence-category
-        note, and a footer with the fixed disclaimer.
+        into ISO/PAS 1996-3:2022): the standard-basis line, an optional
+        metadata header (source/situation, client, measurement position,
+        instrumentation and date, always followed by this result's
+        ``assessment_period_minutes``), a full-width per-impulse table (onset
+        rate, level difference, predicted prominence ``P`` and whether the
+        onset qualifies as an impulse) above the adjustment-curve plot
+        ``KI(P)`` with the candidate impulses marked, the boxed governing
+        prominence ``P`` and the derived ``LAeq`` adjustment ``KI``
+        (Formula 2), an optional verdict row and a prominence-category note,
+        and a footer with the fixed disclaimer.
 
         :param path: Destination path of the PDF file.
         :param metadata: Optional
@@ -345,7 +346,7 @@ def impulse_prominence(
     onset_rates: ArrayLike,
     level_differences: ArrayLike,
     *,
-    assessment_period_min: float = _DEFAULT_ASSESSMENT_PERIOD_MIN,
+    assessment_period_minutes: float = _DEFAULT_ASSESSMENT_PERIOD_MINUTES,
 ) -> ImpulseProminenceResult:
     """Governing prominence and adjustment of a set of impulses (clauses 7-8).
 
@@ -360,7 +361,7 @@ def impulse_prominence(
 
     :param onset_rates: Onset rate of each impulse, in dB/s (> 0).
     :param level_differences: Level difference of each impulse, in dB (> 0).
-    :param assessment_period_min: The assessment time interval the impulses
+    :param assessment_period_minutes: The assessment time interval the impulses
         were selected over, in minutes; the standard's default is 30 min
         (Clause 5), and the value is carried through to the fiche.
     :return: An :class:`ImpulseProminenceResult` with the per-impulse and governing
@@ -369,11 +370,11 @@ def impulse_prominence(
         onset rate or level difference, or an assessment period that is not
         positive and finite.
     """
-    require_scalar(assessment_period_min, "assessment_period_min")
-    if not math.isfinite(assessment_period_min) or assessment_period_min <= 0.0:
+    require_scalar(assessment_period_minutes, "assessment_period_minutes")
+    if not math.isfinite(assessment_period_minutes) or assessment_period_minutes <= 0.0:
         msg = (
-            f"assessment_period_min must be positive and finite; got "
-            f"{assessment_period_min}."
+            f"assessment_period_minutes must be positive and finite; got "
+            f"{assessment_period_minutes}."
         )
         raise ValueError(msg)
     orate = np.asarray(onset_rates, dtype=np.float64).ravel()
@@ -399,7 +400,7 @@ def impulse_prominence(
     return ImpulseProminenceResult(
         onset_rates=orate,
         level_differences=ld,
-        assessment_period_min=float(assessment_period_min),
+        assessment_period_minutes=float(assessment_period_minutes),
     )
 
 

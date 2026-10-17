@@ -2504,7 +2504,7 @@ def splitter_silencer_insertion_loss(
 def silencer_self_noise(
     frequencies: ArrayLike | None,
     airway_velocity: float,
-    passages: int,
+    n_passages: int,
     height_m: float,
     *,
     model: str = "ashrae",
@@ -2539,11 +2539,11 @@ def silencer_self_noise(
     :param frequencies: Octave-band centres, Hz; ``None`` uses the eight
         octave bands from 63 Hz to 8 kHz.
     :param airway_velocity: Velocity ``V`` in the splitter airway, m/s.
-    :param passages: Number of air passages ``N`` between the splitters.
+    :param n_passages: Number of air passages ``N`` between the splitters.
     :param height_m: Silencer height ``H`` (or circumference, if round), m.
     :return: An :class:`HVACSpectrumResult` of the band sound power level,
         dB re 1e-12 W.
-    :raises ValueError: If ``passages`` is not a positive integer.
+    :raises ValueError: If ``n_passages`` is not a positive integer.
     :param model: ``"ashrae"`` (default, Long Eq. 14.31) or ``"vdi2081"``
         (Section 7.2.4.2).
     :param pressure_drop_pa: **VDI 2081 only.** Total pressure drop across the
@@ -2591,14 +2591,14 @@ def silencer_self_noise(
         )
     f, idx = _octave_slots(frequencies)
     v = require_positive(airway_velocity, "airway_velocity")
-    require_scalar(passages, "passages")
-    if passages <= 0 or not float(passages).is_integer():
-        msg = "'passages' must be a positive integer."
+    require_scalar(n_passages, "n_passages")
+    if n_passages <= 0 or not float(n_passages).is_integer():
+        msg = "'n_passages' must be a positive integer."
         raise ValueError(msg)
     h_mm = require_positive(height_m, "height_m") * 1000.0
     overall = (
         55.0 * np.log10(v)
-        + 10.0 * np.log10(float(passages))
+        + 10.0 * np.log10(float(n_passages))
         + 10.0 * np.log10(h_mm)
         - 45.0
     )
@@ -2606,7 +2606,7 @@ def silencer_self_noise(
         frequencies=f,
         values=overall - _SILENCER_SELF_NOISE_CORRECTION[idx],
         quantity="sound_power_level",
-        label=f"Silencer self-noise (V = {v:.1f} m/s, N = {passages})",
+        label=f"Silencer self-noise (V = {v:.1f} m/s, N = {n_passages})",
     )
 
 

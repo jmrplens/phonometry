@@ -309,7 +309,7 @@ slam_lj = emission.sound_energy_reverberation(
     background_levels=np.full(thirds.size, 45.0),   # time-averaged over the same 4 s
     integration_time=4.0, temperature_c=20.0, static_pressure_kpa=101.0,
 )
-print(slam_lj.events, slam_lj.method)                    # 5 direct
+print(slam_lj.n_events, slam_lj.method)                    # 5 direct
 print(np.round(slam_lj.sound_energy_level[:3], 1))       # [96.  94.9 94.2] dB re 1 pJ
 print(round(slam_lj.sound_energy_level_a, 1))            # LJA = 99.0 dB(A)
 
@@ -338,11 +338,11 @@ slam_lj.plot()   # LJ per one-third octave, LJA in the title (needs matplotlib)
 
 `sound_energy_reverberation` takes the room arguments of
 `sound_power_reverberation` and `sound_energy_comparison` the reference-source
-arguments of `sound_power_comparison`, both plus `events`, `background_levels`
+arguments of `sound_power_comparison`, both plus `n_events`, `background_levels`
 with `integration_time`; they return a `ReverberationSoundEnergyResult`
 (`sound_energy_level`, `mean_event_level`, `absorption_area`,
 `waterhouse_correction`, `background_correction`, `c1`, `c2`,
-`speed_of_sound`, `sound_energy_level_a`, `method`, `events`,
+`speed_of_sound`, `sound_energy_level_a`, `method`, `n_events`,
 `integration_time`) with `.plot()`, the same `NaN` fields for the comparison
 method as its sound power twin, and the same qualification warnings. The
 single event results carry no `.report()` fiche, and the averaging over several
@@ -485,7 +485,7 @@ survey = np.array([  # 7.4: six positions, the blender running, dB
 ])
 plan = emission.hard_walled_source_locations(survey, freqs)
 print(np.round(plan.standard_deviation_db, 2))    # [0.93 0.63 0.65 0.8  0.52 0.6  0.42]
-print(plan.required_source_locations)             # 1
+print(plan.n_required_source_locations)             # 1
 ```
 
 **The comparison.** The source runs, then the reference sound source runs
@@ -614,7 +614,7 @@ The function returns a `HardWalledSoundPowerResult`: `sound_power_level`
 `background_correction` and `background_correction_ref` per band,
 `background_requirement_met`, `upper_bound`, `c2`, `sigma_r0` per band (Table 3) and
 `sigma_r0_a`, `sigma_omc_db`, `coverage_factor`, `sound_power_level_a`,
-`microphone_positions` and `source_positions`; the properties `sigma_tot`,
+`n_microphone_positions` and `n_source_positions`; the properties `sigma_tot`,
 `expanded_uncertainty` (and their `_a` forms) and `sound_power_level_ref`
 complete it.
 
@@ -882,7 +882,7 @@ survey2_a = np.array([68.4, 70.1, 68.5, 70.0, 68.1, 69.5])
 plan2 = emission.special_room_source_locations(survey2, freqs, a_weighted_levels=survey2_a)
 print(np.round(plan2.standard_deviation_db, 2))  # [1.02 0.99 3.   0.51 0.35 0.33 0.41]
 print(plan2.spectral_character[2])               # narrow-band
-print(plan2.source_locations, plan2.a_weighted_source_locations)  # [1 1 2 1 1 1 1] 1
+print(plan2.source_locations, plan2.n_a_weighted_source_locations)  # [1 1 2 1 1 1 1] 1
 ```
 
 **The direct and the comparison methods.** Every level is corrected for
@@ -1484,7 +1484,7 @@ $$
 
 (Eq. 19), or its several-location form (Eq. 20). `sound_energy_in_situ`
 takes the events as a 3D `(n, N, bands)` array or as a 2D `(n, bands)`
-measurement with `events=N`, and returns the same result type with
+measurement with `n_events=N`, and returns the same result type with
 `quantity='energy'`, the level in `sound_energy_level` and the Annex D total
 in `sound_energy_level_a`.
 
@@ -1528,7 +1528,7 @@ the inputs are the same: grade 2, $\sigma_\mathrm{omc}$ = 2,0 dB, $k$ = 2.
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `event_levels` | 3D or 2D array | dB | `(n, N, bands)` or `(n, bands)` | $L'_{Ei,q(\mathrm{ST})}$ per event, or $L'_{Ei,N(\mathrm{ST})}$ of one measurement over $N$ events |
-| `events` | int | | $\ge 1$ | $N$ for the 2D form (Eq. 17); must be `None` with the 3D form. Clause 7.6 asks for at least five events, so fewer than five warns and the determination is nonconforming, on either form |
+| `n_events` | int | | $\ge 1$ | $N$ for the 2D form (Eq. 17); must be `None` with the 3D form. Clause 7.6 asks for at least five events, so fewer than five warns and the determination is nonconforming, on either form |
 | `integration_time` | float | s | $> 0$ | $T$ of the event measurement; `None` applies Eq. 14 as printed |
 | `levels_ref`, `lw_ref`, `frequencies`, `background_levels`, `background_levels_ref`, `temperature_c`, `static_pressure_kpa`, `excess_levels`, `directivity_range`, `sigma_omc_db`, `coverage_factor` | | | | As in `sound_power_in_situ()` |
 
@@ -1911,7 +1911,7 @@ same readings give 69.4, 69.8 and 67.5 dB.
 The result, a `HighFrequencySoundPowerResult`, carries the band levels
 (`sound_power_level`), the mean room level (`mean_pressure_level`), the room
 constant, the two corrections (`c1`, `c2`) and the method, and
-`within_10_db_of_maximum` marks the bands within 10 dB of the highest.
+`within_10_db_of_max` marks the bands within 10 dB of the highest.
 
 ## 4. Tones against a reference source
 
@@ -1950,7 +1950,7 @@ turning once every 32 s.
 
 ```python
 speed = 2.0 * np.pi * 1.0 / 32.0                     # m/s along the path
-print(emission.minimum_analyzer_bandwidth(
+print(emission.min_analyzer_bandwidth(
     15625.0, microphone_speed_m_s=speed, speed_of_sound=345.5).round(1))   # [17.8] Hz
 # The FFT is narrower than that, so the tone is the sum of its sidebands.
 tone = emission.tone_level_from_sidebands([42.9, 41.3, 38.0])
@@ -1962,11 +1962,11 @@ tones = emission.high_frequency_sound_power_comparison(
     reference_sound_power_levels=[44.3, 43.9, 43.0],   # dB re 1 pW per hertz
     noise_bandwidth_hz=12.5)
 print(tones.sound_power_level.round(1))              # [59.4 52.2 44.9] dB re 1 pW
-print(tones.within_10_db_of_maximum)                 # [ True  True False]
+print(tones.within_10_db_of_max)                 # [ True  True False]
 ```
 
 Clause 13 c) asks for the level and the frequency of every tone within 10 dB of
-the highest, and `within_10_db_of_maximum` marks them: here the first two.
+the highest, and `within_10_db_of_max` marks them: here the first two.
 A bandwidth wider than 112 Hz emits a `SoundPowerWarning`, and without
 `noise_bandwidth_hz` the same function applies Formula (8) to broadband bands.
 The comparison applies $C_2$ alone, as ISO 3741 does for its own comparison

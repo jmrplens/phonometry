@@ -121,7 +121,7 @@ signal is - or use odd lengths, and the operation is exact.
 ```python
 noise_signal(
     fs: float,
-    seconds: float = 1.0,
+    duration_s: float = 1.0,
     *,
     color: Literal['white', 'pink', 'red', 'blue', 'violet'] = 'white',
     rms: float = 1.0,
@@ -142,12 +142,12 @@ zero-mean and rescaled to the requested RMS exactly.
 | Name | Description |
 | :--- | :--- |
 | `fs` | Rate to generate at, in Hz. |
-| `seconds` | Duration, in seconds (at least 16 samples). |
+| `duration_s` | Duration, in seconds (at least 16 samples). |
 | `color` | Noise color: `'white'`, `'pink'`, `'red'`, `'blue'` or `'violet'`. |
 | `rms` | Root-mean-square value of the returned record. |
 | `seed` | Seed for `numpy.random.default_rng`; the same seed reproduces the same record. `None` draws fresh entropy. |
 
-**Returns:** The noise record, `round(fs * seconds)` samples.
+**Returns:** The noise record, `round(fs * duration_s)` samples.
 
 **Raises**
 
@@ -278,10 +278,10 @@ attenuation and the rejected band shaded.
 tone_burst(
     fs: float,
     frequency: float,
-    cycles: int,
+    n_cycles: int,
     *,
     amplitude: float = 1.0,
-    repetitions: int = 1,
+    n_repetitions: int = 1,
     repetition_rate: float | None = None,
     pre_silence: float = 0.0,
     post_silence: float = 0.0,
@@ -292,15 +292,15 @@ Generate an IEC 60268-1 tone burst (single or repetitive).
 
 IEC 60268-1:1985, Clause A2.1: "The burst should start at the
 zero-crossing of the [...] tone and should consist of an integral
-number of full periods." The burst is a sine of `cycles` full
+number of full periods." The burst is a sine of `n_cycles` full
 periods gated by a rectangular envelope; with `repetition_rate` a
-train of `repetitions` identical bursts is produced, one per
+train of `n_repetitions` identical bursts is produced, one per
 repetition period, as in the repetitive-burst test of Clause A2.2
 (there: 5 ms bursts of 5 kHz tone at 2, 10 or 100 bursts per second).
 
 The gate closes after `round(fs * cycles / frequency)` samples, so
 the "integral number of full periods" is sample-exact only when
-`fs` and `frequency` are commensurate (`fs * cycles/frequency`
+`fs` and `frequency` are commensurate (`fs * n_cycles/frequency`
 an integer). Otherwise the gate closes up to half a sample away from
 the tone's final zero crossing and the gated waveform carries a
 residual step of up to
@@ -316,9 +316,9 @@ realized residual.
 | :--- | :--- |
 | `fs` | Rate to generate at, in Hz. |
 | `frequency` | Tone frequency, in Hz (below the Nyquist rate). |
-| `cycles` | Full tone periods per burst (positive integer). |
+| `n_cycles` | Full tone periods per burst (positive integer). |
 | `amplitude` | Peak amplitude of the tone. |
-| `repetitions` | Number of bursts (requires `repetition_rate` when greater than 1). |
+| `n_repetitions` | Number of bursts (requires `repetition_rate` when greater than 1). |
 | `repetition_rate` | Bursts per second; each burst then occupies one full repetition period (burst plus silence). `None` (the default) produces a single burst with no trailing period. |
 | `pre_silence` | Silence before the first burst, in seconds. |
 | `post_silence` | Silence after the last burst (or after the last repetition period), in seconds. |
@@ -339,12 +339,12 @@ ToneBurstResult(
     envelope: NDArray[np.float64],
     fs: float,
     frequency: float,
-    cycles: int,
+    n_cycles: int,
     amplitude: float,
     burst_s: float,
     burst_samples: int,
     onset_sample: int,
-    repetitions: int,
+    n_repetitions: int,
     repetition_rate: float | None,
     period_samples: int | None,
     duty_cycle: float | None,
@@ -366,12 +366,12 @@ a train of identical bursts, one per repetition period (Clause A2.2).
 | `envelope` | Rectangular gating envelope of `signal` (`amplitude` while the gate is open, `0` elsewhere). |
 | `fs` | Sample rate, in Hz. |
 | `frequency` | Tone frequency, in Hz. |
-| `cycles` | Full tone periods per burst. |
+| `n_cycles` | Full tone periods per burst. |
 | `amplitude` | Peak amplitude of the tone. |
-| `burst_s` | Burst duration `cycles/frequency`, in seconds. |
+| `burst_s` | Burst duration `n_cycles/frequency`, in seconds. |
 | `burst_samples` | Samples per burst, `round(fs * cycles / frequency)`. |
 | `onset_sample` | Index of the first sample of the first burst. |
-| `repetitions` | Number of bursts in the record. |
+| `n_repetitions` | Number of bursts in the record. |
 | `repetition_rate` | Bursts per second, or `None` (single burst). |
 | `period_samples` | Samples per repetition period (`round(fs/repetition_rate)`), or `None` (single burst). |
 | `duty_cycle` | On fraction `burst_samples/period_samples`, or `None` (single burst). |

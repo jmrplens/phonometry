@@ -476,7 +476,7 @@ def gear_mesh_frequencies(
     n_teeth: int,
     *,
     n_harmonics: int = 3,
-    sidebands: int = 0,
+    n_sidebands: int = 0,
     sideband_rate: float | None = None,
 ) -> FaultFrequencyResult:
     r"""Gear-meshing frequency and its sideband family (Norton Eq. 8.3).
@@ -484,7 +484,7 @@ def gear_mesh_frequencies(
     :math:`\mathrm{GMF} = n_{\text{teeth}} \times N/60`, with integer
     harmonics ``k GMF`` (``k = 1 .. n_harmonics``) named ``"GMF"``,
     ``"2xGMF"``, ... Each harmonic can carry a
-    modulation family at ``k GMF +/- m f_mod`` (``m = 1 .. sidebands``), named
+    modulation family at ``k GMF +/- m f_mod`` (``m = 1 .. n_sidebands``), named
     ``"GMF-1x"``, ``"2xGMF+2x"``, and so on. The default modulation rate is
     the shaft rate of the wheel: a chipped tooth or an eccentric wheel
     modulates the mesh once per revolution, which is what produces those
@@ -496,7 +496,7 @@ def gear_mesh_frequencies(
     :param speed_rpm: Shaft speed ``N`` of the wheel, in r/min (> 0).
     :param n_teeth: Number of teeth on that wheel (integer >= 1).
     :param n_harmonics: Number of mesh harmonics (integer >= 1, Default: 3).
-    :param sidebands: Sideband order per harmonic (integer >= 0, Default: 0,
+    :param n_sidebands: Sideband order per harmonic (integer >= 0, Default: 0,
         no sidebands).
     :param sideband_rate: Modulation rate ``f_mod``, in hertz (> 0, Default:
         the wheel's own shaft rate).
@@ -506,7 +506,7 @@ def gear_mesh_frequencies(
     fs = shaft_rate(speed_rpm)
     teeth = _require_count(n_teeth, "n_teeth")
     n_harm = _require_count(n_harmonics, "n_harmonics")
-    n_side = _require_count(sidebands, "sidebands", minimum=0)
+    n_side = _require_count(n_sidebands, "n_sidebands", minimum=0)
     f_mod = (
         fs
         if sideband_rate is None
@@ -571,13 +571,13 @@ def _slot_sidebands(
 
 def induction_motor_frequencies(
     speed_rpm: float,
-    poles: int,
-    rotor_bars: int,
+    n_poles: int,
+    n_rotor_bars: int,
     *,
     slip: float = 0.0,
     supply_frequency: float | None = None,
-    slot_harmonics: int = 1,
-    sidebands: int = 0,
+    n_slot_harmonics: int = 1,
+    n_sidebands: int = 0,
 ) -> FaultFrequencyResult:
     r"""Electrical and slot lines of an induction motor (Norton 8.19, 8.20).
 
@@ -593,7 +593,7 @@ def induction_motor_frequencies(
     for ``R`` rotor bars, ``p`` magnetic poles (not pole pairs), unit slip
     ``s`` and ``n = 1, 2, ...``. Dynamic eccentricity modulates the dominant
     slot harmonic at +/- the shaft rate and +/- the slip frequency, which is
-    what *sidebands* adds around ``fsh``.
+    what *n_sidebands* adds around ``fsh``.
 
     Give the slip directly, or give the mains *supply_frequency* and let it be
     derived from ``fe`` and the measured shaft speed. The supply frequency is
@@ -609,29 +609,29 @@ def induction_motor_frequencies(
     it by the pole count.
 
     :param speed_rpm: Shaft speed ``N``, in r/min (> 0).
-    :param poles: Number of magnetic poles ``p`` (even integer >= 2).
-    :param rotor_bars: Number of rotor bars/slots ``R`` (integer >= 1).
+    :param n_poles: Number of magnetic poles ``p`` (even integer >= 2).
+    :param n_rotor_bars: Number of rotor bars/slots ``R`` (integer >= 1).
     :param slip: Unit slip ``s`` (``0 <= s < 1``, Default: 0); typically 0,02
         to 0,05 under load. Ignored when *supply_frequency* is given.
     :param supply_frequency: Mains frequency ``fe``, in hertz (> 0), from
         which the slip is derived (Default: ``None``, use *slip*).
-    :param slot_harmonics: Number of slot-harmonic orders ``n`` (integer >= 1,
+    :param n_slot_harmonics: Number of slot-harmonic orders ``n`` (integer >= 1,
         Default: 1, the fundamental ``R fs`` alone).
-    :param sidebands: Sideband order around the fundamental slot harmonic at
+    :param n_sidebands: Sideband order around the fundamental slot harmonic at
         +/- the shaft rate and +/- the slip frequency (integer >= 0,
         Default: 0).
     :return: A :class:`FaultFrequencyResult` (source ``"induction motor"``).
     :raises ValueError: for a non-positive, non-integer or inconsistent input.
     """
     fs = shaft_rate(speed_rpm)
-    require_scalar(poles, "poles")
-    p = int(poles)
+    require_scalar(n_poles, "n_poles")
+    p = int(n_poles)
     if p < _MIN_POLES or p % 2:
-        msg = "'poles' must be an even integer of at least 2."
+        msg = "'n_poles' must be an even integer of at least 2."
         raise ValueError(msg)
-    bars = _require_count(rotor_bars, "rotor_bars")
-    n_slot = _require_count(slot_harmonics, "slot_harmonics")
-    n_side = _require_count(sidebands, "sidebands", minimum=0)
+    bars = _require_count(n_rotor_bars, "n_rotor_bars")
+    n_slot = _require_count(n_slot_harmonics, "n_slot_harmonics")
+    n_side = _require_count(n_sidebands, "n_sidebands", minimum=0)
 
     if supply_frequency is not None:
         fe = require_positive(supply_frequency, "supply_frequency")
@@ -640,7 +640,7 @@ def induction_motor_frequencies(
             msg = (
                 "the shaft rate must stay below the synchronous speed "
                 f"{synchronous:g} Hz implied by 'supply_frequency' and "
-                "'poles'; check the pole count."
+                "'n_poles'; check the pole count."
             )
             raise ValueError(msg)
         s = 1.0 - fs / synchronous
@@ -734,7 +734,7 @@ def blade_pass_frequencies(
     *,
     n_harmonics: int = 3,
     n_vanes: int | None = None,
-    lobe_orders: int = 1,
+    n_lobe_orders: int = 1,
 ) -> FaultFrequencyResult:
     r"""Blade-passing frequency and interaction patterns (Norton 8.15-8.17).
 
@@ -761,7 +761,7 @@ def blade_pass_frequencies(
         Default: 3).
     :param n_vanes: Number of stator vanes ``V`` (integer >= 1) to include the
         lobed interaction patterns (Default: ``None``, blade tones only).
-    :param lobe_orders: Highest ``|k|`` in
+    :param n_lobe_orders: Highest ``|k|`` in
         :math:`m_\mathrm{L} = n\, N_{\text{blades}} \pm k\, N_{\text{vanes}}`
         (integer >= 1, Default: 1).
     :return: A :class:`FaultFrequencyResult` (source ``"bladed rotor"``).
@@ -770,7 +770,7 @@ def blade_pass_frequencies(
     fs = shaft_rate(speed_rpm)
     blades = _require_count(n_blades, "n_blades")
     n_harm = _require_count(n_harmonics, "n_harmonics")
-    k_max = _require_count(lobe_orders, "lobe_orders")
+    k_max = _require_count(n_lobe_orders, "n_lobe_orders")
     vanes = None if n_vanes is None else _require_count(n_vanes, "n_vanes")
 
     lines: list[FaultLine] = [_line("shaft", fs, fs, "shaft", _SHAFT_DESCRIPTION)]

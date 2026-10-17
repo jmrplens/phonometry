@@ -122,7 +122,9 @@ class NoiseInducedHearingLossWarning(PhonometryWarning):
     """Warns when an ISO 1999 prediction leaves the standard's validated domain."""
 
 
-def _warn_outside_domain(l_ex: float, years: float, fractile: float) -> None:
+def _warn_outside_domain(
+    l_ex: float, exposure_duration_years: float, fractile: float
+) -> None:
     """Warn (once per offending input) outside the validated ISO 1999 domain.
 
     The quadratic Formula (2) grows without bound in ``(L_EX,8h - L0)``, so
@@ -132,9 +134,9 @@ def _warn_outside_domain(l_ex: float, years: float, fractile: float) -> None:
     the computation available (only non-positive durations and fractiles
     outside (0, 1) are rejected outright).
     """
-    if not _VALIDATED_YEARS[0] <= years <= _VALIDATED_YEARS[1]:
+    if not _VALIDATED_YEARS[0] <= exposure_duration_years <= _VALIDATED_YEARS[1]:
         warnings.warn(
-            f"exposure duration {years:g} years is outside the 1-40 year "
+            f"exposure duration {exposure_duration_years:g} years is outside the 1-40 year "
             f"range ISO 1999:2013 validates (clause 6.3.1); the result is an "
             f"extrapolation.",
             NoiseInducedHearingLossWarning,
@@ -166,7 +168,7 @@ class NIPTSResult(OwnsArrays):
     All arrays are in dB and aligned with ``frequencies``.
 
     :ivar l_ex: Noise exposure level normalized to 8 h, ``L_EX,8h``, in dB.
-    :ivar years: Exposure duration, in years.
+    :ivar exposure_duration_years: Exposure duration, in years.
     :ivar fractile: Population fractile of ``value`` (0-1); the fraction of the
         population with a smaller shift, so ``0.9`` is the most-susceptible 10 %.
     :ivar frequencies: Audiometric frequencies, in hertz.
@@ -177,7 +179,7 @@ class NIPTSResult(OwnsArrays):
     """
 
     l_ex: float
-    years: float
+    exposure_duration_years: float
     fractile: float
     frequencies: np.ndarray
     median: np.ndarray
@@ -204,7 +206,7 @@ class NIPTSResult(OwnsArrays):
         to whatever grid the array was computed on.
 
         The three scalars the prediction is stated for are pinned finite as
-        well: a NaN ``l_ex`` (or ``years``) sails past every domain warning
+        well: a NaN ``l_ex`` (or ``exposure_duration_years``) sails past every domain warning
         (no comparison fires on NaN) and turns every spectrum into NaN, so
         the plot would draw a completely blank axes under an ordinary title
         ending "= nan dB". ``fractile`` leaves the spectra intact and so
@@ -214,7 +216,7 @@ class NIPTSResult(OwnsArrays):
         non-median gloss (no comparison places it at the median either),
         beside an extrapolation caveat earned the same empty way. An infinity
         prints "Q = -inf %". ``l_ex`` deliberately has no lower bound and
-        ``years`` no upper one, and the fractile's own (0, 1) interval is
+        ``exposure_duration_years`` no upper one, and the fractile's own (0, 1) interval is
         :func:`nipts`'s to enforce; only finiteness is construction's
         business.
 
@@ -229,10 +231,10 @@ class NIPTSResult(OwnsArrays):
         convert float NaN to integer".
 
         :raises ValueError: if any spectrum disagrees with ``frequencies``,
-            is empty or non-finite, or if ``l_ex``, ``years`` or ``fractile``
+            is empty or non-finite, or if ``l_ex``, ``exposure_duration_years`` or ``fractile``
             is not finite.
         """
-        require_finite_fields(self, "l_ex", "years", "fractile")
+        require_finite_fields(self, "l_ex", "exposure_duration_years", "fractile")
         require_ranks(
             self,
             frequencies=1,
@@ -331,7 +333,7 @@ class HTLANResult(OwnsArrays):
     :ivar age: Listener age, in years.
     :ivar sex: ``"male"`` or ``"female"``.
     :ivar l_ex: Noise exposure level normalized to 8 h, in dB.
-    :ivar years: Exposure duration, in years.
+    :ivar exposure_duration_years: Exposure duration, in years.
     :ivar fractile: Population fractile (0-1) applied to both components.
     :ivar frequencies: Audiometric frequencies, in hertz.
     :ivar htla: Age component ``H`` (HTLA, database A, evaluated from
@@ -343,7 +345,7 @@ class HTLANResult(OwnsArrays):
     age: float
     sex: str
     l_ex: float
-    years: float
+    exposure_duration_years: float
     fractile: float
     frequencies: np.ndarray
     htla: np.ndarray
@@ -392,9 +394,11 @@ class HTLANResult(OwnsArrays):
 
         :raises ValueError: if any component disagrees with ``frequencies``,
             is empty, or carries a non-finite value, or if ``age``, ``l_ex``,
-            ``years`` or ``fractile`` is not finite.
+            ``exposure_duration_years`` or ``fractile`` is not finite.
         """
-        require_finite_fields(self, "age", "l_ex", "years", "fractile")
+        require_finite_fields(
+            self, "age", "l_ex", "exposure_duration_years", "fractile"
+        )
         require_ranks(self, frequencies=1, htla=1, nipts=1, threshold=1)
         require_same_length(
             self,
@@ -494,20 +498,20 @@ def _select(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndarray:
 
 
 def _nipts_components(
-    l_ex: float, years: float
+    l_ex: float, exposure_duration_years: float
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Median N50 and the spreads du, dl at every audiometric frequency."""
     u, v, l0 = _UVL0[:, 0], _UVL0[:, 1], _UVL0[:, 2]
     # L_EX,8h deemed equal to L0 where it is smaller, so the effect is zero.
     excess2 = np.maximum(l_ex - l0, 0.0) ** 2
-    lg_t = math.log10(years)  # lg(t / t0), t0 = 1 year
+    lg_t = math.log10(exposure_duration_years)  # lg(t / t0), t0 = 1 year
 
     n50_10 = (u + v * math.log10(_FORMULA_2_MIN_YEARS)) * excess2
-    if years >= _FORMULA_2_MIN_YEARS:
+    if exposure_duration_years >= _FORMULA_2_MIN_YEARS:
         n50 = (u + v * lg_t) * excess2
     else:
         # Formula (3): extrapolate below 10 years from the 10-year value.
-        n50 = (math.log10(years + 1.0) / math.log10(11.0)) * n50_10
+        n50 = (math.log10(exposure_duration_years + 1.0) / math.log10(11.0)) * n50_10
     n50 = np.maximum(n50, 0.0)
 
     xu, yu, xl, yl = _XY[:, 0], _XY[:, 1], _XY[:, 2], _XY[:, 3]
@@ -526,7 +530,7 @@ def _nipts_components(
 
 def nipts(
     l_ex: float,
-    years: float,
+    exposure_duration_years: float,
     fractile: float = 0.5,
     frequencies: ArrayLike | None = None,
 ) -> NIPTSResult:
@@ -542,7 +546,7 @@ def nipts(
 
     :param l_ex: Noise exposure level normalized to a nominal 8 h working day,
         ``L_EX,8h``, in dB.
-    :param years: Exposure duration, in years (> 0; the standard establishes
+    :param exposure_duration_years: Exposure duration, in years (> 0; the standard establishes
         10-40 years and extrapolates 1-10 years by Formula 3, below 1 year the
         result is a further extrapolation).
     :param fractile: Population fractile in the open interval (0, 1); ``0.5``
@@ -558,25 +562,25 @@ def nipts(
     runs but a :class:`NoiseInducedHearingLossWarning` marks the result as an
     extrapolation, and the ``.report()`` fiche prints the matching caveat.
     """
-    require_scalar(years, "years")
-    if years <= 0.0:
-        msg = f"years must be positive; got {years}."
+    require_scalar(exposure_duration_years, "exposure_duration_years")
+    if exposure_duration_years <= 0.0:
+        msg = f"'exposure_duration_years' must be positive; got {exposure_duration_years}."
         raise ValueError(msg)
     require_scalar(fractile, "fractile")
     if not 0.0 < fractile < 1.0:
         msg = f"fractile must be in (0, 1); got {fractile}."
         raise ValueError(msg)
-    _warn_outside_domain(float(l_ex), float(years), float(fractile))
+    _warn_outside_domain(float(l_ex), float(exposure_duration_years), float(fractile))
 
     from scipy.special import ndtri  # standard-normal quantile
 
-    n50, du, dl = _nipts_components(float(l_ex), float(years))
+    n50, du, dl = _nipts_components(float(l_ex), float(exposure_duration_years))
     z = float(ndtri(fractile))
     value = np.maximum(n50 + z * (du if z >= 0.0 else dl), 0.0)
 
     return NIPTSResult(
         l_ex=float(l_ex),
-        years=float(years),
+        exposure_duration_years=float(exposure_duration_years),
         fractile=float(fractile),
         frequencies=_select(_NIPTS_FREQUENCIES, frequencies),
         median=_select(n50, frequencies),
@@ -614,7 +618,7 @@ def htlan(
     age: float,
     sex: Literal["male", "female"],
     l_ex: float,
-    years: float,
+    exposure_duration_years: float,
     fractile: float = 0.5,
     frequencies: ArrayLike | None = None,
 ) -> HTLANResult:
@@ -631,7 +635,7 @@ def htlan(
     :param age: Listener age, in years (at least 18, the ISO 7029 lower limit).
     :param sex: ``"male"`` or ``"female"``.
     :param l_ex: Noise exposure level normalized to 8 h, ``L_EX,8h``, in dB.
-    :param years: Exposure duration, in years.
+    :param exposure_duration_years: Exposure duration, in years.
     :param fractile: Population fractile in (0, 1) applied to both components.
     :param frequencies: Optional subset of the audiometric frequencies, in
         hertz; ``None`` uses all six (500 Hz - 6000 Hz).
@@ -647,14 +651,14 @@ def htlan(
     """
     freqs = _select(_NIPTS_FREQUENCIES, frequencies)
     htla = age_threshold(age, sex, fractile, frequencies=freqs).threshold
-    noise = nipts(l_ex, years, fractile, frequencies=freqs).value
+    noise = nipts(l_ex, exposure_duration_years, fractile, frequencies=freqs).value
     threshold = age_and_noise_threshold(htla, noise)
 
     return HTLANResult(
         age=float(age),
         sex=sex,
         l_ex=float(l_ex),
-        years=float(years),
+        exposure_duration_years=float(exposure_duration_years),
         fractile=float(fractile),
         frequencies=freqs,
         htla=htla,

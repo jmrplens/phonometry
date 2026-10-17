@@ -335,7 +335,7 @@ def _table_density_db(frequencies: NDArray[np.float64]) -> NDArray[np.float64]:
 
 def simulated_program_signal(
     fs: int,
-    seconds: float,
+    duration_s: float,
     *,
     rms: float = 1.0,
     spectrum: Literal["table", "figure_2"] = "table",
@@ -372,7 +372,7 @@ def simulated_program_signal(
     the middle need a few seconds.
 
     :param fs: Sample rate, in hertz.
-    :param seconds: Duration, in seconds.
+    :param duration_s: Duration, in seconds.
     :param rms: RMS value of the record, in whatever unit it is scaled to.
     :param spectrum: ``"table"`` (default) for the band levels of Table II,
         ``"figure_2"`` for pink noise through the filter of Figure 2.
@@ -381,7 +381,7 @@ def simulated_program_signal(
         and below the ratio the unclipped record already has.
     :param seed: Seed for :func:`numpy.random.default_rng`; the same seed
         reproduces the same record.
-    :return: The signal, ``round(fs * seconds)`` samples.
+    :return: The signal, ``round(fs * duration_s)`` samples.
     :raises ValueError: If an input is invalid, or ``peak_to_rms`` is not
         below the ratio of the unclipped record.
     """
@@ -389,11 +389,11 @@ def simulated_program_signal(
         msg = f"'spectrum' must be 'table' or 'figure_2'; got {spectrum!r}."
         raise ValueError(msg)
     rate = require_count(fs, "fs")
-    duration = require_positive(seconds, "seconds")
+    duration = require_positive(duration_s, "duration_s")
     level = require_positive(rms, "rms")
     n = round(rate * duration)
     if n < _MIN_SAMPLES:
-        msg = f"'fs'*'seconds' must give at least {_MIN_SAMPLES} samples, got {n}."
+        msg = f"'fs'*'duration_s' must give at least {_MIN_SAMPLES} samples, got {n}."
         raise ValueError(msg)
     rng = np.random.default_rng(seed)
     white = np.fft.rfft(rng.standard_normal(n))

@@ -912,7 +912,7 @@ The four pressure ratios that cut Clause 5.2 into five regimes.
 ```python
 stage_level_correction(
     last_stage_level: float,
-    stages: int,
+    n_stages: int,
     inlet_pressure_pa: float,
     stagnation_pressure_pa: float,
 ) -> float
@@ -934,7 +934,7 @@ only a few decibels.
 | Name | Description |
 | :--- | :--- |
 | `last_stage_level` | $L_{pi,n}$ of Equation (18) computed on the last stage, in dB. |
-| `stages` | $n$, the number of throttling stages, at least two. |
+| `n_stages` | $n$, the number of throttling stages, at least two. |
 | `inlet_pressure_pa` | $p_1$ at the valve inlet, in Pa. |
 | `stagnation_pressure_pa` | $p_n$ at the last stage, in Pa. |
 
@@ -1012,7 +1012,7 @@ the external level of 5.6, which are common to every regime.
 valve_style_modifier(
     passage_area: float,
     wetted_perimeter: float,
-    passages: int,
+    n_passages: int,
 ) -> float
 ```
 
@@ -1033,7 +1033,7 @@ a single large port has $F_d$ near one.
 | :--- | :--- |
 | `passage_area` | $A$, the area of a single flow passage, in m². |
 | `wetted_perimeter` | $l_w$ of that passage, in m. |
-| `passages` | $N_o$, the number of independent flow passages. |
+| `n_passages` | $N_o$, the number of independent flow passages. |
 
 **Returns:** $F_d$, dimensionless.
 

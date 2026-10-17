@@ -400,6 +400,14 @@ repeated, and noted on the audiogram.
 
 **Returns:** `True` when the span exceeds 10 dB.
 
+### AscendingThresholdResult.n_responses_at_threshold
+
+*property*
+
+How many ascents ended at the threshold level.
+
+**Returns:** The count, 0 when no threshold is determined.
+
 ### AscendingThresholdResult.plot()
 
 ```python
@@ -422,14 +430,6 @@ Draw the presentations, heard and not heard, and the threshold.
 | `kwargs` | Forwarded to the presentation staircase. |
 
 **Returns:** The axes.
-
-### AscendingThresholdResult.responses_at_threshold
-
-*property*
-
-How many ascents ended at the threshold level.
-
-**Returns:** The count, 0 when no threshold is determined.
 
 ### AscendingThresholdResult.series_exhausted
 

@@ -570,6 +570,41 @@ MAX_MICROPHONE_TO_CABIN_M = 5.0
 MAX_SOURCE_POSITIONS_IN_SITU = 6
 ```
 
+## min_cabin_clearance_m
+
+```python
+min_cabin_clearance_m(
+    lowest_band_frequency_hz: float,
+    *,
+    speed_of_sound: float = 343.0,
+) -> float
+```
+
+How far the cabin stands from the room, 6.2.
+
+Half a wavelength at the centre of the lowest band of interest, between the
+cabin and the walls, the ceiling and any diffusing element alike. Below
+100 Hz the clause stops computing and fixes a flat
+[`LOW_BAND_CLEARANCE_M`](/phonometry/reference/api/noise_control/cabin-insulation/#low_band_clearance_m), which at 50 Hz is less than the half
+wavelength the rule above it would have asked for: the low-frequency
+sentence relaxes the requirement rather than tightening it, and it is
+written here exactly as printed.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `lowest_band_frequency_hz` | The centre frequency of the lowest band of interest, in hertz. |
+| `speed_of_sound` | Speed of sound in the room, in metres per second. |
+
+**Returns:** The least clearance, in metres.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For a non-positive frequency or speed. |
+
 ## MIN_FIXED_MICROPHONE_POSITIONS
 
 *Constant* (`int`).
@@ -650,41 +685,6 @@ MIN_SOURCE_TO_MICROPHONE_IN_SITU_M = 3.0
 MIN_SOURCE_TO_MICROPHONE_M = 2.0
 ```
 
-## minimum_cabin_clearance_m
-
-```python
-minimum_cabin_clearance_m(
-    lowest_band_frequency_hz: float,
-    *,
-    speed_of_sound: float = 343.0,
-) -> float
-```
-
-How far the cabin stands from the room, 6.2.
-
-Half a wavelength at the centre of the lowest band of interest, between the
-cabin and the walls, the ceiling and any diffusing element alike. Below
-100 Hz the clause stops computing and fixes a flat
-[`LOW_BAND_CLEARANCE_M`](/phonometry/reference/api/noise_control/cabin-insulation/#low_band_clearance_m), which at 50 Hz is less than the half
-wavelength the rule above it would have asked for: the low-frequency
-sentence relaxes the requirement rather than tightening it, and it is
-written here exactly as printed.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `lowest_band_frequency_hz` | The centre frequency of the lowest band of interest, in hertz. |
-| `speed_of_sound` | Speed of sound in the room, in metres per second. |
-
-**Returns:** The least clearance, in metres.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | For a non-positive frequency or speed. |
-
 ## OPERATOR_PATH_INCLINATION_DEG
 
 *Constant* (`float`).
@@ -712,7 +712,7 @@ PREFERRED_SIGNAL_TO_BACKGROUND_DB = 12.0
 ## SourcePositionCheck
 
 ```python
-SourcePositionCheck(positions_used: int, max_octave_spread_db: float)
+SourcePositionCheck(n_positions_used: int, max_octave_spread_db: float)
 ```
 
 Whether enough loudspeaker positions were used, 7.2.1.
@@ -726,10 +726,10 @@ check cannot be built against another rule.
 
 | Name | Description |
 | :--- | :--- |
-| `positions_used` | $N$, the number of source positions measured. |
+| `n_positions_used` | $N$, the number of source positions measured. |
 | `max_octave_spread_db` | The largest difference in $D'_p$ between any two positions, over the octave bands, in decibels. |
 
-### SourcePositionCheck.exceeds_maximum
+### SourcePositionCheck.exceeds_max
 
 *property*
 
@@ -737,7 +737,7 @@ Whether the spread runs past [`MAX_SOURCE_POSITIONS_IN_SITU`](/phonometry/refere
 
 7.2.1 says so shall be stated in the report.
 
-### SourcePositionCheck.required_positions
+### SourcePositionCheck.n_required_positions
 
 *property*
 
@@ -749,7 +749,7 @@ The fewest positions the spread calls for, 7.2.1.
 
 *property*
 
-Whether `positions_used` reaches `required_positions`.
+Whether `n_positions_used` reaches `n_required_positions`.
 
 ## STATED_UNCERTAINTY_BAND_RANGE_HZ
 

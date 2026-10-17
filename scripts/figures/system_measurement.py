@@ -34,7 +34,7 @@ def generate_tone_burst_train(output_dir: str) -> None:
 
     fs = 48000.0
     single = signals.tone_burst(fs, 5000.0, 25, pre_silence=0.001, post_silence=0.001)
-    train = signals.tone_burst(fs, 5000.0, 25, repetitions=4, repetition_rate=10.0)
+    train = signals.tone_burst(fs, 5000.0, 25, n_repetitions=4, repetition_rate=10.0)
 
     fig, axes = plt.subplots(2, 1, figsize=(10, 6.4))
     t_ms = 1e3 * np.arange(single.signal.size) / single.fs

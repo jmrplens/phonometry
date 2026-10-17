@@ -383,12 +383,12 @@ class SpectralDensityResult(OwnsArrays):
     :ivar frequencies: One-sided frequency axis, in Hz.
     :ivar psd: Autospectral density :math:`\hat{G}_{xx}(f)` (units²/Hz
         for ``'density'`` scaling, units² for ``'spectrum'``).
-    :ivar ci_lower: Lower chi-square confidence bound on
+    :ivar confidence_lower: Lower chi-square confidence bound on
         :math:`G_{xx}` (Eq. 8.163;
         the DC bin, and the Nyquist bin for an even segment length, use
         :math:`n = n_\mathrm{d}` degrees of freedom - a wider interval - because
         those bins carry a single real Fourier component).
-    :ivar ci_upper: Upper chi-square confidence bound on :math:`G_{xx}`.
+    :ivar confidence_upper: Upper chi-square confidence bound on :math:`G_{xx}`.
     :ivar confidence: Confidence level of the interval (e.g. ``0.95``).
     :ivar random_error: Normalized random error
         :math:`\varepsilon[\hat{G}_{xx}] = 1/\sqrt{n_\mathrm{d}}`
@@ -411,8 +411,8 @@ class SpectralDensityResult(OwnsArrays):
 
     frequencies: NDArray[np.float64]
     psd: NDArray[np.float64]
-    ci_lower: NDArray[np.float64]
-    ci_upper: NDArray[np.float64]
+    confidence_lower: NDArray[np.float64]
+    confidence_upper: NDArray[np.float64]
     confidence: float
     random_error: float
     n_segments: int
@@ -442,13 +442,15 @@ class SpectralDensityResult(OwnsArrays):
         :raises ValueError: if the axis and the three curves do not share one
             length.
         """
-        require_ranks(self, frequencies=1, psd=1, ci_lower=1, ci_upper=1)
+        require_ranks(
+            self, frequencies=1, psd=1, confidence_lower=1, confidence_upper=1
+        )
         require_same_length(
             self,
             "frequencies",
             "psd",
-            "ci_lower",
-            "ci_upper",
+            "confidence_lower",
+            "confidence_upper",
             axis="frequency",
         )
 
@@ -526,8 +528,8 @@ def power_spectral_density(
     return SpectralDensityResult(
         frequencies=freqs,
         psd=gxx,
-        ci_lower=lower,
-        ci_upper=upper,
+        confidence_lower=lower,
+        confidence_upper=upper,
         confidence=conf,
         random_error=1.0 / float(np.sqrt(nd)),
         n_segments=k,

@@ -282,11 +282,11 @@ preguntas que se hace un higienista *antes* de ir a la instalación están a una
 llamada de distancia. ¿Cuántas horas tiene que cubrir la campaña para un grupo
 de este tamaño? La Tabla 1 fija la duración acumulada mínima de medición para un
 grupo de exposición homogéneo en función de su tamaño, y
-`minimum_cumulative_duration_hours` la lee:
+`min_cumulative_duration_hours` la lee:
 
 ```python
 for n in (4, 10, 25, 50):
-    print(n, hearing.minimum_cumulative_duration_hours(n))
+    print(n, hearing.min_cumulative_duration_hours(n))
 # 4 5.0
 # 10 7.5
 # 25 12.5
@@ -525,7 +525,7 @@ entradas; el balance de incertidumbre del anexo C (Ecuaciones C.6, C.9 y C.12
 con las Tablas C.4 y C.5, y $u_3$ del apartado C.6); el factor de cobertura
 unilateral $k = 1{,}65$ del apartado 14; los avisos de los apartados 9.3 /
 10.4 y de la Tabla 1, alcanzables antes de la campaña mediante
-`minimum_cumulative_duration_hours` y `table_c4_contribution`; y el informe de
+`min_cumulative_duration_hours` y `table_c4_contribution`; y el informe de
 medición del apartado 15 a través de `ExposureResult.report()`, con la
 evaluación de la Directiva 2003/10/CE encima. Se reproducen los tres ejemplos
 resueltos de los anexos D, E y F.

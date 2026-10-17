@@ -374,7 +374,7 @@ MIN_MULTI_JUNCTION_KIJ_DB = -5.0
 ## multi_junction_adjustment
 
 ```python
-multi_junction_adjustment(junctions: int) -> float
+multi_junction_adjustment(n_junctions: int) -> float
 ```
 
 Vibration reduction index adjustment `dK` (EN 12354-5, clause F.1).
@@ -390,7 +390,7 @@ junctions and 6 dB for three or more, with the resulting `Kij` floored at
 
 | Name | Description |
 | :--- | :--- |
-| `junctions` | Number of junctions the transmission path crosses (>= 1). |
+| `n_junctions` | Number of junctions the transmission path crosses (>= 1). |
 
 **Returns:** The adjustment `dK`, in dB (0,0 for a single junction).
 

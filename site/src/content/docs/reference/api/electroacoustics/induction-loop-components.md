@@ -89,7 +89,7 @@ are:
   current is raised until the total harmonic distortion across the resistive
   part of the load reaches the rated value, and the current is the total
   voltage across that resistance over its value
-  ([`maximum_output_current`](/phonometry/reference/api/electroacoustics/induction-loop-components/#maximum_output_current));
+  ([`max_output_current`](/phonometry/reference/api/electroacoustics/induction-loop-components/#max_output_current));
 * the compliance voltage, 5.4.8: the maximum positive-going and negative-going
   peak voltages across the rated load, over at least 60 s of the specified
   pink noise, averaged and divided by $\sqrt{2}$
@@ -434,7 +434,7 @@ loop_center_field(
     length_m: float,
     *,
     width_m: float | None = None,
-    turns: int = 1,
+    n_turns: int = 1,
 ) -> float
 ```
 
@@ -460,7 +460,7 @@ of 1,5 and 3,3 dB at 4.
 | `current_a` | RMS current in each turn, in amperes. |
 | `length_m` | Side of the square, or one side of the rectangle, in metres. |
 | `width_m` | The other side of a rectangle, in metres; `None` for a square. |
-| `turns` | Number of turns. |
+| `n_turns` | Number of turns. |
 
 **Returns:** The field strength at the centre, in A/m.
 
@@ -473,7 +473,7 @@ loop_current(
     *,
     height_m: float = 1.4,
     field_strength_a_per_m: float = 0.4,
-    turns: int = 1,
+    n_turns: int = 1,
 ) -> float
 ```
 
@@ -495,7 +495,7 @@ figure are reproduced: 4,88 A for a 10 m square and 6,41 A for 10 m by
 | `width_m` | Width of the loop, in metres. |
 | `height_m` | Height above the centre of the loop plane, in metres. |
 | `field_strength_a_per_m` | The field strength to reach, in A/m. |
-| `turns` | Number of turns. |
+| `n_turns` | Number of turns. |
 
 **Returns:** The RMS current in each turn, in amperes.
 
@@ -508,7 +508,7 @@ loop_dimensions(
     aspect_ratio: float = 1.0,
     height_m: float = 1.4,
     field_strength_a_per_m: float = 0.4,
-    turns: int = 1,
+    n_turns: int = 1,
 ) -> tuple[float, float]
 ```
 
@@ -530,7 +530,7 @@ specification is read for.
 | `aspect_ratio` | Long side over short side, at least 1 (1 for the square of 5.4.11.1, 3 for its second loop). |
 | `height_m` | Height above the centre of the loop plane, in metres (1,4 m, 5.4.10.2). |
 | `field_strength_a_per_m` | The field strength to reach, in A/m (400 mA/m). |
-| `turns` | Number of turns. |
+| `n_turns` | Number of turns. |
 
 **Returns:** `(short_side_m, long_side_m)`, in metres.
 
@@ -570,7 +570,7 @@ loop_resistance(
     perimeter_m: float,
     conductor_area_mm2: float,
     *,
-    turns: int = 1,
+    n_turns: int = 1,
     conductor_temperature_c: float = 20.0,
 ) -> float
 ```
@@ -591,7 +591,7 @@ $10^{-8}$ ohm metres, and 1/58 is inside that range.
 | :--- | :--- |
 | `perimeter_m` | Length of one turn, in metres. |
 | `conductor_area_mm2` | Cross-sectional area of the conductor, in square millimetres. |
-| `turns` | Number of turns. |
+| `n_turns` | Number of turns. |
 | `conductor_temperature_c` | Temperature of the conductor, in degrees Celsius. |
 
 **Returns:** The DC resistance of the loop, in ohms.
@@ -603,7 +603,7 @@ LoopField(
     current_a: float,
     length_m: float,
     width_m: float,
-    turns: int,
+    n_turns: int,
     x_m: np.ndarray,
     y_m: np.ndarray,
     z_m: np.ndarray,
@@ -630,7 +630,7 @@ same arrays describe it turned on its side.
 | `current_a` | The RMS current in each turn, in amperes. |
 | `length_m` | Length of the loop along $x$, in metres. |
 | `width_m` | Width along $y$, in metres. |
-| `turns` | Number of turns. |
+| `n_turns` | Number of turns. |
 | `x_m` | The points' $x$ coordinates, in metres. |
 | `y_m` | The points' $y$ coordinates, in metres. |
 | `z_m` | The points' $z$ coordinates, in metres. |
@@ -790,16 +790,16 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the impedance curve's `Axes.plot`. |
 
-## maximum_output_current
+## max_output_current
 
 ```python
-maximum_output_current(
+max_output_current(
     resistor_voltage_v: ArrayLike,
     thd_percent: ArrayLike,
     *,
     load_resistance_ohm: float,
     rated_thd_percent: float,
-) -> MaximumOutputCurrent
+) -> MaxOutputCurrent
 ```
 
 The maximum (distortion-limited) output current of an amplifier (5.4.7).
@@ -828,7 +828,7 @@ interpolated linearly between the two steps either side of it.
 | `load_resistance_ohm` | The resistance of the resistive part of the rated load, in ohms. |
 | `rated_thd_percent` | The rated total harmonic distortion (5.4.6), in percent. |
 
-**Returns:** A [`MaximumOutputCurrent`](/phonometry/reference/api/electroacoustics/induction-loop-components/#maximumoutputcurrent).
+**Returns:** A [`MaxOutputCurrent`](/phonometry/reference/api/electroacoustics/induction-loop-components/#maxoutputcurrent).
 
 **Raises**
 
@@ -836,10 +836,10 @@ interpolated linearly between the two steps either side of it.
 | :--- | :--- |
 | ValueError | for a negative distortion, which no measurement gives, or when the distortion never reaches the rated value, or already exceeds it at the first step, so the current lies outside the steps measured. |
 
-## MaximumOutputCurrent
+## MaxOutputCurrent
 
 ```python
-MaximumOutputCurrent(
+MaxOutputCurrent(
     resistor_voltage_v: np.ndarray,
     load_current_a: np.ndarray,
     thd_percent: np.ndarray,
@@ -862,10 +862,10 @@ The maximum (distortion-limited) output current of an amplifier (5.4.7).
 | `rated_thd_percent` | The rated total harmonic distortion of 5.4.6, in percent. |
 | `max_current_a` | The load current at which the distortion first reaches the rated value, interpolated linearly between the two steps either side, in amperes: the characteristic of 5.4.7, stated in amperes (5.4.7.3). |
 
-### MaximumOutputCurrent.plot()
+### MaxOutputCurrent.plot()
 
 ```python
-MaximumOutputCurrent.plot(
+MaxOutputCurrent.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -1189,7 +1189,7 @@ rectangular_loop_field(
     y_m: ArrayLike,
     z_m: ArrayLike,
     *,
-    turns: int = 1,
+    n_turns: int = 1,
 ) -> LoopField
 ```
 
@@ -1214,7 +1214,7 @@ it. Metal in the building, which Annex F describes, is not modelled.
 | `x_m` | $x$ coordinates of the points, in metres, with the loop centred on the origin. |
 | `y_m` | $y$ coordinates, broadcast against `x_m`. |
 | `z_m` | $z$ coordinates (height above the loop plane), broadcast against both. |
-| `turns` | Number of turns, all carrying the same current. |
+| `n_turns` | Number of turns, all carrying the same current. |
 
 **Returns:** A [`LoopField`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loopfield).
 
@@ -1232,7 +1232,7 @@ rectangular_loop_inductance(
     width_m: float,
     conductor_area_mm2: float,
     *,
-    turns: int = 1,
+    n_turns: int = 1,
     internal_inductance: bool = True,
 ) -> float
 ```
@@ -1265,7 +1265,7 @@ at 1 kHz), which is why the term is included by default.
 | `length_m` | One side of the rectangle, in metres. |
 | `width_m` | The other side, in metres. |
 | `conductor_area_mm2` | Cross-sectional area of the round conductor, in square millimetres; the radius is $\sqrt{a/\pi}$. |
-| `turns` | Number of turns. |
+| `n_turns` | Number of turns. |
 | `internal_inductance` | Include the flux inside the wire (the $\mu/4$ term). |
 
 **Returns:** The inductance, in henries.

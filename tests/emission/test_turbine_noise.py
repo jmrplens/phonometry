@@ -224,7 +224,7 @@ def _large_array(**kwargs: object) -> emission.TurbineMicrophoneArray:
     options: dict[str, object] = {
         "microphone_height_m": 1.5,
         "spacing_m": 2.0,
-        "turbine_boxes": 2,
+        "n_turbine_boxes": 2,
     }
     options.update(kwargs)
     return emission.turbine_microphone_positions(surface, **options)  # type: ignore[arg-type]
@@ -380,15 +380,15 @@ def test_positions_refuse_a_height_above_the_lowest_box() -> None:
     surface = emission.turbine_measurement_surface(LARGE_SET)
     with pytest.raises(ValueError, match="microphone_height_m"):
         emission.turbine_microphone_positions(
-            surface, microphone_height_m=3.5, spacing_m=2.0, turbine_boxes=2
+            surface, microphone_height_m=3.5, spacing_m=2.0, n_turbine_boxes=2
         )
 
 
 def test_positions_refuse_a_turbine_that_leaves_no_driven_machine() -> None:
     surface = emission.turbine_measurement_surface(LARGE_SET)
-    with pytest.raises(ValueError, match="turbine_boxes"):
+    with pytest.raises(ValueError, match="n_turbine_boxes"):
         emission.turbine_microphone_positions(
-            surface, microphone_height_m=1.5, spacing_m=2.0, turbine_boxes=4
+            surface, microphone_height_m=1.5, spacing_m=2.0, n_turbine_boxes=4
         )
 
 

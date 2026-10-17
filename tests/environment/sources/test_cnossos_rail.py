@@ -216,7 +216,7 @@ def _case_result(case: dict[str, str]) -> RailwayEmissionResult:
     traction_key = "traction_idling" if idling else "traction_constant"
     speed = float(case["speed_kmh"])
     stock = RollingStock(
-        axles=int(vehicle["axles"]),
+        n_axles=int(vehicle["axles"]),
         wheel_roughness=(
             lam,
             list(wavelength[("wheel_roughness", vehicle["wheel_roughness"])]),
@@ -608,11 +608,11 @@ def test_vehicle_and_track_descriptors_round_trip() -> None:
     """Tables [2.3.a] and [2.3.b]."""
     vehicle = VehicleDescriptor.from_code("a4cn")
     assert vehicle.vehicle_type is VehicleType.FREIGHT
-    assert vehicle.axles == 4
+    assert vehicle.n_axles == 4
     assert vehicle.brake is BrakeType.CAST_IRON
     assert vehicle.measure is WheelMeasure.NONE
     assert vehicle.code == "a4cn"
-    assert VehicleDescriptor.from_code("h16nd").axles == 16
+    assert VehicleDescriptor.from_code("h16nd").n_axles == 16
 
     track = TrackDescriptor.from_code("BMSNNH")
     assert track.base is TrackBase.BALLAST
@@ -646,7 +646,7 @@ def test_descriptor_rejects_bad_codes() -> None:
 
 def _reference_stock(**overrides: object) -> RollingStock:
     fields: dict[str, object] = {
-        "axles": 4,
+        "n_axles": 4,
         "wheel_roughness": wheel_roughness(BrakeType.CAST_IRON),
         "contact_filter": contact_filter(ContactFilter.LOAD_50_DIAMETER_920),
         "wheel_transfer": wheel_transfer(WheelDiameter.MM_920),

@@ -219,7 +219,7 @@ class ConformanceVerification(RichDisplay):
         )
 
     @property
-    def uncertainty_within_maximum(self) -> bool:
+    def uncertainty_within_max(self) -> bool:
         """Criterion (b): the uncertainty does not exceed the maximum permitted."""
         return _at_most(self.uncertainty, self.max_uncertainty)
 
@@ -232,7 +232,7 @@ class ConformanceVerification(RichDisplay):
         measurement that "shall not be used to demonstrate conformance"
         (IEC 60942:2017 5.1.16), which :attr:`outcome` tells apart.
         """
-        return self.deviation_within_limits and self.uncertainty_within_maximum
+        return self.deviation_within_limits and self.uncertainty_within_max
 
     @property
     def outcome(self) -> int:
@@ -241,13 +241,13 @@ class ConformanceVerification(RichDisplay):
         ``1`` conforms; ``2`` the uncertainty exceeds its maximum; ``3`` the
         deviation exceeds its limits; ``4`` both.
         """
-        key = (self.deviation_within_limits, self.uncertainty_within_maximum)
+        key = (self.deviation_within_limits, self.uncertainty_within_max)
         return _OUTCOMES[key][0]
 
     @property
     def reason(self) -> str:
         """Why the measurement does or does not conform, as Table E.1 words it."""
-        key = (self.deviation_within_limits, self.uncertainty_within_maximum)
+        key = (self.deviation_within_limits, self.uncertainty_within_max)
         return _OUTCOMES[key][1]
 
     @property

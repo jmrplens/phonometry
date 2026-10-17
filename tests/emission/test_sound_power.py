@@ -43,14 +43,18 @@ def test_hemisphere_exact_table_b1_position_one() -> None:
 
 def test_hemisphere_two_planes_uses_table_b2() -> None:
     """Two planes -> 5 positions 2,3,6,7,9 from Table B.2 (ISO 3744 8.1.1)."""
-    pos = emission.measurement_positions("hemisphere", radius=1.0, reflecting_planes=2)
+    pos = emission.measurement_positions(
+        "hemisphere", radius=1.0, n_reflecting_planes=2
+    )
     assert pos.shape == (5, 3)
     assert np.allclose(pos[0], [0.50, -0.86, 0.15])  # position 2 of Table B.2
 
 
 def test_hemisphere_three_planes_uses_table_b3() -> None:
     """Three planes -> 3 positions 1,2,3 from Table B.3 (ISO 3744 8.1.1)."""
-    pos = emission.measurement_positions("hemisphere", radius=1.0, reflecting_planes=3)
+    pos = emission.measurement_positions(
+        "hemisphere", radius=1.0, n_reflecting_planes=3
+    )
     assert pos.shape == (3, 3)
     assert np.allclose(pos[0], [0.86, -0.50, 0.15])  # position 1 of Table B.3
 
@@ -59,7 +63,7 @@ def test_survey_three_planes_not_implemented() -> None:
     """Survey 3-plane needs untranscribed extended Table B.2 positions."""
     with pytest.raises(NotImplementedError):
         emission.measurement_positions(
-            "hemisphere", radius=1.0, reflecting_planes=3, grade="survey"
+            "hemisphere", radius=1.0, n_reflecting_planes=3, grade="survey"
         )
 
 

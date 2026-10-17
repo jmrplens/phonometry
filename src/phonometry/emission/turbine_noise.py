@@ -503,7 +503,7 @@ class TurbineMicrophoneArray(OwnsArrays):
         metres.
     :ivar spacing_m: The largest distance allowed between neighbours, in
         metres.
-    :ivar turbine_boxes: How many of the reference boxes enclose the turbine;
+    :ivar n_turbine_boxes: How many of the reference boxes enclose the turbine;
         key positions 2, 3 and 4 stand in the plane that follows them.
     :ivar positions_per_box: Positions on one long side within the length of
         each parallelepiped (the other side mirrors them).
@@ -515,7 +515,7 @@ class TurbineMicrophoneArray(OwnsArrays):
     overhead_mask: np.ndarray
     microphone_height_m: float
     spacing_m: float
-    turbine_boxes: int
+    n_turbine_boxes: int
     positions_per_box: tuple[int, ...]
 
     def __post_init__(self) -> None:
@@ -680,7 +680,7 @@ def _coupling_corner(
         return float(edges[1]) / 2.0, float(widths[0]) / 2.0, float(heights[0])
     if coupling >= parts:
         msg = (
-            f"turbine_microphone_positions: 'turbine_boxes' ({coupling}) must "
+            f"turbine_microphone_positions: 'n_turbine_boxes' ({coupling}) must "
             f"leave at least one of the {parts} boxes for the driven machinery."
         )
         raise ValueError(msg)
@@ -696,7 +696,7 @@ def turbine_microphone_positions(
     *,
     microphone_height_m: float,
     spacing_m: float,
-    turbine_boxes: int = 1,
+    n_turbine_boxes: int = 1,
     include_overhead: bool = True,
 ) -> TurbineMicrophoneArray:
     """Key and additional microphone positions on the measurement surface (7.2).
@@ -736,7 +736,7 @@ def turbine_microphone_positions(
         parallelepiped.
     :param spacing_m: The largest distance between neighbouring positions
         along the path, in metres.
-    :param turbine_boxes: How many reference boxes, from the front, enclose
+    :param n_turbine_boxes: How many reference boxes, from the front, enclose
         the turbine (1 for Figure 2 a, 2 for Figure 2 b, where the HP and IP
         casings share one box and the LP turbine has its own). Ignored for a
         set in a single box.
@@ -747,7 +747,7 @@ def turbine_microphone_positions(
         :attr:`TurbineSoundPowerResult.overhead_effect_db`).
     :return: The positions, their labels and the overhead mask.
     :raises ValueError: for a height outside the sides, a non-positive
-        spacing, or a ``turbine_boxes`` that leaves no driven machinery.
+        spacing, or a ``n_turbine_boxes`` that leaves no driven machinery.
     """
     if not isinstance(surface, TurbineMeasurementSurface):
         msg = "turbine_microphone_positions: 'surface' must be a TurbineMeasurementSurface."
@@ -765,7 +765,7 @@ def turbine_microphone_positions(
     edges = surface.x_edges_m
     widths = np.asarray(surface.widths_m)
     heights = np.asarray(surface.heights_m)
-    coupling = require_count(turbine_boxes, "turbine_boxes")
+    coupling = require_count(n_turbine_boxes, "n_turbine_boxes")
     x_key, y_key, z_key = _coupling_corner(surface, coupling)
 
     def runs(line: np.ndarray, key: np.ndarray) -> tuple[list[np.ndarray], ...]:
@@ -840,7 +840,7 @@ def turbine_microphone_positions(
         overhead_mask=np.asarray(overhead, dtype=bool),
         microphone_height_m=height,
         spacing_m=spacing,
-        turbine_boxes=coupling,
+        n_turbine_boxes=coupling,
         positions_per_box=per_box,
     )
     if not array.every_box_sampled:

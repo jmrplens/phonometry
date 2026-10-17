@@ -126,7 +126,7 @@ impulse_prominence(
     onset_rates: ArrayLike,
     level_differences: ArrayLike,
     *,
-    assessment_period_min: float = 30.0,
+    assessment_period_minutes: float = 30.0,
 ) -> ImpulseProminenceResult
 ```
 
@@ -147,7 +147,7 @@ the adjustment is 0 dB when no event qualifies).
 | :--- | :--- |
 | `onset_rates` | Onset rate of each impulse, in dB/s (> 0). |
 | `level_differences` | Level difference of each impulse, in dB (> 0). |
-| `assessment_period_min` | The assessment time interval the impulses were selected over, in minutes; the standard's default is 30 min (Clause 5), and the value is carried through to the fiche. |
+| `assessment_period_minutes` | The assessment time interval the impulses were selected over, in minutes; the standard's default is 30 min (Clause 5), and the value is carried through to the fiche. |
 
 **Returns:** An [`ImpulseProminenceResult`](/phonometry/reference/api/environment/impulsive-sound/#impulseprominenceresult) with the per-impulse and governing values and `.plot()`.
 
@@ -210,7 +210,7 @@ ImpulseProminenceResult(
     onset_rates: np.ndarray,
     level_differences: np.ndarray,
     *,
-    assessment_period_min: float = 30.0,
+    assessment_period_minutes: float = 30.0,
 )
 ```
 
@@ -227,7 +227,7 @@ an event the standard does not count.
 | :--- | :--- |
 | `onset_rates` | Onset rate of each impulse, in dB/s. |
 | `level_differences` | Level difference of each impulse, in dB. |
-| `assessment_period_min` | The assessment time interval the impulses were selected over, in minutes (Clause 5; 30 min by default). |
+| `assessment_period_minutes` | The assessment time interval the impulses were selected over, in minutes (Clause 5; 30 min by default). |
 
 ### ImpulseProminenceResult.adjustment
 
@@ -293,15 +293,16 @@ ImpulseProminenceResult.report(
 Render an impulsive-sound prominence assessment fiche to a PDF.
 
 Writes a one-page assessment report following NT ACOU 112:2002 (carried
-into ISO/PAS 1996-3:2022): the standard-basis line, an optional metadata
-header (source/situation, client, measurement position, instrumentation
-and date, always followed by this result's `assessment_period_min`), a
-full-width per-impulse table (onset rate, level difference, predicted
-prominence `P` and whether the onset qualifies as an impulse) above the
-adjustment-curve plot `KI(P)` with the candidate impulses marked, the
-boxed governing prominence `P` and the derived `LAeq` adjustment
-`KI` (Formula 2), an optional verdict row and a prominence-category
-note, and a footer with the fixed disclaimer.
+into ISO/PAS 1996-3:2022): the standard-basis line, an optional
+metadata header (source/situation, client, measurement position,
+instrumentation and date, always followed by this result's
+`assessment_period_minutes`), a full-width per-impulse table (onset
+rate, level difference, predicted prominence `P` and whether the
+onset qualifies as an impulse) above the adjustment-curve plot
+`KI(P)` with the candidate impulses marked, the boxed governing
+prominence `P` and the derived `LAeq` adjustment `KI`
+(Formula 2), an optional verdict row and a prominence-category note,
+and a footer with the fixed disclaimer.
 
 **Parameters**
 

@@ -82,7 +82,7 @@ $$
 `g` is the peak of the Fast-weighted response to an exponentially decaying
 burst; for $T = T_0$ the bracket collapses to 1 and the correction
 reduces to the pure volume term $10 \log_{10}(V/V_0)$, as it must. See
-[`standardized_maximum_impact_level`](/phonometry/reference/api/building/heavy-impact/#standardized_maximum_impact_level) and
+[`standardized_max_impact_level`](/phonometry/reference/api/building/heavy-impact/#standardized_max_impact_level) and
 [`fast_reverberation_correction`](/phonometry/reference/api/building/heavy-impact/#fast_reverberation_correction).
 
 **A-weighted rating (ISO 717-2:2020 Annex D, normative).** The single number is
@@ -96,21 +96,21 @@ over the one-third-octave bands 50 Hz to 630 Hz **or** the octave bands 63 Hz to
 500 Hz, with the Table D.3 A-weighting corrections, rounded half-up to an
 integer. One-third-octave measurements are rated in one-third octaves, never by
 first summing them into octaves. See
-[`a_weighted_maximum_impact_level`](/phonometry/reference/api/building/heavy-impact/#a_weighted_maximum_impact_level); [`heavy_impact_octave_levels`](/phonometry/reference/api/building/heavy-impact/#heavy_impact_octave_levels)
+[`a_weighted_max_impact_level`](/phonometry/reference/api/building/heavy-impact/#a_weighted_max_impact_level); [`heavy_impact_octave_levels`](/phonometry/reference/api/building/heavy-impact/#heavy_impact_octave_levels)
 implements the separate octave-band conversion of ISO 16283-2 Formula (20),
 used when the *measurement* is reported in octaves.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## a_weighted_maximum_impact_level
+## a_weighted_max_impact_level
 
 ```python
-a_weighted_maximum_impact_level(
+a_weighted_max_impact_level(
     levels: ArrayLike,
     frequencies: ArrayLike | Sequence[float] | None = None,
     *,
     band: str | None = None,
-) -> AWeightedMaximumImpactResult
+) -> AWeightedMaxImpactResult
 ```
 
 A-weighted maximum impact level `XiA,Fmax` (ISO 717-2:2020, (D.1)).
@@ -130,7 +130,7 @@ corrections of Table D.3. The same formula rates `LiA,Fmax`,
 | `frequencies` | Optional band centre frequencies, in Hz. When given they must be exactly the rating bands of the chosen band width. |
 | `band` | `"third"` or `"octave"`; inferred from the number of values (12 -> third, 4 -> octave) when omitted. |
 
-**Returns:** An [`AWeightedMaximumImpactResult`](/phonometry/reference/api/building/heavy-impact/#aweightedmaximumimpactresult).
+**Returns:** An [`AWeightedMaxImpactResult`](/phonometry/reference/api/building/heavy-impact/#aweightedmaximpactresult).
 
 **Raises**
 
@@ -138,10 +138,10 @@ corrections of Table D.3. The same formula rates `LiA,Fmax`,
 | :--- | :--- |
 | ValueError | for a wrong number of values or mismatched bands. |
 
-## AWeightedMaximumImpactResult
+## AWeightedMaxImpactResult
 
 ```python
-AWeightedMaximumImpactResult(
+AWeightedMaxImpactResult(
     frequencies: np.ndarray,
     band: str,
     levels: np.ndarray,
@@ -166,10 +166,10 @@ A-weighted maximum impact sound pressure level (ISO 717-2 Annex D).
 | `unrounded` | The Formula (D.1) sum before rounding, in dB. |
 | `rating` | The single-number quantity `XiA,Fmax`, rounded half-up to an integer, in dB. |
 
-### AWeightedMaximumImpactResult.plot()
+### AWeightedMaxImpactResult.plot()
 
 ```python
-AWeightedMaximumImpactResult.plot(
+AWeightedMaxImpactResult.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -283,7 +283,7 @@ three and the bands must be in ascending order, three per octave.
 
 Note that ISO 717-2:2020 Annex D forbids using this conversion as a route
 to the single number: a one-third-octave measurement is rated in one-third
-octaves with [`a_weighted_maximum_impact_level`](/phonometry/reference/api/building/heavy-impact/#a_weighted_maximum_impact_level).
+octaves with [`a_weighted_max_impact_level`](/phonometry/reference/api/building/heavy-impact/#a_weighted_max_impact_level).
 
 **Parameters**
 
@@ -527,10 +527,10 @@ supplied record with the trapezoidal rule, so pass one isolated impact.
 | :--- | :--- |
 | ValueError | for a malformed record or a non-positive parameter. |
 
-## standardized_maximum_impact_level
+## standardized_max_impact_level
 
 ```python
-standardized_maximum_impact_level(
+standardized_max_impact_level(
     levels: ArrayLike,
     volume: float,
     reverberation_time: ArrayLike,
@@ -538,7 +538,7 @@ standardized_maximum_impact_level(
     frequencies: ArrayLike | None = None,
     reference_time: float = 0.5,
     reference_volume: float = 50.0,
-) -> StandardizedMaximumImpactResult
+) -> StandardizedMaxImpactResult
 ```
 
 Standardized maximum impact level `L'i,Fmax,V,T` (Formulae (4)-(6)).
@@ -559,7 +559,7 @@ floor excited by the rubber ball. The reverberation term is
 | `reference_time` | Reference reverberation time `T0`, in seconds (Default: 0,5 s). |
 | `reference_volume` | Reference volume `V0`, in m3 (Default: 50 m3 for dwellings). |
 
-**Returns:** A [`StandardizedMaximumImpactResult`](/phonometry/reference/api/building/heavy-impact/#standardizedmaximumimpactresult).
+**Returns:** A [`StandardizedMaxImpactResult`](/phonometry/reference/api/building/heavy-impact/#standardizedmaximpactresult).
 
 **Raises**
 
@@ -567,10 +567,10 @@ floor excited by the rubber ball. The reverberation term is
 | :--- | :--- |
 | ValueError | for mismatched shapes or non-positive inputs. |
 
-## StandardizedMaximumImpactResult
+## StandardizedMaxImpactResult
 
 ```python
-StandardizedMaximumImpactResult(
+StandardizedMaxImpactResult(
     frequencies: np.ndarray | None,
     measured: np.ndarray,
     standardized: np.ndarray,
@@ -595,10 +595,10 @@ Standardized maximum impact sound pressure level (ISO 16283-2 3.16).
 | `volume` | Receiving-room volume `V`, in m3. |
 | `reverberation_time` | Receiving-room reverberation time `T` per band, in seconds. |
 
-### StandardizedMaximumImpactResult.plot()
+### StandardizedMaxImpactResult.plot()
 
 ```python
-StandardizedMaximumImpactResult.plot(
+StandardizedMaxImpactResult.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',

@@ -141,7 +141,7 @@ record = metrology.SoundLevelMeterPeriodicMeasurements(
     high_level_stability_db=0.03,
     high_level_stability_uncertainty_db=0.07,
 )
-meter = metrology.SoundLevelMeterFeatures(level_ranges=2)
+meter = metrology.SoundLevelMeterFeatures(n_level_ranges=2)
 result = metrology.verify_sound_level_meter_periodic(1, record, features=meter)
 print(result.passes)  # False
 print(result.failed)  # (('18', 'F, 0.25 ms'),)
@@ -196,7 +196,7 @@ passed as `features=`, carries what the instruction manual says: `True` for a
 feature the meter has, `False` for one it lacks, `None` (the default) for one
 not declared. A feature declared present owes its tests, one declared absent
 takes its clauses out, and one neither declared nor shown keeps the verdict
-from passing. The level ranges are a number, `level_ranges`, since a record
+from passing. The level ranges are a number, `n_level_ranges`, since a record
 cannot count them either: 1 takes Clause 17 out, and a larger number is how
 many ranges 17.4 covers, the reference one included, and 17.3 besides it. A feature
 declared absent takes with it the one IEC 61672-1 makes depend on it: no
@@ -222,12 +222,12 @@ basic = dataclasses.replace(
 )
 unsaid = metrology.verify_sound_level_meter_periodic(1, basic)
 print([name for name, _ in unsaid.undeclared])
-# ['level_ranges', 'c_weighted_peak']
+# ['n_level_ranges', 'c_weighted_peak']
 declared = metrology.verify_sound_level_meter_periodic(
     1,
     basic,
     features=metrology.SoundLevelMeterFeatures(
-        level_ranges=1, c_weighted_peak=False
+        n_level_ranges=1, c_weighted_peak=False
     ),
 )
 print(declared.undeclared, [clause for clause, _ in declared.not_applicable])
@@ -318,7 +318,7 @@ check = metrology.verify_sound_level_meter_periodic(
     corrections_in_manual=True,
     features=meter,
 )
-print(check.unusable, check.over_maximum_by_correction_data)
+print(check.unusable, check.over_max_by_correction_data)
 # () (('12', '8 kHz'),)
 ```
 

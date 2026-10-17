@@ -598,7 +598,7 @@ REFERENCE_JOINT_DENSITY_PER_M = 0.01
 rolling_sound_power(
     roughness: ArrayLike,
     transfer: ArrayLike,
-    axles: float,
+    n_axles: float,
 ) -> NDArray[np.float64]
 ```
 
@@ -615,7 +615,7 @@ function. All three sit at source A.
 | :--- | :--- |
 | `roughness` | Total effective roughness `L_R,TOT,i`, in dB. |
 | `transfer` | Transfer function `L_H,i`, in dB per axle. |
-| `axles` | Number of axles per vehicle `N_a`. |
+| `n_axles` | Number of axles per vehicle `N_a`. |
 
 **Returns:** The component sound power, in dB.
 
@@ -623,13 +623,13 @@ function. All three sit at source A.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `axles` is not a positive number. |
+| ValueError | If `n_axles` is not a positive number. |
 
 ## RollingStock
 
 ```python
 RollingStock(
-    axles: int,
+    n_axles: int,
     wheel_roughness: tuple[Any, Any],
     contact_filter: tuple[Any, Any],
     wheel_transfer: Any,
@@ -652,7 +652,7 @@ than from the [`cnossos_rail`](/phonometry/reference/api/environment/cnossos-rai
 
 | Name | Description |
 | :--- | :--- |
-| `axles` | Number of axles per vehicle `N_a`. |
+| `n_axles` | Number of axles per vehicle `N_a`. |
 | `wheel_roughness` | `(wavelengths in mm, levels in dB)` of Table G-1a. |
 | `contact_filter` | `(wavelengths in mm, levels in dB)` of Table G-2. |
 | `wheel_transfer` | `L_H,VEH,i` of Table G-3b, 24 values in dB. |
@@ -935,7 +935,7 @@ TRAM_MIN_SPEED_KMH = 30.0
 ```python
 VehicleDescriptor(
     vehicle_type: VehicleType,
-    axles: int,
+    n_axles: int,
     brake: BrakeType,
     measure: WheelMeasure = ...,
 )
@@ -948,7 +948,7 @@ The four-digit vehicle descriptor of Table [2.3.a].
 | Name | Description |
 | :--- | :--- |
 | `vehicle_type` | Digit 1, the [`VehicleType`](/phonometry/reference/api/environment/cnossos-rail/#vehicletype). |
-| `axles` | Digit 2, the number of axles per vehicle. |
+| `n_axles` | Digit 2, the number of axles per vehicle. |
 | `brake` | Digit 3, the [`BrakeType`](/phonometry/reference/api/environment/cnossos-rail/#braketype). |
 | `measure` | Digit 4, the [`WheelMeasure`](/phonometry/reference/api/environment/cnossos-rail/#wheelmeasure). |
 

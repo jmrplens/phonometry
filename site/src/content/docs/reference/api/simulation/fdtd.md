@@ -348,13 +348,13 @@ time stepping happens. Requires matplotlib
 
 ```python
 FDTD2D.run(
-    steps: int,
+    n_steps: int,
     record_every: int | None = None,
     decimate: int = 1,
 ) -> NDArray[np.float64]
 ```
 
-Advance `steps` steps, optionally recording pressure frames.
+Advance `n_steps` steps, optionally recording pressure frames.
 
 With `record_every = k` a snapshot of `p` is stored after every
 `k`-th step (and one of the initial state), spatially subsampled by

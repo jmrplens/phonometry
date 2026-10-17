@@ -136,7 +136,7 @@ ActiveInsertionLossResult(
     standard_uncertainty_db: np.ndarray,
     expanded_uncertainty_db: np.ndarray,
     frequencies: np.ndarray,
-    subjects: int,
+    n_subjects: int,
 )
 ```
 
@@ -153,7 +153,7 @@ The active insertion loss of an ANR earmuff on a panel of subjects.
 | `standard_uncertainty_db` | $u = s/\sqrt{N}$ (A.2), in dB. |
 | `expanded_uncertainty_db` | $U_{95} = 2u$ (A.1), in dB. |
 | `frequencies` | The centre frequencies of the bands, in hertz. |
-| `subjects` | The number of test subjects $N$. |
+| `n_subjects` | The number of test subjects $N$. |
 
 ### ActiveInsertionLossResult.plot()
 

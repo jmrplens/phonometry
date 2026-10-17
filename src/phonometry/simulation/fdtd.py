@@ -391,7 +391,7 @@ class _PressureEngine(Protocol):
 
 def _run_recording(
     engine: _PressureEngine,
-    steps: int,
+    n_steps: int,
     record_every: int | None,
     decimate: int,
 ) -> NDArray[np.float64]:
@@ -401,9 +401,9 @@ def _run_recording(
     for the initial state, then one every ``record_every`` steps), so the
     recording is never held twice, as a list of frames and their stack.
     """
-    steps = _integer("steps", steps)
-    if steps < 0:
-        msg = "steps must be non-negative"
+    n_steps = _integer("n_steps", n_steps)
+    if n_steps < 0:
+        msg = "'n_steps' must be non-negative"
         raise ValueError(msg)
     if record_every is not None:
         record_every = _integer("record_every", record_every)
@@ -415,13 +415,13 @@ def _run_recording(
         msg = "decimate must be >= 1"
         raise ValueError(msg)
     if record_every is None:
-        for _ in range(steps):
+        for _ in range(n_steps):
             engine.step()
         return np.zeros((0, 0, 0), dtype=np.float64)
     first = engine.p[::decimate, ::decimate]
-    frames = np.zeros((steps // record_every + 1, *first.shape), dtype=first.dtype)
+    frames = np.zeros((n_steps // record_every + 1, *first.shape), dtype=first.dtype)
     frames[0] = first
-    for i in range(steps):
+    for i in range(n_steps):
         engine.step()
         if (i + 1) % record_every == 0:
             frames[(i + 1) // record_every] = engine.p[::decimate, ::decimate]
@@ -1222,11 +1222,11 @@ class FDTD2D:
 
     def run(
         self,
-        steps: int,
+        n_steps: int,
         record_every: int | None = None,
         decimate: int = 1,
     ) -> NDArray[np.float64]:
-        """Advance ``steps`` steps, optionally recording pressure frames.
+        """Advance ``n_steps`` steps, optionally recording pressure frames.
 
         With ``record_every = k`` a snapshot of ``p`` is stored after every
         ``k``-th step (and one of the initial state), spatially subsampled by
@@ -1235,7 +1235,7 @@ class FDTD2D:
         ``record_every`` an empty array is returned and only the final state
         is kept (read it from ``self.p``).
         """
-        return _run_recording(self, steps, record_every, decimate)
+        return _run_recording(self, n_steps, record_every, decimate)
 
 
 def _require_grid_axes(

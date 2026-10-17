@@ -107,7 +107,7 @@ the code selects one of them. A vehicle carries four digits and a track six.
 | Vehicle digit | What it selects | Codes | Library |
 | :--- | :--- | :--- | :--- |
 | 1 | Vehicle type | `h` high speed (> 200 km/h), `m` self-propelled passenger coach, `p` hauled passenger coach, `c` city tram or light metro, `d` diesel loco, `e` electric loco, `a` generic freight, `o` other | Chooses the `TractionVehicle` row of Table G-5 and whether the freight superstructure term applies |
-| 2 | Number of axles per vehicle | the actual number | `RollingStock(axles=...)`, the $10\log_{10} N_\mathrm{a}$ of (2.3.8) |
+| 2 | Number of n_axles per vehicle | the actual number | `RollingStock(n_axles=...)`, the $10\log_{10} N_\mathrm{a}$ of (2.3.8) |
 | 3 | Brake type | `c` cast-iron block, `k` composite or sinter metal block, `n` non-tread braked (disc, drum, magnetic) | `BrakeType.CAST_IRON` / `.COMPOSITE` / `.NON_TREAD` → the wheel roughness of G-1a |
 | 4 | Wheel measure | `n` none, `d` dampers, `s` screens, `o` other | Not a table selector in Appendix G |
 
@@ -175,7 +175,7 @@ import matplotlib.pyplot as plt
 from phonometry import environment
 
 stock = environment.RollingStock(
-    axles=4,
+    n_axles=4,
     wheel_roughness=environment.wheel_roughness(environment.BrakeType.NON_TREAD),
     contact_filter=environment.contact_filter(environment.ContactFilter.LOAD_50_DIAMETER_920),
     wheel_transfer=environment.wheel_transfer(environment.WheelDiameter.MM_920),

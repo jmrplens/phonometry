@@ -60,7 +60,7 @@ __all__ = [
     "PhaseDecompositionResult",
     "excess_phase",
     "group_delay",
-    "minimum_phase",
+    "min_phase",
     "phase_decomposition",
 ]
 
@@ -130,7 +130,7 @@ def _trig_oversample(
     return np.asarray(np.fft.rfft(padded).real, dtype=np.float64)
 
 
-def minimum_phase(
+def min_phase(
     response: NDArray[np.complex128] | NDArray[np.float64] | list[float],
     *,
     oversample: int = 8,
@@ -235,7 +235,7 @@ def excess_phase(
     :raises ValueError: If the inputs are invalid.
     """
     resp = _validate_response(response)
-    reconstructed = minimum_phase(resp, oversample=oversample)
+    reconstructed = min_phase(resp, oversample=oversample)
     measured = np.unwrap(np.angle(resp))
     measured = measured - measured[0]  # reference the branch at DC
     return np.asarray(measured - np.unwrap(np.angle(reconstructed)), dtype=np.float64)
@@ -249,14 +249,14 @@ class PhaseDecompositionResult(OwnsArrays):
     :ivar magnitude: :math:`\lvert H(f) \rvert` (shared by the measured
         and minimum-phase responses).
     :ivar phase_rad: Measured phase, unwrapped and referenced to DC, rad.
-    :ivar minimum_phase_rad: Phase reconstructed from :math:`\lvert H \rvert`
+    :ivar min_phase_rad: Phase reconstructed from :math:`\lvert H \rvert`
         alone, rad.
-    :ivar excess_phase_rad: ``phase_rad - minimum_phase_rad``: the all-pass part,
+    :ivar excess_phase_rad: ``phase_rad - min_phase_rad``: the all-pass part,
         rad.
     :ivar group_delay: Group delay of the measured response, s.
     :ivar excess_group_delay: Group delay of the all-pass part alone, s
         (constant :math:`t_0` for a pure latency).
-    :ivar minimum_phase_response: Complex minimum-phase response
+    :ivar min_phase_response: Complex minimum-phase response
         :math:`\lvert H \rvert \exp(j \, \text{minimum\_phase\_rad})`.
     :ivar fs: Sample rate of the underlying record, in Hz.
     """
@@ -264,11 +264,11 @@ class PhaseDecompositionResult(OwnsArrays):
     frequencies: NDArray[np.float64]
     magnitude: NDArray[np.float64]
     phase_rad: NDArray[np.float64]
-    minimum_phase_rad: NDArray[np.float64]
+    min_phase_rad: NDArray[np.float64]
     excess_phase_rad: NDArray[np.float64]
     group_delay: NDArray[np.float64]
     excess_group_delay: NDArray[np.float64]
-    minimum_phase_response: NDArray[np.complex128]
+    min_phase_response: NDArray[np.complex128]
     fs: float
 
     def __post_init__(self) -> None:
@@ -290,7 +290,7 @@ class PhaseDecompositionResult(OwnsArrays):
         about a boolean index and two axis sizes -- the two numbers swap
         round according to which field is at fault, and the message names
         neither the field nor the result it came from.
-        :attr:`minimum_phase_response` has no reader at all: the figure never
+        :attr:`min_phase_response` has no reader at all: the figure never
         opens it, so a complex response of the wrong length raises nothing
         anywhere and travels out whole. It is the one field of the eight a
         caller transforms back to a record, and ``irfft`` of 256 bins is a
@@ -317,22 +317,22 @@ class PhaseDecompositionResult(OwnsArrays):
             frequencies=1,
             magnitude=1,
             phase_rad=1,
-            minimum_phase_rad=1,
+            min_phase_rad=1,
             excess_phase_rad=1,
             group_delay=1,
             excess_group_delay=1,
-            minimum_phase_response=1,
+            min_phase_response=1,
         )
         require_same_length(
             self,
             "frequencies",
             "magnitude",
             "phase_rad",
-            "minimum_phase_rad",
+            "min_phase_rad",
             "excess_phase_rad",
             "group_delay",
             "excess_group_delay",
-            "minimum_phase_response",
+            "min_phase_response",
             axis="frequency bin",
         )
 
@@ -363,7 +363,7 @@ def phase_decomposition(
 ) -> PhaseDecompositionResult:
     """Decompose a response into its minimum-phase and all-pass parts.
 
-    Bundles :func:`minimum_phase`, :func:`excess_phase` and
+    Bundles :func:`min_phase`, :func:`excess_phase` and
     :func:`group_delay` on one frequency axis: the minimum phase carries
     everything an equalizer can invert, the excess phase is the residual
     all-pass (latency plus non-minimum-phase zeros), and the two group
@@ -383,7 +383,7 @@ def phase_decomposition(
     if not np.isfinite(fs_v) or fs_v <= 0.0:
         msg = "'fs' must be a positive, finite number."
         raise ValueError(msg)
-    reconstructed = minimum_phase(resp, oversample=oversample)
+    reconstructed = min_phase(resp, oversample=oversample)
     measured = np.unwrap(np.angle(resp))
     measured = measured - measured[0]
     phase_min = np.unwrap(np.angle(reconstructed))
@@ -395,10 +395,10 @@ def phase_decomposition(
         frequencies=frequencies,
         magnitude=np.abs(resp),
         phase_rad=measured,
-        minimum_phase_rad=phase_min,
+        min_phase_rad=phase_min,
         excess_phase_rad=phase_exc,
         group_delay=tau,
         excess_group_delay=np.asarray(tau - tau_min, dtype=np.float64),
-        minimum_phase_response=reconstructed,
+        min_phase_response=reconstructed,
         fs=fs_v,
     )

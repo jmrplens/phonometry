@@ -1665,7 +1665,7 @@ class ComparisonCalibration(OwnsArrays):
         return _STANDARDS[self.field]
 
     @property
-    def determinations(self) -> int:
+    def n_determinations(self) -> int:
         """The number of determinations averaged."""
         return int(self.output_level_differences_db.shape[0])
 
@@ -2930,9 +2930,9 @@ def _validation_columns(
                 "index of the one compared as 'microphone'."
             )
             raise ValueError(msg)
-        if not 0 <= microphone < validation.microphones:
+        if not 0 <= microphone < validation.n_microphones:
             msg = (
-                f"'microphone' must be one of the {validation.microphones} "
+                f"'microphone' must be one of the {validation.n_microphones} "
                 f"microphones of the reciprocity calibration; got {microphone}."
             )
             raise ValueError(msg)

@@ -774,11 +774,11 @@ class _Comparison:
     coverage_factor: float
 
 
-def _event_shape(arr: np.ndarray, events: int | None) -> tuple[bool, int, int, int]:
+def _event_shape(arr: np.ndarray, n_events: int | None) -> tuple[bool, int, int, int]:
     """Read the two forms of clause 8.4 off the array, and refuse the mixture.
 
     Measured one event at a time the array is ``(positions, N, bands)`` and
-    carries ``N`` itself, so ``events`` would be a second, contradictable
+    carries ``N`` itself, so ``n_events`` would be a second, contradictable
     source for the same number and is refused. Measured once over ``N``
     events the array is ``(positions, bands)``, ``N`` is nowhere in it, and
     Eq. (17) cannot be applied without it.
@@ -787,27 +787,27 @@ def _event_shape(arr: np.ndarray, events: int | None) -> tuple[bool, int, int, i
     """
     one_at_a_time = arr.ndim == 3  # noqa: PLR2004
     if one_at_a_time:
-        if events is not None:
+        if n_events is not None:
             msg = (
-                "'events' is counted from the second axis of a 3D 'event_levels'; "
+                "'n_events' is counted from the second axis of a 3D 'event_levels'; "
                 "pass it only with a 2D (positions, bands) measurement."
             )
             raise ValueError(msg)
         n_positions, n_events, n_bands = arr.shape
         return True, n_positions, n_events, n_bands
     if (
-        events is None
-        or isinstance(events, bool)
-        or not isinstance(events, (int, np.integer))
-        or events < 1
+        n_events is None
+        or isinstance(n_events, bool)
+        or not isinstance(n_events, (int, np.integer))
+        or n_events < 1
     ):
         msg = (
-            "'events' must be a positive integer, the number N of events the "
+            "'n_events' must be a positive integer, the number N of events the "
             "2D 'event_levels' measurement encompasses (ISO 3747:2010, Eq. 17)."
         )
         raise ValueError(msg)
     n_positions, n_bands = arr.shape
-    return False, n_positions, int(events), n_bands
+    return False, n_positions, int(n_events), n_bands
 
 
 def _event_background(
@@ -1059,7 +1059,7 @@ def sound_energy_in_situ(
     lw_ref: ArrayLike | ReferenceSourceCalibration,
     frequencies: ArrayLike,
     *,
-    events: int | None = None,
+    n_events: int | None = None,
     background_levels: ArrayLike | None = None,
     background_levels_ref: ArrayLike | None = None,
     integration_time: float | None = None,
@@ -1077,7 +1077,7 @@ def sound_energy_in_situ(
     bands)``: each event is corrected for background (Eq. 13, 14) and the
     ``N`` corrected levels are energy-averaged into the mean single event
     level of the position (Eq. 15). Measured once over ``N`` successive
-    events, ``event_levels`` is ``(n, bands)`` with ``events=N``: the level
+    events, ``event_levels`` is ``(n, bands)`` with ``n_events=N``: the level
     is corrected (Eq. 16) and reduced by :math:`10 \log_{10} N` to one event
     (Eq. 17). Either way the per-position levels are energy-averaged (Eq. 18)
     and the sound energy level in each band is
@@ -1092,7 +1092,7 @@ def sound_energy_in_situ(
 
     :param event_levels: Measured (uncorrected) octave-band single event
         levels ``L'Ei,q(ST)`` as ``(n, N, bands)``, or ``L'Ei,N(ST)`` of one
-        measurement encompassing ``events`` events as ``(n, bands)``, in
+        measurement encompassing ``n_events`` events as ``(n, bands)``, in
         decibels.
     :param levels_ref: Time-averaged levels of the reference sound source,
         ``(n, bands)`` or ``(m, n, bands)``, as in :func:`sound_power_in_situ`.
@@ -1101,7 +1101,7 @@ def sound_energy_in_situ(
         :class:`~phonometry.emission.ReferenceSourceCalibration`, as for
         :func:`sound_power_in_situ`.
     :param frequencies: Nominal octave mid-band frequencies, one per band.
-    :param events: The number ``N`` of events a 2D ``event_levels`` contains
+    :param n_events: The number ``N`` of events a 2D ``event_levels`` contains
         (Eq. 17); must be ``None`` with the 3D form, which counts them.
     :param background_levels: Octave-band time-averaged background levels
         ``Lpi(B)``, ``(n, bands)`` or ``(bands,)``, in decibels; ``None``
@@ -1125,12 +1125,12 @@ def sound_energy_in_situ(
     :param coverage_factor: ``k`` of Eq. (23), 2 by default.
     :return: :class:`InSituSoundPowerResult` with ``quantity='energy'``.
     :raises ValueError: if ``event_levels`` is not a finite 2D or 3D array,
-        ``events`` is given with the 3D form or missing or not a positive
+        ``n_events`` is given with the 3D form or missing or not a positive
         integer with the 2D form, ``integration_time`` is not positive, or
         any of the refusals of :func:`sound_power_in_situ` applies.
     """
     arr = _finite_grid(event_levels, "event_levels", (2, 3))
-    one_at_a_time, n_positions, n_events, n_bands = _event_shape(arr, events)
+    one_at_a_time, n_positions, n_events, n_bands = _event_shape(arr, n_events)
     _position_advisory(n_positions)
     if n_events < _MIN_EVENTS:
         warnings.warn(

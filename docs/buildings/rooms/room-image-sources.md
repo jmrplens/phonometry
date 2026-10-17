@@ -193,7 +193,7 @@ plt.show()
 | `max_order` | int | -- | >= 0, default 20 | Reflection-order cut-off |
 | `speed_of_sound` | float | m/s | > 0, default 343 | Speed of sound `c` |
 | `air_attenuation_per_m` | float or (n,) | 1/m | >= 0, default 0 | Air power (intensity) attenuation coefficient `m` |
-| `duration` | float, optional | s | > 0 | RIR length (default: last image arrival) |
+| `duration_s` | float, optional | s | > 0 | RIR length (default: last image arrival) |
 | `frequencies` | (n,), optional | Hz | -- | Band centres labelling a per-band result |
 
 Returns an `ImageSourceResult` (`ir`, `fs`, `frequencies`, and the exact

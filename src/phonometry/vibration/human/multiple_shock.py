@@ -388,7 +388,7 @@ def injury_risk(
     daily_compression: float,
     *,
     start_age: float,
-    years: int,
+    exposure_duration_years: int,
     days_per_year: float,
     sex: Literal["male", "female"] = "male",
     mz: float | None = None,
@@ -402,25 +402,25 @@ def injury_risk(
         MPa.
     :param start_age: Age :math:`b` at which the exposure started, in
         years.
-    :param years: Number of exposure years ``n``.
+    :param exposure_duration_years: Number of exposure years ``n``.
     :param days_per_year: Number of exposure days per year ``N``.
     :param sex: ``"male"`` or ``"female"``.
     :param mz: Stress conversion for the static stress
         :math:`S_\text{stat} = m_\mathrm{z} \cdot 9.81`; defaults to the
         sex-specific value.
     :return: The stress variable :math:`R`.
-    :raises ValueError: if ``years`` is not positive or the spine strength
+    :raises ValueError: if ``exposure_duration_years`` is not positive or the spine strength
         is exhausted (:math:`S_\mathrm{u} - S_\text{stat} \le 0`) within the
         exposure period.
     """
     require_choice(sex, "sex", _SEXES)
-    if years <= 0:
-        msg = "years must be a positive integer."
+    if exposure_duration_years <= 0:
+        msg = "'exposure_duration_years' must be a positive integer."
         raise ValueError(msg)
     days_per_year = require_positive(days_per_year, "days_per_year")
     mz = _mz_for_sex(sex) if mz is None else mz
     s_stat = static_stress(mz)
-    ages = start_age + np.arange(years, dtype=np.float64)
+    ages = start_age + np.arange(exposure_duration_years, dtype=np.float64)
     strength = ultimate_strength(ages, sex=sex) - s_stat
     if np.any(strength <= 0.0):
         msg = (
@@ -469,7 +469,7 @@ class MultipleShockResult(OwnsArrays):
     :ivar probability: The probability of lumbar injury :math:`P(R)` in
         0-1.
     :ivar start_age: Age at which the exposure started, in years.
-    :ivar years: Number of exposure years.
+    :ivar exposure_duration_years: Number of exposure years.
     :ivar days_per_year: Number of exposure days per year.
     :ivar peaks: The positive response peaks :math:`A_{\mathrm{z},i}` used for the
         dose, m/s2.
@@ -484,7 +484,7 @@ class MultipleShockResult(OwnsArrays):
     risk: float
     probability: float
     start_age: float
-    years: int
+    exposure_duration_years: int
     days_per_year: float
     peaks: np.ndarray
     risk_thresholds: tuple[float, float, float]
@@ -605,7 +605,7 @@ def multiple_shock_assessment(
     fs: float | None = None,
     *,
     start_age: float,
-    years: int,
+    exposure_duration_years: int,
     days_per_year: float,
     exposure_time: float,
     measurement_time: float,
@@ -620,7 +620,7 @@ def multiple_shock_assessment(
     fs: float | None = None,
     *,
     start_age: float,
-    years: int,
+    exposure_duration_years: int,
     days_per_year: float,
     sex: Literal["male", "female"] = ...,
     mz: float | None = ...,
@@ -632,7 +632,7 @@ def multiple_shock_assessment(
     fs: float | None = None,
     *,
     start_age: float,
-    years: int,
+    exposure_duration_years: int,
     days_per_year: float,
     exposure_time: float | None = None,
     measurement_time: float | None = None,
@@ -663,7 +663,7 @@ def multiple_shock_assessment(
         explicit value that disagrees with it raises instead of silently
         winning.
     :param start_age: Age ``b`` at which the exposure started, in years.
-    :param years: Number of exposure years ``n``.
+    :param exposure_duration_years: Number of exposure years ``n``.
     :param days_per_year: Number of exposure days per year ``N``.
     :param exposure_time: Daily exposure period :math:`t_\mathrm{d}`; when given
         with ``measurement_time`` the dose is scaled to a daily dose
@@ -694,7 +694,7 @@ def multiple_shock_assessment(
     r = injury_risk(
         sd,
         start_age=start_age,
-        years=years,
+        exposure_duration_years=exposure_duration_years,
         days_per_year=days_per_year,
         sex=sex,
         mz=mz,
@@ -708,7 +708,7 @@ def multiple_shock_assessment(
         risk=r,
         probability=prob,
         start_age=start_age,
-        years=years,
+        exposure_duration_years=exposure_duration_years,
         days_per_year=days_per_year,
         peaks=peaks,
         risk_thresholds=_risk_thresholds(sex),

@@ -120,7 +120,7 @@ the two ends, 2 and 4 on the two long sides and 3 overhead, the last three in
 the plane between the turbine and the driven machinery. In Figure 2 a that is
 the plane after the turbine box; in Figure 2 b, between the LP turbine and the
 generator, so the library takes the number of boxes on the turbine side
-(`turbine_boxes`) and puts 2, 3 and 4 at the outer corner of the wider (and
+(`n_turbine_boxes`) and puts 2, 3 and 4 at the outer corner of the wider (and
 taller) of the two parallelepipeds that meet there, as both drawings do.
 
 The **additional positions** start at the key positions and are "arranged at
@@ -147,7 +147,7 @@ preliminary run has shown they change the sound power level by no more than
 
 ```python
 array = emission.turbine_microphone_positions(
-    surface, microphone_height_m=1.5, spacing_m=4.0, turbine_boxes=2)
+    surface, microphone_height_m=1.5, spacing_m=4.0, n_turbine_boxes=2)
 print(array.n_positions, int(array.overhead_mask.sum()))      # 23 7
 print(array.positions_m[array.key_mask])
 # [[ 0.   0.   1.5]     key position 1

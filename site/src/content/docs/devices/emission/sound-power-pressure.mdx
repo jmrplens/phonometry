@@ -199,11 +199,11 @@ levels = base + rng.normal(0.0, 0.5, size=(10, 8))     # (positions, bands)
 background = np.full((10, 8), 55.0)
 
 # ISO 3744 Annex B microphone coordinates on a radius-1.5 m hemisphere.
-mic_xyz = emission.measurement_positions("hemisphere", radius=1.5, reflecting_planes=1)
+mic_xyz = emission.measurement_positions("hemisphere", radius=1.5, n_reflecting_planes=1)
 print(mic_xyz.shape)                                    # (10, 3)
 
 res = emission.sound_power_pressure(
-    levels, "hemisphere", radius=1.5, reflecting_planes=1,
+    levels, "hemisphere", radius=1.5, n_reflecting_planes=1,
     background_levels=background, frequencies=freqs,
     room=emission.RoomEnvironment(reverberation_time=0.6, volume=300.0),  # -> K2
 )
@@ -239,7 +239,7 @@ rng = np.random.default_rng(0)
 levels = base + rng.normal(0.0, 0.5, size=(10, 8))     # (positions, bands)
 background = np.full((10, 8), 55.0)
 res = emission.sound_power_pressure(
-    levels, "hemisphere", radius=1.5, reflecting_planes=1,
+    levels, "hemisphere", radius=1.5, n_reflecting_planes=1,
     background_levels=background, frequencies=freqs,
     room=emission.RoomEnvironment(reverberation_time=0.6, volume=300.0),  # -> K2
 )
@@ -376,7 +376,7 @@ it to $L_W$ exactly as Eq. G.3 adds it to $L_J$.
 | `radius` | float | m | > 0 (hemisphere) | Hemisphere radius $r$ |
 | `dimensions` | (float, float, float) | m | > 0 (box) | Reference-box $(l_1, l_2, l_3)$ |
 | `distance` | float | m | > 0 (box) | Measurement distance $d$ |
-| `reflecting_planes` | int | — | `1` / `2` / `3`, default `1` | Halves/quarters the hemisphere area |
+| `n_reflecting_planes` | int | — | `1` / `2` / `3`, default `1` | Halves/quarters the hemisphere area |
 | `background_levels` | 2D array or spectrum | dB | `(NM, NB)`, or `(NB,)` / `(1, NB)` | Enables $K_1$; a single spectrum broadcasts to every position |
 | `frequencies` | 1D array | Hz | nominal band centres | Enables $L_{W\mathrm{A}}$ (Annex E) |
 | `room` | `RoomEnvironment` or None | — | default `None` (free field) | The room data behind $K_2$; its fields are the three routes to $A$ below |
@@ -392,7 +392,7 @@ Returns a `SoundPowerResult`: `sound_power_level` (per-band $L_W$),
 `directivity_index` (apparent $DI_i^*$ per microphone position **and** frequency
 band, shape `(NM, NB)`; ISO 3744 clause 8.4), `surface_area`,
 `sound_power_level_a` ($L_{W\mathrm{A}}$), `uncertainty` (expanded, 95 %) and `grade`.
-`measurement_positions('hemisphere', radius=…, reflecting_planes=…, tones=…,
+`measurement_positions('hemisphere', radius=…, n_reflecting_planes=…, tones=…,
 grade=…)` returns the normative `(N, 3)` microphone coordinates (Table B.1 for
 tonal sources, B.2 for broadband). Those coordinates plot directly with
 `plot_microphone_positions`, which draws the array on its measurement
@@ -653,7 +653,7 @@ the grade-2 one of section 1: the cost of the grade is mostly time.
 | `coverage_factor` | float | — | default `2.0` | $k$ in $U = k\sqrt{\sigma_{R0}^2 + \sigma_\text{omc}^2}$ |
 
 The last two are the whole uncertainty story, and the default hides it: left
-alone, `sigma_omc = 0` claims a perfectly repeatable installation and the fiche
+alone, `sigma_omc_db = 0` claims a perfectly repeatable installation and the fiche
 prints $U = 1.0$ dB. The 4.1 dB the example below reports is what the same
 determination costs once the clause 10.5 EXAMPLE value $\sigma_\text{omc} = 2.0$
 dB is admitted.
@@ -674,7 +674,7 @@ base = 70.0 + 8.0 * np.exp(-(np.log2(freqs / 1000.0) ** 2) / 2.0)
 rng = np.random.default_rng(7)
 levels = base[None, :] + rng.normal(0.0, 1.0, (40, freqs.size))
 
-# sigma_omc is the operating-and-mounting standard deviation of Clause 10.5;
+# sigma_omc_db is the operating-and-mounting standard deviation of Clause 10.5;
 # with the EXAMPLE value 2.0 dB and the default coverage factor k = 2 the
 # expanded uncertainty U = k*sqrt(sigma_R0^2 + sigma_omc^2) is the 4.1 dB the
 # fiche below prints. Left at its default of 0 it reports 1.0 dB.
@@ -897,7 +897,7 @@ burst = emission.sound_energy_pressure(
     integration_time=10.0, frequencies=bands,
     room=emission.RoomEnvironment(reverberation_time=1.2, volume=900.0),   # -> K2
 )
-print(burst.events)                                        # 5 (Eq. 19 over the first axis)
+print(burst.n_events)                                        # 5 (Eq. 19 over the first axis)
 print(round(float(burst.environmental_correction[0]), 2))  # K2 = 2.64 dB
 print(np.round(burst.sound_energy_level, 1))               # per-band LJ, peaking at 103.5 dB at 1 kHz
 print(round(burst.sound_energy_level_a, 1))                # LJA = 107.7 dB(A)
@@ -955,12 +955,12 @@ $$
 `sound_energy_pressure` takes the three forms `levels_positions` comes in: a
 `(Ne, NM, NB)` array of the events measured one at a time (Eq. 19, as in the
 snippet above), an `(NM, NB)` reading of one measurement encompassing
-`events=Ne` events (Eq. 20), or the `(NM, NB)` mean single event level already
+`n_events=Ne` events (Eq. 20), or the `(NM, NB)` mean single event level already
 formed. Fewer than five events are accepted with a `SoundPowerWarning`, and
 `mean_single_event_level` exposes the same reduction on its own:
 
 ```python
-five_at_once = emission.mean_single_event_level(np.full((10, 1), 97.0), events=5)
+five_at_once = emission.mean_single_event_level(np.full((10, 1), 97.0), n_events=5)
 print(round(float(five_at_once[0, 0]), 2))          # 90.01 dB: 97 - 10 lg 5 (Eq. 20)
 one_by_one = emission.mean_single_event_level(np.array([89.0, 91.0, 90.0, 90.5, 89.5]))
 print(round(float(one_by_one), 2))               # 90.06 dB: the energy mean (Eq. 19)
@@ -1009,11 +1009,11 @@ ten_positions = np.array([70.0, 74.0, 78.0, 80.0, 79.0, 76.0, 72.0, 66.0]) + rng
 quiet = np.full((10, 8), 55.0)
 workshop = emission.RoomEnvironment(reverberation_time=0.6, volume=300.0)
 steady = emission.sound_power_pressure(
-    ten_positions, "hemisphere", radius=1.5, reflecting_planes=1,
+    ten_positions, "hemisphere", radius=1.5, n_reflecting_planes=1,
     background_levels=quiet, frequencies=octaves_hz, room=workshop,
 )
 ten_seconds = emission.sound_energy_pressure(
-    ten_positions + 10.0, "hemisphere", radius=1.5, reflecting_planes=1,
+    ten_positions + 10.0, "hemisphere", radius=1.5, n_reflecting_planes=1,
     background_levels=quiet, integration_time=10.0, frequencies=octaves_hz, room=workshop,
 )
 print(np.round(ten_seconds.sound_energy_level - steady.sound_power_level, 6))   # 10.0 in every band
@@ -1052,9 +1052,9 @@ lj_ref = burst.sound_energy_level + corr.total    # Eq. G.3; Eq. G.1 adds the sa
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `levels_positions` | 2D or 3D array | dB | `(NM, NB)` or `(Ne, NM, NB)` | Single event levels: per-event on the first axis (Eq. 19), one reading of `events` events (Eq. 20), or the mean of one event |
-| `surface`, `radius`, `dimensions`, `distance`, `reflecting_planes` | as in section 1 | | | The same measurement surface and minimum position counts |
-| `events` | int or None | | `>= 1`, default `None` | $N_\mathrm{e}$ encompassed by one reading (Eq. 20); at least 5 without a warning |
+| `levels_positions` | 2D or 3D array | dB | `(NM, NB)` or `(Ne, NM, NB)` | Single event levels: per-event on the first axis (Eq. 19), one reading of `n_events` events (Eq. 20), or the mean of one event |
+| `surface`, `radius`, `dimensions`, `distance`, `n_reflecting_planes` | as in section 1 | | | The same measurement surface and minimum position counts |
+| `n_events` | int or None | | `>= 1`, default `None` | $N_\mathrm{e}$ encompassed by one reading (Eq. 20); at least 5 without a warning |
 | `background_levels` | 2D array or spectrum | dB | `(NM, NB)`, or `(NB,)` / `(1, NB)` | Time-averaged background over the same window; enables $K_1$ (Eq. 21) |
 | `integration_time` | float | s | > 0, required with `background_levels` | The window $T$; the background is compared as its exposure $L_{p(\mathrm{B})} + 10\log_{10}(T/T_0)$ |
 | `frequencies` | 1D array | Hz | nominal band centres | Enables $L_{J\mathrm{A}}$ (Eq. E.2) |
@@ -1067,7 +1067,7 @@ Returns a `SoundEnergyResult`: `sound_energy_level` (per-band $L_J$),
 `mean_event_level` ($\overline{L'_E}$), `background_correction`/
 `environmental_correction`, `directivity_index` (per position and band),
 `surface_area`, `sound_energy_level_a` ($L_{J\mathrm{A}}$), `uncertainty`,
-`grade`, `events` ($N_\mathrm{e}$, or `None` when the means were supplied) and
+`grade`, `n_events` ($N_\mathrm{e}$, or `None` when the means were supplied) and
 `integration_time`. `reference_atmosphere_correction(temperature_c,
 static_pressure_kpa=…, altitude=…)` returns a `ReferenceAtmosphereCorrection`
 with

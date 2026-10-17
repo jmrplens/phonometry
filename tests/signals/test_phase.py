@@ -8,7 +8,7 @@ grid; the exact closed-form group delay of a first-order allpass,
 ``τ_g(ω) = (1-a²)/(1+2a·cosω+a²)`` samples; a pure fractional delay whose
 excess phase is exactly ``-ωD`` and whose excess group delay is the
 constant ``D``; and the invariances (a minimum-phase response has zero
-excess phase; ``minimum_phase`` is idempotent and phase-blind).
+excess phase; ``min_phase`` is idempotent and phase-blind).
 """
 
 from __future__ import annotations
@@ -57,7 +57,7 @@ def _biquad_response(n: int = N_BINS) -> np.ndarray:
 
 
 # ---------------------------------------------------------------------------
-# minimum_phase: cepstral reconstruction
+# min_phase: cepstral reconstruction
 # ---------------------------------------------------------------------------
 
 
@@ -70,14 +70,14 @@ def test_biquad_is_strictly_minimum_phase() -> None:
 def test_minimum_phase_reconstructs_biquad_phase() -> None:
     """On a strictly min-phase response the phase comes back from |H| alone."""
     response = _biquad_response()
-    rec = ph.signals.minimum_phase(response)
+    rec = ph.signals.min_phase(response)
     err = np.abs(np.angle(rec) - np.angle(response))
     assert float(np.max(err)) < MINPHASE_TOL_RAD
 
 
 def test_minimum_phase_preserves_magnitude_exactly() -> None:
     response = _biquad_response()
-    rec = ph.signals.minimum_phase(response)
+    rec = ph.signals.min_phase(response)
     # |mag * exp(j*phi)| only differs from mag by the 1-ulp rounding of
     # the complex modulus.
     np.testing.assert_allclose(np.abs(rec), np.abs(response), rtol=1e-14)
@@ -86,21 +86,21 @@ def test_minimum_phase_preserves_magnitude_exactly() -> None:
 def test_minimum_phase_ignores_input_phase() -> None:
     """Magnitude array and phase-scrambled response give the same output."""
     response = _biquad_response()
-    from_mag = ph.signals.minimum_phase(np.abs(response))
+    from_mag = ph.signals.min_phase(np.abs(response))
     scrambled = response * np.exp(-1j * _digital_grid() * 11.5)
-    from_scrambled = ph.signals.minimum_phase(scrambled)
+    from_scrambled = ph.signals.min_phase(scrambled)
     np.testing.assert_allclose(from_mag, from_scrambled, atol=1e-12)
 
 
 def test_minimum_phase_is_idempotent() -> None:
     response = _biquad_response()
-    once = ph.signals.minimum_phase(response)
-    twice = ph.signals.minimum_phase(once)
+    once = ph.signals.min_phase(response)
+    twice = ph.signals.min_phase(once)
     np.testing.assert_allclose(np.angle(twice), np.angle(once), atol=1e-12)
 
 
 def test_minimum_phase_flat_magnitude_gives_zero_phase() -> None:
-    rec = ph.signals.minimum_phase(np.ones(129))
+    rec = ph.signals.min_phase(np.ones(129))
     np.testing.assert_allclose(np.angle(rec), 0.0, atol=1e-12)
     np.testing.assert_allclose(np.abs(rec), 1.0, atol=1e-12)
 
@@ -118,7 +118,7 @@ def test_minimum_phase_oversample_helps_near_circle_zeros() -> None:
     _, response = sp_signal.freqz(b, a, worN=_digital_grid(513))
     err = []
     for oversample in (1, 8):
-        rec = ph.signals.minimum_phase(response, oversample=oversample)
+        rec = ph.signals.min_phase(response, oversample=oversample)
         err.append(float(np.max(np.abs(np.angle(rec) - np.angle(response)))))
     assert err[0] > 0.02
     assert err[1] < 0.6 * err[0]
@@ -181,14 +181,14 @@ def test_phase_decomposition_bundles_consistently() -> None:
     delayed = _biquad_response() * np.exp(-1j * omega * delay_samples)
     res = ph.signals.phase_decomposition(delayed, FS)
     np.testing.assert_allclose(
-        res.excess_phase_rad, res.phase_rad - res.minimum_phase_rad, atol=0.0
+        res.excess_phase_rad, res.phase_rad - res.min_phase_rad, atol=0.0
     )
     # Each part pinned on its own, so a swap of the two cannot hide behind
     # the identity above: the all-pass part is the pure delay -omega D, and
     # the minimum-phase part is the biquad's own unwrapped phase.
     np.testing.assert_allclose(res.excess_phase_rad, -omega * delay_samples, atol=1e-9)
     np.testing.assert_allclose(
-        res.minimum_phase_rad,
+        res.min_phase_rad,
         np.unwrap(np.angle(_biquad_response())),
         atol=MINPHASE_TOL_RAD,
     )
@@ -202,7 +202,7 @@ def test_phase_decomposition_bundles_consistently() -> None:
     )
     # The reconstructed minimum-phase response carries |H| with phi_min.
     np.testing.assert_allclose(
-        np.angle(res.minimum_phase_response),
+        np.angle(res.min_phase_response),
         np.angle(_biquad_response()),
         atol=MINPHASE_TOL_RAD,
     )
@@ -224,20 +224,20 @@ def test_validation_errors() -> None:
     good = _biquad_response()
     two_dimensional = good.reshape(1, -1)
     with pytest.raises(ValueError, match=r"'response' must be one-dimensional"):
-        ph.signals.minimum_phase(two_dimensional)
+        ph.signals.min_phase(two_dimensional)
     too_short = good[:4]
     with pytest.raises(
         ValueError, match=r"'response' must have at least .* frequency bins"
     ):
-        ph.signals.minimum_phase(too_short)
+        ph.signals.min_phase(too_short)
     not_finite = np.full(64, np.nan + 0j)
     with pytest.raises(ValueError, match=r"'response' must be finite"):
-        ph.signals.minimum_phase(not_finite)
+        ph.signals.min_phase(not_finite)
     all_zero = np.zeros(64)
     with pytest.raises(ValueError, match=r"'response' must not be identically zero"):
-        ph.signals.minimum_phase(all_zero)
+        ph.signals.min_phase(all_zero)
     with pytest.raises(ValueError, match=r"'oversample' must be a positive integer"):
-        ph.signals.minimum_phase(good, oversample=0)
+        ph.signals.min_phase(good, oversample=0)
     with pytest.raises(ValueError, match=r"'fs' must be a positive, finite number"):
         ph.signals.group_delay(good, -1.0)
     with pytest.raises(ValueError, match=r"'fs' must be a positive, finite number"):
@@ -250,7 +250,7 @@ def test_decomposition_parts_must_lie_on_one_grid() -> None:
     The plot masks ``frequencies`` for DC and applies that one mask to seven
     of the eight arrays, so a length disagreement surfaces only as numpy's
     complaint about a boolean index and two axis sizes, naming neither field.
-    Nothing reads ``minimum_phase_response`` at all. And an extra axis counts
+    Nothing reads ``min_phase_response`` at all. And an extra axis counts
     one row per bin, so it passes every length check and reaches the plot as
     a second curve on its panel, doubling that curve's legend entry.
     """
@@ -260,11 +260,11 @@ def test_decomposition_parts_must_lie_on_one_grid() -> None:
         "frequencies",
         "magnitude",
         "phase_rad",
-        "minimum_phase_rad",
+        "min_phase_rad",
         "excess_phase_rad",
         "group_delay",
         "excess_group_delay",
-        "minimum_phase_response",
+        "min_phase_response",
     )
     for field in fields:
         value = np.asarray(getattr(good, field))
@@ -282,7 +282,7 @@ def test_magnitude_zeros_are_floored_not_fatal() -> None:
     """A response with an exact zero still returns finite phase."""
     response = _biquad_response()
     response[response.size // 2] = 0.0
-    rec = ph.signals.minimum_phase(response)
+    rec = ph.signals.min_phase(response)
     assert np.all(np.isfinite(rec))
 
 

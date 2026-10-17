@@ -260,7 +260,7 @@ impone un límite inferior $K_{ij} \ge K_{ij,\min}$ a partir de la geometría de
 la unión (Fórmula 29). Pasa el área del elemento de flanco a
 `flanking_element(..., flanking_area=...)` y la saturación se aplica
 automáticamente trayectoria a trayectoria; o calcula el límite con
-`junction_minimum_vibration_reduction` y pásalo a
+`junction_min_vibration_reduction` y pásalo a
 `flanking_path(..., kij_min=...)`, que eleva un $K_{ij}$ por debajo del límite
 hasta el mínimo.
 
@@ -280,7 +280,7 @@ from phonometry import building
 # (aquí negativo), así que un Kij tabulado realista rara vez se satura; pero
 # los elementos pequeños y ligeros pueden superarlo (p. ej. lf = 4 m,
 # S = 1.5 m² da 7.3 dB, por encima del mínimo de 5 dB de las uniones ligeras).
-print(round(building.junction_minimum_vibration_reduction(coupling_length=4.5,
+print(round(building.junction_min_vibration_reduction(coupling_length=4.5,
                                              s_i=11.5, s_j=11.5), 1))     # -1.1
 ```
 
@@ -627,7 +627,7 @@ vibratoria $K_{ij}$ del Anexo E (uniones rígidas en cruz y en T, capas
 intermedias flexibles, fachadas ligeras y muros de doble hoja, esquinas y
 cambios de espesor) y el límite inferior $K_{ij,\min}$ del apartado 4.4.2
 mediante `building.junction_vibration_reduction` y
-`building.junction_minimum_vibration_reduction`. Impactos: la resta de la Fórmula
+`building.junction_min_vibration_reduction`. Impactos: la resta de la Fórmula
 (21) $L'_\mathrm{n,w} = L_\mathrm{n,w,eq} - \Delta L_\mathrm{w} + K$ mediante
 `building.equivalent_impact_level`, `building.impact_flanking_correction`,
 `building.predicted_impact_insulation` y `building.standardized_impact_level`.

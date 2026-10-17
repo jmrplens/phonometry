@@ -684,14 +684,14 @@ class ModulationPeriod(OwnsArrays):
         )
 
     @property
-    def valid_blocks(self) -> int:
+    def n_valid_blocks(self) -> int:
         """Number of valid blocks, the ``n`` number of 13.6.2.2."""
         return int(np.count_nonzero(np.isfinite(self.modulation_depths_db)))
 
     @property
     def rated(self) -> bool:
         """Whether at least 30 blocks are valid (13.6.2.2)."""
-        return self.valid_blocks >= AM_MIN_VALID_BLOCKS
+        return self.n_valid_blocks >= AM_MIN_VALID_BLOCKS
 
     @property
     def rating_db(self) -> float:

@@ -35,7 +35,7 @@ one step that matters most.
 [Upgrading from 3.3 to 4.0](https://docs.jmrp.io/phonometry/start/upgrading/) is the map: the one rule
 that moves almost every import, a resolver to paste when you would rather not
 look a name up, the four places where the obvious fix is the wrong one, and
-the sixty-seven names that are gone.
+the sixty-nine names that are gone.
 
 **I have a job, not a subject. Which page is it?**
 [What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes the library by
@@ -685,7 +685,7 @@ Source: https://docs.jmrp.io/phonometry/start/upgrading/
 # Upgrading from 3.3 to 4.0
 
 4.0 is a hard break with no compatibility layer. Almost nothing was deleted:
-of the 885 names the root exported in 3.3.0, sixty-seven exist nowhere any more
+of the 885 names the root exported in 3.3.0, sixty-nine exist nowhere any more
 and the rest simply live at a named address instead of a flat one. So most of the
 work is an import sweep, and this page is mostly a map.
 
@@ -709,7 +709,7 @@ print("laeq" in phonometry.__all__)     # False
 from phonometry.signals import laeq     # this is the new spelling
 ```
 
-Measured across the whole surface, 815 of those 885 root names are published
+Measured across the whole surface, 813 of those 885 root names are published
 today by exactly one subpackage, none by two, and none needs a path deeper
 than `phonometry.<subpackage>`. Three more are still at the root, where they
 always were. So the swap is unambiguous: find the subpackage, import from it.
@@ -1013,7 +1013,7 @@ were each the same word for two things:
 | `ground_speed=` on `linear_sound_speed_profile`, `log_linear_sound_speed_profile`, `ray_curvature_radius` and `shadow_zone_distance`, the speed of sound at the ground | `ground_speed_of_sound=` |
 | `RayTraceResult.profile_speeds` | `.profile_speeds_of_sound` |
 | `blade_passing_frequency(rotational_speed=)` | `rotational_speed_rpm=` |
-| `.phase` on `FrequencyResponseResult`, `CrossSpectralDensityResult`, `PhaseDecompositionResult`, `EnvelopeResult` and `MobilityResult`; `.minimum_phase` and `.excess_phase` on `PhaseDecompositionResult`; `CrossSpectralDensityResult.phase_std`, all in radians | `.phase_rad`, `.minimum_phase_rad`, `.excess_phase_rad` and `.phase_standard_deviation_rad` |
+| `.phase` on `FrequencyResponseResult`, `CrossSpectralDensityResult`, `PhaseDecompositionResult`, `EnvelopeResult` and `MobilityResult`; `.minimum_phase` and `.excess_phase` on `PhaseDecompositionResult`; `CrossSpectralDensityResult.phase_std`, all in radians | `.phase_rad`, `.min_phase_rad`, `.excess_phase_rad` and `.phase_standard_deviation_rad` |
 | `residual_index_from_phase_mismatch(phase_mismatch=)` and `IntensityInstrumentComplianceResult.phase_mismatch()`, in degrees | `phase_mismatch_deg=` and `.phase_mismatch_deg()` |
 
 A name is also one spelling inside a package. Where a word was public both bare
@@ -1189,8 +1189,8 @@ prints keeps its print, which is why the CNOSSOS surface below is still
 | `centre=` on `room.filter_bandwidth` and `room.source_directivity_limit` | `center=` |
 | `location="centre"` on the infinite plate and beam point mobilities and impedances of `vibration` | `location="center"` |
 | `.unfavourable_sum` on `WeightedRatingResult`, `ImpactRatingResult` and `AbsorptionRatingResult` | `.unfavorable_sum` |
-| `vibration.storey_fundamental_frequency(storeys)`, `STOREY_FREQUENCY_MIN_STOREYS`, `STOREY_FREQUENCY_NUMERATOR_HZ`, `STOREY_PERIOD_COEFFICIENT_S` | `vibration.story_fundamental_frequency(stories)`, `STORY_FREQUENCY_MIN_STORIES`, `STORY_FREQUENCY_NUMERATOR_HZ`, `STORY_PERIOD_COEFFICIENT_S` |
-| `storeys=` and the model `"storeys"` on `fundamental_period`, `fundamental_frequency` and `estimate_fundamental_frequency` | `stories=` and `"stories"` |
+| `vibration.storey_fundamental_frequency(storeys)`, `STOREY_FREQUENCY_MIN_STOREYS`, `STOREY_FREQUENCY_NUMERATOR_HZ`, `STOREY_PERIOD_COEFFICIENT_S` | `vibration.story_fundamental_frequency(n_stories)`, `STORY_FREQUENCY_MIN_STORIES`, `STORY_FREQUENCY_NUMERATOR_HZ`, `STORY_PERIOD_COEFFICIENT_S` |
+| `storeys=` and the model `"storeys"` on `fundamental_period`, `fundamental_frequency` and `estimate_fundamental_frequency` | `n_stories=` and the model `"stories"` |
 | `draught=` on `underwater.monopole_source_level` | `draft_m=`, which says its unit as well |
 | `procedure="aeroplane"` on `aircraft.effective_perceived_noise_level` | `procedure="airplane"`, still the default |
 | `urbanisation=` on `environment.outdoor_quality_objectives` | `urbanization=` |
@@ -1204,15 +1204,19 @@ A word has one spelling as well. An acronym is written in capitals inside a
 class name, as `EPNLResult` and `STIResult` always were; Ecma, which is the
 name the organisation gives itself and not an acronym, is the exception
 (`EcmaLoudness`). `mic`, `lab` and `std` are spelled out. A count is
-`n_<plural>`. A limit or an extreme is `min_` or `max_`, and `MIN_` or `MAX_`
-in a constant, except where the word is part of the name of a quantity:
-minimum phase, maximum length sequence, the maximum impact level, the takt
-maximum (the clock maximum of DIN 45669-1 and DIN 4150-2,
-`TAKT_MAXIMUM_FACTOR`), and the maximum
-and minimum levels Lmax and Lmin, which are `maximum_level` and
-`minimum_level` also where only the unit says a level (`maximum_level_db`,
-never `max_db`). A function or a class is named in words, `minimum` and
-`maximum` included (`junction_minimum_vibration_reduction`). A function that reads a time
+`n_<plural>`, and a limit on one is `min_n_` or `max_n_` (`min_n_records`,
+`max_n_arrivals`); a duration names its quantity before its unit, never the
+unit alone (`exposure_duration_years`, `duration_s`, `period_hours`), with
+the minute spelled out (`assessment_period_minutes`) because a trailing `_min`
+is a minimum, and a class number, an axis, a number of decimals and a length counted in samples
+are not counts. `minimum`
+and `maximum` are written `min` and `max` in every public name, `MIN` and `MAX`
+in a constant and `Min` and `Max` in a class, as numpy, SciPy, scikit-learn and
+Matplotlib write them, terms of art included: the maximum and minimum levels
+Lmax and Lmin are `max_level` and `min_level` (never a bare `max_db`), the
+takt maximum of DIN 45669-1 and DIN 4150-2 is `TAKT_MAX_FACTOR` and the
+minimum-phase reconstruction is `min_phase`. A confidence bound is
+`confidence_lower` or `confidence_upper`. A function that reads a time
 signal takes it first, as `x`, the name `octave_filter(x, fs)` and the rest
 of the signal functions always used; called by position, nothing changes. The
 3.3.0 top-level names among these are in the table of names that are gone.
@@ -1233,8 +1237,35 @@ of the signal functions always used; called by position, nothing changes. The
 | `harmonics=` on `gear_mesh_frequencies` and `blade_pass_frequencies`, and the `count` of `FaultFrequencyResult.harmonics` | `n_harmonics` |
 | `SawtoothBurstTest.burst_count` | `.n_bursts` |
 | `room.MAXIMUM_DIRECTIVITY_STEP_DEG`, `MINIMUM_BANDWIDTH_TIME_PRODUCT`, `MINIMUM_DETECTOR_MULTIPLE` and `MINIMUM_REFERENCE_DISTANCE_M`, `noise_control.MAXIMUM_PASSAGE_ASPECT`, `MINIMUM_FLOW_RATES` and `MINIMUM_PRESSURE_DIFFERENCE_PA`, `emission.MINIMUM_BACKGROUND_MARGIN_DB` | `MAX_DIRECTIVITY_STEP_DEG`, `MIN_BANDWIDTH_TIME_PRODUCT`, `MIN_DETECTOR_MULTIPLE`, `MIN_REFERENCE_DISTANCE_M`, `MAX_PASSAGE_ASPECT`, `MIN_FLOW_RATES`, `MIN_PRESSURE_DIFFERENCE_PA`, `MIN_BACKGROUND_MARGIN_DB` |
-| `environment.max_infrastructure_limit` | `maximum_infrastructure_limit`: a function is named in words |
 | `OperatingLine.maximum_deviation`, `maximum_open_loop_gain` and `maximum_level_at_microphone` on `FeedbackStabilityResult`, `maximum_reduction_db=` on `end_reflection_loss`, `LoudspeakerCharacteristics.minimum_impedance`, `minimum_load_impedance` on `MicrophoneCharacteristics` and `MicrophoneElectrical`, `DiscretePointIntensityResult.minimum_positions`, `minimum_speed=` on `railway_source_power` | `max_deviation`, `max_open_loop_gain`, `max_level_at_microphone`, `max_reduction_db=`, `min_impedance_ohm`, `min_load_impedance_ohm`, `min_positions`, `min_speed_kmh=` |
+| `building.a_weighted_maximum_impact_level`, `standardized_maximum_impact_level`, `AWeightedMaximumImpactResult` and `StandardizedMaximumImpactResult` | `a_weighted_max_impact_level`, `standardized_max_impact_level`, `AWeightedMaxImpactResult` and `StandardizedMaxImpactResult`: `max` and `min` in every public name, terms of art included |
+| `room.minimum_reliable_reverberation_time` and `minimum_receiver_positions` | `min_reliable_reverberation_time` and `min_receiver_positions` |
+| `PhaseDecompositionResult.minimum_phase_response` | `.min_phase_response` |
+| `maximum_levels=` on `aircraft.event_level` and `noise_contour` | `max_levels=` |
+| `ci_lower` and `ci_upper` on `SpectralDensityResult` and `MultitaperSpectralDensityResult` | `confidence_lower` and `confidence_upper`, as on `MethodBSummary` |
+| `elements=` on `low_frequency_element_normalized_difference`, and `LowFrequencyElementResult.elements` | `n_elements` |
+| `orders=` on `slit_resonance_frequencies`, and the `junctions` of `multi_junction_adjustment` | `n_orders=` and `n_junctions` |
+| `open_microphones=` on `feedback_stability` and `open_microphone_correction`, and `FeedbackStabilityResult.open_microphones` | `n_open_microphones` |
+| `events=` on `sound_energy_pressure`, `mean_single_event_level`, `sound_energy_in_situ`, `sound_energy_reverberation` and `sound_energy_comparison`, and `.events` on `SoundEnergyResult` and `ReverberationSoundEnergyResult` | `n_events` |
+| `reflecting_planes=` on `measurement_positions`, `sound_power_pressure` and `sound_energy_pressure` | `n_reflecting_planes=` |
+| `.positions` on `DiscretePointIntensityResult`, and `.positions`, `.subset_positions` and `.additional_positions` on `PartialPowerConcentration` | `.n_positions`, `.n_subset_positions` and `.n_additional_positions` |
+| `RollingStock.axles`, `VehicleDescriptor.axles` and the `axles` of `rolling_sound_power` | `n_axles` |
+| `sweep_points=` on `verify_weighting_class`, and `WeightingComplianceResult.sweep_points` | `n_sweep_points` |
+| `AssumedProtectionResult.subjects` | `.n_subjects` |
+| `io.AudioFileInfo.channels` and `.frames` | `.n_channels` and `.n_samples`, the samples per channel, as on `Signal` |
+| `quadrature_points=` on `diffuse_field_absorption`, and `sum_terms=` on `helmholtz_resonator_impedance` and `rectangular_duct_properties` | `n_quadrature_points=` and `n_sum_terms=` |
+| `repetitions=` on `predict_diffuser_polar_response`, `predicted_diffusion_spectrum`, `metadiffuser_diffusion_spectrum`, `metadiffuser_polar_response` and `plot_qrd_geometry`, and `DiffuserPolarResponse.repetitions` | `n_repetitions` |
+| `cycles=` and `repetitions=` on `signals.tone_burst`, `ToneBurstResult.cycles` and `.repetitions`, and `cycles=` on `vibration.sawtooth_burst` and `signal_burst_indications` | `n_cycles` and `n_repetitions` |
+| `trials=` on `metrology.monte_carlo`, and `MonteCarloResult.trials` | `n_trials` |
+| the `passages` of `silencer_self_noise`, `valve_style_modifier`, `multihole_incipient_cavitation_ratio` and `uniform_passage_style_modifier`, and the `stages` of `stage_level_correction` | `n_passages` and `n_stages` |
+| the `steps` of `FDTD2D.run` and `ElasticFDTD2D.run`, and `max_arrivals=` on `underwater.eigenrays` | `n_steps` and `max_n_arrivals=` |
+| `sidebands=` on `gear_mesh_frequencies` and `induction_motor_frequencies`, the `poles`, `rotor_bars` and `slot_harmonics` of `induction_motor_frequencies`, and `lobe_orders=` on `blade_pass_frequencies` | `n_sidebands`, `n_poles`, `n_rotor_bars`, `n_slot_harmonics` and `n_lobe_orders` |
+| `years=` on `hearing.nipts` and `htlan` and on `vibration.injury_risk` and `multiple_shock_assessment`, and `.years` on the ISO 1999 results (`NiptsResult` and `HtlanResult` in 3.3.0) and on `MultipleShockResult` | `exposure_duration_years`: a duration names its quantity before its unit |
+| `environment.NoisePhase.hours` and `hours=` on `evaluation_period_level` | `duration_hours` |
+| `seconds=` on `room.sweep_signal`, `inverse_filter` and `shaped_sweep_signal`, on `electroacoustics.synchronized_sweep_signal` and `swept_sine_distortion`, on `signals.noise_signal` and on `speech.stipa_signal`; `duration=` on `room.image_source_rir`, and `SweptSineDistortionResult.duration` | `duration_s`, the spelling the other durations in seconds already had |
+| `hours=` on `environment.lden` and `ldn` | `period_hours=`, which is now keyword-only |
+| `assessment_period_min=` on `environment.impulse_prominence`, and `ImpulseProminenceResult.assessment_period_min` | `assessment_period_minutes`: a trailing `_min` reads as a minimum (`f_min`), so the minute is spelled out, as the hour is |
+| `ReportMetadata.source_positions` and `.receiver_positions` | `.n_source_positions` and `.n_receiver_positions` |
 | `signal_in=` on `loudness_ecma`, `tonality_ecma`, `roughness_ecma`, `fluctuation_strength_ecma` and `fluctuation_strength`; `signal=` on `loudness_moore_glasberg_time`, on the distortion and noise measurements of `electroacoustics` (`thd`, `thd_plus_noise`, `sinad`, `weighted_thd`, `harmonic_analysis`, `harmonic_distortion`, `dynamic_range`, `idle_channel_noise`, `modulation_distortion`, `difference_frequency_distortion`, `total_difference_frequency_distortion`, `dynamic_intermodulation_distortion`), on `impulsive_sound_adjustment` and `sound_pressure_level_history`, on the human-vibration functions (`running_rms`, `mtvv`, `vibration_dose_value`, `motion_sickness_dose_value`, `crest_factor`, `apply_weighting`, `apply_band_limiting`) and on `room.plot_excitation` | `x` |
 | `tone_freq=` on `tone_to_noise_ratio` and `prominence_ratio` | `tone_frequency=`, which, like `resolution_hz=`, is now keyword-only |
 
@@ -1369,7 +1400,7 @@ way in 3.3.0 or 4.0.0rc1 and are not any more:
 | `REFERENCE_VELOCITY`, `REFERENCE_FORCE`, `REFERENCE_SOUND_POWER` and `FREE_VELOCITY_REFERENCE` of `building.measurement.structure_borne_power` (`building.structure_borne_power` in 3.3.0), and `REFERENCE_PRESSURE` of `environment.assessment.impulsive_sound` (`environmental.impulsive_sound` in 3.3.0) | the `.value` of the `metrology.ISO1683_REFERENCE_VALUES` entry each was read from, since the entry is a record and not a number: `["solid"]["velocity"].value` (1 nm/s), `["solid"]["force"].value` (1 µN), `["gas"]["sound_power"].value` (1 pW), `["solid"]["velocity_alternative"].value` (the 50 nm/s of note b of Table 3, the ISO 9611 free-velocity reference) and `["gas"]["sound_pressure"].value` (20 µPa) |
 | `REFERENCE_MOBILITY` and `CHARACTERISTIC_PLATE_MOBILITY` of `building.measurement.structure_borne_power` (`building.structure_borne_power` in 3.3.0), and `REFERENCE_PLATE_MOBILITY` of `building.prediction.installed_structure_borne` (`building.installed_structure_borne` in 3.3.0) | not published. `REFERENCE_MOBILITY` is the 1 m/(N s) reference mobility of EN 15657 clause 5, which the functions apply in its Formulae (15), (17) and (18); the plate mobility is the default of `characteristic_mobility=` and `plate_mobility=` |
 | `SPEED_OF_SOUND`, `AIR_DENSITY`, `REFERENCE_FREQUENCY`, `REFERENCE_LENGTH` and `MAX_RADIATION_FACTOR` of `building.prediction.detailed_model` | not published. The air is `building.EN_12354_AIR`, which carries the 340 m/s and the 1.29 kg/m³ |
-| the coefficients, limits and defaults of `environment.assessment.impulsive_sound` (`environmental.impulse_prominence` and `environmental.impulsive_sound` in 3.3.0): `PROMINENCE_COEFFS`, `ADJUSTMENT_SLOPE`, `ADJUSTMENT_THRESHOLD`, `ONSET_RATE_LIMIT`, `DEFAULT_ASSESSMENT_PERIOD_MIN`, `ONSET_GRADIENT_LIMIT`, `TIME_WEIGHTING_F_TAU`, `MERGE_GAP`, `SAMPLE_INTERVAL_RANGE`, `DEFAULT_SAMPLE_INTERVAL`, `HIGHLY_IMPULSIVE_LIMIT` | not published: each is applied by `impulse_prominence` or `impulsive_sound_adjustment`, and the two defaults are those of `dt=` (20 ms) and `assessment_period_min=` (30 min) |
+| the coefficients, limits and defaults of `environment.assessment.impulsive_sound` (`environmental.impulse_prominence` and `environmental.impulsive_sound` in 3.3.0): `PROMINENCE_COEFFS`, `ADJUSTMENT_SLOPE`, `ADJUSTMENT_THRESHOLD`, `ONSET_RATE_LIMIT`, `DEFAULT_ASSESSMENT_PERIOD_MIN`, `ONSET_GRADIENT_LIMIT`, `TIME_WEIGHTING_F_TAU`, `MERGE_GAP`, `SAMPLE_INTERVAL_RANGE`, `DEFAULT_SAMPLE_INTERVAL`, `HIGHLY_IMPULSIVE_LIMIT` | not published: each is applied by `impulse_prominence` or `impulsive_sound_adjustment`, and the two defaults are those of `dt=` (20 ms) and `assessment_period_minutes=` (30 min) |
 | the Annex C constants of `vibration.human.multiple_shock` (`vibration.multiple_shock_vibration` in 3.3.0): `MZ_MALE`, `MZ_FEMALE`, `DOSE_AMPLITUDE_FACTOR`, `DOSE_EXPONENT`, `GRAVITY`, `ULTIMATE_STRENGTH_INTERCEPT`, `STRENGTH_AGE_SLOPE_MALE`, `STRENGTH_AGE_SLOPE_FEMALE`, `WEIBULL_MALE`, `WEIBULL_FEMALE`, `RISK_THRESHOLDS_MALE`, `RISK_THRESHOLDS_FEMALE` | not published: the functions take `sex=` and apply the pair it names. `compression_dose(..., mz=)` defaults to 0.029, the male value of Formula C.2; pass 0.025 for the female one |
 | `DEFAULT_HEADWIND_KT` and `APPROACH_WEIGHT_FRACTION` of `aircraft.flight_performance` | not published: the 8 kt default of `Aerodrome(headwind_kt=)`, and the 0.9 of the maximum landing weight the approach is flown at |
 | `STANDARD_ATMOSPHERIC_PRESSURE` of `materials.resilient.dynamic_stiffness` (`materials.dynamic_stiffness` in 3.3.0) | not published: the 0.1 MPa default of `static_pressure_pa=` |
@@ -1381,7 +1412,7 @@ way in 3.3.0 or 4.0.0rc1 and are not any more:
 | `AUDIBILITY_THRESHOLD_SONE_HMS` of `psychoacoustics.loudness.ecma` (`psychoacoustics.loudness_ecma` in 3.3.0) | not published, and no function applies it: ECMA-418-2 clause 5.1.9 calls a signal audible when its total basis loudness exceeds 0.01 sone_HMS |
 | `J1_FIRST_ZERO` of `electroacoustics.piston` | gone: nothing read it. It is `scipy.special.jn_zeros(1, 1)[0]` |
 | `critical_bandwidth` of `environment.sources.wind_turbine` (`environmental.wind_turbine_noise` in 3.3.0) | the `critical_bandwidth` of the `WindTurbineTonalityResult`. `environment.critical_bandwidth` is another band, the ISO 1996-2 one |
-| `reference_sound` of `psychoacoustics.quality.sharpness` (`psychoacoustics.sharpness` in 3.3.0) | not published: the library builds the DIN 45692 clause 6 test signal only to fix its own normalization. It is noise band-limited to 920 to 1080 Hz at 60 dB: pass `signals.noise_signal(fs, seconds)` through a 920 to 1080 Hz band-pass and scale it to 0.02 Pa rms, and `psychoacoustics.sharpness_din` gives it 1.00 acum |
+| `reference_sound` of `psychoacoustics.quality.sharpness` (`psychoacoustics.sharpness` in 3.3.0) | not published: the library builds the DIN 45692 clause 6 test signal only to fix its own normalization. It is noise band-limited to 920 to 1080 Hz at 60 dB: pass `signals.noise_signal(fs, duration_s)` through a 920 to 1080 Hz band-pass and scale it to 0.02 Pa rms, and `psychoacoustics.sharpness_din` gives it 1.00 acum |
 | `check_guidance` of `underwater.bioacoustics.weighting` | not published. The functions that take `guidance=` refuse an unknown one, and `underwater.WEIGHTING_GUIDANCE` names the known ones |
 
 The type aliases these modules define (`NCMethod`, `EventMetric` and the rest)
@@ -1767,7 +1798,7 @@ says where each verdict first shipped.
 | `building.PositionSpreadCheck` | `limit_db`, `stage`, `spread_db`, `action`, `next_positions`, `corner_standard_deviation_db` | `levels`, which all of them are read from | after 4.0.0rc1 |
 | `building.HeavyImpactSourceCheck` | `frequencies`, `nominal`, `tolerance_db`, `deviation`, `within_tolerance`, `passes` | `source`, `measured` | 4.0.0rc1 |
 | `noise_control.BandFlatnessCheck` | `limit_db`, `satisfied` | `octave_frequencies`, `spread_db` | after 4.0.0rc1 |
-| `noise_control.SourcePositionCheck` | `required_positions`, `satisfied`, `exceeds_maximum` | `positions_used`, `max_octave_spread_db` | after 4.0.0rc1 |
+| `noise_control.SourcePositionCheck` | `n_required_positions`, `satisfied`, `exceeds_max` | `n_positions_used`, `max_octave_spread_db` | after 4.0.0rc1 |
 | `noise_control.TestEnvironmentApplicability` | `environmental_correction_limit_db`, `background_margin_limit_db`, `required_area_ratio`, `applicable` | `base_standard`, `actual_area_ratio`, `mean_absorption_coefficient` | after 4.0.0rc1 |
 | `environment.ReflectionGridCheck` | `nominal_m`, `deviations_m`, `within` | `check`, `path_differences_m` | after 4.0.0rc1 |
 | `emission.HardWalledRoomCheck` | `limit_db`, `min_volume_m3`, `box_dimension_limit_m`, `min_microphone_distance_m` | the bands, the room and the box | after 4.0.0rc1 |
@@ -1875,10 +1906,10 @@ that is keyword-only.
 | `emission.DiscretePointIntensityResult` | everything but the indicators and the grade: `partial_power`, `sound_power`, `sound_power_level`, `achieved_grade`, both criteria, the A-weighted figures and the rest | gains `normal_intensity`, `segment_areas_m2`, `pressure_residual_index_db`, `band_type` | 4.0.0rc1 |
 | `emission.TurbineTestEnvironmentCheck` | `correction_ok`, `wind_ok`, `windscreen_advised` | `environmental_correction_db`, `ratio`, `wind_speed_m_s` | after 4.0.0rc1 |
 | `environment.ImpulseOnset` | `level_difference`, `prominence`, `qualifies` | `level_start`, `level_end`, `onset_rate` | 3.3.0 |
-| `environment.ImpulseProminenceResult` | `per_impulse`, `qualifies`, `prominence`, `adjustment` | `onset_rates`, `level_differences`, `assessment_period_min` | 3.3.0 |
+| `environment.ImpulseProminenceResult` | `per_impulse`, `qualifies`, `prominence`, `adjustment` | `onset_rates`, `level_differences`, `assessment_period_minutes` | 3.3.0 |
 | `environment.ResidualCorrectionResult` | `reliable` | `margin` | 3.3.0 |
 | `environment.PeriodAssessment` | `reported_level`, `reported_long_term`, `max_phase_level`, `phase_pass`, `daily_pass`, `long_term_pass` | `phases`, the two levels and `limit`; gains `new_activity`, by name only | 4.0.0rc1 |
-| `environment.ModulationPeriod` | `modulation_depths_db`, `fundamental_frequencies_hz`, `valid_blocks`, `rated`, `rating_db`, `mean_modulation_frequency_hz`, `mode_modulation_frequency_hz` | `blocks` | after 4.0.0rc1 |
+| `environment.ModulationPeriod` | `modulation_depths_db`, `fundamental_frequencies_hz`, `n_valid_blocks`, `rated`, `rating_db`, `mean_modulation_frequency_hz`, `mode_modulation_frequency_hz` | `blocks` | after 4.0.0rc1 |
 | `environment.SoundRelevantTurbines` | `relevant`, `total_level_db`, `relevant_level_db` | `predicted_levels_db` | after 4.0.0rc1 |
 | `environment.WindShearProfile` | `typical` | `shear_exponent` | after 4.0.0rc1 |
 | `environment.WindTurbineTonalityResult` | `is_audible` | `tonal_audibility`, `has_identified_tone`, itself read-only (next section) | 3.3.0 |
@@ -2015,7 +2046,7 @@ is read from, has to change, and so does code that reads `band_type` from
 | `metrology.WaveMotionCorrection` | `interpolated` | `frequencies`, `speed_of_sound_ratio` | after 4.0.0rc1 |
 | `noise_control.CabinInsulationResult` | `apparent` (ISO 11957 3.6) | `method` | after 4.0.0rc1 |
 | `environment.WindTurbineTonalityResult` | `has_identified_tone` (IEC 61400-11 9.5.2 to 9.5.4) | `levels`, `frequencies`; gains `candidate_frequency_hz`, by name only | 3.3.0 |
-| `building.LaboratoryJointInsulationResult` | `regime` (ISO 10140-1 J.1) | `r_s_measured_db`, `r_s_max_db`; gains `limit_at_maximum`, by name only | after 4.0.0rc1 |
+| `building.LaboratoryJointInsulationResult` | `regime` (ISO 10140-1 J.1) | `r_s_measured_db`, `r_s_max_db`; gains `limit_at_max`, by name only | after 4.0.0rc1 |
 | `environment.TurbineSoundLevels` | `regimes` (IEC TS 61400-11-2 11.7) | `total_levels_db`, `background_levels` | after 4.0.0rc1 |
 | `underwater.WestonPropagationResult` | `regime` | `range_m`, `boundaries` | 4.0.0rc1 |
 | `signals.SynchronousAverageResult` | `interpolated`, f_s T not a whole number of samples | `fs`, `period_s` | 4.0.0rc1 |
@@ -2084,9 +2115,9 @@ except ValueError as error:
 # True
 ```
 
-## The sixty-seven names that are gone
+## The sixty-nine names that are gone
 
-Everything else moved. These sixty-seven exist in no public module:
+Everything else moved. These sixty-nine exist in no public module:
 
 | Gone | What to write instead |
 | --- | --- |
@@ -2127,7 +2158,8 @@ Everything else moved. These sixty-seven exist in no public module:
 | `HvacSpectrumResult` | `noise_control.HVACSpectrumResult` |
 | `mic_calibration_factor`, `apply_mic_calibration` | `materials.microphone_calibration_factor`, `materials.apply_microphone_calibration` |
 | `lab_airborne_insulation`, `lab_impact_insulation`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `LabInsulationWarning` | `building.laboratory_airborne_insulation`, `building.laboratory_impact_insulation`, `building.LaboratoryAirborneInsulationResult`, `building.LaboratoryImpactInsulationResult`, `building.LaboratoryInsulationWarning` |
-| `junction_min_vibration_reduction`, `max_sampled_area_radius` | `building.junction_minimum_vibration_reduction`, `materials.maximum_sampled_area_radius`: a function is named in words, `minimum` and `maximum` included |
+| `EnclosureResult` | `noise_control.EnclosureInsertionLossResult`, what `enclosure_insertion_loss` returns, beside `EnclosureInsulationResult` |
+| `maximum_repeatability_standard_deviation`, `minimum_cumulative_duration_hours`, `minimum_phase` | `building.max_repeatability_standard_deviation`, `hearing.min_cumulative_duration_hours`, `signals.min_phase`: `max` and `min` in every public name |
 
 ## What did not change
 

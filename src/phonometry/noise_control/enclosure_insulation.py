@@ -269,7 +269,7 @@ def _pair(
 
 @dataclass(frozen=True)
 class EnclosureInsulationResult(OwnsArrays):
-    r"""The insertion loss of an enclosure, band by band.
+    r"""The measured insulation of an enclosure, band by band (ISO 11546).
 
     :ivar frequencies: Nominal band centre frequencies, in hertz, or ``None``
         when the levels were given without them.

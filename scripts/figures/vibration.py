@@ -900,7 +900,7 @@ def generate_multiple_shock(output_dir: str) -> None:
     # The worked example: five 40 m/s2 peaks, 82 kg male -> R = 1.22.
     sd = vibration.compression_dose(vibration.dose_from_peaks([40.0] * 5), mz=_MZ_MALE)
     r_male = vibration.injury_risk(
-        sd, start_age=20, years=20, days_per_year=120, sex="male"
+        sd, start_age=20, exposure_duration_years=20, days_per_year=120, sex="male"
     )
     for level, r_val in zip((10, 50, 90), _RISK_THRESHOLDS_MALE, strict=True):
         ax_r.axhline(level, color="#7f7f7f", linestyle=":", lw=0.8)
@@ -2010,7 +2010,7 @@ def generate_machine_fault_families(output_dir: str) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(13.6, 8.8))
 
     # --- (a) and (b): the same gear pair with two different faults ----------
-    gear = vibration.gear_mesh_frequencies(1500.0, 28, n_harmonics=3, sidebands=2)
+    gear = vibration.gear_mesh_frequencies(1500.0, 28, n_harmonics=3, n_sidebands=2)
     shaft = gear.shaft_rate  # 25 Hz
     gmf = gear["GMF"]  # 700 Hz
     cases = (
@@ -6307,7 +6307,7 @@ def generate_railway_spectra(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.plot(
         positions,
-        passage.band_maximum_levels_db,
+        passage.band_max_levels_db,
         color=COLOR_PRIMARY,
         linewidth=1.8,
         marker="o",

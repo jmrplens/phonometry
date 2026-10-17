@@ -628,7 +628,7 @@ The circle on the reference plane, centred at the point of incidence,
 within which a reflecting object would still fall inside the reflected
 window. It is the ISO 13472-1 construction with the loudspeaker 1,50 m and
 the microphone 0,25 m from the plane, and it reuses
-[`maximum_sampled_area_radius`](/phonometry/reference/api/materials/road-absorption/#maximum_sampled_area_radius).
+[`max_sampled_area_radius`](/phonometry/reference/api/materials/road-absorption/#max_sampled_area_radius).
 NOTE 1 of 5.6.1 gives 1,96 m for the 7,9 ms window at 340 m/s.
 
 **Parameters**

@@ -108,21 +108,21 @@ DEFAULT_STABILITY_MARGIN_DB = 10.0
 CARDIOID_RELATIVE_DIRECTIVITY_DB = -2.0
 
 
-def open_microphone_correction(open_microphones: int) -> float:
+def open_microphone_correction(n_open_microphones: int) -> float:
     r"""Number-of-open-microphones correction (Long Equation (18.23)).
 
     :math:`\Delta L_\text{nom} = 10 \log_{10} N_\mathrm{m}`: doubling the number
     of simultaneously open microphones costs about 3 dB of gain before
     feedback.
 
-    :param open_microphones: Number :math:`N_\mathrm{m}` of microphones open at
+    :param n_open_microphones: Number :math:`N_\mathrm{m}` of microphones open at
         once (>= 1).
     :return: The correction :math:`\Delta L_\text{nom}`, dB.
     """
-    require_scalar(open_microphones, "open_microphones")
-    n = int(open_microphones)
-    if n != open_microphones or n < 1:
-        msg = "'open_microphones' must be an integer of at least 1."
+    require_scalar(n_open_microphones, "n_open_microphones")
+    n = int(n_open_microphones)
+    if n != n_open_microphones or n < 1:
+        msg = "'n_open_microphones' must be an integer of at least 1."
         raise ValueError(msg)
     return 10.0 * math.log10(n)
 
@@ -194,7 +194,7 @@ class FeedbackStabilityResult(RichDisplay):
         dB.
     :ivar level_loudspeaker_at_listener: Input :math:`L_{\mathrm{H}\text{-}\mathrm{L}}`, dB.
     :ivar microphone_directivity: Input :math:`D_\mathrm{M}(\theta)`, dB.
-    :ivar open_microphones: Input :math:`N_\mathrm{m}`.
+    :ivar n_open_microphones: Input :math:`N_\mathrm{m}`.
     """
 
     open_loop_gain: float
@@ -210,7 +210,7 @@ class FeedbackStabilityResult(RichDisplay):
     level_loudspeaker_at_microphone: float
     level_loudspeaker_at_listener: float
     microphone_directivity: float
-    open_microphones: int
+    n_open_microphones: int
 
     @property
     def is_stable(self) -> bool:
@@ -246,7 +246,7 @@ def feedback_stability(
     level_loudspeaker_at_listener: float,
     *,
     microphone_directivity: float = 0.0,
-    open_microphones: int = 1,
+    n_open_microphones: int = 1,
     stability_margin: float = DEFAULT_STABILITY_MARGIN_DB,
 ) -> FeedbackStabilityResult:
     r"""Stability of a reinforcement loop (Long Equations (18.16) to
@@ -269,7 +269,7 @@ def feedback_stability(
     :param microphone_directivity: Directivity index :math:`D_\mathrm{M}(\theta)`
         of the microphone toward the loudspeaker relative to the talker,
         dB.
-    :param open_microphones: Number :math:`N_\mathrm{m}` of microphones open at
+    :param n_open_microphones: Number :math:`N_\mathrm{m}` of microphones open at
         once.
     :param stability_margin: Required margin below oscillation, dB (default
         :data:`DEFAULT_STABILITY_MARGIN_DB`, Long's equalised-system value).
@@ -291,7 +291,7 @@ def feedback_stability(
         level_loudspeaker_at_listener,
         microphone_directivity=microphone_directivity,
     )
-    d_nom = open_microphone_correction(open_microphones)
+    d_nom = open_microphone_correction(n_open_microphones)
     loop = z_s + g_s + d_nom
     l_hm = float(level_loudspeaker_at_microphone)
     l_hl = float(level_loudspeaker_at_listener)
@@ -310,5 +310,5 @@ def feedback_stability(
         level_loudspeaker_at_microphone=l_hm,
         level_loudspeaker_at_listener=l_hl,
         microphone_directivity=d_m,
-        open_microphones=int(open_microphones),
+        n_open_microphones=int(n_open_microphones),
     )

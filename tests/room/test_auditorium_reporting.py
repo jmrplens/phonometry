@@ -218,18 +218,16 @@ class TestMinimumReceiverPositions:
     def test_the_three_printed_rows_reproduce_exactly(
         self, seats: int, positions: float
     ) -> None:
-        assert room.minimum_receiver_positions(seats) == pytest.approx(
-            positions, abs=1e-12
-        )
+        assert room.min_receiver_positions(seats) == pytest.approx(positions, abs=1e-12)
 
     def test_the_rows_are_two_positions_per_doubling(self) -> None:
         # Each printed row doubles the seats and adds two positions, with no
         # residual at any of the three, which is what makes a hall between
         # them answerable at all.
-        assert room.minimum_receiver_positions(1000) - room.minimum_receiver_positions(
+        assert room.min_receiver_positions(1000) - room.min_receiver_positions(
             500
         ) == pytest.approx(2.0, abs=1e-12)
-        assert room.minimum_receiver_positions(500 * np.sqrt(2.0)) == pytest.approx(
+        assert room.min_receiver_positions(500 * np.sqrt(2.0)) == pytest.approx(
             7.0, abs=1e-12
         )
 
@@ -237,17 +235,17 @@ class TestMinimumReceiverPositions:
         # A.4 asks for "a minimum of between 6 and 10", so a 200-seat studio
         # does not get four positions and a 5 000-seat arena does not get
         # thirteen on the strength of three rows.
-        assert room.minimum_receiver_positions(200) == pytest.approx(6.0)
-        assert room.minimum_receiver_positions(5000) == pytest.approx(10.0)
+        assert room.min_receiver_positions(200) == pytest.approx(6.0)
+        assert room.min_receiver_positions(5000) == pytest.approx(10.0)
 
     def test_it_keeps_the_shape_it_is_given(self) -> None:
-        out = room.minimum_receiver_positions([500, 1000, 2000])
+        out = room.min_receiver_positions([500, 1000, 2000])
         assert isinstance(out, np.ndarray)
         assert out == pytest.approx([6.0, 8.0, 10.0])
 
     def test_it_refuses_a_hall_with_no_seats(self) -> None:
         with pytest.raises(ValueError, match="positive, finite number of seats"):
-            room.minimum_receiver_positions(0)
+            room.min_receiver_positions(0)
 
     @pytest.mark.parametrize("seats", [np.nan, np.inf, [500.0, np.nan]])
     def test_it_refuses_a_seat_count_that_is_not_a_number(
@@ -256,7 +254,7 @@ class TestMinimumReceiverPositions:
         # A NaN used to come back as a NaN, and an infinite hall used to be
         # clipped to the ten positions Table A.2 prints for a 2 000-seat one.
         with pytest.raises(ValueError, match="positive, finite number of seats"):
-            room.minimum_receiver_positions(seats)
+            room.min_receiver_positions(seats)
 
 
 class TestSourceDirectivity:

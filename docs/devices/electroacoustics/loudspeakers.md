@@ -438,7 +438,7 @@ audience, while a cardioid may let it rise to 2 dB below.
 | `level_loudspeaker_at_microphone` | float | dB | finite | $L_{\mathrm{H}\text{-}\mathrm{M}}$ |
 | `level_loudspeaker_at_listener` | float | dB | finite | $L_{\mathrm{H}\text{-}\mathrm{L}}$ |
 | `microphone_directivity` | float | dB | default 0 | $D_\mathrm{M}(\theta)$, 0 omni, about −2 cardioid |
-| `open_microphones` | int | — | ≥ 1, default 1 | $N_\mathrm{m}$ |
+| `n_open_microphones` | int | — | ≥ 1, default 1 | $N_\mathrm{m}$ |
 | `stability_margin` | float | dB | ≥ 0, default 10 | Long's equalised-system margin |
 
 Returns a `FeedbackStabilityResult` (`open_loop_gain`, `feedback_loop_gain`,

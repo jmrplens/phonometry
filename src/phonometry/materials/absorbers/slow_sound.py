@@ -215,7 +215,7 @@ def rectangular_duct_properties(
     *,
     side_m: float,
     fluid: Fluid = ABSORBER_AIR,
-    sum_terms: int = _DUCT_TERMS,
+    n_sum_terms: int = _DUCT_TERMS,
 ) -> tuple[Complex, Complex]:
     r"""Effective density and bulk modulus of a square duct of the given side.
 
@@ -248,7 +248,7 @@ def rectangular_duct_properties(
         (:class:`~phonometry.fluids.Fluid`); the
         density ``rho0``, viscosity ``eta``, Prandtl number ``Pr``, ratio of
         specific heats ``gamma`` and static pressure ``P0`` are read from it.
-    :param sum_terms: Transverse modes kept per axis (default 40).
+    :param n_sum_terms: Transverse modes kept per axis (default 40).
     :return: ``(rho, kappa)`` complex arrays shaped like ``frequency``.
     """
     f = require_positive_array(frequency, "frequency")
@@ -258,10 +258,10 @@ def rectangular_duct_properties(
     pr = fluid.prandtl_number
     gamma = fluid.heat_capacity_ratio
     p0 = fluid.static_pressure_pa
-    require_scalar(sum_terms, "sum_terms")
-    n = int(sum_terms)
+    require_scalar(n_sum_terms, "n_sum_terms")
+    n = int(n_sum_terms)
     if n < 1:
-        msg = "'sum_terms' must be at least 1."
+        msg = "'n_sum_terms' must be at least 1."
         raise ValueError(msg)
 
     kappa0 = gamma * p0
@@ -375,14 +375,14 @@ def _square_resonator_ducts(
     *,
     end_correction: bool,
     fluid: Fluid,
-    sum_terms: int,
+    n_sum_terms: int,
 ) -> tuple[Complex, Complex, Complex, Complex, Complex, Complex, float]:
     """Duct parameters of the square resonator (APL Eqs. (A23)-(A26))."""
     rho_n, kap_n = rectangular_duct_properties(
-        f, side_m=wn, fluid=fluid, sum_terms=sum_terms
+        f, side_m=wn, fluid=fluid, n_sum_terms=n_sum_terms
     )
     rho_c, kap_c = rectangular_duct_properties(
-        f, side_m=wc, fluid=fluid, sum_terms=sum_terms
+        f, side_m=wc, fluid=fluid, n_sum_terms=n_sum_terms
     )
     z_n = np.asarray(np.sqrt(kap_n * rho_n) / wn**2, dtype=np.complex128)
     z_c = np.asarray(np.sqrt(kap_c * rho_c) / wc**2, dtype=np.complex128)
@@ -407,7 +407,7 @@ def helmholtz_resonator_impedance(
     end_correction: bool = True,
     geometry: str = "square",
     fluid: Fluid = ABSORBER_AIR,
-    sum_terms: int = _DUCT_TERMS,
+    n_sum_terms: int = _DUCT_TERMS,
 ) -> Complex:
     r"""Acoustic impedance of a Helmholtz resonator with visco-thermal losses.
 
@@ -450,7 +450,7 @@ def helmholtz_resonator_impedance(
         (:class:`~phonometry.fluids.Fluid`); the
         density ``rho0``, viscosity ``eta``, Prandtl number ``Pr``, ratio of
         specific heats ``gamma`` and static pressure ``P0`` are read from it.
-    :param sum_terms: Transverse modes kept per axis in the duct series.
+    :param n_sum_terms: Transverse modes kept per axis in the duct series.
     :return: Complex acoustic impedance ``Z_HR``, in Pa s/m3, shaped like
         ``frequency``.
     """
@@ -482,7 +482,7 @@ def helmholtz_resonator_impedance(
             lattice_step_m=lattice_step_m,
             end_correction=end_correction,
             fluid=fluid,
-            sum_terms=sum_terms,
+            n_sum_terms=n_sum_terms,
         )
     k_n = omega * np.sqrt(rho_n / kap_n)
     k_c = omega * np.sqrt(rho_c / kap_c)

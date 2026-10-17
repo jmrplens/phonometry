@@ -185,9 +185,9 @@ backward integration of 5.3.3.
 ```python
 from phonometry import room
 
-print(round(float(room.minimum_reliable_reverberation_time(88.75)), 4))   # 0.1803  s
-print(round(float(room.minimum_reliable_reverberation_time(2840.0)), 4))  # 0.0056  s
-print(room.minimum_reliable_reverberation_time(710.0, 0.05))              # 0.1  s
+print(round(float(room.min_reliable_reverberation_time(88.75)), 4))   # 0.1803  s
+print(round(float(room.min_reliable_reverberation_time(2840.0)), 4))  # 0.0056  s
+print(room.min_reliable_reverberation_time(710.0, 0.05))              # 0.1  s
 ```
 
 The 125 Hz octave binds hardest, because it is the narrowest: 16 over

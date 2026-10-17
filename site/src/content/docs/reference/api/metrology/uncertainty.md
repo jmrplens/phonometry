@@ -101,7 +101,7 @@ Coverage factor `k` from the t-distribution (GUM clause 6, Annex G).
 monte_carlo(
     model: Callable[..., float],
     quantities: Sequence[Quantity],
-    trials: int = 1000000,
+    n_trials: int = 1000000,
     coverage: float = 0.95,
     seed: int | None = None,
     *,
@@ -111,7 +111,7 @@ monte_carlo(
 
 Propagate uncertainty by the Monte Carlo method (Supplement 1).
 
-Draws `trials` samples of each input from its PDF, evaluates the model and
+Draws `n_trials` samples of each input from its PDF, evaluates the model and
 reports the sample mean, the sample standard deviation and the
 probabilistically symmetric coverage interval (clause 7.7).
 
@@ -128,7 +128,7 @@ probabilistically symmetric one (not the 5.3.4 shortest interval).
 | :--- | :--- |
 | `model` | The measurement function $f(x_1, \ldots, x_N)$ returning `y`; it must accept array arguments (vectorised over the trials). |
 | `quantities` | The input [`Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity) objects, in argument order. |
-| `trials` | Number of Monte Carlo trials `M` (at least 2; the sample standard deviation needs two values). |
+| `n_trials` | Number of Monte Carlo trials `M` (at least 2; the sample standard deviation needs two values). |
 | `coverage` | Coverage probability of the reported interval. |
 | `seed` | Optional seed for the random generator (reproducibility). |
 | `keep_samples` | Retain the raw output sample on the result (one float per trial) so [`MonteCarloResult.plot`](/phonometry/reference/api/metrology/uncertainty/#montecarloresultplot) can draw the output-distribution histogram. |
@@ -149,7 +149,7 @@ MonteCarloResult(
     standard_uncertainty: float,
     interval: tuple[float, float],
     coverage: float,
-    trials: int,
+    n_trials: int,
     samples: np.ndarray | None = None,
 )
 ```
@@ -164,7 +164,7 @@ Result of the Monte Carlo method (Guide 98-3-1, Supplement 1).
 | `standard_uncertainty` | $u(y)$ (the sample standard deviation). |
 | `interval` | Probabilistically symmetric coverage interval `(low, high)` (clause 7.7). |
 | `coverage` | The coverage probability of `interval`. |
-| `trials` | Number of Monte Carlo trials. |
+| `n_trials` | Number of Monte Carlo trials. |
 | `samples` | The raw model-output sample (one value per trial), kept only when [`monte_carlo`](/phonometry/reference/api/metrology/uncertainty/#monte_carlo) is called with `keep_samples=True` (it feeds the output-distribution histogram of `plot`). |
 
 ### MonteCarloResult.plot()

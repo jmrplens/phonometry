@@ -878,7 +878,7 @@ class TestRandomIncidence:
         med = miki(f, 15000.0)
         a64 = diffuse_field_absorption(f, [PorousLayer(0.05, med)]).absorption
         a128 = diffuse_field_absorption(
-            f, [PorousLayer(0.05, med)], quadrature_points=128
+            f, [PorousLayer(0.05, med)], n_quadrature_points=128
         ).absorption
         np.testing.assert_allclose(a64, a128, atol=1e-8)
 
@@ -891,8 +891,10 @@ class TestRandomIncidence:
             ValueError, match=r"'angle_limit_rad' must satisfy 0 < angle_limit <= pi/2"
         ):
             diffuse_field_absorption(f, layers, angle_limit_rad=2.0)
-        with pytest.raises(ValueError, match=r"'quadrature_points' must be at least 2"):
-            diffuse_field_absorption(f, layers, quadrature_points=1)
+        with pytest.raises(
+            ValueError, match=r"'n_quadrature_points' must be at least 2"
+        ):
+            diffuse_field_absorption(f, layers, n_quadrature_points=1)
         negative_real = np.array([-1.0 + 0.5j])
         with pytest.raises(
             ValueError, match=r"'normalized_impedance' must have a positive real part"

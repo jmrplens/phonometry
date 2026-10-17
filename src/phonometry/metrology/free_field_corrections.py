@@ -46,7 +46,7 @@ divided by the divisor its distribution sets, and the effective degrees of
 freedom by Welch-Satterthwaite, which choose the coverage factor for a level of
 confidence of 95 %. :func:`verify_correction_uncertainty` judges the expanded
 uncertainty at each frequency against the maximum permitted by the clause the
-correction belongs to, :func:`maximum_expanded_uncertainty`, and for clauses
+correction belongs to, :func:`max_expanded_uncertainty`, and for clauses
 12 to 14 the range of the corrections over the microphones against the same
 maximum.
 
@@ -136,7 +136,7 @@ __all__ = [
     "correction_uncertainty_budget",
     "electrostatic_actuator_correction",
     "exact_frequencies",
-    "maximum_expanded_uncertainty",
+    "max_expanded_uncertainty",
     "sound_calibrator_correction",
     "verify_correction_uncertainty",
 ]
@@ -982,7 +982,7 @@ class FreeFieldCorrection(OwnsArrays):
         labels = (
             self.microphones
             if self.microphones is not None
-            else tuple(range(self.determinations))
+            else tuple(range(self.n_determinations))
         )
         groups: dict[Hashable, list[int]] = {}
         for row, label in enumerate(labels):
@@ -1013,7 +1013,7 @@ class FreeFieldCorrection(OwnsArrays):
         return np.ptp(self.microphone_corrections_db, axis=0)
 
     @property
-    def determinations(self) -> int:
+    def n_determinations(self) -> int:
         """The number of determinations averaged."""
         return int(self.corrections_db.shape[0])
 
@@ -1799,7 +1799,7 @@ def _maximum_at(frequency: float, clause: int) -> float:
     return _MAXIMUM_UNCERTAINTY_DB[clause][-1][2]
 
 
-def maximum_expanded_uncertainty(
+def max_expanded_uncertainty(
     frequencies: ArrayLike, *, clause: int
 ) -> NDArray[np.float64]:
     r"""The maximum permitted expanded uncertainty of a correction
@@ -1889,7 +1889,7 @@ class CorrectionUncertaintyVerification(OwnsArrays):
         _clause(self.clause)
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
-        maximum_expanded_uncertainty(frequencies, clause=self.clause)
+        max_expanded_uncertainty(frequencies, clause=self.clause)
         if self.correction_range_db is not None and self.clause not in _RANGE_CLAUSES:
             msg = (
                 "CorrectionUncertaintyVerification: the range of the corrections is "
@@ -1922,9 +1922,9 @@ class CorrectionUncertaintyVerification(OwnsArrays):
     @property
     def max_uncertainty_db(self) -> NDArray[np.float64]:
         """The maximum permitted at each frequency by the clause, in dB,
-        :func:`maximum_expanded_uncertainty`.
+        :func:`max_expanded_uncertainty`.
         """
-        return maximum_expanded_uncertainty(self.frequencies, clause=self.clause)
+        return max_expanded_uncertainty(self.frequencies, clause=self.clause)
 
     @property
     def uncertainty_passes(self) -> NDArray[np.bool_]:
@@ -2068,7 +2068,7 @@ def verify_correction_uncertainty(
 
     The actual expanded uncertainty at each frequency, at a level of
     confidence of 95 % with the coverage factor stated (clause 5), has not to
-    exceed :func:`maximum_expanded_uncertainty` of the clause; for a
+    exceed :func:`max_expanded_uncertainty` of the clause; for a
     calibrator, a coupler or an actuator (clauses 12 to 14) the range of the
     corrections over three microphones has not to exceed it either. A
     :class:`FreeFieldCorrection` knows its clause, :attr:`~FreeFieldCorrection.clause`,

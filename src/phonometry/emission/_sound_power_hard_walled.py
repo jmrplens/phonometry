@@ -340,8 +340,8 @@ class HardWalledSoundPowerResult(OwnsArrays):
     table does not reach) and ``sigma_r0_a`` its A-weighted row; with
     ``sigma_omc_db`` the properties give ``sigma_tot`` (Eq. 22) and the expanded
     uncertainty (Eq. 23) for ``coverage_factor``, all ``NaN`` without it.
-    ``microphone_positions`` is :math:`N_\mathrm{M}` (1 for a traverse),
-    ``source_positions`` is :math:`N_\mathrm{S}`, and
+    ``n_microphone_positions`` is :math:`N_\mathrm{M}` (1 for a traverse),
+    ``n_source_positions`` is :math:`N_\mathrm{S}`, and
     ``sound_power_level_a`` / ``sound_energy_level_a`` are the Annex B totals
     of the level that was determined (``NaN`` for the other).
     """
@@ -365,8 +365,8 @@ class HardWalledSoundPowerResult(OwnsArrays):
     sound_power_level_a: float
     sound_energy_level_a: float
     quantity: str
-    microphone_positions: int
-    source_positions: int
+    n_microphone_positions: int
+    n_source_positions: int
 
     def __post_init__(self) -> None:
         """Reject a result whose per-band quantities disagree, or whose tags
@@ -383,10 +383,10 @@ class HardWalledSoundPowerResult(OwnsArrays):
         """
         require_choice(self.quantity, "quantity", ("power", "energy"))
         require_positive(self.coverage_factor, "coverage_factor")
-        if self.microphone_positions < 1 or self.source_positions < 1:
+        if self.n_microphone_positions < 1 or self.n_source_positions < 1:
             msg = (
-                "HardWalledSoundPowerResult: 'microphone_positions' and "
-                "'source_positions' must be at least 1."
+                "HardWalledSoundPowerResult: 'n_microphone_positions' and "
+                "'n_source_positions' must be at least 1."
             )
             raise ValueError(msg)
         bands = (
@@ -773,8 +773,8 @@ def _determine(
         sound_power_level_a=total if is_power else math.nan,
         sound_energy_level_a=math.nan if is_power else total,
         quantity=quantity,
-        microphone_positions=n_positions,
-        source_positions=n_sources,
+        n_microphone_positions=n_positions,
+        n_source_positions=n_sources,
     )
 
 
@@ -881,11 +881,11 @@ def sound_power_hard_walled(
     )
 
 
-def _event_grid(arr: np.ndarray, events: int | None) -> tuple[np.ndarray, bool, int]:
+def _event_grid(arr: np.ndarray, n_events: int | None) -> tuple[np.ndarray, bool, int]:
     r"""The single event levels reduced to one event, as ``(NS, NM, NB)``.
 
-    Measured one event at a time (``events`` ``None``) the events are on the
-    first axis and Eq. (15) averages them; measured once over ``events``
+    Measured one event at a time (``n_events`` ``None``) the events are on the
+    first axis and Eq. (15) averages them; measured once over ``n_events``
     successive events, Eq. (16) subtracts :math:`10 \log_{10} N_\mathrm{e}`.
     The remaining axes read as for :func:`_source_grid`.
 
@@ -893,7 +893,7 @@ def _event_grid(arr: np.ndarray, events: int | None) -> tuple[np.ndarray, bool, 
         events)``.
     :raises ValueError: for a rank that neither form admits.
     """
-    if events is None:
+    if n_events is None:
         if arr.ndim not in (2, 3, 4):
             msg = (
                 "'event_levels' measured one event at a time must be (Ne, bands), "
@@ -907,14 +907,14 @@ def _event_grid(arr: np.ndarray, events: int | None) -> tuple[np.ndarray, bool, 
     else:
         if arr.ndim not in (1, 2, 3):
             msg = (
-                "'event_levels' of one measurement over 'events' events must be "
+                "'event_levels' of one measurement over 'n_events' events must be "
                 "(bands,), (NM, bands) or (NS, NM, bands)."
             )
             raise ValueError(msg)
         one_event = _single_event_mean(
-            arr, events, name="event_levels", stacklevel=5, clause=f"{_STANDARD} 7.6"
+            arr, n_events, name="event_levels", stacklevel=5, clause=f"{_STANDARD} 7.6"
         )
-        count = int(events)
+        count = int(n_events)
     grid, traverse = _source_grid(one_event)
     return grid, traverse, count
 
@@ -925,7 +925,7 @@ def sound_energy_hard_walled(
     lw_ref: ArrayLike | ReferenceSourceCalibration,
     frequencies: ArrayLike,
     *,
-    events: int | None = None,
+    n_events: int | None = None,
     background_levels: ArrayLike | None = None,
     integration_time: float | None = None,
     background_levels_ref: ArrayLike | None = None,
@@ -957,11 +957,11 @@ def sound_energy_hard_walled(
     :math:`L_J = L_W + 10 \log_{10}(T/T_0)`, :math:`T_0` = 1 s (3.4 NOTE 1).
 
     :param event_levels: Measured (uncorrected) octave-band single event
-        levels, in decibels. With ``events`` ``None``: ``(Ne, bands)`` for a
+        levels, in decibels. With ``n_events`` ``None``: ``(Ne, bands)`` for a
         traverse, ``(Ne, NM, bands)`` or ``(Ne, NS, NM, bands)``, one entry
-        per event on the first axis (Eq. 15). With ``events``: ``(bands,)``,
+        per event on the first axis (Eq. 15). With ``n_events``: ``(bands,)``,
         ``(NM, bands)`` or ``(NS, NM, bands)``, one measurement encompassing
-        ``events`` events (Eq. 16).
+        ``n_events`` events (Eq. 16).
     :param levels_ref: Time-averaged levels of the reference sound source,
         ``(NM, bands)`` or ``(bands,)``, as in :func:`sound_power_hard_walled`.
     :param lw_ref: Calibrated sound power level of the reference source,
@@ -969,7 +969,7 @@ def sound_energy_hard_walled(
         test, or its :class:`~phonometry.emission.ReferenceSourceCalibration`,
         as for :func:`sound_power_hard_walled`.
     :param frequencies: Nominal octave mid-band frequencies, one per band.
-    :param events: The number :math:`N_\mathrm{e}` of events one measurement
+    :param n_events: The number :math:`N_\mathrm{e}` of events one measurement
         encompasses (Eq. 16); ``None`` when the events are on the first axis.
         Fewer than five warns (7.6).
     :param background_levels: Time-averaged background levels ``Lpi(B)``,
@@ -990,7 +990,7 @@ def sound_energy_hard_walled(
     :param coverage_factor: ``k`` of Eq. (23), 2 by default.
     :return: :class:`HardWalledSoundPowerResult` with ``quantity='energy'``.
     :raises ValueError: for an ``event_levels`` rank neither form admits, a
-        non-integer or non-positive ``events``, a background without its
+        non-integer or non-positive ``n_events``, a background without its
         ``integration_time``, a non-positive ``integration_time``, or any
         refusal of :func:`sound_power_hard_walled`.
     """
@@ -998,7 +998,7 @@ def sound_energy_hard_walled(
     if arr.size == 0 or not np.all(np.isfinite(arr)):
         msg = "'event_levels' must be a non-empty array of finite levels in decibels."
         raise ValueError(msg)
-    grid, traverse, _ = _event_grid(arr, events)
+    grid, traverse, _ = _event_grid(arr, n_events)
     n_sources, n_positions, n_bands = grid.shape
     _position_advisory(n_positions, traverse=traverse, stacklevel=3)
     per_position = energy_mean(grid, axis=0)  # Eq. (17)
@@ -1115,7 +1115,7 @@ class HardWalledRoomCheck(OwnsArrays):
 
     frequencies: np.ndarray
     level_range_db: np.ndarray
-    orientations: int
+    n_orientations: int
     volume: float
     reference_box_volume_m3: float
     largest_box_dimension_m: float
@@ -1137,8 +1137,8 @@ class HardWalledRoomCheck(OwnsArrays):
                 f"the bands of Table 3 ({_STANDARD})."
             )
             raise ValueError(msg)
-        if self.orientations < 2:  # noqa: PLR2004
-            msg = "HardWalledRoomCheck: 'orientations' must be at least 2."
+        if self.n_orientations < 2:  # noqa: PLR2004
+            msg = "HardWalledRoomCheck: 'n_orientations' must be at least 2."
             raise ValueError(msg)
         require_positive(self.volume, "volume")
         require_positive(self.reference_box_volume_m3, "reference_box_volume_m3")
@@ -1342,7 +1342,7 @@ def check_hard_walled_room(
     return HardWalledRoomCheck(
         frequencies=freqs,
         level_range_db=np.asarray(np.ptp(levels, axis=0), dtype=np.float64),
-        orientations=n_orientations,
+        n_orientations=n_orientations,
         volume=volume,
         reference_box_volume_m3=box_volume,
         largest_box_dimension_m=float(np.max(box)),
@@ -1366,7 +1366,7 @@ class SourceLocationPlan(OwnsArrays):
     locations its table asks for, in the same room. Part 1 sends a band above
     4 dB to a second room as well: ``additional_room_locations`` counts the
     locations there, two in such a band and zero elsewhere, and always zero
-    for Part 2. ``microphone_positions`` is the :math:`N_\mathrm{M}` the
+    for Part 2. ``n_microphone_positions`` is the :math:`N_\mathrm{M}` the
     numbers are read for: the preliminary positions of Part 1, the column of
     Part 2's Table 3.
 
@@ -1384,9 +1384,9 @@ class SourceLocationPlan(OwnsArrays):
     standard_deviation_db: np.ndarray
     source_locations: np.ndarray
     additional_room_locations: np.ndarray
-    microphone_positions: int
+    n_microphone_positions: int
     a_weighted_standard_deviation_db: float = math.nan
-    a_weighted_source_locations: int = 0
+    n_a_weighted_source_locations: int = 0
 
     def __post_init__(self) -> None:
         """Reject a plan whose per-band quantities disagree.
@@ -1432,12 +1432,14 @@ class SourceLocationPlan(OwnsArrays):
         return _sm_class(float(self.a_weighted_standard_deviation_db))
 
     @property
-    def required_source_locations(self) -> int:
+    def n_required_source_locations(self) -> int:
         r"""The largest :math:`N_\mathrm{S}` any band (or the A-weighted row)
         asks for in the test room, which is the number a single determination
         covering them all has to use.
         """
-        return int(max(np.max(self.source_locations), self.a_weighted_source_locations))
+        return int(
+            max(np.max(self.source_locations), self.n_a_weighted_source_locations)
+        )
 
     @property
     def other_room_required(self) -> bool:
@@ -1522,5 +1524,5 @@ def hard_walled_source_locations(
         standard_deviation_db=s_m,
         source_locations=locations,
         additional_room_locations=other,
-        microphone_positions=n_positions,
+        n_microphone_positions=n_positions,
     )

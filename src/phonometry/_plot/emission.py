@@ -648,7 +648,7 @@ def plot_high_frequency_sound_power(
     )
     if result.tonal:
         khz = freqs / 1000.0
-        reported = np.asarray(result.within_10_db_of_maximum, dtype=bool)
+        reported = np.asarray(result.within_10_db_of_max, dtype=bool)
         floor = float(np.min(np.concatenate([levels, mean]))) - 10.0
         colours = [_C_PRIMARY if keep else _C_MUTED for keep in reported]
         ax.vlines(khz, floor, levels, colors=colours, linewidth=2.0)
@@ -1379,7 +1379,7 @@ def plot_source_location_plan(
     if with_a:
         ticks.append("A")
         s_m.append(float(result.a_weighted_standard_deviation_db))
-        counts.append(f"{int(result.a_weighted_source_locations)}")
+        counts.append(f"{int(result.n_a_weighted_source_locations)}")
     positions = _band_axis(ax, ticks, language=language)
     if with_a:
         ax.set_xlabel(_t(_A_BAND_LABEL, language))
@@ -1446,7 +1446,7 @@ def plot_source_location_plan(
             "{standard} source locations, {mics} microphone positions",
             language,
             standard=result.standard,
-            mics=result.microphone_positions,
+            mics=result.n_microphone_positions,
         )
     )
     ax.legend(loc="upper left", fontsize="small")

@@ -258,10 +258,10 @@ $c_2 = c_3 = 1$.
 
 **Returns:** An [`ExposureResult`](/phonometry/reference/api/hearing/occupational-exposure/#exposureresult).
 
-## minimum_cumulative_duration_hours
+## min_cumulative_duration_hours
 
 ```python
-minimum_cumulative_duration_hours(n_workers: int) -> float
+min_cumulative_duration_hours(n_workers: int) -> float
 ```
 
 Minimum cumulative measurement duration (h) for a homogeneous exposure group (Table 1).

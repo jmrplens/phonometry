@@ -161,7 +161,7 @@ def _sine(level_db: float, frequency_hz: float, seconds: float = 2.0) -> np.ndar
 
 def test_meter_reads_a_sine_at_its_level() -> None:
     reading = ea.field_strength_meter(_sine(-6.0, 1000.0), FS)
-    assert reading.maximum_level_db == pytest.approx(-6.0, abs=0.01)
+    assert reading.max_level_db == pytest.approx(-6.0, abs=0.01)
     assert reading.equivalent_db == pytest.approx(-6.0, abs=1e-6)
     assert reading.weighting == "Z"
     assert reading.levels.shape == reading.times.shape
@@ -170,7 +170,7 @@ def test_meter_reads_a_sine_at_its_level() -> None:
 def test_meter_a_weighting_is_transparent_at_1_khz_and_19_db_down_at_100_hz() -> None:
     at_1k = ea.field_strength_meter(_sine(0.0, 1000.0), FS, weighting="A")
     at_100 = ea.field_strength_meter(_sine(0.0, 100.0), FS, weighting="A")
-    assert at_1k.maximum_level_db == pytest.approx(0.0, abs=0.02)
+    assert at_1k.max_level_db == pytest.approx(0.0, abs=0.02)
     assert at_100.equivalent_db == pytest.approx(-19.1, abs=0.1)
 
 
@@ -271,7 +271,7 @@ def test_pink_noise_refuses_a_duration_shorter_than_one_sample() -> None:
 
 
 def test_combi_signal_levels_and_durations() -> None:
-    x = ea.combi_signal(FS, sine_s=1.0, noise_s=4.0, cycles=2, seed=5)
+    x = ea.combi_signal(FS, sine_s=1.0, noise_s=4.0, n_cycles=2, seed=5)
     n_sine = FS
     ramp = round(ref.IEC60118_4_COMBI_RAMP_MS * 1e-3 * FS)
     burst = x[ramp : n_sine - ramp]
@@ -299,7 +299,7 @@ def test_combi_sine_peaks_sit_3_db_below_the_noise_peaks() -> None:
 
 
 def test_combi_transitions_are_near_zero_crossings() -> None:
-    x = ea.combi_signal(FS, cycles=2, seed=4)
+    x = ea.combi_signal(FS, n_cycles=2, seed=4)
     # The burst ramps to zero; the noise starts at the sample nearest its
     # first crossing, which lies within one sample step of zero.
     step = float(np.max(np.abs(np.diff(x[FS:]))))
@@ -1138,7 +1138,7 @@ def test_meter_plot_marks_the_maximum_where_it_occurs() -> None:
     reading = ea.field_strength_meter(_sine(-3.0, 1000.0, seconds=0.5), FS)
     ax = reading.plot()
     marker = ax.lines[-1]
-    assert tuple(marker.get_ydata()) == (reading.maximum_level_db,)
+    assert tuple(marker.get_ydata()) == (reading.max_level_db,)
     peak = int(np.argmax(reading.levels))
     assert tuple(marker.get_xdata()) == (reading.times[peak],)
     plt.close("all")

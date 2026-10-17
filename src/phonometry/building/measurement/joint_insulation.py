@@ -354,12 +354,12 @@ class LaboratoryJointInsulationResult(OwnsArrays):
     :ivar open_band_rating: The single numbers with the indicative bands
         taken as infinitely high, or ``None`` when no band is indicative or
         there is no rating.
-    :ivar limit_at_maximum: Whether the bands within 3 dB of the maximum were
+    :ivar limit_at_max: Whether the bands within 3 dB of the maximum were
         set to :math:`R_\mathrm{s,max}`, as J.1 allows, rather than given the
         1,3 dB correction (Default: ``True``).
 
     How each band was corrected (:attr:`regime`) is read from the measured
-    and the maximum indices and ``limit_at_maximum``, so it is not a field.
+    and the maximum indices and ``limit_at_max``, so it is not a field.
     """
 
     frequencies: np.ndarray
@@ -373,7 +373,7 @@ class LaboratoryJointInsulationResult(OwnsArrays):
     max_rating: WeightedRatingResult | None
     open_band_rating: JointOpenBandRating | None
     _: KW_ONLY
-    limit_at_maximum: bool = True
+    limit_at_max: bool = True
 
     def __post_init__(self) -> None:
         """Reject columns of different lengths, or a correction of another rule.
@@ -400,7 +400,7 @@ class LaboratoryJointInsulationResult(OwnsArrays):
         expected = _correct(
             np.asarray(self.r_s_measured_db, dtype=np.float64),
             np.asarray(self.r_s_max_db, dtype=np.float64),
-            limit_at_maximum=self.limit_at_maximum,
+            limit_at_max=self.limit_at_max,
         )
         if not np.allclose(
             self.r_s_db, expected, rtol=0.0, atol=_FIELD_SLACK_DB, equal_nan=True
@@ -421,12 +421,12 @@ class LaboratoryJointInsulationResult(OwnsArrays):
         when :math:`R_\mathrm{s,max}` is at least 10 dB above, ``"corrected"``
         by Formula (J.2) from 6 dB to 10 dB, ``"limit"`` (the fixed 1,3 dB)
         below 6 dB, and ``"maximum"`` (set to :math:`R_\mathrm{s,max}`) above
-        :math:`R_\mathrm{s,max} - 3` dB when :attr:`limit_at_maximum`.
+        :math:`R_\mathrm{s,max} - 3` dB when :attr:`limit_at_max`.
         """
         return _regimes(
             np.asarray(self.r_s_measured_db),
             np.asarray(self.r_s_max_db),
-            limit_at_maximum=self.limit_at_maximum,
+            limit_at_max=self.limit_at_max,
         )
 
     @property
@@ -581,7 +581,7 @@ def _indicative_bands(measured: np.ndarray, maximum: np.ndarray) -> np.ndarray:
 
 
 def _regimes(
-    measured: np.ndarray, maximum: np.ndarray, *, limit_at_maximum: bool
+    measured: np.ndarray, maximum: np.ndarray, *, limit_at_max: bool
 ) -> tuple[str, ...]:
     """Which rule of J.1 and ISO 10140-2:2021 A.3 corrects each band."""
     regime: list[str] = []
@@ -590,7 +590,7 @@ def _regimes(
             regime.append("uncorrected")
         elif d >= _FORMULA_MARGIN_DB - _SLACK_DB:
             regime.append("corrected")
-        elif limit_at_maximum and d < _MAXIMUM_MARGIN_DB - _SLACK_DB:
+        elif limit_at_max and d < _MAXIMUM_MARGIN_DB - _SLACK_DB:
             regime.append("maximum")
         else:
             regime.append("limit")
@@ -598,11 +598,11 @@ def _regimes(
 
 
 def _correct(
-    measured: np.ndarray, maximum: np.ndarray, *, limit_at_maximum: bool
+    measured: np.ndarray, maximum: np.ndarray, *, limit_at_max: bool
 ) -> np.ndarray:
     """The flanking correction of J.1 and ISO 10140-2:2021 A.3, band by band."""
     corrected = np.empty_like(measured)
-    regimes = _regimes(measured, maximum, limit_at_maximum=limit_at_maximum)
+    regimes = _regimes(measured, maximum, limit_at_max=limit_at_max)
     for k, regime in enumerate(regimes):
         if regime == "uncorrected":
             corrected[k] = measured[k]
@@ -624,7 +624,7 @@ def laboratory_joint_insulation(
     frequencies: ArrayLike,
     *,
     joint_length_m: float | None = None,
-    limit_at_maximum: bool = True,
+    limit_at_max: bool = True,
 ) -> LaboratoryJointInsulationResult:
     r"""Sound reduction index of a joint, corrected for the test arrangement (J.1).
 
@@ -640,7 +640,7 @@ def laboratory_joint_insulation(
     * :math:`d < 6` dB: :math:`R_\mathrm{s} = R_\mathrm{s}' + 1{,}3` dB, the
       correction Formula (J.2) gives at 6 dB, a minimum value
       (ISO 10140-2:2021 A.3);
-    * :math:`d < 3` dB, with ``limit_at_maximum`` (the default): the lower
+    * :math:`d < 3` dB, with ``limit_at_max`` (the default): the lower
       limit set to :math:`R_\mathrm{s} = R_\mathrm{s,max}`, which J.1 allows
       ("may") and presents in brackets as a minimum value.
 
@@ -665,7 +665,7 @@ def laboratory_joint_insulation(
     :param frequencies: Band centre frequencies, in Hz.
     :param joint_length_m: Length of the joint under test, in m, kept for the
         form of Figure J.7; ``None`` leaves that row empty.
-    :param limit_at_maximum: Set the bands within 3 dB of the maximum to
+    :param limit_at_max: Set the bands within 3 dB of the maximum to
         :math:`R_\mathrm{s,max}` (default), or give them the 1,3 dB correction
         like the other bands below 6 dB.
     :return: A :class:`LaboratoryJointInsulationResult`.
@@ -689,7 +689,7 @@ def laboratory_joint_insulation(
         if joint_length_m is None
         else require_positive(joint_length_m, "joint_length_m")
     )
-    r_s = _correct(measured, maximum, limit_at_maximum=limit_at_maximum)
+    r_s = _correct(measured, maximum, limit_at_max=limit_at_max)
 
     core = _match_bands(freqs, _FREQ_THIRD_OCTAVE)
     rating: WeightedRatingResult | None = None
@@ -717,7 +717,7 @@ def laboratory_joint_insulation(
         ctr_100_5000_db=ctr_wide,
         max_rating=max_rating,
         open_band_rating=opened,
-        limit_at_maximum=bool(limit_at_maximum),
+        limit_at_max=bool(limit_at_max),
     )
 
 

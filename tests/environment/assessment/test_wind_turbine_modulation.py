@@ -196,7 +196,7 @@ def test_periods_agree_with_the_ioa_code_and_the_ts(
     period = env.amplitude_modulation_period(
         series, modulation_frequency_range_hz=ref.IOA_PERIOD_RANGE_HZ
     )
-    assert period.valid_blocks == valid
+    assert period.n_valid_blocks == valid
     if rating is None:
         # The AMWG discards the period; the TS keeps it at 0 dB (13.6.3).
         assert not period.rated
@@ -221,7 +221,7 @@ def test_a_rated_period_reports_the_mean_and_mode_fundamental() -> None:
     period = env.amplitude_modulation_period(
         series, modulation_frequency_range_hz=ref.IOA_PERIOD_RANGE_HZ
     )
-    assert period.valid_blocks == valid
+    assert period.n_valid_blocks == valid
     assert period.rating_db == pytest.approx(rating, abs=1e-10)
     assert period.mean_modulation_frequency_hz == pytest.approx(mean, abs=1e-12)
     assert period.mode_modulation_frequency_hz == pytest.approx(mode, abs=1e-12)
@@ -420,7 +420,7 @@ def test_excluded_blocks_do_not_count() -> None:
         modulation_frequency_range_hz=ref.IOA_PERIOD_RANGE_HZ,
         excluded_blocks=excluded,
     )
-    assert period.valid_blocks == case[2] - 10
+    assert period.n_valid_blocks == case[2] - 10
     assert all(
         b.status is env.ModulationBlockStatus.EXCLUDED for b in period.blocks[:10]
     )
@@ -439,7 +439,7 @@ def test_exclusion_flags_may_be_zero_and_one() -> None:
         modulation_frequency_range_hz=ref.IOA_PERIOD_RANGE_HZ,
         excluded_blocks=flags,
     )
-    assert as_integers.valid_blocks == case[2] - 10
+    assert as_integers.n_valid_blocks == case[2] - 10
     ratings, speeds, _ = _ratings()
     by_integers = env.bin_amplitude_modulation(
         ratings, speeds, excluded=[0, 1, 0, 0, 0]

@@ -279,7 +279,7 @@ twice the floor of Formula 2, and the farthest response 10 dB below the
 direct one.
 
 **6.2.2.** When given, the curve radius must be at least
-[`minimum_curve_radius`](/phonometry/reference/api/environment/rolling-stock-noise/#minimum_curve_radius) of the speed, and the gradient at most 5:1 000
+[`min_curve_radius`](/phonometry/reference/api/environment/rolling-stock-noise/#min_curve_radius) of the speed, and the gradient at most 5:1 000
 (the gradient applies where powered units are tested).
 
 **Parameters**
@@ -393,10 +393,10 @@ derivative to mean something; [`pass_by_measurement`](/phonometry/reference/api/
 | :--- | :--- |
 | ValueError | For arrays of different lengths, fewer than two samples, or times that do not increase. |
 
-## minimum_curve_radius
+## min_curve_radius
 
 ```python
-minimum_curve_radius(speed_kmh: float) -> float
+min_curve_radius(speed_kmh: float) -> float
 ```
 
 The smallest radius of curvature the test track may have, 6.2.2.
@@ -556,7 +556,7 @@ PassByMeasurement(
     start_s: float,
     end_s: float,
     equivalent_level_db: float,
-    maximum_level_db: float,
+    max_level_db: float,
     front_level_db: float,
     rear_level_db: float,
     record_start_level_db: float,
@@ -576,7 +576,7 @@ The levels of one pass-by record, 6.5 and 6.6.3.
 | `start_s` | $T_1$, the start of the measurement time interval. |
 | `end_s` | $T_2$, its end, in seconds. |
 | `equivalent_level_db` | $L_{p\mathrm{Aeq},T}$ over $T_1$ to $T_2$, in dB; the pass-by level $L_{p\mathrm{Aeq},T_p}$ when the interval is the pass-by time. |
-| `maximum_level_db` | $L_{p\mathrm{AFmax}}$ within the interval, in dB. |
+| `max_level_db` | $L_{p\mathrm{AFmax}}$ within the interval, in dB. |
 | `front_level_db` | $L_{p\mathrm{AF}}$ when the front of the train is opposite the microphone, in dB. |
 | `rear_level_db` | $L_{p\mathrm{AF}}$ when its rear is, in dB. |
 | `record_start_level_db` | $L_{p\mathrm{AF}}$ at the start of the record, in dB. |

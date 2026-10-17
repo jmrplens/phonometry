@@ -446,7 +446,7 @@ series[gust] += rng.normal(0.0, 2.5, int(gust.sum()))
 period = environment.amplitude_modulation_period(
     np.round(series, 1), modulation_frequency_range_hz=(0.5, 1.1)
 )
-print(period.valid_blocks, round(period.rating_db, 2))    # 55 5.84
+print(period.n_valid_blocks, round(period.rating_db, 2))    # 55 5.84
 print(round(period.mean_modulation_frequency_hz, 2), period.mode_modulation_frequency_hz)  # 0.8 0.8
 ```
 

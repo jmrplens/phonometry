@@ -29,7 +29,7 @@ def test_annex_a_mean_and_spread() -> None:
         np.round(result.standard_deviation, 1).tolist()
         == ref.ISO4869_2_STANDARD_DEVIATION
     )
-    assert result.subjects == 16
+    assert result.n_subjects == 16
     assert result.alpha == 1.0
     assert result.performance == 84
 

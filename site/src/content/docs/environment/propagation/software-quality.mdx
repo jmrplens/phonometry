@@ -426,7 +426,7 @@ spread = 0.15 + 0.6 * rng.gamma(1.5, 0.4, 400)
 levels = common[:, None] + spread[:, None] * rng.standard_normal((400, 4))
 
 rr = environment.round_robin_precision(levels)
-print(rr.receivers, rr.participants, rr.rank_q09, round(rr.q09_db, 2))   # 400 4 361 1.28
+print(rr.n_receivers, rr.n_participants, rr.rank_q09, round(rr.q09_db, 2))   # 400 4 361 1.28
 rr.plot()
 ```
 

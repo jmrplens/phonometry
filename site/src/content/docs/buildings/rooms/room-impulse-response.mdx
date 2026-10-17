@@ -446,11 +446,11 @@ between positions and cannot be equalised away.
 | `fs` | int | Hz | > 0 | Sampling frequency |
 | `f1` | float | Hz | > 0, at/below lowest band | Sweep start frequency |
 | `f2` | float | Hz | `f1 < f2 <= fs/2` | Sweep stop frequency |
-| `seconds` | float | s | 2–4 × the longest expected T | Sweep duration; see "Dimensioning the excitation" above |
+| `duration_s` | float | s | 2–4 × the longest expected T | Sweep duration; see "Dimensioning the excitation" above |
 | `amplitude` | float | — | default `1.0` | Peak amplitude |
 | `fade` | float | — | `[0, 0.5)`, default `0.01` | Half-Hann fade fraction (kills start/stop transients) |
 
-`inverse_filter(fs, f1, f2, seconds, amplitude=..., fade=...)` takes exactly
+`inverse_filter(fs, f1, f2, duration_s, amplitude=..., fade=...)` takes exactly
 the same arguments as `sweep_signal`, because the filter is derived from the
 sweep it has to invert: it is the time-reversed sweep with a +6 dB/octave
 envelope, which whitens the ESS's −3 dB/octave spectrum so that convolving

@@ -137,8 +137,8 @@ def test_sound_power_is_eq14_with_the_background_negligible() -> None:
     assert bool(np.all(res.background_requirement_met))
     assert res.quantity == "power"
     assert np.all(np.isnan(res.sound_energy_level))
-    assert res.microphone_positions == 3
-    assert res.source_positions == 1
+    assert res.n_microphone_positions == 3
+    assert res.n_source_positions == 1
 
 
 def test_background_correction_is_eq13_of_the_two_means() -> None:
@@ -247,7 +247,7 @@ def test_source_locations_are_energy_averaged_first_eq9() -> None:
     per_position = _energy_mean(locations, 0)
     expected = LW_RSS - _energy_mean(RSS, 0) + _energy_mean(per_position, 0)
     np.testing.assert_allclose(res.sound_power_level, expected, atol=1e-12)
-    assert res.source_positions == 2
+    assert res.n_source_positions == 2
 
 
 def test_a_traverse_is_a_1d_spectrum_and_needs_a_traverse_reference() -> None:
@@ -257,7 +257,7 @@ def test_a_traverse_is_a_1d_spectrum_and_needs_a_traverse_reference() -> None:
         background_levels=BACKGROUND,
     )  # fmt: skip
     np.testing.assert_allclose(res.sound_power_level, _power().sound_power_level)
-    assert res.microphone_positions == 1
+    assert res.n_microphone_positions == 1
 
 
 def test_fixed_reference_levels_are_refused_for_a_traverse() -> None:
@@ -394,7 +394,7 @@ def test_events_one_at_a_time_and_one_encompassing_measurement_agree() -> None:
         integration_time=1.0,
     )  # fmt: skip
     encompassing = emission.sound_energy_hard_walled(
-        ST + 10.0 * math.log10(n_events), RSS, LW_RSS, FREQS, events=n_events,
+        ST + 10.0 * math.log10(n_events), RSS, LW_RSS, FREQS, n_events=n_events,
         background_levels=BACKGROUND, integration_time=1.0,
     )  # fmt: skip
     np.testing.assert_allclose(
@@ -410,7 +410,7 @@ def test_energy_source_locations_follow_eq17() -> None:
     per_position = _energy_mean(np.stack([ST, ST + 3.0]), 0)
     expected = LW_RSS - _energy_mean(RSS, 0) + _energy_mean(per_position, 0)
     np.testing.assert_allclose(res.sound_energy_level, expected, atol=1e-9)
-    assert res.source_positions == 2
+    assert res.n_source_positions == 2
 
 
 def test_fewer_than_five_events_warn_citing_7_6() -> None:
@@ -599,7 +599,7 @@ def test_table2_rows(s_m: float, locations: int, other_room: int) -> None:
     assert np.all(plan.source_locations == locations)
     assert np.all(plan.additional_room_locations == other_room)
     assert plan.other_room_required is (other_room > 0)
-    assert plan.required_source_locations == locations
+    assert plan.n_required_source_locations == locations
     assert plan.spectral_character is None
     assert plan.standard == "ISO 3743-1:2010"
 

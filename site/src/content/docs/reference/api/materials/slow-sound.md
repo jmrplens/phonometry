@@ -157,7 +157,7 @@ helmholtz_resonator_impedance(
     end_correction: bool = True,
     geometry: str = 'square',
     fluid: Fluid = ...,
-    sum_terms: int = 40,
+    n_sum_terms: int = 40,
 ) -> NDArray[np.complex128]
 ```
 
@@ -196,7 +196,7 @@ corrections are the 2-D fits of Sci. Rep. 7:5389 Eqs. (11)-(12); both
 | `end_correction` | Include the radiation end corrections (default True). |
 | `geometry` | `"square"` (default) for square-duct necks and cavities, `"slit"` for the two-dimensional resonator model. |
 | `fluid` | State of the air in the neck and cavity ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)); the density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0` are read from it. |
-| `sum_terms` | Transverse modes kept per axis in the duct series. |
+| `n_sum_terms` | Transverse modes kept per axis in the duct series. |
 
 **Returns:** Complex acoustic impedance `Z_HR`, in Pa s/m3, shaped like `frequency`.
 
@@ -311,7 +311,7 @@ rectangular_duct_properties(
     *,
     side_m: float,
     fluid: Fluid = ...,
-    sum_terms: int = 40,
+    n_sum_terms: int = 40,
 ) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]
 ```
 
@@ -347,7 +347,7 @@ $28.454\,\eta/\text{side}^2$ as $\omega \to 0$.
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `side_m` | Square-duct side length, in metres. |
 | `fluid` | State of the air in the duct ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)); the density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0` are read from it. |
-| `sum_terms` | Transverse modes kept per axis (default 40). |
+| `n_sum_terms` | Transverse modes kept per axis (default 40). |
 
 **Returns:** `(rho, kappa)` complex arrays shaped like `frequency`.
 

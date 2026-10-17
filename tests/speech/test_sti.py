@@ -275,7 +275,7 @@ def test_masking_amdb_is_vectorized_and_continuous() -> None:
 @pytest.fixture(scope="module")
 def stipa_18s_seed1234() -> np.ndarray:
     """The 18 s seed-1234 STIPA test signal, generated once for the module."""
-    return speech.stipa_signal(FS, seconds=18.0, seed=1234)
+    return speech.stipa_signal(FS, duration_s=18.0, seed=1234)
 
 
 def test_stipa_loopback_ideal_channel(stipa_18s_seed1234: np.ndarray) -> None:
@@ -294,7 +294,7 @@ def test_stipa_short_recording_warns(stipa_18s_seed1234: np.ndarray) -> None:
     modulation depths (and STI) low; stipa should warn (IEC 60268-16 STIPA
     practice recommends 15 s to 25 s).
     """
-    short = speech.stipa_signal(FS, seconds=5.0, seed=1234)
+    short = speech.stipa_signal(FS, duration_s=5.0, seed=1234)
     with pytest.warns(
         UserWarning, match=r"STIPA recording is .* shorter than the recommended"
     ):
@@ -318,7 +318,7 @@ def test_stipa_with_noise_is_monotonic(stipa_18s_seed1234: np.ndarray) -> None:
 
 
 def test_stipa_reference_normalization() -> None:
-    x = speech.stipa_signal(FS, seconds=18.0, seed=99)
+    x = speech.stipa_signal(FS, duration_s=18.0, seed=99)
     with_nominal = speech.stipa(x, FS)
     with_reference = speech.stipa(0.25 * x, FS, reference=x)
     # Loop-back against the emitted signal itself: m = 1 in every band
@@ -329,7 +329,7 @@ def test_stipa_reference_normalization() -> None:
 
 def test_stipa_signal_properties() -> None:
     seconds = 18.0
-    x = speech.stipa_signal(FS, seconds=seconds, seed=0)
+    x = speech.stipa_signal(FS, duration_s=seconds, seed=0)
     assert x.shape == (int(seconds * FS),)
     # Default normalization: RMS = 0,1 digital units.
     assert float(np.sqrt(np.mean(x**2))) == pytest.approx(0.1, rel=1e-9)
@@ -337,11 +337,13 @@ def test_stipa_signal_properties() -> None:
     crest_db = 20.0 * np.log10(np.max(np.abs(x)) / np.sqrt(np.mean(x**2)))
     assert 9.0 < crest_db < 16.0
     # Calibrated output: overall level in dB re 20 uPa.
-    x_cal = speech.stipa_signal(FS, seconds=6.0, level_db=74.0, seed=0)
+    x_cal = speech.stipa_signal(FS, duration_s=6.0, level_db=74.0, seed=0)
     level = 20.0 * np.log10(np.sqrt(np.mean(x_cal**2)) / 2e-5)
     assert level == pytest.approx(74.0, abs=1e-9)
     # Reproducible for a fixed seed.
-    np.testing.assert_array_equal(x, speech.stipa_signal(FS, seconds=seconds, seed=0))
+    np.testing.assert_array_equal(
+        x, speech.stipa_signal(FS, duration_s=seconds, seed=0)
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -421,7 +423,7 @@ def test_invalid_inputs_raise() -> None:
     two_dimensional_signal = np.zeros((2, FS))
     with pytest.raises(ValueError, match=r"stipa expects a 1D signal"):
         speech.stipa(two_dimensional_signal, FS)
-    half_second_clip = speech.stipa_signal(FS, seconds=18.0, seed=3)[: FS // 2]
+    half_second_clip = speech.stipa_signal(FS, duration_s=18.0, seed=3)[: FS // 2]
     # The 0.5 s clip also triggers the (correct) sub-15 s STIPA warning;
     # silence it so the test output stays clean while asserting the error.
     # simplefilter has to run inside catch_warnings, before the call, so the
@@ -446,8 +448,8 @@ def test_invalid_inputs_raise() -> None:
     # The 1 kHz band carries the tone, unmodulated: m ~ 0.
     assert np.all(res_tone.mtf[3] < 0.01)
 
-    with pytest.raises(ValueError, match=r"'seconds' must be positive"):
-        speech.stipa_signal(FS, seconds=0.0)
+    with pytest.raises(ValueError, match=r"'duration_s' must be positive"):
+        speech.stipa_signal(FS, duration_s=0.0)
     with pytest.raises(
         ValueError, match=r"Sample rate 'fs' must be .* half-octave carrier"
     ):

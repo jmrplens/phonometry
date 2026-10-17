@@ -529,6 +529,12 @@ The lowest of equally frequent ones; `None` when not `rated`.
 
 The depth of each block, in dB; NaN where the block is not valid.
 
+### ModulationPeriod.n_valid_blocks
+
+*property*
+
+Number of valid blocks, the `n` number of 13.6.2.2.
+
 ### ModulationPeriod.plot()
 
 ```python
@@ -566,9 +572,3 @@ The AM rating of the period, in dB.
 
 The 90th percentile of the valid depths when `rated`, else
 0 dB (13.6.3).
-
-### ModulationPeriod.valid_blocks
-
-*property*
-
-Number of valid blocks, the `n` number of 13.6.2.2.

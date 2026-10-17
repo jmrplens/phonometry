@@ -128,7 +128,7 @@ def _sound_power_example() -> tuple[object, ReportMetadata, str]:
         positions,
         "hemisphere",
         radius=4.0,
-        reflecting_planes=1,
+        n_reflecting_planes=1,
         background_levels=np.tile(surface_pressure - 10.0, (10, 1)),
         frequencies=freqs,
         room=ph.emission.RoomEnvironment(absorption_area=1500.0),

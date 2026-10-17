@@ -122,7 +122,7 @@ def test_source_check_plot_forwards_kwargs() -> None:
 
 @pytest.mark.parametrize("language", ["en", "es"])
 def test_standardization_plot_draws_both_spectra(language: str) -> None:
-    res = ph.building.standardized_maximum_impact_level(
+    res = ph.building.standardized_max_impact_level(
         _TABLE_D4,
         41.4,
         [1.43, 3.7, 3.1, 2.38],
@@ -137,7 +137,7 @@ def test_standardization_plot_draws_both_spectra(language: str) -> None:
 
 
 def test_standardization_plot_without_frequencies_uses_band_indices() -> None:
-    res = ph.building.standardized_maximum_impact_level(_TABLE_D4, 41.4, 2.0)
+    res = ph.building.standardized_max_impact_level(_TABLE_D4, 41.4, 2.0)
     ax = res.plot()
     assert [t.get_text() for t in ax.get_xticklabels()] == ["1", "2", "3", "4"]
 
@@ -148,14 +148,14 @@ def test_standardization_plot_without_frequencies_uses_band_indices() -> None:
 def test_band_index_axis_is_labelled_in_the_figure_language(
     language: str, label: str
 ) -> None:
-    res = ph.building.standardized_maximum_impact_level(_TABLE_D4, 41.4, 2.0)
+    res = ph.building.standardized_max_impact_level(_TABLE_D4, 41.4, 2.0)
     ax = res.plot(language=language)
     assert ax.get_xlabel() == label
     assert _plenum().plot(language=language).get_xlabel() == label
 
 
 def test_standardization_plot_forwards_kwargs() -> None:
-    res = ph.building.standardized_maximum_impact_level(_TABLE_D4, 41.4, 2.0)
+    res = ph.building.standardized_max_impact_level(_TABLE_D4, 41.4, 2.0)
     ax = res.plot(linewidth=2.5)
     assert any(ln.get_linewidth() == 2.5 for ln in ax.lines)
 
@@ -167,7 +167,7 @@ def test_standardization_plot_forwards_kwargs() -> None:
 
 @pytest.mark.parametrize("language", ["en", "es"])
 def test_rating_plot_bars_carry_the_corrected_values(language: str) -> None:
-    res = ph.building.a_weighted_maximum_impact_level(_TABLE_D4)
+    res = ph.building.a_weighted_max_impact_level(_TABLE_D4)
     ax = res.plot(language=language)
     heights = [p.get_height() for p in ax.patches]
     np.testing.assert_allclose(heights, res.corrected, atol=1e-9)
@@ -176,13 +176,13 @@ def test_rating_plot_bars_carry_the_corrected_values(language: str) -> None:
 
 
 def test_rating_plot_third_octave_has_twelve_bars() -> None:
-    res = ph.building.a_weighted_maximum_impact_level([60.0] * 12)
+    res = ph.building.a_weighted_max_impact_level([60.0] * 12)
     ax = res.plot()
     assert len(ax.patches) == 12
 
 
 def test_rating_plot_forwards_kwargs_to_the_bars() -> None:
-    res = ph.building.a_weighted_maximum_impact_level(_TABLE_D4)
+    res = ph.building.a_weighted_max_impact_level(_TABLE_D4)
     ax = res.plot(color="red")
     red = plt.matplotlib.colors.to_rgba("red")
     assert any(tuple(p.get_facecolor()) == red for p in ax.patches)
@@ -326,8 +326,8 @@ class _Plottable(Protocol):
     "factory",
     [
         lambda: ph.building.check_heavy_impact_source([39.0, 31.0, 23.0, 17.0, 12.5]),
-        lambda: ph.building.standardized_maximum_impact_level(_TABLE_D4, 41.4, 2.0),
-        lambda: ph.building.a_weighted_maximum_impact_level(_TABLE_D4),
+        lambda: ph.building.standardized_max_impact_level(_TABLE_D4, 41.4, 2.0),
+        lambda: ph.building.a_weighted_max_impact_level(_TABLE_D4),
         lambda: ph.building.ceiling_attenuation_class(_ALA_DNC),
         _plenum,
         lambda: _coupling(tie="butterfly"),

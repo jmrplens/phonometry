@@ -68,7 +68,7 @@ __all__ = [
     "band_uncertainty",
     "insulation_coverage_factor",
     "insulation_expanded_uncertainty",
-    "maximum_repeatability_standard_deviation",
+    "max_repeatability_standard_deviation",
     "prediction_input_uncertainty",
     "reduce_by_independent_measurements",
     "satisfies_lower_requirement",
@@ -594,7 +594,7 @@ def single_number_uncertainty(
     return value
 
 
-def maximum_repeatability_standard_deviation() -> BandUncertainty:
+def max_repeatability_standard_deviation() -> BandUncertainty:
     """Return Table 1, the maximum repeatability standard deviation per band (Clause 5.8).
 
     A laboratory verifies its own procedure when the repeatability standard

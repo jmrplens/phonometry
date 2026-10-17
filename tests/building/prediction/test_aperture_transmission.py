@@ -76,7 +76,7 @@ def test_composite_rejects_bad_shape() -> None:
 # ---------------------------------------------------------------------------
 def test_slit_transmission_peaks_at_first_resonance() -> None:
     w, d = 0.005, 0.1
-    fr = building.slit_resonance_frequencies(d, w, orders=1)
+    fr = building.slit_resonance_frequencies(d, w, n_orders=1)
     f = np.linspace(fr[0] - 300.0, fr[0] + 300.0, 601)
     res = building.slit_transmission_coefficient(f, w, d, field="normal")
     peak = f[int(np.argmax(res.transmission_coefficient))]
@@ -85,7 +85,7 @@ def test_slit_transmission_peaks_at_first_resonance() -> None:
 
 def test_slit_resonances_are_half_wavelength_spaced() -> None:
     # d + 2e = z lambda/2, so the orders are near-integer multiples.
-    fr = building.slit_resonance_frequencies(0.1, 0.005, orders=3)
+    fr = building.slit_resonance_frequencies(0.1, 0.005, n_orders=3)
     assert fr[1] / fr[0] == pytest.approx(2.0, rel=0.05)
     assert fr[2] / fr[0] == pytest.approx(3.0, rel=0.05)
 
@@ -94,7 +94,7 @@ def test_slit_resonance_rejects_wide_shallow_slit() -> None:
     # A very wide, shallow slit drives the effective depth d + 2e non-positive;
     # the resonance is undefined and must raise rather than return NaN.
     with pytest.raises(ValueError, match=r"slit too wide relative to its depth"):
-        building.slit_resonance_frequencies(0.001, 0.2, orders=1)
+        building.slit_resonance_frequencies(0.001, 0.2, n_orders=1)
 
 
 def test_slit_transmission_finite_through_cos_ke_zero() -> None:

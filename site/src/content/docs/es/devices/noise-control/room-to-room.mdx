@@ -448,7 +448,7 @@ y el nivel que hay que perder es solo 5 dB, mientras que a 8 kHz el compresor
 ya se ha callado. Un panel elegido por su comportamiento entre 500 Hz y 2 kHz
 es el panel correcto aquí.
 
-`enclosure_required_transmission_loss` devuelve un `EnclosureResult`, así que
+`enclosure_required_transmission_loss` devuelve un `EnclosureInsertionLossResult`, así que
 `required.plot()` dibuja esa forma y sus dos causas en una línea:
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/enclosure_required_tl.svg" alt="Gráfico por bandas de octava de 63 Hz a 8 kHz del problema 4.16 de Norton. Las barras verdes dan la pérdida por inserción objetivo, que sube de 5 dB a 63 Hz hasta 37 dB entre 1 kHz y 4 kHz; las barras rojas dan la corrección interior, que baja de más 9,5 dB a 63 Hz, pasa por cero cerca de 400 Hz y llega a unos menos 2,4 dB por encima de 2 kHz; y la pérdida por transmisión de panel necesaria discurre como una curva con su máximo de 35,2 dB a 1 kHz que cae a 14,5 dB a 63 Hz y a 31,6 dB a 8 kHz, con las respuestas impresas de Norton marcadas sobre ella como rombos huecos y el modelo de Bies por omisión de la biblioteca dibujado discontinuo un decibelio o dos por encima a partir de 500 Hz" width="88%" />
@@ -468,7 +468,7 @@ revestimiento.*
 ```python
 import matplotlib.pyplot as plt
 
-# `required` es el EnclosureResult construido arriba.
+# `required` es el EnclosureInsertionLossResult construido arriba.
 
 # Una línea: la IL objetivo, la corrección interior y la R de panel necesaria.
 required.plot(language="es")

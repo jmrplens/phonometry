@@ -289,7 +289,7 @@ res = speech.sti_from_impulse_response(ir, fs, snr=25.0)
 print(f"STI = {res.sti:.2f}  ({res.rating})")   # 0.73 (A)
 
 # Medición STIPA directa: reproduce speech.stipa_signal() en la sala y grábala
-test = speech.stipa_signal(fs, seconds=18.0, level_db=80.0)
+test = speech.stipa_signal(fs, duration_s=18.0, level_db=80.0)
 recording = test                       # en la práctica, la señal del micrófono tras la reproducción
 res = speech.stipa(recording, fs)
 res.plot()   # barras del índice de transferencia de modulación (MTI) por banda; STI y valoración en el título

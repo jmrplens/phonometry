@@ -441,7 +441,7 @@ superando el objetivo). Usa el mismo contenedor `ReportMetadata` y el mismo
 motor de renderizado que la [ficha de acústica de salas ISO
 3382-1/-2](/phonometry/es/buildings/rooms/room-acoustics/#informe-iso-3382-report);
 los campos propios de oficinas diáfanas `area` (superficie del suelo),
-`source_positions` y `receiver_positions` (el número de posiciones de medición)
+`n_source_positions` y `n_receiver_positions` (el número de posiciones de medición)
 rellenan la cabecera, junto con `client`, `test_room` (la oficina o zona),
 `specimen` (la descripción y el estado de amueblamiento), `instrumentation`,
 `temperature_c`, `relative_humidity_percent`, `static_pressure_kpa`,
@@ -469,7 +469,7 @@ result.report(
     metadata=ReportMetadata(
         test_room="Oficina diáfana B",
         specimen="Amueblada, desocupada, con ruido de fondo",
-        area=420.0, source_positions=2, receiver_positions=7,
+        area=420.0, n_source_positions=2, n_receiver_positions=7,
         measurement_standard="ISO 3382-3",
         temperature_c=22.0, relative_humidity_percent=45.0,
         laboratory="Laboratorio de referencia Phonometry",

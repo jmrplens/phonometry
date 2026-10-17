@@ -358,7 +358,7 @@ def test_reverberation_correction_vanishes_at_the_reference_time() -> None:
 
 def test_standardization_at_the_reference_time_is_the_volume_term_only() -> None:
     """T = T0 = 0,5 s: L' = Li,Fmax + 10 lg(V/V0) with V0 = 50 m3."""
-    res = building.standardized_maximum_impact_level([70.0, 65.0], 100.0, 0.5)
+    res = building.standardized_max_impact_level([70.0, 65.0], 100.0, 0.5)
     np.testing.assert_allclose(res.reverberation_correction, 0.0, atol=1e-12)
     assert res.volume_term == pytest.approx(10.0 * np.log10(2.0))
     np.testing.assert_allclose(
@@ -368,7 +368,7 @@ def test_standardization_at_the_reference_time_is_the_volume_term_only() -> None
 
 def test_standardization_at_the_reference_volume_is_the_time_term_only() -> None:
     """V = V0 = 50 m3 leaves only the Fast reverberation correction."""
-    res = building.standardized_maximum_impact_level([70.0], 50.0, 2.0)
+    res = building.standardized_max_impact_level([70.0], 50.0, 2.0)
     assert res.volume_term == pytest.approx(0.0)
     np.testing.assert_allclose(res.standardized, 70.0 - res.reverberation_correction)
 
@@ -419,7 +419,7 @@ def test_standardization_reproduces_a_published_25_band_example() -> None:
     decimal, and its 50 Hz entry is affected by the author rounding C to 0,24,
     so the bound is 0,1 dB.
     """
-    res = building.standardized_maximum_impact_level(
+    res = building.standardized_max_impact_level(
         GURTNER_MEASURED, GURTNER_VOLUME, GURTNER_REVERBERATION_TIME
     )
     np.testing.assert_allclose(res.standardized, GURTNER_STANDARDIZED, atol=0.1)
@@ -429,12 +429,12 @@ def test_standardization_rejects_a_mismatched_reverberation_time() -> None:
     with pytest.raises(
         ValueError, match=r"'reverberation_time' must be a scalar or match 'levels'"
     ):
-        building.standardized_maximum_impact_level([70.0, 65.0], 50.0, [1.0, 2.0, 3.0])
+        building.standardized_max_impact_level([70.0, 65.0], 50.0, [1.0, 2.0, 3.0])
 
 
 def test_standardization_rejects_a_mismatched_frequency_axis() -> None:
     with pytest.raises(ValueError, match=r"'frequencies'.*same shape"):
-        building.standardized_maximum_impact_level(
+        building.standardized_max_impact_level(
             [70.0, 65.0, 60.0], 50.0, 0.5, frequencies=[63.0, 125.0]
         )
 
@@ -445,7 +445,7 @@ def test_standardization_result_rejects_a_stretched_reverberation_time() -> None
     The figure draws only ``measured`` and ``standardized``, so this is the
     column a report quotes to justify the shift and nothing else would catch.
     """
-    res = building.standardized_maximum_impact_level([70.0] * 5, 50.0, 0.5)
+    res = building.standardized_max_impact_level([70.0] * 5, 50.0, 0.5)
     stretched = np.append(res.reverberation_time, 0.5)
     with pytest.raises(ValueError, match="'reverberation_time'"):
         dataclasses.replace(res, reverberation_time=stretched)
@@ -541,7 +541,7 @@ def test_iso717_2_table_d4_worked_example() -> None:
     at 63 / 125 / 250 / 500 Hz gives the corrected values 39,1 / 48,3 / 49,3 /
     52,6 dB and LiA,Fmax = 55,350 66... = 55 dB.
     """
-    res = building.a_weighted_maximum_impact_level(ISO717_2_TABLE_D4_LEVELS)
+    res = building.a_weighted_max_impact_level(ISO717_2_TABLE_D4_LEVELS)
     assert res.band == "octave"
     np.testing.assert_allclose(res.a_weighting, ISO717_2_TABLE_D3_OCTAVE)
     np.testing.assert_allclose(res.corrected, ISO717_2_TABLE_D4_CORRECTED, atol=5e-2)
@@ -558,7 +558,7 @@ def test_rating_rounds_halves_up() -> None:
     a = np.asarray(ISO717_2_TABLE_D3_OCTAVE)
     offset = 10.0 * np.log10(np.sum(10.0 ** (a / 10.0)))
     level = 55.5 - offset
-    res = building.a_weighted_maximum_impact_level([level] * 4)
+    res = building.a_weighted_max_impact_level([level] * 4)
     assert res.unrounded == pytest.approx(55.5, abs=1e-9)
     assert res.rating == 56
 
@@ -593,19 +593,19 @@ def test_rating_is_dominated_by_the_low_bands() -> None:
     Adding 1 dB at 500 Hz therefore moves the rating far more than 1 dB at
     63 Hz for the Table D.4 spectrum.
     """
-    base = building.a_weighted_maximum_impact_level(ISO717_2_TABLE_D4_LEVELS).unrounded
+    base = building.a_weighted_max_impact_level(ISO717_2_TABLE_D4_LEVELS).unrounded
     low = list(ISO717_2_TABLE_D4_LEVELS)
     low[0] += 1.0
     high = list(ISO717_2_TABLE_D4_LEVELS)
     high[-1] += 1.0
-    delta_low = building.a_weighted_maximum_impact_level(low).unrounded - base
-    delta_high = building.a_weighted_maximum_impact_level(high).unrounded - base
+    delta_low = building.a_weighted_max_impact_level(low).unrounded - base
+    delta_high = building.a_weighted_max_impact_level(high).unrounded - base
     assert delta_high > delta_low
 
 
 def test_third_octave_rating_uses_twelve_bands() -> None:
     """A one-third-octave measurement is rated in one-third octaves (Clause D.3)."""
-    res = building.a_weighted_maximum_impact_level([60.0] * 12)
+    res = building.a_weighted_max_impact_level([60.0] * 12)
     assert res.band == "third"
     assert res.frequencies.size == 12
     expected = 10.0 * np.log10(
@@ -616,21 +616,21 @@ def test_third_octave_rating_uses_twelve_bands() -> None:
 
 def test_rating_rejects_an_unsupported_band_count() -> None:
     with pytest.raises(ValueError, match="12 one-third-octave values"):
-        building.a_weighted_maximum_impact_level([60.0] * 7)
+        building.a_weighted_max_impact_level([60.0] * 7)
 
 
 def test_rating_names_levels_when_their_count_disagrees_with_the_band() -> None:
     with pytest.raises(
         ValueError, match=r"'levels' must hold 4 values for band='octave'"
     ):
-        building.a_weighted_maximum_impact_level([60.0] * 12, band="octave")
+        building.a_weighted_max_impact_level([60.0] * 12, band="octave")
 
 
 def test_rating_rejects_mismatched_frequencies() -> None:
     with pytest.raises(
         ValueError, match=r"'frequencies' must be the ISO 717-2 Annex D rating bands"
     ):
-        building.a_weighted_maximum_impact_level(
+        building.a_weighted_max_impact_level(
             ISO717_2_TABLE_D4_LEVELS, [125.0, 250.0, 500.0, 1000.0]
         )
 
@@ -641,7 +641,7 @@ def test_rating_rejects_a_stretched_a_weighting() -> None:
     The bars, the unweighted curve and the band axis all stop matplotlib at
     another length; the weighting that explains them does not.
     """
-    res = building.a_weighted_maximum_impact_level(ISO717_2_TABLE_D4_LEVELS)
+    res = building.a_weighted_max_impact_level(ISO717_2_TABLE_D4_LEVELS)
     stretched = np.append(res.a_weighting, 0.0)
     with pytest.raises(ValueError, match="'a_weighting'"):
         dataclasses.replace(res, a_weighting=stretched)
@@ -650,11 +650,11 @@ def test_rating_rejects_a_stretched_a_weighting() -> None:
 def test_rating_rejects_a_band_width_outside_annex_d() -> None:
     """The bar figure titles itself from a label table keyed by ``band``.
 
-    ``a_weighted_maximum_impact_level`` validates the tag at the call, but a
+    ``a_weighted_max_impact_level`` validates the tag at the call, but a
     result rewritten by hand reaches the lookup once the bars are drawn and
     dies mid-render with a bare ``KeyError`` naming the tag alone.
     """
-    res = building.a_weighted_maximum_impact_level(ISO717_2_TABLE_D4_LEVELS)
+    res = building.a_weighted_max_impact_level(ISO717_2_TABLE_D4_LEVELS)
     with pytest.raises(ValueError, match="'band' must be one of"):
         dataclasses.replace(res, band="octaves")
 
@@ -666,9 +666,9 @@ def test_rating_and_standardization_compose() -> None:
     ISO 16283-2 Formula (4) output, so a pure volume gain of 10 lg(V/V0) must
     pass straight through to the single number.
     """
-    standardized = building.standardized_maximum_impact_level(
+    standardized = building.standardized_max_impact_level(
         ISO717_2_TABLE_D4_LEVELS, 100.0, 0.5
     )
-    rated = building.a_weighted_maximum_impact_level(standardized.standardized)
-    plain = building.a_weighted_maximum_impact_level(ISO717_2_TABLE_D4_LEVELS)
+    rated = building.a_weighted_max_impact_level(standardized.standardized)
+    plain = building.a_weighted_max_impact_level(ISO717_2_TABLE_D4_LEVELS)
     assert rated.unrounded - plain.unrounded == pytest.approx(10.0 * np.log10(2.0))

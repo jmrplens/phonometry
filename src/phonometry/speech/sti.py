@@ -1035,7 +1035,7 @@ def _pink_noise(n: int, rng: np.random.Generator) -> np.ndarray:
 
 def stipa_signal(
     fs: int,
-    seconds: float = 18.0,
+    duration_s: float = 18.0,
     level_db: float | None = None,
     seed: int | None = None,
 ) -> np.ndarray:
@@ -1050,14 +1050,14 @@ def stipa_signal(
     in amplitude through its square root (Annex B).
 
     :param fs: Sample rate in Hz (>= 22,5 kHz).
-    :param seconds: Duration in seconds (the standard recommends 15 s to
+    :param duration_s: Duration in seconds (the standard recommends 15 s to
         25 s; default 18 s).
     :param level_db: Optional overall level in dB SPL: the output is
         scaled so its RMS, taken as pascals, sits at ``level_db`` re
         20 uPa. Default (None) normalizes the RMS to 0,1 (digital full
         scale headroom for the 12-14 dB crest factor).
     :param seed: Seed for the pink-noise generator (None: random).
-    :return: Test signal, 1D array of ``round(seconds * fs)`` samples.
+    :return: Test signal, 1D array of ``round(duration_s * fs)`` samples.
     """
     if fs <= 0:
         raise ValueError(_FS_NOT_POSITIVE_MSG)
@@ -1067,11 +1067,11 @@ def stipa_signal(
             "carrier extends beyond 9.4 kHz."
         )
         raise ValueError(msg)
-    if seconds <= 0:
-        msg = "'seconds' must be positive."
+    if duration_s <= 0:
+        msg = "'duration_s' must be positive."
         raise ValueError(msg)
 
-    n = round(seconds * fs)
+    n = round(duration_s * fs)
     rng = np.random.default_rng(seed)
     pink = _pink_noise(n, rng)
     t = np.arange(n) / fs

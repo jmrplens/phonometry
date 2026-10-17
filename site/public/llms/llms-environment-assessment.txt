@@ -220,8 +220,8 @@ counterpart in the library.
 
 | Function | Key parameters | Notes |
 | :--- | :--- | :--- |
-| `lden(lday, levening, lnight, hours=(12, 4, 8))` | period $L_\mathrm{Aeq}$ values [dB]; `hours` must sum to 24 | +5 dB evening, +10 dB night (3.6.4) |
-| `ldn(lday, lnight, hours=(15, 9))` | | +10 dB night (3.6.5) |
+| `lden(lday, levening, lnight, period_hours=(12, 4, 8))` | period $L_\mathrm{Aeq}$ values [dB]; `period_hours` must sum to 24 | +5 dB evening, +10 dB night (3.6.4) |
+| `ldn(lday, lnight, period_hours=(15, 9))` | | +10 dB night (3.6.5) |
 | `composite_rating_level(periods)` | iterable of `(level_db, hours, adjustment_db)`; hours positive, finite and summing to 24 | General Formulae (5)-(6); adjustments per Table A.1 |
 
 Where you put the microphone changes the number: ISO 1996-2 fixes the receiver positions and their façade corrections. The diagram is measurement context, not something the library computes; those position and correction procedures are not implemented, so apply the corrections to your levels yourself before any function on this page consumes them:
@@ -822,7 +822,7 @@ III are what a single emitter is held to.
 | Annex II, Table A | Outdoor objectives by acoustic area type: e 60/60/50, a 65/65/55, d 70/70/65, c 73/73/63, b 75/75/65 dB (as amended by RD 1038/2012) | `outdoor_quality_objectives()` |
 | Annex II, Table B | Indoor objectives by building use and room type | `indoor_quality_objectives()` |
 | Annex II, Table C | Vibration objective $Law$ | `vibration_quality_objective()` |
-| Annex III, Tables A1 and A2 | Limit values for new road, rail and airport infrastructure, and $L_\mathrm{Amax}$ | `infrastructure_limits()`, `maximum_infrastructure_limit()` |
+| Annex III, Tables A1 and A2 | Limit values for new road, rail and airport infrastructure, and $L_\mathrm{Amax}$ | `infrastructure_limits()`, `max_infrastructure_limit()` |
 | Annex III, Table B1 | Limit values for port infrastructure and activities | `activity_limits()` |
 | Annex III, Table B2 | Noise transmitted by activities to acoustically adjacent premises | `adjacent_premises_limits()` |
 
@@ -841,7 +841,7 @@ environment.outdoor_quality_objectives("a")                       # 65 / 65 / 55
 environment.outdoor_quality_objectives("a", urbanization="new")   # 60 / 60 / 50 dB
 environment.indoor_quality_objectives("residential", "bedrooms")  # 40 / 40 / 30 dB
 environment.infrastructure_limits("a")                            # 60 / 60 / 50 dB
-environment.maximum_infrastructure_limit("a")                         # 85 dB (LAmax)
+environment.max_infrastructure_limit("a")                         # 85 dB (LAmax)
 environment.activity_limits("a")                                  # 55 / 55 / 45 dB
 environment.adjacent_premises_limits("residential", "bedrooms")   # 35 / 35 / 25 dB
 environment.vibration_quality_objective("residential")            # 75 dB
@@ -1115,7 +1115,7 @@ each subclass replaced by a Gaussian of standard deviation `sigma` (typically
 energetic mean stays where it was (Equations (17) to (23)).
 
 ```python
-dist = environment.sel_distribution(levels, probabilities, sigma_db=5.0, subclasses=10)
+dist = environment.sel_distribution(levels, probabilities, sigma_db=5.0, n_subclasses=10)
 print(dist.lower_bounds_db[:4].round(2))                              # [27.35 29.45 30.65 30.8 ]
 print([round(float(r), 4) for r in dist.class_densities_per_db[:4]])  # [0.0007, 0.024, 1.2399, 0.2222]
 print(round(dist.level_shift_db, 3))                                  # 2.878

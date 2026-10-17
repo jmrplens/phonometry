@@ -1235,7 +1235,7 @@ def plot_earmuff_insertion_loss(
     left, right = ax.get_xlim()
     decades = float(np.log10(right / left))
     ax.set_box_aspect(((high - low) / _DB_PER_DECADE) / decades)
-    ax.set_title(_t(_IL_TITLE, language).format(n=result.repetitions))
+    ax.set_title(_t(_IL_TITLE, language).format(n=result.n_repetitions))
     return _finish(ax, language)
 
 

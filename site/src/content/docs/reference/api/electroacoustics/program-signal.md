@@ -298,7 +298,7 @@ One row of IEC 60268-1:1985 Table II.
 ```python
 simulated_program_signal(
     fs: int,
-    seconds: float,
+    duration_s: float,
     *,
     rms: float = 1.0,
     spectrum: Literal['table', 'figure_2'] = 'table',
@@ -341,13 +341,13 @@ the middle need a few seconds.
 | Name | Description |
 | :--- | :--- |
 | `fs` | Sample rate, in hertz. |
-| `seconds` | Duration, in seconds. |
+| `duration_s` | Duration, in seconds. |
 | `rms` | RMS value of the record, in whatever unit it is scaled to. |
 | `spectrum` | `"table"` (default) for the band levels of Table II, `"figure_2"` for pink noise through the filter of Figure 2. |
 | `peak_to_rms` | The ratio of the peak value to the RMS value after clipping, or `None` (default) for no clipping. It must be above 1 and below the ratio the unclipped record already has. |
 | `seed` | Seed for `numpy.random.default_rng`; the same seed reproduces the same record. |
 
-**Returns:** The signal, `round(fs * seconds)` samples.
+**Returns:** The signal, `round(fs * duration_s)` samples.
 
 **Raises**
 

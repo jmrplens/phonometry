@@ -200,8 +200,8 @@ def test_evaluation_period_levels_match_ejemplo_3_1() -> None:
     (Annex IV A.3.4.2 b), rounded as the regulation prescribes.
     """
     periods = _example_periods()
-    day = rd.evaluation_period_level(periods["day"], hours=12.0)
-    evening = rd.evaluation_period_level(periods["evening"], hours=4.0)
+    day = rd.evaluation_period_level(periods["day"], duration_hours=12.0)
+    evening = rd.evaluation_period_level(periods["evening"], duration_hours=4.0)
     assert rd.round_reported_level(day) == 57
     assert rd.round_reported_level(evening) == 51
     # Independent recomputation of the same energy means.
@@ -238,7 +238,7 @@ def test_evaluation_period_rejects_durations_that_do_not_sum_to_the_period() -> 
     """Annex IV A.3.4.2 b requires "La suma de los Ti = T"."""
     phases = [rd.NoisePhase(2.0, 50.0)]
     with pytest.raises(ValueError, match="sum Ti = T"):
-        rd.evaluation_period_level(phases, hours=12.0)
+        rd.evaluation_period_level(phases, duration_hours=12.0)
 
 
 # --------------------------------------------------------------------------- #
@@ -354,7 +354,7 @@ def test_maximum_infrastructure_limits_annex_iii_table_a2(
     area: str, expected: float
 ) -> None:
     """Annex III Table A2: the LAmax limit for rail and airport infrastructure."""
-    assert rd.maximum_infrastructure_limit(area) == expected
+    assert rd.max_infrastructure_limit(area) == expected
 
 
 @pytest.mark.parametrize(
@@ -566,9 +566,13 @@ def test_assess_activity_reports_only_the_periods_supplied() -> None:
 # --------------------------------------------------------------------------- #
 def test_noise_phase_validation() -> None:
     """A phase needs a positive duration, a finite level and non-negative corrections."""
-    with pytest.raises(ValueError, match=r"'hours' must be a positive, finite number"):
+    with pytest.raises(
+        ValueError, match=r"'duration_hours' must be a positive, finite number"
+    ):
         rd.NoisePhase(0.0, 50.0)
-    with pytest.raises(ValueError, match=r"'hours' must be a positive, finite number"):
+    with pytest.raises(
+        ValueError, match=r"'duration_hours' must be a positive, finite number"
+    ):
         rd.NoisePhase(-1.0, 50.0)
     with pytest.raises(ValueError, match=r"'laeq' must be finite"):
         rd.NoisePhase(1.0, math.nan)
@@ -701,7 +705,7 @@ def _one_period(period: str = "day") -> rd.PeriodAssessment:
     """One assessed period, laid out as :func:`assess_activity` returns it."""
     return rd.PeriodAssessment(
         period=period,
-        phases=(rd.NoisePhase(hours=12.0, laeq=52.0, kt=3.0),),
+        phases=(rd.NoisePhase(duration_hours=12.0, laeq=52.0, kt=3.0),),
         duration_hours=12.0,
         evaluation_period_level=55.2,
         long_term_corrected_level=None,

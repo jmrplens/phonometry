@@ -255,19 +255,19 @@ by_position = [
 ]
 check = noise_control.check_source_positions(by_position)
 print(check.max_octave_spread_db)   # 4.5
-print(check.required_positions)     # 5
+print(check.n_required_positions)     # 5
 print(check.satisfied)              # False
 ```
 
 Dos posiciones más, y el apartado añade que las tres usadas primero no deberían
 volver a usarse. Pasados los seis decibelios, el exceso se hace constar en el
-informe, que es lo que marca `exceeds_maximum`.
+informe, que es lo que marca `exceeds_max`.
 
 Las demás reglas numéricas de los dos apartados también están.
 `check_band_flatness` es la exigencia de que los tres niveles de tercio de
 octava dentro de una octava difieran como mucho 6 dB en 125 Hz, 5 dB en 250 Hz
 y 4 dB por encima, que es lo que hace que un resultado en octavas signifique lo
-que la norma dice que significa. `minimum_cabin_clearance_m` es la distancia de
+que la norma dice que significa. `min_cabin_clearance_m` es la distancia de
 6.2, escrita exactamente como está impresa, incluida la frase de baja
 frecuencia que la relaja en vez de apretarla. `internal_noise_level` es el
 ruido que hacen los propios ventiladores de la cabina, corregido por el fondo

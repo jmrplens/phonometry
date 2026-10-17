@@ -46,7 +46,7 @@ def _cnossos_rail_case(case: dict[str, str]) -> RailwayEmissionResult:
     idling = case["condition"] == "idling"
     traction = "traction_idling" if idling else "traction_constant"
     stock = ph.environment.RollingStock(
-        axles=int(vehicle["axles"]),
+        n_axles=int(vehicle["axles"]),
         wheel_roughness=(
             lam,
             wavelength[("wheel_roughness", vehicle["wheel_roughness"])],

@@ -67,7 +67,7 @@ print(round(100 * metrology.largest_element_fraction(10.0), 2))  # 2.18
 All ten rows of Table A.1 come out to the five decimals it prints. A.1.6 asks
 for the largest element to be no more than 3 % of the sphere; at 10° steps it
 is the one at 90°, 2,18 %, the "approximately 2,2 %" of A.1.7, and a step of
-15° (3,26 %) warns with a `SphereDivisionWarning`. `planes=4` gives the four
+15° (3,26 %) warns with a `SphereDivisionWarning`. `n_planes=4` gives the four
 planes at 45° of NOTE 2 of A.6, which halve every factor.
 
 The 72 factors sum to one only when the readings at 0° and 180° enter both

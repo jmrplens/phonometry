@@ -128,7 +128,7 @@ III are what a single emitter is held to.
 | Annex II, Table A | Outdoor objectives by acoustic area type: e 60/60/50, a 65/65/55, d 70/70/65, c 73/73/63, b 75/75/65 dB (as amended by RD 1038/2012) | `outdoor_quality_objectives()` |
 | Annex II, Table B | Indoor objectives by building use and room type | `indoor_quality_objectives()` |
 | Annex II, Table C | Vibration objective $Law$ | `vibration_quality_objective()` |
-| Annex III, Tables A1 and A2 | Limit values for new road, rail and airport infrastructure, and $L_\mathrm{Amax}$ | `infrastructure_limits()`, `maximum_infrastructure_limit()` |
+| Annex III, Tables A1 and A2 | Limit values for new road, rail and airport infrastructure, and $L_\mathrm{Amax}$ | `infrastructure_limits()`, `max_infrastructure_limit()` |
 | Annex III, Table B1 | Limit values for port infrastructure and activities | `activity_limits()` |
 | Annex III, Table B2 | Noise transmitted by activities to acoustically adjacent premises | `adjacent_premises_limits()` |
 
@@ -147,7 +147,7 @@ environment.outdoor_quality_objectives("a")                       # 65 / 65 / 55
 environment.outdoor_quality_objectives("a", urbanization="new")   # 60 / 60 / 50 dB
 environment.indoor_quality_objectives("residential", "bedrooms")  # 40 / 40 / 30 dB
 environment.infrastructure_limits("a")                            # 60 / 60 / 50 dB
-environment.maximum_infrastructure_limit("a")                         # 85 dB (LAmax)
+environment.max_infrastructure_limit("a")                         # 85 dB (LAmax)
 environment.activity_limits("a")                                  # 55 / 55 / 45 dB
 environment.adjacent_premises_limits("residential", "bedrooms")   # 35 / 35 / 25 dB
 environment.vibration_quality_objective("residential")            # 75 dB

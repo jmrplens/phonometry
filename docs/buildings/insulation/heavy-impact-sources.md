@@ -141,7 +141,7 @@ freqs = [63.0, 125.0, 250.0, 500.0]
 li_fmax = [65.3, 64.5, 58.0, 55.8]           # energy-averaged over ball positions
 t = [1.43, 3.70, 3.10, 2.38]                 # receiving-room reverberation time
 
-res = building.standardized_maximum_impact_level(li_fmax, 41.4, t, frequencies=freqs)
+res = building.standardized_max_impact_level(li_fmax, 41.4, t, frequencies=freqs)
 print(res.volume_term)                        # 10 lg(41.4/50) = -0.8 dB
 print(building.fast_reverberation_correction([0.5]))   # exactly 0 dB at T = T0
 res.plot()   # measured and standardized spectra (needs matplotlib)
@@ -174,7 +174,7 @@ deliberately unrounded intermediate the standard prints:
 from phonometry import building
 
 # ISO 717-2:2020 Table D.4: a field measurement in octave bands.
-res = building.a_weighted_maximum_impact_level([65.3, 64.5, 58.0, 55.8])
+res = building.a_weighted_max_impact_level([65.3, 64.5, 58.0, 55.8])
 print(list(res.corrected))   # 39.1, 48.3, 49.3, 52.6 dB
 print(res.unrounded)         # 55.350667... dB
 print(res.rating)            # 55 dB
@@ -198,11 +198,11 @@ tolerances, via `building.heavy_impact_source_specification`,
 `building.heavy_impact_source_limits` and
 `building.check_heavy_impact_source`; the standardized maximum impact sound
 pressure level of Formulae (4), (5) and (6) and the octave synthesis of
-Formula (20), via `building.standardized_maximum_impact_level`,
+Formula (20), via `building.standardized_max_impact_level`,
 `building.fast_reverberation_correction` and
 `building.heavy_impact_octave_levels`; and the normative A-weighted rating of
 ISO 717-2:2020 Annex D with the Table D.3 corrections, via
-`building.a_weighted_maximum_impact_level`.
+`building.a_weighted_max_impact_level`.
 
 **Not covered.** The field measurement procedure itself (the four or more
 drop positions of ISO 10140-3 Annex A and the microphone positions) is not

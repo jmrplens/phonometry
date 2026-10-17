@@ -779,7 +779,7 @@ from phonometry import building
 
 # A 2 mm x 100 mm-deep slit: its transmission peaks at the half-wavelength
 # resonances of the slit depth.
-print(building.slit_resonance_frequencies(depth=0.1, width_m=0.002, orders=2).round().tolist())  # [~1500, ~3100]
+print(building.slit_resonance_frequencies(depth=0.1, width_m=0.002, n_orders=2).round().tolist())  # [~1500, ~3100]
 
 # A wall of Rw = 50 dB with 1 % of its area left open as a slit is capped:
 print(round(float(building.composite_transmission_loss([0.99, 0.01], [50.0, 0.0])), 1))   # 20.0

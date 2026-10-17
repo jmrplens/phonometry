@@ -134,7 +134,7 @@ rng = np.random.default_rng(3095)
 p = 0.25 * np.sqrt(angle / np.pi + 1e-4) * rng.standard_normal(t.size)
 
 passby = environment.pass_by_measurement(p, fs, start_s=front_s, end_s=front_s + tp)
-print(round(tp, 2), round(passby.equivalent_level_db, 1), round(passby.maximum_level_db, 1))
+print(round(tp, 2), round(passby.equivalent_level_db, 1), round(passby.max_level_db, 1))
 # 4.5 81.3 81.9   T_p en s, L_pAeq,Tp y L_pAFmax en dB
 ```
 
@@ -207,7 +207,7 @@ repartidas por igual entre ambas cuando esas dos distan más de 50 m (7.5.1.1,
 figura 10):
 
 ```python
-print(environment.type_test_speeds(160.0), environment.minimum_curve_radius(160.0))
+print(environment.type_test_speeds(160.0), environment.min_curve_radius(160.0))
 # (80.0, 160.0) 5000.0
 print(environment.acceleration_test_positions(108.0))
 # [-10.  17.  44.]   metros por detrás de la cabeza de la unidad, como las dibuja la figura 10
@@ -655,7 +655,7 @@ nivel de exposición al tránsito de la ISO 3095:2005 o la fórmula B.1),
 `transit_exposure_level`, `pass_by_time`, `stationary_unit_level` y
 `stationary_test` (fórmulas 1 a 3 y 5.8.1), `rolling_stock_test` para los
 ensayos a velocidad constante, de arranque y de frenado con la dispersión de
-9.3, `type_test_speeds`, `minimum_curve_radius`,
+9.3, `type_test_speeds`, `min_curve_radius`,
 `acceleration_test_positions`, `impulsiveness_rise_speed` (anexo A),
 `check_adjacent_vehicle_neutrality` (6.3.4), `background_level_increase`
 (anexo D), `check_small_roughness_deviations` (anexo C),

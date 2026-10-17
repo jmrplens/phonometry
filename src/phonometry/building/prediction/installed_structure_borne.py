@@ -839,7 +839,7 @@ _MULTI_JUNCTION_ADJUSTMENT: dict[int, float] = {1: 0.0, 2: 4.0, 3: 6.0}
 MIN_MULTI_JUNCTION_KIJ_DB: float = -5.0
 
 
-def multi_junction_adjustment(junctions: int) -> float:
+def multi_junction_adjustment(n_junctions: int) -> float:
     r"""Vibration reduction index adjustment ``dK`` (EN 12354-5, clause F.1).
 
     When the receiving room is more than one junction away from the equipment,
@@ -849,14 +849,14 @@ def multi_junction_adjustment(junctions: int) -> float:
     junctions and 6 dB for three or more, with the resulting ``Kij`` floored at
     :data:`MIN_MULTI_JUNCTION_KIJ_DB`.
 
-    :param junctions: Number of junctions the transmission path crosses (>= 1).
+    :param n_junctions: Number of junctions the transmission path crosses (>= 1).
     :return: The adjustment ``dK``, in dB (0,0 for a single junction).
     :raises ValueError: for fewer than one junction.
     """
-    if junctions < 1:
-        msg = "'junctions' must be at least 1."
+    if n_junctions < 1:
+        msg = "'n_junctions' must be at least 1."
         raise ValueError(msg)
-    return _MULTI_JUNCTION_ADJUSTMENT[min(junctions, 3)]
+    return _MULTI_JUNCTION_ADJUSTMENT[min(n_junctions, 3)]
 
 
 def structure_to_airborne_adjustment(

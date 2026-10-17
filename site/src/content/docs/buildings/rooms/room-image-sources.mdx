@@ -114,8 +114,8 @@ res = room.image_source_rir(
     receiver=(5.2, 3.4, 1.7),
     absorption=0.12,          # uniform wall absorption (scalar)
     fs=48000,
-    # Enough order to cover a T30 fit; see "Choosing max_order, duration and
-    # fs" below. The default 20 truncates this room's tail by half.
+    # Enough order to cover a T30 fit; see "Choosing max_order, duration_s
+    # and fs" below. The default 20 truncates this room's tail by half.
     max_order=60,
 )
 
@@ -360,7 +360,7 @@ plt.show()
 | `max_order` | int | — | ≥ 0, default 20 | Reflection-order cut-off |
 | `speed_of_sound` | float | m/s | > 0, default 343 | Speed of sound `c` |
 | `air_attenuation_per_m` | float or (n,) | 1/m | ≥ 0, default 0 | Air intensity coefficient `m` |
-| `duration` | float, optional | s | > 0 | RIR length (default: last image arrival) |
+| `duration_s` | float, optional | s | > 0 | RIR length (default: last image arrival) |
 | `frequencies` | (n,), optional | Hz | — | Band centres labelling a per-band result |
 
 Returns an `ImageSourceResult` (`ir`, `fs`, `frequencies`, and the exact
@@ -370,7 +370,7 @@ with `.plot()`, `.plot_geometry()` (the mirror-room plan above) and a
 the shoebox image count and `reflection_density(t, volume)` the density
 $4\pi c^3 t^2 / V$.
 
-### Choosing `max_order`, `duration` and `fs`
+### Choosing `max_order`, `duration_s` and `fs`
 
 `max_order` is not a quality knob, it is a **time horizon**. The image lattice
 is complete only out to a radius of roughly `max_order` × the shortest room
@@ -442,7 +442,7 @@ plt.show()
 **`t30_valid` cannot see a truncated lattice.** It reads the decay range of
 whatever array it is handed, so it returns `True` at every order in the table
 above. The flag catches a noisy or too-short *recording*; it cannot catch a
-model that stopped generating reflections. A `duration` shorter than the decay
+model that stopped generating reflections. A `duration_s` shorter than the decay
 truncates the tail exactly the same way, and silently.
 
 Two more caveats belong to the same section. `fs` quantises every arrival to

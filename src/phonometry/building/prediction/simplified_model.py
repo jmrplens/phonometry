@@ -80,7 +80,7 @@ __all__ = [
     "flanking_element",
     "flanking_path",
     "impact_flanking_correction",
-    "junction_minimum_vibration_reduction",
+    "junction_min_vibration_reduction",
     "junction_vibration_reduction",
     "predicted_airborne_insulation",
     "predicted_impact_insulation",
@@ -670,7 +670,7 @@ def junction_vibration_reduction(
     return kij
 
 
-def junction_minimum_vibration_reduction(
+def junction_min_vibration_reduction(
     coupling_length: float, s_i: float, s_j: float
 ) -> float:
     r"""Minimum vibration reduction index ``Kij,min`` (EN 12354-1 Clause 4.4.2).
@@ -762,7 +762,7 @@ def flanking_path(
     (``max(k_ij, kij_min)``) before the path is formed, enforcing the floor
     :math:`K_{ij} \ge K_{ij,\mathrm{min}}` of Clause 4.4.2 (compute
     ``kij_min`` with
-    :func:`junction_minimum_vibration_reduction`). Left as ``None`` the raw ``k_ij``
+    :func:`junction_min_vibration_reduction`). Left as ``None`` the raw ``k_ij``
     is used unchanged.
 
     :param label: Human-readable path name.
@@ -821,7 +821,7 @@ def flanking_element(
     the flanking element) and ``KFd``/``KDf`` to
     :math:`10 \log_{10}[l_\mathrm{f} l_0 (1/S_\mathrm{F} + 1/S_\mathrm{s})]` (flanking and separating
     element), via
-    :func:`junction_minimum_vibration_reduction`. Without ``flanking_area`` the
+    :func:`junction_min_vibration_reduction`. Without ``flanking_area`` the
     per-path floors cannot be formed from the available geometry, so the raw
     ``k_ff``/``k_fd``/``k_df`` are used unchanged; compute the floors
     yourself (or call :func:`flanking_path` with ``kij_min``) in that case to
@@ -848,10 +848,10 @@ def flanking_element(
     kij_min_ff: float | None = None
     kij_min_cross: float | None = None
     if flanking_area is not None:
-        kij_min_ff = junction_minimum_vibration_reduction(
+        kij_min_ff = junction_min_vibration_reduction(
             coupling_length, flanking_area, flanking_area
         )
-        kij_min_cross = junction_minimum_vibration_reduction(
+        kij_min_cross = junction_min_vibration_reduction(
             coupling_length, flanking_area, separating_area
         )
     ff = flanking_path(

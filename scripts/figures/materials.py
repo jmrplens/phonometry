@@ -1322,7 +1322,7 @@ def generate_qrd_geometry(output_dir: str) -> None:
         depths,
         pitch - fin,
         ax=ax,
-        repetitions=2,
+        n_repetitions=2,
         fin_width=fin,
         language=_LANG,
     )
@@ -1378,13 +1378,13 @@ def generate_metadiffuser_polar(output_dir: str) -> None:
         wells,
         depth_m=depth,
         period_m=period_m,
-        repetitions=6,
+        n_repetitions=6,
     )
     qrd = materials.predict_diffuser_polar_response(
         period_m,
         2000.0,
         depths=qrd_depths,
-        repetitions=6,
+        n_repetitions=6,
         include_obliquity=False,
     )
     _fig, ax = plt.subplots(
@@ -1654,10 +1654,10 @@ def generate_metadiffuser_spectrum(output_dir: str) -> None:
         [500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000], dtype=float
     )
     meta = materials.metadiffuser_diffusion_spectrum(
-        freqs, wells, depth_m=depth, period_m=period_m, repetitions=6
+        freqs, wells, depth_m=depth, period_m=period_m, n_repetitions=6
     )
     qrd = materials.predicted_diffusion_spectrum(
-        period_m, freqs, depths=qrd_depths, repetitions=6, include_obliquity=False
+        period_m, freqs, depths=qrd_depths, n_repetitions=6, include_obliquity=False
     )
     f_lobe = 343.0 / (5 * period_m)
 
@@ -2171,7 +2171,7 @@ def generate_qrd_working_band(output_dir: str) -> None:
         width,
         freqs,
         depths=depths,
-        repetitions=repetitions,
+        n_repetitions=repetitions,
         speed_of_sound=c,
         normalize=False,
     )
@@ -2179,7 +2179,7 @@ def generate_qrd_working_band(output_dir: str) -> None:
         width,
         freqs,
         depths=np.zeros_like(depths),
-        repetitions=repetitions,
+        n_repetitions=repetitions,
         speed_of_sound=c,
         normalize=False,
     )
@@ -2281,7 +2281,7 @@ def generate_diffuser_modulation(output_dir: str) -> None:
             width,
             1000.0,
             depths=depths,
-            repetitions=1,
+            n_repetitions=1,
             angles_deg=angles,
             speed_of_sound=c,
         )
@@ -2321,7 +2321,7 @@ def generate_diffuser_modulation(output_dir: str) -> None:
             width,
             freqs,
             depths=depths,
-            repetitions=1,
+            n_repetitions=1,
             angles_deg=angles,
             speed_of_sound=c,
         )
@@ -2376,7 +2376,7 @@ def generate_diffusion_polar(output_dir: str) -> None:
         3.6 / 42,
         1000.0,
         depths=depths,
-        repetitions=6,
+        n_repetitions=6,
         speed_of_sound=343.0,
     )
     result = materials.directional_diffusion(angles, np.round(predicted.levels, 3))
@@ -2436,10 +2436,10 @@ def generate_diffuser_prediction(output_dir: str) -> None:
     )
     depths = materials.qrd_well_depths(7, 500.0)
     qrd = materials.predicted_diffusion_spectrum(
-        0.10, freqs, depths=depths, repetitions=5
+        0.10, freqs, depths=depths, n_repetitions=5
     )
     flat = materials.predicted_diffusion_spectrum(
-        0.10, freqs, depths=np.zeros_like(depths), repetitions=5, normalize=False
+        0.10, freqs, depths=np.zeros_like(depths), n_repetitions=5, normalize=False
     )
 
     _fig, ax = plt.subplots(figsize=(10, 6))

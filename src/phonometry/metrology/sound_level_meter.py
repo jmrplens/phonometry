@@ -28,7 +28,7 @@ NOTE to 22 t) gives in the statement. The record takes that uncertainty
 beside the total,
 :attr:`SoundLevelMeterPeriodicMeasurements.acoustic_weighting_uncertainties_without_correction_data_db`
 and its Clause 13 twin, and a result it clears is listed under
-:attr:`SoundLevelMeterPeriodicVerification.over_maximum_by_correction_data`
+:attr:`SoundLevelMeterPeriodicVerification.over_max_by_correction_data`
 and :attr:`SoundLevelMeterPeriodicVerification.failed` rather than under
 ``unusable``. Without it the total is all the verdict knows, and 4.3 applies.
 
@@ -178,7 +178,7 @@ __all__ = [
     "PERIODIC_TEST_ENVIRONMENT",
     "SLM_PERIODIC_REQUIREMENTS",
     "TONEBURST_TEST_DURATIONS_MS",
-    "MaximumUncertaintyRow",
+    "MaxUncertaintyRow",
     "PeakReference",
     "SoundLevelMeterFeatures",
     "SoundLevelMeterPeriodicMeasurements",
@@ -275,7 +275,7 @@ class PeakReference(RichDisplay):
 
 
 @dataclass(frozen=True)
-class MaximumUncertaintyRow(RichDisplay):
+class MaxUncertaintyRow(RichDisplay):
     """One row of IEC 61672-1:2013 Table B.1, a maximum-permitted uncertainty.
 
     :ivar requirement: The requirement, as the "Requirement" column prints it.
@@ -429,9 +429,7 @@ IEC61672_TABLE_5: tuple[PeakReference, ...] = (
 )
 
 
-def _directional(
-    angle: str, cells: tuple[float, ...]
-) -> tuple[MaximumUncertaintyRow, ...]:
+def _directional(angle: str, cells: tuple[float, ...]) -> tuple[MaxUncertaintyRow, ...]:
     """The five frequency bands of a directional-response row of Table B.1."""
     bands = (
         (250.0, 1000.0, True, "250 Hz to 1 kHz"),
@@ -441,7 +439,7 @@ def _directional(
         (8000.0, 12500.0, False, ">8 kHz to 12,5 kHz"),
     )
     return tuple(
-        MaximumUncertaintyRow(
+        MaxUncertaintyRow(
             f"Directional response: θ = {angle}",
             f"Table 2; {text}",
             value,
@@ -466,13 +464,13 @@ _HIGH_LEVEL_STABILITY = "High-level stability"
 #: uncertainties of measurement for a coverage probability of 95 %, for
 #: pattern-evaluation and periodic tests, in the printed order. The one cell
 #: that prints two figures, the F and S decay rates of 5.8.2, is two rows.
-IEC61672_TABLE_B1: tuple[MaximumUncertaintyRow, ...] = (
+IEC61672_TABLE_B1: tuple[MaxUncertaintyRow, ...] = (
     *_directional("30°", (0.25, 0.25, 0.35, 0.45, 0.55)),
     *_directional("90° & 150°", (0.25, 0.45, 0.45, 0.85, 1.15)),
-    MaximumUncertaintyRow(
+    MaxUncertaintyRow(
         _B1_WEIGHTING, "Table 3, 10 Hz to 4 kHz", 0.60, lower_hz=10.0, upper_hz=4000.0
     ),
-    MaximumUncertaintyRow(
+    MaxUncertaintyRow(
         _B1_WEIGHTING,
         "Table 3, >4 kHz to 10 kHz",
         0.70,
@@ -480,7 +478,7 @@ IEC61672_TABLE_B1: tuple[MaximumUncertaintyRow, ...] = (
         upper_hz=10000.0,
         includes_lower=False,
     ),
-    MaximumUncertaintyRow(
+    MaxUncertaintyRow(
         _B1_WEIGHTING,
         "Table 3, >10 kHz to 20 kHz",
         1.00,
@@ -488,27 +486,25 @@ IEC61672_TABLE_B1: tuple[MaximumUncertaintyRow, ...] = (
         upper_hz=20000.0,
         includes_lower=False,
     ),
-    MaximumUncertaintyRow("A vs. C or Z at 1 kHz", "5.5.9", 0.20),
-    MaximumUncertaintyRow(_B1_LINEARITY, "5.6.5", 0.30),
-    MaximumUncertaintyRow("1 dB to 10 dB change in level", "5.6.6", 0.25),
-    MaximumUncertaintyRow("F and S decay rates", "5.8.2, F", 3.50, unit="dB/s"),
-    MaximumUncertaintyRow("F and S decay rates", "5.8.2, S", 0.40, unit="dB/s"),
-    MaximumUncertaintyRow("F vs. S level at 1 kHz", "5.8.3", 0.20),
-    MaximumUncertaintyRow(_TONEBURST_RESPONSE, "5.9.2, Table 4", 0.30),
-    MaximumUncertaintyRow("Repeated tonebursts", "5.10.1, Table 4", 0.30),
-    MaximumUncertaintyRow(_OVERLOAD_INDICATION, "5.11.3", 0.25),
-    MaximumUncertaintyRow("C-weighted peak sound levels", "5.13.3, Table 5", 0.35),
-    MaximumUncertaintyRow("Stability during continuous operation", "5.14.2", 0.10),
-    MaximumUncertaintyRow(_HIGH_LEVEL_STABILITY, "5.15.2", 0.10),
-    MaximumUncertaintyRow("Analogue electrical output", "5.19.2", 0.15),
-    MaximumUncertaintyRow("Power supply voltage", "5.23.2", 0.20),
-    MaximumUncertaintyRow("Static pressure influence", "6.2.1; 6.2.2", 0.30),
-    MaximumUncertaintyRow("Air temperature influence", "6.3.3; 6.3.4", 0.30),
-    MaximumUncertaintyRow("Humidity influence", "6.4", 0.30),
-    MaximumUncertaintyRow(
-        "Combined temperature and humidity", "6.3.3, 6.3.4, 6.4", 0.35
-    ),
-    MaximumUncertaintyRow("AC and radio-frequency fields", "6.6.6", 0.30),
+    MaxUncertaintyRow("A vs. C or Z at 1 kHz", "5.5.9", 0.20),
+    MaxUncertaintyRow(_B1_LINEARITY, "5.6.5", 0.30),
+    MaxUncertaintyRow("1 dB to 10 dB change in level", "5.6.6", 0.25),
+    MaxUncertaintyRow("F and S decay rates", "5.8.2, F", 3.50, unit="dB/s"),
+    MaxUncertaintyRow("F and S decay rates", "5.8.2, S", 0.40, unit="dB/s"),
+    MaxUncertaintyRow("F vs. S level at 1 kHz", "5.8.3", 0.20),
+    MaxUncertaintyRow(_TONEBURST_RESPONSE, "5.9.2, Table 4", 0.30),
+    MaxUncertaintyRow("Repeated tonebursts", "5.10.1, Table 4", 0.30),
+    MaxUncertaintyRow(_OVERLOAD_INDICATION, "5.11.3", 0.25),
+    MaxUncertaintyRow("C-weighted peak sound levels", "5.13.3, Table 5", 0.35),
+    MaxUncertaintyRow("Stability during continuous operation", "5.14.2", 0.10),
+    MaxUncertaintyRow(_HIGH_LEVEL_STABILITY, "5.15.2", 0.10),
+    MaxUncertaintyRow("Analogue electrical output", "5.19.2", 0.15),
+    MaxUncertaintyRow("Power supply voltage", "5.23.2", 0.20),
+    MaxUncertaintyRow("Static pressure influence", "6.2.1; 6.2.2", 0.30),
+    MaxUncertaintyRow("Air temperature influence", "6.3.3; 6.3.4", 0.30),
+    MaxUncertaintyRow("Humidity influence", "6.4", 0.30),
+    MaxUncertaintyRow("Combined temperature and humidity", "6.3.3, 6.3.4, 6.4", 0.35),
+    MaxUncertaintyRow("AC and radio-frequency fields", "6.6.6", 0.30),
 )
 
 
@@ -1525,7 +1521,7 @@ _FEATURES: tuple[str, ...] = (
     "s_time_weighting",
     "time_averaged",
     "sound_exposure_level",
-    "level_ranges",
+    "n_level_ranges",
     "c_weighted_peak",
 )
 
@@ -1554,7 +1550,7 @@ _FEATURE_TESTS: dict[str, str] = {
 #: The whole clauses a single feature brings into the test, and what the
 #: verdict says of a meter without it.
 _CLAUSE_FEATURES: dict[str, tuple[str, str]] = {
-    "17": ("level_ranges", "the meter has one level range (17.1)"),
+    "17": ("n_level_ranges", "the meter has one level range (17.1)"),
     "19": (
         "c_weighted_peak",
         "the meter does not measure C-weighted peak sound level (8.1)",
@@ -1651,7 +1647,7 @@ class SoundLevelMeterFeatures(RichDisplay):
         not measure sound exposure level.
     :ivar sound_exposure_level: The measurement of sound exposure level: the
         sound exposure level toneburst responses of Clause 18 (18.2).
-    :ivar level_ranges: How many level ranges the meter has, as the
+    :ivar n_level_ranges: How many level ranges the meter has, as the
         instruction manual identifies them (IEC 61672-1 5.1.12): 1 for a
         meter with one, which takes Clause 17 out (17.1), and for more, the
         number 17.4 covers, the reference level range included, and 17.3
@@ -1666,7 +1662,7 @@ class SoundLevelMeterFeatures(RichDisplay):
     s_time_weighting: bool | None = None
     time_averaged: bool | None = None
     sound_exposure_level: bool | None = None
-    level_ranges: int | None = None
+    n_level_ranges: int | None = None
     c_weighted_peak: bool | None = None
 
     def __post_init__(self) -> None:
@@ -1681,7 +1677,7 @@ class SoundLevelMeterFeatures(RichDisplay):
         """
         for name in _FEATURES:
             value = getattr(self, name)
-            if value is None or name == "level_ranges":
+            if value is None or name == "n_level_ranges":
                 continue
             if not isinstance(value, bool | np.bool_):
                 msg = f"'{name}' must be True, False or None (not declared)."
@@ -1692,7 +1688,7 @@ class SoundLevelMeterFeatures(RichDisplay):
 
     def _hold_level_ranges(self) -> None:
         """The number of level ranges as an int from 1 up, or ``None``."""
-        count = self.level_ranges
+        count = self.n_level_ranges
         if count is None:
             return
         if (
@@ -1701,11 +1697,11 @@ class SoundLevelMeterFeatures(RichDisplay):
             or count < 1
         ):
             msg = (
-                "'level_ranges' must be the number of level ranges, a whole "
+                "'n_level_ranges' must be the number of level ranges, a whole "
                 f"number from 1 up, or None (not declared); got {count!r}."
             )
             raise ValueError(msg)
-        object.__setattr__(self, "level_ranges", int(count))
+        object.__setattr__(self, "n_level_ranges", int(count))
 
     def _refuse_what_5_1_9_rules_out(self) -> None:
         """A feature without the one it needs, or a meter that indicates nothing."""
@@ -1751,7 +1747,7 @@ class SoundLevelMeterPeriodicRequirement(RichDisplay):
         operating range (16.4), no overload indication during the
         C-weighted peak test (19.3, 19.5) and the latching of the overload
         indicator (20.5).
-    :ivar over_maximum_by_correction_data: The results whose actual
+    :ivar over_max_by_correction_data: The results whose actual
         uncertainty exceeds its maximum only because it includes the
         uncertainty of the manufacturer's free-field or random-incidence
         correction data (4.4): results that did not conform, for that
@@ -1764,7 +1760,7 @@ class SoundLevelMeterPeriodicRequirement(RichDisplay):
     labels: tuple[str, ...]
     verifications: tuple[ConformanceVerification, ...]
     checks: tuple[tuple[str, bool], ...] = ()
-    over_maximum_by_correction_data: tuple[str, ...] = ()
+    over_max_by_correction_data: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         """One label per result, and at least one result.
@@ -1785,11 +1781,11 @@ class SoundLevelMeterPeriodicRequirement(RichDisplay):
         within = {
             label
             for label, v in zip(self.labels, self.verifications, strict=True)
-            if v.uncertainty_within_maximum
+            if v.uncertainty_within_max
         }
         stray = [
             label
-            for label in self.over_maximum_by_correction_data
+            for label in self.over_max_by_correction_data
             if label not in self.labels or label in within
         ]
         if stray:
@@ -1815,14 +1811,14 @@ class SoundLevelMeterPeriodicRequirement(RichDisplay):
     def unusable(self) -> tuple[str, ...]:
         """The results whose uncertainty exceeds the maximum permitted (4.3).
 
-        All of them but those of :attr:`over_maximum_by_correction_data`,
+        All of them but those of :attr:`over_max_by_correction_data`,
         which 4.4 lets the test proceed with.
         """
         return tuple(
             label
             for label, v in zip(self.labels, self.verifications, strict=True)
-            if not v.uncertainty_within_maximum
-            and label not in self.over_maximum_by_correction_data
+            if not v.uncertainty_within_max
+            and label not in self.over_max_by_correction_data
         )
 
     @property
@@ -1831,14 +1827,14 @@ class SoundLevelMeterPeriodicRequirement(RichDisplay):
 
         A result outside its acceptance limits and measured with an
         acceptable uncertainty, or one of
-        :attr:`over_maximum_by_correction_data` (4.4). A result that is
+        :attr:`over_max_by_correction_data` (4.4). A result that is
         :attr:`unusable` shows nothing about the meter (4.3) and is not here.
         """
         results = tuple(
             label
             for label, v in zip(self.labels, self.verifications, strict=True)
             if v.outcome == _OUTCOME_DEVIATION_EXCEEDS
-            or label in self.over_maximum_by_correction_data
+            or label in self.over_max_by_correction_data
         )
         return results + tuple(what for what, held in self.checks if not held)
 
@@ -1856,7 +1852,7 @@ class SoundLevelMeterPeriodicRequirement(RichDisplay):
         if label in _CHECK_FAILURES:
             return _CHECK_FAILURES[label]
         deviation = _REASONS[self.name]
-        if label not in self.over_maximum_by_correction_data:
+        if label not in self.over_max_by_correction_data:
             return deviation
         verification = self.verifications[self.labels.index(label)]
         if verification.deviation_within_limits:
@@ -1886,7 +1882,7 @@ class SoundLevelMeterPeriodicRequirement(RichDisplay):
         0,7 dB to 16 dB, is drawn as each result's margin to its nearer limit
         instead. A result whose uncertainty exceeds its maximum is drawn
         hollow, as 4.3 forbids using it, and a result of
-        :attr:`over_maximum_by_correction_data` as one that did not conform
+        :attr:`over_max_by_correction_data` as one that did not conform
         (4.4). The title names the clause and its verdict above the clause's
         heading.
 
@@ -2115,7 +2111,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
     def _open_question(self, name: str) -> str | None:
         """What is open about a feature, or ``None`` when nothing is."""
         state = self._state(name)
-        if name == "level_ranges" and self.features.level_ranges is None:
+        if name == "n_level_ranges" and self.features.n_level_ranges is None:
             if state is None:
                 return (
                     "it is not declared how many level ranges the meter has, and "
@@ -2157,8 +2153,8 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
         (:data:`_IMPLIED_ABSENT`): no C-weighted peak sound level without
         frequency weighting C (5.1.10), no S without F (5.1.9).
         """
-        if name == "level_ranges":
-            count = self.features.level_ranges
+        if name == "n_level_ranges":
+            count = self.features.n_level_ranges
             return None if count is None else count > 1
         declared: bool | None = getattr(self.features, name)
         if declared is None and name in _IMPLIED_ABSENT:
@@ -2182,14 +2178,14 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
             reference one than the meter has.
         """
         rows = self.measurements.range_linearity_deviations_db
-        count = self.features.level_ranges
+        count = self.features.n_level_ranges
         if rows is None or count is None:
             return
         held = _other_ranges_held(rows)
         if held > count - 1:
             msg = (
                 f"'range_linearity_deviations_db' covers {held} level ranges "
-                f"besides the reference one, and 'features.level_ranges' gives "
+                f"besides the reference one, and 'features.n_level_ranges' gives "
                 f"the meter {count}."
             )
             raise ValueError(msg)
@@ -2212,7 +2208,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
             "s_time_weighting": self._s_evidence,
             "time_averaged": self._time_averaged_evidence,
             "sound_exposure_level": self._exposure_evidence,
-            "level_ranges": self._ranges_evidence,
+            "n_level_ranges": self._ranges_evidence,
             "c_weighted_peak": self._peak_evidence,
         }
         return finders[name]()
@@ -2534,7 +2530,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
         record without that reading is short of it.
         """
         rows = self.measurements.range_linearity_deviations_db
-        count = self.features.level_ranges
+        count = self.features.n_level_ranges
         if rows is None or count is None:
             return []
         short = [
@@ -2672,7 +2668,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
         )
 
     @property
-    def over_maximum_by_correction_data(self) -> tuple[tuple[str, str], ...]:
+    def over_max_by_correction_data(self) -> tuple[tuple[str, str], ...]:
         """``(clause, result)`` for every result over its maximum only by 4.4.
 
         Its uncertainty exceeds the maximum only because it includes the
@@ -2683,7 +2679,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
         return tuple(
             (r.clause, label)
             for r in self.requirements
-            for label in r.over_maximum_by_correction_data
+            for label in r.over_max_by_correction_data
         )
 
     @property
@@ -3089,13 +3085,13 @@ def _weighting_requirement(
             labels.append(f"{prefix}{_hz_label(f)}")
             if (
                 split is not None
-                and not verification.uncertainty_within_maximum
+                and not verification.uncertainty_within_max
                 and verify_conformance(
                     d,
                     uncertainty=split[k],
                     acceptance_limits=table[f],
                     max_uncertainty=maximum,
-                ).uncertainty_within_maximum
+                ).uncertainty_within_max
             ):
                 over.append(labels[-1])
     return SoundLevelMeterPeriodicRequirement(
@@ -3104,7 +3100,7 @@ def _weighting_requirement(
         tables=_TABLES[name],
         labels=tuple(labels),
         verifications=tuple(verifications),
-        over_maximum_by_correction_data=tuple(over),
+        over_max_by_correction_data=tuple(over),
     )
 
 

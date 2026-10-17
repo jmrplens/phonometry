@@ -531,7 +531,7 @@ low_frequency_element_normalized_difference(
     l_in: Sequence[float] | np.ndarray,
     *,
     measurement_area: float,
-    elements: int = 1,
+    n_elements: int = 1,
     l_p: Sequence[float] | np.ndarray | None = None,
     frequencies: Sequence[float] | np.ndarray | None = None,
     absorbing_specimen_surface: bool = False,
@@ -562,7 +562,7 @@ disagree on the page, and this is the one that agrees with the physics.
 | `lp_surface` | Sound pressure levels over the surface of the test specimen in the source room, `LpS`, in dB. One value per band, or a `(positions, bands)` array that is energy-averaged. |
 | `l_in` | Normal sound intensity levels over the measurement surface in the receiving room, in dB. |
 | `measurement_area` | Measurement-surface area `Sm`, in m². |
-| `elements` | Number `N` of identical element units installed within the measurement surface, at least 1. |
+| `n_elements` | Number `N` of identical element units installed within the measurement surface, at least 1. |
 | `l_p` | Sound pressure levels on the measurement surface in the receiving room, measured alongside `l_in` (Clause 6.4.2), in dB, or `None` when they were not. |
 | `frequencies` | Mid-band frequencies, in hertz, or `None`. Clause 6.6 admits 50 Hz to 160 Hz and nothing else. |
 | `absorbing_specimen_surface` | `True` when the test specimen presents a sound-absorbing surface in the receiving room, which tightens the Clause 6.4.2 limit from 10 dB to 6 dB. |
@@ -573,7 +573,7 @@ disagree on the page, and this is the one that agrees with the physics.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if the band counts differ, if the measurement area is not positive, if `elements` is not a positive integer, if any level is non-finite, or if `frequencies` carries a band outside the range this part is defined for. |
+| ValueError | if the band counts differ, if the measurement area is not positive, if `n_elements` is not a positive integer, if any level is non-finite, or if `frequencies` carries a band outside the range this part is defined for. |
 
 ## low_frequency_intensity_reduction
 
@@ -658,7 +658,7 @@ LowFrequencyElementResult(
     surface_pressure_intensity_indicator: np.ndarray | None,
     frequencies: np.ndarray | None,
     measurement_area: float,
-    elements: int,
+    n_elements: int,
     *,
     absorbing_specimen_surface: bool,
 )
@@ -679,7 +679,7 @@ and ISO 717-1 needs sixteen.
 | `surface_pressure_intensity_indicator` | Surface-pressure intensity indicator $F_{pI}$ per band, in dB (Formula (5)), or `None` where the receiving-side pressure level was not measured alongside the intensity. |
 | `frequencies` | Mid-band frequencies, in hertz, or `None`. |
 | `measurement_area` | Measurement-surface area `Sm`, in m². |
-| `elements` | Number `N` of element units installed within the measurement surface. |
+| `n_elements` | Number `N` of element units installed within the measurement surface. |
 | `absorbing_specimen_surface` | Which of the two Clause 6.4.2 limits was applied. |
 
 ### LowFrequencyElementResult.indicator_limit

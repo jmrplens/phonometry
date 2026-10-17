@@ -250,7 +250,7 @@ def metadiffuser_polar_response(
     period_m: float,
     angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
-    repetitions: int = 1,
+    n_repetitions: int = 1,
     resonator_geometry: str = "slit",
     fluid: Fluid = ABSORBER_AIR,
 ) -> DiffuserPolarResponse:
@@ -272,7 +272,7 @@ def metadiffuser_polar_response(
     :param angles_deg: Receiver reflection angles ``theta``, in degrees.
     :param source_angle_deg: Angle of incidence ``psi`` of the source, in
         degrees; also applied to the local slit reflection.
-    :param repetitions: Number of repetitions ``N_p`` of the single period; the
+    :param n_repetitions: Number of repetitions ``N_p`` of the single period; the
         grating lobes of a Schroeder-like design require ``periods >= 2``.
     :param resonator_geometry: ``"slit"`` (default) for the paper's
         two-dimensional resonators, ``"square"`` for square-duct necks
@@ -303,7 +303,7 @@ def metadiffuser_polar_response(
         reflection=result.reflection[:, 0],
         angles_deg=angles_deg,
         source_angle_deg=source_angle_deg,
-        repetitions=repetitions,
+        n_repetitions=n_repetitions,
         speed_of_sound=fluid.speed_of_sound,
         include_obliquity=False,
     )
@@ -317,7 +317,7 @@ def metadiffuser_diffusion_spectrum(
     period_m: float,
     angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
-    repetitions: int = 1,
+    n_repetitions: int = 1,
     resonator_geometry: str = "slit",
     fluid: Fluid = ABSORBER_AIR,
 ) -> DiffusionSpectrum:
@@ -337,7 +337,7 @@ def metadiffuser_diffusion_spectrum(
     :param period_m: Well pitch ``d`` along the panel face, in metres.
     :param angles_deg: Receiver reflection angles ``theta``, in degrees.
     :param source_angle_deg: Angle of incidence ``psi``, in degrees.
-    :param repetitions: Number of repetitions ``N_p`` of the single period.
+    :param n_repetitions: Number of repetitions ``N_p`` of the single period.
     :param resonator_geometry: ``"slit"`` (default) for the paper's
         two-dimensional resonators, ``"square"`` for square-duct necks
         and cavities.
@@ -374,7 +374,7 @@ def metadiffuser_diffusion_spectrum(
             reflection=result.reflection[:, i],
             angles_deg=angles_deg,
             source_angle_deg=source_angle_deg,
-            repetitions=repetitions,
+            n_repetitions=n_repetitions,
             speed_of_sound=fluid.speed_of_sound,
             include_obliquity=False,
         )
@@ -384,7 +384,7 @@ def metadiffuser_diffusion_spectrum(
             reflection=flat,
             angles_deg=angles_deg,
             source_angle_deg=source_angle_deg,
-            repetitions=repetitions,
+            n_repetitions=n_repetitions,
             speed_of_sound=fluid.speed_of_sound,
             include_obliquity=False,
         )

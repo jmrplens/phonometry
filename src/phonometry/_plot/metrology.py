@@ -862,7 +862,7 @@ def _draw_verdicts(
     shown: set[str] = set()
     user_label = "label" in kwargs
     flags = (
-        [not v.uncertainty_within_maximum for v in verifications]
+        [not v.uncertainty_within_max for v in verifications]
         if unusable is None
         else list(unusable)
     )
@@ -1163,7 +1163,7 @@ def plot_sound_calibrator_verification(
             if not caller_colour
         ),
         *(
-            (bar, v.uncertainty_within_maximum)
+            (bar, v.uncertainty_within_max)
             for bar, v in zip(spread, verdicts, strict=True)
         ),
     ]
@@ -2139,7 +2139,7 @@ def plot_free_field_correction(
     ax = ax if ax is not None else _new_axes()
     frequencies = np.asarray(result.frequencies, dtype=np.float64)
     corrections = np.asarray(result.corrections_db, dtype=np.float64)
-    count = result.determinations
+    count = result.n_determinations
     if count > 1:
         ax.fill_between(
             frequencies,
@@ -2299,7 +2299,7 @@ def plot_correction_uncertainty_verification(
     :return: The axes.
     """
     from .._i18n import localize_axes
-    from ..metrology.free_field_corrections import maximum_expanded_uncertainty
+    from ..metrology.free_field_corrections import max_expanded_uncertainty
 
     ax = ax if ax is not None else _new_axes()
     frequencies = np.asarray(result.frequencies, dtype=np.float64)
@@ -2311,7 +2311,7 @@ def plot_correction_uncertainty_verification(
     )
     ax.plot(
         grid,
-        maximum_expanded_uncertainty(grid, clause=result.clause),
+        max_expanded_uncertainty(grid, clause=result.clause),
         color=_C_REFERENCE,
         lw=1.5,
         label=_t("Maximum, clause {n}", language, n=result.clause),

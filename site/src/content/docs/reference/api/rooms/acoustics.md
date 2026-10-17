@@ -180,10 +180,10 @@ MIN_BANDWIDTH_TIME_PRODUCT = 16.0
 MIN_DETECTOR_MULTIPLE = 2.0
 ```
 
-## minimum_reliable_reverberation_time
+## min_reliable_reverberation_time
 
 ```python
-minimum_reliable_reverberation_time(
+min_reliable_reverberation_time(
     bandwidth: ArrayLike,
     detector_time: float = 0.0,
 ) -> np.ndarray | float
@@ -432,7 +432,7 @@ band (the box names that band, the verdict line does not).
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare characterisation fiche (body, result and disclaimer only). The room-specific fields `room_volume`, `source_positions` and `receiver_positions` populate the header; `requirement` is read as the maximum acceptable reverberation time, compared with the descriptor the result box shows (the mid-frequency T where both mid bands carry a finite T30, otherwise a single band's T30). |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare characterisation fiche (body, result and disclaimer only). The room-specific fields `room_volume`, `n_source_positions` and `n_receiver_positions` populate the header; `requirement` is read as the maximum acceptable reverberation time, compared with the descriptor the result box shows (the mid-frequency T where both mid bands carry a finite T30, otherwise a single band's T30). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for parity with the other fiches; the room table already shows every computed parameter, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |

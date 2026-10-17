@@ -313,7 +313,7 @@ class MonteCarloResult(OwnsArrays):
     :ivar interval: Probabilistically symmetric coverage interval
         ``(low, high)`` (clause 7.7).
     :ivar coverage: The coverage probability of ``interval``.
-    :ivar trials: Number of Monte Carlo trials.
+    :ivar n_trials: Number of Monte Carlo trials.
     :ivar samples: The raw model-output sample (one value per trial), kept
         only when :func:`monte_carlo` is called with ``keep_samples=True``
         (it feeds the output-distribution histogram of :meth:`plot`).
@@ -323,7 +323,7 @@ class MonteCarloResult(OwnsArrays):
     standard_uncertainty: float
     interval: tuple[float, float]
     coverage: float
-    trials: int
+    n_trials: int
     samples: np.ndarray | None = field(default=None, repr=False)
 
     def plot(
@@ -656,7 +656,7 @@ def _sample(q: Quantity, size: int, rng: np.random.Generator) -> np.ndarray:
 def monte_carlo(
     model: Model,
     quantities: Sequence[Quantity],
-    trials: int = 1_000_000,
+    n_trials: int = 1_000_000,
     coverage: float = 0.95,
     seed: int | None = None,
     *,
@@ -664,7 +664,7 @@ def monte_carlo(
 ) -> MonteCarloResult:
     r"""Propagate uncertainty by the Monte Carlo method (Supplement 1).
 
-    Draws ``trials`` samples of each input from its PDF, evaluates the model and
+    Draws ``n_trials`` samples of each input from its PDF, evaluates the model and
     reports the sample mean, the sample standard deviation and the
     probabilistically symmetric coverage interval (clause 7.7).
 
@@ -679,7 +679,7 @@ def monte_carlo(
         :math:`f(x_1, \ldots, x_N)` returning ``y``;
         it must accept array arguments (vectorised over the trials).
     :param quantities: The input :class:`Quantity` objects, in argument order.
-    :param trials: Number of Monte Carlo trials ``M`` (at least 2; the sample
+    :param n_trials: Number of Monte Carlo trials ``M`` (at least 2; the sample
         standard deviation needs two values).
     :param coverage: Coverage probability of the reported interval.
     :param seed: Optional seed for the random generator (reproducibility).
@@ -693,15 +693,15 @@ def monte_carlo(
     if len(quantities) == 0:
         msg = "at least one input quantity is required."
         raise ValueError(msg)
-    if trials < _MIN_TRIALS:
-        msg = f"trials must be at least {_MIN_TRIALS}."
+    if n_trials < _MIN_TRIALS:
+        msg = f"'n_trials' must be at least {_MIN_TRIALS}."
         raise ValueError(msg)
     if not 0.0 < coverage < 1.0:
         msg = f"coverage must be in (0, 1); got {coverage}."
         raise ValueError(msg)
 
     rng = np.random.default_rng(seed)
-    samples = [_sample(q, trials, rng) for q in quantities]
+    samples = [_sample(q, n_trials, rng) for q in quantities]
     output = np.asarray(model(*samples), dtype=np.float64)
     # A model undefined over part of the sampled input domain (sqrt of a
     # Gaussian straddling zero, say) poisons every statistic below: the mean,
@@ -712,7 +712,7 @@ def monte_carlo(
     bad = int(np.count_nonzero(~np.isfinite(output)))
     if bad:
         msg = (
-            f"'model' returned a non-finite output for {bad} of {trials} "
+            f"'model' returned a non-finite output for {bad} of {n_trials} "
             "trials, so the estimate, its standard uncertainty and the "
             "coverage interval are undefined; restrict the input PDFs to the "
             "model's domain or fix the model."
@@ -727,6 +727,6 @@ def monte_carlo(
         standard_uncertainty=float(np.std(output, ddof=1)),
         interval=(float(low), float(high)),
         coverage=coverage,
-        trials=trials,
+        n_trials=n_trials,
         samples=output if keep_samples else None,
     )

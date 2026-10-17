@@ -188,7 +188,7 @@ against `(70, +inf)`).
 
 The actual uncertainty over the maximum permitted. Above 1 it fails.
 
-### ConformanceVerification.uncertainty_within_maximum
+### ConformanceVerification.uncertainty_within_max
 
 *property*
 

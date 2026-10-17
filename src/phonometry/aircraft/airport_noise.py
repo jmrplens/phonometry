@@ -1384,7 +1384,7 @@ def event_level(
     powers: NDArray[np.float64] | list[float],
     distances_m: NDArray[np.float64] | list[float],
     exposure_levels: NDArray[np.float64] | list[list[float]],
-    maximum_levels: NDArray[np.float64] | list[list[float]],
+    max_levels: NDArray[np.float64] | list[list[float]],
     *,
     reference_speed_m_s: float = _VREF_MS,
     mounting: str = "wing",
@@ -1406,7 +1406,7 @@ def event_level(
     :param powers: NPD tabulated power settings.
     :param distances_m: NPD tabulated slant distances, in metres.
     :param exposure_levels: NPD exposure (SEL) levels, shape ``(P, D)``.
-    :param maximum_levels: NPD maximum levels, shape ``(P, D)``.
+    :param max_levels: NPD maximum levels, shape ``(P, D)``.
     :param reference_speed_m_s: NPD reference speed, in m/s (default 160 kt).
     :param mounting: Engine mounting (``"wing"``/``"fuselage"``/``"propeller"``).
     :param metric: ``"exposure"`` (SEL) or ``"maximum"`` (LAmax).
@@ -1431,7 +1431,7 @@ def event_level(
     lr = _validate_ground_roll(segments.landing_roll, pts.shape[0])
     bk = _validate_bank(segments.bank, pts.shape[0])
     p, d, le = _clean_table(powers, distances_m, exposure_levels)
-    _, _, lm = _clean_table(powers, distances_m, maximum_levels)
+    _, _, lm = _clean_table(powers, distances_m, max_levels)
     imp = impedance_adjustment(
         temperature_c=atmosphere.temperature_c,
         static_pressure_kpa=atmosphere.static_pressure_kpa,
@@ -1511,7 +1511,7 @@ def noise_contour(
     powers: NDArray[np.float64] | list[float],
     distances_m: NDArray[np.float64] | list[float],
     exposure_levels: NDArray[np.float64] | list[list[float]],
-    maximum_levels: NDArray[np.float64] | list[list[float]],
+    max_levels: NDArray[np.float64] | list[list[float]],
     *,
     x: NDArray[np.float64] | list[float],
     y: NDArray[np.float64] | list[float],
@@ -1529,7 +1529,7 @@ def noise_contour(
     :param powers: NPD tabulated power settings.
     :param distances_m: NPD tabulated slant distances, in metres.
     :param exposure_levels: NPD exposure (SEL) levels, shape ``(P, D)``.
-    :param maximum_levels: NPD maximum levels, shape ``(P, D)``.
+    :param max_levels: NPD maximum levels, shape ``(P, D)``.
     :param x: Grid x coordinates, in metres.
     :param y: Grid y coordinates, in metres.
     :param reference_speed_m_s: NPD reference speed, in m/s.
@@ -1554,7 +1554,7 @@ def noise_contour(
     lr = _validate_ground_roll(segments.landing_roll, pts.shape[0])
     bk = _validate_bank(segments.bank, pts.shape[0])
     p, d, le = _clean_table(powers, distances_m, exposure_levels)
-    _, _, lm = _clean_table(powers, distances_m, maximum_levels)
+    _, _, lm = _clean_table(powers, distances_m, max_levels)
     vref = float(reference_speed_m_s)
     imp = impedance_adjustment(
         temperature_c=atmosphere.temperature_c,

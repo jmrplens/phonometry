@@ -351,7 +351,7 @@ $$
 (Ec. 19), o su forma con varias ubicaciones (Ec. 20), que es la Ec. 12 con
 la media de sucesos en el último término. `sound_energy_in_situ` toma los
 sucesos como un array 3D `(n, N, bandas)` para la forma de uno cada vez o
-como una medición 2D `(n, bandas)` con `events=N` para la otra, y devuelve
+como una medición 2D `(n, bandas)` con `n_events=N` para la otra, y devuelve
 el mismo tipo de resultado con `quantity='energy'`, el nivel en
 `sound_energy_level` y el total del Anexo D en `sound_energy_level_a`.
 
@@ -403,7 +403,7 @@ $\sigma_\mathrm{omc}$ = 2,0 dB, $k$ = 2.
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
 | `event_levels` | array 3D o 2D | dB | `(n, N, bandas)` o `(n, bandas)` | $L'_{Ei,q(\mathrm{ST})}$ por suceso, o $L'_{Ei,N(\mathrm{ST})}$ de una medición sobre $N$ sucesos |
-| `events` | int | | $\ge 1$ | $N$ para la forma 2D (Ec. 17); debe ser `None` con la forma 3D. El apartado 7.6 pide al menos cinco sucesos, así que menos de cinco avisa y la determinación no es conforme, en cualquiera de las dos formas |
+| `n_events` | int | | $\ge 1$ | $N$ para la forma 2D (Ec. 17); debe ser `None` con la forma 3D. El apartado 7.6 pide al menos cinco sucesos, así que menos de cinco avisa y la determinación no es conforme, en cualquiera de las dos formas |
 | `integration_time` | float | s | $> 0$ | $T$ de la medición del suceso; `None` aplica la Ec. 14 tal como está impresa |
 | `levels_ref`, `lw_ref`, `frequencies`, `background_levels`, `background_levels_ref`, `temperature_c`, `static_pressure_kpa`, `excess_levels`, `directivity_range`, `sigma_omc_db`, `coverage_factor` | | | | Como en `sound_power_in_situ()` |
 

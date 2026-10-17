@@ -8,10 +8,10 @@ single-number rating to ISO 717-1 with their own quantity written where that
 standard writes :math:`R`. Writing any of that twice would let the two copies
 drift, so it is written once here and imported by both public modules.
 
-Nothing in this module is a quantity of its own: the public names it defines
-are re-exported by :mod:`phonometry.noise_control.enclosure_insulation` and
-:mod:`phonometry.noise_control.cabin_insulation`, which is where a reader looks
-for them.
+Nothing in this module is a quantity of its own. Both public modules use what
+it defines, and the public names have one address:
+:mod:`phonometry.noise_control.enclosure_insulation`, the module of the older
+document, publishes them, and that is where a reader looks for them.
 """
 
 from __future__ import annotations

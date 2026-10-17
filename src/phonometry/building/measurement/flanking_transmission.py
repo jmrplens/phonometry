@@ -88,7 +88,7 @@ from ..._internal.validation import (
     require_scalar,
 )
 from ...filters.frequencies import _OCTAVE_SPACING_MIN_RATIO
-from .insulation import (
+from .ratings import (
     ImpactRatingResult,
     WeightedRatingResult,
     weighted_impact_rating,

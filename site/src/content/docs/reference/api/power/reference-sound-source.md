@@ -145,7 +145,7 @@ radiation_impedance_correction(
     *,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
-    radiation: RadiationCharacter = 'unknown',
+    radiation: Literal['monopole', 'dipole', 'unknown'] = 'unknown',
     frequencies_hz: ArrayLike | None = None,
     knee_frequency_hz: float | None = None,
 ) -> np.ndarray
@@ -185,11 +185,11 @@ reference_source_calibration(
     levels_db: ArrayLike,
     *,
     frequencies_hz: ArrayLike,
-    arrangement: MicrophoneArrangement,
+    arrangement: Literal['paths', 'fixed'],
     background_levels_db: ArrayLike | None = None,
     maximum_levels_db: ArrayLike | None = None,
     conditions: CalibrationConditions | None = None,
-    radiation: RadiationCharacter = 'unknown',
+    radiation: Literal['monopole', 'dipole', 'unknown'] = 'unknown',
     knee_frequency_hz: float | None = None,
     c2_db: ArrayLike | None = None,
     intensity_sound_power_level_db: ArrayLike | None = None,
@@ -246,9 +246,9 @@ marks the bands whose level was replaced, as B.2 asks the report to.
 reference_source_reproducibility_db(
     frequencies_hz: ArrayLike,
     *,
-    environment: CalibrationEnvironment,
-    arrangement: MicrophoneArrangement | None = None,
-    bandwidth: BandWidth = 'one-third-octave',
+    environment: Literal['hemi-anechoic', 'reverberation-room'],
+    arrangement: Literal['paths', 'fixed'] | None = None,
+    bandwidth: Literal['one-third-octave', 'octave'] = 'one-third-octave',
 ) -> np.ndarray
 ```
 
@@ -569,7 +569,7 @@ A-weighted sound power level over `a_weighted_range_hz` (5.3).
 ReferenceSourceCalibration.sound_power_level_at(
     frequencies_hz: ArrayLike,
     *,
-    bandwidth: BandWidth = 'one-third-octave',
+    bandwidth: Literal['one-third-octave', 'octave'] = 'one-third-octave',
     temperature_c: float | None = None,
     static_pressure_kpa: float | None = None,
 ) -> np.ndarray

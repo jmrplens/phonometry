@@ -29,7 +29,9 @@ from __future__ import annotations
 
 import ast
 import dataclasses
+import functools
 import importlib
+import importlib.util
 import inspect
 import itertools
 import json
@@ -39,7 +41,7 @@ import sys
 from collections.abc import Mapping
 from pathlib import Path
 from types import MappingProxyType
-from typing import TYPE_CHECKING, get_overloads
+from typing import TYPE_CHECKING, TypeAliasType, get_origin, get_overloads
 
 from api_taxonomy import (
     OBJECT_MODULE_OVERRIDES,
@@ -641,6 +643,161 @@ def _attribute_docstrings(module: ModuleType) -> dict[str, str]:
     return docs
 
 
+# --------------------------------------------------------------------------
+# Type aliases in signatures
+# --------------------------------------------------------------------------
+
+#: A quoted string inside an annotation (a ``Literal`` member), kept verbatim.
+_QUOTED_RE = re.compile(r"""('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")""")
+#: An identifier that starts a name in an annotation: not an attribute
+#: (``np.ndarray``), not the middle of a longer word.
+_ANNOTATION_NAME_RE = re.compile(r"(?<![\w.])[A-Za-z_]\w*")
+#: How deep one alias may name another before the expansion stops.
+_MAX_ALIAS_DEPTH = 5
+
+
+def _is_type_alias(obj: object) -> bool:
+    """Whether ``obj`` is a typing alias (``Literal[...]``, a union, ``type X``)."""
+    return get_origin(obj) is not None or isinstance(obj, TypeAliasType)
+
+
+def _defining_module(obj: object) -> str | None:
+    """The module whose namespace the annotations of ``obj`` were written in."""
+    target = obj.__func__ if isinstance(obj, (staticmethod, classmethod)) else obj
+    if not isinstance(target, type):
+        target = inspect.unwrap(target)  # type: ignore[arg-type]
+    module = getattr(target, "__module__", None)
+    return module if isinstance(module, str) else None
+
+
+@functools.cache
+def _module_tree(module_name: str) -> ast.Module | None:
+    try:
+        source = inspect.getsource(importlib.import_module(module_name))
+    except (OSError, TypeError, ImportError):
+        return None
+    return ast.parse(source)
+
+
+@functools.cache
+def _module_aliases(module_name: str) -> Mapping[str, str]:
+    """The type aliases ``module_name`` assigns at top level, as written.
+
+    The value is the right-hand side unparsed, so a multi-line ``Literal`` reads
+    on one line and every alias reads the way its author spelled it
+    (``NDArray[np.float64]``, not the generic alias numpy expands it into).
+    """
+    tree = _module_tree(module_name)
+    if tree is None:
+        return {}
+    module = sys.modules[module_name]
+    aliases: dict[str, str] = {}
+    for statement in tree.body:
+        name: str | None = None
+        value: ast.expr | None = None
+        if isinstance(statement, ast.TypeAlias) and isinstance(
+            statement.name, ast.Name
+        ):
+            name, value = statement.name.id, statement.value
+        elif (
+            isinstance(statement, ast.Assign)
+            and len(statement.targets) == 1
+            and isinstance(statement.targets[0], ast.Name)
+        ):
+            name, value = statement.targets[0].id, statement.value
+        elif (
+            isinstance(statement, ast.AnnAssign)
+            and isinstance(statement.target, ast.Name)
+            and statement.value is not None
+        ):
+            name, value = statement.target.id, statement.value
+        if name and value and _is_type_alias(getattr(module, name, None)):
+            aliases[name] = ast.unparse(value)
+    return MappingProxyType(aliases)
+
+
+@functools.cache
+def _module_imports(module_name: str) -> Mapping[str, tuple[str, str]]:
+    """``from X import name`` bindings at top level, ``TYPE_CHECKING`` included.
+
+    An annotation may name an alias the module imports only for the type
+    checker, so the runtime namespace does not hold it; the import does.
+    """
+    tree = _module_tree(module_name)
+    if tree is None:
+        return {}
+    package = sys.modules[module_name].__package__ or module_name
+    bindings: dict[str, tuple[str, str]] = {}
+    statements = list(tree.body)
+    while statements:
+        statement = statements.pop(0)
+        if isinstance(statement, ast.If):
+            statements[:0] = [*statement.body, *statement.orelse]
+        elif isinstance(statement, ast.ImportFrom):
+            source = importlib.util.resolve_name(
+                "." * statement.level + (statement.module or ""), package
+            )
+            for alias in statement.names:
+                bindings[alias.asname or alias.name] = (source, alias.name)
+    return MappingProxyType(bindings)
+
+
+def _find_alias(module_name: str, name: str, depth: int = 0) -> tuple[str, str] | None:
+    """``(defining module, definition)`` of the alias ``name`` reads as there."""
+    if depth > _MAX_ALIAS_DEPTH or not module_name.startswith("phonometry"):
+        return None
+    definition = _module_aliases(module_name).get(name)
+    if definition is not None:
+        return module_name, definition
+    imported = _module_imports(module_name).get(name)
+    if imported is None:
+        return None
+    return _find_alias(imported[0], imported[1], depth + 1)
+
+
+@functools.cache
+def _published_ids() -> frozenset[int]:
+    owners = public_names()
+    return frozenset(id(getattr(owners[name], name)) for name in owners)
+
+
+def expand_unpublished_aliases(text: str, module_name: str, depth: int = 0) -> str:
+    """Replace every type alias the library does not publish by its definition.
+
+    A signature is read on a page that links every published name, and
+    ``form: DeclarationForm`` names something a reader can neither import nor
+    look up: no type alias is public. So ``form: Literal['dual-number',
+    'single-number']`` is what the page shows, the alias's definition as its
+    author wrote it. An alias some package did publish would stay a name.
+
+    :param text: The annotation as the source writes it.
+    :param module_name: The module the annotation was written in, whose
+        namespace (and type-checking imports) say what each name is.
+    :param depth: Recursion guard for an alias whose definition names another.
+    :return: The annotation with each unpublished alias spelled out.
+    """
+    if depth > _MAX_ALIAS_DEPTH:
+        return text
+
+    def substitute(match: re.Match[str]) -> str:
+        found = _find_alias(module_name, match.group(0))
+        if found is None:
+            return match.group(0)
+        home, definition = found
+        alias_name = match.group(0)
+        obj = getattr(sys.modules[home], alias_name, None)
+        if obj is not None and id(obj) in _published_ids():
+            return alias_name
+        return expand_unpublished_aliases(definition, home, depth + 1)
+
+    pieces = _QUOTED_RE.split(text)
+    # Odd indices are the quoted strings the split kept; leave them as written.
+    return "".join(
+        piece if index % 2 else _ANNOTATION_NAME_RE.sub(substitute, piece)
+        for index, piece in enumerate(pieces)
+    )
+
+
 def format_signature(
     name: str,
     obj: Callable[..., object],
@@ -656,8 +813,10 @@ def format_signature(
     only that would document a contract the library refuses, so every head is
     rendered, separated by a blank line, the way a stub file shows them.
 
-    Stringized annotations (PEP 563, the repo style) are emitted verbatim.
-    Multi-line when the one-line form would be hard to read.
+    Stringized annotations (PEP 563, the repo style) are emitted as written,
+    except that a type alias the library does not publish is replaced by its
+    definition (see :func:`expand_unpublished_aliases`). Multi-line when the
+    one-line form would be hard to read.
     """
     heads = get_overloads(obj)
     if heads:
@@ -681,6 +840,7 @@ def _format_one_signature(
 ) -> str:
     """Render a single ``name(params) -> ret`` from ``inspect.signature``."""
     signature = inspect.signature(obj)
+    module = _defining_module(obj)
     parameters = list(signature.parameters.values())
     if drop_first and parameters and parameters[0].name in ("self", "cls"):
         parameters = parameters[1:]
@@ -699,13 +859,13 @@ def _format_one_signature(
             star_emitted = True
         if parameter.kind is inspect.Parameter.VAR_POSITIONAL:
             star_emitted = True
-        parts.append(_format_parameter(parameter))
+        parts.append(_format_parameter(parameter, module))
     if saw_positional_only:
         parts.append("/")
 
     returns = ""
     if not omit_return and signature.return_annotation is not (inspect.Signature.empty):
-        returns = f" -> {_format_annotation(signature.return_annotation)}"
+        returns = f" -> {_format_annotation(signature.return_annotation, module)}"
     one_line = f"{name}({', '.join(parts)}){returns}"
     if len(one_line) <= _MAX_SIGNATURE_LINE or not parts:
         return one_line
@@ -713,18 +873,19 @@ def _format_one_signature(
     return f"{name}(\n    {joined},\n){returns}"
 
 
-def _format_annotation(annotation: object) -> str:
+def _format_annotation(annotation: object, module: str | None = None) -> str:
     if isinstance(annotation, str):
         # PEP 563 stringizes annotations; an annotation that was already a
         # string literal in the source keeps its quotes. Strip them.
         text = annotation.strip()
         if len(text) >= 2 and text[0] == text[-1] and text[0] in "'\"":
             text = text[1:-1]
-        return text
-    return inspect.formatannotation(annotation)
+    else:
+        text = inspect.formatannotation(annotation)
+    return expand_unpublished_aliases(text, module) if module else text
 
 
-def _format_parameter(parameter: inspect.Parameter) -> str:
+def _format_parameter(parameter: inspect.Parameter, module: str | None = None) -> str:
     text = parameter.name
     if parameter.kind is inspect.Parameter.VAR_POSITIONAL:
         text = f"*{text}"
@@ -732,7 +893,7 @@ def _format_parameter(parameter: inspect.Parameter) -> str:
         text = f"**{text}"
     annotated = parameter.annotation is not inspect.Parameter.empty
     if annotated:
-        text = f"{text}: {_format_annotation(parameter.annotation)}"
+        text = f"{text}: {_format_annotation(parameter.annotation, module)}"
     if parameter.default is not inspect.Parameter.empty:
         if parameter.default is Ellipsis:
             # The placeholder an overload head uses for "whatever the
@@ -960,12 +1121,64 @@ def build_model() -> tuple[list[ModuleDoc], dict[str, str], list[str]]:
     return pages, xref, issues
 
 
-_TOP_LEVEL_INTRO = (
-    "Package-level names defined in `phonometry/__init__.py` itself. "
-    "Every public name in the library can also be imported directly from "
-    "`phonometry`; this page documents the few objects that live at the "
-    "top level."
+#: Counts the top-level page spells out in words.
+_COUNT_WORDS = (
+    "no",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
 )
+
+
+def _listed(items: list[str]) -> str:
+    """``a``, ``a and b``, ``a, b and c``."""
+    return ", ".join(items[:-1]) + (" and " if len(items) > 1 else "") + items[-1]
+
+
+def top_level_intro(here: list[str]) -> str:
+    """The opening of the top-level page: what it holds and where each is.
+
+    The top level publishes the domain subpackages and a few objects of its
+    own, and not every one of those is documented on its page: ``Signal`` is
+    documented with :mod:`phonometry.io`, the module that defines it. Saying
+    "documented here" of all of them would send a reader to the wrong page, so
+    the sentence is written from where each one really is.
+
+    :param here: The names the top-level page documents.
+    :return: The page's opening paragraph.
+    """
+    import phonometry
+
+    objects = [
+        name
+        for name in phonometry.__all__
+        if not inspect.ismodule(getattr(phonometry, name))
+    ]
+    count = len(objects)
+    counted = _COUNT_WORDS[count] if count < len(_COUNT_WORDS) else str(count)
+    on_page = [f"`{name}`" for name in objects if name in here]
+    elsewhere = [
+        f"`{name}` with `{attribute_module(name, getattr(phonometry, name))}`"
+        for name in objects
+        if name not in here
+    ]
+    where = []
+    if on_page:
+        verb = "is" if len(on_page) == 1 else "are"
+        where.append(f"{_listed(on_page)} {verb} documented here")
+    where.extend(elsewhere)
+    return (
+        f"The top level publishes the domain subpackages and {counted} objects "
+        f"that belong to no single domain. {_listed(where)}; every other name "
+        "is imported from its subpackage."
+    )
 
 
 def _build_page(
@@ -980,7 +1193,9 @@ def _build_page(
     attribute_docs = _attribute_docstrings(module)
     relative = module_name.removeprefix("phonometry.")
     basename = relative.rsplit(".", 1)[-1] if not top_level else "phonometry"
-    intro = _TOP_LEVEL_INTRO if top_level else inspect.cleandoc(module.__doc__ or "")
+    intro = (
+        top_level_intro(names) if top_level else inspect.cleandoc(module.__doc__ or "")
+    )
 
     slugger = _Slugger()
     members: list[MemberDoc] = []
@@ -1319,14 +1534,9 @@ def render_index(
         "```python",
         "from phonometry import filters, underwater",
         "",
-        "spl, freq = filters.octave_filter(x, fs)",
+        "r = filters.octave_filter(x, fs)",
         "snr = underwater.passive_sonar_equation(185.0, 60.0, 50.0)",
         "```",
-        "",
-        (
-            "Every documented name can also be imported directly from the "
-            "top-level package (`from phonometry import leq`)."
-        ),
         "",
         ":::note",
         (

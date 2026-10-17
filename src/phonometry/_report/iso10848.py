@@ -74,10 +74,7 @@ if TYPE_CHECKING:
         FlankingLevelDifferenceResult,
         VibrationReductionResult,
     )
-    from ..building.measurement.insulation import (
-        ImpactRatingResult,
-        WeightedRatingResult,
-    )
+    from ..building.measurement.ratings import ImpactRatingResult, WeightedRatingResult
     from .metadata import ReportMetadata
 
 #: Designation of each applicable ISO 10848 part. The overall flanking

@@ -48,7 +48,7 @@ core range stops at 3150 Hz, is the one the Spanish literature makes explicit
 (Avilés López & Perera Martín, note to expressions [7.15] and [7.16]). The
 library keeps both routes: this module implements the direct Formula
 (A.5)-(A.7) route, which is the normative one for DB-HR, and
-:func:`~phonometry.building.measurement.insulation.weighted_rating_extended` supplies the
+:func:`~phonometry.building.measurement.ratings.weighted_rating_extended` supplies the
 ISO 717-1 route with the enlarged-range adaptation terms.
 
 **Rounding.** DB-HR 3.1.3.1 point 4 requires the final values of the

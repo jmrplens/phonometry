@@ -74,7 +74,7 @@ ExposureResult(
     u3: float | None = None,
     n_samples: int | None = None,
     *,
-    instrument: InstrumentClass | None = None,
+    instrument: Literal['class1', 'class2', 'personal_exposimeter'] | None = None,
     tasks: tuple[TaskContribution, ...] = ...,
     sample_range_db: float | None = None,
     n_workers: int | None = None,
@@ -187,7 +187,7 @@ Upper limit `LEX,8h + U` of the one-sided 95 % interval, dB.
 full_day_exposure(
     samples: Sequence[float],
     effective_duration_hours: float,
-    instrument: InstrumentClass = 'personal_exposimeter',
+    instrument: Literal['class1', 'class2', 'personal_exposimeter'] = 'personal_exposimeter',
     u3: float = 1.0,
     *,
     warn: bool = True,
@@ -227,7 +227,7 @@ INSTRUMENT_U2 = {'class1': 0.7, 'class2': 1.5, 'personal_exposimeter': 1.5}
 job_based_exposure(
     samples: Sequence[float],
     effective_duration_hours: float,
-    instrument: InstrumentClass = 'personal_exposimeter',
+    instrument: Literal['class1', 'class2', 'personal_exposimeter'] = 'personal_exposimeter',
     u3: float = 1.0,
     n_workers: int | None = None,
     sample_duration_hours: float | None = None,
@@ -311,7 +311,7 @@ Task(
     duration_samples: tuple[float, ...] | None = None,
     duration_range: tuple[float, float] | None = None,
     label: str | None = None,
-    instrument: InstrumentClass | None = None,
+    instrument: Literal['class1', 'class2', 'personal_exposimeter'] | None = None,
 )
 ```
 
@@ -333,7 +333,7 @@ One task of a task-based measurement (ISO 9612:2009 Clause 9).
 ```python
 task_based_exposure(
     tasks: Sequence[Task],
-    instrument: InstrumentClass = 'personal_exposimeter',
+    instrument: Literal['class1', 'class2', 'personal_exposimeter'] = 'personal_exposimeter',
     u3: float = 1.0,
     *,
     include_duration_uncertainty: bool = True,

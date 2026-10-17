@@ -40,7 +40,6 @@ from phonometry.noise_control.screen_in_situ import (
     MINIMUM_SCREEN_DIMENSION_M,
     OPERATOR_HEIGHT_M,
     OPERATOR_HEIGHT_TOLERANCE_M,
-    OPERATOR_SPHERE_RADIUS_M,
     OUTDOOR_RANGE_M,
     SCREEN_DISTANCE_FACTORS,
     ScreenInSituWarning,
@@ -208,7 +207,7 @@ def test_fewer_than_three_repeats_is_refused() -> None:
 
 
 def test_the_operator_geometry_is_the_printed_one() -> None:
-    assert OPERATOR_SPHERE_RADIUS_M == 0.3
+    assert noise_control.OPERATOR_SPHERE_RADIUS_M == 0.3
     assert OPERATOR_HEIGHT_M == 1.55
     assert OPERATOR_HEIGHT_TOLERANCE_M == 0.075
     assert OUTDOOR_RANGE_M == 25.0
@@ -216,11 +215,13 @@ def test_the_operator_geometry_is_the_printed_one() -> None:
 
 
 def test_the_sphere_is_the_one_the_cabin_standard_prints() -> None:
-    from phonometry.noise_control.cabin_insulation import (
-        OPERATOR_SPHERE_RADIUS_M as cabin_radius,
-    )
+    """ISO 11821 reuses the ISO 11957 sphere, published once, by the cabin module."""
+    import importlib
 
-    assert OPERATOR_SPHERE_RADIUS_M == cabin_radius
+    cabin = importlib.import_module("phonometry.noise_control.cabin_insulation")
+    screen = importlib.import_module("phonometry.noise_control.screen_in_situ")
+    assert "OPERATOR_SPHERE_RADIUS_M" in cabin.__all__
+    assert "OPERATOR_SPHERE_RADIUS_M" not in screen.__all__
 
 
 def test_the_band_ranges_are_the_printed_ones() -> None:

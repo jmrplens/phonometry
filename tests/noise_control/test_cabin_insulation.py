@@ -522,12 +522,21 @@ def test_the_scope_and_geometry_constants_are_the_printed_ones() -> None:
 
 
 def test_the_leak_ratio_is_shared_with_the_enclosure_module() -> None:
+    """ISO 11957 prints the leak ratio of ISO 11546, so it has one address."""
+    import importlib
+
     from phonometry.noise_control import enclosure_insulation
 
-    assert (
-        noise_control.cabin_insulation.__module__
-        != enclosure_insulation.leak_ratio.__module__
-    )
+    cabin = importlib.import_module("phonometry.noise_control.cabin_insulation")
+    assert noise_control.leak_ratio is enclosure_insulation.leak_ratio
+    for name in (
+        "MANDATORY_BAND_RANGE_HZ",
+        "PREFERRED_BAND_RANGE_HZ",
+        "leak_ratio",
+        "seal_ratio",
+    ):
+        assert name in enclosure_insulation.__all__
+        assert name not in cabin.__all__
     assert noise_control.leak_ratio(0.02, 6.0) == pytest.approx(0.02 / 6.0)
 
 

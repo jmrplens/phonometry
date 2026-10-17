@@ -63,10 +63,10 @@ from ..._internal.validation import (
     require_same_length,
 )
 from ..._internal.warnings import PhonometryWarning
-from .insulation import (
+from .insulation import _as_band_levels
+from .ratings import (
     ImpactRatingResult,
     WeightedRatingResult,
-    _as_band_levels,
     weighted_impact_rating,
     weighted_rating,
 )

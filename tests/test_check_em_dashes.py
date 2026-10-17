@@ -22,6 +22,10 @@ from __future__ import annotations
 
 import pathlib
 import sys
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -159,3 +163,48 @@ def test_a_citation_inside_a_caption_still_carries_its_own_dash() -> None:
     """
     text = '*Read against "Acoustics — Part 2: rooms", the curve is flat.*\n'
     assert ced.markdown_hits(text) == []
+
+
+def test_the_site_data_modules_are_read_by_default(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The home page's text and the catalogue notes are published prose.
+
+    The guard once read the glossary cards and nothing else under
+    ``site/src/data``, so an em dash in the home page's text reached the
+    site with the gate green.
+    """
+    monkeypatch.chdir(pathlib.Path(__file__).resolve().parent.parent)
+    assert "site/src/data" in ced.DEFAULT_ROOTS
+    read = {path.as_posix() for path in ced.iter_files(ced.DEFAULT_ROOTS)}
+    for published in (
+        "site/src/data/home.ts",
+        "site/src/data/glossary.mjs",
+        "site/src/data/catalogue-es.json",
+    ):
+        assert published in read
+
+
+def test_dash_in_a_typescript_data_module_is_refused(tmp_path: pathlib.Path) -> None:
+    page = tmp_path / "home.ts"
+    page.write_text(
+        "// A comment keeps its dash — nobody reads it on the page.\n"
+        "export const NOTE = 'One call — and the figure is drawn.';\n",
+        encoding="utf-8",
+    )
+    assert ced.scan(page) == [2]
+
+
+def test_dash_in_a_json_string_is_refused_unless_it_quotes_a_source(
+    tmp_path: pathlib.Path,
+) -> None:
+    notes = tmp_path / "catalogue-es.json"
+    notes.write_text(
+        "{\n"
+        '  "the page prints “—” where the number would be": "x",\n'
+        '  "empty": "—",\n'
+        '  "note": "la tabla — sin cifra",\n'
+        "}\n",
+        encoding="utf-8",
+    )
+    assert ced.scan(notes) == [4]

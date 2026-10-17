@@ -80,11 +80,10 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .insulation import (
+from .insulation import _as_band_levels, energy_average_level
+from .ratings import (
     ImpactRatingResult,
     WeightedRatingResult,
-    _as_band_levels,
-    energy_average_level,
     weighted_impact_rating,
     weighted_rating,
 )

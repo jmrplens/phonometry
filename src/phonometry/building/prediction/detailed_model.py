@@ -123,7 +123,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     from ..._report.metadata import ReportMetadata
-    from ..measurement.insulation import ImpactRatingResult, WeightedRatingResult
+    from ..measurement.ratings import ImpactRatingResult, WeightedRatingResult
 
 #: Speed of sound in air ``co`` used throughout EN/ISO 12354 (Annex A): 340 m/s.
 SPEED_OF_SOUND: float = 340.0
@@ -1943,7 +1943,7 @@ def detailed_airborne_prediction(
     :return: The :class:`DetailedAirborneResult`.
     :raises ValueError: If a path does not match the band count.
     """
-    from ..measurement.insulation import weighted_rating
+    from ..measurement.ratings import weighted_rating
 
     f = require_positive_array(frequencies, "frequencies")
     direct = BandPath(
@@ -1996,7 +1996,7 @@ def detailed_impact_prediction(
     :raises ValueError: If a path does not match the band count, or if neither
         a direct level nor any flanking path is given.
     """
-    from ..measurement.insulation import weighted_impact_rating
+    from ..measurement.ratings import weighted_impact_rating
 
     f = require_positive_array(frequencies, "frequencies")
     if direct_level is None and not flanking_paths:

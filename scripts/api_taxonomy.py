@@ -593,15 +593,13 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "MOLAR_GAS_CONSTANT": "phonometry.fluids.gas",
     "ideal_gas": "phonometry.fluids.gas",
     # The band ranges, the leak ratio and the seal ratio are printed in the
-    # same words by ISO 11546 and ISO 11957, so they are defined once and
-    # re-exported by both modules, and a plain scan sees them twice. The
-    # enclosure is the older document and owns them.
+    # same words by ISO 11546 and ISO 11957, so they are defined once, in the
+    # private noise_control._insulation_shared, and published by the module of
+    # the older document, the enclosure. The cabin module uses the band range
+    # too, so a plain scan sees it in both.
     "MANDATORY_BAND_RANGE_HZ": "phonometry.noise_control.enclosure_insulation",
     "PREFERRED_BAND_RANGE_HZ": "phonometry.noise_control.enclosure_insulation",
     "leak_ratio": "phonometry.noise_control.enclosure_insulation",
-    # ISO 11957 prints the operator sphere first and ISO 11821 reuses it, so
-    # the cabin module owns the constant and the screen module imports it.
-    "OPERATOR_SPHERE_RADIUS_M": "phonometry.noise_control.cabin_insulation",
     "seal_ratio": "phonometry.noise_control.enclosure_insulation",
     # The two sound speeds and the jet diameter are owned by the aerodynamic
     # valve module and imported by the hydrodynamic one, which IEC 60534-8-4
@@ -778,9 +776,6 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # The ISO 9614-1 Table B.3 limit on F1, defined beside the F1 it bounds and
     # imported by the discrete-point determination that gates on it.
     "TEMPORAL_VARIABILITY_LIMIT": "phonometry.emission.intensity",
-    # A typing.Literal alias, so it reports "typing" as its module; documented
-    # with the declaration whose `form` argument it types.
-    "DeclarationForm": "phonometry.emission.declaration",
     # Defined in phonometry._plot.room; documented helper for the ISO 18233
     # excitation signals that live in room.impulse_response.
     "plot_excitation": "phonometry.room.impulse_response",

@@ -53,8 +53,9 @@ $R$, and the background correction is handed to
 ISO 3741 the clauses point at.
 
 The leak ratio of definition 3.14 and the seal ratio of its note are printed
-word for word as in ISO 11546, so they are imported from
-[`phonometry.noise_control.enclosure_insulation`](/phonometry/reference/api/noise_control/enclosure-insulation/) rather than written twice.
+word for word as in ISO 11546, and so are the band ranges, so they are written
+once and published by [`phonometry.noise_control.enclosure_insulation`](/phonometry/reference/api/noise_control/enclosure-insulation/),
+the module of the older document, rather than a second time here.
 The scope is tighter here: ISO 11546 only prefers a leak ratio under 2 %, while
 clause 1 of ISO 11957 makes it a condition of applicability.
 
@@ -131,7 +132,7 @@ cabin_insulation(
     cabin_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-    method: CabinMethod = 'laboratory',
+    method: Literal['laboratory', 'in-situ-loudspeaker', 'in-situ-actual-noise'] = 'laboratory',
     band_fraction: int = 3,
     room_background_levels: ArrayLike | None = None,
     cabin_background_levels: ArrayLike | None = None,
@@ -763,7 +764,7 @@ uncertainty_conditions(
     *,
     room_volume_m3: float,
     cabin_volume_m3: float,
-    method: CabinMethod = 'laboratory',
+    method: Literal['laboratory', 'in-situ-loudspeaker', 'in-situ-actual-noise'] = 'laboratory',
 ) -> CabinUncertainty
 ```
 

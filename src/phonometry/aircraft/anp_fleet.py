@@ -479,6 +479,8 @@ class AnpAircraft(RichDisplay):
     :ivar power_parameter: Name/unit of the NPD power parameter.
     :ivar approach_spectral_class_id: Spectral class of the approach NPD.
     :ivar departure_spectral_class_id: Spectral class of the departure NPD.
+    :ivar database: The :class:`AnpDatabase` the aircraft was read from, which
+        its NPD, spectral-class, profile and Doc 29 methods consult.
     """
 
     aircraft_id: str
@@ -491,11 +493,11 @@ class AnpAircraft(RichDisplay):
     power_parameter: str
     approach_spectral_class_id: str
     departure_spectral_class_id: str
-    _database: AnpDatabase = field(repr=False, compare=False)
+    database: AnpDatabase = field(repr=False, compare=False)
 
     def npd_curves(self, operation: str, metric: str = "SEL") -> AnpNpdCurves:
         """NPD curves for this aircraft (see :meth:`AnpDatabase.npd_curves`)."""
-        return self._database.npd_curves(self.aircraft_id, operation, metric)
+        return self.database.npd_curves(self.aircraft_id, operation, metric)
 
     def spectral_class(self, operation: str) -> SpectralClass:
         """Spectral class of this aircraft's NPD for an operation.
@@ -510,7 +512,7 @@ class AnpAircraft(RichDisplay):
             if op == _DEPARTURE
             else self.approach_spectral_class_id
         )
-        return self._database.spectral_class(class_id)
+        return self.database.spectral_class(class_id)
 
     def revised_npd_curves(
         self,
@@ -523,7 +525,7 @@ class AnpAircraft(RichDisplay):
         absorption: str = "arp5534",
     ) -> RevisedNpdCurves:
         """NPD curves for another atmosphere (see :meth:`AnpDatabase.revised_npd_curves`)."""
-        return self._database.revised_npd_curves(
+        return self.database.revised_npd_curves(
             self.aircraft_id,
             operation,
             metric,
@@ -537,7 +539,7 @@ class AnpAircraft(RichDisplay):
         self, operation: str, stage_length: int = 1, *, profile_id: str | None = None
     ) -> AnpProfile:
         """Fixed-point profile (see :meth:`AnpDatabase.profile`)."""
-        return self._database.profile(
+        return self.database.profile(
             self.aircraft_id, operation, stage_length, profile_id=profile_id
         )
 
@@ -555,7 +557,7 @@ class AnpAircraft(RichDisplay):
         absorption: str = "arp5534",
     ) -> FlyoverResult:
         """Single-event level at a receiver (see :meth:`AnpDatabase.event_level`)."""
-        return self._database.event_level(
+        return self.database.event_level(
             self.aircraft_id,
             observer,
             operation,
@@ -583,7 +585,7 @@ class AnpAircraft(RichDisplay):
         absorption: str = "arp5534",
     ) -> NoiseContourResult:
         """Single-event ground contour (see :meth:`AnpDatabase.noise_contour`)."""
-        return self._database.noise_contour(
+        return self.database.noise_contour(
             self.aircraft_id,
             operation,
             x=x,
@@ -642,7 +644,6 @@ class AnpDatabase:
         ],
         distances: NDArray[np.float64],
         profiles: Mapping[tuple[str, str, str, int], NDArray[np.float64]],
-        performance: _PerformanceTables | None = None,
         spectral_classes: Mapping[str, SpectralClass] | None = None,
     ) -> None:
         self._aircraft = dict(aircraft)
@@ -655,10 +656,33 @@ class AnpDatabase:
         }
         self._distances = read_only_copy(distances)
         self._profiles = {key: read_only_copy(path) for key, path in profiles.items()}
-        self._performance = (
-            performance if performance is not None else _PerformanceTables()
-        )
+        # Only an export carries the performance tables, and only
+        # load_anp_database reads one (through _from_export); a database built
+        # here flies fixed-point profiles and refuses a procedural one.
+        self._performance = _PerformanceTables()
         self._spectral_classes = dict(spectral_classes or {})
+
+    @classmethod
+    def _from_export(
+        cls,
+        aircraft: Mapping[str, dict[str, str]],
+        npd: Mapping[
+            tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]
+        ],
+        distances: NDArray[np.float64],
+        profiles: Mapping[tuple[str, str, str, int], NDArray[np.float64]],
+        *,
+        performance: _PerformanceTables,
+        spectral_classes: Mapping[str, SpectralClass] | None = None,
+    ) -> AnpDatabase:
+        """A database holding the performance tables an ANP export carries.
+
+        The tables are the parser's own record, not something a caller builds,
+        so they enter here rather than through the public constructor.
+        """
+        database = cls(aircraft, npd, distances, profiles, spectral_classes)
+        database._performance = performance
+        return database
 
     @property
     def aircraft_ids(self) -> list[str]:
@@ -689,7 +713,7 @@ class AnpDatabase:
             power_parameter=m.get("Power Parameter", ""),
             approach_spectral_class_id=m.get("Approach Spectral Class ID", ""),
             departure_spectral_class_id=m.get("Departure Spectral Class ID", ""),
-            _database=self,
+            database=self,
         )
 
     @property
@@ -1783,7 +1807,7 @@ def load_anp_database(path: Path | str | None = None) -> AnpDatabase:
     npd, distances = _parse_npd(_pick("npd", tables))
     profiles = _parse_profiles(_pick("fixed_point", tables))
     spectral = _optional_table("spectral", tables)
-    return AnpDatabase(
+    return AnpDatabase._from_export(
         aircraft=aircraft,
         npd=npd,
         distances=distances,

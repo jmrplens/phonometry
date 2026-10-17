@@ -158,7 +158,7 @@ helmholtz_resonator_impedance(
     geometry: str = 'square',
     fluid: Fluid = ...,
     sum_terms: int = 40,
-) -> Complex
+) -> NDArray[np.complex128]
 ```
 
 Acoustic impedance of a Helmholtz resonator with visco-thermal losses.
@@ -312,7 +312,7 @@ rectangular_duct_properties(
     side: float,
     fluid: Fluid = ...,
     sum_terms: int = 40,
-) -> tuple[Complex, Complex]
+) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]
 ```
 
 Effective density and bulk modulus of a square duct of the given side.
@@ -359,7 +359,7 @@ slit_effective_properties(
     *,
     slit_height: float,
     fluid: Fluid = ...,
-) -> tuple[Complex, Complex]
+) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]
 ```
 
 Effective density and bulk modulus of a narrow slit of height `h`.
@@ -440,15 +440,15 @@ only the front air impedance carries `cos(theta)`.
 
 ```python
 SlitResonatorAbsorberResult(
-    frequencies: Real,
+    frequencies: NDArray[np.float64],
     angle_rad: float,
-    surface_impedance: Complex,
-    normalized_impedance: Complex,
-    reflection: Complex,
-    absorption: Real,
-    effective_wavenumber: Complex,
-    effective_impedance: Complex,
-    transfer_matrix: Complex,
+    surface_impedance: NDArray[np.complex128],
+    normalized_impedance: NDArray[np.complex128],
+    reflection: NDArray[np.complex128],
+    absorption: NDArray[np.float64],
+    effective_wavenumber: NDArray[np.complex128],
+    effective_impedance: NDArray[np.complex128],
+    transfer_matrix: NDArray[np.complex128],
     *,
     resonators: tuple[HelmholtzResonator, ...] | None = None,
     slit_height: float | None = None,

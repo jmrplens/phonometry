@@ -41,7 +41,7 @@ absorption_coefficient_uncertainty(
     u_a: ArrayLike,
     t_b: ArrayLike,
     u_b: ArrayLike,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Uncertainty of a Sabine absorption coefficient (ISO 17497-1, A.3/A.4).
@@ -79,7 +79,7 @@ the standard is taken as a single (mean) speed of sound.
 ```python
 air_attenuation_coefficient(
     pressure_attenuation_db_per_m: ArrayLike,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Energy attenuation coefficient `m` (ISO 17497-1, Clause 8, Eq. (3)).
@@ -132,7 +132,7 @@ base_plate_scattering(
     t3: ArrayLike,
     m1: ArrayLike = 0.0,
     m3: ArrayLike = 0.0,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Scattering coefficient of the base plate alone (ISO 17497-1, Eq. (6)).
@@ -210,7 +210,7 @@ random_incidence_absorption(
     t2: ArrayLike,
     m1: ArrayLike = 0.0,
     m2: ArrayLike = 0.0,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Random-incidence absorption coefficient `alpha_s` (ISO 17497-1, Eq. (1)).
@@ -247,7 +247,7 @@ situation 2 adds the test sample, still without turntable rotation
 ## reverberation_time_uncertainty
 
 ```python
-reverberation_time_uncertainty(times: ArrayLike) -> Real
+reverberation_time_uncertainty(times: ArrayLike) -> NDArray[np.float64]
 ```
 
 Standard uncertainty of a reverberation time (ISO 17497-1, Eq. (A.1)).
@@ -282,7 +282,7 @@ scattering_coefficient(
     alpha_s: ArrayLike,
     *,
     truncate_negative: bool = True,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Random-incidence scattering coefficient `s` (ISO 17497-1, Eq. (5)).
@@ -392,10 +392,10 @@ Advisory for out-of-range scattering/diffusion measurement conditions.
 
 ```python
 ScatteringResult(
-    frequencies: Real,
-    scattering: Real,
-    random_incidence: Real,
-    specular: Real,
+    frequencies: NDArray[np.float64],
+    scattering: NDArray[np.float64],
+    random_incidence: NDArray[np.float64],
+    specular: NDArray[np.float64],
 )
 ```
 
@@ -473,7 +473,10 @@ rating.
 ## ScatteringUncertainty
 
 ```python
-ScatteringUncertainty(u_scattering: Real, expanded: Real)
+ScatteringUncertainty(
+    u_scattering: NDArray[np.float64],
+    expanded: NDArray[np.float64],
+)
 ```
 
 Uncertainty of the scattering coefficient (ISO 17497-1, Annex A).
@@ -498,7 +501,7 @@ specular_absorption_coefficient(
     t4: ArrayLike,
     m3: ArrayLike = 0.0,
     m4: ArrayLike = 0.0,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Specular absorption coefficient `alpha_spec` (ISO 17497-1, Eq. (4)).
@@ -535,7 +538,7 @@ apparent (specular) absorption includes the energy lost to scattering.
 ## speed_of_sound_iso17497
 
 ```python
-speed_of_sound_iso17497(*, temperature_c: ArrayLike) -> Real
+speed_of_sound_iso17497(*, temperature_c: ArrayLike) -> NDArray[np.float64]
 ```
 
 Speed of sound in air (ISO 17497-1:2004, Clause 8, Eq. (2)).

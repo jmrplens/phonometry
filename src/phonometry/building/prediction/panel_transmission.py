@@ -116,7 +116,7 @@ if TYPE_CHECKING:
 
     from ...fluids import Fluid
     from ...materials.absorbers.porous import PorousMediumResult
-    from ..measurement.insulation import WeightedRatingResult
+    from ..measurement.ratings import WeightedRatingResult
 
 #: Default speed of sound in air ``c0``, m/s, of the single-property entry
 #: points: the published air's own, so the module spells 343 m/s once.
@@ -342,9 +342,9 @@ class SoundReductionResult(OwnsArrays):
 
         :param bands: Band set forwarded to
             :func:`phonometry.building.weighted_rating`.
-        :return: The :class:`~phonometry.building.measurement.insulation.WeightedRatingResult`.
+        :return: The :class:`~phonometry.building.measurement.ratings.WeightedRatingResult`.
         """
-        from ..measurement.insulation import weighted_rating
+        from ..measurement.ratings import weighted_rating
 
         return weighted_rating(self.transmission_loss, bands)
 
@@ -352,14 +352,14 @@ class SoundReductionResult(OwnsArrays):
         """Render the ISO 717-1 Annex C rating fiche of ``R(f)`` to a PDF.
 
         Convenience wrapper delegating to
-        :meth:`~phonometry.building.measurement.insulation.WeightedRatingResult.report`
+        :meth:`~phonometry.building.measurement.ratings.WeightedRatingResult.report`
         on :meth:`rating`; requires the predicted spectrum to be on the 16
         one-third-octave bands (100 Hz to 3150 Hz) or the 5 octave bands
         (125 Hz to 2000 Hz).
 
         :param path: Destination path of the PDF file.
         :param kwargs: Forwarded to
-            :meth:`~phonometry.building.measurement.insulation.WeightedRatingResult.report`
+            :meth:`~phonometry.building.measurement.ratings.WeightedRatingResult.report`
             (e.g. ``engine``).
         :return: The written ``path`` as a :class:`str`.
         """

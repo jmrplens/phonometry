@@ -602,7 +602,7 @@ def test_the_bare_names_are_gone() -> None:
     import phonometry.building.measurement.uncertainty as bu
 
     for name in ("coverage_factor", "expanded_uncertainty"):
-        with pytest.raises(AttributeError):
+        with pytest.raises(AttributeError, match=rf"has no attribute '{name}'"):
             getattr(bu, name)
     assert bu.insulation_coverage_factor(0.95) == insulation_coverage_factor(0.95)
     assert bu.insulation_expanded_uncertainty(1.2) == insulation_expanded_uncertainty(
@@ -621,7 +621,7 @@ def test_annex_b_uncorrelated_single_number_uncertainties() -> None:
     """
     import reference_data as ref
 
-    from phonometry.building.measurement.insulation import (
+    from phonometry.building.measurement.ratings import (
         _SPECTRUM1_50_5000,
         _SPECTRUM2_50_5000,
     )
@@ -663,7 +663,7 @@ def test_annex_b_correlated_adaptation_sum_uncertainties() -> None:
     """
     import reference_data as ref
 
-    from phonometry.building.measurement.insulation import (
+    from phonometry.building.measurement.ratings import (
         _SPECTRUM1_50_5000,
         _SPECTRUM2_50_5000,
     )

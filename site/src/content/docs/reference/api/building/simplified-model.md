@@ -516,8 +516,8 @@ the minimum is used (Clause 4.4.2).
 
 ```python
 junction_vibration_reduction(
-    junction_type: JunctionType,
-    path: PathKind,
+    junction_type: Literal['rigid_cross', 'rigid_t', 'flexible_t', 'lightweight_facade', 'lightweight_double_homogeneous', 'lightweight_double_coupled', 'corner', 'thickness_change'],
+    path: Literal['through', 'corner', 'double_leaf'],
     mass_ratio: float,
     *,
     frequency: float = 500.0,

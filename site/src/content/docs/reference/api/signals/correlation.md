@@ -61,7 +61,7 @@ align_impulse_responses(
     reference: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     *,
-    interpolation: _Interpolation = 'parabolic',
+    interpolation: Literal['parabolic', 'none'] = 'parabolic',
     upsample: int = 8,
 ) -> AlignedImpulseResponseResult
 ```
@@ -148,7 +148,7 @@ correlation(
     y: Signal | NDArray[np.float64] | list[float] | None = None,
     fs: float | None = None,
     *,
-    normalization: _Normalization = 'unbiased',
+    normalization: Literal['biased', 'unbiased', 'coefficient'] = 'unbiased',
     max_lag: float | None = None,
 ) -> CorrelationResult
 ```
@@ -333,7 +333,7 @@ impulse_response_delay(
     fs: float | None = None,
     *,
     reference: Signal | NDArray[np.float64] | list[float] | None = None,
-    interpolation: _Interpolation = 'parabolic',
+    interpolation: Literal['parabolic', 'none'] = 'parabolic',
     upsample: int = 8,
 ) -> float
 ```
@@ -381,13 +381,13 @@ time_delay(
     y: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     *,
-    method: _Method = 'gcc',
-    weighting: _Weighting = 'phat',
+    method: Literal['gcc', 'direct', 'phase'] = 'gcc',
+    weighting: Literal['none', 'roth', 'scot', 'phat', 'ml'] = 'phat',
     window: str = 'hann',
     nperseg: int | None = None,
     overlap: float = 0.5,
     max_delay: float | None = None,
-    interpolation: _Interpolation = 'parabolic',
+    interpolation: Literal['parabolic', 'none'] = 'parabolic',
     upsample: int = 1,
     signal_bandwidth: float | None = None,
 ) -> TimeDelayResult

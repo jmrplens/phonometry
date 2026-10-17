@@ -587,9 +587,9 @@ def test_iso5349_2_example_e2_4_burst() -> None:
 def test_iso5349_2_example_e3_forestry_multi_tool() -> None:
     """ISO 5349-2 E.3: three tasks combine to A(8)=3,6 m/s2."""
     partials = [
-        hv.partial_exposure(4.6, 2 * 3600.0),  # brush-saw  -> 2,3
-        hv.partial_exposure(6.0, 1 * 3600.0),  # felling    -> 2,1
-        hv.partial_exposure(3.6, 2 * 3600.0),  # stripping  -> 1,8
+        hv.daily_exposure(4.6, 2 * 3600.0),  # brush-saw  -> 2,3
+        hv.daily_exposure(6.0, 1 * 3600.0),  # felling    -> 2,1
+        hv.daily_exposure(3.6, 2 * 3600.0),  # stripping  -> 1,8
     ]
     assert partials[0] == pytest.approx(2.3, abs=0.05)
     assert partials[1] == pytest.approx(2.1, abs=0.05)
@@ -607,9 +607,7 @@ def test_hav_daily_exposure_matches_partial_combination() -> None:
     values = [3.0, 5.0]
     durations = [2 * 3600.0, 1 * 3600.0]
     direct = hv.hav_daily_exposure(values, durations)
-    partials = [
-        hv.partial_exposure(v, d) for v, d in zip(values, durations, strict=True)
-    ]
+    partials = [hv.daily_exposure(v, d) for v, d in zip(values, durations, strict=True)]
     assert direct == pytest.approx(hv.combine_partial_exposures(partials))
 
 

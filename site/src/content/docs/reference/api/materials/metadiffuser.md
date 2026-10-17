@@ -160,10 +160,10 @@ air impedance.
 
 ```python
 MetadiffuserResult(
-    frequencies: Real,
-    reflection: Complex,
-    absorption: Real,
-    well_absorption: Real,
+    frequencies: NDArray[np.float64],
+    reflection: NDArray[np.complex128],
+    absorption: NDArray[np.float64],
+    well_absorption: NDArray[np.float64],
     *,
     wells: tuple[MetadiffuserWell | None, ...] | None = None,
     depth: float | None = None,

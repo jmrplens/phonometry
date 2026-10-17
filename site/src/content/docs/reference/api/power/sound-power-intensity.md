@@ -476,8 +476,8 @@ sound_power_intensity(
     pressure_levels: np.ndarray | None = None,
     pressure_residual_index: float | np.ndarray | None = None,
     frequencies: np.ndarray | None = None,
-    band_type: BandType = 'third',
-    grade: Grade = 'engineering',
+    band_type: Literal['octave', 'third'] = 'third',
+    grade: Literal['engineering', 'survey'] = 'engineering',
     repeatability_limit: float | np.ndarray | None = None,
 ) -> SoundPowerIntensityResult
 ```

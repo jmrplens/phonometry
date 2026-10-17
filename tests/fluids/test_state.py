@@ -150,7 +150,7 @@ def test_the_state_carries_what_was_assumed(reference_air: Fluid) -> None:
 
 
 def test_the_fluid_is_frozen(reference_air: Fluid) -> None:
-    with pytest.raises(AttributeError):
+    with pytest.raises(AttributeError, match=r"cannot assign to field 'temperature_c'"):
         reference_air.temperature_c = 0.0  # type: ignore[misc]
 
 

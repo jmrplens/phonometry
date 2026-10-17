@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 def generate_insulation_rating(output_dir: str) -> None:
     """ISO 717-1 weighted rating: measured R', shifted reference, deviations."""
     print("Generating insulation_rating.png...")
-    from phonometry.building.measurement.insulation import (
+    from phonometry.building.measurement.ratings import (
         _INDEX_500_THIRD,
         _REF_THIRD_OCTAVE,
         weighted_rating,
@@ -212,7 +212,7 @@ def generate_insulation_rating(output_dir: str) -> None:
 def generate_impact_rating(output_dir: str) -> None:
     """ISO 717-2 weighted impact rating: measured Ln, shifted reference, CI."""
     print("Generating impact_rating.png...")
-    from phonometry.building.measurement.insulation import (
+    from phonometry.building.measurement.ratings import (
         _INDEX_500_THIRD,
         _REF_IMPACT_THIRD_OCTAVE,
         weighted_impact_rating,
@@ -1223,7 +1223,7 @@ def generate_flanking_transmission(output_dir: str) -> None:
 def generate_insulation_uncertainty_demo(output_dir: str) -> None:
     """ISO 12999-1 per-band + single-number measurement uncertainty (situation B)."""
     print("Generating insulation_uncertainty_demo.png...")
-    from phonometry.building.measurement.insulation import weighted_rating
+    from phonometry.building.measurement.ratings import weighted_rating
     from phonometry.building.measurement.uncertainty import (
         band_uncertainty,
         insulation_coverage_factor,

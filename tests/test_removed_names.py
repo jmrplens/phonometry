@@ -87,7 +87,7 @@ _REMOVED_KEYWORDS = [
 @pytest.mark.parametrize(("module", "name"), _REMOVED_FUNCTIONS + _REMOVED_CONSTANTS)
 def test_removed_3_1_alias_is_gone(module: str, name: str) -> None:
     home = importlib.import_module(module)
-    with pytest.raises(AttributeError):
+    with pytest.raises(AttributeError, match=rf"has no attribute '{name}'"):
         getattr(home, name)
 
 
@@ -250,7 +250,7 @@ def test_a_namespace_does_not_serve_a_name_that_left_it() -> None:
         (ph.hearing, "speech_intelligibility_index"),
         (ph.filters, "verify_aircraft_noise_system"),
     ):
-        with pytest.raises(AttributeError):
+        with pytest.raises(AttributeError, match=rf"has no attribute '{name}'"):
             getattr(namespace, name)
 
 
@@ -266,5 +266,136 @@ def test_the_verdict_wrappers_the_4_0_folded_in_are_gone() -> None:
         (ph.filters, "filter_class_compliance"),
         (ph.emission, "intensity_class_compliance"),
     ):
-        with pytest.raises(AttributeError):
+        with pytest.raises(AttributeError, match=rf"has no attribute '{name}'"):
             getattr(namespace, name)
+
+
+# --------------------------------------------------------------------------- #
+# 4.0 one address per name: the alias, the re-export shims and the type
+# aliases that gave a public name a second address, or gave a private one a
+# first, are gone. The names they pointed at are where they always were.
+# --------------------------------------------------------------------------- #
+_REMOVED_4_0_SECOND_NAMES = [
+    ("phonometry.vibration", "partial_exposure"),
+    ("phonometry.vibration.human", "partial_exposure"),
+    ("phonometry.vibration.human.exposure", "partial_exposure"),
+    ("phonometry.building.prediction.resilient_layers", "LiningImprovementResult"),
+    ("phonometry.building.prediction.resilient_layers", "lining_improvement"),
+    ("phonometry.building.prediction.resilient_layers", "lining_improvement_in_situ"),
+    ("phonometry.building.prediction.resilient_layers", "lining_resonance_frequency"),
+    (
+        "phonometry.building.prediction.resilient_layers",
+        "weighted_lining_improvement",
+    ),
+    ("phonometry.emission", "DeclarationForm"),
+    # insulation imports the five ISO 717 names its own body calls; the rest
+    # of ratings, and its private tables, no longer resolve there at all.
+    *(
+        ("phonometry.building.measurement.insulation", name)
+        for name in (
+            "ExtendedImpactRatingResult",
+            "ExtendedWeightedRatingResult",
+            "impact_improvement_adaptation_term",
+            "weighted_impact_improvement",
+            "weighted_impact_rating_extended",
+            "weighted_rating_extended",
+            "_INDEX_500_THIRD",
+            "_REF_IMPACT_THIRD_OCTAVE",
+            "_REF_THIRD_OCTAVE",
+            "_SPECTRUM1_50_5000",
+            "_SPECTRUM2_50_5000",
+        )
+    ),
+    ("phonometry.noise_control.screen_in_situ", "OPERATOR_SPHERE_RADIUS_M"),
+    ("phonometry.noise_control.cabin_insulation", "MANDATORY_BAND_RANGE_HZ"),
+    ("phonometry.noise_control.cabin_insulation", "leak_ratio"),
+    ("phonometry.noise_control.cabin_insulation", "seal_ratio"),
+    # Public-looking constants its package never published: the two defaults
+    # are private now, and the reference sound power is ISO 1683's own.
+    ("phonometry.emission.vibration_sound_power", "REFERENCE_AREA"),
+    ("phonometry.emission.vibration_sound_power", "REFERENCE_IMPEDANCE"),
+    ("phonometry.emission.vibration_sound_power", "REFERENCE_SOUND_POWER"),
+]
+
+
+@pytest.mark.parametrize(("module", "name"), _REMOVED_4_0_SECOND_NAMES)
+def test_a_second_name_the_4_0_removed_is_gone(module: str, name: str) -> None:
+    home = importlib.import_module(module)
+    with pytest.raises(AttributeError, match=rf"has no attribute '{name}'"):
+        getattr(home, name)
+
+
+#: ``(package, class, keyword)``: a constructor keyword 4.0 withdrew. The
+#: aircraft's database is ``database`` now, and a database built by hand takes
+#: no performance tables, which only an ANP export carries.
+_REMOVED_4_0_KEYWORDS = [
+    ("aircraft", "AnpAircraft", "_database"),
+    ("aircraft", "AnpDatabase", "performance"),
+]
+
+
+@pytest.mark.parametrize(("package", "owner", "keyword"), _REMOVED_4_0_KEYWORDS)
+def test_a_constructor_keyword_the_4_0_removed_is_gone(
+    package: str, owner: str, keyword: str
+) -> None:
+    home = getattr(ph, package)
+    assert keyword not in inspect.signature(getattr(home, owner)).parameters
+
+
+def test_a_leaf_module_publishes_only_what_it_defines() -> None:
+    """``insulation`` lists its own results, not the ISO 717 names it calls."""
+    insulation = importlib.import_module("phonometry.building.measurement.insulation")
+    assert sorted(insulation.__all__) == [
+        "AirborneInsulationResult",
+        "FacadeInsulationResult",
+        "ImpactInsulationResult",
+        "airborne_insulation",
+        "energy_average_level",
+        "facade_insulation",
+        "impact_insulation",
+    ]
+    for module, alias in (
+        ("phonometry.emission.sound_power", "Grade"),
+        ("phonometry.emission.sound_power", "Surface"),
+        ("phonometry.filters.equalizer", "EQFilterType"),
+    ):
+        assert alias not in importlib.import_module(module).__all__
+
+
+@pytest.mark.parametrize(
+    ("module", "package"),
+    [
+        ("phonometry.building.measurement.ratings", "phonometry.building.measurement"),
+        ("phonometry.emission.vibration_sound_power", "phonometry.emission"),
+    ],
+)
+def test_an_owner_module_lists_what_its_package_takes_from_it(
+    module: str, package: str
+) -> None:
+    """The module a package imports from says, in ``__all__``, what it gives.
+
+    Neither module had an ``__all__``, so a name it defined and its package
+    never took up (a type alias, a default's constant) looked as public as the
+    ones the package publishes.
+    """
+    owner = importlib.import_module(module)
+    published = importlib.import_module(package)
+    taken = {
+        name
+        for name in published.__all__
+        if name in vars(owner) and vars(owner)[name] is getattr(published, name)
+    }
+    assert sorted(owner.__all__) == sorted(taken)
+
+
+def test_the_names_the_second_addresses_pointed_at_are_all_here() -> None:
+    """The second address went; the one each name really has did not."""
+    assert callable(ph.vibration.daily_exposure)
+    assert callable(ph.building.weighted_rating)
+    assert callable(ph.building.lining_improvement)
+    for module, name in (
+        ("phonometry.building.measurement.ratings", "weighted_rating_extended"),
+        ("phonometry.building.prediction.linings", "lining_improvement"),
+    ):
+        owner = importlib.import_module(module)
+        assert getattr(owner, name).__module__ == module

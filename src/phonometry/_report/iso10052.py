@@ -39,10 +39,7 @@ import numpy as np
 from ._insulation_fiche import iso717_columns_builder, render_insulation_fiche
 
 if TYPE_CHECKING:
-    from ..building.measurement.insulation import (
-        ImpactRatingResult,
-        WeightedRatingResult,
-    )
+    from ..building.measurement.ratings import ImpactRatingResult, WeightedRatingResult
     from ..building.measurement.survey_insulation import (
         SurveyAirborneResult,
         SurveyFacadeResult,

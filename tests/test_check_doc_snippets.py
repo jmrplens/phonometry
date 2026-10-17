@@ -196,3 +196,41 @@ def test_a_fixture_writes_the_file_a_page_reads(
         check_doc_snippets._FIXTURES, "reads", "open('take.txt', 'w').write('x')\n"
     )
     assert check_doc_snippets.check_execution([page]) == []
+
+
+_HOME_PAGE = """export const x = 1;
+const RUNS_CODE = `values = [1, 2]  # the \\`values\\` a backtick quotes
+total, = [sum(values)]`;
+
+const FAILS_CODE = `from phonometry import filters
+spl, freq = filters.octave_filter([0.0] * 4800, fs=48_000)`;
+"""
+
+
+def test_the_home_page_examples_are_read_from_its_data_module(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The home page prints its code from template literals, not fences."""
+    page = tmp_path / "home.ts"
+    page.write_text(_HOME_PAGE, encoding="utf-8")
+    runs, fails = check_doc_snippets._blocks(page)
+    assert runs.splitlines() == [
+        "values = [1, 2]  # the `values` a backtick quotes",
+        "total, = [sum(values)]",
+    ]
+    assert fails.startswith("from phonometry import filters")
+
+
+def test_a_home_page_example_that_does_not_run_is_reported(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The landing page unpacked a result into two arrays for a release."""
+    page = tmp_path / "home.ts"
+    page.write_text(_HOME_PAGE, encoding="utf-8")
+    (failure,) = check_doc_snippets.check_execution([page])
+    assert "cannot unpack" in failure
+
+
+def test_the_home_page_is_one_of_the_published_surfaces() -> None:
+    assert check_doc_snippets._HOME in check_doc_snippets._published()
+    assert check_doc_snippets._blocks(check_doc_snippets._HOME)

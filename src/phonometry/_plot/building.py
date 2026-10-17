@@ -51,12 +51,8 @@ if TYPE_CHECKING:
     )
     from ..building.measurement.insulation import (
         AirborneInsulationResult,
-        ExtendedImpactRatingResult,
-        ExtendedWeightedRatingResult,
         FacadeInsulationResult,
         ImpactInsulationResult,
-        ImpactRatingResult,
-        WeightedRatingResult,
     )
     from ..building.measurement.intensity_insulation import (
         LowFrequencyElementResult,
@@ -75,8 +71,12 @@ if TYPE_CHECKING:
         RainGeneratorVerification,
     )
     from ..building.measurement.ratings import (
+        ExtendedImpactRatingResult,
+        ExtendedWeightedRatingResult,
         ImpactImprovementRatingResult,
+        ImpactRatingResult,
         ReductionImprovementRating,
+        WeightedRatingResult,
     )
     from ..building.measurement.service_equipment import (
         BackgroundDurationCheck,
@@ -103,12 +103,12 @@ if TYPE_CHECKING:
     )
     from ..building.prediction.facade import FacadePredictionResult, RadiatedPowerResult
     from ..building.prediction.installed_structure_borne import InstalledSourceResult
+    from ..building.prediction.linings import LiningImprovementResult
     from ..building.prediction.masonry_cavity_wall import WallTieCouplingResult
     from ..building.prediction.panel_transmission import SoundReductionResult
     from ..building.prediction.resilient_layers import (
         CoveringImprovementResult,
         FloatingFloorImprovementResult,
-        LiningImprovementResult,
         TappingForceResult,
     )
     from ..building.prediction.simplified_model import (
@@ -571,7 +571,7 @@ def plot_weighted_rating(
 ) -> Axes:
     """Airborne rating curve vs shifted reference (ISO 717-1).
 
-    :param result: A :class:`~phonometry.building.measurement.insulation.WeightedRatingResult`.
+    :param result: A :class:`~phonometry.building.measurement.ratings.WeightedRatingResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the measured-curve ``plot`` call.
@@ -616,7 +616,7 @@ def plot_impact_rating(
     the (undistorted) curve and annotates the -5 dB reduction rather than
     pulling the curve down to the rating.
 
-    :param result: An :class:`~phonometry.building.measurement.insulation.ImpactRatingResult`.
+    :param result: An :class:`~phonometry.building.measurement.ratings.ImpactRatingResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the measured-curve ``plot`` call.
@@ -769,7 +769,7 @@ def plot_extended_weighted_rating(
     """Enlarged-range airborne rating curve vs shifted reference (ISO 717-1 Annex B).
 
     :param result: An
-        :class:`~phonometry.building.measurement.insulation.ExtendedWeightedRatingResult`.
+        :class:`~phonometry.building.measurement.ratings.ExtendedWeightedRatingResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the measured-curve ``plot`` call.
@@ -823,7 +823,7 @@ def plot_extended_impact_rating(
     """Enlarged-range impact rating curve vs shifted reference (ISO 717-2 A.2.1).
 
     :param result: An
-        :class:`~phonometry.building.measurement.insulation.ExtendedImpactRatingResult`.
+        :class:`~phonometry.building.measurement.ratings.ExtendedImpactRatingResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the measured-curve ``plot`` call.
@@ -2425,14 +2425,14 @@ def plot_lining_improvement(
     D.3) and marks the result's own resonance frequency.
 
     :param result: A
-        :class:`~phonometry.building.prediction.resilient_layers.LiningImprovementResult`.
+        :class:`~phonometry.building.prediction.linings.LiningImprovementResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the ``ΔRw`` curve ``plot`` call.
     :return: The axes.
     """
     from .._i18n import localize_axes
-    from ..building.prediction.resilient_layers import lining_improvement
+    from ..building.prediction.linings import lining_improvement
 
     ax = ax if ax is not None else _new_axes()
     # The endpoints are written back exactly: np.logspace lands a few ulps

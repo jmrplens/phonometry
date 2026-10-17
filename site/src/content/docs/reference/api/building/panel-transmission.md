@@ -861,7 +861,7 @@ SoundReductionResult.report(path: str, **kwargs: Any) -> str
 Render the ISO 717-1 Annex C rating fiche of `R(f)` to a PDF.
 
 Convenience wrapper delegating to
-[`report`](/phonometry/reference/api/building/insulation/)
+[`report`](/phonometry/reference/api/building/ratings/#weightedratingresultreport)
 on `rating`; requires the predicted spectrum to be on the 16
 one-third-octave bands (100 Hz to 3150 Hz) or the 5 octave bands
 (125 Hz to 2000 Hz).
@@ -871,7 +871,7 @@ one-third-octave bands (100 Hz to 3150 Hz) or the 5 octave bands
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `kwargs` | Forwarded to [`report`](/phonometry/reference/api/building/insulation/) (e.g. `engine`). |
+| `kwargs` | Forwarded to [`report`](/phonometry/reference/api/building/ratings/#weightedratingresultreport) (e.g. `engine`). |
 
 **Returns:** The written `path` as a `str`.
 

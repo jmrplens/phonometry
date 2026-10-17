@@ -71,7 +71,7 @@ def test_a_transcribed_state_holds_only_what_the_page_printed() -> None:
     """
     water = PUBLISHED_FLUIDS["bies-2017-table-c1-fluids/fresh_water"]
     assert set(water.properties) == {"speed_of_sound", "density"}
-    with pytest.raises(AttributeError):
+    with pytest.raises(AttributeError, match=r"does not determine 'viscosity'"):
         _ = water.viscosity
 
 

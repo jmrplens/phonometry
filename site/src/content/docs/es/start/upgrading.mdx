@@ -4,7 +4,7 @@ description: "Lo que la 4.0 movió, renombró y retiró, y cómo encontrar la gr
 ---
 
 La 4.0 rompe duro y no lleva capa de compatibilidad. Casi nada se ha borrado:
-de los 885 nombres que la raíz exportaba en la 3.3.0, diez no existen ya en
+de los 885 nombres que la raíz exportaba en la 3.3.0, once no existen ya en
 ningún sitio y el resto simplemente vive en una dirección con nombre en vez de
 en una plana. Así que el trabajo es sobre todo un barrido de imports, y esta
 página es sobre todo un mapa.
@@ -30,7 +30,7 @@ print("laeq" in phonometry.__all__)     # False
 from phonometry.signals import laeq     # esta es la grafía nueva
 ```
 
-Medido sobre la superficie entera, 872 de aquellos 885 nombres de la raíz los
+Medido sobre la superficie entera, 871 de aquellos 885 nombres de la raíz los
 publica hoy exactamente un subpaquete, ninguno dos, y ninguno necesita una ruta
 más profunda que `phonometry.<subpaquete>`. Otros tres siguen en la raíz, donde
 siempre estuvieron. Así que el cambio no tiene ambigüedad: busca el subpaquete e
@@ -310,6 +310,38 @@ argumento vectorizado que admite un número o un array conserva su nombre.
 `times, levels = decay_curve(ir, fs)` sigue desempaquetando la curva de
 caída, en el mismo orden. Los solvers FDTD conservan `c` y `rho`, que nombran
 los mapas en los que están escritas sus ecuaciones.
+
+## Cada nombre público tiene una sola dirección
+
+Unos pocos nombres se podían importar desde un segundo módulo en la 3.3.0 o en
+la 4.0.0rc1, o desde un módulo que listaba algo que su paquete no publicaba, y
+la base de datos ANP ponía un nombre privado en dos constructores. Cada nombre
+tiene ahora una sola dirección, la que devuelve el resolvedor de más arriba, y
+ninguno es privado:
+
+| 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `vibration.partial_exposure` | `vibration.daily_exposure`, la función de la que era un segundo nombre. Llamada con el valor y la duración de una sola operación, devuelve la exposición parcial Ai(8) de esa operación, y el número no se mueve |
+| las valoraciones ISO 717 que listaba `building.measurement.insulation`: `weighted_rating`, `weighted_impact_rating`, sus formas `_extended`, `weighted_impact_improvement`, `impact_improvement_adaptation_term` y los cuatro resultados de valoración | `building.weighted_rating` y los demás, definidos en `building.measurement.ratings` |
+| `LowFrequencyProcedure`, que listaba `building.measurement.insulation` | `building.LowFrequencyProcedure`, definido en `building.measurement.low_frequency` |
+| los trasdosados del anexo D de la ISO 12354-1 que listaba `building.prediction.resilient_layers`: `lining_improvement`, `lining_improvement_in_situ`, `lining_resonance_frequency`, `weighted_lining_improvement`, `LiningImprovementResult` | `building.lining_improvement` y los demás, definidos en `building.prediction.linings` |
+| `emission.DeclarationForm`; `Grade` y `Surface`, que listaba `emission.sound_power`; `EQFilterType`, que listaba `filters.equalizer` (`metrology.equalizer` en la 3.3.0) | nada que importar: ningún alias de tipo es público. Pasa la cadena que toma el parámetro, por ejemplo `form="single-number"`, y la referencia de la API muestra el `Literal[...]` de cada parámetro donde antes estaba el alias |
+| `BASIC_METHOD_MAX_CREST_FACTOR`, que listaba `vibration.human.exposure` | no se publica. `vibration.crest_factor` avisa por encima de 9, el factor de cresta hasta el que la ISO 2631-1 6.2.2 da por suficiente el método básico |
+| `REFERENCE_IMPEDANCE`, `REFERENCE_AREA` y `REFERENCE_SOUND_POWER` de `emission.vibration_sound_power`, un módulo sin `__all__` cuyo paquete nunca los publicó | no se publican. Los 400 N·s/m³ y el 1 m² son los valores por defecto de `reference_impedance=` y `reference_area=` en `emission.radiated_sound_power_level`, y el 1 pW es `metrology.ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value` |
+| `AnpAircraft(..., _database=db)` y `aircraft._database` | `AnpAircraft(..., database=db)` y `aircraft.database`, que sigue fuera del repr y de las comparaciones |
+| `AnpDatabase(..., performance=...)` (4.0.0rc1) | sin `performance=`, cuyo tipo no publicaba nadie: `aircraft.load_anp_database` lee las tablas de actuaciones de una exportación, y una base de datos construida a mano vuela perfiles de punto fijo |
+
+```python
+from phonometry import building, vibration
+
+# ISO 5349-2 E.3: la exposición parcial de la desbrozadora, 4,6 m/s² durante 2 h
+print(round(vibration.daily_exposure(4.6, 2 * 3600.0), 1))
+print(callable(building.weighted_rating), callable(building.lining_improvement))
+print(hasattr(vibration, "partial_exposure"))
+# 2.3
+# True True
+# False
+```
 
 ## Todo `.plot()` toma primero los ejes
 
@@ -1021,9 +1053,9 @@ except ValueError as error:
 # True
 ```
 
-## Los diez nombres que ya no están
+## Los once nombres que ya no están
 
-Todo lo demás se movió. Estos diez no existen en ningún módulo público:
+Todo lo demás se movió. Estos once no existen en ningún módulo público:
 
 | Ya no está | Qué escribir en su lugar |
 | --- | --- |
@@ -1034,6 +1066,7 @@ Todo lo demás se movió. Estos diez no existen en ningún módulo público:
 | `speed_of_sound` | `fluids.air(temperature_c=...).speed_of_sound` para el medio. Usa un modelo más completo que aquella fórmula de una línea de la ISO 17497-1, así que el número se mueve: 343,99 m/s frente a 343,20 m/s a 20 °C |
 | `depth_to_pressure` | `fluids.depth_to_gauge_pressure_mpa(depth_m=...)`, que devuelve el mismo número, o `fluids.depth_to_absolute_pressure_pa` para la absoluta. Las dos son keyword-only y las dos toman un `latitude_deg` opcional |
 | `TransmissionLossResult` | `PropagationLossResult`, con `.tl` renombrado a `.pl` |
+| `partial_exposure` | `vibration.daily_exposure`, llamada con el valor y la duración de una sola operación. `partial_exposure` era un segundo nombre de la misma función, y el número no se mueve |
 
 ## Lo que no ha cambiado
 

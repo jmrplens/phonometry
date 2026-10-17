@@ -448,7 +448,7 @@ def _apparent_reduction(
 
 def _single_number(values: np.ndarray, bands: str | None) -> tuple[int, int] | None:
     """(rating, Ctr) via ISO 717-1 for 5 octave or 16 third-octave bands."""
-    from ..measurement.insulation import weighted_rating
+    from ..measurement.ratings import weighted_rating
 
     if values.size not in (5, 16):
         return None

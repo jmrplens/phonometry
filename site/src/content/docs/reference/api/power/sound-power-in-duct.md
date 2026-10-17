@@ -94,7 +94,7 @@ flow_modal_correction(
     flow_velocity: float,
     duct_diameter_m: float,
     *,
-    shield: MicrophoneShield = 'sampling-tube',
+    shield: Literal['sampling-tube', 'nose-cone', 'foam-ball'] = 'sampling-tube',
     speed_of_sound: float = 340.0,
 ) -> np.ndarray
 ```
@@ -279,7 +279,7 @@ sound_power_in_duct(
     duct_diameter_m: float,
     flow_velocity: float,
     *,
-    shield: MicrophoneShield = 'sampling-tube',
+    shield: Literal['sampling-tube', 'nose-cone', 'foam-ball'] = 'sampling-tube',
     microphone_correction: ArrayLike = 0.0,
     shield_correction: ArrayLike = 0.0,
     temperature_c: float = 20.0,

@@ -52720,7 +52720,6 @@ documents, one page per module.
 | `reference_atmosphere_correction` | `function` | **Annex G corrections C1, C2 to 101.325 kPa and 23 °C (ISO 3744 Eq. G.1/G.3).**<br>• `temperature_c` [°C]<br>• `static_pressure_kpa` [kPa], or `altitude` [m] via Eq. G.2 | `corr = emission.reference_atmosphere_correction(8.0, altitude=1200.0)`<br><br>• `ReferenceAtmosphereCorrection` |
 | `ReferenceAtmosphereCorrection` | `dataclass` | **The two Annex G corrections.**<br>• `c1`, `c2`, `total` [dB]<br>• `static_pressure_kpa` [kPa], `temperature_c` [°C] | `lj_ref = lj.sound_energy_level + corr.total` |
 | `OperatingModeDeclaration` | `dataclass` | **ISO 4871 dual-number values for one operating mode.**<br>• `mode`: column label<br>• `sound_power_level` L_WA [dB re 1 pW]<br>• `sound_power_uncertainty` K_WA [dB]<br>• `emission_pressure_level` L_pA, `emission_pressure_uncertainty` K_pA [dB] (optional)<br>• `verification_level` L_1 [dB] (optional)<br>• `declared_sound_power_level`: L_WAd = L_WA + K_WA (3.15)<br>• `verified`: L_1 ≤ L_WAd (6.2, combined form)<br>• `verified_dual`: L_1 ≤ round(L_WA) + round(K_WA) (6.2, dual-number form) | `OperatingModeDeclaration('Mode 1', 88.0, 2.0)` |
-| `DeclarationForm` | `constant` | **The `form` literal of `NoiseEmissionDeclaration` (ISO 4871 clause 6).**<br>• `'dual-number'`: L_WA and K_WA declared as a pair (Default)<br>• `'single-number'`: the declared L_WAd alone | `NoiseEmissionDeclaration(modes, form='single-number')` |
 | `NoiseEmissionDeclaration` | `dataclass` | **ISO 4871:1996 noise emission declaration (machinery).**<br>• `modes`: `OperatingModeDeclaration` per mode<br>• `machine`, `operating_conditions` (clause 5)<br>• `noise_test_code`, `basic_standards` (clause 5 b)<br>• `form`: 'dual-number' (Default) / 'single-number'<br>• `.report(path, ...)`: ISO 4871 fiche → PDF | `NoiseEmissionDeclaration((m1, m2), machine='...').report('iso4871.pdf')` |
 | `sound_power_reverberation` | `function` | **Reverberation-room LW, direct (ISO 3741).**<br>• `levels`: mean room SPL [dB] (1D or (NM, NB))<br>• `t60` [s]<br>• `volume` V [m³]<br>• `surface_area` S [m²]<br>• `frequencies` [Hz] (required)<br>• `background_levels`: for K1<br>• `temperature_c` [°C] (Default: 23)<br>• `static_pressure_kpa` [kPa] (Default: 101.325) | `rev = emission.sound_power_reverberation(lp, t60, 200, 220, f)`<br><br>• `ReverberationSoundPowerResult` |
 | `reverberation_background_correction` | `function` | **The background-noise correction K1 of ISO 3741:2010 Eq. (14), on its own.**<br>• `levels`, `background_levels`, `frequencies`, all per band [dB, dB, Hz]<br>• `K1 = −10 lg(1 − 10^(−0.1 ΔL))`, with the qualification of 9.1.2: the lower criterion is 6 dB at 200 Hz and below and at 6.3 kHz and above and 10 dB between them, below it the correction is held there and the answer is an upper bound, and at 15 dB and over there is nothing to correct<br>• the standards that ask for a correction in accordance with ISO 3741, ISO 11957 four times over, call this rather than repeat it | `emission.reverberation_background_correction(lp, bg, f)`<br><br>• K1 [dB] |
@@ -53469,7 +53468,7 @@ documents, one page per module.
 | `NoiseContourResult` | `dataclass` | **Ground-grid contour result.**<br>• `x` / `y` [m] / `levels` [dB] (Ny×Nx) / `metric`<br>• `.plot()`: filled contours | `res.levels` |
 | `load_anp_database` | `function` | **Load an EASA ANP fleet database (NPD curves + default profiles).**<br>• `path`: CSV export directory, or `None` for the bundled curated subset | `db = aircraft.load_anp_database()`<br><br>• `AnpDatabase` |
 | `AnpDatabase` | `class` | **Parsed ANP database wiring real aircraft into the Doc 29 chain.**<br>• `.aircraft(id)` / `.aircraft_ids` / `.npd_curves(id, op, metric)` / `.profile(id, op, profile_id=)`<br>• `.spectral_class(id)` / `.spectral_class_ids` / `.revised_npd_curves(id, op, metric, temperature_c=, relative_humidity_percent=)` (Appendix D)<br>• `.event_level(id, obs, op)` / `.noise_contour(id, op, x=, y=)`; `relative_humidity_percent=` / `absorption=` recalculate the NPD tables for the field's air | `db.noise_contour("747100", "departure", x=gx, y=gy)`<br><br>• `AnpAircraft` |
-| `AnpAircraft` | `dataclass` | **One ANP aircraft type: metadata + NPD/profile access + Doc 29 wiring.**<br>• `aircraft_id` / `description` / `engine_type` / `num_engines` / `weight_class` / `mounting` / `npd_id`<br>• `approach_spectral_class_id` / `departure_spectral_class_id`<br>• `.npd_curves(op, metric)` / `.spectral_class(op)` / `.revised_npd_curves(op, metric, ...)` / `.profile(op)` / `.event_level(obs, op)` / `.noise_contour(op, x=, y=)` | `db.aircraft("747100").mounting` |
+| `AnpAircraft` | `dataclass` | **One ANP aircraft type: metadata + NPD/profile access + Doc 29 wiring.**<br>• `aircraft_id` / `description` / `engine_type` / `num_engines` / `weight_class` / `mounting` / `npd_id`<br>• `approach_spectral_class_id` / `departure_spectral_class_id`<br>• `database`: the `AnpDatabase` it was read from<br>• `.npd_curves(op, metric)` / `.spectral_class(op)` / `.revised_npd_curves(op, metric, ...)` / `.profile(op)` / `.event_level(obs, op)` / `.noise_contour(op, x=, y=)` | `db.aircraft("747100").mounting` |
 | `AnpNpdCurves` | `dataclass` | **ANP NPD curves for one aircraft, metric and operation.**<br>• `powers` / `distances` [m] / `levels` [dB] (P×D) / `metric` / `operation`<br>• `.level(power, distance)` / `.plot()`: level vs slant distance | `db.npd_curves("747100", "departure", "SEL")` |
 | `AnpProfile` | `dataclass` | **ANP default fixed-point trajectory as a Doc 29 flight path.**<br>• `path` (N,5): x,y,z,power,speed [SI] / `ground_roll` / `landing_roll` masks<br>• `.plot()`: altitude vs along-track distance | `db.profile("747100", "departure").path` |
 | `SpectralClass` | `dataclass` | **One ANP spectral class (ECAC Doc 29 Vol. 2 G4.3).**<br>• `class_id` / `operation` A\|D / `description`<br>• `frequencies_hz` [Hz] / `levels_db` [dB] at 1000 ft, 70 dB at 1 kHz<br>• `.plot()`: band level vs frequency | `db.spectral_class(103).levels_db` |
@@ -54351,8 +54350,7 @@ documents, one page per module.
 | `crest_factor` | `function` | **Crest factor of a weighted signal (clause 6.2.1).**<br>• `signal` [m/s²] | `crest_factor(aw_t)`<br><br>• peak/r.m.s.; `HumanVibrationWarning` above 9 |
 | `vibration_total_value` | `function` | **Vibration total value av/ahv (ISO 2631-1 Eq. 10).**<br>• `components`: axis-weighted r.m.s. [m/s²]<br>• `k`: per-axis factors (Default: None → 1, the ISO 5349-1 vector sum) | `vibration_total_value([0.3, 0.4, 0.5], k=[1.4, 1.4, 1.0])  # 0.86`<br><br>• √(Σ kj²awj²) [m/s²] |
 | `wbv_exposure_basis` | `function` | **Whole-body A(8) basis of Directive 2002/44/EC (Annex Part B).**<br>• `a_wx`, `a_wy`: Wd-weighted axis r.m.s. [m/s²]<br>• `a_wz`: Wk-weighted axis r.m.s. [m/s²] | `wbv_exposure_basis(0.35, 0.28, 0.62)  # 0.62`<br><br>• max(1.4·awx, 1.4·awy, awz) [m/s²], the dominant axis (not the vector total av) |
-| `daily_exposure` | `function` | **Daily exposure A(8) for one operation (ISO 5349-1 Eq. 2).**<br>• `total_value`: ahv (hand-arm) or aw,max (whole-body) [m/s²]<br>• `duration_s`: T [s] | `daily_exposure(3.0, 4*3600)  # 2.12`<br><br>• ahv √(T/8h) [m/s²] |
-| `partial_exposure` | `function` | **Partial exposure Ai(8) of one operation (Eq. 2).**<br>• `total_value` [m/s²], `duration_s` [s] | `partial_exposure(3.0, 2*3600)  # 1.5` |
+| `daily_exposure` | `function` | **Daily exposure A(8) for one operation (ISO 5349-1 Eq. 2).** The same call with one operation's value and duration gives its partial exposure Ai(8) (ISO 5349-2 Eq. 2).<br>• `total_value`: ahv (hand-arm) or aw,max (whole-body) [m/s²]<br>• `duration_s`: T [s] | `daily_exposure(3.0, 4*3600)  # 2.12`<br><br>• ahv √(T/8h) [m/s²] |
 | `combine_partial_exposures` | `function` | **Combine partial exposures (Eq. 3).**<br>• `partials`: Ai(8) [m/s²] | `combine_partial_exposures([1.5, 2.1])  # 2.58`<br><br>• √(Σ Ai(8)²) [m/s²] |
 | `hav_daily_exposure` | `function` | **A(8) for several operations (ISO 5349-1 Eq. 3).**<br>• `total_values`: ahvi [m/s²]<br>• `durations_s`: Ti [s] | `hav_daily_exposure([3.0, 5.0], [2*3600, 3600])  # 2.32` |
 | `energy_equivalent_acceleration` | `function` | **Energy-equivalent magnitude aw,e (ISO 2631-1 Eq. B.3).**<br>• `magnitudes` [m/s²], `durations_s` [s] | `energy_equivalent_acceleration([0.5, 1.0], [3600, 1800])  # 0.707` |
@@ -72201,7 +72199,7 @@ one step that matters most.
 [Upgrading from 3.3 to 4.0](https://docs.jmrp.io/phonometry/start/upgrading/) is the map: the one rule
 that moves almost every import, a resolver to paste when you would rather not
 look a name up, the three places where the obvious fix is the wrong one, and
-the ten names that are gone.
+the eleven names that are gone.
 
 **I have a job, not a subject. Which page is it?**
 [What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes the library by
@@ -72358,7 +72356,7 @@ Source: https://docs.jmrp.io/phonometry/start/upgrading/
 # Upgrading from 3.3 to 4.0
 
 4.0 is a hard break with no compatibility layer. Almost nothing was deleted:
-of the 885 names the root exported in 3.3.0, ten exist nowhere any more and
+of the 885 names the root exported in 3.3.0, eleven exist nowhere any more and
 the rest simply live at a named address instead of a flat one. So most of the
 work is an import sweep, and this page is mostly a map.
 
@@ -72382,7 +72380,7 @@ print("laeq" in phonometry.__all__)     # False
 from phonometry.signals import laeq     # this is the new spelling
 ```
 
-Measured across the whole surface, 872 of those 885 root names are published
+Measured across the whole surface, 871 of those 885 root names are published
 today by exactly one subpackage, none by two, and none needs a path deeper
 than `phonometry.<subpackage>`. Three more are still at the root, where they
 always were. So the swap is unambiguous: find the subpackage, import from it.
@@ -72656,6 +72654,37 @@ that takes either a number or an array keeps its name.
 `times, levels = decay_curve(ir, fs)` still unpacks the decay curve, in the
 same order. The FDTD solvers keep `c` and `rho`, which name the maps their
 equations are written in.
+
+## Every public name has one address
+
+A handful of names could be imported from a second module in 3.3.0 or
+4.0.0rc1, or from a module that listed something its package did not publish,
+and the ANP database put a private name in two constructors. Each name has a
+single address now, the one the resolver above returns, and none is private:
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `vibration.partial_exposure` | `vibration.daily_exposure`, the function it was a second name for. Called with the value and the duration of one operation, it returns that operation's partial exposure Ai(8), and the number does not move |
+| the ISO 717 ratings listed by `building.measurement.insulation`: `weighted_rating`, `weighted_impact_rating`, their `_extended` forms, `weighted_impact_improvement`, `impact_improvement_adaptation_term` and the four rating results | `building.weighted_rating` and the rest, defined in `building.measurement.ratings` |
+| `LowFrequencyProcedure` listed by `building.measurement.insulation` | `building.LowFrequencyProcedure`, defined in `building.measurement.low_frequency` |
+| the ISO 12354-1 Annex D linings listed by `building.prediction.resilient_layers`: `lining_improvement`, `lining_improvement_in_situ`, `lining_resonance_frequency`, `weighted_lining_improvement`, `LiningImprovementResult` | `building.lining_improvement` and the rest, defined in `building.prediction.linings` |
+| `emission.DeclarationForm`; `Grade` and `Surface` listed by `emission.sound_power`; `EQFilterType` listed by `filters.equalizer` (`metrology.equalizer` in 3.3.0) | nothing to import: no type alias is public. Pass the string the parameter takes, `form="single-number"` for instance, and the API reference shows each parameter's `Literal[...]` where the alias used to be |
+| `BASIC_METHOD_MAX_CREST_FACTOR` listed by `vibration.human.exposure` | not published. `vibration.crest_factor` warns above 9, the crest factor up to which ISO 2631-1 6.2.2 holds the basic method sufficient |
+| `REFERENCE_IMPEDANCE`, `REFERENCE_AREA` and `REFERENCE_SOUND_POWER` of `emission.vibration_sound_power`, a module with no `__all__` whose package never published them | not published. The 400 N·s/m³ and the 1 m² are the defaults of `reference_impedance=` and `reference_area=` in `emission.radiated_sound_power_level`, and the 1 pW is `metrology.ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value` |
+| `AnpAircraft(..., _database=db)` and `aircraft._database` | `AnpAircraft(..., database=db)` and `aircraft.database`, still left out of the repr and of comparisons |
+| `AnpDatabase(..., performance=...)` (4.0.0rc1) | no `performance=`, whose type nothing published: `aircraft.load_anp_database` reads the performance tables of an export, and a database built by hand flies fixed-point profiles |
+
+```python
+from phonometry import building, vibration
+
+# ISO 5349-2 E.3: the brush-saw's partial exposure, 4,6 m/s² for 2 h
+print(round(vibration.daily_exposure(4.6, 2 * 3600.0), 1))
+print(callable(building.weighted_rating), callable(building.lining_improvement))
+print(hasattr(vibration, "partial_exposure"))
+# 2.3
+# True True
+# False
+```
 
 ## Every `.plot()` takes the axes first
 
@@ -73343,9 +73372,9 @@ except ValueError as error:
 # True
 ```
 
-## The ten names that are gone
+## The eleven names that are gone
 
-Everything else moved. These ten exist in no public module:
+Everything else moved. These eleven exist in no public module:
 
 | Gone | What to write instead |
 | --- | --- |
@@ -73356,6 +73385,7 @@ Everything else moved. These ten exist in no public module:
 | `speed_of_sound` | `fluids.air(temperature_c=...).speed_of_sound` for the medium. It uses a fuller model than the ISO 17497-1 one-liner did, so the number moves: 343.99 m/s against 343.20 m/s at 20 °C |
 | `depth_to_pressure` | `fluids.depth_to_gauge_pressure_mpa(depth_m=...)`, which returns the same number, or `fluids.depth_to_absolute_pressure_pa` for the absolute one. Both are keyword-only and both take an optional `latitude_deg` |
 | `TransmissionLossResult` | `PropagationLossResult`, with `.tl` renamed to `.pl` |
+| `partial_exposure` | `vibration.daily_exposure`, called with one operation's value and duration. `partial_exposure` was a second name for the same function, and the number does not move |
 
 ## What did not change
 

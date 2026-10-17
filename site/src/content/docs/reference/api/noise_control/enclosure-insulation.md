@@ -83,8 +83,8 @@ thresholds and tables.
 ```python
 applicable_methods(
     *,
-    condition: EnclosureCondition = 'laboratory',
-    source_kind: SourceKind = 'actual',
+    condition: Literal['laboratory', 'in-situ'] = 'laboratory',
+    source_kind: Literal['actual', 'reciprocity', 'artificial'] = 'actual',
 ) -> tuple[MethodEntry, ...]
 ```
 
@@ -135,7 +135,7 @@ artificial_source_insulation(
     *,
     frequencies: ArrayLike | None = None,
     quantity: str = 'sound_power',
-    condition: EnclosureCondition = 'laboratory',
+    condition: Literal['laboratory', 'in-situ'] = 'laboratory',
     band_fraction: int = 3,
 ) -> EnclosureInsulationResult
 ```
@@ -505,8 +505,8 @@ sound_power_insulation(
     a_weighted_without: float | None = None,
     a_weighted_with: float | None = None,
     base_standard: str = 'ISO 3744',
-    condition: EnclosureCondition = 'laboratory',
-    source_kind: SourceKind = 'actual',
+    condition: Literal['laboratory', 'in-situ'] = 'laboratory',
+    source_kind: Literal['actual', 'reciprocity', 'artificial'] = 'actual',
     band_fraction: int = 3,
 ) -> EnclosureInsulationResult
 ```
@@ -551,8 +551,8 @@ sound_pressure_insulation(
     a_weighted_without: float | None = None,
     a_weighted_with: float | None = None,
     base_standard: str = 'ISO 11201',
-    condition: EnclosureCondition = 'laboratory',
-    source_kind: SourceKind = 'actual',
+    condition: Literal['laboratory', 'in-situ'] = 'laboratory',
+    source_kind: Literal['actual', 'reciprocity', 'artificial'] = 'actual',
     band_fraction: int = 3,
 ) -> EnclosureInsulationResult
 ```

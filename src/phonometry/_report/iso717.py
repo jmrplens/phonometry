@@ -1,9 +1,9 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """ISO 717 sound-insulation rating fiche (reportlab renderer).
 
-Renders a :class:`~phonometry.building.measurement.insulation.WeightedRatingResult`
+Renders a :class:`~phonometry.building.measurement.ratings.WeightedRatingResult`
 (airborne, ISO 717-1) or
-:class:`~phonometry.building.measurement.insulation.ImpactRatingResult` (impact,
+:class:`~phonometry.building.measurement.ratings.ImpactRatingResult` (impact,
 ISO 717-2) to a one-page PDF laid out like an accredited-laboratory test
 report (modelled on ISO 10140-2 / ISO 16283 lab reports rated per ISO 717):
 
@@ -61,10 +61,7 @@ from ._layout import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
-    from ..building.measurement.insulation import (
-        ImpactRatingResult,
-        WeightedRatingResult,
-    )
+    from ..building.measurement.ratings import ImpactRatingResult, WeightedRatingResult
     from .metadata import ReportMetadata
 
 #: Band-centre count that identifies an ISO 717 rating computed from octave
@@ -465,9 +462,9 @@ def render_iso717_report(
     """Render an ISO 717 accredited-laboratory rating fiche to a PDF at ``path``.
 
     :param result: A
-        :class:`~phonometry.building.measurement.insulation.WeightedRatingResult`
+        :class:`~phonometry.building.measurement.ratings.WeightedRatingResult`
         (airborne, ISO 717-1) or
-        :class:`~phonometry.building.measurement.insulation.ImpactRatingResult` (impact,
+        :class:`~phonometry.building.measurement.ratings.ImpactRatingResult` (impact,
         ISO 717-2) carrying the per-band ``band_centers``, ``measured`` and
         ``shifted_reference`` curves.
     :param path: Destination path of the PDF file.

@@ -343,7 +343,7 @@ screen_attenuation(
     screened_levels_db: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-    source_kind: SourceKind = 'actual',
+    source_kind: Literal['actual', 'artificial'] = 'actual',
     a_weighted_unscreened_level_db: float | None = None,
     a_weighted_screened_level_db: float | None = None,
     distance_m: float | None = None,

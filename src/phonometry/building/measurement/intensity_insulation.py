@@ -93,11 +93,8 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .insulation import (
-    WeightedRatingResult,
-    _as_band_levels,
-    weighted_rating,
-)
+from .insulation import _as_band_levels
+from .ratings import WeightedRatingResult, weighted_rating
 
 if TYPE_CHECKING:
     from collections.abc import Sequence

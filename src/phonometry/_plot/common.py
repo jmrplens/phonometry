@@ -41,10 +41,7 @@ if TYPE_CHECKING:
     from matplotlib.transforms import Bbox
     from matplotlib.typing import ColorType, LegendLocType
 
-    from ..building.measurement.insulation import (
-        ImpactRatingResult,
-        WeightedRatingResult,
-    )
+    from ..building.measurement.ratings import ImpactRatingResult, WeightedRatingResult
     from ..emission.sound_power import SoundEnergyResult, SoundPowerResult
     from ..emission.sound_power_anechoic import PrecisionSoundPowerResult
     from ..emission.sound_power_in_duct import InDuctSoundPowerResult

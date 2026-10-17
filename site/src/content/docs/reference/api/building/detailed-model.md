@@ -99,7 +99,7 @@ tables are recorded in `docs/ERRATA.md`.
 airborne_flanking_path(
     *,
     label: str,
-    kind: FlankingKind,
+    kind: Literal['Ff', 'Df', 'Fd'],
     element_i: InSituElementResult,
     element_j: InSituElementResult,
     vibration_reduction_index: ArrayLike,
@@ -267,7 +267,7 @@ calculated_sound_reduction_index(
     total_loss_factor: ArrayLike,
     radiation_factor: ArrayLike,
     forced_radiation_factor: ArrayLike,
-    bands: BandType = 'third',
+    bands: Literal['third', 'octave'] = 'third',
     resonant_only: bool = False,
     density: float | None = None,
     longitudinal_velocity: float | None = None,
@@ -340,7 +340,7 @@ detailed_airborne_prediction(
     direct_index: ArrayLike,
     flanking_paths: Sequence[BandPath] = (),
     direct_label: str = 'Dd',
-    bands: BandType = 'third',
+    bands: Literal['third', 'octave'] = 'third',
 ) -> DetailedAirborneResult
 ```
 
@@ -381,7 +381,7 @@ detailed_impact_prediction(
     direct_level: ArrayLike | None = None,
     flanking_paths: Sequence[BandPath] = (),
     direct_label: str = 'Dd',
-    bands: BandType = 'third',
+    bands: Literal['third', 'octave'] = 'third',
 ) -> DetailedImpactResult
 ```
 
@@ -1142,7 +1142,7 @@ in_situ_element(
     element: HomogeneousElement,
     frequencies: ArrayLike,
     *,
-    bands: BandType = 'third',
+    bands: Literal['third', 'octave'] = 'third',
     resonant_only: bool = False,
     fluid: Fluid = ...,
 ) -> InSituElementResult
@@ -1497,7 +1497,7 @@ reciprocity_impact_level(
     sound_reduction_index: ArrayLike,
     frequencies: ArrayLike,
     *,
-    bands: BandType = 'third',
+    bands: Literal['third', 'octave'] = 'third',
 ) -> np.ndarray
 ```
 

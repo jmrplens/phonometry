@@ -91,6 +91,7 @@ from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
+from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_mean
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
@@ -100,6 +101,7 @@ from ..._internal.validation import (
     require_equal_shapes,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from .low_frequency import (
     LowFrequencyProcedure,
@@ -122,51 +124,14 @@ if TYPE_CHECKING:
     from ..._report.metadata import ReportMetadata
     from .low_frequency import LowFrequencyResult
 
-# The ISO 717 rating machinery now lives in :mod:`.ratings`. Until every caller
-# in the tree reads it from there, the names this module used to define stay
-# importable from this path, unchanged; the ``__all__`` below re-exports them.
-from ..._internal.frozen import OwnsArrays
-from ..._internal.validation import require_scalar
-from .ratings import (
-    _INDEX_500_THIRD,
-    _REF_IMPACT_THIRD_OCTAVE,
-    _REF_THIRD_OCTAVE,
-    _SPECTRUM1_50_5000,
-    _SPECTRUM2_50_5000,
-    ExtendedImpactRatingResult,
-    ExtendedWeightedRatingResult,
-    impact_improvement_adaptation_term,
-    weighted_impact_improvement,
-    weighted_impact_rating_extended,
-    weighted_rating_extended,
-)
-
-# The ISO 717 names above are listed here so they keep resolving through this
-# module; everything else is defined below.
 __all__ = [
-    "_INDEX_500_THIRD",
-    "_REF_IMPACT_THIRD_OCTAVE",
-    "_REF_THIRD_OCTAVE",
-    "_SPECTRUM1_50_5000",
-    "_SPECTRUM2_50_5000",
     "AirborneInsulationResult",
-    "ExtendedImpactRatingResult",
-    "ExtendedWeightedRatingResult",
     "FacadeInsulationResult",
     "ImpactInsulationResult",
-    "ImpactRatingResult",
-    "LowFrequencyProcedure",
-    "WeightedRatingResult",
     "airborne_insulation",
     "energy_average_level",
     "facade_insulation",
-    "impact_improvement_adaptation_term",
     "impact_insulation",
-    "weighted_impact_improvement",
-    "weighted_impact_rating",
-    "weighted_impact_rating_extended",
-    "weighted_rating",
-    "weighted_rating_extended",
 ]
 
 #: Reference absorption area A0 for the normalized impact level (Clause 3.15).

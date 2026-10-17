@@ -65,11 +65,11 @@ by applying the exact analog response of ISO 8041-1 in the frequency domain.
 
 ```python
 apply_band_limiting(
-    signal: SignalInput,
+    signal: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     name: str,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Apply the band-limiting weighting of `name` to a time signal.
@@ -107,11 +107,11 @@ and the switch-on transient is part of what they measure.
 
 ```python
 apply_weighting(
-    signal: SignalInput,
+    signal: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     name: str,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Apply frequency weighting `name` to a time signal (ISO 8041-1).
@@ -142,7 +142,10 @@ negligible, as for any block frequency-domain filtering.
 ## band_limiting_factors
 
 ```python
-band_limiting_factors(name: str, frequencies: ArrayLike) -> Real
+band_limiting_factors(
+    name: str,
+    frequencies: ArrayLike,
+) -> NDArray[np.float64]
 ```
 
 Band-limiting weighting factors (ISO 8041-1:2017, Annex B).
@@ -233,7 +236,7 @@ $A(8) = \sqrt{\sum_i A_i(8)^2}$.
 ## crest_factor
 
 ```python
-crest_factor(signal: SignalInput) -> float
+crest_factor(signal: Signal | Sequence[float] | np.ndarray) -> float
 ```
 
 Crest factor of a weighted signal (ISO 2631-1 clause 6.2.1).
@@ -265,7 +268,10 @@ Daily exposure `A(8)` for one operation (ISO 5349-1 Eq. (2)).
 $A(8) = a_\mathrm{hv} \sqrt{T / T_0}$ with $T_0 = 8$ h.  The
 identical form gives the whole-body `A(8)` of Directive 2002/44/EC,
 whose magnitude is the Annex Part B dominant-axis value (see
-[`wbv_exposure_basis`](/phonometry/reference/api/vibration/exposure/#wbv_exposure_basis)) rather than a vector total.
+[`wbv_exposure_basis`](/phonometry/reference/api/vibration/exposure/#wbv_exposure_basis)) rather than a vector total.  Called with the
+value and duration of one operation of a working day, it returns that
+operation's partial vibration exposure $A_i(8)$ (ISO 5349-2
+Eq. (2)), the term [`combine_partial_exposures`](/phonometry/reference/api/vibration/exposure/#combine_partial_exposures) sums.
 
 **Parameters**
 
@@ -330,9 +336,9 @@ Eq. (10) vector total `a_v`.
 DailyVibrationExposure(
     a8: float,
     labels: tuple[str, ...],
-    total_values: Real,
-    durations_s: Real,
-    partials: Real,
+    total_values: NDArray[np.float64],
+    durations_s: NDArray[np.float64],
+    partials: NDArray[np.float64],
     assessment: ExposureAssessment,
 )
 ```
@@ -626,7 +632,7 @@ Advisory for out-of-range human-vibration measurement conditions.
 
 ```python
 motion_sickness_dose_value(
-    signal: SignalInput,
+    signal: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
 ) -> float
 ```
@@ -656,7 +662,7 @@ m/s^1.5; the `Wf`-weighted signal is the intended input.
 
 ```python
 mtvv(
-    signal: SignalInput,
+    signal: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     integration_time: float = 1.0,
@@ -693,34 +699,6 @@ defines the MTVV on.
 | :--- | :--- |
 | ValueError | for a bad signal, non-positive `fs`/`tau` or an unknown `method`. |
 
-## partial_exposure
-
-```python
-partial_exposure(total_value: float, duration_s: float) -> float
-```
-
-Daily exposure `A(8)` for one operation (ISO 5349-1 Eq. (2)).
-
-$A(8) = a_\mathrm{hv} \sqrt{T / T_0}$ with $T_0 = 8$ h.  The
-identical form gives the whole-body `A(8)` of Directive 2002/44/EC,
-whose magnitude is the Annex Part B dominant-axis value (see
-[`wbv_exposure_basis`](/phonometry/reference/api/vibration/exposure/#wbv_exposure_basis)) rather than a vector total.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `total_value` | Vibration total value `a_hv` (or `a_v`), in m/s2. |
-| `duration_s` | Daily exposure duration `T`, in seconds. |
-
-**Returns:** The daily exposure `A(8)`, in m/s2.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | for a non-finite or negative magnitude or duration. |
-
 ## REFERENCE_ACCELERATION
 
 *Constant* (`float`).
@@ -741,12 +719,12 @@ REFERENCE_DURATION_S = 28800.0
 
 ```python
 running_rms(
-    signal: SignalInput,
+    signal: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     integration_time: float = 1.0,
     method: str = 'linear',
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Running r.m.s. of a weighted signal (ISO 2631-1 Eqs. (2)/(3)).
@@ -771,7 +749,10 @@ Running r.m.s. of a weighted signal (ISO 2631-1 Eqs. (2)/(3)).
 ## vibration_dose_value
 
 ```python
-vibration_dose_value(signal: SignalInput, fs: float | None = None) -> float
+vibration_dose_value(
+    signal: Signal | Sequence[float] | np.ndarray,
+    fs: float | None = None,
+) -> float
 ```
 
 Vibration dose value `VDV` (ISO 2631-1 Eq. (5)).
@@ -941,11 +922,11 @@ comparing against the tabulated factors; a nominal label (e.g.
 
 ```python
 WeightedSpectrum(
-    frequencies: Real,
-    band_accelerations: Real,
+    frequencies: NDArray[np.float64],
+    band_accelerations: NDArray[np.float64],
     weighting_name: str,
-    weighting_factors: Real,
-    weighted: Real,
+    weighting_factors: NDArray[np.float64],
+    weighted: NDArray[np.float64],
     overall: float,
 )
 ```
@@ -982,7 +963,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ## weighting_factors
 
 ```python
-weighting_factors(name: str, frequencies: ArrayLike) -> Real
+weighting_factors(name: str, frequencies: ArrayLike) -> NDArray[np.float64]
 ```
 
 Weighting factors `|H(f)|` of weighting `name` (ISO 8041-1).
@@ -1012,10 +993,10 @@ WEIGHTING_NAMES = ('Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm')
 ```python
 WeightingResponse(
     name: str,
-    frequencies: Real,
-    response: Complex,
-    magnitude: Real,
-    magnitude_db: Real,
+    frequencies: NDArray[np.float64],
+    response: NDArray[np.complex128],
+    magnitude: NDArray[np.float64],
+    magnitude_db: NDArray[np.float64],
     *,
     band_limiting: bool = False,
 )

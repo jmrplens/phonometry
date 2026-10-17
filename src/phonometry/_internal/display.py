@@ -239,13 +239,17 @@ _WORD = 3
 #: The longest suffix :data:`_UNITS` spells, in words.
 _LONGEST = max(len(key.split("_")) for key in _UNITS)
 
+#: What a title shows for a record whose ``passes`` holds no truth value, or
+#: raises when it is read.
+_NO_VERDICT = "no verdict"
+
 #: Each outcome a title can show, with its colour: white on green, on red and
 #: on grey, which read on the light and the dark themes of every notebook
 #: front end.
 _OUTCOMES: tuple[tuple[str, str], ...] = (
     ("PASS", "#1a7f37"),
     ("FAIL", "#cf222e"),
-    ("no verdict", "#6e7781"),
+    (_NO_VERDICT, "#6e7781"),
 )
 
 #: Left-aligned cells: JupyterLab aligns the cells of an HTML table right.
@@ -330,10 +334,10 @@ def verdict_of(record: object) -> str | None:
     try:
         outcome = record.passes  # type: ignore[attr-defined]
     except Exception:  # a display never raises; where the verdict is read, it does
-        return "no verdict"
+        return _NO_VERDICT
     if isinstance(outcome, bool | np.bool_):
         return "PASS" if outcome else "FAIL"
-    return "no verdict"
+    return _NO_VERDICT
 
 
 def _field_names(record: object) -> tuple[str, ...]:

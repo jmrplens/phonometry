@@ -77,9 +77,10 @@ export interface HomeContent {
  */
 const DOI = '10.5281/zenodo.21215280';
 
-// `octave_filter` is the one-shot function and returns a pair of arrays, so the
-// "draws itself" claim has to be carried by a result object: the PSD estimate
-// returns a SpectralDensityResult and `.plot()` on it is the whole figure call.
+// `octave_filter` is the one-shot function and returns an OctaveFilterResult;
+// the "draws itself" claim is carried by the PSD estimate, whose
+// SpectralDensityResult `.plot()` is the whole figure call. The snippet runs
+// under scripts/check_doc_snippets.py, like every guide's.
 const SPECTRUM_CODE = `import numpy as np
 from phonometry import filters, signals
 
@@ -87,7 +88,7 @@ fs = 48_000
 t = np.linspace(0, 1, fs, endpoint=False)
 signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
 
-spl, freq = filters.octave_filter(signal, fs=fs, fraction=3)
+bands = filters.octave_filter(signal, fs=fs, fraction=3)
 
 psd = signals.power_spectral_density(signal, fs=fs)
 ax = psd.plot()          # the result draws itself`;
@@ -162,7 +163,7 @@ export const en: HomeContent = {
 		},
 		spectrum: {
 			title: 'An analysis, and the figure it draws',
-			note: 'One-third-octave band levels per the IEC 61260-1 band edges, and the power spectral density of the same record — which is a result object, so one call draws it. The figure below is committed to the documentation, not a mock-up; it is drawn from a six-tone signal rather than the two-tone one in the snippet, so that the band structure is worth looking at.',
+			note: 'One-third-octave band levels per the IEC 61260-1 band edges, and the power spectral density of the same record, which is a result object, so one call draws it. The figure below is committed to the documentation, not a mock-up; it is drawn from a six-tone signal rather than the two-tone one in the snippet, so that the band structure is worth looking at.',
 			code: SPECTRUM_CODE,
 			alt: 'One-third-octave spectrum of a six-tone signal, with the raw power spectral density in the background',
 			caption: 'From the Getting Started guide: 33 bands from 12.6 Hz to 20 kHz, with tones at 20, 100, 500, 2000, 4000 and 15 000 Hz standing out of the spectrum behind them.',

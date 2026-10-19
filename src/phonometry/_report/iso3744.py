@@ -67,6 +67,7 @@ if TYPE_CHECKING:
     # it at run time.
     from typing_extensions import TypeIs
 
+    from .._i18n import Language
     from ..emission._sound_power_anechoic import PrecisionSoundPowerResult
     from ..emission.sound_power import SoundPowerResult
     from .metadata import ReportMetadata
@@ -96,7 +97,7 @@ def _is_precision(
 
 
 def _method(
-    result: SoundPowerResult | PrecisionSoundPowerResult, language: str = "en"
+    result: SoundPowerResult | PrecisionSoundPowerResult, language: Language = "en"
 ) -> tuple[str, str]:
     """Return ``(standard, grade_phrase)`` for the applied determination method.
 
@@ -113,7 +114,7 @@ def _method(
 
 
 def _basis(
-    result: SoundPowerResult | PrecisionSoundPowerResult, language: str = "en"
+    result: SoundPowerResult | PrecisionSoundPowerResult, language: Language = "en"
 ) -> str:
     """The standard-basis line naming the method, the surface and the grade."""
     standard, grade_phrase = _method(result, language)
@@ -135,7 +136,7 @@ def _value_table(
     result: SoundPowerResult | PrecisionSoundPowerResult,
     *,
     verbose: bool,
-    language: str = "en",
+    language: Language = "en",
 ) -> Table:
     """Build the full-width per-band table (nominal frequency, Lp, LW).
 
@@ -207,7 +208,7 @@ def _value_table(
 
 
 def _statement(
-    result: SoundPowerResult | PrecisionSoundPowerResult, language: str = "en"
+    result: SoundPowerResult | PrecisionSoundPowerResult, language: Language = "en"
 ) -> tuple[str, list[str]]:
     """The boxed sound-power result and its extended terms.
 
@@ -233,7 +234,7 @@ def _statement(
 
 
 def _corrections_strip(
-    result: SoundPowerResult | PrecisionSoundPowerResult, language: str = "en"
+    result: SoundPowerResult | PrecisionSoundPowerResult, language: Language = "en"
 ) -> str:
     """The applied-corrections line for the basis strip (K1/K2 or C1/C2/C3)."""
     if _is_precision(result):
@@ -268,7 +269,7 @@ def _corrections_strip(
 
 
 def _a_weighting_strip(
-    result: SoundPowerResult | PrecisionSoundPowerResult, language: str = "en"
+    result: SoundPowerResult | PrecisionSoundPowerResult, language: Language = "en"
 ) -> str:
     """The A-weighting citation line, keyed to the method that combined LWA.
 
@@ -300,7 +301,7 @@ def render_sound_power_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a sound-power determination fiche to a PDF at ``path``.
 

@@ -91,8 +91,8 @@ rows = [  # slit h, neck l_n, cavity l_c, neck w_n, cavity w_c  [mm]
 ]
 wells = [
     materials.MetadiffuserWell(
-        h * mm,
-        2 * (materials.HelmholtzResonator(ln * mm, wn * mm, lc * mm, wc * mm),),
+        slit_height_m=h * mm,
+        resonators=2 * (materials.HelmholtzResonator(neck_length_m=ln * mm, neck_side_m=wn * mm, cavity_length_m=lc * mm, cavity_side_m=wc * mm),),
     )
     for h, ln, lc, wn, wc in rows
 ]
@@ -127,8 +127,8 @@ rows = [
 ]
 wells = [
     materials.MetadiffuserWell(
-        h * mm,
-        2 * (materials.HelmholtzResonator(ln * mm, wn * mm, lc * mm, wc * mm),),
+        slit_height_m=h * mm,
+        resonators=2 * (materials.HelmholtzResonator(neck_length_m=ln * mm, neck_side_m=wn * mm, cavity_length_m=lc * mm, cavity_side_m=wc * mm),),
     )
     for h, ln, lc, wn, wc in rows
 ]

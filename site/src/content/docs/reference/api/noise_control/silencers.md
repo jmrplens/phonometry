@@ -391,11 +391,11 @@ $$
 
 ```python
 plot_silencer_geometry(
-    kind: str,
+    kind: Literal['expansion chamber', 'extended-tube chamber', 'Helmholtz resonator', 'quarter-wave resonator'],
     geometry: Mapping[str, float],
     *,
     ax: Axes | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -544,7 +544,7 @@ Transmission and insertion loss of a reactive silencer over frequency.
 ReactiveSilencerResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -560,7 +560,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ReactiveSilencerResult.plot_geometry(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> Axes
 ```
 
@@ -594,9 +594,9 @@ ReactiveSilencerResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -750,7 +750,7 @@ The analysis frequencies shared by every element, Hz.
 SilencerChain.plot_geometry(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> Axes
 ```
 

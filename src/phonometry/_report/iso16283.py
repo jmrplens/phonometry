@@ -57,6 +57,7 @@ from ._insulation_fiche import (
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from .._i18n import Language
     from ..building.measurement.insulation import (
         AirborneInsulationResult,
         FacadeInsulationResult,
@@ -150,7 +151,7 @@ def render_iso16283_report(
     quantity: str,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 16283 field sound-insulation test report to a PDF.
 
@@ -180,7 +181,7 @@ def render_iso16283_report(
     is_impact = quantity in _IMPACT_QUANTITIES
 
     def build_columns(
-        value_header: str, curve: np.ndarray, *, verbose: bool, language: str
+        value_header: str, curve: np.ndarray, *, verbose: bool, language: Language
     ) -> tuple[Sequence[Column], str, Any]:
         """The field table: ``f | value`` or, verbose, the measurement chain."""
         from reportlab.lib.units import mm
@@ -310,7 +311,7 @@ def render_iso16283_facade_report(
     quantity: str,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 16283-3 field facade sound-insulation report to a PDF.
 

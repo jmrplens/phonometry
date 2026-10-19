@@ -185,7 +185,7 @@ helmholtz_resonator_impedance(
     slit_height_m: float | None = None,
     lattice_step_m: float | None = None,
     end_correction: bool = True,
-    geometry: str = 'square',
+    geometry: Literal['square', 'slit'] = 'square',
     fluid: Fluid = ...,
     n_sum_terms: int = 40,
 ) -> NDArray[np.complex128]
@@ -240,6 +240,7 @@ corrections are the 2-D fits of Sci. Rep. 7:5389 Eqs. (11)-(12); both
 
 ```python
 HelmholtzResonator(
+    *,
     neck_length_m: float,
     neck_side_m: float,
     cavity_length_m: float,
@@ -259,7 +260,7 @@ all lengths are in metres.
 HelmholtzResonator.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -276,7 +277,7 @@ plot_helmholtz_resonator_geometry(
     resonator: HelmholtzResonator,
     *,
     ax: Axes | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -307,7 +308,7 @@ plot_slit_absorber_geometry(
     slit_height_m: float,
     lattice_step_m: float,
     period_m: float,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -449,7 +450,7 @@ slit_helmholtz_absorber(
     angle_rad: float = 0.0,
     end_correction: bool = True,
     slit_radiation: bool = True,
-    resonator_geometry: str = 'square',
+    resonator_geometry: Literal['square', 'slit'] = 'square',
     fluid: Fluid = ...,
 ) -> SlitResonatorAbsorberResult
 ```
@@ -534,7 +535,7 @@ with (`resonators`, `slit_height_m`, `lattice_step_m`, `period_m`) so
 SlitResonatorAbsorberResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -550,7 +551,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 SlitResonatorAbsorberResult.plot_geometry(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

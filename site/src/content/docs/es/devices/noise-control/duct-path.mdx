@@ -94,10 +94,10 @@ ventilador = [90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0]
 
 trayecto = noise_control.duct_path(
     ventilador, [
-        noise_control.DuctElement("Codo, 36 x 24 in, sin revestir",
+        noise_control.DuctElement(label="Codo, 36 x 24 in, sin revestir",
                                   attenuation=[0, 1, 2, 3, 3, 3, 3, 3],
                                   self_noise=[41, 39, 36, 29, 20, 6, 0, 0], code="2"),
-        noise_control.DuctElement("Silenciador, 3 ft, pérdida de carga estándar",
+        noise_control.DuctElement(label="Silenciador, 3 ft, pérdida de carga estándar",
                                   attenuation=[7, 12, 16, 28, 35, 35, 28, 17],
                                   self_noise=[49, 43, 44, 42, 42, 45, 35, 24], code="3"),
     ],
@@ -797,20 +797,20 @@ fuente = "Ventilador centrífugo FC, 5000 cfm, 2 in c.a."
 
 impulsion = noise_control.duct_path(
     ventilador, [
-        noise_control.DuctElement("Codo, 36 x 24 in, sin revestir", [0, 1, 2, 3, 3, 3, 3, 3],
-                                  [41, 39, 36, 29, 20, 6, 0, 0], code="2"),
-        noise_control.DuctElement("Silenciador, 3 ft, pérdida de carga estándar",
-                                  [7, 12, 16, 28, 35, 35, 28, 17],
-                                  [49, 43, 44, 42, 42, 45, 35, 24], code="3"),
-        noise_control.DuctElement("Conducto, 36 x 24 in, 5 ft, revestimiento de 1 in",
-                                  [2, 2, 3, 7, 15, 12, 11, 9], code="4"),
-        noise_control.DuctElement("Derivación, 25 por ciento", 6.0, code="5"),
-        noise_control.DuctElement("Conducto, 18 x 12 in, 6 ft, revestimiento de 1 in",
-                                  [3, 3, 5, 11, 25, 22, 16, 13], code="6"),
-        noise_control.DuctElement("Conducto flexible, 12 in, 6 ft",
-                                  [14, 14, 16, 15, 17, 22, 16, 13], code="7"),
-        noise_control.DuctElement("Difusor rectangular, 312 cfm", None,
-                                  [33, 32, 29, 23, 15, 4, 0, 0], code="8"),
+        noise_control.DuctElement(label="Codo, 36 x 24 in, sin revestir", attenuation=[0, 1, 2, 3, 3, 3, 3, 3],
+                                  self_noise=[41, 39, 36, 29, 20, 6, 0, 0], code="2"),
+        noise_control.DuctElement(label="Silenciador, 3 ft, pérdida de carga estándar",
+                                  attenuation=[7, 12, 16, 28, 35, 35, 28, 17],
+                                  self_noise=[49, 43, 44, 42, 42, 45, 35, 24], code="3"),
+        noise_control.DuctElement(label="Conducto, 36 x 24 in, 5 ft, revestimiento de 1 in",
+                                  attenuation=[2, 2, 3, 7, 15, 12, 11, 9], code="4"),
+        noise_control.DuctElement(label="Derivación, 25 por ciento", attenuation=6.0, code="5"),
+        noise_control.DuctElement(label="Conducto, 18 x 12 in, 6 ft, revestimiento de 1 in",
+                                  attenuation=[3, 3, 5, 11, 25, 22, 16, 13], code="6"),
+        noise_control.DuctElement(label="Conducto flexible, 12 in, 6 ft",
+                                  attenuation=[14, 14, 16, 15, 17, 22, 16, 13], code="7"),
+        noise_control.DuctElement(label="Difusor rectangular, 312 cfm", attenuation=None,
+                                  self_noise=[33, 32, 29, 23, 15, 4, 0, 0], code="8"),
     ],
     frequencies=bandas,
     room_effect=[6, 6, 5, 5, 6, 7, 6, 6],
@@ -819,17 +819,17 @@ impulsion = noise_control.duct_path(
 
 retorno = noise_control.duct_path(
     ventilador, [
-        noise_control.DuctElement("Codo, 36 x 24 in, sin revestir", [0, 1, 2, 3, 3, 3, 3, 3],
-                                                [43, 42, 39, 33, 24, 12, 0, 0], code="2"),
-        noise_control.DuctElement("Silenciador, 5 ft, tipo baja frecuencia",
-                                                [16, 21, 35, 41, 41, 28, 21, 15],
-                                                [51, 49, 53, 56, 56, 59, 60, 53], code="3"),
-        noise_control.DuctElement("Codo, 36 x 24 in, revestido, 1 in", [1, 2, 3, 4, 5, 6, 8, 10],
-                                                [39, 38, 34, 28, 18, 4, 0, 0], code="4"),
-        noise_control.DuctElement("Plenum, 800 sq ft, 50 por ciento revestido",
-                                                [12, 13, 19, 20, 20, 20, 21, 21], code="5"),
-        noise_control.DuctElement("Rejilla rectangular, 24 x 24 in, 563 cfm", None,
-                                                [30, 29, 26, 20, 12, 1, 0, 0], code="6"),
+        noise_control.DuctElement(label="Codo, 36 x 24 in, sin revestir", attenuation=[0, 1, 2, 3, 3, 3, 3, 3],
+                                                self_noise=[43, 42, 39, 33, 24, 12, 0, 0], code="2"),
+        noise_control.DuctElement(label="Silenciador, 5 ft, tipo baja frecuencia",
+                                                attenuation=[16, 21, 35, 41, 41, 28, 21, 15],
+                                                self_noise=[51, 49, 53, 56, 56, 59, 60, 53], code="3"),
+        noise_control.DuctElement(label="Codo, 36 x 24 in, revestido, 1 in", attenuation=[1, 2, 3, 4, 5, 6, 8, 10],
+                                                self_noise=[39, 38, 34, 28, 18, 4, 0, 0], code="4"),
+        noise_control.DuctElement(label="Plenum, 800 sq ft, 50 por ciento revestido",
+                                                attenuation=[12, 13, 19, 20, 20, 20, 21, 21], code="5"),
+        noise_control.DuctElement(label="Rejilla rectangular, 24 x 24 in, 563 cfm", attenuation=None,
+                                                self_noise=[30, 29, 26, 20, 12, 1, 0, 0], code="6"),
     ],
     frequencies=bandas,
     room_effect=[9, 8, 6, 8, 8, 8, 9, 10],
@@ -1154,7 +1154,7 @@ bandas = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
 
 with warnings.catch_warnings(record=True) as avisos:
     warnings.simplefilter("always")
-    noise_control.duct_path([90.0] * 8, [noise_control.DuctElement("Tramo recto", 3.0)], frequencies=bandas,
+    noise_control.duct_path([90.0] * 8, [noise_control.DuctElement(label="Tramo recto", attenuation=3.0)], frequencies=bandas,
                             section={"width_m": 36 * IN, "height_m": 24 * IN},
                             flow_velocity=6.0, label="Impulsión")
 print(avisos[0].category is noise_control.PlaneWaveWarning)

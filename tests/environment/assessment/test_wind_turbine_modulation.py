@@ -505,7 +505,9 @@ def _ratings() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
 def test_bins_average_the_zeros_and_pick_the_worst_band() -> None:
     ratings, speeds, directions = _ratings()
-    binned = env.bin_amplitude_modulation(ratings, speeds, directions)
+    binned = env.bin_amplitude_modulation(
+        ratings, speeds, wind_directions_deg=directions
+    )
     np.testing.assert_allclose(binned.wind_directions_deg, [0.0, 30.0, 210.0])
     np.testing.assert_allclose(binned.wind_speeds_m_s, [5.0, 5.0, 7.0])
     # 350 degrees at 4.6 m/s and 14 degrees at 5.4 m/s share sector 0, bin 5.
@@ -547,7 +549,10 @@ def test_a_tie_selects_the_lowest_band() -> None:
 def test_excluded_periods_leave_their_bins() -> None:
     ratings, speeds, directions = _ratings()
     binned = env.bin_amplitude_modulation(
-        ratings, speeds, directions, excluded=[False, True, False, False, False]
+        ratings,
+        speeds,
+        wind_directions_deg=directions,
+        excluded=[False, True, False, False, False],
     )
     assert binned.counts[0] == 1
 
@@ -628,7 +633,7 @@ def test_the_binned_plot_draws_twelve_sectors_in_twelve_colours() -> None:
     directions = np.repeat(np.arange(0.0, 360.0, 30.0), 2)
     speeds = np.tile([5.0, 6.0], 12)
     binned = env.bin_amplitude_modulation(
-        np.full((24, 1), 3.0), speeds, directions, bands=[1]
+        np.full((24, 1), 3.0), speeds, wind_directions_deg=directions, bands=[1]
     )
     ax = binned.plot()
     legend = ax.get_legend()
@@ -651,7 +656,11 @@ def test_the_binned_plot_writes_a_sector_centre_in_its_language(
     language: str, name: str
 ) -> None:
     binned = env.bin_amplitude_modulation(
-        np.full((2, 1), 3.0), [5.0, 5.0], [22.5, 45.0], bands=[1], sector_width_deg=22.5
+        np.full((2, 1), 3.0),
+        [5.0, 5.0],
+        wind_directions_deg=[22.5, 45.0],
+        bands=[1],
+        sector_width_deg=22.5,
     )
     texts = [
         t.get_text() for t in binned.plot(language=language).get_legend().get_texts()

@@ -103,6 +103,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+
 __all__ = [
     "AM_BLOCK_SAMPLES",
     "AM_EXCEEDANCE_DEPTHS_DB",
@@ -286,6 +288,7 @@ def amplitude_modulation_band_levels(
 def _validated_range(modulation_frequency_range_hz: Sequence[float]) -> tuple[int, int]:
     """Line indices (0.1 Hz grid) bounding the user's fundamental range."""
     values = tuple(float(v) for v in modulation_frequency_range_hz)
+    # The length of a fixed-size argument, not a quantity.
     if len(values) != 2 or not all(math.isfinite(v) for v in values):  # noqa: PLR2004
         msg = "'modulation_frequency_range_hz' must be two finite frequencies."
         raise ValueError(msg)
@@ -476,7 +479,7 @@ class ModulationBlock(OwnsArrays):
         ax: Axes | None = None,
         *,
         kind: Literal["spectrum", "series"] = "spectrum",
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Plot the block's power spectrum (Figure 1) or its two time series.
@@ -735,7 +738,7 @@ class ModulationPeriod(OwnsArrays):
         return self.fundamental_frequencies_hz[valid]
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the 10 s depths through the period and the 10 min rating.
 
@@ -900,7 +903,7 @@ class BinnedModulation(OwnsArrays):
     selected_ratings_db: NDArray[np.float64]
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the worst-band mean rating of each bin against wind speed.
 
@@ -925,8 +928,8 @@ class BinnedModulation(OwnsArrays):
 def bin_amplitude_modulation(
     ratings_db: ArrayLike,
     wind_speeds_m_s: ArrayLike,
-    wind_directions_deg: ArrayLike | None = None,
     *,
+    wind_directions_deg: ArrayLike | None = None,
     bands: Iterable[int] = (1, 2, 3),
     excluded: ArrayLike | None = None,
     sector_width_deg: float = 30.0,

@@ -7,7 +7,7 @@ contours, and the rotorcraft ground effect, flyover and terrain screening of
 ICAO Doc 32. Everything here is embedded by a page under ``aircraft/``.
 """
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -110,7 +110,7 @@ def generate_aircraft_atmospheric_absorption(output_dir: str) -> None:
     freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)  # 50 Hz - 10 kHz thirds
     _fig, ax = plt.subplots(figsize=(10, 6))
     for s, color in ((1000.0, COLOR_SECONDARY), (7620.0, COLOR_PRIMARY)):
-        res = aircraft.sae_band_attenuation(
+        res = aircraft.band_attenuation_arp5534(
             freqs, s, temperature_c=25.0, relative_humidity_percent=70.0
         )
         ax.plot(
@@ -894,11 +894,12 @@ def generate_airport_segment_corrections(output_dir: str) -> None:
 
     # (a) engine installation: the depression-angle directivity, per mounting.
     phi = np.linspace(0.0, 180.0, 361)
-    for mounting, color, label in (
+    mountings: tuple[tuple[Literal["wing", "fuselage", "propeller"], str, str], ...] = (
         ("wing", COLOR_PRIMARY, "Wing-mounted"),
         ("fuselage", COLOR_SECONDARY, "Fuselage-mounted"),
         ("propeller", COLOR_TERTIARY, "Propeller"),
-    ):
+    )
+    for mounting, color, label in mountings:
         di = np.array(
             [aircraft.engine_installation_correction(p, mounting) for p in phi]
         )
@@ -1143,7 +1144,11 @@ def generate_npd_atmosphere_attenuation(output_dir: str) -> None:
 
     spectrum = aircraft.load_anp_database().spectral_class(103)
     _fig, ax = plt.subplots(figsize=(10, 6))
-    for route, reference in (("arp5534", True), ("arp866a", False)):
+    routes: tuple[tuple[Literal["arp5534", "arp866a"], bool], ...] = (
+        ("arp5534", True),
+        ("arp866a", False),
+    )
+    for route, reference in routes:
         aircraft.npd_atmosphere_increment(
             spectrum, absorption=route, **_APPENDIX_D_AIR
         ).plot_attenuation(
@@ -1164,10 +1169,11 @@ def generate_npd_atmosphere_increment(output_dir: str) -> None:
     database = aircraft.load_anp_database()
     _fig, ax = plt.subplots(figsize=(10, 6))
     for class_id, operation, marker in ((103, "DEP", "o"), (205, "ARR", "s")):
-        for route, name, color in (
+        routes: tuple[tuple[Literal["arp5534", "arp866a"], str, str], ...] = (
             ("arp5534", "SAE ARP 5534", COLOR_PRIMARY),
             ("arp866a", "SAE ARP 866A", COLOR_SECONDARY),
-        ):
+        )
+        for route, name, color in routes:
             aircraft.npd_atmosphere_increment(
                 database.spectral_class(class_id), absorption=route, **_APPENDIX_D_AIR
             ).plot(

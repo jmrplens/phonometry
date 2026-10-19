@@ -32,6 +32,7 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..emission.sound_power_plant import (
         PartialPlantContributions,
         PlantMeasurementCheck,
@@ -115,7 +116,7 @@ _ROW_LABELS: dict[str, tuple[str, str]] = {
 }
 
 
-def _t(text: str, language: str = "en", **fmt: Any) -> str:
+def _t(text: str, language: Language = "en", **fmt: Any) -> str:
     """Localise a fixed string; English is returned verbatim."""
     s = _STRINGS.get(text, text) if language == "es" else text
     return s.format(**fmt) if fmt else s
@@ -129,7 +130,7 @@ def _closed(vertices: np.ndarray) -> np.ndarray:
 def plot_plant_contour(
     contour: PlantMeasurementContour,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The plan of an ISO 8297 contour: plant area, contour, positions.
@@ -293,7 +294,7 @@ def plot_plant_contour(
 def plot_plant_sound_power(
     result: PlantSoundPowerResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The octave-band :math:`L_W` of a plant beside the contour average.
@@ -359,7 +360,7 @@ def plot_plant_sound_power(
 def plot_plant_measurement_check(
     check: PlantMeasurementCheck,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The margin of every requirement an ISO 8297 check holds.
@@ -476,7 +477,7 @@ def plot_plant_measurement_check(
 def plot_partial_plant_contributions(
     result: PartialPlantContributions,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The octave-band :math:`L_W` of each part of a plant and of their sum.

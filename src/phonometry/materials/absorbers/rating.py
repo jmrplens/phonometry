@@ -70,6 +70,8 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -250,7 +252,7 @@ def _unfavourable_deviation_sum(
     return float(np.sum(np.maximum(shifted_reference - measured, 0.0)))
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class AbsorptionRatingResult(OwnsArrays):
     r"""Weighted sound absorption rating (ISO 11654:1997).
 
@@ -442,7 +444,7 @@ class AbsorptionRatingResult(OwnsArrays):
         return f"{self.alpha_w:.2f}"
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the practical curve vs the shifted reference (ISO 11654).
 
@@ -462,9 +464,9 @@ class AbsorptionRatingResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an ISO 11654 sound-absorption rating fiche to a PDF.
 

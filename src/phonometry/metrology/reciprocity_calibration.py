@@ -63,7 +63,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -83,6 +83,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from .._i18n import Language
 
 
 __all__ = [
@@ -223,7 +225,7 @@ class ReciprocityCalibration(OwnsArrays):
     sensitivity_v_per_pa: NDArray[np.complex128]
     products_v2_per_pa2: NDArray[np.complex128]
     field: CalibrationField
-    method: str
+    method: Literal["three_microphones", "auxiliary_source"]
     corrections: Mapping[str, NDArray[np.float64]]
     expanded_uncertainty_db: NDArray[np.float64] | None = None
 
@@ -317,7 +319,7 @@ class ReciprocityCalibration(OwnsArrays):
         return np.mod(np.degrees(np.angle(self.sensitivity_v_per_pa)), 360.0)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the sensitivity level of each microphone against frequency,
         with the expanded uncertainty as a band when it is known.
@@ -342,7 +344,7 @@ def _calibration(
     products: NDArray[np.complex128],
     *,
     field: CalibrationField,
-    method: str,
+    method: Literal["three_microphones", "auxiliary_source"],
     corrections: Mapping[str, ArrayLike] | None,
     expanded_uncertainty_db: ArrayLike | None,
 ) -> ReciprocityCalibration:
@@ -372,6 +374,7 @@ def _solved(
     expanded_uncertainty_db: ArrayLike | None,
 ) -> ReciprocityCalibration:
     """Solve the products for the sensitivities, by the triad or by a pair."""
+    method: Literal["three_microphones", "auxiliary_source"]
     if sensitivity_ratio is None:
         sensitivities = _triad(products)
         method = "three_microphones"
@@ -688,7 +691,7 @@ class ReciprocityUncertaintyBudget(OwnsArrays):
         return 20.0 * np.log10(1.0 + np.sqrt(np.sum(relative**2, axis=0)))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot each standard uncertainty and the expanded uncertainty against
         frequency.

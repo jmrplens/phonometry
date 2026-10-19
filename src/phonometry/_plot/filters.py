@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.transforms import Transform
 
+    from .._i18n import Language
     from ..filters.compliance import FilterComplianceResult
     from ..filters.core import OctaveFilterResult, OctaveSpectrogramResult
     from ..filters.equalizer import EQResponseResult
@@ -150,7 +151,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en", **fmt: Any) -> str:
+def _t(text: str, language: Language = "en", **fmt: Any) -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     s = _STRINGS.get(text, text) if language == "es" else text
     return s.format(**fmt) if fmt else s
@@ -195,7 +196,7 @@ def plot_filter_class(
     result: FilterComplianceResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Measured relative attenuation of the binding band over its class corridor.
@@ -344,7 +345,7 @@ def _cover(
     return min(low, lo - pad), max(high, hi + pad)
 
 
-def _class_title(met: str, unmet: str, cls: int | None, language: str) -> str:
+def _class_title(met: str, unmet: str, cls: int | None, language: Language) -> str:
     """A requirement's title: *met* with its class, or *unmet* when none."""
     if cls is None:
         return _t(unmet, language)
@@ -354,7 +355,7 @@ def _class_title(met: str, unmet: str, cls: int | None, language: str) -> str:
 def _limit_lines(
     ax: Axes,
     limits: dict[int, tuple[float, float]],
-    language: str,
+    language: Language,
 ) -> None:
     """Dashed horizontal acceptance limits, one colour per class."""
     colours = {0: _C_QUATERNARY, 1: _C_TERTIARY, 2: _C_SECONDARY}
@@ -379,7 +380,7 @@ def plot_filter_bandwidth(
     result: FilterComplianceResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The effective bandwidth deviation of every band against its limits.
@@ -442,7 +443,7 @@ def plot_filter_summation(
     result: FilterComplianceResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The summation of adjacent outputs across every band it applies to.
@@ -566,7 +567,7 @@ def plot_time_invariance(
     result: TimeInvarianceResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Each band's swept output against Formula (17), one line per sweep rate.
@@ -648,7 +649,7 @@ def _draw_margins(
     ax: Axes,
     positions: np.ndarray,
     verifications: tuple[ConformanceVerification, ...],
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
     shown: set[str],
     *,
@@ -726,7 +727,7 @@ def _margin_legend_label(
     shown: set[str],
     *,
     unusable_label: str | None,
-    language: str,
+    language: Language,
 ) -> object:
     """The legend label of one marker: each verdict once, or the caller's label once.
 
@@ -765,7 +766,7 @@ _MARGIN_TICKS_DB = (
 
 
 def _margin_axis(
-    ax: Axes, verifications: list[ConformanceVerification], language: str
+    ax: Axes, verifications: list[ConformanceVerification], language: Language
 ) -> None:
     """The zero line and a symmetric-log margin axis with plain labels.
 
@@ -807,7 +808,7 @@ def plot_periodic_clause(
     result: PeriodicTestClause,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """One clause of IEC 61260-3:2016 against its acceptance limits.
@@ -869,7 +870,7 @@ def plot_periodic_verification(
     result: FilterPeriodicVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Every result of the periodic tests at its margin, grouped by clause.
@@ -915,7 +916,7 @@ def plot_periodic_verification(
 
 
 def _normalized_frequency_axis(
-    ax: Axes, lo: float, hi: float, language: str = "en"
+    ax: Axes, lo: float, hi: float, language: Language = "en"
 ) -> None:
     """Label a logarithmic ``f / f_m`` axis with plain decimal ratios.
 
@@ -941,7 +942,7 @@ def plot_parametric_eq(
     result: EQResponseResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     show_sections: bool = True,
     **kwargs: Any,
 ) -> Axes | np.ndarray:
@@ -1025,7 +1026,7 @@ def plot_time_weighted_envelope(
     result: TimeWeightedEnvelope,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The level trace of a :class:`~phonometry.filters.TimeWeightedEnvelope`.
@@ -1098,7 +1099,7 @@ def plot_octave_levels(
     result: OctaveFilterResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The band levels of an :class:`~phonometry.filters.OctaveFilterResult`.
@@ -1227,6 +1228,7 @@ def _spectrogram_grid(
         channel that is not a whole number, or one the result does not hold.
     """
     levels = np.asarray(result.levels, dtype=np.float64)
+    # The number is a count of array axes, not a quantity.
     if levels.ndim == 2:  # noqa: PLR2004
         if channel not in (None, 0):
             msg = (
@@ -1257,7 +1259,7 @@ def plot_octave_spectrogram(
     ax: Axes | None = None,
     *,
     channel: int | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Band levels over time, as one raster on a logarithmic frequency axis.
@@ -1325,6 +1327,7 @@ def plot_octave_spectrogram(
     if new_figure:
         title = (
             _t("Band levels over time", language)
+            # The number is a count of array axes, not a quantity.
             if channel is None or np.ndim(result.levels) == 2  # noqa: PLR2004
             else _t(
                 "Band levels over time, channel {n}",

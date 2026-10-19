@@ -122,7 +122,9 @@ class TestDelanyBazley:
         f = np.linspace(5.0, 200.0, 100)
         with pytest.warns(PorousAbsorberWarning):
             med = delany_bazley(f, sigma, fluid=ABSORBER_AIR)
-        zs = layered_absorber(f, [PorousLayer(0.01, med)]).surface_impedance
+        zs = layered_absorber(
+            f, [PorousLayer(thickness_m=0.01, medium=med)]
+        ).surface_impedance
         assert np.min(zs.real) < 0.0
 
     def test_warns_outside_validity(self) -> None:
@@ -194,7 +196,9 @@ class TestMiki:
         with pytest.warns(PorousAbsorberWarning):
             med = miki(f, sigma, fluid=ABSORBER_AIR)
         assert np.all(med.characteristic_impedance.real > 0.0)
-        zs = layered_absorber(f, [PorousLayer(0.01, med)]).surface_impedance
+        zs = layered_absorber(
+            f, [PorousLayer(thickness_m=0.01, medium=med)]
+        ).surface_impedance
         assert np.all(zs.real > -1e-9)
 
     def test_agrees_with_delany_bazley_in_fit_range(self) -> None:
@@ -272,8 +276,10 @@ class TestJohnsonChampouxAllard:
         rel_k = np.abs(jca.wavenumber - db.wavenumber)
         assert np.max(rel_z / np.abs(db.characteristic_impedance)) < 0.15
         assert np.max(rel_k / np.abs(db.wavenumber)) < 0.10
-        a_j = layered_absorber(f, [PorousLayer(0.05, jca)]).absorption
-        a_d = layered_absorber(f, [PorousLayer(0.05, db)]).absorption
+        a_j = layered_absorber(
+            f, [PorousLayer(thickness_m=0.05, medium=jca)]
+        ).absorption
+        a_d = layered_absorber(f, [PorousLayer(thickness_m=0.05, medium=db)]).absorption
         assert np.max(np.abs(a_j - a_d)) < 0.06
 
     def test_consistency_zc_k_density_modulus(self) -> None:
@@ -322,7 +328,9 @@ class TestLayeredAbsorber:
         """Zs = -j Zc cot(k d) (Mechel D.3 Eq. (1); Bies Eq. (D.94))."""
         f = _grid(200.0, 4000.0)
         med = delany_bazley(f, 20000.0, fluid=ABSORBER_AIR)
-        res = layered_absorber(f, [PorousLayer(0.05, med)], fluid=ABSORBER_AIR)
+        res = layered_absorber(
+            f, [PorousLayer(thickness_m=0.05, medium=med)], fluid=ABSORBER_AIR
+        )
         zs_ref = -1j * med.characteristic_impedance / np.tan(med.wavenumber * 0.05)
         np.testing.assert_allclose(res.surface_impedance, zs_ref, rtol=1e-12)
 
@@ -331,7 +339,11 @@ class TestLayeredAbsorber:
         f = _grid(300.0, 3000.0, 200)
         med1 = delany_bazley(f, 30000.0, fluid=ABSORBER_AIR)
         med2 = miki(f, 8000.0, fluid=ABSORBER_AIR)
-        layers = [PorousLayer(0.02, med1), AirLayer(0.03), PorousLayer(0.04, med2)]
+        layers = [
+            PorousLayer(thickness_m=0.02, medium=med1),
+            AirLayer(thickness_m=0.03),
+            PorousLayer(thickness_m=0.04, medium=med2),
+        ]
         res = layered_absorber(f, layers, fluid=ABSORBER_AIR)
         # Bies (D.95): Z_i = Zm (Z_{i-1} + j Zm tan(km l)) / (Zm + j Z_{i-1} tan)
         k0 = 2.0 * np.pi * f / C0
@@ -357,7 +369,7 @@ class TestLayeredAbsorber:
         f_quarter = C0 / (4.0 * d)
         f = np.linspace(20.0, 4000.0, 500)
         f = np.sort(np.append(f, f_quarter))
-        res = layered_absorber(f, [AirLayer(d)], fluid=ABSORBER_AIR)
+        res = layered_absorber(f, [AirLayer(thickness_m=d)], fluid=ABSORBER_AIR)
         np.testing.assert_allclose(np.abs(res.reflection), 1.0, atol=1e-12)
         np.testing.assert_allclose(res.absorption, 0.0, atol=1e-12)
 
@@ -365,9 +377,14 @@ class TestLayeredAbsorber:
         f = _grid(200.0, 1000.0, 50)
         med = delany_bazley(f, 20000.0, fluid=ABSORBER_AIR)
         with_zero = layered_absorber(
-            f, [AirLayer(0.0), PorousLayer(0.0, med), PorousLayer(0.05, med)]
+            f,
+            [
+                AirLayer(thickness_m=0.0),
+                PorousLayer(thickness_m=0.0, medium=med),
+                PorousLayer(thickness_m=0.05, medium=med),
+            ],
         )
-        without = layered_absorber(f, [PorousLayer(0.05, med)])
+        without = layered_absorber(f, [PorousLayer(thickness_m=0.05, medium=med)])
         np.testing.assert_array_equal(with_zero.reflection, without.reflection)
 
     @pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
@@ -375,15 +392,17 @@ class TestLayeredAbsorber:
         f = _grid(100.0, 1000.0, 50)
         with pytest.warns(PorousAbsorberWarning):
             med = miki(f, 1e9, fluid=ABSORBER_AIR)
-        res = layered_absorber(f, [PorousLayer(0.05, med)])
+        res = layered_absorber(f, [PorousLayer(thickness_m=0.05, medium=med)])
         assert np.max(res.absorption) < 0.01
 
     def test_free_termination_of_bare_air_is_reflectionless(self) -> None:
         """An air 'layer' radiating into free air behind reflects nothing."""
         f = _grid(100.0, 1000.0, 50)
-        res = layered_absorber(f, [AirLayer(0.1)], termination="free")
+        res = layered_absorber(f, [AirLayer(thickness_m=0.1)], termination="free")
         np.testing.assert_allclose(np.abs(res.reflection), 0.0, atol=1e-12)
-        res_ob = layered_absorber(f, [AirLayer(0.1)], termination="free", angle_rad=0.7)
+        res_ob = layered_absorber(
+            f, [AirLayer(thickness_m=0.1)], termination="free", angle_rad=0.7
+        )
         np.testing.assert_allclose(np.abs(res_ob.reflection), 0.0, atol=1e-12)
 
     def test_free_termination_admittance_is_the_literal_cosine_over_rho_c(
@@ -410,8 +429,10 @@ class TestLayeredAbsorber:
     def test_impedance_termination_matches_rigid_limit(self) -> None:
         f = _grid(200.0, 1000.0, 50)
         med = delany_bazley(f, 20000.0, fluid=ABSORBER_AIR)
-        rigid = layered_absorber(f, [PorousLayer(0.05, med)])
-        huge = layered_absorber(f, [PorousLayer(0.05, med)], termination=1e12 + 0j)
+        rigid = layered_absorber(f, [PorousLayer(thickness_m=0.05, medium=med)])
+        huge = layered_absorber(
+            f, [PorousLayer(thickness_m=0.05, medium=med)], termination=1e12 + 0j
+        )
         np.testing.assert_allclose(huge.reflection, rigid.reflection, atol=1e-6)
 
     def test_cross_check_with_impedance_tube_machinery(self) -> None:
@@ -419,7 +440,9 @@ class TestLayeredAbsorber:
         f = _grid(200.0, 800.0, 60)  # keep Re(k d) < pi for arccos branch
         med = delany_bazley(f, 20000.0, fluid=ABSORBER_AIR)
         d = 0.05
-        res = layered_absorber(f, [PorousLayer(d, med)], fluid=ABSORBER_AIR)
+        res = layered_absorber(
+            f, [PorousLayer(thickness_m=d, medium=med)], fluid=ABSORBER_AIR
+        )
         tm = res.transfer_matrix
         t = TransferMatrix(t11=tm[0, 0], t12=tm[0, 1], t21=tm[1, 0], t22=tm[1, 1])
         np.testing.assert_allclose(
@@ -441,14 +464,14 @@ class TestLayeredAbsorber:
             med = miki(f, float(rng.uniform(3000, 80000)), fluid=ABSORBER_AIR)
             layers = [
                 MicroperforatedPlateLayer(
-                    float(rng.uniform(2e-4, 1e-3)),
-                    float(rng.uniform(5e-5, 3e-4)),
-                    float(rng.uniform(0.005, 0.05)),
+                    thickness_m=float(rng.uniform(2e-4, 1e-3)),
+                    hole_radius=float(rng.uniform(5e-5, 3e-4)),
+                    open_area=float(rng.uniform(0.005, 0.05)),
                 ),
-                AirLayer(float(rng.uniform(0.0, 0.05))),
-                PorousLayer(float(rng.uniform(0.01, 0.1)), med),
-                MembraneLayer(float(rng.uniform(0.1, 5.0))),
-                AirLayer(float(rng.uniform(0.01, 0.1))),
+                AirLayer(thickness_m=float(rng.uniform(0.0, 0.05))),
+                PorousLayer(thickness_m=float(rng.uniform(0.01, 0.1)), medium=med),
+                MembraneLayer(surface_density=float(rng.uniform(0.1, 5.0))),
+                AirLayer(thickness_m=float(rng.uniform(0.01, 0.1))),
             ]
             angle_rad = float(rng.uniform(0.0, 1.4))
             res = layered_absorber(f, layers, angle_rad=angle_rad)
@@ -472,11 +495,13 @@ class TestLayeredAbsorber:
         f = _grid(250.0, 4000.0, 300)
         med = miki(f, 20000.0, fluid=ABSORBER_AIR)
         layers = [
-            MicroperforatedPlateLayer(3e-4, 1e-4, 0.01),
-            AirLayer(0.02),
-            PorousLayer(0.03, med),
-            MembraneLayer(1.2),
-            AirLayer(0.04),
+            MicroperforatedPlateLayer(
+                thickness_m=3e-4, hole_radius=1e-4, open_area=0.01
+            ),
+            AirLayer(thickness_m=0.02),
+            PorousLayer(thickness_m=0.03, medium=med),
+            MembraneLayer(surface_density=1.2),
+            AirLayer(thickness_m=0.04),
         ]
         for termination in ("rigid", "free", 800.0 + 200.0j):
             for angle_rad in (0.0, 0.7, 1.3):
@@ -499,7 +524,7 @@ class TestLayeredAbsorber:
         f = _grid(100.0, 2000.0, 100)
         theta = 0.9
         d = 0.04
-        res = layered_absorber(f, [AirLayer(d)], angle_rad=theta)
+        res = layered_absorber(f, [AirLayer(thickness_m=d)], angle_rad=theta)
         k0 = 2.0 * np.pi * f / C0
         zs_ref = -1j * (RC / np.cos(theta)) / np.tan(k0 * d * np.cos(theta))
         np.testing.assert_allclose(res.surface_impedance, zs_ref, rtol=1e-10)
@@ -508,7 +533,7 @@ class TestLayeredAbsorber:
     def test_rejects_bad_inputs(self) -> None:
         f = _grid(100.0, 200.0, 5)
         med = miki(f, 20000.0)
-        layers = [PorousLayer(0.05, med)]
+        layers = [PorousLayer(thickness_m=0.05, medium=med)]
         with pytest.raises(ValueError, match="at least one layer"):
             layered_absorber(f, [])
         with pytest.raises(
@@ -520,7 +545,7 @@ class TestLayeredAbsorber:
         ):
             layered_absorber(f, layers, termination="soft")
         other = miki(_grid(100.0, 200.0, 7), 20000.0)
-        mismatched = [PorousLayer(0.05, other)]
+        mismatched = [PorousLayer(thickness_m=0.05, medium=other)]
         with pytest.raises(
             ValueError,
             match=r"PorousLayer\.medium was evaluated on a different frequency vector",
@@ -539,7 +564,9 @@ class TestResonantSheets:
 
     def test_helmholtz_resonance_closed_form_vs_tmm(self) -> None:
         """f0 = (c/2pi) sqrt(eps/(t' d)) matches the TMM peak (Cox Eq. 7.4)."""
-        plate = PerforatedPlateLayer(0.006, 0.0025, 0.05)
+        plate = PerforatedPlateLayer(
+            thickness_m=0.006, hole_radius=0.0025, open_area=0.05
+        )
         d = 0.025
         f0 = helmholtz_resonance_frequency(
             cavity_depth=d,
@@ -548,7 +575,7 @@ class TestResonantSheets:
             open_area=plate.open_area,
         )
         f = np.linspace(0.3 * f0, 2.0 * f0, 4000)
-        res = layered_absorber(f, [plate, AirLayer(d)])
+        res = layered_absorber(f, [plate, AirLayer(thickness_m=d)])
         # Resonance = zero crossing of Im(Zs); alpha peaks there too.
         f_peak = f[int(np.argmax(res.absorption))]
         assert abs(f_peak - f0) / f0 < 0.12
@@ -567,9 +594,11 @@ class TestResonantSheets:
             f,
             [
                 MicroperforatedPlateLayer(
-                    ref.MAA_FIG5_THICKNESS, ref.MAA_FIG5_DIAMETER / 2.0, eps
+                    thickness_m=ref.MAA_FIG5_THICKNESS,
+                    hole_radius=ref.MAA_FIG5_DIAMETER / 2.0,
+                    open_area=eps,
                 ),
-                AirLayer(ref.MAA_FIG5_CAVITY),
+                AirLayer(thickness_m=ref.MAA_FIG5_CAVITY),
             ],
         )
         i = int(np.argmax(res.absorption))
@@ -631,7 +660,9 @@ class TestResonantSheets:
         eps = (np.pi / 4.0) * (ref.MAA_FIG5_DIAMETER / ref.MAA_FIG5_SEPARATION) ** 2
         f = np.linspace(100.0, 4000.0, 400)
         mpp = MicroperforatedPlateLayer(
-            ref.MAA_FIG5_THICKNESS, ref.MAA_FIG5_DIAMETER / 2.0, eps
+            thickness_m=ref.MAA_FIG5_THICKNESS,
+            hole_radius=ref.MAA_FIG5_DIAMETER / 2.0,
+            open_area=eps,
         )
         z_sheet = (
             microperforated_plate_impedance(
@@ -646,7 +677,7 @@ class TestResonantSheets:
         k0 = 2.0 * np.pi * f / C0
         for theta in (0.0, 0.9):
             res = layered_absorber(
-                f, [mpp, AirLayer(ref.MAA_FIG5_CAVITY)], angle_rad=theta
+                f, [mpp, AirLayer(thickness_m=ref.MAA_FIG5_CAVITY)], angle_rad=theta
             )
             cos_t = np.cos(theta)
             reactance = z_sheet.imag - (
@@ -662,9 +693,11 @@ class TestResonantSheets:
         eps = (np.pi / 4.0) * (ref.MAA_FIG5_DIAMETER / ref.MAA_FIG5_SEPARATION) ** 2
         f = np.linspace(200.0, 2000.0, 8000)
         mpp = MicroperforatedPlateLayer(
-            ref.MAA_FIG5_THICKNESS, ref.MAA_FIG5_DIAMETER / 2.0, eps
+            thickness_m=ref.MAA_FIG5_THICKNESS,
+            hole_radius=ref.MAA_FIG5_DIAMETER / 2.0,
+            open_area=eps,
         )
-        res = layered_absorber(f, [mpp, AirLayer(ref.MAA_FIG5_CAVITY)])
+        res = layered_absorber(f, [mpp, AirLayer(thickness_m=ref.MAA_FIG5_CAVITY)])
         xm = (
             microperforated_plate_impedance(
                 f,
@@ -760,7 +793,12 @@ class TestResonantSheets:
         f = np.linspace(20.0, 500.0, 3000)
         med = delany_bazley(f, 10000.0, fluid=ABSORBER_AIR)
         res = layered_absorber(
-            f, [MembraneLayer(m), AirLayer(0.02), PorousLayer(0.03, med)]
+            f,
+            [
+                MembraneLayer(surface_density=m),
+                AirLayer(thickness_m=0.02),
+                PorousLayer(thickness_m=0.03, medium=med),
+            ],
         )
         f_peak = f[int(np.argmax(res.absorption))]
         assert abs(f_peak - f0) / f0 < 0.10
@@ -776,7 +814,7 @@ class TestResonantSheets:
         exactly zero (inf * 0 = nan); they are rejected up front.
         """
         f = np.array([1000.0])
-        layers = [AirLayer(0.05)]
+        layers = [AirLayer(thickness_m=0.05)]
         with pytest.raises(
             ValueError, match=r"'angle_rad' must satisfy 0 <= angle < pi/2"
         ):
@@ -784,7 +822,7 @@ class TestResonantSheets:
 
     def test_termination_array_length_mismatch_rejected(self) -> None:
         f = np.array([500.0, 1000.0])
-        layers = [AirLayer(0.05)]
+        layers = [AirLayer(thickness_m=0.05)]
         termination = np.array([800.0 + 0j] * 3)
         with pytest.raises(
             ValueError,
@@ -866,19 +904,23 @@ class TestRandomIncidence:
     def test_diffuse_field_bounds_and_value(self) -> None:
         f = np.array([250.0, 500.0, 1000.0, 2000.0])
         med = delany_bazley(f, 20000.0, fluid=ABSORBER_AIR)
-        res = diffuse_field_absorption(f, [PorousLayer(0.05, med)])
+        res = diffuse_field_absorption(f, [PorousLayer(thickness_m=0.05, medium=med)])
         assert np.all(res.absorption >= 0.0)
         assert np.all(res.absorption <= 1.0)
         # Thick porous layer: diffuse alpha exceeds normal incidence at mid f.
-        normal = layered_absorber(f, [PorousLayer(0.05, med)]).absorption
+        normal = layered_absorber(
+            f, [PorousLayer(thickness_m=0.05, medium=med)]
+        ).absorption
         assert res.absorption[1] > normal[1]
 
     def test_diffuse_field_quadrature_converges(self) -> None:
         f = np.array([500.0])
         med = miki(f, 15000.0)
-        a64 = diffuse_field_absorption(f, [PorousLayer(0.05, med)]).absorption
+        a64 = diffuse_field_absorption(
+            f, [PorousLayer(thickness_m=0.05, medium=med)]
+        ).absorption
         a128 = diffuse_field_absorption(
-            f, [PorousLayer(0.05, med)], n_quadrature_points=128
+            f, [PorousLayer(thickness_m=0.05, medium=med)], n_quadrature_points=128
         ).absorption
         np.testing.assert_allclose(a64, a128, atol=1e-8)
 
@@ -886,7 +928,7 @@ class TestRandomIncidence:
     def test_rejects_bad_inputs(self) -> None:
         f = np.array([500.0])
         med = miki(f, 15000.0)
-        layers = [PorousLayer(0.05, med)]
+        layers = [PorousLayer(thickness_m=0.05, medium=med)]
         with pytest.raises(
             ValueError, match=r"'angle_limit_rad' must satisfy 0 < angle_limit <= pi/2"
         ):

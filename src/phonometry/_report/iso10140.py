@@ -33,6 +33,7 @@ from ._insulation_fiche import Column, render_insulation_fiche
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from .._i18n import Language
     from ..building.measurement.laboratory_insulation import (
         LaboratoryAirborneInsulationResult,
         LaboratoryImpactInsulationResult,
@@ -90,7 +91,7 @@ def render_iso10140_report(
     quantity: str,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 10140 laboratory sound-insulation test report to a PDF.
 
@@ -117,7 +118,7 @@ def render_iso10140_report(
     is_impact = quantity == "l_n"
 
     def build_columns(
-        value_header: str, curve: np.ndarray, *, verbose: bool, language: str
+        value_header: str, curve: np.ndarray, *, verbose: bool, language: Language
     ) -> tuple[Sequence[Column], str, Any]:
         """The laboratory table: ``f | value`` or, verbose, ``f | A | value``."""
         from reportlab.lib.units import mm

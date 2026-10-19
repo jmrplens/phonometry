@@ -73,12 +73,13 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from .._report.metadata import ReportMetadata
 
 from numpy.typing import ArrayLike, NDArray
 
 from .._internal.frozen import OwnsArrays
-from .._internal.types import as_float_or_array
+from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
     require_finite_fields,
@@ -667,7 +668,7 @@ class ReverberationModelResult(OwnsArrays):
         }
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the reverberation-time curves of the five models.
 
@@ -685,9 +686,9 @@ class ReverberationModelResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a reverberation-time prediction fiche to a PDF.
 

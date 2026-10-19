@@ -43,11 +43,13 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ...metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
+
+    from ..._i18n import Language
 
 __all__ = [
     "AmbientNoiseResult",
@@ -59,7 +61,7 @@ __all__ = [
 #: Boltzmann constant ``k`` (J/K).
 _BOLTZMANN = 1.380649e-23
 #: Underwater reference pressure ``p₀`` (Pa), i.e. 1 µPa (ISO 1683:2015 Table 2).
-_P_REF = ISO1683_REFERENCE_VALUES["liquid"]["sound_pressure"].value
+_P_REF = REFERENCE_VALUES["liquid"]["sound_pressure"].value
 #: Wind-noise reference wind speed for the rule of fives (knots).
 _WIND_REF_KNOTS = 5.0
 #: Rule-of-fives anchor at 1 kHz / 5 kt, re 1 µPa²/Hz. Wenz/Knudsen state
@@ -68,7 +70,7 @@ _WIND_REF_KNOTS = 5.0
 #: ``20·lg(20) ≈ 26.02`` dB, the step between the two pressures of
 #: ISO 1683:2015 Tables 1 and 2 (note b of Table 2).
 _WIND_ANCHOR_DB = 25.0 + 20.0 * np.log10(
-    ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value / _P_REF
+    REFERENCE_VALUES["gas"]["sound_pressure"].value / _P_REF
 )
 
 
@@ -192,7 +194,7 @@ class AmbientNoiseResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the composite spectrum and its components versus frequency."""
         from ..._i18n import check_language

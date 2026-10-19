@@ -28,14 +28,14 @@ implement names another:
   also used for structure-borne sound, against which the velocity level comes
   out close to the associated sound pressure and intensity levels.
 
-[`ISO1683_REFERENCE_VALUES`](/phonometry/reference/api/metrology/reference-values/#iso1683_reference_values) holds all of them, keyed by medium and then
+[`REFERENCE_VALUES`](/phonometry/reference/api/metrology/reference-values/#reference_values) holds all of them, keyed by medium and then
 by quantity, and every value is in the coherent SI unit its row names, so the
 20 µPa of air is `2e-05` Pa:
 
 ```text
 from phonometry import metrology
 
-p0 = metrology.ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"]
+p0 = metrology.REFERENCE_VALUES["gas"]["sound_pressure"]
 p0.value, p0.unit, p0.printed  # (2e-05, 'Pa', '20 µPa')
 ```
 
@@ -56,7 +56,7 @@ declared in the package either points at this table or says where it was read.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## ISO1683_REFERENCE_VALUES
+## REFERENCE_VALUES
 
 *Constant* (`mapping`).
 
@@ -65,11 +65,11 @@ declared in the package either points at this table or says where it was read.
 ```python
 ReferenceValue(
     quantity: str,
-    medium: str,
+    medium: Literal['gas', 'liquid', 'solid'],
     value: float,
     unit: str,
     printed: str,
-    table: str,
+    table: Literal['Table 1', 'Table 2', 'Table 3', 'Table 3, note b'],
 )
 ```
 

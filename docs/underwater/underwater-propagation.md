@@ -579,7 +579,7 @@ fig, ax = plt.subplots()
 for vessel_class, speed, length in (("containership", 18.0, 300.0),
                                     ("cruise", 17.1, 250.0),
                                     ("tug", 3.7, 30.0)):
-    s = underwater.ship_source_spectrum(speed, length, vessel_class=vessel_class)
+    s = underwater.ship_source_spectrum(speed, length_m=length, vessel_class=vessel_class)
     ax.semilogx(s.frequencies, s.source_psd,
                 label=f"{vessel_class} ({speed:.0f} kt, {length:.0f} m)")
 ax.set(xlabel="Frequency [Hz]",
@@ -595,7 +595,7 @@ plt.show()
 from phonometry import underwater
 
 # A container ship at 18 knots, 300 m long (JOMOPANS-ECHO default):
-ship = underwater.ship_source_spectrum(18.0, 300.0, vessel_class="containership")
+ship = underwater.ship_source_spectrum(18.0, length_m=300.0, vessel_class="containership")
 ship.plot()                     # source spectral density vs frequency
 
 print(underwater.VESSEL_CLASSES)        # the 13 JOMOPANS-ECHO vessel classes

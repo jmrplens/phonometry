@@ -22,7 +22,7 @@ sound_speed_profile(
     temperatures_c: NDArray[np.float64] | list[float] | float,
     salinities: NDArray[np.float64] | list[float] | float,
     *,
-    model: str = 'unesco',
+    model: Literal['unesco', 'del_grosso', 'mackenzie', 'medwin'] = 'unesco',
     latitude: float = 45.0,
 ) -> SoundSpeedProfile
 ```
@@ -54,7 +54,7 @@ SoundSpeedProfile(
     depths: NDArray[np.float64],
     speeds_of_sound: NDArray[np.float64],
     gradient_per_s: NDArray[np.float64],
-    model: str,
+    model: Literal['unesco', 'del_grosso', 'mackenzie', 'medwin'],
 )
 ```
 
@@ -75,7 +75,7 @@ Sound-speed profile `c(z)` over a column of water.
 SoundSpeedProfile.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

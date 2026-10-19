@@ -47,7 +47,7 @@ _PRINTED: dict[tuple[str, str], tuple[float, float, str, str]] = {
     ("solid", "velocity_alternative"): (50.0, _NANO, "m/s", "Table 3, note b"),
 }
 
-_TABLE = metrology.ISO1683_REFERENCE_VALUES
+_TABLE = metrology.REFERENCE_VALUES
 
 
 def test_the_table_holds_exactly_the_printed_rows() -> None:

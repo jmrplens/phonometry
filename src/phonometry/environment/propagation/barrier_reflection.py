@@ -134,6 +134,8 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+
 #: The eighteen bands of EN 1793-3, 100 Hz to 5 kHz.
 _BANDS_HZ: tuple[float, ...] = _devices.TRAFFIC_NOISE_BANDS_HZ
 
@@ -514,7 +516,7 @@ def _blackman_harris(t_s: NDArray[np.float64], length_s: float) -> NDArray[np.fl
 
 
 def adrienne_reflection_window(
-    fs: float, window_length_s: float = ADRIENNE_STANDARD_LENGTH_S
+    fs: float, *, window_length_s: float = ADRIENNE_STANDARD_LENGTH_S
 ) -> NDArray[np.float64]:
     r"""The Adrienne temporal window of EN 1793-5, 5.5.5.
 
@@ -681,7 +683,7 @@ class DirectSoundSubtraction(OwnsArrays):
             require_signal_rate(self, field, self.fs)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the record, the aligned direct sound and what is left.
 
@@ -994,7 +996,7 @@ def source_directivity_corrections(
             (low, slice(0, _FIRST_FULL_GRID_BAND)),
             (high, slice(_FIRST_FULL_GRID_BAND, None)),
         ):
-            window = adrienne_reflection_window(rate, float(lengths[k]))
+            window = adrienne_reflection_window(rate, window_length_s=float(lengths[k]))
             energies = []
             for record in (on_axis[k], specular[k]):
                 peak = float(np.argmax(np.abs(record)))
@@ -1147,7 +1149,7 @@ class ReflectionIndexResult(OwnsArrays):
     subtraction_reductions: NDArray[np.float64] | None = None
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the index per band, each grid position and the rating.
 
@@ -1194,7 +1196,7 @@ class ReflectionIndexUncertainty(OwnsArrays):
     coverage_factor: float
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw :math:`U_j` band by band with the :math:`U` of :math:`DL_{RI}`.
 
@@ -1397,7 +1399,9 @@ def reflection_index(
     paths = reflection_grid_paths_m()
     divergence = (paths[:, 1] / paths[:, 0]) ** 2
     delays = (paths[:, 1] - paths[:, 0]) / speed * rate
-    calibration = adrienne_reflection_window(rate, ADRIENNE_CALIBRATION_LENGTH_S)
+    calibration = adrienne_reflection_window(
+        rate, window_length_s=ADRIENNE_CALIBRATION_LENGTH_S
+    )
     gain_lower = (_BAND_LOWER_HZ[_BANDS_HZ.index(_GAIN_BANDS_HZ[0])],)
     gain_upper = (_BAND_UPPER_HZ[_BANDS_HZ.index(_GAIN_BANDS_HZ[1])],)
 
@@ -1440,7 +1444,9 @@ def reflection_index(
             if k + 1 in low_mics:
                 groups.append((low, low_bands))
             for lengths, selected in groups:
-                window = adrienne_reflection_window(rate, float(lengths[k]))
+                window = adrienne_reflection_window(
+                    rate, window_length_s=float(lengths[k])
+                )
                 incident = _band_energies(
                     _windowed(
                         free_field[p][k], free_peak, window, rate, "incident component"
@@ -1525,7 +1531,7 @@ class ReflectionFrequencyLimit(OwnsArrays):
     limiting_component: tuple[str, ...]
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the limit at each microphone and what sets it.
 
@@ -1676,7 +1682,7 @@ class ReflectionGridCheck(OwnsArrays):
         part in the relative check.
     """
 
-    check: str
+    check: Literal["relative", "grid"]
     path_differences_m: NDArray[np.float64]
 
     def __post_init__(self) -> None:
@@ -1755,7 +1761,7 @@ class ReflectionGridCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw each microphone's deviation against the 25 mm tolerance.
 
@@ -1803,6 +1809,7 @@ def check_reflection_grid_position(
     :raises TypeError: if ``check`` is not a text, or ``speed_of_sound`` is not a single
         number.
     """
+    kind: Literal["relative", "grid"]
     kind = require_choice(check, "check", ("relative", "grid"))
     speed = require_positive(speed_of_sound, "speed_of_sound")
     delays = np.asarray(time_delays_s, dtype=np.float64)

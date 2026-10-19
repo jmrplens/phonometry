@@ -21,7 +21,7 @@ references:
     year: 2015
     title: "Acoustics. Preferred reference values for acoustical and vibratory levels"
     designation: "ISO 1683:2015"
-    note: "Las Tablas 1 a 3, el valor de referencia desde el que se cuenta cada nivel de esta página (20 µPa para el sonido en el aire), publicadas como metrology.ISO1683_REFERENCE_VALUES; la nota b de la Tabla 2, los 26,0 dB entre las referencias de presión del aire y del agua. Leída en la adopción española UNE-EN ISO 1683:2016."
+    note: "Las Tablas 1 a 3, el valor de referencia desde el que se cuenta cada nivel de esta página (20 µPa para el sonido en el aire), publicadas como metrology.REFERENCE_VALUES; la nota b de la Tabla 2, los 26,0 dB entre las referencias de presión del aire y del agua. Leída en la adopción española UNE-EN ISO 1683:2016."
   - type: book
     authors: ["Kinsler, L. E.", "Frey, A. R.", "Coppens, A. B.", "Sanders, J. V."]
     year: 2000
@@ -882,7 +882,7 @@ sonora y el LEX,8h de la IEC 61252:1993 (`sound_exposure`, `lex_8h`); el
 espectrograma en bandas de fracción de octava de
 `OctaveFilterBank.spectrogram`; y los valores de referencia de la
 ISO 1683:2015 desde los que se cuenta cada nivel, publicados como
-`metrology.ISO1683_REFERENCE_VALUES`.
+`metrology.REFERENCE_VALUES`.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
@@ -936,7 +936,7 @@ Un nivel en decibelios es el cociente con un valor de referencia, así que no
 significa nada hasta que se nombra la referencia. La ISO 1683:2015 fija una
 por magnitud, y la biblioteca cuenta cada nivel desde ella salvo que la norma
 que implementa una función nombre otra. La tabla se publica como
-`metrology.ISO1683_REFERENCE_VALUES`, indexada por el medio y después por la
+`metrology.REFERENCE_VALUES`, indexada por el medio y después por la
 magnitud:
 
 | Magnitud | Gases (Tabla 1) | Líquidos (Tabla 2) | Vibración (Tabla 3) |
@@ -965,6 +965,6 @@ usan para el ruido estructural.
 ```python
 from phonometry import metrology
 
-p0 = metrology.ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"]
+p0 = metrology.REFERENCE_VALUES["gas"]["sound_pressure"]
 print(p0.value, p0.unit, p0.printed)  # 2e-05 Pa 20 µPa
 ```

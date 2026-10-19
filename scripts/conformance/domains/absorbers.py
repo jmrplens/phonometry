@@ -118,7 +118,7 @@ def _chk_porous_rigid_backed() -> Outcome:
     med = ph.materials.delany_bazley(f, _PA_SIGMA, fluid=ph.materials.ABSORBER_AIR)
     res = ph.materials.layered_absorber(
         f,
-        [ph.materials.PorousLayer(0.05, med)],
+        [ph.materials.PorousLayer(thickness_m=0.05, medium=med)],
         fluid=ph.materials.ABSORBER_AIR,
     )
     zs_ref = -1j * med.characteristic_impedance / np.tan(med.wavenumber * 0.05)
@@ -136,7 +136,7 @@ def _chk_porous_air_cavity() -> Outcome:
     f = np.array([_PA_C0 / (4.0 * d)])
     res = ph.materials.layered_absorber(
         f,
-        [ph.materials.AirLayer(d)],
+        [ph.materials.AirLayer(thickness_m=d)],
         fluid=ph.materials.ABSORBER_AIR,
     )
     return numeric(0.0, float(res.absorption[0]), 1e-12, places=4)
@@ -181,9 +181,11 @@ def _chk_porous_mpp_peak() -> Outcome:
         f,
         [
             ph.materials.MicroperforatedPlateLayer(
-                ref.MAA_FIG5_THICKNESS, ref.MAA_FIG5_DIAMETER / 2.0, eps
+                thickness_m=ref.MAA_FIG5_THICKNESS,
+                hole_radius=ref.MAA_FIG5_DIAMETER / 2.0,
+                open_area=eps,
             ),
-            ph.materials.AirLayer(ref.MAA_FIG5_CAVITY),
+            ph.materials.AirLayer(thickness_m=ref.MAA_FIG5_CAVITY),
         ],
         fluid=ph.materials.ABSORBER_AIR,
     )
@@ -209,8 +211,10 @@ def _chk_porous_maa_peak_closed_form() -> Outcome:
     res = ph.materials.layered_absorber(
         f,
         [
-            ph.materials.MicroperforatedPlateLayer(t, d / 2.0, eps),
-            ph.materials.AirLayer(ref.MAA_FIG5_CAVITY),
+            ph.materials.MicroperforatedPlateLayer(
+                thickness_m=t, hole_radius=d / 2.0, open_area=eps
+            ),
+            ph.materials.AirLayer(thickness_m=ref.MAA_FIG5_CAVITY),
         ],
         fluid=ph.materials.ABSORBER_AIR,
     )
@@ -360,12 +364,12 @@ def _aa_glass_wool_layer(
 ) -> PoroelasticLayer:
     """The same material as a poroelastic layer, optionally frozen stiff."""
     return ph.materials.PoroelasticLayer(
-        thickness,
-        medium,
-        _GLASS_WOOL_POROSITY,
-        _GLASS_WOOL_TORTUOSITY,
-        _GLASS_WOOL_FRAME_DENSITY * scale,
-        _GLASS_WOOL_SHEAR * scale,
+        thickness_m=thickness,
+        medium=medium,
+        porosity=_GLASS_WOOL_POROSITY,
+        tortuosity=_GLASS_WOOL_TORTUOSITY,
+        frame_density=_GLASS_WOOL_FRAME_DENSITY * scale,
+        shear_modulus=_GLASS_WOOL_SHEAR * scale,
     )
 
 
@@ -430,7 +434,7 @@ def _chk_biot_rigid_frame_limit() -> Outcome:
     medium = _GLASS_WOOL.medium(frequency)
     reference = ph.materials.layered_absorber(
         frequency,
-        [ph.materials.PorousLayer(0.05, medium)],
+        [ph.materials.PorousLayer(thickness_m=0.05, medium=medium)],
         angle_rad=math.pi / 4.0,
     ).surface_impedance
     frozen = ph.materials.layered_absorber(

@@ -410,6 +410,11 @@ jobs:
     # not meet centre_frequency on the next.
     - name: Check that every public identifier is spelled in American English
       run: python scripts/check_identifier_spelling.py
+    # The same walk holds every public choice of a fixed set of strings to a
+    # Literal of its options, so a type checker refuses a misspelt option
+    # before the call runs; a string open by its nature says why.
+    - name: Check that every fixed public choice is typed Literal
+      run: python scripts/check_choice_literals.py
 
   # A published table is shared by every caller in the process, so a dict
   # behind a `Mapping` annotation, or a writeable array, lets one caller change
@@ -959,7 +964,7 @@ jobs:
 
   # A level is a ratio to a reference value, and ISO 1683 fixes one per
   # quantity. The package publishes them once, as
-  # phonometry.metrology.ISO1683_REFERENCE_VALUES; before that the same 20 µPa
+  # phonometry.metrology.REFERENCE_VALUES; before that the same 20 µPa
   # was typed out seventeen times and one name meant a pressure in four modules
   # and a power in two. This fails on a reference value in src that repeats a
   # value of the table instead of reading it, and on one that differs from it

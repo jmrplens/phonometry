@@ -79,6 +79,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
     from ..io._signal import Signal
 
 __all__ = [
@@ -114,7 +115,7 @@ _DEFAULT_Q = 1.0 / math.sqrt(2.0)
 _MIN_RESPONSE_POINTS = 2
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class EQSection(RichDisplay):
     r"""One biquad of the RBJ Audio EQ Cookbook.
 
@@ -498,7 +499,7 @@ class EQResponseResult(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        language: str = "en",
+        language: Language = "en",
         show_sections: bool = True,
         **kwargs: Any,
     ) -> Axes | NDArray[Any]:

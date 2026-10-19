@@ -25,6 +25,7 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..emission.free_field_qualification import (
         FreeFieldCheck,
         InverseSquareLawResult,
@@ -111,18 +112,18 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en", **fmt: Any) -> str:
+def _t(text: str, language: Language = "en", **fmt: Any) -> str:
     """Localise a fixed string; English is returned verbatim."""
     s = _STRINGS.get(text, text) if language == "es" else text
     return s.format(**fmt) if fmt else s
 
 
-def _number(value: float, language: str, places: int = 2) -> str:
+def _number(value: float, language: Language, places: int = 2) -> str:
     text = f"{value:.{places}f}"
     return text.replace(".", ",") if language == "es" else text
 
 
-def _hertz(value: float, language: str) -> str:
+def _hertz(value: float, language: Language) -> str:
     """A band frequency as a label: ``125 Hz``, ``6.3 kHz`` (``6,3 kHz``)."""
     text = f"{value / _KILO:g} kHz" if value >= _KILO else f"{value:g} Hz"
     return text.replace(".", ",") if language == "es" else text
@@ -183,7 +184,7 @@ def plot_inverse_square_law(
     ax: Axes | None = None,
     *,
     frequency_hz: float | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""Deviation from the inverse square law along each traverse at one frequency.
@@ -292,7 +293,7 @@ def plot_free_field_check(
     result: FreeFieldCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Qualified distance per frequency, with the radius the verdict judged.
@@ -392,7 +393,7 @@ def plot_source_directionality(
     result: SourceDirectionalityResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Largest deviations from the mean level per band against Table B.1.
@@ -449,7 +450,7 @@ def plot_reference_source_calibration(
     result: ReferenceSourceCalibration,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The calibrated one-third octave sound power levels with their uncertainty.
@@ -497,7 +498,7 @@ def plot_reference_sound_source(
     result: ReferenceSoundSourceVerdict,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Each requirement of ISO 6926 clause 5 as a share of its limit.
@@ -601,7 +602,7 @@ def plot_reference_source_drift(
     result: ReferenceSourceDriftResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Change of each band between two checks against 2,83 times Table 1.

@@ -113,7 +113,7 @@ import math
 from dataclasses import KW_ONLY, dataclass
 from functools import cached_property
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from scipy import signal
@@ -139,8 +139,12 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
     from .core import OctaveFilterBank
+
+Edition = Literal["2014", "1995"]
 
 __all__ = [
     "FilterComplianceResult",
@@ -297,7 +301,7 @@ def _map_breakpoint(exponent: float, fraction: float) -> float:
 
 
 def class_limits(
-    fraction: float, filter_class: int, omega: np.ndarray, *, edition: str = "2014"
+    fraction: float, filter_class: int, omega: np.ndarray, *, edition: Edition = "2014"
 ) -> tuple[np.ndarray, np.ndarray]:
     r"""Acceptance limits on relative attenuation at normalized frequencies.
 
@@ -617,7 +621,7 @@ def _mask_margin(
     filter_class: int,
     omega: np.ndarray,
     delta_a: np.ndarray,
-    edition: str,
+    edition: Edition,
 ) -> float:
     """The smallest distance, dB, of a relative attenuation to the Table 1 corridor.
 
@@ -919,7 +923,7 @@ def _verify_band(
     idx: int,
     classes_ordered: tuple[int, ...],
     breakpoint_omegas: np.ndarray,
-    edition: str,
+    edition: Edition,
     n_points: int,
 ) -> dict[str, Any]:
     """Grade one band on Table 1 at the full input rate; return its entry.
@@ -1046,7 +1050,7 @@ def verify_filter_class(
     bank: OctaveFilterBank,
     *,
     n_points: int = 2**15,
-    edition: str = "2014",
+    edition: Edition = "2014",
     points_per_bandwidth: int = _MIN_POINTS_PER_BANDWIDTH,
 ) -> FilterComplianceResult:
     r"""Verify a filter bank against the IEC 61260 class limits.
@@ -1278,7 +1282,7 @@ class FilterComplianceResult(OwnsArrays):
 
     band_margins: tuple[Mapping[str, Any], ...]
     fraction: int
-    edition: str
+    edition: Edition
     sos: tuple[np.ndarray, ...]
     frequencies: np.ndarray
     factors: tuple[int, ...]
@@ -1515,7 +1519,7 @@ class FilterComplianceResult(OwnsArrays):
         ax: Axes | None = None,
         *,
         requirement: str = "relative_attenuation",
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         r"""Plot one graded requirement.
@@ -1558,9 +1562,9 @@ class FilterComplianceResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an IEC 61260-1 filter-class-compliance fiche to a PDF.
 

@@ -52,12 +52,12 @@ from collections.abc import Mapping
 from dataclasses import KW_ONLY, dataclass, fields
 from enum import Enum
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 
 from ..._internal.display import RichDisplay
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, reduce_with_plain_rows
 from ..._internal.validation import (
     require_axis_count,
     require_equal_counts,
@@ -69,6 +69,8 @@ from ..._internal.validation import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
+
+    from ..._i18n import Language
 
 __all__ = [
     "CNOSSOS_A_WEIGHTING",
@@ -152,6 +154,16 @@ CNOSSOS_A_WEIGHTING: tuple[float, ...] = (
 )
 
 
+#: A :class:`RoadVehicleCategory`, by the code Table [2.2.a] gives it.
+RoadVehicleCode = Literal[
+    "1",
+    "2",
+    "3",
+    "4a",
+    "4b",
+]
+
+
 class RoadVehicleCategory(Enum):
     """Vehicle categories of Table [2.2.a].
 
@@ -180,6 +192,26 @@ class JunctionType(Enum):
     CROSSING = 1
     #: ``k = 2``, a roundabout.
     ROUNDABOUT = 2
+
+
+#: A :class:`RoadSurface`, by the description Table F-4 prints for it.
+RoadSurfaceName = Literal[
+    "reference road surface",
+    "1-layer ZOAB",
+    "2-layer ZOAB",
+    "2-layer ZOAB (fine)",
+    "SMA-NL5",
+    "SMA-NL8",
+    "brushed down concrete",
+    "optimised brushed down concrete",
+    "fine broomed concrete",
+    "worked surface",
+    "hard elements in herringbone",
+    "hard elements not in herringbone",
+    "quiet hard elements",
+    "thin layer A",
+    "thin layer B",
+]
 
 
 class RoadSurface(Enum):
@@ -260,11 +292,11 @@ _TABLE_F3: dict[str, tuple[tuple[float, float], tuple[float, float]]] = {
     "4b": ((0.0, 0.0), (0.0, 0.0)),
 }
 
-#: Temperature coefficients ``K_m`` of (2.2.10), in dB per degree Celsius:
+#: Temperature coefficients ``K_m`` of (2.2.10), in dB per kelvin (per degree):
 #: 0,08 for light vehicles, 0,04 for the two heavy categories, and no
 #: temperature dependence for the powered two-wheelers, which have no rolling
 #: noise at all.
-_TEMPERATURE_COEFFICIENTS_DB_PER_C: dict[str, float] = {
+_TEMPERATURE_COEFFICIENTS_DB_PER_K: dict[str, float] = {
     "1": 0.08,
     "2": 0.04,
     "3": 0.04,
@@ -415,7 +447,7 @@ _TABLE_F4: dict[
 }
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RoadEmissionCoefficients(RichDisplay):
     """Appendix F coefficient database for the road source.
 
@@ -434,7 +466,9 @@ class RoadEmissionCoefficients(RichDisplay):
     :ivar studded_b: ``b_i`` of Table F-2 (category 1 only), in dB.
     :ivar junction_c: ``(C_R, C_P)`` of Table F-3 per category and junction
         type, in dB.
-    :ivar temperature_coefficient_db_per_c: ``K_m`` of (2.2.10), in dB per degree Celsius.
+    :ivar temperature_coefficient_db_per_k: ``K_m`` of (2.2.10), in dB per kelvin,
+        the same number per degree Celsius, since it multiplies a difference
+        of temperatures.
     """
 
     rolling_a: Mapping[str, tuple[float, ...]]
@@ -444,7 +478,7 @@ class RoadEmissionCoefficients(RichDisplay):
     studded_a: tuple[float, ...]
     studded_b: tuple[float, ...]
     junction_c: Mapping[str, tuple[tuple[float, float], tuple[float, float]]]
-    temperature_coefficient_db_per_c: Mapping[str, float]
+    temperature_coefficient_db_per_k: Mapping[str, float]
 
     def __post_init__(self) -> None:
         """Hold every per-category table read-only.
@@ -459,20 +493,15 @@ class RoadEmissionCoefficients(RichDisplay):
             if isinstance(value, Mapping):
                 object.__setattr__(self, field.name, MappingProxyType(dict(value)))
 
-    def __reduce__(
-        self,
-    ) -> tuple[type[RoadEmissionCoefficients], tuple[object, ...]]:
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
         """Rebuild from plain dictionaries when pickled or deep-copied.
 
         A read-only mapping can be neither pickled nor deep-copied, so the
-        instance travels as plain dictionaries and :meth:`__post_init__`
-        wraps them again on arrival, which keeps the coefficients usable as
-        an argument to a process pool.
+        instance travels as plain dictionaries, by keyword, and
+        :meth:`__post_init__` wraps them again on arrival, which keeps the
+        coefficients usable as an argument to a process pool.
         """
-        return type(self), tuple(
-            dict(value) if isinstance(value, Mapping) else value
-            for value in (getattr(self, field.name) for field in fields(self))
-        )
+        return reduce_with_plain_rows(self)
 
 
 #: The Appendix F database of the consolidated Directive: Tables F-1 and F-4 as
@@ -485,11 +514,11 @@ ROAD_COEFFICIENTS = RoadEmissionCoefficients(
     studded_a=_TABLE_F2_A,
     studded_b=_TABLE_F2_B,
     junction_c=_TABLE_F3,
-    temperature_coefficient_db_per_c=_TEMPERATURE_COEFFICIENTS_DB_PER_C,
+    temperature_coefficient_db_per_k=_TEMPERATURE_COEFFICIENTS_DB_PER_K,
 )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RoadSurfaceCoefficients(RichDisplay):
     """One row of Table F-4: the acoustic signature of a road surface.
 
@@ -509,7 +538,9 @@ class RoadSurfaceCoefficients(RichDisplay):
     speed_range_kmh: tuple[float, float] | None
 
 
-def road_surface_coefficients(surface: RoadSurface | str) -> RoadSurfaceCoefficients:
+def road_surface_coefficients(
+    surface: RoadSurface | RoadSurfaceName,
+) -> RoadSurfaceCoefficients:
     """Look up a Table F-4 row.
 
     :param surface: A :class:`RoadSurface` member or its description string.
@@ -532,7 +563,7 @@ def road_surface_coefficients(surface: RoadSurface | str) -> RoadSurfaceCoeffici
     )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RoadTraffic(RichDisplay):
     """The traffic of one vehicle category on a source line.
 
@@ -582,14 +613,15 @@ def _combine_rolling_and_propulsion(
     )
 
 
-def _category_key(category: RoadVehicleCategory | str) -> str:
+def _category_key(category: RoadVehicleCategory | str) -> RoadVehicleCode:
     key = category.value if isinstance(category, RoadVehicleCategory) else str(category)
     if key not in _TABLE_F1:
         raise ValueError(
             f"Unknown vehicle category {key!r}; Table [2.2.a] categories with "
             "coefficients in Appendix F are: " + ", ".join(_TABLE_F1)
         )
-    return key
+    # _TABLE_F1 holds exactly the five codes, so the key is one of them.
+    return cast("RoadVehicleCode", key)
 
 
 def _require_category(key: str, coefficients: RoadEmissionCoefficients) -> None:
@@ -609,8 +641,8 @@ def _require_category(key: str, coefficients: RoadEmissionCoefficients) -> None:
             ("propulsion_b", coefficients.propulsion_b),
             ("junction_c", coefficients.junction_c),
             (
-                "temperature_coefficient_db_per_c",
-                coefficients.temperature_coefficient_db_per_c,
+                "temperature_coefficient_db_per_k",
+                coefficients.temperature_coefficient_db_per_k,
             ),
         )
         if key not in table
@@ -625,7 +657,7 @@ def _require_category(key: str, coefficients: RoadEmissionCoefficients) -> None:
 
 
 def _surface_of(
-    surface: RoadSurface | str | RoadSurfaceCoefficients, key: str
+    surface: RoadSurface | RoadSurfaceName | RoadSurfaceCoefficients, key: str
 ) -> RoadSurfaceCoefficients:
     """Resolve a surface and check that it covers the vehicle category.
 
@@ -716,10 +748,12 @@ def _gradient_correction(key: str, slope: float, speed: float) -> float:
 
 
 def road_rolling_noise(
-    category: RoadVehicleCategory | str,
+    category: RoadVehicleCategory | RoadVehicleCode,
     speed_kmh: float,
     *,
-    surface: RoadSurface | str | RoadSurfaceCoefficients = RoadSurface.REFERENCE,
+    surface: RoadSurface | RoadSurfaceName | RoadSurfaceCoefficients = (
+        RoadSurface.REFERENCE
+    ),
     temperature_c: float = ROAD_REFERENCE_TEMPERATURE_C,
     studded_fraction: float = 0.0,
     studded_months: float = 0.0,
@@ -779,17 +813,19 @@ def road_rolling_noise(
         else 0.0
     )
     # (2.2.10) air-temperature correction, equal in every octave band.
-    d_temp = coefficients.temperature_coefficient_db_per_c[key] * (
+    d_temp = coefficients.temperature_coefficient_db_per_k[key] * (
         ROAD_REFERENCE_TEMPERATURE_C - _finite(temperature_c, "temperature_c")
     )
     return np.asarray(base + d_road + d_stud + d_acc + d_temp, dtype=np.float64)
 
 
 def road_propulsion_noise(
-    category: RoadVehicleCategory | str,
+    category: RoadVehicleCategory | RoadVehicleCode,
     speed_kmh: float,
     *,
-    surface: RoadSurface | str | RoadSurfaceCoefficients = RoadSurface.REFERENCE,
+    surface: RoadSurface | RoadSurfaceName | RoadSurfaceCoefficients = (
+        RoadSurface.REFERENCE
+    ),
     road_slope_percent: float = 0.0,
     junction_distance: float | None = None,
     junction_type: JunctionType = JunctionType.NONE,
@@ -852,10 +888,12 @@ def _positive_speed(speed_kmh: float) -> float:
 
 
 def road_vehicle_sound_power(
-    category: RoadVehicleCategory | str,
+    category: RoadVehicleCategory | RoadVehicleCode,
     speed_kmh: float,
     *,
-    surface: RoadSurface | str | RoadSurfaceCoefficients = RoadSurface.REFERENCE,
+    surface: RoadSurface | RoadSurfaceName | RoadSurfaceCoefficients = (
+        RoadSurface.REFERENCE
+    ),
     temperature_c: float = ROAD_REFERENCE_TEMPERATURE_C,
     road_slope_percent: float = 0.0,
     studded_fraction: float = 0.0,
@@ -1028,7 +1066,7 @@ class RoadEmissionResult(OwnsArrays):
         return float(10.0 * np.log10(np.sum(10.0 ** (weighted / 10.0))))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-metre line power spectrum and its category breakdown."""
         from ..._i18n import check_language
@@ -1042,7 +1080,9 @@ class RoadEmissionResult(OwnsArrays):
 def road_source_power(
     traffic: RoadTraffic | list[RoadTraffic] | tuple[RoadTraffic, ...],
     *,
-    surface: RoadSurface | str | RoadSurfaceCoefficients = RoadSurface.REFERENCE,
+    surface: RoadSurface | RoadSurfaceName | RoadSurfaceCoefficients = (
+        RoadSurface.REFERENCE
+    ),
     temperature_c: float = ROAD_REFERENCE_TEMPERATURE_C,
     road_slope_percent: float = 0.0,
     studded_months: float = 0.0,

@@ -82,7 +82,13 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
     from ..io._signal import Signal
+
+Scaling = Literal["density", "spectrum"]
+
+#: The two scalings of a spectrum: a density per hertz, or a power per band.
+_SCALINGS: tuple[Scaling, ...] = ("density", "spectrum")
 
 __all__ = [
     "CoherentOutputSpectrumResult",
@@ -370,8 +376,8 @@ def _validate_confidence(confidence: float) -> float:
     return conf
 
 
-def _validate_scaling(scaling: str) -> str:
-    if scaling not in ("density", "spectrum"):
+def _validate_scaling(scaling: str) -> Scaling:
+    if scaling not in _SCALINGS:
         msg = "'scaling' must be 'density' or 'spectrum'."
         raise ValueError(msg)
     return scaling
@@ -428,7 +434,7 @@ class SpectralDensityResult(OwnsArrays):
     window: str
     nperseg: int
     overlap: float
-    scaling: str
+    scaling: Scaling
 
     def __post_init__(self) -> None:
         """Reject a density whose band does not sit on its own frequency axis.
@@ -461,7 +467,7 @@ class SpectralDensityResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the spectral density in dB with its confidence band.
 
@@ -629,7 +635,7 @@ class CrossSpectralDensityResult(OwnsArrays):
     window: str
     nperseg: int
     overlap: float
-    scaling: str
+    scaling: Scaling
 
     def __post_init__(self) -> None:
         r"""Reject a cross-spectrum whose curves do not share one axis.
@@ -678,7 +684,7 @@ class CrossSpectralDensityResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | NDArray[Any]:
         """Plot the magnitude, phase (with ±σ band) and coherence.
 
@@ -846,7 +852,7 @@ class CoherentOutputSpectrumResult(OwnsArrays):
     window: str
     nperseg: int
     overlap: float
-    scaling: str
+    scaling: Scaling
 
     def __post_init__(self) -> None:
         r"""Reject a split whose parts do not share one frequency axis.
@@ -907,7 +913,7 @@ class CoherentOutputSpectrumResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | NDArray[Any]:
         """Plot the output/coherent/noise spectra and the spectral SNR.
 

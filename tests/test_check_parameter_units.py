@@ -201,6 +201,39 @@ def test_the_tree_spells_every_unit_one_way() -> None:
     assert stale == []
 
 
+def test_the_tree_writes_every_temperature_on_its_scale() -> None:
+    """A temperature in degrees Celsius, an interval of temperature in kelvin."""
+    found, stale = cpu.temperature_scales()
+    assert found == []
+    assert stale == []
+
+
+@pytest.mark.parametrize(
+    ("name", "verdict"),
+    [
+        ("temperature_c", "kept"),
+        ("inlet_temperature_c", "kept"),
+        ("u_temperature_k", "refused"),
+        ("temperature_coefficient_db_per_k", "kept"),
+        ("temperature_coefficient_db_per_c", "refused"),
+        ("inlet_temperature_k", "refused"),
+        ("temperature_difference_c", "refused"),
+        ("temperature_difference_k", "refused"),
+        ("u_temperature_c", "refused"),
+        ("TEMPERATURE_TOLERANCE_C", "refused"),
+        ("temperature_term_db", "kept"),
+    ],
+)
+def test_the_temperature_scale_rule_reads_a_name(name: str, verdict: str) -> None:
+    """``_k`` on a temperature is refused unless listed as an interval.
+
+    ``temperature_difference_k`` and ``u_temperature_k`` are refused by the
+    rule alone: an interval on the tree is listed with its reason in
+    :data:`TEMPERATURE_INTERVALS`, so a new one is read before it is admitted.
+    """
+    assert ("refused" if cpu.temperature_scale(name) else "kept") == verdict
+
+
 def test_every_published_constant_says_its_unit() -> None:
     found, stale = cpu.unitless_constants()
     assert found == []
@@ -1467,6 +1500,121 @@ def test_an_input_record_takes_its_frequency_axis_by_name(
         ("_Hemisphere", "frequencies", ("levels",))
     ]
     assert stale == []
+
+
+@dataclasses.dataclass(frozen=True)
+class _Material:
+    """A stub input record that takes every field by position."""
+
+    c_p: float
+    c_s: float
+    rho: float
+
+
+def _wave(material: _Material, fs: float, duration_s: float = 1.0) -> float:
+    return fs * duration_s
+
+
+def test_every_field_of_an_input_record_is_written_by_name(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """``Material(2000.0, 1200.0, 1800.0)`` binds three speeds and a density
+    in an order nobody reads off the call, so a record a caller builds takes
+    every field by name; one that keeps a positional field says why.
+    """
+    for obj in (_Material, _Impedance, _wave):
+        monkeypatch.setattr(obj, "__module__", "phonometry.simulation.stub")
+    stub = types.ModuleType("phonometry.stub")
+    stub.__all__ = ["Material", "Impedance", "wave"]  # type: ignore[attr-defined]
+    stub.Material = _Material  # type: ignore[attr-defined]
+    stub.Impedance = _Impedance  # type: ignore[attr-defined]
+    stub.wave = _wave  # type: ignore[attr-defined]
+
+    def modules() -> Iterator[tuple[str, types.ModuleType]]:
+        yield "phonometry.stub", stub
+
+    monkeypatch.setattr(cpu, "public_modules", modules)
+    monkeypatch.setattr(cpu, "RECORD_AXIS_EXEMPT", {})
+    monkeypatch.setattr(cpu, "RECORD_POSITIONAL_EXEMPT", {})
+    found, stale = cpu.positional_records()
+    assert [(entry.qualname, fields) for entry, fields in found] == [
+        ("_Material", ("c_p", "c_s", "rho"))
+    ]
+    assert stale == []
+
+
+@dataclasses.dataclass(frozen=True)
+class _Gap:
+    """A stub layer a caller builds, its thickness by position."""
+
+    thickness_m: float
+
+
+@dataclasses.dataclass(frozen=True)
+class _Plate:
+    """A stub layer a caller builds, its fields by position."""
+
+    thickness_m: float
+    hole_radius: float
+
+
+#: The way a function says it takes any of several records: under postponed
+#: annotations its signature names the alias, never the records.
+_Layer = _Gap | _Plate
+
+
+def _stack(layers: list[_Layer]) -> int:
+    return len(layers)
+
+
+def test_a_record_behind_a_union_alias_is_written_by_name(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """``layered_absorber(layers: list[Layer])`` takes six records it never
+    names: the alias is expanded, so each record it stands for is held to the
+    rule like one the signature spells out.
+    """
+    stub = types.ModuleType("phonometry.stub")
+    stub.__all__ = ["Gap", "Plate", "stack"]  # type: ignore[attr-defined]
+    stub.Gap = _Gap  # type: ignore[attr-defined]
+    stub.Plate = _Plate  # type: ignore[attr-defined]
+    stub.stack = _stack  # type: ignore[attr-defined]
+
+    def modules() -> Iterator[tuple[str, types.ModuleType]]:
+        yield "phonometry.stub", stub
+
+    monkeypatch.setattr(cpu, "public_modules", modules)
+    monkeypatch.setattr(cpu, "RECORD_AXIS_EXEMPT", {})
+    monkeypatch.setattr(cpu, "RECORD_POSITIONAL_EXEMPT", {})
+    found, stale = cpu.positional_records()
+    assert sorted((entry.qualname, fields) for entry, fields in found) == [
+        ("_Gap", ("thickness_m",)),
+        ("_Plate", ("thickness_m", "hole_radius")),
+    ]
+    assert stale == []
+
+
+def test_a_unit_named_default_is_passed_by_name(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """``duration_s`` names no quantity the first half reads, but it carries
+    a unit and a default, so it is reported while it stays positional.
+    """
+    stub = types.ModuleType("phonometry.stub")
+    stub.__all__ = ["wave"]  # type: ignore[attr-defined]
+    stub.wave = _wave  # type: ignore[attr-defined]
+
+    def modules() -> Iterator[tuple[str, types.ModuleType]]:
+        yield "phonometry.stub", stub
+
+    monkeypatch.setattr(cpu, "public_modules", modules)
+    _, loose, _ = cpu.offenders()
+    assert {(p.qualname, p.name) for p in loose} == {("wave", "duration_s")}
+
+
+def test_the_tree_writes_every_input_record_by_name() -> None:
+    """The real tree passes the input-record rule, and its exemption is live."""
+    assert cpu.positional_records() == ([], [])
 
 
 @dataclasses.dataclass(frozen=True)

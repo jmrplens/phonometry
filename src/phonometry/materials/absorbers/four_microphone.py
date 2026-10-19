@@ -30,7 +30,7 @@ from __future__ import annotations
 import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -53,7 +53,10 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
     from ..._internal.types import Real
+
+Shape = Literal["circular", "rectangular", "square"]
 
 Complex = NDArray[np.complex128]
 
@@ -85,12 +88,12 @@ _LOAD_TRANSFER_FUNCTIONS = 4
 
 __all__ = [
     "TransferMatrix",
-    "air_density_astm",
+    "air_density_astm_e2611",
     "air_layer_transfer_matrix",
     "face_quantities",
     "FaceQuantities",
-    "plane_wave_frequency_range_astm",
-    "speed_of_sound_astm",
+    "plane_wave_frequency_range_astm_e2611",
+    "speed_of_sound_astm_e2611",
     "transfer_matrix_one_load",
     "transfer_matrix_two_load",
     "wave_decomposition",
@@ -102,7 +105,7 @@ __all__ = [
 # Air properties. The ISO 10534-2 pair lives with the two-microphone method;
 # both pairs take degrees Celsius.
 # ---------------------------------------------------------------------------
-def speed_of_sound_astm(*, temperature_c: ArrayLike) -> Real:
+def speed_of_sound_astm_e2611(*, temperature_c: ArrayLike) -> Real:
     r"""Speed of sound in air (ASTM E2611-19, Eq. (4)).
 
     :math:`c = 20.047 \sqrt{273.15 + T}`.
@@ -117,7 +120,7 @@ def speed_of_sound_astm(*, temperature_c: ArrayLike) -> Real:
     return np.asarray(_ASTM_C_CONST * np.sqrt(_ASTM_T0 + t), dtype=np.float64)
 
 
-def air_density_astm(
+def air_density_astm_e2611(
     *,
     temperature_c: ArrayLike,
     static_pressure_kpa: ArrayLike = _ASTM_P_REF,
@@ -149,12 +152,12 @@ def air_density_astm(
 # ---------------------------------------------------------------------------
 # Plane-wave working range (ASTM E2611-19, 6.2.3-6.2.5, 6.5.4).
 # ---------------------------------------------------------------------------
-def plane_wave_frequency_range_astm(
+def plane_wave_frequency_range_astm_e2611(
     spacing_m: float,
     speed_of_sound: float,
     *,
     diameter_m: float | None = None,
-    shape: str = "circular",
+    shape: Shape = "circular",
 ) -> tuple[float, float]:
     r"""Working plane-wave frequency range ``(f_l, f_u)`` (ASTM E2611-19).
 
@@ -232,7 +235,7 @@ def _warn_astm_plane_wave(
             "Wavenumbers outside the ASTM E2611-19 plane-wave working range "
             "(6.2.3-6.2.5, 6.5.4) for the given microphone spacings and tube "
             "cross-section; results there are advisory. See "
-            "plane_wave_frequency_range_astm() for the limits in hertz.",
+            "plane_wave_frequency_range_astm_e2611() for the limits in hertz.",
             ImpedanceTubeWarning,
             stacklevel=stacklevel + 1,
         )
@@ -290,7 +293,7 @@ def wave_decomposition(
     s2: float,
     wavenumber: ArrayLike,
     diameter_m: float | None = None,
-    shape: str = "circular",
+    shape: Shape = "circular",
 ) -> WaveAmplitudes:
     r"""Decompose the wave field into ``(A, B, C, D)`` (ASTM E2611-19, Eqs. (17)-(20)).
 
@@ -460,7 +463,7 @@ class TransferMatrix(OwnsArrays):
     s2: float | None = None
     thickness_m: float | None = None
     diameter_m: float | None = None
-    shape: str | None = None
+    shape: Shape | None = None
     frequencies: Real | None = None
     air_characteristic_impedance: float | None = None
 
@@ -558,7 +561,7 @@ class TransferMatrix(OwnsArrays):
         *,
         frequencies: ArrayLike | None = None,
         characteristic_impedance: float | None = None,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Plot the transmission loss with the hard-backed absorption overlaid.
@@ -614,7 +617,7 @@ class TransferMatrix(OwnsArrays):
         )
 
     def plot_geometry(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the four-microphone tube to scale (dimensioned side view).
 
@@ -785,7 +788,7 @@ def transfer_matrix_two_load(
     characteristic_impedance: float,
     frequencies: ArrayLike | None = None,
     diameter_m: float | None = None,
-    shape: str = "circular",
+    shape: Shape = "circular",
 ) -> TransferMatrix:
     r"""Two-load transfer matrix (ASTM E2611-19, Eqs. (17)-(22)).
 
@@ -893,7 +896,7 @@ def transfer_matrix_one_load(
     characteristic_impedance: float,
     frequencies: ArrayLike | None = None,
     diameter_m: float | None = None,
-    shape: str = "circular",
+    shape: Shape = "circular",
 ) -> TransferMatrix:
     r"""One-load transfer matrix, symmetric specimen (ASTM E2611-19, Eqs. (23)-(24)).
 

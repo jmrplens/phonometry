@@ -15,9 +15,13 @@ limits on the dynamic transfer stiffness of a resilient element.
 from __future__ import annotations
 
 import math
+from typing import TYPE_CHECKING
 
 import numpy as np
 from scipy.special import erfc
+
+if TYPE_CHECKING:
+    from phonometry.vibration.human.exposure import WeightingName
 
 # ---------------------------------------------------------------------------
 # PR-F human vibration (ISO 8041-1 / ISO 2631 / ISO 5349 / Directive 2002/44/EC).
@@ -397,7 +401,7 @@ ISO8041_1_ANNEX_B_FACTORS: dict[str, tuple[tuple[int, float], ...]] = {
 # arctan function. Transcribed from the page images and checked as a set
 # against Formula (5): all 318 cells are reproduced within their own print
 # rounding.
-ISO8041_1_ANNEX_B_PHASES_DEG: dict[str, tuple[tuple[int, float], ...]] = {
+ISO8041_1_ANNEX_B_PHASES_DEG: dict[WeightingName, tuple[tuple[int, float], ...]] = {
     "Wb": (  # Table B.1, 37 rows, n = -10 to 26
         (-10, 160.0),
         (-9, 154.5),

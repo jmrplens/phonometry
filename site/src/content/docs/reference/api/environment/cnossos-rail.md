@@ -139,7 +139,9 @@ Digit 3 of the vehicle descriptor, Table [2.3.a].
 ## bridge_transfer
 
 ```python
-bridge_transfer(bridge: BridgeType | str) -> NDArray[np.float64]
+bridge_transfer(
+    bridge: BridgeType | Literal['+10 dB(A)', '+15 dB(A)'],
+) -> NDArray[np.float64]
 ```
 
 Bridge transfer function `L_H,bridge,i` of Table G-7, in dB per axle.
@@ -358,7 +360,9 @@ band".
 ## rail_roughness
 
 ```python
-rail_roughness(roughness: RailRoughnessClass | str) -> WavelengthSpectrum
+rail_roughness(
+    roughness: RailRoughnessClass | Literal['E', 'M', 'N', 'B'],
+) -> WavelengthSpectrum
 ```
 
 Rail roughness `L_r,TR` of Table G-1b.
@@ -413,6 +417,7 @@ Digit 2 of the track descriptor, Table [2.3.b].
 
 ```python
 RailSourceSpectra(
+    *,
     source_a: NDArray[np.float64],
     source_b: NDArray[np.float64],
 )
@@ -550,7 +555,7 @@ Directional sound power per metre of a CNOSSOS-EU railway source.
 RailwayEmissionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -561,6 +566,7 @@ Plot the per-metre line power of the two equivalent source heights.
 
 ```python
 RailwayTrack(
+    *,
     rail_roughness: WavelengthSpectrum,
     track_transfer: Any,
     impact_roughness: WavelengthSpectrum | None = None,
@@ -589,9 +595,9 @@ The Appendix G data of one track section.
 
 ```python
 RailwayVehicle(
+    *,
     stock: RollingStock,
     flow_rate: float = 0.0,
-    *,
     speed_kmh: float = 0.0,
     condition: RunningCondition = ...,
     idling_time: float = 0.0,
@@ -656,6 +662,7 @@ function. All three sit at source A.
 
 ```python
 RollingStock(
+    *,
     n_axles: int,
     wheel_roughness: WavelengthSpectrum,
     contact_filter: WavelengthSpectrum,
@@ -664,7 +671,6 @@ RollingStock(
     traction: RailSourceSpectra | None = None,
     aerodynamic: RailSourceSpectra | None = None,
     aerodynamic_alpha: float = 50.0,
-    *,
     tram: bool = False,
 )
 ```
@@ -806,7 +812,9 @@ three spectra must already be on the frequency grid, that is resampled with
 ## track_transfer
 
 ```python
-track_transfer(track: TrackTransferClass | str) -> NDArray[np.float64]
+track_transfer(
+    track: TrackTransferClass | Literal['M/S', 'M/M', 'M/H', 'B/S', 'B/M', 'B/H', 'W', 'D'],
+) -> NDArray[np.float64]
 ```
 
 Track transfer function `L_H,TR,i` of Table G-3a, in dB per axle.
@@ -916,7 +924,9 @@ Columns of Table G-3a, `track base / rail pad` of the track descriptor.
 ## traction_sound_power
 
 ```python
-traction_sound_power(vehicle: TractionVehicle | str) -> RailSourceSpectra
+traction_sound_power(
+    vehicle: TractionVehicle | Literal['diesel locomotive, c. 800 kW', 'diesel locomotive, c. 2 200 kW', 'diesel multiple unit', 'electric locomotive', 'electric multiple unit'],
+) -> RailSourceSpectra
 ```
 
 Traction sound power per vehicle of Table G-5, in dB.
@@ -1091,7 +1101,7 @@ used to be unpacked by position.
 WavelengthSpectrum.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1111,7 +1121,9 @@ Plot the levels against wavelength, on a logarithmic wavelength axis.
 ## wheel_roughness
 
 ```python
-wheel_roughness(brake: BrakeType | str) -> WavelengthSpectrum
+wheel_roughness(
+    brake: BrakeType | Literal['c', 'k', 'n'],
+) -> WavelengthSpectrum
 ```
 
 Wheel roughness `L_r,VEH` of Table G-1a.

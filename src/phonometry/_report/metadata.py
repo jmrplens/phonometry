@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, fields
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from .._internal.display import RichDisplay
 from .._internal.validation import require_count
@@ -177,7 +177,7 @@ class ReportMetadata(RichDisplay):
     requirement: float | None = None
     required_class: int | None = None
     notes: str | None = None
-    tube_shape: str | None = None
+    tube_shape: Literal["circular", "rectangular", "square"] | None = None
     curing_time_hours: float | None = None
     separating_element: str | None = None
     test_signal: str | None = None

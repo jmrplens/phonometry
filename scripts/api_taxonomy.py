@@ -83,7 +83,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.signals.windows",
             "phonometry.signals.miso",
             "phonometry.signals.time_frequency",
-            "phonometry.signals.test_signals",
+            "phonometry.signals._test_signals",
             "phonometry.signals.phase",
             "phonometry.signals._cepstrum",
             "phonometry.signals.synchronous_average",
@@ -537,7 +537,7 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # otherwise. It belongs to the model that publishes those constants.
     "ABSORBER_AIR": "phonometry.materials.absorbers.porous",
     "ANNEX_A_AIR": "phonometry.materials.absorbers._airflow_resistance",
-    "EN_12354_AIR": "phonometry.building.prediction.detailed_model",
+    "EN12354_AIR": "phonometry.building.prediction.detailed_model",
     "SIMULATION_AIR": "phonometry.simulation.ntff",
     # The same holds for an uncertainty budget: the ISO 4869-6 one is an
     # instance of the ISO 4869-1 budget type and belongs to the standard that
@@ -681,7 +681,7 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # The ISO 1683 table is a mapping, so a scan by module finds no owner for
     # it; it belongs to the module that publishes it, which is where every
     # private reference value in the package points.
-    "ISO1683_REFERENCE_VALUES": "phonometry.metrology.reference_values",
+    "REFERENCE_VALUES": "phonometry.metrology.reference_values",
     # The IEC 60942:2017 tables are tuples and read-only mappings, so a scan
     # by module finds no owner; they belong to the module that grades a
     # calibrator against them.
@@ -878,6 +878,7 @@ PRIVATE_MODULE_TOPICS: dict[str, str] = {
     "phonometry.signals._cepstrum": "cepstrum",
     "phonometry.signals._correlation": "correlation",
     "phonometry.signals._envelope": "envelope",
+    "phonometry.signals._test_signals": "test signals",
     "phonometry.underwater.propagation._seabed_reflection": "seabed reflection",
     "phonometry.vibration.structural._impact_mobility": "impact mobility",
     "phonometry.vibration.structural._junction_transmission": "junction transmission",

@@ -225,7 +225,7 @@ The strictest class every band meets, `None` if one meets none.
 TimeInvarianceResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

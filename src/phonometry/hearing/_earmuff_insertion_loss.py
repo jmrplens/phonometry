@@ -84,6 +84,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
+
 __all__ = [
     "ATF_FRONT_TO_RANDOM_INDEX",
     "EARMUFF_INSERTION_LOSS_UNCERTAINTY",
@@ -348,7 +350,7 @@ class InsertionLossUncertaintyBudget(RichDisplay):
         return _COVERAGE_FACTOR * self.combined_uncertainty_db
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the five contributions as bars, with the combined value.
 
@@ -542,7 +544,7 @@ class EarmuffInsertionLossResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the insertion loss as Clause 6 asks, increasing downwards.
 
@@ -813,7 +815,7 @@ class PlaneProgressiveWaveCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw both conditions against their limits, band by band.
 
@@ -1003,7 +1005,7 @@ class FixtureIsolationVerification(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the isolation against the requirement, band by band.
 

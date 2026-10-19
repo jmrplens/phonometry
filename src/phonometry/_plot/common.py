@@ -43,6 +43,7 @@ if TYPE_CHECKING:
     from matplotlib.transforms import Bbox
     from matplotlib.typing import ColorType, LegendLocType
 
+    from .._i18n import Language
     from ..emission._sound_power_anechoic import PrecisionSoundPowerResult
     from ..emission._sound_power_in_duct import InDuctSoundPowerResult
     from ..emission._sound_power_intensity import (
@@ -309,6 +310,7 @@ def delta_e_2000(
     d_c = cp_2 - cp_1
     if neutral_pair:
         d_h = 0.0
+    # Degrees of a half and of a whole turn.
     elif abs(hp_2 - hp_1) <= 180.0:  # noqa: PLR2004
         d_h = hp_2 - hp_1
     else:
@@ -319,8 +321,10 @@ def delta_e_2000(
     c_bar = 0.5 * (cp_1 + cp_2)
     if neutral_pair:
         h_bar = hp_1 + hp_2
+    # Degrees of a half and of a whole turn.
     elif abs(hp_1 - hp_2) <= 180.0:  # noqa: PLR2004
         h_bar = 0.5 * (hp_1 + hp_2)
+    # Degrees of a half and of a whole turn.
     elif hp_1 + hp_2 < 360.0:  # noqa: PLR2004
         h_bar = 0.5 * (hp_1 + hp_2 + 360.0)
     else:
@@ -591,7 +595,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -726,7 +730,7 @@ def styled(kwargs: dict[str, Any], **defaults: Any) -> dict[str, Any]:
     return merged
 
 
-def _freq_axis(ax: Axes, freqs: np.ndarray, *, language: str = "en") -> None:
+def _freq_axis(ax: Axes, freqs: np.ndarray, *, language: Language = "en") -> None:
     """Configure a logarithmic frequency x-axis labelled with band centres."""
     import matplotlib.ticker as mticker
 
@@ -741,7 +745,7 @@ def _freq_axis(ax: Axes, freqs: np.ndarray, *, language: str = "en") -> None:
     ax.set_xlabel(_t(_LABEL_FREQUENCY_HZ, language))
 
 
-def _format_freq(f: float, language: str = "en") -> str:
+def _format_freq(f: float, language: Language = "en") -> str:
     """Short human label for a band centre frequency.
 
     The label is localised here rather than by :func:`~phonometry._i18n.localize_axes`:
@@ -842,7 +846,7 @@ def format_frequency_axis(
     fmax: float | None = None,
     *,
     minor: str | None = "thirds",
-    language: str = "en",
+    language: Language = "en",
     axis: str = "x",
 ) -> None:
     """Label a *continuous* logarithmic frequency axis with band centres.
@@ -911,7 +915,7 @@ def _band_axis(
     labels_or_freqs: np.ndarray | Sequence[str] | Sequence[float],
     *,
     xlabel: str | None = _LABEL_FREQUENCY_HZ,
-    language: str = "en",
+    language: Language = "en",
 ) -> np.ndarray:
     """Categorical band x-axis: evenly spaced positions labelled with centres.
 
@@ -942,7 +946,7 @@ def _fractile_band(
     *,
     color: str,
     floor: float | None = None,
-    language: str = "en",
+    language: Language = "en",
 ) -> None:
     """Shade the 10-90 % fractile band around a median spectrum.
 
@@ -1019,7 +1023,7 @@ def _plot_rating(
     measured_label: str = "Measured",
     ylim: tuple[float, float] | None = None,
     ax: Axes | None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Shared renderer for the shifted-reference rating figures.
@@ -1084,7 +1088,7 @@ def _annotate_impact_500(
     reference: np.ndarray,
     rating: int,
     *,
-    language: str = "en",
+    language: Language = "en",
 ) -> None:
     """Mark the 500 Hz read value on the reference curve and, when the
     octave-band -5 dB reduction applies (ISO 717-2 Clause 4.3.2), annotate
@@ -1137,7 +1141,7 @@ def _annotate_impact_500(
 
 
 def _facade_x_axis(
-    ax: Axes, freqs: np.ndarray | None, n: int, *, language: str = "en"
+    ax: Axes, freqs: np.ndarray | None, n: int, *, language: Language = "en"
 ) -> np.ndarray:
     """Frequency x-axis when centres are known, else a labelled band index."""
     if freqs is None:
@@ -1297,7 +1301,7 @@ def _fit_segment(
 
 
 def _time_axis(
-    n: int, fs: int | None, *, language: str = "en"
+    n: int, fs: int | None, *, language: Language = "en"
 ) -> tuple[np.ndarray, str]:
     """Sample times in seconds when ``fs`` is known, else sample index."""
     if fs:
@@ -1343,7 +1347,7 @@ def _plot_band_level_bars(
     *,
     ylabel: str,
     title: str,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-band level bar chart with a band-summed total line (shared helper)."""
@@ -1423,7 +1427,7 @@ def _plot_insulation_bands(
     ylabel: str,
     title: str,
     ax: Axes | None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Shared per-band insulation renderer (measurement bands are index-only).
@@ -1683,7 +1687,7 @@ def _plot_two_runs(
     frequency_label: str,
     band_label: str,
     title: str,
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
 ) -> Axes:
     """Two measured spectra, the area between them, and their difference.

@@ -131,7 +131,7 @@ Dynamic stiffness of a resilient layer and the floating-floor resonance.
 DynamicStiffnessResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -148,9 +148,9 @@ DynamicStiffnessResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -365,7 +365,7 @@ plot_dynamic_stiffness_rig(
     specimen_side: float = 0.2,
     specimen_thickness_m: float = 0.02,
     load_mass: float = 8.0,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

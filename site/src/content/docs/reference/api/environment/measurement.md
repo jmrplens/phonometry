@@ -467,7 +467,7 @@ Tonal-audibility assessment of a tone in noise (ISO 1996-2 Annex C).
 TonalAssessmentResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -523,7 +523,7 @@ The level difference Annex K asks of each band, in dB.
 TonalSurveyAssessment.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

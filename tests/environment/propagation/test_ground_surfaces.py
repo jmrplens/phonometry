@@ -94,7 +94,7 @@ def test_each_ground_class_carries_its_letter_and_its_two_factors(
 
     assert row.harmonoise_class == letter
     assert row.flow_resistivity_pa_s_m2 == pytest.approx(resistivity, rel=1e-12)
-    assert row.iso_9613_ground_factor == pytest.approx(iso_g, rel=1e-12)
+    assert row.iso9613_ground_factor == pytest.approx(iso_g, rel=1e-12)
     assert row.nmpb_ground_factor == pytest.approx(nmpb_g, rel=1e-12)
 
 
@@ -113,7 +113,7 @@ def test_the_two_ground_factors_differ_for_two_of_the_eight_classes() -> None:
     differing = {
         letter
         for letter, row in classes.items()
-        if row.iso_9613_ground_factor != row.nmpb_ground_factor
+        if row.iso9613_ground_factor != row.nmpb_ground_factor
     }
 
     assert differing == {"E", "F"}

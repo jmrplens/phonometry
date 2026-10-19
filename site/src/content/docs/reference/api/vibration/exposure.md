@@ -76,7 +76,7 @@ apply_band_limiting(
     x: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
-    name: str,
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
 ) -> NDArray[np.float64]
 ```
 
@@ -119,7 +119,7 @@ apply_weighting(
     x: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
-    name: str,
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
 ) -> NDArray[np.float64]
 ```
 
@@ -153,7 +153,7 @@ negligible, as for any block frequency-domain filtering.
 
 ```python
 band_limiting_factors(
-    name: str,
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
     frequencies: ArrayLike,
 ) -> NDArray[np.float64]
 ```
@@ -177,7 +177,7 @@ Tables B.1 to B.9.
 
 ```python
 band_limiting_response(
-    name: str,
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
     frequencies: ArrayLike,
 ) -> WeightingResponse
 ```
@@ -306,7 +306,7 @@ daily_vibration_exposure(
     total_values: ArrayLike,
     durations_s: ArrayLike,
     *,
-    kind: str,
+    kind: Literal['hav', 'wbv'],
     labels: list[str] | tuple[str, ...] | None = None,
 ) -> DailyVibrationExposure
 ```
@@ -374,7 +374,7 @@ A daily exposure built from several operations, with its assessment.
 DailyVibrationExposure.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -391,9 +391,9 @@ DailyVibrationExposure.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -469,8 +469,8 @@ $a_\mathrm{w,e} = \sqrt{\sum a_{\mathrm{w}i}^2 T_i / \sum T_i}$.
 exposure_assessment(
     value: float,
     *,
-    kind: str,
-    metric: str = 'a8',
+    kind: Literal['hav', 'wbv'],
+    metric: Literal['a8', 'vdv'] = 'a8',
 ) -> ExposureAssessment
 ```
 
@@ -495,7 +495,11 @@ Assess a daily exposure against Directive 2002/44/EC (Article 3).
 ## ExposureAssessment
 
 ```python
-ExposureAssessment(value: float, kind: str, metric: str)
+ExposureAssessment(
+    value: float,
+    kind: Literal['hav', 'wbv'],
+    metric: Literal['a8', 'vdv'],
+)
 ```
 
 A daily exposure assessed against the Directive 2002/44/EC values.
@@ -545,7 +549,10 @@ The exposure limit value (ELV) of Article 3 for the kind and metric.
 ## frequency_weighting
 
 ```python
-frequency_weighting(name: str, frequencies: ArrayLike) -> WeightingResponse
+frequency_weighting(
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
+    frequencies: ArrayLike,
+) -> WeightingResponse
 ```
 
 Frequency-weighting response `H(f)` (ISO 8041-1:2017, Formula (5)).
@@ -680,7 +687,7 @@ mtvv(
     fs: float | None = None,
     *,
     integration_time: float = 1.0,
-    method: str = 'linear',
+    method: Literal['linear', 'exponential'] = 'linear',
 ) -> float
 ```
 
@@ -729,7 +736,7 @@ running_rms(
     fs: float | None = None,
     *,
     integration_time: float = 1.0,
-    method: str = 'linear',
+    method: Literal['linear', 'exponential'] = 'linear',
 ) -> NDArray[np.float64]
 ```
 
@@ -888,7 +895,7 @@ vector total `a_hv` instead (Annex, Part A, point 1).
 ```python
 weighted_acceleration(
     band_accelerations: ArrayLike,
-    weighting: str,
+    weighting: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
     *,
     frequencies: ArrayLike,
 ) -> WeightedSpectrum
@@ -961,7 +968,7 @@ A weighted one-third-octave acceleration spectrum and its `a_w`.
 WeightedSpectrum.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -974,7 +981,10 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ## weighting_factors
 
 ```python
-weighting_factors(name: str, frequencies: ArrayLike) -> NDArray[np.float64]
+weighting_factors(
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
+    frequencies: ArrayLike,
+) -> NDArray[np.float64]
 ```
 
 Weighting factors `|H(f)|` of weighting `name` (ISO 8041-1).
@@ -1032,7 +1042,7 @@ A frequency-weighting magnitude response (ISO 8041-1, Formula (5)).
 WeightingResponse.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

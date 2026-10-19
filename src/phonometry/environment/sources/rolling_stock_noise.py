@@ -94,7 +94,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -111,7 +111,7 @@ from ..._internal.validation import (
     require_scalar,
 )
 from ...io._resolve import SignalInput, resolve_fs, resolve_samples
-from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ...metrology.reference_values import REFERENCE_VALUES
 from ._shared import _TOLERANCE
 from .acoustic_roughness import (
     _MINIMUM_FILTERED_TOTAL_M,
@@ -130,6 +130,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
     from ...metrology.uncertainty import Quantity
 
 __all__ = [
@@ -279,7 +280,7 @@ ROLLING_STOCK_TEST_METHODS: tuple[str, ...] = (
 )
 
 #: 3.11: the reference sound pressure in air, from the published ISO 1683 table.
-_P0_PA = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_P0_PA = REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 #: 5.7, 6.6.1, 7.5.3, 7.6.3 and 8.6: the fewest valid runs per position.
 _MINIMUM_RUNS = 3
@@ -486,7 +487,7 @@ def acceleration_test_positions(unit_length_m: float) -> NDArray[np.float64]:
 # ---------------------------------------------------------------------------
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class PassByMeasurement(OwnsArrays):
     r"""The levels of one pass-by record, 6.5 and 6.6.3.
 
@@ -576,7 +577,7 @@ class PassByMeasurement(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the level history with the measurement interval, as Figure 7 does.
 
@@ -787,6 +788,7 @@ class StationaryTestResult(OwnsArrays):
         """
         levels = np.atleast_2d(np.asarray(self.levels, dtype=np.float64))
         lengths = require_positive_array(self.lengths_m, "lengths_m")
+        # The number is a count of array axes, not a quantity.
         if levels.ndim != 2 or levels.shape[1] != lengths.size:  # noqa: PLR2004
             msg = "'levels' needs one row per set and one column per position."
             raise ValueError(msg)
@@ -827,7 +829,7 @@ class StationaryTestResult(OwnsArrays):
         return bool(np.all(self.position_spreads_db <= _MAXIMUM_SPREAD_DB + _TOLERANCE))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the level of every position and the unit level.
 
@@ -875,7 +877,9 @@ class RollingStockTestResult(RichDisplay):
         method).
     """
 
-    method: str
+    method: Literal[
+        "constant_speed", "acceleration_maximum", "acceleration_averaged", "braking"
+    ]
     run_levels: Mapping[str, tuple[float, ...]]
 
     def __post_init__(self) -> None:
@@ -952,7 +956,7 @@ class RollingStockTestResult(RichDisplay):
         return self.reported_levels[self.governing_position]
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw every run, each position's rounded mean and the result.
 
@@ -969,7 +973,11 @@ class RollingStockTestResult(RichDisplay):
 
 
 def rolling_stock_test(
-    run_levels: Mapping[str, ArrayLike], *, method: str = "constant_speed"
+    run_levels: Mapping[str, ArrayLike],
+    *,
+    method: Literal[
+        "constant_speed", "acceleration_maximum", "acceleration_averaged", "braking"
+    ] = "constant_speed",
 ) -> RollingStockTestResult:
     """The result of a constant-speed, starting or braking test, 6.7.1, 7.5.4, 7.6.4, 8.7.
 
@@ -1042,7 +1050,7 @@ class RiseSpeedResult(OwnsArrays):
         return max(self.rise_speeds_db_per_s) if self.rise_speeds_db_per_s else None
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the history with the slopes that count and the steepest rise.
 
@@ -1207,7 +1215,7 @@ class AdjacentVehicleNeutrality(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the two levels and the 2 dB the adjacent vehicle may add.
 
@@ -1415,7 +1423,7 @@ class SmallRoughnessDeviation(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the measured and revised noise spectra and the correction.
 
@@ -1573,7 +1581,7 @@ class RoughnessComparability(OwnsArrays):
         return max(abs(d) for d in self.level_differences)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the two roughness spectra and their envelopes, as Figure E.1.
 
@@ -1849,8 +1857,8 @@ class ReferenceTrackCheck(RichDisplay):
         self,
         ax: Axes | None = None,
         *,
-        panel: str = "roughness",
-        language: str = "en",
+        panel: Literal["roughness", "decay"] = "roughness",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Draw the roughness spectra against Figure 2, or the decay rates against Figure 3.
@@ -2427,7 +2435,7 @@ class PassByUncertainty(RichDisplay):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw each input's share of the variance, largest first, as Figure G.1.
 

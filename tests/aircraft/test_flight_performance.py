@@ -48,6 +48,10 @@ from phonometry.aircraft.flight_performance import (
     departure_profile,
 )
 
+#: The fields of each engine record, in the order the test tables hold them.
+_JET_FIELDS = ("e", "f", "ga", "gb", "h")
+_PROPELLER_FIELDS = ("efficiency", "power_hp")
+
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
@@ -137,12 +141,14 @@ def _aircraft(aircraft_id: str) -> PerformanceAircraft:
         max_static_thrust_lb=static_thrust,
         max_landing_weight_lb=landing_weight,
         jet_coefficients={
-            rating: JetEngineCoefficients(*values)
+            rating: JetEngineCoefficients(**dict(zip(_JET_FIELDS, values, strict=True)))
             for (acft, rating), values in JET_COEFFICIENTS.items()
             if acft == aircraft_id
         },
         propeller_coefficients={
-            rating: PropellerEngineCoefficients(*values)
+            rating: PropellerEngineCoefficients(
+                **dict(zip(_PROPELLER_FIELDS, values, strict=True))
+            )
             for (acft, rating), values in PROP_COEFFICIENTS.items()
             if acft == aircraft_id
         },
@@ -489,8 +495,8 @@ def test_approach_step_refuses_a_negative_length() -> None:
     """
     with pytest.raises(ValueError, match=r"ApproachStep: 'distance_ft' must not"):
         ApproachStep(
-            "Decelerate",
-            "-NONE-",
+            step_type="Decelerate",
+            flap_id="-NONE-",
             start_calibrated_airspeed_kt=130.0,
             distance_ft=-5.0,
             start_thrust_percent=40.0,

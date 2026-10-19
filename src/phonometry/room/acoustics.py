@@ -65,11 +65,11 @@ from ._shared import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
-
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
     from ..io._signal import Signal
 
@@ -244,7 +244,7 @@ class RoomAcousticsResult(OwnsArrays):
         return np.isfinite(self.t30) & (self.dynamic_range >= needed)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | np.ndarray:
         """Plot per-band decay times (EDT/T20/T30) and clarity (C50/C80).
 
@@ -264,9 +264,9 @@ class RoomAcousticsResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a room acoustic parameters fiche to a PDF (ISO 3382-1/-2).
 
@@ -419,10 +419,9 @@ class DecayCurve(OwnsArrays):
     ``levels`` the decay levels in dB (0 dB at time zero), up to the noise
     truncation point (ISO 3382-1:2009, 5.3.3). ``band`` is the
     octave/third-octave band centre in Hz, or ``None`` for a broadband decay.
-
-    For backward compatibility with the previous ``(time, level)`` tuple
-    return of :func:`decay_curve`, the dataclass is iterable and unpacks as
-    ``time, level = decay_curve(...)``.
+    The curve is read by name, ``curve.times`` and ``curve.levels``, like every
+    other record: it does not unpack as the ``(time, level)`` pair
+    :func:`decay_curve` returned before it.
     """
 
     times: np.ndarray
@@ -436,13 +435,12 @@ class DecayCurve(OwnsArrays):
         the plot draws the levels against the times point for point, and each
         straight-line fit cuts its evaluation range as a mask over ``levels``
         and indexes ``times`` with it, so a decay time is only ever as right as
-        the pairing. Nothing downstream re-establishes it, and the dataclass
-        unpacks as ``time, level = decay_curve(...)``, which sends the two
-        arrays on into code that never sees this class again. Left to be
-        discovered there, the halves are reported by matplotlib or numpy as a
-        pair of shapes, from inside whatever finally drew them, which for a
-        curve computed once and plotted later is a long way from the point
-        the two parted company.
+        the pairing. Nothing downstream re-establishes it, and the two arrays
+        are read off the record and handed on into code that never sees this
+        class again. Left to be discovered there, the halves are reported by
+        matplotlib or numpy as a pair of shapes, from inside whatever finally
+        drew them, which for a curve computed once and plotted later is a long
+        way from the point the two parted company.
 
         ``band`` is a single centre frequency labelling the whole curve, not
         an axis, and is left out.
@@ -452,13 +450,8 @@ class DecayCurve(OwnsArrays):
         require_ranks(self, times=1, levels=1)
         require_same_length(self, "times", "levels", axis="sample")
 
-    def __iter__(self) -> Iterator[np.ndarray]:
-        """Yield ``times`` then ``levels`` so the result unpacks like a tuple."""
-        yield self.times
-        yield self.levels
-
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the decay curve with optional straight T-fit overlays.
 
@@ -514,8 +507,7 @@ def decay_curve(
         125 Hz. Only used when ``band`` is not None. Default False (causal).
     :return: A :class:`DecayCurve` with ``times`` in seconds from the direct
         sound and ``levels`` in dB (0 dB at time zero), up to the noise
-        truncation point. It unpacks as ``times, levels = decay_curve(...)``
-        for backward compatibility and exposes :meth:`DecayCurve.plot`.
+        truncation point, read by name, with :meth:`DecayCurve.plot`.
     :raises TypeError: if ``band`` or ``fraction`` is not a single number.
     """
     require_scalar(band, "band")

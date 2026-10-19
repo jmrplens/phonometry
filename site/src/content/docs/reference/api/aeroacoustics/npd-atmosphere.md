@@ -24,7 +24,7 @@ the NPD, the unweighted reference spectrum at 1 000 ft, in three steps:
    levels is the increment $\Delta L(d_i)$ (Eq. D-4), added to the
    `Lmax` and `LE` NPD levels alike.
 
-* [`SAE_AIR1845_ATTENUATION_DB_PER_100M`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#sae_air1845_attenuation_db_per_100m) -- Table D-1.
+* [`AIR1845_ATTENUATION_DB_PER_100M`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#air1845_attenuation_db_per_100m) -- Table D-1.
 * [`npd_atmosphere_increment`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npd_atmosphere_increment) -- the increment at each NPD distance, as an
   [`NPDAtmosphereIncrement`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npdatmosphereincrement) with `.plot()` (the increment against
   distance) and `.plot_attenuation()` (the attenuation of the two
@@ -47,6 +47,14 @@ appendix.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
+## AIR1845_ATTENUATION_DB_PER_100M
+
+*Constant* (`mapping`).
+
+```python
+AIR1845_ATTENUATION_DB_PER_100M = {50.0: 0.033, 63.0: 0.033, 80.0: 0.033, 100.0: 0.066, 125.0: 0.066, 160.0: 0.098, 200.0: 0.131, 250.0: 0.131, 315.0: 0.197, 400.0: 0.23, 500.0: 0.295, 630.0: 0.361, 800.0: 0.459, 1000.0: 0.59, 1250.0: 0.754, 1600.0: 0.983, 2000.0: 1.311, 2500.0: 1.705, 3150.0: 2.295, 4000.0: 3.115, 5000.0: 3.607, 6300.0: 5.246, 8000.0: 7.213, 10000.0: 9.836}
+```
+
 ## npd_atmosphere_increment
 
 ```python
@@ -56,7 +64,7 @@ npd_atmosphere_increment(
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
-    absorption: str = 'arp5534',
+    absorption: Literal['arp5534', 'arp866a'] = 'arp5534',
     distances_m: ArrayLike | None = None,
 ) -> NPDAtmosphereIncrement
 ```
@@ -85,9 +93,9 @@ the unit the table prints (Doc 29 writes the equations with the rates in
 dB/m instead), and
 $\delta_n(d_i) \, d_i / (100\,\mathrm{m})$ the band attenuation of
 the specified atmosphere over $d_i$: the SAE Method of SAE ARP 5534
-([`sae_band_attenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#sae_band_attenuation)),
+([`band_attenuation_arp5534`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#band_attenuation_arp5534)),
 which depends on the path and the pressure, or SAE ARP 866A
-([`arp866a_attenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#arp866a_attenuation)),
+([`attenuation_arp866a`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#attenuation_arp866a)),
 which depends on neither, with `η(δ)` read linearly in Table 1 of ISO
 3891, as Tables D-3b and D-5 are computed. Doc 29 recommends ARP 5534 and
 keeps ARP 866A for transition. Nothing is rounded: Tables D-4 to D-6c are rounded for
@@ -130,7 +138,7 @@ NPDAtmosphereIncrement(
     reference_levels_dba: NDArray[np.float64],
     specified_levels_dba: NDArray[np.float64],
     increment_db: NDArray[np.float64],
-    absorption: str,
+    absorption: Literal['arp5534', 'arp866a'],
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float,
@@ -189,7 +197,7 @@ Column of the tables that holds one of `distances_m`.
 NPDAtmosphereIncrement.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -204,7 +212,7 @@ NPDAtmosphereIncrement.plot_attenuation(
     *,
     distance_m: float = 304.8,
     reference: bool = True,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -233,7 +241,7 @@ revise_npd_curves(
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
-    absorption: str = 'arp5534',
+    absorption: Literal['arp5534', 'arp866a'] = 'arp5534',
 ) -> RevisedNPDCurves
 ```
 
@@ -290,17 +298,9 @@ NPD curves recalculated for a specified atmosphere (Doc 29 Vol. 2 Appendix D).
 RevisedNPDCurves.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
 
 Plot the revised curves over the original ones against slant distance.
-
-## SAE_AIR1845_ATTENUATION_DB_PER_100M
-
-*Constant* (`mapping`).
-
-```python
-SAE_AIR1845_ATTENUATION_DB_PER_100M = {50.0: 0.033, 63.0: 0.033, 80.0: 0.033, 100.0: 0.066, 125.0: 0.066, 160.0: 0.098, 200.0: 0.131, 250.0: 0.131, 315.0: 0.197, 400.0: 0.23, 500.0: 0.295, 630.0: 0.361, 800.0: 0.459, 1000.0: 0.59, 1250.0: 0.754, 1600.0: 0.983, 2000.0: 1.311, 2500.0: 1.705, 3150.0: 2.295, 4000.0: 3.115, 5000.0: 3.607, 6300.0: 5.246, 8000.0: 7.213, 10000.0: 9.836}
-```

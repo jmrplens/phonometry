@@ -39,7 +39,7 @@ from .distortion import (
     _steady_slice,
     _validate_notch_q,
     _validate_signal,
-    itu_r_468_weighting,
+    weighting_bs468,
 )
 
 if TYPE_CHECKING:
@@ -74,7 +74,7 @@ def _ccir_rms_weighted_rms(
     gains = np.zeros(freqs.size)
     nonzero = freqs > 0.0
     gains[nonzero] = 10.0 ** (
-        (itu_r_468_weighting(freqs[nonzero]) + _CCIR_RMS_OFFSET_DB) / 20.0
+        (weighting_bs468(freqs[nonzero]) + _CCIR_RMS_OFFSET_DB) / 20.0
     )
     f_hi = (
         fs / 2.0

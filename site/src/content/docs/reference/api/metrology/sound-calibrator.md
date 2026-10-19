@@ -171,7 +171,9 @@ Whether a nominal frequency falls in this row's range.
 ### CalibratorTableRow.for_class()
 
 ```python
-CalibratorTableRow.for_class(calibrator_class: str) -> float | None
+CalibratorTableRow.for_class(
+    calibrator_class: Literal['LS', 'LS/M', '1', '1/M', '2'],
+) -> float | None
 ```
 
 The figure this row prints for a class, or `None` for a dash.
@@ -306,6 +308,7 @@ LEVEL_MAX_UNCERTAINTY_DB = (CalibratorTableRow(lower_hz=31.5, upper_hz=63.0, inc
 
 ```python
 SoundCalibratorMeasurements(
+    *,
     level_deviation_db: float | Sequence[float] | None = None,
     level_uncertainty_db: float | Sequence[float] | None = None,
     static_pressure_correction: float | Sequence[float] | None = None,
@@ -366,7 +369,7 @@ frequency); an uncertainty given as one number applies to all of them.
 
 ```python
 SoundCalibratorMeasurements.pairs(
-    requirement: str,
+    requirement: Literal['level', 'fluctuation', 'frequency', 'distortion', 'supply_voltage', 'environmental_level', 'environmental_level_in_band', 'environmental_frequency', 'field_immunity'],
 ) -> tuple[tuple[float, float], ...]
 ```
 
@@ -433,7 +436,7 @@ Whether every measurement of the requirement demonstrates conformance.
 SoundCalibratorRequirement.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -463,7 +466,7 @@ The unit the requirement is measured in, `"dB"` or `"%"`.
 SoundCalibratorVerification(
     calibrator_class: str,
     nominal_frequency_hz: float,
-    environmental_test: str,
+    environmental_test: Literal['full', 'abbreviated'],
     measurements: SoundCalibratorMeasurements,
     requirements: tuple[SoundCalibratorRequirement, ...],
 )
@@ -504,7 +507,7 @@ due (A.6.1.2), not that the calibrator does not conform.
 SoundCalibratorVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -570,11 +573,11 @@ SUPPLY_VOLTAGE_MAX_UNCERTAINTY_DB = {'LS': 0.02, '1': 0.04, '2': 0.04}
 
 ```python
 verify_sound_calibrator(
-    calibrator_class: str,
+    calibrator_class: Literal['LS', 'LS/M', '1', '1/M', '2'],
     measurements: SoundCalibratorMeasurements,
     *,
     nominal_frequency_hz: float,
-    environmental_test: str = 'full',
+    environmental_test: Literal['full', 'abbreviated'] = 'full',
 ) -> SoundCalibratorVerification
 ```
 

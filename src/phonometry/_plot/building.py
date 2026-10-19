@@ -39,6 +39,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..building.measurement._rainfall_sound import (
         RainfallReferenceCorrection,
         RainfallSoundResult,
@@ -433,12 +434,12 @@ _HEAVY_IMPACT_SOURCE_LABELS = {
 _HEAVY_IMPACT_BAND_LABELS = {3: "one-third octave", 1: "octave"}
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     return _STRINGS.get(text, text) if language == "es" else text
 
 
-def _verdict_word(*, passes: bool, language: str) -> str:
+def _verdict_word(*, passes: bool, language: Language) -> str:
     """``conforms`` or ``does not conform``, localised."""
     return _t(_CONFORMS if passes else _DOES_NOT_CONFORM, language)
 
@@ -446,7 +447,7 @@ def _verdict_word(*, passes: bool, language: str) -> str:
 def plot_sound_reduction(
     result: SoundReductionResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Predicted sound reduction index ``R(f)`` (Bies 7.2).
@@ -536,7 +537,7 @@ def plot_sound_reduction(
 def plot_aperture_transmission(
     result: ApertureTransmissionResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Aperture sound reduction index ``R(f) = -10 log10(tau)`` (Hopkins 4.3.10).
@@ -570,7 +571,7 @@ def plot_aperture_transmission(
 def plot_weighted_rating(
     result: WeightedRatingResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Airborne rating curve vs shifted reference (ISO 717-1).
@@ -608,7 +609,7 @@ def plot_weighted_rating(
 def plot_impact_rating(
     result: ImpactRatingResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Impact rating curve vs shifted reference (ISO 717-2).
@@ -664,7 +665,7 @@ def _plot_extended_rating(
     ylabel: str,
     span_label: str,
     ax: Axes | None,
-    language: str,
+    language: Language,
     **kwargs: Any,
 ) -> Axes:
     """Shared renderer for the two enlarged-range ISO 717 rating plots."""
@@ -736,7 +737,7 @@ def _plot_extended_rating(
 
 
 def _extended_terms_line(
-    terms: list[tuple[str, float | None]], language: str, decimals: int
+    terms: list[tuple[str, float | None]], language: Language, decimals: int
 ) -> str:
     """Format the available Annex B adaptation terms as ``name = value dB``."""
     from .._i18n import format_number
@@ -752,7 +753,7 @@ def _extended_terms_line(
 def plot_extended_weighted_rating(
     result: ExtendedWeightedRatingResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Enlarged-range airborne rating curve vs shifted reference (ISO 717-1 Annex B).
@@ -806,7 +807,7 @@ def plot_extended_weighted_rating(
 def plot_extended_impact_rating(
     result: ExtendedImpactRatingResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Enlarged-range impact rating curve vs shifted reference (ISO 717-2 A.2.1).
@@ -849,7 +850,7 @@ def plot_extended_impact_rating(
 def plot_facade_insulation(
     result: FacadeInsulationResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-band façade sound-insulation profile (ISO 16283-3).
@@ -902,7 +903,7 @@ def plot_facade_insulation(
 def plot_facade_prediction(
     result: FacadePredictionResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Predicted façade insulation profile (EN 12354-3:2000).
@@ -954,7 +955,7 @@ def plot_facade_prediction(
 def plot_radiated_power(
     result: RadiatedPowerResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Radiated sound power level ``LW`` per band (EN 12354-4:2000).
@@ -1007,7 +1008,7 @@ def plot_radiated_power(
 def plot_vibration_reduction(
     result: VibrationReductionResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Vibration reduction index ``Kij`` versus frequency (ISO 10848).
@@ -1056,7 +1057,7 @@ def plot_vibration_reduction(
 def plot_structure_borne_power(
     result: StructureBornePowerResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Characteristic structure-borne sound power level per band (EN 15657).
@@ -1088,7 +1089,7 @@ def plot_structure_borne_power(
 def plot_installed_structure_borne(
     result: InstalledSourceResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-path and total normalised structure-borne SPL (EN 12354-5).
@@ -1139,7 +1140,7 @@ def plot_installed_structure_borne(
 def plot_airborne_prediction(
     result: AirbornePredictionResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-path shares of the transmitted energy (EN 12354-1).
@@ -1183,7 +1184,7 @@ def plot_airborne_prediction(
 def plot_impact_prediction(
     result: ImpactPredictionResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Terms of the apparent impact-level prediction (EN 12354-2).
@@ -1244,7 +1245,7 @@ def _plot_path_shares(
     ylabel: str,
     title: str,
     ax: Axes | None,
-    language: str,
+    language: Language,
     **kwargs: Any,
 ) -> Axes:
     """Stacked per-band path shares with the resulting total on a twin axis.
@@ -1341,7 +1342,7 @@ def _plot_path_shares(
 def plot_detailed_airborne_prediction(
     result: DetailedAirborneResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-band path contributions and ``R'`` (EN/ISO 12354-1 detailed model).
@@ -1376,7 +1377,7 @@ def plot_detailed_airborne_prediction(
 def plot_detailed_impact_prediction(
     result: DetailedImpactResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-band path contributions and ``L'n`` (EN/ISO 12354-2 detailed model).
@@ -1411,7 +1412,7 @@ def plot_detailed_impact_prediction(
 def plot_in_situ_element(
     result: InSituElementResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """In-situ ``Rsitu`` and ``Ln,situ`` of one element (EN/ISO 12354).
@@ -1456,7 +1457,7 @@ def plot_in_situ_element(
 def plot_airborne_insulation(
     result: AirborneInsulationResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-band airborne insulation quantities (ISO 16283-1).
@@ -1494,7 +1495,7 @@ def plot_airborne_insulation(
 def plot_impact_insulation(
     result: ImpactInsulationResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-band impact sound pressure levels (ISO 16283-2).
@@ -1532,7 +1533,7 @@ def plot_impact_insulation(
 def plot_low_frequency_procedure(
     result: LowFrequencyResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The three low-frequency bands of ISO 16283, default against corner.
@@ -1576,7 +1577,10 @@ def plot_low_frequency_procedure(
 
 
 def plot_band_uncertainty(
-    result: BandUncertainty, ax: Axes | None = None, language: str = "en", **kwargs: Any
+    result: BandUncertainty,
+    ax: Axes | None = None,
+    language: Language = "en",
+    **kwargs: Any,
 ) -> Axes:
     """Per-band standard uncertainty of an insulation quantity (ISO 12999-1).
 
@@ -1618,7 +1622,7 @@ def _plot_improvement(
     dl: np.ndarray,
     limited: np.ndarray | None,
     title: str,
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
 ) -> Axes:
     """The improvement spectrum ``ΔL`` against frequency, titled *title*.
@@ -1665,7 +1669,7 @@ def _plot_improvement(
 def plot_floor_covering_improvement(
     result: FloorCoveringImprovementResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Impact-sound improvement spectrum ΔL of a floor covering (ISO 16251-1).
@@ -1699,7 +1703,7 @@ def plot_floor_covering_improvement(
 def plot_impact_improvement_rating(
     result: ImpactImprovementRatingResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The improvement spectrum ΔL a covering is rated from (ISO 717-2).
@@ -1747,7 +1751,7 @@ _DB_HR_SPECTRUM_LABELS = {
 def plot_db_hr_global_index(
     result: DBHRGlobalIndexResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Band insulation and per-band transmitted level of a DB-HR global index.
@@ -1813,7 +1817,10 @@ def plot_db_hr_global_index(
 
 
 def plot_db_hr_assessment(
-    result: DBHRAssessment, ax: Axes | None = None, language: str = "en", **kwargs: Any
+    result: DBHRAssessment,
+    ax: Axes | None = None,
+    language: Language = "en",
+    **kwargs: Any,
 ) -> Axes:
     """Achieved values against their CTE DB-HR requirements.
 
@@ -1877,7 +1884,7 @@ def _plot_shaded_band_pair(
     fill_label: str,
     ylabel: str,
     title: str,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Two band curves on a categorical axis with the gap between them shaded.
@@ -1931,7 +1938,7 @@ def _plot_shaded_band_pair(
 def plot_heavy_impact_source(
     result: HeavyImpactSourceCheck,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Measured heavy-impact source ``LFE`` against its printed tolerance band.
@@ -1999,7 +2006,7 @@ def plot_heavy_impact_source(
 def plot_standardized_maximum_impact(
     result: StandardizedMaxImpactResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Measured and standardized maximum impact levels (ISO 16283-2 3.16).
@@ -2036,7 +2043,7 @@ def plot_standardized_maximum_impact(
 def plot_a_weighted_maximum_impact(
     result: AWeightedMaxImpactResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """A-weighted maximum impact level and its band contributions (ISO 717-2 D).
@@ -2087,7 +2094,7 @@ def plot_a_weighted_maximum_impact(
 def plot_ceiling_attenuation(
     result: CeilingAttenuationResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Normalized ceiling attenuation against the fitted ASTM E413 contour.
@@ -2124,7 +2131,7 @@ def plot_ceiling_attenuation(
 def plot_plenum_flanking(
     result: PlenumFlankingResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Ceiling/plenum flanking path ``Rcl`` against the two ceilings.
@@ -2163,7 +2170,7 @@ def plot_plenum_flanking(
 def plot_wall_tie_coupling(
     result: WallTieCouplingResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Wall-tie coupling loss factor against the rigid-connection ceiling.
@@ -2230,7 +2237,7 @@ def _plot_improvement_spectrum(
     curves: Sequence[tuple[np.ndarray, str, str, str]],
     marker_frequency: float | None,
     marker_label: str,
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
 ) -> None:
     """Draw one or more ``ΔL(f)`` curves with an optional vertical marker."""
@@ -2261,7 +2268,7 @@ def _plot_improvement_spectrum(
 def plot_tapping_force(
     result: TappingForceResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Force spectrum of the ISO tapping machine on one walking surface.
@@ -2324,7 +2331,7 @@ def plot_tapping_force(
 def plot_covering_improvement(
     result: CoveringImprovementResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Predicted ``ΔL`` of a soft floor covering beside its two-line estimate.
@@ -2365,7 +2372,7 @@ def plot_covering_improvement(
 def plot_floating_floor_improvement(
     result: FloatingFloorImprovementResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Predicted ``ΔL`` of a floating floor above its mass-spring resonance.
@@ -2405,7 +2412,7 @@ def plot_floating_floor_improvement(
 def plot_lining_improvement(
     result: LiningImprovementResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Annex D single-number ratings of an additional layer against ``fo``.
@@ -2486,7 +2493,7 @@ def _plot_low_frequency(
     title: str,
     ylabel: str,
     ax: Axes | None,
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
 ) -> Axes:
     """One band figure for either ISO 15186-3 quantity.
@@ -2584,7 +2591,7 @@ def _plot_low_frequency(
 def plot_low_frequency_intensity(
     result: LowFrequencyIntensityResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Low-frequency intensity sound reduction index (ISO 15186-3).
@@ -2616,7 +2623,7 @@ def plot_low_frequency_intensity(
 def plot_low_frequency_element(
     result: LowFrequencyElementResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Low-frequency element normalized level difference (ISO 15186-3).
@@ -2672,7 +2679,7 @@ def _mark_upper_limits(
     positions: np.ndarray,
     levels: np.ndarray,
     limited: np.ndarray,
-    language: str,
+    language: Language,
 ) -> None:
     """Mark the bands the background held at 2,2 dB as upper limits."""
     ax.plot(
@@ -2690,7 +2697,7 @@ def _mark_upper_limits(
 def plot_service_equipment_level(
     result: ServiceEquipmentResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Band spectrum of a service-equipment measurement, step by step.
@@ -2765,7 +2772,7 @@ def plot_service_equipment_level(
 def plot_service_equipment_background(
     result: ServiceEquipmentBackgroundResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Measured, background and corrected band levels (ISO/DIS 16032 Clause 9).
@@ -2840,7 +2847,7 @@ def _reading_names(count: int) -> list[str]:
 def plot_position_spread(
     result: PositionSpreadCheck,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The A-weighted readings of 7.4.1 against the spread their stage allows.
@@ -2912,7 +2919,7 @@ def plot_position_spread(
 def plot_service_equipment_positions(
     result: ServiceEquipmentPositionCheck,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Plan view of the room with the microphone positions of 7.2 and 7.3.
@@ -3062,7 +3069,7 @@ def plot_service_equipment_positions(
 _CLAUSE_5_READINGS = ("beginning", "end")
 
 
-def _calibration_names(previous: int, current: int, language: str) -> list[str]:
+def _calibration_names(previous: int, current: int, language: Language) -> list[str]:
     """Tick names: the earlier calibrations, then beginning and end."""
     earlier = _t("earlier", language)
     names = (
@@ -3078,7 +3085,7 @@ def _calibration_names(previous: int, current: int, language: str) -> list[str]:
 def plot_calibration_deviation(
     result: CalibrationDeviationResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Each calibration reading against the window the earlier ones leave it.
@@ -3184,7 +3191,7 @@ def plot_calibration_deviation(
 def plot_background_duration(
     result: BackgroundDurationCheck,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Each background measurement time against the 30 s of 7.6 and the tolerance.
@@ -3273,7 +3280,7 @@ def plot_background_duration(
 def plot_varying_background(
     result: VaryingBackgroundCheck,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The equipment level, the background maximum and the 10 dB line, per band.
@@ -3351,7 +3358,7 @@ def plot_varying_background(
 def plot_measurement_disturbance(
     result: MeasurementDisturbanceCheck,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Each period's maximum less equivalent level against the 5 dB of Clause 9.
@@ -3411,7 +3418,7 @@ def plot_measurement_disturbance(
 def plot_instrument_agreement(
     result: InstrumentAgreementCheck,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Each calculated-less-instrument difference against the 2 dB of 7.8.
@@ -3601,7 +3608,7 @@ _FLOOR_ADAPTATION_SYMBOLS = {
 }
 
 
-def _db(value: float, language: str) -> str:
+def _db(value: float, language: Language) -> str:
     """A decibel value for a title: typographic minus, the locale's separator."""
     from .._i18n import decimal_comma, fmt_minus
 
@@ -3614,7 +3621,7 @@ def _improvement_curve(
     freqs: np.ndarray,
     values: np.ndarray,
     label: str,
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
 ) -> None:
     """Draw one improvement spectrum on a band axis with its zero line."""
@@ -3630,7 +3637,7 @@ def _improvement_curve(
 def plot_reduction_improvement_rating(
     result: ReductionImprovementRating,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The two curves ISO 717-1 Annex D rates, and the improvement between them.
@@ -3678,7 +3685,7 @@ def plot_reduction_improvement_rating(
 def plot_lab_lining_improvement(
     result: LaboratoryLiningImprovementResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Improvement ``ΔR`` of a lining per band (ISO 10140-1:2021 Annex G).
@@ -3719,7 +3726,7 @@ def plot_lab_lining_improvement(
 def plot_lining_curing_check(
     result: LiningCuringCheck,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Admissible curing time and time lag of ISO 10140-1:2021 G.4.
@@ -3788,7 +3795,7 @@ def plot_lining_curing_check(
 def plot_lab_floor_covering_improvement(
     result: LaboratoryFloorCoveringImprovementResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     *,
     rating_range: bool = False,
     **kwargs: Any,
@@ -3844,7 +3851,7 @@ def plot_lab_floor_covering_improvement(
 def plot_heavy_impact_improvement(
     result: HeavyImpactImprovementResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Improvement ``ΔLr`` of a floor covering under the rubber ball (H.6.1).
@@ -3877,7 +3884,7 @@ def plot_heavy_impact_improvement(
 def plot_rain_generator_verification(
     result: RainGeneratorVerification,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Each quantity of the generated rain against its tolerance window.
@@ -3963,7 +3970,7 @@ def plot_rain_generator_verification(
 def plot_rainfall_reference_correction(
     result: RainfallReferenceCorrection,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Corrected level of the reference pane against Table I.1 (Annex I).
@@ -3981,8 +3988,8 @@ def plot_rainfall_reference_correction(
     positions = _band_axis(ax, result.frequencies, language=language)
     ax.fill_between(
         positions,
-        result.l_ic_ref,
-        result.l_i_m_ref,
+        result.l_ic_reference,
+        result.l_i_m_reference,
         color=theme_fill(_C_TERTIARY, ax),
         lw=0,
         zorder=0,
@@ -3990,7 +3997,7 @@ def plot_rainfall_reference_correction(
     )
     ax.plot(
         positions,
-        result.l_ic_ref,
+        result.l_ic_reference,
         "s--",
         color=_C_REFERENCE,
         lw=1.2,
@@ -3999,7 +4006,7 @@ def plot_rainfall_reference_correction(
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("label", r"$L_{I,\mathrm{m,ref}}$")
-    ax.plot(positions, result.l_i_m_ref, **kwargs)
+    ax.plot(positions, result.l_i_m_reference, **kwargs)
     ax.set_ylabel(_t(_INTENSITY_LEVEL_LABEL, language))
     ax.set_title(_t(_RAIN_REFERENCE_TITLE, language))
     ax.grid(visible=True, which="both", alpha=0.3)
@@ -4011,7 +4018,7 @@ def plot_rainfall_reference_correction(
 def plot_rainfall_sound(
     result: RainfallSoundResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Sound intensity level of a specimen under rain, per band (Annex K).
@@ -4062,7 +4069,7 @@ def plot_octave_band_spectrum(
     result: OctaveBandSpectrum,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """One value per octave band, labelled by the quantity it holds.
@@ -4126,7 +4133,7 @@ _STRINGS.update(
 
 
 def _named_band_axis(
-    ax: Axes, frequencies: np.ndarray | None, n_bands: int, language: str
+    ax: Axes, frequencies: np.ndarray | None, n_bands: int, language: Language
 ) -> np.ndarray:
     """A band axis labelled with the centres, or numbered where none were given."""
     if frequencies is None:
@@ -4148,7 +4155,7 @@ def plot_background_corrected_level(
     result: BackgroundCorrectedLevel,
     *,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The margin :math:`L' - L_\mathrm{b}` of each band against ISO 16251-1 F. (2).
@@ -4242,7 +4249,7 @@ def plot_strong_coupling_check(
     result: StrongCouplingCheck,
     *,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""``Dv,ij`` band by band against the bound of ISO 10848-1 Formula (15).

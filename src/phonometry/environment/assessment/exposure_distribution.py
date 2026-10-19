@@ -78,7 +78,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -93,6 +93,8 @@ from ..._internal.validation import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from ..._i18n import Language
 
 __all__ = [
     "SELDistribution",
@@ -618,8 +620,8 @@ class SELDistribution(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        view: str = "density",
-        language: str = "en",
+        view: Literal["classes", "density", "exceedance"] = "density",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         r"""Plot the distribution, as its class density, density or exceedance.

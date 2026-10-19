@@ -135,15 +135,15 @@ Splits signal into low and high bands with flat sum response.
 time_weighting(
     x: Signal,
     fs: int | None = ...,
-    mode: str = ...,
-    initial_state: str | float | np.ndarray | None = ...,
+    mode: Literal['fast', 'slow', 'impulse'] = ...,
+    initial_state: Literal['zero', 'first'] | float | np.ndarray | None = ...,
 ) -> TimeWeightedEnvelope
 
 time_weighting(
     x: list[float] | np.ndarray,
     fs: int,
-    mode: str = ...,
-    initial_state: str | float | np.ndarray | None = ...,
+    mode: Literal['fast', 'slow', 'impulse'] = ...,
+    initial_state: Literal['zero', 'first'] | float | np.ndarray | None = ...,
 ) -> np.ndarray
 ```
 
@@ -172,7 +172,7 @@ Apply time weighting to a signal (Exponential averaging).
 TimeWeightedEnvelope(
     mean_square: np.ndarray,
     fs: int,
-    mode: str,
+    mode: Literal['fast', 'slow', 'impulse'],
     *,
     calibrated: bool,
 )
@@ -221,7 +221,7 @@ Number of dimensions of the envelope.
 TimeWeightedEnvelope.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -256,7 +256,7 @@ Sample times, in seconds from the start of the record.
 ## TimeWeighting
 
 ```python
-TimeWeighting(fs: int, mode: str = 'fast')
+TimeWeighting(fs: int, mode: Literal['fast', 'slow', 'impulse'] = 'fast')
 ```
 
 Stateful time weighting for block processing.
@@ -323,7 +323,7 @@ Forget the carried state (the next block starts from rest).
 weighting_filter(
     x: Signal,
     fs: int | None = ...,
-    weighting: str = ...,
+    weighting: Literal['A', 'C', 'B', 'D', 'G', 'AU', '468', 'Z'] = ...,
     *,
     high_accuracy: bool = ...,
 ) -> Signal
@@ -331,7 +331,7 @@ weighting_filter(
 weighting_filter(
     x: list[float] | np.ndarray,
     fs: int,
-    weighting: str = ...,
+    weighting: Literal['A', 'C', 'B', 'D', 'G', 'AU', '468', 'Z'] = ...,
     *,
     high_accuracy: bool = ...,
 ) -> np.ndarray
@@ -355,7 +355,7 @@ Apply a frequency weighting to a signal.
 ```python
 WeightingFilter(
     fs: int,
-    weighting: str = 'A',
+    weighting: Literal['A', 'C', 'B', 'D', 'G', 'AU', '468', 'Z'] = 'A',
     *,
     stateful: bool = False,
     steady_ic: bool = False,

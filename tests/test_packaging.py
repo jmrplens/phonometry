@@ -174,8 +174,8 @@ def _tracked(paths: list[str], root: pathlib.Path = _ROOT) -> set[str]:
     about a repository built for the purpose.
     """
     # Fixed argv, paths from our own page
-    listed = subprocess.run(  # noqa: S603
-        ["git", "-C", str(root), "ls-files", "-z", "--", *paths],  # noqa: S607
+    listed = subprocess.run(
+        ["git", "-C", str(root), "ls-files", "-z", "--", *paths],
         capture_output=True,
         text=True,
         check=True,
@@ -186,8 +186,8 @@ def _tracked(paths: list[str], root: pathlib.Path = _ROOT) -> set[str]:
 def _git(root: pathlib.Path, *args: str) -> None:
     """Run one git command in *root*, for building a fixture repository."""
     # Fixed argv, arguments from this file
-    subprocess.run(  # noqa: S603
-        ["git", "-C", str(root), *args],  # noqa: S607
+    subprocess.run(
+        ["git", "-C", str(root), *args],
         capture_output=True,
         text=True,
         check=True,

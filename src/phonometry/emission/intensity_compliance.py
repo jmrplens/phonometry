@@ -65,7 +65,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -84,7 +84,11 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
+
+Device = Literal["probe", "processor", "instrument"]
 
 __all__ = [
     "IntensityInstrumentComplianceResult",
@@ -229,7 +233,7 @@ class ResidualIndexLimits(OwnsArrays):
 
 
 def residual_index_limits(
-    device: str = "instrument",
+    device: Device = "instrument",
     *,
     spacing_m: float = _REFERENCE_SPACING_M,
     frequencies: list[float] | np.ndarray | None = None,
@@ -338,7 +342,7 @@ def verify_intensity_class(
     residual_index: list[float] | np.ndarray,
     *,
     frequencies: list[float] | np.ndarray,
-    device: str = "instrument",
+    device: Device = "instrument",
     spacing_m: float = _REFERENCE_SPACING_M,
 ) -> IntensityInstrumentComplianceResult:
     r"""Verify a measured ``delta_pI0`` spectrum against IEC 61043:1993 Table 2.
@@ -431,7 +435,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
 
     frequencies: np.ndarray
     residual_index: np.ndarray
-    device: str
+    device: Device
     spacing_m: float
 
     def __post_init__(self) -> None:
@@ -529,6 +533,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         covered = set(np.asarray(self.frequencies, dtype=np.float64).tolist())
         full_range = covered.issuperset(_THIRD_OCTAVE_BANDS) or (
             self.device != "probe"
+            # A class number, as the standard numbers it.
             and self.overall_class == 2  # noqa: PLR2004
             and covered.issuperset(_OCTAVE_BANDS)
         )
@@ -626,7 +631,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the measured ``delta_pI0`` over the Table 2 class masks.
 
@@ -647,9 +652,9 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an IEC 61043 residual-index verification fiche to a PDF.
 

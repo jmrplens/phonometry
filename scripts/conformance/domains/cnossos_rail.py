@@ -25,6 +25,10 @@ from ..registry import Outcome, count, numeric, register
 
 if TYPE_CHECKING:
     from phonometry.environment import RailwayEmissionResult
+    from phonometry.environment.sources.cnossos_rail import (
+        BrakeCode,
+        RailRoughnessCode,
+    )
 
 _CNOSSOS_RAIL = "CNOSSOS-EU railway source (Directive 2002/49/EC Annex II)"
 
@@ -139,14 +143,19 @@ def _chk_cnossos_rail_workbook() -> Outcome:
 )
 def _chk_cnossos_rail_roughness_tables() -> Outcome:
     bad = 0
-    for brake, expected in (
+    brakes: tuple[tuple[BrakeCode, tuple[float, ...]], ...] = (
         ("c", ref.CNOSSOS_RAIL_G1A_CAST_IRON),
         ("k", ref.CNOSSOS_RAIL_G1A_COMPOSITE),
         ("n", ref.CNOSSOS_RAIL_G1A_NON_TREAD),
-    ):
+    )
+    for brake, expected in brakes:
         levels = ph.environment.wheel_roughness(brake).levels
         bad += sum(1 for a, b in zip(levels, expected, strict=True) if a != b)
-    for cls, expected in (("E", ref.CNOSSOS_RAIL_G1B_E), ("M", ref.CNOSSOS_RAIL_G1B_M)):
+    classes: tuple[tuple[RailRoughnessCode, tuple[float, ...]], ...] = (
+        ("E", ref.CNOSSOS_RAIL_G1B_E),
+        ("M", ref.CNOSSOS_RAIL_G1B_M),
+    )
+    for cls, expected in classes:
         levels = ph.environment.rail_roughness(cls).levels
         bad += sum(1 for a, b in zip(levels, expected, strict=True) if a != b)
     return count(

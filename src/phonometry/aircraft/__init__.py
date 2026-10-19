@@ -31,8 +31,8 @@ from .anp_fleet import (
 from .atmospheric_absorption import (
     AircraftBandAttenuation,
     ARP866AAttenuation,
-    arp866a_attenuation,
-    sae_band_attenuation,
+    attenuation_arp866a,
+    band_attenuation_arp5534,
 )
 from .certification import (
     NOY_BANDS_HZ,
@@ -63,7 +63,7 @@ from .measurement_system import (
     verify_aircraft_noise_system,
 )
 from .npd_atmosphere import (
-    SAE_AIR1845_ATTENUATION_DB_PER_100M,
+    AIR1845_ATTENUATION_DB_PER_100M,
     NPDAtmosphereIncrement,
     RevisedNPDCurves,
     npd_atmosphere_increment,
@@ -136,11 +136,11 @@ __all__ = [
     "RotorcraftHemisphere",
     "RotorcraftNoiseContourResult",
     "RotorcraftTrackState",
-    "SAE_AIR1845_ATTENUATION_DB_PER_100M",
+    "AIR1845_ATTENUATION_DB_PER_100M",
     "SpectralClass",
     "TerrainScreeningResult",
     "approach_profile",
-    "arp866a_attenuation",
+    "attenuation_arp866a",
     "atmospheric_adjustment",
     "departure_profile",
     "diffraction_attenuation",
@@ -171,7 +171,7 @@ __all__ = [
     "revise_npd_curves",
     "rotorcraft_event_level",
     "rotorcraft_noise_contour",
-    "sae_band_attenuation",
+    "band_attenuation_arp5534",
     "spherical_spreading_adjustment",
     "start_of_roll_directivity",
     "terrain_screening_adjustment",

@@ -120,12 +120,14 @@ from .._internal.validation import (
 from ..filters.weighting import weighting_filter
 from ..io._resolve import SignalInput, resolve_fs, resolve_samples
 from ..io._signal import Signal
-from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ..metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+
+    from .._i18n import Language
 
 __all__ = [
     "BS468_BALLISTICS",
@@ -156,7 +158,7 @@ DBQPS_REFERENCE_V = 0.775
 #: so that :attr:`QuasiPeakResult.level_unit` can name the scale a caller
 #: gets by reading a pressure record against 20 uPa, which is a quasi-peak
 #: sound pressure level and is not dBqps. The 20 uPa is ISO 1683:2015's.
-_P_REF = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_P_REF = REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 #: Carrier of the clause 2.1 and 2.2 stimuli, in Hz.
 _BURST_HZ = 5000.0
@@ -195,7 +197,7 @@ _BURST_TAIL_SECONDS = 0.5
 _WEIGHTING_TAIL_SECONDS = 0.005
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class QuasiPeakBallistics(RichDisplay):
     """Time constants of the quasi-peak chain, in seconds.
 
@@ -544,7 +546,7 @@ class QuasiPeakResult(OwnsArrays):
         return f"dB re {self.reference:g}"
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the quasi-peak trace over time, with the reading marked.
 
@@ -703,7 +705,7 @@ def _burst_percent(
     :param ballistics: The three time constants of the chain.
     :return: The reading, in percent of the steady 5 kHz reading.
     """
-    from ..signals.test_signals import tone_burst
+    from ..signals._test_signals import tone_burst
 
     burst = tone_burst(
         fs,

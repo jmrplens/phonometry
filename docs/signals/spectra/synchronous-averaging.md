@@ -32,7 +32,7 @@ periodic = (
     + 0.5 * np.cos(2.0 * np.pi * 3.0 * phase + 0.4)
     - 0.3 * np.cos(2.0 * np.pi * 6.0 * phase)
 )
-recording = periodic + signals.noise_signal(fs, phase.size / fs, rms=0.9, seed=11)
+recording = periodic + signals.noise_signal(fs, duration_s=phase.size / fs, rms=0.9, seed=11)
 res = signals.time_synchronous_average(recording, fs, period_s=period_s, n_averages=n_avg)
 
 fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(11, 4.6))

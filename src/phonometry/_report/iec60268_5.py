@@ -60,6 +60,7 @@ if TYPE_CHECKING:
     from matplotlib.projections.polar import PolarAxes
     from reportlab.graphics.shapes import Drawing
 
+    from .._i18n import Language
     from ..electroacoustics.loudspeaker import LoudspeakerCharacteristics
     from .metadata import ReportMetadata
 
@@ -75,7 +76,7 @@ _OHM = "&#937;"  # reportlab entity for the ohm sign
 _MAX_UNTHINNED_TICKLABELS = 6
 
 
-def _basis(metadata: ReportMetadata | None, language: str = "en") -> str:
+def _basis(metadata: ReportMetadata | None, language: Language = "en") -> str:
     """The standard-basis line: IEC 60268-5 with the IEC 60263 graph convention."""
     standard = metadata.measurement_standard if metadata is not None else None
     if standard:
@@ -93,7 +94,7 @@ def _basis(metadata: ReportMetadata | None, language: str = "en") -> str:
 
 
 def _metadata_pairs(
-    metadata: ReportMetadata, language: str = "en"
+    metadata: ReportMetadata, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Ordered (label, value) header pairs for the supplied loudspeaker fields."""
 
@@ -116,18 +117,18 @@ def _metadata_pairs(
     ]
 
 
-def _freq(value: float, language: str = "en") -> str:
+def _freq(value: float, language: Language = "en") -> str:
     """A frequency rounded to the nearest hertz, locale-formatted."""
     return format_number(round(float(value)), language, decimals=0)
 
 
-def _range_text(lo: float, hi: float, language: str = "en") -> str:
+def _range_text(lo: float, hi: float, language: Language = "en") -> str:
     """A frequency range ``lo - hi Hz`` with an en dash."""
     return f"{_freq(lo, language)}&#8211;{_freq(hi, language)} Hz"
 
 
 def _rated_rows(
-    result: LoudspeakerCharacteristics, language: str = "en"
+    result: LoudspeakerCharacteristics, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """The rated-characteristics table rows (only the quantities that exist)."""
     rows: list[tuple[str, str]] = [
@@ -199,7 +200,7 @@ def _rated_rows(
 # IEC 60263 characteristic graphs
 # --------------------------------------------------------------------------- #
 def _drawing_from_figure(
-    fig: Figure, target_width: float, language: str = "en"
+    fig: Figure, target_width: float, language: Language = "en"
 ) -> Drawing:
     """Convert a matplotlib figure to a scaled, vector reportlab ``Drawing``.
 
@@ -241,7 +242,7 @@ def _drawing_from_figure(
 
 
 def _response_drawing(
-    result: LoudspeakerCharacteristics, target_width: float, language: str = "en"
+    result: LoudspeakerCharacteristics, target_width: float, language: Language = "en"
 ) -> Drawing:
     """On-axis response with the tolerance band and effective-range markers.
 
@@ -269,7 +270,7 @@ def _response_drawing(
 
 
 def _secondary_drawing(
-    result: LoudspeakerCharacteristics, target_width: float, language: str = "en"
+    result: LoudspeakerCharacteristics, target_width: float, language: Language = "en"
 ) -> Drawing | None:
     """Impedance, THD and polar-directivity panels for the data supplied.
 
@@ -342,7 +343,7 @@ def _thin_freq_ticklabels(ax: Axes, keep_every: int = 2) -> None:
     )
 
 
-def _statement(result: LoudspeakerCharacteristics, language: str = "en") -> str:
+def _statement(result: LoudspeakerCharacteristics, language: Language = "en") -> str:
     """The boxed headline: characteristic sensitivity and effective range."""
     return t(
         "Characteristic sensitivity <b>{level} dB</b> (1 W / 1 m); "
@@ -355,7 +356,7 @@ def _statement(result: LoudspeakerCharacteristics, language: str = "en") -> str:
 
 
 def _verdict(
-    result: LoudspeakerCharacteristics, requirement: float, language: str = "en"
+    result: LoudspeakerCharacteristics, requirement: float, language: Language = "en"
 ) -> tuple[str, bool]:
     """Sensitivity verdict: the characteristic sensitivity level must reach it."""
     level = result.sensitivity_level
@@ -375,7 +376,7 @@ def render_iec60268_5_report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an IEC 60268-5 loudspeaker-characteristics fiche to a PDF at ``path``.
 

@@ -40,7 +40,7 @@ from __future__ import annotations
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -59,6 +59,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from .._i18n import Language
 
 __all__ = [
     "DuctModeResult",
@@ -124,7 +126,7 @@ class DuctModeResult(OwnsArrays):
     cut_on_no_flow: np.ndarray
     axial_wavenumber: np.ndarray
     mach: float
-    section: str
+    section: Literal["circular", "rectangular"]
     label: str
 
     def __post_init__(self) -> None:
@@ -169,7 +171,7 @@ class DuctModeResult(OwnsArrays):
         return float(np.min(self.cut_on))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the cut-on ladder, with and without flow, over the mode order.
 

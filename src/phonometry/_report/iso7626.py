@@ -41,6 +41,7 @@ from ._frf_fiche import frequency_range, frf_metadata_pairs, render_frf_fiche
 from ._i18n import format_number, t
 
 if TYPE_CHECKING:
+    from .._i18n import Language
     from ..vibration.structural._impact_mobility import ImpactMobilityResult
     from ..vibration.structural.mechanical_mobility import MobilityResult
     from .metadata import ReportMetadata
@@ -49,13 +50,13 @@ if TYPE_CHECKING:
 _MOBILITY_UNIT = "m/(N&#183;s)"
 
 
-def _kind(result: MobilityResult, language: str = "en") -> str:
+def _kind(result: MobilityResult, language: Language = "en") -> str:
     """The FRF-type phrase: driving-point (i = j) or transfer."""
     key = "driving-point" if result.driving_point else "transfer"
     return t(key, language)
 
 
-def _basis(result: MobilityResult, language: str = "en") -> str:
+def _basis(result: MobilityResult, language: Language = "en") -> str:
     """The standard-basis line naming the FRF type and the ISO 7626 parts."""
     return t(
         "Measurement of the {kind} mechanical mobility Y = v/F over frequency "
@@ -72,19 +73,21 @@ def _peak(result: MobilityResult) -> tuple[int, float, float]:
     return index, float(magnitude[index]), float(result.frequencies[index])
 
 
-def _sig(value: float, language: str = "en") -> str:
+def _sig(value: float, language: Language = "en") -> str:
     """A magnitude to three significant figures (mobility spans many decades)."""
     from ._i18n import decimal_comma
 
     return decimal_comma(f"{value:.3g}", language)
 
 
-def _deg(value_rad: float, language: str = "en") -> str:
+def _deg(value_rad: float, language: Language = "en") -> str:
     """A phase angle in degrees, to the nearest degree."""
     return format_number(np.degrees(value_rad), language, decimals=0)
 
 
-def _metric_rows(result: MobilityResult, language: str = "en") -> list[tuple[str, str]]:
+def _metric_rows(
+    result: MobilityResult, language: Language = "en"
+) -> list[tuple[str, str]]:
     """The characteristic points shown in the left-hand table.
 
     The FRF type, the measured frequency range, the peak (resonance for a
@@ -112,7 +115,7 @@ def _metric_rows(result: MobilityResult, language: str = "en") -> list[tuple[str
     ]
 
 
-def _statement(result: MobilityResult, language: str = "en") -> str:
+def _statement(result: MobilityResult, language: Language = "en") -> str:
     """The boxed representative value: the peak mobility and its frequency."""
     _, peak_mag, peak_freq = _peak(result)
     return t("Peak mobility |Y| = <b>{value} {unit}</b> at {freq} Hz", language).format(
@@ -122,7 +125,7 @@ def _statement(result: MobilityResult, language: str = "en") -> str:
     )
 
 
-def _extended_terms(result: MobilityResult, language: str = "en") -> list[str]:
+def _extended_terms(result: MobilityResult, language: Language = "en") -> list[str]:
     """The FRF type, the frequency range and the peak phase shown beside the box."""
     index, _, _ = _peak(result)
     phase = float(np.asarray(result.phase_rad, dtype=np.float64)[index])
@@ -143,7 +146,7 @@ def render_mobility_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 7626 mechanical-mobility fiche to a PDF at ``path``.
 
@@ -184,7 +187,7 @@ def render_mobility_report(
     )
 
 
-def _impact_basis(result: ImpactMobilityResult, language: str = "en") -> str:
+def _impact_basis(result: ImpactMobilityResult, language: Language = "en") -> str:
     """The standard-basis line of an impact measurement, naming ISO 7626-5."""
     kind = _kind(result.mobility_result, language)
     if result.n_impacts == 1:
@@ -202,7 +205,7 @@ def _impact_basis(result: ImpactMobilityResult, language: str = "en") -> str:
     ).format(kind=kind, n=result.n_impacts)
 
 
-def _window_reading(result: ImpactMobilityResult, language: str = "en") -> str:
+def _window_reading(result: ImpactMobilityResult, language: Language = "en") -> str:
     """The exponential window's decay rate, or the word for none."""
     if result.exponential_decay_rate_per_s > 0.0:
         return format_number(result.exponential_decay_rate_per_s, language, decimals=1)
@@ -210,7 +213,7 @@ def _window_reading(result: ImpactMobilityResult, language: str = "en") -> str:
 
 
 def _impact_rows(
-    result: ImpactMobilityResult, language: str = "en"
+    result: ImpactMobilityResult, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """The characteristic points of the mobility, then the impact specifics."""
     mobility = result.mobility_result
@@ -227,7 +230,9 @@ def _impact_rows(
     ]
 
 
-def _impact_extended(result: ImpactMobilityResult, language: str = "en") -> list[str]:
+def _impact_extended(
+    result: ImpactMobilityResult, language: Language = "en"
+) -> list[str]:
     """The extended terms, with the window's effect on the peaks stated."""
     terms = _extended_terms(result.mobility_result, language)
     if result.exponential_decay_rate_per_s > 0.0:
@@ -247,7 +252,7 @@ def render_impact_mobility_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render the ISO 7626 fiche for a mobility measured by impact (ISO 7626-5).
 

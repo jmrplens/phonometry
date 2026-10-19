@@ -219,7 +219,7 @@ plt.show()
 
 # A mano: ambas fuentes por posición arriba, la Ec. 11 abajo.
 corrected_st = st - res.background_correction
-corrected_rss = rss - res.background_correction_ref[0]
+corrected_rss = rss - res.reference_background_correction[0]
 x = np.arange(freqs.size)
 fig, (axt, axb) = plt.subplots(2, 1, figsize=(10, 8.4), sharex=True)
 for i, offset in enumerate(np.linspace(-0.27, 0.27, st.shape[0])):
@@ -307,11 +307,11 @@ cobertura y probabilidad.
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
 | `levels` | array 2D | dB | `(n, bandas)` | $L'_{pi(\mathrm{ST})}$ medidos, una fila por posición de micrófono, tres o cuatro posiciones (7.4.1) |
-| `levels_ref` | array 2D o 3D | dB | `(n, bandas)` o `(m, n, bandas)` | La fuente de referencia en las mismas posiciones, una rejilla por ubicación, corregida según su fabricante por velocidad, temperatura y presión pero no por ruido de fondo |
-| `lw_ref` | array 1D o 2D, o `ReferenceSourceCalibration` | dB | `(bandas,)` o `(m, bandas)` | $L_{W(\mathrm{RSS})}$ calibrada, por ubicación cuando cada una se calibró en su propia posición similar (Ec. 12); una [`ReferenceSourceCalibration`](/phonometry/es/devices/emission/free-field-qualification/) se suma de sus bandas de tercio de octava a las octavas de `frequencies` |
+| `reference_levels` | array 2D o 3D | dB | `(n, bandas)` o `(m, n, bandas)` | La fuente de referencia en las mismas posiciones, una rejilla por ubicación, corregida según su fabricante por velocidad, temperatura y presión pero no por ruido de fondo |
+| `reference_sound_power_levels` | array 1D o 2D, o `ReferenceSourceCalibration` | dB | `(bandas,)` o `(m, bandas)` | $L_{W(\mathrm{RSS})}$ calibrada, por ubicación cuando cada una se calibró en su propia posición similar (Ec. 12); una [`ReferenceSourceCalibration`](/phonometry/es/devices/emission/free-field-qualification/) se suma de sus bandas de tercio de octava a las octavas de `frequencies` |
 | `frequencies` | array 1D | Hz | octavas de 63 Hz a 8 kHz | Frecuencias centrales nominales de octava de la Tabla D.1; obligatorio. El apartado 3.11 fija el rango de uso general en 125 Hz a 8 kHz; la fila de 63 Hz de la Tabla D.1 lleva la nota a, que solo la admite donde el entorno de ensayo, la fuente sonora de referencia y la instrumentación sean satisfactorios en esa frecuencia |
 | `background_levels` | array 1D o 2D | dB | `(bandas,)` o `(n, bandas)` | $L_{pi(\mathrm{B})}$; un espectro sirve para todas las posiciones. `None` avisa y deja `background_requirement_met` a `False` en todas las bandas, porque el 7.5 lo mide en cada posición y el 8.1 necesita el margen |
-| `background_levels_ref` | array 1D o 2D | dB | mismas formas | Ruido de fondo de la lectura de la fuente de referencia; `None` reutiliza `background_levels` (7.5) |
+| `reference_background_levels` | array 1D o 2D | dB | mismas formas | Ruido de fondo de la lectura de la fuente de referencia; `None` reutiliza `background_levels` (7.5) |
 | `temperature_c` | float | °C | por defecto `23.0` | Temperatura del aire en el ensayo, para $C_2$ |
 | `static_pressure_kpa` | float | kPa | por defecto `101.325` | Presión estática en el ensayo, para $C_2$; véase `static_pressure_from_altitude` |
 | `conditions` | `GradeConditions` | | | Las dos condiciones que la Tabla 2 lee juntas: `excess_levels`, el $\Delta L_{f\mathrm{A}}$ en cada posición `(n,)` en decibelios (Anexo A), y `directivity_range`, la semiamplitud del barrido de directividad ponderado A en decibelios (7.2). Si falta cualquiera de las dos, la determinación se queda en grado de control |
@@ -322,10 +322,10 @@ La función devuelve un `InSituSoundPowerResult`: `sound_power_level`
 (Ec. 11 o 12, en las condiciones del ensayo), `mean_source_level` y
 `mean_reference_level` (Ec. 8, 9), `reference_levels` por ubicación
 (Ec. 10), `reference_power_level`, `background_correction` por posición y
-banda, `background_correction_ref` por ubicación, posición y banda,
+banda, `reference_background_correction` por ubicación, posición y banda,
 `background_requirement_met` y `upper_bound` por banda, `c2`, `grade`, `sigma_r0`,
 `sigma_omc_db`, `sigma_tot`, `expanded_uncertainty`, `coverage_factor`,
-`sound_power_level_a` y `quantity`. `sound_power_level_ref` suma `c2` al
+`sound_power_level_a` y `quantity`. `sound_power_level_at_reference_conditions` suma `c2` al
 nivel (sección 3).
 
 ## 2. Fuentes impulsivas: el nivel de energía acústica (Ec. 13 a 20)
@@ -405,7 +405,7 @@ $\sigma_\mathrm{omc}$ = 2,0 dB, $k$ = 2.
 | `event_levels` | array 3D o 2D | dB | `(n, N, bandas)` o `(n, bandas)` | $L'_{Ei,q(\mathrm{ST})}$ por suceso, o $L'_{Ei,N(\mathrm{ST})}$ de una medición sobre $N$ sucesos |
 | `n_events` | int | | $\ge 1$ | $N$ para la forma 2D (Ec. 17); debe ser `None` con la forma 3D. El apartado 7.6 pide al menos cinco sucesos, así que menos de cinco avisa y la determinación no es conforme, en cualquiera de las dos formas |
 | `integration_time` | float | s | $> 0$ | $T$ de la medición del suceso; `None` aplica la Ec. 14 tal como está impresa |
-| `levels_ref`, `lw_ref`, `frequencies`, `background_levels`, `background_levels_ref`, `temperature_c`, `static_pressure_kpa`, `excess_levels`, `directivity_range`, `sigma_omc_db`, `coverage_factor` | | | | Como en `sound_power_in_situ()` |
+| `reference_levels`, `reference_sound_power_levels`, `frequencies`, `background_levels`, `reference_background_levels`, `temperature_c`, `static_pressure_kpa`, `excess_levels`, `directivity_range`, `sigma_omc_db`, `coverage_factor` | | | | Como en `sound_power_in_situ()` |
 
 ## 3. Grado, incertidumbre y condiciones de referencia
 
@@ -469,7 +469,7 @@ fuentes, y estima la presión estática a partir de la altitud del
 emplazamiento cuando no se leyó ningún barómetro (Ec. C.2):
 $p_\mathrm{s} = p_{\mathrm{s},0}\,(1 - a H_\mathrm{a})^b$ con
 $a$ = 2,2560 × 10⁻⁵ m⁻¹ y $b$ = 5,2553. El resultado expone `c2` y las
-propiedades `sound_power_level_ref` y `sound_energy_level_ref` (Ec. C.1,
+propiedades `sound_power_level_at_reference_conditions` y `sound_energy_level_at_reference_conditions` (Ec. C.1,
 C.3); el total ponderado A en condiciones de referencia es
 `sound_power_level_a + c2`, ya que el desplazamiento es el mismo en todas
 las bandas. Un detalle del anexo conviene saberlo: $\theta_\mathrm{ref}$
@@ -487,7 +487,7 @@ high = emission.sound_power_in_situ(
     temperature_c=27.0, static_pressure_kpa=ps,
 )
 print(round(high.c2, 3))                            # 0.423 dB
-print(round(float(high.sound_power_level[3]), 2), round(float(high.sound_power_level_ref[3]), 2))
+print(round(float(high.sound_power_level[3]), 2), round(float(high.sound_power_level_at_reference_conditions[3]), 2))
 # 91.76 en las condiciones del ensayo, 92.18 en las condiciones de referencia (1 kHz)
 
 # Anexo A a lo largo de una línea de visión desde la fuente de referencia, ponderado A.

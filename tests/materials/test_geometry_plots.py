@@ -50,9 +50,11 @@ def _resonator() -> m.HelmholtzResonator:
 def _layers() -> list:
     medium = m.miki(FREQ, 20000.0)
     return [
-        m.MicroperforatedPlateLayer(0.001, 0.0002, 0.01),
-        m.AirLayer(0.03),
-        m.PorousLayer(0.05, medium),
+        m.MicroperforatedPlateLayer(
+            thickness_m=0.001, hole_radius=0.0002, open_area=0.01
+        ),
+        m.AirLayer(thickness_m=0.03),
+        m.PorousLayer(thickness_m=0.05, medium=medium),
     ]
 
 
@@ -119,8 +121,13 @@ def test_layered_result_retains_layers_and_draws() -> None:
 def test_single_layer_dataclasses_plot() -> None:
     for layer in _layers():
         assert layer.plot() is not None
-    assert m.MembraneLayer(0.5).plot() is not None
-    assert m.PerforatedPlateLayer(0.01, 0.005, 0.2).plot() is not None
+    assert m.MembraneLayer(surface_density=0.5).plot() is not None
+    assert (
+        m.PerforatedPlateLayer(
+            thickness_m=0.01, hole_radius=0.005, open_area=0.2
+        ).plot()
+        is not None
+    )
 
 
 def test_slit_result_retains_geometry_and_draws() -> None:

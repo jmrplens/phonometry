@@ -151,10 +151,14 @@ def _cnossos_road() -> ph.environment.RoadEmissionResult:
     return ph.environment.road_source_power(
         [
             ph.environment.RoadTraffic(
-                ph.environment.RoadVehicleCategory.LIGHT, 1200.0, 50.0
+                category=ph.environment.RoadVehicleCategory.LIGHT,
+                flow_rate=1200.0,
+                speed_kmh=50.0,
             ),
             ph.environment.RoadTraffic(
-                ph.environment.RoadVehicleCategory.HEAVY, 45.0, 50.0
+                category=ph.environment.RoadVehicleCategory.HEAVY,
+                flow_rate=45.0,
+                speed_kmh=50.0,
             ),
         ],
         surface=ph.environment.RoadSurface.THIN_LAYER_A,
@@ -295,10 +299,10 @@ def _turbine_levels() -> ph.environment.TurbineSoundLevels:
 def _turbine_levels_by_sector() -> ph.environment.TurbineSoundLevels:
     speeds, directions = [4.0, 5.0, 6.0, 4.0, 5.0, 6.0], [0.0] * 3 + [90.0] * 3
     total = ph.environment.bin_sound_levels(
-        [38.0, 40.0, 42.0, 36.0, 39.0, 41.0], speeds, directions
+        [38.0, 40.0, 42.0, 36.0, 39.0, 41.0], speeds, wind_directions_deg=directions
     )
     background = ph.environment.bin_sound_levels(
-        [33.0, 36.0, 40.0, 30.0, 32.0, 35.0], speeds, directions
+        [33.0, 36.0, 40.0, 30.0, 32.0, 35.0], speeds, wind_directions_deg=directions
     )
     return total.background_corrected(background)
 
@@ -480,9 +484,9 @@ def _pass_by_uncertainty() -> ph.environment.PassByUncertainty:
     return ph.environment.pass_by_uncertainty(
         55.0,
         [
-            ph.metrology.Quantity(0.0, 0.46, name="level linearity"),
-            ph.metrology.Quantity(0.0, 0.35, name="tripod"),
-            ph.metrology.Quantity(0.515, 0.30, name="ground level"),
+            ph.metrology.Quantity(value=0.0, uncertainty=0.46, name="level linearity"),
+            ph.metrology.Quantity(value=0.0, uncertainty=0.35, name="tripod"),
+            ph.metrology.Quantity(value=0.515, uncertainty=0.30, name="ground level"),
         ],
     )
 
@@ -495,14 +499,18 @@ def _porous_medium() -> ph.materials.PorousMediumResult:
 def _layered_absorber() -> ph.materials.LayeredAbsorberResult:
     f = np.linspace(400.0, 4000.0, 40)
     med = ph.materials.miki(f, 20000.0)
-    return ph.materials.layered_absorber(f, [ph.materials.PorousLayer(0.05, med)])
+    return ph.materials.layered_absorber(
+        f, [ph.materials.PorousLayer(thickness_m=0.05, medium=med)]
+    )
 
 
 def _diffuse_absorption() -> ph.materials.DiffuseFieldAbsorptionResult:
     f = np.linspace(400.0, 4000.0, 8)
     med = ph.materials.miki(f, 20000.0)
     return ph.materials.diffuse_field_absorption(
-        f, [ph.materials.PorousLayer(0.05, med)], n_quadrature_points=16
+        f,
+        [ph.materials.PorousLayer(thickness_m=0.05, medium=med)],
+        n_quadrature_points=16,
     )
 
 
@@ -526,9 +534,9 @@ def _impedance_tube() -> ph.materials.ImpedanceTubeResult:
 
 
 _MC_QUANTITIES = (
-    ph.metrology.Quantity(74.0, 0.0, name="Reading"),
+    ph.metrology.Quantity(value=74.0, uncertainty=0.0, name="Reading"),
     ph.metrology.rectangular(0.0, 0.20, name="Calibration"),
-    ph.metrology.Quantity(0.0, 0.35, dof=9, name="Position"),
+    ph.metrology.Quantity(value=0.0, uncertainty=0.35, dof=9, name="Position"),
 )
 
 
@@ -544,9 +552,15 @@ def _monte_carlo() -> ph.metrology.MonteCarloResult:
 
 def _exposure() -> ph.hearing.ExposureResult:
     tasks = [
-        ph.hearing.Task((86.4, 86.7, 87.0), 2.0, label="grinding"),
-        ph.hearing.Task((80.1, 80.9, 80.5), 3.0, label="welding"),
-        ph.hearing.Task((75.0, 74.6, 74.9), 3.0, label="assembly"),
+        ph.hearing.Task(
+            samples=(86.4, 86.7, 87.0), duration_hours=2.0, label="grinding"
+        ),
+        ph.hearing.Task(
+            samples=(80.1, 80.9, 80.5), duration_hours=3.0, label="welding"
+        ),
+        ph.hearing.Task(
+            samples=(75.0, 74.6, 74.9), duration_hours=3.0, label="assembly"
+        ),
     ]
     return ph.hearing.task_based_exposure(tasks)
 
@@ -1473,7 +1487,7 @@ def _effective_blocking_mass() -> ph.vibration.EffectiveBlockingMass:
     ones = np.ones(f.size, dtype=complex)
     return ph.vibration.effective_blocking_mass(
         frequencies=f,
-        force=m_eff * ones,
+        force_n=m_eff * ones,
         first_acceleration_m_s2=ones,
         second_acceleration_m_s2=ones,
         blocking_mass=20.0,
@@ -1920,8 +1934,12 @@ def _turbine_surface() -> ph.emission.TurbineMeasurementSurface:
     """IEC 61063: a turbine box and a generator box, as Figure 2 a draws them."""
     return ph.emission.turbine_measurement_surface(
         [
-            ph.emission.TurbineReferenceBox(5.0, 3.0, 3.0, "turbine"),
-            ph.emission.TurbineReferenceBox(6.0, 2.5, 2.5, "generator"),
+            ph.emission.TurbineReferenceBox(
+                length_m=5.0, width_m=3.0, height_m=3.0, label="turbine"
+            ),
+            ph.emission.TurbineReferenceBox(
+                length_m=6.0, width_m=2.5, height_m=2.5, label="generator"
+            ),
         ]
     )
 

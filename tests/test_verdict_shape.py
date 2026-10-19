@@ -240,7 +240,7 @@ def _resolve(annotation: object, owner: object) -> object:
     namespace.setdefault("NDArray", NDArray)
     try:
         # Annotations of our own source
-        return eval(annotation, {}, namespace)  # noqa: S307
+        return eval(annotation, {}, namespace)
     except (NameError, TypeError, SyntaxError):  # pragma: no cover - reported below
         return annotation
 
@@ -352,6 +352,25 @@ def test_no_public_name_is_collected_by_pytest() -> None:
     assert not offenders, (
         "pytest collects these from a user's test module; name them for what "
         "they answer:\n" + "\n".join(offenders)
+    )
+
+
+def test_no_public_module_is_named_like_a_test_file() -> None:
+    """A module a caller imports is never named ``test_*``.
+
+    pytest collects a file named ``test_*.py``, and the prefix tells a reader
+    it holds tests. A module that generates test signals is private
+    (``signals._test_signals``) and its package publishes what it holds.
+    """
+    offenders = sorted(
+        found.name
+        for found in pkgutil.walk_packages(phonometry.__path__, "phonometry.")
+        if not any(part.startswith("_") for part in found.name.split("."))
+        and found.name.rsplit(".", 1)[1].startswith("test")
+    )
+    assert not offenders, (
+        "a public module is named like a test file; make it private and "
+        "publish its names from the package:\n" + "\n".join(offenders)
     )
 
 
@@ -547,9 +566,9 @@ def _activity() -> object:
 
     phases = {
         "day": [
-            environment.NoisePhase(2.0, 0.0),
-            environment.NoisePhase(6.0, 50.0, kt=6.0, kf=3.0),
-            environment.NoisePhase(4.0, 48.0, kt=3.0, kf=3.0),
+            environment.NoisePhase(duration_hours=2.0, laeq=0.0),
+            environment.NoisePhase(duration_hours=6.0, laeq=50.0, kt=6.0, kf=3.0),
+            environment.NoisePhase(duration_hours=4.0, laeq=48.0, kt=3.0, kf=3.0),
         ]
     }
     return environment.assess_activity(

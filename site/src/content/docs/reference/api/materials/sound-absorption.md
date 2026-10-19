@@ -320,7 +320,7 @@ it by the specimen area `S` gives `alpha_s` (Eq. (9)).
 SoundAbsorptionMeasurement.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -349,9 +349,9 @@ SoundAbsorptionMeasurement.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

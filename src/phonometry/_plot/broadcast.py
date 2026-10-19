@@ -24,6 +24,7 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..broadcast._program_loudness import (
         KWeightingResponse,
         ProgramLoudnessResult,
@@ -60,7 +61,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -69,7 +70,7 @@ def plot_program_loudness(
     result: ProgramLoudnessResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """EBU Mode loudness over time (ITU-R BS.1770-5 / EBU R 128).
@@ -149,7 +150,7 @@ def plot_k_weighting_response(
     result: KWeightingResponse,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """K-weighting magnitude frequency response (ITU-R BS.1770-5 Annex 1).
@@ -209,7 +210,7 @@ def plot_quasi_peak(
     result: QuasiPeakResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Quasi-peak needle over the record (ITU-R BS.468-4 clause 2).

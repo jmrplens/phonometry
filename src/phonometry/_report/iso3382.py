@@ -68,6 +68,7 @@ from ._layout import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..room.acoustics import RoomAcousticsResult
     from .metadata import ReportMetadata
 
@@ -106,7 +107,9 @@ _MAX_ROOMY_ROWS = 8
 _THIRD_OCTAVE_FRACTION = 3
 
 
-def _cell(value: float, decimals: int, language: str, *, scale: float = 1.0) -> str:
+def _cell(
+    value: float, decimals: int, language: Language, *, scale: float = 1.0
+) -> str:
     """Format one table value, or an em dash when it is not finite.
 
     A non-finite parameter (evaluation range unreachable, or reaching below the
@@ -119,7 +122,7 @@ def _cell(value: float, decimals: int, language: str, *, scale: float = 1.0) -> 
     return format_number(v, language, decimals=decimals)
 
 
-def _fraction_label(frequency: np.ndarray | None, language: str) -> str:
+def _fraction_label(frequency: np.ndarray | None, language: Language) -> str:
     """Return the caption describing the analysis band set.
 
     Only a ``frequency is None`` result is a broadband analysis; a result that
@@ -153,7 +156,7 @@ def _band_label(exact_freq: float, fraction: int) -> str:
 
 
 def _metadata_pairs(
-    metadata: ReportMetadata, language: str = "en"
+    metadata: ReportMetadata, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the room-acoustics header grid.
 
@@ -191,7 +194,7 @@ def _metadata_pairs(
     return escaped_pairs(specs)
 
 
-def _parameter_table(result: RoomAcousticsResult, language: str = "en") -> Table:
+def _parameter_table(result: RoomAcousticsResult, language: Language = "en") -> Table:
     """Build the full-width per-band parameter table.
 
     Rows are the analysis bands (or a single ``Broadband`` row); the columns are
@@ -379,7 +382,7 @@ def _reverberation_descriptor(
 
 
 def _statement(
-    result: RoomAcousticsResult, language: str = "en"
+    result: RoomAcousticsResult, language: Language = "en"
 ) -> tuple[str, list[str]]:
     """The boxed reverberation-time descriptor and its extended EDT term.
 
@@ -454,7 +457,7 @@ def _statement(
 
 
 def _verdict(
-    result: RoomAcousticsResult, requirement: float, language: str = "en"
+    result: RoomAcousticsResult, requirement: float, language: Language = "en"
 ) -> tuple[str, bool] | None:
     """Verdict text and PASS flag for a supplied target reverberation time.
 
@@ -516,7 +519,7 @@ def render_iso3382_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a room-acoustics parameters fiche to a PDF at ``path``.
 

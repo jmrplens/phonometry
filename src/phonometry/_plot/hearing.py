@@ -26,6 +26,7 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..hearing._real_ear_attenuation import (
         AttenuationDifferenceResult,
         RealEarAttenuationResult,
@@ -168,7 +169,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -177,7 +178,7 @@ def plot_age_threshold(
     result: AgeThresholdResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Median age-related hearing threshold with the 10-90 % fractile band.
@@ -229,7 +230,7 @@ def plot_nipts(
     result: NIPTSResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Median NIPTS spectrum with the 10-90 % fractile band (ISO 1999).
@@ -296,7 +297,7 @@ def plot_htlan(
     result: HTLANResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Age, noise and combined hearing threshold components (ISO 1999, 6.1).
@@ -350,7 +351,7 @@ def plot_occupational_exposure(
     result: ExposureResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-task contributions to the daily exposure level (ISO 9612).
@@ -424,7 +425,7 @@ def plot_occupational_exposure(
 def plot_assumed_protection(
     result: AssumedProtectionResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Assumed protection values against the distribution they came from.
@@ -495,7 +496,7 @@ def plot_assumed_protection(
 def plot_hml_rating(
     result: HMLRatingResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The ``HML`` two-segment line, over the reference noises behind it.
@@ -564,7 +565,7 @@ def plot_hml_rating(
 def plot_snr_rating(
     result: SNRRatingResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The per-subject ratings the single number was reduced from.
@@ -622,7 +623,7 @@ def plot_snr_rating(
 def plot_protected_level(
     result: ProtectedLevelResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The A-weighted band levels the protector leaves at the ear.
@@ -690,7 +691,7 @@ def plot_real_ear_attenuation(
     result: RealEarAttenuationResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The mean attenuation of a protector, drawn as ISO 4869-1 Clause 6 l) asks.
@@ -762,7 +763,7 @@ def plot_attenuation_difference(
     result: AttenuationDifferenceResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""Each band's difference of the means against the criterion of Annex B.
@@ -843,7 +844,7 @@ def plot_reat_sound_field(
     result: REATSoundFieldCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The three sound-field conditions of ISO 4869-1 4.2.2, each on its limit.
@@ -938,7 +939,7 @@ def plot_active_insertion_loss(
     result: ActiveInsertionLossResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The mean active insertion loss of an ANR earmuff, ISO 4869-6 Annex A.
@@ -1002,7 +1003,7 @@ def plot_anr_total_attenuation(
     result: ANRTotalAttenuationResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The passive, active and total attenuation of an ANR earmuff, 5.5.
@@ -1091,7 +1092,7 @@ def plot_anr_linearity(
     result: ANRLinearityResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Every step at the ear against the 5 dB ± 1 dB of ISO 4869-6 5.4.4.

@@ -43,6 +43,10 @@ FreeOrDiffuseField = Literal["free", "diffuse"]
 #: coupler) or a free field.
 CalibrationField = Literal["pressure", "free"]
 
+#: The engine a ``report`` entry point draws its fiche with. ``"reportlab"``
+#: is the only one; the parameter is the seam a second engine would come in by.
+ReportEngine = Literal["reportlab"]
+
 #: The two weightings :data:`AOrZWeighting` accepts.
 A_OR_Z_WEIGHTINGS: tuple[AOrZWeighting, ...] = ("A", "Z")
 

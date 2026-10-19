@@ -13,7 +13,7 @@ the checks made around the measurement are in :mod:`figures.metrology`.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
@@ -44,6 +44,13 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
 
+#: The filter designs, weightings and time weightings these figures draw.
+_FilterType = Literal["butter", "cheby1", "cheby2", "ellip", "bessel"]
+_Weighting = Literal["A", "C", "Z"]
+_TimeWeighting = Literal["fast", "slow", "impulse"]
+_AnyWeighting = Literal["A", "B", "C", "D", "G", "AU", "468", "Z"]
+
+
 def generate_filter_type_comparison(output_dir: str) -> None:
     """Compare different filter architectures with a zoom inset."""
     print("Generating filter_type_comparison.png...")
@@ -54,7 +61,7 @@ def generate_filter_type_comparison(output_dir: str) -> None:
     # We want exactly the 1000Hz band
     limits = [800.0, 1200.0]
 
-    designs = [
+    designs: list[tuple[_FilterType, str, str, str]] = [
         ("butter", "Butterworth", COLOR_PRIMARY, "-"),
         ("cheby1", "Chebyshev I", COLOR_SECONDARY, "--"),
         ("cheby2", "Chebyshev II", COLOR_TERTIARY, ":"),
@@ -126,7 +133,7 @@ def generate_filter_responses(output_dir: str) -> None:
     fs = 48000
 
     # Filter types to generate
-    filter_types = [
+    filter_types: list[tuple[str, _FilterType]] = [
         ("butter", "butter"),
         ("cheby1", "cheby1"),
         ("cheby2", "cheby2"),
@@ -433,7 +440,7 @@ def generate_decomposition_plot(output_dir: str) -> None:
 def _draw_weighting_curves(
     ax: Axes,
     fs: int,
-    curves: tuple[tuple[str, str, str, str, float], ...],
+    curves: tuple[tuple[_AnyWeighting, str, str, str, float], ...],
     inset: Axes | None = None,
 ) -> None:
     """Draw ``(code, label, colour, linestyle, linewidth)`` curves measured at *fs*.
@@ -472,7 +479,7 @@ def generate_weighting_responses(output_dir: str) -> None:
     # The special B, D and AU curves have their own figure
     # (generate_special_weighting_responses); the infrasound G curve has
     # generate_g_weighting_response.
-    curves = (
+    curves: tuple[tuple[_AnyWeighting, str, str, str, float], ...] = (
         ("A", "A-Weighting", COLOR_PRIMARY, "-", 1.8),
         ("C", "C-Weighting", COLOR_SECONDARY, "-", 1.8),
         ("Z", "Z-Weighting (Flat)", COLOR_FG, "--", 1.8),
@@ -525,7 +532,7 @@ def generate_special_weighting_responses(output_dir: str) -> None:
     # A is drawn first, as a wide pale line, so it reads as the reference the
     # other three are described against: AU runs inside it up to 10 kHz and
     # then leaves, B stays above it, D crosses it at its 3.15 kHz hump.
-    curves = (
+    curves: tuple[tuple[_AnyWeighting, str, str, str, float], ...] = (
         ("A", "A-Weighting (reference)", COLOR_MUTED, "-", 4.0),
         ("B", "B-Weighting (historical)", COLOR_TERTIARY, "--", 1.8),
         ("D", "D-Weighting (aircraft, withdrawn)", "#9467bd", "-.", 1.8),
@@ -746,42 +753,47 @@ def generate_parametric_eq_family(output_dir: str) -> None:
 
     family = [
         (
-            filters.EQSection("peaking", 1000.0, gain_db=6.0, q=1.4),
+            filters.EQSection(filter_type="peaking", f0=1000.0, gain_db=6.0, q=1.4),
             "Peaking +6 dB ($Q$ = 1.4)",
             COLOR_PRIMARY,
             "-",
         ),
         (
-            filters.EQSection("lowshelf", 125.0, gain_db=6.0),
+            filters.EQSection(filter_type="lowshelf", f0=125.0, gain_db=6.0),
             "Low shelf +6 dB",
             COLOR_TERTIARY,
             "-",
         ),
         (
-            filters.EQSection("highshelf", 4000.0, gain_db=-6.0),
+            filters.EQSection(filter_type="highshelf", f0=4000.0, gain_db=-6.0),
             "High shelf −6 dB",
             "#9467bd",
             "-",
         ),
         (
-            filters.EQSection("lowpass", 10000.0),
+            filters.EQSection(filter_type="lowpass", f0=10000.0),
             "Low-pass ($Q$ = 0.707)",
             COLOR_SECONDARY,
             "--",
         ),
         (
-            filters.EQSection("highpass", 50.0),
+            filters.EQSection(filter_type="highpass", f0=50.0),
             "High-pass ($Q$ = 0.707)",
             "#8c564b",
             "--",
         ),
         (
-            filters.EQSection("bandpass", 500.0, q=2.0),
+            filters.EQSection(filter_type="bandpass", f0=500.0, q=2.0),
             "Band-pass ($Q$ = 2)",
             "#ff7f0e",
             "-.",
         ),
-        (filters.EQSection("notch", 2000.0, q=6.0), "Notch ($Q$ = 6)", "#17becf", "-."),
+        (
+            filters.EQSection(filter_type="notch", f0=2000.0, q=6.0),
+            "Notch ($Q$ = 6)",
+            "#17becf",
+            "-.",
+        ),
     ]
 
     _, ax = plt.subplots(figsize=(10, 6))
@@ -1026,7 +1038,7 @@ def generate_group_delay_comparison(output_dir: str) -> None:
     fs = 48000
     limits = [800.0, 1200.0]
 
-    designs = [
+    designs: list[tuple[_FilterType, str, str, str]] = [
         ("butter", "Butterworth", COLOR_PRIMARY, "-"),
         ("cheby1", "Chebyshev I", COLOR_SECONDARY, "--"),
         ("cheby2", "Chebyshev II", COLOR_TERTIARY, ":"),
@@ -1543,7 +1555,11 @@ def generate_weighting_class_mask(output_dir: str) -> None:
         drawstyle="steps-mid",
     )
 
-    for curve, colour, marker in (("A", COLOR_PRIMARY, "o"), ("C", "#9467bd", "s")):
+    verified: tuple[tuple[_Weighting, str, str], ...] = (
+        ("A", COLOR_PRIMARY, "o"),
+        ("C", "#9467bd", "s"),
+    )
+    for curve, colour, marker in verified:
         result = filters.verify_weighting_class(filters.WeightingFilter(48000, curve))
         f = np.array([b["frequency"] for b in result.bands])
         dev = np.array([b["deviation_db"] for b in result.bands])
@@ -1641,7 +1657,9 @@ def _slm_walkthrough_signals() -> tuple[int, np.ndarray, float]:
 
     fs = 48000
     calibrator = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(3 * fs) / fs)
-    recording = level_signals.noise_signal(fs, 10.0, color="pink", rms=0.02, seed=7)
+    recording = level_signals.noise_signal(
+        fs, duration_s=10.0, color="pink", rms=0.02, seed=7
+    )
     recording[4 * fs : 5 * fs] += (
         0.2 * np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
     )
@@ -2174,7 +2192,7 @@ def generate_ballistics_vs_duration(output_dir: str) -> None:
     }
 
     _, ax = plt.subplots(figsize=(10, 5.4))
-    modes = [
+    modes: list[tuple[_TimeWeighting, float | None, str, str]] = [
         ("fast", 0.125, COLOR_PRIMARY, "-"),
         ("slow", 1.0, COLOR_TERTIARY, "-"),
         ("impulse", None, COLOR_SECONDARY, "-"),
@@ -2218,7 +2236,8 @@ def generate_ballistics_vs_duration(output_dir: str) -> None:
 
     # The F/S gap at exactly 100 ms, measured rather than interpolated.
     at_100ms = {}
-    for mode in ("fast", "slow", "impulse"):
+    time_weightings: tuple[_TimeWeighting, ...] = ("fast", "slow", "impulse")
+    for mode in time_weightings:
         reference = steady[mode]
         burst = np.zeros_like(t)
         burst[start : start + int(0.1 * fs)] = tone[start : start + int(0.1 * fs)]
@@ -2291,14 +2310,14 @@ def generate_c_minus_a_spectrum(output_dir: str) -> None:
     t = np.arange(10 * fs) / fs
     rng = np.random.default_rng(1)
     rumble = 0.2 * np.sin(2 * np.pi * 50 * t) + 0.01 * rng.standard_normal(t.size)
-    pink = signals.noise_signal(fs, 10.0, color="pink", rms=0.02, seed=5)
+    pink = signals.noise_signal(fs, duration_s=10.0, color="pink", rms=0.02, seed=5)
 
     scenes = [
         ("A 50 Hz rumble under a light hiss", rumble),
         ("Broadband pink noise", pink),
     ]
     fig, axes = plt.subplots(1, 2, figsize=(12, 5.0), sharey=True)
-    curves = [
+    curves: list[tuple[_Weighting, str, str]] = [
         ("Z", COLOR_MUTED, "-"),
         ("C", COLOR_PRIMARY, "--"),
         ("A", COLOR_SECONDARY, ":"),
@@ -2486,9 +2505,9 @@ def generate_parametric_eq_cascade(output_dir: str) -> None:
     eq = filters.ParametricEQ(
         fs,
         [
-            filters.EQSection("lowshelf", 100.0, gain_db=4.0),
-            filters.EQSection("peaking", 1000.0, gain_db=-6.0, bw=1.0),
-            filters.EQSection("highshelf", 8000.0, gain_db=3.0),
+            filters.EQSection(filter_type="lowshelf", f0=100.0, gain_db=4.0),
+            filters.EQSection(filter_type="peaking", f0=1000.0, gain_db=-6.0, bw=1.0),
+            filters.EQSection(filter_type="highshelf", f0=8000.0, gain_db=3.0),
         ],
     )
     result = eq.response(f_min=20.0, f_max=20000.0)
@@ -2535,7 +2554,7 @@ def generate_architecture_tradeoff(output_dir: str) -> None:
     from scipy.signal import sosfreqz
 
     fs = 48000
-    names = ("butter", "cheby1", "cheby2", "ellip", "bessel")
+    names: tuple[_FilterType, ...] = ("butter", "cheby1", "cheby2", "ellip", "bessel")
     two_fm, four_fm, delays = [], [], []
     for ftype in names:
         bank = filters.OctaveFilterBank(
@@ -2620,7 +2639,7 @@ def generate_class_mask_architectures(output_dir: str) -> None:
     print("Generating class_mask_architectures.png...")
 
     fs = 48000
-    cases = (
+    cases: tuple[tuple[_FilterType, str], ...] = (
         ("butter", "Butterworth: passes"),
         ("cheby1", "Chebyshev I: passband ripple"),
         ("ellip", "Elliptic: ripple in both bands"),
@@ -2658,7 +2677,7 @@ def generate_leakage_floor(output_dir: str) -> None:
     # so the real floor and the filter's own skirt are within reach of each
     # other and the crossing is the point of the figure.
     tone = np.sqrt(2) * (2e-5 * 10 ** (100 / 20)) * np.sin(2 * np.pi * 1000 * t)
-    floor = signals.noise_signal(fs, 8.0, color="pink", rms=2.04e-3, seed=4)
+    floor = signals.noise_signal(fs, duration_s=8.0, color="pink", rms=2.04e-3, seed=4)
     x = tone + floor
 
     calibration = filters.LevelCalibration(factor=1.0)
@@ -2871,7 +2890,7 @@ def generate_survey_channel_average(output_dir: str) -> None:
     rng = np.random.default_rng(23)
     # Five positions in one room: the same source, a modal field below about
     # 300 Hz where the positions disagree, and a diffuse field above it.
-    base = signals.noise_signal(fs, 6.0, color="pink", rms=0.05, seed=1)
+    base = signals.noise_signal(fs, duration_s=6.0, color="pink", rms=0.05, seed=1)
     survey = []
     for _ in range(5):
         modal = np.zeros_like(base)

@@ -56,12 +56,13 @@ from ._layout import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..psychoacoustics.loudness.zwicker import ZwickerLoudness
     from .metadata import ReportMetadata
 
 
 def _metadata_pairs(
-    metadata: ReportMetadata, language: str = "en"
+    metadata: ReportMetadata, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the loudness header grid.
 
@@ -96,7 +97,7 @@ def _loudness_symbol(result: ZwickerLoudness) -> str:
 
 
 def _metric_rows(
-    result: ZwickerLoudness, language: str = "en"
+    result: ZwickerLoudness, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """The scalar loudness results shown in the left-hand metrics table.
 
@@ -126,7 +127,7 @@ def _metric_rows(
     return rows
 
 
-def _statement(result: ZwickerLoudness, language: str = "en") -> str:
+def _statement(result: ZwickerLoudness, language: Language = "en") -> str:
     """The boxed single-number statement ``N = X sone (LN = Y phon)``."""
     loudness = format_number(
         display_round(float(result.loudness)), language, decimals=1
@@ -139,7 +140,7 @@ def _statement(result: ZwickerLoudness, language: str = "en") -> str:
 
 
 def _verdict(
-    result: ZwickerLoudness, requirement: float, language: str = "en"
+    result: ZwickerLoudness, requirement: float, language: Language = "en"
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag: loudness passes at or below the requirement.
 
@@ -162,7 +163,7 @@ def _verdict(
 def _basis_line(
     result: ZwickerLoudness,
     metadata: ReportMetadata | None,
-    language: str,
+    language: Language,
 ) -> str:
     """The standard-basis line, with the clause 7 c)/d) mandatory items.
 
@@ -202,7 +203,7 @@ def render_iso532_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 532-1 Zwicker loudness fiche to a PDF at ``path``.
 
@@ -270,7 +271,7 @@ def render_iso532_report(
         # time function in sones". Full-width landscape N(t) trace with the
         # N5/N10 percentile levels marked.
         def _time_plot(
-            ax: Axes | None = None, language: str = "en", **kwargs: Any
+            ax: Axes | None = None, language: Language = "en", **kwargs: Any
         ) -> Axes:
             from .._plot.psychoacoustics import plot_zwicker_loudness_time
 

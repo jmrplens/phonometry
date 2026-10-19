@@ -58,7 +58,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -76,6 +76,18 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from ..._i18n import Language
+
+Guidance = Literal["nmfs-2024", "nmfs-2018", "southall-2019"]
+
+#: A marine-mammal hearing group, by the code its guidance version gives it:
+#: the seven of NMFS (2024), the MF group NMFS (2018) adds, and the five
+#: Southall et al. (2019) names otherwise. :func:`hearing_groups` says which
+#: codes one version uses.
+HearingGroup = Literal[
+    "LF", "MF", "HF", "VHF", "PW", "OW", "PA", "OA", "SI", "PCW", "OCW", "PCA", "OCA"
+]
+
 __all__ = [
     "WEIGHTING_GUIDANCE",
     "AuditoryWeightingResult",
@@ -90,7 +102,7 @@ __all__ = [
 ]
 
 #: Selectable guidance versions, most recent first.
-WEIGHTING_GUIDANCE = ("nmfs-2024", "nmfs-2018", "southall-2019")
+WEIGHTING_GUIDANCE: tuple[Guidance, ...] = ("nmfs-2024", "nmfs-2018", "southall-2019")
 
 
 @dataclass(frozen=True)
@@ -115,8 +127,8 @@ class WeightingParameters(RichDisplay):
         than borrowed from elsewhere.
     """
 
-    group: str
-    guidance: str
+    group: HearingGroup
+    guidance: Guidance
     description: str
     a: float
     b: float
@@ -131,8 +143,8 @@ class WeightingParameters(RichDisplay):
 
 
 def _row(
-    group: str,
-    guidance: str,
+    group: HearingGroup,
+    guidance: Guidance,
     description: str,
     a: float,
     b: float,
@@ -419,14 +431,14 @@ class ExposureCriteria(RichDisplay):
     """
 
     group: str
-    guidance: str
+    guidance: Guidance
     _: KW_ONLY
     impulsive: bool
     tts_sel: float | None
     injury_sel: float | None
     tts_peak_spl: float | None
     injury_peak_spl: float | None
-    injury_label: str
+    injury_label: Literal["PTS", "AUD INJ"]
     sel_reference: str
     peak_reference: str
     source: str
@@ -497,7 +509,14 @@ _CRITERIA_SOUTHALL_IMPULSIVE: dict[str, _CriteriaRow] = {
 }
 
 _CRITERIA: dict[
-    str, tuple[dict[str, _CriteriaRow], dict[str, _CriteriaRow], str, str, str]
+    Guidance,
+    tuple[
+        dict[str, _CriteriaRow],
+        dict[str, _CriteriaRow],
+        Literal["PTS", "AUD INJ"],
+        str,
+        str,
+    ],
 ] = {
     "nmfs-2018": (
         _CRITERIA_2018_CONTINUOUS,
@@ -523,7 +542,7 @@ _CRITERIA: dict[
 }
 
 
-def _check_guidance(guidance: str) -> str:
+def _check_guidance(guidance: str) -> Guidance:
     """Normalise and validate a guidance-version name.
 
     :param guidance: One of :data:`WEIGHTING_GUIDANCE` (case-insensitive,
@@ -532,13 +551,13 @@ def _check_guidance(guidance: str) -> str:
     :raises ValueError: If the version is unknown.
     """
     key = str(guidance).strip().lower().replace("_", "-")
-    if key not in _PARAMETERS:
+    if key not in WEIGHTING_GUIDANCE:
         msg = f"'guidance' must be one of {WEIGHTING_GUIDANCE}, got {guidance!r}."
         raise ValueError(msg)
     return key
 
 
-def hearing_groups(guidance: str = "nmfs-2024") -> tuple[str, ...]:
+def hearing_groups(guidance: Guidance = "nmfs-2024") -> tuple[str, ...]:
     """Hearing-group codes defined by a guidance version.
 
     :param guidance: One of :data:`WEIGHTING_GUIDANCE`.
@@ -549,7 +568,7 @@ def hearing_groups(guidance: str = "nmfs-2024") -> tuple[str, ...]:
 
 
 def weighting_parameters(
-    group: str, *, guidance: str = "nmfs-2024"
+    group: HearingGroup, *, guidance: Guidance = "nmfs-2024"
 ) -> WeightingParameters:
     """Weighting/exposure parameters of one hearing group.
 
@@ -603,8 +622,8 @@ class AuditoryWeightingResult(OwnsArrays):
     weighting: NDArray[np.float64]
     exposure_function: NDArray[np.float64]
     parameters: WeightingParameters
-    guidance: str
-    group: str
+    guidance: Guidance
+    group: HearingGroup
     weighted_tts_onset: float
 
     def __post_init__(self) -> None:
@@ -641,7 +660,7 @@ class AuditoryWeightingResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the weighting function versus frequency."""
         from ..._i18n import check_language
@@ -668,9 +687,9 @@ def _positive_frequencies(
 
 def auditory_weighting(
     frequency_hz: NDArray[np.float64] | list[float] | float,
-    group: str,
+    group: HearingGroup,
     *,
-    guidance: str = "nmfs-2024",
+    guidance: Guidance = "nmfs-2024",
 ) -> AuditoryWeightingResult:
     """Auditory weighting function ``W(f)`` of a marine-mammal hearing group.
 
@@ -697,7 +716,7 @@ def auditory_weighting(
 
 
 def exposure_criteria(
-    group: str, *, guidance: str = "nmfs-2024", impulsive: bool = False
+    group: HearingGroup, *, guidance: Guidance = "nmfs-2024", impulsive: bool = False
 ) -> ExposureCriteria:
     """Published TTS and injury onset criteria of a hearing group.
 
@@ -777,8 +796,8 @@ class WeightedExposureResult(OwnsArrays):
     peak_margin: float | None
     tts_peak_margin: float | None
     _: KW_ONLY
-    guidance: str
-    group: str
+    guidance: Guidance
+    group: HearingGroup
     impulsive: bool
 
     def __post_init__(self) -> None:
@@ -867,7 +886,7 @@ class WeightedExposureResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the unweighted and weighted band spectra with the criteria."""
         from ..._i18n import check_language
@@ -1051,10 +1070,10 @@ def _require_margins_restate(result: WeightedExposureResult) -> None:
 
 def weighted_exposure(
     band_sel: NDArray[np.float64] | list[float],
-    group: str,
+    group: HearingGroup,
     *,
     frequencies_hz: NDArray[np.float64] | list[float],
-    guidance: str = "nmfs-2024",
+    guidance: Guidance = "nmfs-2024",
     impulsive: bool = True,
     n_events: int = 1,
     peak_spl: float | None = None,

@@ -26,12 +26,17 @@ Annex B (folios 56 to 72).
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 import reference_data as ref
 
 import phonometry as ph
 
 from ..registry import Outcome, count, numeric, record, register
+
+if TYPE_CHECKING:
+    from phonometry.vibration.human.exposure import WeightingName
 
 _METER = "Human-vibration meter verification (ISO 8041-1)"
 
@@ -47,7 +52,7 @@ _TABLE_4_PRINTED = {
 
 #: Table 1: the reference frequency in hertz, and the weighted acceleration a
 #: conforming meter indicates there.
-_TABLE_1_PRINTED = {
+_TABLE_1_PRINTED: dict[WeightingName, tuple[float, float]] = {
     "Wb": (15.915, 0.8126),
     "Wd": (15.915, 0.1261),
     "Wh": (79.58, 2.020),
@@ -91,7 +96,7 @@ def _register_table_1() -> None:
         )(_check_frequency)
 
         def _check_indication(
-            weighting: str = weighting, printed: float = indication
+            weighting: WeightingName = weighting, printed: float = indication
         ) -> Outcome:
             computed = ph.vibration.reference_indication(weighting)
             return numeric(printed, computed, 1e-3, unit="m/s2", places=5, rel=True)
@@ -209,7 +214,7 @@ def _chk_low_frequency_indication() -> Outcome:
 
 
 def _deviating_measurement(
-    weighting: str, frequency_hz: float, percent: float
+    weighting: WeightingName, frequency_hz: float, percent: float
 ) -> list[float]:
     """A measured factor that deviates from the design goal by ``percent``."""
     design = float(
@@ -403,7 +408,9 @@ def _chk_peak_deviation_at_twelve_degrees() -> Outcome:
     )
 
 
-def _annex_b_design_phase_deg(weighting: str) -> tuple[np.ndarray, np.ndarray]:
+def _annex_b_design_phase_deg(
+    weighting: WeightingName,
+) -> tuple[np.ndarray, np.ndarray]:
     """The design-goal phase on the Annex B grid, as that annex prints it.
 
     The one-third-octave centres of Annex B are the exact ``10**(n/10)`` of
@@ -424,7 +431,7 @@ _PHASE_ROUNDING_DEG = 0.05
 
 #: The sampled Annex B phase cells, one per printed table: weighting, band
 #: number, and the phase the table prints in degrees.
-_ANNEX_B_PHASE_CELLS = (
+_ANNEX_B_PHASE_CELLS: tuple[tuple[WeightingName, int, float], ...] = (
     ("Wh", 22, -93.75),  # Table B.6, 158,5 Hz
     ("Wb", 0, 42.42),  # Table B.1, 1 Hz
     ("Wk", 12, -61.84),  # Table B.8, 15,85 Hz
@@ -440,7 +447,9 @@ def _register_annex_b_phase_cells() -> None:
         frequency = 10.0 ** (band / 10.0)
 
         def _check(
-            weighting: str = weighting, index: int = index, printed: float = printed
+            weighting: WeightingName = weighting,
+            index: int = index,
+            printed: float = printed,
         ) -> Outcome:
             _, design = _annex_b_design_phase_deg(weighting)
             return numeric(

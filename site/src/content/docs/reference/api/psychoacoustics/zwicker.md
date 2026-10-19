@@ -146,7 +146,7 @@ to state.
 ZwickerLoudness.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | np.ndarray
 ```
@@ -164,9 +164,9 @@ ZwickerLoudness.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

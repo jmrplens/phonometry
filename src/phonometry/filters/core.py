@@ -6,7 +6,7 @@ from __future__ import annotations
 import warnings
 from dataclasses import KW_ONLY, dataclass
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 from scipy import signal
@@ -32,7 +32,7 @@ from ..io._resolve import (
     resolve_samples,
 )
 from ..io._signal import Signal
-from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ..metrology.reference_values import REFERENCE_VALUES
 from ._warnings import FilterBankWarning
 from .design import _cheby2_headroom, _design_sos_filter
 from .frequencies import _genfreqs
@@ -40,6 +40,13 @@ from .frequencies import _genfreqs
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
+
+    from .._i18n import Language
+
+Mode = Literal["rms", "peak"]
+
+#: The two levels a band can report: the RMS and the peak.
+_LEVEL_MODES: tuple[Mode, ...] = ("rms", "peak")
 
 __all__ = [
     "BlockProcessing",
@@ -53,7 +60,7 @@ __all__ = [
 ]
 
 #: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
-_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_P0 = REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 
 #: Filter families the bank knows how to design (see ``OctaveFilterBank``).
@@ -186,7 +193,7 @@ class OctaveFilterResult(OwnsArrays):
         return self.bands
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the band levels against their band centres.
 
@@ -277,7 +284,7 @@ class OctaveSpectrogramResult(OwnsArrays):
         ax: Axes | None = None,
         *,
         channel: int | None = None,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Draw the levels as one raster over time and band centre, with a colour bar.
@@ -306,7 +313,7 @@ class OctaveSpectrogramResult(OwnsArrays):
         )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class FilterDesign(RichDisplay):
     """How the band-pass filters of a bank are designed.
 
@@ -340,14 +347,13 @@ class FilterDesign(RichDisplay):
         :func:`~phonometry.filters.verify_filter_class` grades those images.
     """
 
-    filter_type: str = "butter"
+    filter_type: Literal["butter", "cheby1", "cheby2", "ellip", "bessel"] = "butter"
     ripple: float = 0.1
     attenuation: float = 72.0
-    _: KW_ONLY
     resample: bool = True
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class LevelCalibration(RichDisplay):
     """How the energy in a band becomes a level reading.
 
@@ -359,7 +365,6 @@ class LevelCalibration(RichDisplay):
     """
 
     factor: float = 1.0
-    _: KW_ONLY
     dbfs: bool = False
 
 
@@ -437,6 +442,7 @@ def _validate_bank_design(
     msg = "Limits must be a list of two frequencies [f_min, f_max]."
     if not all(is_scalar(f) for f in limits):
         raise TypeError(msg)
+    # The length of a fixed-size argument, not a quantity.
     if len(limits) != 2:  # noqa: PLR2004
         raise ValueError(msg)
     if limits[0] <= 0 or limits[1] <= 0:
@@ -455,7 +461,7 @@ def _validate_bank_design(
     return limits
 
 
-def _require_level_mode(mode: str) -> str:
+def _require_level_mode(mode: str) -> Mode:
     """Check ``mode`` at the entry point the caller typed.
 
     ``_calculate_level`` inspects the mode band by band, after the filtering
@@ -472,7 +478,7 @@ def _require_level_mode(mode: str) -> str:
     if not isinstance(mode, str):
         msg = f"'mode' must be a string; got {type(mode).__name__}."
         raise TypeError(msg)
-    return require_choice(mode.lower(), "mode", ("rms", "peak"))
+    return require_choice(mode.lower(), "mode", _LEVEL_MODES)
 
 
 def _require_bank_input(x_proc: np.ndarray) -> None:
@@ -489,6 +495,7 @@ def _require_bank_input(x_proc: np.ndarray) -> None:
     :raises ValueError: for an array of more than two axes, or an input with
         no samples.
     """
+    # The number is a count of array axes, not a quantity.
     if x_proc.ndim > 2:  # noqa: PLR2004
         msg = (
             "'x' must be a 1-D signal or a 2-D [channels, samples] array; "
@@ -669,7 +676,7 @@ class OctaveFilterBank:
         x: Signal | list[float] | np.ndarray,
         *,
         sigbands: bool = False,
-        mode: str = "rms",
+        mode: Mode = "rms",
         detrend: bool = True,
         calculate_level: bool = True,
         nominal: bool = False,
@@ -791,7 +798,7 @@ class OctaveFilterBank:
         x: Signal | list[float] | np.ndarray,
         window_time: float = 0.125,
         overlap: float = 0.5,
-        mode: str = "rms",
+        mode: Mode = "rms",
         *,
         detrend: bool = True,
         zero_phase: bool = False,
@@ -883,7 +890,7 @@ class OctaveFilterBank:
         num_channels: int,
         *,
         sigbands: bool,
-        mode: str = "rms",
+        mode: Mode = "rms",
         calculate_level: bool = True,
         zero_phase: bool = False,
     ) -> tuple[np.ndarray | None, list[np.ndarray] | None]:
@@ -964,7 +971,7 @@ class OctaveFilterBank:
         # sosfilt supports axis=-1 by default
         return cast(np.ndarray, y)
 
-    def _calculate_level(self, y: np.ndarray, mode: str) -> float | np.ndarray:
+    def _calculate_level(self, y: np.ndarray, mode: Mode) -> float | np.ndarray:
         """Calculate the level (RMS or Peak) in dB."""
         if mode.lower() == "rms":
             # Use norm for better performance and reduced memory overhead
@@ -1052,7 +1059,7 @@ def octave_filter(
     *,
     sigbands: bool = False,
     detrend: bool = True,
-    mode: str = "rms",
+    mode: Mode = "rms",
     nominal: bool = False,
     design: FilterDesign = _DEFAULT_DESIGN,
     calibration: LevelCalibration = _DEFAULT_CALIBRATION,

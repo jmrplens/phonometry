@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import Literal
 
 import numpy as np
 import reference_data as ref
@@ -33,7 +34,13 @@ from phonometry.filters.compliance import (
 )
 from phonometry.filters.weighting import _runtime_frequency_response
 
-_FILTER_ARCHS = ["butter", "cheby1", "cheby2", "ellip", "bessel"]
+_FILTER_ARCHS: list[Literal["butter", "cheby1", "cheby2", "ellip", "bessel"]] = [
+    "butter",
+    "cheby1",
+    "cheby2",
+    "ellip",
+    "bessel",
+]
 
 
 @dataclass(frozen=True)
@@ -77,7 +84,9 @@ class WeightingDeviation:
     min_headroom: float
 
 
-def _filter_class(arch: str, fraction: float) -> FilterClass:
+def _filter_class(
+    arch: Literal["butter", "cheby1", "cheby2", "ellip", "bessel"], fraction: float
+) -> FilterClass:
     """IEC 61260-1 Table 1 class verification summary for one architecture.
 
     The pass/fail verdict and margins come from the library's
@@ -157,7 +166,9 @@ def _pass_edge(fraction: float) -> float:
     return float((10.0 ** (3.0 / 10.0)) ** (1.0 / (2.0 * fraction)))
 
 
-def _weighting_deviation(curve: str, fs: int) -> WeightingDeviation:
+def _weighting_deviation(
+    curve: Literal["A", "C", "B", "D", "G", "AU", "468", "Z"], fs: int
+) -> WeightingDeviation:
     """Weighting deviation vs the normative curve, informational maximum plus
     the binding-frequency compliance margin.
 

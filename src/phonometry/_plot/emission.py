@@ -39,6 +39,7 @@ if TYPE_CHECKING:
     from matplotlib.container import BarContainer
     from matplotlib.patches import Rectangle
 
+    from .._i18n import Language
     from ..emission._sound_power_anechoic import PrecisionSoundPowerResult
     from ..emission._sound_power_hard_walled import (
         HardWalledRoomCheck,
@@ -264,7 +265,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en", **fmt: Any) -> str:
+def _t(text: str, language: Language = "en", **fmt: Any) -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     s = _STRINGS.get(text, text) if language == "es" else text
     return s.format(**fmt) if fmt else s
@@ -273,7 +274,7 @@ def _t(text: str, language: str = "en", **fmt: Any) -> str:
 def plot_emission_pressure(
     result: EmissionPressureResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The reading, the two corrections taken off it, and what is left.
@@ -408,7 +409,7 @@ def plot_sound_power(
         | InDuctSoundPowerResult
     ),
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Sound power level spectrum with the A-weighted total annotated.
@@ -497,7 +498,7 @@ def plot_sound_power(
 def plot_sound_energy(
     result: SoundEnergyResult | ReverberationSoundEnergyResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""Sound energy level spectrum with the A-weighted total annotated.
@@ -557,7 +558,7 @@ def plot_sound_energy(
 def plot_in_situ_sound_power(
     result: InSituSoundPowerResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """In situ sound power (or energy) spectrum with the A-weighted total.
@@ -621,7 +622,7 @@ def plot_in_situ_sound_power(
 def plot_high_frequency_sound_power(
     result: HighFrequencySoundPowerResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""ISO 9295 band levels, with the mean room level they came from.
@@ -724,7 +725,10 @@ def plot_high_frequency_sound_power(
 
 
 def plot_intensity(
-    result: IntensityResult, ax: Axes | None = None, language: str = "en", **kwargs: Any
+    result: IntensityResult,
+    ax: Axes | None = None,
+    language: Language = "en",
+    **kwargs: Any,
 ) -> Axes:
     """Pressure vs intensity level per band with the pressure-intensity index.
 
@@ -799,7 +803,7 @@ def plot_field_indicators(
     ax: Axes | None = None,
     *,
     dynamic_capability: float | np.ndarray | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-band ISO 9614-1 field indicators against the dynamic capability.
@@ -911,7 +915,7 @@ def plot_field_indicators(
 def plot_vibration_sound_power(
     result: VibrationSoundPowerResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Radiated sound power level per band (ISO/TS 7849).
@@ -949,7 +953,7 @@ def plot_intensity_class(
     result: IntensityInstrumentComplianceResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Measured pressure-residual intensity index over the IEC 61043 masks.
@@ -1123,7 +1127,7 @@ def _plot_determined_spectrum(
     expanded: np.ndarray,
     total: float,
     labels: tuple[str, str, str, str, str],
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
 ) -> Axes:
     """The bar spectrum the ISO 3743 determinations share.
@@ -1182,7 +1186,7 @@ def _plot_determined_spectrum(
 def plot_hard_walled_sound_power(
     result: HardWalledSoundPowerResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""Sound power (or energy) spectrum in a hard-walled test room.
@@ -1235,7 +1239,7 @@ def plot_hard_walled_sound_power(
 def plot_special_room_sound_power(
     result: SpecialRoomSoundPowerResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Sound power spectrum in a special reverberation test room.
@@ -1283,7 +1287,7 @@ def plot_hard_walled_room_check(
     result: HardWalledRoomCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The spread between the orientations of 4.4 against Table 3.
@@ -1352,7 +1356,7 @@ def plot_source_location_plan(
     result: SourceLocationPlan,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The survey standard deviation per band against the class limits of the
@@ -1465,7 +1469,7 @@ def plot_special_room_reverberation(
     result: SpecialRoomReverberationCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The measured :math:`T/T_\mathrm{nom}` within the limiting curves of
@@ -1555,7 +1559,7 @@ def plot_special_room_surfaces(
     result: SpecialRoomSurfaceCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The absorption of each wall and of the ceiling within 0,5 to 1,5 times
@@ -1651,7 +1655,7 @@ def plot_special_room_suitability(
     result: SpecialRoomSuitabilityCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The difference between a reference source determined in the room and
@@ -1778,7 +1782,7 @@ def _turbine_boxes(surface: TurbineMeasurementSurface, ax: Axes, view: str) -> N
 
 
 def _turbine_positions(
-    array: TurbineMicrophoneArray, ax: Axes, view: str, language: str
+    array: TurbineMicrophoneArray, ax: Axes, view: str, language: Language
 ) -> None:
     """Draw the key positions as numbered crosses and the others as circles."""
     positions = np.asarray(array.positions_m)
@@ -1846,7 +1850,7 @@ def plot_turbine_layout(
     ax: Axes | None = None,
     *,
     view: str = "plan",
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The reference boxes, the measurement surface and the positions on it.
@@ -1925,7 +1929,7 @@ def plot_turbine_environmental_correction(
     *,
     passes: bool | None,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""Figure A.3 of IEC 61063 with one test environment on it.
@@ -2024,7 +2028,7 @@ def plot_turbine_sound_power(
     ax: Axes | None = None,
     *,
     position_labels: Sequence[str] | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The level at each position after Table 2, and the surface level.
@@ -2155,7 +2159,7 @@ def plot_turbine_noise_declaration(
     declaration: TurbineNoiseDeclaration,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The reported sound power level of each operating condition.
@@ -2237,7 +2241,7 @@ def plot_octave_band_levels(
     result: OctaveBandLevels,
     *,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Octave-band levels summed from one-third octaves (ISO 3741 Annex F).

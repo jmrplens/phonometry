@@ -75,6 +75,8 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -538,7 +540,7 @@ class SoundAbsorptionMeasurement(OwnsArrays):
         return self.absorption_area_with_specimen - self.absorption_area_empty
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the sound absorption coefficient ``alpha_s`` versus frequency.
 
@@ -563,9 +565,9 @@ class SoundAbsorptionMeasurement(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an ISO 354 sound-absorption test-report fiche to a PDF.
 

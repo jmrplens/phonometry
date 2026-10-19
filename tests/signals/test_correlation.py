@@ -32,7 +32,9 @@ N = 32768
 
 
 def _white(seed: int, rms: float = 1.0, n: int = N) -> np.ndarray:
-    return ph.signals.noise_signal(FS, n / FS, color="white", rms=rms, seed=seed)
+    return ph.signals.noise_signal(
+        FS, duration_s=n / FS, color="white", rms=rms, seed=seed
+    )
 
 
 def _bandlimited(seed: int, cutoff: float, n: int = N) -> np.ndarray:
@@ -108,7 +110,9 @@ def test_cross_correlation_peaks_at_the_imposed_delay() -> None:
     """B&P Eq. 5.21: R̂xy peaks at τ0 with ρ ≈ α·σx/σy (Eq. 5.22)."""
     delay = 40
     x = _white(2)
-    noise = ph.signals.noise_signal(FS, N / FS, color="white", rms=0.75, seed=3)
+    noise = ph.signals.noise_signal(
+        FS, duration_s=N / FS, color="white", rms=0.75, seed=3
+    )
     y = 0.5 * np.roll(x, delay) + noise
     res = ph.signals.correlation(x, y, FS, normalization="coefficient")
     peak = int(np.argmax(res.values))
@@ -262,8 +266,12 @@ def test_ml_weighting_suppresses_empty_bands_where_phat_jitters() -> None:
     observed through noisy sensors.
     """
     s = _bandlimited(11, 0.4 * FS)
-    noise_a = ph.signals.noise_signal(FS, N / FS, color="white", rms=0.1, seed=311)
-    noise_b = ph.signals.noise_signal(FS, N / FS, color="white", rms=0.1, seed=312)
+    noise_a = ph.signals.noise_signal(
+        FS, duration_s=N / FS, color="white", rms=0.1, seed=311
+    )
+    noise_b = ph.signals.noise_signal(
+        FS, duration_s=N / FS, color="white", rms=0.1, seed=312
+    )
     x = s + noise_a
     y = _fractional_delay(s, 12.25) + noise_b
     ml = ph.signals.time_delay(
@@ -364,8 +372,12 @@ def _two_detector_pair(
     """
     s = _bandlimited(2000 + seed, bandwidth, n=n)
     rms = float(np.sqrt(nsr) * np.std(s))
-    m = ph.signals.noise_signal(FS, n / FS, color="white", rms=rms, seed=4000 + seed)
-    nn = ph.signals.noise_signal(FS, n / FS, color="white", rms=rms, seed=6000 + seed)
+    m = ph.signals.noise_signal(
+        FS, duration_s=n / FS, color="white", rms=rms, seed=4000 + seed
+    )
+    nn = ph.signals.noise_signal(
+        FS, duration_s=n / FS, color="white", rms=rms, seed=6000 + seed
+    )
     return s + m, np.roll(s, delay) + nn
 
 

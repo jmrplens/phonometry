@@ -28,7 +28,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-import generate_llms as llms  # noqa: E402
+import generate_llms as llms
 
 
 def _runs_of(text: str) -> dict[str, list[str]]:

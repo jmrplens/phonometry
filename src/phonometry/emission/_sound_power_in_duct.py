@@ -115,6 +115,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
+
 __all__ = [
     "InDuctSoundPowerResult",
     "flow_modal_correction",
@@ -653,7 +655,7 @@ class InDuctSoundPowerResult(OwnsArrays):
     characteristic_impedance: float
     speed_of_sound: float
     flow_velocity: float
-    shield: str
+    shield: Literal["sampling-tube", "nose-cone", "foam-ball"]
     sound_power_level_a: float
 
     def __post_init__(self) -> None:
@@ -729,7 +731,7 @@ class InDuctSoundPowerResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot the in-duct sound power spectrum with the A-weighted total.
 
@@ -1094,6 +1096,7 @@ def _position_levels(levels: ArrayLike, n_bands: int) -> np.ndarray:
     if not np.all(np.isfinite(arr)):
         msg = "'levels' must contain only finite values."
         raise ValueError(msg)
+    # The number is a count of array axes, not a quantity.
     if arr.ndim == 2 and arr.shape[0] < _MIN_POSITIONS:  # noqa: PLR2004
         warnings.warn(
             f"Only {arr.shape[0]} microphone position(s) were supplied; "

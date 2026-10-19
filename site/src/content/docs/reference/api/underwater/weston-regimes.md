@@ -92,7 +92,7 @@ effective_depth(
     water_depth: float,
     frequency_hz: float,
     *,
-    seabed: str | WestonSeabed = 'sand',
+    seabed: Literal['sand', 'mud'] | WestonSeabed = 'sand',
     speed_of_sound: float = 1500.0,
 ) -> float
 ```
@@ -150,7 +150,7 @@ $\varepsilon = \beta_{\mathrm{sed}}/(40 \pi \log_{10} e)$
 
 ```python
 reflection_loss_gradient(
-    seabed: str | WestonSeabed = 'sand',
+    seabed: Literal['sand', 'mud'] | WestonSeabed = 'sand',
     *,
     frequency_hz: float | None = None,
 ) -> float
@@ -190,7 +190,7 @@ Eq. 9.45). Two branches:
 waveguide_cutoff_frequency(
     water_depth: float,
     *,
-    seabed: str | WestonSeabed = 'sand',
+    seabed: Literal['sand', 'mud'] | WestonSeabed = 'sand',
     speed_of_sound: float = 1500.0,
 ) -> float
 ```
@@ -226,7 +226,7 @@ weston_propagation_loss(
     frequency_hz: float,
     water_depth: float,
     *,
-    seabed: str | WestonSeabed = 'sand',
+    seabed: Literal['sand', 'mud'] | WestonSeabed = 'sand',
     speed_of_sound: float = 1500.0,
     source_depth: float | None = None,
     receiver_depth: float | None = None,
@@ -272,7 +272,7 @@ weston_regime_boundaries(
     frequency_hz: float,
     water_depth: float,
     *,
-    seabed: str | WestonSeabed = 'sand',
+    seabed: Literal['sand', 'mud'] | WestonSeabed = 'sand',
     speed_of_sound: float = 1500.0,
     critical_angle_deg: float | None = None,
     reflection_loss_gradient_value_np_per_rad: float | None = None,
@@ -378,7 +378,7 @@ ranges and the boundaries, so it is not a field.
 WestonPropagationResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -430,6 +430,7 @@ Range boundaries between Weston's four propagation regimes.
 
 ```python
 WestonSeabed(
+    *,
     name: str,
     grain_size: float,
     sound_speed_ratio: float,

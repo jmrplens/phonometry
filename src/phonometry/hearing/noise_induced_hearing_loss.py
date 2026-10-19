@@ -44,6 +44,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
 
 __all__ = [
@@ -263,7 +265,7 @@ class NIPTSResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the NIPTS spectrum with the fractile band over frequency.
 
@@ -280,9 +282,9 @@ class NIPTSResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a NIPTS hearing-loss prediction fiche to a PDF.
 
@@ -343,7 +345,7 @@ class HTLANResult(OwnsArrays):
     """
 
     age: float
-    sex: str
+    sex: Literal["male", "female"]
     l_ex: float
     exposure_duration_years: float
     fractile: float
@@ -417,7 +419,7 @@ class HTLANResult(OwnsArrays):
         require_finite_fields(self, "frequencies", "htla", "nipts", "threshold")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the age, noise and combined threshold components over frequency.
 
@@ -434,9 +436,9 @@ class HTLANResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         r"""Render an HTLAN hearing-threshold prediction fiche to a PDF.
 

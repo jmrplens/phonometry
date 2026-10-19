@@ -126,7 +126,7 @@ import math
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -148,6 +148,12 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from .._i18n import Language
+
+#: The three calibrations of the reference instrument a diffuse-field
+#: sensitivity is transferred from (Formulas (9), (10) and (11)).
+Route = Literal["random_incidence", "free", "pressure"]
 
 __all__ = [
     "IEC61183_TABLE_B1",
@@ -559,7 +565,7 @@ class DirectivityFactor(OwnsArrays):
     reference_level: float
     gamma: float
     largest_element_fraction: float
-    formula: str
+    formula: Literal["A.3", "A.4", "A.5"]
 
     def __post_init__(self) -> None:
         r"""Refuse columns that disagree or a value out of its range, and
@@ -623,8 +629,8 @@ class DirectivityFactor(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        view: str = "response",
-        language: str = "en",
+        view: Literal["response", "weights"] = "response",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         r"""Plot the directional response or the weight of each reading.
@@ -694,7 +700,7 @@ def _plane_readings(
 def _from_planes(
     levels: NDArray[np.float64],
     reference_level: float | None,
-    formula: str,
+    formula: Literal["A.3", "A.4", "A.5"],
 ) -> DirectivityFactor:
     """Formula (A.3) or (A.4) on a ``(planes, m)`` grid of readings.
 
@@ -991,8 +997,8 @@ class RandomIncidenceSensitivity(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        view: str = "levels",
-        language: str = "en",
+        view: Literal["levels", "correction"] = "levels",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         r"""Plot the sensitivity levels or the correction against frequency.
@@ -1126,7 +1132,7 @@ class DiffuseFieldSensitivity(OwnsArrays):
     reference_indicated_level: NDArray[np.float64]
     reference_sensitivity_level: NDArray[np.float64]
     reference_correction: NDArray[np.float64]
-    route: str
+    route: Route
 
     def __post_init__(self) -> None:
         """Refuse columns that disagree or an unknown route, and publish the
@@ -1190,7 +1196,7 @@ class DiffuseFieldSensitivity(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         r"""Plot :math:`G_\mathrm{D}`, :math:`\Delta G_\mathrm{D}` and
@@ -1277,7 +1283,7 @@ def diffuse_field_sensitivity(
         ``reference_indicated_level`` holds a text or a value that is not a real number.
     """
     frequencies = _frequency_axis(frequencies)
-    given = {
+    given: dict[Route, ArrayLike | None] = {
         "random_incidence": reference_random_incidence_level,
         "free": reference_free_field_level,
         "pressure": reference_pressure_level,

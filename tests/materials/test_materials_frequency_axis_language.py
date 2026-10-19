@@ -85,7 +85,9 @@ def _diffuse_field(language: str) -> Axes:
     # Drawn through the shared absorption-spectrum axes of the materials module.
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        result = diffuse_field_absorption(_FREQUENCIES, [PorousLayer(0.05, _medium())])
+        result = diffuse_field_absorption(
+            _FREQUENCIES, [PorousLayer(thickness_m=0.05, medium=_medium())]
+        )
     return result.plot(language=language)
 
 

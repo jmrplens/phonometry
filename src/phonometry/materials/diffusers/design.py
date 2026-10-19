@@ -77,6 +77,7 @@ from .scattering_diffusion import (
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
     from ..._internal.types import Real
 
 #: Complex-valued complex128 array alias (per-well reflection coefficients).
@@ -129,6 +130,7 @@ def _prime_generator(prime: int) -> int:
     if n != prime:
         msg = "'prime' must be an integer."
         raise ValueError(msg)
+    # The smallest odd prime a sequence is built on.
     if n < 3 or n % 2 == 0:  # noqa: PLR2004
         msg = "'prime' must be an odd prime >= 3."
         raise ValueError(msg)
@@ -297,7 +299,7 @@ class DiffuserPolarResponse(OwnsArrays):
         require_present(self, "well_width", "n_repetitions")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the predicted polar response with the diffusion coefficient annotated.
 
@@ -311,7 +313,7 @@ class DiffuserPolarResponse(OwnsArrays):
         return plot_diffuser_polar_response(self, ax=ax, language=language, **kwargs)
 
     def plot_geometry(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the well profile of the predicted surface to scale.
 

@@ -49,7 +49,7 @@ Read from BS EN 15461:2008+A1:2010, which is identical to EN
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -67,6 +67,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from ..._i18n import Language
+
+Direction = Literal["vertical", "lateral"]
 
 __all__ = [
     "TRACK_DECAY_DIRECTIONS",
@@ -181,6 +185,7 @@ def _response_magnitudes(responses: ArrayLike, band_count: int) -> NDArray[np.fl
     matrix = np.asarray(responses, dtype=np.float64)
     if matrix.ndim == 1:
         matrix = matrix[:, None]
+    # The number is a count of array axes, not a quantity.
     if matrix.ndim != 2 or matrix.shape[1] != band_count:  # noqa: PLR2004
         msg = "'responses' needs one row per position and one column per band."
         raise ValueError(msg)
@@ -254,7 +259,7 @@ class TrackDecayRate(OwnsArrays):
         taken from a report.
     """
 
-    direction: str
+    direction: Direction
     frequencies: NDArray[np.float64]
     decay_rates_db_per_m: NDArray[np.float64]
     distances: NDArray[np.float64] | None = None
@@ -360,7 +365,7 @@ class TrackDecayRate(OwnsArrays):
         ax: Axes | None = None,
         *,
         limit_db_per_m: Mapping[float, float] | None = None,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Draw the rates as EN 15461 9.2 presents them.
@@ -392,7 +397,7 @@ def track_decay_rate(
     frequencies: ArrayLike,
     distances: ArrayLike | None = None,
     sleeper_spacing_m: float = _DEFAULT_SLEEPER_SPACING_M,
-    direction: str = "vertical",
+    direction: Direction = "vertical",
 ) -> TrackDecayRate:
     r"""The decay rate of a rail from its responses along it (clause 7, Formula 1).
 

@@ -69,6 +69,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -177,7 +179,7 @@ _TABLE1_K = (
 )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class FlankingPath(RichDisplay):
     """One flanking transmission path (Ff, Df or Fd) of the simplified model.
 
@@ -204,7 +206,7 @@ class PathContribution(RichDisplay):
     """
 
     label: str
-    kind: str
+    kind: Literal["Dd", "Ff", "Df", "Fd"]
     r_w: float
     energy_fraction: float
 
@@ -257,7 +259,7 @@ class AirbornePredictionResult(RichDisplay):
         _check_finite(self.r_direct_w, "r_direct_w")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-path shares of the transmitted energy.
 
@@ -275,9 +277,9 @@ class AirbornePredictionResult(RichDisplay):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a predicted airborne insulation report to a PDF (EN 12354-1).
 
@@ -362,7 +364,7 @@ class ImpactPredictionResult(RichDisplay):
         _check_finite(self.k_correction, "k_correction")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the Formula 21 terms and the resulting ``L'n,w``.
 
@@ -380,9 +382,9 @@ class ImpactPredictionResult(RichDisplay):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a predicted impact insulation report to a PDF (EN 12354-2).
 

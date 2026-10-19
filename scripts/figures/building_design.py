@@ -10,6 +10,8 @@ standing on it. Everything here is embedded by a page under
 ``buildings/design/``.
 """
 
+from typing import Literal
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -253,7 +255,11 @@ def generate_masonry_wall_ties(output_dir: str) -> None:
     freq = np.logspace(np.log10(50.0), np.log10(5000.0), 200)
     stiffness1 = 150.0 * 2000.0**2 * 0.1**2 / 12.0
     stiffness2 = 170.0 * 2000.0**2 * 0.1**2 / 12.0
-    ties = ("butterfly", "double_triangle", "vertical_twist")
+    ties: tuple[Literal["butterfly", "double_triangle", "vertical_twist"], ...] = (
+        "butterfly",
+        "double_triangle",
+        "vertical_twist",
+    )
     colours = (COLOR_PRIMARY, COLOR_TERTIARY, COLOR_SECONDARY)
     for tie, colour in zip(ties, colours, strict=True):
         clf = building.wall_tie_coupling_loss_factor(

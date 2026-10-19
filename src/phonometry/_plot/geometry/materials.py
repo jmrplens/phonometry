@@ -17,7 +17,7 @@ dispatched by class name at runtime for the same reason.
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -52,6 +52,7 @@ if TYPE_CHECKING:
     from matplotlib.patches import Rectangle
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
     from ...materials.absorbers.four_microphone import TransferMatrix
     from ...materials.absorbers.impedance_tube import ImpedanceTubeResult
     from ...materials.absorbers.layered import (
@@ -70,6 +71,8 @@ if TYPE_CHECKING:
         MetadiffuserWell,
     )
     from ...materials.surfaces.road_absorption import InSituAbsorptionResult
+
+Shape = Literal["circular", "rectangular", "square"]
 
 #: Spanish translations of the fixed strings rendered here, keyed by their
 #: verbatim English text. ``_t`` returns the English key unchanged for any
@@ -108,7 +111,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Translate a fixed UI string to Spanish, else return it unchanged."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -199,7 +202,7 @@ def plot_absorber_stack(
     layers: Sequence[Layer] | Layer,
     *,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw a layered-absorber cross-section to scale, rigid backing at right.
@@ -346,7 +349,7 @@ def plot_helmholtz_resonator_geometry(
     resonator: HelmholtzResonator,
     *,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw a square-section Helmholtz resonator cross-section, to scale.
@@ -406,7 +409,7 @@ def plot_slit_absorber_geometry(
     slit_height_m: float,
     lattice_step_m: float,
     period_m: float,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw one period of the slit metamaterial absorber, to scale.
@@ -511,7 +514,7 @@ def plot_qrd_geometry(
     ax: Axes | None = None,
     n_repetitions: int = 1,
     fin_width: float | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw the well profile of a quadratic-residue diffuser, to scale.
@@ -643,7 +646,7 @@ def _tube_frequency_note(
     x: float,
     y: float,
     f_range: tuple[float, float],
-    language: str,
+    language: Language,
 ) -> None:
     """The plane-wave working range printed under a tube drawing."""
     from ..._i18n import format_number
@@ -667,9 +670,9 @@ def _tube_bore(
     x_left: float,
     x_right: float,
     bore: float,
-    language: str,
+    language: Language,
     *,
-    shape: str | None,
+    shape: Shape | None,
     diameter_known: bool,
     **kwargs: Any,
 ) -> Rectangle:
@@ -743,10 +746,10 @@ def plot_impedance_tube_geometry(
     spacing_m: float,
     x1: float,
     diameter_m: float | None = None,
-    shape: str | None = "circular",
+    shape: Shape | None = "circular",
     sample_thickness_m: float | None = None,
     speed_of_sound: float = 343.2,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw the ISO 10534-2 two-microphone tube to scale.
@@ -800,7 +803,7 @@ def plot_impedance_tube_geometry(
     lead_in = _SOURCE_MARGIN_DIAMETERS * bore
     x_left = -(x1 + lead_in)
     x_right = thickness + 0.35 * bore
-    emblem = "circular" if shape in (None, "circular") else "rectangular"
+    emblem: Shape = "circular" if shape in (None, "circular") else "rectangular"
     _tube_bore(
         ax,
         x_left,
@@ -863,9 +866,9 @@ def plot_transmission_tube_geometry(
     s2: float,
     thickness_m: float,
     diameter_m: float | None = None,
-    shape: str | None = "circular",
+    shape: Shape | None = "circular",
     speed_of_sound: float = 343.2,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw the ASTM E2611 four-microphone transmission tube to scale.
@@ -876,7 +879,7 @@ def plot_transmission_tube_geometry(
     (measured from the front face, the module's locked convention), and the
     changeable termination of the two-load method, with the ASTM working
     range of
-    :func:`~phonometry.materials.plane_wave_frequency_range_astm`.
+    :func:`~phonometry.materials.plane_wave_frequency_range_astm_e2611`.
 
     :param ax: Existing axes, or ``None`` to create a figure.
     :param l1: Front face to the nearer upstream microphone, in metres.
@@ -900,7 +903,9 @@ def plot_transmission_tube_geometry(
     """
     require_scalar(l2, "l2")
     require_scalar(thickness_m, "thickness_m")
-    from ...materials.absorbers.four_microphone import plane_wave_frequency_range_astm
+    from ...materials.absorbers.four_microphone import (
+        plane_wave_frequency_range_astm_e2611,
+    )
 
     _check_language(language)
     for name, value in (
@@ -923,7 +928,7 @@ def plot_transmission_tube_geometry(
     x_left = -(l1 + s1 + lead_in)
     x_term = l2 + s2 + 0.8 * bore
     x_right = x_term + 0.6 * bore
-    emblem = "circular" if shape in (None, "circular") else "rectangular"
+    emblem: Shape = "circular" if shape in (None, "circular") else "rectangular"
     _tube_bore(
         ax,
         x_left,
@@ -992,7 +997,7 @@ def plot_transmission_tube_geometry(
         (l2, y_dim - 4.0 * off),
         "l2 = " + _mm(l2, language),
     )
-    f_range = plane_wave_frequency_range_astm(
+    f_range = plane_wave_frequency_range_astm_e2611(
         max(s1, s2),
         speed_of_sound,
         diameter_m=diameter_m,
@@ -1012,7 +1017,7 @@ def plot_layered_absorber_geometry(
     result: LayeredAbsorberResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Stack drawing of the ``layers`` a result was solved for."""
@@ -1023,7 +1028,7 @@ def plot_slit_absorber_result_geometry(
     result: SlitResonatorAbsorberResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Slit-panel drawing of the geometry a result was predicted for."""
@@ -1085,7 +1090,7 @@ def plot_metadiffuser_panel_geometry(
     ax: Axes | None = None,
     depth_m: float,
     period_m: float,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw one period of a metadiffuser panel, to scale.
@@ -1116,6 +1121,7 @@ def plot_metadiffuser_panel_geometry(
     require_positive(depth_m, "depth_m")
     require_positive(period_m, "period_m")
     cells = list(wells)
+    # The fewest values the step below can work with, not a quantity.
     if len(cells) < 2:  # noqa: PLR2004
         msg = "'wells' must contain at least two wells."
         raise ValueError(msg)
@@ -1210,7 +1216,7 @@ def plot_metadiffuser_geometry(
     result: MetadiffuserResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Panel drawing of the geometry a metadiffuser result was predicted for."""
@@ -1228,7 +1234,7 @@ def plot_diffuser_geometry(
     result: DiffuserPolarResponse,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """QRD well profile for a polar response that retained its geometry."""
@@ -1253,7 +1259,7 @@ def plot_impedance_tube_result_geometry(
     result: ImpedanceTubeResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Tube drawing at the geometry an ISO 10534-2 result was reduced with."""
@@ -1272,7 +1278,7 @@ def plot_transfer_matrix_geometry(
     result: TransferMatrix,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Tube drawing for an ASTM E2611 matrix that retained its context."""
@@ -1312,7 +1318,7 @@ def plot_in_situ_geometry(
     source_height_m: float = 1.25,
     microphone_height_m: float = 0.25,
     sampled_radius: float | None = 1.34,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw the in-situ surface-absorption set-up to scale.
@@ -1431,7 +1437,7 @@ def plot_in_situ_result_geometry(
     result: InSituAbsorptionResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Set-up drawing at the heights a result was reduced with."""
@@ -1453,7 +1459,7 @@ def plot_dynamic_stiffness_rig(
     specimen_side: float = 0.2,
     specimen_thickness_m: float = 0.02,
     load_mass: float = 8.0,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw the dynamic-stiffness resonance rig to scale.
@@ -1550,7 +1556,7 @@ def plot_goniometer_geometry(
     receiver_radius: float = 5.0,
     angular_step: float = 5.0,
     sample_width: float = 0.6,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw the free-field diffusion goniometer in plan, to scale.

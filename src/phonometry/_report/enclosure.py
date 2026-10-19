@@ -50,11 +50,12 @@ from ._noise_control_fiche import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..noise_control.enclosures import EnclosureInsertionLossResult
     from .metadata import ReportMetadata
 
 
-def _basis(language: str = "en") -> str:
+def _basis(language: Language = "en") -> str:
     """The prediction-basis line naming the Bies enclosure insertion-loss model."""
     return t(
         "Predicted insertion loss of a machine enclosure, estimated from the "
@@ -66,7 +67,7 @@ def _basis(language: str = "en") -> str:
     )
 
 
-def _prediction_statement(language: str = "en") -> str:
+def _prediction_statement(language: Language = "en") -> str:
     """The prediction statement printed under the boxed insertion loss."""
     return t(
         "Predicted (estimated) result computed from the declared enclosure "
@@ -78,7 +79,7 @@ def _prediction_statement(language: str = "en") -> str:
     )
 
 
-def _caption(result: EnclosureInsertionLossResult, language: str = "en") -> str:
+def _caption(result: EnclosureInsertionLossResult, language: Language = "en") -> str:
     """The caption declaring the analysis band set above the table."""
     freqs = getattr(result, "frequencies", None)
     if freqs is None:
@@ -90,7 +91,7 @@ def _caption(result: EnclosureInsertionLossResult, language: str = "en") -> str:
 
 
 def _value_table(
-    result: EnclosureInsertionLossResult, *, verbose: bool, language: str = "en"
+    result: EnclosureInsertionLossResult, *, verbose: bool, language: Language = "en"
 ) -> Table:
     """Build the per-band table (nominal frequency, R, C, IL; verbose adds R_i).
 
@@ -139,7 +140,7 @@ def _value_table(
 
 
 def _statement(
-    result: EnclosureInsertionLossResult, language: str = "en"
+    result: EnclosureInsertionLossResult, language: Language = "en"
 ) -> tuple[float, str, list[str]]:
     """The boxed mean insertion loss and its extended enclosure terms."""
     mean_il = mean_finite(result.insertion_loss)
@@ -167,7 +168,7 @@ def _statement(
     return mean_il, statement, extended
 
 
-def _basis_strip(language: str = "en") -> str:
+def _basis_strip(language: Language = "en") -> str:
     """The IL = R - C relation line for the method-basis strip."""
     return t(
         "IL = R - C with the interior build-up correction "
@@ -186,7 +187,7 @@ def render_enclosure_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a machine-enclosure insertion-loss fiche to a PDF at ``path``.
 

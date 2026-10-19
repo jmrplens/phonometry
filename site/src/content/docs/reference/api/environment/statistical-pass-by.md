@@ -149,8 +149,8 @@ pass_by_regression(
     speeds_kmh: ArrayLike,
     max_levels: ArrayLike,
     *,
-    vehicle_category: str,
-    road_speed_category: str,
+    vehicle_category: Literal['1', '2a', '2b'],
+    road_speed_category: Literal['low', 'medium', 'high'],
 ) -> PassByRegression
 ```
 
@@ -190,8 +190,8 @@ stay on the result.
 
 ```python
 PassByRegression(
-    vehicle_category: str,
-    road_speed_category: str,
+    vehicle_category: Literal['1', '2a', '2b'],
+    road_speed_category: Literal['low', 'medium', 'high'],
     speeds_kmh: NDArray[np.float64],
     max_levels: NDArray[np.float64],
     reference_speed_kmh: float,
@@ -281,7 +281,7 @@ How many pass-bys the line was fitted through.
 PassByRegression.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -422,7 +422,7 @@ statistical_pass_by(
     speeds_kmh: ArrayLike,
     max_levels: ArrayLike,
     *,
-    road_speed_category: str,
+    road_speed_category: Literal['low', 'medium', 'high'],
     corrected_vehicle_sound_levels: Mapping[str, float] | None = None,
     reference_levels: float | Mapping[str, float] | None = None,
     weighting_factors: Mapping[str, float] | None = None,
@@ -471,7 +471,7 @@ speed windows are judged, kept on the result and emitted as
 statistical_pass_by_index(
     vehicle_sound_levels: Mapping[str, float],
     *,
-    road_speed_category: str,
+    road_speed_category: Literal['low', 'medium', 'high'],
     weighting_factors: Mapping[str, float] | None = None,
 ) -> float
 ```
@@ -517,7 +517,7 @@ before calling this.
 
 ```python
 StatisticalPassByResult(
-    road_speed_category: str,
+    road_speed_category: Literal['low', 'medium', 'high'],
     regressions: Mapping[str, PassByRegression],
     weighting_factors: Mapping[str, float],
     vehicle_sound_levels: Mapping[str, float],
@@ -605,7 +605,7 @@ Dual-axle and multi-axle heavy vehicles together, as 7.3 counts them.
 StatisticalPassByResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

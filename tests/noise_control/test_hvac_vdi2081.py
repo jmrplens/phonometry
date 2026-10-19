@@ -859,7 +859,7 @@ def test_the_assessment_curve_is_the_inverse_a_weighting_less_five() -> None:
     spectrum flat in A-weighted terms would earn 9 dB; 5 is taken because the
     noise of an air-conditioning system does not follow the inverse A curve.
     """
-    assert hvac.VDI2081_SPECTRAL_CORRECTION == pytest.approx(PRINTED_KA_DB, abs=1e-9)
+    assert hvac.SPECTRAL_CORRECTION == pytest.approx(PRINTED_KA_DB, abs=1e-9)
     inverse = -np.array(PRINTED_A_WEIGHTING_DB) - 5.0
     assert np.round(inverse) == pytest.approx(PRINTED_KA_DB, abs=1e-9)
 

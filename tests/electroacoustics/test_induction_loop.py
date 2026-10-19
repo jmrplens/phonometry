@@ -406,7 +406,8 @@ def test_measurement_points_refuse_an_unknown_layout() -> None:
 def test_background_noise_categories_at_the_boundaries(
     worst_db: float,
     category: str,
-    report: bool,  # noqa: FBT001
+    *,
+    report: bool,
 ) -> None:
     result = ea.assess_background_noise([-60.0, worst_db, -55.0])
     assert result.category == category

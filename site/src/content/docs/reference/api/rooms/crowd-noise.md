@@ -224,7 +224,7 @@ Self-generated noise of an occupied room versus occupancy and absorption.
 CrowdNoiseResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

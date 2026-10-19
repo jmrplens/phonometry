@@ -51,6 +51,7 @@ if TYPE_CHECKING:
     from mpl_toolkits.mplot3d.axes3d import Axes3D
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
     from ...emission.intensity import IntensityResult
 
 #: Luma threshold above which a point-index chip is light enough to carry
@@ -78,7 +79,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Translate a fixed UI string to Spanish, else return it unchanged."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -155,7 +156,7 @@ def plot_microphone_positions(
     *,
     ax: Axes3D | None = None,
     radius: float | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes3D:
     """Draw a microphone position array on its measurement surface, in 3-D.
@@ -182,6 +183,7 @@ def plot_microphone_positions(
 
     _check_language(language)
     pts = np.asarray(positions, dtype=np.float64)
+    # The number is a count of array axes, not a quantity.
     if pts.ndim != 2 or pts.shape[1] != 3 or pts.shape[0] == 0:  # noqa: PLR2004
         msg = "'positions' must have shape (N, 3) with N >= 1."
         raise ValueError(msg)
@@ -280,7 +282,7 @@ def plot_pp_probe_geometry(
     spacing_m: float = 0.012,
     *,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw the face-to-face p-p intensity probe to scale.
@@ -375,7 +377,7 @@ def plot_intensity_result_geometry(
     result: IntensityResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Probe drawing for a result, from the spacer it keeps."""

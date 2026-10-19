@@ -56,6 +56,7 @@ from ._sound_power_fiche import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..noise_control.enclosures import EnclosureInsertionLossResult
     from ..noise_control.hvac import HVACSpectrumResult
     from ..noise_control.silencers import ReactiveSilencerResult
@@ -102,7 +103,7 @@ def performance_verdict(
     *,
     higher_is_better: bool,
     unit: str = "dB",
-    language: str = "en",
+    language: Language = "en",
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag for a performance figure against a requirement.
 
@@ -146,7 +147,7 @@ def render_noise_control_fiche(
     extended: list[str],
     basis_strips: list[str],
     metadata: ReportMetadata | None,
-    language: str,
+    language: Language,
     prediction_statement: str,
     verdict: tuple[str, bool] | None = None,
 ) -> str:

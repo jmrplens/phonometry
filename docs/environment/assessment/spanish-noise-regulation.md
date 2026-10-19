@@ -105,9 +105,9 @@ from phonometry import environment
 environment.RD1367_PERIOD_CLOCK_LIMITS["day"]     # (7, 19)
 environment.RD1367_PERIOD_HOURS["day"]            # 12.0 h
 
-day = [environment.NoisePhase(2, 0.0, label="cerrada"),
-       environment.NoisePhase(6, 50.0, kt=6, kf=3),
-       environment.NoisePhase(4, 48.0, kt=3, kf=3)]
+day = [environment.NoisePhase(duration_hours=2, laeq=0.0, label="cerrada"),
+       environment.NoisePhase(duration_hours=6, laeq=50.0, kt=6, kf=3),
+       environment.NoisePhase(duration_hours=4, laeq=48.0, kt=3, kf=3)]
 
 lkeq_d = environment.evaluation_period_level(day)   # 56.82 dB, unrounded
 environment.round_reported_level(lkeq_d)            # 57 dB
@@ -185,11 +185,11 @@ $L_{\mathrm{K},x}$:
 ```python
 from phonometry import environment
 
-day = [environment.NoisePhase(2, 0.0, label="cerrada"),
-       environment.NoisePhase(6, 50.0, kt=6, kf=3),
-       environment.NoisePhase(4, 48.0, kt=3, kf=3)]
-evening = [environment.NoisePhase(2, 48.0, kt=3, kf=3),
-           environment.NoisePhase(2, 0.0, label="cerrada")]
+day = [environment.NoisePhase(duration_hours=2, laeq=0.0, label="cerrada"),
+       environment.NoisePhase(duration_hours=6, laeq=50.0, kt=6, kf=3),
+       environment.NoisePhase(duration_hours=4, laeq=48.0, kt=3, kf=3)]
+evening = [environment.NoisePhase(duration_hours=2, laeq=48.0, kt=3, kf=3),
+           environment.NoisePhase(duration_hours=2, laeq=0.0, label="cerrada")]
 
 limits = environment.activity_limits("a")          # 55 / 55 / 45 dB
 verdict = environment.assess_activity(
@@ -209,11 +209,11 @@ verdict.passes                         # False: LK,d exceeds 55 dB
 import matplotlib.pyplot as plt
 from phonometry import environment
 
-day = [environment.NoisePhase(2, 0.0, label="cerrada"),
-       environment.NoisePhase(6, 50.0, kt=6, kf=3),
-       environment.NoisePhase(4, 48.0, kt=3, kf=3)]
-evening = [environment.NoisePhase(2, 48.0, kt=3, kf=3),
-           environment.NoisePhase(2, 0.0, label="cerrada")]
+day = [environment.NoisePhase(duration_hours=2, laeq=0.0, label="cerrada"),
+       environment.NoisePhase(duration_hours=6, laeq=50.0, kt=6, kf=3),
+       environment.NoisePhase(duration_hours=4, laeq=48.0, kt=3, kf=3)]
+evening = [environment.NoisePhase(duration_hours=2, laeq=48.0, kt=3, kf=3),
+           environment.NoisePhase(duration_hours=2, laeq=0.0, label="cerrada")]
 
 verdict = environment.assess_activity(
     {"day": day, "evening": evening},
@@ -251,11 +251,11 @@ the language of the regulation; `language="en"` translates it.
 from phonometry import environment
 
 verdict = environment.assess_activity(
-    {"day": [environment.NoisePhase(2, 0.0, label="cerrada"),
-             environment.NoisePhase(6, 50.0, kt=6, kf=3),
-             environment.NoisePhase(4, 48.0, kt=3, kf=3)],
-     "evening": [environment.NoisePhase(2, 48.0, kt=3, kf=3),
-                 environment.NoisePhase(2, 0.0, label="cerrada")]},
+    {"day": [environment.NoisePhase(duration_hours=2, laeq=0.0, label="cerrada"),
+             environment.NoisePhase(duration_hours=6, laeq=50.0, kt=6, kf=3),
+             environment.NoisePhase(duration_hours=4, laeq=48.0, kt=3, kf=3)],
+     "evening": [environment.NoisePhase(duration_hours=2, laeq=48.0, kt=3, kf=3),
+                 environment.NoisePhase(duration_hours=2, laeq=0.0, label="cerrada")]},
     environment.activity_limits("a"),
     operating_days=303,
 )

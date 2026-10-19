@@ -169,7 +169,7 @@ $L' - L_\mathrm{b}$, in dB, in the shape of the readings.
 BackgroundCorrectedLevel.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -243,7 +243,7 @@ FloorCoveringImprovementResult.octave_bands() -> OctaveBandSpectrum
 FloorCoveringImprovementResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -260,9 +260,9 @@ FloorCoveringImprovementResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -351,7 +351,7 @@ improvement_octave_bands(
     improvement: Sequence[float] | np.ndarray,
     *,
     frequencies: Sequence[float] | np.ndarray,
-    quantity: str = 'ΔL',
+    quantity: Literal['ΔL', 'ΔR', 'Rs', 'LI', 'LI,norm'] = 'ΔL',
 ) -> OctaveBandSpectrum
 ```
 
@@ -384,7 +384,7 @@ each octave.
 OctaveBandSpectrum(
     frequencies: np.ndarray,
     values: np.ndarray,
-    quantity: str,
+    quantity: Literal['ΔL', 'ΔR', 'Rs', 'LI', 'LI,norm'],
 )
 ```
 
@@ -410,7 +410,7 @@ read as the other, and the quantity they are values of.
 OctaveBandSpectrum.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

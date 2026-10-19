@@ -24,7 +24,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -47,6 +47,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
 
 __all__ = [
@@ -769,7 +771,7 @@ class EPNLResult(OwnsArrays):
             raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the PNL and PNLT time histories with PNLTM and the 10 dB-down band."""
         from .._i18n import check_language
@@ -782,9 +784,9 @@ class EPNLResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an ICAO Annex 16 EPNL certification fiche to a PDF.
 
@@ -838,7 +840,7 @@ def effective_perceived_noise_level(
     dt: float | NDArray[np.float64] | list[float] = 0.5,
     *,
     reference_time: float = _EPNL_REFERENCE_TIME,
-    procedure: str = "airplane",
+    procedure: Literal["airplane", "helicopter"] = "airplane",
 ) -> EPNLResult:
     r"""Effective Perceived Noise Level from a spectral time history (ICAO Annex 16).
 
@@ -860,6 +862,7 @@ def effective_perceived_noise_level(
         ``procedure`` is not ``"airplane"`` or ``"helicopter"``.
     """
     arr = np.asarray(spectra, dtype=np.float64)
+    # The number is a count of array axes, not a quantity.
     if arr.ndim != 2 or arr.shape[1] != NOY_BANDS_HZ.size or arr.shape[0] < 1:  # noqa: PLR2004
         msg = "'spectra' must have shape (K, 24)."
         raise ValueError(msg)

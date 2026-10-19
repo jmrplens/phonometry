@@ -444,9 +444,9 @@ att.plot()                        # the stacked breakdown above (needs matplotli
 lw = np.full(len(bands), 95.0)
 lp = environment.predicted_receiver_level(
     lw,
-    environment.PropagationGeometry(200.0, 1.5, 1.5),   # d, hs, hr
+    environment.PropagationGeometry(distance=200.0, source_height_m=1.5, receiver_height_m=1.5),   # d, hs, hr
     frequencies=bands,
-    ground=environment.GroundFactors(1.0, 1.0, 1.0),    # Gs, Gm, Gr
+    ground=environment.GroundFactors(source=1.0, middle=1.0, receiver=1.0),    # Gs, Gm, Gr
     barrier=barrier,
     atmosphere=environment.AtmosphericConditions(
         temperature_c=15.0, relative_humidity_percent=70.0),
@@ -1927,7 +1927,7 @@ which is what makes the reference plane the conventional reflection plane of a
 device that is not flat.
 
 ```python
-window = environment.adrienne_reflection_window(fs, environment.ADRIENNE_SHORT_LENGTH_S)
+window = environment.adrienne_reflection_window(fs, window_length_s=environment.ADRIENNE_SHORT_LENGTH_S)
 print(window.size)                                        # 288 samples at 48 kHz
 print(round(environment.adrienne_low_frequency_limit(7.9e-3), 1))   # 162.5 Hz
 ```
@@ -2351,9 +2351,9 @@ d = math.hypot(d_p, 3.0)
 levels = np.asarray(
     environment.predicted_receiver_level(
         np.full(8, 93.0),
-        environment.PropagationGeometry(d, 1.0, 4.0, projected_distance=d_p),
+        environment.PropagationGeometry(distance=d, source_height_m=1.0, receiver_height_m=4.0, projected_distance=d_p),
         frequencies=bands,
-        ground=environment.GroundFactors(1.0, 1.0, 1.0),
+        ground=environment.GroundFactors(source=1.0, middle=1.0, receiver=1.0),
         atmosphere=environment.AtmosphericConditions(
             temperature_c=20.0, relative_humidity_percent=70.0
         ),

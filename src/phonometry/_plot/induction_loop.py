@@ -12,7 +12,7 @@ campo magnético útil*, *relación señal-ruido de referencia*.
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -34,6 +34,7 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..electroacoustics.induction_loop import (
         AmplifierOverloadVerification,
         BackgroundNoiseAssessment,
@@ -187,26 +188,26 @@ _NOISE_PAD_BELOW_DB = 3.0
 _NOISE_PAD_ABOVE_DB = 12.0
 
 
-def _t(text: str, language: str = "en", **fmt: Any) -> str:
+def _t(text: str, language: Language = "en", **fmt: Any) -> str:
     """Localise a fixed string; English is returned verbatim."""
     s = _STRINGS.get(text, text) if language == "es" else text
     return s.format(**fmt) if fmt else s
 
 
-def _num(value: float, language: str, decimals: int = 1) -> str:
+def _num(value: float, language: Language, decimals: int = 1) -> str:
     """A number with the language's decimal separator and a true minus."""
     from .._i18n import format_number
 
     return format_number(value, language, decimals=decimals)
 
 
-def _verdict(*, passes: bool, language: str) -> str:
+def _verdict(*, passes: bool, language: Language) -> str:
     """The verdict word."""
     english, spanish = _VERDICTS[passes]
     return spanish if language == "es" else english
 
 
-def _requirement_name(name: str, language: str) -> str:
+def _requirement_name(name: str, language: Language) -> str:
     """The printed name of a requirement."""
     english, spanish = _REQUIREMENT_NAMES.get(name, (name, name))
     return spanish if language == "es" else english
@@ -226,8 +227,8 @@ def plot_loop_field(
     result: LoopField,
     ax: Axes | None = None,
     *,
-    component: str = "z",
-    language: str = "en",
+    component: Literal["x", "y", "z", "magnitude"] = "z",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The field strength level of a loop along its points.
@@ -277,7 +278,7 @@ def plot_loop_impedance(
     result: LoopImpedance,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The magnitude of a loop's impedance against frequency.
@@ -333,7 +334,7 @@ def _response_panel(
     response: np.ndarray,
     kwargs: dict[str, Any],
     label: str,
-    language: str,
+    language: Language,
 ) -> None:
     """A response against frequency with the 0 dB line and the ±3 dB band."""
     ax.plot(
@@ -363,7 +364,7 @@ def plot_amplifier_frequency_response(
     result: AmplifierFrequencyResponse,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """An amplifier's current response into its load, 0 dB at 1 kHz.
@@ -395,7 +396,7 @@ def plot_agc_characteristic(
     result: AGCCharacteristic,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Output level against input level, with the AGC range shaded.
@@ -459,7 +460,7 @@ def plot_quadrature_phase_error(
     result: QuadraturePhaseError,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The deviation from 90 degrees between two loop currents.
@@ -528,7 +529,7 @@ def plot_neck_loop_characteristics(
     result: NeckLoopCharacteristics,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """A neck loop's frequency response on the jig, 0 dB at 1 kHz.
@@ -568,7 +569,7 @@ def plot_neck_loop_verification(
     result: NeckLoopVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """A neck loop's two values as shares of their draft limits.
@@ -644,7 +645,7 @@ def plot_field_strength_reading(
     result: FieldStrengthReading,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The meter's time-weighted level against time.
@@ -701,7 +702,7 @@ def plot_background_noise(
     result: BackgroundNoiseAssessment,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The noise at each point against the lines of 7.2.
@@ -760,7 +761,7 @@ def plot_loop_requirement(
     result: LoopRequirement,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Each judged value of one requirement against its limits.
@@ -841,7 +842,7 @@ def plot_induction_loop_verification(
     result: InductionLoopVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The worst margin of every requirement, as bars.
@@ -896,7 +897,7 @@ def plot_amplifier_overload(
     result: AmplifierOverloadVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The loop voltage along the overload sweep against the compliance voltage.
@@ -975,7 +976,7 @@ def plot_maximum_output_current(
     result: MaxOutputCurrent,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The distortion against the load current, with the rated THD and the maximum.

@@ -206,7 +206,7 @@ plottable bundle around it.
 PistonDirectivity.plot(
     ax: PolarAxes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -238,7 +238,7 @@ plot_piston_geometry(
     angles_rad: ArrayLike,
     directivity: ArrayLike,
     lobe_label: str | None = ...,
-    language: str = ...,
+    language: Literal['en', 'es'] = ...,
     **kwargs: Any,
 ) -> Axes
 
@@ -247,7 +247,7 @@ plot_piston_geometry(
     *,
     ax: Axes | None = ...,
     lobe_label: str | None = ...,
-    language: str = ...,
+    language: Literal['en', 'es'] = ...,
     **kwargs: Any,
 ) -> Axes
 ```
@@ -366,7 +366,7 @@ Radiation impedance and directivity of a baffled circular piston.
 RadiatingPistonResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -390,7 +390,7 @@ RadiatingPistonResult.plot_geometry(
     ax: Axes | None = None,
     *,
     frequency_index: int = -1,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

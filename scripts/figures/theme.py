@@ -15,7 +15,7 @@ measurement the weighting figures are drawn from and the tests guard.
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 # The annotation recorder sits at the top of ``scripts/``, next to the checker
 # that reads what it writes, exactly as the language one does. No sys.path
@@ -249,8 +249,9 @@ def save_figure(output_dir: str, filename: str, **kwargs: Any) -> None:
     across matplotlib builds and runs. In both cases ``filename`` may carry
     any extension; the real one is chosen here.
     """
-    # The code that draws the clips is hashed into
-    # scripts/animation_fingerprints.txt, so rewriting this asks for a
+    # This function is the last user of ``os`` here, and the imports of a
+    # module a clip reaches are hashed into scripts/animation_fingerprints.txt:
+    # moving it to pathlib drops the import and asks every clip for a
     # re-render that would draw the very same frames.
     stem = os.path.splitext(filename)[0]  # noqa: PTH122
     audit_figure(stem)
@@ -269,6 +270,7 @@ def save_figure(output_dir: str, filename: str, **kwargs: Any) -> None:
         # reason: a Spanish label carries a decimal comma and a longer word.
         _ticks.audit(plt.gcf(), f"{stem}{_LANG_SUFFIX}")
     ext = "webp" if stem in _RASTER_FIGURES else "svg"
+    # Kept on ``os`` for the reason given at the stem above.
     path = os.path.join(output_dir, f"{stem}{_LANG_SUFFIX}{_FILENAME_SUFFIX}.{ext}")  # noqa: PTH118
     if ext == "svg":
         plt.rcParams["svg.hashsalt"] = "phonometry"
@@ -329,6 +331,7 @@ def save_figure(output_dir: str, filename: str, **kwargs: Any) -> None:
 
         drawn = io.StringIO()
         plt.savefig(drawn, format="svg", **kwargs)
+        # A ``str`` path, for the reason given at the stem above.
         with open(path, "w", encoding="utf-8") as handle:  # noqa: PTH123
             handle.write(generated_assets.compact_svg(drawn.getvalue()))
         return
@@ -426,7 +429,9 @@ def plot_psd(
 
 
 def measure_weighting_response(
-    fs: int, curve: str, freqs: np.ndarray | None = None
+    fs: int,
+    curve: Literal["A", "B", "C", "D", "G", "AU", "468", "Z"],
+    freqs: np.ndarray | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Measure a weighting curve the way the docs figure plots it: impulse
     response through the real filter path, evaluated with ``freqz`` (DTFT

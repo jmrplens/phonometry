@@ -285,8 +285,8 @@ for attenuation, style in ((0.0, "-"), (m, "--")):
         air_attenuation_per_m=attenuation,
     )
     for row, f in zip(banded.ir, freqs):
-        time, level = room.decay_curve(row, banded.fs)
-        ax.plot(time, level, style, label=f"{f:g} Hz")
+        decay = room.decay_curve(row, banded.fs)
+        ax.plot(decay.times, decay.levels, style, label=f"{f:g} Hz")
 ax.set_xlabel("Tiempo [s]")
 ax.set_ylabel("Nivel re estado estacionario [dB]")
 plt.show()

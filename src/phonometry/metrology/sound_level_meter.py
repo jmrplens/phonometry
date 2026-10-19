@@ -156,7 +156,7 @@ import itertools
 import math
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
@@ -173,6 +173,8 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
 
     from matplotlib.axes import Axes
+
+    from .._i18n import Language
 
 __all__ = [
     "ACOUSTIC_TEST_FREQUENCIES_HZ",
@@ -269,7 +271,7 @@ class PeakReference(RichDisplay):
     :ivar class_2_limits_db: The class 2 acceptance limits, in decibels.
     """
 
-    signal: str
+    signal: Literal["one cycle", "positive half cycle", "negative half cycle"]
     nominal_frequency_hz: float
     reference_difference: float
     class_1_limits_db: tuple[float, float]
@@ -287,7 +289,7 @@ class PeakReference(RichDisplay):
         return _limits_for(meter_class, self.class_1_limits_db, self.class_2_limits_db)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class MaxUncertaintyRow(RichDisplay):
     """One row of IEC 61672-1:2013 Table B.1, a maximum-permitted uncertainty.
 
@@ -309,7 +311,7 @@ class MaxUncertaintyRow(RichDisplay):
     requirement: str
     reference: str
     max_uncertainty: float
-    unit: str = "dB"
+    unit: Literal["dB", "dB/s"] = "dB"
     lower_hz: float | None = None
     upper_hz: float | None = None
     includes_lower: bool = True
@@ -427,7 +429,7 @@ IEC61672_TABLE_4: Mapping[str, tuple[ToneburstReference, ...]] = MappingProxyTyp
 
 #: The complete-cycle signal of IEC 61672-1:2013 Table 5, named once for its
 #: three rows.
-_ONE_CYCLE = "one cycle"
+_ONE_CYCLE: Final = "one cycle"
 
 #: IEC 61672-1:2013 Table 5 (folio 28): the reference differences between the
 #: C-weighted peak sound level and the C-weighted level of the steady signal,
@@ -453,9 +455,9 @@ def _directional(angle: str, cells: tuple[float, ...]) -> tuple[MaxUncertaintyRo
     )
     return tuple(
         MaxUncertaintyRow(
-            f"Directional response: θ = {angle}",
-            f"Table 2; {text}",
-            value,
+            requirement=f"Directional response: θ = {angle}",
+            reference=f"Table 2; {text}",
+            max_uncertainty=value,
             lower_hz=lower,
             upper_hz=upper,
             includes_lower=closed,
@@ -481,43 +483,111 @@ IEC61672_TABLE_B1: tuple[MaxUncertaintyRow, ...] = (
     *_directional("30°", (0.25, 0.25, 0.35, 0.45, 0.55)),
     *_directional("90° & 150°", (0.25, 0.45, 0.45, 0.85, 1.15)),
     MaxUncertaintyRow(
-        _B1_WEIGHTING, "Table 3, 10 Hz to 4 kHz", 0.60, lower_hz=10.0, upper_hz=4000.0
+        requirement=_B1_WEIGHTING,
+        reference="Table 3, 10 Hz to 4 kHz",
+        max_uncertainty=0.60,
+        lower_hz=10.0,
+        upper_hz=4000.0,
     ),
     MaxUncertaintyRow(
-        _B1_WEIGHTING,
-        "Table 3, >4 kHz to 10 kHz",
-        0.70,
+        requirement=_B1_WEIGHTING,
+        reference="Table 3, >4 kHz to 10 kHz",
+        max_uncertainty=0.70,
         lower_hz=4000.0,
         upper_hz=10000.0,
         includes_lower=False,
     ),
     MaxUncertaintyRow(
-        _B1_WEIGHTING,
-        "Table 3, >10 kHz to 20 kHz",
-        1.00,
+        requirement=_B1_WEIGHTING,
+        reference="Table 3, >10 kHz to 20 kHz",
+        max_uncertainty=1.00,
         lower_hz=10000.0,
         upper_hz=20000.0,
         includes_lower=False,
     ),
-    MaxUncertaintyRow("A vs. C or Z at 1 kHz", "5.5.9", 0.20),
-    MaxUncertaintyRow(_B1_LINEARITY, "5.6.5", 0.30),
-    MaxUncertaintyRow("1 dB to 10 dB change in level", "5.6.6", 0.25),
-    MaxUncertaintyRow("F and S decay rates", "5.8.2, F", 3.50, unit="dB/s"),
-    MaxUncertaintyRow("F and S decay rates", "5.8.2, S", 0.40, unit="dB/s"),
-    MaxUncertaintyRow("F vs. S level at 1 kHz", "5.8.3", 0.20),
-    MaxUncertaintyRow(_TONEBURST_RESPONSE, "5.9.2, Table 4", 0.30),
-    MaxUncertaintyRow("Repeated tonebursts", "5.10.1, Table 4", 0.30),
-    MaxUncertaintyRow(_OVERLOAD_INDICATION, "5.11.3", 0.25),
-    MaxUncertaintyRow("C-weighted peak sound levels", "5.13.3, Table 5", 0.35),
-    MaxUncertaintyRow("Stability during continuous operation", "5.14.2", 0.10),
-    MaxUncertaintyRow(_HIGH_LEVEL_STABILITY, "5.15.2", 0.10),
-    MaxUncertaintyRow("Analogue electrical output", "5.19.2", 0.15),
-    MaxUncertaintyRow("Power supply voltage", "5.23.2", 0.20),
-    MaxUncertaintyRow("Static pressure influence", "6.2.1; 6.2.2", 0.30),
-    MaxUncertaintyRow("Air temperature influence", "6.3.3; 6.3.4", 0.30),
-    MaxUncertaintyRow("Humidity influence", "6.4", 0.30),
-    MaxUncertaintyRow("Combined temperature and humidity", "6.3.3, 6.3.4, 6.4", 0.35),
-    MaxUncertaintyRow("AC and radio-frequency fields", "6.6.6", 0.30),
+    MaxUncertaintyRow(
+        requirement="A vs. C or Z at 1 kHz", reference="5.5.9", max_uncertainty=0.20
+    ),
+    MaxUncertaintyRow(
+        requirement=_B1_LINEARITY, reference="5.6.5", max_uncertainty=0.30
+    ),
+    MaxUncertaintyRow(
+        requirement="1 dB to 10 dB change in level",
+        reference="5.6.6",
+        max_uncertainty=0.25,
+    ),
+    MaxUncertaintyRow(
+        requirement="F and S decay rates",
+        reference="5.8.2, F",
+        max_uncertainty=3.50,
+        unit="dB/s",
+    ),
+    MaxUncertaintyRow(
+        requirement="F and S decay rates",
+        reference="5.8.2, S",
+        max_uncertainty=0.40,
+        unit="dB/s",
+    ),
+    MaxUncertaintyRow(
+        requirement="F vs. S level at 1 kHz", reference="5.8.3", max_uncertainty=0.20
+    ),
+    MaxUncertaintyRow(
+        requirement=_TONEBURST_RESPONSE,
+        reference="5.9.2, Table 4",
+        max_uncertainty=0.30,
+    ),
+    MaxUncertaintyRow(
+        requirement="Repeated tonebursts",
+        reference="5.10.1, Table 4",
+        max_uncertainty=0.30,
+    ),
+    MaxUncertaintyRow(
+        requirement=_OVERLOAD_INDICATION, reference="5.11.3", max_uncertainty=0.25
+    ),
+    MaxUncertaintyRow(
+        requirement="C-weighted peak sound levels",
+        reference="5.13.3, Table 5",
+        max_uncertainty=0.35,
+    ),
+    MaxUncertaintyRow(
+        requirement="Stability during continuous operation",
+        reference="5.14.2",
+        max_uncertainty=0.10,
+    ),
+    MaxUncertaintyRow(
+        requirement=_HIGH_LEVEL_STABILITY, reference="5.15.2", max_uncertainty=0.10
+    ),
+    MaxUncertaintyRow(
+        requirement="Analogue electrical output",
+        reference="5.19.2",
+        max_uncertainty=0.15,
+    ),
+    MaxUncertaintyRow(
+        requirement="Power supply voltage", reference="5.23.2", max_uncertainty=0.20
+    ),
+    MaxUncertaintyRow(
+        requirement="Static pressure influence",
+        reference="6.2.1; 6.2.2",
+        max_uncertainty=0.30,
+    ),
+    MaxUncertaintyRow(
+        requirement="Air temperature influence",
+        reference="6.3.3; 6.3.4",
+        max_uncertainty=0.30,
+    ),
+    MaxUncertaintyRow(
+        requirement="Humidity influence", reference="6.4", max_uncertainty=0.30
+    ),
+    MaxUncertaintyRow(
+        requirement="Combined temperature and humidity",
+        reference="6.3.3, 6.3.4, 6.4",
+        max_uncertainty=0.35,
+    ),
+    MaxUncertaintyRow(
+        requirement="AC and radio-frequency fields",
+        reference="6.6.6",
+        max_uncertainty=0.30,
+    ),
 )
 
 
@@ -1892,7 +1962,7 @@ class SoundLevelMeterPeriodicRequirement(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw every result of the requirement against its limits.
 
@@ -2844,7 +2914,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw every graded clause at its margin to its acceptance limits.
 

@@ -103,7 +103,7 @@ BURST_TOLERANCE_PERCENT = {'rms': 10.0, 'vdv': 12.0, 'mtvv_linear': 10.0, 'mtvv_
 
 ```python
 sawtooth_burst(
-    application: str,
+    application: Literal['hand-arm', 'whole-body', 'low-frequency-whole-body'],
     n_cycles: int | None,
     *,
     fs: float | None = None,
@@ -163,9 +163,9 @@ SAWTOOTH_BURST_TESTS = {'hand-arm': SawtoothBurstTest(application='hand-arm', we
 
 ```python
 SawtoothBurstTest(
-    application: str,
-    weightings: tuple[str, ...],
-    band_limiting_weighting: str,
+    application: Literal['hand-arm', 'whole-body', 'low-frequency-whole-body'],
+    weightings: tuple[Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'], ...],
+    band_limiting_weighting: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
     angular_frequency_rad_s: float,
     start_time_s: float,
     cycle_counts: tuple[int, ...],
@@ -212,8 +212,8 @@ How many bursts the printed duration holds at the repeat time.
 
 ```python
 signal_burst_indications(
-    application: str,
-    name: str,
+    application: Literal['hand-arm', 'whole-body', 'low-frequency-whole-body'],
+    name: Literal[Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'], 'band-limiting'],
     n_cycles: int | None,
     *,
     fs: float | None = None,
@@ -256,8 +256,8 @@ the linear and the exponential average of Annex D.
 
 ```python
 SignalBurstVerification(
-    application: str,
-    weighting: str,
+    application: Literal['hand-arm', 'whole-body', 'low-frequency-whole-body'],
+    weighting: Literal[Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'], 'band-limiting'],
     amplitude_m_s2: float,
     cycle_counts: tuple[int | None, ...],
     quantities: tuple[str, ...],
@@ -305,7 +305,7 @@ and the others are hardware measurements this cannot stand in for.
 SignalBurstVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -353,8 +353,8 @@ The largest deviation in magnitude, signed as it was measured.
 
 ```python
 verify_signal_burst_response(
-    application: str,
-    name: str,
+    application: Literal['hand-arm', 'whole-body', 'low-frequency-whole-body'],
+    name: Literal[Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'], 'band-limiting'],
     measured: Mapping[int | None, Mapping[str, float]],
     *,
     amplitude_m_s2: float = 1.0,

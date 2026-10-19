@@ -197,7 +197,7 @@ energy sum of its three one-third octave bands, exactly as
 
 | Name | Description |
 | :--- | :--- |
-| `measured_power_levels` | The reference source's octave-band power levels determined in the room, in decibels: the `sound_power_level` of [`sound_power_special_room`](/phonometry/reference/api/power/sound-power-special-room/#sound_power_special_room), the level at the test, and not its `sound_power_level_ref`, which the Annex E $C_2$ has already carried to the reference conditions: against a calibration read at the conditions of the test, it would count $C_2$ twice. |
+| `measured_power_levels` | The reference source's octave-band power levels determined in the room, in decibels: the `sound_power_level` of [`sound_power_special_room`](/phonometry/reference/api/power/sound-power-special-room/#sound_power_special_room), the level at the test, and not its `sound_power_level_at_reference_conditions`, which the Annex E $C_2$ has already carried to the reference conditions: against a calibration read at the conditions of the test, it would count $C_2$ twice. |
 | `calibrated_power_levels` | Its calibrated octave-band levels, in decibels, already under the meteorological conditions of the test; or its [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration), which is read there. |
 | `frequencies` | Octave centres from 125 Hz to 8 kHz, ascending. |
 | `temperature_c` | Air temperature in the room during step 2, in degrees Celsius; it reads a calibration and is otherwise only validated. |
@@ -368,12 +368,12 @@ Annex F total of the octave bands.
 ```python
 sound_power_special_room_comparison(
     levels: ArrayLike,
-    levels_ref: ArrayLike,
-    lw_ref: ArrayLike | ReferenceSourceCalibration,
+    reference_levels: ArrayLike,
+    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
     *,
     frequencies: ArrayLike,
     background_levels: ArrayLike | None = None,
-    background_levels_ref: ArrayLike | None = None,
+    reference_background_levels: ArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     sigma_omc_db: float | None = None,
@@ -403,11 +403,11 @@ needed, and the 300 m³ ceiling of 6.2 does not apply (NOTE).
 | Name | Description |
 | :--- | :--- |
 | `levels` | Levels of the source under test, `(bands,)`, `(NM, bands)` or `(NS, NM, bands)`, in decibels. |
-| `levels_ref` | Levels of the reference source, `(NMr, bands)`, at least six positions (10.3), or one traverse level `(bands,)`. |
-| `lw_ref` | The reference source's calibrated octave-band power level $L_{W\mathrm{r}}$, `(bands,)`, in decibels, under the meteorological conditions of the test, since Formula (10) gives $L_{W\mathrm{e}}$ there (Annex E); or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, whose one-third octave bands are summed into the octaves at `frequencies` and carried from the reference conditions to those of the test by its own `C2` (ISO 6926:2016, 8.4). |
+| `reference_levels` | Levels of the reference source, `(NMr, bands)`, at least six positions (10.3), or one traverse level `(bands,)`. |
+| `reference_sound_power_levels` | The reference source's calibrated octave-band power level $L_{W\mathrm{r}}$, `(bands,)`, in decibels, under the meteorological conditions of the test, since Formula (10) gives $L_{W\mathrm{e}}$ there (Annex E); or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, whose one-third octave bands are summed into the octaves at `frequencies` and carried from the reference conditions to those of the test by its own `C2` (ISO 6926:2016, 8.4). |
 | `frequencies` | Nominal octave centres from 63 Hz to 8 kHz. |
 | `background_levels` | Background for the source under test, as in [`sound_power_special_room`](/phonometry/reference/api/power/sound-power-special-room/#sound_power_special_room). |
-| `background_levels_ref` | Background at the reference source's positions; `None` reuses `background_levels` when it fits them. |
+| `reference_background_levels` | Background at the reference source's positions; `None` reuses `background_levels` when it fits them. |
 | `temperature_c` | Air temperature at the test, in degrees Celsius. |
 | `static_pressure_kpa` | Static pressure at the test, in kilopascals. |
 | `sigma_omc_db` | Operating-and-mounting standard deviation, in decibels. |
@@ -515,13 +515,14 @@ shall be reported.
 
 ```python
 SpecialRoomReverberationCheck(
+    *,
     frequencies: np.ndarray,
     reverberation_time: np.ndarray,
     reverberation_parameter: np.ndarray,
     nominal_reverberation_time_s: float,
     centered: bool,
     volume: float,
-    method: str,
+    method: Literal['direct', 'comparison'],
     climate_product_change: float = nan,
     source_volume_m3: float = nan,
 )
@@ -595,7 +596,7 @@ source is read by `source_size_recommended` and left out.
 SpecialRoomReverberationCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -663,7 +664,7 @@ SpecialRoomSoundPowerResult(
     mean_pressure_level: np.ndarray,
     background_correction: np.ndarray,
     background_margin_db: np.ndarray,
-    background_margin_ref_db: np.ndarray,
+    reference_background_margin_db: np.ndarray,
     mean_reference_level: np.ndarray,
     reference_power_level: np.ndarray,
     volume: float,
@@ -677,7 +678,7 @@ SpecialRoomSoundPowerResult(
     sound_power_level_a_direct: float,
     mean_a_weighted_level: float,
     background_margin_a_db: float,
-    method: str,
+    method: Literal['direct', 'comparison'],
     n_microphone_positions: int,
     n_source_positions: int,
 )
@@ -697,7 +698,7 @@ source under test, $\overline{L_p}$ (Formula 8) or
 $L_{p\mathrm{e}}$, and `background_correction` the per-band shift
 the Table 4 corrections made to it. `background_margin_db` is the
 smallest margin of the source over the background per band, and
-`background_margin_ref_db` that of the reference source (the
+`reference_background_margin_db` that of the reference source (the
 comparison method only), `NaN` where nothing was measured.
 `background_requirement_met` is read from them and the 4 dB of 6.5 and
 9.8, so it is not a field: `True` only where a background was measured
@@ -756,7 +757,7 @@ Whether every A-weighted margin reached the 4 dB of 6.5.
 SpecialRoomSoundPowerResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -785,9 +786,9 @@ SpecialRoomSoundPowerResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -838,13 +839,13 @@ Formula (12) per band, in decibels; `NaN` without `sigma_omc_db`.
 
 Formula (12) with the A-weighted row of Table 5, in decibels.
 
-### SpecialRoomSoundPowerResult.sound_power_level_a_ref
+### SpecialRoomSoundPowerResult.sound_power_level_a_at_reference_conditions
 
 *property*
 
-The Annex F total of `sound_power_level_ref`, `LWA + C2`.
+The Annex F total of `sound_power_level_at_reference_conditions`, `LWA + C2`.
 
-### SpecialRoomSoundPowerResult.sound_power_level_ref
+### SpecialRoomSoundPowerResult.sound_power_level_at_reference_conditions
 
 *property*
 
@@ -899,7 +900,7 @@ Whether the room is suitable for broad-band sources (step 4 of 6.7).
 SpecialRoomSuitabilityCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -956,7 +957,7 @@ Whether both criteria of 6.4 hold in every band.
 SpecialRoomSurfaceCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

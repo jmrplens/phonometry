@@ -69,6 +69,7 @@ if TYPE_CHECKING:
     from reportlab.lib.styles import StyleSheet1
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..building.measurement.flanking_transmission import (
         FlankingImpactLevelResult,
         FlankingLevelDifferenceResult,
@@ -113,7 +114,7 @@ def _part_designation(part: int) -> str:
         raise ValueError(msg) from exc
 
 
-def _dnf_spec(standard: str, language: str) -> dict[str, str]:
+def _dnf_spec(standard: str, language: Language) -> dict[str, str]:
     """Fixed labels of the ``Dn,f`` fiche for the governing ``standard``.
 
     The natural-language strings are pre-translated here (with the standard
@@ -139,7 +140,7 @@ def _dnf_spec(standard: str, language: str) -> dict[str, str]:
     }
 
 
-def _lnf_spec(standard: str, language: str) -> dict[str, str]:
+def _lnf_spec(standard: str, language: Language) -> dict[str, str]:
     """Fixed labels of the ``Ln,f`` fiche for the governing ``standard``."""
     return {
         "title": "Flanking impact sound insulation of floors",
@@ -186,7 +187,7 @@ def render_flanking_level_difference_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
     part: int = 2,
 ) -> str:
     """Render a normalized flanking level difference ``Dn,f`` fiche (ISO 10848).
@@ -233,7 +234,7 @@ def render_flanking_impact_level_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
     part: int = 2,
 ) -> str:
     """Render a normalized flanking impact level ``Ln,f`` fiche (ISO 10848).
@@ -327,7 +328,7 @@ def _kij_value_table(
     in_mean: np.ndarray,
     *,
     verbose: bool,
-    language: str,
+    language: Language,
 ) -> Table:
     """Build the per-band ``Kij`` table.
 
@@ -372,7 +373,7 @@ def _kij_result_box(
     band_range: tuple[float, float],
     styles: StyleSheet1,
     accent: Color,
-    language: str,
+    language: Language,
 ) -> Table:
     """Build the boxed single-number ``Kij`` result with its extended terms."""
     low, high = band_range
@@ -416,7 +417,7 @@ def render_vibration_reduction_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a vibration reduction index ``Kij`` junction fiche (ISO 10848-1).
 

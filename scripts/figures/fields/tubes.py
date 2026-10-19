@@ -226,8 +226,10 @@ def _impedance_tube_fields(
             damping=damping,
             edge_impedance={"left": 1.2 * 343.0},
         )
-        tone = fdtd2d.CWSource(0, 0, frequency=_VTUBE_F)
-        sim.add_source(fdtd2d.PlaneWaveSource("right", tone.value, offset=2))
+        tone = fdtd2d.CWSource(ix=0, iy=0, frequency=_VTUBE_F)
+        sim.add_source(
+            fdtd2d.PlaneWaveSource(direction="right", waveform=tone.value, offset=2)
+        )
         period_frames = max(1, round(1.0 / (_VTUBE_F * every * sim.dt)))
         ps: list[Any] = []
         env: list[Any] = []

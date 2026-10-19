@@ -34,7 +34,7 @@ simplification, both transcriptions verified digit-for-digit).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -50,6 +50,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from ..._i18n import Language
+
 __all__ = [
     "PropagationLossResult",
     "propagation_loss",
@@ -58,7 +60,18 @@ __all__ = [
 ]
 
 _SPREADING_LAWS = ("spherical", "cylindrical", "practical")
-_ABSORPTION_MODELS = ("francois-garrison", "ainslie-mccolm", "thorp")
+#: The three seawater absorption models (Francois-Garrison, Ainslie-McColm,
+#: Thorp).
+AbsorptionModel = Literal["francois-garrison", "ainslie-mccolm", "thorp"]
+
+#: A geometric spreading law of :func:`spreading_loss`.
+SpreadingLaw = Literal["spherical", "cylindrical", "practical"]
+
+_ABSORPTION_MODELS: tuple[AbsorptionModel, ...] = (
+    "francois-garrison",
+    "ainslie-mccolm",
+    "thorp",
+)
 #: Metres per kilometre.
 _M_PER_KM = 1000.0
 #: Francois-Garrison pure-water (A3) coefficient boundary, in degrees Celsius:
@@ -92,7 +105,7 @@ def _positive_array(
 def spreading_loss(
     range_m: NDArray[np.float64] | list[float] | float,
     *,
-    law: str = "spherical",
+    law: SpreadingLaw = "spherical",
     transition_range: float | None = None,
 ) -> NDArray[np.float64]:
     r"""Geometrical spreading loss, in dB.
@@ -198,7 +211,7 @@ def seawater_absorption(
     salinity: float = 35.0,
     depth: float = 0.0,
     ph: float = 8.0,
-    model: str = "francois-garrison",
+    model: AbsorptionModel = "francois-garrison",
 ) -> NDArray[np.float64]:
     r"""Volume absorption coefficient :math:`\alpha`, in dB/km.
 
@@ -319,7 +332,7 @@ class PropagationLossResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the propagation loss versus range with its two contributions."""
         from ..._i18n import check_language
@@ -334,12 +347,12 @@ def propagation_loss(
     range_m: NDArray[np.float64] | list[float] | float,
     frequency_hz: float,
     *,
-    law: str = "spherical",
+    law: SpreadingLaw = "spherical",
     temperature_c: float = 10.0,
     salinity: float = 35.0,
     depth: float = 0.0,
     ph: float = 8.0,
-    model: str = "francois-garrison",
+    model: AbsorptionModel = "francois-garrison",
     transition_range: float | None = None,
 ) -> PropagationLossResult:
     r"""Total propagation loss

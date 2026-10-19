@@ -229,10 +229,10 @@ takes through the wall.
 
 ```python
 DownstreamPipe(
+    *,
     internal_diameter_m: float,
     wall_thickness_m: float,
     density: float,
-    *,
     speed_of_sound: float = 5000.0,
     air_sound_speed: float = 343.0,
     atmospheric_pressure_pa: float = 101325.0,
@@ -262,6 +262,7 @@ not settings anyone is expected to change.
 
 ```python
 Expander(
+    *,
     contraction: float = 0.93,
     efficiency_correction: float = -3.0,
     strouhal_number: float = 0.2,
@@ -421,6 +422,7 @@ normative text and its list is consistent, so this follows the clause;
 
 ```python
 GasStream(
+    *,
     mass_flow: float,
     inlet_pressure_pa: float,
     outlet_pressure_pa: float,
@@ -508,7 +510,7 @@ jet_diameter_m(
     style_modifier: float,
     pressure_recovery: float,
     *,
-    coefficient: str = 'Cv',
+    coefficient: Literal['Cv', 'Kv'] = 'Cv',
 ) -> float
 ```
 
@@ -550,7 +552,7 @@ LAST_STAGE_AREA_CONSTANTS = {'Cv': 48900.0, 'Kv': 42300.0}
 last_stage_flow_coefficient(
     total_area: float,
     *,
-    coefficient: str = 'Cv',
+    coefficient: Literal['Cv', 'Kv'] = 'Cv',
 ) -> float
 ```
 
@@ -604,7 +606,7 @@ multiple_passage_jet_diameter(
     passage_length: float,
     passage_diameter_m: float,
     *,
-    coefficient: str = 'Cv',
+    coefficient: Literal['Cv', 'Kv'] = 'Cv',
 ) -> float
 ```
 
@@ -706,7 +708,7 @@ MultistageConditions(
     flow_coefficient: float,
     stagnation_pressure_pa: float,
     stagnation_density: float,
-    equation: str,
+    equation: Literal['28a', '28b', '28c'],
 )
 ```
 
@@ -897,6 +899,7 @@ REGIME_SUPERSONIC = 3
 
 ```python
 RegimeBoundaries(
+    *,
     vena_contracta: float,
     critical: float,
     break_point: float,
@@ -1063,13 +1066,14 @@ A valve read outside the conditions IEC 60534-8-3 prints for it.
 
 ```python
 ValveTrim(
+    *,
     flow_coefficient: float,
     style_modifier: float,
     pressure_recovery: float,
     outlet_diameter_m: float,
     efficiency_correction: float,
     strouhal_number: float,
-    coefficient: str = 'Cv',
+    coefficient: Literal['Cv', 'Kv'] = 'Cv',
 )
 ```
 

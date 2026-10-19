@@ -48,6 +48,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from ..._i18n import Language
+
 # Upper edge of the grazing-angle domain: 90° is normal incidence.
 _NORMAL_INCIDENCE_DEG = 90.0
 
@@ -189,7 +191,7 @@ class BottomLossResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the bottom loss versus grazing angle with the critical angle."""
         from ..._i18n import check_language
@@ -324,7 +326,7 @@ class SeabedReflection(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the reflection-coefficient magnitude ``|R|`` versus grazing angle.
 

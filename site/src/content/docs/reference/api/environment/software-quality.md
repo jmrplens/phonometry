@@ -222,7 +222,7 @@ Whether every result is inside its limits: the verdict of the form.
 CalculationVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -376,7 +376,7 @@ C.5: the value "specified for considering a systematic deviation".
 LevelDifferenceQuantiles.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -594,7 +594,7 @@ $\bar L_n$, the arithmetic mean at each receiver, in dB.
 RoundRobinPrecision.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

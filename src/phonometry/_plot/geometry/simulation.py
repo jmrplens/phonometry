@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
     from ...simulation.fdtd import FDTD2D
 
 #: Spanish translations of the fixed strings rendered here, keyed by their
@@ -52,7 +53,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Translate a fixed UI string to Spanish, else return it unchanged."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -117,7 +118,7 @@ def plot_fdtd_domain(
     ax: Axes | None = None,
     *,
     probes: ArrayLike | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw an FDTD2D domain before running it: what will be simulated.
@@ -142,6 +143,7 @@ def plot_fdtd_domain(
     pts: NDArray[np.float64] | None = None
     if probes is not None:
         pts = np.asarray(probes, dtype=np.float64)
+        # The number is a count of array axes, not a quantity.
         if pts.ndim != 2 or pts.shape[1] != 2:  # noqa: PLR2004
             msg = "'probes' must have shape (N, 2)."
             raise ValueError(msg)

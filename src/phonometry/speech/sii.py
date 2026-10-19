@@ -42,7 +42,7 @@ applied (see ``docs/ERRATA.md``).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -63,7 +63,11 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
+
+Method = Literal["critical-band", "equally-contributing", "one-third-octave", "octave"]
 
 __all__ = [
     "SII_METHODS",
@@ -81,7 +85,7 @@ __all__ = [
 #: to 4: the critical-band procedure (21 bands), the equally-contributing
 #: critical-band procedure (17 bands), the one-third-octave-band procedure
 #: (18 bands, the library default) and the octave-band procedure (6 bands).
-SII_METHODS: tuple[str, ...] = (
+SII_METHODS: tuple[Method, ...] = (
     "critical-band",
     "equally-contributing",
     "one-third-octave",
@@ -276,7 +280,10 @@ _REFERENCE_INTERNAL_NOISE: np.ndarray = read_only(
     )
 )
 
-_VOCAL_EFFORTS: tuple[str, ...] = ("normal", "raised", "loud", "shout")
+#: The four vocal efforts ANSI S3.5-1997 Table 3 prints a speech spectrum for.
+VocalEffort = Literal["normal", "raised", "loud", "shout"]
+
+_VOCAL_EFFORTS: tuple[VocalEffort, ...] = ("normal", "raised", "loud", "shout")
 
 # ---------------------------------------------------------------------------
 # Normative constants - ANSI S3.5-1997, critical-band method (Table 1).
@@ -533,7 +540,7 @@ class _BandProcedure:
         indexed ``[i, k]``, or ``None`` when there is no spread of masking.
     """
 
-    method: str
+    method: Method
     frequencies: np.ndarray
     band_edges: np.ndarray
     band_importance: np.ndarray
@@ -765,7 +772,7 @@ class SIIResult(OwnsArrays):
     disturbance: np.ndarray
     masking: np.ndarray
     level_distortion: np.ndarray
-    method: str = "one-third-octave"
+    method: Method = "one-third-octave"
 
     def __post_init__(self) -> None:
         """Reject a result whose per-band quantities disagree.
@@ -848,7 +855,7 @@ class SIIResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-band audibility weighted by importance, with the SII.
 
@@ -865,9 +872,9 @@ class SIIResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an ANSI S3.5-1997 speech-intelligibility-index fiche to a PDF.
 
@@ -908,7 +915,9 @@ class SIIResult(OwnsArrays):
         )
 
 
-def standard_speech_spectrum(vocal_effort: str = "normal") -> np.ndarray:
+def standard_speech_spectrum(
+    vocal_effort: VocalEffort = "normal",
+) -> np.ndarray:
     """Standard speech spectrum level by vocal effort (ANSI S3.5-1997 Table 3).
 
     :param vocal_effort: One of ``"normal"``, ``"raised"``, ``"loud"``,
@@ -974,7 +983,7 @@ class StandardSpeechSpectrum(OwnsArrays):
         require_same_length(self, "vocal_efforts", "levels", axis="vocal effort")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the standard speech spectrum level versus frequency band.
 
@@ -1000,7 +1009,7 @@ class StandardSpeechSpectrum(OwnsArrays):
 
 
 def standard_speech_spectra(
-    vocal_efforts: str | Sequence[str] = _VOCAL_EFFORTS,
+    vocal_efforts: VocalEffort | Sequence[VocalEffort] = _VOCAL_EFFORTS,
 ) -> StandardSpeechSpectrum:
     """Build the plottable ANSI S3.5-1997 standard speech spectra (Table 3).
 
@@ -1114,21 +1123,21 @@ def _procedure_speech_spectrum(
     of Table 3 are available on the one-third-octave procedure through
     :func:`standard_speech_spectrum`.
     """
+    if vocal_effort not in _VOCAL_EFFORTS:
+        msg = (
+            f"Unknown vocal_effort {vocal_effort!r}; choose from "
+            f"{', '.join(_VOCAL_EFFORTS)}."
+        )
+        raise ValueError(msg)
     if procedure.method == "one-third-octave":
         return standard_speech_spectrum(vocal_effort)
     if vocal_effort == "normal":
         return procedure.speech_spectrum.copy()
-    if vocal_effort in _VOCAL_EFFORTS:
-        msg = (
-            f"The {procedure.method!r} procedure carries the standard speech "
-            f"spectrum for normal vocal effort only; {vocal_effort!r} is "
-            "carried for the one-third-octave procedure. Pass an explicit "
-            "equivalent speech spectrum level instead."
-        )
-        raise ValueError(msg)
     msg = (
-        f"Unknown vocal_effort {vocal_effort!r}; choose from "
-        f"{', '.join(_VOCAL_EFFORTS)}."
+        f"The {procedure.method!r} procedure carries the standard speech "
+        f"spectrum for normal vocal effort only; {vocal_effort!r} is "
+        "carried for the one-third-octave procedure. Pass an explicit "
+        "equivalent speech spectrum level instead."
     )
     raise ValueError(msg)
 
@@ -1138,7 +1147,7 @@ def speech_intelligibility_index(
     noise_spectrum: ArrayLike | None = None,
     *,
     threshold: ArrayLike | None = None,
-    method: str = "one-third-octave",
+    method: Method = "one-third-octave",
     band_importance: ArrayLike | None = None,
 ) -> SIIResult:
     """Speech Intelligibility Index (ANSI S3.5-1997, any of the four methods).
@@ -1254,7 +1263,7 @@ class SIIProcedure(OwnsArrays):
         vocal effort, in dB SPL.
     """
 
-    method: str
+    method: Method
     frequencies: np.ndarray
     band_edges: np.ndarray
     band_importance: np.ndarray
@@ -1325,7 +1334,7 @@ class SIIProcedure(OwnsArrays):
         _require_closing_edge(self)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the band-importance function of the procedure versus frequency.
 
@@ -1349,7 +1358,7 @@ class SIIProcedure(OwnsArrays):
         )
 
 
-def sii_procedure(method: str = "one-third-octave") -> SIIProcedure:
+def sii_procedure(method: Method = "one-third-octave") -> SIIProcedure:
     """Build the plottable band table of an ANSI S3.5-1997 band procedure.
 
     :param method: The band procedure, one of :data:`SII_METHODS`.

@@ -49,7 +49,9 @@ def _add4(a: float, b: float, c: float, d: float) -> float:
 
 
 def test_uncertainty_budget_es() -> None:
-    result = u.uncertainty_propagation(_add4, [u.Quantity(0.0, 1.0) for _ in range(4)])
+    result = u.uncertainty_propagation(
+        _add4, [u.Quantity(value=0.0, uncertainty=1.0) for _ in range(4)]
+    )
     ax = result.plot(language="es")
     assert ax.get_title().startswith("Balance de incertidumbre (GUM)")
     assert "incertidumbre combinada" in ax.get_xlabel()
@@ -61,7 +63,10 @@ def test_uncertainty_budget_es() -> None:
 def test_monte_carlo_es() -> None:
     mc = u.monte_carlo(
         _add4,
-        [u.Quantity(0.0, 1.0, "rectangular") for _ in range(4)],
+        [
+            u.Quantity(value=0.0, uncertainty=1.0, distribution="rectangular")
+            for _ in range(4)
+        ],
         n_trials=20_000,
         seed=3,
         keep_samples=True,

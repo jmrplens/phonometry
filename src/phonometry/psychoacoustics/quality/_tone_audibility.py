@@ -95,7 +95,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -115,6 +115,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
 
 #: Constant term of the critical bandwidth Δfc (Formula (2)), in Hz.
@@ -672,6 +674,7 @@ def _step3_groups(
     for band_tone in tones:
         f1, f2 = critical_band_corners(band_tone[0])
         members = {i for i, t in enumerate(tones) if f1 <= t[0] <= f2}
+        # A cluster takes two tones at least.
         if len(members) < 2:  # noqa: PLR2004
             continue
         for c in [c for c in clusters if c & members]:
@@ -681,6 +684,7 @@ def _step3_groups(
     groups: list[tuple[int, ...]] = []
     for cluster in clusters:
         members_t = tuple(sorted(cluster))
+        # A pair of tones, which 5.3.8 (Formulae (18)/(19)) may rate separately.
         if len(members_t) == 2:  # noqa: PLR2004
             (ta, tb) = (tones[members_t[0]], tones[members_t[1]])
             if resolve_tones_separately(ta[0], tb[0], ta[4], tb[4]):
@@ -1150,17 +1154,18 @@ def _require_group_counts(counts: NDArray[np.int_] | None) -> None:
     ``OverflowError``. None of the three names the field and none names the
     result, so the cast is made under the same wording the shared
     :func:`~phonometry._internal.validation.require_finite_fields` uses for
-    the measured columns beside it, and keeps the class of each: an object
-    is the wrong type, a string or a count past a double a wrong value.
+    the measured columns beside it, and keeps the class of each: a string or
+    an object is the wrong type, a count past a double a wrong value.
 
     ``None`` is skipped: :func:`assess_tones` builds a result from bare
     levels, which never ran Step 3, and that absence is documented.
 
     :param counts: The ``group_sizes`` field, or ``None`` when the Step 3
         combination was not performed.
-    :raises TypeError: if the field holds objects that are not numbers.
-    :raises ValueError: if the field holds text, or a count is non-finite,
-        fractional, below one or past what a double holds.
+    :raises TypeError: if the field holds text, or objects that are not
+        numbers.
+    :raises ValueError: if a count is non-finite, fractional, below one or
+        past what a double holds.
     """
     if counts is None:
         return
@@ -1413,8 +1418,8 @@ class ToneAudibilityResult(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        view: str = "audibility",
-        language: str = "en",
+        view: Literal["audibility", "levels"] = "audibility",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Plot the assessment, either as audibilities or as levels.
@@ -1451,9 +1456,9 @@ class ToneAudibilityResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a tonal audibility assessment fiche to a PDF.
 

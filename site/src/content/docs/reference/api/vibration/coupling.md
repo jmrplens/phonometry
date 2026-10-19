@@ -51,8 +51,8 @@ check_loose_mounting(
     peak_acceleration_m_s2: float,
     upper_frequency_hz: float,
     *,
-    direction: str,
-    surface: str = 'hard',
+    direction: Literal['vertical', 'horizontal'],
+    surface: Literal['hard', 'soft'] = 'hard',
 ) -> MountingCheck
 ```
 
@@ -111,7 +111,7 @@ GROUND_COUPLING_DEVIATION_DB = 15.0
 
 ```python
 instrument_confidence_limit_percent(
-    quantity: str,
+    quantity: Literal['rms', 'peak'],
     accuracy_class: int = 1,
 ) -> float
 ```
@@ -206,8 +206,8 @@ MASS_LOADING_RATIO_LIMIT = 0.01
 MountingCheck(
     peak_acceleration_m_s2: float,
     upper_frequency_hz: float,
-    direction: str,
-    surface: str,
+    direction: Literal['vertical', 'horizontal'],
+    surface: Literal['hard', 'soft'],
 )
 ```
 

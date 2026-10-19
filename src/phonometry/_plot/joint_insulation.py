@@ -35,6 +35,7 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..building.measurement.joint_insulation import (
         GapWidthCheck,
         JointGapSeries,
@@ -127,36 +128,38 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en", **fmt: Any) -> str:
+def _t(text: str, language: Language = "en", **fmt: Any) -> str:
     """Localise a fixed string; English is returned verbatim."""
     s = _STRINGS.get(text, text) if language == "es" else text
     return s.format(**fmt) if fmt else s
 
 
-def _num(value: float, language: str, decimals: int = 1) -> str:
+def _num(value: float, language: Language, decimals: int = 1) -> str:
     """A number with the language's decimal separator and a true minus."""
     from .._i18n import format_number
 
     return format_number(value, language, decimals=decimals)
 
 
-def _int(value: float, language: str) -> str:
+def _int(value: float, language: Language) -> str:
     """A whole number of decibels with a true minus sign."""
     return _num(float(value), language, decimals=0)
 
 
-def _signed(value: float, language: str) -> str:
+def _signed(value: float, language: Language) -> str:
     """An adaptation term with its sign: ``+1``, ``0``, ``−4``."""
     text = _int(value, language)
     return f"+{text}" if value > 0 else text
 
 
-def _verdict(*, passes: bool, language: str) -> str:
+def _verdict(*, passes: bool, language: Language) -> str:
     """``conforms`` or ``does not conform``, localised."""
     return _t("conforms" if passes else "does not conform", language)
 
 
-def _rating_headline(result: LaboratoryJointInsulationResult, language: str) -> str:
+def _rating_headline(
+    result: LaboratoryJointInsulationResult, language: Language
+) -> str:
     """``Rs,w (C; Ctr) = 49 (−1; −4) dB``, in brackets when J.1 puts it there."""
     rating = result.rating
     if rating is None:
@@ -171,7 +174,7 @@ def _rating_headline(result: LaboratoryJointInsulationResult, language: str) -> 
 def plot_lab_joint_insulation(
     result: LaboratoryJointInsulationResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The sound reduction index of a joint per band (ISO 10140-1:2021 Figure J.7).
@@ -252,7 +255,7 @@ def plot_lab_joint_insulation(
 def plot_joint_open_band_rating(
     result: JointOpenBandRating,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The single numbers rated with the indicative bands taken as open (J.1).
@@ -315,7 +318,7 @@ def plot_joint_open_band_rating(
 def plot_joint_test_element_check(
     result: JointTestElementCheck,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The length and width of a joint as fractions of their bounds (J.2.1, J.2.2).
@@ -372,7 +375,7 @@ def plot_joint_test_element_check(
 def plot_gap_width_check(
     result: GapWidthCheck,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The gap widths read along a joint with their average (J.2.2).
@@ -438,7 +441,7 @@ def plot_gap_width_check(
 def plot_joint_gap_series(
     result: JointGapSeries,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     *,
     quantity: Literal["r_s_w", "r_s_w_c", "r_s_w_ctr"] = "r_s_w_ctr",
     **kwargs: Any,
@@ -518,7 +521,7 @@ def plot_joint_gap_series(
 def plot_joint_gap_octaves(
     result: JointGapSeries,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The sound reduction index of a slit in octave bands at each gap width (Figure J.9).
@@ -600,7 +603,7 @@ def plot_joint_gap_octaves(
 def plot_joint_gap_series_check(
     result: JointGapSeriesCheck,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The gap widths measured against the three widths of J.4.

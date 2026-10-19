@@ -242,7 +242,7 @@ def test_reference_pane_at_the_reference_needs_no_correction() -> None:
     res = building.rainfall_reference_correction(_I1_LEVEL, t_s)
     np.testing.assert_allclose(res.loss_factor, _I1_ETA_REF, rtol=1e-12)
     np.testing.assert_allclose(res.reference_loss_factor, _I1_ETA_REF, rtol=1e-12)
-    np.testing.assert_allclose(res.l_ic_ref, _I1_LEVEL)
+    np.testing.assert_allclose(res.l_ic_reference, _I1_LEVEL)
     np.testing.assert_allclose(res.correction, 0.0, atol=1e-9)
 
 
@@ -547,7 +547,9 @@ def test_reference_figure_draws_the_corrected_level_against_table_i1() -> None:
         _I1_LEVEL + 1.0, 2.2 / (_I1_BANDS * 2.0 * _I1_ETA_REF)
     )
     ax = res.plot()
-    np.testing.assert_allclose(_line(ax, r"$L_{I,\mathrm{m,ref}}$"), res.l_i_m_ref)
+    np.testing.assert_allclose(
+        _line(ax, r"$L_{I,\mathrm{m,ref}}$"), res.l_i_m_reference
+    )
     np.testing.assert_allclose(
         _line(ax, r"$L_{I\mathrm{c,ref}}$ (Table I.1)"), _I1_LEVEL
     )

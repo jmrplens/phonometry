@@ -68,7 +68,7 @@ calibrator = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(3 * fs) / fs)
 
 # Medición "de calle": 10 s de ruido rosa de fondo más un evento de 1 s a
 #   1 kHz, tipo bocina, para que los niveles estadísticos tengan algo que separar.
-recording = signals.noise_signal(fs, 10.0, color="pink", rms=0.02, seed=7)
+recording = signals.noise_signal(fs, duration_s=10.0, color="pink", rms=0.02, seed=7)
 recording[4 * fs : 5 * fs] += 0.2 * np.sqrt(2) * np.sin(
     2 * np.pi * 1000 * np.arange(fs) / fs
 )
@@ -375,7 +375,7 @@ runs = (np.split(at_full_scale, np.flatnonzero(np.diff(at_full_scale) > 1) + 1)
 clipped_runs = sum(1 for run in runs if run.size >= 2)
 
 # (b) Rango inferior: la misma cadena capturando su propio ruido (cápsula ficticia).
-self_noise = signals.noise_signal(fs, 3.0, color="pink", rms=2e-4, seed=11)
+self_noise = signals.noise_signal(fs, duration_s=3.0, color="pink", rms=2e-4, seed=11)
 margin = la_eq - signals.laeq(self_noise, fs, calibration_factor=cal)
 
 # (c) Deriva: el tono del calibrador grabado otra vez tras la medición.

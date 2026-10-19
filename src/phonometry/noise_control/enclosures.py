@@ -64,7 +64,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Protocol, cast
+from typing import TYPE_CHECKING, Any, Literal, Protocol, cast
 
 import numpy as np
 
@@ -82,6 +82,12 @@ from ..room.steady_field import room_constant
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
+
+#: The two enclosure models this module offers, by the book that prints each.
+EnclosureModel = Literal["bies", "norton"]
+
 __all__ = [
     "ENCLOSURE_MODELS",
     "EnclosureInsertionLossResult",
@@ -94,7 +100,9 @@ __all__ = [
 #: (Equation (7.111)) carry ``0.3``, which caps the insertion loss of a fully
 #: lined enclosure at ``R + 5.2 dB``; Norton & Karczub (Equation (4.115)) carry
 #: none.
-ENCLOSURE_MODELS: Mapping[str, float] = MappingProxyType({"bies": 0.3, "norton": 0.0})
+ENCLOSURE_MODELS: Mapping[EnclosureModel, float] = MappingProxyType(
+    {"bies": 0.3, "norton": 0.0}
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -179,7 +187,7 @@ class EnclosureInsertionLossResult(OwnsArrays):
         require_positive(self.internal_area, "internal_area")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the panel ``R``, correction ``C`` and net insertion loss.
 
@@ -197,9 +205,9 @@ class EnclosureInsertionLossResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         r"""Render a machine-enclosure insertion-loss fiche to ``path``.
 
@@ -385,7 +393,7 @@ def enclosure_insertion_loss(
     internal_absorption: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-    model: str = "bies",
+    model: EnclosureModel = "bies",
 ) -> EnclosureInsertionLossResult:
     r"""Net insertion loss of a machine enclosure (Bies Eqs. (7.103), (7.111)).
 
@@ -477,7 +485,7 @@ def enclosure_required_transmission_loss(
     internal_absorption: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-    model: str = "bies",
+    model: EnclosureModel = "bies",
 ) -> EnclosureInsertionLossResult:
     r"""Panel ``R`` an enclosure needs to deliver a given insertion loss.
 

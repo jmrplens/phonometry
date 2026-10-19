@@ -80,7 +80,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -99,6 +99,18 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
+
+    from ..._i18n import Language
+
+Spectrum = Literal["pink", "traffic", "railway", "aircraft"]
+ReceivingRoom = Literal["protected", "habitable"]
+
+#: The four normalised spectra of Tables A.2 to A.5, and the two each formula
+#: reads: Formula (A.5) the pink and railway spectra, Formula (A.6) the
+#: traffic and aircraft ones.
+_SPECTRA: tuple[Spectrum, ...] = ("pink", "traffic", "railway", "aircraft")
+_A5_SPECTRA: tuple[Spectrum, ...] = ("pink", "railway")
+_A6_SPECTRA: tuple[Spectrum, ...] = ("traffic", "aircraft")
 
 __all__ = [
     "DB_HR_FREQUENCIES_HZ",
@@ -384,7 +396,7 @@ class DBHRGlobalIndexResult(OwnsArrays):
     intermediate: float
     reported: int
     name: str
-    spectrum: str
+    spectrum: Spectrum
     frequencies: np.ndarray
     band_values: np.ndarray
     spectrum_levels: np.ndarray
@@ -442,7 +454,7 @@ class DBHRGlobalIndexResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the band insulation with the weighted per-band contributions."""
         from ..._i18n import check_language
@@ -471,7 +483,7 @@ def _match_bands(frequencies: np.ndarray) -> np.ndarray:
 
 def db_hr_global_index(
     band_values: Sequence[float] | np.ndarray,
-    spectrum: str = "pink",
+    spectrum: Spectrum = "pink",
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
     name: str | None = None,
@@ -497,7 +509,7 @@ def db_hr_global_index(
         non-finite values.
     """
     key = str(spectrum).strip().lower()
-    if key not in DB_HR_NORMALIZED_SPECTRA:
+    if key not in _SPECTRA:
         msg = (
             "'spectrum' must be one of "
             f"{sorted(DB_HR_NORMALIZED_SPECTRA)}; got {spectrum!r}."
@@ -604,7 +616,7 @@ def d2m_nt_a(
     level_difference: Sequence[float] | np.ndarray,
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
-    spectrum: str = "pink",
+    spectrum: Literal["pink", "railway"] = "pink",
 ) -> DBHRGlobalIndexResult:
     """A-weighted facade level difference ``D2m,nT,A`` (Formula (A.5)).
 
@@ -626,7 +638,7 @@ def d2m_nt_a(
     :raises ValueError: For a spectrum Formula (A.5) does not cover.
     """
     key = str(spectrum).strip().lower()
-    if key not in ("pink", "railway"):
+    if key not in _A5_SPECTRA:
         msg = (
             "Formula (A.5) evaluates 'D2m,nT,A' for pink noise or, on a "
             "railway-dominant site, the Table A.4 railway spectrum; "
@@ -643,7 +655,7 @@ def d2m_nt_atr(
     level_difference: Sequence[float] | np.ndarray,
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
-    spectrum: str = "traffic",
+    spectrum: Literal["traffic", "aircraft"] = "traffic",
 ) -> DBHRGlobalIndexResult:
     """A-weighted facade level difference ``D2m,nT,Atr`` (Formula (A.6)).
 
@@ -668,7 +680,7 @@ def d2m_nt_atr(
     :raises ValueError: For a spectrum Formula (A.6) does not cover.
     """
     key = str(spectrum).strip().lower()
-    if key not in ("traffic", "aircraft"):
+    if key not in _A6_SPECTRA:
         msg = (
             "Formula (A.6) evaluates 'D2m,nT,Atr' for road-traffic noise or, "
             "on an aircraft-dominant site, the Table A.2 aircraft spectrum; "
@@ -705,7 +717,7 @@ def window_size_correction(area: float) -> int:
 # --------------------------------------------------------------------------- #
 # Requirements (Clause 2)
 # --------------------------------------------------------------------------- #
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class DBHRRequirement(RichDisplay):
     """A single DB-HR performance requirement.
 
@@ -724,7 +736,7 @@ class DBHRRequirement(RichDisplay):
 
     quantity: str
     limit: float
-    direction: str
+    direction: Literal["min", "max"]
     unit: str
     decimals: int
     reference: str
@@ -834,7 +846,7 @@ class DBHRAssessment(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the achieved values against their DB-HR limits."""
         from ..._i18n import check_language
@@ -847,10 +859,36 @@ class DBHRAssessment(RichDisplay):
 
 def db_hr_facade_requirement(
     ld: float,
-    building_use: str,
-    room_type: str,
+    building_use: Literal[
+        "residential",
+        "hospital",
+        "cultural",
+        "sanitary",
+        "educational",
+        "administrative",
+        "docente",
+        "dwelling",
+        "hospitalario",
+        "housing",
+        "office",
+        "offices",
+        "teaching",
+    ],
+    room_type: Literal[
+        "bedrooms",
+        "living",
+        "classrooms",
+        "aulas",
+        "bedroom",
+        "classroom",
+        "dormitories",
+        "dormitorios",
+        "estancias",
+        "living_room",
+        "living_rooms",
+    ],
     *,
-    dominant_noise: str = "road",
+    dominant_noise: Literal["road", "railway", "aircraft"] = "road",
     quiet_facade: bool = False,
 ) -> DBHRRequirement:
     """Required facade insulation ``D2m,nT,Atr`` (DB-HR Table 2.1).
@@ -1003,7 +1041,10 @@ _SHARED_OPENING_ROWS: dict[tuple[str, str], tuple[float, float, str]] = {
 
 
 def db_hr_airborne_requirement(
-    receiving_room: str, source_room: str, *, shared_opening: bool = False
+    receiving_room: ReceivingRoom,
+    source_room: Literal["same_unit", "other_unit", "installations", "activity"],
+    *,
+    shared_opening: bool = False,
 ) -> tuple[DBHRRequirement, ...]:
     """Airborne insulation requirements between two rooms (DB-HR 2.1.1).
 
@@ -1142,7 +1183,10 @@ _IMPACT_ROWS: dict[tuple[str, str], tuple[float, str]] = {
 }
 
 
-def db_hr_impact_requirement(receiving_room: str, source_room: str) -> DBHRRequirement:
+def db_hr_impact_requirement(
+    receiving_room: ReceivingRoom,
+    source_room: Literal["other_unit", "installations", "activity"],
+) -> DBHRRequirement:
     """Impact sound requirement ``L'nT,w`` (DB-HR 2.1.2).
 
     The standardized impact sound pressure level in a protected room adjacent
@@ -1202,7 +1246,20 @@ _COMMON_AREA_ABSORPTION = 0.2
 
 
 def db_hr_reverberation_requirement(
-    room_use: str, *, furnished: bool = False
+    room_use: Literal[
+        "classroom",
+        "conference_hall",
+        "lecture_hall",
+        "aula",
+        "restaurant",
+        "dining_room",
+        "comedor",
+        "common_area",
+        "common_areas",
+        "zonas_comunes",
+    ],
+    *,
+    furnished: bool = False,
 ) -> DBHRRequirement:
     """Reverberation or absorption requirement (DB-HR 2.2).
 

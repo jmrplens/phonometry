@@ -22,6 +22,7 @@ here as "160 Hz and above".
 from __future__ import annotations
 
 import math
+from typing import Literal
 
 import numpy as np
 
@@ -217,7 +218,11 @@ def _chk_reproducibility_table() -> Outcome:
     based on experience looks like.
     """
     bands = (50.0, 250.0, 1000.0, 4000.0)
-    columns = ("insertion_loss", "transmission_loss", "intensity")
+    columns: tuple[Literal["insertion_loss", "transmission_loss", "intensity"], ...] = (
+        "insertion_loss",
+        "transmission_loss",
+        "intensity",
+    )
     expected = {
         "insertion_loss 50 Hz": 1.5,
         "insertion_loss 250 Hz": 1.0,

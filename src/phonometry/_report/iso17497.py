@@ -68,6 +68,7 @@ if TYPE_CHECKING:
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..materials.diffusers.reverberation_room_scattering import ScatteringResult
     from ..materials.diffusers.scattering_diffusion import (
         DiffusionResult,
@@ -78,12 +79,12 @@ if TYPE_CHECKING:
 _FREQUENCY_COLUMN = "f [Hz]"
 
 
-def _c2(value: float, language: str = "en") -> str:
+def _c2(value: float, language: Language = "en") -> str:
     """Two decimals (coefficients ``s``, ``d``; ISO 17497 rounds to 0,01)."""
     return format_number(value, language, decimals=2)
 
 
-def _d1(value: float, language: str = "en") -> str:
+def _d1(value: float, language: Language = "en") -> str:
     """One decimal (polar reflected levels; ISO 17497-2 rounds to 0,1 dB)."""
     return format_number(value, language, decimals=1)
 
@@ -91,7 +92,7 @@ def _d1(value: float, language: str = "en") -> str:
 def _common_metadata_pairs(
     metadata: ReportMetadata | None,
     freq_range: str | None,
-    language: str = "en",
+    language: Language = "en",
     *,
     include_room_fields: bool = True,
 ) -> list[tuple[str, str]]:
@@ -157,7 +158,7 @@ def _common_metadata_pairs(
     ]
 
 
-def _freq_range(freqs: np.ndarray, language: str) -> str | None:
+def _freq_range(freqs: np.ndarray, language: Language) -> str | None:
     """The ``{lo} to {hi}`` frequency-range string, or ``None`` when empty."""
     if not freqs.size:
         return None
@@ -170,7 +171,7 @@ def _basis_line(
     metadata: ReportMetadata | None,
     with_standard: str,
     without_standard: str,
-    language: str,
+    language: Language,
 ) -> str:
     """The standard-basis line, naming the measurement standard when supplied."""
     measurement_standard = (
@@ -210,7 +211,7 @@ def _header_flow(
 # ISO 17497-1: random-incidence scattering coefficient.
 # ---------------------------------------------------------------------------
 def _scattering_table(
-    result: ScatteringResult, *, verbose: bool, language: str = "en"
+    result: ScatteringResult, *, verbose: bool, language: Language = "en"
 ) -> Table:
     """Build the per-band ``f | alpha_s | s`` table (``alpha_spec`` if verbose)."""
     from reportlab.lib.units import mm
@@ -265,7 +266,7 @@ def render_scattering_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 17497-1 scattering-coefficient fiche to a PDF at ``path``.
 
@@ -378,7 +379,7 @@ def render_scattering_report(
 # ISO 17497-2: directional diffusion coefficient spectrum d(f).
 # ---------------------------------------------------------------------------
 def _diffusion_table(
-    result: DiffusionSpectrum, *, show_normalized: bool, language: str = "en"
+    result: DiffusionSpectrum, *, show_normalized: bool, language: Language = "en"
 ) -> Table:
     """Build the per-band ``f | d`` table (adds ``d_n`` when requested)."""
     from reportlab.lib.units import mm
@@ -423,7 +424,7 @@ def render_diffusion_spectrum_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 17497-2 diffusion-coefficient fiche to a PDF at ``path``.
 
@@ -522,7 +523,7 @@ def render_diffusion_spectrum_report(
 # ---------------------------------------------------------------------------
 # ISO 17497-2: single-source polar response.
 # ---------------------------------------------------------------------------
-def _polar_table(result: DiffusionResult, language: str = "en") -> Table:
+def _polar_table(result: DiffusionResult, language: Language = "en") -> Table:
     """Build the corrected ``angle | reflected level`` polar-response table."""
     from reportlab.lib.units import mm
 
@@ -547,7 +548,7 @@ def render_diffusion_polar_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 17497-2 polar-response fiche to a PDF at ``path``.
 

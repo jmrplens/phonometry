@@ -159,7 +159,7 @@ BinauralIndicators.plot(
     ax: Axes | None = None,
     *,
     parameter: str | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

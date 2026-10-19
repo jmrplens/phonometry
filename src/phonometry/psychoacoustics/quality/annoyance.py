@@ -54,6 +54,8 @@ from ...io._resolve import SignalInput, resolve_calibration, resolve_fs
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
+
 __all__ = [
     "PsychoacousticAnnoyanceResult",
     "psychoacoustic_annoyance",
@@ -108,7 +110,7 @@ class PsychoacousticAnnoyanceResult(RichDisplay):
     w_fr: float
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the PA value and the ``wS`` / ``wFR`` term contributions."""
         from ..._i18n import check_language

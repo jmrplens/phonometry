@@ -52,7 +52,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from scipy.special import erf
@@ -71,6 +71,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
+
+    from ..._i18n import Language
 
 __all__ = [
     "WESTON_REGIMES",
@@ -99,7 +101,7 @@ _FIELD_SLACK_DB = 1e-9
 _NORMAL_INCIDENCE_DEG = 90.0
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class WestonSeabed(RichDisplay):
     r"""Characteristic seabed properties (Ainslie Table 9.1, printed p. 454).
 
@@ -124,6 +126,9 @@ class WestonSeabed(RichDisplay):
     loss_parameter: float
     sound_speed_gradient_per_s: float
 
+
+#: A characteristic seabed of Ainslie Table 9.1, by name.
+SeabedName = Literal["sand", "mud"]
 
 #: The two characteristic seabeds tabulated in Ainslie Table 9.1, PDF page 484
 #: (printed p. 454): medium sand
@@ -204,7 +209,7 @@ def loss_parameter(attenuation_db_per_wavelength: float) -> float:
 
 
 def reflection_loss_gradient(
-    seabed: str | WestonSeabed = "sand", *, frequency_hz: float | None = None
+    seabed: SeabedName | WestonSeabed = "sand", *, frequency_hz: float | None = None
 ) -> float:
     r"""Reflection loss gradient :math:`\eta`, in nepers per radian.
 
@@ -256,7 +261,7 @@ def effective_depth(
     water_depth: float,
     frequency_hz: float,
     *,
-    seabed: str | WestonSeabed = "sand",
+    seabed: SeabedName | WestonSeabed = "sand",
     speed_of_sound: float = 1500.0,
 ) -> float:
     r"""Weston effective water depth ``He`` (Ainslie Eq. 9.55), in metres.
@@ -294,7 +299,7 @@ def effective_depth(
 def waveguide_cutoff_frequency(
     water_depth: float,
     *,
-    seabed: str | WestonSeabed = "sand",
+    seabed: SeabedName | WestonSeabed = "sand",
     speed_of_sound: float = 1500.0,
 ) -> float:
     r"""Shallow-water waveguide cut-off frequency ``fc`` (Ainslie Eq. 9.60),
@@ -361,7 +366,7 @@ def weston_regime_boundaries(
     frequency_hz: float,
     water_depth: float,
     *,
-    seabed: str | WestonSeabed = "sand",
+    seabed: SeabedName | WestonSeabed = "sand",
     speed_of_sound: float = 1500.0,
     critical_angle_deg: float | None = None,
     reflection_loss_gradient_value_np_per_rad: float | None = None,
@@ -606,7 +611,7 @@ class WestonPropagationResult(OwnsArrays):
         return _regime_labels(self.range_m, self.boundaries)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the composite loss with each regime's law and the boundaries."""
         from ..._i18n import check_language
@@ -654,7 +659,7 @@ def weston_propagation_loss(
     frequency_hz: float,
     water_depth: float,
     *,
-    seabed: str | WestonSeabed = "sand",
+    seabed: SeabedName | WestonSeabed = "sand",
     speed_of_sound: float = 1500.0,
     source_depth: float | None = None,
     receiver_depth: float | None = None,

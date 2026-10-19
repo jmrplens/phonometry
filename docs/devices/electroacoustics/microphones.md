@@ -85,12 +85,12 @@ weighting `"468"` wherever it takes one. The signal-to-noise ratio re 1 Pa
 (94 dB SPL) is
 derived from the same equivalent noise level, and the overload sound
 pressure level (clause 15.2) bounds the usable range from above. The
-ITU-R BS.468-4 weighting curve itself is exposed as `itu_r_468_weighting` in the
+ITU-R BS.468-4 weighting curve itself is exposed as `weighting_bs468` in the
 [electroacoustics distortion set](electroacoustics.md), where it also
 weights THD. The quasi-peak detector is implemented too, as
 `broadcast.quasi_peak_meter`
 ([Quasi-peak programme meter](../broadcast/quasi-peak.md)), but it reads a
-*recording*, and `itu_r_468_weighting` is the network alone: an
+*recording*, and `weighting_bs468` is the network alone: an
 inherent-noise level computed from the network and an r.m.s. sum is still
 not a dBqps figure. Clause 17 has no waveform to hand it either (it takes
 the stated voltage or level from the data sheet), so

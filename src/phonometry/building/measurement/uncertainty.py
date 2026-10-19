@@ -67,6 +67,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
+
 __all__ = [
     "COVERAGE_FACTORS",
     "BandUncertainty",
@@ -86,6 +88,33 @@ __all__ = [
 
 Situation = Literal["A", "B", "C"]
 Measurand = Literal["airborne", "impact", "impact_reduction"]
+#: A single-number rating of Tables 3, 5 and 7, by the key the tables are read
+#: under, or one of the aliases that name the same rating.
+SingleNumberQuantity = Literal[
+    "r_w",
+    "r_w+c_50_3150",
+    "r_w+c_50_5000",
+    "r_w+c_100_3150",
+    "r_w+c_100_5000",
+    "r_w+ctr_50_3150",
+    "r_w+ctr_50_5000",
+    "r_w+ctr_100_3150",
+    "r_w+ctr_100_5000",
+    "ln_w",
+    "ln_w+ci",
+    "delta_lw",
+    "rprime_w",
+    "r_prime_w",
+    "dn_w",
+    "dnw",
+    "dnt_w",
+    "dntw",
+    "lprime_n_w",
+    "lnprime_w",
+    "lnt_w",
+    "lprime_nt_w",
+    "delta_l_w",
+]
 
 # --------------------------------------------------------------------------- #
 # One-third-octave-band frequency axes (Hz).
@@ -437,15 +466,15 @@ class BandUncertainty(RichDisplay):
     :ivar upper_limit: ``True`` for the ``σR95`` upper limit (Annex D Table D.1).
     """
 
-    measurand: str
-    situation: str
+    measurand: Literal["airborne", "impact", "impact_reduction"]
+    situation: Literal["A", "B", "C"]
     frequencies: tuple[float, ...]
     uncertainties: tuple[float, ...]
     _: KW_ONLY
     upper_limit: bool = False
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-band standard uncertainty spectrum.
 
@@ -550,7 +579,7 @@ def band_uncertainty(
 
 
 def single_number_uncertainty(
-    quantity: str,
+    quantity: SingleNumberQuantity,
     situation: Situation,
     *,
     upper_limit: bool = False,
@@ -665,7 +694,7 @@ def insulation_expanded_uncertainty(
 
 def uncertain_value(
     value: float,
-    quantity: str,
+    quantity: SingleNumberQuantity,
     situation: Situation,
     *,
     coverage: float = 0.95,

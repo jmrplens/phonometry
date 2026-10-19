@@ -214,8 +214,10 @@ def _slit_absorber_fields(
             obstacle_mask=mask,
             edge_impedance={"left": 1.2 * 343.0},
         )
-        tone = fdtd2d.CWSource(0, 0, frequency=_SLIT_ABS_F0)
-        sim.add_source(fdtd2d.PlaneWaveSource("right", tone.value, offset=2))
+        tone = fdtd2d.CWSource(ix=0, iy=0, frequency=_SLIT_ABS_F0)
+        sim.add_source(
+            fdtd2d.PlaneWaveSource(direction="right", waveform=tone.value, offset=2)
+        )
         mid = ny // 2
         # Settle to steady state, sampling the exact standing-wave
         # envelope over the final full period.

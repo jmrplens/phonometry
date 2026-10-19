@@ -42,7 +42,7 @@ def generate_psd_confidence_smoothing(output_dir: str) -> None:
     from phonometry import signals
 
     fs = 48000.0
-    x = signals.noise_signal(fs, 20.0, color="pink", seed=11)
+    x = signals.noise_signal(fs, duration_s=20.0, color="pink", seed=11)
     res = signals.power_spectral_density(x, fs, nperseg=4096)
     band = (res.frequencies >= 20.0) & (res.frequencies <= 20000.0)
     freqs = res.frequencies[band]
@@ -117,7 +117,7 @@ def generate_multitaper_psd_confidence(output_dir: str) -> None:
 
     fs = 48000.0
     n = 8192  # a genuinely short record: 171 ms
-    x = signals.noise_signal(fs, n / fs, color="pink", seed=11)
+    x = signals.noise_signal(fs, duration_s=n / fs, color="pink", seed=11)
     single = signals.multitaper_psd(x, fs, n_tapers=1, adaptive=False)
     res = signals.multitaper_psd(x, fs)
     band = (res.frequencies >= 20.0) & (res.frequencies <= 20000.0)
@@ -211,7 +211,7 @@ def generate_multitaper_psd_confidence(output_dir: str) -> None:
     # their keep and the equivalent degrees of freedom pay for it. ---
     n_hd = 1 << 15
     tt = np.arange(n_hd) / fs
-    floor = signals.noise_signal(fs, n_hd / fs, color="pink", seed=3)
+    floor = signals.noise_signal(fs, duration_s=n_hd / fs, color="pink", seed=3)
     tone_amp = float(np.sqrt(np.mean(floor**2))) * 10 ** (60.0 / 20.0)
     hd = floor + tone_amp * np.sin(2 * np.pi * 1000.0 * tt)
     w_hd = signals.power_spectral_density(hd, fs, nperseg=4096)
@@ -269,7 +269,7 @@ def generate_psd_segment_tradeoff(output_dir: str) -> None:
 
     fs = 48000.0
     f_r, b_r = 1000.0, 25.0  # a resonance of half-power width 25 Hz
-    x = signals.noise_signal(fs, 20.0, color="white", seed=5)
+    x = signals.noise_signal(fs, duration_s=20.0, color="white", seed=5)
     q = f_r / b_r
     b_coef, a_coef = scipy_signal.iirpeak(f_r, q, fs=fs)
     resonant = scipy_signal.lfilter(b_coef, a_coef, x)
@@ -380,7 +380,7 @@ def generate_noise_colors(output_dir: str) -> None:
 
     _fig, ax = plt.subplots(figsize=(10, 6.4))
     for name, alpha, color in colors:
-        x = signals.noise_signal(fs, 20.0, color=name, seed=7)
+        x = signals.noise_signal(fs, duration_s=20.0, color=name, seed=7)
         res = signals.power_spectral_density(x, fs, nperseg=8192)
         band = (res.frequencies >= 20.0) & (res.frequencies <= 20000.0)
         freqs = res.frequencies[band]
@@ -443,7 +443,11 @@ def generate_calibrated_spectrogram(output_dir: str) -> None:
     impact = rng.standard_normal(n_imp) * np.exp(-np.arange(n_imp) / (0.012 * fs))
     x[int(2.5 * fs) : int(2.5 * fs) + n_imp] += 0.4 * impact
     x += signals.noise_signal(
-        fs, duration, color="pink", rms=p_ref * 10.0 ** (45.0 / 20.0), seed=10
+        fs,
+        duration_s=duration,
+        color="pink",
+        rms=p_ref * 10.0 ** (45.0 / 20.0),
+        seed=10,
     )
 
     res = signals.spectrogram(x, fs, nperseg=1024, overlap=0.75, scaling="spectrum")
@@ -613,11 +617,13 @@ def generate_miso_coherence(output_dir: str) -> None:
     # high-frequency path. x2 is correlated with x1, so its ORDINARY coherence
     # with the output is inflated in the low band (borrowed through x1), while
     # its PARTIAL coherence is clean once x1 is conditioned out.
-    x1 = signals.noise_signal(fs, seconds, color="white", seed=1)
-    x2 = 0.7 * x1 + signals.noise_signal(fs, seconds, color="white", seed=2)
+    x1 = signals.noise_signal(fs, duration_s=seconds, color="white", seed=1)
+    x2 = 0.7 * x1 + signals.noise_signal(fs, duration_s=seconds, color="white", seed=2)
     low = sp_signal.butter(4, 400.0, fs=fs, output="sos")
     high = sp_signal.butter(4, 1500.0, btype="high", fs=fs, output="sos")
-    noise = signals.noise_signal(fs, seconds, color="white", rms=0.05, seed=3)
+    noise = signals.noise_signal(
+        fs, duration_s=seconds, color="white", rms=0.05, seed=3
+    )
     y = sp_signal.sosfilt(low, x1) + sp_signal.sosfilt(high, x2) + noise
     res = signals.miso_coherence([x1, x2], y, fs, nperseg=2048)
 
@@ -724,8 +730,8 @@ def generate_cross_spectral_density_delay(output_dir: str) -> None:
     fs = 8000.0
     tau = 0.002  # 2 ms = 16 samples
     delay = int(tau * fs)
-    x = signals.noise_signal(fs, 8.0, seed=8)
-    noise = signals.noise_signal(fs, 8.0, rms=0.3, seed=9)
+    x = signals.noise_signal(fs, duration_s=8.0, seed=8)
+    noise = signals.noise_signal(fs, duration_s=8.0, rms=0.3, seed=9)
     y = 0.9 * np.concatenate([np.zeros(delay), x[:-delay]]) + noise
 
     res = signals.cross_spectral_density(x, y, fs)
@@ -787,8 +793,8 @@ def generate_coherent_output_snr(output_dir: str) -> None:
     from phonometry import signals
 
     fs = 48000.0
-    x = signals.noise_signal(fs, 8.0, color="white", seed=1)
-    noise = signals.noise_signal(fs, 8.0, color="white", rms=0.5, seed=2)
+    x = signals.noise_signal(fs, duration_s=8.0, color="white", seed=1)
+    noise = signals.noise_signal(fs, duration_s=8.0, color="white", rms=0.5, seed=2)
     y = 0.8 * x + noise  # SNR = 0.64/0.25 per band
 
     res = signals.coherent_output_spectrum(x, y, fs, nperseg=2048)

@@ -321,7 +321,7 @@ Whether the frequencies span the rated range (8.6.2.2 b), `None` if unstated.
 CouplerFrequencyResponse.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     iec_scale: bool = True,
     **kwargs: Any,
 ) -> Axes
@@ -441,7 +441,7 @@ The smallest attenuation over the frequencies, in dB.
 CrosstalkAttenuation.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -567,7 +567,7 @@ The number of test persons.
 EarCanalFrequencyResponse.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     iec_scale: bool = True,
     **kwargs: Any,
 ) -> Axes
@@ -669,7 +669,7 @@ Whether all five requirements hold.
 EarCanalMicrophoneVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -797,7 +797,7 @@ The number of test persons.
 FieldComparisonResponse.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     iec_scale: bool = True,
     **kwargs: Any,
 ) -> Axes
@@ -1093,7 +1093,7 @@ Whether the peak-to-RMS ratio is between 1,8 and 2,2.
 LimitingTestSignalCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1285,7 +1285,7 @@ The corrected level of the whole signal in each fitting, in dB re 20 µPa.
 ProgramCharacteristicVoltage.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1380,7 +1380,7 @@ voltage".
 ProtectionVoltage.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1478,7 +1478,7 @@ Whether the rated impedance is at most 1,25 times the lowest modulus in range.
 RatedImpedanceVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

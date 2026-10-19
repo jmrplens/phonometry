@@ -69,11 +69,12 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
     from ...io._signal import Signal
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import require_ranks, require_same_length, require_scalar
-from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ...metrology.reference_values import REFERENCE_VALUES
 from .moore_glasberg import (
     _ERB_C1,
     _ERB_C2,
@@ -282,7 +283,7 @@ _WINDOWS: tuple[tuple[float, float, float], ...] = (
 # field yields exactly 1.000 sone, exactly as the standard derives the 3.32 dB.
 _SPECTRAL_CAL_DB = -0.9252
 # Reference sound pressure [Pa], 20 uPa (ISO 1683:2015 Table 1).
-_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_P0 = REFERENCE_VALUES["gas"]["sound_pressure"].value
 _PRUNE_DB = 80.0  # drop components > 80 dB below the frame's loudest component
 _N_EARS = 2  # ear channels of a two-channel (left, right) input
 
@@ -486,7 +487,7 @@ class MooreGlasbergTimeVaryingLoudness(OwnsArrays):
             raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the short-term and long-term loudness against time.
 
@@ -722,6 +723,7 @@ def _as_two_channels(
 ) -> tuple[np.ndarray, np.ndarray | None]:
     """Split the input into left and (optional) right calibrated pressure signals."""
     array = apply_calibration(signal, np.asarray(signal, dtype=np.float64))
+    # The number is a count of array axes, not a quantity.
     if array.ndim == 2:  # noqa: PLR2004
         if array.shape[1] == _N_EARS and array.shape[0] != _N_EARS:
             left, right = array[:, 0], array[:, 1]

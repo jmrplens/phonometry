@@ -107,7 +107,7 @@ reduces to the looser of the two component classes.
 IntensityInstrumentComplianceResult(
     frequencies: np.ndarray,
     residual_index: np.ndarray,
-    device: str,
+    device: Literal['probe', 'processor', 'instrument'],
     spacing_m: float,
 )
 ```
@@ -239,7 +239,7 @@ the chain achieves.
 IntensityInstrumentComplianceResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -287,9 +287,9 @@ IntensityInstrumentComplianceResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -426,7 +426,7 @@ table requires.
 
 ```python
 residual_index_limits(
-    device: str = 'instrument',
+    device: Literal['probe', 'processor', 'instrument'] = 'instrument',
     *,
     spacing_m: float = 0.025,
     frequencies: list[float] | np.ndarray | None = None,
@@ -489,7 +489,7 @@ verify_intensity_class(
     residual_index: list[float] | np.ndarray,
     *,
     frequencies: list[float] | np.ndarray,
-    device: str = 'instrument',
+    device: Literal['probe', 'processor', 'instrument'] = 'instrument',
     spacing_m: float = 0.025,
 ) -> IntensityInstrumentComplianceResult
 ```

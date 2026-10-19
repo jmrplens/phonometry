@@ -43,7 +43,7 @@ def _git(checkout: pathlib.Path, *args: str) -> str:
     Only the final newline: ``status --porcelain`` writes a leading space for
     an unstaged change, and stripping it would shift the path by one column.
     """
-    return subprocess.run(  # noqa: S603
+    return subprocess.run(
         ["git", "-C", str(checkout), *args],
         check=True,
         capture_output=True,

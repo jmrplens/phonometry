@@ -18,7 +18,7 @@ the NPD, the unweighted reference spectrum at 1 000 ft, in three steps:
    levels is the increment :math:`\Delta L(d_i)` (Eq. D-4), added to the
    ``Lmax`` and ``LE`` NPD levels alike.
 
-* :data:`SAE_AIR1845_ATTENUATION_DB_PER_100M` -- Table D-1.
+* :data:`AIR1845_ATTENUATION_DB_PER_100M` -- Table D-1.
 * :func:`npd_atmosphere_increment` -- the increment at each NPD distance, as an
   :class:`NPDAtmosphereIncrement` with ``.plot()`` (the increment against
   distance) and ``.plot_attenuation()`` (the attenuation of the two
@@ -45,7 +45,7 @@ from __future__ import annotations
 import dataclasses
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
@@ -63,7 +63,7 @@ from .anp_fleet import SpectralClass
 from .atmospheric_absorption import (
     _arp5534_coefficient,
     _sae_band,
-    arp866a_attenuation,
+    attenuation_arp866a,
 )
 from .certification import NOY_BANDS_HZ
 
@@ -73,10 +73,13 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
     from .anp_fleet import ANPNPDCurves
 
+Absorption = Literal["arp5534", "arp866a"]
+
 __all__ = [
-    "SAE_AIR1845_ATTENUATION_DB_PER_100M",
+    "AIR1845_ATTENUATION_DB_PER_100M",
     "npd_atmosphere_increment",
     "revise_npd_curves",
     "NPDAtmosphereIncrement",
@@ -86,7 +89,7 @@ __all__ = [
 #: ECAC Doc 29 Vol. 2 Table D-1: the average atmospheric attenuation rates of
 #: SAE AIR-1845 that normalise the ANP NPD data, in dB per 100 m, keyed by the
 #: nominal one-third-octave-band centre frequency in Hz (50 Hz to 10 kHz).
-SAE_AIR1845_ATTENUATION_DB_PER_100M: Final[Mapping[float, float]] = MappingProxyType(
+AIR1845_ATTENUATION_DB_PER_100M: Final[Mapping[float, float]] = MappingProxyType(
     {
         50.0: 0.033,
         63.0: 0.033,
@@ -142,7 +145,7 @@ _NPD_DISTANCES_M = read_only(
     * _FT_M
 )
 #: The two absorption routes Appendix D offers for the specified atmosphere.
-_ABSORPTION = ("arp5534", "arp866a")
+_ABSORPTION: tuple[Absorption, ...] = ("arp5534", "arp866a")
 #: Relative tolerance within which a distance names one of the table's own.
 _DISTANCE_MATCH_RTOL = 1e-9
 
@@ -210,7 +213,7 @@ class NPDAtmosphereIncrement(OwnsArrays):
     reference_levels_dba: NDArray[np.float64]
     specified_levels_dba: NDArray[np.float64]
     increment_db: NDArray[np.float64]
-    absorption: str
+    absorption: Absorption
     temperature_c: float
     relative_humidity_percent: float
     static_pressure_kpa: float
@@ -276,7 +279,7 @@ class NPDAtmosphereIncrement(OwnsArrays):
         return int(match[0])
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the increment against slant distance."""
         from .._i18n import check_language
@@ -292,7 +295,7 @@ class NPDAtmosphereIncrement(OwnsArrays):
         *,
         distance_m: float = _REFERENCE_DISTANCE_M,
         reference: bool = True,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Plot the attenuation of both atmospheres against frequency at one distance.
@@ -324,7 +327,7 @@ def npd_atmosphere_increment(
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
-    absorption: str = "arp5534",
+    absorption: Absorption = "arp5534",
     distances_m: ArrayLike | None = None,
 ) -> NPDAtmosphereIncrement:
     r"""NPD increment of a spectral class for a specified atmosphere (Doc 29 Appendix D).
@@ -355,9 +358,9 @@ def npd_atmosphere_increment(
     dB/m instead), and
     :math:`\delta_n(d_i) \, d_i / (100\,\mathrm{m})` the band attenuation of
     the specified atmosphere over :math:`d_i`: the SAE Method of SAE ARP 5534
-    (:func:`~phonometry.aircraft.atmospheric_absorption.sae_band_attenuation`),
+    (:func:`~phonometry.aircraft.atmospheric_absorption.band_attenuation_arp5534`),
     which depends on the path and the pressure, or SAE ARP 866A
-    (:func:`~phonometry.aircraft.atmospheric_absorption.arp866a_attenuation`),
+    (:func:`~phonometry.aircraft.atmospheric_absorption.attenuation_arp866a`),
     which depends on neither, with ``η(δ)`` read linearly in Table 1 of ISO
     3891, as Tables D-3b and D-5 are computed. Doc 29 recommends ARP 5534 and
     keeps ARP 866A for transition. Nothing is rounded: Tables D-4 to D-6c are rounded for
@@ -392,9 +395,7 @@ def npd_atmosphere_increment(
         else require_positive_array(distances_m, "distances_m")
     )
     frequencies = np.array(NOY_BANDS_HZ, dtype=np.float64)
-    rates = np.array(
-        [SAE_AIR1845_ATTENUATION_DB_PER_100M[float(f)] for f in frequencies]
-    )
+    rates = np.array([AIR1845_ATTENUATION_DB_PER_100M[float(f)] for f in frequencies])
     source = levels + rates / 100.0 * _REFERENCE_DISTANCE_M
     reference_attenuation = np.multiply.outer(rates / 100.0, d)
     if route == "arp5534":
@@ -407,8 +408,8 @@ def npd_atmosphere_increment(
         specified_attenuation = _sae_band(np.multiply.outer(alpha, d))
     else:
         # Table D-3b, and through it Tables D-5 and D-6c, read eta(delta)
-        # linearly in Table 1 of ISO 3891 (see arp866a_attenuation).
-        specified_attenuation = arp866a_attenuation(
+        # linearly in Table 1 of ISO 3891 (see attenuation_arp866a).
+        specified_attenuation = attenuation_arp866a(
             frequencies,
             temperature_c=temperature_c,
             relative_humidity_percent=relative_humidity_percent,
@@ -472,7 +473,7 @@ class RevisedNPDCurves(RichDisplay):
             raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the revised curves over the original ones against slant distance."""
         from .._i18n import check_language
@@ -490,7 +491,7 @@ def revise_npd_curves(
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
-    absorption: str = "arp5534",
+    absorption: Absorption = "arp5534",
 ) -> RevisedNPDCurves:
     """NPD curves recalculated for a specified atmosphere (Doc 29 Vol. 2 Appendix D).
 

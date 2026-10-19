@@ -38,7 +38,9 @@ N = 32768
 
 
 def _white(seed: int, rms: float = 1.0, n: int = N) -> np.ndarray:
-    return ph.signals.noise_signal(FS, n / FS, color="white", rms=rms, seed=seed)
+    return ph.signals.noise_signal(
+        FS, duration_s=n / FS, color="white", rms=rms, seed=seed
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -243,7 +245,9 @@ def test_multitaper_adaptive_dof_drops_where_leakage_would_bias() -> None:
     """
     n = 4096
     t = np.arange(n) / FS
-    rng_x = ph.signals.noise_signal(FS, n / FS, color="white", rms=1e-3, seed=99)
+    rng_x = ph.signals.noise_signal(
+        FS, duration_s=n / FS, color="white", rms=1e-3, seed=99
+    )
     x = 50.0 * np.sin(2.0 * np.pi * 200.0 * t) + rng_x
     res = ph.signals.multitaper_psd(x, FS)
     faint = (res.frequencies > 2000.0) & (res.frequencies < 3800.0)

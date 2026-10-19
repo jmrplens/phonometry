@@ -102,7 +102,7 @@ stop at 4 kHz). `threshold` is the threshold of hearing T_f in dB re
 EqualLoudnessContours.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -187,7 +187,7 @@ tuple used to be unpacked by position.
 LoudnessContour.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

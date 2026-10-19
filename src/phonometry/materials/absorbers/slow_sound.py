@@ -68,7 +68,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from scipy.optimize import root
@@ -90,8 +90,11 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
     from ..._internal.types import Real
     from ...fluids import Fluid
+
+Geometry = Literal["square", "slit"]
 
 #: Default number of transverse modes kept per axis in the duct series.
 _DUCT_TERMS = 40
@@ -118,7 +121,7 @@ class SlowSoundAbsorberWarning(PhonometryWarning):
     """Advisory for slow-sound absorber use outside the modelled regime."""
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class HelmholtzResonator(RichDisplay):
     """A square-cross-section Helmholtz resonator loading a slit.
 
@@ -150,7 +153,7 @@ class HelmholtzResonator(RichDisplay):
         require_positive(self.cavity_side_m, "cavity_side_m")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the resonator cross-section to scale (dimensioned).
 
@@ -444,7 +447,7 @@ def helmholtz_resonator_impedance(
     slit_height_m: float | None = None,
     lattice_step_m: float | None = None,
     end_correction: bool = True,
-    geometry: str = "square",
+    geometry: Geometry = "square",
     fluid: Fluid = ABSORBER_AIR,
     n_sum_terms: int = _DUCT_TERMS,
 ) -> Complex:
@@ -584,7 +587,7 @@ class SlitResonatorAbsorberResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the absorption spectrum ``alpha(f)`` with ``|R|`` overlaid.
 
@@ -598,7 +601,7 @@ class SlitResonatorAbsorberResult(OwnsArrays):
         return plot_slit_resonator_absorber(self, ax=ax, language=language, **kwargs)
 
     def plot_geometry(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw one period of the panel cross-section to scale (dimensioned).
 
@@ -636,7 +639,7 @@ def _panel_transfer_matrix(
     period_m: float,
     slit_radiation: bool,
     end_correction: bool,
-    resonator_geometry: str,
+    resonator_geometry: Geometry,
     fluid: Fluid,
 ) -> Complex:
     """Total chain matrix ``M_dl (M_s M_HR M_s)...`` shaped ``(2, 2, nf)``."""
@@ -707,7 +710,7 @@ def slit_helmholtz_absorber(
     angle_rad: float = 0.0,
     end_correction: bool = True,
     slit_radiation: bool = True,
-    resonator_geometry: str = "square",
+    resonator_geometry: Geometry = "square",
     fluid: Fluid = ABSORBER_AIR,
 ) -> SlitResonatorAbsorberResult:
     r"""Transfer-matrix prediction of a slit panel loaded with resonators.
@@ -957,7 +960,10 @@ def critical_coupling_design(
         if not (lc_lo <= lc <= lc_hi and h_lo <= h <= h_hi and h <= d):
             return [1e6, 1e6]
         cand = HelmholtzResonator(
-            resonator.neck_length_m, resonator.neck_side_m, lc, resonator.cavity_side_m
+            neck_length_m=resonator.neck_length_m,
+            neck_side_m=resonator.neck_side_m,
+            cavity_length_m=lc,
+            cavity_side_m=resonator.cavity_side_m,
         )
         z = _acoustic_surface_impedance(
             f0,
@@ -978,7 +984,10 @@ def critical_coupling_design(
     sol = root(residual, guess, method="hybr", tol=1e-10)
     lc_opt, h_opt = float(sol.x[0]), float(sol.x[1])
     designed = HelmholtzResonator(
-        resonator.neck_length_m, resonator.neck_side_m, lc_opt, resonator.cavity_side_m
+        neck_length_m=resonator.neck_length_m,
+        neck_side_m=resonator.neck_side_m,
+        cavity_length_m=lc_opt,
+        cavity_side_m=resonator.cavity_side_m,
     )
     z_final = _acoustic_surface_impedance(
         f0,

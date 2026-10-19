@@ -53,7 +53,7 @@ import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -67,7 +67,7 @@ from .._internal.validation import (
 )
 from .._internal.warnings import PhonometryWarning
 from ..io._resolve import resolve_fs
-from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ..metrology.reference_values import REFERENCE_VALUES
 from ._shared import (
     noise_power,
     onset_index,
@@ -82,7 +82,10 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
     from ..io._signal import Signal
+
+Symbol = Literal["G", "EDT", "C80", "D50", "Ts", "J_LF", "J_LFC", "L_J"]
 
 __all__ = [
     "DIFFUSE_FIELD_REFERENCE_OFFSET_DB",
@@ -146,7 +149,7 @@ __all__ = [
 
 #: Reference sound pressure, 20 uPa (ISO 3382-1:2009, A.2.1), the value of
 #: ISO 1683:2015 Table 1.
-_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_P0 = REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 #: Reference time, 1 s, of the sound pressure exposure level
 #: (ISO 3382-1:2009, Equations (A.2) and (A.3)).
@@ -612,7 +615,7 @@ class SoundStrengthResult(OwnsArrays):
     reference_level: NDArray[np.float64]
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | np.ndarray:
         """Plot the per-band sound strength against the Table A.1 range.
 
@@ -803,7 +806,7 @@ class LateralEnergyResult(OwnsArrays):
     weighting: str
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-band lateral fraction against the Table A.1 range.
 
@@ -822,7 +825,7 @@ def early_lateral_energy_fraction(
     lateral_ir: Signal | list[float] | NDArray[np.float64],
     fs: int | None = None,
     *,
-    weighting: str = "squared",
+    weighting: Literal["squared", "cosine"] = "squared",
     limits: tuple[float, float] | None = _DEFAULT_BANDS,
     fraction: int = 1,
 ) -> LateralEnergyResult:
@@ -942,7 +945,7 @@ class LateLateralResult(OwnsArrays):
     reference_level: NDArray[np.float64]
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-band late lateral level against the Table A.1 range.
 
@@ -1140,7 +1143,7 @@ class InterauralCorrelationResult(OwnsArrays):
     correlation: NDArray[np.float64]
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the correlation function over the search window, per band.
 
@@ -1380,7 +1383,7 @@ class StageSupportResult(OwnsArrays):
     late: NDArray[np.float64]
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot both supports per band against the Table C.1 ranges.
 
@@ -1712,7 +1715,7 @@ def _band_positions(
 
 
 def single_number_average(
-    symbol: str, values: ArrayLike, *, frequencies: ArrayLike
+    symbol: Symbol, values: ArrayLike, *, frequencies: ArrayLike
 ) -> float:
     r"""The Table A.1 single number of one auditorium quantity.
 
@@ -1877,7 +1880,7 @@ class PerceptibleDifference(OwnsArrays):
 
 
 def assess_perceptible_difference(
-    symbol: str, first: ArrayLike, second: ArrayLike
+    symbol: Symbol, first: ArrayLike, second: ArrayLike
 ) -> PerceptibleDifference:
     """Would a listener hear the difference between two values? (Table A.1).
 

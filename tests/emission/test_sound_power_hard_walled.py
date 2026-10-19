@@ -139,7 +139,7 @@ def test_sound_power_is_eq14_with_the_background_negligible() -> None:
     )
     np.testing.assert_allclose(res.mean_background_level, BACKGROUND, atol=1e-12)
     assert np.all(res.background_correction == 0.0)
-    assert np.all(res.background_correction_ref == 0.0)
+    assert np.all(res.reference_background_correction == 0.0)
     assert bool(np.all(res.background_requirement_met))
     assert res.quantity == "power"
     assert np.all(np.isnan(res.sound_energy_level))
@@ -156,9 +156,11 @@ def test_background_correction_is_eq13_of_the_two_means() -> None:
     background[3] = mean_st[3] - margin_st
     bg_ref = BACKGROUND.copy()
     bg_ref[3] = mean_rss[3] - margin_rss
-    res = _power(background_levels=background, background_levels_ref=bg_ref)
+    res = _power(background_levels=background, reference_background_levels=bg_ref)
     assert res.background_correction[3] == pytest.approx(_k1(margin_st), abs=1e-9)
-    assert res.background_correction_ref[3] == pytest.approx(_k1(margin_rss), abs=1e-9)
+    assert res.reference_background_correction[3] == pytest.approx(
+        _k1(margin_rss), abs=1e-9
+    )
     expected = LW_RSS[3] - mean_rss[3] + mean_st[3] + _k1(margin_rss) - _k1(margin_st)
     assert res.sound_power_level[3] == pytest.approx(expected, abs=1e-9)
 
@@ -182,7 +184,9 @@ def test_background_rules_of_8_1_3(margin: float, expected: float) -> None:
     background = _energy_mean(ST, 0) - margin
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", emission.SoundPowerWarning)
-        res = _power(background_levels=background, background_levels_ref=BACKGROUND)
+        res = _power(
+            background_levels=background, reference_background_levels=BACKGROUND
+        )
     np.testing.assert_allclose(res.background_correction, expected, atol=5e-5)
     assert bool(np.all(res.background_requirement_met)) is (margin >= 6.0)
 
@@ -194,7 +198,9 @@ def test_margin_of_the_source_below_6_db_is_an_upper_bound() -> None:
     background = BACKGROUND.copy()
     background[0] = _energy_mean(ST, 0)[0] - 3.0
     with pytest.warns(emission.SoundPowerWarning, match="source under test.*upper"):
-        res = _power(background_levels=background, background_levels_ref=BACKGROUND)
+        res = _power(
+            background_levels=background, reference_background_levels=BACKGROUND
+        )
     assert res.background_margin_db[0] == pytest.approx(3.0, abs=1e-9)
     assert not bool(res.background_requirement_met[0])
     assert bool(np.all(res.background_requirement_met[1:]))
@@ -211,9 +217,9 @@ def test_reference_source_margin_fails_4_5_but_is_no_upper_bound() -> None:
     bg_ref = BACKGROUND.copy()
     bg_ref[6] = _energy_mean(RSS, 0)[6] - 4.0
     with pytest.warns(emission.SoundPowerWarning, match="not upper bounds"):
-        res = _power(background_levels_ref=bg_ref)
-    assert res.background_correction_ref[6] == pytest.approx(1.3)
-    assert res.background_margin_ref_db[6] == pytest.approx(4.0, abs=1e-9)
+        res = _power(reference_background_levels=bg_ref)
+    assert res.reference_background_correction[6] == pytest.approx(1.3)
+    assert res.reference_background_margin_db[6] == pytest.approx(4.0, abs=1e-9)
     assert not bool(res.background_requirement_met[6])
     assert not bool(np.any(res.upper_bound))
     expected = LW_RSS[6] - _energy_mean(RSS, 0)[6] + _energy_mean(ST, 0)[6] + 1.3
@@ -268,7 +274,7 @@ def test_a_traverse_is_a_1d_spectrum_and_needs_a_traverse_reference() -> None:
 
 def test_fixed_reference_levels_are_refused_for_a_traverse() -> None:
     mean_st = _energy_mean(ST, 0)
-    with pytest.raises(ValueError, match="levels_ref"):
+    with pytest.raises(ValueError, match="reference_levels"):
         emission.sound_power_hard_walled(mean_st, RSS, LW_RSS, frequencies=FREQS)
 
 
@@ -287,9 +293,9 @@ def test_annex_a_c2_at_the_reference_conditions_is_theta1_residue() -> None:
     res = _power()
     assert res.c2 == pytest.approx(15.0 * math.log10(296.15 / 296.0), abs=1e-12)
     np.testing.assert_allclose(
-        res.sound_power_level_ref, res.sound_power_level + res.c2
+        res.sound_power_level_at_reference_conditions, res.sound_power_level + res.c2
     )
-    assert res.sound_power_level_a_ref == pytest.approx(
+    assert res.sound_power_level_a_at_reference_conditions == pytest.approx(
         res.sound_power_level_a + res.c2
     )
 
@@ -666,7 +672,7 @@ def test_plot_draws_one_bar_per_band_hatches_and_error_bars() -> None:
         warnings.simplefilter("ignore", emission.SoundPowerWarning)
         res = _power(
             background_levels=background,
-            background_levels_ref=bg_ref,
+            reference_background_levels=bg_ref,
             sigma_omc_db=2.0,
         )
     ax = res.plot()

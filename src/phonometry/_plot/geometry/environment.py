@@ -36,6 +36,7 @@ from ._draft import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
     from ...environment.propagation.ground_barriers import BarrierInsertionLoss
 
 #: Spanish translations of the fixed strings rendered here, keyed by their
@@ -52,7 +53,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Translate a fixed UI string to Spanish, else return it unchanged."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -69,7 +70,7 @@ def plot_barrier_geometry(
     receiver_distance: float,
     receiver_height_m: float,
     thickness_m: float | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw the source-barrier-receiver section to scale.
@@ -235,7 +236,7 @@ def plot_barrier_result_geometry(
     result: BarrierInsertionLoss,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Barrier section for a result, drawn from the geometry it keeps."""

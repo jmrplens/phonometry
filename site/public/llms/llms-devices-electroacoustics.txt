@@ -260,7 +260,7 @@ measurement wants a steady, sufficiently long capture.
 so the perceptual emphasis of the distortion products is accounted for. The
 default weighting is the network the clause requires: the IEC 60268-1
 Appendix A curve, i.e. ITU-R BS.468-4, which peaks at +12.2 dB near 6.3 kHz
-(exposed as `itu_r_468_weighting`); `'A'` and `'C'` remain as labelled options.
+(exposed as `weighting_bs468`); `'A'` and `'C'` remain as labelled options.
 Per the clause, the weighted measurement is valid for fundamental frequencies
 between 31.5 Hz and 400 Hz:
 
@@ -269,7 +269,7 @@ from phonometry import electroacoustics
 
 print(electroacoustics.weighted_thd(signal, fs, 100.0))                  # ITU-R BS.468-4 network
 print(electroacoustics.weighted_thd(signal, fs, 100.0, weighting="A"))   # A-weighted variant
-print(electroacoustics.itu_r_468_weighting([6300.0]))                    # [+12.2167] dB
+print(electroacoustics.weighting_bs468([6300.0]))                    # [+12.2167] dB
 ```
 
 ### 2.2 Dynamic range and idle channel noise (AES17-2015 6.4)
@@ -1088,12 +1088,12 @@ weighting `"468"` wherever it takes one. The signal-to-noise ratio re 1 Pa
 (94 dB SPL) is
 derived from the same equivalent noise level, and the overload sound
 pressure level (clause 15.2) bounds the usable range from above. The
-ITU-R BS.468-4 weighting curve itself is exposed as `itu_r_468_weighting` in the
+ITU-R BS.468-4 weighting curve itself is exposed as `weighting_bs468` in the
 [electroacoustics distortion set](https://docs.jmrp.io/phonometry/devices/electroacoustics/electroacoustics/), where it also
 weights THD. The quasi-peak detector is implemented too, as
 `broadcast.quasi_peak_meter`
 ([Quasi-peak programme meter](https://docs.jmrp.io/phonometry/devices/broadcast/quasi-peak/)), but it reads a
-*recording*, and `itu_r_468_weighting` is the network alone: an
+*recording*, and `weighting_bs468` is the network alone: an
 inherent-noise level computed from the network and an r.m.s. sum is still
 not a dBqps figure. Clause 17 has no waveform to hand it either (it takes
 the stated voltage or level from the data sheet), so

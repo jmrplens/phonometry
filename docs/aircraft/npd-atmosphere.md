@@ -26,7 +26,7 @@ in decibels per 100 m, from 50 Hz to 10 kHz.
 ```python
 from phonometry import aircraft
 
-rates = aircraft.SAE_AIR1845_ATTENUATION_DB_PER_100M
+rates = aircraft.AIR1845_ATTENUATION_DB_PER_100M
 print(rates[1000.0], rates[10000.0])   # 0.59 9.836 dB/100 m
 ```
 
@@ -167,11 +167,11 @@ D-3c.
 
 **SAE ARP 866A** (`absorption="arp866a"`, kept for transition) is a rate per
 band that depends on temperature and humidity only, implemented from ISO
-3891:1978 Annex A as `arp866a_attenuation`. Above 4 kHz it is evaluated at the
+3891:1978 Annex A as `attenuation_arp866a`. Above 4 kHz it is evaluated at the
 lower band edge that Table 2 prints (4500, 5600, 7100 and 9000 Hz). Table 1
 asks for "a form of quadratic interpolation" of $\eta(\delta)$ without saying
 which: the parabola through three neighbouring entries reproduces all 264 cells
-of ISO 3891 Table 10 and is the default of `arp866a_attenuation`, while Doc 29
+of ISO 3891 Table 10 and is the default of `attenuation_arp866a`, while Doc 29
 Table D-3b is reproduced by linear interpolation
 (`eta_interpolation="linear"`), which is what the Appendix D route uses. The
 two readings part only below $\delta$ = 6.50; from there on Table 1 prints
@@ -181,7 +181,7 @@ two readings part only below $\delta$ = 6.50; from there on Table 1 prints
 import numpy as np
 from phonometry import aircraft
 
-absorption = aircraft.arp866a_attenuation(
+absorption = aircraft.attenuation_arp866a(
     [1000.0, 10000.0], temperature_c=10.0, relative_humidity_percent=80.0
 )
 print(absorption.evaluation_frequencies_hz)             # [1000. 9000.] Hz

@@ -277,7 +277,7 @@ Whether the room qualifies on every criterion that was evaluated.
 HardWalledRoomCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -325,9 +325,9 @@ HardWalledSoundPowerResult(
     mean_background_level: np.ndarray,
     reference_power_level: np.ndarray,
     background_correction: np.ndarray,
-    background_correction_ref: np.ndarray,
+    reference_background_correction: np.ndarray,
     background_margin_db: np.ndarray,
-    background_margin_ref_db: np.ndarray,
+    reference_background_margin_db: np.ndarray,
     c2: float,
     sigma_r0: np.ndarray,
     sigma_r0_a: float,
@@ -335,7 +335,7 @@ HardWalledSoundPowerResult(
     coverage_factor: float,
     sound_power_level_a: float,
     sound_energy_level_a: float,
-    quantity: str,
+    quantity: Literal['power', 'energy'],
     n_microphone_positions: int,
     n_source_positions: int,
 )
@@ -359,9 +359,9 @@ $\overline{L'_{p(\mathrm{RSS})}}$ (Eq. 11); `mean_background_level`
 is $\overline{L_{p(\mathrm{B})}}$ (Eq. 12), `NaN` where no
 background was measured, and `reference_power_level` the calibrated
 $L_{W(\mathrm{RSS})}$. `background_correction` and
-`background_correction_ref` are $K_1$ and
+`reference_background_correction` are $K_1$ and
 $K_{1(\mathrm{RSS})}$ per band, and `background_margin_db` and
-`background_margin_ref_db` the two margins over the background they
+`reference_background_margin_db` the two margins over the background they
 were read from (`NaN` where no background was measured).
 `background_requirement_met` and `upper_bound` are read from those
 margins and the 6 dB of 4.5, so they are not fields: the first is
@@ -413,7 +413,7 @@ EXAMPLE.
 HardWalledSoundPowerResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -443,9 +443,9 @@ HardWalledSoundPowerResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -497,29 +497,29 @@ $\sigma_\mathrm{tot} = \sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$ per band (E
 
 Eq. (22) with the A-weighted row of Table 3, in decibels.
 
-### HardWalledSoundPowerResult.sound_energy_level_a_ref
+### HardWalledSoundPowerResult.sound_energy_level_a_at_reference_conditions
 
 *property*
 
-The A-weighted total of `sound_energy_level_ref` (Eq. B.2).
+The A-weighted total of `sound_energy_level_at_reference_conditions` (Eq. B.2).
 
-### HardWalledSoundPowerResult.sound_energy_level_ref
+### HardWalledSoundPowerResult.sound_energy_level_at_reference_conditions
 
 *property*
 
 `LJ + C2` under the reference meteorological conditions (Eq. A.3);
 `NaN` for a power determination.
 
-### HardWalledSoundPowerResult.sound_power_level_a_ref
+### HardWalledSoundPowerResult.sound_power_level_a_at_reference_conditions
 
 *property*
 
-The A-weighted total of `sound_power_level_ref`.
+The A-weighted total of `sound_power_level_at_reference_conditions`.
 
 `C2` is the same in every band, so it passes through Eq. (B.1)
 unchanged: the total moves by `C2` too.
 
-### HardWalledSoundPowerResult.sound_power_level_ref
+### HardWalledSoundPowerResult.sound_power_level_at_reference_conditions
 
 *property*
 
@@ -588,14 +588,14 @@ value is still returned.
 ```python
 sound_energy_hard_walled(
     event_levels: ArrayLike,
-    levels_ref: ArrayLike,
-    lw_ref: ArrayLike | ReferenceSourceCalibration,
+    reference_levels: ArrayLike,
+    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
     *,
     frequencies: ArrayLike,
     n_events: int | None = None,
     background_levels: ArrayLike | None = None,
     integration_time: float | None = None,
-    background_levels_ref: ArrayLike | None = None,
+    reference_background_levels: ArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     sigma_omc_db: float | None = None,
@@ -628,13 +628,13 @@ $L_J = L_W + 10 \log_{10}(T/T_0)$, $T_0$ = 1 s (3.4 NOTE 1).
 | Name | Description |
 | :--- | :--- |
 | `event_levels` | Measured (uncorrected) octave-band single event levels, in decibels. With `n_events` `None`: `(Ne, bands)` for a traverse, `(Ne, NM, bands)` or `(Ne, NS, NM, bands)`, one entry per event on the first axis (Eq. 15). With `n_events`: `(bands,)`, `(NM, bands)` or `(NS, NM, bands)`, one measurement encompassing `n_events` events (Eq. 16). |
-| `levels_ref` | Time-averaged levels of the reference sound source, `(NM, bands)` or `(bands,)`, as in [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
-| `lw_ref` | Calibrated sound power level of the reference source, `(bands,)`, in decibels, under the meteorological conditions of the test, or its [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration), as for [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
+| `reference_levels` | Time-averaged levels of the reference sound source, `(NM, bands)` or `(bands,)`, as in [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
+| `reference_sound_power_levels` | Calibrated sound power level of the reference source, `(bands,)`, in decibels, under the meteorological conditions of the test, or its [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration), as for [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
 | `frequencies` | Nominal octave mid-band frequencies, one per band. |
 | `n_events` | The number $N_\mathrm{e}$ of events one measurement encompasses (Eq. 16); `None` when the events are on the first axis. Fewer than five warns (7.6). |
 | `background_levels` | Time-averaged background levels `Lpi(B)`, `(NM, bands)` or `(bands,)`, in decibels; requires `integration_time`. `None` applies no correction, warns and leaves `background_requirement_met` `False` throughout. |
 | `integration_time` | The integration time `T` of the single event levels, in seconds. The background is compared as its exposure over the same `T`, $L_{p(\mathrm{B})} + 10 \log_{10}(T/T_0)$, so that Eq. (19) subtracts one energy from another. |
-| `background_levels_ref` | Background for the reference-source measurement; `None` reuses `background_levels`, compared with the time-averaged reference level as it stands. |
+| `reference_background_levels` | Background for the reference-source measurement; `None` reuses `background_levels`, compared with the time-averaged reference level as it stands. |
 | `temperature_c` | Air temperature at the test, in degrees Celsius. |
 | `static_pressure_kpa` | Static pressure at the test, in kilopascals. |
 | `sigma_omc_db` | Operating-and-mounting standard deviation, in decibels. |
@@ -654,12 +654,12 @@ $L_J = L_W + 10 \log_{10}(T/T_0)$, $T_0$ = 1 s (3.4 NOTE 1).
 ```python
 sound_power_hard_walled(
     levels: ArrayLike,
-    levels_ref: ArrayLike,
-    lw_ref: ArrayLike | ReferenceSourceCalibration,
+    reference_levels: ArrayLike,
+    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
     *,
     frequencies: ArrayLike,
     background_levels: ArrayLike | None = None,
-    background_levels_ref: ArrayLike | None = None,
+    reference_background_levels: ArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     sigma_omc_db: float | None = None,
@@ -682,7 +682,7 @@ $$
 L_W = L_{W(\mathrm{RSS})} - \overline{L'_{p(\mathrm{RSS})}} + \overline{L'_{p(\mathrm{ST})}} + K_{1(\mathrm{RSS})} - K_1 \tag{Eq. 14}
 $$
 
-at the meteorological conditions of the test; `sound_power_level_ref`
+at the meteorological conditions of the test; `sound_power_level_at_reference_conditions`
 adds the Annex A correction and `sound_power_level_a` is the Annex B
 total.
 
@@ -691,11 +691,11 @@ total.
 | Name | Description |
 | :--- | :--- |
 | `levels` | Measured (uncorrected) octave-band time-averaged levels of the source under test, in decibels: `(bands,)` for one microphone traverse (NOTE to 8.1.2), `(NM, bands)` for fixed positions, or `(NS, NM, bands)` for several source locations (Eq. 9). |
-| `levels_ref` | The same for the reference sound source at the same microphone positions, `(NM, bands)`, or its traverse level `(bands,)`. |
-| `lw_ref` | Calibrated octave-band sound power level of the reference source `LW(RSS)`, `(bands,)`, in decibels, under the meteorological conditions of the test, since Eq. (14) gives `LW` there (Annex A); or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, whose one-third octave bands are summed into the octaves at `frequencies` and carried from the reference conditions to those of the test by its own `C2` (ISO 6926:2016, 8.4). |
+| `reference_levels` | The same for the reference sound source at the same microphone positions, `(NM, bands)`, or its traverse level `(bands,)`. |
+| `reference_sound_power_levels` | Calibrated octave-band sound power level of the reference source `LW(RSS)`, `(bands,)`, in decibels, under the meteorological conditions of the test, since Eq. (14) gives `LW` there (Annex A); or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, whose one-third octave bands are summed into the octaves at `frequencies` and carried from the reference conditions to those of the test by its own `C2` (ISO 6926:2016, 8.4). |
 | `frequencies` | Nominal octave mid-band frequencies, one per band, ascending, from 125 Hz to 8 kHz; 63 Hz is accepted where the room and the instrumentation are satisfactory there (3.11, Table B.1 footnote). |
 | `background_levels` | Octave-band background levels `Lpi(B)`, `(NM, bands)` or one averaged `(bands,)` spectrum, in decibels. `None` applies no correction, warns and leaves `background_requirement_met` `False` throughout (4.5, 7.5). |
-| `background_levels_ref` | Background for the reference-source measurement, same shapes; `None` reuses `background_levels`. |
+| `reference_background_levels` | Background for the reference-source measurement, same shapes; `None` reuses `background_levels`. |
 | `temperature_c` | Air temperature at the test, in degrees Celsius. |
 | `static_pressure_kpa` | Static pressure at the test, in kilopascals (Eq. A.2 gives it from the altitude, [`static_pressure_from_altitude`](/phonometry/reference/api/power/sound-power-in-situ/#static_pressure_from_altitude)). |
 | `sigma_omc_db` | Standard deviation of the operating and mounting conditions of the source (9.2, Eq. C.1), in decibels; `None` leaves `sigma_tot` and the expanded uncertainty `NaN`. |
@@ -713,7 +713,7 @@ total.
 
 ```python
 SourceLocationPlan(
-    standard: str,
+    standard: Literal['ISO 3743-1:2010', 'ISO 3743-2:2018'],
     frequencies: np.ndarray,
     standard_deviation_db: np.ndarray,
     source_locations: np.ndarray,
@@ -772,7 +772,7 @@ Whether a band of Part 1 sends the determination to a second room.
 SourceLocationPlan.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

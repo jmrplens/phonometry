@@ -68,7 +68,7 @@ averages is not, in general, optimal.
 **Non-integer samples per period.** When $f_\mathrm{s} T$ is not an integer
 the period boundaries fall between samples. Each block is then aligned to
 a common integer grid by the band-limited fractional delay of
-[`phonometry.signals.test_signals.fractional_delay`](/phonometry/reference/api/signals/test-signals/#fractional_delay) before averaging, so
+[`phonometry.signals.fractional_delay`](/phonometry/reference/api/signals/test-signals/#fractional_delay) before averaging, so
 the periodic waveform is recovered within the interpolation error of that
 band-limited shift. An integer $f_\mathrm{s} T$ needs no interpolation and
 the waveform is recovered to machine precision. The averaged samples stay
@@ -180,7 +180,7 @@ each block is shifted onto the grid before it is averaged. Read from
 SynchronousAverageResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
 ```

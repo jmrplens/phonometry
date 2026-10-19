@@ -17,7 +17,7 @@ diffraction.
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
@@ -178,9 +178,11 @@ _SPLIT_BAND_HZ = 10000.0
 def _arp5534_at_split(offset: float) -> float:
     """Library δ_B (dB) at the path whose δ_t is ``150 (1 + offset)`` dB."""
     alpha = float(
-        ph.aircraft.sae_band_attenuation([_SPLIT_BAND_HZ], 1.0).midband_attenuation[0]
+        ph.aircraft.band_attenuation_arp5534([_SPLIT_BAND_HZ], 1.0).midband_attenuation[
+            0
+        ]
     )
-    res = ph.aircraft.sae_band_attenuation(
+    res = ph.aircraft.band_attenuation_arp5534(
         [_SPLIT_BAND_HZ], 150.0 / alpha * (1.0 + offset)
     )
     return float(res.band_attenuation[0])
@@ -640,7 +642,7 @@ def _chk_arp5534_coefficient() -> Outcome:
             exact_midband=True,
         )
     )
-    res = ph.aircraft.sae_band_attenuation(
+    res = ph.aircraft.band_attenuation_arp5534(
         [1000.0], 1000.0, temperature_c=25.0, relative_humidity_percent=70.0
     )
     return numeric(
@@ -809,27 +811,33 @@ def _doc29_reference_jet() -> ph.aircraft.PerformanceAircraft:
         max_landing_weight_lb=159222.0,
         jet_coefficients={
             "MaxTakeoff": ph.aircraft.JetEngineCoefficients(
-                25000.0, -25.0, 0.3, 1e-5, 0.0
+                e=25000.0, f=-25.0, ga=0.3, gb=1e-5, h=0.0
             ),
             "MaxClimb": ph.aircraft.JetEngineCoefficients(
-                16000.0, -4.0, 0.4, -1e-5, 0.0
+                e=16000.0, f=-4.0, ga=0.4, gb=-1e-5, h=0.0
             ),
             "IdleApproach": ph.aircraft.JetEngineCoefficients(
-                1100.0, -6.5, 0.17, -1e-5, 0.0
+                e=1100.0, f=-6.5, ga=0.17, gb=-1e-5, h=0.0
             ),
         },
         # Sheet C-4, in its own order: drag ratio R, then the ground-roll
         # coefficient B of Eq. B-16 and the speed coefficient C/D of Eq. B-15
         # or Eq. B-75 where the sheet prints one rather than a dash.
         aerodynamic_coefficients={
-            ("A", "5"): ph.aircraft.AerodynamicCoefficients(0.07),
-            ("A", "15"): ph.aircraft.AerodynamicCoefficients(0.075),
-            ("A", "25"): ph.aircraft.AerodynamicCoefficients(0.1, None, 0.375),
-            ("A", "30"): ph.aircraft.AerodynamicCoefficients(0.12, None, 0.35),
-            ("A", "ZERO"): ph.aircraft.AerodynamicCoefficients(0.055),
-            ("D", "1"): ph.aircraft.AerodynamicCoefficients(0.06),
-            ("D", "5"): ph.aircraft.AerodynamicCoefficients(0.07, 0.0075, 0.4),
-            ("D", "ZERO"): ph.aircraft.AerodynamicCoefficients(0.055),
+            ("A", "5"): ph.aircraft.AerodynamicCoefficients(drag_ratio=0.07),
+            ("A", "15"): ph.aircraft.AerodynamicCoefficients(drag_ratio=0.075),
+            ("A", "25"): ph.aircraft.AerodynamicCoefficients(
+                drag_ratio=0.1, ground_roll_coefficient=None, speed_coefficient=0.375
+            ),
+            ("A", "30"): ph.aircraft.AerodynamicCoefficients(
+                drag_ratio=0.12, ground_roll_coefficient=None, speed_coefficient=0.35
+            ),
+            ("A", "ZERO"): ph.aircraft.AerodynamicCoefficients(drag_ratio=0.055),
+            ("D", "1"): ph.aircraft.AerodynamicCoefficients(drag_ratio=0.06),
+            ("D", "5"): ph.aircraft.AerodynamicCoefficients(
+                drag_ratio=0.07, ground_roll_coefficient=0.0075, speed_coefficient=0.4
+            ),
+            ("D", "ZERO"): ph.aircraft.AerodynamicCoefficients(drag_ratio=0.055),
         },
     )
 
@@ -846,7 +854,11 @@ def _chk_doc29_takeoff_roll() -> Outcome:
     # speed of Eq. B-15.
     profile = ph.aircraft.departure_profile(
         _doc29_reference_jet(),
-        [ph.aircraft.DepartureStep("Takeoff", "MaxTakeoff", "5")],
+        [
+            ph.aircraft.DepartureStep(
+                step_type="Takeoff", thrust_rating="MaxTakeoff", flap_id="5"
+            )
+        ],
         weight_lb=165347.0,
         aerodrome=ph.aircraft.Aerodrome(
             elevation_ft=0.0, temperature_c=15.0, headwind_kt=8.0
@@ -871,51 +883,53 @@ def _chk_doc29_approach_thrust() -> Outcome:
     # taken to the one decimal that sheet prints it to.
     steps = [
         ph.aircraft.ApproachStep(
-            "Descend",
-            "ZERO",
+            step_type="Descend",
+            flap_id="ZERO",
             start_altitude_ft=6000.0,
             start_calibrated_airspeed_kt=250.0,
             descent_angle_deg=2.8,
         ),
         ph.aircraft.ApproachStep(
-            "Descend",
-            "5",
+            step_type="Descend",
+            flap_id="5",
             start_altitude_ft=3000.0,
             start_calibrated_airspeed_kt=180.0,
             descent_angle_deg=3.0,
         ),
         ph.aircraft.ApproachStep(
-            "Descend",
-            "25",
+            step_type="Descend",
+            flap_id="25",
             start_altitude_ft=1500.0,
             start_calibrated_airspeed_kt=150.0,
             descent_angle_deg=3.0,
         ),
         ph.aircraft.ApproachStep(
-            "Descend",
-            "30",
+            step_type="Descend",
+            flap_id="30",
             start_altitude_ft=1000.0,
             start_calibrated_airspeed_kt=135.0,
             descent_angle_deg=3.0,
         ),
         ph.aircraft.ApproachStep(
-            "Descend",
-            "30",
+            step_type="Descend",
+            flap_id="30",
             start_altitude_ft=49.9,
             start_calibrated_airspeed_kt=135.0,
             descent_angle_deg=3.0,
         ),
-        ph.aircraft.ApproachStep("Land", "30", touchdown_roll_ft=304.1),
         ph.aircraft.ApproachStep(
-            "Decelerate",
-            "-NONE-",
+            step_type="Land", flap_id="30", touchdown_roll_ft=304.1
+        ),
+        ph.aircraft.ApproachStep(
+            step_type="Decelerate",
+            flap_id="-NONE-",
             start_calibrated_airspeed_kt=129.6,
             distance_ft=3937.0,
             start_thrust_percent=40.0,
         ),
         ph.aircraft.ApproachStep(
-            "Decelerate",
-            "-NONE-",
+            step_type="Decelerate",
+            flap_id="-NONE-",
             start_calibrated_airspeed_kt=27.0,
             distance_ft=0.0,
             start_thrust_percent=10.0,
@@ -955,7 +969,7 @@ def _appendix_d_tables() -> ModuleType:
 
 
 def _appendix_d_increment(
-    class_id: int, absorption: str
+    class_id: int, absorption: Literal["arp5534", "arp866a"]
 ) -> ph.aircraft.NPDAtmosphereIncrement:
     database = ph.aircraft.load_anp_database()
     return ph.aircraft.npd_atmosphere_increment(
@@ -1041,7 +1055,7 @@ def _chk_doc29_table_d3c() -> Outcome:
     return count(matching, printed.size, subject="cells of Table D-3c")
 
 
-def _appendix_d_levels(absorption: str) -> np.ndarray:
+def _appendix_d_levels(absorption: Literal["arp5534", "arp866a"]) -> np.ndarray:
     """``LA,ref``, ``LA,atm`` and the increment for 103 then 205, as printed."""
     columns = []
     for class_id in (103, 205):
@@ -1076,13 +1090,16 @@ def _chk_doc29_table_d5() -> Outcome:
     return count(matching, printed.size, subject="cells of Table D-5")
 
 
-def _appendix_d_revised(absorption: str) -> tuple[np.ndarray, np.ndarray]:
+def _appendix_d_revised(
+    absorption: Literal["arp5534", "arp866a"],
+) -> tuple[np.ndarray, np.ndarray]:
     """The JETW NPD data of Table D-6a revised by one route, and Table D-6a's rows."""
     tables = _appendix_d_tables()
     database = ph.aircraft.load_anp_database()
     distances = np.asarray(tables.DISTANCES_FT) * 0.3048
     revised = []
-    for operation, class_id in (("A", 205), ("D", 103)):
+    operations: tuple[tuple[Literal["A", "D"], int], ...] = (("A", 205), ("D", 103))
+    for operation, class_id in operations:
         rows = [r for r in tables.TABLE_D6A if r[0] == operation]
         curves = ph.aircraft.ANPNPDCurves(
             aircraft_id="JETW",
@@ -1172,7 +1189,7 @@ def _chk_iso3891_annex_c() -> Outcome:
 )
 def _chk_iso3891_table_10() -> Outcome:
     # The formula of A.2 with eta read from Table 1 by the three-point
-    # quadratic of arp866a_attenuation, against the table ISO 3891 prints from
+    # quadratic of attenuation_arp866a, against the table ISO 3891 prints from
     # it (PDF page 19, printed p. 16), to its one decimal. Linear interpolation
     # misses 11 of the 264 cells. The 12 500 Hz row the table also prints has
     # no evaluation frequency in Table 2 and is not a band of the function.
@@ -1180,7 +1197,7 @@ def _chk_iso3891_table_10() -> Outcome:
     printed = np.asarray(tables.TABLE_10)
     got = np.column_stack(
         [
-            ph.aircraft.arp866a_attenuation(
+            ph.aircraft.attenuation_arp866a(
                 tables.FREQUENCIES_HZ,
                 temperature_c=t,
                 relative_humidity_percent=80.0,

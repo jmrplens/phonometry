@@ -491,6 +491,7 @@ and leave [`TurbineSoundPowerResult.conforms`](/phonometry/reference/api/power/t
 
 ```python
 TurbineEnvironmentalCorrection(
+    *,
     environmental_correction: float,
     method: Literal['absorption', 'reference source'],
     surface_area: float | None = None,
@@ -522,7 +523,7 @@ by [`turbine_reference_source_correction`](/phonometry/reference/api/power/turbi
 TurbineEnvironmentalCorrection.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -549,6 +550,7 @@ $A/S$, the abscissa of Figure A.3, or `None` (A.3.2).
 
 ```python
 TurbineMeasurementSurface(
+    *,
     reference_boxes: tuple[TurbineReferenceBox, ...],
     lengths_m: np.ndarray,
     widths_m: np.ndarray,
@@ -613,7 +615,7 @@ TurbineMeasurementSurface.plot(
     ax: Axes | None = None,
     *,
     view: Literal['plan', 'elevation'] = 'plan',
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -709,7 +711,7 @@ TurbineMicrophoneArray.plot(
     ax: Axes | None = None,
     *,
     view: Literal['plan', 'elevation'] = 'plan',
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -779,7 +781,7 @@ tie it is the first condition listed.
 TurbineNoiseDeclaration.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -824,6 +826,7 @@ The statement clause 10 requires the report to contain.
 
 ```python
 TurbineReferenceBox(
+    *,
     length_m: float,
     width_m: float,
     height_m: float,
@@ -862,6 +865,7 @@ width across from where the drawing puts them.
 
 ```python
 TurbineSoundPowerResult(
+    *,
     pressure_levels: np.ndarray,
     background_levels: np.ndarray | None,
     background_corrections: np.ndarray,
@@ -964,7 +968,7 @@ TurbineSoundPowerResult.plot(
     ax: Axes | None = None,
     *,
     position_labels: Sequence[str] | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1051,7 +1055,7 @@ The verdict: the environment qualifies for measurements to the standard.
 TurbineTestEnvironmentCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

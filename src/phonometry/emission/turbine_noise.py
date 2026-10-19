@@ -137,6 +137,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
+
 __all__ = [
     "TurbineEnvironmentalCorrection",
     "TurbineMeasurementSurface",
@@ -271,7 +273,7 @@ def _within_k_limit(k: float) -> bool:
 # ---------------------------------------------------------------------------
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class TurbineReferenceBox(RichDisplay):
     """One reference box of a turbine set (clause 7.1).
 
@@ -303,7 +305,7 @@ class TurbineReferenceBox(RichDisplay):
             require_positive(getattr(self, name), name)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class TurbineMeasurementSurface(OwnsArrays):
     r"""The measurement surface of a turbine set and its area (clause 7.1).
 
@@ -404,7 +406,7 @@ class TurbineMeasurementSurface(OwnsArrays):
         ax: Axes | None = None,
         *,
         view: Literal["plan", "elevation"] = "plan",
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Draw the reference boxes and the measurement surface around them.
@@ -577,7 +579,7 @@ class TurbineMicrophoneArray(OwnsArrays):
         ax: Axes | None = None,
         *,
         view: Literal["plan", "elevation"] = "plan",
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Draw the positions on the measurement surface, as Figure 2 does.
@@ -921,7 +923,7 @@ def turbine_background_correction(level_difference: ArrayLike) -> float | np.nda
     return float(correction[0]) if scalar else correction
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class TurbineEnvironmentalCorrection(OwnsArrays):
     r"""The environmental correction ``K`` of a test room (clause 8.2, Annex A).
 
@@ -989,7 +991,7 @@ class TurbineEnvironmentalCorrection(OwnsArrays):
         return self.absorption_area / self.surface_area
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw Figure A.3 with this room on it.
 
@@ -1185,7 +1187,7 @@ class TurbineTestEnvironmentCheck(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw Figure A.3 with the 7 dB limit and this environment on it.
 
@@ -1279,7 +1281,7 @@ def check_turbine_test_environment(
 # ---------------------------------------------------------------------------
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class TurbineSoundPowerResult(OwnsArrays):
     r"""A-weighted surface sound pressure level and sound power level (8.3, 8.4).
 
@@ -1444,7 +1446,7 @@ class TurbineSoundPowerResult(OwnsArrays):
         ax: Axes | None = None,
         *,
         position_labels: Sequence[str] | None = None,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Draw the corrected level at each position with the surface level.
@@ -1680,7 +1682,7 @@ class TurbineNoiseDeclaration(OwnsArrays):
         return self.operating_conditions[index]
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the sound power level of each operating condition.
 

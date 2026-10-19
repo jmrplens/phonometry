@@ -48,6 +48,8 @@ from .._internal.validation import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
 
 __all__ = [
@@ -126,7 +128,7 @@ class OpenPlanResult(OwnsArrays):
         require_present(self, "positions_m")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the spatial decay of speech with ``rD``/``rP`` marked.
 
@@ -142,7 +144,7 @@ class OpenPlanResult(OwnsArrays):
         return plot_open_plan(self, ax=ax, language=language, **kwargs)
 
     def plot_geometry(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the measurement line to scale, rD and rP marked.
 
@@ -160,9 +162,9 @@ class OpenPlanResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an open-plan office acoustics fiche to a PDF (ISO 3382-3).
 

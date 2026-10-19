@@ -118,6 +118,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
+
 __all__ = [
     "SIMULATED_PROGRAM_SPECTRUM",
     "ProgramSignalCheck",
@@ -134,15 +136,15 @@ class ProgramSpectrumBand(RichDisplay):
 
     :ivar relative_level: The relative level of the one-third-octave band,
         in dB.
-    :ivar upper_tolerance_db: The upper tolerance, in dB, as printed (a
-        positive number).
     :ivar lower_tolerance_db: The lower tolerance, in dB, as printed (a
+        positive number).
+    :ivar upper_tolerance_db: The upper tolerance, in dB, as printed (a
         positive number).
     """
 
     relative_level: float
-    upper_tolerance_db: float
     lower_tolerance_db: float
+    upper_tolerance_db: float
 
 
 #: IEC 60268-1:1985 Table II, "Power spectrum of simulated programme signal"
@@ -151,7 +153,11 @@ class ProgramSpectrumBand(RichDisplay):
 #: and are equal in every row.
 SIMULATED_PROGRAM_SPECTRUM: Mapping[float, ProgramSpectrumBand] = MappingProxyType(
     {
-        frequency: ProgramSpectrumBand(level, tolerance, tolerance)
+        frequency: ProgramSpectrumBand(
+            relative_level=level,
+            lower_tolerance_db=tolerance,
+            upper_tolerance_db=tolerance,
+        )
         for frequency, level, tolerance in (
             (20.0, -13.5, 3.0),
             (25.0, -10.2, 2.0),
@@ -513,14 +519,14 @@ class ProgramSignalCheck(OwnsArrays):
         return np.array([row.relative_level for row in self._rows()])
 
     @property
-    def upper_tolerance_db(self) -> NDArray[np.float64]:
-        """The upper tolerances of Table II at the bands, in dB."""
-        return np.array([row.upper_tolerance_db for row in self._rows()])
-
-    @property
     def lower_tolerance_db(self) -> NDArray[np.float64]:
         """The lower tolerances of Table II at the bands, in dB."""
         return np.array([row.lower_tolerance_db for row in self._rows()])
+
+    @property
+    def upper_tolerance_db(self) -> NDArray[np.float64]:
+        """The upper tolerances of Table II at the bands, in dB."""
+        return np.array([row.upper_tolerance_db for row in self._rows()])
 
     @property
     def offset_db(self) -> float:
@@ -591,7 +597,7 @@ class ProgramSignalCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the referred band levels inside the tolerances of Table II.
 

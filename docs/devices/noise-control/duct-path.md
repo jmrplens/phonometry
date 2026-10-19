@@ -40,10 +40,10 @@ fan = [90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0]
 
 path = noise_control.duct_path(
     fan, [
-        noise_control.DuctElement("Elbow, 36 x 24 in, unlined",
+        noise_control.DuctElement(label="Elbow, 36 x 24 in, unlined",
                                   attenuation=[0, 1, 2, 3, 3, 3, 3, 3],
                                   self_noise=[41, 39, 36, 29, 20, 6, 0, 0], code="2"),
-        noise_control.DuctElement("Silencer, 3 ft, standard pressure drop",
+        noise_control.DuctElement(label="Silencer, 3 ft, standard pressure drop",
                                   attenuation=[7, 12, 16, 28, 35, 35, 28, 17],
                                   self_noise=[49, 43, 44, 42, 42, 45, 35, 24], code="3"),
     ],
@@ -431,20 +431,20 @@ source = "Fan, centrifugal FC, 5000 cfm, 2 in w.g."
 
 supply = noise_control.duct_path(
     fan, [
-        noise_control.DuctElement("Elbow, 36 x 24 in, unlined", [0, 1, 2, 3, 3, 3, 3, 3],
-                                  [41, 39, 36, 29, 20, 6, 0, 0], code="2"),
-        noise_control.DuctElement("Silencer, 3 ft, standard pressure drop",
-                                  [7, 12, 16, 28, 35, 35, 28, 17],
-                                  [49, 43, 44, 42, 42, 45, 35, 24], code="3"),
-        noise_control.DuctElement("Duct, 36 x 24 in, 5 ft, 1 in lining",
-                                  [2, 2, 3, 7, 15, 12, 11, 9], code="4"),
-        noise_control.DuctElement("Split, 25 per cent", 6.0, code="5"),
-        noise_control.DuctElement("Duct, 18 x 12 in, 6 ft, 1 in lining",
-                                  [3, 3, 5, 11, 25, 22, 16, 13], code="6"),
-        noise_control.DuctElement("Flexible duct, 12 in, 6 ft",
-                                  [14, 14, 16, 15, 17, 22, 16, 13], code="7"),
-        noise_control.DuctElement("Rectangular diffuser, 312 cfm", None,
-                                  [33, 32, 29, 23, 15, 4, 0, 0], code="8"),
+        noise_control.DuctElement(label="Elbow, 36 x 24 in, unlined", attenuation=[0, 1, 2, 3, 3, 3, 3, 3],
+                                  self_noise=[41, 39, 36, 29, 20, 6, 0, 0], code="2"),
+        noise_control.DuctElement(label="Silencer, 3 ft, standard pressure drop",
+                                  attenuation=[7, 12, 16, 28, 35, 35, 28, 17],
+                                  self_noise=[49, 43, 44, 42, 42, 45, 35, 24], code="3"),
+        noise_control.DuctElement(label="Duct, 36 x 24 in, 5 ft, 1 in lining",
+                                  attenuation=[2, 2, 3, 7, 15, 12, 11, 9], code="4"),
+        noise_control.DuctElement(label="Split, 25 per cent", attenuation=6.0, code="5"),
+        noise_control.DuctElement(label="Duct, 18 x 12 in, 6 ft, 1 in lining",
+                                  attenuation=[3, 3, 5, 11, 25, 22, 16, 13], code="6"),
+        noise_control.DuctElement(label="Flexible duct, 12 in, 6 ft",
+                                  attenuation=[14, 14, 16, 15, 17, 22, 16, 13], code="7"),
+        noise_control.DuctElement(label="Rectangular diffuser, 312 cfm", attenuation=None,
+                                  self_noise=[33, 32, 29, 23, 15, 4, 0, 0], code="8"),
     ],
     frequencies=bands,
     room_effect=[6, 6, 5, 5, 6, 7, 6, 6],
@@ -453,17 +453,17 @@ supply = noise_control.duct_path(
 
 ret = noise_control.duct_path(
     fan, [
-        noise_control.DuctElement("Elbow, 36 x 24 in, unlined", [0, 1, 2, 3, 3, 3, 3, 3],
-                                  [43, 42, 39, 33, 24, 12, 0, 0], code="2"),
-        noise_control.DuctElement("Silencer, 5 ft, low-frequency type",
-                                  [16, 21, 35, 41, 41, 28, 21, 15],
-                                  [51, 49, 53, 56, 56, 59, 60, 53], code="3"),
-        noise_control.DuctElement("Elbow, 36 x 24 in, lined, 1 in", [1, 2, 3, 4, 5, 6, 8, 10],
-                                  [39, 38, 34, 28, 18, 4, 0, 0], code="4"),
-        noise_control.DuctElement("Plenum, 800 sq ft, 50 per cent lined",
-                                  [12, 13, 19, 20, 20, 20, 21, 21], code="5"),
-        noise_control.DuctElement("Rectangular grille, 24 x 24 in, 563 cfm", None,
-                                  [30, 29, 26, 20, 12, 1, 0, 0], code="6"),
+        noise_control.DuctElement(label="Elbow, 36 x 24 in, unlined", attenuation=[0, 1, 2, 3, 3, 3, 3, 3],
+                                  self_noise=[43, 42, 39, 33, 24, 12, 0, 0], code="2"),
+        noise_control.DuctElement(label="Silencer, 5 ft, low-frequency type",
+                                  attenuation=[16, 21, 35, 41, 41, 28, 21, 15],
+                                  self_noise=[51, 49, 53, 56, 56, 59, 60, 53], code="3"),
+        noise_control.DuctElement(label="Elbow, 36 x 24 in, lined, 1 in", attenuation=[1, 2, 3, 4, 5, 6, 8, 10],
+                                  self_noise=[39, 38, 34, 28, 18, 4, 0, 0], code="4"),
+        noise_control.DuctElement(label="Plenum, 800 sq ft, 50 per cent lined",
+                                  attenuation=[12, 13, 19, 20, 20, 20, 21, 21], code="5"),
+        noise_control.DuctElement(label="Rectangular grille, 24 x 24 in, 563 cfm", attenuation=None,
+                                  self_noise=[30, 29, 26, 20, 12, 1, 0, 0], code="6"),
     ],
     frequencies=bands,
     room_effect=[9, 8, 6, 8, 8, 8, 9, 10],
@@ -721,7 +721,7 @@ bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
 
 with warnings.catch_warnings(record=True) as caught:
     warnings.simplefilter("always")
-    noise_control.duct_path([90.0] * 8, [noise_control.DuctElement("Straight run", 3.0)], frequencies=bands,
+    noise_control.duct_path([90.0] * 8, [noise_control.DuctElement(label="Straight run", attenuation=3.0)], frequencies=bands,
                             section={"width_m": 36 * IN, "height_m": 24 * IN},
                             flow_velocity=6.0, label="Supply")
 print(caught[0].category is noise_control.PlaneWaveWarning)

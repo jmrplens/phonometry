@@ -85,6 +85,8 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+
 __all__ = [
     "AtmosphericAbsorptionWarning",
     "AtmosphericAttenuation",
@@ -471,7 +473,7 @@ class AtmosphericAttenuation(OwnsArrays):
         return np.asarray(alpha * self.distance, dtype=np.float64)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the attenuation coefficient ``alpha`` versus frequency.
 

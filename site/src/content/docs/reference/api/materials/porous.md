@@ -118,7 +118,7 @@ bulk density outside the range the fit was made over emits a
 check_limp_frame(
     frame_bulk_modulus: float,
     *,
-    criterion: str = 'doutres',
+    criterion: Literal['beranek', 'doutres'] = 'doutres',
     fluid_bulk_modulus: float = 101325.0,
 ) -> LimpFrameCheck
 ```
@@ -196,7 +196,7 @@ delany_bazley(
     frequency: ArrayLike,
     flow_resistivity_pa_s_m2: float,
     *,
-    coefficients: str | tuple[float, ...] = 'delany_bazley',
+    coefficients: Literal['delany_bazley', 'garai_pompoli', 'dunn_davern', 'wu'] | tuple[float, ...] = 'delany_bazley',
     fluid: Fluid = ...,
 ) -> PorousMediumResult
 ```
@@ -319,11 +319,12 @@ named tuple used to unpack them by position.
 
 ```python
 FiberResistivityFit(
+    *,
     k1: float,
     k2: float,
     fiber_diameter_um: float,
     bulk_density_range_kg_m3: tuple[float, float],
-    direction: str,
+    direction: Literal['lateral', 'longitudinal'],
     source: str,
 )
 ```
@@ -536,7 +537,7 @@ LIMP_FRAME_CRITERIA = {'beranek': 0.05, 'doutres': 0.2}
 LimpFrameCheck(
     frame_bulk_modulus: float,
     *,
-    criterion: str = 'doutres',
+    criterion: Literal['beranek', 'doutres'] = 'doutres',
     fluid_bulk_modulus: float = 101325.0,
 )
 ```
@@ -844,7 +845,7 @@ plot_absorber_stack(
     layers: Sequence[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer] | AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer,
     *,
     ax: Axes | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -910,6 +911,7 @@ Advisory for porous-model use outside the published fit range.
 
 ```python
 PorousMediumResult(
+    *,
     frequencies: NDArray[np.float64],
     characteristic_impedance: NDArray[np.complex128],
     wavenumber: NDArray[np.complex128],
@@ -953,7 +955,7 @@ $k_0 = \omega / c$.
 PorousMediumResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

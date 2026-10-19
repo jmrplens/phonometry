@@ -216,27 +216,29 @@ verify_source_positions(...)  # judges the measurement setup
 **Exceptions.** A predicate that only selects which procedure a clause applies answers no pass or fail, keeps its verb and returns a `bool` (`low_frequency_procedure_applies`, `resolve_tones_separately`, listed in `REGIME_PREDICATES` of the test with their reason). A method that tests membership or provenance, looks up one requirement of a verdict, or says how a value is reported goes in `PREDICATE_METHODS`, keyed by location with its reason. The tests prove that a judgment carries one of the three verbs; which verb fits is review.
 
 <a id="n10"></a>
-### N10. Never start a public function or class name with `test` or `Test`
+### N10. Never start a public function, class or module name with `test` or `Test`
 
-**Why.** pytest collects every function named `test*` and every class named `Test*` from a module a test file imports, so `from phonometry.noise_control import *` in a user's test file collected `test_environment_applicability` and failed on a fixture it never asked for.
+**Why.** pytest collects every function named `test*` and every class named `Test*` from a module a test file imports, so `from phonometry.noise_control import *` in a user's test file collected `test_environment_applicability` and failed on a fixture it never asked for. A module named `test_*.py` is collected from the repository root and reads as a test file in every listing: `signals.test_signals` held the library's test signals and nothing a test runs.
 
 **Do**
 
 ```python
-from phonometry import noise_control
+from phonometry import noise_control, signals
 
 noise_control.check_enclosure_test_environment
+signals.noise_signal
 ```
 
 **Don't**
 
 ```py
 test_environment_applicability(...)
+from phonometry.signals.test_signals import noise_signal
 ```
 
-**Enforced by:** `tests/test_verdict_shape.py::test_no_public_name_is_collected_by_pytest`
+**Enforced by:** `tests/test_verdict_shape.py::test_no_public_name_is_collected_by_pytest`, `tests/test_verdict_shape.py::test_no_public_module_is_named_like_a_test_file`, `tests/test_removed_names.py::test_the_test_signal_module_is_private`
 
-**Exceptions.** Upper-case constants (`TEST_REPORT_ITEMS`, `TEST_RUNS`) are not collected by pytest and are not held to it, nor is a field or a method of a class whose name does not start with `Test` (`Provenance.test_standard_of`). A module named `test_*.py` is collected from the repository root, but pytest finds nothing to run in `signals.test_signals`.
+**Exceptions.** Upper-case constants (`TEST_REPORT_ITEMS`, `TEST_RUNS`) are not collected by pytest and are not held to it, nor is a field or a method of a class whose name does not start with `Test` (`Provenance.test_standard_of`). A private module may hold test signals (`signals._test_signals`); its functions keep their package address.
 
 <a id="n11"></a>
 ### N11. Name a catalogue lookup `<x>_named` after its `PUBLISHED_<X>`, and take `catalogue=`
@@ -291,18 +293,19 @@ bands = result.band_centers
 **Exceptions.** The retired spellings are the `_MINORITY` table of the test (`sample_rate` and `fs_hz` for `fs`; `freqs` and `band_centers` for `frequencies`; `sound_speed` for `speed_of_sound`; `passed` for `passes`; `band_type` for `fraction`; `curve` for `weighting`; and more). A minority spelling is kept only in `_MINORITY_EXEMPT`, keyed by location with its reason, and an entry that matches nothing fails: the aircraft NPD `distances_m` (tables printed in feet), the underwater `frequencies_hz` (formulas printed in kHz), `BandAveragedStiffness.center_frequencies`.
 
 <a id="n13"></a>
-### N13. Name the time signal `x`, as the first parameter
+### N13. Name the time signal `x`, first, and a signal of one physical quantity for it, with its unit
 
-**Why.** Thirty functions took the time signal as `signal` or `signal_in` while `octave_filter(x, fs)` took `x`, and their error messages named a parameter the caller had not written.
+**Why.** Thirty functions took the time signal as `signal` or `signal_in` while `octave_filter(x, fs)` took `x`, and their error messages named a parameter the caller had not written. A signal that is one physical quantity is the other way round: the underwater levels took `pressure`, the multiple-shock model `acceleration` and the impact functions `force`, a word without the unit the formula assumes, while the DIN 4150 functions already took `velocity_mm_s`.
 
 **Do**
 
 ```python
 import numpy as np
-from phonometry import filters
+from phonometry import filters, underwater
 
 x = np.zeros(48000)
 result = filters.octave_filter(x, 48000)
+spl = underwater.sound_pressure_level(np.full(1000, 2.0))  # pressure_pa
 ```
 
 **Don't**
@@ -310,11 +313,12 @@ result = filters.octave_filter(x, 48000)
 ```py
 def thd(signal, fs): ...
 def loudness_ecma(signal_in, fs): ...
+def sound_pressure_level(pressure, *, reference=1e-6): ...
 ```
 
-**Enforced by:** `tests/test_public_vocabulary.py::test_the_time_signal_is_x`
+**Enforced by:** `tests/test_public_vocabulary.py::test_the_time_signal_is_x`, `tests/test_public_vocabulary.py::test_a_signal_named_for_its_quantity_carries_its_unit`
 
-**Exceptions.** A record field that holds an output signal keeps `signal` (`EnvelopeResult.signal`). Two signals are named by role (`x` and `y`; `p1` and `p2`; `incident_ir` and `reflected_ir`; `clean` and `degraded`), and an impulse response is `ir`. The test refuses the names `signal` and `signal_in`; it does not check the position.
+**Exceptions.** A record field that holds an output signal keeps `signal` (`EnvelopeResult.signal`). Two signals are named by role (`x` and `y`; `p1` and `p2`; `incident_ir` and `reflected_ir`; `clean` and `degraded`), and an impulse response is `ir`. A record in any unit is `x`, not `record`. The quantity signals carry their unit: `pressure_pa`, `acceleration_m_s2`, `force_n`, `velocity_mm_s`. The tests refuse the names `signal` and `signal_in`, and a parameter or field typed as a signal (`Signal`, `SignalInput`) named for a quantity without its unit; they do not check the position.
 
 <a id="n14"></a>
 ### N14. Name a parameter `speed_of_sound` or `density`, never by its symbol `c` or `rho`
@@ -366,7 +370,7 @@ def energy_mean(level: ArrayLike) -> float: ...
 **Exceptions.** A vectorized evaluator keeps its singular name when its `:param` text says it takes one value or many, `(scalar or array)` (the porous models' `frequency`). A unit suffix does not change the rule (`frequency_hz` holding a band axis is a singular array).
 
 <a id="n16"></a>
-### N16. Put a unit in a name wherever two customary units compete for the quantity
+### N16. Put the unit in the name of a scalar quantity, and leave a band axis bare
 
 **Why.** A number the caller types is where a unit is lost, silently: a static pressure of `101325` handed to a function that wants kilopascals is a thousand atmospheres, and every result is still a float. No guard on magnitude can catch it, because both readings are legitimate elsewhere in the library. A band axis is the other way round: `frequencies`, `levels`, `times` and `distances` are one word each across the library, and a suffix would give the same field a second spelling.
 
@@ -387,7 +391,7 @@ result.frequencies_hz  # a band axis carries no unit
 
 **Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py`, `tests/test_public_vocabulary.py::test_one_concept_is_spelled_one_way`
 
-**Exceptions.** The quantities that compete are the ones `scripts/check_parameter_units.py` lists (pressure, temperature, humidity, diameter, angle, period, gradient, molar mass, thickness, spacing, height, phase, speed, attenuation rates; distance inside `aircraft`). A name built on one of them may instead end in a suffix that says it has no unit of its own (`pressure_ratio`, `temperature_correction`: `_level`, `_index`, `_ratio`, `_coefficient`, `_correction`, `_uncertainty`); a quantity in decibels follows [N23](#n23) and [N24](#n24). A `bool` parameter is outside the rule. Anything else goes in `EXEMPT` of the guard, keyed by (module, qualified name, parameter) with its reason (acoustic waveforms, ratios of two figures in any unit); a stale entry fails. The guard refuses no unit on any other name: a single frequency keeps `frequency_hz`, and the underwater ones read formulas printed in kHz. A band axis carries none ([N12](#n12)), except two second units: `distances_m` in `aircraft` (NPD tables in feet) and `frequencies_hz` in `underwater` (formulas in kHz).
+**Exceptions.** The guard demands the unit on the quantities where two customary units compete, the ones `scripts/check_parameter_units.py` lists (pressure, temperature, humidity, diameter, angle, period, gradient, molar mass, thickness, spacing, height, phase, speed, attenuation rates; distance inside `aircraft`); any other scalar keeps a unit it carries, so a single frequency is `frequency_hz` and a time signal of one quantity is `pressure_pa` ([N13](#n13)). A name built on a listed quantity may instead end in a suffix that says it has no unit of its own (`pressure_ratio`, `temperature_correction`: `_level`, `_index`, `_ratio`, `_coefficient`, `_correction`, `_uncertainty`); a quantity in decibels follows [N23](#n23) and [N24](#n24). A `bool` parameter is outside the rule. Anything else goes in `EXEMPT` of the guard, keyed by (module, qualified name, parameter) with its reason (acoustic waveforms, ratios of two figures in any unit); a stale entry fails. A band axis carries no unit ([N12](#n12)), except two second units: `distances_m` in `aircraft` (NPD tables in feet) and `frequencies_hz` in `underwater` (formulas in kHz).
 
 <a id="n17"></a>
 ### N17. Spell each unit suffix one way: `_deg`, `_s`, `_minutes`, `_hours`, `_kmh`, `_kt`
@@ -412,9 +416,9 @@ def exposure(duration_seconds, angle_degrees, period_h): ...
 **Exceptions.** The retired spellings the guard refuses are `_degrees`, `_seconds`, `_km_h`, `_db_s`, `_knots` and an `_h` that means hours. An `_min` that means minutes is retired too (`_min` is a minimum): the guard reports it on a period or another quantity it lists (`assessment_period_min` names no unit), and on any other duration it is review. A name that means something else by the suffix goes in `SPELLING_EXEMPT` of the guard with its reason (`inductance_h` is the henry). An hour or a minute that ends a compound rate is a denominator and stays (`_mm_h`, `_ft_per_min`).
 
 <a id="n18"></a>
-### N18. Name every public temperature in degrees Celsius, ending `_c`
+### N18. Name an absolute temperature in degrees Celsius, `_c`, and a temperature interval in kelvin, `_k`
 
-**Why.** `GasStream(inlet_temperature_k=450.0)` renamed to `_c` with the number kept made the gas 273.15 K hotter without an error. With 29 of 31 public temperatures already in degrees Celsius, the other two moved to Celsius rather than keeping a kelvin name: one scale, without exceptions. The guard demands a temperature unit and accepts `_k`, so the Celsius half is review.
+**Why.** `GasStream(inlet_temperature_k=450.0)` renamed to `_c` with the number kept made the gas 273.15 K hotter without an error. With 29 of 31 public temperatures already in degrees Celsius, the other two moved to Celsius rather than keeping a kelvin name: one scale for a temperature, without exceptions. An interval is the other case: a difference, a tolerance, an uncertainty of a temperature and a coefficient per degree are the same number in kelvin and in degrees Celsius, and the SI writes an interval in kelvin whichever of the two a standard prints (Directive (EU) 2015/996 prints the CNOSSOS-EU coefficient in dB/°C, ISO 10847 its tolerance in °C), so `temperature_coefficient_db_per_c` read as a temperature where `_per_k` reads as a rate.
 
 **Do**
 
@@ -422,15 +426,19 @@ def exposure(duration_seconds, angle_degrees, period_h): ...
 from phonometry import environment
 
 attenuation = environment.air_attenuation([1000.0], temperature_c=10.0, relative_humidity_percent=70.0)
+coefficient = environment.ROAD_COEFFICIENTS.temperature_coefficient_db_per_k
 ```
 
 **Don't**
 
 ```py
 fluids.air(temperature_k=293.15)
+temperature_coefficient_db_per_c
 ```
 
-**Enforced by:** `scripts/check_parameter_units.py`, review
+**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_the_tree_writes_every_temperature_on_its_scale`, `tests/test_check_parameter_units.py::test_the_temperature_scale_rule_reads_a_name`
+
+**Exceptions.** A coefficient per degree ends in `_per_k`. An interval of temperature ends in `_k` and is listed in `TEMPERATURE_INTERVALS` of the guard, keyed by (module, qualified name, parameter) with its reason (`u_temperature_k` of the reciprocity uncertainty budgets, `TEMPERATURE_TOLERANCE_K` of ISO 10847), so a new one is read before it is admitted; a stale entry fails.
 
 <a id="n19"></a>
 ### N19. Name the pressure of the medium `static_pressure_pa` or `static_pressure_kpa`
@@ -504,14 +512,15 @@ def plate(thickness): ...  # same subpackage, same quantity
 <a id="n22"></a>
 ### N22. Make every defaulted unit-named parameter and every medium condition keyword-only
 
-**Why.** A unit in the name helps only if the name appears at the call: with a default and a positional slot the number is written bare, and `ground_attenuation(200, 2, 2, bands, 1, 1, 1)` or `sound_exposure(x, fs, 8.0, cal)` reads as a row of numbers in an order nobody remembers. A frequency axis and a record a caller builds are taken by keyword too ([A17](api.md#a17), [A18](api.md#a18)).
+**Why.** A unit in the name helps only if the name appears at the call: with a default and a positional slot the number is written bare, and `ground_attenuation(200, 2, 2, bands, 1, 1, 1)`, `sound_exposure(x, fs, 8.0, cal)` or `noise_signal(fs, 2.0)` reads as a row of numbers in an order nobody remembers. A frequency axis and a record a caller builds are taken by keyword too ([A17](api.md#a17), [A18](api.md#a18)).
 
 **Do**
 
 ```python
-from phonometry import environment
+from phonometry import environment, signals
 
 attenuations = environment.atmospheric_absorption(100.0, temperature_c=15.0, relative_humidity_percent=70.0)
+noise = signals.noise_signal(48000, duration_s=0.5, seed=1)
 ```
 
 **Don't**
@@ -520,11 +529,12 @@ attenuations = environment.atmospheric_absorption(100.0, temperature_c=15.0, rel
 def absorption(distance, temperature_c=20.0, speed_of_sound=343.0): ...
 
 absorption(100.0, 15.0, 340.0)
+noise_signal(48000, 0.5)
 ```
 
-**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_every_condition_on_the_tree_is_written_by_name`, review
+**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_every_condition_on_the_tree_is_written_by_name`, `tests/test_check_parameter_units.py::test_a_unit_named_default_is_passed_by_name`
 
-**Exceptions.** The conditions of the medium and of the measuring chain are held to it whatever their suffix (`speed_of_sound`, `air_density`, `air_sound_speed`, `water_density`, `calibration_factor`, the ground factors; `CONDITIONS` of the guard). The first parameter is not held to it, nor an option (`mode`, `method`, `fraction`, `n`, `seed`), nor a condition the call cannot do without (`tube_wavenumber(frequency, speed_of_sound)`). A dataclass field uses `KW_ONLY`. A signature that must stay positional goes in `POSITIONAL` of the guard with its reason (`metrology.sensitivity(reference_pressure_pa)`, part of the `Signal` overload contract). The guard holds the conditions and the parameters that name a quantity of [N16](#n16); any other defaulted parameter that ends in a unit is review.
+**Exceptions.** The conditions of the medium and of the measuring chain are held to it whatever their suffix (`speed_of_sound`, `air_density`, `air_sound_speed`, `water_density`, `calibration_factor`, the ground factors; `CONDITIONS` of the guard), and every defaulted parameter whose name ends in a unit of the guard's `UNITS` whatever quantity it names (`duration_s`, `length_m`, `high_hz`, `wind_directions_deg`). The first parameter is not held to it, nor an option (`mode`, `method`, `fraction`, `n`, `seed`), nor a condition the call cannot do without (`tube_wavenumber(frequency, speed_of_sound)`). A record's fields are held by [A18](api.md#a18). A signature that must stay positional goes in `POSITIONAL` of the guard with its reason (`metrology.sensitivity(reference_pressure_pa)`, part of the `Signal` overload contract).
 
 <a id="n23"></a>
 ### N23. Leave `_db` off a level or a level difference; keep it on other decibel quantities
@@ -643,29 +653,31 @@ _MAX_SPECIMEN_VELOCITY_M_S = 0.5  # defined, cited in a docstring, never compare
 **Exceptions.** A name counts as read when it is loaded, used as an attribute, imported or named in a string anywhere in `src`, `tests` or `scripts`. `KEPT` in the script takes a constant, keyed (module, name), with its reason, and nothing belongs there that could be used instead. A constant kept only for documentation belongs in a docstring.
 
 <a id="n28"></a>
-### N28. Spell words out: `microphone`, `laboratory`, `standard_deviation`, `frequency`, `confidence`
+### N28. Spell words out: `microphone`, `laboratory`, `reference`, `standard_deviation`, `frequency`, `confidence`
 
-**Why.** `mic_calibration_factor`, `lab_airborne_insulation`, `delay_std`, `bank.freq` and `ci_lower` each had a spelled-out twin elsewhere in the API.
+**Why.** `mic_calibration_factor`, `lab_airborne_insulation`, `levels_ref`, `delay_std`, `bank.freq` and `ci_lower` each had a spelled-out twin elsewhere in the API.
 
 **Do**
 
 ```python
-from phonometry import materials
+from phonometry import emission, materials
 
 materials.microphone_calibration_factor
+emission.sound_power_comparison  # takes reference_levels=
 ```
 
 **Don't**
 
 ```py
 mic_calibration_factor(...)
+sound_power_comparison(levels, levels_ref, lw_ref)
 result.delay_std
 result.ci_lower
 ```
 
 **Enforced by:** `tests/test_public_vocabulary.py::test_words_are_spelled_out`, `tests/test_public_vocabulary.py::test_the_row_keys_of_a_verdict_are_spelled_out`, `tests/test_public_vocabulary.py::test_every_kept_spelling_still_exists`
 
-**Exceptions.** A confidence bound is `confidence_lower` or `confidence_upper`; `ci` is a word of no public name except the impact sound adaptation term of ISO 717-2 (`ci`, `ci_delta`, `ci_r`). `fs`, `min`, `max` and `n_` are established terms, not abbreviations. The public attributes a plain class sets on `self` and the row keys of verdict dictionaries are held too. A spelling kept on purpose goes in `_SPELLING_EXEMPT` of the test, keyed by location with its reason.
+**Exceptions.** A confidence bound is `confidence_lower` or `confidence_upper`; `ci` is a word of no public name except the impact sound adaptation term of ISO 717-2 (`ci`, `ci_delta`, `ci_r`). `fs`, `min`, `max` and `n_` are established terms, not abbreviations, and so are the acronyms SPL, SEL, SNR and RMS, terms of art like `L_max`. The public attributes a plain class sets on `self` and the row keys of verdict dictionaries are held too. A spelling kept on purpose goes in `_SPELLING_EXEMPT` of the test, keyed by location with its reason.
 
 <a id="n29"></a>
 ### N29. Write `min` and `max` in every public name, `MIN` and `MAX` in a constant
@@ -806,3 +818,31 @@ language_t = Literal["en", "es"]
 ```
 
 **Enforced by:** review
+
+<a id="n35"></a>
+### N35. Put a standard's designation in a name only where it tells two things apart, and write it one way
+
+**Why.** About 56 public names carried a designation in mixed forms: `EN_12354_AIR` beside `ISO7235_AIR_GAS_CONSTANT_J_KG_K`, `sae_band_attenuation` beside `air_density_iso10534`, and `ISO1683_REFERENCE_VALUES` in the module that implements nothing but ISO 1683. A designation the module already states is noise in the name, and two forms of one designation are two names to remember.
+
+**Do**
+
+```python
+from phonometry import building, materials, metrology
+
+air = building.EN12354_AIR
+density = materials.air_density_iso10534(temperature_c=23.0, static_pressure_kpa=101.325)
+p0 = metrology.REFERENCE_VALUES["gas"]["sound_pressure"].value
+```
+
+**Don't**
+
+```py
+building.EN_12354_AIR
+metrology.ISO1683_REFERENCE_VALUES
+iso_9613_ground_factor
+```
+
+**Enforced by:** `tests/test_public_vocabulary.py::test_a_standard_designation_is_written_one_way_and_only_where_it_distinguishes`, `tests/test_public_vocabulary.py::test_the_designation_rule_reads_a_name`
+
+**Exceptions.** A designation stays where it separates two things the module does not (`air_density_iso10534` and `air_density_astm_e2611`, the IEC 61094 tables of `metrology`). It joins the body to the number, takes a part after an underscore (`IEC61094_2_`), and comes first in a constant, a class or a field and last in a function (`band_attenuation_arp5534`). Every designation that stays is listed in `_DESIGNATION_KEPT` of the test with its reason; a module is named for its subject, never for a designation ([N1](#n1)).
+

@@ -86,7 +86,7 @@ admissible_exposure_s(
     kb_ftm: float,
     a_r: float,
     *,
-    time_of_day: str = 'day',
+    time_of_day: Literal['day', 'night'] = 'day',
 ) -> float
 ```
 
@@ -151,9 +151,9 @@ assess_people_in_buildings(
     guide: GuideValues,
     *,
     kb_ftr: float | None = None,
-    source: str = 'general',
+    source: Literal['general', 'road', 'railway', 'urban_railway', 'quarry_blasting', 'road_existing', 'induced_seismic'] = 'general',
     rare_short_events: bool = False,
-    edition: str | None = None,
+    edition: Literal['1999', '2023'] | None = None,
 ) -> PeopleAssessment
 ```
 
@@ -240,7 +240,7 @@ assessment_vibration_severity(
     kb_ftm: ArrayLike,
     exposure_s: ArrayLike,
     *,
-    time_of_day: str = 'day',
+    time_of_day: Literal['day', 'night'] = 'day',
     in_rest_time: ArrayLike | None = None,
 ) -> float
 ```
@@ -310,8 +310,8 @@ CONSTRUCTION_GUIDE_VALUES = {'I': {1: GuideValues(a_u=0.8, a_o=5.0, a_r=0.4, tim
 construction_guide_values(
     duration_days: int,
     *,
-    stage: str = 'I',
-    area: str = 'residential',
+    stage: Literal['I', 'II', 'III'] = 'I',
+    area: Literal['industrial', 'commercial', 'mixed', 'residential', 'sensitive'] = 'residential',
 ) -> GuideValues
 ```
 
@@ -371,11 +371,11 @@ GUIDE_VALUES = {'industrial': {'day': GuideValues(a_u=0.4, a_o=6.0, a_r=0.2, tim
 
 ```python
 guide_values(
-    area: str,
+    area: Literal['industrial', 'commercial', 'mixed', 'residential', 'sensitive'],
     *,
-    time_of_day: str = 'day',
-    source: str = 'general',
-    edition: str = '1999',
+    time_of_day: Literal['day', 'night'] = 'day',
+    source: Literal['general', 'road', 'railway', 'urban_railway', 'quarry_blasting', 'road_existing', 'induced_seismic'] = 'general',
+    edition: Literal['1999', '2023'] = '1999',
 ) -> GuideValues
 ```
 
@@ -410,11 +410,12 @@ GUIDE_VALUES_2023 = {'industrial': {'day': GuideValues(a_u=0.4, a_o=6.0, a_r=0.2
 
 ```python
 GuideValues(
+    *,
     a_u: float,
     a_o: float,
     a_r: float,
-    time_of_day: str = 'day',
-    edition: str = '1999',
+    time_of_day: Literal['day', 'night'] = 'day',
+    edition: Literal['1999', '2023'] = '1999',
 )
 ```
 
@@ -473,7 +474,7 @@ kb_fmax_from_peak_velocity(
     peak_velocity_mm_s: float,
     frequency_hz: float,
     *,
-    kind: str,
+    kind: Literal['harmonic', 'harmonic_distorted', 'stochastic_resonant', 'stochastic', 'single_event_resonant', 'single_event'],
 ) -> float
 ```
 
@@ -600,7 +601,7 @@ The verdict: the requirement of the standard is met.
 PeopleAssessment.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -637,7 +638,7 @@ railway_assessment_severity(
     kb_ftm: ArrayLike,
     occupied_takte: ArrayLike,
     *,
-    time_of_day: str = 'day',
+    time_of_day: Literal['day', 'night'] = 'day',
     spread: ArrayLike | None = None,
 ) -> RailwayAssessment
 ```
@@ -744,7 +745,7 @@ RailwayAssessment(
     occupied_takte: NDArray[np.int64],
     lower: float | None,
     upper: float | None,
-    time_of_day: str,
+    time_of_day: Literal['day', 'night'],
 )
 ```
 

@@ -59,6 +59,7 @@ from ._layout import (
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
+    from .._i18n import Language
     from ..metrology.free_field_corrections import (
         CorrectionUncertaintyVerification,
     )
@@ -79,7 +80,7 @@ _DRAWING_WIDTH_MM = 86.0
 def _basis(
     result: CorrectionUncertaintyVerification,
     metadata: ReportMetadata | None,
-    language: str,
+    language: Language,
 ) -> str:
     """The standard-basis line for the fiche, naming what the clause corrects
     for in the words the verdict carries.
@@ -97,7 +98,9 @@ def _basis(
     return f"{clause}."
 
 
-def _metadata_pairs(metadata: ReportMetadata, language: str) -> list[tuple[str, str]]:
+def _metadata_pairs(
+    metadata: ReportMetadata, language: Language
+) -> list[tuple[str, str]]:
     """The ordered (label, value) pairs of the header grid.
 
     The item is a model of sound level meter with its source, so the specimen
@@ -115,7 +118,7 @@ def _metadata_pairs(metadata: ReportMetadata, language: str) -> list[tuple[str, 
     ]
 
 
-def _cell(value: float | None, language: str, decimals: int) -> str:
+def _cell(value: float | None, language: Language, decimals: int) -> str:
     """A table cell, or an en dash where the value was not given."""
     if value is None:
         return "&#8211;"
@@ -127,7 +130,9 @@ def _column(values: NDArray[np.float64] | None, index: int) -> float | None:
     return None if values is None else float(values[index])
 
 
-def _rows(result: CorrectionUncertaintyVerification, language: str) -> list[list[Any]]:
+def _rows(
+    result: CorrectionUncertaintyVerification, language: Language
+) -> list[list[Any]]:
     """Header plus per-frequency rows of the results table."""
     header_style = band_table_header_style()
     with_range = result.correction_range_db is not None
@@ -167,7 +172,7 @@ def _rows(result: CorrectionUncertaintyVerification, language: str) -> list[list
     return rows
 
 
-def _basis_strip(result: CorrectionUncertaintyVerification, language: str) -> str:
+def _basis_strip(result: CorrectionUncertaintyVerification, language: Language) -> str:
     """The measurement-basis line: confidence level, reading, consequence."""
     text = t(
         "Expanded uncertainties at a level of confidence of 95 % (clause 5) "
@@ -186,7 +191,7 @@ def _basis_strip(result: CorrectionUncertaintyVerification, language: str) -> st
 
 
 def _statement(
-    result: CorrectionUncertaintyVerification, language: str
+    result: CorrectionUncertaintyVerification, language: Language
 ) -> tuple[str, list[str]]:
     """The boxed statement and the extended terms beside it."""
     failures = int(result.failing_frequencies_hz.size)
@@ -232,7 +237,7 @@ def render_iec62585_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an IEC 62585 free-field-correction fiche to a PDF at ``path``.
 

@@ -101,7 +101,7 @@ duct_path(
     frequencies: ArrayLike,
     room_effect: ArrayLike | None = None,
     source_label: str = 'Fan',
-    criterion: str = 'NC',
+    criterion: Literal['NC', 'RC'] = 'NC',
     target: float | None = None,
     self_noise_floor: float | None = 0.0,
     section: dict[str, float] | None = None,
@@ -148,6 +148,7 @@ calculation of Long Table 14.9 and of AHRI 885 Table 8.
 
 ```python
 DuctElement(
+    *,
     label: str,
     attenuation: Any = None,
     self_noise: Any = None,
@@ -176,7 +177,7 @@ DuctPathResult(
     stages: tuple[DuctPathStage, ...],
     room_effect: np.ndarray | None,
     received_level: np.ndarray,
-    criterion: str,
+    criterion: Literal['NC', 'RC'],
     target: float | None,
     label: str,
     contributions: tuple[tuple[str, np.ndarray], ...] = ...,
@@ -239,7 +240,7 @@ standard derives by its own two-step procedure.
 DuctPathResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -278,9 +279,9 @@ DuctPathResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

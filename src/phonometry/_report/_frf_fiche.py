@@ -48,13 +48,14 @@ if TYPE_CHECKING:
 
     import numpy as np
 
+    from .._i18n import Language
     from ..vibration.structural._impact_mobility import ImpactMobilityResult
     from ..vibration.structural.mechanical_mobility import MobilityResult
     from ..vibration.structural.transfer_stiffness import TransferStiffnessResult
     from .metadata import ReportMetadata
 
 
-def frequency_range(frequencies: np.ndarray, language: str = "en") -> str:
+def frequency_range(frequencies: np.ndarray, language: Language = "en") -> str:
     """The ``fmin - fmax`` frequency-range string, in hertz (compact form)."""
     lo = format_number(float(frequencies.min()), language, decimals=1, trim=True)
     hi = format_number(float(frequencies.max()), language, decimals=1, trim=True)
@@ -64,7 +65,7 @@ def frequency_range(frequencies: np.ndarray, language: str = "en") -> str:
 def frf_metadata_pairs(
     metadata: ReportMetadata,
     extra: list[tuple[str, str | None]],
-    language: str = "en",
+    language: Language = "en",
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the FRF fiche header grid.
 
@@ -107,7 +108,7 @@ def render_frf_fiche(
     statement: str,
     extended: list[str],
     metadata: ReportMetadata | None,
-    language: str = "en",
+    language: Language = "en",
     after_body: Callable[[], list[Any]] | None = None,
 ) -> str:
     """Assemble a structural-vibration FRF fiche into a one-page PDF at ``path``.

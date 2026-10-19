@@ -65,6 +65,7 @@ if TYPE_CHECKING:
     from reportlab.lib.styles import ParagraphStyle, StyleSheet1
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..room.enclosed_space_absorption import ReverberationResult
     from ..room.reverberation_prediction import ReverberationModelResult
     from .metadata import ReportMetadata
@@ -89,7 +90,7 @@ _PRIMARY_MODEL = "Arau-Puchades"
 # ---------------------------------------------------------------------------
 
 
-def _fmt_t(value: float, language: str = "en") -> str:
+def _fmt_t(value: float, language: Language = "en") -> str:
     """Format a reverberation time to two decimals, or an em dash if not finite."""
     v = float(value)
     if not math.isfinite(v):
@@ -172,7 +173,9 @@ def _band_header_style() -> ParagraphStyle:
     )
 
 
-def _target_line(requirement: float, styles: StyleSheet1, language: str) -> list[Any]:
+def _target_line(
+    requirement: float, styles: StyleSheet1, language: Language
+) -> list[Any]:
     """A muted reference line for a supplied target reverberation time.
 
     A room reverberation time is a target range, not a strictly
@@ -205,7 +208,7 @@ def _header_grid(
     volume: float,
     extra_pairs: Sequence[tuple[str, str | None]],
     metadata: ReportMetadata | None,
-    language: str,
+    language: Language,
 ) -> list[Any]:
     """Build the metadata header grid (volume plus room-identity fields).
 
@@ -256,7 +259,7 @@ def _header_grid(
 # ---------------------------------------------------------------------------
 
 
-def _models_table(result: ReverberationModelResult, language: str) -> Table:
+def _models_table(result: ReverberationModelResult, language: Language) -> Table:
     """Build the per-band table with one reverberation-time column per model."""
     from reportlab.lib.units import mm
 
@@ -278,7 +281,7 @@ def _models_table(result: ReverberationModelResult, language: str) -> Table:
 
 
 def _prediction_statement(
-    result: ReverberationModelResult, language: str
+    result: ReverberationModelResult, language: Language
 ) -> tuple[str, list[str]]:
     """The boxed prediction descriptor and the per-model spread beside it."""
     freqs = np.asarray(result.frequencies, dtype=np.float64)
@@ -308,7 +311,7 @@ def render_reverberation_models_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a reverberation-time prediction fiche to a PDF at ``path``.
 
@@ -415,7 +418,7 @@ def render_reverberation_models_report(
 # ---------------------------------------------------------------------------
 
 
-def _enclosed_table(result: ReverberationResult, language: str) -> Table:
+def _enclosed_table(result: ReverberationResult, language: Language) -> Table:
     """Build the per-band ``f | A | T`` table of the enclosed-space fiche."""
     from reportlab.lib.units import mm
 
@@ -443,7 +446,7 @@ def _enclosed_table(result: ReverberationResult, language: str) -> Table:
 
 
 def _enclosed_statement(
-    result: ReverberationResult, language: str
+    result: ReverberationResult, language: Language
 ) -> tuple[str, list[str]]:
     """The boxed reverberation-time descriptor and the mid-frequency area."""
     freqs = np.asarray(result.frequencies, dtype=np.float64)
@@ -475,7 +478,7 @@ def render_enclosed_space_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an enclosed-space absorption/reverberation fiche to a PDF at ``path``.
 

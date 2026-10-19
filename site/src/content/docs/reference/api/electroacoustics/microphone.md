@@ -131,7 +131,7 @@ MicrophoneCharacteristics(
     rated_impedance_ohm: float | None,
     min_load_impedance_ohm: float | None,
     equivalent_noise_level: float | None,
-    noise_weighting: str,
+    noise_weighting: Literal['A', '468'],
     max_spl: float | None,
     max_spl_thd_percent: float,
     distortion_spl: NDArray[np.float64] | None,
@@ -199,8 +199,8 @@ plane-wave sensitivity level minus the directivity index (13.2).
 MicrophoneCharacteristics.plot(
     ax: Axes | None = None,
     *,
-    quantity: str = 'response',
-    language: str = 'en',
+    quantity: Literal['response', 'directivity', 'noise', 'distortion'] = 'response',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -239,9 +239,9 @@ MicrophoneCharacteristics.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -296,6 +296,7 @@ noise (17), carrying the same weighting.
 
 ```python
 MicrophoneDirectivity(
+    *,
     polar: tuple[ArrayLike, ArrayLike] | None = None,
     frequency: float | None = None,
     index: float | None = None,
@@ -321,6 +322,7 @@ incidence for a stated frequency, and the directivity index read from it
 
 ```python
 MicrophoneElectrical(
+    *,
     rated_impedance_ohm: float | None = None,
     min_load_impedance_ohm: float | None = None,
     powering: str | None = None,
@@ -347,9 +349,10 @@ the rated power supply of Clause 9.
 
 ```python
 MicrophoneNoise(
+    *,
     voltage_v: float | None = None,
     equivalent_level: float | None = None,
-    weighting: str = 'A',
+    weighting: Literal['A', '468'] = 'A',
     spectrum: tuple[ArrayLike, ArrayLike] | None = None,
 )
 ```
@@ -373,6 +376,7 @@ output voltage, and the band spectrum that voltage was measured over.
 
 ```python
 MicrophoneOverload(
+    *,
     distortion: tuple[ArrayLike, ArrayLike] | None = None,
     thd_percent: float = 1.0,
     spl: float | None = None,

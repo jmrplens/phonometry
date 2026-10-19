@@ -51,7 +51,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Final
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal
 
 import numpy as np
 
@@ -80,6 +80,14 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
+
+    from .._i18n import Language
+
+EventMetric = Literal["exposure", "maximum"]
+
+#: The two event metrics a rotorcraft contour reads: the exposure level and
+#: the maximum level.
+_METRICS: tuple[EventMetric, ...] = ("exposure", "maximum")
 
 __all__ = [
     "FlightConditionInterpolation",
@@ -179,7 +187,7 @@ class RotorcraftHemisphere(OwnsArrays):
         require_same_length(self, "frequencies", ("levels", 2))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the hemisphere directivity for one band (polar section)."""
         from .._i18n import check_language
@@ -419,7 +427,7 @@ def hover_ring_hemisphere(
     distance_m: float = 70.0,
     azimuth_step: float = 10.0,
     polar_step: float = 10.0,
-    mapping: str = "constant_phi",
+    mapping: Literal["constant_phi", "bearing"] = "constant_phi",
 ) -> RotorcraftHemisphere:
     r"""Noise hemisphere from a ground-ring hover measurement (guidance §A.3.5).
 
@@ -475,12 +483,14 @@ def hover_ring_hemisphere(
     freqs = require_positive_array(frequencies, "frequencies")
     brg = np.atleast_1d(np.asarray(bearings, dtype=np.float64))
     lv = np.asarray(levels, dtype=np.float64)
+    # The number is a count of array axes, not a quantity.
     if brg.ndim != 1 or brg.size < 2:  # noqa: PLR2004
         msg = "'bearings' must be 1-D with at least two ring directions."
         raise ValueError(msg)
     if not np.all(np.isfinite(brg)) or np.any(np.diff(brg) <= 0.0):
         msg = "'bearings' must be finite and strictly increasing."
         raise ValueError(msg)
+    # Degrees of a half and of a whole turn.
     if brg[0] < -180.0 or brg[-1] > 180.0:  # noqa: PLR2004
         msg = "'bearings' must lie within [-180, 180] degrees."
         raise ValueError(msg)
@@ -523,7 +533,7 @@ def hover_ring_hemisphere(
 
 def hover_derived_hemisphere(
     hemisphere: RotorcraftHemisphere,
-    condition: str,
+    condition: Literal["out_of_ground_hover", "reduced_rpm_idle", "full_rpm_idle"],
     *,
     offset_db: float | None = None,
 ) -> RotorcraftHemisphere:
@@ -711,6 +721,7 @@ def _simplex_from_table(
     """The first triangle of a lookup table enveloping ``q``, or ``None``."""
     require_scalar(n, "n")
     tri = np.asarray(triangles, dtype=np.intp)
+    # The number is a count of array axes, not a quantity.
     if tri.ndim != 2 or tri.shape[1] != 3 or tri.size == 0:  # noqa: PLR2004
         msg = "'triangles' must have shape (T, 3)."
         raise ValueError(msg)
@@ -886,7 +897,7 @@ class FlightPathKinematics(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the speed and angle profiles along the track."""
         from .._i18n import check_language
@@ -1154,7 +1165,7 @@ class RotorcraftEventResult(OwnsArrays):
             raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the A-weighted level time history with its event metrics."""
         from .._i18n import check_language
@@ -1178,7 +1189,7 @@ class RotorcraftNoiseContourResult(OwnsArrays):
     x: NDArray[np.float64]
     y: NDArray[np.float64]
     levels: NDArray[np.float64]
-    metric: str
+    metric: EventMetric
 
     def __post_init__(self) -> None:
         """Reject a grid whose levels do not span its own coordinates.
@@ -1210,7 +1221,7 @@ class RotorcraftNoiseContourResult(OwnsArrays):
         require_choice(self.metric, "metric", ("exposure", "maximum"))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot filled noise contours over the ground plane."""
         from .._i18n import check_language
@@ -1248,6 +1259,7 @@ def _validated_track(
     """The validated ``(times, positions)`` track arrays."""
     t = np.asarray(times, dtype=np.float64)
     p = np.asarray(positions, dtype=np.float64)
+    # The number is a count of array axes, not a quantity.
     if t.ndim != 1 or t.size < 2:  # noqa: PLR2004
         msg = "'times' must be 1-D with at least two points."
         raise ValueError(msg)
@@ -1297,10 +1309,10 @@ class RotorcraftAtmosphere(RichDisplay):
     temperature_c: float = 25.0
     relative_humidity_percent: float = 70.0
     static_pressure_kpa: float = 101.325
-    atmospheric_method: str = "iso9613"
+    atmospheric_method: Literal["iso9613", "sae"] = "iso9613"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RotorcraftGround(OwnsArrays):
     """The ground a rotorcraft event stands on (guidance §A.4.3-A.4.5).
 
@@ -1379,7 +1391,7 @@ class RotorcraftTrackState(OwnsArrays):
     bank_angle_deg: float | NDArray[np.float64] | list[float] | None = None
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class FlightConditionInterpolation(OwnsArrays):
     """How a flight condition blends the database hemispheres (Eq. 3-10).
 
@@ -1655,6 +1667,7 @@ def _validated_terrain(
     """The validated ``(x, y, z)`` digital elevation model, or ``None``."""
     if terrain is None:
         return None
+    # The length of a fixed-size argument, not a quantity.
     if len(terrain) != 3:  # noqa: PLR2004
         msg = "'terrain' must be an (x, y, z) elevation model."
         raise ValueError(msg)
@@ -1662,7 +1675,9 @@ def _validated_terrain(
     ty = np.asarray(terrain[1], dtype=np.float64).ravel()
     tz = np.asarray(terrain[2], dtype=np.float64)
     if (
+        # The fewest values the step below can work with, not a quantity.
         tx.size < 2  # noqa: PLR2004
+        # The fewest values the step below can work with, not a quantity.
         or ty.size < 2  # noqa: PLR2004
         or np.any(np.diff(tx) <= 0)
         or np.any(np.diff(ty) <= 0)
@@ -2003,6 +2018,7 @@ def rotorcraft_event_level(
         interpolation=interpolation,
     )
     rx = np.asarray(receiver, dtype=np.float64).ravel()
+    # The length of a fixed-size argument, not a quantity.
     if rx.size != 2 or not np.all(np.isfinite(rx)):  # noqa: PLR2004
         msg = "'receiver' must be a finite (x, y) ground position."
         raise ValueError(msg)
@@ -2070,7 +2086,7 @@ def rotorcraft_noise_contour(
     *,
     x: NDArray[np.float64] | list[float],
     y: NDArray[np.float64] | list[float],
-    metric: str = "exposure",
+    metric: EventMetric = "exposure",
     level_offset: float | NDArray[np.float64] | list[float] = 0.0,
     atmosphere: RotorcraftAtmosphere = _ICAO_ATMOSPHERE,
     ground: RotorcraftGround = _FLAT_GROUND,
@@ -2125,13 +2141,15 @@ def rotorcraft_noise_contour(
     gx = np.asarray(x, dtype=np.float64).ravel()
     gy = np.asarray(y, dtype=np.float64).ravel()
     if (
+        # The fewest values the step below can work with, not a quantity.
         gx.size < 2  # noqa: PLR2004
+        # The fewest values the step below can work with, not a quantity.
         or gy.size < 2  # noqa: PLR2004
         or not (np.all(np.isfinite(gx)) and np.all(np.isfinite(gy)))
     ):
         msg = "'x' and 'y' must each be finite with at least two grid points."
         raise ValueError(msg)
-    key = require_choice(metric, "metric", ("exposure", "maximum"))
+    key = require_choice(metric, "metric", _METRICS)
     xx, yy = np.meshgrid(gx, gy)
     n_g = xx.size
     for name, value in (

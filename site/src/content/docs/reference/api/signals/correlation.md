@@ -129,7 +129,7 @@ otherwise.
 AlignedImpulseResponseResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -247,8 +247,8 @@ CorrelationResult(
     lags: NDArray[np.float64],
     values: NDArray[np.float64],
     coefficient: NDArray[np.float64],
-    normalization: str,
-    kind: str,
+    normalization: Literal['biased', 'unbiased', 'coefficient'],
+    kind: Literal['autocorrelation', 'cross-correlation'],
     fs: float,
     n_samples: int,
     duration_s: float,
@@ -276,7 +276,7 @@ Auto- or cross-correlation estimate (B&P Sections 5.1, 8.4, 11.4).
 CorrelationResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -472,7 +472,7 @@ interval (Eq. 8.130).
 TimeDelayResult(
     delay: float,
     delay_samples: float,
-    method: str,
+    method: Literal['direct', 'gcc', 'phase'],
     weighting: str | None,
     lags: NDArray[np.float64],
     correlation: NDArray[np.float64],
@@ -508,7 +508,7 @@ Time-delay estimate between two records.
 TimeDelayResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

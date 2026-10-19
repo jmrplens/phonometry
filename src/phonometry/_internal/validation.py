@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
     from numpy.typing import ArrayLike
 
-    from .types import BandFraction
+    from .types import BandFraction, ReportEngine
 
 
 def is_positive(value: float) -> bool:
@@ -440,7 +440,7 @@ def require_band_fraction(value: object, name: str) -> BandFraction:
     return cast("BandFraction", int(value))
 
 
-def check_engine(engine: str) -> None:
+def check_engine(engine: str) -> ReportEngine:
     """Require *engine* to name the one report engine there is.
 
     The counterpart of :func:`phonometry._i18n.check_language` for the
@@ -451,10 +451,11 @@ def check_engine(engine: str) -> None:
     same way, with one message to update when that day comes.
 
     :param engine: The requested report engine.
+    :return: The engine, typed as the one choice there is.
     :raises ValueError: for any value other than ``"reportlab"``.
     """
     if engine == "reportlab":
-        return
+        return "reportlab"
     msg = f"Unknown report engine {engine!r}; only 'reportlab' is supported."
     raise ValueError(msg)
 

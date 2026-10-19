@@ -2204,10 +2204,10 @@
         "peak_temperature_at_1000_hz_c": {
           "$ref": "#/$defs/number"
         },
-        "youngs_modulus_max_pa": {
+        "youngs_modulus_min_pa": {
           "$ref": "#/$defs/number_from_0"
         },
-        "youngs_modulus_min_pa": {
+        "youngs_modulus_max_pa": {
           "$ref": "#/$defs/number_from_0"
         },
         "youngs_modulus_transition_pa": {
@@ -3224,7 +3224,7 @@
         "porosity_decay_rate_per_m": {
           "$ref": "#/$defs/number"
         },
-        "iso_9613_ground_factor": {
+        "iso9613_ground_factor": {
           "$ref": "#/$defs/number"
         },
         "nmpb_ground_factor": {
@@ -3258,7 +3258,7 @@
         "flow_resistivity_pa_s_m2",
         "group",
         "harmonoise_class",
-        "iso_9613_ground_factor",
+        "iso9613_ground_factor",
         "name",
         "nmpb_ground_factor",
         "note",
@@ -3273,7 +3273,7 @@
     "GroundSurface.fields": {
       "enum": [
         "flow_resistivity_pa_s_m2",
-        "iso_9613_ground_factor",
+        "iso9613_ground_factor",
         "nmpb_ground_factor",
         "porosity",
         "porosity_decay_rate_per_m",

@@ -63,7 +63,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -85,7 +85,10 @@ from ...io._resolve import (
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
     from ..._internal.types import Real
+
+LeadingEdge = Literal["blackman-harris", "cosine-squared"]
 
 Complex = NDArray[np.complex128]
 
@@ -306,8 +309,8 @@ def adrienne_window(
     flat_duration: float = _ADRIENNE_FLAT,
     leading_duration: float = _ADRIENNE_LEADING,
     trailing_duration: float = _ADRIENNE_TRAILING,
-    leading_edge: str = "blackman-harris",
-    trailing_edge: str = "blackman-harris",
+    leading_edge: LeadingEdge = "blackman-harris",
+    trailing_edge: LeadingEdge = "blackman-harris",
 ) -> Real:
     """Adrienne-type temporal window (ISO 13472-1:2002, Clause 6.4).
 
@@ -637,7 +640,7 @@ class OneThirdOctaveAbsorption(OwnsArrays):
     absorption: NDArray[np.float64]
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the band absorption against the band centres.
 
@@ -740,7 +743,7 @@ class InSituAbsorptionResult(OwnsArrays):
         require_present(self, "source_height_m", "microphone_height_m")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the in-situ absorption spectrum ``alpha(f)``.
 
@@ -754,7 +757,7 @@ class InSituAbsorptionResult(OwnsArrays):
         return plot_in_situ_absorption(self, ax=ax, language=language, **kwargs)
 
     def plot_geometry(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the measurement set-up to scale.
 

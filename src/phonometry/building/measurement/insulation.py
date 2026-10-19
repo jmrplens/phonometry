@@ -87,13 +87,13 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_mean
-from ..._internal.types import as_float_or_array
+from ..._internal.types import ReportEngine, as_float_or_array
 from ..._internal.validation import (
     check_engine,
     is_positive,
@@ -122,8 +122,11 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
     from ..._report.metadata import ReportMetadata
     from .low_frequency import LowFrequencyResult
+
+Method = Literal["road_traffic", "loudspeaker"]
 
 __all__ = [
     "AirborneInsulationResult",
@@ -233,7 +236,7 @@ class AirborneInsulationResult(OwnsArrays):
                 raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-band insulation quantities (``DnT``, ``D``, ``R'``).
 
@@ -250,11 +253,11 @@ class AirborneInsulationResult(OwnsArrays):
         self,
         path: str,
         *,
-        quantity: str = "dnt",
+        quantity: Literal["dnt", "r_prime"] = "dnt",
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an ISO 16283-1 field airborne sound-insulation report to a PDF.
 
@@ -373,7 +376,7 @@ class ImpactInsulationResult(OwnsArrays):
                 raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-band impact levels (``L'nT`` and, if present, ``L'n``).
 
@@ -390,11 +393,11 @@ class ImpactInsulationResult(OwnsArrays):
         self,
         path: str,
         *,
-        quantity: str = "l_n_t",
+        quantity: Literal["l_n_t", "l_n"] = "l_n_t",
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an ISO 16283-2 field impact sound-insulation report to a PDF.
 
@@ -475,7 +478,7 @@ class FacadeInsulationResult(OwnsArrays):
     d_2m_n: np.ndarray | None
     r_prime: np.ndarray | None
     frequencies: np.ndarray | None = None
-    method: str = "loudspeaker"
+    method: Method = "loudspeaker"
     low_frequency: LowFrequencyResult | None = None
 
     def __post_init__(self) -> None:
@@ -510,7 +513,7 @@ class FacadeInsulationResult(OwnsArrays):
         require_same_length(self, "d_2m", "d_2m_nt", "d_2m_n", "r_prime", "frequencies")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-band façade insulation profile (ISO 16283-3).
 
@@ -529,11 +532,11 @@ class FacadeInsulationResult(OwnsArrays):
         self,
         path: str,
         *,
-        quantity: str = "d_2m_nt",
+        quantity: Literal["d_2m_nt", "d_2m_n", "r_prime"] = "d_2m_nt",
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an ISO 16283-3 field facade sound-insulation report to a PDF.
 
@@ -600,9 +603,9 @@ def _render_iso16283(
     *,
     quantity: str,
     metadata: ReportMetadata | None,
-    engine: str,
+    engine: ReportEngine,
     verbose: bool,
-    language: str,
+    language: Language,
 ) -> str:
     """Validate the field-report request and delegate to the renderer.
 
@@ -671,9 +674,9 @@ def _render_iso16283_facade(
     *,
     quantity: str,
     metadata: ReportMetadata | None,
-    engine: str,
+    engine: ReportEngine,
     verbose: bool,
-    language: str,
+    language: Language,
 ) -> str:
     """Validate the facade-report request and delegate to the renderer.
 
@@ -760,6 +763,7 @@ def _as_band_levels(levels: Sequence[float] | np.ndarray, name: str) -> np.ndarr
     data = np.asarray(levels, dtype=np.float64)
     if data.ndim == 1:
         out = data
+    # The number is a count of array axes, not a quantity.
     elif data.ndim == 2:  # noqa: PLR2004
         out = np.asarray(energy_average_level(data, axis=0), dtype=np.float64)
     else:
@@ -1288,7 +1292,7 @@ def facade_insulation(
     area: float | None = None,
     volume: float | None = None,
     surface_level: Sequence[float] | np.ndarray | None = None,
-    method: str = "loudspeaker",
+    method: Method = "loudspeaker",
     t0: float = 0.5,
     frequencies: Sequence[float] | np.ndarray | None = None,
     low_frequency: LowFrequencyProcedure | None = None,

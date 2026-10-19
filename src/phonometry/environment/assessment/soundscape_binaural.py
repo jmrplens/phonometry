@@ -96,6 +96,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from ..._i18n import Language
     from ...io._resolve import SignalInput
 
 __all__ = [
@@ -392,7 +393,7 @@ class BinauralIndicators(RichDisplay):
         ax: Axes | None = None,
         *,
         parameter: str | None = None,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Plot one row of Table D.1: each metric at both ears, with the

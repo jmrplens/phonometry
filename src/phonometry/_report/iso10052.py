@@ -39,6 +39,7 @@ import numpy as np
 from ._insulation_fiche import iso717_columns_builder, render_insulation_fiche
 
 if TYPE_CHECKING:
+    from .._i18n import Language
     from ..building.measurement.ratings import ImpactRatingResult, WeightedRatingResult
     from ..building.measurement.survey_insulation import (
         SurveyAirborneResult,
@@ -132,7 +133,7 @@ def _render_survey(
     curve_attr: str,
     metadata: ReportMetadata | None,
     verbose: bool,
-    language: str,
+    language: Language,
 ) -> str:
     """Drive the shared insulation skeleton with the survey band table.
 
@@ -178,7 +179,7 @@ def render_survey_airborne_report(
     quantity: str,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a survey-method airborne fiche (ISO 10052) to a PDF.
 
@@ -220,7 +221,7 @@ def render_survey_impact_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a survey-method impact fiche ``L'nT`` (ISO 10052) to a PDF.
 
@@ -258,7 +259,7 @@ def render_survey_facade_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a survey-method facade fiche ``D2m,nT`` (ISO 10052) to a PDF.
 

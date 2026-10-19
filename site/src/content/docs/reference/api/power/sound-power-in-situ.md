@@ -92,7 +92,7 @@ evaluated.
 ```python
 excess_sound_pressure_level(
     level: ArrayLike,
-    lw_ref: ArrayLike,
+    reference_sound_power_levels: ArrayLike,
     distance: ArrayLike,
 ) -> np.ndarray | float
 ```
@@ -117,7 +117,7 @@ traverse of levels and distances.
 | Name | Description |
 | :--- | :--- |
 | `level` | Sound pressure level(s) `Lp(RSS),r` measured at distance `r` from the reference sound source, in decibels. |
-| `lw_ref` | Calibrated sound power level `LW(RSS)` of the reference source, in decibels (per band, or A-weighted). |
+| `reference_sound_power_levels` | Calibrated sound power level `LW(RSS)` of the reference source, in decibels (per band, or A-weighted). |
 | `distance` | Distance(s) `r` from the microphone to the reference source, in metres. |
 
 **Returns:** The excess `dLf(r)`, in decibels, as a float for scalar input or an array of the broadcast shape.
@@ -132,6 +132,7 @@ traverse of levels and distances.
 
 ```python
 GradeConditions(
+    *,
     excess_levels: ArrayLike | None = None,
     directivity_range: float | None = None,
 )
@@ -165,9 +166,9 @@ InSituSoundPowerResult(
     reference_levels: np.ndarray,
     reference_power_level: np.ndarray,
     background_correction: np.ndarray,
-    background_correction_ref: np.ndarray,
+    reference_background_correction: np.ndarray,
     background_margin_db: np.ndarray,
-    background_margin_ref_db: np.ndarray,
+    reference_background_margin_db: np.ndarray,
     c2: float,
     excess_levels: np.ndarray | None,
     directivity_range_db: float | None,
@@ -175,7 +176,7 @@ InSituSoundPowerResult(
     coverage_factor: float,
     sound_power_level_a: float,
     sound_energy_level_a: float,
-    quantity: str,
+    quantity: Literal['power', 'energy'],
 )
 ```
 
@@ -187,7 +188,7 @@ carries the octave-band sound power level `LW` (Eq. 11 or 12) in
 `'energy'` the sound energy level `LJ` (Eq. 19 or 20) in
 `sound_energy_level` with `sound_power_level` all `NaN`. Both are
 at the meteorological conditions of the test; the properties
-`sound_power_level_ref` and `sound_energy_level_ref` add the
+`sound_power_level_at_reference_conditions` and `sound_energy_level_at_reference_conditions` add the
 Annex C correction `c2` (Eq. C.1, C.3).
 
 `mean_source_level` is the mean corrected level of the source under
@@ -202,9 +203,9 @@ energy-averaged over its locations (the first term of Eq. 12).
 `background_correction` is `K1i` at each microphone position and band
 for the source under test (Eq. 7; for `N` events measured one at a
 time it is the per-position shift the per-event corrections of Eq. 13
-produce in the mean of Eq. 15), `background_correction_ref` the same for
+produce in the mean of Eq. 15), `reference_background_correction` the same for
 the reference source at each location (Eq. 9, 10).
-`background_margin_db` and `background_margin_ref_db` are the smallest
+`background_margin_db` and `reference_background_margin_db` are the smallest
 margin over the background per band, of the source under test over its
 positions (and events) and of the reference source over its locations and
 positions, `NaN` where no background was measured; the two flags below
@@ -269,7 +270,7 @@ fails or was not determined.
 InSituSoundPowerResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -295,14 +296,14 @@ The typical reproducibility of Table 2 at `grade`, in dB.
 
 Eq. (22), $\sqrt{\sigma_{R0}^2 + \sigma_{omc}^2}$, `NaN` without `sigma_omc_db`.
 
-### InSituSoundPowerResult.sound_energy_level_ref
+### InSituSoundPowerResult.sound_energy_level_at_reference_conditions
 
 *property*
 
 `LJ` under the reference meteorological conditions, `LJ + C2`
 (ISO 3747:2010 Annex C, Eq. C.3); `NaN` for a power determination.
 
-### InSituSoundPowerResult.sound_power_level_ref
+### InSituSoundPowerResult.sound_power_level_at_reference_conditions
 
 *property*
 
@@ -323,13 +324,13 @@ while the reference source's margin met it everywhere.
 ```python
 sound_energy_in_situ(
     event_levels: ArrayLike,
-    levels_ref: ArrayLike,
-    lw_ref: ArrayLike | ReferenceSourceCalibration,
+    reference_levels: ArrayLike,
+    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
     *,
     frequencies: ArrayLike,
     n_events: int | None = None,
     background_levels: ArrayLike | None = None,
-    background_levels_ref: ArrayLike | None = None,
+    reference_background_levels: ArrayLike | None = None,
     integration_time: float | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
@@ -364,12 +365,12 @@ time-averaged, over 30 s (7.6), exactly as for a steady source.
 | Name | Description |
 | :--- | :--- |
 | `event_levels` | Measured (uncorrected) octave-band single event levels `L'Ei,q(ST)` as `(n, N, bands)`, or `L'Ei,N(ST)` of one measurement encompassing `n_events` events as `(n, bands)`, in decibels. |
-| `levels_ref` | Time-averaged levels of the reference sound source, `(n, bands)` or `(m, n, bands)`, as in [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ). |
-| `lw_ref` | Calibrated sound power level of the reference source, `(bands,)` or `(m, bands)`, in decibels, or its [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration), as for [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ). |
+| `reference_levels` | Time-averaged levels of the reference sound source, `(n, bands)` or `(m, n, bands)`, as in [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ). |
+| `reference_sound_power_levels` | Calibrated sound power level of the reference source, `(bands,)` or `(m, bands)`, in decibels, or its [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration), as for [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ). |
 | `frequencies` | Nominal octave mid-band frequencies, one per band. |
 | `n_events` | The number `N` of events a 2D `event_levels` contains (Eq. 17); must be `None` with the 3D form, which counts them. |
 | `background_levels` | Octave-band time-averaged background levels `Lpi(B)`, `(n, bands)` or `(bands,)`, in decibels; `None` applies no correction, warns, and leaves `background_requirement_met` `False` in every band (7.5, 8.1). |
-| `background_levels_ref` | Background for the reference-source measurement; `None` reuses `background_levels` (7.5). |
+| `reference_background_levels` | Background for the reference-source measurement; `None` reuses `background_levels` (7.5). |
 | `integration_time` | The integration time `T` of the event measurement, in seconds. `None` applies Eq. (14) as printed, subtracting the time-averaged background from the single event level; a value carries the background to the same interval first, $L_{pi(\mathrm{B})} + 10 \log_{10}(T/T_0)$ with `T0` = 1 s (3.4, NOTE 1), so that the margin compares like with like. The two coincide at `T` = 1 s. |
 | `temperature_c` | Air temperature at the test, in degrees Celsius. |
 | `static_pressure_kpa` | Static pressure at the test, in kilopascals, as for [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ); Annex C itself prints pascals. |
@@ -391,12 +392,12 @@ time-averaged, over 30 s (7.6), exactly as for a steady source.
 ```python
 sound_power_in_situ(
     levels: ArrayLike,
-    levels_ref: ArrayLike,
-    lw_ref: ArrayLike | ReferenceSourceCalibration,
+    reference_levels: ArrayLike,
+    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
     *,
     frequencies: ArrayLike,
     background_levels: ArrayLike | None = None,
-    background_levels_ref: ArrayLike | None = None,
+    reference_background_levels: ArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     conditions: GradeConditions | None = None,
@@ -421,7 +422,7 @@ L_W = L_{W(\mathrm{RSS})} - \overline{L_{p(\mathrm{RSS})}} + \overline{L_{p(\mat
 $$
 
 at the meteorological conditions of the test; the returned `c2` and
-the `sound_power_level_ref` property carry it to the reference
+the `sound_power_level_at_reference_conditions` property carry it to the reference
 conditions of Annex C, and `sound_power_level_a` is the Annex D total.
 
 **Parameters**
@@ -429,11 +430,11 @@ conditions of Annex C, and `sound_power_level_a` is the Annex D total.
 | Name | Description |
 | :--- | :--- |
 | `levels` | Measured (uncorrected) octave-band time-averaged levels `L'pi(ST)` of the source under test, `(n, bands)`, one row per microphone position, in decibels. |
-| `levels_ref` | The same for the reference sound source, `L'pi(RSS)` already corrected for speed, temperature and static pressure per its manufacturer but not for background: `(n, bands)` for one location, or `(m, n, bands)` for `m` locations (Eq. 10). |
-| `lw_ref` | Calibrated octave-band sound power level `LW(RSS)` of the reference source, `(bands,)`, or `(m, bands)` when each location was calibrated in its own similar position (Eq. 12), in decibels; or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, whose one-third octave bands are summed into the octaves at `frequencies`. It is read as calibrated: Eq. (9) corrects the measured levels of the reference source for speed, temperature and static pressure by the manufacturer's specifications instead. |
+| `reference_levels` | The same for the reference sound source, `L'pi(RSS)` already corrected for speed, temperature and static pressure per its manufacturer but not for background: `(n, bands)` for one location, or `(m, n, bands)` for `m` locations (Eq. 10). |
+| `reference_sound_power_levels` | Calibrated octave-band sound power level `LW(RSS)` of the reference source, `(bands,)`, or `(m, bands)` when each location was calibrated in its own similar position (Eq. 12), in decibels; or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, whose one-third octave bands are summed into the octaves at `frequencies`. It is read as calibrated: Eq. (9) corrects the measured levels of the reference source for speed, temperature and static pressure by the manufacturer's specifications instead. |
 | `frequencies` | Nominal octave mid-band frequencies, one per band, from 63 Hz to 8 kHz (Table D.1), in hertz. |
 | `background_levels` | Octave-band time-averaged background levels `Lpi(B)`, `(n, bands)` or one `(bands,)` spectrum for every position, in decibels; `None` applies no correction, warns, and leaves `background_requirement_met` `False` in every band, since 7.5 has the background measured at each position and 8.1 needs the margin to declare the measurement valid. |
-| `background_levels_ref` | Background for the reference-source measurement, same shapes; `None` reuses `background_levels`, since the procedure takes one background reading (7.5). |
+| `reference_background_levels` | Background for the reference-source measurement, same shapes; `None` reuses `background_levels`, since the procedure takes one background reading (7.5). |
 | `temperature_c` | Air temperature at the test, in degrees Celsius. |
 | `static_pressure_kpa` | Static pressure at the test, in kilopascals (see [`static_pressure_from_altitude`](/phonometry/reference/api/power/sound-power-in-situ/#static_pressure_from_altitude)). Annex C prints this quantity in pascals, with $p_{\mathrm{s},0}$ = 1,013 25 x 10^5 Pa, and is alone in its family in doing so: ISO 3741:2010, ISO 3744:2010 and ISO 3745:2012 all print kilopascals. This argument follows the three, so that one unit serves the whole ISO 3740 family; `C2` carries a pressure term and a temperature term, and the pressure enters only as the ratio $p_\mathrm{s}/p_{\mathrm{s},0}$, so converting both together cannot move a result. |
 | `conditions` | The [`GradeConditions`](/phonometry/reference/api/power/sound-power-in-situ/#gradeconditions) Table 2 reads to decide the accuracy grade: the excess of sound pressure level at each microphone position (Annex A) and the range of the directivity survey of the source (7.2). `None`, or either condition left out, leaves the determination at survey grade. |
@@ -446,7 +447,7 @@ conditions of Annex C, and `sound_power_level_a` is the Annex D total.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if `levels` is not a finite `(n, bands)` array, `levels_ref`, `lw_ref` or either background does not match it, `frequencies` are not the octave centres of Table D.1, `temperature_c` or `static_pressure_kpa` is out of range, `conditions.excess_levels` is supplied and is not one finite value per position, `conditions.directivity_range` or `sigma_omc_db` is supplied and is negative, or `coverage_factor` is not positive. |
+| ValueError | if `levels` is not a finite `(n, bands)` array, `reference_levels`, `reference_sound_power_levels` or either background does not match it, `frequencies` are not the octave centres of Table D.1, `temperature_c` or `static_pressure_kpa` is out of range, `conditions.excess_levels` is supplied and is not one finite value per position, `conditions.directivity_range` or `sigma_omc_db` is supplied and is negative, or `coverage_factor` is not positive. |
 
 ## static_pressure_from_altitude
 

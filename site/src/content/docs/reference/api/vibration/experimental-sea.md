@@ -342,7 +342,7 @@ PowerInjectionResult(
     input_power2: NDArray[np.float64],
     modal_density1: NDArray[np.float64] | None,
     modal_density2: NDArray[np.float64] | None,
-    method: str,
+    method: Literal['single-drive', 'two-drive'],
 )
 ```
 
@@ -413,7 +413,7 @@ measurement.
 PowerInjectionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

@@ -251,7 +251,7 @@ Build it with [`k_weighting_response`](/phonometry/reference/api/broadcast/progr
 KWeightingResponse.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -395,7 +395,7 @@ EBU Mode loudness measurement of a programme (BS.1770-5 / EBU R 128).
 ProgramLoudnessResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -419,10 +419,10 @@ ProgramLoudnessResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
-    tolerance: str = 'qc',
+    language: Literal['en', 'es'] = 'en',
+    tolerance: Literal['qc', 'live'] = 'qc',
 ) -> str
 ```
 

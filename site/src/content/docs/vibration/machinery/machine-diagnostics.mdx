@@ -63,7 +63,7 @@ tau = np.arange(int(0.004 * fs)) / fs
 ring = np.exp(-tau / 6.0e-4) * np.sin(2.0 * np.pi * 3000.0 * tau)
 x = np.convolve(impacts, ring)[: t.size] * 0.6
 x += 0.35 * np.sin(2.0 * np.pi * shaft * t)          # residual unbalance
-x += signals.noise_signal(fs, seconds, color="white", rms=0.25, seed=17)
+x += signals.noise_signal(fs, duration_s=seconds, color="white", rms=0.25, seed=17)
 
 # Band-pass the resonance the impacts ring, envelope it, transform it,
 # and let the result draw its own lines on top.

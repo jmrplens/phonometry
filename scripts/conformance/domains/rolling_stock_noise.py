@@ -47,7 +47,10 @@ def _table_g2() -> ph.environment.PassByUncertainty:
     """The budget of Table G.2 from its printed rows."""
     return ph.environment.pass_by_uncertainty(
         ref.TABLE_G2_READING_DB,
-        [ph.metrology.Quantity(v, u, name=n) for n, v, u in ref.TABLE_G2_ROWS],
+        [
+            ph.metrology.Quantity(value=v, uncertainty=u, name=n)
+            for n, v, u in ref.TABLE_G2_ROWS
+        ],
     )
 
 

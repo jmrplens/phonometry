@@ -112,10 +112,10 @@ AMBIENT_NOISE_BANDS_HZ = (31.5, 40.0, 50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200
 
 ```python
 ambient_noise_limits(
-    presentation: str = 'air',
+    presentation: Literal['air', 'bone', 'sound field'] = 'air',
     *,
     lowest_test_frequency_hz: float = 125.0,
-    earphone: str = 'supra-aural',
+    earphone: Literal['supra-aural', 'ER-3A', 'HDA 200'] = 'supra-aural',
     earphone_attenuation: ArrayLike | None = None,
     lowest_hearing_level: float = 0.0,
     allowed_threshold_shift_db: float = 2.0,
@@ -164,13 +164,13 @@ conservative reading.
 
 ```python
 AmbientNoiseCheck(
-    presentation: str,
+    presentation: Literal['air', 'bone', 'sound field'],
     frequencies: np.ndarray,
     levels: np.ndarray,
     lowest_test_frequency_hz: float,
     lowest_hearing_level: float,
     noise_floor_levels: np.ndarray | None = None,
-    earphone: str | None = None,
+    earphone: Literal['supra-aural', 'ER-3A', 'HDA 200', 'own attenuation'] | None = None,
     earphone_attenuation: np.ndarray | None = None,
     allowed_threshold_shift_db: float = 2.0,
 )
@@ -267,7 +267,7 @@ Whether every band of the table was measured and is within its limit.
 AmbientNoiseCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -415,7 +415,7 @@ How many ascents ended at the threshold level.
 AscendingThresholdResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -466,7 +466,7 @@ audiogram_cautions(
     *,
     air_conduction_threshold_levels: ArrayLike | None = None,
     bone_conduction_threshold_levels: ArrayLike | None = None,
-    vibrator_placement: str = 'mastoid',
+    vibrator_placement: Literal['mastoid', 'forehead'] = 'mastoid',
 ) -> AudiogramCautions
 ```
 
@@ -515,7 +515,7 @@ AudiogramCautions(
     frequencies: np.ndarray,
     air_conduction_threshold_levels: np.ndarray | None,
     bone_conduction_threshold_levels: np.ndarray | None,
-    vibrator_placement: str,
+    vibrator_placement: Literal['mastoid', 'forehead'],
 )
 ```
 
@@ -556,7 +556,7 @@ contralateral masking can be necessary.
 AudiogramCautions.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -599,7 +599,7 @@ The average vibrotactile threshold of 8.4 at each frequency, in dB.
 audiometric_uncertainty(
     frequency: float,
     *,
-    conduction: str = 'air',
+    conduction: Literal['air', 'bone'] = 'air',
     masked: bool = False,
     level_step_db: float = 5.0,
     environment_uncertainty_db: float = 2.0,
@@ -727,7 +727,7 @@ The eight input quantities of Table A.1, in its order.
 AudiometricUncertaintyBudget.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -848,7 +848,7 @@ The retained peaks, in dB.
 AutomaticThresholdResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -987,7 +987,7 @@ The average of the descents' lowest response levels, in dB.
 BracketingThresholdResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1020,9 +1020,9 @@ Whether the ascents or the descents spread over more than 10 dB.
 check_audiometric_ambient_noise(
     levels: ArrayLike,
     *,
-    presentation: str = 'air',
+    presentation: Literal['air', 'bone', 'sound field'] = 'air',
     lowest_test_frequency_hz: float = 125.0,
-    earphone: str = 'supra-aural',
+    earphone: Literal['supra-aural', 'ER-3A', 'HDA 200'] = 'supra-aural',
     earphone_attenuation: ArrayLike | None = None,
     lowest_hearing_level: float = 0.0,
     allowed_threshold_shift_db: float = 2.0,
@@ -1165,7 +1165,7 @@ Whether the two agree to 5 dB or less, and the test moves on.
 RetestAgreementCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1297,7 +1297,7 @@ Per frequency, whether its peaks or valleys spread over 10 dB.
 SweepThresholdResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

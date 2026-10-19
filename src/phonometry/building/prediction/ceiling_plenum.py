@@ -105,7 +105,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -124,6 +124,11 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
+
+    from ..._i18n import Language
+
+#: The two plenum sidewall conditions of Vigran Section 9.2.3.2.
+Sidewalls = Literal["absorbing", "reflecting"]
 
 __all__ = [
     "CEILING_ATTENUATION_CONTOUR",
@@ -408,7 +413,7 @@ class CeilingAttenuationResult(OwnsArrays):
         return np.asarray(np.floor(measured + 0.5), dtype=np.float64)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``Dn,c`` against the fitted ASTM E413 contour.
 
@@ -516,7 +521,7 @@ class PlenumFlankingResult(OwnsArrays):
     reduction_index_receiving: np.ndarray
     geometry_term: float | None
     penalty: np.ndarray
-    model: str
+    model: Literal["undamped", "attenuated"]
     epsilon: float
     plenum_height_m: float
     ceiling_length: float
@@ -554,7 +559,7 @@ class PlenumFlankingResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``Rcl`` against the two ceiling reduction indices.
 
@@ -575,7 +580,7 @@ def plenum_flanking_reduction_index(
     *,
     ceiling_length: float,
     plenum_height_m: float,
-    sidewalls: str = ...,
+    sidewalls: Sidewalls = ...,
     frequencies: ArrayLike | None = ...,
     attenuation_source_per_m: ArrayLike,
     attenuation_receiving_per_m: ArrayLike,
@@ -592,7 +597,7 @@ def plenum_flanking_reduction_index(
     *,
     ceiling_length: float,
     plenum_height_m: float,
-    sidewalls: str = ...,
+    sidewalls: Sidewalls = ...,
     frequencies: ArrayLike | None = ...,
     source_length: float | None = ...,
     split_source: float = ...,
@@ -606,7 +611,7 @@ def plenum_flanking_reduction_index(
     *,
     ceiling_length: float,
     plenum_height_m: float,
-    sidewalls: str = "reflecting",
+    sidewalls: Sidewalls = "reflecting",
     frequencies: ArrayLike | None = None,
     attenuation_source_per_m: ArrayLike | None = None,
     attenuation_receiving_per_m: ArrayLike | None = None,

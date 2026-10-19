@@ -33,6 +33,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..environment.sources.acoustic_roughness import AcousticRoughnessSpectrum
     from ..environment.sources.rolling_stock_noise import (
         AdjacentVehicleNeutrality,
@@ -138,12 +139,12 @@ _MAXIMUM_SPREAD_DB = 3.0
 _R10 = (1.0, 1.25, 1.6, 2.0, 2.5, 3.15, 4.0, 5.0, 6.3, 8.0)
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Localise a fixed string; English is returned verbatim."""
     return _STRINGS.get(text, text) if language == "es" else text
 
 
-def _roughness_axis(ax: Axes, wavelengths_m: list[float], language: str) -> None:
+def _roughness_axis(ax: Axes, wavelengths_m: list[float], language: Language) -> None:
     """A logarithmic wavelength axis in centimetres, longest on the left."""
     import matplotlib.ticker as mticker
 
@@ -163,7 +164,7 @@ def _roughness_axis(ax: Axes, wavelengths_m: list[float], language: str) -> None
 
 
 def _draw_roughness_limit(
-    ax: Axes, limit_db: Mapping[float, float], language: str
+    ax: Axes, limit_db: Mapping[float, float], language: Language
 ) -> None:
     wavelengths = sorted(limit_db, reverse=True)
     ax.plot(
@@ -183,7 +184,7 @@ def plot_roughness_spectrum(
     ax: Axes | None = None,
     *,
     limit_db: Mapping[float, float] | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """A rail roughness spectrum against decreasing wavelength, EN 15610 clause 9.
@@ -237,13 +238,13 @@ def _nominal_frequency(band: int) -> float:
     return value * 10.0**exponent if exponent >= 0 else value / 10.0 ** (-exponent)
 
 
-def _band_label(band: int, language: str) -> str:
+def _band_label(band: int, language: Language) -> str:
     from .common import _format_freq
 
     return _format_freq(_nominal_frequency(band), language)
 
 
-def _band_axis(ax: Axes, positions: dict[int, float], language: str) -> None:
+def _band_axis(ax: Axes, positions: dict[int, float], language: Language) -> None:
     ax.set_xticks(list(positions.values()))
     ax.set_xticklabels(
         [_band_label(b, language) for b in positions], rotation=45, ha="right"
@@ -255,7 +256,7 @@ def _draw_decay(
     ax: Axes,
     rates: TrackDecayRate,
     positions: dict[int, float],
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
     *,
     label: str,
@@ -298,7 +299,7 @@ def _draw_decay_limit(
     )
 
 
-def _decay_axis(ax: Axes, positions: dict[int, float], language: str) -> None:
+def _decay_axis(ax: Axes, positions: dict[int, float], language: Language) -> None:
     ax.set_yscale("log")
     ax.set_ylim(*_DECAY_AXIS_DB_PER_M)
     _band_axis(ax, positions, language)
@@ -310,7 +311,7 @@ def plot_track_decay_rate(
     ax: Axes | None = None,
     *,
     limit_db_per_m: Mapping[float, float] | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Track decay rates on the logarithmic axis of EN 15461 9.2.
@@ -354,7 +355,7 @@ def plot_pass_by_measurement(
     result: PassByMeasurement,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The level history of a pass-by with its measurement interval, as ISO 3095 Figure 7.
@@ -418,7 +419,7 @@ def plot_stationary_test(
     result: StationaryTestResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The mean level of every position of a stationary mesh and the unit level.
@@ -466,7 +467,7 @@ def plot_rolling_stock_test(
     result: RollingStockTestResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Every run of a test of three runs, each position's rounded mean and the result.
@@ -546,7 +547,7 @@ def plot_rise_speed(
     result: RiseSpeedResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """A level history with the slopes that rise 10 dB and the steepest rise, Annex A.
@@ -592,7 +593,7 @@ def plot_adjacent_neutrality(
     result: AdjacentVehicleNeutrality,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The two pass-by levels of 6.3.4 and the 2 dB the adjacent vehicle may add.
@@ -650,7 +651,7 @@ def plot_small_roughness_deviation(
     result: SmallRoughnessDeviation,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The measured and revised noise spectra of ISO 3095 Annex C, and the correction.
@@ -708,7 +709,7 @@ def plot_roughness_comparability(
     result: RoughnessComparability,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The two roughness spectra of Annex E and their envelopes, as Figure E.1.
@@ -779,7 +780,7 @@ def _draw_reference_roughness(
     result: ReferenceTrackCheck,
     kwargs: dict[str, Any],
     first_label: str | None,
-    language: str,
+    language: Language,
 ) -> None:
     """The measured roughness spectra against the limit of Figure 2."""
     colors = (_C_PRIMARY, _C_TERTIARY, _C_QUATERNARY, _C_MUTED)
@@ -804,7 +805,7 @@ def _draw_reference_roughness(
     _roughness_axis(ax, wavelengths, language)
 
 
-def _decay_set_labels(result: ReferenceTrackCheck, language: str) -> list[str]:
+def _decay_set_labels(result: ReferenceTrackCheck, language: Language) -> list[str]:
     """The legend label of each set of decay rates, in order.
 
     Sets are numbered within their direction, and only when a direction has
@@ -830,7 +831,7 @@ def _draw_reference_decay(
     result: ReferenceTrackCheck,
     kwargs: dict[str, Any],
     first_label: str | None,
-    language: str,
+    language: Language,
 ) -> None:
     """The decay rates of every set against the lower limits of Figure 3."""
     frequencies = [
@@ -858,7 +859,7 @@ def _draw_reference_decay(
 
 
 def _reference_track_title(
-    result: ReferenceTrackCheck, panel: str, language: str
+    result: ReferenceTrackCheck, panel: str, language: Language
 ) -> str:
     """The verdict, and the Annex C effect it rests on when the roughness is drawn."""
     from .._i18n import format_number
@@ -880,7 +881,7 @@ def plot_reference_track(
     ax: Axes | None = None,
     *,
     panel: str = "roughness",
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The measured roughness against Figure 2, or the decay rates against Figure 3.
@@ -911,7 +912,7 @@ def plot_pass_by_uncertainty(
     result: PassByUncertainty,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Each input's share of the variance of the result, largest first, as Figure G.1.

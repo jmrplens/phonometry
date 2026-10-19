@@ -79,11 +79,11 @@ def test_rejects_invalid_signal() -> None:
     with_nan = np.array([np.nan, 1.0])
     valid_tone = _tone(500.0, 0.1, 1.0)
     silence = np.zeros(100)
-    with pytest.raises(ValueError, match="'pressure' must be one-dimensional"):
+    with pytest.raises(ValueError, match="'pressure_pa' must be one-dimensional"):
         underwater.sound_pressure_level(two_dimensional)
-    with pytest.raises(ValueError, match="'pressure' must be finite"):
+    with pytest.raises(ValueError, match="'pressure_pa' must be finite"):
         underwater.sound_pressure_level(with_nan)
     with pytest.raises(ValueError, match="'fs' must be a positive"):
         underwater.sound_exposure_level(valid_tone, 0.0)
-    with pytest.raises(ValueError, match="'pressure' has no energy"):
+    with pytest.raises(ValueError, match="'pressure_pa' has no energy"):
         underwater.sound_pressure_level(silence)  # no energy

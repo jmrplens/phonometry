@@ -28,6 +28,7 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from ..psychoacoustics.loudness.contours import (
         EqualLoudnessContours,
         LoudnessContour,
@@ -138,7 +139,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -147,7 +148,7 @@ def plot_zwicker_loudness(
     result: ZwickerLoudness,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Specific loudness N'(z) over the Bark scale (ISO 532-1).
@@ -209,7 +210,7 @@ def plot_zwicker_loudness_time(
     result: ZwickerLoudness,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Loudness-versus-time function N(t) of a time-varying result (ISO 532-1).
@@ -271,7 +272,7 @@ def plot_ecma_loudness(
     result: EcmaLoudness,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Average specific loudness N'(z) and time-dependent loudness N(l).
@@ -345,7 +346,7 @@ def plot_moore_glasberg_loudness(
     result: MooreGlasbergLoudness,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Specific loudness N'(i) over the ERB-number (Cam) scale (ISO 532-2).
@@ -387,7 +388,7 @@ def plot_moore_glasberg_time_loudness(
     result: MooreGlasbergTimeVaryingLoudness,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Short-term and long-term loudness against time (ISO 532-3).
@@ -441,7 +442,7 @@ def plot_ecma_tonality(
     result: EcmaTonality,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Average specific tonality T'(z) and time-dependent tonality T(l).
@@ -522,7 +523,7 @@ def _plot_hms_time_and_heatmap(
     title: str,
     heat_label: str,
     kwargs: dict[str, Any],
-    language: str = "en",
+    language: Language = "en",
 ) -> Axes | np.ndarray:
     """Shared renderer for the HMS time-trace + specific-value heatmaps.
 
@@ -572,7 +573,7 @@ def plot_ecma_roughness(
     result: EcmaRoughness,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Time-dependent roughness R(l50) and a specific-roughness heatmap.
@@ -614,7 +615,7 @@ def plot_ecma_fluctuation_strength(
     result: EcmaFluctuationStrength,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Time-dependent fluctuation strength F(l50) and a specific heatmap.
@@ -662,7 +663,7 @@ def plot_fluctuation_strength(
     result: FluctuationStrengthResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Specific fluctuation strength ``f(z)`` against critical-band rate.
@@ -705,7 +706,7 @@ def plot_psychoacoustic_annoyance(
     result: PsychoacousticAnnoyanceResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Psychoacoustic annoyance with its ``wS`` and ``wFR`` term contributions.
@@ -755,7 +756,7 @@ def plot_tone_assessment(
     result: ToneAssessment,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Assessed tone against the ECMA-418-1 prominence criterion.
@@ -850,7 +851,7 @@ def plot_tone_audibility(
     result: ToneAudibilityResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-tone audibility ``ΔL`` against tone frequency (ISO/PAS 20065).
@@ -909,7 +910,7 @@ def plot_tone_audibility_levels(
     result: ToneAudibilityResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""Tone level and critical-band masking noise against frequency (ISO 1996-2).
@@ -1021,7 +1022,7 @@ def plot_equal_loudness_contours(
     result: EqualLoudnessContours,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Normal equal-loudness-level contour family (ISO 226:2023).
@@ -1102,7 +1103,7 @@ def plot_loudness_contour(
     result: LoudnessContour,
     *,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """One ISO 226:2023 curve: an equal-loudness contour or the threshold.

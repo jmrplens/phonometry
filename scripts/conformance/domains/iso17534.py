@@ -110,7 +110,10 @@ def _general_method(
     return ph.environment.predicted_receiver_level(
         np.full(len(_BANDS), _LW),
         ph.environment.PropagationGeometry(
-            distance, _SOURCE[2], _RECEIVER[2], projected_distance=_DP
+            distance=distance,
+            source_height_m=_SOURCE[2],
+            receiver_height_m=_RECEIVER[2],
+            projected_distance=_DP,
         ),
         frequencies=np.array(_BANDS),
         ground=ground,
@@ -165,7 +168,9 @@ _HOMOGENEOUS = (
 
 def _homogeneous_levels(g: float) -> np.ndarray:
     """One of T01 to T03: the same ground factor in all three regions."""
-    return _general_method(ph.environment.GroundFactors(g, g, g), _D3_FLAT)
+    return _general_method(
+        ph.environment.GroundFactors(source=g, middle=g, receiver=g), _D3_FLAT
+    )
 
 
 def _chk_homogeneous_spectrum(g: float, printed: tuple[float, ...]) -> Outcome:

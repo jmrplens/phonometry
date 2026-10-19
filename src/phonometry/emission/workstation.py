@@ -123,6 +123,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
+
 __all__ = [
     "DEFAULT_COVERAGE_FACTOR",
     "GRADE_2_MAX_K3",
@@ -229,7 +231,7 @@ class EmissionPressureResult(OwnsArrays):
         return bool(np.any(settled(np.asarray(self.background_margin_db)) < floor))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the reading, the two corrections and what is left of them."""
         from .._i18n import check_language

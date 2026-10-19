@@ -104,7 +104,7 @@ Single-number open-plan-office quantities (ISO 3382-3:2012, Cl. 4).
 OpenPlanResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -122,7 +122,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 OpenPlanResult.plot_geometry(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -139,9 +139,9 @@ OpenPlanResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -194,7 +194,7 @@ plot_open_plan_geometry(
     ax: Axes | None = None,
     rd: float | None = None,
     rp: float | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

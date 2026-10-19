@@ -153,7 +153,8 @@ $1/\sqrt{r}$ amplitude spreading.
 
 ```python
 ElasticBoundaries(
-    sides: str | Mapping[str, str] = 'rigid',
+    *,
+    sides: Literal['rigid', 'absorbing', 'free'] | Mapping[Literal['left', 'right', 'top', 'bottom'], Literal['rigid', 'absorbing', 'free']] = 'rigid',
     absorbing_layer_cells: int = 20,
 )
 ```
@@ -181,7 +182,7 @@ ElasticFDTD2D(
     rho: float | NDArray[np.float64],
     cfl: float = 0.6,
     sponge_width: int = 0,
-    sponge_sides: str | Iterable[str] | None = None,
+    sponge_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
     sponge_reflection: float = 0.0001,
     damping: float | NDArray[np.float64] = 0.0,
     shape: tuple[int, int] | None = None,
@@ -251,7 +252,9 @@ and the obstacle mask.
 ### ElasticFDTD2D.collocated()
 
 ```python
-ElasticFDTD2D.collocated(field: str) -> NDArray[np.float64]
+ElasticFDTD2D.collocated(
+    field: Literal['p', 'vx', 'vy'],
+) -> NDArray[np.float64]
 ```
 
 One field interpolated to the cell centres, shape `(ny, nx)`.
@@ -385,7 +388,7 @@ ElasticFDTDResult(
     sources: tuple[ExplosionSource | ForceSource, ...],
     snapshots: NDArray[np.float64] | None,
     snapshot_times: NDArray[np.float64] | None,
-    snapshot_field: str,
+    snapshot_field: Literal['p', 'vx', 'vy'],
     obstacle_mask: NDArray[np.bool_] | None,
     free_sides: tuple[str, ...],
 )
@@ -418,9 +421,9 @@ Frozen result of an [`elastic_fdtd_simulation`](/phonometry/reference/api/simula
 ElasticFDTDResult.plot(
     ax: Axes | None = None,
     *,
-    kind: str = 'probes',
+    kind: Literal['probes', 'snapshot'] = 'probes',
     frame: int = -1,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -449,10 +452,11 @@ Domain size `(lx, ly)` [m].
 
 ```python
 ElasticRecording(
+    *,
     probes: Sequence[tuple[int, int]] = (),
     probe_fields: Sequence[str] = ('vy',),
     snapshot_every: int | None = None,
-    snapshot_field: str = 'p',
+    snapshot_field: Literal['p', 'vx', 'vy'] = 'p',
 )
 ```
 
@@ -476,6 +480,7 @@ nothing (the default) runs the physics and keeps only the time axis.
 
 ```python
 ExplosionSource(
+    *,
     ix: int,
     iy: int,
     waveform: Callable[[float], float],
@@ -514,9 +519,10 @@ are not used here).
 
 ```python
 ForceSource(
+    *,
     ix: int,
     iy: int,
-    direction: str,
+    direction: Literal['x', 'y'],
     waveform: Callable[[float], float],
     amplitude: float = 1.0,
 )
@@ -550,7 +556,7 @@ wave (Virieux 1986, Fig. 5).
 ## Material
 
 ```python
-Material(c_p: float, c_s: float, rho: float)
+Material(*, c_p: float, c_s: float, rho: float)
 ```
 
 An isotropic elastic medium as measurable wave speeds and density.

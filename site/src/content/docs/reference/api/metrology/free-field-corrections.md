@@ -156,6 +156,7 @@ text asks for.
 
 ```python
 AdjustmentValue(
+    *,
     frequencies: NDArray[np.float64],
     free_field_deviation_db: NDArray[np.float64],
     calibrator_level: float,
@@ -235,7 +236,7 @@ calibration check frequency, after the adjustment, in dB.
 AdjustmentValue.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -486,7 +487,7 @@ $U = k\,u_\mathrm{c}$, in dB.
 CorrectionUncertaintyBudget.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -590,7 +591,7 @@ conform to IEC 61672-1, which clause 15 p) asks separately.
 CorrectionUncertaintyVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -622,9 +623,9 @@ CorrectionUncertaintyVerification.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -781,10 +782,11 @@ the one-third-octave ones.
 
 ```python
 FreeFieldCorrection(
+    *,
     frequencies: NDArray[np.float64],
     corrections: NDArray[np.float64],
     reference_correction: NDArray[np.float64],
-    source: str,
+    source: Literal['sound_calibrator', 'comparison_coupler', 'electrostatic_actuator'],
     check_frequency_hz: float | None = None,
     microphones: tuple[Hashable, ...] | None = None,
 )
@@ -860,7 +862,7 @@ The number of microphones the determinations were made with.
 FreeFieldCorrection.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1004,7 +1006,7 @@ taken over the three microphones and not over the calibrators as well.
 UncertaintyComponentRow(
     symbol: str,
     description: str,
-    distribution: str,
+    distribution: Literal['rectangular', 'normal'],
     divisor: float,
 )
 ```

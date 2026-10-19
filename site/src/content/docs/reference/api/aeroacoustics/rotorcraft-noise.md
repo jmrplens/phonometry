@@ -157,6 +157,7 @@ radar tracks (e.g. spline resampling) before differentiating.
 
 ```python
 FlightConditionInterpolation(
+    *,
     scaling_factor: float = 2.0,
     triangles: NDArray[np.int_] | list[list[int]] | None = None,
 )
@@ -220,7 +221,7 @@ inconsistent with its use; ECAC Doc 32 Eq. 10 states the correct
 FlightPathKinematics.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -267,7 +268,7 @@ grid return `NaN`.
 ```python
 hover_derived_hemisphere(
     hemisphere: RotorcraftHemisphere,
-    condition: str,
+    condition: Literal['out_of_ground_hover', 'reduced_rpm_idle', 'full_rpm_idle'],
     *,
     offset_db: float | None = None,
 ) -> RotorcraftHemisphere
@@ -318,7 +319,7 @@ hover_ring_hemisphere(
     distance_m: float = 70.0,
     azimuth_step: float = 10.0,
     polar_step: float = 10.0,
-    mapping: str = 'constant_phi',
+    mapping: Literal['constant_phi', 'bearing'] = 'constant_phi',
 ) -> RotorcraftHemisphere
 ```
 
@@ -495,7 +496,7 @@ rotorcraft_noise_contour(
     *,
     x: NDArray[np.float64] | list[float],
     y: NDArray[np.float64] | list[float],
-    metric: str = 'exposure',
+    metric: Literal['exposure', 'maximum'] = 'exposure',
     level_offset: float | NDArray[np.float64] | list[float] = 0.0,
     atmosphere: RotorcraftAtmosphere = ...,
     ground: RotorcraftGround = ...,
@@ -546,7 +547,7 @@ RotorcraftAtmosphere(
     temperature_c: float = 25.0,
     relative_humidity_percent: float = 70.0,
     static_pressure_kpa: float = 101.325,
-    atmospheric_method: str = 'iso9613',
+    atmospheric_method: Literal['iso9613', 'sae'] = 'iso9613',
 )
 ```
 
@@ -617,7 +618,7 @@ A rotorcraft single-event time history at a receiver (Doc 32 §6.1).
 RotorcraftEventResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -628,6 +629,7 @@ Plot the A-weighted level time history with its event metrics.
 
 ```python
 RotorcraftGround(
+    *,
     receiver_height_m: float = 1.2,
     ground_elevation: float | NDArray[np.float64] | list[float] | list[list[float]] = 0.0,
     flow_resistivity: float | str | np.floating[Any] | np.integer[Any] | NDArray[np.float64] | list[float] | list[list[float]] = 'G',
@@ -703,7 +705,7 @@ by reversing the hemisphere azimuth angle.
 RotorcraftHemisphere.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -717,7 +719,7 @@ RotorcraftNoiseContourResult(
     x: NDArray[np.float64],
     y: NDArray[np.float64],
     levels: NDArray[np.float64],
-    metric: str,
+    metric: Literal['exposure', 'maximum'],
 )
 ```
 
@@ -738,7 +740,7 @@ Rotorcraft single-event noise level over a ground grid (Doc 32 §6.3).
 RotorcraftNoiseContourResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

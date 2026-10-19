@@ -50,7 +50,7 @@ verify_weighting_class(
     wf: WeightingFilter,
     *,
     n_sweep_points: int = 4096,
-    edition: str = '2013',
+    edition: Literal['2013', '1979'] = '2013',
 ) -> WeightingComplianceResult
 ```
 
@@ -153,7 +153,7 @@ over the standard's full frequency range.
 weighting_class_limits(
     weighting_class: int,
     *,
-    edition: str = '2013',
+    edition: Literal['2013', '1979'] = '2013',
 ) -> WeightingClassLimits
 ```
 
@@ -215,8 +215,8 @@ position.
 WeightingComplianceResult(
     band_margins: tuple[Mapping[str, Any], ...],
     between_nominals: Mapping[str, float] | None,
-    weighting: str,
-    edition: str,
+    weighting: Literal['A', 'B', 'C', 'AU', 'Z'],
+    edition: Literal['2013', '1979'],
     fs: float,
     n_sweep_points: int,
 )

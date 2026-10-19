@@ -442,9 +442,9 @@ att.plot()                        # the stacked breakdown above (needs matplotli
 lw = np.full(len(bands), 95.0)
 lp = environment.predicted_receiver_level(
     lw,
-    environment.PropagationGeometry(200.0, 1.5, 1.5),   # d, hs, hr
+    environment.PropagationGeometry(distance=200.0, source_height_m=1.5, receiver_height_m=1.5),   # d, hs, hr
     frequencies=bands,
-    ground=environment.GroundFactors(1.0, 1.0, 1.0),    # Gs, Gm, Gr
+    ground=environment.GroundFactors(source=1.0, middle=1.0, receiver=1.0),    # Gs, Gm, Gr
     barrier=barrier,
     atmosphere=environment.AtmosphericConditions(
         temperature_c=15.0, relative_humidity_percent=70.0),

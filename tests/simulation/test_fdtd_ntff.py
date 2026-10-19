@@ -273,7 +273,13 @@ def _cw_panel_levels(
     sim = FDTD2D(
         C0, dx, shape=(ny, nx), sponge_width=sponge, cfl=0.9, obstacle_mask=mask
     )
-    sim.add_source(PlaneWaveSource("down", CWSource(0, 0, F0).value, offset=sponge))
+    sim.add_source(
+        PlaneWaveSource(
+            direction="down",
+            waveform=CWSource(ix=0, iy=0, frequency=F0).value,
+            offset=sponge,
+        )
+    )
     probe = sim.add_contour_probe(*contour, frequencies=[F0])
     sim.run(round(settle / sim.dt))
     probe.reset()
@@ -444,10 +450,13 @@ def test_meshed_metadiffuser_far_field_matches_tmm_model(
     # no more.
     wells = [
         materials.MetadiffuserWell(
-            h * 1e-3,
-            (
+            slit_height_m=h * 1e-3,
+            resonators=(
                 materials.HelmholtzResonator(
-                    l_n * 1e-3, w_n * 1e-3, l_c * 1e-3, w_c * 1e-3
+                    neck_length_m=l_n * 1e-3,
+                    neck_side_m=w_n * 1e-3,
+                    cavity_length_m=l_c * 1e-3,
+                    cavity_side_m=w_c * 1e-3,
                 ),
             )
             * 2,

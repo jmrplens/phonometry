@@ -41,7 +41,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from ..._internal.display import RichDisplay
 from ..._internal.validation import (
@@ -52,6 +52,11 @@ from ..._internal.validation import (
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
+
+Direction = Literal["vertical", "horizontal"]
+Surface = Literal["hard", "soft"]
+#: A displayed quantity of Table 3: one based on an r.m.s., or a peak.
+DisplayedQuantity = Literal["rms", "peak"]
 
 __all__ = [
     "CLEARANCE_TO_DISTURBING_BODY_FACTOR",
@@ -120,8 +125,8 @@ EMISSION_POINT_TRACK_DISTANCE_M: float = 8.0
 #: field, as a multiple of the body's largest dimension (5.1.4): at least 1,5.
 CLEARANCE_TO_DISTURBING_BODY_FACTOR: float = 1.5
 
-_DIRECTIONS = tuple(LOOSE_MOUNTING_LIMITS_HZ)
-_SURFACES = ("hard", "soft")
+_DIRECTIONS: tuple[Direction, ...] = ("vertical", "horizontal")
+_SURFACES: tuple[Surface, ...] = ("hard", "soft")
 _QUANTITIES = tuple(INSTRUMENT_CONFIDENCE_LIMITS_PERCENT)
 _CLASSES = (1, 2)
 
@@ -154,8 +159,8 @@ class MountingCheck(RichDisplay):
 
     peak_acceleration_m_s2: float
     upper_frequency_hz: float
-    direction: str
-    surface: str
+    direction: Direction
+    surface: Surface
 
     def __post_init__(self) -> None:
         """Reject a direction, a surface or a reading the clause cannot judge.
@@ -208,8 +213,8 @@ def check_loose_mounting(
     peak_acceleration_m_s2: float,
     upper_frequency_hz: float,
     *,
-    direction: str,
-    surface: str = "hard",
+    direction: Direction,
+    surface: Surface = "hard",
 ) -> MountingCheck:
     """May the transducer be set down without fastening? (5.3.2 and 5.3.3)
 
@@ -247,7 +252,7 @@ def check_loose_mounting(
 
 
 def instrument_confidence_limit_percent(
-    quantity: str, accuracy_class: int = 1
+    quantity: DisplayedQuantity, accuracy_class: int = 1
 ) -> float:
     r"""The confidence limit of the meter's own error on one quantity (Table 3).
 

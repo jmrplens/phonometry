@@ -211,7 +211,7 @@ impulse[0] = 1.0
 b, a = sp_signal.butter(2, [0.004, 0.9], btype="bandpass")
 direct = sp_signal.lfilter(b, a, impulse)              # broadband click
 ir = direct + 0.5 * np.roll(direct, int(0.008 * fs))   # echo at 8 ms
-ir += signals.noise_signal(fs, n / fs, color="white", rms=1e-4, seed=13)
+ir += signals.noise_signal(fs, duration_s=n / fs, color="white", rms=1e-4, seed=13)
 
 res = signals.echo_detection(ir, fs, min_quefrency=0.002)
 
@@ -482,7 +482,7 @@ fs = 8192.0
 seconds = 4.0
 t = np.arange(int(seconds * fs)) / fs
 x = (1.0 + 0.4 * np.cos(2 * np.pi * 25.0 * t)) * np.cos(2 * np.pi * 1000.0 * t)
-x += signals.noise_signal(fs, seconds, color="white", rms=0.03, seed=8)
+x += signals.noise_signal(fs, duration_s=seconds, color="white", rms=0.03, seed=8)
 
 res = signals.envelope_spectrum(x, fs)
 

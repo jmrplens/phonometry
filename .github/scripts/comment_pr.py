@@ -128,7 +128,8 @@ def parse_test_results(test_dir: str, ref: str) -> tuple[str, int, int]:
                     cov_root = cov_tree.getroot()
                     line_rate = float(cov_root.attrib.get("line-rate", 0))
                     coverage_pct = f"{line_rate * 100:.1f}%"
-                except Exception:  # noqa: BLE001 - degrade gracefully if the coverage artifact is malformed
+                # Degrade gracefully if the coverage artifact is malformed.
+                except Exception:
                     coverage_pct = "error"
 
             # The mark, then the word. The word is what a reader gets if the
@@ -145,7 +146,8 @@ def parse_test_results(test_dir: str, ref: str) -> tuple[str, int, int]:
 
             total_tests += tests
             total_failures += failures
-        except Exception as e:  # noqa: BLE001 - degrade gracefully if the coverage artifact is malformed
+        # Degrade gracefully if a test report is malformed.
+        except Exception as e:
             summary.append(f"| {f_name} | - | - | - | Error parsing: {e} |")
 
     return "\n".join(summary), total_tests, total_failures

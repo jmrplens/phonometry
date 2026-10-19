@@ -70,7 +70,7 @@ import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -93,7 +93,10 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
     from ..._internal.types import Real
+
+Criterion = Literal["beranek", "doutres"]
 
 Complex = NDArray[np.complex128]
 
@@ -115,21 +118,26 @@ _OPEN_AREA_MESSAGE = "'open_area' must not exceed 1."
 #: Shared validation message for open porosities.
 _POROSITY_MESSAGE = "'porosity' must not exceed 1."
 
+#: A Delany-Bazley coefficient preset of Bies 5e Table D.1, by name.
+DelanyBazleyPreset = Literal["delany_bazley", "garai_pompoli", "dunn_davern", "wu"]
+
 #: Delany-Bazley power-law coefficient presets ``(C1..C8)`` from Bies 5e
 #: Table D.1, PDF page 757 (printed p. 728), in Appendix D:
 #: ``Zc = rho c (1 + C1 X^-C2 - j C3 X^-C4)`` and
 #: ``k = (w/c)(1 + C5 X^-C6 - j C7 X^-C8)`` with ``X = rho f / sigma``.
-DELANY_BAZLEY_COEFFICIENTS: Mapping[str, tuple[float, ...]] = MappingProxyType(
-    {
-        # Rockwool / fibreglass (Delany & Bazley 1970).
-        "delany_bazley": (0.0571, 0.754, 0.087, 0.732, 0.0978, 0.700, 0.189, 0.595),
-        # Polyester (Garai & Pompoli 2005).
-        "garai_pompoli": (0.078, 0.623, 0.074, 0.660, 0.159, 0.571, 0.121, 0.530),
-        # Polyurethane foam of low flow resistivity (Dunn & Davern 1986).
-        "dunn_davern": (0.114, 0.369, 0.0985, 0.758, 0.168, 0.715, 0.136, 0.491),
-        # Porous plastic foams of medium flow resistivity (Wu 1988).
-        "wu": (0.212, 0.455, 0.105, 0.607, 0.163, 0.592, 0.188, 0.544),
-    }
+DELANY_BAZLEY_COEFFICIENTS: Mapping[DelanyBazleyPreset, tuple[float, ...]] = (
+    MappingProxyType(
+        {
+            # Rockwool / fibreglass (Delany & Bazley 1970).
+            "delany_bazley": (0.0571, 0.754, 0.087, 0.732, 0.0978, 0.700, 0.189, 0.595),
+            # Polyester (Garai & Pompoli 2005).
+            "garai_pompoli": (0.078, 0.623, 0.074, 0.660, 0.159, 0.571, 0.121, 0.530),
+            # Polyurethane foam of low flow resistivity (Dunn & Davern 1986).
+            "dunn_davern": (0.114, 0.369, 0.0985, 0.758, 0.168, 0.715, 0.136, 0.491),
+            # Porous plastic foams of medium flow resistivity (Wu 1988).
+            "wu": (0.212, 0.455, 0.105, 0.607, 0.163, 0.592, 0.188, 0.544),
+        }
+    )
 )
 
 #: Count of Delany-Bazley power-law coefficients ``C1..C8`` an explicit
@@ -155,7 +163,7 @@ MIKI_VALIDITY = (0.01, 1.0)
 #: to which Doutres et al. (2007) relaxed it with their frame structural
 #: interaction criterion (which, with ``K_f`` approximated by the isothermal
 #: value of air ``P0 = 101,3 kPa``, is the book's "lower than 20 kPa").
-LIMP_FRAME_CRITERIA: Mapping[str, float] = MappingProxyType(
+LIMP_FRAME_CRITERIA: Mapping[Criterion, float] = MappingProxyType(
     {"beranek": 0.05, "doutres": 0.2}
 )
 
@@ -245,7 +253,7 @@ ABSORBER_AIR = Fluid(
 # ---------------------------------------------------------------------------
 # Equivalent-fluid models of porous materials
 # ---------------------------------------------------------------------------
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class PorousMediumResult(OwnsArrays):
     r"""Equivalent-fluid characterisation of a porous material.
 
@@ -285,7 +293,7 @@ class PorousMediumResult(OwnsArrays):
         return np.asarray(self.wavenumber / k0, dtype=np.complex128)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the normalised ``Zc`` and ``k`` components against frequency.
 
@@ -342,7 +350,7 @@ def delany_bazley(
     frequency: ArrayLike,
     flow_resistivity_pa_s_m2: float,
     *,
-    coefficients: str | tuple[float, ...] = "delany_bazley",
+    coefficients: DelanyBazleyPreset | tuple[float, ...] = "delany_bazley",
     fluid: Fluid = ABSORBER_AIR,
 ) -> PorousMediumResult:
     r"""Delany-Bazley one-parameter porous model (power laws in ``X``).
@@ -608,7 +616,7 @@ class LimpFrameCheck(RichDisplay):
 
     frame_bulk_modulus: float
     _: KW_ONLY
-    criterion: str = "doutres"
+    criterion: Criterion = "doutres"
     fluid_bulk_modulus: float = _ATMOSPHERIC_PRESSURE
 
     def __post_init__(self) -> None:
@@ -655,7 +663,7 @@ class LimpFrameCheck(RichDisplay):
 def check_limp_frame(
     frame_bulk_modulus: float,
     *,
-    criterion: str = "doutres",
+    criterion: Criterion = "doutres",
     fluid_bulk_modulus: float = _ATMOSPHERIC_PRESSURE,
 ) -> LimpFrameCheck:
     r"""May the limp-frame model be used for this frame? (A&A 2e pp. 253-254).
@@ -793,7 +801,7 @@ def limp_frame(
 # ---------------------------------------------------------------------------
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class FiberResistivityFit(RichDisplay):
     """A published ``k1``, ``k2`` pair of Hopkins Eq. (1.165), and its range.
 
@@ -818,7 +826,7 @@ class FiberResistivityFit(RichDisplay):
     k2: float
     fiber_diameter_um: float
     bulk_density_range_kg_m3: tuple[float, float]
-    direction: str
+    direction: Literal["lateral", "longitudinal"]
     source: str
 
 

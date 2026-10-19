@@ -351,14 +351,14 @@ dos ediciones con las mismas entradas y en el mismo orden.
   $\hat\rho = 1027 + 4{,}3\times10^{-7}\hat P_\mathrm{w} + 0{,}75[S-35] -
   0{,}16[\hat T-10] - 0{,}004[\hat T-10]^2$, atribuida a Pierce (1989,
   p. 34), con las unidades fijadas por las Ecs. (4.7) a (4.10) del folio 128:
-  presión en pascales, temperatura en grados Celsius, densidad en kg/m³. La
+  presión en pascales, temperatura en grados Celsius, densidad en $\text{kg/m}^3$. La
   Ec. (4.4) del folio 127 define esa presión como
   $P_\mathrm{w}(z) = P_\mathrm{atm} + \int_0^z \rho g\,\mathrm{d}\zeta$,
   y la Ec. (4.11) del folio 128 la evalúa en $98\,066{,}5 \times 1{,}04 =
   101\,989{,}16$ Pa en superficie. El folio 177 enuncia después, para los
   cocientes que escalan las correlaciones de sedimento de Bachman, «*standard
   conditions involving atmospheric pressure, a temperature of 23 °C, and
-  salinity 35*» con $\rho_\mathrm{w} = 1024{,}2$ kg/m³.
+  salinity 35*» con $\rho_\mathrm{w} = 1024{,}2\ \text{kg/m}^3$.
 - **El problema:** dos defectos de distinta naturaleza.
 
   (a) El 1024,2 del folio 177 no se sigue de la Ec. (4.6) leída con la
@@ -366,13 +366,13 @@ dos ediciones con las mismas entradas y en el mismo orden.
   que imprime 1024,3. El 1024,2 impreso es lo que da la ecuación con su término
   de presión a cero, es decir, leyendo $P_\mathrm{w}$ como presión manométrica
   contra la definición que enuncia el mismo capítulo. La diferencia son
-  0,043 9 kg/m³, o 4,3 partes por cien mil.
+  $0{,}043\,9\ \text{kg/m}^3$, o 4,3 partes por cien mil.
 
   (b) La Ec. (4.13), que despeja la (4.6) para estimar la salinidad a partir de
   una densidad medida, imprime el coeficiente de presión como
   $4{,}3\times10^{-5}$ donde la (4.6) tiene $4{,}3\times10^{-7}$. Dos órdenes
   de magnitud, y no es otra magnitud reformulada: es el mismo coeficiente en el
-  mismo papel. Arrastrado a 23 °C da 1028,63 kg/m³ frente a 1024,29, un error
+  mismo papel. Arrastrado a 23 °C da $1028{,}63\ \text{kg/m}^3$ frente a 1024,29, un error
   del 0,42 %.
 - **Evidencia:** la Ec. (4.6) evaluada en las condiciones enunciadas con la
   presión de la Ec. (4.11), contra el valor que imprime el folio 177; y los dos
@@ -396,12 +396,12 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Lo impreso:** «The following physical properties for air, valid at 23 °C,
   101,325 kPa and 50 % RH, are used for the calculation (values from
   IEC 61094-2:2009):», y a continuación $c_0 = 345{,}9$ m/s, $\rho_0 = 1{,}186$
-  kg/m³, $\kappa = 1{,}400\,8$, $k_\mathrm{a} = 0{,}023\,55$ J/(s·m·K) y, a la
+  $\text{kg/m}^3$, $\kappa = 1{,}400\,8$, $k_\mathrm{a} = 0{,}023\,55$ J/(s·m·K) y, a la
   vuelta, $C_\mathrm{P} = 938{,}7$ J/(kg·K).
 - **El problema:** dos de los cinco no son valores de IEC 61094-2:2009. La
   Tabla F.1 de esa norma (folio impreso 40) tabula exactamente cinco magnitudes
   en ese estado: $\rho$, $c_0$, $\kappa$, $\eta$ y la **difusividad** térmica
-  $\alpha_t = 2{,}115\,317 \times 10^{-5}$ m²/s. No tabula ni la conductividad
+  $\alpha_t = 2{,}115\,317 \times 10^{-5}\ \text{m}^2\text{/s}$. No tabula ni la conductividad
   térmica ni el calor específico; ésos aparecen en el Anexo F sólo como las dos
   expresiones de la cláusula F.6, que no imprimen valor. Los tres valores del
   Anexo A.3 que sí cuadran son precisamente las tres celdas de la Tabla F.1
@@ -539,7 +539,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **El problema:** la forma reducida está mal por un factor de diez. Seis
   líneas más arriba, la lista de símbolos del apartado 3.1.4 define $A_0$
   como «the reference equivalent sound absorption area, in square metres, for
-  dwellings given as 10 m²», y la lista de símbolos del apartado 3.1.3 de la
+  dwellings given as $10\ \text{m}^2$», y la lista de símbolos del apartado 3.1.3 de la
   página anterior define $T_0$ como «the reference reverberation time, in
   seconds, for dwellings given as 0,5 s». Así que
   $0{,}16/(T_0 A_0) = 0{,}16/5 = 0{,}032$, no 0,32. Aplicada como está
@@ -1038,35 +1038,35 @@ dos ediciones con las mismas entradas y en el mismo orden.
   ISO 15186-3:2010**, la adopción británica de texto idéntico de la ISO
   15186-3:2002, página 18 del PDF (p. 12 impresa).
 - **El impreso:** dos columnas de seis valores en tercios de octava, de 50 Hz
-  a 160 Hz. La columna del cartón-yeso va encabezada por «10 kg/m²» sobre un
-  «Test opening 10 m²» y da 10,7 / 11,9 / 13,4 / 14,8 / 16,3 / 17,9. La del
-  acero va encabezada por «17 kg/m²» sobre un «Test opening 1,25 m × 1,50 m» y
+  a 160 Hz. La columna del cartón-yeso va encabezada por «$10\ \text{kg/m}^2$» sobre un
+  «Test opening $10\ \text{m}^2$» y da 10,7 / 11,9 / 13,4 / 14,8 / 16,3 / 17,9. La del
+  acero va encabezada por «$17\ \text{kg/m}^2$» sobre un «Test opening 1,25 m × 1,50 m» y
   da 21,3 / 21,2 / 21,7 / 22,7 / 23,8 / 25,1. A.2 añade que «the dimensions of
   the free part of the panel are 1,162 m × 1,412 m».
 - **El problema:** ninguna lectura de los datos impresos junto a la columna del
-  acero la reproduce. Con el hueco de ensayo (1,875 m²) y la masa declarada,
+  acero la reproduce. Con el hueco de ensayo ($1{,}875\ \text{m}^2$) y la masa declarada,
   los seis valores calculados quedan entre 1,27 dB y 0,72 dB por debajo de los
   impresos. Esa dispersión de 0,55 dB entre ambos extremos descarta cualquier
   masa superficial con esa área, porque un error de masa desplaza
   $R_0 = 20 \lg(\pi f m / \rho c)$ lo mismo en todas las bandas. Con la parte
-  libre del panel (1,640744 m²) el residuo queda casi plano, de media
+  libre del panel ($1{,}640744\ \text{m}^2$) el residuo queda casi plano, de media
   0,562 dB, pero aun así se abre 0,102 dB de un extremo a otro, que es el ancho
   entero del decimal impreso, así que tampoco es el desplazamiento constante
   que dejaría una masa equivocada por sí sola.
 
   Ningún dato aislado la cierra dentro de los 0,05 dB que admite una impresión
   de un decimal. La mejor masa superficial sola, sobre la parte libre, es
-  18,13 kg/m² y deja 0,051 dB; la mejor presión estática sola son 950 hPa y
+  $18{,}13\ \text{kg/m}^2$ y deja 0,051 dB; la mejor presión estática sola son 950 hPa y
   deja 0,051 dB; la mejor temperatura sola, sobre el hueco de ensayo, son 63 °C
   y deja 0,052 dB. Las dos últimas contradicen el encabezado, que fija el clima
   en 1 013 hPa y 23 °C, y la columna del cartón-yeso sí se reproduce justo con
   ese clima, así que las dos columnas no pueden leerse con climas distintos.
 
   La única lectura que sí reproduce los seis valores mueve dos datos a la vez:
-  un área de unos 1,654 m², cercana a la parte libre pero no igual a ella,
-  junto con una masa superficial de unos 18,16 kg/m². Esa masa no está al
+  un área de unos $1{,}654\ \text{m}^2$, cercana a la parte libre pero no igual a ella,
+  junto con una masa superficial de unos $18{,}16\ \text{kg/m}^2$. Esa masa no está al
   alcance de la probeta descrita. El acero macizo de 2,2 mm da entre
-  16,9 kg/m² y 17,3 kg/m², y la hoja es un sándwich acero/resina/acero, así que
+  $16{,}9\ \text{kg/m}^2$ y $17{,}3\ \text{kg/m}^2$, y la hoja es un sándwich acero/resina/acero, así que
   su masa superficial queda por fuerza por debajo. La columna del cartón-yeso
   de esa misma tabla, con las mismas fórmulas y el mismo clima, reproduce sus
   seis valores dentro de 0,050 dB.
@@ -1074,7 +1074,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   declarados, leídas en las páginas 17 y 18 del PDF (pp. 11 y 12 impresas) de
   BS EN ISO 15186-3:2010. La ISO 140-3:1995, C.2.4, que A.2 cita como origen de
   la probeta, describe la hoja de acero/resina/acero de 2,2 mm pero no declara
-  masa superficial alguna, así que los 17 kg/m² no vienen de ahí. No consta
+  masa superficial alguna, así que los $17\ \text{kg/m}^2$ no vienen de ahí. No consta
   corrigendum al anexo A.
 - **Comportamiento de la biblioteca:** `limp_panel_reduction_index` implementa
   las Fórmulas (A.1) a (A.5) tal como se imprimen. La suite de conformidad las
@@ -1181,12 +1181,12 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **El impreso:** la frase lee «a partir del nivel de velocidad promediado
   espacialmente de la placa $L_\mathrm{v}$, de la **masa por unidad de superficie**
   $m$, del área de la placa $S$ y del factor de pérdida $\eta$, utilizando
-  $f_0 = 1$ Hz, $m_0 = 1$ kg y $S_0 = 1$ m² como referencias», sobre
+  $f_0 = 1$ Hz, $m_0 = 1$ kg y $S_0 = 1\ \text{m}^2$ como referencias», sobre
   $L_\mathrm{Ws} = \left(10\lg\left(\dfrac{2\pi f m \eta S}{f_0 \cdot m_0 \cdot S_0}\right)\right)\text{dB} + L_\mathrm{v} - 60\ \text{dB}$.
 - **El problema:** la misma frase define $m$ como una masa por unidad de
-  superficie, en kg/m², y su referencia $m_0$ como 1 kg. Con $m$ en kg/m² y
-  $S$ en m², el grupo $2\pi f\,\eta\,m\,S / (f_0 m_0 S_0)$ solo es
-  adimensional si $m_0$ es 1 kg/m²; tal como está impreso arrastra un m⁻²
+  superficie, en $\text{kg/m}^2$, y su referencia $m_0$ como 1 kg. Con $m$ en $\text{kg/m}^2$ y
+  $S$ en $\text{m}^2$, el grupo $2\pi f\,\eta\,m\,S / (f_0 m_0 S_0)$ solo es
+  adimensional si $m_0$ es $1\ \text{kg/m}^2$; tal como está impreso arrastra un $\text{m}^{-2}$
   suelto. La constante de cierre confirma la lectura pretendida:
   $10\lg(f_0 m_0 S_0 v_0^2 / P_0) = -60$ dB con $v_0 = 10^{-9}$ m/s y
   $P_0 = 1$ pW cierra en vatios solo cuando $f_0 m_0 S_0$ tiene las unidades
@@ -1201,7 +1201,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   adopción en español, así que esta entrada no establece si el impreso inglés
   de EN 15657:2018 lleva la misma referencia.
 - **Comportamiento de la biblioteca:** no hizo falta ningún cambio.
-  `characteristic_reception_plate_power` toma `mass_per_area` en kg/m² y
+  `characteristic_reception_plate_power` toma `mass_per_area` en $\text{kg/m}^2$ y
   reproduce los propios valores resueltos de la norma, así que la lectura
   pretendida es la implementada; la guía y el docstring conservan la
   referencia impresa y nombran esta entrada a su lado.
@@ -1283,7 +1283,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Ubicación:** Tabla 4 (estimador del índice de reverberación), encabezado
   del rango de volúmenes.
 - **El impreso:** el encabezado lee «60 ≤ V < 150» mientras que el cuerpo del
-  texto dice que el método se aplica a salas «up to 150 m³».
+  texto dice que el método se aplica a salas «up to $150\ \text{m}^3$».
 - **El problema:** el límite $V = 150\ \text{m}^3$ queda incluido por el
   texto y excluido por el encabezado.
 - **Evidencia:** comparación directa del encabezado y el texto del apartado.
@@ -1297,7 +1297,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   reverberación (p. 6 impresa).
 - **El impreso:** «For the reverberation time, the low-frequency procedure
   shall be used for the 50 Hz, 63 Hz, and 80 Hz one-third octave bands in
-  **the source and/or receiving room** when its volume is smaller than 25 m³
+  **the source and/or receiving room** when its volume is smaller than $25\ \text{m}^3$
   (calculated to the nearest cubic metre).»
 - **El problema:** ISO 16283-1 no mide ningún tiempo de reverberación de la
   sala emisora, así que no hay nada en la sala emisora a lo que aplicar un
@@ -1310,16 +1310,16 @@ dos ediciones con las mismas entradas y en el mismo orden.
   cuatro veces: su título es «Reverberation time **in the receiving room**
   (default and low-frequency procedure)», su apartado 10.1 acota todo el
   apartado a «the receiving room», su apartado 10.3 bifurca según si «the
-  receiving room has a volume larger than or equal to 25 m³», y su apartado
+  receiving room has a volume larger than or equal to $25\ \text{m}^3$», y su apartado
   10.4 aplica el procedimiento de baja frecuencia «when **the receiving
-  room** volume is smaller than 25 m³». La locución es correcta dos párrafos
+  room** volume is smaller than $25\ \text{m}^3$». La locución es correcta dos párrafos
   más arriba, uno de ellos la NOTA, donde le corresponde: el *nivel de
   presión sonora* sí se mide en ambas salas y su procedimiento de baja
   frecuencia sí aplica a cualquiera de las dos. Se arrastró hasta la frase
   del tiempo de reverberación, donde solo existe una sala. Las otras dos
   partes imprimen la misma frase con una sola sala: el apartado 6 de
   ISO 16283-2:2020 y el apartado 6 de ISO 16283-3:2016 leen ambos «in the
-  receiving room when its volume is smaller than 25 m³», así que la Parte 1
+  receiving room when its volume is smaller than $25\ \text{m}^3$», así que la Parte 1
   es la discrepante de las tres.
 - **Evidencia:** la frase en la página 12 del PDF (p. 6 impresa) de
   ISO 16283-1:2014, idéntica en la página 14 del PDF (p. 6 impresa) de
@@ -1348,7 +1348,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   de sala emisora que calcular. Todas las demás formulaciones del mismo
   procedimiento en la misma parte nombran una sola sala: el apartado 6 lo
   introduce como usado «in the receiving room when its volume is smaller than
-  25 m³» (p. 6 impresa), el apartado 8.1 repite «in the receiving room»
+  $25\ \text{m}^3$» (p. 6 impresa), el apartado 8.1 repite «in the receiving room»
   (p. 14 impresa), el apartado 8.5 construye $L_\text{i,Corner}$ desde
   esquinas de la sala receptora (p. 16 impresa), y las Fórmulas (1) y (3), a
   las que la misma frase remite al lector, están escritas en $L_\text{i}$, el
@@ -1369,21 +1369,21 @@ dos ediciones con las mismas entradas y en el mismo orden.
   emisora.
 - **Estado:** sin notificar.
 
-## ISO 16283-2:2020, apartado 10.3 (una sala receptora de exactamente 25 m³)
+## ISO 16283-2:2020, apartado 10.3 (una sala receptora de exactamente $25\ \text{m}^3$)
 
 - **Ubicación:** apartado 10.3 «Default procedure» del tiempo de
   reverberación (p. 18 impresa).
 - **El impreso:** «for all one-third octave bands between 50 Hz and 5 000 Hz
-  when the receiving room has a volume **larger than** 25 m³ (calculated to
+  when the receiving room has a volume **larger than** $25\ \text{m}^3$ (calculated to
   the nearest cubic metre) and between 100 Hz and 5 000 Hz when the receiving
-  room has a volume smaller than 25 m³ (calculated to the nearest cubic
+  room has a volume smaller than $25\ \text{m}^3$ (calculated to the nearest cubic
   metre)».
-- **El problema:** una sala receptora que redondea a exactamente 25 m³ no cae
+- **El problema:** una sala receptora que redondea a exactamente $25\ \text{m}^3$ no cae
   en ninguna de las dos ramas, así que el apartado no declara rango de
   frecuencias para ella. Las otras dos partes imprimen «larger than **or
-  equal to** 25 m³» en la frase por lo demás idéntica, que cierra el límite.
+  equal to** $25\ \text{m}^3$» en la frase por lo demás idéntica, que cierra el límite.
   La lectura pretendida no está en duda: el disparador de los apartados 8.1 y
-  10.4 es «smaller than 25 m³» en las tres partes, así que 25 m³ pertenece a
+  10.4 es «smaller than $25\ \text{m}^3$» en las tres partes, así que $25\ \text{m}^3$ pertenece a
   la rama mayor y toma el rango por defecto completo de 50 Hz a 5 000 Hz.
 - **Evidencia:** página 24 del PDF (p. 18 impresa) de ISO 16283-2:2020,
   contra la página 24 del PDF (p. 18 impresa) de ISO 16283-1:2014 y la página
@@ -1393,11 +1393,11 @@ dos ediciones con las mismas entradas y en el mismo orden.
   BSI DPC 13/30269186 DC ya leía igual, y también la edición anterior
   publicada, cuyo apartado 10.3 en la página 25 del PDF (p. 25 impresa) de
   UNE-EN ISO 16283-2:2016, la traducción española de ISO 16283-2:2015, lee
-  «un volumen **superior a** 25 m³» sin «o igual a». La redacción ha
+  «un volumen **superior a** $25\ \text{m}^3$» sin «o igual a». La redacción ha
   permanecido sin cambios a través de dos ediciones y una revisión.
 - **Comportamiento de la biblioteca:** el predicado disparador es el
-  «smaller than 25 m³» estricto que comparten las tres partes, así que una
-  sala de exactamente 25 m³ toma el procedimiento por defecto en todas las
+  «smaller than $25\ \text{m}^3$» estricto que comparten las tres partes, así que una
+  sala de exactamente $25\ \text{m}^3$ toma el procedimiento por defecto en todas las
   partes y no existe hueco.
 - **Estado:** sin notificar.
 
@@ -2486,14 +2486,14 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Ubicación:** Anexo B, Tabla B.1 «Typical loop characteristics» (folio
   impreso 22), la fila «Counter loop».
 - **El impreso:** dimensiones «0,35 × 0,45» m, 10 espiras, perímetro
-  **1,5** m, sección del conductor 0,75 mm², resistencia 0,37 Ω.
+  **1,5** m, sección del conductor $0{,}75\ \text{mm}^2$, resistencia 0,37 Ω.
 - **El problema:** un rectángulo de 0,35 m por 0,45 m tiene un perímetro de
   $2(0{,}35 + 0{,}45) = 1{,}6$ m, y todas las demás filas imprimen el
   perímetro que dan sus dimensiones: 0,7 m para el diámetro de 0,22 m
   ($\pi \times 0{,}22 = 0{,}69$ m) y 14 m, 28 m, 60 m y 110 m para los cuatro
   rectángulos. La propia resistencia de la fila necesita 1,6 m: con la
-  resistividad del cobre recocido patrón a 20 °C, 1/58 Ω·mm²/m (IEC 60028),
-  diez espiras de 1,6 m en 0,75 mm² son 0,368 Ω, impresos 0,37, mientras que
+  resistividad del cobre recocido patrón a 20 °C, $1/58\ \Omega\cdot\text{mm}^2\text{/m}$ (IEC 60028),
+  diez espiras de 1,6 m en $0{,}75\ \text{mm}^2$ son 0,368 Ω, impresos 0,37, mientras que
   diez espiras de 1,5 m serían 0,345 Ω. La misma resistividad da la
   resistencia impresa de las otras cinco filas a la centésima. El perímetro
   se lee **1,6** m.
@@ -2872,7 +2872,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   1/6 mm, 0,166 67 mm. La impedancia va con la cuarta potencia del radio (B.1),
   así que el redondeo de la cabecera desplaza el resultado un 0,08 %, más que
   la última cifra impresa: las Fórmulas (B.1) a (B.3) en las condiciones de
-  referencia dan a 20 Hz 3,013 y 6,029 GPa·s/m³ para los tubos de 50 mm y 100
+  referencia dan a 20 Hz 3,013 y $6{,}029\ \text{GPa}\cdot\text{s/m}^3$ para los tubos de 50 mm y 100
   mm con 0,1667 mm, y los 3,015 y 6,034 impresos con 1/6 mm. Un programa
   contrastado con la tabla usando el radio tal como está impreso falla la
   prueba por hasta cinco unidades de la última cifra. Los otros dos deslices
@@ -3266,7 +3266,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   $L_{p(\mathrm{B})} + 10 \lg(T/T_0)$, y exigen `integration_time` con el fondo
   de la fuente bajo ensayo, que es el que se compara contra un nivel de suceso.
   La fuente de referencia de `sound_energy_comparison` es estacionaria, así que
-  `background_levels_ref` se corrige con la regla promediada en el tiempo de
+  `reference_background_levels` se corrige con la regla promediada en el tiempo de
   9.1.2 y no lleva ventana; los criterios y el tope de 8.2.3 (y de 9.1.2 en ISO 3741) se
   aplican entonces a ese margen. `tests/emission/test_sound_energy.py` fija
   $K_1 = 1{,}2563$ dB para una ráfaga de 78 dB sobre un fondo de 62 dB en una
@@ -3923,8 +3923,8 @@ dos ediciones con las mismas entradas y en el mismo orden.
 
 - **Ubicación:** apartado 6.7.3, la lista de símbolos bajo la ecuación (36), la
   entrada del área de absorción equivalente ``A``.
-- **Lo impreso:** «A  äquivalente Absorptionsfläche; in m², Gleichung (36)» /
-  «A  is the equivalent absorption area; in m², Equation (36)».
+- **Lo impreso:** «A  äquivalente Absorptionsfläche; in $\text{m}^2$, Gleichung (36)» /
+  «A  is the equivalent absorption area; in $\text{m}^2$, Equation (36)».
 - **El problema:** la ecuación (36) es la ecuación de nivel a la que pertenece
   la lista, $L_P = L_W + 10\lg[Q/(4\pi r^2) + 4/A]$, en la que ``A`` es un
   dato de entrada. No define ``A``. La guía lo define dos veces más abajo en el
@@ -4669,9 +4669,9 @@ dos ediciones con las mismas entradas y en el mismo orden.
   $16\pi \cdot 10^{-0.9}/2 = 3.1640$, confirmando la fórmula y el $Q = 2$.
   Solo la constante de -6 dB está desviada. Lo que *no* discrimina es la
   prosa de Long un párrafo después, «at least 6.3 or more square meters (68
-  sq ft) of absorption per table»: 6.313 m² son $67.95\ \text{ft}^2$ y
-  6.33 m² son $68.14\ \text{ft}^2$, así que ambos se imprimen como 68 sq ft,
-  y ambos redondean a 6.3 m². Una revisión anterior de esta entrada ofrecía
+  sq ft) of absorption per table»: $6.313\ \text{m}^2$ son $67.95\ \text{ft}^2$ y
+  $6.33\ \text{m}^2$ son $68.14\ \text{ft}^2$, así que ambos se imprimen como 68 sq ft,
+  y ambos redondean a $6.3\ \text{m}^2$. Una revisión anterior de esta entrada ofrecía
   esa conversión como corroboración. Verificado en la página 665 del PDF
   (p. 666 impresa) de Long, Architectural Acoustics 2e (2014).
 - **Comportamiento de la biblioteca:** `absorption_per_table` en
@@ -4728,7 +4728,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **El impreso:** la nomenclatura bajo la ecuación da «U_G = flow velocity
   prior to the diffuser (ft/min)» y, en la línea siguiente, «= Q/(60·S_G)
   (for Q in cfm)».
-- **El problema:** las dos declaraciones se contradicen. $Q$ en ft³/min
+- **El problema:** las dos declaraciones se contradicen. $Q$ en $\text{ft}^3\text{/min}$
   dividido por $60 S_G$ es una velocidad en **ft/s**, no ft/min, y solo la
   lectura en ft/s hace correcta la constante: $334.9/\rho_0$ con
   $\rho_0 = 0.075\ \text{lb/ft}^3$ es $4465 \cdot \Delta P/U^2$, que es la
@@ -4872,7 +4872,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   $\eta_{12} = 4.26 \cdot 10^{-4}$, $\eta_{21} = 3.92 \cdot 10^{-4}$ y
   $\Pi_\text{in} = 1.31\ \text{W}$.
 - **El impreso:** el enunciado da la plataforma de aluminio como «5 mm thick
-  and 3.5 m × 3 m», es decir, 10.5 m².
+  and 3.5 m × 3 m», es decir, $10.5\ \text{m}^2$.
 - **El problema:** esa área es inconsistente con las tres respuestas
   impresas. La Ec. (6.12) fija
   $E_1/E_2 = (\eta_2 + \eta_{21})/\eta_{12} = 6.554$ desde los factores de
@@ -4880,10 +4880,10 @@ dos ediciones con las mismas entradas y en el mismo orden.
   velocidades impresas (27.2 y 13.2 mm/s) da 7.88. La razón de energías es
   independiente de las densidades modales y de la velocidad de onda, así que
   ninguna elección de esas puede reconciliarla; solo el área de la plataforma
-  puede. El área que las respuestas implican es 8.73 m², que es
+  puede. El área que las respuestas implican es $8.73\ \text{m}^2$, que es
   $3.5 \times 3$ menos la huella $\pi(0.75\ \text{m})^2$ del cilindro que la
   Fig. P6.10 muestra atravesando la plataforma.
-- **Evidencia:** con 8.73 m² la inversión de las Ecs. (6.15), (6.8) y (6.10)
+- **Evidencia:** con $8.73\ \text{m}^2$ la inversión de las Ecs. (6.15), (6.8) y (6.10)
   devuelve $\eta_{12} = 4.256 \cdot 10^{-4}$,
   $\eta_{21} = 3.910 \cdot 10^{-4}$ y $\Pi_\text{in} = 1.306\ \text{W}$, es
   decir, las tres respuestas impresas dentro del 0.4 %; la energía y la
@@ -5950,7 +5950,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   impresa) de ISO 3891:1978, que lleva las tablas 9 y 10, y en las páginas 14
   y 15 del PDF (pp. 11 y 12 impresas) del mismo documento para la fórmula de
   A.2 y la tabla 1.
-- **Comportamiento de la biblioteca:** `arp866a_attenuation` evalúa la
+- **Comportamiento de la biblioteca:** `attenuation_arp866a` evalúa la
   fórmula y reproduce la tabla 10; la fila de conformidad
   *ISO 3891:1978 Annex A Table 10* sostiene esa tabla,
   `test_iso3891_table_9_contradicts_table_10_where_humidity_drops_out` fija
@@ -6047,7 +6047,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   requiera corrección meteorológica». El ejemplo informativo es inconsistente
   con el anexo normativo que cita.
 - **Evidencia:** recálculo de la Ec. (C.2) y de $C_2$ a partir de las
-  constantes impresas ($a = 2{,}2560 \times 10^{-5}$ m⁻¹, $b$ = 5,255 3,
+  constantes impresas ($a = 2{,}2560 \times 10^{-5}\ \text{m}^{-1}$, $b$ = 5,255 3,
   $p_{\mathrm{s},0}$ = $1{,}013\,25 \times 10^{5}$ Pa, $\theta_\mathrm{ref}$ = 296 K).
   Verificado en la página 46 del PDF (p. 37 impresa) y en la página 36 del
   PDF (p. 27 impresa) de BS EN ISO 3747:2010.
@@ -6237,14 +6237,14 @@ dos ediciones con las mismas entradas y en el mismo orden.
   imprime $C_2$ solo. El divisor es correcto, $0{,}4/\sqrt{6} = 0{,}16$, que
   redondea al 0,2 impreso.
 - **Evidencia:** recálculo de la Ecuación (A.2) y de $C_2$ a partir de las
-  constantes que imprime el Anexo A ($a = 2{,}256\,0 \times 10^{-5}$ m⁻¹, $b$ = 5,255 3,
+  constantes que imprime el Anexo A ($a = 2{,}256\,0 \times 10^{-5}\ \text{m}^{-1}$, $b$ = 5,255 3,
   $p_{\mathrm{s},0}$ = 101,325 kPa, $\theta_1$ = 296 K), y de $C_1 + C_2$ a
   partir del apartado 9.1.4 de ISO 3741:2010. Verificado en la página 41 del
   PDF (p. 32 impresa) y en la página 31 del PDF (p. 22 impresa) de BS EN ISO
   3743-1:2010.
 - **Comportamiento de la biblioteca:** implementa el Anexo A tal como está
   impreso: un emplazamiento a 500 m y 23 °C recibe $C_2$ = 0,26 dB en `c2` y
-  en `sound_power_level_ref`
+  en `sound_power_level_at_reference_conditions`
   ([`_sound_power_hard_walled.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/emission/_sound_power_hard_walled.py)).
   El balance del Anexo C no está modelado. Fijado por
   `test_annex_a_c2_at_500_m_is_0_26_db` en
@@ -6387,7 +6387,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   tiene: es la derivada del $4{,}34\,A/S$ de la Ecuación (20) de ISO 3741:2010
   con $A = 55{,}26\,V/(c\,T)$ ($4{,}34 \times 55{,}26 = 240$), así que la tabla
   deriva ISO 3741 y no la fórmula que nombra el apartado; para un cubo de
-  70 m³ a 343 m/s lleva el coeficiente a −10,5 dB/s. Y la contribución del
+  $70\ \text{m}^3$ a 343 m/s lleva el coeficiente a −10,5 dB/s. Y la contribución del
   peor caso no se sigue del propio $u_T = \sqrt{2{,}42\,T_\mathrm{nom}/f +
   s_T^2/N_\mathrm{decays}}$ de la tabla con las 120 caídas que el apartado
   llama típicas: $u_T$ = 0,056 s, y 0,056 s × 8,7 dB/s = 0,5 dB.
@@ -6455,18 +6455,18 @@ dos ediciones con las mismas entradas y en el mismo orden.
 ## ISO 3743-2:2018, 6.3, Figura 1 (una curva que va por encima de la fórmula (1) en graves)
 
 - **Ubicación:** 6.3, Figura 1 «Values of $R$ at the one-third-octave-band
-  centre frequencies for $V$ = 70 m³», y la frase que la precede.
+  centre frequencies for $V$ = $70\ \text{m}^3$», y la frase que la precede.
 - **El impreso:** 6.3 da $R = 1 + 257/(f V^{1/3})$ como fórmula (1) y dice
-  «For a room volume $V$ of 70 m³, the value of $R$ is determined from Figure
+  «For a room volume $V$ of $70\ \text{m}^3$, the value of $R$ is determined from Figure
   1». La curva de la figura, leída contra su propia cuadrícula (0,2 por
   división), pasa por 1,66 a 100 Hz, 1,54 a 125 Hz, 1,43 a 160 Hz, 1,34 a
   200 Hz, 1,06 a 1 000 Hz y 1,02 a 2 000 Hz.
-- **El problema:** la fórmula (1) para 70 m³ da 1,62, 1,50, 1,39, 1,31, 1,06 y
+- **El problema:** la fórmula (1) para $70\ \text{m}^3$ da 1,62, 1,50, 1,39, 1,31, 1,06 y
   1,03 en las mismas frecuencias. La figura coincide con ella a 1 000 Hz, la
   frecuencia que usa la fórmula (B.2), pero va entre 0,03 y 0,04 por encima de
   100 Hz a 160 Hz y alrededor de 0,01 por debajo a partir de 1 600 Hz, de
   cuatro a cinco veces el grosor de la línea trazada en graves. La figura a la
-  que la cláusula manda una sala de 70 m³ no es, por tanto, la fórmula que la
+  que la cláusula manda una sala de $70\ \text{m}^3$ no es, por tanto, la fórmula que la
   misma cláusula da para toda sala, y una sala cuyo tiempo de reverberación
   sigue la figura se mide contra límites un 2,5 % más altos a 100 Hz que una
   que sigue la fórmula.
@@ -6476,7 +6476,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   (1) en la página 9 del PDF (p. 3 impresa) del mismo documento.
 - **Comportamiento de la biblioteca:** `reverberation_parameter` y
   `check_special_room_reverberation` evalúan la fórmula (1) para cualquier
-  volumen, 70 m³ incluido, y no toman nada de la figura
+  volumen, $70\ \text{m}^3$ incluido, y no toman nada de la figura
   ([`_sound_power_special_room.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/emission/_sound_power_special_room.py)).
   La diferencia a 100 Hz es una cuarta parte de la tolerancia de ±10 % de 6.3.
   Fijado por `test_formula1_gives_the_1_06_of_formula_b2_for_70_m3` en
@@ -6489,7 +6489,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 
 - **Ubicación:** Anexo B (informativo), B.5, Figura B.3 «Limiting curves for
   the ratio of the reverberation time $T$ to the nominal reverberation time
-  $T_\mathrm{nom}$ for a 70 m³ room».
+  $T_\mathrm{nom}$ for a $70\ \text{m}^3$ room».
 - **El impreso:** 6.3 fija los límites en $0{,}9\,R\,T_\mathrm{nom}$ y
   $1{,}1\,R\,T_\mathrm{nom}$ y dice «For frequencies above 6,3 kHz, constants
   0,9 and 1,1 shall be replaced by 0,8 and 1,2 respectively». Las dos curvas
@@ -6498,7 +6498,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   1,22 y 0,84 en la banda de 6,3 kHz, donde casi han alcanzado las mesetas de
   alrededor de 1,23 y 0,82 que mantienen hasta 10 kHz.
 - **El problema:** en 6,3 kHz el texto aún sujeta la banda a 0,9 y 1,1: con
-  $R$ = 1,01 para 70 m³ los límites son 0,91 y 1,11. La figura dibuja ya el
+  $R$ = 1,01 para $70\ \text{m}^3$ los límites son 0,91 y 1,11. La figura dibuja ya el
   par ancho en esa banda, 0,1 más ancho por cada lado, de modo que una sala
   cuya banda de 6,3 kHz lee 1,15 $R$ cumple frente a la figura e incumple
   frente al texto. El ensanchamiento corresponde a las bandas por encima de
@@ -6530,7 +6530,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **El problema:** la curva de la Figura B.4, leída contra su cuadrícula, da
   $T/T_{1\,000}$ = 1,40 a 100 Hz, 1,34 a 200 Hz, 1,30 a 250 Hz, 1,24 a
   315 Hz, 1,00 de 1 000 Hz a 2 000 Hz y 0,80 a 10 kHz. Multiplicadas por 1,09
-  y divididas por el $R$ de la fórmula (1) para 70 m³, las bandas de 200 Hz a
+  y divididas por el $R$ de la fórmula (1) para $70\ \text{m}^3$, las bandas de 200 Hz a
   400 Hz superan 1,1, y la de 250 Hz llega a 1,13: centrada como se imprime,
   la sala del ejemplo incumple el requisito de 6.3 que ilustra. El 1,09 es el
   punto medio de las razones extremas $q = (T/T_{1\,000})/R$ tomadas como si
@@ -7270,7 +7270,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   (8a) impresa justo debajo.
 - **Lo impreso:** las seis columnas de la fila (8c) dicen $d_0 = 0.010$ m. Los
   datos de partida del folio 31 dan $N_\mathrm{O} = 6$ aberturas de jaula y
-  $A = 0{,}00137$ m² para una de ellas, y la Ecuación (8c) es
+  $A = 0{,}00137\ \text{m}^2$ para una de ellas, y la Ecuación (8c) es
   $d_o = \sqrt{4 N_o A/\pi}$.
 - **El problema:** $\sqrt{4 \times 6 \times 0{,}00137/\pi} = 0{,}102$ m, no
   0,010 m. Los dos numerales son las mismas tres cifras en otro orden. La fila
@@ -10498,14 +10498,14 @@ dos ediciones con las mismas entradas y en el mismo orden.
   es $10/[\ln(f_\mathrm{end}/f_\mathrm{start})\ln(10)\,f_\mathrm{end}]$, y la
   (A.1) la eleva al cuadrado como a todos los demás coeficientes. Sin elevar,
   el coeficiente vale 0,377 para el barrido de cinco décadas del ejemplo, y su
-  término de frecuencia es 0,0038 dB² en vez de 0,0014 dB². Tal como está
+  término de frecuencia es $0{,}0038\ \text{dB}^2$ en vez de $0{,}0014\ \text{dB}^2$. Tal como está
   impresa, la (A.2) da $u_{L_\mathrm{c}} = 0{,}075$ dB, una incertidumbre
   expandida de 0,150 dB y 0,161 dB con el visualizador; con el cuadrado da
   0,057 dB, 0,115 dB y 0,128 dB, los tres valores que imprimen las dos partes.
   Los dos cálculos usan la $u_{L_\mathrm{in}}$ que deduce el ejemplo,
   0,0416 dB a partir de una resolución de visualizador de 0,1 dB y una
   constancia de 0,03 dB, no los 0,042 dB a los que la redondea, que darían
-  0,058 dB. La forma sin cuadrado tampoco está en dB², así que cambia con la
+  0,058 dB. La forma sin cuadrado tampoco está en $\text{dB}^2$, así que cambia con la
   unidad del nivel.
 - **Evidencia:** un recálculo del ejemplo impreso de las dos maneras.
   Verificado en la página 21 del PDF (p. 19 impresa) y en la página 23 del PDF
@@ -11951,8 +11951,8 @@ concordancia con las fuentes publicadas:
   tras ellos, escriben $X = \rho_0 f / R_f$ con exponentes negativos. Las dos
   formas se diferencian exactamente en $\rho_0^{\,b}$, y despejar
   $C = a\,\rho_0^{\,b}$ fila a fila da $\rho_0$ = 1.16, 1.19, 1.21,
-  1.14 kg/m³, que es la densidad del aire en todas ellas; hacer la conversión
-  en sentido contrario con $\rho_0$ = 1.18 kg/m³ reproduce las cuatro
+  $1.14\ \text{kg/m}^3$, que es la densidad del aire en todas ellas; hacer la conversión
+  en sentido contrario con $\rho_0$ = $1.18\ \text{kg/m}^3$ reproduce las cuatro
   amplitudes impresas con un 1,4 %, un 0,4 %, un 1,5 % y un 2,1 % de
   diferencia. Los exponentes lo corroboran por su cuenta: Beranek imprime
   $b_1$ a $b_4$ = 0.75, 0.73, 0.70, 0.59 frente a $C_2$, $C_4$, $C_6$, $C_8$ =

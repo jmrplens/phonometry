@@ -37,7 +37,7 @@ def _spectra_fs() -> float:
 
 def _spectra_white(seed: int, rms: float = 1.0) -> np.ndarray:
     return ph.signals.noise_signal(
-        _spectra_fs(), 4.0, color="white", rms=rms, seed=seed
+        _spectra_fs(), duration_s=4.0, color="white", rms=rms, seed=seed
     )
 
 
@@ -103,7 +103,7 @@ def _chk_psd_ci_coverage() -> Outcome:
 def _chk_coherent_output_snr() -> Outcome:
     fs = _spectra_fs()
     x = _spectra_white(11)
-    noise = ph.signals.noise_signal(fs, 4.0, color="white", rms=0.5, seed=12)
+    noise = ph.signals.noise_signal(fs, duration_s=4.0, color="white", rms=0.5, seed=12)
     res = ph.signals.coherent_output_spectrum(x, 0.8 * x + noise, fs, nperseg=1024)
     snr = 0.64 / 0.25
     band = slice(50, 400)
@@ -122,7 +122,7 @@ def _chk_coherent_output_snr() -> Outcome:
 )
 def _chk_pink_noise_slope() -> Outcome:
     fs = 48000.0
-    x = ph.signals.noise_signal(fs, 40.0, color="pink", seed=3)
+    x = ph.signals.noise_signal(fs, duration_s=40.0, color="pink", seed=3)
     res = ph.signals.power_spectral_density(x, fs, nperseg=8192)
     band = (res.frequencies >= 20.0) & (res.frequencies <= 20000.0)
     slope = float(
@@ -289,7 +289,9 @@ def _chk_miso_multiple_snr() -> Outcome:
     fs = _spectra_fs()
     x1 = _spectra_white(201)
     x2 = _spectra_white(202)
-    noise = ph.signals.noise_signal(fs, 4.0, color="white", rms=0.5, seed=203)
+    noise = ph.signals.noise_signal(
+        fs, duration_s=4.0, color="white", rms=0.5, seed=203
+    )
     res = ph.signals.miso_coherence([x1, x2], x1 + x2 + noise, fs, nperseg=1024)
     band = (res.frequencies > 200.0) & (res.frequencies < 3800.0)
     snr = 2.0 / 0.25  # Gvv = 2*sigma^2, Gnn = 0.5^2, both flat
@@ -310,7 +312,9 @@ def _chk_miso_independent_sum() -> Outcome:
     fs = _spectra_fs()
     x1 = _spectra_white(211)
     x2 = _spectra_white(212)
-    noise = ph.signals.noise_signal(fs, 4.0, color="white", rms=0.4, seed=213)
+    noise = ph.signals.noise_signal(
+        fs, duration_s=4.0, color="white", rms=0.4, seed=213
+    )
     res = ph.signals.miso_coherence([x1, x2], x1 + 0.7 * x2 + noise, fs, nperseg=1024)
     band = (res.frequencies > 200.0) & (res.frequencies < 3800.0)
     diff = (res.multiple_coherence - res.ordinary_coherence.sum(axis=0))[band]
@@ -327,7 +331,9 @@ def _chk_miso_output_decomposition() -> Outcome:
     fs = _spectra_fs()
     x1 = _spectra_white(221)
     x2 = 0.5 * x1 + _spectra_white(222)
-    noise = ph.signals.noise_signal(fs, 4.0, color="white", rms=0.3, seed=223)
+    noise = ph.signals.noise_signal(
+        fs, duration_s=4.0, color="white", rms=0.3, seed=223
+    )
     res = ph.signals.miso_coherence([x1, x2], x1 + x2 + noise, fs, nperseg=1024)
     reconstructed = res.coherent_output_spectra.sum(axis=0) + res.noise_psd
     resid = float(np.max(np.abs(reconstructed - res.output_psd)))
@@ -414,7 +420,7 @@ def _corr_fs() -> float:
 def _corr_fractional_pair(seed: int, shift: float) -> tuple[np.ndarray, np.ndarray]:
     """White noise and its exact circular fractional delay by ``shift``."""
     fs = _corr_fs()
-    x = ph.signals.noise_signal(fs, 4.0, color="white", seed=seed)
+    x = ph.signals.noise_signal(fs, duration_s=4.0, color="white", seed=seed)
     ramp = np.exp(-2j * np.pi * np.fft.rfftfreq(x.size) * shift)
     return x, np.fft.irfft(np.fft.rfft(x) * ramp, x.size)
 
@@ -426,7 +432,7 @@ def _corr_fractional_pair(seed: int, shift: float) -> tuple[np.ndarray, np.ndarr
 )
 def _chk_tde_integer_delay() -> Outcome:
     fs = _corr_fs()
-    x = ph.signals.noise_signal(fs, 4.0, color="white", seed=40)
+    x = ph.signals.noise_signal(fs, duration_s=4.0, color="white", seed=40)
     res = ph.signals.time_delay(x, np.roll(x, 16), fs, method="direct")
     return numeric(16.0, res.delay_samples, 1e-3, places=4)
 
@@ -469,7 +475,7 @@ def _chk_tde_phase_slope_fractional() -> Outcome:
 def _chk_blwn_autocorrelation_sinc() -> Outcome:
     fs = _corr_fs()
     bandwidth = fs / 5.0
-    x = ph.signals.noise_signal(fs, 4.0, color="white", seed=41)
+    x = ph.signals.noise_signal(fs, duration_s=4.0, color="white", seed=41)
     spectrum = np.fft.rfft(x)
     spectrum[np.fft.rfftfreq(x.size, 1.0 / fs) > bandwidth] = 0.0
     xb = np.fft.irfft(spectrum, x.size)

@@ -215,7 +215,7 @@ Modulation (intermodulation) distortion (IEC 60268-3 14.12.7).
 ModulationDistortionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

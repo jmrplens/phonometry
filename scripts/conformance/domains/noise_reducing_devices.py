@@ -28,6 +28,7 @@ three lowest bands and none of the others.
 from __future__ import annotations
 
 import warnings
+from typing import TYPE_CHECKING
 
 import numpy as np
 from reference_data import barrier_reflection as ref_reflection
@@ -36,12 +37,15 @@ import phonometry as ph
 
 from ..registry import Outcome, count, numeric, record, register
 
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
 _ROAD_DEVICES = "Road traffic noise reducing devices (EN 1793)"
 _RAIL_DEVICES = "Railway noise reducing devices (EN 16272)"
 _BANDS = len(ph.environment.TRAFFIC_NOISE_BANDS_HZ)
 
 
-def _ladder(printed: dict[int, str], computed: dict[int, str | None]) -> Outcome:
+def _ladder(printed: Mapping[int, str], computed: Mapping[int, str | None]) -> Outcome:
     """Compare a category ladder at the decibel values where it changes."""
     as_text = ", ".join(f"{value} dB -> {name}" for value, name in printed.items())
     got_text = ", ".join(f"{value} dB -> {name}" for value, name in computed.items())
@@ -337,7 +341,7 @@ def _chk_reflection_windows() -> Outcome:
     printed: dict[str, float] = {}
     computed: dict[str, float] = {}
     for length, parts in ref_reflection.WINDOW_PARTS_S.items():
-        window = ph.environment.adrienne_reflection_window(fs, length)
+        window = ph.environment.adrienne_reflection_window(fs, window_length_s=length)
         lead = round(parts[0] * fs)
         flat = int(np.sum(window >= 1.0))
         trail = window.size - lead - flat

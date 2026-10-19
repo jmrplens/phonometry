@@ -75,7 +75,7 @@ Clause/formula citations refer to EN 12354-3:2000 or EN 12354-4:2000.
 
 ```python
 facade_shape_level_difference(
-    shape: str,
+    shape: Literal['plane_facade', 'gallery_2', 'gallery_3', 'gallery_4', 'gallery_5', 'balcony_6', 'balcony_7', 'balcony_8', 'terrace_open', 'terrace_closed'],
     *,
     line_of_sight: float = 0.0,
     absorption: float = 0.3,
@@ -159,6 +159,7 @@ indices (Formulas 11-12) and the standardized level difference (Formula 13).
 
 ```python
 FacadeElement(
+    *,
     name: str,
     area: float | None = None,
     r: float | Sequence[float] | np.ndarray | None = None,
@@ -240,7 +241,7 @@ Predicted façade airborne insulation (EN 12354-3:2000).
 FacadePredictionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -253,7 +254,7 @@ Plot the per-element partial indices and the façade `R'` / `D2m,nT`.
 FacadePredictionResult.plot_geometry(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -270,9 +271,9 @@ FacadePredictionResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -389,7 +390,7 @@ plot_facade_elements(
     elements: Sequence[FacadeElement],
     *,
     ax: Axes | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -487,7 +488,7 @@ Predicted sound power radiated to the outside by a segment (EN 12354-4).
 RadiatedPowerResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

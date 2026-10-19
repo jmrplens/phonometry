@@ -71,6 +71,7 @@ from ..io._resolve import (
     resolve_pair_fs,
 )
 from ..io._signal import Signal
+from ._test_signals import _fractional_advance
 from .spectra import (
     _coherence_from_spectra,
     _noverlap_samples,
@@ -79,11 +80,12 @@ from .spectra import (
     _validate_welch_params,
     _welch_pair,
 )
-from .test_signals import _fractional_advance
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
+
+    from .._i18n import Language
 
 __all__ = [
     "AlignedImpulseResponseResult",
@@ -176,8 +178,8 @@ class CorrelationResult(OwnsArrays):
     lags: NDArray[np.float64]
     values: NDArray[np.float64]
     coefficient: NDArray[np.float64]
-    normalization: str
-    kind: str
+    normalization: Literal["biased", "unbiased", "coefficient"]
+    kind: Literal["autocorrelation", "cross-correlation"]
     fs: float
     n_samples: int
     duration_s: float
@@ -236,7 +238,7 @@ class CorrelationResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the correlation estimate against the lag in seconds.
 
@@ -529,7 +531,7 @@ class TimeDelayResult(OwnsArrays):
 
     delay: float
     delay_samples: float
-    method: str
+    method: Literal["direct", "gcc", "phase"]
     weighting: str | None
     lags: NDArray[np.float64]
     correlation: NDArray[np.float64]
@@ -558,7 +560,7 @@ class TimeDelayResult(OwnsArrays):
         require_same_length(self, "lags", "correlation", axis="lag")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the correlation function with the estimated delay marked.
 
@@ -1003,7 +1005,7 @@ class AlignedImpulseResponseResult(OwnsArrays):
         require_signal_rate(self, "reference", self.fs)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the reference and the aligned impulse response.
 

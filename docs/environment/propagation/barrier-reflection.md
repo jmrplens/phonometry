@@ -138,7 +138,7 @@ which is what makes the reference plane the conventional reflection plane of a
 device that is not flat.
 
 ```python
-window = environment.adrienne_reflection_window(fs, environment.ADRIENNE_SHORT_LENGTH_S)
+window = environment.adrienne_reflection_window(fs, window_length_s=environment.ADRIENNE_SHORT_LENGTH_S)
 print(window.size)                                        # 288 samples at 48 kHz
 print(round(environment.adrienne_low_frequency_limit(7.9e-3), 1))   # 162.5 Hz
 ```

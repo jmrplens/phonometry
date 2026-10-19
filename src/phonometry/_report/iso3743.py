@@ -57,6 +57,7 @@ from ._sound_power_fiche import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..emission._sound_power_hard_walled import HardWalledSoundPowerResult
     from ..emission._sound_power_special_room import SpecialRoomSoundPowerResult
     from .metadata import ReportMetadata
@@ -93,7 +94,7 @@ def _widths(columns: int) -> list[float]:
     return [_TABLE_WIDTH_MM / columns] * columns
 
 
-def _marked(values: np.ndarray, marks: list[str], language: str) -> list[str]:
+def _marked(values: np.ndarray, marks: list[str], language: Language) -> list[str]:
     """One decimal per band, followed by the band's background marker."""
     return [
         d1(float(value), language) + (f" {mark}" if mark else "")
@@ -116,7 +117,7 @@ def _nearest_half(values: np.ndarray) -> np.ndarray:
     return np.asarray(np.round(2.0 * np.asarray(values, dtype=np.float64)) / 2.0)
 
 
-def _coverage_sentence(k: float, language: str) -> str:
+def _coverage_sentence(k: float, language: Language) -> str:
     """What the coverage factor of the sheet gives, as 9.1 of Part 1 and 11.1
     of Part 2 print it: 95 % two-sided for ``k`` = 2, 95 % one-sided for a
     comparison with a limit for ``k`` = 1,6, and the factor alone otherwise.
@@ -134,7 +135,7 @@ def _coverage_sentence(k: float, language: str) -> str:
 
 
 def _uncertainty_term(
-    result: HardWalledSoundPowerResult | SpecialRoomSoundPowerResult, language: str
+    result: HardWalledSoundPowerResult | SpecialRoomSoundPowerResult, language: Language
 ) -> str | None:
     """The expanded uncertainty of the headline level with its coverage factor."""
     value = float(result.expanded_uncertainty_a)
@@ -152,7 +153,7 @@ def _closing_strip(
     result: HardWalledSoundPowerResult | SpecialRoomSoundPowerResult,
     table: str,
     a_weighting: str,
-    language: str,
+    language: Language,
 ) -> str:
     """How the expanded uncertainty was formed, then the A-weighting basis.
 
@@ -191,7 +192,7 @@ def _hard_walled_energy(result: HardWalledSoundPowerResult) -> bool:
     return result.quantity == "energy"
 
 
-def _hard_walled_basis(result: HardWalledSoundPowerResult, language: str) -> str:
+def _hard_walled_basis(result: HardWalledSoundPowerResult, language: Language) -> str:
     """The standard-basis line of an ISO 3743-1 sheet."""
     grade = t("engineering method, accuracy grade 2", language)
     if _hard_walled_energy(result):
@@ -210,7 +211,7 @@ def _hard_walled_basis(result: HardWalledSoundPowerResult, language: str) -> str
 
 
 def _hard_walled_table(
-    result: HardWalledSoundPowerResult, *, verbose: bool, language: str
+    result: HardWalledSoundPowerResult, *, verbose: bool, language: Language
 ) -> Table:
     """The per-band table of the comparison: both sources and the result.
 
@@ -249,7 +250,7 @@ def _hard_walled_table(
             row += [
                 d1(result.mean_background_level[i], language),
                 d1(result.background_correction[i], language),
-                d1(result.background_correction_ref[i], language),
+                d1(result.reference_background_correction[i], language),
             ]
         row += [d1(result.reference_power_level[i], language), marked[i]]
         rows.append(row)
@@ -257,7 +258,7 @@ def _hard_walled_table(
 
 
 def _hard_walled_statement(
-    result: HardWalledSoundPowerResult, language: str
+    result: HardWalledSoundPowerResult, language: Language
 ) -> tuple[str, list[str], float]:
     """The boxed result, its extended terms and the A-weighted headline."""
     if _hard_walled_energy(result):
@@ -294,11 +295,13 @@ def _hard_walled_statement(
     return statement, extended, headline
 
 
-def _hard_walled_corrections(result: HardWalledSoundPowerResult, language: str) -> str:
+def _hard_walled_corrections(
+    result: HardWalledSoundPowerResult, language: Language
+) -> str:
     """The Eq. 10 to 14 (or 18 to 20) chain with the corrections it applied."""
     values = {
         "k1": range_str(result.background_correction, language),
-        "k1r": range_str(result.background_correction_ref, language),
+        "k1r": range_str(result.reference_background_correction, language),
         "c2": format_number(float(result.c2), language, decimals=2),
     }
     if _hard_walled_energy(result):
@@ -328,7 +331,7 @@ def _hard_walled_corrections(result: HardWalledSoundPowerResult, language: str) 
 
 
 def _hard_walled_background(
-    result: HardWalledSoundPowerResult, language: str
+    result: HardWalledSoundPowerResult, language: Language
 ) -> str | None:
     """The sentences that name the failing bands, when there are any.
 
@@ -372,7 +375,9 @@ def _hard_walled_background(
     return " ".join(sentences)
 
 
-def _hard_walled_a_weighting(result: HardWalledSoundPowerResult, language: str) -> str:
+def _hard_walled_a_weighting(
+    result: HardWalledSoundPowerResult, language: Language
+) -> str:
     """The Annex B citation line."""
     if _hard_walled_energy(result):
         return t(
@@ -397,7 +402,7 @@ def render_hard_walled_power_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 3743-1 hard-walled test room fiche to ``path``.
 
@@ -469,7 +474,7 @@ def _special_comparison(result: SpecialRoomSoundPowerResult) -> bool:
     return result.method == "comparison"
 
 
-def _special_basis(result: SpecialRoomSoundPowerResult, language: str) -> str:
+def _special_basis(result: SpecialRoomSoundPowerResult, language: Language) -> str:
     """The standard-basis line of an ISO 3743-2 sheet."""
     grade = t("engineering method, accuracy grade 2", language)
     if _special_comparison(result):
@@ -488,7 +493,7 @@ def _special_basis(result: SpecialRoomSoundPowerResult, language: str) -> str:
 
 
 def _special_table(
-    result: SpecialRoomSoundPowerResult, *, verbose: bool, language: str
+    result: SpecialRoomSoundPowerResult, *, verbose: bool, language: Language
 ) -> Table:
     """The per-band table: the mean level, the reference source and ``LW``.
 
@@ -544,7 +549,7 @@ def _special_headline(result: SpecialRoomSoundPowerResult) -> float | None:
 
 
 def _special_statement(
-    result: SpecialRoomSoundPowerResult, language: str
+    result: SpecialRoomSoundPowerResult, language: Language
 ) -> tuple[str, list[str]]:
     """The boxed result and its extended terms."""
     level_a = _special_headline(result)
@@ -579,7 +584,9 @@ def _special_statement(
     return statement, extended
 
 
-def _special_corrections(result: SpecialRoomSoundPowerResult, language: str) -> str:
+def _special_corrections(
+    result: SpecialRoomSoundPowerResult, language: Language
+) -> str:
     """Formula 8 with Table 4, and Formula 9 or 10."""
     c2 = format_number(float(result.c2), language, decimals=2)
     if _special_comparison(result):
@@ -605,7 +612,7 @@ def _special_corrections(result: SpecialRoomSoundPowerResult, language: str) -> 
     ).format(c2=c2)
 
 
-def _special_rounding(language: str) -> str:
+def _special_rounding(language: Language) -> str:
     """The sentence that says how the band column of Part 2 is rounded."""
     return t(
         "The band levels L<sub>W</sub> are tabulated to the nearest one-half "
@@ -614,7 +621,9 @@ def _special_rounding(language: str) -> str:
     )
 
 
-def _special_a_weighting(result: SpecialRoomSoundPowerResult, language: str) -> str:
+def _special_a_weighting(
+    result: SpecialRoomSoundPowerResult, language: Language
+) -> str:
     """The clause 4 / Annex F citation line."""
     if _special_headline(result) is not None:
         return t(
@@ -640,7 +649,7 @@ def render_special_room_power_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 3743-2 special reverberation test room fiche to ``path``.
 

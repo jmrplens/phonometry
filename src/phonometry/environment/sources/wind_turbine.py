@@ -27,7 +27,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -46,6 +46,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -86,7 +88,10 @@ def _positive(value: float, name: str) -> float:
 
 
 def slant_distance(
-    hub_height_m: float, rotor_diameter_m: float, *, rotor_axis: str = "horizontal"
+    hub_height_m: float,
+    rotor_diameter_m: float,
+    *,
+    rotor_axis: Literal["horizontal", "vertical"] = "horizontal",
 ) -> float:
     r"""Slant distance ``R1`` from the rotor centre to the ground microphone.
 
@@ -358,7 +363,7 @@ class WindTurbineTonalityResult(OwnsArrays):
                 raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the narrowband spectrum with the critical band and masking level."""
         from ..._i18n import check_language
@@ -373,9 +378,9 @@ class WindTurbineTonalityResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a wind-turbine tonal audibility assessment fiche to a PDF.
 
@@ -634,6 +639,7 @@ def _tonality_chain(
     tone_energy = 0.0
     for run in runs:
         run_energy = float(np.sum(10.0 ** (lv[run] / 10.0)))
+        # Two values are the fewest a run is made of.
         if run.size >= 2:  # noqa: PLR2004
             run_energy /= _HANNING_ENBW_FACTOR
         tone_energy += run_energy

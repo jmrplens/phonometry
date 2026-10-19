@@ -76,7 +76,7 @@ integrated impulse response, Clause 6).
 | `fraction` | Bandwidth fraction of the band filter (1 = octave, 3 = one-third octave). Only used when `band` is not None. |
 | `zero_phase` | If True, filter the band with forward-backward (zero-phase) filtering, removing the octave filter's group delay before the backward integration. ISO 3382-2:2008 Clause 7.3 NOTE permits time-reversed filtering (it relaxes the B\*T > 16 rule to B\*T > 4); it roughly halves the low-frequency short-decay bias at 125 Hz. Only used when `band` is not None. Default False (causal). |
 
-**Returns:** A [`DecayCurve`](/phonometry/reference/api/rooms/acoustics/#decaycurve) with `times` in seconds from the direct sound and `levels` in dB (0 dB at time zero), up to the noise truncation point. It unpacks as `times, levels = decay_curve(...)` for backward compatibility and exposes [`DecayCurve.plot`](/phonometry/reference/api/rooms/acoustics/#decaycurveplot).
+**Returns:** A [`DecayCurve`](/phonometry/reference/api/rooms/acoustics/#decaycurve) with `times` in seconds from the direct sound and `levels` in dB (0 dB at time zero), up to the noise truncation point, read by name, with [`DecayCurve.plot`](/phonometry/reference/api/rooms/acoustics/#decaycurveplot).
 
 **Raises**
 
@@ -104,10 +104,9 @@ Schroeder backward-integrated decay curve of an impulse response.
 `levels` the decay levels in dB (0 dB at time zero), up to the noise
 truncation point (ISO 3382-1:2009, 5.3.3). `band` is the
 octave/third-octave band centre in Hz, or `None` for a broadband decay.
-
-For backward compatibility with the previous `(time, level)` tuple
-return of [`decay_curve`](/phonometry/reference/api/rooms/acoustics/#decay_curve), the dataclass is iterable and unpacks as
-`time, level = decay_curve(...)`.
+The curve is read by name, `curve.times` and `curve.levels`, like every
+other record: it does not unpack as the `(time, level)` pair
+[`decay_curve`](/phonometry/reference/api/rooms/acoustics/#decay_curve) returned before it.
 
 ### DecayCurve.plot()
 
@@ -115,7 +114,7 @@ return of [`decay_curve`](/phonometry/reference/api/rooms/acoustics/#decay_curve
 DecayCurve.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -388,7 +387,7 @@ At least 10 dB + 15 dB under the maximum (ISO 3382-1:2009, 5.3.3);
 RoomAcousticsResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | np.ndarray
 ```
@@ -407,9 +406,9 @@ RoomAcousticsResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

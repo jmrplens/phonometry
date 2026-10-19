@@ -76,9 +76,9 @@ def _run_case(case: dict[str, str]) -> RoadEmissionResult:
     surfaces = _surfaces_2015()
     traffic = [
         RoadTraffic(
-            RoadVehicleCategory(c),
-            float(case[f"q_{c}"]),
-            float(case[f"v_{c}"]),
+            category=RoadVehicleCategory(c),
+            flow_rate=float(case[f"q_{c}"]),
+            speed_kmh=float(case[f"v_{c}"]),
             studded_fraction=0.5 if c == "1" else 0.0,
         )
         for c in CATEGORIES
@@ -213,7 +213,7 @@ def test_temperature_coefficients_match_the_directive() -> None:
     because no computed level can reach them.
     """
     assert (
-        ROAD_COEFFICIENTS.temperature_coefficient_db_per_c
+        ROAD_COEFFICIENTS.temperature_coefficient_db_per_k
         == ref.CNOSSOS_ROAD_TEMPERATURE_COEFFICIENTS_DB_PER_C
     )
 
@@ -274,8 +274,14 @@ def test_speed_floor_freezes_the_power_below_20_km_h() -> None:
 
 def test_flow_term_is_exactly_the_published_logarithm() -> None:
     """(2.2.1): doubling the hourly flow adds exactly ``10 lg 2``."""
-    single = road_source_power(RoadTraffic(RoadVehicleCategory.HEAVY, 500.0, 80.0))
-    double = road_source_power(RoadTraffic(RoadVehicleCategory.HEAVY, 1000.0, 80.0))
+    single = road_source_power(
+        RoadTraffic(category=RoadVehicleCategory.HEAVY, flow_rate=500.0, speed_kmh=80.0)
+    )
+    double = road_source_power(
+        RoadTraffic(
+            category=RoadVehicleCategory.HEAVY, flow_rate=1000.0, speed_kmh=80.0
+        )
+    )
     assert double.total_line_power - single.total_line_power == pytest.approx(
         10.0 * math.log10(2.0), abs=1e-12
     )
@@ -287,15 +293,21 @@ def test_flow_term_is_exactly_the_published_logarithm() -> None:
 
 def test_flow_term_uses_the_true_speed_below_the_floor() -> None:
     """The 20 km/h floor freezes the power, never the ``Q/(1000 v)`` term."""
-    result = road_source_power(RoadTraffic(RoadVehicleCategory.LIGHT, 600.0, 10.0))
+    result = road_source_power(
+        RoadTraffic(category=RoadVehicleCategory.LIGHT, flow_rate=600.0, speed_kmh=10.0)
+    )
     expected = road_vehicle_sound_power("1", 20.0) + 10.0 * math.log10(600.0 / 10000.0)
     assert result.total_line_power == pytest.approx(expected, abs=1e-12)
 
 
 def test_zero_flow_contributes_nothing() -> None:
     """An empty category leaves the line power of the rest untouched."""
-    busy = RoadTraffic(RoadVehicleCategory.LIGHT, 800.0, 60.0)
-    empty = RoadTraffic(RoadVehicleCategory.HEAVY, 0.0, 60.0)
+    busy = RoadTraffic(
+        category=RoadVehicleCategory.LIGHT, flow_rate=800.0, speed_kmh=60.0
+    )
+    empty = RoadTraffic(
+        category=RoadVehicleCategory.HEAVY, flow_rate=0.0, speed_kmh=60.0
+    )
     alone = road_source_power(busy)
     both = road_source_power([busy, empty])
     assert both.total_line_power == pytest.approx(alone.total_line_power, abs=1e-12)
@@ -595,8 +607,12 @@ def test_surface_accepts_a_description_string() -> None:
 def test_categories_are_summed_energetically() -> None:
     """(2.3.1)-style energy sum of the per-category line powers."""
     flows = [
-        RoadTraffic(RoadVehicleCategory.LIGHT, 1200.0, 90.0),
-        RoadTraffic(RoadVehicleCategory.HEAVY, 150.0, 80.0),
+        RoadTraffic(
+            category=RoadVehicleCategory.LIGHT, flow_rate=1200.0, speed_kmh=90.0
+        ),
+        RoadTraffic(
+            category=RoadVehicleCategory.HEAVY, flow_rate=150.0, speed_kmh=80.0
+        ),
     ]
     result = road_source_power(flows)
     expected = 10.0 * np.log10(np.sum(10.0 ** (result.line_power / 10.0), axis=0))
@@ -606,7 +622,11 @@ def test_categories_are_summed_energetically() -> None:
 
 
 def test_result_arrays_are_consistent() -> None:
-    flows = [RoadTraffic(RoadVehicleCategory.MEDIUM_HEAVY, 400.0, 70.0)]
+    flows = [
+        RoadTraffic(
+            category=RoadVehicleCategory.MEDIUM_HEAVY, flow_rate=400.0, speed_kmh=70.0
+        )
+    ]
     result = road_source_power(flows)
     assert result.frequencies.tolist() == list(ROAD_OCTAVE_BANDS_HZ)
     assert result.source_height_m == 0.05
@@ -620,7 +640,11 @@ def test_result_arrays_are_consistent() -> None:
 
 
 def test_a_weighted_line_power_uses_the_directive_table() -> None:
-    result = road_source_power(RoadTraffic(RoadVehicleCategory.LIGHT, 1000.0, 70.0))
+    result = road_source_power(
+        RoadTraffic(
+            category=RoadVehicleCategory.LIGHT, flow_rate=1000.0, speed_kmh=70.0
+        )
+    )
     weighted = result.total_line_power + np.asarray(CNOSSOS_A_WEIGHTING)
     assert result.a_weighted_line_power == pytest.approx(
         float(10.0 * np.log10(np.sum(10.0 ** (weighted / 10.0)))), abs=1e-12
@@ -647,15 +671,23 @@ def test_segment_power_feeds_the_propagation_stage() -> None:
 
     result = road_source_power(
         [
-            RoadTraffic(RoadVehicleCategory.LIGHT, 1000.0, 90.0),
-            RoadTraffic(RoadVehicleCategory.HEAVY, 120.0, 80.0),
+            RoadTraffic(
+                category=RoadVehicleCategory.LIGHT, flow_rate=1000.0, speed_kmh=90.0
+            ),
+            RoadTraffic(
+                category=RoadVehicleCategory.HEAVY, flow_rate=120.0, speed_kmh=80.0
+            ),
         ],
         surface=RoadSurface.THIN_LAYER_A,
     )
     segment = line_source_segment_power(result.total_line_power, 20.0)
     levels = predicted_receiver_level(
         segment,
-        PropagationGeometry(100.0, result.source_height_m, 4.0),
+        PropagationGeometry(
+            distance=100.0,
+            source_height_m=result.source_height_m,
+            receiver_height_m=4.0,
+        ),
         frequencies=result.frequencies,
     )
     assert levels.shape == (8,)
@@ -684,12 +716,18 @@ def test_invalid_inputs_are_rejected() -> None:
     with pytest.raises(ValueError, match="at least one vehicle category"):
         road_source_power([])
     repeated = [
-        RoadTraffic(RoadVehicleCategory.LIGHT, 100.0, 50.0),
-        RoadTraffic(RoadVehicleCategory.LIGHT, 200.0, 60.0),
+        RoadTraffic(
+            category=RoadVehicleCategory.LIGHT, flow_rate=100.0, speed_kmh=50.0
+        ),
+        RoadTraffic(
+            category=RoadVehicleCategory.LIGHT, flow_rate=200.0, speed_kmh=60.0
+        ),
     ]
     with pytest.raises(ValueError, match="at most one flow per vehicle category"):
         road_source_power(repeated)
-    negative = RoadTraffic(RoadVehicleCategory.LIGHT, -1.0, 50.0)
+    negative = RoadTraffic(
+        category=RoadVehicleCategory.LIGHT, flow_rate=-1.0, speed_kmh=50.0
+    )
     with pytest.raises(ValueError, match=r"'flow_rate' must be a non-negative number"):
         road_source_power(negative)
     power = np.array([90.0])
@@ -710,8 +748,12 @@ def test_result_band_axis_is_refused_when_a_field_disagrees() -> None:
     """
     result = road_source_power(
         [
-            RoadTraffic(RoadVehicleCategory.LIGHT, 1200.0, 50.0),
-            RoadTraffic(RoadVehicleCategory.HEAVY, 45.0, 50.0),
+            RoadTraffic(
+                category=RoadVehicleCategory.LIGHT, flow_rate=1200.0, speed_kmh=50.0
+            ),
+            RoadTraffic(
+                category=RoadVehicleCategory.HEAVY, flow_rate=45.0, speed_kmh=50.0
+            ),
         ]
     )
     one_band = result.total_line_power[:1]
@@ -727,7 +769,11 @@ def test_result_band_axis_is_refused_off_the_weighting_grid() -> None:
     array consistently carried one band passed every count and was stretched
     over all eight just the same.
     """
-    result = road_source_power(RoadTraffic(RoadVehicleCategory.LIGHT, 1200.0, 50.0))
+    result = road_source_power(
+        RoadTraffic(
+            category=RoadVehicleCategory.LIGHT, flow_rate=1200.0, speed_kmh=50.0
+        )
+    )
     first_band = {
         "frequencies": result.frequencies[:1],
         "rolling": result.rolling[:, :1],
@@ -770,8 +816,8 @@ def test_incomplete_database_is_rejected_as_an_invalid_input() -> None:
         studded_a=ROAD_COEFFICIENTS.studded_a,
         studded_b=ROAD_COEFFICIENTS.studded_b,
         junction_c={"1": ROAD_COEFFICIENTS.junction_c["1"]},
-        temperature_coefficient_db_per_c={
-            "1": ROAD_COEFFICIENTS.temperature_coefficient_db_per_c["1"]
+        temperature_coefficient_db_per_k={
+            "1": ROAD_COEFFICIENTS.temperature_coefficient_db_per_k["1"]
         },
     )
     assert road_rolling_noise("1", 70.0, coefficients=partial).shape == (8,)
@@ -781,7 +827,9 @@ def test_incomplete_database_is_rejected_as_an_invalid_input() -> None:
             call("3", 70.0, coefficients=partial)
     with pytest.raises(ValueError, match=unknown):
         road_vehicle_sound_power("3", 70.0, coefficients=partial)
-    heavy = RoadTraffic(RoadVehicleCategory.HEAVY, 100.0, 70.0)
+    heavy = RoadTraffic(
+        category=RoadVehicleCategory.HEAVY, flow_rate=100.0, speed_kmh=70.0
+    )
     with pytest.raises(ValueError, match=unknown):
         road_source_power(heavy, coefficients=partial)
 
@@ -832,9 +880,15 @@ def test_plot_draws_the_total_and_every_category() -> None:
 
     result = road_source_power(
         [
-            RoadTraffic(RoadVehicleCategory.LIGHT, 1000.0, 90.0),
-            RoadTraffic(RoadVehicleCategory.HEAVY, 200.0, 80.0),
-            RoadTraffic(RoadVehicleCategory.MOTORCYCLES, 50.0, 70.0),
+            RoadTraffic(
+                category=RoadVehicleCategory.LIGHT, flow_rate=1000.0, speed_kmh=90.0
+            ),
+            RoadTraffic(
+                category=RoadVehicleCategory.HEAVY, flow_rate=200.0, speed_kmh=80.0
+            ),
+            RoadTraffic(
+                category=RoadVehicleCategory.MOTORCYCLES, flow_rate=50.0, speed_kmh=70.0
+            ),
         ]
     )
     ax = result.plot()
@@ -853,13 +907,13 @@ def test_the_coefficient_tables_refuse_writes_on_any_instance() -> None:
     builds from plain dictionaries is held the same way.
     """
     built = dataclasses.replace(
-        ROAD_COEFFICIENTS, temperature_coefficient_db_per_c={"1": 0.08}
+        ROAD_COEFFICIENTS, temperature_coefficient_db_per_k={"1": 0.08}
     )
     for database in (ROAD_COEFFICIENTS, built):
         with pytest.raises(TypeError, match="does not support item assignment"):
             database.rolling_a["1"] = (0.0,) * 8  # type: ignore[index]
         with pytest.raises(TypeError, match="does not support item assignment"):
-            database.temperature_coefficient_db_per_c["1"] = 0.0  # type: ignore[index]
+            database.temperature_coefficient_db_per_k["1"] = 0.0  # type: ignore[index]
 
 
 def test_the_coefficients_survive_pickling_and_deep_copies() -> None:
@@ -873,7 +927,7 @@ def test_the_coefficients_survive_pickling_and_deep_copies() -> None:
 
     for clone in (
         # Own object
-        pickle.loads(pickle.dumps(ROAD_COEFFICIENTS)),  # noqa: S301
+        pickle.loads(pickle.dumps(ROAD_COEFFICIENTS)),
         copy.deepcopy(ROAD_COEFFICIENTS),
     ):
         assert clone == ROAD_COEFFICIENTS

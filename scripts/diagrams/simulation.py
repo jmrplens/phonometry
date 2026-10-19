@@ -171,7 +171,7 @@ def _d_ntff_contour(s: SVG, th: Theme) -> None:
     s.text(
         gx(490),
         y_src + 34,
-        'PlaneWaveSource("down", offset = 60)',
+        'PlaneWaveSource(direction = "down", offset = 60)',
         13,
         th.primary,
         "middle",

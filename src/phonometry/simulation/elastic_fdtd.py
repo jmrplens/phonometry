@@ -69,7 +69,7 @@ from __future__ import annotations
 import dataclasses
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from scipy.optimize import brentq
@@ -86,6 +86,7 @@ from .._internal.validation import (
 from .fdtd import (
     _SIDES,
     Field2D,
+    Side,
     _finite,
     _integer,
     _positive_finite,
@@ -102,6 +103,10 @@ from .fdtd import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
+
+    from .._i18n import Language
+
+Field = Literal["p", "vx", "vy"]
 
 __all__ = [
     "AIR",
@@ -121,13 +126,15 @@ __all__ = [
 ]
 
 #: Boundary-condition names accepted by :func:`elastic_fdtd_simulation`.
-_BOUNDARY_NAMES = ("rigid", "absorbing", "free")
+#: How a side of the elastic domain is terminated, by name.
+ElasticBoundary = Literal["rigid", "absorbing", "free"]
+_BOUNDARY_NAMES: tuple[ElasticBoundary, ...] = ("rigid", "absorbing", "free")
 
 #: Force directions accepted by :class:`ForceSource`.
 _DIRECTIONS = ("x", "y")
 
 #: Fields a probe or a snapshot can record.
-_FIELD_NAMES = ("p", "vx", "vy")
+_FIELD_NAMES: tuple[Field, ...] = ("p", "vx", "vy")
 
 #: Smallest grid extent per axis (in cells) the staggered scheme supports:
 #: an axis shorter than this has no interior faces or corners, so the velocity
@@ -135,7 +142,7 @@ _FIELD_NAMES = ("p", "vx", "vy")
 _MIN_GRID_CELLS = 2
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ExplosionSource(RichDisplay):
     r"""An isotropic (explosive) stress injection at one cell centre.
 
@@ -172,7 +179,7 @@ class ExplosionSource(RichDisplay):
         _finite("amplitude", self.amplitude)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ForceSource(RichDisplay):
     """A directional body-force injection at one velocity node.
 
@@ -199,7 +206,7 @@ class ForceSource(RichDisplay):
 
     ix: int
     iy: int
-    direction: str
+    direction: Literal["x", "y"]
     waveform: Callable[[float], float]
     amplitude: float = 1.0
 
@@ -214,7 +221,7 @@ class ForceSource(RichDisplay):
 ElasticSource = ExplosionSource | ForceSource
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class Material(RichDisplay):
     r"""An isotropic elastic medium as measurable wave speeds and density.
 
@@ -372,6 +379,7 @@ def _as_material(name: str, value: object) -> Material:
         return value
     if isinstance(value, CatalogueRow):
         return _material_of_row(name, value)
+    # The length of a fixed-size argument, not a quantity.
     if isinstance(value, Sequence) and not isinstance(value, str) and len(value) == 3:  # noqa: PLR2004
         c_p, c_s, rho = (float(np.real(v)) for v in value)
         return Material(c_p=c_p, c_s=c_s, rho=rho)
@@ -473,6 +481,7 @@ def _resolve_speed_map(
         out = np.full(shape, float(np.real(value)), dtype=np.float64)
     else:
         out = np.asarray(value, dtype=np.float64)
+    # The number is a count of array axes, not a quantity.
     if out.ndim != 2:  # noqa: PLR2004
         msg = f"{name} must be a 2D (ny, nx) map"
         raise ValueError(msg)
@@ -568,7 +577,7 @@ class ElasticFDTD2D:
         rho: float | Field2D,
         cfl: float = 0.6,
         sponge_width: int = 0,
-        sponge_sides: str | Iterable[str] | None = None,
+        sponge_sides: Side | Iterable[Side] | None = None,
         sponge_reflection: float = 1e-4,
         damping: float | NDArray[np.float64] = 0.0,
         shape: tuple[int, int] | None = None,
@@ -1087,7 +1096,7 @@ class ElasticFDTD2D:
         )
         return (e_v + e_n + e_s) * self.dx**2
 
-    def collocated(self, field: str) -> Field2D:
+    def collocated(self, field: Field) -> Field2D:
         """One field interpolated to the cell centres, shape ``(ny, nx)``.
 
         ``"p"`` is the synthetic pressure; ``"vx"``/``"vy"`` average the two
@@ -1168,7 +1177,7 @@ class ElasticFDTDResult(OwnsArrays):
     sources: tuple[ElasticSource, ...]
     snapshots: NDArray[np.float64] | None
     snapshot_times: NDArray[np.float64] | None
-    snapshot_field: str
+    snapshot_field: Field
     obstacle_mask: NDArray[np.bool_] | None
     free_sides: tuple[str, ...]
 
@@ -1219,9 +1228,9 @@ class ElasticFDTDResult(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        kind: str = "probes",
+        kind: Literal["probes", "snapshot"] = "probes",
         frame: int = -1,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Plot the probe histories or one recorded field snapshot.
@@ -1253,7 +1262,7 @@ class ElasticFDTDResult(OwnsArrays):
         raise ValueError(msg)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ElasticRecording(RichDisplay):
     """What an elastic run writes down: probe traces and field snapshots.
 
@@ -1275,10 +1284,10 @@ class ElasticRecording(RichDisplay):
     probes: Sequence[tuple[int, int]] = ()
     probe_fields: Sequence[str] = ("vy",)
     snapshot_every: int | None = None
-    snapshot_field: str = "p"
+    snapshot_field: Field = "p"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ElasticBoundaries(RichDisplay):
     """How the four edges of the elastic domain are terminated.
 
@@ -1292,15 +1301,15 @@ class ElasticBoundaries(RichDisplay):
         in cells.
     """
 
-    sides: str | Mapping[str, str] = "rigid"
+    sides: ElasticBoundary | Mapping[Side, ElasticBoundary] = "rigid"
     absorbing_layer_cells: int = 20
 
 
 def _parse_elastic_boundaries(
-    boundaries: str | Mapping[str, str],
-) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    boundaries: ElasticBoundary | Mapping[Side, ElasticBoundary],
+) -> tuple[tuple[Side, ...], tuple[Side, ...]]:
     """Split the boundary spec into absorbing sides and free sides."""
-    spec: dict[str, str]
+    spec: dict[Side, str]
     if isinstance(boundaries, str):
         spec = dict.fromkeys(_SIDES, boundaries)
     else:
@@ -1309,8 +1318,8 @@ def _parse_elastic_boundaries(
             msg = f"unknown boundary sides: {sorted(unknown)}"
             raise ValueError(msg)
         spec = {side: boundaries.get(side, "rigid") for side in _SIDES}
-    absorbing: list[str] = []
-    free: list[str] = []
+    absorbing: list[Side] = []
+    free: list[Side] = []
     for side in _SIDES:
         value = spec[side]
         if value not in _BOUNDARY_NAMES:
@@ -1365,7 +1374,7 @@ def _record_elastic_run(
     probe_ix: NDArray[np.int_],
     probe_fields: tuple[str, ...],
     snapshot_every: int | None,
-    snapshot_field: str,
+    snapshot_field: Field,
     signals: NDArray[np.float64],
     snapshots: NDArray[np.float64] | None,
 ) -> None:
@@ -1396,7 +1405,7 @@ def _record_elastic_run(
 
 def _validated_snapshot_options(
     recording: ElasticRecording,
-) -> tuple[int | None, str]:
+) -> tuple[int | None, Field]:
     """Validate and normalise the snapshot cadence and field."""
     snapshot_every = recording.snapshot_every
     snapshot_field = recording.snapshot_field

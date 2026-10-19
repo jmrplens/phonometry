@@ -209,8 +209,8 @@ is the same thing.
 ```python
 high_frequency_levels_to_determine(
     *,
-    noise_125_hz_to_8_khz: str,
-    noise_16_khz_octave: str,
+    noise_125_hz_to_8_khz: Literal['broadband', 'narrowband', 'none'],
+    noise_16_khz_octave: Literal['none', 'broadband', 'discrete_tone', 'multiple_tones'],
 ) -> tuple[str, ...]
 ```
 
@@ -360,7 +360,7 @@ HighFrequencySoundPowerResult(
     noise_bandwidth_hz: float | None,
     c1: float,
     c2: float,
-    method: str,
+    method: Literal['direct', 'comparison'],
     tonal: bool,
 )
 ```
@@ -392,7 +392,7 @@ broadband noise, or the narrow band of a discrete tone.
 HighFrequencySoundPowerResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

@@ -104,7 +104,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
     from .._internal.types import BandFraction
+
+Method = Literal["laboratory", "in-situ-loudspeaker", "in-situ-actual-noise"]
 
 __all__ = [
     "BAND_FLATNESS_LIMIT_DB",
@@ -247,7 +250,7 @@ INCREASED_UNCERTAINTY_BAND_RANGE_HZ: tuple[float, float] = (50.0, 200.0)
 IN_SITU_EXCESS_STANDARD_DEVIATION_DB: float = 2.0
 
 CabinMethod = Literal["laboratory", "in-situ-loudspeaker", "in-situ-actual-noise"]
-_METHODS: tuple[str, ...] = (
+_METHODS: tuple[CabinMethod, ...] = (
     "laboratory",
     "in-situ-loudspeaker",
     "in-situ-actual-noise",
@@ -357,7 +360,7 @@ class CabinInsulationResult(OwnsArrays):
     insulation: NDArray[np.float64]
     a_weighted_insulation: float | None
     internal_noise_level: float | None
-    method: str
+    method: Method
     fraction: int
 
     def __post_init__(self) -> None:
@@ -404,7 +407,7 @@ class CabinInsulationResult(OwnsArrays):
         return np.asarray(round_half_even(self.insulation), dtype=np.int_)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the two levels and the difference between them.
 
@@ -446,7 +449,7 @@ class WeightedCabinInsulation(OwnsArrays):
     ctr: int
     unfavorable_sum: float
     frequencies: NDArray[np.float64]
-    method: str
+    method: Method
 
     def __post_init__(self) -> None:
         """Reject a method the standard does not describe.
@@ -657,7 +660,7 @@ class CabinUncertainty(RichDisplay):
     :ivar volume_ratio: :math:`V_{\text{room}} / V_{\text{cabin}}`.
     """
 
-    method: str
+    method: Method
     volume_ratio: float
 
     def __post_init__(self) -> None:

@@ -123,7 +123,7 @@ def _sbr_ring_down() -> float:
     def wave(t: float) -> float:
         return float(np.exp(-(((t - 4.0 * w) / w) ** 2)))
 
-    sim.add_source(fdtd2d.PlaneWaveSource("right", wave, offset=2))
+    sim.add_source(fdtd2d.PlaneWaveSource(direction="right", waveform=wave, offset=2))
     iy = duct0 + _SBR_BORE_C + _SBR_STUB_D - 1
     ix = _SBR_JUNC + _SBR_STUB_W // 2
     n_steps = round(0.10 / sim.dt)
@@ -174,8 +174,10 @@ def _side_branch_fields() -> tuple[Any, ...]:
     t_tr = np.zeros(0)
     for f in (f0, _SBR_F_OFF):
         sim, air, duct0 = _sbr_rig()
-        tone = fdtd2d.CWSource(0, 0, frequency=f, ramp_cycles=2.0)
-        sim.add_source(fdtd2d.PlaneWaveSource("right", tone.value, offset=2))
+        tone = fdtd2d.CWSource(ix=0, iy=0, frequency=f, ramp_cycles=2.0)
+        sim.add_source(
+            fdtd2d.PlaneWaveSource(direction="right", waveform=tone.value, offset=2)
+        )
         iy = duct0 + _SBR_BORE_C + _SBR_STUB_D - 1
         ix = _SBR_JUNC + _SBR_STUB_W // 2
         n_steps = _SBR_EVERY * _SBR_FRAMES

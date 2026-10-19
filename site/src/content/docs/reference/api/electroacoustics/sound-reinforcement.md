@@ -230,7 +230,7 @@ meets it whichever way the last bits fall.
 FeedbackStabilityResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -278,7 +278,7 @@ plot_sound_reinforcement_geometry(
     listener_distance: float,
     *,
     ax: Axes | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

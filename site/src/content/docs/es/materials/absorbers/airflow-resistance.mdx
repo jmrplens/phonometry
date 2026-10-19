@@ -546,7 +546,7 @@ partes de ISO 9053.*
 f_win = np.geomspace(100.0, 5000.0, 200)
 for sigma in (2e3, 8e3, 20e3, 33e3, 100e3):
     layer = materials.layered_absorber(
-        f_win, [materials.PorousLayer(0.05, materials.miki(f_win, sigma))]
+        f_win, [materials.PorousLayer(thickness_m=0.05, medium=materials.miki(f_win, sigma))]
     )
     plt.semilogx(f_win, layer.absorption, label=f"{sigma/1e3:g} kPa s/m^2")
 plt.xlabel("Frecuencia [Hz]")

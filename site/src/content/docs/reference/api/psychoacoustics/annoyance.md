@@ -161,7 +161,7 @@ Psychoacoustic annoyance and its contributing terms (Fastl & Zwicker).
 PsychoacousticAnnoyanceResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

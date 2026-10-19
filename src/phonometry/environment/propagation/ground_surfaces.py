@@ -115,7 +115,7 @@ class GroundSurface(CatalogueRow):
     :ivar porosity_decay_rate_per_m: The rate ``zeta`` at which porosity falls
         with depth in the variable-porosity model, in 1/m. It is negative for
         several surfaces, which is what the page prints.
-    :ivar iso_9613_ground_factor: The ground factor ``G`` of ISO 9613-2 for a
+    :ivar iso9613_ground_factor: The ground factor ``G`` of ISO 9613-2 for a
         ground class: 0 for hard ground, 1 for porous ground.
     :ivar nmpb_ground_factor: The ground factor ``G`` of NMPB-2008 for the
         same class, which is not always the ISO one: two of the eight classes
@@ -128,7 +128,7 @@ class GroundSurface(CatalogueRow):
     porosity: float | None = None
     water_content_percent: float | None = None
     porosity_decay_rate_per_m: float | None = None
-    iso_9613_ground_factor: float | None = None
+    iso9613_ground_factor: float | None = None
     nmpb_ground_factor: float | None = None
     harmonoise_class: str = ""
 

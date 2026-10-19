@@ -90,7 +90,7 @@ plt.show()
 The same helper covers square and rectangular tubes: pass `shape="square"` or
 `shape="rectangular"` and the Eq. (3) factor replaces the circular one, with
 $d$ the maximum side length. The four-microphone branch keeps its own limits
-in `plane_wave_frequency_range_astm`: ASTM E2611 retains the unrounded
+in `plane_wave_frequency_range_astm_e2611`: ASTM E2611 retains the unrounded
 circular constant ($f\,d < 0.586\,c$, 6.2.4.1), the same rectangular
 $f\,d < 0.500\,c$ (6.2.5), a slightly stricter spacing bound
 $f\,s < 0.40\,c$ (6.5.4) and a laxer low end at 1 % of the wavelength
@@ -285,7 +285,7 @@ from phonometry import materials
 # the true reflection factor, from which the transfer function H12 follows.
 f = np.linspace(200.0, 1500.0, 260)
 med = materials.miki(f, 20000.0)
-layer = materials.layered_absorber(f, [materials.PorousLayer(0.05, med)])
+layer = materials.layered_absorber(f, [materials.PorousLayer(thickness_m=0.05, medium=med)])
 spacing, x1, c0 = 0.10, 0.20, 343.2
 k0 = materials.tube_wavenumber(f, c0)
 x2 = x1 - spacing
@@ -472,7 +472,7 @@ from phonometry import materials
 # ASTM E2611 machinery: TL and hard-backed absorption of the same specimen.
 f = np.linspace(200.0, 1600.0, 300)
 med = materials.miki(f, 20000.0)
-layer = materials.layered_absorber(f, [materials.PorousLayer(0.05, med)])
+layer = materials.layered_absorber(f, [materials.PorousLayer(thickness_m=0.05, medium=med)])
 chain = layer.transfer_matrix                       # shape (2, 2, len(f))
 tm = materials.TransferMatrix(t11=chain[0, 0], t12=chain[0, 1],
                               t21=chain[1, 0], t22=chain[1, 1])
@@ -497,7 +497,7 @@ from phonometry import materials
 
 f = np.linspace(200.0, 1600.0, 300)
 med = materials.miki(f, 20000.0)
-layer = materials.layered_absorber(f, [materials.PorousLayer(0.05, med)])
+layer = materials.layered_absorber(f, [materials.PorousLayer(thickness_m=0.05, medium=med)])
 chain = layer.transfer_matrix                       # shape (2, 2, len(f))
 tm = materials.TransferMatrix(t11=chain[0, 0], t12=chain[0, 1],
                               t21=chain[1, 0], t22=chain[1, 1])

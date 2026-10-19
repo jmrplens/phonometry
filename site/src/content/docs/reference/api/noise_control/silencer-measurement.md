@@ -421,7 +421,7 @@ $D_\mathrm{td}$ goes to zero and the two quantities meet.
 measurement_expanded_uncertainty(
     frequency: float,
     *,
-    quantity: str = 'insertion_loss',
+    quantity: Literal['insertion_loss', 'transmission_loss', 'intensity'] = 'insertion_loss',
 ) -> float
 ```
 
@@ -453,7 +453,7 @@ figure at 4 kHz within 6.
 measurement_reproducibility(
     frequency: float,
     *,
-    quantity: str = 'insertion_loss',
+    quantity: Literal['insertion_loss', 'transmission_loss', 'intensity'] = 'insertion_loss',
 ) -> float
 ```
 
@@ -896,7 +896,7 @@ The fitted level at one duty, in dB.
 OperatingLine.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

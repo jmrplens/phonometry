@@ -61,6 +61,7 @@ if TYPE_CHECKING:
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..materials.absorbers.impedance_tube import ImpedanceTubeResult
 
 #: Printable label for each accepted ``ReportMetadata.tube_shape`` value.
@@ -71,7 +72,7 @@ _SHAPE_LABELS = {
 }
 
 
-def _a2(value: float, language: str = "en") -> str:
+def _a2(value: float, language: Language = "en") -> str:
     """Two decimals (``alpha``, ``|r|`` and the normalised impedance parts)."""
     return format_number(value, language, decimals=2)
 
@@ -79,7 +80,7 @@ def _a2(value: float, language: str = "en") -> str:
 def _metadata_pairs(
     result: ImpedanceTubeResult,
     metadata: ReportMetadata | None,
-    language: str = "en",
+    language: Language = "en",
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the impedance-tube header grid.
 
@@ -162,7 +163,7 @@ def _metadata_pairs(
 
 
 def _value_table(
-    result: ImpedanceTubeResult, *, verbose: bool, language: str = "en"
+    result: ImpedanceTubeResult, *, verbose: bool, language: Language = "en"
 ) -> Table:
     """Build the per-frequency value table (~102 mm wide).
 
@@ -222,7 +223,7 @@ def _value_table(
     return band_table(rows, col_widths, len(freqs), band_centres=freqs)
 
 
-def _statement(result: ImpedanceTubeResult, language: str = "en") -> str:
+def _statement(result: ImpedanceTubeResult, language: Language = "en") -> str:
     """The boxed characterisation headline (ISO 10534-2 has no single number)."""
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     lo = round(float(freqs.min())) if freqs.size else 0
@@ -234,7 +235,7 @@ def _statement(result: ImpedanceTubeResult, language: str = "en") -> str:
     ).format(lo=lo, hi=hi)
 
 
-def _basis_line(metadata: ReportMetadata | None, language: str = "en") -> str:
+def _basis_line(metadata: ReportMetadata | None, language: Language = "en") -> str:
     """The standard-basis line, naming the measurement standard when supplied."""
     measurement_standard = (
         metadata.measurement_standard if metadata is not None else None
@@ -254,7 +255,7 @@ def _basis_line(metadata: ReportMetadata | None, language: str = "en") -> str:
     )
 
 
-def _caption(*, verbose: bool, language: str = "en") -> str:
+def _caption(*, verbose: bool, language: Language = "en") -> str:
     """The left-panel caption, listing the columns present for this fiche."""
     if verbose:
         return t(
@@ -269,7 +270,7 @@ def _body(
     *,
     verbose: bool,
     caption_style: ParagraphStyle,
-    language: str = "en",
+    language: Language = "en",
 ) -> Table:
     """The two-panel body: the per-frequency table beside the ``alpha(f)`` curve.
 
@@ -297,7 +298,7 @@ def render_iso10534_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 10534-2 impedance-tube test-report fiche to a PDF at ``path``.
 

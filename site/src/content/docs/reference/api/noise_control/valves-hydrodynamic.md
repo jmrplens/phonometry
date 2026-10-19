@@ -585,7 +585,7 @@ incipient_cavitation_ratio(
     style_modifier: float,
     pressure_recovery: float,
     *,
-    coefficient: str = 'Cv',
+    coefficient: Literal['Cv', 'Kv'] = 'Cv',
 ) -> float
 ```
 
@@ -684,8 +684,8 @@ jet_strouhal_number(
     seat_diameter_m: float,
     inlet_pressure_pa: float,
     vapor_pressure_pa: float,
-    coefficient: str = 'Cv',
-    form: str = 'annex',
+    coefficient: Literal['Cv', 'Kv'] = 'Cv',
+    form: Literal['annex', 'clause'] = 'annex',
 ) -> float
 ```
 
@@ -779,7 +779,7 @@ the cap says so.
 last_stage_seat_diameter_mm(
     flow_coefficient: float,
     *,
-    coefficient: str = 'Cv',
+    coefficient: Literal['Cv', 'Kv'] = 'Cv',
 ) -> float
 ```
 
@@ -816,10 +816,10 @@ metres, so divide by 1 000 before passing it on.
 
 ```python
 LiquidPipe(
+    *,
     internal_diameter_m: float,
     wall_thickness_m: float,
     density: float,
-    *,
     speed_of_sound: float = 5000.0,
     air_density: float = 1.293,
     air_sound_speed: float = 343.0,
@@ -843,6 +843,7 @@ The pipe the noise comes out of, and the air around it.
 
 ```python
 LiquidStream(
+    *,
     mass_flow: float,
     inlet_pressure_pa: float,
     outlet_pressure_pa: float,
@@ -869,6 +870,7 @@ The liquid and the operating point, which Clause 4.1 reads first.
 
 ```python
 LiquidTrim(
+    *,
     flow_coefficient: float,
     style_modifier: float,
     pressure_recovery: float,
@@ -876,7 +878,7 @@ LiquidTrim(
     power_ratio: float,
     valve_diameter_m: float,
     seat_diameter_m: float,
-    coefficient: str = 'Cv',
+    coefficient: Literal['Cv', 'Kv'] = 'Cv',
 )
 ```
 
@@ -1351,7 +1353,7 @@ valve_hydrodynamic_noise(
     valve: LiquidTrim,
     pipe: LiquidPipe,
     *,
-    strouhal_form: str = 'annex',
+    strouhal_form: Literal['annex', 'clause'] = 'annex',
     frequencies: ArrayLike | None = None,
 ) -> HydrodynamicValveNoise
 ```

@@ -149,19 +149,55 @@ def test_reference_source_background_is_corrected_per_location_and_position() ->
     res = emission.sound_power_in_situ(
         ST, two, LW_RSS, frequencies=FREQS, background_levels=background
     )
-    assert res.background_correction_ref.shape == (2, 4, 7)
-    assert res.background_correction_ref[0, 0, 5] == pytest.approx(_k1(8.0))
-    assert res.background_correction_ref[1, 0, 5] == pytest.approx(_k1(10.0))
-    assert res.background_correction_ref[0, 1, 5] == 0.0
+    assert res.reference_background_correction.shape == (2, 4, 7)
+    assert res.reference_background_correction[0, 0, 5] == pytest.approx(_k1(8.0))
+    assert res.reference_background_correction[1, 0, 5] == pytest.approx(_k1(10.0))
+    assert res.reference_background_correction[0, 1, 5] == 0.0
     own = emission.sound_power_in_situ(
         ST,
         two,
         LW_RSS,
         frequencies=FREQS,
         background_levels=background,
-        background_levels_ref=40.0 + np.zeros(7),
+        reference_background_levels=40.0 + np.zeros(7),
     )
-    assert np.all(own.background_correction_ref == 0.0)
+    assert np.all(own.reference_background_correction == 0.0)
+
+
+def test_the_reference_background_correction_reaches_the_sound_power() -> None:
+    """K1i(RSS) of Eq. (9) is taken off the reference levels before Eq. (11).
+
+    The reference background sits 6.9 dB to 8.1 dB under the reference at
+    4 kHz, where Eq. (7) corrects each position, and far under everywhere
+    else; the source's own background corrects nothing. The corrected
+    reference mean is rebuilt here from Eq. (7) and Eq. (9), so a correction
+    added instead of subtracted, or left out, moves the 4 kHz band by more
+    than a decibel and fails.
+    """
+    reference_background = np.full(7, 40.0)
+    reference_background[5] = 76.0
+    res = emission.sound_power_in_situ(
+        ST,
+        RSS,
+        LW_RSS,
+        frequencies=FREQS,
+        background_levels=np.full(7, 40.0),
+        reference_background_levels=reference_background,
+    )
+    margins = RSS[:, 5] - 76.0
+    corrected = RSS[:, 5] - np.array([_k1(float(d)) for d in margins])
+    lp_rss = float(_energy_mean(corrected, axis=0))
+    lp_st = float(_energy_mean(ST[:, 5], axis=0))
+    expected = LW_RSS[5] - lp_rss + lp_st
+    assert res.sound_power_level[5] == pytest.approx(expected, abs=1e-12)
+    uncorrected = LW_RSS[5] - float(_energy_mean(RSS[:, 5], axis=0)) + lp_st
+    assert expected - uncorrected > 0.5
+    others = [0, 1, 2, 3, 4, 6]
+    np.testing.assert_allclose(
+        res.sound_power_level[others],
+        (LW_RSS - _energy_mean(RSS, axis=0) + _energy_mean(ST, axis=0))[others],
+        atol=1e-12,
+    )
 
 
 # --------------------------------------------------------------------------
@@ -185,7 +221,7 @@ def test_sound_power_level_is_eq11_of_the_energy_means() -> None:
 
 def test_eq12_with_identical_locations_collapses_to_eq11() -> None:
     """The energy mean of m equal terms is the term: Eq. (12) with the RSS at
-    m indistinguishable locations is Eq. (11), whichever way lw_ref is given.
+    m indistinguishable locations is Eq. (11), whichever way reference_sound_power_levels is given.
     """
     one = _power(background_levels=BACKGROUND)
     three = emission.sound_power_in_situ(
@@ -242,7 +278,9 @@ def test_eq11_agrees_with_the_iso3741_comparison_method() -> None:
         )
     res = _power(temperature_c=20.0, static_pressure_kpa=100.0)
     np.testing.assert_allclose(
-        res.sound_power_level_ref, room.sound_power_level, atol=1e-12
+        res.sound_power_level_at_reference_conditions,
+        room.sound_power_level,
+        atol=1e-12,
     )
     assert res.c2 == pytest.approx(room.c2)
 
@@ -463,7 +501,7 @@ def test_c2_at_reference_conditions_is_the_296_k_residual() -> None:
     res = _power()
     assert res.c2 == pytest.approx(0.0033004, abs=5e-8)
     np.testing.assert_allclose(
-        res.sound_power_level_ref, res.sound_power_level + res.c2
+        res.sound_power_level_at_reference_conditions, res.sound_power_level + res.c2
     )
 
 
@@ -580,16 +618,23 @@ def test_levels_must_be_finite() -> None:
 
 
 def test_levels_ref_must_match_positions_and_bands() -> None:
-    with pytest.raises(ValueError, match="'levels_ref' must be measured at the same"):
+    with pytest.raises(
+        ValueError, match="'reference_levels' must be measured at the same"
+    ):
         emission.sound_power_in_situ(ST, RSS[:3], LW_RSS, frequencies=FREQS)
 
 
 def test_lw_ref_must_match_bands_or_locations() -> None:
-    with pytest.raises(ValueError, match="'lw_ref' must carry one value per band"):
+    with pytest.raises(
+        ValueError, match="'reference_sound_power_levels' must carry one value per band"
+    ):
         emission.sound_power_in_situ(ST, RSS, LW_RSS[:5], frequencies=FREQS)
     two_locations = np.stack([RSS, RSS])
     three_powers = np.stack([LW_RSS] * 3)
-    with pytest.raises(ValueError, match="'lw_ref' must be one spectrum, or one per"):
+    with pytest.raises(
+        ValueError,
+        match="'reference_sound_power_levels' must be one spectrum, or one per",
+    ):
         emission.sound_power_in_situ(ST, two_locations, three_powers, frequencies=FREQS)
 
 
@@ -626,9 +671,10 @@ def test_background_shapes_are_checked_by_name() -> None:
     ):
         _power(background_levels=three_rows)
     with pytest.raises(
-        ValueError, match="'background_levels_ref' must be one spectrum or one per"
+        ValueError,
+        match="'reference_background_levels' must be one spectrum or one per",
     ):
-        _power(background_levels_ref=five_rows)
+        _power(reference_background_levels=five_rows)
 
 
 @pytest.mark.parametrize("theta", [-273.0, -300.0, float("nan")])
@@ -747,12 +793,15 @@ def test_excess_level_inputs_are_validated() -> None:
     unbounded = float("inf")
     with pytest.raises(ValueError, match="'level' must be finite"):
         emission.excess_sound_pressure_level(not_a_number, 92.0, 2.0)
-    with pytest.raises(ValueError, match="'lw_ref' must be finite"):
+    with pytest.raises(
+        ValueError, match="'reference_sound_power_levels' must be finite"
+    ):
         emission.excess_sound_pressure_level(70.0, unbounded, 2.0)
     with pytest.raises(ValueError, match="'level' must not be empty"):
         emission.excess_sound_pressure_level([], [], [])
     with pytest.raises(
-        ValueError, match="'level', 'lw_ref' and 'distance' must broadcast"
+        ValueError,
+        match="'level', 'reference_sound_power_levels' and 'distance' must broadcast",
     ):
         emission.excess_sound_pressure_level([70.0, 71.0, 72.0], [90.0, 91.0], 2.0)
 
@@ -761,9 +810,12 @@ def test_result_refuses_disagreeing_shapes() -> None:
     res = _power()
     with pytest.raises(ValueError, match="'sound_power_level'"):
         dataclasses.replace(res, sound_power_level=res.sound_power_level[:-1])
-    with pytest.raises(ValueError, match="'background_correction_ref'"):
+    with pytest.raises(ValueError, match="'reference_background_correction'"):
         dataclasses.replace(
-            res, background_correction_ref=res.background_correction_ref[:, :3, :]
+            res,
+            reference_background_correction=res.reference_background_correction[
+                :, :3, :
+            ],
         )
     two_locations = np.stack([res.reference_levels[0]] * 2)
     with pytest.raises(ValueError, match="'reference_levels'"):
@@ -808,7 +860,7 @@ def test_plot_draws_one_bar_per_band_and_hatches_upper_bounds() -> None:
     background[3, 2] = ST[3, 2] - 3.0
     bg_ref = np.full_like(RSS, 40.0)
     bg_ref[0, 5] = RSS[0, 5] - 3.0
-    res = _power(background_levels=background, background_levels_ref=bg_ref)
+    res = _power(background_levels=background, reference_background_levels=bg_ref)
     assert res.upper_bound.tolist() == [False, False, True] + [False] * 4
     assert not bool(res.background_requirement_met[5])
     ax = res.plot()
@@ -865,7 +917,7 @@ def test_one_quiet_event_takes_its_band_off_the_requirement() -> None:
         LW_RSS,
         frequencies=FREQS,
         background_levels=background,
-        background_levels_ref=RSS - 20.0,
+        reference_background_levels=RSS - 20.0,
     )
     expected = np.full(FREQS.size, 20.0)
     expected[4] = 4.0
@@ -888,7 +940,7 @@ def test_one_quiet_position_over_n_events_takes_its_band_off_the_requirement() -
         frequencies=FREQS,
         n_events=5,
         background_levels=background,
-        background_levels_ref=RSS - 20.0,
+        reference_background_levels=RSS - 20.0,
     )
     expected = np.full(FREQS.size, 20.0)
     expected[2] = 4.0
@@ -902,11 +954,11 @@ def test_one_quiet_position_takes_the_source_band_off_the_requirement() -> None:
     """
     background = ST - 20.0
     background[3, 1] = ST[3, 1] - 4.0
-    res = _power(background_levels=background, background_levels_ref=RSS - 20.0)
+    res = _power(background_levels=background, reference_background_levels=RSS - 20.0)
     expected = np.full(FREQS.size, 20.0)
     expected[1] = 4.0
     np.testing.assert_allclose(res.background_margin_db, expected, atol=1e-9)
-    np.testing.assert_allclose(res.background_margin_ref_db, 20.0, atol=1e-9)
+    np.testing.assert_allclose(res.reference_background_margin_db, 20.0, atol=1e-9)
     assert res.background_requirement_met.tolist() == [True, False] + [True] * 5
     assert res.upper_bound.tolist() == [False, True] + [False] * 5
 
@@ -917,10 +969,12 @@ def test_one_quiet_reference_position_fails_the_band_without_an_upper_bound() ->
     """
     background_ref = RSS - 20.0
     background_ref[0, 6] = RSS[0, 6] - 4.0
-    res = _power(background_levels=ST - 20.0, background_levels_ref=background_ref)
+    res = _power(
+        background_levels=ST - 20.0, reference_background_levels=background_ref
+    )
     expected = np.full(FREQS.size, 20.0)
     expected[6] = 4.0
-    np.testing.assert_allclose(res.background_margin_ref_db, expected, atol=1e-9)
+    np.testing.assert_allclose(res.reference_background_margin_db, expected, atol=1e-9)
     np.testing.assert_allclose(res.background_margin_db, 20.0, atol=1e-9)
     assert res.background_requirement_met.tolist() == [True] * 6 + [False]
     assert not bool(np.any(res.upper_bound))

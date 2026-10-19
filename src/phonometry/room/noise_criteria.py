@@ -55,7 +55,15 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
+
+#: The RC Mark II classifications this library rates: neutral ``N``, rumble
+#: ``R`` and hiss ``H`` of clause D.3.5, and ``RH``, both at once, a diagnostic
+#: extension of this library. The vibration and rattle designation ``RV`` of
+#: clause D.3.4 needs the Table 6 criterion test, which is not implemented.
+RCClassification = Literal["N", "R", "H", "RH"]
 
 __all__ = [
     "NC_CURVE_LEVELS",
@@ -281,7 +289,7 @@ class NCResult(OwnsArrays):
         return f"NC-{self.rating:g} ({self.governing_frequency:g} Hz)"
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the measured spectrum against the NC curves.
 
@@ -299,9 +307,9 @@ class NCResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a Noise Criteria (NC) assessment fiche to a PDF.
 
@@ -362,7 +370,7 @@ class RCResult(OwnsArrays):
 
     rating: int
     lmf: float
-    classification: str
+    classification: RCClassification
     reference_curve: np.ndarray
     frequencies: np.ndarray
     levels: np.ndarray
@@ -438,7 +446,9 @@ class RCResult(OwnsArrays):
                 f"the curve by that whole number); got {self.rating!r}."
             )
             raise TypeError(msg)
-        if self.classification == "RV":
+        # Read as a plain text: the type admits no RV, a caller's value may.
+        classification: str = self.classification
+        if classification == "RV":
             msg = (
                 "RCResult: classification 'RV' (vibration and rattle, "
                 "ANSI/ASA S12.2-2019 clause D.3.4) requires the Table 6 "
@@ -470,7 +480,7 @@ class RCResult(OwnsArrays):
         return not _RC_FAMILY_MIN <= self.rating <= _RC_FAMILY_MAX
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the measured spectrum against the reference RC Mark II curve.
 
@@ -488,9 +498,9 @@ class RCResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a Room Criteria Mark II (RC) assessment fiche to a PDF.
 
@@ -789,8 +799,13 @@ def room_criterion(
     high_dev = deviation[high][~np.isnan(deviation[high])]
     rumble = low_dev.size > 0 and np.max(low_dev) > _RC_RUMBLE_LIMIT_DB
     hiss = high_dev.size > 0 and np.max(high_dev) > _RC_HISS_LIMIT_DB
-    tag = ("R" if rumble else "") + ("H" if hiss else "")
-    classification = tag or "N"
+    classification: RCClassification = "N"
+    if rumble and hiss:
+        classification = "RH"
+    elif rumble:
+        classification = "R"
+    elif hiss:
+        classification = "H"
 
     return RCResult(
         rating=rating,

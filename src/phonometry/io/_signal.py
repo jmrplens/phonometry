@@ -6,7 +6,7 @@ calibration and its provenance, yet the ecosystem's readers return a bare
 ``(x, fs)`` tuple and leave the rest to a notebook variable that does not
 survive the session. :class:`Signal` keeps them in one immutable object,
 following the library's result-object pattern (a frozen dataclass with
-``__array__``, e.g. :class:`~phonometry.room.impulse_response.ImpulseResponseResult`)
+``__array__``, e.g. :class:`~phonometry.room.ImpulseResponseResult`)
 rather than subclassing :class:`numpy.ndarray`: NumPy's own subclassing guide
 warns that functions may return the base class and *forget* the attached
 attributes, and for metrological metadata a silently dropped ``fs`` or

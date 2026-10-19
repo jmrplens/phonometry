@@ -512,7 +512,7 @@ the base-10 logarithm. Both quantities are read from the A-weighted,
 time-weighting-F level history: the onset rate is the slope of the onset in
 dB/s and the level difference is the level rise over the onset in dB
 (clauses 4.6-4.7). An impulse qualifies when its onset rate exceeds
-`ONSET_RATE_LIMIT` (10 dB/s).
+10 dB/s (clause 4.5).
 
 **Parameters**
 

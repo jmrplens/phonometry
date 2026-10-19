@@ -19,8 +19,8 @@ import pytest
 from report_assertions import assert_one_page
 
 from phonometry import ReportMetadata
-from phonometry.noise_control.duct_path import DuctElement, DuctPathResult, duct_path
-from phonometry.noise_control.hvac import OCTAVE_BANDS
+from phonometry.noise_control import DuctElement, DuctPathResult, duct_path
+from phonometry.noise_control.hvac import _OCTAVE_BANDS
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -36,7 +36,7 @@ def _extract_text(path: str) -> str:
 def _supply() -> DuctPathResult:
     """The supply path of Long Table 14.9, from its published element rows."""
     return duct_path(
-        OCTAVE_BANDS,
+        _OCTAVE_BANDS,
         [90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0],
         [
             DuctElement(
@@ -191,11 +191,11 @@ def test_spanish_sheet(tmp_path: Path) -> None:
 
 def test_combined_paths_sheet_lists_its_contributions(tmp_path: Path) -> None:
     _reportlab()
-    from phonometry.noise_control.duct_path import combine_duct_paths
+    from phonometry.noise_control import combine_duct_paths
 
     supply = _supply()
     other = duct_path(
-        OCTAVE_BANDS,
+        _OCTAVE_BANDS,
         [90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0],
         [DuctElement("Return plenum", 30.0, code="R")],
         room_effect=8.0,
@@ -219,7 +219,7 @@ def test_a_long_path_still_renders_on_one_page(
     """A fiche is one page: a path too long for it elides its middle rows."""
     _reportlab()
     res = duct_path(
-        OCTAVE_BANDS,
+        _OCTAVE_BANDS,
         [90.0] * 8,
         [
             DuctElement(f"Duct element {i}", 3.0, [40.0 - i] * 8, code=str(i))

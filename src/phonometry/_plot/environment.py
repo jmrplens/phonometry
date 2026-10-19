@@ -80,12 +80,12 @@ if TYPE_CHECKING:
         LevelDifferenceQuantiles,
         RoundRobinPrecision,
     )
-    from ..environment.sources.cnossos_rail import RailwayEmissionResult
-    from ..environment.sources.cnossos_road import RoadEmissionResult
-    from ..environment.sources.statistical_pass_by import (
+    from ..environment.sources._statistical_pass_by import (
         PassByRegression,
         StatisticalPassByResult,
     )
+    from ..environment.sources.cnossos_rail import RailwayEmissionResult
+    from ..environment.sources.cnossos_road import RoadEmissionResult
     from ..environment.sources.wind_turbine import WindTurbineTonalityResult
 
 #: Spanish translations of the fixed strings rendered by the environmental
@@ -448,7 +448,7 @@ def plot_impulse_prominence(
     """
     from .._i18n import decimal_comma, format_number, localize_axes
     from ..environment.assessment.impulsive_sound import (
-        ADJUSTMENT_THRESHOLD,
+        _ADJUSTMENT_THRESHOLD,
         impulse_adjustment,
     )
 
@@ -464,10 +464,10 @@ def plot_impulse_prominence(
         label=_t(r"$K_\mathrm{I} = 1.8\,(P-5)$", language),
     )
     ax.axvline(
-        ADJUSTMENT_THRESHOLD,
+        _ADJUSTMENT_THRESHOLD,
         color=_C_MUTED,
         ls=":",
-        label=f"{_t('threshold', language)} $P = {decimal_comma(f'{ADJUSTMENT_THRESHOLD:g}', language)}$",
+        label=f"{_t('threshold', language)} $P = {decimal_comma(f'{_ADJUSTMENT_THRESHOLD:g}', language)}$",
     )
 
     style_default(kwargs, "color", _C_PRIMARY_LIGHT)
@@ -1751,7 +1751,7 @@ def plot_pass_by_regression(
     vehicle sound level read off the line at the Table 1 reference speed.
 
     :param result: A
-        :class:`~phonometry.environment.sources.statistical_pass_by.PassByRegression`.
+        :class:`~phonometry.environment.sources.PassByRegression`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the fitted line.
@@ -1833,7 +1833,7 @@ def plot_statistical_pass_by(
     levels make.
 
     :param result: A
-        :class:`~phonometry.environment.sources.statistical_pass_by.StatisticalPassByResult`.
+        :class:`~phonometry.environment.sources.StatisticalPassByResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the three fitted lines.

@@ -25,7 +25,7 @@ import reference_data as ref
 
 from phonometry import vibration
 from phonometry.io import Signal
-from phonometry.vibration.structural.impact_mobility import (
+from phonometry.vibration.structural import (
     CHANNEL_MAGNITUDE_TOLERANCE,
     CHANNEL_PHASE_TOLERANCE_DEG,
     COHERENCE_RECORDS,
@@ -50,7 +50,7 @@ if TYPE_CHECKING:
     from matplotlib.figure import Figure
     from numpy.typing import NDArray
 
-    from phonometry.vibration.structural.impact_mobility import ResponseQuantity
+    from phonometry.vibration.structural._impact_mobility import ResponseQuantity
 
 FS = ref.ISO7626_5_FS_HZ
 N = ref.ISO7626_5_SAMPLES

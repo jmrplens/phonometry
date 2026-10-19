@@ -103,6 +103,21 @@ if TYPE_CHECKING:
 
     from ..._report.metadata import ReportMetadata
 
+__all__ = [
+    "IntensityElementNormalizedResult",
+    "IntensityReductionResult",
+    "LowFrequencyElementResult",
+    "LowFrequencyIntensityResult",
+    "adaptation_term_kc",
+    "intensity_element_normalized_difference",
+    "intensity_sound_reduction",
+    "limp_panel_reduction_index",
+    "low_frequency_element_normalized_difference",
+    "low_frequency_intensity_reduction",
+    "subarea_intensity_level",
+    "surface_pressure_intensity_indicator",
+]
+
 #: Reference equivalent absorption area for the element-normalized level
 #: difference (ISO 15186-1:2000, Clause 3.9): 10 m².
 _A0 = 10.0

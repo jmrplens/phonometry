@@ -102,6 +102,25 @@ if TYPE_CHECKING:
 
     from ..._report.metadata import ReportMetadata
 
+__all__ = [
+    "FlankingImpactLevelResult",
+    "FlankingLevelDifferenceResult",
+    "VibrationReductionResult",
+    "band_mode_count",
+    "critical_frequency",
+    "direction_averaged_level_difference",
+    "equivalent_absorption_length",
+    "modal_density",
+    "modal_overlap_factor",
+    "normalized_flanking_impact_level",
+    "normalized_flanking_level_difference",
+    "strong_coupling_satisfied",
+    "total_loss_factor",
+    "velocity_level_difference",
+    "vibration_reduction_index",
+    "vibration_reduction_index_from_flanking",
+]
+
 
 def _validate_report_request(engine: str, language: str) -> None:
     """Reject an unknown engine or language before a fiche is rendered.

@@ -2,7 +2,7 @@
 """EBU R 128 programme-loudness compliance fiche (reportlab renderer).
 
 Renders a
-:class:`~phonometry.broadcast.program_loudness.ProgramLoudnessResult` to a
+:class:`~phonometry.broadcast.ProgramLoudnessResult` to a
 one-page PDF laid out like a broadcast loudness-compliance sheet:
 
 * a title and the standard-basis line (measurement standard + EBU R 128 /
@@ -52,7 +52,7 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
-    from ..broadcast.program_loudness import ProgramLoudnessResult
+    from ..broadcast._program_loudness import ProgramLoudnessResult
     from .metadata import ReportMetadata
 
 #: EBU R 128 target programme loudness, LUFS.
@@ -74,7 +74,7 @@ _TOLERANCE_CLAUSES: dict[str, str] = {"qc": "item i", "live": "item h"}
 _MAX_TRUE_PEAK_DBTP = -1.0
 
 #: The em dash printed wherever the measurement leaves a reading undefined.
-#: :func:`~phonometry.broadcast.program_loudness.program_loudness` returns
+#: :func:`~phonometry.broadcast.program_loudness` returns
 #: ``-inf`` for the integrated loudness when no gating block reaches the
 #: -70 LUFS absolute threshold (ITU-R BS.1770-5, Annex 1), and the maxima and
 #: the true peak of a digitally silent programme come back ``-inf`` with it.
@@ -303,7 +303,7 @@ def render_program_loudness_report(
     """Render an EBU R 128 programme-loudness fiche to a PDF at ``path``.
 
     :param result: A
-        :class:`~phonometry.broadcast.program_loudness.ProgramLoudnessResult`
+        :class:`~phonometry.broadcast.ProgramLoudnessResult`
         carrying the integrated loudness, loudness range, true peak and the
         momentary/short-term loudness series.
     :param path: Destination path of the PDF file.

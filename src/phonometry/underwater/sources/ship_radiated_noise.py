@@ -42,6 +42,14 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+__all__ = [
+    "ShipSourceLevelResult",
+    "hydrophone_depths",
+    "monopole_source_level",
+    "radiated_noise_level",
+    "source_level_uncertainty",
+]
+
 #: Default speed of sound in sea water (m/s).
 _DEFAULT_SOUND_SPEED = 1500.0
 #: Nominal source depth as a fraction of the ship draught (ISO 17208-2 Formula 1).

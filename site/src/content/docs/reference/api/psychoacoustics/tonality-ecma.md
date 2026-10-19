@@ -1,9 +1,11 @@
 ---
-title: "psychoacoustics.quality.tonality_ecma"
+title: "psychoacoustics: tonality (Sottek model)"
 description: "Psychoacoustic tonality per ECMA-418-2:2025 (4th ed., Sottek Hearing Model)."
 sidebar:
   label: "tonality_ecma"
 ---
+
+Every name on this page is published by `phonometry.psychoacoustics`: `from phonometry import psychoacoustics`, then `psychoacoustics.<name>`.
 
 Psychoacoustic tonality per ECMA-418-2:2025 (4th ed., Sottek Hearing Model).
 

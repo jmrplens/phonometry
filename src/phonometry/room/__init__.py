@@ -7,6 +7,31 @@ from .._plot.geometry import (
     plot_open_plan_geometry,
 )
 from .._plot.room import plot_excitation
+from ._crowd_noise import (
+    COMMUNICATION_SNR_DB,
+    NORMAL_VOICE_POWER_LEVEL,
+    PRIVACY_SNR_DB,
+    TALKER_DIRECTIVITY,
+    CrowdNoiseResult,
+    absorption_per_table,
+    crowd_noise,
+    crowd_noise_level,
+    speech_direct_level,
+    speech_to_noise_ratio,
+)
+from ._impulse_response import (
+    ImpulseResponseResult,
+    ImpulseResponseWarning,
+    ShapedSweepResult,
+    golay_impulse_response,
+    golay_pair,
+    impulse_response,
+    inverse_filter,
+    mls_impulse_response,
+    mls_signal,
+    shaped_sweep_signal,
+    sweep_signal,
+)
 from .acoustics import (
     DECAY_UNCERTAINTY_COEFFICIENTS,
     FILTER_BANDWIDTH_FRACTION,
@@ -79,18 +104,6 @@ from .auditorium import (
     source_directivity_limit,
     stage_support,
 )
-from .crowd_noise import (
-    COMMUNICATION_SNR_DB,
-    NORMAL_VOICE_POWER_LEVEL,
-    PRIVACY_SNR_DB,
-    TALKER_DIRECTIVITY,
-    CrowdNoiseResult,
-    absorption_per_table,
-    crowd_noise,
-    crowd_noise_level,
-    speech_direct_level,
-    speech_to_noise_ratio,
-)
 from .enclosed_space_absorption import (
     ReverberationResult,
     air_absorption_area,
@@ -106,19 +119,6 @@ from .image_source import (
     image_source_rir,
     reflection_density,
 )
-from .impulse_response import (
-    ImpulseResponseResult,
-    ImpulseResponseWarning,
-    ShapedSweepResult,
-    golay_impulse_response,
-    golay_pair,
-    impulse_response,
-    inverse_filter,
-    mls_impulse_response,
-    mls_signal,
-    shaped_sweep_signal,
-    sweep_signal,
-)
 from .modes import (
     MODE_KINDS,
     RoomModesResult,
@@ -128,6 +128,9 @@ from .modes import (
     room_modes,
 )
 from .noise_criteria import (
+    NC_CURVES_DB,
+    NC_OCTAVE_BANDS_HZ,
+    NC_RATINGS,
     NCResult,
     RCResult,
     nc_curve,
@@ -255,6 +258,9 @@ __all__ = [
     "MIN_REFERENCE_DISTANCE_M",
     "MIN_SOURCE_TO_WALL_M",
     "MODE_KINDS",
+    "NC_CURVES_DB",
+    "NC_OCTAVE_BANDS_HZ",
+    "NC_RATINGS",
     "NEAR_REGION_START_M",
     "NORMALIZED_OFFSET_DB",
     "NORMAL_VOICE_POWER_LEVEL",

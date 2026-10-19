@@ -307,9 +307,9 @@ _REMOVED_4_0_SECOND_NAMES = [
         )
     ),
     ("phonometry.noise_control.screen_in_situ", "OPERATOR_SPHERE_RADIUS_M"),
-    ("phonometry.noise_control.cabin_insulation", "MANDATORY_BAND_RANGE_HZ"),
-    ("phonometry.noise_control.cabin_insulation", "leak_ratio"),
-    ("phonometry.noise_control.cabin_insulation", "seal_ratio"),
+    ("phonometry.noise_control._cabin_insulation", "MANDATORY_BAND_RANGE_HZ"),
+    ("phonometry.noise_control._cabin_insulation", "leak_ratio"),
+    ("phonometry.noise_control._cabin_insulation", "seal_ratio"),
     # Public-looking constants its package never published: the two defaults
     # are private now, and the reference sound power is ISO 1683's own.
     ("phonometry.emission.vibration_sound_power", "REFERENCE_AREA"),
@@ -648,3 +648,112 @@ def test_a_keyword_the_4_0_respelled_is_gone(
     parameters = inspect.signature(getattr(getattr(ph, package), owner)).parameters
     assert new in parameters
     assert old not in parameters
+
+
+# --------------------------------------------------------------------------- #
+# 4.0: a module that shared its name with the function its package publishes
+# was reachable only through ``from <leaf path> import``; ``import a.b.c as m``
+# bound the function. Each is private now, and its names are reached through
+# the package. All 31 paths, frozen: a stale file left on disk would serve the
+# old path again, and nothing else in the suite would notice.
+# --------------------------------------------------------------------------- #
+_REMOVED_4_0_HIDDEN_MODULE_PATHS = [
+    "phonometry.broadcast.program_loudness",
+    "phonometry.building.measurement.rainfall_sound",
+    "phonometry.emission.sound_power_anechoic",
+    "phonometry.emission.sound_power_hard_walled",
+    "phonometry.emission.sound_power_in_duct",
+    "phonometry.emission.sound_power_in_situ",
+    "phonometry.emission.sound_power_intensity",
+    "phonometry.emission.sound_power_intensity_points",
+    "phonometry.emission.sound_power_reverberation",
+    "phonometry.emission.sound_power_special_room",
+    "phonometry.environment.sources.statistical_pass_by",
+    "phonometry.fluids.air",
+    "phonometry.hearing.earmuff_insertion_loss",
+    "phonometry.hearing.real_ear_attenuation",
+    "phonometry.materials.absorbers.airflow_resistance",
+    "phonometry.noise_control.cabin_insulation",
+    "phonometry.noise_control.duct_path",
+    "phonometry.psychoacoustics.quality.fluctuation_strength",
+    "phonometry.psychoacoustics.quality.fluctuation_strength_ecma",
+    "phonometry.psychoacoustics.quality.roughness_ecma",
+    "phonometry.psychoacoustics.quality.tonality_ecma",
+    "phonometry.psychoacoustics.quality.tone_audibility",
+    "phonometry.room.crowd_noise",
+    "phonometry.room.impulse_response",
+    "phonometry.signals.cepstrum",
+    "phonometry.signals.correlation",
+    "phonometry.signals.envelope",
+    "phonometry.underwater.propagation.seabed_reflection",
+    "phonometry.vibration.structural.impact_mobility",
+    "phonometry.vibration.structural.junction_transmission",
+    "phonometry.vibration.structural.radiation_efficiency",
+]
+
+
+@pytest.mark.parametrize("path", _REMOVED_4_0_HIDDEN_MODULE_PATHS)
+def test_a_module_hidden_behind_its_function_is_private(path: str) -> None:
+    """The leaf path is gone; the function of that name is where it was."""
+    package, _, leaf = path.rpartition(".")
+    with pytest.raises(
+        ModuleNotFoundError, match=rf"No module named '{re.escape(path)}'"
+    ):
+        importlib.import_module(path)
+    assert callable(getattr(importlib.import_module(package), leaf))
+
+
+def test_the_names_a_hidden_module_held_keep_their_package_address() -> None:
+    """``signals.correlation`` is the function, and ``time_delay`` is beside it."""
+    assert callable(ph.signals.correlation)
+    assert callable(ph.signals.time_delay)
+    assert callable(ph.room.impulse_response)
+    assert callable(ph.fluids.air)
+    assert ph.signals.time_delay.__module__ == "phonometry.signals._correlation"
+
+
+#: ``(module, name)``: a public-looking name a public module defined for its
+#: own use and its package never published. Each module lists what it
+#: publishes now, and these are private or gone. A sample, one per kind.
+_WITHDRAWN_4_0_MODULE_NAMES = [
+    # The band axes a module tabulated for itself: the results carry theirs.
+    ("phonometry.noise_control.hvac", "OCTAVE_BANDS"),
+    ("phonometry.room.enclosed_space_absorption", "OCTAVE_BANDS"),
+    ("phonometry.speech.sii", "BAND_CENTERS"),
+    ("phonometry.hearing.noise_induced_hearing_loss", "NIPTS_FREQUENCIES"),
+    # The NC curves are published by ``room`` under names that carry the unit.
+    ("phonometry.room.noise_criteria", "OCTAVE_BANDS"),
+    ("phonometry.room.noise_criteria", "NC_CURVES"),
+    ("phonometry.room.noise_criteria", "NC_INDICES"),
+    # Coefficients and defaults a function reads, in the function's module.
+    ("phonometry.speech.sii", "BAND_IMPORTANCE"),
+    ("phonometry.speech.sii", "VOCAL_EFFORTS"),
+    ("phonometry.vibration.human.multiple_shock", "MZ_MALE"),
+    ("phonometry.building.measurement.structure_borne_power", "REFERENCE_VELOCITY"),
+    ("phonometry.environment.assessment.impulsive_sound", "ADJUSTMENT_THRESHOLD"),
+    # Helpers a sibling calls.
+    ("phonometry.noise_control.duct_modes", "warn_above_plane_wave_limit"),
+    ("phonometry.environment.sources.wind_turbine", "critical_bandwidth"),
+    # Constants nothing read.
+    ("phonometry.electroacoustics.piston", "J1_FIRST_ZERO"),
+    ("phonometry.noise_control.duct_modes", "PLANE_WAVE_EIGENVALUE"),
+]
+
+
+@pytest.mark.parametrize(("module", "name"), _WITHDRAWN_4_0_MODULE_NAMES)
+def test_a_name_its_package_never_published_is_withdrawn(
+    module: str, name: str
+) -> None:
+    home = importlib.import_module(module)
+    assert name not in home.__all__
+    with pytest.raises(AttributeError, match=rf"has no attribute '{name}'"):
+        getattr(home, name)
+
+
+def test_the_nc_curves_are_published_with_their_unit() -> None:
+    """The one table a guide drew by hand, published by ``room``."""
+    assert ph.room.NC_OCTAVE_BANDS_HZ.shape == (10,)
+    assert ph.room.NC_CURVES_DB.shape == (ph.room.NC_RATINGS.size, 10)
+    np.testing.assert_allclose(
+        ph.room.nc_curve(40.0), ph.room.NC_CURVES_DB[ph.room.NC_RATINGS == 40.0][0]
+    )

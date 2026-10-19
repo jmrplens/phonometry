@@ -9,6 +9,14 @@ they travel through.
 
 from __future__ import annotations
 
+from ._seabed_reflection import (
+    BottomLossResult,
+    SeabedReflection,
+    bottom_reflection_loss,
+    critical_angle,
+    reflection_coefficient,
+    seabed_reflection,
+)
 from .closed_form import (
     PropagationLossResult,
     propagation_loss,
@@ -29,14 +37,6 @@ from .numerical import (
     normal_modes,
     parabolic_equation,
     ray_trace,
-)
-from .seabed_reflection import (
-    BottomLossResult,
-    SeabedReflection,
-    bottom_reflection_loss,
-    critical_angle,
-    reflection_coefficient,
-    seabed_reflection,
 )
 from .sound_speed import (
     SoundSpeedProfile,

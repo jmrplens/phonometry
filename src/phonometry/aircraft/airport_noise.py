@@ -52,6 +52,24 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+__all__ = [
+    "AerodromeAtmosphere",
+    "FlightSegmentState",
+    "FlyoverResult",
+    "NPDLevelResult",
+    "NoiseContourResult",
+    "duration_correction",
+    "engine_installation_correction",
+    "event_level",
+    "impedance_adjustment",
+    "lateral_attenuation",
+    "noise_contour",
+    "noise_fraction",
+    "npd_curve",
+    "npd_level",
+    "start_of_roll_directivity",
+]
+
 
 #: Engine-installation coefficients (a, b, c) by mounting (Eq. 4-15).
 _INSTALLATION = {

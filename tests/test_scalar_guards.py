@@ -258,7 +258,7 @@ _NAMED_GUARDS: list[tuple[str, str]] = [
     ("building.regulation.spain", "_positive"),
     ("electroacoustics.distortion", "_positive"),
     ("electroacoustics.swept_sine", "_positive"),
-    ("emission.sound_power_in_duct", "_as_scalar"),
+    ("emission._sound_power_in_duct", "_as_scalar"),
     ("environment.assessment.measurement", "_positive"),
     ("environment.assessment.measurement", "_finite"),
     ("environment.assessment.spain", "_finite"),
@@ -274,8 +274,8 @@ _NAMED_GUARDS: list[tuple[str, str]] = [
     ("metrology.sound_level_meter", "_scalar"),
     ("noise_control.valves_hydrodynamic", "_require_count"),
     ("psychoacoustics.quality.annoyance", "_nonnegative"),
-    ("psychoacoustics.quality.tone_audibility", "_positive"),
-    ("psychoacoustics.quality.tone_audibility", "_finite"),
+    ("psychoacoustics.quality._tone_audibility", "_positive"),
+    ("psychoacoustics.quality._tone_audibility", "_finite"),
     ("signals.spectra", "_positive"),
     ("underwater.acoustics", "_positive"),
     ("underwater.acoustics", "_finite"),
@@ -342,25 +342,25 @@ _OWN_SIGNATURES: list[tuple[str, str, Callable[[object], tuple[object, ...]], st
         "altitude",
     ),
     (
-        "emission.sound_power_hard_walled",
+        "emission._sound_power_hard_walled",
         "_check_uncertainty_inputs",
         lambda v: (v, 2.0),
         "sigma_omc_db",
     ),
     (
-        "emission.sound_power_in_situ",
+        "emission._sound_power_in_situ",
         "_checked_sigma_omc",
         lambda v: (v, 2.0),
         "sigma_omc_db",
     ),
     (
-        "emission.sound_power_intensity_points",
+        "emission._sound_power_intensity_points",
         "_nominal_band",
         lambda v: (v, "octave"),
         "frequencies",
     ),
     (
-        "emission.sound_power_reverberation",
+        "emission._sound_power_reverberation",
         "_room_inputs",
         lambda v: (v, 120.0, 20.0, 101.325),
         "volume",
@@ -403,13 +403,13 @@ _OWN_SIGNATURES: list[tuple[str, str, Callable[[object], tuple[object, ...]], st
         "repeatability_dof",
     ),
     (
-        "psychoacoustics.quality.tonality_ecma",
+        "psychoacoustics.quality._tonality_ecma",
         "_band_range",
         lambda v: (v, None),
         "f_low",
     ),
     (
-        "psychoacoustics.quality.tone_audibility",
+        "psychoacoustics.quality._tone_audibility",
         "_require_line_spacing",
         lambda v: (v,),
         "line_spacing_hz",
@@ -418,7 +418,7 @@ _OWN_SIGNATURES: list[tuple[str, str, Callable[[object], tuple[object, ...]], st
     ("signals.spectra", "_validate_confidence", lambda v: (v,), "confidence"),
     ("vibration.human.exposure", "_positive_fs", lambda v: (v,), "fs"),
     (
-        "vibration.structural.impact_mobility",
+        "vibration.structural._impact_mobility",
         "_pair",
         lambda v: ((v, 100.0), "band_hz"),
         "band_hz",
@@ -487,7 +487,7 @@ def test_a_frequency_pair_member_refuses_an_array(value: np.ndarray) -> None:
 
 @pytest.mark.parametrize("value", _one_element_arrays(100.0), ids=_ARRAY_IDS)
 def test_an_envelope_band_edge_refuses_an_array(value: np.ndarray) -> None:
-    guard = _helper("signals.envelope", "_bandpass_pre_filter")
+    guard = _helper("signals._envelope", "_bandpass_pre_filter")
     record = np.zeros(4096)
     with pytest.raises(ValueError, match="'band'"):
         guard(record, 48_000.0, (value, 1000.0))

@@ -299,26 +299,26 @@ plt.show()
 # By hand, mirroring what NCResult.plot() / RCResult.plot() draw. Either
 # family can also be built one curve at a time from the public helpers
 # room.nc_curve(index) and room.rc_curve(index), which is what the RC panel
-# below does; OCTAVE_BANDS is re-exported at the top level as well.
-from phonometry.room.noise_criteria import NC_CURVES, NC_INDICES, OCTAVE_BANDS
+# below does; room.NC_OCTAVE_BANDS_HZ holds the ten bands of both.
 nc, rc = room.noise_criterion(spl), room.room_criterion(spl)
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
 
-for row, idx in zip(NC_CURVES, NC_INDICES):
-    ax1.plot(OCTAVE_BANDS, row, color="#bbbbbb", lw=0.8)
-ax1.plot(OCTAVE_BANDS, spl, "o-", label="Measured")
-gov = spl[OCTAVE_BANDS == nc.governing_frequency][0]
+bands = room.NC_OCTAVE_BANDS_HZ   # the ten octave bands of ANSI/ASA S12.2 Table 1
+for row, idx in zip(room.NC_CURVES_DB, room.NC_RATINGS):
+    ax1.plot(bands, row, color="#bbbbbb", lw=0.8)
+ax1.plot(bands, spl, "o-", label="Measured")
+gov = spl[bands == nc.governing_frequency][0]
 ax1.plot([nc.governing_frequency], [gov], "D", color="#d62728")
 ax1.set_xscale("log"); ax1.set_title(f"NC-{nc.rating:g}")
 
 for idx in range(25, 51, 5):        # the Table D.1 family, RC-25 to RC-50
-    ax2.plot(OCTAVE_BANDS, room.rc_curve(float(idx)), color="#bbbbbb", lw=0.8)
+    ax2.plot(bands, room.rc_curve(float(idx)), color="#bbbbbb", lw=0.8)
 ref = rc.reference_curve
-low, high = OCTAVE_BANDS <= 500, OCTAVE_BANDS >= 1000
-ax2.plot(OCTAVE_BANDS, ref, "s--", color="#7f7f7f", label=f"Reference RC-{rc.rating}")
-ax2.fill_between(OCTAVE_BANDS[low], ref[low], ref[low] + 5, color="#ffbb78", alpha=0.35)
-ax2.fill_between(OCTAVE_BANDS[high], ref[high], ref[high] + 3, color="#aec7e8", alpha=0.45)
-ax2.plot(OCTAVE_BANDS, spl, "o-", label="Measured")
+low, high = bands <= 500, bands >= 1000
+ax2.plot(bands, ref, "s--", color="#7f7f7f", label=f"Reference RC-{rc.rating}")
+ax2.fill_between(bands[low], ref[low], ref[low] + 5, color="#ffbb78", alpha=0.35)
+ax2.fill_between(bands[high], ref[high], ref[high] + 3, color="#aec7e8", alpha=0.45)
+ax2.plot(bands, spl, "o-", label="Measured")
 ax2.set_xscale("log"); ax2.set_title(rc.label)
 plt.show()
 ```

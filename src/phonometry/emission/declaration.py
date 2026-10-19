@@ -50,6 +50,11 @@ if TYPE_CHECKING:
 
     from .._report.metadata import ReportMetadata
 
+__all__ = [
+    "NoiseEmissionDeclaration",
+    "OperatingModeDeclaration",
+]
+
 #: The two alternative forms of a noise emission declaration (ISO 4871 clause 4).
 DeclarationForm = Literal["dual-number", "single-number"]
 

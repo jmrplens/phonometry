@@ -49,6 +49,13 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+__all__ = [
+    "AmbientNoiseResult",
+    "ocean_ambient_noise",
+    "thermal_noise_spectrum",
+    "wind_noise_spectrum",
+]
+
 #: Boltzmann constant ``k`` (J/K).
 _BOLTZMANN = 1.380649e-23
 #: Underwater reference pressure ``p₀`` (Pa), i.e. 1 µPa (ISO 1683:2015 Table 2).

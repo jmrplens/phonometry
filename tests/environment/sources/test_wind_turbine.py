@@ -16,8 +16,8 @@ import pytest
 
 from phonometry.environment.sources.wind_turbine import (
     WindTurbineNoiseWarning,
+    _critical_bandwidth,
     apparent_sound_power_level,
-    critical_bandwidth,
     slant_distance,
     wind_turbine_tonality,
 )
@@ -25,12 +25,12 @@ from phonometry.environment.sources.wind_turbine import (
 
 def test_critical_bandwidth_formula() -> None:
     # 25 + 75*(1 + 1.4*0.25)^0.69 = 117.256 Hz at 500 Hz.
-    assert critical_bandwidth(500.0) == pytest.approx(117.256, abs=0.02)
+    assert _critical_bandwidth(500.0) == pytest.approx(117.256, abs=0.02)
 
 
 def test_critical_bandwidth_low_frequency_band() -> None:
     # A candidate tone in 20-70 Hz uses the fixed 20-120 Hz (100 Hz) band.
-    assert critical_bandwidth(50.0) == 100.0
+    assert _critical_bandwidth(50.0) == 100.0
 
 
 def test_slant_distance() -> None:

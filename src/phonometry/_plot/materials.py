@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
-    from ..materials.absorbers.airflow_resistance import StaticAirflowResult
+    from ..materials.absorbers._airflow_resistance import StaticAirflowResult
     from ..materials.absorbers.biot import BiotWavesResult
     from ..materials.absorbers.four_microphone import TransferMatrix
     from ..materials.absorbers.impedance_tube import ImpedanceTubeResult
@@ -619,7 +619,7 @@ def plot_static_airflow(
     the evaluation range and marks the reference evaluation point.
 
     :param result: A
-        :class:`~phonometry.materials.absorbers.airflow_resistance.StaticAirflowResult`.
+        :class:`~phonometry.materials.absorbers.StaticAirflowResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param kwargs: Forwarded to the fitted-curve ``plot`` call.
     :return: The axes.

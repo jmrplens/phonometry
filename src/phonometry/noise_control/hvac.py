@@ -29,7 +29,7 @@ serves both. Where they genuinely differ -- the end reflection, tabulated by
 Bies and given in closed form by Long -- both are selectable
 (``method="bies"`` or ``method="long"``) and neither replaces the other.
 
-:mod:`phonometry.noise_control.duct_path` chains these elements into the
+:func:`phonometry.noise_control.duct_path` chains these elements into the
 end-to-end fan-to-room calculation.
 
 .. note::
@@ -101,17 +101,49 @@ if TYPE_CHECKING:
 
     from .._report.metadata import ReportMetadata
 
+__all__ = [
+    "VDI2081_SPECTRAL_CORRECTION",
+    "HVACSpectrumResult",
+    "HVACWarning",
+    "air_terminal_damper_correction",
+    "air_terminal_velocity_limit",
+    "blade_passing_frequency",
+    "diffuser_sound_power",
+    "elbow_insertion_loss",
+    "end_reflection_loss",
+    "end_reflection_loss_closed_form",
+    "equivalent_diameter",
+    "fan_casing_attenuation",
+    "fan_efficiency_correction",
+    "fan_sound_power",
+    "flexible_duct_insertion_loss",
+    "flow_noise_bend",
+    "flow_noise_straight_duct",
+    "flow_noise_straight_duct_overall",
+    "lined_circular_duct_attenuation",
+    "lined_rectangular_duct_attenuation",
+    "octave_band_limits",
+    "plenum_attenuation",
+    "room_effect",
+    "section_change_loss",
+    "silencer_self_noise",
+    "split_loss",
+    "splitter_silencer_insertion_loss",
+    "unlined_circular_duct_attenuation",
+    "unlined_rectangular_duct_attenuation",
+]
+
 _C_AIR = 343.0
 
 #: The eight octave bands of the ASHRAE / Long duct-borne noise calculation, Hz.
-OCTAVE_BANDS: NDArray[np.float64] = read_only(
+_OCTAVE_BANDS: NDArray[np.float64] = read_only(
     np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
 )
 
 # Half an octave, in log2 (octave) units: the half-spacing of adjacent
 # octave-band centres, used as the "same band" criterion so the blade frequency
 # increment C_BFI (Long Table 13.7) lands in exactly the one band of
-# OCTAVE_BANDS that matches the target band.
+# _OCTAVE_BANDS that matches the target band.
 _HALF_OCTAVE = 0.5
 
 # Imperial-to-SI conversions. The Reynolds regressions and the ASHRAE fan
@@ -541,7 +573,7 @@ _DAMPER_CORRECTION: dict[str, NDArray[np.float64]] = {
 
 
 def _frequencies(frequencies: ArrayLike) -> NDArray[np.float64]:
-    # A copy, so a result never hands out OCTAVE_BANDS (read-only) or the
+    # A copy, so a result never hands out _OCTAVE_BANDS (read-only) or the
     # caller's own array.
     f = np.array(frequencies, dtype=np.float64, ndmin=1)
     if f.ndim != 1 or f.size == 0:
@@ -555,7 +587,7 @@ def _frequencies(frequencies: ArrayLike) -> NDArray[np.float64]:
 
 def _octave_slots(
     frequencies: ArrayLike | None,
-    bands: NDArray[np.float64] = OCTAVE_BANDS,
+    bands: NDArray[np.float64] = _OCTAVE_BANDS,
 ) -> tuple[NDArray[np.float64], NDArray[np.intp]]:
     """Map requested frequencies onto tabulated octave-band slots.
 
@@ -1512,7 +1544,7 @@ def fan_sound_power(  # noqa: PLR0913
     :param relative_flow: **VDI 2081 only.** Duty as a fraction of the best
         efficiency point, ``\dot{V} / \dot{V}_\mathrm{opt}`` (default 1).
     :param frequencies: Octave-band centres, Hz; ``None`` (default) uses the
-        63 Hz to 8 kHz bands of :data:`OCTAVE_BANDS`.
+        eight octave bands from 63 Hz to 8 kHz.
     :return: An :class:`HVACSpectrumResult` of the band sound power level,
         dB re 1e-12 W.
     """
@@ -1560,10 +1592,10 @@ def fan_sound_power(  # noqa: PLR0913
     band, c_bfi = _FAN_BLADE_INCREMENT[kind]
     if blade_frequency is not None:
         f_bp = require_positive(blade_frequency, "blade_frequency")
-        nearest = int(np.argmin(np.abs(np.log2(f_bp / OCTAVE_BANDS))))
-        band = float(OCTAVE_BANDS[nearest])
+        nearest = int(np.argmin(np.abs(np.log2(f_bp / _OCTAVE_BANDS))))
+        band = float(_OCTAVE_BANDS[nearest])
     increment = np.where(
-        np.abs(np.log2(OCTAVE_BANDS / band)) < _HALF_OCTAVE, c_bfi, 0.0
+        np.abs(np.log2(_OCTAVE_BANDS / band)) < _HALF_OCTAVE, c_bfi, 0.0
     )
 
     lw = _FAN_LEVEL_CORRECTION[kind][idx] + duty + c_eff + increment[idx]
@@ -1600,7 +1632,7 @@ def octave_band_limits(
     :param a_weighted_limit_db: The A-weighted level the room is required to
         meet ``L_A``, dB.
     :param frequencies: Octave-band centres, Hz; ``None`` (default) uses the
-        63 Hz to 8 kHz bands of :data:`OCTAVE_BANDS`.
+        eight octave bands from 63 Hz to 8 kHz.
     :return: An :class:`HVACSpectrumResult` of the per-band limit, dB.
     """
     f, idx = _octave_slots(frequencies)
@@ -1631,8 +1663,8 @@ def fan_casing_attenuation(
     approximate: real values depend strongly on the gauge and construction of
     the housing.
 
-    :param frequencies: Octave-band centres, Hz; ``None`` (default) uses
-        :data:`OCTAVE_BANDS`.
+    :param frequencies: Octave-band centres, Hz; ``None`` (default) uses the eight
+        octave bands from 63 Hz to 8 kHz.
     :return: An :class:`HVACSpectrumResult` of the attenuation, dB.
     """
     f, idx = _octave_slots(frequencies)
@@ -1966,8 +1998,8 @@ def unlined_circular_duct_attenuation(
     prints a dash. That is the substantive difference between the two accounts
     of this element, and it is why ``diameter_m`` is required there and not here.
 
-    :param frequencies: Octave-band centres, Hz; ``None`` uses
-        :data:`OCTAVE_BANDS`.
+    :param frequencies: Octave-band centres, Hz; ``None`` uses the eight
+        octave bands from 63 Hz to 8 kHz.
     :param length: Duct run length, m.
     :param diameter_m: **VDI 2081 only.** Internal diameter, m, which selects the
         Table 5 row. The table stops at 1,00 m.
@@ -1982,7 +2014,7 @@ def unlined_circular_duct_attenuation(
                 "duct by its bore, where Long Table 14.1 does not."
             )
             raise ValueError(msg)
-        bands = _frequencies(OCTAVE_BANDS if frequencies is None else frequencies)
+        bands = _frequencies(_OCTAVE_BANDS if frequencies is None else frequencies)
         bore = require_positive(diameter_m, "diameter_m")
         return HVACSpectrumResult(
             frequencies=bands,
@@ -2028,8 +2060,8 @@ def lined_rectangular_duct_attenuation(
     on top (``include_unlined=True``, which Long recommends for rectangular
     ducts). Flanking limits the total to 40 dB.
 
-    :param frequencies: Octave-band centres, Hz; ``None`` uses
-        :data:`OCTAVE_BANDS`.
+    :param frequencies: Octave-band centres, Hz; ``None`` uses the eight
+        octave bands from 63 Hz to 8 kHz.
     :param width_m: Duct width, m.
     :param height_m: Duct height, m.
     :param length: Duct run length ``l``, m.
@@ -2080,8 +2112,8 @@ def lined_circular_duct_attenuation(
     to 40 dB. The unlined contribution is so small for circular ducts that Long
     ignores it.
 
-    :param frequencies: Octave-band centres, Hz; ``None`` uses
-        :data:`OCTAVE_BANDS`.
+    :param frequencies: Octave-band centres, Hz; ``None`` uses the eight
+        octave bands from 63 Hz to 8 kHz.
     :param diameter_m: Internal diameter ``d``, m.
     :param length: Duct run length ``l``, m.
     :param lining_thickness_m: Lining thickness ``t``, m.
@@ -2425,8 +2457,8 @@ def splitter_silencer_insertion_loss(
     ignores the entrance and exit losses of the unit. The unit's regenerated
     noise is a separate quantity, :func:`silencer_self_noise`.
 
-    :param frequencies: Octave-band centres, Hz; ``None`` (default) uses
-        :data:`OCTAVE_BANDS`.
+    :param frequencies: Octave-band centres, Hz; ``None`` (default) uses the eight
+        octave bands from 63 Hz to 8 kHz.
     :param height_m: Height of the silencer face, m (the airway dimension the
         splitters do not divide).
     :param length: Length of the silencer in the flow direction, m.
@@ -2504,8 +2536,8 @@ def silencer_self_noise(
     the actual face area before it is used; this estimate needs no such
     correction because the face size enters through ``N`` and ``H``.
 
-    :param frequencies: Octave-band centres, Hz; ``None`` uses
-        :data:`OCTAVE_BANDS`.
+    :param frequencies: Octave-band centres, Hz; ``None`` uses the eight
+        octave bands from 63 Hz to 8 kHz.
     :param airway_velocity: Velocity ``V`` in the splitter airway, m/s.
     :param passages: Number of air passages ``N`` between the splitters.
     :param height_m: Silencer height ``H`` (or circumference, if round), m.
@@ -2543,7 +2575,7 @@ def silencer_self_noise(
                 "form takes."
             )
             raise ValueError(msg)
-        bands = _frequencies(OCTAVE_BANDS if frequencies is None else frequencies)
+        bands = _frequencies(_OCTAVE_BANDS if frequencies is None else frequencies)
         gap = require_positive(airway_width, "airway_width")
         return HVACSpectrumResult(
             frequencies=bands,
@@ -2634,8 +2666,8 @@ def diffuser_sound_power(
     Several identical devices serving the same room add :math:`10 \log_{10} n`,
     which is what ``n_devices`` applies.
 
-    :param frequencies: Octave-band centres, Hz; ``None`` uses
-        :data:`OCTAVE_BANDS`.
+    :param frequencies: Octave-band centres, Hz; ``None`` uses the eight
+        octave bands from 63 Hz to 8 kHz.
     :param face_area: Cross-sectional face area ``S_\mathrm{G}`` of one device, m2.
     :param volume_flow: Volume flow ``Q`` through one device, m3/s.
     :param pressure_drop_pa: Static pressure drop ``dP`` across the device, Pa.
@@ -2647,7 +2679,7 @@ def diffuser_sound_power(
     :raises ValueError: If a dimension is not positive, ``n_devices`` is not a
         positive integer or ``shape`` is unknown.
     """
-    f = OCTAVE_BANDS if frequencies is None else _frequencies(frequencies)
+    f = _OCTAVE_BANDS if frequencies is None else _frequencies(frequencies)
     area_ft2 = require_positive(face_area, "face_area") / _M_PER_FT**2
     flow_cfm = require_positive(volume_flow, "volume_flow") / _M3S_PER_CFM
     drop_in_wg = require_positive(pressure_drop_pa, "pressure_drop_pa") / _PA_PER_IN_WG

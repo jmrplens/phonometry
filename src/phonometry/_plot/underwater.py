@@ -34,6 +34,10 @@ if TYPE_CHECKING:
         AuditoryWeightingResult,
         WeightedExposureResult,
     )
+    from ..underwater.propagation._seabed_reflection import (
+        BottomLossResult,
+        SeabedReflection,
+    )
     from ..underwater.propagation.closed_form import PropagationLossResult
     from ..underwater.propagation.numerical import (
         EigenrayResult,
@@ -41,10 +45,6 @@ if TYPE_CHECKING:
         NormalModeResult,
         ParabolicEquationResult,
         RayTraceResult,
-    )
-    from ..underwater.propagation.seabed_reflection import (
-        BottomLossResult,
-        SeabedReflection,
     )
     from ..underwater.propagation.sound_speed import SoundSpeedProfile
     from ..underwater.propagation.weston_regimes import WestonPropagationResult
@@ -455,7 +455,7 @@ def plot_bottom_loss(
 ) -> Axes:
     """Bottom reflection loss versus grazing angle, marking the critical angle.
 
-    :param result: A :class:`~phonometry.underwater.propagation.seabed_reflection.BottomLossResult`.
+    :param result: A :class:`~phonometry.underwater.propagation.BottomLossResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the bottom-loss ``plot`` call.
@@ -500,7 +500,7 @@ def plot_seabed_reflection(
     Draws ``|R|`` on a linear grazing-angle axis, marking the critical angle
     when the sediment is faster than the water.
 
-    :param result: A :class:`~phonometry.underwater.propagation.seabed_reflection.SeabedReflection`.
+    :param result: A :class:`~phonometry.underwater.propagation.SeabedReflection`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the magnitude ``plot`` call.

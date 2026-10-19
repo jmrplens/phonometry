@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
-    from phonometry.noise_control.duct_path import DuctPathResult
+    from phonometry.noise_control import DuctPathResult
     from phonometry.noise_control.enclosures import EnclosureResult
     from phonometry.noise_control.hvac import HVACSpectrumResult
     from phonometry.noise_control.room_to_room import RoomToRoomResult

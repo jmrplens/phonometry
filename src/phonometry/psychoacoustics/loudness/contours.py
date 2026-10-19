@@ -21,6 +21,14 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+__all__ = [
+    "EqualLoudnessContours",
+    "equal_loudness_contour",
+    "equal_loudness_contours",
+    "hearing_threshold",
+    "loudness_level",
+]
+
 # ISO 226:2023 Table 1 (p. 4): frequency Hz -> (alpha_f, L_U dB, T_f dB).
 # alpha_f: exponent for loudness perception; L_U: magnitude of the linear
 # transfer function normalized at 1 kHz; T_f: threshold of hearing.

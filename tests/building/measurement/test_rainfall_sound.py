@@ -32,7 +32,7 @@ import pytest
 import reference_data as ref
 
 from phonometry import building
-from phonometry.building.measurement.rainfall_sound import RainfallSoundResult
+from phonometry.building.measurement import RainfallSoundResult
 
 #: The 18 bands of Formula (K.2), 100 Hz to 5000 Hz.
 _BANDS = [

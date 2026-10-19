@@ -1416,7 +1416,7 @@ class SourceLocationPlan(OwnsArrays):
         """
         if self.standard != _PART2_STANDARD:
             return None
-        from .sound_power_special_room import _sm_class
+        from ._sound_power_special_room import _sm_class
 
         return tuple(_sm_class(float(s)) for s in self.standard_deviation_db)
 
@@ -1427,7 +1427,7 @@ class SourceLocationPlan(OwnsArrays):
             self.a_weighted_standard_deviation_db
         ):
             return None
-        from .sound_power_special_room import _sm_class
+        from ._sound_power_special_room import _sm_class
 
         return _sm_class(float(self.a_weighted_standard_deviation_db))
 

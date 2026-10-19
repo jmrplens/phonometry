@@ -71,6 +71,18 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+__all__ = [
+    "MeanGroundPlaneResult",
+    "TerrainScreeningResult",
+    "atmospheric_adjustment",
+    "diffraction_attenuation",
+    "ground_effect_adjustment",
+    "mean_flow_resistivity",
+    "mean_ground_plane",
+    "spherical_spreading_adjustment",
+    "terrain_screening_adjustment",
+]
+
 #: Hemisphere reference distance, in metres (ECAC Doc 32 §A.3.2 / Eq. 24).
 _RH = 60.0
 #: Speed of sound at ICAO reference conditions, in m/s (Eq. 22).

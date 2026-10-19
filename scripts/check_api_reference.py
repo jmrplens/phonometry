@@ -59,6 +59,26 @@ public module and fails on five things:
   modules both import (``leak_ratio``, shared by ISO 11546 and ISO 11957) is
   published by one of them.
 
+The **modules** themselves are held to two more rules by
+:func:`module_problems`, because a module is an address too:
+
+* no public module shares its name with something else its package holds.
+  ``phonometry.signals`` publishes the function ``correlation``, so a module
+  ``signals/correlation.py`` is hidden behind it: ``import
+  phonometry.signals.correlation as m`` binds the function, and
+  ``signals.correlation.time_delay`` raises ``AttributeError`` although the
+  reference has a page under that address. Such a module is private
+  (``_correlation.py``) and its names are reached through the package;
+* every public module declares ``__all__``, and the list is the whole truth.
+  A module without one says nothing about which of its names are public, so a
+  constant it defines for its own use looks as public as its functions, and
+  none of the rules above can see it. A module with one lists every name it
+  defines that its package publishes, and every other public-looking name it
+  defines is either a typing construct (a type alias, a ``TypeVar``, a
+  ``Protocol``, none of them published) or takes a leading underscore. An
+  exception is keyed by location in :data:`UNLISTED_EXEMPTIONS`, with its
+  reason, and an entry that no longer applies is reported.
+
 The **version row** shows the package version as a literal
 (``phonometry.__version__  # '3.3.0'``). Nothing else re-reads that literal
 after a release bump, so it is checked against the installed
@@ -71,7 +91,9 @@ Usage::
 
 Exit status 0 when every public name has a row that says what it is, every
 plain-name row names something public, every public name has one address and
-none is an alias, and the page shows the current version; 1 otherwise.
+none is an alias, every public module is reached by its name and declares an
+``__all__`` that lists all it publishes, and the page shows the current
+version; 1 otherwise.
 """
 
 from __future__ import annotations
@@ -87,12 +109,16 @@ import pkgutil
 import re
 import sys
 from collections.abc import Collection, Mapping
-from typing import TYPE_CHECKING, TypeAliasType, get_origin
+from typing import TYPE_CHECKING, TypeAliasType, TypeVar, get_origin
 
 from api_taxonomy import public_names
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from types import ModuleType
+
+#: What a package held under a name before anything was imported there.
+_NOTHING = object()
 
 #: A backticked name inside a table cell, e.g. ```leq``` or ```.plot()```.
 _BACKTICKED = re.compile(r"`([^`]+)`")
@@ -343,7 +369,7 @@ def surface_problems(domains: list[ModuleType]) -> list[str]:
         for info in pkgutil.walk_packages(domain.__path__, domain.__name__ + "."):
             if not _is_public_path(info.name):
                 continue
-            module = importlib.import_module(info.name)
+            module, _ = _import_public(info.name)
             listed = getattr(module, "__all__", None)
             if listed is None:
                 continue
@@ -389,6 +415,296 @@ def _listing_problem(
     if listed_by is not None and name in listed_by:
         return f"which {listed_by[name]} lists too"
     return ""
+
+
+#: A public-looking name a public module defines and does not list, allowed
+#: here for a reason, keyed ``"<module>.<name>"``. An entry whose name the
+#: module no longer defines unlisted is reported, so the table cannot go stale.
+UNLISTED_EXEMPTIONS: Mapping[str, str] = {}
+
+
+def defined_names(module: ModuleType) -> list[str]:
+    """Every name ``module``'s own statements bind at import, in source order.
+
+    A ``def``, a ``class``, an assignment or a ``type`` statement at module
+    level, also inside an ``if`` or a ``try`` that runs; an import binds a name
+    too but defines nothing, and an ``if TYPE_CHECKING:`` block binds nothing a
+    caller can reach. An annotation without a value binds nothing either.
+
+    :param module: An imported module whose source is available.
+    :return: The bound names, each once, in the order the source binds them.
+    """
+    try:
+        tree = ast.parse(inspect.getsource(module))
+    except (OSError, TypeError):
+        return []
+    found: dict[str, None] = {}
+    statements = list(tree.body)
+    while statements:
+        statement = statements.pop(0)
+        if isinstance(statement, (ast.If, ast.Try)):
+            if not _is_type_checking_block(statement):
+                nested = [*statement.body, *statement.orelse]
+                if isinstance(statement, ast.Try):
+                    nested += [s for h in statement.handlers for s in h.body]
+                    nested += statement.finalbody
+                statements[:0] = nested
+        elif isinstance(
+            statement, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+        ):
+            found[statement.name] = None
+        elif isinstance(statement, ast.TypeAlias):
+            found[statement.name.id] = None
+        elif isinstance(statement, ast.AnnAssign) and statement.value is not None:
+            if isinstance(statement.target, ast.Name):
+                found[statement.target.id] = None
+        elif isinstance(statement, ast.Assign):
+            for target in statement.targets:
+                for node in ast.walk(target):
+                    if isinstance(node, ast.Name):
+                        found[node.id] = None
+    return list(found)
+
+
+def is_typing_construct(obj: object) -> bool:
+    """Whether *obj* only describes types: an alias, a ``TypeVar``, a ``Protocol``.
+
+    None of them is published (an alias reads as its definition in the
+    reference), and none is a value or a callable a reader would reach for.
+
+    :param obj: The object a module-level name resolves to.
+    """
+    return (
+        is_type_alias(obj)
+        or isinstance(obj, TypeVar)
+        or (inspect.isclass(obj) and bool(getattr(obj, "_is_protocol", False)))
+    )
+
+
+def module_problems(domains: list[ModuleType]) -> list[str]:
+    """Every public module a reader cannot reach by its name, or that hides what it holds.
+
+    A module whose name its package gives to something else (a function, a
+    class, a constant) is reachable only by a ``from`` import of its file
+    path: the package attribute of that name is the other object, so ``import
+    a.b.c as m`` binds it and ``a.b.c.name`` fails. A public module with no
+    ``__all__`` publishes nothing it can be held to. And a module that does
+    declare one says what it publishes only if the list is the whole truth: a
+    name it defines and its package publishes is in it, and a public-looking
+    name it defines is in it or is a typing construct (a type alias, a
+    ``TypeVar`` or a ``Protocol``, none of which is published). Anything else
+    a module defines for its own use takes a leading underscore. The domain
+    packages are walked too: each is a public module like any other.
+
+    :param domains: The domain packages the top level publishes.
+    :return: One message per offending module or name, in walking order.
+    """
+    problems: list[str] = []
+    seen_exemptions: set[str] = set()
+    for domain in domains:
+        for name, module, held in _public_modules(domain):
+            parent_name, _, leaf = name.rpartition(".")
+            parent = sys.modules.get(parent_name)
+            binding = _package_binding(parent, leaf)
+            if not inspect.ismodule(held):
+                kind = "class" if inspect.isclass(held) else type(held).__name__
+                problems.append(
+                    f"{name} is hidden behind {parent_name}.{leaf}, a {kind}: "
+                    f"`import {name}` binds the {kind}, so the module is private "
+                    f"(_{leaf}) and its names are reached through {parent_name}"
+                )
+            elif binding is not None:
+                problems.append(
+                    f"{name} is hidden behind {parent_name}.{leaf}: the package "
+                    f"binds {leaf!r} by `{binding}`, so the module is private "
+                    f"(_{leaf}) and its names are reached through {parent_name}"
+                )
+            if "__all__" not in vars(module):
+                problems.append(
+                    f"{name} declares no __all__, so nothing says which of its "
+                    "names are public"
+                )
+                continue
+            problems.extend(
+                _unlisted_problems(name, module, parent, parent_name, seen_exemptions)
+            )
+    problems.extend(
+        f"UNLISTED_EXEMPTIONS names {key}, which is no longer defined unlisted; "
+        "drop the entry"
+        for key in UNLISTED_EXEMPTIONS
+        if key not in seen_exemptions
+        and any(key.startswith(d.__name__ + ".") for d in domains)
+    )
+    return problems
+
+
+def _public_modules(
+    domain: ModuleType,
+) -> Iterator[tuple[str, ModuleType, object]]:
+    """Every public module of ``domain`` with what its package held under its name.
+
+    The package attribute is read *before* the module is imported, because
+    importing a submodule for the first time binds the package attribute of its
+    name to the module: read afterwards, a function the package published under
+    that name would already have been replaced, and the hidden module would
+    pass. When the import did replace something, the package gets it back, so
+    walking the tree leaves the library as it found it.
+
+    :param domain: A domain package the top level publishes.
+    :return: ``(dotted name, module, object the package held)`` in walking
+        order, the domain itself first; the held object is the module when
+        the package held nothing under that name.
+    """
+    yield domain.__name__, domain, domain
+    for info in pkgutil.walk_packages(domain.__path__, domain.__name__ + "."):
+        if _is_public_path(info.name):
+            module, held = _import_public(info.name)
+            yield info.name, module, held
+
+
+def _import_public(name: str) -> tuple[ModuleType, object]:
+    """Import the module ``name`` and say what its package held under its name.
+
+    :param name: A dotted module name whose package is already imported.
+    :return: The module, and the object the package held under the module's
+        last name component before the import (the module itself when it held
+        nothing). An object the import replaced is put back on the package.
+    """
+    parent_name, _, leaf = name.rpartition(".")
+    parent = sys.modules.get(parent_name)
+    before = vars(parent).get(leaf, _NOTHING) if parent is not None else _NOTHING
+    module = importlib.import_module(name)
+    if before is _NOTHING:
+        return module, module
+    if before is not module and getattr(parent, leaf, None) is module:
+        setattr(parent, leaf, before)
+    return module, before
+
+
+def _package_binding(parent: ModuleType | None, leaf: str) -> str | None:
+    """The statement of ``parent``'s ``__init__`` that gives ``leaf`` to something else.
+
+    Reading the package source closes what reading its attributes cannot: a
+    module that some other import reached first has already replaced the
+    published object, and then the attribute shows the module. Only importing
+    the submodule itself (``from . import leaf``, ``import pkg.leaf``) binds
+    the name to it; any other import, assignment, function or class of that
+    name hides it.
+
+    :param parent: The package, or ``None`` for a top-level module.
+    :param leaf: The last component of the module's dotted name.
+    :return: The offending statement as source text, or ``None``.
+    """
+    source_path = getattr(parent, "__file__", None)
+    if parent is None or source_path is None or not source_path.endswith("__init__.py"):
+        return None
+    tree = ast.parse(pathlib.Path(source_path).read_text(encoding="utf-8"))
+    for node in _module_level_statements(tree.body):
+        binding = _binding_other_than_submodule(node, parent.__name__, leaf)
+        if binding is not None:
+            return binding
+    return None
+
+
+def _module_level_statements(body: list[ast.stmt]) -> Iterator[ast.stmt]:
+    """The statements that run at import time, inside ``if``/``try``/``with`` too."""
+    for node in body:
+        yield node
+        for field in ("body", "orelse", "finalbody", "handlers"):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                break
+            for child in getattr(node, field, ()):
+                if isinstance(child, ast.ExceptHandler):
+                    yield from _module_level_statements(child.body)
+                elif isinstance(child, ast.stmt):
+                    yield from _module_level_statements([child])
+
+
+def _binding_other_than_submodule(
+    node: ast.stmt, package: str, leaf: str
+) -> str | None:
+    """How ``node`` binds ``leaf`` in ``package`` to anything but the submodule.
+
+    :param node: A statement of the package's ``__init__``.
+    :param package: The package's dotted name.
+    :param leaf: The name of one of its submodules.
+    :return: The binding written as source (``from ._impl import probe``,
+        ``def probe``, ``probe = ...``), or ``None`` when ``node`` leaves the
+        name alone or binds it to the submodule itself.
+    """
+    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        return f"def {leaf}" if node.name == leaf else None
+    if isinstance(node, ast.ClassDef):
+        return f"class {leaf}" if node.name == leaf else None
+    if isinstance(node, ast.ImportFrom):
+        source = "." * node.level + (node.module or "")
+        submodule_itself = source in {".", package}
+        for alias in node.names:
+            if (alias.asname or alias.name) == leaf and not (
+                submodule_itself and alias.name == leaf
+            ):
+                renamed = f" as {alias.asname}" if alias.asname else ""
+                return f"from {source} import {alias.name}{renamed}"
+        return None
+    if isinstance(node, ast.Import):
+        for alias in node.names:
+            if alias.asname == leaf:
+                return f"import {alias.name} as {leaf}"
+        return None
+    targets: list[ast.expr] = []
+    if isinstance(node, ast.Assign):
+        targets = list(node.targets)
+    elif isinstance(node, (ast.AnnAssign, ast.AugAssign)):
+        targets = [node.target]
+    if any(
+        isinstance(sub, ast.Name) and sub.id == leaf
+        for target in targets
+        for sub in ast.walk(target)
+    ):
+        return f"{leaf} = ..."
+    return None
+
+
+def _unlisted_problems(
+    name: str,
+    module: ModuleType,
+    parent: ModuleType | None,
+    parent_name: str,
+    seen_exemptions: set[str],
+) -> list[str]:
+    """The names ``module`` defines that its ``__all__`` should say and does not.
+
+    :param name: The module's dotted name.
+    :param module: A public module that declares ``__all__``.
+    :param parent: The package it belongs to, if any.
+    :param parent_name: That package's dotted name.
+    :param seen_exemptions: Collects the :data:`UNLISTED_EXEMPTIONS` keys used.
+    :return: One message per name, in source order.
+    """
+    listed = set(module.__all__)
+    published = set(getattr(parent, "__all__", ()))
+    problems: list[str] = []
+    for defined in defined_names(module):
+        if defined.startswith("_") or defined in listed:
+            continue
+        obj = getattr(module, defined, None)
+        if defined in published and getattr(parent, defined, None) is obj:
+            problems.append(
+                f"{name} defines {defined!r}, which {parent_name} publishes, and "
+                "its __all__ does not list it"
+            )
+            continue
+        if is_typing_construct(obj):
+            continue
+        key = f"{name}.{defined}"
+        if key in UNLISTED_EXEMPTIONS:
+            seen_exemptions.add(key)
+            continue
+        problems.append(
+            f"{name} defines {defined!r} and its __all__ does not list it; a "
+            f"name its package does not publish is private (_{defined})"
+        )
+    return problems
 
 
 def version_problems(markdown: str, version: str) -> list[str]:
@@ -465,6 +781,16 @@ def main() -> int:
         for problem in surface:
             print(f"  - {problem}")
         return 1
+    modules = module_problems(domains)
+    if modules:
+        print(
+            f"{len(modules)} public module problem(s); a module is never hidden "
+            "behind a name of its package, and every public module says what it "
+            "publishes:"
+        )
+        for problem in modules:
+            print(f"  - {problem}")
+        return 1
     problems = version_problems(markdown, phonometry.__version__)
     if problems:
         print(
@@ -478,7 +804,8 @@ def main() -> int:
     print(
         f"docs/reference/api/index.md covers all {len(public)} public names, "
         f"says what each of them is, and shows version {phonometry.__version__}; "
-        "every public name has one address and none is a type alias."
+        "every public name has one address and none is a type alias, and every "
+        "public module is reached by its name and lists all it publishes."
     )
     return 0
 

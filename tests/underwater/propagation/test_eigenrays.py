@@ -229,7 +229,7 @@ def test_a_lossy_seabed_charges_R_at_each_arrivals_own_angle_as_printed() -> Non
     every magnitude in this test untouched and turn every below-critical
     phase backwards. The geometry, again, must not move at all.
     """
-    from phonometry.underwater.propagation.seabed_reflection import (
+    from phonometry.underwater.propagation import (
         reflection_coefficient,
     )
 

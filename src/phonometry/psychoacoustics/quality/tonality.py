@@ -34,6 +34,13 @@ if TYPE_CHECKING:
 
     from ...io._signal import Signal
 
+__all__ = [
+    "TonalityWarning",
+    "ToneAssessment",
+    "prominence_ratio",
+    "tone_to_noise_ratio",
+]
+
 
 class TonalityWarning(PhonometryWarning):
     """Warns about biased tonality estimates (e.g. coarse FFT resolution)."""

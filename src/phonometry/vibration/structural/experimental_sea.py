@@ -5,9 +5,9 @@ energies (Norton & Karczub Ch. 6).
 Statistical energy analysis (SEA) has two routes to the coupling loss factor
 ``eta_ij``. The **predictive** route derives it from a wave transmission
 coefficient at the junction, which is what
-:func:`~phonometry.vibration.structural.junction_transmission.coupling_loss_factor` does
+:func:`~phonometry.vibration.structural.coupling_loss_factor` does
 with the closed-form coefficients of
-:func:`~phonometry.vibration.structural.junction_transmission.junction_transmission`. The
+:func:`~phonometry.vibration.structural.junction_transmission`. The
 **experimental** route, implemented here, inverts the steady-state power
 balance from *measured* subsystem energies: it needs no model of the junction
 at all, and it is the only route open for real joints (welds, bolt rows,

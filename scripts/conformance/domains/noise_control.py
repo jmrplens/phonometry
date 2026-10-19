@@ -201,11 +201,11 @@ def _chk_split_loss() -> Outcome:
     "Fan to room, 8 octave bands -> 52/42/30/18/9/-2/-2/-1 dB at the receiver",
 )
 def _chk_duct_path_table_14_9() -> Outcome:
-    from phonometry.noise_control.duct_path import DuctElement, duct_path
-    from phonometry.noise_control.hvac import OCTAVE_BANDS
+    from phonometry.noise_control import DuctElement, duct_path
+    from phonometry.noise_control.hvac import _OCTAVE_BANDS
 
     res = duct_path(
-        OCTAVE_BANDS,
+        _OCTAVE_BANDS,
         [90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0],
         [
             DuctElement(

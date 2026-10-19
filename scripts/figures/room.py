@@ -1614,7 +1614,7 @@ def generate_enclosed_space_absorption(output_dir: str) -> None:
     """EN 12354-6: absorption area and reverberation time of a room."""
     print("Generating enclosed_space_absorption.png...")
     from phonometry import room
-    from phonometry.room.enclosed_space_absorption import OCTAVE_BANDS
+    from phonometry.room.enclosed_space_absorption import _OCTAVE_BANDS
 
     # A 5 x 4 x 3 m office (60 m3): hard plaster walls and floor; the ceiling is
     # either bare plaster or lined with an absorbing acoustic tile.
@@ -1630,7 +1630,7 @@ def generate_enclosed_space_absorption(output_dir: str) -> None:
     )
 
     _fig, (ax_a, ax_t) = plt.subplots(1, 2, figsize=(12.5, 5.4))
-    freq = OCTAVE_BANDS
+    freq = _OCTAVE_BANDS
     labels = [f"{f:g}" if f < 1000 else f"{f / 1000:g}k" for f in freq]
 
     for res, colour, name in (
@@ -1698,7 +1698,7 @@ def generate_room_noise_criteria(output_dir: str) -> None:
     """ANSI S12.2-2019: NC tangency rating and RC Mark II classification."""
     print("Generating room_noise_criteria.png...")
     from phonometry import room
-    from phonometry.room.noise_criteria import NC_CURVES, NC_INDICES, OCTAVE_BANDS
+    from phonometry.room import NC_CURVES_DB, NC_OCTAVE_BANDS_HZ, NC_RATINGS
 
     # A ventilation-dominated room spectrum: the low-frequency bands rise well
     # above the sloped RC reference (a rumble tag under RC Mark II) while the
@@ -1725,17 +1725,22 @@ def generate_room_noise_criteria(output_dir: str) -> None:
     }
 
     # --- Left: NC curves + tangency rating. ---
-    for row, idx in zip(NC_CURVES, NC_INDICES, strict=True):
-        ax_nc.plot(OCTAVE_BANDS, row, color=COLOR_GRID, lw=0.8, zorder=1)
+    for row, idx in zip(NC_CURVES_DB, NC_RATINGS, strict=True):
+        ax_nc.plot(NC_OCTAVE_BANDS_HZ, row, color=COLOR_GRID, lw=0.8, zorder=1)
         ax_nc.annotate(
             f"{idx:.0f}",
-            (OCTAVE_BANDS[-1], row[-1]),
+            (NC_OCTAVE_BANDS_HZ[-1], row[-1]),
             **family_label,
         )
     ax_nc.plot(
-        OCTAVE_BANDS, spectrum, "o-", color=COLOR_PRIMARY, zorder=3, label="Measured"
+        NC_OCTAVE_BANDS_HZ,
+        spectrum,
+        "o-",
+        color=COLOR_PRIMARY,
+        zorder=3,
+        label="Measured",
     )
-    gov = spectrum[OCTAVE_BANDS == nc.governing_frequency][0]
+    gov = spectrum[NC_OCTAVE_BANDS_HZ == nc.governing_frequency][0]
     ax_nc.plot(
         [nc.governing_frequency],
         [gov],
@@ -1746,12 +1751,12 @@ def generate_room_noise_criteria(output_dir: str) -> None:
         label=f"Tangent @ {nc.governing_frequency:g} Hz",
     )
     ax_nc.set_title(f"Noise Criteria: tangency method   NC-{nc.rating:g}", pad=10)
-    _room_criteria_axis(ax_nc, OCTAVE_BANDS)
+    _room_criteria_axis(ax_nc, NC_OCTAVE_BANDS_HZ)
 
     # --- Right: RC Mark II family, reference + rumble/hiss tolerances. ---
     ref = rc.reference_curve
-    low = OCTAVE_BANDS <= 500.0
-    high = OCTAVE_BANDS >= 1000.0
+    low = NC_OCTAVE_BANDS_HZ <= 500.0
+    high = NC_OCTAVE_BANDS_HZ >= 1000.0
     # The Table D.1 family, mirroring the NC family on the left: constant
     # -5 dB/octave keyed to the 1 kHz value, with the 55 dB low-frequency
     # floor flattening the 16/31.5 Hz end of RC-25 to RC-30.
@@ -1766,11 +1771,11 @@ def generate_room_noise_criteria(output_dir: str) -> None:
     }
     for index in range(25, 51, 5):
         family = room.rc_curve(float(index))
-        ax_rc.plot(OCTAVE_BANDS, family, color=COLOR_GRID, lw=0.8, zorder=1)
+        ax_rc.plot(NC_OCTAVE_BANDS_HZ, family, color=COLOR_GRID, lw=0.8, zorder=1)
         struck = index == int(rc.rating)
         ax_rc.annotate(
             f"{index:d}",
-            (OCTAVE_BANDS[-1], family[-1]),
+            (NC_OCTAVE_BANDS_HZ[-1], family[-1]),
             zorder=6 if struck else 3,
             bbox=chip if struck else None,
             **family_label,
@@ -1791,7 +1796,7 @@ def generate_room_noise_criteria(output_dir: str) -> None:
         arrowprops={"arrowstyle": "->", "color": COLOR_FG, "lw": 0.9},
     )
     ax_rc.plot(
-        OCTAVE_BANDS,
+        NC_OCTAVE_BANDS_HZ,
         ref,
         "s--",
         color="#7f7f7f",
@@ -1799,7 +1804,7 @@ def generate_room_noise_criteria(output_dir: str) -> None:
         label=f"Reference RC-{rc.rating}",
     )
     ax_rc.fill_between(
-        OCTAVE_BANDS[low],
+        NC_OCTAVE_BANDS_HZ[low],
         ref[low],
         ref[low] + 5.0,
         zorder=0,
@@ -1807,7 +1812,7 @@ def generate_room_noise_criteria(output_dir: str) -> None:
         label="Rumble tol. (+5 dB)",
     )
     ax_rc.fill_between(
-        OCTAVE_BANDS[high],
+        NC_OCTAVE_BANDS_HZ[high],
         ref[high],
         ref[high] + 3.0,
         zorder=0,
@@ -1815,10 +1820,15 @@ def generate_room_noise_criteria(output_dir: str) -> None:
         label="Hiss tol. (+3 dB)",
     )
     ax_rc.plot(
-        OCTAVE_BANDS, spectrum, "o-", color=COLOR_PRIMARY, zorder=3, label="Measured"
+        NC_OCTAVE_BANDS_HZ,
+        spectrum,
+        "o-",
+        color=COLOR_PRIMARY,
+        zorder=3,
+        label="Measured",
     )
     ax_rc.set_title(f"Room Criteria Mark II   {rc.label}", pad=10)
-    _room_criteria_axis(ax_rc, OCTAVE_BANDS)
+    _room_criteria_axis(ax_rc, NC_OCTAVE_BANDS_HZ)
 
     plt.tight_layout()
     save_figure(output_dir, "room_noise_criteria.png")
@@ -1829,7 +1839,7 @@ def generate_nc_blind_spot(output_dir: str) -> None:
     """Two rooms with the same NC rating and opposite spectral character."""
     print("Generating nc_blind_spot...")
     from phonometry import room
-    from phonometry.room.noise_criteria import NC_CURVES, NC_INDICES, OCTAVE_BANDS
+    from phonometry.room import NC_CURVES_DB, NC_OCTAVE_BANDS_HZ, NC_RATINGS
 
     # Two ANSI/ASA S12.2 spectra built to touch the NC-40 curve at one band
     # each: a duct-rumble room tangent at 125 Hz, and a diffuser-hiss room
@@ -1846,11 +1856,11 @@ def generate_nc_blind_spot(output_dir: str) -> None:
     _fig, (ax_nc, ax_rc) = plt.subplots(1, 2, figsize=(12.5, 5.6))
 
     # --- Left: one NC label for two spectra. ---
-    for row, idx in zip(NC_CURVES, NC_INDICES, strict=True):
-        ax_nc.plot(OCTAVE_BANDS, row, color=COLOR_GRID, lw=0.8, zorder=1)
+    for row, idx in zip(NC_CURVES_DB, NC_RATINGS, strict=True):
+        ax_nc.plot(NC_OCTAVE_BANDS_HZ, row, color=COLOR_GRID, lw=0.8, zorder=1)
         ax_nc.annotate(
             f"{idx:.0f}",
-            (OCTAVE_BANDS[-1], row[-1]),
+            (NC_OCTAVE_BANDS_HZ[-1], row[-1]),
             fontsize=7,
             color="#999999",
             va="center",
@@ -1858,14 +1868,14 @@ def generate_nc_blind_spot(output_dir: str) -> None:
     for label, spectrum, color, style in cases:
         nc = room.noise_criterion(spectrum)
         ax_nc.plot(
-            OCTAVE_BANDS,
+            NC_OCTAVE_BANDS_HZ,
             spectrum,
             style,
             color=color,
             zorder=3,
             label=f"{label} (tangent at {nc.governing_frequency:g} Hz)",
         )
-        gov = spectrum[OCTAVE_BANDS == nc.governing_frequency][0]
+        gov = spectrum[NC_OCTAVE_BANDS_HZ == nc.governing_frequency][0]
         ax_nc.plot(
             [nc.governing_frequency],
             [gov],
@@ -1881,9 +1891,9 @@ def generate_nc_blind_spot(output_dir: str) -> None:
     # --- Right: the deviation from each room's own RC reference curve. ---
     # The tag rule read directly: +5 dB at and below 500 Hz, +3 dB at and
     # above 1 kHz (clause D.3), drawn as one step threshold.
-    threshold = np.where(OCTAVE_BANDS <= 500.0, 5.0, 3.0)
+    threshold = np.where(NC_OCTAVE_BANDS_HZ <= 500.0, 5.0, 3.0)
     ax_rc.step(
-        OCTAVE_BANDS,
+        NC_OCTAVE_BANDS_HZ,
         threshold,
         where="mid",
         color=COLOR_FG,
@@ -1893,7 +1903,7 @@ def generate_nc_blind_spot(output_dir: str) -> None:
         label="Tag threshold (D.3): +5 / +3 dB",
     )
     ax_rc.fill_between(
-        OCTAVE_BANDS,
+        NC_OCTAVE_BANDS_HZ,
         threshold,
         17.0,
         step="mid",
@@ -1904,7 +1914,7 @@ def generate_nc_blind_spot(output_dir: str) -> None:
     for label, spectrum, color, style in cases:
         rc = room.room_criterion(spectrum)
         ax_rc.plot(
-            OCTAVE_BANDS,
+            NC_OCTAVE_BANDS_HZ,
             spectrum - rc.reference_curve,
             style,
             color=color,
@@ -1916,8 +1926,10 @@ def generate_nc_blind_spot(output_dir: str) -> None:
 
     for axis in (ax_nc, ax_rc):
         axis.set_xscale("log")
-        axis.set_xticks(list(OCTAVE_BANDS))
-        axis.set_xticklabels([f"{f:g}" for f in OCTAVE_BANDS], rotation=45, ha="right")
+        axis.set_xticks(list(NC_OCTAVE_BANDS_HZ))
+        axis.set_xticklabels(
+            [f"{f:g}" for f in NC_OCTAVE_BANDS_HZ], rotation=45, ha="right"
+        )
         axis.set_xlabel("Octave-band center frequency [Hz]")
         axis.grid(which="both", axis="y", color=COLOR_GRID, linestyle="-", alpha=0.4)
         axis.set_axisbelow(True)
@@ -2113,19 +2125,19 @@ def generate_enclosed_space_air_term(output_dir: str) -> None:
     print("Generating enclosed_space_air_term...")
     from phonometry import room
     from phonometry.room.enclosed_space_absorption import (
-        AIR_ATTENUATION,
-        OCTAVE_BANDS,
+        _AIR_ATTENUATION,
+        _OCTAVE_BANDS,
     )
 
-    freq = np.asarray(OCTAVE_BANDS)
+    freq = np.asarray(_OCTAVE_BANDS)
     soft = [0.15] * freq.size  # a plausible ordinary room, per band
     hall_area, hall_volume = 1000.0, 2000.0
 
     _fig, (left, right) = plt.subplots(1, 2, figsize=(12.6, 5.4))
 
     still = room.enclosed_space_reverberation([(hall_area, soft)], hall_volume)
-    colours = series_colors(len(AIR_ATTENUATION))
-    for colour, name in zip(colours, AIR_ATTENUATION, strict=True):
+    colours = series_colors(len(_AIR_ATTENUATION))
+    for colour, name in zip(colours, _AIR_ATTENUATION, strict=True):
         humid = room.enclosed_space_reverberation(
             [(hall_area, soft)], hall_volume, air_condition=name
         )
@@ -2217,9 +2229,9 @@ def generate_enclosed_space_objects(output_dir: str) -> None:
     """
     print("Generating enclosed_space_objects...")
     from phonometry import room
-    from phonometry.room.enclosed_space_absorption import OCTAVE_BANDS
+    from phonometry.room.enclosed_space_absorption import _OCTAVE_BANDS
 
-    freq = np.asarray(OCTAVE_BANDS)
+    freq = np.asarray(_OCTAVE_BANDS)
     n = freq.size
     # EN 12354-6 Annex E: a 4.54 x 2.73 x 2.40 m room, V = 29.75 m3, with the
     # annex's 1 kHz coefficients held across the band set.

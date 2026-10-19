@@ -50,7 +50,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import require_ranks, require_same_length, require_scalar
-from .cepstrum import _fold_causal
+from ._cepstrum import _fold_causal
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -142,7 +142,7 @@ def minimum_phase(
     Sec. 13.1.4) via the real cepstrum: the inverse transform of
     :math:`\ln \lvert H \rvert` is folded onto positive
     quefrencies (doubling them, keeping the ends; the folding core is
-    shared with :mod:`phonometry.signals.cepstrum`) and transformed
+    shared with :func:`phonometry.signals.cepstrum`) and transformed
     back, so ``exp`` of the result is the unique stable, causal, causally
     invertible response with that magnitude. The input phase, if any, is
     ignored: passing a plain magnitude array works.

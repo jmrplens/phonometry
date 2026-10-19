@@ -21,7 +21,7 @@ import pytest
 from scipy import signal
 
 from phonometry import room
-from phonometry.room.impulse_response import _MLS_TAPS
+from phonometry.room._impulse_response import _MLS_TAPS
 
 FS = 48000
 

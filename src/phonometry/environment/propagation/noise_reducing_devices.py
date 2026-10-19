@@ -89,6 +89,21 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+__all__ = [
+    "ABSORPTION_CATEGORIES",
+    "ABSORPTION_RATIO_LIMIT",
+    "INSULATION_CATEGORIES",
+    "SPECTRA",
+    "TRAFFIC_NOISE_BANDS_HZ",
+    "RoadDeviceRating",
+    "RoadDeviceWarning",
+    "airborne_insulation_rating",
+    "sound_absorption_rating",
+    "sound_reflection_rating",
+    "NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB",
+    "NORMALIZED_RAILWAY_NOISE_SPECTRUM_DB",
+]
+
 #: EN 1793-3:1997, Table 1. The eighteen one-third octave bands the
 #: normalised traffic noise spectrum is printed for, in Hz.
 TRAFFIC_NOISE_BANDS_HZ: tuple[float, ...] = (

@@ -68,6 +68,13 @@ from ..erb_scale import (
     frequency_from_cam,
 )
 
+__all__ = [
+    "MooreGlasbergLoudness",
+    "loudness_moore_glasberg",
+    "loudness_moore_glasberg_from_spectrum",
+    "loudness_moore_glasberg_from_third_octave",
+]
+
 #: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
 _P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 

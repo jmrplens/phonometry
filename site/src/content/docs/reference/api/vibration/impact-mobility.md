@@ -1,9 +1,11 @@
 ---
-title: "vibration.structural.impact_mobility"
+title: "vibration: impact mobility"
 description: "Mechanical mobility measured by impact excitation (ISO 7626-5:2019)."
 sidebar:
   label: "impact_mobility"
 ---
+
+Every name on this page is published by `phonometry.vibration`: `from phonometry import vibration`, then `vibration.<name>`.
 
 Mechanical mobility measured by impact excitation (ISO 7626-5:2019).
 

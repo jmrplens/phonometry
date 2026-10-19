@@ -214,7 +214,7 @@ with the material's structure: $s'_\mathrm{a} = p_0 / (d\,\epsilon)$.
 | :--- | :--- |
 | `thickness_m` | Thickness `d` of the specimen under the static load, in metres (scalar or array). |
 | `porosity` | Porosity `epsilon` of the specimen (0-1). |
-| `static_pressure_pa` | Atmospheric pressure `p0`, in pascals (default `STANDARD_ATMOSPHERIC_PRESSURE`, the standard's 0,1 MPa). |
+| `static_pressure_pa` | Atmospheric pressure `p0`, in pascals (default the standard's 0,1 MPa). |
 
 **Returns:** The enclosed-gas dynamic stiffness per unit area `s'a`, in N/m3.
 

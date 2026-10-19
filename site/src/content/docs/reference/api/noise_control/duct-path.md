@@ -1,9 +1,11 @@
 ---
-title: "noise_control.duct_path"
+title: "noise_control: duct path"
 description: "End-to-end duct-borne noise calculation: fan to room, element by element."
 sidebar:
   label: "duct_path"
 ---
+
+Every name on this page is published by `phonometry.noise_control`: `from phonometry import noise_control`, then `noise_control.<name>`.
 
 End-to-end duct-borne noise calculation: fan to room, element by element.
 

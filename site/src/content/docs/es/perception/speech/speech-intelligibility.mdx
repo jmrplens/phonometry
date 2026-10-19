@@ -71,7 +71,7 @@ from phonometry import speech
 # El espectro de habla estándar de esfuerzo normal (Tabla 3) en silencio, audición normal.
 result = speech.speech_intelligibility_index("normal")
 print(round(result.sii, 3))          # 0.996  (casi todo audible)
-print(round(speech.sii.BAND_IMPORTANCE.sum(), 6))   # 1.0
+print(round(speech.sii_procedure("one-third-octave").band_importance.sum(), 6))   # 1.0
 
 result.plot()   # audibilidad por banda y su contribución ponderada (necesita matplotlib)
 ```
@@ -410,7 +410,7 @@ from phonometry import speech
 # El mismo ruido de banda ancha, cuatro esfuerzos vocales.
 noise = np.array([48.0, 47.0, 46.0, 44.0, 42.0, 40.0, 38.0, 36.0, 34.0,
                   32.0, 30.0, 28.0, 26.0, 24.0, 22.0, 20.0, 18.0, 16.0])
-for effort in speech.sii.VOCAL_EFFORTS:
+for effort in speech.standard_speech_spectra().vocal_efforts:
     print(effort, round(speech.speech_intelligibility_index(effort, noise).sii, 2))
 # normal 0.12 | raised 0.36 | loud 0.59 | shout 0.79
 
@@ -480,8 +480,9 @@ from phonometry import speech
 # Los cuatro espectros de la Tabla 3 de ANSI S3.5-1997 y el ruido fijo de arriba.
 noise = np.array([48.0, 47.0, 46.0, 44.0, 42.0, 40.0, 38.0, 36.0, 34.0,
                   32.0, 30.0, 28.0, 26.0, 24.0, 22.0, 20.0, 18.0, 16.0])
-efforts = speech.sii.VOCAL_EFFORTS         # ("normal", "raised", "loud", "shout")
-freqs = speech.sii.BAND_CENTERS            # los 18 centros de banda de tercio de octava
+spectra = speech.standard_speech_spectra()
+efforts = spectra.vocal_efforts         # ("normal", "raised", "loud", "shout")
+freqs = spectra.frequencies             # los 18 centros de banda de tercio de octava
 nombres = {"normal": "Normal", "raised": "Elevada",
            "loud": "Fuerte", "shout": "Grito"}
 

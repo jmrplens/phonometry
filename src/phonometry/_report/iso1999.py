@@ -555,15 +555,15 @@ def _outside_validated_domain(l_ex: float, years: float, fractile: float) -> boo
     extrapolated print-out.
     """
     from ..hearing.noise_induced_hearing_loss import (
-        VALIDATED_FRACTILES,
-        VALIDATED_L_EX_MAX,
-        VALIDATED_YEARS,
+        _VALIDATED_FRACTILES,
+        _VALIDATED_L_EX_MAX,
+        _VALIDATED_YEARS,
     )
 
     return (
-        l_ex > VALIDATED_L_EX_MAX
-        or not VALIDATED_YEARS[0] <= years <= VALIDATED_YEARS[1]
-        or not VALIDATED_FRACTILES[0] <= fractile <= VALIDATED_FRACTILES[1]
+        l_ex > _VALIDATED_L_EX_MAX
+        or not _VALIDATED_YEARS[0] <= years <= _VALIDATED_YEARS[1]
+        or not _VALIDATED_FRACTILES[0] <= fractile <= _VALIDATED_FRACTILES[1]
     )
 
 

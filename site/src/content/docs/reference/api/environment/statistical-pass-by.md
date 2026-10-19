@@ -1,9 +1,11 @@
 ---
-title: "environment.sources.statistical_pass_by"
+title: "environment: statistical pass-by"
 description: "What a road surface adds to the noise of the traffic on it (ISO 11819-1:1997)."
 sidebar:
   label: "statistical_pass_by"
 ---
+
+Every name on this page is published by `phonometry.environment`: `from phonometry import environment`, then `environment.<name>`.
 
 What a road surface adds to the noise of the traffic on it (ISO 11819-1:1997).
 

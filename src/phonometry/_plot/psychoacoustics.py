@@ -35,15 +35,17 @@ if TYPE_CHECKING:
         MooreGlasbergTimeVaryingLoudness,
     )
     from ..psychoacoustics.loudness.zwicker import ZwickerLoudness
-    from ..psychoacoustics.quality.annoyance import PsychoacousticAnnoyanceResult
-    from ..psychoacoustics.quality.fluctuation_strength import FluctuationStrengthResult
-    from ..psychoacoustics.quality.fluctuation_strength_ecma import (
+    from ..psychoacoustics.quality._fluctuation_strength import (
+        FluctuationStrengthResult,
+    )
+    from ..psychoacoustics.quality._fluctuation_strength_ecma import (
         EcmaFluctuationStrength,
     )
-    from ..psychoacoustics.quality.roughness_ecma import EcmaRoughness
+    from ..psychoacoustics.quality._roughness_ecma import EcmaRoughness
+    from ..psychoacoustics.quality._tonality_ecma import EcmaTonality
+    from ..psychoacoustics.quality._tone_audibility import ToneAudibilityResult
+    from ..psychoacoustics.quality.annoyance import PsychoacousticAnnoyanceResult
     from ..psychoacoustics.quality.tonality import ToneAssessment
-    from ..psychoacoustics.quality.tonality_ecma import EcmaTonality
-    from ..psychoacoustics.quality.tone_audibility import ToneAudibilityResult
 
 #: Critical-band rate axis label of the Zwicker/DIN 45631 family (Bark scale).
 _AXIS_BARK = "Critical-band rate $z$ [Bark]"
@@ -442,7 +444,7 @@ def plot_ecma_tonality(
     is returned; when ``ax`` is supplied only the specific-tonality panel is
     drawn on it and that single axes is returned.
 
-    :param result: An :class:`~phonometry.psychoacoustics.quality.tonality_ecma.EcmaTonality`.
+    :param result: An :class:`~phonometry.psychoacoustics.quality.EcmaTonality`.
     :param ax: Existing axes to draw on, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the specific-tonality line ``plot`` call.
@@ -573,7 +575,7 @@ def plot_ecma_roughness(
     and an array of two axes is returned; when ``ax`` is supplied only the
     time-dependent roughness is drawn on it and that single axes is returned.
 
-    :param result: An :class:`~phonometry.psychoacoustics.quality.roughness_ecma.EcmaRoughness`.
+    :param result: An :class:`~phonometry.psychoacoustics.quality.EcmaRoughness`.
     :param ax: Existing axes to draw on, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the roughness-vs-time line ``plot`` call.
@@ -616,8 +618,8 @@ def plot_ecma_fluctuation_strength(
     ``ax`` is supplied only the time-dependent fluctuation strength is drawn
     on it and that single axes is returned.
 
-    :param result: An :class:`~phonometry.psychoacoustics.quality.
-        fluctuation_strength_ecma.EcmaFluctuationStrength`.
+    :param result: An
+        :class:`~phonometry.psychoacoustics.quality.EcmaFluctuationStrength`.
     :param ax: Existing axes to draw on, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the time-trace line ``plot`` call.
@@ -662,7 +664,7 @@ def plot_fluctuation_strength(
     annotated with the overall ``F`` in vacil.
 
     :param result: A
-        :class:`~phonometry.psychoacoustics.quality.fluctuation_strength.FluctuationStrengthResult`.
+        :class:`~phonometry.psychoacoustics.quality.FluctuationStrengthResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the ``plot`` call.
@@ -849,7 +851,7 @@ def plot_tone_audibility(
     Draws one bar per tone with the decisive (most audible) tone emphasised and
     the ``ΔL = 0`` audibility threshold marked; tones above it are present.
 
-    :param result: A :class:`~phonometry.psychoacoustics.quality.tone_audibility.ToneAudibilityResult`.
+    :param result: A :class:`~phonometry.psychoacoustics.quality.ToneAudibilityResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the bar ``bar`` call.
@@ -911,7 +913,7 @@ def plot_tone_audibility_levels(
     masking threshold is the audibility ``ΔL_ta``. The decisive (most audible)
     tone is emphasised and the frequency axis is continuous and logarithmic.
 
-    :param result: A :class:`~phonometry.psychoacoustics.quality.tone_audibility.ToneAudibilityResult`.
+    :param result: A :class:`~phonometry.psychoacoustics.quality.ToneAudibilityResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the tone-level marker ``plot`` call.

@@ -83,6 +83,36 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+__all__ = [
+    "GEAR_ACCEPTANCE_HEADROOM",
+    "GEAR_DISPLACEMENT_CORNER_HZ",
+    "GEAR_DISPLACEMENT_SLOPE_DB_PER_DECADE",
+    "GEAR_UNIT_CLASSES",
+    "GEAR_UNIT_ZONES",
+    "GEAR_VELOCITY_CORNERS_HZ",
+    "GEAR_VELOCITY_SLOPE_DB_PER_DECADE",
+    "INDUSTRIAL_MACHINE_ZONES",
+    "OPERATIONAL_LIMIT_HEADROOM",
+    "SIGNIFICANT_CHANGE_FRACTION",
+    "TYPICAL_BOUNDARY_LADDER_MM_S",
+    "TYPICAL_ZONE_BOUNDARY_RANGES_MM_S",
+    "ZONE_LIMIT_FACTORS",
+    "GearUnitRatings",
+    "MachineZoneLimits",
+    "VectorChangeResult",
+    "ZoneBoundaries",
+    "alarm_limit",
+    "allowable_velocity",
+    "evaluation_zone",
+    "gear_housing_velocity_limit",
+    "gear_shaft_displacement_limit",
+    "gear_unit_zone_boundaries",
+    "industrial_machine_zone",
+    "is_significant_change",
+    "trip_limit",
+    "vibration_vector_change",
+]
+
 #: The four grades of ISO 20816-1, 6.3.2.3, worst last.
 EvaluationZone = Literal["A", "B", "C", "D"]
 

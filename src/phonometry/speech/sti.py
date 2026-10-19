@@ -54,6 +54,15 @@ from ..filters.frequencies import nominal_frequencies
 from ..io._resolve import apply_calibration, resolve_fs, resolve_pair_fs
 from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 
+__all__ = [
+    "STIResult",
+    "STIWarning",
+    "sti_adjusted_for_levels",
+    "sti_from_impulse_response",
+    "stipa",
+    "stipa_signal",
+]
+
 #: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
 _P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 

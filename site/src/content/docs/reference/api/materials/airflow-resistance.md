@@ -1,9 +1,11 @@
 ---
-title: "materials.absorbers.airflow_resistance"
+title: "materials: airflow resistance"
 description: "Airflow resistance of porous materials: ISO 9053-1 and ISO 9053-2."
 sidebar:
   label: "airflow_resistance"
 ---
+
+Every name on this page is published by `phonometry.materials`: `from phonometry import materials`, then `materials.<name>`.
 
 Airflow resistance of porous materials: ISO 9053-1 and ISO 9053-2.
 

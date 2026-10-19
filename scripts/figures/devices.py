@@ -3821,7 +3821,8 @@ def generate_duct_sheet_verification(output_dir: str) -> None:
     diffuser = hvac.diffuser_sound_power(
         bands, (24 * inch) ** 2, volume_flow=312 * cfm, pressure_drop_pa=0.05 * in_wg
     )
-    nc30 = np.asarray(room.nc_curve(30), dtype=float)[2:]  # OCTAVE_BANDS is 16 Hz up
+    # room.NC_OCTAVE_BANDS_HZ starts at 16 Hz; the panels start at 63 Hz.
+    nc30 = np.asarray(room.nc_curve(30), dtype=float)[2:]
 
     panels = (
         ("Fan, Eq. 13.1", [90, 86, 82, 79, 77, 75, 71, 61], np.asarray(fan.values)),

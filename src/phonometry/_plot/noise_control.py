@@ -26,9 +26,9 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-    from ..noise_control.cabin_insulation import CabinInsulationResult
+    from ..noise_control._cabin_insulation import CabinInsulationResult
+    from ..noise_control._duct_path import DuctPathResult
     from ..noise_control.duct_modes import DuctModeResult
-    from ..noise_control.duct_path import DuctPathResult
     from ..noise_control.enclosure_insulation import EnclosureInsulationResult
     from ..noise_control.enclosures import EnclosureResult
     from ..noise_control.hvac import HVACSpectrumResult
@@ -261,7 +261,7 @@ def plot_duct_path(
     overlaid as a dashed reference.
 
     :param result: A
-        :class:`~phonometry.noise_control.duct_path.DuctPathResult`.
+        :class:`~phonometry.noise_control.DuctPathResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the received-level ``Axes.plot``.
@@ -683,7 +683,7 @@ def plot_cabin_insulation(
     """The room, the inside of the cabin and the insulation between them.
 
     :param result: A
-        :class:`~phonometry.noise_control.cabin_insulation.CabinInsulationResult`.
+        :class:`~phonometry.noise_control.CabinInsulationResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the insulation ``Axes.plot``.

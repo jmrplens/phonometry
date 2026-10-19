@@ -1,9 +1,11 @@
 ---
-title: "signals.cepstrum"
+title: "signals: cepstrum"
 description: "Cepstral analysis: real/power/complex cepstrum, liftering and echo detection."
 sidebar:
   label: "cepstrum"
 ---
+
+Every name on this page is published by `phonometry.signals`: `from phonometry import signals`, then `signals.<name>`.
 
 Cepstral analysis: real/power/complex cepstrum, liftering and echo detection.
 

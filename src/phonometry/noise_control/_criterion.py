@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Shared plumbing of the composed noise-control workflows.
 
-:mod:`phonometry.noise_control.duct_path` and
+:func:`phonometry.noise_control.duct_path` and
 :mod:`phonometry.noise_control.room_to_room` are the two calculations in the
 library that walk a whole path and end by laying the received octave-band
 spectrum against a room criterion. They differ in everything between the ends
@@ -101,7 +101,7 @@ class CriterionCarrier(Protocol):
 
     Structural contract of the four helpers below: the analysis bands, the
     spectrum that arrives at the receiver, the criterion family and the design
-    target. :class:`~phonometry.noise_control.duct_path.DuctPathResult` and
+    target. :class:`~phonometry.noise_control.DuctPathResult` and
     :class:`~phonometry.noise_control.room_to_room.RoomToRoomResult` both
     satisfy it.
     """

@@ -2,7 +2,7 @@
 """Reverberation-room sound power determination fiche (reportlab, ISO 3741).
 
 Renders a
-:class:`~phonometry.emission.sound_power_reverberation.ReverberationSoundPowerResult`
+:class:`~phonometry.emission.ReverberationSoundPowerResult`
 (sound power determined in a qualified hard-walled reverberation test room,
 ISO 3741:2010 precision method, accuracy grade 1) to a one-page PDF laid out
 like a sound-power test sheet:
@@ -60,7 +60,7 @@ from ._sound_power_fiche import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
-    from ..emission.sound_power_reverberation import ReverberationSoundPowerResult
+    from ..emission._sound_power_reverberation import ReverberationSoundPowerResult
     from .metadata import ReportMetadata
 
 #: Band-frequency column heading of the per-band table (translated by ``t``).
@@ -236,7 +236,7 @@ def render_reverberation_power_report(
     """Render a reverberation-room sound-power determination fiche to ``path``.
 
     :param result: A
-        :class:`~phonometry.emission.sound_power_reverberation.ReverberationSoundPowerResult`
+        :class:`~phonometry.emission.ReverberationSoundPowerResult`
         carrying the per-band ``sound_power_level``, the mean room
         ``mean_pressure_level`` and the A-weighted total.
     :param path: Destination path of the PDF file.

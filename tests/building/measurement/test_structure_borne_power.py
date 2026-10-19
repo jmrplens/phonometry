@@ -350,10 +350,10 @@ def test_iso9611_mean_free_velocity_level() -> None:
     import reference_data as ref
 
     from phonometry.building.measurement.structure_borne_power import (
-        FREE_VELOCITY_REFERENCE,
+        _FREE_VELOCITY_REFERENCE,
     )
 
-    assert FREE_VELOCITY_REFERENCE == ref.ISO9611_FREE_VELOCITY_REFERENCE
+    assert _FREE_VELOCITY_REFERENCE == ref.ISO9611_FREE_VELOCITY_REFERENCE
     assert building.mean_free_velocity_level(ref.ISO9611_MEAN_LEVELS) == pytest.approx(
         ref.ISO9611_MEAN_EXPECTED
     )

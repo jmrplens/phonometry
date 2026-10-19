@@ -29,7 +29,7 @@ import pytest
 
 from phonometry import psychoacoustics
 from phonometry._plot import psychoacoustics as psychoacoustics_plot
-from phonometry.psychoacoustics.quality.tone_audibility import ToneAudibilityResult
+from phonometry.psychoacoustics.quality import ToneAudibilityResult
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator

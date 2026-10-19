@@ -65,6 +65,17 @@ if TYPE_CHECKING:
 
     from .._report.metadata import ReportMetadata
 
+__all__ = [
+    "SII_METHODS",
+    "SIIProcedure",
+    "SIIResult",
+    "StandardSpeechSpectrum",
+    "sii_procedure",
+    "speech_intelligibility_index",
+    "standard_speech_spectra",
+    "standard_speech_spectrum",
+]
+
 
 #: The four band procedures of ANSI S3.5-1997, in the order of its Tables 1
 #: to 4: the critical-band procedure (21 bands), the equally-contributing
@@ -82,7 +93,7 @@ SII_METHODS: tuple[str, ...] = (
 # ---------------------------------------------------------------------------
 
 #: One-third-octave band centre frequencies, in hertz (18 bands, Table 3).
-BAND_CENTERS: np.ndarray = read_only(
+_BAND_CENTERS: np.ndarray = read_only(
     np.array(
         [
             160.0,
@@ -109,7 +120,7 @@ BAND_CENTERS: np.ndarray = read_only(
 )
 
 #: Band-importance function ``Ii`` (Table 3, average speech material); sums to 1.
-BAND_IMPORTANCE: np.ndarray = read_only(
+_BAND_IMPORTANCE: np.ndarray = read_only(
     np.array(
         [
             0.0083,
@@ -239,7 +250,7 @@ _SPEECH_SPECTRA: dict[str, np.ndarray] = {
 }
 
 #: Reference internal noise spectrum level ``Xi`` (Table 3), dB SPL.
-REFERENCE_INTERNAL_NOISE: np.ndarray = read_only(
+_REFERENCE_INTERNAL_NOISE: np.ndarray = read_only(
     np.array(
         [
             0.6,
@@ -265,7 +276,7 @@ REFERENCE_INTERNAL_NOISE: np.ndarray = read_only(
     )
 )
 
-VOCAL_EFFORTS: tuple[str, ...] = ("normal", "raised", "loud", "shout")
+_VOCAL_EFFORTS: tuple[str, ...] = ("normal", "raised", "loud", "shout")
 
 # ---------------------------------------------------------------------------
 # Normative constants - ANSI S3.5-1997, critical-band method (Table 1).
@@ -641,7 +652,7 @@ def _third_octave_geometry() -> tuple[np.ndarray, np.ndarray]:
     returned as the procedure's ``bandwidth_offset_db`` and subtracted after
     the addition.
     """
-    f = BAND_CENTERS
+    f = _BAND_CENTERS
     return 10.0 * np.log10(f), np.log10(0.89 * f[:, np.newaxis] / f[np.newaxis, :])
 
 
@@ -677,17 +688,17 @@ def _build_procedures() -> dict[str, _BandProcedure]:
         ),
         "one-third-octave": _BandProcedure(
             method="one-third-octave",
-            frequencies=BAND_CENTERS,
+            frequencies=_BAND_CENTERS,
             # Table 3 prints the centre frequencies; the exact one-third-octave
             # limits 2**(-+1/6) fi bound the same bands.
             band_edges=np.concatenate(
                 (
-                    BAND_CENTERS * 2.0 ** (-1.0 / 6.0),
-                    BAND_CENTERS[-1:] * 2.0 ** (1.0 / 6.0),
+                    _BAND_CENTERS * 2.0 ** (-1.0 / 6.0),
+                    _BAND_CENTERS[-1:] * 2.0 ** (1.0 / 6.0),
                 )
             ),
-            band_importance=BAND_IMPORTANCE,
-            internal_noise=REFERENCE_INTERNAL_NOISE,
+            band_importance=_BAND_IMPORTANCE,
+            internal_noise=_REFERENCE_INTERNAL_NOISE,
             speech_spectrum=_SPEECH_NORMAL,
             bandwidth_db=third_bandwidth_db,
             bandwidth_offset_db=6.353,
@@ -909,7 +920,7 @@ def standard_speech_spectrum(vocal_effort: str = "normal") -> np.ndarray:
     except KeyError:
         msg = (
             f"Unknown vocal_effort {vocal_effort!r}; choose from "
-            f"{', '.join(VOCAL_EFFORTS)}."
+            f"{', '.join(_VOCAL_EFFORTS)}."
         )
         raise ValueError(msg) from None
 
@@ -988,7 +999,7 @@ class StandardSpeechSpectrum(OwnsArrays):
 
 
 def standard_speech_spectra(
-    vocal_efforts: str | Sequence[str] = VOCAL_EFFORTS,
+    vocal_efforts: str | Sequence[str] = _VOCAL_EFFORTS,
 ) -> StandardSpeechSpectrum:
     """Build the plottable ANSI S3.5-1997 standard speech spectra (Table 3).
 
@@ -1010,7 +1021,7 @@ def standard_speech_spectra(
     if not efforts:
         msg = (
             "'vocal_efforts' cannot be empty; choose at least one of "
-            f"{', '.join(VOCAL_EFFORTS)}."
+            f"{', '.join(_VOCAL_EFFORTS)}."
         )
         raise ValueError(msg)
     levels = np.array(
@@ -1018,7 +1029,7 @@ def standard_speech_spectra(
         dtype=np.float64,
     )
     return StandardSpeechSpectrum(
-        frequencies=BAND_CENTERS,
+        frequencies=_BAND_CENTERS,
         vocal_efforts=efforts,
         levels=levels,
     )
@@ -1106,7 +1117,7 @@ def _procedure_speech_spectrum(
         return standard_speech_spectrum(vocal_effort)
     if vocal_effort == "normal":
         return procedure.speech_spectrum.copy()
-    if vocal_effort in VOCAL_EFFORTS:
+    if vocal_effort in _VOCAL_EFFORTS:
         msg = (
             f"The {procedure.method!r} procedure carries the standard speech "
             f"spectrum for normal vocal effort only; {vocal_effort!r} is "
@@ -1116,7 +1127,7 @@ def _procedure_speech_spectrum(
         raise ValueError(msg)
     msg = (
         f"Unknown vocal_effort {vocal_effort!r}; choose from "
-        f"{', '.join(VOCAL_EFFORTS)}."
+        f"{', '.join(_VOCAL_EFFORTS)}."
     )
     raise ValueError(msg)
 

@@ -312,7 +312,7 @@ accumulates more of it than the single closed form allows.
   community annoyance, the other thing the word means, and the rating levels it
   is assessed with.
 - Theory: [Advanced loudness models and sound quality](../../reference/theory/perception.md#advanced-loudness-models--sound-quality): the loudness and sound-quality metrics the annoyance model combines, derived one at a time.
-- API reference: [`psychoacoustics.quality.annoyance`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/annoyance/) and [`psychoacoustics.quality.fluctuation_strength`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/fluctuation-strength/).
+- API reference: [`psychoacoustics.quality.annoyance`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/annoyance/) and [`psychoacoustics`: fluctuation strength](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/fluctuation-strength/).
 
 ## References
 

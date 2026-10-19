@@ -42,8 +42,8 @@ from __future__ import annotations
 import math
 import warnings
 
+from ._air import DEFAULT_STATIC_PRESSURE_PA
 from ._state import Fluid, FluidAssumptionWarning
-from .air import DEFAULT_STATIC_PRESSURE_PA
 
 __all__ = [
     "IDEAL_GAS_VALIDITY",

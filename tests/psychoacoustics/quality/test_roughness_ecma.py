@@ -73,7 +73,7 @@ def test_calibration_constant_is_the_tabulated_c_r() -> None:
     # standard's value verbatim (shared oracle in tests/reference_data/).
     from reference_data import ECMA418_2_ROUGHNESS_C_R
 
-    from phonometry.psychoacoustics.quality.roughness_ecma import _C_R
+    from phonometry.psychoacoustics.quality._roughness_ecma import _C_R
 
     assert _C_R == ECMA418_2_ROUGHNESS_C_R
 
@@ -275,7 +275,7 @@ def test_time_dependent_pchip_batch_matches_per_band_bitwise() -> None:
     # must stay bit-identical to the per-band interpolator loop it replaced.
     from scipy.interpolate import PchipInterpolator
 
-    from phonometry.psychoacoustics.quality.roughness_ecma import _CBF, _R_S50
+    from phonometry.psychoacoustics.quality._roughness_ecma import _CBF, _R_S50
 
     rng = np.random.default_rng(20260715)
     block_times = np.arange(9) * (4096.0 / FS)

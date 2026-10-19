@@ -1,9 +1,11 @@
 ---
-title: "broadcast.program_loudness"
+title: "broadcast: program loudness and true peak"
 description: "Programme loudness and true-peak level (ITU-R BS.1770-5, EBU R 128)."
 sidebar:
   label: "program_loudness"
 ---
+
+Every name on this page is published by `phonometry.broadcast`: `from phonometry import broadcast`, then `broadcast.<name>`.
 
 Programme loudness and true-peak level (ITU-R BS.1770-5, EBU R 128).
 

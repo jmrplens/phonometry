@@ -103,7 +103,7 @@ from ._shared import (
     _reference_power_levels,
     _validate_meteorology,
 )
-from .sound_power_hard_walled import (
+from ._sound_power_hard_walled import (
     SourceLocationPlan,
     _check_uncertainty_inputs,
     _finite,

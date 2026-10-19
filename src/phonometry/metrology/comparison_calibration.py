@@ -3229,7 +3229,7 @@ def _medium(
             )
             raise ValueError(msg)
         return gas
-    from ..fluids.air import air
+    from ..fluids._air import air
 
     return air(
         temperature_c=temperature_c,

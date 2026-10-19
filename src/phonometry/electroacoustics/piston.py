@@ -95,9 +95,15 @@ if TYPE_CHECKING:
     from matplotlib.projections.polar import PolarAxes
     from numpy.typing import ArrayLike, NDArray
 
-#: First zero of the Bessel function ``J1``; the first directivity null of the
-#: baffled piston sits at ``ka sin theta = J1_FIRST_ZERO`` (Beranek & Mellow).
-J1_FIRST_ZERO = 3.8317059702075125
+__all__ = [
+    "PistonDirectivity",
+    "RadiatingPistonResult",
+    "piston_directivity",
+    "piston_directivity_pattern",
+    "piston_reactance",
+    "piston_resistance",
+    "radiating_piston",
+]
 
 #: Reference characteristic impedance factors of air at 20 degC, 101.325 kPa.
 _RHO_AIR = 1.206

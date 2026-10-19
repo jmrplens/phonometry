@@ -70,7 +70,7 @@ def test_calibration_constant_is_the_tabulated_c_t() -> None:
     # standard's value verbatim (shared oracle in tests/reference_data/).
     from reference_data import ECMA418_2_TONALITY_C_T
 
-    from phonometry.psychoacoustics.quality.tonality_ecma import _C_T
+    from phonometry.psychoacoustics.quality._tonality_ecma import _C_T
 
     assert _C_T == ECMA418_2_TONALITY_C_T
 
@@ -83,18 +83,18 @@ def test_decision_thresholds_are_the_standard_constants() -> None:
     import reference_data as ref
 
     from phonometry.psychoacoustics.loudness.ecma import (
-        AUDIBILITY_THRESHOLD_SONE_HMS,
+        _AUDIBILITY_THRESHOLD_SONE_HMS,
     )
-    from phonometry.psychoacoustics.quality.roughness_ecma import (
+    from phonometry.psychoacoustics.quality._roughness_ecma import (
         PROMINENT_ROUGHNESS_ASPER,
     )
-    from phonometry.psychoacoustics.quality.tonality_ecma import (
+    from phonometry.psychoacoustics.quality._tonality_ecma import (
         PROMINENT_TONALITY_TU_HMS,
     )
 
     assert PROMINENT_TONALITY_TU_HMS == ref.ECMA418_2_PROMINENT_TONALITY_TU
     assert PROMINENT_ROUGHNESS_ASPER == ref.ECMA418_2_PROMINENT_ROUGHNESS_ASPER
-    assert AUDIBILITY_THRESHOLD_SONE_HMS == ref.ECMA418_2_AUDIBILITY_THRESHOLD_SONE
+    assert _AUDIBILITY_THRESHOLD_SONE_HMS == ref.ECMA418_2_AUDIBILITY_THRESHOLD_SONE
 
 
 # --------------------------------------------------------------------------
@@ -188,7 +188,7 @@ def test_loudness_and_tonality_share_the_tonal_split(
     import sys
 
     L = sys.modules["phonometry.psychoacoustics.loudness.ecma"]
-    T = sys.modules["phonometry.psychoacoustics.quality.tonality_ecma"]
+    T = sys.modules["phonometry.psychoacoustics.quality._tonality_ecma"]
     assert T._tonal_noise_split is L._tonal_noise_split
 
     recorded = []
@@ -240,7 +240,7 @@ def test_band_range_uses_edge_midpoints() -> None:
     # F(z) and its upper boundary (F(z)+F(z+0.5))/2, band z must still be the
     # lower edge z_L (a centre-frequency threshold would wrongly exclude it).
     from phonometry.psychoacoustics.loudness.ecma import _F_CENTRE
-    from phonometry.psychoacoustics.quality.tonality_ecma import _band_range
+    from phonometry.psychoacoustics.quality._tonality_ecma import _band_range
 
     z = 20
     upper_mid = 0.5 * (_F_CENTRE[z] + _F_CENTRE[z + 1])

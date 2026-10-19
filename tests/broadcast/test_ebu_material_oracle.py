@@ -42,7 +42,7 @@ from scipy.io import wavfile
 
 from phonometry import broadcast
 from phonometry.broadcast import loudness_range
-from phonometry.broadcast.program_loudness import _integrated_from_blocks
+from phonometry.broadcast._program_loudness import _integrated_from_blocks
 
 _NLR = "seq-3341-7_seq-3342-5-24bit.wav"
 _WLR = "seq-3341-2011-8_seq-3342-6-24bit-v02.wav"

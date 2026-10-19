@@ -35,13 +35,13 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from phonometry.vibration.human.exposure import WeightingResponse
+    from phonometry.vibration.structural import (
+        RadiationEfficiencyResult,
+    )
     from phonometry.vibration.structural.experimental_sea import PowerInjectionResult
     from phonometry.vibration.structural.mechanical_mobility import (
         MobilityResult,
         RigidMassCalibrationResult,
-    )
-    from phonometry.vibration.structural.radiation_efficiency import (
-        RadiationEfficiencyResult,
     )
     from phonometry.vibration.structural.transfer_stiffness import (
         BandAveragedStiffness,

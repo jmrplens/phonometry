@@ -66,6 +66,28 @@ if TYPE_CHECKING:
 
     from ..._report.metadata import ReportMetadata
 
+__all__ = [
+    "DEFAULT_FREQUENCIES_HZ",
+    "AtmosphericConditions",
+    "Barrier",
+    "DirectivityCorrection",
+    "GroundFactors",
+    "OutdoorAttenuation",
+    "PropagationGeometry",
+    "SourceEmission",
+    "atmospheric_absorption",
+    "barrier_attenuation",
+    "directivity_omega",
+    "geometric_divergence",
+    "ground_attenuation",
+    "ground_attenuation_alternative",
+    "mean_path_height",
+    "meteorological_correction",
+    "outdoor_propagation_attenuation",
+    "predicted_receiver_level",
+    "region_ground_factors",
+]
+
 #: Reference distance ``d0`` in the divergence term (ISO 9613-2:1996, Eq. (7)), m.
 _D0 = 1.0
 #: Message of the shared guard on the source-to-receiver distance: every term of

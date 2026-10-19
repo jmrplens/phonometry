@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from .cepstrum import (
+from ._cepstrum import (
     CepstrumResult,
     EchoDetectionResult,
     LifterResult,
@@ -11,7 +11,7 @@ from .cepstrum import (
     echo_detection,
     lifter,
 )
-from .correlation import (
+from ._correlation import (
     AlignedImpulseResponseResult,
     CorrelationResult,
     TimeDelayResult,
@@ -21,7 +21,7 @@ from .correlation import (
     impulse_response_delay,
     time_delay,
 )
-from .envelope import (
+from ._envelope import (
     EnvelopeResult,
     EnvelopeSpectrumResult,
     envelope,

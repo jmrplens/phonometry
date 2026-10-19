@@ -38,7 +38,7 @@ from phonometry.building.prediction.resilient_layers import (
     floating_floor_improvement_spectrum,
 )
 from phonometry.building.regulation.spain import db_hr_global_index
-from phonometry.emission.sound_power_anechoic import sound_power_anechoic
+from phonometry.emission import sound_power_anechoic
 from phonometry.environment.assessment.measurement import gaussian_residual_level
 from phonometry.environment.propagation.ground_barriers import ground_effect
 from phonometry.materials.diffusers.design import predict_diffuser_polar_response

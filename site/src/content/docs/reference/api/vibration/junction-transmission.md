@@ -1,9 +1,11 @@
 ---
-title: "vibration.structural.junction_transmission"
+title: "vibration: junction transmission"
 description: "Bending-wave transmission coefficients for rigid plate junctions (Hopkins 2007, Sound Insulation, Section 5.2.1.3; Cremer et al. 1973; Craik 1981, 1996)."
 sidebar:
   label: "junction_transmission"
 ---
+
+Every name on this page but `plot_junction_geometry` is published by `phonometry.vibration`: `from phonometry import vibration`, then `vibration.<name>`. `plot_junction_geometry` is published by `phonometry.building`.
 
 Bending-wave transmission coefficients for rigid plate junctions
 (Hopkins 2007, *Sound Insulation*, Section 5.2.1.3; Cremer et al. 1973;
@@ -474,7 +476,7 @@ Draw a plate junction cross-section to scale.
 Plate 1 runs horizontally; the perpendicular plate(s) of thickness 2
 form the L, T or X. The incident bending wave arrives on plate 1 and
 the junction type follows
-[`junction_transmission`](/phonometry/reference/api/vibration/junction-transmission/).
+[`junction_transmission`](/phonometry/reference/api/vibration/junction-transmission/#junction_transmission).
 
 **Parameters**
 

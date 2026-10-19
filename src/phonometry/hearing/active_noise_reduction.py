@@ -79,6 +79,7 @@ import numpy as np
 
 from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays
+from ._real_ear_attenuation import ProtectorUncertaintyBudget, RealEarAttenuationResult
 from .hearing_protectors import (
     AssumedProtectionResult,
     HMLRatingResult,
@@ -87,7 +88,6 @@ from .hearing_protectors import (
     hml_rating,
     snr_rating,
 )
-from .real_ear_attenuation import ProtectorUncertaintyBudget, RealEarAttenuationResult
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes

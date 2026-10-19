@@ -26,6 +26,11 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from ..hearing._real_ear_attenuation import (
+        AttenuationDifferenceResult,
+        RealEarAttenuationResult,
+        REATSoundFieldCheck,
+    )
     from ..hearing.active_noise_reduction import (
         ActiveInsertionLossResult,
         ANRLinearityResult,
@@ -39,11 +44,6 @@ if TYPE_CHECKING:
     )
     from ..hearing.noise_induced_hearing_loss import HTLANResult, NIPTSResult
     from ..hearing.occupational_exposure import ExposureResult
-    from ..hearing.real_ear_attenuation import (
-        AttenuationDifferenceResult,
-        RealEarAttenuationResult,
-        REATSoundFieldCheck,
-    )
     from ..hearing.threshold import AgeThresholdResult
 
 # Tolerance under which the requested population fractile counts as the
@@ -699,7 +699,7 @@ def plot_real_ear_attenuation(
     drawn faint behind the mean and the expanded uncertainty as bars on it.
     On a figure this creates, the box is shaped so that 50 dB spans one
     decade of frequency (IEC 60263); axes handed in keep their own shape.
-    Works for :class:`~phonometry.hearing.real_ear_attenuation.RealEarAttenuationResult`.
+    Works for :class:`~phonometry.hearing.RealEarAttenuationResult`.
 
     :param result: A real-ear attenuation result.
     :param ax: Existing axes, or ``None`` to create a figure.
@@ -771,7 +771,7 @@ def plot_attenuation_difference(
     :math:`\sqrt{U_{95,1}^2 + U_{95,2}^2}` as a marked line over it; a bar
     that rises past its marker is a significant difference, hatched and named
     in the legend. Works for
-    :class:`~phonometry.hearing.real_ear_attenuation.AttenuationDifferenceResult`.
+    :class:`~phonometry.hearing.AttenuationDifferenceResult`.
 
     :param result: An attenuation difference result.
     :param ax: Existing axes, or ``None`` to create a figure.
@@ -854,7 +854,7 @@ def plot_reat_sound_field(
     a rotated directional microphone saw against the limit Table 1 gives it.
     A check without the rotation is titled as meeting a) only, since b) was
     not judged. Works for
-    :class:`~phonometry.hearing.real_ear_attenuation.REATSoundFieldCheck`.
+    :class:`~phonometry.hearing.REATSoundFieldCheck`.
 
     :param result: A sound-field check.
     :param ax: Existing axes, or ``None`` to create a figure.

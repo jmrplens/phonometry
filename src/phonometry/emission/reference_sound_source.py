@@ -98,14 +98,14 @@ from ._shared import (
     _c1_correction,
     _validate_meteorology,
 )
+from ._sound_power_anechoic import sound_power_anechoic
 from .free_field_qualification import FreeFieldCheck, _band_index, _nominal
-from .sound_power_anechoic import sound_power_anechoic
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
-    from .sound_power_anechoic import PrecisionSoundPowerResult
+    from ._sound_power_anechoic import PrecisionSoundPowerResult
 
 RadiationCharacter = Literal["monopole", "dipole", "unknown"]
 MicrophoneArrangement = Literal["paths", "fixed"]

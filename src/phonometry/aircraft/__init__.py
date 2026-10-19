@@ -35,7 +35,7 @@ from .atmospheric_absorption import (
     sae_band_attenuation,
 )
 from .certification import (
-    NOY_BANDS,
+    NOY_BANDS_HZ,
     EPNLResult,
     effective_perceived_noise_level,
     epnl_from_pnlt,
@@ -118,7 +118,7 @@ __all__ = [
     "FlyoverResult",
     "JetEngineCoefficients",
     "MeanGroundPlaneResult",
-    "NOY_BANDS",
+    "NOY_BANDS_HZ",
     "NoiseContourResult",
     "NpdAtmosphereIncrement",
     "NpdLevelResult",

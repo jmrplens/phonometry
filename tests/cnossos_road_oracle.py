@@ -47,7 +47,7 @@ def coefficients_2015() -> environment.RoadEmissionCoefficients:
         studded_a=environment.ROAD_COEFFICIENTS.studded_a,
         studded_b=environment.ROAD_COEFFICIENTS.studded_b,
         junction_c=environment.ROAD_COEFFICIENTS.junction_c,
-        temperature_k=environment.ROAD_COEFFICIENTS.temperature_k,
+        temperature_coefficient_db_per_c=environment.ROAD_COEFFICIENTS.temperature_coefficient_db_per_c,
     )
 
 

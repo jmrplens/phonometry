@@ -41,7 +41,7 @@ AmbientNoiseResult(
     wind: NDArray[np.float64],
     thermal: NDArray[np.float64],
     shipping: NDArray[np.float64] | None,
-    wind_speed_knots: float,
+    wind_speed_kt: float,
 )
 ```
 
@@ -56,7 +56,7 @@ Composite ambient-noise spectrum (Wenz framework).
 | `wind` | Wind-noise component per frequency, in dB re 1 µPa²/Hz. |
 | `thermal` | Thermal-noise component per frequency, in dB re 1 µPa²/Hz. |
 | `shipping` | Caller-supplied shipping component, or `None`. |
-| `wind_speed_knots` | The wind speed used, in knots. |
+| `wind_speed_kt` | The wind speed used, in knots. |
 
 ### AmbientNoiseResult.plot()
 
@@ -77,7 +77,7 @@ Plot the composite spectrum and its components versus frequency.
 ocean_ambient_noise(
     frequencies_hz: NDArray[np.float64] | list[float],
     *,
-    wind_speed_knots: float,
+    wind_speed_kt: float,
     shipping: NDArray[np.float64] | list[float] | None = None,
     temperature_c: float = 16.85,
     density: float = 1025.0,
@@ -95,7 +95,7 @@ components, plus an optional caller-supplied shipping spectrum.
 | Name | Description |
 | :--- | :--- |
 | `frequencies_hz` | Frequencies, in Hz (1-D, strictly positive). |
-| `wind_speed_knots` | Wind speed `U`, in knots. |
+| `wind_speed_kt` | Wind speed `U`, in knots. |
 | `shipping` | Optional shipping-noise spectrum level per frequency, in dB re 1 µPa²/Hz (same length as `frequencies_hz`), or `None`. |
 | `temperature_c` | Water temperature, in degrees Celsius. |
 | `density` | Water density, in kg/m³. |
@@ -148,7 +148,7 @@ level is $10 \log_{10}(\langle p^2 \rangle / p_0^2)$.
 ```python
 wind_noise_spectrum(
     frequency_hz: NDArray[np.float64] | list[float] | float,
-    wind_speed_knots: float,
+    wind_speed_kt: float,
 ) -> NDArray[np.float64]
 ```
 
@@ -170,7 +170,7 @@ outside both the formula extrapolates.
 | Name | Description |
 | :--- | :--- |
 | `frequency_hz` | Frequency, in Hz (scalar or array). |
-| `wind_speed_knots` | Wind speed `U`, in knots. A calm sea (`0`) has no wind-driven noise, returning `-inf` (zero contribution in the energy sum). |
+| `wind_speed_kt` | Wind speed `U`, in knots. A calm sea (`0`) has no wind-driven noise, returning `-inf` (zero contribution in the energy sum). |
 
 **Returns:** Wind-noise spectrum level per frequency, in dB re 1 µPa²/Hz.
 

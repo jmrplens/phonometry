@@ -54,9 +54,7 @@ def _ship_source_level(language: str) -> Axes:
 
 
 def _ambient_noise(language: str) -> Axes:
-    return ocean_ambient_noise(_FREQUENCIES, wind_speed_knots=15.0).plot(
-        language=language
-    )
+    return ocean_ambient_noise(_FREQUENCIES, wind_speed_kt=15.0).plot(language=language)
 
 
 def _ship_traffic(language: str) -> Axes:

@@ -258,12 +258,12 @@ when $T = T_0$.
 HEAVY_IMPACT_A_WEIGHTING = {'third': {50.0: -30.3, 63.0: -26.2, 80.0: -22.4, 100.0: -19.1, 125.0: -16.2, 160.0: -13.2, 200.0: -10.8, 250.0: -8.7, 315.0: -6.6, 400.0: -4.8, 500.0: -3.2, 630.0: -1.9}, 'octave': {63.0: -26.2, 125.0: -16.2, 250.0: -8.7, 500.0: -3.2}}
 ```
 
-## HEAVY_IMPACT_OCTAVE_BANDS
+## HEAVY_IMPACT_OCTAVE_BANDS_HZ
 
 *Constant* (`tuple`).
 
 ```python
-HEAVY_IMPACT_OCTAVE_BANDS = (31.5, 63.0, 125.0, 250.0, 500.0)
+HEAVY_IMPACT_OCTAVE_BANDS_HZ = (31.5, 63.0, 125.0, 250.0, 500.0)
 ```
 
 ## heavy_impact_octave_levels

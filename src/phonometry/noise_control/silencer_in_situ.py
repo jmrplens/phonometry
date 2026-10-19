@@ -97,7 +97,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import ArrayLike, NDArray
 
 __all__ = [
-    "ISO11820_AIR_GAS_CONSTANT",
+    "ISO11820_AIR_GAS_CONSTANT_J_KG_K",
     "ISO11820_BACKGROUND_CORRECTIONS_DB",
     "DOWNSTREAM_DISTANCE_COEFFICIENTS",
     "INSTALLATION_CASES",
@@ -107,12 +107,12 @@ __all__ = [
     "ISO11820_OCTAVE_BAND_EXTENDED_RANGE_HZ",
     "ISO11820_OCTAVE_BAND_RANGE_HZ",
     "SABINE_AREA_COEFFICIENT",
-    "ISO11820_SOUND_SPEED_M_S",
+    "ISO11820_SPEED_OF_SOUND_M_S",
     "ISO11820_AMBIENT_PRESSURE_PA",
     "ISO11820_THIRD_OCTAVE_BAND_EXTENDED_RANGE_HZ",
     "ISO11820_THIRD_OCTAVE_BAND_RANGE_HZ",
     "TYPICAL_FIELD_CORRECTION_LIMIT_DB",
-    "ISO11820_GAS_CONSTANT",
+    "ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K",
     "UPSTREAM_DISTANCE_DIAMETERS",
     "VELOCITY_UNIFORMITY_TOLERANCE_PERCENT",
     "InstallationCase",
@@ -183,7 +183,7 @@ ISO11820_THIRD_OCTAVE_BAND_EXTENDED_RANGE_HZ: tuple[float, float] = (25.0, 10000
 
 #: The note under Equation (6): "c = 340 m/s at room temperature", in metres
 #: per second. The standard prints this rounded value and not 343.
-ISO11820_SOUND_SPEED_M_S: float = 340.0
+ISO11820_SPEED_OF_SOUND_M_S: float = 340.0
 
 #: Equations (6), (10) and (12): the :math:`6 \ln 10` of the Sabine equivalent
 #: area, dimensionless.
@@ -194,10 +194,10 @@ SABINE_AREA_COEFFICIENT: float = 6.0 * math.log(10.0)
 TYPICAL_FIELD_CORRECTION_LIMIT_DB: float = 3.0
 
 #: Equation (29): the universal gas constant as printed, in N m per kmol K.
-ISO11820_GAS_CONSTANT: float = 8314.4
+ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K: float = 8314.4
 
 #: Equation (29): R/M for air as printed, in N m per kg K.
-ISO11820_AIR_GAS_CONSTANT: float = 287.0
+ISO11820_AIR_GAS_CONSTANT_J_KG_K: float = 287.0
 
 #: Equation (29): the ambient static pressure it assumes, in pascals.
 ISO11820_AMBIENT_PRESSURE_PA: float = 100_000.0
@@ -576,7 +576,7 @@ def reverberant_surface_area_m2(
     volume_m3: float,
     reverberation_time_s: ArrayLike,
     *,
-    speed_of_sound: float = ISO11820_SOUND_SPEED_M_S,
+    speed_of_sound: float = ISO11820_SPEED_OF_SOUND_M_S,
 ) -> NDArray[np.float64]:
     r"""A quarter of the room absorption, as an area, Equations (6), (10) and (12).
 
@@ -1181,9 +1181,9 @@ def gas_density_kg_m3(
         )
         raise ValueError(msg)
     if molar_mass_kg_kmol is None:
-        return pressure / (ISO11820_AIR_GAS_CONSTANT * absolute)
+        return pressure / (ISO11820_AIR_GAS_CONSTANT_J_KG_K * absolute)
     molar_mass = require_positive(molar_mass_kg_kmol, "molar_mass_kg_kmol")
-    return molar_mass * pressure / (ISO11820_GAS_CONSTANT * absolute)
+    return molar_mass * pressure / (ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K * absolute)
 
 
 def silencer_flow_velocity_m_s(

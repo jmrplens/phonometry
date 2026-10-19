@@ -76,7 +76,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
 #: Speed of sound in air used when none is given, in m/s (20 degC).
-DEFAULT_SPEED_OF_SOUND = 343.0
+_SPEED_OF_SOUND_M_S = 343.0
 
 #: Mode kinds, ordered from the strongest (one axis) to the weakest (three).
 MODE_KINDS: tuple[str, str, str] = ("axial", "tangential", "oblique")
@@ -119,7 +119,7 @@ def room_mode_frequency(
     orders: ArrayLike,
     dimensions: ArrayLike,
     *,
-    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND,
+    speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> np.ndarray | float:
     r"""Eigenfrequency of a rectangular-room mode (Long Equation (8.43)).
 
@@ -134,7 +134,7 @@ def room_mode_frequency(
         a single triple or an ``(N, 3)`` array of triples.
     :param dimensions: Room dimensions ``(lx, ly, lz)``, m.
     :param speed_of_sound: Speed of sound ``c0``, m/s (default
-        :data:`DEFAULT_SPEED_OF_SOUND`).
+        343 m/s, dry air at 20 °C).
     :return: The modal frequency in Hz; a float for a single triple, otherwise
         one frequency per row.
     """
@@ -160,7 +160,7 @@ def room_mode_count(
     frequency: ArrayLike,
     dimensions: ArrayLike,
     *,
-    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND,
+    speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> np.ndarray | float:
     r"""Integrated number of modes below ``frequency`` (Long Equation (8.45)).
 
@@ -200,7 +200,7 @@ def room_modal_density(
     frequency: ArrayLike,
     dimensions: ArrayLike,
     *,
-    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND,
+    speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> np.ndarray | float:
     r"""Modal density :math:`dN/df` in modes per hertz (Long Equation (8.46)).
 
@@ -371,7 +371,7 @@ def room_modes(
     dimensions: ArrayLike,
     *,
     max_frequency: float = 200.0,
-    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND,
+    speed_of_sound: float = _SPEED_OF_SOUND_M_S,
     reverberation_time: float | None = None,
 ) -> RoomModesResult:
     r"""Enumerate the normal modes of a rectangular room (Long Chapter 8).
@@ -386,7 +386,7 @@ def room_modes(
     :param dimensions: Room dimensions ``(lx, ly, lz)``, m.
     :param max_frequency: Highest modal frequency to enumerate, Hz.
     :param speed_of_sound: Speed of sound ``c0``, m/s (default
-        :data:`DEFAULT_SPEED_OF_SOUND`).
+        343 m/s, dry air at 20 °C).
     :param reverberation_time: Optional reverberation time ``T``, s. When
         given, the Schroeder frequency :math:`2000 \sqrt{T/V}` is computed and
         carried in the result (and marked by :meth:`RoomModesResult.plot`).

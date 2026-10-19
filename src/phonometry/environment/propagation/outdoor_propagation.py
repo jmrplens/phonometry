@@ -75,7 +75,7 @@ _DISTANCE_NOT_POSITIVE = "'distance' must be positive."
 #: (ISO 9613-2:1996, clause 7.5 writes ``lambda = 340/f``), in m/s.
 _C_SOUND = 340.0
 #: Nominal octave-band midband frequencies of the method (clause 1), in hertz.
-DEFAULT_FREQUENCIES: tuple[float, ...] = (
+DEFAULT_FREQUENCIES_HZ: tuple[float, ...] = (
     63.0,
     125.0,
     250.0,
@@ -94,7 +94,7 @@ _DZ_LIMIT_DOUBLE = 25.0
 #: col. 2) and the middle-region term is Am = -3q (Table 3, note 2), in hertz.
 _LOWEST_NOMINAL_BAND = 63.0
 
-_NOMINAL_BANDS = np.array(DEFAULT_FREQUENCIES, dtype=np.float64)
+_NOMINAL_BANDS = np.array(DEFAULT_FREQUENCIES_HZ, dtype=np.float64)
 
 #: Fewest points a ground profile can have and still enclose an area: the
 #: two ends of one segment (ISO 9613-2:1996, Figure 3).
@@ -481,7 +481,7 @@ def geometric_divergence(distance: float) -> float:
 def atmospheric_absorption(
     distance: float,
     *,
-    frequencies: ArrayLike = DEFAULT_FREQUENCIES,
+    frequencies: ArrayLike = DEFAULT_FREQUENCIES_HZ,
     temperature_c: float = 20.0,
     relative_humidity_percent: float | None = None,
     atmospheric_pressure_kpa: float = 101.325,
@@ -573,7 +573,7 @@ def ground_attenuation(
     distance: float,
     source_height: float,
     receiver_height: float,
-    frequencies: ArrayLike = DEFAULT_FREQUENCIES,
+    frequencies: ArrayLike = DEFAULT_FREQUENCIES_HZ,
     ground_source: float = 0.0,
     ground_middle: float = 0.0,
     ground_receiver: float = 0.0,
@@ -908,7 +908,7 @@ def _c3_double(lam: float, edge_separation: float) -> float:
 def barrier_attenuation(
     barrier: Barrier,
     distance: float,
-    frequencies: ArrayLike = DEFAULT_FREQUENCIES,
+    frequencies: ArrayLike = DEFAULT_FREQUENCIES_HZ,
 ) -> NDArray[np.float64]:
     r"""Barrier diffraction attenuation ``Dz`` (ISO 9613-2:1996, Eq. (14)).
 
@@ -1056,7 +1056,7 @@ def outdoor_propagation_attenuation(
     source_height: float,
     receiver_height: float,
     *,
-    frequencies: ArrayLike = DEFAULT_FREQUENCIES,
+    frequencies: ArrayLike = DEFAULT_FREQUENCIES_HZ,
     ground_source: float = 0.0,
     ground_middle: float = 0.0,
     ground_receiver: float = 0.0,
@@ -1145,7 +1145,7 @@ def predicted_receiver_level(
     sound_power_level: ArrayLike,
     geometry: PropagationGeometry,
     *,
-    frequencies: ArrayLike = DEFAULT_FREQUENCIES,
+    frequencies: ArrayLike = DEFAULT_FREQUENCIES_HZ,
     ground: GroundFactors | None = None,
     barrier: Barrier | None = None,
     atmosphere: AtmosphericConditions | None = None,

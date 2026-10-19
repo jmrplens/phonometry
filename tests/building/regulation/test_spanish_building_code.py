@@ -86,9 +86,9 @@ _D2M_NT = (
 # --------------------------------------------------------------------------- #
 def test_band_set_is_the_eighteen_bands_of_annex_a() -> None:
     """Formulae (A.5)-(A.7) run over the 1/3-octave bands 100 Hz to 5 kHz."""
-    assert len(hr.DB_HR_FREQUENCIES) == 18
-    assert hr.DB_HR_FREQUENCIES[0] == 100.0
-    assert hr.DB_HR_FREQUENCIES[-1] == 5000.0
+    assert len(hr.DB_HR_FREQUENCIES_HZ) == 18
+    assert hr.DB_HR_FREQUENCIES_HZ[0] == 100.0
+    assert hr.DB_HR_FREQUENCIES_HZ[-1] == 5000.0
 
 
 def test_normalised_spectra_match_annex_a_tables() -> None:
@@ -225,7 +225,7 @@ def test_direct_route_and_iso717_route_agree_on_both_published_spectra() -> None
     ISO 717-1 engine, so that half is a self-consistency check between the
     two routes rather than a published oracle.
     """
-    frequencies = list(hr.DB_HR_FREQUENCIES)
+    frequencies = list(hr.DB_HR_FREQUENCIES_HZ)
 
     wall = weighted_rating_extended(list(_R_PRIME), frequencies)
     assert wall.rating == 52
@@ -246,7 +246,7 @@ def test_plain_c_differs_from_the_enlarged_range_term_on_the_facade() -> None:
     On the Ejercicio 7.1 facade the core-range C is -2 while C100-5000 is -1,
     so reading "C" as the ISO 717-1 core term would give 36 instead of 37.
     """
-    facade = weighted_rating_extended(list(_D2M_NT), list(hr.DB_HR_FREQUENCIES))
+    facade = weighted_rating_extended(list(_D2M_NT), list(hr.DB_HR_FREQUENCIES_HZ))
     assert facade.c == -2
     assert facade.c_100_5000 == -1
     assert facade.rating + facade.c != facade.rating + facade.c_100_5000
@@ -324,7 +324,7 @@ def test_railway_facade_requirement_is_stated_in_d2m_nt_a() -> None:
 
 def test_global_index_selects_the_eighteen_bands_from_a_wider_spectrum() -> None:
     """A spectrum wider than Annex A is narrowed to the eighteen bands."""
-    frequencies = [50.0, 63.0, 80.0, *hr.DB_HR_FREQUENCIES]
+    frequencies = [50.0, 63.0, 80.0, *hr.DB_HR_FREQUENCIES_HZ]
     values = [10.0, 10.0, 10.0, *_R_PRIME]
     assert hr.ra(values, frequencies=frequencies).value == pytest.approx(
         hr.ra(_R_PRIME).value, abs=1e-12
@@ -684,12 +684,12 @@ def test_global_index_validation() -> None:
     with pytest.raises(ValueError, match=r"'frequencies'.*same shape"):
         hr.db_hr_global_index(_R_PRIME, frequencies=[100.0, 125.0])
     with pytest.raises(ValueError, match=r"'frequencies' must contain positive"):
-        hr.db_hr_global_index(_R_PRIME, frequencies=[0.0, *hr.DB_HR_FREQUENCIES[1:]])
+        hr.db_hr_global_index(_R_PRIME, frequencies=[0.0, *hr.DB_HR_FREQUENCIES_HZ[1:]])
 
 
 def test_global_index_rejects_a_spectrum_missing_a_db_hr_band() -> None:
     """Every one of the eighteen bands must be present exactly once."""
-    frequencies = [*hr.DB_HR_FREQUENCIES[:-1], 6300.0]
+    frequencies = [*hr.DB_HR_FREQUENCIES_HZ[:-1], 6300.0]
     with pytest.raises(ValueError, match="5000 Hz matched 0 bands"):
         hr.db_hr_global_index(_R_PRIME, frequencies=frequencies)
 

@@ -61,7 +61,7 @@ $L_{x,i}$ el espectro normalizado de la fuente. La suma recorre **dieciocho**
 bandas de tercio de octava, de 100 Hz a 5 kHz, dos más que las dieciséis de
 ISO 717-1 (100 Hz a 3150 Hz): las bandas de 4 kHz y 5 kHz, que son la primera
 razón por la que las dos vías no dan siempre lo mismo. Los centros de banda
-están en `DB_HR_FREQUENCIES`.
+están en `DB_HR_FREQUENCIES_HZ`.
 
 | Espectro normalizado | Tabla del anejo A | Magnitud que define | Expresión |
 | :--- | :--- | :--- | :--- |
@@ -185,7 +185,7 @@ d2m_nt = [28.5, 28.5, 18.9, 23.7, 30.7, 31.3, 37.8, 35.2, 34.7,
 direct = building.d2m_nt_atr(d2m_nt)
 direct.intermediate, direct.reported   # 32,8 dBA -> 33 dBA
 
-iso = building.weighted_rating_extended(d2m_nt, building.DB_HR_FREQUENCIES)
+iso = building.weighted_rating_extended(d2m_nt, building.DB_HR_FREQUENCIES_HZ)
 iso.rating, iso.ctr_100_5000           # 38 dB, -5 dB -> 33 dBA, la misma cifra
 iso.c, iso.c_100_5000                  # -2 y -1: el rango básico frente al ampliado
 ```

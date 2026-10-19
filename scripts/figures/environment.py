@@ -1490,7 +1490,7 @@ def generate_cnossos_rail_roughness_shift(output_dir: str) -> None:
     print("Generating cnossos_rail_roughness_shift.png...")
     from phonometry import environment
 
-    freqs = np.asarray(environment.RAILWAY_THIRD_OCTAVE_BANDS)
+    freqs = np.asarray(environment.RAILWAY_THIRD_OCTAVE_BANDS_HZ)
     rail = environment.rail_roughness(environment.RailRoughnessClass.NORMAL)
     wheel = environment.wheel_roughness(environment.BrakeType.NON_TREAD)
     filt = environment.contact_filter(environment.ContactFilter.LOAD_50_DIAMETER_920)

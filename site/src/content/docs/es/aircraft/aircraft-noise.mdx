@@ -268,7 +268,7 @@ from phonometry import aircraft
 # aquí el sobrevuelo sintético de la figura de arriba
 k, dt = 41, 0.5
 idx = np.arange(k)
-shape = 15.0 * np.exp(-((np.log10(aircraft.NOY_BANDS) - np.log10(400.0)) ** 2) / 0.5)
+shape = 15.0 * np.exp(-((np.log10(aircraft.NOY_BANDS_HZ) - np.log10(400.0)) ** 2) / 0.5)
 gain = 30.0 * np.exp(-((idx - 20.0) ** 2) / (2 * 5.0**2)) - 5.0
 spectra = (55.0 + shape)[None, :] + gain[:, None]
 spectra[:, 17] += 12.0 * np.exp(-((idx - 20.0) ** 2) / (2 * 6.0**2))  # tono de ventilador 2500 Hz

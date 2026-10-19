@@ -97,14 +97,14 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
 __all__ = [
-    "AERODYNAMIC_REFERENCE_SPEED",
-    "AERODYNAMIC_THRESHOLD_SPEED",
-    "RAILWAY_MINIMUM_SPEED",
-    "RAILWAY_OCTAVE_BANDS",
-    "RAILWAY_SOURCE_HEIGHTS",
-    "RAILWAY_THIRD_OCTAVE_BANDS",
-    "REFERENCE_JOINT_DENSITY",
-    "TRAM_MINIMUM_SPEED",
+    "AERODYNAMIC_REFERENCE_SPEED_KMH",
+    "AERODYNAMIC_THRESHOLD_SPEED_KMH",
+    "RAILWAY_MINIMUM_SPEED_KMH",
+    "RAILWAY_OCTAVE_BANDS_HZ",
+    "RAILWAY_SOURCE_HEIGHTS_M",
+    "RAILWAY_THIRD_OCTAVE_BANDS_HZ",
+    "REFERENCE_JOINT_DENSITY_PER_M",
+    "TRAM_MINIMUM_SPEED_KMH",
     "BrakeType",
     "BridgeType",
     "ContactFilter",
@@ -156,7 +156,7 @@ __all__ = [
 #: 1/3-octave midband frequencies of the railway source, in Hz. (EU) 2021/1226
 #: Annex point (1) states that the railway sound power is derived in 1/3 octave
 #: bands; Appendix G tabulates 50 Hz to 10 kHz.
-RAILWAY_THIRD_OCTAVE_BANDS: tuple[float, ...] = (
+RAILWAY_THIRD_OCTAVE_BANDS_HZ: tuple[float, ...] = (
     50.0,
     63.0,
     80.0,
@@ -183,7 +183,7 @@ RAILWAY_THIRD_OCTAVE_BANDS: tuple[float, ...] = (
     10000.0,
 )
 #: Octave-band midband frequencies handed to the propagation stage, in Hz.
-RAILWAY_OCTAVE_BANDS: tuple[float, ...] = (
+RAILWAY_OCTAVE_BANDS_HZ: tuple[float, ...] = (
     63.0,
     125.0,
     250.0,
@@ -195,17 +195,17 @@ RAILWAY_OCTAVE_BANDS: tuple[float, ...] = (
 )
 #: Heights of the two equivalent source lines above the rail head, in m
 #: (2.3.1): source A at 0,5 m and source B at 4,0 m.
-RAILWAY_SOURCE_HEIGHTS: tuple[float, float] = (0.5, 4.0)
+RAILWAY_SOURCE_HEIGHTS_M: tuple[float, float] = (0.5, 4.0)
 #: Speed floor used to determine the total effective roughness of a train, km/h.
-RAILWAY_MINIMUM_SPEED = 50.0
+RAILWAY_MINIMUM_SPEED_KMH = 50.0
 #: Speed floor used instead for trams and light metro, km/h.
-TRAM_MINIMUM_SPEED = 30.0
+TRAM_MINIMUM_SPEED_KMH = 30.0
 #: Speed above which aerodynamic noise is relevant (2.3.13), km/h.
-AERODYNAMIC_THRESHOLD_SPEED = 200.0
+AERODYNAMIC_THRESHOLD_SPEED_KMH = 200.0
 #: Reference speed ``v_0`` of (2.3.13) and (2.3.14), km/h.
-AERODYNAMIC_REFERENCE_SPEED = 300.0
+AERODYNAMIC_REFERENCE_SPEED_KMH = 300.0
 #: Joint density the impact-noise table of Appendix G is given for, in m^-1.
-REFERENCE_JOINT_DENSITY = 0.01
+REFERENCE_JOINT_DENSITY_PER_M = 0.01
 
 #: Wavelength grid of Tables G-1b, G-2 and G-4 as replaced by (EU) 2021/1226,
 #: in mm: the standard 1/3-octave series from 2 000 mm to 0,8 mm.
@@ -1963,7 +1963,7 @@ def traction_sound_power(
 
 
 def aerodynamic_sound_power(
-    speed: float = AERODYNAMIC_REFERENCE_SPEED,
+    speed: float = AERODYNAMIC_REFERENCE_SPEED_KMH,
     *,
     reference: tuple[NDArray[np.float64], NDArray[np.float64]] | None = None,
     alpha: float = _AERODYNAMIC_ALPHA,
@@ -1993,7 +1993,7 @@ def aerodynamic_sound_power(
             _spectrum(reference[1], "reference[1]"),
         )
     )
-    shift = _finite(alpha, "alpha") * np.log10(v / AERODYNAMIC_REFERENCE_SPEED)
+    shift = _finite(alpha, "alpha") * np.log10(v / AERODYNAMIC_REFERENCE_SPEED_KMH)
     return low + shift, high + shift
 
 
@@ -2022,7 +2022,7 @@ def roughness_to_frequency(
     wavelengths: ArrayLike,
     speed: float,
     *,
-    frequencies: ArrayLike = RAILWAY_THIRD_OCTAVE_BANDS,
+    frequencies: ArrayLike = RAILWAY_THIRD_OCTAVE_BANDS_HZ,
     interpolation: RoughnessInterpolation = RoughnessInterpolation.PROPORTIONAL,
 ) -> NDArray[np.float64]:
     r"""Resample a roughness spectrum from wavelength onto frequency.
@@ -2112,7 +2112,7 @@ def impact_roughness(single: ArrayLike, joint_density: float) -> NDArray[np.floa
     if density <= 0.0:
         return np.full_like(spectrum, -np.inf)
     return np.asarray(
-        spectrum + 10.0 * np.log10(density / REFERENCE_JOINT_DENSITY),
+        spectrum + 10.0 * np.log10(density / REFERENCE_JOINT_DENSITY_PER_M),
         dtype=np.float64,
     )
 
@@ -2193,7 +2193,7 @@ def curve_squeal_excess(
 
 
 def horizontal_directivity(
-    phi: float, *, frequencies: ArrayLike = RAILWAY_THIRD_OCTAVE_BANDS
+    phi: float, *, frequencies: ArrayLike = RAILWAY_THIRD_OCTAVE_BANDS_HZ
 ) -> NDArray[np.float64]:
     r"""Horizontal directivity ``dL_W,dir,hor,i`` of (2.3.15), in dB.
 
@@ -2220,7 +2220,7 @@ def horizontal_directivity(
 def vertical_directivity(
     psi: float,
     *,
-    frequencies: ArrayLike = RAILWAY_THIRD_OCTAVE_BANDS,
+    frequencies: ArrayLike = RAILWAY_THIRD_OCTAVE_BANDS_HZ,
     height: int = 1,
     aerodynamic: bool = False,
     edition: DirectivityEdition = DirectivityEdition.CURRENT,
@@ -2363,7 +2363,7 @@ class RailwayTrack(OwnsArrays):
     rail_roughness: tuple[Any, Any]
     track_transfer: Any
     impact_roughness: tuple[Any, Any] | None = None
-    joint_density: float = REFERENCE_JOINT_DENSITY
+    joint_density: float = REFERENCE_JOINT_DENSITY_PER_M
     bridge_transfer: Any | None = None
     squeal_excess: float = 0.0
     length: float = 100.0
@@ -2540,7 +2540,7 @@ def _roughness_speed_floor(stock: RollingStock, minimum_speed: float | None) -> 
     """Speed floor of 2.3.2: 50 km/h, or 30 km/h for a tram or light metro."""
     if minimum_speed is not None:
         return _finite(minimum_speed, "minimum_speed")
-    return TRAM_MINIMUM_SPEED if stock.tram else RAILWAY_MINIMUM_SPEED
+    return TRAM_MINIMUM_SPEED_KMH if stock.tram else RAILWAY_MINIMUM_SPEED_KMH
 
 
 def _flow_term(vehicle: RailwayVehicle, reference_time: float, length: float) -> float:
@@ -2604,7 +2604,7 @@ def _vehicle_spectra(
         if bridge is not None:
             omni.append(bridge)
             components.append(("bridge", 0, bridge))
-        if stock.aerodynamic is not None and speed > AERODYNAMIC_THRESHOLD_SPEED:
+        if stock.aerodynamic is not None and speed > AERODYNAMIC_THRESHOLD_SPEED_KMH:
             low, high = aerodynamic_sound_power(
                 speed, reference=stock.aerodynamic, alpha=stock.aerodynamic_alpha
             )
@@ -2705,7 +2705,7 @@ def railway_source_power(
         msg = "'length' must be a positive number of metres."
         raise ValueError(msg)
 
-    n_bands = len(RAILWAY_THIRD_OCTAVE_BANDS)
+    n_bands = len(RAILWAY_THIRD_OCTAVE_BANDS_HZ)
     per_height: list[list[NDArray[np.float64]]] = [[], []]
     components: dict[str, list[list[NDArray[np.float64]]]] = {
         name: [[], []] for name in ("rolling", "traction", "aerodynamic", "bridge")
@@ -2742,10 +2742,10 @@ def railway_source_power(
     )
     return RailwayEmissionResult(
         third_octave_frequencies=np.asarray(
-            RAILWAY_THIRD_OCTAVE_BANDS, dtype=np.float64
+            RAILWAY_THIRD_OCTAVE_BANDS_HZ, dtype=np.float64
         ),
-        frequencies=np.asarray(RAILWAY_OCTAVE_BANDS, dtype=np.float64),
-        heights=RAILWAY_SOURCE_HEIGHTS,
+        frequencies=np.asarray(RAILWAY_OCTAVE_BANDS_HZ, dtype=np.float64),
+        heights=RAILWAY_SOURCE_HEIGHTS_M,
         third_octave_line_power=third,
         line_power=octaves,
         total_line_power=_energy_sum(*octaves),

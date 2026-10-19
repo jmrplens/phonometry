@@ -60,7 +60,13 @@ from ..._internal.validation import (
     require_scalar,
 )
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
-from ..erb_scale import CAM_C, ERB_C1, ERB_C2, erb_bandwidth, frequency_from_cam
+from ..erb_scale import (
+    CAM_C,
+    ERB_C1_HZ,
+    ERB_C2_PER_HZ,
+    erb_bandwidth,
+    frequency_from_cam,
+)
 
 #: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
 _P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
@@ -254,8 +260,8 @@ _T1_MIDDLE = np.array(
 # Formulae (1) and (6) of clause 7.4 are the Glasberg and Moore (1990) ERB_N
 # scale; they are shared with the public utilities of
 # :mod:`phonometry.psychoacoustics.erb_scale`, which own the constants.
-_ERB_C1 = ERB_C1
-_ERB_C2 = ERB_C2
+_ERB_C1 = ERB_C1_HZ
+_ERB_C2 = ERB_C2_PER_HZ
 _CAM_C = CAM_C  # Formula (6): i = 21.366 * log10(C2 * fc + 1)
 _ROEX_D = 0.35  # constant D of Formula (5)
 _ROEX_G_MAX = 4.0  # Formula (4): drop upper-side components g > 4 (clause 7.4)

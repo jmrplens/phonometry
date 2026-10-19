@@ -90,7 +90,7 @@ DampingTreatment(
     group: str = '',
     note: str = '',
     provenance: Provenance | None = None,
-    decay_rate_db_s: float | None = None,
+    decay_rate_db_per_s: float | None = None,
     temperature_c: float | None = None,
     adhered_area_percent: float | None = None,
     surface_density_kg_m2: float | None = None,
@@ -103,7 +103,7 @@ One damping treatment, rated on the chapter's standard panel.
 
 | Name | Description |
 | :--- | :--- |
-| `decay_rate_db_s` | The decay rate of the vibration of the treated standard panel, in decibels per second. Printed as a range on most rows, which [`ranges`](/phonometry/reference/api/io/io/#cataloguerow) holds. |
+| `decay_rate_db_per_s` | The decay rate of the vibration of the treated standard panel, in decibels per second. Printed as a range on most rows, which [`ranges`](/phonometry/reference/api/io/io/#cataloguerow) holds. |
 | `temperature_c` | The temperature of the measurement, in degrees Celsius, which the table prints once, in the decay rate's heading. |
 | `adhered_area_percent` | The percentage of the panel the treatment is bonded over. Two rows print the word "No" instead, for a treatment laid without adhesive, which [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) hands back. |
 | `surface_density_kg_m2` | The weight of the treatment, in kg/m2. |

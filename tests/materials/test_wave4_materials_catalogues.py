@@ -83,7 +83,7 @@ def test_every_treatment_holds_the_printed_decay_area_and_weight() -> None:
         assert row.name == label.rstrip(" *")
         assert row.temperature_c == 21
         for field, cell in (
-            ("decay_rate_db_s", decay),
+            ("decay_rate_db_per_s", decay),
             ("surface_density_kg_m2", weight),
         ):
             printed = _span(cell)

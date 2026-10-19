@@ -109,7 +109,7 @@ from ...metrology.uncertainty import Quantity, UncertaintyResult, combine_uncert
 from .mechanical_mobility import convert_frf
 
 #: Reference dynamic stiffness for the level ``L_k`` (ISO 10846-2/-3, 3.17), N/m.
-REFERENCE_STIFFNESS: float = 1.0
+REFERENCE_STIFFNESS_N_M: float = 1.0
 
 #: Validity limit on the vibration transmissibility magnitude for the indirect
 #: method (ISO 10846-3:2002, 6.1, Inequality (2)): measurements are valid only
@@ -209,7 +209,7 @@ def _omega(frequency: ArrayLike, name: str = "frequency") -> NDArray[np.float64]
 
 
 def transfer_stiffness_level(
-    stiffness: ArrayLike, *, reference: float = REFERENCE_STIFFNESS
+    stiffness: ArrayLike, *, reference: float = REFERENCE_STIFFNESS_N_M
 ) -> np.ndarray:
     r"""Level of the dynamic transfer stiffness (ISO 10846-2/-3, 3.17).
 
@@ -849,7 +849,7 @@ class BandAveragedStiffness(OwnsArrays):
         k = np.asarray(self.stiffness, dtype=np.float64)
         out = np.full(k.shape, np.nan)
         determined = self.determined
-        out[determined] = 20.0 * np.log10(k[determined] / REFERENCE_STIFFNESS)
+        out[determined] = 20.0 * np.log10(k[determined] / REFERENCE_STIFFNESS_N_M)
         return out
 
     def plot(
@@ -1887,7 +1887,7 @@ class DrivingPointStiffnessResult(OwnsArrays):
         """
         lines = self._low_frequency_lines()
         power = float(np.mean(self.magnitude[lines] ** 2))
-        return 10.0 * math.log10(power / REFERENCE_STIFFNESS**2)
+        return 10.0 * math.log10(power / REFERENCE_STIFFNESS_N_M**2)
 
     @property
     def threshold_level_db(self) -> float:

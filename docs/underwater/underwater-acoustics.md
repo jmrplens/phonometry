@@ -130,7 +130,7 @@ then arithmetically averaged (Formula 9), and port and starboard are also
 reported separately, because a real ship does not radiate symmetrically
 (Clause 6.5). Background noise is measured at the start and end of each test
 period and the ISO 3744-style correction applied per band; the recommended
-wind limit is 20 kn for ships above 100 m (Clause 5.3). Skip any of this and
+wind limit is 20 kt for ships above 100 m (Clause 5.3). Skip any of this and
 the number you quote is a level, but not an ISO 17208 radiated noise level.
 None of that discipline is implemented in code: the library supplies the
 closed-form `radiated_noise_level` and `monopole_source_level`, and the runs,

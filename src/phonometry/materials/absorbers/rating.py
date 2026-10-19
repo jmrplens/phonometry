@@ -73,9 +73,9 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
-    "OCTAVE_BANDS",
+    "RATING_OCTAVE_BANDS_HZ",
     "REFERENCE_CURVE",
-    "THIRD_OCTAVE_BANDS",
+    "RATING_THIRD_OCTAVE_BANDS_HZ",
     "AbsorptionRatingResult",
     "absorption_class",
     "practical_absorption_coefficient",
@@ -86,11 +86,11 @@ __all__ = [
 # --- ISO 11654:1997 fixed data ------------------------------------------
 
 #: Octave rating bands, in Hz (Clause 4.1); the reference-curve bands.
-OCTAVE_BANDS: tuple[int, ...] = (250, 500, 1000, 2000, 4000)
+RATING_OCTAVE_BANDS_HZ: tuple[int, ...] = (250, 500, 1000, 2000, 4000)
 
 #: One-third-octave bands feeding the five octaves, in Hz (200 Hz to
 #: 5000 Hz); each consecutive triple averages into one octave (Clause 4.1).
-THIRD_OCTAVE_BANDS: tuple[int, ...] = (
+RATING_THIRD_OCTAVE_BANDS_HZ: tuple[int, ...] = (
     200,
     250,
     315,
@@ -280,7 +280,7 @@ class AbsorptionRatingResult(OwnsArrays):
         one-third-octave table every accredited ISO 354 certificate reports.
     :ivar third_octave_bands: The one-third-octave centre frequencies, in Hz,
         that pair with ``third_octave_alpha_s`` (the module
-        :data:`THIRD_OCTAVE_BANDS`); ``None`` when ``third_octave_alpha_s`` is.
+        :data:`RATING_THIRD_OCTAVE_BANDS_HZ`); ``None`` when ``third_octave_alpha_s`` is.
     """
 
     alpha_w: float
@@ -522,13 +522,15 @@ def practical_absorption_coefficient(
     :raises ValueError: if any coefficient is negative or the wrong number
         of values is supplied.
     """
-    values = _coerce(third_octave_alpha_s, THIRD_OCTAVE_BANDS, "third_octave_alpha_s")
+    values = _coerce(
+        third_octave_alpha_s, RATING_THIRD_OCTAVE_BANDS_HZ, "third_octave_alpha_s"
+    )
     if any(v < 0.0 for v in values):
         msg = "alpha_s values must be non-negative"
         raise ValueError(msg)
     alpha_p = [
         _practical_round((values[3 * i] + values[3 * i + 1] + values[3 * i + 2]) / 3.0)
-        for i in range(len(OCTAVE_BANDS))
+        for i in range(len(RATING_OCTAVE_BANDS_HZ))
     ]
     return np.asarray(alpha_p, dtype=np.float64)
 
@@ -573,7 +575,7 @@ def weighted_absorption(
     :raises ValueError: if any coefficient is negative or the wrong number
         of values is supplied.
     """
-    values = _coerce(alpha_p, OCTAVE_BANDS, "alpha_p")
+    values = _coerce(alpha_p, RATING_OCTAVE_BANDS_HZ, "alpha_p")
     if any(v < 0.0 for v in values):
         msg = "'alpha_p' must be non-negative."
         raise ValueError(msg)
@@ -616,7 +618,7 @@ def _rate(
         absorption_class=absorption_class(alpha_w_units / 20.0),
         shift=shift_units / 20.0,
         unfavourable_sum=unfav_units / 20.0,
-        frequencies=np.asarray(OCTAVE_BANDS, dtype=np.float64),
+        frequencies=np.asarray(RATING_OCTAVE_BANDS_HZ, dtype=np.float64),
         measured=np.asarray([u / 20.0 for u in measured_units], dtype=np.float64),
         shifted_reference=np.asarray(
             [u / 20.0 for u in shifted_units], dtype=np.float64
@@ -627,7 +629,7 @@ def _rate(
         third_octave_bands=(
             None
             if third_octave is None
-            else np.asarray(THIRD_OCTAVE_BANDS, dtype=np.float64)
+            else np.asarray(RATING_THIRD_OCTAVE_BANDS_HZ, dtype=np.float64)
         ),
     )
 
@@ -654,13 +656,15 @@ def weighted_absorption_from_third_octave(
     :returns: A frozen :class:`AbsorptionRatingResult` identical to
         :func:`weighted_absorption` on the derived ``alpha_p``, additionally
         carrying ``third_octave_alpha_s`` (the input as given) and
-        ``third_octave_bands`` (:data:`THIRD_OCTAVE_BANDS`).
+        ``third_octave_bands`` (:data:`RATING_THIRD_OCTAVE_BANDS_HZ`).
     :raises ValueError: if any coefficient is negative or the wrong number of
         values is supplied.
     """
-    values = _coerce(third_octave_alpha_s, THIRD_OCTAVE_BANDS, "third_octave_alpha_s")
+    values = _coerce(
+        third_octave_alpha_s, RATING_THIRD_OCTAVE_BANDS_HZ, "third_octave_alpha_s"
+    )
     alpha_p = practical_absorption_coefficient(values)
-    return _rate(_coerce(alpha_p, OCTAVE_BANDS, "alpha_p"), values)
+    return _rate(_coerce(alpha_p, RATING_OCTAVE_BANDS_HZ, "alpha_p"), values)
 
 
 def absorption_class(alpha_w: float) -> str:

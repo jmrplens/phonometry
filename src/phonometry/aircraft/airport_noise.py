@@ -486,7 +486,7 @@ def npd_curve(
 # Single-event flight-path calculation (ECAC Doc 29 §4.3-4.5)
 # ===========================================================================
 
-#: Reference speed 160 kn in m/s and the noise-fraction d0 = (2/π)·Vref·t0 (m).
+#: Reference speed 160 kt in m/s and the noise-fraction d0 = (2/π)·Vref·t0 (m).
 _VREF_MS = 160.0 * 0.514444
 _D0_M = (2.0 / np.pi) * _VREF_MS * 1.0
 #: Recommended lower limit on NPD lookup distances, in metres (Doc 29 §4.2).
@@ -1383,7 +1383,7 @@ def event_level(
     :param distances: NPD tabulated slant distances, in metres.
     :param exposure_levels: NPD exposure (SEL) levels, shape ``(P, D)``.
     :param maximum_levels: NPD maximum levels, shape ``(P, D)``.
-    :param reference_speed: NPD reference speed, in m/s (default 160 kn).
+    :param reference_speed: NPD reference speed, in m/s (default 160 kt).
     :param mounting: Engine mounting (``"wing"``/``"fuselage"``/``"propeller"``).
     :param metric: ``"exposure"`` (SEL) or ``"maximum"`` (LAmax).
     :param atmosphere: Aerodrome air temperature and pressure, an

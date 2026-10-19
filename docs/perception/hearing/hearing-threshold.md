@@ -139,7 +139,7 @@ more sensitive condition (a lower threshold) around 3–4 kHz.
 ```python
 import matplotlib.pyplot as plt
 from phonometry import hearing
-from phonometry.hearing import AUDIOMETRIC_FREQUENCIES as f
+from phonometry.hearing import AUDIOMETRIC_FREQUENCIES_HZ as f
 
 # One line for the age distribution:
 hearing.age_threshold(70, "male", 0.5).plot()

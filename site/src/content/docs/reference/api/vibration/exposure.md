@@ -61,6 +61,14 @@ by applying the exact analog response of ISO 8041-1 in the frequency domain.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
+## ACCELERATION_LEVEL_REFERENCE_M_S2
+
+*Constant* (`float`).
+
+```python
+ACCELERATION_LEVEL_REFERENCE_M_S2 = 1e-06
+```
+
 ## apply_band_limiting
 
 ```python
@@ -581,20 +589,20 @@ $A(8) = \sqrt{(1/T_0) \sum_i a_{\mathrm{hv}i}^2 T_i}$.
 | :--- | :--- |
 | ValueError | if the inputs differ in length, are empty or negative. |
 
-## HAV_EAV_A8
+## HAV_EAV_A8_M_S2
 
 *Constant* (`float`).
 
 ```python
-HAV_EAV_A8 = 2.5
+HAV_EAV_A8_M_S2 = 2.5
 ```
 
-## HAV_ELV_A8
+## HAV_ELV_A8_M_S2
 
 *Constant* (`float`).
 
 ```python
-HAV_ELV_A8 = 5.0
+HAV_ELV_A8_M_S2 = 5.0
 ```
 
 ## hav_vwf_lifetime_years
@@ -699,14 +707,6 @@ defines the MTVV on.
 | :--- | :--- |
 | ValueError | for a bad signal, non-positive `fs`/`tau` or an unknown `method`. |
 
-## REFERENCE_ACCELERATION
-
-*Constant* (`float`).
-
-```python
-REFERENCE_ACCELERATION = 1e-06
-```
-
 ## REFERENCE_DURATION_S
 
 *Constant* (`float`).
@@ -807,12 +807,12 @@ returned.
 | :--- | :--- |
 | ValueError | if `components` is empty or `k` differs in length. |
 
-## WBV_EAV_A8
+## WBV_EAV_A8_M_S2
 
 *Constant* (`float`).
 
 ```python
-WBV_EAV_A8 = 0.5
+WBV_EAV_A8_M_S2 = 0.5
 ```
 
 ## WBV_EAV_VDV
@@ -823,12 +823,12 @@ WBV_EAV_A8 = 0.5
 WBV_EAV_VDV = 9.1
 ```
 
-## WBV_ELV_A8
+## WBV_ELV_A8_M_S2
 
 *Constant* (`float`).
 
 ```python
-WBV_ELV_A8 = 1.15
+WBV_ELV_A8_M_S2 = 1.15
 ```
 
 ## WBV_ELV_VDV

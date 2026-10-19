@@ -77,7 +77,7 @@ def test_short_pulse_coefficient_reproduces_eq_3_92() -> None:
     ``F2rms = 2 m^2 vo^2 fi B = 3,925 B``, printed rounded to 3,9.
     """
     v0 = building.hammer_impact_velocity()
-    peak = 2.0 * building.TAPPING_HAMMER_MASS * v0 / 0.1
+    peak = 2.0 * building.TAPPING_HAMMER_MASS_KG * v0 / 0.1
     derived = peak**2 / (2.0 * 10.0)
     assert derived == pytest.approx(3.925, abs=5e-3)
     # The library's own 3,9 B must agree with the printed coefficient.
@@ -201,7 +201,7 @@ def test_over_critical_cut_off_is_the_lower_root() -> None:
     for name, thickness in (("chipboard", 0.022), ("osb", 0.015)):
         stiffness, impedance = _plate(name, thickness)
         decay = stiffness / (2.0 * impedance)
-        root = np.sqrt(decay**2 - stiffness / building.TAPPING_HAMMER_MASS)
+        root = np.sqrt(decay**2 - stiffness / building.TAPPING_HAMMER_MASS_KG)
         fco = building.tapping_cut_off_frequency(stiffness, impedance)
         assert fco == pytest.approx((decay - root) / (2.0 * np.pi))
         assert fco < 1000.0
@@ -209,8 +209,8 @@ def test_over_critical_cut_off_is_the_lower_root() -> None:
 
     # Continuity across the critical boundary, from both sides.
     stiffness = 1.0e8
-    critical = np.sqrt(stiffness * building.TAPPING_HAMMER_MASS) / 2.0
-    undamped = np.sqrt(stiffness / building.TAPPING_HAMMER_MASS) / (2.0 * np.pi)
+    critical = np.sqrt(stiffness * building.TAPPING_HAMMER_MASS_KG) / 2.0
+    undamped = np.sqrt(stiffness / building.TAPPING_HAMMER_MASS_KG) / (2.0 * np.pi)
     assert building.tapping_cut_off_frequency(stiffness, critical * (1.0 - 1e-9)) == (
         pytest.approx(undamped, rel=1e-4)
     )
@@ -290,7 +290,7 @@ def test_critical_damping_matches_vigran_pi_m_f0() -> None:
     pi m f0", with ``f0 = sqrt(s/m)/(2 pi)``. Setting ``Zdp = pi m f0`` in
     Hopkins's criterion must land exactly on the boundary.
     """
-    mass, stiffness = building.TAPPING_HAMMER_MASS, 3.2e5
+    mass, stiffness = building.TAPPING_HAMMER_MASS_KG, 3.2e5
     f0 = np.sqrt(stiffness / mass) / (2.0 * np.pi)
     critical = np.pi * mass * f0
     assert stiffness * mass == pytest.approx(4.0 * critical**2, rel=1e-12)
@@ -310,7 +310,7 @@ def test_hammer_contact_area_matches_vigran_seven_square_centimetres() -> None:
     of the hammer(s) Sh, the latter being 7 cm2", with ``s = E Sh/d``. The two
     printed forms agree to 1 %.
     """
-    area = np.pi * building.TAPPING_HAMMER_RADIUS**2
+    area = np.pi * building.TAPPING_HAMMER_RADIUS_M**2
     assert area == pytest.approx(7.0e-4, rel=0.02)
     modulus, thickness = 2.8e8 * 0.005, 0.005
     vigran = modulus * 7.0e-4 / thickness
@@ -329,7 +329,7 @@ def test_force_pulse_transform_matches_the_closed_form_spectrum() -> None:
     """
     stiffness, impedance = _plate("concrete", 0.14)
     decay = stiffness / (2.0 * impedance)
-    beta = np.sqrt(stiffness / building.TAPPING_HAMMER_MASS - decay**2)
+    beta = np.sqrt(stiffness / building.TAPPING_HAMMER_MASS_KG - decay**2)
     time = np.linspace(0.0, np.pi / beta, 200001)
     pulse = building.force_pulse(time, stiffness, impedance)
     assert np.all(pulse >= -1e-6)
@@ -391,7 +391,7 @@ def test_over_critical_pulse_is_still_equation_3_95() -> None:
     stiffness, impedance = _plate("chipboard", 0.022)
     v0 = building.hammer_impact_velocity()
     decay = stiffness / (2.0 * impedance)
-    gamma = np.sqrt(decay**2 - stiffness / building.TAPPING_HAMMER_MASS)
+    gamma = np.sqrt(decay**2 - stiffness / building.TAPPING_HAMMER_MASS_KG)
 
     safe = np.linspace(1e-7, 0.02, 4001)
     printed = v0 * stiffness * np.exp(-decay * safe) * np.sinh(gamma * safe) / gamma
@@ -425,7 +425,7 @@ def test_under_critical_pulse_is_truncated_at_the_first_zero_crossing() -> None:
     """
     stiffness, impedance = _plate("concrete", 0.14)
     decay = stiffness / (2.0 * impedance)
-    omega0 = np.sqrt(stiffness / building.TAPPING_HAMMER_MASS)
+    omega0 = np.sqrt(stiffness / building.TAPPING_HAMMER_MASS_KG)
     beta = np.sqrt(omega0**2 - decay**2)
     duration = np.pi / beta
     # Positive right up to the cut, exactly zero just after it.
@@ -456,7 +456,7 @@ def test_spectrum_truncation_uses_the_same_duration_as_the_pulse() -> None:
     """
     stiffness, impedance = _plate("concrete", 0.14)
     decay = stiffness / (2.0 * impedance)
-    beta = np.sqrt(stiffness / building.TAPPING_HAMMER_MASS - decay**2)
+    beta = np.sqrt(stiffness / building.TAPPING_HAMMER_MASS_KG - decay**2)
     duration = np.pi / beta
     # Integrate over three times the pulse duration: the extra range is zero
     # in the pulse, so a transform truncated at 2 pi/beta or pi/omega_o can no
@@ -481,7 +481,7 @@ def test_spectrum_truncation_holds_for_a_heavily_damped_impact() -> None:
     truncation time. Just below the critical point they differ by a factor of
     five, which is where the distinction is actually observable.
     """
-    stiffness, mass = 1.0e8, building.TAPPING_HAMMER_MASS
+    stiffness, mass = 1.0e8, building.TAPPING_HAMMER_MASS_KG
     impedance = 3600.0  # 4 Zdp^2 = 5,18e7 > K m = 5,0e7
     assert stiffness * mass < 4.0 * impedance**2
     decay = stiffness / (2.0 * impedance)
@@ -512,7 +512,7 @@ def test_critical_case_is_inclusive_and_finite() -> None:
     that case to the over-critical branch, whose critically damped limit
     ``F1 = vo K t e^(-a t)`` is finite.
     """
-    mass = building.TAPPING_HAMMER_MASS
+    mass = building.TAPPING_HAMMER_MASS_KG
     stiffness = 1.0e8
     critical = np.sqrt(stiffness * mass) / 2.0  # K m == 4 Zdp^2 exactly
     assert stiffness * mass == pytest.approx(4.0 * critical**2, rel=1e-12)

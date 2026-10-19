@@ -1558,7 +1558,7 @@ def plot_weighting_verification(
     """
     from .._i18n import format_number, localize_axes
     from ..vibration.human.instrumentation import (
-        UNCONSTRAINED_BELOW,
+        UNCONSTRAINED_BELOW_PERCENT,
         weighting_tolerance_percent,
     )
 
@@ -1585,7 +1585,7 @@ def plot_weighting_verification(
     # explain it. The tail keeps its lower edge, exactly as the verdict does.
     uncertainty = result.expanded_uncertainty_percent
     if uncertainty > 0.0:
-        unconstrained = lower <= UNCONSTRAINED_BELOW
+        unconstrained = lower <= UNCONSTRAINED_BELOW_PERCENT
         effective_lower = np.where(unconstrained, lower, lower + uncertainty)
         ax.fill_between(
             freqs,

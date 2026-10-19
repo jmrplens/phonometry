@@ -56,7 +56,7 @@ from ..environment.propagation.air_absorption import (
     _pure_tone_terms,
     _validate,
 )
-from .certification import NOY_BANDS
+from .certification import NOY_BANDS_HZ
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -351,7 +351,7 @@ _ETA = read_only(
 #: 7.00 and 10.00): past it ``η`` is flat, whatever the interpolation.
 _ETA_PLATEAU_DELTA = 6.50
 #: ISO 3891:1978 Annex A, Table 2: the frequency ``f0`` at which the formula of
-#: A.2 is evaluated for each nominal band of :data:`NOY_BANDS` (50 Hz to
+#: A.2 is evaluated for each nominal band of :data:`NOY_BANDS_HZ` (50 Hz to
 #: 10 kHz). A.1 sets it at the band centre up to 4 kHz and at the lower band
 #: edge above, which Table 2 prints rounded: 4 500, 5 600, 7 100 and 9 000 Hz.
 _F0_HZ = read_only(
@@ -630,7 +630,7 @@ def arp866a_attenuation(
     alpha = 10.0 ** (
         2.05 * np.log10(f0 / 1000.0) + 1.1394e-3 * theta - 1.916984
     ) + eta * 10.0 ** (np.log10(f0) + 8.42994e-3 * theta - 2.755624)
-    nominal = np.asarray(NOY_BANDS[rows], dtype=np.float64)
+    nominal = np.asarray(NOY_BANDS_HZ[rows], dtype=np.float64)
     return Arp866aAttenuation(
         frequencies=nominal,
         evaluation_frequencies_hz=f0,

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from .design import (
-    DEFAULT_POLAR_ANGLES,
+    DEFAULT_POLAR_ANGLES_DEG,
     DiffuserPolarResponse,
     predict_diffuser_polar_response,
     predicted_diffusion_spectrum,
@@ -36,7 +36,7 @@ from .predicted_scattering import (
     predicted_scattering_named,
 )
 from .reverberation_room_scattering import (
-    BASE_PLATE_BANDS,
+    BASE_PLATE_BANDS_HZ,
     BASE_PLATE_MAX_SCATTERING,
     ScatteringDiffusionWarning,
     ScatteringResult,
@@ -66,9 +66,9 @@ from .scattering_diffusion import (
 )
 
 __all__ = [
-    "BASE_PLATE_BANDS",
+    "BASE_PLATE_BANDS_HZ",
     "BASE_PLATE_MAX_SCATTERING",
-    "DEFAULT_POLAR_ANGLES",
+    "DEFAULT_POLAR_ANGLES_DEG",
     "DIFFUSION_BANDS_HZ",
     "PUBLISHED_DIFFUSION",
     "PUBLISHED_PREDICTED_SCATTERING",

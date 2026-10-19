@@ -336,7 +336,7 @@ receiving room volume; the one-third-octave table of $L_\mathrm{n,0}$ and
 $\Delta L$ beside the $\Delta L$ diagram with the frequency range of the
 ISO 717-2 rating dashed, as key 1 of the form marks it; and the rating, with
 the two floor ratings H.5 i) asks for beside it. The product identification
-and the curing time come from the `product` and `curing_time_h` fields of
+and the curing time come from the `product` and `curing_time_hours` fields of
 `ReportMetadata`.
 
 ```python
@@ -344,7 +344,7 @@ from phonometry import ReportMetadata
 
 cover.report("covering.pdf", metadata=ReportMetadata(
     manufacturer="Example floorings", product="Resilient vinyl, 4 mm",
-    mass_per_area=2.6, curing_time_h=0.0, source_temperature_c=21.2,
+    mass_per_area=2.6, curing_time_hours=0.0, source_temperature_c=21.2,
     source_relative_humidity_percent=48.0, receiving_volume=58.0))
 ```
 

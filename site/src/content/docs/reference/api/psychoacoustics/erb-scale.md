@@ -107,20 +107,20 @@ $24.7 \, (4.37 F + 1)$ for `F` in kHz).
 
 **Returns:** The bandwidth `ERB_N`, Hz; a float for a scalar input.
 
-## ERB_C1
+## ERB_C1_HZ
 
 *Constant* (`float`).
 
 ```python
-ERB_C1 = 24.673
+ERB_C1_HZ = 24.673
 ```
 
-## ERB_C2
+## ERB_C2_PER_HZ
 
 *Constant* (`float`).
 
 ```python
-ERB_C2 = 0.004368
+ERB_C2_PER_HZ = 0.004368
 ```
 
 ## frequency_from_cam

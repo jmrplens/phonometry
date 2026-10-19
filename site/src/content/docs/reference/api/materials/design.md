@@ -60,12 +60,12 @@ directly.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## DEFAULT_POLAR_ANGLES
+## DEFAULT_POLAR_ANGLES_DEG
 
 *Constant* (`tuple`).
 
 ```python
-DEFAULT_POLAR_ANGLES = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90)
+DEFAULT_POLAR_ANGLES_DEG = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90)
 ```
 
 ## DiffuserPolarResponse
@@ -226,7 +226,7 @@ exactly one.
 | `frequency` | Frequency of the prediction `f`, in hertz. |
 | `depths` | Well depths `d_n` of one period, in metres (1-D, at least two wells); mutually exclusive with `reflection`. |
 | `reflection` | Explicit per-well complex pressure reflection coefficient of one period (1-D, at least two wells); mutually exclusive with `depths`. |
-| `angles_deg` | Receiver reflection angles `theta`, in degrees; defaults to the ISO 17497-2 semicircle [`DEFAULT_POLAR_ANGLES`](/phonometry/reference/api/materials/design/#default_polar_angles). |
+| `angles_deg` | Receiver reflection angles `theta`, in degrees; defaults to the ISO 17497-2 semicircle [`DEFAULT_POLAR_ANGLES_DEG`](/phonometry/reference/api/materials/design/#default_polar_angles_deg). |
 | `source_angle_deg` | Angle of incidence `psi` of the source, in degrees (0 = normal incidence). |
 | `repetitions` | Number of repetitions `N_p` of the single period; the grating lobes that define a Schroeder diffuser require `periods >= 2`. |
 | `speed_of_sound` | Speed of sound `c`, in metres per second. |
@@ -284,7 +284,7 @@ for this helper (build the spectrum yourself from
 | `frequencies` | Frequencies of the spectrum, in hertz (1-D). |
 | `depths` | Well depths `d_n` of one period, in metres (1-D, at least two wells). |
 | `reflection_of` | Reserved for future frequency-dependent reflection models; must be `None`. |
-| `angles_deg` | Receiver reflection angles `theta`, in degrees; defaults to [`DEFAULT_POLAR_ANGLES`](/phonometry/reference/api/materials/design/#default_polar_angles). |
+| `angles_deg` | Receiver reflection angles `theta`, in degrees; defaults to [`DEFAULT_POLAR_ANGLES_DEG`](/phonometry/reference/api/materials/design/#default_polar_angles_deg). |
 | `source_angle_deg` | Angle of incidence `psi`, in degrees. |
 | `repetitions` | Number of repetitions `N_p` of the single period. |
 | `speed_of_sound` | Speed of sound `c`, in metres per second. |

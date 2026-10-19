@@ -27,11 +27,11 @@ import pytest
 
 import phonometry.materials.surfaces.road_absorption as road
 from phonometry.materials.surfaces.road_absorption import (
-    DEFAULT_MIC_HEIGHT,
-    DEFAULT_SOURCE_HEIGHT,
-    PART1_FREQUENCY_RANGE,
-    SPOT_FREQUENCY_RANGE,
-    SPOT_NARROW_BAND_RANGE,
+    DEFAULT_MICROPHONE_HEIGHT_M,
+    DEFAULT_SOURCE_HEIGHT_M,
+    PART1_FREQUENCY_RANGE_HZ,
+    SPOT_FREQUENCY_RANGE_HZ,
+    SPOT_NARROW_BAND_RANGE_HZ,
     InsituAbsorptionResult,
     RoadAbsorptionWarning,
     absorption_reference_corrected,
@@ -90,7 +90,9 @@ def test_module_exports_match_all() -> None:
 # Geometry (Clause 4.1 / Annex F)
 # --------------------------------------------------------------------------- #
 def test_default_kr_is_two_thirds() -> None:
-    kr = geometric_spreading_factor(DEFAULT_SOURCE_HEIGHT, DEFAULT_MIC_HEIGHT)
+    kr = geometric_spreading_factor(
+        DEFAULT_SOURCE_HEIGHT_M, DEFAULT_MICROPHONE_HEIGHT_M
+    )
     assert kr == pytest.approx(2.0 / 3.0)
     assert kr == pytest.approx(0.6666666666, abs=1e-9)
 
@@ -116,10 +118,12 @@ def test_reflected_path_delay() -> None:
 
 def test_geometry_guards() -> None:
     with pytest.raises(
-        ValueError, match="'source_height' and 'mic_height' must be positive"
+        ValueError, match="'source_height_m' and 'microphone_height_m' must be positive"
     ):
         geometric_spreading_factor(0.0, 0.25)
-    with pytest.raises(ValueError, match="'source_height' must exceed 'mic_height'"):
+    with pytest.raises(
+        ValueError, match="'source_height_m' must exceed 'microphone_height_m'"
+    ):
         geometric_spreading_factor(0.25, 1.25)  # source must exceed mic
 
 
@@ -323,7 +327,9 @@ def test_one_third_octave_band_count_part1() -> None:
 def test_one_third_octave_band_count_spot() -> None:
     freq = np.linspace(100.0, 3000.0, 6000)
     alpha = np.full_like(freq, 0.05)
-    centres, _ = one_third_octave_absorption(freq, alpha, f_max=SPOT_FREQUENCY_RANGE[1])
+    centres, _ = one_third_octave_absorption(
+        freq, alpha, f_max=SPOT_FREQUENCY_RANGE_HZ[1]
+    )
     assert centres.shape == (9,)  # 250..1600 Hz (Annex D of Part 2)
 
 
@@ -411,8 +417,8 @@ def test_msa_radius_annex_a_oracle() -> None:
     # ds=1.25, dm=0.25, c=340, Tw=5 ms -> r ~ 1.34 m (Annex A worked example).
     r = max_sampled_area_radius(
         5e-3,
-        source_height=1.25,
-        mic_height=0.25,
+        source_height_m=1.25,
+        microphone_height_m=0.25,
         speed_of_sound=340.0,
     )
     assert r == pytest.approx(1.34, abs=0.005)
@@ -420,7 +426,9 @@ def test_msa_radius_annex_a_oracle() -> None:
 
 def test_msa_major_axis_reduces_to_normal_at_zero_projection() -> None:
     tw, c = 5e-3, 340.0
-    a = msa_major_axis(tw, 0.0, source_height=1.25, mic_height=0.25, speed_of_sound=c)
+    a = msa_major_axis(
+        tw, 0.0, source_height_m=1.25, microphone_height_m=0.25, speed_of_sound=c
+    )
     # dp = 0 -> a = c*Tw + (ds + dm).
     assert a == pytest.approx(c * tw + 1.5)
 
@@ -466,9 +474,9 @@ def test_spot_frequency_range_guard_warns() -> None:
 
 
 def test_spot_frequency_range_constants() -> None:
-    assert SPOT_FREQUENCY_RANGE == (250.0, 1600.0)
-    assert SPOT_NARROW_BAND_RANGE == (220.0, 1800.0)
-    assert PART1_FREQUENCY_RANGE == (250.0, 4000.0)
+    assert SPOT_FREQUENCY_RANGE_HZ == (250.0, 1600.0)
+    assert SPOT_NARROW_BAND_RANGE_HZ == (220.0, 1800.0)
+    assert PART1_FREQUENCY_RANGE_HZ == (250.0, 4000.0)
 
 
 def test_spot_internal_loss_correction() -> None:

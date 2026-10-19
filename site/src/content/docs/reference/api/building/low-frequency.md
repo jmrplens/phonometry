@@ -188,14 +188,6 @@ own where-list.
 | :--- | :--- |
 | ValueError | If the array is not two- or three-dimensional, is empty, or holds a non-finite value. |
 
-## LOW_FREQUENCY_BANDS
-
-*Constant* (`tuple`).
-
-```python
-LOW_FREQUENCY_BANDS = (50.0, 63.0, 80.0)
-```
-
 ## low_frequency_level
 
 ```python
@@ -265,12 +257,20 @@ to 25 m³ here and does **not** trigger, where Python's built-in
 | :--- | :--- |
 | ValueError | If `volume` is not a positive, finite number. |
 
-## LOW_FREQUENCY_VOLUME_LIMIT
+## LOW_FREQUENCY_PROCEDURE_BANDS_HZ
+
+*Constant* (`tuple`).
+
+```python
+LOW_FREQUENCY_PROCEDURE_BANDS_HZ = (50.0, 63.0, 80.0)
+```
+
+## LOW_FREQUENCY_VOLUME_LIMIT_M3
 
 *Constant* (`float`).
 
 ```python
-LOW_FREQUENCY_VOLUME_LIMIT = 25.0
+LOW_FREQUENCY_VOLUME_LIMIT_M3 = 25.0
 ```
 
 ## LowFrequencyProcedure

@@ -389,7 +389,7 @@ tabla en tercios de octava de $L_\mathrm{n,0}$ y $\Delta L$ junto al diagrama de
 $\Delta L$, con el intervalo de frecuencias de la evaluación de ISO 717-2 en
 trazo discontinuo, como lo marca la clave 1 del formulario; y el índice, con los
 dos índices del suelo que pide H.5 i) a su lado. La identificación del producto
-y el tiempo de curado salen de los campos `product` y `curing_time_h` de
+y el tiempo de curado salen de los campos `product` y `curing_time_hours` de
 `ReportMetadata`.
 
 ```python
@@ -397,7 +397,7 @@ from phonometry import ReportMetadata
 
 cover.report("covering.pdf", metadata=ReportMetadata(
     manufacturer="Example floorings", product="Resilient vinyl, 4 mm",
-    mass_per_area=2.6, curing_time_h=0.0, source_temperature_c=21.2,
+    mass_per_area=2.6, curing_time_hours=0.0, source_temperature_c=21.2,
     source_relative_humidity_percent=48.0, receiving_volume=58.0))
 ```
 

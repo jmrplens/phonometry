@@ -123,17 +123,6 @@ if TYPE_CHECKING:
     from ...fluids import Fluid
     from ...materials.absorbers.porous import PorousMediumResult
 
-#: Nominal octave-band midband frequencies, in hertz (as ISO 9613-2 clause 1).
-DEFAULT_FREQUENCIES: tuple[float, ...] = (
-    63.0,
-    125.0,
-    250.0,
-    500.0,
-    1000.0,
-    2000.0,
-    4000.0,
-    8000.0,
-)
 #: The diffraction models :func:`barrier_insertion_loss` implements, and the
 #: only tags a :class:`BarrierInsertionLoss` may carry: the fiche and the plot
 #: both name the model from this tag, so one they do not know would be printed

@@ -30,11 +30,11 @@ from reference_data import silencer_in_situ as oracle
 from phonometry import noise_control
 from phonometry.noise_control.silencer_in_situ import (
     INSTALLATION_CASES,
-    ISO11820_AIR_GAS_CONSTANT,
+    ISO11820_AIR_GAS_CONSTANT_J_KG_K,
     ISO11820_BACKGROUND_CORRECTIONS_DB,
-    ISO11820_GAS_CONSTANT,
     ISO11820_MINIMUM_BACKGROUND_MARGIN_DB,
-    ISO11820_SOUND_SPEED_M_S,
+    ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K,
+    ISO11820_SPEED_OF_SOUND_M_S,
     SABINE_AREA_COEFFICIENT,
     SilencerInSituWarning,
 )
@@ -126,9 +126,9 @@ def test_an_extraneous_level_above_the_measurement_is_refused() -> None:
 
 def test_the_reverberant_area_is_a_quarter_of_the_absorption() -> None:
     area = noise_control.reverberant_surface_area_m2(300.0, [1.2])
-    expected = SABINE_AREA_COEFFICIENT * 300.0 / (ISO11820_SOUND_SPEED_M_S * 1.2)
+    expected = SABINE_AREA_COEFFICIENT * 300.0 / (ISO11820_SPEED_OF_SOUND_M_S * 1.2)
     assert area[0] == pytest.approx(expected)
-    assert ISO11820_SOUND_SPEED_M_S == 340.0
+    assert ISO11820_SPEED_OF_SOUND_M_S == 340.0
 
 
 def test_a_non_positive_reverberation_time_is_refused() -> None:
@@ -452,16 +452,20 @@ def test_a_negative_velocity_pressure_is_refused() -> None:
 
 def test_equation_twenty_nine_takes_air_by_default() -> None:
     density = noise_control.gas_density_kg_m3(temperature_c=20.0)
-    assert density == pytest.approx(100_000.0 / (ISO11820_AIR_GAS_CONSTANT * 293.0))
-    assert ISO11820_AIR_GAS_CONSTANT == 287.0
-    assert ISO11820_GAS_CONSTANT == 8314.4
+    assert density == pytest.approx(
+        100_000.0 / (ISO11820_AIR_GAS_CONSTANT_J_KG_K * 293.0)
+    )
+    assert ISO11820_AIR_GAS_CONSTANT_J_KG_K == 287.0
+    assert ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K == 8314.4
 
 
 def test_equation_twenty_nine_admits_another_gas() -> None:
     density = noise_control.gas_density_kg_m3(
         temperature_c=20.0, molar_mass_kg_kmol=44.01
     )
-    assert density == pytest.approx(44.01 * 100_000.0 / (ISO11820_GAS_CONSTANT * 293.0))
+    assert density == pytest.approx(
+        44.01 * 100_000.0 / (ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K * 293.0)
+    )
 
 
 def test_equation_thirty_one_scales_by_the_area_ratio() -> None:

@@ -55729,7 +55729,7 @@ export const catalogues = {
   "dampingTreatments": {
     "columns": [
       {
-        "field": "decay_rate_db_s",
+        "field": "decay_rate_db_per_s",
         "heading": "Decay rate",
         "headingEs": "Tasa de decaimiento",
         "unit": "dB/s"

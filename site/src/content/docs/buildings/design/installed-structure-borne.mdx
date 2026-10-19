@@ -349,7 +349,7 @@ $D_{\mathrm{C},i} = -10\log_{10}(\omega M Y_i) + 10\log_{10}[1 + (\omega M Y_i)^
 import numpy as np
 from phonometry import building
 
-bands = np.array(building.TABLE_F1_OCTAVE_BANDS)
+bands = np.array(building.TABLE_F1_OCTAVE_BANDS_HZ)
 lf = building.tapping_machine_force_level()            # Table F.1
 lw_c = building.tapping_machine_characteristic_power_level(bands, lf)
 print(np.round(lw_c, 1))   # [119. 119. 119. 119. 119. 119. 118. 115.]

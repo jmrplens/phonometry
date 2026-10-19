@@ -35,9 +35,9 @@ from reference_data import (
 )
 
 from phonometry.materials.absorbers.rating import (
-    OCTAVE_BANDS,
+    RATING_OCTAVE_BANDS_HZ,
+    RATING_THIRD_OCTAVE_BANDS_HZ,
     REFERENCE_CURVE,
-    THIRD_OCTAVE_BANDS,
     AbsorptionRatingResult,
     absorption_class,
     practical_absorption_coefficient,
@@ -67,8 +67,8 @@ def test_reference_curve_verbatim() -> None:
 
 
 def test_band_layout() -> None:
-    assert OCTAVE_BANDS == (250, 500, 1000, 2000, 4000)
-    assert THIRD_OCTAVE_BANDS == (
+    assert RATING_OCTAVE_BANDS_HZ == (250, 500, 1000, 2000, 4000)
+    assert RATING_THIRD_OCTAVE_BANDS_HZ == (
         200,
         250,
         315,
@@ -86,8 +86,8 @@ def test_band_layout() -> None:
         5000,
     )
     # Each octave centre is the middle of its one-third-octave triple.
-    for i, octave in enumerate(OCTAVE_BANDS):
-        assert THIRD_OCTAVE_BANDS[3 * i + 1] == octave
+    for i, octave in enumerate(RATING_OCTAVE_BANDS_HZ):
+        assert RATING_THIRD_OCTAVE_BANDS_HZ[3 * i + 1] == octave
 
 
 # --- Annex A oracles ------------------------------------------------------
@@ -195,7 +195,7 @@ def test_practical_wrong_length() -> None:
 
 def test_practical_mapping_matches_sequence() -> None:
     seq = [0.10 + 0.05 * i for i in range(15)]
-    mapping = dict(zip(THIRD_OCTAVE_BANDS, seq, strict=True))
+    mapping = dict(zip(RATING_THIRD_OCTAVE_BANDS_HZ, seq, strict=True))
     np.testing.assert_allclose(
         practical_absorption_coefficient(mapping),
         practical_absorption_coefficient(seq),
@@ -275,7 +275,7 @@ def test_result_is_frozen() -> None:
 
 def test_result_exposes_curves_for_plotting() -> None:
     res = weighted_absorption(_ANNEX_A1_ALPHA_P)
-    np.testing.assert_allclose(res.frequencies, OCTAVE_BANDS)
+    np.testing.assert_allclose(res.frequencies, RATING_OCTAVE_BANDS_HZ)
     np.testing.assert_allclose(res.measured, _ANNEX_A1_ALPHA_P)
     assert res.measured.shape == res.shifted_reference.shape == res.frequencies.shape
 
@@ -362,7 +362,7 @@ def test_a_sum_off_by_a_last_bit_is_kept() -> None:
 
 
 def test_weighted_mapping_matches_sequence() -> None:
-    mapping = dict(zip(OCTAVE_BANDS, _ANNEX_A2_ALPHA_P, strict=True))
+    mapping = dict(zip(RATING_OCTAVE_BANDS_HZ, _ANNEX_A2_ALPHA_P, strict=True))
     res_map = weighted_absorption(mapping)
     res_seq = weighted_absorption(_ANNEX_A2_ALPHA_P)
     assert _almost(res_map.alpha_w, res_seq.alpha_w)
@@ -412,7 +412,7 @@ def test_from_third_octave_matches_octave_path_and_carries_alpha_s() -> None:
     assert res.third_octave_alpha_s is not None
     assert res.third_octave_bands is not None
     np.testing.assert_allclose(res.third_octave_alpha_s, alpha_s)
-    np.testing.assert_allclose(res.third_octave_bands, THIRD_OCTAVE_BANDS)
+    np.testing.assert_allclose(res.third_octave_bands, RATING_THIRD_OCTAVE_BANDS_HZ)
     # The octave path leaves the new fields unset (backward compatible).
     assert ref.third_octave_alpha_s is None
     assert ref.third_octave_bands is None
@@ -420,7 +420,7 @@ def test_from_third_octave_matches_octave_path_and_carries_alpha_s() -> None:
 
 def test_from_third_octave_accepts_mapping() -> None:
     seq = [0.10 + 0.05 * i for i in range(15)]
-    mapping = dict(zip(THIRD_OCTAVE_BANDS, seq, strict=True))
+    mapping = dict(zip(RATING_THIRD_OCTAVE_BANDS_HZ, seq, strict=True))
     res_map = weighted_absorption_from_third_octave(mapping)
     res_seq = weighted_absorption_from_third_octave(seq)
     assert _almost(res_map.alpha_w, res_seq.alpha_w)
@@ -464,9 +464,9 @@ def test_public_exports() -> None:
 
     for name in (
         "AbsorptionRatingResult",
-        "OCTAVE_BANDS",
+        "RATING_OCTAVE_BANDS_HZ",
         "REFERENCE_CURVE",
-        "THIRD_OCTAVE_BANDS",
+        "RATING_THIRD_OCTAVE_BANDS_HZ",
         "absorption_class",
         "practical_absorption_coefficient",
         "weighted_absorption",

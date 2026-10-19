@@ -28,8 +28,8 @@ one step that matters most.
 **My code is written against 3.3 and the imports fail.**
 [Upgrading from 3.3 to 4.0](/phonometry/start/upgrading/) is the map: the one rule
 that moves almost every import, a resolver to paste when you would rather not
-look a name up, the three places where the obvious fix is the wrong one, and
-the eleven names that are gone.
+look a name up, the four places where the obvious fix is the wrong one, and
+the thirty-five names that are gone.
 
 **I have a job, not a subject. Which page is it?**
 [What do you need to measure?](/phonometry/start/tasks/) indexes the library by

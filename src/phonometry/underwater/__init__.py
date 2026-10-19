@@ -13,8 +13,8 @@ here, so ``from phonometry import underwater`` reads as it did.
 from __future__ import annotations
 
 from .acoustics import (
-    UNDERWATER_REFERENCE_EXPOSURE,
-    UNDERWATER_REFERENCE_PRESSURE,
+    UNDERWATER_REFERENCE_EXPOSURE_PA2_S,
+    UNDERWATER_REFERENCE_PRESSURE_PA,
     in_air_to_underwater_spl,
     peak_sound_pressure_level,
     sound_exposure_level,
@@ -116,8 +116,8 @@ __all__ = [
     "AUDIOGRAM_GROUPS",
     "BEST_HEARING_FREQUENCY_KHZ",
     "ORCA_AUDIOGRAM_RANGE_KHZ",
-    "UNDERWATER_REFERENCE_EXPOSURE",
-    "UNDERWATER_REFERENCE_PRESSURE",
+    "UNDERWATER_REFERENCE_EXPOSURE_PA2_S",
+    "UNDERWATER_REFERENCE_PRESSURE_PA",
     "VESSEL_CLASSES",
     "WEIGHTING_GUIDANCE",
     "WESTON_REGIMES",

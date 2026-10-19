@@ -85,20 +85,20 @@ closed forms and on the special cases he states in words.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## CARDIOID_RELATIVE_DIRECTIVITY
+## CARDIOID_RELATIVE_DIRECTIVITY_DB
 
 *Constant* (`float`).
 
 ```python
-CARDIOID_RELATIVE_DIRECTIVITY = -2.0
+CARDIOID_RELATIVE_DIRECTIVITY_DB = -2.0
 ```
 
-## DEFAULT_STABILITY_MARGIN
+## DEFAULT_STABILITY_MARGIN_DB
 
 *Constant* (`float`).
 
 ```python
-DEFAULT_STABILITY_MARGIN = 10.0
+DEFAULT_STABILITY_MARGIN_DB = 10.0
 ```
 
 ## feedback_loop_gain
@@ -122,7 +122,7 @@ $G_\mathrm{S} = L_{\mathrm{H}\text{-}\mathrm{M}} - L_{\mathrm{H}\text{-}\mathrm{
 | :--- | :--- |
 | `level_loudspeaker_at_microphone` | Direct-field level $L_{\mathrm{H}\text{-}\mathrm{M}}$ the loudspeaker produces at the microphone, dB. |
 | `level_loudspeaker_at_listener` | Direct-field level $L_{\mathrm{H}\text{-}\mathrm{L}}$ the loudspeaker produces at an average listener, dB. |
-| `microphone_directivity` | Directivity index $D_\mathrm{M}(\theta)$ of the microphone toward the loudspeaker relative to the talker, dB (0 for an omnidirectional microphone, about [`CARDIOID_RELATIVE_DIRECTIVITY`](/phonometry/reference/api/electroacoustics/sound-reinforcement/#cardioid_relative_directivity) for a cardioid). |
+| `microphone_directivity` | Directivity index $D_\mathrm{M}(\theta)$ of the microphone toward the loudspeaker relative to the talker, dB (0 for an omnidirectional microphone, about [`CARDIOID_RELATIVE_DIRECTIVITY_DB`](/phonometry/reference/api/electroacoustics/sound-reinforcement/#cardioid_relative_directivity_db) for a cardioid). |
 
 **Returns:** The feedback-loop gain $G_\mathrm{S}$, dB.
 
@@ -157,7 +157,7 @@ Equation (18.20) (see the module docstring).
 | `level_loudspeaker_at_listener` | Direct-field level $L_{\mathrm{H}\text{-}\mathrm{L}}$ produced by the loudspeaker system at an average listener, dB. |
 | `microphone_directivity` | Directivity index $D_\mathrm{M}(\theta)$ of the microphone toward the loudspeaker relative to the talker, dB. |
 | `open_microphones` | Number $N_\mathrm{m}$ of microphones open at once. |
-| `stability_margin` | Required margin below oscillation, dB (default [`DEFAULT_STABILITY_MARGIN`](/phonometry/reference/api/electroacoustics/sound-reinforcement/#default_stability_margin), Long's equalised-system value). |
+| `stability_margin` | Required margin below oscillation, dB (default [`DEFAULT_STABILITY_MARGIN_DB`](/phonometry/reference/api/electroacoustics/sound-reinforcement/#default_stability_margin_db), Long's equalised-system value). |
 
 **Returns:** A [`FeedbackStabilityResult`](/phonometry/reference/api/electroacoustics/sound-reinforcement/#feedbackstabilityresult).
 

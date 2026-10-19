@@ -549,7 +549,9 @@ def plot_ambient_noise(
 
     ax = ax if ax is not None else _new_axes()
     f = np.asarray(result.frequencies, dtype=np.float64)
-    label = f"{_t('Total', language)} ({format_number(result.wind_speed_knots, language)} kn)"
+    label = (
+        f"{_t('Total', language)} ({format_number(result.wind_speed_kt, language)} kt)"
+    )
     ax.plot(
         f,
         np.asarray(result.spectrum_level),

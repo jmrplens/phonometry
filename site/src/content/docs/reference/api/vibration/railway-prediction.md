@@ -578,8 +578,8 @@ RECOMMENDED_DISTANCES_M = {'freight_soft_soil': {'tunnel': None, 'surface': 200.
 rescale_emission_for_speed(
     levels: ArrayLike,
     *,
-    speed_from_km_h: float,
-    speed_to_km_h: float,
+    speed_from_kmh: float,
+    speed_to_kmh: float,
 ) -> NDArray[np.float64]
 ```
 
@@ -597,8 +597,8 @@ refused.
 | Name | Description |
 | :--- | :--- |
 | `levels` | $L_{v,\mathrm{E1}}$, the spectrum measured at the first speed, in decibels. |
-| `speed_from_km_h` | $v_1$, the speed it was measured at. |
-| `speed_to_km_h` | $v_2$, the speed wanted, in the same unit. |
+| `speed_from_kmh` | $v_1$, the speed it was measured at. |
+| `speed_to_kmh` | $v_2$, the speed wanted, in the same unit. |
 
 **Returns:** $L_{v,\mathrm{E2}}$.
 

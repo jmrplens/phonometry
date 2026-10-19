@@ -154,7 +154,7 @@ ground-roll segments, and combines them into the exposure level `SEL`
 | `distances` | NPD tabulated slant distances, in metres. |
 | `exposure_levels` | NPD exposure (SEL) levels, shape `(P, D)`. |
 | `maximum_levels` | NPD maximum levels, shape `(P, D)`. |
-| `reference_speed` | NPD reference speed, in m/s (default 160 kn). |
+| `reference_speed` | NPD reference speed, in m/s (default 160 kt). |
 | `mounting` | Engine mounting (`"wing"`/`"fuselage"`/`"propeller"`). |
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LAmax). |
 | `atmosphere` | Aerodrome air temperature and pressure, an [`AerodromeAtmosphere`](/phonometry/reference/api/aeroacoustics/airport-noise/#aerodromeatmosphere) (default: the standard atmosphere); they set the impedance adjustment. |

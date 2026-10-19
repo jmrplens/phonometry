@@ -38,18 +38,18 @@ def test_wind_rule_of_fives_anchor() -> None:
 
 def test_wind_matches_published_wenz_chart() -> None:
     # Graphical anchors from the published Wenz chart (Etter 2003, axes in
-    # dB re 1 uPa): ~50 dB at 1 kHz for 4-6 kn (Fig. 6.2) and ~35 dB at
-    # 10 kHz for the Knudsen sea-state-1/2 curve (Fig. 6.5, ~5 kn).
+    # dB re 1 uPa): ~50 dB at 1 kHz for 4-6 kt (Fig. 6.2) and ~35 dB at
+    # 10 kHz for the Knudsen sea-state-1/2 curve (Fig. 6.5, ~5 kt).
     assert float(wind_noise_spectrum(1000.0, 5.0)[0]) == pytest.approx(50.0, abs=3.0)
     assert float(wind_noise_spectrum(10000.0, 5.0)[0]) == pytest.approx(35.0, abs=3.0)
 
 
 def test_wind_thermal_crossover_near_wenz_chart() -> None:
-    # With the 1 uPa anchor the 5 kn wind and thermal curves cross where the
+    # With the 1 uPa anchor the 5 kt wind and thermal curves cross where the
     # Wenz chart shows it, in the tens of kHz (about 63 kHz), not ~12 kHz as
     # the 20 uPa-anchored level would give.
     f = np.logspace(3.5, 5.5, 2001)
-    res = ocean_ambient_noise(f, wind_speed_knots=5.0)
+    res = ocean_ambient_noise(f, wind_speed_kt=5.0)
     cross = f[np.argmin(np.abs(res.wind - res.thermal))]
     assert 40e3 < cross < 90e3
 
@@ -84,7 +84,7 @@ def test_thermal_rises_twenty_db_per_decade() -> None:
 
 def test_composite_is_energy_sum_and_dominates_components() -> None:
     f = np.array([500.0, 1000.0, 5e4])
-    res = ocean_ambient_noise(f, wind_speed_knots=10.0)
+    res = ocean_ambient_noise(f, wind_speed_kt=10.0)
     assert isinstance(res, AmbientNoiseResult)
     expected = 10.0 * np.log10(10.0 ** (res.wind / 10.0) + 10.0 ** (res.thermal / 10.0))
     assert np.allclose(res.spectrum_level, expected, atol=1e-9)
@@ -95,7 +95,7 @@ def test_composite_is_energy_sum_and_dominates_components() -> None:
 def test_shipping_component_added_in_energy() -> None:
     f = np.array([100.0, 1000.0])
     ship = np.array([80.0, 70.0])
-    res = ocean_ambient_noise(f, wind_speed_knots=5.0, shipping=ship)
+    res = ocean_ambient_noise(f, wind_speed_kt=5.0, shipping=ship)
     expected = 10.0 * np.log10(
         10.0 ** (res.wind / 10.0) + 10.0 ** (res.thermal / 10.0) + 10.0 ** (ship / 10.0)
     )
@@ -105,20 +105,18 @@ def test_shipping_component_added_in_energy() -> None:
 
 def test_shipping_length_mismatch_rejected() -> None:
     with pytest.raises(ValueError, match="shipping.*same shape"):
-        ocean_ambient_noise([100.0, 1000.0], wind_speed_knots=5.0, shipping=[80.0])
+        ocean_ambient_noise([100.0, 1000.0], wind_speed_kt=5.0, shipping=[80.0])
 
 
 def test_shipping_non_finite_rejected() -> None:
     with pytest.raises(ValueError, match=r"'shipping' must contain only finite"):
-        ocean_ambient_noise(
-            [100.0, 1000.0], wind_speed_knots=5.0, shipping=[80.0, np.nan]
-        )
+        ocean_ambient_noise([100.0, 1000.0], wind_speed_kt=5.0, shipping=[80.0, np.nan])
 
 
 def test_invalid_inputs_rejected() -> None:
     with pytest.raises(ValueError, match=r"'frequency_hz' must be strictly positive"):
         wind_noise_spectrum(-1.0, 5.0)
-    with pytest.raises(ValueError, match=r"'wind_speed_knots' must be non-negative"):
+    with pytest.raises(ValueError, match=r"'wind_speed_kt' must be non-negative"):
         wind_noise_spectrum(1000.0, -1.0)
 
 
@@ -126,7 +124,7 @@ def test_calm_sea_zero_wind_returns_minus_inf() -> None:
     # A calm sea (0 knots) has no wind-driven noise: -inf dB (0 energy).
     assert float(wind_noise_spectrum(1000.0, 0.0)[0]) == -np.inf
     # In the composite, the wind term then drops out (thermal only here).
-    res = ocean_ambient_noise([5e4], wind_speed_knots=0.0)
+    res = ocean_ambient_noise([5e4], wind_speed_kt=0.0)
     assert np.isneginf(res.wind[0])
     assert np.isfinite(res.spectrum_level[0])
     assert float(res.spectrum_level[0]) == pytest.approx(
@@ -136,7 +134,7 @@ def test_calm_sea_zero_wind_returns_minus_inf() -> None:
 
 def test_ambient_plot_smoke() -> None:
     f = np.logspace(2, 5, 50)
-    res = ocean_ambient_noise(f, wind_speed_knots=10.0, shipping=np.full(50, 60.0))
+    res = ocean_ambient_noise(f, wind_speed_kt=10.0, shipping=np.full(50, 60.0))
     assert res.plot() is not None
 
 

@@ -172,7 +172,7 @@ def _chk_tail_lower() -> Outcome:
 )
 def _chk_central_phase() -> Outcome:
     """The ``6 degrees`` of footnote a, for a meter reporting a non-r.m.s. parameter."""
-    limits = ph.vibration.phase_tolerance_degrees("Wk", [16.0])
+    limits = ph.vibration.phase_tolerance_deg("Wk", [16.0])
     return numeric(6.0, float(limits[0]), _TOLERANCE, unit="deg", places=4)
 
 

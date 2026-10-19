@@ -141,7 +141,7 @@ TRANSITION_FREQUENCIES_HZ: Mapping[str, tuple[float, float, float, float]] = (
 
 #: The lower limit the standard writes as ``−100 %``: below the first
 #: transition frequency and above the last one, no response is too small.
-UNCONSTRAINED_BELOW = -100.0
+UNCONSTRAINED_BELOW_PERCENT = -100.0
 
 #: Table 5, from the middle of the range outwards: the central region, the two
 #: skirts around it, and the two tails. Each entry is
@@ -150,7 +150,7 @@ UNCONSTRAINED_BELOW = -100.0
 #: not based on r.m.s. values, which is footnote a of the table.
 CENTRAL_TOLERANCE_PERCENT = (12.0, -11.0, 6.0)
 SKIRT_TOLERANCE_PERCENT = (26.0, -21.0, 12.0)
-TAIL_TOLERANCE_PERCENT = (26.0, UNCONSTRAINED_BELOW, math.inf)
+TAIL_TOLERANCE_PERCENT = (26.0, UNCONSTRAINED_BELOW_PERCENT, math.inf)
 
 #: Table 1: the frequency at which each weighting is calibrated, in hertz. The
 #: standard prints them in radians per second (100 rad/s for whole-body,
@@ -370,7 +370,7 @@ def weighting_tolerance_percent(
     :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
     :param frequencies: Frequencies at which the band is wanted, in hertz.
     :return: ``(upper, lower)`` percentages, elementwise. ``lower`` is
-        :data:`UNCONSTRAINED_BELOW` outside the two outer transition
+        :data:`UNCONSTRAINED_BELOW_PERCENT` outside the two outer transition
         frequencies, where the standard sets no lower limit at all.
     :raises ValueError: If the weighting is not one of the nine, or a
         frequency is not positive and finite.
@@ -391,7 +391,7 @@ def weighting_tolerance_percent(
     return upper, lower
 
 
-def phase_tolerance_degrees(name: str, frequencies: ArrayLike) -> NDArray[np.float64]:
+def phase_tolerance_deg(name: str, frequencies: ArrayLike) -> NDArray[np.float64]:
     """The Table 5 characteristic phase-deviation band, region by region.
 
     Footnote a of the table limits this to instruments that provide a
@@ -490,7 +490,7 @@ class WeightingVerification(OwnsArrays):
         upper, lower = weighting_tolerance_percent(self.weighting, self.frequencies)
         deviation = np.asarray(self.deviation_percent, dtype=np.float64)
         uncertainty = self.expanded_uncertainty_percent
-        unconstrained = lower <= UNCONSTRAINED_BELOW
+        unconstrained = lower <= UNCONSTRAINED_BELOW_PERCENT
         within = (deviation + uncertainty <= upper) & (
             unconstrained | (deviation - uncertainty >= lower)
         )
@@ -931,18 +931,16 @@ class PhaseVerification(OwnsArrays):
         :raises ValueError: if the weighting is not one of the nine, or a
             characteristic frequency is not positive and finite.
         """
-        phase_tolerance_degrees(self.weighting, self.characteristic_frequencies_hz)
+        phase_tolerance_deg(self.weighting, self.characteristic_frequencies_hz)
 
     @property
     def tolerance_deg(self) -> NDArray[np.float64]:
         """The Table 5 limit at each characteristic frequency, in degrees.
 
-        :return: :func:`phase_tolerance_degrees` of the weighting, infinite
+        :return: :func:`phase_tolerance_deg` of the weighting, infinite
             in the two tails.
         """
-        return phase_tolerance_degrees(
-            self.weighting, self.characteristic_frequencies_hz
-        )
+        return phase_tolerance_deg(self.weighting, self.characteristic_frequencies_hz)
 
     @property
     def within_tolerance(self) -> NDArray[np.bool_]:

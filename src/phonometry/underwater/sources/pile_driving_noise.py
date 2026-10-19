@@ -46,8 +46,8 @@ from ...io._resolve import (
     resolve_fs,
 )
 from ..acoustics import (
-    UNDERWATER_REFERENCE_EXPOSURE,
-    UNDERWATER_REFERENCE_PRESSURE,
+    UNDERWATER_REFERENCE_EXPOSURE_PA2_S,
+    UNDERWATER_REFERENCE_PRESSURE_PA,
     _positive,
     _validate_pressure,
     peak_sound_pressure_level,
@@ -232,7 +232,7 @@ def _peak_level(pressure: NDArray[np.float64]) -> float:
     """
     peak = float(np.max(np.abs(np.asarray(pressure, dtype=np.float64))))
     with np.errstate(divide="ignore"):
-        return float(20.0 * np.log10(peak / UNDERWATER_REFERENCE_PRESSURE))
+        return float(20.0 * np.log10(peak / UNDERWATER_REFERENCE_PRESSURE_PA))
 
 
 def _band_energy_sum(band_sel: NDArray[np.float64]) -> float:
@@ -530,7 +530,7 @@ def strike_sel_spectrum(
             for f_lo, f_hi in zip(lower, upper, strict=True)
         ]
     )
-    e0 = UNDERWATER_REFERENCE_EXPOSURE  # 1 µPa²·s in Pa²·s
+    e0 = UNDERWATER_REFERENCE_EXPOSURE_PA2_S  # 1 µPa²·s in Pa²·s
     # An empty band (narrower than the bin spacing fs/n) carries no energy, so
     # its level is -inf: the neutral element of the energy sum downstream.
     with np.errstate(divide="ignore"):

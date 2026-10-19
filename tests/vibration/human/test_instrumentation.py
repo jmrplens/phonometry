@@ -114,7 +114,7 @@ def test_the_phase_band_is_a_separate_question() -> None:
     subject to.
     """
     ft1, ft2, ft3, ft4 = ins.TRANSITION_FREQUENCIES_HZ["Wk"]
-    got = ins.phase_tolerance_degrees("Wk", [ft1 * 0.5, ft1 * 1.5, ft2, ft4 * 2.0])
+    got = ins.phase_tolerance_deg("Wk", [ft1 * 0.5, ft1 * 1.5, ft2, ft4 * 2.0])
     assert got[0] == math.inf
     assert got[1] == pytest.approx(12.0)
     assert got[2] == pytest.approx(6.0)
@@ -196,7 +196,7 @@ def test_an_unknown_weighting_is_refused_by_every_entry_point() -> None:
         lambda: vibration.verify_weighting("Wz", [1.0], [1.0]),
         lambda: vibration.verify_phase_response("Wz", [1.0, 2.0], [0.0, 0.0]),
         lambda: ins.weighting_tolerance_percent("Wz", [1.0]),
-        lambda: ins.phase_tolerance_degrees("Wz", [1.0]),
+        lambda: ins.phase_tolerance_deg("Wz", [1.0]),
         lambda: ins.indication_tolerance_percent("Wz"),
         lambda: ins.reference_indication("Wz"),
     ):

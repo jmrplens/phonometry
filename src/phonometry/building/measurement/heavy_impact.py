@@ -123,7 +123,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "HEAVY_IMPACT_A_WEIGHTING",
-    "HEAVY_IMPACT_OCTAVE_BANDS",
+    "HEAVY_IMPACT_OCTAVE_BANDS_HZ",
     "HEAVY_IMPACT_SOURCES",
     "AWeightedMaximumImpactResult",
     "HeavyImpactSourceCheck",
@@ -141,7 +141,7 @@ __all__ = [
 
 #: Octave-band centre frequencies of the heavy-impact source specification
 #: (ISO 16283-2:2020 Table A.1; JIS A 1418-2:2019 Tables A.1 and A.2), in Hz.
-HEAVY_IMPACT_OCTAVE_BANDS: tuple[float, ...] = (31.5, 63.0, 125.0, 250.0, 500.0)
+HEAVY_IMPACT_OCTAVE_BANDS_HZ: tuple[float, ...] = (31.5, 63.0, 125.0, 250.0, 500.0)
 
 #: Impact force exposure level ``LFE`` and its tolerance per octave band, in
 #: dB re 1 N, transcribed digit-for-digit from the primary texts. The rubber
@@ -151,7 +151,7 @@ HEAVY_IMPACT_OCTAVE_BANDS: tuple[float, ...] = (31.5, 63.0, 125.0, 250.0, 500.0)
 #: characteristic 2); the bang machine only in **JIS A 1418-2:2019
 #: Table A.1** (impact force characteristic 1, printed p. 6). Keyed by source
 #: name, each value is the tuple of ``(LFE, tolerance)`` pairs ordered as
-#: :data:`HEAVY_IMPACT_OCTAVE_BANDS`.
+#: :data:`HEAVY_IMPACT_OCTAVE_BANDS_HZ`.
 HEAVY_IMPACT_SOURCES: Mapping[str, tuple[tuple[float, float], ...]] = MappingProxyType(
     {
         "rubber_ball": (
@@ -271,7 +271,7 @@ class HeavyImpactSourceSpec(RichDisplay):
 _SPECS: dict[str, HeavyImpactSourceSpec] = {
     "rubber_ball": HeavyImpactSourceSpec(
         name="rubber_ball",
-        frequencies=HEAVY_IMPACT_OCTAVE_BANDS,
+        frequencies=HEAVY_IMPACT_OCTAVE_BANDS_HZ,
         force_exposure_level=tuple(v for v, _ in HEAVY_IMPACT_SOURCES["rubber_ball"]),
         tolerance=tuple(t for _, t in HEAVY_IMPACT_SOURCES["rubber_ball"]),
         drop_height=1.00,
@@ -289,7 +289,7 @@ _SPECS: dict[str, HeavyImpactSourceSpec] = {
     ),
     "bang_machine": HeavyImpactSourceSpec(
         name="bang_machine",
-        frequencies=HEAVY_IMPACT_OCTAVE_BANDS,
+        frequencies=HEAVY_IMPACT_OCTAVE_BANDS_HZ,
         force_exposure_level=tuple(v for v, _ in HEAVY_IMPACT_SOURCES["bang_machine"]),
         tolerance=tuple(t for _, t in HEAVY_IMPACT_SOURCES["bang_machine"]),
         drop_height=0.85,

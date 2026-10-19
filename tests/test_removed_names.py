@@ -108,9 +108,9 @@ def test_the_canonical_names_the_3_1_aliases_pointed_at_are_all_here() -> None:
         ("building", "insulation_expanded_uncertainty"),
         ("environment", "environmental_expanded_uncertainty"),
         ("emission", "emission_expanded_uncertainty"),
-        ("materials", "OCTAVE_BANDS"),
-        ("materials", "THIRD_OCTAVE_BANDS"),
-        ("materials", "BASE_PLATE_BANDS"),
+        ("materials", "RATING_OCTAVE_BANDS_HZ"),
+        ("materials", "RATING_THIRD_OCTAVE_BANDS_HZ"),
+        ("materials", "BASE_PLATE_BANDS_HZ"),
         ("hearing", "OccupationalExposureWarning"),
     ):
         assert hasattr(getattr(ph, package), name), f"{package}.{name}"

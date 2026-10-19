@@ -835,7 +835,7 @@ def _band_running_rms(
         bank = OctaveFilterBank(
             rate, fraction=3, limits=[PASSAGE_BANDS_HZ[0], upper_band_hz]
         )
-    if not math.isclose(float(bank.nominal_freq[-1]), upper_band_hz):
+    if not math.isclose(float(bank.labels[-1]), upper_band_hz):
         msg = (
             f"a sampling frequency of {fs:g} Hz cannot carry the "
             f"{upper_band_hz:g} Hz third octave; raise it above twice the "
@@ -848,9 +848,7 @@ def _band_running_rms(
     band_rms = np.vstack(
         [_exponential_running_rms(np.asarray(band), fs) for band in bands]
     )
-    nominal = np.asarray(
-        [float(label) for label in bank.nominal_freq], dtype=np.float64
-    )
+    nominal = np.asarray([float(label) for label in bank.labels], dtype=np.float64)
     return nominal, band_rms
 
 

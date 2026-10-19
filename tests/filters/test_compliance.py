@@ -113,9 +113,14 @@ def test_low_order_fails_class1() -> None:
 def test_result_has_per_band_details() -> None:
     bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[500, 2000])
     result = filters.verify_filter_class(bank)
-    assert len(result.bands) == bank.num_bands
+    assert len(result.bands) == bank.n_bands
     for band in result.bands:
-        assert set(band) >= {"freq", "class", "margin_class1_db", "margin_class2_db"}
+        assert set(band) >= {
+            "frequency",
+            "class",
+            "margin_class1_db",
+            "margin_class2_db",
+        }
     # margins must be finite floats
     assert all(np.isfinite(b["margin_class1_db"]) for b in result.bands)
 
@@ -250,7 +255,7 @@ def test_butter_meets_class0_1995() -> None:
         for c in (0, 1, 2)
     }
     assert set(band) == {
-        "freq",
+        "frequency",
         "class",
         "checked_to_omega",
         "bandwidth_deviation_db",
@@ -272,7 +277,7 @@ def test_2014_default_unaffected_by_edition_support() -> None:
     result = filters.verify_filter_class(bank)
     assert result.overall_class == 1
     assert set(result.bands[0]) == {
-        "freq",
+        "frequency",
         "class",
         "checked_to_omega",
         "margin_class1_db",
@@ -302,7 +307,7 @@ def test_range_limited_flag_reports_unverifiable_stopband() -> None:
     assert result.range_limited is True
     assert max(bank.factor) > 1
     for band in result.bands:
-        assert band["checked_to_omega"] * band["freq"] == pytest.approx(24000.0)
+        assert band["checked_to_omega"] * band["frequency"] == pytest.approx(24000.0)
     top = result.bands[-1]["checked_to_omega"]
     # The checked range covers the band edge but not the G^4 mask end.
     assert 10**0.15 < top < 10 ** (0.3 * 4)

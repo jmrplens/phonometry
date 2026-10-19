@@ -146,7 +146,7 @@ the ambiguity is registered in `docs/ERRATA.md`.
 *Constant* (`tuple`).
 
 ```python
-CENTRAL_TOLERANCE_PERCENT = (12.0, -11.0, 6.0)
+CENTRAL_TOLERANCE_PERCENT = (-11.0, 12.0, 6.0)
 ```
 
 ## characteristic_phase_deviation
@@ -662,7 +662,7 @@ The longest decay time the row accepts, in seconds.
 *Constant* (`tuple`).
 
 ```python
-SKIRT_TOLERANCE_PERCENT = (26.0, -21.0, 12.0)
+SKIRT_TOLERANCE_PERCENT = (-21.0, 26.0, 12.0)
 ```
 
 ## TAIL_TOLERANCE_PERCENT
@@ -670,7 +670,7 @@ SKIRT_TOLERANCE_PERCENT = (26.0, -21.0, 12.0)
 *Constant* (`tuple`).
 
 ```python
-TAIL_TOLERANCE_PERCENT = (26.0, -100.0, inf)
+TAIL_TOLERANCE_PERCENT = (-100.0, 26.0, inf)
 ```
 
 ## TRANSITION_FREQUENCIES_HZ
@@ -870,7 +870,7 @@ The Table 5 band around a weighting, region by region.
 | `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). |
 | `frequencies` | Frequencies at which the band is wanted, in hertz. |
 
-**Returns:** `(upper, lower)` percentages, elementwise. `lower` is [`UNCONSTRAINED_BELOW_PERCENT`](/phonometry/reference/api/vibration/instrumentation/#unconstrained_below_percent) outside the two outer transition frequencies, where the standard sets no lower limit at all.
+**Returns:** `(lower, upper)` percentages, elementwise, lower first and signed as Table 5 prints them: `lower` is negative (`-11.0` in the central region) and `upper` positive (`12.0`). `lower` is [`UNCONSTRAINED_BELOW_PERCENT`](/phonometry/reference/api/vibration/instrumentation/#unconstrained_below_percent) (`-100.0`) outside the two outer transition frequencies, where the standard sets no lower limit at all.
 
 **Raises**
 

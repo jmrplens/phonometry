@@ -190,10 +190,10 @@ AirborneInsulationResult(
     d: np.ndarray,
     dnt: np.ndarray,
     r_prime: np.ndarray | None,
-    l1: np.ndarray | None = None,
-    l2: np.ndarray | None = None,
-    t2: np.ndarray | None = None,
-    t0: float | None = None,
+    l1: np.ndarray,
+    l2: np.ndarray,
+    t2: np.ndarray,
+    t0: float,
     source_low_frequency: LowFrequencyResult | None = None,
     receiver_low_frequency: LowFrequencyResult | None = None,
 )
@@ -208,10 +208,10 @@ Per-band field airborne sound insulation (ISO 16283-1:2014).
 | `d` | Level difference $D = L_1 - L_2$ per band, in dB (Clause 3.12, Formula (1)). |
 | `dnt` | Standardized level difference `DnT` per band, in dB (Clause 3.13, Formula (2)). |
 | `r_prime` | Apparent sound reduction index `R'` per band, in dB (Clause 3.14, Formula (4)), or `None` when the partition area and receiving-room volume were not supplied. |
-| `l1` | Energy-average source-room levels the quantities were formed from, in dB (after any position averaging, Formula (9)). Defaults to `None` for backward-compatible construction. |
-| `l2` | Energy-average receiving-room levels, in dB. Defaults to `None`. |
-| `t2` | Receiving-room reverberation time per band, in seconds, after any 63 Hz octave substitution. Defaults to `None`. |
-| `t0` | Reference reverberation time `T0` used for `DnT`, in seconds. Defaults to `None`. |
+| `l1` | Energy-average source-room levels the quantities were formed from, in dB (after any position averaging, Formula (9)). |
+| `l2` | Energy-average receiving-room levels, in dB. |
+| `t2` | Receiving-room reverberation time per band, in seconds, after any 63 Hz octave substitution. |
+| `t0` | Reference reverberation time `T0` used for `DnT`, in seconds. |
 | `source_low_frequency` | What the ISO 16283-1 Clause 8 low-frequency procedure did to `l1`, or `None` when the source room was not under 25 m³ or carried no corner measurements. |
 | `receiver_low_frequency` | The same for `l2` and, through Clause 10.4, for `t2`. |
 
@@ -264,7 +264,7 @@ verdict row and a footer with the identity block and disclaimer.
 | `quantity` | The reported field quantity: `"dnt"` (default, the standardized level difference of Annex B Figure B.1) or `"r_prime"` (the apparent sound reduction index of Figure B.2; requires the result to carry `r_prime`). |
 | `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
-| `verbose` | When `True`, the table shows the measurement chain per band (energy-average `L1` and `L2`, reverberation time `T` and the quantity) instead of the two-column `f \| value` form; it requires the result to carry `l1`, `l2` and `t2` (populated by [`airborne_insulation`](/phonometry/reference/api/building/insulation/#airborne_insulation)). |
+| `verbose` | When `True`, the table shows the measurement chain per band (energy-average `L1` and `L2`, reverberation time `T` and the quantity) instead of the two-column `f \| value` form. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
 
 **Returns:** The written `path` as a `str`.
@@ -273,7 +273,7 @@ verdict row and a footer with the identity block and disclaimer.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `engine` or `quantity` is unknown, the selected quantity is not available, the result does not hold the 16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-1 rating needs, or `verbose=True` without the per-band chain. |
+| ValueError | If `engine` or `quantity` is unknown, the selected quantity is not available, the result does not hold the 16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-1 rating needs. |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
 
 ## energy_average_level
@@ -562,9 +562,9 @@ answers from the default procedure alone and raises a
 ImpactInsulationResult(
     l_n_t: np.ndarray,
     l_n: np.ndarray | None,
-    li: np.ndarray | None = None,
-    t2: np.ndarray | None = None,
-    t0: float | None = None,
+    li: np.ndarray,
+    t2: np.ndarray,
+    t0: float,
     low_frequency: LowFrequencyResult | None = None,
 )
 ```
@@ -577,9 +577,9 @@ Per-band field impact sound insulation (ISO 16283-2).
 | :--- | :--- |
 | `l_n_t` | Standardized impact sound pressure level $L'_{\mathrm{n}T} = L_\mathrm{i} - 10 \log_{10}(T/T_0)$ per band, in dB (Clause 3.13, Formula (1)). |
 | `l_n` | Normalized impact sound pressure level $L'_\mathrm{n} = L_\mathrm{i} + 10 \log_{10}(A/A_0)$ per band, in dB (Clause 3.15, Formula (3)), or `None` when the receiving-room volume was not supplied. |
-| `li` | Energy-average impact sound pressure levels the quantities were formed from, in dB (after any position averaging, Formula (11)). Defaults to `None` for backward-compatible construction. |
-| `t2` | Receiving-room reverberation time per band, in seconds, after any 63 Hz octave substitution. Defaults to `None`. |
-| `t0` | Reference reverberation time `T0` used for `L'nT`, in seconds. Defaults to `None`. |
+| `li` | Energy-average impact sound pressure levels the quantities were formed from, in dB (after any position averaging, Formula (11)). |
+| `t2` | Receiving-room reverberation time per band, in seconds, after any 63 Hz octave substitution. |
+| `t0` | Reference reverberation time `T0` used for `L'nT`, in seconds. |
 | `low_frequency` | What the ISO 16283-2 Clause 8 low-frequency procedure did to `li` and, through Clause 10.4, to `t2`; `None` when the receiving room was not under 25 m³ or carried no corner measurements. |
 
 ### ImpactInsulationResult.plot()
@@ -631,7 +631,7 @@ disclaimer.
 | `quantity` | The reported field quantity: `"l_n_t"` (default, the standardized level of Annex C Figure C.1) or `"l_n"` (the normalized level of Figure C.2; requires the result to carry `l_n`). |
 | `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
-| `verbose` | When `True`, the table shows the measurement chain per band (energy-average `Li`, reverberation time `T` and the quantity) instead of the two-column `f \| value` form; it requires the result to carry `li` and `t2` (populated by [`impact_insulation`](/phonometry/reference/api/building/insulation/#impact_insulation)). |
+| `verbose` | When `True`, the table shows the measurement chain per band (energy-average `Li`, reverberation time `T` and the quantity) instead of the two-column `f \| value` form. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
 
 **Returns:** The written `path` as a `str`.
@@ -640,7 +640,7 @@ disclaimer.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `engine` or `quantity` is unknown, the selected quantity is not available, the result does not hold the 16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-2 rating needs, or `verbose=True` without the per-band chain. |
+| ValueError | If `engine` or `quantity` is unknown, the selected quantity is not available, the result does not hold the 16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-2 rating needs. |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
 
 ## ReportMetadata

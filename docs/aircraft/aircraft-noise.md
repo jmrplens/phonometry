@@ -96,7 +96,9 @@ the `epnl` and the 10 dB-down `band_limits`. The reference-condition
 integrated-method example of ETM Vol. I **Table 4-4** (a 31-record
 $\mathrm{PNLT}$ history with non-uniform durations) is reproduced as
 $\mathrm{EPNL} = 92.6\ \text{EPNdB}$. `epnl_from_pnlt` exposes the
-duration/limit machinery directly from a $\mathrm{PNLT}$ series.
+duration/limit machinery directly from a $\mathrm{PNLT}$ series, as an
+`EPNLIntegration` record that names `epnl`, `pnltm`, `bandsharing_adjustment`,
+`band_limits` and `duration_correction`.
 
 <details>
 <summary>Show the code for this figure</summary>

@@ -2608,7 +2608,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   their sum fall. `emission.partial_power_concentration` takes one segment
   more when the strongest ones carry exactly half the power, as the "more than
   half" of ISO 9614-1 B.1.3 asks. The whole decibels reported by the
-  `rounded()` methods of `noise_control.screen_attenuation`,
+  `rounded` properties of `noise_control.screen_attenuation`,
   `noise_control.cabin_insulation`, the ISO 11546 enclosure insulations and
   the ISO 10847 measured insertion losses, and the NC-(SIL) rating of
   `room.noise_criterion` and the RC rating of `room.room_criterion`, send a
@@ -3282,6 +3282,86 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `ExtraneousCorrectionResult` (the corrected level, the margin and the
   `capped` it reads from it). Each reads its limits from its own module and
   warns as before.
+
+- **Results that were tuples are records: the spectrogram, the band set, the
+  octave bands of the building improvements and the EPNL integration.**
+  `OctaveFilterBank.spectrogram` returns a `filters.OctaveSpectrogramResult`
+  (`levels`, `frequencies` as a read-only array, `times`) that checks its
+  level grid against both axes and draws itself with `.plot()`: one raster on
+  a logarithmic frequency axis, each row the band it was measured in, with a
+  dB colour bar, and `channel=` to pick the channel of a multichannel result.
+  `filters.nominal_frequencies` returns a `filters.FractionalOctaveBands`
+  (`frequencies`, `lower_edges`, `upper_edges` and the nominal `labels` as a
+  tuple of text). `building.improvement_octave_bands` and the `octave_bands()`
+  methods of the floor-covering, laboratory lining, laboratory floor-covering,
+  joint and rainfall results return a `building.OctaveBandSpectrum`
+  (`frequencies`, `values` in dB and the `quantity` they hold: `"ΔL"`, `"ΔR"`,
+  `"Rs"`, `"LI"` or `"LI,norm"`), which plots itself labelled by that quantity.
+  `aircraft.epnl_from_pnlt` returns an `aircraft.EPNLIntegration` (`epnl`,
+  `pnltm`, `bandsharing_adjustment`, `band_limits` and the derived
+  `duration_correction`), from which `effective_perceived_noise_level` builds
+  its `EPNLResult`. None of the four unpacks by position any more; the
+  migration guide maps each unpacking to its fields.
+
+- **The band set of a filter bank is read from attributes spelled out in full,
+  and they are read-only.** `OctaveFilterBank.freq`, `freq_d`, `freq_u`,
+  `nominal_freq` and `num_bands` are `frequencies`, `lower_edges`,
+  `upper_edges`, `labels` and `n_bands`: properties over the bank's
+  `FractionalOctaveBands`, whose arrays refuse writes and whose labels are a
+  tuple. The spelling guard of `tests/test_public_vocabulary.py` now also reads
+  the attributes a plain class writes on `self`, where these five had stayed
+  out of sight of every field and parameter check, and refuses `freq` in any
+  public name.
+
+- **A verifier's band rows say `frequency`.** The `bands` rows of
+  `filters.FilterComplianceResult`, `filters.WeightingComplianceResult` and
+  `emission.IntensityInstrumentComplianceResult` key the band centre
+  `frequency` instead of `freq`, and the between-nominals sweep of
+  `WeightingComplianceResult` reads `worst_frequency` instead of
+  `worst_freq`, the spelling every field of the library uses for the axis.
+  `tests/test_public_vocabulary.py` reads the row keys of a verdict of each
+  kind and holds them to the spelled-out words.
+
+- **A tone-corrected perceived noise level is stated in TPNdB.** The PNLT
+  series and the PNLTM of `aircraft.EPNLResult`, `aircraft.EPNLIntegration`
+  and `aircraft.RotorcraftEventResult` read TPNdB, the unit the Nomenclature of
+  ICAO Annex 16 Volume I prints for them (I-6), in their documentation, in the
+  notebook table, on the `.plot()` of `EPNLResult` and on the EPNL fiche, where
+  they read PNdB; the PNL stays in PNdB and the EPNL in EPNdB. No number
+  changes.
+
+- **Tolerance limits come lower first, and signed.**
+  `vibration.weighting_tolerance_percent` returns the ISO 8041-1 Table 5 band
+  as `(lower, upper)`, and `CENTRAL_TOLERANCE_PERCENT`,
+  `SKIRT_TOLERANCE_PERCENT` and `TAIL_TOLERANCE_PERCENT` hold
+  `(lower %, upper %, phase °)`: `(-11.0, 12.0, 6.0)`, `(-21.0, 26.0, 12.0)`
+  and `(-100.0, 26.0, inf)`. The change raises nothing: an unpacking written
+  `upper, lower = ...` still runs, and swaps the two.
+
+- **A record's fields are required.** The fields that defaulted to `None` so
+  that a result built by hand from a few of its numbers would still construct
+  are required, and a record built without one, or with `None` for one,
+  raises `TypeError` naming it:
+  `l1`, `l2`, `t2` and `t0` of `building.AirborneInsulationResult`; `li`, `t2`
+  and `t0` of `building.ImpactInsulationResult`; `frequencies`, `measured` and
+  `shifted_reference` of `WeightedRatingResult` and `ImpactRatingResult`, and
+  `frequencies` and `measured` of their `Extended*` counterparts; `depth` of
+  `building.ApertureTransmissionResult`, which also keeps the `width_m` of a
+  slit or the `radius` of a circular aperture; `elements` of
+  `building.FacadePredictionResult`; `spacing_m` of `emission.IntensityResult`;
+  the five geometry fields of `environment.BarrierInsertionLoss`; and `field`
+  of `psychoacoustics.ZwickerLoudness`, typed `"free"` or `"diffuse"` and now
+  the fourth field. The reports, plots and geometry drawings lose the branches
+  that refused a record without them. `filters.WeightingFilter` takes
+  `high_accuracy` as a `bool`, `True` by default, and refuses `None`, which
+  used to select the default and would now read as false.
+
+- **The rounded ceiling attenuation is read from the measurement.**
+  `building.CeilingAttenuationResult.rounded` is a read-only property, read
+  from `measured` rounded to the nearest integer as ASTM E413 clause 5.2 asks
+  (the clause leaves a half open, and the library rounds it up), instead of a
+  field passed in, so it cannot disagree with the data. A record built with
+  `rounded=` raises `TypeError`.
 
 - **A function is named for what it returns, and a unit stays in the name only
   where the quantity has two.** A level, a correction, a difference, an index
@@ -5778,9 +5858,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   point no longer decides which side of it a printed 3,0 dB pair lands on.
 
   ISO 11821 7.4 c) reports the attenuation of a screen to the nearest whole
-  decibel, and `ScreenInSituResult` left that to the caller. `rounded()` and
-  `rounded_a_weighted()` give it, as the barrier, enclosure and cabin results
-  already did.
+  decibel, and `ScreenInSituResult` left that to the caller. Its `rounded`
+  and `rounded_a_weighted` properties give it, as the barrier, enclosure and
+  cabin results already did.
 
   The two loss functions of ISO 11820 took their areas as single numbers. The
   area of a diffuse room is a quarter of its absorption and moves with the
@@ -6186,7 +6266,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   than the gain: Formula (7) normalises both responses at the 16 Hz reference,
   so a flat calibration error is not a conformity finding, and the reference
   frequency itself is dropped from the verdict because the standard writes
-  every limit "for all f not equal to f_r".
+  every limit "for all f not equal to f_r". `response_tolerance_percent`
+  gives the two limits at each frequency lower first and signed, as the
+  condition of 5.2.3.3 writes them: the lower limit is `-10.0` from 1,25 f_u
+  to 0,8 f_o, `-20.0` from 0,5 f_u to 1,25 f_u and from 0,8 f_o to 2 f_o, and
+  `-100.0`, no limit at all, outside 0,5 f_u to 2 f_o.
 
   Annex E is the part that reaches furthest. DIN 4150-3 compares a peak
   velocity with a guideline value that depends on frequency, and Annex D gives

@@ -89,34 +89,77 @@ def test_format_1k_and_above() -> None:
     assert _format_nominal_freq(1250.0) == "1.25k"
 
 
-# --- nominal_frequencies — 4-tuple ---
+# --- nominal_frequencies: the band-set record ---
 
 
-def test_getansifrequencies_returns_labels() -> None:
-    freq, _, _, labels = nominal_frequencies(fraction=3)
-    assert isinstance(labels, list)
-    assert all(isinstance(label, str) for label in labels)
-    assert len(labels) == len(freq)
-    assert "1k" in labels
-    assert "31.5" in labels
+def test_nominal_frequencies_returns_labels() -> None:
+    bands = nominal_frequencies(fraction=3)
+    assert isinstance(bands, filters.FractionalOctaveBands)
+    assert isinstance(bands.labels, tuple)
+    assert all(isinstance(label, str) for label in bands.labels)
+    assert len(bands.labels) == bands.frequencies.size
+    assert "1k" in bands.labels
+    assert "31.5" in bands.labels
 
 
-def test_getansifrequencies_fraction1_labels() -> None:
-    freq, _, _, labels = nominal_frequencies(fraction=1)
-    assert "1k" in labels
-    assert len(labels) == len(freq)
+def test_nominal_frequencies_fraction1_labels() -> None:
+    bands = nominal_frequencies(fraction=1)
+    assert "1k" in bands.labels
+    assert len(bands.labels) == bands.frequencies.size
 
 
-# --- OctaveFilterBank.nominal_freq attribute ---
+def test_the_band_set_is_a_record_and_not_a_tuple() -> None:
+    """Four columns by name: no positional unpacking, no writable array."""
+    bands = nominal_frequencies(1, [125, 4000])
+    with pytest.raises(TypeError, match="cannot unpack non-iterable"):
+        _centres, _lower, _upper, _labels = bands  # type: ignore[misc]
+    for column in (bands.frequencies, bands.lower_edges, bands.upper_edges):
+        assert column.dtype == np.float64
+        assert not column.flags.writeable
+    assert bands.labels == ("125", "250", "500", "1k", "2k", "4k")
+    # IEC 61260-1:2014 5.4: the edges sit G^(1/2b) either side of the centre.
+    edge = 10.0 ** (3.0 / 20.0)
+    assert bands.lower_edges == pytest.approx(bands.frequencies / edge)
+    assert bands.upper_edges == pytest.approx(bands.frequencies * edge)
 
 
-def test_filterbank_nominal_freq_attribute() -> None:
+def test_the_band_set_refuses_columns_that_disagree() -> None:
+    """One entry per band in every column, and edges that enclose the centre."""
+    centres = [500.0, 1000.0]
+    lower = [354.8, 707.9]
+    upper = [707.9, 1412.5]
+    with pytest.raises(ValueError, match="one entry per band in every column"):
+        filters.FractionalOctaveBands(centres, lower, upper, ("500",))
+    with pytest.raises(ValueError, match="edges must enclose its centre"):
+        filters.FractionalOctaveBands(centres, upper, lower, ("500", "1k"))
+
+
+def test_the_band_set_refuses_one_string_for_its_labels() -> None:
+    """A two-character string is not two labels, even beside two bands."""
+    centres = [1000.0, 2000.0]
+    lower = [707.9, 1412.5]
+    upper = [1412.5, 2818.4]
+    with pytest.raises(TypeError, match="'labels' must hold one label per band"):
+        filters.FractionalOctaveBands(centres, lower, upper, "1k")  # type: ignore[arg-type]
+
+
+# --- OctaveFilterBank band-set attributes ---
+
+
+def test_filterbank_band_set_attributes() -> None:
     fb = filters.OctaveFilterBank(fs=48000, fraction=1)
-    assert hasattr(fb, "nominal_freq")
-    assert isinstance(fb.nominal_freq, list)
-    assert all(isinstance(label, str) for label in fb.nominal_freq)
-    assert "1k" in fb.nominal_freq
-    assert len(fb.nominal_freq) == fb.num_bands
+    assert not hasattr(fb, "nominal_freq")
+    assert not hasattr(fb, "freq")
+    assert not hasattr(fb, "bands")
+    assert isinstance(fb.labels, tuple)
+    assert all(isinstance(label, str) for label in fb.labels)
+    assert "1k" in fb.labels
+    assert len(fb.labels) == fb.n_bands
+    assert fb.frequencies.size == fb.lower_edges.size == fb.upper_edges.size
+    assert not fb.frequencies.flags.writeable
+    replacement = np.ones(fb.n_bands)
+    with pytest.raises(AttributeError, match="frequencies"):
+        fb.frequencies = replacement  # type: ignore[misc]
 
 
 # --- filter(nominal=False) — default exact floats ---

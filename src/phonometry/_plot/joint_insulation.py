@@ -212,7 +212,7 @@ def plot_lab_joint_insulation(
         label=rf"$R_\mathrm{{s}}'$ ({_t('measured', language)})",
     )
     rating = result.rating
-    if rating is not None and rating.shifted_reference is not None:
+    if rating is not None:
         core = [
             int(np.argmin(np.abs(freqs - f))) for f in np.asarray(rating.frequencies)
         ]
@@ -542,7 +542,7 @@ def plot_joint_gap_octaves(
 
     ax = ax if ax is not None else _new_axes()
     octaves = [r.octave_bands() for r in result.results]
-    centres = octaves[0][0]
+    centres = octaves[0].frequencies
     positions = _band_axis(ax, centres, xlabel=_OCTAVE_LABEL, language=language)
     ax.set_xlabel(_t(_OCTAVE_LABEL, language))
     sealed: list[np.ndarray] = []
@@ -552,11 +552,15 @@ def plot_joint_gap_octaves(
             sealed.append(maximum)
     ink = theme_line(ax.xaxis.label.get_color(), ax, quiet=1.0)
     for k, maximum in enumerate(sealed):
-        freqs, values = improvement_octave_bands(maximum, result.results[0].frequencies)
-        index = [int(np.argmin(np.abs(centres - f))) for f in freqs]
+        sealed_octaves = improvement_octave_bands(
+            maximum, result.results[0].frequencies, quantity="Rs"
+        )
+        index = [
+            int(np.argmin(np.abs(centres - f))) for f in sealed_octaves.frequencies
+        ]
         ax.plot(
             positions[index],
-            values,
+            sealed_octaves.values,
             "s-",
             color=ink,
             lw=1.6,
@@ -568,15 +572,15 @@ def plot_joint_gap_octaves(
             ),
         )
     cmap_colors = _width_colours(len(octaves))
-    for width, (freqs, values), colour in zip(
+    for width, octave, colour in zip(
         result.gap_widths_mm, octaves, cmap_colors, strict=True
     ):
         per_line = dict(kwargs)
         style_default(per_line, "color", colour)
         per_line.setdefault("marker", "o")
         per_line.setdefault("label", f"$b$ = {_num(float(width), language, 1)} mm")
-        index = [int(np.argmin(np.abs(centres - f))) for f in freqs]
-        ax.plot(positions[index], values, **per_line)
+        index = [int(np.argmin(np.abs(centres - f))) for f in octave.frequencies]
+        ax.plot(positions[index], octave.values, **per_line)
     ax.set_ylabel(_t(_JOINT_LABEL, language))
     ax.set_title(_t(_OCTAVES_TITLE, language))
     ax.grid(visible=True, alpha=0.3)

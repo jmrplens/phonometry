@@ -78,7 +78,7 @@ for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
     # limits selecciona únicamente la banda de octava de 1 kHz
     bank = filters.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
                             design=filters.FilterDesign(filter_type=ftype))
-    idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+    idx = int(np.argmin(np.abs(np.array(bank.frequencies) - 1000)))
     fsd = fs / bank.factor[idx]           # frecuencia real de la banda
     w, h = sosfreqz(bank.sos[idx], worN=16384, fs=fsd)
     ax.semilogx(w, 20 * np.log10(np.abs(h) + 1e-9), label=ftype)
@@ -154,8 +154,8 @@ for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
     bank = filters.OctaveFilterBank(
         fs, fraction=1, order=6, limits=[800, 1200],
         design=filters.FilterDesign(filter_type=ftype, resample=False))
-    idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
-    f_m = float(bank.freq[idx])
+    idx = int(np.argmin(np.abs(np.array(bank.frequencies) - 1000)))
+    f_m = float(bank.frequencies[idx])
     w, h = sosfreqz(bank.sos[idx], worN=1 << 17, fs=fs)
     mag = 20 * np.log10(np.abs(h) + 1e-15)
     mag -= mag.max()

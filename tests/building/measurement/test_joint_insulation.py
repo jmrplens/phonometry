@@ -383,12 +383,13 @@ def test_octave_bands_average_the_transmitted_power() -> None:
     res = building.laboratory_joint_insulation(
         [40.0, 43.0, 46.0], [80.0, 80.0, 80.0], [400.0, 500.0, 630.0]
     )
-    centres, values = res.octave_bands()
+    octaves = res.octave_bands()
     expected = -10.0 * math.log10(
         np.mean(10.0 ** (-np.array([40.0, 43.0, 46.0]) / 10.0))
     )
-    assert centres.tolist() == [500.0]
-    assert values[0] == pytest.approx(expected, abs=1e-12)
+    assert octaves.quantity == "Rs"
+    assert octaves.frequencies.tolist() == [500.0]
+    assert octaves.values[0] == pytest.approx(expected, abs=1e-12)
 
 
 # --- J.2: the test element ------------------------------------------------------
@@ -820,11 +821,11 @@ def test_gap_series_octave_figure_draws_the_sealed_element_and_each_width() -> N
     ax = series.plot_octave_bands()
     assert len(ax.lines) == len(series.gap_widths_mm) + 1
     sealed = series.results[0]
-    _, maximum = improvement_octave_bands(sealed.r_s_max, sealed.frequencies)
+    maximum = improvement_octave_bands(sealed.r_s_max, sealed.frequencies).values
     assert ax.lines[0].get_ydata() == pytest.approx(maximum)
     assert "R_\\mathrm{s,max}" in ax.lines[0].get_label()
     for line, result in zip(ax.lines[1:], series.results, strict=True):
-        assert line.get_ydata() == pytest.approx(result.octave_bands()[1])
+        assert line.get_ydata() == pytest.approx(result.octave_bands().values)
     assert "Figure J.9" in ax.get_title()
     legend = ax.get_legend()
     assert legend is not None

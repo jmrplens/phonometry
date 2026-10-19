@@ -813,7 +813,7 @@ def _settled_points_per_bandwidth(
     """
     factors = tuple(int(f) for f in bank.factor)
     fs = float(bank.fs)
-    mids = np.asarray(bank.freq, dtype=np.float64)
+    mids = np.asarray(bank.frequencies, dtype=np.float64)
 
     def tenths(s: int) -> list[int]:
         return [
@@ -829,7 +829,7 @@ def _settled_points_per_bandwidth(
                     "1995",
                 )
             )
-            for idx in range(bank.num_bands)
+            for idx in range(bank.n_bands)
         ]
 
     s = points_per_bandwidth
@@ -926,7 +926,7 @@ def _verify_band(
     the Table 1 breakpoints exactly and on the alias images of the half-band
     up to half the input rate (:class:`_BandGrid`, :func:`_image_window`).
     """
-    fm = float(bank.freq[idx])
+    fm = float(bank.frequencies[idx])
     fs = float(bank.fs)
     grid = _BandGrid(
         np.asarray(bank.sos[idx], dtype=np.float64),
@@ -961,7 +961,7 @@ def _verify_band(
                 ),
             )
 
-    band_entry: dict[str, Any] = {"freq": fm, "checked_to_omega": nyquist / fm}
+    band_entry: dict[str, Any] = {"frequency": fm, "checked_to_omega": nyquist / fm}
     for cls in classes_ordered:
         band_entry[f"margin_class{cls}_db"] = margins[cls]
     return band_entry
@@ -985,7 +985,7 @@ def _grade_pattern_requirements(
     """
     factors = tuple(int(f) for f in bank.factor)
     fs = float(bank.fs)
-    mids = np.asarray(bank.freq, dtype=np.float64)
+    mids = np.asarray(bank.frequencies, dtype=np.float64)
     bandwidth_limits = _BANDWIDTH_LIMITS_DB[edition]
     summation_limits = _SUMMATION_LIMITS_DB[edition]
     for idx, band in enumerate(bands):
@@ -1123,7 +1123,7 @@ def verify_filter_class(
 
     bands = [
         _verify_band(bank, idx, classes_ordered, breakpoint_omegas, edition, n_points)
-        for idx in range(bank.num_bands)
+        for idx in range(bank.n_bands)
     ]
     if edition == "1995":
         points_per_bandwidth = _settled_points_per_bandwidth(bank, points_per_bandwidth)
@@ -1136,7 +1136,7 @@ def verify_filter_class(
         fraction=int(bank.fraction),
         edition=edition,
         sos=tuple(np.asarray(s, dtype=np.float64) for s in bank.sos),
-        frequencies=np.asarray(bank.freq, dtype=np.float64),
+        frequencies=np.asarray(bank.frequencies, dtype=np.float64),
         factors=tuple(int(f) for f in bank.factor),
         fs=float(bank.fs),
         n_points=int(n_points),
@@ -1176,7 +1176,7 @@ def _require_margin_classes(
         if carried != wanted:
             msg = (
                 f"'edition' ({edition!r}) defines classes {expected}, but the "
-                f"{band.get('freq', math.nan):g} Hz entry of 'band_margins' carries "
+                f"{band.get('frequency', math.nan):g} Hz entry of 'band_margins' carries "
                 f"margins for classes {carried}."
             )
             raise ValueError(msg)
@@ -1204,7 +1204,7 @@ def _require_requirement_keys(
             missing = next(b for b, has in zip(bands, carried, strict=True) if not has)
             msg = (
                 f"'band_margins' must carry the {name!r} requirement in every band or "
-                f"in none; the {missing.get('freq', math.nan):g} Hz entry has "
+                f"in none; the {missing.get('frequency', math.nan):g} Hz entry has "
                 f"no {key!r}."
             )
             raise ValueError(msg)
@@ -1224,7 +1224,7 @@ class FilterComplianceResult(OwnsArrays):
     state a class its margins do not reach.
 
     :ivar band_margins: What each band was measured to, without its class:
-        one ``{"freq", "checked_to_omega", "margin_class<c>_db", ...}`` per
+        one ``{"frequency", "checked_to_omega", "margin_class<c>_db", ...}`` per
         band, as an immutable tuple of read-only rows, copied at construction
         so a write into a caller's dictionary cannot move the verdict;
         :attr:`bands` adds the class each band reaches.
@@ -1320,7 +1320,7 @@ class FilterComplianceResult(OwnsArrays):
                 msg = (
                     "'band_margins' must not state a class: the class of a band "
                     "is read from its margins. The "
-                    f"{band.get('freq', math.nan):g} Hz entry states "
+                    f"{band.get('frequency', math.nan):g} Hz entry states "
                     f"{band['class']!r}."
                 )
                 raise ValueError(msg)
@@ -1330,7 +1330,7 @@ class FilterComplianceResult(OwnsArrays):
                 if isinstance(value, float) and not math.isfinite(value):
                     msg = (
                         "'band_margins' must carry finite per-band values; the "
-                        f"{band.get('freq', math.nan):g} Hz entry has "
+                        f"{band.get('frequency', math.nan):g} Hz entry has "
                         f"{key}={value!r}."
                     )
                     raise ValueError(msg)
@@ -1339,7 +1339,7 @@ class FilterComplianceResult(OwnsArrays):
     def bands(self) -> tuple[dict[str, Any], ...]:
         """The per-band verdicts, each margin row with the class it reaches.
 
-        One ``{"freq", "class", "checked_to_omega", "margin_class<c>_db",
+        One ``{"frequency", "class", "checked_to_omega", "margin_class<c>_db",
         ...}`` per band: the ``class`` is the strictest class of the edition
         the band meets on every requirement graded, or ``None``. A fresh copy
         at every read.
@@ -1347,7 +1347,7 @@ class FilterComplianceResult(OwnsArrays):
         classes = tuple(_FILTER_EDITIONS[self.edition]["classes"])
         return tuple(
             {
-                "freq": band["freq"],
+                "frequency": band["frequency"],
                 "class": _band_class(band, classes),
                 **{key: value for key, value in band.items() if key != "class"},
             }

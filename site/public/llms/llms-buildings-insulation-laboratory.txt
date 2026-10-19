@@ -1013,8 +1013,8 @@ t = np.array([1.9, 1.8, 1.7, 1.6, 1.5, 1.45, 1.4, 1.35, 1.3, 1.25, 1.2, 1.15,
 rain = building.rainfall_sound(l_pr, t, freqs, volume=62.0,
                                excited_area_m2=1.875,
                                reference_correction=correction)
-print(round(rain.l_ia, 1), round(rain.l_ia_norm, 1))     # 69.3 67.5
-print(rain.octave_bands()[0])       # [ 125.  250.  500. 1000. 2000. 4000.]
+print(round(rain.l_ia, 1), round(rain.l_ia_norm, 1))  # 69.3 67.5
+print(rain.octave_bands().frequencies)                # [ 125.  250.  500. 1000. 2000. 4000.]
 ```
 
 K.5 e) asks for $L_I$, $L_{I\mathrm{norm}}$, $L_{I\mathrm{A}}$ and
@@ -1059,6 +1059,41 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.6))
 correction.plot(ax=ax1)
 rain.plot(ax=ax2)
 plt.tight_layout()
+plt.show()
+```
+
+</details>
+
+Formula (K.3) folds the intensity level into octaves, the energy sum of the
+three one-third-octave bands of each octave, and `rain.octave_bands()` returns
+it as one record that names its bands, its values and the quantity they hold,
+`"LI"` (or `"LI,norm"` with `normalized=True`), and draws itself:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rainfall_octave_bands_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rainfall_octave_bands.svg" alt="One panel over the six octave bands from 125 Hz to 4000 Hz: the sound intensity level of the rooflight under heavy rain, folded into octaves, rising from 54.7 dB at 125 Hz through 61.3 dB at 250 Hz and 64.4 dB at 500 Hz to a peak of 65.2 dB at 1000 Hz, then falling to 63.3 dB at 2000 Hz and 58.9 dB at 4000 Hz, drawn as square markers joined by a line" width="70%"></picture>
+
+*The rooflight's sound intensity level in the six octave bands Formula (K.3)
+forms from the eighteen thirds: the peak at 1000 Hz is the octave of the
+800 Hz third where the one-third-octave spectrum peaks.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+# One line:
+rain.octave_bands().plot()
+plt.show()
+
+# By hand, from the record's fields: one point per octave, on one
+# categorical tick per octave band.
+octaves = rain.octave_bands()
+positions = np.arange(octaves.frequencies.size)
+fig, ax = plt.subplots()
+ax.plot(positions, octaves.values, "s-", label=octaves.quantity)
+ax.set_xticks(positions, [f"{f:g}" for f in octaves.frequencies])
+ax.set(xlabel="Octave band [Hz]",
+       ylabel="Sound intensity level $L_I$ [dB re 1 pW/m²]",
+       title="In octave bands")
+ax.legend()
 plt.show()
 ```
 

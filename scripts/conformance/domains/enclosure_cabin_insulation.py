@@ -1369,7 +1369,7 @@ def _chk_iso80000_rounding() -> Outcome:
     given = [number / scale for number, scale, _ in examples]
     rounded = ph.noise_control.enclosure_sound_power_insulation(
         given, [0.0] * len(given)
-    ).rounded()
+    ).rounded
     printed = [want for _, _, want in examples]
     matching = sum(
         int(got == want) for got, want in zip(rounded.tolist(), printed, strict=True)

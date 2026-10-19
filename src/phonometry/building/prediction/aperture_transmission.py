@@ -64,6 +64,7 @@ from ..._internal.validation import (
     require_choice,
     require_equal_counts,
     require_positive,
+    require_present,
     require_ranks,
     require_same_length,
 )
@@ -117,20 +118,20 @@ class ApertureTransmissionResult(OwnsArrays):
     :ivar frequencies: Band centre frequencies, in hertz.
     :ivar transmission_coefficient: Transmission coefficient ``tau`` per band.
     :ivar kind: ``"slit"`` or ``"circular"``.
-    :ivar width_m: Slit width, in metres, retained (with ``depth``) so
-        :meth:`plot_geometry` can draw the section; appended after the
-        original fields and ``None`` for circular apertures or hand-built
-        results.
-    :ivar radius: Circular-aperture radius, in metres, or ``None``.
-    :ivar depth: Wall thickness, in metres, or ``None``.
+    :ivar depth: Wall thickness, in metres.
+    :ivar width_m: Slit width, in metres, kept (with ``depth``) so
+        :meth:`plot_geometry` can draw the section; given for a slit and
+        ``None`` for a circular aperture.
+    :ivar radius: Circular-aperture radius, in metres; given for a circular
+        aperture and ``None`` for a slit.
     """
 
     frequencies: np.ndarray
     transmission_coefficient: np.ndarray
     kind: str
+    depth: float
     width_m: float | None = None
     radius: float | None = None
-    depth: float | None = None
 
     def __post_init__(self) -> None:
         """Reject an aperture whose coefficient and band axis disagree.
@@ -145,10 +146,10 @@ class ApertureTransmissionResult(OwnsArrays):
         frequency only.
 
         The retained geometry is pinned to one shape as well: a slit keeps its
-        ``width_m`` and a circular aperture its ``radius``, never both, and
-        :meth:`plot_geometry` draws whichever is present, testing ``width_m``
-        first. A result carrying both would silently render the slit section
-        for what claims to be a circular aperture.
+        ``width_m`` and a circular aperture its ``radius``, always one and
+        never both, and :meth:`plot_geometry` draws whichever is present,
+        testing ``width_m`` first. A result carrying both would silently
+        render the slit section for what claims to be a circular aperture.
 
         The kept shape has to be the shape ``kind`` names, too. The section is
         drawn from whichever of the two is present and nothing in it says which
@@ -158,12 +159,16 @@ class ApertureTransmissionResult(OwnsArrays):
         ``"slit"`` that kept a ``radius`` draws the hole section of the doubled
         opening.
 
-        :raises ValueError: if the two per-band arrays disagree, if the result
-            carries both a slit width and a circular radius, or if the shape it
-            carries is not the one ``kind`` names.
+        :raises ValueError: if the two per-band arrays disagree, ``kind`` is
+            neither ``"slit"`` nor ``"circular"``, the result carries both a
+            slit width and a circular radius, the shape it carries is not the
+            one ``kind`` names, or it carries no shape at all.
+        :raises TypeError: if ``depth`` is ``None``.
         """
+        require_present(self, "depth")
         require_ranks(self, frequencies=1, transmission_coefficient=1)
         require_same_length(self, "frequencies", "transmission_coefficient")
+        require_choice(self.kind, "kind", ("slit", "circular"))
         if self.width_m is not None and self.radius is not None:
             msg = (
                 "Give at most one of 'width_m' (a slit) and 'radius' (a "
@@ -181,6 +186,10 @@ class ApertureTransmissionResult(OwnsArrays):
                 f"'radius' is the circular-aperture radius, but 'kind' is "
                 f"{self.kind!r}; give 'width_m' for a slit."
             )
+            raise ValueError(msg)
+        if (self.width_m if self.kind == "slit" else self.radius) is None:
+            shape = "'width_m'" if self.kind == "slit" else "'radius'"
+            msg = f"A {self.kind!r} aperture keeps its {shape}; this result has none."
             raise ValueError(msg)
 
     @property
@@ -211,8 +220,6 @@ class ApertureTransmissionResult(OwnsArrays):
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
-
-        :raises ValueError: If the result does not retain its geometry.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_aperture_result_geometry

@@ -626,7 +626,10 @@ def _weighting_band_verdicts(
             cls: float(min(upper[i] - deviation[i], deviation[i] - lower[i]))
             for cls, (lower, upper) in masks.items()
         }
-        band: dict[str, Any] = {"freq": float(fm), "deviation_db": float(deviation[i])}
+        band: dict[str, Any] = {
+            "frequency": float(fm),
+            "deviation_db": float(deviation[i]),
+        }
         band.update({f"margin_class{cls}_db": m for cls, m in margins.items()})
         bands.append(band)
     return bands
@@ -658,7 +661,7 @@ def _between_nominals_sweep(
         sweep_margins[cls] = np.minimum(up - sweep_dev, sweep_dev - lo)
     # The worst frequency is read off the strictest class, the first key.
     worst = int(np.argmin(next(iter(sweep_margins.values()))))
-    between: dict[str, float] = {"worst_freq": float(grid[worst])}
+    between: dict[str, float] = {"worst_frequency": float(grid[worst])}
     between.update(
         {f"margin_class{cls}_db": float(np.min(m)) for cls, m in sweep_margins.items()}
     )
@@ -693,12 +696,12 @@ class WeightingComplianceResult(OwnsArrays):
     built to state a class its margins do not reach.
 
     :ivar band_margins: What each tabulated frequency below the Nyquist
-        frequency was measured to, without its class: one ``{"freq",
+        frequency was measured to, without its class: one ``{"frequency",
         "deviation_db", "margin_class<c>_db"}`` per frequency, as an
         immutable tuple of read-only rows, copied at construction so a write
         into a caller's dictionary cannot move the verdict; :attr:`bands`
         adds the class each one reaches.
-    :ivar between_nominals: The subclause 5.5.7 sweep, ``{"worst_freq",
+    :ivar between_nominals: The subclause 5.5.7 sweep, ``{"worst_frequency",
         "margin_class<c>_db"}``, read-only, or ``None`` when no tabulated
         frequency was in range and there was nothing to sweep between.
     :ivar weighting: The weighting the verdict is about (``"A"``, ``"B"``,
@@ -766,7 +769,7 @@ class WeightingComplianceResult(OwnsArrays):
             if _margin_classes(band) != carried:
                 msg = (
                     f"{who}: every row must carry the same classes; the "
-                    f"{band.get('freq', '?')} Hz row carries "
+                    f"{band.get('frequency', '?')} Hz row carries "
                     f"{_margin_classes(band)} where the first carries "
                     f"{carried}."
                 )
@@ -775,7 +778,7 @@ class WeightingComplianceResult(OwnsArrays):
                 msg = (
                     f"{who}: 'band_margins' must not state a class: the class "
                     "of a row is read from its margins. The "
-                    f"{band.get('freq', '?')} Hz row states {band['class']!r}."
+                    f"{band.get('frequency', '?')} Hz row states {band['class']!r}."
                 )
                 raise ValueError(msg)
         if (self.between_nominals is None) != (not rows):
@@ -801,7 +804,7 @@ class WeightingComplianceResult(OwnsArrays):
     def bands(self) -> tuple[dict[str, Any], ...]:
         """The per-frequency verdicts, each margin row with the class it reaches.
 
-        One ``{"freq", "class", "deviation_db", "margin_class<c>_db"}`` per
+        One ``{"frequency", "class", "deviation_db", "margin_class<c>_db"}`` per
         tabulated frequency below the Nyquist frequency: the ``class`` is the
         strictest class of the edition whose margin is not negative, or
         ``None``. A fresh copy at every read.
@@ -809,7 +812,7 @@ class WeightingComplianceResult(OwnsArrays):
         classes = _WEIGHTING_EDITIONS[self.edition]["classes"]
         return tuple(
             {
-                "freq": band["freq"],
+                "frequency": band["frequency"],
                 "class": _band_class(
                     {cls: band[f"margin_class{cls}_db"] for cls in classes}
                 ),

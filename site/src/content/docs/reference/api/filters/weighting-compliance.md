@@ -207,8 +207,8 @@ built to state a class its margins do not reach.
 
 | Name | Description |
 | :--- | :--- |
-| `band_margins` | What each tabulated frequency below the Nyquist frequency was measured to, without its class: one `{"freq", "deviation_db", "margin_class<c>_db"}` per frequency, as an immutable tuple of read-only rows, copied at construction so a write into a caller's dictionary cannot move the verdict; `bands` adds the class each one reaches. |
-| `between_nominals` | The subclause 5.5.7 sweep, `{"worst_freq", "margin_class<c>_db"}`, read-only, or `None` when no tabulated frequency was in range and there was nothing to sweep between. |
+| `band_margins` | What each tabulated frequency below the Nyquist frequency was measured to, without its class: one `{"frequency", "deviation_db", "margin_class<c>_db"}` per frequency, as an immutable tuple of read-only rows, copied at construction so a write into a caller's dictionary cannot move the verdict; `bands` adds the class each one reaches. |
+| `between_nominals` | The subclause 5.5.7 sweep, `{"worst_frequency", "margin_class<c>_db"}`, read-only, or `None` when no tabulated frequency was in range and there was nothing to sweep between. |
 | `weighting` | The weighting the verdict is about (`"A"`, `"B"`, `"C"`, `"AU"` or `"Z"`). |
 | `edition` | `"2013"` (IEC 61672-1:2013, classes 1/2) or `"1979"` (IEC 651:1979, Types 0/1/2/3 offered as classes 0-3). |
 | `fs` | Sampling rate of the verified filter, in Hz. It is what puts rows out of range, so the verdict carries it. |
@@ -220,7 +220,7 @@ built to state a class its margins do not reach.
 
 The per-frequency verdicts, each margin row with the class it reaches.
 
-One `{"freq", "class", "deviation_db", "margin_class<c>_db"}` per
+One `{"frequency", "class", "deviation_db", "margin_class<c>_db"}` per
 tabulated frequency below the Nyquist frequency: the `class` is the
 strictest class of the edition whose margin is not negative, or
 `None`. A fresh copy at every read.

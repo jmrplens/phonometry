@@ -399,21 +399,11 @@ def _validated_curves(
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Band centres, measured and shifted curves, and the unfavourable deviations.
 
-    :raises ValueError: If a curve is missing from the result or the three do
-        not share a shape.
+    :raises ValueError: If the three curves do not share a shape.
     """
-    centers = result.frequencies
-    measured = result.measured
-    shifted = result.shifted_reference
-    if centers is None or measured is None or shifted is None:
-        msg = (
-            "render_iso717_report() needs 'frequencies', 'measured' and "
-            "'shifted_reference' on the result."
-        )
-        raise ValueError(msg)
-    centers = np.asarray(centers, dtype=np.float64)
-    measured = np.asarray(measured, dtype=np.float64)
-    shifted = np.asarray(shifted, dtype=np.float64)
+    centers = np.asarray(result.frequencies, dtype=np.float64)
+    measured = np.asarray(result.measured, dtype=np.float64)
+    shifted = np.asarray(result.shifted_reference, dtype=np.float64)
     require_equal_shapes(
         f"{type(result).__name__}.report",
         {

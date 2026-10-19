@@ -225,7 +225,7 @@ def _chk_anti_alias_tones_1995() -> Outcome:
     fs = 48000
     bank = ph.filters.OctaveFilterBank(fs, fraction=3)
     t = np.arange(4 * fs) / fs
-    nominal = list(bank.nominal_freq)
+    nominal = list(bank.labels)
     held = 0
     picks = (20.0, 200.0)
     for target in picks:

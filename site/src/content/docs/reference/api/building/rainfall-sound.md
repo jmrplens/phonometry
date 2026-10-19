@@ -393,10 +393,10 @@ Sound intensity level radiated by a specimen under rain (Annex K).
 RainfallSoundResult.octave_bands(
     *,
     normalized: bool = False,
-) -> tuple[np.ndarray, np.ndarray]
+) -> OctaveBandSpectrum
 ```
 
-`(octave centres in Hz, LIoct in dB)` by Formula (K.3).
+$L_{I\mathrm{oct}}$ in octave bands, by Formula (K.3).
 
 $L_{I\mathrm{oct}} = 10 \log_{10} \sum_{j=1}^{3} 10^{0.1 L_{I,j}}$
 over the three one-third-octave bands of each octave present.
@@ -405,7 +405,7 @@ over the three one-third-octave bands of each octave present.
 
 | Name | Description |
 | :--- | :--- |
-| `normalized` | Combine $L_{I\mathrm{norm}}$ instead of $L_I$. |
+| `normalized` | Combine $L_{I\mathrm{norm}}$ instead of $L_I$. The standard defines $L_{I\mathrm{norm}}$ in one-third-octave bands only (Formula (K.5)) and prints Formula (K.3) for $L_I$; combining the normalized levels the same way is this library's extension, and the result keeps the symbol $L_{I\mathrm{norm}}$. |
 
 **Raises**
 

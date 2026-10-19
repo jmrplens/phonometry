@@ -501,6 +501,11 @@ def test_a_barrier_loss_covering_no_frequency_is_refused() -> None:
             fresnel_number=empty,
             method="kurze_anderson",
             ground=False,
+            source_height_m=1.0,
+            barrier_distance=5.0,
+            barrier_height_m=3.0,
+            receiver_distance=20.0,
+            receiver_height_m=1.5,
         )
 
 

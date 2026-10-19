@@ -500,22 +500,27 @@ def verify_time_invariance(
             f"per decade (IEC 61260-1:2014 5.14.3); got {seconds_per_decade!r}."
         )
         raise ValueError(msg)
-    if bank.num_bands < 1:
+    if bank.n_bands < 1:
         msg = "The bank has no bands to test."
         raise ValueError(msg)
     fs = float(bank.fs)
-    mids = [float(f) for f in bank.freq]
+    mids = [float(f) for f in bank.frequencies]
     rates_hz = [fs / float(f) for f in bank.factor]
     guard = 10.0**_SWEEP_GUARD_DECADES
     factors = [int(f) for f in bank.factor]
     lowest = _edge_frequency_hz(
-        bank.sos[0], factors[0], fs, mids[0], float(bank.freq_d[0]), below=True
+        bank.sos[0], factors[0], fs, mids[0], float(bank.lower_edges[0]), below=True
     )
     start_hz = (
-        lowest if lowest is not None else float(bank.freq_d[0]) / 1000.0
+        lowest if lowest is not None else float(bank.lower_edges[0]) / 1000.0
     ) / guard
     highest = _edge_frequency_hz(
-        bank.sos[-1], factors[-1], fs, mids[-1], float(bank.freq_u[-1]), below=False
+        bank.sos[-1],
+        factors[-1],
+        fs,
+        mids[-1],
+        float(bank.upper_edges[-1]),
+        below=False,
     )
     end_hz = min(highest * guard, fs / 2.0) if highest is not None else fs / 2.0
     decay_s = max(
@@ -523,7 +528,7 @@ def verify_time_invariance(
     )
 
     sweep_ratio_lg = math.log10(end_hz / start_hz)
-    outputs = np.empty((len(rates_spd), bank.num_bands))
+    outputs = np.empty((len(rates_spd), bank.n_bands))
     expected = np.empty_like(outputs)
     sweeps: list[float] = []
     averages: list[float] = []
@@ -536,7 +541,7 @@ def verify_time_invariance(
         t_avg = x.size / fs
         sweeps.append(t_sweep)
         averages.append(t_avg)
-        for idx in range(bank.num_bands):
+        for idx in range(bank.n_bands):
             y = _decimate_and_filter(x, bank.sos[idx], factors[idx])
             energy = float(np.sum(y * y)) / rates_hz[idx]
             outputs[row, idx] = 10.0 * math.log10(energy / t_avg)

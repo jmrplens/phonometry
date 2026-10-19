@@ -75,7 +75,7 @@ def test_verification_figure_draws_the_band_from_the_tables() -> None:
     band = ax.collections[0].get_paths()[0].vertices
     lower_edge = band[:, 1].min()
     upper_edge = band[:, 1].max()
-    assert lower_edge == pytest.approx(-result.lower_percent.max())
+    assert lower_edge == pytest.approx(result.lower_percent.min())
     assert upper_edge == pytest.approx(result.upper_percent.max())
     outside = [line for line in ax.lines if line.get_marker() == "X"]
     assert len(outside) == 1

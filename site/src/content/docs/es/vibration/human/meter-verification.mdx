@@ -196,7 +196,7 @@ print([round(f, 4) for f in vibration.TRANSITION_FREQUENCIES_HZ["Wk"]])
 # [0.2512, 0.631, 63.0957, 158.4893]
 
 # La Tabla 5 leída a lo largo de ellas: cola, falda, central, falda, cola.
-upper, lower = vibration.weighting_tolerance_percent(
+lower, upper = vibration.weighting_tolerance_percent(
     "Wk", [0.2, 0.5, 16.0, 100.0, 200.0]
 )
 print(upper)   # [26. 26. 12. 26. 26.]
@@ -214,7 +214,7 @@ usa las frecuencias centrales verdaderas, nunca las etiquetas nominales de
 banda.
 
 ```python
-print(vibration.weighting_tolerance_percent("Wk", [10 ** 1.8, 63.1])[1])
+print(vibration.weighting_tolerance_percent("Wk", [10 ** 1.8, 63.1])[0])
 # [-11. -21.]
 ```
 
@@ -239,7 +239,7 @@ from phonometry import vibration
 ft1, ft2, ft3, ft4 = vibration.TRANSITION_FREQUENCIES_HZ["Wk"]
 corners = [ft1, ft2, 6.31, ft3, ft4]
 design = vibration.weighting_factors("Wk", corners)
-upper, _ = vibration.weighting_tolerance_percent("Wk", corners)
+_, upper = vibration.weighting_tolerance_percent("Wk", corners)
 
 print(design.round(4))                   # [0.1832 0.4588 1.0544 0.1857 0.0292]
 print((design * upper / 100).round(4))   # [0.0476 0.0551 0.1265 0.0223 0.0076]
@@ -314,7 +314,7 @@ plt.show()
 
 # A mano, a partir de los campos del resultado, replicando lo que dibuja
 # WeightingVerification.plot():
-upper, lower = vibration.weighting_tolerance_percent(
+lower, upper = vibration.weighting_tolerance_percent(
     check.weighting, check.frequencies
 )
 inside = check.within_tolerance
@@ -382,8 +382,8 @@ equivoca en la dirección que deja pasar un instrumento.
 La primera es la frase del 5.6.6 citada al final de la sección 1: los límites
 de tolerancia de la Tabla 5 *incluyen* las **máximas** incertidumbres
 expandidas de medida aplicables. Eso es una afirmación sobre cómo se trazó la
-tabla. Es la razón de que `weighting_tolerance_percent` devuelva +12 % y
-−11 % y nunca nada más ancho: la holgura que se le concede a un banco
+tabla. Es la razón de que `weighting_tolerance_percent` devuelva −11 % y
++12 % y nunca nada más ancho: la holgura que se le concede a un banco
 cuidadoso ya está dentro de esos números, y sumarles algo sería gastarla dos
 veces.
 
@@ -495,11 +495,11 @@ plt.show()
 # puntos a cada lado de cada una dibuja la escalera exactamente.
 edges = np.sort(np.concatenate((corners * (1 - 1e-9), corners * (1 + 1e-9),
                                 [0.1, 400.0])))
-band_upper, band_lower = vibration.weighting_tolerance_percent("Wk", edges)
+band_lower, band_upper = vibration.weighting_tolerance_percent("Wk", edges)
 
 # En las dos colas el límite inferior es -100 %, al que verify_weighting no le
 # resta nada, así que allí la barra tiene un solo brazo.
-_ceiling, floor = vibration.weighting_tolerance_percent("Wk", sweep_hz)
+floor, _ceiling = vibration.weighting_tolerance_percent("Wk", sweep_hz)
 arms = np.vstack((np.where(floor <= vibration.UNCONSTRAINED_BELOW_PERCENT, 0.0, u),
                   np.full(sweep_hz.shape, u)))
 kept = graded.within_tolerance

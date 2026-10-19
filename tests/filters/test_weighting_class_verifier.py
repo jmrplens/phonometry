@@ -85,7 +85,7 @@ def test_high_accuracy_weighting_verdicts(fs: int, curve: str) -> None:
         # Exactly one row, the one nearest Nyquist, is what costs the class.
         off = [b for b in result.bands if b["class"] != 1]
         assert len(off) == 1
-        assert off[0]["freq"] == max(b["freq"] for b in result.bands)
+        assert off[0]["frequency"] == max(b["frequency"] for b in result.bands)
 
 
 def test_high_accuracy_docstring_states_what_the_plain_design_earns() -> None:
@@ -132,7 +132,7 @@ def test_band_dict_keys_and_deviation_sign() -> None:
     result = filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
     band = result.bands[0]
     assert set(band) == {
-        "freq",
+        "frequency",
         "class",
         "deviation_db",
         "margin_class1_db",
@@ -150,7 +150,7 @@ def test_frequencies_above_nyquist_are_dropped() -> None:
     7 943.3 Hz, is below Nyquist) while 10 kHz and above are dropped.
     """
     result = filters.verify_weighting_class(filters.WeightingFilter(16000, "A"))
-    assert max(b["freq"] for b in result.bands) == 8000.0
+    assert max(b["frequency"] for b in result.bands) == 8000.0
 
 
 def test_low_fs_verdict_is_flagged_range_limited() -> None:
@@ -173,7 +173,7 @@ def test_deviation_evaluated_at_exact_base10_frequency() -> None:
     """
     wf = filters.WeightingFilter(96000, "A")
     band = next(
-        b for b in filters.verify_weighting_class(wf).bands if b["freq"] == 16000.0
+        b for b in filters.verify_weighting_class(wf).bands if b["frequency"] == 16000.0
     )
     ref_1k = _tone_gain_db(wf, 96000, 1000.0)
     at_exact = _tone_gain_db(wf, 96000, 15848.93192) - ref_1k - (-6.6)
@@ -200,7 +200,7 @@ def test_verdict_measures_the_path_a_signal_takes(fs: int, label: float) -> None
     """
     wf = filters.WeightingFilter(fs, "A")
     band = next(
-        b for b in filters.verify_weighting_class(wf).bands if b["freq"] == label
+        b for b in filters.verify_weighting_class(wf).bands if b["frequency"] == label
     )
     exact = 10.0 ** (round(10.0 * math.log10(label)) / 10.0)
     design = {row[0]: row[1] for row in _WEIGHTING_TABLE3}[label]
@@ -223,14 +223,14 @@ def test_notch_between_nominals_fails_the_sweep() -> None:
     assert all(bd["class"] == 1 for bd in result.bands)
     assert result.between_nominals["margin_class1_db"] < 0.0
     assert result.between_nominals["margin_class2_db"] < 0.0
-    assert 800.0 < result.between_nominals["worst_freq"] < 1000.0
+    assert 800.0 < result.between_nominals["worst_frequency"] < 1000.0
     assert result.overall_class is None
 
 
 def test_sweep_result_reported_for_compliant_filter() -> None:
     result = filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
     between = result.between_nominals
-    assert set(between) == {"worst_freq", "margin_class1_db", "margin_class2_db"}
+    assert set(between) == {"worst_frequency", "margin_class1_db", "margin_class2_db"}
     assert between["margin_class1_db"] >= 0.0
     wf = filters.WeightingFilter(48000, "A")
     with pytest.raises(ValueError, match=r"'n_sweep_points' must be at least"):
@@ -278,7 +278,8 @@ def test_deviation_matches_independent_tone_measurement() -> None:
     fs = 48000
     wf = filters.WeightingFilter(fs, "A")  # stateless, so it can be reused per tone
     bands = {
-        b["freq"]: b["deviation_db"] for b in filters.verify_weighting_class(wf).bands
+        b["frequency"]: b["deviation_db"]
+        for b in filters.verify_weighting_class(wf).bands
     }
     ref_1k = _tone_gain_db(wf, fs, 1000.0)
     for f0 in (63.0, 250.0, 1000.0, 4000.0, 8000.0):

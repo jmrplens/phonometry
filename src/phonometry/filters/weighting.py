@@ -558,7 +558,7 @@ class WeightingFilter:
         *,
         stateful: bool = False,
         steady_ic: bool = False,
-        high_accuracy: bool | None = None,
+        high_accuracy: bool = True,
     ) -> None:
         """Initialize the weighting filter.
 
@@ -604,22 +604,19 @@ class WeightingFilter:
             class 2 at 32 000 and 22 050 Hz, and meets no class at 16 000 Hz.
             It is refused for the '468' curve, whose skirt puts it 23 dB out at
             16 kHz with no lower grade in the Recommendation to fall back to.
-
-            Defaults to True (``None`` selects the default too, which is
-            what it used to mean in every mode but the stateful one).
+            Defaults to True.
         """
         if fs <= 0:
             raise ValueError(_FS_POSITIVE)
         weighting = _require_str(weighting, "weighting")
-        if high_accuracy is None:
-            # ``None`` used to mean "True unless stateful", because the two
-            # were mutually exclusive. They are not any more, so it resolves
-            # to the accurate design in every mode. The sentinel is kept
-            # rather than replaced by a plain ``True`` default so that a
-            # caller still passing ``None`` gets the default rather than a
-            # value that reads as false.
-            high_accuracy = True
-
+        if not isinstance(high_accuracy, bool | np.bool_):
+            # ``None`` used to select the default; read as a truth value now
+            # it would quietly pick the plain design instead.
+            msg = (
+                "'high_accuracy' must be True or False; got "
+                f"{type(high_accuracy).__name__}."
+            )
+            raise TypeError(msg)
         self.fs = fs
         self.weighting = weighting.upper()
         self.stateful = stateful

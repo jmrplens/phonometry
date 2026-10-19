@@ -18,6 +18,7 @@ import pytest
 
 from phonometry.aircraft.certification import (
     NOY_BANDS_HZ,
+    EPNLIntegration,
     EPNLResult,
     _tone_background,
     effective_perceived_noise_level,
@@ -238,19 +239,24 @@ def test_tone_correction_start_band_must_be_an_integral_index() -> None:
 def test_epnl_table_44() -> None:
     # ETM Vol. I Table 4-4: integrated-method reference EPNL = 92.61892 EPNdB,
     # PNLTM = 97.40, window records 4-28 (0-based 3-27).
-    epnl, pnltm, kf, kl = epnl_from_pnlt(np.array(_PNLTR_44), np.array(_DTR_44))
-    assert pnltm == pytest.approx(97.40, abs=1e-6)
-    assert (kf, kl) == (3, 27)
-    assert epnl == pytest.approx(92.61892, abs=1e-2)
+    integration = epnl_from_pnlt(np.array(_PNLTR_44), np.array(_DTR_44))
+    assert isinstance(integration, EPNLIntegration)
+    assert integration.pnltm == pytest.approx(97.40, abs=1e-6)
+    assert integration.band_limits == (3, 27)
+    assert integration.epnl == pytest.approx(92.61892, abs=1e-2)
+    assert integration.bandsharing_adjustment == 0.0
+    assert integration.duration_correction == pytest.approx(
+        integration.epnl - integration.pnltm
+    )
 
 
 def test_epnl_uniform_dt_matches_energy_sum() -> None:
     # With dt=0.5 and T0=10, EPNL = 10 lg(Σ 0.5·10^(PNLT/10)) − 10 lg(10).
     p = np.array([90.0, 95.0, 90.0])  # all within 10 dB of the peak
-    epnl, _pnltm, kf, kl = epnl_from_pnlt(p, 0.5)
+    integration = epnl_from_pnlt(p, 0.5)
     expected = 10.0 * np.log10(np.sum(0.5 * 10.0 ** (p / 10.0))) - 10.0 * np.log10(10.0)
-    assert epnl == pytest.approx(expected, rel=1e-9)
-    assert (kf, kl) == (0, 2)
+    assert integration.epnl == pytest.approx(expected, rel=1e-9)
+    assert integration.band_limits == (0, 2)
 
 
 def test_effective_perceived_noise_level_bundle() -> None:
@@ -266,8 +272,8 @@ def test_effective_perceived_noise_level_bundle() -> None:
 def test_epnl_single_element_dt_treated_as_scalar() -> None:
     # A one-element dt (list or 1-D array) broadcasts like a scalar.
     p = np.array([90.0, 95.0, 90.0])
-    a, *_ = epnl_from_pnlt(p, [0.5])
-    b, *_ = epnl_from_pnlt(p, 0.5)
+    a = epnl_from_pnlt(p, [0.5]).epnl
+    b = epnl_from_pnlt(p, 0.5).epnl
     assert a == pytest.approx(b, rel=1e-12)
 
 
@@ -322,12 +328,59 @@ def test_effective_perceived_noise_level_rejects_bad_procedure() -> None:
         effective_perceived_noise_level(spectra, procedure="rocket")
 
 
-def test_epnl_result_plot_smoke() -> None:
+@pytest.mark.parametrize(
+    ("language", "ylabel"),
+    [("en", "Level [PNdB, TPNdB]"), ("es", "Nivel [PNdB, TPNdB]")],
+)
+def test_epnl_result_plot_states_the_units_annex_16_prints(
+    language: str, ylabel: str
+) -> None:
+    """PNL is in PNdB and the tone-corrected PNLT and PNLTM in TPNdB (I-6)."""
+    import matplotlib.pyplot as plt
+
     rng = np.random.default_rng(0)
     peak = 20.0 * np.exp(-((np.arange(20) - 10.0) ** 2) / 8.0)
     spectra = 60.0 + peak[:, None] + rng.standard_normal((20, 24))
     res = effective_perceived_noise_level(spectra)
-    assert res.plot() is not None
+    ax = res.plot(language=language)
+    try:
+        assert ax.get_ylabel() == ylabel
+        labels = [text.get_text() for text in ax.get_legend().get_texts()]
+        peak = [label for label in labels if label.startswith("PNLTM")]
+        assert len(peak) == 1
+        assert peak[0].endswith(" TPNdB")
+    finally:
+        plt.close(ax.figure)
+
+
+def test_epnl_records_show_the_units_annex_16_prints() -> None:
+    """The notebook table reads PNdB, TPNdB and EPNdB, not a bare number."""
+    import re
+
+    def units(record: object) -> dict[str, str]:
+        html = record._repr_html_()  # type: ignore[attr-defined]
+        row = r"<code>(\w+)</code></td><td[^>]*>[^<]*</td><td[^>]*>([^<]*)<"
+        return dict(re.findall(row, html))
+
+    integration = epnl_from_pnlt(np.array([80.0, 90.0, 97.4, 92.0, 84.0]))
+    assert units(integration) == {
+        "epnl": "EPNdB",
+        "pnltm": "TPNdB",
+        "bandsharing_adjustment": "dB",
+        "band_limits": "",
+    }
+    rng = np.random.default_rng(0)
+    peak = 20.0 * np.exp(-((np.arange(20) - 10.0) ** 2) / 8.0)
+    result = effective_perceived_noise_level(
+        60.0 + peak[:, None] + rng.standard_normal((20, 24))
+    )
+    shown = units(result)
+    assert (shown["pnl"], shown["pnlt"], shown["pnltm"], shown["epnl"]) == (
+        "PNdB",
+        "TPNdB",
+        "TPNdB",
+        "EPNdB",
+    )
 
 
 def test_epnl_exposed_at_package_top_level() -> None:
@@ -349,15 +402,17 @@ def test_bandsharing_adjustment_applied() -> None:
 
     pnlt = np.array([80.0, 90.0, 95.0, 100.0, 95.0, 90.0, 80.0])
     c = np.array([0.0, 2.0, 2.0, 0.0, 2.0, 2.0, 0.0])
-    plain_epnl, plain_pnltm, _, _ = epnl_from_pnlt(pnlt, 0.5)
-    adj_epnl, adj_pnltm, _, _ = epnl_from_pnlt(pnlt, 0.5, tone_corrections=c)
-    assert adj_pnltm - plain_pnltm == pytest.approx(1.6)
-    assert adj_epnl - plain_epnl == pytest.approx(1.6)
+    plain = epnl_from_pnlt(pnlt, 0.5)
+    adjusted = epnl_from_pnlt(pnlt, 0.5, tone_corrections=c)
+    assert adjusted.bandsharing_adjustment == pytest.approx(1.6)
+    assert adjusted.pnltm - plain.pnltm == pytest.approx(1.6)
+    assert adjusted.epnl - plain.epnl == pytest.approx(1.6)
     # No suppression at the peak -> Delta_B = 0.
     c2 = np.array([0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0])
-    same_epnl, same_pnltm, _, _ = epnl_from_pnlt(pnlt, 0.5, tone_corrections=c2)
-    assert same_pnltm == pytest.approx(plain_pnltm)
-    assert same_epnl == pytest.approx(plain_epnl)
+    same = epnl_from_pnlt(pnlt, 0.5, tone_corrections=c2)
+    assert same.bandsharing_adjustment == 0.0
+    assert same.pnltm == pytest.approx(plain.pnltm)
+    assert same.epnl == pytest.approx(plain.epnl)
 
 
 def test_bandsharing_window_scales_with_record_duration() -> None:
@@ -367,12 +422,12 @@ def test_bandsharing_window_scales_with_record_duration() -> None:
 
     pnlt = np.array([80.0, 90.0, 95.0, 100.0, 95.0, 90.0, 80.0])
     c = np.array([0.0, 2.0, 2.0, 0.0, 2.0, 2.0, 0.0])
-    _, pnltm_1s, _, _ = epnl_from_pnlt(pnlt, 1.0, tone_corrections=c)
+    pnltm_1s = epnl_from_pnlt(pnlt, 1.0, tone_corrections=c).pnltm
     plain = float(np.max(pnlt))
     # Window = [2, 0, 2] -> mean 4/3 -> Delta_B = 4/3.
     assert pnltm_1s - plain == pytest.approx(4.0 / 3.0)
     # Per-record durations follow the same rule (uniform 1 s array).
-    _, pnltm_arr, _, _ = epnl_from_pnlt(pnlt, np.full(7, 1.0), tone_corrections=c)
+    pnltm_arr = epnl_from_pnlt(pnlt, np.full(7, 1.0), tone_corrections=c).pnltm
     assert pnltm_arr == pytest.approx(pnltm_1s)
 
 
@@ -385,6 +440,31 @@ def test_effective_epnl_exposes_bandsharing_field() -> None:
     assert res.bandsharing_adjustment >= 0.0
     assert res.pnltm == pytest.approx(
         float(np.max(res.pnlt)) + res.bandsharing_adjustment
+    )
+
+
+def test_effective_epnl_carries_the_bandsharing_adjustment_of_its_flyover() -> None:
+    # A tone in band 12 on the two records either side of the peak, and none
+    # at the peak itself: the tone correction at PNLTM is suppressed, so App. 2
+    # section 4.4.2 adds Delta_B = C_avg - C(k_M) over the five records
+    # k_M - 2 .. k_M + 2 (0.5 s records), and PNLTM = PNLT(k_M) + Delta_B.
+    from phonometry import aircraft
+    from phonometry.aircraft.certification import epnl_from_pnlt
+
+    spectra = np.full((7, 24), 70.0)
+    spectra += np.array([0.0, 3.0, 4.0, 10.0, 4.0, 3.0, 0.0])[:, None]
+    spectra[[1, 2, 4, 5], 12] += 8.0
+
+    res = aircraft.effective_perceived_noise_level(spectra, 0.5)
+    k_m = int(np.argmax(res.pnlt))
+    c = res.tone_correction
+    expected = float(np.mean(c[k_m - 2 : k_m + 3])) - float(c[k_m])
+    assert expected > 0.0
+    assert res.bandsharing_adjustment == pytest.approx(expected)
+    assert res.pnltm == pytest.approx(float(res.pnlt[k_m]) + expected)
+    integration = epnl_from_pnlt(res.pnlt, 0.5, tone_corrections=c)
+    assert res.bandsharing_adjustment == pytest.approx(
+        integration.bandsharing_adjustment
     )
 
 
@@ -517,3 +597,26 @@ def test_a_window_that_is_not_a_pair_of_indices_is_refused() -> None:
     result = _flyover()
     with pytest.raises(ValueError, match=r"'band_limits' must be a pair"):
         dataclasses.replace(result, band_limits=(0.5, 9.5))
+
+
+def test_the_epnl_integration_is_a_record_and_not_a_tuple() -> None:
+    """``epnl, pnltm, kf, kl = epnl_from_pnlt(...)`` is gone: read it by name."""
+    integration = epnl_from_pnlt(np.array([90.0, 95.0, 90.0]), 0.5)
+    with pytest.raises(TypeError, match="cannot unpack non-iterable"):
+        _epnl, _pnltm, _kf, _kl = integration  # type: ignore[misc]
+
+
+def test_the_epnl_integration_refuses_a_window_that_is_not_one() -> None:
+    """A window is two ordered record indices, and a level is finite."""
+    with pytest.raises(ValueError, match="0 <= kF <= kL"):
+        EPNLIntegration(90.0, 95.0, 0.0, (3, 1))
+    with pytest.raises(ValueError, match="pair of 0-based"):
+        EPNLIntegration(90.0, 95.0, 0.0, (1.5, 3))  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="'epnl' must be finite"):
+        EPNLIntegration(float("nan"), 95.0, 0.0, (0, 1))
+    with pytest.raises(
+        ValueError, match="'bandsharing_adjustment' must be non-negative"
+    ):
+        EPNLIntegration(90.0, 95.0, -1.0, (0, 1))
+    with pytest.raises(ValueError, match="'pnltm'"):
+        EPNLIntegration(90.0, np.array([95.0]), 0.0, (0, 1))  # type: ignore[arg-type]

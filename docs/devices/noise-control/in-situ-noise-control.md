@@ -102,7 +102,7 @@ A-weighted pair of 5.9 is refused with an artificial source, because then the
 spectrum weighted is the loudspeaker's. An artificial source has its own test to
 pass first, the twelve-position directivity index of definition 3.10 with the
 8 dB limit of 5.2.2. 7.4 c) reports the attenuation and its A-weighted value to
-the nearest whole decibel: `rounded()` and `rounded_a_weighted()` give them that
+the nearest whole decibel: `rounded` and `rounded_a_weighted` give them that
 way, with an exact half going to the even decibel, while `attenuation` keeps
 the unrounded difference.
 

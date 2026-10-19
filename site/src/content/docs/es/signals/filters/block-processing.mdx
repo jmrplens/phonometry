@@ -186,7 +186,7 @@ unilateral y siempre subestima.
 La versión por bandas es el mismo acumulador con un vector a la izquierda:
 
 ```python
-band_squares = np.zeros(bank.num_bands)   # de tu OctaveFilterBank con estado
+band_squares = np.zeros(bank.n_bands)   # de tu OctaveFilterBank con estado
 
 for x in audio_stream(block):        # tu callback de captura
     bands = bank.filter(x, sigbands=True, detrend=False,

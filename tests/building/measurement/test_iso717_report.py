@@ -90,15 +90,6 @@ def test_unknown_engine_rejected(tmp_path: Path) -> None:
         result.report(out, engine="weasyprint")
 
 
-def test_missing_band_data_rejected(tmp_path: Path) -> None:
-    """A rating built without the per-band curves cannot be reported."""
-    bare = building.WeightedRatingResult(rating=52, c=-1, ctr=-4, unfavorable_sum=30.0)
-    assert bare.frequencies is None
-    out = str(tmp_path / "bare.pdf")
-    with pytest.raises(ValueError, match="per-band data"):
-        bare.report(out)
-
-
 def test_airborne_fiche_reproduces_iso717_1_annex_c1(tmp_path: Path) -> None:
     """The airborne fiche reproduces the ISO 717-1:2020 Annex C Table C.1 example.
 
@@ -343,3 +334,24 @@ def test_unknown_language_rejected(tmp_path: Path) -> None:
     result = building.weighted_rating(_AIRBORNE_R)
     with pytest.raises(ValueError, match=r"Unknown language"):
         result.report(str(tmp_path / "bad.pdf"), language="xx")
+
+
+@pytest.mark.parametrize(
+    ("record", "scalars"),
+    [
+        (building.WeightedRatingResult, {"rating": 52, "c": -1, "ctr": -4}),
+        (building.ImpactRatingResult, {"rating": 52, "ci": -1}),
+    ],
+)
+def test_a_rating_cannot_be_built_without_its_band_curves(
+    record: type, scalars: dict[str, int]
+) -> None:
+    """The band centres, the measured curve and the shifted reference are required.
+
+    They used to default to ``None`` for a rating built from its single
+    numbers alone, and every reader then had to ask whether they were there:
+    the fiche, the plot and the unfavourable-sum check. A rating is now the
+    record of the curves it was fitted to, or nothing.
+    """
+    with pytest.raises(TypeError, match="frequencies"):
+        record(**scalars, unfavorable_sum=30.0)

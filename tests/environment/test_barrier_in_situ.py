@@ -96,7 +96,7 @@ def test_the_rounding_is_the_reporting_rule() -> None:
     res = environment.measured_insertion_loss_direct(
         [70.0, 70.0], [70.0, 70.0], [60.0, 60.0], [55.4, 55.6]
     )
-    assert res.rounded().tolist() == [5, 4]
+    assert res.rounded.tolist() == [5, 4]
 
 
 def test_the_indirect_method_matches_the_direct_one_for_one_receiver_kind() -> None:
@@ -505,7 +505,7 @@ def test_the_cordero_campaign_reports_its_two_insertion_losses() -> None:
             receiver_after_db=[receiver_after],
         )
     for case, reported in oracle.CORDERO_TABLA_2_DBA.items():
-        assert results[case].rounded().tolist() == [reported]
+        assert results[case].rounded.tolist() == [reported]
     assert float(results["con ruido"].insertion_loss[0]) == pytest.approx(
         oracle.CORDERO_UNROUNDED_CON_RUIDO_DBA, abs=PRINTED_TENTH_DB
     )
@@ -641,13 +641,13 @@ def test_an_exact_half_is_reported_as_the_even_whole_decibel() -> None:
         [0.0, 0.0],
         [0.0, 0.0],
     )
-    assert (res.rounded() * 10).tolist() == [
+    assert (res.rounded * 10).tolist() == [
         multiples * scale for _, scale, multiples in ties
     ]
     ties = environment.measured_insertion_loss_direct(
         [0.0] * 6, [0.5, 1.5, 2.5, 3.5, 4.5, 5.5], [0.0] * 6, [0.0] * 6
     )
-    assert ties.rounded().tolist() == [0, 2, 2, 4, 4, 6]
+    assert ties.rounded.tolist() == [0, 2, 2, 4, 4, 6]
 
 
 def test_the_upwind_class_is_printed_as_an_interval_by_the_fhwa_manual() -> None:

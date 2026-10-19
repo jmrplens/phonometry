@@ -76,7 +76,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from .floor_covering_improvement import improvement_octave_bands
+from .floor_covering_improvement import OctaveBandSpectrum, improvement_octave_bands
 from .insulation import _as_band_levels
 from .ratings import (
     _EXTENDED_RANGES,
@@ -483,14 +483,17 @@ class LaboratoryJointInsulationResult(OwnsArrays):
         r""":math:`R_\mathrm{s,Atr} = R_\mathrm{s,w} + C_\mathrm{tr}`, in dB, or ``None``."""
         return None if self.rating is None else self.rating.rating + self.rating.ctr
 
-    def octave_bands(self) -> tuple[np.ndarray, np.ndarray]:
-        r"""``(octave centres in Hz, Rs,oct in dB)`` from the three thirds of each octave.
+    def octave_bands(self) -> OctaveBandSpectrum:
+        r""":math:`R_\mathrm{s}` in octave bands, from the three thirds of each octave.
 
-        :math:`R_\mathrm{oct} = -10 \lg[(1/3) \sum 10^{-R_j/10}]`: the
+        :math:`-10 \lg[(1/3) \sum 10^{-R_{\mathrm{s},j}/10}]`: the
         transmitted power of the three thirds averaged, as Figure J.9 plots
-        a joint at several gap widths in octave bands.
+        a joint at several gap widths in octave bands. The standard prints
+        no octave symbol for the joint; Figure J.9 keys it :math:`R_\mathrm{s}`
+        against the octave band, and the form is that of ISO 717-1:2020
+        Formula (D.1).
         """
-        return improvement_octave_bands(self.r_s, self.frequencies)
+        return improvement_octave_bands(self.r_s, self.frequencies, quantity="Rs")
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any

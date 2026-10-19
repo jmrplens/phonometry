@@ -309,7 +309,7 @@ def test_the_spectrogram_agrees_with_the_filter_on_the_same_bank() -> None:
     bank = OctaveFilterBank(fs=FS, fraction=3)
     filtered = bank.filter(sig)
     spl, freq = filtered.levels, filtered.frequencies
-    levels, _, _ = bank.spectrogram(sig, window_time=0.125)
+    levels = bank.spectrogram(sig, window_time=0.125).levels
     # Energy-average the frames back to the whole-record level.
     averaged = 10 * np.log10(np.mean(10 ** (levels / 10), axis=-1))
     peak = int(np.argmax(spl))
@@ -320,8 +320,8 @@ def test_the_spectrogram_agrees_with_the_filter_on_the_same_bank() -> None:
 def test_the_spectrogram_returns_pascal_levels_for_a_calibrated_signal() -> None:
     x = _tone()
     bank = OctaveFilterBank(fs=FS, fraction=3)
-    levels, _, _ = bank.spectrogram(Signal(x, FS, calibration_factor=MIC))
-    ref, _, _ = bank.spectrogram(MIC * x)
+    levels = bank.spectrogram(Signal(x, FS, calibration_factor=MIC)).levels
+    ref = bank.spectrogram(MIC * x).levels
     assert np.array_equal(levels, ref)
 
 

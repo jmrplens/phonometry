@@ -62,7 +62,7 @@ Annex A is a hardware drawing and Annex B an illustration; their numbers are
 constants here and nothing more. Clause 5 is instrumentation, clause 8 hands
 its uncertainty to the base standard and to ISO 4871, and clauses 9 and 10 are
 a report. The one piece of clause 9 that computes is the rounding of
-9.4, which is :meth:`EnclosureInsulationResult.rounded`.
+9.4, which is :attr:`EnclosureInsulationResult.rounded`.
 
 Neither part prints a worked example, so the tests are anchored where the
 documents allow: the algebraic identities of the subtraction, the closed form
@@ -310,6 +310,7 @@ class EnclosureInsulationResult(OwnsArrays):
         """
         require_band_fraction(self.fraction, "fraction")
 
+    @property
     def rounded(self) -> NDArray[np.int_]:
         """The band values as clause 9.4 reports them, to the nearest decibel."""
         return np.asarray(round_half_even(self.insulation), dtype=np.int_)

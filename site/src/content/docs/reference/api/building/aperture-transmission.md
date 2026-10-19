@@ -190,8 +190,8 @@ A bare opening enters with $R = 0$ ($\tau = 1$).
 ```python
 plot_aperture_geometry(
     depth: float,
-    ax: Axes | None = ...,
     *,
+    ax: Axes | None = ...,
     width_m: float,
     language: str = ...,
     **kwargs: Any,
@@ -199,8 +199,8 @@ plot_aperture_geometry(
 
 plot_aperture_geometry(
     depth: float,
-    ax: Axes | None = ...,
     *,
+    ax: Axes | None = ...,
     radius: float,
     language: str = ...,
     **kwargs: Any,

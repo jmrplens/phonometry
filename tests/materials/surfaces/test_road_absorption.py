@@ -114,7 +114,9 @@ def test_kr_angle_grows_toward_unity_at_grazing() -> None:
 
 
 def test_reflected_path_delay() -> None:
-    assert reflected_path_delay(0.25, 340.0) == pytest.approx(2.0 * 0.25 / 340.0)
+    assert reflected_path_delay(0.25, speed_of_sound=340.0) == pytest.approx(
+        2.0 * 0.25 / 340.0
+    )
 
 
 def test_geometry_guards() -> None:
@@ -318,7 +320,7 @@ def test_adrienne_window_guards() -> None:
 def test_one_third_octave_band_count_part1() -> None:
     freq = np.linspace(100.0, 6000.0, 8000)
     alpha = np.full_like(freq, 0.3)
-    centres, band = one_third_octave_absorption(freq, alpha)
+    centres, band = one_third_octave_absorption(frequencies=freq, absorption=alpha)
     assert centres.shape == (13,)  # 250..4000 Hz, Annex E
     assert centres[0] == 250.0
     assert centres[-1] == 4000.0
@@ -329,7 +331,7 @@ def test_one_third_octave_band_count_spot() -> None:
     freq = np.linspace(100.0, 3000.0, 6000)
     alpha = np.full_like(freq, 0.05)
     centres, _ = one_third_octave_absorption(
-        freq, alpha, f_max=SPOT_FREQUENCY_RANGE_HZ[1]
+        frequencies=freq, absorption=alpha, f_max=SPOT_FREQUENCY_RANGE_HZ[1]
     )
     assert centres.shape == (9,)  # 250..1600 Hz (Annex D of Part 2)
 
@@ -337,8 +339,12 @@ def test_one_third_octave_band_count_spot() -> None:
 def test_one_third_octave_clipping() -> None:
     freq = np.linspace(200.0, 4500.0, 6000)
     alpha = np.full_like(freq, -0.02)
-    _, clipped = one_third_octave_absorption(freq, alpha, clip_negative=True)
-    _, raw = one_third_octave_absorption(freq, alpha, clip_negative=False)
+    _, clipped = one_third_octave_absorption(
+        frequencies=freq, absorption=alpha, clip_negative=True
+    )
+    _, raw = one_third_octave_absorption(
+        frequencies=freq, absorption=alpha, clip_negative=False
+    )
     np.testing.assert_allclose(clipped, 0.0, atol=1e-12)
     assert np.all(raw < 0.0)
 
@@ -348,9 +354,9 @@ def test_one_third_octave_guards() -> None:
         ValueError,
         match=r"one_third_octave_absorption: 'frequencies' .*'absorption' .*same shape",
     ):
-        one_third_octave_absorption([250.0, 500.0], [0.1])
+        one_third_octave_absorption(frequencies=[250.0, 500.0], absorption=[0.1])
     with pytest.raises(ValueError, match=r"'frequencies' .*must be non-empty"):
-        one_third_octave_absorption([], [])
+        one_third_octave_absorption(frequencies=[], absorption=[])
 
 
 # --------------------------------------------------------------------------- #
@@ -445,12 +451,14 @@ def test_msa_guards() -> None:
 # ISO 13472-2 spot method helpers (Clause 5.4 / Annex A)
 # --------------------------------------------------------------------------- #
 def test_spot_upper_frequency_100mm_tube() -> None:
-    fu = spot_tube_upper_frequency(0.100, 343.0)
+    fu = spot_tube_upper_frequency(0.100, speed_of_sound=343.0)
     assert fu == pytest.approx(1989.4, abs=0.1)  # 0.58*343/0.1
 
 
 def test_spot_spacing_bounds() -> None:
-    s_min, s_max = spot_microphone_spacing_bounds(340.0, f_min=220.0, f_max=1800.0)
+    s_min, s_max = spot_microphone_spacing_bounds(
+        speed_of_sound=340.0, f_min=220.0, f_max=1800.0
+    )
     assert s_max == pytest.approx(0.085, abs=1e-4)  # 85 mm
     assert s_min == pytest.approx(0.07727, abs=1e-4)  # 77 mm
     assert s_min < 0.081 < s_max  # brackets nominal 81 mm spacing
@@ -459,7 +467,9 @@ def test_spot_spacing_bounds() -> None:
 def test_spot_spacing_bounds_warns_when_interval_empty() -> None:
     # A range far wider than the narrow band leaves no valid spacing (s_min>=s_max).
     with pytest.warns(RoadAbsorptionWarning):
-        s_min, s_max = spot_microphone_spacing_bounds(340.0, f_min=220.0, f_max=4000.0)
+        s_min, s_max = spot_microphone_spacing_bounds(
+            speed_of_sound=340.0, f_min=220.0, f_max=4000.0
+        )
     assert s_min >= s_max
 
 
@@ -500,7 +510,7 @@ def test_spot_guards() -> None:
     with pytest.raises(ValueError, match="'diameter_m' must be positive"):
         spot_tube_upper_frequency(0.0)
     with pytest.raises(ValueError, match="'f_min' must be less than 'f_max'"):
-        spot_microphone_spacing_bounds(340.0, f_min=1800.0, f_max=220.0)
+        spot_microphone_spacing_bounds(speed_of_sound=340.0, f_min=1800.0, f_max=220.0)
     with pytest.raises(
         ValueError,
         match=(

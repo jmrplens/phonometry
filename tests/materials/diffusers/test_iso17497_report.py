@@ -92,7 +92,9 @@ def _scattering() -> materials.ScatteringResult:
     alpha_spec = materials.specular_absorption_coefficient(
         volume, area, c3=c, t3=_T1, c4=c, t4=t4
     )
-    return materials.scattering_coefficient_spectrum(_FREQS, alpha_spec, alpha_s)
+    return materials.scattering_coefficient_spectrum(
+        frequencies=_FREQS, specular_absorption=alpha_spec, random_absorption=alpha_s
+    )
 
 
 _SOURCES = np.array([0.0, 30.0, -30.0, 60.0, -60.0])
@@ -130,7 +132,7 @@ def _diffusion_spectrum() -> materials.DiffusionSpectrum:
             )
         d[k] = materials.random_incidence_diffusion(d_theta, weights=weights)
         d_n[k] = materials.random_incidence_diffusion(d_theta_n, weights=weights)
-    return materials.diffusion_spectrum(_FREQS, d, normalized=d_n)
+    return materials.diffusion_spectrum(frequencies=_FREQS, diffusion=d, normalized=d_n)
 
 
 def _polar() -> materials.DiffusionResult:

@@ -206,7 +206,7 @@ def test_structural_reverberation_time_is_the_loss_factor_inverse(situ: dict) ->
     """``Ts = 2,2/(f ηtot)`` closes the Formula (C.1) pair exactly."""
     floor = situ["floor"]
     assert building.structural_reverberation_time(
-        BANDS, floor.total_loss_factor
+        frequencies=BANDS, total_loss_factor=floor.total_loss_factor
     ) == pytest.approx(floor.reverberation_time, rel=1e-12)
 
 
@@ -455,7 +455,7 @@ def test_table_l12_resonant_correction_of_the_wall_leaf() -> None:
     bands, above which the printed correction drops to zero.
     """
     got = building.resonant_sound_reduction_index(
-        ref.ISO12354_TABLE_L12_R_WALL, BANDS, critical_frequency=2200.0
+        ref.ISO12354_TABLE_L12_R_WALL, frequencies=BANDS, critical_frequency=2200.0
     )
     assert got == pytest.approx(ref.ISO12354_TABLE_L12_R_STAR_WALL, abs=TOL)
 
@@ -705,7 +705,7 @@ def test_table_b2_octave_impact_levels_of_monolithic_floors() -> None:
             third,
             mass_per_area=mass,
             structural_reverberation_time=building.structural_reverberation_time(
-                third, eta
+                frequencies=third, total_loss_factor=eta
             ),
             radiation_factor=sigma,
         )
@@ -717,9 +717,9 @@ def test_table_b2_octave_impact_levels_of_monolithic_floors() -> None:
 def test_reciprocity_relation_closes_on_itself() -> None:
     """Part 2 Formulae (B.3)/(B.4): ``R + Ln`` depends only on frequency."""
     r = np.linspace(30.0, 70.0, BANDS.size)
-    ln = building.reciprocity_impact_level(r, BANDS)
+    ln = building.reciprocity_impact_level(r, frequencies=BANDS)
     assert r + ln == pytest.approx(38.0 + 30.0 * np.log10(BANDS))
-    ln_oct = building.reciprocity_impact_level(r, BANDS, fraction=1)
+    ln_oct = building.reciprocity_impact_level(r, frequencies=BANDS, fraction=1)
     assert ln_oct - ln == pytest.approx(5.0)
 
 
@@ -868,7 +868,9 @@ def test_perimeter_absorption_rejects_mismatched_lengths() -> None:
             r"one value per connected element"
         ),
     ):
-        building.perimeter_absorption_coefficient([100.0, 200.0], [6.0])
+        building.perimeter_absorption_coefficient(
+            [6.0], critical_frequencies=[100.0, 200.0]
+        )
 
 
 def test_flanking_path_rejects_an_unknown_kind(situ: dict) -> None:

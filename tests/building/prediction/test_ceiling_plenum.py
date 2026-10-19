@@ -363,7 +363,7 @@ def test_rating_rejects_mismatched_frequencies() -> None:
         ValueError, match=r"'frequencies' must be the 16 ASTM E413 contour bands"
     ):
         building.ceiling_attenuation_class(
-            [30.0] * 16, [100.0 * (i + 1) for i in range(16)]
+            [30.0] * 16, frequencies=[100.0 * (i + 1) for i in range(16)]
         )
 
 

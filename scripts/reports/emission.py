@@ -551,7 +551,7 @@ def _hard_walled_sound_power_example() -> tuple[object, ReportMetadata, str]:
             source,
             reference,
             lw_reference,
-            freqs,
+            frequencies=freqs,
             background_levels=background,
             temperature_c=22.0,
             static_pressure_kpa=101.2,
@@ -616,7 +616,7 @@ def _special_room_sound_power_example() -> tuple[object, ReportMetadata, str]:
     )
     result = ph.emission.sound_power_special_room(
         np.stack([first, second]),
-        freqs,
+        frequencies=freqs,
         volume=72.0,
         nominal_reverberation_time_s=0.77,
         background_levels=np.array([48.0, 45.0, 42.0, 40.0, 38.0, 36.0, 35.0]),

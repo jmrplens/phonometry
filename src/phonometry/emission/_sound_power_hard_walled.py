@@ -785,8 +785,8 @@ def sound_power_hard_walled(
     levels: ArrayLike,
     levels_ref: ArrayLike,
     lw_ref: ArrayLike | ReferenceSourceCalibration,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     background_levels: ArrayLike | None = None,
     background_levels_ref: ArrayLike | None = None,
     temperature_c: float = 23.0,
@@ -926,8 +926,8 @@ def sound_energy_hard_walled(
     event_levels: ArrayLike,
     levels_ref: ArrayLike,
     lw_ref: ArrayLike | ReferenceSourceCalibration,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     n_events: int | None = None,
     background_levels: ArrayLike | None = None,
     integration_time: float | None = None,
@@ -1265,8 +1265,8 @@ class HardWalledRoomCheck(OwnsArrays):
 
 def check_hard_walled_room(
     orientation_levels: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     volume: float,
     reference_box_m: ArrayLike,
     absorption_coefficients: ArrayLike | None = None,
@@ -1472,7 +1472,7 @@ class SourceLocationPlan(OwnsArrays):
 
 
 def hard_walled_source_locations(
-    levels: ArrayLike, frequencies: ArrayLike
+    levels: ArrayLike, *, frequencies: ArrayLike
 ) -> SourceLocationPlan:
     r"""The number of source locations from the preliminary survey of
     ISO 3743-1:2010, 7.4 (Table 2).

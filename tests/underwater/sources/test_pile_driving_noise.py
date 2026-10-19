@@ -202,10 +202,18 @@ def test_weighted_exposure_of_a_pile_driving_campaign() -> None:
     spec = underwater.strike_sel_spectrum(_pulse(50.0, 0.2), FS, fraction=3)
     # No masking: the spectrum goes into the assessment exactly as returned.
     lf = underwater.weighted_exposure(
-        spec.frequencies, spec.band_sel, "LF", n_events=1000, impulsive=True
+        frequencies_hz=spec.frequencies,
+        band_sel=spec.band_sel,
+        group="LF",
+        n_events=1000,
+        impulsive=True,
     )
     vhf = underwater.weighted_exposure(
-        spec.frequencies, spec.band_sel, "VHF", n_events=1000, impulsive=True
+        frequencies_hz=spec.frequencies,
+        band_sel=spec.band_sel,
+        group="VHF",
+        n_events=1000,
+        impulsive=True,
     )
     assert lf.weighted_sel > vhf.weighted_sel + 20.0
     assert lf.cumulative_sel == pytest.approx(lf.weighted_sel + 30.0, abs=1e-9)
@@ -230,12 +238,18 @@ def test_the_advertised_chain_runs_unaided_on_short_records(
     spec = underwater.strike_sel_spectrum(strike, fs, fraction=3)
     assert not np.any(np.isnan(spec.band_sel))
     res = underwater.weighted_exposure(
-        spec.frequencies, spec.band_sel, "LF", impulsive=True
+        frequencies_hz=spec.frequencies,
+        band_sel=spec.band_sel,
+        group="LF",
+        impulsive=True,
     )
     # Empty bands are the neutral element: dropping them changes nothing.
     finite = np.isfinite(spec.band_sel)
     masked = underwater.weighted_exposure(
-        spec.frequencies[finite], spec.band_sel[finite], "LF", impulsive=True
+        frequencies_hz=spec.frequencies[finite],
+        band_sel=spec.band_sel[finite],
+        group="LF",
+        impulsive=True,
     )
     assert res.weighted_sel == pytest.approx(masked.weighted_sel, abs=1e-9)
     assert res.unweighted_sel == pytest.approx(spec.total_sel, abs=1e-9)

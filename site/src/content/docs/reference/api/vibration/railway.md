@@ -628,8 +628,9 @@ THIRD_OCTAVE_LINES = {4.0: 1, 5.0: 1, 6.3: 1, 8.0: 2, 10.0: 2, 12.5: 2, 16.0: 3,
 
 ```python
 third_octaves_from_narrowband(
-    frequencies: ArrayLike,
     psd: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]
 ```
 

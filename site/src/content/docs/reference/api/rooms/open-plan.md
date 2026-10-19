@@ -196,8 +196,8 @@ above it).
 ```python
 plot_open_plan_geometry(
     positions: ArrayLike,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     rd: float | None = None,
     rp: float | None = None,
     language: str = 'en',

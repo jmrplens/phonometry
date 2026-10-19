@@ -367,7 +367,7 @@ def test_standard_measuring_conditions_are_10_db_down() -> None:
 
 def test_frequency_response_is_0_db_at_1_khz() -> None:
     response = ea.amplifier_frequency_response(
-        [50.0, 100.0, 1000.0, 8000.0], [1.0, 1.9, 2.0, 1.5]
+        frequencies=[50.0, 100.0, 1000.0, 8000.0], output_current_a=[1.0, 1.9, 2.0, 1.5]
     )
     assert response.response_db[2] == pytest.approx(0.0)
     assert response.response_db[0] == pytest.approx(20 * math.log10(0.5))
@@ -377,11 +377,15 @@ def test_frequency_response_is_0_db_at_1_khz() -> None:
 
 def test_frequency_response_needs_1_khz() -> None:
     with pytest.raises(ValueError, match="1000 Hz"):
-        ea.amplifier_frequency_response([100.0, 2000.0], [1.0, 1.0])
+        ea.amplifier_frequency_response(
+            frequencies=[100.0, 2000.0], output_current_a=[1.0, 1.0]
+        )
 
 
 def test_frequency_response_is_read_within_its_range() -> None:
-    response = ea.amplifier_frequency_response([100.0, 1000.0], [1.0, 1.0])
+    response = ea.amplifier_frequency_response(
+        frequencies=[100.0, 1000.0], output_current_a=[1.0, 1.0]
+    )
     with pytest.raises(ValueError, match="outside"):
         response.at(5000.0)
 
@@ -391,7 +395,9 @@ def test_impedance_and_response_are_read_at_positive_finite_frequencies(
     frequency: float,
 ) -> None:
     impedance = ea.loop_impedance(0.69, 109e-6)
-    response = ea.amplifier_frequency_response([100.0, 1000.0, 2000.0], [1.0, 1.0, 1.0])
+    response = ea.amplifier_frequency_response(
+        frequencies=[100.0, 1000.0, 2000.0], output_current_a=[1.0, 1.0, 1.0]
+    )
     with pytest.raises(ValueError, match="'frequency_hz' must be positive and finite"):
         impedance.at(frequency)
     with pytest.raises(ValueError, match="'frequency_hz' must be positive and finite"):
@@ -495,7 +501,9 @@ def test_agc_range_does_not_grow_with_the_span_of_the_input() -> None:
 
 
 def test_quadrature_example_of_5_4_14_1() -> None:
-    error = ea.quadrature_phase_error([100.0, 1000.0, 5000.0], [90.0, 85.0, 91.0])
+    error = ea.quadrature_phase_error(
+        frequencies=[100.0, 1000.0, 5000.0], phase_difference_deg=[90.0, 85.0, 91.0]
+    )
     assert error.max_deviation_deg == pytest.approx(5.0)
     assert error.max_deviation_frequency_hz == pytest.approx(1000.0)
     angle = ref.IEC62489_1_QUADRATURE_EXAMPLE_DEG
@@ -510,25 +518,33 @@ def test_quadrature_example_of_5_4_14_1() -> None:
 
 
 def test_quadrature_folds_either_loop_leading() -> None:
-    error = ea.quadrature_phase_error([100.0, 1000.0, 4000.0], [-90.0, 270.0, -95.0])
+    error = ea.quadrature_phase_error(
+        frequencies=[100.0, 1000.0, 4000.0], phase_difference_deg=[-90.0, 270.0, -95.0]
+    )
     np.testing.assert_allclose(error.deviation_deg, [0.0, 0.0, 5.0], atol=1e-12)
 
 
 def test_quadrature_ignores_frequencies_outside_100_hz_to_5_khz() -> None:
-    error = ea.quadrature_phase_error([50.0, 1000.0, 8000.0], [60.0, 88.0, 120.0])
+    error = ea.quadrature_phase_error(
+        frequencies=[50.0, 1000.0, 8000.0], phase_difference_deg=[60.0, 88.0, 120.0]
+    )
     assert error.max_deviation_deg == pytest.approx(2.0)
 
 
 def test_quadrature_needs_a_frequency_in_the_band() -> None:
     with pytest.raises(ValueError, match="100 Hz to 5 kHz"):
-        ea.quadrature_phase_error([50.0, 8000.0], [90.0, 90.0])
+        ea.quadrature_phase_error(
+            frequencies=[50.0, 8000.0], phase_difference_deg=[90.0, 90.0]
+        )
 
 
 @pytest.mark.parametrize("phase", [0.0, 180.0, -180.0, 360.0])
 def test_quadrature_in_phase_currents_cancel_where_they_subtract(phase: float) -> None:
     # A deviation of 90 degrees is the failure the characteristic detects: the
     # two fields add to twice one of them and cancel where they subtract.
-    error = ea.quadrature_phase_error([1000.0], [phase])
+    error = ea.quadrature_phase_error(
+        frequencies=[1000.0], phase_difference_deg=[phase]
+    )
     assert error.max_deviation_deg == pytest.approx(90.0)
     assert error.level_increase == pytest.approx(20 * math.log10(2.0), rel=1e-12)
     assert math.isinf(error.level_decrease)
@@ -537,7 +553,9 @@ def test_quadrature_in_phase_currents_cancel_where_they_subtract(phase: float) -
 
 def test_quadrature_decrease_near_90_degrees_is_accurate() -> None:
     # 20 lg(1 - sin 89,9999 degrees), from the series 1 - sin(90 - e) = e^2/2.
-    error = ea.quadrature_phase_error([1000.0], [1.0e-4])
+    error = ea.quadrature_phase_error(
+        frequencies=[1000.0], phase_difference_deg=[1.0e-4]
+    )
     e = math.radians(1.0e-4)
     assert error.level_decrease == pytest.approx(20 * math.log10(e * e / 2.0), abs=1e-6)
 
@@ -549,9 +567,9 @@ def test_quadrature_decrease_near_90_degrees_is_accurate() -> None:
 
 def test_neck_loop_characteristics() -> None:
     result = ea.neck_loop_characteristics(
-        [100.0, 200.0, 1000.0, 5000.0, 8000.0],
-        [-8.0, -2.0, 0.5, -1.0, -5.0],
-        [31.6, 32.0, 32.4, 40.0, 50.0],
+        frequencies=[100.0, 200.0, 1000.0, 5000.0, 8000.0],
+        field_strength_level=[-8.0, -2.0, 0.5, -1.0, -5.0],
+        impedance_ohm=[31.6, 32.0, 32.4, 40.0, 50.0],
         input_voltage_v=1.0,
     )
     assert result.reference_input_voltage_v == pytest.approx(10 ** (-0.5 / 20))
@@ -564,9 +582,9 @@ def test_neck_loop_characteristics() -> None:
 
 def test_neck_loop_minimum_impedance_rounds_half_up() -> None:
     result = ea.neck_loop_characteristics(
-        [100.0, 1000.0, 5000.0],
-        [0.0, 0.0, 0.0],
-        [16.5, 20.0, 30.0],
+        frequencies=[100.0, 1000.0, 5000.0],
+        field_strength_level=[0.0, 0.0, 0.0],
+        impedance_ohm=[16.5, 20.0, 30.0],
         input_voltage_v=1.0,
     )
     assert result.min_impedance_ohm == pytest.approx(17.0)
@@ -576,9 +594,9 @@ def test_neck_loop_minimum_impedance_is_taken_over_100_hz_to_5_khz_only() -> Non
     # 9.2.1: the smallest magnitude "over the frequency range 100 Hz to 5 kHz";
     # the 20 ohm at 50 Hz is outside it.
     result = ea.neck_loop_characteristics(
-        [50.0, 100.0, 1000.0, 5000.0, 8000.0],
-        [0.0, 0.0, 0.0, 0.0, 0.0],
-        [20.0, 32.0, 33.0, 40.0, 50.0],
+        frequencies=[50.0, 100.0, 1000.0, 5000.0, 8000.0],
+        field_strength_level=[0.0, 0.0, 0.0, 0.0, 0.0],
+        impedance_ohm=[20.0, 32.0, 33.0, 40.0, 50.0],
         input_voltage_v=1.0,
     )
     assert result.min_impedance_ohm == pytest.approx(32.0)
@@ -586,9 +604,9 @@ def test_neck_loop_minimum_impedance_is_taken_over_100_hz_to_5_khz_only() -> Non
 
 def test_neck_loop_takes_the_magnitude_of_a_complex_impedance() -> None:
     result = ea.neck_loop_characteristics(
-        [100.0, 1000.0, 5000.0],
-        [0.0, 0.0, 0.0],
-        [3 + 4j, 8.0, 9.0],
+        frequencies=[100.0, 1000.0, 5000.0],
+        field_strength_level=[0.0, 0.0, 0.0],
+        impedance_ohm=[3 + 4j, 8.0, 9.0],
         input_voltage_v=1.0,
     )
     assert result.min_impedance_ohm == pytest.approx(5.0)
@@ -674,16 +692,16 @@ def test_neck_loop_takes_a_whole_numpy_type() -> None:
 def test_neck_loop_refuses_a_negative_real_impedance() -> None:
     with pytest.raises(ValueError, match="'impedance_ohm' must be strictly positive"):
         ea.neck_loop_characteristics(
-            [100.0, 1000.0, 5000.0],
-            [0.0, 0.0, 0.0],
-            [-32.0, 32.0, 32.0],
+            frequencies=[100.0, 1000.0, 5000.0],
+            field_strength_level=[0.0, 0.0, 0.0],
+            impedance_ohm=[-32.0, 32.0, 32.0],
             input_voltage_v=1.0,
         )
     with pytest.raises(TypeError, match="'impedance_ohm' must be numbers, not text"):
         ea.neck_loop_characteristics(
-            [100.0, 1000.0, 5000.0],
-            [0.0, 0.0, 0.0],
-            ["a", "b", "c"],
+            frequencies=[100.0, 1000.0, 5000.0],
+            field_strength_level=[0.0, 0.0, 0.0],
+            impedance_ohm=["a", "b", "c"],
             input_voltage_v=1.0,
         )
 
@@ -782,13 +800,17 @@ def test_every_result_plots(language: str) -> None:
     results = (
         ea.rectangular_loop_field(1.0, 10.0, 15.0, np.linspace(-7, 7, 57), 0.0, 1.2),
         ea.loop_impedance(0.69, 109e-6),
-        ea.amplifier_frequency_response([50.0, 1000.0, 8000.0], [0.9, 1.0, 0.8]),
+        ea.amplifier_frequency_response(
+            frequencies=[50.0, 1000.0, 8000.0], output_current_a=[0.9, 1.0, 0.8]
+        ),
         ea.agc_characteristic([-40.0, -20.0, 0.0], [-20.0, -1.0, 0.0]),
-        ea.quadrature_phase_error([100.0, 1000.0, 5000.0], [88.0, 90.0, 95.0]),
+        ea.quadrature_phase_error(
+            frequencies=[100.0, 1000.0, 5000.0], phase_difference_deg=[88.0, 90.0, 95.0]
+        ),
         ea.neck_loop_characteristics(
-            [100.0, 1000.0, 5000.0],
-            [-4.0, 0.0, -1.0],
-            [32.0, 33.0, 40.0],
+            frequencies=[100.0, 1000.0, 5000.0],
+            field_strength_level=[-4.0, 0.0, -1.0],
+            impedance_ohm=[32.0, 33.0, 40.0],
             input_voltage_v=1.0,
         ),
         ea.verify_neck_loop(32.0, 1.0),

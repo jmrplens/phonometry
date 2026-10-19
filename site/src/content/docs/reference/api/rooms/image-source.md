@@ -259,6 +259,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 reflection_density(
     time: ArrayLike,
     volume: float,
+    *,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray | float
 ```

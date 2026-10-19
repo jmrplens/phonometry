@@ -61,7 +61,7 @@ _DELTA_L = np.array(
 
 def _result() -> building.FloorCoveringImprovementResult:
     bare = np.full(16, 78.0)
-    return building.impact_improvement(bare, bare - _DELTA_L, _FREQS)
+    return building.impact_improvement(bare, bare - _DELTA_L, frequencies=_FREQS)
 
 
 def _metadata(**overrides: float | str) -> ReportMetadata:
@@ -176,7 +176,9 @@ def test_limited_band_uses_literal_greater_than(tmp_path: Path) -> None:
     bare = np.full(16, 50.0)
     covering = np.full(16, 49.0)
     background = np.full(16, 48.0)  # margin 2 dB < 6 dB -> every band limited
-    result = building.impact_improvement(bare, covering, _FREQS, background=background)
+    result = building.impact_improvement(
+        bare, covering, frequencies=_FREQS, background=background
+    )
     assert bool(np.any(result.limited))
     out = tmp_path / "iso16251_limited.pdf"
     result.report(str(out))
@@ -241,7 +243,7 @@ def test_spanish_fiche_uses_comma_decimal(tmp_path: Path) -> None:
 def test_characterisation_headline_without_rating_bands(tmp_path: Path) -> None:
     """A spectrum without the 16 rating bands boxes a characterisation, no number."""
     result = building.impact_improvement(
-        [1.0, 2.0, 3.0], [0.0, 0.0, 0.0], [500.0, 1000.0, 2000.0]
+        [1.0, 2.0, 3.0], [0.0, 0.0, 0.0], frequencies=[500.0, 1000.0, 2000.0]
     )
     assert result.delta_lw is None
     out = tmp_path / "iso16251_norate.pdf"

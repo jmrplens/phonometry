@@ -105,6 +105,7 @@ class Signal(RichDisplay):
 
     data: NDArray[np.float64]
     fs: int
+    _: KW_ONLY
     calibration_factor: float | None = None
     channel_labels: tuple[str, ...] | None = None
     provenance: BroadcastMetadata | None = None

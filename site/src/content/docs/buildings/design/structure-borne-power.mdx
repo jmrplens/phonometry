@@ -73,9 +73,9 @@ lv_low = np.array([72.0, 74.0, 71.0, 68.0, 64.0, 60.0, 55.0])
 # 4.9e-6, so for a source of |Y_S| ~ 1e-3 m/(N.s) its spatial-mean velocity
 # level runs 35.1 dB higher: 12.0 dB of that is extra injected power and the
 # rest is the plate's much smaller eta*m*S dissipating it.
-low = building.reception_plate_power(lv_low, bands, mass_per_area=230.0,
+low = building.reception_plate_power(lv_low, frequency=bands, mass_per_area=230.0,
                                      area=7.0, reverberation_time=0.25)
-high = building.reception_plate_power(lv_low + 35.1, bands, mass_per_area=7.9,
+high = building.reception_plate_power(lv_low + 35.1, frequency=bands, mass_per_area=7.9,
                                       area=2.0, reverberation_time=0.5)
 
 # One line — the L_Ws(f) bars of one determination with its band-summed total:
@@ -460,7 +460,7 @@ from phonometry import ReportMetadata, building
 freqs = np.array([125, 250, 500, 1000, 2000, 4000], float)
 lv = np.array([70.0, 72, 68, 64, 60, 55])   # spatial mean plate velocity level [dB]
 res = building.reception_plate_power(               # the clause 7.2.2 low-mobility plate
-    lv, freqs, mass_per_area=230.0, area=7.0, reverberation_time=0.25,
+    lv, frequency=freqs, mass_per_area=230.0, area=7.0, reverberation_time=0.25,
 )
 
 res.report(

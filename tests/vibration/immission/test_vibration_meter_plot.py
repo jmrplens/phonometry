@@ -68,7 +68,7 @@ def test_verification_figure_draws_the_band_from_the_tables() -> None:
     freqs = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0, 80.0])
     measured = np.abs(im.kb_weighting_response(freqs)) * 1.02
     measured[5] *= 1.15
-    result = im.verify_vibration_meter(freqs, measured)
+    result = im.verify_vibration_meter(frequencies=freqs, measured_response=measured)
     ax = result.plot()
     assert not result.passes
     assert "FAIL" in ax.get_title()
@@ -109,7 +109,9 @@ def test_verification_figure_speaks_both_languages(
 ) -> None:
     """The Spanish edition translates the prose and keeps the symbols."""
     freqs = np.array([1.0, 16.0, 31.5, 80.0])
-    result = im.verify_vibration_meter(freqs, np.abs(im.kb_weighting_response(freqs)))
+    result = im.verify_vibration_meter(
+        frequencies=freqs, measured_response=np.abs(im.kb_weighting_response(freqs))
+    )
     ax = result.plot(language=language)
     assert title_fragment in ax.get_title()
     assert ax.get_ylabel() == ylabel

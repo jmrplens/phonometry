@@ -105,7 +105,15 @@ class TestNortonProblem610:
     @pytest.fixture(scope="class")
     def result(self) -> PowerInjectionResult:
         e_1, e_2, n_1, n_2 = _problem_610_inputs()
-        return power_injection_clf(_BAND, e_1, e_2, 4.4e-3, 2.4e-3, n_1, n_2)
+        return power_injection_clf(
+            frequencies=_BAND,
+            energy1=e_1,
+            energy2=e_2,
+            internal_loss_factor1=4.4e-3,
+            internal_loss_factor2=2.4e-3,
+            modal_density1=n_1,
+            modal_density2=n_2,
+        )
 
     def test_coupling_loss_factor_12(self, result: PowerInjectionResult) -> None:
         """Printed answer eta_12 = 4,26e-4."""
@@ -202,7 +210,15 @@ class TestSingleDriveRoundTrip:
     ) -> None:
         f = np.array([250.0, 500.0, 1000.0])
         e_1, e_2 = self._forward(f, eta_1, eta_2, eta_12, n_1, n_2, 1.0)
-        res = power_injection_clf(f, e_1, e_2, eta_1, eta_2, n_1, n_2)
+        res = power_injection_clf(
+            frequencies=f,
+            energy1=e_1,
+            energy2=e_2,
+            internal_loss_factor1=eta_1,
+            internal_loss_factor2=eta_2,
+            modal_density1=n_1,
+            modal_density2=n_2,
+        )
         np.testing.assert_allclose(res.coupling_loss_factor12, eta_12, rtol=1e-10)
         np.testing.assert_allclose(
             res.coupling_loss_factor21, eta_12 * n_1 / n_2, rtol=1e-10
@@ -212,14 +228,30 @@ class TestSingleDriveRoundTrip:
     def test_scalar_loss_factors_broadcast_over_bands(self) -> None:
         f = np.array([125.0, 250.0, 500.0, 1000.0])
         e_1, e_2 = self._forward(f, 5e-3, 5e-3, 1e-3, 1.0, 1.0, 2.0)
-        res = power_injection_clf(f, e_1, e_2, 5e-3, 5e-3, 1.0, 1.0)
+        res = power_injection_clf(
+            frequencies=f,
+            energy1=e_1,
+            energy2=e_2,
+            internal_loss_factor1=5e-3,
+            internal_loss_factor2=5e-3,
+            modal_density1=1.0,
+            modal_density2=1.0,
+        )
         assert res.coupling_loss_factor12.shape == f.shape
         np.testing.assert_allclose(res.coupling_loss_factor12, 1e-3, rtol=1e-10)
 
     def test_modal_density_ratio_property(self) -> None:
         f = np.array([500.0])
         e_1, e_2 = self._forward(f, 5e-3, 5e-3, 1e-3, 0.8, 3.2, 1.0)
-        res = power_injection_clf(f, e_1, e_2, 5e-3, 5e-3, 0.8, 3.2)
+        res = power_injection_clf(
+            frequencies=f,
+            energy1=e_1,
+            energy2=e_2,
+            internal_loss_factor1=5e-3,
+            internal_loss_factor2=5e-3,
+            modal_density1=0.8,
+            modal_density2=3.2,
+        )
         np.testing.assert_allclose(res.modal_density_ratio, 0.8 / 3.2, rtol=1e-10)
 
 
@@ -253,7 +285,7 @@ class TestTwoDriveMatrix:
         eta_1, eta_2, eta_12, eta_21 = 4.4e-3, 2.4e-3, 4.26e-4, 3.92e-4
         e = self._energies(f, eta_1, eta_2, eta_12, eta_21, 1.31, 0.7)
         powers = np.stack([np.full(f.size, 1.31), np.full(f.size, 0.7)])
-        res = power_injection_matrix(f, e, powers)
+        res = power_injection_matrix(frequencies=f, energies=e, input_powers=powers)
         np.testing.assert_allclose(res.coupling_loss_factor12, eta_12, rtol=1e-9)
         np.testing.assert_allclose(res.coupling_loss_factor21, eta_21, rtol=1e-9)
         np.testing.assert_allclose(res.internal_loss_factor1, eta_1, rtol=1e-9)
@@ -267,7 +299,9 @@ class TestTwoDriveMatrix:
         n_1, n_2 = 0.557, 0.606
         eta_12 = 4.26e-4
         e = self._energies(f, 4.4e-3, 2.4e-3, eta_12, eta_12 * n_1 / n_2, 1.31, 0.7)
-        res = power_injection_matrix(f, e, np.stack([[1.31], [0.7]]))
+        res = power_injection_matrix(
+            frequencies=f, energies=e, input_powers=np.stack([[1.31], [0.7]])
+        )
         np.testing.assert_allclose(res.modal_density_ratio, n_1 / n_2, rtol=1e-8)
 
 
@@ -373,16 +407,40 @@ class TestValidation:
             ValueError,
             match=r"driven subsystem must hold more modal energy than the receiver",
         ):
-            power_injection_clf(500.0, 1.0, 2.0, 4.4e-3, 2.4e-3, 1.0, 1.0)
+            power_injection_clf(
+                frequencies=500.0,
+                energy1=1.0,
+                energy2=2.0,
+                internal_loss_factor1=4.4e-3,
+                internal_loss_factor2=2.4e-3,
+                modal_density1=1.0,
+                modal_density2=1.0,
+            )
 
     @pytest.mark.parametrize("bad", [0.0, -1.0])
     def test_non_positive_inputs(self, bad: float) -> None:
         with pytest.raises(ValueError, match="'energy1' must be strictly positive"):
-            power_injection_clf(500.0, bad, 0.1, 4.4e-3, 2.4e-3, 1.0, 1.0)
+            power_injection_clf(
+                frequencies=500.0,
+                energy1=bad,
+                energy2=0.1,
+                internal_loss_factor1=4.4e-3,
+                internal_loss_factor2=2.4e-3,
+                modal_density1=1.0,
+                modal_density2=1.0,
+            )
 
     def test_a_band_axis_that_is_not_positive_is_named_frequencies(self) -> None:
         with pytest.raises(ValueError, match="'frequencies' must be strictly positive"):
-            power_injection_clf([-125.0, 250.0], 1.0, 0.1, 4.4e-3, 2.4e-3, 1.0, 1.0)
+            power_injection_clf(
+                frequencies=[-125.0, 250.0],
+                energy1=1.0,
+                energy2=0.1,
+                internal_loss_factor1=4.4e-3,
+                internal_loss_factor2=2.4e-3,
+                modal_density1=1.0,
+                modal_density2=1.0,
+            )
 
     def test_band_length_mismatch(self) -> None:
         with pytest.raises(
@@ -390,36 +448,52 @@ class TestValidation:
             match=r"'energy1' must be a scalar or match the \d+ frequency bands",
         ):
             power_injection_clf(
-                [125.0, 250.0], [1.0, 0.9, 0.8], 0.1, 4.4e-3, 2.4e-3, 1.0, 1.0
+                frequencies=[125.0, 250.0],
+                energy1=[1.0, 0.9, 0.8],
+                energy2=0.1,
+                internal_loss_factor1=4.4e-3,
+                internal_loss_factor2=2.4e-3,
+                modal_density1=1.0,
+                modal_density2=1.0,
             )
 
     def test_matrix_rejects_a_bad_energy_shape(self) -> None:
         f, energies, powers = _ONE_BAND, np.ones((2, 2, 2)), np.ones((2, 1))
         with pytest.raises(ValueError, match=r"shape \(2, 2, 1\)"):
-            power_injection_matrix(f, energies, powers)
+            power_injection_matrix(
+                frequencies=f, energies=energies, input_powers=powers
+            )
 
     def test_matrix_rejects_a_bad_power_shape(self) -> None:
         f, energies, powers = _ONE_BAND, np.ones((2, 2, 1)), np.ones((2, 2))
         with pytest.raises(ValueError, match=r"shape \(2, 1\)"):
-            power_injection_matrix(f, energies, powers)
+            power_injection_matrix(
+                frequencies=f, energies=energies, input_powers=powers
+            )
 
     def test_matrix_rejects_non_positive_energies(self) -> None:
         energies, powers = np.ones((2, 2, 1)), np.ones((2, 1))
         energies[0, 0, 0] = 0.0
         with pytest.raises(ValueError, match="'energies'"):
-            power_injection_matrix(_ONE_BAND, energies, powers)
+            power_injection_matrix(
+                frequencies=_ONE_BAND, energies=energies, input_powers=powers
+            )
 
     def test_matrix_rejects_non_positive_powers(self) -> None:
         energies, powers = np.ones((2, 2, 1)), np.zeros((2, 1))
         with pytest.raises(ValueError, match="'input_powers'"):
-            power_injection_matrix(_ONE_BAND, energies, powers)
+            power_injection_matrix(
+                frequencies=_ONE_BAND, energies=energies, input_powers=powers
+            )
 
     def test_matrix_rejects_indistinguishable_drive_tests(self) -> None:
         """Two tests with proportional energy distributions are singular."""
         energies = np.array([[[1.0], [2.0]], [[0.5], [1.0]]])
         powers = np.ones((2, 1))
         with pytest.raises(ValueError, match=r"measured energy matrix is singular"):
-            power_injection_matrix(_ONE_BAND, energies, powers)
+            power_injection_matrix(
+                frequencies=_ONE_BAND, energies=energies, input_powers=powers
+            )
 
     def test_unknown_band(self) -> None:
         with pytest.raises(ValueError, match="'fraction' must be 1"):

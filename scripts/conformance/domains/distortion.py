@@ -94,7 +94,10 @@ def _loudspeaker_flat_response() -> tuple[np.ndarray, np.ndarray]:
 def _chk_loudspeaker_sensitivity() -> Outcome:
     f, spl = _loudspeaker_flat_response()
     result = ph.electroacoustics.loudspeaker_characteristics(
-        f, spl, 8.0, sensitivity_band=(200.0, 4000.0)
+        frequencies=f,
+        spl=spl,
+        rated_impedance_ohm=8.0,
+        sensitivity_band=(200.0, 4000.0),
     )
     # A flat 90 dB response driven at sqrt(8) V (1 W) at 1 m has a
     # characteristic sensitivity level of 90 dB exactly (the corrections vanish).
@@ -109,7 +112,10 @@ def _chk_loudspeaker_sensitivity() -> Outcome:
 def _chk_loudspeaker_effective_range() -> Outcome:
     f, spl = _loudspeaker_flat_response()
     result = ph.electroacoustics.loudspeaker_characteristics(
-        f, spl, 8.0, sensitivity_band=(200.0, 4000.0)
+        frequencies=f,
+        spl=spl,
+        rated_impedance_ohm=8.0,
+        sensitivity_band=(200.0, 4000.0),
     )
     lo, hi = result.effective_range
     ok = abs(lo - 50.0) <= 5e-3 and abs(hi - 18000.0) <= 2.0
@@ -152,7 +158,7 @@ def _microphone_flat_response() -> tuple[np.ndarray, np.ndarray]:
 def _chk_microphone_sensitivity_level() -> Outcome:
     f, rel = _microphone_flat_response()
     result = ph.electroacoustics.microphone_characteristics(
-        f, rel, 12.5, tolerance_db=3.0
+        frequencies=f, response_db=rel, sensitivity_mv_per_pa=12.5, tolerance_db=3.0
     )
     # Hand-computed: 20 lg 0.0125 = -38.061800 dB re 1 V/Pa.
     return numeric(-38.061800, result.sensitivity_level, 1e-5, unit="dB", places=6)
@@ -166,7 +172,7 @@ def _chk_microphone_sensitivity_level() -> Outcome:
 def _chk_microphone_effective_range() -> Outcome:
     f, rel = _microphone_flat_response()
     result = ph.electroacoustics.microphone_characteristics(
-        f, rel, 12.5, tolerance_db=3.0
+        frequencies=f, response_db=rel, sensitivity_mv_per_pa=12.5, tolerance_db=3.0
     )
     lo, hi = result.effective_range
     ok = abs(lo - 40.0) <= 5e-3 and abs(hi - 18000.0) <= 2.0
@@ -188,9 +194,9 @@ def _chk_microphone_cardioid_di() -> Outcome:
     angles = np.linspace(0.0, 179.9, 1800)
     pattern = 20.0 * np.log10((1.0 + np.cos(np.radians(angles))) / 2.0)
     result = ph.electroacoustics.microphone_characteristics(
-        f,
-        rel,
-        12.5,
+        frequencies=f,
+        response_db=rel,
+        sensitivity_mv_per_pa=12.5,
         tolerance_db=3.0,
         directivity=ph.electroacoustics.MicrophoneDirectivity(polar=(angles, pattern)),
     )
@@ -211,9 +217,9 @@ def _chk_microphone_cardioid_di() -> Outcome:
 def _chk_microphone_equivalent_noise() -> Outcome:
     f, rel = _microphone_flat_response()
     result = ph.electroacoustics.microphone_characteristics(
-        f,
-        rel,
-        12.5,
+        frequencies=f,
+        response_db=rel,
+        sensitivity_mv_per_pa=12.5,
         tolerance_db=3.0,
         noise=ph.electroacoustics.MicrophoneNoise(voltage_v=2.5e-6),
     )

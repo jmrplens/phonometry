@@ -27,6 +27,7 @@ sharpness_din(
     fs: int | None = None,
     field: Literal['free', 'diffuse'] = 'free',
     method: Literal['din', 'aures', 'bismarck'] = 'din',
+    *,
     calibration_factor: float | None = None,
 ) -> float
 ```

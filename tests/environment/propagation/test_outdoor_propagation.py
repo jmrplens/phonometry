@@ -124,7 +124,15 @@ class TestAtmosphericAbsorption:
 class TestGroundGeneral:
     def test_hard_ground_no_middle_region(self) -> None:
         # G = 0 everywhere and dp <= 30(hs+hr) (q=0): As=Ar=-1,5, Am=0 => -3 dB.
-        agr = environment.ground_attenuation(50.0, 1.0, 1.0, BANDS, 0.0, 0.0, 0.0)
+        agr = environment.ground_attenuation(
+            50.0,
+            1.0,
+            1.0,
+            frequencies=BANDS,
+            ground_source=0.0,
+            ground_middle=0.0,
+            ground_receiver=0.0,
+        )
         assert np.allclose(agr, -3.0)
 
     def test_hard_ground_far_still_minus_three_low_band(self) -> None:
@@ -134,10 +142,10 @@ class TestGroundGeneral:
             1000.0,
             1.0,
             1.0,
-            [63.0, 8000.0],
-            0.0,
-            0.0,
-            0.0,
+            frequencies=[63.0, 8000.0],
+            ground_source=0.0,
+            ground_middle=0.0,
+            ground_receiver=0.0,
             projected_distance=1000.0,
         )
         # dp=1000 > 30*2=60 => q = 1 - 60/1000 = 0,94; Am(63) = -3*0,94 = -2,82.
@@ -155,10 +163,10 @@ class TestGroundGeneral:
             big,
             0.0,
             0.0,
-            [250.0, 500.0, 1000.0],
-            1.0,
-            1.0,
-            1.0,
+            frequencies=[250.0, 500.0, 1000.0],
+            ground_source=1.0,
+            ground_middle=1.0,
+            ground_receiver=1.0,
             projected_distance=big,
         )
         # hs=hr=0 => threshold=0, q=1; Gm=1 => Am(>=125)=0.
@@ -171,31 +179,83 @@ class TestGroundGeneral:
         # a'(h) at h=5, huge dp: 3,0*e^0 + 5,7*e^{-0,09*25} => 1,5+3,0+5,7*e^-2,25.
         big = 1.0e7
         agr = environment.ground_attenuation(
-            big, 5.0, 5.0, [125.0], 1.0, 1.0, 1.0, projected_distance=big
+            big,
+            5.0,
+            5.0,
+            frequencies=[125.0],
+            ground_source=1.0,
+            ground_middle=1.0,
+            ground_receiver=1.0,
+            projected_distance=big,
         )
         a_prime = 1.5 + 3.0 + 5.7 * math.exp(-2.25)
         assert agr[0] == pytest.approx(2.0 * (-1.5 + a_prime), abs=1e-6)
 
     def test_porous_more_attenuation_than_hard(self) -> None:
-        hard = environment.ground_attenuation(500.0, 2.0, 2.0, BANDS, 0.0, 0.0, 0.0)
-        porous = environment.ground_attenuation(500.0, 2.0, 2.0, BANDS, 1.0, 1.0, 1.0)
+        hard = environment.ground_attenuation(
+            500.0,
+            2.0,
+            2.0,
+            frequencies=BANDS,
+            ground_source=0.0,
+            ground_middle=0.0,
+            ground_receiver=0.0,
+        )
+        porous = environment.ground_attenuation(
+            500.0,
+            2.0,
+            2.0,
+            frequencies=BANDS,
+            ground_source=1.0,
+            ground_middle=1.0,
+            ground_receiver=1.0,
+        )
         # Porous yields larger (more positive) Agr at mid/high bands.
         assert np.all(porous[1:] >= hard[1:] - 1e-9)
         assert porous[3] > hard[3]
 
     def test_invalid_ground_factor_raises(self) -> None:
         with pytest.raises(ValueError, match=r"'ground_source' must be within"):
-            environment.ground_attenuation(100.0, 1.0, 1.0, BANDS, 1.5, 0.0, 0.0)
+            environment.ground_attenuation(
+                100.0,
+                1.0,
+                1.0,
+                frequencies=BANDS,
+                ground_source=1.5,
+                ground_middle=0.0,
+                ground_receiver=0.0,
+            )
         with pytest.raises(ValueError, match=r"'ground_middle' must be within"):
-            environment.ground_attenuation(100.0, 1.0, 1.0, BANDS, 0.0, -0.1, 0.0)
+            environment.ground_attenuation(
+                100.0,
+                1.0,
+                1.0,
+                frequencies=BANDS,
+                ground_source=0.0,
+                ground_middle=-0.1,
+                ground_receiver=0.0,
+            )
 
     def test_default_projected_distance(self) -> None:
         # dp = sqrt(d^2 - (hs-hr)^2); with hs=hr it equals d.
         a_default = environment.ground_attenuation(
-            100.0, 3.0, 3.0, BANDS, 1.0, 1.0, 1.0
+            100.0,
+            3.0,
+            3.0,
+            frequencies=BANDS,
+            ground_source=1.0,
+            ground_middle=1.0,
+            ground_receiver=1.0,
         )
         a_explicit = environment.ground_attenuation(
-            100.0, 3.0, 3.0, BANDS, 1.0, 1.0, 1.0, projected_distance=100.0
+            100.0,
+            3.0,
+            3.0,
+            frequencies=BANDS,
+            ground_source=1.0,
+            ground_middle=1.0,
+            ground_receiver=1.0,
+            projected_distance=100.0,
         )
         assert np.allclose(a_default, a_explicit)
 
@@ -523,11 +583,27 @@ class TestInputValidation:
     def test_ground_attenuation_rejects_nonpositive_frequency(self) -> None:
         with_zero = np.array([0.0, 500.0])
         with pytest.raises(ValueError, match=r"'frequencies' must be positive"):
-            environment.ground_attenuation(200.0, 2.0, 2.0, with_zero, 1.0, 1.0, 1.0)
+            environment.ground_attenuation(
+                200.0,
+                2.0,
+                2.0,
+                frequencies=with_zero,
+                ground_source=1.0,
+                ground_middle=1.0,
+                ground_receiver=1.0,
+            )
 
     def test_ground_attenuation_rejects_nonpositive_distance(self) -> None:
         with pytest.raises(ValueError, match=r"'distance' must be positive"):
-            environment.ground_attenuation(0.0, 2.0, 2.0, BANDS, 1.0, 1.0, 1.0)
+            environment.ground_attenuation(
+                0.0,
+                2.0,
+                2.0,
+                frequencies=BANDS,
+                ground_source=1.0,
+                ground_middle=1.0,
+                ground_receiver=1.0,
+            )
 
     def test_barrier_attenuation_rejects_nonpositive_frequency(self) -> None:
         barrier = environment.Barrier(source_to_edge=50.0, edge_to_receiver=50.0)

@@ -233,8 +233,8 @@ matplotlib (`pip install phonometry[plot]`).
 ```python
 plot_piston_geometry(
     radius: float,
-    ax: Axes | None = ...,
     *,
+    ax: Axes | None = ...,
     angles_rad: ArrayLike,
     directivity: ArrayLike,
     lobe_label: str | None = ...,
@@ -244,8 +244,8 @@ plot_piston_geometry(
 
 plot_piston_geometry(
     radius: float,
-    ax: Axes | None = ...,
     *,
+    ax: Axes | None = ...,
     lobe_label: str | None = ...,
     language: str = ...,
     **kwargs: Any,

@@ -456,7 +456,11 @@ def _comparison(
     """
     half = -38.0 - np.asarray(level)
     return metrology.simultaneous_comparison(
-        frequencies, -38.0, half, -half, expanded_uncertainty_db=uncertainty_db
+        frequencies=frequencies,
+        reference_sensitivity_level=-38.0,
+        channel_difference=half,
+        interchanged_channel_difference=-half,
+        expanded_uncertainty_db=uncertainty_db,
     )
 
 
@@ -625,7 +629,12 @@ def test_validation_refuses_a_free_field_reciprocity_calibration() -> None:
 
 def test_validation_refuses_a_free_field_calibration() -> None:
     free = metrology.sequential_comparison(
-        _F_VAL, -38.0, 94.0, 105.7, field="free", expanded_uncertainty_db=0.1
+        frequencies=_F_VAL,
+        reference_sensitivity_level=-38.0,
+        reference_output_level=94.0,
+        test_output_level=105.7,
+        field="free",
+        expanded_uncertainty_db=0.1,
     )
     other = _comparison(np.full(4, -26.3), 0.08)
     with pytest.raises(ValueError, match="free-field one"):
@@ -633,7 +642,12 @@ def test_validation_refuses_a_free_field_calibration() -> None:
 
 
 def test_validation_needs_both_uncertainties() -> None:
-    jig = metrology.simultaneous_comparison(_F_VAL, -38.0, 5.85, -5.85)
+    jig = metrology.simultaneous_comparison(
+        frequencies=_F_VAL,
+        reference_sensitivity_level=-38.0,
+        channel_difference=5.85,
+        interchanged_channel_difference=-5.85,
+    )
     other = _comparison(np.full(4, -26.3), 0.08)
     with pytest.raises(ValueError, match="'calibration' must carry"):
         metrology.verify_jig_or_coupler(jig, other)
@@ -641,7 +655,12 @@ def test_validation_needs_both_uncertainties() -> None:
 
 def test_validation_refuses_a_validation_without_uncertainty() -> None:
     jig = _comparison(np.full(4, -26.3), 0.08)
-    other = metrology.simultaneous_comparison(_F_VAL, -38.0, 5.85, -5.85)
+    other = metrology.simultaneous_comparison(
+        frequencies=_F_VAL,
+        reference_sensitivity_level=-38.0,
+        channel_difference=5.85,
+        interchanged_channel_difference=-5.85,
+    )
     with pytest.raises(ValueError, match="'validation' must carry"):
         metrology.verify_jig_or_coupler(jig, other)
 

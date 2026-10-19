@@ -177,7 +177,9 @@ def test_tables_2_and_3_limits(frequency_hz: float, lower: float, upper: float) 
 def test_a_meter_on_its_design_response_passes() -> None:
     """The design response itself is the centre of the band, at every point."""
     f = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0, 80.0])
-    result = im.verify_vibration_meter(f, np.abs(im.kb_weighting_response(f)))
+    result = im.verify_vibration_meter(
+        frequencies=f, measured_response=np.abs(im.kb_weighting_response(f))
+    )
     assert result.passes
     assert result.deviation_percent == pytest.approx(np.zeros(f.size - 1), abs=1e-9)
     # The reference frequency carries no requirement and is not graded.
@@ -189,12 +191,12 @@ def test_an_unweighted_meter_is_graded_against_the_band_limitation() -> None:
     """``weighting="Z"`` is the band limitation of Formula (3) and nothing else."""
     f = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0, 80.0])
     flat = np.abs(im.band_limitation_response(f))
-    result = im.verify_vibration_meter(f, flat, weighting="Z")
+    result = im.verify_vibration_meter(flat, frequencies=f, weighting="Z")
     assert result.weighting == "Z"
     assert result.passes
     assert result.deviation_percent == pytest.approx(np.zeros(f.size - 1), abs=1e-9)
     # The same flat response read against the KB weighting is far off it.
-    weighted = im.verify_vibration_meter(f, flat)
+    weighted = im.verify_vibration_meter(flat, frequencies=f)
     assert not weighted.passes
 
 
@@ -204,7 +206,7 @@ def test_a_meter_outside_the_central_band_fails_there_and_only_there() -> None:
     measured = np.abs(im.kb_weighting_response(f))
     measured[2] *= 1.12
     measured[0] *= 1.15
-    result = im.verify_vibration_meter(f, measured)
+    result = im.verify_vibration_meter(frequencies=f, measured_response=measured)
     assert not result.passes
     graded = dict(zip(result.frequencies, result.within_tolerance, strict=True))
     assert not graded[31.5]
@@ -223,7 +225,7 @@ def test_a_meter_below_the_central_band_is_judged_by_the_signed_lower_limit() ->
     measured = np.abs(im.kb_weighting_response(f))
     measured[2] *= 0.88
     measured[0] *= 0.85
-    result = im.verify_vibration_meter(f, measured)
+    result = im.verify_vibration_meter(measured, frequencies=f)
     graded = dict(zip(result.frequencies, result.within_tolerance, strict=True))
     assert result.lower_percent[list(result.frequencies).index(31.5)] == -10.0
     assert not graded[31.5]
@@ -236,9 +238,9 @@ def test_verification_normalises_at_the_reference_and_needs_it() -> None:
     """A meter with a flat gain error passes; without f_r nothing can be said."""
     f = np.array([1.0, 16.0, 31.5, 80.0])
     scaled = np.abs(im.kb_weighting_response(f)) * 3.0
-    assert im.verify_vibration_meter(f, scaled).passes
+    assert im.verify_vibration_meter(frequencies=f, measured_response=scaled).passes
     with pytest.raises(ValueError, match="reference_frequency_hz"):
-        im.verify_vibration_meter([1.0, 31.5], [1.0, 1.0])
+        im.verify_vibration_meter(frequencies=[1.0, 31.5], measured_response=[1.0, 1.0])
 
 
 def test_a_response_at_or_below_0_01_has_no_upper_limit() -> None:
@@ -250,8 +252,8 @@ def test_a_response_at_or_below_0_01_has_no_upper_limit() -> None:
     """
     f = np.array([16.0, 200.0])
     shape = np.abs(im.kb_weighting_response(f)) * np.array([1.0, 1.5])
-    loud = im.verify_vibration_meter(f, shape)
-    quiet = im.verify_vibration_meter(f, shape * 1e-3)
+    loud = im.verify_vibration_meter(frequencies=f, measured_response=shape)
+    quiet = im.verify_vibration_meter(frequencies=f, measured_response=shape * 1e-3)
     assert loud.upper_percent[0] == pytest.approx(20.0)
     assert not loud.passes
     assert math.isinf(quiet.upper_percent[0])
@@ -261,9 +263,13 @@ def test_a_response_at_or_below_0_01_has_no_upper_limit() -> None:
 def test_verification_refuses_mismatched_inputs() -> None:
     """Two arrays that do not line up cannot be compared point by point."""
     with pytest.raises(ValueError, match="same shape"):
-        im.verify_vibration_meter([1.0, 16.0, 31.5], [1.0, 1.0])
+        im.verify_vibration_meter(
+            frequencies=[1.0, 16.0, 31.5], measured_response=[1.0, 1.0]
+        )
     with pytest.raises(ValueError, match="weighting"):
-        im.verify_vibration_meter([16.0, 31.5], [1.0, 1.0], weighting="A")
+        im.verify_vibration_meter(
+            frequencies=[16.0, 31.5], measured_response=[1.0, 1.0], weighting="A"
+        )
 
 
 def test_clock_maxima_drop_a_partial_interval() -> None:

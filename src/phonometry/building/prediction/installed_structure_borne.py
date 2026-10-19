@@ -761,7 +761,7 @@ def tapping_machine_force_level_estimate(
 
 
 def tapping_machine_characteristic_power_level(
-    frequency: ArrayLike, force_level: ArrayLike
+    force_level: ArrayLike, *, frequency: ArrayLike
 ) -> np.ndarray:
     r"""Characteristic power level of the tapping machine (Formula D.9a).
 
@@ -791,9 +791,9 @@ def tapping_machine_characteristic_power_level(
 
 
 def tapping_machine_coupling_term(
-    frequency: ArrayLike,
     receiver_mobility: ArrayLike,
     *,
+    frequency: ArrayLike,
     hammer_mass: float = TAPPING_HAMMER_MASS_KG,
 ) -> np.ndarray:
     r"""Coupling term of the tapping machine (EN 12354-5, Formula D.9b).

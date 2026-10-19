@@ -453,8 +453,8 @@ _RETIRED_SPELLINGS: list[tuple[str, Callable[[], object], type[Exception], str]]
     (
         "vibration meter 'unweighted'",
         lambda: phonometry.vibration.verify_vibration_meter(
-            [8.0, 16.0, 31.5],
             [1.0, 1.0, 1.0],
+            frequencies=[8.0, 16.0, 31.5],
             weighting="unweighted",  # type: ignore[arg-type]
         ),
         ValueError,
@@ -475,10 +475,10 @@ _RETIRED_SPELLINGS: list[tuple[str, Callable[[], object], type[Exception], str]]
     (
         "sequential comparison 'free_field'",
         lambda: phonometry.metrology.sequential_comparison(
-            [1000.0],
             [-26.0],
             [90.0],
             [89.0],
+            frequencies=[1000.0],
             field="free_field",  # type: ignore[arg-type]
         ),
         ValueError,
@@ -487,10 +487,10 @@ _RETIRED_SPELLINGS: list[tuple[str, Callable[[], object], type[Exception], str]]
     (
         "simultaneous comparison 'free_field'",
         lambda: phonometry.metrology.simultaneous_comparison(
-            [1000.0],
             [-26.0],
             [0.1],
             [0.1],
+            frequencies=[1000.0],
             field="free_field",  # type: ignore[arg-type]
         ),
         ValueError,
@@ -509,8 +509,8 @@ _RETIRED_SPELLINGS: list[tuple[str, Callable[[], object], type[Exception], str]]
     (
         "reciprocity budget 'free_field'",
         lambda: phonometry.metrology.reciprocity_uncertainty_budget(
-            [1000.0],
             {},
+            frequencies=[1000.0],
             field="free_field",  # type: ignore[arg-type]
         ),
         ValueError,

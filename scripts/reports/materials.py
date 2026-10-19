@@ -149,9 +149,9 @@ def _sound_absorption_example() -> tuple[object, ReportMetadata, str]:
         ]
     )
     result = ph.materials.measure_sound_absorption(
-        freqs,
-        t_empty,
-        t_specimen,
+        frequencies=freqs,
+        t_empty=t_empty,
+        t_specimen=t_specimen,
         volume=200.0,
         area=10.8,
         temperature_c=20.0,
@@ -336,7 +336,9 @@ def _scattering_example() -> tuple[object, ReportMetadata, str]:
         volume, area, c3=c, t3=t3, c4=c, t4=t4
     )
     result = ph.materials.scattering_coefficient_spectrum(
-        _SCATTER_FREQS, alpha_spec, alpha_s
+        frequencies=_SCATTER_FREQS,
+        specular_absorption=alpha_spec,
+        random_absorption=alpha_s,
     )
     metadata = ReportMetadata(
         specimen="1:1 quadratic-residue diffuser (N = 7)",
@@ -423,7 +425,9 @@ def _diffusion_example() -> tuple[object, ReportMetadata, str]:
         # positions, band by band, to get the random-incidence coefficient.
         d[k] = ph.materials.random_incidence_diffusion(d_theta, weights=weights)
         d_n[k] = ph.materials.random_incidence_diffusion(d_theta_n, weights=weights)
-    result = ph.materials.diffusion_spectrum(_SCATTER_FREQS, d, normalized=d_n)
+    result = ph.materials.diffusion_spectrum(
+        frequencies=_SCATTER_FREQS, diffusion=d, normalized=d_n
+    )
     metadata = ReportMetadata(
         specimen="1:1 single-plane Schroeder diffuser (N = 7)",
         client="Example client",

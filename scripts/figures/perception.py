@@ -2156,7 +2156,7 @@ def generate_tone_audibility(output_dir: str) -> None:
     ]
     freqs = [t[0] for t in tones]
     res = psychoacoustics.assess_tones(
-        freqs, [t[2] for t in tones], [t[1] for t in tones], 2.7
+        [t[2] for t in tones], [t[1] for t in tones], 2.7, tone_frequencies=freqs
     )
 
     x = np.arange(len(freqs))
@@ -3643,7 +3643,7 @@ def generate_tone_audibility_levels(output_dir: str) -> None:
     ft = [118.4, 137.3, 158.8, 314.9, 433.4, 592.2, 629.8, 643.3, 1582.7]
     lt = [64.56, 67.96, 68.63, 68.50, 73.17, 78.31, 75.00, 79.75, 71.07]
     ls = [48.91, 49.22, 50.50, 52.85, 58.29, 59.53, 59.71, 61.98, 54.16]
-    res = psychoacoustics.assess_tones(ft, lt, ls, 2.7)
+    res = psychoacoustics.assess_tones(lt, ls, 2.7, tone_frequencies=ft)
 
     _fig, ax = plt.subplots(figsize=(10, 6))
     res.plot(ax=ax, view="levels", language=_LANG)

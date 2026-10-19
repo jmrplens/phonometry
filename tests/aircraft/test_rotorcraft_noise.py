@@ -877,7 +877,11 @@ def _ring(levels_per_bearing: np.ndarray, bands: int = 2) -> np.ndarray:
 
 
 def test_hover_ring_uniform_ring_gives_uniform_hemisphere() -> None:
-    h = hover_ring_hemisphere([500.0, 1000.0], _RING_BEARINGS, _ring(np.full(12, 80.0)))
+    h = hover_ring_hemisphere(
+        frequencies=[500.0, 1000.0],
+        bearings=_RING_BEARINGS,
+        levels=_ring(np.full(12, 80.0)),
+    )
     assert h.distance_m == 70.0
     assert h.azimuth_deg.size == 19
     assert h.polar_deg.size == 19
@@ -890,7 +894,9 @@ def test_hover_ring_constant_phi_closed_form() -> None:
     # Ring level = 60 + bearing/10 dB: every hemisphere bin reads the ring at
     # the bearing +-theta of its own half, in closed form.
     h = hover_ring_hemisphere(
-        [500.0, 1000.0], _RING_BEARINGS, _ring(60.0 + _RING_BEARINGS / 10.0)
+        frequencies=[500.0, 1000.0],
+        bearings=_RING_BEARINGS,
+        levels=_ring(60.0 + _RING_BEARINGS / 10.0),
     )
     ia = {a: i for i, a in enumerate(h.azimuth_deg)}
     ip = {p: i for i, p in enumerate(h.polar_deg)}
@@ -909,7 +915,9 @@ def test_hover_ring_periodic_energy_interpolation() -> None:
     # Alternating 70/80 dB ring: lookups between bearings blend in the energy
     # domain, and the wrap cell between +150 and -180 interpolates too.
     alternating = np.where(np.arange(12) % 2 == 0, 70.0, 80.0)
-    h = hover_ring_hemisphere([500.0, 1000.0], _RING_BEARINGS, _ring(alternating))
+    h = hover_ring_hemisphere(
+        frequencies=[500.0, 1000.0], bearings=_RING_BEARINGS, levels=_ring(alternating)
+    )
     # Rim lookup at theta = 15: halfway between ring(0) = 70 and ring(30) = 80,
     # through the grid nodes at 10 and 20 (both stages are linear in energy).
     expected = 10.0 * np.log10((10.0**7.0 + 10.0**8.0) / 2.0)
@@ -929,9 +937,9 @@ def test_hover_ring_middle_column_survives_inexact_step() -> None:
     # construction), so it still takes the energy mean of ring(+-theta) and
     # the halves still split port/starboard around it.
     h = hover_ring_hemisphere(
-        [500.0, 1000.0],
-        _RING_BEARINGS,
-        _ring(60.0 + _RING_BEARINGS / 10.0),
+        frequencies=[500.0, 1000.0],
+        bearings=_RING_BEARINGS,
+        levels=_ring(60.0 + _RING_BEARINGS / 10.0),
         azimuth_step=180.0 / 14.0,
     )
     assert h.azimuth_deg.size == 15
@@ -946,9 +954,9 @@ def test_hover_ring_bearing_mapping_closed_form() -> None:
     # The NORAH2 reference implementation's reading: the level depends on the
     # horizontal bearing beta = atan2(sin(theta)*sin(phi), cos(theta)).
     h = hover_ring_hemisphere(
-        [500.0, 1000.0],
-        _RING_BEARINGS,
-        _ring(60.0 + _RING_BEARINGS / 10.0),
+        frequencies=[500.0, 1000.0],
+        bearings=_RING_BEARINGS,
+        levels=_ring(60.0 + _RING_BEARINGS / 10.0),
         mapping="bearing",
     )
     ia = {a: i for i, a in enumerate(h.azimuth_deg)}
@@ -997,7 +1005,9 @@ def test_hover_derived_approach2_measured_offset() -> None:
     # Approach 2: LA_HOGE(0) = 95.3, LA_HIGE(0) = 88.1 -> offset 7.2 dB,
     # applied bin for bin; the 0-degree lookup rises by exactly that.
     h = hover_ring_hemisphere(
-        [500.0, 1000.0], _RING_BEARINGS, _ring(60.0 + _RING_BEARINGS / 10.0)
+        frequencies=[500.0, 1000.0],
+        bearings=_RING_BEARINGS,
+        levels=_ring(60.0 + _RING_BEARINGS / 10.0),
     )
     hoge = hover_derived_hemisphere(h, "out_of_ground_hover", offset_db=95.3 - 88.1)
     assert np.allclose(hoge.levels - h.levels, 7.2)
@@ -1010,31 +1020,51 @@ def test_hover_helpers_validation() -> None:
     freqs = [500.0, 1000.0]
     ring = _ring(np.full(12, 80.0))
     with pytest.raises(ValueError, match=r"'frequencies' must be strictly positive"):
-        hover_ring_hemisphere([500.0, 0.0], _RING_BEARINGS, ring)
+        hover_ring_hemisphere(
+            frequencies=[500.0, 0.0], bearings=_RING_BEARINGS, levels=ring
+        )
     with pytest.raises(ValueError, match=r"'frequencies' must be strictly positive"):
-        hover_ring_hemisphere([500.0, -1000.0], _RING_BEARINGS, ring)
+        hover_ring_hemisphere(
+            frequencies=[500.0, -1000.0], bearings=_RING_BEARINGS, levels=ring
+        )
     with pytest.raises(ValueError, match=r"'bearings' must be 1-D"):
-        hover_ring_hemisphere(freqs, [0.0], [[80.0, 80.0]])
+        hover_ring_hemisphere(frequencies=freqs, bearings=[0.0], levels=[[80.0, 80.0]])
     with pytest.raises(
         ValueError, match=r"'bearings' must be finite and strictly increasing"
     ):
-        hover_ring_hemisphere(freqs, _RING_BEARINGS[::-1], ring)
+        hover_ring_hemisphere(
+            frequencies=freqs, bearings=_RING_BEARINGS[::-1], levels=ring
+        )
     with pytest.raises(ValueError, match=r"'bearings' must lie within"):
-        hover_ring_hemisphere(freqs, _RING_BEARINGS + 200.0, ring)
+        hover_ring_hemisphere(
+            frequencies=freqs, bearings=_RING_BEARINGS + 200.0, levels=ring
+        )
     with pytest.raises(ValueError, match=r"'levels' must have shape"):
-        hover_ring_hemisphere(freqs, _RING_BEARINGS, ring[:, :1])
+        hover_ring_hemisphere(
+            frequencies=freqs, bearings=_RING_BEARINGS, levels=ring[:, :1]
+        )
     with_nan = np.where(ring > 0.0, np.nan, ring)
     with pytest.raises(ValueError, match=r"'levels' must be finite"):
-        hover_ring_hemisphere(freqs, _RING_BEARINGS, with_nan)
+        hover_ring_hemisphere(
+            frequencies=freqs, bearings=_RING_BEARINGS, levels=with_nan
+        )
     with pytest.raises(ValueError, match=r"'distance_m' must be positive"):
-        hover_ring_hemisphere(freqs, _RING_BEARINGS, ring, distance_m=0.0)
+        hover_ring_hemisphere(
+            frequencies=freqs, bearings=_RING_BEARINGS, levels=ring, distance_m=0.0
+        )
     with pytest.raises(ValueError, match=r"'azimuth_step' must divide"):
-        hover_ring_hemisphere(freqs, _RING_BEARINGS, ring, azimuth_step=7.0)
+        hover_ring_hemisphere(
+            frequencies=freqs, bearings=_RING_BEARINGS, levels=ring, azimuth_step=7.0
+        )
     with pytest.raises(ValueError, match=r"'polar_step' must divide"):
-        hover_ring_hemisphere(freqs, _RING_BEARINGS, ring, polar_step=1000.0)
+        hover_ring_hemisphere(
+            frequencies=freqs, bearings=_RING_BEARINGS, levels=ring, polar_step=1000.0
+        )
     with pytest.raises(ValueError, match=r"'mapping' must be one of"):
-        hover_ring_hemisphere(freqs, _RING_BEARINGS, ring, mapping="nearest")
-    h = hover_ring_hemisphere(freqs, _RING_BEARINGS, ring)
+        hover_ring_hemisphere(
+            frequencies=freqs, bearings=_RING_BEARINGS, levels=ring, mapping="nearest"
+        )
+    h = hover_ring_hemisphere(frequencies=freqs, bearings=_RING_BEARINGS, levels=ring)
     with pytest.raises(ValueError, match=r"'condition' must be one of"):
         hover_derived_hemisphere(h, "hover")
     with pytest.raises(ValueError, match=r"'offset_db' must be finite"):
@@ -1047,7 +1077,11 @@ def test_hemisphere_axes_must_span_the_level_grid() -> None:
     # labels its curve with a frequency the levels were never computed at. The
     # angle axes eventually raise from inside the gap fill, in numpy's words;
     # the construction names the field instead.
-    h = hover_ring_hemisphere([500.0, 1000.0], _RING_BEARINGS, _ring(np.full(12, 80.0)))
+    h = hover_ring_hemisphere(
+        frequencies=[500.0, 1000.0],
+        bearings=_RING_BEARINGS,
+        levels=_ring(np.full(12, 80.0)),
+    )
     extra_band = np.append(h.frequencies, 2000.0)
     with pytest.raises(ValueError, match=r"'frequencies'.*per band"):
         dataclasses.replace(h, frequencies=extra_band)

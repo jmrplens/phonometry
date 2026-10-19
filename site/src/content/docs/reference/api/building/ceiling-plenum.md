@@ -109,6 +109,7 @@ The measurement chain
 ```python
 ceiling_attenuation_class(
     attenuation: ArrayLike,
+    *,
     frequencies: ArrayLike | None = None,
 ) -> CeilingAttenuationResult
 ```

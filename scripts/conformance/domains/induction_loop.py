@@ -845,14 +845,18 @@ def _chk_compliance_voltage() -> Outcome:
     _AFILS, f"{_62489} 5.4.14.1", "In-phase part of a quadrature network at 85 degrees"
 )
 def _chk_quadrature_cos() -> Outcome:
-    error = ea.quadrature_phase_error([100.0, 1000.0, 5000.0], [90.0, 85.0, 90.0])
+    error = ea.quadrature_phase_error(
+        frequencies=[100.0, 1000.0, 5000.0], phase_difference_deg=[90.0, 85.0, 90.0]
+    )
     in_phase = math.sin(math.radians(error.max_deviation_deg))
     return numeric(ref.IEC62489_1_QUADRATURE_EXAMPLE_COS, in_phase, 5e-4, places=4)
 
 
 @register(_AFILS, f"{_62489} 5.4.14.1", "Rise where the fields add at 85 degrees")
 def _chk_quadrature_rise() -> Outcome:
-    error = ea.quadrature_phase_error([100.0, 1000.0, 5000.0], [90.0, 85.0, 90.0])
+    error = ea.quadrature_phase_error(
+        frequencies=[100.0, 1000.0, 5000.0], phase_difference_deg=[90.0, 85.0, 90.0]
+    )
     return numeric(
         ref.IEC62489_1_QUADRATURE_EXAMPLE_DB,
         error.level_increase,
@@ -864,7 +868,9 @@ def _chk_quadrature_rise() -> Outcome:
 
 @register(_AFILS, f"{_62489} 5.4.14.1", "Fall where the fields subtract at 85 degrees")
 def _chk_quadrature_fall() -> Outcome:
-    error = ea.quadrature_phase_error([100.0, 1000.0, 5000.0], [90.0, 85.0, 90.0])
+    error = ea.quadrature_phase_error(
+        frequencies=[100.0, 1000.0, 5000.0], phase_difference_deg=[90.0, 85.0, 90.0]
+    )
     closed = 20.0 * math.log10(1.0 - math.cos(math.radians(85.0)))
     return numeric(
         closed,

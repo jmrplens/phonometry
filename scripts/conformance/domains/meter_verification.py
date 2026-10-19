@@ -236,9 +236,14 @@ def _chk_decision_rule_upper() -> Outcome:
     checked is that the verdict turns where the sentence turns it.
     """
     measured = _deviating_measurement("Wk", 16.0, 11.5)
-    bare = ph.vibration.verify_weighting("Wk", [16.0], measured)
+    bare = ph.vibration.verify_weighting(
+        "Wk", frequencies=[16.0], measured_factors=measured
+    )
     extended = ph.vibration.verify_weighting(
-        "Wk", [16.0], measured, expanded_uncertainty_percent=1.0
+        "Wk",
+        frequencies=[16.0],
+        measured_factors=measured,
+        expanded_uncertainty_percent=1.0,
     )
     agree = int(bare.passes) + int(not extended.passes)
     return count(
@@ -262,9 +267,14 @@ def _chk_decision_rule_lower() -> Outcome:
     conforms bare and -10,5 % minus 1 % does not.
     """
     measured = _deviating_measurement("Wk", 16.0, -10.5)
-    bare = ph.vibration.verify_weighting("Wk", [16.0], measured)
+    bare = ph.vibration.verify_weighting(
+        "Wk", frequencies=[16.0], measured_factors=measured
+    )
     extended = ph.vibration.verify_weighting(
-        "Wk", [16.0], measured, expanded_uncertainty_percent=1.0
+        "Wk",
+        frequencies=[16.0],
+        measured_factors=measured,
+        expanded_uncertainty_percent=1.0,
     )
     agree = int(bare.passes) + int(not extended.passes)
     return count(
@@ -498,7 +508,9 @@ def _chk_annex_b_phase_columns_conform() -> Outcome:
     for weighting, rows in ref.ISO8041_1_ANNEX_B_PHASES_DEG.items():
         frequencies = np.array([10.0 ** (n / 10.0) for n, _ in rows])
         printed = np.array([phase for _, phase in rows])
-        verdict = ph.vibration.verify_phase_response(weighting, frequencies, printed)
+        verdict = ph.vibration.verify_phase_response(
+            weighting, frequencies=frequencies, measured_phase_deg=printed
+        )
         conforming += int(verdict.passes)
     return count(
         conforming,
@@ -527,7 +539,9 @@ def _chk_constant_group_delay() -> Outcome:
     """
     frequencies = np.array([10.0 ** (n / 10.0) for n in range(-1, 37)])
     deviation = -0.001 * 360.0 * frequencies
-    computed = ph.vibration.characteristic_phase_deviation(frequencies, deviation)
+    computed = ph.vibration.characteristic_phase_deviation(
+        frequencies=frequencies, phase_deviation_deg=deviation
+    )
     return numeric(
         0.0,
         float(np.max(np.abs(computed))),

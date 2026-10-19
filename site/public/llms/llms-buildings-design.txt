@@ -693,10 +693,12 @@ print(round(k_floor_int, 1), round(k_int_int, 1))     # 8.8 11.0  (Table L.6)
 
 # The floor's perimeter: it butts into an external wall above and below at each
 # of its two external edges, and crosses the internal walls at the other two.
-a_at_ext = building.perimeter_absorption_coefficient([92.6, 92.6], [k_floor_ext] * 2)
+a_at_ext = building.perimeter_absorption_coefficient(
+    [k_floor_ext] * 2, critical_frequencies=[92.6, 92.6])
 a_at_int = building.perimeter_absorption_coefficient(
-    [76.8, 128.4, 128.4], [building.junction_vibration_reduction(
-        "rigid_cross", "through", 360.0 / 484.0), k_floor_int, k_floor_int])
+    [building.junction_vibration_reduction("rigid_cross", "through", 360.0 / 484.0),
+     k_floor_int, k_floor_int],
+    critical_frequencies=[76.8, 128.4, 128.4])
 floor_perimeter = 9.0 * (a_at_ext + a_at_int)         # 2.659 m (Formula C.4)
 
 floor = building.HomogeneousElement("floor", 20.0, 5.0, 4.0, 484.0, 76.8, 0.005,
@@ -834,7 +836,10 @@ k = {
     "corner": building.junction_vibration_reduction("corner", "corner", 1.0),
     "int-int-x": building.junction_vibration_reduction("rigid_cross", "through", 1.0),
 }
-a = building.perimeter_absorption_coefficient
+def a(critical_frequencies, indices):
+    return building.perimeter_absorption_coefficient(
+        indices, critical_frequencies=critical_frequencies)
+
 floor_sum = 9.0 * (a([92.6, 92.6], [k["floor-ext"]] * 2)
                    + a([76.8, 128.4, 128.4],
                        [k["floor-floor"], k["floor-int"], k["floor-int"]]))
@@ -944,7 +949,7 @@ dv_n = ...          # normalized junction velocity level difference, dB (ISO 108
 dnf_13 = ...        # laboratory normalized flanking level difference Dn,f, dB
 lnf_13 = ...        # laboratory normalized flanking impact level Ln,f, dB
 
-r_star = building.resonant_sound_reduction_index(r_wall_leaf, bands,
+r_star = building.resonant_sound_reduction_index(r_wall_leaf, frequencies=bands,
                                                  critical_frequency=2200.0)   # +8 dB below fc
 r_ff = building.flanking_reduction_index_from_normalized_difference(
     index_i=r_star, index_j=r_star, normalized_velocity_level_difference=dv_n,
@@ -2019,7 +2024,7 @@ bare = np.full(16, 78.0)                       # bare-plate acceleration level
 # A real textile carpet measured on the CSTB mock-up (Foret et al. 2011, Fig. 4).
 covering = bare - np.array([5, 8, 10, 14, 18, 23, 30, 31,
                             39, 49, 53, 57, 60, 67, 68, 71])
-res = building.impact_improvement(bare, covering, freqs)
+res = building.impact_improvement(bare, covering, frequencies=freqs)
 print(res.delta_lw)   # weighted improvement delta-Lw = 29 dB (ISO 717-2)
 res.plot()
 plt.show()
@@ -2040,7 +2045,7 @@ freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
 bare_levels = [72, 73, 74, 74, 75, 75, 76, 76, 77, 77, 78, 78, 79, 79, 80, 80]
 covered_levels = [b - d for b, d in zip(bare_levels, delta_l)]
 bg = [40.0] * 16
-res = building.impact_improvement(bare_levels, covered_levels, freqs, background=bg)
+res = building.impact_improvement(bare_levels, covered_levels, frequencies=freqs, background=bg)
 res.improvement       # delta-L per band
 res.delta_lw          # weighted single number (rated on the 100-3150 Hz sub-range)
 res.ci_delta          # spectrum adaptation term CI,delta (Formula (A.4))
@@ -2074,7 +2079,7 @@ freqs = [100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150]
 delta_l = [5, 8, 10, 14, 18, 23, 30, 31, 39, 49, 53, 57, 60, 67, 68, 71]
 bare = [78.0] * 16
-res = building.impact_improvement(bare, [b - d for b, d in zip(bare, delta_l)], freqs)
+res = building.impact_improvement(bare, [b - d for b, d in zip(bare, delta_l)], frequencies=freqs)
 res.report("dLw.pdf",
            metadata=ReportMetadata(
                specimen="Textile floor covering (carpet), laid loose",
@@ -2679,9 +2684,9 @@ from phonometry import building
 bands = np.array([50.0, 100.0, 200.0, 400.0, 800.0, 1600.0, 3150.0])
 lv_low = np.array([88.0, 90.0, 87.0, 84.0, 80.0, 76.0, 71.0])
 
-low = building.reception_plate_power(lv_low, bands, mass_per_area=600.0,
+low = building.reception_plate_power(lv_low, frequency=bands, mass_per_area=600.0,
                                      area=2.0, reverberation_time=0.8)
-high = building.reception_plate_power(lv_low + 6.0, bands, mass_per_area=150.0,
+high = building.reception_plate_power(lv_low + 6.0, frequency=bands, mass_per_area=150.0,
                                       area=2.0, reverberation_time=0.5)
 
 # One line — the L_Ws(f) bars of one determination with its band-summed total:
@@ -2858,7 +2863,7 @@ from phonometry import ReportMetadata, building
 freqs = np.array([125, 250, 500, 1000, 2000, 4000], float)
 lv = np.array([88.0, 90, 86, 82, 78, 73])   # spatial mean plate velocity level [dB]
 res = building.reception_plate_power(
-    lv, freqs, mass_per_area=25.0, area=1.2, reverberation_time=0.3,
+    lv, frequency=freqs, mass_per_area=25.0, area=1.2, reverberation_time=0.3,
 )
 res.report(
     "structure_borne_power.pdf",
@@ -3114,9 +3119,9 @@ from phonometry import building
 
 bands = np.array(building.TABLE_F1_OCTAVE_BANDS_HZ)
 lw_c = building.tapping_machine_characteristic_power_level(
-    bands, building.tapping_machine_force_level()
+    building.tapping_machine_force_level(), frequency=bands
 )
-dc = building.tapping_machine_coupling_term(bands, 1.07e-6)   # 220 mm concrete
+dc = building.tapping_machine_coupling_term(1.07e-6, frequency=bands)   # 220 mm concrete
 print(np.round(lw_c - dc, 1))   # [79.3 82.3 85.3 88.3 91.3 94.3 96.3 96.3]
 ```
 

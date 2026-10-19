@@ -115,6 +115,7 @@ $\overline{L_p} + 10 \log_{10}(S/S_0)$ to obtain `LW`.
 precision_background_correction(
     source_levels: np.ndarray,
     background_levels: np.ndarray,
+    *,
     frequencies: np.ndarray,
 ) -> np.ndarray
 ```

@@ -181,7 +181,9 @@ def _chk_earphone_artificial_ear() -> Outcome:
 def _chk_hearing_level_definition() -> Outcome:
     reference = float(ph.hearing.earphone_reference_level("TDH 39", [4000.0])[0])
     value = float(
-        ph.hearing.hearing_level_to_coupler_spl([40.0], "TDH 39", [4000.0])[0]
+        ph.hearing.hearing_level_to_coupler_spl([40.0], "TDH 39", frequencies=[4000.0])[
+            0
+        ]
     )
     return numeric(reference + 40.0, value, 1e-9, unit="dB", places=3)
 

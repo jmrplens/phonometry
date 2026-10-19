@@ -210,7 +210,7 @@ freqs = 1000.0 * 10.0 ** (np.arange(-20, 11) / 10.0)    # 10 Hz-10 kHz thirds
 bearings = np.arange(-180.0, 151.0, 30.0)               # the ring closes at ±180°
 ring_levels = (86.0 - 10.0 * np.log10(freqs / 160.0) ** 2
                + 3.5 * np.cos(np.radians(bearings))[:, None])
-hige = aircraft.hover_ring_hemisphere(freqs, bearings, ring_levels, distance_m=70.0)
+hige = aircraft.hover_ring_hemisphere(bearings, ring_levels, frequencies=freqs, distance_m=70.0)
 hoge = aircraft.hover_derived_hemisphere(hige, "out_of_ground_hover")   # +12 dB
 full_rpm_idle = aircraft.hover_derived_hemisphere(hige, "full_rpm_idle")  # -2.5 dB
 ```
@@ -234,7 +234,7 @@ spectrum = 86.0 - 10.0 * np.log10(freqs / 160.0) ** 2
 directivity = (3.5 * np.cos(np.radians(bearings))
                + 3.0 * np.exp(-((bearings - 120.0) ** 2) / (2.0 * 40.0**2)))
 ring = spectrum[None, :] + directivity[:, None]
-hige = aircraft.hover_ring_hemisphere(freqs, bearings, ring, distance_m=70.0)
+hige = aircraft.hover_ring_hemisphere(bearings, ring, frequencies=freqs, distance_m=70.0)
 
 k = int(np.argmin(np.abs(freqs - 315.0)))
 theta = np.linspace(0.0, 180.0, 361)
@@ -351,7 +351,8 @@ po = np.arange(0.0, 181.0, 10.0)
 spectrum = 88.0 - 12.0 * np.log10(freqs / 100.0) ** 2   # broad low-mid hump
 levels = (spectrum[None, None, :] - 0.045 * np.abs(po - 80.0)[None, :, None]
           - 0.02 * np.abs(az)[:, None, None])
-h = aircraft.RotorcraftHemisphere(freqs, az, po, levels)
+h = aircraft.RotorcraftHemisphere(frequencies=freqs, azimuth_deg=az, polar_deg=po,
+                                  levels=levels)
 
 speed = 30.87                                           # 60 kt, in m/s
 t = np.arange(0.0, 130.01, 0.5)
@@ -471,7 +472,7 @@ d = [0.0, 150.0, 260.0, 300.0, 340.0, 420.0, 600.0]     # section distances
 z = [0.0, 4.0, 48.0, 62.0, 40.0, 8.0, 2.0]              # terrain heights
 freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)
 res = aircraft.terrain_screening_adjustment(
-    freqs, source=(0.0, 90.0), receiver=(600.0, 3.2), distances_m=d, heights_m=z,
+    frequencies=freqs, source=(0.0, 90.0), receiver=(600.0, 3.2), distances_m=d, heights_m=z,
     flow_resistivity="D")
 res.screened, res.path_difference      # True, the rubber-band delta
 res.adjustment                         # per band, replaces the flat-ground ΔLg
@@ -495,7 +496,7 @@ freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # 50 Hz-10 kHz thirds
 d = np.array([0.0, 150.0, 260.0, 300.0, 340.0, 420.0, 600.0])
 z = np.array([0.0, 4.0, 48.0, 62.0, 40.0, 8.0, 2.0])
 res = aircraft.terrain_screening_adjustment(
-    freqs, (0.0, 90.0), (600.0, 3.2), d, z, flow_resistivity="D")
+    (0.0, 90.0), (600.0, 3.2), d, z, frequencies=freqs, flow_resistivity="D")
 flat = aircraft.ground_effect_adjustment(freqs, 90.0, 1.2, 600.0,
                                          flow_resistivity="D")
 

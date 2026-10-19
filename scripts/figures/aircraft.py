@@ -497,7 +497,12 @@ def generate_rotorcraft_terrain_screening(output_dir: str) -> None:
     src = (0.0, 90.0)  # helicopter
     rcv = (600.0, 2.0 + 1.2)  # microphone at 1.2 m
     res = aircraft.terrain_screening_adjustment(
-        freqs, src, rcv, d, z, flow_resistivity="D"
+        frequencies=freqs,
+        source=src,
+        receiver=rcv,
+        distances_m=d,
+        heights_m=z,
+        flow_resistivity="D",
     )
     flat = aircraft.ground_effect_adjustment(
         freqs, src[1], 1.2, rcv[0], flow_resistivity="D"
@@ -1348,7 +1353,9 @@ def generate_rotorcraft_hover_ring(output_dir: str) -> None:
         -((bearings - 120.0) ** 2) / (2.0 * 40.0**2)
     )
     ring = spectrum[None, :] + directivity[:, None]
-    hige = aircraft.hover_ring_hemisphere(freqs, bearings, ring, distance_m=70.0)
+    hige = aircraft.hover_ring_hemisphere(
+        frequencies=freqs, bearings=bearings, levels=ring, distance_m=70.0
+    )
 
     k = int(np.argmin(np.abs(np.asarray(freqs) - 315.0)))
     _fig, (ax, ax2) = plt.subplots(1, 2, figsize=(12, 5.2))

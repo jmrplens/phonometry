@@ -127,7 +127,10 @@ def _impedance(minimum: float) -> tuple[np.ndarray, np.ndarray]:
 def test_rated_impedance_passes_at_exactly_80_percent() -> None:
     f, z = _impedance(25.6)
     verdict = ea.verify_rated_impedance(
-        f, z, rated_impedance_ohm=32.0, rated_frequency_range_hz=(20.0, 20000.0)
+        frequencies=f,
+        impedance_ohm=z,
+        rated_impedance_ohm=32.0,
+        rated_frequency_range_hz=(20.0, 20000.0),
     )
     assert verdict.min_ohm == 25.6
     assert verdict.min_ratio == pytest.approx(ref.IEC60268_7_RATED_IMPEDANCE_FRACTION)
@@ -138,7 +141,10 @@ def test_rated_impedance_passes_at_exactly_80_percent() -> None:
 def test_rated_impedance_fails_below_80_percent() -> None:
     f, z = _impedance(25.0)
     verdict = ea.verify_rated_impedance(
-        f, z, rated_impedance_ohm=32.0, rated_frequency_range_hz=(20.0, 20000.0)
+        frequencies=f,
+        impedance_ohm=z,
+        rated_impedance_ohm=32.0,
+        rated_frequency_range_hz=(20.0, 20000.0),
     )
     assert not verdict.passes
     assert verdict.min_frequency_hz == float(f[100])
@@ -151,7 +157,10 @@ def test_a_dip_outside_the_rated_range_is_listed_but_not_judged() -> None:
     z[195] = 20.0  # above 20 kHz, beyond the "0 kHz and 20 kHz" of 8.2.1 b)
     assert f[195] > ref.IEC60268_7_IMPEDANCE_RANGE_HZ[1]
     verdict = ea.verify_rated_impedance(
-        f, z, rated_impedance_ohm=32.0, rated_frequency_range_hz=(50.0, 15000.0)
+        frequencies=f,
+        impedance_ohm=z,
+        rated_impedance_ohm=32.0,
+        rated_frequency_range_hz=(50.0, 15000.0),
     )
     assert verdict.passes
     np.testing.assert_array_equal(verdict.frequencies_to_state_hz, [f[5]])
@@ -160,8 +169,8 @@ def test_a_dip_outside_the_rated_range_is_listed_but_not_judged() -> None:
 def test_the_modulus_of_a_complex_impedance_is_taken() -> None:
     f = np.array([20.0, 1000.0, 20000.0])
     verdict = ea.verify_rated_impedance(
-        f,
-        [30.0 + 40.0j, 50.0, 60.0],
+        frequencies=f,
+        impedance_ohm=[30.0 + 40.0j, 50.0, 60.0],
         rated_impedance_ohm=50.0,
         rated_frequency_range_hz=(20.0, 20000.0),
     )
@@ -172,8 +181,8 @@ def test_the_modulus_of_a_complex_impedance_is_taken() -> None:
 def test_a_measurement_short_of_20_khz_does_not_cover_the_range() -> None:
     f = np.array([20.0, 1000.0, 16000.0])
     verdict = ea.verify_rated_impedance(
-        f,
-        [32.0, 32.0, 32.0],
+        frequencies=f,
+        impedance_ohm=[32.0, 32.0, 32.0],
         rated_impedance_ohm=32.0,
         rated_frequency_range_hz=(20.0, 16000.0),
     )
@@ -185,14 +194,20 @@ def test_rated_impedance_needs_a_point_in_the_rated_range() -> None:
     z = np.array([32.0, 32.0])
     with pytest.raises(ValueError, match="rated frequency range"):
         ea.verify_rated_impedance(
-            f, z, rated_impedance_ohm=32.0, rated_frequency_range_hz=(20.0, 20000.0)
+            frequencies=f,
+            impedance_ohm=z,
+            rated_impedance_ohm=32.0,
+            rated_frequency_range_hz=(20.0, 20000.0),
         )
 
 
 def test_rated_impedance_verdict_has_no_truth_value() -> None:
     f, z = _impedance(30.0)
     verdict = ea.verify_rated_impedance(
-        f, z, rated_impedance_ohm=32.0, rated_frequency_range_hz=(20.0, 20000.0)
+        frequencies=f,
+        impedance_ohm=z,
+        rated_impedance_ohm=32.0,
+        rated_frequency_range_hz=(20.0, 20000.0),
     )
     with pytest.raises(TypeError, match="passes"):
         bool(verdict)
@@ -293,7 +308,9 @@ def test_a_negative_source_impedance_is_refused() -> None:
 
 
 def test_programme_level_is_the_power_sum_of_the_bands() -> None:
-    level = ea.program_signal_level(BANDS, np.full(BANDS.size, 70.0))
+    level = ea.program_signal_level(
+        frequencies=BANDS, band_levels=np.full(BANDS.size, 70.0)
+    )
     assert level == pytest.approx(70.0 + 10.0 * math.log10(BANDS.size), abs=1e-12)
 
 
@@ -304,14 +321,18 @@ def test_a_weighting_reproduces_iec_61672_table_3(
     frequency: float, a_weighting: float
 ) -> None:
     pair = np.array([frequency, frequency * 10.0**0.1])
-    level = ea.program_signal_level(pair, [80.0, -300.0], weighting="A")
+    level = ea.program_signal_level(
+        frequencies=pair, band_levels=[80.0, -300.0], weighting="A"
+    )
     assert round(level - 80.0, 1) == a_weighting
 
 
 def test_free_field_compensation_subtracts_the_response() -> None:
     response = np.linspace(0.0, 10.0, BANDS.size)
     flat = np.full(BANDS.size, 70.0)
-    compensated = ea.program_signal_level(BANDS, flat, free_field_response_db=response)
+    compensated = ea.program_signal_level(
+        frequencies=BANDS, band_levels=flat, free_field_response_db=response
+    )
     expected = 10.0 * math.log10(float(np.sum(10.0 ** ((flat - response) / 10.0))))
     assert compensated == pytest.approx(expected, abs=1e-12)
 
@@ -320,7 +341,9 @@ def test_programme_characteristic_voltage_averages_the_fittings() -> None:
     levels = np.array(
         [np.full(BANDS.size, 80.0) + offset for offset in (0.0, 1.0, -1.0)]
     )
-    result = ea.program_characteristic_voltage(0.05, BANDS, levels)
+    result = ea.program_characteristic_voltage(
+        0.05, frequencies=BANDS, band_levels=levels
+    )
     sums = 80.0 + 10.0 * math.log10(BANDS.size) + np.array([0.0, 1.0, -1.0])
     expected = 0.05 * 10.0 ** ((94.0 - sums) / 20.0)
     np.testing.assert_allclose(result.voltages_v, expected, rtol=1e-12)
@@ -329,14 +352,16 @@ def test_programme_characteristic_voltage_averages_the_fittings() -> None:
 
 
 def test_one_fitting_does_not_conform_to_8_3_5() -> None:
-    result = ea.program_characteristic_voltage(0.05, BANDS, np.full(BANDS.size, 80.0))
+    result = ea.program_characteristic_voltage(
+        0.05, frequencies=BANDS, band_levels=np.full(BANDS.size, 80.0)
+    )
     assert not result.fittings_conform
 
 
 def test_band_levels_at_the_characteristic_voltage_sum_to_94_db() -> None:
     levels = np.tile(np.linspace(70.0, 85.0, BANDS.size), (3, 1))
     result = ea.program_characteristic_voltage(
-        [0.05, 0.05, 0.05], BANDS, levels, weighting="A"
+        [0.05, 0.05, 0.05], frequencies=BANDS, band_levels=levels, weighting="A"
     )
     at_voltage = result.band_levels_at_characteristic
     total = 10.0 * math.log10(float(np.sum(10.0 ** (at_voltage / 10.0))))
@@ -344,7 +369,9 @@ def test_band_levels_at_the_characteristic_voltage_sum_to_94_db() -> None:
 
 
 def test_programme_characteristic_voltage_results_are_read_only() -> None:
-    result = ea.program_characteristic_voltage(0.05, BANDS, np.full(BANDS.size, 80.0))
+    result = ea.program_characteristic_voltage(
+        0.05, frequencies=BANDS, band_levels=np.full(BANDS.size, 80.0)
+    )
     assert not result.band_levels.flags.writeable
     with pytest.raises(dataclasses.FrozenInstanceError, match="weighting"):
         result.weighting = "Z"  # type: ignore[misc]
@@ -357,17 +384,21 @@ def test_the_programme_level_refuses_a_weighting_8_3_5_does_not_apply() -> None:
     """Only the A-weighting of 8.3.5, or none; a C-weighting is not read as none."""
     levels = np.full(BANDS.size, 70.0)
     with pytest.raises(ValueError, match=_A_OR_Z):
-        ea.program_signal_level(BANDS, levels, weighting="C")  # type: ignore[arg-type]
+        ea.program_signal_level(levels, frequencies=BANDS, weighting="C")  # type: ignore[arg-type]
 
 
 def test_the_characteristic_voltage_refuses_a_weighting_8_3_5_does_not_apply() -> None:
     levels = np.full(BANDS.size, 80.0)
     with pytest.raises(ValueError, match=_A_OR_Z):
-        ea.program_characteristic_voltage(0.05, BANDS, levels, weighting="C")  # type: ignore[arg-type]
+        ea.program_characteristic_voltage(
+            0.05, levels, frequencies=BANDS, weighting="C"
+        )  # type: ignore[arg-type]
 
 
 def test_a_characteristic_voltage_built_by_hand_refuses_another_weighting() -> None:
-    result = ea.program_characteristic_voltage(0.05, BANDS, np.full(BANDS.size, 80.0))
+    result = ea.program_characteristic_voltage(
+        0.05, np.full(BANDS.size, 80.0), frequencies=BANDS
+    )
     with pytest.raises(ValueError, match=_A_OR_Z):
         dataclasses.replace(result, weighting="C")
 
@@ -461,7 +492,9 @@ def test_protection_needs_two_steps() -> None:
 def test_coupler_response_is_referred_to_500_hz() -> None:
     levels = 100.0 + np.linspace(-3.0, 3.0, BANDS.size)
     response = ea.coupler_frequency_response(
-        BANDS, levels, rated_frequency_range_hz=(100.0, 10000.0)
+        frequencies=BANDS,
+        sound_pressure_level=levels,
+        rated_frequency_range_hz=(100.0, 10000.0),
     )
     relative = response.relative_response()
     assert relative[list(BANDS).index(500.0)] == 0.0
@@ -470,16 +503,22 @@ def test_coupler_response_is_referred_to_500_hz() -> None:
 
 def test_coupler_response_short_of_the_rated_range() -> None:
     response = ea.coupler_frequency_response(
-        BANDS, np.full(BANDS.size, 100.0), rated_frequency_range_hz=(20.0, 20000.0)
+        frequencies=BANDS,
+        sound_pressure_level=np.full(BANDS.size, 100.0),
+        rated_frequency_range_hz=(20.0, 20000.0),
     )
     assert response.covers_rated_range is False
-    unstated = ea.coupler_frequency_response(BANDS, np.full(BANDS.size, 100.0))
+    unstated = ea.coupler_frequency_response(
+        frequencies=BANDS, sound_pressure_level=np.full(BANDS.size, 100.0)
+    )
     assert unstated.covers_rated_range is None
 
 
 def test_crosstalk_is_the_difference_of_the_levels() -> None:
     result = ea.crosstalk_attenuation(
-        BANDS, np.full(BANDS.size, 100.0), np.linspace(40.0, 60.0, BANDS.size)
+        frequencies=BANDS,
+        driven_level=np.full(BANDS.size, 100.0),
+        other_level=np.linspace(40.0, 60.0, BANDS.size),
     )
     np.testing.assert_allclose(result.attenuation, np.linspace(60.0, 40.0, BANDS.size))
     assert result.min_db == pytest.approx(40.0)
@@ -496,7 +535,9 @@ def test_field_comparison_response_is_the_quotient_referred_to_1_khz() -> None:
         rng.normal(0.0, 1.0, (ref.IEC60268_7_MIN_PERSONS, BANDS.size)) / 20.0
     )
     field = np.linspace(68.0, 72.0, BANDS.size)
-    result = ea.field_comparison_response(BANDS, field, emf, field="free")
+    result = ea.field_comparison_response(
+        frequencies=BANDS, field_level=field, source_emf_v=emf, field="free"
+    )
     assert (
         result.reference_frequency_hz == ref.IEC60268_1_STANDARD_REFERENCE_FREQUENCY_HZ
     )
@@ -517,9 +558,15 @@ def test_field_comparison_response_is_the_quotient_referred_to_1_khz() -> None:
 def test_field_comparison_may_be_referred_to_500_hz() -> None:
     rng = np.random.default_rng(3)
     emf = 0.05 * 10.0 ** (rng.normal(0.0, 1.0, (8, BANDS.size)) / 20.0)
-    at_1_khz = ea.field_comparison_response(BANDS, 70.0, emf, field="diffuse")
+    at_1_khz = ea.field_comparison_response(
+        frequencies=BANDS, field_level=70.0, source_emf_v=emf, field="diffuse"
+    )
     at_500_hz = ea.field_comparison_response(
-        BANDS, 70.0, emf, field="diffuse", reference_frequency_hz=500.0
+        frequencies=BANDS,
+        field_level=70.0,
+        source_emf_v=emf,
+        field="diffuse",
+        reference_frequency_hz=500.0,
     )
     shift = at_1_khz.response_db[:, [list(BANDS).index(500.0)]]
     np.testing.assert_allclose(at_500_hz.response_db, at_1_khz.response_db - shift)
@@ -528,27 +575,41 @@ def test_field_comparison_may_be_referred_to_500_hz() -> None:
 
 def test_sixteen_persons_qualify_a_substitution_reference() -> None:
     emf = np.full((ref.IEC60268_7_MIN_REFERENCE_PERSONS, BANDS.size), 0.05)
-    result = ea.field_comparison_response(BANDS, 70.0, emf, field="diffuse")
+    result = ea.field_comparison_response(
+        frequencies=BANDS, field_level=70.0, source_emf_v=emf, field="diffuse"
+    )
     assert result.qualifies_as_reference
     np.testing.assert_allclose(result.mean_db, 0.0, atol=1e-12)
 
 
 def test_seven_persons_are_too_few() -> None:
     emf = np.full((7, BANDS.size), 0.05)
-    result = ea.field_comparison_response(BANDS, 70.0, emf, field="free")
+    result = ea.field_comparison_response(
+        frequencies=BANDS, field_level=70.0, source_emf_v=emf, field="free"
+    )
     assert not result.meets_panel_size
 
 
 def test_field_comparison_needs_the_reference_band() -> None:
     emf = np.full((8, 3), 0.05)
     with pytest.raises(ValueError, match="reference band"):
-        ea.field_comparison_response([100.0, 500.0, 2000.0], 70.0, emf, field="free")
+        ea.field_comparison_response(
+            frequencies=[100.0, 500.0, 2000.0],
+            field_level=70.0,
+            source_emf_v=emf,
+            field="free",
+        )
 
 
 def test_field_comparison_refuses_another_field() -> None:
     emf = np.full((8, BANDS.size), 0.05)
     with pytest.raises(ValueError, match="'free' or 'diffuse'"):
-        ea.field_comparison_response(BANDS, 70.0, emf, field="near")  # type: ignore[arg-type]
+        ea.field_comparison_response(
+            70.0,
+            emf,
+            frequencies=BANDS,
+            field="near",  # type: ignore[arg-type]
+        )
 
 
 def _ear_canal_levels() -> tuple[np.ndarray, np.ndarray]:
@@ -561,7 +622,9 @@ def _ear_canal_levels() -> tuple[np.ndarray, np.ndarray]:
 
 def test_ear_canal_response_is_formula_1() -> None:
     earphone, field = _ear_canal_levels()
-    result = ea.ear_canal_frequency_response(BANDS, earphone, field)
+    result = ea.ear_canal_frequency_response(
+        frequencies=BANDS, earphone_levels=earphone, sound_field_levels=field
+    )
     difference = earphone.mean(axis=1) - field.mean(axis=1)
     reference = list(BANDS).index(500.0)
     np.testing.assert_allclose(
@@ -581,9 +644,15 @@ def test_sixteen_persons_calibrate_the_reference_of_the_indirect_method() -> Non
     persons = ref.IEC60268_7_MIN_REFERENCE_PERSONS
     field = 70.0 + rng.normal(0.0, 0.5, (persons, 2, BANDS.size))
     earphone = 70.0 + rng.normal(0.0, 0.5, (persons, 2, BANDS.size))
-    result = ea.ear_canal_frequency_response(BANDS, earphone, field)
+    result = ea.ear_canal_frequency_response(
+        frequencies=BANDS, earphone_levels=earphone, sound_field_levels=field
+    )
     assert result.qualifies_as_reference
-    fewer = ea.ear_canal_frequency_response(BANDS, earphone[:15], field[:15])
+    fewer = ea.ear_canal_frequency_response(
+        frequencies=BANDS,
+        earphone_levels=earphone[:15],
+        sound_field_levels=field[:15],
+    )
     assert not fewer.qualifies_as_reference
 
 
@@ -592,7 +661,9 @@ def test_fittings_more_than_2_5_db_apart_are_flagged() -> None:
     earphone[:, 1] = earphone[:, 0]
     earphone[3, 1, 4] += ref.IEC60268_7_MAX_FITTING_DIFFERENCE_DB
     earphone[5, 1, 6] += 2.6
-    result = ea.ear_canal_frequency_response(BANDS, earphone, field)
+    result = ea.ear_canal_frequency_response(
+        frequencies=BANDS, earphone_levels=earphone, sound_field_levels=field
+    )
     expected = np.ones(8, dtype=bool)
     expected[5] = False
     np.testing.assert_array_equal(result.fittings_consistent, expected)
@@ -604,14 +675,20 @@ def test_the_500_hz_band_is_matched_within_3_db() -> None:
     earphone[:, 0, reference] = field[:, 0, reference]
     earphone[2, 0, reference] += ref.IEC60268_7_LEVEL_MATCH_DB
     earphone[4, 0, reference] -= 3.1
-    result = ea.ear_canal_frequency_response(BANDS, earphone, field)
+    result = ea.ear_canal_frequency_response(
+        frequencies=BANDS, earphone_levels=earphone, sound_field_levels=field
+    )
     assert result.levels_matched[2]
     assert not result.levels_matched[4]
 
 
 def test_one_person_may_be_given_without_the_panel_axis() -> None:
     earphone, field = _ear_canal_levels()
-    result = ea.ear_canal_frequency_response(BANDS, earphone[0], field[0])
+    result = ea.ear_canal_frequency_response(
+        frequencies=BANDS,
+        earphone_levels=earphone[0],
+        sound_field_levels=field[0],
+    )
     assert result.n_persons == 1
     np.testing.assert_array_equal(result.standard_deviation_db, 0.0)
     assert not result.meets_panel_size
@@ -620,7 +697,9 @@ def test_one_person_may_be_given_without_the_panel_axis() -> None:
 def test_ear_canal_needs_two_readings() -> None:
     levels = np.zeros((8, 3, BANDS.size))
     with pytest.raises(ValueError, match=r"\(persons, 2, bands\)"):
-        ea.ear_canal_frequency_response(BANDS, levels, levels)
+        ea.ear_canal_frequency_response(
+            frequencies=BANDS, earphone_levels=levels, sound_field_levels=levels
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -740,7 +819,10 @@ def test_impedance_plot_draws_the_modulus_the_limit_and_the_minimum(
     plt = pytest.importorskip("matplotlib.pyplot")
     f, z = _impedance(minimum)
     verdict = ea.verify_rated_impedance(
-        f, z, rated_impedance_ohm=32.0, rated_frequency_range_hz=(20.0, 20000.0)
+        frequencies=f,
+        impedance_ohm=z,
+        rated_impedance_ohm=32.0,
+        rated_frequency_range_hz=(20.0, 20000.0),
     )
     ax = verdict.plot(language=language)
     curve, rated, limit, lowest = ax.lines
@@ -781,7 +863,7 @@ def test_coupler_plot_holds_50_db_to_the_decade(
 ) -> None:
     plt = pytest.importorskip("matplotlib.pyplot")
     response = ea.coupler_frequency_response(
-        BANDS, np.linspace(95.0, 105.0, BANDS.size)
+        frequencies=BANDS, sound_pressure_level=np.linspace(95.0, 105.0, BANDS.size)
     )
     ax = response.plot(language=language, iec_scale=iec_scale)
     np.testing.assert_array_equal(
@@ -802,7 +884,9 @@ def test_comparison_plot_draws_the_mean_and_the_spread(
     plt = pytest.importorskip("matplotlib.pyplot")
     rng = np.random.default_rng(5)
     emf = 0.05 * 10.0 ** (rng.normal(0.0, 1.5, (8, BANDS.size)) / 20.0)
-    result = ea.field_comparison_response(BANDS, 70.0, emf, field="free")
+    result = ea.field_comparison_response(
+        frequencies=BANDS, field_level=70.0, source_emf_v=emf, field="free"
+    )
     ax = result.plot(language=language, iec_scale=iec_scale)
     heights = [patch.get_height() for patch in ax.patches]
     np.testing.assert_allclose(heights, result.mean_db)
@@ -828,7 +912,9 @@ def test_ear_canal_plot_draws_the_persons_the_mean_and_the_spread(
 ) -> None:
     plt = pytest.importorskip("matplotlib.pyplot")
     earphone, field = _ear_canal_levels()
-    result = ea.ear_canal_frequency_response(BANDS, earphone, field)
+    result = ea.ear_canal_frequency_response(
+        frequencies=BANDS, earphone_levels=earphone, sound_field_levels=field
+    )
     ax = result.plot(language=language, iec_scale=iec_scale)
     persons = ax.lines[: result.n_persons]
     for line, response in zip(persons, result.response_db, strict=True):
@@ -892,8 +978,8 @@ def test_characteristic_voltage_plot_names_what_was_corrected(
     levels = np.tile(np.linspace(70.0, 85.0, BANDS.size), (3, 1))
     result = ea.program_characteristic_voltage(
         0.05,
-        BANDS,
-        levels,
+        frequencies=BANDS,
+        band_levels=levels,
         weighting=weighting,  # type: ignore[arg-type]
         free_field_response_db=np.zeros(BANDS.size) if free_field else None,
     )

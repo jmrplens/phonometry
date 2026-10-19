@@ -247,8 +247,9 @@ The range 5.4.13.4 recommends, 32 dB, for comparison with `agc_range_db`.
 
 ```python
 amplifier_frequency_response(
-    frequencies: ArrayLike,
     output_current_a: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> AmplifierFrequencyResponse
 ```
 
@@ -890,10 +891,10 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 ```python
 neck_loop_characteristics(
-    frequencies: ArrayLike,
     field_strength_level: ArrayLike,
     impedance_ohm: ArrayLike,
     *,
+    frequencies: ArrayLike,
     input_voltage_v: float,
 ) -> NeckLoopCharacteristics
 ```
@@ -1089,8 +1090,9 @@ Whether 400 mA/m is reached within the type's input voltage.
 
 ```python
 quadrature_phase_error(
-    frequencies: ArrayLike,
     phase_difference_deg: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> QuadraturePhaseError
 ```
 

@@ -165,7 +165,9 @@ def test_the_background_correction_is_the_one_of_iso_3741() -> None:
         frequencies=THIRD_OCTAVES,
         cabin_background_levels=background,
     )
-    k1 = reverberation_background_correction(cabin, background, THIRD_OCTAVES)
+    k1 = reverberation_background_correction(
+        cabin, background, frequencies=THIRD_OCTAVES
+    )
     assert np.allclose(res.cabin_levels, cabin - k1)
     assert np.allclose(res.insulation, room - (cabin - k1))
 
@@ -709,7 +711,7 @@ def test_the_background_correction_matches_the_printed_clamps_of_iso_3741() -> N
     """
     levels = np.full(K1_CLAMP_BANDS_HZ.size, 80.0)
     correction = reverberation_background_correction(
-        levels, levels - K1_CLAMP_MARGIN_DB, K1_CLAMP_BANDS_HZ
+        levels, levels - K1_CLAMP_MARGIN_DB, frequencies=K1_CLAMP_BANDS_HZ
     )
     assert correction == pytest.approx(PRINTED_K1_DB, abs=PRINTED_K1_TOLERANCE_DB)
 

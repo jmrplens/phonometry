@@ -204,7 +204,7 @@ def test_rc_missing_d4_bands_warn() -> None:
     # octave bands; a subset missing any of them warns that the absent bands
     # are skipped by the spectral-tag deviation tests.
     with pytest.warns(NoiseCriterionWarning, match="31.5 Hz to 4000 Hz"):
-        rn.room_criterion([40.0, 35.0, 30.0], [500.0, 1000.0, 2000.0])
+        rn.room_criterion([40.0, 35.0, 30.0], frequencies=[500.0, 1000.0, 2000.0])
 
 
 def test_rc_complete_spectrum_does_not_warn() -> None:
@@ -236,7 +236,7 @@ def test_subset_by_frequency() -> None:
     # A subset of the octave bands may be supplied with explicit frequencies.
     freqs = [500.0, 1000.0, 2000.0, 4000.0, 8000.0]
     levels = [40.0, 35.0, 30.0, 27.0, 22.0]
-    result = rn.noise_criterion(levels, freqs)
+    result = rn.noise_criterion(levels, frequencies=freqs)
     assert result.rating == pytest.approx(35.0, abs=1e-9)
 
 
@@ -246,7 +246,7 @@ def test_rc_requires_mid_frequency_bands() -> None:
         ValueError,
         match=r"octave bands are required to compute the mid-frequency average",
     ):
-        rn.room_criterion([50.0, 45.0], [63.0, 125.0])
+        rn.room_criterion([50.0, 45.0], frequencies=[63.0, 125.0])
 
 
 def test_invalid_inputs_raise() -> None:
@@ -255,16 +255,16 @@ def test_invalid_inputs_raise() -> None:
     with pytest.raises(
         ValueError, match=r"noise_criterion: 'levels'.*must all have the same shape"
     ):
-        rn.noise_criterion([1.0, 2.0], [63.0])
+        rn.noise_criterion([1.0, 2.0], frequencies=[63.0])
     with pytest.raises(ValueError, match="not one of"):
-        rn.noise_criterion([50.0], [777.0])
+        rn.noise_criterion([50.0], frequencies=[777.0])
     two_dimensional = np.zeros((2, 10))
     with pytest.raises(
         ValueError, match=r"levels must be a 1-D vector of octave-band levels"
     ):
         rn.noise_criterion(two_dimensional)
     with pytest.raises(ValueError, match=r"no valid octave-band levels were supplied"):
-        rn.noise_criterion([], [])
+        rn.noise_criterion([], frequencies=[])
 
 
 def test_result_fields_and_copy() -> None:
@@ -316,7 +316,7 @@ def test_nc_rating_manual_es_measured_spectrum() -> None:
     # covers the book's whole-dB curve stepping against the interpolation.
     res = rn.noise_criterion(
         [46.0, 44.0, 38.0, 31.0, 27.0, 22.0, 24.0, 21.0],
-        [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0],
+        frequencies=[63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0],
     )
     assert res.rating == pytest.approx(27.0, abs=0.5)
     assert res.rating <= 30.0  # the book's unrefined tangency designation
@@ -330,7 +330,7 @@ def test_nc_verdict_long_hvac_receiver_spectrum() -> None:
     # the NC family).
     res = rn.noise_criterion(
         [55.0, 45.0, 32.0, 26.0, 23.0, 25.0, 22.0, 12.0],
-        [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0],
+        frequencies=[63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0],
     )
     assert res.out_of_range is None
     assert res.rating <= 30.0
@@ -347,7 +347,9 @@ def test_an_nc_rating_refuses_levels_off_the_band_axis(*, trim: bool) -> None:
     levels never had.
     """
     bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
-    result = rn.noise_criterion([50.0, 45.0, 40.0, 38.0, 35.0, 32.0, 30.0, 28.0], bands)
+    result = rn.noise_criterion(
+        [50.0, 45.0, 40.0, 38.0, 35.0, 32.0, 30.0, 28.0], frequencies=bands
+    )
     levels = np.asarray(result.levels)
     wrong = levels[:-1] if trim else np.append(levels, levels[-1])
     with pytest.raises(ValueError, match=rf"NCResult: .*'levels' \({wrong.size}\)"):
@@ -484,7 +486,9 @@ def test_an_rc_rating_keeps_the_bands_it_was_never_given() -> None:
     seven of the ten bands were never measured.
     """
     with pytest.warns(NoiseCriterionWarning, match="31.5 Hz to 4000 Hz octave bands"):
-        result = rn.room_criterion([35.0, 32.0, 30.0], [500.0, 1000.0, 2000.0])
+        result = rn.room_criterion(
+            [35.0, 32.0, 30.0], frequencies=[500.0, 1000.0, 2000.0]
+        )
     absent = np.isnan(np.asarray(result.levels))
     assert absent.sum() == 7
     assert np.isfinite(np.asarray(result.reference_curve)).all()

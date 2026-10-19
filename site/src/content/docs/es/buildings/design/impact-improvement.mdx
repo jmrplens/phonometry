@@ -210,7 +210,7 @@ bare = np.full(16, 78.0)                       # nivel de aceleración de la pla
 # Una moqueta textil real medida en la maqueta del CSTB (Foret et al. 2011, Fig. 4).
 covering = bare - np.array([5, 8, 10, 14, 18, 23, 30, 31,
                             39, 49, 53, 57, 60, 67, 68, 71])
-res = building.impact_improvement(bare, covering, freqs)
+res = building.impact_improvement(bare, covering, frequencies=freqs)
 print(res.delta_lw)   # mejora ponderada delta-Lw = 29 dB (ISO 717-2)
 res.plot(language="es")
 plt.show()
@@ -239,7 +239,7 @@ freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
 bare_levels = [72, 73, 74, 74, 75, 75, 76, 76, 77, 77, 78, 78, 79, 79, 80, 80]
 covered_levels = [b - d for b, d in zip(bare_levels, delta_l)]
 bg = [40.0] * 16
-res = building.impact_improvement(bare_levels, covered_levels, freqs, background=bg)
+res = building.impact_improvement(bare_levels, covered_levels, frequencies=freqs, background=bg)
 res.improvement       # delta-L por banda
 res.delta_lw          # número único ponderado (valorado sobre el subrango 100-3150 Hz)
 res.ci_delta          # término de adaptación espectral CI,delta (Fórmula (A.4))
@@ -293,7 +293,7 @@ freqs = [100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150]
 delta_l = [5, 8, 10, 14, 18, 23, 30, 31, 39, 49, 53, 57, 60, 67, 68, 71]
 bare = [78.0] * 16
-res = building.impact_improvement(bare, [b - d for b, d in zip(bare, delta_l)], freqs)
+res = building.impact_improvement(bare, [b - d for b, d in zip(bare, delta_l)], frequencies=freqs)
 res.report("dLw.pdf",
            metadata=ReportMetadata(
                specimen="Revestimiento textil (moqueta), colocado suelto",

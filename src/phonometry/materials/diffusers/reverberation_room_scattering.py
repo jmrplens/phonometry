@@ -479,10 +479,10 @@ class ScatteringResult(OwnsArrays):
 
 
 def scattering_coefficient_spectrum(
-    frequencies: ArrayLike,
     specular_absorption: ArrayLike,
     random_absorption: ArrayLike,
     *,
+    frequencies: ArrayLike,
     truncate_negative: bool = True,
 ) -> ScatteringResult:
     """Scattering-coefficient spectrum ``s(f)`` (ISO 17497-1, Eq. (5)).

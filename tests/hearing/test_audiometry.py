@@ -518,7 +518,7 @@ def _sweep() -> tuple[np.ndarray, np.ndarray]:
 
 def test_the_sweep_threshold_averages_the_three_nearest_peaks_and_valleys() -> None:
     freqs, levels = _sweep()
-    result = hearing.sweep_audiometry_threshold(freqs, levels)
+    result = hearing.sweep_audiometry_threshold(levels, reversal_frequencies=freqs)
     np.testing.assert_array_equal(
         result.frequencies,
         [250.0, 500.0, 750.0, 1000.0, 1500.0, 2000.0]
@@ -531,7 +531,9 @@ def test_the_sweep_threshold_averages_the_three_nearest_peaks_and_valleys() -> N
 
 def test_the_running_threshold_sits_at_the_geometric_mean_frequency() -> None:
     freqs, levels = _sweep()
-    result = hearing.sweep_audiometry_threshold(freqs, levels, frequencies=[1000.0])
+    result = hearing.sweep_audiometry_threshold(
+        levels, reversal_frequencies=freqs, frequencies=[1000.0]
+    )
     assert result.running_threshold_db.size == 24 - 5
     np.testing.assert_allclose(result.running_threshold_db, 25.0)
     assert result.running_frequencies[0] == pytest.approx(
@@ -542,7 +544,9 @@ def test_the_running_threshold_sits_at_the_geometric_mean_frequency() -> None:
 def test_the_sweep_threshold_rounds_to_the_nearest_decibel() -> None:
     freqs, levels = _sweep()
     shifted = levels + np.where(np.arange(24) % 2 == 0, 0.6, 0.0)
-    result = hearing.sweep_audiometry_threshold(freqs, shifted, frequencies=[2000.0])
+    result = hearing.sweep_audiometry_threshold(
+        shifted, reversal_frequencies=freqs, frequencies=[2000.0]
+    )
     assert result.mean_db[0] == pytest.approx(25.3)
     assert result.threshold_db[0] == 25.0
 
@@ -553,7 +557,9 @@ def test_the_nearest_reversals_are_found_on_the_logarithmic_axis() -> None:
     """
     freqs, levels = _sweep()
     levels[6] = 40.0
-    result = hearing.sweep_audiometry_threshold(freqs, levels, frequencies=[1000.0])
+    result = hearing.sweep_audiometry_threshold(
+        levels, reversal_frequencies=freqs, frequencies=[1000.0]
+    )
     assert result.mean_db[0] == pytest.approx(25.0)
     assert result.threshold_db[0] == 25.0
 
@@ -561,14 +567,18 @@ def test_the_nearest_reversals_are_found_on_the_logarithmic_axis() -> None:
 def test_a_sweep_whose_peaks_spread_is_less_reliable() -> None:
     freqs, levels = _sweep()
     levels[10] = 45.0
-    result = hearing.sweep_audiometry_threshold(freqs, levels, frequencies=[1000.0])
+    result = hearing.sweep_audiometry_threshold(
+        levels, reversal_frequencies=freqs, frequencies=[1000.0]
+    )
     assert result.less_reliable[0]
 
 
 def test_a_downward_sweep_reads_the_same() -> None:
     freqs, levels = _sweep()
-    up = hearing.sweep_audiometry_threshold(freqs, levels)
-    down = hearing.sweep_audiometry_threshold(freqs[::-1], levels[::-1])
+    up = hearing.sweep_audiometry_threshold(levels, reversal_frequencies=freqs)
+    down = hearing.sweep_audiometry_threshold(
+        levels[::-1], reversal_frequencies=freqs[::-1]
+    )
     np.testing.assert_array_equal(up.threshold_db, down.threshold_db)
 
 
@@ -592,7 +602,7 @@ def test_the_sweep_refuses_a_tracing_it_cannot_read(change: str, match: str) -> 
     else:
         freqs = np.geomspace(20.0, 100.0, 24)
     with pytest.raises(ValueError, match=match):
-        hearing.sweep_audiometry_threshold(freqs, levels)
+        hearing.sweep_audiometry_threshold(levels, reversal_frequencies=freqs)
 
 
 # ---------------------------------------------------------------------------

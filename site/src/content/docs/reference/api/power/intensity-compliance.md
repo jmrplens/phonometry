@@ -207,6 +207,7 @@ per-band class, because a band meeting class 1 meets class 2 as well.
 
 ```python
 IntensityInstrumentComplianceResult.phase_mismatch_deg(
+    *,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray
 ```
@@ -324,8 +325,9 @@ The Table 2 Note 1 term $10 \log_{10}(x/25)$, in dB.
 ```python
 phase_mismatch_from_residual_index(
     residual_index: float | list[float] | np.ndarray,
-    frequency: float | list[float] | np.ndarray,
     spacing_m: float,
+    *,
+    frequency: float | list[float] | np.ndarray,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray
 ```
@@ -368,8 +370,9 @@ angular unit $k d$ is expressed in; degrees are used here.
 ```python
 residual_index_from_phase_mismatch(
     phase_mismatch_deg: float | list[float] | np.ndarray,
-    frequency: float | list[float] | np.ndarray,
     spacing_m: float,
+    *,
+    frequency: float | list[float] | np.ndarray,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray
 ```
@@ -449,8 +452,8 @@ for a spacing in metres).
 ```python
 verify_intensity_class(
     residual_index: list[float] | np.ndarray,
-    frequencies: list[float] | np.ndarray,
     *,
+    frequencies: list[float] | np.ndarray,
     device: str = 'instrument',
     spacing_m: float = 0.025,
 ) -> IntensityInstrumentComplianceResult

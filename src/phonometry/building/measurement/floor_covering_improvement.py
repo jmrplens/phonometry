@@ -357,7 +357,7 @@ class FloorCoveringImprovementResult(OwnsArrays):
 
     def octave_bands(self) -> OctaveBandSpectrum:
         """``ΔLoct`` in octave bands, via Formula (5) (needs whole octave triplets)."""
-        return improvement_octave_bands(self.improvement, self.frequencies)
+        return improvement_octave_bands(self.improvement, frequencies=self.frequencies)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -469,8 +469,8 @@ def _rating(
 def impact_improvement(
     bare: float | Sequence[float] | np.ndarray,
     with_covering: float | Sequence[float] | np.ndarray,
-    frequencies: float | Sequence[float] | np.ndarray,
     *,
+    frequencies: float | Sequence[float] | np.ndarray,
     background: float | Sequence[float] | np.ndarray | None = None,
 ) -> FloorCoveringImprovementResult:
     r"""Improvement of impact sound insulation ``ΔL`` of a floor covering.
@@ -614,8 +614,8 @@ class OctaveBandSpectrum(OwnsArrays):
 
 def improvement_octave_bands(
     improvement: Sequence[float] | np.ndarray,
-    frequencies: Sequence[float] | np.ndarray,
     *,
+    frequencies: Sequence[float] | np.ndarray,
     quantity: str = "ΔL",
 ) -> OctaveBandSpectrum:
     r"""Convert a one-third-octave improvement spectrum to octaves (F. (5)).

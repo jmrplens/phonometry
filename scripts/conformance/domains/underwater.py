@@ -97,7 +97,9 @@ def _chk_uw_delta_l() -> Outcome:
     ds = 0.7 * draught
     u = 2.0 * math.pi * f / c * ds
     expected = -10.0 * math.log10((2 * u**4 + 14 * u**2) / (14 + 2 * u**2 + u**4))
-    res = ph.underwater.monopole_source_level(120.0, f, draught, speed_of_sound=c)
+    res = ph.underwater.monopole_source_level(
+        120.0, frequency=f, draft_m=draught, speed_of_sound=c
+    )
     return numeric(expected, float(res.surface_correction[0]), 1e-4, places=4)
 
 

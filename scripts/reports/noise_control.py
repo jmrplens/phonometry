@@ -142,9 +142,9 @@ def _duct_path_example() -> tuple[object, ReportMetadata, str]:
     from phonometry.noise_control.hvac import _OCTAVE_BANDS
 
     result = duct_path(
-        _OCTAVE_BANDS,
-        [90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0],
-        [
+        frequencies=_OCTAVE_BANDS,
+        source_level=[90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0],
+        elements=[
             DuctElement(
                 "Elbow, 36 x 24 in, unlined",
                 [0, 1, 2, 3, 3, 3, 3, 3],

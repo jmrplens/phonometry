@@ -2426,11 +2426,12 @@ def equivalent_diameter(area: float) -> float:
 # Silencers and terminal devices
 # ---------------------------------------------------------------------------
 def splitter_silencer_insertion_loss(
-    frequencies: ArrayLike | None,
     height_m: float,
     length: float,
     airway_widths: ArrayLike,
     splitter_thickness_m: float,
+    *,
+    frequencies: ArrayLike | None,
 ) -> HVACSpectrumResult:
     r"""Insertion loss of a parallel-splitter (dissipative) silencer.
 

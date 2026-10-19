@@ -32,7 +32,9 @@ if TYPE_CHECKING:
 def _result() -> psychoacoustics.ToneAudibilityResult:
     """The ISO/PAS 20065 Annex E spectrum-1 detection (three tones + FG)."""
     return psychoacoustics.analyze_spectrum(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        line_spacing_hz=ref.ISO20065_LINE_SPACING,
     )
 
 
@@ -173,7 +175,7 @@ def test_absent_tone_reports_zero_adjustment(tmp_path: Path) -> None:
     K stay consistent with the decisive audibility.
     """
     # One tone barely above the masking threshold: LT chosen so ΔL_ta is small.
-    result = psychoacoustics.assess_tones([500.0], [40.0], [30.0], 2.0)
+    result = psychoacoustics.assess_tones([40.0], [30.0], 2.0, tone_frequencies=[500.0])
     out = tmp_path / "weak.pdf"
     result.report(str(out))
     assert_one_page(str(out))

@@ -201,8 +201,11 @@ res.plot_geometry(language="es")
 plt.show()
 
 # El mismo dibujo sin resultado, con la función libre:
-noise_control.plot_silencer_geometry("expansion chamber", length=0.3,
-                                     chamber_area=0.04, pipe_area=0.01, language="es")
+noise_control.plot_silencer_geometry(
+    "expansion chamber",
+    {"length": 0.3, "chamber_area": 0.04, "pipe_area": 0.01},
+    language="es",
+)
 plt.show()
 ```
 

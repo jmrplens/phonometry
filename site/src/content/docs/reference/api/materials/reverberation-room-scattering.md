@@ -375,10 +375,10 @@ results table is left to the caller.
 
 ```python
 scattering_coefficient_spectrum(
-    frequencies: ArrayLike,
     specular_absorption: ArrayLike,
     random_absorption: ArrayLike,
     *,
+    frequencies: ArrayLike,
     truncate_negative: bool = True,
 ) -> ScatteringResult
 ```

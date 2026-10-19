@@ -219,9 +219,9 @@ class ShipSourceLevelResult(OwnsArrays):
 
 def monopole_source_level(
     rnl: float | NDArray[np.float64] | list[float],
-    frequency: float | NDArray[np.float64] | list[float],
     draft_m: float,
     *,
+    frequency: float | NDArray[np.float64] | list[float],
     speed_of_sound: float = _DEFAULT_SOUND_SPEED,
 ) -> ShipSourceLevelResult:
     r"""Equivalent monopole source level from radiated noise level

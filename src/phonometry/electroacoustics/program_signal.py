@@ -608,7 +608,7 @@ class ProgramSignalCheck(OwnsArrays):
 
 
 def check_program_signal(
-    frequencies: ArrayLike, band_levels: ArrayLike
+    band_levels: ArrayLike, *, frequencies: ArrayLike
 ) -> ProgramSignalCheck:
     r"""Is this one-third-octave spectrum the programme signal of IEC 60268-1?
 

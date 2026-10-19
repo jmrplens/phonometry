@@ -122,10 +122,10 @@ def test_table_2_is_the_kb_weighting_rounded_to_a_tenth() -> None:
     # Without the band limitation of the meter, which would take 1,5 dB off at 80 Hz.
     limited = 20.0 * np.log10(np.abs(im.kb_weighting_response(freqs)))
     assert limited[-1] < response[-1] - 1.0
-    weighted = im.kb_weighted_levels(np.zeros(14), freqs)
+    weighted = im.kb_weighted_levels(np.zeros(14), frequencies=freqs)
     assert list(weighted) == list(im.KB_WEIGHTING_TABLE_DB.values())
     with pytest.raises(ValueError, match="nominal third-octave centre"):
-        im.kb_weighted_levels([0.0], [100.0])
+        im.kb_weighted_levels([0.0], frequencies=[100.0])
     with pytest.raises(ValueError, match="14 bands"):
         im.predict_train_category(np.zeros(10), frequencies=FREQS[:10])
 

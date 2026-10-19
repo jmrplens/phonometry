@@ -549,14 +549,20 @@ def test_equal_area_readings_keep_their_planes() -> None:
 # --------------------------------------------------------------------------
 def test_random_incidence_is_free_field_less_the_directivity_index() -> None:
     result = metrology.random_incidence_sensitivity(
-        [1000.0, 4000.0, 8000.0], [0.2, -0.1, -0.8], [0.05, 0.85, 2.45]
+        frequencies=[1000.0, 4000.0, 8000.0],
+        free_field_level=[0.2, -0.1, -0.8],
+        directivity_index=[0.05, 0.85, 2.45],
     )
     np.testing.assert_allclose(result.random_incidence_level, [0.15, -0.95, -3.25])
     np.testing.assert_allclose(result.correction, [-0.05, -0.85, -2.45])
 
 
 def test_a_single_free_field_level_is_spread_over_the_bands() -> None:
-    result = metrology.random_incidence_sensitivity([1000.0, 2000.0], 0.0, [0.1, 0.2])
+    result = metrology.random_incidence_sensitivity(
+        frequencies=[1000.0, 2000.0],
+        free_field_level=0.0,
+        directivity_index=[0.1, 0.2],
+    )
     np.testing.assert_allclose(result.free_field_level, [0.0, 0.0])
 
 
@@ -564,12 +570,20 @@ def test_random_incidence_refuses_a_column_of_the_wrong_length() -> None:
     with pytest.raises(
         ValueError, match="'directivity_index' must hold one value per frequency"
     ):
-        metrology.random_incidence_sensitivity([1000.0, 2000.0], 0.0, [0.1, 0.2, 0.3])
+        metrology.random_incidence_sensitivity(
+            frequencies=[1000.0, 2000.0],
+            free_field_level=0.0,
+            directivity_index=[0.1, 0.2, 0.3],
+        )
 
 
 def test_random_incidence_refuses_frequencies_out_of_order() -> None:
     with pytest.raises(ValueError, match="'frequencies' must be strictly increasing"):
-        metrology.random_incidence_sensitivity([2000.0, 1000.0], 0.0, 0.1)
+        metrology.random_incidence_sensitivity(
+            frequencies=[2000.0, 1000.0],
+            free_field_level=0.0,
+            directivity_index=0.1,
+        )
 
 
 def test_random_incidence_from_a_directivity_measurement() -> None:
@@ -578,7 +592,9 @@ def test_random_incidence_from_a_directivity_measurement() -> None:
         metrology.directivity_factor(_omni(2, 36)),
     ]
     result = metrology.random_incidence_sensitivity(
-        [1000.0, 2000.0], [0.0, 0.0], [d.directivity_index for d in dirs]
+        frequencies=[1000.0, 2000.0],
+        free_field_level=[0.0, 0.0],
+        directivity_index=[d.directivity_index for d in dirs],
     )
     assert result.random_incidence_level[0] == pytest.approx(
         -10.0 * math.log10(dirs[0].gamma)
@@ -587,7 +603,9 @@ def test_random_incidence_from_a_directivity_measurement() -> None:
 
 
 def test_the_sensitivity_columns_are_read_only() -> None:
-    result = metrology.random_incidence_sensitivity([1000.0], 0.0, 0.1)
+    result = metrology.random_incidence_sensitivity(
+        frequencies=[1000.0], free_field_level=0.0, directivity_index=0.1
+    )
     assert not result.random_incidence_level.flags.writeable
     assert not result.frequencies.flags.writeable
 
@@ -620,9 +638,9 @@ def test_table_b1_is_immutable() -> None:
 
 def test_formula_9_adds_the_random_incidence_level_of_the_reference() -> None:
     result = metrology.diffuse_field_sensitivity(
-        [1000.0, 2000.0],
-        [80.0, 81.0],
-        [79.5, 80.2],
+        frequencies=[1000.0, 2000.0],
+        indicated_level=[80.0, 81.0],
+        reference_indicated_level=[79.5, 80.2],
         reference_random_incidence_level=[-0.1, -0.3],
     )
     np.testing.assert_allclose(result.level_difference, [0.5, 0.8])
@@ -632,9 +650,9 @@ def test_formula_9_adds_the_random_incidence_level_of_the_reference() -> None:
 
 def test_formula_10_takes_the_directivity_of_table_b1_by_default() -> None:
     result = metrology.diffuse_field_sensitivity(
-        [1000.0, 8000.0, 20000.0],
-        [80.0, 80.0, 80.0],
-        [80.0, 80.0, 80.0],
+        frequencies=[1000.0, 8000.0, 20000.0],
+        indicated_level=[80.0, 80.0, 80.0],
+        reference_indicated_level=[80.0, 80.0, 80.0],
         reference_free_field_level=0.0,
     )
     np.testing.assert_allclose(result.reference_correction, [-0.05, -2.45, -6.70])
@@ -643,9 +661,9 @@ def test_formula_10_takes_the_directivity_of_table_b1_by_default() -> None:
 
 def test_formula_10_with_a_known_directivity() -> None:
     result = metrology.diffuse_field_sensitivity(
-        [1000.0],
-        [80.0],
-        [79.0],
+        frequencies=[1000.0],
+        indicated_level=[80.0],
+        reference_indicated_level=[79.0],
         reference_free_field_level=[0.3],
         reference_directivity_index=[0.2],
     )
@@ -654,9 +672,9 @@ def test_formula_10_with_a_known_directivity() -> None:
 
 def test_formula_11_adds_the_diffuse_to_pressure_difference_of_table_b1() -> None:
     result = metrology.diffuse_field_sensitivity(
-        [500.0, 8000.0, 16000.0],
-        [70.0, 70.0, 70.0],
-        [70.0, 70.0, 70.0],
+        frequencies=[500.0, 8000.0, 16000.0],
+        indicated_level=[70.0, 70.0, 70.0],
+        reference_indicated_level=[70.0, 70.0, 70.0],
         reference_pressure_level=-26.0,
     )
     np.testing.assert_allclose(result.reference_correction, [0.0, 1.20, 3.05])
@@ -666,7 +684,10 @@ def test_formula_11_adds_the_diffuse_to_pressure_difference_of_table_b1() -> Non
 def test_table_b1_answers_an_exact_midband_frequency() -> None:
     """15 849 Hz is the base-ten midband of the 16 kHz band."""
     result = metrology.diffuse_field_sensitivity(
-        [1000.0 * 10.0**1.2], [0.0], [0.0], reference_pressure_level=0.0
+        frequencies=[1000.0 * 10.0**1.2],
+        indicated_level=[0.0],
+        reference_indicated_level=[0.0],
+        reference_pressure_level=0.0,
     )
     np.testing.assert_allclose(result.reference_correction, [3.05])
 
@@ -677,7 +698,10 @@ def test_table_b1_refuses_a_frequency_it_does_not_print() -> None:
         ValueError, match="pass 'reference_diffuse_pressure_difference_db' for it"
     ):
         metrology.diffuse_field_sensitivity(
-            frequencies, 0.0, 0.0, reference_pressure_level=0.0
+            frequencies=frequencies,
+            indicated_level=0.0,
+            reference_indicated_level=0.0,
+            reference_pressure_level=0.0,
         )
 
 
@@ -685,7 +709,10 @@ def test_a_frequency_between_the_rows_is_refused() -> None:
     frequencies = [1100.0]
     with pytest.raises(ValueError, match="pass 'reference_directivity_index' for it"):
         metrology.diffuse_field_sensitivity(
-            frequencies, 0.0, 0.0, reference_free_field_level=0.0
+            frequencies=frequencies,
+            indicated_level=0.0,
+            reference_indicated_level=0.0,
+            reference_free_field_level=0.0,
         )
 
 
@@ -695,7 +722,11 @@ def test_exactly_one_reference_calibration_is_needed() -> None:
         ValueError,
         match="Give exactly one calibration of the reference instrument: 'reference_random",
     ):
-        metrology.diffuse_field_sensitivity(frequencies, 0.0, 0.0)
+        metrology.diffuse_field_sensitivity(
+            frequencies=frequencies,
+            indicated_level=0.0,
+            reference_indicated_level=0.0,
+        )
 
 
 def test_two_reference_calibrations_are_refused() -> None:
@@ -705,9 +736,9 @@ def test_two_reference_calibrations_are_refused() -> None:
         match="Give exactly one calibration of the reference instrument: 'reference_random",
     ):
         metrology.diffuse_field_sensitivity(
-            frequencies,
-            0.0,
-            0.0,
+            frequencies=frequencies,
+            indicated_level=0.0,
+            reference_indicated_level=0.0,
             reference_random_incidence_level=0.0,
             reference_pressure_level=0.0,
         )
@@ -719,9 +750,9 @@ def test_a_correction_of_another_route_is_refused() -> None:
         ValueError, match="'reference_directivity_index' belongs to the free"
     ):
         metrology.diffuse_field_sensitivity(
-            frequencies,
-            0.0,
-            0.0,
+            frequencies=frequencies,
+            indicated_level=0.0,
+            reference_indicated_level=0.0,
             reference_pressure_level=0.0,
             reference_directivity_index=0.1,
         )
@@ -870,7 +901,9 @@ def test_four_planes_are_labelled_by_their_angle() -> None:
 
 def test_the_sensitivity_views_draw_the_levels_and_the_correction() -> None:
     result = metrology.random_incidence_sensitivity(
-        [1000.0, 4000.0, 8000.0], [0.2, -0.1, -0.8], [0.05, 0.85, 2.45]
+        frequencies=[1000.0, 4000.0, 8000.0],
+        free_field_level=[0.2, -0.1, -0.8],
+        directivity_index=[0.05, 0.85, 2.45],
     )
     ax = result.plot()
     np.testing.assert_allclose(ax.lines[0].get_ydata(), result.free_field_level)
@@ -890,7 +923,9 @@ def test_the_sensitivity_views_draw_the_levels_and_the_correction() -> None:
         (_two_plane_result, "weights"),
         (
             lambda: metrology.random_incidence_sensitivity(
-                [1000.0, 2000.0], 0.0, [0.05, 0.2]
+                frequencies=[1000.0, 2000.0],
+                free_field_level=0.0,
+                directivity_index=[0.05, 0.2],
             ),
             "correction",
         ),
@@ -910,7 +945,10 @@ def test_the_other_views_forward_style_to_their_first_curve(
 
 def test_the_diffuse_figure_draws_the_three_terms() -> None:
     result = metrology.diffuse_field_sensitivity(
-        [1000.0, 8000.0], [80.0, 81.0], [79.5, 80.0], reference_pressure_level=-26.0
+        frequencies=[1000.0, 8000.0],
+        indicated_level=[80.0, 81.0],
+        reference_indicated_level=[79.5, 80.0],
+        reference_pressure_level=-26.0,
     )
     ax = result.plot()
     np.testing.assert_allclose(ax.lines[0].get_ydata(), result.diffuse_field_level)

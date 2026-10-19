@@ -173,13 +173,11 @@ def test_silencer_chain_without_a_duct_refuses_to_draw() -> None:
 
 def test_silencer_free_function_validation() -> None:
     with pytest.raises(ValueError, match="Unknown silencer kind"):
-        pm.noise_control.plot_silencer_geometry("muffler")
+        pm.noise_control.plot_silencer_geometry("muffler", {"length": 0.3})
     with pytest.raises(ValueError, match=r"'chamber_area' must exceed 'pipe_area'"):
         pm.noise_control.plot_silencer_geometry(
             "expansion chamber",
-            length=0.3,
-            chamber_area=0.004,
-            pipe_area=0.005,
+            {"length": 0.3, "chamber_area": 0.004, "pipe_area": 0.005},
         )
     with pytest.raises(
         ValueError,
@@ -187,16 +185,82 @@ def test_silencer_free_function_validation() -> None:
     ):
         pm.noise_control.plot_silencer_geometry(
             "extended-tube chamber",
-            length=0.1,
-            chamber_area=0.03,
-            pipe_area=0.005,
-            inlet_extension=0.08,
-            outlet_extension=0.08,
+            {
+                "length": 0.1,
+                "chamber_area": 0.03,
+                "pipe_area": 0.005,
+                "inlet_extension": 0.08,
+                "outlet_extension": 0.08,
+            },
         )
     with pytest.raises(
         ValueError, match=r"A Helmholtz resonator drawing needs 'neck_area'"
     ):
-        pm.noise_control.plot_silencer_geometry("Helmholtz resonator", duct_area=0.01)
+        pm.noise_control.plot_silencer_geometry(
+            "Helmholtz resonator", {"duct_area": 0.01}
+        )
+
+
+def test_silencer_geometry_names_a_key_its_kind_does_not_take() -> None:
+    """The drawing reads the ``geometry`` a result keeps, and each kind takes
+    only its own keys: a quarter-wave length handed to a Helmholtz resonator,
+    or a tube extension handed to a plain expansion chamber, is named rather
+    than left out of the drawing.
+    """
+    with pytest.raises(
+        ValueError,
+        match=r"The Helmholtz resonator drawing takes no 'length'; its geometry "
+        r"keys are 'duct_area', 'neck_area', 'neck_length', 'cavity_volume'\.",
+    ):
+        pm.noise_control.plot_silencer_geometry(
+            "Helmholtz resonator",
+            {
+                "duct_area": 0.01,
+                "neck_area": 0.0005,
+                "neck_length": 0.02,
+                "cavity_volume": 0.002,
+                "length": 0.3,
+            },
+        )
+    with pytest.raises(
+        ValueError, match=r"The expansion chamber drawing takes no 'inlet_extension'"
+    ):
+        pm.noise_control.plot_silencer_geometry(
+            "expansion chamber",
+            {
+                "length": 0.3,
+                "chamber_area": 0.1,
+                "pipe_area": 0.01,
+                "inlet_extension": 0.05,
+            },
+        )
+    with pytest.raises(
+        ValueError, match=r"A chamber drawing needs 'length', 'chamber_area'"
+    ):
+        pm.noise_control.plot_silencer_geometry(
+            "extended-tube chamber", {"length": 0.3, "chamber_area": 0.1}
+        )
+
+
+def test_silencer_geometry_refuses_dimensions_that_are_not_a_mapping() -> None:
+    with pytest.raises(TypeError, match=r"'geometry' must be a mapping .* not tuple"):
+        pm.noise_control.plot_silencer_geometry(
+            "expansion chamber",
+            (0.3, 0.1, 0.01),  # type: ignore[arg-type]
+        )
+
+
+def test_silencer_geometry_draws_what_the_result_keeps() -> None:
+    """The free function and the result's own drawing read the same pair."""
+    below_cut_on = np.linspace(50.0, 400.0, 8)
+    res = pm.noise_control.extended_tube_chamber(
+        below_cut_on, 0.3, 0.1, 0.01, inlet_extension=0.05, outlet_extension=0.08
+    )
+    assert res.geometry is not None
+    free = pm.noise_control.plot_silencer_geometry(res.kind, res.geometry)
+    drawn = res.plot_geometry()
+    assert [t.get_text() for t in free.texts] == [t.get_text() for t in drawn.texts]
+    assert len(free.patches) == len(drawn.patches)
 
 
 def test_silencer_geometry_refuses_a_nan_chamber_length() -> None:
@@ -206,9 +270,7 @@ def test_silencer_geometry_refuses_a_nan_chamber_length() -> None:
     with pytest.raises(ValueError, match="'length' must be positive"):
         pm.noise_control.plot_silencer_geometry(
             "expansion chamber",
-            length=float("nan"),
-            chamber_area=0.1,
-            pipe_area=0.01,
+            {"length": float("nan"), "chamber_area": 0.1, "pipe_area": 0.01},
         )
 
 
@@ -219,9 +281,7 @@ def test_silencer_geometry_names_the_area_that_is_not_positive() -> None:
     with pytest.raises(ValueError, match="'pipe_area' must be positive"):
         pm.noise_control.plot_silencer_geometry(
             "expansion chamber",
-            length=0.3,
-            chamber_area=0.1,
-            pipe_area=float("nan"),
+            {"length": 0.3, "chamber_area": 0.1, "pipe_area": float("nan")},
         )
 
 
@@ -229,11 +289,59 @@ def test_silencer_geometry_refuses_a_nan_cavity_volume() -> None:
     with pytest.raises(ValueError, match="'cavity_volume' must be positive"):
         pm.noise_control.plot_silencer_geometry(
             "Helmholtz resonator",
-            duct_area=0.01,
-            neck_area=0.0005,
-            neck_length=0.02,
-            cavity_volume=float("nan"),
+            {
+                "duct_area": 0.01,
+                "neck_area": 0.0005,
+                "neck_length": 0.02,
+                "cavity_volume": float("nan"),
+            },
         )
+
+
+@pytest.mark.parametrize(
+    ("kind", "geometry"),
+    [
+        ("expansion chamber", {"length": 0.3, "chamber_area": 0.1, "pipe_area": 0.01}),
+        (
+            "extended-tube chamber",
+            {
+                "length": 0.3,
+                "chamber_area": 0.1,
+                "pipe_area": 0.01,
+                "inlet_extension": 0.05,
+                "outlet_extension": 0.05,
+            },
+        ),
+        (
+            "Helmholtz resonator",
+            {
+                "duct_area": 0.01,
+                "neck_area": 0.0005,
+                "neck_length": 0.02,
+                "cavity_volume": 0.002,
+            },
+        ),
+        (
+            "quarter-wave resonator",
+            {"duct_area": 0.01, "length": 0.4, "branch_area": 0.002},
+        ),
+    ],
+)
+def test_silencer_geometry_forwards_style_keywords_to_the_bore(
+    kind: str, geometry: dict[str, float]
+) -> None:
+    """The style keywords reach the outline of the main bore, and only it.
+
+    ``plot_silencer_geometry`` was the one geometry helper that took no style
+    keywords; it now forwards them as the others do, to the chamber shell of a
+    chamber and to the duct of a side branch. A helper that accepted
+    ``**kwargs`` and dropped them would draw every outline in its own grey.
+    """
+    from matplotlib.colors import to_hex
+
+    ax = pm.noise_control.plot_silencer_geometry(kind, geometry, edgecolor="red")
+    edges = [to_hex(patch.get_edgecolor()) for patch in ax.patches]
+    assert edges.count("#ff0000") == 1, edges
 
 
 # ---------------------------------------------------------------------------

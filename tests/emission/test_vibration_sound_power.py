@@ -32,19 +32,21 @@ def test_velocity_level_reference() -> None:
 
 def test_calibration_example_from_standard() -> None:
     """ISO/TS 7849-1 worked EXAMPLE: 9,81 m/s^2 at 100 Hz -> 106,9 dB."""
-    lv = float(emission.velocity_level_from_acceleration(9.81, 100.0))
+    lv = float(emission.velocity_level_from_acceleration(9.81, frequency=100.0))
     assert lv == pytest.approx(106.9, abs=0.05)
 
 
 def test_calibration_matches_hand_formula() -> None:
     a, f = 4.0, 250.0
     expected = 20.0 * math.log10(a / (2.0 * math.pi * f * V0 * math.sqrt(2.0)))
-    assert emission.velocity_level_from_acceleration(a, f) == pytest.approx(expected)
+    assert emission.velocity_level_from_acceleration(a, frequency=f) == pytest.approx(
+        expected
+    )
 
 
 def test_calibration_rejects_non_positive_frequency() -> None:
     with pytest.raises(ValueError, match=r"'frequency' must be positive"):
-        emission.velocity_level_from_acceleration(9.81, 0.0)
+        emission.velocity_level_from_acceleration(9.81, frequency=0.0)
 
 
 # ---------------------------------------------------------------------------

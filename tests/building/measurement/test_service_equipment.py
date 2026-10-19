@@ -261,7 +261,10 @@ def test_the_clause_9_thresholds_hold_for_decimal_levels(
 
 def test_a_4_db_margin_in_decimal_levels_is_not_an_upper_limit() -> None:
     res = building.service_equipment_level(
-        _flat(32.3), THIRD, quantity="eq", background_db=np.full(THIRD.size, 28.3)
+        _flat(32.3),
+        frequencies=THIRD,
+        quantity="eq",
+        background_db=np.full(THIRD.size, 28.3),
     )
     assert res.background is not None
     assert set(res.background.regime) == {"corrected"}
@@ -311,7 +314,7 @@ def test_background_result_checks_its_own_bands() -> None:
 def test_average_is_formula_1_rounded_to_one_decimal() -> None:
     readings = np.array([[40.0], [43.0], [46.0]])
     res = building.service_equipment_level(
-        np.repeat(readings, THIRD.size, axis=1), THIRD, quantity="eq"
+        np.repeat(readings, THIRD.size, axis=1), frequencies=THIRD, quantity="eq"
     )
     expected = 10.0 * math.log10((10**4.0 + 10**4.3 + 10**4.6) / 3.0)
     np.testing.assert_allclose(res.average_db, round(expected, 1))
@@ -328,7 +331,9 @@ def test_average_is_formula_1_rounded_to_one_decimal() -> None:
     ],
 )
 def test_a_half_tenth_rounds_up(level: float, rounded: float) -> None:
-    res = building.service_equipment_level(_flat(level), THIRD, quantity="eq")
+    res = building.service_equipment_level(
+        _flat(level), frequencies=THIRD, quantity="eq"
+    )
     np.testing.assert_array_equal(res.average_db, np.full(THIRD.size, rounded))
 
 
@@ -337,14 +342,16 @@ def test_a_half_decibel_single_number_rounds_up() -> None:
     levels = np.full(THIRD.size, -200.0)
     levels[THIRD == 1000.0] = 44.5
     res = building.service_equipment_level(
-        np.tile(levels, (3, 1)), THIRD, quantity="eq"
+        np.tile(levels, (3, 1)), frequencies=THIRD, quantity="eq"
     )
     assert res.unrounded_ratings["LA,eq"] == pytest.approx(44.5, abs=1e-12)
     assert res.ratings["LA,eq"] == 45
 
 
 def test_flat_spectrum_a_and_c_weighted_values() -> None:
-    res = building.service_equipment_level(_flat(40.0), THIRD, quantity="Fmax")
+    res = building.service_equipment_level(
+        _flat(40.0), frequencies=THIRD, quantity="Fmax"
+    )
     table = building.SERVICE_EQUIPMENT_WEIGHTING[3]
     a = [40.0 + table["A"][f] for f in RESTRICTED]
     c = [40.0 + table["C"][f] for f in THIRD]
@@ -358,7 +365,10 @@ def test_flat_spectrum_a_and_c_weighted_values() -> None:
 
 def test_each_single_number_carries_its_table_2_deviation() -> None:
     res = building.service_equipment_level(
-        _flat(40.0), THIRD, quantity="Smax", reverberation_time=np.full(27, 0.7)
+        _flat(40.0),
+        frequencies=THIRD,
+        quantity="Smax",
+        reverberation_time=np.full(27, 0.7),
     )
     assert dict(res.weighted_reproducibility_db) == {
         "LA,Smax": 0.8,
@@ -370,16 +380,18 @@ def test_each_single_number_carries_its_table_2_deviation() -> None:
 
 
 def test_extended_a_range_adds_the_outer_bands() -> None:
-    restricted = building.service_equipment_level(_flat(40.0), THIRD, quantity="eq")
+    restricted = building.service_equipment_level(
+        _flat(40.0), frequencies=THIRD, quantity="eq"
+    )
     extended = building.service_equipment_level(
-        _flat(40.0), THIRD, quantity="eq", a_weighting_range="extended"
+        _flat(40.0), frequencies=THIRD, quantity="eq", a_weighting_range="extended"
     )
     assert extended.unrounded_ratings["LA,eq"] > restricted.unrounded_ratings["LA,eq"]
 
 
 def test_restricted_bands_give_no_c_weighted_value() -> None:
     res = building.service_equipment_level(
-        _flat(40.0, RESTRICTED), RESTRICTED, quantity="eq"
+        _flat(40.0, RESTRICTED), frequencies=RESTRICTED, quantity="eq"
     )
     assert set(res.ratings) == {"LA,eq"}
 
@@ -388,13 +400,13 @@ def test_a_weighting_range_must_be_covered() -> None:
     freqs = RESTRICTED[1:]
     levels = _flat(40.0, freqs)
     with pytest.raises(ValueError, match="A-weighting range"):
-        building.service_equipment_level(levels, freqs, quantity="eq")
+        building.service_equipment_level(levels, frequencies=freqs, quantity="eq")
 
 
 def test_reverberation_time_equal_to_t0_leaves_the_levels() -> None:
     res = building.service_equipment_level(
         _flat(40.0),
-        THIRD,
+        frequencies=THIRD,
         quantity="Smax",
         reverberation_time=np.full(THIRD.size, 0.5),
     )
@@ -407,7 +419,7 @@ def test_formula_5_in_the_standardization_range_only() -> None:
     t = np.full(THIRD.size, 1.0)
     t[~((THIRD >= 50.0) & (THIRD <= 5000.0))] = np.nan
     res = building.service_equipment_level(
-        _flat(40.0), THIRD, quantity="eq", reverberation_time=t
+        _flat(40.0), frequencies=THIRD, quantity="eq", reverberation_time=t
     )
     assert res.standardized_db is not None
     inside = res.standardizable
@@ -423,7 +435,7 @@ def test_formula_6_at_the_reference_absorption_leaves_the_levels() -> None:
     volume = 10.0 * t / 0.16
     res = building.service_equipment_level(
         _flat(40.0),
-        THIRD,
+        frequencies=THIRD,
         quantity="eq",
         reverberation_time=np.full(THIRD.size, t),
         volume=volume,
@@ -437,7 +449,7 @@ def test_formula_6_raises_a_room_more_absorbing_than_a0() -> None:
     """T = 0,5 s in 50 m³ is A = 16 m²: 10 lg 1,6 = 2,04 dB is added."""
     res = building.service_equipment_level(
         _flat(40.0),
-        THIRD,
+        frequencies=THIRD,
         quantity="eq",
         reverberation_time=np.full(THIRD.size, 0.5),
         volume=50.0,
@@ -454,7 +466,7 @@ def test_formula_6_raises_a_room_more_absorbing_than_a0() -> None:
 def test_reference_reverberation_time_can_be_specified() -> None:
     res = building.service_equipment_level(
         _flat(40.0),
-        THIRD,
+        frequencies=THIRD,
         quantity="eq",
         reverberation_time=np.full(THIRD.size, 0.8),
         reference_reverberation_time_s=0.8,
@@ -466,7 +478,7 @@ def test_reference_reverberation_time_can_be_specified() -> None:
 def test_background_rows_are_energy_averaged() -> None:
     background = np.vstack((np.full(THIRD.size, 30.0), np.full(THIRD.size, 33.0)))
     res = building.service_equipment_level(
-        _flat(40.0), THIRD, quantity="eq", background_db=background
+        _flat(40.0), frequencies=THIRD, quantity="eq", background_db=background
     )
     assert res.background is not None
     expected = 10.0 * math.log10((10**3.0 + 10**3.3) / 2.0)
@@ -477,19 +489,21 @@ def test_limited_band_makes_the_weighted_value_an_upper_limit() -> None:
     background = np.full(THIRD.size, 20.0)
     background[-1] = 39.0  # 10 000 Hz: in the C range, outside the restricted A range
     res = building.service_equipment_level(
-        _flat(40.0), THIRD, quantity="eq", background_db=background
+        _flat(40.0), frequencies=THIRD, quantity="eq", background_db=background
     )
     assert res.upper_limit("C")
     assert not res.upper_limit("A")
     background[10] = 39.0  # 250 Hz: in both
     res = building.service_equipment_level(
-        _flat(40.0), THIRD, quantity="eq", background_db=background
+        _flat(40.0), frequencies=THIRD, quantity="eq", background_db=background
     )
     assert res.upper_limit("A")
 
 
 def test_upper_limit_names_a_weighting() -> None:
-    res = building.service_equipment_level(_flat(40.0), THIRD, quantity="eq")
+    res = building.service_equipment_level(
+        _flat(40.0), frequencies=THIRD, quantity="eq"
+    )
     assert not res.upper_limit("A")
     with pytest.raises(ValueError, match="weighting"):
         res.upper_limit("Z")
@@ -497,7 +511,7 @@ def test_upper_limit_names_a_weighting() -> None:
 
 def test_octave_bands() -> None:
     res = building.service_equipment_level(
-        _flat(40.0, OCTAVE), OCTAVE, quantity="eq", fraction=1
+        _flat(40.0, OCTAVE), frequencies=OCTAVE, quantity="eq", fraction=1
     )
     table = building.SERVICE_EQUIPMENT_WEIGHTING[1]
     a = [40.0 + table["A"][f] for f in OCTAVE if 63.0 <= f <= 4000.0]
@@ -513,7 +527,7 @@ def test_octave_standardization_leaves_out_31_5_and_8000_hz() -> None:
     t[[0, -1]] = np.nan
     res = building.service_equipment_level(
         _flat(40.0, OCTAVE),
-        OCTAVE,
+        frequencies=OCTAVE,
         quantity="eq",
         fraction=1,
         reverberation_time=t,
@@ -527,13 +541,15 @@ def test_octave_standardization_leaves_out_31_5_and_8000_hz() -> None:
 
 def test_exact_centres_are_matched_to_nominal_bands() -> None:
     exact = 1000.0 * 10.0 ** (np.arange(-16, 11) / 10.0)
-    res = building.service_equipment_level(_flat(40.0), exact, quantity="eq")
+    res = building.service_equipment_level(
+        _flat(40.0), frequencies=exact, quantity="eq"
+    )
     np.testing.assert_array_equal(res.frequencies, THIRD)
 
 
 def test_a_single_reading_is_one_row() -> None:
     res = building.service_equipment_level(
-        np.full(THIRD.size, 40.0), THIRD, quantity="eq"
+        np.full(THIRD.size, 40.0), frequencies=THIRD, quantity="eq"
     )
     assert res.readings_db.shape == (1, THIRD.size)
 
@@ -541,7 +557,9 @@ def test_a_single_reading_is_one_row() -> None:
 def test_volume_needs_a_reverberation_time() -> None:
     levels = _flat(40.0)
     with pytest.raises(ValueError, match="reverberation_time"):
-        building.service_equipment_level(levels, THIRD, quantity="eq", volume=50.0)
+        building.service_equipment_level(
+            levels, frequencies=THIRD, quantity="eq", volume=50.0
+        )
 
 
 def test_reverberation_time_must_be_positive_in_the_range() -> None:
@@ -550,7 +568,7 @@ def test_reverberation_time_must_be_positive_in_the_range() -> None:
     levels = _flat(40.0)
     with pytest.raises(ValueError, match="reverberation_time"):
         building.service_equipment_level(
-            levels, THIRD, quantity="eq", reverberation_time=t
+            levels, frequencies=THIRD, quantity="eq", reverberation_time=t
         )
 
 
@@ -565,7 +583,7 @@ def test_reverberation_time_must_be_positive_in_the_range() -> None:
 def test_choices_are_checked(kwargs: dict[str, str], fragment: str) -> None:
     levels = _flat(40.0)
     with pytest.raises(ValueError, match=fragment):
-        building.service_equipment_level(levels, THIRD, **kwargs)  # type: ignore[arg-type]
+        building.service_equipment_level(levels, frequencies=THIRD, **kwargs)  # type: ignore[arg-type]
 
 
 def _level_inputs() -> dict[str, object]:
@@ -659,18 +677,20 @@ def test_a_centre_off_the_nominal_bands_is_refused() -> None:
     freqs[5] = 90.0
     levels = _flat(40.0)
     with pytest.raises(ValueError, match="nominal"):
-        building.service_equipment_level(levels, freqs, quantity="eq")
+        building.service_equipment_level(levels, frequencies=freqs, quantity="eq")
 
 
 def test_bands_must_increase() -> None:
     freqs = THIRD[::-1]
     levels = _flat(40.0)
     with pytest.raises(ValueError, match="increasing"):
-        building.service_equipment_level(levels, freqs, quantity="eq")
+        building.service_equipment_level(levels, frequencies=freqs, quantity="eq")
 
 
 def test_result_checks_its_band_arrays() -> None:
-    res = building.service_equipment_level(_flat(40.0), THIRD, quantity="eq")
+    res = building.service_equipment_level(
+        _flat(40.0), frequencies=THIRD, quantity="eq"
+    )
     short = res.average_db[:-1]
     with pytest.raises(ValueError, match="one value per band"):
         dataclasses.replace(res, average_db=short)
@@ -1179,7 +1199,7 @@ def _chain() -> building.ServiceEquipmentResult:
     t = np.full(THIRD.size, 0.7)
     return building.service_equipment_level(
         _flat(40.0),
-        THIRD,
+        frequencies=THIRD,
         quantity="eq",
         background_db=background,
         reverberation_time=t,

@@ -189,7 +189,7 @@ def generate_floor_covering_improvement(output_dir: str) -> None:
     covering = bare - np.array(
         [5, 8, 10, 14, 18, 23, 30, 31, 39, 49, 53, 57, 60, 67, 68, 71], dtype=float
     )
-    res = building.impact_improvement(bare, covering, freqs)
+    res = building.impact_improvement(bare, covering, frequencies=freqs)
     assert res.delta_lw is not None
 
     x = np.arange(len(freqs))
@@ -662,10 +662,10 @@ def generate_structure_borne_power(output_dir: str) -> None:
     # its far smaller eta*m*S dissipating it.
     lv_high = lv_low + 35.1
     res_low = building.reception_plate_power(
-        lv_low, bands, mass_per_area=230.0, area=7.0, reverberation_time=0.25
+        lv_low, frequency=bands, mass_per_area=230.0, area=7.0, reverberation_time=0.25
     )
     res_high = building.reception_plate_power(
-        lv_high, bands, mass_per_area=7.9, area=2.0, reverberation_time=0.5
+        lv_high, frequency=bands, mass_per_area=7.9, area=2.0, reverberation_time=0.5
     )
 
     x = np.arange(bands.size)

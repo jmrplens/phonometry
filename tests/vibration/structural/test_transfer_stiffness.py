@@ -117,15 +117,21 @@ def test_direct_method_rejects_zero_displacement() -> None:
 def test_indirect_matches_equation_1() -> None:
     f, m2, t = 500.0, 10.0, 0.01 + 0j
     expected = -((2.0 * math.pi * f) ** 2) * m2 * t
-    assert complex(vibration.transfer_stiffness_indirect(f, t, m2)) == pytest.approx(
-        expected
-    )
+    assert complex(
+        vibration.transfer_stiffness_indirect(
+            frequency=f, transmissibility=t, blocking_mass=m2
+        )
+    ) == pytest.approx(expected)
 
 
 def test_indirect_includes_flange_mass() -> None:
     f, t = 300.0, 0.02 + 0j
-    k_no_flange = vibration.transfer_stiffness_indirect(f, t, 8.0)
-    k_flange = vibration.transfer_stiffness_indirect(f, t, 8.0, flange_mass=2.0)
+    k_no_flange = vibration.transfer_stiffness_indirect(
+        frequency=f, transmissibility=t, blocking_mass=8.0
+    )
+    k_flange = vibration.transfer_stiffness_indirect(
+        frequency=f, transmissibility=t, blocking_mass=8.0, flange_mass=2.0
+    )
     assert complex(k_flange) == pytest.approx(complex(k_no_flange) * 10.0 / 8.0)
 
 
@@ -135,22 +141,30 @@ def test_indirect_recovers_kelvin_voigt_at_high_frequency() -> None:
     f0 = math.sqrt(k / m) / (2.0 * math.pi)
     f = 30.0 * f0  # well into T << 1
     t = vibration.base_transmissibility(f, m, k, c)
-    k_rec = complex(vibration.transfer_stiffness_indirect(f, t, m))
+    k_rec = complex(
+        vibration.transfer_stiffness_indirect(
+            frequency=f, transmissibility=t, blocking_mass=m
+        )
+    )
     k_true = k + 1j * (2.0 * math.pi * f) * c
     assert k_rec == pytest.approx(k_true, rel=5e-3)
 
 
 def test_indirect_rejects_bad_inputs() -> None:
     with pytest.raises(ValueError, match=r"'frequency' must be positive"):
-        vibration.transfer_stiffness_indirect(0.0, 0.01 + 0j, 10.0)
+        vibration.transfer_stiffness_indirect(
+            frequency=0.0, transmissibility=0.01 + 0j, blocking_mass=10.0
+        )
     with pytest.raises(ValueError, match=r"'blocking_mass' must be positive"):
-        vibration.transfer_stiffness_indirect(500.0, 0.01 + 0j, 0.0)
+        vibration.transfer_stiffness_indirect(
+            frequency=500.0, transmissibility=0.01 + 0j, blocking_mass=0.0
+        )
 
 
 def test_indirect_result_names_its_own_frequency_axis() -> None:
     with pytest.raises(ValueError, match=r"'frequencies' must be positive"):
         vibration.indirect_transfer_stiffness_result(
-            [-1.0, 2.0], 0.01, blocking_mass=8.0
+            frequencies=[-1.0, 2.0], transmissibility=0.01, blocking_mass=8.0
         )
 
 
@@ -162,15 +176,23 @@ def test_indirect_warns_above_transmissibility_limit() -> None:
     with pytest.warns(
         PhonometryWarning, match=r"ISO 10846-3 Inequality \(2\) is violated"
     ):
-        vibration.transfer_stiffness_indirect(50.0, 0.5 + 0j, 10.0)
+        vibration.transfer_stiffness_indirect(
+            frequency=50.0, transmissibility=0.5 + 0j, blocking_mass=10.0
+        )
 
 
 def test_indirect_silent_within_transmissibility_limit() -> None:
     # |T| = 0.05 satisfies Inequality (2): no PhonometryWarning is emitted.
     with warnings.catch_warnings():
         warnings.simplefilter("error", PhonometryWarning)
-        vibration.transfer_stiffness_indirect(500.0, 0.05 + 0j, 10.0)
-        vibration.transfer_stiffness_indirect(500.0, TRANSMISSIBILITY_LIMIT + 0j, 10.0)
+        vibration.transfer_stiffness_indirect(
+            frequency=500.0, transmissibility=0.05 + 0j, blocking_mass=10.0
+        )
+        vibration.transfer_stiffness_indirect(
+            frequency=500.0,
+            transmissibility=TRANSMISSIBILITY_LIMIT + 0j,
+            blocking_mass=10.0,
+        )
 
 
 def test_result_helper_warns_above_transmissibility_limit() -> None:
@@ -179,7 +201,9 @@ def test_result_helper_warns_above_transmissibility_limit() -> None:
     with pytest.warns(
         PhonometryWarning, match=r"ISO 10846-3 Inequality \(2\) is violated"
     ):
-        vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
+        vibration.indirect_transfer_stiffness_result(
+            frequencies=f, transmissibility=t, blocking_mass=8.0
+        )
 
 
 def test_indirect_bias_at_the_validity_limit_is_within_1_db() -> None:
@@ -190,7 +214,11 @@ def test_indirect_bias_at_the_validity_limit_is_within_1_db() -> None:
     f = math.sqrt(11.0 * k / m) / (2.0 * math.pi)  # omega^2 m = 11 k -> T = -0.1
     t = complex(vibration.base_transmissibility(f, m, k))
     assert abs(t) == pytest.approx(TRANSMISSIBILITY_LIMIT)
-    k_rec = complex(vibration.transfer_stiffness_indirect(f, t, m))
+    k_rec = complex(
+        vibration.transfer_stiffness_indirect(
+            frequency=f, transmissibility=t, blocking_mass=m
+        )
+    )
     assert abs(k_rec) / k == pytest.approx(1.1)
     bias_db = 20.0 * math.log10(abs(k_rec) / k)
     assert bias_db == pytest.approx(0.828, abs=0.001)
@@ -226,7 +254,11 @@ def test_indirect_still_recovers_kelvin_voigt_below_the_warning() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error", PhonometryWarning)
         t = vibration.base_transmissibility(f, m, k, c)
-        k_rec = complex(vibration.transfer_stiffness_indirect(f, t, m))
+        k_rec = complex(
+            vibration.transfer_stiffness_indirect(
+                frequency=f, transmissibility=t, blocking_mass=m
+            )
+        )
     assert k_rec == pytest.approx(k + 1j * (2.0 * math.pi * f) * c, rel=5e-3)
 
 
@@ -263,8 +295,12 @@ def test_stiffness_impedance_effective_mass_relations() -> None:
     f = 250.0
     w = 2.0 * math.pi * f
     k = 1e6 + 1j * 5e4
-    z = vibration.convert_frf(k, f, "dynamic_stiffness", "impedance")
-    m_eff = vibration.convert_frf(k, f, "dynamic_stiffness", "apparent_mass")
+    z = vibration.convert_frf(
+        k, frequency=f, source="dynamic_stiffness", target="impedance"
+    )
+    m_eff = vibration.convert_frf(
+        k, frequency=f, source="dynamic_stiffness", target="apparent_mass"
+    )
     assert complex(k) == pytest.approx(1j * w * complex(z))
     assert complex(k) == pytest.approx(-(w**2) * complex(m_eff))
 
@@ -275,7 +311,9 @@ def test_stiffness_impedance_effective_mass_relations() -> None:
 def test_result_bundle() -> None:
     f = np.array([100.0, 200.0, 400.0])
     t = np.array([0.05, 0.02, 0.008]) * np.exp(1j * 0.1)
-    res = vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
+    res = vibration.indirect_transfer_stiffness_result(
+        frequencies=f, transmissibility=t, blocking_mass=8.0
+    )
     assert isinstance(res, vibration.TransferStiffnessResult)
     assert res.blocking_mass == 8.0
     # level is the level of the bundled stiffness
@@ -301,7 +339,9 @@ def test_plot_returns_axes() -> None:
     with pytest.warns(
         PhonometryWarning, match=r"ISO 10846-3 Inequality \(2\) is violated"
     ):
-        res = vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=5.0)
+        res = vibration.indirect_transfer_stiffness_result(
+            frequencies=f, transmissibility=t, blocking_mass=5.0
+        )
     assert res.plot() is not None
 
 
@@ -317,11 +357,17 @@ def test_a_single_frequency_result_keeps_its_bare_numbers() -> None:
     from the accepting side too, or the exemption can be dropped without a
     single test noticing that the library stops answering its own call.
     """
-    res = vibration.indirect_transfer_stiffness_result(500.0, 0.01, blocking_mass=8.0)
+    res = vibration.indirect_transfer_stiffness_result(
+        frequencies=500.0, transmissibility=0.01, blocking_mass=8.0
+    )
     assert res.frequencies.ndim == 0
     assert res.transfer_stiffness.ndim == 0
     assert complex(res.transfer_stiffness) == pytest.approx(
-        complex(vibration.transfer_stiffness_indirect(500.0, 0.01, 8.0))
+        complex(
+            vibration.transfer_stiffness_indirect(
+                frequency=500.0, transmissibility=0.01, blocking_mass=8.0
+            )
+        )
     )
 
 
@@ -336,7 +382,9 @@ def test_a_stiffness_short_of_its_frequencies_is_refused() -> None:
     """
     f = np.array([100.0, 200.0, 400.0])
     t = np.array([0.05, 0.02, 0.008]) * np.exp(1j * 0.1)
-    res = vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
+    res = vibration.indirect_transfer_stiffness_result(
+        frequencies=f, transmissibility=t, blocking_mass=8.0
+    )
     short = res.transfer_stiffness[:-1]
     with pytest.raises(ValueError, match=rf"'transfer_stiffness' \({short.size}\)"):
         dataclasses.replace(res, transfer_stiffness=short)
@@ -349,7 +397,9 @@ def test_a_lone_frequency_beside_a_spectrum_is_refused() -> None:
     exemption deliberately leaves to the count: exempting each field on its
     own would let a one-frequency label sit under three stiffnesses.
     """
-    res = vibration.indirect_transfer_stiffness_result(500.0, 0.01, blocking_mass=8.0)
+    res = vibration.indirect_transfer_stiffness_result(
+        frequencies=500.0, transmissibility=0.01, blocking_mass=8.0
+    )
     spectrum = np.full(3, complex(res.transfer_stiffness))
     with pytest.raises(ValueError, match="'frequencies' must have one axis"):
         dataclasses.replace(res, transfer_stiffness=spectrum)
@@ -367,7 +417,9 @@ def test_one_stiffness_under_a_swept_frequency_is_refused() -> None:
     """
     f = np.array([100.0, 200.0, 400.0])
     t = np.array([0.05, 0.02, 0.008]) * np.exp(1j * 0.1)
-    res = vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
+    res = vibration.indirect_transfer_stiffness_result(
+        frequencies=f, transmissibility=t, blocking_mass=8.0
+    )
     lone = res.transfer_stiffness[:1]
     assert lone.ndim == 1
     with pytest.raises(ValueError, match="'transfer_stiffness' [(]1[)]"):
@@ -412,7 +464,7 @@ _TWO_BANDS_HZ = np.concatenate([_TWO_BANDS_HZ, _TWO_BANDS_HZ * 1.25])
 def test_a_band_of_identical_lines_averages_to_itself() -> None:
     """Formula (11) is a mean of squares: n equal lines return that line."""
     k = np.full(_TWO_BANDS_HZ.size, 1.0e6 * (1.0 + 0.05j))
-    bands = vibration.band_averaged_stiffness(_TWO_BANDS_HZ, k)
+    bands = vibration.band_averaged_stiffness(frequencies=_TWO_BANDS_HZ, stiffness=k)
     assert bands.nominal_frequencies.tolist() == [1000.0, 1250.0]
     assert bands.line_counts.tolist() == [5, 5]
     assert bands.stiffness == pytest.approx(np.full(2, abs(k[0])), rel=1e-15)
@@ -422,7 +474,9 @@ def test_a_band_of_identical_lines_averages_to_itself() -> None:
 def test_the_band_average_is_the_root_mean_square_magnitude() -> None:
     """|k| = 1..5 MN/m in one band: k_av = sqrt((1+4+9+16+25)/5) = sqrt(11) MN/m."""
     k = 1.0e6 * np.array([1.0, 2.0j, -3.0, 4.0 + 0j, 5.0]) * np.exp(1j * 0.3)
-    bands = vibration.band_averaged_stiffness(_TWO_BANDS_HZ[:5], k)
+    bands = vibration.band_averaged_stiffness(
+        frequencies=_TWO_BANDS_HZ[:5], stiffness=k
+    )
     assert float(bands.stiffness[0]) == pytest.approx(math.sqrt(11.0) * 1.0e6)
 
 
@@ -432,7 +486,9 @@ def test_a_line_belongs_to_the_base_ten_band_that_encloses_it() -> None:
         [900.0, 950.0, 1000.0, 1050.0, edge * (1.0 - 1e-9), edge * (1.0 + 1e-9)]
     )
     with pytest.warns(vibration.TransferStiffnessWarning, match=r"1250 Hz \(1\)"):
-        bands = vibration.band_averaged_stiffness(f, np.full(f.size, 1.0e6))
+        bands = vibration.band_averaged_stiffness(
+            frequencies=f, stiffness=np.full(f.size, 1.0e6)
+        )
     assert bands.line_counts.tolist() == [5, 1]
 
 
@@ -444,7 +500,7 @@ def test_a_band_of_four_lines_has_no_value_and_says_so() -> None:
         vibration.TransferStiffnessWarning,
         match=r"at least 5 frequencies.*1250 Hz \(4\)",
     ):
-        bands = vibration.band_averaged_stiffness(f, k)
+        bands = vibration.band_averaged_stiffness(frequencies=f, stiffness=k)
     assert bands.determined.tolist() == [True, False]
     assert math.isnan(float(bands.stiffness[1]))
     assert math.isnan(float(bands.levels[1]))
@@ -456,7 +512,9 @@ def test_lines_marked_invalid_are_left_out_of_the_average() -> None:
     valid = np.ones(k.size, dtype=bool)
     valid[2] = False
     with pytest.warns(vibration.TransferStiffnessWarning, match=r"1000 Hz \(4\)"):
-        bands = vibration.band_averaged_stiffness(_TWO_BANDS_HZ, k, valid=valid)
+        bands = vibration.band_averaged_stiffness(
+            frequencies=_TWO_BANDS_HZ, stiffness=k, valid=valid
+        )
     assert bands.line_counts.tolist() == [4, 5]
     assert float(bands.stiffness[1]) == pytest.approx(1.0e6)
 
@@ -465,7 +523,9 @@ def test_bands_beyond_the_outermost_valid_line_are_not_listed() -> None:
     valid = np.zeros(_TWO_BANDS_HZ.size, dtype=bool)
     valid[:5] = True
     bands = vibration.band_averaged_stiffness(
-        _TWO_BANDS_HZ, np.full(_TWO_BANDS_HZ.size, 1.0e6), valid=valid
+        frequencies=_TWO_BANDS_HZ,
+        stiffness=np.full(_TWO_BANDS_HZ.size, 1.0e6),
+        valid=valid,
     )
     assert bands.nominal_frequencies.tolist() == [1000.0]
 
@@ -485,7 +545,9 @@ def test_a_band_whose_lines_were_all_excluded_is_undetermined_without_a_warning(
     k = np.full(f.size, 1.0e6)
     with warnings.catch_warnings():
         warnings.simplefilter("error", vibration.TransferStiffnessWarning)
-        bands = vibration.band_averaged_stiffness(f, k, valid=valid)
+        bands = vibration.band_averaged_stiffness(
+            frequencies=f, stiffness=k, valid=valid
+        )
     assert bands.nominal_frequencies.tolist() == [1000.0, 1250.0, 1600.0]
     assert bands.line_counts.tolist() == [5, 0, 5]
     assert math.isnan(float(bands.stiffness[1]))
@@ -496,21 +558,25 @@ def test_the_band_average_refuses_a_repeated_line() -> None:
     f = np.array([900.0, 950.0, 950.0, 1000.0, 1050.0])
     k = np.full(f.size, 1.0e6)
     with pytest.raises(ValueError, match="must be distinct"):
-        vibration.band_averaged_stiffness(f, k)
+        vibration.band_averaged_stiffness(frequencies=f, stiffness=k)
 
 
 def test_the_band_average_refuses_a_mask_that_is_not_boolean() -> None:
     k = np.full(_TWO_BANDS_HZ.size, 1.0e6)
     mask = np.ones(k.size)
     with pytest.raises(TypeError, match="'valid' must be boolean"):
-        vibration.band_averaged_stiffness(_TWO_BANDS_HZ, k, valid=mask)
+        vibration.band_averaged_stiffness(
+            frequencies=_TWO_BANDS_HZ, stiffness=k, valid=mask
+        )
 
 
 def test_the_band_average_refuses_when_every_line_is_invalid() -> None:
     k = np.full(_TWO_BANDS_HZ.size, 1.0e6)
     mask = np.zeros(k.size, dtype=bool)
     with pytest.raises(ValueError, match="no valid line"):
-        vibration.band_averaged_stiffness(_TWO_BANDS_HZ, k, valid=mask)
+        vibration.band_averaged_stiffness(
+            frequencies=_TWO_BANDS_HZ, stiffness=k, valid=mask
+        )
 
 
 @pytest.mark.parametrize(
@@ -537,14 +603,16 @@ def test_the_indirect_result_averages_only_where_the_transmissibility_is_small()
     f = np.geomspace(20.0, 2000.0, 400)
     t = vibration.base_transmissibility(f, 8.0, 1.0e6, 120.0)
     with pytest.warns(vibration.TransferStiffnessWarning, match="Inequality"):
-        res = vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
+        res = vibration.indirect_transfer_stiffness_result(
+            frequencies=f, transmissibility=t, blocking_mass=8.0
+        )
     assert res.valid is not None
     assert res.valid.tolist() == (np.abs(t) <= TRANSMISSIBILITY_LIMIT).tolist()
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", vibration.TransferStiffnessWarning)
         bands = res.band_average()
         by_hand = vibration.band_averaged_stiffness(
-            f[res.valid], res.transfer_stiffness[res.valid]
+            frequencies=f[res.valid], stiffness=res.transfer_stiffness[res.valid]
         )
     assert bands.nominal_frequencies.tolist() == by_hand.nominal_frequencies.tolist()
     assert bands.line_counts.tolist() == by_hand.line_counts.tolist()
@@ -578,7 +646,9 @@ def test_a_result_reads_its_validity_from_the_transmissibility() -> None:
 
 def test_the_indirect_warning_is_the_transfer_stiffness_warning() -> None:
     with pytest.warns(vibration.TransferStiffnessWarning, match="Inequality"):
-        vibration.transfer_stiffness_indirect(50.0, 0.5 + 0j, 10.0)
+        vibration.transfer_stiffness_indirect(
+            frequency=50.0, transmissibility=0.5 + 0j, blocking_mass=10.0
+        )
     assert issubclass(vibration.TransferStiffnessWarning, PhonometryWarning)
 
 
@@ -591,7 +661,11 @@ def test_an_output_20_db_below_the_input_is_blocked() -> None:
     with pytest.warns(
         vibration.TransferStiffnessWarning, match="down to 19.9 dB at 200 Hz"
     ):
-        check = vibration.check_blocked_output(f, [100.0, 100.0], [80.0, 80.1])
+        check = vibration.check_blocked_output(
+            frequencies=f,
+            input_acceleration_level=[100.0, 100.0],
+            output_acceleration_level=[80.0, 80.1],
+        )
     assert check.holds.tolist() == [True, False]
     assert check.passes is False
     assert check.limit_db == pytest.approx(20.0)
@@ -600,7 +674,11 @@ def test_an_output_20_db_below_the_input_is_blocked() -> None:
 def test_a_still_output_is_blocked_whatever_the_input() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error", vibration.TransferStiffnessWarning)
-        check = vibration.check_blocked_output([100.0], [60.0], [-math.inf])
+        check = vibration.check_blocked_output(
+            frequencies=[100.0],
+            input_acceleration_level=[60.0],
+            output_acceleration_level=[-math.inf],
+        )
     assert check.passes is True
 
 
@@ -608,7 +686,11 @@ def test_the_loudest_unwanted_direction_decides() -> None:
     f = np.array([100.0, 200.0])
     unwanted = np.array([[80.0, 90.0], [84.0, 70.0]])
     with pytest.warns(vibration.TransferStiffnessWarning, match="Inequality \\(2\\)"):
-        check = vibration.check_unwanted_input(f, [100.0, 100.0], unwanted)
+        check = vibration.check_unwanted_input(
+            frequencies=f,
+            excitation_level=[100.0, 100.0],
+            unwanted_level=unwanted,
+        )
     assert check.difference.tolist() == [16.0, 10.0]
     assert check.holds.tolist() == [True, False]
 
@@ -619,7 +701,11 @@ def test_an_unwanted_direction_15_db_down_is_acceptable() -> None:
     with pytest.warns(
         vibration.TransferStiffnessWarning, match="down to 14.9 dB at 200 Hz"
     ):
-        check = vibration.check_unwanted_input(f, [100.0, 100.0], [85.0, 85.1])
+        check = vibration.check_unwanted_input(
+            frequencies=f,
+            excitation_level=[100.0, 100.0],
+            unwanted_level=[85.0, 85.1],
+        )
     assert check.holds.tolist() == [True, False]
     assert check.limit_db == pytest.approx(15.0)
 
@@ -638,7 +724,9 @@ def test_the_level_difference_curve_does_not_claim_the_verdict() -> None:
 
     f = [63.0, 125.0, 250.0]
     with pytest.warns(vibration.TransferStiffnessWarning, match="unwanted directions"):
-        check = vibration.check_unwanted_input(f, [100.0] * 3, [88.0] * 3)
+        check = vibration.check_unwanted_input(
+            frequencies=f, excitation_level=[100.0] * 3, unwanted_level=[88.0] * 3
+        )
     for language, curve, failed in (
         ("en", "level difference", "condition not met"),
         ("es", "diferencia de niveles", "condición no cumplida"),
@@ -653,14 +741,23 @@ def test_the_level_difference_curve_does_not_claim_the_verdict() -> None:
 
 
 def test_a_level_difference_check_is_not_a_truth_value() -> None:
-    check = vibration.check_blocked_output([100.0], [100.0], [50.0])
+    check = vibration.check_blocked_output(
+        frequencies=[100.0],
+        input_acceleration_level=[100.0],
+        output_acceleration_level=[50.0],
+    )
     with pytest.raises(TypeError, match="no truth value"):
         bool(check)
 
 
 def test_the_output_mass_limit_is_six_percent_of_force_over_acceleration() -> None:
     """LF2 = 120 dB re 1 µN is 1 N, La2 = 100 dB re 1 µm/s² is 0,1 m/s²: 0,6 kg."""
-    check = vibration.check_output_mass([100.0], 0.3, [120.0], [100.0])
+    check = vibration.check_output_mass(
+        frequencies=[100.0],
+        output_mass_kg=0.3,
+        output_force_level=[120.0],
+        output_acceleration_level=[100.0],
+    )
     assert float(check.mass_limit_kg[0]) == pytest.approx(0.6, rel=1e-12)
     assert check.passes is True
 
@@ -672,7 +769,12 @@ def test_the_output_mass_on_its_limit_biases_the_force_by_half_a_decibel() -> No
     Fb = F2 + m0 a2 moves the level by 20 lg 1,06 = 0,51 dB in phase and by
     -20 lg 0,94 = 0,54 dB in antiphase, both 0,5 dB to the tenth.
     """
-    check = vibration.check_output_mass([100.0], 0.6, [120.0], [100.0])
+    check = vibration.check_output_mass(
+        frequencies=[100.0],
+        output_mass_kg=0.6,
+        output_force_level=[120.0],
+        output_acceleration_level=[100.0],
+    )
     assert check.passes is True
     assert float(check.inertia_ratio[0]) == pytest.approx(0.06)
     worst = float(check.bias_bound_db[0])
@@ -689,14 +791,22 @@ def test_a_heavy_output_mass_warns() -> None:
     """0,5 kg against limits of 0,6 kg (La2 = 100 dB) and 0,19 kg (La2 = 110 dB)."""
     with pytest.warns(vibration.TransferStiffnessWarning, match="NOTE 2"):
         check = vibration.check_output_mass(
-            [100.0, 200.0], 0.5, [120.0, 120.0], [100.0, 110.0]
+            frequencies=[100.0, 200.0],
+            output_mass_kg=0.5,
+            output_force_level=[120.0, 120.0],
+            output_acceleration_level=[100.0, 110.0],
         )
     assert check.holds.tolist() == [True, False]
     assert check.passes is False
 
 
 def test_an_output_mass_check_is_not_a_truth_value() -> None:
-    check = vibration.check_output_mass([100.0], 0.1, [120.0], [100.0])
+    check = vibration.check_output_mass(
+        frequencies=[100.0],
+        output_mass_kg=0.1,
+        output_force_level=[120.0],
+        output_acceleration_level=[100.0],
+    )
     with pytest.raises(TypeError, match="no truth value"):
         bool(check)
 
@@ -709,7 +819,13 @@ def test_a_rigid_block_has_its_own_mass_and_no_upper_limit() -> None:
     m2 = 25.0
     force = np.full(f.size, 10.0 + 0j)
     a = force / m2
-    em = vibration.effective_blocking_mass(f, force, a, a, blocking_mass=m2)
+    em = vibration.effective_blocking_mass(
+        frequencies=f,
+        force=force,
+        first_acceleration_m_s2=a,
+        second_acceleration_m_s2=a,
+        blocking_mass=m2,
+    )
     assert em.effective_mass_kg == pytest.approx(np.full(f.size, m2), rel=1e-15)
     assert em.upper_frequency_limit_hz is None
     assert bool(np.all(em.valid))
@@ -719,7 +835,11 @@ def test_formula_6_divides_twice_the_force_by_the_sum_of_the_two_accelerations()
     None
 ):
     em = vibration.effective_blocking_mass(
-        [100.0], [3.0 + 0j], [0.1 + 0.02j], [0.2 - 0.02j], blocking_mass=20.0
+        frequencies=[100.0],
+        force=[3.0 + 0j],
+        first_acceleration_m_s2=[0.1 + 0.02j],
+        second_acceleration_m_s2=[0.2 - 0.02j],
+        blocking_mass=20.0,
     )
     assert float(em.effective_mass_kg[0]) == pytest.approx(20.0)
 
@@ -731,7 +851,11 @@ def test_f3_is_where_the_effective_mass_leaves_1_db() -> None:
     m_eff = m2 * (1.0 + (f / fc) ** 2)
     ones = np.ones(f.size, dtype=complex)
     em = vibration.effective_blocking_mass(
-        f, m_eff * ones, ones, ones, blocking_mass=m2
+        frequencies=f,
+        force=m_eff * ones,
+        first_acceleration_m_s2=ones,
+        second_acceleration_m_s2=ones,
+        blocking_mass=m2,
     )
     expected = fc * math.sqrt(10.0**0.05 - 1.0)
     assert em.upper_frequency_limit_hz == pytest.approx(expected, rel=1e-5)
@@ -751,7 +875,11 @@ def test_f3_is_interpolated_in_log_frequency_and_the_mask_ends_before_it() -> No
     m_eff = m2 * (1.0 + (f / fc) ** 2)
     ones = np.ones(f.size, dtype=complex)
     em = vibration.effective_blocking_mass(
-        f, m_eff * ones, ones, ones, blocking_mass=m2
+        frequencies=f,
+        force=m_eff * ones,
+        first_acceleration_m_s2=ones,
+        second_acceleration_m_s2=ones,
+        blocking_mass=m2,
     )
     deviation = 20.0 * np.log10(m_eff / m2)
     first = int(np.flatnonzero(np.abs(deviation) > 1.0)[0])
@@ -772,7 +900,11 @@ def test_a_deviation_below_40_hz_does_not_set_f3() -> None:
     m_eff = np.array([30.0, 25.0, 20.0, 20.0, 20.0])
     ones = np.ones(f.size, dtype=complex)
     em = vibration.effective_blocking_mass(
-        f, m_eff * ones, ones, ones, blocking_mass=20.0
+        frequencies=f,
+        force=m_eff * ones,
+        first_acceleration_m_s2=ones,
+        second_acceleration_m_s2=ones,
+        blocking_mass=20.0,
     )
     assert em.upper_frequency_limit_hz is None
     assert em.ignored_below_hz == pytest.approx(40.0)
@@ -782,7 +914,11 @@ def test_effective_mass_refuses_accelerations_that_cancel() -> None:
     ones = np.ones(2, dtype=complex)
     with pytest.raises(ValueError, match="sum to zero"):
         vibration.effective_blocking_mass(
-            [100.0, 200.0], ones, ones, -ones, blocking_mass=20.0
+            frequencies=[100.0, 200.0],
+            force=ones,
+            first_acceleration_m_s2=ones,
+            second_acceleration_m_s2=-ones,
+            blocking_mass=20.0,
         )
 
 
@@ -790,7 +926,11 @@ def test_effective_mass_refuses_an_unsorted_sweep() -> None:
     ones = np.ones(2, dtype=complex)
     with pytest.raises(ValueError, match="must increase strictly"):
         vibration.effective_blocking_mass(
-            [200.0, 100.0], ones, ones, ones, blocking_mass=20.0
+            frequencies=[200.0, 100.0],
+            force=ones,
+            first_acceleration_m_s2=ones,
+            second_acceleration_m_s2=ones,
+            blocking_mass=20.0,
         )
 
 
@@ -811,7 +951,9 @@ def _driven(stiffness: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 def test_formula_3_turns_force_and_acceleration_into_force_over_displacement() -> None:
     k = 1.0e6 * (1.0 + 0.04j)
     force, accel = _driven(np.full(_SWEEP_HZ.size, k))
-    res = vibration.driving_point_stiffness(_SWEEP_HZ, force, accel)
+    res = vibration.driving_point_stiffness(
+        frequencies=_SWEEP_HZ, input_force_n=force, input_acceleration_m_s2=accel
+    )
     assert res.driving_point_stiffness == pytest.approx(np.full(_SWEEP_HZ.size, k))
     assert res.loss_factor == pytest.approx(np.full(_SWEEP_HZ.size, 0.04))
 
@@ -819,7 +961,9 @@ def test_formula_3_turns_force_and_acceleration_into_force_over_displacement() -
 def test_a_massless_spring_has_a_flat_stiffness_and_no_upper_limit() -> None:
     """The closed-form anchor: |k1,1| = |k2,1| everywhere, so f_UL is never reached."""
     force, accel = _driven(np.full(_SWEEP_HZ.size, 1.0e6 + 0j))
-    res = vibration.driving_point_stiffness(_SWEEP_HZ, force, accel)
+    res = vibration.driving_point_stiffness(
+        frequencies=_SWEEP_HZ, input_force_n=force, input_acceleration_m_s2=accel
+    )
     assert res.low_frequency_level == pytest.approx(120.0)
     assert res.upper_limiting_frequency_hz is None
     assert bool(np.all(res.valid))
@@ -831,7 +975,9 @@ def test_f_ul_of_a_mass_loaded_spring_is_its_closed_form() -> None:
     """k1,1 = k - w^2 m0 falls 2 dB below its 1-20 Hz average at a known frequency."""
     k, m0 = 1.0e6, 2.0
     force, accel = _driven(k - _OMEGA**2 * m0)
-    res = vibration.driving_point_stiffness(_SWEEP_HZ, force, accel)
+    res = vibration.driving_point_stiffness(
+        frequencies=_SWEEP_HZ, input_force_n=force, input_acceleration_m_s2=accel
+    )
     lines = (_SWEEP_HZ >= 1.0) & (_SWEEP_HZ <= 20.0)
     low = 10.0 * math.log10(float(np.mean((k - _OMEGA[lines] ** 2 * m0) ** 2)))
     assert res.low_frequency_level == pytest.approx(low, abs=1e-12)
@@ -845,7 +991,9 @@ def test_band_averages_below_f_ul_are_within_2_db_of_the_transfer_stiffness() ->
     """Formula (7): every valid band of k1,1 is within 2 dB of k2,1 = k."""
     k, m0 = 1.0e6, 2.0
     force, accel = _driven(k - _OMEGA**2 * m0)
-    res = vibration.driving_point_stiffness(_SWEEP_HZ, force, accel)
+    res = vibration.driving_point_stiffness(
+        frequencies=_SWEEP_HZ, input_force_n=force, input_acceleration_m_s2=accel
+    )
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", vibration.TransferStiffnessWarning)
         bands = res.band_average()
@@ -857,7 +1005,9 @@ def test_band_averages_below_f_ul_are_within_2_db_of_the_transfer_stiffness() ->
 def test_the_band_average_is_quiet_about_the_short_bands_below_20_hz() -> None:
     """7.5: 0,2 Hz spacing up to 20 Hz leaves the lowest bands short of five."""
     force, accel = _driven(np.full(_SWEEP_HZ.size, 1.0e6 + 0j))
-    res = vibration.driving_point_stiffness(_SWEEP_HZ, force, accel)
+    res = vibration.driving_point_stiffness(
+        frequencies=_SWEEP_HZ, input_force_n=force, input_acceleration_m_s2=accel
+    )
     with warnings.catch_warnings():
         warnings.simplefilter("error", vibration.TransferStiffnessWarning)
         bands = res.band_average()
@@ -870,7 +1020,10 @@ def test_lines_where_the_output_is_not_blocked_are_excluded() -> None:
     output[_SWEEP_HZ > 300.0] = accel[_SWEEP_HZ > 300.0] * 0.2  # 14 dB down
     with pytest.warns(vibration.TransferStiffnessWarning, match="not blocked"):
         res = vibration.driving_point_stiffness(
-            _SWEEP_HZ, force, accel, output_acceleration_m_s2=output
+            frequencies=_SWEEP_HZ,
+            input_force_n=force,
+            input_acceleration_m_s2=accel,
+            output_acceleration_m_s2=output,
         )
     assert res.adequate is not None
     assert res.adequate.tolist() == (_SWEEP_HZ <= 300.0).tolist()
@@ -883,7 +1036,10 @@ def test_lines_with_unwanted_input_motion_are_excluded() -> None:
     unwanted[1, _SWEEP_HZ < 5.0] = accel[_SWEEP_HZ < 5.0] * 0.5
     with pytest.warns(vibration.TransferStiffnessWarning, match="unwanted directions"):
         res = vibration.driving_point_stiffness(
-            _SWEEP_HZ, force, accel, unwanted_acceleration_m_s2=unwanted
+            frequencies=_SWEEP_HZ,
+            input_force_n=force,
+            input_acceleration_m_s2=accel,
+            unwanted_acceleration_m_s2=unwanted,
         )
     assert not bool(np.any(res.valid[_SWEEP_HZ < 5.0]))
 
@@ -897,7 +1053,11 @@ def test_a_line_exactly_on_the_threshold_is_f_ul_and_is_kept() -> None:
     f = np.array([1.0, 5.0, 10.0, 20.0, 30.0, 40.0])
     k = 10.0 ** (np.array([120.0, 120.0, 120.0, 120.0, 118.0, 117.0]) / 20.0)
     w = 2.0 * np.pi * f
-    res = vibration.driving_point_stiffness(f, k * 1.0e-6, -(w**2) * 1.0e-6)
+    res = vibration.driving_point_stiffness(
+        frequencies=f,
+        input_force_n=k * 1.0e-6,
+        input_acceleration_m_s2=-(w**2) * 1.0e-6,
+    )
     assert res.threshold_level == pytest.approx(118.0, abs=1e-12)
     assert res.upper_limiting_frequency_hz == pytest.approx(30.0, abs=1e-12)
     assert res.valid.tolist() == [True, True, True, True, True, False]
@@ -923,9 +1083,9 @@ def test_a_line_must_pass_both_inequalities_and_counts_nowhere_if_it_fails() -> 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", vibration.TransferStiffnessWarning)
         res = vibration.driving_point_stiffness(
-            _SWEEP_HZ,
-            force,
-            accel,
+            frequencies=_SWEEP_HZ,
+            input_force_n=force,
+            input_acceleration_m_s2=accel,
             output_acceleration_m_s2=output,
             unwanted_acceleration_m_s2=unwanted,
         )
@@ -942,7 +1102,11 @@ def test_lines_below_1_hz_neither_set_f_ul_nor_enter_the_result() -> None:
     k = np.full(f.size, 1.0e6 + 0j)
     below = f < 0.95
     k[below] *= 10.0 ** (-3.0 / 20.0)
-    res = vibration.driving_point_stiffness(f, k * 1.0e-6, -(w**2) * 1.0e-6)
+    res = vibration.driving_point_stiffness(
+        frequencies=f,
+        input_force_n=k * 1.0e-6,
+        input_acceleration_m_s2=-(w**2) * 1.0e-6,
+    )
     assert res.upper_limiting_frequency_hz is None
     assert res.low_frequency_level == pytest.approx(120.0, abs=1e-9)
     assert not bool(np.any(res.valid[below]))
@@ -959,7 +1123,9 @@ def test_short_bands_are_quiet_up_to_20_hz_and_no_further() -> None:
     f = np.arange(1.0, 400.0, 1.0)
     w = 2.0 * np.pi * f
     res = vibration.driving_point_stiffness(
-        f, np.full(f.size, 1.0) + 0j, -(w**2) * 1.0e-6
+        frequencies=f,
+        input_force_n=np.full(f.size, 1.0) + 0j,
+        input_acceleration_m_s2=-(w**2) * 1.0e-6,
     )
     with warnings.catch_warnings():
         warnings.simplefilter("error", vibration.TransferStiffnessWarning)
@@ -973,7 +1139,9 @@ def test_short_bands_are_quiet_up_to_20_hz_and_no_further() -> None:
     sparse = np.concatenate([np.arange(1.0, 20.1, 0.2), [25.0, 26.0, 27.0]])
     w = 2.0 * np.pi * sparse
     short = vibration.driving_point_stiffness(
-        sparse, np.full(sparse.size, 1.0) + 0j, -(w**2) * 1.0e-6
+        frequencies=sparse,
+        input_force_n=np.full(sparse.size, 1.0) + 0j,
+        input_acceleration_m_s2=-(w**2) * 1.0e-6,
     )
     with pytest.warns(vibration.TransferStiffnessWarning, match=r"25 Hz \(3\)"):
         short.band_average()
@@ -987,14 +1155,18 @@ def test_the_driving_point_method_needs_lines_from_1_to_20_hz() -> None:
     with pytest.raises(
         ValueError, match="no adequate line lies between 1 Hz and 20 Hz"
     ):
-        vibration.driving_point_stiffness(f, force, accel)
+        vibration.driving_point_stiffness(
+            frequencies=f, input_force_n=force, input_acceleration_m_s2=accel
+        )
 
 
 def test_the_driving_point_method_refuses_a_still_input() -> None:
     force = np.ones(_SWEEP_HZ.size, dtype=complex)
     accel = np.zeros(_SWEEP_HZ.size, dtype=complex)
     with pytest.raises(ValueError, match="contains zeros"):
-        vibration.driving_point_stiffness(_SWEEP_HZ, force, accel)
+        vibration.driving_point_stiffness(
+            frequencies=_SWEEP_HZ, input_force_n=force, input_acceleration_m_s2=accel
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -1066,7 +1238,9 @@ def test_the_driving_point_figure_marks_f_ul_and_the_threshold() -> None:
 
     k, m0 = 1.0e6, 2.0
     force, accel = _driven(k - _OMEGA**2 * m0)
-    res = vibration.driving_point_stiffness(_SWEEP_HZ, force, accel)
+    res = vibration.driving_point_stiffness(
+        frequencies=_SWEEP_HZ, input_force_n=force, input_acceleration_m_s2=accel
+    )
     ax = res.plot()
     f_ul = res.upper_limiting_frequency_hz
     assert f_ul is not None
@@ -1107,7 +1281,9 @@ def test_the_band_figure_marks_the_undetermined_bands() -> None:
 
     f = np.concatenate([_TWO_BANDS_HZ[:5], _TWO_BANDS_HZ[5:8]])
     with pytest.warns(vibration.TransferStiffnessWarning, match=r"1250 Hz \(3\)"):
-        bands = vibration.band_averaged_stiffness(f, np.full(f.size, 1.0e6))
+        bands = vibration.band_averaged_stiffness(
+            frequencies=f, stiffness=np.full(f.size, 1.0e6)
+        )
     ax = bands.plot()
     assert "fewer than five lines" in ax.get_legend_handles_labels()[1]
     plt.close("all")
@@ -1123,7 +1299,9 @@ def test_a_band_figure_with_no_band_determined_says_so() -> None:
 
     f = np.geomspace(20.0, 2000.0, 60)
     with pytest.warns(vibration.TransferStiffnessWarning, match="left undetermined"):
-        bands = vibration.band_averaged_stiffness(f, np.full(f.size, 1.0e6))
+        bands = vibration.band_averaged_stiffness(
+            frequencies=f, stiffness=np.full(f.size, 1.0e6)
+        )
     assert not bool(np.any(bands.determined))
     ax = bands.plot(language="es")
     texts = [text.get_text() for text in ax.texts]
@@ -1150,7 +1328,9 @@ def test_the_band_figure_legend_leaves_every_marker_clear(language: str) -> None
     f = np.arange(1.0, 200.0, 0.2)
     w = 2.0 * np.pi * f
     res = vibration.driving_point_stiffness(
-        f, (k - w**2 * m0) * 1.0e-6, -(w**2) * 1.0e-6
+        frequencies=f,
+        input_force_n=(k - w**2 * m0) * 1.0e-6,
+        input_acceleration_m_s2=-(w**2) * 1.0e-6,
     )
     fig, ax = plt.subplots()
     res.band_average().plot(ax=ax, language=language)
@@ -1180,7 +1360,10 @@ def test_a_spanish_title_fits_the_default_figure() -> None:
     import matplotlib.pyplot as plt
 
     check = vibration.check_output_mass(
-        [20.0, 63.0, 125.0], 0.1, [120.0] * 3, [100.0, 104.0, 106.0]
+        frequencies=[20.0, 63.0, 125.0],
+        output_mass_kg=0.1,
+        output_force_level=[120.0] * 3,
+        output_acceleration_level=[100.0, 104.0, 106.0],
     )
     ax = check.plot(language="es")
     fig = ax.figure
@@ -1207,7 +1390,9 @@ def test_the_transfer_stiffness_figure_draws_the_excluded_lines_apart() -> None:
     f = np.arange(90.0, 1120.0, 2.0)
     t = vibration.base_transmissibility(f, mass=8.0, stiffness=1.0e6, damping=120.0)
     with pytest.warns(vibration.TransferStiffnessWarning, match="Inequality \\(2\\)"):
-        res = vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
+        res = vibration.indirect_transfer_stiffness_result(
+            frequencies=f, transmissibility=t, blocking_mass=8.0
+        )
     assert res.valid is not None
     ax = res.plot()
     valid_curve, excluded_curve = ax.lines[0], ax.lines[1]

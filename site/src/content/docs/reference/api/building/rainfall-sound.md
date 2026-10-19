@@ -161,6 +161,7 @@ one hour (the definition under Table H.1).
 rainfall_reference_correction(
     l_i_ref: ArrayLike,
     structural_reverberation_time: ArrayLike,
+    *,
     frequencies: ArrayLike | None = None,
 ) -> RainfallReferenceCorrection
 ```
@@ -219,8 +220,8 @@ RAINFALL_REFERENCE_LOSS_FACTOR_DB = {100.0: -10.0, 125.0: -11.0, 160.0: -11.0, 2
 rainfall_sound(
     l_pr: ArrayLike,
     reverberation_time: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     volume: float,
     excited_area_m2: float,
     background_db: ArrayLike | None = None,
@@ -276,8 +277,8 @@ for comparison between laboratories.
 ```python
 rainfall_sound_from_intensity(
     l_im: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     measuring_area_m2: float,
     excited_area_m2: float,
     reference_correction: RainfallReferenceCorrection | ArrayLike | None = None,

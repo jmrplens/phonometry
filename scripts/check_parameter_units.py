@@ -30,7 +30,18 @@ path would never see it.
 
 The second half of the rule is where the name has to appear: a parameter under
 the rule that carries a default is keyword-only, so the number cannot be
-written as a bare positional argument with the name nowhere on the line.
+written as a bare positional argument with the name nowhere on the line. The
+conditions of :data:`CONDITIONS` (the speed of sound and the density of the
+medium, a calibration factor, the ground factors) are held to this half
+whatever their suffix, because the name is all a reader of the call has.
+
+A frequency axis is written by name too. A public function or method that
+takes its frequencies (:data:`FREQUENCY_AXES`, or a name that ends in one of
+them such as ``tone_frequencies``) by position beside another array of
+numbers is reported: two arrays of the same length in a row bind
+the other way round without a complaint, and the answer comes back computed
+on the wrong axis. The values stay positional, in their order, and the axis
+goes behind the bare ``*``. :data:`FREQUENCY_AXIS_EXEMPT` is its escape hatch.
 
 :data:`EXEMPT` is the escape hatch for the first half and :data:`POSITIONAL`
 for the second, both keyed by module, qualified name and parameter, and each
@@ -88,7 +99,7 @@ import pkgutil
 import re
 import sys
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple, cast
 
 import numpy as np
 
@@ -928,6 +939,28 @@ POSITIONAL: dict[tuple[str, str, str], str] = {
     ),
 }
 
+#: Conditions of the medium and of the measuring chain that are written by
+#: name whatever their suffix says. The second half of the rule only sees a
+#: name that carries a unit, and these carry none of their own or none at all:
+#: a speed of sound, a density of air or of water and a calibration factor are
+#: each one bare number (343, 1.2, 1000, 0.5) that reads as any other at the
+#: call site, and the three ground factors G of ISO 9613-2 are three numbers
+#: between 0 and 1 in a row, the order nobody remembers. Each one that carries
+#: a default and is not the first parameter is keyword-only, as a unit-named
+#: condition is; :data:`POSITIONAL` is still the escape hatch, with its reason.
+CONDITIONS = frozenset(
+    {
+        "speed_of_sound",
+        "air_density",
+        "air_sound_speed",
+        "water_density",
+        "calibration_factor",
+        "ground_source",
+        "ground_middle",
+        "ground_receiver",
+    }
+)
+
 
 class Parameter(NamedTuple):
     """One public parameter, and where a reader finds it."""
@@ -1452,6 +1485,13 @@ def offenders(
     loose: list[Parameter] = []
     used: set[tuple[str, str, str]] = set()
     for parameter in public_parameters() if parameters is None else parameters:
+        if parameter.positional_with_default and parameter.name in CONDITIONS:
+            key = (parameter.module, parameter.qualname, parameter.name)
+            if key in POSITIONAL:
+                used.add(key)
+            else:
+                loose.append(parameter)
+            continue
         if not names_a_quantity(parameter.name, parameter.module):
             continue
         if holds_a_truth_value(parameter.annotation):
@@ -2245,6 +2285,12 @@ def _public_functions() -> Iterator[PublicName]:
     name it is called with. A method is found on every published class that
     answers to it, inherited ones included (:func:`_class_methods`).
     """
+    for entry, _ in _public_function_targets():
+        yield entry
+
+
+def _public_function_targets() -> Iterator[tuple[PublicName, Callable[..., object]]]:
+    """:func:`_public_functions`, each beside the function object it names."""
     seen: set[tuple[str, str]] = set()
     for _, module in public_modules():
         for exported in getattr(module, "__all__", ()):
@@ -2261,9 +2307,119 @@ def _public_functions() -> Iterator[PublicName]:
                 if (home, qualname) in seen:
                     continue
                 seen.add((home, qualname))
-                yield PublicName(
+                entry = PublicName(
                     home, qualname, qualname.rpartition(".")[2], _where(target)
                 )
+                yield entry, cast("Callable[..., object]", target)
+
+
+#: The names a frequency axis goes by: ``frequencies`` across the tree,
+#: ``frequencies_hz`` in underwater, where the formulas are printed in kHz, and
+#: ``frequency`` or ``frequency_hz`` where a function is vectorised over it.
+#: A name that ends in one of them is a frequency array too
+#: (:func:`is_frequency_axis`): ``tone_frequencies`` beside ``tone_levels``,
+#: ``reversal_frequencies`` beside the levels of a tracing, a critical
+#: frequency or a natural frequency per element or per mode beside the value
+#: it pairs with. The hazard is the same: two arrays of one length in a row.
+FREQUENCY_AXES = frozenset(
+    {"frequencies", "frequency", "frequencies_hz", "frequency_hz"}
+)
+
+#: An annotation that says the parameter holds an array of numbers: an
+#: ``ArrayLike``, an ``NDArray`` or a sequence of floats, but not a sequence of
+#: layers or wells, and not a ``tuple[float, float]`` pair such as a band edge.
+_NUMERIC_ARRAY = re.compile(
+    r"\b(?:ArrayLike|NDArray|ndarray)\b"
+    r"|\b(?:Sequence|list|Iterable)\[(?:float|int|complex)\]"
+    r"|\btuple\[(?:float|int), \.\.\.\]"
+)
+
+#: The parameter kinds a call fills by position.
+_BY_POSITION = (
+    inspect.Parameter.POSITIONAL_ONLY,
+    inspect.Parameter.POSITIONAL_OR_KEYWORD,
+)
+
+#: Functions that keep their frequency axis positional beside another array,
+#: keyed by module and qualified name, each with its reason.
+FREQUENCY_AXIS_EXEMPT: dict[tuple[str, str], str] = {}
+
+
+def is_frequency_axis(name: str) -> bool:
+    """Whether a parameter name says it holds frequencies."""
+    return name in FREQUENCY_AXES or any(
+        name.endswith(f"_{axis}") for axis in FREQUENCY_AXES
+    )
+
+
+def holds_an_array(annotation: object) -> bool:
+    """Whether a parameter's annotation says it holds an array of numbers."""
+    if annotation is inspect.Parameter.empty:
+        return False
+    return bool(_NUMERIC_ARRAY.search(str(annotation)))
+
+
+def positional_frequency_axes() -> tuple[
+    list[tuple[PublicName, str, tuple[str, ...]]], list[tuple[str, str]]
+]:
+    """The public functions that take a frequency axis by position beside an array.
+
+    Each finding is the function, the axis it takes by position and the other
+    arrays a caller passes by position beside it; the second list is the
+    exemptions nothing needs any more. A record is not walked: a result's
+    fields are read by name off it. The few records a caller builds as input
+    (``aircraft.RotorcraftHemisphere``) are outside this rule, and the guides
+    build them with every field named.
+    """
+    found: list[tuple[PublicName, str, tuple[str, ...]]] = []
+    used: set[tuple[str, str]] = set()
+    for entry, target in _public_function_targets():
+        try:
+            signature = inspect.signature(target)
+        except (TypeError, ValueError):
+            continue
+        by_position = [
+            p
+            for p in signature.parameters.values()
+            if p.kind in _BY_POSITION and p.name not in {"self", "cls"}
+        ]
+        axes = [
+            p.name
+            for p in by_position
+            if is_frequency_axis(p.name) and holds_an_array(p.annotation)
+        ]
+        values = tuple(
+            p.name
+            for p in by_position
+            if not is_frequency_axis(p.name) and holds_an_array(p.annotation)
+        )
+        if not axes or not values:
+            continue
+        key = (entry.module, entry.qualname)
+        if key in FREQUENCY_AXIS_EXEMPT:
+            used.add(key)
+            continue
+        found.extend((entry, axis, values) for axis in axes)
+    return found, [k for k in FREQUENCY_AXIS_EXEMPT if k not in used]
+
+
+def _report_frequency_axes(
+    axes: list[tuple[PublicName, str, tuple[str, ...]]],
+) -> None:
+    """Print the frequency-axis rule's findings."""
+    if not axes:
+        return
+    print("::error::a frequency axis can still be passed by position beside its values")
+    print(f"{len(axes)} function(s) take the axis positionally beside another array:")
+    for entry, axis, values in sorted(axes):
+        print(
+            f"  {entry.qualname}({axis}) beside ({', '.join(values)})  <- {entry.where}"
+        )
+    print(
+        "  -> put the axis behind a bare '*', keeping the values positional in "
+        "their order; a signature that has to keep it goes in "
+        "FREQUENCY_AXIS_EXEMPT with the reason."
+    )
 
 
 def unit_named_functions() -> tuple[list[PublicName], list[tuple[str, str]]]:
@@ -2492,6 +2648,7 @@ def main() -> int:
     pairs, stale_pairs = bare_and_suffixed(parameters)
     functions, stale_functions = unit_named_functions()
     levels, stale_levels = decibel_suffixed()
+    axes, stale_axes = positional_frequency_axes()
     stale_keys = [
         *stale,
         *stale_spellings,
@@ -2501,6 +2658,7 @@ def main() -> int:
         *stale_pairs,
         *stale_functions,
         *stale_levels,
+        *stale_axes,
     ]
     if not (
         unnamed
@@ -2512,12 +2670,14 @@ def main() -> int:
         or pairs
         or functions
         or levels
+        or axes
         or stale_keys
     ):
         print(
             "Every public parameter and constant under the rule names its unit, "
             "in the one spelling the tree uses, and asks for it by name; every "
-            "public function is named for what it returns."
+            "condition and every frequency axis beside its values is written by "
+            "name; every public function is named for what it returns."
         )
         return 0
     if unnamed:
@@ -2540,7 +2700,7 @@ def main() -> int:
             print(f"  {parameter.qualname}({parameter.name})  <- {parameter.where}")
         print(
             "  -> put a bare '*' before it in the signature, or KW_ONLY before "
-            "the field, so the unit in the name is written at the call site; "
+            "the field, so its name and unit are written at the call site; "
             "a signature that has to keep its positional form goes in "
             "POSITIONAL with the reason."
         )
@@ -2548,6 +2708,7 @@ def main() -> int:
     _report_closing(rates, pressures, pairs)
     _report_functions(functions)
     _report_levels(levels)
+    _report_frequency_axes(axes)
     for key in stale_keys:
         print(
             f"::error::an exemption at the top of scripts/check_parameter_units.py "

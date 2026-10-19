@@ -775,10 +775,10 @@ def _resolve_polar(
 
 
 def loudspeaker_characteristics(
-    frequencies: ArrayLike,
     spl: ArrayLike,
     rated_impedance_ohm: float,
     *,
+    frequencies: ArrayLike,
     input_voltage_v: float | None = None,
     distance: float = 1.0,
     sensitivity_band: tuple[float, float] | None = None,

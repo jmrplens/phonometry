@@ -81,7 +81,9 @@ def _reverb_power() -> ph.emission.ReverberationSoundPowerResult:
     freqs = np.array([250.0, 500.0, 1000.0, 2000.0])
     t60 = np.array([1.6, 1.5, 1.4, 1.1])
     lp = np.tile(np.array([80.0, 82.0, 84.0, 81.0]), (6, 1))
-    return ph.emission.sound_power_reverberation(lp, t60, 200.0, 220.0, freqs)
+    return ph.emission.sound_power_reverberation(
+        lp, t60, 200.0, 220.0, frequencies=freqs
+    )
 
 
 def _sound_energy() -> ph.emission.SoundEnergyResult:
@@ -99,7 +101,9 @@ def _reverb_energy() -> ph.emission.ReverberationSoundEnergyResult:
     freqs = np.array([250.0, 500.0, 1000.0, 2000.0])
     t60 = np.array([1.6, 1.5, 1.4, 1.1])
     le = np.tile(np.array([90.0, 92.0, 94.0, 91.0]), (6, 1))
-    return ph.emission.sound_energy_reverberation(le, t60, 200.0, 220.0, freqs)
+    return ph.emission.sound_energy_reverberation(
+        le, t60, 200.0, 220.0, frequencies=freqs
+    )
 
 
 def _intensity_power_negative() -> ph.emission.SoundPowerIntensityResult:
@@ -586,7 +590,7 @@ def _service_equipment() -> ph.building.ServiceEquipmentResult:
     t = np.full(freqs.size, 0.6)
     return ph.building.service_equipment_level(
         readings,
-        freqs,
+        frequencies=freqs,
         quantity="eq",
         background_db=background,
         reverberation_time=t,
@@ -748,18 +752,18 @@ def _directivity_factor() -> ph.metrology.DirectivityFactor:
 def _random_incidence() -> ph.metrology.RandomIncidenceSensitivity:
     """G_F and 10 lg gamma of a meter at four bands (IEC 61183 Formula (1))."""
     return ph.metrology.random_incidence_sensitivity(
-        [1000.0, 2000.0, 4000.0, 8000.0],
-        [0.1, 0.0, -0.3, -0.9],
-        [0.05, 0.2, 0.85, 2.45],
+        frequencies=[1000.0, 2000.0, 4000.0, 8000.0],
+        free_field_level=[0.1, 0.0, -0.3, -0.9],
+        directivity_index=[0.05, 0.2, 0.85, 2.45],
     )
 
 
 def _diffuse_field() -> ph.metrology.DiffuseFieldSensitivity:
     """A meter compared with a pressure-calibrated reference (IEC 61183 (11))."""
     return ph.metrology.diffuse_field_sensitivity(
-        [1000.0, 2000.0, 4000.0, 8000.0],
-        [80.2, 80.4, 80.1, 79.0],
-        [80.0, 80.0, 80.0, 80.0],
+        frequencies=[1000.0, 2000.0, 4000.0, 8000.0],
+        indicated_level=[80.2, 80.4, 80.1, 79.0],
+        reference_indicated_level=[80.0, 80.0, 80.0, 80.0],
         reference_pressure_level=-26.0,
     )
 
@@ -767,9 +771,9 @@ def _diffuse_field() -> ph.metrology.DiffuseFieldSensitivity:
 def _adjustment_value() -> ph.metrology.AdjustmentValue:
     """A meter's free-field response fitted to its tolerances (IEC 62585 A)."""
     return ph.metrology.adjustment_value(
-        [125.0, 1000.0, 8000.0],
-        [94.2, 94.1, 93.4],
-        94.3,
+        frequencies=[125.0, 1000.0, 8000.0],
+        free_field_indicated_level=[94.2, 94.1, 93.4],
+        calibrator_reading_db=94.3,
         calibrator_level=94.0,
         tolerance_db=[1.0, 0.7, 1.5],
     )
@@ -778,11 +782,15 @@ def _adjustment_value() -> ph.metrology.AdjustmentValue:
 def _free_field_correction() -> ph.metrology.FreeFieldCorrection:
     """Three microphones on a calibrator (IEC 62585 Formula (D.7))."""
     return ph.metrology.sound_calibrator_correction(
-        [1000.0, 4000.0, 8000.0],
-        [[94.0, 93.6, 92.9], [94.0, 93.65, 93.0], [94.0, 93.55, 92.85]],
-        [94.08, 94.95, 96.6],
-        [94.0, 93.1, 91.6],
-        [94.0, 94.1, 94.2],
+        frequencies=[1000.0, 4000.0, 8000.0],
+        slm_free_field_level=[
+            [94.0, 93.6, 92.9],
+            [94.0, 93.65, 93.0],
+            [94.0, 93.55, 92.85],
+        ],
+        reference_free_field_level=[94.08, 94.95, 96.6],
+        slm_calibrator_level=[94.0, 93.1, 91.6],
+        reference_calibrator_level=[94.0, 94.1, 94.2],
         reference_free_field_correction=[0.08, 0.85, 2.4],
     )
 
@@ -802,8 +810,8 @@ def _correction_budget() -> ph.metrology.CorrectionUncertaintyBudget:
 def _correction_verification() -> ph.metrology.CorrectionUncertaintyVerification:
     """Expanded uncertainties against the maxima of IEC 62585 clause 12."""
     return ph.metrology.verify_correction_uncertainty(
-        [1000.0, 4000.0, 8000.0, 16000.0],
-        [0.12, 0.2, 0.3, 0.55],
+        frequencies=[1000.0, 4000.0, 8000.0, 16000.0],
+        expanded_uncertainty_db=[0.12, 0.2, 0.3, 0.55],
         clause=12,
         correction_range_db=[0.02, 0.05, 0.1, 0.2],
     )
@@ -814,10 +822,10 @@ def _comparison_calibration() -> ph.metrology.ComparisonCalibration:
     (IEC 61094-5 Annex C).
     """
     return ph.metrology.simultaneous_comparison(
-        [1000.0, 2000.0, 4000.0],
-        [-38.0, -37.98, -37.95],
-        [-11.2, -11.3, -11.4],
-        [11.4, 11.5, 11.6],
+        frequencies=[1000.0, 2000.0, 4000.0],
+        reference_sensitivity_level=[-38.0, -37.98, -37.95],
+        channel_difference=[-11.2, -11.3, -11.4],
+        interchanged_channel_difference=[11.4, 11.5, 11.6],
         expanded_uncertainty_db=[0.08, 0.09, 0.12],
     )
 
@@ -932,15 +940,18 @@ def _pressure_reciprocity() -> ph.metrology.ReciprocityCalibration:
         for (i, j), z in zip(((0, 1), (1, 2), (2, 0)), acoustic, strict=True)
     ]
     return ph.metrology.pressure_reciprocity(
-        frequencies, electrical, acoustic, expanded_uncertainty_db=0.03
+        frequencies=frequencies,
+        electrical_transfer_impedances_ohm=electrical,
+        acoustic_transfer_impedances=acoustic,
+        expanded_uncertainty_db=0.03,
     )
 
 
 def _reciprocity_budget() -> ph.metrology.ReciprocityUncertaintyBudget:
     """Three components of IEC 61094-2 Table 1 at three frequencies."""
     return ph.metrology.reciprocity_uncertainty_budget(
-        [250.0, 1000.0, 4000.0],
-        {
+        frequencies=[250.0, 1000.0, 4000.0],
+        standard_uncertainties_db={
             "voltage_ratio": 0.003,
             "coupler_length": 0.004,
             "repeatability": [0.005, 0.004, 0.008],
@@ -1040,10 +1051,10 @@ def _comparison_phase() -> ph.metrology.ComparisonCalibration:
     (IEC 61094-5 5.1.1), interchanged in a coupler.
     """
     return ph.metrology.simultaneous_comparison(
-        [1000.0, 2000.0, 4000.0],
-        [-38.0, -37.98, -37.95],
-        [-11.2, -11.3, -11.4],
-        [11.4, 11.5, 11.6],
+        frequencies=[1000.0, 2000.0, 4000.0],
+        reference_sensitivity_level=[-38.0, -37.98, -37.95],
+        channel_difference=[-11.2, -11.3, -11.4],
+        interchanged_channel_difference=[11.4, 11.5, 11.6],
         phase=ph.metrology.SimultaneousComparisonPhase(
             reference_sensitivity_phase_deg=[-1.5, -3.1, -6.4],
             channel_phase_difference_deg=[2.1, 4.4, 9.0],
@@ -1101,7 +1112,9 @@ def _stepped_sine_impulse_response() -> ph.metrology.SteppedSineImpulseResponse:
     """A stepped-sine measurement at 120 Hz steps (IEC 61094-8 B.2)."""
     frequencies = np.arange(0.0, 24001.0, 120.0)
     response = np.exp(-2j * np.pi * frequencies * 0.003)
-    return ph.metrology.stepped_sine_impulse_response(frequencies, response)
+    return ph.metrology.stepped_sine_impulse_response(
+        frequencies=frequencies, response=response
+    )
 
 
 def _static_airflow() -> ph.materials.StaticAirflowResult:
@@ -1165,7 +1178,7 @@ def _lab_lining_improvement() -> ph.building.LaboratoryLiningImprovementResult:
     """A lining 2 dB to 19 dB better, on the heavy standard wall (ISO 10140-1 G)."""
     without = np.linspace(40.0, 65.0, 18)
     return ph.building.laboratory_lining_improvement(
-        without, without + np.linspace(2.0, 19.0, 18), _LAB_BANDS
+        without, without + np.linspace(2.0, 19.0, 18), frequencies=_LAB_BANDS
     )
 
 
@@ -1184,7 +1197,7 @@ def _lab_floor_covering_improvement() -> (
     return ph.building.laboratory_floor_covering_improvement(
         bare,
         bare - np.linspace(1.0, 30.0, 18),
-        _LAB_BANDS,
+        frequencies=_LAB_BANDS,
         reference_floor="lightweight_3",
     )
 
@@ -1194,7 +1207,7 @@ def _lab_joint_insulation() -> ph.building.LaboratoryJointInsulationResult:
     maximum = np.linspace(40.0, 69.0, 18)
     measured = maximum - np.concatenate([np.linspace(7.0, 15.0, 15), [9.0, 5.0, 2.0]])
     return ph.building.laboratory_joint_insulation(
-        measured, maximum, _LAB_BANDS, joint_length_m=5.4
+        measured, maximum, frequencies=_LAB_BANDS, joint_length_m=5.4
     )
 
 
@@ -1219,7 +1232,9 @@ def _joint_gap_series() -> ph.building.JointGapSeries:
     """The seal at 3 mm, 5 mm and 8 mm (ISO 10140-1 J.4)."""
     maximum = np.linspace(40.0, 69.0, 18)
     results = [
-        ph.building.laboratory_joint_insulation(maximum - drop, maximum, _LAB_BANDS)
+        ph.building.laboratory_joint_insulation(
+            maximum - drop, maximum, frequencies=_LAB_BANDS
+        )
         for drop in (6.0, 10.0, 18.0)
     ]
     return ph.building.joint_gap_series([3.0, 5.0, 8.0], results, min_gap_mm=3.0)
@@ -1233,7 +1248,9 @@ def _joint_gap_series_check() -> ph.building.JointGapSeriesCheck:
 def _heavy_impact_improvement() -> ph.building.HeavyImpactImprovementResult:
     """The rubber-ball improvement of ISO 10140-1 H.6.1 in four octaves."""
     return ph.building.heavy_impact_improvement(
-        [80.0, 75.0, 70.0, 65.0], [78.0, 70.0, 62.0, 55.0], [63, 125, 250, 500]
+        [80.0, 75.0, 70.0, 65.0],
+        [78.0, 70.0, 62.0, 55.0],
+        frequencies=[63, 125, 250, 500],
     )
 
 
@@ -1254,7 +1271,7 @@ def _rainfall_sound() -> ph.building.RainfallSoundResult:
     return ph.building.rainfall_sound(
         np.linspace(48.0, 60.0, 18),
         np.linspace(1.9, 0.85, 18),
-        _LAB_BANDS,
+        frequencies=_LAB_BANDS,
         volume=62.0,
         excited_area_m2=1.875,
         reference_correction=_rainfall_reference_correction(),
@@ -1272,8 +1289,8 @@ def _low_frequency_procedure() -> ph.building.LowFrequencyResult:
     """The ISO 16283 corner procedure in a 18 m3 receiving room."""
     return ph.building.apply_low_frequency_procedure(
         [50.0, 52.0, 49.0],
-        [50.0, 63.0, 80.0],
-        ph.building.LowFrequencyProcedure(
+        frequencies=[50.0, 63.0, 80.0],
+        procedure=ph.building.LowFrequencyProcedure(
             volume=18.0,
             corner_levels=[
                 [56.0, 58.0, 54.0],
@@ -1362,7 +1379,7 @@ _ANNEX_C2_FREQS = [
 
 def _extended_rating() -> ph.building.ExtendedWeightedRatingResult:
     return ph.building.weighted_rating_extended(
-        [18.7, 19.2, 20.0, *_ANNEX_C2_R, 26.8, 29.2], _ANNEX_C2_FREQS
+        [18.7, 19.2, 20.0, *_ANNEX_C2_R, 26.8, 29.2], frequencies=_ANNEX_C2_FREQS
     )
 
 
@@ -1409,7 +1426,7 @@ def _extended_impact_rating() -> ph.building.ExtendedImpactRatingResult:
         2500,
         3150,
     ]
-    return ph.building.weighted_impact_rating_extended(li, freqs)
+    return ph.building.weighted_impact_rating_extended(li, frequencies=freqs)
 
 
 _PANEL_BANDS = np.array(
@@ -1438,7 +1455,9 @@ _PANEL_BANDS = np.array(
 def _band_averaged_stiffness() -> ph.vibration.BandAveragedStiffness:
     """Twenty lines in each third-octave band from 100 Hz to 2 kHz, of a Kelvin-Voigt element."""
     f = np.geomspace(89.2, 2238.0, 280)
-    return ph.vibration.band_averaged_stiffness(f, 1.0e6 + 1j * 2.0 * np.pi * f * 80.0)
+    return ph.vibration.band_averaged_stiffness(
+        frequencies=f, stiffness=1.0e6 + 1j * 2.0 * np.pi * f * 80.0
+    )
 
 
 def _effective_blocking_mass() -> ph.vibration.EffectiveBlockingMass:
@@ -1447,7 +1466,11 @@ def _effective_blocking_mass() -> ph.vibration.EffectiveBlockingMass:
     m_eff = 20.0 * (1.0 + (f / 3000.0) ** 2)
     ones = np.ones(f.size, dtype=complex)
     return ph.vibration.effective_blocking_mass(
-        f, m_eff * ones, ones, ones, blocking_mass=20.0
+        frequencies=f,
+        force=m_eff * ones,
+        first_acceleration_m_s2=ones,
+        second_acceleration_m_s2=ones,
+        blocking_mass=20.0,
     )
 
 
@@ -1456,7 +1479,11 @@ def _driving_point_stiffness() -> ph.vibration.DrivingPointStiffnessResult:
     f = np.arange(1.0, 200.0, 0.2)
     w = 2.0 * np.pi * f
     k11 = 1.0e6 - w**2 * 2.0
-    return ph.vibration.driving_point_stiffness(f, k11 * 1.0e-6, -(w**2) * 1.0e-6)
+    return ph.vibration.driving_point_stiffness(
+        frequencies=f,
+        input_force_n=k11 * 1.0e-6,
+        input_acceleration_m_s2=-(w**2) * 1.0e-6,
+    )
 
 
 def _impact_records() -> tuple[np.ndarray, np.ndarray]:
@@ -1494,7 +1521,9 @@ def _single_mode_fit() -> ph.vibration.SingleModeFitResult:
 
 def _window_correction() -> ph.vibration.ExponentialWindowCorrection:
     return ph.vibration.exponential_window_correction(
-        [40.0, 125.0], [0.03, 0.02], exponential_decay_rate_per_s=5.0
+        [0.03, 0.02],
+        damped_natural_frequency_hz=[40.0, 125.0],
+        exponential_decay_rate_per_s=5.0,
     )
 
 
@@ -1531,8 +1560,8 @@ def _response_decay() -> ph.vibration.ResponseDecayCheck:
 def _channel_match() -> ph.vibration.ChannelMatchVerification:
     f = np.geomspace(10.0, 1000.0, 60)
     return ph.vibration.verify_channel_match(
-        f,
-        1.0 + 0.03 * np.exp(-f / 300.0) * np.exp(0.02j),
+        frequencies=f,
+        response=1.0 + 0.03 * np.exp(-f / 300.0) * np.exp(0.02j),
         frequency_range_hz=(10.0, 1000.0),
     )
 
@@ -1574,7 +1603,9 @@ def _field_indicators() -> ph.emission.FieldIndicators:
     rng = np.random.default_rng(9614)
     lp = 74.0 + rng.normal(0.0, 0.8, (8, 4))
     i_n = 1.0e-5 * (1.0 + rng.normal(0.0, 0.2, (8, 4)))
-    return ph.emission.field_indicators(lp, i_n, [125.0, 250.0, 500.0, 1000.0])
+    return ph.emission.field_indicators(
+        lp, i_n, frequencies=[125.0, 250.0, 500.0, 1000.0]
+    )
 
 
 def _room_with_one_invalid_band() -> ph.room.RoomAcousticsResult:
@@ -1748,7 +1779,7 @@ def _plant_sound_power() -> ph.emission.PlantSoundPowerResult:
     rng = np.random.default_rng(8297)
     levels = base + rng.uniform(-1.0, 1.0, (contour.positions_m.shape[0], base.size))
     return contour.sound_power(
-        levels, [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
+        levels, frequencies=[63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
     )
 
 
@@ -1773,7 +1804,11 @@ def _in_situ_power() -> ph.emission.InSituSoundPowerResult:
     )
     background = np.array([70.0, 72.0, 71.0, 78.0])  # 2 kHz margin below 6 dB
     return ph.emission.sound_power_in_situ(
-        st, rss, np.array([90.5, 92.5, 93.8, 94.0]), freqs, background_levels=background
+        st,
+        rss,
+        np.array([90.5, 92.5, 93.8, 94.0]),
+        frequencies=freqs,
+        background_levels=background,
     )
 
 
@@ -1801,7 +1836,7 @@ def _hard_walled_power() -> ph.emission.HardWalledSoundPowerResult:
     with pytest.warns(ph.emission.SoundPowerWarning, match="below 6 dB"):
         return ph.emission.sound_power_hard_walled(
             _ISO3743_ST, _ISO3743_RSS, np.array([90.5, 92.5, 93.8, 94.0]),
-            _ISO3743_FREQS, background_levels=background, sigma_omc_db=1.0,
+            frequencies=_ISO3743_FREQS, background_levels=background, sigma_omc_db=1.0,
         )  # fmt: skip
 
 
@@ -1810,7 +1845,10 @@ def _hard_walled_room_check() -> ph.emission.HardWalledRoomCheck:
     spread = np.array([1.8, 1.2, 1.9, 1.0])
     orientations = 80.0 + np.linspace(0.0, 1.0, 8)[:, None] * spread[None, :]
     return ph.emission.check_hard_walled_room(
-        orientations, _ISO3743_FREQS, volume=60.0, reference_box_m=[0.6, 0.5, 0.4]
+        orientations,
+        frequencies=_ISO3743_FREQS,
+        volume=60.0,
+        reference_box_m=[0.6, 0.5, 0.4],
     )
 
 
@@ -1827,14 +1865,16 @@ def _source_location_plan() -> ph.emission.SourceLocationPlan:
         ]
     )
     return ph.emission.special_room_source_locations(
-        survey, _ISO3743_FREQS, a_weighted_levels=[80.0, 81.5, 79.8, 80.9, 80.2, 81.0]
+        survey,
+        frequencies=_ISO3743_FREQS,
+        a_weighted_levels=[80.0, 81.5, 79.8, 80.9, 80.2, 81.0],
     )
 
 
 def _special_room_power() -> ph.emission.SpecialRoomSoundPowerResult:
     """ISO 3743-2 direct method in a 70 m3 room, Tnom = 0,73 s."""
     return ph.emission.sound_power_special_room(
-        _ISO3743_ST, _ISO3743_FREQS, volume=70.0, nominal_reverberation_time_s=0.73,
+        _ISO3743_ST, frequencies=_ISO3743_FREQS, volume=70.0, nominal_reverberation_time_s=0.73,
         background_levels=np.array([66.0, 67.0, 66.0, 60.0]), sigma_omc_db=1.0,
     )  # fmt: skip
 
@@ -1848,21 +1888,25 @@ def _special_room_reverberation() -> ph.emission.SpecialRoomReverberationCheck:
     t = 0.7 * ph.emission.reverberation_parameter(thirds, 70.0)
     t[4] *= 1.25
     return ph.emission.check_special_room_reverberation(
-        t, thirds, volume=70.0, nominal_reverberation_time_s=0.7
+        t, frequencies=thirds, volume=70.0, nominal_reverberation_time_s=0.7
     )
 
 
 def _special_room_surfaces() -> ph.emission.SpecialRoomSurfaceCheck:
     """ISO 3743-2 6.4, five surfaces around a mean of 0,15."""
     walls = 0.15 * np.array([1.0, 1.2, 0.8, 1.1, 0.9])[:, None] * np.ones((1, 4))
-    return ph.emission.check_special_room_surfaces(walls, [0.03] * 4, _ISO3743_FREQS)
+    return ph.emission.check_special_room_surfaces(
+        walls, [0.03] * 4, frequencies=_ISO3743_FREQS
+    )
 
 
 def _special_room_suitability() -> ph.emission.SpecialRoomSuitabilityCheck:
     """ISO 3743-2 6.7, the 2 kHz difference beyond Table 1."""
     calibrated = np.array([90.5, 92.5, 93.8, 94.0])
     return ph.emission.check_special_room_suitability(
-        calibrated + np.array([1.0, -2.0, 0.5, 3.4]), calibrated, _ISO3743_FREQS
+        calibrated + np.array([1.0, -2.0, 0.5, 3.4]),
+        calibrated,
+        frequencies=_ISO3743_FREQS,
     )
 
 
@@ -1939,7 +1983,7 @@ def _vibration_meter_verification() -> object:
     freqs = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0, 80.0])
     measured = np.abs(kb_weighting_response(freqs)) * 1.02
     measured[5] *= 1.15  # 31,5 Hz, outside the 10 % of the central band
-    return verify_vibration_meter(freqs, measured)
+    return verify_vibration_meter(frequencies=freqs, measured_response=measured)
 
 
 def _assessment_velocity() -> object:
@@ -2061,7 +2105,8 @@ def _loop_impedance() -> ph.electroacoustics.LoopImpedance:
 def _amplifier_frequency_response() -> ph.electroacoustics.AmplifierFrequencyResponse:
     """A loop amplifier rolling off below 100 Hz and above 5 kHz."""
     return ph.electroacoustics.amplifier_frequency_response(
-        [50.0, 100.0, 1000.0, 5000.0, 8000.0], [0.8, 0.97, 1.0, 0.95, 0.7]
+        frequencies=[50.0, 100.0, 1000.0, 5000.0, 8000.0],
+        output_current_a=[0.8, 0.97, 1.0, 0.95, 0.7],
     )
 
 
@@ -2076,16 +2121,17 @@ def _agc_characteristic() -> ph.electroacoustics.AGCCharacteristic:
 def _quadrature_phase_error() -> ph.electroacoustics.QuadraturePhaseError:
     """A quadrature network drifting to 85 degrees at 5 kHz."""
     return ph.electroacoustics.quadrature_phase_error(
-        [100.0, 1000.0, 2000.0, 5000.0], [92.0, 90.0, 88.0, 85.0]
+        frequencies=[100.0, 1000.0, 2000.0, 5000.0],
+        phase_difference_deg=[92.0, 90.0, 88.0, 85.0],
     )
 
 
 def _neck_loop_characteristics() -> ph.electroacoustics.NeckLoopCharacteristics:
     """A passive neck loop on the jig of IEC 62489-1:2010+A1:2014 Annex E."""
     return ph.electroacoustics.neck_loop_characteristics(
-        [100.0, 200.0, 1000.0, 5000.0, 8000.0],
-        [-6.0, -2.0, 0.5, -1.0, -5.0],
-        [31.0, 31.5, 32.0, 36.0, 42.0],
+        frequencies=[100.0, 200.0, 1000.0, 5000.0, 8000.0],
+        field_strength_level=[-6.0, -2.0, 0.5, -1.0, -5.0],
+        impedance_ohm=[31.0, 31.5, 32.0, 36.0, 42.0],
         input_voltage_v=1.0,
     )
 
@@ -2153,7 +2199,8 @@ def _programme_signal_check() -> ph.electroacoustics.ProgramSignalCheck:
     """IEC 60268-1:1985 Table II itself, judged against itself."""
     table = ph.electroacoustics.SIMULATED_PROGRAM_SPECTRUM
     return ph.electroacoustics.check_program_signal(
-        list(table), [band.relative_level for band in table.values()]
+        frequencies=list(table),
+        band_levels=[band.relative_level for band in table.values()],
     )
 
 
@@ -2168,7 +2215,10 @@ def _rated_impedance() -> ph.electroacoustics.RatedImpedanceVerification:
     f = np.geomspace(20.0, 20000.0, 61)
     z = 33.0 + 18.0 * np.exp(-(np.log10(f / 80.0) ** 2) / 0.02)
     return ph.electroacoustics.verify_rated_impedance(
-        f, z, rated_impedance_ohm=32.0, rated_frequency_range_hz=(20.0, 20000.0)
+        frequencies=f,
+        impedance_ohm=z,
+        rated_impedance_ohm=32.0,
+        rated_frequency_range_hz=(20.0, 20000.0),
     )
 
 
@@ -2180,7 +2230,7 @@ def _programme_characteristic_voltage() -> (
         [np.linspace(70.0, 84.0, _HEADPHONE_BANDS.size) + d for d in (0.0, 0.4, -0.3)]
     )
     return ph.electroacoustics.program_characteristic_voltage(
-        0.05, _HEADPHONE_BANDS, levels, weighting="A"
+        0.05, frequencies=_HEADPHONE_BANDS, band_levels=levels, weighting="A"
     )
 
 
@@ -2196,8 +2246,8 @@ def _coupler_frequency_response() -> ph.electroacoustics.CouplerFrequencyRespons
     """IEC 60268-7:2010 8.6.2: a response falling 6 dB at each end."""
     f = np.geomspace(20.0, 20000.0, 61)
     return ph.electroacoustics.coupler_frequency_response(
-        f,
-        100.0 - 6.0 * np.log10(f / 1000.0) ** 2,
+        frequencies=f,
+        sound_pressure_level=100.0 - 6.0 * np.log10(f / 1000.0) ** 2,
         rated_frequency_range_hz=(20.0, 20000.0),
     )
 
@@ -2205,9 +2255,9 @@ def _coupler_frequency_response() -> ph.electroacoustics.CouplerFrequencyRespons
 def _crosstalk_attenuation() -> ph.electroacoustics.CrosstalkAttenuation:
     """IEC 60268-7:2010 8.12: crosstalk rising with frequency."""
     return ph.electroacoustics.crosstalk_attenuation(
-        _HEADPHONE_BANDS,
-        np.full(_HEADPHONE_BANDS.size, 100.0),
-        40.0 + 10.0 * np.log10(_HEADPHONE_BANDS / 100.0),
+        frequencies=_HEADPHONE_BANDS,
+        driven_level=np.full(_HEADPHONE_BANDS.size, 100.0),
+        other_level=40.0 + 10.0 * np.log10(_HEADPHONE_BANDS / 100.0),
     )
 
 
@@ -2216,7 +2266,10 @@ def _field_comparison_response() -> ph.electroacoustics.FieldComparisonResponse:
     rng = np.random.default_rng(3)
     emf = 0.05 * 10.0 ** (rng.normal(0.0, 1.0, (8, _HEADPHONE_BANDS.size)) / 20.0)
     return ph.electroacoustics.field_comparison_response(
-        _HEADPHONE_BANDS, 70.0, emf, field="free"
+        frequencies=_HEADPHONE_BANDS,
+        field_level=70.0,
+        source_emf_v=emf,
+        field="free",
     )
 
 
@@ -2225,9 +2278,9 @@ def _ear_canal_frequency_response() -> ph.electroacoustics.EarCanalFrequencyResp
     rng = np.random.default_rng(4)
     shape = (8, 2, _HEADPHONE_BANDS.size)
     return ph.electroacoustics.ear_canal_frequency_response(
-        _HEADPHONE_BANDS,
-        70.0 + rng.normal(0.0, 0.5, shape),
-        70.0 + rng.normal(0.0, 0.5, shape),
+        frequencies=_HEADPHONE_BANDS,
+        earphone_levels=70.0 + rng.normal(0.0, 0.5, shape),
+        sound_field_levels=70.0 + rng.normal(0.0, 0.5, shape),
     )
 
 

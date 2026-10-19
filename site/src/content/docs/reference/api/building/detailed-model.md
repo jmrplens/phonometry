@@ -1460,8 +1460,9 @@ $m' = 800$ kg/m² and `ηint` can normally be taken as 0.01.
 
 ```python
 perimeter_absorption_coefficient(
-    critical_frequencies: ArrayLike,
     vibration_reduction_indices: ArrayLike,
+    *,
+    critical_frequencies: ArrayLike,
 ) -> float
 ```
 
@@ -1479,8 +1480,8 @@ coefficients between 0,05 and 0,5.
 
 | Name | Description |
 | :--- | :--- |
-| `critical_frequencies` | Critical frequency `fc,j` of each connected element, in Hz. |
-| `vibration_reduction_indices` | Vibration reduction index `Kij` of the path to each connected element, in dB (same order and length). |
+| `vibration_reduction_indices` | Vibration reduction index `Kij` of the path to each connected element, in dB. |
+| `critical_frequencies` | Critical frequency `fc,j` of each connected element, in Hz (same order and length). |
 
 **Returns:** The absorption coefficient `αk` at that border (dimensionless).
 
@@ -1495,8 +1496,8 @@ coefficients between 0,05 and 0,5.
 ```python
 reciprocity_impact_level(
     sound_reduction_index: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     fraction: Literal[1, 3] = 3,
 ) -> np.ndarray
 ```
@@ -1532,8 +1533,8 @@ about 1 kHz, above which the stiffness of the floor's top layer matters).
 ```python
 resonant_sound_reduction_index(
     sound_reduction_index: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     critical_frequency: float,
     correction: float = 8.0,
 ) -> np.ndarray
@@ -1571,8 +1572,9 @@ describes resonant transmission and is returned unchanged.
 
 ```python
 structural_reverberation_time(
-    frequencies: ArrayLike,
     total_loss_factor: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> np.ndarray
 ```
 

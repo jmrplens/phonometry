@@ -335,8 +335,8 @@ $f_0 = (1/2\pi)\sqrt{s'/m'}$.
 
 ```python
 plot_dynamic_stiffness_rig(
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     specimen_side: float = 0.2,
     specimen_thickness_m: float = 0.02,
     load_mass: float = 8.0,

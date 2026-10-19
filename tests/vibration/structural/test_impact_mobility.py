@@ -274,7 +274,7 @@ def test_a_rigid_mass_calibrates_to_one_over_its_mass() -> None:
     band = _band(res.frequencies)
     np.testing.assert_allclose(res.to("accelerance")[band], 1.0 / block_kg, rtol=1e-12)
     check = vibration.verify_rigid_mass_calibration(
-        res.to("accelerance")[band], res.frequencies[band], block_kg
+        res.to("accelerance")[band], frequencies=res.frequencies[band], mass=block_kg
     )
     assert check.passes
 
@@ -456,7 +456,9 @@ def test_an_odd_record_reaches_the_nyquist_frequency_itself() -> None:
         ),
         (
             lambda f, x: vibration.single_mode_fit(
-                np.linspace(1.0, 100.0, 100), np.ones(100), band_hz=cast("Any", (50.0,))
+                frequencies=np.linspace(1.0, 100.0, 100),
+                frf=np.ones(100),
+                band_hz=cast("Any", (50.0,)),
             ),
             "band_hz",
         ),
@@ -568,7 +570,9 @@ def test_the_fitted_accelerance_carries_the_mass_line() -> None:
 def test_formula_a3_as_printed() -> None:
     """Formula (A.3): zeta_r = zeta_hat_r - a / omega_r, omega_r damped, in rad/s."""
     correction = vibration.exponential_window_correction(
-        [40.0, 125.0], [0.03, 0.02], exponential_decay_rate_per_s=5.0
+        [0.03, 0.02],
+        damped_natural_frequency_hz=[40.0, 125.0],
+        exponential_decay_rate_per_s=5.0,
     )
     omega = 2.0 * math.pi * np.array([40.0, 125.0])
     np.testing.assert_allclose(correction.window_damping_ratio, 5.0 / omega, rtol=1e-15)
@@ -616,7 +620,9 @@ def test_the_fit_holds_its_mode_against_one_outside_the_band() -> None:
     two_modes = _modal_mobility(freqs, F_N_HZ, 0.005) + _modal_mobility(
         freqs, 125.0, 0.01
     )
-    fit = vibration.single_mode_fit(freqs, two_modes, band_hz=(30.0, 50.0))
+    fit = vibration.single_mode_fit(
+        frequencies=freqs, frf=two_modes, band_hz=(30.0, 50.0)
+    )
     damped = F_N_HZ * math.sqrt(1.0 - 0.005**2)
     assert fit.damped_natural_frequency_hz == pytest.approx(damped, abs=2e-3)
     assert fit.apparent_damping_ratio == pytest.approx(0.005, rel=5e-3)
@@ -628,7 +634,7 @@ def test_the_fit_settles_on_noisy_data() -> None:
     rng = np.random.default_rng(7626)
     noise = rng.standard_normal(freqs.size) + 1j * rng.standard_normal(freqs.size)
     noisy = _modal_mobility(freqs, F_N_HZ, 0.005) * (1.0 + 0.01 * noise / math.sqrt(2))
-    fit = vibration.single_mode_fit(freqs, noisy, band_hz=(30.0, 50.0))
+    fit = vibration.single_mode_fit(frequencies=freqs, frf=noisy, band_hz=(30.0, 50.0))
     damped = F_N_HZ * math.sqrt(1.0 - 0.005**2)
     assert fit.damped_natural_frequency_hz == pytest.approx(damped, abs=5e-3)
     assert fit.apparent_damping_ratio == pytest.approx(0.005, rel=0.02)
@@ -656,7 +662,7 @@ def test_peak_factor_restores_a_lightly_damped_peak() -> None:
 def test_a_window_heavier_than_the_apparent_damping_is_refused() -> None:
     with pytest.raises(ValueError, match="not below the apparent damping"):
         vibration.exponential_window_correction(
-            40.0, 0.01, exponential_decay_rate_per_s=10.0
+            0.01, damped_natural_frequency_hz=40.0, exponential_decay_rate_per_s=10.0
         )
 
 
@@ -717,7 +723,7 @@ def test_a_band_without_a_mode_is_refused(
     """
     with pytest.raises(ValueError, match="no lightly damped mode"):
         vibration.single_mode_fit(
-            _LINE_FREQUENCIES, frf, band_hz=(20.0, 60.0), kind=kind
+            frequencies=_LINE_FREQUENCIES, frf=frf, band_hz=(20.0, 60.0), kind=kind
         )
 
 
@@ -725,7 +731,9 @@ def test_a_mode_over_the_same_band_is_found() -> None:
     """The refusal leaves a lightly damped mode on the same line, noise and all."""
     zeta = 0.01
     frf = _flat(1e-12) + _modal_mobility(_LINE_FREQUENCIES, F_N_HZ, zeta)
-    fit = vibration.single_mode_fit(_LINE_FREQUENCIES, frf, band_hz=(20.0, 60.0))
+    fit = vibration.single_mode_fit(
+        frequencies=_LINE_FREQUENCIES, frf=frf, band_hz=(20.0, 60.0)
+    )
     damped = F_N_HZ * math.sqrt(1.0 - zeta**2)
     assert fit.damped_natural_frequency_hz == pytest.approx(damped, rel=1e-8)
     assert fit.apparent_damping_ratio == pytest.approx(zeta, rel=1e-8)
@@ -736,7 +744,7 @@ def test_a_band_of_two_frequencies_is_refused() -> None:
     freqs = np.array([10.0, 20.0, 30.0])
     values = np.ones(3, dtype=complex)
     with pytest.raises(ValueError, match="band_hz"):
-        vibration.single_mode_fit(freqs, values, band_hz=(15.0, 30.0))
+        vibration.single_mode_fit(frequencies=freqs, frf=values, band_hz=(15.0, 30.0))
 
 
 # ---------------------------------------------------------------------------
@@ -1123,16 +1131,20 @@ def test_channel_match_tolerances() -> None:
         1j * np.radians(0.999 * CHANNEL_PHASE_TOLERANCE_DEG)
     )
     assert vibration.verify_channel_match(
-        freqs, np.full(50, inside), frequency_range_hz=(10.0, 1000.0)
+        frequencies=freqs,
+        response=np.full(50, inside),
+        frequency_range_hz=(10.0, 1000.0),
     ).passes
     magnitude_out = vibration.verify_channel_match(
-        freqs, np.full(50, 1.051 + 0j), frequency_range_hz=(10.0, 1000.0)
+        frequencies=freqs,
+        response=np.full(50, 1.051 + 0j),
+        frequency_range_hz=(10.0, 1000.0),
     )
     assert not magnitude_out.passes
     assert np.all(magnitude_out.phase_within)
     phase_out = vibration.verify_channel_match(
-        freqs,
-        np.full(50, np.exp(1j * np.radians(5.1))),
+        frequencies=freqs,
+        response=np.full(50, np.exp(1j * np.radians(5.1))),
         frequency_range_hz=(10.0, 1000.0),
     )
     assert not phase_out.passes
@@ -1151,7 +1163,9 @@ def test_the_channel_tolerances_include_their_bounds(response: complex) -> None:
     """8.1: "within +/- 5 %" and "within +/- 5 degrees" hold the bounds themselves."""
     freqs = np.array([100.0, 200.0])
     check = vibration.verify_channel_match(
-        freqs, np.full(2, response, dtype=complex), frequency_range_hz=(50.0, 300.0)
+        frequencies=freqs,
+        response=np.full(2, response, dtype=complex),
+        frequency_range_hz=(50.0, 300.0),
     )
     assert check.passes
 
@@ -1163,12 +1177,14 @@ def test_channel_data_that_are_not_finite_are_refused_outside_the_range_too() ->
     holed_response = np.r_[np.ones(99), np.nan]
     with pytest.raises(ValueError, match="must be finite"):
         vibration.verify_channel_match(
-            freqs, holed_response, frequency_range_hz=(10.0, 500.0)
+            frequencies=freqs, response=holed_response, frequency_range_hz=(10.0, 500.0)
         )
     holed = freqs.copy()
     holed[-1] = np.nan
     with pytest.raises(ValueError, match="must be finite"):
-        vibration.verify_channel_match(holed, unit, frequency_range_hz=(10.0, 500.0))
+        vibration.verify_channel_match(
+            frequencies=holed, response=unit, frequency_range_hz=(10.0, 500.0)
+        )
 
 
 @pytest.mark.parametrize(
@@ -1181,8 +1197,8 @@ def test_channel_data_that_are_not_finite_are_refused_outside_the_range_too() ->
         lambda f: vibration.check_overload(f, FS, full_scale=1e3),
         lambda f: vibration.check_response_decay(f, FS),
         lambda f: vibration.verify_channel_match(
-            np.array([1.0, 2.0]),
-            np.ones(2, dtype=complex),
+            frequencies=np.array([1.0, 2.0]),
+            response=np.ones(2, dtype=complex),
             frequency_range_hz=(0.5, 3.0),
         ),
     ],
@@ -1347,10 +1363,14 @@ def _impact_verdicts() -> list[Any]:
         vibration.check_coherence(five, frequency_range_hz=(10.0, 400.0)),
         vibration.check_coherence(single, frequency_range_hz=(10.0, 400.0)),
         vibration.verify_channel_match(
-            freqs, np.ones(50, dtype=complex), frequency_range_hz=(10.0, 1000.0)
+            frequencies=freqs,
+            response=np.ones(50, dtype=complex),
+            frequency_range_hz=(10.0, 1000.0),
         ),
         vibration.verify_channel_match(
-            freqs, np.full(50, 1.2 + 0j), frequency_range_hz=(10.0, 1000.0)
+            frequencies=freqs,
+            response=np.full(50, 1.2 + 0j),
+            frequency_range_hz=(10.0, 1000.0),
         ),
     ]
 
@@ -1408,7 +1428,7 @@ def test_the_channel_figure_holds_every_deviation() -> None:
         1j * np.radians(20.0 * freqs / 1000.0)
     )
     check = vibration.verify_channel_match(
-        freqs, response, frequency_range_hz=(20.0, 800.0)
+        frequencies=freqs, response=response, frequency_range_hz=(20.0, 800.0)
     )
     magnitude_ax, phase_ax = np.asarray(check.plot())
     low, high = magnitude_ax.get_ylim()

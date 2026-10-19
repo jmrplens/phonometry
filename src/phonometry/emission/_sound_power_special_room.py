@@ -608,8 +608,8 @@ def _climate_change(
 
 def check_special_room_reverberation(
     reverberation_time: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     volume: float,
     nominal_reverberation_time_s: float | None = None,
     surface_area: float | None = None,
@@ -877,8 +877,8 @@ def _coefficients(value: ArrayLike, name: str, ndim: int) -> np.ndarray:
 def check_special_room_surfaces(
     surface_absorption_coefficients: ArrayLike,
     floor_absorption_coefficients: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     surface_areas_m2: ArrayLike | None = None,
 ) -> SpecialRoomSurfaceCheck:
     """Are the room's surfaces treated as ISO 3743-2:2018, 6.4 asks?
@@ -1049,8 +1049,8 @@ def _table_bands(frequencies: ArrayLike, n_bands: int, table: str) -> np.ndarray
 def check_special_room_suitability(
     measured_power_levels: ArrayLike,
     calibrated_power_levels: ArrayLike | ReferenceSourceCalibration,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
 ) -> SpecialRoomSuitabilityCheck:
@@ -1161,8 +1161,8 @@ def _survey_deviation(levels: np.ndarray) -> np.ndarray:
 
 def special_room_source_locations(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     n_microphone_positions: int = _SURVEY_MICROPHONES,
     a_weighted_levels: ArrayLike | None = None,
 ) -> SourceLocationPlan:
@@ -1645,8 +1645,8 @@ def _annex_f_total(level: np.ndarray, freqs: np.ndarray) -> float:
 
 def sound_power_special_room(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     volume: float,
     nominal_reverberation_time_s: float,
     background_levels: ArrayLike | None = None,
@@ -1770,8 +1770,8 @@ def sound_power_special_room_comparison(
     levels: ArrayLike,
     levels_ref: ArrayLike,
     lw_ref: ArrayLike | ReferenceSourceCalibration,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     background_levels: ArrayLike | None = None,
     background_levels_ref: ArrayLike | None = None,
     temperature_c: float = 23.0,

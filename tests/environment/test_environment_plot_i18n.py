@@ -22,7 +22,7 @@ def _result() -> object:
     freqs = np.arange(440.0, 560.0 + df, df)
     levels = np.full(freqs.size, 30.0)
     levels[int(np.argmin(np.abs(freqs - 500.0)))] = 60.0
-    return wind_turbine_tonality(levels, freqs)
+    return wind_turbine_tonality(levels, frequencies=freqs)
 
 
 def test_plot_default_is_english() -> None:

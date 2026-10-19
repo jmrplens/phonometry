@@ -611,7 +611,7 @@ def test_the_unit_is_read_from_the_end_of_the_name(name: str, unit: str) -> None
 def test_a_renamed_band_axis_keeps_its_unit_in_the_table() -> None:
     """``frequencies_hz`` became ``frequencies`` and still shows hertz."""
     check = phonometry.vibration.verify_weighting(
-        "Wk", [4.0, 8.0, 16.0], [1.0, 1.0, 1.0]
+        "Wk", frequencies=[4.0, 8.0, 16.0], measured_factors=[1.0, 1.0, 1.0]
     )
     units = {row.name: row.unit for row in display._rows(check, depth=0)[0]}
     assert units["frequencies"] == "Hz"

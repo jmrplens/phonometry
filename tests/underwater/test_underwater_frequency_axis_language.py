@@ -48,7 +48,7 @@ def _tick_labels(ax: Axes) -> list[str]:
 
 def _ship_source_level(language: str) -> Axes:
     result = underwater.monopole_source_level(
-        np.full(_FREQUENCIES.size, 150.0), _FREQUENCIES, 8.0
+        np.full(_FREQUENCIES.size, 150.0), frequency=_FREQUENCIES, draft_m=8.0
     )
     return result.plot(language=language)
 

@@ -294,7 +294,7 @@ print(f"H = {H:.2f} m, N = {contour.positions_m.shape[0]}, "
 
 levels = levels_at(contour, sources)
 background = levels - np.array([14, 13, 15, 17, 19, 20, 22, 24])
-result = contour.sound_power(levels, bands, background_levels=background)
+result = contour.sound_power(levels, frequencies=bands, background_levels=background)
 print(np.round(result.mean_level, 1))
 # [63.8 65.8 65.6 63.2 60.2 56.  49.1 39.9]
 print(f"dLS = {result.area_term_db:.2f} dB, dLF = {result.near_field_term_db:.2f} dB")
@@ -457,11 +457,11 @@ to the formula, which 15 °C and 70 % already take; the warm dry air itself
 adds 1.0 dB.
 
 ```python
-warm = contour.sound_power(levels, bands, background_levels=background,
+warm = contour.sound_power(levels, frequencies=bands, background_levels=background,
                            temperature_c=25.0, relative_humidity_percent=40.0)
 print(np.round(warm.sound_power_level - result.sound_power_level, 2))
 # [0.03 0.07 0.04 0.08 0.08 0.19 0.34 2.4 ]
-reference = contour.sound_power(levels, bands, background_levels=background,
+reference = contour.sound_power(levels, frequencies=bands, background_levels=background,
                                 temperature_c=15.0, relative_humidity_percent=70.0)
 print(np.round(warm.sound_power_level - reference.sound_power_level, 2))
 # [0.01 0.01 0.02 0.05 0.1  0.19 0.43 0.97]
@@ -496,7 +496,7 @@ asphalt = emission.plant_measurement_contour(
     [[285, 5], [375, 5], [375, 75], [285, 75]],
     characteristic_height_m=emission.plant_characteristic_height_m([4.0, 8.0, 12.0]),
 )
-asphalt_result = asphalt.sound_power(levels_at(asphalt, asphalt_sources), bands)
+asphalt_result = asphalt.sound_power(levels_at(asphalt, asphalt_sources), frequencies=bands)
 print(f"LWA = {asphalt_result.a_weighted_sound_power_level:.1f} dB")
 # LWA = 105.4 dB
 

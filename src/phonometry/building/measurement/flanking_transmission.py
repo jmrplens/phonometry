@@ -281,8 +281,9 @@ def direction_averaged_level_difference(
 # Structural quantities (Part 1, Clauses 3.5/3.8)
 # --------------------------------------------------------------------------- #
 def total_loss_factor(
-    frequencies: Sequence[float] | np.ndarray,
     structural_reverberation_time: float | Sequence[float] | np.ndarray,
+    *,
+    frequencies: Sequence[float] | np.ndarray,
 ) -> np.ndarray:
     r"""Total loss factor :math:`\eta = 2.2 / (f \, T_\mathrm{s})` (Clause 7.3.1).
 
@@ -302,8 +303,8 @@ def total_loss_factor(
 def equivalent_absorption_length(
     area: float,
     structural_reverberation_time: float | Sequence[float] | np.ndarray,
-    frequencies: Sequence[float] | np.ndarray,
     *,
+    frequencies: Sequence[float] | np.ndarray,
     speed_of_sound: float = _DEFAULT_SPEED_OF_SOUND,
 ) -> np.ndarray:
     r"""Equivalent absorption length ``aj`` (Formula (12)).
@@ -669,13 +670,13 @@ def vibration_reduction_index(
         a_i = equivalent_absorption_length(
             s_i,
             structural_reverberation_time_i,  # type: ignore[arg-type]
-            freq,
+            frequencies=freq,
             speed_of_sound=speed_of_sound,
         )
         a_j = equivalent_absorption_length(
             s_j,
             structural_reverberation_time_j,  # type: ignore[arg-type]
-            freq,
+            frequencies=freq,
             speed_of_sound=speed_of_sound,
         )
     else:

@@ -1103,7 +1103,7 @@ def test_the_row_keys_of_a_verdict_are_spelled_out() -> None:
             filters.WeightingFilter(48000, "A"), n_sweep_points=256
         ),
         "IntensityInstrumentComplianceResult": emission.verify_intensity_class(
-            class1 + 1.0, frequencies, device="probe"
+            class1 + 1.0, frequencies=frequencies, device="probe"
         ),
     }
     offenders: list[str] = []

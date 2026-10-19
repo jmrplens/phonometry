@@ -634,7 +634,7 @@ def test_steps_1_and_4_to_8_by_hand() -> None:
     levels = np.array([[70.0, 60.0], [72.0, 61.0], [74.0, 59.0]])
     res = emission.plant_sound_power(
         levels,
-        [1000.0, 4000.0],
+        frequencies=[1000.0, 4000.0],
         measurement_area_m2=40000.0,
         contour_length_m=800.0,
         microphone_height_m=10.0,
@@ -660,7 +660,7 @@ def test_steps_1_and_4_to_8_by_hand() -> None:
 def test_note_11_bounds_the_proximity_term() -> None:
     """At the two ends of 9.1.1 a), dLF = lg(0,5/4) and lg(0,05/4): -0,9 and -1,9 dB."""
     top = emission.plant_sound_power(
-        [[70.0]], [1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
+        [[70.0]], frequencies=[1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
         microphone_height_m=5.0, mean_distance_m=50.0, plant_area_m2=1e4,
     )  # fmt: skip
     bottom = dataclasses.replace(top, mean_distance_m=5.0)
@@ -683,7 +683,7 @@ def test_note_11_holds_for_every_contour_that_meets_9_1() -> None:
             continue
         distance = min(float(rng.uniform(lower, upper)) + 1e-9, upper)
         res = emission.plant_sound_power(
-            [[70.0]], [1000.0], measurement_area_m2=4.0 * area,
+            [[70.0]], frequencies=[1000.0], measurement_area_m2=4.0 * area,
             contour_length_m=8.0 * math.sqrt(area), microphone_height_m=5.0,
             mean_distance_m=distance, plant_area_m2=area,
         )  # fmt: skip
@@ -714,7 +714,7 @@ def test_a_point_source_gives_its_own_sound_power_back() -> None:
     for height in (1e-6, 5.0, 20.0):
         lp = source_lw - 10.0 * math.log10(2.0 * math.pi * (radius**2 + height**2))
         res = emission.plant_sound_power(
-            np.full((24, 1), lp), [63.0], measurement_area_m2=sm,
+            np.full((24, 1), lp), frequencies=[63.0], measurement_area_m2=sm,
             contour_length_m=length, microphone_height_m=height,
             mean_distance_m=4.0 * math.sqrt(plant_area), plant_area_m2=plant_area,
         )  # fmt: skip
@@ -728,7 +728,7 @@ def test_a_point_source_gives_its_own_sound_power_back() -> None:
 def test_a_result_keeps_copies_of_the_callers_readings() -> None:
     levels = np.array([[70.0, 60.0], [72.0, 61.0]])
     res = emission.plant_sound_power(
-        levels, [500.0, 1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
+        levels, frequencies=[500.0, 1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
         microphone_height_m=5.0, mean_distance_m=10.0, plant_area_m2=4e3,
     )  # fmt: skip
     before = res.sound_power_level.copy()
@@ -742,7 +742,7 @@ def test_background_is_corrected_position_by_position() -> None:
     levels = np.array([[70.0, 60.0], [72.0, 61.0]])
     background = levels - np.array([[6.0, 9.0], [12.0, 7.0]])
     res = emission.plant_sound_power(
-        levels, [500.0, 1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
+        levels, frequencies=[500.0, 1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
         microphone_height_m=5.0, mean_distance_m=10.0, plant_area_m2=4e3,
         background_levels=background,
     )  # fmt: skip
@@ -755,7 +755,7 @@ def test_a_background_too_close_makes_the_determination_invalid() -> None:
     background = np.array([[66.0], [60.0]])
     with pytest.raises(ValueError, match="Table 2 calls a measurement invalid"):
         emission.plant_sound_power(
-            levels, [500.0], measurement_area_m2=1e4, contour_length_m=400.0,
+            levels, frequencies=[500.0], measurement_area_m2=1e4, contour_length_m=400.0,
             microphone_height_m=5.0, mean_distance_m=10.0, plant_area_m2=4e3,
             background_levels=background,
         )  # fmt: skip
@@ -765,7 +765,7 @@ def test_steps_2_and_3_cap_a_level_far_above_the_average() -> None:
     levels = np.array([[60.0], [60.0], [60.0], [60.0], [80.0]])
     with pytest.warns(emission.SoundPowerWarning, match="10.2"):
         res = emission.plant_sound_power(
-            levels, [1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
+            levels, frequencies=[1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
             microphone_height_m=5.0, mean_distance_m=10.0, plant_area_m2=4e3,
         )  # fmt: skip
     mean = 10.0 * math.log10(np.mean(10.0 ** (levels[:, 0] / 10.0)))
@@ -782,7 +782,9 @@ def test_steps_2_and_3_cap_a_level_far_above_the_average() -> None:
 def test_no_warning_when_every_level_is_within_5_db() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        res = _contour().sound_power(_levels(_contour().positions_m.shape[0]), OCTAVES)
+        res = _contour().sound_power(
+            _levels(_contour().positions_m.shape[0]), frequencies=OCTAVES
+        )
     assert not res.steps_2_3_applied
     np.testing.assert_allclose(res.corrected_mean_level, res.mean_level)
 
@@ -790,7 +792,7 @@ def test_no_warning_when_every_level_is_within_5_db() -> None:
 @pytest.mark.parametrize(("theta", "term"), [(30.0, 2.0), (45.0, 1.5), (90.0, 0.0)])
 def test_directional_microphone_term(theta: float, term: float) -> None:
     res = emission.plant_sound_power(
-        [[70.0]], [1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
+        [[70.0]], frequencies=[1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
         microphone_height_m=5.0, mean_distance_m=10.0, plant_area_m2=4e3,
         directional_microphone_angle_deg=theta,
     )  # fmt: skip
@@ -800,7 +802,7 @@ def test_directional_microphone_term(theta: float, term: float) -> None:
 def test_directional_microphone_past_90_degrees_is_refused() -> None:
     with pytest.raises(ValueError, match="'directional_microphone_angle_deg' must lie"):
         emission.plant_sound_power(
-            [[70.0]], [1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
+            [[70.0]], frequencies=[1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
             microphone_height_m=5.0, mean_distance_m=10.0, plant_area_m2=4e3,
             directional_microphone_angle_deg=120.0,
         )  # fmt: skip
@@ -809,7 +811,7 @@ def test_directional_microphone_past_90_degrees_is_refused() -> None:
 def test_a_weighted_level_uses_the_annex_e_octave_corrections() -> None:
     lw_levels = np.full((1, OCTAVES.size), 70.0)
     res = emission.plant_sound_power(
-        lw_levels, OCTAVES, measurement_area_m2=1e4, contour_length_m=400.0,
+        lw_levels, frequencies=OCTAVES, measurement_area_m2=1e4, contour_length_m=400.0,
         microphone_height_m=5.0, mean_distance_m=10.0, plant_area_m2=4e3,
     )  # fmt: skip
     ck = np.array([-26.2, -16.1, -8.6, -3.2, 0.0, 1.2, 1.0, -1.1])
@@ -819,7 +821,7 @@ def test_a_weighted_level_uses_the_annex_e_octave_corrections() -> None:
 
 def test_the_31_5_hz_band_is_left_out_of_lwa() -> None:
     with_low = emission.plant_sound_power(
-        [[90.0, 70.0]], [31.5, 1000.0], measurement_area_m2=1e4,
+        [[90.0, 70.0]], frequencies=[31.5, 1000.0], measurement_area_m2=1e4,
         contour_length_m=400.0, microphone_height_m=5.0, mean_distance_m=10.0,
         plant_area_m2=4e3,
     )  # fmt: skip
@@ -832,9 +834,9 @@ def test_the_31_5_hz_band_is_left_out_of_lwa() -> None:
 def test_weather_changes_only_the_air_term() -> None:
     contour = _contour()
     levels = _levels(contour.positions_m.shape[0])
-    table = contour.sound_power(levels, OCTAVES)
+    table = contour.sound_power(levels, frequencies=OCTAVES)
     weather = contour.sound_power(
-        levels, OCTAVES, temperature_c=25.0, relative_humidity_percent=40.0
+        levels, frequencies=OCTAVES, temperature_c=25.0, relative_humidity_percent=40.0
     )
     delta = weather.sound_power_level - table.sound_power_level
     np.testing.assert_allclose(
@@ -843,7 +845,9 @@ def test_weather_changes_only_the_air_term() -> None:
 
 
 def test_uncertainty_follows_the_distance_ratio() -> None:
-    res = _contour().sound_power(_levels(_contour().positions_m.shape[0]), OCTAVES)
+    res = _contour().sound_power(
+        _levels(_contour().positions_m.shape[0]), frequencies=OCTAVES
+    )
     assert res.uncertainty_db == emission.plant_method_uncertainty(res.distance_ratio)
     outside = dataclasses.replace(res, mean_distance_m=1.0)
     assert outside.uncertainty_db is None
@@ -852,7 +856,7 @@ def test_uncertainty_follows_the_distance_ratio() -> None:
 def test_contour_supplies_its_geometry_and_the_prescribed_height() -> None:
     contour = _contour()
     levels = _levels(contour.positions_m.shape[0])
-    res = contour.sound_power(levels, OCTAVES)
+    res = contour.sound_power(levels, frequencies=OCTAVES)
     assert res.measurement_area_m2 == pytest.approx(contour.measurement_area_m2)
     assert res.contour_length_m == pytest.approx(contour.contour_length_m)
     assert res.mean_distance_m == pytest.approx(contour.mean_distance_m)
@@ -866,13 +870,13 @@ def test_contour_needs_one_row_per_measured_position() -> None:
     contour = _contour()
     levels = _levels(contour.positions_m.shape[0] + 1)
     with pytest.raises(ValueError, match="'levels' has .* rows for"):
-        contour.sound_power(levels, OCTAVES)
+        contour.sound_power(levels, frequencies=OCTAVES)
 
 
 def test_levels_must_match_the_bands() -> None:
     with pytest.raises(ValueError, match="'measured_levels' has 2 columns"):
         emission.plant_sound_power(
-            [[70.0, 71.0]], [1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
+            [[70.0, 71.0]], frequencies=[1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
             microphone_height_m=5.0, mean_distance_m=10.0, plant_area_m2=4e3,
         )  # fmt: skip
 
@@ -880,7 +884,7 @@ def test_levels_must_match_the_bands() -> None:
 def test_a_spectrum_of_31_5_hz_alone_cannot_be_a_weighted() -> None:
     with pytest.raises(ValueError, match="A-weighting of 10.9"):
         emission.plant_sound_power(
-            [[70.0]], [31.5], measurement_area_m2=1e4, contour_length_m=400.0,
+            [[70.0]], frequencies=[31.5], measurement_area_m2=1e4, contour_length_m=400.0,
             microphone_height_m=5.0, mean_distance_m=10.0, plant_area_m2=4e3,
         )  # fmt: skip
 
@@ -893,7 +897,7 @@ def test_a_spectrum_of_31_5_hz_alone_cannot_be_a_weighted() -> None:
 def _passing() -> tuple[spp.PlantMeasurementContour, spp.PlantSoundPowerResult]:
     contour = _contour()
     levels = _levels(contour.positions_m.shape[0])[:, :-1]
-    res = contour.sound_power(levels, OCTAVES[:-1])
+    res = contour.sound_power(levels, frequencies=OCTAVES[:-1])
     return contour, res
 
 
@@ -905,7 +909,9 @@ def _requirement(res: spp.PlantSoundPowerResult, key: str) -> spp.PlantRequireme
 def test_a_compliant_measurement_passes() -> None:
     contour = _contour()
     levels = _levels(contour.positions_m.shape[0])
-    res = contour.sound_power(levels, OCTAVES, background_levels=levels - 12.0)
+    res = contour.sound_power(
+        levels, frequencies=OCTAVES, background_levels=levels - 12.0
+    )
     check = emission.check_plant_measurement(contour, res, measurement_time_s=90.0)
     assert check.passes, check.failures
     assert check.deviations == ()
@@ -952,11 +958,11 @@ def test_more_than_10_percent_omitted_fails_9_1_2_4() -> None:
 def test_a_low_microphone_is_a_deviation_above_5_m_and_a_failure_below() -> None:
     contour = _contour()
     levels = _levels(contour.positions_m.shape[0])
-    low = contour.sound_power(levels, OCTAVES, microphone_height_m=6.0)
+    low = contour.sound_power(levels, frequencies=OCTAVES, microphone_height_m=6.0)
     check = emission.check_plant_measurement(contour, low)
     assert check.passes
     assert [r.key for r in check.deviations] == ["microphone_height"]
-    lower = contour.sound_power(levels, OCTAVES, microphone_height_m=4.0)
+    lower = contour.sound_power(levels, frequencies=OCTAVES, microphone_height_m=4.0)
     assert not emission.check_plant_measurement(contour, lower).passes
 
 
@@ -967,7 +973,7 @@ def test_a_microphone_above_the_prescribed_height_is_a_deviation(height: float) 
     """
     contour = _contour()
     levels = _levels(contour.positions_m.shape[0])
-    high = contour.sound_power(levels, OCTAVES, microphone_height_m=height)
+    high = contour.sound_power(levels, frequencies=OCTAVES, microphone_height_m=height)
     check = emission.check_plant_measurement(contour, high)
     assert check.passes
     assert [r.key for r in check.deviations] == ["microphone_height"]
@@ -981,7 +987,7 @@ def test_a_microphone_within_the_plan_accuracy_is_at_the_prescribed_height(
     contour = _contour()
     levels = _levels(contour.positions_m.shape[0])
     height = factor * contour.prescribed_microphone_height_m
-    res = contour.sound_power(levels, OCTAVES, microphone_height_m=height)
+    res = contour.sound_power(levels, frequencies=OCTAVES, microphone_height_m=height)
     row = emission.check_plant_measurement(contour, res).requirement(
         "microphone_height"
     )
@@ -994,7 +1000,9 @@ def test_a_microphone_within_the_plan_accuracy_is_at_the_prescribed_height(
 def test_a_narrow_directional_microphone_fails_7_1() -> None:
     contour = _contour()
     levels = _levels(contour.positions_m.shape[0])
-    res = contour.sound_power(levels, OCTAVES, directional_microphone_angle_deg=25.0)
+    res = contour.sound_power(
+        levels, frequencies=OCTAVES, directional_microphone_angle_deg=25.0
+    )
     check = emission.check_plant_measurement(contour, res)
     assert not check.requirement("directional_microphone").holds
     assert res.microphone_term_db[0] == pytest.approx(3.0 * (1.0 - 25.0 / 90.0))
@@ -1003,7 +1011,9 @@ def test_a_narrow_directional_microphone_fails_7_1() -> None:
 def test_background_under_10_db_is_a_deviation() -> None:
     contour = _contour()
     levels = _levels(contour.positions_m.shape[0])
-    res = contour.sound_power(levels, OCTAVES, background_levels=levels - 8.0)
+    res = contour.sound_power(
+        levels, frequencies=OCTAVES, background_levels=levels - 8.0
+    )
     check = emission.check_plant_measurement(contour, res)
     assert check.passes
     assert [r.key for r in check.deviations] == ["background_margin_preferred"]
@@ -1012,7 +1022,7 @@ def test_background_under_10_db_is_a_deviation() -> None:
 def test_missing_octave_bands_fail_9_5_1_a() -> None:
     contour = _contour()
     levels = _levels(contour.positions_m.shape[0])[:, 1:]
-    res = contour.sound_power(levels, OCTAVES[1:])
+    res = contour.sound_power(levels, frequencies=OCTAVES[1:])
     check = emission.check_plant_measurement(contour, res)
     row = check.requirement("octave_bands")
     assert not row.holds
@@ -1024,7 +1034,7 @@ def test_a_level_far_above_the_average_is_a_deviation() -> None:
     levels = _levels(contour.positions_m.shape[0])
     levels[2, 3] += 12.0
     with pytest.warns(emission.SoundPowerWarning, match="10.2"):
-        res = contour.sound_power(levels, OCTAVES)
+        res = contour.sound_power(levels, frequencies=OCTAVES)
     check = emission.check_plant_measurement(contour, res)
     assert "level_excess" in {r.key for r in check.deviations}
 
@@ -1106,7 +1116,7 @@ def test_a_3_db_angle_of_exactly_30_degrees_fails_7_1() -> None:
     """7.1: the angle "shall exceed +/-30 deg"."""
     contour = _contour()
     res = contour.sound_power(
-        _levels(contour.positions_m.shape[0]), OCTAVES,
+        _levels(contour.positions_m.shape[0]), frequencies=OCTAVES,
         directional_microphone_angle_deg=30.0,
     )  # fmt: skip
     row = emission.check_plant_measurement(contour, res).requirement(
@@ -1125,7 +1135,9 @@ def test_background_margins_at_the_edges_of_6_b(
     """6 b): "at least 6 dB, and preferably more than 10 dB"."""
     contour = _contour()
     levels = np.round(2.0 * _levels(contour.positions_m.shape[0])) / 2.0
-    res = contour.sound_power(levels, OCTAVES, background_levels=levels - margin)
+    res = contour.sound_power(
+        levels, frequencies=OCTAVES, background_levels=levels - margin
+    )
     check = emission.check_plant_measurement(contour, res)
     assert check.requirement("background_margin").holds is required
     assert check.requirement("background_margin_preferred").holds is preferred
@@ -1144,7 +1156,7 @@ def test_a_level_exactly_5_db_above_the_average_is_not_replaced() -> None:
     """10.2 replaces a level that exceeds the average "by more than 5 dB"."""
     top = 10.0 * math.log10(3e6 * 10.0**0.5 / (4.0 - 10.0**0.5))
     res = emission.plant_sound_power(
-        [[60.0], [60.0], [60.0], [top]], [1000.0], measurement_area_m2=1e4,
+        [[60.0], [60.0], [60.0], [top]], frequencies=[1000.0], measurement_area_m2=1e4,
         contour_length_m=400.0, microphone_height_m=5.0, mean_distance_m=10.0,
         plant_area_m2=4e3,
     )  # fmt: skip
@@ -1171,7 +1183,7 @@ def test_a_level_a_hair_under_5_db_above_the_average_is_not_replaced(
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         res = emission.plant_sound_power(
-            levels, [1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
+            levels, frequencies=[1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
             microphone_height_m=5.0, mean_distance_m=10.0, plant_area_m2=4e3,
         )  # fmt: skip
     assert not res.capped.any()
@@ -1201,7 +1213,7 @@ def test_background_margins_of_decimal_readings_at_the_edges_of_6_b(
     contour = _contour()
     shape = (contour.positions_m.shape[0], OCTAVES.size)
     res = contour.sound_power(
-        np.full(shape, operating), OCTAVES,
+        np.full(shape, operating), frequencies=OCTAVES,
         background_levels=np.full(shape, background),
     )  # fmt: skip
     np.testing.assert_array_equal(res.background_correction, correction)
@@ -1213,7 +1225,7 @@ def test_background_margins_of_decimal_readings_at_the_edges_of_6_b(
 def test_a_determination_of_another_contour_is_refused() -> None:
     contour = _contour()
     other = _contour(n_positions=contour.n_positions + 3)
-    res = other.sound_power(_levels(other.positions_m.shape[0]), OCTAVES)
+    res = other.sound_power(_levels(other.positions_m.shape[0]), frequencies=OCTAVES)
     with pytest.raises(ValueError, match="another 'mean_distance_m'"):
         emission.check_plant_measurement(contour, res)
 
@@ -1222,7 +1234,7 @@ def test_a_determination_with_another_number_of_positions_is_refused() -> None:
     contour = _contour()
     count = contour.positions_m.shape[0] + 2
     res = emission.plant_sound_power(
-        _levels(count), OCTAVES,
+        _levels(count), frequencies=OCTAVES,
         measurement_area_m2=contour.measurement_area_m2,
         contour_length_m=contour.contour_length_m,
         microphone_height_m=contour.prescribed_microphone_height_m,
@@ -1291,7 +1303,9 @@ def test_parts_are_named_by_default() -> None:
 def test_parts_over_different_bands_are_refused() -> None:
     _contour_, res = _passing()
     contour = _contour()
-    other = contour.sound_power(_levels(contour.positions_m.shape[0]), OCTAVES)
+    other = contour.sound_power(
+        _levels(contour.positions_m.shape[0]), frequencies=OCTAVES
+    )
     with pytest.raises(ValueError, match="same octave bands"):
         emission.partial_plant_contributions([res, other])
 
@@ -1328,7 +1342,9 @@ def test_contour_plot_in_spanish() -> None:
 
 def test_sound_power_plot_draws_one_bar_per_band() -> None:
     contour = _contour()
-    res = contour.sound_power(_levels(contour.positions_m.shape[0]), OCTAVES)
+    res = contour.sound_power(
+        _levels(contour.positions_m.shape[0]), frequencies=OCTAVES
+    )
     ax = res.plot()
     heights = [p.get_height() for p in ax.patches]
     np.testing.assert_allclose(heights, res.sound_power_level)
@@ -1351,7 +1367,9 @@ def test_check_plot_marks_advisory_rows_hollow() -> None:
     """
     contour = _contour()
     levels = _levels(contour.positions_m.shape[0])
-    res = contour.sound_power(levels, OCTAVES, background_levels=levels - 8.0)
+    res = contour.sound_power(
+        levels, frequencies=OCTAVES, background_levels=levels - 8.0
+    )
     check = emission.check_plant_measurement(contour, res)
     ax = check.plot()
     marks = [c.get_offsets().shape[0] for c in ax.collections]

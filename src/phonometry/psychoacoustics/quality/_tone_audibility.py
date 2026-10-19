@@ -363,9 +363,9 @@ _TONE_PEAK_DROP = 10.0
 
 def mean_narrowband_level(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     tone_frequency: float,
     *,
+    frequencies: ArrayLike,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
 ) -> float:
     r"""Mean narrow-band level ``LS`` of the masking noise (Formula (6), Annex D).
@@ -457,10 +457,10 @@ def _mean_narrowband_level_lines(
 
 def tone_level(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     tone_frequency: float,
     mean_narrowband_level: float,
     *,
+    frequencies: ArrayLike,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
 ) -> float:
     r"""Tone level ``LT`` from the tonal lines about a tone (Formula (8)).
@@ -612,7 +612,10 @@ def _detect_tones(
         """LS at a line, or None if its critical band holds no other line."""
         try:
             return mean_narrowband_level(
-                lev, freq, float(freq[index]), effective_bandwidth_factor=factor
+                lev,
+                frequencies=freq,
+                tone_frequency=float(freq[index]),
+                effective_bandwidth_factor=factor,
             )
         except ValueError:
             return None
@@ -676,9 +679,9 @@ def _step3_groups(
 
 def analyze_spectrum(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     line_spacing_hz: float,
     *,
+    frequencies: ArrayLike,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
 ) -> ToneAudibilityResult:
     r"""Detect and rate the audible tones of a narrow-band spectrum (Clause 5.3.8).
@@ -751,9 +754,9 @@ def analyze_spectrum(
         anchor = max((tones[i] for i in group), key=lambda t: t[4])
         lt_fg = combined_tone_level(
             lev,
-            freq,
-            [tones[i][0] for i in group],
-            [tones[i][2] for i in group],
+            frequencies=freq,
+            tone_frequencies=[tones[i][0] for i in group],
+            mean_narrowband_levels=[tones[i][2] for i in group],
             effective_bandwidth_factor=factor,
         )
         # Clause 6 note for summated tones: the N summated tone levels stand
@@ -764,10 +767,10 @@ def analyze_spectrum(
         entries.append((anchor[0], lt_fg, anchor[2], u_fg, len(group)))
 
     result = assess_tones(
-        [e[0] for e in entries],
         [e[1] for e in entries],
         [e[2] for e in entries],
         df,
+        tone_frequencies=[e[0] for e in entries],
         extended_uncertainties=[e[3] for e in entries],
     )
     return ToneAudibilityResult(
@@ -788,10 +791,10 @@ def analyze_spectrum(
 
 def combined_tone_level(
     levels: ArrayLike,
-    frequencies: ArrayLike,
-    tone_frequencies: ArrayLike,
     mean_narrowband_levels: ArrayLike,
     *,
+    frequencies: ArrayLike,
+    tone_frequencies: ArrayLike,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
 ) -> float:
     r"""Combined tone level ``LT`` of several tones in one critical band (Formula (17)).
@@ -803,10 +806,10 @@ def combined_tone_level(
     then rated at the frequency of its most audible tone.
 
     :param levels: Narrow-band levels ``Li`` of the spectrum, in dB.
-    :param frequencies: The line frequencies, in Hz (strictly increasing).
-    :param tone_frequencies: The tone frequencies sharing the critical band, Hz.
     :param mean_narrowband_levels: Each tone's mean narrow-band level ``LS``, dB
         (same length as ``tone_frequencies``).
+    :param frequencies: The line frequencies, in Hz (strictly increasing).
+    :param tone_frequencies: The tone frequencies sharing the critical band, Hz.
     :param effective_bandwidth_factor: :math:`\Delta f_\mathrm{e}/\Delta f`; 1.5
         for a Hanning window.
     :return: Combined tone level ``LT``, in dB.
@@ -1506,11 +1509,11 @@ def tone_audibility(
 
 
 def assess_tones(
-    tone_frequencies: ArrayLike,
     tone_levels: ArrayLike,
     mean_narrowband_levels: ArrayLike,
     line_spacing_hz: float,
     *,
+    tone_frequencies: ArrayLike,
     extended_uncertainties: ArrayLike | None = None,
 ) -> ToneAudibilityResult:
     """Assess the audibility of the tones of a narrow-band spectrum.
@@ -1519,11 +1522,11 @@ def assess_tones(
     (Formula (12)), masking index (Formula (13)) and audibility (Formula (14))
     to every tone and bundles them into a plottable :class:`ToneAudibilityResult`.
 
-    :param tone_frequencies: Tone frequencies ``fT``, in Hz.
     :param tone_levels: Tone levels ``LT``, in dB (Formula (8)).
     :param mean_narrowband_levels: Mean narrow-band levels ``LS`` of the masking
         noise, in dB (Formula (6)).
     :param line_spacing_hz: Line spacing (frequency resolution) ``Δf``, in Hz.
+    :param tone_frequencies: Tone frequencies ``fT``, in Hz.
     :param extended_uncertainties: Optional per-tone extended uncertainties
         ``U``, in dB (see :func:`audibility_uncertainty`; computed
         automatically by :func:`analyze_spectrum`, which has the per-line

@@ -353,8 +353,8 @@ The lower limit uses the Clause 4.2 guideline that the spacing exceed
 
 ```python
 plot_impedance_tube_geometry(
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     spacing_m: float,
     x1: float,
     diameter_m: float | None = None,
@@ -400,8 +400,8 @@ working range of [`plane_wave_frequency_range`](/phonometry/reference/api/materi
 
 ```python
 plot_transmission_tube_geometry(
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     l1: float,
     s1: float,
     l2: float,

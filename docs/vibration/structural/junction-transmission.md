@@ -363,7 +363,7 @@ tau = vibration.right_angle_transmission_coefficient(h1, h2, density1=rho, densi
                                                      wave_speed1=cl, wave_speed2=cl)
 cb = plate_bending_wave_speed(bands, vibration.plate_bending_stiffness(young, h1, nu),
                               rho * h1)
-welded = [float(vibration.coupling_loss_factor(tau, 2.0 * c, length, f, area1))
+welded = [float(vibration.coupling_loss_factor(tau, 2.0 * c, length, area1, frequency=f))
           for c, f in zip(cb, bands, strict=True)]
 bolted = vibration.point_connection_coupling_loss_factor(
     bands, 12, thickness1_m=h1, thickness2_m=h2, surface_density1=rho * h1,
@@ -376,10 +376,10 @@ t_p, t_c, radius = 0.005, 0.003, 0.75
 area_c = 2.0 * math.pi * radius * 2.0
 area_p = 3.5 * 3.0 - math.pi * radius**2
 sea = vibration.power_injection_clf(
-    500.0, rho * t_p * area_p * 0.0272**2, rho * t_c * area_c * 0.0132**2,
-    4.4e-3, 2.4e-3,
-    vibration.flat_plate_modal_density(area_p, t_p, cl),
-    float(vibration.cylindrical_shell_modal_density(500.0, area_c, t_c, radius, cl)[0]))
+    rho * t_p * area_p * 0.0272**2, rho * t_c * area_c * 0.0132**2, 4.4e-3,
+    2.4e-3, vibration.flat_plate_modal_density(area_p, t_p, cl),
+    float(vibration.cylindrical_shell_modal_density(500.0, area_c, t_c, radius, cl)[0]),
+    frequencies=500.0)
 
 print(f"{float(sea.coupling_loss_factor12[0]):.2e}")   # 4.26e-04
 print(f"{float(sea.coupling_loss_factor21[0]):.2e}")   # 3.91e-04

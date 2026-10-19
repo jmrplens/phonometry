@@ -82,6 +82,7 @@ Combines [`tonal_audibility`](/phonometry/reference/api/environment/measurement/
 ```python
 assess_tonal_survey(
     levels: Sequence[float] | np.ndarray,
+    *,
     frequencies: Sequence[float] | np.ndarray,
 ) -> TonalSurveyAssessment
 ```

@@ -94,10 +94,10 @@ def test_problem_4_21_noise_reduction(
     chain reproduces all eighteen values to 0.05 dB.
     """
     result = noise_control.room_to_room_transmission(
-        _BANDS_6,
-        tl,
-        8.0 * 3.0,
-        _receiving_absorption_421(),
+        frequencies=_BANDS_6,
+        transmission_loss=tl,
+        partition_area=8.0 * 3.0,
+        receiving_absorption=_receiving_absorption_421(),
         source=noise_control.SourceRoom(level=90.0),
         label=name,
     )
@@ -121,10 +121,10 @@ def test_problem_4_21_partition_transmission_term_is_negligible() -> None:
     """
     _, tl, printed = _R421_CASES[0]
     with_term = noise_control.room_to_room_transmission(
-        _BANDS_6,
-        tl,
-        8.0 * 3.0,
-        _receiving_absorption_421(),
+        frequencies=_BANDS_6,
+        transmission_loss=tl,
+        partition_area=8.0 * 3.0,
+        receiving_absorption=_receiving_absorption_421(),
         source=noise_control.SourceRoom(level=90.0),
         include_partition_transmission=True,
     )
@@ -171,10 +171,10 @@ def _problem_4_18(
         (4.0 * (5.0 * 3.0), _R418_WALLS),
     ]
     return noise_control.room_to_room_transmission(
-        _BANDS_6,
-        _R418_TL,
-        5.0 * 3.0,
-        room.equivalent_absorption_area(operator),
+        frequencies=_BANDS_6,
+        transmission_loss=_R418_TL,
+        partition_area=5.0 * 3.0,
+        receiving_absorption=room.equivalent_absorption_area(operator),
         source=noise_control.SourceRoom(
             power_level=_R418_LW,
             room_constant=r1,

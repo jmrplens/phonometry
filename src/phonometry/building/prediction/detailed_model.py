@@ -586,7 +586,7 @@ def bare_floor_impact_level(
 # Structural reverberation time and loss factors (Annex C)
 # --------------------------------------------------------------------------- #
 def perimeter_absorption_coefficient(
-    critical_frequencies: ArrayLike, vibration_reduction_indices: ArrayLike
+    vibration_reduction_indices: ArrayLike, *, critical_frequencies: ArrayLike
 ) -> float:
     r"""Absorption coefficient for bending waves at one border (Formula C.4).
 
@@ -598,10 +598,10 @@ def perimeter_absorption_coefficient(
     :func:`in_situ_total_loss_factor` takes. Annex C.3 places the in-situ
     coefficients between 0,05 and 0,5.
 
-    :param critical_frequencies: Critical frequency ``fc,j`` of each connected
-        element, in Hz.
     :param vibration_reduction_indices: Vibration reduction index ``Kij`` of
-        the path to each connected element, in dB (same order and length).
+        the path to each connected element, in dB.
+    :param critical_frequencies: Critical frequency ``fc,j`` of each connected
+        element, in Hz (same order and length).
     :return: The absorption coefficient ``αk`` at that border
         (dimensionless).
     :raises ValueError: If the two sequences differ in length, a critical
@@ -705,7 +705,7 @@ def laboratory_total_loss_factor(
 
 
 def structural_reverberation_time(
-    frequencies: ArrayLike, total_loss_factor: ArrayLike
+    total_loss_factor: ArrayLike, *, frequencies: ArrayLike
 ) -> np.ndarray:
     r"""Structural reverberation time :math:`T_\mathrm{s} = 2.2/(f \eta_\mathrm{tot})` (C.1).
 
@@ -810,7 +810,9 @@ def in_situ_equivalent_absorption_length(
         situ_reverberation_time, f.size, "situ_reverberation_time", positive=True
     )
     return np.asarray(
-        equivalent_absorption_length(area, ts, f, speed_of_sound=speed_of_sound),
+        equivalent_absorption_length(
+            area, ts, frequencies=f, speed_of_sound=speed_of_sound
+        ),
         dtype=np.float64,
     )
 
@@ -1026,8 +1028,8 @@ def flanking_reduction_index_from_flanking_level(
 
 def resonant_sound_reduction_index(
     sound_reduction_index: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     critical_frequency: float,
     correction: float = 8.0,
 ) -> np.ndarray:
@@ -1061,8 +1063,8 @@ def resonant_sound_reduction_index(
 
 def reciprocity_impact_level(
     sound_reduction_index: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     fraction: BandFraction = 3,
 ) -> np.ndarray:
     r"""Impact level of a homogeneous floor by reciprocity (Part 2, B.3/B.4).
@@ -1551,7 +1553,7 @@ def in_situ_element(
         perimeter_absorption=element.perimeter_absorption,
         fluid=fluid,
     )
-    ts = structural_reverberation_time(f, eta)
+    ts = structural_reverberation_time(frequencies=f, total_loss_factor=eta)
     r = calculated_sound_reduction_index(
         f,
         mass_per_area=element.mass_per_area,

@@ -439,8 +439,7 @@ class TonalSurveyAssessment(OwnsArrays):
 
 
 def assess_tonal_survey(
-    levels: Sequence[float] | np.ndarray,
-    frequencies: Sequence[float] | np.ndarray,
+    levels: Sequence[float] | np.ndarray, *, frequencies: Sequence[float] | np.ndarray
 ) -> TonalSurveyAssessment:
     """Which one-third-octave bands hold a prominent tone? (Annex K, survey method).
 

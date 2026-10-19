@@ -277,11 +277,12 @@ class SphericalGroundResult(OwnsArrays):
 
 
 def spherical_reflection_coefficient(
-    frequencies: ArrayLike,
     normalized_impedance: ArrayLike,
     source_height_m: float,
     receiver_height_m: float,
     distance: float,
+    *,
+    frequencies: ArrayLike,
     speed_of_sound: float = ABSORBER_AIR.speed_of_sound,
 ) -> Complex:
     r"""Spherical-wave reflection coefficient ``Q`` (Weyl-Van der Pol).
@@ -450,6 +451,7 @@ def fresnel_number(
     edge_to_receiver: float,
     direct_distance: float,
     frequencies: ArrayLike,
+    *,
     speed_of_sound: float = ABSORBER_AIR.speed_of_sound,
 ) -> Real:
     r"""Fresnel number :math:`N = (2/\lambda)(A + B - d)` (Bies Eq. (5.134)).
@@ -1067,12 +1069,12 @@ def _exact_barrier_il(setup: _ExactBarrierSetup) -> Real:
     # Spherical-wave reflection coefficient for the source-side and receiver-side
     # ground bounces (evaluated over the full source-receiver geometry).
     q_src = spherical_reflection_coefficient(
-        setup.frequencies,
-        z,
-        hs,
-        hr,
-        setup.receiver_distance,
-        setup.fluid.speed_of_sound,
+        frequencies=setup.frequencies,
+        normalized_impedance=z,
+        source_height_m=hs,
+        receiver_height_m=hr,
+        distance=setup.receiver_distance,
+        speed_of_sound=setup.fluid.speed_of_sound,
     )
     q_rec = q_src
     # Four diffracted paths: {source, source image} x {receiver, receiver image}.

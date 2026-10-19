@@ -433,7 +433,7 @@ def test_mtvv_takes_the_two_averagings_running_rms_has_and_no_others() -> None:
 def test_weighted_acceleration_matches_manual_sum() -> None:
     freqs = np.array([8.0, 16.0, 31.5, 63.0])
     accel = np.array([0.5, 0.8, 0.3, 0.1])
-    result = hv.weighted_acceleration(accel, freqs, "Wk")
+    result = hv.weighted_acceleration(accel, frequencies=freqs, weighting="Wk")
     factors = hv.weighting_factors("Wk", freqs)
     expected = math.sqrt(np.sum((factors * accel) ** 2))
     assert result.overall == pytest.approx(expected)
@@ -442,7 +442,7 @@ def test_weighted_acceleration_matches_manual_sum() -> None:
 
 
 def test_weighted_acceleration_single_band_equals_factor_times_level() -> None:
-    result = hv.weighted_acceleration([1.0], [10.0], "Wh")
+    result = hv.weighted_acceleration([1.0], frequencies=[10.0], weighting="Wh")
     assert result.overall == pytest.approx(hv.weighting_factors("Wh", 10.0)[0])
 
 
@@ -452,7 +452,7 @@ def test_weighted_acceleration_length_mismatch_raises() -> None:
         match=r"weighted_acceleration: 'band_accelerations' .*'frequencies' "
         r".*same shape",
     ):
-        hv.weighted_acceleration([1.0, 2.0], [8.0], "Wk")
+        hv.weighted_acceleration([1.0, 2.0], frequencies=[8.0], weighting="Wk")
 
 
 @pytest.mark.parametrize(
@@ -470,7 +470,9 @@ def test_weighted_acceleration_refuses_a_non_finite_band(name: str) -> None:
     values[name] = [*values[name][:1], float("nan"), *values[name][2:]]
     with pytest.raises(ValueError, match=f"'{name}' must contain only finite"):
         hv.weighted_acceleration(
-            values["band_accelerations"], values["frequencies"], "Wk"
+            values["band_accelerations"],
+            frequencies=values["frequencies"],
+            weighting="Wk",
         )
 
 
@@ -800,7 +802,9 @@ def test_weighted_spectrum_plot_returns_axes() -> None:
     mpl.use("Agg")
     import matplotlib.pyplot as plt
 
-    result = hv.weighted_acceleration([0.5, 0.8, 0.3], [16.0, 31.5, 63.0], "Wk")
+    result = hv.weighted_acceleration(
+        [0.5, 0.8, 0.3], frequencies=[16.0, 31.5, 63.0], weighting="Wk"
+    )
     ax = result.plot()
     assert isinstance(ax, plt.Axes)
     plt.close("all")

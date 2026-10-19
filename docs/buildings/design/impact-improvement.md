@@ -70,7 +70,7 @@ bare = np.full(16, 78.0)                       # bare-plate acceleration level
 # A real textile carpet measured on the CSTB mock-up (Foret et al. 2011, Fig. 4).
 covering = bare - np.array([5, 8, 10, 14, 18, 23, 30, 31,
                             39, 49, 53, 57, 60, 67, 68, 71])
-res = building.impact_improvement(bare, covering, freqs)
+res = building.impact_improvement(bare, covering, frequencies=freqs)
 print(res.delta_lw)   # weighted improvement delta-Lw = 29 dB (ISO 717-2)
 res.plot()
 plt.show()
@@ -91,7 +91,7 @@ freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
 bare_levels = [72, 73, 74, 74, 75, 75, 76, 76, 77, 77, 78, 78, 79, 79, 80, 80]
 covered_levels = [b - d for b, d in zip(bare_levels, delta_l)]
 bg = [40.0] * 16
-res = building.impact_improvement(bare_levels, covered_levels, freqs, background=bg)
+res = building.impact_improvement(bare_levels, covered_levels, frequencies=freqs, background=bg)
 res.improvement       # delta-L per band
 res.delta_lw          # weighted single number (rated on the 100-3150 Hz sub-range)
 res.ci_delta          # spectrum adaptation term CI,delta (Formula (A.4))
@@ -125,7 +125,7 @@ freqs = [100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150]
 delta_l = [5, 8, 10, 14, 18, 23, 30, 31, 39, 49, 53, 57, 60, 67, 68, 71]
 bare = [78.0] * 16
-res = building.impact_improvement(bare, [b - d for b, d in zip(bare, delta_l)], freqs)
+res = building.impact_improvement(bare, [b - d for b, d in zip(bare, delta_l)], frequencies=freqs)
 res.report("dLw.pdf",
            metadata=ReportMetadata(
                specimen="Textile floor covering (carpet), laid loose",

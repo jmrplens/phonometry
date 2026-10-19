@@ -73,9 +73,9 @@ MODE_KINDS = ('axial', 'tangential', 'oblique')
 
 ```python
 room_modal_density(
-    frequency: ArrayLike,
     dimensions: ArrayLike,
     *,
+    frequency: ArrayLike,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray | float
 ```
@@ -104,9 +104,9 @@ between adjacent eigenfrequencies.
 
 ```python
 room_mode_count(
-    frequency: ArrayLike,
     dimensions: ArrayLike,
     *,
+    frequency: ArrayLike,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray | float
 ```

@@ -566,8 +566,8 @@ def plenum_flanking_reduction_index(
     plenum_height_m: float,
     sidewalls: str = ...,
     frequencies: ArrayLike | None = ...,
-    attenuation_source: ArrayLike,
-    attenuation_receiving: ArrayLike,
+    attenuation_source_per_m: ArrayLike,
+    attenuation_receiving_per_m: ArrayLike,
     source_length: float | None = ...,
     split_source: float = ...,
     split_receiving: float = ...,
@@ -597,8 +597,8 @@ def plenum_flanking_reduction_index(
     plenum_height_m: float,
     sidewalls: str = "reflecting",
     frequencies: ArrayLike | None = None,
-    attenuation_source: ArrayLike | None = None,
-    attenuation_receiving: ArrayLike | None = None,
+    attenuation_source_per_m: ArrayLike | None = None,
+    attenuation_receiving_per_m: ArrayLike | None = None,
     source_length: float | None = None,
     split_source: float = 0.5,
     split_receiving: float = 0.5,
@@ -631,10 +631,10 @@ def plenum_flanking_reduction_index(
         ``"absorbing"`` (:math:`\epsilon = 1`); :math:`\epsilon` scales both
         the geometry penalty of Eq. (9.20) and the exponents of Eq. (9.18).
     :param frequencies: Optional band centre frequencies, in Hz.
-    :param attenuation_source: Optional plenum power attenuation coefficient
+    :param attenuation_source_per_m: Optional plenum power attenuation coefficient
         ``mS`` per band, in 1/m (> 0); switches to Eq. (9.18).
-    :param attenuation_receiving: Optional ``mR`` per band, in 1/m (> 0);
-        required together with *attenuation_source*.
+    :param attenuation_receiving_per_m: Optional ``mR`` per band, in 1/m (> 0);
+        required together with *attenuation_source_per_m*.
     :param source_length: Source-side ceiling length ``LS``, in m
         (Default: equal to *ceiling_length*).
     :param split_source: Power split ``sS`` towards the partition, in
@@ -677,10 +677,10 @@ def plenum_flanking_reduction_index(
 
     tau_s = 10.0 ** (-rs / 10.0)
     tau_r = 10.0 ** (-rr / 10.0)
-    if (attenuation_source is None) != (attenuation_receiving is None):
-        msg = "'attenuation_source' and 'attenuation_receiving' must be given together."
+    if (attenuation_source_per_m is None) != (attenuation_receiving_per_m is None):
+        msg = "'attenuation_source_per_m' and 'attenuation_receiving_per_m' must be given together."
         raise ValueError(msg)
-    if attenuation_source is None or attenuation_receiving is None:
+    if attenuation_source_per_m is None or attenuation_receiving_per_m is None:
         geometry = float(10.0 * np.log10(eps**2 * lr / (4.0 * h)))
         tau = eps**2 * tau_s * tau_r * lr / (4.0 * h)
         _require_transmission_factor(tau)
@@ -699,14 +699,16 @@ def plenum_flanking_reduction_index(
             ceiling_length=lr,
         )
 
-    ms = require_finite_array(attenuation_source, "attenuation_source")
-    mr = require_finite_array(attenuation_receiving, "attenuation_receiving")
+    ms = require_finite_array(attenuation_source_per_m, "attenuation_source_per_m")
+    mr = require_finite_array(
+        attenuation_receiving_per_m, "attenuation_receiving_per_m"
+    )
     require_equal_shapes(
         "plenum_flanking_reduction_index",
         {
             "reduction_index_source": rs.shape,
-            "attenuation_source": ms.shape,
-            "attenuation_receiving": mr.shape,
+            "attenuation_source_per_m": ms.shape,
+            "attenuation_receiving_per_m": mr.shape,
         },
         "band",
     )

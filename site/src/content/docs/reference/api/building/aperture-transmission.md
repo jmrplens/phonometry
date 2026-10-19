@@ -60,7 +60,7 @@ ApertureTransmissionResult(
     frequencies: np.ndarray,
     transmission_coefficient: np.ndarray,
     kind: str,
-    width: float | None = None,
+    width_m: float | None = None,
     radius: float | None = None,
     depth: float | None = None,
 )
@@ -75,7 +75,7 @@ Transmission through a slit or circular aperture (Hopkins 4.3.10).
 | `frequencies` | Band centre frequencies, in hertz. |
 | `transmission_coefficient` | Transmission coefficient `tau` per band. |
 | `kind` | `"slit"` or `"circular"`. |
-| `width` | Slit width, in metres, retained (with `depth`) so `plot_geometry` can draw the section; appended after the original fields and `None` for circular apertures or hand-built results. |
+| `width_m` | Slit width, in metres, retained (with `depth`) so `plot_geometry` can draw the section; appended after the original fields and `None` for circular apertures or hand-built results. |
 | `radius` | Circular-aperture radius, in metres, or `None`. |
 | `depth` | Wall thickness, in metres, or `None`. |
 
@@ -198,7 +198,7 @@ plot_aperture_geometry(
     depth: float,
     ax: Axes | None = ...,
     *,
-    width: float,
+    width_m: float,
     language: str = ...,
     **kwargs: Any,
 ) -> Axes
@@ -215,10 +215,10 @@ plot_aperture_geometry(
 
 Draw the section through a wall aperture to scale.
 
-Wall of thickness `depth` with a slit of the given `width` (or the
+Wall of thickness `depth` with a slit of the given `width_m` (or the
 diametral section of a circular hole of the given `radius`), incident
 sound on the left and the transmitted wavefronts sketched on the right.
-Give exactly one of `width`/`radius`, matching
+Give exactly one of `width_m`/`radius`, matching
 [`slit_transmission_coefficient`](/phonometry/reference/api/building/aperture-transmission/#slit_transmission_coefficient) /
 [`circular_aperture_transmission_coefficient`](/phonometry/reference/api/building/aperture-transmission/#circular_aperture_transmission_coefficient).
 
@@ -228,7 +228,7 @@ Give exactly one of `width`/`radius`, matching
 | :--- | :--- |
 | `depth` | Wall thickness `d`, in metres. |
 | `ax` | Existing axes, or `None` to create a figure. |
-| `width` | Slit width `w`, in metres. |
+| `width_m` | Slit width `w`, in metres. |
 | `radius` | Circular-hole radius, in metres. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the wall rectangles. |
@@ -239,14 +239,14 @@ Give exactly one of `width`/`radius`, matching
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a `depth`, `width` or `radius` that is not finite and positive, or for anything other than exactly one of `width`/`radius`. |
+| ValueError | for a `depth`, `width_m` or `radius` that is not finite and positive, or for anything other than exactly one of `width_m`/`radius`. |
 
 ## slit_resonance_frequencies
 
 ```python
 slit_resonance_frequencies(
     depth: float,
-    width: float,
+    width_m: float,
     *,
     orders: int = 3,
     speed_of_sound: float = 343.0,
@@ -265,7 +265,7 @@ because the end correction `e` depends weakly on frequency.
 | Name | Description |
 | :--- | :--- |
 | `depth` | Slit depth `d`, in m (> 0). |
-| `width` | Slit width `w`, in m (> 0). |
+| `width_m` | Slit width `w`, in m (> 0). |
 | `orders` | Number of resonance orders `z = 1..orders` (>= 1). |
 | `speed_of_sound` | Speed of sound in air `c0` (Default: 343 m/s). |
 
@@ -275,14 +275,14 @@ because the end correction `e` depends weakly on frequency.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-positive input, `orders < 1`, or a slit so wide relative to its depth that the effective depth $d + 2e$ is non-positive (no resonance exists; `width` must be much less than the wavelength). |
+| ValueError | for a non-positive input, `orders < 1`, or a slit so wide relative to its depth that the effective depth $d + 2e$ is non-positive (no resonance exists; `width_m` must be much less than the wavelength). |
 
 ## slit_transmission_coefficient
 
 ```python
 slit_transmission_coefficient(
     frequency: ArrayLike,
-    width: float,
+    width_m: float,
     depth: float,
     *,
     field: str = 'diffuse',
@@ -298,7 +298,7 @@ Transmission coefficient of a straight-edged slit (Hopkins Eq. 4.99).
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
-| `width` | Slit width `w`, in m (> 0). |
+| `width_m` | Slit width `w`, in m (> 0). |
 | `depth` | Slit depth `d` (wall thickness across the slit), in m (> 0). |
 | `field` | `"diffuse"` ($m = 8$) or `"normal"` ($m = 4$). |
 | `position` | `"mid"` ($n = 1$) or `"edge"` ($n = 0.5$). |

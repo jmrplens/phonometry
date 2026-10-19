@@ -524,8 +524,8 @@ def plot_dynamic_stiffness(
     from .._i18n import decimal_comma, format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    m = result.floor_mass_per_area
-    s_mn = result.dynamic_stiffness / 1e6
+    m = result.floor_mass_per_area_kg_m2
+    s_mn = result.dynamic_stiffness_n_m3 / 1e6
     grid = np.logspace(np.log10(max(s_mn * 0.2, 1e-2)), np.log10(s_mn * 5.0), 240)
     f0 = np.sqrt(grid * 1e6 / m) / (2.0 * np.pi)
     ax.plot(
@@ -826,7 +826,7 @@ def plot_porous_medium(
     ax.set_ylabel(_t("Normalised characteristic value", language))
     ax.set_title(
         f"{_t('Porous medium', language)} ({result.model}), "
-        f"$\\sigma$ = {decimal_comma(f'{result.flow_resistivity:g}', language)} Pa s/m²"
+        f"$\\sigma$ = {decimal_comma(f'{result.flow_resistivity_pa_s_m2:g}', language)} Pa s/m²"
     )
     ax.legend(loc="best", fontsize="small")
     ax.grid(visible=True, which="both", alpha=0.3)

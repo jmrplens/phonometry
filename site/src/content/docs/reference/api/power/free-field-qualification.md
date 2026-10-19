@@ -169,7 +169,7 @@ allows, "in conformity" but not "in full conformity".
 directionality_positions(
     room: Literal['anechoic', 'hemi-anechoic'],
     *,
-    radius_m: float = 1.5,
+    radius: float = 1.5,
 ) -> np.ndarray
 ```
 
@@ -187,7 +187,7 @@ hemi-anechoic room, 64 in an anechoic one (Figure B.1).
 | Name | Description |
 | :--- | :--- |
 | `room` | `"anechoic"` or `"hemi-anechoic"`. |
-| `radius_m` | The radius, in metres; 1,5 m in B.3.2. |
+| `radius` | The radius, in metres; 1,5 m in B.3.2. |
 
 **Returns:** `(32, 3)` or `(64, 3)` coordinates, in metres.
 
@@ -635,7 +635,7 @@ MicrophoneTraverse(
     positions_m: np.ndarray,
     levels: np.ndarray,
     monitor_levels_db: np.ndarray | None = None,
-    background_levels_db: np.ndarray | None = None,
+    background_levels: np.ndarray | None = None,
     name: str = '',
     targets: tuple[str, ...] = (),
 )
@@ -650,7 +650,7 @@ One straight microphone traverse of ISO 26101:2017 5.1.3.2.
 | `positions_m` | The measurement points, one row per point, as `(x, y, z)` coordinates in metres in the room frame: `z` points up and, in a hemi-anechoic room, the reflecting plane is `z = 0`. The mathematical origin of the traverse is given to [`inverse_square_law_deviations`](/phonometry/reference/api/power/free-field-qualification/#inverse_square_law_deviations) in the same frame. |
 | `levels` | The measured sound pressure level $L'_{pi}$ at each point, one row per point and one column per test frequency, in dB. A `nan` marks a point not measured at that frequency, which is how a spacing that changes with frequency is written (ISO 3745 A.4.3 asks for equally spaced points *at each frequency*). Every other level is finite. |
 | `monitor_levels_db` | The monitor microphone level $L_{p,\mathrm{ref},i}$ recorded with each point, same shape; the first row is the level for the initial point 0, which every point is corrected to. It is finite wherever a level was measured and in the first row of every frequency measured. `None` applies no stability correction. |
-| `background_levels_db` | The background level at each point, same shape, or one row for the whole traverse, finite wherever a level was measured; `None` leaves the 6 dB requirement of ISO 26101 5.1.2.2 c) unjudged. |
+| `background_levels` | The background level at each point, same shape, or one row for the whole traverse, finite wherever a level was measured; `None` leaves the 6 dB requirement of ISO 26101 5.1.2.2 c) unjudged. |
 | `name` | A label for the traverse (the path it follows: a dihedral corner, the nearest wall, a door). |
 | `targets` | What the path is selected towards, among the five of the amended ISO 3745 A.3.3 a) to e): `"dihedral corner"`, `"trihedral corner"`, `"boundary centre"` (the centre of the most uniform boundary surface), `"closest boundary"` and `"unique features"` (a door, a window, a ventilation opening). One path may serve more than one target, as A.3.3 NOTE 1 allows for c) and d); an empty tuple names none. |
 
@@ -666,7 +666,7 @@ MicrophoneTraverse.along(
     *,
     start_m: ArrayLike = (0.0, 0.0, 0.0),
     monitor_levels_db: ArrayLike | None = None,
-    background_levels_db: ArrayLike | None = None,
+    background_levels: ArrayLike | None = None,
     name: str = '',
     targets: Sequence[str] = (),
 ) -> MicrophoneTraverse
@@ -683,7 +683,7 @@ A traverse laid out along a straight line from `start_m`.
 | `levels` | One row per point, one column per frequency, in dB. |
 | `start_m` | The point the distances are counted from, in metres; the room frame's origin by default. |
 | `monitor_levels_db` | As for the class. |
-| `background_levels_db` | As for the class. |
+| `background_levels` | As for the class. |
 | `name` | As for the class. |
 | `targets` | As for the class. |
 

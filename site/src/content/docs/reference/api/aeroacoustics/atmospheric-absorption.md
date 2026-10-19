@@ -46,11 +46,11 @@ AircraftBandAttenuation(
     frequencies: NDArray[np.float64],
     band_attenuation: NDArray[np.float64],
     midband_attenuation: NDArray[np.float64],
-    coefficient: NDArray[np.float64],
-    path_length: float,
+    coefficient_db_per_m: NDArray[np.float64],
+    path_length_m: float,
     temperature_c: float,
     relative_humidity_percent: float,
-    atmospheric_pressure_kpa: float,
+    static_pressure_kpa: float,
 )
 ```
 
@@ -63,11 +63,11 @@ One-third-octave-band atmospheric attenuation over a path (SAE ARP 5534).
 | `frequencies` | Nominal one-third-octave-band centre frequencies, in Hz. |
 | `band_attenuation` | SAE-Method band attenuation `δ_B` per band, in dB. |
 | `midband_attenuation` | Pure-tone mid-band path-length attenuation $\delta_\mathrm{t} = \alpha \cdot s$ per band, in dB (ARP 5534 Eqs. 1-6 coefficient). |
-| `coefficient` | Pure-tone mid-band attenuation coefficient `α` per band, in dB/m. |
-| `path_length` | Propagation path length `s`, in metres. |
+| `coefficient_db_per_m` | Pure-tone mid-band attenuation coefficient `α` per band, in dB/m. |
+| `path_length_m` | Propagation path length `s`, in metres. |
 | `temperature_c` | Air temperature, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity, in percent. |
-| `atmospheric_pressure_kpa` | Ambient atmospheric pressure, in kPa. |
+| `static_pressure_kpa` | Ambient atmospheric pressure, in kPa. |
 
 ### AircraftBandAttenuation.plot()
 
@@ -223,11 +223,11 @@ Plot the attenuation coefficient versus frequency.
 ```python
 sae_band_attenuation(
     frequencies: NDArray[np.float64] | list[float],
-    path_length: float,
+    path_length_m: float,
     *,
     temperature_c: float = 25.0,
     relative_humidity_percent: float = 70.0,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
 ) -> AircraftBandAttenuation
 ```
 
@@ -247,10 +247,10 @@ Annex B form leaves 57 of them up to 0.036 dB off.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Nominal one-third-octave-band centre frequencies, in Hz (standard range 50 Hz-10 kHz; the method extends to 25 Hz-20 kHz). |
-| `path_length` | Propagation path length `s`, in metres (`>= 0`). |
+| `path_length_m` | Propagation path length `s`, in metres (`>= 0`). |
 | `temperature_c` | Air temperature, in degrees Celsius (SAE window ~6-32 °C; default 25 °C, the ARP 5534 reference point). |
 | `relative_humidity_percent` | Relative humidity, in percent (SAE window ~20-95 %; default 70 %). |
-| `atmospheric_pressure_kpa` | Ambient atmospheric pressure, in kPa (default 101.325). |
+| `static_pressure_kpa` | Ambient atmospheric pressure, in kPa (default 101.325). |
 
 **Returns:** An [`AircraftBandAttenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#aircraftbandattenuation).
 

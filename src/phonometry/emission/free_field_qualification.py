@@ -490,15 +490,15 @@ def _checked_background(value: ArrayLike, levels: np.ndarray) -> np.ndarray:
     background = np.asarray(value, dtype=np.float64)
     if background.ndim == 1 and background.shape[0] == levels.shape[1]:
         background = np.broadcast_to(background, levels.shape)
-    background = _as_levels(background, levels.shape[0], "background_levels_db")
+    background = _as_levels(background, levels.shape[0], "background_levels")
     if background.shape != levels.shape:
         msg = (
-            "'background_levels_db' must have the shape of 'levels', "
+            "'background_levels' must have the shape of 'levels', "
             "or be one row for the whole traverse."
         )
         raise ValueError(msg)
     if np.any(np.isfinite(levels) & ~np.isfinite(background)):
-        msg = "'background_levels_db' must be finite at every measured point."
+        msg = "'background_levels' must be finite at every measured point."
         raise ValueError(msg)
     return background
 
@@ -524,7 +524,7 @@ class MicrophoneTraverse(OwnsArrays):
         corrected to. It is finite wherever a level was measured and in the
         first row of every frequency measured. ``None`` applies no stability
         correction.
-    :ivar background_levels_db: The background level at each point, same
+    :ivar background_levels: The background level at each point, same
         shape, or one row for the whole traverse, finite wherever a level was
         measured; ``None`` leaves the 6 dB requirement of ISO 26101
         5.1.2.2 c) unjudged.
@@ -542,7 +542,7 @@ class MicrophoneTraverse(OwnsArrays):
     positions_m: np.ndarray
     levels: np.ndarray
     monitor_levels_db: np.ndarray | None = None
-    background_levels_db: np.ndarray | None = None
+    background_levels: np.ndarray | None = None
     name: str = ""
     targets: tuple[str, ...] = ()
 
@@ -563,9 +563,9 @@ class MicrophoneTraverse(OwnsArrays):
         if self.monitor_levels_db is not None:
             monitor = _checked_monitor(self.monitor_levels_db, levels)
             object.__setattr__(self, "monitor_levels_db", read_only(monitor))
-        if self.background_levels_db is not None:
-            background = _checked_background(self.background_levels_db, levels)
-            object.__setattr__(self, "background_levels_db", read_only(background))
+        if self.background_levels is not None:
+            background = _checked_background(self.background_levels, levels)
+            object.__setattr__(self, "background_levels", read_only(background))
 
     @classmethod
     def along(
@@ -576,7 +576,7 @@ class MicrophoneTraverse(OwnsArrays):
         *,
         start_m: ArrayLike = (0.0, 0.0, 0.0),
         monitor_levels_db: ArrayLike | None = None,
-        background_levels_db: ArrayLike | None = None,
+        background_levels: ArrayLike | None = None,
         name: str = "",
         targets: Sequence[str] = (),
     ) -> MicrophoneTraverse:
@@ -589,7 +589,7 @@ class MicrophoneTraverse(OwnsArrays):
         :param start_m: The point the distances are counted from, in metres;
             the room frame's origin by default.
         :param monitor_levels_db: As for the class.
-        :param background_levels_db: As for the class.
+        :param background_levels: As for the class.
         :param name: As for the class.
         :param targets: As for the class.
         :return: The traverse.
@@ -611,10 +611,10 @@ class MicrophoneTraverse(OwnsArrays):
                 if monitor_levels_db is None
                 else np.asarray(monitor_levels_db, dtype=np.float64)
             ),
-            background_levels_db=(
+            background_levels=(
                 None
-                if background_levels_db is None
-                else np.asarray(background_levels_db, dtype=np.float64)
+                if background_levels is None
+                else np.asarray(background_levels, dtype=np.float64)
             ),
             name=name,
             targets=tuple(targets),
@@ -1055,8 +1055,8 @@ def _prepared_traverses(
         stability.append(excursion)
         margins.append(
             None
-            if traverse.background_levels_db is None
-            else traverse.levels - traverse.background_levels_db
+            if traverse.background_levels is None
+            else traverse.levels - traverse.background_levels
         )
     return _Prepared(positions, levels, tuple(margins), tuple(stability))
 
@@ -1208,7 +1208,7 @@ def inverse_square_law_deviations(
 
 
 def directionality_positions(
-    room: FreeFieldRoom, *, radius_m: float = _DIRECTIONALITY_RADIUS_M
+    room: FreeFieldRoom, *, radius: float = _DIRECTIONALITY_RADIUS_M
 ) -> np.ndarray:
     r"""Microphone positions of the directionality test (ISO 26101 B.3.2).
 
@@ -1220,11 +1220,11 @@ def directionality_positions(
     hemi-anechoic room, 64 in an anechoic one (Figure B.1).
 
     :param room: ``"anechoic"`` or ``"hemi-anechoic"``.
-    :param radius_m: The radius, in metres; 1,5 m in B.3.2.
+    :param radius: The radius, in metres; 1,5 m in B.3.2.
     :return: ``(32, 3)`` or ``(64, 3)`` coordinates, in metres.
     """
     _check_room(room)
-    radius = require_positive(radius_m, "radius_m")
+    radius = require_positive(radius, "radius")
     rows = []
     for polar in _DIRECTIONALITY_POLAR_DEG[room]:
         for azimuth in _DIRECTIONALITY_AZIMUTH_DEG:

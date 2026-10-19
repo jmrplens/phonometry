@@ -805,7 +805,7 @@ class ImpactMobilityResult(OwnsArrays):
         return np.asarray(np.abs(self.mobility), dtype=np.float64)
 
     @property
-    def phase(self) -> np.ndarray:
+    def phase_rad(self) -> np.ndarray:
         """Mobility phase, in radians."""
         return np.asarray(np.angle(self.mobility), dtype=np.float64)
 

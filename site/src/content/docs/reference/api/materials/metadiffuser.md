@@ -38,7 +38,7 @@ metadiffuser_diffusion_spectrum(
     frequencies: ArrayLike,
     wells: Sequence[MetadiffuserWell | None],
     *,
-    depth: float,
+    depth_m: float,
     period_m: float,
     angles_deg: ArrayLike = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90),
     source_angle_deg: float = 0.0,
@@ -63,7 +63,7 @@ exactly as the paper reports `delta_n`.
 | :--- | :--- |
 | `frequencies` | Frequencies of the spectrum, in hertz (1-D). |
 | `wells` | Sequence of [`MetadiffuserWell`](/phonometry/reference/api/materials/metadiffuser/#metadiffuserwell) (or `None` for a flat rigid strip) describing one period of the panel face. |
-| `depth` | Panel depth `L` common to all slits, in metres. |
+| `depth_m` | Panel depth `L` common to all slits, in metres. |
 | `period_m` | Well pitch `d` along the panel face, in metres. |
 | `angles_deg` | Receiver reflection angles `theta`, in degrees. |
 | `source_angle_deg` | Angle of incidence `psi`, in degrees. |
@@ -80,7 +80,7 @@ metadiffuser_polar_response(
     frequency: float,
     wells: Sequence[MetadiffuserWell | None],
     *,
-    depth: float,
+    depth_m: float,
     period_m: float,
     angles_deg: ArrayLike = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90),
     source_angle_deg: float = 0.0,
@@ -105,7 +105,7 @@ with
 | :--- | :--- |
 | `frequency` | Frequency of the prediction `f`, in hertz. |
 | `wells` | Sequence of [`MetadiffuserWell`](/phonometry/reference/api/materials/metadiffuser/#metadiffuserwell) (or `None` for a flat rigid strip) describing one period of the panel face. |
-| `depth` | Panel depth `L` common to all slits, in metres. |
+| `depth_m` | Panel depth `L` common to all slits, in metres. |
 | `period_m` | Well pitch `d` along the panel face, in metres; it is the `well_width` of the far-field model. |
 | `angles_deg` | Receiver reflection angles `theta`, in degrees. |
 | `source_angle_deg` | Angle of incidence `psi` of the source, in degrees; also applied to the local slit reflection. |
@@ -122,7 +122,7 @@ metadiffuser_reflection(
     frequency: ArrayLike,
     wells: Sequence[MetadiffuserWell | None],
     *,
-    depth: float,
+    depth_m: float,
     period_m: float,
     angle_rad: float = 0.0,
     resonator_geometry: str = 'slit',
@@ -148,7 +148,7 @@ air impedance.
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `wells` | Sequence of [`MetadiffuserWell`](/phonometry/reference/api/materials/metadiffuser/#metadiffuserwell) (or `None` for a flat rigid strip) describing one period of the panel face. |
-| `depth` | Panel depth `L` common to all slits, in metres. |
+| `depth_m` | Panel depth `L` common to all slits, in metres. |
 | `period_m` | Well pitch `d` along the panel face, in metres. |
 | `angle_rad` | Polar angle of incidence `theta`, in radians. |
 | `resonator_geometry` | `"slit"` (default) for the paper's two-dimensional resonators, `"square"` for square-duct necks and cavities. |
@@ -166,7 +166,7 @@ MetadiffuserResult(
     well_absorption: NDArray[np.float64],
     *,
     wells: tuple[MetadiffuserWell | None, ...] | None = None,
-    depth: float | None = None,
+    depth_m: float | None = None,
     period_m: float | None = None,
 )
 ```
@@ -179,7 +179,7 @@ pressure reflection factor of each well (flat strips are exactly `1`),
 $\alpha(f) = 1 - \operatorname{mean}_n \lvert R_n \rvert^2$ and
 `well_absorption` the per-well
 $\alpha_n = 1 - \lvert R_n \rvert^2$. The trailing fields retain the geometry the
-prediction was run with (`wells`, `depth`, `period_m`) so
+prediction was run with (`wells`, `depth_m`, `period_m`) so
 `plot_geometry` can draw the panel section; they default to
 `None` for hand-built results.
 
@@ -247,7 +247,7 @@ plot_metadiffuser_panel_geometry(
     wells: Sequence[Any],
     ax: Axes | None = None,
     *,
-    depth: float,
+    depth_m: float,
     period_m: float,
     language: str = 'en',
     **kwargs: Any,
@@ -269,7 +269,7 @@ at the lattice step `a = L / M` shelved sideways into the septum;
 | :--- | :--- |
 | `wells` | The well sequence of [`metadiffuser_reflection`](/phonometry/reference/api/materials/metadiffuser/#metadiffuser_reflection) ([`MetadiffuserWell`](/phonometry/reference/api/materials/metadiffuser/#metadiffuserwell) or `None` per well). |
 | `ax` | Existing axes, or `None` to create a figure. |
-| `depth` | Panel depth `L`, in metres. |
+| `depth_m` | Panel depth `L`, in metres. |
 | `period_m` | Well pitch `d`, in metres. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the slit rectangles. |

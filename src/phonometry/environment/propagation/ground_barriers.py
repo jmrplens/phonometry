@@ -169,10 +169,10 @@ def _normalized_ground_impedance(
     from ...materials.absorbers.porous import PorousMediumResult
 
     if (impedance is None) == (flow_resistivity is None):
-        msg = "provide exactly one of 'impedance' or 'flow_resistivity'."
+        msg = "provide exactly one of 'impedance' or 'flow_resistivity_pa_s_m2'."
         raise ValueError(msg)
     if flow_resistivity is not None:
-        sigma = require_positive(flow_resistivity, "flow_resistivity")
+        sigma = require_positive(flow_resistivity, "flow_resistivity_pa_s_m2")
         if model == "delany_bazley":
             medium = delany_bazley(frequency, sigma, fluid=fluid)
         elif model == "miki":
@@ -332,7 +332,7 @@ def ground_effect(
     receiver_height_m: float,
     distance: float,
     *,
-    flow_resistivity: float,
+    flow_resistivity_pa_s_m2: float,
     model: Literal["delany_bazley", "miki"] = ...,
     fluid: Fluid = ...,
 ) -> SphericalGroundResult: ...
@@ -345,7 +345,7 @@ def ground_effect(
     distance: float,
     *,
     impedance: ArrayLike | PorousMediumResult | None = None,
-    flow_resistivity: float | None = None,
+    flow_resistivity_pa_s_m2: float | None = None,
     model: Literal["delany_bazley", "miki"] = "delany_bazley",
     fluid: Fluid = PUBLISHED_AIR,
 ) -> SphericalGroundResult:
@@ -363,7 +363,7 @@ def ground_effect(
     The ground surface impedance is either supplied through ``impedance`` (a
     normalized complex array/scalar, or a
     :class:`~phonometry.materials.PorousMediumResult`) or derived from an
-    effective ``flow_resistivity`` (in Pa s/m2) via the ``model`` porous model
+    effective ``flow_resistivity_pa_s_m2`` (in Pa s/m2) via the ``model`` porous model
     of the materials domain. Exactly one of the two must be given.
 
     :param frequencies: Frequencies, in hertz.
@@ -374,20 +374,20 @@ def ground_effect(
         convention, :math:`\operatorname{Im}(Z) > 0` for a passive ground), or
         a ``PorousMediumResult`` (which is conjugated internally from the
         materials' :math:`\mathrm{e}^{+j \omega t}` convention).
-    :param flow_resistivity: Effective flow resistivity ``sigma`` (Pa s/m2);
+    :param flow_resistivity_pa_s_m2: Effective flow resistivity ``sigma`` (Pa s/m2);
         grassland is about ``2e5`` (Salomons Sec. 3.1). The porous model raises
         a :class:`~phonometry.materials.PorousAbsorberWarning` when the lowest
         bands fall below its published fit range
         :math:`0.01 < \rho f / \sigma < 1`
         (it still extrapolates a value there).
-    :param model: Porous model for ``flow_resistivity`` (``"delany_bazley"`` or
+    :param model: Porous model for ``flow_resistivity_pa_s_m2`` (``"delany_bazley"`` or
         ``"miki"``).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
         (Default: :data:`PUBLISHED_AIR`, the air this model was published
         with). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`SphericalGroundResult`.
-    :raises ValueError: If neither or both of ``impedance``/``flow_resistivity``
+    :raises ValueError: If neither or both of ``impedance``/``flow_resistivity_pa_s_m2``
         are given, a height is negative, or the distance is not positive.
     """
     if source_height_m < 0.0 or receiver_height_m < 0.0:
@@ -398,7 +398,9 @@ def ground_effect(
         raise ValueError(msg)
     speed_of_sound = fluid.speed_of_sound
     f = require_positive_array(frequencies, "frequencies")
-    z = _normalized_ground_impedance(f, impedance, flow_resistivity, model, fluid)
+    z = _normalized_ground_impedance(
+        f, impedance, flow_resistivity_pa_s_m2, model, fluid
+    )
     k = 2.0 * np.pi * f / speed_of_sound
     r1 = float(np.hypot(distance, source_height_m - receiver_height_m))
     r2 = float(np.hypot(distance, source_height_m + receiver_height_m))
@@ -843,7 +845,7 @@ def barrier_insertion_loss(
     method: Literal["kurze_anderson", "exact"] = "exact",
     thickness_m: float | None = None,
     ground_impedance: ArrayLike | PorousMediumResult | None = None,
-    ground_flow_resistivity: float | None = None,
+    ground_flow_resistivity_pa_s_m2: float | None = None,
     ground_model: Literal["delany_bazley", "miki"] = "delany_bazley",
     fluid: Fluid = PUBLISHED_AIR,
 ) -> BarrierInsertionLoss:
@@ -862,7 +864,7 @@ def barrier_insertion_loss(
       rigid thin screen (:func:`_screen_field`, MacDonald / Hadden & Pierce),
       :math:`\mathrm{IL} = 20 \log_{10} |p_{\text{free}} / p_{\text{diffracted}}|`.
     * ``method="exact"`` with a ground (``ground_impedance`` or
-      ``ground_flow_resistivity``): the coherent four-path model. The field with
+      ``ground_flow_resistivity_pa_s_m2``): the coherent four-path model. The field with
       the barrier sums the four source-image / receiver-image diffracted paths,
       each ground reflection weighted by the spherical-wave coefficient ``Q``
       (:func:`spherical_reflection_coefficient`); the field without the barrier
@@ -888,9 +890,9 @@ def barrier_insertion_loss(
         (:math:`\operatorname{Im}(Z) > 0` for a passive ground); a
         ``PorousMediumResult`` is conjugated internally from the materials'
         :math:`\mathrm{e}^{+j \omega t}` convention.
-    :param ground_flow_resistivity: Effective flow resistivity ``sigma``
+    :param ground_flow_resistivity_pa_s_m2: Effective flow resistivity ``sigma``
         (Pa s/m2) for the ground model, as an alternative to ``ground_impedance``.
-    :param ground_model: Porous model for ``ground_flow_resistivity``.
+    :param ground_model: Porous model for ``ground_flow_resistivity_pa_s_m2``.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
         (Default: :data:`PUBLISHED_AIR`, the air this model was published
         with). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
@@ -907,7 +909,9 @@ def barrier_insertion_loss(
         receiver_height_m,
         thickness_m,
     )
-    has_ground = ground_impedance is not None or ground_flow_resistivity is not None
+    has_ground = (
+        ground_impedance is not None or ground_flow_resistivity_pa_s_m2 is not None
+    )
     speed_of_sound = fluid.speed_of_sound
     f = require_positive_array(frequencies, "frequencies")
     k = 2.0 * np.pi * f / speed_of_sound
@@ -942,7 +946,7 @@ def barrier_insertion_loss(
                 receiver_distance=receiver_distance,
                 fluid=fluid,
                 ground_impedance=ground_impedance,
-                ground_flow_resistivity=ground_flow_resistivity,
+                ground_flow_resistivity=ground_flow_resistivity_pa_s_m2,
                 ground_model=ground_model,
             )
         )

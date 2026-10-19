@@ -82,7 +82,7 @@ def _cnossos_rail_case(case: dict[str, str]) -> RailwayEmissionResult:
         ph.environment.RailwayVehicle(
             stock=stock,
             flow_rate=float(case["flow_veh_per_h"]),
-            speed=float(case["speed_kmh"]),
+            speed_kmh=float(case["speed_kmh"]),
             condition=(
                 ph.environment.RunningCondition.IDLING
                 if idling
@@ -94,7 +94,7 @@ def _cnossos_rail_case(case: dict[str, str]) -> RailwayEmissionResult:
         psi=float(case["psi_deg"]),
         phi=float(case["phi_deg"]),
         reference_time=12.0,
-        minimum_speed=0.0,
+        minimum_speed_kmh=0.0,
         directivity_edition=ph.environment.DirectivityEdition.ORIGINAL_2015,
     )
 

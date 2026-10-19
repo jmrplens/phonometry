@@ -46,7 +46,7 @@ Salomons (a passive ground has $\operatorname{Im}(Z) > 0$), shared with
 [`phonometry.environment.propagation.ground_barriers`](/phonometry/reference/api/environment/ground-barriers/). The porous models of
 `phonometry.materials` work in the opposite $\mathrm{e}^{+j \omega t}$
 convention ($\operatorname{Im}(Z) < 0$), so an impedance derived from
-them (`flow_resistivity=` or a
+them (`flow_resistivity_pa_s_m2=` or a
 `PorousMediumResult`) is conjugated internally before entering the PE ground
 condition. Heights and ranges are in metres, sound speeds in m/s and
 frequencies in Hz.
@@ -62,7 +62,7 @@ atmospheric_parabolic_equation(
     *,
     source_height_m: float,
     impedance: ArrayLike | PorousMediumResult | None = None,
-    flow_resistivity: float | None = None,
+    flow_resistivity_pa_s_m2: float | None = None,
     model: Literal['delany_bazley', 'miki'] = 'delany_bazley',
     max_range: float = 1000.0,
     max_height_m: float = 100.0,
@@ -97,10 +97,10 @@ atmosphere it reproduces the spherical-wave ground effect of
 The ground surface impedance is either supplied through `impedance` (a
 normalized complex value/array, or a
 [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult)) or derived from an
-effective `flow_resistivity` (Pa s/m2) via the `model` porous model.
+effective `flow_resistivity_pa_s_m2` (Pa s/m2) via the `model` porous model.
 Exactly one of the two must be given. A plain `impedance` value is taken
 in the $\mathrm{e}^{-i \omega t}$ convention ($\operatorname{Im}(Z) > 0$
-for a passive ground); a `PorousMediumResult` or `flow_resistivity` is
+for a passive ground); a `PorousMediumResult` or `flow_resistivity_pa_s_m2` is
 conjugated internally from the materials' $\mathrm{e}^{+j \omega t}$
 convention.
 
@@ -112,8 +112,8 @@ convention.
 | `profile` | The effective sound-speed profile. |
 | `source_height_m` | Source height `zs`, in metres (> 0). |
 | `impedance` | Normalized ground impedance, or a `PorousMediumResult`. |
-| `flow_resistivity` | Effective flow resistivity `sigma` (Pa s/m2), as an alternative to `impedance`. |
-| `model` | Porous model for `flow_resistivity`. |
+| `flow_resistivity_pa_s_m2` | Effective flow resistivity `sigma` (Pa s/m2), as an alternative to `impedance`. |
+| `model` | Porous model for `flow_resistivity_pa_s_m2`. |
 | `max_range` | Maximum range, in metres. |
 | `max_height_m` | Top of the output height grid, in metres (the receiver region of interest; an absorbing layer is added above it). |
 | `range_step` | Range marching step `dr`, in metres. Default (`None`): one wavelength. |
@@ -316,7 +316,7 @@ Piecewise-linear effective sound speed at one or more heights.
 linear_sound_speed_profile(
     gradient_per_s: float,
     *,
-    ground_speed: float = 343.0,
+    ground_speed_of_sound: float = 343.0,
     max_height_m: float = 100.0,
 ) -> EffectiveSoundSpeedProfile
 ```
@@ -333,7 +333,7 @@ and creates an acoustic shadow near the ground (Salomons Sec. 4.2).
 | Name | Description |
 | :--- | :--- |
 | `gradient_per_s` | Vertical gradient `dc/dz`, in s^-1 (m/s per m). |
-| `ground_speed` | Sound speed `c0` at the ground, in m/s. |
+| `ground_speed_of_sound` | Sound speed `c0` at the ground, in m/s. |
 | `max_height_m` | Top of the sampled profile, in metres. |
 
 **Returns:** A two-point [`EffectiveSoundSpeedProfile`](/phonometry/reference/api/environment/refraction/#effectivesoundspeedprofile).
@@ -342,7 +342,7 @@ and creates an acoustic shadow near the ground (Salomons Sec. 4.2).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `max_height_m` or `ground_speed` is not positive, or the profile turns non-positive within `[0, max_height]`. |
+| ValueError | If `max_height_m` or `ground_speed_of_sound` is not positive, or the profile turns non-positive within `[0, max_height_m]`. |
 
 ## log_linear_sound_speed_profile
 
@@ -350,7 +350,7 @@ and creates an acoustic shadow near the ground (Salomons Sec. 4.2).
 log_linear_sound_speed_profile(
     b: float,
     *,
-    ground_speed: float = 340.0,
+    ground_speed_of_sound: float = 340.0,
     roughness_length: float = 0.1,
     max_height_m: float = 100.0,
     n_points: int = 128,
@@ -371,7 +371,7 @@ near the ground is resolved by sampling the height grid logarithmically.
 | Name | Description |
 | :--- | :--- |
 | `b` | Profile strength `b`, in m/s (positive: downward refraction). |
-| `ground_speed` | Sound speed `c0` at the ground, in m/s. |
+| `ground_speed_of_sound` | Sound speed `c0` at the ground, in m/s. |
 | `roughness_length` | Aerodynamic roughness length `z0`, in metres. |
 | `max_height_m` | Top of the sampled profile, in metres. |
 | `n_points` | Number of samples of the height grid (>= 2). |
@@ -390,7 +390,7 @@ near the ground is resolved by sampling the height grid logarithmically.
 ray_curvature_radius(
     gradient_per_s: float,
     *,
-    ground_speed: float = 343.0,
+    ground_speed_of_sound: float = 343.0,
     launch_angle_deg: float = 0.0,
 ) -> float
 ```
@@ -401,7 +401,7 @@ In a linear effective sound-speed profile a sound ray is an exact circular
 arc of radius $R_\mathrm{c} = 1/(|\text{gradient}| \, \xi)$ with the Snell
 invariant $\xi = \cos(\theta_0)/c$, evaluated at the launch height
 (Salomons Sec. 4.4; Attenborough Ch. 11). For a ray launched from the
-height where the speed is `ground_speed` ($c_0$),
+height where the speed is `ground_speed_of_sound` ($c_0$),
 $R_\mathrm{c} = c_0 / (|\text{gradient}| \cos\theta_0)$.
 
 **Parameters**
@@ -409,7 +409,7 @@ $R_\mathrm{c} = c_0 / (|\text{gradient}| \cos\theta_0)$.
 | Name | Description |
 | :--- | :--- |
 | `gradient_per_s` | Vertical gradient `dc/dz`, in s^-1 (must be non-zero). |
-| `ground_speed` | Sound speed at the launch height, in m/s. |
+| `ground_speed_of_sound` | Sound speed at the launch height, in m/s. |
 | `launch_angle_deg` | Launch angle from the horizontal, in degrees. |
 
 **Returns:** The radius of curvature `Rc`, in metres (always positive).
@@ -428,7 +428,7 @@ shadow_zone_distance(
     source_height_m: float,
     receiver_height_m: float,
     *,
-    ground_speed: float = 343.0,
+    ground_speed_of_sound: float = 343.0,
 ) -> float
 ```
 
@@ -454,7 +454,7 @@ compared with $R_\mathrm{c}$.
 | `gradient_per_s` | Vertical gradient `dc/dz`, in s^-1 (must be negative for a shadow zone to exist). |
 | `source_height_m` | Source height `hs`, in metres (>= 0). |
 | `receiver_height_m` | Receiver height `hr`, in metres (>= 0). |
-| `ground_speed` | Sound speed `c0` at the ground, in m/s. |
+| `ground_speed_of_sound` | Sound speed `c0` at the ground, in m/s. |
 
 **Returns:** The horizontal shadow-boundary distance, in metres.
 

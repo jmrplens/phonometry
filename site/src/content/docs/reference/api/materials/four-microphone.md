@@ -38,7 +38,7 @@ that module.
 air_density_astm(
     *,
     temperature_c: ArrayLike,
-    atmospheric_pressure_kpa: ArrayLike = 101.325,
+    static_pressure_kpa: ArrayLike = 101.325,
 ) -> NDArray[np.float64]
 ```
 
@@ -51,7 +51,7 @@ $\rho = 1.290 \, \frac{P}{101.325} \, \frac{273.15}{273.15 + T}$.
 | Name | Description |
 | :--- | :--- |
 | `temperature_c` | Room temperature, in **degrees Celsius**. |
-| `atmospheric_pressure_kpa` | Atmospheric pressure `P`, in **kilopascals** (default 101.325 kPa). |
+| `static_pressure_kpa` | Atmospheric pressure `P`, in **kilopascals** (default 101.325 kPa). |
 
 **Returns:** Air density `rho`, in kilograms per cubic metre.
 

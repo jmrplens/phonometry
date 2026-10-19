@@ -273,7 +273,7 @@ them.
 joint_sound_reduction_index(
     l1_db: ArrayLike,
     l2_db: ArrayLike,
-    absorption_m2: ArrayLike,
+    absorption_area: ArrayLike,
     *,
     joint_length_m: float,
 ) -> np.ndarray
@@ -299,7 +299,7 @@ of the test arrangement $R_\mathrm{s,max}$ that
 | :--- | :--- |
 | `l1_db` | Energy average sound pressure level in the source room, in dB, one value per band, or a `(positions, bands)` array that is energy-averaged over the positions (ISO 10140-2). |
 | `l2_db` | The same in the receiving room, in dB. |
-| `absorption_m2` | Equivalent absorption area $A$ of the receiving room per band, in m². |
+| `absorption_area` | Equivalent absorption area $A$ of the receiving room per band, in m². |
 | `joint_length_m` | Length $l$ of the joint under test, in m. |
 
 **Returns:** $R_\mathrm{s}$ per band, in dB.

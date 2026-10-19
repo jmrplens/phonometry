@@ -701,7 +701,7 @@ says that this is the depth the data for CE marking is compiled at.
 ```python
 from phonometry import materials
 
-check = materials.check_ceiling_specimen(area_m2=10.8, mounting="E", depth_mm=200.0)
+check = materials.check_ceiling_specimen(area=10.8, mounting="E", depth_mm=200.0)
 print(check.satisfied)            # True
 print(check.ce_marking_depth)     # True
 print(materials.mounting_type("E"))
@@ -723,7 +723,7 @@ clause asks to be aimed at, published as constants to build to and not judged.
 
 ```python
 dry = materials.check_ceiling_specimen(
-    area_m2=10.8, mounting="E", depth_mm=200.0,
+    area=10.8, mounting="E", depth_mm=200.0,
     support_width_mm=40.0, support_height_mm=40.0, support_centre_distance_m=1.2,
     relative_humidity_percent=[41.0, 44.0],
 )
@@ -756,10 +756,10 @@ least 50 % relative humidity.
 
 ```python
 correction = materials.air_absorption_correction(
-    volume_m3=200.0,
+    volume=200.0,
     specimen_area_m2=10.8,
-    attenuation_with=[0.0011, 0.0013, 0.0018, 0.0028, 0.0055, 0.0170],
-    attenuation_empty=[0.0010, 0.0012, 0.0016, 0.0025, 0.0050, 0.0160],
+    attenuation_with_per_m=[0.0011, 0.0013, 0.0018, 0.0028, 0.0055, 0.0170],
+    attenuation_empty_per_m=[0.0010, 0.0012, 0.0016, 0.0025, 0.0050, 0.0160],
 )
 print(correction.round(3))     # [0.007 0.007 0.015 0.022 0.037 0.074]
 ```
@@ -1198,7 +1198,7 @@ $f\,s < 0.40\,c$ (6.5.4) and a laxer low end at 1 % of the wavelength
 (6.2.3). Passing `diameter_m=` (and `shape=`) to `two_microphone_impedance`,
 `wave_decomposition` or the `transfer_matrix_*` solvers turns the matching
 check into an advisory warning, and for the Annex A attenuation estimate of a
-rectangular tube `hydraulic_diameter(width, height)` supplies the $4A/P$
+rectangular tube `hydraulic_diameter(width_m, height_m)` supplies the $4A/P$
 diameter that `tube_attenuation_constant` expects. That function implements
 only the Eq. (A.18) estimate, which the standard itself calls a lower limit;
 the measured determination of Eqs. (A.13)/(A.14) from the empty tube is not
@@ -1456,7 +1456,7 @@ from phonometry import ReportMetadata, fluids, materials
 c0 = float(materials.speed_of_sound_iso10534(temperature_c=20.0))   # 343.29 m/s
 rho_c = fluids.characteristic_impedance(
     float(materials.air_density_iso10534(
-        temperature_c=20.0, atmospheric_pressure_kpa=101.0)), c0)   # 405.6 Pa.s/m
+        temperature_c=20.0, static_pressure_kpa=101.0)), c0)   # 405.6 Pa.s/m
 diameter_m, spacing, x1 = 0.100, 0.050, 0.100
 theta, cavity = 1.0, c0 / (4.0 * 1000.0)          # quarter-wave at 1 kHz: 86 mm
 freqs = np.array([400, 500, 630, 800, 1000, 1250, 1600], dtype=float)
@@ -1896,7 +1896,7 @@ db = materials.delany_bazley(f, 20000.0)          # sigma in Pa s/m2
 mk = materials.miki(f, 20000.0)
 jca = materials.johnson_champoux_allard(
     f, 20000.0, porosity=0.98, tortuosity=1.0,
-    viscous_length=8.7e-5, thermal_length=8.7e-5,
+    viscous_length_m=8.7e-5, thermal_length_m=8.7e-5,
 )
 print(np.round(db.normalized_impedance[0], 3))    # (2.598-2.209j)
 print(np.round(mk.normalized_impedance[0], 3))    # (2.286-1.965j)
@@ -2765,15 +2765,15 @@ import numpy as np
 from phonometry import materials
 
 base = materials.HelmholtzResonator(
-    neck_length=1.0e-3, neck_side=3.0e-3,
-    cavity_length=30.0e-3, cavity_side=27.0e-3,
+    neck_length_m=1.0e-3, neck_side_m=3.0e-3,
+    cavity_length_m=30.0e-3, cavity_side_m=27.0e-3,
 )
-design = materials.critical_coupling_design(300.0, base, lattice_step=3.0e-2, period_m=5.0e-2)
+design = materials.critical_coupling_design(300.0, base, lattice_step_m=3.0e-2, period_m=5.0e-2)
 
 f = np.array([300.0])
 res = materials.slit_helmholtz_absorber(
     f, design.resonator, slit_height_m=design.slit_height_m,
-    lattice_step=3.0e-2, period_m=5.0e-2,
+    lattice_step_m=3.0e-2, period_m=5.0e-2,
 )
 z = res.normalized_impedance[0]
 print(round(z.real, 2), round(z.imag, 2))       # 1.0 -0.0  (matched)
@@ -2813,16 +2813,16 @@ import numpy as np
 from phonometry import materials
 
 base = materials.HelmholtzResonator(
-    neck_length=1.0e-3, neck_side=3.0e-3,
-    cavity_length=30.0e-3, cavity_side=27.0e-3,
+    neck_length_m=1.0e-3, neck_side_m=3.0e-3,
+    cavity_length_m=30.0e-3, cavity_side_m=27.0e-3,
 )
-design = materials.critical_coupling_design(300.0, base, lattice_step=3.0e-2, period_m=5.0e-2)
+design = materials.critical_coupling_design(300.0, base, lattice_step_m=3.0e-2, period_m=5.0e-2)
 print(round(design.absorption, 4))          # ~1.0 (perfect absorption)
 
 f = np.linspace(150.0, 500.0, 700)
 res = materials.slit_helmholtz_absorber(
     f, design.resonator, slit_height_m=design.slit_height_m,
-    lattice_step=3.0e-2, period_m=5.0e-2,
+    lattice_step_m=3.0e-2, period_m=5.0e-2,
 )
 res.plot()   # alpha(f) with |R| overlaid; peak = 1 at 300 Hz
 ```
@@ -2846,8 +2846,8 @@ import matplotlib.pyplot as plt
 from phonometry import materials
 
 resonator = materials.HelmholtzResonator(
-    neck_length=1.0e-3, neck_side=3.0e-3,
-    cavity_length=30.0e-3, cavity_side=27.0e-3,
+    neck_length_m=1.0e-3, neck_side_m=3.0e-3,
+    cavity_length_m=30.0e-3, cavity_side_m=27.0e-3,
 )
 resonator.plot()   # dimensioned cross-section, to scale
 plt.show()
@@ -2870,18 +2870,18 @@ import matplotlib.pyplot as plt
 from phonometry import materials
 
 base = materials.HelmholtzResonator(
-    neck_length=1.0e-3, neck_side=3.0e-3,
-    cavity_length=30.0e-3, cavity_side=27.0e-3,
+    neck_length_m=1.0e-3, neck_side_m=3.0e-3,
+    cavity_length_m=30.0e-3, cavity_side_m=27.0e-3,
 )
 design = materials.critical_coupling_design(
-    300.0, base, lattice_step=3.0e-2, period_m=5.0e-2,
+    300.0, base, lattice_step_m=3.0e-2, period_m=5.0e-2,
 )
 
 # The free function draws any resonator list; a slit_helmholtz_absorber
 # result retains its geometry, so res.plot_geometry() draws the same period_m.
 materials.plot_slit_absorber_geometry(
     [design.resonator], slit_height_m=design.slit_height_m,
-    lattice_step=3.0e-2, period_m=5.0e-2,
+    lattice_step_m=3.0e-2, period_m=5.0e-2,
 )
 plt.show()
 ```
@@ -2904,7 +2904,7 @@ from phonometry import materials
 
 a, d, f0 = 3.0e-2, 5.0e-2, 300.0
 base = materials.HelmholtzResonator(1.0e-3, 3.0e-3, 30.0e-3, 27.0e-3)
-design = materials.critical_coupling_design(f0, base, lattice_step=a, period_m=d)
+design = materials.critical_coupling_design(f0, base, lattice_step_m=a, period_m=d)
 h0 = design.slit_height_m
 
 f = np.linspace(150.0, 500.0, 700)
@@ -2913,7 +2913,7 @@ for factor, label in [(1.0, "critically coupled"),
                       (0.6, "narrow slit"), (1.7, "wide slit")]:
     res = materials.slit_helmholtz_absorber(
         f, design.resonator, slit_height_m=factor * h0,
-        lattice_step=a, period_m=d,
+        lattice_step_m=a, period_m=d,
     )
     ax.plot(f, res.absorption, label=label)
 ax.set(xlabel="Frequency [Hz]", ylabel="Absorption coefficient")
@@ -2945,13 +2945,13 @@ import numpy as np
 from phonometry import materials
 
 base = materials.HelmholtzResonator(
-    neck_length=1.0e-3, neck_side=3.0e-3,
-    cavity_length=30.0e-3, cavity_side=27.0e-3,
+    neck_length_m=1.0e-3, neck_side_m=3.0e-3,
+    cavity_length_m=30.0e-3, cavity_side_m=27.0e-3,
 )
-design = materials.critical_coupling_design(300.0, base, lattice_step=3.0e-2, period_m=5.0e-2)
+design = materials.critical_coupling_design(300.0, base, lattice_step_m=3.0e-2, period_m=5.0e-2)
 res = materials.slit_helmholtz_absorber(
     np.array([300.0]), design.resonator, slit_height_m=design.slit_height_m,
-    lattice_step=3.0e-2, period_m=5.0e-2,
+    lattice_step_m=3.0e-2, period_m=5.0e-2,
 )
 
 # Phase speed of the slit mode at the design frequency, from k_eff.

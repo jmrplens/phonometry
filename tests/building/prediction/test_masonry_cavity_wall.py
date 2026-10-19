@@ -167,7 +167,7 @@ def test_fig_4_35_resonance_pair_with_the_library_default_air() -> None:
     kwargs = {
         "mass1": FIG_4_35_SURFACE_DENSITY,
         "mass2": FIG_4_35_SURFACE_DENSITY,
-        "gap": FIG_4_35_CAVITY_DEPTH,
+        "gap_m": FIG_4_35_CAVITY_DEPTH,
     }
     ties = building.wall_tie_stiffness_per_area(
         FIG_4_35_TIES_PER_AREA, FIG_4_35_TIE_STIFFNESS
@@ -195,7 +195,7 @@ def test_resonance_grows_as_the_square_root_of_the_tie_stiffness() -> None:
 
     Taking the air stiffness away by comparing two tie terms that dominate it.
     """
-    kwargs = {"mass1": 140.0, "mass2": 140.0, "gap": 0.075}
+    kwargs = {"mass1": 140.0, "mass2": 140.0, "gap_m": 0.075}
     low = building.mass_spring_mass_resonance(**kwargs, tie_stiffness_per_area=1e9)
     high = building.mass_spring_mass_resonance(**kwargs, tie_stiffness_per_area=4e9)
     assert high / low == pytest.approx(2.0, rel=1e-3)

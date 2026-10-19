@@ -188,7 +188,7 @@ track = environment.RailwayTrack(
     impact_roughness=environment.impact_roughness_single(),
 )
 result = environment.railway_source_power(
-    environment.RailwayVehicle(stock, flow_rate=96.0, speed=160.0), track, phi=90.0, psi=10.0,
+    environment.RailwayVehicle(stock, flow_rate=96.0, speed_kmh=160.0), track, phi=90.0, psi=10.0,
 )
 result.plot()
 plt.show()
@@ -222,7 +222,7 @@ def total(bands):
 
 fig, (left, right) = plt.subplots(1, 2, figsize=(12, 4.6))
 result = environment.railway_source_power(
-    environment.RailwayVehicle(stock, flow_rate=96.0, speed=160.0), track, phi=90.0, psi=10.0)
+    environment.RailwayVehicle(stock, flow_rate=96.0, speed_kmh=160.0), track, phi=90.0, psi=10.0)
 for name, spectrum in result.components.items():
     for row, height in ((0, "0,5 m"), (1, "4,0 m")):
         values = np.asarray(spectrum)[row]
@@ -236,7 +236,7 @@ speeds = np.linspace(60.0, 350.0, 30)
 for row, label in [(0, "Source A (0,5 m)"), (1, "Source B (4,0 m)")]:
     right.plot(speeds, [
         total(environment.railway_source_power(
-            environment.RailwayVehicle(stock, flow_rate=96.0, speed=float(v)),
+            environment.RailwayVehicle(stock, flow_rate=96.0, speed_kmh=float(v)),
             track, phi=90.0, psi=10.0).line_power[row]) for v in speeds],
         label=label)
 right.axvline(200.0, ls=":", label="Aerodynamic threshold")

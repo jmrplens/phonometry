@@ -129,7 +129,7 @@ print(room.detail_is_sufficient("1", room_detail=3,
 print(round(room.fitting_density(480.0, 1200.0), 2))                           # 0.1
 print(round(room.workstation_level(sound_power_level_db=95.0,
                                    emission_level_db=85.0,
-                                   absorption_area_m2=200.0), 2))              # 85.79
+                                   absorption_area=200.0), 2))              # 85.79
 ```
 
 ## What this page does not cover

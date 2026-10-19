@@ -216,7 +216,7 @@ def test_c3_from_air_absorption() -> None:
     mc = meteorological_corrections(
         temperature_c=23.0,
         static_pressure_kpa=101.325,
-        air_absorption_coefficient=a,
+        air_absorption_db_per_m=a,
         radius=r,
     )
     a0 = a * r
@@ -268,6 +268,22 @@ def test_hemisphere_uniform_field_lw() -> None:
     assert res.surface_area == pytest.approx(2.0 * np.pi * r**2)
     assert res.sound_power_level[0] == pytest.approx(expected, abs=1e-9)
     assert isinstance(res, PrecisionSoundPowerResult)
+
+
+def test_the_air_absorption_rate_reaches_c3_of_each_band() -> None:
+    """``air_absorption_db_per_m`` is the a(f) of C3 (Eq. 21), per band: a
+    band with 0.02 dB/m on a 3 m sphere gains A0*(1,005 3 - 0,001 2*A0)^1,6
+    with A0 = a*r, and a band with none gains nothing.
+    """
+    r, a = 3.0, 0.02
+    levels = np.full((40, 2), 70.0)
+    without = sound_power_anechoic(levels, "hemisphere", radius=r)
+    res = sound_power_anechoic(
+        levels, "hemisphere", radius=r, air_absorption_db_per_m=np.array([0.0, a])
+    )
+    a0 = a * r
+    gained = res.sound_power_level - without.sound_power_level
+    assert gained == pytest.approx([0.0, a0 * (1.0053 - 0.0012 * a0) ** 1.6], abs=1e-12)
 
 
 def test_sphere_uniform_field_lw_uses_4pi() -> None:
@@ -474,9 +490,9 @@ def test_precision_intensity_refuses_a_pressure_that_is_not_one() -> None:
     apart and only the argument names keep them straight.
     """
     areas = np.array([1.0, 1.0])
-    with pytest.raises(ValueError, match=r"'barometric_pressure_pa' must be positive"):
+    with pytest.raises(ValueError, match=r"'static_pressure_pa' must be positive"):
         sound_power_intensity_precision(
-            np.full(areas.shape, 1.0e-5), areas, barometric_pressure_pa=0.0
+            np.full(areas.shape, 1.0e-5), areas, static_pressure_pa=0.0
         )
 
 
@@ -507,7 +523,7 @@ def test_lw0_equals_lw_at_reference() -> None:
     areas = np.array([1.0, 1.0])
     i_n = np.full((2,), 1.0e-5)
     res = sound_power_intensity_precision(
-        i_n, areas, temperature_c=23.0, barometric_pressure_pa=101325.0
+        i_n, areas, temperature_c=23.0, static_pressure_pa=101325.0
     )
     assert res.sound_power_level_normalized[0] == pytest.approx(
         res.sound_power_level[0], abs=1e-12
@@ -519,7 +535,7 @@ def test_lw0_shift_off_reference() -> None:
     areas = np.array([1.0, 1.0])
     i_n = np.full((2,), 1.0e-5)
     res = sound_power_intensity_precision(
-        i_n, areas, temperature_c=20.0, barometric_pressure_pa=100000.0
+        i_n, areas, temperature_c=20.0, static_pressure_pa=100000.0
     )
     shift = res.sound_power_level_normalized[0] - res.sound_power_level[0]
     expected = -15.0 * np.log10((100000.0 / 101325.0) * (296.15 / 293.15))

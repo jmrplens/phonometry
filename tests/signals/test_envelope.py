@@ -58,7 +58,7 @@ def test_hilbert_transform_of_cos_is_sin() -> None:
     f0 = 500.0
     res = ph.signals.envelope(_tone(f0), FS)
     t = np.arange(N) / FS
-    reconstructed = res.envelope * np.sin(res.phase)
+    reconstructed = res.envelope * np.sin(res.phase_rad)
     np.testing.assert_allclose(
         reconstructed[INTERIOR],
         np.sin(2.0 * np.pi * f0 * t)[INTERIOR],
@@ -76,7 +76,7 @@ def test_am_envelope_is_recovered_exactly() -> None:
 def test_instantaneous_phase_of_tone_advances_linearly() -> None:
     f0 = 250.0
     res = ph.signals.envelope(_tone(f0), FS)
-    slope = float(np.polyfit(res.times[INTERIOR], res.phase[INTERIOR], 1)[0])
+    slope = float(np.polyfit(res.times[INTERIOR], res.phase_rad[INTERIOR], 1)[0])
     assert slope / (2.0 * np.pi) == pytest.approx(f0, rel=1e-6)
 
 
@@ -122,12 +122,12 @@ def test_antialiased_decimation_tracks_the_smooth_envelope() -> None:
 def test_decimated_outputs_share_one_time_axis() -> None:
     x, _ = _am(2000.0, 20.0, 0.3)
     res = ph.signals.envelope(x, FS, decimation_factor=8)
-    assert res.envelope.size == res.phase.size
+    assert res.envelope.size == res.phase_rad.size
     assert res.envelope.size == res.instantaneous_frequency.size
     assert res.envelope.size == res.times.size
     # Phase/instantaneous frequency are subsampled from the full rate.
     full = ph.signals.envelope(x, FS)
-    np.testing.assert_array_equal(res.phase, full.phase[::8])
+    np.testing.assert_array_equal(res.phase_rad, full.phase_rad[::8])
     np.testing.assert_array_equal(
         res.instantaneous_frequency, full.instantaneous_frequency[::8]
     )
@@ -185,7 +185,7 @@ def test_result_is_frozen() -> None:
 def test_envelope_outputs_must_lie_on_one_time_axis() -> None:
     """An output off the decimated time axis is refused when built.
 
-    ``phase`` is the one nothing reads: the plot draws the envelope on the
+    ``phase_rad`` is the one nothing reads: the plot draws the envelope on the
     upper panel and the instantaneous frequency on the lower one, so a phase
     of another length, short or long, reaches the caller whole, indexed by a
     time axis it was not measured on. The other three are loud when drawn,
@@ -196,7 +196,7 @@ def test_envelope_outputs_must_lie_on_one_time_axis() -> None:
     """
     good = ph.signals.envelope(_am(1000.0, 10.0, 0.5)[0], FS, decimation_factor=4)
     per_sample = "one value per output sample"
-    for field in ("times", "envelope", "phase", "instantaneous_frequency"):
+    for field in ("times", "envelope", "phase_rad", "instantaneous_frequency"):
         value = np.asarray(getattr(good, field))
         cases = (
             (value[:-1], per_sample),

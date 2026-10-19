@@ -115,7 +115,7 @@ __all__ = [
 #: proprietary vertical-twist tie is from Hall & Hopkins (2001). The stiffness
 #: is a property of the tie *at that cavity width*: the same vertical-twist
 #: design measures 94,0 MN/m at 50 mm and 43,4 MN/m at 100 mm, so pass the
-#: matching ``gap`` to the double-wall functions.
+#: matching ``gap_m`` to the double-wall functions.
 WALL_TIE_STIFFNESS: Mapping[str, tuple[float, float]] = MappingProxyType(
     {
         "butterfly": (0.050, 1.7e6),

@@ -112,23 +112,23 @@ def speed_of_sound_astm(*, temperature_c: ArrayLike) -> Real:
 def air_density_astm(
     *,
     temperature_c: ArrayLike,
-    atmospheric_pressure_kpa: ArrayLike = _ASTM_P_REF,
+    static_pressure_kpa: ArrayLike = _ASTM_P_REF,
 ) -> Real:
     r"""Air density (ASTM E2611-19, Eq. (5)).
 
     :math:`\rho = 1.290 \, \frac{P}{101.325} \, \frac{273.15}{273.15 + T}`.
 
     :param temperature_c: Room temperature, in **degrees Celsius**.
-    :param atmospheric_pressure_kpa: Atmospheric pressure ``P``, in
+    :param static_pressure_kpa: Atmospheric pressure ``P``, in
         **kilopascals** (default 101.325 kPa).
     :return: Air density ``rho``, in kilograms per cubic metre.
     :raises ValueError: if any temperature is at or below -273.15 degC, or any
         pressure is not positive.
     """
     t = require_above_absolute_zero_array(temperature_c, "temperature_c")
-    p = np.asarray(atmospheric_pressure_kpa, dtype=np.float64)
+    p = np.asarray(static_pressure_kpa, dtype=np.float64)
     if np.any(p <= 0.0):
-        msg = "'atmospheric_pressure_kpa' must be positive (kPa)."
+        msg = "'static_pressure_kpa' must be positive (kPa)."
         raise ValueError(msg)
     return np.asarray(
         _ASTM_RHO_REF * (p / _ASTM_P_REF) * (_ASTM_T0 / (_ASTM_T0 + t)),

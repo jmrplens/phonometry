@@ -133,7 +133,7 @@ def _rated_rows(
     rows: list[tuple[str, str]] = [
         (
             t("Rated impedance", language),
-            f"{fmt_num(result.rated_impedance, language)} {_OHM}",
+            f"{fmt_num(result.rated_impedance_ohm, language)} {_OHM}",
         ),
         (
             t("Characteristic sensitivity", language),
@@ -144,11 +144,11 @@ def _rated_rows(
             _range_text(*result.effective_range, language=language),
         ),
     ]
-    if result.rated_frequency_range is not None:
+    if result.rated_frequency_range_hz is not None:
         rows.append(
             (
                 t("Rated frequency range", language),
-                _range_text(*result.rated_frequency_range, language=language),
+                _range_text(*result.rated_frequency_range_hz, language=language),
             )
         )
     if result.resonance_frequency is not None:
@@ -172,7 +172,7 @@ def _rated_rows(
                 f"{fmt_num(result.rated_sinusoidal_power, language)} W",
             )
         )
-    min_z = result.minimum_impedance
+    min_z = result.minimum_impedance_ohm
     if min_z is not None:
         rows.append(
             (

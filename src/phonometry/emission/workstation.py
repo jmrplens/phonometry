@@ -365,7 +365,7 @@ def environmental_ratio_from_k2(
 
 
 def environmental_ratio_from_absorption(
-    absorption_area_m2: ArrayLike,
+    absorption_area: ArrayLike,
     measurement_surface_m2: float,
     directivity_index_db: ArrayLike = 0.0,
 ) -> float | NDArray[np.float64]:
@@ -381,7 +381,7 @@ def environmental_ratio_from_absorption(
     :math:`K_2 = 10 \lg (1 + 4 S_M / A)` the two are identically equal, which is
     why ISO 11204 A.1.2 says the two routes rest on the same assumptions.
 
-    :param absorption_area_m2: Equivalent sound absorption area :math:`A` of the
+    :param absorption_area: Equivalent sound absorption area :math:`A` of the
         test room, in square metres, strictly positive.
     :param measurement_surface_m2: Area :math:`S_M` of the reference measurement
         surface, in square metres, strictly positive.
@@ -390,7 +390,7 @@ def environmental_ratio_from_absorption(
     :return: The ratio :math:`z`.
     :raises ValueError: If either area is not strictly positive.
     """
-    a = require_positive_array(absorption_area_m2, "absorption_area_m2")
+    a = require_positive_array(absorption_area, "absorption_area")
     s_m = require_positive(measurement_surface_m2, "measurement_surface_m2")
     di = np.asarray(directivity_index_db, dtype=np.float64)
     ratio = 1.0 - np.power(10.0, -0.1 * di) / (1.0 + a / (4.0 * s_m))

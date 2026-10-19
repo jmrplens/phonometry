@@ -203,7 +203,7 @@ def test_cross_spectrum_of_known_gain_path() -> None:
     # Gxy = H·Gxx with H = 0.8 (uncorrelated noise drops out on average).
     expected = 0.8 / (FS / 2.0)
     assert float(np.mean(res.magnitude[band])) == pytest.approx(expected, rel=0.05)
-    assert float(np.mean(np.abs(res.phase[band]))) < 0.05
+    assert float(np.mean(np.abs(res.phase_rad[band]))) < 0.05
     gamma2 = snr / (1.0 + snr)
     assert float(np.median(res.coherence[band])) == pytest.approx(gamma2, abs=0.03)
 
@@ -218,11 +218,11 @@ def test_cross_spectrum_error_formulas_match_monte_carlo() -> None:
         x, y, snr = _known_snr_pair(seed)
         res = ph.signals.cross_spectral_density(x, y, FS, nperseg=1024, overlap=0.0)
         mags.append(res.magnitude[b])
-        phases.append(res.phase[b])
+        phases.append(res.phase_rad[b])
         nd = res.n_averages
         if seed == 0:
             reported_mag_err = float(np.median(res.magnitude_random_error))
-            reported_phase_std = float(np.median(res.phase_std))
+            reported_phase_std = float(np.median(res.phase_standard_deviation_rad))
     gamma2 = snr / (1.0 + snr)
     gamma = np.sqrt(gamma2)
     expected_mag = 1.0 / (gamma * np.sqrt(nd))
@@ -243,7 +243,7 @@ def test_cross_spectrum_phase_slope_measures_pure_delay() -> None:
     y = np.roll(x, delay)
     res = ph.signals.cross_spectral_density(x, y, FS, nperseg=2048)
     band = (res.frequencies > 100.0) & (res.frequencies < 2000.0)
-    slope = np.polyfit(res.frequencies[band], res.phase[band], 1)[0]
+    slope = np.polyfit(res.frequencies[band], res.phase_rad[band], 1)[0]
     assert slope / (-2.0 * np.pi) * FS == pytest.approx(delay, rel=1e-3)
 
 
@@ -551,10 +551,10 @@ def test_cross_spectrum_curves_must_share_one_frequency_axis() -> None:
         "frequencies",
         "csd",
         "magnitude",
-        "phase",
+        "phase_rad",
         "coherence",
         "magnitude_random_error",
-        "phase_std",
+        "phase_standard_deviation_rad",
     ):
         curve = getattr(good, field)
         for value in (curve[:-1], np.append(curve, curve[-1])):

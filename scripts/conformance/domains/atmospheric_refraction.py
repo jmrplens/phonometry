@@ -29,7 +29,7 @@ def _chk_atm_ray_turning() -> Outcome:
     rc = c0 / (gradient * math.cos(math.radians(angle)))
     turn = rc * (1.0 - math.cos(math.radians(angle)))
     prof = ph.environment.linear_sound_speed_profile(
-        gradient, ground_speed=c0, max_height_m=3000.0
+        gradient, ground_speed_of_sound=c0, max_height_m=3000.0
     )
     res = ph.environment.atmospheric_ray_paths(
         prof,
@@ -49,7 +49,7 @@ def _chk_atm_ray_turning() -> Outcome:
 def _chk_atm_pe_ground_effect() -> Outcome:
     freq, zs, zr, z = 250.0, 1.0, 1.0, 11.0 + 8.0j
     flat = ph.environment.linear_sound_speed_profile(
-        1e-12, ground_speed=343.0, max_height_m=200.0
+        1e-12, ground_speed_of_sound=343.0, max_height_m=200.0
     )
     pe = ph.environment.atmospheric_parabolic_equation(
         freq,
@@ -82,7 +82,7 @@ def _chk_atm_pe_ground_effect() -> Outcome:
 def _chk_atm_pe_hard_ground() -> Outcome:
     freq, zs, zr = 500.0, 2.0, 2.0
     flat = ph.environment.linear_sound_speed_profile(
-        1e-12, ground_speed=343.0, max_height_m=200.0
+        1e-12, ground_speed_of_sound=343.0, max_height_m=200.0
     )
     pe = ph.environment.atmospheric_parabolic_equation(
         freq,

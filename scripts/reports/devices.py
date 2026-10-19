@@ -222,7 +222,7 @@ def _microphone_example() -> tuple[object, ReportMetadata, str]:
             frequency=1000.0,
         ),
         noise=ph.electroacoustics.MicrophoneNoise(
-            voltage=1.25e-6,
+            voltage_v=1.25e-6,
             spectrum=(noise_freqs, noise_levels),
         ),
         overload=ph.electroacoustics.MicrophoneOverload(
@@ -230,8 +230,8 @@ def _microphone_example() -> tuple[object, ReportMetadata, str]:
             thd_percent=0.5,
         ),
         electrical=ph.electroacoustics.MicrophoneElectrical(
-            rated_impedance=150.0,
-            minimum_load_impedance=1000.0,
+            rated_impedance_ohm=150.0,
+            minimum_load_impedance_ohm=1000.0,
             powering="Phantom P48 (IEC 61938)",
             supply_current_ma=3.1,
         ),

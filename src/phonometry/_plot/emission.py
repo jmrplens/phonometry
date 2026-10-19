@@ -1900,7 +1900,7 @@ def plot_turbine_layout(
         if view == "plan"
         else _t("Height $z$ [m]", language)
     )
-    area = format_number(float(surface.area_m2), language, decimals=1)
+    area = format_number(float(surface.area), language, decimals=1)
     title = (
         "IEC 61063 plan, $S$ = {area} m²"
         if view == "plan"
@@ -2078,8 +2078,8 @@ def plot_turbine_sound_power(
     if limited is not None:
         _hatch_invalid(bars, np.asarray(limited, dtype=bool))
     floor = float(np.min(corrected))
-    if result.background_levels_db is not None:
-        background = np.asarray(result.background_levels_db, dtype=np.float64)
+    if result.background_levels is not None:
+        background = np.asarray(result.background_levels, dtype=np.float64)
         floor = min(floor, float(np.min(background)))
         ax.plot(
             positions,

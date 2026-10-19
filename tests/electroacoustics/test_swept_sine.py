@@ -172,14 +172,14 @@ def test_polynomial_phase_coherent_across_band() -> None:
 def test_polynomial_thd_matches_closed_form() -> None:
     res = _analyze()
     idx = int(np.argmin(np.abs(res.thd_frequencies - 1000.0)))
-    assert res.thd[idx] == pytest.approx(THD_EXPECTED, rel=1e-3)
+    assert res.thd_ratio[idx] == pytest.approx(THD_EXPECTED, rel=1e-3)
 
 
 def test_thd_flat_for_memoryless_polynomial() -> None:
     """The polynomial THD is frequency-independent over the interior band."""
     res = _analyze()
     band = (res.thd_frequencies > 200.0) & (res.thd_frequencies < 1800.0)
-    np.testing.assert_allclose(res.thd[band], THD_EXPECTED, rtol=5e-3)
+    np.testing.assert_allclose(res.thd_ratio[band], THD_EXPECTED, rtol=5e-3)
 
 
 def test_sweep_thd_matches_classical_tone_analyzer() -> None:
@@ -192,7 +192,7 @@ def test_sweep_thd_matches_classical_tone_analyzer() -> None:
     res = _analyze()
     idx = int(np.argmin(np.abs(res.thd_frequencies - 1000.0)))
     assert classical == pytest.approx(THD_EXPECTED, rel=1e-6)
-    assert res.thd[idx] == pytest.approx(classical, rel=1e-3)
+    assert res.thd_ratio[idx] == pytest.approx(classical, rel=1e-3)
 
 
 def test_linear_system_thd_is_noise_floor() -> None:
@@ -204,7 +204,7 @@ def test_linear_system_thd_is_noise_floor() -> None:
     h1 = abs(_at(res.frequencies, res.harmonic_responses[0], 1000.0))
     assert h1 == pytest.approx(0.5, rel=1e-3)
     band = (res.thd_frequencies > 100.0) & (res.thd_frequencies < 2000.0)
-    assert float(np.max(res.thd[band])) < 1e-3
+    assert float(np.max(res.thd_ratio[band])) < 1e-3
 
 
 def test_hammerstein_composition_delay_and_gain() -> None:
@@ -222,7 +222,7 @@ def test_hammerstein_composition_delay_and_gain() -> None:
     assert h3 == pytest.approx(0.5 * H3_EXPECTED, rel=2e-3)
     # The THD is a ratio: the linear post-filter cancels out of it.
     idx = int(np.argmin(np.abs(res.thd_frequencies - 1000.0)))
-    assert res.thd[idx] == pytest.approx(THD_EXPECTED, rel=2e-3)
+    assert res.thd_ratio[idx] == pytest.approx(THD_EXPECTED, rel=2e-3)
 
 
 def test_delays_follow_l_ln_n() -> None:
@@ -259,7 +259,7 @@ def test_farina_magnitudes_match_chebyshev() -> None:
 def test_farina_thd_matches_closed_form() -> None:
     res = _analyze_farina()
     idx = int(np.argmin(np.abs(res.thd_frequencies - 1000.0)))
-    assert res.thd[idx] == pytest.approx(THD_EXPECTED, rel=2e-3)
+    assert res.thd_ratio[idx] == pytest.approx(THD_EXPECTED, rel=2e-3)
 
 
 def test_farina_band_is_capped_at_f2() -> None:

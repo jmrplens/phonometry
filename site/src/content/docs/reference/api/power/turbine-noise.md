@@ -204,11 +204,11 @@ than to the surface-averaged level.
 
 ```python
 turbine_environmental_correction(
-    surface_area_m2: float,
+    surface_area: float,
     *,
-    absorption_area_m2: float | None = None,
-    volume_m3: float | None = None,
-    reverberation_time_s: float | None = None,
+    absorption_area: float | None = None,
+    volume: float | None = None,
+    reverberation_time: float | None = None,
 ) -> TurbineEnvironmentalCorrection
 ```
 
@@ -231,10 +231,10 @@ the judgement, and [`turbine_sound_power`](/phonometry/reference/api/power/turbi
 
 | Name | Description |
 | :--- | :--- |
-| `surface_area_m2` | $S$, in square metres. |
-| `absorption_area_m2` | $A$, in square metres; or give `volume_m3` and `reverberation_time_s` instead. |
-| `volume_m3` | $V$ of the test room, in cubic metres. |
-| `reverberation_time_s` | $T$ of the test room with A-weighting on the receiving system, in seconds. |
+| `surface_area` | $S$, in square metres. |
+| `absorption_area` | $A$, in square metres; or give `volume` and `reverberation_time` instead. |
+| `volume` | $V$ of the test room, in cubic metres. |
+| `reverberation_time` | $T$ of the test room with A-weighting on the receiving system, in seconds. |
 
 **Returns:** The correction and the room data it came from.
 
@@ -434,10 +434,10 @@ of the determinations.
 
 ```python
 turbine_sound_power(
-    pressure_levels_db: ArrayLike,
+    pressure_levels: ArrayLike,
     *,
-    surface_area_m2: float,
-    background_levels_db: ArrayLike | None,
+    surface_area: float,
+    background_levels: ArrayLike | None,
     environmental_correction_db: float,
     overhead_mask: ArrayLike | None = None,
 ) -> TurbineSoundPowerResult
@@ -465,9 +465,9 @@ and leave [`TurbineSoundPowerResult.conforms`](/phonometry/reference/api/power/t
 
 | Name | Description |
 | :--- | :--- |
-| `pressure_levels_db` | $L_{p\mathrm{A}i}$ with the turbine set operating, one per position, in dB re 20 µPa: at least the four key positions that remain once the overhead one is deleted. |
-| `surface_area_m2` | $S$, from [`turbine_measurement_surface`](/phonometry/reference/api/power/turbine-noise/#turbine_measurement_surface), in square metres. |
-| `background_levels_db` | The A-weighted background level at each position, in dB. It is often impossible to measure with the turbine stopped, and NOTE 1 of 8.1 allows it to be evaluated by computation instead. `None` states that no background was determined, and no correction is applied. |
+| `pressure_levels` | $L_{p\mathrm{A}i}$ with the turbine set operating, one per position, in dB re 20 µPa: at least the four key positions that remain once the overhead one is deleted. |
+| `surface_area` | $S$, from [`turbine_measurement_surface`](/phonometry/reference/api/power/turbine-noise/#turbine_measurement_surface), in square metres. |
+| `background_levels` | The A-weighted background level at each position, in dB. It is often impossible to measure with the turbine stopped, and NOTE 1 of 8.1 allows it to be evaluated by computation instead. `None` states that no background was determined, and no correction is applied. |
 | `environmental_correction_db` | $K$, in dB: from [`turbine_environmental_correction`](/phonometry/reference/api/power/turbine-noise/#turbine_environmental_correction) or [`turbine_reference_source_correction`](/phonometry/reference/api/power/turbine-noise/#turbine_reference_source_correction), or `0.0` outdoors (A.4). |
 | `overhead_mask` | Which positions are overhead ([`TurbineMicrophoneArray.overhead_mask`](/phonometry/reference/api/power/turbine-noise/#turbinemicrophonearray)), for the effect of deleting them (NOTE of 7.2.2); `None` if not needed. |
 
@@ -485,8 +485,8 @@ and leave [`TurbineSoundPowerResult.conforms`](/phonometry/reference/api/power/t
 TurbineEnvironmentalCorrection(
     environmental_correction_db: float,
     method: Literal['absorption', 'reference source'],
-    surface_area_m2: float | None = None,
-    absorption_area_m2: float | None = None,
+    surface_area: float | None = None,
+    absorption_area: float | None = None,
     reference_levels_db: np.ndarray | None = None,
     calibrated_level_db: float | None = None,
 )
@@ -503,8 +503,8 @@ by [`turbine_reference_source_correction`](/phonometry/reference/api/power/turbi
 | :--- | :--- |
 | `environmental_correction_db` | $K$, in dB. |
 | `method` | `"absorption"` (A.3.1) or `"reference source"` (A.3.2). |
-| `surface_area_m2` | $S$ (A.3.1), in square metres, or `None`. |
-| `absorption_area_m2` | $A$ (A.3.1), in square metres, or `None`. |
+| `surface_area` | $S$ (A.3.1), in square metres, or `None`. |
+| `absorption_area` | $A$ (A.3.1), in square metres, or `None`. |
 | `reference_levels_db` | The determinations of the reference source's sound power level $L_W$ (A.3.2), in dB, or `None`. |
 | `calibrated_level_db` | $L_{W\mathrm{r}}$ (A.3.2), in dB, or `None`. |
 
@@ -545,7 +545,7 @@ TurbineMeasurementSurface(
     lengths_m: np.ndarray,
     widths_m: np.ndarray,
     heights_m: np.ndarray,
-    area_m2: float,
+    area: float,
     measurement_distance_m: float = 1.0,
 )
 ```
@@ -565,7 +565,7 @@ the set.
 | `lengths_m` | $l_i$ of each parallelepiped of the measurement surface, in metres. |
 | `widths_m` | $b_i$, in metres. |
 | `heights_m` | $h_i$, in metres. |
-| `area_m2` | $S$ of Equation (1), in square metres. |
+| `area` | $S$ of Equation (1), in square metres. |
 | `measurement_distance_m` | $d$, 1 m (7.1). |
 
 ### TurbineMeasurementSurface.enveloping_area_m2
@@ -854,12 +854,12 @@ width across from where the drawing puts them.
 
 ```python
 TurbineSoundPowerResult(
-    pressure_levels_db: np.ndarray,
-    background_levels_db: np.ndarray | None,
+    pressure_levels: np.ndarray,
+    background_levels: np.ndarray | None,
     background_corrections_db: np.ndarray,
     corrected_levels_db: np.ndarray,
     environmental_correction_db: float,
-    surface_area_m2: float,
+    surface_area: float,
     surface_pressure_level_db: float,
     sound_power_level_db: float,
     overhead_mask: np.ndarray | None = None,
@@ -874,12 +874,12 @@ Built by [`turbine_sound_power`](/phonometry/reference/api/power/turbine-noise/#
 
 | Name | Description |
 | :--- | :--- |
-| `pressure_levels_db` | $L_{p\mathrm{A}i}$ measured with the turbine set operating, one per position, in dB re 20 µPa. |
-| `background_levels_db` | The background level at each position, in dB, or `None` when it was not determined. |
+| `pressure_levels` | $L_{p\mathrm{A}i}$ measured with the turbine set operating, one per position, in dB re 20 µPa. |
+| `background_levels` | The background level at each position, in dB, or `None` when it was not determined. |
 | `background_corrections_db` | The correction of Table 2 at each position, in dB (zero where no background was given). |
 | `corrected_levels_db` | The levels after 8.1, in dB. |
 | `environmental_correction_db` | $K$, in dB. |
-| `surface_area_m2` | $S$, in square metres. |
+| `surface_area` | $S$, in square metres. |
 | `surface_pressure_level_db` | $\overline{L_{p\mathrm{A}}}$ of Equation (2), $K$ subtracted, in dB re 20 µPa. |
 | `sound_power_level_db` | $L_{W\mathrm{A}}$ of Equation (3), in dB re 1 pW. |
 | `overhead_mask` | Which positions are overhead, or `None`. |
@@ -1006,6 +1006,7 @@ indication of the upper limit of the sound power level.
 TurbineTestEnvironmentCheck(
     environmental_correction_db: float,
     ratio: float | None,
+    *,
     wind_speed_m_s: float | None = None,
 )
 ```

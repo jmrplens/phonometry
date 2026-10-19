@@ -884,7 +884,7 @@ def _vdi2081_bend_result(
 
 def elbow_insertion_loss(
     frequencies: ArrayLike,
-    width: float,
+    width_m: float,
     *,
     bend_type: str = "square",
     vanes: bool = False,
@@ -910,12 +910,12 @@ def elbow_insertion_loss(
 
     The two methods index the same physics on the same ratio, but they do not
     tabulate the same bends: Table 7 distinguishes lining before, after, or on
-    both sides of the corner, which the ASHRAE table does not, and ``width`` is
+    both sides of the corner, which the ASHRAE table does not, and ``width_m`` is
     read there as the largest side of a rectangular duct or the bore of a round
     one rather than as the width in the plane of the bend.
 
     :param frequencies: Frequencies ``f``, Hz (1-D array).
-    :param width: Duct width ``W`` in the plane of the bend, m. For
+    :param width_m: Duct width ``W`` in the plane of the bend, m. For
         ``model="vdi2081"`` it is the largest side of a rectangular duct, or
         the internal diameter of a round one.
     :param bend_type: ``"square"`` or ``"round"``. VDI 2081 reads a square bend
@@ -933,7 +933,7 @@ def elbow_insertion_loss(
     if scheme == "vdi2081":
         return _vdi2081_bend_result(
             _frequencies(frequencies),
-            width=width,
+            width=width_m,
             bend_type=bend_type,
             vanes=vanes,
             lined=lined,
@@ -941,7 +941,7 @@ def elbow_insertion_loss(
             speed_of_sound=speed_of_sound,
         )
     f = _frequencies(frequencies)
-    w = require_positive(width, "width")
+    w = require_positive(width_m, "width_m")
     c = require_positive(speed_of_sound, "speed_of_sound")
     if bend_type == "round":
         if vanes or lined:
@@ -1232,17 +1232,17 @@ def flow_noise_bend(
 # ---------------------------------------------------------------------------
 # Fan sound power (Long Chapter 13)
 # ---------------------------------------------------------------------------
-def blade_passing_frequency(rotational_speed: float, blades: int) -> float:
+def blade_passing_frequency(rotational_speed_rpm: float, blades: int) -> float:
     r"""Blade passing frequency (Long Eq. 13.4).
 
     :math:`f_{bp} = \mathrm{rpm} \times \mathrm{blades} / 60`.
 
-    :param rotational_speed: Fan speed, revolutions per minute.
+    :param rotational_speed_rpm: Fan speed, revolutions per minute.
     :param blades: Number of impeller blades.
     :return: The blade passing frequency, Hz.
     :raises ValueError: If ``blades`` is not a positive integer.
     """
-    rpm = require_positive(rotational_speed, "rotational_speed")
+    rpm = require_positive(rotational_speed_rpm, "rotational_speed_rpm")
     require_scalar(blades, "blades")
     if blades <= 0 or not float(blades).is_integer():
         msg = "'blades' must be a positive integer."
@@ -1776,7 +1776,7 @@ def _vdi2081_limit_frequency(shape: str, size: float, speed_of_sound: float) -> 
     """
     if shape == "rectangular":
         return plane_wave_limit(
-            width=size, height_m=size, speed_of_sound=speed_of_sound
+            width_m=size, height_m=size, speed_of_sound=speed_of_sound
         )
     return plane_wave_limit(diameter_m=size, speed_of_sound=speed_of_sound)
 
@@ -1859,7 +1859,7 @@ def _perimeter_over_area(width: float, height: float) -> float:
 
 def unlined_rectangular_duct_attenuation(
     frequencies: ArrayLike,
-    width: float,
+    width_m: float,
     height_m: float,
     length: float,
     *,
@@ -1888,7 +1888,7 @@ def unlined_rectangular_duct_attenuation(
     and is refused.
 
     :param frequencies: Octave-band centre frequencies ``f``, Hz (1-D array).
-    :param width: Duct width, m.
+    :param width_m: Duct width, m.
     :param height_m: Duct height, m.
     :param length: Duct run length ``l``, m.
     :param wrapped: The duct is externally wrapped with a fibreglass blanket,
@@ -1907,7 +1907,7 @@ def unlined_rectangular_duct_attenuation(
             )
             raise ValueError(msg)
         side = max(
-            require_positive(width, "width"), require_positive(height_m, "height_m")
+            require_positive(width_m, "width_m"), require_positive(height_m, "height_m")
         )
         return HvacSpectrumResult(
             frequencies=f,
@@ -1919,11 +1919,11 @@ def unlined_rectangular_duct_attenuation(
             ),
             quantity="attenuation",
             label=(
-                f"Straight duct, VDI 2081 ({width * 1000:.0f} x "
+                f"Straight duct, VDI 2081 ({width_m * 1000:.0f} x "
                 f"{height_m * 1000:.0f} mm, {length:.2f} m)"
             ),
         )
-    ps = _perimeter_over_area(width, height_m)
+    ps = _perimeter_over_area(width_m, height_m)
     ell = require_positive(length, "length") / _M_PER_FT
     low = (
         17.0 * ps**0.25 * f**-0.85 * ell
@@ -1939,7 +1939,7 @@ def unlined_rectangular_duct_attenuation(
         values=values,
         quantity="attenuation",
         label=(
-            f"Unlined rectangular duct ({width * 1000:.0f} x {height_m * 1000:.0f} mm, "
+            f"Unlined rectangular duct ({width_m * 1000:.0f} x {height_m * 1000:.0f} mm, "
             f"{length:.2f} m)"
         ),
     )
@@ -2009,7 +2009,7 @@ def unlined_circular_duct_attenuation(
 
 def lined_rectangular_duct_attenuation(
     frequencies: ArrayLike | None,
-    width: float,
+    width_m: float,
     height_m: float,
     length: float,
     lining_thickness_m: float,
@@ -2030,7 +2030,7 @@ def lined_rectangular_duct_attenuation(
 
     :param frequencies: Octave-band centres, Hz; ``None`` uses
         :data:`OCTAVE_BANDS`.
-    :param width: Duct width, m.
+    :param width_m: Duct width, m.
     :param height_m: Duct height, m.
     :param length: Duct run length ``l``, m.
     :param lining_thickness_m: Lining thickness ``t``, m.
@@ -2040,7 +2040,7 @@ def lined_rectangular_duct_attenuation(
     :return: An :class:`HvacSpectrumResult` of the attenuation, dB.
     """
     f, idx = _octave_slots(frequencies)
-    ps = _perimeter_over_area(width, height_m)
+    ps = _perimeter_over_area(width_m, height_m)
     ell = require_positive(length, "length") / _M_PER_FT
     t_in = require_positive(lining_thickness_m, "lining_thickness_m") / _M_PER_IN
     values = (
@@ -2049,14 +2049,14 @@ def lined_rectangular_duct_attenuation(
     if include_unlined:
         values = (
             values
-            + unlined_rectangular_duct_attenuation(f, width, height_m, length).values
+            + unlined_rectangular_duct_attenuation(f, width_m, height_m, length).values
         )
     return HvacSpectrumResult(
         frequencies=f,
         values=np.minimum(values, _LINED_DUCT_LIMIT),
         quantity="attenuation",
         label=(
-            f"Lined rectangular duct ({width * 1000:.0f} x {height_m * 1000:.0f} mm, "
+            f"Lined rectangular duct ({width_m * 1000:.0f} x {height_m * 1000:.0f} mm, "
             f"{length:.2f} m, {lining_thickness_m * 1000:.0f} mm lining)"
         ),
     )

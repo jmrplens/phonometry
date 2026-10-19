@@ -762,7 +762,7 @@ def _chk_probst_fitting_density() -> Outcome:
     worst = 0.0
     matching = 0
     for (*_, volume), _, surface, want in spatial.PROBST_ROOMS.values():
-        got = ph.room.fitting_density(surface_area_m2=surface, volume_m3=volume)
+        got = ph.room.fitting_density(surface_area=surface, volume=volume)
         if abs(got - want) <= 0.0005:
             matching += 1
         worst = max(worst, abs(got - want))
@@ -788,7 +788,7 @@ def _chk_annex_c_of_11690() -> Outcome:
         got = ph.room.workstation_level_increase(
             sound_power_level_db=power,
             emission_level_db=emission,
-            absorption_area_m2=prediction.ANNEX_C_ABSORPTION_M2,
+            absorption_area=prediction.ANNEX_C_ABSORPTION_M2,
         )
         if abs(got - want) <= 0.45:
             matching += 1
@@ -812,7 +812,7 @@ def _chk_m8_off_the_chart() -> Outcome:
     got = ph.room.workstation_level_increase(
         sound_power_level_db=power,
         emission_level_db=emission,
-        absorption_area_m2=prediction.ANNEX_C_ABSORPTION_M2,
+        absorption_area=prediction.ANNEX_C_ABSORPTION_M2,
     )
     return numeric(
         12.4,
@@ -950,7 +950,7 @@ def _annex_b_level(
                 ph.room.workstation_level(
                     sound_power_level_db=power,
                     emission_level_db=emission,
-                    absorption_area_m2=absorption,
+                    absorption_area=absorption,
                 )
             )
         else:
@@ -1128,7 +1128,7 @@ def _chk_annex_c_level_of_11690() -> Outcome:
                 ph.room.workstation_level(
                     sound_power_level_db=power,
                     emission_level_db=emission,
-                    absorption_area_m2=prediction.ANNEX_C_ABSORPTION_M2,
+                    absorption_area=prediction.ANNEX_C_ABSORPTION_M2,
                 )
             )
         )

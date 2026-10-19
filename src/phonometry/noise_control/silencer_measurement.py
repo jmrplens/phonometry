@@ -918,7 +918,7 @@ def modal_filter_cut_on(
 
 def normal_air_density(
     static_gauge_pressure_pa: float,
-    ambient_pressure_pa: float,
+    atmospheric_pressure_pa: float,
     temperature_c: float,
 ) -> float:
     r"""ISO 7235 Equations (10), (21) and (22): the density where it matters.
@@ -951,7 +951,7 @@ def normal_air_density(
 
     :param static_gauge_pressure_pa: :math:`p_{s1}`, the duct static pressure
         relative to the ambient, in Pa.
-    :param ambient_pressure_pa: :math:`p_a`, the absolute ambient pressure, in
+    :param atmospheric_pressure_pa: :math:`p_a`, the absolute ambient pressure, in
         Pa.
     :param temperature_c: :math:`\theta_1`, in °C.
     :return: :math:`\rho_{1n}`, in kg/m³.
@@ -960,7 +960,7 @@ def normal_air_density(
         make is not positive, or if the temperature is at or below the
         printed absolute zero.
     """
-    ambient = require_positive(ambient_pressure_pa, "ambient_pressure_pa")
+    ambient = require_positive(atmospheric_pressure_pa, "atmospheric_pressure_pa")
     gauge = _require_finite_scalar(static_gauge_pressure_pa, "static_gauge_pressure_pa")
     celsius = _require_finite_scalar(temperature_c, "temperature_c")
     absolute = gauge + ambient
@@ -969,7 +969,7 @@ def normal_air_density(
             "'static_gauge_pressure_pa' is measured against the ambient, so the "
             "two add to the absolute pressure of the gas law, which has to "
             f"be positive; got {static_gauge_pressure_pa!r} Pa against "
-            f"{ambient_pressure_pa!r} Pa."
+            f"{atmospheric_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     kelvin = celsius + ISO7235_ABSOLUTE_ZERO_OFFSET_K

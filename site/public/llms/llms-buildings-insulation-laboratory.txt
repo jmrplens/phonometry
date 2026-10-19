@@ -87,7 +87,7 @@ l2 = np.full(16, 40.0)
 t2 = np.full(16, 0.5)
 lab = building.lab_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
 print(round(float(lab.r[0]), 1))              # 38.0  R = L1 - L2 + 10 lg(S/A)
-print(round(float(lab.absorption[0]), 1))     # 16.0  A = 0.16 V / T (m^2)
+print(round(float(lab.absorption_area[0]), 1))     # 16.0  A = 0.16 V / T (m^2)
 print(lab.rating.rating, lab.rating.c, lab.rating.ctr)   # 38 0 0  ->  Rw(C;Ctr)
 
 # Impact: the tapping-machine level Li normalized to A0 = 10 m^2 gives Ln
@@ -172,8 +172,8 @@ plt.show()
 | `volume` | float | m³ | > 0 | Receiving-room volume $V$ |
 
 `lab_airborne_insulation()` returns a `LabAirborneInsulationResult` (`r`,
-`absorption`, `rating`); `lab_impact_insulation()` a
-`LabImpactInsulationResult` (`l_n`, `absorption`, `rating`);
+`absorption_area`, `rating`); `lab_impact_insulation()` a
+`LabImpactInsulationResult` (`l_n`, `absorption_area`, `rating`);
 `background_correction(signal_and_background, background)` returns the corrected
 levels directly.
 
@@ -1010,7 +1010,7 @@ l_pr = np.array([48.2, 51.0, 53.1, 55.4, 57.0, 58.3, 59.1, 59.8, 60.2, 60.4,
                  60.1, 59.4, 58.6, 57.5, 56.2, 54.4, 52.3, 49.8])
 t = np.array([1.9, 1.8, 1.7, 1.6, 1.5, 1.45, 1.4, 1.35, 1.3, 1.25, 1.2, 1.15,
               1.1, 1.05, 1.0, 0.95, 0.9, 0.85])
-rain = building.rainfall_sound(l_pr, t, freqs, volume_m3=62.0,
+rain = building.rainfall_sound(l_pr, t, freqs, volume=62.0,
                                excited_area_m2=1.875,
                                reference_correction=correction)
 print(round(rain.l_ia_db, 1), round(rain.l_ia_norm_db, 1))     # 69.3 67.5
@@ -1051,7 +1051,7 @@ l_pr = np.array([48.2, 51.0, 53.1, 55.4, 57.0, 58.3, 59.1, 59.8, 60.2, 60.4,
                  60.1, 59.4, 58.6, 57.5, 56.2, 54.4, 52.3, 49.8])
 t = np.array([1.9, 1.8, 1.7, 1.6, 1.5, 1.45, 1.4, 1.35, 1.3, 1.25, 1.2, 1.15,
               1.1, 1.05, 1.0, 0.95, 0.9, 0.85])
-rain = building.rainfall_sound(l_pr, t, freqs, volume_m3=62.0,
+rain = building.rainfall_sound(l_pr, t, freqs, volume=62.0,
                                excited_area_m2=1.875,
                                reference_correction=correction)
 
@@ -2028,7 +2028,7 @@ res.plot()                            # Rcl against the two ceilings
 # A lined plenum attenuates the sideways path (Eq. (9.18) instead of (9.20)):
 damped = building.plenum_flanking_reduction_index(
     ceiling, ceiling, ceiling_length=4.75, plenum_height_m=0.43,
-    attenuation_source=[0.5] * 7, attenuation_receiving=[0.5] * 7,
+    attenuation_source_per_m=[0.5] * 7, attenuation_receiving_per_m=[0.5] * 7,
 )
 
 # Referred to the partition instead of the ceiling (Eq. (9.13)):

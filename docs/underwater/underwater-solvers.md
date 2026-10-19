@@ -550,7 +550,7 @@ supposed to be draining. The marcher integrates $s$ with the same Runge-Kutta
 stages that place the ray ($ds/dr = 1/(\xi c)$), `ray_trace` exposes it per
 ray as `arc_lengths`, and the coefficient, one $\alpha$ per run evaluated at
 the source frequency and depth, is recorded on the result as
-`absorption_coefficient`.
+`absorption_db_per_km`.
 
 **A lossy seabed** is the other loss the default leaves out, and in shallow
 water the dominant one: a perfect bottom hands every steep multiple back

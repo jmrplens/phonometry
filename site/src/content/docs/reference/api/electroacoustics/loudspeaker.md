@@ -57,9 +57,9 @@ the report never merely repeats a manufacturer number:
 loudspeaker_characteristics(
     frequencies: ArrayLike,
     spl_db: ArrayLike,
-    rated_impedance: float,
+    rated_impedance_ohm: float,
     *,
-    input_voltage: float | None = None,
+    input_voltage_v: float | None = None,
     distance: float = 1.0,
     sensitivity_band: tuple[float, float] | None = None,
     tolerance_db: float = 3.0,
@@ -83,13 +83,13 @@ distortion and directivity data feed the corresponding report panels.
 | :--- | :--- |
 | `frequencies` | On-axis response frequency axis, in Hz (1-D, > 0). Logarithmically spaced samples are strongly recommended: the band averages behind the sensitivity level and the effective-range reference weight each sample equally, so a linearly spaced grid over-weights the high-frequency end of every band. |
 | `spl_db` | On-axis sound pressure level, in dB re 20 uPa. |
-| `rated_impedance` | Rated impedance `R`, in ohm (16.1). |
-| `input_voltage` | Constant drive voltage of the response, in V; defaults to $\sqrt{R}$ (1 W into `R`, the 2.83 V @ 8 ohm convention). |
+| `rated_impedance_ohm` | Rated impedance `R`, in ohm (16.1). |
+| `input_voltage_v` | Constant drive voltage of the response, in V; defaults to $\sqrt{R}$ (1 W into `R`, the 2.83 V @ 8 ohm convention). |
 | `distance` | Measuring distance of the response, in m (default 1). |
 | `sensitivity_band` | Stated band `(lo, hi)` for the characteristic sensitivity, in Hz; defaults to the one-octave band in the region of maximum sensitivity. |
 | `tolerance_db` | Half-width of the plotted response tolerance band, in dB (default 3). |
 | `impedance` | Impedance curve as `(frequencies, modulus)` in `(Hz, ohm)` (16.2). |
-| `distortion` | THD against frequency, either as a [`SweptSineDistortionResult`](/phonometry/reference/api/electroacoustics/swept-sine/#sweptsinedistortionresult) (its `thd` ratio is converted to %) or a `(frequencies, thd_percent)` pair (24.1). |
+| `distortion` | THD against frequency, either as a [`SweptSineDistortionResult`](/phonometry/reference/api/electroacoustics/swept-sine/#sweptsinedistortionresult) (its `thd_ratio` is converted to %) or a `(frequencies, thd_percent)` pair (24.1). |
 | `directivity` | Directional characteristics of Clause 23 as a [`LoudspeakerDirectivity`](/phonometry/reference/api/electroacoustics/loudspeaker/#loudspeakerdirectivity): the pattern (measured or from a radiating piston), its stated frequency and the directivity index. |
 | `ratings` | Manufacturer-stated ratings of Clauses 18 and 19 as a [`LoudspeakerRatings`](/phonometry/reference/api/electroacoustics/loudspeaker/#loudspeakerratings): the rated frequency range, the rated noise and sinusoidal powers and the resonance frequency. |
 
@@ -107,20 +107,20 @@ distortion and directivity data feed the corresponding report panels.
 LoudspeakerCharacteristics(
     frequencies: NDArray[np.float64],
     spl_db: NDArray[np.float64],
-    rated_impedance: float,
-    input_voltage: float,
+    rated_impedance_ohm: float,
+    input_voltage_v: float,
     distance: float,
     sensitivity_band: tuple[float, float],
     tolerance_db: float,
     reference_level_db: float,
     sensitivity_level_db: float,
     effective_range: tuple[float, float],
-    rated_frequency_range: tuple[float, float] | None,
+    rated_frequency_range_hz: tuple[float, float] | None,
     rated_noise_power: float | None,
     rated_sinusoidal_power: float | None,
     resonance_frequency: float | None,
     impedance_frequencies: NDArray[np.float64] | None,
-    impedance_modulus: NDArray[np.float64] | None,
+    impedance_modulus_ohm: NDArray[np.float64] | None,
     thd_frequencies: NDArray[np.float64] | None,
     thd_percent: NDArray[np.float64] | None,
     polar_angles_deg: NDArray[np.float64] | None,
@@ -143,21 +143,21 @@ computed from the on-axis response (see the module docstring).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | On-axis response frequency axis, in Hz. |
-| `spl_db` | On-axis sound pressure level (re 20 uPa), in dB, measured at `input_voltage` and `distance`. |
-| `rated_impedance` | Rated impedance `R`, in ohm (16.1). |
-| `input_voltage` | Constant drive voltage of the response, in V. |
+| `spl_db` | On-axis sound pressure level (re 20 uPa), in dB, measured at `input_voltage_v` and `distance`. |
+| `rated_impedance_ohm` | Rated impedance `R`, in ohm (16.1). |
+| `input_voltage_v` | Constant drive voltage of the response, in V. |
 | `distance` | Measuring distance of the response, in m. |
 | `sensitivity_band` | Stated band `(lo, hi)` for the characteristic sensitivity, in Hz. |
 | `tolerance_db` | Half-width of the response tolerance band, in dB. |
 | `reference_level_db` | Level averaged over a one-octave band in the region of maximum sensitivity (the effective-range reference), in dB. |
 | `sensitivity_level_db` | Characteristic sensitivity level referred to 1 W into `R` at 1 m (20.3/20.4), in dB. |
 | `effective_range` | Computed effective frequency range `(lo, hi)`, Hz. |
-| `rated_frequency_range` | Manufacturer-stated rated frequency range `(lo, hi)` in Hz (19.1), or `None`. |
+| `rated_frequency_range_hz` | Manufacturer-stated rated frequency range `(lo, hi)` in Hz (19.1), or `None`. |
 | `rated_noise_power` | Rated noise power, in W (18.1), or `None`. |
 | `rated_sinusoidal_power` | Rated sinusoidal power, in W (18.4), or `None`. |
 | `resonance_frequency` | Resonance frequency, in Hz (19.2), or `None`. |
 | `impedance_frequencies` | Impedance-curve frequency axis, Hz, or `None`. |
-| `impedance_modulus` | Impedance modulus `\|Z\|`, ohm, or `None`. |
+| `impedance_modulus_ohm` | Impedance modulus `\|Z\|`, ohm, or `None`. |
 | `thd_frequencies` | THD-curve frequency axis, Hz, or `None`. |
 | `thd_percent` | Total harmonic distortion, in %, or `None`. |
 | `polar_angles_deg` | Polar-response angles, in degrees, or `None`. |
@@ -174,7 +174,7 @@ Characteristic sensitivity as a pressure, in Pa (20.3).
 The sound pressure at 1 m for 1 W into the rated impedance:
 $p_M = p_\text{ref} \cdot 10^{L_M / 20}$.
 
-### LoudspeakerCharacteristics.minimum_impedance
+### LoudspeakerCharacteristics.minimum_impedance_ohm
 
 *property*
 
@@ -182,7 +182,7 @@ Lowest impedance modulus over the rated range, ohm (16.1), or `None`.
 
 IEC 60268-5 16.1 requires the lowest value of the impedance modulus
 *in the rated frequency range* to be not less than 80 % of the rated
-impedance, so the scan uses `rated_frequency_range` when it is
+impedance, so the scan uses `rated_frequency_range_hz` when it is
 supplied. When no rated range is stated, the computed
 `effective_range` stands in for it; note that the two ranges may
 differ (19.1 NOTE 2), particularly for tweeters or woofers, so an

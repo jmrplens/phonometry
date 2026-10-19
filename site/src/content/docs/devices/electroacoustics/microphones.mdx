@@ -340,7 +340,7 @@ turntable in the same room, one cut per stated frequency, in a plane containing
 the reference axis, with the distance, the sound pressure and the frequency
 held constant while $\theta$ is stepped (13.1.2 a). The **inherent-noise
 spectrum** is the third-octave breakdown of the clause 17.2 measurement, with
-the analyser bandwidth stated, and the single `voltage` is the weighted r.m.s.
+the analyser bandwidth stated, and the single `voltage_v` is the weighted r.m.s.
 of the same measurement. The **distortion-against-level curve** comes from
 stepping the sound pressure of a high-level source while the distortion at the
 output is measured (15.2.2), and the overload level is read off it where the
@@ -363,7 +363,7 @@ result = electroacoustics.microphone_characteristics(
     freqs, response, 12.5, tolerance_db=3.0,          # 12.5 mV/Pa at 1 kHz
     directivity=electroacoustics.MicrophoneDirectivity(polar=(angles_rad, cardioid), frequency=1000.0),
     noise=electroacoustics.MicrophoneNoise(                             # A-weighted, V
-        voltage=1.25e-6,
+        voltage_v=1.25e-6,
         spectrum=(noise_f, 6.0 + 12.0 * np.log10(1000.0 / noise_f)),
     ),
     overload=electroacoustics.MicrophoneOverload(
@@ -372,7 +372,7 @@ result = electroacoustics.microphone_characteristics(
         thd_percent=0.5,
     ),
     electrical=electroacoustics.MicrophoneElectrical(
-        rated_impedance=150.0, minimum_load_impedance=1000.0,
+        rated_impedance_ohm=150.0, minimum_load_impedance_ohm=1000.0,
         powering="Phantom P48 (IEC 61938)", supply_current_ma=3.1,
     ),
 )
@@ -408,7 +408,7 @@ detector would be reported about 10 dB higher for the same capsule, so this
 number is 14 dB(A) and must never be set beside a dB(468) figure from another
 sheet.
 
-One trap the API reproduces and the page has to close: `MicrophoneNoise.voltage`
+One trap the API reproduces and the page has to close: `MicrophoneNoise.voltage_v`
 is the inherent-noise voltage **as measured through the weighting network**, not
 a raw wideband r.m.s., and `weighting=` records which network that was. It
 defaults silently to `'A'` (IEC 60268-1 6.2.1). The field is a *label, not a
@@ -530,7 +530,7 @@ noise_f = np.geomspace(20, 20000, 31)
 result = electroacoustics.microphone_characteristics(
     freqs, response, 12.5, tolerance_db=3.0,
     noise=electroacoustics.MicrophoneNoise(
-        voltage=1.25e-6,
+        voltage_v=1.25e-6,
         spectrum=(noise_f, 6.0 + 12.0 * np.log10(1000.0 / noise_f)),
     ),
 )

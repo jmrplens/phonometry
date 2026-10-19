@@ -201,7 +201,7 @@ def test_the_aerodrome_also_answers_for_the_impedance_adjustment() -> None:
         "departure",
         aerodrome=hot,
         temperature_c=35.0,
-        atmospheric_pressure_kpa=at_field_kpa,
+        static_pressure_kpa=at_field_kpa,
     )
     assert followed.level == pytest.approx(stated.level)
     # Leaving the standard atmosphere in place instead does change it, which is
@@ -212,7 +212,7 @@ def test_the_aerodrome_also_answers_for_the_impedance_adjustment() -> None:
         "departure",
         aerodrome=hot,
         temperature_c=15.0,
-        atmospheric_pressure_kpa=101.325,
+        static_pressure_kpa=101.325,
     )
     assert standard_day.level != pytest.approx(followed.level)
 
@@ -228,7 +228,7 @@ def test_no_aerodrome_leaves_the_fixed_point_chain_exactly_as_it_was() -> None:
         [3000.0, 500.0, 0.0],
         "departure",
         temperature_c=15.0,
-        atmospheric_pressure_kpa=101.325,
+        static_pressure_kpa=101.325,
     )
     assert flyover.level == pytest.approx(spelled.level)
 

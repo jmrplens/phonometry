@@ -228,7 +228,7 @@ def plot_aircraft_band_attenuation(
 
     ax = ax if ax is not None else _new_axes()
     f = np.asarray(result.frequencies, dtype=np.float64)
-    label = f"{_t('SAE band', language)} ({format_number(result.path_length, language, decimals=0)} m)"
+    label = f"{_t('SAE band', language)} ({format_number(result.path_length_m, language, decimals=0)} m)"
     ax.plot(
         f,
         np.asarray(result.band_attenuation),
@@ -359,7 +359,7 @@ def plot_rotorcraft_hemisphere(
 
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
-    theta = np.linspace(float(result.polar[0]), float(result.polar[-1]), 181)
+    theta = np.linspace(float(result.polar_deg[0]), float(result.polar_deg[-1]), 181)
     grid = np.array([hemisphere_source_level(result, 0.0, t) for t in theta])
     idx = (
         int(np.argmin(np.abs(freqs - band)))
@@ -462,7 +462,7 @@ def plot_flight_path_kinematics(
     t = np.asarray(result.times, dtype=np.float64)
     ax.plot(
         t,
-        result.airspeed,
+        result.airspeed_m_s,
         **styled(
             kwargs,
             color=_C_PRIMARY,
@@ -472,7 +472,7 @@ def plot_flight_path_kinematics(
     )
     ax.plot(
         t,
-        result.ground_speed,
+        result.ground_speed_m_s,
         **styled(
             kwargs,
             color=_C_SECONDARY,

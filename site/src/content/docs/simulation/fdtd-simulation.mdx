@@ -667,7 +667,7 @@ wells = [materials.MetadiffuserWell(h * 1e-3,
                                     (materials.HelmholtzResonator(ln * 1e-3, wn * 1e-3,
                                                         lc * 1e-3, wc * 1e-3),) * 2)
          for h, ln, lc, wn, wc in rows]
-model = materials.metadiffuser_polar_response(f0, wells, depth=0.02, period_m=pitch,
+model = materials.metadiffuser_polar_response(f0, wells, depth_m=0.02, period_m=pitch,
                                               angles_deg=angles_deg, repetitions=1)
 ax = model.plot(color="#1f77b4", marker="", linestyle="--",
                 label="TMM + Fraunhofer model")
@@ -701,7 +701,7 @@ grid. That difference is where the shifted nulls come from.*
 # The model's view (top panel) is drawn by the library itself, from the same
 # `wells` the block above built:
 #     from phonometry.materials import plot_metadiffuser_panel_geometry
-#     plot_metadiffuser_panel_geometry(wells, depth=0.02, period_m=0.07)
+#     plot_metadiffuser_panel_geometry(wells, depth_m=0.02, period_m=0.07)
 
 # The solver's view: the boolean mask the block above meshed, and one cell
 # of it magnified.

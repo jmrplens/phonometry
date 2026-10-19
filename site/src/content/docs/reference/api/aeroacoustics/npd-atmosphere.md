@@ -55,7 +55,7 @@ npd_atmosphere_increment(
     *,
     temperature_c: float,
     relative_humidity_percent: float,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
     absorption: str = 'arp5534',
     distances_m: ArrayLike | None = None,
 ) -> NpdAtmosphereIncrement
@@ -104,7 +104,7 @@ shape; the spectral classes are normalised to 70 dB at 1 kHz (G4.3).
 | `spectrum` | The spectral class of the NPD, a [`SpectralClass`](/phonometry/reference/api/aeroacoustics/anp-fleet/#spectralclass) or its 24 one-third-octave-band levels from 50 Hz to 10 kHz at 1 000 ft, in dB. |
 | `temperature_c` | Air temperature `T`, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity, in percent. |
-| `atmospheric_pressure_kpa` | Air pressure `pa`, in kPa (default 101.325, sea level). Read by ARP 5534 only. |
+| `static_pressure_kpa` | Air pressure `pa`, in kPa (default 101.325, sea level). Read by ARP 5534 only. |
 | `absorption` | `"arp5534"` (default) or `"arp866a"`. |
 | `distances_m` | The NPD slant distances, in metres. `None` takes the ten standard ones of footnote 40, 200 ft to 25 000 ft. |
 
@@ -132,7 +132,7 @@ NpdAtmosphereIncrement(
     absorption: str,
     temperature_c: float,
     relative_humidity_percent: float,
-    atmospheric_pressure_kpa: float,
+    static_pressure_kpa: float,
 )
 ```
 
@@ -158,7 +158,7 @@ tables are `(bands, distances)`.
 | `absorption` | `"arp5534"` or `"arp866a"`, the route taken for the specified atmosphere. |
 | `temperature_c` | Air temperature, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity, in percent. |
-| `atmospheric_pressure_kpa` | Air pressure, in kPa. SAE ARP 866A does not use it. |
+| `static_pressure_kpa` | Air pressure, in kPa. SAE ARP 866A does not use it. |
 
 ### NpdAtmosphereIncrement.distance_column()
 
@@ -231,7 +231,7 @@ revise_npd_curves(
     *,
     temperature_c: float,
     relative_humidity_percent: float,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
     absorption: str = 'arp5534',
 ) -> RevisedNpdCurves
 ```
@@ -252,7 +252,7 @@ time history (Appendix D, last paragraph of step 3).
 | `spectrum` | The spectral class of the same aircraft and operation (see [`spectral_class`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraftspectral_class)). |
 | `temperature_c` | Air temperature, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity, in percent. |
-| `atmospheric_pressure_kpa` | Air pressure, in kPa (default 101.325). |
+| `static_pressure_kpa` | Air pressure, in kPa (default 101.325). |
 | `absorption` | `"arp5534"` (default) or `"arp866a"`. |
 
 **Returns:** A [`RevisedNpdCurves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revisednpdcurves).

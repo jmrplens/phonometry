@@ -46,7 +46,7 @@ def test_density_reproduces_the_standard_ocean() -> None:
     rho = sea_water_density(
         temperature_c=10.0,
         salinity_psu=35.0,
-        absolute_pressure_pa=depth_to_absolute_pressure_pa(depth_m=0.0),
+        static_pressure_pa=depth_to_absolute_pressure_pa(depth_m=0.0),
     )
     assert round(rho) == 1027
 
@@ -59,26 +59,26 @@ def test_the_pressure_term_is_small_but_present() -> None:
     exactly that much.
     """
     at_surface = sea_water_density(
-        temperature_c=23.0, salinity_psu=35.0, absolute_pressure_pa=_SURFACE_ABSOLUTE_PA
+        temperature_c=23.0, salinity_psu=35.0, static_pressure_pa=_SURFACE_ABSOLUTE_PA
     )
     without_the_term = sea_water_density(
-        temperature_c=23.0, salinity_psu=35.0, absolute_pressure_pa=1.0
+        temperature_c=23.0, salinity_psu=35.0, static_pressure_pa=1.0
     )
     assert at_surface - without_the_term == pytest.approx(0.0439, abs=1e-4)
 
 
 def test_density_falls_with_temperature_and_rises_with_salt_and_depth() -> None:
     """The three signs Equation (4.6) prints."""
-    base = {"salinity_psu": 35.0, "absolute_pressure_pa": _SURFACE_ABSOLUTE_PA}
+    base = {"salinity_psu": 35.0, "static_pressure_pa": _SURFACE_ABSOLUTE_PA}
     assert sea_water_density(temperature_c=25.0, **base) < sea_water_density(
         temperature_c=5.0, **base
     )
     assert sea_water_density(
-        temperature_c=10.0, salinity_psu=38.0, absolute_pressure_pa=_SURFACE_ABSOLUTE_PA
+        temperature_c=10.0, salinity_psu=38.0, static_pressure_pa=_SURFACE_ABSOLUTE_PA
     ) > sea_water_density(temperature_c=10.0, **base)
     deep = depth_to_absolute_pressure_pa(depth_m=4000.0)
     assert sea_water_density(
-        temperature_c=10.0, salinity_psu=35.0, absolute_pressure_pa=deep
+        temperature_c=10.0, salinity_psu=35.0, static_pressure_pa=deep
     ) > sea_water_density(temperature_c=10.0, **base)
 
 
@@ -122,11 +122,11 @@ def test_every_sound_speed_model_still_reaches_the_fluid(model: str) -> None:
 def test_impossible_states_are_refused() -> None:
     with pytest.raises(ValueError, match="'temperature_c' must be"):
         sea_water_density(
-            temperature_c=-300.0, salinity_psu=35.0, absolute_pressure_pa=101325.0
+            temperature_c=-300.0, salinity_psu=35.0, static_pressure_pa=101325.0
         )
     with pytest.raises(ValueError, match="'salinity_psu' must be non-negative"):
         sea_water_density(
-            temperature_c=10.0, salinity_psu=-1.0, absolute_pressure_pa=101325.0
+            temperature_c=10.0, salinity_psu=-1.0, static_pressure_pa=101325.0
         )
     with pytest.raises(ValueError, match="'depth_m' must be non-negative"):
         depth_to_absolute_pressure_pa(depth_m=-1.0)

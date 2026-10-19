@@ -127,7 +127,7 @@ def _exact_midband(frequencies: NDArray[np.float64]) -> NDArray[np.float64]:
 def _molar_water_vapour(
     temperature_k: float,
     relative_humidity_percent: float,
-    atmospheric_pressure_kpa: float,
+    static_pressure_kpa: float,
     saturation_ratio: float | None = None,
 ) -> float:
     r"""Molar concentration of water vapour ``h`` (%), ISO 9613-1 clause 6.4.
@@ -146,16 +146,14 @@ def _molar_water_vapour(
         if saturation_ratio is None
         else saturation_ratio
     )
-    return float(
-        relative_humidity_percent * psat_over_pr / (atmospheric_pressure_kpa / _PR)
-    )
+    return float(relative_humidity_percent * psat_over_pr / (static_pressure_kpa / _PR))
 
 
 def _validate(
     freqs: NDArray[np.float64],
     temperature_c: float,
     relative_humidity_percent: float,
-    atmospheric_pressure_kpa: float,
+    static_pressure_kpa: float,
     *,
     frequency_scope: tuple[float, float, str] | None = None,
 ) -> None:
@@ -174,12 +172,12 @@ def _validate(
     # psychrometric conversion would then read it as its element on numpy 2.0
     # to 2.3 and refuse it anonymously from 2.4 on.
     require_scalar(relative_humidity_percent, "relative_humidity_percent")
-    require_scalar(atmospheric_pressure_kpa, "atmospheric_pressure_kpa")
+    require_scalar(static_pressure_kpa, "static_pressure_kpa")
     if not 0.0 <= relative_humidity_percent <= _MAX_RELATIVE_HUMIDITY_PERCENT:
         msg = "'relative_humidity_percent' must be within [0, 100] %."
         raise ValueError(msg)
-    if atmospheric_pressure_kpa <= 0.0:
-        msg = "'atmospheric_pressure_kpa' must be positive."
+    if static_pressure_kpa <= 0.0:
+        msg = "'static_pressure_kpa' must be positive."
         raise ValueError(msg)
 
     lo_t, hi_t = _TEMPERATURE_RANGE
@@ -211,9 +209,9 @@ def _validate(
             AtmosphericAbsorptionWarning,
             stacklevel=3,
         )
-    if atmospheric_pressure_kpa > _PRESSURE_MAX:
+    if static_pressure_kpa > _PRESSURE_MAX:
         warnings.warn(
-            f"Pressure {atmospheric_pressure_kpa:g} kPa exceeds the {_PRESSURE_MAX:g} kPa "
+            f"Pressure {static_pressure_kpa:g} kPa exceeds the {_PRESSURE_MAX:g} kPa "
             "validity envelope of ISO 9613-1:1993 (clause 7); the result is "
             "advisory.",
             AtmosphericAbsorptionWarning,
@@ -226,7 +224,7 @@ def air_attenuation(
     *,
     temperature_c: float = 20.0,
     relative_humidity_percent: float = 50.0,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
     exact_midband: bool = False,
 ) -> NDArray[np.float64]:
     r"""Pure-tone atmospheric attenuation coefficient (ISO 9613-1, Eq. (5)).
@@ -235,7 +233,7 @@ def air_attenuation(
     relaxation frequencies (Eq. (3)/(4)) and the classical, rotational and
     vibrational absorption terms (Eq. (5)). Fully vectorized over
     ``frequencies``; ``temperature_c``, ``relative_humidity_percent`` and
-    ``atmospheric_pressure_kpa`` are scalars.
+    ``static_pressure_kpa`` are scalars.
 
     :param frequencies: Frequency or frequencies ``f``, in hertz (array-like).
     :param temperature_c: Ambient air temperature, in degrees Celsius
@@ -247,7 +245,7 @@ def air_attenuation(
         saturation over liquid water (default 50 %). Outside 10..100 % emits an
         :class:`AtmosphericAbsorptionWarning`; outside [0, 100] % raises
         ``ValueError``.
-    :param atmospheric_pressure_kpa: Ambient atmospheric pressure ``pa``, in kilopascals
+    :param static_pressure_kpa: Ambient atmospheric pressure ``pa``, in kilopascals
         (default 101.325 kPa = one standard atmosphere = ``pr``). Above 200 kPa
         emits an :class:`AtmosphericAbsorptionWarning`; non-positive raises
         ``ValueError``.
@@ -267,7 +265,7 @@ def air_attenuation(
         :func:`~phonometry.materials.absorbers.sound_absorption.absorption_coefficient`.
     """
     freqs = np.asarray(frequencies, dtype=np.float64)
-    _validate(freqs, temperature_c, relative_humidity_percent, atmospheric_pressure_kpa)
+    _validate(freqs, temperature_c, relative_humidity_percent, static_pressure_kpa)
     if exact_midband:
         freqs = _exact_midband(freqs)
 
@@ -275,7 +273,7 @@ def air_attenuation(
         freqs,
         temperature_c + _KELVIN,
         relative_humidity_percent,
-        atmospheric_pressure_kpa,
+        static_pressure_kpa,
     )
     alpha = _EIGHT_686 * f2 * bracket
     return np.asarray(alpha, dtype=np.float64)
@@ -285,7 +283,7 @@ def _pure_tone_terms(
     freqs: NDArray[np.float64],
     temperature_k: float,
     relative_humidity_percent: float,
-    atmospheric_pressure_kpa: float,
+    static_pressure_kpa: float,
     *,
     saturation_ratio: float | None = None,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
@@ -300,13 +298,13 @@ def _pure_tone_terms(
     caller that owns it. Nothing is validated here. ``saturation_ratio`` is
     passed on to :func:`_molar_water_vapour`.
     """
-    pa_over_pr = atmospheric_pressure_kpa / _PR
+    pa_over_pr = static_pressure_kpa / _PR
     t_ratio = temperature_k / _T0
 
     h = _molar_water_vapour(
         temperature_k,
         relative_humidity_percent,
-        atmospheric_pressure_kpa,
+        static_pressure_kpa,
         saturation_ratio,
     )
     fro = pa_over_pr * (24.0 + 4.04e4 * h * (0.02 + h) / (0.391 + h))
@@ -330,7 +328,7 @@ def air_attenuation_m(
     *,
     temperature_c: float = 20.0,
     relative_humidity_percent: float = 50.0,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
     exact_midband: bool = False,
 ) -> NDArray[np.float64]:
     r"""ISO 354 air power-attenuation coefficient ``m`` (1/m) from conditions.
@@ -347,7 +345,7 @@ def air_attenuation_m(
     :param frequencies: Frequency or frequencies ``f``, in hertz (array-like).
     :param temperature_c: Ambient air temperature, in degrees Celsius (default 20).
     :param relative_humidity_percent: Relative humidity, in percent (default 50).
-    :param atmospheric_pressure_kpa: Ambient atmospheric pressure, in kilopascals
+    :param static_pressure_kpa: Ambient atmospheric pressure, in kilopascals
         (default 101.325).
     :param exact_midband: Snap frequencies to exact midbands; see
         :func:`air_attenuation`.
@@ -358,7 +356,7 @@ def air_attenuation_m(
         frequencies,
         temperature_c=temperature_c,
         relative_humidity_percent=relative_humidity_percent,
-        atmospheric_pressure_kpa=atmospheric_pressure_kpa,
+        static_pressure_kpa=static_pressure_kpa,
         exact_midband=exact_midband,
     )
     return attenuation_from_alpha(alpha)
@@ -379,22 +377,22 @@ class AtmosphericAttenuation(OwnsArrays):
 
     :ivar frequencies: Frequencies ``f`` the coefficient is evaluated at, in Hz
         (the exact one-third-octave midbands when ``exact_midband`` was used).
-    :ivar attenuation_coefficient: Pure-tone attenuation coefficient ``alpha``,
+    :ivar attenuation_db_per_m: Pure-tone attenuation coefficient ``alpha``,
         per frequency, in decibels per metre (Table 1 prints dB/km, i.e.
         :math:`\times 1000`).
     :ivar temperature_c: Ambient air temperature, in degrees Celsius.
     :ivar relative_humidity_percent: Relative humidity, in percent.
-    :ivar atmospheric_pressure_kpa: Ambient atmospheric pressure ``pa``, in kilopascals.
+    :ivar static_pressure_kpa: Ambient atmospheric pressure ``pa``, in kilopascals.
     :ivar distance: Propagation distance ``d``, in metres, or ``None`` when the
         result carries only the coefficient. When given, :attr:`total_attenuation`
         returns the total attenuation :math:`A = \alpha d` over that distance.
     """
 
     frequencies: NDArray[np.float64]
-    attenuation_coefficient: NDArray[np.float64]
+    attenuation_db_per_m: NDArray[np.float64]
     temperature_c: float
     relative_humidity_percent: float
-    atmospheric_pressure_kpa: float
+    static_pressure_kpa: float
     distance: float | None = None
 
     def __post_init__(self) -> None:
@@ -405,7 +403,7 @@ class AtmosphericAttenuation(OwnsArrays):
         construction of the frozen result and the factory consistent.
 
         The rest of the result is a single curve: every entry of
-        :attr:`attenuation_coefficient` is Eq. (5) evaluated at the frequency
+        :attr:`attenuation_db_per_m` is Eq. (5) evaluated at the frequency
         in the same position of :attr:`frequencies`, which is why the factory
         derives both from the one array the caller passed. :meth:`plot` reads
         them as that pair, in one ``semilogx`` call of alpha against the
@@ -439,7 +437,7 @@ class AtmosphericAttenuation(OwnsArrays):
             msg = "'distance' must be a finite, non-negative number of metres."
             raise ValueError(msg)
         require_same_shape(
-            self, "frequencies", "attenuation_coefficient", quantity="frequency"
+            self, "frequencies", "attenuation_db_per_m", quantity="frequency"
         )
 
     @property
@@ -457,7 +455,7 @@ class AtmosphericAttenuation(OwnsArrays):
         # an array, but the frozen result can be built by hand with a plain
         # list, and a list times a float is sequence repetition, not
         # arithmetic.
-        alpha = np.asarray(self.attenuation_coefficient, dtype=np.float64)
+        alpha = np.asarray(self.attenuation_db_per_m, dtype=np.float64)
         return np.asarray(alpha * self.distance, dtype=np.float64)
 
     def plot(
@@ -487,7 +485,7 @@ def atmospheric_attenuation(
     *,
     temperature_c: float = 20.0,
     relative_humidity_percent: float = 50.0,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
     exact_midband: bool = False,
     distance: float | None = None,
 ) -> AtmosphericAttenuation:
@@ -502,7 +500,7 @@ def atmospheric_attenuation(
     :param frequencies: Frequency or frequencies ``f``, in hertz (array-like).
     :param temperature_c: Ambient air temperature, in degrees Celsius (default 20).
     :param relative_humidity_percent: Relative humidity, in percent (default 50).
-    :param atmospheric_pressure_kpa: Ambient atmospheric pressure, in kilopascals
+    :param static_pressure_kpa: Ambient atmospheric pressure, in kilopascals
         (default 101.325 kPa, one standard atmosphere).
     :param exact_midband: Snap the frequencies to the exact one-third-octave
         midbands :math:`f_\mathrm{m} = 1000 \cdot 10^{k/10}` (Eq. (6)) before
@@ -523,16 +521,16 @@ def atmospheric_attenuation(
         frequencies,
         temperature_c=temperature_c,
         relative_humidity_percent=relative_humidity_percent,
-        atmospheric_pressure_kpa=atmospheric_pressure_kpa,
+        static_pressure_kpa=static_pressure_kpa,
         exact_midband=exact_midband,
     )
     if exact_midband:
         freqs = _exact_midband(freqs)
     return AtmosphericAttenuation(
         frequencies=np.atleast_1d(freqs),
-        attenuation_coefficient=np.atleast_1d(alpha),
+        attenuation_db_per_m=np.atleast_1d(alpha),
         temperature_c=float(temperature_c),
         relative_humidity_percent=float(relative_humidity_percent),
-        atmospheric_pressure_kpa=float(atmospheric_pressure_kpa),
+        static_pressure_kpa=float(static_pressure_kpa),
         distance=None if distance is None else float(distance),
     )

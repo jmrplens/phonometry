@@ -272,8 +272,8 @@ plenum_flanking_reduction_index(
     plenum_height_m: float,
     sidewalls: str = ...,
     frequencies: ArrayLike | None = ...,
-    attenuation_source: ArrayLike,
-    attenuation_receiving: ArrayLike,
+    attenuation_source_per_m: ArrayLike,
+    attenuation_receiving_per_m: ArrayLike,
     source_length: float | None = ...,
     split_source: float = ...,
     split_receiving: float = ...,
@@ -322,8 +322,8 @@ about 0.24 dB.
 | `plenum_height_m` | Plenum height `h`, in m (> 0). |
 | `sidewalls` | `"reflecting"` ($\epsilon = 2$, Default) or `"absorbing"` ($\epsilon = 1$); $\epsilon$ scales both the geometry penalty of Eq. (9.20) and the exponents of Eq. (9.18). |
 | `frequencies` | Optional band centre frequencies, in Hz. |
-| `attenuation_source` | Optional plenum power attenuation coefficient `mS` per band, in 1/m (> 0); switches to Eq. (9.18). |
-| `attenuation_receiving` | Optional `mR` per band, in 1/m (> 0); required together with *attenuation_source*. |
+| `attenuation_source_per_m` | Optional plenum power attenuation coefficient `mS` per band, in 1/m (> 0); switches to Eq. (9.18). |
+| `attenuation_receiving_per_m` | Optional `mR` per band, in 1/m (> 0); required together with *attenuation_source_per_m*. |
 | `source_length` | Source-side ceiling length `LS`, in m (Default: equal to *ceiling_length*). |
 | `split_source` | Power split `sS` towards the partition, in `(0, 1]` (Default: 0,5). |
 | `split_receiving` | Power split `sR` on the receiving side, in `(0, 1]` (Default: 0,5). |

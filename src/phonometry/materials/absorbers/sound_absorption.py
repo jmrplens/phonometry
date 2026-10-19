@@ -439,7 +439,7 @@ class SoundAbsorptionMeasurement(OwnsArrays):
         the air attenuation coefficient ``m`` (via ISO 9613-1), never directly.
     :ivar speed_of_sound: Propagation speed of sound ``c`` used in the Sabine
         inversion, in m/s (from Eq. (6) unless it was given explicitly).
-    :ivar air_attenuation: Power attenuation coefficient of air ``m``, per band,
+    :ivar air_attenuation_per_m: Power attenuation coefficient of air ``m``, per band,
         in 1/m (``0`` when no air correction was applied).
     :ivar absorption_area_empty: Equivalent sound absorption area of the empty
         room ``A1`` (Eq. (5)), per band, in square metres.
@@ -458,7 +458,7 @@ class SoundAbsorptionMeasurement(OwnsArrays):
     temperature_c: float
     relative_humidity_percent: float | None
     speed_of_sound: float
-    air_attenuation: NDArray[np.float64]
+    air_attenuation_per_m: NDArray[np.float64]
     absorption_area_empty: NDArray[np.float64]
     absorption_area_with_specimen: NDArray[np.float64]
     alpha_s: NDArray[np.float64]
@@ -484,7 +484,7 @@ class SoundAbsorptionMeasurement(OwnsArrays):
             frequencies=1,
             t_empty=1,
             t_specimen=1,
-            air_attenuation=1,
+            air_attenuation_per_m=1,
             absorption_area_empty=1,
             absorption_area_with_specimen=1,
             alpha_s=1,
@@ -494,7 +494,7 @@ class SoundAbsorptionMeasurement(OwnsArrays):
             "frequencies",
             "t_empty",
             "t_specimen",
-            "air_attenuation",
+            "air_attenuation_per_m",
             "absorption_area_empty",
             "absorption_area_with_specimen",
             "alpha_s",
@@ -694,7 +694,7 @@ def measure_sound_absorption(
         temperature_c=float(temperature_c),
         relative_humidity_percent=humidity_pct,
         speed_of_sound=c,
-        air_attenuation=m_arr,
+        air_attenuation_per_m=m_arr,
         absorption_area_empty=a1,
         absorption_area_with_specimen=a2,
         alpha_s=alpha_s,

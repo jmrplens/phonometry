@@ -171,6 +171,7 @@ _UNITS: Mapping[str, str] = MappingProxyType(
         "db_per_s": "dB/s",
         "db_per_m": "dB/m",
         "db_per_100m": "dB/100 m",
+        "db_per_km": "dB/km",
         "db_per_k": "dB/K",
         "db_per_kpa": "dB/kPa",
         "db_per_percent": "dB/%",

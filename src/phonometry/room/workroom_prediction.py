@@ -319,7 +319,7 @@ def _require_level(value: int, table: Mapping[int, str], name: str, number: int)
     return value
 
 
-def fitting_density(surface_area_m2: float, volume_m3: float) -> float:
+def fitting_density(surface_area: float, volume: float) -> float:
     r"""The density of the fittings, NOTE 3 of 6.2.2.
 
     .. math::
@@ -331,13 +331,13 @@ def fitting_density(surface_area_m2: float, volume_m3: float) -> float:
     geometrical method of category 2a or 2b takes instead of the fittings
     themselves.
 
-    :param surface_area_m2: :math:`S`, in square metres.
-    :param volume_m3: :math:`V`, in cubic metres.
+    :param surface_area: :math:`S`, in square metres.
+    :param volume: :math:`V`, in cubic metres.
     :return: :math:`q`, in reciprocal metres.
     :raises ValueError: For a non-positive area or volume.
     """
-    area = require_positive(surface_area_m2, "surface_area_m2")
-    volume = require_positive(volume_m3, "volume_m3")
+    area = require_positive(surface_area, "surface_area")
+    volume = require_positive(volume, "volume")
     return area / (4.0 * volume)
 
 
@@ -345,7 +345,7 @@ def workstation_level_increase(
     *,
     sound_power_level_db: float,
     emission_level_db: float,
-    absorption_area_m2: float,
+    absorption_area: float,
 ) -> float:
     r"""How much the room adds at the machine's own workstation, Annex C.
 
@@ -363,7 +363,7 @@ def workstation_level_increase(
 
     :param sound_power_level_db: :math:`L_{W\mathrm{A}}` of the machine, in decibels.
     :param emission_level_db: :math:`L_{p\mathrm{A}}` at its workstation, in decibels.
-    :param absorption_area_m2: :math:`A` of the room, in square metres.
+    :param absorption_area: :math:`A` of the room, in square metres.
     :return: :math:`\Delta L_\mathrm{A}`, in decibels.
     :raises ValueError: For a non-finite level, a non-positive absorption
         area, or an emission level above the sound power level, which would
@@ -372,7 +372,7 @@ def workstation_level_increase(
     """
     power = require_finite(sound_power_level_db, "sound_power_level_db")
     emission = require_finite(emission_level_db, "emission_level_db")
-    absorption = require_positive(absorption_area_m2, "absorption_area_m2")
+    absorption = require_positive(absorption_area, "absorption_area")
     difference = power - emission
     if difference < 0.0:
         msg = (
@@ -389,7 +389,7 @@ def workstation_level(
     *,
     sound_power_level_db: float,
     emission_level_db: float,
-    absorption_area_m2: float,
+    absorption_area: float,
 ) -> float:
     r"""The level at the machine's own workstation in the room, Annex C.
 
@@ -398,14 +398,14 @@ def workstation_level(
 
     :param sound_power_level_db: :math:`L_{W\mathrm{A}}` of the machine, in decibels.
     :param emission_level_db: :math:`L_{p\mathrm{A}}` at its workstation, in decibels.
-    :param absorption_area_m2: :math:`A` of the room, in square metres.
+    :param absorption_area: :math:`A` of the room, in square metres.
     :return: :math:`L'_{p\mathrm{A}}`, in decibels.
     :raises ValueError: As :func:`workstation_level_increase`.
     """
     return emission_level_db + workstation_level_increase(
         sound_power_level_db=sound_power_level_db,
         emission_level_db=emission_level_db,
-        absorption_area_m2=absorption_area_m2,
+        absorption_area=absorption_area,
     )
 
 

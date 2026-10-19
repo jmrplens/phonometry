@@ -41,7 +41,7 @@ def _refraction_profiles() -> tuple[Any, ...]:
 
     return tuple(
         environment.log_linear_sound_speed_profile(
-            sign * _REFR_B, ground_speed=_REFR_C0, max_height_m=140.0
+            sign * _REFR_B, ground_speed_of_sound=_REFR_C0, max_height_m=140.0
         )
         for sign in (1.0, -1.0)
     )
@@ -192,7 +192,7 @@ def animate_fdtd_refraction(output_dir: str) -> None:
     # closed-form grazing-ray distance.
     grad = float(profiles[1].speed_at(10.0) - profiles[1].speed_at(0.0))
     x_shadow = environment.shadow_zone_distance(
-        grad / 10.0, _REFR_SRC[1], _REFR_SRC[1], ground_speed=_REFR_C0
+        grad / 10.0, _REFR_SRC[1], _REFR_SRC[1], ground_speed_of_sound=_REFR_C0
     )
     extent = (0.0, 1507 * _REFR_DX, 0.0, 440 * _REFR_DX)
     src_x, src_h = _REFR_SRC

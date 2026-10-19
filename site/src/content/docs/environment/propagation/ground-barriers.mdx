@@ -132,13 +132,13 @@ bands = np.array([63., 125., 250., 500., 1000., 2000., 4000., 8000.])
 # receiver 1.5 m high, 50 m apart. The impedance comes from the Delany-Bazley
 # porous model of phonometry.materials (a semi-infinite ground).
 # Argument order: frequencies, source_height, receiver_height, distance.
-res = environment.ground_effect(bands, 1.0, 1.5, 50.0, flow_resistivity=2e5)
+res = environment.ground_effect(bands, 1.0, 1.5, 50.0, flow_resistivity_pa_s_m2=2e5)
 print(res.excess_attenuation)     # the ground dip (dB re free field)
 print(res.reflection_coefficient) # complex Q per band
 res.plot()                        # excess attenuation vs frequency
 ```
 
-The ground impedance is either derived from an effective `flow_resistivity`
+The ground impedance is either derived from an effective `flow_resistivity_pa_s_m2`
 (via the `delany_bazley` or `miki` model of
 [`phonometry.materials`](/phonometry/materials/absorbers/porous-absorbers/), which model a
 semi-infinite porous ground) or supplied directly as a normalized complex
@@ -147,7 +147,7 @@ semi-infinite porous ground) or supplied directly as a normalized complex
 which a passive ground has $\operatorname{Im}(Z) > 0$; the porous models of
 `phonometry.materials` work in the opposite $\mathrm{e}^{+j\omega t}$ convention
 ($\operatorname{Im}(Z) < 0$), so anything obtained
-from them (a `flow_resistivity` or a `PorousMediumResult`) is conjugated
+from them (a `flow_resistivity_pa_s_m2` or a `PorousMediumResult`) is conjugated
 internally before it enters the Weyl-Van der Pol formulas.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ground_effect_spherical.svg" alt="Excess attenuation (level re free field) against frequency on a log axis for four ground types. Fresh snow (10 kPa s/m2) dips deepest and lowest in frequency, near minus 18 dB around 150 Hz; forest floor (50 kPa s/m2) reaches about minus 15 dB near 290 Hz and grassland (200 kPa s/m2) about minus 12 dB near 540 Hz; asphalt (20000 kPa s/m2) hugs the plus 6 dB hard-ground enhancement limit until a deep dip near 2.4 kHz. A dotted line marks the plus 6 dB hard-ground limit and a solid line the 0 dB free field" width="90%" loading="eager" />
@@ -174,7 +174,7 @@ grounds = [
 ]
 fig, ax = plt.subplots(figsize=(11, 6.4))
 for label, sigma, color in grounds:
-    res = environment.ground_effect(freqs, 1.0, 1.5, 50.0, flow_resistivity=sigma)
+    res = environment.ground_effect(freqs, 1.0, 1.5, 50.0, flow_resistivity_pa_s_m2=sigma)
     ax.plot(freqs, res.excess_attenuation, color=color, label=label)
 ax.axhline(6.0, color="k", ls=":", label="Hard-ground limit (+6 dB)")
 ax.axhline(0.0, color="k", lw=0.8)
@@ -219,7 +219,7 @@ c0, f, d = 343.0, 500.0, 50.0
 k = 2 * np.pi * f / c0
 q_mag, rp_mag, dl_q, dl_p = [], [], [], []
 for h in heights:
-    res = environment.ground_effect([f], h, h, d, flow_resistivity=2e5, model="miki")
+    res = environment.ground_effect([f], h, h, d, flow_resistivity_pa_s_m2=2e5, model="miki")
     rp = res.plane_reflection_coefficient[0]
     q = res.reflection_coefficient[0]
     phase = np.exp(1j * k * (float(res.r_reflected) - float(res.r_direct)))
@@ -414,7 +414,7 @@ plt.show()
 </details>
 
 **Coherent barrier on the ground.** With a `ground_impedance` (or a
-`ground_flow_resistivity`) the four source-image / receiver-image diffracted
+`ground_flow_resistivity_pa_s_m2`) the four source-image / receiver-image diffracted
 paths are combined coherently, each ground reflection weighted by the
 spherical-wave coefficient $Q$ above (Attenborough Ch. 9; Bies Sec. 5.3.5).
 This exposes the ground-barrier interference structure that a purely energetic
@@ -428,7 +428,7 @@ boundary-element solution.
 
 ```python
 il = environment.barrier_insertion_loss(bands, 1.0, 50.0, 4.0, 100.0, 1.5,
-                                        method="exact", ground_flow_resistivity=2e5)
+                                        method="exact", ground_flow_resistivity_pa_s_m2=2e5)
 il.ground        # True: the four-path coherent ground model was applied
 il.plot()
 ```
@@ -464,7 +464,7 @@ il_ka = environment.barrier_insertion_loss(freqs, 1.0, 50.0, 4.0, 100.0, 1.5,
 il_ex = environment.barrier_insertion_loss(freqs, 1.0, 50.0, 4.0, 100.0, 1.5,
                                            method="exact")
 il_gr = environment.barrier_insertion_loss(freqs, 1.0, 50.0, 4.0, 100.0, 1.5,
-                                           method="exact", ground_flow_resistivity=2e5)
+                                           method="exact", ground_flow_resistivity_pa_s_m2=2e5)
 fig, ax = plt.subplots(figsize=(11, 6.4))
 ax.semilogx(freqs, il_ka.insertion_loss, "--", label="Kurze-Anderson (thin screen)")
 ax.semilogx(freqs, il_ex.insertion_loss, label="Exact rigid half-plane")
@@ -526,7 +526,7 @@ parallel.
 | `receiver_height_m` | float | m | ≥ 0 | $h_\mathrm{r}$ (**before** the distance) |
 | `distance` | float | m | > 0 | Horizontal source-receiver distance |
 | `impedance` | array, `PorousMediumResult` or None | — | `None` | Normalized $Z$ in the $\mathrm{e}^{-i\omega t}$ convention |
-| `flow_resistivity` | float or None | Pa·s/m² | `None` | Effective $\sigma$; feeds the porous model |
+| `flow_resistivity_pa_s_m2` | float or None | Pa·s/m² | `None` | Effective $\sigma$; feeds the porous model |
 | `model` | `"delany_bazley"` \| `"miki"` | — | `"delany_bazley"` | Prefer `"miki"` below the fit range |
 | `speed_of_sound` / `air_density` | float | m/s, kg/m³ | 343.0 / 1.205 | |
 
@@ -541,7 +541,7 @@ parallel.
 | `method` | `"kurze_anderson"` \| `"exact"` | — | `"exact"` | `"exact"` is the rigid half-plane |
 | `thickness_m` | float or None | m | `None` | Top width $e$; double edge |
 | `ground_impedance` | array, `PorousMediumResult` or None | — | `None` | Selects the coherent four-path model |
-| `ground_flow_resistivity` | float or None | Pa·s/m² | `None` | Same, from an effective $\sigma$ |
+| `ground_flow_resistivity_pa_s_m2` | float or None | Pa·s/m² | `None` | Same, from an effective $\sigma$ |
 | `ground_model` | `"delany_bazley"` \| `"miki"` | — | `"delany_bazley"` | Note the name: not `model=` |
 | `speed_of_sound` / `air_density` | float | m/s, kg/m³ | 343.0 / 1.205 | |
 
@@ -743,7 +743,7 @@ it is coherent and reciprocal but not a full boundary-element solution.
 
 - [Outdoor Sound Propagation](/phonometry/environment/propagation/outdoor-propagation/): the octave-band ISO 9613-2 fits these models sit underneath, and the rule an obstacle has to satisfy to be a barrier at all.
 - [Atmospheric refraction: rays and the GFPE](/phonometry/environment/propagation/atmospheric-refraction/): the vertical sound-speed gradient both models here assume away.
-- [Porous absorbers](/phonometry/materials/absorbers/porous-absorbers/): the Delany-Bazley and Miki models behind `flow_resistivity`, and their fit range.
+- [Porous absorbers](/phonometry/materials/absorbers/porous-absorbers/): the Delany-Bazley and Miki models behind `flow_resistivity_pa_s_m2`, and their fit range.
 - Theory: [Outdoor propagation](/phonometry/reference/theory/environment-transport/#outdoor-propagation-iso-9613-12): the ground and barrier terms of ISO 9613-2 in the context of the whole attenuation sum.
 - API reference: [`environment.propagation.ground_barriers`](/phonometry/reference/api/environment/ground-barriers/).
 - [Published catalogues](/phonometry/reference/catalogues/#ground-surfaces): the

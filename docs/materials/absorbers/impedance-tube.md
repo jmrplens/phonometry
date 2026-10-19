@@ -97,7 +97,7 @@ $f\,s < 0.40\,c$ (6.5.4) and a laxer low end at 1 % of the wavelength
 (6.2.3). Passing `diameter_m=` (and `shape=`) to `two_microphone_impedance`,
 `wave_decomposition` or the `transfer_matrix_*` solvers turns the matching
 check into an advisory warning, and for the Annex A attenuation estimate of a
-rectangular tube `hydraulic_diameter(width, height)` supplies the $4A/P$
+rectangular tube `hydraulic_diameter(width_m, height_m)` supplies the $4A/P$
 diameter that `tube_attenuation_constant` expects. That function implements
 only the Eq. (A.18) estimate, which the standard itself calls a lower limit;
 the measured determination of Eqs. (A.13)/(A.14) from the empty tube is not
@@ -355,7 +355,7 @@ from phonometry import ReportMetadata, fluids, materials
 c0 = float(materials.speed_of_sound_iso10534(temperature_c=20.0))   # 343.29 m/s
 rho_c = fluids.characteristic_impedance(
     float(materials.air_density_iso10534(
-        temperature_c=20.0, atmospheric_pressure_kpa=101.0)), c0)   # 405.6 Pa.s/m
+        temperature_c=20.0, static_pressure_kpa=101.0)), c0)   # 405.6 Pa.s/m
 diameter_m, spacing, x1 = 0.100, 0.050, 0.100
 theta, cavity = 1.0, c0 / (4.0 * 1000.0)          # quarter-wave at 1 kHz: 86 mm
 freqs = np.array([400, 500, 630, 800, 1000, 1250, 1600], dtype=float)

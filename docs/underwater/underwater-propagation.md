@@ -41,7 +41,7 @@ ranges = np.linspace(10.0, 20_000.0, 400)
 pl = underwater.propagation_loss(ranges, 10e3, law="practical",
                                   transition_range=1000.0, temperature_c=10.0,
                                   salinity=35.0, depth=100.0)
-print(f"alpha = {pl.absorption_coefficient:.2f} dB/km")   # alpha = 0.95 dB/km
+print(f"alpha = {pl.absorption_db_per_km:.2f} dB/km")   # alpha = 0.95 dB/km
 pl.plot()   # total PL with the spreading and absorption contributions
 plt.show()
 ```
@@ -61,12 +61,12 @@ print(f"α = {alpha:.3f} dB/km")
 ranges = np.linspace(10.0, 20_000.0, 400)
 pl = underwater.propagation_loss(ranges, 10e3, law="practical", transition_range=1000.0,
                           temperature_c=10.0, salinity=35.0, depth=100.0)
-print(pl.absorption_coefficient, pl.pl[-1])
+print(pl.absorption_db_per_km, pl.pl[-1])
 pl.plot()   # PL vs range with the spreading/absorption split (needs matplotlib)
 ```
 
 `propagation_loss` returns a `PropagationLossResult` with `pl`, `spreading`,
-`absorption` (arrays), the `frequency` and the `absorption_coefficient`
+`absorption` (arrays), the `frequency` and the `absorption_db_per_km`
 (dB/km). Francois–Garrison and Ainslie–McColm agree to within ~10 % across
 100 Hz–1 MHz, so either is a good cross-check of the other.
 

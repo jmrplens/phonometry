@@ -1066,7 +1066,7 @@ wells = [materials.MetadiffuserWell(h * 1e-3,
                                     (materials.HelmholtzResonator(ln * 1e-3, wn * 1e-3,
                                                         lc * 1e-3, wc * 1e-3),) * 2)
          for h, ln, lc, wn, wc in rows]
-model = materials.metadiffuser_polar_response(f0, wells, depth=0.02, period_m=pitch,
+model = materials.metadiffuser_polar_response(f0, wells, depth_m=0.02, period_m=pitch,
                                               angles_deg=angles_deg, repetitions=1)
 ax = model.plot(color="#1f77b4", marker="", linestyle="--",
                 label="TMM + Fraunhofer model")

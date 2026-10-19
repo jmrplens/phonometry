@@ -360,7 +360,7 @@ def test_flat_spectrum_a_and_c_weighted_values() -> None:
 
 def test_each_single_number_carries_its_table_2_deviation() -> None:
     res = building.service_equipment_level(
-        _flat(40.0), THIRD, quantity="Smax", reverberation_time_s=np.full(27, 0.7)
+        _flat(40.0), THIRD, quantity="Smax", reverberation_time=np.full(27, 0.7)
     )
     assert dict(res.weighted_reproducibility_db) == {
         "LA,Smax": 0.8,
@@ -398,7 +398,7 @@ def test_reverberation_time_equal_to_t0_leaves_the_levels() -> None:
         _flat(40.0),
         THIRD,
         quantity="Smax",
-        reverberation_time_s=np.full(THIRD.size, 0.5),
+        reverberation_time=np.full(THIRD.size, 0.5),
     )
     assert res.standardized_db is not None
     np.testing.assert_allclose(res.standardized_db, res.corrected_db, atol=1e-12)
@@ -409,7 +409,7 @@ def test_formula_5_in_the_standardization_range_only() -> None:
     t = np.full(THIRD.size, 1.0)
     t[~((THIRD >= 50.0) & (THIRD <= 5000.0))] = np.nan
     res = building.service_equipment_level(
-        _flat(40.0), THIRD, quantity="eq", reverberation_time_s=t
+        _flat(40.0), THIRD, quantity="eq", reverberation_time=t
     )
     assert res.standardized_db is not None
     inside = res.standardizable
@@ -427,8 +427,8 @@ def test_formula_6_at_the_reference_absorption_leaves_the_levels() -> None:
         _flat(40.0),
         THIRD,
         quantity="eq",
-        reverberation_time_s=np.full(THIRD.size, t),
-        volume_m3=volume,
+        reverberation_time=np.full(THIRD.size, t),
+        volume=volume,
     )
     assert res.normalized_db is not None
     np.testing.assert_allclose(res.normalized_db, res.corrected_db, atol=1e-12)
@@ -441,8 +441,8 @@ def test_formula_6_raises_a_room_more_absorbing_than_a0() -> None:
         _flat(40.0),
         THIRD,
         quantity="eq",
-        reverberation_time_s=np.full(THIRD.size, 0.5),
-        volume_m3=50.0,
+        reverberation_time=np.full(THIRD.size, 0.5),
+        volume=50.0,
     )
     assert res.normalized_db is not None
     inside = res.standardizable
@@ -458,7 +458,7 @@ def test_reference_reverberation_time_can_be_specified() -> None:
         _flat(40.0),
         THIRD,
         quantity="eq",
-        reverberation_time_s=np.full(THIRD.size, 0.8),
+        reverberation_time=np.full(THIRD.size, 0.8),
         reference_reverberation_time_s=0.8,
     )
     assert res.standardized_db is not None
@@ -518,7 +518,7 @@ def test_octave_standardization_leaves_out_31_5_and_8000_hz() -> None:
         OCTAVE,
         quantity="eq",
         band="octave",
-        reverberation_time_s=t,
+        reverberation_time=t,
     )
     assert res.standardized_db is not None
     expected = np.full(OCTAVE.size, 40.0 - 10.0 * math.log10(2.0))
@@ -542,17 +542,17 @@ def test_a_single_reading_is_one_row() -> None:
 
 def test_volume_needs_a_reverberation_time() -> None:
     levels = _flat(40.0)
-    with pytest.raises(ValueError, match="reverberation_time_s"):
-        building.service_equipment_level(levels, THIRD, quantity="eq", volume_m3=50.0)
+    with pytest.raises(ValueError, match="reverberation_time"):
+        building.service_equipment_level(levels, THIRD, quantity="eq", volume=50.0)
 
 
 def test_reverberation_time_must_be_positive_in_the_range() -> None:
     t = np.full(THIRD.size, 0.5)
     t[10] = 0.0
     levels = _flat(40.0)
-    with pytest.raises(ValueError, match="reverberation_time_s"):
+    with pytest.raises(ValueError, match="reverberation_time"):
         building.service_equipment_level(
-            levels, THIRD, quantity="eq", reverberation_time_s=t
+            levels, THIRD, quantity="eq", reverberation_time=t
         )
 
 
@@ -575,8 +575,8 @@ def _level_inputs() -> dict[str, object]:
         "levels": _flat(40.0),
         "frequencies": THIRD,
         "background_db": np.full(THIRD.size, 20.0),
-        "reverberation_time_s": np.full(THIRD.size, 0.5),
-        "volume_m3": 50.0,
+        "reverberation_time": np.full(THIRD.size, 0.5),
+        "volume": 50.0,
     }
 
 
@@ -587,7 +587,7 @@ def _level_call(**overrides: object) -> building.ServiceEquipmentResult:
 
 @pytest.mark.parametrize(
     "name",
-    ["levels", "frequencies", "background_db", "reverberation_time_s"],
+    ["levels", "frequencies", "background_db", "reverberation_time"],
 )
 def test_a_complex_array_is_refused_not_cut_to_its_real_part(name: str) -> None:
     # np.asarray(z, dtype=float) keeps the real part with only a warning: a
@@ -605,15 +605,15 @@ def test_levels_that_are_not_numbers_are_refused_by_name() -> None:
 @pytest.mark.parametrize(
     ("name", "value"),
     [
-        ("volume_m3", "50"),
-        ("volume_m3", True),
-        ("volume_m3", np.array([50.0])),
-        ("volume_m3", 50.0 + 0j),
-        ("volume_m3", np.array(1, dtype=bool)),
-        ("volume_m3", np.array("50")),
-        ("volume_m3", np.array(np.True_, dtype=object)),
-        ("volume_m3", np.array("50", dtype=object)),
-        ("volume_m3", [[50.0], [50.0, 50.0]]),
+        ("volume", "50"),
+        ("volume", True),
+        ("volume", np.array([50.0])),
+        ("volume", 50.0 + 0j),
+        ("volume", np.array(1, dtype=bool)),
+        ("volume", np.array("50")),
+        ("volume", np.array(np.True_, dtype=object)),
+        ("volume", np.array("50", dtype=object)),
+        ("volume", [[50.0], [50.0, 50.0]]),
         ("reference_reverberation_time_s", "0.5"),
         ("reference_reverberation_time_s", np.array([0.5, 0.5])),
         ("reference_reverberation_time_s", np.array(1, dtype=bool)),
@@ -630,17 +630,17 @@ def test_t0_is_refused_by_name_without_a_reverberation_time(value: object) -> No
     # call names is still one positive number or a refusal.
     with pytest.raises(ValueError, match="reference_reverberation_time_s"):
         _level_call(
-            reverberation_time_s=None,
-            volume_m3=None,
+            reverberation_time=None,
+            volume=None,
             reference_reverberation_time_s=value,
         )
 
 
 def test_a_volume_given_as_a_numpy_scalar_is_one_number() -> None:
-    plain = _level_call(volume_m3=50.0)
+    plain = _level_call(volume=50.0)
     # A number held in an object array is still a number.
     for value in (np.float32(50.0), np.array(50.0), 50, np.array(50, dtype=object)):
-        assert _level_call(volume_m3=value).ratings == plain.ratings
+        assert _level_call(volume=value).ratings == plain.ratings
 
 
 def test_a_centre_off_the_nominal_bands_is_refused() -> None:
@@ -1152,7 +1152,7 @@ def _chain() -> building.ServiceEquipmentResult:
         THIRD,
         quantity="eq",
         background_db=background,
-        reverberation_time_s=t,
+        reverberation_time=t,
     )
 
 

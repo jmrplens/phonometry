@@ -44,8 +44,10 @@ default $c_0 = 343$ m/s it takes the familiar textbook value
 `k` to `55.3` and uses $c_0 = 345.6$ to pin the factor at exactly
 `0.16`.)
 
-Air absorption enters every model through the `air_attenuation` power
-coefficient `m` (in neper per metre) as the additive term $4 m V$;
+Air absorption enters every model through the `air_attenuation_per_m` power
+attenuation coefficient `m`, in reciprocal metres (ISO 354 8.1.2.1:
+$m = \alpha / (10 \lg \mathrm{e})$, with $\alpha$ the ISO 9613-1
+attenuation in dB/m), as the additive term $4 m V$;
 obtain a physical `m` from temperature and humidity with
 [`air_attenuation_m`](/phonometry/reference/api/environment/air-absorption/#air_attenuation_m).
 
@@ -72,7 +74,7 @@ arau_puchades_reverberation_time(
     dimensions: Sequence[float],
     absorptions: Sequence[ArrayLike],
     *,
-    air_attenuation: ArrayLike = 0.0,
+    air_attenuation_per_m: ArrayLike = 0.0,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray | float
 ```
@@ -92,7 +94,7 @@ $\ln(1 - \alpha_i)$, so each must be below 1.
 | :--- | :--- |
 | `dimensions` | Room lengths `(Lx, Ly, Lz)`, m. |
 | `absorptions` | Mean absorption `(alpha_x, alpha_y, alpha_z)` of the three wall pairs (perpendicular to x, y, z); each a scalar or per-band array. |
-| `air_attenuation` | Air power-attenuation coefficient `m` (1/m). |
+| `air_attenuation_per_m` | Air power-attenuation coefficient `m` (1/m). |
 | `speed_of_sound` | Speed of sound `c0`, m/s. |
 
 **Returns:** The reverberation time `T`, s.
@@ -104,7 +106,7 @@ eyring_reverberation_time(
     volume: float,
     surfaces: Sequence[tuple[float, ArrayLike]],
     *,
-    air_attenuation: ArrayLike = 0.0,
+    air_attenuation_per_m: ArrayLike = 0.0,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray | float
 ```
@@ -130,7 +132,7 @@ coefficient stays within the shared unit-error ceiling of 2.
 | :--- | :--- |
 | `volume` | Room volume `V`, m3. |
 | `surfaces` | Sequence of `(area, absorption_coefficient)` pairs. |
-| `air_attenuation` | Air power-attenuation coefficient `m` (1/m). |
+| `air_attenuation_per_m` | Air power-attenuation coefficient `m` (1/m). |
 | `speed_of_sound` | Speed of sound `c0`, m/s. |
 
 **Returns:** The reverberation time `T`, s.
@@ -142,7 +144,7 @@ fitzroy_reverberation_time(
     dimensions: Sequence[float],
     absorptions: Sequence[ArrayLike],
     *,
-    air_attenuation: ArrayLike = 0.0,
+    air_attenuation_per_m: ArrayLike = 0.0,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray | float
 ```
@@ -164,7 +166,7 @@ must be below 1.
 | :--- | :--- |
 | `dimensions` | Room lengths `(Lx, Ly, Lz)`, m. |
 | `absorptions` | Mean absorption `(alpha_x, alpha_y, alpha_z)` of the three wall pairs (perpendicular to x, y, z); each a scalar or per-band array. |
-| `air_attenuation` | Air power-attenuation coefficient `m` (1/m). |
+| `air_attenuation_per_m` | Air power-attenuation coefficient `m` (1/m). |
 | `speed_of_sound` | Speed of sound `c0`, m/s. |
 
 **Returns:** The reverberation time `T`, s.
@@ -195,7 +197,7 @@ millington_sette_reverberation_time(
     volume: float,
     surfaces: Sequence[tuple[float, ArrayLike]],
     *,
-    air_attenuation: ArrayLike = 0.0,
+    air_attenuation_per_m: ArrayLike = 0.0,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray | float
 ```
@@ -221,7 +223,7 @@ this model's domain (use Sabine, or Eyring while the mean stays below 1).
 | :--- | :--- |
 | `volume` | Room volume `V`, m3. |
 | `surfaces` | Sequence of `(area, absorption_coefficient)` pairs. |
-| `air_attenuation` | Air power-attenuation coefficient `m` (1/m). |
+| `air_attenuation_per_m` | Air power-attenuation coefficient `m` (1/m). |
 | `speed_of_sound` | Speed of sound `c0`, m/s. |
 
 **Returns:** The reverberation time `T`, s.
@@ -233,7 +235,7 @@ reverberation_time_models(
     dimensions: Sequence[float],
     absorptions: Sequence[ArrayLike],
     *,
-    air_attenuation: ArrayLike = 0.0,
+    air_attenuation_per_m: ArrayLike = 0.0,
     frequencies: ArrayLike | None = None,
     speed_of_sound: float = 343.0,
 ) -> ReverberationModelResult
@@ -255,7 +257,7 @@ the strictest of the five domains: every absorption below 1.
 | :--- | :--- |
 | `dimensions` | Room lengths `(Lx, Ly, Lz)`, m. |
 | `absorptions` | Mean absorption `(alpha_x, alpha_y, alpha_z)` of the three wall pairs (perpendicular to x, y, z); each a scalar or a per-band array aligned with `frequencies`. |
-| `air_attenuation` | Air power-attenuation coefficient `m` (1/m), scalar or per-band. |
+| `air_attenuation_per_m` | Air power-attenuation coefficient `m` (1/m), scalar or per-band. |
 | `frequencies` | Band centre frequencies, in hertz, used only to label the result and its plot; defaults to an integer index over the bands. |
 | `speed_of_sound` | Speed of sound `c0`, m/s. |
 
@@ -371,7 +373,7 @@ sabine_reverberation_time(
     volume: float,
     surfaces: Sequence[tuple[float, ArrayLike]],
     *,
-    air_attenuation: ArrayLike = 0.0,
+    air_attenuation_per_m: ArrayLike = 0.0,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray | float
 ```
@@ -392,7 +394,7 @@ error (a percentage passed instead of a fraction).
 | :--- | :--- |
 | `volume` | Room volume `V`, m3. |
 | `surfaces` | Sequence of `(area, absorption_coefficient)` pairs; each coefficient a scalar or a per-band array in `[0, 2]`. |
-| `air_attenuation` | Air power-attenuation coefficient `m`, in neper per metre (scalar or per-band); see [`air_attenuation_m`](/phonometry/reference/api/environment/air-absorption/#air_attenuation_m). Default `0` (air absorption neglected). |
+| `air_attenuation_per_m` | Air power attenuation coefficient `m`, in reciprocal metres (ISO 354 8.1.2.1, $m = \alpha / (10 \lg \mathrm{e})$), scalar or per-band; see [`air_attenuation_m`](/phonometry/reference/api/environment/air-absorption/#air_attenuation_m). Default `0` (air absorption neglected). |
 | `speed_of_sound` | Speed of sound `c0`, m/s (default 343 m/s, dry air at 20 °C, giving the factor `0.161`). |
 
 **Returns:** The reverberation time `T`, s; a float for scalar inputs, otherwise a per-band array.

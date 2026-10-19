@@ -138,7 +138,7 @@ def sound_speed_profile(
     # asks them for the whole profile at once rather than restating the
     # dispatch and the pressure conversion a second time.
     c = np.asarray(
-        sea_water_sound_speed(temp, sal, z, model=model, latitude=latitude),
+        sea_water_sound_speed(temp, sal, z, model=model, latitude_deg=latitude),
         dtype=np.float64,
     )
     gradient_per_s = np.gradient(c, z)

@@ -116,7 +116,7 @@ def test_a_hair_outside_the_band_is_still_outside_it() -> None:
 
 def test_the_tolerance_can_be_tightened() -> None:
     with pytest.raises(ValueError, match=r"more than the 1 % this test allows"):
-        st.mean_of_test_runs([1.0, 1.03, 1.0], tolerance=0.01)
+        st.mean_of_test_runs([1.0, 1.03, 1.0], relative_tolerance=0.01)
 
 
 def test_one_run_has_no_spread_to_check() -> None:

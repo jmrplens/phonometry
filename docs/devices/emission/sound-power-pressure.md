@@ -657,6 +657,6 @@ temperature or pressure argument, and the sum is added by hand. ISO 3745
 defines no sound energy level of its own, so a burst in the precision anechoic
 room has no route here. The
 $C_3$ meteorological correction of ISO 3745 needs an air-absorption coefficient
-the caller supplies through `air_absorption_coefficient=`; this module does not
+the caller supplies through `air_absorption_db_per_m=`; this module does not
 compute it from **ISO 9613-1** itself.
 

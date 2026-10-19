@@ -93,8 +93,8 @@ def test_a_tapping_power_input_is_the_mean_square_force_over_zdp() -> None:
 
 def test_a_tapping_result_needs_a_positive_hammer_mass() -> None:
     soft = _tapping(1.0e6, 3.0e4)
-    with pytest.raises(ValueError, match="mass_kg"):
-        dataclasses.replace(soft, mass_kg=0.0)
+    with pytest.raises(ValueError, match="mass"):
+        dataclasses.replace(soft, mass=0.0)
 
 
 # --- IEC 60534-8-4 5.1: cavitating when dp exceeds x_Fzp1 (p1 - pv) --------------
@@ -593,7 +593,7 @@ def test_a_turbine_level_follows_the_rule_of_its_bin() -> None:
     # subtraction kept from 37 dB.
     result = environment.turbine_sound_levels([40.0], [37.0])
     louder = {
-        "background_levels_db": np.array([45.0]),
+        "background_levels": np.array([45.0]),
         "level_differences_db": np.array([-5.0]),
     }
     with pytest.raises(ValueError, match="turbine_levels_db"):

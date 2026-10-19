@@ -694,9 +694,9 @@ def test_ray_fan_must_line_up_with_its_histories() -> None:
             rf"'arc_lengths \(axis 1\)'.*{_PER_SAMPLE}",
         ),
         (
-            "profile_speeds",
-            good.profile_speeds[:-1],
-            r"'profile_speeds'.*per profile node",
+            "profile_speeds_of_sound",
+            good.profile_speeds_of_sound[:-1],
+            r"'profile_speeds_of_sound'.*per profile node",
         ),
     )
     for field, value, pattern in cases:

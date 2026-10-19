@@ -269,10 +269,15 @@ def test_air_attenuation_reduces_late_energy() -> None:
     dims = (8.0, 6.0, 4.0)
     common = {"fs": 48000, "max_order": 30}
     dry = room.image_source_rir(
-        dims, (2.0, 2.0, 2.0), (6.0, 4.0, 2.0), 0.1, air_attenuation=0.0, **common
+        dims, (2.0, 2.0, 2.0), (6.0, 4.0, 2.0), 0.1, air_attenuation_per_m=0.0, **common
     )
     humid = room.image_source_rir(
-        dims, (2.0, 2.0, 2.0), (6.0, 4.0, 2.0), 0.1, air_attenuation=0.01, **common
+        dims,
+        (2.0, 2.0, 2.0),
+        (6.0, 4.0, 2.0),
+        0.1,
+        air_attenuation_per_m=0.01,
+        **common,
     )
     # Air absorption scales exp(-m r / 2); distant (late) images lose more.
     late = dry.times > 0.05
@@ -283,6 +288,24 @@ def test_air_attenuation_reduces_late_energy() -> None:
     assert np.sum(np.atleast_1d(humid.amplitudes) ** 2) < np.sum(
         np.atleast_1d(dry.amplitudes) ** 2
     )
+
+
+def test_air_attenuation_scales_each_path_by_half_the_power_rate() -> None:
+    """``air_attenuation_per_m`` is the power coefficient ``m`` of ISO 354, so
+    the pressure of a path of length r falls by exp(-m r / 2) (Kuttruff 4.1),
+    not by exp(-m r): the direct sound alone pins the factor.
+    """
+    dims = (8.0, 6.0, 4.0)
+    source, receiver = (2.0, 2.0, 2.0), (6.0, 4.0, 2.0)
+    m = 0.01
+    common = {"fs": 48000, "max_order": 0}
+    dry = room.image_source_rir(dims, source, receiver, 0.1, **common)
+    humid = room.image_source_rir(
+        dims, source, receiver, 0.1, air_attenuation_per_m=m, **common
+    )
+    r = float(np.linalg.norm(np.subtract(receiver, source)))
+    ratio = np.atleast_1d(humid.amplitudes) / np.atleast_1d(dry.amplitudes)
+    np.testing.assert_allclose(ratio, np.exp(-0.5 * m * r), rtol=1e-12)
 
 
 # ---------------------------------------------------------------------------
@@ -479,7 +502,9 @@ def test_air_attenuation_must_be_a_band_vector() -> None:
     # A 2-D input whose size matched the band count used to slip through the
     # size check and die in np.broadcast_to with numpy's axis-remapping
     # message, naming no argument.
-    with pytest.raises(ValueError, match="'air_attenuation' must be a scalar or a 1-D"):
+    with pytest.raises(
+        ValueError, match="'air_attenuation_per_m' must be a scalar or a 1-D"
+    ):
         room.image_source_rir(
             (5.0, 4.0, 3.0),
             (1.0, 1.0, 1.5),
@@ -487,7 +512,7 @@ def test_air_attenuation_must_be_a_band_vector() -> None:
             0.2,
             fs=8000,
             frequencies=[125.0, 250.0, 500.0, 1000.0],
-            air_attenuation=[[1e-3, 2e-3], [3e-3, 4e-3]],
+            air_attenuation_per_m=[[1e-3, 2e-3], [3e-3, 4e-3]],
         )
 
 

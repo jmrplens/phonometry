@@ -183,7 +183,7 @@ Draw the mean active insertion loss with its expanded uncertainty.
 ```python
 anr_total_attenuation(
     reat: ArrayLike | RealEarAttenuationResult,
-    insertion_loss: ArrayLike | ActiveInsertionLossResult,
+    insertion_loss_db: ArrayLike | ActiveInsertionLossResult,
 ) -> AnrTotalAttenuationResult
 ```
 
@@ -212,7 +212,7 @@ attenuation from 63 Hz then still places the 100 Hz band, by interpolation.
 | Name | Description |
 | :--- | :--- |
 | `reat` | The passive attenuation, a [`RealEarAttenuationResult`](/phonometry/reference/api/hearing/real-ear-attenuation/#realearattenuationresult) or its `(subjects, octaves)` grid in dB on the octave bands 63 Hz or 125 Hz to 8 kHz. |
-| `insertion_loss` | The active insertion loss, an [`ActiveInsertionLossResult`](/phonometry/reference/api/hearing/active-noise-reduction/#activeinsertionlossresult) or a grid [`active_insertion_loss`](/phonometry/reference/api/hearing/active-noise-reduction/#active_insertion_loss) accepts, on the one-third-octave bands of 5.3.1. |
+| `insertion_loss_db` | The active insertion loss, an [`ActiveInsertionLossResult`](/phonometry/reference/api/hearing/active-noise-reduction/#activeinsertionlossresult) or a grid [`active_insertion_loss`](/phonometry/reference/api/hearing/active-noise-reduction/#active_insertion_loss) accepts, on the one-third-octave bands of 5.3.1. |
 
 **Returns:** [`AnrTotalAttenuationResult`](/phonometry/reference/api/hearing/active-noise-reduction/#anrtotalattenuationresult).
 

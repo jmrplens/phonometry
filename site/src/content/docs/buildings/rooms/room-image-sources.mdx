@@ -86,7 +86,7 @@ amplitude built from the $1/(4\pi r_n)$ spherical spreading, the product of the
 wall **pressure reflection factors** $R_\mathrm{w} = \sqrt{1 - \alpha_\mathrm{w}}$ each raised to
 the number of reflections $k_{w,n}$ that image made off wall $w$, and the air
 pressure loss $\mathrm{e}^{-m r_n/2}$ over the path ($m$ the power (intensity)
-attenuation coefficient in neper per metre, so intensity falls as $\mathrm{e}^{-m r}$ and
+attenuation coefficient in reciprocal metres of ISO 354 8.1.2.1, so intensity falls as $\mathrm{e}^{-m r}$ and
 pressure as $\mathrm{e}^{-m r/2}$: the same $m$ the
 [reverberation-time](/phonometry/buildings/rooms/reverberation-prediction/) and
 [EN 12354-6](/phonometry/buildings/rooms/enclosed-space-absorption/) guides feed
@@ -231,7 +231,7 @@ plt.show()
 **Per band, per wall and with air.** Pass per-band coefficients (a `(6, n_bands)`
 per-wall array, a per-band vector or a `frequencies` list) to synthesise one
 decay per octave band; a length-6 vector sets each wall separately (order
-`x0, xL, y0, yL, z0, zL`); and `air_attenuation` (the intensity coefficient `m`
+`x0, xL, y0, yL, z0, zL`); and `air_attenuation_per_m` (the intensity coefficient `m`
 from `air_attenuation_m`) adds the `exp(-m r / 2)` air loss that eats the
 high-frequency tail.
 
@@ -275,7 +275,7 @@ for attenuation, style in ((0.0, "-"), (m, "--")):
     banded = room.image_source_rir(
         (7.0, 5.0, 3.0), (2.0, 1.6, 1.5), (5.2, 3.4, 1.7), alpha,
         fs=48000, max_order=60, frequencies=freqs,
-        air_attenuation=attenuation,
+        air_attenuation_per_m=attenuation,
     )
     for row, f in zip(banded.ir, freqs):
         time, level = room.decay_curve(row, banded.fs)
@@ -359,7 +359,7 @@ plt.show()
 | `fs` | int | Hz | > 0 | Sample rate |
 | `max_order` | int | — | ≥ 0, default 20 | Reflection-order cut-off |
 | `speed_of_sound` | float | m/s | > 0, default 343 | Speed of sound `c` |
-| `air_attenuation` | float or (n,) | 1/m | ≥ 0, default 0 | Air intensity coefficient `m` |
+| `air_attenuation_per_m` | float or (n,) | 1/m | ≥ 0, default 0 | Air intensity coefficient `m` |
 | `duration` | float, optional | s | > 0 | RIR length (default: last image arrival) |
 | `frequencies` | (n,), optional | Hz | — | Band centres labelling a per-band result |
 

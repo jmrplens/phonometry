@@ -51,15 +51,15 @@ import numpy as np
 from phonometry import materials
 
 base = materials.HelmholtzResonator(
-    neck_length=1.0e-3, neck_side=3.0e-3,
-    cavity_length=30.0e-3, cavity_side=27.0e-3,
+    neck_length_m=1.0e-3, neck_side_m=3.0e-3,
+    cavity_length_m=30.0e-3, cavity_side_m=27.0e-3,
 )
-design = materials.critical_coupling_design(300.0, base, lattice_step=3.0e-2, period_m=5.0e-2)
+design = materials.critical_coupling_design(300.0, base, lattice_step_m=3.0e-2, period_m=5.0e-2)
 
 f = np.array([300.0])
 res = materials.slit_helmholtz_absorber(
     f, design.resonator, slit_height_m=design.slit_height_m,
-    lattice_step=3.0e-2, period_m=5.0e-2,
+    lattice_step_m=3.0e-2, period_m=5.0e-2,
 )
 z = res.normalized_impedance[0]
 print(round(z.real, 2), round(z.imag, 2))       # 1.0 -0.0  (matched)
@@ -99,16 +99,16 @@ import numpy as np
 from phonometry import materials
 
 base = materials.HelmholtzResonator(
-    neck_length=1.0e-3, neck_side=3.0e-3,
-    cavity_length=30.0e-3, cavity_side=27.0e-3,
+    neck_length_m=1.0e-3, neck_side_m=3.0e-3,
+    cavity_length_m=30.0e-3, cavity_side_m=27.0e-3,
 )
-design = materials.critical_coupling_design(300.0, base, lattice_step=3.0e-2, period_m=5.0e-2)
+design = materials.critical_coupling_design(300.0, base, lattice_step_m=3.0e-2, period_m=5.0e-2)
 print(round(design.absorption, 4))          # ~1.0 (perfect absorption)
 
 f = np.linspace(150.0, 500.0, 700)
 res = materials.slit_helmholtz_absorber(
     f, design.resonator, slit_height_m=design.slit_height_m,
-    lattice_step=3.0e-2, period_m=5.0e-2,
+    lattice_step_m=3.0e-2, period_m=5.0e-2,
 )
 res.plot()   # alpha(f) with |R| overlaid; peak = 1 at 300 Hz
 ```
@@ -132,8 +132,8 @@ import matplotlib.pyplot as plt
 from phonometry import materials
 
 resonator = materials.HelmholtzResonator(
-    neck_length=1.0e-3, neck_side=3.0e-3,
-    cavity_length=30.0e-3, cavity_side=27.0e-3,
+    neck_length_m=1.0e-3, neck_side_m=3.0e-3,
+    cavity_length_m=30.0e-3, cavity_side_m=27.0e-3,
 )
 resonator.plot()   # dimensioned cross-section, to scale
 plt.show()
@@ -156,18 +156,18 @@ import matplotlib.pyplot as plt
 from phonometry import materials
 
 base = materials.HelmholtzResonator(
-    neck_length=1.0e-3, neck_side=3.0e-3,
-    cavity_length=30.0e-3, cavity_side=27.0e-3,
+    neck_length_m=1.0e-3, neck_side_m=3.0e-3,
+    cavity_length_m=30.0e-3, cavity_side_m=27.0e-3,
 )
 design = materials.critical_coupling_design(
-    300.0, base, lattice_step=3.0e-2, period_m=5.0e-2,
+    300.0, base, lattice_step_m=3.0e-2, period_m=5.0e-2,
 )
 
 # The free function draws any resonator list; a slit_helmholtz_absorber
 # result retains its geometry, so res.plot_geometry() draws the same period_m.
 materials.plot_slit_absorber_geometry(
     [design.resonator], slit_height_m=design.slit_height_m,
-    lattice_step=3.0e-2, period_m=5.0e-2,
+    lattice_step_m=3.0e-2, period_m=5.0e-2,
 )
 plt.show()
 ```
@@ -190,7 +190,7 @@ from phonometry import materials
 
 a, d, f0 = 3.0e-2, 5.0e-2, 300.0
 base = materials.HelmholtzResonator(1.0e-3, 3.0e-3, 30.0e-3, 27.0e-3)
-design = materials.critical_coupling_design(f0, base, lattice_step=a, period_m=d)
+design = materials.critical_coupling_design(f0, base, lattice_step_m=a, period_m=d)
 h0 = design.slit_height_m
 
 f = np.linspace(150.0, 500.0, 700)
@@ -199,7 +199,7 @@ for factor, label in [(1.0, "critically coupled"),
                       (0.6, "narrow slit"), (1.7, "wide slit")]:
     res = materials.slit_helmholtz_absorber(
         f, design.resonator, slit_height_m=factor * h0,
-        lattice_step=a, period_m=d,
+        lattice_step_m=a, period_m=d,
     )
     ax.plot(f, res.absorption, label=label)
 ax.set(xlabel="Frequency [Hz]", ylabel="Absorption coefficient")
@@ -231,13 +231,13 @@ import numpy as np
 from phonometry import materials
 
 base = materials.HelmholtzResonator(
-    neck_length=1.0e-3, neck_side=3.0e-3,
-    cavity_length=30.0e-3, cavity_side=27.0e-3,
+    neck_length_m=1.0e-3, neck_side_m=3.0e-3,
+    cavity_length_m=30.0e-3, cavity_side_m=27.0e-3,
 )
-design = materials.critical_coupling_design(300.0, base, lattice_step=3.0e-2, period_m=5.0e-2)
+design = materials.critical_coupling_design(300.0, base, lattice_step_m=3.0e-2, period_m=5.0e-2)
 res = materials.slit_helmholtz_absorber(
     np.array([300.0]), design.resonator, slit_height_m=design.slit_height_m,
-    lattice_step=3.0e-2, period_m=5.0e-2,
+    lattice_step_m=3.0e-2, period_m=5.0e-2,
 )
 
 # Phase speed of the slit mode at the design frequency, from k_eff.

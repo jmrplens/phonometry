@@ -38,8 +38,10 @@ default :math:`c_0 = 343` m/s it takes the familiar textbook value
 ``k`` to ``55.3`` and uses :math:`c_0 = 345.6` to pin the factor at exactly
 ``0.16``.)
 
-Air absorption enters every model through the ``air_attenuation`` power
-coefficient ``m`` (in neper per metre) as the additive term :math:`4 m V`;
+Air absorption enters every model through the ``air_attenuation_per_m`` power
+attenuation coefficient ``m``, in reciprocal metres (ISO 354 8.1.2.1:
+:math:`m = \alpha / (10 \lg \mathrm{e})`, with :math:`\alpha` the ISO 9613-1
+attenuation in dB/m), as the additive term :math:`4 m V`;
 obtain a physical ``m`` from temperature and humidity with
 :func:`~phonometry.environment.propagation.air_absorption.air_attenuation_m`.
 
@@ -195,20 +197,22 @@ def _accumulate_surfaces(
     return total_area, absorption_area, list(zip(areas, alphas, strict=True))
 
 
-def _air_term(air_attenuation: ArrayLike, volume: float) -> NDArray[np.float64]:
+def _air_term(air_attenuation_per_m: ArrayLike, volume: float) -> NDArray[np.float64]:
     """Air absorption area ``4 m V`` (m2), validated finite and non-negative."""
-    m = np.asarray(air_attenuation, dtype=np.float64)
+    m = np.asarray(air_attenuation_per_m, dtype=np.float64)
     if not np.all(np.isfinite(m)) or np.any(m < 0.0):
-        msg = "'air_attenuation' must be finite and non-negative."
+        msg = "'air_attenuation_per_m' must be finite and non-negative."
         raise ValueError(msg)
     return np.asarray(4.0 * m * volume, dtype=np.float64)
 
 
 def _add_air(
-    absorption_term: NDArray[np.float64], air_attenuation: ArrayLike, volume: float
+    absorption_term: NDArray[np.float64],
+    air_attenuation_per_m: ArrayLike,
+    volume: float,
 ) -> NDArray[np.float64]:
     """Add the air term ``4 m V`` to an absorption term, band counts checked."""
-    air = _air_term(air_attenuation, volume)
+    air = _air_term(air_attenuation_per_m, volume)
     _broadcast_or_raise(
         [absorption_term.shape, air.shape], "absorption and air attenuation"
     )
@@ -297,7 +301,7 @@ def sabine_reverberation_time(
     volume: float,
     surfaces: Sequence[Surface],
     *,
-    air_attenuation: ArrayLike = 0.0,
+    air_attenuation_per_m: ArrayLike = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> np.ndarray | float:
     r"""Sabine reverberation time :math:`T = k V / (A + 4 m V)`.
@@ -313,8 +317,9 @@ def sabine_reverberation_time(
     :param volume: Room volume ``V``, m3.
     :param surfaces: Sequence of ``(area, absorption_coefficient)`` pairs; each
         coefficient a scalar or a per-band array in ``[0, 2]``.
-    :param air_attenuation: Air power-attenuation coefficient ``m``, in neper
-        per metre (scalar or per-band); see
+    :param air_attenuation_per_m: Air power attenuation coefficient ``m``, in
+        reciprocal metres (ISO 354 8.1.2.1, :math:`m = \alpha / (10 \lg
+        \mathrm{e})`), scalar or per-band; see
         :func:`~phonometry.environment.propagation.air_absorption.air_attenuation_m`. Default ``0``
         (air absorption neglected).
     :param speed_of_sound: Speed of sound ``c0``, m/s (default
@@ -325,7 +330,7 @@ def sabine_reverberation_time(
     volume = require_positive(volume, "volume")
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
     _, absorption_area, _ = _accumulate_surfaces(surfaces)
-    absorption = _add_air(absorption_area, air_attenuation, volume)
+    absorption = _add_air(absorption_area, air_attenuation_per_m, volume)
     return _reverberation_time(volume, absorption, speed_of_sound)
 
 
@@ -333,7 +338,7 @@ def eyring_reverberation_time(
     volume: float,
     surfaces: Sequence[Surface],
     *,
-    air_attenuation: ArrayLike = 0.0,
+    air_attenuation_per_m: ArrayLike = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> np.ndarray | float:
     r"""Eyring (Norris-Eyring) reverberation time.
@@ -353,7 +358,7 @@ def eyring_reverberation_time(
 
     :param volume: Room volume ``V``, m3.
     :param surfaces: Sequence of ``(area, absorption_coefficient)`` pairs.
-    :param air_attenuation: Air power-attenuation coefficient ``m`` (1/m).
+    :param air_attenuation_per_m: Air power-attenuation coefficient ``m`` (1/m).
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The reverberation time ``T``, s.
     """
@@ -361,7 +366,9 @@ def eyring_reverberation_time(
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
     total_area, absorption_area, _ = _accumulate_surfaces(surfaces)
     mean = absorption_area / total_area
-    absorption = _add_air(_eyring_absorption(total_area, mean), air_attenuation, volume)
+    absorption = _add_air(
+        _eyring_absorption(total_area, mean), air_attenuation_per_m, volume
+    )
     return _reverberation_time(volume, absorption, speed_of_sound)
 
 
@@ -369,7 +376,7 @@ def millington_sette_reverberation_time(
     volume: float,
     surfaces: Sequence[Surface],
     *,
-    air_attenuation: ArrayLike = 0.0,
+    air_attenuation_per_m: ArrayLike = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> np.ndarray | float:
     r"""Millington-Sette reverberation time.
@@ -389,14 +396,14 @@ def millington_sette_reverberation_time(
 
     :param volume: Room volume ``V``, m3.
     :param surfaces: Sequence of ``(area, absorption_coefficient)`` pairs.
-    :param air_attenuation: Air power-attenuation coefficient ``m`` (1/m).
+    :param air_attenuation_per_m: Air power-attenuation coefficient ``m`` (1/m).
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The reverberation time ``T``, s.
     """
     volume = require_positive(volume, "volume")
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
     _, _, pairs = _accumulate_surfaces(surfaces)
-    absorption = _add_air(_millington_absorption(pairs), air_attenuation, volume)
+    absorption = _add_air(_millington_absorption(pairs), air_attenuation_per_m, volume)
     return _reverberation_time(volume, absorption, speed_of_sound)
 
 
@@ -429,7 +436,7 @@ def _axial_geometry(
 def _axial_eyring_times(
     dimensions: Sequence[float],
     absorptions: Sequence[ArrayLike],
-    air_attenuation: ArrayLike,
+    air_attenuation_per_m: ArrayLike,
     speed_of_sound: float,
 ) -> tuple[NDArray[np.float64], list[np.ndarray | float]]:
     """Per-axis Eyring reverberation times and their area weights ``S_i / S``.
@@ -446,7 +453,7 @@ def _axial_eyring_times(
         raise ValueError(msg)
     volume, total_area, pair_areas = _axial_geometry(dimensions)
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
-    air = _air_term(air_attenuation, volume)
+    air = _air_term(air_attenuation_per_m, volume)
     means: list[NDArray[np.float64]] = []
     for alpha in absorptions:
         mean = np.asarray(alpha, dtype=np.float64)
@@ -482,7 +489,7 @@ def fitzroy_reverberation_time(
     dimensions: Sequence[float],
     absorptions: Sequence[ArrayLike],
     *,
-    air_attenuation: ArrayLike = 0.0,
+    air_attenuation_per_m: ArrayLike = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> np.ndarray | float:
     r"""Fitzroy reverberation time -- area-weighted arithmetic mean of axial times.
@@ -500,12 +507,12 @@ def fitzroy_reverberation_time(
     :param absorptions: Mean absorption ``(alpha_x, alpha_y, alpha_z)`` of the
         three wall pairs (perpendicular to x, y, z); each a scalar or per-band
         array.
-    :param air_attenuation: Air power-attenuation coefficient ``m`` (1/m).
+    :param air_attenuation_per_m: Air power-attenuation coefficient ``m`` (1/m).
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The reverberation time ``T``, s.
     """
     weights, times = _axial_eyring_times(
-        dimensions, absorptions, air_attenuation, speed_of_sound
+        dimensions, absorptions, air_attenuation_per_m, speed_of_sound
     )
     total = sum(
         w * np.asarray(t, dtype=np.float64) for w, t in zip(weights, times, strict=True)
@@ -517,7 +524,7 @@ def arau_puchades_reverberation_time(
     dimensions: Sequence[float],
     absorptions: Sequence[ArrayLike],
     *,
-    air_attenuation: ArrayLike = 0.0,
+    air_attenuation_per_m: ArrayLike = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> np.ndarray | float:
     r"""Arau-Puchades reverberation time -- area-weighted geometric mean of axial times.
@@ -533,12 +540,12 @@ def arau_puchades_reverberation_time(
     :param absorptions: Mean absorption ``(alpha_x, alpha_y, alpha_z)`` of the
         three wall pairs (perpendicular to x, y, z); each a scalar or per-band
         array.
-    :param air_attenuation: Air power-attenuation coefficient ``m`` (1/m).
+    :param air_attenuation_per_m: Air power-attenuation coefficient ``m`` (1/m).
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The reverberation time ``T``, s.
     """
     weights, times = _axial_eyring_times(
-        dimensions, absorptions, air_attenuation, speed_of_sound
+        dimensions, absorptions, air_attenuation_per_m, speed_of_sound
     )
     log_t = sum(
         w * np.log(np.asarray(t, dtype=np.float64))
@@ -715,7 +722,7 @@ def reverberation_time_models(
     dimensions: Sequence[float],
     absorptions: Sequence[ArrayLike],
     *,
-    air_attenuation: ArrayLike = 0.0,
+    air_attenuation_per_m: ArrayLike = 0.0,
     frequencies: ArrayLike | None = None,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> ReverberationModelResult:
@@ -733,7 +740,7 @@ def reverberation_time_models(
     :param absorptions: Mean absorption ``(alpha_x, alpha_y, alpha_z)`` of the
         three wall pairs (perpendicular to x, y, z); each a scalar or a per-band
         array aligned with ``frequencies``.
-    :param air_attenuation: Air power-attenuation coefficient ``m`` (1/m),
+    :param air_attenuation_per_m: Air power-attenuation coefficient ``m`` (1/m),
         scalar or per-band.
     :param frequencies: Band centre frequencies, in hertz, used only to label
         the result and its plot; defaults to an integer index over the bands.
@@ -754,7 +761,7 @@ def reverberation_time_models(
         sabine_reverberation_time(
             volume,
             surfaces,
-            air_attenuation=air_attenuation,
+            air_attenuation_per_m=air_attenuation_per_m,
             speed_of_sound=speed_of_sound,
         )
     )
@@ -762,7 +769,7 @@ def reverberation_time_models(
         eyring_reverberation_time(
             volume,
             surfaces,
-            air_attenuation=air_attenuation,
+            air_attenuation_per_m=air_attenuation_per_m,
             speed_of_sound=speed_of_sound,
         )
     )
@@ -770,7 +777,7 @@ def reverberation_time_models(
         millington_sette_reverberation_time(
             volume,
             surfaces,
-            air_attenuation=air_attenuation,
+            air_attenuation_per_m=air_attenuation_per_m,
             speed_of_sound=speed_of_sound,
         )
     )
@@ -778,7 +785,7 @@ def reverberation_time_models(
         fitzroy_reverberation_time(
             dimensions,
             absorptions,
-            air_attenuation=air_attenuation,
+            air_attenuation_per_m=air_attenuation_per_m,
             speed_of_sound=speed_of_sound,
         )
     )
@@ -786,7 +793,7 @@ def reverberation_time_models(
         arau_puchades_reverberation_time(
             dimensions,
             absorptions,
-            air_attenuation=air_attenuation,
+            air_attenuation_per_m=air_attenuation_per_m,
             speed_of_sound=speed_of_sound,
         )
     )

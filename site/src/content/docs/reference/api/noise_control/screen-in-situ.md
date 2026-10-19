@@ -69,7 +69,7 @@ number the standard forbids.
 ```python
 background_corrected_level_db(
     levels: ArrayLike,
-    background_levels_db: ArrayLike,
+    background_levels: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -94,7 +94,7 @@ the remedy is to wait for a quieter day rather than to correct harder.
 | Name | Description |
 | :--- | :--- |
 | `levels` | The level with the sources on, per band, in decibels. |
-| `background_levels_db` | The level with them off, per band, in decibels. |
+| `background_levels` | The level with them off, per band, in decibels. |
 
 **Returns:** The corrected level per band, in decibels.
 
@@ -346,7 +346,7 @@ screen_attenuation(
     source_kind: Literal['actual', 'artificial'] = 'actual',
     a_weighted_unscreened_level_db: float | None = None,
     a_weighted_screened_level_db: float | None = None,
-    distance_m: float | None = None,
+    distance: float | None = None,
 ) -> ScreenInSituResult
 ```
 
@@ -376,7 +376,7 @@ machine's, so the pair is refused rather than computed under
 | `source_kind` | `"actual"` (default) or `"artificial"`. |
 | `a_weighted_unscreened_level_db` | $L_{p\mathrm{A}1}$, in decibels. |
 | `a_weighted_screened_level_db` | $L_{p\mathrm{A}2}$, in decibels. |
-| `distance_m` | How far this position stands from the screen, in metres, carried into the result because 5.5.2 reports the spread over the line rather than one number. |
+| `distance` | How far this position stands from the screen, in metres, carried into the result because 5.5.2 reports the spread over the line rather than one number. |
 
 **Returns:** The attenuation, as a [`ScreenInSituResult`](/phonometry/reference/api/noise_control/screen-in-situ/#screeninsituresult).
 
@@ -404,7 +404,7 @@ ScreenInSituResult(
     attenuation_db: NDArray[np.float64],
     a_weighted_attenuation_db: float | None,
     source_kind: str,
-    distance_m: float | None,
+    distance: float | None,
 )
 ```
 
@@ -420,7 +420,7 @@ The in-situ attenuation of a removable screen, ISO 11821 clause 5.8.
 | `attenuation_db` | $D_p$ per band, in decibels. |
 | `a_weighted_attenuation_db` | $D_{p\mathrm{A}}$, in decibels, or `None`. Clause 5.9 allows it only with the actual source. |
 | `source_kind` | `"actual"` or `"artificial"`. |
-| `distance_m` | How far the position stands from the screen, in metres, or `None`. |
+| `distance` | How far the position stands from the screen, in metres, or `None`. |
 
 ### ScreenInSituResult.plot()
 

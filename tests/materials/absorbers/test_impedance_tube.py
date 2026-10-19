@@ -94,12 +94,10 @@ def test_both_speed_formulas_agree_at_20c() -> None:
 
 def test_air_density_reference_values() -> None:
     # ISO Eq. (7): rho0 at the reference state (19,85 degC is 293 K exactly).
-    rho_iso = air_density_iso10534(
-        temperature_c=19.85, atmospheric_pressure_kpa=101.325
-    )
+    rho_iso = air_density_iso10534(temperature_c=19.85, static_pressure_kpa=101.325)
     assert float(rho_iso) == pytest.approx(1.186, abs=1e-9)
     # ASTM Eq. (5) at 20 degC, 101.325 kPa -> 1.2020 kg/m3 (notes 2.11).
-    rho_astm = air_density_astm(temperature_c=20.0, atmospheric_pressure_kpa=101.325)
+    rho_astm = air_density_astm(temperature_c=20.0, static_pressure_kpa=101.325)
     assert float(rho_astm) == pytest.approx(1.2020, abs=1e-3)
 
 
@@ -108,10 +106,10 @@ def test_air_property_domain_errors() -> None:
         speed_of_sound_iso10534(temperature_c=-300.0)
     with pytest.raises(ValueError, match="'temperature_c' must be finite and above"):
         speed_of_sound_astm(temperature_c=-300.0)
-    with pytest.raises(ValueError, match="'atmospheric_pressure_kpa' must be positive"):
-        air_density_iso10534(temperature_c=19.85, atmospheric_pressure_kpa=-1.0)
-    with pytest.raises(ValueError, match="'atmospheric_pressure_kpa' must be positive"):
-        air_density_astm(temperature_c=20.0, atmospheric_pressure_kpa=-1.0)
+    with pytest.raises(ValueError, match="'static_pressure_kpa' must be positive"):
+        air_density_iso10534(temperature_c=19.85, static_pressure_kpa=-1.0)
+    with pytest.raises(ValueError, match="'static_pressure_kpa' must be positive"):
+        air_density_astm(temperature_c=20.0, static_pressure_kpa=-1.0)
 
 
 def test_air_density_astm_rejects_temperature_below_absolute_zero() -> None:
@@ -123,16 +121,16 @@ def test_air_density_astm_rejects_temperature_below_absolute_zero() -> None:
     ``speed_of_sound_astm`` refuses it above.
     """
     with pytest.raises(ValueError, match="'temperature_c' must be finite and above"):
-        air_density_astm(temperature_c=-300.0, atmospheric_pressure_kpa=101.325)
+        air_density_astm(temperature_c=-300.0, static_pressure_kpa=101.325)
 
 
 def test_air_density_mismatched_arrays_raise() -> None:
     # Two arrays of different lengths must be refused by name, not left to
     # numpy's two-shapes broadcast error.
-    with pytest.raises(ValueError, match="'temperature_c'.*'atmospheric_pressure_kpa'"):
+    with pytest.raises(ValueError, match="'temperature_c'.*'static_pressure_kpa'"):
         air_density_iso10534(
             temperature_c=[19.85, 26.85],
-            atmospheric_pressure_kpa=[101.0, 100.0, 99.0],
+            static_pressure_kpa=[101.0, 100.0, 99.0],
         )
 
 
@@ -178,9 +176,7 @@ def test_air_helpers_bound_only_absolute_zero(
 def test_air_density_scalar_beside_array_still_broadcasts() -> None:
     # One shared temperature against several pressures stays legal.
     rho = np.asarray(
-        air_density_iso10534(
-            temperature_c=19.85, atmospheric_pressure_kpa=[101.325, 100.0]
-        )
+        air_density_iso10534(temperature_c=19.85, static_pressure_kpa=[101.325, 100.0])
     )
     assert rho.shape == (2,)
     assert rho[0] == pytest.approx(1.186, abs=1e-9)
@@ -249,7 +245,7 @@ def test_reflection_factor_round_trip_with_attenuation() -> None:
     f = np.array([500.0, 1200.0])
     x1, spacing = 0.12, 0.03
     att = tube_attenuation_constant(f, C0, diameter_m=0.05)
-    k0 = tube_wavenumber(f, C0, attenuation=att)
+    k0 = tube_wavenumber(f, C0, attenuation_np_per_m=att)
     reflection = 0.6 - 0.2j
     h12 = _synth_h12(reflection, np.asarray(k0), x1, spacing)
     r = reflection_factor(h12, spacing_m=spacing, x1=x1, wavenumber=k0)
@@ -269,8 +265,12 @@ def test_tube_wavenumber_rejects_nan_frequency() -> None:
 def test_tube_wavenumber_rejects_mismatched_attenuation() -> None:
     # A two-band attenuation against three frequencies used to die as
     # numpy's two-shapes broadcast error, naming neither argument.
-    with pytest.raises(ValueError, match="'attenuation' must be a scalar or carry"):
-        tube_wavenumber(np.array([100.0, 200.0, 300.0]), C0, attenuation=[0.1, 0.2])
+    with pytest.raises(
+        ValueError, match="'attenuation_np_per_m' must be a scalar or carry"
+    ):
+        tube_wavenumber(
+            np.array([100.0, 200.0, 300.0]), C0, attenuation_np_per_m=[0.1, 0.2]
+        )
 
 
 def test_reflection_factor_rejects_mismatched_h12() -> None:
@@ -441,7 +441,7 @@ def test_hydraulic_diameter_values() -> None:
     assert hydraulic_diameter(0.08, 0.04) == pytest.approx(
         4.0 * (0.08 * 0.04) / (2.0 * (0.08 + 0.04))
     )
-    with pytest.raises(ValueError, match=r"'width' and 'height_m' must be positive"):
+    with pytest.raises(ValueError, match=r"'width_m' and 'height_m' must be positive"):
         hydraulic_diameter(0.0, 0.05)
 
 

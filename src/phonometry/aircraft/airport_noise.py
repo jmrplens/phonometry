@@ -123,22 +123,25 @@ def engine_installation_correction(
     return float(10.0 * np.log10(num / den))
 
 
-def duration_correction(reference_speed: float, segment_speed: float) -> float:
+def duration_correction(reference_speed_m_s: float, segment_speed_m_s: float) -> float:
     r"""Duration correction (Eq. 4-14, exposure only).
 
     :math:`\Delta V = 10 \cdot \log_{10}(V_{\mathrm{ref}}/V_{\mathrm{seg}})`.
 
-    :param reference_speed: NPD reference speed ``Vref`` (any consistent unit).
-    :param segment_speed: Segment speed ``Vseg`` (same unit).
+    :param reference_speed_m_s: NPD reference speed ``Vref``, in m/s, the unit
+        :func:`event_level` passes; only the ratio enters, so two speeds in
+        any one unit give the same correction.
+    :param segment_speed_m_s: Segment speed ``Vseg``, in the unit of
+        ``reference_speed_m_s``.
     :return: The duration correction ``ΔV``, in dB.
     :raises ValueError: If a speed is not strictly positive.
     """
-    require_scalar(reference_speed, "reference_speed")
-    vref = float(reference_speed)
-    require_scalar(segment_speed, "segment_speed")
-    vseg = float(segment_speed)
+    require_scalar(reference_speed_m_s, "reference_speed_m_s")
+    vref = float(reference_speed_m_s)
+    require_scalar(segment_speed_m_s, "segment_speed_m_s")
+    vseg = float(segment_speed_m_s)
     if not (np.isfinite(vref) and vref > 0.0 and np.isfinite(vseg) and vseg > 0.0):
-        msg = "'reference_speed' and 'segment_speed' must be positive."
+        msg = "'reference_speed_m_s' and 'segment_speed_m_s' must be positive."
         raise ValueError(msg)
     return float(10.0 * np.log10(vref / vseg))
 
@@ -187,7 +190,7 @@ _T0_C = 15.0
 
 
 def impedance_adjustment(
-    *, temperature_c: float = _T0_C, atmospheric_pressure_kpa: float = _P0_KPA
+    *, temperature_c: float = _T0_C, static_pressure_kpa: float = _P0_KPA
 ) -> float:
     r"""Acoustic-impedance adjustment of the standard NPD data (Eq. 4-6/4-7).
 
@@ -200,17 +203,17 @@ def impedance_adjustment(
     added to the NPD levels. Under the standard atmosphere it is +0.074 dB.
 
     :param temperature_c: Aerodrome air temperature ``T``, in °C (default 15 °C).
-    :param atmospheric_pressure_kpa: Aerodrome air pressure ``p``, in kPa (default 101.325 kPa).
+    :param static_pressure_kpa: Aerodrome air pressure ``p``, in kPa (default 101.325 kPa).
     :return: The impedance adjustment, in dB (added to the NPD level).
     :raises ValueError: If the pressure is not positive, the temperature is at
         or below -273,15 degC, or either input is non-finite.
     """
     require_scalar(temperature_c, "temperature_c")
     t = float(temperature_c)
-    require_scalar(atmospheric_pressure_kpa, "atmospheric_pressure_kpa")
-    p = float(atmospheric_pressure_kpa)
+    require_scalar(static_pressure_kpa, "static_pressure_kpa")
+    p = float(static_pressure_kpa)
     if not (np.isfinite(t) and np.isfinite(p) and p > 0.0):
-        msg = "'atmospheric_pressure_kpa' must be positive and inputs finite."
+        msg = "'static_pressure_kpa' must be positive and inputs finite."
         raise ValueError(msg)
     require_above_absolute_zero(t, "temperature_c")
     delta = p / _P0_KPA
@@ -234,11 +237,11 @@ class AerodromeAtmosphere(RichDisplay):
     the ICAO 25 °C/70 % of the hemisphere database, not the 15 °C of Eq. 4-7.
 
     :ivar temperature_c: Aerodrome air temperature ``T``, in °C (default 15).
-    :ivar atmospheric_pressure_kpa: Aerodrome air pressure ``p``, in kPa (default 101.325).
+    :ivar static_pressure_kpa: Aerodrome air pressure ``p``, in kPa (default 101.325).
     """
 
     temperature_c: float = _T0_C
-    atmospheric_pressure_kpa: float = _P0_KPA
+    static_pressure_kpa: float = _P0_KPA
 
 
 #: The standard atmosphere (δ = θ = 1), the default of the event entry points.
@@ -1315,7 +1318,7 @@ def _grid_event_levels(
     mount_key = mounting.strip().lower()
     engine_installation_correction(0.0, mounting)  # validate 'mounting' once
     if not (np.isfinite(vref) and vref > 0.0):
-        msg = "'reference_speed' must be positive."
+        msg = "'reference_speed_m_s' must be positive."
         raise ValueError(msg)
     ctx = _GridContext(
         obs,
@@ -1365,7 +1368,7 @@ def event_level(
     exposure_levels: NDArray[np.float64] | list[list[float]],
     maximum_levels: NDArray[np.float64] | list[list[float]],
     *,
-    reference_speed: float = _VREF_MS,
+    reference_speed_m_s: float = _VREF_MS,
     mounting: str = "wing",
     metric: EventMetric = "exposure",
     atmosphere: AerodromeAtmosphere = _STANDARD_ATMOSPHERE,
@@ -1386,7 +1389,7 @@ def event_level(
     :param distances_m: NPD tabulated slant distances, in metres.
     :param exposure_levels: NPD exposure (SEL) levels, shape ``(P, D)``.
     :param maximum_levels: NPD maximum levels, shape ``(P, D)``.
-    :param reference_speed: NPD reference speed, in m/s (default 160 kt).
+    :param reference_speed_m_s: NPD reference speed, in m/s (default 160 kt).
     :param mounting: Engine mounting (``"wing"``/``"fuselage"``/``"propeller"``).
     :param metric: ``"exposure"`` (SEL) or ``"maximum"`` (LAmax).
     :param atmosphere: Aerodrome air temperature and pressure, an
@@ -1413,10 +1416,22 @@ def event_level(
     _, _, lm = _clean_table(powers, distances_m, maximum_levels)
     imp = impedance_adjustment(
         temperature_c=atmosphere.temperature_c,
-        atmospheric_pressure_kpa=atmosphere.atmospheric_pressure_kpa,
+        static_pressure_kpa=atmosphere.static_pressure_kpa,
     )
     total, seg_arr = _event_level_core(
-        pts, obs, p, d, le, lm, float(reference_speed), imp, mounting, key, gr, lr, bk
+        pts,
+        obs,
+        p,
+        d,
+        le,
+        lm,
+        float(reference_speed_m_s),
+        imp,
+        mounting,
+        key,
+        gr,
+        lr,
+        bk,
     )
     return FlyoverResult(level=total, metric=key, segment_levels=seg_arr, observer=obs)
 
@@ -1482,7 +1497,7 @@ def noise_contour(
     *,
     x: NDArray[np.float64] | list[float],
     y: NDArray[np.float64] | list[float],
-    reference_speed: float = _VREF_MS,
+    reference_speed_m_s: float = _VREF_MS,
     mounting: str = "wing",
     metric: EventMetric = "exposure",
     atmosphere: AerodromeAtmosphere = _STANDARD_ATMOSPHERE,
@@ -1499,7 +1514,7 @@ def noise_contour(
     :param maximum_levels: NPD maximum levels, shape ``(P, D)``.
     :param x: Grid x coordinates, in metres.
     :param y: Grid y coordinates, in metres.
-    :param reference_speed: NPD reference speed, in m/s.
+    :param reference_speed_m_s: NPD reference speed, in m/s.
     :param mounting: Engine mounting.
     :param metric: ``"exposure"`` (SEL) or ``"maximum"`` (LAmax).
     :param atmosphere: Aerodrome air temperature and pressure, an
@@ -1522,10 +1537,10 @@ def noise_contour(
     bk = _validate_bank(segments.bank, pts.shape[0])
     p, d, le = _clean_table(powers, distances_m, exposure_levels)
     _, _, lm = _clean_table(powers, distances_m, maximum_levels)
-    vref = float(reference_speed)
+    vref = float(reference_speed_m_s)
     imp = impedance_adjustment(
         temperature_c=atmosphere.temperature_c,
-        atmospheric_pressure_kpa=atmosphere.atmospheric_pressure_kpa,
+        static_pressure_kpa=atmosphere.static_pressure_kpa,
     )
     # One vectorised pass per flight-path segment over the whole grid (the
     # per-point scalar loop is O(grid × segments) Python calls; this is

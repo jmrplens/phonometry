@@ -261,7 +261,7 @@ TABLE_D1_QUANTITIES: Mapping[str, tuple[str, ...]] = MappingProxyType(
     {
         "mass": ("mass",),
         "bar_end": ("density", "longitudinal_velocity", "area"),
-        "beam": ("density", "longitudinal_velocity", "thickness_m", "width"),
+        "beam": ("density", "longitudinal_velocity", "thickness_m", "width_m"),
         "plate": ("density", "longitudinal_velocity", "thickness_m"),
         "pipe": ("density", "longitudinal_velocity", "thickness_m", "radius"),
         "mass_spring": ("mass", "stiffness", "loss_factor"),
@@ -345,7 +345,7 @@ def _beam_mobility(
     rho = require_positive(density, "density")
     c_l = require_positive(longitudinal_velocity, "longitudinal_velocity")
     t = require_positive(thickness, "thickness_m")
-    w = require_positive(width, "width")
+    w = require_positive(width, "width_m")
     return np.asarray(
         1.0 / (7.6 * rho * t * w * np.sqrt(c_l * t * f)), dtype=np.float64
     )
@@ -494,7 +494,7 @@ def typical_element_mobility(
     density: float | None = None,
     longitudinal_velocity: float | None = None,
     thickness_m: float | None = None,
-    width: float | None = None,
+    width_m: float | None = None,
     area: float | None = None,
     radius: float | None = None,
     stiffness: float | None = None,
@@ -511,7 +511,7 @@ def typical_element_mobility(
       ``longitudinal_velocity`` :math:`c_\mathrm{L}` [m/s] and ``area`` :math:`S`
       [m2]: :math:`\lvert Y \rvert = \left[ \rho c_\mathrm{L} S \right]^{-1}`.
     - ``"beam"``, described by :math:`\rho`, :math:`c_\mathrm{L}`, ``thickness_m``
-      :math:`t` [m] and ``width`` :math:`w` [m]:
+      :math:`t` [m] and ``width_m`` :math:`w` [m]:
       :math:`\lvert Y \rvert = \left[ 7{,}6\, \rho t w \sqrt{c_\mathrm{L} t f}
       \right]^{-1}`.
     - ``"plate"``, described by :math:`\rho`, :math:`c_\mathrm{L}` and :math:`t`:
@@ -558,7 +558,7 @@ def typical_element_mobility(
     :param density: Density ``rho``, in kg/m^3.
     :param longitudinal_velocity: Quasi-longitudinal wave speed ``cL``, in m/s.
     :param thickness_m: Thickness ``t``, in metres.
-    :param width: Beam width ``w``, in metres (row ``"beam"``).
+    :param width_m: Beam width ``w``, in metres (row ``"beam"``).
     :param area: Cross-sectional area ``S``, in m^2 (row ``"bar_end"``).
     :param radius: Pipe radius ``r``, in metres (row ``"pipe"``).
     :param stiffness: Support stiffness ``s``, in N/m (row ``"mass_spring"``).
@@ -576,7 +576,7 @@ def typical_element_mobility(
             "density": density,
             "longitudinal_velocity": longitudinal_velocity,
             "thickness_m": thickness_m,
-            "width": width,
+            "width_m": width_m,
             "area": area,
             "radius": radius,
             "stiffness": stiffness,
@@ -596,7 +596,7 @@ def typical_element_mobility(
             args["density"],
             args["longitudinal_velocity"],
             args["thickness_m"],
-            args["width"],
+            args["width_m"],
         )
     if row == "plate":
         return _plate_mobility(

@@ -131,7 +131,7 @@ def test_clause_4_3_the_building_on_its_ground() -> None:
     ground, V_D from 25 to 10 for a concrete floor, and the storey formula.
     """
     assert im.soil_building_natural_frequency_hz(
-        4.0 * math.pi**2 * 1e8, mass_kg=1e6
+        4.0 * math.pi**2 * 1e8, mass=1e6
     ) == pytest.approx(10.0)
     assert im.soil_building_frequency_guide_hz(1) == (15.0, 15.0)
     assert im.soil_building_frequency_guide_hz(2) == (8.0, 15.0)

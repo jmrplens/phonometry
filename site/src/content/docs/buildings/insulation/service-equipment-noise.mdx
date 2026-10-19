@@ -296,7 +296,7 @@ t = np.array([np.nan, np.nan, np.nan, 0.82, 0.78, 0.74, 0.70, 0.66, 0.63,
               0.48, 0.47, 0.46, 0.45, 0.44, np.nan, np.nan, np.nan])
 res = building.service_equipment_level(
     readings, freqs, quantity="eq",
-    background_db=background, reverberation_time_s=t, volume_m3=35.7,
+    background_db=background, reverberation_time=t, volume=35.7,
 )
 print(res.ratings["LA,eq"], res.ratings["LA,eq,nT"], res.ratings["LC,eq,nT"])
 # 45 45 51
@@ -327,8 +327,8 @@ they are.*
 | `quantity` | str | | required | `"Smax"`, `"Fmax"` or `"eq"`, the Table 1 quantity; it names the single numbers |
 | `band` | str | | `"third"` | `"third"` or `"octave"`; Clause 6 asks for one-third octaves, octaves are optional |
 | `background_db` | array | dB | `None` | One level per band, or one row per position, energy-averaged |
-| `reverberation_time_s` | array | s | `None` | Per band; only 50 Hz to 5 kHz (octaves 63 Hz to 4 kHz) is read, the rest may be `nan` |
-| `volume_m3` | float | m³ | `None` | Room volume for the normalized levels; needs the reverberation time |
+| `reverberation_time` | array | s | `None` | Per band; only 50 Hz to 5 kHz (octaves 63 Hz to 4 kHz) is read, the rest may be `nan` |
+| `volume` | float | m³ | `None` | Room volume for the normalized levels; needs the reverberation time |
 | `reference_reverberation_time_s` | float | s | `0.5` | $T_0$ of Formula (5) |
 | `a_weighting_range` | str | | `"restricted"` | `"restricted"` (50 Hz to 5 kHz; octaves 63 Hz to 4 kHz) or `"extended"` (25 Hz to 10 kHz; octaves 31.5 Hz to 8 kHz) |
 

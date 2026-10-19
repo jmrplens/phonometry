@@ -1020,7 +1020,7 @@ def generate_airport_segment_corrections(output_dir: str) -> None:
         f"15 °C, 101.3 kPa: {_fmt_minus(aircraft.impedance_adjustment(), '+.2f')} dB\n"
         f"30 °C, 101.3 kPa: {_fmt_minus(aircraft.impedance_adjustment(temperature_c=30.0), '+.2f')} dB\n"
         f"15 °C, 95.0 kPa: "
-        f"{_fmt_minus(aircraft.impedance_adjustment(temperature_c=15.0, atmospheric_pressure_kpa=95.0), '+.2f')} dB",
+        f"{_fmt_minus(aircraft.impedance_adjustment(temperature_c=15.0, static_pressure_kpa=95.0), '+.2f')} dB",
         transform=ax_v.transAxes,
         ha="right",
         va="top",
@@ -1254,8 +1254,8 @@ def generate_rotorcraft_hemisphere(output_dir: str) -> None:
 
     h = _synthetic_hemisphere(masked=True)
     freqs = np.asarray(h.frequencies)
-    az = np.asarray(h.azimuth)
-    po = np.asarray(h.polar)
+    az = np.asarray(h.azimuth_deg)
+    po = np.asarray(h.polar_deg)
 
     _fig, (ax, ax2) = plt.subplots(1, 2, figsize=(12, 5.4))
     for band, color in (

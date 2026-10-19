@@ -255,7 +255,7 @@ from phonometry import vibration
 # Hormigón, módulo dinámico de 30 GPa, 2400 kg/m3, primer modo, 10 mm/s de pico.
 # Ojo a la unidad: las tablas van en mm/s y esta fórmula en m/s.
 sigma = vibration.bending_stress(
-    0.010, dynamic_modulus_pa=3.0e10, density_kg_m3=2400.0
+    0.010, dynamic_modulus_pa=3.0e10, density=2400.0
 )
 print(round(sigma / 1e6, 2), "MPa")     # 0.15 MPa
 ```

@@ -264,7 +264,7 @@ def generate_underwater_propagation_loss(output_dir: str) -> None:
     ax.text(
         0.02,
         0.05,
-        f"$f$ = 10 kHz, $\\alpha$ = {res.absorption_coefficient:.2f} dB/km\n"
+        f"$f$ = 10 kHz, $\\alpha$ = {res.absorption_db_per_km:.2f} dB/km\n"
         "practical spreading ($R_0$ = 1000 m)",
         transform=ax.transAxes,
         va="bottom",

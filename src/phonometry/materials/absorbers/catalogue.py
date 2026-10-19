@@ -139,14 +139,14 @@ class PorousMaterial(CatalogueRow):
     :ivar porosity: Open porosity ``phi``.
     :ivar tortuosity: Tortuosity ``alpha_inf``.
     :ivar viscous_length_um: Viscous characteristic length ``Lambda``, in
-        micrometres, the unit the tables print it in. The ``viscous_length``
+        micrometres, the unit the tables print it in. The ``viscous_length_m``
         parameter of
         :func:`~phonometry.materials.absorbers.johnson_champoux_allard` is in
         **metres**, so this field is not passed to it directly:
         :meth:`medium` makes the conversion, once, and a caller who assembles
         the argument list by hand divides by a million first.
     :ivar thermal_length_um: Thermal characteristic length ``Lambda'``, in
-        micrometres. Metres at the model's ``thermal_length``, as above.
+        micrometres. Metres at the model's ``thermal_length_m``, as above.
     :ivar thermal_permeability_m2: Static thermal permeability ``q'_0``, in
         m2, which two of the tables print beside the thermal length.
     :ivar fibre_diameter_um: Fibre diameter ``d``, in micrometres, for the
@@ -326,9 +326,9 @@ class PorousMaterial(CatalogueRow):
             sigma,
             porosity=self.printed("porosity", wanted_by=model),
             tortuosity=self.printed("tortuosity", wanted_by=model),
-            viscous_length=self.printed("viscous_length_um", wanted_by=model)
+            viscous_length_m=self.printed("viscous_length_um", wanted_by=model)
             / _MICROMETRES_PER_METRE,
-            thermal_length=self.printed("thermal_length_um", wanted_by=model)
+            thermal_length_m=self.printed("thermal_length_um", wanted_by=model)
             / _MICROMETRES_PER_METRE,
             fluid=fluid,
         )

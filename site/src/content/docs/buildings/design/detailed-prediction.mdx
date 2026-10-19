@@ -327,10 +327,10 @@ same_floor = building.HomogeneousElement.from_solid(
     concrete,
     thickness_m=0.22,
     internal_loss_factor=0.005,
-    area_m2=20.0,
-    length1_m=5.0,
-    length2_m=4.0,
-    perimeter_absorption_m=floor_perimeter,
+    area=20.0,
+    length1=5.0,
+    length2=4.0,
+    perimeter_absorption=floor_perimeter,
     label="floor",
 )
 print(round(same_floor.mass_per_area, 1), round(same_floor.critical_frequency, 2))   # 484.0 76.82

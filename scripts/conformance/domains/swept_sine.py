@@ -82,7 +82,7 @@ def _chk_swept_sine_thd_closed_form() -> Outcome:
     res = _swept_sine_polynomial()
     idx = int(np.argmin(np.abs(res.thd_frequencies - 1000.0)))
     expected = math.hypot(_SS_A2 / 2.0, _SS_A3 / 4.0) / (1.0 + 3.0 * _SS_A3 / 4.0)
-    return numeric(expected, float(res.thd[idx]), 1e-3, places=5)
+    return numeric(expected, float(res.thd_ratio[idx]), 1e-3, places=5)
 
 
 @register(
@@ -99,7 +99,7 @@ def _chk_swept_sine_linear_floor() -> Outcome:
         0.5 * x, fs, f1=f1, f2=f2, seconds=seconds, n_harmonics=3
     )
     band = (res.thd_frequencies > 100.0) & (res.thd_frequencies < 2000.0)
-    return numeric(0.0, float(np.max(res.thd[band])), 1e-3, places=5)
+    return numeric(0.0, float(np.max(res.thd_ratio[band])), 1e-3, places=5)
 
 
 @register(

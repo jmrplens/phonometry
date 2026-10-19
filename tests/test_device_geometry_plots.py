@@ -369,7 +369,7 @@ def test_microphone_positions_hemisphere_and_sphere() -> None:
 # ---------------------------------------------------------------------------
 def test_aperture_results_retain_geometry_and_draw() -> None:
     slit = pm.building.slit_transmission_coefficient(FREQ, 0.003, 0.1)
-    assert slit.width == pytest.approx(0.003)
+    assert slit.width_m == pytest.approx(0.003)
     assert slit.depth == pytest.approx(0.1)
     assert slit.plot_geometry() is not None
     hole = pm.building.circular_aperture_transmission_coefficient(FREQ, 0.005, 0.1)
@@ -378,12 +378,12 @@ def test_aperture_results_retain_geometry_and_draw() -> None:
 
 
 def test_aperture_validation() -> None:
-    with pytest.raises(ValueError, match=r"Give exactly one of 'width' or 'radius'"):
+    with pytest.raises(ValueError, match=r"Give exactly one of 'width_m' or 'radius'"):
         pm.building.plot_aperture_geometry(0.1)
-    with pytest.raises(ValueError, match=r"Give exactly one of 'width' or 'radius'"):
-        pm.building.plot_aperture_geometry(0.1, width=0.003, radius=0.005)
+    with pytest.raises(ValueError, match=r"Give exactly one of 'width_m' or 'radius'"):
+        pm.building.plot_aperture_geometry(0.1, width_m=0.003, radius=0.005)
     with pytest.raises(ValueError, match="'depth' must be positive"):
-        pm.building.plot_aperture_geometry(0.0, width=0.003)
+        pm.building.plot_aperture_geometry(0.0, width_m=0.003)
 
 
 def test_aperture_geometry_refuses_a_nan_depth() -> None:
@@ -391,12 +391,12 @@ def test_aperture_geometry_refuses_a_nan_depth() -> None:
     one into the wall thickness and left a titled, blank section.
     """
     with pytest.raises(ValueError, match="'depth' must be positive"):
-        pm.building.plot_aperture_geometry(float("nan"), width=0.003)
+        pm.building.plot_aperture_geometry(float("nan"), width_m=0.003)
 
 
 def test_aperture_geometry_refuses_a_nan_slit_width() -> None:
-    with pytest.raises(ValueError, match="'width' must be positive"):
-        pm.building.plot_aperture_geometry(0.1, width=float("nan"))
+    with pytest.raises(ValueError, match="'width_m' must be positive"):
+        pm.building.plot_aperture_geometry(0.1, width_m=float("nan"))
 
 
 def test_aperture_geometry_refuses_a_nan_hole_radius() -> None:
@@ -415,24 +415,24 @@ def test_an_aperture_result_refuses_to_carry_both_shapes() -> None:
     import dataclasses
 
     hole = pm.building.circular_aperture_transmission_coefficient(FREQ, 0.005, 0.1)
-    with pytest.raises(ValueError, match="'width'.*'radius'.*carries both"):
-        dataclasses.replace(hole, width=0.02)
+    with pytest.raises(ValueError, match="'width_m'.*'radius'.*carries both"):
+        dataclasses.replace(hole, width_m=0.02)
 
 
 def test_a_circular_result_refuses_a_retained_slit_width() -> None:
     """Keeping one shape is not enough: it has to be the shape ``kind`` names.
 
-    The section is drawn from whichever of ``width``/``radius`` the result
+    The section is drawn from whichever of ``width_m``/``radius`` the result
     kept and carries no mark of its kind, so a ``"circular"`` result holding
-    a ``width`` drew the slit section of that width -- the same figure, pixel
+    a ``width_m`` drew the slit section of that width -- the same figure, pixel
     for pixel, as the slit of the same number, and half the opening of the
     circular aperture the companion curve labels it.
     """
     import dataclasses
 
     hole = pm.building.circular_aperture_transmission_coefficient(FREQ, 0.005, 0.1)
-    with pytest.raises(ValueError, match="'width' is the slit width, but 'kind' is"):
-        dataclasses.replace(hole, width=0.005, radius=None)
+    with pytest.raises(ValueError, match="'width_m' is the slit width, but 'kind' is"):
+        dataclasses.replace(hole, width_m=0.005, radius=None)
 
 
 def test_a_slit_result_refuses_a_retained_hole_radius() -> None:
@@ -445,7 +445,7 @@ def test_a_slit_result_refuses_a_retained_hole_radius() -> None:
     with pytest.raises(
         ValueError, match="'radius' is the circular-aperture radius, but 'kind' is"
     ):
-        dataclasses.replace(slit, radius=0.003, width=None)
+        dataclasses.replace(slit, radius=0.003, width_m=None)
 
 
 # ---------------------------------------------------------------------------

@@ -91,7 +91,7 @@ AnpAircraft.event_level(
     stage_length: int | str = 1,
     metric: Literal['exposure', 'maximum'] = 'exposure',
     temperature_c: float | None = None,
-    atmospheric_pressure_kpa: float | None = None,
+    static_pressure_kpa: float | None = None,
     relative_humidity_percent: float | None = None,
     absorption: str = 'arp5534',
 ) -> FlyoverResult
@@ -111,7 +111,7 @@ AnpAircraft.noise_contour(
     stage_length: int | str = 1,
     metric: Literal['exposure', 'maximum'] = 'exposure',
     temperature_c: float | None = None,
-    atmospheric_pressure_kpa: float | None = None,
+    static_pressure_kpa: float | None = None,
     relative_humidity_percent: float | None = None,
     absorption: str = 'arp5534',
 ) -> NoiseContourResult
@@ -149,7 +149,7 @@ AnpAircraft.revised_npd_curves(
     *,
     temperature_c: float,
     relative_humidity_percent: float,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
     absorption: str = 'arp5534',
 ) -> RevisedNpdCurves
 ```
@@ -229,7 +229,7 @@ AnpDatabase.event_level(
     stage_length: int | str = 1,
     metric: Literal['exposure', 'maximum'] = 'exposure',
     temperature_c: float | None = None,
-    atmospheric_pressure_kpa: float | None = None,
+    static_pressure_kpa: float | None = None,
     relative_humidity_percent: float | None = None,
     absorption: str = 'arp5534',
 ) -> FlyoverResult
@@ -251,7 +251,7 @@ Feeds the aircraft's profile and NPD curves into
 | `stage_length` | ANP stage length (default 1). |
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LAmax). |
 | `temperature_c` | Air temperature at the field, in °C, for the atmospheric impedance adjustment. Left unset it follows *aerodrome*, or the standard atmosphere when there is none. |
-| `atmospheric_pressure_kpa` | Air pressure at the field, in kPa, likewise. |
+| `static_pressure_kpa` | Air pressure at the field, in kPa, likewise. |
 | `relative_humidity_percent` | Relative humidity at the field, in percent. Given, the SEL and LAmax NPD curves are recalculated for that humidity and the temperature and pressure above by ECAC Doc 29 Vol. 2 Appendix D, with the aircraft's spectral class for the operation; left unset they stay in the SAE AIR-1845 atmosphere the database is normalised to. |
 | `absorption` | The Appendix D absorption route, `"arp5534"` (default) or `"arp866a"`; read only with a humidity. |
 
@@ -309,7 +309,7 @@ AnpDatabase.noise_contour(
     stage_length: int | str = 1,
     metric: Literal['exposure', 'maximum'] = 'exposure',
     temperature_c: float | None = None,
-    atmospheric_pressure_kpa: float | None = None,
+    static_pressure_kpa: float | None = None,
     relative_humidity_percent: float | None = None,
     absorption: str = 'arp5534',
 ) -> NoiseContourResult
@@ -332,7 +332,7 @@ Feeds the aircraft's profile and NPD curves into
 | `stage_length` | ANP stage length (default 1). |
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LAmax). |
 | `temperature_c` | Air temperature at the field, in °C, for the atmospheric impedance adjustment. Left unset it follows *aerodrome*, or the standard atmosphere when there is none. |
-| `atmospheric_pressure_kpa` | Air pressure at the field, in kPa, likewise. |
+| `static_pressure_kpa` | Air pressure at the field, in kPa, likewise. |
 | `relative_humidity_percent` | Relative humidity at the field, in percent. Given, the SEL and LAmax NPD curves are recalculated for that humidity and the temperature and pressure above by ECAC Doc 29 Vol. 2 Appendix D, with the aircraft's spectral class for the operation; left unset they stay in the SAE AIR-1845 atmosphere the database is normalised to. |
 | `absorption` | The Appendix D absorption route, `"arp5534"` (default) or `"arp866a"`; read only with a humidity. |
 
@@ -510,7 +510,7 @@ AnpDatabase.revised_npd_curves(
     *,
     temperature_c: float,
     relative_humidity_percent: float,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
     absorption: str = 'arp5534',
 ) -> RevisedNpdCurves
 ```
@@ -531,7 +531,7 @@ it.
 | `metric` | `"SEL"` (default) or `"LAmax"`. |
 | `temperature_c` | Air temperature, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity, in percent. |
-| `atmospheric_pressure_kpa` | Air pressure, in kPa (default 101.325). |
+| `static_pressure_kpa` | Air pressure, in kPa (default 101.325). |
 | `absorption` | `"arp5534"` (default) or `"arp866a"`. |
 
 **Returns:** A [`RevisedNpdCurves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revisednpdcurves).

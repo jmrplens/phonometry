@@ -329,7 +329,7 @@ res = materials.floating_floor_resonance(
     airflow_resistivity_kpa_s_m2=50.0,   # kPa.s/m2 (= 50000 Pa.s/m2 from ISO 9053)
     thickness_m=0.020, porosity=0.9,
 )
-print(round(res.dynamic_stiffness / 1e6, 2), round(res.natural_frequency, 1))
+print(round(res.dynamic_stiffness_n_m3 / 1e6, 2), round(res.natural_frequency, 1))
 # 10.49 47.1
 
 res.plot()   # the f0(s') design curve with this determination marked (needs matplotlib)

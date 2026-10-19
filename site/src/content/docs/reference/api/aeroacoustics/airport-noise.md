@@ -43,7 +43,7 @@ Doc 29 5th ed. Vol 3 Part 1 reference workbook.
 AerodromeAtmosphere(
     *,
     temperature_c: float = 15.0,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
 )
 ```
 
@@ -64,12 +64,15 @@ the ICAO 25 °C/70 % of the hemisphere database, not the 15 °C of Eq. 4-7.
 | Name | Description |
 | :--- | :--- |
 | `temperature_c` | Aerodrome air temperature `T`, in °C (default 15). |
-| `atmospheric_pressure_kpa` | Aerodrome air pressure `p`, in kPa (default 101.325). |
+| `static_pressure_kpa` | Aerodrome air pressure `p`, in kPa (default 101.325). |
 
 ## duration_correction
 
 ```python
-duration_correction(reference_speed: float, segment_speed: float) -> float
+duration_correction(
+    reference_speed_m_s: float,
+    segment_speed_m_s: float,
+) -> float
 ```
 
 Duration correction (Eq. 4-14, exposure only).
@@ -80,8 +83,8 @@ $\Delta V = 10 \cdot \log_{10}(V_{\mathrm{ref}}/V_{\mathrm{seg}})$.
 
 | Name | Description |
 | :--- | :--- |
-| `reference_speed` | NPD reference speed `Vref` (any consistent unit). |
-| `segment_speed` | Segment speed `Vseg` (same unit). |
+| `reference_speed_m_s` | NPD reference speed `Vref`, in m/s, the unit [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/#event_level) passes; only the ratio enters, so two speeds in any one unit give the same correction. |
+| `segment_speed_m_s` | Segment speed `Vseg`, in the unit of `reference_speed_m_s`. |
 
 **Returns:** The duration correction `ΔV`, in dB.
 
@@ -128,7 +131,7 @@ event_level(
     exposure_levels: NDArray[np.float64] | list[list[float]],
     maximum_levels: NDArray[np.float64] | list[list[float]],
     *,
-    reference_speed: float = 82.31104,
+    reference_speed_m_s: float = 82.31104,
     mounting: str = 'wing',
     metric: Literal['exposure', 'maximum'] = 'exposure',
     atmosphere: AerodromeAtmosphere = ...,
@@ -154,7 +157,7 @@ ground-roll segments, and combines them into the exposure level `SEL`
 | `distances_m` | NPD tabulated slant distances, in metres. |
 | `exposure_levels` | NPD exposure (SEL) levels, shape `(P, D)`. |
 | `maximum_levels` | NPD maximum levels, shape `(P, D)`. |
-| `reference_speed` | NPD reference speed, in m/s (default 160 kt). |
+| `reference_speed_m_s` | NPD reference speed, in m/s (default 160 kt). |
 | `mounting` | Engine mounting (`"wing"`/`"fuselage"`/`"propeller"`). |
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LAmax). |
 | `atmosphere` | Aerodrome air temperature and pressure, an [`AerodromeAtmosphere`](/phonometry/reference/api/aeroacoustics/airport-noise/#aerodromeatmosphere) (default: the standard atmosphere); they set the impedance adjustment. |
@@ -233,7 +236,7 @@ Plot the per-segment contributions to the event level.
 impedance_adjustment(
     *,
     temperature_c: float = 15.0,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
 ) -> float
 ```
 
@@ -252,7 +255,7 @@ added to the NPD levels. Under the standard atmosphere it is +0.074 dB.
 | Name | Description |
 | :--- | :--- |
 | `temperature_c` | Aerodrome air temperature `T`, in °C (default 15 °C). |
-| `atmospheric_pressure_kpa` | Aerodrome air pressure `p`, in kPa (default 101.325 kPa). |
+| `static_pressure_kpa` | Aerodrome air pressure `p`, in kPa (default 101.325 kPa). |
 
 **Returns:** The impedance adjustment, in dB (added to the NPD level).
 
@@ -297,7 +300,7 @@ noise_contour(
     *,
     x: NDArray[np.float64] | list[float],
     y: NDArray[np.float64] | list[float],
-    reference_speed: float = 82.31104,
+    reference_speed_m_s: float = 82.31104,
     mounting: str = 'wing',
     metric: Literal['exposure', 'maximum'] = 'exposure',
     atmosphere: AerodromeAtmosphere = ...,
@@ -320,7 +323,7 @@ Evaluates [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/
 | `maximum_levels` | NPD maximum levels, shape `(P, D)`. |
 | `x` | Grid x coordinates, in metres. |
 | `y` | Grid y coordinates, in metres. |
-| `reference_speed` | NPD reference speed, in m/s. |
+| `reference_speed_m_s` | NPD reference speed, in m/s. |
 | `mounting` | Engine mounting. |
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LAmax). |
 | `atmosphere` | Aerodrome air temperature and pressure, an [`AerodromeAtmosphere`](/phonometry/reference/api/aeroacoustics/airport-noise/#aerodromeatmosphere) (impedance adjustment). |

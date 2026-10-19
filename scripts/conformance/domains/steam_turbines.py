@@ -92,8 +92,8 @@ def _chk_table_one() -> Outcome:
     levels = np.array([90.0, 91.0, 92.0, 91.5, 90.5])
     result = emission.turbine_sound_power(
         levels,
-        surface_area_m2=100.0,
-        background_levels_db=None,
+        surface_area=100.0,
+        background_levels=None,
         environmental_correction_db=0.0,
     )
     computed = {
@@ -161,7 +161,7 @@ def _chk_equation_one() -> Outcome:
     surface = emission.turbine_measurement_surface(
         [emission.TurbineReferenceBox(*box) for box in _LARGE_SET]
     )
-    return numeric(faces + ends + steps, surface.area_m2, 1e-9, unit="m2", places=3)
+    return numeric(faces + ends + steps, surface.area, 1e-9, unit="m2", places=3)
 
 
 @register(
@@ -182,7 +182,7 @@ def _chk_figure_a3() -> Outcome:
     worst = max(
         abs(
             emission.turbine_environmental_correction(
-                surface, absorption_area_m2=ratio * surface
+                surface, absorption_area=ratio * surface
             ).environmental_correction_db
             - 10.0 * math.log10(1.0 + 4.0 / ratio)
         )
@@ -218,7 +218,7 @@ def _chk_ratio_at_limit() -> Outcome:
     for _ in range(60):
         middle = 0.5 * (low + high)
         k = emission.turbine_environmental_correction(
-            surface, absorption_area_m2=middle * surface
+            surface, absorption_area=middle * surface
         ).environmental_correction_db
         if k > oracle.IEC61063_K_LIMIT_DB:
             low = middle
@@ -248,8 +248,8 @@ def _chk_arithmetic_note() -> Outcome:
         levels = np.r_[np.full(louder, 90.0 + span), np.full(1000 - louder, 90.0)]
         result = emission.turbine_sound_power(
             levels,
-            surface_area_m2=100.0,
-            background_levels_db=None,
+            surface_area=100.0,
+            background_levels=None,
             environmental_correction_db=0.0,
         )
         worst = max(worst, result.surface_pressure_level_db - result.arithmetic_mean_db)
@@ -285,8 +285,8 @@ def _chk_printed_limits() -> Outcome:
             warnings.simplefilter("ignore", emission.SoundPowerWarning)
             return emission.turbine_sound_power(
                 levels,
-                surface_area_m2=100.0,
-                background_levels_db=levels - margin_db,
+                surface_area=100.0,
+                background_levels=levels - margin_db,
                 environmental_correction_db=0.0,
             ).upper_limit
 
@@ -294,8 +294,8 @@ def _chk_printed_limits() -> Outcome:
         # Four positions at 80 dB and one overhead position.
         return emission.turbine_sound_power(
             np.array([80.0, 80.0, 80.0, 80.0, level_db]),
-            surface_area_m2=100.0,
-            background_levels_db=None,
+            surface_area=100.0,
+            background_levels=None,
             environmental_correction_db=0.0,
             overhead_mask=np.array([False, False, False, False, True]),
         )

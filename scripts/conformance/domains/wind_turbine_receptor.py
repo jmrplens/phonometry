@@ -392,7 +392,7 @@ def _chk_c1() -> Outcome:
     )
     result = env.wind_turbine_low_frequency_level(
         [95.0],
-        distance_m=500.0,
+        distance=500.0,
         hub_height_m=100.0,
         frequencies=[63.0],
         facade_insulation_db=[16.6],

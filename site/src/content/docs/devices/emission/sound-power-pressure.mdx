@@ -648,7 +648,7 @@ the grade-2 one of section 1: the cost of the grade is mostly time.
 | `areas` | 1D array | m² | one per position | Unequal segment areas, for a localized investigation (clause 9.4.3.2); equal areas assumed when omitted |
 | `temperature_c` | float | °C | default `23.0` | Sets $C_1$, $C_2$ |
 | `static_pressure_kpa` | float | kPa | default `101.325` | Sets $C_1$, $C_2$ |
-| `air_absorption_coefficient` | float or 1D array | dB/m | default `None` | The $C_3$ air-absorption term; supplied, not computed |
+| `air_absorption_db_per_m` | float or 1D array | dB/m | default `None` | The $C_3$ air-absorption term; supplied, not computed |
 | `sigma_omc_db` | float | dB | default `0.0` | Operating and mounting standard deviation, clause 10.5 |
 | `coverage_factor` | float | — | default `2.0` | $k$ in $U = k\sqrt{\sigma_{R0}^2 + \sigma_\text{omc}^2}$ |
 
@@ -1111,7 +1111,7 @@ pressure argument, and the sum is added by hand. ISO 3745 defines no sound
 energy level of its own, so a burst in the precision anechoic room has no
 route here. The $C_3$
 meteorological correction of ISO 3745 needs an air-absorption coefficient the
-caller supplies (`air_absorption_coefficient=`); this module does not compute
+caller supplies (`air_absorption_db_per_m=`); this module does not compute
 it from ISO 9613-1 itself. Choosing among the seven routes, and the ISO 4871
 declaration a result feeds, live in [Sound
 Power](/phonometry/devices/emission/sound-power/).

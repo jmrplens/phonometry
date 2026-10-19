@@ -76,12 +76,12 @@ the spectral character of 9.5.
 
 ```python
 check_special_room_reverberation(
-    reverberation_time_s: ArrayLike,
+    reverberation_time: ArrayLike,
     frequencies: ArrayLike,
     *,
     volume: float,
     nominal_reverberation_time_s: float | None = None,
-    surface_area_m2: float | None = None,
+    surface_area: float | None = None,
     speed_of_sound: float | None = None,
     method: Literal['direct', 'comparison'] = 'direct',
     relative_humidity_percent: float | None = None,
@@ -135,11 +135,11 @@ but keeps it out of the verdict, the clause saying "should".
 
 | Name | Description |
 | :--- | :--- |
-| `reverberation_time_s` | Measured reverberation time per band, in seconds, in one-third-octave bands as Figure B.3 has them. |
+| `reverberation_time` | Measured reverberation time per band, in seconds, in one-third-octave bands as Figure B.3 has them. |
 | `frequencies` | Band centre frequencies, in hertz. |
 | `volume` | Volume of the test room, in cubic metres. |
 | `nominal_reverberation_time_s` | $T_\mathrm{nom}$ to check, in seconds; `None` centres it. |
-| `surface_area_m2` | Room surface area for the NOTE form of $R$, in square metres, with `speed_of_sound`. |
+| `surface_area` | Room surface area for the NOTE form of $R$, in square metres, with `speed_of_sound`. |
 | `speed_of_sound` | Speed of sound for the NOTE form, in metres per second. |
 | `method` | `'direct'` (default) or `'comparison'`, for the 300 m³ ceiling. |
 | `relative_humidity_percent` | Relative humidity during the test, in per cent. |
@@ -254,7 +254,7 @@ reverberation_parameter(
     frequencies: ArrayLike,
     volume: float,
     *,
-    surface_area_m2: float | None = None,
+    surface_area: float | None = None,
     speed_of_sound: float | None = None,
 ) -> np.ndarray
 ```
@@ -288,8 +288,8 @@ that volume too and nothing is read off the figure.
 | :--- | :--- |
 | `frequencies` | Band centre frequencies, in hertz. |
 | `volume` | Volume of the test room, in cubic metres. |
-| `surface_area_m2` | Total surface area of the room, in square metres; with `speed_of_sound` it selects the NOTE form. |
-| `speed_of_sound` | Speed of sound, in metres per second, required with `surface_area_m2` and refused without it. |
+| `surface_area` | Total surface area of the room, in square metres; with `speed_of_sound` it selects the NOTE form. |
+| `speed_of_sound` | Speed of sound, in metres per second, required with `surface_area` and refused without it. |
 
 **Returns:** $R$ per frequency.
 
@@ -510,7 +510,7 @@ shall be reported.
 ```python
 SpecialRoomReverberationCheck(
     frequencies: np.ndarray,
-    reverberation_time_s: np.ndarray,
+    reverberation_time: np.ndarray,
     reverberation_parameter: np.ndarray,
     nominal_reverberation_time_s: float,
     centred: bool,
@@ -524,7 +524,7 @@ SpecialRoomReverberationCheck(
 Qualification of a special reverberation test room by its
 reverberation time, volume and climate (ISO 3743-2:2018, 6.2, 6.3, 6.6).
 
-`reverberation_time_s` is the measured $T$ per band and
+`reverberation_time` is the measured $T$ per band and
 `reverberation_parameter` the $R$ of Formula (1) (or its NOTE);
 `nominal_reverberation_time_s` is $T_\mathrm{nom}$, supplied or,
 with `centred` `True`, found by centring the measured values within

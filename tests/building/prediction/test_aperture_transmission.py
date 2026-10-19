@@ -145,7 +145,7 @@ def test_circular_aperture_thin_hole_reduction_positive_at_low_f() -> None:
 def test_rejects_bad_input() -> None:
     with pytest.raises(ValueError, match=r"'field' must be one of"):
         building.slit_transmission_coefficient([500.0], 0.002, 0.1, field="oblique")
-    with pytest.raises(ValueError, match=r"'width' must be positive"):
+    with pytest.raises(ValueError, match=r"'width_m' must be positive"):
         building.slit_transmission_coefficient([500.0], -0.002, 0.1)
     with pytest.raises(ValueError, match=r"'tau' must be positive"):
         building.transmission_loss_from_coefficient([-1.0])

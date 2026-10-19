@@ -670,8 +670,8 @@ def test_attenuated_model_converges_to_the_undamped_limit() -> None:
         [100.0],
         ceiling_length=4.75,
         plenum_height_m=0.43,
-        attenuation_source=[1e-5],
-        attenuation_receiving=[1e-5],
+        attenuation_source_per_m=[1e-5],
+        attenuation_receiving_per_m=[1e-5],
     )
     assert float(attenuated.reduction_index[0]) == pytest.approx(
         float(undamped.reduction_index[0]), abs=1e-3
@@ -698,8 +698,8 @@ def test_leakage_term_bites_at_a_realistic_ceiling() -> None:
         [20.0],
         ceiling_length=4.75,
         plenum_height_m=0.43,
-        attenuation_source=[1e-6],
-        attenuation_receiving=[1e-6],
+        attenuation_source_per_m=[1e-6],
+        attenuation_receiving_per_m=[1e-6],
     )
     excess = float(attenuated.reduction_index[0] - undamped.reduction_index[0])
     assert excess == pytest.approx(0.2377, abs=2e-3)
@@ -721,8 +721,8 @@ def test_attenuated_model_is_monotonic_in_the_plenum_damping() -> None:
                 [25.0],
                 ceiling_length=5.0,
                 plenum_height_m=0.6,
-                attenuation_source=[m],
-                attenuation_receiving=[m],
+                attenuation_source_per_m=[m],
+                attenuation_receiving_per_m=[m],
             ).reduction_index[0]
         )
         for m in (1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0)
@@ -745,8 +745,8 @@ def test_attenuated_model_never_exceeds_the_undamped_path() -> None:
             [25.0],
             ceiling_length=5.0,
             plenum_height_m=0.6,
-            attenuation_source=[m],
-            attenuation_receiving=[m],
+            attenuation_source_per_m=[m],
+            attenuation_receiving_per_m=[m],
         )
         assert (
             float(attenuated.reduction_index[0])
@@ -782,8 +782,8 @@ def test_attenuated_transmission_factor_stays_below_unity() -> None:
                 [0.0],
                 ceiling_length=5.0,
                 plenum_height_m=h,
-                attenuation_source=[m],
-                attenuation_receiving=[m],
+                attenuation_source_per_m=[m],
+                attenuation_receiving_per_m=[m],
             )
             assert float(res.transmission_factor[0]) <= 1.0
             assert float(res.reduction_index[0]) >= 0.0
@@ -798,8 +798,8 @@ def test_plenum_attenuation_increases_the_reduction_index() -> None:
                 [30.0],
                 ceiling_length=4.75,
                 plenum_height_m=0.43,
-                attenuation_source=[m],
-                attenuation_receiving=[m],
+                attenuation_source_per_m=[m],
+                attenuation_receiving_per_m=[m],
             ).reduction_index[0]
         )
         for m in (0.01, 0.1, 0.5, 1.0)
@@ -821,16 +821,16 @@ def test_attenuated_model_carries_the_sidewall_factor_in_its_exponents() -> None
         [50.0],
         [100.0],
         sidewalls="reflecting",
-        attenuation_source=[0.2],
-        attenuation_receiving=[0.2],
+        attenuation_source_per_m=[0.2],
+        attenuation_receiving_per_m=[0.2],
         **kwargs,
     )
     absorbing = building.plenum_flanking_reduction_index(
         [50.0],
         [100.0],
         sidewalls="absorbing",
-        attenuation_source=[0.4],
-        attenuation_receiving=[0.4],
+        attenuation_source_per_m=[0.4],
+        attenuation_receiving_per_m=[0.4],
         **kwargs,
     )
     # The two exponents then agree exactly; only the 1/(mS LS mR LR) prefactor
@@ -848,8 +848,8 @@ def test_absorbing_sidewalls_converge_to_their_own_undamped_limit() -> None:
     attenuated = building.plenum_flanking_reduction_index(
         [50.0],
         [100.0],
-        attenuation_source=[1e-5],
-        attenuation_receiving=[1e-5],
+        attenuation_source_per_m=[1e-5],
+        attenuation_receiving_per_m=[1e-5],
         **kwargs,
     )
     assert float(attenuated.reduction_index[0]) == pytest.approx(
@@ -873,14 +873,14 @@ def test_power_split_must_be_a_fraction(name: str) -> None:
 def test_attenuation_coefficients_must_come_in_pairs() -> None:
     with pytest.raises(
         ValueError,
-        match=r"'attenuation_source' and 'attenuation_receiving' must be given together",
+        match=r"'attenuation_source_per_m' and 'attenuation_receiving_per_m' must be given together",
     ):
         building.plenum_flanking_reduction_index(
             [30.0],
             [30.0],
             ceiling_length=4.75,
             plenum_height_m=0.43,
-            attenuation_source=[0.1],
+            attenuation_source_per_m=[0.1],
         )
 
 
@@ -933,16 +933,16 @@ def test_plenum_model_names_which_attenuation_coefficient_disagrees() -> None:
     """
     with pytest.raises(
         ValueError,
-        match=r"'reduction_index_source'.*'attenuation_source'"
-        r".*'attenuation_receiving'.*shape",
+        match=r"'reduction_index_source'.*'attenuation_source_per_m'"
+        r".*'attenuation_receiving_per_m'.*shape",
     ):
         building.plenum_flanking_reduction_index(
             [30.0, 35.0, 40.0],
             [28.0, 33.0, 38.0],
             ceiling_length=4.75,
             plenum_height_m=0.43,
-            attenuation_source=[0.5, 0.5],
-            attenuation_receiving=[0.5, 0.5, 0.5],
+            attenuation_source_per_m=[0.5, 0.5],
+            attenuation_receiving_per_m=[0.5, 0.5, 0.5],
         )
 
 

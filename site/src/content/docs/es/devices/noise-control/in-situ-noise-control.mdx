@@ -356,10 +356,11 @@ imprime una desigualdad para la campaña "antes" y dos para la "después", todas
 contra el mismo cociente de 0,1, y las dos campañas pueden no coincidir:
 
 ```python
-print(environment.is_short_distance(
+geometry = environment.check_short_distance(
     source_height_m=1.0, receiver_height_m=1.5, barrier_height_m=4.0,
     source_to_barrier_m=10.0, barrier_to_receiver_m=20.0,
-))   # (False, True)
+)
+print(geometry.before, geometry.after)   # False True
 ```
 
 Por encima de 5 m/s en valor absoluto no se mide nada, lo que es un rechazo y no
@@ -415,8 +416,9 @@ que las fuentes sobre las que trabaja el silenciador se puedan apagar y medir
 aparte: la resta energética de las ecuaciones (17) y (18), con un tope de 3 dB.
 Pasado el tope la magnitud no queda determinada, y lo que se puede enunciar en su
 lugar es la desigualdad del apartado 4. `extraneous_corrected_mean_level`
-devuelve el nivel corregido y si se llegó al tope, para que un número topado no
-se pueda escribir como una determinación. El tope se juzga sobre el margen, que
+devuelve el nivel corregido, el margen con que se leyó y si se llegó al tope
+(`capped`), para que un número topado no se pueda escribir como una
+determinación. El tope se juzga sobre el margen, que
 es donde lo pone la tabla 1. Con un margen de exactamente 3 dB la resta quita
 3,02 dB, que son los 3 dB impresos sin redondear y la corrección que la tabla 1
 aplica en esa fila, así que el nivel sigue determinado; por debajo de 3 dB, no.

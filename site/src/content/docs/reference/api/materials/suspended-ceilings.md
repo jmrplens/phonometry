@@ -197,11 +197,11 @@ Whether every measurement was made at 50 % relative humidity or more (4.2.2).
 
 `None` when no humidity was given.
 
-### CeilingSpecimenCheck.satisfied
+### CeilingSpecimenCheck.passes
 
 *property*
 
-Whether every judged limit holds.
+The verdict: every judged limit holds.
 
 The fixture, the substructure, the deflection, the supports and, when
 it was given, the humidity: a humidity that was not given is not
@@ -269,7 +269,7 @@ it that a number of the arrangement as built can be held to:
   measurement (4.2.2, checked for each measurement by 4.2.3).
 
 Leaving one of them raises a [`SuspendedCeilingWarning`](/phonometry/reference/api/materials/suspended-ceilings/#suspendedceilingwarning) that names
-it, and makes `satisfied` false. A substructure and support units are
+it, and makes `passes` false. A substructure and support units are
 what 4.1.1.2.3.4 and 4.1.1.2.3.6 allow rather than require, so their
 dimensions default to zero, which is none at all, and the centre distance
 is judged only when it is given. The cap of 4.2.1 on the air-absorption

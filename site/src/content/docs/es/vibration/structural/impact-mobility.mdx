@@ -73,7 +73,7 @@ El orden de trabajo que implica la parte, y la función que juzga cada paso:
 1. **Calibrar sobre un bloque rígido** de masa conocida, suspendido libremente,
    al principio y al final de cada serie y siempre que cambie la punta o la
    masa (7.2). Su acelerancia debería leer $1/m$ con ±5 %:
-   `rigid_mass_calibration_check`, la comprobación de la ISO 7626-2 que el 7.2
+   `verify_rigid_mass_calibration`, la comprobación de la ISO 7626-2 que el 7.2
    llama esencialmente el mismo procedimiento.
 2. **Comprobar los canales entre sí** alimentando los dos con una misma señal
    de banda ancha: unidad con ±5 % y fase nula con ±5° (8.1),
@@ -650,7 +650,7 @@ de esta página que juzga el instrumento y no el registro, de ahí `verify_` en
 lugar de `check_`.
 
 **Calibración (7.2).** La comprobación con bloque rígido del 7.5.2 de la
-ISO 7626-2, `rigid_mass_calibration_check`, descrita en la [página de
+ISO 7626-2, `verify_rigid_mass_calibration`, descrita en la [página de
 movilidad](/phonometry/es/vibration/structural/mechanical-mobility/). La masa
 del bloque debe elegirse para que su movilidad sea representativa de las
 movilidades que se van a medir, y el martillo y el analizador deben estar

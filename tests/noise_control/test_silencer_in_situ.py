@@ -36,6 +36,7 @@ from phonometry.noise_control.silencer_in_situ import (
     ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K,
     ISO11820_SPEED_OF_SOUND_M_S,
     SABINE_AREA_COEFFICIENT,
+    ExtraneousCorrectionResult,
     SilencerInSituWarning,
 )
 
@@ -104,9 +105,8 @@ def test_equation_three_names_its_runs() -> None:
 
 
 def test_the_extraneous_route_subtracts_energy() -> None:
-    corrected, capped = noise_control.extraneous_corrected_mean_level(
-        [80.0, 80.0], [70.0, 70.0]
-    )
+    outcome = noise_control.extraneous_corrected_mean_level([80.0, 80.0], [70.0, 70.0])
+    corrected, capped = outcome.corrected_level, outcome.capped
     expected = 10.0 * math.log10(10.0**8.0 - 10.0**7.0)
     assert corrected == pytest.approx(expected)
     assert capped is False
@@ -114,11 +114,38 @@ def test_the_extraneous_route_subtracts_energy() -> None:
 
 def test_the_extraneous_correction_is_capped_at_three_decibels() -> None:
     with pytest.warns(SilencerInSituWarning, match="3 dB"):
-        corrected, capped = noise_control.extraneous_corrected_mean_level(
+        outcome = noise_control.extraneous_corrected_mean_level(
             [80.0, 80.0], [78.0, 78.0]
         )
+    corrected, capped = outcome.corrected_level, outcome.capped
     assert capped is True
     assert corrected < 80.0
+
+
+def test_the_extraneous_margin_is_read_from_the_two_energy_means() -> None:
+    # 80 dB over 70 dB at every point: the energy means are 80 and 70 dB, a
+    # margin of 10 dB; the uneven set has the same two means shuffled.
+    even = noise_control.extraneous_corrected_mean_level([80.0, 80.0], [70.0, 70.0])
+    uneven = noise_control.extraneous_corrected_mean_level(
+        [80.0, 82.0, 81.0], [70.0, 71.0, 72.0]
+    )
+    assert even.margin_db == pytest.approx(10.0, abs=1e-12)
+    assert uneven.margin_db == pytest.approx(10.0, abs=1e-12)
+    # The margin is of the levels as measured (Equation (2)), not of the
+    # corrected mean, which sits under them.
+    measured_mean = 10.0 * math.log10((10.0**8.0 + 10.0**8.2 + 10.0**8.1) / 3.0)
+    assert uneven.corrected_level < measured_mean
+
+
+@pytest.mark.parametrize(
+    ("corrected", "margin", "name"),
+    [(math.nan, 3.0, "corrected_level"), (80.0, math.inf, "margin_db")],
+)
+def test_the_extraneous_result_refuses_a_number_that_is_not_finite(
+    corrected: float, margin: float, name: str
+) -> None:
+    with pytest.raises(ValueError, match=f"'{name}' must be finite"):
+        ExtraneousCorrectionResult(corrected_level=corrected, margin_db=margin)
 
 
 def test_an_extraneous_level_above_the_measurement_is_refused() -> None:
@@ -578,9 +605,9 @@ def background_correction(margin_db: float) -> float:
         # tested on its own below; this helper is about the arithmetic under
         # it, which the module returns uncapped either way.
         warnings.simplefilter("ignore", SilencerInSituWarning)
-        corrected, _ = noise_control.extraneous_corrected_mean_level(
+        corrected = noise_control.extraneous_corrected_mean_level(
             [CARRIER_DB], [CARRIER_DB - margin_db]
-        )
+        ).corrected_level
     return CARRIER_DB - corrected
 
 
@@ -750,9 +777,10 @@ def test_the_two_routes_agree_at_the_three_decibel_margin() -> None:
     assert float(noise_control.silencer_background_correction([3.0])[0]) == 3.0
     with warnings.catch_warnings():
         warnings.simplefilter("error", SilencerInSituWarning)
-        corrected, capped = noise_control.extraneous_corrected_mean_level(
+        outcome = noise_control.extraneous_corrected_mean_level(
             [CARRIER_DB], [CARRIER_DB - 3.0]
         )
+        corrected, capped = outcome.corrected_level, outcome.capped
     assert capped is False
     assert CARRIER_DB - corrected == pytest.approx(3.0206, abs=5e-4)
 
@@ -760,9 +788,10 @@ def test_the_two_routes_agree_at_the_three_decibel_margin() -> None:
 def test_a_margin_under_three_decibels_trips_the_extraneous_cap() -> None:
     """A tenth under the row Table 1 still accepts is past the cap."""
     with pytest.warns(SilencerInSituWarning, match="3 dB"):
-        corrected, capped = noise_control.extraneous_corrected_mean_level(
+        outcome = noise_control.extraneous_corrected_mean_level(
             [CARRIER_DB], [CARRIER_DB - 2.9]
         )
+    corrected, capped = outcome.corrected_level, outcome.capped
     assert capped is True
     assert CARRIER_DB - corrected > 3.0206
 
@@ -778,9 +807,9 @@ def test_no_printed_three_decibel_margin_trips_the_cap() -> None:
         warnings.simplefilter("error", SilencerInSituWarning)
         for step in range(901):
             level = round(40.0 + 0.1 * step, 10)
-            _, capped = noise_control.extraneous_corrected_mean_level(
+            capped = noise_control.extraneous_corrected_mean_level(
                 [level], [level - 3.0]
-            )
+            ).capped
             assert capped is False
 
 
@@ -795,9 +824,9 @@ def test_the_margin_window_is_the_declared_thousandth_of_a_nanodecibel() -> None
     for deficit, expected in ((5e-10, False), (2e-9, True), (1e-8, True)):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", SilencerInSituWarning)
-            _, capped = noise_control.extraneous_corrected_mean_level(
+            capped = noise_control.extraneous_corrected_mean_level(
                 [CARRIER_DB], [CARRIER_DB - (3.0 - deficit)]
-            )
+            ).capped
         assert capped is expected
 
 
@@ -807,9 +836,8 @@ def test_two_worked_background_subtractions() -> None:
         oracle.BIES_EXAMPLE_1_4_DB,
         oracle.BARRON_EXAMPLE_3_6_DB,
     ):
-        corrected, capped = noise_control.extraneous_corrected_mean_level(
-            [level], [background]
-        )
+        outcome = noise_control.extraneous_corrected_mean_level([level], [background])
+        corrected, capped = outcome.corrected_level, outcome.capped
         assert round(corrected, 1) == printed
         assert capped is False
 

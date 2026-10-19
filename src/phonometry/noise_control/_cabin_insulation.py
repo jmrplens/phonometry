@@ -517,9 +517,17 @@ class SourcePositionCheck(RichDisplay):
         )
 
     @property
-    def satisfied(self) -> bool:
-        """Whether :attr:`n_positions_used` reaches :attr:`n_required_positions`."""
+    def passes(self) -> bool:
+        """The verdict: :attr:`n_positions_used` reaches :attr:`n_required_positions`."""
         return int(self.n_positions_used) >= self.n_required_positions
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "a SourcePositionCheck has no truth value; read its '.passes'"
+        raise TypeError(msg)
 
     @property
     def exceeds_max(self) -> bool:
@@ -601,21 +609,33 @@ class BandFlatnessCheck(OwnsArrays):
         )
 
     @property
-    def satisfied(self) -> NDArray[np.bool_]:
+    def within_limit(self) -> NDArray[np.bool_]:
         """Whether each octave meets its limit.
 
         Judged settled: three readings 6,0 dB apart in decimal are within the
         6 dB of 125 Hz whichever way the last bits of their difference fall.
-        An octave with no printed limit is reported as satisfied.
+        An octave with no printed limit is reported as within it.
         """
         limit = self.limit_db
         held = np.isnan(limit) | (settled(self.spread_db) <= limit)
         return np.asarray(held, dtype=np.bool_)
 
     @property
-    def all_satisfied(self) -> bool:
-        """Whether every octave with a printed limit meets it."""
-        return bool(np.all(self.satisfied))
+    def passes(self) -> bool:
+        """The verdict: every octave with a printed limit meets it."""
+        return bool(np.all(self.within_limit))
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`, and the
+            octave by octave answer is :attr:`within_limit`.
+        """
+        msg = (
+            "a BandFlatnessCheck has no truth value; read its '.passes' or "
+            "'.within_limit'"
+        )
+        raise TypeError(msg)
 
 
 @dataclass(frozen=True)

@@ -1956,13 +1956,13 @@ $$
 
 Past 15 dB of margin the background is negligible and $K_1$ is zero. Below 6 dB
 (grade 2) or 3 dB (grade 3) the correction is held at its value there and the
-level becomes an upper bound; the second return value says so.
+level becomes an upper bound, which the result's `upper_bound` says.
 
 ```python
 from phonometry import emission
 
-k1, upper_bound = emission.background_noise_correction_at_workstation(79.0, 70.0)
-print(round(k1, 1), upper_bound)          # 0.6 False
+background = emission.background_noise_correction_at_workstation(79.0, 70.0)
+print(round(background.correction, 1), background.upper_bound)          # 0.6 False
 ```
 
 ## 3. The room, and the one ratio it comes down to

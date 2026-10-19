@@ -25,7 +25,7 @@ says that this is the depth the data for CE marking is compiled at.
 from phonometry import materials
 
 check = materials.check_ceiling_specimen(area=10.8, mounting="E", depth_mm=200.0)
-print(check.satisfied)            # True
+print(check.passes)            # True
 print(check.ce_marking_depth)     # True
 print(materials.mounting_type("E"))
 # suspended from a hard surface with an air space behind it
@@ -39,7 +39,7 @@ arrangement can be held to: a substructure no more than 30 mm wide and 50 mm
 deep, support units no larger than 50 mm by 50 mm at centre distances of at
 least 1,2 m, a mounting fixture of at least 20 kg/m2, a deflection of no more
 than 5 mm and, when `relative_humidity_percent` gives one value per measurement,
-the 50 % of 4.2.2 in every one of them. Leaving one makes `satisfied` false and
+the 50 % of 4.2.2 in every one of them. Leaving one makes `passes` false and
 raises a `SuspendedCeilingWarning` that says which. The 0,6 m test object, the
 10 degree edge angle and the substructure pitch of about 0,6 m are targets the
 clause asks to be aimed at, published as constants to build to and not judged.
@@ -50,7 +50,7 @@ dry = materials.check_ceiling_specimen(
     support_width_mm=40.0, support_height_mm=40.0, support_center_distance_m=1.2,
     relative_humidity_percent=[41.0, 44.0],
 )
-print(dry.supports_ok, dry.humidity_ok, dry.satisfied)   # True False False
+print(dry.supports_ok, dry.humidity_ok, dry.passes)   # True False False
 ```
 
 ## How the measurement goes

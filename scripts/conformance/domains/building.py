@@ -2401,7 +2401,7 @@ def _chk_iso10846_stiffness_impedance() -> Outcome:
     "Rigid-mass calibration: accelerance mag(A) = 1/m  (m=10 kg)",
 )
 def _chk_iso7626_2_rigid_mass_accelerance() -> Outcome:
-    res = ph.vibration.rigid_mass_calibration_check(
+    res = ph.vibration.verify_rigid_mass_calibration(
         [ref.ISO7626_2_CAL_ACCELERANCE], [100.0], ref.ISO7626_2_CAL_MASS_KG
     )
     value = float(res.expected[0]) if res.passes else math.nan
@@ -2414,7 +2414,7 @@ def _chk_iso7626_2_rigid_mass_accelerance() -> Outcome:
     "Rigid-mass calibration: mobility mag(Y) = 1/(2πf·m) at 100 Hz  (m=10 kg)",
 )
 def _chk_iso7626_2_rigid_mass_mobility() -> Outcome:
-    res = ph.vibration.rigid_mass_calibration_check(
+    res = ph.vibration.verify_rigid_mass_calibration(
         [ref.ISO7626_2_CAL_MOBILITY_100HZ],
         [100.0],
         ref.ISO7626_2_CAL_MASS_KG,
@@ -2667,7 +2667,7 @@ def _chk_iso7626_5_rigid_block() -> Outcome:
     )
     band = res.frequencies <= 500.0
     accelerance = np.abs(res.to("accelerance")[band])
-    check = ph.vibration.rigid_mass_calibration_check(
+    check = ph.vibration.verify_rigid_mass_calibration(
         accelerance, res.frequencies[band], block_kg
     )
     worst = float(accelerance[int(np.argmax(np.abs(accelerance - 1.0 / block_kg)))])

@@ -156,7 +156,7 @@ facade.
 
 The weather is part of the measurement. `wind_class` is Table 1, with a downwind
 class and a calm one over any distance and an upwind class over short distances
-alone; `is_short_distance` is the geometry test of 6.3.1 that decides whether
+alone; `check_short_distance` is the geometry test of 6.3.1 that decides whether
 that class exists at all, and the two campaigns can disagree about it. Past 5 m/s
 no measurement is made, the two campaigns must agree within 2 m/s and 10 °C, and
 the cloud cover is recorded in the four classes of Table 2.

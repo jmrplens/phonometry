@@ -15,15 +15,15 @@ import pytest
 
 from phonometry import metrology
 from phonometry.building.measurement.uncertainty import (
+    RequirementConformity,
     UncertainValue,
+    assess_requirement_conformity,
     band_uncertainty,
     insulation_coverage_factor,
     insulation_expanded_uncertainty,
     max_repeatability_standard_deviation,
     prediction_input_uncertainty,
     reduce_by_independent_measurements,
-    satisfies_lower_requirement,
-    satisfies_upper_requirement,
     single_number_uncertainty,
     single_number_uncertainty_uncorrelated,
     uncertain_value,
@@ -535,16 +535,71 @@ def test_single_number_uncorrelated_length_mismatch() -> None:
 # --------------------------------------------------------------------------- #
 # Conformity with a requirement (Formulae 4/5).
 # --------------------------------------------------------------------------- #
-def test_satisfies_lower_requirement() -> None:
+def test_a_minimum_requirement_is_met_beyond_the_uncertainty() -> None:
     # R'w = 54, U = 1.5 -> 52.5 > 52 required: pass.
-    assert satisfies_lower_requirement(54.0, 1.5, 52.0) is True
-    assert satisfies_lower_requirement(53.0, 1.5, 52.0) is False
+    assert (
+        assess_requirement_conformity(54.0, 1.5, 52.0, bound="minimum").passes is True
+    )
+    assert (
+        assess_requirement_conformity(53.0, 1.5, 52.0, bound="minimum").passes is False
+    )
 
 
-def test_satisfies_upper_requirement() -> None:
+def test_a_maximum_requirement_is_met_beyond_the_uncertainty() -> None:
     # L'n,w = 50, U = 1.0 -> 51 < 53 required: pass.
-    assert satisfies_upper_requirement(50.0, 1.0, 53.0) is True
-    assert satisfies_upper_requirement(52.5, 1.0, 53.0) is False
+    assert (
+        assess_requirement_conformity(50.0, 1.0, 53.0, bound="maximum").passes is True
+    )
+    assert (
+        assess_requirement_conformity(52.5, 1.0, 53.0, bound="maximum").passes is False
+    )
+
+
+def test_a_conformity_record_carries_its_margin() -> None:
+    # Formula (5): y - U - Yrequired = 54 - 1,5 - 52 = 0,5 dB; Formula (4):
+    # Yrequired - (y + U) = 53 - (52,5 + 1) = -0,5 dB.
+    lower = assess_requirement_conformity(54.0, 1.5, 52.0, bound="minimum")
+    upper = assess_requirement_conformity(52.5, 1.0, 53.0, bound="maximum")
+    assert (lower.value_db, lower.expanded_uncertainty_db, lower.requirement_db) == (
+        54.0,
+        1.5,
+        52.0,
+    )
+    assert lower.margin_db == pytest.approx(0.5)
+    assert upper.margin_db == pytest.approx(-0.5)
+
+
+def test_a_value_exactly_u_from_the_requirement_does_not_conform() -> None:
+    # Both formulae are strict: a margin of zero is no conformity.
+    assert not assess_requirement_conformity(53.5, 1.5, 52.0, bound="minimum").passes
+    assert not assess_requirement_conformity(52.0, 1.0, 53.0, bound="maximum").passes
+
+
+def test_a_conformity_needs_a_side() -> None:
+    with pytest.raises(ValueError, match="'bound' must be one of"):
+        RequirementConformity(52.0, 1.5, 50.0, bound="lower")  # type: ignore[arg-type]
+
+
+def test_a_conformity_refuses_a_negative_uncertainty() -> None:
+    with pytest.raises(ValueError, match="expanded_uncertainty_db"):
+        assess_requirement_conformity(52.0, -1.5, 50.0, bound="minimum")
+
+
+@pytest.mark.parametrize(
+    ("values", "name"),
+    [
+        ((math.nan, 1.5, 50.0), "value_db"),
+        ((52.0, math.inf, 50.0), "expanded_uncertainty_db"),
+        ((52.0, 1.5, -math.inf), "requirement_db"),
+    ],
+)
+def test_a_conformity_refuses_a_number_that_is_not_finite(
+    values: tuple[float, float, float], name: str
+) -> None:
+    # A NaN margin is never positive, so it would fail every requirement
+    # silently instead of saying the input is not a number.
+    with pytest.raises(ValueError, match=f"'{name}' must be finite"):
+        RequirementConformity(*values, bound="minimum")
 
 
 # --------------------------------------------------------------------------- #

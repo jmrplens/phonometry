@@ -29,7 +29,7 @@ edition defers the full engineering method to ISO/PAS 20065; the detailed,
 self-contained algorithm implemented here is the 2007/2009 Annex C one.)
 
 **Survey method (ISO 1996-2:2017 Annex K).**
-[`tonal_seeking_survey`](/phonometry/reference/api/environment/measurement/#tonal_seeking_survey) flags a one-third-octave band that exceeds *both*
+[`assess_tonal_survey`](/phonometry/reference/api/environment/measurement/#assess_tonal_survey) flags a one-third-octave band that exceeds *both*
 neighbours by 15 dB (25–125 Hz), 8 dB (160–400 Hz) or 5 dB (500–10 000 Hz).
 
 **Mean-audibility route (ISO 1996-2:2017 Table J.1).**
@@ -76,6 +76,37 @@ Combines [`tonal_audibility`](/phonometry/reference/api/environment/measurement/
 | `center_frequency` | Critical-band centre frequency `fc`, in Hz. |
 
 **Returns:** A [`TonalAssessmentResult`](/phonometry/reference/api/environment/measurement/#tonalassessmentresult).
+
+## assess_tonal_survey
+
+```python
+assess_tonal_survey(
+    levels: Sequence[float] | np.ndarray,
+    frequencies: Sequence[float] | np.ndarray,
+) -> TonalSurveyAssessment
+```
+
+Which one-third-octave bands hold a prominent tone? (Annex K, survey method).
+
+ISO 1996-2:2017 Annex K, the objective survey method for the audibility
+of tones in noise: a band is a prominent tone when it exceeds both
+neighbours by 15 dB (25–125 Hz), 8 dB (160–400 Hz) or 5 dB
+(500–10 000 Hz).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `levels` | One-third-octave-band time-average levels, in dB. |
+| `frequencies` | The band centre frequencies, in Hz (same length). |
+
+**Returns:** The answer, as a [`TonalSurveyAssessment`](/phonometry/reference/api/environment/measurement/#tonalsurveyassessment); the bands with a prominent tone are its `prominent` and `tone_frequencies`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the inputs are empty, non-finite, or differ in length. |
 
 ## critical_bandwidth
 
@@ -395,43 +426,6 @@ dB.
 | :--- | :--- |
 | ValueError | If `center_frequency` is not positive/finite or the levels are not finite. |
 
-## tonal_seeking_survey
-
-```python
-tonal_seeking_survey(
-    levels: Sequence[float] | np.ndarray,
-    frequencies: Sequence[float] | np.ndarray,
-) -> np.ndarray
-```
-
-Flag prominent tones by the one-third-octave survey method (Annex K).
-
-A band is flagged when it exceeds *both* adjacent one-third-octave bands by
-the level difference for its range: 15 dB (25–125 Hz), 8 dB (160–400 Hz),
-5 dB (500–10 000 Hz). The two end bands (no pair of neighbours) are never
-flagged.
-
-:::note
-Annex K defines the thresholds for 25 Hz to 10 kHz only. Bands
-supplied outside that span are extrapolated with the nearest rule
-(15 dB below 25 Hz, 5 dB above 10 kHz), outside the standard.
-:::
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `levels` | One-third-octave-band time-average levels, in dB. |
-| `frequencies` | The band centre frequencies, in Hz (same length). |
-
-**Returns:** Boolean array, `True` where a prominent tone is present.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | If the inputs are empty, non-finite, or differ in length. |
-
 ## TonalAssessmentResult
 
 ```python
@@ -470,6 +464,87 @@ TonalAssessmentResult.plot(
 ```
 
 Plot the `Kt(ΔLta)` adjustment curve with this tone marked.
+
+## TonalSurveyAssessment
+
+```python
+TonalSurveyAssessment(
+    levels: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
+)
+```
+
+Prominent tones in a one-third-octave spectrum, by the survey method (Annex K).
+
+A band holds a prominent tone when it exceeds *both* adjacent
+one-third-octave bands by the level difference for its range: 15 dB
+(25–125 Hz), 8 dB (160–400 Hz), 5 dB (500–10 000 Hz). The two end bands,
+with no pair of neighbours, never do. The thresholds, the level
+differences and the answer are read from the levels and the band centres,
+so they are not fields.
+
+:::note
+Annex K defines the thresholds for 25 Hz to 10 kHz only. Bands
+supplied outside that span are judged with the nearest rule
+(15 dB below 25 Hz, 5 dB above 10 kHz), outside the standard.
+:::
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `levels` | One-third-octave-band time-average levels, in dB. |
+| `frequencies` | The band centre frequencies, in Hz (same length). |
+
+### TonalSurveyAssessment.level_differences
+
+*property*
+
+Each band less the louder of its two neighbours, in dB; NaN at the ends.
+
+### TonalSurveyAssessment.plot()
+
+```python
+TonalSurveyAssessment.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Draw the spectrum with the prominent bands marked and each band's bar.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the band bars. |
+
+**Returns:** The axes.
+
+### TonalSurveyAssessment.prominent
+
+*property*
+
+Whether each band holds a prominent tone; the two end bands never do.
+
+Judged settled: a band 5 dB above its neighbours in decimal reaches the
+threshold whichever way the last bits of the subtraction fall.
+
+### TonalSurveyAssessment.thresholds_db
+
+*property*
+
+The level difference Annex K asks of each band, in dB.
+
+### TonalSurveyAssessment.tone_frequencies
+
+*property*
+
+The centres of the bands that hold a prominent tone, in Hz.
 
 ## uncertainty_from_repeated_measurements
 

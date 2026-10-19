@@ -107,7 +107,7 @@ def test_annex_c_formula_11_with_the_printed_inputs() -> None:
     assert guide == im.GuideValues(0.2, 5.0, 0.1, edition="2023")
     assert im.assess_people_in_buildings(
         0.6, guide, kb_ftr=day, source="railway", edition="2023"
-    ).complies
+    ).passes
 
 
 def test_table_2_is_the_kb_weighting_rounded_to_a_tenth() -> None:

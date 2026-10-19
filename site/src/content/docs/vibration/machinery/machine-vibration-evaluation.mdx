@@ -323,8 +323,8 @@ from phonometry import vibration
 
 limits = vibration.INDUSTRIAL_MACHINE_ZONES["group_2", "rigid"].velocity_mm_s
 
-print(vibration.is_significant_change(0.8, limits.b_c))   # True
-print(vibration.is_significant_change(0.6, limits.b_c))   # False
+print(vibration.assess_operational_change(0.8, limits.b_c).significant)   # True
+print(vibration.assess_operational_change(0.6, limits.b_c).significant)   # False
 print(round(vibration.alarm_limit(0.9, limits.b_c), 3))   # 1.6
 print(round(vibration.alarm_limit(2.9, limits.b_c), 3))   # 3.5, at the cap
 print(round(vibration.trip_limit(limits.c_d), 3))         # 5.625
@@ -426,7 +426,7 @@ and `vibration_vector_change`. For industrial machines, the boundaries of
 Tables A.1 and A.2 in both quantities, the most-restrictive rule of 5.2.3, the
 significant change of 5.3 and the ALARM and TRIP settings of 5.4, through
 `INDUSTRIAL_MACHINE_ZONES`, `industrial_machine_zone`,
-`is_significant_change`, `alarm_limit` and `trip_limit`. For gear units, the three rating
+`assess_operational_change`, `alarm_limit` and `trip_limit`. For gear units, the three rating
 tables and the classification of ISO 20816-9, and the two rating curves of
 its Annex A, through `GEAR_UNIT_ZONES`, `GEAR_UNIT_CLASSES`,
 `gear_unit_zone_boundaries`, `gear_shaft_displacement_limit` and

@@ -1846,7 +1846,7 @@ def plot_db_hr_assessment(
     rows = np.arange(len(checks), dtype=np.float64)
     achieved = np.array([c.reported for c in checks], dtype=np.float64)
     limits = np.array([c.requirement.limit for c in checks], dtype=np.float64)
-    colours = [_C_TERTIARY if c.complies else _C_REFERENCE for c in checks]
+    colours = [_C_TERTIARY if c.passes else _C_REFERENCE for c in checks]
 
     ax.hlines(rows, limits, achieved, colors=colours, linewidth=2.0)
     ax.scatter(

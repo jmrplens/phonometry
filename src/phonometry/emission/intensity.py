@@ -69,6 +69,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
 from .._internal.boundary import settled, settled_net_share
 from .._internal.frozen import OwnsArrays
@@ -78,6 +79,7 @@ from .._internal.validation import (
     require_axis_count,
     require_equal_counts,
     require_equal_shapes,
+    require_finite_array,
     require_finite_fields,
     require_ranks,
     require_same_length,
@@ -94,6 +96,7 @@ from ..signals.spectra import (
 __all__ = [
     "TEMPORAL_VARIABILITY_LIMIT",
     "FieldIndicators",
+    "FieldStationarityCheck",
     "IntensityResult",
     "dynamic_capability_index",
     "field_indicators",
@@ -364,6 +367,67 @@ class IntensityResult(OwnsArrays):
 
 
 @dataclass(frozen=True)
+class FieldStationarityCheck(OwnsArrays):
+    r"""The temporal variability :math:`F_1` against Table B.3 (ISO 9614-1:1993).
+
+    Table B.3 lists :math:`F_1 > 0.6` as the condition that calls for action
+    code (e): reducing the temporal variability of the extraneous intensity,
+    measuring during quieter periods or lengthening the averaging time at
+    each position. A field at exactly the limit is not flagged, so it passes.
+    The limit is the table's, :data:`TEMPORAL_VARIABILITY_LIMIT`, and the
+    answers are read from :math:`F_1` and it, so they are not fields: a check
+    cannot be built against another limit.
+
+    :ivar f1: The temporal variability indicator :math:`F_1` (equation
+        (A.1)); a number, or one value per band.
+    """
+
+    f1: float | NDArray[np.float64]
+
+    def __post_init__(self) -> None:
+        """Reject an indicator the table cannot judge.
+
+        :raises ValueError: For an indicator that is not a number or a
+            one-dimensional array of them, or one that is not finite.
+        """
+        require_finite_array(self.f1, "f1")
+
+    @property
+    def limit(self) -> float:
+        """The Table B.3 limit on :math:`F_1`, :data:`TEMPORAL_VARIABILITY_LIMIT`."""
+        return TEMPORAL_VARIABILITY_LIMIT
+
+    @property
+    def stationary(self) -> bool | NDArray[np.bool_]:
+        """Whether :math:`F_1` stays within the limit: a bool, or one per band.
+
+        Judged settled: samples whose standard deviation is 0,6 of their mean
+        in decimal are at the limit, whichever side of it the last bits fall.
+        """
+        within = settled(np.asarray(self.f1, dtype=np.float64)) <= self.limit
+        return (
+            bool(within) if np.ndim(within) == 0 else np.asarray(within, dtype=np.bool_)
+        )
+
+    @property
+    def passes(self) -> bool:
+        """The verdict: :math:`F_1` stays within the limit in every band."""
+        return bool(np.all(self.stationary))
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`, and band by
+            band :attr:`stationary`.
+        """
+        msg = (
+            "a FieldStationarityCheck has no truth value; read its '.passes' "
+            "or '.stationary'"
+        )
+        raise TypeError(msg)
+
+
+@dataclass(frozen=True)
 class FieldIndicators(OwnsArrays):
     r"""ISO 9614-1:1993 Annex A field indicators over a measurement surface.
 
@@ -405,7 +469,7 @@ class FieldIndicators(OwnsArrays):
         the whole row, while F1 is broadcast onto the band axis outright, so
         one value is drawn as a flat line across every band against the
         Table B.3 limit, and the figure shows a field qualified over the
-        whole spectrum. :meth:`field_is_stationary` answers from the same
+        whole spectrum. :meth:`check_field_stationarity` answers from the same
         array, band by band.
 
         An indicator is a scalar for a single-band surface and an array for a
@@ -444,10 +508,8 @@ class FieldIndicators(OwnsArrays):
             )
         require_equal_counts(owner, counts)
 
-    def field_is_stationary(
-        self, limit: float = TEMPORAL_VARIABILITY_LIMIT
-    ) -> bool | np.ndarray:
-        r"""Whether the temporal variability stays within the Table B.3 limit.
+    def check_field_stationarity(self) -> FieldStationarityCheck:
+        r"""Is the field steady enough for the measurement? (ISO 9614-1 Table B.3).
 
         ISO 9614-1:1993 Table B.3 lists :math:`F_1 > 0.6` as the condition
         that calls for action code (e), i.e. reducing the temporal variability
@@ -455,10 +517,8 @@ class FieldIndicators(OwnsArrays):
         lengthening the averaging time at each position. A field at exactly
         the limit is not flagged.
 
-        :param limit: The Table B.3 threshold (default
-            :data:`TEMPORAL_VARIABILITY_LIMIT`, 0.6).
-        :return: ``True``/``False`` for a scalar ``f1``, or a boolean array
-            per band for a per-band ``f1``.
+        :return: The verdict, as a :class:`FieldStationarityCheck`: ``passes``
+            over every band, and band by band its ``stationary``.
         :raises ValueError: If the result carries no ``f1`` (call
             :func:`field_indicators` with ``temporal_intensity``, or use
             :func:`temporal_variability_indicator` directly).
@@ -469,11 +529,7 @@ class FieldIndicators(OwnsArrays):
                 "temporal_intensity=...) or temporal_variability_indicator()."
             )
             raise ValueError(msg)
-        # Settled: samples whose standard deviation is 0,6 of their mean in
-        # decimal are at the limit, whichever side of it the last bits fall.
-        f1 = settled(self.f1)
-        ok = f1 <= float(limit)
-        return bool(ok) if ok.ndim == 0 else ok
+        return FieldStationarityCheck(self.f1)
 
     def plot(
         self,
@@ -924,8 +980,8 @@ def _temporal_indicator_for(
     F1 follows the shape of its siblings. A 1D per-position surface carries
     scalar F2/F3/F4, so a one-column ``(M, 1)`` sample array is unwrapped to a
     scalar F1 too; otherwise
-    :meth:`FieldIndicators.field_is_stationary` would answer such a result
-    with ``array([True])`` where ``f2``/``f3``/``f4`` are plain floats. A 2D
+    :meth:`FieldIndicators.check_field_stationarity` would answer such a
+    result with ``array([True])`` where ``f2``/``f3``/``f4`` are plain floats. A 2D
     ``(positions, 1)`` surface keeps per-band arrays throughout, so F1 stays a
     length-one array there.
 

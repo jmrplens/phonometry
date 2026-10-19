@@ -2569,7 +2569,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `hearing.assess_anr_linearity`; `building.satisfies_lower_requirement`,
   `building.satisfies_upper_requirement` and
   `building.strong_coupling_satisfied`; `emission.precision_qualification`,
-  `environment.is_short_distance`, `noise_control.substitution_area_ratio`,
+  `environment.check_short_distance`, `noise_control.substitution_area_ratio`,
   `noise_control.fit_operating_line`, `noise_control.impulse_mean_level`,
   `noise_control.uncertainty_conditions`, `materials.limp_frame_applicable`,
   `materials.air_absorption_correction`, `materials.installed_dynamic_stiffness`,
@@ -3204,6 +3204,84 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `DominantFrequency`, `BuildingFrequencyEstimate`), with no `| str` beside
   them. A type checker flags a misspelt choice before the call runs; the call
   refuses it at run time as before.
+
+- **Every verdict is spelled `passes`, and none stands in for a bool.** The
+  overall pass or fail of a verdict was `passes` on most records and
+  `complies`, `satisfied`, `all_satisfied`, `acceptable` or `applicable` on
+  the rest. It is `passes` on all of them: `DBHRCheck`, `DBHRAssessment`,
+  `ActivityAssessment` and `PeriodAssessment`, whose `complies` shipped in
+  4.0.0rc1, and `PeopleAssessment`, `RailwayChange`, `MountingCheck`,
+  `CeilingSpecimenCheck`, `BackgroundMarginCheck`, `PredictionDetailCheck`,
+  `SourcePositionCheck`, `BandFlatnessCheck` and
+  `EnclosureTestEnvironmentCheck`; the per-octave mask of
+  `BandFlatnessCheck` is `within_limit`, named like the per-band
+  `within_tolerance` of the instrument verifications. A record a `verify_`,
+  `assess_` or `check_` function returns, and every record with a `passes`,
+  now refuses to be read as a truth value: `if verdict:` raises `TypeError`
+  and the message names what to read. In 4.0.0rc1 `QuasiPeakDynamicsResult`,
+  `AircraftSystemComplianceResult`, `WeightingVerification`,
+  `PhaseVerification` and `SignalBurstVerification` were always true, and so
+  were `FilterComplianceResult`, `WeightingComplianceResult` and
+  `IntensityInstrumentComplianceResult` (read `overall_class`),
+  `DamageAssessment` (read `within_guideline`, which stays: DIN 4150-3 does
+  not call exceeding a guideline value a failure), `PrecisionCriteria` (read
+  `qualified`), `TonalAssessmentResult` (read `adjustment`) and
+  `ToneAudibilityResult` (read `decisive_audibility`). A new test reads the
+  whole public API and fails on a public name pytest would collect as a test,
+  on a function or a method that answers with a bool, a tuple of them, a
+  boolean array or a verdict without a judging verb, on a judging verb that
+  returns no record,
+  on a verdict whose truth value does not raise, and on a pass or fail
+  spelled any other way than `passes`; the two regime predicates
+  `building.low_frequency_procedure_applies` and
+  `psychoacoustics.resolve_tones_separately` keep their names, since they
+  select a procedure and judge nothing.
+
+- **A judgement carries its verb, and returns a record.**
+  `vibration.is_significant_change` is `vibration.assess_operational_change`,
+  whose `OperationalChange` holds the change and the zone B limit and reads
+  the `threshold` and `significant` from them. `materials.limp_frame_applicable`
+  is `materials.check_limp_frame`, a `LimpFrameCheck` with the `ratio`, the
+  `threshold` and `passes`, and a ratio exactly on the threshold no longer
+  passes, since Allard & Atalla print both criteria as strict inequalities.
+  `FieldIndicators.field_is_stationary` is
+  `FieldIndicators.check_field_stationarity`, a `FieldStationarityCheck` with
+  `stationary` band by band and `passes` over them; the limit is the 0.6 of
+  ISO 9614-1 Table B.3 and no longer an argument.
+  `room.perceptibly_different` is
+  `room.assess_perceptible_difference`, a `PerceptibleDifference` with the
+  just-noticeable difference and `different`, and it refuses two values of
+  different shapes. The enclosure test environment of ISO 11546-2 Annex C is
+  `noise_control.check_enclosure_test_environment`, so that no public name
+  starts with `test`, and a room the standard sets no K2 limit for still
+  passes with `required_area_ratio` at `None`. The geometry test of ISO 10847
+  6.3.1 is `environment.check_short_distance`, a `ShortDistanceCheck` that
+  holds the five lengths and reads the three ratios and the `before` and
+  `after` answers from them; `wind_class` still takes the answer for the
+  campaign at hand. The prediction detail of ISO 11690-3 Table E.1 is
+  `room.check_prediction_detail` and its `PredictionDetailCheck`, and the
+  ISO 4869-3 fixture verdict is `hearing.FixtureIsolationVerification`, the
+  record `verify_fixture_isolation` returns.
+
+- **A check that returned a bare tuple returns a record.**
+  `materials.check_base_plate_scattering` returned the bands over the limit
+  of ISO 17497-1 Table 1, so an empty tuple was the pass. It returns a
+  `BasePlateScatteringCheck` that holds the eighteen bands and the measured
+  coefficients and reads the `limits`, the settled `margins`, the strict
+  `exceeds` per band, the `exceeded_frequencies` and `passes` from them; its
+  `.plot()` draws the coefficients against the stepped limit with the bands
+  over it ringed, and the diffuser guide shows it. A coefficient that is not
+  finite raises `ValueError`, where a NaN used to pass. Three background
+  corrections that returned a value and a flag return a small record each:
+  `building.background_corrected_level` a `BackgroundCorrectedLevel`
+  (`corrected_levels`, `limited`, `margins_db`, read from the two readings),
+  `emission.background_noise_correction_at_workstation` a
+  `WorkstationBackgroundCorrection` (`correction` and `upper_bound`, read
+  from the margin and the grade) and
+  `noise_control.extraneous_corrected_mean_level` an
+  `ExtraneousCorrectionResult` (the corrected level, the margin and the
+  `capped` it reads from it). Each reads its limits from its own module and
+  warns as before.
 
 - **A function is named for what it returns, and a unit stays in the name only
   where the quantity has two.** A level, a correction, a difference, an index
@@ -3920,7 +3998,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - **A verdict is read from the values it holds instead of being stored beside
   them.** Sixty-two result classes stored the pass or fail flag their
-  function had worked out: `passes`, `complies`, `qualified`, the `*_met` and
+  function had worked out: `passes`, `qualified`, the `*_met` and
   `*_ok` flags, the advisories, the per-band and overall classes of the
   IEC 61260-1, IEC 61672-1 and IEC 61043 verdicts, the per-band grade and
   screening of ISO 9614-2, the background requirement and upper bound of
@@ -4346,6 +4424,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   too, the word its figure already used.
 
 ### Removed
+
+- **`rigid_mass_calibration_check`, `satisfies_lower_requirement`,
+  `satisfies_upper_requirement`, `strong_coupling_satisfied` and
+  `tonal_seeking_survey` are gone.** `vibration.verify_rigid_mass_calibration`
+  takes the same arguments and returns the same `RigidMassCalibrationResult`;
+  it judges a measuring chain, so its verb is `verify_`. The two conformity
+  tests of ISO 12999-1 Formulae (4) and (5) are one
+  `building.assess_requirement_conformity(value_db, expanded_uncertainty_db,
+  requirement_db, bound=...)`, a `RequirementConformity` with the settled
+  `margin_db` and `passes`, both formulae still strict.
+  `building.check_strong_coupling` returns a `StrongCouplingCheck` whose
+  `holds` is the boolean array `strong_coupling_satisfied` returned, and
+  `environment.assess_tonal_survey` a `TonalSurveyAssessment` whose
+  `prominent` is the array `tonal_seeking_survey` returned, beside the
+  thresholds and the level differences it is read from, and a `.plot()`. All
+  five were names the 3.3.0 top level exported, so the migration guide lists
+  them among the names that are gone.
 
 - **`building.combine_uncertainties`, `environment.combined_standard_uncertainty`
   and `metrology.expanded_uncertainty` are gone.** The first two are
@@ -5137,7 +5232,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   A-weighted number and nothing per band, and that number is carried as the
   A-weighted total rather than passed off as a band value. The same table is
   read before the calculation, so a combination it does not print, such as the
-  reciprocity method in situ, is refused instead of answered. `test_environment_applicability` is
+  reciprocity method in situ, is refused instead of answered. `check_enclosure_test_environment` is
   Annex C of part 2 in closed form, `S_V/S = 4/((10^(K2/10) - 1) alpha)`, which
   is the curve of Figure C.1 the annex asks the reader to read off by eye, and
   it is cross-checked against `emission.environmental_correction`.
@@ -5188,7 +5283,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `phonometry.room.workroom_prediction`. The document prints almost no
   arithmetic: what it prints is Tables 1 to 4 and E.1, a way of deciding which
   of the four categories of method the data in hand can feed, and
-  `detail_is_sufficient` reads that table in both directions.
+  `check_prediction_detail` reads that table in both directions.
   `workstation_level_increase` is Annex C, which turns out to be the
   environmental correction of ISO 3744 drawn as a flow chart, and reproduces
   seven of the eight rows of its own Table C.2 within the half decibel the
@@ -5240,7 +5335,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   needs the site before the barrier was built and the indirect one borrows an
   equivalent site, and both normalise with a reference microphone above the
   top edge so that a source that ran differently on the two days does not read
-  as barrier performance. `wind_class` is Table 1, `is_short_distance` is the
+  as barrier performance. `wind_class` is Table 1, `check_short_distance` is the
   geometry test of 6.3.1 that decides whether the upwind class exists at all,
   and `barrier_background_correction` is Table 3, whose values are printed
   negative and are added, where the ISO 11820 table prints the same physical
@@ -5702,7 +5797,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   support units of 4.1.1.2.3.6 (`support_width_mm`, `support_height_mm`,
   `support_center_distance_m`) and, given one value per measurement in
   `relative_humidity_percent`, the 50 % of 4.2.2. `CeilingSpecimenCheck` gains
-  `supports_ok` and `humidity_ok`, and `satisfied` covers them; the conformance
+  `supports_ok` and `humidity_ok`, and `passes` covers them; the conformance
   row on the room climates of three real test reports reads that verdict
   instead of comparing by hand. A type E depth other than 200 mm still passes,
   and its warning no longer calls the arrangement outside EN 16487: the clause

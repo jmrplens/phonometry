@@ -1090,6 +1090,14 @@ class PrecisionCriteria(OwnsArrays):
             criterion_1 & criterion_2 & self.criterion_3 & non_uniformity_ok, dtype=bool
         )
 
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict, band by band, is :attr:`qualified`.
+        """
+        msg = "a PrecisionCriteria has no truth value; read its '.qualified'"
+        raise TypeError(msg)
+
 
 def _table_1_repeatability_db(frequencies: np.ndarray) -> np.ndarray:
     """The criterion-1 limit ``s`` of ISO 9614-3 Table 1 at each band centre, in dB."""

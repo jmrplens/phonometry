@@ -373,13 +373,13 @@ and on tiles or parquet adhesive wax carries the horizontal component to 80 Hz.
 from phonometry import vibration
 
 floor = vibration.check_loose_mounting(1.2, 63.0, direction="horizontal")
-print(f"loose, horizontal to 63 Hz: {floor.acceptable}")  # False
+print(f"loose, horizontal to 63 Hz: {floor.passes}")  # False
 print(f"  limit {floor.frequency_limit_hz:g} Hz, {floor.peak_acceleration_limit_m_s2:g} m/s2")
 
 carpet = vibration.check_loose_mounting(
     1.2, 80.0, direction="vertical", surface="soft"
 )
-print(f"loose, vertical to 80 Hz on a carpet: {carpet.acceptable}")  # True
+print(f"loose, vertical to 80 Hz on a carpet: {carpet.passes}")  # True
 print(f"  on {carpet.device}")
 ```
 

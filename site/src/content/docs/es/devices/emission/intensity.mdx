@@ -250,7 +250,7 @@ print(round(f1, 3))                          # 0.177, un campo estacionario
 fi = emission.field_indicators([74.1, 73.8, 74.5, 73.2],
                                [1.2e-5, 1.0e-5, 1.4e-5, 0.9e-5],
                                temporal_intensity=samples)
-print(fi.field_is_stationary())              # True (límite 0,6 de la tabla B.3)
+print(fi.check_field_stationarity().passes)  # True (límite 0,6 de la tabla B.3)
 ```
 
 Sobre una superficie de medición, los demás indicadores de campo del Anexo A

@@ -158,6 +158,59 @@ ARTIFICIAL_SOURCE_PLATE_MM = (4.0, 800.0, 300.0)
 ARTIFICIAL_SOURCE_STANDOFF_MM = 60.0
 ```
 
+## check_enclosure_test_environment
+
+```python
+check_enclosure_test_environment(
+    *,
+    base_standard: str,
+    mean_absorption_coefficient: float,
+    room_surface_area_m2: float,
+    measurement_surface_area_m2: float,
+) -> EnclosureTestEnvironmentCheck
+```
+
+Is this room good enough for that base standard? Annex C of part 2.
+
+Annex C asks the question the other way round from the emission
+standards: not what the environmental correction of this room is, but how
+much room a method needs. With
+$K_2 = 10 \lg (1 + 4 S / (\alpha S_V))$ held at the limit Table C.1
+sets, the ratio the room must reach is
+
+$$
+\frac{S_V}{S} = \frac{4}{(10^{K_2/10} - 1)\,\alpha}
+$$
+
+which is Figure C.1 in closed form, the curve the annex asks the reader to
+read off by eye. Take $\alpha$ from
+[`ROOM_ABSORPTION_ESTIMATES`](/phonometry/reference/api/noise_control/enclosure-insulation/#room_absorption_estimates) when nobody measured it.
+
+A standard that works by comparison with a reference sound source, ISO
+3743-1 and ISO 3747, states no $K_2$ requirement at all; for those
+the answer carries the background margin and nothing else, and
+`passes` is decided by the margin alone, which this function does
+not see. It is reported as `True` there, with
+`required_area_ratio` at `None`, so that the caller reads the table
+rather than a number the annex does not give.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `base_standard` | One of the columns of Table C.1, as [`TEST_ENVIRONMENT_REQUIREMENTS`](/phonometry/reference/api/noise_control/enclosure-insulation/#test_environment_requirements) keys them. |
+| `mean_absorption_coefficient` | $\alpha$ of the room, dimensionless. |
+| `room_surface_area_m2` | $S_V$, the total area of the room's boundary surfaces, in square metres. |
+| `measurement_surface_area_m2` | $S$, the area of the measurement surface around the source, in square metres. |
+
+**Returns:** The verdict, as an [`EnclosureTestEnvironmentCheck`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosuretestenvironmentcheck).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For an unknown standard, a coefficient outside `(0, 1]` or a non-positive area. |
+
 ## enclosure_artificial_source_insulation
 
 ```python
@@ -407,6 +460,66 @@ The band values as clause 9.4 reports them, to the nearest decibel.
 
 The measurement is outside a condition ISO 11546 states.
 
+## EnclosureTestEnvironmentCheck
+
+```python
+EnclosureTestEnvironmentCheck(
+    base_standard: str,
+    actual_area_ratio: float,
+    mean_absorption_coefficient: float,
+)
+```
+
+Whether a room is good enough for a base standard, Annex C of part 2.
+
+Table C.1 is the annex's, so its two columns, the area ratio they call for
+and the verdict are read from the standard asked about and the room, not
+stored beside them: an answer cannot be built against another limit.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `base_standard` | The standard asked about, one of the keys of [`TEST_ENVIRONMENT_REQUIREMENTS`](/phonometry/reference/api/noise_control/enclosure-insulation/#test_environment_requirements). |
+| `actual_area_ratio` | The $S_V/S$ of the room and the measurement surface given. |
+| `mean_absorption_coefficient` | The $\alpha$ the answer was read at. |
+
+### EnclosureTestEnvironmentCheck.background_margin_limit_db
+
+*property*
+
+The smallest margin over the background Table C.1 asks, in decibels.
+
+**Returns:** The margin, or `None` where the table states none.
+
+### EnclosureTestEnvironmentCheck.environmental_correction_limit_db
+
+*property*
+
+The largest $K_2$ Table C.1 allows the standard, in decibels.
+
+**Returns:** The limit, or `None` where the standard states none.
+
+### EnclosureTestEnvironmentCheck.passes
+
+*property*
+
+The verdict: the room meets the $K_2$ limit of the standard.
+
+`True` for a standard with no $K_2$ limit, whose answer turns
+on the background margin alone, which this check does not see.
+
+### EnclosureTestEnvironmentCheck.required_area_ratio
+
+*property*
+
+The smallest $S_V/S$ that meets the $K_2$ limit.
+
+$4 / ((10^{K_2/10} - 1)\,\alpha)$ at
+`mean_absorption_coefficient`.
+
+**Returns:** The ratio, or `None` where the standard states no $K_2$ limit.
+
 ## estimated_a_weighted_enclosure_insulation
 
 ```python
@@ -624,59 +737,6 @@ enclosure has room for them.
 SOURCE_WALL_CLEARANCE_FACTOR = 0.2
 ```
 
-## test_environment_applicability
-
-```python
-test_environment_applicability(
-    *,
-    base_standard: str,
-    mean_absorption_coefficient: float,
-    room_surface_area_m2: float,
-    measurement_surface_area_m2: float,
-) -> TestEnvironmentApplicability
-```
-
-Is this room good enough for that base standard? Annex C of part 2.
-
-Annex C asks the question the other way round from the emission
-standards: not what the environmental correction of this room is, but how
-much room a method needs. With
-$K_2 = 10 \lg (1 + 4 S / (\alpha S_V))$ held at the limit Table C.1
-sets, the ratio the room must reach is
-
-$$
-\frac{S_V}{S} = \frac{4}{(10^{K_2/10} - 1)\,\alpha}
-$$
-
-which is Figure C.1 in closed form, the curve the annex asks the reader to
-read off by eye. Take $\alpha$ from
-[`ROOM_ABSORPTION_ESTIMATES`](/phonometry/reference/api/noise_control/enclosure-insulation/#room_absorption_estimates) when nobody measured it.
-
-A standard that works by comparison with a reference sound source, ISO
-3743-1 and ISO 3747, states no $K_2$ requirement at all; for those
-the answer carries the background margin and nothing else, and
-`applicable` is decided by the margin alone, which this function does
-not see. It is reported as `True` there, with
-`required_area_ratio` at `None`, so that the caller reads the table
-rather than a number the annex does not give.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `base_standard` | One of the columns of Table C.1, as [`TEST_ENVIRONMENT_REQUIREMENTS`](/phonometry/reference/api/noise_control/enclosure-insulation/#test_environment_requirements) keys them. |
-| `mean_absorption_coefficient` | $\alpha$ of the room, dimensionless. |
-| `room_surface_area_m2` | $S_V$, the total area of the room's boundary surfaces, in square metres. |
-| `measurement_surface_area_m2` | $S$, the area of the measurement surface around the source, in square metres. |
-
-**Returns:** The verdict, as a [`TestEnvironmentApplicability`](/phonometry/reference/api/noise_control/enclosure-insulation/#testenvironmentapplicability).
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | For an unknown standard, a coefficient outside `(0, 1]` or a non-positive area. |
-
 ## TEST_ENVIRONMENT_REQUIREMENTS
 
 *Constant* (`mapping`).
@@ -684,66 +744,6 @@ rather than a number the annex does not give.
 ```python
 TEST_ENVIRONMENT_REQUIREMENTS = {'ISO 3743-1': (None, 6.0), 'ISO 3744': (2.0, 6.0), 'ISO 3746': (7.0, 3.0), 'ISO 3747': (None, 3.0), 'ISO 9614-1': (None, None), 'ISO 9614-2': (None, None), 'ISO 11201': (2.0, 6.0), 'ISO 11202': (7.0, 3.0), 'ISO 11204': (7.0, 6.0)}
 ```
-
-## TestEnvironmentApplicability
-
-```python
-TestEnvironmentApplicability(
-    base_standard: str,
-    actual_area_ratio: float,
-    mean_absorption_coefficient: float,
-)
-```
-
-Whether a room is good enough for a base standard, Annex C of part 2.
-
-Table C.1 is the annex's, so its two columns, the area ratio they call for
-and the verdict are read from the standard asked about and the room, not
-stored beside them: an answer cannot be built against another limit.
-
-**Attributes**
-
-| Name | Description |
-| :--- | :--- |
-| `base_standard` | The standard asked about, one of the keys of [`TEST_ENVIRONMENT_REQUIREMENTS`](/phonometry/reference/api/noise_control/enclosure-insulation/#test_environment_requirements). |
-| `actual_area_ratio` | The $S_V/S$ of the room and the measurement surface given. |
-| `mean_absorption_coefficient` | The $\alpha$ the answer was read at. |
-
-### TestEnvironmentApplicability.applicable
-
-*property*
-
-Whether the room meets the $K_2$ limit of the standard.
-
-`True` for a standard with no $K_2$ limit, whose answer turns
-on the background margin alone, which this check does not see.
-
-### TestEnvironmentApplicability.background_margin_limit_db
-
-*property*
-
-The smallest margin over the background Table C.1 asks, in decibels.
-
-**Returns:** The margin, or `None` where the table states none.
-
-### TestEnvironmentApplicability.environmental_correction_limit_db
-
-*property*
-
-The largest $K_2$ Table C.1 allows the standard, in decibels.
-
-**Returns:** The limit, or `None` where the standard states none.
-
-### TestEnvironmentApplicability.required_area_ratio
-
-*property*
-
-The smallest $S_V/S$ that meets the $K_2$ limit.
-
-$4 / ((10^{K_2/10} - 1)\,\alpha)$ at
-`mean_absorption_coefficient`.
-
-**Returns:** The ratio, or `None` where the standard states no $K_2$ limit.
 
 ## UNRESTRICTED_ENCLOSURE_VOLUME_M3
 

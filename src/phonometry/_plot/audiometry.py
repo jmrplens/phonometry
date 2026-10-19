@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
     from ..hearing._earmuff_insertion_loss import (
         EarmuffInsertionLossResult,
-        FixtureIsolationCheck,
+        FixtureIsolationVerification,
         InsertionLossUncertaintyBudget,
         PlaneProgressiveWaveCheck,
     )
@@ -1310,7 +1310,7 @@ def plot_plane_progressive_wave(
 
 
 def plot_fixture_isolation(
-    result: FixtureIsolationCheck,
+    result: FixtureIsolationVerification,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -1319,7 +1319,7 @@ def plot_fixture_isolation(
     """The fixture's acoustic isolation against the least 5.1.4 asks.
 
     Works for
-    :class:`~phonometry.hearing.FixtureIsolationCheck`.
+    :class:`~phonometry.hearing.FixtureIsolationVerification`.
 
     :param result: A fixture isolation check.
     :param ax: Existing axes, or ``None`` to create a figure.

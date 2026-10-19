@@ -205,7 +205,7 @@ def _chk_rd1367_activity_verdict() -> Outcome:
         verdict.periods[0].phase_pass
         and verdict.periods[0].daily_pass
         and not verdict.periods[0].long_term_pass
-        and not verdict.complies
+        and not verdict.passes
     )
     return Outcome(
         expected="phase and daily pass, annual fails, activity not compliant",

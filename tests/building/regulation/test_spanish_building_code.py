@@ -629,29 +629,29 @@ def test_check_rounds_before_comparing_and_reports_the_margin() -> None:
     check = hr.check_db_hr_requirement(hr.d2m_nt_atr(_D2M_NT).value, req)
     assert check.reported == 33.0
     assert check.margin == 1.0
-    assert check.complies is True
+    assert check.passes is True
 
     strict = hr.db_hr_facade_requirement(72.0, "residential", "bedrooms")  # 42 dBA
     failing = hr.check_db_hr_requirement(hr.d2m_nt_atr(_D2M_NT).value, strict)
     assert failing.margin == pytest.approx(-9.0)
-    assert failing.complies is False
+    assert failing.passes is False
 
 
 def test_check_direction_max_inverts_the_margin() -> None:
     """For a "max" requirement the margin is limit - achieved."""
     req = hr.db_hr_impact_requirement("protected", "other_unit")  # <= 65 dB
-    assert hr.check_db_hr_requirement(58.4, req).complies is True
+    assert hr.check_db_hr_requirement(58.4, req).passes is True
     assert hr.check_db_hr_requirement(58.4, req).margin == pytest.approx(7.0)
-    assert hr.check_db_hr_requirement(67.2, req).complies is False
+    assert hr.check_db_hr_requirement(67.2, req).passes is False
 
 
 def test_reverberation_check_rounds_to_one_decimal() -> None:
     """DB-HR rounds reverberation times to the first decimal (1,25 -> 1,3)."""
     req = hr.db_hr_reverberation_requirement("classroom")  # <= 0,7 s
     assert hr.check_db_hr_requirement(0.74, req).reported == 0.7
-    assert hr.check_db_hr_requirement(0.74, req).complies is True
+    assert hr.check_db_hr_requirement(0.74, req).passes is True
     assert hr.check_db_hr_requirement(0.75, req).reported == 0.8
-    assert hr.check_db_hr_requirement(0.75, req).complies is False
+    assert hr.check_db_hr_requirement(0.75, req).passes is False
 
 
 def test_assessment_aggregates_every_check() -> None:
@@ -659,10 +659,10 @@ def test_assessment_aggregates_every_check() -> None:
     facade = hr.db_hr_facade_requirement(62.0, "residential", "bedrooms")  # 32 dBA
     impact = hr.db_hr_impact_requirement("protected", "other_unit")  # <= 65 dB
     good = hr.assess_db_hr([(33.0, facade), (58.0, impact)])
-    assert [c.complies for c in good.checks] == [True, True]
-    assert good.complies is True
+    assert [c.passes for c in good.checks] == [True, True]
+    assert good.passes is True
     mixed = hr.assess_db_hr([(33.0, facade), (70.0, impact)])
-    assert mixed.complies is False
+    assert mixed.passes is False
 
 
 # --------------------------------------------------------------------------- #
@@ -723,7 +723,7 @@ def test_global_index_rejects_a_spectrum_annex_a_does_not_tabulate() -> None:
 
 
 def test_a_check_reads_its_verdict_from_the_value() -> None:
-    """The lollipop colours each check by ``complies`` and nothing else.
+    """The lollipop colours each check by ``passes`` and nothing else.
 
     A check reporting 45 dBA against a 50 dBA minimum used to take its
     rounding, its margin and its verdict as fields, so one built by hand with
@@ -734,11 +734,11 @@ def test_a_check_reads_its_verdict_from_the_value() -> None:
         "DnT,A", 50.0, "min", "dBA", 0, "DB-HR 2.1", "between dwellings"
     )
     check = hr.DBHRCheck(requirement, 45.0)
-    assert (check.reported, check.margin, check.complies) == (45.0, -5.0, False)
+    assert (check.reported, check.margin, check.passes) == (45.0, -5.0, False)
     fields = {field.name for field in dataclasses.fields(hr.DBHRCheck)}
     assert fields == {"requirement", "value"}
-    with pytest.raises(TypeError, match="complies"):
-        dataclasses.replace(check, complies=True)
+    with pytest.raises(TypeError, match="passes"):
+        dataclasses.replace(check, passes=True)
 
 
 def test_a_check_rounds_by_the_requirements_decimals() -> None:
@@ -756,7 +756,7 @@ def test_a_check_rounds_by_the_requirements_decimals() -> None:
     assert hr.check_db_hr_requirement(50.5, decibels).reported == pytest.approx(51.0)
     assert hr.DBHRCheck(decibels, 50.5).margin == pytest.approx(1.0)
     # A value just under the limit that rounds onto it complies.
-    assert hr.DBHRCheck(decibels, 49.5).complies
+    assert hr.DBHRCheck(decibels, 49.5).passes
 
 
 def test_a_check_on_an_undetermined_value_is_refused() -> None:

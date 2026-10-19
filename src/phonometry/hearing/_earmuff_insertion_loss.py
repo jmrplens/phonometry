@@ -89,7 +89,7 @@ __all__ = [
     "EARMUFF_TEST_BANDS_HZ",
     "RANDOM_INCIDENCE_VARIATION_LIMITS",
     "EarmuffInsertionLossResult",
-    "FixtureIsolationCheck",
+    "FixtureIsolationVerification",
     "InsertionLossUncertaintyBudget",
     "PlaneProgressiveWaveCheck",
     "check_plane_progressive_wave",
@@ -927,7 +927,7 @@ def _isolation_requirement(frequencies: np.ndarray) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class FixtureIsolationCheck(OwnsArrays):
+class FixtureIsolationVerification(OwnsArrays):
     """Whether the test fixture isolates its microphone well enough (5.1.4).
 
     The requirement is the clause's, read from the bands as
@@ -948,7 +948,7 @@ class FixtureIsolationCheck(OwnsArrays):
         :raises ValueError: if the isolation does not hold one value per band.
         """
         if np.asarray(self.isolation).shape != np.asarray(self.frequencies).shape:
-            msg = "FixtureIsolationCheck: 'isolation' must hold one value per band."
+            msg = "FixtureIsolationVerification: 'isolation' must hold one value per band."
             raise ValueError(msg)
 
     @property
@@ -992,8 +992,8 @@ class FixtureIsolationCheck(OwnsArrays):
         :raises TypeError: Always; the verdict is :attr:`passes`.
         """
         msg = (
-            "a FixtureIsolationCheck has no truth value; read its '.passes' for "
-            "the verdict"
+            "a FixtureIsolationVerification has no truth value; read its "
+            "'.passes' for the verdict"
         )
         raise TypeError(msg)
 
@@ -1017,7 +1017,7 @@ def verify_fixture_isolation(
     cup_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-) -> FixtureIsolationCheck:
+) -> FixtureIsolationVerification:
     """Does the test fixture isolate its microphone well enough? (5.1.4).
 
     With the test signal of 5.3 at the actual test site, the microphone is
@@ -1033,7 +1033,7 @@ def verify_fixture_isolation(
     :param cup_levels: The level with the cup sealed on, per band, in dB.
     :param frequencies: The centre frequencies, in hertz, or ``None`` for the
         22 bands of 63 Hz to 8 kHz.
-    :return: :class:`FixtureIsolationCheck`.
+    :return: :class:`FixtureIsolationVerification`.
     :raises ValueError: for levels that are not finite or do not match the
         bands.
     """
@@ -1043,7 +1043,7 @@ def verify_fixture_isolation(
         msg = "'open_levels' and 'cup_levels' must be one spectrum each on the same bands."
         raise ValueError(msg)
     freqs = _band_axis(frequencies, open_levels.shape[1], "verify_fixture_isolation")
-    return FixtureIsolationCheck(
+    return FixtureIsolationVerification(
         frequencies=freqs,
         isolation=open_levels[0] - cup[0],
     )

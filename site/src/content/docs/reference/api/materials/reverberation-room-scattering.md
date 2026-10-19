@@ -142,20 +142,105 @@ must not exceed the Table 1 limits (Clause 6.2). See
 | :--- | :--- |
 | ValueError | for non-positive `V`, `S`, `c` or `T`. |
 
+## BasePlateScatteringCheck
+
+```python
+BasePlateScatteringCheck(
+    frequencies: NDArray[np.float64],
+    scattering: NDArray[np.float64],
+)
+```
+
+The scattering of the base plate alone against Table 1 (ISO 17497-1, 6.2).
+
+6.2 has the scattering coefficient of the base plate alone, worked by
+8.1.4 ([`base_plate_scattering`](/phonometry/reference/api/materials/reverberation-room-scattering/#base_plate_scattering)), measured to check the quality of
+the arrangement, and says the values of Table 1 "shall not be exceeded".
+The limits are the table's, so they are read from the bands and are not
+fields: a check cannot be built against other limits, nor on bands the
+table does not list.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | The eighteen one-third-octave bands of Table 1, [`BASE_PLATE_BANDS_HZ`](/phonometry/reference/api/materials/reverberation-room-scattering/#base_plate_bands_hz), in hertz (equivalent full scale). |
+| `scattering` | $s_\mathrm{base}$ in each band, dimensionless. |
+
+### BasePlateScatteringCheck.exceeded_frequencies
+
+*property*
+
+The bands over their limit, in hertz, in ascending order.
+
+### BasePlateScatteringCheck.exceeds
+
+*property*
+
+Whether each band is over its limit; at the limit is not over it.
+
+### BasePlateScatteringCheck.limits
+
+*property*
+
+The largest $s_\mathrm{base}$ Table 1 allows in each band.
+
+### BasePlateScatteringCheck.margins
+
+*property*
+
+The limit less the measured coefficient in each band, settled.
+
+Positive or zero inside the limit, negative over it, judged to nine
+decimals so a coefficient worked out to the printed limit in decimal
+is not taken past it by the last bits.
+
+### BasePlateScatteringCheck.passes
+
+*property*
+
+The verdict: no band exceeds its Table 1 limit.
+
+### BasePlateScatteringCheck.plot()
+
+```python
+BasePlateScatteringCheck.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Draw $s_\mathrm{base}$ against the stepped limit of Table 1.
+
+Requires matplotlib (`pip install phonometry[plot]`).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the measured coefficient curve. |
+
+**Returns:** The axes, with the bands over the limit marked.
+
 ## check_base_plate_scattering
 
 ```python
 check_base_plate_scattering(
     scattering: Mapping[Any, float] | Sequence[float] | ArrayLike,
-) -> tuple[int, ...]
+) -> BasePlateScatteringCheck
 ```
 
-Check base-plate scattering against Table 1 (ISO 17497-1, Clause 6.2).
+Is the base plate good enough for the measurement? (ISO 17497-1, 6.2).
 
-Every band whose measured base-plate scattering coefficient exceeds the
-[`BASE_PLATE_MAX_SCATTERING`](/phonometry/reference/api/materials/reverberation-room-scattering/#base_plate_max_scattering) limit is collected and a single
-[`ScatteringDiffusionWarning`](/phonometry/reference/api/materials/reverberation-room-scattering/#scatteringdiffusionwarning) is issued when any band is over the
-limit.
+The scattering coefficient of the base plate alone, from
+[`base_plate_scattering`](/phonometry/reference/api/materials/reverberation-room-scattering/#base_plate_scattering), is held to the
+[`BASE_PLATE_MAX_SCATTERING`](/phonometry/reference/api/materials/reverberation-room-scattering/#base_plate_max_scattering) limit of each band of Table 1. A single
+[`ScatteringDiffusionWarning`](/phonometry/reference/api/materials/reverberation-room-scattering/#scatteringdiffusionwarning) names the bands over the limit, when
+there are any.
 
 **Parameters**
 
@@ -163,13 +248,13 @@ limit.
 | :--- | :--- |
 | `scattering` | Measured base-plate scattering coefficients, either a mapping keyed by one-third-octave centre frequency (Hz) or a sequence of 18 values ordered as [`BASE_PLATE_BANDS_HZ`](/phonometry/reference/api/materials/reverberation-room-scattering/#base_plate_bands_hz). |
 
-**Returns:** Tuple of the centre frequencies (Hz) that exceed the limit, in ascending order (empty if the base plate is compliant).
+**Returns:** The verdict, as a [`BasePlateScatteringCheck`](/phonometry/reference/api/materials/reverberation-room-scattering/#baseplatescatteringcheck); the bands over the limit are its [`exceeded_frequencies`](/phonometry/reference/api/materials/reverberation-room-scattering/#baseplatescatteringcheckexceeded_frequencies).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a mapping missing a band or a sequence of the wrong length. |
+| ValueError | for a mapping missing a band, a sequence of the wrong length, or a coefficient that is not finite (NaN or infinite). |
 
 ## random_incidence_absorption
 

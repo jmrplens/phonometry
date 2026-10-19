@@ -153,11 +153,11 @@ $$
 $$
 
 which is Figure C.1 in closed form: the curve the annex asks the reader to read
-off by eye. `test_environment_applicability` evaluates it and compares it with
+off by eye. `check_enclosure_test_environment` evaluates it and compares it with
 the room in front of you.
 
 ```python
-verdict = noise_control.test_environment_applicability(
+verdict = noise_control.check_enclosure_test_environment(
     base_standard="ISO 3744",
     mean_absorption_coefficient=0.15,
     room_surface_area_m2=520.0,
@@ -165,7 +165,7 @@ verdict = noise_control.test_environment_applicability(
 )
 print(round(verdict.required_area_ratio, 1))  # 45.6
 print(round(verdict.actual_area_ratio, 1))    # 36.9
-print(verdict.applicable)                     # False
+print(verdict.passes)                     # False
 ```
 
 That room cannot carry a precision determination. It can carry a survey one,
@@ -191,7 +191,7 @@ surface and keep it for both runs. Determine the machine's sound power without
 the enclosure, fit the enclosure without moving the machine or the microphones,
 and determine it again. Where the machine cannot be run twice, use the
 reciprocity method or the artificial source of Annex A instead, and say which in
-the report. In situ, run `test_environment_applicability` on the room before
+the report. In situ, run `check_enclosure_test_environment` on the room before
 anything else: a room that cannot meet the environmental correction the base
 standard asks for will not be rescued by a careful measurement.
 
@@ -252,7 +252,7 @@ by_position = [
 check = noise_control.check_source_positions(by_position)
 print(check.max_octave_spread_db)   # 4.5
 print(check.n_required_positions)     # 5
-print(check.satisfied)              # False
+print(check.passes)                   # False
 ```
 
 Two more positions, and the clause adds that the three used first should not be
@@ -354,7 +354,7 @@ through `weighted_enclosure_insulation`; the estimate of Annex C and Annex D thr
 `estimated_a_weighted_enclosure_insulation`; the leak, seal and fill ratios of the
 definitions; the source clearance of 7.2; and the whole of Annex C of part 2,
 with Table C.1, Table C.2 and Figure C.1 in closed form through
-`test_environment_applicability`, cross-checked against the environmental
+`check_enclosure_test_environment`, cross-checked against the environmental
 correction of ISO 3744. From ISO 11957: Equations (1), (2) and (3) through
 `cabin_insulation`, with the prime of definition 3.6 and the refusal to name
 an A-weighted insulation outside the actual-noise method; the ISO 717-1 rating

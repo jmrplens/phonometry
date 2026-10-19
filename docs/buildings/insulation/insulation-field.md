@@ -395,7 +395,10 @@ print(round(uv.lower, 1), round(uv.upper, 1))      # 50.2 53.8  ->  52 ± 1.8 dB
 # Declaring conformity uses the ONE-sided factor (k = 1.65): does R'w provably
 # clear a 50 dB requirement?
 uc = building.uncertain_value(52.0, "rprime_w", "B", one_sided=True)
-print(building.satisfies_lower_requirement(52.0, uc.expanded_uncertainty, 50.0))   # True
+conformity = building.assess_requirement_conformity(
+    52.0, uc.expanded_uncertainty, 50.0, bound="minimum"
+)
+print(conformity.passes)   # True
 ```
 
 Impact quantities offer situations B/C only (Table 4, no 500 Hz band in the 2020

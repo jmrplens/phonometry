@@ -448,13 +448,13 @@ def test_assess_activity_reproduces_ejemplo_3_3_for_a_new_activity() -> None:
     assert day.phase_pass is True
     assert day.daily_pass is True
     assert day.long_term_pass is False
-    assert day.complies is False
+    assert day.passes is False
 
     assert evening.reported_level == 51
     assert evening.reported_long_term == 50
-    assert evening.complies is True
+    assert evening.passes is True
 
-    assert verdict.complies is False
+    assert verdict.passes is False
 
 
 def test_assess_activity_reproduces_ejemplo_3_3_for_an_operating_activity() -> None:
@@ -470,7 +470,7 @@ def test_assess_activity_reproduces_ejemplo_3_3_for_an_operating_activity() -> N
         new_activity=False,
     )
     assert all(p.long_term_pass is None for p in verdict.periods)
-    assert verdict.complies is True
+    assert verdict.passes is True
 
 
 def test_assess_activity_accepts_annual_levels_directly() -> None:
@@ -509,8 +509,8 @@ def test_operating_activity_without_annual_information_is_allowed() -> None:
     assert day.long_term_corrected_level is None
     assert day.reported_long_term is None
     assert day.long_term_pass is None
-    assert day.complies is True
-    assert verdict.complies is True
+    assert day.passes is True
+    assert verdict.passes is True
 
 
 def test_assess_activity_flags_a_phase_that_exceeds_the_five_decibel_allowance() -> (
@@ -522,7 +522,7 @@ def test_assess_activity_flags_a_phase_that_exceeds_the_five_decibel_allowance()
     night = verdict.periods[0]
     assert night.phase_limit == 50.0
     assert night.phase_pass is False
-    assert night.complies is False
+    assert night.passes is False
 
 
 @pytest.mark.parametrize(
@@ -550,7 +550,7 @@ def test_the_daily_index_takes_three_decibels_and_a_phase_five(
     day = verdict.periods[0]
     assert (day.daily_limit, day.phase_limit) == (58.0, 60.0)
     assert (day.daily_pass, day.phase_pass) == (daily, phase)
-    assert day.complies is (daily and phase)
+    assert day.passes is (daily and phase)
 
 
 def test_assess_activity_reports_only_the_periods_supplied() -> None:
@@ -748,7 +748,7 @@ def test_the_three_evaluation_periods_are_accepted() -> None:
 def test_an_assessment_over_no_period_is_refused() -> None:
     """An empty assessment complied vacuously and rendered an empty acta.
 
-    ``complies`` is an ``all()`` over nothing, so it answered ``True``, and
+    ``passes`` is an ``all()`` over nothing, so it answered ``True``, and
     the fiche printed its conclusion and PASS verdict over a phase table
     with no rows before the figure gave up with an ``IndexError`` about
     axis 0 of size 0.

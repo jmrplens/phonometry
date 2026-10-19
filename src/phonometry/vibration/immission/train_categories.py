@@ -385,13 +385,21 @@ class RailwayChange(RichDisplay):
         )
 
     @property
-    def complies(self) -> bool:
-        r"""Whether the requirements count as met for the planned case.
+    def passes(self) -> bool:
+        r"""The verdict: the requirements count as met for the planned case.
 
         :math:`KB_\mathrm{Fmax}` keeps to :math:`A_\mathrm{u}`, or both the
         :math:`KB_\mathrm{Fmax}` and the :math:`KB_\mathrm{FTr}` condition hold.
         """
         return self.kb_fmax_met and self.kb_ftr_met
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "a RailwayChange has no truth value; read its '.passes'"
+        raise TypeError(msg)
 
 
 def _increase_percent(before: float, after: float) -> float:

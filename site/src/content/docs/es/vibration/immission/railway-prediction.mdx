@@ -257,7 +257,7 @@ print(guide)  # GuideValues(a_u=0.1, a_o=0.6, a_r=0.07, time_of_day='night', edi
 verdict = vibration.assess_people_in_buildings(
     prediction.kb_fmax, guide, kb_ftr=night, source="railway", edition="2023"
 )
-print(verdict.complies, verdict.criterion)  # True A_r
+print(verdict.passes, verdict.criterion)  # True A_r
 ```
 
 La fórmula (13) va en sentido contrario, de un espectro de niveles a un

@@ -59,7 +59,7 @@ import numpy as np
 
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
-from .._internal.frozen import OwnsArrays
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import require_choice, require_finite_array
 from .._internal.warnings import PhonometryWarning
 from ..io._resolve import resolve_fs
@@ -116,8 +116,10 @@ __all__ = [
     "InterauralCorrelationResult",
     "LateLateralResult",
     "LateralEnergyResult",
+    "PerceptibleDifference",
     "SoundStrengthResult",
     "StageSupportResult",
+    "assess_perceptible_difference",
     "directivity_energy_average",
     "early_lateral_energy_fraction",
     "free_field_reference_level",
@@ -127,7 +129,6 @@ __all__ = [
     "late_lateral_sound_level",
     "min_receiver_positions",
     "octave_pair_averages",
-    "perceptibly_different",
     "reverberation_room_reference_level",
     "single_number_average",
     "sound_pressure_exposure_level",
@@ -1785,13 +1786,93 @@ def octave_pair_averages(values: ArrayLike, frequencies: ArrayLike) -> dict[str,
     }
 
 
-def perceptibly_different(symbol: str, first: ArrayLike, second: ArrayLike) -> bool:
-    """Whether two values of a quantity differ by its Table A.1 JND.
+@dataclass(frozen=True)
+class PerceptibleDifference(OwnsArrays):
+    """Two values of a quantity against its just-noticeable difference (Table A.1).
 
     The comparison is absolute for every quantity but the early decay time,
     whose JND the table prints as "Rel. 5 %", a fraction of the value rather
-    than a difference in seconds. The late lateral sound level has no JND at
-    all, printed as "Not known", and this function refuses to invent one.
+    than a difference in seconds. The JND and the answer are read from the
+    symbol and the two values, so they are not fields: a record cannot be
+    built against another JND.
+
+    :ivar symbol: The quantity, as :data:`TABLE_A1` keys it, or ``"J_LFC"``.
+    :ivar first: One value, in the quantity's unit.
+    :ivar second: The other, of the same shape.
+    """
+
+    symbol: str
+    first: NDArray[np.float64]
+    second: NDArray[np.float64]
+
+    def __post_init__(self) -> None:
+        """Reject a quantity Table A.1 gives no JND for, or values that do not pair.
+
+        :raises ValueError: If the symbol is not one Table A.1 prints, if the
+            table prints no just-noticeable difference for it, or if the two
+            values do not have the same shape.
+        """
+        quantity = _table_a1_row(self.symbol)
+        if quantity.just_noticeable_difference is None:
+            msg = (
+                f"ISO 3382-1:2009, Table A.1 prints the just-noticeable "
+                f"difference of {quantity.symbol} as 'Not known', so two values "
+                "of it cannot be compared against one."
+            )
+            raise ValueError(msg)
+        first = np.asarray(self.first, dtype=np.float64)
+        second = np.asarray(self.second, dtype=np.float64)
+        if first.shape != second.shape:
+            msg = "'first' and 'second' must have the same shape."
+            raise ValueError(msg)
+        object.__setattr__(self, "first", read_only(first))
+        object.__setattr__(self, "second", read_only(second))
+
+    @property
+    def just_noticeable_difference(self) -> float:
+        """The JND Table A.1 prints, a fraction of the value when it is relative."""
+        jnd = _table_a1_row(self.symbol).just_noticeable_difference
+        return float(jnd) if jnd is not None else math.nan
+
+    @property
+    def relative(self) -> bool:
+        """Whether the JND is a fraction of the value (only EDT, "Rel. 5 %")."""
+        return _table_a1_row(self.symbol).relative_jnd
+
+    @property
+    def different(self) -> bool:
+        """Whether the two differ by at least the JND, everywhere they are given.
+
+        A listener could then be expected to hear it. A relative JND is a
+        fraction of the mean of the two, the reading that does not depend on
+        which one is called the reference. Judged settled: 1,95 and 2,05 s
+        differ by the 0,1 s of a JND in decimal whichever side of it the
+        subtraction lands.
+        """
+        a = np.asarray(self.first, dtype=np.float64)
+        b = np.asarray(self.second, dtype=np.float64)
+        limit = self.just_noticeable_difference
+        if self.relative:
+            reference = 0.5 * np.abs(a + b)
+            return bool(np.all(settled(np.abs(a - b) - limit * reference) >= 0.0))
+        return bool(np.all(settled(np.abs(a - b)) >= limit))
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the answer it carries.
+
+        :raises TypeError: Always; the answer is :attr:`different`.
+        """
+        msg = "a PerceptibleDifference has no truth value; read its '.different'"
+        raise TypeError(msg)
+
+
+def assess_perceptible_difference(
+    symbol: str, first: ArrayLike, second: ArrayLike
+) -> PerceptibleDifference:
+    """Would a listener hear the difference between two values? (Table A.1).
+
+    The late lateral sound level has no JND at all, printed as "Not known",
+    and this function refuses to invent one.
 
     :param symbol: The quantity, as :data:`TABLE_A1` keys it. ``"J_LFC"``
         is taken too: Table A.1 prints the early lateral energy fraction as
@@ -1800,30 +1881,18 @@ def perceptibly_different(symbol: str, first: ArrayLike, second: ArrayLike) -> b
         just-noticeable difference and its typical range.
     :param first: One value, in the quantity's unit.
     :param second: The other, of the same shape.
-    :return: True when the two differ by at least the just-noticeable
-        difference, so a listener could be expected to hear it.
-    :raises ValueError: If the symbol is not one Table A.1 prints, or if the
-        table prints no just-noticeable difference for it.
+    :return: The answer, as a :class:`PerceptibleDifference`; its
+        :attr:`~PerceptibleDifference.different` is true when the two differ by
+        at least the just-noticeable difference.
+    :raises ValueError: If the symbol is not one Table A.1 prints, if the
+        table prints no just-noticeable difference for it, or if the two
+        values do not have the same shape.
     """
-    quantity = _table_a1_row(symbol)
-    if quantity.just_noticeable_difference is None:
-        msg = (
-            f"ISO 3382-1:2009, Table A.1 prints the just-noticeable "
-            f"difference of {quantity.symbol} as 'Not known', so two values "
-            "of it cannot be compared against one."
-        )
-        raise ValueError(msg)
-    a = np.asarray(first, dtype=np.float64)
-    b = np.asarray(second, dtype=np.float64)
-    limit = quantity.just_noticeable_difference
-    if quantity.relative_jnd:
-        # "Rel. 5 %" of what is not printed; the mean of the two is the
-        # reading that does not depend on which one is called the reference.
-        reference = 0.5 * np.abs(a + b)
-        return bool(np.all(settled(np.abs(a - b) - limit * reference) >= 0.0))
-    # Judged settled: 1,95 and 2,05 s differ by the 0,1 s of a JND in decimal
-    # whichever side of it the subtraction lands.
-    return bool(np.all(settled(np.abs(a - b)) >= limit))
+    return PerceptibleDifference(
+        symbol,
+        np.asarray(first, dtype=np.float64),
+        np.asarray(second, dtype=np.float64),
+    )
 
 
 def _table_a1_row(symbol: str) -> AuditoriumQuantity:

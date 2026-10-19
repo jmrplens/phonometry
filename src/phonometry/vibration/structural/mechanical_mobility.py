@@ -64,7 +64,7 @@ used for its data-quality checks are
 :func:`phonometry.electroacoustics.frequency_response.coherence`; both are
 exported at the package top level. This module adds the ISO 7626-2 acceptance
 criteria on top of them: the operational rigid-mass calibration of 7.5.2
-(:func:`rigid_mass_calibration_check`, +/- 5 %) and the Annex A normalized
+(:func:`verify_rigid_mass_calibration`, +/- 5 %) and the Annex A normalized
 random error with its < 5 % averaging criterion (:func:`random_error_percent`).
 """
 
@@ -104,7 +104,7 @@ __all__ = [
     "convert_frf",
     "random_error_percent",
     "resonance_frequency",
-    "rigid_mass_calibration_check",
+    "verify_rigid_mass_calibration",
     "sdof_accelerance",
     "sdof_mobility",
     "sdof_mobility_result",
@@ -417,14 +417,14 @@ class RigidMassCalibrationResult(OwnsArrays):
         )
 
 
-def rigid_mass_calibration_check(
+def verify_rigid_mass_calibration(
     frf: ArrayLike,
     frequencies: ArrayLike,
     mass: float,
     *,
     quantity: str = "accelerance",
 ) -> RigidMassCalibrationResult:
-    r"""Check an operational calibration on a rigid mass (ISO 7626-2, 7.5.2).
+    r"""Verify an operational calibration on a rigid mass (ISO 7626-2, 7.5.2).
 
     The measured frequency response of a freely suspended rigid calibration
     block of known mass ``m`` shall agree within +/- 5 % with its known correct
@@ -454,7 +454,7 @@ def rigid_mass_calibration_check(
     freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     measured = np.abs(np.atleast_1d(np.asarray(frf, dtype=np.complex128)))
     require_equal_shapes(
-        "rigid_mass_calibration_check",
+        "verify_rigid_mass_calibration",
         {"frf": measured.shape, "frequencies": freq.shape},
         "frequency",
     )

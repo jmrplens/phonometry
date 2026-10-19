@@ -443,6 +443,14 @@ class DamageAssessment(RichDisplay):
         # in decimal and a last bit under it in binary.
         return bool(settled(self.velocity_mm_s - self.guideline_mm_s) <= 0.0)
 
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the answer it carries.
+
+        :raises TypeError: Always; the answer is :attr:`within_guideline`.
+        """
+        msg = "a DamageAssessment has no truth value; read its '.within_guideline'"
+        raise TypeError(msg)
+
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
     ) -> Axes:

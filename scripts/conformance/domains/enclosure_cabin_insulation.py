@@ -158,7 +158,7 @@ def _chk_figure_c1_closed_form() -> Outcome:
     assert limit is not None
     worst = 0.0
     for alpha in ROOM_ABSORPTION_ESTIMATES:
-        verdict = ph.noise_control.test_environment_applicability(
+        verdict = ph.noise_control.check_enclosure_test_environment(
             base_standard="ISO 3744",
             mean_absorption_coefficient=alpha,
             room_surface_area_m2=surface,
@@ -484,13 +484,13 @@ def _chk_npl_annex_c_against_the_measurement() -> Outcome:
         room_surface_m2, _, _, _, alpha = oracle.NPL_ROOMS[room]
         for surface, measured in printed.items():
             total += 1
-            verdict = ph.noise_control.test_environment_applicability(
+            verdict = ph.noise_control.check_enclosure_test_environment(
                 base_standard="ISO 3746",
                 mean_absorption_coefficient=alpha,
                 room_surface_area_m2=room_surface_m2,
                 measurement_surface_area_m2=oracle.NPL_SURFACE_M2[surface],
             )
-            matching += int(verdict.applicable is (measured <= ceiling))
+            matching += int(verdict.passes is (measured <= ceiling))
     return count(
         matching,
         total,
@@ -516,13 +516,13 @@ def _chk_npl_annex_c_at_the_precision_ceiling() -> Outcome:
     for room, printed in oracle.NPL_MEASURED_K2A.items():
         room_surface_m2, _, _, _, alpha = oracle.NPL_ROOMS[room]
         for surface, measured in printed.items():
-            verdict = ph.noise_control.test_environment_applicability(
+            verdict = ph.noise_control.check_enclosure_test_environment(
                 base_standard="ISO 3744",
                 mean_absorption_coefficient=alpha,
                 room_surface_area_m2=room_surface_m2,
                 measurement_surface_area_m2=oracle.NPL_SURFACE_M2[surface],
             )
-            if verdict.applicable is (measured <= ceiling):
+            if verdict.passes is (measured <= ceiling):
                 matching += 1
             else:
                 differing.append(f"{room}{surface}")
@@ -554,12 +554,12 @@ def _chk_npl_room_e_area_conflict() -> Outcome:
     for room_surface_m2 in (table_nine_m2, table_six_m2):
         agreeing[room_surface_m2] = sum(
             int(
-                ph.noise_control.test_environment_applicability(
+                ph.noise_control.check_enclosure_test_environment(
                     base_standard="ISO 3746",
                     mean_absorption_coefficient=oracle.NPL_ROOMS["E"][4],
                     room_surface_area_m2=room_surface_m2,
                     measurement_surface_area_m2=oracle.NPL_SURFACE_M2[surface],
-                ).applicable
+                ).passes
                 is (value <= ceiling)
             )
             for surface, value in measured.items()
@@ -684,13 +684,13 @@ def _chk_baua_applicability_verdict() -> Outcome:
             oracle.BAUA_SURFACES_M2, (at_half_metre, at_one_metre), strict=True
         ):
             total += 1
-            verdict = ph.noise_control.test_environment_applicability(
+            verdict = ph.noise_control.check_enclosure_test_environment(
                 base_standard="ISO 11202",
                 mean_absorption_coefficient=alpha,
                 room_surface_area_m2=room_surface_m2,
                 measurement_surface_area_m2=surface_m2,
             )
-            matching += int(verdict.applicable is (printed <= ceiling))
+            matching += int(verdict.passes is (printed <= ceiling))
     return count(
         matching,
         total,

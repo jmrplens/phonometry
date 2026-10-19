@@ -87,14 +87,14 @@ def test_example_8_the_metro_is_zeroed_in_formula_6_only() -> None:
         source="railway",
         edition="2023",
     )
-    assert not verdict.complies
+    assert not verdict.passes
     assert verdict.criterion == "A_r"
     # By night the trams exceed the A_o of 0,2 for a new building (6.5.3.7).
     night = im.guide_values("residential", time_of_day="night", edition="2023")
     at_night = im.assess_people_in_buildings(
         im.railway_kb_fmax(kb_ftm), night, source="railway", edition="2023"
     )
-    assert not at_night.complies
+    assert not at_night.passes
     assert at_night.criterion == "A_o"
 
 
@@ -143,7 +143,7 @@ def test_example_9_the_change_of_the_night_severity_exceeds_25_percent() -> None
         guide=guide,
         time_of_day="night",
     )
-    assert not change.complies
+    assert not change.passes
     assert change.kb_fmax_met  # 0,66 above the 0,6 of a surface line, but no increase
     assert not change.kb_ftr_met
     assert change.kb_fmax_increase_percent == 0.0
@@ -156,7 +156,7 @@ def test_example_9_the_change_of_the_night_severity_exceeds_25_percent() -> None
         guide=guide,
         time_of_day="night",
     )
-    assert within.complies
+    assert within.passes
     assert within.kb_ftr_increase_percent == pytest.approx(12.5)
 
 
@@ -226,7 +226,7 @@ def test_the_change_of_nothing_is_nothing() -> None:
         kb_ftr_after=0.0,
         guide=im.railway_guide_values("mixed"),
     )
-    assert change.complies
+    assert change.passes
     assert change.kb_fmax_increase_percent == 0.0
     grown = im.assess_railway_change(
         kb_fmax_before=0.0,
@@ -235,7 +235,7 @@ def test_the_change_of_nothing_is_nothing() -> None:
         kb_ftr_after=0.2,
         guide=im.railway_guide_values("mixed"),
     )
-    assert not grown.complies
+    assert not grown.passes
     assert np.isinf(grown.kb_ftr_increase_percent)
 
 
@@ -261,7 +261,7 @@ def test_a_planned_case_within_a_u_is_met_before_any_change_is_looked_at() -> No
         guide=guide,
         time_of_day="night",
     )
-    assert change.complies
+    assert change.passes
     assert change.kb_fmax_met
     assert change.kb_ftr_met
     assert change.kb_ftr_increase_percent == pytest.approx(80.0)

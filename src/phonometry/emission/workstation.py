@@ -52,7 +52,7 @@ already uses, ISO 3744:2010 Equation (16), but this group sets its own
 thresholds: 15 dB of margin makes it negligible, and 6 dB (grade 2) or 3 dB
 (grade 3) is as far down as a result may be claimed. Below that the correction
 is clamped and the level becomes an upper bound, which is why
-:func:`background_noise_correction_at_workstation` returns the clamp rather than
+:func:`background_noise_correction_at_workstation` reports the clamp rather than
 raising: the reading is still worth reporting, it just stops being a
 determination.
 
@@ -129,6 +129,7 @@ __all__ = [
     "MAX_K3",
     "NEGLIGIBLE_BACKGROUND_MARGIN_DB",
     "EmissionPressureResult",
+    "WorkstationBackgroundCorrection",
     "background_noise_correction_at_workstation",
     "emission_expanded_uncertainty",
     "emission_sound_pressure_level",
@@ -239,28 +240,80 @@ class EmissionPressureResult(OwnsArrays):
         )
 
 
-def background_noise_correction_at_workstation(
-    measured_level: ArrayLike,
-    background_level: ArrayLike,
-    *,
-    grade: Grade = "engineering",
-) -> tuple[float | NDArray[np.float64], bool]:
-    r"""Background-noise correction :math:`K_1` for the ISO 11200 group.
+@dataclass(frozen=True)
+class WorkstationBackgroundCorrection(OwnsArrays):
+    r"""The background-noise correction :math:`K_1` of the ISO 11200 group.
 
     .. math::
 
        K_1 = -10 \lg \left( 1 - 10^{-0,1 \Delta L} \right)\ \mathrm{dB},
        \qquad \Delta L = L'_p - L_p(B)
 
+    Above :data:`NEGLIGIBLE_BACKGROUND_MARGIN_DB` the correction is taken as
+    zero, and below the grade's entry in :data:`MIN_BACKGROUND_MARGIN_DB` it
+    is held at the value it has there. The correction and whether it was held
+    are read from the margin and the grade, so they are not fields: a record
+    cannot be built to hold a correction its margin does not give.
+
+    :ivar background_margin_db: :math:`\Delta L`, the reading with the
+        machine running less the reading with it stopped, in decibels; a
+        number, or one value per band.
+    :ivar grade: ``'engineering'`` (grade 2, 6 dB) or ``'survey'`` (grade 3,
+        3 dB), which sets how far down a determination may be claimed.
+    """
+
+    background_margin_db: float | NDArray[np.float64]
+    _: KW_ONLY
+    grade: Grade = "engineering"
+
+    def __post_init__(self) -> None:
+        """Reject a grade the group does not name.
+
+        :raises ValueError: For a grade that is neither of the two.
+        """
+        _check_grade(self.grade)
+
+    @property
+    def _floor_db(self) -> float:
+        return MIN_BACKGROUND_MARGIN_DB[self.grade]
+
+    @property
+    def correction(self) -> float | NDArray[np.float64]:
+        """:math:`K_1`, in decibels: a number, or one value per band."""
+        delta = np.asarray(self.background_margin_db, dtype=np.float64)
+        clamped = np.clip(delta, self._floor_db, None)
+        correction = -10.0 * np.log10(1.0 - np.power(10.0, -0.1 * clamped))
+        # The criteria are judged on the settled margin, so a difference of two
+        # readings that is 15 dB in decimal is not taken as above it in binary.
+        judged = settled(delta)
+        correction = np.where(judged > NEGLIGIBLE_BACKGROUND_MARGIN_DB, 0.0, correction)
+        return _like(np.asarray(correction, dtype=np.float64))
+
+    @property
+    def upper_bound(self) -> bool:
+        """Whether the correction was held anywhere, which makes the level an upper bound.
+
+        A held correction does not fail the measurement; it makes the level an
+        upper bound, which the caller must carry into what it publishes.
+        """
+        judged = settled(np.asarray(self.background_margin_db, dtype=np.float64))
+        return bool(np.any(judged < self._floor_db))
+
+
+def background_noise_correction_at_workstation(
+    measured_level: ArrayLike,
+    background_level: ArrayLike,
+    *,
+    grade: Grade = "engineering",
+) -> WorkstationBackgroundCorrection:
+    r"""Background-noise correction :math:`K_1` for the ISO 11200 group.
+
     ISO 11201:2010 Equation (5), ISO 11202:2010 Equation (8) and
     ISO 11204:2010 Equation (7), one expression printed three times. It is the
     same closed form as ISO 3744:2010 Equation (16) on the sound-power side, and
-    this group puts its own thresholds around it: above
-    :data:`NEGLIGIBLE_BACKGROUND_MARGIN_DB` the correction is taken as zero, and
-    below the grade's entry in :data:`MIN_BACKGROUND_MARGIN_DB` it is held
-    at the value it has there. A held correction does not fail the measurement;
-    it makes the level an upper bound, which the second return value reports and
-    the caller must carry into what it publishes.
+    this group puts its own thresholds around it, which
+    :class:`WorkstationBackgroundCorrection` applies. A held correction emits
+    a :class:`SoundPowerWarning`.
 
     :param measured_level: The reading with the machine running,
         :math:`L'_p`, in decibels; a scalar or one value per band.
@@ -268,7 +321,9 @@ def background_noise_correction_at_workstation(
         decibels, of the same shape.
     :param grade: ``'engineering'`` (grade 2, 6 dB) or ``'survey'`` (grade 3,
         3 dB), which sets how far down a determination may be claimed.
-    :return: The correction in decibels, and whether any value was clamped.
+    :return: The correction, as a :class:`WorkstationBackgroundCorrection`:
+        :math:`K_1` in its ``correction``, and in its ``upper_bound`` whether
+        the background held it anywhere.
     :raises ValueError: If the two arguments do not have the same shape, or the
         grade is neither of the two.
     """
@@ -282,18 +337,11 @@ def background_noise_correction_at_workstation(
             "reading per source reading."
         )
         raise ValueError(msg)
-
-    floor = MIN_BACKGROUND_MARGIN_DB[checked]
-    delta = measured - background
-    clamped = np.clip(delta, floor, None)
-    correction = -10.0 * np.log10(1.0 - np.power(10.0, -0.1 * clamped))
-    # The criteria are judged on the settled margin, so a difference of two
-    # readings that is 15 dB in decimal is not taken as above it in binary.
-    judged = settled(delta)
-    correction = np.where(judged > NEGLIGIBLE_BACKGROUND_MARGIN_DB, 0.0, correction)
-
-    held = bool(np.any(judged < floor))
-    if held:
+    result = WorkstationBackgroundCorrection(
+        _like(np.asarray(measured - background, dtype=np.float64)), grade=checked
+    )
+    if result.upper_bound:
+        floor = MIN_BACKGROUND_MARGIN_DB[checked]
         warnings.warn(
             f"the background is within {floor:g} dB of the source in at least "
             f"one band, so K1 is held at its value there and the emission "
@@ -302,7 +350,7 @@ def background_noise_correction_at_workstation(
             SoundPowerWarning,
             stacklevel=2,
         )
-    return _like(np.asarray(correction, dtype=np.float64)), held
+    return result
 
 
 def local_environmental_correction(ratio: ArrayLike) -> float | NDArray[np.float64]:

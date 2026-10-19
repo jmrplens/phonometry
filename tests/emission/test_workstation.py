@@ -78,7 +78,8 @@ def test_annex_b_example_2_earns_grade_2() -> None:
 
 def test_annex_b_example_3_background_correction() -> None:
     """79,0 dB against a 70,0 dB background is a 0,6 dB correction."""
-    k1, held = ws.background_noise_correction_at_workstation(79.0, 70.0)
+    outcome = ws.background_noise_correction_at_workstation(79.0, 70.0)
+    k1, held = outcome.correction, outcome.upper_bound
     assert k1 == pytest.approx(0.6, abs=0.05)
     assert not held
     assert ws.emission_sound_pressure_level(
@@ -231,7 +232,8 @@ def test_the_ratio_refuses_a_negative_environmental_correction() -> None:
 
 def test_a_background_far_below_needs_no_correction() -> None:
     """Past 15 dB of margin the standard says to take K1 as zero."""
-    k1, held = ws.background_noise_correction_at_workstation(90.0, 70.0)
+    outcome = ws.background_noise_correction_at_workstation(90.0, 70.0)
+    k1, held = outcome.correction, outcome.upper_bound
     assert k1 == 0.0
     assert not held
 
@@ -239,7 +241,8 @@ def test_a_background_far_below_needs_no_correction() -> None:
 def test_a_background_too_close_clamps_and_warns() -> None:
     """The reading is still worth reporting; it stops being a determination."""
     with pytest.warns(SoundPowerWarning, match="upper bound"):
-        k1, held = ws.background_noise_correction_at_workstation(80.0, 77.0)
+        outcome = ws.background_noise_correction_at_workstation(80.0, 77.0)
+    k1, held = outcome.correction, outcome.upper_bound
     assert held
     # Held at the grade-2 floor of 6 dB, which is a 1,3 dB correction.
     assert k1 == pytest.approx(1.256, abs=0.005)
@@ -248,12 +251,12 @@ def test_a_background_too_close_clamps_and_warns() -> None:
 def test_the_survey_grade_reaches_three_decibels_lower() -> None:
     """Grade 3 may be determined from a 3 dB margin, where grade 2 may not."""
     with pytest.warns(SoundPowerWarning):
-        _, held_engineering = ws.background_noise_correction_at_workstation(
+        held_engineering = ws.background_noise_correction_at_workstation(
             80.0, 76.0, grade="engineering"
-        )
-    _, held_survey = ws.background_noise_correction_at_workstation(
+        ).upper_bound
+    held_survey = ws.background_noise_correction_at_workstation(
         80.0, 76.0, grade="survey"
-    )
+    ).upper_bound
     assert held_engineering
     assert not held_survey
 

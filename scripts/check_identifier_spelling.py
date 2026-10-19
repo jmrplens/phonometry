@@ -447,7 +447,12 @@ EXEMPT: dict[tuple[str, str, str], str] = {
     ): _SURNAME,
     (
         "phonometry.materials.absorbers.porous",
-        "limp_frame_applicable(criterion)",
+        "check_limp_frame(criterion)",
+        "doutres",
+    ): _SURNAME,
+    (
+        "phonometry.materials.absorbers.porous",
+        "LimpFrameCheck(criterion)",
         "doutres",
     ): _SURNAME,
 }

@@ -71,12 +71,12 @@ print(guide)  # GuideValues(a_u=0.3, a_o=6.0, a_r=0.15, time_of_day='day', editi
 
 # Anexo C, ejemplo 1: la vibración estacionaria de 5 Hz de una serrería, KB_Fmax = 0.25.
 verdict = vibration.assess_people_in_buildings(0.25, guide)
-print(verdict.complies, verdict.criterion)  # True A_u
+print(verdict.passes, verdict.criterion)  # True A_u
 
 # Por encima de A_o la pregunta se acaba al revés, salvo que los sucesos sean raros.
 print(vibration.assess_people_in_buildings(6.5, guide).criterion)  # A_o
 blast = vibration.assess_people_in_buildings(2.0, guide, rare_short_events=True)
-print(blast.complies)  # True
+print(blast.passes)  # True
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/people_guide_values.svg" alt="Dos paneles, de día y de noche, con los cinco tipos de zona de la tabla 1 en el eje horizontal y los valores de referencia en un eje vertical logarítmico de 0,05 a 10. En cada panel una barra azul es el valor inferior A u, una barra verde a su lado el valor de valoración A r, y un triángulo rojo encima el valor superior A o. De día los valores inferiores bajan de 0,4 en una zona industrial a 0,1 en una sensible y los superiores de 6 a 3; de noche los inferiores bajan de 0,3 a 0,1 y los superiores de 0,6 a 0,15, una década entera por debajo del día" width="96%" />
@@ -180,8 +180,8 @@ evening = vibration.assessment_vibration_severity(
 print(f"KB_FTr = {evening:.2f}")  # 0.20
 
 guide = vibration.guide_values("commercial")
-print(vibration.assess_people_in_buildings(0.47, guide, kb_ftr=kb_ftr).complies)   # True
-print(vibration.assess_people_in_buildings(0.47, guide, kb_ftr=evening).complies)  # False
+print(vibration.assess_people_in_buildings(0.47, guide, kb_ftr=kb_ftr).passes)   # True
+print(vibration.assess_people_in_buildings(0.47, guide, kb_ftr=evening).passes)  # False
 ```
 
 La misma fórmula dada la vuelta dice cuánto tiempo puede actuar una fuente antes
@@ -275,7 +275,7 @@ guide = vibration.guide_values("residential")
 verdict = vibration.assess_people_in_buildings(
     0.92, guide, kb_ftr=railway.kb_ftr, source="railway"
 )
-print(verdict.complies, verdict.criterion)  # False A_r
+print(verdict.passes, verdict.criterion)  # False A_r
 ```
 
 El anexo D da la vuelta a la fórmula (A.3) y la convierte en una figura: con una

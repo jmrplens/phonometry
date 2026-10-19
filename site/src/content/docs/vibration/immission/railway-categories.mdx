@@ -130,7 +130,7 @@ guide = vibration.guide_values("residential", edition="2023")
 verdict = vibration.assess_people_in_buildings(
     vibration.railway_kb_fmax(kb_ftm), guide, kb_ftr=day, source="railway", edition="2023"
 )
-print(verdict.complies, verdict.criterion)  # False A_r
+print(verdict.passes, verdict.criterion)  # False A_r
 ```
 
 Under the draft a railway is compared with $A_\mathrm{o}$ like any other source,
@@ -143,7 +143,7 @@ from phonometry import vibration
 
 night = vibration.guide_values("residential", time_of_day="night", edition="2023")
 verdict = vibration.assess_people_in_buildings(0.851, night, source="railway", edition="2023")
-print(verdict.complies, verdict.criterion)  # False A_o
+print(verdict.passes, verdict.criterion)  # False A_o
 ```
 
 ## 3. A new line, and an old one made bigger
@@ -203,7 +203,7 @@ change = vibration.assess_railway_change(
     guide=vibration.railway_guide_values("mixed", time_of_day="night"),
     time_of_day="night",
 )
-print(change.complies, change.kb_fmax_met, change.kb_ftr_met)  # False True False
+print(change.passes, change.kb_fmax_met, change.kb_ftr_met)  # False True False
 print(f"{change.kb_ftr_increase_percent:.0f} %")  # 44 %
 ```
 
@@ -297,7 +297,7 @@ print(vibration.guide_values("mixed", time_of_day="night", edition="2023"))
 # The draft's Example 3: inside the 15 % and no longer excused by it.
 guide = vibration.guide_values("mixed", time_of_day="night", edition="2023")
 verdict = vibration.assess_people_in_buildings(0.114, guide, kb_ftr=0.075, edition="2023")
-print(verdict.complies, verdict.criterion)  # False A_r
+print(verdict.passes, verdict.criterion)  # False A_r
 
 print(vibration.guide_values("residential", source="road_existing", edition="2023"))
 # GuideValues(a_u=0.225, a_o=3.0, a_r=0.105, time_of_day='day', edition='2023')

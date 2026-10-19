@@ -53,6 +53,37 @@ hall, and this module does not make them follow the weather.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
+## assess_perceptible_difference
+
+```python
+assess_perceptible_difference(
+    symbol: str,
+    first: ArrayLike,
+    second: ArrayLike,
+) -> PerceptibleDifference
+```
+
+Would a listener hear the difference between two values? (Table A.1).
+
+The late lateral sound level has no JND at all, printed as "Not known",
+and this function refuses to invent one.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `symbol` | The quantity, as [`TABLE_A1`](/phonometry/reference/api/rooms/auditorium/#table_a1) keys it. `"J_LFC"` is taken too: Table A.1 prints the early lateral energy fraction as one row, "J_LF or J_LFC", so both weightings of [`early_lateral_energy_fraction`](/phonometry/reference/api/rooms/auditorium/#early_lateral_energy_fraction) share its four bands, its just-noticeable difference and its typical range. |
+| `first` | One value, in the quantity's unit. |
+| `second` | The other, of the same shape. |
+
+**Returns:** The answer, as a [`PerceptibleDifference`](/phonometry/reference/api/rooms/auditorium/#perceptibledifference); its [`different`](/phonometry/reference/api/rooms/auditorium/#perceptibledifferencedifferent) is true when the two differ by at least the just-noticeable difference.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the symbol is not one Table A.1 prints, if the table prints no just-noticeable difference for it, or if the two values do not have the same shape. |
+
 ## AuditoriumQuantity
 
 ```python
@@ -806,38 +837,55 @@ pair means little for them.
 OCTAVE_PAIRS_HZ = {'low': (125.0, 250.0), 'mid': (500.0, 1000.0), 'high': (2000.0, 4000.0)}
 ```
 
-## perceptibly_different
+## PerceptibleDifference
 
 ```python
-perceptibly_different(
+PerceptibleDifference(
     symbol: str,
-    first: ArrayLike,
-    second: ArrayLike,
-) -> bool
+    first: NDArray[np.float64],
+    second: NDArray[np.float64],
+)
 ```
 
-Whether two values of a quantity differ by its Table A.1 JND.
+Two values of a quantity against its just-noticeable difference (Table A.1).
 
 The comparison is absolute for every quantity but the early decay time,
 whose JND the table prints as "Rel. 5 %", a fraction of the value rather
-than a difference in seconds. The late lateral sound level has no JND at
-all, printed as "Not known", and this function refuses to invent one.
+than a difference in seconds. The JND and the answer are read from the
+symbol and the two values, so they are not fields: a record cannot be
+built against another JND.
 
-**Parameters**
+**Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `symbol` | The quantity, as [`TABLE_A1`](/phonometry/reference/api/rooms/auditorium/#table_a1) keys it. `"J_LFC"` is taken too: Table A.1 prints the early lateral energy fraction as one row, "J_LF or J_LFC", so both weightings of [`early_lateral_energy_fraction`](/phonometry/reference/api/rooms/auditorium/#early_lateral_energy_fraction) share its four bands, its just-noticeable difference and its typical range. |
+| `symbol` | The quantity, as [`TABLE_A1`](/phonometry/reference/api/rooms/auditorium/#table_a1) keys it, or `"J_LFC"`. |
 | `first` | One value, in the quantity's unit. |
 | `second` | The other, of the same shape. |
 
-**Returns:** True when the two differ by at least the just-noticeable difference, so a listener could be expected to hear it.
+### PerceptibleDifference.different
 
-**Raises**
+*property*
 
-| Exception | When |
-| :--- | :--- |
-| ValueError | If the symbol is not one Table A.1 prints, or if the table prints no just-noticeable difference for it. |
+Whether the two differ by at least the JND, everywhere they are given.
+
+A listener could then be expected to hear it. A relative JND is a
+fraction of the mean of the two, the reading that does not depend on
+which one is called the reference. Judged settled: 1,95 and 2,05 s
+differ by the 0,1 s of a JND in decimal whichever side of it the
+subtraction lands.
+
+### PerceptibleDifference.just_noticeable_difference
+
+*property*
+
+The JND Table A.1 prints, a fraction of the value when it is relative.
+
+### PerceptibleDifference.relative
+
+*property*
+
+Whether the JND is a fraction of the value (only EDT, "Rel. 5 %").
 
 ## REFERENCE_DISTANCE_M
 

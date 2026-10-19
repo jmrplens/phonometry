@@ -354,7 +354,7 @@ def test_figure_c1_is_the_environmental_correction_solved_for_the_room() -> None
 
 def test_a_room_at_the_required_ratio_is_applicable() -> None:
     surface = 14.1
-    verdict = noise_control.test_environment_applicability(
+    verdict = noise_control.check_enclosure_test_environment(
         base_standard="ISO 3744",
         mean_absorption_coefficient=0.15,
         room_surface_area_m2=surface * 60.0,
@@ -362,22 +362,22 @@ def test_a_room_at_the_required_ratio_is_applicable() -> None:
     )
     assert verdict.required_area_ratio is not None
     assert verdict.actual_area_ratio == pytest.approx(60.0)
-    assert verdict.applicable is (60.0 >= verdict.required_area_ratio)
+    assert verdict.passes is (60.0 >= verdict.required_area_ratio)
     assert verdict.background_margin_limit_db == 6.0
 
 
 def test_a_hard_small_room_fails_the_precision_method() -> None:
-    verdict = noise_control.test_environment_applicability(
+    verdict = noise_control.check_enclosure_test_environment(
         base_standard="ISO 3744",
         mean_absorption_coefficient=0.05,
         room_surface_area_m2=100.0,
         measurement_surface_area_m2=14.1,
     )
-    assert verdict.applicable is False
+    assert verdict.passes is False
 
 
 def test_a_comparison_method_states_no_environmental_limit() -> None:
-    verdict = noise_control.test_environment_applicability(
+    verdict = noise_control.check_enclosure_test_environment(
         base_standard="ISO 3747",
         mean_absorption_coefficient=0.05,
         room_surface_area_m2=100.0,
@@ -385,12 +385,12 @@ def test_a_comparison_method_states_no_environmental_limit() -> None:
     )
     assert verdict.environmental_correction_limit_db is None
     assert verdict.required_area_ratio is None
-    assert verdict.applicable is True
+    assert verdict.passes is True
 
 
 def test_an_absorption_coefficient_above_one_is_refused() -> None:
     with pytest.raises(ValueError, match="mean_absorption_coefficient"):
-        noise_control.test_environment_applicability(
+        noise_control.check_enclosure_test_environment(
             base_standard="ISO 3744",
             mean_absorption_coefficient=1.5,
             room_surface_area_m2=100.0,
@@ -400,7 +400,7 @@ def test_an_absorption_coefficient_above_one_is_refused() -> None:
 
 def test_an_unknown_base_standard_is_refused() -> None:
     with pytest.raises(ValueError, match="base_standard"):
-        noise_control.test_environment_applicability(
+        noise_control.check_enclosure_test_environment(
             base_standard="ISO 3740",
             mean_absorption_coefficient=0.15,
             room_surface_area_m2=100.0,
@@ -625,13 +625,13 @@ def test_annex_c_agrees_with_the_npl_measurement_at_the_survey_ceiling() -> None
     for room, printed in oracle.NPL_MEASURED_K2A.items():
         room_surface_m2, _, _, _, alpha = oracle.NPL_ROOMS[room]
         for surface, measured in printed.items():
-            verdict = noise_control.test_environment_applicability(
+            verdict = noise_control.check_enclosure_test_environment(
                 base_standard="ISO 3746",
                 mean_absorption_coefficient=alpha,
                 room_surface_area_m2=room_surface_m2,
                 measurement_surface_area_m2=oracle.NPL_SURFACE_M2[surface],
             )
-            assert verdict.applicable is (measured <= ceiling), f"{room}{surface}"
+            assert verdict.passes is (measured <= ceiling), f"{room}{surface}"
 
 
 def test_annex_c_refuses_the_hemi_anechoic_room_at_the_precision_ceiling() -> None:
@@ -646,13 +646,13 @@ def test_annex_c_refuses_the_hemi_anechoic_room_at_the_precision_ceiling() -> No
     for room, printed in oracle.NPL_MEASURED_K2A.items():
         room_surface_m2, _, _, _, alpha = oracle.NPL_ROOMS[room]
         for surface, measured in printed.items():
-            verdict = noise_control.test_environment_applicability(
+            verdict = noise_control.check_enclosure_test_environment(
                 base_standard="ISO 3744",
                 mean_absorption_coefficient=alpha,
                 room_surface_area_m2=room_surface_m2,
                 measurement_surface_area_m2=oracle.NPL_SURFACE_M2[surface],
             )
-            if verdict.applicable is not (measured <= ceiling):
+            if verdict.passes is not (measured <= ceiling):
                 differing.append(f"{room}{surface}")
     assert differing == ["A1", "A2", "A3", "A4"]
 
@@ -668,12 +668,12 @@ def test_the_npl_room_e_area_conflict_decides_two_of_its_three_surfaces() -> Non
         oracle.NPL_TABLE_6_ROOM_E_SURFACE_M2,
     ):
         agreeing[room_surface_m2] = [
-            noise_control.test_environment_applicability(
+            noise_control.check_enclosure_test_environment(
                 base_standard="ISO 3746",
                 mean_absorption_coefficient=oracle.NPL_ROOMS["E"][4],
                 room_surface_area_m2=room_surface_m2,
                 measurement_surface_area_m2=oracle.NPL_SURFACE_M2[surface],
-            ).applicable
+            ).passes
             is (measured <= 7.0)
             for surface, measured in oracle.NPL_MEASURED_K2A["E"].items()
         ]
@@ -761,15 +761,15 @@ def test_the_baua_engineers_disagree_about_the_same_workroom() -> None:
     for name, (alpha, room_surface_m2, _, *printed) in oracle.BAUA_ENGINEERS.items():
         verdicts[name] = []
         for surface_m2, want in zip(oracle.BAUA_SURFACES_M2, printed, strict=True):
-            verdict = noise_control.test_environment_applicability(
+            verdict = noise_control.check_enclosure_test_environment(
                 base_standard="ISO 11202",
                 mean_absorption_coefficient=alpha,
                 room_surface_area_m2=room_surface_m2,
                 measurement_surface_area_m2=surface_m2,
             )
             assert verdict.environmental_correction_limit_db == ceiling
-            assert verdict.applicable is (want <= ceiling)
-            verdicts[name].append(verdict.applicable)
+            assert verdict.passes is (want <= ceiling)
+            verdicts[name].append(verdict.passes)
     assert verdicts["Test Eng. 1"] == [False, False]
     assert verdicts["Test Eng. 2"] == [False, False]
     assert verdicts["Test Eng. 3"] == [True, True]

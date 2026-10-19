@@ -98,7 +98,7 @@ def test_survey_thresholds() -> None:
     # 125 Hz band +20 over neighbours (>15 low-freq threshold) -> flagged
     # 630 Hz band +6 over neighbours (>5 high-freq threshold) -> flagged
     levels = [40.0, 40.0, 60.0, 40.0, 40.0, 50.0, 56.0, 50.0]
-    flags = environment.tonal_seeking_survey(levels, freqs)
+    flags = environment.assess_tonal_survey(levels, freqs).prominent
     assert flags[2]  # 125 Hz
     assert flags[6]  # 630 Hz
     assert not flags[0]  # end bands never flagged
@@ -108,17 +108,72 @@ def test_survey_thresholds() -> None:
 def test_survey_below_threshold_not_flagged() -> None:
     freqs = [160.0, 200.0, 250.0]
     levels = [40.0, 45.0, 40.0]  # +5 < 8 dB mid-freq threshold
-    assert not environment.tonal_seeking_survey(levels, freqs)[1]
+    assert not environment.assess_tonal_survey(levels, freqs).prominent[1]
 
 
 def test_survey_names_both_band_counts() -> None:
     """A level without a band centre is refused, naming what each input holds."""
     with pytest.raises(
         ValueError,
-        match=r"tonal_seeking_survey: 'levels' .* must each carry one value per band",
+        match=r"assess_tonal_survey: 'levels' .* must each carry one value per band",
     ):
-        environment.tonal_seeking_survey(
-            [40.0, 60.0, 40.0, 41.0], [100.0, 125.0, 160.0]
+        environment.assess_tonal_survey([40.0, 60.0, 40.0, 41.0], [100.0, 125.0, 160.0])
+
+
+def test_the_survey_record_reads_its_thresholds_and_differences() -> None:
+    """Annex K: 15 dB to 125 Hz, 8 dB to 400 Hz, 5 dB above; NaN at the two ends."""
+    survey = environment.assess_tonal_survey(
+        [40.0, 60.0, 40.0, 50.0, 41.0], [100.0, 125.0, 160.0, 500.0, 630.0]
+    )
+    assert survey.thresholds_db.tolist() == [15.0, 15.0, 8.0, 5.0, 5.0]
+    assert np.isnan(survey.level_differences[0])
+    assert np.isnan(survey.level_differences[-1])
+    assert survey.level_differences[1:-1].tolist() == [20.0, -20.0, 9.0]
+    assert survey.prominent.tolist() == [False, True, False, True, False]
+    assert survey.tone_frequencies.tolist() == [125.0, 500.0]
+
+
+@pytest.mark.parametrize(
+    ("language", "title", "prominent_label"),
+    [
+        ("en", "ISO 1996-2 Annex K tonal survey", "Prominent tone"),
+        ("es", "Método de control de tonos, anexo K de ISO 1996-2", "Tono prominente"),
+    ],
+)
+def test_the_survey_plot_draws_the_bands_the_tones_and_what_each_needs(
+    language: str, title: str, prominent_label: str
+) -> None:
+    """Every band is a bar, the prominent ones again on top, and each inner
+    band carries the level it needs: its louder neighbour plus its threshold.
+    """
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    import matplotlib.pyplot as plt
+
+    survey = environment.assess_tonal_survey(
+        [40.0, 60.0, 40.0, 50.0, 41.0], [100.0, 125.0, 160.0, 500.0, 630.0]
+    )
+    ax = survey.plot(language=language)
+    try:
+        assert ax.get_title() == title
+        bars = [patch.get_height() for patch in ax.patches]
+        assert bars == [40.0, 60.0, 40.0, 50.0, 41.0, 60.0, 50.0]
+        (needed,) = ax.get_lines()
+        heights = np.asarray(needed.get_ydata(), dtype=float)
+        assert np.isnan(heights[[0, -1]]).all()
+        assert heights[1:-1].tolist() == [55.0, 68.0, 46.0]
+        labels = [text.get_text() for text in ax.get_legend().get_texts()]
+        assert prominent_label in labels
+    finally:
+        plt.close(ax.figure)
+
+
+def test_a_survey_record_refuses_a_spectrum_the_method_cannot_read() -> None:
+    with pytest.raises(ValueError, match="at least three bands"):
+        environment.TonalSurveyAssessment(
+            np.array([40.0, 60.0]), np.array([100.0, 125.0])
         )
 
 

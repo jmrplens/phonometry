@@ -281,26 +281,44 @@ def test_limp_frame_criteria_match_the_printed_thresholds() -> None:
     """A&A pp. 253-254: 0,05 (Beranek), 0,2 (Doutres), "lower than 20 kPa".
 
     With ``Kf`` approximated by the isothermal bulk modulus of air,
-    ``P0 = 101 325`` Pa, the relaxed criterion admits up to 20,3 kPa, which is
-    the book's rounded 20 kPa; Beranek's original admits 5,1 kPa.
+    ``P0 = 101 325`` Pa, the relaxed criterion admits anything below 20,3 kPa,
+    which is the book's rounded 20 kPa; Beranek's original anything below
+    5,1 kPa. Both are printed as strict inequalities.
     """
     assert materials.LIMP_FRAME_CRITERIA == {"beranek": 0.05, "doutres": 0.2}
-    assert materials.limp_frame_applicable(20.0e3)
-    assert not materials.limp_frame_applicable(20.5e3)
-    assert materials.limp_frame_applicable(5.0e3, criterion="beranek")
-    assert not materials.limp_frame_applicable(5.1e3, criterion="beranek")
-    # Exactly at the boundary of each printed threshold, and a millionth past
-    # it: the ratio is judged settled to nine decimals, so a part in a billion
-    # is still on the threshold rather than past it.
+    assert materials.check_limp_frame(20.0e3).passes
+    assert not materials.check_limp_frame(20.5e3).passes
+    assert materials.check_limp_frame(5.0e3, criterion="beranek").passes
+    assert not materials.check_limp_frame(5.1e3, criterion="beranek").passes
+    # Exactly on each printed threshold, and a millionth inside it: the book
+    # prints "< 0.05" and "< 0.2", so the threshold itself does not pass. The
+    # ratio is judged settled to nine decimals, so a part in a billion is
+    # still on the threshold rather than inside it.
     for name, ratio in materials.LIMP_FRAME_CRITERIA.items():
-        assert materials.limp_frame_applicable(ratio * 101325.0, criterion=name)
-        assert not materials.limp_frame_applicable(
-            ratio * 101325.0 * (1.0 + 1e-6), criterion=name
-        )
+        assert not materials.check_limp_frame(ratio * 101325.0, criterion=name).passes
+        assert materials.check_limp_frame(
+            ratio * 101325.0 * (1.0 - 1e-6), criterion=name
+        ).passes
 
 
-def test_limp_frame_applicable_rejects_bad_input() -> None:
+def test_limp_frame_check_reads_the_ratio_and_the_threshold() -> None:
+    # Kc = 10 132,5 Pa over Kf = 101 325 Pa is 0,1: inside Doutres' 0,2 and
+    # outside Beranek's 0,05.
+    doutres = materials.check_limp_frame(10132.5)
+    beranek = materials.check_limp_frame(10132.5, criterion="beranek")
+    assert doutres.ratio == pytest.approx(0.1, abs=1e-15)
+    assert doutres.threshold == 0.2
+    assert beranek.threshold == 0.05
+    assert doutres.passes is True
+    assert beranek.passes is False
+    # Another fluid moves the ratio, not the threshold.
+    water = materials.check_limp_frame(10132.5, fluid_bulk_modulus=2.2e9)
+    assert water.ratio == pytest.approx(10132.5 / 2.2e9, rel=1e-15)
+    assert water.threshold == 0.2
+
+
+def test_check_limp_frame_rejects_bad_input() -> None:
     with pytest.raises(ValueError, match=r"'frame_bulk_modulus' must be non-negative"):
-        materials.limp_frame_applicable(-1.0)
+        materials.check_limp_frame(-1.0)
     with pytest.raises(ValueError, match="'criterion' must be one of"):
-        materials.limp_frame_applicable(1.0e3, criterion="panneton")
+        materials.check_limp_frame(1.0e3, criterion="panneton")

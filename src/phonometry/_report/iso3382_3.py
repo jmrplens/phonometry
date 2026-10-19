@@ -41,6 +41,7 @@ import html
 import math
 from typing import TYPE_CHECKING, Any
 
+from .._internal.validation import require_count
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -94,7 +95,11 @@ def _metadata_pairs(
         return fmt_meta(value, language) if value is not None else None
 
     def count(value: int | None) -> str | None:
-        return str(int(value)) if value is not None else None
+        return (
+            str(require_count(value, "value", at_least=None))
+            if value is not None
+            else None
+        )
 
     specs: list[tuple[str, str | None]] = [
         (t("Client", language), metadata.client),

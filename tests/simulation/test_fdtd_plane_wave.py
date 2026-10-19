@@ -101,7 +101,7 @@ def test_plane_wave_source_rejects_bad_waveform_and_amplitude() -> None:
     # A non-callable waveform used to surface from inside _inject_plane as
     # the interpreter's "'float' object is not callable", and a NaN
     # amplitude silently NaNed the field step by step.
-    with pytest.raises(ValueError, match="waveform must be callable"):
+    with pytest.raises(TypeError, match="waveform must be callable"):
         PlaneWaveSource("down", 1.0)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="amplitude must be finite"):
         PlaneWaveSource("down", lambda t: 0.0, amplitude=np.nan)

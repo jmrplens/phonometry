@@ -96,7 +96,10 @@ from scipy import signal
 
 from .._internal.frozen import OwnsArrays
 from .._internal.utils import _sos_initial_state, _sos_state_mismatch
-from .._internal.validation import require_positive
+from .._internal.validation import (
+    require_positive,
+    require_scalar,
+)
 from ..io._resolve import (
     like_input,
     refuse_foreign_rate,
@@ -605,7 +608,12 @@ class WeightingFilter:
             It is refused for the '468' curve, whose skirt puts it 23 dB out at
             16 kHz with no lower grade in the Recommendation to fall back to.
             Defaults to True.
+        :raises TypeError: if ``fs`` is not one number, ``weighting`` is not a
+            text, or ``high_accuracy`` is not ``True`` or ``False``.
+        :raises ValueError: if ``fs`` is not positive, or ``weighting`` names
+            no curve this class designs or one it cannot design as asked.
         """
+        require_scalar(fs, "fs")
         if fs <= 0:
             raise ValueError(_FS_POSITIVE)
         weighting = _require_str(weighting, "weighting")
@@ -1027,6 +1035,7 @@ def time_weighting(
         everywhere it was used and adds the rate and a level plot. It is not
         a Signal, because a mean square is not a pressure record.
     """
+    require_scalar(fs, "fs")
     fs = resolve_fs(x, fs)
     x_proc = resolve_samples(x)
     if fs <= 0:
@@ -1081,6 +1090,7 @@ class TimeWeighting:
         """:param fs: Sample rate in Hz.
         :param mode: 'fast' (125 ms), 'slow' (1000 ms) or 'impulse' (35 ms / 1.5 s).
         """
+        require_scalar(fs, "fs")
         if fs <= 0:
             raise ValueError(_FS_POSITIVE)
         mode = _require_str(mode, "mode")
@@ -1160,6 +1170,8 @@ def linkwitz_riley(
     :param order: Total order (must be even, typically 2 or 4).
     :return: (low_pass_signal, high_pass_signal)
     """
+    require_scalar(fs, "fs")
+    require_scalar(order, "order")
     fs = resolve_fs(x, fs)
     x_proc = resolve_samples(x)
     if fs <= 0:

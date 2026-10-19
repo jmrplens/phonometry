@@ -296,7 +296,7 @@ def test_stipa_short_recording_warns(stipa_18s_seed1234: np.ndarray) -> None:
     """
     short = speech.stipa_signal(FS, duration_s=5.0, seed=1234)
     with pytest.warns(
-        UserWarning, match=r"STIPA recording is .* shorter than the recommended"
+        STIWarning, match=r"STIPA recording is .* shorter than the recommended"
     ):
         speech.stipa(short, FS)
     # No warning at the recommended length.
@@ -429,7 +429,7 @@ def test_invalid_inputs_raise() -> None:
     # simplefilter has to run inside catch_warnings, before the call, so the
     # two blocks stay nested rather than combined.
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore", UserWarning)
+        warnings.simplefilter("ignore", STIWarning)
         with pytest.raises(
             ValueError,
             match=r"Signal too short for STIPA: it must contain at least one full period",
@@ -466,7 +466,7 @@ def test_invalid_inputs_raise() -> None:
 def test_mtf_above_1_3_warns_and_truncates() -> None:
     over_unity = _uniform_mtf(1.4)
     with pytest.warns(
-        UserWarning, match=r"Modulation transfer values above .* detected"
+        STIWarning, match=r"Modulation transfer values above .* detected"
     ):
         result = _sti_from_mtf(over_unity)
     assert result.sti == 1.0

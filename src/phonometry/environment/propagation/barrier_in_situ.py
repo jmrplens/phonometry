@@ -268,7 +268,14 @@ _RECEIVER_TYPES: tuple[str, ...] = ("hemi_free_field", "reflecting_surface")
 
 
 class BarrierInSituWarning(PhonometryWarning):
-    """The measurement is outside a condition ISO 10847 states."""
+    """A NOTE of ISO 10847 the measurement cannot follow.
+
+    Emitted when :func:`reference_microphone_height_m` cannot raise the
+    reference microphone to the 10 degrees of the NOTE to 7.2.2, and when
+    :func:`measured_insertion_loss_indirect` is given receiver types that
+    differ between the two campaigns, against the NOTE to 8.2.2. The clause
+    each NOTE hangs from is still applied.
+    """
 
 
 def barrier_background_correction(

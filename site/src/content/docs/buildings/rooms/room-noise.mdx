@@ -243,7 +243,7 @@ excess sits: a low-frequency excess is spread over the four bands at and below
 high-frequency excess at or above 1 kHz lands squarely in the speech range and
 is objectionable at 3 dB. The tag is computed only over the bands actually
 supplied, which is why a spectrum missing bands still rates but emits a
-`UserWarning`.
+`room.NoiseCriterionWarning`.
 
 ```python
 import numpy as np
@@ -336,8 +336,8 @@ $N$, $R$, $H$ or $RV$; when both the rumble and hiss deviations fire, the
 library reports the combined `RH` as a diagnostic extension. Each result
 exposes a `.plot()` that renders its panel above. Clause D.4 expects at
 least the 31.5 Hz to 4000 Hz octave bands: a spectrum missing any of them
-still rates, but emits a `UserWarning` because the absent bands are skipped
-by the tag deviation tests.
+still rates, but emits a `room.NoiseCriterionWarning` because the absent
+bands are skipped by the tag deviation tests.
 
 ## 3. Choosing a criterion: NC, RC Mark II or NR
 

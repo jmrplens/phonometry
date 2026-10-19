@@ -224,13 +224,20 @@ measurement_positions(
 
 Normative microphone coordinates on the measurement surface.
 
-For a `'hemisphere'` the coordinates come from ISO 3744:2010 Annex B:
-Table B.1 for sources that may emit discrete tones (`tones=True`) and
-Table B.2 for broadband sources. The engineering grade uses the 10 key
-positions for one reflecting plane (5 for two, 3 for three); the survey
-grade uses the reduced arrays of ISO 3746:2010 clause 8.2.1 (positions
-4, 5, 6, 10 for one plane). Coordinates are scaled by `radius` and
-returned as an `(N, 3)` array of Cartesian `(x, y, z)` in metres.
+For a `'hemisphere'` the engineering grade reads ISO 3744:2010 Annex B:
+the 10 key positions of Table B.1 for a source that may emit discrete
+tones (`tones=True`) or of Table B.2 for a broadband one, over one
+reflecting plane; positions 2, 3, 6, 7 and 9 of Table B.2 for two planes;
+and positions 1, 2 and 3 of Table B.3 for three. The survey grade reads the
+reduced arrays of ISO 3746:2010 clause 8.2.1, the same whatever the source
+emits: positions 4, 5, 6 and 10 of ISO 3746 Table B.1 (the broadband
+positions of those numbers in ISO 3744 Table B.2) for one plane, and
+positions 14, 15 and 18 (two planes) or 14, 21 and 22 (three planes) of
+ISO 3746 Table B.2. Both standards ask for a radius of at least 3 m beside
+two or three reflecting planes (ISO 3744 and ISO 3746, Annex B.2 and B.3);
+that condition is the measurer's to meet and is not checked here.
+Coordinates are scaled by `radius` and returned as an `(N, 3)` array of
+Cartesian `(x, y, z)` in metres, in the order of the position numbers.
 
 **Parameters**
 
@@ -239,10 +246,16 @@ returned as an `(N, 3)` array of Cartesian `(x, y, z)` in metres.
 | `surface` | `'hemisphere'` (only shape with a coordinate table). |
 | `radius` | Hemisphere radius `r`, in metres. |
 | `n_reflecting_planes` | Number of reflecting planes (1, 2 or 3). |
-| `tones` | If True use Table B.1, else Table B.2. |
+| `tones` | Engineering grade over one plane only: True reads Table B.1 of ISO 3744, False its Table B.2. The survey grade and the arrays for two and three planes have one table each and do not read it. |
 | `grade` | `'engineering'` or `'survey'`. |
 
 **Returns:** `(N, 3)` microphone coordinates, in metres.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for a surface other than `'hemisphere'`, a radius that is not positive, a number of reflecting planes other than 1, 2 or 3, or an unknown grade. |
 
 ## plot_microphone_positions
 

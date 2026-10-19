@@ -99,6 +99,7 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.validation import (
     require_choice,
+    require_count,
     require_non_negative,
     require_positive,
     require_scalar,
@@ -116,19 +117,6 @@ _MAX_CONTACT_ANGLE_DEG = 90.0
 
 #: Minimum magnetic pole count of an induction motor: one pole pair.
 _MIN_POLES = 2
-
-
-def _require_count(value: int, name: str, minimum: int = 1) -> int:
-    """An integer parameter that must be at least *minimum*."""
-    require_scalar(value, name)
-    n = int(value)
-    if n < minimum:
-        raise ValueError(
-            f"'{name}' must be a non-negative integer."
-            if minimum == 0
-            else f"'{name}' must be a positive integer."
-        )
-    return n
 
 
 __all__ = [
@@ -249,7 +237,7 @@ class FaultFrequencyResult(RichDisplay):
         :raises KeyError: If no line carries that name.
         :raises ValueError: If *n_harmonics* is not a positive integer.
         """
-        n = _require_count(n_harmonics, "n_harmonics")
+        n = require_count(n_harmonics, "n_harmonics")
         return self[name] * np.arange(1, n + 1, dtype=np.float64)
 
     def within(self, low: float, high: float) -> FaultFrequencyResult:
@@ -389,7 +377,7 @@ def bearing_fault_frequencies(
     :raises ValueError: for a non-positive or inconsistent geometry.
     """
     fs = shaft_rate(speed_rpm)
-    z = _require_count(n_elements, "n_elements")
+    z = require_count(n_elements, "n_elements")
     d = require_positive(element_diameter, "element_diameter")
     dm = require_positive(pitch_diameter, "pitch_diameter")
     if d >= dm:
@@ -504,9 +492,9 @@ def gear_mesh_frequencies(
     :raises ValueError: for a non-positive or non-integer input.
     """
     fs = shaft_rate(speed_rpm)
-    teeth = _require_count(n_teeth, "n_teeth")
-    n_harm = _require_count(n_harmonics, "n_harmonics")
-    n_side = _require_count(n_sidebands, "n_sidebands", minimum=0)
+    teeth = require_count(n_teeth, "n_teeth")
+    n_harm = require_count(n_harmonics, "n_harmonics")
+    n_side = require_count(n_sidebands, "n_sidebands", at_least=0)
     f_mod = (
         fs
         if sideband_rate is None
@@ -625,13 +613,13 @@ def induction_motor_frequencies(
     """
     fs = shaft_rate(speed_rpm)
     require_scalar(n_poles, "n_poles")
-    p = int(n_poles)
+    p = require_count(n_poles, "n_poles", at_least=None)
     if p < _MIN_POLES or p % 2:
         msg = "'n_poles' must be an even integer of at least 2."
         raise ValueError(msg)
-    bars = _require_count(n_rotor_bars, "n_rotor_bars")
-    n_slot = _require_count(n_slot_harmonics, "n_slot_harmonics")
-    n_side = _require_count(n_sidebands, "n_sidebands", minimum=0)
+    bars = require_count(n_rotor_bars, "n_rotor_bars")
+    n_slot = require_count(n_slot_harmonics, "n_slot_harmonics")
+    n_side = require_count(n_sidebands, "n_sidebands", at_least=0)
 
     if supply_frequency is not None:
         fe = require_positive(supply_frequency, "supply_frequency")
@@ -768,10 +756,10 @@ def blade_pass_frequencies(
     :raises ValueError: for a non-positive or non-integer input.
     """
     fs = shaft_rate(speed_rpm)
-    blades = _require_count(n_blades, "n_blades")
-    n_harm = _require_count(n_harmonics, "n_harmonics")
-    k_max = _require_count(n_lobe_orders, "n_lobe_orders")
-    vanes = None if n_vanes is None else _require_count(n_vanes, "n_vanes")
+    blades = require_count(n_blades, "n_blades")
+    n_harm = require_count(n_harmonics, "n_harmonics")
+    k_max = require_count(n_lobe_orders, "n_lobe_orders")
+    vanes = None if n_vanes is None else require_count(n_vanes, "n_vanes")
 
     lines: list[FaultLine] = [_line("shaft", fs, fs, "shaft", _SHAFT_DESCRIPTION)]
     for n in range(1, n_harm + 1):

@@ -22,6 +22,7 @@ import pytest
 from reference_data import workroom_prediction as barron
 
 from phonometry import noise_control, room
+from phonometry.room import NoiseCriterionWarning
 
 if TYPE_CHECKING:
     from phonometry.noise_control.room_to_room import RoomToRoomResult
@@ -181,7 +182,9 @@ def test_rc_criterion_family() -> None:
     assert result.criterion_curve is not None
     # The six bands of this chain are short of the 31.5 Hz to 4 kHz span
     # clause D.4 asks for, which the rating reports as a warning.
-    with pytest.warns(UserWarning, match=r"clause D\.4 rates a spectrum that includes"):
+    with pytest.warns(
+        NoiseCriterionWarning, match=r"clause D\.4 rates a spectrum that includes"
+    ):
         assert result.rating.__class__.__name__ == "RCResult"
 
 

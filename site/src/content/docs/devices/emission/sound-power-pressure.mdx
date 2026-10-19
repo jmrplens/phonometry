@@ -394,9 +394,17 @@ band, shape `(NM, NB)`; ISO 3744 clause 8.4), `surface_area`,
 `sound_power_level_a` ($L_{W\mathrm{A}}$), `uncertainty` (expanded, 95 %) and `grade`.
 `measurement_positions('hemisphere', radius=…, n_reflecting_planes=…, tones=…,
 grade=…)` returns the normative `(N, 3)` microphone coordinates (Table B.1 for
-tonal sources, B.2 for broadband). Those coordinates plot directly with
-`plot_microphone_positions`, which draws the array on its measurement
-surface in 3-D, numbered as in the standard.
+tonal sources, B.2 for broadband). The survey grade takes the reduced arrays of ISO 3746 clause 8.2.1, one array
+whatever the source emits: positions 4, 5, 6 and 10 of ISO 3746 Table B.1 over
+one plane (the broadband positions of those numbers in ISO 3744 Table B.2), and
+positions 14, 15 and 18 (two planes) or 14, 21 and 22 (three planes) of
+ISO 3746 Table B.2. Beside two or three reflecting planes both standards ask
+for a radius of at least 3 m (clauses B.2 and B.3 of Annex B), which the
+function does not check. Those coordinates plot directly with
+`plot_microphone_positions`, which draws the array on its measurement surface
+in 3-D and numbers the points 1 to N in the order given, so a reduced array
+such as the survey's is numbered from 1 rather than with the standard's
+position numbers.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/microphone_positions_hemisphere.svg" alt="Three-dimensional view of the ISO 3744 microphone array: ten numbered microphones on a 2 m wireframe hemisphere standing on a shaded circular reflecting plane, with positions 1 and 2 close to the plane, the others staggered in height up to positions 9 and 10 near the top, and the x, y and z axes graduated in metres" width="88%" />
 

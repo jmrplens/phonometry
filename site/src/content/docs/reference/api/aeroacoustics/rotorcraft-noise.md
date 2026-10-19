@@ -476,6 +476,7 @@ oriented by the heading and tilted by the bank angle in turns (guidance
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | If the ground holds an array of flow resistivities or ground elevations, which are for the contour grid. |
 | ValueError | If the inputs are invalid. |
 
 ## rotorcraft_noise_contour

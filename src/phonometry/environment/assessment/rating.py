@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from ..._internal.validation import require_scalar
+
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
@@ -83,6 +85,9 @@ def lden(
         may define the periods differently (3.6.4 Note 1).
     :return: Lden in dB.
     """
+    require_scalar(lday, "lday")
+    require_scalar(levening, "levening")
+    require_scalar(lnight, "lnight")
     td, te, tn = period_hours
     return composite_rating_level(
         [(lday, td, 0.0), (levening, te, 5.0), (lnight, tn, 10.0)]
@@ -108,5 +113,7 @@ def ldn(
         in hours, summing to 24. Default (15, 9).
     :return: Ldn in dB.
     """
+    require_scalar(lday, "lday")
+    require_scalar(lnight, "lnight")
     td, tn = period_hours
     return composite_rating_level([(lday, td, 0.0), (lnight, tn, 10.0)])

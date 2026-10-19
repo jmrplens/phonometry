@@ -664,7 +664,7 @@ def test_refuses_a_non_scalar_where_one_measurement_is_meant(
         "flow_velocity": 10.0,
         **kwargs,
     }
-    with pytest.raises(ValueError, match=f"'{name}' must be a real number"):
+    with pytest.raises(TypeError, match=f"'{name}' must be a real number"):
         emission.sound_power_in_duct([80.0], [1000.0], **call)  # type: ignore[arg-type]
 
 
@@ -734,7 +734,7 @@ def test_refuses_non_finite_or_non_numeric_levels() -> None:
     levels[1, 2] = np.nan
     with pytest.raises(ValueError, match="'levels' must contain only finite"):
         emission.sound_power_in_duct(levels, _BANDS[:5], 0.5, 10.0)
-    with pytest.raises(ValueError, match="'levels' must be numeric"):
+    with pytest.raises(TypeError, match="'levels' must be numbers, not text"):
         emission.sound_power_in_duct(["a", "b"], _BANDS[:2], 0.5, 10.0)
 
 

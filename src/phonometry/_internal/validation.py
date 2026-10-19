@@ -79,60 +79,130 @@ def is_scalar(value: object) -> bool:
         return False
 
 
+def holds_text(value: object) -> bool:
+    """True when *value* is text, or an array that holds text.
+
+    A ``str`` or ``bytes``, a numpy array of a string dtype, or an object
+    array with a ``str`` or ``bytes`` element. Text is the wrong type where a
+    number belongs, whatever it reads as: :func:`float` and ``np.asarray(...,
+    dtype=float)`` parse it, which is what they are for, but a guard is not a
+    parser, and ``math.sqrt("4")`` and ``np.sqrt("4")`` refuse it with
+    :class:`TypeError` as a numerical function does.
+
+    :param value: The value to test, of any type.
+    :return: Whether *value* is or holds text.
+    """
+    if isinstance(value, (str, bytes)):
+        return True
+    if not isinstance(value, np.ndarray):
+        return False
+    kind = value.dtype.kind
+    if kind in "SU":
+        return True
+    return kind == "O" and any(isinstance(item, (str, bytes)) for item in value.flat)
+
+
+def refuse_text(value: object, msg: str) -> None:
+    """Refuse a text, or a sequence or array that holds one, with *msg*.
+
+    For the conversions that parse what they are given (``np.asarray(x,
+    dtype=complex)`` reads ``"1"`` as ``1+0j``) where a number belongs: see
+    :func:`holds_text`. A ragged nesting is left to the conversion that
+    follows, which refuses it on its own terms.
+
+    :param value: The caller's value, of any type.
+    :param msg: The refusal, worded by the guard that owns the parameter.
+    :raises TypeError: with *msg*, for a text or anything that holds one.
+    """
+    if isinstance(value, np.ndarray):
+        found = holds_text(value)
+    elif isinstance(value, (str, bytes)):
+        found = True
+    else:
+        try:
+            found = holds_text(np.asarray(value, dtype=object))
+        except ValueError:
+            return
+    if found:
+        raise TypeError(msg)
+
+
 def require_real(value: object, msg: str) -> float:
-    """*value* as a ``float``, or ``ValueError(msg)`` when it is not one number.
+    """*value* as a ``float``, or a refusal worded *msg* when it is not one number.
 
     The coercion a guard means when it hands a caller's value to
     :func:`float` and renames the failure: the rank is asked first, through
     :func:`is_scalar`, so that a one-element array is refused on every numpy
     rather than only on those where :func:`float` happens to refuse it.
 
+    The refusal keeps the class the mistake has. An array, ``None``, a text
+    (whether or not it reads as a number, see :func:`holds_text`) or any other
+    object :func:`float` cannot take is the wrong type, and is refused with
+    :class:`TypeError`; a number too large for a float is a value of the
+    right type, and is refused with :class:`ValueError`.
+
     :param value: The caller's value, of any type.
     :param msg: The refusal, worded by the guard that owns the parameter.
     :return: ``float(value)``.
-    :raises ValueError: with *msg*, for an array of any shape, or for anything
-        :func:`float` cannot take.
+    :raises TypeError: with *msg*, for an array of any shape, a text, or
+        anything whose type :func:`float` refuses.
+    :raises ValueError: with *msg*, for a number :func:`float` cannot hold.
     """
-    if not is_scalar(value):
-        raise ValueError(msg)
+    if not is_scalar(value) or holds_text(value):
+        raise TypeError(msg)
     try:
         return float(cast("float", value))
-    except (TypeError, ValueError, OverflowError):
+    except TypeError:
+        raise TypeError(msg) from None
+    except (ValueError, OverflowError):
         raise ValueError(msg) from None
 
 
 def require_scalar(value: object, name: str) -> None:
-    """Refuse an array before a scalar guard reads it as one number.
+    """Refuse an array or a text before a scalar guard reads it as one number.
 
     Every scalar guard opens with this. The guards test their value through
     :func:`float` or :mod:`math`, which converts it the same way, and so
     inherit the numpy dependence :func:`is_scalar` describes: a one-element
     array would be read as its element on numpy 2.0 to 2.3 and refused with an
-    anonymous ``TypeError`` from 2.4 on.
+    anonymous ``TypeError`` from 2.4 on. :func:`float` would also parse a
+    text, ``"20"`` into a number and ``"fifty"`` into an anonymous
+    ``ValueError``.
+
+    An array or a text where one number is asked for is the wrong type, so it
+    is refused with :class:`TypeError`, the class numpy 2.4 gives ``float()``
+    of an array and ``math.sqrt`` gives a text. ``None`` passes, for the
+    guards of an optional parameter to settle.
 
     :param value: The caller's value, of any type.
     :param name: Parameter name used in the error message.
-    :raises ValueError: for an array of any shape, a ragged sequence included.
+    :raises TypeError: for an array of any shape, a ragged sequence included,
+        or a text.
     """
     if not is_scalar(value):
         msg = f"'{name}' must be one number, not an array."
-        raise ValueError(msg)
+        raise TypeError(msg)
+    if holds_text(value):
+        msg = f"'{name}' must be one number, not a text."
+        raise TypeError(msg)
 
 
 def _one_number(value: object, name: str) -> float:
     """*value* as a ``float``, refused by name when it is not one number.
 
     What every shared scalar guard reads first. The rank is asked before the
-    conversion (an array is refused on every numpy), and the conversion is
-    :func:`float`'s, so whatever it took before these guards asked the rank,
-    a numeric string such as ``"1000"`` included, it still takes; what it
-    cannot take is refused with the parameter's name instead of the anonymous
-    ``TypeError`` :mod:`math` would raise on it.
+    conversion (an array is refused on every numpy), a text is refused
+    whatever it reads as (``"1000"`` as much as ``"fifty"``: a guard is not a
+    parser), and what :func:`float` cannot take is refused with the
+    parameter's name instead of the anonymous ``TypeError`` :mod:`math` would
+    raise on it.
 
     :param value: The caller's value, of any type.
     :param name: Parameter name used in the error message.
     :return: ``float(value)``.
-    :raises ValueError: for an array, or for anything :func:`float` refuses.
+    :raises TypeError: for an array, a text, or anything whose type
+        :func:`float` refuses.
+    :raises ValueError: for a number too large for a float.
     """
     require_scalar(value, name)
     return require_real(value, f"'{name}' must be a number, got {value!r}.")
@@ -144,8 +214,9 @@ def require_positive(value: float, name: str) -> float:
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
     :return: The validated value as a ``float``.
-    :raises ValueError: for an array, something that is not a number, or a
-        non-finite or non-positive value.
+    :raises TypeError: for an array, a text, or something else that is not a
+        number.
+    :raises ValueError: for a non-finite or non-positive value.
     """
     number = _one_number(value, name)
     if not math.isfinite(number) or number <= 0.0:
@@ -176,8 +247,10 @@ def require_above_absolute_zero(value: float, name: str) -> float:
     :param value: The temperature to validate, in degrees Celsius.
     :param name: Parameter name used in the error message.
     :return: The validated temperature as a ``float``.
-    :raises ValueError: for an array, something that is not a number, a
-        non-finite temperature, or one at or below -273,15 degC.
+    :raises TypeError: for an array, a text, or something else that is not a
+        number.
+    :raises ValueError: for a non-finite temperature, or one at or below
+        -273,15 degC.
     """
     number = _one_number(value, name)
     if not math.isfinite(number) or number <= ABSOLUTE_ZERO_C:
@@ -215,8 +288,9 @@ def require_non_negative(value: float, name: str) -> float:
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
     :return: The validated value as a ``float``.
-    :raises ValueError: for an array, something that is not a number, or a
-        non-finite or negative value.
+    :raises TypeError: for an array, a text, or something else that is not a
+        number.
+    :raises ValueError: for a non-finite or negative value.
     """
     number = _one_number(value, name)
     if not math.isfinite(number) or number < 0.0:
@@ -236,8 +310,9 @@ def require_finite(value: float, name: str) -> float:
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
     :return: The validated value as a ``float``.
-    :raises ValueError: for an array, something that is not a number, or a
-        non-finite value.
+    :raises TypeError: for an array, a text, or something else that is not a
+        number.
+    :raises ValueError: for a non-finite value.
     """
     number = _one_number(value, name)
     if not math.isfinite(number):
@@ -252,8 +327,9 @@ def require_fraction(value: float, name: str) -> float:
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
     :return: The validated value as a ``float``.
-    :raises ValueError: for an array, something that is not a number, a
-        non-finite value, or one outside ``[0, 1)``.
+    :raises TypeError: for an array, a text, or something else that is not a
+        number.
+    :raises ValueError: for a non-finite value, or one outside ``[0, 1)``.
     """
     number = _one_number(value, name)
     if not math.isfinite(number) or number < 0.0 or number >= 1.0:
@@ -262,26 +338,46 @@ def require_fraction(value: float, name: str) -> float:
     return number
 
 
-def require_count(value: object, name: str, *, at_least: int = 1) -> int:
+def require_count(value: object, name: str, *, at_least: int | None = 1) -> int:
     """Require a whole number of things, at least *at_least*.
 
     An ``int`` or a numpy integer, or a float that is whole, such as 3.0;
-    never a bool, a string or a non-finite number.
+    never a bool, a string, an array or a non-finite number. What is not a
+    number at all is the wrong type and is refused with :class:`TypeError`;
+    a number that is not whole, not finite or below *at_least* is the right
+    type with the wrong value, and is refused with :class:`ValueError`.
 
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
-    :param at_least: The smallest count accepted, 1 by default.
+    :param at_least: The smallest count accepted, 1 by default; ``None`` for
+        a whole number with no lower bound, such as a grid index whose range
+        the caller checks against the grid.
     :return: The validated value as an ``int``.
-    :raises ValueError: for anything that is not a whole number at or above
+    :raises TypeError: for a bool, a text, an array or anything else that is
+        not a number.
+    :raises ValueError: for a number that is not a whole number at or above
         *at_least*.
     """
-    msg = f"'{name}' must be a whole number, at least {at_least}, got {value!r}."
     if isinstance(value, bool) or not isinstance(
         value, (int, float, np.integer, np.floating)
     ):
-        raise ValueError(msg)
+        msg = f"'{name}' must be a whole number, got {value!r}."
+        raise TypeError(msg)
+    floor = -math.inf if at_least is None else at_least
+    if isinstance(value, (int, np.integer)):
+        # Whole by its type, and read as an int: float() of one past 1e308
+        # would overflow before the bound could name it.
+        whole = int(value)
+        if whole < floor:
+            msg = (
+                f"'{name}' must be a whole number, at least {at_least}, got {value!r}."
+            )
+            raise ValueError(msg)
+        return whole
     number = float(value)
-    if not math.isfinite(number) or not number.is_integer() or number < at_least:
+    if not math.isfinite(number) or not number.is_integer() or number < floor:
+        least = "" if at_least is None else f", at least {at_least}"
+        msg = f"'{name}' must be a whole number{least}, got {value!r}."
         raise ValueError(msg)
     return int(number)
 
@@ -293,12 +389,23 @@ def require_choice[T](value: object, name: str, options: tuple[T, ...]) -> T:
     the checked value back as that alias: the caller narrows a ``str``
     without a ``cast`` of its own.
 
+    A choice among names is a text: a value of another type (``period=5``,
+    ``mode=None``) is the wrong type and is refused with :class:`TypeError`;
+    a text that names none of the options is the right type with the wrong
+    value, a :class:`ValueError`.
+
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
     :param options: The accepted values.
     :return: The validated value.
+    :raises TypeError: for a value that is not a text when every option is.
     :raises ValueError: for a value not in *options*.
     """
+    if not isinstance(value, str) and all(
+        isinstance(option, str) for option in options
+    ):
+        msg = f"'{name}' must be one of {options}, a text; got {value!r}."
+        raise TypeError(msg)
     if value not in options:
         msg = f"'{name}' must be one of {options}; got {value!r}."
         raise ValueError(msg)
@@ -321,14 +428,14 @@ def require_band_fraction(value: object, name: str) -> BandFraction:
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
     :return: The validated band fraction.
-    :raises ValueError: for anything other than the integers 1 and 3.
+    :raises TypeError: for a value that is not an integer: a word, a flag or
+        a float.
+    :raises ValueError: for an integer other than 1 and 3.
     """
-    if (
-        isinstance(value, bool)
-        or not isinstance(value, int | np.integer)
-        or int(value) not in _BAND_FRACTIONS
-    ):
-        msg = f"'{name}' must be 1 (octave) or 3 (one-third octave); got {value!r}."
+    msg = f"'{name}' must be 1 (octave) or 3 (one-third octave); got {value!r}."
+    if isinstance(value, bool) or not isinstance(value, int | np.integer):
+        raise TypeError(msg)
+    if int(value) not in _BAND_FRACTIONS:
         raise ValueError(msg)
     return cast("BandFraction", int(value))
 
@@ -359,31 +466,40 @@ _MATRIX_RANK = 2
 def _as_float64(x: ArrayLike, name: str) -> np.ndarray:
     """Convert *x* to ``float64``, naming the parameter when numpy cannot.
 
-    A string element raises numpy's anonymous "could not convert string to
-    float", and an unconvertible object a bare ``TypeError``; both would
+    An unconvertible element would otherwise raise numpy's anonymous
+    ``TypeError``, and a ragged list its anonymous ``ValueError``; both would
     escape the array guards below without saying which parameter refused.
 
-    A complex array is refused rather than converted. ``np.asarray(z,
-    dtype=float64)`` does not fail on one: it drops the imaginary part and
-    emits a ``ComplexWarning``, which is a warning and not an error, so
-    ``np.array([1 + 2j])`` would arrive at the guards below as ``[1.0]`` and
-    pass every one of them. A list of complex numbers already raised here, so
-    the two spellings of the same input disagreed.
+    Two inputs numpy converts are refused rather than converted. A complex
+    array: ``np.asarray(z, dtype=float64)`` drops the imaginary part with no
+    more than a ``ComplexWarning``, so ``np.array([1 + 2j])`` would arrive at
+    the guards below as ``[1.0]`` and pass every one of them. And text:
+    ``np.asarray(["94.0"], dtype=float64)`` parses it, so a column of readings
+    left as text passed for numbers while one cell that reads as none raised
+    a ``ValueError``; text is the wrong type where numbers belong whatever it
+    reads as, refused here as :func:`require_real` refuses one text.
+
+    :raises TypeError: for a complex array, text, or an element that is not a
+        number.
+    :raises ValueError: for a ragged nesting, to which numpy gives no shape.
     """
     try:
-        complex_input = np.iscomplexobj(x)
-    except (TypeError, ValueError) as exc:
-        # `iscomplexobj` builds the array to read its dtype, so a ragged list
-        # fails here rather than below and would escape without naming the
-        # parameter. Its refusal is the same refusal, in the same words.
+        array = np.asarray(x)
+    except ValueError as exc:
         msg = f"'{name}' must be numeric."
         raise ValueError(msg) from exc
-    if complex_input:
+    if array.dtype.kind == "c":
         msg = f"'{name}' must be real, not complex."
-        raise ValueError(msg)
+        raise TypeError(msg)
+    if holds_text(array):
+        msg = f"'{name}' must be numbers, not text."
+        raise TypeError(msg)
     try:
-        return np.asarray(x, dtype=np.float64)
-    except (TypeError, ValueError) as exc:
+        return array.astype(np.float64, copy=False)
+    except TypeError as exc:
+        msg = f"'{name}' must be numeric."
+        raise TypeError(msg) from exc
+    except ValueError as exc:
         msg = f"'{name}' must be numeric."
         raise ValueError(msg) from exc
 
@@ -480,7 +596,8 @@ def require_axis_count(
     :param rank: The number of axes the field must have, or ``None`` when that
         is checked elsewhere.
     :return: The number of entries.
-    :raises ValueError: if *value* is a single number, or has another rank.
+    :raises TypeError: if *value* is a single number.
+    :raises ValueError: if *value* has another rank.
     """
     if rank is not None:
         require_axis_rank(value, owner, name, rank)
@@ -488,7 +605,7 @@ def require_axis_count(
         return len(value)  # type: ignore[arg-type]
     except TypeError:
         msg = f"{owner}: '{name}' must carry one value per {axis}, not a single number."
-        raise ValueError(msg) from None
+        raise TypeError(msg) from None
 
 
 def _rank(value: object) -> int:
@@ -545,6 +662,7 @@ def require_axis_rank(value: object, owner: str, name: str, rank: int) -> None:
     :param rank: The number of axes the field must have.
     :raises ValueError: if *value* has a different number of axes.
     """
+    require_scalar(rank, "rank")
     actual = _rank(value)
     if actual != rank:
         axes = "one axis" if rank == 1 else f"{rank} axes"
@@ -742,6 +860,33 @@ def require_same_shape(owner: object, *fields: str, quantity: str = "point") -> 
     require_equal_shapes(type(owner).__name__, shapes, quantity)
 
 
+def _as_numeric_field(owner: object, name: str, value: object) -> np.ndarray:
+    """A field of *owner* as an array, ``float64`` unless it is complex.
+
+    :raises TypeError: if the field is text or holds an element that is not a
+        number.
+    :raises ValueError: if the field is a ragged nesting.
+    """
+    try:
+        array = np.asarray(value)
+    except ValueError as exc:
+        msg = f"{type(owner).__name__}: '{name}' must be numeric."
+        raise ValueError(msg) from exc
+    if holds_text(array):
+        msg = f"{type(owner).__name__}: '{name}' must be numeric, not text."
+        raise TypeError(msg)
+    if array.dtype.kind == "c":
+        return array
+    try:
+        return array.astype(np.float64)
+    except TypeError as exc:
+        msg = f"{type(owner).__name__}: '{name}' must be numeric."
+        raise TypeError(msg) from exc
+    except ValueError as exc:
+        msg = f"{type(owner).__name__}: '{name}' must be numeric."
+        raise ValueError(msg) from exc
+
+
 def require_finite_fields(owner: object, *fields: str) -> None:
     """Require each named field of *owner* to carry only finite values.
 
@@ -772,27 +917,23 @@ def require_finite_fields(owner: object, *fields: str) -> None:
     made only for the fields that are not complex to begin with.
 
     That cast is also what refuses a field that is not numeric at all, and it
-    is kept for the sake of it: a string or an object array reaches
-    ``np.isfinite`` as an anonymous ``TypeError`` raised from inside numpy,
-    which names neither the field nor the result and is not the
-    ``ValueError`` this guard documents.
+    is kept for the sake of it: an object array reaches ``np.isfinite`` as an
+    anonymous ``TypeError`` raised from inside numpy, which names neither the
+    field nor the result. Text is refused before it, whatever it reads as,
+    since the cast would parse ``"94.0"`` into a number (:func:`holds_text`).
 
     :param owner: The instance whose fields are measured.
     :param fields: Field names that must be finite throughout.
-    :raises ValueError: if a field carries a ``NaN`` or an infinity, or is
-        not numeric.
+    :raises TypeError: if a field is text or holds an element that is not a
+        number.
+    :raises ValueError: if a field carries a ``NaN`` or an infinity, or is a
+        ragged nesting.
     """
     for name in fields:
         value = getattr(owner, name)
         if value is None:
             continue
-        try:
-            array = np.asarray(value)
-            if array.dtype.kind != "c":
-                array = array.astype(np.float64)
-        except (TypeError, ValueError) as exc:
-            msg = f"{type(owner).__name__}: '{name}' must be numeric."
-            raise ValueError(msg) from exc
+        array = _as_numeric_field(owner, name, value)
         if np.all(np.isfinite(array)):
             continue
         what = "be finite" if array.ndim == 0 else "contain only finite values"

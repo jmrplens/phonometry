@@ -836,10 +836,10 @@ def test_a_table_key_that_is_not_a_string_is_refused_by_name() -> None:
 
     Passing something other than a string used to die inside ``str.strip``
     with an anonymous ``AttributeError``; the refusal names the argument, and
-    it is a ``ValueError`` like every other refusal in this module rather than
-    the ``TypeError`` the isinstance check suggests.
+    it is a ``TypeError``, because a number where a word belongs is the wrong
+    type.
     """
-    with pytest.raises(ValueError, match=r"'building_use' must be a string"):
+    with pytest.raises(TypeError, match=r"'building_use' must be a string"):
         hr.db_hr_facade_requirement(60.0, 5, "protected")  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match=r"'room_type' must be a string"):
+    with pytest.raises(TypeError, match=r"'room_type' must be a string"):
         hr.db_hr_facade_requirement(60.0, "residential", None)  # type: ignore[arg-type]

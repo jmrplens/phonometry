@@ -106,7 +106,11 @@ import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
-from .._internal.validation import require_count, require_positive
+from .._internal.validation import (
+    require_count,
+    require_positive,
+    require_scalar,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -427,6 +431,7 @@ def _clip_to_ratio(x: NDArray[np.float64], ratio: float) -> NDArray[np.float64]:
     square wave) to the ratio of the unclipped record, so the threshold is
     found by bisection on that bracket.
     """
+    require_scalar(ratio, "ratio")
     from scipy.optimize import brentq
 
     peak = float(np.max(np.abs(x)))

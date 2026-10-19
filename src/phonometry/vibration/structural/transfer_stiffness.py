@@ -773,8 +773,10 @@ def _as_flags(
 ) -> NDArray[np.bool_]:
     """A boolean mask with one flag per frequency."""
     flags = np.asarray(value)
-    if flags.dtype != np.bool_ or flags.shape != shape:
-        msg = f"{owner}: '{name}' must be boolean, one flag per frequency."
+    msg = f"{owner}: '{name}' must be boolean, one flag per frequency."
+    if flags.dtype != np.bool_:
+        raise TypeError(msg)
+    if flags.shape != shape:
         raise ValueError(msg)
     return flags
 
@@ -824,10 +826,11 @@ class BandAveragedStiffness(OwnsArrays):
         hide a band that was measured. Both are refused, as are fields of
         different lengths and counts that are not whole numbers.
 
+        :raises TypeError: if the counts are not integers.
         :raises ValueError: if the fields disagree in length or rank, the
-            frequencies are not finite and positive, a count is negative or
-            not an integer, or the stiffness is not a positive finite number
-            exactly where the count reaches five.
+            frequencies are not finite and positive, a count is negative,
+            or the stiffness is not a positive finite number exactly where
+            the count reaches five.
         """
         owner = type(self).__name__
         require_ranks(
@@ -850,8 +853,10 @@ class BandAveragedStiffness(OwnsArrays):
                 msg = f"{owner}: '{name}' must be positive."
                 raise ValueError(msg)
         counts = np.asarray(self.line_counts)
-        if counts.dtype.kind not in "iu" or np.any(counts < 0):
-            msg = f"{owner}: 'line_counts' must be non-negative integers."
+        msg = f"{owner}: 'line_counts' must be non-negative integers."
+        if counts.dtype.kind not in "iu":
+            raise TypeError(msg)
+        if np.any(counts < 0):
             raise ValueError(msg)
         k = np.asarray(self.stiffness, dtype=np.float64)
         determined = counts >= MIN_FREQUENCIES_PER_BAND
@@ -946,9 +951,10 @@ def band_averaged_stiffness(
     :param valid: Per frequency, whether the line enters the average
         (Default: ``None``, every line).
     :return: The :class:`BandAveragedStiffness`.
+    :raises TypeError: for a mask that is not boolean.
     :raises ValueError: for frequencies that are not one-dimensional, finite,
         positive and distinct, a stiffness of another length or not finite, a
-        mask that is not boolean or has another length, or no valid line.
+        mask of another length, or no valid line.
     :warns TransferStiffnessWarning: when a band holds between one and four
         valid lines.
     """

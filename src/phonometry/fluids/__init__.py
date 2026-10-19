@@ -27,7 +27,7 @@ from ._air import (
 from ._state import (
     Fluid,
     FluidAssumptionWarning,
-    FluidPropertyUnavailable,
+    FluidPropertyUnavailableError,
     FluidWarning,
     characteristic_impedance,
 )
@@ -66,7 +66,7 @@ __all__ = [
     "PUBLISHED_NONLINEARITY",
     "Fluid",
     "FluidAssumptionWarning",
-    "FluidPropertyUnavailable",
+    "FluidPropertyUnavailableError",
     "FluidWarning",
     "Gas",
     "NonlinearityParameter",

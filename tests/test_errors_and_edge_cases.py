@@ -320,11 +320,19 @@ def test_octave_filter_rejects_empty_signal() -> None:
         filters.octave_filter(empty, 48000)
 
 
-@pytest.mark.parametrize("limits", [1000, ["a", 5000]])
-def test_octave_filter_rejects_malformed_limits(limits: object) -> None:
-    """Malformed limits used to die in the cache key's float(), naming nothing."""
+@pytest.mark.parametrize(
+    ("limits", "refusal"), [(1000, TypeError), (["a", 5000], TypeError)]
+)
+def test_octave_filter_rejects_malformed_limits(
+    limits: object, refusal: type[Exception]
+) -> None:
+    """Malformed limits used to die in the cache key's float(), naming nothing.
+
+    A bare number where a pair belongs is the wrong type, and so is a pair
+    holding a text, whatever the text reads as.
+    """
     x = np.zeros(1000)
-    with pytest.raises(ValueError, match="'limits' must be a pair of frequencies"):
+    with pytest.raises(refusal, match="'limits' must be a pair of frequencies"):
         filters.octave_filter(x, 48000, limits=limits)  # type: ignore[arg-type]
 
 
@@ -332,7 +340,7 @@ def test_octave_filter_rejects_malformed_limits_on_the_plotting_path() -> None:
     """The plot branch bypasses the design cache; it must refuse the same way."""
     x = np.zeros(1000)
     plot = filters.ResponsePlot(file="unused.png")
-    with pytest.raises(ValueError, match="'limits' must be a pair of frequencies"):
+    with pytest.raises(TypeError, match="'limits' must be a pair of frequencies"):
         filters.octave_filter(
             x,
             48000,

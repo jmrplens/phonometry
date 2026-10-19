@@ -11,8 +11,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
-from .._internal.validation import require_positive
-from .._internal.warnings import PhonometryWarning
+from .._internal.validation import require_positive, require_scalar
+from ._warnings import FilterBankWarning
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -223,7 +223,7 @@ def _deleteouters(bands: FractionalOctaveBands, fs: int) -> FractionalOctaveBand
         return bands
     warnings.warn(
         "Low sampling rate: frequencies above fs/2 removed",
-        PhonometryWarning,
+        FilterBankWarning,
         stacklevel=3,
     )
     return _band_set(
@@ -314,6 +314,7 @@ def normalized_frequencies(fraction: int) -> list[float]:
     :param fraction: 1 or 3 (Octave or 1/3 Octave).
     :return: List of standard frequencies.
     """
+    require_scalar(fraction, "fraction")
     predefined = {
         1: [16, 31.5, 63, 125, 250, 500, 1000, 2000, 4000, 8000, 16000],
         3: [

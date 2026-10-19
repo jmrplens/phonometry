@@ -295,7 +295,8 @@ place, and the differences go to [`level_difference_quantiles`](/phonometry/refe
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a sample smaller than 20, a length that is not a finite, positive number (a string or a bool included), or contours so short that two points would fall on the same whole metre, which happens only below `M` metres. |
+| TypeError | for a length that is a text, a bool or anything else that is not a number, or a sample size that is not a whole number's type. |
+| ValueError | for a sample smaller than 20, a length that is not a finite, positive number, or contours so short that two points would fall on the same whole metre, which happens only below `M` metres. |
 
 ## level_difference_quantiles
 

@@ -121,7 +121,7 @@ def test_hydrophone_depths_rejects_a_nested_angle_grid() -> None:
 def test_hydrophone_depths_rejects_a_non_numeric_angle() -> None:
     # A string element used to escape as numpy's anonymous "could not
     # convert string to float" instead of naming the parameter.
-    with pytest.raises(ValueError, match="'angles_deg' must be numeric"):
+    with pytest.raises(TypeError, match="'angles_deg' must be numbers, not text"):
         underwater.hydrophone_depths(100.0, angles_deg=("bad",))  # type: ignore[arg-type]
 
 
@@ -175,7 +175,7 @@ def test_monopole_source_level_rejects_a_two_dimensional_frequency_grid() -> Non
 def test_monopole_source_level_rejects_non_numeric_inputs() -> None:
     # Both shared array guards name the parameter a conversion failure sits
     # in, instead of letting numpy's anonymous error escape.
-    with pytest.raises(ValueError, match="'frequency' must be numeric"):
+    with pytest.raises(TypeError, match="'frequency' must be numbers, not text"):
         underwater.monopole_source_level(140.0, ("bad",), 8.0)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="'rnl' must be numeric"):
+    with pytest.raises(TypeError, match="'rnl' must be numbers, not text"):
         underwater.monopole_source_level(("bad",), 125.0, 8.0)  # type: ignore[arg-type]

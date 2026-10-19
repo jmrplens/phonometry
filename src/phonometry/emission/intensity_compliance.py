@@ -71,6 +71,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     check_engine,
+    require_count,
     require_equal_counts,
     require_ranks,
     require_same_length,
@@ -163,6 +164,7 @@ def _match_band(frequency: float) -> float:
     :raises ValueError: If no tabulated band lies within
         :data:`_BAND_MATCH_TOLERANCE` of ``frequency``.
     """
+    require_scalar(frequency, "frequency")
     if not np.isfinite(frequency) or frequency <= 0.0:
         msg = "Band centre frequencies must be finite and positive."
         raise ValueError(msg)
@@ -257,13 +259,18 @@ def instrument_class_from_components(probe_class: int, processor_class: int) -> 
     :raises ValueError: If either class is not 1 or 2. The non-real-time
         class 2X of clause 4 is not modelled here.
     """
+    require_scalar(probe_class, "probe_class")
+    require_scalar(processor_class, "processor_class")
     if probe_class not in (1, 2) or processor_class not in (1, 2):
         msg = (
             "'probe_class' and 'processor_class' must be 1 or 2; the "
             "non-real-time class 2X of IEC 61043 clause 4 is not modelled."
         )
         raise ValueError(msg)
-    return max(int(probe_class), int(processor_class))
+    return max(
+        require_count(probe_class, "probe_class", at_least=None),
+        require_count(processor_class, "processor_class", at_least=None),
+    )
 
 
 def _band_verdicts(
@@ -538,7 +545,11 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
             :meth:`reference_class`.
         :raises ValueError: If ``device_class`` is not 1 or 2.
         """
-        cls = self.reference_class() if device_class is None else int(device_class)
+        cls = (
+            self.reference_class()
+            if device_class is None
+            else require_count(device_class, "device_class", at_least=None)
+        )
         if cls not in (1, 2):
             msg = "'device_class' must be 1 or 2."
             raise ValueError(msg)
@@ -550,7 +561,11 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         :param device_class: 1 or 2; ``None`` (default) uses
             :meth:`reference_class`.
         """
-        cls = self.reference_class() if device_class is None else int(device_class)
+        cls = (
+            self.reference_class()
+            if device_class is None
+            else require_count(device_class, "device_class", at_least=None)
+        )
         if cls not in (1, 2):
             msg = "'device_class' must be 1 or 2."
             raise ValueError(msg)
@@ -644,6 +659,7 @@ def _plane_wave_phase_deg(
     r"""Plane-wave phase difference :math:`k d` across the spacer, in
     degrees.
     """
+    require_scalar(c, "c")
     require_scalar(spacing, "spacing_m")
     if not np.isfinite(spacing) or spacing <= 0.0:
         msg = "'spacing_m' must be a positive, finite distance in metres."

@@ -326,7 +326,7 @@ class TestValidation:
         ("kwargs", "match"),
         [
             ({"speed_rpm": 0.0}, "'speed_rpm' must be positive"),
-            ({"n_elements": 0}, "'n_elements' must be a positive integer"),
+            ({"n_elements": 0}, "'n_elements' must be a whole number, at least 1"),
             ({"element_diameter": 0.0}, "'element_diameter' must be positive"),
             ({"pitch_diameter": 0.0}, "'pitch_diameter' must be positive"),
             ({"contact_angle_deg": -1.0}, "'contact_angle_deg' must be non-negative"),
@@ -348,9 +348,9 @@ class TestValidation:
     @pytest.mark.parametrize(
         ("kwargs", "match"),
         [
-            ({"n_teeth": 0}, "'n_teeth' must be a positive integer"),
-            ({"n_harmonics": 0}, "'n_harmonics' must be a positive integer"),
-            ({"n_sidebands": -1}, "'n_sidebands' must be a non-negative integer"),
+            ({"n_teeth": 0}, "'n_teeth' must be a whole number, at least 1"),
+            ({"n_harmonics": 0}, "'n_harmonics' must be a whole number, at least 1"),
+            ({"n_sidebands": -1}, "'n_sidebands' must be a whole number, at least 0"),
             ({"sideband_rate": 0.0}, "'sideband_rate' must be positive"),
         ],
     )
@@ -363,11 +363,14 @@ class TestValidation:
         [
             ({"n_poles": 3}, "'n_poles' must be an even integer"),
             ({"n_poles": 0}, "'n_poles' must be an even integer"),
-            ({"n_rotor_bars": 0}, "'n_rotor_bars' must be a positive integer"),
+            ({"n_rotor_bars": 0}, "'n_rotor_bars' must be a whole number, at least 1"),
             ({"slip": 1.0}, "'slip' must be below"),
             ({"slip": -0.1}, "'slip' must be non-negative"),
-            ({"n_slot_harmonics": 0}, "'n_slot_harmonics' must be a positive integer"),
-            ({"n_sidebands": -1}, "'n_sidebands' must be a non-negative integer"),
+            (
+                {"n_slot_harmonics": 0},
+                "'n_slot_harmonics' must be a whole number, at least 1",
+            ),
+            ({"n_sidebands": -1}, "'n_sidebands' must be a whole number, at least 0"),
         ],
     )
     def test_motor_rejects(self, kwargs: dict[str, object], match: str) -> None:
@@ -386,10 +389,13 @@ class TestValidation:
     @pytest.mark.parametrize(
         ("kwargs", "match"),
         [
-            ({"n_blades": 0}, "'n_blades' must be a positive integer"),
-            ({"n_harmonics": 0}, "'n_harmonics' must be a positive integer"),
-            ({"n_vanes": 0}, "'n_vanes' must be a positive integer"),
-            ({"n_lobe_orders": 0}, "'n_lobe_orders' must be a positive integer"),
+            ({"n_blades": 0}, "'n_blades' must be a whole number, at least 1"),
+            ({"n_harmonics": 0}, "'n_harmonics' must be a whole number, at least 1"),
+            ({"n_vanes": 0}, "'n_vanes' must be a whole number, at least 1"),
+            (
+                {"n_lobe_orders": 0},
+                "'n_lobe_orders' must be a whole number, at least 1",
+            ),
         ],
     )
     def test_blade_rejects(self, kwargs: dict[str, object], match: str) -> None:
@@ -409,7 +415,7 @@ class TestValidation:
     def test_harmonics_rejects_zero_count(self) -> None:
         res = bearing_fault_frequencies(**_P85)  # type: ignore[arg-type]
         with pytest.raises(
-            ValueError, match=r"'n_harmonics' must be a positive integer"
+            ValueError, match=r"'n_harmonics' must be a whole number, at least 1"
         ):
             res.harmonics("BPFO", 0)
 

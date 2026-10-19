@@ -562,6 +562,7 @@ def nipts(
     runs but a :class:`NoiseInducedHearingLossWarning` marks the result as an
     extrapolation, and the ``.report()`` fiche prints the matching caveat.
     """
+    require_scalar(l_ex, "l_ex")
     require_scalar(exposure_duration_years, "exposure_duration_years")
     if exposure_duration_years <= 0.0:
         msg = f"'exposure_duration_years' must be positive; got {exposure_duration_years}."

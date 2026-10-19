@@ -77,6 +77,7 @@ from ..._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -664,6 +665,8 @@ def wind_shear_profile(
     :raises ValueError: If a speed or height is not positive or the upper
         height is not above the lower one.
     """
+    require_scalar(lower_speed_m_s, "lower_speed_m_s")
+    require_scalar(upper_speed_m_s, "upper_speed_m_s")
     low_z = require_positive(lower_height_m, "lower_height_m")
     high_z = require_positive(upper_height_m, "upper_height_m")
     if high_z <= low_z:
@@ -727,6 +730,7 @@ def _bin_keys(
     ``sector_width_deg`` wide and the first is centred on north (345 degrees
     to 15 degrees for 30 degree sectors).
     """
+    require_scalar(count, "count")
     speeds = require_finite_array(wind_speeds_m_s, "wind_speeds_m_s")
     if speeds.size != count:
         msg = f"'wind_speeds_m_s' must hold one value per data point ({count})."
@@ -1298,6 +1302,7 @@ def _optional_per_bin(
     values: ArrayLike | None, bins: int, name: str
 ) -> NDArray[np.float64] | None:
     """A finite array with one value per bin, or ``None`` if not given."""
+    require_scalar(bins, "bins")
     if values is None:
         return None
     out = require_finite_array(values, name)
@@ -1630,6 +1635,7 @@ def wind_turbine_low_frequency_level(
     :param weighting: ``"A"`` (default) to add the A-weighting of Table C.4
         (IEC 61672-1) to each band, or ``"Z"`` for unweighted levels.
     :return: A :class:`LowFrequencyLevel`.
+    :raises TypeError: If ``weighting`` is not a text.
     :raises ValueError: If the shapes disagree, a distance or height is not
         positive, an air attenuation coefficient is negative, a default table
         has no value at a supplied band, or ``weighting`` is neither ``"A"``
@@ -1720,6 +1726,7 @@ def _per_band(
     :math:`\Delta L_\mathrm{a}` into a gain. The ground and facade terms may
     be negative (Table C.3 prints -0,2 dB).
     """
+    require_scalar(bands, "bands")
     out = require_finite_array(values, name)
     if out.size != bands:
         msg = f"'{name}' must hold one value per band ({bands}); got {out.size}."

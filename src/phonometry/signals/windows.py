@@ -28,6 +28,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_axis_count,
+    require_count,
     require_equal_counts,
     require_ranks,
     require_scalar,
@@ -219,12 +220,16 @@ def window_metrics(
         ``('kaiser', 8.6)``, ``('tukey', 0.5)``).
     :param n: Window length, in samples (at least 16).
     :return: A :class:`WindowMetricsResult`.
-    :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: If ``n`` is not a whole number's type (a bool, a text,
+        an array), or ``window`` is a specification of a type
+        :func:`scipy.signal.get_window` does not take.
+    :raises ValueError: If ``n`` is not whole or is below 16, the window name
+        is unknown, or the window is degenerate.
     """
     from scipy import signal as sp_signal
 
     require_scalar(n, "n")
-    n_v = int(n)
+    n_v = require_count(n, "n", at_least=None)
     if n_v < _MIN_WINDOW_LENGTH:
         msg = f"'n' must be at least {_MIN_WINDOW_LENGTH} samples."
         raise ValueError(msg)
@@ -232,7 +237,10 @@ def window_metrics(
         w = np.asarray(
             sp_signal.get_window(window, n_v, fftbins=True), dtype=np.float64
         )
-    except (ValueError, TypeError) as exc:
+    except TypeError as exc:
+        msg = f"Unknown window specification: {window!r}"
+        raise TypeError(msg) from exc
+    except ValueError as exc:
         msg = f"Unknown window specification: {window!r}"
         raise ValueError(msg) from exc
     if np.any(~np.isfinite(w)) or float(np.sum(w)) <= 0.0:

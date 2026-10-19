@@ -1220,7 +1220,7 @@ credited the way the others are:
 | `PUBLISHED_RESILIENT_LAYERS["mineral_wool_rock_60_30"]`, `resilient_layer("mineral_wool_rock_60_30")` | `"hopkins-2007-table-a3/mineral_wool_rock_60_30"`, the `"<table>/<row>"` key of every catalogue |
 | `layer.attributed_to`, a string | `layer.attributed_to["row"]`, a mapping as on every row |
 | `ResilientLayer(...)` with the stiffness, the density and the thickness required | every quantity optional, and `apparent_dynamic_stiffness_n_m3` beside `dynamic_stiffness_n_m3` for a source that gives only the apparent $s'_\mathrm{t}$ |
-| `layer.natural_frequency(mass_per_area=...)` | `layer.natural_frequency(mass_per_area_kg_m2=...)`; a layer that holds only $s'_\mathrm{t}$ also takes `airflow_resistivity_pa_s_m2=` and `gas_stiffness_n_m3=`, and raises `io.CatalogueError` without the first |
+| `layer.natural_frequency(mass_per_area=...)` | `layer.natural_frequency(mass_per_area_kg_m2=...)`; a layer that holds only $s'_\mathrm{t}$ also takes `airflow_resistivity_pa_s_m2=` and `gas_stiffness_n_m3=`, and raises `ValueError` without the first |
 
 Hopkins Table A3 prints $s'$, the stiffness of the installed layer as the
 book's own list of symbols defines it, so its fifteen rows still hold
@@ -1651,6 +1651,81 @@ try:
     dataclasses.replace(force, impedance=100.0)
 except ValueError as error:
     print("cut_off_frequency" in str(error))
+# True
+```
+
+## A wrong type raises `TypeError`, a missing key `KeyError`, and every warning has a topic
+
+The Python documentation draws the line between the two refusals:
+`TypeError` is "raised when an operation or function is applied to an object
+of inappropriate type", and `ValueError` "when an operation or function
+receives an argument that has the right type but an inappropriate value". In
+3.3.0 and 4.0.0rc1 seventy-six refusals asked an argument for its type and
+raised `ValueError`, thirty-two more caught a `TypeError` and raised it again
+as a `ValueError`, and the shared guards of every scalar parameter refused an
+array that way too, while a handful of others raised `TypeError` for the same
+mistake. 4.0 raises `TypeError` for a wrong type and `ValueError` for a
+right type with a wrong value, everywhere. A call wrapped in `except
+ValueError` to absorb any bad input should catch `(TypeError, ValueError)`.
+
+| Passed | 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- | --- |
+| an array, `None`, a text or an object that is not a number where one number belongs, on any scalar parameter | `ValueError`, and a text that reads as a number, such as `"20"`, was taken as that number | `TypeError`, naming the parameter, for `"20"` and `"fifty"` alike: a text is the wrong type where a number belongs, whatever it reads as |
+| an element that is not a number inside an array of numbers (`[None, 1.0]`, `["94.0", "94.1"]`) | `ValueError`, and text numpy reads as numbers was taken as them | `TypeError`, for text whatever it reads as |
+| a complex number or array where a real one belongs, on any parameter the shared guards read | `ValueError` | `TypeError`, saying it must be real |
+| an array of the wrong kind: a mask that is not boolean (`obstacle_mask=` of `simulation.FDTD2D` and `simulation.fdtd_simulation`, the region masks of `simulation.ElasticFDTD2D.from_regions`, `valid=` of `vibration.band_averaged_stiffness`), `line_counts` of `vibration.BandAveragedStiffness` that are not integers, exclusion flags that are neither booleans nor integers (`excluded_blocks=` of `environment.amplitude_modulation_period`, `excluded=` of `environment.bin_amplitude_modulation`), text where the readings, distances and durations of the service equipment functions of `building` belong (`building.verify_calibration_deviation`, `building.check_background_duration` and the rest) | `ValueError` | `TypeError` |
+| a sequence where one measurement belongs: the pressures and temperatures of `noise_control.normal_air_density`, `noise_control.total_pressure`, `noise_control.total_pressure_loss` and `noise_control.pressure_loss_coefficient`, `altitude` of `emission.static_pressure_from_altitude`, `tolerance_s=` of `building.check_background_duration` | `ValueError`, and the `noise_control` functions read a one-element sequence as its element | `TypeError`, a one-element sequence included |
+| a whole number (a count, an index, a class, a number of points or of decimals: any parameter written as an `int`) given as a text, a bool or an array: `signals.zoom_fft(..., n_points=)`, `signals.window_metrics(window, n)`, `signals.min_phase(..., oversample=)`, `electroacoustics.swept_sine_distortion(..., n_harmonics=)`, `metrology.stationarity_test(..., n_segments=)`, `vibration.story_fundamental_frequency(n_stories)`, `n_events=` of the sound energy functions and of `emission.SoundEnergyResult` and `emission.ReverberationSoundEnergyResult`, `n=` of `building.prediction_input_uncertainty` and `building.intensity_element_normalized_difference`, `oversample=` of `signals.lc_peak` and `broadcast.true_peak_level`, `max_order=` of `room.image_source_rir` and `room.audible_image_count`, the grid indices and step counts of `simulation.FDTD2D`, `duration_days=` of `vibration.construction_guide_values`, `start_band=` of `aircraft.tone_correction`, `n_level_ranges=` of `metrology.SoundLevelMeterFeatures`, `n_impacts` of `vibration.ImpactMobilityResult`, the position counts of `ReportMetadata` | `ValueError`, or, where the value went through `int()`, a bool taken as 0 or 1, a text parsed and a fraction truncated without a word (`n_points=100.6` drew 100 points) | `TypeError`. A number that is not whole, or is below the least the count can be, is a `ValueError`, and a whole float such as `5.0` is taken as `5` |
+| a flag that is not `True` or `False`: `small_room=` of `building.check_service_equipment_positions`, `absorbing_specimen_surface=` of the ISO 15186 insulation, the declarations of the free-field qualification in `emission`, the features of `metrology.SoundLevelMeterFeatures` and the observations of `metrology.SoundLevelMeterPeriodicMeasurements` | `ValueError` | `TypeError` |
+| a name that is not a text: the area types, uses and periods of the RD 1367/2007 and DB-HR functions (`environment.activity_limits` and the rest), the Annex A items of `environment.SoundscapeAcousticEnvironment`, the descriptions of `emission.turbine_noise_declaration`, and any choice among named options given as something other than a text (`period=5`) | `ValueError` | `TypeError`; an empty text, or a text that names none of the options, stays a `ValueError` |
+| an object of the wrong class: the boxes of `emission.turbine_measurement_surface`, `surface=` of `emission.turbine_microphone_positions`, `correction=` of `emission.check_turbine_test_environment`, the determinations of `emission.turbine_noise_declaration`, the parts of `environment.SoundscapeReport`, a material of the elastic FDTD that is no `Material`, catalogue row or triple, a `waveform` that is not callable, a bare array to `io.write(..., sidecar=True)`, a band calibration where `emission.high_frequency_sound_power_comparison` compares tones | `ValueError` | `TypeError` |
+| a text where a sequence belongs, a number where a pair or a list does, or a pair holding an array: `rankings` of `environment.method_b_source_ranking`, `bands=` of `environment.bin_amplitude_modulation`, `exclude_hz=` and the frequency pairs of the ISO 7626-5 mobility, `microphones=` of the IEC 61094-8 corrections, the limits of a filter bank, `shape=` of `simulation.FDTD2D`, the band edges of `electroacoustics.LoudspeakerCharacteristics` and `electroacoustics.MicrophoneCharacteristics` | `ValueError` | `TypeError` |
+| a performance of `hearing.assumed_protection_value` or `hearing.hml_rating` that is not a number, a `clause=` of `metrology.max_expanded_uncertainty` that is not a number, a `part=` of `environment.method_a_scale_values` that is a bool | `ValueError` | `TypeError`; a number Table 1 does not tabulate, or a clause or part that does not exist, stays a `ValueError` |
+
+A lookup that misses raises what a mapping raises when the result is read
+like one, and `ValueError` when a number falls outside what it covers:
+
+| Asked | 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- | --- |
+| `RegulationLimits[period]` for a period it does not hold | `ValueError` | `KeyError`. The key is matched exactly, as a `dict` key is: `limits["Day"]` and `limits[" night "]`, which were read as `"day"` and `"night"`, now raise `KeyError` too. The period of `environment.PeriodAssessment`, a choice, still raises `ValueError` |
+| `emission.measurement_positions("hemisphere", ..., n_reflecting_planes=3, grade="survey")` | `NotImplementedError` | the positions 14, 21 and 22 of ISO 3746:2010 Table B.2 |
+| `emission.measurement_positions("hemisphere", ..., grade="survey")` over one reflecting plane | positions 4, 5, 6 and 10 of ISO 3744 Table B.1, the array for a source with tones | positions 4, 5, 6 and 10 of ISO 3746:2010 Table B.1, which clause 8.2.1 prescribes: the broadband positions of those numbers in ISO 3744 Table B.2 |
+| `fluids.FluidPropertyUnavailable` | the exception | `fluids.FluidPropertyUnavailableError`, still an `AttributeError`, so `hasattr` and `getattr` with a default behave as before |
+
+These warnings now derive from `PhonometryWarning`, each with a topic of its
+own, so `warnings.simplefilter("error", phonometry.PhonometryWarning)` reaches
+all of them and a filter on the topic reaches one. They are still
+`UserWarning`s, so a filter written on that class still matches:
+
+| Emitted by | 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- | --- |
+| `environment.sound_absorption_rating` and `environment.sound_reflection_rating` at the 0,99 cap | `environment.RoadDeviceWarning`, a `UserWarning` outside the hierarchy | `environment.RoadDeviceWarning`, a `PhonometryWarning` |
+| `building.equivalent_impact_level`, `building.weighted_lining_improvement` and `building.lining_improvement` outside the range their relation is stated for | `UserWarning` | `building.BuildingPredictionWarning` |
+| `building.intensity_element_normalized_difference` with `n > 1` | `UserWarning` | `building.LaboratoryInsulationWarning` |
+| `room.room_criterion` on a spectrum missing a band from 31.5 Hz to 4000 Hz | `UserWarning` | `room.NoiseCriterionWarning` |
+| `aircraft.approach_profile` on a Level-Idle step whose start altitude or start CAS disagrees with the following Level-Idle step (Doc 29 B7.1.4) | `UserWarning` | `aircraft.FlightProfileWarning`, which also reports a following step that is neither Level-Idle nor Descend-Idle (Case 2) |
+| `signals.tone_burst` when `fs` and `frequency` are incommensurate | `PhonometryWarning` | `signals.ToneBurstWarning` |
+| `underwater.normal_modes`, `underwater.eigenrays` and `underwater.gaussian_beams` | `PhonometryWarning` | `underwater.NumericalPropagationWarning` |
+| a filter bank dropping the bands above the Nyquist frequency (`Low sampling rate`) | `PhonometryWarning` | `filters.FilterBankWarning` |
+
+```python
+import phonometry
+from phonometry import environment, vibration
+
+limits = environment.activity_limits("a")
+try:
+    limits["noon"]
+except KeyError:
+    print("KeyError")
+for n_stories in ("5", 2.5):
+    try:
+        vibration.story_fundamental_frequency(n_stories)
+    except (TypeError, ValueError) as refusal:
+        print(type(refusal).__name__)
+print(issubclass(environment.RoadDeviceWarning, phonometry.PhonometryWarning))
+# KeyError
+# TypeError
+# ValueError
 # True
 ```
 

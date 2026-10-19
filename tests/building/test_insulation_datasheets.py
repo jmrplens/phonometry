@@ -270,7 +270,7 @@ def test_a_float_keyed_mapping_is_read_like_an_integer_keyed_one() -> None:
     keyed = dict(zip(_RATED, ref.ISO717_1_ANNEX_C_R, strict=True))
     floats = {float(band): value for band, value in keyed.items()}
     assert building.weighted_rating(floats).rating == 30
-    with pytest.raises(ValueError, match="'fraction' must be 1"):
+    with pytest.raises(TypeError, match="'fraction' must be 1"):
         building.weighted_rating(floats, fraction="thirds")  # type: ignore[arg-type]
 
 

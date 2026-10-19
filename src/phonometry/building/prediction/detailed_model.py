@@ -216,6 +216,7 @@ def _band_array(
     values: ArrayLike, n_bands: int, name: str, *, positive: bool = False
 ) -> np.ndarray:
     """Coerce *values* to ``n_bands`` finite floats, broadcasting a scalar."""
+    require_scalar(n_bands, "n_bands")
     data = np.atleast_1d(np.asarray(values, dtype=np.float64))
     if data.ndim != 1 or data.size == 0:
         msg = f"'{name}' must be a non-empty 1-D array."

@@ -133,7 +133,7 @@ que nadie imprimió. El error nombra el modelo, lo que sí determina y las dos
 salidas:
 
 ```python
-from phonometry.fluids import Fluid, FluidPropertyUnavailable
+from phonometry.fluids import Fluid, FluidPropertyUnavailableError
 
 medido = Fluid(
     temperature_c=10.0,
@@ -145,7 +145,7 @@ medido = Fluid(
 )
 try:
     medido.heat_capacity_ratio
-except FluidPropertyUnavailable as exc:
+except FluidPropertyUnavailableError as exc:
     print(exc)
 # 'a density and a sound speed, measured' does not determine
 # 'heat_capacity_ratio'; it determines density, speed_of_sound. Supply the

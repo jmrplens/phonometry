@@ -454,15 +454,33 @@ def test_room_volume_must_be_positive() -> None:
 
 
 @pytest.mark.parametrize("field", ["n_source_positions", "n_receiver_positions"])
-@pytest.mark.parametrize("bad", [0, -1, 2.5, True])
+@pytest.mark.parametrize(
+    ("bad", "refusal"),
+    [
+        (0, ValueError),
+        (-1, ValueError),
+        (2.5, ValueError),
+        (True, TypeError),
+        ("2", TypeError),
+    ],
+)
 def test_position_counts_must_be_positive_integers(
-    field: str, bad: int | float
+    field: str, bad: object, refusal: type[Exception]
 ) -> None:
-    """A position count must be a positive integer (bools and floats rejected)."""
+    """A position count is a positive whole number: a bool or a text is the
+    wrong type, a fraction or a count below one the wrong value.
+    """
     with pytest.raises(
-        ValueError, match=rf"ReportMetadata\.{field} must be a positive integer"
+        refusal, match=rf"ReportMetadata\.{field} must be a positive integer"
     ):
         ReportMetadata(**{field: bad})
+
+
+def test_a_whole_float_position_count_is_kept_as_its_integer() -> None:
+    meta = ReportMetadata(n_source_positions=2.0, n_receiver_positions=np.int64(6))  # type: ignore[arg-type]
+    assert meta.n_source_positions == 2
+    assert type(meta.n_source_positions) is int
+    assert type(meta.n_receiver_positions) is int
 
 
 def test_position_counts_accept_positive_integers() -> None:

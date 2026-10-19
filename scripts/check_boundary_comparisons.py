@@ -950,8 +950,18 @@ class Module:
         while current.function is not None:
             function = current.function
             if name in self.local_bindings(function):
+                key = ("local", current, name)
+                if key in self._busy and _parameter(function, name) is not None:
+                    # Read inside its own binding, ``levels =
+                    # np.asarray(levels)``, a parameter's name still holds the
+                    # caller's value: the binding has not happened yet. Cut
+                    # as a cycle, the caller's decimal went missing.
+                    return self._guarded(
+                        ("param", current, name),
+                        functools.partial(self.parameter, current, name),
+                    )
                 return self._guarded(
-                    ("local", current, name),
+                    key,
                     functools.partial(self.local, current, name),
                 )
             if _parameter(function, name) is not None:

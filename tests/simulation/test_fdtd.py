@@ -377,7 +377,7 @@ def test_obstacle_mask_validation() -> None:
     open_source = GaussianPulse(ix=1, iy=1, half_width_s=1e-4)
     with pytest.raises(ValueError, match="match the grid shape"):
         FDTD2D(C0, 0.05, shape=(10, 12), obstacle_mask=mask)
-    with pytest.raises(ValueError, match=r"obstacle_mask must be a boolean array"):
+    with pytest.raises(TypeError, match=r"obstacle_mask must be a boolean array"):
         FDTD2D(C0, 0.05, shape=(10, 10), obstacle_mask=float_mask)
     with pytest.raises(ValueError, match=r"obstacle_mask must leave open cells"):
         FDTD2D(C0, 0.05, shape=(10, 10), obstacle_mask=full_mask)
@@ -627,21 +627,20 @@ def test_each_snapshot_is_the_field_of_its_own_step() -> None:
         ({"duration": 0.0}, "duration must be positive"),
         ({"duration": 1e-9}, "at least one time step"),
         ({"snapshot_every": 0}, "snapshot_every must be >= 1"),
-        ({"snapshot_every": 2.5}, "snapshot_every must be an integer"),
+        ({"snapshot_every": 2.5}, "'snapshot_every' must be a whole number"),
         ({"probes": [(99, 0)]}, r"probe .* lies outside the grid"),
-        ({"probes": [(2.5, 3)]}, "probe ix must be an integer"),
-        ({"probes": [(2, 3.5)]}, "probe iy must be an integer"),
+        ({"probes": [(2.5, 3)]}, "'probe ix' must be a whole number"),
+        ({"probes": [(2, 3.5)]}, "'probe iy' must be a whole number"),
         # A malformed entry used to be reported by the interpreter's
         # unpacking message, naming neither probes nor the entry.
         ({"probes": [(1, 2, 3)]}, r"probes must hold \(ix, iy\) index pairs"),
-        ({"probes": [5]}, r"probes must hold \(ix, iy\) index pairs"),
         (
             {"boundaries": "absorbing", "absorbing_layer_cells": 0},
             "absorbing_layer_cells must be >= 1",
         ),
         (
             {"boundaries": "absorbing", "absorbing_layer_cells": 2.5},
-            "absorbing_layer_cells must be an integer",
+            "'absorbing_layer_cells' must be a whole number",
         ),
     ],
 )
@@ -659,21 +658,36 @@ def test_simulation_rejects_invalid_arguments(
         fdtd_simulation(C0, 0.05, duration, shape=(30, 30), **full)
 
 
+def test_a_probe_that_is_not_a_pair_is_the_wrong_type() -> None:
+    # A bare index where a pair belongs cannot be unpacked at all: the wrong
+    # type, where a triple is a pair of the wrong length.
+    sources = [GaussianPulse(ix=5, iy=5, half_width_s=1e-4)]
+    with pytest.raises(TypeError, match=r"probes must hold \(ix, iy\) index pairs"):
+        fdtd_simulation(
+            C0,
+            0.05,
+            1e-3,
+            shape=(30, 30),
+            sources=sources,
+            probes=[5],  # type: ignore[list-item]
+        )
+
+
 def test_non_integral_counts_and_coordinates_are_rejected() -> None:
     # Fractional cell counts or indices raise instead of being truncated
     # (a float probe would silently record a different cell) or crashing
     # later inside numpy indexing, slicing or range().
-    with pytest.raises(ValueError, match="sponge_width must be an integer"):
+    with pytest.raises(ValueError, match="'sponge_width' must be a whole number"):
         FDTD2D(C0, 0.05, shape=(20, 20), sponge_width=2.5)  # type: ignore[arg-type]
     sim = FDTD2D(C0, 0.05, shape=(20, 20))
     float_source = GaussianPulse(ix=2.5, iy=3, half_width_s=1e-4)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="source ix must be an integer"):
+    with pytest.raises(ValueError, match="'source ix' must be a whole number"):
         sim.add_source(float_source)
-    with pytest.raises(ValueError, match="n_steps must be an integer"):
+    with pytest.raises(ValueError, match="'n_steps' must be a whole number"):
         sim.run(1.5)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="record_every must be an integer"):
+    with pytest.raises(ValueError, match="'record_every' must be a whole number"):
         sim.run(10, record_every=1.5)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="decimate must be an integer"):
+    with pytest.raises(ValueError, match="'decimate' must be a whole number"):
         sim.run(10, decimate=1.5)  # type: ignore[arg-type]
     assert sim.n == 0  # nothing ran on the rejected calls
 

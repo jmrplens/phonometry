@@ -70,6 +70,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    require_count,
     require_equal_counts,
     require_ranks,
     require_same_length,
@@ -152,11 +153,16 @@ def _validate_signal(
 def _validate_welch_params(
     n: int, fs: float, nperseg: int | None, overlap: float
 ) -> tuple[int, float]:
+    require_scalar(n, "n")
     require_scalar(overlap, "overlap")
     if not 0.0 <= float(overlap) < 1.0:
         msg = "'overlap' must be in [0, 1)."
         raise ValueError(msg)
-    seg = _default_nperseg(n, fs) if nperseg is None else int(nperseg)
+    seg = (
+        _default_nperseg(n, fs)
+        if nperseg is None
+        else require_count(nperseg, "nperseg", at_least=None)
+    )
     if seg < _MIN_SAMPLES or seg > n:
         msg = f"'nperseg' must be between {_MIN_SAMPLES} and the signal length."
         raise ValueError(msg)

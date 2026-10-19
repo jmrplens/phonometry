@@ -55,7 +55,12 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_ranks, require_same_length, require_scalar
+from .._internal.validation import (
+    require_count,
+    require_ranks,
+    require_same_length,
+    require_scalar,
+)
 from ..io._resolve import resolve_fs
 from .spectra import (
     _DEFAULT_OVERLAP,
@@ -439,7 +444,7 @@ def zoom_fft(
         m = int(np.ceil((hi - lo) * xa.size / fs_v)) + 1
     else:
         require_scalar(n_points, "n_points")
-        m = int(n_points)
+        m = require_count(n_points, "n_points", at_least=None)
     if m < _MIN_ZOOM_GRID_POINTS:
         msg = "'n_points' must be at least 2."
         raise ValueError(msg)

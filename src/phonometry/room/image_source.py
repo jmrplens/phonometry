@@ -78,6 +78,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_axis_count,
     require_axis_rank,
+    require_count,
     require_equal_counts,
     require_positive,
     require_ranks,
@@ -644,9 +645,7 @@ def image_source_rir(
         msg = "Sample rate 'fs' must be positive."
         raise ValueError(msg)
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
-    if not isinstance(max_order, (int, np.integer)) or max_order < 0:
-        msg = "'max_order' must be a non-negative integer."
-        raise ValueError(msg)
+    max_order = require_count(max_order, "max_order", at_least=0)
     src = _validate_point(source, dims, "source")
     rcv = _validate_point(receiver, dims, "receiver")
     if float(np.linalg.norm(src - rcv)) <= 0.0:
@@ -691,7 +690,7 @@ def image_source_rir(
 
     return ImageSourceResult(
         ir=ir_out,
-        fs=int(fs),
+        fs=require_count(fs, "fs", at_least=None),
         frequencies=freq,
         times=times,
         distances=distances,
@@ -718,10 +717,7 @@ def audible_image_count(max_order: int) -> int:
     :param max_order: Reflection-order cut-off ``i0`` (non-negative integer).
     :return: The audible image count.
     """
-    if not isinstance(max_order, (int, np.integer)) or max_order < 0:
-        msg = "'max_order' must be a non-negative integer."
-        raise ValueError(msg)
-    i0 = int(max_order)
+    i0 = require_count(max_order, "max_order", at_least=0)
     return (2 * (2 * i0**3 + 3 * i0**2 + 4 * i0)) // 3
 
 

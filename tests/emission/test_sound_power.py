@@ -29,10 +29,27 @@ def test_hemisphere_key_positions_count_and_radius() -> None:
     assert np.allclose(norms, 4.0, atol=4.0 * 0.03)
 
 
-def test_hemisphere_survey_four_positions() -> None:
-    """Survey, one plane -> 4 positions 4,5,6,10 (ISO 3746 clause 8.2.1)."""
-    pos = emission.measurement_positions("hemisphere", radius=1.0, grade="survey")
-    assert pos.shape == (4, 3)
+@pytest.mark.parametrize("tones", [True, False])
+def test_survey_one_plane_reads_iso_3746_table_b1(*, tones: bool) -> None:
+    """One plane -> positions 4, 5, 6 and 10 of ISO 3746:2010 Table B.1.
+
+    The values are read from BS EN ISO 3746:2010, PDF page 34, printed folio
+    25 (x/r, y/r, z/r), and scaled by the radius. They are the broadband
+    positions of ISO 3744 Table B.2, not those of its tonal Table B.1, and
+    ISO 3746 has one array whatever the source emits.
+    """
+    pos = emission.measurement_positions(
+        "hemisphere", radius=2.0, grade="survey", tones=tones
+    )
+    printed = np.array(
+        [
+            [-0.45, 0.77, 0.45],  # 4
+            [-0.45, -0.77, 0.45],  # 5
+            [0.89, 0.0, 0.45],  # 6
+            [0.0, 0.0, 1.0],  # 10
+        ]
+    )
+    np.testing.assert_allclose(pos, 2.0 * printed, rtol=0.0, atol=1e-12)
 
 
 def test_hemisphere_exact_table_b1_position_one() -> None:
@@ -59,12 +76,57 @@ def test_hemisphere_three_planes_uses_table_b3() -> None:
     assert np.allclose(pos[0], [0.86, -0.50, 0.15])  # position 1 of Table B.3
 
 
-def test_survey_three_planes_not_implemented() -> None:
-    """Survey 3-plane needs untranscribed extended Table B.2 positions."""
-    with pytest.raises(NotImplementedError):
-        emission.measurement_positions(
-            "hemisphere", radius=1.0, n_reflecting_planes=3, grade="survey"
-        )
+def test_survey_three_planes_reads_iso_3746_table_b2() -> None:
+    """Three planes -> positions 14, 21 and 22 of ISO 3746:2010 Table B.2.
+
+    The values are read from BS EN ISO 3746:2010, PDF page 35, printed folio
+    26 (x/r, y/r, z/r), and scaled by the radius.
+    """
+    pos = emission.measurement_positions(
+        "hemisphere", radius=3.0, n_reflecting_planes=3, grade="survey"
+    )
+    printed = np.array(
+        [
+            [0.45, -0.77, 0.45],  # 14
+            [0.77, -0.45, 0.45],  # 21
+            [0.47, -0.47, 0.75],  # 22
+        ]
+    )
+    np.testing.assert_allclose(pos, 3.0 * printed, rtol=0.0, atol=1e-12)
+
+
+def test_survey_two_planes_reads_iso_3746_table_b2() -> None:
+    """Two planes -> positions 14, 15 and 18 of ISO 3746:2010 Table B.2."""
+    pos = emission.measurement_positions(
+        "hemisphere", radius=3.0, n_reflecting_planes=2, grade="survey"
+    )
+    printed = np.array(
+        [
+            [0.45, -0.77, 0.45],  # 14
+            [0.45, 0.77, 0.45],  # 15
+            [0.66, 0.0, 0.75],  # 18
+        ]
+    )
+    np.testing.assert_allclose(pos, 3.0 * printed, rtol=0.0, atol=1e-12)
+
+
+@pytest.mark.parametrize("planes", [1, 2, 3])
+def test_survey_positions_lie_on_the_hemisphere_in_the_free_octants(
+    planes: int,
+) -> None:
+    """Each printed position is on the unit sphere to its two decimals, above
+    the floor, and clear of the walls: x >= 0 against one wall, and y <= 0 too
+    in a corner.
+    """
+    pos = emission.measurement_positions(
+        "hemisphere", radius=1.0, n_reflecting_planes=planes, grade="survey"
+    )
+    np.testing.assert_allclose(np.linalg.norm(pos, axis=1), 1.0, atol=0.005)
+    assert np.all(pos[:, 2] > 0.0)
+    if planes >= 2:
+        assert np.all(pos[:, 0] > 0.0)
+    if planes == 3:
+        assert np.all(pos[:, 1] < 0.0)
 
 
 # --------------------------------------------------------------------------
@@ -560,7 +622,7 @@ def test_negative_omc_uncertainty_raises() -> None:
 def test_k2_per_band_volume_array_raises() -> None:
     """'volume' is a scalar; per-band variation belongs to the T array."""
     per_band_t = np.array([1.2, 1.4])
-    with pytest.raises(ValueError, match="'volume' must be a scalar"):
+    with pytest.raises(TypeError, match="'volume' must be one number"):
         emission.environmental_correction(
             40.0, reverberation_time=per_band_t, volume=np.array([300.0, 300.0])
         )
@@ -569,7 +631,7 @@ def test_k2_per_band_volume_array_raises() -> None:
 def test_k2_per_band_room_surface_array_raises() -> None:
     """'room_surface' is a scalar; per-band variation belongs to alpha."""
     per_band_alpha = np.array([0.2, 0.3])
-    with pytest.raises(ValueError, match="'room_surface' must be a scalar"):
+    with pytest.raises(TypeError, match="'room_surface' must be one number"):
         emission.environmental_correction(
             40.0,
             mean_absorption_coefficient=per_band_alpha,

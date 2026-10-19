@@ -58,6 +58,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    require_count,
     require_equal_counts,
     require_ranks,
     require_same_length,
@@ -480,7 +481,7 @@ def _validate_refinement(interpolation: str, upsample: int) -> int:
         msg = "'interpolation' must be 'parabolic' or 'none'."
         raise ValueError(msg)
     require_scalar(upsample, "upsample")
-    factor = int(upsample)
+    factor = require_count(upsample, "upsample", at_least=None)
     if factor < 1:
         msg = "'upsample' must be a positive integer."
         raise ValueError(msg)

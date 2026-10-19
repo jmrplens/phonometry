@@ -1092,3 +1092,298 @@ def test_a_judgement_summary_does_not_open_with_another_family_verb() -> None:
                 mismatched.append(f"{name} ({family}) opens with {opening!r}")
     assert not mismatched, mismatched
     assert len(seen) >= 26, f"only {len(seen)} judgement functions found"
+
+
+def _published_classes() -> dict[str, type]:
+    """Every class a domain package (or the root) publishes, by its name."""
+    import inspect
+
+    import phonometry
+
+    owners = [phonometry] + [
+        getattr(phonometry, name)
+        for name in sorted(dir(phonometry))
+        if not name.startswith("_") and inspect.ismodule(getattr(phonometry, name))
+    ]
+    return {
+        name: obj
+        for owner in owners
+        for name in getattr(owner, "__all__", ())
+        if inspect.isclass(obj := getattr(owner, name))
+    }
+
+
+def test_every_published_warning_is_a_phonometry_warning() -> None:
+    """One ``filterwarnings`` rule reaches every warning the library emits.
+
+    The root promises it: "every warning the library emits derives from
+    PhonometryWarning". ``RoadDeviceWarning`` derived from ``UserWarning``
+    alone, so ``warnings.simplefilter("error", PhonometryWarning)`` let the
+    EN 1793 ratio cap through while it escalated every other advisory. The
+    walk reads what each domain's ``__all__`` publishes, which reaches the
+    classes defined in private modules (``fluids._state``, the io privates)
+    that a walk of the public modules skips.
+    """
+    from phonometry import PhonometryWarning
+
+    outside = sorted(
+        f"{name} derives from {[base.__name__ for base in obj.__mro__[1:]]}"
+        for name, obj in _published_classes().items()
+        if issubclass(obj, Warning)
+        and obj is not PhonometryWarning
+        and not issubclass(obj, PhonometryWarning)
+    )
+    assert not outside, (
+        "published warnings outside the PhonometryWarning hierarchy:\n  "
+        + "\n  ".join(outside)
+    )
+
+
+def test_every_published_exception_is_named_an_error() -> None:
+    """An exception reads as one: ``<Topic>Error``, as PEP 8 asks.
+
+    ``FluidPropertyUnavailable`` was the one published exception without the
+    suffix, beside ``CatalogueError``; a reader who met it in an ``except``
+    clause could not tell it from a value.
+    """
+    unnamed = sorted(
+        name
+        for name, obj in _published_classes().items()
+        if issubclass(obj, BaseException)
+        and not issubclass(obj, Warning)
+        and not name.endswith("Error")
+    )
+    assert not unnamed, f"published exceptions not named <Topic>Error: {unnamed}"
+
+
+def _resolve_category(
+    module: object,
+    function: ast.FunctionDef | ast.AsyncFunctionDef | None,
+    expression: ast.expr,
+) -> object:
+    """The object a ``warnings.warn`` category expression names, or ``None``.
+
+    A name is looked up in the module first and then in the imports of the
+    function around the call (the underwater solvers import their warning
+    lazily); a parameter of that function is answered with its annotation, as
+    the string ``type[...]`` it is written as.
+    """
+    import importlib
+
+    if isinstance(expression, ast.Name):
+        if function is not None:
+            arguments = function.args
+            for arg in arguments.posonlyargs + arguments.args + arguments.kwonlyargs:
+                if arg.arg == expression.id:
+                    return ast.unparse(arg.annotation) if arg.annotation else None
+            for node in ast.walk(function):
+                if isinstance(node, ast.ImportFrom) and any(
+                    (alias.asname or alias.name) == expression.id
+                    for alias in node.names
+                ):
+                    package = getattr(module, "__package__", None) or ""
+                    imported = importlib.import_module(
+                        "." * node.level + (node.module or ""), package
+                    )
+                    return getattr(imported, expression.id, None)
+        return getattr(module, expression.id, None)
+    if isinstance(expression, ast.Attribute):
+        owner = _resolve_category(module, function, expression.value)
+        return getattr(owner, expression.attr, None)
+    return None
+
+
+def _warning_calls(
+    tree: ast.AST,
+) -> list[tuple[ast.FunctionDef | ast.AsyncFunctionDef | None, ast.Call]]:
+    """Every ``warnings.warn(...)`` call, with the function it is written in."""
+    calls: list[tuple[ast.FunctionDef | ast.AsyncFunctionDef | None, ast.Call]] = []
+
+    def visit(
+        node: ast.AST, function: ast.FunctionDef | ast.AsyncFunctionDef | None
+    ) -> None:
+        for child in ast.iter_child_nodes(node):
+            inner = (
+                child
+                if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef))
+                else function
+            )
+            if (
+                isinstance(child, ast.Call)
+                and isinstance(child.func, ast.Attribute)
+                and child.func.attr == "warn"
+                and isinstance(child.func.value, ast.Name)
+                and child.func.value.id == "warnings"
+            ):
+                calls.append((function, child))
+            visit(child, inner)
+
+    visit(tree, None)
+    return calls
+
+
+def warnings_without_a_topic(path: Path) -> list[str]:
+    """Each ``warnings.warn`` in *path* whose category is not a published topic.
+
+    The category has to be explicit and has to resolve to a published, strict
+    subclass of ``PhonometryWarning``: never missing (a bare ``UserWarning``),
+    never the root itself, which leaves a caller who wants to silence one
+    advisory only the rule that silences every other. A helper that warns on
+    behalf of several topics takes the category as a parameter typed
+    ``type[PhonometryWarning]``.
+    """
+    import importlib
+
+    from phonometry import PhonometryWarning
+
+    rel = path.relative_to(SRC.parent).with_suffix("")
+    parts = list(rel.parts)
+    if parts[-1] == "__init__":
+        parts.pop()
+    module = importlib.import_module(".".join(parts))
+    published = set(_published_classes().values())
+    found: list[str] = []
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    for function, call in _warning_calls(tree):
+        expression = next(
+            (keyword.value for keyword in call.keywords if keyword.arg == "category"),
+            call.args[1] if len(call.args) > 1 else None,
+        )
+        where = f"{path.relative_to(SRC).as_posix()}:{call.lineno}"
+        if expression is None:
+            found.append(f"{where} names no category")
+            continue
+        category = _resolve_category(module, function, expression)
+        if isinstance(category, str):
+            if category.replace(" ", "") != "type[PhonometryWarning]":
+                found.append(f"{where} takes its category as {category!r}")
+            continue
+        if (
+            not isinstance(category, type)
+            or not issubclass(category, PhonometryWarning)
+            or category is PhonometryWarning
+            or category not in published
+        ):
+            found.append(f"{where} warns with {ast.unparse(expression)}")
+    return found
+
+
+def test_every_warning_names_a_published_topic() -> None:
+    """A warning is filtered by its topic, so each one is emitted as one.
+
+    Seven calls warned as a plain ``UserWarning`` (two of them naming no
+    category at all), and five as the bare ``PhonometryWarning``: the low
+    sampling rate of the filter bank beside its own ``FilterBankWarning``, the
+    tone burst, and three underwater solvers. None of them could be silenced
+    or escalated without silencing or escalating every other advisory too.
+    """
+    found = [
+        offence
+        for path in sorted(SRC.rglob("*.py"))
+        if "warnings.warn" in path.read_text(encoding="utf-8")
+        for offence in warnings_without_a_topic(path)
+    ]
+    assert not found, "warnings emitted without a published topic:\n  " + (
+        "\n  ".join(found)
+    )
+
+
+def broad_warning_filters(path: Path) -> list[str]:
+    """Each warning filter in *path* that names no topic.
+
+    A ``warnings.simplefilter`` or ``warnings.filterwarnings`` call inside the
+    library has to name the class it means: a filter on ``UserWarning``,
+    ``Warning`` or the root ``PhonometryWarning`` (or on no category at all)
+    also swallows every other advisory raised inside its block, including one
+    the caller asked to see.
+    """
+    import builtins
+    import importlib
+
+    from phonometry import PhonometryWarning
+
+    rel = path.relative_to(SRC.parent).with_suffix("")
+    parts = list(rel.parts)
+    if parts[-1] == "__init__":
+        parts.pop()
+    module = importlib.import_module(".".join(parts))
+    broad = {Warning, UserWarning, PhonometryWarning}
+    found: list[str] = []
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    functions = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    ]
+    for call in ast.walk(tree):
+        if not (
+            isinstance(call, ast.Call)
+            and isinstance(call.func, ast.Attribute)
+            and call.func.attr in {"simplefilter", "filterwarnings"}
+            and isinstance(call.func.value, ast.Name)
+            and call.func.value.id == "warnings"
+        ):
+            continue
+        position = 1 if call.func.attr == "simplefilter" else 2
+        expression = next(
+            (keyword.value for keyword in call.keywords if keyword.arg == "category"),
+            call.args[position] if len(call.args) > position else None,
+        )
+        where = f"{path.relative_to(SRC).as_posix()}:{call.lineno}"
+        if expression is None:
+            found.append(f"{where} filters every warning")
+            continue
+        function = next(
+            (
+                node
+                for node in functions
+                if node.lineno <= call.lineno <= (node.end_lineno or node.lineno)
+            ),
+            None,
+        )
+        category = _resolve_category(module, function, expression)
+        if category is None and isinstance(expression, ast.Name):
+            category = getattr(builtins, expression.id, None)
+        if category in broad:
+            found.append(f"{where} filters {ast.unparse(expression)}")
+    return found
+
+
+def test_a_warning_filter_in_the_library_names_its_topic() -> None:
+    """The library silences the one advisory it means, never a whole family.
+
+    The railway passage bank silenced ``UserWarning`` around the filter bank
+    it builds, to drop the band the rate cannot carry; inside that block every
+    advisory the bank raised for any other reason went unseen as well. It now
+    silences ``FilterBankWarning``, the topic the bank warns with.
+    """
+    found = [
+        offence
+        for path in sorted(SRC.rglob("*.py"))
+        if "filterwarnings(" in (text := path.read_text(encoding="utf-8"))
+        or "simplefilter(" in text
+        for offence in broad_warning_filters(path)
+    ]
+    assert not found, "warning filters that name no topic:\n  " + "\n  ".join(found)
+
+
+def test_a_docstring_lists_a_warning_under_warns() -> None:
+    """A warning is emitted, not raised, so its docstring field is ``:warns``.
+
+    ``:raises UserWarning:`` put ``HumanVibrationWarning`` in the exceptions
+    table of the API reference under the name of its base class, where a
+    reader looking for what to filter found a class that filters every
+    advisory; ``:warns <Topic>Warning:`` gives it its own table, by name.
+    """
+    import re
+
+    field = re.compile(r":raises\s+[\w.~`:]*Warning\b")
+    found = [
+        f"{path.relative_to(SRC).as_posix()}:{number}"
+        for path in sorted(SRC.rglob("*.py"))
+        for number, line in enumerate(
+            path.read_text(encoding="utf-8").splitlines(), start=1
+        )
+        if field.search(line)
+    ]
+    assert not found, "warnings documented as raised:\n  " + "\n  ".join(found)

@@ -1107,7 +1107,7 @@ def test_iso_9295_reads_the_bands_of_the_16_khz_octave() -> None:
         rtol=0,
         atol=1e-12,
     )
-    with pytest.raises(ValueError, match="per hertz"):
+    with pytest.raises(TypeError, match="per hertz"):
         emission.high_frequency_sound_power_comparison(
             st,
             frequencies=freqs,

@@ -57,6 +57,7 @@ from ..._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from .air_absorption import air_attenuation
 
@@ -168,6 +169,10 @@ class Barrier(RichDisplay):
 
     def __post_init__(self) -> None:
         """Reject negative ``dss``/``dsr``/``a`` and a non-positive spacing ``e``."""
+        require_scalar(self.edge_separation, "edge_separation")
+        require_scalar(self.edge_to_receiver, "edge_to_receiver")
+        require_scalar(self.parallel_distance, "parallel_distance")
+        require_scalar(self.source_to_edge, "source_to_edge")
         if self.source_to_edge < 0.0 or self.edge_to_receiver < 0.0:
             msg = "Barrier edge distances must be non-negative."
             raise ValueError(msg)
@@ -495,6 +500,7 @@ def geometric_divergence(distance: float) -> float:
     :return: ``Adiv``, in decibels (51 dB at 100 m, 11 dB at 1 m).
     :raises ValueError: If ``distance`` is not positive.
     """
+    require_scalar(distance, "distance")
     if distance <= 0.0:
         raise ValueError(_DISTANCE_NOT_POSITIVE)
     return float(20.0 * np.log10(distance / _D0) + 11.0)
@@ -531,6 +537,7 @@ def atmospheric_absorption(
     :param static_pressure_kpa: Atmospheric pressure, in kilopascals.
     :return: ``Aatm`` per band, in decibels.
     """
+    require_scalar(distance, "distance")
     relative_humidity_percent = (
         70.0 if relative_humidity_percent is None else relative_humidity_percent
     )
@@ -636,6 +643,10 @@ def ground_attenuation(
     :raises ValueError: If a ground factor is outside ``[0, 1]``, ``distance``
         is not positive, a height is negative, or a frequency is not positive.
     """
+    require_scalar(ground_middle, "ground_middle")
+    require_scalar(ground_receiver, "ground_receiver")
+    require_scalar(ground_source, "ground_source")
+    require_scalar(distance, "distance")
     for name, g in (
         ("ground_source", ground_source),
         ("ground_middle", ground_middle),
@@ -697,6 +708,8 @@ def ground_attenuation_alternative(
     :return: ``Agr``, in decibels (>= 0).
     :raises ValueError: If ``distance`` is not positive.
     """
+    require_scalar(mean_height_m, "mean_height_m")
+    require_scalar(distance, "distance")
     if distance <= 0.0:
         raise ValueError(_DISTANCE_NOT_POSITIVE)
     agr = 4.8 - (2.0 * mean_height_m / distance) * (17.0 + 300.0 / distance)
@@ -724,6 +737,9 @@ def directivity_omega(
     :param projected_distance: Ground-plane projected distance ``dp``, in metres.
     :return: ``DOmega``, in decibels (0 to ~3 dB).
     """
+    require_scalar(projected_distance, "projected_distance")
+    require_scalar(receiver_height_m, "receiver_height_m")
+    require_scalar(source_height_m, "source_height_m")
     num = projected_distance**2 + (source_height_m - receiver_height_m) ** 2
     den = projected_distance**2 + (source_height_m + receiver_height_m) ** 2
     return float(10.0 * np.log10(1.0 + num / den))
@@ -958,6 +974,7 @@ def barrier_attenuation(
     :return: ``Dz`` per band, in decibels (>= 0).
     :raises ValueError: If ``distance`` or any frequency is not positive.
     """
+    require_scalar(distance, "distance")
     if distance <= 0.0:
         raise ValueError(_DISTANCE_NOT_POSITIVE)
     freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
@@ -1029,6 +1046,10 @@ def meteorological_correction(
     :param c0: Meteorological factor ``C0``, in decibels.
     :return: ``Cmet``, in decibels (>= 0 for :math:`C_0 \ge 0`).
     """
+    require_scalar(c0, "c0")
+    require_scalar(projected_distance, "projected_distance")
+    require_scalar(receiver_height_m, "receiver_height_m")
+    require_scalar(source_height_m, "source_height_m")
     threshold = 10.0 * (source_height_m + receiver_height_m)
     if projected_distance <= threshold:
         return 0.0
@@ -1119,6 +1140,10 @@ def outdoor_propagation_attenuation(
     :return: :class:`OutdoorAttenuation` with the per-band term breakdown.
     :raises ValueError: If ``distance`` is not positive.
     """
+    require_scalar(ground_middle, "ground_middle")
+    require_scalar(ground_receiver, "ground_receiver")
+    require_scalar(ground_source, "ground_source")
+    require_scalar(distance, "distance")
     relative_humidity_percent = (
         70.0 if relative_humidity_percent is None else relative_humidity_percent
     )

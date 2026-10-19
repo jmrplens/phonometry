@@ -1043,6 +1043,9 @@ def wbv_exposure_basis(a_wx: float, a_wy: float, a_wz: float) -> float:
         :math:`\max(1.4 a_{\mathrm{w}x}, 1.4 a_{\mathrm{w}y}, a_{\mathrm{w}z})`, in m/s2.
     :raises ValueError: for a negative or non-finite axis value.
     """
+    require_scalar(a_wx, "a_wx")
+    require_scalar(a_wy, "a_wy")
+    require_scalar(a_wz, "a_wz")
     values = (float(a_wx), float(a_wy), float(a_wz))
     if any(not math.isfinite(v) or v < 0.0 for v in values):
         msg = "The axis r.m.s. accelerations must be non-negative."

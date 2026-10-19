@@ -61,6 +61,7 @@ from ..._internal.validation import (
     require_equal_shapes,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ..._internal.warnings import PhonometryWarning
 from .insulation import _as_band_levels
@@ -107,7 +108,13 @@ _BACKGROUND_HIGH = 15.0
 
 
 class LaboratoryInsulationWarning(PhonometryWarning):
-    """Warning for laboratory-insulation limit-of-measurement conditions."""
+    """A laboratory insulation measurement at the limit of what it can show.
+
+    Emitted at the limit-of-measurement conditions of ISO 10140-4, and by the
+    ISO 15186-1 element-normalized intensity difference when it counts more
+    than one element unit, where it departs from the printed sign of
+    Formula (8) (see ``docs/ERRATA.md``).
+    """
 
 
 @dataclass(frozen=True)
@@ -409,6 +416,8 @@ def _absorption_area(
 
     (ISO 10140-4:2010, Clause 4.6.3, Formula (5).)
     """
+    require_scalar(n_bands, "n_bands")
+    require_scalar(volume, "volume")
     t = np.asarray(t2, dtype=np.float64)
     if t.ndim != 1:
         msg = "'t2' must be one-dimensional (one value per band)."
@@ -538,6 +547,7 @@ def laboratory_airborne_insulation(
         differ, if ``area``/``volume``/``t2`` are not positive, or if inputs
         are non-finite.
     """
+    require_scalar(area, "area")
     l1_bands = _as_band_levels(l1, "l1")
     l2_bands = _as_band_levels(l2, "l2")
     require_equal_shapes(

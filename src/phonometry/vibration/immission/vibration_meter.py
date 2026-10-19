@@ -76,6 +76,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
+    require_count,
     require_equal_shapes,
     require_finite_array,
     require_positive,
@@ -980,7 +981,7 @@ def assessment_weighting_taps(
         taps += 1 - taps % 2
     else:
         require_scalar(n_taps, "n_taps")
-        taps = int(n_taps)
+        taps = require_count(n_taps, "n_taps", at_least=None)
         if taps <= 0 or taps % 2 == 0:
             msg = f"'n_taps' must be a positive odd number; got {n_taps!r}."
             raise ValueError(msg)

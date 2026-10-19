@@ -425,7 +425,8 @@ at 0 dB (a barrier never amplifies).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-numeric or non-finite `fresnel_number`. |
+| TypeError | for a `fresnel_number` that is text, complex or otherwise not a number. |
+| ValueError | for a non-finite or ragged `fresnel_number`. |
 
 ## plot_barrier_geometry
 

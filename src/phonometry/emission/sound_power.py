@@ -76,18 +76,20 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
-from .._internal.frozen import OwnsArrays
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
     check_engine,
     require_choice,
+    require_count,
     require_non_negative,
     require_per_band,
     require_positive,
@@ -228,6 +230,60 @@ _TABLE_B3: np.ndarray = np.array(
         [0.77, -0.45, 0.45],
         [0.47, -0.47, 0.75],
     ]
+)
+
+# --- ISO 3746:2010 Annex B, survey coordinates (x/r, y/r, z/r) ---
+#: Table B.1 of ISO 3746:2010 - the survey positions for a source over one
+#: reflecting plane: the key positions 4, 5, 6 and 10 and the additional
+#: positions 14, 15, 16 and 20, in the order the table prints them. Read from
+#: BS EN ISO 3746:2010, PDF page 34, printed folio 25. Its note says they are a
+#: subset of the broadband positions of ISO 3744, and they are the rows of
+#: those numbers in ISO 3744 Table B.2, not of the tonal Table B.1.
+_ISO3746_TABLE_B1: np.ndarray = read_only(
+    np.array(
+        [
+            [-0.45, 0.77, 0.45],
+            [-0.45, -0.77, 0.45],
+            [0.89, 0.0, 0.45],
+            [0.0, 0.0, 1.0],
+            [0.45, -0.77, 0.45],
+            [0.45, 0.77, 0.45],
+            [-0.89, 0.0, 0.45],
+            [0.0, 0.0, 1.0],
+        ]
+    )
+)
+#: The position number of each row of :data:`_ISO3746_TABLE_B1`.
+_ISO3746_TABLE_B1_POSITIONS: tuple[int, ...] = (4, 5, 6, 10, 14, 15, 16, 20)
+#: Table B.2 of ISO 3746:2010 - the survey positions for a source adjacent to
+#: two reflecting planes (14, 15 and 18, Figure B.3) and to three (14, 21 and
+#: 22, Figure B.4), in the order the table prints them. Read from BS EN
+#: ISO 3746:2010, PDF page 35, printed folio 26. Positions 14, 15 and 18 are
+#: the same points as the positions of those numbers in ISO 3744 Table B.2;
+#: 21 and 22 are two of the corner array of ISO 3744 Table B.3.
+_ISO3746_TABLE_B2: np.ndarray = read_only(
+    np.array(
+        [
+            [0.45, -0.77, 0.45],
+            [0.45, 0.77, 0.45],
+            [0.66, 0.0, 0.75],
+            [0.77, -0.45, 0.45],
+            [0.47, -0.47, 0.75],
+        ]
+    )
+)
+#: The position number of each row of :data:`_ISO3746_TABLE_B2`.
+_ISO3746_TABLE_B2_POSITIONS: tuple[int, ...] = (14, 15, 18, 21, 22)
+#: The key positions ISO 3746:2010 clause 8.2.1 (PDF page 22, printed folio
+#: 13) prescribes, by the number of reflecting planes: 4, 5, 6 and 10 of its
+#: Table B.1 for one plane, and 14, 15 and 18 or 14, 21 and 22 of its Table B.2
+#: for two and three.
+_ISO3746_SURVEY_POSITIONS: MappingProxyType[int, tuple[int, ...]] = MappingProxyType(
+    {
+        1: (4, 5, 6, 10),
+        2: (14, 15, 18),
+        3: (14, 21, 22),
+    }
 )
 
 #: Background-noise criteria (low, high) in dB: below ``low`` the correction is
@@ -611,8 +667,13 @@ def _room_absorption_area(
         (Eq. A.7).
     :param room_surface: Room boundary area ``Sv`` (m^2), with ``alpha``.
     :return: ``A`` in square metres (scalar or per band), or ``None``.
+    :raises TypeError: For a ``volume`` or a ``room_surface`` given per band:
+        only ``reverberation_time`` and ``mean_absorption_coefficient`` may
+        vary with the band.
     :raises ValueError: For a half-specified or non-physical room pair.
     """
+    require_scalar(room_surface, "room_surface")
+    require_scalar(volume, "volume")
     _require_room_pair(
         reverberation_time, volume, "reverberation_time", "volume", "Eq. A.3"
     )
@@ -624,24 +685,12 @@ def _room_absorption_area(
         "Eq. A.7",
     )
     if reverberation_time is not None and volume is not None:
-        if np.ndim(volume) != 0:
-            msg = (
-                "'volume' must be a scalar (m^3); only 'reverberation_time' "
-                "may vary per band."
-            )
-            raise ValueError(msg)
         t = np.asarray(reverberation_time, dtype=np.float64)
         if volume <= 0 or np.any(t <= 0.0):
             msg = "reverberation_time and volume must be > 0."
             raise ValueError(msg)
         return 0.16 * volume / t
     if mean_absorption_coefficient is not None and room_surface is not None:
-        if np.ndim(room_surface) != 0:
-            msg = (
-                "'room_surface' must be a scalar (m^2); only "
-                "'mean_absorption_coefficient' may vary per band."
-            )
-            raise ValueError(msg)
         alpha = np.asarray(mean_absorption_coefficient, dtype=np.float64)
         if room_surface <= 0 or np.any(alpha <= 0.0) or np.any(alpha > 1.0):
             msg = "mean_absorption_coefficient must be in (0, 1] and room_surface > 0."
@@ -711,9 +760,9 @@ def _hemisphere_position_table(
 
     :param grade: ``'engineering'`` (ISO 3744) or ``'survey'`` (ISO 3746).
     :param n_reflecting_planes: Number of reflecting planes (1, 2 or 3).
-    :param tones: If True use Table B.1, else Table B.2.
+    :param tones: Engineering grade over one plane: True reads ISO 3744
+        Table B.1, False its Table B.2.
     :return: The unscaled coordinate table and the rows to take from it.
-    :raises NotImplementedError: For the survey array on three planes.
     """
     if grade == "engineering":  # ISO 3744 clause 8.1.1
         if n_reflecting_planes == 1:  # positions 1-10, Table B.1 (or B.2 broadband)
@@ -721,18 +770,19 @@ def _hemisphere_position_table(
         if n_reflecting_planes == 2:  # positions 2,3,6,7,9 of Table B.2  # noqa: PLR2004
             return _TABLE_B2, (1, 2, 5, 6, 8)
         return _TABLE_B3, (0, 1, 2)  # positions 1,2,3 of Table B.3
-    # survey, ISO 3746 clause 8.2.1
-    if n_reflecting_planes == 1:  # positions 4,5,6,10 of Table B.1
-        return _TABLE_B1, (3, 4, 5, 9)
-    if n_reflecting_planes == 2:  # positions 14,15,18 of Table B.2  # noqa: PLR2004
-        return _TABLE_B2, (13, 14, 17)
-    # positions 14,21,22 of Table B.2 (extended array not transcribed)
-    msg = (
-        "Survey coordinates for a source adjacent to three reflecting "
-        "planes require the extended ISO 3746:2010 Table B.2 positions "
-        "21 and 22 (see Figure B.4)."
+    # survey, ISO 3746 clause 8.2.1: one plane reads its Table B.1, two and
+    # three planes its Table B.2; ISO 3746 has one array whatever the source
+    # emits, so `tones` does not choose here.
+    table, numbers = (
+        (_ISO3746_TABLE_B1, _ISO3746_TABLE_B1_POSITIONS)
+        if n_reflecting_planes == 1
+        else (_ISO3746_TABLE_B2, _ISO3746_TABLE_B2_POSITIONS)
     )
-    raise NotImplementedError(msg)
+    rows = tuple(
+        numbers.index(position)
+        for position in _ISO3746_SURVEY_POSITIONS[n_reflecting_planes]
+    )
+    return table, rows
 
 
 def measurement_positions(
@@ -745,21 +795,34 @@ def measurement_positions(
 ) -> np.ndarray:
     """Normative microphone coordinates on the measurement surface.
 
-    For a ``'hemisphere'`` the coordinates come from ISO 3744:2010 Annex B:
-    Table B.1 for sources that may emit discrete tones (``tones=True``) and
-    Table B.2 for broadband sources. The engineering grade uses the 10 key
-    positions for one reflecting plane (5 for two, 3 for three); the survey
-    grade uses the reduced arrays of ISO 3746:2010 clause 8.2.1 (positions
-    4, 5, 6, 10 for one plane). Coordinates are scaled by ``radius`` and
-    returned as an ``(N, 3)`` array of Cartesian ``(x, y, z)`` in metres.
+    For a ``'hemisphere'`` the engineering grade reads ISO 3744:2010 Annex B:
+    the 10 key positions of Table B.1 for a source that may emit discrete
+    tones (``tones=True``) or of Table B.2 for a broadband one, over one
+    reflecting plane; positions 2, 3, 6, 7 and 9 of Table B.2 for two planes;
+    and positions 1, 2 and 3 of Table B.3 for three. The survey grade reads the
+    reduced arrays of ISO 3746:2010 clause 8.2.1, the same whatever the source
+    emits: positions 4, 5, 6 and 10 of ISO 3746 Table B.1 (the broadband
+    positions of those numbers in ISO 3744 Table B.2) for one plane, and
+    positions 14, 15 and 18 (two planes) or 14, 21 and 22 (three planes) of
+    ISO 3746 Table B.2. Both standards ask for a radius of at least 3 m beside
+    two or three reflecting planes (ISO 3744 and ISO 3746, Annex B.2 and B.3);
+    that condition is the measurer's to meet and is not checked here.
+    Coordinates are scaled by ``radius`` and returned as an ``(N, 3)`` array of
+    Cartesian ``(x, y, z)`` in metres, in the order of the position numbers.
 
     :param surface: ``'hemisphere'`` (only shape with a coordinate table).
     :param radius: Hemisphere radius ``r``, in metres.
     :param n_reflecting_planes: Number of reflecting planes (1, 2 or 3).
-    :param tones: If True use Table B.1, else Table B.2.
+    :param tones: Engineering grade over one plane only: True reads Table B.1
+        of ISO 3744, False its Table B.2. The survey grade and the arrays for
+        two and three planes have one table each and do not read it.
     :param grade: ``'engineering'`` or ``'survey'``.
     :return: ``(N, 3)`` microphone coordinates, in metres.
+    :raises ValueError: for a surface other than ``'hemisphere'``, a radius
+        that is not positive, a number of reflecting planes other than 1, 2
+        or 3, or an unknown grade.
     """
+    require_scalar(radius, "radius")
     if surface != "hemisphere":
         msg = (
             "measurement_positions provides coordinates for 'hemisphere' only; "
@@ -822,6 +885,7 @@ def _measurement_surface(
     :return: ``(S, minimum positions)``.
     :raises ValueError: For an unknown surface or missing/non-physical geometry.
     """
+    require_scalar(radius, "radius")
     if surface == "hemisphere":
         if radius is None or radius <= 0:
             msg = "A positive 'radius' is required for a hemisphere."
@@ -937,6 +1001,7 @@ def _a_weighted_total(
     :return: ``(frequencies as an array or None, LWA)``.
     :raises ValueError: If the frequencies do not match the number of bands.
     """
+    require_scalar(n_bands, "n_bands")
     if frequencies is None:
         # A-weighting needs the band centre frequencies; with several bands and
         # none supplied the A-weighted total is undefined (NaN). A single band
@@ -1172,7 +1237,11 @@ class SoundEnergyResult(OwnsArrays):
                 f"got {self.surface_area!r}."
             )
             raise ValueError(msg)
-        _validate_event_count(self.n_events, "SoundEnergyResult")
+        object.__setattr__(
+            self,
+            "n_events",
+            _validate_event_count(self.n_events, "SoundEnergyResult"),
+        )
         if self.integration_time is not None:
             require_positive(self.integration_time, "integration_time")
         require_ranks(
@@ -1391,7 +1460,7 @@ def _event_position_levels(
             raise ValueError(msg)
         return arr, None
     arr = _single_event_mean(arr, n_events, name="levels_positions", stacklevel=4)
-    return arr, int(n_events)
+    return arr, require_count(n_events, "n_events", at_least=None)
 
 
 def sound_energy_pressure(

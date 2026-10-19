@@ -631,6 +631,7 @@ def environmental_expanded_uncertainty(
     :raises ValueError: If ``u`` is negative/non-finite or ``coverage`` is
         not one of the tabulated values.
     """
+    require_scalar(coverage, "coverage")
     u = _finite(standard_uncertainty, "standard_uncertainty")
     if u < 0.0:
         msg = "'standard_uncertainty' must be non-negative."

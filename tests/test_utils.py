@@ -30,22 +30,27 @@ def test_typesignal_refuses_none_as_the_whole_signal() -> None:
 
 
 @pytest.mark.parametrize(
-    "bad",
+    ("bad", "refusal"),
     [
-        pytest.param("hello", id="string"),
-        pytest.param({"a": 1.0}, id="dict"),
-        pytest.param(object(), id="object"),
-        pytest.param([[1.0, 2.0], [3.0]], id="ragged"),
+        pytest.param("hello", TypeError, id="string"),
+        pytest.param(["1.0", "2.0"], TypeError, id="numeric-text"),
+        pytest.param({"a": 1.0}, TypeError, id="dict"),
+        pytest.param(object(), TypeError, id="object"),
+        pytest.param([[1.0, 2.0], [3.0]], ValueError, id="ragged"),
     ],
 )
-def test_typesignal_refuses_what_is_not_numeric_by_name(bad: Any) -> None:  # noqa: ANN401 - the point is that anything at all may arrive here
+def test_typesignal_refuses_what_is_not_numeric_by_name(
+    bad: Any,  # noqa: ANN401 - the point is that anything at all may arrive here
+    refusal: type[Exception],
+) -> None:  # noqa: ANN401 - the point is that anything at all may arrive here
     """What numpy cannot read as numbers is refused naming the parameter.
 
     Numpy answers a string or a ragged list in its own words and an object or
     a dict with a TypeError, which is not the exception the entry points
-    document.
+    document. A ragged list is a wrong value, as numpy has it, and a text
+    (whatever it reads as), an object or a mapping the wrong type.
     """
-    with pytest.raises(ValueError, match=r"'x' must be numeric"):
+    with pytest.raises(refusal, match=r"'x' must be (numeric|numbers, not text)"):
         _typesignal(bad)
 
 
@@ -57,7 +62,7 @@ def test_typesignal_refuses_a_complex_signal_saying_so() -> None:
     imaginary part, under a warning rather than an error. Saying "not complex"
     tells a caller who passed an analytic signal what actually happened.
     """
-    with pytest.raises(ValueError, match=r"'x' must be real, not complex"):
+    with pytest.raises(TypeError, match=r"'x' must be real, not complex"):
         _typesignal(1 + 2j)
 
 
@@ -81,7 +86,7 @@ def test_typesignal_refuses_a_non_finite_sample(bad: Any) -> None:  # noqa: ANN4
 
 def test_typesignal_names_the_parameter_it_was_given() -> None:
     """The name is the caller's, so a refusal names an argument that exists."""
-    with pytest.raises(ValueError, match=r"'reference' must be numeric"):
+    with pytest.raises(TypeError, match=r"'reference' must be numbers, not text"):
         _typesignal("hello", name="reference")
 
 

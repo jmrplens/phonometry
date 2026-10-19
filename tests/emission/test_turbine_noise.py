@@ -199,7 +199,7 @@ def test_surface_refuses_no_box() -> None:
 
 def test_surface_refuses_something_that_is_not_a_box() -> None:
     boxes = [(1.0, 2.0, 3.0)]
-    with pytest.raises(ValueError, match="TurbineReferenceBox"):
+    with pytest.raises(TypeError, match="TurbineReferenceBox"):
         emission.turbine_measurement_surface(boxes)  # type: ignore[list-item]
 
 
@@ -494,7 +494,7 @@ def test_the_check_needs_a_correction() -> None:
 
 
 def test_the_check_refuses_a_bare_k_in_place_of_a_correction() -> None:
-    with pytest.raises(ValueError, match="environmental_correction"):
+    with pytest.raises(TypeError, match="environmental_correction"):
         emission.check_turbine_test_environment(2.0)  # type: ignore[arg-type]
 
 

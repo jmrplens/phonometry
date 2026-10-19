@@ -63,6 +63,7 @@ import numpy as np
 
 from .._internal.boundary import round_half_away_from_zero
 from .._internal.frozen import OwnsArrays
+from .._internal.validation import require_count, require_scalar
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -216,6 +217,7 @@ def _alpha_for(performance: int) -> float:
 
     :param performance: The protection performance ``x``, in per cent.
     :return: The constant ``alpha``.
+    :raises TypeError: for a performance that is not a number.
     :raises ValueError: for a performance Table 1 does not tabulate.
     """
     listed = ", ".join(str(x) for x in sorted(PROTECTION_PERFORMANCES))
@@ -226,11 +228,12 @@ def _alpha_for(performance: int) -> float:
     if isinstance(performance, (bool, np.bool_)) or not isinstance(
         performance, (int, float, np.integer, np.floating)
     ):
+        raise TypeError(msg)
+    # Membership first, so 84.5 and a NaN are refused as performances the
+    # table does not hold, in the table's own words.
+    if performance not in PROTECTION_PERFORMANCES:
         raise ValueError(msg)
-    whole = int(performance)
-    if whole != performance or whole not in PROTECTION_PERFORMANCES:
-        raise ValueError(msg)
-    return PROTECTION_PERFORMANCES[whole]
+    return PROTECTION_PERFORMANCES[require_count(performance, "performance")]
 
 
 def _subject_attenuations(
@@ -364,7 +367,7 @@ def assumed_protection_value(
         apv=np.asarray(mean - alpha * spread, dtype=np.float64),
         mean_attenuation=mean,
         standard_deviation=spread,
-        performance=int(performance),
+        performance=require_count(performance, "performance", at_least=None),
         alpha=alpha,
         frequencies=freqs,
         n_subjects=int(grid.shape[0]),
@@ -382,6 +385,7 @@ def _octave_axis(
     :return: The mid-frequencies as a float array.
     :raises ValueError: if the count does not match, or if no default fits.
     """
+    require_scalar(count, "count")
     if frequencies is None:
         if count == len(PROTECTOR_OCTAVE_BANDS_HZ):
             return np.asarray(PROTECTOR_OCTAVE_BANDS_HZ, dtype=np.float64)
@@ -690,7 +694,7 @@ def hml_rating(
         subject_medium=subject_medium,
         subject_low=subject_low,
         predicted_reduction=pnr,
-        performance=int(performance),
+        performance=require_count(performance, "performance", at_least=None),
         alpha=alpha,
     )
 
@@ -869,7 +873,7 @@ def snr_rating(
         subject_snr=per_subject,
         mean=mean,
         standard_deviation=spread,
-        performance=int(performance),
+        performance=require_count(performance, "performance", at_least=None),
         alpha=alpha,
     )
 

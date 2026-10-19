@@ -179,6 +179,7 @@ def absorption_coverage_factor(coverage: float = 0.95) -> float:
         ``0.68, 0.80, 0.90, 0.95, 0.99, 0.999`` (Table 3, Gaussian measurand).
     :raises ValueError: Coverage probability not tabulated in Table 3.
     """
+    require_scalar(coverage, "coverage")
     for level, k in _COVERAGE_FACTORS.items():
         if abs(level - coverage) < _COVERAGE_MATCH_TOL:
             return k
@@ -494,6 +495,7 @@ def weighted_coefficient_uncertainty(
     :param coverage: Coverage probability for the coverage factor ``k`` (Table 3).
     :raises ValueError: Unknown ``condition`` or an untabulated ``coverage``.
     """
+    require_scalar(alpha_w, "alpha_w")
     cond = _condition(condition)
     return _single_number(
         float(alpha_w),

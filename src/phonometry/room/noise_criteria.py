@@ -49,6 +49,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -61,12 +62,22 @@ __all__ = [
     "NC_OCTAVE_BANDS_HZ",
     "NC_RATINGS",
     "NCResult",
+    "NoiseCriterionWarning",
     "RCResult",
     "nc_curve",
     "noise_criterion",
     "rc_curve",
     "room_criterion",
 ]
+
+
+class NoiseCriterionWarning(PhonometryWarning):
+    """A room noise rating computed on fewer bands than its clause rates.
+
+    Emitted by :func:`room_criterion` when the spectrum lacks one of the
+    31.5 Hz to 4000 Hz octave bands ANSI/ASA S12.2-2019 clause D.4 rates,
+    which the spectral-tag deviation tests then skip.
+    """
 
 
 # ---------------------------------------------------------------------------
@@ -401,11 +412,11 @@ class RCResult(OwnsArrays):
         :func:`room_criterion` marks each band it was not given with a
         ``NaN`` that the fiche renders as an em dash.
 
+        :raises TypeError: if 'rating' is not an integer (a bool is not one).
         :raises ValueError: if the three per-band arrays do not share one
             length, 'frequencies' is not the ten tabulated octave bands,
-            'rating', 'lmf' or 'reference_curve' is not finite, 'rating' is
-            not an integer, or 'classification' is not one of ``N``, ``R``,
-            ``H`` or ``RH``.
+            'rating', 'lmf' or 'reference_curve' is not finite, or
+            'classification' is not one of ``N``, ``R``, ``H`` or ``RH``.
         """
         require_ranks(self, frequencies=1, levels=1, reference_curve=1)
         require_same_length(self, "frequencies", "levels", "reference_curve")
@@ -423,7 +434,7 @@ class RCResult(OwnsArrays):
                 f"average to the nearest decibel and clause D.3.5 designates "
                 f"the curve by that whole number); got {self.rating!r}."
             )
-            raise ValueError(msg)
+            raise TypeError(msg)
         if self.classification == "RV":
             msg = (
                 "RCResult: classification 'RV' (vibration and rattle, "
@@ -525,6 +536,7 @@ def nc_curve(index: float) -> np.ndarray:
     :return: The 10-band curve levels, in dB, aligned with :data:`NC_OCTAVE_BANDS_HZ`.
     :raises ValueError: if ``index`` is outside the tabulated range.
     """
+    require_scalar(index, "index")
     if index < NC_RATINGS[0] or index > NC_RATINGS[-1]:
         msg = (
             f"NC index {index} is outside the tabulated range "
@@ -546,6 +558,7 @@ def rc_curve(index: float) -> np.ndarray:
     :param index: The RC designation (value at 1000 Hz).
     :return: The 10-band curve levels, in dB, aligned with :data:`NC_OCTAVE_BANDS_HZ`.
     """
+    require_scalar(index, "index")
     curve = index - 5.0 * _RC_OCTAVE_STEPS
     low = max(index + 25.0, _RC_LOW_FREQUENCY_FLOOR)
     curve[1] = low  # 31.5 Hz floor
@@ -726,7 +739,7 @@ def room_criterion(levels: ArrayLike, frequencies: ArrayLike | None = None) -> R
 
     Clause D.4 evaluates a spectrum that includes at least the octave bands
     from 31.5 Hz through 4000 Hz; when any of those bands is missing a
-    :class:`UserWarning` is emitted, since the absent bands are silently
+    :class:`NoiseCriterionWarning` is emitted, since the absent bands are
     skipped by the spectral-tag deviation tests. A rating outside the
     tabulated RC-25 to RC-50 family is flagged by
     :attr:`RCResult.out_of_family`.
@@ -737,6 +750,7 @@ def room_criterion(levels: ArrayLike, frequencies: ArrayLike | None = None) -> R
         ``levels``.
     :return: An :class:`RCResult` with the rating, tag and its ``.plot()``.
     :raises ValueError: if the 500/1000/2000 Hz mid-frequency bands are absent.
+    :warns NoiseCriterionWarning: if a band from 31.5 Hz to 4000 Hz is absent.
     """
     aligned = _align_levels(levels, frequencies, "room_criterion")
     mid = aligned[5:8]  # 500, 1000, 2000 Hz.
@@ -754,6 +768,7 @@ def room_criterion(levels: ArrayLike, frequencies: ArrayLike | None = None) -> R
             "at least the 31.5 Hz to 4000 Hz octave bands; the missing bands "
             f"({', '.join(f'{f:g}' for f in missing)} Hz) are skipped by the "
             "spectral-tag deviation tests.",
+            NoiseCriterionWarning,
             stacklevel=2,
         )
     lmf = float(np.mean(mid))

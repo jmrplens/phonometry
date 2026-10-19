@@ -270,9 +270,9 @@ def test_kurze_anderson_rejects_non_numeric_and_nan() -> None:
     and a NaN came back as a NaN "attenuation" against the documented
     >= 0 dB contract.
     """
-    with pytest.raises(ValueError, match="'fresnel_number' must be numeric"):
+    with pytest.raises(TypeError, match="'fresnel_number' must be numbers, not text"):
         environment.kurze_anderson_attenuation("loud")
-    with pytest.raises(ValueError, match="'fresnel_number' must be numeric"):
+    with pytest.raises(TypeError, match="'fresnel_number' must be real"):
         environment.kurze_anderson_attenuation(1.0 + 2.0j)
     with pytest.raises(ValueError, match="'fresnel_number' must contain only finite"):
         environment.kurze_anderson_attenuation(float("nan"))

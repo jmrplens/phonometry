@@ -89,6 +89,7 @@ from ..._internal.boundary import settled_ratio
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    require_count,
     require_equal_shapes,
     require_non_negative,
     require_positive,
@@ -487,7 +488,7 @@ def random_error_percent(coherence: ArrayLike, n_averages: int) -> np.ndarray:
     :raises ValueError: for a coherence outside (0, 1] or ``n_averages < 1``.
     """
     require_scalar(n_averages, "n_averages")
-    n = int(n_averages)
+    n = require_count(n_averages, "n_averages", at_least=None)
     if n < 1:
         msg = "'n_averages' must be at least 1."
         raise ValueError(msg)

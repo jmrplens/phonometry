@@ -90,6 +90,7 @@ from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     is_class_designation,
+    require_count,
     require_finite_array,
     require_finite_matrix,
     require_scalar,
@@ -271,7 +272,7 @@ def amplitude_modulation_band_levels(
             f"has {levels.shape[1]} columns."
         )
         raise ValueError(msg)
-    centres = AM_FREQUENCY_BANDS_HZ[int(band)]
+    centres = AM_FREQUENCY_BANDS_HZ[require_count(band, "band", at_least=None)]
     columns = [_nominal_index(freqs, centre) for centre in centres]
     selected = levels[:, columns]
     if weighting == "Z":
@@ -772,6 +773,8 @@ def amplitude_modulation_period(
         practice excludes whole 10 min periods, so excluding single blocks is
         an adaptation to be justified.
     :return: A :class:`ModulationPeriod`.
+    :raises TypeError: If the exclusion flags are neither booleans nor
+        integers.
     :raises ValueError: If the period does not hold 6 000 finite values or the
         exclusion flags are not sixty booleans (or 0 and 1).
     """
@@ -815,13 +818,18 @@ def _exclusion_flags(flags: ArrayLike, name: str) -> NDArray[np.bool_]:
     array = np.asarray(flags)
     if array.dtype == np.bool_:
         return array.ravel()
-    if array.dtype.kind in "iu":
-        if np.all((array == 0) | (array == 1)):
-            return array.astype(np.bool_).ravel()
-        found = "an integer other than 0 and 1"
-    else:
-        found = f"values of type {array.dtype}"
-    msg = f"'{name}' must hold booleans (True to exclude), or 0 and 1; got {found}."
+    if array.dtype.kind not in "iu":
+        msg = (
+            f"'{name}' must hold booleans (True to exclude), or 0 and 1; got "
+            f"values of type {array.dtype}."
+        )
+        raise TypeError(msg)
+    if np.all((array == 0) | (array == 1)):
+        return array.astype(np.bool_).ravel()
+    msg = (
+        f"'{name}' must hold booleans (True to exclude), or 0 and 1; got an "
+        "integer other than 0 and 1."
+    )
     raise ValueError(msg)
 
 
@@ -946,14 +954,16 @@ def bin_amplitude_modulation(
         rotating the directions so that the sector of interest is centred on
         zero.
     :return: A :class:`BinnedModulation`.
+    :raises TypeError: If ``bands`` is a text rather than a sequence of band
+        numbers, or the exclusion flags are neither booleans nor integers.
     :raises ValueError: If the shapes disagree, a value is not finite, a
         wind speed is negative, a band is not a band number or is repeated,
-        the exclusion flags are not booleans (or 0 and 1), or the sector
-        width does not divide 360 degrees.
+        an integer exclusion flag is other than 0 and 1, or the sector width
+        does not divide 360 degrees.
     """
     if isinstance(bands, str):
         msg = f"'bands' must be a sequence of band numbers; got {bands!r}."
-        raise ValueError(msg)
+        raise TypeError(msg)
     # Read once, so that an iterator is validated and converted from the same
     # values rather than consumed by the check.
     band_values = tuple(bands)

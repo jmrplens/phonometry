@@ -1557,7 +1557,10 @@ def test_more_readings_than_level_ranges_is_refused() -> None:
 def test_the_record_refuses_unreadable_rows_of_clause_17(
     rows: object, match: str
 ) -> None:
-    with pytest.raises(ValueError, match=match):
+    # A flat list where a mapping belongs is the wrong type; a mapping with
+    # the wrong rows is the right type with a wrong value.
+    refusal = ValueError if isinstance(rows, dict) else TypeError
+    with pytest.raises(refusal, match=match):
         _record(
             range_linearity_deviations_db=rows,
             range_linearity_uncertainties_db=rows,
@@ -1810,7 +1813,10 @@ def test_class_1_cannot_be_declared_without_c() -> None:
 def test_the_features_refuse_a_meter_the_standard_rules_out(
     declared: dict[str, Any], match: str
 ) -> None:
-    with pytest.raises(ValueError, match=match):
+    # A text where a flag belongs is the wrong type; two flags the standard
+    # rules out together are the right type with a wrong value.
+    flags = all(isinstance(value, bool) for value in declared.values())
+    with pytest.raises(ValueError if flags else TypeError, match=match):
         metrology.SoundLevelMeterFeatures(**declared)
 
 
@@ -1910,10 +1916,29 @@ def test_a_meter_that_indicates_nothing_is_refused(declared: dict[str, bool]) ->
         metrology.SoundLevelMeterFeatures(**declared)
 
 
-@pytest.mark.parametrize("count", [0, -2, 1.5, True, "3", np.float64(2.0)], ids=repr)
-def test_the_number_of_level_ranges_is_a_whole_number_from_1(count: object) -> None:
-    with pytest.raises(ValueError, match="'n_level_ranges' must be the number"):
+@pytest.mark.parametrize(
+    ("count", "refusal"),
+    [
+        (0, ValueError),
+        (-2, ValueError),
+        (1.5, ValueError),
+        (True, TypeError),
+        ("3", TypeError),
+    ],
+    ids=repr,
+)
+def test_the_number_of_level_ranges_is_a_whole_number_from_1(
+    count: object, refusal: type[Exception]
+) -> None:
+    with pytest.raises(refusal, match="'n_level_ranges' must be a whole number"):
         metrology.SoundLevelMeterFeatures(n_level_ranges=count)  # type: ignore[arg-type]
+
+
+def test_a_whole_float_number_of_level_ranges_is_taken_as_its_integer() -> None:
+    # Every count goes through one check, which takes a whole float.
+    features = metrology.SoundLevelMeterFeatures(n_level_ranges=np.float64(2.0))  # type: ignore[arg-type]
+    assert features.n_level_ranges == 2
+    assert type(features.n_level_ranges) is int
 
 
 def test_the_number_of_level_ranges_is_held_as_an_int() -> None:
@@ -2321,7 +2346,9 @@ def test_the_record_refuses_what_the_rule_cannot_read(
     record = _record()
     base = {f.name: getattr(record, f.name) for f in dataclasses.fields(record)}
     base.update(fields)
-    with pytest.raises(ValueError, match=match):
+    # A text where an observed flag belongs is the wrong type.
+    refusal = TypeError if "must be True or False" in match else ValueError
+    with pytest.raises(refusal, match=match):
         metrology.SoundLevelMeterPeriodicMeasurements(**base)
 
 

@@ -87,6 +87,7 @@ impact level `L'n,w` provably below its maximum.
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | For a value that is not one number, or a `bound` that is not a text. |
 | ValueError | For an unknown `bound`, a value that is not finite or a negative uncertainty. |
 
 ## band_uncertainty

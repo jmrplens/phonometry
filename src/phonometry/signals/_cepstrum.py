@@ -72,7 +72,12 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_ranks, require_same_length, require_scalar
+from .._internal.validation import (
+    require_count,
+    require_ranks,
+    require_same_length,
+    require_scalar,
+)
 from ..io._resolve import resolve_fs
 from .spectra import _positive, _validate_signal
 
@@ -125,10 +130,11 @@ def _fold_causal(cepstrum: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 def _validate_nfft(n: int, nfft: int | None) -> int:
+    require_scalar(n, "n")
     if nfft is None:
         return n if n % 2 == 0 else n + 1
     require_scalar(nfft, "nfft")
-    out = int(nfft)
+    out = require_count(nfft, "nfft", at_least=None)
     if out < n:
         msg = f"'nfft' must be at least the record length ({n} samples)."
         raise ValueError(msg)

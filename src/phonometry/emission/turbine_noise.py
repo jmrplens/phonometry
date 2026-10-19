@@ -444,8 +444,8 @@ def turbine_measurement_surface(
     :param reference_boxes: The reference boxes in order along the shaft, from
         the turbine end (Figure 2): one :class:`TurbineReferenceBox` per part.
     :return: The surface, its parallelepipeds and its area.
-    :raises ValueError: if no box is given or an entry is not a
-        :class:`TurbineReferenceBox`.
+    :raises ValueError: if no box is given.
+    :raises TypeError: if an entry is not a :class:`TurbineReferenceBox`.
     """
     boxes = tuple(reference_boxes)
     if not boxes:
@@ -457,7 +457,7 @@ def turbine_measurement_surface(
                 "turbine_measurement_surface: every entry must be a "
                 f"TurbineReferenceBox; got {type(box).__name__}."
             )
-            raise ValueError(msg)
+            raise TypeError(msg)
     d = _MEASUREMENT_DISTANCE_M
     lengths = np.array([box.length_m for box in boxes], dtype=np.float64)
     lengths[0] += d
@@ -672,6 +672,7 @@ def _coupling_corner(
     corner of the wider (or taller) of the two parallelepipeds that meet
     there; a set in a single box has that plane at mid-length.
     """
+    require_scalar(coupling, "coupling")
     parts = len(surface.lengths_m)
     edges = surface.x_edges_m
     widths = surface.widths_m
@@ -746,12 +747,14 @@ def turbine_microphone_positions(
         level by no more than 1,0 dB (see
         :attr:`TurbineSoundPowerResult.overhead_effect_db`).
     :return: The positions, their labels and the overhead mask.
+    :raises TypeError: for a ``surface`` that is not a
+        :class:`TurbineMeasurementSurface`.
     :raises ValueError: for a height outside the sides, a non-positive
         spacing, or a ``n_turbine_boxes`` that leaves no driven machinery.
     """
     if not isinstance(surface, TurbineMeasurementSurface):
         msg = "turbine_microphone_positions: 'surface' must be a TurbineMeasurementSurface."
-        raise ValueError(msg)
+        raise TypeError(msg)
     height = require_positive(microphone_height_m, "microphone_height_m")
     spacing = require_positive(spacing_m, "spacing_m")
     if height > float(np.min(surface.heights_m)):
@@ -1220,6 +1223,8 @@ def check_turbine_test_environment(
     :param wind_speed_m_s: The wind speed for a measurement outdoors, in
         metres per second; ``None`` indoors.
     :return: The conditions and the verdict.
+    :raises TypeError: for a ``correction`` that is not a
+        :class:`TurbineEnvironmentalCorrection`.
     :raises ValueError: unless exactly one of ``correction`` and
         ``environmental_correction`` is given, for a non-finite correction
         or for a negative wind speed.
@@ -1242,7 +1247,7 @@ def check_turbine_test_environment(
             "TurbineEnvironmentalCorrection; pass a bare K as "
             "'environmental_correction'."
         )
-        raise ValueError(msg)
+        raise TypeError(msg)
     wind: float | None = None
     if wind_speed_m_s is not None:
         require_scalar(wind_speed_m_s, "wind_speed_m_s")
@@ -1711,6 +1716,8 @@ def turbine_noise_declaration(
     :param tonal: Whether the sound contains prominent discrete tones (Table
         1).
     :return: The report.
+    :raises TypeError: for a determination that is not a
+        :class:`TurbineSoundPowerResult`, or a description that is not a text.
     :raises ValueError: for no determination, a determination that does not
         conform, or an empty description.
     """
@@ -1722,10 +1729,10 @@ def turbine_noise_declaration(
         ("noise_control", noise_control),
         ("measured_at", measured_at),
     ):
-        if not isinstance(text, str) or not text.strip():
-            msg = (
-                f"turbine_noise_declaration: '{name}' must be a non-empty description."
-            )
+        msg = f"turbine_noise_declaration: '{name}' must be a non-empty description."
+        if not isinstance(text, str):
+            raise TypeError(msg)
+        if not text.strip():
             raise ValueError(msg)
     conditions: list[str] = []
     levels: list[np.ndarray] = []
@@ -1737,7 +1744,7 @@ def turbine_noise_declaration(
                 f"turbine_noise_declaration: the determination for {condition!r} "
                 "must be a TurbineSoundPowerResult."
             )
-            raise ValueError(msg)
+            raise TypeError(msg)
         if not result.conforms:
             reason = (
                 "its background is less than 3 dB below at some position (4.2)"

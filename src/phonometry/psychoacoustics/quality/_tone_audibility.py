@@ -102,6 +102,7 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    refuse_text,
     require_equal_counts,
     require_equal_shapes,
     require_ranks,
@@ -1091,6 +1092,11 @@ def mean_audibility_uncertainty(
 # --------------------------------------------------------------------------- #
 # Result
 # --------------------------------------------------------------------------- #
+#: The refusal of a ``group_sizes`` field that is not made of numbers, raised
+#: as the class of what it holds.
+_GROUP_SIZES_NOT_NUMERIC = "ToneAudibilityResult: 'group_sizes' must be numeric."
+
+
 def _require_group_counts(counts: NDArray[np.int_] | None) -> None:
     """Require ``group_sizes`` to be whole counts of one tone or more.
 
@@ -1119,27 +1125,30 @@ def _require_group_counts(counts: NDArray[np.int_] | None) -> None:
     strings comes back from numpy as ``could not convert string to float``, a
     field of arbitrary objects as a ``TypeError`` raised from inside it, and
     a count written as an integer too large for a double as an
-    ``OverflowError``. None of the three names the field, none names the
-    result, and two of them are not the ``ValueError`` this guard documents,
-    so the cast is made under the same wording the shared
+    ``OverflowError``. None of the three names the field and none names the
+    result, so the cast is made under the same wording the shared
     :func:`~phonometry._internal.validation.require_finite_fields` uses for
-    the measured columns beside it.
+    the measured columns beside it, and keeps the class of each: an object
+    is the wrong type, a string or a count past a double a wrong value.
 
     ``None`` is skipped: :func:`assess_tones` builds a result from bare
     levels, which never ran Step 3, and that absence is documented.
 
     :param counts: The ``group_sizes`` field, or ``None`` when the Step 3
         combination was not performed.
-    :raises ValueError: if the field is not numeric, or a count is
-        non-finite, fractional, or below one.
+    :raises TypeError: if the field holds objects that are not numbers.
+    :raises ValueError: if the field holds text, or a count is non-finite,
+        fractional, below one or past what a double holds.
     """
     if counts is None:
         return
+    refuse_text(counts, _GROUP_SIZES_NOT_NUMERIC)
     try:
         values = np.asarray(counts, dtype=np.float64).ravel()
-    except (TypeError, ValueError, OverflowError) as exc:
-        msg = "ToneAudibilityResult: 'group_sizes' must be numeric."
-        raise ValueError(msg) from exc
+    except TypeError as exc:
+        raise TypeError(_GROUP_SIZES_NOT_NUMERIC) from exc
+    except (ValueError, OverflowError) as exc:
+        raise ValueError(_GROUP_SIZES_NOT_NUMERIC) from exc
     whole = np.isfinite(values) & (values >= 1.0) & (values == np.floor(values))
     if bool(np.all(whole)):
         return
@@ -1173,14 +1182,15 @@ def _require_line_spacing(spacing: float) -> None:
     ``float`` refuses a string with ``could not convert string to float``, a
     ``None`` or an arbitrary object with a ``TypeError``, and an integer too
     large for a double with an ``OverflowError``. All three are raised from
-    inside the standard library, naming neither the field nor the result, and
-    two are not the ``ValueError`` documented here, so they leave under the
-    wording the shared
-    :func:`~phonometry._internal.validation.require_finite_fields` uses.
+    inside the standard library, naming neither the field nor the result, so
+    they leave under the wording the shared
+    :func:`~phonometry._internal.validation.require_finite_fields` uses, each
+    with its class: ``None`` or an object is the wrong type, a string or an
+    integer past a double a wrong value.
 
     :param spacing: The ``line_spacing_hz`` field, in Hz.
-    :raises ValueError: if the field is not numeric, or is not a positive,
-        finite resolution.
+    :raises TypeError: if the field is a text or not a number at all.
+    :raises ValueError: if the field is not a positive, finite resolution.
     """
     value = require_real(
         spacing, "ToneAudibilityResult: 'line_spacing_hz' must be numeric."

@@ -2244,6 +2244,7 @@ def vertical_directivity(
     :return: The correction, in dB, one value per band.
     :raises ValueError: If the angle is not finite or the height is not 1 or 2.
     """
+    require_scalar(height, "height")
     angle = np.radians(_finite(psi, "psi"))
     freqs = np.asarray(frequencies, dtype=np.float64)
     if height not in (1, 2):

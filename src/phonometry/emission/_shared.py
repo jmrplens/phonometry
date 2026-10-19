@@ -62,7 +62,11 @@ from typing import TYPE_CHECKING, Literal, cast
 import numpy as np
 
 from .._internal.levels_math import energy_mean
-from .._internal.validation import require_positive
+from .._internal.validation import (
+    require_count,
+    require_positive,
+    require_scalar,
+)
 from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
@@ -93,25 +97,25 @@ _T0 = 1.0
 _MIN_EVENTS = 5
 
 
-def _validate_event_count(n_events: object, owner: str) -> None:
-    """Refuse a count of events that is not a whole number of them.
+def _validate_event_count(n_events: object, owner: str) -> int | None:
+    """A count of events as an ``int``, or ``None``, refused when it is not one.
 
     The entry points already refuse it, but a result can also be built
     directly or rebuilt with :func:`dataclasses.replace`, and a count of 2,5
-    events describes no measurement the standard defines. ``bool`` is refused
-    on its own because it is an ``int`` in Python and ``True`` would otherwise
-    pass as one event. Rejecting a wrong type here rather than letting the
-    comparison below raise keeps the promise the docstring makes, which is a
-    ``ValueError`` and not a ``TypeError``.
+    events describes no measurement the standard defines. The count goes
+    through :func:`~phonometry._internal.validation.require_count`, so a bool,
+    a text or an array is a :class:`TypeError` and a number that is not a
+    whole one, or is below one, a :class:`ValueError`, both naming the owner.
+
+    :return: The count as an ``int``, or ``None`` when none was given.
     """
     if n_events is None:
-        return
-    if isinstance(n_events, bool) or not isinstance(n_events, (int, np.integer)):
-        msg = f"{owner}: 'n_events' must be a whole number of events; got {n_events!r}."
-        raise ValueError(msg)
-    if int(n_events) < 1:
-        msg = f"{owner}: 'n_events' must be at least 1; got {n_events!r}."
-        raise ValueError(msg)
+        return None
+    try:
+        return require_count(n_events, "n_events")
+    except (TypeError, ValueError) as error:
+        msg = f"{owner}: {error}"
+        raise type(error)(msg) from None
 
 
 Grade = Literal["engineering", "survey"]
@@ -203,6 +207,8 @@ def _validate_meteorology(temperature_c: float, static_pressure_kpa: float) -> N
     static pressure makes :math:`\log_{10}(p_\mathrm{s}/p_{\mathrm{s}0})` undefined; both are rejected
     with a clean ``ValueError``.
     """
+    require_scalar(static_pressure_kpa, "static_pressure_kpa")
+    require_scalar(temperature_c, "temperature_c")
     if not np.isfinite(temperature_c) or temperature_c <= _ROUNDED_ABS_ZERO_C:
         msg = "'temperature_c' must be finite and greater than -273 degC."
         raise ValueError(msg)
@@ -301,13 +307,7 @@ def _single_event_mean(
         count = int(arr.shape[0])
         mean = energy_mean(arr, axis=0)
     else:
-        if isinstance(n_events, bool) or not isinstance(n_events, (int, np.integer)):
-            msg = "'n_events' must be an integer: the number of events one measurement encompasses."
-            raise ValueError(msg)
-        if n_events < 1:
-            msg = "'n_events' must be a positive integer."
-            raise ValueError(msg)
-        count = int(n_events)
+        count = require_count(n_events, "n_events")
         mean = arr - 10.0 * np.log10(count)
     if count < _MIN_EVENTS:
         warnings.warn(

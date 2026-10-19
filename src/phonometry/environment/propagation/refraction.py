@@ -57,6 +57,7 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays, handed_over
 from ..._internal.rays import march_rays
 from ..._internal.validation import (
+    require_count,
     require_equal_shapes,
     require_positive,
     require_ranks,
@@ -175,6 +176,7 @@ def linear_sound_speed_profile(
     :raises ValueError: If ``max_height_m`` or ``ground_speed_of_sound`` is not positive, or
         the profile turns non-positive within ``[0, max_height_m]``.
     """
+    require_scalar(gradient_per_s, "gradient_per_s")
     c0 = require_positive(ground_speed_of_sound, "ground_speed_of_sound")
     h = require_positive(max_height_m, "max_height_m")
     if not np.isfinite(gradient_per_s):
@@ -221,6 +223,7 @@ def log_linear_sound_speed_profile(
     :raises ValueError: On non-positive ``c0``, ``z0`` or ``max_height_m``, fewer
         than two points, or a profile that turns non-positive.
     """
+    require_scalar(b, "b")
     c0 = require_positive(ground_speed_of_sound, "ground_speed_of_sound")
     z0 = require_positive(roughness_length, "roughness_length")
     h = require_positive(max_height_m, "max_height_m")
@@ -228,14 +231,18 @@ def log_linear_sound_speed_profile(
         msg = "'b' must be finite."
         raise ValueError(msg)
     require_scalar(n_points, "n_points")
-    if int(n_points) < _MIN_POLYLINE_NODES:
+    if require_count(n_points, "n_points", at_least=None) < _MIN_POLYLINE_NODES:
         msg = "'n_points' must be at least 2."
         raise ValueError(msg)
     # Logarithmic height grid from the ground to max_height (z = 0 included).
     z = np.concatenate(
         (
             [0.0],
-            np.geomspace(min(z0, h) * 0.1, h, int(n_points) - 1),
+            np.geomspace(
+                min(z0, h) * 0.1,
+                h,
+                require_count(n_points, "n_points", at_least=None) - 1,
+            ),
         )
     )
     z = np.unique(np.clip(z, 0.0, h))
@@ -308,6 +315,8 @@ def ray_curvature_radius(
     :raises ValueError: If the gradient is zero (a straight ray) or the launch
         angle is not within ``(-90, 90)`` degrees.
     """
+    require_scalar(gradient_per_s, "gradient_per_s")
+    require_scalar(launch_angle_deg, "launch_angle_deg")
     c0 = require_positive(ground_speed_of_sound, "ground_speed_of_sound")
     if not (np.isfinite(gradient_per_s) and abs(gradient_per_s) > 0.0):
         msg = "'gradient_per_s' must be finite and non-zero (a curved ray)."
@@ -348,6 +357,9 @@ def shadow_zone_distance(
     :return: The horizontal shadow-boundary distance, in metres.
     :raises ValueError: If the gradient is not negative, or a height is negative.
     """
+    require_scalar(gradient_per_s, "gradient_per_s")
+    require_scalar(receiver_height_m, "receiver_height_m")
+    require_scalar(source_height_m, "source_height_m")
     c0 = require_positive(ground_speed_of_sound, "ground_speed_of_sound")
     if not np.isfinite(gradient_per_s) or gradient_per_s >= 0.0:
         msg = (
@@ -493,7 +505,7 @@ def atmospheric_ray_paths(
         raise ValueError(msg)
     rmax = require_positive(max_range, "max_range")
     require_scalar(n_steps, "n_steps")
-    if int(n_steps) < _MIN_RAY_STEPS:
+    if require_count(n_steps, "n_steps", at_least=None) < _MIN_RAY_STEPS:
         msg = "'n_steps' must be at least 2."
         raise ValueError(msg)
     angles = np.asarray(launch_angles_deg, dtype=np.float64).ravel()
@@ -518,7 +530,7 @@ def atmospheric_ray_paths(
     def _speed_at(zq: NDArray[np.float64]) -> NDArray[np.float64]:
         return np.asarray(np.interp(zq, z_prof, c_prof), dtype=np.float64)
 
-    ns = int(n_steps)
+    ns = require_count(n_steps, "n_steps", at_least=None)
     ranges = np.linspace(0.0, rmax, ns)
     c0 = float(np.interp(zs, z_prof, c_prof))
     th = np.radians(angles)

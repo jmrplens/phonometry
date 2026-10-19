@@ -22,6 +22,7 @@ from __future__ import annotations
 import math
 import warnings
 
+from .._internal.validation import require_scalar
 from ._state import Fluid, FluidAssumptionWarning, FluidWarning
 
 __all__ = [
@@ -247,6 +248,7 @@ def air(
     warns outside it, because a fit past its range is still arithmetic; what it
     refuses is a state that cannot exist.
     """
+    require_scalar(temperature_c, "temperature_c")
     kelvin = _ABSOLUTE_ZERO_C_OFFSET + float(temperature_c)
     if not math.isfinite(kelvin) or kelvin <= 0.0:
         msg = "'temperature_c' must be a finite temperature above -273.15 degC."

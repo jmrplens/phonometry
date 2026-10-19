@@ -14,7 +14,11 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays, read_only
-from ..._internal.validation import require_ranks, require_same_length
+from ..._internal.validation import (
+    require_ranks,
+    require_same_length,
+    require_scalar,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -86,6 +90,7 @@ def _params(frequency: float) -> tuple[float, float, float]:
     error; adjacent table rows are >20 % apart, so a near-miss can never
     resolve to the wrong row - anything else raises.
     """
+    require_scalar(frequency, "frequency")
     for f, params in _TABLE1.items():
         if abs(frequency - f) <= 1e-6 * f:
             return params
@@ -120,6 +125,7 @@ def equal_loudness_contour(phon: float) -> tuple[np.ndarray, np.ndarray]:
     :param phon: Loudness level in phons (20 to 90).
     :return: Tuple ``(frequencies, spl)`` in Hz and dB re 20 uPa.
     """
+    require_scalar(phon, "phon")
     if not _PHON_MIN <= phon <= _PHON_MAX:
         msg = (
             "ISO 226:2023 Formula (1) is specified for 20 phon to 90 phon "
@@ -145,6 +151,7 @@ def loudness_level(spl: float, frequency: float) -> float:
     :return: Loudness level in phons. Values outside 20-90 phon (80 above
         4 kHz) are extrapolations the standard labels as informative only.
     """
+    require_scalar(spl, "spl")
     alpha_f, l_u, t_f = _params(frequency)
     b = (
         10 ** (alpha_f * (spl + l_u) / 10) - 10 ** (alpha_f * (t_f + l_u) / 10)

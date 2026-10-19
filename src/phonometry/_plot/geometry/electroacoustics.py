@@ -17,7 +17,11 @@ from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
-from ..._internal.validation import require_equal_shapes, require_positive
+from ..._internal.validation import (
+    require_equal_shapes,
+    require_positive,
+    require_scalar,
+)
 from ..common import (
     _C_EDGE,
     _C_MUTED,
@@ -199,6 +203,7 @@ def plot_piston_result_geometry(
     directivity, the lobe of the selected frequency is overlaid with its
     ``ka`` in the legend.
     """
+    require_scalar(frequency_index, "frequency_index")
     angles_rad = None
     lobe = None
     label = None

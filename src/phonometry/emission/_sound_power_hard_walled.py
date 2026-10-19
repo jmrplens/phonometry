@@ -122,6 +122,7 @@ from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
     require_choice,
+    require_count,
     require_non_negative,
     require_positive,
     require_ranks,
@@ -381,6 +382,8 @@ class HardWalledSoundPowerResult(OwnsArrays):
             ``'energy'``, ``coverage_factor`` is not positive, a count is below
             one, or any per-band array disagrees with the rest.
         """
+        require_scalar(self.n_microphone_positions, "n_microphone_positions")
+        require_scalar(self.n_source_positions, "n_source_positions")
         require_choice(self.quantity, "quantity", ("power", "energy"))
         require_positive(self.coverage_factor, "coverage_factor")
         if self.n_microphone_positions < 1 or self.n_source_positions < 1:
@@ -914,7 +917,7 @@ def _event_grid(arr: np.ndarray, n_events: int | None) -> tuple[np.ndarray, bool
         one_event = _single_event_mean(
             arr, n_events, name="event_levels", stacklevel=5, clause=f"{_STANDARD} 7.6"
         )
-        count = int(n_events)
+        count = require_count(n_events, "n_events", at_least=None)
     grid, traverse = _source_grid(one_event)
     return grid, traverse, count
 
@@ -1129,6 +1132,7 @@ class HardWalledRoomCheck(OwnsArrays):
             orientations are recorded, or the room or the box is not
             positive.
         """
+        require_scalar(self.n_orientations, "n_orientations")
         require_ranks(self, frequencies=1, level_range_db=1)
         require_same_length(self, "frequencies", "level_range_db")
         if any(round(float(f)) not in _SIGMA_R0_DB for f in self.frequencies):

@@ -34,6 +34,7 @@ import numpy as np
 import pytest
 
 from phonometry import building
+from phonometry.building import BuildingPredictionWarning
 from phonometry.building.prediction.linings import (
     _THIRD_OCTAVE_CENTRES,
     _THIRD_OCTAVE_FIRST_INDEX,
@@ -127,7 +128,7 @@ def test_table_d1_low_frequency_branch() -> None:
     assert building.weighted_lining_improvement(160.0, 60.0) == pytest.approx(
         74.4 - 20.0 * np.log10(160.0) - 30.0, abs=1e-9
     )
-    with pytest.warns(UserWarning, match="outside the 20 dB"):
+    with pytest.warns(BuildingPredictionWarning, match="outside the 20 dB"):
         assert building.weighted_lining_improvement(160.0, 62.0) == 0.0
 
 
@@ -272,7 +273,7 @@ def test_table_d1_warns_outside_the_stated_rw_box(rating: float) -> None:
     is still returned, because the formula is what it is, but the caller is
     told the standard does not cover it.
     """
-    with pytest.warns(UserWarning, match="outside the 20 dB"):
+    with pytest.warns(BuildingPredictionWarning, match="outside the 20 dB"):
         building.weighted_lining_improvement(50.0, rating)
 
 
@@ -295,9 +296,9 @@ def test_lining_formulae_warn_outside_the_annex_d_range(resonance: float) -> Non
     the annex bounds ``fo``, at 30 Hz to 5 000 Hz, so that is the envelope
     used.
     """
-    with pytest.warns(UserWarning, match="outside the 30 Hz"):
+    with pytest.warns(BuildingPredictionWarning, match="outside the 30 Hz"):
         building.lining_improvement(resonance)
-    with pytest.warns(UserWarning, match="outside the 30 Hz"):
+    with pytest.warns(BuildingPredictionWarning, match="outside the 30 Hz"):
         building.lining_improvement(resonance, system="studs")
 
 

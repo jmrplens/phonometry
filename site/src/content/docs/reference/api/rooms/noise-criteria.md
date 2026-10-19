@@ -214,6 +214,14 @@ reads `">NC-70"` / `"<NC-15"`.
 | :--- | :--- |
 | ValueError | for malformed inputs or unknown band frequencies. |
 
+## NoiseCriterionWarning
+
+A room noise rating computed on fewer bands than its clause rates.
+
+Emitted by [`room_criterion`](/phonometry/reference/api/rooms/noise-criteria/#room_criterion) when the spectrum lacks one of the
+31.5 Hz to 4000 Hz octave bands ANSI/ASA S12.2-2019 clause D.4 rates,
+which the spectral-tag deviation tests then skip.
+
 ## rc_curve
 
 ```python
@@ -363,7 +371,7 @@ clause D.3.5 letters (see [`RCResult`](/phonometry/reference/api/rooms/noise-cri
 
 Clause D.4 evaluates a spectrum that includes at least the octave bands
 from 31.5 Hz through 4000 Hz; when any of those bands is missing a
-`UserWarning` is emitted, since the absent bands are silently
+[`NoiseCriterionWarning`](/phonometry/reference/api/rooms/noise-criteria/#noisecriterionwarning) is emitted, since the absent bands are
 skipped by the spectral-tag deviation tests. A rating outside the
 tabulated RC-25 to RC-50 family is flagged by
 [`RCResult.out_of_family`](/phonometry/reference/api/rooms/noise-criteria/#rcresultout_of_family).
@@ -382,3 +390,9 @@ tabulated RC-25 to RC-50 family is flagged by
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the 500/1000/2000 Hz mid-frequency bands are absent. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| NoiseCriterionWarning | if a band from 31.5 Hz to 4000 Hz is absent. |

@@ -411,10 +411,10 @@ def test_a_spectrum_refuses_increasing_wavelengths() -> None:
         AcousticRoughnessSpectrum([0.05, 0.1], [1.0, 2.0])
 
 
-def test_a_missing_band_is_a_key_error() -> None:
+def test_a_wavelength_without_a_band_is_a_value_error() -> None:
     """level_at names the band it could not find."""
     spectrum = AcousticRoughnessSpectrum([0.1, 0.05], [1.0, 2.0])
-    with pytest.raises(KeyError, match=r"no band at 0\.2 m"):
+    with pytest.raises(ValueError, match=r"no band at 0\.2 m"):
         spectrum.level_at(0.2)
 
 

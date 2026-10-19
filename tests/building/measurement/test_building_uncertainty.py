@@ -637,19 +637,19 @@ def test_band_uncertainty_to_arrays_roundtrip() -> None:
 
 
 def test_prediction_input_rejects_bad_n() -> None:
-    with pytest.raises(ValueError, match="n must be a positive integer"):
+    with pytest.raises(ValueError, match="'n' must be a whole number"):
         prediction_input_uncertainty(1.2, 1.0, 0)
 
 
 def test_prediction_input_rejects_fractional_n() -> None:
     # A fractional n used to sail past the `n < 1` range check and be
     # divided by, returning a wrong number without an error.
-    with pytest.raises(ValueError, match="n must be a positive integer"):
+    with pytest.raises(ValueError, match="'n' must be a whole number"):
         prediction_input_uncertainty(1.2, 1.0, 2.5)  # type: ignore[arg-type]
 
 
 def test_prediction_input_rejects_nan_n() -> None:
-    with pytest.raises(ValueError, match="n must be a positive integer"):
+    with pytest.raises(ValueError, match="'n' must be a whole number"):
         prediction_input_uncertainty(1.2, 1.0, float("nan"))  # type: ignore[arg-type]
 
 

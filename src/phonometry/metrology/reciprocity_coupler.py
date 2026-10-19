@@ -113,6 +113,7 @@ from .._internal.validation import (
     require_count,
     require_non_negative,
     require_positive,
+    require_scalar,
 )
 from .free_field_corrections import _frequency_axis
 from .reciprocity_calibration import (
@@ -1357,6 +1358,8 @@ def coupler_transfer_impedance(
         :math:`E_V` in a large-volume coupler
         (:func:`temperature_transfer_function`).
     :return: The :class:`CouplerTransferImpedance`.
+    :raises TypeError: for a ``coupler`` that is neither a
+        :class:`PlaneWaveCoupler` nor a :class:`LargeVolumeCoupler`.
     :raises ValueError: for frequencies that are not positive and increasing,
         a static pressure that is not positive, or an unknown method.
     """
@@ -1644,6 +1647,7 @@ def _table_c3(frequency: float) -> tuple[float, bool]:
 
     :raises ValueError: above the last row, 2 500 Hz.
     """
+    require_scalar(frequency, "frequency")
     printed = np.array(sorted(IEC61094_2_TABLE_C3), dtype=np.float64)
     values = np.array([IEC61094_2_TABLE_C3[f] for f in printed])
     nearest = int(np.argmin(np.abs(np.log(printed / frequency))))
@@ -2338,6 +2342,8 @@ def _capillary_steps(
     """The coupler with the length, then the radius, of its tubes moved, by
     uncertainties already checked to be finite and non-negative.
     """
+    require_scalar(u_length, "u_length")
+    require_scalar(u_radius, "u_radius")
     if u_length <= 0.0 and u_radius <= 0.0:
         return []
     tube = coupler.capillary

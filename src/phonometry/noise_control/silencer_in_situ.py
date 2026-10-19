@@ -83,10 +83,12 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean
 from .._internal.validation import (
+    require_count,
     require_finite,
     require_finite_array,
     require_positive,
     require_positive_array,
+    require_scalar,
 )
 from .._internal.warnings import PhonometryWarning
 
@@ -356,7 +358,8 @@ def installation_case(number: int) -> InstallationCase:
     :return: The case, as an :class:`InstallationCase`.
     :raises ValueError: For a number outside the figure.
     """
-    case = INSTALLATION_CASES.get(int(number))
+    require_scalar(number, "number")
+    case = INSTALLATION_CASES.get(require_count(number, "number", at_least=None))
     if case is None:
         msg = (
             "Figure 1 of ISO 11820 numbers its installations 1 to 20, "

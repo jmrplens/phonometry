@@ -337,6 +337,7 @@ def equivalent_absorption_length(
 
 def _broadcast(values: np.ndarray, n_bands: int, name: str) -> np.ndarray:
     """Broadcast a scalar-per-band array to ``n_bands``, or validate the count."""
+    require_scalar(n_bands, "n_bands")
     if values.size == 1:
         return np.full(n_bands, values[0], dtype=np.float64)
     if values.size != n_bands:

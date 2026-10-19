@@ -98,6 +98,13 @@ constant $R_\mathrm{i} = S_\mathrm{i} \alpha_\mathrm{i} / (1 - \alpha_\mathrm{i}
 
 **Returns:** An [`EnclosureInsertionLossResult`](/phonometry/reference/api/noise_control/enclosures/#enclosureinsertionlossresult).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `panel_transmission_loss` is none of the forms above. |
+| ValueError | if an area is not positive, `internal_absorption` is not in `(0, 1)` or does not carry one value per band, a callable is given without `frequencies`, or `model` is unknown. |
+
 ## ENCLOSURE_MODELS
 
 *Constant* (`mapping`).

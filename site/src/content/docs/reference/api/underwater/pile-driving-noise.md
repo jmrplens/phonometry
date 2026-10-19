@@ -215,7 +215,8 @@ handed straight to
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the inputs are invalid. |
+| TypeError | If `limits` is not a sequence, or holds a text or anything else that is not a number. |
+| ValueError | If the inputs are invalid: a `fraction` other than 1 or 3, `limits` that are not a finite, increasing, positive pair, or a pressure or sampling rate the analysis cannot take. |
 
 ## StrikeSELSpectrum
 

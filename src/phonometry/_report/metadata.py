@@ -54,11 +54,11 @@ class ReportMetadata(RichDisplay):
         volume to be reported; the room-acoustics fiche prints it in the
         header. Distinct from the ``source_volume``/``receiving_volume`` pair,
         which describe a sound-transmission measurement.
-    :ivar source_positions: Number of source (loudspeaker/omnidirectional)
+    :ivar n_source_positions: Number of source (loudspeaker/omnidirectional)
         positions used in the measurement, an integer (ISO 3382-1:2009 Table 1
         and ISO 3382-2:2008 Clause 8 require reporting the number of source
         positions). Printed by the room-acoustics fiche.
-    :ivar receiver_positions: Number of microphone (receiver) positions used,
+    :ivar n_receiver_positions: Number of microphone (receiver) positions used,
         an integer (ISO 3382-1:2009 Table 1 and ISO 3382-2:2008 Clause 8
         require reporting the number of microphone positions). Printed by the
         room-acoustics fiche.
@@ -152,8 +152,8 @@ class ReportMetadata(RichDisplay):
     source_volume: float | None = None
     receiving_volume: float | None = None
     room_volume: float | None = None
-    source_positions: int | None = None
-    receiver_positions: int | None = None
+    n_source_positions: int | None = None
+    n_receiver_positions: int | None = None
     temperature_c: float | None = None
     relative_humidity_percent: float | None = None
     source_temperature_c: float | None = None
@@ -196,8 +196,8 @@ class ReportMetadata(RichDisplay):
     #: Count fields that must be finite, positive integers (numbers of source
     #: and receiver positions in a room-acoustics measurement).
     _POSITIVE_INT_FIELDS = (
-        "source_positions",
-        "receiver_positions",
+        "n_source_positions",
+        "n_receiver_positions",
     )
     #: Fields that need only be finite, of any sign: the test temperatures (0 C
     #: or below is a valid condition, e.g. an unheated outdoor facade) and the

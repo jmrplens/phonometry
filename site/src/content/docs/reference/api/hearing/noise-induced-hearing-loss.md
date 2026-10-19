@@ -66,7 +66,7 @@ htlan(
     age: float,
     sex: Literal['male', 'female'],
     l_ex: float,
-    years: float,
+    exposure_duration_years: float,
     fractile: float = 0.5,
     frequencies: ArrayLike | None = None,
 ) -> HTLANResult
@@ -89,7 +89,7 @@ components.
 | `age` | Listener age, in years (at least 18, the ISO 7029 lower limit). |
 | `sex` | `"male"` or `"female"`. |
 | `l_ex` | Noise exposure level normalized to 8 h, `L_EX,8h`, in dB. |
-| `years` | Exposure duration, in years. |
+| `exposure_duration_years` | Exposure duration, in years. |
 | `fractile` | Population fractile in (0, 1) applied to both components. |
 | `frequencies` | Optional subset of the audiometric frequencies, in hertz; `None` uses all six (500 Hz - 6000 Hz). |
 
@@ -113,7 +113,7 @@ HTLANResult(
     age: float,
     sex: str,
     l_ex: float,
-    years: float,
+    exposure_duration_years: float,
     fractile: float,
     frequencies: np.ndarray,
     htla: np.ndarray,
@@ -133,7 +133,7 @@ All arrays are in dB and aligned with `frequencies`.
 | `age` | Listener age, in years. |
 | `sex` | `"male"` or `"female"`. |
 | `l_ex` | Noise exposure level normalized to 8 h, in dB. |
-| `years` | Exposure duration, in years. |
+| `exposure_duration_years` | Exposure duration, in years. |
 | `fractile` | Population fractile (0-1) applied to both components. |
 | `frequencies` | Audiometric frequencies, in hertz. |
 | `htla` | Age component `H` (HTLA, database A, evaluated from ISO 7029:2017, the edition ISO 1999:2013 references undated in 6.2.2). |
@@ -207,7 +207,7 @@ individual.
 ```python
 nipts(
     l_ex: float,
-    years: float,
+    exposure_duration_years: float,
     fractile: float = 0.5,
     frequencies: ArrayLike | None = None,
 ) -> NIPTSResult
@@ -228,7 +228,7 @@ zero.
 | Name | Description |
 | :--- | :--- |
 | `l_ex` | Noise exposure level normalized to a nominal 8 h working day, `L_EX,8h`, in dB. |
-| `years` | Exposure duration, in years (> 0; the standard establishes 10-40 years and extrapolates 1-10 years by Formula 3, below 1 year the result is a further extrapolation). |
+| `exposure_duration_years` | Exposure duration, in years (> 0; the standard establishes 10-40 years and extrapolates 1-10 years by Formula 3, below 1 year the result is a further extrapolation). |
 | `fractile` | Population fractile in the open interval (0, 1); `0.5` gives the median. The reliable range of the standard is 0.05-0.95. |
 | `frequencies` | Optional subset of the audiometric frequencies, in hertz; `None` uses all six (500 Hz - 6000 Hz). |
 
@@ -250,7 +250,7 @@ extrapolation, and the `.report()` fiche prints the matching caveat.
 ```python
 NIPTSResult(
     l_ex: float,
-    years: float,
+    exposure_duration_years: float,
     fractile: float,
     frequencies: np.ndarray,
     median: np.ndarray,
@@ -269,7 +269,7 @@ All arrays are in dB and aligned with `frequencies`.
 | Name | Description |
 | :--- | :--- |
 | `l_ex` | Noise exposure level normalized to 8 h, `L_EX,8h`, in dB. |
-| `years` | Exposure duration, in years. |
+| `exposure_duration_years` | Exposure duration, in years. |
 | `fractile` | Population fractile of `value` (0-1); the fraction of the population with a smaller shift, so `0.9` is the most-susceptible 10 %. |
 | `frequencies` | Audiometric frequencies, in hertz. |
 | `median` | Median NIPTS `N50` (Formula 2/3). |

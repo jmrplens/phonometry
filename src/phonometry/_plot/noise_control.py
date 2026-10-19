@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from ..noise_control._duct_path import DuctPathResult
     from ..noise_control.duct_modes import DuctModeResult
     from ..noise_control.enclosure_insulation import EnclosureInsulationResult
-    from ..noise_control.enclosures import EnclosureResult
+    from ..noise_control.enclosures import EnclosureInsertionLossResult
     from ..noise_control.hvac import HVACSpectrumResult
     from ..noise_control.room_to_room import RoomToRoomResult
     from ..noise_control.screen_in_situ import ScreenInSituResult
@@ -477,12 +477,15 @@ def plot_duct_modes(
 
 
 def plot_enclosure(
-    result: EnclosureResult, ax: Axes | None = None, language: str = "en", **kwargs: Any
+    result: EnclosureInsertionLossResult,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
 ) -> Axes:
     """Panel R, interior correction C and net insertion loss of an enclosure.
 
     :param result: An
-        :class:`~phonometry.noise_control.enclosures.EnclosureResult`.
+        :class:`~phonometry.noise_control.enclosures.EnclosureInsertionLossResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the insertion-loss ``Axes.plot``.

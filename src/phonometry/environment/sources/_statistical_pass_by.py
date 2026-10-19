@@ -395,7 +395,7 @@ class PassByRegression(OwnsArrays):
     :param vehicle_category: ``"1"``, ``"2a"`` or ``"2b"``.
     :param road_speed_category: ``"low"``, ``"medium"`` or ``"high"``.
     :param speeds_kmh: The measured speed of each pass-by, in km/h, read-only.
-    :param maximum_levels_db: The maximum A-weighted level of each pass-by, time
+    :param max_levels_db: The maximum A-weighted level of each pass-by, time
         weighting F, in decibels, read-only.
     :param reference_speed_kmh: The Table 1 reference speed of the category,
         in km/h.
@@ -416,7 +416,7 @@ class PassByRegression(OwnsArrays):
     vehicle_category: str
     road_speed_category: str
     speeds_kmh: NDArray[np.float64]
-    maximum_levels_db: NDArray[np.float64]
+    max_levels_db: NDArray[np.float64]
     reference_speed_kmh: float
     intercept_db: float
     slope_db_per_decade: float
@@ -433,7 +433,7 @@ class PassByRegression(OwnsArrays):
     @property
     def mean_level_db(self) -> float:
         """The mean of the measured levels, in decibels."""
-        return float(np.mean(self.maximum_levels_db))
+        return float(np.mean(self.max_levels_db))
 
     @property
     def mean_speed_kmh(self) -> float:
@@ -531,16 +531,16 @@ class PassByRegression(OwnsArrays):
 
 def _fit(
     speeds_kmh: ArrayLike,
-    maximum_levels_db: ArrayLike,
+    max_levels_db: ArrayLike,
     vehicle_category: str,
     road_speed_category: str,
 ) -> PassByRegression:
     """The least-squares line of 9.1 and the statistics clause 13 reports."""
     speeds = require_positive_array(speeds_kmh, "speeds_kmh")
-    levels = require_finite_array(maximum_levels_db, "maximum_levels_db")
+    levels = require_finite_array(max_levels_db, "max_levels_db")
     if speeds.ndim != 1 or levels.ndim != 1 or speeds.size != levels.size:
         msg = (
-            "'speeds_kmh' and 'maximum_levels_db' must be one-dimensional and hold "
+            "'speeds_kmh' and 'max_levels_db' must be one-dimensional and hold "
             "one value per pass-by each."
         )
         raise ValueError(msg)
@@ -573,7 +573,7 @@ def _fit(
         vehicle_category=vehicle_category,
         road_speed_category=road_speed_category,
         speeds_kmh=np.asarray(speeds, dtype=np.float64),
-        maximum_levels_db=np.asarray(levels, dtype=np.float64),
+        max_levels_db=np.asarray(levels, dtype=np.float64),
         reference_speed_kmh=SPB_REFERENCE_SPEEDS_KMH[road_speed_category][
             vehicle_category
         ],
@@ -614,7 +614,7 @@ def _warn_regression(regression: PassByRegression, stacklevel: int) -> None:
 
 def pass_by_regression(
     speeds_kmh: ArrayLike,
-    maximum_levels_db: ArrayLike,
+    max_levels_db: ArrayLike,
     *,
     vehicle_category: str,
     road_speed_category: str,
@@ -635,7 +635,7 @@ def pass_by_regression(
 
     :param speeds_kmh: The speed of each pass-by, in km/h, measured as the
         vehicle midpoint passes the microphone (8.4).
-    :param maximum_levels_db: The maximum A-weighted sound pressure level of each
+    :param max_levels_db: The maximum A-weighted sound pressure level of each
         pass-by, time weighting F, in decibels, in the same order.
     :param vehicle_category: ``"1"`` (cars), ``"2a"`` (dual-axle heavy
         vehicles) or ``"2b"`` (multi-axle heavy vehicles).
@@ -648,7 +648,7 @@ def pass_by_regression(
     """
     road = _road_category(road_speed_category)
     category = _vehicle_category(vehicle_category)
-    regression = _fit(speeds_kmh, maximum_levels_db, category, road)
+    regression = _fit(speeds_kmh, max_levels_db, category, road)
     _warn_regression(regression, stacklevel=3)
     return regression
 
@@ -823,7 +823,7 @@ class StatisticalPassByResult(RichDisplay):
 def statistical_pass_by(
     vehicle_categories: ArrayLike,
     speeds_kmh: ArrayLike,
-    maximum_levels_db: ArrayLike,
+    max_levels_db: ArrayLike,
     *,
     road_speed_category: str,
     corrected_vehicle_sound_levels_db: Mapping[str, float] | None = None,
@@ -848,14 +848,14 @@ def statistical_pass_by(
     :param vehicle_categories: The category of each pass-by, ``"1"``, ``"2a"``
         or ``"2b"``.
     :param speeds_kmh: The speed of each pass-by, in km/h.
-    :param maximum_levels_db: The maximum A-weighted level of each pass-by, time
+    :param max_levels_db: The maximum A-weighted level of each pass-by, time
         weighting F, in decibels.
     :param road_speed_category: ``"low"``, ``"medium"`` or ``"high"`` (3.3).
     :param corrected_vehicle_sound_levels_db: Vehicle sound levels corrected to
         :data:`SPB_REFERENCE_AIR_TEMPERATURE_C` by a method of the caller's
         choosing, keyed by category, for which the index is also computed,
         from the levels rounded to one decimal. 9.4 gives no method. To correct
-        each pass-by instead, which 9.4 prefers, correct ``maximum_levels_db`` and
+        each pass-by instead, which 9.4 prefers, correct ``max_levels_db`` and
         call this again.
     :param reference_db: The reference surface of clause 10: either its SPBI in
         decibels, used as given, or its three vehicle sound levels keyed by
@@ -873,14 +873,14 @@ def statistical_pass_by(
     road = _road_category(road_speed_category)
     labels = np.asarray(vehicle_categories, dtype=object).ravel()
     speeds = np.asarray(speeds_kmh, dtype=np.float64)
-    levels = np.asarray(maximum_levels_db, dtype=np.float64)
+    levels = np.asarray(max_levels_db, dtype=np.float64)
     if (
         speeds.ndim != 1
         or levels.ndim != 1
         or not (labels.size == speeds.size == levels.size)
     ):
         msg = (
-            "'vehicle_categories', 'speeds_kmh' and 'maximum_levels_db' must be "
+            "'vehicle_categories', 'speeds_kmh' and 'max_levels_db' must be "
             "one-dimensional and hold one value per pass-by each."
         )
         raise ValueError(msg)

@@ -64,7 +64,8 @@ def lden(
     lday: float,
     levening: float,
     lnight: float,
-    hours: tuple[float, float, float] = (12.0, 4.0, 8.0),
+    *,
+    period_hours: tuple[float, float, float] = (12.0, 4.0, 8.0),
 ) -> float:
     r"""Day-evening-night sound level Lden (ISO 1996-1:2016, 3.6.4).
 
@@ -77,12 +78,12 @@ def lden(
     :param lday: LAeq over the day period, in dB.
     :param levening: LAeq over the evening period, in dB (+5 dB weighting).
     :param lnight: LAeq over the night period, in dB (+10 dB weighting).
-    :param hours: ``(t_day, t_evening, t_night)`` in hours, summing to 24.
-        Default (12, 4, 8); countries may define the periods differently
-        (3.6.4 Note 1).
+    :param period_hours: ``(t_day, t_evening, t_night)``, the duration of
+        each period in hours, summing to 24. Default (12, 4, 8); countries
+        may define the periods differently (3.6.4 Note 1).
     :return: Lden in dB.
     """
-    td, te, tn = hours
+    td, te, tn = period_hours
     return composite_rating_level(
         [(lday, td, 0.0), (levening, te, 5.0), (lnight, tn, 10.0)]
     )
@@ -91,7 +92,8 @@ def lden(
 def ldn(
     lday: float,
     lnight: float,
-    hours: tuple[float, float] = (15.0, 9.0),
+    *,
+    period_hours: tuple[float, float] = (15.0, 9.0),
 ) -> float:
     r"""Day-night sound level Ldn (ISO 1996-1:2016, 3.6.5).
 
@@ -102,9 +104,9 @@ def ldn(
 
     :param lday: LAeq over the day period, in dB.
     :param lnight: LAeq over the night period, in dB (+10 dB weighting).
-    :param hours: ``(t_day, t_night)`` in hours, summing to 24.
-        Default (15, 9).
+    :param period_hours: ``(t_day, t_night)``, the duration of each period
+        in hours, summing to 24. Default (15, 9).
     :return: Ldn in dB.
     """
-    td, tn = hours
+    td, tn = period_hours
     return composite_rating_level([(lday, td, 0.0), (lnight, tn, 10.0)])

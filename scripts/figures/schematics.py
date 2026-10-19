@@ -5091,7 +5091,7 @@ def _feedback_howl_data() -> list[dict[str, Any]]:
     n = np.arange(_FBH_ROUND_TRIPS + 1)
     out = []
     for zs, mics in _FBH_CASES:
-        res = ea.feedback_stability(zs, _FBH_LHM, _FBH_LHL, open_microphones=mics)
+        res = ea.feedback_stability(zs, _FBH_LHM, _FBH_LHL, n_open_microphones=mics)
         loop = float(res.loop_gain)
         g = 10.0 ** (loop / 20.0)
         copies = g**n

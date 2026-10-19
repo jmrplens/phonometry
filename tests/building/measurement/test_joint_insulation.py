@@ -168,7 +168,7 @@ def test_six_decibels_reached_in_decimals_is_still_formula_j2() -> None:
 
 def test_the_maximum_rule_is_optional() -> None:
     """J.1 "may" set the lower limit to Rs,max; without it, 1,3 dB applies."""
-    res = _one_band(48.0, 50.4, limit_at_maximum=False)
+    res = _one_band(48.0, 50.4, limit_at_max=False)
     assert res.regime == ("limit",)
     assert res.r_s_db[0] == pytest.approx(49.3)
 
@@ -183,7 +183,7 @@ def test_printed_lower_limit_example() -> None:
 
 
 def test_indicative_bands_follow_the_measured_index_whatever_the_rule() -> None:
-    res = _one_band(48.0, 50.4, limit_at_maximum=False)
+    res = _one_band(48.0, 50.4, limit_at_max=False)
     assert res.indicative.tolist() == [True]
 
 
@@ -228,7 +228,7 @@ def test_result_takes_no_regime() -> None:
 
 
 @pytest.mark.parametrize(
-    ("maximum", "limit_at_maximum", "regime"),
+    ("maximum", "limit_at_max", "regime"),
     [
         (60.0, True, "uncorrected"),
         (52.0, True, "corrected"),
@@ -238,19 +238,19 @@ def test_result_takes_no_regime() -> None:
     ],
 )
 def test_a_hand_built_result_reads_its_regime_from_its_columns(
-    maximum: float, *, limit_at_maximum: bool, regime: str
+    maximum: float, *, limit_at_max: bool, regime: str
 ) -> None:
     """The regime follows the measured and maximum indices and the J.1 rule."""
-    columns = _columns(_one_band(45.0, maximum, limit_at_maximum=limit_at_maximum))
-    res = LaboratoryJointInsulationResult(**columns, limit_at_maximum=limit_at_maximum)  # type: ignore[arg-type]
+    columns = _columns(_one_band(45.0, maximum, limit_at_max=limit_at_max))
+    res = LaboratoryJointInsulationResult(**columns, limit_at_max=limit_at_max)  # type: ignore[arg-type]
     assert res.regime == (regime,)
 
 
 def test_a_hand_built_result_refuses_the_correction_of_another_rule() -> None:
     """Within 3 dB of the maximum, J.1 gives 1,3 dB or the maximum, not both."""
-    columns = _columns(_one_band(45.0, 46.0, limit_at_maximum=True))
+    columns = _columns(_one_band(45.0, 46.0, limit_at_max=True))
     with pytest.raises(ValueError, match="r_s_db"):
-        LaboratoryJointInsulationResult(**columns, limit_at_maximum=False)  # type: ignore[arg-type]
+        LaboratoryJointInsulationResult(**columns, limit_at_max=False)  # type: ignore[arg-type]
 
 
 def test_laboratory_joint_insulation_refuses_a_length_mismatch() -> None:

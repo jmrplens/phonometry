@@ -362,7 +362,7 @@ steeper than the traced aperture does not exist to it, and a pair of
 arrivals standing between the same two fan rays merges into no bracket at
 all, so the fan's density and half-angle are the completeness levers, and
 they stay where they are visible, in the `ray_trace` call. The multipath
-ladder of a hard-bottomed guide is unbounded, so `max_arrivals` (64 by
+ladder of a hard-bottomed guide is unbounded, so `max_n_arrivals` (64 by
 default) keeps the earliest arrivals, the flat, least-bounced ones that
 carry the energy, and warns when it truncates. And the amplitude is
 classical on purpose: a receiver standing exactly on a caustic is answered

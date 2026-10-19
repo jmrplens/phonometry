@@ -477,6 +477,33 @@ def test_a_name_that_only_contains_the_letters_is_not(name: str) -> None:
     assert not cpu.names_a_quantity(name, "phonometry.materials")
 
 
+@pytest.mark.parametrize("name", ["assessment_period_minutes", "period_hours"])
+def test_a_period_in_minutes_spells_the_minute_out(name: str) -> None:
+    """The minute is ``_minutes``, spelled out as the hour is."""
+    assert cpu.names_a_quantity(name, "phonometry.environment")
+    assert cpu.declares_its_unit(name)
+
+
+@pytest.mark.parametrize("name", ["assessment_period_min", "period_min"])
+def test_a_period_that_ends_in_min_names_no_unit(name: str) -> None:
+    """A trailing ``_min`` is a minimum (``f_min``, ``kij_min``), so a period
+    that ends in it names no unit and the rule reports it, as it reports a
+    bare one.
+    """
+    assert cpu.names_a_quantity(name, "phonometry.environment")
+    assert not cpu.declares_its_unit(name)
+
+
+def test_a_minute_under_per_is_the_denominator_of_a_rate() -> None:
+    """The feet per minute of an ANP climb rate is a unit, and ``min`` alone
+    is not one, so ``envelope``/``envelope_min`` is no pair.
+    """
+    assert cpu.declares_its_unit("rate_of_climb_ft_per_min")
+    assert cpu.is_unit_tail("ft_per_min")
+    assert cpu.is_unit_tail("minutes")
+    assert not cpu.is_unit_tail("min")
+
+
 def _npd(distances_m: float, distance: float, *, level_db: float = 0.0) -> float:
     return distances_m + distance + level_db
 

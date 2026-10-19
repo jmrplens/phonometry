@@ -92,7 +92,7 @@ def test_monte_carlo_matches_supplement1_table3() -> None:
     # Supplement 1 Table 3 (clause 9.2.3): four rectangular Xi, mean 0, sd 1
     # -> u(y) = 2.00 and a 95 % symmetric coverage interval ~ [-3.88, 3.88].
     qs = [u.Quantity(0.0, 1.0, "rectangular") for _ in range(4)]
-    mc = u.monte_carlo(_add4, qs, trials=2_000_000, coverage=0.95, seed=42)
+    mc = u.monte_carlo(_add4, qs, n_trials=2_000_000, coverage=0.95, seed=42)
     assert mc.value == pytest.approx(0.0, abs=0.01)
     assert mc.standard_uncertainty == pytest.approx(2.0, abs=0.01)
     assert mc.interval[0] == pytest.approx(-3.88, abs=0.03)
@@ -102,7 +102,9 @@ def test_monte_carlo_matches_supplement1_table3() -> None:
 def test_monte_carlo_agrees_with_gum_for_linear_gaussian() -> None:
     qs = [u.Quantity(10.0, 0.5), u.Quantity(5.0, 0.3)]
     gum = u.uncertainty_propagation(lambda a, b: a - b, qs)
-    mc = u.monte_carlo(lambda a, b: a - b, qs, trials=1_000_000, coverage=0.95, seed=1)
+    mc = u.monte_carlo(
+        lambda a, b: a - b, qs, n_trials=1_000_000, coverage=0.95, seed=1
+    )
     assert mc.value == pytest.approx(gum.value, abs=0.01)
     assert mc.standard_uncertainty == pytest.approx(gum.combined_uncertainty, rel=0.02)
 
@@ -139,7 +141,7 @@ def test_monte_carlo_distributions_recover_std(dist: str) -> None:
     # Every PDF is parameterised so that its standard deviation is the given
     # standard uncertainty; the Monte Carlo std must recover it.
     qs = [u.Quantity(0.0, 1.0, dist) for _ in range(2)]
-    mc = u.monte_carlo(lambda a, b: a + b, qs, trials=500_000, coverage=0.95, seed=7)
+    mc = u.monte_carlo(lambda a, b: a + b, qs, n_trials=500_000, coverage=0.95, seed=7)
     assert mc.standard_uncertainty == pytest.approx(math.sqrt(2.0), rel=0.03)
 
 
@@ -148,7 +150,7 @@ def test_monte_carlo_zero_uncertainty_input(dist: str) -> None:
     # A constant (zero-uncertainty) input must not break the sampler for any
     # PDF (rng.triangular rejects a zero-width support, so it is guarded).
     qs = [u.Quantity(5.0, 0.0, dist), u.Quantity(0.0, 1.0)]
-    mc = u.monte_carlo(lambda a, b: a + b, qs, trials=10_000, seed=3)
+    mc = u.monte_carlo(lambda a, b: a + b, qs, n_trials=10_000, seed=3)
     assert mc.value == pytest.approx(5.0, abs=0.05)
     assert mc.standard_uncertainty == pytest.approx(1.0, rel=0.05)
 
@@ -157,7 +159,7 @@ def test_monte_carlo_triangular_tiny_uncertainty() -> None:
     # A tiny but non-zero triangular u whose support underflows against mu must
     # not crash rng.triangular (bounds mu +/- a round to the same float).
     qs = [u.Quantity(1.0, 1e-17, "triangular"), u.Quantity(0.0, 1.0)]
-    mc = u.monte_carlo(lambda a, b: a + b, qs, trials=5_000, seed=5)
+    mc = u.monte_carlo(lambda a, b: a + b, qs, n_trials=5_000, seed=5)
     assert mc.value == pytest.approx(1.0, abs=0.05)
     assert mc.standard_uncertainty == pytest.approx(1.0, rel=0.05)
 
@@ -188,11 +190,11 @@ def test_invalid_inputs_raise() -> None:
     with pytest.raises(ValueError, match="positive semi-definite"):
         u.uncertainty_propagation(_add2, pair, correlation=indefinite)
     quantities = [u.Quantity(0, 1)]
-    with pytest.raises(ValueError, match=r"trials must be at least 2"):
-        u.monte_carlo(_add4, quantities, trials=0)
-    with pytest.raises(ValueError, match=r"trials must be at least 2"):
-        # trials=1 used to return NaN (ddof=1) with a raw numpy warning.
-        u.monte_carlo(_add4, quantities, trials=1)
+    with pytest.raises(ValueError, match=r"'n_trials' must be at least 2"):
+        u.monte_carlo(_add4, quantities, n_trials=0)
+    with pytest.raises(ValueError, match=r"'n_trials' must be at least 2"):
+        # n_trials=1 used to return NaN (ddof=1) with a raw numpy warning.
+        u.monte_carlo(_add4, quantities, n_trials=1)
     with pytest.raises(ValueError, match=r"coverage must be in \(0, 1\)"):
         u.monte_carlo(_add4, quantities, coverage=2.0)
     with pytest.raises(ValueError, match="at least one input quantity is required"):
@@ -410,7 +412,7 @@ def test_monte_carlo_matches_supplement1_table2_gaussian() -> None:
     from reference_data import GUMS1_TABLE2_INTERVAL_95
 
     qs = [u.Quantity(0.0, 1.0) for _ in range(4)]
-    mc = u.monte_carlo(_add4, qs, trials=2_000_000, coverage=0.95, seed=7)
+    mc = u.monte_carlo(_add4, qs, n_trials=2_000_000, coverage=0.95, seed=7)
     assert mc.value == pytest.approx(0.0, abs=0.01)
     assert mc.standard_uncertainty == pytest.approx(2.0, abs=0.01)
     assert mc.interval[0] == pytest.approx(-GUMS1_TABLE2_INTERVAL_95, abs=0.03)
@@ -568,7 +570,7 @@ def test_monte_carlo_rejects_model_with_non_finite_output() -> None:
         ValueError,
         match=r"'model' returned a non-finite output for \d+ of \d+ trials",
     ):
-        u.monte_carlo(partial_model, inputs, trials=2000, seed=1)
+        u.monte_carlo(partial_model, inputs, n_trials=2000, seed=1)
 
 
 # ---------------------------------------------------------------------------

@@ -112,8 +112,8 @@ the resolution bandwidth $2W$).
 MultitaperSpectralDensityResult(
     frequencies: NDArray[np.float64],
     psd: NDArray[np.float64],
-    ci_lower: NDArray[np.float64],
-    ci_upper: NDArray[np.float64],
+    confidence_lower: NDArray[np.float64],
+    confidence_upper: NDArray[np.float64],
     confidence: float,
     degrees_of_freedom: NDArray[np.float64],
     random_error: NDArray[np.float64],
@@ -147,8 +147,8 @@ costs degrees of freedom there (P&W Eq. 370b).
 | :--- | :--- |
 | `frequencies` | One-sided frequency axis, in Hz. |
 | `psd` | Multitaper spectral density $\hat{S}^{(mt)}(f)$ (units²/Hz for `'density'` scaling, units² for `'spectrum'`). |
-| `ci_lower` | Lower chi-square confidence bound, $\nu \hat{S}/\chi^2_{\nu;\alpha/2}$ with the per-frequency $\nu$ (the same interval form as B&P Eq. 8.163, with $\nu$ from P&W Eq. 370b). |
-| `ci_upper` | Upper chi-square confidence bound. |
+| `confidence_lower` | Lower chi-square confidence bound, $\nu \hat{S}/\chi^2_{\nu;\alpha/2}$ with the per-frequency $\nu$ (the same interval form as B&P Eq. 8.163, with $\nu$ from P&W Eq. 370b). |
+| `confidence_upper` | Upper chi-square confidence bound. |
 | `confidence` | Confidence level of the interval (e.g. `0.95`). |
 | `degrees_of_freedom` | Per-frequency equivalent chi-square degrees of freedom $\nu(f) = 2 \left( \sum_k d_k \right)^2 / \sum_k d_k^2$ with $d_k = b_k^2(f) \lambda_k$ (P&W Eq. 370b); $2K \left( \sum \lambda_k / K \right)^2 K / \sum \lambda_k^2 \approx 2K$ for unity weights. The DC bin - and the Nyquist bin for an even record length - carries half (a single real Fourier component per eigenspectrum). |
 | `random_error` | Per-frequency normalized random error $\varepsilon[\hat{S}^{(mt)}] = \sqrt{2/\nu}$ ($\approx 1/\sqrt{K}$), the multitaper counterpart of B&P Eq. 8.158. |

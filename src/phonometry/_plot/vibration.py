@@ -3115,7 +3115,7 @@ def plot_train_passage_spectrum(
     kwargs.setdefault("marker", "o")
     style_default(kwargs, "markersize", 4)
     kwargs.setdefault("label", _t(_MAX_LEVEL_LABEL, language))
-    ax.plot(positions, result.band_maximum_levels_db, **kwargs)
+    ax.plot(positions, result.band_max_levels_db, **kwargs)
     ax.plot(
         positions,
         result.band_interval_levels_db[1],
@@ -3314,8 +3314,8 @@ def plot_impact_mobility(
         line_kwargs.setdefault(
             "label",
             _t(_SINGLE_IMPACT_LABEL, language)
-            if result.impacts == 1
-            else _t(_IMPACT_AVERAGE_LABEL, language).format(n=result.impacts),
+            if result.n_impacts == 1
+            else _t(_IMPACT_AVERAGE_LABEL, language).format(n=result.n_impacts),
         )
         axm.loglog(freq, magnitude, **line_kwargs)
         format_frequency_axis(axm, fmin, fmax, language=language)
@@ -3538,14 +3538,14 @@ def plot_double_hit_check(
             "o",
             color=_C_TERTIARY if result.passes else _C_REFERENCE,
             zorder=4,
-            label=_t(_IMPACTS_LABEL, language).format(n=result.impacts),
+            label=_t(_IMPACTS_LABEL, language).format(n=result.n_impacts),
         )
         axt.set_xlim(0.0, right)
         axt.set_xlabel(_t(_TIME_LABEL, language))
         axt.set_ylabel(_t(_FORCE_AXIS_LABEL, language))
         key = _SINGLE_IMPACT_TITLE if result.passes else _DOUBLE_HIT_TITLE
         axt.set_title(
-            _t(key, language).format(n=result.impacts)
+            _t(key, language).format(n=result.n_impacts)
             + f" ({_verdict_word(passes=result.passes, language=language)})"
         )
         axt.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
@@ -3725,8 +3725,8 @@ def plot_coherence_check(
     ax.set_ylabel(_t(_COHERENCE_LABEL, language))
     title = (
         _t(_SINGLE_COHERENCE_TITLE, language)
-        if result.impacts == 1
-        else _t(_COHERENCE_TITLE, language).format(n=result.impacts)
+        if result.n_impacts == 1
+        else _t(_COHERENCE_TITLE, language).format(n=result.n_impacts)
     )
     ax.set_title(title + f" ({_verdict_word(passes=result.passes, language=language)})")
     ax.legend(loc=_LEGEND_LOWER_LEFT, fontsize="small")
@@ -3776,7 +3776,7 @@ def plot_overload_check(
             color=_C_REFERENCE,
             markersize=4,
             zorder=3,
-            label=_t(_CLIPPED_LABEL, language).format(n=result.clipped_samples),
+            label=_t(_CLIPPED_LABEL, language).format(n=result.n_clipped_samples),
         )
     span = 1.15 * max(result.full_scale, result.peak)
     ax.set_ylim(-span, span)

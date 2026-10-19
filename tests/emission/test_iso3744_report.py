@@ -68,7 +68,7 @@ def _uniform_result(radius: float = 2.0) -> SoundPowerResult:
         positions,
         "hemisphere",
         radius=radius,
-        reflecting_planes=1,
+        n_reflecting_planes=1,
         background_levels=np.tile(_SURFACE_LP - 10.0, (10, 1)),
         frequencies=_FREQS,
         grade="engineering",

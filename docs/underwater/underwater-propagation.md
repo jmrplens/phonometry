@@ -166,7 +166,7 @@ print(mean(flux.propagation_loss), mean(modes.propagation_loss))
 **UNESCO / Chen–Millero** equation (default, the international standard, in the
 Wong & Zhu 1995 ITS-90 form), **Del Grosso** (1974), **Mackenzie** (1981) or
 **Medwin** (1975). The UNESCO and Del Grosso equations use pressure, so depth is
-first converted with the Leroy & Parthiot (1998) formula (`depth_to_pressure`).
+first converted with the Leroy & Parthiot (1998) formula (`fluids.depth_to_gauge_pressure_mpa`).
 The four agree to within ~2.5 m/s in their common domain; Mackenzie's canonical
 check value is 1550.744 m/s at 25 °C, 35 ppt, 1000 m.
 

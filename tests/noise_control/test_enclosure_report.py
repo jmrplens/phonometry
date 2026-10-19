@@ -41,7 +41,7 @@ def _extract_text(path: str) -> str:
     return " ".join(raw.split())
 
 
-def _result() -> noise_control.EnclosureResult:
+def _result() -> noise_control.EnclosureInsertionLossResult:
     return noise_control.enclosure_insertion_loss(
         _PANEL_R, _S_E, _S_I, _ALPHA, frequencies=_FREQS
     )

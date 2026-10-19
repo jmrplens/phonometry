@@ -406,7 +406,7 @@ class SELDistribution(OwnsArrays):
     (ISO 13474:2009, clause 5).
 
     The replica atmospheres, sorted by level, are the ``M`` classes of
-    Equations (10) to (16); each class is split into ``subclasses`` equal
+    Equations (10) to (16); each class is split into ``n_subclasses`` equal
     subclasses (Equations (17) to (20)) and each subclass is replaced by a
     normal distribution of standard deviation ``sigma_db`` centred
     ``level_shift_db`` below the subclass centre (Equations (21) to (23)).
@@ -424,7 +424,7 @@ class SELDistribution(OwnsArrays):
         dB (Equation (18)).
     :ivar sigma_db: :math:`\sigma` of the turbulent spread, in dB.
     :ivar level_shift_db: :math:`\Delta\mu`, in dB (Equation (22)).
-    :ivar subclasses: :math:`N_\mathrm{sub}`, the subclasses per class.
+    :ivar n_subclasses: :math:`N_\mathrm{sub}`, the subclasses per class.
     :ivar long_term_level_db: :math:`\langle L_{E,\mathrm{w}}\rangle_\mathrm{LT}`
         from the classes, Equation (7); Annex A's ``LT1``.
     :ivar distribution_long_term_level_db: the same average taken over the
@@ -444,7 +444,7 @@ class SELDistribution(OwnsArrays):
     subclass_centers_db: NDArray[np.float64]
     sigma_db: float
     level_shift_db: float
-    subclasses: int
+    n_subclasses: int
     long_term_level_db: float
     distribution_long_term_level_db: float
     replicas: tuple[tuple[int, ...], ...]
@@ -453,7 +453,7 @@ class SELDistribution(OwnsArrays):
         """Refuse a distribution whose columns disagree with each other.
 
         Every per-class column must hold the same ``M`` classes, at least two,
-        the subclass centres one row of ``subclasses`` per class, and each
+        the subclass centres one row of ``n_subclasses`` per class, and each
         class a positive width; the methods below read them together and a
         short column would shift every density by a class.
 
@@ -475,10 +475,10 @@ class SELDistribution(OwnsArrays):
                 f"the same length, at least two classes; got {sizes}."
             )
             raise ValueError(msg)
-        if np.shape(self.subclass_centers_db) != (count, self.subclasses):
+        if np.shape(self.subclass_centers_db) != (count, self.n_subclasses):
             msg = (
                 "SELDistribution: 'subclass_centers_db' must have one row of "
-                f"'subclasses' ({self.subclasses}) centres per class; got "
+                f"'n_subclasses' ({self.n_subclasses}) centres per class; got "
                 f"{np.shape(self.subclass_centers_db)}."
             )
             raise ValueError(msg)
@@ -519,7 +519,7 @@ class SELDistribution(OwnsArrays):
         (Equation (21)) and its mean :math:`\mu_{m,j} - \Delta\mu`.
         """
         means = (self.subclass_centers_db - self.level_shift_db).ravel()
-        weights = np.repeat(self.probabilities / self.subclasses, self.subclasses)
+        weights = np.repeat(self.probabilities / self.n_subclasses, self.n_subclasses)
         return means, weights
 
     def density(self, x_db: ArrayLike) -> float | NDArray[np.float64]:
@@ -651,7 +651,7 @@ def sel_distribution(
     probabilities: ArrayLike,
     *,
     sigma_db: float = _TYPICAL_SIGMA_DB,
-    subclasses: int = _ANNEX_A_SUBCLASSES,
+    n_subclasses: int = _ANNEX_A_SUBCLASSES,
 ) -> SELDistribution:
     r"""Statistical distribution of the single-event sound exposure level
     (ISO 13474:2009, clause 5).
@@ -662,7 +662,7 @@ def sel_distribution(
     the nearest inner one about the end level (Equations (12), (13)); each
     class has the constant density :math:`\rho_m = \wp_m/(g_{\mathrm{U},m} -
     g_{\mathrm{L},m})` (Equation (15)). Each class is then divided into
-    ``subclasses`` equal subclasses of width :math:`b_m` centred at
+    ``n_subclasses`` equal subclasses of width :math:`b_m` centred at
     :math:`\mu_{m,j} = g_{\mathrm{L},m} + (j - \tfrac12)b_m` (Equations (17),
     (18)), and each subclass is replaced by a normal distribution of standard
     deviation ``sigma_db`` and weight :math:`b_m\rho_m`, centred at
@@ -678,18 +678,18 @@ def sel_distribution(
         :func:`replica_probabilities`).
     :param sigma_db: Standard deviation of the spread due to turbulence, in dB;
         5 dB by default, the value clause 5 says is typically used.
-    :param subclasses: :math:`N_\mathrm{sub}`, the subclasses per class; 10 by
+    :param n_subclasses: :math:`N_\mathrm{sub}`, the subclasses per class; 10 by
         default, the number Annex A uses. The standard fixes none.
     :return: The distribution.
     :raises ValueError: if the shapes differ, a value is not finite, a
         probability is negative, the probabilities do not sum to one, every
         probability is zero, fewer than two distinct levels remain once equal
-        levels are combined, ``sigma_db`` is not positive, or ``subclasses``
+        levels are combined, ``sigma_db`` is not positive, or ``n_subclasses``
         is not a whole number of at least one.
     """
     levels, probs = _levels_and_probabilities(levels, probabilities)
     sigma = require_positive(sigma_db, "sigma_db")
-    n_sub = require_count(subclasses, "subclasses")
+    n_sub = require_count(n_subclasses, "n_subclasses")
     lt1 = _energy_mean_db(levels, probs)
 
     order = np.argsort(levels, kind="stable")
@@ -728,7 +728,7 @@ def sel_distribution(
         subclass_centers_db=read_only(centres),
         sigma_db=sigma,
         level_shift_db=shift,
-        subclasses=n_sub,
+        n_subclasses=n_sub,
         long_term_level_db=lt1,
         distribution_long_term_level_db=lt2,
         replicas=tuple(members),

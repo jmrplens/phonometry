@@ -1762,7 +1762,7 @@ def plot_pass_by_regression(
     ax = ax if ax is not None else _new_axes()
     color, marker = _SPB_CATEGORY_STYLE[result.vehicle_category]
     speeds = np.asarray(result.speeds_kmh, dtype=np.float64)
-    levels = np.asarray(result.maximum_levels_db, dtype=np.float64)
+    levels = np.asarray(result.max_levels_db, dtype=np.float64)
     low, high = result.speed_window_kmh
     ax.axvspan(
         low,
@@ -1846,7 +1846,7 @@ def plot_statistical_pass_by(
     for category, regression in result.regressions.items():
         color, marker = _SPB_CATEGORY_STYLE[category]
         speeds = np.asarray(regression.speeds_kmh, dtype=np.float64)
-        levels = np.asarray(regression.maximum_levels_db, dtype=np.float64)
+        levels = np.asarray(regression.max_levels_db, dtype=np.float64)
         ax.plot(
             speeds,
             levels,
@@ -2890,7 +2890,7 @@ def plot_round_robin_precision(
         _t(
             "ISO 17534-1: round robin of {m} programs at {n} receivers",
             language,
-        ).format(m=result.participants, n=result.receivers)
+        ).format(m=result.n_participants, n=result.n_receivers)
     )
     ax.grid(visible=True, axis="y", alpha=0.3)
     ax.set_axisbelow(True)

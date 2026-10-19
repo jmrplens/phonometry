@@ -35,7 +35,7 @@ def _table_a3() -> hearing.RealEarAttenuationResult:
 def test_table_a3_derived_rows() -> None:
     """All 28 derived cells of Table A.3, computed at full precision."""
     result = _table_a3()
-    assert result.subjects == 16
+    assert result.n_subjects == 16
     assert result.frequencies.tolist() == ref.ISO4869_1_FREQUENCIES
     assert np.round(result.mean_db, 1).tolist() == ref.ISO4869_1_TABLE_A3_MEAN
     assert (
@@ -296,7 +296,7 @@ def test_a_difference_equal_to_the_criterion_is_not_significant() -> None:
 def test_minimum_differences_as_the_text_computes_them(key: tuple[str, str]) -> None:
     """B.1.1 and B.2: sqrt(2) times the rounded U95 the text quotes."""
     u95, printed = ref.ISO4869_1_MINIMUM_DIFFERENCES[key]
-    assert round(hearing.minimum_significant_difference(u95), 1) == printed
+    assert round(hearing.min_significant_difference(u95), 1) == printed
 
 
 def test_minimum_difference_from_the_unrounded_budget() -> None:
@@ -308,18 +308,18 @@ def test_minimum_difference_from_the_unrounded_budget() -> None:
     middle = "250 Hz up to 4 kHz"
     within = hearing.REAT_WITHIN_LABORATORY_UNCERTAINTY
     between = hearing.REAT_BETWEEN_LABORATORY_UNCERTAINTY
-    plug_within = hearing.minimum_significant_difference(
+    plug_within = hearing.min_significant_difference(
         within["earplug"][middle].expanded_db
     )
-    plug_between = hearing.minimum_significant_difference(
+    plug_between = hearing.min_significant_difference(
         between["earplug"][middle].expanded_db
     )
     assert plug_within == pytest.approx(3.2125, abs=5e-5)
     assert plug_between == pytest.approx(9.3680, abs=5e-5)
-    muff_within = hearing.minimum_significant_difference(
+    muff_within = hearing.min_significant_difference(
         within["earmuff"][middle].expanded_db
     )
-    muff_between = hearing.minimum_significant_difference(
+    muff_between = hearing.min_significant_difference(
         between["earmuff"][middle].expanded_db
     )
     assert (round(muff_within, 1), round(muff_between, 1)) == (2.3, 6.9)
@@ -335,18 +335,18 @@ def test_minimum_difference_is_the_criterion_for_two_equal_uncertainties() -> No
         frequencies=[250.0, 1000.0],
     )
     np.testing.assert_allclose(
-        result.criterion_db, hearing.minimum_significant_difference([2.3, 1.6])
+        result.criterion_db, hearing.min_significant_difference([2.3, 1.6])
     )
 
 
 def test_minimum_difference_returns_a_float_for_a_scalar() -> None:
-    assert isinstance(hearing.minimum_significant_difference(2.3), float)
-    assert hearing.minimum_significant_difference([1.0, 2.0]).shape == (2,)
+    assert isinstance(hearing.min_significant_difference(2.3), float)
+    assert hearing.min_significant_difference([1.0, 2.0]).shape == (2,)
 
 
 def test_minimum_difference_refuses_a_negative_uncertainty() -> None:
     with pytest.raises(ValueError, match="expanded_uncertainty_db"):
-        hearing.minimum_significant_difference(-1.0)
+        hearing.min_significant_difference(-1.0)
 
 
 def test_bare_means_need_their_uncertainty() -> None:

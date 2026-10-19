@@ -255,7 +255,7 @@ not applied to road or rail traffic.
 
 | Name | Description |
 | :--- | :--- |
-| `kb_ftm` | $KB_\mathrm{FTm}$ of each stretch, dimensionless, as [`takt_maximum_rms`](/phonometry/reference/api/vibration/vibration-meter/#takt_maximum_rms) gives it. |
+| `kb_ftm` | $KB_\mathrm{FTm}$ of each stretch, dimensionless, as [`takt_max_rms`](/phonometry/reference/api/vibration/vibration-meter/#takt_max_rms) gives it. |
 | `exposure_s` | $T_{\mathrm{e},j}$, how long each stretch lasts within the period, in seconds. |
 | `time_of_day` | `"day"` (default, $T_\mathrm{r}$ = 16 h) or `"night"` (8 h). |
 | `in_rest_time` | Whether each stretch falls in the rest hours of the day, one flag per stretch; `None` (default) for none. Rest hours exist by day only. |
@@ -648,7 +648,7 @@ how Example 8 reports $0{,}325^{+0{,}059}_{-0{,}073}$.
 
 | Name | Description |
 | :--- | :--- |
-| `kb_ftm` | $KB_{\mathrm{FTm},j}$, one per class, as [`railway_takt_maximum_rms`](/phonometry/reference/api/vibration/people/#railway_takt_maximum_rms) gives them. |
+| `kb_ftm` | $KB_{\mathrm{FTm},j}$, one per class, as [`railway_takt_max_rms`](/phonometry/reference/api/vibration/people/#railway_takt_max_rms) gives them. |
 | `occupied_takte` | $M_j$, the clock intervals each class occupies in the period, one per class, which is about the number of its trains in the period when a train occupies one interval. |
 | `time_of_day` | `"day"` (default) or `"night"`. |
 | `spread` | $s(KB^2_{\mathrm{FTm},j})$ of each class, or `None`. |
@@ -669,10 +669,10 @@ how Example 8 reports $0{,}325^{+0{,}059}_{-0{,}073}$.
 RAILWAY_NIGHT_INVESTIGATION_KB = {'surface': 0.6, 'underground': 0.3}
 ```
 
-## railway_takt_maximum_rms
+## railway_takt_max_rms
 
 ```python
-railway_takt_maximum_rms(kb_fti: ArrayLike) -> float
+railway_takt_max_rms(kb_fti: ArrayLike) -> float
 ```
 
 The clock maximum r.m.s. of one class of train, Formula (A.1).
@@ -708,7 +708,7 @@ The standard deviation of the square of the clock maxima, Formula (A.2).
 $s(KB^2_{\mathrm{FTm},j}) = \sqrt{\frac{1}{Z_j - 1} \sum_i (KB^2_{\mathrm{FT}i,j} - KB^2_{\mathrm{FTm},j})^2}$, on the square because it is the square that Formula
 (A.3) averages, so the spread of $KB_\mathrm{FTr}$ follows from it by
 adding and subtracting it there. The maxima enter as they enter
-[`railway_takt_maximum_rms`](/phonometry/reference/api/vibration/people/#railway_takt_maximum_rms), a value at or below 0,1 as zero, so the
+[`railway_takt_max_rms`](/phonometry/reference/api/vibration/people/#railway_takt_max_rms), a value at or below 0,1 as zero, so the
 spread is about the mean square that function returns.
 
 **Parameters**

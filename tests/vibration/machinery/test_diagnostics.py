@@ -250,7 +250,7 @@ class TestNortonProblem87:
     def test_slot_sidebands_straddle_the_slot_harmonic(self) -> None:
         """Dynamic eccentricity: sidebands at +/- fs and +/- the slip rate."""
         res = induction_motor_frequencies(
-            1750.0, 4, 52, supply_frequency=60.0, sidebands=1
+            1750.0, 4, 52, supply_frequency=60.0, n_sidebands=1
         )
         fsh, fs = res["fsh"], res.shaft_rate
         assert res["fsh+1x"] == pytest.approx(fsh + fs, rel=1e-12)
@@ -271,7 +271,7 @@ class TestGearMesh:
 
     def test_sidebands_are_spaced_by_the_modulating_rate(self) -> None:
         """A once-per-revolution fault puts sidebands at ``k GMF +/- m fs``."""
-        res = gear_mesh_frequencies(1500.0, 28, n_harmonics=2, sidebands=2)
+        res = gear_mesh_frequencies(1500.0, 28, n_harmonics=2, n_sidebands=2)
         assert res["GMF+1x"] - res["GMF"] == pytest.approx(25.0, rel=1e-12)
         assert res["GMF"] - res["GMF-2x"] == pytest.approx(50.0, rel=1e-12)
         assert res["2xGMF+1x"] == pytest.approx(1425.0, rel=1e-12)
@@ -279,13 +279,13 @@ class TestGearMesh:
     def test_mating_wheel_modulation_rate(self) -> None:
         """*sideband_rate* modulates at the mating wheel's shaft rate."""
         res = gear_mesh_frequencies(
-            1500.0, 28, n_harmonics=1, sidebands=1, sideband_rate=17.5
+            1500.0, 28, n_harmonics=1, n_sidebands=1, sideband_rate=17.5
         )
         assert res["GMF+1x"] - res["GMF"] == pytest.approx(17.5, rel=1e-12)
 
     def test_non_positive_sidebands_are_dropped(self) -> None:
         """Lines at or below 0 Hz never enter the family."""
-        res = gear_mesh_frequencies(60.0, 2, n_harmonics=1, sidebands=3)
+        res = gear_mesh_frequencies(60.0, 2, n_harmonics=1, n_sidebands=3)
         assert all(line.frequency > 0.0 for line in res.lines)
 
 
@@ -350,7 +350,7 @@ class TestValidation:
         [
             ({"n_teeth": 0}, "'n_teeth' must be a positive integer"),
             ({"n_harmonics": 0}, "'n_harmonics' must be a positive integer"),
-            ({"sidebands": -1}, "'sidebands' must be a non-negative integer"),
+            ({"n_sidebands": -1}, "'n_sidebands' must be a non-negative integer"),
             ({"sideband_rate": 0.0}, "'sideband_rate' must be positive"),
         ],
     )
@@ -361,19 +361,19 @@ class TestValidation:
     @pytest.mark.parametrize(
         ("kwargs", "match"),
         [
-            ({"poles": 3}, "'poles' must be an even integer"),
-            ({"poles": 0}, "'poles' must be an even integer"),
-            ({"rotor_bars": 0}, "'rotor_bars' must be a positive integer"),
+            ({"n_poles": 3}, "'n_poles' must be an even integer"),
+            ({"n_poles": 0}, "'n_poles' must be an even integer"),
+            ({"n_rotor_bars": 0}, "'n_rotor_bars' must be a positive integer"),
             ({"slip": 1.0}, "'slip' must be below"),
             ({"slip": -0.1}, "'slip' must be non-negative"),
-            ({"slot_harmonics": 0}, "'slot_harmonics' must be a positive integer"),
-            ({"sidebands": -1}, "'sidebands' must be a non-negative integer"),
+            ({"n_slot_harmonics": 0}, "'n_slot_harmonics' must be a positive integer"),
+            ({"n_sidebands": -1}, "'n_sidebands' must be a non-negative integer"),
         ],
     )
     def test_motor_rejects(self, kwargs: dict[str, object], match: str) -> None:
         with pytest.raises(ValueError, match=match):
             induction_motor_frequencies(
-                1750.0, **{"poles": 4, "rotor_bars": 52, **kwargs}
+                1750.0, **{"n_poles": 4, "n_rotor_bars": 52, **kwargs}
             )  # type: ignore[arg-type]
 
     def test_motor_rejects_supply_below_shaft_rate(self) -> None:
@@ -389,7 +389,7 @@ class TestValidation:
             ({"n_blades": 0}, "'n_blades' must be a positive integer"),
             ({"n_harmonics": 0}, "'n_harmonics' must be a positive integer"),
             ({"n_vanes": 0}, "'n_vanes' must be a positive integer"),
-            ({"lobe_orders": 0}, "'lobe_orders' must be a positive integer"),
+            ({"n_lobe_orders": 0}, "'n_lobe_orders' must be a positive integer"),
         ],
     )
     def test_blade_rejects(self, kwargs: dict[str, object], match: str) -> None:

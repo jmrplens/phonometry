@@ -273,7 +273,7 @@ class ReciprocityCalibration(OwnsArrays):
         return _STANDARDS[self.field]
 
     @property
-    def microphones(self) -> int:
+    def n_microphones(self) -> int:
         """The number of microphones calibrated: 3, or 2 with a source."""
         return int(self.sensitivity_v_per_pa.shape[0])
 

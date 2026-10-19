@@ -115,7 +115,7 @@ def test_float64_wav_conversion_is_the_identity(tmp_path: Path) -> None:
     assert result.bit_depth == 64
     # ...and the return value is the destination's own description.
     assert result.path == str(dst)
-    assert result.frames == 1500
+    assert result.n_samples == 1500
 
 
 def test_int16_wav_default_preserves_the_depth(tmp_path: Path) -> None:
@@ -173,8 +173,8 @@ def test_lossy_source_converts_with_the_metrology_warning(
     # consistency (the written header equals the streamed samples) plus
     # agreement with the source within one MP3 granule train (1152
     # frames), not exact equality with the source header.
-    assert result.frames == np.asarray(read(dst)).shape[-1]
-    assert abs(result.frames - info(src).frames) <= 1152
+    assert result.n_samples == np.asarray(read(dst)).shape[-1]
+    assert abs(result.n_samples - info(src).n_samples) <= 1152
 
 
 def test_lossy_targets_are_refused_before_reading_anything(

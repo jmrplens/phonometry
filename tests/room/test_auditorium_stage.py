@@ -266,32 +266,32 @@ class TestMinimumReliableReverberationTime:
     """Clause 7.3, Equations (6) and (7)."""
 
     def test_the_filter_limit_is_sixteen_over_the_bandwidth(self) -> None:
-        assert room.minimum_reliable_reverberation_time(710.0) == pytest.approx(
+        assert room.min_reliable_reverberation_time(710.0) == pytest.approx(
             16.0 / 710.0, abs=1e-15
         )
 
     def test_the_detector_takes_over_when_it_is_the_slower_of_the_two(self) -> None:
         # 2 T_det = 0,1 s against 16/B = 0,0225 s.
-        assert room.minimum_reliable_reverberation_time(710.0, 0.05) == pytest.approx(
+        assert room.min_reliable_reverberation_time(710.0, 0.05) == pytest.approx(
             0.1, abs=1e-15
         )
 
     def test_a_narrow_band_binds_harder_than_a_wide_one(self) -> None:
-        low = room.minimum_reliable_reverberation_time(room.filter_bandwidth(125.0))
-        high = room.minimum_reliable_reverberation_time(room.filter_bandwidth(4000.0))
+        low = room.min_reliable_reverberation_time(room.filter_bandwidth(125.0))
+        high = room.min_reliable_reverberation_time(room.filter_bandwidth(4000.0))
         assert low > high
         assert low == pytest.approx(16.0 / 88.75, abs=1e-12)
 
     def test_it_refuses_a_negative_detector_time(self) -> None:
         with pytest.raises(ValueError, match="zero seconds or more"):
-            room.minimum_reliable_reverberation_time(710.0, -0.1)
+            room.min_reliable_reverberation_time(710.0, -0.1)
 
     @pytest.mark.parametrize("bad", [np.nan, np.inf])
     def test_it_refuses_a_bandwidth_that_is_not_a_number(self, bad: float) -> None:
         with pytest.raises(ValueError, match="positive, finite bandwidth"):
-            room.minimum_reliable_reverberation_time(bad)
+            room.min_reliable_reverberation_time(bad)
 
     @pytest.mark.parametrize("bad", [np.nan, np.inf])
     def test_it_refuses_a_detector_time_that_is_not_a_number(self, bad: float) -> None:
         with pytest.raises(ValueError, match="zero seconds or more"):
-            room.minimum_reliable_reverberation_time(710.0, bad)
+            room.min_reliable_reverberation_time(710.0, bad)

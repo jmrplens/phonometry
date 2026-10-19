@@ -184,7 +184,7 @@ def _phase_table(
             row = [
                 fiche_paragraph(period_label if index == 1 else "", label_style),
                 fiche_paragraph(html.escape(name), label_style),
-                fiche_paragraph(_fmt(phase.hours, language), value_style),
+                fiche_paragraph(_fmt(phase.duration_hours, language), value_style),
                 fiche_paragraph(_fmt(phase.laeq, language), value_style),
                 fiche_paragraph(_fmt(phase.kt, language, decimals=0), value_style),
                 fiche_paragraph(_fmt(phase.kf, language, decimals=0), value_style),

@@ -541,17 +541,17 @@ def _sample_ir(
     times: NDArray[np.float64],
     amp: NDArray[np.float64],
     fs: int,
-    duration: float | None,
+    duration_s: float | None,
     n_bands: int,
 ) -> NDArray[np.float64]:
     """Accumulate the per-band impulses at the nearest sample to each delay."""
-    if duration is None:
+    if duration_s is None:
         duration = float(times[-1]) + 1.0 / fs
     else:
-        duration = require_positive(duration, "duration")
+        duration = require_positive(duration_s, "duration_s")
     n_samples = int(np.ceil(duration * fs))
     if n_samples < 1:
-        msg = "'duration' must cover at least one sample."
+        msg = "'duration_s' must cover at least one sample."
         raise ValueError(msg)
     sample_idx = np.rint(times * fs).astype(np.int64)
     inside = sample_idx < n_samples
@@ -571,7 +571,7 @@ def image_source_rir(
     max_order: int = 20,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
     air_attenuation_per_m: ArrayLike = 0.0,
-    duration: float | None = None,
+    duration_s: float | None = None,
     frequencies: ArrayLike | None = None,
 ) -> ImageSourceResult:
     r"""Synthetic room impulse response of a shoebox by the image-source method.
@@ -618,7 +618,7 @@ def image_source_rir(
         path is scaled by :math:`\mathrm{e}^{-m r / 2}` (Kuttruff 4.1). Default 0 (air
         absorption neglected). Obtain a physical ``m`` from
         :func:`~phonometry.environment.propagation.air_absorption.air_power_attenuation_per_m`.
-    :param duration: RIR length, s; default the latest image arrival rounded up
+    :param duration_s: RIR length, s; default the latest image arrival rounded up
         to the next sample.
     :param frequencies: Optional band centre frequencies, Hz, labelling a
         per-band result. When given, its length must match the band count of
@@ -680,7 +680,7 @@ def image_source_rir(
         src, rcv, dims, max_order, speed_of_sound
     )
     amp = _image_amplitudes(reflection, counts, m_bands, distances)
-    ir = _sample_ir(times, amp, fs, duration, n_bands)
+    ir = _sample_ir(times, amp, fs, duration_s, n_bands)
 
     if banded:
         ir_out: np.ndarray = ir

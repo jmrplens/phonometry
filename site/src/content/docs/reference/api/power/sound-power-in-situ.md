@@ -327,7 +327,7 @@ sound_energy_in_situ(
     lw_ref: ArrayLike | ReferenceSourceCalibration,
     frequencies: ArrayLike,
     *,
-    events: int | None = None,
+    n_events: int | None = None,
     background_levels: ArrayLike | None = None,
     background_levels_ref: ArrayLike | None = None,
     integration_time: float | None = None,
@@ -347,7 +347,7 @@ admits. Measured one event at a time, `event_levels` is `(n, N,
 bands)`: each event is corrected for background (Eq. 13, 14) and the
 `N` corrected levels are energy-averaged into the mean single event
 level of the position (Eq. 15). Measured once over `N` successive
-events, `event_levels` is `(n, bands)` with `events=N`: the level
+events, `event_levels` is `(n, bands)` with `n_events=N`: the level
 is corrected (Eq. 16) and reduced by $10 \log_{10} N$ to one event
 (Eq. 17). Either way the per-position levels are energy-averaged (Eq. 18)
 and the sound energy level in each band is
@@ -363,11 +363,11 @@ time-averaged, over 30 s (7.6), exactly as for a steady source.
 
 | Name | Description |
 | :--- | :--- |
-| `event_levels` | Measured (uncorrected) octave-band single event levels `L'Ei,q(ST)` as `(n, N, bands)`, or `L'Ei,N(ST)` of one measurement encompassing `events` events as `(n, bands)`, in decibels. |
+| `event_levels` | Measured (uncorrected) octave-band single event levels `L'Ei,q(ST)` as `(n, N, bands)`, or `L'Ei,N(ST)` of one measurement encompassing `n_events` events as `(n, bands)`, in decibels. |
 | `levels_ref` | Time-averaged levels of the reference sound source, `(n, bands)` or `(m, n, bands)`, as in [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ). |
 | `lw_ref` | Calibrated sound power level of the reference source, `(bands,)` or `(m, bands)`, in decibels, or its [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration), as for [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ). |
 | `frequencies` | Nominal octave mid-band frequencies, one per band. |
-| `events` | The number `N` of events a 2D `event_levels` contains (Eq. 17); must be `None` with the 3D form, which counts them. |
+| `n_events` | The number `N` of events a 2D `event_levels` contains (Eq. 17); must be `None` with the 3D form, which counts them. |
 | `background_levels` | Octave-band time-averaged background levels `Lpi(B)`, `(n, bands)` or `(bands,)`, in decibels; `None` applies no correction, warns, and leaves `background_requirement_met` `False` in every band (7.5, 8.1). |
 | `background_levels_ref` | Background for the reference-source measurement; `None` reuses `background_levels` (7.5). |
 | `integration_time` | The integration time `T` of the event measurement, in seconds. `None` applies Eq. (14) as printed, subtracting the time-averaged background from the single event level; a value carries the background to the same interval first, $L_{pi(\mathrm{B})} + 10 \log_{10}(T/T_0)$ with `T0` = 1 s (3.4, NOTE 1), so that the margin compares like with like. The two coincide at `T` = 1 s. |
@@ -383,7 +383,7 @@ time-averaged, over 30 s (7.6), exactly as for a steady source.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if `event_levels` is not a finite 2D or 3D array, `events` is given with the 3D form or missing or not a positive integer with the 2D form, `integration_time` is not positive, or any of the refusals of [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ) applies. |
+| ValueError | if `event_levels` is not a finite 2D or 3D array, `n_events` is given with the 3D form or missing or not a positive integer with the 2D form, `integration_time` is not positive, or any of the refusals of [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ) applies. |
 
 ## sound_power_in_situ
 

@@ -190,7 +190,7 @@ forces = force * gains
 accels = accel * gains + 0.02 * rng.standard_normal((5, n))
 estimate = vibration.impact_mobility(forces, accels, fs, force_window_s=0.015,
                                      frequency_range_hz=(5.0, 800.0))
-print(estimate.impacts, estimate.measured_frf)     # 5 accelerance
+print(estimate.n_impacts, estimate.measured_frf)     # 5 accelerance
 
 coh = vibration.check_coherence(estimate, frequency_range_hz=(10.0, 400.0))
 print(coh.passes, round(float(coh.coherence.min()), 3))   # True 0.992
@@ -216,7 +216,7 @@ judges and at least **five** impacts were averaged. Both numbers are 9.1's: a
 coherence above 0.9 is what it calls high, and five to ten records are what a
 high coherence needs for confidence in its own estimate. Five is also the top
 of the three to five that 8.6 finds usually enough, so averaging five satisfies
-both; `min_records` lowers the count when fewer were judged enough. A
+both; `min_n_records` lowers the count when fewer were judged enough. A
 single impact has a coherence of 1 by construction, which is why it fails the
 second condition.
 Low coherence at an antiresonance is not generally a concern (9.1 NOTE 1), and
@@ -491,7 +491,7 @@ noise.
 ```python
 double = force + 0.6 * np.roll(force, round(0.06 * fs))   # 60 % again, 60 ms later
 hit = vibration.check_double_hit(double, fs)
-print(hit.passes, hit.impacts, round(hit.delay_s, 3))     # False 2 0.06
+print(hit.passes, hit.n_impacts, round(hit.delay_s, 3))     # False 2 0.06
 print(round(hit.notch_spacing_hz, 1), round(hit.ripple_db, 1))  # 16.7 12.0
 print(vibration.check_double_hit(force, fs).passes)       # True
 ```

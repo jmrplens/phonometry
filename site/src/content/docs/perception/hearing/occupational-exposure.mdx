@@ -261,11 +261,11 @@ ISO 9612 is a planning standard as much as a computation standard, and the two
 questions a hygienist asks *before* going on site are each one call away. How
 many hours must the survey cover for a group of this size? Table 1 fixes the
 minimum cumulative measurement duration for a homogeneous exposure group as a
-function of its size, and `minimum_cumulative_duration_hours` reads it:
+function of its size, and `min_cumulative_duration_hours` reads it:
 
 ```python
 for n in (4, 10, 25, 50):
-    print(n, hearing.minimum_cumulative_duration_hours(n))
+    print(n, hearing.min_cumulative_duration_hours(n))
 # 4 5.0
 # 10 7.5
 # 25 12.5
@@ -489,7 +489,7 @@ stated here as the procedure that produces their inputs; the Annex C
 uncertainty budget (Formulae C.6, C.9 and C.12 with Tables C.4 and C.5, and
 $u_3$ from Clause C.6); the one-sided coverage factor $k = 1.65$ of Clause 14;
 the Clause 9.3 / 10.4 / Table 1 advisories, reachable before the survey
-through `minimum_cumulative_duration_hours` and `table_c4_contribution`; and
+through `min_cumulative_duration_hours` and `table_c4_contribution`; and
 the Clause 15 measurement report through `ExposureResult.report()`, with the
 Directive 2003/10/EC assessment on top of it. The three worked examples of
 Annexes D, E and F are reproduced.

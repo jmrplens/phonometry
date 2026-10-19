@@ -809,7 +809,7 @@ def diffuse_field_absorption(
     layers: list[Layer] | tuple[Layer, ...],
     *,
     angle_limit_rad: float = np.pi / 2.0,
-    quadrature_points: int = 64,
+    n_quadrature_points: int = 64,
     termination: str | complex | ArrayLike = "rigid",
     fluid: Fluid = ABSORBER_AIR,
 ) -> DiffuseFieldAbsorptionResult:
@@ -832,7 +832,7 @@ def diffuse_field_absorption(
     :param layers: Layer stack, as in :func:`layered_absorber`.
     :param angle_limit_rad: Upper integration angle ``theta_lim``, in radians
         (0 < theta_lim <= pi/2; default pi/2).
-    :param quadrature_points: Gauss-Legendre order (default 64).
+    :param n_quadrature_points: Gauss-Legendre order (default 64).
     :param termination: As in :func:`layered_absorber`.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
         (Default: :data:`ABSORBER_AIR`, dry air at 20 degC at textbook
@@ -846,10 +846,10 @@ def diffuse_field_absorption(
     if not 0.0 < lim <= np.pi / 2.0:
         msg = "'angle_limit_rad' must satisfy 0 < angle_limit <= pi/2."
         raise ValueError(msg)
-    require_scalar(quadrature_points, "quadrature_points")
-    n = int(quadrature_points)
+    require_scalar(n_quadrature_points, "n_quadrature_points")
+    n = int(n_quadrature_points)
     if n < _MIN_QUADRATURE_POINTS:
-        msg = "'quadrature_points' must be at least 2."
+        msg = "'n_quadrature_points' must be at least 2."
         raise ValueError(msg)
     nodes, weights = np.polynomial.legendre.leggauss(n)
     theta = 0.5 * lim * (nodes + 1.0)

@@ -33,7 +33,7 @@ import phonometry as ph
 def test_monte_carlo_plot_histogram_and_interval() -> None:
     res = _monte_carlo()
     assert res.samples is not None
-    assert res.samples.size == res.trials
+    assert res.samples.size == res.n_trials
     ax = res.plot()
     bars = [p for p in ax.patches if "coverage interval" not in str(p.get_label())]
     assert bars, "expected histogram bars"
@@ -48,7 +48,7 @@ def test_monte_carlo_plot_histogram_and_interval() -> None:
 
 def test_monte_carlo_plot_without_samples_raises() -> None:
     res = ph.metrology.monte_carlo(
-        lambda a, b, c: a + b + c, _MC_QUANTITIES, trials=200, seed=7
+        lambda a, b, c: a + b + c, _MC_QUANTITIES, n_trials=200, seed=7
     )
     assert res.samples is None
     with pytest.raises(

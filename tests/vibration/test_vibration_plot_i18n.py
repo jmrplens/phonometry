@@ -73,7 +73,9 @@ def test_multiple_shock_spanish_title_translates_sex() -> None:
     peaks = np.full(5, 40.0)
     dz = dose_from_peaks(peaks)
     sd = compression_dose(dz, mz=_MZ_MALE)
-    r = injury_risk(sd, start_age=20.0, years=20, days_per_year=120.0, sex="male")
+    r = injury_risk(
+        sd, start_age=20.0, exposure_duration_years=20, days_per_year=120.0, sex="male"
+    )
     res = MultipleShockResult(
         sex="male",
         acceleration_dose=dz,
@@ -82,7 +84,7 @@ def test_multiple_shock_spanish_title_translates_sex() -> None:
         risk=r,
         probability=float(injury_probability(r, sex="male")),
         start_age=20.0,
-        years=20,
+        exposure_duration_years=20,
         days_per_year=120.0,
         peaks=peaks,
         risk_thresholds=_RISK_THRESHOLDS_MALE,

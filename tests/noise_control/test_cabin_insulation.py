@@ -317,11 +317,11 @@ def test_the_source_count_criterion_of_7_2_1() -> None:
         ]
     )
     verdict = noise_control.check_source_positions(close)
-    assert verdict.positions_used == MIN_SOURCE_POSITIONS_IN_SITU
+    assert verdict.n_positions_used == MIN_SOURCE_POSITIONS_IN_SITU
     assert verdict.max_octave_spread_db == pytest.approx(2.0)
-    assert verdict.required_positions == MIN_SOURCE_POSITIONS_IN_SITU
+    assert verdict.n_required_positions == MIN_SOURCE_POSITIONS_IN_SITU
     assert verdict.satisfied is True
-    assert verdict.exceeds_maximum is False
+    assert verdict.exceeds_max is False
 
 
 def test_a_wide_spread_asks_for_more_positions() -> None:
@@ -334,17 +334,17 @@ def test_a_wide_spread_asks_for_more_positions() -> None:
     )
     verdict = noise_control.check_source_positions(wide)
     assert verdict.max_octave_spread_db == pytest.approx(9.5)
-    assert verdict.required_positions == MAX_SOURCE_POSITIONS_IN_SITU
+    assert verdict.n_required_positions == MAX_SOURCE_POSITIONS_IN_SITU
     assert verdict.satisfied is False
-    assert verdict.exceeds_maximum is True
+    assert verdict.exceeds_max is True
 
 
 def test_a_spread_the_six_positions_can_carry_is_not_flagged() -> None:
     rows = [np.full(OCTAVES.size, 30.0 + step) for step in range(4)]
     verdict = noise_control.check_source_positions(np.vstack(rows))
     assert verdict.max_octave_spread_db == pytest.approx(3.0)
-    assert verdict.required_positions == MIN_SOURCE_POSITIONS_IN_SITU
-    assert verdict.exceeds_maximum is False
+    assert verdict.n_required_positions == MIN_SOURCE_POSITIONS_IN_SITU
+    assert verdict.exceeds_max is False
 
 
 def test_a_spread_between_whole_decibels_rounds_the_count_up() -> None:
@@ -359,8 +359,8 @@ def test_a_spread_between_whole_decibels_rounds_the_count_up() -> None:
     four = noise_control.check_source_positions(np.vstack(spread[:4]))
     five = noise_control.check_source_positions(np.vstack(spread))
     assert four.max_octave_spread_db == pytest.approx(4.2)
-    assert (four.required_positions, four.satisfied) == (5, False)
-    assert (five.required_positions, five.satisfied) == (5, True)
+    assert (four.n_required_positions, four.satisfied) == (5, False)
+    assert (five.n_required_positions, five.satisfied) == (5, True)
 
 
 def test_fewer_than_three_positions_is_refused() -> None:
@@ -417,15 +417,15 @@ def test_a_frequency_that_is_not_a_band_centre_is_refused() -> None:
 
 
 def test_the_clearance_is_half_a_wavelength_above_the_low_range() -> None:
-    assert noise_control.minimum_cabin_clearance_m(100.0) == pytest.approx(1.715)
-    assert noise_control.minimum_cabin_clearance_m(
+    assert noise_control.min_cabin_clearance_m(100.0) == pytest.approx(1.715)
+    assert noise_control.min_cabin_clearance_m(
         200.0, speed_of_sound=340.0
     ) == pytest.approx(0.85)
 
 
 def test_the_low_range_takes_the_flat_two_metres() -> None:
     for frequency in (50.0, 63.0, 80.0):
-        assert noise_control.minimum_cabin_clearance_m(frequency) == pytest.approx(
+        assert noise_control.min_cabin_clearance_m(frequency) == pytest.approx(
             LOW_BAND_CLEARANCE_M
         )
 
@@ -434,17 +434,17 @@ def test_the_low_range_relaxes_rather_than_tightens() -> None:
     # At 50 Hz half a wavelength is 3.43 m, and the clause asks for 2 m: the
     # special case is the smaller number. Recorded as printed.
     half_wavelength = 0.5 * 343.0 / 50.0
-    assert noise_control.minimum_cabin_clearance_m(50.0) < half_wavelength
+    assert noise_control.min_cabin_clearance_m(50.0) < half_wavelength
 
 
 def test_a_frequency_outside_the_covered_range_is_reported() -> None:
     with pytest.warns(CabinInsulationWarning, match="6.2 covers"):
-        noise_control.minimum_cabin_clearance_m(12500.0)
+        noise_control.min_cabin_clearance_m(12500.0)
 
 
 def test_a_non_positive_frequency_is_refused() -> None:
     with pytest.raises(ValueError, match="lowest_band_frequency_hz"):
-        noise_control.minimum_cabin_clearance_m(0.0)
+        noise_control.min_cabin_clearance_m(0.0)
 
 
 def test_the_laboratory_uncertainty_needs_the_volume_ratio() -> None:

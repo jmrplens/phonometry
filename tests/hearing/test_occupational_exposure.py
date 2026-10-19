@@ -25,7 +25,7 @@ from phonometry.hearing.occupational_exposure import (
     TaskContribution,
     full_day_exposure,
     job_based_exposure,
-    minimum_cumulative_duration_hours,
+    min_cumulative_duration_hours,
     table_c4_contribution,
     task_based_exposure,
 )
@@ -103,12 +103,12 @@ def test_table_c4_origin_and_clamp() -> None:
 
 def test_table_1_minimum_durations() -> None:
     """Table 1 breakpoints for the cumulative measurement duration."""
-    assert minimum_cumulative_duration_hours(5) == 5.0
-    assert minimum_cumulative_duration_hours(6) == 5.5
-    assert minimum_cumulative_duration_hours(15) == 10.0
-    assert minimum_cumulative_duration_hours(18) == 10.75
-    assert minimum_cumulative_duration_hours(40) == 16.25
-    assert minimum_cumulative_duration_hours(41) == 17.0
+    assert min_cumulative_duration_hours(5) == 5.0
+    assert min_cumulative_duration_hours(6) == 5.5
+    assert min_cumulative_duration_hours(15) == 10.0
+    assert min_cumulative_duration_hours(18) == 10.75
+    assert min_cumulative_duration_hours(40) == 16.25
+    assert min_cumulative_duration_hours(41) == 17.0
 
 
 def test_instrument_u2_values() -> None:

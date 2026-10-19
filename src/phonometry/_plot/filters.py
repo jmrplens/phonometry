@@ -654,7 +654,7 @@ def _draw_margins(
     when not every result over its maximum is (IEC 61672-3:2013 4.4).
     """
     flags = (
-        [not v.uncertainty_within_maximum for v in verifications]
+        [not v.uncertainty_within_max for v in verifications]
         if unusable is None
         else list(unusable)
     )

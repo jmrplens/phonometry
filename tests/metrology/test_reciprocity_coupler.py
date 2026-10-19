@@ -632,7 +632,7 @@ def test_two_microphones_and_a_source_give_their_sensitivities_back() -> None:
     np.testing.assert_allclose(
         calibration.sensitivity_v_per_pa, sign * true[:2], rtol=1e-12
     )
-    assert calibration.microphones == 2
+    assert calibration.n_microphones == 2
 
 
 def test_numbers_and_results_give_the_same_calibration() -> None:

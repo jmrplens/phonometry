@@ -216,7 +216,7 @@ from phonometry import vibration
 class_1 = [0.92, 0.6, 0.9]  # the clock maxima trains of class 1 occupied
 class_2 = [0.2, 0.24]
 
-kb_ftm = [vibration.railway_takt_maximum_rms(c) for c in (class_1, class_2)]
+kb_ftm = [vibration.railway_takt_max_rms(c) for c in (class_1, class_2)]
 spread = [vibration.railway_takt_spread(c) for c in (class_1, class_2)]
 print([round(v, 2) for v in kb_ftm])  # [0.82, 0.22]
 

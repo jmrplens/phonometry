@@ -255,7 +255,7 @@ _MIN_BOX_POSITIONS: dict[str, int] = {"engineering": 9, "survey": 4}
 #: surface. Named because the three entry points that take it must refuse it
 #: in the same words: a caller who reads one message and then meets another
 #: for the same mistake has to work out whether it is the same mistake.
-_REFLECTING_PLANES_MSG = "'reflecting_planes' must be 1, 2 or 3."
+_REFLECTING_PLANES_MSG = "'n_reflecting_planes' must be 1, 2 or 3."
 #: Typical A-weighted reproducibility standard deviation sigma_R0, in dB.
 #: ISO 3744 Table 2 (1,5); ISO 3746 Table 1 (3,0, tone-free). Table 2 states
 #: its values "for sound power levels and sound energy levels" alike, and
@@ -705,26 +705,26 @@ def environmental_correction(
 
 
 def _hemisphere_position_table(
-    grade: Grade, reflecting_planes: int, *, tones: bool
+    grade: Grade, n_reflecting_planes: int, *, tones: bool
 ) -> tuple[np.ndarray, tuple[int, ...]]:
     """Coordinate table and row selection for the hemisphere key positions.
 
     :param grade: ``'engineering'`` (ISO 3744) or ``'survey'`` (ISO 3746).
-    :param reflecting_planes: Number of reflecting planes (1, 2 or 3).
+    :param n_reflecting_planes: Number of reflecting planes (1, 2 or 3).
     :param tones: If True use Table B.1, else Table B.2.
     :return: The unscaled coordinate table and the rows to take from it.
     :raises NotImplementedError: For the survey array on three planes.
     """
     if grade == "engineering":  # ISO 3744 clause 8.1.1
-        if reflecting_planes == 1:  # positions 1-10, Table B.1 (or B.2 broadband)
+        if n_reflecting_planes == 1:  # positions 1-10, Table B.1 (or B.2 broadband)
             return (_TABLE_B1 if tones else _TABLE_B2), tuple(range(10))
-        if reflecting_planes == 2:  # positions 2,3,6,7,9 of Table B.2  # noqa: PLR2004
+        if n_reflecting_planes == 2:  # positions 2,3,6,7,9 of Table B.2  # noqa: PLR2004
             return _TABLE_B2, (1, 2, 5, 6, 8)
         return _TABLE_B3, (0, 1, 2)  # positions 1,2,3 of Table B.3
     # survey, ISO 3746 clause 8.2.1
-    if reflecting_planes == 1:  # positions 4,5,6,10 of Table B.1
+    if n_reflecting_planes == 1:  # positions 4,5,6,10 of Table B.1
         return _TABLE_B1, (3, 4, 5, 9)
-    if reflecting_planes == 2:  # positions 14,15,18 of Table B.2  # noqa: PLR2004
+    if n_reflecting_planes == 2:  # positions 14,15,18 of Table B.2  # noqa: PLR2004
         return _TABLE_B2, (13, 14, 17)
     # positions 14,21,22 of Table B.2 (extended array not transcribed)
     msg = (
@@ -739,7 +739,7 @@ def measurement_positions(
     surface: Surface,
     *,
     radius: float,
-    reflecting_planes: int = 1,
+    n_reflecting_planes: int = 1,
     tones: bool = True,
     grade: Grade = "engineering",
 ) -> np.ndarray:
@@ -755,7 +755,7 @@ def measurement_positions(
 
     :param surface: ``'hemisphere'`` (only shape with a coordinate table).
     :param radius: Hemisphere radius ``r``, in metres.
-    :param reflecting_planes: Number of reflecting planes (1, 2 or 3).
+    :param n_reflecting_planes: Number of reflecting planes (1, 2 or 3).
     :param tones: If True use Table B.1, else Table B.2.
     :param grade: ``'engineering'`` or ``'survey'``.
     :return: ``(N, 3)`` microphone coordinates, in metres.
@@ -770,32 +770,32 @@ def measurement_positions(
     if radius <= 0:
         msg = "A positive 'radius' is required for a hemisphere."
         raise ValueError(msg)
-    if reflecting_planes not in (1, 2, 3):
+    if n_reflecting_planes not in (1, 2, 3):
         msg = _REFLECTING_PLANES_MSG
         raise ValueError(msg)
     grade = _check_grade(grade)
     table, index = _hemisphere_position_table(
-        grade=grade, reflecting_planes=reflecting_planes, tones=tones
+        grade=grade, n_reflecting_planes=n_reflecting_planes, tones=tones
     )
     return np.asarray(table[list(index)] * radius, dtype=np.float64)
 
 
-def _hemisphere_area(radius: float, reflecting_planes: int) -> float:
+def _hemisphere_area(radius: float, n_reflecting_planes: int) -> float:
     """Hemisphere/half/quarter area (ISO 3744:2010 clause 7.2.3)."""
-    factor = {1: 2.0, 2: 1.0, 3: 0.5}[reflecting_planes]
+    factor = {1: 2.0, 2: 1.0, 3: 0.5}[n_reflecting_planes]
     return factor * np.pi * radius**2
 
 
 def _box_area(
-    dimensions: tuple[float, float, float], distance: float, reflecting_planes: int
+    dimensions: tuple[float, float, float], distance: float, n_reflecting_planes: int
 ) -> float:
     """Parallelepiped area (ISO 3744:2010 clause 7.2.4, equations (9)-(11))."""
     l1, l2, l3 = dimensions
     d = distance
-    if reflecting_planes == 1:  # Eq. 9
+    if n_reflecting_planes == 1:  # Eq. 9
         a, b, c = 0.5 * l1 + d, 0.5 * l2 + d, l3 + d
         return 4.0 * (a * b + b * c + c * a)
-    if reflecting_planes == 2:  # Eq. 10 (against a wall)  # noqa: PLR2004
+    if n_reflecting_planes == 2:  # Eq. 10 (against a wall)  # noqa: PLR2004
         a, b, c = 0.5 * l2 + 0.5 * d, 0.5 * l1 + d, l3 + d
         return 2.0 * (2.0 * a * b + b * c + 2.0 * c * a)
     # Eq. 11 (in a corner)
@@ -808,7 +808,7 @@ def _measurement_surface(
     radius: float | None,
     dimensions: tuple[float, float, float] | None,
     distance: float | None,
-    reflecting_planes: int,
+    n_reflecting_planes: int,
     grade: Grade,
 ) -> tuple[float, int]:
     """Measurement surface area ``S`` and the minimum number of positions.
@@ -817,7 +817,7 @@ def _measurement_surface(
     :param radius: Hemisphere radius ``r``, in metres.
     :param dimensions: Reference box ``(l1, l2, l3)``, in metres.
     :param distance: Measurement distance ``d``, in metres.
-    :param reflecting_planes: Number of reflecting planes (1, 2 or 3).
+    :param n_reflecting_planes: Number of reflecting planes (1, 2 or 3).
     :param grade: ``'engineering'`` (ISO 3744) or ``'survey'`` (ISO 3746).
     :return: ``(S, minimum positions)``.
     :raises ValueError: For an unknown surface or missing/non-physical geometry.
@@ -827,8 +827,8 @@ def _measurement_surface(
             msg = "A positive 'radius' is required for a hemisphere."
             raise ValueError(msg)
         return (
-            _hemisphere_area(radius, reflecting_planes),
-            _MIN_HEMI_POSITIONS[grade][reflecting_planes],
+            _hemisphere_area(radius, n_reflecting_planes),
+            _MIN_HEMI_POSITIONS[grade][n_reflecting_planes],
         )
     if surface == "box":
         if dimensions is None or distance is None:
@@ -841,7 +841,7 @@ def _measurement_surface(
         distance = require_positive(distance, "distance")
         box = (float(dims[0]), float(dims[1]), float(dims[2]))
         return (
-            _box_area(box, distance, reflecting_planes),
+            _box_area(box, distance, n_reflecting_planes),
             _MIN_BOX_POSITIONS[grade],
         )
     msg = "'surface' must be 'hemisphere' or 'box'."
@@ -958,7 +958,7 @@ def sound_power_pressure(
     radius: float | None = None,
     dimensions: tuple[float, float, float] | None = None,
     distance: float | None = None,
-    reflecting_planes: int = 1,
+    n_reflecting_planes: int = 1,
     background_levels: np.ndarray | None = None,
     frequencies: np.ndarray | None = None,
     room: RoomEnvironment | None = None,
@@ -989,7 +989,7 @@ def sound_power_pressure(
     :param radius: Hemisphere radius ``r`` (metres), for ``surface='hemisphere'``.
     :param dimensions: Reference box ``(l1, l2, l3)`` (metres), for ``'box'``.
     :param distance: Measurement distance ``d`` (metres), for ``'box'``.
-    :param reflecting_planes: Number of reflecting planes (1, 2 or 3).
+    :param n_reflecting_planes: Number of reflecting planes (1, 2 or 3).
     :param background_levels: ``(NM, NB)`` background levels for ``K1``, or a
         single spectrum ``(NB,)`` / ``(1, NB)`` broadcast to every position.
     :param frequencies: Band mid-band frequencies (Hz) for the A-weighted total.
@@ -1015,16 +1015,16 @@ def sound_power_pressure(
     n_positions = levels.shape[0]
 
     # --- measurement surface area -----------------------------------------
-    if reflecting_planes not in (1, 2, 3):
+    if n_reflecting_planes not in (1, 2, 3):
         msg = _REFLECTING_PLANES_MSG
         raise ValueError(msg)
     area, min_positions = _measurement_surface(
-        surface, radius, dimensions, distance, reflecting_planes, grade
+        surface, radius, dimensions, distance, n_reflecting_planes, grade
     )
 
     if n_positions < min_positions:
         msg = (
-            f"{grade} {surface} with {reflecting_planes} reflecting plane(s) "
+            f"{grade} {surface} with {n_reflecting_planes} reflecting plane(s) "
             f"requires at least {min_positions} microphone positions, got "
             f"{n_positions} (ISO 3744/3746:2010 clause 8)."
         )
@@ -1124,7 +1124,7 @@ class SoundEnergyResult(OwnsArrays):
     exactly as clause 3.24 allows. ``uncertainty`` is the expanded uncertainty
     :math:`U = 2\sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}` (95 %),
     which clause 9.1 Eq. (24) makes the same for ``LJ`` as for ``LW``.
-    ``events`` is the number of single sound emission events :math:`N_\mathrm{e}`
+    ``n_events`` is the number of single sound emission events :math:`N_\mathrm{e}`
     the levels were reduced from, or ``None`` when the caller supplied the
     per-position mean single event levels directly; ``integration_time`` is
     the interval :math:`T` of the single event levels, in seconds, or ``None``
@@ -1142,7 +1142,7 @@ class SoundEnergyResult(OwnsArrays):
     sound_energy_level_a: float
     uncertainty: float
     grade: str
-    events: int | None
+    n_events: int | None
     integration_time: float | None
 
     def __post_init__(self) -> None:
@@ -1154,14 +1154,14 @@ class SoundEnergyResult(OwnsArrays):
         per-band column must be as long as it; ``grade`` names the applied
         standard; ``surface_area`` and every band of ``sound_energy_level``
         must be finite because the figure would draw a NaN band as a 0 dB bar.
-        ``events`` and ``integration_time`` are pinned as well: a count of
+        ``n_events`` and ``integration_time`` are pinned as well: a count of
         events below one or a non-positive interval describes no measurement
         the standard defines.
 
         :raises ValueError: if any per-band quantity disagrees with the rest,
             ``grade`` is neither ``'engineering'`` nor ``'survey'``,
             ``surface_area`` is not finite, ``sound_energy_level`` carries a
-            non-finite band, ``events`` is below one or ``integration_time``
+            non-finite band, ``n_events`` is below one or ``integration_time``
             is not positive.
         """
         require_choice(self.grade, "grade", ("engineering", "survey"))
@@ -1172,7 +1172,7 @@ class SoundEnergyResult(OwnsArrays):
                 f"got {self.surface_area!r}."
             )
             raise ValueError(msg)
-        _validate_event_count(self.events, "SoundEnergyResult")
+        _validate_event_count(self.n_events, "SoundEnergyResult")
         if self.integration_time is not None:
             require_positive(self.integration_time, "integration_time")
         require_ranks(
@@ -1215,14 +1215,14 @@ class SoundEnergyResult(OwnsArrays):
 
 
 def mean_single_event_level(
-    levels: np.ndarray, *, events: int | None = None
+    levels: np.ndarray, *, n_events: int | None = None
 ) -> np.ndarray:
     r"""Mean single event time-integrated level of one event (ISO 3744 Eq. 19/20).
 
     Two ways of measuring :math:`N_\mathrm{e}` sound emission events reach the
     same quantity, the single event time-integrated sound pressure level of
     *one* event at a microphone position. Measured one at a time
-    (``events=None``), the first axis of ``levels`` holds one entry per event
+    (``n_events=None``), the first axis of ``levels`` holds one entry per event
     and the mean is their energy average, ISO 3744:2010 Eq. (19):
 
     .. math::
@@ -1231,7 +1231,7 @@ def mean_single_event_level(
        \sum_{q=1}^{N_\mathrm{e}} 10^{0.1 L'_{Ei,q(\mathrm{ST})}} \right]
 
     Measured as one level that encompasses :math:`N_\mathrm{e}` successive
-    events (``events`` :math:`= N_\mathrm{e}`), the level of one event is the
+    events (``n_events`` :math:`= N_\mathrm{e}`), the level of one event is the
     measurement less :math:`10 \log_{10} N_\mathrm{e}`, Eq. (20):
 
     .. math::
@@ -1243,18 +1243,18 @@ def mean_single_event_level(
     same pair. Both modes require at least five events (clause 8.3.1); fewer
     are accepted with a :class:`SoundPowerWarning`.
 
-    :param levels: With ``events=None``, the per-event levels in decibels with
+    :param levels: With ``n_events=None``, the per-event levels in decibels with
         the events on the first axis (``(Ne,)``, ``(Ne, NB)`` or
         ``(Ne, NM, NB)``); otherwise the one measurement encompassing
-        ``events`` events, of any shape.
-    :param events: ``None`` when each entry of the first axis is one event,
+        ``n_events`` events, of any shape.
+    :param n_events: ``None`` when each entry of the first axis is one event,
         else the number of events the single measurement encompasses.
     :return: The level of one event, in decibels: ``levels`` less its first
-        axis for ``events=None``, the shape of ``levels`` otherwise.
+        axis for ``n_events=None``, the shape of ``levels`` otherwise.
     :raises ValueError: for non-finite levels, an empty first axis or a
-        non-positive ``events``.
+        non-positive ``n_events``.
     """
-    return _single_event_mean(levels, events, name="levels", stacklevel=3)
+    return _single_event_mean(levels, n_events, name="levels", stacklevel=3)
 
 
 def _static_pressure_at_altitude(altitude: float) -> float:
@@ -1350,29 +1350,29 @@ def reference_atmosphere_correction(
 
 
 def _event_position_levels(
-    levels_positions: np.ndarray, events: int | None
+    levels_positions: np.ndarray, n_events: int | None
 ) -> tuple[np.ndarray, int | None]:
     """The ``(NM, NB)`` mean single event levels behind the three input forms.
 
     A 3-D ``(Ne, NM, NB)`` array holds one event per entry of its first axis
-    and is reduced by Eq. (19); a 2-D ``(NM, NB)`` array with ``events`` is
+    and is reduced by Eq. (19); a 2-D ``(NM, NB)`` array with ``n_events`` is
     one measurement encompassing that many events and is reduced by Eq. (20);
-    a 2-D array without ``events`` is taken as the mean single event level of
+    a 2-D array without ``n_events`` is taken as the mean single event level of
     one event at each position, already formed.
 
     :param levels_positions: The levels, in decibels.
-    :param events: ``None``, or the number of events one measurement holds.
+    :param n_events: ``None``, or the number of events one measurement holds.
     :return: The ``(NM, NB)`` levels and the event count they rest on
         (``None`` when the caller supplied the means).
     :raises ValueError: for a rank other than 2 or 3, non-finite levels, or a
-        per-event array given together with ``events``.
+        per-event array given together with ``n_events``.
     """
     arr = np.asarray(levels_positions, dtype=np.float64)
     if arr.ndim == 3:  # noqa: PLR2004
-        if events is not None:
+        if n_events is not None:
             msg = (
                 "'levels_positions' already carries one entry per event on its "
-                "first axis; 'events' applies to one measurement encompassing "
+                "first axis; 'n_events' applies to one measurement encompassing "
                 "several events (ISO 3744:2010 Eq. 20), not to per-event levels."
             )
             raise ValueError(msg)
@@ -1385,13 +1385,13 @@ def _event_position_levels(
             "event levels or a 3D (events, positions, bands) array."
         )
         raise ValueError(msg)
-    if events is None:
+    if n_events is None:
         if not np.all(np.isfinite(arr)):
             msg = "'levels_positions' must contain only finite values."
             raise ValueError(msg)
         return arr, None
-    arr = _single_event_mean(arr, events, name="levels_positions", stacklevel=4)
-    return arr, int(events)
+    arr = _single_event_mean(arr, n_events, name="levels_positions", stacklevel=4)
+    return arr, int(n_events)
 
 
 def sound_energy_pressure(
@@ -1401,8 +1401,8 @@ def sound_energy_pressure(
     radius: float | None = None,
     dimensions: tuple[float, float, float] | None = None,
     distance: float | None = None,
-    reflecting_planes: int = 1,
-    events: int | None = None,
+    n_reflecting_planes: int = 1,
+    n_events: int | None = None,
     background_levels: np.ndarray | None = None,
     integration_time: float | None = None,
     frequencies: np.ndarray | None = None,
@@ -1420,7 +1420,7 @@ def sound_energy_pressure(
     is either the ``(NM, NB)`` mean single event level of one event at each
     position, a ``(Ne, NM, NB)`` array of the :math:`N_\mathrm{e}` events measured
     one at a time (reduced by Eq. 19), or the ``(NM, NB)`` level of one
-    measurement encompassing ``events`` successive events (reduced by Eq. 20).
+    measurement encompassing ``n_events`` successive events (reduced by Eq. 20).
     The positions are then energy-averaged as in 8.2.2 (clause 8.3.3), the
     surface level is corrected for background noise and for the test
     environment and the surface term added:
@@ -1453,13 +1453,13 @@ def sound_energy_pressure(
 
     :param levels_positions: Single event levels, in decibels: ``(NM, NB)``
         means, ``(Ne, NM, NB)`` per-event levels, or ``(NM, NB)`` of one
-        measurement of ``events`` events.
+        measurement of ``n_events`` events.
     :param surface: ``'hemisphere'`` or ``'box'``.
     :param radius: Hemisphere radius ``r`` (metres), for ``surface='hemisphere'``.
     :param dimensions: Reference box ``(l1, l2, l3)`` (metres), for ``'box'``.
     :param distance: Measurement distance ``d`` (metres), for ``'box'``.
-    :param reflecting_planes: Number of reflecting planes (1, 2 or 3).
-    :param events: The number of events ``Ne`` one measurement encompasses
+    :param n_reflecting_planes: Number of reflecting planes (1, 2 or 3).
+    :param n_events: The number of events ``Ne`` one measurement encompasses
         (Eq. 20); ``None`` when ``levels_positions`` is per event or already
         the mean of one event.
     :param background_levels: ``(NM, NB)`` time-averaged background levels for
@@ -1481,7 +1481,7 @@ def sound_energy_pressure(
     """
     grade = _check_grade(grade)
     sigma_omc_db = require_non_negative(sigma_omc_db, "sigma_omc_db")
-    levels, event_count = _event_position_levels(levels_positions, events)
+    levels, event_count = _event_position_levels(levels_positions, n_events)
     if levels.shape[1] == 0:
         msg = "'levels_positions' must contain at least one frequency band."
         raise ValueError(msg)
@@ -1490,15 +1490,15 @@ def sound_energy_pressure(
         integration_time = require_positive(integration_time, "integration_time")
 
     # --- measurement surface area (clause 7.2, as for LW) -----------------
-    if reflecting_planes not in (1, 2, 3):
+    if n_reflecting_planes not in (1, 2, 3):
         msg = _REFLECTING_PLANES_MSG
         raise ValueError(msg)
     area, min_positions = _measurement_surface(
-        surface, radius, dimensions, distance, reflecting_planes, grade
+        surface, radius, dimensions, distance, n_reflecting_planes, grade
     )
     if n_positions < min_positions:
         msg = (
-            f"{grade} {surface} with {reflecting_planes} reflecting plane(s) "
+            f"{grade} {surface} with {n_reflecting_planes} reflecting plane(s) "
             f"requires at least {min_positions} microphone positions, got "
             f"{n_positions} (ISO 3744/3746:2010 clause 8)."
         )
@@ -1542,6 +1542,6 @@ def sound_energy_pressure(
         sound_energy_level_a=lja,
         uncertainty=uncertainty,
         grade=grade,
-        events=event_count,
+        n_events=event_count,
         integration_time=integration_time,
     )

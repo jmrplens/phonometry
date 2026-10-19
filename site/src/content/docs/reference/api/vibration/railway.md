@@ -54,7 +54,7 @@ test an analyser, which this module is not.
 amplitude_distribution(
     velocity_mm_s: ArrayLike,
     *,
-    bins: int = 101,
+    n_bins: int = 101,
 ) -> AmplitudeDistribution
 ```
 
@@ -68,7 +68,7 @@ normalised to unit area: equal bins across the range of the stretch.
 | Name | Description |
 | :--- | :--- |
 | `velocity_mm_s` | The velocity of the stretch, in millimetres per second (1-D). |
-| `bins` | How many equal bins span the range of the stretch (default 101, odd so that zero sits in the middle of one). |
+| `n_bins` | How many equal bins span the range of the stretch (default 101, odd so that zero sits in the middle of one). |
 
 **Returns:** The density and its cumulative function, as an [`AmplitudeDistribution`](/phonometry/reference/api/vibration/railway/#amplitudedistribution).
 
@@ -684,7 +684,7 @@ TrainPassage(
     event_level_db: float,
     frequencies: NDArray[np.float64],
     band_interval_levels_db: NDArray[np.float64],
-    band_maximum_levels_db: NDArray[np.float64],
+    band_max_levels_db: NDArray[np.float64],
     fs: float,
 )
 ```
@@ -706,7 +706,7 @@ One passage reduced the way Clauses 5 to 7 reduce it.
 | `event_level_db` | $L_{v\mathrm{E}}$ of Formula (9). |
 | `frequencies` | The nominal third-octave centres analysed. |
 | `band_interval_levels_db` | $L_{v\mathrm{F}j}(f_{\mathrm{T}n})$ of Formula (6), one row per stretch, $T_1$ to $T_3$. |
-| `band_maximum_levels_db` | $L_{v\mathrm{Fmax}}(f_{\mathrm{T}n})$ of Formula (7), over $T_3$. |
+| `band_max_levels_db` | $L_{v\mathrm{Fmax}}(f_{\mathrm{T}n})$ of Formula (7), over $T_3$. |
 | `fs` | The sampling frequency of the record. |
 
 ### TrainPassage.plot()

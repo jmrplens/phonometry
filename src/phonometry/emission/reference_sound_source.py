@@ -762,7 +762,7 @@ def _hemisphere_levels(
     levels: ArrayLike,
     freqs: np.ndarray,
     background_levels: ArrayLike | None,
-    maximum_levels_db: ArrayLike | None,
+    max_levels_db: ArrayLike | None,
 ) -> PrecisionSoundPowerResult:
     """The surface level over the 2 m hemisphere, refusing levels that are not finite.
 
@@ -775,7 +775,7 @@ def _hemisphere_levels(
         raise ValueError(msg)
     for name, extra in (
         ("background_levels", background_levels),
-        ("maximum_levels_db", maximum_levels_db),
+        ("max_levels_db", max_levels_db),
     ):
         if extra is not None and not np.all(
             np.isfinite(np.asarray(extra, dtype=np.float64))
@@ -834,14 +834,14 @@ def _with_annex_b(
 
 
 def _calibration_directivity(
-    precision: PrecisionSoundPowerResult, maximum_levels_db: ArrayLike | None
+    precision: PrecisionSoundPowerResult, max_levels_db: ArrayLike | None
 ) -> np.ndarray:
     """The directivity index of each position, from the traverse maxima if given (8.3.2)."""
-    if maximum_levels_db is None:
+    if max_levels_db is None:
         return precision.directivity_index
-    maxima = np.asarray(maximum_levels_db, dtype=np.float64)
+    maxima = np.asarray(max_levels_db, dtype=np.float64)
     if maxima.shape != precision.directivity_index.shape:
-        msg = "'maximum_levels_db' must have the shape of 'levels'."
+        msg = "'max_levels_db' must have the shape of 'levels'."
         raise ValueError(msg)
     return np.asarray(
         maxima - precision.surface_pressure_level[np.newaxis, :], dtype=np.float64
@@ -871,7 +871,7 @@ def reference_source_calibration(
     frequencies: ArrayLike,
     arrangement: MicrophoneArrangement,
     background_levels: ArrayLike | None = None,
-    maximum_levels_db: ArrayLike | None = None,
+    max_levels_db: ArrayLike | None = None,
     conditions: CalibrationConditions | None = None,
     radiation: RadiationCharacter = "unknown",
     knee_frequency_hz: float | None = None,
@@ -889,7 +889,7 @@ def reference_source_calibration(
     meteorological conditions with the :math:`C_1`, :math:`C_2` and
     :math:`C_3` of 8.4. The directivity index of each position (3.9) is its
     level less the surface level; for traversing microphones 8.3.2 takes the
-    highest level seen on the traverse instead, which ``maximum_levels_db``
+    highest level seen on the traverse instead, which ``max_levels_db``
     carries. Annex B, the alternative at low frequencies, replaces the 50 Hz
     to 80 Hz bands by the intensity levels when both agree within Table B.1
     from 50 Hz to 315 Hz. B.2 asks for the directivity index of those three
@@ -906,7 +906,7 @@ def reference_source_calibration(
         selects the column of Table 2.
     :param background_levels: Background levels, per position or one
         spectrum, for the ISO 3745 correction; ``None`` applies none.
-    :param maximum_levels_db: For traverses, the highest level recorded on
+    :param max_levels_db: For traverses, the highest level recorded on
         each (8.3.2), same shape as ``levels``.
     :param conditions: The :class:`CalibrationConditions` of the air during
         the calibration, whose temperature and static pressure enter
@@ -940,7 +940,7 @@ def reference_source_calibration(
     _column("hemi-anechoic", arrangement)
     air = CalibrationConditions() if conditions is None else conditions
     k = require_positive(coverage_factor, "coverage_factor")
-    precision = _hemisphere_levels(levels, freqs, background_levels, maximum_levels_db)
+    precision = _hemisphere_levels(levels, freqs, background_levels, max_levels_db)
     lp_bar = precision.surface_pressure_level
     area = 2.0 * math.pi * _RADIUS_M**2
     c1 = _c1_correction(air.temperature_c, air.static_pressure_kpa)
@@ -963,7 +963,7 @@ def reference_source_calibration(
         ks,
         intensity_sound_power_level_db,
     )
-    directivity = _calibration_directivity(precision, maximum_levels_db)
+    directivity = _calibration_directivity(precision, max_levels_db)
     _calibration_room_qualified(room_qualification, freqs[~intensity_bands])
     uncertainty = k * reference_source_reproducibility(
         freqs, environment="hemi-anechoic", arrangement=arrangement

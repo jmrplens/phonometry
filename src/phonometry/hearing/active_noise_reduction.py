@@ -215,7 +215,7 @@ class ActiveInsertionLossResult(OwnsArrays):
     :ivar standard_uncertainty_db: :math:`u = s/\sqrt{N}` (A.2), in dB.
     :ivar expanded_uncertainty_db: :math:`U_{95} = 2u` (A.1), in dB.
     :ivar frequencies: The centre frequencies of the bands, in hertz.
-    :ivar subjects: The number of test subjects :math:`N`.
+    :ivar n_subjects: The number of test subjects :math:`N`.
     """
 
     insertion_loss_db: np.ndarray
@@ -225,7 +225,7 @@ class ActiveInsertionLossResult(OwnsArrays):
     standard_uncertainty_db: np.ndarray
     expanded_uncertainty_db: np.ndarray
     frequencies: np.ndarray
-    subjects: int
+    n_subjects: int
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -390,10 +390,10 @@ def active_insertion_loss(
         )
         raise ValueError(msg)
     freqs = _band_frequencies(frequencies, lower.shape[1])
-    subjects = int(lower.shape[0])
+    n_subjects = int(lower.shape[0])
     mean = np.asarray(lower.mean(axis=0), dtype=np.float64)
     spread = np.asarray(lower.std(axis=0, ddof=1), dtype=np.float64)
-    standard = spread / math.sqrt(subjects)
+    standard = spread / math.sqrt(n_subjects)
     return ActiveInsertionLossResult(
         insertion_loss_db=lower,
         per_ear_db=per_ear,
@@ -402,7 +402,7 @@ def active_insertion_loss(
         standard_uncertainty_db=standard,
         expanded_uncertainty_db=_COVERAGE_FACTOR * standard,
         frequencies=np.asarray(freqs, dtype=np.float64),
-        subjects=subjects,
+        n_subjects=n_subjects,
     )
 
 

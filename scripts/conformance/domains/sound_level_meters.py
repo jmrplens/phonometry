@@ -210,7 +210,7 @@ _STEPS_DB = (
 #: That meter as its instruction manual declares the one feature a record
 #: cannot count: two level ranges, so 17.3 reads the one besides the
 #: reference one and 17.4 both, the reference one first.
-_METER = ph.metrology.SoundLevelMeterFeatures(level_ranges=2)
+_METER = ph.metrology.SoundLevelMeterFeatures(n_level_ranges=2)
 
 
 def _steps(index: int, value: float) -> list[float]:
@@ -877,7 +877,7 @@ def _chk_correction_data() -> Outcome:
                 ],
             ),
         )
-        four_four = result.over_maximum_by_correction_data == (("12", "8 kHz"),)
+        four_four = result.over_max_by_correction_data == (("12", "8 kHz"),)
         computed[state] = float(
             four_four and result.failed == (("12", "8 kHz"),) and not result.unusable
         )
@@ -978,7 +978,7 @@ def _chk_linearity_extent() -> Outcome:
             range_linearity_deviations_db={"17.4": [0.0, 0.0]},
             range_linearity_uncertainties_db={"17.4": [0.2, 0.2]},
         ),
-        features=ph.metrology.SoundLevelMeterFeatures(level_ranges=3),
+        features=ph.metrology.SoundLevelMeterFeatures(n_level_ranges=3),
     )
     no_reference = verify(
         1,

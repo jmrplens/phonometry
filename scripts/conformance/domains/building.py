@@ -431,7 +431,7 @@ def _chk_iso3382_1_reliable_limit() -> Outcome:
     # 16/88,75 = 0,1803 s, well above the 2 T_det of a fast detector.
     bandwidth = float(np.asarray(ph.room.filter_bandwidth(125.0)))
     computed = float(
-        np.asarray(ph.room.minimum_reliable_reverberation_time(bandwidth, 0.02))
+        np.asarray(ph.room.min_reliable_reverberation_time(bandwidth, 0.02))
     )
     return numeric(16.0 / 88.75, computed, 1e-12, unit="s", places=6)
 
@@ -491,7 +491,7 @@ def _chk_iso3382_1_receiver_positions() -> Outcome:
         {"500 seats": 6.0, "1000 seats": 8.0, "2000 seats": 10.0},
         {
             f"{seats} seats": round(
-                float(np.asarray(ph.room.minimum_receiver_positions(seats))), 12
+                float(np.asarray(ph.room.min_receiver_positions(seats))), 12
             )
             for seats in (500, 1000, 2000)
         },
@@ -1851,7 +1851,7 @@ def _chk_low_frequency_element() -> Outcome:
         [90.0], [60.0], measurement_area=10.0
     )
     four = ph.building.low_frequency_element_normalized_difference(
-        [90.0], [60.0], measurement_area=10.0, elements=4
+        [90.0], [60.0], measurement_area=10.0, n_elements=4
     )
     base = float(single.d_i_n_e[0])
     lift = float(four.d_i_n_e[0]) - base
@@ -2153,7 +2153,7 @@ _ISO717_2_D4_LEVELS = (65.3, 64.5, 58.0, 55.8)
     "A-weighted maximum impact level LiA,Fmax of the Annex D worked example",
 )
 def _chk_iso717_2_annex_d_rating() -> Outcome:
-    res = ph.building.a_weighted_maximum_impact_level(_ISO717_2_D4_LEVELS)
+    res = ph.building.a_weighted_max_impact_level(_ISO717_2_D4_LEVELS)
     return (
         numeric(
             55.350_667,
@@ -2206,7 +2206,7 @@ def _chk_iso16283_2_rubber_ball_spectrum() -> Outcome:
 def _chk_iso16283_2_standardization_identity() -> Outcome:
     # Li,Fmax = 70 dB in a 100 m3 room at the reference T0 = 0,5 s: the Fast
     # correction term is identically zero, leaving 10 lg(100/50) = 3,0103 dB.
-    res = ph.building.standardized_maximum_impact_level([70.0], 100.0, 0.5)
+    res = ph.building.standardized_max_impact_level([70.0], 100.0, 0.5)
     return numeric(
         70.0 + 10.0 * math.log10(2.0),
         float(res.standardized[0]),

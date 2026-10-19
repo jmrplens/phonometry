@@ -398,7 +398,7 @@ ISO 10140-2 Formula (6). The Part 1 print is registered in
 # Four identical trickle ventilators inside one 2.0 m2 measurement surface.
 element = building.low_frequency_element_normalized_difference(
     np.full(6, 90.0), np.array([62.0, 61.0, 60.0, 58.0, 57.0, 55.0]),
-    measurement_area=2.0, elements=4, frequencies=freqs,
+    measurement_area=2.0, n_elements=4, frequencies=freqs,
 )
 print(np.round(element.d_i_n_e, 1))     # [32. 33. 34. 36. 37. 39.]
 ```

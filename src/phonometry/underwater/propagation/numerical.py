@@ -1357,23 +1357,23 @@ def _arrival_bottom_coefficient(
 
 def _earliest_arrivals(
     times: NDArray[np.float64],
-    max_arrivals: int,
+    max_n_arrivals: int,
 ) -> NDArray[np.intp]:
     """The stable order of the arrival times, truncated to the cap and said."""
     order = np.argsort(times, kind="stable")
-    if order.size > int(max_arrivals):
+    if order.size > int(max_n_arrivals):
         import warnings
 
         from ..._internal.warnings import PhonometryWarning
 
         warnings.warn(
             f"eigenrays: {order.size} eigenrays connect the receiver within"
-            f" the traced fan; keeping the {int(max_arrivals)} earliest."
-            " Raise 'max_arrivals' to keep them all.",
+            f" the traced fan; keeping the {int(max_n_arrivals)} earliest."
+            " Raise 'max_n_arrivals' to keep them all.",
             PhonometryWarning,
             stacklevel=3,
         )
-        order = order[: int(max_arrivals)]
+        order = order[: int(max_n_arrivals)]
     return order
 
 
@@ -1383,7 +1383,7 @@ def eigenrays(
     receiver_range: float,
     receiver_depth: float,
     bottom: str | FluidSeabed = "pressure-release",
-    max_arrivals: int = 64,
+    max_n_arrivals: int = 64,
     n_steps: int | None = None,
 ) -> EigenrayResult:
     r"""The eigenrays a traced fan brackets between a source and a receiver.
@@ -1466,8 +1466,8 @@ def eigenrays(
     **The cap.** The multipath count grows without bound as paths steepen: in
     an ideal waveguide nothing but spreading attenuates the high-order
     bounces, and every extra :math:`2D` of unfolded depth is two more
-    arrivals. ``max_arrivals`` bounds what is returned: the earliest
-    ``max_arrivals`` arrivals are kept, because the early paths are the flat,
+    arrivals. ``max_n_arrivals`` bounds what is returned: the earliest
+    ``max_n_arrivals`` arrivals are kept, because the early paths are the flat,
     least-bounced, least-attenuated ones that carry the energy, and the tail
     being discarded is the part every physical seabed drains fastest. A
     :class:`~phonometry.PhonometryWarning` says when the cap truncated; raise
@@ -1485,7 +1485,7 @@ def eigenrays(
         instead. The sea surface is always pressure-release. The choice
         touches amplitudes only; the geometry, times and angles of the
         eigenrays are specular either way.
-    :param max_arrivals: Most arrivals to return (earliest kept, see above).
+    :param max_n_arrivals: Most arrivals to return (earliest kept, see above).
     :param n_steps: Range samples per refinement march, receiver column
         included. Default (``None``): the step of ``trace`` itself carried
         over, so the search resolves what the fan resolved.
@@ -1524,9 +1524,9 @@ def eigenrays(
             " one is touched tangentially and never crossed."
         )
         raise ValueError(msg)
-    require_scalar(max_arrivals, "max_arrivals")
-    if int(max_arrivals) < 1:
-        msg = "'max_arrivals' must be at least 1."
+    require_scalar(max_n_arrivals, "max_n_arrivals")
+    if int(max_n_arrivals) < 1:
+        msg = "'max_n_arrivals' must be at least 1."
         raise ValueError(msg)
     if trace.launch_angles_deg.size < 2:  # noqa: PLR2004
         msg = "'trace' must carry at least two rays to bracket between."
@@ -1595,7 +1595,7 @@ def eigenrays(
     times = final.times[:, -1]
     arrival = np.degrees(np.arcsin(np.clip(final.verticals[:, -1] * c_end, -1.0, 1.0)))
 
-    order = _earliest_arrivals(times, max_arrivals)
+    order = _earliest_arrivals(times, max_n_arrivals)
 
     return EigenrayResult(
         launch_angles_deg=np.degrees(refined[order]),

@@ -799,7 +799,7 @@ from phonometry import building
 
 # Una rendija de 2 mm x 100 mm de fondo: su transmisión tiene máximos en las
 # resonancias de media longitud de onda del fondo de la rendija.
-print(building.slit_resonance_frequencies(depth=0.1, width_m=0.002, orders=2).round().tolist())  # [~1500, ~3100]
+print(building.slit_resonance_frequencies(depth=0.1, width_m=0.002, n_orders=2).round().tolist())  # [~1500, ~3100]
 
 # Una pared de Rw = 50 dB con el 1 % de su área abierta como rendija queda limitada:
 print(round(float(building.composite_transmission_loss([0.99, 0.01], [50.0, 0.0])), 1))   # 20.0

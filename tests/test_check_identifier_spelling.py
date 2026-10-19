@@ -377,7 +377,7 @@ def test_the_walk_reads_a_parameter_of_every_kind() -> None:
             "fundamental_period", building_response.fundamental_period
         )
     }
-    assert ("fundamental_period", "stories") in slots
+    assert ("fundamental_period", "n_stories") in slots
     params = inspect.signature(building_response.fundamental_period).parameters
     namespace = spelling._namespace(building_response.fundamental_period)
     assert "stories" in set(

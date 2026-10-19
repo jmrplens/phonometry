@@ -72,7 +72,7 @@ def test_parse_reads_the_clause_layout_with_spaces() -> None:
     parsed = ea.parse_classification_code("60268-7 - IEC - MESO - 06R2 - 1")
     assert parsed.impedance_ohm == 600.0
     assert parsed.earphone_type == "E"
-    assert parsed.channels == 1
+    assert parsed.n_channels == 1
 
 
 def test_parse_refuses_another_form() -> None:
@@ -96,7 +96,7 @@ def test_classification_refuses_an_unknown_letter() -> None:
 
 
 def test_classification_refuses_ten_channels() -> None:
-    with pytest.raises(ValueError, match="channels"):
+    with pytest.raises(ValueError, match="n_channels"):
         ea.HeadphoneClassification("D", "C", "S", "C", 32.0, 10)
 
 
@@ -592,7 +592,7 @@ def test_the_500_hz_band_is_matched_within_3_db() -> None:
 def test_one_person_may_be_given_without_the_panel_axis() -> None:
     earphone, field = _ear_canal_levels()
     result = ea.ear_canal_frequency_response(BANDS, earphone[0], field[0])
-    assert result.persons == 1
+    assert result.n_persons == 1
     np.testing.assert_array_equal(result.standard_deviation_db, 0.0)
     assert not result.meets_panel_size
 
@@ -810,10 +810,12 @@ def test_ear_canal_plot_draws_the_persons_the_mean_and_the_spread(
     earphone, field = _ear_canal_levels()
     result = ea.ear_canal_frequency_response(BANDS, earphone, field)
     ax = result.plot(language=language, iec_scale=iec_scale)
-    persons = ax.lines[: result.persons]
+    persons = ax.lines[: result.n_persons]
     for line, response in zip(persons, result.response_db, strict=True):
         np.testing.assert_array_equal(line.get_ydata(), response)
-    np.testing.assert_array_equal(ax.lines[result.persons].get_ydata(), result.mean_db)
+    np.testing.assert_array_equal(
+        ax.lines[result.n_persons].get_ydata(), result.mean_db
+    )
     band = ax.collections[0].get_paths()[0].vertices[:, 1]
     lowest = result.mean_db - result.standard_deviation_db
     highest = result.mean_db + result.standard_deviation_db

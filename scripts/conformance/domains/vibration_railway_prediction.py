@@ -138,14 +138,14 @@ def _chk_sum_level() -> Outcome:
     "KB_FTm,Zug from 78,1 dB by Formula (9), c_T1 = 1",
 )
 def _chk_kb_ftm() -> Outcome:
-    return numeric(0.4, ph.vibration.takt_maximum_kb([78.1]), 0.05, places=4)
+    return numeric(0.4, ph.vibration.takt_max_kb([78.1]), 0.05, places=4)
 
 
 @register(
     _PREDICTION, f"{_EDITION} Annex C, C.3", "KB_Fmax,Zug by Formula (10), 1,5 times it"
 )
 def _chk_kb_fmax() -> Outcome:
-    computed = ph.vibration.TRAIN_KB_FMAX_FACTOR * ph.vibration.takt_maximum_kb([78.1])
+    computed = ph.vibration.TRAIN_KB_FMAX_FACTOR * ph.vibration.takt_max_kb([78.1])
     return numeric(0.6, computed, 0.05, places=4)
 
 
@@ -153,7 +153,7 @@ def _chk_kb_fmax() -> Outcome:
     _PREDICTION, f"{_EDITION} Annex C, C.3", "v_max by Formula (12), 3 times that, mm/s"
 )
 def _chk_peak_velocity() -> Outcome:
-    kb_fmax = ph.vibration.TRAIN_KB_FMAX_FACTOR * ph.vibration.takt_maximum_kb([78.1])
+    kb_fmax = ph.vibration.TRAIN_KB_FMAX_FACTOR * ph.vibration.takt_max_kb([78.1])
     return numeric(
         1.81,
         ph.vibration.peak_velocity_from_kb_mm_s(kb_fmax),

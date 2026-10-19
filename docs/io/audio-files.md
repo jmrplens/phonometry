@@ -127,7 +127,7 @@ instant on a 12-hour RF64, and it still describes a compressed WAV that
 ```python
 meta = io.info("measurement.wav")
 print(meta.container, meta.format_name, meta.bit_depth)   # WAV PCM 24
-print(meta.frames, f"{meta.duration:.1f} s")              # 480000 10.0 s
+print(meta.n_samples, f"{meta.duration:.1f} s")              # 480000 10.0 s
 ```
 
 ## Calibrating from the calibrator take

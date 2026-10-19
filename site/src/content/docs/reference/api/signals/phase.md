@@ -117,10 +117,10 @@ impulse response must fit the record the grid implies.
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
 
-## minimum_phase
+## min_phase
 
 ```python
-minimum_phase(
+min_phase(
     response: NDArray[np.complex128] | NDArray[np.float64] | list[float],
     *,
     oversample: int = 8,
@@ -173,7 +173,7 @@ phase_decomposition(
 
 Decompose a response into its minimum-phase and all-pass parts.
 
-Bundles [`minimum_phase`](/phonometry/reference/api/signals/phase/#minimum_phase), [`excess_phase`](/phonometry/reference/api/signals/phase/#excess_phase) and
+Bundles [`min_phase`](/phonometry/reference/api/signals/phase/#min_phase), [`excess_phase`](/phonometry/reference/api/signals/phase/#excess_phase) and
 [`group_delay`](/phonometry/reference/api/signals/phase/#group_delay) on one frequency axis: the minimum phase carries
 everything an equalizer can invert, the excess phase is the residual
 all-pass (latency plus non-minimum-phase zeros), and the two group
@@ -202,11 +202,11 @@ PhaseDecompositionResult(
     frequencies: NDArray[np.float64],
     magnitude: NDArray[np.float64],
     phase_rad: NDArray[np.float64],
-    minimum_phase_rad: NDArray[np.float64],
+    min_phase_rad: NDArray[np.float64],
     excess_phase_rad: NDArray[np.float64],
     group_delay: NDArray[np.float64],
     excess_group_delay: NDArray[np.float64],
-    minimum_phase_response: NDArray[np.complex128],
+    min_phase_response: NDArray[np.complex128],
     fs: float,
 )
 ```
@@ -220,11 +220,11 @@ Minimum-phase / all-pass decomposition of a frequency response.
 | `frequencies` | Frequency axis, in Hz. |
 | `magnitude` | $\lvert H(f) \rvert$ (shared by the measured and minimum-phase responses). |
 | `phase_rad` | Measured phase, unwrapped and referenced to DC, rad. |
-| `minimum_phase_rad` | Phase reconstructed from $\lvert H \rvert$ alone, rad. |
-| `excess_phase_rad` | `phase_rad - minimum_phase_rad`: the all-pass part, rad. |
+| `min_phase_rad` | Phase reconstructed from $\lvert H \rvert$ alone, rad. |
+| `excess_phase_rad` | `phase_rad - min_phase_rad`: the all-pass part, rad. |
 | `group_delay` | Group delay of the measured response, s. |
 | `excess_group_delay` | Group delay of the all-pass part alone, s (constant $t_0$ for a pure latency). |
-| `minimum_phase_response` | Complex minimum-phase response $\lvert H \rvert \exp(j \, \text{minimum\_phase\_rad})$. |
+| `min_phase_response` | Complex minimum-phase response $\lvert H \rvert \exp(j \, \text{minimum\_phase\_rad})$. |
 | `fs` | Sample rate of the underlying record, in Hz. |
 
 ### PhaseDecompositionResult.plot()

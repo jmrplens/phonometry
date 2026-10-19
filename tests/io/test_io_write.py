@@ -328,7 +328,7 @@ def test_streamed_header_reconciles_with_an_estimated_frame_count(
         1152,
         frames_are_estimate=True,
     )
-    assert info(path).frames == actual
+    assert info(path).n_samples == actual
     assert read(path).n_samples == actual
     # The outer RIFF size agrees with the bytes actually on disk.
     (riff_size,) = struct.unpack_from("<I", path.read_bytes(), 4)

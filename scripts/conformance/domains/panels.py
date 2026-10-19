@@ -265,7 +265,7 @@ def _chk_hopkins_table_a2_products() -> Outcome:
     "Transmission maximum at first resonance",
 )
 def _chk_slit_resonance() -> Outcome:
-    fr = float(ph.building.slit_resonance_frequencies(0.1, 0.005, orders=1)[0])
+    fr = float(ph.building.slit_resonance_frequencies(0.1, 0.005, n_orders=1)[0])
     f = np.linspace(fr - 300.0, fr + 300.0, 601)
     res = ph.building.slit_transmission_coefficient(f, 0.005, 0.1, field="normal")
     peak = float(f[int(np.argmax(res.transmission_coefficient))])

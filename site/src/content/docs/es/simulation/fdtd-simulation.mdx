@@ -708,7 +708,7 @@ wells = [materials.MetadiffuserWell(h * 1e-3,
                                                         lc * 1e-3, wc * 1e-3),) * 2)
          for h, ln, lc, wn, wc in rows]
 model = materials.metadiffuser_polar_response(f0, wells, depth_m=0.02, period_m=pitch,
-                                              angles_deg=angles_deg, repetitions=1)
+                                              angles_deg=angles_deg, n_repetitions=1)
 ax = model.plot(color="#1f77b4", marker="", linestyle="--",
                 label="Modelo TMM + Fraunhofer", language="es")
 ax.plot(np.radians(angles_deg), levels, color="#d62728", lw=2.2,

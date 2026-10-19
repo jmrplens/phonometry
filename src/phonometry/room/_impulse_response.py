@@ -224,7 +224,7 @@ def sweep_signal(
     fs: int,
     f1: float,
     f2: float,
-    seconds: float,
+    duration_s: float,
     *,
     amplitude: float = 1.0,
     fade: float = 0.01,
@@ -243,7 +243,7 @@ def sweep_signal(
         measured, ISO 18233 B.3.1). Must be > 0.
     :param f2: Stop frequency in Hz (at or above the highest band edge). Must
         satisfy :math:`f_1 < f_2 \le f_\mathrm{s}/2`.
-    :param seconds: Sweep duration in seconds. Any duration may be used; a
+    :param duration_s: Sweep duration in seconds. Any duration may be used; a
         longer sweep raises the effective signal-to-noise ratio (B.2, B.6).
     :param amplitude: Peak amplitude of the sweep. Default 1.0.
     :param fade: Half-Hann fade-in/out length as a fraction of the sweep
@@ -255,7 +255,7 @@ def sweep_signal(
         band is unusable, so choose ``f1``/``f2`` with margin beyond the
         analysis range (ISO 18233 B.3.1) rather than relying on a smaller
         fade.
-    :return: The sweep samples, length ``round(seconds*fs)``.
+    :return: The sweep samples, length ``round(duration_s*fs)``.
     """
     if f1 <= 0.0:
         msg = "f1 must be positive"
@@ -270,9 +270,9 @@ def sweep_signal(
         msg = "fade must be in [0, 0.5)"
         raise ValueError(msg)
 
-    n = round(seconds * fs)
+    n = round(duration_s * fs)
     if n < 2:  # noqa: PLR2004
-        msg = "seconds*fs must yield at least 2 samples"
+        msg = "duration_s*fs must yield at least 2 samples"
         raise ValueError(msg)
 
     t = np.arange(n) / fs
@@ -306,7 +306,7 @@ def inverse_filter(
     fs: int,
     f1: float,
     f2: float,
-    seconds: float,
+    duration_s: float,
     *,
     amplitude: float = 1.0,
     fade: float = 0.01,
@@ -326,12 +326,12 @@ def inverse_filter(
     :param fs: Sampling frequency in Hz.
     :param f1: Sweep start frequency in Hz (same value used for the sweep).
     :param f2: Sweep stop frequency in Hz.
-    :param seconds: Sweep duration in seconds.
+    :param duration_s: Sweep duration in seconds.
     :param amplitude: Peak amplitude used for the source sweep. Default 1.0.
     :param fade: Fade fraction used for the source sweep. Default 0.01.
     :return: The inverse-filter samples (same length as the sweep).
     """
-    sweep = sweep_signal(fs, f1, f2, seconds, amplitude=amplitude, fade=fade)
+    sweep = sweep_signal(fs, f1, f2, duration_s, amplitude=amplitude, fade=fade)
     n = sweep.size
     ts = n / fs
     t = np.arange(n) / fs
@@ -355,7 +355,7 @@ def inverse_filter(
         msg = (
             "no frequency bin falls within the sweep band [f1, f2]; the "
             "sweep is too short for this frequency resolution; increase "
-            "'seconds' or widen the (f1, f2) range."
+            "'duration_s' or widen the (f1, f2) range."
         )
         raise ValueError(msg)
     gain = float(np.median(np.abs(np.fft.rfft(comp)[band])))
@@ -1025,7 +1025,7 @@ def shaped_sweep_signal(
     fs: int,
     f1: float,
     f2: float,
-    seconds: float,
+    duration_s: float,
     *,
     target: str | tuple[np.ndarray, np.ndarray] = "pink",
     amplitude: float = 1.0,
@@ -1068,7 +1068,7 @@ def shaped_sweep_signal(
         first FFT bin), so the full target level holds across ``[f1, f2]``.
     :param f2: Stop frequency in Hz. Must satisfy :math:`f_1 < f_2 \le f_\mathrm{s}/2`;
         keep some margin below Nyquist so the upper roll-off has room.
-    :param seconds: Sweep duration :math:`\tau_\mathrm{G}(f_2) - \tau_\mathrm{G}(f_1)` in
+    :param duration_s: Sweep duration :math:`\tau_\mathrm{G}(f_2) - \tau_\mathrm{G}(f_1)` in
         seconds.
         The returned signal is slightly longer (lead-in plus tail margin,
         see ``start_delay``).
@@ -1080,9 +1080,9 @@ def shaped_sweep_signal(
     :param amplitude: Peak amplitude of the returned sweep. Default 1.0.
     :param start_delay: Group delay assigned to ``f1``, in seconds; the
         same margin is left after ``tau_G(f2)``, so the signal lasts
-        ``seconds + 2*start_delay``. The sweep spreads slightly beyond its
+        ``duration_s + 2*start_delay``. The sweep spreads slightly beyond its
         nominal start (Sec. 4.2: the group delay of the lowest bin "should
-        not be set to zero"), so the default ``0.05*seconds`` gives the
+        not be set to zero"), so the default ``0.05*duration_s`` gives the
         first half-wave room to evolve.
     :param fade: Half-Hann fade-in/out length as a fraction of the returned
         signal, applied to pin the ends to zero (Sec. 4.2). Default 0.01;
@@ -1107,8 +1107,8 @@ def shaped_sweep_signal(
     if f2 > fs_v / 2.0:
         msg = "f2 must not exceed the Nyquist frequency fs/2"
         raise ValueError(msg)
-    if seconds <= 0.0:
-        msg = "seconds must be positive"
+    if duration_s <= 0.0:
+        msg = "duration_s must be positive"
         raise ValueError(msg)
     if amplitude <= 0.0:
         msg = "amplitude must be positive"
@@ -1116,7 +1116,7 @@ def shaped_sweep_signal(
     if not 0.0 <= fade < _MAX_FADE_FRACTION:
         msg = "fade must be in [0, 0.5)"
         raise ValueError(msg)
-    lead = 0.05 * seconds if start_delay is None else float(start_delay)
+    lead = 0.05 * duration_s if start_delay is None else float(start_delay)
     if lead <= 0.0:
         msg = "start_delay must be positive"
         raise ValueError(msg)
@@ -1124,16 +1124,16 @@ def shaped_sweep_signal(
     # FFT block at least double the total signal so low-frequency
     # pre-ringing folding to "negative times" stays clear of the tail
     # (Mueller & Massarani 2001, Sec. 4.2).
-    total = seconds + 2.0 * lead
+    total = duration_s + 2.0 * lead
     n_keep = round(total * fs_v)
     if n_keep < _MIN_SHAPED_SWEEP_SAMPLES:
-        msg = "seconds*fs must yield at least 16 samples"
+        msg = "duration_s*fs must yield at least 16 samples"
         raise ValueError(msg)
     n_fft = int(2 ** np.ceil(np.log2(2 * n_keep)))
     freqs = np.asarray(np.fft.rfftfreq(n_fft, 1.0 / fs_v), dtype=np.float64)
     if not np.any((freqs >= f1) & (freqs <= f2)):
         msg = (
-            "no frequency bin falls within [f1, f2]; lengthen 'seconds' or "
+            "no frequency bin falls within [f1, f2]; lengthen 'duration_s' or "
             "widen the (f1, f2) range."
         )
         raise ValueError(msg)
@@ -1148,7 +1148,7 @@ def shaped_sweep_signal(
     # Group delay grows with the spectral power (Eqs. (11)-(12)); the
     # cumulative sum is the discrete form of the bin-by-bin recursion.
     power = magnitude**2
-    tau = lead + seconds * np.cumsum(power) / float(np.sum(power))
+    tau = lead + duration_s * np.cumsum(power) / float(np.sum(power))
 
     # Phase = -2*pi * integral of the group delay; then force the Nyquist
     # phase onto a multiple of pi with a linear-in-f correction (Eq. (10)).
@@ -1165,11 +1165,11 @@ def shaped_sweep_signal(
     sweep *= amplitude / float(np.max(np.abs(sweep)))
 
     # Crest factor over the constant-envelope interval [lead, lead+seconds].
-    # A tiny 'seconds' next to a dominant 'start_delay' can round the two
+    # A tiny 'duration_s' next to a dominant 'start_delay' can round the two
     # edges onto the same sample, leaving an empty (or single-sample) core
     # that would make the statistic blow up; fall back to the whole
     # retained sweep in that degenerate case.
-    core = sweep[round(lead * fs_v) : round((lead + seconds) * fs_v)]
+    core = sweep[round(lead * fs_v) : round((lead + duration_s) * fs_v)]
     if core.size < 2:  # noqa: PLR2004
         core = sweep
     rms = float(np.sqrt(np.mean(core**2)))

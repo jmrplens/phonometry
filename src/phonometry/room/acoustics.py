@@ -81,7 +81,7 @@ __all__ = [
     "RoomAcousticsResult",
     "decay_curve",
     "filter_bandwidth",
-    "minimum_reliable_reverberation_time",
+    "min_reliable_reverberation_time",
     "reverberation_time_standard_deviation",
     "room_parameters",
     "MIN_BANDWIDTH_TIME_PRODUCT",
@@ -294,8 +294,8 @@ class RoomAcousticsResult(OwnsArrays):
         :param metadata: Optional
             :class:`~phonometry.ReportMetadata`; ``None`` produces a bare
             characterisation fiche (body, result and disclaimer only). The
-            room-specific fields ``room_volume``, ``source_positions`` and
-            ``receiver_positions`` populate the header; ``requirement`` is read
+            room-specific fields ``room_volume``, ``n_source_positions`` and
+            ``n_receiver_positions`` populate the header; ``requirement`` is read
             as the maximum acceptable reverberation time, compared with the
             descriptor the result box shows (the mid-frequency T where both mid
             bands carry a finite T30, otherwise a single band's T30).
@@ -785,7 +785,7 @@ def reverberation_time_standard_deviation(
     return float(sigma) if sigma.ndim == 0 else sigma
 
 
-def minimum_reliable_reverberation_time(
+def min_reliable_reverberation_time(
     bandwidth: ArrayLike, detector_time: float = 0.0
 ) -> np.ndarray | float:
     r"""Shortest decay time a forward analysis can be trusted with (7.3).

@@ -7664,7 +7664,7 @@ in the same order.
 - **Consequence for the standard's own tables:** none; the example that uses
   the formula uses the correct one.
 - **Library behaviour:**
-  [`railway_takt_maximum_rms`](../src/phonometry/vibration/immission/people.py)
+  [`railway_takt_max_rms`](../src/phonometry/vibration/immission/people.py)
   takes the root, and the tests hold it to the 0,82 and 0,22 of Example 8.
 - **Status:** unreported.
 
@@ -8346,7 +8346,7 @@ in the same order.
 - **Consequence for the standard's own tables:** none; the standard prints no
   worked layout.
 - **Library behaviour:**
-  [`minimum_cabin_clearance_m`](../src/phonometry/noise_control/_cabin_insulation.py)
+  [`min_cabin_clearance_m`](../src/phonometry/noise_control/_cabin_insulation.py)
   returns the flat 2 m from 50 Hz to 80 Hz and the half wavelength above,
   exactly as printed, and a test asserts that the low branch is the smaller
   of the two so that the non-monotonicity cannot be "fixed" silently.
@@ -8372,7 +8372,7 @@ in the same order.
   BS EN ISO 11957:2009.
 - **Consequence for the standard's own tables:** none.
 - **Library behaviour:**
-  [`minimum_cabin_clearance_m`](../src/phonometry/noise_control/_cabin_insulation.py)
+  [`min_cabin_clearance_m`](../src/phonometry/noise_control/_cabin_insulation.py)
   returns one distance for the walls, the ceiling and the diffusing elements
   alike, which is the reading the words carry, and says so.
 - **Status:** not reported.

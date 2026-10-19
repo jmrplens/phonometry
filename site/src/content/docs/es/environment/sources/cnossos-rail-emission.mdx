@@ -109,7 +109,7 @@ y una vía seis.
 | Dígito del vehículo | Qué selecciona | Códigos | Biblioteca |
 | :--- | :--- | :--- | :--- |
 | 1 | Tipo de vehículo | `h` alta velocidad (> 200 km/h), `m` coche de viajeros automotor, `p` coche de viajeros remolcado, `c` tranvía urbano o metro ligero, `d` locomotora diésel, `e` locomotora eléctrica, `a` mercancías genérico, `o` otros | Elige la fila de `TractionVehicle` de la Tabla G-5 y si aplica el término de superestructura de mercancías |
-| 2 | Número de ejes por vehículo | el número real | `RollingStock(axles=...)`, el $10\log_{10} N_\mathrm{a}$ de (2.3.8) |
+| 2 | Número de ejes por vehículo | el número real | `RollingStock(n_axles=...)`, el $10\log_{10} N_\mathrm{a}$ de (2.3.8) |
 | 3 | Tipo de freno | `c` zapata de fundición, `k` zapata de material compuesto o sinterizado, `n` sin freno sobre la banda de rodadura (disco, tambor, magnético) | `BrakeType.CAST_IRON` / `.COMPOSITE` / `.NON_TREAD` → la rugosidad de rueda de G-1a |
 | 4 | Medida en la rueda | `n` ninguna, `d` amortiguadores, `s` pantallas, `o` otras | No selecciona ninguna tabla en el Apéndice G |
 
@@ -178,7 +178,7 @@ import matplotlib.pyplot as plt
 from phonometry import environment
 
 stock = environment.RollingStock(
-    axles=4,
+    n_axles=4,
     wheel_roughness=environment.wheel_roughness(environment.BrakeType.NON_TREAD),
     contact_filter=environment.contact_filter(environment.ContactFilter.LOAD_50_DIAMETER_920),
     wheel_transfer=environment.wheel_transfer(environment.WheelDiameter.MM_920),

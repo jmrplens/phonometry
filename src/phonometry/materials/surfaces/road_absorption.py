@@ -151,7 +151,7 @@ __all__ = [
     "in_situ_absorption_from_reflection",
     "in_situ_absorption_spectrum",
     "in_situ_reflection_factor",
-    "maximum_sampled_area_radius",
+    "max_sampled_area_radius",
     "msa_major_axis",
     "one_third_octave_absorption",
     "power_reflection_coefficient",
@@ -785,7 +785,7 @@ def in_situ_absorption_spectrum(
 # --------------------------------------------------------------------------- #
 # Maximum sampled area (ISO 13472-1 Annex A / Annex F)
 # --------------------------------------------------------------------------- #
-def maximum_sampled_area_radius(
+def max_sampled_area_radius(
     window_width: float,
     *,
     source_height_m: float = DEFAULT_SOURCE_HEIGHT_M,

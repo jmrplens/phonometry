@@ -90,7 +90,7 @@ def _chk_psd_ci_coverage() -> Outcome:
             _spectra_white(300 + seed), fs, nperseg=1024
         )
         for b in (60, 120, 240):
-            hits += int(res.ci_lower[b] <= true_psd <= res.ci_upper[b])
+            hits += int(res.confidence_lower[b] <= true_psd <= res.confidence_upper[b])
             total += 1
     return numeric(0.95, hits / total, 0.025, places=4)
 

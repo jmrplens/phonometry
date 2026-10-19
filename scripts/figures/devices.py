@@ -59,7 +59,7 @@ if TYPE_CHECKING:
         TurbineSoundPowerResult,
     )
     from phonometry.noise_control import (
-        EnclosureResult,
+        EnclosureInsertionLossResult,
         HydrodynamicValveNoise,
         RoomToRoomResult,
     )
@@ -433,7 +433,7 @@ def generate_swept_sine_thd(output_dir: str) -> None:
     b, a = sp_signal.butter(2, 3000.0, fs=fs)
     y = sp_signal.lfilter(b, a, x + a2 * x**2 + a3 * x**3)
     res = electroacoustics.swept_sine_distortion(
-        y, fs, f1=f1, f2=f2, seconds=seconds, n_harmonics=3
+        y, fs, f1=f1, f2=f2, duration_s=seconds, n_harmonics=3
     )
 
     sel = (res.thd_frequencies >= 30.0) & (res.thd_frequencies <= 2800.0)
@@ -808,7 +808,7 @@ def generate_quasi_peak_meter(output_dir: str) -> None:
         # Sixteen bursts, not the eight that fit more comfortably: the needle
         # is still 0.4 percentage points short of its settled value after
         # eight, and the point of the figure is the settled Table 3 reading.
-        repetitions=16,
+        n_repetitions=16,
         repetition_rate=10.0,
         post_silence=0.5,
     )
@@ -1215,7 +1215,7 @@ def generate_sound_power_pressure_result(output_dir: str) -> None:
         levels,
         "hemisphere",
         radius=1.5,
-        reflecting_planes=1,
+        n_reflecting_planes=1,
         background_levels=background,
         frequencies=freqs,
         room=emission.RoomEnvironment(reverberation_time=0.6, volume=300.0),
@@ -1368,7 +1368,7 @@ def generate_sound_energy_burst(output_dir: str) -> None:
         events,
         "hemisphere",
         radius=2.0,
-        reflecting_planes=1,
+        n_reflecting_planes=1,
         background_levels=np.full((10, freqs.size), 62.0),
         integration_time=window,
         frequencies=freqs,
@@ -1881,7 +1881,7 @@ def generate_discrete_point_qualification(output_dir: str) -> None:
         )
     handles.append(
         axt.axhline(
-            float(result.positions),
+            float(result.n_positions),
             color=COLOR_SECONDARY,
             linestyle="--",
             linewidth=1.8,
@@ -3902,7 +3902,7 @@ def generate_duct_regenerated_noise(output_dir: str) -> None:
         (40.0, COLOR_FG),
     ):
         res = hvac.silencer_self_noise(
-            bands, airway_velocity=velocity, passages=5, height_m=24 * inch
+            bands, airway_velocity=velocity, n_passages=5, height_m=24 * inch
         )
         ax.semilogx(
             bands,
@@ -4339,7 +4339,7 @@ def generate_enclosure_required_tl(output_dir: str) -> None:
     bare_floor = 2.5 * 3.5 - 1.5 * 2.5
     alpha = room.mean_absorption([(radiating, wool), (bare_floor + machine, concrete)])
 
-    def _required(model: str) -> "EnclosureResult":
+    def _required(model: str) -> "EnclosureInsertionLossResult":
         return noise_control.enclosure_required_transmission_loss(
             lp1 - nc45,
             radiating,
@@ -4629,7 +4629,7 @@ def generate_duct_mode_cut_on(output_dir: str) -> None:
 
 
 def generate_enclosure_insertion_loss(output_dir: str) -> None:
-    """Machine-enclosure IL = R - C per band via EnclosureResult.plot()."""
+    """Machine-enclosure IL = R - C per band via EnclosureInsertionLossResult.plot()."""
     print("Generating enclosure_insertion_loss.svg...")
     from phonometry import noise_control
 
@@ -5024,7 +5024,7 @@ def generate_feedback_stability(output_dir: str) -> None:
     from phonometry import electroacoustics as ea
 
     one = ea.feedback_stability(-6.0, 76.0, 80.0)
-    four = ea.feedback_stability(-6.0, 76.0, 80.0, open_microphones=4)
+    four = ea.feedback_stability(-6.0, 76.0, 80.0, n_open_microphones=4)
 
     _fig, axes = plt.subplots(2, 1, figsize=(10, 9.2), sharey=True)
     titles = (
@@ -5245,7 +5245,7 @@ def generate_swept_sine_harmonic_responses(output_dir: str) -> None:
     b, a = scipy_signal.butter(2, 3000.0, fs=fs)
     y = scipy_signal.lfilter(b, a, x + a2 * x**2 + a3 * x**3)
     res = electroacoustics.swept_sine_distortion(
-        y, fs, f1=f1, f2=f2, seconds=seconds, n_harmonics=3
+        y, fs, f1=f1, f2=f2, duration_s=seconds, n_harmonics=3
     )
 
     h1_ref = 1.0 + 3.0 * a3 / 4.0
@@ -5316,10 +5316,10 @@ def generate_swept_sine_methods(output_dir: str) -> None:
     # analysis of the same recording has to be told the length it really is.
     actual = len(x) / fs
     sync = electroacoustics.swept_sine_distortion(
-        y, fs, f1=f1, f2=f2, seconds=actual, n_harmonics=3
+        y, fs, f1=f1, f2=f2, duration_s=actual, n_harmonics=3
     )
     farina = electroacoustics.swept_sine_distortion(
-        y, fs, f1=f1, f2=f2, seconds=actual, n_harmonics=3, method="farina"
+        y, fs, f1=f1, f2=f2, duration_s=actual, n_harmonics=3, method="farina"
     )
 
     _fig, (ax_mag, ax_ph) = plt.subplots(
@@ -8227,7 +8227,7 @@ def _turbine_example() -> tuple[
         ]
     )
     array = emission.turbine_microphone_positions(
-        surface, microphone_height_m=1.5, spacing_m=4.0, turbine_boxes=2
+        surface, microphone_height_m=1.5, spacing_m=4.0, n_turbine_boxes=2
     )
     room = emission.turbine_environmental_correction(
         surface.area, volume=60000.0, reverberation_time=3.2
@@ -8435,7 +8435,7 @@ def generate_induction_loop_combi(output_dir: str) -> None:
     print("Generating induction_loop_combi...")
     from phonometry import electroacoustics
 
-    combi = 0.4 * electroacoustics.combi_signal(_LOOP_FS, cycles=2, seed=7)
+    combi = 0.4 * electroacoustics.combi_signal(_LOOP_FS, n_cycles=2, seed=7)
     reading = electroacoustics.field_strength_meter(combi, _LOOP_FS)
     fig, ax = plt.subplots(figsize=(10, 5.2))
     reading.plot(ax, language=_LANG)

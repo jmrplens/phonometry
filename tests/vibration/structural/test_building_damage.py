@@ -225,12 +225,12 @@ def test_the_storey_estimate_of_6_4() -> None:
 
 @pytest.mark.parametrize("bad", [0, -3])
 def test_a_building_with_no_storeys_is_refused(bad: int) -> None:
-    with pytest.raises(ValueError, match=r"'stories' must be at least 1"):
+    with pytest.raises(ValueError, match=r"'n_stories' must be at least 1"):
         bd.story_fundamental_frequency(bad)
 
 
 def test_a_fractional_storey_count_is_refused() -> None:
-    with pytest.raises(ValueError, match=r"'stories' must be an integer"):
+    with pytest.raises(ValueError, match=r"'n_stories' must be an integer"):
         bd.story_fundamental_frequency(4.5)  # type: ignore[arg-type]
 
 

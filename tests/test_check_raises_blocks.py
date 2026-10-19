@@ -268,7 +268,7 @@ def test_two_waiters_in_one_with_wait_on_their_body(tmp_path: pathlib.Path) -> N
                 pytest.warns(UserWarning, match="range"),
                 pytest.raises(ValueError, match="finite"),
             ):
-                nipts(l_ex=85.0, years=float("nan"))
+                nipts(l_ex=85.0, exposure_duration_years=float("nan"))
         """,
     )
     assert found == []

@@ -235,7 +235,7 @@ A.2.3 and still carry a finite level here. `criterion_1`
 `criterion_2` ($N > C F_4^2$, equation (B.2)) are the per-band
 verdicts, `None` where they could not be evaluated;
 `min_positions` is the $C F_4^2$ that criterion 2 compares
-`positions` against.
+`n_positions` against.
 
 `achieved_grade` is the per-band grade, one of `'precision'`,
 `'engineering'` and `'none'`. Grade 3 is never among them: Table B.2
@@ -317,7 +317,13 @@ The field non-uniformity of the A-weighted determination (B.1.2).
 
 *property*
 
-The $C F_4^2$ that criterion 2 compares `positions` against.
+The $C F_4^2$ that criterion 2 compares `n_positions` against.
+
+### DiscretePointIntensityResult.n_positions
+
+*property*
+
+The number $N$ of measurement positions.
 
 ### DiscretePointIntensityResult.negative_power_within_limit
 
@@ -368,12 +374,6 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the band `bar`. |
-
-### DiscretePointIntensityResult.positions
-
-*property*
-
-The number $N$ of measurement positions.
 
 ### DiscretePointIntensityResult.required_actions()
 
@@ -574,15 +574,15 @@ budget, and the procedure cannot help.
 
 ```python
 PartialPowerConcentration(
-    positions: int,
-    subset_positions: int,
+    n_positions: int,
+    n_subset_positions: int,
     subset_area: float,
     power_fraction: float,
     subset_nonuniformity: float,
     remainder_nonuniformity: float,
     error_factor: float,
     subset_error_factor: float,
-    additional_positions: int,
+    n_additional_positions: int,
 )
 ```
 
@@ -595,15 +595,15 @@ equation (B.4) asks to be spread over them.
 
 | Name | Description |
 | :--- | :--- |
-| `positions` | `N`, the number of positions on the whole surface. |
-| `subset_positions` | $N_\alpha$, the segments in the selected subset. B.1.3 requires this to be fewer than half of `N`. |
+| `n_positions` | `N`, the number of positions on the whole surface. |
+| `n_subset_positions` | $N_\alpha$, the segments in the selected subset. B.1.3 requires this to be fewer than half of `N`. |
 | `subset_area` | $S_\alpha$, the total area of the subset, m^2; the new positions are distributed over it in proportion to segment area. |
 | `power_fraction` | $\alpha$, the fraction of the total sound power passing through the subset, always above 0,5. |
 | `subset_nonuniformity` | $F_4(\alpha)$, the field non-uniformity of the subset alone (equations (A.8), (A.9)). |
 | `remainder_nonuniformity` | $F_4(1-\alpha)$, that of the remaining segments. |
 | `error_factor` | $\Delta$ for the requested grade (Table B.1). |
 | `subset_error_factor` | $\Delta_\alpha$, the share of that error budget the subset may spend, after the remainder has taken its own. |
-| `additional_positions` | $N^*$, the smallest whole number of new positions satisfying equation (B.4). |
+| `n_additional_positions` | $N^*$, the smallest whole number of new positions satisfying equation (B.4). |
 
 ## position_count_factor
 

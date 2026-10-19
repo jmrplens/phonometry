@@ -71,7 +71,7 @@ each subclass replaced by a Gaussian of standard deviation `sigma` (typically
 energetic mean stays where it was (Equations (17) to (23)).
 
 ```python
-dist = environment.sel_distribution(levels, probabilities, sigma_db=5.0, subclasses=10)
+dist = environment.sel_distribution(levels, probabilities, sigma_db=5.0, n_subclasses=10)
 print(dist.lower_bounds_db[:4].round(2))                              # [27.35 29.45 30.65 30.8 ]
 print([round(float(r), 4) for r in dist.class_densities_per_db[:4]])  # [0.0007, 0.024, 1.2399, 0.2222]
 print(round(dist.level_shift_db, 3))                                  # 2.878

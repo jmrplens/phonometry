@@ -37,7 +37,7 @@ from ._real_ear_attenuation import (
     allowable_field_variation,
     assess_attenuation_difference,
     check_reat_sound_field,
-    minimum_significant_difference,
+    min_significant_difference,
     real_ear_attenuation,
     reat_expanded_uncertainty,
 )
@@ -110,7 +110,7 @@ from .occupational_exposure import (
     TaskContribution,
     full_day_exposure,
     job_based_exposure,
-    minimum_cumulative_duration_hours,
+    min_cumulative_duration_hours,
     table_c4_contribution,
     task_based_exposure,
 )
@@ -213,8 +213,8 @@ __all__ = [
     "InsertionLossUncertaintyBudget",
     "INSTRUMENT_U2",
     "job_based_exposure",
-    "minimum_cumulative_duration_hours",
-    "minimum_significant_difference",
+    "min_cumulative_duration_hours",
+    "min_significant_difference",
     "nipts",
     "NIPTSResult",
     "NoiseInducedHearingLossWarning",

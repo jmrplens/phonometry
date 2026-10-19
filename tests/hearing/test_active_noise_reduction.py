@@ -59,7 +59,7 @@ def _workbook_total() -> hearing.ANRTotalAttenuationResult:
 def test_table_a3_mean_and_spread() -> None:
     """The mean and sigma rows of Table A.3, all 16 cells, at full precision."""
     result = hearing.active_insertion_loss(_A3)
-    assert result.subjects == 16
+    assert result.n_subjects == 16
     assert result.frequencies.tolist() == _OCTAVES
     assert np.round(result.mean_db, 1).tolist() == ref.ISO4869_6_TABLE_A3_MEAN
     assert (

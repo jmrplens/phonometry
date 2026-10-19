@@ -443,7 +443,7 @@ def test_uniform_enclosing_surface_recovers_the_source_power() -> None:
     assert result.sound_power[0] == pytest.approx(1.0e-3)
     assert result.sound_power_level[0] == pytest.approx(90.0)
     assert result.surface_area == pytest.approx(10.0)
-    assert result.positions == 10
+    assert result.n_positions == 10
 
 
 def test_unequal_segments_weight_by_their_own_area() -> None:
@@ -803,7 +803,7 @@ def test_too_much_inward_flow_leaves_the_band_ungraded() -> None:
     assert float(result.f3[0] - result.f2[0]) > 3.0
     assert result.criterion_1 is not None
     assert bool(result.criterion_1[0])
-    assert result.positions > 11.0 * float(result.f4[0]) ** 2
+    assert result.n_positions > 11.0 * float(result.f4[0]) ** 2
     assert result.achieved_grade[0] == "none"
 
 
@@ -1356,7 +1356,7 @@ def test_note_11_reads_c_in_the_mid_row_when_the_top_bands_are_quiet() -> None:
     contributions = 10.0 ** (0.1 * (result.sound_power_level + corrections))
     assert float(contributions[2]) < 0.5 * float(np.sum(contributions))
 
-    required = result.positions / result.field_nonuniformity_a**2
+    required = result.n_positions / result.field_nonuniformity_a**2
     assert (
         emission.position_count_factor("precision", 250.0, band_type="octave")
         < required
@@ -1641,8 +1641,8 @@ def test_the_survey_grade_is_reached_only_on_the_a_weighted_sum() -> None:
         grade="survey",
     )
     assert result.achieved_grade_a == "survey"
-    assert result.positions > 8.0 * result.field_nonuniformity_a**2
-    assert result.positions < 29.0 * result.field_nonuniformity_a**2
+    assert result.n_positions > 8.0 * result.field_nonuniformity_a**2
+    assert result.n_positions < 29.0 * result.field_nonuniformity_a**2
 
 
 def test_a_single_band_without_frequencies_is_its_own_a_weighted_total() -> None:
@@ -1705,8 +1705,8 @@ def test_partial_power_concentration_follows_equation_b4() -> None:
     )
 
     total = float(np.sum(intensity * areas))
-    assert outcome.subset_positions == 4
-    assert outcome.subset_positions < 0.5 * outcome.positions
+    assert outcome.n_subset_positions == 4
+    assert outcome.n_subset_positions < 0.5 * outcome.n_positions
     assert outcome.power_fraction == pytest.approx(float(np.sum(intensity[:4])) / total)
     assert outcome.power_fraction > 0.5
     assert outcome.subset_area == pytest.approx(4.0)
@@ -1722,7 +1722,7 @@ def test_partial_power_concentration_follows_equation_b4() -> None:
     assert outcome.subset_nonuniformity == pytest.approx(f4_subset)
     assert outcome.remainder_nonuniformity == pytest.approx(f4_remainder)
     assert outcome.subset_error_factor == pytest.approx(delta_alpha)
-    assert outcome.additional_positions == math.ceil(
+    assert outcome.n_additional_positions == math.ceil(
         4.0 * (f4_subset / delta_alpha) ** 2
     )
 
@@ -1750,7 +1750,7 @@ def test_a_stricter_grade_asks_for_more_new_positions() -> None:
     engineering = emission.partial_power_concentration(
         intensity, areas, grade="engineering"
     )
-    assert precision.additional_positions >= engineering.additional_positions
+    assert precision.n_additional_positions >= engineering.n_additional_positions
 
 
 def test_a_non_uniform_remainder_spends_part_of_the_error_budget() -> None:
@@ -1778,25 +1778,25 @@ def test_a_non_uniform_remainder_spends_part_of_the_error_budget() -> None:
     spent = (1.0 - alpha) * (2.0 / math.sqrt(remainder.size)) * f4_remainder
     delta_alpha = (0.29 - spent) / alpha
 
-    assert outcome.subset_positions == 4
+    assert outcome.n_subset_positions == 4
     assert outcome.remainder_nonuniformity == pytest.approx(f4_remainder)
     assert outcome.remainder_nonuniformity > 0.0
     assert spent == pytest.approx(0.1027, abs=5.0e-4)
     assert outcome.subset_error_factor == pytest.approx(delta_alpha)
-    assert outcome.additional_positions == 5
-    assert outcome.additional_positions == math.ceil(
+    assert outcome.n_additional_positions == 5
+    assert outcome.n_additional_positions == math.ceil(
         4.0 * (f4_subset / delta_alpha) ** 2
     )
     # What the degenerate case cannot tell apart: a remainder that spends
     # nothing asks for 2 new positions, a factor of 3 in place of the 4 asks
     # for 4, and dropping the square root asks for 3.
-    assert outcome.additional_positions != math.ceil(
+    assert outcome.n_additional_positions != math.ceil(
         4.0 * (f4_subset * alpha / 0.29) ** 2
     )
-    assert outcome.additional_positions != math.ceil(
+    assert outcome.n_additional_positions != math.ceil(
         3.0 * (f4_subset / delta_alpha) ** 2
     )
-    assert outcome.additional_positions != math.ceil(
+    assert outcome.n_additional_positions != math.ceil(
         4.0
         * (
             f4_subset
@@ -1857,8 +1857,8 @@ def test_fewer_than_half_of_an_odd_segment_count_is_half_of_n() -> None:
     intensity = np.array([1.5] * 5 + [1.0] * 6)
     areas = np.full(11, 1.0)
     outcome = emission.partial_power_concentration(intensity, areas)
-    assert outcome.positions == 11
-    assert outcome.subset_positions == 5
+    assert outcome.n_positions == 11
+    assert outcome.n_subset_positions == 5
 
 
 def test_one_position_cannot_be_split_into_a_subset_and_a_remainder() -> None:
@@ -1887,7 +1887,7 @@ def test_the_half_is_half_of_the_net_sound_power() -> None:
     )
     areas = np.array([4.0, 2.0, 4.0, 2.0, 4.0, 4.0, 2.0, 8.0, 1.0, 1.0])
     outcome = emission.partial_power_concentration(intensity, areas)
-    assert outcome.subset_positions == 2
+    assert outcome.n_subset_positions == 2
     assert outcome.subset_area == pytest.approx(6.0)
 
 
@@ -1906,9 +1906,9 @@ def test_the_ranking_is_of_partial_powers_and_not_of_intensities() -> None:
     )
     areas = np.array([8.0, 4.0, 1.0, 4.0, 2.0, 4.0, 8.0, 8.0, 8.0, 4.0, 2.0, 4.0])
     outcome = emission.partial_power_concentration(intensity, areas)
-    assert outcome.subset_positions == 3
+    assert outcome.n_subset_positions == 3
     assert outcome.subset_area == pytest.approx(20.0)
-    assert outcome.additional_positions == 91
+    assert outcome.n_additional_positions == 91
 
 
 def test_a_source_concentrated_in_one_segment_is_refused_by_name() -> None:

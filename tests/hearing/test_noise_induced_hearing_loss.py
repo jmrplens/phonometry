@@ -167,7 +167,7 @@ def test_frequency_subset() -> None:
 
 
 def test_invalid_inputs_raise() -> None:
-    with pytest.raises(ValueError, match="years must be positive"):
+    with pytest.raises(ValueError, match="'exposure_duration_years' must be positive"):
         m.nipts(90.0, 0.0)
     with pytest.raises(ValueError, match=r"fractile must be in \(0, 1\)"):
         m.nipts(90.0, 20.0, 1.5)
@@ -287,7 +287,7 @@ def test_nipts_rejects_nan_exposure_level() -> None:
     under a title ending "= nan dB", with no warning of any category.
     """
     with pytest.raises(ValueError, match="'l_ex' must be finite"):
-        m.nipts(l_ex=float("nan"), years=10.0)
+        m.nipts(l_ex=float("nan"), exposure_duration_years=10.0)
 
 
 def test_nipts_rejects_nan_years() -> None:
@@ -296,9 +296,9 @@ def test_nipts_rejects_nan_years() -> None:
             m.NoiseInducedHearingLossWarning,
             match=r"exposure duration .* is outside the 1-40 year range",
         ),
-        pytest.raises(ValueError, match="'years' must be finite"),
+        pytest.raises(ValueError, match="'exposure_duration_years' must be finite"),
     ):
-        m.nipts(l_ex=85.0, years=float("nan"))
+        m.nipts(l_ex=85.0, exposure_duration_years=float("nan"))
 
 
 def test_nipts_rejects_an_empty_frequency_subset() -> None:
@@ -358,7 +358,9 @@ def test_nipts_rejects_a_non_finite_fractile(value: float) -> None:
         dataclasses.replace(result, fractile=value)
 
 
-@pytest.mark.parametrize("field", ["age", "l_ex", "years", "fractile"])
+@pytest.mark.parametrize(
+    "field", ["age", "l_ex", "exposure_duration_years", "fractile"]
+)
 @pytest.mark.parametrize("value", [float("nan"), float("inf")])
 def test_htlan_rejects_a_non_finite_condition(field: str, value: float) -> None:
     """Nothing here computes with the four conditions, so nothing tripped on them.

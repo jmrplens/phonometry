@@ -153,7 +153,7 @@ __all__ = [
     "check_reference_track",
     "check_small_roughness_deviations",
     "impulsiveness_rise_speed",
-    "minimum_curve_radius",
+    "min_curve_radius",
     "pass_by_measurement",
     "pass_by_time",
     "pass_by_uncertainty",
@@ -387,7 +387,7 @@ def type_test_speeds(max_speed_kmh: float) -> tuple[float, ...]:
     return tuple(speeds)
 
 
-def minimum_curve_radius(speed_kmh: float) -> float:
+def min_curve_radius(speed_kmh: float) -> float:
     """The smallest radius of curvature the test track may have, 6.2.2.
 
     1 000 m for tests up to 70 km/h, 3 000 m above 70 km/h and up to
@@ -492,7 +492,7 @@ class PassByMeasurement(OwnsArrays):
     :param equivalent_level_db: :math:`L_{p\mathrm{Aeq},T}` over
         :math:`T_1` to :math:`T_2`, in dB; the pass-by level
         :math:`L_{p\mathrm{Aeq},T_p}` when the interval is the pass-by time.
-    :param maximum_level_db: :math:`L_{p\mathrm{AFmax}}` within the interval, in dB.
+    :param max_level_db: :math:`L_{p\mathrm{AFmax}}` within the interval, in dB.
     :param front_level_db: :math:`L_{p\mathrm{AF}}` when the front of the
         train is opposite the microphone, in dB.
     :param rear_level_db: :math:`L_{p\mathrm{AF}}` when its rear is, in dB.
@@ -507,7 +507,7 @@ class PassByMeasurement(OwnsArrays):
     start_s: float
     end_s: float
     equivalent_level_db: float
-    maximum_level_db: float
+    max_level_db: float
     front_level_db: float
     rear_level_db: float
     record_start_level_db: float
@@ -704,7 +704,7 @@ def pass_by_measurement(
         start_s=first / rate,
         end_s=last / rate,
         equivalent_level_db=level(float(np.mean(weighted[first:last] ** 2))),
-        maximum_level_db=level(float(np.max(mean_square[first:last]))),
+        max_level_db=level(float(np.max(mean_square[first:last]))),
         front_level_db=level(float(mean_square[min(front, mean_square.size - 1)])),
         rear_level_db=level(float(mean_square[min(rear, mean_square.size - 1)])),
         record_start_level_db=level(float(mean_square[0])),
@@ -2223,7 +2223,7 @@ def check_reference_track(
     direct one.
 
     **6.2.2.** When given, the curve radius must be at least
-    :func:`minimum_curve_radius` of the speed, and the gradient at most 5:1 000
+    :func:`min_curve_radius` of the speed, and the gradient at most 5:1 000
     (the gradient applies where powered units are tested).
 
     :param roughness: The roughness spectra, one per rail or line, each the
@@ -2284,7 +2284,7 @@ def _track_conditions(check: ReferenceTrackCheck) -> tuple[TrackCondition, ...]:
     conditions += _decay_conditions(check.decay_rates, check.decay_limits_db_per_m)
     if check.curve_radius_m is not None:
         radius = check.curve_radius_m
-        needed = minimum_curve_radius(speed)
+        needed = min_curve_radius(speed)
         conditions.append(
             TrackCondition(
                 clause="6.2.2",

@@ -50,9 +50,9 @@ if TYPE_CHECKING:
         FloorCoveringImprovementResult,
     )
     from ..building.measurement.heavy_impact import (
-        AWeightedMaximumImpactResult,
+        AWeightedMaxImpactResult,
         HeavyImpactSourceCheck,
-        StandardizedMaximumImpactResult,
+        StandardizedMaxImpactResult,
     )
     from ..building.measurement.insulation import (
         AirborneInsulationResult,
@@ -2007,7 +2007,7 @@ def plot_heavy_impact_source(
 
 
 def plot_standardized_maximum_impact(
-    result: StandardizedMaximumImpactResult,
+    result: StandardizedMaxImpactResult,
     ax: Axes | None = None,
     language: str = "en",
     **kwargs: Any,
@@ -2015,7 +2015,7 @@ def plot_standardized_maximum_impact(
     """Measured and standardized maximum impact levels (ISO 16283-2 3.16).
 
     :param result: A
-        :class:`~phonometry.building.measurement.heavy_impact.StandardizedMaximumImpactResult`.
+        :class:`~phonometry.building.measurement.heavy_impact.StandardizedMaxImpactResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the standardized-curve ``plot`` call.
@@ -2044,7 +2044,7 @@ def plot_standardized_maximum_impact(
 
 
 def plot_a_weighted_maximum_impact(
-    result: AWeightedMaximumImpactResult,
+    result: AWeightedMaxImpactResult,
     ax: Axes | None = None,
     language: str = "en",
     **kwargs: Any,
@@ -2052,7 +2052,7 @@ def plot_a_weighted_maximum_impact(
     """A-weighted maximum impact level and its band contributions (ISO 717-2 D).
 
     :param result: An
-        :class:`~phonometry.building.measurement.heavy_impact.AWeightedMaximumImpactResult`.
+        :class:`~phonometry.building.measurement.heavy_impact.AWeightedMaxImpactResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the ``bar`` call for the corrected values.
@@ -3294,7 +3294,7 @@ def plot_varying_background(
     ax = ax if ax is not None else _new_axes()
     freqs = result.frequencies
     equipment = np.asarray(result.equipment_levels_db, dtype=np.float64)
-    background = np.asarray(result.background_maximum_level_db, dtype=np.float64)
+    background = np.asarray(result.background_max_level_db, dtype=np.float64)
     labels = freqs if freqs is not None else np.arange(equipment.size) + 1.0
     positions = _band_axis(
         ax,

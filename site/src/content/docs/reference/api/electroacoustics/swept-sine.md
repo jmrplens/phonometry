@@ -69,7 +69,7 @@ swept_sine_distortion(
     *,
     f1: float,
     f2: float,
-    seconds: float,
+    duration_s: float,
     method: Literal['synchronized', 'farina'] = 'synchronized',
     n_harmonics: int = 5,
     ir_length: int | None = None,
@@ -104,7 +104,7 @@ capped at `f2` by the inverse filter).
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `f1` | Sweep start frequency, in Hz. |
 | `f2` | Sweep stop frequency, in Hz. Distortion products above Nyquist fold back in any real recording, so keep `n_harmonics*f2` in mind when choosing the sweep band. |
-| `seconds` | Sweep duration handed to the generator, in seconds (for the synchronized method the actual duration is the same quantized value the generator used). |
+| `duration_s` | Sweep duration handed to the generator, in seconds (for the synchronized method the actual duration is the same quantized value the generator used). |
 | `method` | `"synchronized"` (Novak et al. 2015, default) or `"farina"` (classical ESS with the Farina inverse filter). |
 | `n_harmonics` | Highest harmonic order to separate (>= 2, default 5). |
 | `ir_length` | Window length per harmonic IR, in samples. Default: the largest power of two that fits the closest harmonic spacing (at most 8192). Must not exceed the spacing `L*ln(n_harmonics/(n_harmonics-1))*fs` between the two closest arrivals, or the windows would overlap. |
@@ -134,7 +134,7 @@ SweptSineDistortionResult(
     fs: float,
     f1: float,
     f2: float,
-    duration: float,
+    duration_s: float,
     rate: float,
     method: str,
 )
@@ -166,7 +166,7 @@ magnitudes are meaningful.
 | `fs` | Sample rate, in Hz. |
 | `f1` | Sweep start frequency, in Hz. |
 | `f2` | Sweep stop frequency, in Hz. |
-| `duration` | Actual sweep duration `T` used by the analysis, s. |
+| `duration_s` | Actual sweep duration `T` used by the analysis, s. |
 | `rate` | Sweep rate $L = T / \ln(f_2/f_1)$, in seconds. |
 | `method` | `"synchronized"` or `"farina"`. |
 
@@ -207,7 +207,7 @@ synchronized_sweep_signal(
     fs: int,
     f1: float,
     f2: float,
-    seconds: float,
+    duration_s: float,
     *,
     amplitude: float = 1.0,
     fade: float = 0.0,
@@ -218,7 +218,7 @@ Generate a synchronized exponential sweep (Novak et al. 2015, Eq. 47).
 
 $x(t) = A \sin[2\pi f_1 L \exp(t/L)]$ with the rate
 $L = \operatorname{round}(f_1 \tilde{T} / \ln(f_2/f_1)) / f_1$
-(Eq. 49, with `seconds` as the requested duration
+(Eq. 49, with `duration_s` as the requested duration
 $\tilde{T}$). Because
 $f_1 L$ is an integer, delaying the signal by $L \ln(n)$
 is exactly equivalent to generating its n-th harmonic (Eq. 18), which
@@ -226,7 +226,7 @@ is what makes the harmonic phases measured by
 [`swept_sine_distortion`](/phonometry/reference/api/electroacoustics/swept-sine/#swept_sine_distortion) properties of the system under test
 rather than of the excitation. The rounding adjusts the duration
 slightly: the generated signal lasts $T = L \ln(f_2/f_1)$
-seconds rather than exactly `seconds` (the difference is at most
+seconds rather than exactly `duration_s` (the difference is at most
 $\ln(f_2/f_1)/2$ periods of `f1`).
 
 **Parameters**
@@ -236,7 +236,7 @@ $\ln(f_2/f_1)/2$ periods of `f1`).
 | `fs` | Sampling frequency in Hz. |
 | `f1` | Start frequency in Hz. Must be > 0. |
 | `f2` | Stop frequency in Hz. Must satisfy $f_1 < f_2 \le f_\mathrm{s}/2$. When $f_2/f_1$ is an integer the sweep also *ends* with zero phase (Novak et al. 2015, Sec. 2.5). |
-| `seconds` | Approximate sweep duration in seconds; the exact duration is quantized by the synchronization rounding. |
+| `duration_s` | Approximate sweep duration in seconds; the exact duration is quantized by the synchronization rounding. |
 | `amplitude` | Peak amplitude of the sweep. Default 1.0. |
 | `fade` | Optional half-Hann fade-in/out as a fraction of the sweep duration (default 0.0: the analytic deconvolution assumes the unfaded sweep, and fades only reshape the band edges). Keep it small if the playback chain needs one, and pass the same value to [`swept_sine_distortion`](/phonometry/reference/api/electroacoustics/swept-sine/#swept_sine_distortion). |
 

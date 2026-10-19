@@ -302,7 +302,7 @@ slam_lj = emission.sound_energy_reverberation(
     background_levels=np.full(thirds.size, 45.0),   # time-averaged over the same 4 s
     integration_time=4.0, temperature_c=20.0, static_pressure_kpa=101.0,
 )
-print(slam_lj.events, slam_lj.method)                    # 5 direct
+print(slam_lj.n_events, slam_lj.method)                    # 5 direct
 print(np.round(slam_lj.sound_energy_level[:3], 1))       # [96.  94.9 94.2] dB re 1 pJ
 print(round(slam_lj.sound_energy_level_a, 1))            # LJA = 99.0 dB(A)
 
@@ -331,11 +331,11 @@ slam_lj.plot()   # LJ per one-third octave, LJA in the title (needs matplotlib)
 
 `sound_energy_reverberation` takes the room arguments of
 `sound_power_reverberation` and `sound_energy_comparison` the reference-source
-arguments of `sound_power_comparison`, both plus `events`, `background_levels`
+arguments of `sound_power_comparison`, both plus `n_events`, `background_levels`
 with `integration_time`; they return a `ReverberationSoundEnergyResult`
 (`sound_energy_level`, `mean_event_level`, `absorption_area`,
 `waterhouse_correction`, `background_correction`, `c1`, `c2`,
-`speed_of_sound`, `sound_energy_level_a`, `method`, `events`,
+`speed_of_sound`, `sound_energy_level_a`, `method`, `n_events`,
 `integration_time`) with `.plot()`, the same `NaN` fields for the comparison
 method as its sound power twin, and the same qualification warnings. The
 single event results carry no `.report()` fiche, and the averaging over several

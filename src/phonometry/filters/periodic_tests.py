@@ -556,7 +556,7 @@ class PeriodicTestClause(RichDisplay):
         return tuple(
             label
             for label, v in zip(self.labels, self.verifications, strict=True)
-            if not v.uncertainty_within_maximum
+            if not v.uncertainty_within_max
         )
 
     @property

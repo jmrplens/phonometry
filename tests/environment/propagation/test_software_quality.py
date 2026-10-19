@@ -432,8 +432,8 @@ def test_round_robin_deviations_are_from_the_arithmetic_mean() -> None:
         result.deviations_db, levels - levels.mean(axis=1)[:, None]
     )
     np.testing.assert_allclose(result.max_abs_deviations_db, np.linspace(0.05, 2.0, 40))
-    assert result.receivers == 40
-    assert result.participants == 4
+    assert result.n_receivers == 40
+    assert result.n_participants == 4
 
 
 def test_round_robin_result_is_the_q09_of_the_largest_deviations() -> None:

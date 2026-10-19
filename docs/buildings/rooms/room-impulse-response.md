@@ -183,7 +183,7 @@ plt.xlabel("Time [s]"); plt.ylabel("Level re peak [dB]")
 | `fs` | int | Hz | > 0 | Sampling frequency |
 | `f1` | float | Hz | > 0, at/below lowest band | Sweep start frequency |
 | `f2` | float | Hz | `f1 < f2 <= fs/2` | Sweep stop frequency |
-| `seconds` | float | s | any; longer ⇒ more SNR | Sweep duration |
+| `duration_s` | float | s | any; longer ⇒ more SNR | Sweep duration |
 | `amplitude` | float | — | default `1.0` | Peak amplitude |
 | `fade` | float | — | `[0, 0.5)`, default `0.01` | Half-Hann fade fraction (kills start/stop transients) |
 

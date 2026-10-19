@@ -54,8 +54,8 @@ def generate_psd_confidence_smoothing(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.fill_between(
         freqs,
-        10.0 * np.log10(res.ci_lower[band]),
-        10.0 * np.log10(res.ci_upper[band]),
+        10.0 * np.log10(res.confidence_lower[band]),
+        10.0 * np.log10(res.confidence_upper[band]),
         color=COLOR_PRIMARY,
         alpha=0.28,
         lw=0.0,
@@ -133,8 +133,8 @@ def generate_multitaper_psd_confidence(output_dir: str) -> None:
     wband = (welch.frequencies >= 20.0) & (welch.frequencies <= 20000.0)
     ax.fill_between(
         welch.frequencies[wband],
-        10.0 * np.log10(welch.ci_lower[wband]),
-        10.0 * np.log10(welch.ci_upper[wband]),
+        10.0 * np.log10(welch.confidence_lower[wband]),
+        10.0 * np.log10(welch.confidence_upper[wband]),
         color=COLOR_SECONDARY,
         alpha=0.20,
         lw=0.0,
@@ -160,8 +160,8 @@ def generate_multitaper_psd_confidence(output_dir: str) -> None:
     )
     ax.fill_between(
         freqs,
-        10.0 * np.log10(res.ci_lower[band]),
-        10.0 * np.log10(res.ci_upper[band]),
+        10.0 * np.log10(res.confidence_lower[band]),
+        10.0 * np.log10(res.confidence_upper[band]),
         color=COLOR_PRIMARY,
         alpha=0.28,
         lw=0.0,

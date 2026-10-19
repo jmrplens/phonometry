@@ -277,7 +277,7 @@ def test_repeats_are_averaged_and_counted() -> None:
     result = metrology.simultaneous_comparison(
         _F, _L_REF, first + noise, second - noise
     )
-    assert result.determinations == 3
+    assert result.n_determinations == 3
     np.testing.assert_allclose(result.sensitivity_level_db, _L_TEST, atol=1e-12)
 
 

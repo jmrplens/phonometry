@@ -119,7 +119,7 @@ AssumedProtectionResult(
     performance: int,
     alpha: float,
     frequencies: np.ndarray,
-    subjects: int,
+    n_subjects: int,
 )
 ```
 
@@ -135,7 +135,7 @@ Assumed protection values of a hearing protector (Clause 5).
 | `performance` | The protection performance `x`, in per cent. |
 | `alpha` | The Table 1 constant that `performance` selected. |
 | `frequencies` | Octave-band mid-frequencies, in hertz. |
-| `subjects` | Number of test subjects the distribution came from. |
+| `n_subjects` | Number of test subjects the distribution came from. |
 
 ### AssumedProtectionResult.plot()
 

@@ -27,6 +27,7 @@ Three generations, all removed:
 
 from __future__ import annotations
 
+import dataclasses
 import importlib
 import inspect
 import re
@@ -540,7 +541,7 @@ def test_a_british_choice_the_4_0_retired_is_refused() -> None:
     """A choice is typed like a name, and the British one is refused by name."""
     spectra = np.zeros((5, 24))
     with pytest.raises(ValueError, match=r"'model' must be one of"):
-        ph.vibration.fundamental_period("storeys", stories=10)  # type: ignore[arg-type]
+        ph.vibration.fundamental_period("storeys", n_stories=10)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match=r"'location' must be 'center' or 'edge'"):
         ph.vibration.infinite_plate_impedance(1.0, 10.0, location="centre")
     with pytest.raises(ValueError, match=r"Unknown procedure 'aeroplane'"):
@@ -563,8 +564,10 @@ def test_the_american_spellings_are_all_here() -> None:
 
 # --------------------------------------------------------------------------- #
 # 4.0 one spelling per word: acronyms in capitals, abbreviations spelled out,
-# a count as n_<plural> and the time signal as x. The old spellings are gone,
-# with no alias; a sample of each kind, the 3.3.0 top-level names among them.
+# a count as n_<plural>, minimum and maximum as min and max, a confidence
+# bound as confidence_lower/upper and the time signal as x. The old spellings
+# are gone, with no alias; a sample of each kind, the 3.3.0 top-level names
+# among them.
 # --------------------------------------------------------------------------- #
 _RESPELLED_4_0_NAMES = [
     ("hearing", "HtlanResult", "HTLANResult"),
@@ -588,15 +591,17 @@ _RESPELLED_4_0_NAMES = [
     ("noise_control", "MINIMUM_MICROPHONE_DISTANCE_M", "MIN_MICROPHONE_DISTANCE_M"),
     ("room", "MAXIMUM_DIRECTIVITY_STEP_DEG", "MAX_DIRECTIVITY_STEP_DEG"),
     ("environment", "RAILWAY_MINIMUM_SPEED", "RAILWAY_MIN_SPEED_KMH"),
+    ("building", "a_weighted_maximum_impact_level", "a_weighted_max_impact_level"),
+    ("building", "AWeightedMaximumImpactResult", "AWeightedMaxImpactResult"),
     (
         "building",
-        "junction_min_vibration_reduction",
-        "junction_minimum_vibration_reduction",
+        "maximum_repeatability_standard_deviation",
+        "max_repeatability_standard_deviation",
     ),
-    ("materials", "max_sampled_area_radius", "maximum_sampled_area_radius"),
-    ("environment", "max_infrastructure_limit", "maximum_infrastructure_limit"),
-    ("metrology", "MaxUncertaintyRow", "MaximumUncertaintyRow"),
-    ("vibration", "floor_transfer_max", "floor_transfer_maximum"),
+    ("hearing", "minimum_cumulative_duration_hours", "min_cumulative_duration_hours"),
+    ("signals", "minimum_phase", "min_phase"),
+    ("room", "minimum_reliable_reverberation_time", "min_reliable_reverberation_time"),
+    ("noise_control", "EnclosureResult", "EnclosureInsertionLossResult"),
 ]
 
 
@@ -635,9 +640,37 @@ _RENAMED_4_0_KEYWORDS = [
         "building",
         "check_varying_background",
         "background_maximum_db",
-        "background_maximum_level_db",
+        "background_max_level_db",
     ),
-    ("emission", "plant_steady_reading", "maximum_db", "maximum_level_db"),
+    ("emission", "plant_steady_reading", "maximum_db", "max_level_db"),
+    ("emission", "sound_energy_pressure", "events", "n_events"),
+    ("emission", "measurement_positions", "reflecting_planes", "n_reflecting_planes"),
+    ("signals", "tone_burst", "cycles", "n_cycles"),
+    ("metrology", "monte_carlo", "trials", "n_trials"),
+    ("hearing", "nipts", "years", "exposure_duration_years"),
+    ("aircraft", "event_level", "maximum_levels", "max_levels"),
+    (
+        "materials",
+        "diffuse_field_absorption",
+        "quadrature_points",
+        "n_quadrature_points",
+    ),
+    ("underwater", "eigenrays", "max_arrivals", "max_n_arrivals"),
+    ("vibration", "induction_motor_frequencies", "poles", "n_poles"),
+    ("environment", "evaluation_period_level", "hours", "duration_hours"),
+    ("environment", "lden", "hours", "period_hours"),
+    ("room", "sweep_signal", "seconds", "duration_s"),
+    ("room", "image_source_rir", "duration", "duration_s"),
+    ("electroacoustics", "swept_sine_distortion", "seconds", "duration_s"),
+    ("electroacoustics", "SweptSineDistortionResult", "duration", "duration_s"),
+    ("signals", "noise_signal", "seconds", "duration_s"),
+    ("speech", "stipa_signal", "seconds", "duration_s"),
+    (
+        "environment",
+        "impulse_prominence",
+        "assessment_period_min",
+        "assessment_period_minutes",
+    ),
 ]
 
 
@@ -648,6 +681,38 @@ def test_a_keyword_the_4_0_respelled_is_gone(
     parameters = inspect.signature(getattr(getattr(ph, package), owner)).parameters
     assert new in parameters
     assert old not in parameters
+
+
+#: ``(package or "" for the root, record, old field, new field)``.
+_RESPELLED_4_0_FIELDS = [
+    ("signals", "SpectralDensityResult", "ci_lower", "confidence_lower"),
+    ("signals", "MultitaperSpectralDensityResult", "ci_upper", "confidence_upper"),
+    (
+        "signals",
+        "PhaseDecompositionResult",
+        "minimum_phase_response",
+        "min_phase_response",
+    ),
+    ("io", "AudioFileInfo", "frames", "n_samples"),
+    ("emission", "SoundEnergyResult", "events", "n_events"),
+    ("", "ReportMetadata", "source_positions", "n_source_positions"),
+    (
+        "environment",
+        "ImpulseProminenceResult",
+        "assessment_period_min",
+        "assessment_period_minutes",
+    ),
+]
+
+
+@pytest.mark.parametrize(("package", "record", "old", "new"), _RESPELLED_4_0_FIELDS)
+def test_a_field_the_4_0_respelled_is_gone(
+    package: str, record: str, old: str, new: str
+) -> None:
+    owner = getattr(getattr(ph, package) if package else ph, record)
+    fields = {field.name for field in dataclasses.fields(owner)}
+    assert new in fields
+    assert old not in fields
 
 
 # --------------------------------------------------------------------------- #

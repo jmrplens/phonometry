@@ -288,7 +288,7 @@ turbine_microphone_positions(
     *,
     microphone_height_m: float,
     spacing_m: float,
-    turbine_boxes: int = 1,
+    n_turbine_boxes: int = 1,
     include_overhead: bool = True,
 ) -> TurbineMicrophoneArray
 ```
@@ -330,7 +330,7 @@ to lie on the sides of every parallelepiped.
 | `surface` | The measurement surface, from [`turbine_measurement_surface`](/phonometry/reference/api/power/turbine-noise/#turbine_measurement_surface). |
 | `microphone_height_m` | Height of the row round the sides, in metres, above the reflecting plane and no higher than the lowest parallelepiped. |
 | `spacing_m` | The largest distance between neighbouring positions along the path, in metres. |
-| `turbine_boxes` | How many reference boxes, from the front, enclose the turbine (1 for Figure 2 a, 2 for Figure 2 b, where the HP and IP casings share one box and the LP turbine has its own). Ignored for a set in a single box. |
+| `n_turbine_boxes` | How many reference boxes, from the front, enclose the turbine (1 for Figure 2 a, 2 for Figure 2 b, where the HP and IP casings share one box and the LP turbine has its own). Ignored for a set in a single box. |
 | `include_overhead` | `False` leaves the overhead line out, key position 3 with it, as the NOTE of 7.2.2 allows once a preliminary investigation has shown the overhead positions move the sound power level by no more than 1,0 dB (see [`TurbineSoundPowerResult.overhead_effect_db`](/phonometry/reference/api/power/turbine-noise/#turbinesoundpowerresultoverhead_effect_db)). |
 
 **Returns:** The positions, their labels and the overhead mask.
@@ -339,7 +339,7 @@ to lie on the sides of every parallelepiped.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a height outside the sides, a non-positive spacing, or a `turbine_boxes` that leaves no driven machinery. |
+| ValueError | for a height outside the sides, a non-positive spacing, or a `n_turbine_boxes` that leaves no driven machinery. |
 
 ## turbine_noise_declaration
 
@@ -641,7 +641,7 @@ TurbineMicrophoneArray(
     overhead_mask: np.ndarray,
     microphone_height_m: float,
     spacing_m: float,
-    turbine_boxes: int,
+    n_turbine_boxes: int,
     positions_per_box: tuple[int, ...],
 )
 ```
@@ -667,7 +667,7 @@ and down the rear end towards 5.
 | `overhead_mask` | Which positions are on the overhead line, the ends above the row round the sides and the top of the surface. |
 | `microphone_height_m` | Height of the positions round the sides, in metres. |
 | `spacing_m` | The largest distance allowed between neighbours, in metres. |
-| `turbine_boxes` | How many of the reference boxes enclose the turbine; key positions 2, 3 and 4 stand in the plane that follows them. |
+| `n_turbine_boxes` | How many of the reference boxes enclose the turbine; key positions 2, 3 and 4 stand in the plane that follows them. |
 | `positions_per_box` | Positions on one long side within the length of each parallelepiped (the other side mirrors them). |
 
 ### TurbineMicrophoneArray.every_box_sampled

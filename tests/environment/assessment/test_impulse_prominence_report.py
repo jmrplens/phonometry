@@ -319,7 +319,7 @@ def test_assessment_period_reflects_the_analysed_interval(tmp_path: Path) -> Non
     assert "30 min" in _extract_text(str(default_out))
 
     other = nt.impulse_prominence(
-        _ONSET_RATES, _LEVEL_DIFFERENCES, assessment_period_min=15.0
+        _ONSET_RATES, _LEVEL_DIFFERENCES, assessment_period_minutes=15.0
     )
     other_out = tmp_path / "quarter_hour.pdf"
     other.report(str(other_out))

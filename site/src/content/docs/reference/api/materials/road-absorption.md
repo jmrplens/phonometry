@@ -480,10 +480,10 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ISO13472_SPEED_OF_SOUND_M_S = 340.0
 ```
 
-## maximum_sampled_area_radius
+## max_sampled_area_radius
 
 ```python
-maximum_sampled_area_radius(
+max_sampled_area_radius(
     window_width: float,
     *,
     source_height_m: float = 1.25,

@@ -63,7 +63,7 @@ __all__ = [
 
 _INF = float("inf")
 
-# Floor on the `sweep_points` parameter of `verify_weighting_class` (default
+# Floor on the `n_sweep_points` parameter of `verify_weighting_class` (default
 # 4096): fewer grid frequencies would make the geometric grid of the
 # between-nominals sweep too coarse for its verdict to mean anything. The
 # floor is the function's own guard, not a value from the standard.
@@ -636,7 +636,7 @@ def _between_nominals_sweep(
     wf: WeightingFilter,
     freqs_exact: np.ndarray,
     masks: dict[int, tuple[np.ndarray, np.ndarray]],
-    sweep_points: int,
+    n_sweep_points: int,
 ) -> dict[str, float]:
     """Subclause 5.5.7 sweep between adjacent exact nominal frequencies.
 
@@ -644,7 +644,7 @@ def _between_nominals_sweep(
     larger of the two adjacent tabulated limits; the design goal there is the
     analytic Annex E response.
     """
-    grid = np.geomspace(freqs_exact[0], freqs_exact[-1], sweep_points)
+    grid = np.geomspace(freqs_exact[0], freqs_exact[-1], n_sweep_points)
     sweep_dev = _weighting_response_db(wf, grid) - _analytic_weighting_db(
         wf.curve, grid
     )
@@ -707,7 +707,7 @@ class WeightingComplianceResult(OwnsArrays):
         (IEC 651:1979, Types 0/1/2/3 offered as classes 0-3).
     :ivar fs: Sampling rate of the verified filter, in Hz. It is what puts
         rows out of range, so the verdict carries it.
-    :ivar sweep_points: Grid frequencies used by the 5.5.7 sweep.
+    :ivar n_sweep_points: Grid frequencies used by the 5.5.7 sweep.
     """
 
     band_margins: tuple[Mapping[str, Any], ...]
@@ -715,7 +715,7 @@ class WeightingComplianceResult(OwnsArrays):
     curve: str
     edition: str
     fs: float
-    sweep_points: int
+    n_sweep_points: int
 
     def __post_init__(self) -> None:
         """Reject readings the verdict cannot be read from.
@@ -859,7 +859,7 @@ def _margin_classes(band: Mapping[str, Any]) -> list[int]:
 
 
 def verify_weighting_class(
-    wf: WeightingFilter, *, sweep_points: int = 4096, edition: str = "2013"
+    wf: WeightingFilter, *, n_sweep_points: int = 4096, edition: str = "2013"
 ) -> WeightingComplianceResult:
     r"""Verify a frequency-weighting filter against its standard's tolerances.
 
@@ -912,9 +912,9 @@ def verify_weighting_class(
     tabulated at the nominal frequencies and nowhere else, the sweep is
     applied as the analogous engineering check). Both the per-frequency
     verdicts and the sweep must pass for
-    ``overall_class``. The sweep samples ``sweep_points`` grid frequencies; a
+    ``overall_class``. The sweep samples ``n_sweep_points`` grid frequencies; a
     violation narrower than the grid spacing could in principle fall between
-    samples, so raise ``sweep_points`` for higher-Q suspects (the verdict
+    samples, so raise ``n_sweep_points`` for higher-Q suspects (the verdict
     attests the sampled grid, not a continuous proof).
 
     The response is taken over the whole path a signal travels through
@@ -939,7 +939,7 @@ def verify_weighting_class(
 
     :param wf: The weighting filter to verify (``A``, ``B``, ``C``, ``AU``
         or ``Z``; ``A``, ``B`` or ``C`` for ``edition="1979"``).
-    :param sweep_points: Number of points of the 5.5.7 between-nominals sweep
+    :param n_sweep_points: Number of points of the 5.5.7 between-nominals sweep
         (>= 64).
     :param edition: ``"2013"`` (IEC 61672-1:2013, classes 1/2) or ``"1979"``
         (IEC 651:1979, Types 0/1/2/3 offered as classes 0-3).
@@ -947,7 +947,7 @@ def verify_weighting_class(
         together with the per-frequency verdicts it rests on, the
         between-nominals sweep and the filter it was measured on.
     :raises ValueError: if the edition is unknown, the edition does not define
-        the filter's curve, or ``sweep_points`` is below 64.
+        the filter's curve, or ``n_sweep_points`` is below 64.
     """
     spec = _edition_spec(edition)
     if wf.curve not in spec["curves"]:
@@ -956,9 +956,9 @@ def verify_weighting_class(
             f"for edition '{edition}'."
         )
         raise ValueError(msg)
-    require_scalar(sweep_points, "sweep_points")
-    if sweep_points < _MIN_SWEEP_POINTS:
-        msg = "'sweep_points' must be at least 64."
+    require_scalar(n_sweep_points, "n_sweep_points")
+    if n_sweep_points < _MIN_SWEEP_POINTS:
+        msg = "'n_sweep_points' must be at least 64."
         raise ValueError(msg)
 
     nyquist = wf.fs / 2.0
@@ -983,7 +983,9 @@ def verify_weighting_class(
     bands = _weighting_band_verdicts(freqs_nom, deviation, masks)
 
     between = (
-        _between_nominals_sweep(wf, freqs_exact, masks, sweep_points) if bands else None
+        _between_nominals_sweep(wf, freqs_exact, masks, n_sweep_points)
+        if bands
+        else None
     )
 
     return WeightingComplianceResult(
@@ -992,5 +994,5 @@ def verify_weighting_class(
         curve=str(wf.curve),
         edition=edition,
         fs=float(wf.fs),
-        sweep_points=int(sweep_points),
+        n_sweep_points=int(n_sweep_points),
     )

@@ -49,7 +49,7 @@ around each mid-band frequency, live in [`phonometry.filters.compliance`](/phono
 verify_weighting_class(
     wf: WeightingFilter,
     *,
-    sweep_points: int = 4096,
+    n_sweep_points: int = 4096,
     edition: str = '2013',
 ) -> WeightingComplianceResult
 ```
@@ -105,9 +105,9 @@ unnoticed (for B, for AU and under the 1979 edition, whose tables are
 tabulated at the nominal frequencies and nowhere else, the sweep is
 applied as the analogous engineering check). Both the per-frequency
 verdicts and the sweep must pass for
-`overall_class`. The sweep samples `sweep_points` grid frequencies; a
+`overall_class`. The sweep samples `n_sweep_points` grid frequencies; a
 violation narrower than the grid spacing could in principle fall between
-samples, so raise `sweep_points` for higher-Q suspects (the verdict
+samples, so raise `n_sweep_points` for higher-Q suspects (the verdict
 attests the sampled grid, not a continuous proof).
 
 The response is taken over the whole path a signal travels through
@@ -135,7 +135,7 @@ over the standard's full frequency range.
 | Name | Description |
 | :--- | :--- |
 | `wf` | The weighting filter to verify (`A`, `B`, `C`, `AU` or `Z`; `A`, `B` or `C` for `edition="1979"`). |
-| `sweep_points` | Number of points of the 5.5.7 between-nominals sweep (>= 64). |
+| `n_sweep_points` | Number of points of the 5.5.7 between-nominals sweep (>= 64). |
 | `edition` | `"2013"` (IEC 61672-1:2013, classes 1/2) or `"1979"` (IEC 651:1979, Types 0/1/2/3 offered as classes 0-3). |
 
 **Returns:** A [`WeightingComplianceResult`](/phonometry/reference/api/filters/weighting-compliance/#weightingcomplianceresult), which carries the class together with the per-frequency verdicts it rests on, the between-nominals sweep and the filter it was measured on.
@@ -144,7 +144,7 @@ over the standard's full frequency range.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if the edition is unknown, the edition does not define the filter's curve, or `sweep_points` is below 64. |
+| ValueError | if the edition is unknown, the edition does not define the filter's curve, or `n_sweep_points` is below 64. |
 
 ## weighting_class_limits
 
@@ -191,7 +191,7 @@ WeightingComplianceResult(
     curve: str,
     edition: str,
     fs: float,
-    sweep_points: int,
+    n_sweep_points: int,
 )
 ```
 
@@ -212,7 +212,7 @@ built to state a class its margins do not reach.
 | `curve` | The weighting the verdict is about (`"A"`, `"B"`, `"C"`, `"AU"` or `"Z"`). |
 | `edition` | `"2013"` (IEC 61672-1:2013, classes 1/2) or `"1979"` (IEC 651:1979, Types 0/1/2/3 offered as classes 0-3). |
 | `fs` | Sampling rate of the verified filter, in Hz. It is what puts rows out of range, so the verdict carries it. |
-| `sweep_points` | Grid frequencies used by the 5.5.7 sweep. |
+| `n_sweep_points` | Grid frequencies used by the 5.5.7 sweep. |
 
 ### WeightingComplianceResult.bands
 

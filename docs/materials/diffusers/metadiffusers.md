@@ -72,7 +72,7 @@ panel scatters like the 27.4 cm deep QRD it mimics.
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_geometry.svg" alt="To-scale cross-section of the published quadratic-residue metadiffuser: a 350 by 20 millimetre panel over a rigid backing with five numbered slits opening at the face, each loaded by two Helmholtz resonators whose necks and cavities shelve sideways into the septum between slits; dimension lines mark the 350 millimetre width, the 70 millimetre pitch, the 14.7 millimetre first slit and the 20 millimetre depth, with the incident sound arriving from above" width="92%"></picture>
 
 As in the published far-field comparison, the polar response repeats the
-five-well sequence six times (`repetitions=6`, a 2.1 m panel):
+five-well sequence six times (`n_repetitions=6`, a 2.1 m panel):
 
 ```python
 import numpy as np
@@ -104,7 +104,7 @@ print(round(float(alpha1.max()), 2), int(f[alpha1.argmax()]))  # 0.99 2305
 
 # Far-field comparison: the five-well sequence repeated six times (2.1 m).
 polar = materials.metadiffuser_polar_response(2000.0, wells, depth_m=0.02,
-                                              period_m=0.07, repetitions=6)
+                                              period_m=0.07, n_repetitions=6)
 print(round(polar.coefficient, 2))                             # 0.32
 ```
 
@@ -136,11 +136,11 @@ wells = [
 # The metadiffuser panel and the QRD it was tuned to at 2 kHz, both with
 # six repetitions of the period_m (2.1 m panels).
 meta = materials.metadiffuser_polar_response(2000.0, wells, depth_m=0.02, period_m=0.07,
-                                             repetitions=6)
+                                             n_repetitions=6)
 sequence = np.roll(materials.quadratic_residue_sequence(5), -1)
 depths = sequence * (343.0 / 500.0) / (2 * 5)
 qrd = materials.predict_diffuser_polar_response(
-    0.07, 2000.0, depths=depths, repetitions=6, include_obliquity=False,
+    0.07, 2000.0, depths=depths, n_repetitions=6, include_obliquity=False,
 )
 
 ax = meta.plot(marker="", linewidth=2.2, label="Metadiffuser, panel 2 cm")

@@ -97,8 +97,8 @@ __all__ = [
     "blast_peak_velocity_mm_s",
     "fall_energy_kj",
     "far_field_velocity_mm_s",
-    "floor_transfer_maximum",
-    "foundation_transfer_maximum",
+    "floor_transfer_max",
+    "foundation_transfer_max",
     "geometric_exponent",
     "impact_peak_velocity_mm_s",
     "machine_count_correction",
@@ -419,7 +419,7 @@ def soil_building_natural_frequency(stiffness: float, *, mass: float) -> float:
     return math.sqrt(stiffness / mass) / (2.0 * math.pi)
 
 
-def soil_building_frequency_guide(stories: int) -> tuple[float, float]:
+def soil_building_frequency_guide(n_stories: int) -> tuple[float, float]:
     """The natural frequency Clause 4.3 gives a building on medium ground.
 
     About 15 Hz for one or two storeys, 8 Hz to 12 Hz for two to six, under
@@ -427,13 +427,13 @@ def soil_building_frequency_guide(stories: int) -> tuple[float, float]:
     200 m/s. The clause prints two storeys in both ranges, so a two-storey
     building gets the union, 8 Hz to 15 Hz.
 
-    :param stories: The number of storeys, at least one.
+    :param n_stories: The number of storeys, at least one.
     :return: ``(low, high)`` in hertz; the low bound is 0 above six storeys
         and both are 15 for a single storey.
     :raises ValueError: For fewer than one storey or a count that is not
         whole.
     """
-    count = require_count(stories, "stories")
+    count = require_count(n_stories, "n_stories")
     if count < _LOW_RISE_STOREYS:
         return _LOW_RISE_HZ
     if count == _LOW_RISE_STOREYS:
@@ -443,7 +443,7 @@ def soil_building_frequency_guide(stories: int) -> tuple[float, float]:
     return _HIGH_RISE_HZ
 
 
-def foundation_transfer_maximum(
+def foundation_transfer_max(
     system_damping_ratio: float = LOOSE_GROUND_SYSTEM_DAMPING,
 ) -> float:
     r"""The most a foundation passes at the building's resonance, Clause 4.3.
@@ -460,7 +460,7 @@ def foundation_transfer_maximum(
     return 1.0 / (2.0 * require_positive(system_damping_ratio, "system_damping_ratio"))
 
 
-def floor_transfer_maximum(floor_damping_ratio: float) -> float:
+def floor_transfer_max(floor_damping_ratio: float) -> float:
     r"""The most a floor amplifies at its resonance, Clause 4.3.
 
     :math:`V_D = 1 / (2 D_1)`, from the foundation through the walls to the

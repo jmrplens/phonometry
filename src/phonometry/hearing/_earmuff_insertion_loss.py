@@ -414,7 +414,7 @@ class EarmuffInsertionLossResult(OwnsArrays):
     isolation_cup_levels_db: np.ndarray | None = None
 
     @property
-    def repetitions(self) -> int:
+    def n_repetitions(self) -> int:
         """The number of fittings measured.
 
         :return: The count of occluded measurements.
@@ -430,7 +430,7 @@ class EarmuffInsertionLossResult(OwnsArrays):
 
         :return: ``True`` from three repetitions.
         """
-        return self.repetitions >= _MINIMUM_REPETITIONS
+        return self.n_repetitions >= _MINIMUM_REPETITIONS
 
     @property
     def reported_db(self) -> np.ndarray:

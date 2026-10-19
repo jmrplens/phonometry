@@ -645,10 +645,7 @@ The geometry is the one 9.2 measures on the plot plan, to within ±5 %;
 ## plant_steady_reading
 
 ```python
-plant_steady_reading(
-    maximum_level_db: float,
-    minimum_level_db: float,
-) -> float
+plant_steady_reading(max_level_db: float, min_level_db: float) -> float
 ```
 
 The level read on a sound level meter from a steady noise, 9.5.2.
@@ -665,8 +662,8 @@ judges that one.
 
 | Name | Description |
 | :--- | :--- |
-| `maximum_level_db` | The highest level read, in decibels. |
-| `minimum_level_db` | The lowest level read, in decibels. |
+| `max_level_db` | The highest level read, in decibels. |
+| `min_level_db` | The lowest level read, in decibels. |
 
 **Returns:** The level, in decibels.
 

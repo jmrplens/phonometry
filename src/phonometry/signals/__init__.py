@@ -35,7 +35,7 @@ from .phase import (
     PhaseDecompositionResult,
     excess_phase,
     group_delay,
-    minimum_phase,
+    min_phase,
     phase_decomposition,
 )
 from .spectra import (
@@ -112,7 +112,7 @@ __all__ = [
     "lex_8h",
     "lifter",
     "ln_levels",
-    "minimum_phase",
+    "min_phase",
     "miso_coherence",
     "multitaper_psd",
     "noise_signal",

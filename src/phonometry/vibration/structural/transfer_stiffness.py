@@ -105,7 +105,11 @@ from ..._internal.validation import (
 from ..._internal.warnings import PhonometryWarning
 from ...filters.frequencies import _nominal_freq_for_band
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
-from ...metrology.uncertainty import Quantity, UncertaintyResult, combine_uncertainty
+from ...metrology.uncertainty import (
+    Quantity,
+    UncertaintyResult,
+    uncertainty_propagation,
+)
 from .mechanical_mobility import convert_frf
 
 #: Reference dynamic stiffness for the level ``L_k`` (ISO 10846-2/-3, 3.17), N/m.
@@ -2190,7 +2194,7 @@ def driving_point_uncertainty(
 ) -> DrivingPointUncertainty:
     r"""Uncertainty of a band level measured by the driving-point method (ISO 10846-5 Annex B).
 
-    Table B.1, built on :func:`phonometry.metrology.combine_uncertainty`:
+    Table B.1, built on :func:`phonometry.metrology.uncertainty_propagation`:
 
     - :math:`\hat{L}_{k,\mathrm{av}}`, signal processing and background
       noise, normal, 0,3 dB (B.3.1);
@@ -2275,5 +2279,5 @@ def driving_point_uncertainty(
             0.0, u["linearity_uncertainty_db"], "rectangular", name=_ANNEX_B_NAMES[5]
         ),
     )
-    budget = combine_uncertainty(_sum_of_inputs, quantities)
+    budget = uncertainty_propagation(_sum_of_inputs, quantities)
     return DrivingPointUncertainty(budget=budget)

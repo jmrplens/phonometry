@@ -99,10 +99,10 @@ _SOURCE = np.linspace(95.0, 80.0, _BANDS.size)
 )
 def _chk_sound_power_insulation_is_a_difference() -> Outcome:
     with_enclosure = _SOURCE - np.linspace(10.0, 30.0, _BANDS.size)
-    plain = ph.noise_control.sound_power_insulation(
+    plain = ph.noise_control.enclosure_sound_power_insulation(
         _SOURCE, with_enclosure, frequencies=_BANDS
     )
-    shifted = ph.noise_control.sound_power_insulation(
+    shifted = ph.noise_control.enclosure_sound_power_insulation(
         _SOURCE + 7.5, with_enclosure + 7.5, frequencies=_BANDS
     )
     worst = float(np.max(np.abs(plain.insulation - shifted.insulation)))
@@ -123,10 +123,10 @@ def _chk_sound_power_insulation_is_a_difference() -> Outcome:
 )
 def _chk_estimated_insulation_identity() -> Outcome:
     insulation = np.linspace(5.0, 35.0, _BANDS.size)
-    estimate = ph.noise_control.estimated_a_weighted_insulation(
+    estimate = ph.noise_control.estimated_a_weighted_enclosure_insulation(
         _SOURCE, insulation, frequencies=_BANDS
     )
-    res = ph.noise_control.sound_power_insulation(
+    res = ph.noise_control.enclosure_sound_power_insulation(
         _SOURCE, _SOURCE - insulation, frequencies=_BANDS
     )
     assert res.a_weighted_insulation is not None
@@ -140,7 +140,7 @@ def _chk_estimated_insulation_identity() -> Outcome:
     "which is the sign test of the A-weighting term A_i",
 )
 def _chk_estimated_insulation_zero() -> Outcome:
-    estimate = ph.noise_control.estimated_a_weighted_insulation(
+    estimate = ph.noise_control.estimated_a_weighted_enclosure_insulation(
         _SOURCE, np.zeros(_BANDS.size), frequencies=_BANDS
     )
     return numeric(0.0, estimate, 1e-12, unit="dB")
@@ -306,7 +306,7 @@ def _chk_cabin_estimate_identity() -> Outcome:
     cabin = ph.noise_control.estimated_cabin_noise_insulation(
         _SOURCE, insulation, frequencies=_BANDS
     )
-    enclosure = ph.noise_control.estimated_a_weighted_insulation(
+    enclosure = ph.noise_control.estimated_a_weighted_enclosure_insulation(
         _SOURCE, insulation, frequencies=_BANDS
     )
     return numeric(enclosure, cabin, 1e-12, unit="dB")
@@ -782,7 +782,7 @@ def _chk_barron_a_weighted_totals() -> Outcome:
 )
 def _chk_smith_estimate_follows_the_spectrum() -> Outcome:
     computed = {
-        name: ph.noise_control.estimated_a_weighted_insulation(
+        name: ph.noise_control.estimated_a_weighted_enclosure_insulation(
             list(spectrum),
             np.array(oracle.SMITH_EXAMPLE_1_13_ATTENUATION_DB),
             frequencies=np.array(oracle.SMITH_EXAMPLE_1_13_OCTAVES_HZ),
@@ -841,7 +841,7 @@ def _chk_ifa_installed_enclosures() -> Outcome:
     computed: dict[str, float] = {}
     printed: dict[str, float] = {}
     for name, (without, with_, reduction) in oracle.IFA_LSA_01_243_ENCLOSURES.items():
-        result = ph.noise_control.sound_pressure_insulation(
+        result = ph.noise_control.enclosure_sound_pressure_insulation(
             [without],
             [with_],
             a_weighted_without=without,
@@ -1215,7 +1215,7 @@ _BARRON_POWER_BANDS = _BOOK_OCTAVES_HZ != oracle.BARRON_TABLE_7_5_INCONSISTENT_B
     "pressure spectra, against the printed insertion loss row",
 )
 def _chk_barron_pressure_bands() -> Outcome:
-    result = ph.noise_control.sound_pressure_insulation(
+    result = ph.noise_control.enclosure_sound_pressure_insulation(
         _BARRON_LP_WITHOUT_DB,
         _BARRON_LP_WITH_DB,
         frequencies=_BOOK_OCTAVES_HZ,
@@ -1239,7 +1239,7 @@ def _chk_barron_pressure_bands() -> Outcome:
     "the difference of the printed 108.4 dBA and 89.8 dBA",
 )
 def _chk_barron_a_weighted_insulation() -> Outcome:
-    result = ph.noise_control.sound_pressure_insulation(
+    result = ph.noise_control.enclosure_sound_pressure_insulation(
         _BARRON_LP_WITHOUT_DB,
         _BARRON_LP_WITH_DB,
         frequencies=_BOOK_OCTAVES_HZ,
@@ -1267,7 +1267,7 @@ def _chk_barron_a_weighted_insulation() -> Outcome:
     "difference of A-weighted levels",
 )
 def _chk_barron_annex_c_estimate() -> Outcome:
-    estimate = ph.noise_control.estimated_a_weighted_insulation(
+    estimate = ph.noise_control.estimated_a_weighted_enclosure_insulation(
         _BARRON_LP_WITHOUT_DB,
         _BARRON_IL_DB,
         frequencies=_BOOK_OCTAVES_HZ,
@@ -1291,7 +1291,7 @@ def _chk_barron_annex_c_estimate() -> Outcome:
 )
 def _chk_barron_power_bands() -> Outcome:
     keep = _BARRON_POWER_BANDS
-    result = ph.noise_control.sound_power_insulation(
+    result = ph.noise_control.enclosure_sound_power_insulation(
         _BARRON_LW_DB[keep],
         _BARRON_LW_OUT_DB[keep],
         frequencies=_BOOK_OCTAVES_HZ[keep],
@@ -1319,7 +1319,7 @@ def _chk_harris_estimated_reduction() -> Outcome:
     worst = 0.0
     matching = 0
     for reduction, printed_dba in oracle.HARRIS_CASES.values():
-        estimate = ph.noise_control.estimated_a_weighted_insulation(
+        estimate = ph.noise_control.estimated_a_weighted_enclosure_insulation(
             np.array(oracle.HARRIS_BEFORE_DB),
             list(reduction),
             frequencies=_BOOK_OCTAVES_HZ,
@@ -1342,7 +1342,7 @@ def _chk_harris_estimated_reduction() -> Outcome:
     "printed calculation example reads through that pass-through unchanged",
 )
 def _chk_iso717_pass_through() -> Outcome:
-    rated = ph.noise_control.weighted_insulation(
+    rated = ph.noise_control.weighted_enclosure_insulation(
         ref.ISO717_1_ANNEX_C_R,
         quantity="sound_power",
         band_fraction=3,
@@ -1367,7 +1367,7 @@ def _chk_iso717_pass_through() -> Outcome:
 def _chk_iso80000_rounding() -> Outcome:
     examples = rounding.ISO80000_1_ANNEX_B_ROUNDINGS.values()
     given = [number / scale for number, scale, _ in examples]
-    rounded = ph.noise_control.sound_power_insulation(
+    rounded = ph.noise_control.enclosure_sound_power_insulation(
         given, [0.0] * len(given)
     ).rounded()
     printed = [want for _, _, want in examples]
@@ -1399,7 +1399,7 @@ def _chk_suva_a_weighted_total() -> Outcome:
     octaves = np.array(oracle.SUVA_OCTAVES_HZ)
     reference = np.full(levels.size, -300.0)
     reference[octaves == 1000.0] = 0.0
-    result = ph.noise_control.sound_power_insulation(
+    result = ph.noise_control.enclosure_sound_power_insulation(
         levels,
         reference,
         frequencies=octaves,

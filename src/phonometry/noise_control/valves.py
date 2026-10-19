@@ -77,16 +77,16 @@ from .._internal.warnings import PhonometryWarning
 from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
-    from collections.abc import Mapping
+    from collections.abc import Mapping, Sequence
 
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
 __all__ = [
     "AERODYNAMIC_A_WEIGHTING_DB",
     "AerodynamicValveNoise",
     "AIR_SPEED_OF_SOUND_M_S",
     "coincidence_frequencies",
-    "combine_internal_levels",
+    "combined_internal_levels",
     "DEFAULT_EXPANDER",
     "DownstreamPipe",
     "Expander",
@@ -1217,8 +1217,8 @@ def expander_noise(  # noqa: PLR0913
     )
 
 
-def combine_internal_levels(
-    *levels: NDArray[np.float64],
+def combined_internal_levels(
+    levels: Sequence[ArrayLike],
 ) -> NDArray[np.float64]:
     r"""Equation (43): two internal spectra at the same pipe wall, added.
 
@@ -1231,18 +1231,27 @@ def combine_internal_levels(
     add in energy and not in level, and the sum is what Equation (24) then
     takes through the wall.
 
-    :param levels: Two or more band level arrays of the same shape, in dB.
+    :param levels: One sequence of two or more band level arrays of the same
+        shape, in dB, one per source.
     :return: Their energy sum, in dB.
-    :raises ValueError: If fewer than two are given, or they disagree in
-        shape.
+    :raises ValueError: If an entry is a single level rather than a band
+        array (one spectrum passed where the sequence of spectra belongs),
+        if fewer than two are given, or if they disagree in shape.
     """
-    if len(levels) < _MINIMUM_SOURCES:
+    arrays = [np.asarray(level, dtype=np.float64) for level in levels]
+    if any(array.ndim == 0 for array in arrays):
         msg = (
-            "Equation (43) combines the valve trim with the expander, so "
-            f"'levels' needs at least two spectra; got {len(levels)}."
+            "Each entry of 'levels' is one source's band spectrum, so a single "
+            "level cannot stand for one; pass the spectra as one sequence, "
+            "[trim, outlet], rather than one spectrum on its own."
         )
         raise ValueError(msg)
-    arrays = [np.asarray(level, dtype=np.float64) for level in levels]
+    if len(arrays) < _MINIMUM_SOURCES:
+        msg = (
+            "Equation (43) combines the valve trim with the expander, so "
+            f"'levels' needs at least two spectra; got {len(arrays)}."
+        )
+        raise ValueError(msg)
     shapes = {array.shape for array in arrays}
     if len(shapes) != 1:
         msg = f"Every spectrum must have the same shape; got {sorted(shapes)}."
@@ -1612,8 +1621,8 @@ def valve_aerodynamic_noise(
             velocity_correction=velocity_correction,
             expander=expander,
         )
-        band_internal = combine_internal_levels(
-            band_internal, outlet_noise.band_internal_level
+        band_internal = combined_internal_levels(
+            (band_internal, outlet_noise.band_internal_level)
         )
     elif outlet_mach > MACH_LIMIT_STANDARD_TRIM:
         warnings.warn(

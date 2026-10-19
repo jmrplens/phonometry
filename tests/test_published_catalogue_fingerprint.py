@@ -15,6 +15,7 @@ from fractions import Fraction
 
 import catalogue_fingerprint as fp
 import numpy as np
+import pytest
 
 
 def _text(value: object) -> str:
@@ -322,3 +323,29 @@ def test_nonlinearity_credits_by_scope_moves_the_key_of_each_credit_only() -> No
             _text({f: v for f, v in row.items() if f != "attributed_to"})
         )
     assert scopes == {"row": 102, "table": 62}
+
+
+def test_catalogues_named_as_their_lookups_moves_three_names_and_no_row() -> None:
+    """The step renames three mappings and carries every row of them as it was.
+
+    Each renamed mapping holds the rows of its old name, in their order and to
+    the last digit; every other mapping comes out of the step as it went in.
+    """
+    before = fp.baseline()
+    for change in fp.CHANGES[: fp.CHANGES.index(fp.catalogues_named_as_their_lookups)]:
+        before = change(before)
+    after = fp.catalogues_named_as_their_lookups(before)
+    renamed = dict(fp.CATALOGUES_RENAMED)
+    assert set(after) == (set(before) - set(renamed)) | set(renamed.values())
+    for old, new in renamed.items():
+        assert list(after[new]) == list(before[old])
+        assert _text(after[new]) == _text(before[old])
+    for name in set(before) - set(renamed):
+        assert _text(after[name]) == _text(before[name])
+
+
+def test_catalogues_named_as_their_lookups_refuses_a_rename_it_cannot_make() -> None:
+    """A dump without the old name cannot be said to have been renamed."""
+    taken = fp.catalogues_named_as_their_lookups(fp.baseline())
+    with pytest.raises(ValueError, match="cannot rename PUBLISHED_GROUND to"):
+        fp.catalogues_named_as_their_lookups(taken)

@@ -48,7 +48,7 @@ from phonometry.building import (  # noqa: E402
     TRANSMISSION_LOSS_BANDS_HZ,
 )
 from phonometry.building.prediction.detailed_model import EN_12354_AIR  # noqa: E402
-from phonometry.environment.propagation import PUBLISHED_GROUND  # noqa: E402
+from phonometry.environment.propagation import PUBLISHED_GROUND_SURFACES  # noqa: E402
 from phonometry.fluids import (  # noqa: E402
     PUBLISHED_FLUIDS,
     PUBLISHED_GASES,
@@ -59,11 +59,11 @@ from phonometry.materials.absorbers import (  # noqa: E402
     PUBLISHED_ABSORPTION,
     PUBLISHED_ABSORPTION_AREAS,
     PUBLISHED_CARPETS,
-    PUBLISHED_FLOW_RESISTANCE,
-    PUBLISHED_POROUS,
+    PUBLISHED_POROUS_MATERIALS,
+    PUBLISHED_RESISTIVE_SHEETS,
 )
 from phonometry.materials.absorbers.airflow_resistance import ANNEX_A_AIR  # noqa: E402
-from phonometry.materials.absorbers.porous import PUBLISHED_AIR  # noqa: E402
+from phonometry.materials.absorbers.porous import ABSORBER_AIR  # noqa: E402
 from phonometry.materials.diffusers import (  # noqa: E402
     DIFFUSION_BANDS_HZ,
     PUBLISHED_DIFFUSION,
@@ -1147,7 +1147,7 @@ def rows(
 IN_TREE_FLUIDS = {
     "iec-61094-2-annex-f/air": ANNEX_A_AIR,
     "en-12354-annex-a/air": EN_12354_AIR,
-    "allard-2009-jca/air": PUBLISHED_AIR,
+    "phonometry-absorbers/air": ABSORBER_AIR,
     "phonometry-solver/air": SIMULATION_AIR,
 }
 
@@ -1549,8 +1549,8 @@ def render() -> str:
     :raises MissingSpanishError: When the Spanish page would print English.
     """
     solid_styles = styles(PUBLISHED_SOLIDS, SOLID_COLUMNS)
-    porous_styles = styles(PUBLISHED_POROUS, POROUS_COLUMNS)
-    ground_styles = styles(PUBLISHED_GROUND, GROUND_COLUMNS)
+    porous_styles = styles(PUBLISHED_POROUS_MATERIALS, POROUS_COLUMNS)
+    ground_styles = styles(PUBLISHED_GROUND_SURFACES, GROUND_COLUMNS)
     gas_styles = styles(PUBLISHED_GASES, GAS_COLUMNS)
     fluid_columns, fluid_rows = fluids()
     document = {
@@ -1576,7 +1576,7 @@ def render() -> str:
                 }
                 for field, heading, spanish, _ in POROUS_COLUMNS
             ],
-            "rows": list(rows(PUBLISHED_POROUS, POROUS_COLUMNS)),
+            "rows": list(rows(PUBLISHED_POROUS_MATERIALS, POROUS_COLUMNS)),
         },
         "ground": {
             "columns": [
@@ -1588,7 +1588,7 @@ def render() -> str:
                 }
                 for field, heading, spanish, _ in GROUND_COLUMNS
             ],
-            "rows": list(rows(PUBLISHED_GROUND, GROUND_COLUMNS)),
+            "rows": list(rows(PUBLISHED_GROUND_SURFACES, GROUND_COLUMNS)),
         },
         "gases": {
             "columns": [
@@ -1612,7 +1612,7 @@ def render() -> str:
         "solidNonlinearity": section(
             PUBLISHED_SOLID_NONLINEARITY, SOLID_NONLINEARITY_COLUMNS
         ),
-        "flowResistance": section(PUBLISHED_FLOW_RESISTANCE, FLOW_RESISTANCE_COLUMNS),
+        "flowResistance": section(PUBLISHED_RESISTIVE_SHEETS, FLOW_RESISTANCE_COLUMNS),
         "resilientLayers": section(PUBLISHED_RESILIENT_LAYERS, RESILIENT_LAYER_COLUMNS),
         "resilientModuli": section(
             PUBLISHED_RESILIENT_MODULI, RESILIENT_MODULUS_COLUMNS
@@ -1829,9 +1829,9 @@ def main(argv: list[str] | None = None) -> int:
         "carpets": len(PUBLISHED_CARPETS),
         "nonlinearity values": len(PUBLISHED_NONLINEARITY),
         "solid nonlinearity": len(PUBLISHED_SOLID_NONLINEARITY),
-        "ground": len(PUBLISHED_GROUND),
-        "porous": len(PUBLISHED_POROUS),
-        "resistive facings": len(PUBLISHED_FLOW_RESISTANCE),
+        "ground": len(PUBLISHED_GROUND_SURFACES),
+        "porous": len(PUBLISHED_POROUS_MATERIALS),
+        "resistive facings": len(PUBLISHED_RESISTIVE_SHEETS),
         "resilient layers": len(PUBLISHED_RESILIENT_LAYERS),
         "gases": len(PUBLISHED_GASES),
         "absorption": len(PUBLISHED_ABSORPTION),

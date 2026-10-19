@@ -225,7 +225,7 @@ cell = environment.air_attenuation(1000.0, temperature_c=10.0, relative_humidity
 print(round(float(cell), 2))                # 3.66  (dB/km, Table 1)
 
 # Feed real conditions into the ISO 354 power attenuation coefficient m [1/m]
-m = environment.air_attenuation_m([1000.0, 4000.0], temperature_c=20.0,
+m = environment.air_power_attenuation_per_m([1000.0, 4000.0], temperature_c=20.0,
                                   relative_humidity_percent=50.0)
 print(np.round(m, 5))                        # [0.00107 0.00683]
 ```
@@ -240,12 +240,12 @@ stated $\pm 10$ % accuracy (Clause 7.1). Inputs outside the tabulated ranges
 (−20…+50 °C, 10…100 % RH, 50…10 000 Hz, or above the 200 kPa validity envelope)
 still compute but raise an `AtmosphericAbsorptionWarning`; non-physical inputs
 (non-positive frequency, humidity outside 0…100 %, sub-absolute-zero
-temperature) raise `ValueError`. `air_attenuation_m` composes $\alpha$ with the
+temperature) raise `ValueError`. `air_power_attenuation_per_m` composes $\alpha$ with the
 ISO 354 conversion $m = \alpha/(10 \log_{10} e)$ so an ISO 354 caller can feed real
 atmospheric conditions straight into `absorption_area` /
 `absorption_coefficient` instead of hand-entering $m$.
 
-### `air_attenuation()` / `air_attenuation_m()` parameters
+### `air_attenuation()` / `air_power_attenuation_per_m()` parameters
 
 | Parameter | Type / shape | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
@@ -255,7 +255,7 @@ atmospheric conditions straight into `absorption_area` /
 | `static_pressure_kpa` | float | kPa | default `101.325` | ≤ 200 valid (Clause 7); above warns |
 | `exact_midband` | bool | — | default `False` | Snap to $f_\mathrm{m} = 1000\cdot10^{k/10}$ (reproduces Table 1) |
 
-`air_attenuation` returns $\alpha$ in dB/m; `air_attenuation_m` returns
+`air_attenuation` returns $\alpha$ in dB/m; `air_power_attenuation_per_m` returns
 $m = \alpha/(10 \log_{10} e)$ in 1/m for ISO 354.
 
 ### A plottable result: `atmospheric_attenuation()`
@@ -922,7 +922,7 @@ length-weighted region ground factors of 6.2.5 behind `region_ground_factors`,
 and test cases T01 to T07, the ones it marks as answerable by ISO 9613-2 alone.
 ISO 354:2003, *Acoustics — Measurement of sound
 absorption in a reverberation room*: only the clause 8.1.2.1 conversion
-$m = \alpha/(10 \log_{10} e)$ behind `air_attenuation_m`; the reverberation-room
+$m = \alpha/(10 \log_{10} e)$ behind `air_power_attenuation_per_m`; the reverberation-room
 method itself is covered in the [Room Acoustics guide](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/).
 
 ---
@@ -1052,7 +1052,7 @@ effect is reciprocal under an exchange of source and receiver heights.
 
 ### A ground from a catalogue
 
-A row of `environment.PUBLISHED_GROUND`, or of [a catalogue of your own](https://docs.jmrp.io/phonometry/io/material-catalogues/),
+A row of `environment.PUBLISHED_GROUND_SURFACES`, or of [a catalogue of your own](https://docs.jmrp.io/phonometry/io/material-catalogues/),
 gives the impedance itself: `GroundSurface.medium` is the porous half-space
 of its effective flow resistivity, by the Delany and Bazley or the Miki
 model, which `ground_effect` takes as `impedance`, `barrier_insertion_loss`
@@ -1065,12 +1065,12 @@ curve of the case above:
 
 ```python
 octaves = [125.0, 250.0, 500.0, 1000.0]
-pasture = environment.PUBLISHED_GROUND["bies-2017-table-5-2/normal_uncompacted_ground"]
+pasture = environment.PUBLISHED_GROUND_SURFACES["bies-2017-table-5-2/normal_uncompacted_ground"]
 ground = pasture.medium(octaves, model="miki")
 over_pasture = environment.ground_effect(octaves, 1.0, 1.5, 50.0, impedance=ground)
 print(over_pasture.excess_attenuation.round(2))   # [  3.84  -3.18 -13.19  -2.96]
 
-field = environment.PUBLISHED_GROUND["cox-2017-table-6-7/sports_field_delany_bazley"]
+field = environment.PUBLISHED_GROUND_SURFACES["cox-2017-table-6-7/sports_field_delany_bazley"]
 try:
     field.medium(octaves, model="miki")
 except ValueError as error:
@@ -1929,7 +1929,7 @@ device that is not flat.
 ```python
 window = environment.adrienne_reflection_window(fs, environment.ADRIENNE_SHORT_LENGTH_S)
 print(window.size)                                        # 288 samples at 48 kHz
-print(round(environment.adrienne_low_frequency_limit_hz(7.9e-3), 1))   # 162.5 Hz
+print(round(environment.adrienne_low_frequency_limit(7.9e-3), 1))   # 162.5 Hz
 ```
 
 The edges are Formula (7) sampled as printed, each a half of a full
@@ -2116,8 +2116,8 @@ print(annex_b.reflection_index.round(2)[4:10])  # [0.39 0.36 0.26 0.12 0.05 0.09
 print(annex_b.rating.reported)                 # 8 dB, as printed under the table
 print(round(annex_b.rating.rating, 2))         # 7.65 dB before rounding, see below
 
-u_bands, u_rating = annex_b.expanded_uncertainty()   # Table A.1, high column, k = 1.96
-print(round(u_rating, 2))                            # 1.59 dB, Table B.2
+u = environment.reflection_index_expanded_uncertainty()  # Table A.1, high column, k = 1.96
+print(round(u.rating_db, 2))                             # 1.59 dB, Table B.2
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_index_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_index.svg" alt="The sound reflection index of the Annex B barrier over the eighteen one-third octave bands from 100 Hz to 5 kHz: twelve light points per band for the twelve grid positions and a line through their average, near 0.58 in the three hatched bands below 200 Hz, falling from 0.39 at 250 Hz to 0.05 at 630 Hz, around 0.1 up to 1.25 kHz, a peak of 0.30 at 1.6 kHz and a rise to 0.43 at 5 kHz. The title gives DL RI of 8 dB from 200 Hz to 5 kHz." width="92%"></picture>
@@ -2150,6 +2150,23 @@ single number; in seven bands Table B.2 prints a hundredth less than 1,96
 times the $s_\mathrm{R}$ of Table A.1, as unrounded standard deviations would give. The
 print does not say which values the example multiplied, and the library
 multiplies the printed ones.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_uncertainty_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_uncertainty.svg" alt="Bars of the expanded uncertainty U j of the sound reflection index in each of the eighteen one-third octave bands from 100 Hz to 5 kHz, from the high column of Table A.1 with a coverage factor of 1.96: 0.63 at 100 Hz, 0.35 at 125 Hz, between 0.24 and 0.31 from 160 Hz to 2.5 kHz, then 0.33, 0.39 and 0.45 at 3.15, 4 and 5 kHz. The legend states the expanded uncertainty of DL RI, 1.59 dB." width="92%"></picture>
+
+*The high column of Table A.1 times 1,96, band by band: the inter-laboratory
+test agreed least at 100 Hz. The $U_j$ are in units of the index, which is a
+ratio, and the 1,59 dB of $DL_{RI}$ is a level, so the legend states it rather
+than the axis.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+u.plot()
+plt.show()
+```
+
+</details>
 
 ## Relation to the other parts of EN 1793
 

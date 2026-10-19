@@ -39,7 +39,9 @@ $1 / (2 D_0)$ of the ground's amplitude at that frequency, 2 for the
 0,25 of loose ground, and a mean of 0,5 above it, or all of it on rock; a
 floor amplifies by at most $1 / (2 D_1)$, 10 to 25 for a concrete
 floor; and the lowest horizontal natural frequency of a building of five
-storeys or more is about $10 / n$ Hz (Formula (4)).
+storeys or more is about $10 / n$ Hz (Formula (4)), the estimate
+DIN 4150-3 prints in 6.4 and ISO 4866 in D.2 as well, so it has one home:
+[`storey_fundamental_frequency`](/phonometry/reference/api/vibration/building-damage/#storey_fundamental_frequency).
 
 **Sources** (Clause 5). A blast in the far field follows
 $v_{\max} = k (L/L_0)^b (R/R_0)^{-m}$ (Formula (5)) with the charge per
@@ -533,10 +535,10 @@ than it Formula (2) does not hold.
 | :--- | :--- |
 | ValueError | For a negative extent or a non-positive wavelength. |
 
-## soil_building_frequency_guide_hz
+## soil_building_frequency_guide
 
 ```python
-soil_building_frequency_guide_hz(storeys: int) -> tuple[float, float]
+soil_building_frequency_guide(storeys: int) -> tuple[float, float]
 ```
 
 The natural frequency Clause 4.3 gives a building on medium ground.
@@ -560,14 +562,10 @@ building gets the union, 8 Hz to 15 Hz.
 | :--- | :--- |
 | ValueError | For fewer than one storey or a count that is not whole. |
 
-## soil_building_natural_frequency_hz
+## soil_building_natural_frequency
 
 ```python
-soil_building_natural_frequency_hz(
-    stiffness: float,
-    *,
-    mass: float,
-) -> float
+soil_building_natural_frequency(stiffness: float, *, mass: float) -> float
 ```
 
 The natural frequency of a building on its ground, Formula (3).
@@ -599,44 +597,10 @@ and predominantly harmonic vibration in the lower frequency range.
 SOURCE_EXPONENTS = {('line', 'harmonic', 'surface'): 0.0, ('line', 'harmonic', 'body'): 0.5, ('point', 'harmonic', 'surface'): 0.5, ('line', 'impulsive', 'surface'): 0.5, ('point', 'harmonic', 'body'): 1.0, ('line', 'impulsive', 'body'): 1.0, ('point', 'impulsive', 'surface'): 1.0, ('point', 'impulsive', 'body'): 1.5}
 ```
 
-## STOREY_FORMULA_MIN_STOREYS
-
-*Constant* (`int`).
+## track_excitation_frequency
 
 ```python
-STOREY_FORMULA_MIN_STOREYS = 5
-```
-
-## storey_frequency_hz
-
-```python
-storey_frequency_hz(storeys: int) -> float
-```
-
-The lowest horizontal natural frequency of a building, Formula (4).
-
-$f_1 \approx 10 / n$ Hz for a building of $n$ storeys, meant
-for five and more, where a tall slender building meets a low excitation
-frequency.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `storeys` | $n$, at least five. |
-
-**Returns:** $f_1$, in hertz.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | For fewer than five storeys. |
-
-## track_excitation_frequency_hz
-
-```python
-track_excitation_frequency_hz(
+track_excitation_frequency(
     train_speed_m_s: float,
     *,
     spacing_m: float,

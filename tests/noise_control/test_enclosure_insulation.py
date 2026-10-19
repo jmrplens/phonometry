@@ -61,7 +61,7 @@ def _levels(offset: float = 0.0) -> np.ndarray:
 def test_equation_one_is_the_difference() -> None:
     without = _levels()
     with_ = without - np.linspace(10.0, 30.0, without.size)
-    res = noise_control.sound_power_insulation(
+    res = noise_control.enclosure_sound_power_insulation(
         without, with_, frequencies=THIRD_OCTAVES
     )
     assert np.allclose(res.insulation, without - with_)
@@ -73,10 +73,10 @@ def test_equation_one_is_the_difference() -> None:
 def test_a_common_offset_leaves_the_insulation_alone() -> None:
     without = _levels()
     with_ = without - 12.0
-    plain = noise_control.sound_power_insulation(
+    plain = noise_control.enclosure_sound_power_insulation(
         without, with_, frequencies=THIRD_OCTAVES
     )
-    raised = noise_control.sound_power_insulation(
+    raised = noise_control.enclosure_sound_power_insulation(
         without + 7.5, with_ + 7.5, frequencies=THIRD_OCTAVES
     )
     assert np.allclose(plain.insulation, raised.insulation)
@@ -86,17 +86,17 @@ def test_a_common_offset_leaves_the_insulation_alone() -> None:
 def test_swapping_the_two_runs_changes_the_sign() -> None:
     without = _levels()
     with_ = without - 9.0
-    forward = noise_control.sound_power_insulation(
+    forward = noise_control.enclosure_sound_power_insulation(
         without, with_, frequencies=THIRD_OCTAVES
     )
-    backward = noise_control.sound_power_insulation(
+    backward = noise_control.enclosure_sound_power_insulation(
         with_, without, frequencies=THIRD_OCTAVES
     )
     assert np.allclose(forward.insulation, -backward.insulation)
 
 
 def test_a_weighted_pair_is_used_as_given() -> None:
-    res = noise_control.sound_power_insulation(
+    res = noise_control.enclosure_sound_power_insulation(
         _levels(),
         _levels() - 15.0,
         frequencies=THIRD_OCTAVES,
@@ -107,14 +107,14 @@ def test_a_weighted_pair_is_used_as_given() -> None:
 
 
 def test_without_frequencies_there_is_no_a_weighted_number() -> None:
-    res = noise_control.sound_power_insulation(_levels(), _levels() - 15.0)
+    res = noise_control.enclosure_sound_power_insulation(_levels(), _levels() - 15.0)
     assert res.a_weighted_insulation is None
     assert res.frequencies is None
 
 
 def test_rounding_is_the_report_rule() -> None:
     with pytest.warns(EnclosureInsulationWarning):
-        res = noise_control.sound_power_insulation(
+        res = noise_control.enclosure_sound_power_insulation(
             [90.0, 90.0], [79.4, 79.6], frequencies=[500.0, 1000.0]
         )
     assert res.rounded().tolist() == [11, 10]
@@ -122,12 +122,12 @@ def test_rounding_is_the_report_rule() -> None:
 
 def test_mismatched_spectra_are_refused() -> None:
     with pytest.raises(ValueError, match="level_with"):
-        noise_control.sound_power_insulation([90.0, 90.0], [80.0])
+        noise_control.enclosure_sound_power_insulation([90.0, 90.0], [80.0])
 
 
 def test_frequencies_must_match_the_spectra() -> None:
     with pytest.raises(ValueError, match="frequencies"):
-        noise_control.sound_power_insulation(
+        noise_control.enclosure_sound_power_insulation(
             [90.0, 90.0], [80.0, 80.0], frequencies=[500.0]
         )
 
@@ -136,7 +136,7 @@ def test_a_short_band_range_is_reported() -> None:
     low, high = MANDATORY_BAND_RANGE_HZ[3]
     assert (low, high) == (100.0, 5000.0)
     with pytest.warns(EnclosureInsulationWarning, match="100 Hz to 5000 Hz"):
-        noise_control.sound_power_insulation(
+        noise_control.enclosure_sound_power_insulation(
             [90.0, 90.0], [80.0, 80.0], frequencies=[500.0, 1000.0]
         )
 
@@ -153,7 +153,7 @@ def test_a_survey_standard_cannot_declare_a_band_spectrum() -> None:
     without = _levels()
     with_box = without - 12.0
     with pytest.warns(EnclosureInsulationWarning, match="A-weighted value only"):
-        noise_control.sound_power_insulation(
+        noise_control.enclosure_sound_power_insulation(
             without,
             with_box,
             frequencies=THIRD_OCTAVES,
@@ -163,7 +163,7 @@ def test_a_survey_standard_cannot_declare_a_band_spectrum() -> None:
 
 def test_the_only_value_of_a_survey_standard_is_the_a_weighted_one() -> None:
     """Table 1 gives ISO 3746 the quantity D_WA and no band value at all."""
-    res = noise_control.sound_power_insulation(
+    res = noise_control.enclosure_sound_power_insulation(
         [94.0], [79.5], base_standard="ISO 3746", condition="in-situ"
     )
     assert res.a_weighted_insulation == pytest.approx(14.5)
@@ -171,14 +171,14 @@ def test_the_only_value_of_a_survey_standard_is_the_a_weighted_one() -> None:
 
 
 def test_the_same_holds_for_the_survey_pressure_standard() -> None:
-    res = noise_control.sound_pressure_insulation(
+    res = noise_control.enclosure_sound_pressure_insulation(
         [88.0], [76.0], base_standard="ISO 11202", condition="in-situ"
     )
     assert res.a_weighted_insulation == pytest.approx(12.0)
 
 
 def test_a_measured_a_weighted_pair_still_wins_over_the_single_value() -> None:
-    res = noise_control.sound_power_insulation(
+    res = noise_control.enclosure_sound_power_insulation(
         [94.0],
         [79.5],
         a_weighted_without=93.2,
@@ -194,7 +194,7 @@ def test_a_combination_table_one_does_not_print_is_refused() -> None:
     without = _levels()
     with_box = without - 12.0
     with pytest.raises(ValueError, match="reciprocity method"):
-        noise_control.sound_power_insulation(
+        noise_control.enclosure_sound_power_insulation(
             without,
             with_box,
             frequencies=THIRD_OCTAVES,
@@ -204,7 +204,7 @@ def test_a_combination_table_one_does_not_print_is_refused() -> None:
 
 
 def test_sound_pressure_insulation_names_its_quantity() -> None:
-    res = noise_control.sound_pressure_insulation(
+    res = noise_control.enclosure_sound_pressure_insulation(
         _levels(),
         _levels() - 11.0,
         frequencies=THIRD_OCTAVES,
@@ -216,7 +216,7 @@ def test_sound_pressure_insulation_names_its_quantity() -> None:
 
 
 def test_reciprocity_is_a_laboratory_quantity() -> None:
-    res = noise_control.reciprocity_insulation(
+    res = noise_control.enclosure_reciprocity_insulation(
         _levels(), _levels() - 20.0, frequencies=THIRD_OCTAVES
     )
     assert res.quantity == "reciprocity"
@@ -227,7 +227,7 @@ def test_reciprocity_is_a_laboratory_quantity() -> None:
 def test_the_artificial_source_averages_positions_arithmetically() -> None:
     without = np.vstack([_levels(), _levels(4.0), _levels(-4.0)])
     with_ = without - 18.0
-    res = noise_control.artificial_source_insulation(
+    res = noise_control.enclosure_artificial_source_insulation(
         without, with_, frequencies=THIRD_OCTAVES
     )
     assert np.allclose(res.level_without, np.mean(without, axis=0))
@@ -238,7 +238,7 @@ def test_the_artificial_source_averages_positions_arithmetically() -> None:
 
 def test_the_artificial_source_may_report_either_quantity() -> None:
     without = np.vstack([_levels(), _levels(4.0)])
-    res = noise_control.artificial_source_insulation(
+    res = noise_control.enclosure_artificial_source_insulation(
         without,
         without - 15.0,
         frequencies=THIRD_OCTAVES,
@@ -246,7 +246,7 @@ def test_the_artificial_source_may_report_either_quantity() -> None:
     )
     assert res.quantity == "sound_pressure"
     with pytest.raises(ValueError, match="quantity"):
-        noise_control.artificial_source_insulation(
+        noise_control.enclosure_artificial_source_insulation(
             without, without - 15.0, frequencies=THIRD_OCTAVES, quantity="D_W"
         )
 
@@ -255,7 +255,7 @@ def test_one_source_position_is_not_enough() -> None:
     without = [_levels()]
     with_box = [_levels() - 10.0]
     with pytest.raises(ValueError, match="positions"):
-        noise_control.artificial_source_insulation(
+        noise_control.enclosure_artificial_source_insulation(
             without, with_box, frequencies=THIRD_OCTAVES
         )
 
@@ -264,14 +264,14 @@ def test_the_two_position_matrices_must_match() -> None:
     without = np.vstack([_levels(), _levels(2.0)])
     with_box = np.vstack([_levels(), _levels(2.0), _levels(4.0)])
     with pytest.raises(ValueError, match="one row per source position"):
-        noise_control.artificial_source_insulation(
+        noise_control.enclosure_artificial_source_insulation(
             without, with_box, frequencies=THIRD_OCTAVES
         )
 
 
 def test_the_rating_reads_the_rating_bands() -> None:
     insulation = np.linspace(12.0, 40.0, RATING_BANDS.size)
-    rating = noise_control.weighted_insulation(insulation)
+    rating = noise_control.weighted_enclosure_insulation(insulation)
     assert rating.frequencies.tolist() == RATING_BANDS.tolist()
     assert rating.quantity == "sound_power"
     assert isinstance(rating.rating, int)
@@ -280,11 +280,11 @@ def test_the_rating_reads_the_rating_bands() -> None:
 def test_a_spectrum_that_is_not_the_rating_bands_is_refused() -> None:
     eighteen_bands = np.zeros(18)
     with pytest.raises(ValueError, match="16 bands"):
-        noise_control.weighted_insulation(eighteen_bands)
+        noise_control.weighted_enclosure_insulation(eighteen_bands)
 
 
 def test_the_octave_rating_reads_five_bands() -> None:
-    rating = noise_control.weighted_insulation(
+    rating = noise_control.weighted_enclosure_insulation(
         [15.0, 20.0, 25.0, 30.0, 35.0], band_fraction=1
     )
     assert rating.frequencies.tolist() == [125.0, 250.0, 500.0, 1000.0, 2000.0]
@@ -293,7 +293,7 @@ def test_the_octave_rating_reads_five_bands() -> None:
 def test_a_flat_insulation_estimates_itself() -> None:
     spectrum = _levels()
     for value in (0.0, 7.5, 23.0):
-        estimate = noise_control.estimated_a_weighted_insulation(
+        estimate = noise_control.estimated_a_weighted_enclosure_insulation(
             spectrum, np.full(spectrum.size, value), frequencies=THIRD_OCTAVES
         )
         assert estimate == pytest.approx(value)
@@ -302,10 +302,10 @@ def test_a_flat_insulation_estimates_itself() -> None:
 def test_the_estimate_is_the_difference_of_two_a_weighted_totals() -> None:
     spectrum = _levels()
     insulation = np.linspace(5.0, 35.0, spectrum.size)
-    estimate = noise_control.estimated_a_weighted_insulation(
+    estimate = noise_control.estimated_a_weighted_enclosure_insulation(
         spectrum, insulation, frequencies=THIRD_OCTAVES
     )
-    res = noise_control.sound_power_insulation(
+    res = noise_control.enclosure_sound_power_insulation(
         spectrum, spectrum - insulation, frequencies=THIRD_OCTAVES
     )
     assert estimate == pytest.approx(res.a_weighted_insulation)
@@ -313,7 +313,7 @@ def test_the_estimate_is_the_difference_of_two_a_weighted_totals() -> None:
 
 def test_the_estimate_needs_matching_inputs() -> None:
     with pytest.raises(ValueError, match="band for band"):
-        noise_control.estimated_a_weighted_insulation(
+        noise_control.estimated_a_weighted_enclosure_insulation(
             [90.0, 90.0], [10.0], frequencies=[500.0, 1000.0]
         )
 
@@ -507,7 +507,7 @@ def test_the_plot_draws_three_series() -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    res = noise_control.sound_power_insulation(
+    res = noise_control.enclosure_sound_power_insulation(
         _levels(), _levels() - 14.0, frequencies=THIRD_OCTAVES
     )
     fig, ax = plt.subplots()
@@ -525,7 +525,7 @@ def test_the_spanish_plot_translates_its_labels() -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    res = noise_control.sound_power_insulation(
+    res = noise_control.enclosure_sound_power_insulation(
         _levels(), _levels() - 14.0, frequencies=THIRD_OCTAVES
     )
     fig, ax = plt.subplots()
@@ -539,7 +539,7 @@ def test_the_insulation_of_a_two_metre_enclosure_is_a_plain_subtraction() -> Non
     # A worked reading of clause 6.2: the machine at 97 dB in the 1 kHz band,
     # 74 dB once the enclosure is on, is 23 dB of insulation and nothing else.
     with pytest.warns(EnclosureInsulationWarning):
-        res = noise_control.sound_power_insulation(
+        res = noise_control.enclosure_sound_power_insulation(
             [97.0], [74.0], frequencies=[1000.0], band_fraction=3
         )
     assert res.insulation[0] == pytest.approx(23.0)
@@ -552,7 +552,7 @@ def test_half_an_a_weighted_pair_is_refused() -> None:
     without = _levels()
     with_box = without - 12.0
     with pytest.raises(ValueError, match="both"):
-        noise_control.sound_power_insulation(
+        noise_control.enclosure_sound_power_insulation(
             without, with_box, frequencies=THIRD_OCTAVES, a_weighted_without=99.0
         )
 
@@ -561,7 +561,7 @@ def test_an_infinite_a_weighted_level_is_refused() -> None:
     without = _levels()
     with_box = without - 12.0
     with pytest.raises(ValueError, match="a_weighted_with"):
-        noise_control.sound_power_insulation(
+        noise_control.enclosure_sound_power_insulation(
             without,
             with_box,
             frequencies=THIRD_OCTAVES,
@@ -821,7 +821,7 @@ def test_the_barron_example_prints_both_a_weighted_totals() -> None:
     assert _a_weighted_total(BARRON_WITH_DB, BARRON_OCTAVES_HZ) == pytest.approx(
         with_, abs=0.05
     )
-    result = noise_control.sound_pressure_insulation(
+    result = noise_control.enclosure_sound_pressure_insulation(
         BARRON_WITHOUT_DB,
         BARRON_WITH_DB,
         frequencies=BARRON_OCTAVES_HZ,
@@ -842,7 +842,7 @@ def test_the_smith_example_gives_one_enclosure_two_a_weighted_values() -> None:
     # estimate tied to an assumed spectrum rather than a property of the
     # enclosure. The book says so in as many words under its answer box.
     estimates = {
-        name: noise_control.estimated_a_weighted_insulation(
+        name: noise_control.estimated_a_weighted_enclosure_insulation(
             spectrum, SMITH_ATTENUATION_DB, frequencies=SMITH_OCTAVES_HZ
         )
         for name, (spectrum, _) in oracle.SMITH_EXAMPLE_1_13_MACHINES.items()
@@ -873,7 +873,7 @@ def test_two_installed_enclosures_give_their_printed_a_weighted_reduction() -> N
     # is the order of the subtraction of Equation (4) against real
     # installations, not a precise figure.
     for name, (without, with_, reduction) in oracle.IFA_LSA_01_243_ENCLOSURES.items():
-        result = noise_control.sound_pressure_insulation(
+        result = noise_control.enclosure_sound_pressure_insulation(
             [without],
             [with_],
             a_weighted_without=without,

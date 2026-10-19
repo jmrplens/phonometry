@@ -544,10 +544,10 @@ OMNIDIRECTIONAL_RAMP_HZ = (630.0, 1000.0)
 OMNIDIRECTIONAL_TOLERANCE_DB = (2.0, 8.0)
 ```
 
-## omnidirectionality_tolerance_db
+## omnidirectionality_tolerance
 
 ```python
-omnidirectionality_tolerance_db(frequency_hz: float) -> float
+omnidirectionality_tolerance(frequency_hz: float) -> float
 ```
 
 The directivity band a qualifying source stays inside, A.1.

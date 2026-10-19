@@ -61,7 +61,7 @@ reproduce Table 1 exactly.
 This module closes the loop with :mod:`~phonometry.materials.absorbers.sound_absorption` (ISO 354),
 whose air power-attenuation coefficient ``m`` (1/m) is defined only through
 the ISO 9613-1 ``alpha`` via :math:`m = \alpha / (10 \log_{10} e)`.
-:func:`air_attenuation_m` returns that ``m`` directly.
+:func:`air_power_attenuation_per_m` returns that ``m`` directly.
 """
 
 from __future__ import annotations
@@ -79,7 +79,7 @@ from ..._internal.validation import (
     require_scalar,
 )
 from ..._internal.warnings import PhonometryWarning
-from ...materials.absorbers.sound_absorption import attenuation_from_alpha
+from ...materials.absorbers.sound_absorption import power_attenuation_from_alpha
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
@@ -260,7 +260,7 @@ def air_attenuation(
     .. note::
         ISO 354:2003 defers its air power-attenuation coefficient ``m`` (1/m)
         entirely to this ``alpha`` via :math:`m = \alpha / (10 \log_{10} e)`. Use
-        :func:`air_attenuation_m` to obtain that ``m`` for
+        :func:`air_power_attenuation_per_m` to obtain that ``m`` for
         :func:`~phonometry.materials.absorbers.sound_absorption.absorption_area` /
         :func:`~phonometry.materials.absorbers.sound_absorption.absorption_coefficient`.
     """
@@ -323,7 +323,7 @@ def _pure_tone_terms(
     return f2, np.asarray(classical + vibrational, dtype=np.float64)
 
 
-def air_attenuation_m(
+def air_power_attenuation_per_m(
     frequencies: ArrayLike,
     *,
     temperature_c: float = 20.0,
@@ -336,7 +336,7 @@ def air_attenuation_m(
     Convenience composition of :func:`air_attenuation` (ISO 9613-1 ``alpha`` in
     dB/m) with the ISO 354:2003 (8.1.2.1) conversion
     :math:`m = \alpha / (10 \log_{10} e)`
-    (via :func:`~phonometry.materials.absorbers.sound_absorption.attenuation_from_alpha`). It lets an
+    (via :func:`~phonometry.materials.absorbers.sound_absorption.power_attenuation_from_alpha`). It lets an
     ISO 354 caller feed real atmospheric conditions into
     :func:`~phonometry.materials.absorbers.sound_absorption.absorption_area` /
     :func:`~phonometry.materials.absorbers.sound_absorption.absorption_coefficient` instead of
@@ -359,7 +359,7 @@ def air_attenuation_m(
         static_pressure_kpa=static_pressure_kpa,
         exact_midband=exact_midband,
     )
-    return attenuation_from_alpha(alpha)
+    return power_attenuation_from_alpha(alpha)
 
 
 # --- plottable atmospheric-attenuation result (ISO 9613-1:1993) -----------

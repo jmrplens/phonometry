@@ -17,7 +17,7 @@ flow resistance.
 
 Not the flow resistivity, which is the other catalogue
 ------------------------------------------------------
-[`PUBLISHED_POROUS`](/phonometry/reference/api/materials/catalogue/#published_porous) holds a flow
+[`PUBLISHED_POROUS_MATERIALS`](/phonometry/reference/api/materials/catalogue/#published_porous_materials) holds a flow
 **resistivity**, `sigma`, in Pa s/m2: a property of a bulk material, per
 metre of it, which has to be multiplied by a thickness before it means
 anything. This catalogue holds a flow **resistance**, `R_s`, in Pa s/m: a
@@ -102,14 +102,14 @@ cloth tables print none.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## PUBLISHED_FLOW_RESISTANCE
+## PUBLISHED_RESISTIVE_SHEETS
 
 *Constant* (`mapping`).
 
-## resistive_sheet_named
+## resistive_sheets_named
 
 ```python
-resistive_sheet_named(
+resistive_sheets_named(
     name: str,
     *,
     catalogue: Mapping[str, ResistiveSheet] | None = None,
@@ -131,7 +131,7 @@ other.
 | Name | Description |
 | :--- | :--- |
 | `name` | The label as its page prints it: `"80"`, `"1584"`, `"FM 122"`. |
-| `catalogue` | The rows to search in place of [`PUBLISHED_FLOW_RESISTANCE`](/phonometry/reference/api/materials/resistive-sheets/#published_flow_resistance): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_FLOW_RESISTANCE \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_FLOW_RESISTANCE`](/phonometry/reference/api/materials/resistive-sheets/#published_flow_resistance)). |
+| `catalogue` | The rows to search in place of [`PUBLISHED_RESISTIVE_SHEETS`](/phonometry/reference/api/materials/resistive-sheets/#published_resistive_sheets): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_RESISTIVE_SHEETS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_RESISTIVE_SHEETS`](/phonometry/reference/api/materials/resistive-sheets/#published_resistive_sheets)). |
 
 **Returns:** The matching rows, in catalogue order. Empty when none match.
 
@@ -193,7 +193,7 @@ is optional.
 
 | Name | Description |
 | :--- | :--- |
-| `specific_flow_resistance_pa_s_m` | The resistance of unit area of the facing, `R_s`, in pascal seconds per metre, which is the N s/m3 the three tables print and the mks rayls TABLE 8.6 also heads its column with. Per unit **area**, so unlike the flow resistivity of [`PUBLISHED_POROUS`](/phonometry/reference/api/materials/catalogue/#published_porous) it is not multiplied by a thickness. |
+| `specific_flow_resistance_pa_s_m` | The resistance of unit area of the facing, `R_s`, in pascal seconds per metre, which is the N s/m3 the three tables print and the mks rayls TABLE 8.6 also heads its column with. Per unit **area**, so unlike the flow resistivity of [`PUBLISHED_POROUS_MATERIALS`](/phonometry/reference/api/materials/catalogue/#published_porous_materials) it is not multiplied by a thickness. |
 | `normalized_flow_resistance` | The same resistance divided by the characteristic impedance of air, dimensionless, as two of the tables print it in a column of their own. Kept rather than recomputed because the two tables do not normalize by the same impedance: `reference_impedance_pa_s_m` recovers the one each row was divided by. |
 | `wires_per_cm` | Wires per centimetre of the woven mesh, as TABLE 8.5 heads the column and prints it again as wires per inch beside it. One count and not two: the page says nothing about the two directions of the weave, where the glass cloth table prints a count for each. |
 | `wire_diameter_um` | Diameter of the wire, in micrometres. |

@@ -303,7 +303,7 @@ for stage in stages:
 # 712426 0.267
 # 522582 0.236
 
-print(round(noise_control.combine_stage_levels(78.0, 74.0, 71.0), 1))   # 80.0
+print(round(noise_control.combined_stage_level([78.0, 74.0, 71.0]), 1))   # 80.0
 ```
 
 Those three coefficients increase along the flow, which is the device of

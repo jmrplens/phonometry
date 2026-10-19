@@ -112,7 +112,7 @@ def test_a_spectrum_off_the_frequency_axis_is_refused(case: str) -> None:
     """``threshold`` is the spectrum no reader catches at the median fractile.
 
     The plot draws it only away from 0.5, so at the default fractile a wrong
-    length reaches ``combine_age_and_noise`` unseen, where a lone value from
+    length reaches ``age_and_noise_threshold`` unseen, where a lone value from
     an own HTLA database (clause 6.2) is broadcast over every noise band.
     """
     result = h.age_threshold(60, "male", 0.5)

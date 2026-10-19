@@ -226,7 +226,7 @@ class AgeThresholdResult(OwnsArrays):
         rather than in the readers: the plot draws that spectrum only away
         from the median fractile, so at the default ``0.5`` one of the wrong
         length is never looked at, and
-        :func:`~phonometry.hearing.combine_age_and_noise` then stretches a
+        :func:`~phonometry.hearing.age_and_noise_threshold` then stretches a
         lone age value over every band of the noise component and returns a
         full combined spectrum built from it. A mismatched ``median``,
         ``spread_upper`` or ``spread_lower`` does raise, but from the band

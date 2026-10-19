@@ -98,7 +98,7 @@ def test_table_2_one_third_octave_cells(
 ) -> None:
     def cell(environment: str, arrangement: str | None) -> float:
         return float(
-            emission.reference_source_reproducibility_db(
+            emission.reference_source_reproducibility(
                 [frequency],
                 environment=environment,
                 arrangement=arrangement,  # type: ignore[arg-type]
@@ -111,7 +111,7 @@ def test_table_2_one_third_octave_cells(
 
 
 def test_table_2_octave_cells() -> None:
-    got = emission.reference_source_reproducibility_db(
+    got = emission.reference_source_reproducibility(
         [63, 125, 250, 2000, 4000, 8000, 16000],
         environment="hemi-anechoic",
         arrangement="fixed",
@@ -122,13 +122,11 @@ def test_table_2_octave_cells() -> None:
 
 def test_table_2_refuses_a_band_it_does_not_print() -> None:
     with pytest.raises(ValueError, match="Table 2"):
-        emission.reference_source_reproducibility_db(
+        emission.reference_source_reproducibility(
             [40.0], environment="reverberation-room"
         )
     with pytest.raises(ValueError, match="'arrangement'"):
-        emission.reference_source_reproducibility_db(
-            [1000.0], environment="hemi-anechoic"
-        )
+        emission.reference_source_reproducibility([1000.0], environment="hemi-anechoic")
 
 
 def test_knee_frequency_of_formula_a1() -> None:
@@ -331,7 +329,7 @@ def test_an_octave_is_read_only_at_an_octave_mid_band() -> None:
     with pytest.raises(ValueError, match="160 Hz is not an octave mid-band"):
         cal.sound_power_level_at([160.0], bandwidth="octave")
     with pytest.raises(ValueError, match="160 Hz is not an octave mid-band"):
-        emission.reference_source_reproducibility_db(
+        emission.reference_source_reproducibility(
             [160.0],
             environment="hemi-anechoic",
             arrangement="fixed",
@@ -461,7 +459,7 @@ def test_the_calibration_conditions_hold_their_own_air_absorption() -> None:
 
 
 def _hemi_check(radius_end: float) -> emission.FreeFieldCheck:
-    grid = emission.qualification_frequencies_hz()
+    grid = emission.qualification_frequencies()
     d = np.arange(0.30, radius_end + 1e-9, 0.02)
     directions = (
         ((1, 1, 1), ("trihedral corner",)),

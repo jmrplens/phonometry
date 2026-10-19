@@ -26,7 +26,7 @@ $$
 u_\mathrm{c}^2(y) = \sum_{i=1}^{N} \left(\frac{\partial f}{\partial x_i}\right)^2 u^2(x_i).
 $$
 
-`combine_uncertainty` evaluates the sensitivities by central differences, so any
+`uncertainty_propagation` evaluates the sensitivities by central differences, so any
 callable model works, with no hand-derived partials. Input quantities are described
 by a `Quantity` (best estimate, standard uncertainty, PDF, degrees of freedom).
 Type B evaluations from a half-width $a$ are built by `rectangular`
@@ -44,7 +44,7 @@ quantities = [
     metrology.rectangular(0.0, 0.30, name="Instrument"),
     metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
 ]
-result = metrology.combine_uncertainty(lambda a, b, c, d: a + b + c + d, quantities)
+result = metrology.uncertainty_propagation(lambda a, b, c, d: a + b + c + d, quantities)
 
 print(round(result.value, 2))                 # 74.0
 print(round(result.combined_uncertainty, 3))  # 0.407 dB
@@ -88,7 +88,7 @@ and reports the mean, the standard deviation and the **probabilistically
 symmetric coverage interval** (equal probability in each tail, clause 7.7).
 The inputs are sampled independently; the Supplement's multivariate-Gaussian
 path for non-independent quantities (6.4.8) is not implemented, so correlated
-budgets belong to `combine_uncertainty`. The number of trials is fixed (no
+budgets belong to `uncertainty_propagation`. The number of trials is fixed (no
 adaptive 7.9 procedure, at least 2 trials) and the interval is the symmetric
 one, not the 5.3.4 shortest interval. Supplement 2 (models with multiple
 output quantities) is not implemented at all.
@@ -152,7 +152,7 @@ quantities = [
     metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
 ]
 model = lambda a, b, c, d: a + b + c + d
-result = metrology.combine_uncertainty(model, quantities)
+result = metrology.uncertainty_propagation(model, quantities)
 mc = metrology.monte_carlo(model, quantities, trials=1_000_000, coverage=0.95, seed=1,
                     keep_samples=True)
 k, U = result.expanded(0.95)

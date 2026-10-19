@@ -189,9 +189,9 @@ saltar más de 8 dB entre tercios de octava contiguos, y su emisión debe ser
 estable en 0,5 dB durante la medida.
 
 ```python
-print(room.omnidirectionality_tolerance_db(630.0))   # 2.0
-print(room.omnidirectionality_tolerance_db(800.0))   # 5.0
-print(room.omnidirectionality_tolerance_db(1000.0))  # 8.0
+print(room.omnidirectionality_tolerance(630.0))   # 2.0
+print(room.omnidirectionality_tolerance(800.0))   # 5.0
+print(room.omnidirectionality_tolerance(1000.0))  # 8.0
 ```
 
 El valor de 800 Hz es una lectura y no una cita: el apartado dice que la

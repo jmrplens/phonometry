@@ -27,10 +27,13 @@ $H' = H + N - H N / 120$ (clause 6.1, Formula 1).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## combine_age_and_noise
+## age_and_noise_threshold
 
 ```python
-combine_age_and_noise(htla: ArrayLike, nipts_value: ArrayLike) -> np.ndarray
+age_and_noise_threshold(
+    htla: ArrayLike,
+    nipts_value: ArrayLike,
+) -> np.ndarray
 ```
 
 Combine the age and noise components by Formula (1) (clause 6.1).

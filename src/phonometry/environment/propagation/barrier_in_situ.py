@@ -113,7 +113,7 @@ __all__ = [
     "WIND_VECTOR_TOLERANCE_M_S",
     "BarrierInSituWarning",
     "MeasuredBarrierInsertionLoss",
-    "barrier_background_correction_db",
+    "barrier_background_correction",
     "hemi_free_field_distance_m",
     "is_short_distance",
     "measured_insertion_loss_direct",
@@ -269,7 +269,7 @@ class BarrierInSituWarning(PhonometryWarning):
     """The measurement is outside a condition ISO 10847 states."""
 
 
-def barrier_background_correction_db(
+def barrier_background_correction(
     level_difference_db: ArrayLike,
 ) -> NDArray[np.float64]:
     r"""The background correction of Table 3, in decibels to add.

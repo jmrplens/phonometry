@@ -232,7 +232,7 @@ for every situation because the standard does: the correction term
 $-4(V/S)(m_2 - m_1)$ subtracts the air's own absorption, and in the top bands
 it is comparable with the specimen's. Compute $c$ from Eq. (2) with
 `speed_of_sound`, and $m$ from the ISO 9613-1 pure-tone attenuation with
-`air_attenuation_coefficient` (Eq. (3), $m \approx \alpha/4.343$ for $\alpha$
+`power_attenuation_from_alpha` (Eq. (3), $m \approx \alpha/4.343$ for $\alpha$
 in dB/m), once per situation, from the mean of the readings taken before and
 after it:
 
@@ -247,7 +247,7 @@ temps = [20.0, 20.5, 21.0, 21.5]        # degC, mean per situation (Clause 7.4)
 alpha = [0.04062, 0.04189, 0.04334, 0.04502]
 c = [float(materials.speed_of_sound_iso17497(temperature_c=t))
      for t in temps]                                             # Eq. (2)
-m = [float(materials.air_attenuation_coefficient(a)) for a in alpha]  # Eq. (3)
+m = [float(materials.power_attenuation_from_alpha(a)) for a in alpha]  # Eq. (3)
 print(np.round(c, 2))    # [343.2  343.49 343.78 344.08]
 print(np.round(m, 5))    # [0.00935 0.00965 0.00998 0.01037]   1/m at 5 kHz
 

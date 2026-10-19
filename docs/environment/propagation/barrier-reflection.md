@@ -140,7 +140,7 @@ device that is not flat.
 ```python
 window = environment.adrienne_reflection_window(fs, environment.ADRIENNE_SHORT_LENGTH_S)
 print(window.size)                                        # 288 samples at 48 kHz
-print(round(environment.adrienne_low_frequency_limit_hz(7.9e-3), 1))   # 162.5 Hz
+print(round(environment.adrienne_low_frequency_limit(7.9e-3), 1))   # 162.5 Hz
 ```
 
 The edges are Formula (7) sampled as printed, each a half of a full
@@ -327,8 +327,8 @@ print(annex_b.reflection_index.round(2)[4:10])  # [0.39 0.36 0.26 0.12 0.05 0.09
 print(annex_b.rating.reported)                 # 8 dB, as printed under the table
 print(round(annex_b.rating.rating, 2))         # 7.65 dB before rounding, see below
 
-u_bands, u_rating = annex_b.expanded_uncertainty()   # Table A.1, high column, k = 1.96
-print(round(u_rating, 2))                            # 1.59 dB, Table B.2
+u = environment.reflection_index_expanded_uncertainty()  # Table A.1, high column, k = 1.96
+print(round(u.rating_db, 2))                             # 1.59 dB, Table B.2
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_index_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_index.svg" alt="The sound reflection index of the Annex B barrier over the eighteen one-third octave bands from 100 Hz to 5 kHz: twelve light points per band for the twelve grid positions and a line through their average, near 0.58 in the three hatched bands below 200 Hz, falling from 0.39 at 250 Hz to 0.05 at 630 Hz, around 0.1 up to 1.25 kHz, a peak of 0.30 at 1.6 kHz and a rise to 0.43 at 5 kHz. The title gives DL RI of 8 dB from 200 Hz to 5 kHz." width="92%"></picture>
@@ -361,6 +361,23 @@ single number; in seven bands Table B.2 prints a hundredth less than 1,96
 times the $s_\mathrm{R}$ of Table A.1, as unrounded standard deviations would give. The
 print does not say which values the example multiplied, and the library
 multiplies the printed ones.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_uncertainty_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_uncertainty.svg" alt="Bars of the expanded uncertainty U j of the sound reflection index in each of the eighteen one-third octave bands from 100 Hz to 5 kHz, from the high column of Table A.1 with a coverage factor of 1.96: 0.63 at 100 Hz, 0.35 at 125 Hz, between 0.24 and 0.31 from 160 Hz to 2.5 kHz, then 0.33, 0.39 and 0.45 at 3.15, 4 and 5 kHz. The legend states the expanded uncertainty of DL RI, 1.59 dB." width="92%"></picture>
+
+*The high column of Table A.1 times 1,96, band by band: the inter-laboratory
+test agreed least at 100 Hz. The $U_j$ are in units of the index, which is a
+ratio, and the 1,59 dB of $DL_{RI}$ is a level, so the legend states it rather
+than the axis.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+u.plot()
+plt.show()
+```
+
+</details>
 
 ## Relation to the other parts of EN 1793
 

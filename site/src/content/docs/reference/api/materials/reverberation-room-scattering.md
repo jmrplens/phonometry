@@ -17,8 +17,11 @@ $s = (\alpha_{\mathrm{spec}} - \alpha_\mathrm{s}) / (1 - \alpha_\mathrm{s})$
 (Clause 8.1.3, Eq. (5)). The turntable base plate is qualified through its
 own scattering coefficient (Clause 8.1.4, Eq. (6)) against the Table 1
 limits (Clause 6.2). Air properties come from the speed-of-sound and
-energy-attenuation relations of Clause 8 (Eqs. (2)/(3), after ISO 9613-1),
-and measurement accuracy from Annex A (Eqs. (A.1)-(A.5)).
+energy-attenuation relations of Clause 8 (Eqs. (2)/(3), after ISO 9613-1;
+Eq. (3) is the conversion ISO 354 makes too, so it is
+[`power_attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#power_attenuation_from_alpha), shared with the
+absorption measurement), and measurement accuracy from Annex A
+(Eqs. (A.1)-(A.5)).
 
 One subject: everything the reverberation-room method needs, from the four
 measured decay times to the scattering coefficient and its uncertainty. Part 2
@@ -73,35 +76,6 @@ the standard is taken as a single (mean) speed of sound.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for non-positive `V`, `S`, `c` or `T`. |
-
-## air_attenuation_coefficient
-
-```python
-air_attenuation_coefficient(
-    pressure_attenuation_db_per_m: ArrayLike,
-) -> NDArray[np.float64]
-```
-
-Energy attenuation coefficient `m` (ISO 17497-1, Clause 8, Eq. (3)).
-
-$m = \alpha / (10 \log_{10}(e)) \approx \alpha / 4.343$ (1/m), where
-`alpha` is
-the sound-*pressure* attenuation coefficient in dB/m obtained from
-ISO 9613-1 using the measured temperature and relative humidity.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `pressure_attenuation_db_per_m` | Pressure attenuation coefficient `alpha` from ISO 9613-1, in decibels per metre (scalar or per band). |
-
-**Returns:** Energy (power) attenuation coefficient `m`, in reciprocal metres.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | if any value is negative or non-finite. |
 
 ## BASE_PLATE_BANDS_HZ
 
@@ -233,7 +207,7 @@ situation 2 adds the test sample, still without turntable rotation
 | `t1` | Reverberation time without sample (base plate only), in seconds. |
 | `c2` | Speed of sound during `t2`, in m/s. |
 | `t2` | Reverberation time with the test sample, in seconds. |
-| `m1` | Energy attenuation coefficient during `t1`, in 1/m (see [`air_attenuation_coefficient`](/phonometry/reference/api/materials/reverberation-room-scattering/#air_attenuation_coefficient)); defaults to 0. |
+| `m1` | Energy attenuation coefficient during `t1`, in 1/m (see [`power_attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#power_attenuation_from_alpha)); defaults to 0. |
 | `m2` | Energy attenuation coefficient during `t2`, in 1/m; defaults to 0. |
 
 **Returns:** Random-incidence absorption coefficient `alpha_s` (per band).

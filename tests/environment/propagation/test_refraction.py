@@ -41,7 +41,7 @@ from phonometry.environment.propagation.refraction import (
     ray_curvature_radius,
     shadow_zone_distance,
 )
-from phonometry.materials.absorbers.porous import PUBLISHED_AIR
+from phonometry.materials.absorbers.porous import ABSORBER_AIR
 
 C0 = 343.0
 # A representative grassland surface impedance (normalized, e^{-i omega t}:
@@ -308,7 +308,7 @@ def test_pe_reproduces_spherical_ground_effect() -> None:
                 zr,
                 max(float(r), 1.0),
                 impedance=Z_GRASS,
-                fluid=PUBLISHED_AIR,
+                fluid=ABSORBER_AIR,
             ).excess_attenuation[0]
             for r in ranges
         ]
@@ -339,7 +339,7 @@ def test_pe_matches_ground_effect_configs(freq: float, zs: float, zr: float) -> 
                 zr,
                 max(float(r), 1.0),
                 impedance=Z_GRASS,
-                fluid=PUBLISHED_AIR,
+                fluid=ABSORBER_AIR,
             ).excess_attenuation[0]
             for r in ranges
         ]
@@ -488,7 +488,7 @@ def test_pe_flow_resistivity_matches_impedance_path() -> None:
         z = complex(
             np.conj(
                 delany_bazley(
-                    np.array([freq]), 2.0e5, fluid=PUBLISHED_AIR
+                    np.array([freq]), 2.0e5, fluid=ABSORBER_AIR
                 ).normalized_impedance[0]
             )
         )

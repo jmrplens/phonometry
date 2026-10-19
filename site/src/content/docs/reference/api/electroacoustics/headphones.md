@@ -343,10 +343,10 @@ IEC 60263)". Requires matplotlib (`pip install phonometry[plot]`).
 
 **Returns:** The axes.
 
-### CouplerFrequencyResponse.relative_response_db()
+### CouplerFrequencyResponse.relative_response()
 
 ```python
-CouplerFrequencyResponse.relative_response_db(
+CouplerFrequencyResponse.relative_response(
     *,
     reference_frequency_hz: float = 500.0,
 ) -> NDArray[np.float64]

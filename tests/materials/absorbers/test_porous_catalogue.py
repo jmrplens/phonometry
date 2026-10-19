@@ -29,7 +29,7 @@ import reference_data as ref
 
 import phonometry
 from phonometry.materials.absorbers import (
-    PUBLISHED_POROUS,
+    PUBLISHED_POROUS_MATERIALS,
     PorousMaterial,
     delany_bazley,
     johnson_champoux_allard,
@@ -67,7 +67,9 @@ _SPECIMEN_TABLES = "allard-2009-"
 
 def test_every_specimen_row_is_in_the_oracle() -> None:
     """Both directions: no row unchecked, no oracle entry without a row."""
-    specimens = {key for key in PUBLISHED_POROUS if key.startswith(_SPECIMEN_TABLES)}
+    specimens = {
+        key for key in PUBLISHED_POROUS_MATERIALS if key.startswith(_SPECIMEN_TABLES)
+    }
 
     assert specimens == set(_ORACLE)
 
@@ -82,7 +84,7 @@ def test_each_row_carries_the_printed_cells(
     matches here matches the printed digit **and** the factor: Table 9.1's
     ``0.12`` millimetres is 120 micrometres or the transcription is wrong.
     """
-    row = PUBLISHED_POROUS[key]
+    row = PUBLISHED_POROUS_MATERIALS[key]
     for field, value in printed.items():
         assert getattr(row, field) == pytest.approx(value, rel=1e-12), field
 
@@ -95,7 +97,7 @@ def test_no_row_holds_a_cell_its_page_does_not_print(key: str) -> None:
     had grown a tortuosity nobody printed, which is the failure mode a
     parameter catalogue has to be proof against.
     """
-    row = PUBLISHED_POROUS[key]
+    row = PUBLISHED_POROUS_MATERIALS[key]
     printed = _ORACLE[key]
     quantities = [
         name
@@ -111,7 +113,7 @@ def test_no_row_holds_a_cell_its_page_does_not_print(key: str) -> None:
 def test_every_table_holds_the_rows_its_page_prints() -> None:
     """Row counts per table, so a dropped row cannot pass unnoticed."""
     counted: dict[str, int] = {}
-    for row in PUBLISHED_POROUS.values():
+    for row in PUBLISHED_POROUS_MATERIALS.values():
         counted[row.table] = counted.get(row.table, 0) + 1
     assert counted == {
         "allard-2009-table-6-1": 1,
@@ -149,7 +151,7 @@ _BOOKS = ("Allard & Atalla 2e ", "Cox & D'Antonio 3e ", "Mechel 2e ")
 
 def test_every_row_cites_a_document_a_page_and_a_folio() -> None:
     """Read the citations the way the provenance gate reads them."""
-    for key, row in PUBLISHED_POROUS.items():
+    for key, row in PUBLISHED_POROUS_MATERIALS.items():
         for citation in _CITATION_JOINER.split(row.source):
             assert citation.startswith(_BOOKS), key
             assert "PDF page " in citation, key
@@ -164,7 +166,7 @@ def test_the_one_specimen_that_takes_two_pages_names_both() -> None:
     facing folio rather than in the table. The row would be citing a page that
     does not carry half its cells if the citation named the table alone.
     """
-    row = PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
+    row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-6-1/domisol_coffrage"]
     assert "Table 6.1, PDF page 133 (printed p. 124)" in row.source
     assert "Sect. 6.5.4, PDF page 132 (printed p. 123)" in row.source
     assert row.viscous_length_um / 1e6 == pytest.approx(
@@ -187,8 +189,8 @@ def test_the_two_pages_that_print_the_glass_wool_describe_one_specimen() -> None
     what licenses reading the two tables as one material, and is also the one
     arithmetic check available on a page that prints no wave speed.
     """
-    table_6_1 = PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
-    table_11_8 = PUBLISHED_POROUS["allard-2009-table-11-8/glass_wool"]
+    table_6_1 = PUBLISHED_POROUS_MATERIALS["allard-2009-table-6-1/domisol_coffrage"]
+    table_11_8 = PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-8/glass_wool"]
     for field in (
         "porosity",
         "tortuosity",
@@ -211,7 +213,7 @@ def test_the_thermal_length_of_the_glass_wool_is_the_one_both_pages_print() -> N
     what settles it; deriving the length from the viscous one would put a
     number in the catalogue that neither page has.
     """
-    row = PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
+    row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-6-1/domisol_coffrage"]
     assert row.thermal_length_um == 110.0
     assert row.thermal_length_um != 2.0 * row.viscous_length_um
     assert not row.is_derived("thermal_length_um")
@@ -240,7 +242,7 @@ def test_one_specimen_printed_on_several_pages_agrees_with_itself(
     again. The elastic constants are not compared, because two of the four
     pages print none: the limp examples do not need them.
     """
-    rows = [PUBLISHED_POROUS[key] for key in keys]
+    rows = [PUBLISHED_POROUS_MATERIALS[key] for key in keys]
     for field in (
         "porosity",
         "flow_resistivity_pa_s_m2",
@@ -261,8 +263,8 @@ def test_the_two_directions_of_the_anisotropic_glass_wool_are_two_rows() -> None
     gets. Two rows, each a direction, leaves the choice with the caller and
     the page's own word, ``variant``, saying what it is.
     """
-    x = PUBLISHED_POROUS["allard-2009-table-10-1/glass_wool_x"]
-    z = PUBLISHED_POROUS["allard-2009-table-10-1/glass_wool_z"]
+    x = PUBLISHED_POROUS_MATERIALS["allard-2009-table-10-1/glass_wool_x"]
+    z = PUBLISHED_POROUS_MATERIALS["allard-2009-table-10-1/glass_wool_z"]
     assert x.name == z.name
     assert (x.variant, z.variant) == ("direction x", "direction z")
     assert (x.flow_resistivity_pa_s_m2, z.flow_resistivity_pa_s_m2) == (4000.0, 8000.0)
@@ -281,7 +283,7 @@ def test_a_cell_that_prints_a_word_keeps_the_word() -> None:
     frequency-dependent expression, so no single number stands for either. A
     float there would be a tortuosity nobody published.
     """
-    row = PUBLISHED_POROUS["allard-2009-table-11-5/screen_2"]
+    row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-5/screen_2"]
     for field in ("tortuosity", "viscous_length_um", "thermal_length_um"):
         assert getattr(row, field) is None, field
         assert row.unquantified[field] == "model", field
@@ -292,7 +294,7 @@ def test_a_cell_that_prints_a_word_keeps_the_word() -> None:
 
 def test_a_thickness_the_page_calls_variable_is_not_a_number() -> None:
     """Table 12.1 sweeps the foam thickness and prints the word."""
-    row = PUBLISHED_POROUS["allard-2009-table-12-1/foam_1"]
+    row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-12-1/foam_1"]
     assert row.thickness_mm is None
     assert row.unquantified["thickness_mm"] == "variable"
     assert row.why_missing("thickness_mm") == (
@@ -302,7 +304,7 @@ def test_a_thickness_the_page_calls_variable_is_not_a_number() -> None:
 
 def test_a_cell_the_page_leaves_empty_says_so_differently() -> None:
     """An empty cell and a cell holding a word are two different answers."""
-    row = PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
+    row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-2/soft_fibrous"]
     assert row.youngs_modulus_pa is None
     assert row.why_missing("youngs_modulus_pa") == (
         "the page does not give it, and it does not follow from the cells that it does"
@@ -314,14 +316,14 @@ def test_a_cell_the_page_leaves_empty_says_so_differently() -> None:
 # ---------------------------------------------------------------------------
 def test_the_modulus_that_follows_from_the_other_two_is_marked_derived() -> None:
     """A page prints ``N`` or ``E``; the catalogue answers both, and says so."""
-    printed_shear = PUBLISHED_POROUS["allard-2009-table-8-1/material_1"]
+    printed_shear = PUBLISHED_POROUS_MATERIALS["allard-2009-table-8-1/material_1"]
     assert printed_shear.is_derived("youngs_modulus_pa")
     assert not printed_shear.is_derived("shear_modulus_pa")
     assert printed_shear.youngs_modulus_pa == pytest.approx(
         2.0 * 75.0e3 * (1.0 + 0.3), rel=1e-12
     )
 
-    printed_young = PUBLISHED_POROUS["allard-2009-table-11-6/foam"]
+    printed_young = PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-6/foam"]
     assert printed_young.is_derived("shear_modulus_pa")
     assert not printed_young.is_derived("youngs_modulus_pa")
     assert printed_young.shear_modulus_pa == pytest.approx(
@@ -336,7 +338,7 @@ def test_nothing_is_derived_without_a_poisson_ratio() -> None:
     catalogue that reached for a nominal 0,3 would be publishing a modulus the
     book does not have.
     """
-    row = PUBLISHED_POROUS["allard-2009-table-11-5/felt_1"]
+    row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-5/felt_1"]
     assert row.poisson_ratio is None
     assert row.youngs_modulus_pa is None
     assert row.shear_modulus_pa is None
@@ -345,7 +347,7 @@ def test_nothing_is_derived_without_a_poisson_ratio() -> None:
 
 def test_the_complex_shear_modulus_is_rebuilt_from_the_two_stored_fields() -> None:
     """``N(1 + j eta)`` goes in as two reals and comes back as one complex."""
-    row = PUBLISHED_POROUS["allard-2009-table-8-1/material_2"]
+    row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-8-1/material_2"]
     shear, poisson = row.frame_constants()
     assert shear == pytest.approx(complex(80.0e3, 12.0e3), rel=1e-12)
     assert poisson == 0.44
@@ -353,7 +355,7 @@ def test_the_complex_shear_modulus_is_rebuilt_from_the_two_stored_fields() -> No
 
 def test_frame_constants_refuses_a_specimen_published_without_them() -> None:
     """Table 11.2 prints no elastic constants, and the object says so."""
-    row = PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
+    row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-2/soft_fibrous"]
     with pytest.raises(ValueError, match=r"published without frame elastic"):
         row.frame_constants()
 
@@ -364,7 +366,7 @@ def test_a_row_whose_page_prints_no_loss_factor_is_not_given_one() -> None:
     The field stays ``None`` rather than holding a typical value nobody
     printed.
     """
-    row = PUBLISHED_POROUS["allard-2009-table-12-4/limp_foam"]
+    row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-12-4/limp_foam"]
     assert row.structural_loss_factor is None
 
 
@@ -390,7 +392,7 @@ def test_every_published_row_with_both_moduli_prints_its_loss_factor() -> None:
     """So the refusal above moves no published result."""
     with_moduli = [
         row
-        for row in PUBLISHED_POROUS.values()
+        for row in PUBLISHED_POROUS_MATERIALS.values()
         if row.shear_modulus_pa is not None and row.poisson_ratio is not None
     ]
     assert len(with_moduli) >= 20
@@ -407,7 +409,7 @@ def test_every_published_row_with_both_moduli_prints_its_loss_factor() -> None:
 # ---------------------------------------------------------------------------
 def test_medium_is_the_model_called_with_the_stored_parameters() -> None:
     """``medium()`` converts the lengths and dispatches, and does no more."""
-    row = PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
+    row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-2/soft_fibrous"]
     f = np.array([125.0, 500.0, 2000.0])
     direct = johnson_champoux_allard(
         f,
@@ -425,14 +427,14 @@ def test_medium_is_the_model_called_with_the_stored_parameters() -> None:
 
 @pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
 def test_medium_dispatches_to_the_one_parameter_models() -> None:
-    row = PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
+    row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-2/soft_fibrous"]
     f = np.array([500.0])
     assert row.medium(f, model="miki").model == "miki"
     assert row.medium(f, model="delany_bazley").model == "delany_bazley[delany_bazley]"
 
 
 def test_medium_rejects_an_unknown_model() -> None:
-    row = PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
+    row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-2/soft_fibrous"]
     with pytest.raises(ValueError, match=r"'model' must be one of"):
         row.medium(np.array([500.0]), model="biot")
 
@@ -445,7 +447,7 @@ def test_medium_refuses_a_row_whose_page_left_the_parameter_out() -> None:
     cannot. Failing here beats a ``TypeError`` about ``None`` four frames down
     inside the model.
     """
-    row = PUBLISHED_POROUS["allard-2009-table-11-5/screen_2"]
+    row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-5/screen_2"]
     f = np.array([500.0])
     with pytest.raises(ValueError, match=r"has no tortuosity.*model.*Table 11\.5"):
         row.medium(f)
@@ -486,14 +488,16 @@ def test_the_lookup_ignores_case_and_answers_nothing_for_an_unknown_name() -> No
 # ---------------------------------------------------------------------------
 def test_the_table_itself_cannot_be_edited() -> None:
     with pytest.raises(TypeError):
-        PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"] = PorousMaterial(  # type: ignore[index]
-            name="x", source="y"
+        PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-2/soft_fibrous"] = (
+            PorousMaterial(  # type: ignore[index]
+                name="x", source="y"
+            )
         )
 
 
 def test_the_mappings_inside_a_row_cannot_be_edited() -> None:
     """``frozen=True`` protects the fields, not what they point at."""
-    row = PUBLISHED_POROUS["allard-2009-table-11-5/screen_2"]
+    row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-5/screen_2"]
     with pytest.raises(TypeError):
         row.unquantified["tortuosity"] = "1.0"  # type: ignore[index]
     with pytest.raises(TypeError):
@@ -501,7 +505,7 @@ def test_the_mappings_inside_a_row_cannot_be_edited() -> None:
 
 
 def test_a_row_cannot_be_edited() -> None:
-    row = PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
+    row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-2/soft_fibrous"]
     with pytest.raises(AttributeError, match=r"cannot assign to field 'porosity'"):
         row.porosity = 0.5  # type: ignore[misc]
 
@@ -533,7 +537,7 @@ def _uses(source: str, name: str) -> bool:
     Read through the syntax tree and not by searching the text, because a
     module is allowed to name a sibling catalogue in its prose and one has
     to: ``resistive_sheets`` opens by saying that its flow resistance is per
-    unit area and is not the per-metre resistivity of ``PUBLISHED_POROUS``,
+    unit area and is not the per-metre resistivity of ``PUBLISHED_POROUS_MATERIALS``,
     which is the confusion most likely to cost a reader a factor of the
     thickness. A guard that counted that sentence as a read would push the
     next author into dropping the warning to keep the test green.
@@ -553,7 +557,7 @@ def test_nothing_in_the_library_reads_the_published_tables() -> None:
     readers = [
         path.relative_to(root).as_posix()
         for path in root.rglob("*.py")
-        if _uses(path.read_text(encoding="utf-8"), "PUBLISHED_POROUS")
+        if _uses(path.read_text(encoding="utf-8"), "PUBLISHED_POROUS_MATERIALS")
     ]
     assert sorted(readers) == [
         "materials/__init__.py",
@@ -605,8 +609,8 @@ def test_the_two_books_agree_about_the_rows_cox_credits_to_mechel(
     give: two books, two pages, two readers, and the interval has to come out
     the same. A digit misread on either page breaks the pair.
     """
-    from_cox = PUBLISHED_POROUS[f"cox-2017-table-6-5/{cox}"]
-    from_mechel = PUBLISHED_POROUS[f"mechel-2008-section-g1-table-1/{mechel}"]
+    from_cox = PUBLISHED_POROUS_MATERIALS[f"cox-2017-table-6-5/{cox}"]
+    from_mechel = PUBLISHED_POROUS_MATERIALS[f"mechel-2008-section-g1-table-1/{mechel}"]
 
     assert from_cox.ranges["porosity"] == pytest.approx(printed, rel=1e-12)
     assert from_mechel.ranges["porosity"] == pytest.approx(printed, rel=1e-12)
@@ -623,7 +627,7 @@ def test_the_cells_that_are_not_a_number_survive_the_reading(
     intervals in one cell, a bound, a tilde, and the two rows of Table 6.9
     that the text layer does not contain at all.
     """
-    row = PUBLISHED_POROUS[key]
+    row = PUBLISHED_POROUS_MATERIALS[key]
     held = row.reported.get(field) or row.ranges.get(field) or getattr(row, field)
 
     # A cell that lists two intervals is a tuple of tuples, which
@@ -633,7 +637,7 @@ def test_the_cells_that_are_not_a_number_survive_the_reading(
 
 def test_a_compiled_row_answers_none_where_it_holds_an_interval() -> None:
     """Almost every cell of these tables is a range, and a range is not a value."""
-    row = PUBLISHED_POROUS["cox-2017-table-6-2/mineral_wool"]
+    row = PUBLISHED_POROUS_MATERIALS["cox-2017-table-6-2/mineral_wool"]
 
     assert row.flow_resistivity_pa_s_m2 is None
     assert row.ranges["flow_resistivity_pa_s_m2"]
@@ -642,7 +646,7 @@ def test_a_compiled_row_answers_none_where_it_holds_an_interval() -> None:
 
 def test_a_lower_bound_keeps_the_printed_end_and_marks_the_other() -> None:
     """Cox gives an aerogel ">0.75"; the 1 beside it is what a porosity is."""
-    row = PUBLISHED_POROUS["cox-2017-table-6-5/aerogel"]
+    row = PUBLISHED_POROUS_MATERIALS["cox-2017-table-6-5/aerogel"]
 
     assert "porosity" in row.bounded_below
     assert row.ranges["porosity"] == pytest.approx((0.75, 1.0), rel=1e-12)
@@ -655,7 +659,7 @@ def test_the_group_each_table_files_a_row_under_is_kept() -> None:
     """Cox prints its rows under four bold headings, and they are data."""
     groups = {
         row.group
-        for key, row in PUBLISHED_POROUS.items()
+        for key, row in PUBLISHED_POROUS_MATERIALS.items()
         if key.startswith("cox-2017-table-6-9/")
     }
 
@@ -674,8 +678,8 @@ def test_mechel_credits_its_chapter_and_cox_credits_its_row() -> None:
     row; Mechel prints no marks at all and credits the whole chapter in prose,
     which is a table-level credit and is recorded as one.
     """
-    cox = PUBLISHED_POROUS["cox-2017-table-6-2/felt"]
-    mechel = PUBLISHED_POROUS["mechel-2008-section-g1-table-1/felts"]
+    cox = PUBLISHED_POROUS_MATERIALS["cox-2017-table-6-2/felt"]
+    mechel = PUBLISHED_POROUS_MATERIALS["mechel-2008-section-g1-table-1/felts"]
 
     assert set(cox.attributed_to) == {"row"}
     assert mechel.attributed_to == {"table": "Mechel, 1995"}
@@ -690,7 +694,7 @@ def test_a_pair_the_page_does_not_pair_is_not_paired() -> None:
     with the sizes reversed. So the row keeps both readings and pairs
     neither.
     """
-    row = PUBLISHED_POROUS["cox-2017-table-6-2/glass_beads"]
+    row = PUBLISHED_POROUS_MATERIALS["cox-2017-table-6-2/glass_beads"]
 
     assert row.flow_resistivity_pa_s_m2 is None
     assert row.reported["flow_resistivity_pa_s_m2"] == (13_000.0, 43_200.0)

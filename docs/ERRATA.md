@@ -7202,7 +7202,7 @@ in the same order.
   page 57 (printed p. 55) and Table A.1 on PDF page 49 (printed p. 47) of
   BS EN 1793-5:2016. The rest is a recomputation from the printed cells.
 - **Library behaviour:**
-  [`ReflectionIndexResult.expanded_uncertainty`](../src/phonometry/environment/propagation/barrier_reflection.py)
+  [`environment.reflection_index_expanded_uncertainty`](../src/phonometry/environment/propagation/barrier_reflection.py)
   multiplies the values of Table A.1 as printed. The conformance row
   "EN 1793-5:2016 Table B.2 (expanded uncertainty per band)" checks the
   eleven cells that follow from them, and a test pins the other seven a
@@ -7968,7 +7968,7 @@ in the same order.
   input.
 - **Library behaviour:** the conformance rows of Table C.1 take the printed
   column as an input of Formula (1) and hold the sum;
-  [`foundation_to_floor_transfer_db`](../src/phonometry/vibration/immission/railway_prediction.py)
+  [`foundation_to_floor_transfer`](../src/phonometry/vibration/immission/railway_prediction.py)
   reads Table A.5 as printed.
 - **Status:** not reported; the document is a draft under comment.
 
@@ -8203,7 +8203,7 @@ in the same order.
 - **Consequence for the standard's own tables:** none; Equation (2) is printed
   correctly where it belongs.
 - **Library behaviour:**
-  [`sound_power_insulation`](../src/phonometry/noise_control/enclosure_insulation.py)
+  [`enclosure_sound_power_insulation`](../src/phonometry/noise_control/enclosure_insulation.py)
   returns $D_{W\mathrm{A}}$ from Equation (2) and cites 6.2 for it.
 - **Status:** not reported.
 
@@ -8273,7 +8273,7 @@ in the same order.
 - **Consequence for the standard's own tables:** none; the formula is the
   same in both parts.
 - **Library behaviour:**
-  [`estimated_a_weighted_insulation`](../src/phonometry/noise_control/enclosure_insulation.py)
+  [`estimated_a_weighted_enclosure_insulation`](../src/phonometry/noise_control/enclosure_insulation.py)
   cites Annex C of part 1 and Annex D of part 2, which is where each prints
   it.
 - **Status:** not reported.
@@ -8469,7 +8469,7 @@ in the same order.
   transmission loss of Equation (19) and the insertion loss of Equation (21)
   come out 2,08 dB low.
 - **Library behaviour:**
-  [`temperature_field_correction_db`](../src/phonometry/noise_control/silencer_in_situ.py)
+  [`temperature_field_correction`](../src/phonometry/noise_control/silencer_in_situ.py)
   returns the equation as printed, because a reader holding ISO 11820 has to
   find the standard's own number, and its docstring names this entry. The
   conformance row "ISO 11820:1996 Eqs. (20) and (22)" pins the printed form.
@@ -9148,7 +9148,7 @@ in the same order.
   Diffusers*, third edition: the heading prints no unit, and the six cells
   print the values quoted, the fourth as "48 ± 4".
 - **Library behaviour:** in
-  [`PUBLISHED_GROUND`](../src/phonometry/environment/propagation/ground_surfaces.py)
+  [`PUBLISHED_GROUND_SURFACES`](../src/phonometry/environment/propagation/ground_surfaces.py)
   the six rows leave `GroundSurface.porosity`, which is a fraction from 0 to 1,
   empty, and hold the cell as `misprinted`: `why_missing("porosity")` and the
   refusal of `printed("porosity")` quote the figure the page prints, the
@@ -9277,7 +9277,7 @@ in the same order.
   correctly, so the defect belongs to this cell and to the printing.
 - **What the library does:** this catalogue publishes the SI column of each
   pair, so the defective cell reaches no value served from
-  [`PUBLISHED_FLOW_RESISTANCE`](../src/phonometry/materials/absorbers/resistive_sheets.py).
+  [`PUBLISHED_RESISTIVE_SHEETS`](../src/phonometry/materials/absorbers/resistive_sheets.py).
   The row holds the printed 0.31 kg/m2, which the column and the weave both
   support, and its `note` quotes the pound cell and points here, so a reader
   reproducing the book sees what the book says without it reaching a
@@ -9321,7 +9321,7 @@ in the same order.
 - **What the library does:** holds the gramme per square metre the page
   prints, as it prints it, in `surface_density_g_m2`. Every row of this table
   in
-  [`PUBLISHED_FLOW_RESISTANCE`](../src/phonometry/materials/absorbers/resistive_sheets.py)
+  [`PUBLISHED_RESISTIVE_SHEETS`](../src/phonometry/materials/absorbers/resistive_sheets.py)
   carries a `note` that quotes both printed values and the exact factor
   between their units and points here, so the contradiction reaches the reader
   with the number rather than instead of it. The library neither chooses
@@ -11184,9 +11184,9 @@ published sources:
   written from opposite ends. Read on PDF page 13 (printed p. 5) of EN ISO
   11820:1996 and on PDF page 11 (printed p. 7) of ISO 10847:1997. The library
   keeps them apart as
-  [`silencer_background_correction_db`](../src/phonometry/noise_control/silencer_in_situ.py)
+  [`silencer_background_correction`](../src/phonometry/noise_control/silencer_in_situ.py)
   and
-  [`barrier_background_correction_db`](../src/phonometry/environment/propagation/barrier_in_situ.py),
+  [`barrier_background_correction`](../src/phonometry/environment/propagation/barrier_in_situ.py),
   each with its own sign convention and its own refusal, and a conformance
   check holds them against each other at the margin where they part. Do not
   merge them into one helper.

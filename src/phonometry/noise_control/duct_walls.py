@@ -102,7 +102,7 @@ __all__ = [
     "DUCT_WALL_BANDS_HZ",
     "PUBLISHED_DUCT_TRANSMISSION_LOSS",
     "DuctWallSpectrum",
-    "duct_wall_named",
+    "duct_transmission_loss_named",
 ]
 
 #: The octave-band centre frequencies a duct-wall table can print, in hertz.
@@ -252,7 +252,7 @@ PUBLISHED_DUCT_TRANSMISSION_LOSS: Mapping[str, DuctWallSpectrum] = MappingProxyT
 )
 
 
-def duct_wall_named(
+def duct_transmission_loss_named(
     name: str, *, catalogue: Mapping[str, DuctWallSpectrum] | None = None
 ) -> tuple[DuctWallSpectrum, ...]:
     """Every duct wall whose printed label contains *name*, without case.
@@ -283,7 +283,7 @@ def duct_wall_named(
             catalogue,
             PUBLISHED_DUCT_TRANSMISSION_LOSS,
             DuctWallSpectrum,
-            "duct_wall_named",
+            "duct_transmission_loss_named",
         )
         if needle in search_text(row.name)
     )

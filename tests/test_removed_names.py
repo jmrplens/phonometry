@@ -399,3 +399,73 @@ def test_the_names_the_second_addresses_pointed_at_are_all_here() -> None:
     ):
         owner = importlib.import_module(module)
         assert getattr(owner, name).__module__ == module
+
+
+# --------------------------------------------------------------------------- #
+# 4.0 one name per computation: a formula two modules published under two
+# names keeps the one, a function is named for what it returns, and the old
+# spellings are gone with no alias.
+# --------------------------------------------------------------------------- #
+_REMOVED_4_0_FUNCTION_NAMES = [
+    # DIN 4150-1 Formula (4) is the storey estimate of DIN 4150-3 6.4 and
+    # ISO 4866 D.2; vibration.storey_fundamental_frequency is the one function.
+    *(
+        (module, name)
+        for module in (
+            "phonometry.vibration",
+            "phonometry.vibration.immission",
+            "phonometry.vibration.immission.prediction",
+        )
+        for name in ("storey_frequency_hz", "STOREY_FORMULA_MIN_STOREYS")
+    ),
+    # One conversion from the ISO 9613-1 alpha to the power attenuation m.
+    ("phonometry.environment", "air_attenuation_m"),
+    ("phonometry.materials", "attenuation_from_alpha"),
+    ("phonometry.materials", "air_attenuation_coefficient"),
+    ("phonometry.materials.diffusers", "air_attenuation_coefficient"),
+    # One root-sum-square, in metrology, and the GUM propagation named for
+    # what it does; the expanded uncertainty is the result's own method.
+    ("phonometry.building", "combine_uncertainties"),
+    ("phonometry.building.measurement.uncertainty", "combine_uncertainties"),
+    ("phonometry.environment", "combined_standard_uncertainty"),
+    ("phonometry.environment.assessment.measurement", "combined_standard_uncertainty"),
+    ("phonometry.metrology", "combine_uncertainty"),
+    ("phonometry.metrology", "expanded_uncertainty"),
+    ("phonometry.metrology.uncertainty", "expanded_uncertainty"),
+    # A computation is a noun phrase.
+    ("phonometry.building", "combine_linings"),
+    ("phonometry.building", "combine_subareas"),
+    ("phonometry.noise_control", "combine_stage_levels"),
+    ("phonometry.noise_control", "combine_internal_levels"),
+    ("phonometry.vibration", "combine_partial_exposures"),
+    ("phonometry.hearing", "combine_age_and_noise"),
+    # The Johnson-Champoux-Allard air is named for its model.
+    ("phonometry.materials", "PUBLISHED_AIR"),
+]
+
+
+@pytest.mark.parametrize(("module", "name"), _REMOVED_4_0_FUNCTION_NAMES)
+def test_a_function_name_the_4_0_retired_is_gone(module: str, name: str) -> None:
+    home = importlib.import_module(module)
+    with pytest.raises(AttributeError, match=rf"has no attribute '{name}'"):
+        getattr(home, name)
+
+
+def test_the_reflection_index_has_no_uncertainty_method_of_its_own() -> None:
+    """EN 1793-5 A.2 reads Table A.1 alone, so it is a function of the package."""
+    assert not hasattr(ph.environment.ReflectionIndexResult, "expanded_uncertainty")
+    assert callable(ph.environment.reflection_index_expanded_uncertainty)
+
+
+def test_the_one_name_each_retired_function_left_is_here() -> None:
+    """Each retired name left one function computing what it computed."""
+    assert ph.vibration.storey_fundamental_frequency(8) == pytest.approx(1.25)
+    assert ph.metrology.combined_standard_uncertainty([3.0, 4.0]) == pytest.approx(5.0)
+    assert ph.noise_control.combined_stage_level([80.0, 80.0]) == pytest.approx(
+        80.0 + 10.0 * np.log10(2.0)
+    )
+    alpha = 10.0 * np.log10(np.e)
+    assert float(ph.materials.power_attenuation_from_alpha(alpha)) == pytest.approx(1.0)
+    m = ph.environment.air_power_attenuation_per_m([1000.0], temperature_c=20.0)
+    expected = ph.environment.air_attenuation([1000.0], temperature_c=20.0) / alpha
+    np.testing.assert_allclose(m, expected, rtol=1e-12)

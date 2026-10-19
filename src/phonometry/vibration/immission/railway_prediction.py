@@ -121,13 +121,13 @@ __all__ = [
     "SPEED_RESCALING_LIMIT",
     "TAKT_MAXIMUM_FACTOR",
     "TrainCategoryPrediction",
-    "foundation_to_floor_transfer_db",
+    "foundation_to_floor_transfer",
     "ground_attenuation_coefficient_per_m",
-    "ground_to_floor_transfer_db",
-    "ground_to_foundation_transfer_db",
-    "ground_transmission_db",
-    "kb_weighted_levels_db",
-    "line_source_correction_db",
+    "ground_to_floor_transfer",
+    "ground_to_foundation_transfer",
+    "ground_transmission",
+    "kb_weighted_levels",
+    "line_source_correction",
     "peak_velocity_from_kb_mm_s",
     "point_to_line_transition_distance_m",
     "predict_floor_spectrum",
@@ -557,7 +557,7 @@ def ground_attenuation_coefficient_per_m(
     return 2.0 * math.pi * freqs * damping / speed
 
 
-def ground_transmission_db(
+def ground_transmission(
     frequencies: ArrayLike,
     *,
     distance_m: float,
@@ -619,7 +619,7 @@ def ground_transmission_db(
     return spreading - 20.0 * math.log10(math.e) * alpha * (distance - reference)
 
 
-def ground_to_floor_transfer_db(
+def ground_to_floor_transfer(
     floor: str, *, floor_natural_frequency_hz: float
 ) -> NDArray[np.float64]:
     r"""The level difference from the ground to a floor, Tables A.1 and A.2.
@@ -645,7 +645,7 @@ def ground_to_floor_transfer_db(
     return np.asarray(table[FLOOR_NATURAL_FREQUENCIES_HZ[int(index[0])]])
 
 
-def ground_to_foundation_transfer_db(
+def ground_to_foundation_transfer(
     level: str, *, statistic: str = "mean"
 ) -> NDArray[np.float64]:
     r"""The level difference from the ground into the foundation, Tables A.3 and A.4.
@@ -667,7 +667,7 @@ def ground_to_foundation_transfer_db(
     return np.asarray(table[require_choice(str(statistic), "statistic", _STATISTICS)])
 
 
-def foundation_to_floor_transfer_db(
+def foundation_to_floor_transfer(
     frequencies: ArrayLike,
     *,
     floor: str,
@@ -711,7 +711,7 @@ def foundation_to_floor_transfer_db(
     return np.asarray(out, dtype=np.float64)
 
 
-def kb_weighted_levels_db(
+def kb_weighted_levels(
     levels: ArrayLike, frequencies: ArrayLike
 ) -> NDArray[np.float64]:
     r"""The KB-weighted third-octave levels, Formula (8) with Table 2.
@@ -748,7 +748,7 @@ def takt_maximum_kb(weighted_levels_db: ArrayLike) -> float:
     prints 0,4 for a sum level of 78,1 dB.
 
     :param weighted_levels_db: :math:`L_{v,KB}`, as
-        :func:`kb_weighted_levels_db` gives them, one per band.
+        :func:`kb_weighted_levels` gives them, one per band.
     :return: :math:`KB_\mathrm{FTm,Zug}`, dimensionless.
     :raises ValueError: For an empty or non-finite input.
     """
@@ -886,7 +886,7 @@ def predict_train_category(
             f"{high:g} Hz; the spectrum holds {int(np.count_nonzero(inside))} of them."
         )
         raise ValueError(msg)
-    weighted = kb_weighted_levels_db(floor[inside], freqs[inside])
+    weighted = kb_weighted_levels(floor[inside], freqs[inside])
     kb_ftm = takt_maximum_kb(weighted)
     kb_fmax = TRAIN_KB_FMAX_FACTOR * kb_ftm
     return TrainCategoryPrediction(
@@ -922,7 +922,7 @@ def point_to_line_transition_distance_m(
     return length**2 / wavelength
 
 
-def line_source_correction_db(
+def line_source_correction(
     distance_m: float, *, reference_distance_m: float, exponent_correction: float
 ) -> float:
     r"""The correction of a point-source decay to a train, Formula (B.2).

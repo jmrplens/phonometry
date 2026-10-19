@@ -813,7 +813,7 @@ def generate_uncertainty(output_dir: str) -> None:
     def model(a: float, b: float, c: float, d: float) -> float:
         return a + b + c + d
 
-    result = ph.metrology.combine_uncertainty(model, quantities)
+    result = ph.metrology.uncertainty_propagation(model, quantities)
     mc = ph.metrology.monte_carlo(
         model, quantities, trials=1_000_000, coverage=0.95, seed=1
     )
@@ -1170,7 +1170,7 @@ def generate_uncertainty_gum_vs_mc(output_dir: str) -> None:
 
     _fig, axes = plt.subplots(3, 1, figsize=(10, 11))
     for ax, (title, model, quantities, xlabel, ymax) in zip(axes, panels, strict=True):
-        gum = ph.metrology.combine_uncertainty(model, quantities)
+        gum = ph.metrology.uncertainty_propagation(model, quantities)
         mc = ph.metrology.monte_carlo(
             model,
             quantities,
@@ -1263,12 +1263,12 @@ def generate_uncertainty_correlation(output_dir: str) -> None:
     for r in rho:
         corr = [[1.0, float(r)], [float(r), 1.0]]
         same.append(
-            ph.metrology.combine_uncertainty(
+            ph.metrology.uncertainty_propagation(
                 lambda a, b: a + b, pair, correlation=corr
             ).combined_uncertainty
         )
         opposite.append(
-            ph.metrology.combine_uncertainty(
+            ph.metrology.uncertainty_propagation(
                 lambda a, b: a - b, pair, correlation=corr
             ).combined_uncertainty
         )

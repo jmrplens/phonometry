@@ -174,14 +174,14 @@ __all__ = [
     "check_plant_measurement",
     "partial_plant_contributions",
     "plant_air_absorption_db_per_m",
-    "plant_background_correction_db",
+    "plant_background_correction",
     "plant_characteristic_height_m",
     "plant_mean_distance_limits_m",
     "plant_measurement_contour",
-    "plant_method_uncertainty_db",
+    "plant_method_uncertainty",
     "plant_microphone_height_m",
     "plant_sound_power",
-    "plant_steady_reading_db",
+    "plant_steady_reading",
 ]
 
 # --------------------------------------------------------------------------- #
@@ -502,7 +502,7 @@ def plant_mean_distance_limits_m(plant_area_m2: float) -> tuple[float, float]:
     )
 
 
-def plant_background_correction_db(
+def plant_background_correction(
     level_difference_db: ArrayLike,
 ) -> float | NDArray[np.float64]:
     r"""The background correction of Table 2, to subtract from the level measured.
@@ -599,7 +599,7 @@ def plant_air_absorption_db_per_m(
     return alpha
 
 
-def plant_method_uncertainty_db(distance_ratio: float) -> tuple[float, float]:
+def plant_method_uncertainty(distance_ratio: float) -> tuple[float, float]:
     r"""The uncertainty inherent in the method, Table 1: a 95 % confidence
     interval for one determination, as ``(lower, upper)`` in decibels.
 
@@ -631,7 +631,7 @@ def plant_method_uncertainty_db(distance_ratio: float) -> tuple[float, float]:
     return PLANT_METHOD_UNCERTAINTY_DB[below[-1]]
 
 
-def plant_steady_reading_db(maximum_db: float, minimum_db: float) -> float:
+def plant_steady_reading(maximum_db: float, minimum_db: float) -> float:
     r"""The level read on a sound level meter from a steady noise, 9.5.2.
 
     With time weighting S, a needle that swings over less than 5 dB marks
@@ -1493,7 +1493,7 @@ class PlantSoundPowerResult(OwnsArrays):
                     "row per position and one column per band."
                 )
                 raise ValueError(msg)
-            plant_background_correction_db(levels - background)
+            plant_background_correction(levels - background)
             object.__setattr__(self, "background_levels", background)
         for name in (
             "measurement_area_m2",
@@ -1532,7 +1532,7 @@ class PlantSoundPowerResult(OwnsArrays):
         margin = self.background_margin_db
         if margin is None:
             return None
-        return np.asarray(plant_background_correction_db(margin), dtype=np.float64)
+        return np.asarray(plant_background_correction(margin), dtype=np.float64)
 
     @property
     def levels(self) -> NDArray[np.float64]:
@@ -1684,7 +1684,7 @@ class PlantSoundPowerResult(OwnsArrays):
         9.1.1 a).
         """
         try:
-            return plant_method_uncertainty_db(self.distance_ratio)
+            return plant_method_uncertainty(self.distance_ratio)
         except ValueError:
             return None
 
@@ -2122,7 +2122,7 @@ def check_plant_measurement(
         moved when it was taken, in decibels: one value, or one per measured
         position (or per position and band); ``None`` to leave 9.5.3
         unjudged. A sound level meter's reading is judged by
-        :func:`plant_steady_reading_db` instead (9.5.2).
+        :func:`plant_steady_reading` instead (9.5.2).
     :return: A :class:`PlantMeasurementCheck`.
     :raises ValueError: for a determination whose geometry or number of
         positions is not the contour's, a non-positive time, or a negative

@@ -43,7 +43,7 @@ from .orthotropic_wood import (
     OrthotropicWood,
     orthotropic_wood_named,
 )
-from .plateau import PUBLISHED_PLATEAU_DATA, PlateauMaterial, plateau_material_named
+from .plateau import PUBLISHED_PLATEAU_DATA, PlateauMaterial, plateau_data_named
 
 __all__ = [
     "PUBLISHED_SOLID_NONLINEARITY",
@@ -64,7 +64,7 @@ __all__ = [
     "OrthotropicWood",
     "PlateauMaterial",
     "orthotropic_wood_named",
-    "plateau_material_named",
+    "plateau_data_named",
     "damping_named",
     "plate_longitudinal_speed",
     "solids_named",

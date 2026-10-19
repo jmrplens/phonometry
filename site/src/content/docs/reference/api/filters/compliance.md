@@ -239,10 +239,10 @@ One `{"freq", "class", "checked_to_omega", "margin_class<c>_db",
 the band meets on every requirement graded, or `None`. A fresh copy
 at every read.
 
-### FilterComplianceResult.binding_margin_db()
+### FilterComplianceResult.binding_margin()
 
 ```python
-FilterComplianceResult.binding_margin_db(
+FilterComplianceResult.binding_margin(
     requirement: str,
     filter_class: int,
 ) -> float

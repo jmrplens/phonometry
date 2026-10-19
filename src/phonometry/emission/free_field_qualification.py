@@ -322,7 +322,7 @@ def _table_b1(k: int, room: str) -> float:
     return top
 
 
-def inverse_square_law_tolerance_db(
+def inverse_square_law_tolerance(
     frequencies: ArrayLike, *, room: FreeFieldRoom
 ) -> np.ndarray:
     """Allowable deviation from the inverse square law per band (Table A.1).
@@ -343,7 +343,7 @@ def inverse_square_law_tolerance_db(
     )
 
 
-def directionality_tolerance_db(
+def directionality_tolerance(
     frequencies: ArrayLike, *, room: FreeFieldRoom
 ) -> np.ndarray:
     """Allowable deviation of the test source directionality (ISO 26101 Table B.1).
@@ -360,7 +360,7 @@ def directionality_tolerance_db(
     )
 
 
-def qualification_frequencies_hz(
+def qualification_frequencies(
     low_hz: float = 100.0, high_hz: float = 10000.0
 ) -> np.ndarray:
     """The frequencies ISO 3745:2012/Amd.1:2017 A.2.3 evaluates over a range.
@@ -965,7 +965,7 @@ class InverseSquareLawResult(OwnsArrays):
     def tolerance_db(self) -> np.ndarray:
         """The Table A.1 limit of each frequency, in dB, read from the room.
 
-        :return: :func:`inverse_square_law_tolerance_db` of
+        :return: :func:`inverse_square_law_tolerance` of
             :attr:`frequencies` in :attr:`room`.
         """
         return np.array(
@@ -1270,7 +1270,7 @@ class SourceDirectionalityResult(OwnsArrays):
     def tolerance_db(self) -> np.ndarray:
         """The Table B.1 limit per band, in dB, read from the room.
 
-        :return: :func:`directionality_tolerance_db` of :attr:`frequencies`
+        :return: :func:`directionality_tolerance` of :attr:`frequencies`
             in :attr:`room`.
         """
         return np.array(
@@ -2280,9 +2280,9 @@ __all__ = [
     "SourceDirectionalityResult",
     "check_free_field",
     "directionality_positions",
-    "directionality_tolerance_db",
+    "directionality_tolerance",
     "inverse_square_law_deviations",
-    "inverse_square_law_tolerance_db",
-    "qualification_frequencies_hz",
+    "inverse_square_law_tolerance",
+    "qualification_frequencies",
     "verify_source_directionality",
 ]

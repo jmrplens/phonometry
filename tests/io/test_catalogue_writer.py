@@ -405,7 +405,7 @@ def test_the_fluid_states_are_not_rows(tmp_path: pathlib.Path) -> None:
 
 def test_rows_of_two_classes_are_refused(tmp_path: pathlib.Path) -> None:
     rows = {
-        **dict(list(materials.PUBLISHED_POROUS.items())[:1]),
+        **dict(list(materials.PUBLISHED_POROUS_MATERIALS.items())[:1]),
         **dict(list(materials.PUBLISHED_CARPETS.items())[:1]),
     }
     with pytest.raises(TypeError, match="rows of one class"):

@@ -50,22 +50,22 @@ exposes the rounded view through [`AbsorptionUncertaintyResult.reported_expanded
 ## absorption_coverage_factor
 
 ```python
-absorption_coverage_factor(confidence: float = 0.95) -> float
+absorption_coverage_factor(coverage: float = 0.95) -> float
 ```
 
-Return the coverage factor `k` for a confidence level (Table 3).
+Return the coverage factor `k` for a coverage probability (Table 3).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `confidence` | Confidence level as a fraction; one of `0.68, 0.80, 0.90, 0.95, 0.99, 0.999` (Table 3, Gaussian measurand). |
+| `coverage` | Coverage probability as a fraction; one of `0.68, 0.80, 0.90, 0.95, 0.99, 0.999` (Table 3, Gaussian measurand). |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | Confidence level not tabulated in Table 3. |
+| ValueError | Coverage probability not tabulated in Table 3. |
 
 ## AbsorptionUncertaintyResult
 
@@ -144,7 +144,7 @@ equivalent_area_uncertainty(
     frequencies: float | Sequence[float] | np.ndarray,
     *,
     condition: str = 'reproducibility',
-    confidence: float = 0.95,
+    coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult
 ```
 
@@ -161,13 +161,13 @@ per one-third-octave band; $\sigma_\mathrm{r} = 0.6\,\sigma_\mathrm{R}$ (Formula
 | `area` | Equivalent sound absorption area `AT` per band, in m². |
 | `frequencies` | One-third-octave midband frequencies in Hz (Table 1), aligned with `area`. |
 | `condition` | `"reproducibility"` (default) or `"repeatability"`. |
-| `confidence` | Confidence level for the coverage factor `k` (Table 3). |
+| `coverage` | Coverage probability for the coverage factor `k` (Table 3). |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | Mismatched shapes, an untabulated frequency, an unknown `condition` or an untabulated `confidence`. |
+| ValueError | Mismatched shapes, an untabulated frequency, an unknown `condition` or an untabulated `coverage`. |
 
 ## practical_coefficient_uncertainty
 
@@ -177,7 +177,7 @@ practical_coefficient_uncertainty(
     frequencies: float | Sequence[float] | np.ndarray,
     *,
     condition: str = 'reproducibility',
-    confidence: float = 0.95,
+    coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult
 ```
 
@@ -194,13 +194,13 @@ $\sigma_\mathrm{r} = 0.6\,\sigma_\mathrm{R}$ (Formula (5)).
 | `alpha_p` | Practical sound absorption coefficient `αp` per band. |
 | `frequencies` | Octave midband frequencies in Hz (Table 2, 250-4000), aligned with `alpha_p`. |
 | `condition` | `"reproducibility"` (default) or `"repeatability"`. |
-| `confidence` | Confidence level for the coverage factor `k` (Table 3). |
+| `coverage` | Coverage probability for the coverage factor `k` (Table 3). |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | Mismatched shapes, an untabulated frequency, an unknown `condition` or an untabulated `confidence`. |
+| ValueError | Mismatched shapes, an untabulated frequency, an unknown `condition` or an untabulated `coverage`. |
 
 ## single_number_rating_uncertainty
 
@@ -209,7 +209,7 @@ single_number_rating_uncertainty(
     dl_alpha: float,
     *,
     condition: str = 'reproducibility',
-    confidence: float = 0.95,
+    coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult
 ```
 
@@ -225,13 +225,13 @@ $\sigma_\mathrm{r} = 0.02\,D_{L\alpha,\mathrm{NRD}}$ (Formula (9)).
 | :--- | :--- |
 | `dl_alpha` | Single-number rating `DLα,NRD`, in dB (non-negative). |
 | `condition` | `"reproducibility"` (default) or `"repeatability"`. |
-| `confidence` | Confidence level for the coverage factor `k` (Table 3). |
+| `coverage` | Coverage probability for the coverage factor `k` (Table 3). |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | Negative `dl_alpha`, unknown `condition` or an untabulated `confidence`. |
+| ValueError | Negative `dl_alpha`, unknown `condition` or an untabulated `coverage`. |
 
 ## sound_absorption_coefficient_uncertainty
 
@@ -241,7 +241,7 @@ sound_absorption_coefficient_uncertainty(
     frequencies: float | Sequence[float] | np.ndarray,
     *,
     condition: str = 'reproducibility',
-    confidence: float = 0.95,
+    coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult
 ```
 
@@ -258,13 +258,13 @@ $\sigma_\mathrm{r} = 0.6\,\sigma_\mathrm{R}$ (Formula (3)).
 | `alpha` | Sound absorption coefficient `αs` per band. |
 | `frequencies` | One-third-octave midband frequencies in Hz (Table 1, 63-5000), aligned with `alpha`. |
 | `condition` | `"reproducibility"` (default) or `"repeatability"`. |
-| `confidence` | Confidence level for the coverage factor `k` (Table 3). |
+| `coverage` | Coverage probability for the coverage factor `k` (Table 3). |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | Mismatched shapes, an untabulated frequency, an unknown `condition` or an untabulated `confidence`. |
+| ValueError | Mismatched shapes, an untabulated frequency, an unknown `condition` or an untabulated `coverage`. |
 
 ## weighted_coefficient_uncertainty
 
@@ -273,7 +273,7 @@ weighted_coefficient_uncertainty(
     alpha_w: float = 0.0,
     *,
     condition: str = 'reproducibility',
-    confidence: float = 0.95,
+    coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult
 ```
 
@@ -290,10 +290,10 @@ the value.
 | :--- | :--- |
 | `alpha_w` | Weighted sound absorption coefficient `αw` (carried through for the reported interval; does not affect `u`). |
 | `condition` | `"reproducibility"` (default) or `"repeatability"`. |
-| `confidence` | Confidence level for the coverage factor `k` (Table 3). |
+| `coverage` | Coverage probability for the coverage factor `k` (Table 3). |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | Unknown `condition` or an untabulated `confidence`. |
+| ValueError | Unknown `condition` or an untabulated `coverage`. |

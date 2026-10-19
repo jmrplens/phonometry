@@ -80,10 +80,9 @@ def published_names() -> dict[str, str]:
 def _is_named(name: str, generator: str) -> bool:
     """Whether *generator* names this catalogue, rather than merely contains it.
 
-    A plain substring test passes on a prefix. ``PUBLISHED_AIR`` is inside
-    ``PUBLISHED_AIR_CONDITION``, ``PUBLISHED_ABSORPTION`` inside
-    ``PUBLISHED_ABSORPTION_AREAS`` and ``PUBLISHED_TRANSMISSION_LOSS`` inside
-    ``PUBLISHED_DUCT_TRANSMISSION_LOSS``, all of which are in the tree today,
+    A plain substring test passes on a prefix. ``PUBLISHED_ABSORPTION`` is
+    inside ``PUBLISHED_ABSORPTION_AREAS`` and ``PUBLISHED_TRANSMISSION_LOSS``
+    inside ``PUBLISHED_DUCT_TRANSMISSION_LOSS``, both of which are in the tree,
     so a catalogue added under any of those shorter names would have been
     reported as reaching a page that had never heard of it. That is the one
     question this file exists to answer, so the match is on whole words.

@@ -264,6 +264,7 @@ from .environment import (
     generate_barrier_insertion_loss_methods,
     generate_barrier_reflection_index,
     generate_barrier_reflection_limit,
+    generate_barrier_reflection_uncertainty,
     generate_barrier_thickness_gain,
     generate_cnossos_rail_components,
     generate_cnossos_rail_directivity,
@@ -967,6 +968,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_road_device_ratings,
     # EN 1793-5: the sound reflection of a barrier measured where it stands.
     generate_barrier_reflection_index,
+    generate_barrier_reflection_uncertainty,
     generate_barrier_direct_sound_subtraction,
     generate_barrier_reflection_limit,
     generate_atmospheric_refraction,

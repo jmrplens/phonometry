@@ -130,30 +130,6 @@ BandUncertainty.to_arrays() -> tuple[np.ndarray, np.ndarray]
 
 Return `(frequencies, uncertainties)` as float `numpy.ndarray`.
 
-## combine_uncertainties
-
-```python
-combine_uncertainties(*components: float) -> float
-```
-
-Combine independent standard uncertainties in quadrature (Formula C.2).
-
-$u_\mathrm{c} = \sqrt{\sum u_i^2}$ for uncorrelated contributions with unit
-sensitivity
-coefficients, also the model/reality combination of Formula (A.2).
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `components` | Standard-uncertainty contributions, in dB (non-negative). |
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | No components, or a negative component. |
-
 ## COVERAGE_FACTORS
 
 *Constant* (`mapping`).
@@ -166,26 +142,26 @@ COVERAGE_FACTORS = {(0.68, False): 1.0, (0.8, False): 1.28, (0.9, False): 1.65, 
 
 ```python
 insulation_coverage_factor(
-    confidence: float = 0.95,
+    coverage: float = 0.95,
     *,
     one_sided: bool = False,
 ) -> float
 ```
 
-Return the coverage factor `k` for a confidence level (Table 8).
+Return the coverage factor `k` for a coverage probability (Table 8).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `confidence` | Confidence level as a fraction. Two-sided values are `0.68, 0.80, 0.90, 0.95, 0.99, 0.999`; one-sided values are `0.84, 0.90, 0.95, 0.975, 0.995, 0.9995`. |
+| `coverage` | Coverage probability as a fraction. Two-sided values are `0.68, 0.80, 0.90, 0.95, 0.99, 0.999`; one-sided values are `0.84, 0.90, 0.95, 0.975, 0.995, 0.9995`. |
 | `one_sided` | Use the one-sided column (conformity checks, Formulae 4/5). |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | Confidence level not tabulated in Table 8. |
+| ValueError | Coverage probability not tabulated in Table 8. |
 
 ## insulation_expanded_uncertainty
 
@@ -200,22 +176,22 @@ insulation_expanded_uncertainty(
 
 Return the expanded uncertainty $U = k\,u$ (Formula 2, Clause 8).
 
-The coverage factor `k` is taken from Table 8 for the requested confidence
-level; a minimum of $k = 1$ is enforced (Clause 8).
+The coverage factor `k` is taken from Table 8 for the requested coverage
+probability; a minimum of $k = 1$ is enforced (Clause 8).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `u` | Standard uncertainty `u`, in dB (must be non-negative). |
-| `coverage` | Confidence level as a fraction (see [`insulation_coverage_factor`](/phonometry/reference/api/building/uncertainty/#insulation_coverage_factor)). |
+| `coverage` | Coverage probability as a fraction (see [`insulation_coverage_factor`](/phonometry/reference/api/building/uncertainty/#insulation_coverage_factor)). |
 | `one_sided` | Use the one-sided coverage factor (conformity checks). |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | Negative `u` or an untabulated confidence level. |
+| ValueError | Negative `u` or an untabulated coverage probability. |
 
 ## maximum_repeatability_standard_deviation
 
@@ -432,7 +408,7 @@ dataclasses. For conformity checks pass `one_sided=True` and read
 | `value` | Best estimate `y` (e.g. `Rw` in dB). |
 | `quantity` | Rating descriptor (see [`single_number_uncertainty`](/phonometry/reference/api/building/uncertainty/#single_number_uncertainty)). |
 | `situation` | Measurement situation `"A"`, `"B"` or `"C"` (Clause 5.2). |
-| `coverage` | Confidence level as a fraction. |
+| `coverage` | Coverage probability as a fraction. |
 | `one_sided` | Use the one-sided coverage factor. |
 | `upper_limit` | Use the `σR95` upper limit (airborne, situation A). |
 
@@ -444,7 +420,7 @@ UncertainValue(
     standard_uncertainty: float,
     coverage_factor: float,
     expanded_uncertainty: float,
-    confidence: float,
+    coverage: float,
     *,
     one_sided: bool,
 )
@@ -460,7 +436,7 @@ A best estimate with its ISO 12999-1 expanded uncertainty (Clause 8).
 | `standard_uncertainty` | Standard uncertainty `u`, in dB. |
 | `coverage_factor` | Coverage factor `k` (Table 8). |
 | `expanded_uncertainty` | $U = k\,u$, in dB. |
-| `confidence` | Confidence level as a fraction (e.g. `0.95`). |
+| `coverage` | The coverage probability of `expanded_uncertainty`, as a fraction (e.g. `0.95`). |
 | `one_sided` | `True` for a one-sided interval (conformity checks). |
 
 ### UncertainValue.lower

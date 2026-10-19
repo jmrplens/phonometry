@@ -64,7 +64,7 @@ references:
     title: "Acoustics — Measurement of sound absorption in a reverberation room"
     designation: "ISO 354:2003"
     url: "https://www.iso.org/standard/34545.html"
-    note: "Solo la conversión m = alfa/(10 lg e) del apartado 8.1.2.1 en que se basa air_attenuation_m; el método en cámara reverberante se trata en la guía de Acústica de salas."
+    note: "Solo la conversión m = alfa/(10 lg e) del apartado 8.1.2.1 en que se basa air_power_attenuation_per_m; el método en cámara reverberante se trata en la guía de Acústica de salas."
 ---
 
 import SeeAlso from '../../../../../components/SeeAlso.astro';
@@ -154,7 +154,7 @@ cell = environment.air_attenuation(1000.0, temperature_c=10.0, relative_humidity
 print(round(float(cell), 2))                # 3.66  (dB/km, Tabla 1)
 
 # Alimenta condiciones reales al coeficiente de atenuación de potencia m [1/m] de la ISO 354
-m = environment.air_attenuation_m([1000.0, 4000.0], temperature_c=20.0,
+m = environment.air_power_attenuation_per_m([1000.0, 4000.0], temperature_c=20.0,
                                   relative_humidity_percent=50.0)
 print(np.round(m, 5))                        # [0.00107 0.00683]
 ```
@@ -170,13 +170,13 @@ $\pm 10$ % (apartado 7.1). Las entradas fuera de los rangos tabulados
 (−20…+50 °C, 10…100 % HR, 50…10 000 Hz, o por encima de la envolvente de validez
 de 200 kPa) siguen calculándose pero emiten una `AtmosphericAbsorptionWarning`;
 las entradas no físicas (frecuencia no positiva, humedad fuera de 0…100 %,
-temperatura igual o inferior al cero absoluto) lanzan `ValueError`. `air_attenuation_m`
+temperatura igual o inferior al cero absoluto) lanzan `ValueError`. `air_power_attenuation_per_m`
 compone $\alpha$ con la conversión de la ISO 354 $m = \alpha/(10 \log_{10} e)$, de modo
 que quien use la ISO 354 puede alimentar condiciones atmosféricas reales
 directamente a `absorption_area` / `absorption_coefficient` en vez de introducir
 $m$ a mano.
 
-### Parámetros de `air_attenuation()` / `air_attenuation_m()`
+### Parámetros de `air_attenuation()` / `air_power_attenuation_per_m()`
 
 | Parámetro | Tipo / forma | Unidades | Rango / def. | Notas |
 | :--- | :--- | :--- | :--- | :--- |
@@ -186,7 +186,7 @@ $m$ a mano.
 | `static_pressure_kpa` | float | kPa | def. `101.325` | ≤ 200 válido (apartado 7); por encima avisa |
 | `exact_midband` | bool | — | def. `False` | Ajusta a $f_\mathrm{m} = 1000\cdot10^{k/10}$ (reproduce la Tabla 1) |
 
-`air_attenuation` devuelve $\alpha$ en dB/m; `air_attenuation_m` devuelve
+`air_attenuation` devuelve $\alpha$ en dB/m; `air_power_attenuation_per_m` devuelve
 $m = \alpha/(10 \log_{10} e)$ en 1/m para la ISO 354.
 
 ### Un resultado representable: `atmospheric_attenuation()`

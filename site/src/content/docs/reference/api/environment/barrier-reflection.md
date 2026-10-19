@@ -87,7 +87,7 @@ the limit as three curves (Figure 14) without the formula behind them.
 method's authors (Garai and Guidorzi, J. Acoust. Soc. Am. 108 (2000) 1054,
 section III.D): the window ends where the first unwanted component arrives,
 and its low frequency limit is the first notch of its spectrum
-([`adrienne_low_frequency_limit_hz`](/phonometry/reference/api/environment/barrier-reflection/#adrienne_low_frequency_limit_hz), 162,5 Hz for 7,9 ms, which the
+([`adrienne_low_frequency_limit`](/phonometry/reference/api/environment/barrier-reflection/#adrienne_low_frequency_limit), 162,5 Hz for 7,9 ms, which the
 paper gives as about 160 Hz). Against the curves read off Figure 14 it
 follows microphone 5 within 5 % from 2,75 m up (5,5 % below at 2,5 m). At
 microphone 2 it comes out about 3 % to 10 % above the printed curve, set by
@@ -107,10 +107,10 @@ caller.
 ADRIENNE_CALIBRATION_LENGTH_S = 0.0013
 ```
 
-## adrienne_low_frequency_limit_hz
+## adrienne_low_frequency_limit
 
 ```python
-adrienne_low_frequency_limit_hz(window_length_s: float) -> float
+adrienne_low_frequency_limit(window_length_s: float) -> float
 ```
 
 The first notch in the spectrum of an Adrienne window, in hertz.
@@ -452,6 +452,40 @@ within 5 % of 1; the value computed is always used here.
 | :--- | :--- |
 | BarrierReflectionWarning | For an $R_\mathrm{sub}$ below 10 dB, a gain factor more than 20 % from 1, or a sample rate below 44 kHz. |
 
+## reflection_index_expanded_uncertainty
+
+```python
+reflection_index_expanded_uncertainty(
+    *,
+    estimate: Literal['median', 'low', 'high'] = 'high',
+    coverage_factor: float = 1.96,
+) -> ReflectionIndexUncertainty
+```
+
+Expanded uncertainty of a sound reflection index from Table A.1 (A.2).
+
+$U_j = k_p\, s_{\mathrm{R},j}$, with $s_\mathrm{R}$ taken as
+the combined standard uncertainty. Annex B.5 takes the high column and
+$k_p$ = 1,96 for 95 % coverage, which is the default. The
+reproducibility is the standard's, not the measurement's, so the answer
+depends on the column and the factor alone: one call serves every
+[`ReflectionIndexResult`](/phonometry/reference/api/environment/barrier-reflection/#reflectionindexresult).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `estimate` | The column of Table A.1, `"median"`, `"low"` or `"high"`. |
+| `coverage_factor` | $k_p$. |
+
+**Returns:** A [`ReflectionIndexUncertainty`](/phonometry/reference/api/environment/barrier-reflection/#reflectionindexuncertainty), the eighteen $U_j$ aligned with the bands, in units of the index, and the $U$ of $DL_{RI}$, in decibels.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | On an unknown column or a non-positive factor. |
+
 ## reflection_index_from_positions
 
 ```python
@@ -643,7 +677,7 @@ How far down a device of a given size can be measured, 5.5.7.
 | `device_length_m` | The length of the sample, or `None` when its side edges were not considered. |
 | `source_height_m` | $h_S$, the height of the loudspeaker and of microphone 5. |
 | `window_length_s` | Per microphone, the longest Adrienne window whose tail ends before the first unwanted component: the flat part and the trailing edge last as long as the delay between the reflection and that component, plus the 0,5 ms leading edge. |
-| `low_frequency_limit_hz` | Per microphone, the first notch of that window's spectrum ([`adrienne_low_frequency_limit_hz`](/phonometry/reference/api/environment/barrier-reflection/#adrienne_low_frequency_limit_hz)). |
+| `low_frequency_limit_hz` | Per microphone, the first notch of that window's spectrum ([`adrienne_low_frequency_limit`](/phonometry/reference/api/environment/barrier-reflection/#adrienne_low_frequency_limit)). |
 | `limiting_component` | Per microphone, `"ground"` for the ground reflection on the source side, `"top edge"` or `"side edge"` for a diffraction by an edge of the device. |
 
 ### ReflectionFrequencyLimit.plot()
@@ -778,37 +812,6 @@ The sound reflection index of a device, per one-third octave band.
 | `gain_corrections` | `(positions, 9)`: $C_{\mathrm{gain},k}$ of Formula (4), or `None`. |
 | `subtraction_reductions_db` | `(positions, 9)`: $R_\mathrm{sub}$ of each subtraction, in decibels, or `None`. |
 
-### ReflectionIndexResult.expanded_uncertainty()
-
-```python
-ReflectionIndexResult.expanded_uncertainty(
-    *,
-    estimate: Literal['median', 'low', 'high'] = 'high',
-    coverage_factor: float = 1.96,
-) -> tuple[NDArray[np.float64], float]
-```
-
-Expanded uncertainty from the reproducibility of Table A.1 (A.2).
-
-$U_j = k_p\, s_{\mathrm{R},j}$, with $s_\mathrm{R}$ taken as the combined
-standard uncertainty. Annex B.5 takes the high column and
-$k_p$ = 1,96 for 95 % coverage, which is the default.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `estimate` | The column of Table A.1, `"median"`, `"low"` or `"high"`. |
-| `coverage_factor` | $k_p$. |
-
-**Returns:** The eighteen $U_j$ and the $U$ of $DL_{RI}$ in decibels.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | On an unknown column or a non-positive factor. |
-
 ### ReflectionIndexResult.plot()
 
 ```python
@@ -831,6 +834,56 @@ Requires matplotlib (`pip install phonometry[plot]`).
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the average `Axes.plot` call. |
+
+**Returns:** The `Axes`.
+
+## ReflectionIndexUncertainty
+
+```python
+ReflectionIndexUncertainty(
+    frequencies: NDArray[np.float64],
+    expanded_uncertainty: NDArray[np.float64],
+    rating_db: float,
+    estimate: Literal['median', 'low', 'high'],
+    coverage_factor: float,
+)
+```
+
+The expanded uncertainty of a declared sound reflection index (A.2).
+
+$U_j = k_p\, s_{\mathrm{R},j}$ per band and $U = k_p\, s_\mathrm{R}$ of $DL_{RI}$, with the reproducibility standard
+deviation of Table A.1 taken as the combined standard uncertainty.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | The eighteen band centres, 100 Hz to 5 kHz, the bands of [`ReflectionIndexResult.frequencies`](/phonometry/reference/api/environment/barrier-reflection/#reflectionindexresult). |
+| `expanded_uncertainty` | $U_j$ per band, aligned with `frequencies`, in units of the index itself: $RI$ is a ratio, and Table B.2 prints its $U_j$ beside it as one (0,62 at 100 Hz against an $RI$ of 0,58). |
+| `rating_db` | $U$ of the single-number rating $DL_{RI}$, in decibels, the one row of Table A.1 that is a level. |
+| `estimate` | The column of Table A.1 read: `"median"`, `"low"` or `"high"`. |
+| `coverage_factor` | $k_p$. |
+
+### ReflectionIndexUncertainty.plot()
+
+```python
+ReflectionIndexUncertainty.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Draw $U_j$ band by band with the $U$ of $DL_{RI}$.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the `Axes.bar` call. |
 
 **Returns:** The `Axes`.
 

@@ -577,7 +577,7 @@ def surface_pressure_intensity_indicator(
     return p - i
 
 
-def combine_subareas(
+def subarea_intensity_level(
     l_in: Sequence[Sequence[float]] | np.ndarray,
     measurement_area: Sequence[float] | np.ndarray,
 ) -> tuple[np.ndarray, float]:
@@ -624,7 +624,7 @@ def combine_subareas(
         msg = "'measurement_area' must be a one-dimensional array of subarea areas."
         raise ValueError(msg)
     require_equal_counts(
-        "combine_subareas",
+        "subarea_intensity_level",
         {"measurement_area": areas.size, "l_in rows": levels.shape[0]},
         "subarea",
     )
@@ -682,7 +682,7 @@ def intensity_sound_reduction(
     ``lp1`` and ``l_in`` may be one value per band (already averaged) or a
     two-dimensional ``(positions, bands)`` array, in which case the positions
     are energy-averaged. Subareas scanned separately should first be combined
-    with :func:`combine_subareas`.
+    with :func:`subarea_intensity_level`.
 
     :param lp1: Source-room sound pressure levels, in dB.
     :param l_in: Normal sound intensity levels over the measurement surface,
@@ -1246,12 +1246,12 @@ def low_frequency_intensity_reduction(
 
     Clause 6.4.2 refuses a negative measured intensity for the same reason,
     which a level cannot carry: pass the signed sub-area intensities through
-    :func:`combine_subareas` first, which is where the sign lives.
+    :func:`subarea_intensity_level` first, which is where the sign lives.
 
     ``lp_surface`` and ``l_in`` may be one value per band or a
     ``(positions, bands)`` array, in which case the positions are
     energy-averaged. Sub-areas scanned separately are combined first with
-    :func:`combine_subareas`, which is Formulas (9) and (10) here.
+    :func:`subarea_intensity_level`, which is Formulas (9) and (10) here.
 
     :param lp_surface: Sound pressure levels over the surface of the test
         specimen in the source room, ``LpS``, in dB.

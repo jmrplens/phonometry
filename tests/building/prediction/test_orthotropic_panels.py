@@ -37,7 +37,7 @@ from scipy.integrate import quad
 
 from phonometry import building, vibration
 from phonometry.fluids import Fluid
-from phonometry.materials.absorbers.porous import PUBLISHED_AIR
+from phonometry.materials.absorbers.porous import ABSORBER_AIR
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -331,7 +331,7 @@ def _fig627(
     loss_factor: float = 0.01,
     area: float | None = None,
     limiting_angle_deg: float = 78.0,
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> building.SoundReductionResult:
     """The Figure 6.27 panel: 7,5 kg/m2 with the range 400 Hz to 4000 Hz."""
     return building.orthotropic_transmission_loss(
@@ -347,7 +347,7 @@ def _fig627(
     )
 
 
-def _heckl(freq: np.ndarray, fluid: Fluid = PUBLISHED_AIR) -> np.ndarray:
+def _heckl(freq: np.ndarray, fluid: Fluid = ABSORBER_AIR) -> np.ndarray:
     res = _fig627(freq, method="heckl", fluid=fluid)
     return np.asarray(res.transmission_loss, dtype=np.float64)
 

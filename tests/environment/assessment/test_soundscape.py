@@ -567,7 +567,7 @@ def test_method_b_summary_mean_sd_and_confidence_interval() -> None:
     assert summary.confidence_lower[0, 0] == pytest.approx(low, rel=1e-12)
     assert summary.confidence_upper[0, 0] == pytest.approx(high, rel=1e-12)
     assert summary.medians[0, 0] == pytest.approx(np.median(loud))
-    assert summary.confidence_level == 0.95
+    assert summary.confidence == 0.95
 
 
 def test_method_b_summary_columns_are_the_figure_c7_scales() -> None:
@@ -587,8 +587,10 @@ def test_method_b_summary_leaves_one_answer_without_spread() -> None:
 
 def test_method_b_summary_refuses_a_confidence_level_of_one() -> None:
     values = [2.0, 3.0]
-    with pytest.raises(ValueError, match="confidence_level"):
-        sc.method_b_summary(values, confidence_level=1.0)
+    with pytest.raises(
+        ValueError, match="'confidence' must lie strictly between 0 and 1"
+    ):
+        sc.method_b_summary(values, confidence=1.0)
 
 
 def test_source_ranking_median_and_range() -> None:

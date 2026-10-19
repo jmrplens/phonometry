@@ -453,7 +453,7 @@ def generate_absorption_uncertainty(output_dir: str) -> None:
         ]
     )
     res = materials.sound_absorption_coefficient_uncertainty(
-        alpha_s, freqs, confidence=0.95
+        alpha_s, freqs, coverage=0.95
     )
     u = res.expanded_uncertainty
 
@@ -940,7 +940,9 @@ def generate_limp_frame_effective_density(output_dir: str) -> None:
 
     # Allard & Atalla Table 11.2 (printed p. 254): the soft fibrous material
     # behind their Figure 11.2, read from the published object.
-    specimen = materials.PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
+    specimen = materials.PUBLISHED_POROUS_MATERIALS[
+        "allard-2009-table-11-2/soft_fibrous"
+    ]
     porosity = specimen.printed("porosity")
     resistivity = specimen.printed("flow_resistivity_pa_s_m2")
     frame_density = specimen.printed("frame_density_kg_m3")
@@ -1057,7 +1059,9 @@ def generate_biot_frame_resonance(output_dir: str) -> None:
     # Allard & Atalla Sect. 6.5.4: the glass wool "Domisol Coffrage", six
     # parameters from Table 6.1 on printed p. 124 and the two characteristic
     # lengths from the prose of printed p. 123, read from the published object.
-    specimen = materials.PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
+    specimen = materials.PUBLISHED_POROUS_MATERIALS[
+        "allard-2009-table-6-1/domisol_coffrage"
+    ]
     porosity = specimen.printed("porosity")
     tortuosity = specimen.printed("tortuosity")
     frame_density = specimen.printed("frame_density_kg_m3")
@@ -3830,7 +3834,9 @@ def generate_biot_waves(output_dir: str) -> None:
 
     # Allard & Atalla Sect. 6.5.4 glass wool, the same input set as the
     # frame-resonance figure, read from the published object.
-    specimen = materials.PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
+    specimen = materials.PUBLISHED_POROUS_MATERIALS[
+        "allard-2009-table-6-1/domisol_coffrage"
+    ]
     shear, poisson_ratio = specimen.frame_constants()
     freq = np.linspace(50.0, 1500.0, 1451)
     waves = materials.biot_waves(

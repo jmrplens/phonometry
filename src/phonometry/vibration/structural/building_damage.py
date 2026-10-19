@@ -46,7 +46,9 @@ has the tables needs them in the same breath:
 * The lowest horizontal natural frequency of a building of five storeys or
   more is roughly :math:`f_i \approx 10/n` with :math:`n` the storey count
   (6.4), which is the estimate that tells you whether the topmost floor plane
-  will be excited at all.
+  will be excited at all. DIN 4150-1 prints it as Formula (4) and ISO 4866 in
+  D.2, and :func:`storey_fundamental_frequency` is the one function for all
+  three.
 
 Clause 6.2 turns a measured velocity into a bending stress for a beam or a
 one-way slab vibrating in one mode, which is the bridge from this guideline
@@ -188,11 +190,14 @@ PIPELINE_LONG_TERM_FACTOR: float = 0.5
 #: ``y_max / i`` of a full rectangular section.
 BENDING_STRESS_CONSTANT: float = 1.73
 
-#: Clause 6.4: the numerator of the storey estimate ``f_i ~ 10 / n``, in
-#: hertz. It applies to buildings from about five storeys up.
+#: The numerator of the storey estimate ``f ~ 10 / n``, in hertz, for
+#: buildings from about five storeys up: DIN 4150-3 6.4, the same estimate as
+#: DIN 4150-1 Formula (4) and ISO 4866 D.2.
 STOREY_FREQUENCY_NUMERATOR_HZ: float = 10.0
 
-#: Clause 6.4: the storey count from which the estimate is offered.
+#: The storey count from which the estimate is offered: about five in
+#: DIN 4150-3 6.4, five and more in DIN 4150-1 Formula (4). ISO 4866 D.2
+#: offers it for tall buildings without a count.
 STOREY_FREQUENCY_MIN_STOREYS: int = 5
 
 
@@ -221,9 +226,11 @@ class BuildingDamageWarning(PhonometryWarning):
     """A DIN 4150-3 rule is used outside the range the standard offers it for.
 
     Raised by :func:`storey_fundamental_frequency` below
-    :data:`STOREY_FREQUENCY_MIN_STOREYS`. The estimate is still returned: the
-    standard offers ``10 / n`` from about five storeys up, and below that it
-    says nothing, so the number is an extrapolation rather than the rule.
+    :data:`STOREY_FREQUENCY_MIN_STOREYS`. The estimate is still returned:
+    DIN 4150-3 6.4 offers ``10 / n`` from about five storeys up, DIN 4150-1
+    Formula (4) for five and more, ISO 4866 D.2 for tall buildings, and below
+    five none of them says anything, so the number is an extrapolation
+    rather than the rule.
     """
 
 
@@ -472,12 +479,16 @@ def assess_building_vibration(
 
 
 def storey_fundamental_frequency(storeys: int) -> float:
-    """The rough lowest horizontal natural frequency of a building (6.4).
+    """The rough lowest horizontal natural frequency of a building.
 
-    ``f_i ~ 10 / n``, offered for buildings from about five storeys up. It is
-    a rough estimate and the standard says so; its use is to tell whether the
-    excitation is anywhere near the frequency at which the topmost floor
-    plane will answer.
+    ``f ~ 10 / n``, offered for buildings from about five storeys up. Three
+    documents print the same estimate: DIN 4150-3:1999-02 6.4 (the
+    ``Stockwerkgleichung``, from about five storeys), DIN 4150-1:2001-06
+    Formula (4) (five storeys and more) and ISO 4866:2010 D.2 (the simplest
+    of the empirical formulae for tall buildings), so this is the one
+    function for all three. It is a rough estimate and the standards say so;
+    its use is to tell whether the excitation is anywhere near the frequency
+    at which the topmost floor plane will answer.
 
     :param storeys: The number of storeys ``n``.
     :return: The estimated lowest horizontal natural frequency, in hertz.

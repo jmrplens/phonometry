@@ -77,32 +77,6 @@ Combines [`tonal_audibility`](/phonometry/reference/api/environment/measurement/
 
 **Returns:** A [`TonalAssessmentResult`](/phonometry/reference/api/environment/measurement/#tonalassessmentresult).
 
-## combined_standard_uncertainty
-
-```python
-combined_standard_uncertainty(
-    contributions: Sequence[float] | Sequence[tuple[float, float]] | np.ndarray,
-) -> float
-```
-
-Combined standard uncertainty (Formula (2)).
-
-$u = \sqrt{\sum (c_j \cdot u_j)^2}$.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `contributions` | Either the per-component products $c_j \cdot u_j$ (dB), or `(uⱼ, cⱼ)` pairs whose product is formed. Independent inputs are assumed (no covariance term). |
-
-**Returns:** The combined standard uncertainty, in dB.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | If `contributions` is empty or non-finite. |
-
 ## critical_bandwidth
 
 ```python
@@ -134,7 +108,7 @@ above 500 Hz.
 environmental_expanded_uncertainty(
     standard_uncertainty: float,
     *,
-    confidence: float = 0.95,
+    coverage: float = 0.95,
 ) -> float
 ```
 
@@ -162,7 +136,7 @@ the other two had to be qualified.
 | Name | Description |
 | :--- | :--- |
 | `standard_uncertainty` | Combined standard uncertainty `u`, in dB. |
-| `confidence` | Coverage probability (0.95 or 0.80). |
+| `coverage` | Coverage probability (0.95 or 0.80). |
 
 **Returns:** The expanded uncertainty `U`, in dB.
 
@@ -170,7 +144,7 @@ the other two had to be qualified.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `u` is negative/non-finite or `confidence` is not one of the tabulated values. |
+| ValueError | If `u` is negative/non-finite or `coverage` is not one of the tabulated values. |
 
 ## EnvironmentalMeasurementWarning
 

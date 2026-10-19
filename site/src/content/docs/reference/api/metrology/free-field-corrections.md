@@ -44,7 +44,7 @@ the microphones, the quantity clauses 12 to 14 judge.
 
 **The uncertainty, Annex I and clauses 9 to 14.**
 [`correction_uncertainty_budget`](/phonometry/reference/api/metrology/free-field-corrections/#correction_uncertainty_budget) builds the budget of Table I.1 on
-[`combine_uncertainty`](/phonometry/reference/api/metrology/uncertainty/#combine_uncertainty): its 15 components, each
+[`uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation): its 15 components, each
 divided by the divisor its distribution sets, and the effective degrees of
 freedom by Welch-Satterthwaite, which choose the coverage factor for a level of
 confidence of 95 %. [`verify_correction_uncertainty`](/phonometry/reference/api/metrology/free-field-corrections/#verify_correction_uncertainty) judges the expanded
@@ -369,7 +369,7 @@ correction of the reference microphone (a7), and the standard uncertainty
 from repeated measurements for the repeatability (a15). The divisors of
 Table I.1, $\sqrt{3}$, 2 and 1, turn them into standard
 uncertainties; the combination is
-[`combine_uncertainty`](/phonometry/reference/api/metrology/uncertainty/#combine_uncertainty) on Formula (E.6), every
+[`uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation) on Formula (E.6), every
 component a correction with a sensitivity of $\pm 1$; the effective
 degrees of freedom are Welch-Satterthwaite's, with only the repeatability
 finite; and the coverage factor is the Student factor for them at a level

@@ -53,7 +53,7 @@ $$
 ISO 354 otherwise defers the calculation of `alpha` entirely to ISO 9613-1.
 `m` is therefore a user-supplied per-band parameter here (default 0, i.e. no air
 correction); a caller holding ISO 9613-1 `alpha` values can convert them with
-[`attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#attenuation_from_alpha).
+[`power_attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#power_attenuation_from_alpha).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -84,7 +84,7 @@ with-specimen area `A2` from `T2` (both equations have identical form).
 | `volume` | Room volume `V`, in cubic metres. |
 | `temperature_c` | Air temperature, in degrees Celsius, used to compute the speed of sound via Eq. (6) when `speed_of_sound` is not given (default 20 degC, i.e. c = 343 m/s). A temperature outside 15..30 degC emits an [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning). A room volume below the 150 m3 minimum of clause 6.1.1 likewise emits an advisory [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning). |
 | `speed_of_sound` | Explicit speed of sound `c`, in m/s; overrides `temperature_c` and Eq. (6) when supplied. |
-| `m` | Power attenuation coefficient of air `m`, in 1/m (a scalar or an array matching the shape of `t60`; default 0, i.e. no air correction). A per-band `m` whose shape differs from `t60` raises `ValueError`. Obtain it from an ISO 9613-1 attenuation coefficient with [`attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#attenuation_from_alpha). |
+| `m` | Power attenuation coefficient of air `m`, in 1/m (a scalar or an array matching the shape of `t60`; default 0, i.e. no air correction). A per-band `m` whose shape differs from `t60` raises `ValueError`. Obtain it from an ISO 9613-1 attenuation coefficient with [`power_attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#power_attenuation_from_alpha). |
 
 **Returns:** Equivalent sound absorption area `A`, in square metres, with the shape of `t60`.
 
@@ -149,30 +149,6 @@ advisory [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorpt
 
 Advisory for out-of-range or non-physical ISO 354 absorption inputs.
 
-## attenuation_from_alpha
-
-```python
-attenuation_from_alpha(alpha: ArrayLike) -> NDArray[np.float64]
-```
-
-Air power attenuation coefficient `m` from ISO 9613-1 `alpha`.
-
-Applies the ISO 354:2003 (8.1.2.1) conversion
-$m = \alpha / (10 \log_{10} e)$,
-where `alpha` is the attenuation coefficient in decibels per metre used by
-ISO 9613-1 and `m` is the power attenuation coefficient in reciprocal
-metres entering Eq. (5)/(7)/(8). ISO 354 itself provides no `alpha` table
-or formula (it defers to ISO 9613-1); this helper only performs the unit
-conversion for a caller who already holds `alpha` values.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `alpha` | Attenuation coefficient, in dB/m (scalar or per band). |
-
-**Returns:** Power attenuation coefficient `m`, in 1/m.
-
 ## measure_sound_absorption
 
 ```python
@@ -218,7 +194,7 @@ with-specimen climates differ.
 | `temperature_c` | Air temperature during the test, in degrees Celsius (default 20). Used for the speed of sound via Eq. (6) unless `speed_of_sound` is given; a temperature outside 15..30 degC emits an [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning). |
 | `relative_humidity_percent` | Relative humidity during the test, in % within `[0, 100]` (informational; recorded on the result but not used in the computation, which sees the climate only through `m`). `None` leaves it unrecorded. |
 | `speed_of_sound` | Explicit speed of sound `c`, in m/s; overrides `temperature_c` and Eq. (6) when supplied. |
-| `m` | Power attenuation coefficient of air `m`, in 1/m (a scalar or a per-band array matching `frequencies`; default 0, i.e. no air correction). Obtain it from an ISO 9613-1 attenuation coefficient with [`attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#attenuation_from_alpha). |
+| `m` | Power attenuation coefficient of air `m`, in 1/m (a scalar or a per-band array matching `frequencies`; default 0, i.e. no air correction). Obtain it from an ISO 9613-1 attenuation coefficient with [`power_attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#power_attenuation_from_alpha). |
 
 **Returns:** A frozen [`SoundAbsorptionMeasurement`](/phonometry/reference/api/materials/sound-absorption/#soundabsorptionmeasurement).
 
@@ -227,6 +203,42 @@ with-specimen climates differ.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the frequency and reverberation-time arrays do not share one shape, `relative_humidity_percent` is not within `[0, 100]` %, or an input is non-physical (see [`absorption_coefficient`](/phonometry/reference/api/materials/sound-absorption/#absorption_coefficient)). |
+
+## power_attenuation_from_alpha
+
+```python
+power_attenuation_from_alpha(
+    attenuation_db_per_m: ArrayLike,
+) -> NDArray[np.float64]
+```
+
+Air power attenuation coefficient `m` from the ISO 9613-1 `alpha`.
+
+The one conversion both reverberation-room standards make, ISO 354:2003
+(8.1.2.1) and ISO 17497-1:2004 (Clause 8, Eq. (3)):
+$m = \alpha / (10 \log_{10} e) \approx \alpha / 4.343$, where
+`alpha` is the attenuation coefficient in decibels per metre of
+ISO 9613-1, a sound-*pressure* level per metre, and `m` is the *power*
+attenuation coefficient in reciprocal metres that ISO 354 Eqs. (5), (7)
+and (8) and ISO 17497-1 Eqs. (1), (4) and (6) take. Neither standard
+tabulates `alpha`: both defer it to ISO 9613-1, so this only converts a
+value the caller already holds (from
+[`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation), for example, or in one
+step with [`air_power_attenuation_per_m`](/phonometry/reference/api/environment/air-absorption/#air_power_attenuation_per_m)).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `attenuation_db_per_m` | Attenuation coefficient `alpha` of ISO 9613-1, in dB/m (scalar or per band). |
+
+**Returns:** Power attenuation coefficient `m`, in 1/m, with the shape of `attenuation_db_per_m`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | if any value is negative or not finite. |
 
 ## SoundAbsorptionMeasurement
 

@@ -716,7 +716,7 @@ from phonometry import io, materials
 
 allard = {
     key: row
-    for key, row in materials.PUBLISHED_POROUS.items()
+    for key, row in materials.PUBLISHED_POROUS_MATERIALS.items()
     if row.table == "allard-2009-table-13-1"
 }
 written = io.write_catalogue(allard, "template.json", catalogue="template-allard")
@@ -1209,7 +1209,7 @@ ground = pasture.medium(octaves, model="miki")
 over_pasture = environment.ground_effect(octaves, 1.0, 1.5, 50.0, impedance=ground)
 print(over_pasture.excess_attenuation.round(1))   # [  3.6  -4.2 -12.8  -2.8]
 
-fitted = environment.PUBLISHED_GROUND["cox-2017-table-6-7/sports_field_semi_phenomenological"]
+fitted = environment.PUBLISHED_GROUND_SURFACES["cox-2017-table-6-7/sports_field_semi_phenomenological"]
 try:
     fitted.medium(octaves)
 except ValueError as error:
@@ -1289,11 +1289,11 @@ by hand does.
 ### Searching your catalogue and the published ones
 
 Every `*_named` lookup takes `catalogue=`, the rows to search in place of its
-own `PUBLISHED_*`. `PUBLISHED_POROUS | mine` joins the two into one read-only
+own `PUBLISHED_*`. `PUBLISHED_POROUS_MATERIALS | mine` joins the two into one read-only
 mapping that refuses a key both hold, so one search answers from both:
 
 ```python
-both = materials.PUBLISHED_POROUS | mine
+both = materials.PUBLISHED_POROUS_MATERIALS | mine
 for row in materials.porous_materials_named("panel 40 core", catalogue=both):
     print(row.table, row.variant)
 # panel-40 as declared

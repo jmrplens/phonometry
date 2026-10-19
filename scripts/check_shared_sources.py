@@ -53,8 +53,8 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 from check_solid_agreement import normalised  # noqa: E402
 
-from phonometry.environment.propagation import PUBLISHED_GROUND  # noqa: E402
-from phonometry.materials.absorbers import PUBLISHED_POROUS  # noqa: E402
+from phonometry.environment.propagation import PUBLISHED_GROUND_SURFACES  # noqa: E402
+from phonometry.materials.absorbers import PUBLISHED_POROUS_MATERIALS  # noqa: E402
 from phonometry.solids import PUBLISHED_SOLIDS  # noqa: E402
 
 if TYPE_CHECKING:
@@ -83,7 +83,7 @@ CATALOGUES: tuple[tuple[str, Mapping[str, CatalogueRow], tuple[str, ...]], ...] 
     ),
     (
         "porous",
-        PUBLISHED_POROUS,
+        PUBLISHED_POROUS_MATERIALS,
         (
             "flow_resistivity_pa_s_m2",
             "porosity",
@@ -95,7 +95,7 @@ CATALOGUES: tuple[tuple[str, Mapping[str, CatalogueRow], tuple[str, ...]], ...] 
     ),
     (
         "ground",
-        PUBLISHED_GROUND,
+        PUBLISHED_GROUND_SURFACES,
         (
             "flow_resistivity_pa_s_m2",
             "porosity",

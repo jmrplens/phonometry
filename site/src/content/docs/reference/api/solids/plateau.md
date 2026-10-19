@@ -57,10 +57,10 @@ catalogue here.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## plateau_material_named
+## plateau_data_named
 
 ```python
-plateau_material_named(
+plateau_data_named(
     name: str,
     *,
     catalogue: Mapping[str, PlateauMaterial] | None = None,

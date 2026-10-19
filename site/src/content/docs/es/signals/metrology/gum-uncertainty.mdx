@@ -63,7 +63,7 @@ $$
 u_\mathrm{c}^2(y) = \sum_{i=1}^{N} \left(\frac{\partial f}{\partial x_i}\right)^2 u^2(x_i).
 $$
 
-`combine_uncertainty` evalúa las sensibilidades por diferencias centradas, de
+`uncertainty_propagation` evalúa las sensibilidades por diferencias centradas, de
 modo que funciona casi cualquier modelo invocable, sin derivadas parciales a
 mano. Las magnitudes de entrada se describen con una `Quantity` (mejor
 estimación, incertidumbre típica, PDF, grados de libertad).
@@ -142,7 +142,7 @@ quantities = [
     metrology.rectangular(0.0, 0.30, name="Instrument"),
     metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
 ]
-result = metrology.combine_uncertainty(lambda a, b, c, d: a + b + c + d, quantities)
+result = metrology.uncertainty_propagation(lambda a, b, c, d: a + b + c + d, quantities)
 
 print(round(result.value, 2))                 # 74.0
 print(round(result.combined_uncertainty, 3))  # 0.407 dB
@@ -231,7 +231,7 @@ pareja totalmente correlacionada puede cancelarse por completo.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_correlation.svg" alt="Izquierda: la incertidumbre típica combinada de dos términos de 0,3 dB frente a su coeficiente de correlación, subiendo desde cero en menos uno, pasando por el valor en cuadratura 0,424 en cero, hasta 0,600 en más uno para sensibilidades del mismo signo, y la curva reflejada para signos opuestos. Derecha: el mismo balance como dos barras, 0,424 dB suponiendo independencia frente a 0,600 dB con trazabilidad al mismo calibrador, anotado como un 41 por ciento subestimado" width="92%" />
 
-*Dos términos de 0,3 dB cada uno, combinados con `combine_uncertainty` y una
+*Dos términos de 0,3 dB cada uno, combinados con `uncertainty_propagation` y una
 matriz de correlación. Tratar como independiente una pareja totalmente
 correlacionada subestima $u_\mathrm{c}$ en un 41 % (0,424 dB en lugar de 0,600 dB), y el
 error crece con el número de términos que comparten fuente. Leyendo la misma
@@ -259,7 +259,7 @@ correlation = [
     [0.0, 1.0, 1.0, 0.0],
     [0.0, 0.0, 0.0, 1.0],
 ]
-correlated = metrology.combine_uncertainty(  # avisa: aquí no hay Welch-Satterthwaite
+correlated = metrology.uncertainty_propagation(  # avisa: aquí no hay Welch-Satterthwaite
     lambda a, b, c, d: a + b + c + d, quantities, correlation=correlation)
 print(round(correlated.combined_uncertainty, 3))            # 0.454 dB (era 0.407)
 print(correlated.effective_dof)                             # nan
@@ -282,7 +282,7 @@ simétrico en probabilidad** (igual probabilidad en cada cola, apartado 7.7).
 Las entradas se muestrean de forma independiente; la vía gaussiana
 multivariante del Suplemento para magnitudes no independientes (6.4.8) no está
 implementada, así que los balances correlacionados corresponden a
-`combine_uncertainty`. El número de ensayos es fijo (sin el procedimiento
+`uncertainty_propagation`. El número de ensayos es fijo (sin el procedimiento
 adaptativo de 7.9, mínimo 2 ensayos) y el intervalo es el simétrico, no el
 intervalo más corto de 5.3.4.
 
@@ -334,7 +334,7 @@ en un balance propio:
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_gum_vs_mc.svg" alt="Tres paneles apilados, cada uno con un histograma de Monte Carlo, la gaussiana de la GUM superpuesta, el intervalo de cobertura de Monte Carlo sombreado y el intervalo Y más o menos U de la GUM como líneas discontinuas. Arriba: una entrada rectangular dominante da una salida casi rectangular que el intervalo gaussiano sobrecubre. En medio: la suma energética de dos niveles da una distribución asimétrica cuya media queda desplazada respecto al valor de la GUM. Abajo: un coeficiente de absorción saturado en uno da un intervalo asimétrico que ninguna declaración simétrica puede representar" width="88%" />
 
-*Los tres regímenes, cada uno calculado con `combine_uncertainty` y
+*Los tres regímenes, cada uno calculado con `uncertainty_propagation` y
 `monte_carlo` sobre las mismas entradas. **Arriba**, un término rectangular
 dominante ($a = 1$ dB) junto a uno gaussiano pequeño: la salida es casi
 rectangular, y el intervalo de la GUM de $\pm 1{,}15$ dB sobrecubre en un 17 % el
@@ -377,7 +377,7 @@ quantities = [
     metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
 ]
 model = lambda a, b, c, d: a + b + c + d
-result = metrology.combine_uncertainty(model, quantities)
+result = metrology.uncertainty_propagation(model, quantities)
 mc = metrology.monte_carlo(model, quantities, trials=1_000_000, coverage=0.95, seed=1,
                     keep_samples=True)
 k, U = result.expanded(0.95)
@@ -480,7 +480,7 @@ El procedimiento adaptativo de número de ensayos del apartado 7.9 del
 Suplemento 1 (el número de ensayos es fijo, con un mínimo de 2), el intervalo
 de cobertura más corto del apartado 5.3.4 y el muestreo gaussiano
 multivariante del apartado 6.4.8, de modo que un balance correlacionado se
-queda con `combine_uncertainty`. El Suplemento 2 (varias magnitudes de salida)
+queda con `uncertainty_propagation`. El Suplemento 2 (varias magnitudes de salida)
 no está implementado en absoluto. La validación del marco de la GUM contra el
 resultado de Monte Carlo del apartado 8 es una comparación que se hace leyendo
 los dos resultados, no un veredicto automático. Los balances de dominio que

@@ -69,7 +69,7 @@ the room allows it. The source has to qualify first: Annex A asks for a
 directivity index inside ± 2 dB up to 630 Hz, rising to ± 8 dB at 1 kHz.
 
 ```python
-print(room.omnidirectionality_tolerance_db(800.0))   # 5.0
+print(room.omnidirectionality_tolerance(800.0))   # 5.0
 ```
 
 The margin over the background is a judgement the library will make for you,

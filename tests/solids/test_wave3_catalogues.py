@@ -220,8 +220,8 @@ def test_every_plateau_constant_is_the_printed_one(
 
 def test_the_plateau_catalogue_holds_all_eight_rows() -> None:
     assert len(PUBLISHED_PLATEAU_DATA) == len(ref.NORTON_KARCZUB_3_1) == 8
-    assert solids.plateau_material_named("steel")[0].name == "Steel"
-    assert solids.plateau_material_named("unobtainium") == ()
+    assert solids.plateau_data_named("steel")[0].name == "Steel"
+    assert solids.plateau_data_named("unobtainium") == ()
 
 
 # ---------------------------------------------------------------------------

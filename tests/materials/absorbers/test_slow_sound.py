@@ -27,7 +27,7 @@ import numpy as np
 import pytest
 
 from phonometry.fluids import FluidPropertyUnavailable
-from phonometry.materials.absorbers.porous import PUBLISHED_AIR
+from phonometry.materials.absorbers.porous import ABSORBER_AIR
 from phonometry.materials.absorbers.slow_sound import (
     CriticalCouplingResult,
     HelmholtzResonator,
@@ -46,26 +46,26 @@ _C0 = 343.0
 _GAMMA = 1.4
 _P0 = 101325.0
 _PR = 0.71
-# The five constants above are the paper's, read off its text; the model's
-# published air is meant to be the same air. Pinning them here and asserting
+# The five constants above are the paper's, read off its text; the library's
+# absorber air is meant to be the same air. Pinning them here and asserting
 # the identity below keeps the oracle independent while making any drift
 # between the two a test failure rather than a silent change of oracle.
-_AIR = PUBLISHED_AIR
+_AIR = ABSORBER_AIR
 
 
-def test_published_air_is_the_papers_air() -> None:
-    """The model's published air carries the constants the paper prints."""
-    assert PUBLISHED_AIR.speed_of_sound == pytest.approx(_C0, abs=0.0)
-    assert PUBLISHED_AIR.density == pytest.approx(_RHO0, abs=0.0)
-    assert PUBLISHED_AIR.viscosity == pytest.approx(_ETA, abs=0.0)
-    assert PUBLISHED_AIR.heat_capacity_ratio == pytest.approx(_GAMMA, abs=0.0)
-    assert PUBLISHED_AIR.static_pressure_pa == pytest.approx(_P0, abs=0.0)
+def test_the_absorber_air_is_the_papers_air() -> None:
+    """The library's absorber air carries the constants the paper prints."""
+    assert ABSORBER_AIR.speed_of_sound == pytest.approx(_C0, abs=0.0)
+    assert ABSORBER_AIR.density == pytest.approx(_RHO0, abs=0.0)
+    assert ABSORBER_AIR.viscosity == pytest.approx(_ETA, abs=0.0)
+    assert ABSORBER_AIR.heat_capacity_ratio == pytest.approx(_GAMMA, abs=0.0)
+    assert ABSORBER_AIR.static_pressure_pa == pytest.approx(_P0, abs=0.0)
     # The one the models read that is not closed from the others: this air
     # determines no thermal diffusivity, so eta / (rho alpha_t) has nothing to
     # close from, and the fitted 0,71 has to be carried rather than derived.
-    assert PUBLISHED_AIR.prandtl_number == pytest.approx(_PR, abs=0.0)
+    assert ABSORBER_AIR.prandtl_number == pytest.approx(_PR, abs=0.0)
     with pytest.raises(FluidPropertyUnavailable):
-        _ = PUBLISHED_AIR.thermal_diffusivity
+        _ = ABSORBER_AIR.thermal_diffusivity
 
 
 def _base_resonator() -> HelmholtzResonator:
@@ -142,7 +142,7 @@ def test_duct_reduces_to_slit_in_wide_limit() -> None:
     rho_s, kap_s = slit_effective_properties(f, slit_height_m=h)
     # Rebuild the rectangular series directly with a != b (b wide), on the
     # same air the model defaults to.
-    air = PUBLISHED_AIR
+    air = ABSORBER_AIR
     idx = np.arange(400)
     a2 = ((2 * idx + 1) * np.pi / h) ** 2
     b2 = ((2 * idx + 1) * np.pi / 0.08) ** 2
@@ -187,7 +187,7 @@ def test_resonator_impedance_lumped_helmholtz_limit() -> None:
     z = helmholtz_resonator_impedance(
         f,
         res,
-        fluid=PUBLISHED_AIR,
+        fluid=ABSORBER_AIR,
     )
     # resonance = reactance sign change
     react = z.imag

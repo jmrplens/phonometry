@@ -142,7 +142,7 @@ __all__ = [
     "level_excess_at",
     "mean_level_excess",
     "normalized_distribution_value",
-    "omnidirectionality_tolerance_db",
+    "omnidirectionality_tolerance",
     "reference_distribution_value",
     "sound_distribution_value",
     "spatial_decay_curve",
@@ -973,7 +973,7 @@ def distance_region(
     return "far"
 
 
-def omnidirectionality_tolerance_db(frequency_hz: float) -> float:
+def omnidirectionality_tolerance(frequency_hz: float) -> float:
     """The directivity band a qualifying source stays inside, A.1.
 
     The clause states the tolerance in three pieces: ``+/- 2`` dB in the

@@ -3635,6 +3635,19 @@ def generate_barrier_reflection_index(output_dir: str) -> None:
     plt.close()
 
 
+def generate_barrier_reflection_uncertainty(output_dir: str) -> None:
+    """EN 1793-5 A.2 and B.5: the expanded uncertainty of the Annex B index."""
+    print("Generating barrier_reflection_uncertainty...")
+    from phonometry import environment
+
+    result = environment.reflection_index_expanded_uncertainty()
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    result.plot(ax=ax, language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "barrier_reflection_uncertainty.svg")
+    plt.close()
+
+
 def generate_barrier_direct_sound_subtraction(output_dir: str) -> None:
     """EN 1793-5 5.5.4: the direct sound taken out of microphone 5's record."""
     print("Generating barrier_direct_sound_subtraction...")

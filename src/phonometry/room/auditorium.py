@@ -96,13 +96,13 @@ REFERENCE_DISTANCE_M = 10.0
 #: Shortest source-to-microphone distance the inverse-square correction of
 #: Equations (A.4) and (A.8) is printed for, in metres: both are given for
 #: "a point which is d (>= 3 m) from the source".
-MINIMUM_REFERENCE_DISTANCE_M = 3.0
+MIN_REFERENCE_DISTANCE_M = 3.0
 
 #: Coarsest angular step the note under Equation (A.4) allows when averaging
 #: the source's directivity out of a free-field measurement, in degrees.
 #: The note prints "every 12,5 degrees", which does not divide a full turn:
 #: see :func:`directivity_energy_average`.
-MAXIMUM_DIRECTIVITY_STEP_DEG = 12.5
+MAX_DIRECTIVITY_STEP_DEG = 12.5
 
 #: The integral of Equations (A.2) and (A.3) runs to a time "greater than or
 #: equal to the point at which the decay curve has decreased by 30 dB"
@@ -355,10 +355,10 @@ def free_field_reference_level(
     if not np.isfinite(distance) or distance <= 0.0:
         msg = f"'distance' must be a positive, finite length in m, got {distance!r}."
         raise ValueError(msg)
-    if distance < MINIMUM_REFERENCE_DISTANCE_M:
+    if distance < MIN_REFERENCE_DISTANCE_M:
         warnings.warn(
             f"ISO 3382-1:2009, Equations (A.4) and (A.8) are printed for a "
-            f"distance of at least {MINIMUM_REFERENCE_DISTANCE_M:g} m; "
+            f"distance of at least {MIN_REFERENCE_DISTANCE_M:g} m; "
             f"{distance:g} m is inside that, where the inverse-square law "
             "need not hold.",
             AuditoriumWarning,
@@ -415,13 +415,13 @@ def directivity_energy_average(
         msg = "'levels' must be a non-empty array of finite decibel values."
         raise ValueError(msg)
     bearings = values.shape[axis] if values.ndim else 0
-    minimum = math.ceil(360.0 / MAXIMUM_DIRECTIVITY_STEP_DEG)
+    minimum = math.ceil(360.0 / MAX_DIRECTIVITY_STEP_DEG)
     if bearings < minimum:
         msg = (
             f"'levels' holds {bearings} bearing(s) along axis {axis}; "
             "averaging the source directivity out of a free-field reference "
             f"needs a full turn sampled no coarser than "
-            f"{MAXIMUM_DIRECTIVITY_STEP_DEG:g} degrees, so at least "
+            f"{MAX_DIRECTIVITY_STEP_DEG:g} degrees, so at least "
             f"{minimum}."
         )
         raise ValueError(msg)

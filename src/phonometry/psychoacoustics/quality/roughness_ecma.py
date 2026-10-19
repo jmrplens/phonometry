@@ -597,13 +597,13 @@ def _aggregate(
 
 
 def roughness_ecma(
-    signal_in: Signal | np.ndarray,
+    x: Signal | np.ndarray,
     fs: float | None = None,
     field: Literal["free", "diffuse"] = "free",
 ) -> EcmaRoughness:
     """Psychoacoustic roughness per ECMA-418-2:2025 (Sottek Hearing Model).
 
-    :param signal_in: Calibrated sound pressure signal in pascals. Accepts a
+    :param x: Calibrated sound pressure signal in pascals. Accepts a
         :class:`phonometry.io.Signal`, which is where "calibrated" comes
         from without arithmetic: this model reads absolute levels, so an
         uncalibrated record is taken as if one digital unit were one
@@ -625,13 +625,13 @@ def roughness_ecma(
     if field not in ("free", "diffuse"):
         msg = "field must be 'free' or 'diffuse'"
         raise ValueError(msg)
-    fs = resolve_fs(signal_in, fs, name="signal_in")
-    x = apply_calibration(
-        signal_in,
-        require_1d_signal(_typesignal(signal_in, name="signal_in")),
+    fs = resolve_fs(x, fs, name="x")
+    samples = apply_calibration(
+        x,
+        require_1d_signal(_typesignal(x, name="x"), name="x"),
     )
-    if x.size == 0:
-        msg = "signal must not be empty"
+    if samples.size == 0:
+        msg = "'x' must not be empty"
         raise ValueError(msg)
     require_scalar(fs, "fs")
     fs = float(fs)
@@ -639,9 +639,9 @@ def roughness_ecma(
         msg = "fs must be positive"
         raise ValueError(msg)
     if fs != _FS:
-        x = signal.resample(x, max(1, round(x.size * _FS / fs)))
+        samples = signal.resample(samples, max(1, round(samples.size * _FS / fs)))
 
-    envelopes, basis, block_times, _ = _front_end(x, field)
+    envelopes, basis, block_times, _ = _front_end(samples, field)
     spectra = _noise_reduced_spectra(envelopes, basis)
     a_lz = _amplitudes(spectra)
     r_time, grid = _time_dependent(a_lz, block_times)

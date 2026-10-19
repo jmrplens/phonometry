@@ -94,10 +94,10 @@ __all__ = [
     "HEMI_FREE_FIELD_DISTANCE_M",
     "LINE_SOURCE_DIVERGENCE_DB",
     "LONG_DISTANCE_M",
-    "MAXIMUM_WIND_SPEED_M_S",
-    "ISO10847_MINIMUM_BACKGROUND_MARGIN_DB",
-    "MINIMUM_RECEIVER_HEIGHT_M",
-    "MINIMUM_REPETITIONS",
+    "MAX_WIND_SPEED_M_S",
+    "ISO10847_MIN_BACKGROUND_MARGIN_DB",
+    "MIN_RECEIVER_HEIGHT_M",
+    "MIN_REPETITIONS",
     "ISO10847_OCTAVE_BAND_EXTENDED_RANGE_HZ",
     "ISO10847_OCTAVE_BAND_RANGE_HZ",
     "POINT_SOURCE_DIVERGENCE_DB",
@@ -140,7 +140,7 @@ ISO10847_BACKGROUND_CORRECTIONS_DB: Mapping[int, float] = MappingProxyType(
 
 #: 6.4: under this margin the results are not valid, and this is the margin
 #: the clause would rather have.
-ISO10847_MINIMUM_BACKGROUND_MARGIN_DB: float = 4.0
+ISO10847_MIN_BACKGROUND_MARGIN_DB: float = 4.0
 ISO10847_PREFERRED_BACKGROUND_MARGIN_DB: float = 10.0
 
 #: Table 1: the wind classes and the vector component of the wind velocity,
@@ -169,7 +169,7 @@ WIND_CLASSES: Mapping[str, Mapping[str, tuple[float, float]]] = MappingProxyType
 
 #: 6.3.1: no measurement is made above this average wind velocity, in metres
 #: per second, whatever its direction.
-MAXIMUM_WIND_SPEED_M_S: float = 5.0
+MAX_WIND_SPEED_M_S: float = 5.0
 
 #: 6.3.1: the vector components of the average wind velocity may not differ by
 #: more than this between the two campaigns, in metres per second.
@@ -232,7 +232,7 @@ HEMI_FREE_FIELD_DISTANCE_M: float = 30.0
 HEMI_FREE_FIELD_DISTANCE_FACTOR: float = 2.0
 
 #: 8.1.2 NOTE: the least height of a receiver position, in metres.
-MINIMUM_RECEIVER_HEIGHT_M: float = 1.2
+MIN_RECEIVER_HEIGHT_M: float = 1.2
 
 #: 8.2.2: the correction for the kind of receiver position, in decibels. The
 #: 6 dB is the pressure doubling at a large hard surface.
@@ -245,7 +245,7 @@ RECEIVER_CORRECTIONS_DB: Mapping[str, float] = MappingProxyType(
 
 #: 8.1.4: the fewest repetitions, and the source-receiver distance in metres
 #: past which more may be needed.
-MINIMUM_REPETITIONS: int = 3
+MIN_REPETITIONS: int = 3
 LONG_DISTANCE_M: float = 250.0
 
 #: 8.1.3: the band range the measurement covers, and the extension it
@@ -290,15 +290,15 @@ def barrier_background_correction(
         the source and the level without it, in decibels.
     :return: The correction to add, in decibels, which is zero or negative.
     :raises ValueError: For a margin under
-        :data:`ISO10847_MINIMUM_BACKGROUND_MARGIN_DB`, which 6.4 calls invalid.
+        :data:`ISO10847_MIN_BACKGROUND_MARGIN_DB`, which 6.4 calls invalid.
     """
     # Settled: a difference of two readings that is 10 dB in decimal can be
     # 9,999 999 999 999 996 in binary, which would floor to the 9 dB row.
     margin = settled(require_finite_array(level_difference_db, "level_difference_db"))
-    if float(np.min(margin)) < ISO10847_MINIMUM_BACKGROUND_MARGIN_DB:
+    if float(np.min(margin)) < ISO10847_MIN_BACKGROUND_MARGIN_DB:
         msg = (
             f"ISO 10847 6.4 calls the results invalid under "
-            f"{ISO10847_MINIMUM_BACKGROUND_MARGIN_DB:g} dB over the background; the "
+            f"{ISO10847_MIN_BACKGROUND_MARGIN_DB:g} dB over the background; the "
             f"smallest margin is {float(np.min(margin)):.1f} dB."
         )
         raise ValueError(msg)
@@ -378,7 +378,7 @@ def wind_class(
     The calm class carries a footnote of its own over all distances: it counts
     "only with the case of temperature inversion".
 
-    Above :data:`MAXIMUM_WIND_SPEED_M_S` in absolute value no measurement is
+    Above :data:`MAX_WIND_SPEED_M_S` in absolute value no measurement is
     made at all, which is a refusal rather than a class.
 
     :param vector_component_m_s: The vector component, in metres per second.
@@ -387,13 +387,13 @@ def wind_class(
     :return: The class name, or ``None`` where the component falls in no class
         the table prints, which over long distances is any upwind component.
     :raises ValueError: For a component that is not finite, or past
-        :data:`MAXIMUM_WIND_SPEED_M_S` in absolute value.
+        :data:`MAX_WIND_SPEED_M_S` in absolute value.
     """
     component = require_finite(vector_component_m_s, "vector_component_m_s")
-    if abs(component) > MAXIMUM_WIND_SPEED_M_S:
+    if abs(component) > MAX_WIND_SPEED_M_S:
         msg = (
             f"ISO 10847 6.3.1 makes no measurement above "
-            f"{MAXIMUM_WIND_SPEED_M_S:g} m/s whatever the direction; the "
+            f"{MAX_WIND_SPEED_M_S:g} m/s whatever the direction; the "
             f"component is {component:g} m/s."
         )
         raise ValueError(msg)

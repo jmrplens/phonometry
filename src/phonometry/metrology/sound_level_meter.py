@@ -178,7 +178,7 @@ __all__ = [
     "PERIODIC_TEST_ENVIRONMENT",
     "SLM_PERIODIC_REQUIREMENTS",
     "TONEBURST_TEST_DURATIONS_MS",
-    "MaxUncertaintyRow",
+    "MaximumUncertaintyRow",
     "PeakReference",
     "SoundLevelMeterFeatures",
     "SoundLevelMeterPeriodicMeasurements",
@@ -275,7 +275,7 @@ class PeakReference(RichDisplay):
 
 
 @dataclass(frozen=True)
-class MaxUncertaintyRow(RichDisplay):
+class MaximumUncertaintyRow(RichDisplay):
     """One row of IEC 61672-1:2013 Table B.1, a maximum-permitted uncertainty.
 
     :ivar requirement: The requirement, as the "Requirement" column prints it.
@@ -429,7 +429,9 @@ IEC61672_TABLE_5: tuple[PeakReference, ...] = (
 )
 
 
-def _directional(angle: str, cells: tuple[float, ...]) -> tuple[MaxUncertaintyRow, ...]:
+def _directional(
+    angle: str, cells: tuple[float, ...]
+) -> tuple[MaximumUncertaintyRow, ...]:
     """The five frequency bands of a directional-response row of Table B.1."""
     bands = (
         (250.0, 1000.0, True, "250 Hz to 1 kHz"),
@@ -439,7 +441,7 @@ def _directional(angle: str, cells: tuple[float, ...]) -> tuple[MaxUncertaintyRo
         (8000.0, 12500.0, False, ">8 kHz to 12,5 kHz"),
     )
     return tuple(
-        MaxUncertaintyRow(
+        MaximumUncertaintyRow(
             f"Directional response: θ = {angle}",
             f"Table 2; {text}",
             value,
@@ -464,13 +466,13 @@ _HIGH_LEVEL_STABILITY = "High-level stability"
 #: uncertainties of measurement for a coverage probability of 95 %, for
 #: pattern-evaluation and periodic tests, in the printed order. The one cell
 #: that prints two figures, the F and S decay rates of 5.8.2, is two rows.
-IEC61672_TABLE_B1: tuple[MaxUncertaintyRow, ...] = (
+IEC61672_TABLE_B1: tuple[MaximumUncertaintyRow, ...] = (
     *_directional("30°", (0.25, 0.25, 0.35, 0.45, 0.55)),
     *_directional("90° & 150°", (0.25, 0.45, 0.45, 0.85, 1.15)),
-    MaxUncertaintyRow(
+    MaximumUncertaintyRow(
         _B1_WEIGHTING, "Table 3, 10 Hz to 4 kHz", 0.60, lower_hz=10.0, upper_hz=4000.0
     ),
-    MaxUncertaintyRow(
+    MaximumUncertaintyRow(
         _B1_WEIGHTING,
         "Table 3, >4 kHz to 10 kHz",
         0.70,
@@ -478,7 +480,7 @@ IEC61672_TABLE_B1: tuple[MaxUncertaintyRow, ...] = (
         upper_hz=10000.0,
         includes_lower=False,
     ),
-    MaxUncertaintyRow(
+    MaximumUncertaintyRow(
         _B1_WEIGHTING,
         "Table 3, >10 kHz to 20 kHz",
         1.00,
@@ -486,25 +488,27 @@ IEC61672_TABLE_B1: tuple[MaxUncertaintyRow, ...] = (
         upper_hz=20000.0,
         includes_lower=False,
     ),
-    MaxUncertaintyRow("A vs. C or Z at 1 kHz", "5.5.9", 0.20),
-    MaxUncertaintyRow(_B1_LINEARITY, "5.6.5", 0.30),
-    MaxUncertaintyRow("1 dB to 10 dB change in level", "5.6.6", 0.25),
-    MaxUncertaintyRow("F and S decay rates", "5.8.2, F", 3.50, unit="dB/s"),
-    MaxUncertaintyRow("F and S decay rates", "5.8.2, S", 0.40, unit="dB/s"),
-    MaxUncertaintyRow("F vs. S level at 1 kHz", "5.8.3", 0.20),
-    MaxUncertaintyRow(_TONEBURST_RESPONSE, "5.9.2, Table 4", 0.30),
-    MaxUncertaintyRow("Repeated tonebursts", "5.10.1, Table 4", 0.30),
-    MaxUncertaintyRow(_OVERLOAD_INDICATION, "5.11.3", 0.25),
-    MaxUncertaintyRow("C-weighted peak sound levels", "5.13.3, Table 5", 0.35),
-    MaxUncertaintyRow("Stability during continuous operation", "5.14.2", 0.10),
-    MaxUncertaintyRow(_HIGH_LEVEL_STABILITY, "5.15.2", 0.10),
-    MaxUncertaintyRow("Analogue electrical output", "5.19.2", 0.15),
-    MaxUncertaintyRow("Power supply voltage", "5.23.2", 0.20),
-    MaxUncertaintyRow("Static pressure influence", "6.2.1; 6.2.2", 0.30),
-    MaxUncertaintyRow("Air temperature influence", "6.3.3; 6.3.4", 0.30),
-    MaxUncertaintyRow("Humidity influence", "6.4", 0.30),
-    MaxUncertaintyRow("Combined temperature and humidity", "6.3.3, 6.3.4, 6.4", 0.35),
-    MaxUncertaintyRow("AC and radio-frequency fields", "6.6.6", 0.30),
+    MaximumUncertaintyRow("A vs. C or Z at 1 kHz", "5.5.9", 0.20),
+    MaximumUncertaintyRow(_B1_LINEARITY, "5.6.5", 0.30),
+    MaximumUncertaintyRow("1 dB to 10 dB change in level", "5.6.6", 0.25),
+    MaximumUncertaintyRow("F and S decay rates", "5.8.2, F", 3.50, unit="dB/s"),
+    MaximumUncertaintyRow("F and S decay rates", "5.8.2, S", 0.40, unit="dB/s"),
+    MaximumUncertaintyRow("F vs. S level at 1 kHz", "5.8.3", 0.20),
+    MaximumUncertaintyRow(_TONEBURST_RESPONSE, "5.9.2, Table 4", 0.30),
+    MaximumUncertaintyRow("Repeated tonebursts", "5.10.1, Table 4", 0.30),
+    MaximumUncertaintyRow(_OVERLOAD_INDICATION, "5.11.3", 0.25),
+    MaximumUncertaintyRow("C-weighted peak sound levels", "5.13.3, Table 5", 0.35),
+    MaximumUncertaintyRow("Stability during continuous operation", "5.14.2", 0.10),
+    MaximumUncertaintyRow(_HIGH_LEVEL_STABILITY, "5.15.2", 0.10),
+    MaximumUncertaintyRow("Analogue electrical output", "5.19.2", 0.15),
+    MaximumUncertaintyRow("Power supply voltage", "5.23.2", 0.20),
+    MaximumUncertaintyRow("Static pressure influence", "6.2.1; 6.2.2", 0.30),
+    MaximumUncertaintyRow("Air temperature influence", "6.3.3; 6.3.4", 0.30),
+    MaximumUncertaintyRow("Humidity influence", "6.4", 0.30),
+    MaximumUncertaintyRow(
+        "Combined temperature and humidity", "6.3.3, 6.3.4, 6.4", 0.35
+    ),
+    MaximumUncertaintyRow("AC and radio-frequency fields", "6.6.6", 0.30),
 )
 
 

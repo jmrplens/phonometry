@@ -238,7 +238,7 @@ Whether a room qualifies as anechoic or hemi-anechoic for ISO 3745.
 The verdict of the amended ISO 3745:2012 Annex A over the frequencies
 evaluated, with the ISO 26101:2017 clauses it defers to. Every per-band
 array is aligned with `frequencies` (ascending) and judged within
-`maximum_qualified_radius_m`.
+`max_qualified_radius_m`.
 
 Every verdict, the radius and the reduced range are read from the
 analyses and the declarations the check holds, against the figures the
@@ -352,7 +352,7 @@ Traverse starting at most, and running at least, a quarter wavelength at the low
 
 ISO 26101 5.1.4.3.
 
-### FreeFieldCheck.maximum_qualified_radius_m
+### FreeFieldCheck.max_qualified_radius_m
 
 *property*
 
@@ -587,7 +587,7 @@ The largest $|\Delta L_{pi}|$ within each band's radius.
 
 **Returns:** One value per frequency, in dB.
 
-### InverseSquareLawResult.maximum_qualified_radius_m
+### InverseSquareLawResult.max_qualified_radius_m
 
 *property*
 
@@ -733,8 +733,8 @@ SourceDirectionalityResult(
     frequencies: np.ndarray,
     room: str,
     mean_level_db: np.ndarray,
-    maximum_positive_deviation_db: np.ndarray,
-    maximum_negative_deviation_db: np.ndarray,
+    max_positive_deviation_db: np.ndarray,
+    max_negative_deviation_db: np.ndarray,
 )
 ```
 
@@ -747,8 +747,8 @@ Whether a test source is uniform enough to qualify a room (ISO 26101 B.4).
 | `frequencies` | The one-third octave mid-band frequencies, in hertz. |
 | `room` | The room type the source is to qualify. |
 | `mean_level_db` | The arithmetic mean of the decibel levels per band. |
-| `maximum_positive_deviation_db` | The largest level above the mean. |
-| `maximum_negative_deviation_db` | The largest level below the mean, a negative number. |
+| `max_positive_deviation_db` | The largest level above the mean. |
+| `max_negative_deviation_db` | The largest level below the mean, a negative number. |
 
 ### SourceDirectionalityResult.passes
 

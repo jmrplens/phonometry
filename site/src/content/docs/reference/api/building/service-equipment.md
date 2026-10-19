@@ -566,7 +566,7 @@ positions, whose 0,50 m from the room surfaces 7.3 sets instead.
 
 ```python
 check_varying_background(
-    background_maximum_db: ArrayLike,
+    background_maximum_level_db: ArrayLike,
     equipment_levels_db: ArrayLike,
     *,
     observation_time_s: float,
@@ -596,7 +596,7 @@ of the microphone positions"; the draft names the corner.
 
 | Name | Description |
 | :--- | :--- |
-| `background_maximum_db` | The maximum level of the background over the observation period, at the corner position, per band, in dB. |
+| `background_maximum_level_db` | The maximum level of the background over the observation period, at the corner position, per band, in dB. |
 | `equipment_levels_db` | The service equipment sound pressure level in the same bands, in dB. |
 | `observation_time_s` | How long the background maximum was watched for, in s. |
 | `frequencies` | Band centres in Hz, kept for the plot only. |
@@ -1388,6 +1388,14 @@ Produced by [`service_equipment_level`](/phonometry/reference/api/building/servi
 | `unrounded_ratings` | The same single numbers before rounding, in dB. |
 | `reproducibility_db` | The Table 2 standard deviation of each band, in dB. |
 
+### ServiceEquipmentResult.n_readings
+
+*property*
+
+The number of readings averaged by Formula (1).
+
+**Returns:** The number of rows of `readings_db`.
+
 ### ServiceEquipmentResult.plot()
 
 ```python
@@ -1415,14 +1423,6 @@ A-weighted single numbers in the title. Requires matplotlib
 | `kwargs` | Forwarded to the curve of the final band levels. |
 
 **Returns:** The axes.
-
-### ServiceEquipmentResult.reading_count
-
-*property*
-
-The number of readings averaged by Formula (1).
-
-**Returns:** The number of rows of `readings_db`.
 
 ### ServiceEquipmentResult.standardizable
 
@@ -1488,7 +1488,7 @@ of all, is more uncertain, and the draft states no coverage factor.
 
 ```python
 VaryingBackgroundCheck(
-    background_maximum_db: np.ndarray,
+    background_maximum_level_db: np.ndarray,
     equipment_levels_db: np.ndarray,
     observation_time_s: float,
     frequencies: np.ndarray | None = None,
@@ -1503,7 +1503,7 @@ The route the NOTE to Clause 9 offers when the background varies in time.
 
 | Name | Description |
 | :--- | :--- |
-| `background_maximum_db` | The maximum level of the background over the observation period at the corner position, per band (or one weighted value), in dB. |
+| `background_maximum_level_db` | The maximum level of the background over the observation period at the corner position, per band (or one weighted value), in dB. |
 | `equipment_levels_db` | The service equipment sound pressure level, the same bands, in dB. |
 | `observation_time_s` | How long the background maximum was watched for, in s. |
 | `frequencies` | The band centres, in Hz, or `None` when not given. |

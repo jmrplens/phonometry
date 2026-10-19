@@ -581,12 +581,12 @@ and says to use this only when the manufacturer does not state one.
 MACH_LIMIT_STANDARD_TRIM = 0.3
 ```
 
-## MAXIMUM_PASSAGE_ASPECT
+## MAX_PASSAGE_ASPECT
 
 *Constant* (`float`).
 
 ```python
-MAXIMUM_PASSAGE_ASPECT = 4.0
+MAX_PASSAGE_ASPECT = 4.0
 ```
 
 ## multiple_passage_jet_diameter

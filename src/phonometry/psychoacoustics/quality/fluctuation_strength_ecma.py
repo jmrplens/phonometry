@@ -921,13 +921,13 @@ def _aggregate(
 
 
 def fluctuation_strength_ecma(
-    signal_in: Signal | np.ndarray,
+    x: Signal | np.ndarray,
     fs: float | None = None,
     field: Literal["free", "diffuse"] = "free",
 ) -> EcmaFluctuationStrength:
     """Psychoacoustic fluctuation strength per ECMA-418-2:2025 (Clause 9).
 
-    :param signal_in: Calibrated sound pressure signal in pascals. Accepts a
+    :param x: Calibrated sound pressure signal in pascals. Accepts a
         :class:`phonometry.io.Signal`, which is where "calibrated" comes
         from without arithmetic: this model reads absolute levels, so an
         uncalibrated record is taken as if one digital unit were one
@@ -953,19 +953,19 @@ def fluctuation_strength_ecma(
     if field not in ("free", "diffuse"):
         msg = "field must be 'free' or 'diffuse'"
         raise ValueError(msg)
-    fs = resolve_fs(signal_in, fs, name="signal_in")
-    x = apply_calibration(
-        signal_in,
-        require_1d_signal(_typesignal(signal_in, name="signal_in")),
+    fs = resolve_fs(x, fs, name="x")
+    samples = apply_calibration(
+        x,
+        require_1d_signal(_typesignal(x, name="x"), name="x"),
     )
-    if x.size == 0:
-        msg = "signal must not be empty"
+    if samples.size == 0:
+        msg = "'x' must not be empty"
         raise ValueError(msg)
     fs = require_positive(fs, "fs")
     if fs != _FS:
-        x = signal.resample(x, max(1, round(x.size * _FS / fs)))
+        samples = signal.resample(samples, max(1, round(samples.size * _FS / fs)))
 
-    envelopes, block_times = _front_end(x, field)
+    envelopes, block_times = _front_end(samples, field)
     a_lz = _amplitudes(envelopes)
     f_time, grid = _time_dependent(a_lz, block_times)
     f_single, f_spec, f_vs_time = _aggregate(f_time)

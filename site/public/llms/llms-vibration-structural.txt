@@ -727,7 +727,7 @@ judges and at least **five** impacts were averaged. Both numbers are 9.1's: a
 coherence above 0.9 is what it calls high, and five to ten records are what a
 high coherence needs for confidence in its own estimate. Five is also the top
 of the three to five that 8.6 finds usually enough, so averaging five satisfies
-both; `minimum_records` lowers the count when fewer were judged enough. A
+both; `min_records` lowers the count when fewer were judged enough. A
 single impact has a coherence of 1 by construction, which is why it fails the
 second condition.
 Low coherence at an antiresonance is not generally a concern (9.1 NOTE 1), and

@@ -268,16 +268,14 @@ def test_the_directivity_index_of_3_9() -> None:
     cal = _calibration(levels)
     mean = 10.0 * math.log10((19 + 10.0**0.6) / 20.0) + 80.0
     np.testing.assert_allclose(
-        cal.maximum_directivity_index_db, 86.0 - mean, rtol=0, atol=1e-12
+        cal.max_directivity_index_db, 86.0 - mean, rtol=0, atol=1e-12
     )
 
 
 def test_traverse_maxima_give_the_directivity_index() -> None:
     maxima = np.full((20, _THIRDS.size), 83.0)
     cal = _calibration(maximum_levels_db=maxima)
-    np.testing.assert_allclose(
-        cal.maximum_directivity_index_db, 3.0, rtol=0, atol=1e-12
-    )
+    np.testing.assert_allclose(cal.max_directivity_index_db, 3.0, rtol=0, atol=1e-12)
 
 
 #: Unequal one-third octaves in the 125 Hz octave (100, 125 and 160 Hz), dB:

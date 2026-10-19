@@ -38,8 +38,8 @@ published procedure into a profile for aircraft that ship no fixed-point
 trajectory. `Spectral_classes.csv` is read as well: the spectral class of
 each aircraft's approach and departure NPD is what ECAC Doc 29 Vol. 2
 Appendix D recalculates the NPD curves from for a non-reference atmosphere, in
-`npd_atmosphere` (`AnpDatabase.spectral_class`,
-`AnpDatabase.revised_npd_curves` and the `relative_humidity_percent` of the
+`npd_atmosphere` (`ANPDatabase.spectral_class`,
+`ANPDatabase.revised_npd_curves` and the `relative_humidity_percent` of the
 event and contour wiring). Its classes 103 and 205 are the ones Appendix D
 prints as Table D-2, and they agree with it to the last digit.
 

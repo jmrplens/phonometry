@@ -216,7 +216,7 @@ _STAGNATION_BRANCH_RATIO = 2.0
 #: NOTE 1 to Equation (26): the length-to-diameter ratio of a flow passage is
 #: capped here, because the bracket it sits in would otherwise go negative
 #: and the jet diameter with it.
-MAXIMUM_PASSAGE_ASPECT = 4.0
+MAX_PASSAGE_ASPECT = 4.0
 
 #: NOTE 1 to Equation (34): the downstream pipe velocity of Clause 7 is
 #: capped at this Mach number however fast the pipe would otherwise run.
@@ -999,7 +999,7 @@ def multiple_passage_jet_diameter(
     ):
         msg = "The jet diameter needs finite arguments."
         raise ValueError(msg)
-    aspect = min(length / diameter_m, MAXIMUM_PASSAGE_ASPECT)
+    aspect = min(length / diameter_m, MAX_PASSAGE_ASPECT)
     recovery = 0.9 - 0.06 * aspect
     return float(
         FLOW_COEFFICIENT_CONSTANTS[kind] * modifier * math.sqrt(capacity * recovery)

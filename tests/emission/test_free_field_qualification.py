@@ -200,7 +200,7 @@ def test_an_exact_inverse_square_field_qualifies_at_every_distance() -> None:
         _free_field_traverses(d), frequencies=_GRID, room="anechoic"
     )
     np.testing.assert_allclose(fit.traverse_radius_m, d[-1], rtol=0, atol=1e-12)
-    assert fit.maximum_qualified_radius_m == pytest.approx(d[-1], abs=1e-12)
+    assert fit.max_qualified_radius_m == pytest.approx(d[-1], abs=1e-12)
     np.testing.assert_allclose(fit.source_strength_db, _L1M, rtol=0, atol=1e-12)
     np.testing.assert_allclose(fit.initial_source_strength_db, _L1M, rtol=0, atol=1e-12)
     for deviation in fit.deviations_db:
@@ -292,7 +292,7 @@ def test_a_radius_the_levels_do_not_qualify_is_refused() -> None:
     fit = emission.inverse_square_law_deviations(
         [traverse], frequencies=[1000.0], room="anechoic"
     )
-    assert fit.maximum_qualified_radius_m < d[-1]
+    assert fit.max_qualified_radius_m < d[-1]
     forged = {
         "band_radius_m": np.array([d[-1]]),
         "traverse_radius_m": np.array([[d[-1]]]),
@@ -410,7 +410,7 @@ def test_the_origin_is_found_inside_the_source_volume() -> None:
         source_box_m=((-0.1, -0.1, 0.0), (0.1, 0.1, 0.2)),
     )
     assert fitted.origin_fitted
-    assert fitted.maximum_qualified_radius_m > fixed.maximum_qualified_radius_m
+    assert fitted.max_qualified_radius_m > fixed.max_qualified_radius_m
     assert np.all(fitted.origin_m >= [-0.1, -0.1, 0.0])
     assert np.all(fitted.origin_m <= [0.1, 0.1, 0.2])
     np.testing.assert_allclose(fitted.origin_m, true_origin, rtol=0, atol=2e-3)
@@ -462,7 +462,7 @@ def test_a_field_that_qualifies_everywhere_returns_its_centre() -> None:
         source_box_m=((-0.05, -0.05, 0.0), (0.05, 0.05, 0.08)),
     )
     np.testing.assert_allclose(fitted.origin_m, true_origin, rtol=0, atol=1.5e-3)
-    assert fitted.maximum_qualified_radius_m == pytest.approx(2.5, abs=2e-3)
+    assert fitted.max_qualified_radius_m == pytest.approx(2.5, abs=2e-3)
     assert float(fitted.largest_deviation_db[0]) < 0.05
 
 
@@ -524,7 +524,7 @@ def test_a_short_traverse_does_not_pull_the_origin_off_the_centre() -> None:
     )
     assert fitted.traverse_radius_m[2, 0] < 2.3  # the room ends the +y run
     np.testing.assert_allclose(fitted.origin_m, 0.0, rtol=0, atol=5e-3)
-    assert fitted.maximum_qualified_radius_m == pytest.approx(1.0, abs=5e-3)
+    assert fitted.max_qualified_radius_m == pytest.approx(1.0, abs=5e-3)
     assert float(fitted.largest_deviation_db[0]) < 0.2
 
 
@@ -560,7 +560,7 @@ def test_a_traverse_starting_beyond_the_radius_is_centred_on_its_own_run() -> No
     fit = emission.inverse_square_law_deviations(
         [broken, late], frequencies=[1000.0], room="anechoic"
     )
-    assert fit.maximum_qualified_radius_m == pytest.approx(0.70)
+    assert fit.max_qualified_radius_m == pytest.approx(0.70)
     assert fit.source_strength_db[1, 0] == pytest.approx(_L1M + 1.0, abs=1e-9)
     np.testing.assert_allclose(fit.deviations_db[1][:, 0], 0.0, rtol=0, atol=1e-9)
 
@@ -648,8 +648,8 @@ def test_a_lobe_beyond_table_b1_is_not_suitable() -> None:
         levels, frequencies=[1000.0], room="hemi-anechoic"
     )
     mean = levels.mean()
-    assert result.maximum_positive_deviation_db[0] == pytest.approx(82.7 - mean)
-    assert result.maximum_negative_deviation_db[0] == pytest.approx(80.0 - mean)
+    assert result.max_positive_deviation_db[0] == pytest.approx(82.7 - mean)
+    assert result.max_negative_deviation_db[0] == pytest.approx(80.0 - mean)
     assert not result.passes
 
 
@@ -678,7 +678,7 @@ def test_a_free_field_is_in_full_conformity() -> None:
     assert check.passes
     assert check.full_frequency_range
     assert check.not_judged == ()
-    assert check.maximum_qualified_radius_m == pytest.approx(_SPACING[-1])
+    assert check.max_qualified_radius_m == pytest.approx(_SPACING[-1])
     assert check.conforming_range_hz == (100.0, 10000.0)
     assert check.path_angles_met is True
     assert check.discrete_frequency

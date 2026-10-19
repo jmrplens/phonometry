@@ -155,7 +155,7 @@ electromagnetic exposure of IEC 62489-2 is outside this library.
 agc_characteristic(
     source_emf_db: ArrayLike,
     output_level_db: ArrayLike,
-) -> AgcCharacteristic
+) -> AGCCharacteristic
 ```
 
 The output/input characteristic of an amplifier and its AGC range (5.4.13).
@@ -184,12 +184,12 @@ measured.
 | `source_emf_db` | Source e.m.f. levels, in dB re any fixed voltage, strictly ascending. |
 | `output_level_db` | Output current level at each, in dB re the rated maximum output current. |
 
-**Returns:** An [`AgcCharacteristic`](/phonometry/reference/api/electroacoustics/induction-loop-components/#agccharacteristic).
+**Returns:** An [`AGCCharacteristic`](/phonometry/reference/api/electroacoustics/induction-loop-components/#agccharacteristic).
 
-## AgcCharacteristic
+## AGCCharacteristic
 
 ```python
-AgcCharacteristic(
+AGCCharacteristic(
     source_emf_db: np.ndarray,
     output_level_db: np.ndarray,
     agc_range_db: float,
@@ -210,10 +210,10 @@ The steady-state output/input characteristic of an amplifier (5.4.13).
 | `agc_range_start_db` | The input level where that span starts, in dB. |
 | `agc_range_end_db` | The input level where it ends, in dB. |
 
-### AgcCharacteristic.plot()
+### AGCCharacteristic.plot()
 
 ```python
-AgcCharacteristic.plot(
+AGCCharacteristic.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -237,7 +237,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the characteristic's `Axes.plot`. |
 
-### AgcCharacteristic.recommended_range_db
+### AGCCharacteristic.recommended_range_db
 
 *property*
 
@@ -845,7 +845,7 @@ MaximumOutputCurrent(
     thd_percent: np.ndarray,
     load_resistance_ohm: float,
     rated_thd_percent: float,
-    maximum_current_a: float,
+    max_current_a: float,
 )
 ```
 
@@ -860,7 +860,7 @@ The maximum (distortion-limited) output current of an amplifier (5.4.7).
 | `thd_percent` | The total harmonic distortion across the resistive part at each step, in percent. |
 | `load_resistance_ohm` | The resistance of the resistive part of the rated load, in ohms. |
 | `rated_thd_percent` | The rated total harmonic distortion of 5.4.6, in percent. |
-| `maximum_current_a` | The load current at which the distortion first reaches the rated value, interpolated linearly between the two steps either side, in amperes: the characteristic of 5.4.7, stated in amperes (5.4.7.3). |
+| `max_current_a` | The load current at which the distortion first reaches the rated value, interpolated linearly between the two steps either side, in amperes: the characteristic of 5.4.7, stated in amperes (5.4.7.3). |
 
 ### MaximumOutputCurrent.plot()
 
@@ -939,7 +939,7 @@ NeckLoopCharacteristics(
     impedance_ohm: np.ndarray,
     input_voltage_v: float,
     reference_input_voltage_v: float,
-    minimum_impedance_ohm: float,
+    min_impedance_ohm: float,
     response_db: np.ndarray,
     frequencies_3db_hz: tuple[float, ...],
 )
@@ -956,7 +956,7 @@ What IEC 62489-1:2010+A1:2014 clause 9 states for a neck loop.
 | `impedance_ohm` | The magnitude of the input impedance at each, in ohms. |
 | `input_voltage_v` | The input voltage the field was measured with, in volts. |
 | `reference_input_voltage_v` | The input voltage that produces 400 mA/m at 1 kHz at the telecoil position of the jig, the characteristic of 9.1, in volts. |
-| `minimum_impedance_ohm` | The smallest magnitude of the input impedance over 100 Hz to 5 kHz, rounded to the nearest ohm (9.2.1). |
+| `min_impedance_ohm` | The smallest magnitude of the input impedance over 100 Hz to 5 kHz, rounded to the nearest ohm (9.2.1). |
 | `response_db` | The field strength level relative to the one at 1 kHz, in dB. |
 | `frequencies_3db_hz` | The frequencies where the response differs from the one at 1 kHz by 3 dB, which 9.3.3 states when the response is given as text. |
 

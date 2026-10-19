@@ -295,13 +295,13 @@ def test_characteristic_height_is_the_mean_source_height() -> None:
 
 
 def test_note_7_takes_ten_low_sources_at_one_metre() -> None:
-    height = emission.plant_characteristic_height_m([20.0, 30.0], low_source_count=10)
+    height = emission.plant_characteristic_height_m([20.0, 30.0], n_low_sources=10)
     assert height == pytest.approx((20.0 + 30.0 + 10.0) / 12.0)
 
 
 def test_note_7_needs_ten_sources() -> None:
     with pytest.raises(ValueError, match="NOTE 7"):
-        emission.plant_characteristic_height_m([20.0], low_source_count=9)
+        emission.plant_characteristic_height_m([20.0], n_low_sources=9)
 
 
 def test_characteristic_height_needs_a_source() -> None:
@@ -379,12 +379,12 @@ def test_contour_areas_and_length() -> None:
 def test_default_layout_is_the_fewest_positions_9_1_1_c_allows() -> None:
     contour = _contour()
     assert contour.position_spacing_m <= 2.0 * contour.mean_distance_m
-    fewer = _contour(position_count=contour.position_count - 1)
+    fewer = _contour(n_positions=contour.n_positions - 1)
     assert fewer.position_spacing_m > 2.0 * fewer.mean_distance_m
 
 
 def test_positions_are_equidistant_along_the_contour() -> None:
-    contour = _contour(position_count=16)
+    contour = _contour(n_positions=16)
     assert contour.positions_m.shape == (16, 2)
     np.testing.assert_allclose(contour.positions_m[0], CONTOUR[0])
     # 16 positions round 840 m of rectangle: one every 52,5 m.
@@ -393,7 +393,7 @@ def test_positions_are_equidistant_along_the_contour() -> None:
 
 
 def test_distances_are_to_the_nearest_point_of_the_perimeter() -> None:
-    contour = _contour(position_count=16)
+    contour = _contour(n_positions=16)
     # Position 1 at (27,5; -25) is straight below the bottom edge.
     assert contour.distances[1] == pytest.approx(25.0)
     np.testing.assert_allclose(contour.nearest_perimeter_points_m[1], [27.5, 0.0])
@@ -403,16 +403,16 @@ def test_distances_are_to_the_nearest_point_of_the_perimeter() -> None:
 
 
 def test_microphones_point_into_the_contour_at_right_angles() -> None:
-    contour = _contour(position_count=16)
+    contour = _contour(n_positions=16)
     np.testing.assert_allclose(contour.microphone_directions[1], [0.0, 1.0], atol=1e-12)
     corner = contour.microphone_directions[0]
     np.testing.assert_allclose(corner, [math.sqrt(0.5), math.sqrt(0.5)], atol=1e-12)
 
 
 def test_microphone_direction_does_not_depend_on_the_winding() -> None:
-    forward = _contour(position_count=16)
+    forward = _contour(n_positions=16)
     backward = emission.plant_measurement_contour(
-        PLANT, CONTOUR[::-1], characteristic_height_m=8.0, position_count=16
+        PLANT, CONTOUR[::-1], characteristic_height_m=8.0, n_positions=16
     )
     inward = backward.plant_center_m - backward.positions_m
     dots = np.sum(inward * backward.microphone_directions, axis=1)
@@ -450,7 +450,7 @@ def test_contour_into_the_notch_of_a_plant_fails_9_1_1_b() -> None:
         dtype=float,
     )
     contour = emission.plant_measurement_contour(
-        u_shape, hugging, characteristic_height_m=5.0, position_count=24
+        u_shape, hugging, characteristic_height_m=5.0, n_positions=24
     )
     check = emission.check_plant_measurement(contour)
     row = check.requirement("aspect_angle")
@@ -460,7 +460,7 @@ def test_contour_into_the_notch_of_a_plant_fails_9_1_1_b() -> None:
         u_shape,
         [[-10, -10], [70, -10], [70, 70], [-10, 70]],
         characteristic_height_m=5.0,
-        position_count=24,
+        n_positions=24,
     )
     assert emission.check_plant_measurement(outside).requirement("aspect_angle").holds
 
@@ -478,7 +478,7 @@ def test_largest_aspect_angle_is_the_closed_form_at_mid_side(
     far = side + gap
     ring = [[-gap, -gap], [far, -gap], [far, far], [-gap, far]]
     contour = emission.plant_measurement_contour(
-        plant, ring, characteristic_height_m=5.0, position_count=count
+        plant, ring, characteristic_height_m=5.0, n_positions=count
     )
     expected = 2.0 * math.degrees(math.atan(side / (2.0 * gap)))
     assert contour.largest_aspect_angle_deg == pytest.approx(expected, rel=1e-12)
@@ -556,19 +556,19 @@ def test_default_layout_meets_the_exhaustive_search_off_centre(
     exhaustive = 3
     while True:
         trial = emission.plant_measurement_contour(
-            plant, ring, characteristic_height_m=5.0, position_count=exhaustive
+            plant, ring, characteristic_height_m=5.0, n_positions=exhaustive
         )
         if trial.position_spacing_m <= 2.0 * trial.mean_distance_m:
             break
         exhaustive += 1
-    assert layout.position_count == exhaustive == count
+    assert layout.n_positions == exhaustive == count
 
 
 def test_largest_dimension_and_receiver_distance() -> None:
     contour = _contour()
     diagonal = math.hypot(200.0, 120.0)
     assert contour.largest_plant_dimension_m == pytest.approx(diagonal)
-    assert contour.minimum_receiver_distance_m == pytest.approx(1.5 * diagonal)
+    assert contour.min_receiver_distance_m == pytest.approx(1.5 * diagonal)
 
 
 def test_plant_centre_is_the_centroid() -> None:
@@ -581,8 +581,8 @@ def test_plant_centre_is_the_centroid() -> None:
 
 
 def test_omitted_positions_leave_the_layout_and_the_mean() -> None:
-    full = _contour(position_count=16)
-    partial = _contour(position_count=16, omitted_positions=[3])
+    full = _contour(n_positions=16)
+    partial = _contour(n_positions=16, omitted_positions=[3])
     assert partial.positions_m.shape == (15, 2)
     assert partial.omitted_percent == pytest.approx(100.0 / 16.0)
     kept = np.delete(full.distances, 3)
@@ -591,7 +591,7 @@ def test_omitted_positions_leave_the_layout_and_the_mean() -> None:
 
 
 def test_omitted_positions_need_a_layout() -> None:
-    with pytest.raises(ValueError, match="give its 'position_count'"):
+    with pytest.raises(ValueError, match="give its 'n_positions'"):
         emission.plant_measurement_contour(
             PLANT, CONTOUR, characteristic_height_m=8.0, omitted_positions=[1]
         )
@@ -945,13 +945,13 @@ def test_a_contour_too_far_out_fails_9_1_1_a() -> None:
 
 
 def test_too_few_positions_fail_9_1_1_c() -> None:
-    contour = _contour(position_count=4)
+    contour = _contour(n_positions=4)
     check = emission.check_plant_measurement(contour)
     assert not check.requirement("position_spacing").holds
 
 
 def test_more_than_10_percent_omitted_fails_9_1_2_4() -> None:
-    contour = _contour(position_count=16, omitted_positions=[1, 5])
+    contour = _contour(n_positions=16, omitted_positions=[1, 5])
     check = emission.check_plant_measurement(contour)
     assert not check.requirement("omitted_positions").holds
     assert check.requirement("omitted_positions").value == pytest.approx(12.5)
@@ -1102,7 +1102,7 @@ def test_a_mean_distance_of_exactly_5_m_fails_9_1_1_a() -> None:
     # Four positions, each on a side 5 m out, starting at the middle of one.
     ring = [[50.0, -5.0], [105.0, -5.0], [105.0, 25.0], [-5.0, 25.0], [-5.0, -5.0]]
     contour = emission.plant_measurement_contour(
-        plant, ring, characteristic_height_m=2.0, position_count=4
+        plant, ring, characteristic_height_m=2.0, n_positions=4
     )
     row = emission.check_plant_measurement(contour).requirement("mean_distance_min")
     assert contour.mean_distance_m == pytest.approx(5.0, abs=1e-12)
@@ -1141,7 +1141,7 @@ def test_background_margins_at_the_edges_of_6_b(
 
 def test_one_omitted_position_in_ten_meets_9_1_2_4() -> None:
     """9.1.2.4 asks for another contour only when the omissions exceed 10 %."""
-    contour = _contour(position_count=10, omitted_positions=[3])
+    contour = _contour(n_positions=10, omitted_positions=[3])
     row = emission.check_plant_measurement(contour).requirement("omitted_positions")
     assert row.clause == "9.1.2.4, 12 n)"
     assert row.value == pytest.approx(10.0)
@@ -1220,7 +1220,7 @@ def test_background_margins_of_decimal_readings_at_the_edges_of_6_b(
 
 def test_a_determination_of_another_contour_is_refused() -> None:
     contour = _contour()
-    other = _contour(position_count=contour.position_count + 3)
+    other = _contour(n_positions=contour.n_positions + 3)
     res = other.sound_power(_levels(other.positions_m.shape[0]), OCTAVES)
     with pytest.raises(ValueError, match="another 'mean_distance_m'"):
         emission.check_plant_measurement(contour, res)
@@ -1315,7 +1315,7 @@ def test_no_parts_is_refused() -> None:
 
 
 def test_contour_plot_draws_plant_contour_and_positions() -> None:
-    contour = _contour(position_count=16, omitted_positions=[2])
+    contour = _contour(n_positions=16, omitted_positions=[2])
     ax = contour.plot()
     labels = ax.get_legend().get_texts()
     texts = [t.get_text() for t in labels]
@@ -1345,7 +1345,7 @@ def test_sound_power_plot_draws_one_bar_per_band() -> None:
 
 
 def test_check_plot_draws_one_bar_per_requirement() -> None:
-    contour = _contour(position_count=4)
+    contour = _contour(n_positions=4)
     check = emission.check_plant_measurement(contour)
     ax = check.plot(language="es")
     assert len(ax.patches) == len(check.requirements)

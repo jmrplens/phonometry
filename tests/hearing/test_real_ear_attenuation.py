@@ -83,7 +83,7 @@ def test_the_grid_feeds_iso_4869_2_unchanged() -> None:
     assert apv.frequencies.tolist() == ref.ISO4869_1_FREQUENCIES
     np.testing.assert_allclose(apv.mean_attenuation, _table_a3().mean_db)
     # HML and SNR read 125 Hz to 8 kHz, which is exactly what 4.1 measures.
-    assert hearing.hml_rating(grid).subject_h.shape == (16,)
+    assert hearing.hml_rating(grid).subject_high.shape == (16,)
     assert hearing.snr_rating(grid).subject_snr.shape == (16,)
 
 

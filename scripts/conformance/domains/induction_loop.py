@@ -828,9 +828,7 @@ def _chk_maximum_output_current() -> Outcome:
     )
     # 1 % lies a quarter of the way from 0,8 % at 3 V to 1,6 % at 3,5 V.
     closed = (3.0 + 0.25 * 0.5) / resistance
-    return numeric(
-        closed, result.maximum_current_a, 1e-12, rel=True, unit="A", places=4
-    )
+    return numeric(closed, result.max_current_a, 1e-12, rel=True, unit="A", places=4)
 
 
 @register(

@@ -110,7 +110,7 @@ _MIN_SIGNAL_SAMPLES = 64
 
 
 def _validate_signal(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     *,
     calibrate: bool = True,
 ) -> NDArray[np.float64]:
@@ -119,20 +119,20 @@ def _validate_signal(
     ``calibrate=False`` is for the quantities referenced to digital full
     scale rather than to 20 uPa: see :mod:`phonometry.io._resolve`.
     """
-    sig = np.asarray(signal, dtype=np.float64)
+    sig = np.asarray(x, dtype=np.float64)
     if sig.ndim != 1:
-        msg = "'signal' must be one-dimensional."
+        msg = "'x' must be one-dimensional."
         raise ValueError(msg)
     if sig.size < _MIN_SIGNAL_SAMPLES:
         msg = (
-            f"'signal' must contain at least {_MIN_SIGNAL_SAMPLES} samples to "
+            f"'x' must contain at least {_MIN_SIGNAL_SAMPLES} samples to "
             "resolve a fundamental and its harmonics."
         )
         raise ValueError(msg)
     if not np.all(np.isfinite(sig)):
-        msg = "'signal' must be finite."
+        msg = "'x' must be finite."
         raise ValueError(msg)
-    return apply_calibration(signal, sig) if calibrate else sig
+    return apply_calibration(x, sig) if calibrate else sig
 
 
 def _amplitude_spectrum(
@@ -203,7 +203,7 @@ def _harmonic_amplitudes(
 # Harmonic distortion (IEC 60268-3 14.12.2-3 / 14.12.5, AES17 6.3)
 # --------------------------------------------------------------------------- #
 def thd(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -230,7 +230,7 @@ def thd(
     the fundamental-referenced convention widespread in audio practice and
     datasheets; the two agree to first order for small distortion.
 
-    :param signal: Captured signal (1-D). Accepts a
+    :param x: Captured signal (1-D). Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the
         samples and then cancels: this is a ratio of amplitudes drawn from
         the same record, so the factor divides out and the answer is the
@@ -249,8 +249,8 @@ def thd(
     :raises ValueError: If the signal/parameters are invalid, ``kind`` is
         unknown, or no harmonic of the fundamental lies below Nyquist.
     """
-    fs = resolve_fs(signal, fs, name="signal")
-    sig = _validate_signal(signal)
+    fs = resolve_fs(x, fs, name="x")
+    sig = _validate_signal(x)
     fs_v = _positive(fs, "fs")
     if kind not in ("F", "R"):
         msg = "'kind' must be 'F' or 'R'."
@@ -273,7 +273,7 @@ def thd(
 
 
 def harmonic_distortion(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     *,
     fundamental: float,
@@ -286,7 +286,7 @@ def harmonic_distortion(
     :math:`d_n = a_n / \sqrt{\sum_{k \ge 1} a_k^2}` -- the nth harmonic
     amplitude relative to the total RMS.
 
-    :param signal: Captured signal (1-D). Accepts a
+    :param x: Captured signal (1-D). Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the
         samples and then cancels: this is a ratio of amplitudes drawn from
         the same record, so the factor divides out and the answer is the
@@ -303,8 +303,8 @@ def harmonic_distortion(
     :raises ValueError: If ``order`` is not an integer, ``order`` < 2 or the
         inputs are invalid.
     """
-    fs = resolve_fs(signal, fs, name="signal")
-    sig = _validate_signal(signal)
+    fs = resolve_fs(x, fs, name="x")
+    sig = _validate_signal(x)
     fs_v = _positive(fs, "fs")
     f0 = _positive(fundamental, "fundamental")
     # ``order`` indexes the harmonic amplitudes, so a non-integral value must
@@ -412,7 +412,7 @@ def _aes17_rms_pair(
 
 
 def thd_plus_noise(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -432,7 +432,7 @@ def thd_plus_noise(
     standard low-pass at ``bandwidth`` (5.2.5 / 6.3.1) -- so DC offsets
     and out-of-band noise do not inflate the result.
 
-    :param signal: Captured signal (1-D). Accepts a
+    :param x: Captured signal (1-D). Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the
         samples and then cancels: this is a ratio of amplitudes drawn from
         the same record, so the factor divides out and the answer is the
@@ -452,8 +452,8 @@ def thd_plus_noise(
     :return: THD+N as a ratio (default) or in dB.
     :raises ValueError: If the inputs are invalid or ``notch_q`` out of range.
     """
-    fs = resolve_fs(signal, fs, name="signal")
-    sig = _validate_signal(signal)
+    fs = resolve_fs(x, fs, name="x")
+    sig = _validate_signal(x)
     fs_v = _positive(fs, "fs")
     _validate_notch_q(notch_q)
     if fundamental is None:
@@ -475,7 +475,7 @@ def thd_plus_noise(
 
 
 def sinad(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -494,7 +494,7 @@ def sinad(
     define SINAD; this value is derived from the AES17 6.3.1 THD+N
     measurement (same notch, same measurement bandwidth).
 
-    :param signal: Captured signal (1-D). Accepts a
+    :param x: Captured signal (1-D). Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the
         samples and then cancels: SINAD is the decibel form of a ratio of
         amplitudes drawn from the same record rather than a level, so the
@@ -511,7 +511,7 @@ def sinad(
     :raises ValueError: If the inputs are invalid.
     """
     thdn_db = thd_plus_noise(
-        signal,
+        x,
         fs,
         fundamental,
         notch_q=notch_q,
@@ -590,7 +590,7 @@ def _weighted_rms_468(x: NDArray[np.float64], fs: float) -> float:
 
 
 def weighted_thd(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -613,7 +613,7 @@ def weighted_thd(
     the weighted measurement is valid only for fundamental frequencies
     between 31,5 Hz and 400 Hz.
 
-    :param signal: Captured signal (1-D). Accepts a
+    :param x: Captured signal (1-D). Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the
         samples and then cancels: this is a ratio of amplitudes drawn from
         the same record, so the factor divides out and the answer is the
@@ -630,8 +630,8 @@ def weighted_thd(
     :return: Weighted THD, as a ratio.
     :raises ValueError: If the inputs are invalid.
     """
-    fs = resolve_fs(signal, fs, name="signal")
-    sig = _validate_signal(signal)
+    fs = resolve_fs(x, fs, name="x")
+    sig = _validate_signal(x)
     fs_v = _positive(fs, "fs")
     if weighting not in ("468", "A", "C"):
         msg = "'weighting' must be '468', 'A' or 'C'."
@@ -721,7 +721,7 @@ class HarmonicDistortionResult(OwnsArrays):
 
 
 def harmonic_analysis(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -735,7 +735,7 @@ def harmonic_analysis(
     Bundles the fundamental, the harmonic amplitudes and the THD (both
     conventions), THD+N and SINAD into a plottable result.
 
-    :param signal: Captured signal (1-D). Accepts a
+    :param x: Captured signal (1-D). Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the
         samples: the three distortion ratios come out unchanged, and so does
         ``sinad_db``, which is the decibel form of one such ratio rather
@@ -753,8 +753,8 @@ def harmonic_analysis(
     :return: A :class:`HarmonicDistortionResult`.
     :raises ValueError: If the inputs are invalid.
     """
-    fs = resolve_fs(signal, fs, name="signal")
-    sig = _validate_signal(signal)
+    fs = resolve_fs(x, fs, name="x")
+    sig = _validate_signal(x)
     fs_v = _positive(fs, "fs")
     f0, amps = _harmonic_amplitudes(sig, fs_v, fundamental, n_harmonics, window)
     if amps.size == 0 or amps[0] <= 0.0:

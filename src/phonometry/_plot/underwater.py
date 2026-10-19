@@ -52,7 +52,7 @@ if TYPE_CHECKING:
     from ..underwater.sources.ambient_noise import AmbientNoiseResult
     from ..underwater.sources.pile_driving_noise import (
         PileStrikeResult,
-        StrikeSelSpectrum,
+        StrikeSELSpectrum,
     )
     from ..underwater.sources.ship_radiated_noise import ShipSourceLevelResult
     from ..underwater.sources.ship_traffic_noise import ShipTrafficSpectrum
@@ -1204,7 +1204,7 @@ def plot_weighted_exposure(
 
 
 def plot_strike_sel_spectrum(
-    result: StrikeSelSpectrum,
+    result: StrikeSELSpectrum,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -1213,7 +1213,7 @@ def plot_strike_sel_spectrum(
     """Per-band single-strike sound exposure level of a pile strike.
 
     :param result: A
-        :class:`~phonometry.underwater.sources.pile_driving_noise.StrikeSelSpectrum`.
+        :class:`~phonometry.underwater.sources.pile_driving_noise.StrikeSELSpectrum`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the band-level ``plot`` call.

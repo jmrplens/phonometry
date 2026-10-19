@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
 
-    from ..environment.assessment.exposure_distribution import SelDistribution
+    from ..environment.assessment.exposure_distribution import SELDistribution
     from ..environment.assessment.impulsive_sound import ImpulseProminenceResult
     from ..environment.assessment.measurement import TonalAssessmentResult
     from ..environment.assessment.soundscape import (
@@ -1762,7 +1762,7 @@ def plot_pass_by_regression(
     ax = ax if ax is not None else _new_axes()
     color, marker = _SPB_CATEGORY_STYLE[result.vehicle_category]
     speeds = np.asarray(result.speeds_kmh, dtype=np.float64)
-    levels = np.asarray(result.max_levels_db, dtype=np.float64)
+    levels = np.asarray(result.maximum_levels_db, dtype=np.float64)
     low, high = result.speed_window_kmh
     ax.axvspan(
         low,
@@ -1778,7 +1778,7 @@ def plot_pass_by_regression(
         ms=4,
         color=color,
         alpha=0.55,
-        label=f"{_t('Pass-bys', language)} ($n$ = {result.vehicle_count})",
+        label=f"{_t('Pass-bys', language)} ($n$ = {result.n_vehicles})",
     )
     span = [float(speeds.min()), float(speeds.max()), result.reference_speed_kmh]
     line_x, line_y = _spb_line(result, min(span), max(span))
@@ -1846,7 +1846,7 @@ def plot_statistical_pass_by(
     for category, regression in result.regressions.items():
         color, marker = _SPB_CATEGORY_STYLE[category]
         speeds = np.asarray(regression.speeds_kmh, dtype=np.float64)
-        levels = np.asarray(regression.max_levels_db, dtype=np.float64)
+        levels = np.asarray(regression.maximum_levels_db, dtype=np.float64)
         ax.plot(
             speeds,
             levels,
@@ -1902,7 +1902,7 @@ _SEL_SPREAD_MARGIN = 4.0
 
 
 def plot_sel_distribution(
-    result: SelDistribution,
+    result: SELDistribution,
     ax: Axes | None = None,
     *,
     view: str = "density",
@@ -1918,7 +1918,7 @@ def plot_sel_distribution(
     95, 50, 10, 5 and 1 per cent exceedance levels marked (Figure A.3).
 
     :param result: A
-        :class:`~phonometry.environment.assessment.exposure_distribution.SelDistribution`.
+        :class:`~phonometry.environment.assessment.exposure_distribution.SELDistribution`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param view: ``"classes"``, ``"density"`` or ``"exceedance"``.
     :param language: Label language, ``"en"`` (default) or ``"es"``.

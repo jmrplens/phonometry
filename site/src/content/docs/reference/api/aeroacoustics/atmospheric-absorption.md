@@ -28,7 +28,7 @@ Two SAE practices give it.
   form ISO 3891:1978 Annex A gives it: an attenuation coefficient per band, in
   decibels per 100 m, independent of pressure and of path length, evaluated at
   the band centre up to 4 kHz and at the lower band edge above. The result is an
-  [`Arp866aAttenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#arp866aattenuation) with a `.plot()`.
+  [`ARP866AAttenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#arp866aattenuation) with a `.plot()`.
 
 Sources (clean-room, implemented from the documents): SAE ARP 5534 (2021),
 *Application of Pure-Tone Atmospheric Absorption Losses to One-Third-Octave-Band
@@ -91,7 +91,7 @@ arp866a_attenuation(
     temperature_c: float,
     relative_humidity_percent: float,
     eta_interpolation: str = 'quadratic',
-) -> Arp866aAttenuation
+) -> ARP866AAttenuation
 ```
 
 One-third-octave-band attenuation coefficient by SAE ARP 866A (ISO 3891 Annex A).
@@ -140,7 +140,7 @@ from 30 % to 90 %. Its Tables 3 to 12 print the formula from -10 °C to
 | `relative_humidity_percent` | Relative humidity `RH`, in percent (0 to 100). |
 | `eta_interpolation` | `"quadratic"` (default, ISO 3891) or `"linear"` (ECAC Doc 29 Appendix D). |
 
-**Returns:** An [`Arp866aAttenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#arp866aattenuation).
+**Returns:** An [`ARP866AAttenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#arp866aattenuation).
 
 **Raises**
 
@@ -148,10 +148,10 @@ from 30 % to 90 %. Its Tables 3 to 12 print the formula from -10 °C to
 | :--- | :--- |
 | ValueError | for a band outside Table 2, a temperature at or below absolute zero, a humidity outside 0 % to 100 %, or an unknown interpolation. |
 
-## Arp866aAttenuation
+## ARP866AAttenuation
 
 ```python
-Arp866aAttenuation(
+ARP866AAttenuation(
     frequencies: NDArray[np.float64],
     evaluation_frequencies_hz: NDArray[np.float64],
     delta: NDArray[np.float64],
@@ -178,10 +178,10 @@ Atmospheric attenuation coefficient per band by SAE ARP 866A (ISO 3891 Annex A).
 | `relative_humidity_percent` | Relative humidity `RH`, in percent. |
 | `eta_interpolation` | How `η` was read between the entries of Table 1, `"quadratic"` or `"linear"` (see [`arp866a_attenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#arp866a_attenuation)). |
 
-### Arp866aAttenuation.path_attenuation()
+### ARP866AAttenuation.path_attenuation()
 
 ```python
-Arp866aAttenuation.path_attenuation(
+ARP866AAttenuation.path_attenuation(
     path_length_m: float | ArrayLike,
 ) -> NDArray[np.float64]
 ```
@@ -205,10 +205,10 @@ length and does not depend on the pressure, unlike SAE ARP 5534.
 | :--- | :--- |
 | ValueError | if a length is negative or not finite. |
 
-### Arp866aAttenuation.plot()
+### ARP866AAttenuation.plot()
 
 ```python
-Arp866aAttenuation.plot(
+ARP866AAttenuation.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',

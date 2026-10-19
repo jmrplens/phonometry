@@ -330,7 +330,7 @@ A supplied level rise does not qualify as an impulse (clause 4.5).
 
 ```python
 impulsive_sound_adjustment(
-    signal: Signal | Sequence[float] | np.ndarray,
+    x: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     dt: float = 0.02,
@@ -352,8 +352,8 @@ together with the source category (Clause 7) and the adjusted `LAeq`.
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | Calibrated sound pressure signal of the candidate event, in pascal. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: that factor is what puts them in pascal, and it is a different knob from `calibration_offset`, which shifts the finished level in decibels for a record that never was. |
-| `fs` | Sampling rate of `signal`, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Calibrated sound pressure signal of the candidate event, in pascal. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: that factor is what puts them in pascal, and it is a different knob from `calibration_offset`, which shifts the finished level in decibels for a record that never was. |
+| `fs` | Sampling rate of `x`, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `dt` | Target `LpAF` sampling interval, in seconds (10-25 ms). |
 | `reference_pressure_pa` | Reference pressure, in pascal (default 20 uPa). |
 | `calibration_offset` | Level offset, in dB, for signals not scaled to pascal. The adjustment `KI` is unaffected by it (Clause 8); only the reported levels shift. |
@@ -570,7 +570,7 @@ $$
 
 ```python
 sound_pressure_level_history(
-    signal: Signal | Sequence[float] | np.ndarray,
+    x: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     dt: float = 0.02,
@@ -590,8 +590,8 @@ standard.
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | Calibrated sound pressure signal, in pascal. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: that factor is what puts them in pascal, and it is a different knob from `calibration_offset`, which shifts the finished level in decibels for a record that never was. |
-| `fs` | Sampling rate of `signal`, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Calibrated sound pressure signal, in pascal. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: that factor is what puts them in pascal, and it is a different knob from `calibration_offset`, which shifts the finished level in decibels for a record that never was. |
+| `fs` | Sampling rate of `x`, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `dt` | Target sampling interval of `LpAF`, in seconds (10-25 ms). |
 | `reference_pressure_pa` | Reference pressure, in pascal (default 20 uPa). |
 | `calibration_offset` | Level offset added to `LpAF`, in dB, for signals recorded on a scale other than pascal. |

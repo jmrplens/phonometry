@@ -103,10 +103,10 @@ if TYPE_CHECKING:
 __all__ = [
     "DB_HR_FREQUENCIES_HZ",
     "DB_HR_NORMALIZED_SPECTRA",
-    "DbHrAssessment",
-    "DbHrCheck",
-    "DbHrGlobalIndexResult",
-    "DbHrRequirement",
+    "DBHRAssessment",
+    "DBHRCheck",
+    "DBHRGlobalIndexResult",
+    "DBHRRequirement",
     "assess_db_hr",
     "check_db_hr_requirement",
     "d2m_nt_a",
@@ -362,7 +362,7 @@ def _normalise(value: str, aliases: Mapping[str, str], name: str) -> str:
 # Global indices (Annex A, Formulae (A.5) to (A.7))
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class DbHrGlobalIndexResult(OwnsArrays):
+class DBHRGlobalIndexResult(OwnsArrays):
     """A DB-HR A-weighted global insulation index.
 
     :ivar value: The index, in dBA, unrounded.
@@ -475,7 +475,7 @@ def db_hr_global_index(
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
     name: str | None = None,
-) -> DbHrGlobalIndexResult:
+) -> DBHRGlobalIndexResult:
     r"""A-weighted global insulation index per DB-HR Annex A.
 
     :math:`I_x = -10 \log_{10} \sum_i 10^{(L_{x,i} - X_i)/10}` over the eighteen
@@ -492,7 +492,7 @@ def db_hr_global_index(
         ``band_values`` at run time, which a signature cannot state, so it is
         checked here and raises rather than being caught by a type checker.
     :param name: Optional index name carried on the result (e.g. ``"R'A"``).
-    :return: A :class:`DbHrGlobalIndexResult`.
+    :return: A :class:`DBHRGlobalIndexResult`.
     :raises ValueError: For an unknown spectrum, a wrong band count, or
         non-finite values.
     """
@@ -538,7 +538,7 @@ def db_hr_global_index(
     levels = np.asarray(DB_HR_NORMALIZED_SPECTRA[key], dtype=np.float64)
     contributions = levels - selected
     value = float(-10.0 * np.log10(np.sum(10.0 ** (contributions / 10.0))))
-    return DbHrGlobalIndexResult(
+    return DBHRGlobalIndexResult(
         value=value,
         intermediate=_round_half_up(value, 1),
         reported=int(_round_half_up(value)),
@@ -556,12 +556,12 @@ def ra(
     reduction_index: Sequence[float] | np.ndarray,
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
-) -> DbHrGlobalIndexResult:
+) -> DBHRGlobalIndexResult:
     """A-weighted global sound reduction index ``RA`` for pink noise.
 
     :param reduction_index: Band sound reduction index ``R`` (or ``R'``), in dB.
     :param frequencies: Band centre frequencies, in Hz (optional).
-    :return: A :class:`DbHrGlobalIndexResult` named ``"RA"``.
+    :return: A :class:`DBHRGlobalIndexResult` named ``"RA"``.
     """
     return db_hr_global_index(
         reduction_index, "pink", frequencies=frequencies, name="RA"
@@ -572,12 +572,12 @@ def ra_tr(
     reduction_index: Sequence[float] | np.ndarray,
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
-) -> DbHrGlobalIndexResult:
+) -> DBHRGlobalIndexResult:
     """A-weighted global sound reduction index ``RA,tr`` for road-traffic noise.
 
     :param reduction_index: Band sound reduction index ``R`` (or ``R'``), in dB.
     :param frequencies: Band centre frequencies, in Hz (optional).
-    :return: A :class:`DbHrGlobalIndexResult` named ``"RA,tr"``.
+    :return: A :class:`DBHRGlobalIndexResult` named ``"RA,tr"``.
     """
     return db_hr_global_index(
         reduction_index, "traffic", frequencies=frequencies, name="RA,tr"
@@ -588,12 +588,12 @@ def dnt_a(
     level_difference: Sequence[float] | np.ndarray,
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
-) -> DbHrGlobalIndexResult:
+) -> DBHRGlobalIndexResult:
     """A-weighted standardized level difference ``DnT,A`` (Formula (A.7)).
 
     :param level_difference: Band standardized level difference ``DnT``, in dB.
     :param frequencies: Band centre frequencies, in Hz (optional).
-    :return: A :class:`DbHrGlobalIndexResult` named ``_DNT_A``.
+    :return: A :class:`DBHRGlobalIndexResult` named ``_DNT_A``.
     """
     return db_hr_global_index(
         level_difference, "pink", frequencies=frequencies, name=_DNT_A
@@ -605,7 +605,7 @@ def d2m_nt_a(
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
     spectrum: str = "pink",
-) -> DbHrGlobalIndexResult:
+) -> DBHRGlobalIndexResult:
     """A-weighted facade level difference ``D2m,nT,A`` (Formula (A.5)).
 
     The pink-noise global quantity of a facade, a roof or a floor in contact
@@ -622,7 +622,7 @@ def d2m_nt_a(
     :param frequencies: Band centre frequencies, in Hz (optional).
     :param spectrum: ``"pink"`` (default, Table A.5) or ``"railway"``
         (Table A.4), per the dominant outdoor noise.
-    :return: A :class:`DbHrGlobalIndexResult` named ``"D2m,nT,A"``.
+    :return: A :class:`DBHRGlobalIndexResult` named ``"D2m,nT,A"``.
     :raises ValueError: For a spectrum Formula (A.5) does not cover.
     """
     key = str(spectrum).strip().lower()
@@ -644,7 +644,7 @@ def d2m_nt_atr(
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
     spectrum: str = "traffic",
-) -> DbHrGlobalIndexResult:
+) -> DBHRGlobalIndexResult:
     """A-weighted facade level difference ``D2m,nT,Atr`` (Formula (A.6)).
 
     The road-traffic global quantity of a facade, a roof or a floor in contact
@@ -664,7 +664,7 @@ def d2m_nt_atr(
     :param frequencies: Band centre frequencies, in Hz (optional).
     :param spectrum: ``"traffic"`` (default, Table A.3) or ``"aircraft"``
         (Table A.2), per the dominant outdoor noise.
-    :return: A :class:`DbHrGlobalIndexResult` named ``_D2M_NT_ATR``.
+    :return: A :class:`DBHRGlobalIndexResult` named ``_D2M_NT_ATR``.
     :raises ValueError: For a spectrum Formula (A.6) does not cover.
     """
     key = str(spectrum).strip().lower()
@@ -705,7 +705,7 @@ def window_size_correction(area: float) -> int:
 # Requirements (Clause 2)
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class DbHrRequirement(RichDisplay):
+class DBHRRequirement(RichDisplay):
     """A single DB-HR performance requirement.
 
     :ivar quantity: The quantity the requirement is stated in, e.g.
@@ -746,18 +746,18 @@ class DbHrRequirement(RichDisplay):
 
 
 @dataclass(frozen=True)
-class DbHrCheck(RichDisplay):
+class DBHRCheck(RichDisplay):
     """A DB-HR requirement checked against an achieved value.
 
     The rounding, the margin and the verdict are read from the achieved value
     and the requirement, so they are not fields: a check cannot be built to
     comply with a value DB-HR fails.
 
-    :ivar requirement: The :class:`DbHrRequirement` checked.
+    :ivar requirement: The :class:`DBHRRequirement` checked.
     :ivar value: The achieved value, unrounded.
     """
 
-    requirement: DbHrRequirement
+    requirement: DBHRRequirement
     value: float
 
     def __post_init__(self) -> None:
@@ -771,7 +771,7 @@ class DbHrCheck(RichDisplay):
         """
         require_scalar(self.value, "value")
         if not math.isfinite(self.value):
-            msg = f"DbHrCheck: 'value' must be finite; got {self.value!r}."
+            msg = f"DBHRCheck: 'value' must be finite; got {self.value!r}."
             raise ValueError(msg)
 
     @property
@@ -802,13 +802,13 @@ class DbHrCheck(RichDisplay):
 
 
 @dataclass(frozen=True)
-class DbHrAssessment(RichDisplay):
+class DBHRAssessment(RichDisplay):
     """A set of DB-HR requirement checks.
 
-    :ivar checks: The individual :class:`DbHrCheck` results.
+    :ivar checks: The individual :class:`DBHRCheck` results.
     """
 
-    checks: tuple[DbHrCheck, ...]
+    checks: tuple[DBHRCheck, ...]
 
     @property
     def complies(self) -> bool:
@@ -834,7 +834,7 @@ def db_hr_facade_requirement(
     *,
     dominant_noise: str = "road",
     quiet_facade: bool = False,
-) -> DbHrRequirement:
+) -> DBHRRequirement:
     """Required facade insulation ``D2m,nT,Atr`` (DB-HR Table 2.1).
 
     The requirement is keyed on the day noise index ``Ld`` of the site (Annex I
@@ -858,7 +858,7 @@ def db_hr_facade_requirement(
         ``D2m,nT,A`` requirement (Formula (A.5)) and the other two a
         ``D2m,nT,Atr`` one (Formula (A.6)), per clause 3.1.3.4 point 1.
     :param quiet_facade: Assess with ``Ld`` reduced by 10 dBA.
-    :return: The :class:`DbHrRequirement`, on ``D2m,nT,Atr`` or, for a
+    :return: The :class:`DBHRRequirement`, on ``D2m,nT,Atr`` or, for a
         railway-dominant site, on ``D2m,nT,A``.
     :raises ValueError: For an unknown use/room combination, an unknown
         dominant noise, or a non-finite ``Ld``.
@@ -900,7 +900,7 @@ def db_hr_facade_requirement(
     # D2m,nT,A (Formula (A.5)), road traffic and aircraft in D2m,nT,Atr
     # (Formula (A.6)). Table 2.1 supplies the same numeric limit either way.
     quantity = "D2m,nT,A" if noise == "railway" else _D2M_NT_ATR
-    return DbHrRequirement(
+    return DBHRRequirement(
         quantity=quantity,
         limit=limit,
         direction="min",
@@ -985,7 +985,7 @@ _SHARED_OPENING_ROWS: dict[tuple[str, str], tuple[float, float, str]] = {
 
 def db_hr_airborne_requirement(
     receiving_room: str, source_room: str, *, shared_opening: bool = False
-) -> tuple[DbHrRequirement, ...]:
+) -> tuple[DBHRRequirement, ...]:
     """Airborne insulation requirements between two rooms (DB-HR 2.1.1).
 
     A *protected* room is a habitable room of special protection (bedrooms,
@@ -1004,7 +1004,7 @@ def db_hr_airborne_requirement(
     :param source_room: ``"same_unit"``, ``"other_unit"``, ``"installations"``
         or ``"activity"``.
     :param shared_opening: The two rooms share a door or window.
-    :return: A tuple of :class:`DbHrRequirement`, of length one in the general
+    :return: A tuple of :class:`DBHRRequirement`, of length one in the general
         case and two when ``shared_opening`` applies.
     :raises ValueError: For an unknown combination, or for ``shared_opening``
         in a case DB-HR does not contemplate (a protected room against a
@@ -1023,7 +1023,7 @@ def db_hr_airborne_requirement(
     if not shared_opening:
         quantity, limit, reference, description = _AIRBORNE_ROWS[key]
         requirements = [
-            DbHrRequirement(
+            DBHRRequirement(
                 quantity=quantity,
                 limit=limit,
                 direction="min",
@@ -1050,7 +1050,7 @@ def db_hr_airborne_requirement(
         )
     )
     requirements = [
-        DbHrRequirement(
+        DBHRRequirement(
             quantity="RA",
             limit=opening_limit,
             direction="min",
@@ -1059,7 +1059,7 @@ def db_hr_airborne_requirement(
             reference=reference,
             description=opening_note,
         ),
-        DbHrRequirement(
+        DBHRRequirement(
             quantity="RA",
             limit=enclosure_limit,
             direction="min",
@@ -1080,7 +1080,7 @@ _PARTY_WALL_ROUTES: dict[str, tuple[float, str]] = {
 }
 
 
-def db_hr_party_wall_requirement(quantity: str = "D2m,nT,Atr") -> DbHrRequirement:
+def db_hr_party_wall_requirement(quantity: str = "D2m,nT,Atr") -> DBHRRequirement:
     """Airborne requirement on a party wall between two buildings (DB-HR 2.1.1 c).
 
     For a habitable or protected room against a *medianería*, DB-HR offers two
@@ -1091,7 +1091,7 @@ def db_hr_party_wall_requirement(quantity: str = "D2m,nT,Atr") -> DbHrRequiremen
 
     :param quantity: ``_D2M_NT_ATR`` (default, the per-leaf route) or
         ``_DNT_A`` (the combined route).
-    :return: The :class:`DbHrRequirement` of the chosen route.
+    :return: The :class:`DBHRRequirement` of the chosen route.
     :raises ValueError: For an unknown quantity.
     """
     key = str(quantity).strip()
@@ -1102,7 +1102,7 @@ def db_hr_party_wall_requirement(quantity: str = "D2m,nT,Atr") -> DbHrRequiremen
         )
         raise ValueError(msg)
     limit, description = _PARTY_WALL_ROUTES[key]
-    return DbHrRequirement(
+    return DBHRRequirement(
         quantity=key,
         limit=limit,
         direction="min",
@@ -1123,7 +1123,7 @@ _IMPACT_ROWS: dict[tuple[str, str], tuple[float, str]] = {
 }
 
 
-def db_hr_impact_requirement(receiving_room: str, source_room: str) -> DbHrRequirement:
+def db_hr_impact_requirement(receiving_room: str, source_room: str) -> DBHRRequirement:
     """Impact sound requirement ``L'nT,w`` (DB-HR 2.1.2).
 
     The standardized impact sound pressure level in a protected room adjacent
@@ -1135,7 +1135,7 @@ def db_hr_impact_requirement(receiving_room: str, source_room: str) -> DbHrRequi
     :param receiving_room: ``"protected"`` or ``"habitable"``.
     :param source_room: ``"other_unit"``, ``"installations"`` or
         ``"activity"``.
-    :return: The :class:`DbHrRequirement` on ``L'nT,w``.
+    :return: The :class:`DBHRRequirement` on ``L'nT,w``.
     :raises ValueError: For a combination DB-HR states no impact limit for.
     """
     key = (str(receiving_room).strip().lower(), str(source_room).strip().lower())
@@ -1147,7 +1147,7 @@ def db_hr_impact_requirement(receiving_room: str, source_room: str) -> DbHrRequi
         )
         raise ValueError(msg)
     limit, reference = _IMPACT_ROWS[key]
-    return DbHrRequirement(
+    return DBHRRequirement(
         quantity="L'nT,w",
         limit=limit,
         direction="max",
@@ -1184,7 +1184,7 @@ _COMMON_AREA_ABSORPTION = 0.2
 
 def db_hr_reverberation_requirement(
     room_use: str, *, furnished: bool = False
-) -> DbHrRequirement:
+) -> DBHRRequirement:
     """Reverberation or absorption requirement (DB-HR 2.2).
 
     Classrooms and conference halls under 350 m3 must not exceed 0,7 s empty
@@ -1197,7 +1197,7 @@ def db_hr_reverberation_requirement(
         ``"restaurant"`` (or ``"dining_room"``) or ``"common_area"``.
     :param furnished: For a classroom or conference hall, include the seating
         (the 0,5 s limit).
-    :return: The :class:`DbHrRequirement`.
+    :return: The :class:`DBHRRequirement`.
     :raises ValueError: For an unknown room use.
     """
     key = str(room_use).strip().lower().replace(" ", "_").replace("-", "_")
@@ -1212,7 +1212,7 @@ def db_hr_reverberation_requirement(
     }
     key = aliases.get(key, key)
     if key == "common_area":
-        return DbHrRequirement(
+        return DBHRRequirement(
             quantity="A/V",
             limit=_COMMON_AREA_ABSORPTION,
             direction="min",
@@ -1230,7 +1230,7 @@ def db_hr_reverberation_requirement(
         )
         raise ValueError(msg)
     limit, reference, description = _REVERBERATION_ROWS[key]
-    return DbHrRequirement(
+    return DBHRRequirement(
         quantity="T",
         limit=limit,
         direction="max",
@@ -1241,7 +1241,7 @@ def db_hr_reverberation_requirement(
     )
 
 
-def check_db_hr_requirement(value: float, requirement: DbHrRequirement) -> DbHrCheck:
+def check_db_hr_requirement(value: float, requirement: DBHRRequirement) -> DBHRCheck:
     """Check an achieved value against a DB-HR requirement.
 
     The achieved value is first rounded as DB-HR prescribes for the quantity
@@ -1249,26 +1249,26 @@ def check_db_hr_requirement(value: float, requirement: DbHrRequirement) -> DbHrC
     for a reverberation time), and the rounded value is compared with the limit.
 
     :param value: The achieved value, in the requirement's unit.
-    :param requirement: The :class:`DbHrRequirement` to check against.
-    :return: A :class:`DbHrCheck`.
+    :param requirement: The :class:`DBHRRequirement` to check against.
+    :return: A :class:`DBHRCheck`.
     :raises ValueError: If ``value`` is not finite.
     """
-    return DbHrCheck(requirement=requirement, value=_finite(value, "value"))
+    return DBHRCheck(requirement=requirement, value=_finite(value, "value"))
 
 
 def assess_db_hr(
-    items: Sequence[tuple[float, DbHrRequirement]],
-) -> DbHrAssessment:
+    items: Sequence[tuple[float, DBHRRequirement]],
+) -> DBHRAssessment:
     """Judge a set of achieved values against their DB-HR requirements.
 
     :param items: ``(value, requirement)`` pairs.
-    :return: A :class:`DbHrAssessment`.
+    :return: A :class:`DBHRAssessment`.
     :raises ValueError: If ``items`` is empty or a value is not finite.
     """
     pairs = list(items)
     if not pairs:
         msg = "At least one (value, requirement) pair is required."
         raise ValueError(msg)
-    return DbHrAssessment(
+    return DBHRAssessment(
         checks=tuple(check_db_hr_requirement(value, req) for value, req in pairs)
     )

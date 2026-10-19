@@ -1094,7 +1094,7 @@ test = vibration.SAWTOOTH_BURST_TESTS["whole-body"]
 print(test.weightings)
 # ('Wb', 'Wc', 'Wd', 'We', 'Wj', 'Wk', 'Wm')
 print(round(test.frequency_hz, 4), test.start_time_s, test.repeat_time_s,
-      test.duration_s, test.burst_count)
+      test.duration_s, test.n_bursts)
 # 15.9155 1.0 10.0 60.0 6
 print(test.cycle_counts, test.recommended_sampling_rate_hz)
 # (1, 2, 4, 8, 16) 20000.0

@@ -22,7 +22,7 @@ Two SAE practices give it.
   form ISO 3891:1978 Annex A gives it: an attenuation coefficient per band, in
   decibels per 100 m, independent of pressure and of path length, evaluated at
   the band centre up to 4 kHz and at the lower band edge above. The result is an
-  :class:`Arp866aAttenuation` with a ``.plot()``.
+  :class:`ARP866AAttenuation` with a ``.plot()``.
 
 Sources (clean-room, implemented from the documents): SAE ARP 5534 (2021),
 *Application of Pure-Tone Atmospheric Absorption Losses to One-Third-Octave-Band
@@ -413,7 +413,7 @@ def _table2_rows(frequencies: NDArray[np.float64]) -> NDArray[np.intp]:
 
 
 @dataclass(frozen=True)
-class Arp866aAttenuation(OwnsArrays):
+class ARP866AAttenuation(OwnsArrays):
     r"""Atmospheric attenuation coefficient per band by SAE ARP 866A (ISO 3891 Annex A).
 
     :ivar frequencies: Nominal one-third-octave-band centre frequencies, in
@@ -539,7 +539,7 @@ def arp866a_attenuation(
     temperature_c: float,
     relative_humidity_percent: float,
     eta_interpolation: str = "quadratic",
-) -> Arp866aAttenuation:
+) -> ARP866AAttenuation:
     r"""One-third-octave-band attenuation coefficient by SAE ARP 866A (ISO 3891 Annex A).
 
     The formula of ISO 3891:1978 A.2, in decibels per 100 m:
@@ -589,7 +589,7 @@ def arp866a_attenuation(
         (0 to 100).
     :param eta_interpolation: ``"quadratic"`` (default, ISO 3891) or
         ``"linear"`` (ECAC Doc 29 Appendix D).
-    :return: An :class:`Arp866aAttenuation`.
+    :return: An :class:`ARP866AAttenuation`.
     :raises ValueError: for a band outside Table 2, a temperature at or below
         absolute zero, a humidity outside 0 % to 100 %, or an unknown
         interpolation.
@@ -629,7 +629,7 @@ def arp866a_attenuation(
         2.05 * np.log10(f0 / 1000.0) + 1.1394e-3 * theta - 1.916984
     ) + eta * 10.0 ** (np.log10(f0) + 8.42994e-3 * theta - 2.755624)
     nominal = np.asarray(NOY_BANDS_HZ[rows], dtype=np.float64)
-    return Arp866aAttenuation(
+    return ARP866AAttenuation(
         frequencies=nominal,
         evaluation_frequencies_hz=f0,
         delta=np.asarray(delta, dtype=np.float64),

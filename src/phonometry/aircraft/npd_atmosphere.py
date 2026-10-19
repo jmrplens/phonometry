@@ -20,12 +20,12 @@ the NPD, the unweighted reference spectrum at 1 000 ft, in three steps:
 
 * :data:`SAE_AIR1845_ATTENUATION_DB_PER_100M` -- Table D-1.
 * :func:`npd_atmosphere_increment` -- the increment at each NPD distance, as an
-  :class:`NpdAtmosphereIncrement` with ``.plot()`` (the increment against
+  :class:`NPDAtmosphereIncrement` with ``.plot()`` (the increment against
   distance) and ``.plot_attenuation()`` (the attenuation of the two
   atmospheres against frequency).
 * :func:`revise_npd_curves` -- an
-  :class:`~phonometry.aircraft.anp_fleet.AnpNpdCurves` revised by that
-  increment, as a :class:`RevisedNpdCurves` with ``.plot()``; its ``revised``
+  :class:`~phonometry.aircraft.anp_fleet.ANPNPDCurves` revised by that
+  increment, as a :class:`RevisedNPDCurves` with ``.plot()``; its ``revised``
   curves feed :func:`~phonometry.aircraft.airport_noise.event_level` and
   :func:`~phonometry.aircraft.airport_noise.noise_contour` like any other NPD
   table.
@@ -73,7 +73,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
-    from .anp_fleet import AnpNpdCurves
+    from .anp_fleet import ANPNPDCurves
 
 #: ECAC Doc 29 Vol. 2 Table D-1: the average atmospheric attenuation rates of
 #: SAE AIR-1845 that normalise the ANP NPD data, in dB per 100 m, keyed by the
@@ -161,7 +161,7 @@ def _a_weighted_sum(levels: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 @dataclass(frozen=True)
-class NpdAtmosphereIncrement(OwnsArrays):
+class NPDAtmosphereIncrement(OwnsArrays):
     r"""The NPD increment for a specified atmosphere (ECAC Doc 29 Vol. 2 Appendix D).
 
     Every per-band array runs over the 24 bands of :attr:`frequencies`, and
@@ -318,7 +318,7 @@ def npd_atmosphere_increment(
     static_pressure_kpa: float = 101.325,
     absorption: str = "arp5534",
     distances_m: ArrayLike | None = None,
-) -> NpdAtmosphereIncrement:
+) -> NPDAtmosphereIncrement:
     r"""NPD increment of a spectral class for a specified atmosphere (Doc 29 Appendix D).
 
     .. math::
@@ -369,7 +369,7 @@ def npd_atmosphere_increment(
     :param absorption: ``"arp5534"`` (default) or ``"arp866a"``.
     :param distances_m: The NPD slant distances, in metres. ``None`` takes the
         ten standard ones of footnote 40, 200 ft to 25 000 ft.
-    :return: An :class:`NpdAtmosphereIncrement`.
+    :return: An :class:`NPDAtmosphereIncrement`.
     :raises ValueError: for a spectrum that is not 24 finite levels, an unknown
         absorption route, a distance that is not positive, or an atmosphere
         the chosen route refuses.
@@ -407,7 +407,7 @@ def npd_atmosphere_increment(
     spread = source[:, None] - 20.0 * np.log10(d / _REFERENCE_DISTANCE_M)[None, :]
     reference_levels = _a_weighted_sum(spread - reference_attenuation)
     specified_levels = _a_weighted_sum(spread - specified_attenuation)
-    return NpdAtmosphereIncrement(
+    return NPDAtmosphereIncrement(
         frequencies=frequencies,
         distances_m=d,
         spectrum_db=levels,
@@ -425,21 +425,21 @@ def npd_atmosphere_increment(
 
 
 @dataclass(frozen=True)
-class RevisedNpdCurves(RichDisplay):
+class RevisedNPDCurves(RichDisplay):
     """NPD curves recalculated for a specified atmosphere (Doc 29 Vol. 2 Appendix D).
 
     :ivar original: The curves as the ANP database gives them, in the AIR-1845
         atmosphere.
     :ivar revised: The same curves with :attr:`increment` added at every power
-        setting, an :class:`~phonometry.aircraft.anp_fleet.AnpNpdCurves` that
-        :meth:`~phonometry.aircraft.anp_fleet.AnpNpdCurves.level` and the Doc 29
+        setting, an :class:`~phonometry.aircraft.anp_fleet.ANPNPDCurves` that
+        :meth:`~phonometry.aircraft.anp_fleet.ANPNPDCurves.level` and the Doc 29
         event chain read like any other.
     :ivar increment: The increment and everything it was computed from.
     """
 
-    original: AnpNpdCurves
-    revised: AnpNpdCurves
-    increment: NpdAtmosphereIncrement
+    original: ANPNPDCurves
+    revised: ANPNPDCurves
+    increment: NPDAtmosphereIncrement
 
     def __post_init__(self) -> None:
         """Reject a revision whose increment was taken at other distances.
@@ -456,7 +456,7 @@ class RevisedNpdCurves(RichDisplay):
             )
         ):
             msg = (
-                "RevisedNpdCurves: the increment must be taken at the distances "
+                "RevisedNPDCurves: the increment must be taken at the distances "
                 "of the curves it revises."
             )
             raise ValueError(msg)
@@ -474,14 +474,14 @@ class RevisedNpdCurves(RichDisplay):
 
 
 def revise_npd_curves(
-    curves: AnpNpdCurves,
+    curves: ANPNPDCurves,
     spectrum: SpectralClass | ArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
     absorption: str = "arp5534",
-) -> RevisedNpdCurves:
+) -> RevisedNPDCurves:
     """NPD curves recalculated for a specified atmosphere (Doc 29 Vol. 2 Appendix D).
 
     Adds :func:`npd_atmosphere_increment`, taken at the curves' own distances,
@@ -491,14 +491,14 @@ def revise_npd_curves(
     time history (Appendix D, last paragraph of step 3).
 
     :param curves: The NPD curves, an
-        :class:`~phonometry.aircraft.anp_fleet.AnpNpdCurves`.
+        :class:`~phonometry.aircraft.anp_fleet.ANPNPDCurves`.
     :param spectrum: The spectral class of the same aircraft and operation
-        (see :meth:`~phonometry.aircraft.anp_fleet.AnpAircraft.spectral_class`).
+        (see :meth:`~phonometry.aircraft.anp_fleet.ANPAircraft.spectral_class`).
     :param temperature_c: Air temperature, in degrees Celsius.
     :param relative_humidity_percent: Relative humidity, in percent.
     :param static_pressure_kpa: Air pressure, in kPa (default 101.325).
     :param absorption: ``"arp5534"`` (default) or ``"arp866a"``.
-    :return: A :class:`RevisedNpdCurves`.
+    :return: A :class:`RevisedNPDCurves`.
     :raises ValueError: as :func:`npd_atmosphere_increment` does.
     """
     increment = npd_atmosphere_increment(
@@ -512,7 +512,7 @@ def revise_npd_curves(
     levels = read_only(
         np.asarray(curves.levels, dtype=np.float64) + increment.increment_db[None, :]
     )
-    return RevisedNpdCurves(
+    return RevisedNPDCurves(
         original=curves,
         revised=dataclasses.replace(curves, levels=levels),
         increment=increment,

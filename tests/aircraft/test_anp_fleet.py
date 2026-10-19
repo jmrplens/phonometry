@@ -22,10 +22,10 @@ mpl.use("Agg")
 import matplotlib.pyplot as plt
 
 from phonometry.aircraft import (
-    AnpAircraft,
-    AnpDatabase,
-    AnpNpdCurves,
-    AnpProfile,
+    ANPAircraft,
+    ANPDatabase,
+    ANPNPDCurves,
+    ANPProfile,
     load_anp_database,
 )
 
@@ -55,7 +55,7 @@ def test_metadata_and_mounting_mapping() -> None:
     assert _DB.aircraft("747100").mounting == "wing"
     assert _DB.aircraft("727200").mounting == "fuselage"
     assert _DB.aircraft("PA31").mounting == "propeller"
-    assert _DB.aircraft("747100").num_engines == 4
+    assert _DB.aircraft("747100").n_engines == 4
     assert "747" in _DB.aircraft("747100").description
 
 
@@ -104,7 +104,7 @@ def test_modern_aircraft_has_npd_but_no_fixed_point_profile() -> None:
 
 def test_profile_units_and_ground_roll_mask() -> None:
     dep = _DB.profile("747100", "departure")
-    assert isinstance(dep, AnpProfile)
+    assert isinstance(dep, ANPProfile)
     assert dep.path.shape[1] == 5
     # First departure point of 747100: distance 0 ft, altitude 0 ft, TAS 35 kt.
     assert dep.path[0, 0] == pytest.approx(0.0)
@@ -419,7 +419,7 @@ def test_mismatched_sel_lamax_powers_raise() -> None:
     npd = {("NX", "SEL", "D"): sel, ("NX", "LAmax", "D"): lmax}
     path = np.array([[0.0, 0.0, 0.0, 8000.0, 20.0], [1000.0, 0.0, 300.0, 8000.0, 80.0]])
     profiles = {("X", "D", "DEFAULT", 1): path}
-    db = AnpDatabase(
+    db = ANPDatabase(
         aircraft=aircraft, npd=npd, distances_m=distances, profiles=profiles
     )
     with pytest.raises(ValueError, match="power settings differ"):
@@ -428,7 +428,7 @@ def test_mismatched_sel_lamax_powers_raise() -> None:
 
 def test_plot_smoke_en_es() -> None:
     npd = _DB.npd_curves("747100", "departure", "SEL")
-    assert isinstance(npd, AnpNpdCurves)
+    assert isinstance(npd, ANPNPDCurves)
     ax = npd.plot()
     assert "747100" in ax.get_title()
     npd.plot(language="es")
@@ -441,7 +441,7 @@ def test_plot_smoke_en_es() -> None:
 
 
 def test_aircraft_object_type() -> None:
-    assert isinstance(_DB.aircraft("PA31"), AnpAircraft)
+    assert isinstance(_DB.aircraft("PA31"), ANPAircraft)
 
 
 # ---------------------------------------------------------------------------
@@ -466,7 +466,7 @@ def _profiles_oracle() -> list[dict[str, str]]:
     return list(csv.DictReader(text.splitlines(), delimiter=";"))
 
 
-def _synthetic_db(tmp_path: object, profile_rows: list[str]) -> AnpDatabase:
+def _synthetic_db(tmp_path: object, profile_rows: list[str]) -> ANPDatabase:
     """Bundled aircraft/NPD tables plus a synthetic fixed-point profile CSV."""
     import pathlib
 
@@ -622,7 +622,7 @@ def test_procedural_profile_reaches_an_aircraft_with_no_fixed_point_trajectory()
 
 
 def test_procedural_profile_feeds_the_doc29_chain() -> None:
-    """A synthesised profile is an AnpProfile, so the noise functions take it."""
+    """A synthesised profile is an ANPProfile, so the noise functions take it."""
     from phonometry.aircraft.airport_noise import FlightSegmentState, event_level
     from phonometry.aircraft.flight_performance import Aerodrome
 
@@ -649,7 +649,7 @@ def test_procedural_profile_feeds_the_doc29_chain() -> None:
 def test_performance_aircraft_carries_the_coefficient_tables() -> None:
     """The four Appendix B tables, gathered per aircraft from the CSV export."""
     acft = _DB.performance_aircraft("A320-211")
-    assert acft.engines == 2
+    assert acft.n_engines == 2
     assert acft.approach_weight_lb == pytest.approx(0.9 * acft.max_landing_weight_lb)
     assert "MaxClimb" in acft.jet_coefficients
     assert acft.flap("D", "ZERO").drag_ratio > 0.0
@@ -694,7 +694,7 @@ def test_a_level_approach_step_holds_the_speed_of_the_step_below_it() -> None:
     thrust_lb = (
         acft.approach_weight_lb
         / aerodrome.pressure_ratio(level_ft)
-        / acft.engines
+        / acft.n_engines
         * acft.flap("A", level.flap_id).drag_ratio
     )
     profile = _DB.flight_profile("A380-841", "arrival", aerodrome=aerodrome)
@@ -743,7 +743,7 @@ def test_a_lone_procedure_is_labelled_with_the_identifier_it_was_found_under(
     A profile with nothing to choose between is taken whatever it is called, so
     the label has to come from the selection and not from the argument: a
     procedure published as ICAO_A is flown and then reported as ICAO_A, both by
-    ``FlightProfile.procedure_id`` and by the ``AnpProfile.profile_id`` the
+    ``FlightProfile.procedure_id`` and by the ``ANPProfile.profile_id`` the
     noise chain reads it through.
 
     Only a user-supplied export gets here. Every key of the bundled v2.3 fleet
@@ -950,7 +950,7 @@ def test_a_database_built_by_hand_keeps_arrays_of_its_own() -> None:
     powers = np.array([8000.0, 12000.0])
     levels = np.array([[95.0, 90.0, 85.0], [99.0, 94.0, 89.0]])
     path = np.array([[0.0, 0.0, 0.0, 8000.0, 20.0], [1000.0, 0.0, 300.0, 8000.0, 80.0]])
-    db = AnpDatabase(
+    db = ANPDatabase(
         aircraft={"X": {"ACFT_ID": "X", "NPD_ID": "NX", "Power Parameter": "CNT"}},
         npd={("NX", "SEL", "D"): (powers, levels)},
         distances_m=distances,
@@ -970,9 +970,9 @@ def test_a_database_built_by_hand_keeps_arrays_of_its_own() -> None:
         assert not kept.flags.writeable
 
 
-def _hand_built_database() -> AnpDatabase:
+def _hand_built_database() -> ANPDatabase:
     path = np.array([[0.0, 0.0, 0.0, 8000.0, 20.0], [1000.0, 0.0, 300.0, 8000.0, 80.0]])
-    return AnpDatabase(
+    return ANPDatabase(
         aircraft={"X": {"ACFT_ID": "X", "NPD_ID": "NX", "Power Parameter": "CNT"}},
         npd={
             ("NX", "SEL", "D"): (
@@ -997,7 +997,7 @@ def test_an_aircraft_names_the_database_it_was_read_from() -> None:
 
 def test_a_database_built_by_hand_takes_no_performance_tables() -> None:
     """The tables are the parser's record; only an export carries them."""
-    parameters = inspect.signature(AnpDatabase).parameters
+    parameters = inspect.signature(ANPDatabase).parameters
     assert list(parameters) == [
         "aircraft",
         "npd",

@@ -148,7 +148,7 @@ preliminary run has shown they change the sound power level by no more than
 ```python
 array = emission.turbine_microphone_positions(
     surface, microphone_height_m=1.5, spacing_m=4.0, turbine_boxes=2)
-print(array.count, int(array.overhead_mask.sum()))      # 23 7
+print(array.n_positions, int(array.overhead_mask.sum()))      # 23 7
 print(array.positions_m[array.key_mask])
 # [[ 0.   0.   1.5]     key position 1
 #  [12.   3.5  1.5]     2

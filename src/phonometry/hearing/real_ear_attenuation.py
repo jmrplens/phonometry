@@ -96,7 +96,7 @@ __all__ = [
     "AttenuationDifferenceResult",
     "ProtectorUncertaintyBudget",
     "RealEarAttenuationResult",
-    "ReatSoundFieldCheck",
+    "REATSoundFieldCheck",
     "allowable_field_variation",
     "assess_attenuation_difference",
     "check_reat_sound_field",
@@ -764,7 +764,7 @@ def allowable_field_variation(free_field_rejection_db: float) -> float:
 
 
 @dataclass(frozen=True)
-class ReatSoundFieldCheck(OwnsArrays):
+class REATSoundFieldCheck(OwnsArrays):
     r"""Whether the test site's sound field qualifies for ISO 4869-1 (4.2.2).
 
     :ivar frequencies: The centre frequencies of the test signals, in hertz.
@@ -882,7 +882,7 @@ class ReatSoundFieldCheck(OwnsArrays):
 
         :raises TypeError: Always; the verdict is :attr:`passes`.
         """
-        msg = "a ReatSoundFieldCheck has no truth value; read its '.passes' for the verdict"
+        msg = "a REATSoundFieldCheck has no truth value; read its '.passes' for the verdict"
         raise TypeError(msg)
 
     def plot(
@@ -907,7 +907,7 @@ def check_reat_sound_field(
     rotation_levels_db: ArrayLike | None = None,
     free_field_rejection_db: float | None = None,
     frequencies: ArrayLike | None = None,
-) -> ReatSoundFieldCheck:
+) -> REATSoundFieldCheck:
     r"""Is the sound field of the test site diffuse enough? (4.2.2).
 
     Measured with the subject and the chair absent (4.2.1):
@@ -937,7 +937,7 @@ def check_reat_sound_field(
         microphone, in dB, required with ``rotation_levels_db``.
     :param frequencies: The centre frequencies, in hertz, or ``None`` for the
         test signals of 4.1 as :func:`real_ear_attenuation` assumes them.
-    :return: :class:`ReatSoundFieldCheck`.
+    :return: :class:`REATSoundFieldCheck`.
     :raises ValueError: if a position is missing or unknown, if the bands do
         not match, if a rotation is given without its microphone's rejection
         or the other way round, or if that rejection is below the 10 dB Table 1
@@ -991,7 +991,7 @@ def check_reat_sound_field(
             )
             raise ValueError(msg)
         variation[judged] = readings.max(axis=0) - readings.min(axis=0)
-    return ReatSoundFieldCheck(
+    return REATSoundFieldCheck(
         frequencies=np.asarray(freqs, dtype=np.float64),
         position_deviation_db=deviation,
         left_right_difference_db=np.abs(right - left),

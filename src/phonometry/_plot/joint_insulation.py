@@ -41,7 +41,7 @@ if TYPE_CHECKING:
         JointGapSeriesCheck,
         JointOpenBandRating,
         JointTestElementCheck,
-        LabJointInsulationResult,
+        LaboratoryJointInsulationResult,
     )
 
 #: Title of the joint figure.
@@ -156,7 +156,7 @@ def _verdict(*, passes: bool, language: str) -> str:
     return _t("conforms" if passes else "does not conform", language)
 
 
-def _rating_headline(result: LabJointInsulationResult, language: str) -> str:
+def _rating_headline(result: LaboratoryJointInsulationResult, language: str) -> str:
     """``Rs,w (C; Ctr) = 49 (−1; −4) dB``, in brackets when J.1 puts it there."""
     rating = result.rating
     if rating is None:
@@ -169,7 +169,7 @@ def _rating_headline(result: LabJointInsulationResult, language: str) -> str:
 
 
 def plot_lab_joint_insulation(
-    result: LabJointInsulationResult,
+    result: LaboratoryJointInsulationResult,
     ax: Axes | None = None,
     language: str = "en",
     **kwargs: Any,
@@ -182,7 +182,7 @@ def plot_lab_joint_insulation(
     the rating range 100 Hz to 3 150 Hz.
 
     :param result: A
-        :class:`~phonometry.building.measurement.joint_insulation.LabJointInsulationResult`.
+        :class:`~phonometry.building.measurement.joint_insulation.LaboratoryJointInsulationResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the :math:`R_\mathrm{s}` curve ``plot`` call.
@@ -228,7 +228,7 @@ def plot_lab_joint_insulation(
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("label", rf"$R_\mathrm{{s}}$ ({_t('corrected', language)})")
     ax.plot(positions, result.r_s_db, **kwargs)
-    minimum = np.asarray(result.minimum_value, dtype=bool)
+    minimum = np.asarray(result.min_value, dtype=bool)
     if bool(np.any(minimum)):
         ax.plot(
             positions[minimum],
@@ -486,13 +486,13 @@ def plot_joint_gap_series(
         lw=1.4,
         label=rf"$b_\mathrm{{n}} + 3$ = {_num(high, language, 1)} mm",
     )
-    if result.minimum_gap_mm is not None:
+    if result.min_gap_mm is not None:
         ax.axvline(
-            result.minimum_gap_mm,
+            result.min_gap_mm,
             color=theme_line(ax.xaxis.label.get_color(), ax, quiet=_INK_QUIET_FIRM),
             ls="-.",
             lw=1.2,
-            label=rf"$b_\mathrm{{min}}$ = {_num(result.minimum_gap_mm, language, 1)} mm",
+            label=rf"$b_\mathrm{{min}}$ = {_num(result.min_gap_mm, language, 1)} mm",
         )
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("marker", "o")
@@ -501,9 +501,9 @@ def plot_joint_gap_series(
         "label", f"{_SERIES_SYMBOLS[quantity]} ({_t('measurements', language)})"
     )
     ax.plot(widths, values, **kwargs)
-    span = max(widths[-1], high) - min(widths[0], low, result.minimum_gap_mm or low)
+    span = max(widths[-1], high) - min(widths[0], low, result.min_gap_mm or low)
     ax.set_xlim(
-        min(widths[0], low, result.minimum_gap_mm or low) - 0.08 * span,
+        min(widths[0], low, result.min_gap_mm or low) - 0.08 * span,
         max(widths[-1], high) + 0.08 * span,
     )
     ax.set_xlabel(_t(_GAP_LABEL, language))
@@ -619,12 +619,12 @@ def plot_joint_gap_series_check(
     nominal = result.nominal_gap_mm
     tolerance = result.tolerance_mm
     targets: list[tuple[float, str, str, Any]] = []
-    if result.minimum_gap_mm is not None:
+    if result.min_gap_mm is not None:
         targets.append(
             (
-                result.minimum_gap_mm,
+                result.min_gap_mm,
                 "-.",
-                rf"$b_\mathrm{{min}}$ = {_num(result.minimum_gap_mm, language, 1)} mm",
+                rf"$b_\mathrm{{min}}$ = {_num(result.min_gap_mm, language, 1)} mm",
                 theme_line(ax.xaxis.label.get_color(), ax, quiet=_INK_QUIET_FIRM),
             )
         )

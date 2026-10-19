@@ -298,9 +298,9 @@ HMLRatingResult(
     high: float,
     medium: float,
     low: float,
-    subject_h: np.ndarray,
-    subject_m: np.ndarray,
-    subject_l: np.ndarray,
+    subject_high: np.ndarray,
+    subject_medium: np.ndarray,
+    subject_low: np.ndarray,
     predicted_reduction: np.ndarray,
     performance: int,
     alpha: float,
@@ -316,9 +316,9 @@ The three `HML` attenuation values of a protector (Clause 7.2).
 | `high` | $H_x$, the high-frequency value, in dB, unrounded. |
 | `medium` | $M_x$, the medium-frequency value, in dB, unrounded. |
 | `low` | $L_x$, the low-frequency value, in dB, unrounded. |
-| `subject_h` | $H_j$ per test subject, in dB (Formula (12)). |
-| `subject_m` | $M_j$ per test subject, in dB (Formula (13)). |
-| `subject_l` | $L_j$ per test subject, in dB (Formula (14)). |
+| `subject_high` | $H_j$ per test subject, in dB (Formula (12)). |
+| `subject_medium` | $M_j$ per test subject, in dB (Formula (13)). |
+| `subject_low` | $L_j$ per test subject, in dB (Formula (14)). |
 | `predicted_reduction` | $PNR_{ji}$ per subject and reference noise, in dB, a `(subjects, 8)` grid (Formula (15)). |
 | `performance` | The protection performance `x`, in per cent. |
 | `alpha` | The Table 1 constant that `performance` selected. |

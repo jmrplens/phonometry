@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """HVAC duct-noise-spectrum performance fiche (reportlab renderer).
 
-Renders a :class:`~phonometry.noise_control.hvac.HvacSpectrumResult` (a
+Renders a :class:`~phonometry.noise_control.hvac.HVACSpectrumResult` (a
 per-band HVAC duct quantity: the flow-generated (regenerated) sound power level
 of a straight duct or bend, or the passive attenuation of an end reflection,
 bend or plenum, Bies, Hansen & Howard, *Engineering Noise Control* 5th ed.,
@@ -51,7 +51,7 @@ from ._noise_control_fiche import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
-    from ..noise_control.hvac import HvacSpectrumResult
+    from ..noise_control.hvac import HVACSpectrumResult
     from .metadata import ReportMetadata
 
 #: Reference sound power for a regenerated-noise sound power level, 1 pW.
@@ -62,7 +62,7 @@ _POWER_REFERENCE = "1 pW"
 _THIRD_OCTAVE_FRACTION = 3
 
 
-def _is_power(result: HvacSpectrumResult) -> bool:
+def _is_power(result: HVACSpectrumResult) -> bool:
     """Return ``True`` for a regenerated sound power spectrum, else attenuation."""
     return getattr(result, "quantity", "") == "sound_power_level"
 
@@ -107,7 +107,7 @@ def _a_weighted_total(
     return _overall_level(weighted)
 
 
-def _basis(result: HvacSpectrumResult, language: str = "en") -> str:
+def _basis(result: HVACSpectrumResult, language: str = "en") -> str:
     """The prediction-basis line naming the quantity and the Bies chapter."""
     if _is_power(result):
         return t(
@@ -125,7 +125,7 @@ def _basis(result: HvacSpectrumResult, language: str = "en") -> str:
     )
 
 
-def _prediction_statement(result: HvacSpectrumResult, language: str = "en") -> str:
+def _prediction_statement(result: HVACSpectrumResult, language: str = "en") -> str:
     """The prediction statement printed under the boxed figure."""
     if _is_power(result):
         return t(
@@ -144,7 +144,7 @@ def _prediction_statement(result: HvacSpectrumResult, language: str = "en") -> s
     )
 
 
-def _element_label(result: HvacSpectrumResult, language: str = "en") -> str:
+def _element_label(result: HVACSpectrumResult, language: str = "en") -> str:
     """The element label, with its descriptive words translated.
 
     The result carries a short English label built from the element kind and
@@ -166,7 +166,7 @@ def _element_label(result: HvacSpectrumResult, language: str = "en") -> str:
     return f"{t(head, language)} ({', '.join(parts)})"
 
 
-def _caption(result: HvacSpectrumResult, language: str = "en") -> str:
+def _caption(result: HVACSpectrumResult, language: str = "en") -> str:
     """The caption declaring the analysis band set above the table."""
     _, fraction = nominal_bands(getattr(result, "frequencies", None))
     power = _is_power(result)
@@ -190,7 +190,7 @@ def _caption(result: HvacSpectrumResult, language: str = "en") -> str:
 
 
 def _value_table(
-    result: HvacSpectrumResult,
+    result: HVACSpectrumResult,
     *,
     verbose: bool,
     corrections: np.ndarray | None,
@@ -234,7 +234,7 @@ def _value_table(
 
 
 def _statement(
-    result: HvacSpectrumResult,
+    result: HVACSpectrumResult,
     corrections: np.ndarray | None,
     language: str = "en",
 ) -> tuple[float, bool, str, list[str]]:
@@ -287,7 +287,7 @@ def _statement(
 
 
 def _basis_strip(
-    result: HvacSpectrumResult,
+    result: HVACSpectrumResult,
     corrections: np.ndarray | None,
     language: str = "en",
 ) -> list[str]:
@@ -322,7 +322,7 @@ def _basis_strip(
 
 
 def render_hvac_report(
-    result: HvacSpectrumResult,
+    result: HVACSpectrumResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -332,7 +332,7 @@ def render_hvac_report(
     """Render an HVAC duct-noise-spectrum fiche to a PDF at ``path``.
 
     :param result: An
-        :class:`~phonometry.noise_control.hvac.HvacSpectrumResult` carrying the
+        :class:`~phonometry.noise_control.hvac.HVACSpectrumResult` carrying the
         per-band quantity (a regenerated sound power level or a passive
         attenuation), its band frequencies and a short element label.
     :param path: Destination path of the PDF file.

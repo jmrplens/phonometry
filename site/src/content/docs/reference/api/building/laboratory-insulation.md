@@ -1,8 +1,8 @@
 ---
-title: "building.measurement.lab_insulation"
+title: "building.measurement.laboratory_insulation"
 description: "Laboratory sound insulation of building elements (ISO 10140)."
 sidebar:
-  label: "lab_insulation"
+  label: "laboratory_insulation"
 ---
 
 Laboratory sound insulation of building elements (ISO 10140).
@@ -36,7 +36,7 @@ $A_0 = 10$ m². The single-number weighted rating `Ln,w` and the term
 
 **Background-noise correction (ISO 10140-4:2010, Clause 4.3, Formula (4)).**
 The receiving-room levels must be corrected for background noise before the
-insulation is formed. [`background_correction`](/phonometry/reference/api/building/lab-insulation/#background_correction) implements the correction
+insulation is formed. [`background_correction`](/phonometry/reference/api/building/laboratory-insulation/#background_correction) implements the correction
 $L = 10 \log_{10}(10^{L_\mathrm{sb}/10} - 10^{L_\mathrm{b}/10})$ for a signal-to-background
 margin
 between 6 dB and 15 dB, the fixed 1.3 dB correction (limit of measurement)
@@ -78,7 +78,7 @@ using the margin `Lsb - Lb`:
   applied
   ($L = L_\mathrm{sb} - 1.3$); such bands are the *limit of measurement*
   and a
-  [`LabInsulationWarning`](/phonometry/reference/api/building/lab-insulation/#labinsulationwarning) is emitted (Clause 4.3). A *negative*
+  [`LaboratoryInsulationWarning`](/phonometry/reference/api/building/laboratory-insulation/#laboratoryinsulationwarning) is emitted (Clause 4.3). A *negative*
   margin ($L_\mathrm{b} > L_\mathrm{sb}$, i.e. background above the measured
   signal) falls
   in this branch and is likewise capped at $L_\mathrm{sb} - 1.3$: the
@@ -109,17 +109,17 @@ directly.
 | :--- | :--- |
 | ValueError | If the shapes differ or contain non-finite values. |
 
-## lab_airborne_insulation
+## laboratory_airborne_insulation
 
 ```python
-lab_airborne_insulation(
+laboratory_airborne_insulation(
     l1: Sequence[float] | np.ndarray,
     l2: Sequence[float] | np.ndarray,
     t2: Sequence[float] | np.ndarray,
     *,
     area: float,
     volume: float,
-) -> LabAirborneInsulationResult
+) -> LaboratoryAirborneInsulationResult
 ```
 
 Laboratory airborne sound reduction index per ISO 10140-2:2010.
@@ -137,7 +137,7 @@ is also formed via [`phonometry.building.weighted_rating`](/phonometry/reference
 two-dimensional `(positions, bands)` array, in which case the positions
 are energy-averaged (ISO 10140-4:2010, Formula (2)). The band levels are
 assumed already corrected for background noise (see
-[`background_correction`](/phonometry/reference/api/building/lab-insulation/#background_correction)).
+[`background_correction`](/phonometry/reference/api/building/laboratory-insulation/#background_correction)).
 
 **Parameters**
 
@@ -149,7 +149,7 @@ assumed already corrected for background noise (see
 | `area` | Area `S` of the free test opening, in m². |
 | `volume` | Receiving-room volume `V`, in m³. |
 
-**Returns:** [`LabAirborneInsulationResult`](/phonometry/reference/api/building/lab-insulation/#labairborneinsulationresult) with `r`, `absorption_area` and `rating`.
+**Returns:** [`LaboratoryAirborneInsulationResult`](/phonometry/reference/api/building/laboratory-insulation/#laboratoryairborneinsulationresult) with `r`, `absorption_area` and `rating`.
 
 **Raises**
 
@@ -157,15 +157,15 @@ assumed already corrected for background noise (see
 | :--- | :--- |
 | ValueError | If the band counts of `l1`, `l2` and `t2` differ, if `area`/`volume`/`t2` are not positive, or if inputs are non-finite. |
 
-## lab_impact_insulation
+## laboratory_impact_insulation
 
 ```python
-lab_impact_insulation(
+laboratory_impact_insulation(
     li: Sequence[float] | np.ndarray,
     t2: Sequence[float] | np.ndarray,
     *,
     volume: float,
-) -> LabImpactInsulationResult
+) -> LaboratoryImpactInsulationResult
 ```
 
 Laboratory impact sound pressure level per ISO 10140-3:2010.
@@ -184,7 +184,7 @@ formed via [`phonometry.building.weighted_impact_rating`](/phonometry/reference/
 two-dimensional `(positions, bands)` array, in which case the positions
 are energy-averaged (ISO 10140-4:2010, Formula (2)). The band levels are
 assumed already corrected for background noise (see
-[`background_correction`](/phonometry/reference/api/building/lab-insulation/#background_correction)).
+[`background_correction`](/phonometry/reference/api/building/laboratory-insulation/#background_correction)).
 
 **Parameters**
 
@@ -194,7 +194,7 @@ assumed already corrected for background noise (see
 | `t2` | Receiving-room reverberation time per band, in seconds. |
 | `volume` | Receiving-room volume `V`, in m³. |
 
-**Returns:** [`LabImpactInsulationResult`](/phonometry/reference/api/building/lab-insulation/#labimpactinsulationresult) with `l_n`, `absorption_area` and `rating`.
+**Returns:** [`LaboratoryImpactInsulationResult`](/phonometry/reference/api/building/laboratory-insulation/#laboratoryimpactinsulationresult) with `l_n`, `absorption_area` and `rating`.
 
 **Raises**
 
@@ -202,10 +202,10 @@ assumed already corrected for background noise (see
 | :--- | :--- |
 | ValueError | If the band counts of `li` and `t2` differ, if `volume`/`t2` are not positive, or if inputs are non-finite. |
 
-## LabAirborneInsulationResult
+## LaboratoryAirborneInsulationResult
 
 ```python
-LabAirborneInsulationResult(
+LaboratoryAirborneInsulationResult(
     r: np.ndarray,
     absorption_area: np.ndarray,
     rating: WeightedRatingResult | None,
@@ -222,10 +222,10 @@ Per-band laboratory airborne sound insulation (ISO 10140-2:2010).
 | `absorption_area` | Equivalent sound absorption area $A = 0.16\,V/T$ per band, in m² (ISO 10140-4:2010, Formula (5)). |
 | `rating` | Single-number weighted rating `Rw` with `C` / `Ctr` (ISO 717-1), or `None` when the number of bands is neither 16 (one-third octave) nor 5 (octave) and no rating can be formed. |
 
-### LabAirborneInsulationResult.plot()
+### LaboratoryAirborneInsulationResult.plot()
 
 ```python
-LabAirborneInsulationResult.plot(
+LaboratoryAirborneInsulationResult.plot(
     ax: Axes | None = None,
     **kwargs: Any,
 ) -> Axes
@@ -239,10 +239,10 @@ automatic rating to be available (16 or 5 bands) and matplotlib
 (`pip install phonometry[plot]`); returns the
 `Axes`.
 
-### LabAirborneInsulationResult.report()
+### LaboratoryAirborneInsulationResult.report()
 
 ```python
-LabAirborneInsulationResult.report(
+LaboratoryAirborneInsulationResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -286,10 +286,10 @@ is rejected.
 | ValueError | If `engine` is unknown, `language` is not one of the supported values, or the result carries no single-number rating (its band count is neither 16 one-third-octave nor 5 octave, so the ISO 717-1 rating the fiche needs was not formed). |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded rating figure (`pip install phonometry[plot]`). |
 
-## LabImpactInsulationResult
+## LaboratoryImpactInsulationResult
 
 ```python
-LabImpactInsulationResult(
+LaboratoryImpactInsulationResult(
     l_n: np.ndarray,
     absorption_area: np.ndarray,
     rating: ImpactRatingResult | None,
@@ -306,10 +306,10 @@ Per-band laboratory impact sound insulation (ISO 10140-3:2010).
 | `absorption_area` | Equivalent sound absorption area $A = 0.16\,V/T$ per band, in m² (ISO 10140-4:2010, Formula (5)). |
 | `rating` | Single-number weighted rating `Ln,w` with `CI` (ISO 717-2), or `None` when the number of bands is neither 16 (one-third octave) nor 5 (octave) and no rating can be formed. |
 
-### LabImpactInsulationResult.plot()
+### LaboratoryImpactInsulationResult.plot()
 
 ```python
-LabImpactInsulationResult.plot(
+LaboratoryImpactInsulationResult.plot(
     ax: Axes | None = None,
     **kwargs: Any,
 ) -> Axes
@@ -322,10 +322,10 @@ rating to be available (16 or 5 bands) and matplotlib
 (`pip install phonometry[plot]`); returns the
 `Axes`.
 
-### LabImpactInsulationResult.report()
+### LaboratoryImpactInsulationResult.report()
 
 ```python
-LabImpactInsulationResult.report(
+LaboratoryImpactInsulationResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -368,6 +368,6 @@ is rejected.
 | ValueError | If `engine` is unknown, `language` is not one of the supported values, or the result carries no single-number rating (its band count is neither 16 one-third-octave nor 5 octave, so the ISO 717-2 rating the fiche needs was not formed). |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded rating figure (`pip install phonometry[plot]`). |
 
-## LabInsulationWarning
+## LaboratoryInsulationWarning
 
 Warning for laboratory-insulation limit-of-measurement conditions.

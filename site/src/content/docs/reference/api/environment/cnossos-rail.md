@@ -407,12 +407,12 @@ RailRoughnessClass(*values)
 
 Digit 2 of the track descriptor, Table [2.3.b].
 
-## RAILWAY_MINIMUM_SPEED_KMH
+## RAILWAY_MIN_SPEED_KMH
 
 *Constant* (`float`).
 
 ```python
-RAILWAY_MINIMUM_SPEED_KMH = 50.0
+RAILWAY_MIN_SPEED_KMH = 50.0
 ```
 
 ## RAILWAY_OCTAVE_BANDS_HZ
@@ -441,7 +441,7 @@ railway_source_power(
     psi: float = 0.0,
     phi: float = 90.0,
     reference_time: float = 12.0,
-    minimum_speed_kmh: float | None = None,
+    min_speed_kmh: float | None = None,
     interpolation: RoughnessInterpolation = ...,
     directivity_edition: DirectivityEdition = ...,
 ) -> RailwayEmissionResult
@@ -470,7 +470,7 @@ below the minimum speed nor while idling.
 | `psi` | Vertical angle `psi` to the receiver, in degrees. |
 | `phi` | Horizontal angle `phi` to the receiver, in degrees; the default 90 deg is broadside, where the dipole correction is 0 dB. |
 | `reference_time` | Reference period `T_ref` of (2.3.4), in the same unit as `idling_time`. |
-| `minimum_speed_kmh` | Speed floor used to determine the total effective roughness, in km/h; `None` (the default) selects 50 km/h, or 30 km/h for a tram. Pass `0` to switch the floor off, which also switches off the exclusion of impact noise below it. |
+| `min_speed_kmh` | Speed floor used to determine the total effective roughness, in km/h; `None` (the default) selects 50 km/h, or 30 km/h for a tram. Pass `0` to switch the floor off, which also switches off the exclusion of impact noise below it. |
 | `interpolation` | The [`RoughnessInterpolation`](/phonometry/reference/api/environment/cnossos-rail/#roughnessinterpolation) rule. |
 | `directivity_edition` | Which text of (2.3.16) to evaluate. |
 
@@ -922,12 +922,12 @@ TractionVehicle(*values)
 
 Columns of Table G-5, the traction sound power per vehicle.
 
-## TRAM_MINIMUM_SPEED_KMH
+## TRAM_MIN_SPEED_KMH
 
 *Constant* (`float`).
 
 ```python
-TRAM_MINIMUM_SPEED_KMH = 30.0
+TRAM_MIN_SPEED_KMH = 30.0
 ```
 
 ## VehicleDescriptor

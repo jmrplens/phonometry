@@ -560,7 +560,6 @@ def test_the_worst_case_stays_bounded() -> None:
         ("inductance_h", "H"),
         ("curing_time_hours", "h"),
         # A symbol and its subscript, not a unit.
-        ("subject_h", ""),
         ("a_atm", ""),
         ("a_bar", ""),
         ("alpha_s", ""),
@@ -570,7 +569,6 @@ def test_the_worst_case_stays_bounded() -> None:
         ("r_direct_w", ""),
         ("delta_rw_c", ""),
         ("sound_power_level_a", ""),
-        ("subject_m", ""),
         ("m", ""),
         # The axes the vocabulary names by the bare concept, in their one unit.
         ("frequencies", "Hz"),

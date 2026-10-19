@@ -67,7 +67,7 @@ from .facade import (
     radiated_sound_power,
 )
 from .installed_structure_borne import (
-    MINIMUM_MULTI_JUNCTION_KIJ_DB,
+    MIN_MULTI_JUNCTION_KIJ_DB,
     REFERENCE_AREA_M2,
     TABLE_D1_QUANTITIES,
     TABLE_F1_FORCE_LEVEL,
@@ -152,7 +152,7 @@ from .simplified_model import (
     flanking_element,
     flanking_path,
     impact_flanking_correction,
-    junction_min_vibration_reduction,
+    junction_minimum_vibration_reduction,
     junction_vibration_reduction,
     predicted_airborne_insulation,
     predicted_impact_insulation,
@@ -163,7 +163,7 @@ from .simplified_model import (
 __all__ = [
     "CEILING_ATTENUATION_CONTOUR",
     "EN_12354_AIR",
-    "MINIMUM_MULTI_JUNCTION_KIJ_DB",
+    "MIN_MULTI_JUNCTION_KIJ_DB",
     "PLATEAU_MATERIALS",
     "REFERENCE_AREA_M2",
     "TABLE_D1_QUANTITIES",
@@ -248,7 +248,7 @@ __all__ = [
     "installed_power_from_reception_plate",
     "installed_source_prediction",
     "installed_structure_borne_power_level",
-    "junction_min_vibration_reduction",
+    "junction_minimum_vibration_reduction",
     "junction_vibration_reduction",
     "laboratory_total_loss_factor",
     "lining_improvement",

@@ -582,21 +582,21 @@ class RatedImpedanceVerification(OwnsArrays):
         return (self.frequencies >= lower) & (self.frequencies <= upper)
 
     @property
-    def minimum_ohm(self) -> float:
+    def min_ohm(self) -> float:
         """The lowest modulus within the rated frequency range, in ohms."""
         return float(np.min(self.impedance_ohm[self._in_rated_range()]))
 
     @property
-    def minimum_frequency_hz(self) -> float:
-        """The frequency of :attr:`minimum_ohm`, in Hz."""
+    def min_frequency_hz(self) -> float:
+        """The frequency of :attr:`min_ohm`, in Hz."""
         inside = self._in_rated_range()
         index = int(np.argmin(self.impedance_ohm[inside]))
         return float(self.frequencies[inside][index])
 
     @property
-    def minimum_ratio(self) -> float:
-        """:attr:`minimum_ohm` over the rated impedance."""
-        return self.minimum_ohm / self.rated_impedance_ohm
+    def min_ratio(self) -> float:
+        """:attr:`min_ohm` over the rated impedance."""
+        return self.min_ohm / self.rated_impedance_ohm
 
     @property
     def frequencies_to_state_hz(self) -> NDArray[np.float64]:
@@ -621,7 +621,7 @@ class RatedImpedanceVerification(OwnsArrays):
     @property
     def passes(self) -> bool:
         """Whether the rated impedance is at most 1,25 times the lowest modulus in range."""
-        return self.minimum_ratio >= _RATED_IMPEDANCE_FRACTION * (1.0 - _LIMIT_SLACK)
+        return self.min_ratio >= _RATED_IMPEDANCE_FRACTION * (1.0 - _LIMIT_SLACK)
 
     def __bool__(self) -> bool:
         """Refuse to stand in for the verdict it carries.
@@ -1138,7 +1138,7 @@ class LimitingTestSignalCheck(RichDisplay):
 
 
 def check_limiting_test_signal(
-    signal: Signal | NDArray[np.float64] | list[float], fs: int | None = None
+    x: Signal | NDArray[np.float64] | list[float], fs: int | None = None
 ) -> LimitingTestSignalCheck:
     """Is this the clipped programme signal IEC 60268-7 8.3.2.2 b) asks for?
 
@@ -1152,7 +1152,7 @@ def check_limiting_test_signal(
     :func:`~phonometry.electroacoustics.simulated_program_signal` with
     ``peak_to_rms`` generates such a record.
 
-    :param signal: The record (1-D), or a :class:`phonometry.io.Signal`.
+    :param x: The record (1-D), or a :class:`phonometry.io.Signal`.
     :param fs: Sample rate, in Hz; required for a bare array.
     :return: A :class:`LimitingTestSignalCheck`.
     :raises ValueError: If the record is not 1-D and finite, or too short.
@@ -1160,19 +1160,19 @@ def check_limiting_test_signal(
     from ..filters.core import octave_filter
     from ..io._resolve import resolve_fs
 
-    rate = resolve_fs(signal, fs, name="signal")
-    x = np.asarray(signal, dtype=np.float64)
+    rate = resolve_fs(x, fs, name="x")
+    x = np.asarray(x, dtype=np.float64)
     if x.ndim != 1 or x.size < _FEWEST_POINTS:
-        msg = "'signal' must be a 1-D record of at least two samples."
+        msg = "'x' must be a 1-D record of at least two samples."
         raise ValueError(msg)
     if not np.all(np.isfinite(x)):
-        msg = "'signal' must be finite."
+        msg = "'x' must be finite."
         raise ValueError(msg)
     # The ratio is read on the record as given, the voltage at the amplifier's
     # output; the band analysis removes any offset on its own.
     rms = float(np.sqrt(np.mean(x * x)))
     if rms <= 0.0:
-        msg = "'signal' is constant; it has no RMS value to judge."
+        msg = "'x' is constant; it has no RMS value to judge."
         raise ValueError(msg)
     peak_to_rms = float(np.max(np.abs(x))) / rms
     nyquist = 0.5 * float(rate)
@@ -1435,7 +1435,7 @@ class CrosstalkAttenuation(OwnsArrays):
         return np.asarray(self.driven_level_db - self.other_level_db, dtype=np.float64)
 
     @property
-    def minimum_db(self) -> float:
+    def min_db(self) -> float:
         """The smallest attenuation over the frequencies, in dB."""
         return float(np.min(self.attenuation_db))
 

@@ -94,7 +94,7 @@ def test_equation_18_21_omnidirectional_microphone_4_db_below() -> None:
     result = electroacoustics.feedback_stability(
         LONG_OPEN_LOOP_GAIN, LEVEL_AT_LISTENER - 4.0, LEVEL_AT_LISTENER
     )
-    assert result.maximum_level_at_microphone == pytest.approx(LEVEL_AT_LISTENER - 4.0)
+    assert result.max_level_at_microphone == pytest.approx(LEVEL_AT_LISTENER - 4.0)
     assert result.is_stable
     assert result.headroom == pytest.approx(0.0)
     # One decibel more at the microphone and the criterion fails.
@@ -113,7 +113,7 @@ def test_equation_18_22_cardioid_microphone_2_db_below() -> None:
         LEVEL_AT_LISTENER,
         microphone_directivity=electroacoustics.CARDIOID_RELATIVE_DIRECTIVITY_DB,
     )
-    assert result.maximum_level_at_microphone == pytest.approx(LEVEL_AT_LISTENER - 2.0)
+    assert result.max_level_at_microphone == pytest.approx(LEVEL_AT_LISTENER - 2.0)
     assert result.is_stable
     assert result.headroom == pytest.approx(0.0)
 
@@ -154,8 +154,8 @@ def test_open_microphones_eat_the_headroom() -> None:
     )
     assert four.nom_correction == pytest.approx(10.0 * math.log10(4.0))
     assert one.headroom - four.headroom == pytest.approx(four.nom_correction)
-    assert four.maximum_open_loop_gain == pytest.approx(
-        one.maximum_open_loop_gain - four.nom_correction
+    assert four.max_open_loop_gain == pytest.approx(
+        one.max_open_loop_gain - four.nom_correction
     )
 
 
@@ -165,7 +165,7 @@ def test_maximum_open_loop_gain_is_the_stability_edge() -> None:
         0.0, 74.0, LEVEL_AT_LISTENER, open_microphones=3
     )
     at_limit = electroacoustics.feedback_stability(
-        probe.maximum_open_loop_gain,
+        probe.max_open_loop_gain,
         74.0,
         LEVEL_AT_LISTENER,
         open_microphones=3,

@@ -158,18 +158,23 @@ def test_coarse_grid_breakpoints_evaluated_exactly() -> None:
         design=filters.FilterDesign(filter_type="butter"),
     )
     dense = filters.verify_filter_class(bank)
-    coarse = filters.verify_filter_class(bank, num_points=16)
+    coarse = filters.verify_filter_class(bank, n_points=16)
+    assert coarse.n_points == 16
     assert coarse.overall_class == dense.overall_class == 1
     m_dense = min(b["margin_class1_db"] for b in dense.bands)
     m_coarse = min(b["margin_class1_db"] for b in coarse.bands)
     assert m_coarse == pytest.approx(m_dense, abs=0.05)
+    # The grid is the one asked for: 16 points per half-band read the
+    # mask at other frequencies than the dense default, so the margins
+    # agree only to the grid, not to the last digit.
+    assert m_coarse != pytest.approx(m_dense, abs=1e-9)
 
 
 def test_invalid_inputs_raise() -> None:
     bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[500, 2000])
     band_centre = np.array([1.0])
-    with pytest.raises(ValueError, match=r"'num_points' must be at least"):
-        filters.verify_filter_class(bank, num_points=4)
+    with pytest.raises(ValueError, match=r"'n_points' must be at least"):
+        filters.verify_filter_class(bank, n_points=4)
     with pytest.raises(
         ValueError, match=r"filter_class must be one of .* for edition '2014'"
     ):

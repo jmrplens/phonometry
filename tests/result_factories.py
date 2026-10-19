@@ -541,7 +541,7 @@ def _exposure() -> ph.hearing.ExposureResult:
     return ph.hearing.task_based_exposure(tasks)
 
 
-def _sel_distribution() -> ph.environment.SelDistribution:
+def _sel_distribution() -> ph.environment.SELDistribution:
     """Five replica levels of a distant blast and their probabilities (ISO 13474)."""
     return ph.environment.sel_distribution(
         [30.0, 33.0, 36.0, 41.0, 45.0], [0.3, 0.3, 0.2, 0.15, 0.05]
@@ -892,7 +892,7 @@ def _reciprocity_coupler() -> ph.metrology.PlaneWaveCoupler:
         length_m=7.5e-3,
         diameter_m=18.6e-3,
         capillary=ph.metrology.CapillaryTube(
-            length_m=0.05, radius_m=1.0 / 6000.0, count=2
+            length_m=0.05, radius_m=1.0 / 6000.0, n_tubes=2
         ),
     )
 
@@ -1161,10 +1161,10 @@ _LAB_BANDS = [
 ]
 
 
-def _lab_lining_improvement() -> ph.building.LabLiningImprovementResult:
+def _lab_lining_improvement() -> ph.building.LaboratoryLiningImprovementResult:
     """A lining 2 dB to 19 dB better, on the heavy standard wall (ISO 10140-1 G)."""
     without = np.linspace(40.0, 65.0, 18)
-    return ph.building.lab_lining_improvement(
+    return ph.building.laboratory_lining_improvement(
         without, without + np.linspace(2.0, 19.0, 18), _LAB_BANDS
     )
 
@@ -1176,10 +1176,12 @@ def _reduction_improvement_rating() -> ph.building.ReductionImprovementRating:
     return rating
 
 
-def _lab_floor_covering_improvement() -> ph.building.LabFloorCoveringImprovementResult:
+def _lab_floor_covering_improvement() -> (
+    ph.building.LaboratoryFloorCoveringImprovementResult
+):
     """A covering on the lightweight reference floor No 3 (ISO 10140-1 H)."""
     bare = np.full(18, 75.0)
-    return ph.building.lab_floor_covering_improvement(
+    return ph.building.laboratory_floor_covering_improvement(
         bare,
         bare - np.linspace(1.0, 30.0, 18),
         _LAB_BANDS,
@@ -1187,11 +1189,11 @@ def _lab_floor_covering_improvement() -> ph.building.LabFloorCoveringImprovement
     )
 
 
-def _lab_joint_insulation() -> ph.building.LabJointInsulationResult:
+def _lab_joint_insulation() -> ph.building.LaboratoryJointInsulationResult:
     """A rebate seal 4 dB to 15 dB under its arrangement (ISO 10140-1 Annex J)."""
     maximum = np.linspace(40.0, 69.0, 18)
     measured = maximum - np.concatenate([np.linspace(7.0, 15.0, 15), [9.0, 5.0, 2.0]])
-    return ph.building.lab_joint_insulation(
+    return ph.building.laboratory_joint_insulation(
         measured, maximum, _LAB_BANDS, joint_length_m=5.4
     )
 
@@ -1217,10 +1219,10 @@ def _joint_gap_series() -> ph.building.JointGapSeries:
     """The seal at 3 mm, 5 mm and 8 mm (ISO 10140-1 J.4)."""
     maximum = np.linspace(40.0, 69.0, 18)
     results = [
-        ph.building.lab_joint_insulation(maximum - drop, maximum, _LAB_BANDS)
+        ph.building.laboratory_joint_insulation(maximum - drop, maximum, _LAB_BANDS)
         for drop in (6.0, 10.0, 18.0)
     ]
-    return ph.building.joint_gap_series([3.0, 5.0, 8.0], results, minimum_gap_mm=3.0)
+    return ph.building.joint_gap_series([3.0, 5.0, 8.0], results, min_gap_mm=3.0)
 
 
 def _joint_gap_series_check() -> ph.building.JointGapSeriesCheck:
@@ -2062,7 +2064,7 @@ def _amplifier_frequency_response() -> ph.electroacoustics.AmplifierFrequencyRes
     )
 
 
-def _agc_characteristic() -> ph.electroacoustics.AgcCharacteristic:
+def _agc_characteristic() -> ph.electroacoustics.AGCCharacteristic:
     """An automatic gain control like the one of IEC 62489-1:2010 Figure A.1."""
     return ph.electroacoustics.agc_characteristic(
         [-60.0, -50.0, -40.0, -30.0, -20.0, -10.0, 0.0],

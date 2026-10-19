@@ -63,7 +63,7 @@ room = emission.check_hard_walled_room(
 print(np.round(room.level_range_db, 1))           # [2.5 1.8 1.4 1.3 1.2 1.2 1.6]
 print(room.limit_db)                              # [3.  2.  1.5 1.5 1.5 1.5 2.5]
 print(room.passes)                                # True
-print(round(room.minimum_microphone_distance_m, 2))  # 1.17 m from the source (7.3)
+print(round(room.min_microphone_distance_m, 2))  # 1.17 m from the source (7.3)
 ```
 
 Table 3 prints its middle octave row as "400 to 5 000", a one-third-octave

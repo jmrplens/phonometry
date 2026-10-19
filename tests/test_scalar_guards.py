@@ -536,7 +536,7 @@ _PUBLIC_CALLS: list[tuple[str, Callable[[object], object], float, str]] = [
         "noise_control.blade_passing_frequency",
         lambda v: noise_control.blade_passing_frequency(1450.0, v),
         12,
-        "blades",
+        "n_blades",
     ),
     (
         "building.low_frequency_procedure_applies",

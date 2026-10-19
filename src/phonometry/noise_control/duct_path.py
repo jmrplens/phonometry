@@ -98,7 +98,7 @@ class DuctElement(OwnsArrays):
         ``"Silencer, 3 ft, standard pressure drop"``.
     :ivar attenuation: Octave-band attenuation as a **positive** loss, dB. A
         scalar is broadcast over the bands; an
-        :class:`~phonometry.noise_control.hvac.HvacSpectrumResult` (or anything
+        :class:`~phonometry.noise_control.hvac.HVACSpectrumResult` (or anything
         exposing ``values``) is accepted directly. ``None`` means no
         attenuation.
     :ivar self_noise: Octave-band regenerated sound power level of the element,
@@ -489,7 +489,7 @@ def duct_path(
     :param elements: The path elements in order, as :class:`DuctElement`
         entries. Their ``attenuation`` and ``self_noise`` accept a scalar, a
         per-band array or an
-        :class:`~phonometry.noise_control.hvac.HvacSpectrumResult`.
+        :class:`~phonometry.noise_control.hvac.HVACSpectrumResult`.
     :param room_effect: The room effect as a positive attenuation, dB (from
         :func:`phonometry.noise_control.hvac.room_effect`). ``None`` leaves the
         received spectrum as a sound power level at the terminal device.

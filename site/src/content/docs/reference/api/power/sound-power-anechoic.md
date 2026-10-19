@@ -149,7 +149,7 @@ precision_positions(
     *,
     radius: float,
     array: Literal['general', 'broadband'] = 'general',
-    count: int = 40,
+    n_positions: int = 40,
 ) -> np.ndarray
 ```
 
@@ -170,9 +170,9 @@ scaled to metres by `radius`.
 | `surface` | `'sphere'` or `'hemisphere'`. |
 | `radius` | Measurement radius `r`, in metres. |
 | `array` | `'general'` (Table E.1) or `'broadband'` (Table E.2); ignored for a sphere (only Table D.1 exists). |
-| `count` | `20` (primary array) or `40` (full array). |
+| `n_positions` | `20` (primary array) or `40` (full array). |
 
-**Returns:** `(count, 3)` microphone coordinates, in metres.
+**Returns:** `(n_positions, 3)` microphone coordinates, in metres.
 
 ## precision_uncertainty
 

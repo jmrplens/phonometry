@@ -276,7 +276,7 @@ def _chk_air_terminal_velocity() -> Outcome:
 )
 def _chk_duct_cut_on_with_flow() -> Outcome:
     res = ph.noise_control.circular_duct_cut_on(
-        0.254, flow_velocity=200.0, speed_of_sound=405.0, count=1
+        0.254, flow_velocity=200.0, speed_of_sound=405.0, n_modes=1
     )
     worst = max(
         abs(float(res.cut_on[0]) - 812.0),
@@ -292,7 +292,7 @@ def _chk_duct_cut_on_with_flow() -> Outcome:
 )
 def _chk_rectangular_duct_cut_on() -> Outcome:
     res = ph.noise_control.rectangular_duct_cut_on(
-        0.65, 0.4, flow_velocity=15.0, count=3
+        0.65, 0.4, flow_velocity=15.0, n_modes=3
     )
     printed = np.array([264.0, 428.0, 503.0])
     worst = float(np.max(np.abs(np.round(res.cut_on) - printed)))

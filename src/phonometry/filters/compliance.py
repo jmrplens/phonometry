@@ -482,9 +482,9 @@ def _band_relative_attenuation(
 class _BandGrid:
     r"""One band read on the frequency grid of :func:`verify_filter_class`.
 
-    ``num_points`` frequencies cover the band's decimated half-band,
+    ``n_points`` frequencies cover the band's decimated half-band,
     :math:`[0, f_\mathrm{s}/(2M))`, at the spacing
-    :math:`f_\mathrm{s}/(2M\,\mathrm{num\_points})`; the alias images
+    :math:`f_\mathrm{s}/(2M\,\mathrm{n\_points})`; the alias images
     above it are read at the same spacing, on the frequencies that fold onto
     the same points.
 
@@ -492,14 +492,14 @@ class _BandGrid:
     :ivar factor: Its decimation factor :math:`M`.
     :ivar fs_hz: The bank's input sampling rate.
     :ivar mid_hz: Its exact mid-band frequency.
-    :ivar num_points: Points per decimated half-band.
+    :ivar n_points: Points per decimated half-band.
     """
 
     sos: np.ndarray
     factor: int
     fs_hz: float
     mid_hz: float
-    num_points: int
+    n_points: int
 
     @property
     def rate_hz(self) -> float:
@@ -509,7 +509,7 @@ class _BandGrid:
     @property
     def spacing_hz(self) -> float:
         """The grid spacing, the same in the half-band and in every image."""
-        return self.rate_hz / (2.0 * self.num_points)
+        return self.rate_hz / (2.0 * self.n_points)
 
     @cached_property
     def reference_db(self) -> float:
@@ -518,13 +518,13 @@ class _BandGrid:
 
     @cached_property
     def folded_gain(self) -> np.ndarray:
-        """The sections' magnitude at the folded points ``0 .. num_points``.
+        """The sections' magnitude at the folded points ``0 .. n_points``.
 
         Point ``j`` is the frequency ``j * spacing`` of the decimated
         half-band, its Nyquist frequency included; every image frequency
         folds onto one of them. The anti-aliasing filter is not in it.
         """
-        g = np.arange(self.num_points + 1) * self.spacing_hz
+        g = np.arange(self.n_points + 1) * self.spacing_hz
         _, h = signal.sosfreqz(self.sos, worN=g, fs=self.rate_hz)
         return read_only(np.abs(h))
 
@@ -534,14 +534,14 @@ class _BandGrid:
         :return: ``(frequencies, relative_attenuation_db)`` on the grid
             points of ``(0, fs / (2 M))``.
         """
-        g = np.arange(1, self.num_points) * self.spacing_hz
-        gain = self.folded_gain[1 : self.num_points]
+        g = np.arange(1, self.n_points) * self.spacing_hz
+        gain = self.folded_gain[1 : self.n_points]
         if self.factor > 1:
             taps = _multirate_lowpass(self.factor)
             zoom = signal.ZoomFFT(
                 taps.size,
-                [self.spacing_hz, self.num_points * self.spacing_hz],
-                m=self.num_points - 1,
+                [self.spacing_hz, self.n_points * self.spacing_hz],
+                m=self.n_points - 1,
                 fs=self.fs_hz,
             )
             gain = gain * np.abs(zoom(taps))
@@ -559,7 +559,7 @@ class _BandGrid:
         :math:`k f_\mathrm{s}/M` per image and side.
 
         :param first: The first folded point (>= 0).
-        :param last: The last folded point (<= ``num_points``).
+        :param last: The last folded point (<= ``n_points``).
         :return: One ``(frequencies, relative_attenuation_db)`` per image
             and side.
         """
@@ -660,7 +660,7 @@ def _image_window(
         return 0, -1
     edge = _map_breakpoint(spec["passband_max"][-1][0], fraction)
     if grid.rate_hz / 2.0 <= edge * grid.mid_hz:
-        return 0, grid.num_points
+        return 0, grid.n_points
     taps = _multirate_lowpass(grid.factor)
     gain_db = 20.0 * math.log10(float(np.sum(np.abs(taps))))
     threshold = gain_db + max(
@@ -918,7 +918,7 @@ def _verify_band(
     classes_ordered: tuple[int, ...],
     breakpoint_omegas: np.ndarray,
     edition: str,
-    num_points: int,
+    n_points: int,
 ) -> dict[str, Any]:
     """Grade one band on Table 1 at the full input rate; return its entry.
 
@@ -933,7 +933,7 @@ def _verify_band(
         int(bank.factor[idx]),
         fs,
         fm,
-        num_points,
+        n_points,
     )
     nyquist = fs / 2.0
     freqs, delta_a = grid.baseband()
@@ -1043,7 +1043,7 @@ def _band_class(
 def verify_filter_class(
     bank: OctaveFilterBank,
     *,
-    num_points: int = 2**15,
+    n_points: int = 2**15,
     edition: str = "2014",
     points_per_bandwidth: int = _MIN_POINTS_PER_BANDWIDTH,
 ) -> FilterComplianceResult:
@@ -1057,7 +1057,7 @@ def verify_filter_class(
     band is graded where the input carries it. Table 1 covers every
     frequency (its last rows read :math:`\le G^{-4}` and :math:`\ge G^{+4}`),
     and a sampled input holds every frequency below half its sampling rate,
-    so that is the range graded: ``num_points`` frequencies cover the
+    so that is the range graded: ``n_points`` frequencies cover the
     band's decimated half-band and the images above it are read at the same
     spacing, up to half the input rate. The Table 1 breakpoint frequencies
     in that range are always evaluated exactly, so the pass-band
@@ -1083,7 +1083,7 @@ def verify_filter_class(
 
     :param bank: The filter bank to verify (its designed SOS are analyzed;
         works for stateful and stateless banks alike).
-    :param num_points: Number of frequency grid points per band on its
+    :param n_points: Number of frequency grid points per band on its
         decimated half-band (>= 16); the alias images are read at the same
         spacing.
     :param edition: ``"2014"`` (IEC 61260-1:2014, classes 1/2) or ``"1995"``
@@ -1101,9 +1101,9 @@ def verify_filter_class(
         relative attenuation and render an accredited ``.report()`` fiche
         without keeping a reference to the (possibly stateful) bank.
     """
-    require_scalar(num_points, "num_points")
-    if num_points < _MIN_GRID_POINTS:
-        msg = "'num_points' must be at least 16."
+    require_scalar(n_points, "n_points")
+    if n_points < _MIN_GRID_POINTS:
+        msg = "'n_points' must be at least 16."
         raise ValueError(msg)
     points_per_bandwidth = require_count(
         points_per_bandwidth, "points_per_bandwidth", minimum=_MIN_POINTS_PER_BANDWIDTH
@@ -1122,7 +1122,7 @@ def verify_filter_class(
     breakpoint_omegas = np.concatenate([1.0 / breakpoint_omegas, breakpoint_omegas])
 
     bands = [
-        _verify_band(bank, idx, classes_ordered, breakpoint_omegas, edition, num_points)
+        _verify_band(bank, idx, classes_ordered, breakpoint_omegas, edition, n_points)
         for idx in range(bank.num_bands)
     ]
     if edition == "1995":
@@ -1139,7 +1139,7 @@ def verify_filter_class(
         frequencies=np.asarray(bank.freq, dtype=np.float64),
         factors=tuple(int(f) for f in bank.factor),
         fs=float(bank.fs),
-        num_points=int(num_points),
+        n_points=int(n_points),
         points_per_bandwidth=points_per_bandwidth,
     )
 
@@ -1242,7 +1242,7 @@ class FilterComplianceResult(OwnsArrays):
         response is evaluated through both, which the verifier's public
         return does not otherwise expose.
     :ivar fs: The bank's full sampling rate in Hz.
-    :ivar num_points: Frequency grid points per band used by the verification,
+    :ivar n_points: Frequency grid points per band used by the verification,
         retained so the redrawn curve matches the analysed grid.
     :ivar points_per_bandwidth: ``S``, the test frequencies per bandwidth of
         IEC 61260-2:2016 Formula (1) (IEC 61260:1995 equation (15)) the
@@ -1275,7 +1275,7 @@ class FilterComplianceResult(OwnsArrays):
     frequencies: np.ndarray
     factors: tuple[int, ...]
     fs: float
-    num_points: int
+    n_points: int
     _: KW_ONLY
     points_per_bandwidth: int = _MIN_POINTS_PER_BANDWIDTH
 

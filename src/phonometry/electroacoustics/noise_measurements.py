@@ -97,7 +97,7 @@ def _full_scale_rms(full_scale: float) -> float:
 
 
 def dynamic_range(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -124,7 +124,7 @@ def dynamic_range(
     It includes all harmonic, inharmonic and noise components and is also
     known as the signal-to-noise ratio (6.4.1 note).
 
-    :param signal: Captured output of the device under test (1-D), scaled so
+    :param x: Captured output of the device under test (1-D), scaled so
         that ``full_scale`` is the digital full-scale peak amplitude.
         Accepts a :class:`phonometry.io.Signal` for the rate, but a
         calibration factor it carries is deliberately **not** applied: this
@@ -148,8 +148,8 @@ def dynamic_range(
     :raises ValueError: If the inputs are invalid or ``notch_q`` is out of
         range.
     """
-    fs = resolve_fs(signal, fs, name="signal")
-    sig = _validate_signal(signal, calibrate=False)
+    fs = resolve_fs(x, fs, name="x")
+    sig = _validate_signal(x, calibrate=False)
     fs_v = _positive(fs, "fs")
     _validate_notch_q(notch_q)
     reference = _full_scale_rms(full_scale)
@@ -168,7 +168,7 @@ def dynamic_range(
 
 
 def idle_channel_noise(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     *,
     bandwidth: float | None = _AES17_BANDWIDTH_HZ,
@@ -187,7 +187,7 @@ def idle_channel_noise(
        V_\text{idle,CCIR-RMS} / (\text{full\_scale} / \sqrt{2})
        \right)
 
-    :param signal: Captured idle output of the device under test (1-D), scaled
+    :param x: Captured idle output of the device under test (1-D), scaled
         so that ``full_scale`` is the digital full-scale peak amplitude.
         Accepts a :class:`phonometry.io.Signal` for the rate, but a
         calibration factor it carries is deliberately **not** applied: this
@@ -204,8 +204,8 @@ def idle_channel_noise(
         number for any real device).
     :raises ValueError: If the inputs are invalid.
     """
-    fs = resolve_fs(signal, fs, name="signal")
-    sig = _validate_signal(signal, calibrate=False)
+    fs = resolve_fs(x, fs, name="x")
+    sig = _validate_signal(x, calibrate=False)
     fs_v = _positive(fs, "fs")
     reference = _full_scale_rms(full_scale)
     weighted = _ccir_rms_weighted_rms(sig, fs_v, bandwidth)

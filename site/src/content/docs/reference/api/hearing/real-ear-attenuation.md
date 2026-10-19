@@ -241,7 +241,7 @@ check_reat_sound_field(
     rotation_levels_db: ArrayLike | None = None,
     free_field_rejection_db: float | None = None,
     frequencies: ArrayLike | None = None,
-) -> ReatSoundFieldCheck
+) -> REATSoundFieldCheck
 ```
 
 Is the sound field of the test site diffuse enough? (4.2.2).
@@ -270,7 +270,7 @@ separate requirements of the test site and are not judged here.
 | `free_field_rejection_db` | The free-field rejection of that microphone, in dB, required with `rotation_levels_db`. |
 | `frequencies` | The centre frequencies, in hertz, or `None` for the test signals of 4.1 as [`real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation) assumes them. |
 
-**Returns:** [`ReatSoundFieldCheck`](/phonometry/reference/api/hearing/real-ear-attenuation/#reatsoundfieldcheck).
+**Returns:** [`REATSoundFieldCheck`](/phonometry/reference/api/hearing/real-ear-attenuation/#reatsoundfieldcheck).
 
 **Raises**
 
@@ -533,10 +533,10 @@ REAT_FREQUENCY_RANGES = ('below 250 Hz', '250 Hz up to 4 kHz', 'above 4 kHz')
 REAT_WITHIN_LABORATORY_UNCERTAINTY = {'earplug': {'below 250 Hz': ProtectorUncertaintyBudget(method_db=1.5, equipment_db=0.2, environment_db=0.5), '250 Hz up to 4 kHz': ProtectorUncertaintyBudget(method_db=1.0, equipment_db=0.2, environment_db=0.5), 'above 4 kHz': ProtectorUncertaintyBudget(method_db=1.5, equipment_db=0.2, environment_db=0.5)}, 'earmuff': {'below 250 Hz': ProtectorUncertaintyBudget(method_db=1.0, equipment_db=0.2, environment_db=0.5), '250 Hz up to 4 kHz': ProtectorUncertaintyBudget(method_db=0.6, equipment_db=0.2, environment_db=0.5), 'above 4 kHz': ProtectorUncertaintyBudget(method_db=1.0, equipment_db=0.2, environment_db=0.5)}}
 ```
 
-## ReatSoundFieldCheck
+## REATSoundFieldCheck
 
 ```python
-ReatSoundFieldCheck(
+REATSoundFieldCheck(
     frequencies: np.ndarray,
     position_deviation_db: np.ndarray,
     left_right_difference_db: np.ndarray,
@@ -565,7 +565,7 @@ without the rotation leaves it unjudged whenever a band reaches 500 Hz,
 until it is judged. `uniform` and `balanced` still give the
 verdict of a) on its own.
 
-### ReatSoundFieldCheck.allowable_variation_db
+### REATSoundFieldCheck.allowable_variation_db
 
 *property*
 
@@ -573,7 +573,7 @@ What Table 1 allows the rotation spread, in dB.
 
 **Returns:** The allowance for `free_field_rejection_db`, or `None` when no rotation was given.
 
-### ReatSoundFieldCheck.balanced
+### REATSoundFieldCheck.balanced
 
 *property*
 
@@ -581,7 +581,7 @@ Per band, whether right and left differ by 3 dB at most (4.2.2 a)).
 
 **Returns:** One boolean per band.
 
-### ReatSoundFieldCheck.diffuse
+### REATSoundFieldCheck.diffuse
 
 *property*
 
@@ -593,7 +593,7 @@ With no rotation given nothing was measured, every band reads
 
 **Returns:** One boolean per band.
 
-### ReatSoundFieldCheck.directionality_judged
+### REATSoundFieldCheck.directionality_judged
 
 *property*
 
@@ -601,7 +601,7 @@ Whether 4.2.2 b) was judged.
 
 **Returns:** `True` when a rotation was given, or when no test signal reaches the 500 Hz from which b) applies.
 
-### ReatSoundFieldCheck.passes
+### REATSoundFieldCheck.passes
 
 *property*
 
@@ -609,10 +609,10 @@ Whether the sound field qualifies for 4.2.2, a) and b) both judged.
 
 **Returns:** `True` when every band meets a) and b); `False` when a band fails either, or when b) was not judged.
 
-### ReatSoundFieldCheck.plot()
+### REATSoundFieldCheck.plot()
 
 ```python
-ReatSoundFieldCheck.plot(
+REATSoundFieldCheck.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -632,7 +632,7 @@ Draw each condition of 4.2.2 against its limit, band by band.
 
 **Returns:** The axes.
 
-### ReatSoundFieldCheck.uniform
+### REATSoundFieldCheck.uniform
 
 *property*
 

@@ -34,10 +34,10 @@ from phonometry.noise_control.screen_in_situ import (
     IMPULSE_INVALID_DEVIATION_DB,
     IMPULSE_REPEAT_DEVIATION_DB,
     IMPULSE_REPEATS,
-    ISO11821_MINIMUM_BACKGROUND_MARGIN_DB,
+    ISO11821_MIN_BACKGROUND_MARGIN_DB,
     ISO11821_PREFERRED_BACKGROUND_MARGIN_DB,
-    MINIMUM_MICROPHONE_DISTANCE_M,
-    MINIMUM_SCREEN_DIMENSION_M,
+    MIN_MICROPHONE_DISTANCE_M,
+    MIN_SCREEN_DIMENSION_M,
     OPERATOR_HEIGHT_M,
     OPERATOR_HEIGHT_TOLERANCE_M,
     OUTDOOR_RANGE_M,
@@ -120,7 +120,7 @@ def test_a_wide_margin_leaves_the_level_alone() -> None:
 def test_the_correction_window_is_the_printed_one() -> None:
     lower, upper = BACKGROUND_CORRECTION_WINDOW_DB
     assert (lower, upper) == (6.0, 10.0)
-    assert ISO11821_MINIMUM_BACKGROUND_MARGIN_DB == 6.0
+    assert ISO11821_MIN_BACKGROUND_MARGIN_DB == 6.0
     assert ISO11821_PREFERRED_BACKGROUND_MARGIN_DB == 10.0
     # At the two ends of the window the correction is 1,2563 dB and 0,4576 dB.
     at_six = noise_control.screen_background_corrected_level([80.0], [74.0])
@@ -171,8 +171,8 @@ def test_the_microphone_distances_are_four_multiples_of_the_height() -> None:
 def test_the_one_metre_floor_holds_for_a_low_screen() -> None:
     distances = noise_control.microphone_distances_m(2.0)
     assert distances.tolist() == [
-        MINIMUM_MICROPHONE_DISTANCE_M,
-        MINIMUM_MICROPHONE_DISTANCE_M,
+        MIN_MICROPHONE_DISTANCE_M,
+        MIN_MICROPHONE_DISTANCE_M,
         2.0,
         4.0,
     ]
@@ -181,7 +181,7 @@ def test_the_one_metre_floor_holds_for_a_low_screen() -> None:
 def test_a_screen_under_one_and_a_half_metres_is_reported() -> None:
     with pytest.warns(ScreenInSituWarning, match="1.5 m"):
         noise_control.microphone_distances_m(1.2)
-    assert MINIMUM_SCREEN_DIMENSION_M == 1.5
+    assert MIN_SCREEN_DIMENSION_M == 1.5
 
 
 def test_the_impulse_level_is_an_arithmetic_mean() -> None:

@@ -214,10 +214,10 @@ amplitude at the reference distance, spread with the exponent of Figure
 FLOOR_DAMPING_RATIO_RANGE = (0.02, 0.05)
 ```
 
-## floor_transfer_max
+## floor_transfer_maximum
 
 ```python
-floor_transfer_max(floor_damping_ratio: float) -> float
+floor_transfer_maximum(floor_damping_ratio: float) -> float
 ```
 
 The most a floor amplifies at its resonance, Clause 4.3.
@@ -250,10 +250,10 @@ foundation on loose ground raise the damping.
 FOUNDATION_TRANSFER_ABOVE_RESONANCE = 0.5
 ```
 
-## foundation_transfer_max
+## foundation_transfer_maximum
 
 ```python
-foundation_transfer_max(system_damping_ratio: float = 0.25) -> float
+foundation_transfer_maximum(system_damping_ratio: float = 0.25) -> float
 ```
 
 The most a foundation passes at the building's resonance, Clause 4.3.
@@ -373,9 +373,9 @@ MACHINE_COUNT_CORRECTION = {3: (0.551, 0.537, 0.519, 0.496, 0.471, 0.423, 0.383,
 
 ```python
 machine_count_correction(
-    machine_count: ArrayLike,
+    n_machines: ArrayLike,
     *,
-    reference_count: int,
+    n_reference_machines: int,
 ) -> NDArray[np.float64]
 ```
 
@@ -390,8 +390,8 @@ five-hundredth and interpolated linearly between the readings.
 
 | Name | Description |
 | :--- | :--- |
-| `machine_count` | $N$, from 4 to 100, one or many. |
-| `reference_count` | $N_B$, one of the six curves. |
+| `n_machines` | $N$, from 4 to 100, one or many. |
+| `n_reference_machines` | $N_B$, one of the six curves. |
 
 **Returns:** $\chi$, one per count.
 
@@ -414,9 +414,9 @@ MACHINE_FREQUENCY_BANDS_HZ = {'counter_blow_hammer': (4.0, 8.0), 'forging_press_
 ```python
 machine_hall_velocity_mm_s(
     reference_velocity_mm_s: float,
-    machine_count: ArrayLike,
+    n_machines: ArrayLike,
     *,
-    reference_count: int,
+    n_reference_machines: int,
 ) -> NDArray[np.float64]
 ```
 
@@ -433,8 +433,8 @@ sixty, the nearest group; beyond that the added groups are further off.
 | Name | Description |
 | :--- | :--- |
 | `reference_velocity_mm_s` | $v_B$, in millimetres per second. |
-| `machine_count` | $N$, from 4 to 100, one or many. |
-| `reference_count` | $N_B$, one of 3, 5, 10, 30, 60 or 100. |
+| `n_machines` | $N$, from 4 to 100, one or many. |
+| `n_reference_machines` | $N_B$, one of 3, 5, 10, 30, 60 or 100. |
 
 **Returns:** $v_N$, one per count, in millimetres per second.
 
@@ -604,7 +604,7 @@ track_excitation_frequency(
     train_speed_m_s: float,
     *,
     spacing_m: float,
-    harmonics: int = 1,
+    n_harmonics: int = 1,
 ) -> NDArray[np.float64]
 ```
 
@@ -621,7 +621,7 @@ frequencies of the vehicle itself do not move with the speed.
 | :--- | :--- |
 | `train_speed_m_s` | $v_Z$, in metres per second. |
 | `spacing_m` | $d$, in metres. |
-| `harmonics` | How many multiples to return, the fundamental first. |
+| `n_harmonics` | How many multiples to return, the fundamental first. |
 
 **Returns:** $f_A$ and its multiples, in hertz.
 

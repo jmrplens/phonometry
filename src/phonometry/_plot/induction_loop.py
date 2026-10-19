@@ -42,7 +42,7 @@ if TYPE_CHECKING:
         LoopRequirement,
     )
     from ..electroacoustics.induction_loop_components import (
-        AgcCharacteristic,
+        AGCCharacteristic,
         AmplifierFrequencyResponse,
         LoopField,
         LoopImpedance,
@@ -392,7 +392,7 @@ def plot_amplifier_frequency_response(
 
 
 def plot_agc_characteristic(
-    result: AgcCharacteristic,
+    result: AGCCharacteristic,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -400,7 +400,7 @@ def plot_agc_characteristic(
 ) -> Axes:
     """Output level against input level, with the AGC range shaded.
 
-    :param result: An :class:`~phonometry.electroacoustics.induction_loop_components.AgcCharacteristic`.
+    :param result: An :class:`~phonometry.electroacoustics.induction_loop_components.AGCCharacteristic`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language.
     :param kwargs: Forwarded to the characteristic's ``Axes.plot``.
@@ -668,14 +668,16 @@ def plot_field_strength_reading(
     peak = int(np.argmax(np.where(finite, result.levels, -np.inf)))
     ax.plot(
         [result.times[peak]],
-        [result.maximum_db],
+        [result.maximum_level_db],
         ls="none",
         marker="D",
         ms=6,
         color=_C_SECONDARY,
         zorder=4,
         label=_t(
-            "Maximum {level} dB", language, level=_num(result.maximum_db, language)
+            "Maximum {level} dB",
+            language,
+            level=_num(result.maximum_level_db, language),
         ),
     )
     ax.set_xlabel(_t("Time [s]", language))
@@ -1009,14 +1011,14 @@ def plot_maximum_output_current(
         ),
     )
     ax.axvline(
-        result.maximum_current_a,
+        result.max_current_a,
         color=_C_SECONDARY,
         lw=1.0,
         ls=":",
         label=_t(
             "Maximum current {current} A",
             language,
-            current=_num(result.maximum_current_a, language, 2),
+            current=_num(result.max_current_a, language, 2),
         ),
     )
     ax.set_ylim(bottom=0.0)

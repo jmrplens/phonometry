@@ -161,7 +161,7 @@ def _sine(level_db: float, frequency_hz: float, seconds: float = 2.0) -> np.ndar
 
 def test_meter_reads_a_sine_at_its_level() -> None:
     reading = ea.field_strength_meter(_sine(-6.0, 1000.0), FS)
-    assert reading.maximum_db == pytest.approx(-6.0, abs=0.01)
+    assert reading.maximum_level_db == pytest.approx(-6.0, abs=0.01)
     assert reading.equivalent_db == pytest.approx(-6.0, abs=1e-6)
     assert reading.weighting == "Z"
     assert reading.levels.shape == reading.times.shape
@@ -170,7 +170,7 @@ def test_meter_reads_a_sine_at_its_level() -> None:
 def test_meter_a_weighting_is_transparent_at_1_khz_and_19_db_down_at_100_hz() -> None:
     at_1k = ea.field_strength_meter(_sine(0.0, 1000.0), FS, weighting="A")
     at_100 = ea.field_strength_meter(_sine(0.0, 100.0), FS, weighting="A")
-    assert at_1k.maximum_db == pytest.approx(0.0, abs=0.02)
+    assert at_1k.maximum_level_db == pytest.approx(0.0, abs=0.02)
     assert at_100.equivalent_db == pytest.approx(-19.1, abs=0.1)
 
 
@@ -1138,7 +1138,7 @@ def test_meter_plot_marks_the_maximum_where_it_occurs() -> None:
     reading = ea.field_strength_meter(_sine(-3.0, 1000.0, seconds=0.5), FS)
     ax = reading.plot()
     marker = ax.lines[-1]
-    assert tuple(marker.get_ydata()) == (reading.maximum_db,)
+    assert tuple(marker.get_ydata()) == (reading.maximum_level_db,)
     peak = int(np.argmax(reading.levels))
     assert tuple(marker.get_xdata()) == (reading.times[peak],)
     plt.close("all")

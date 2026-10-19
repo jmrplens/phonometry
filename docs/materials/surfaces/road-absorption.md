@@ -164,7 +164,7 @@ about 1.34 m.
 
 ```python
 from phonometry import materials
-print(round(materials.max_sampled_area_radius(5.0e-3), 3))   # 1.343  (metres)
+print(round(materials.maximum_sampled_area_radius(5.0e-3), 3))   # 1.343  (metres)
 ```
 
 The whole arrangement fits in one to-scale drawing. `plot_in_situ_geometry`

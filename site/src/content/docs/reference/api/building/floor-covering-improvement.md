@@ -30,7 +30,7 @@ subtraction $10 \log_{10}(10^{L'/10} - 10^{L_\mathrm{b}/10})$ for
 $6 \le \mathrm{margin} < 15$ dB; and the fixed $L' - 1.3$ dB limit
 for $< 6$ dB. Bands hitting the 1.3 dB limit are flagged as the *limit of
 measurement* (reported as $> \Delta L$). This differs from the ISO
-10140-4 correction ([`phonometry.building.background_correction`](/phonometry/reference/api/building/lab-insulation/#background_correction)) only at
+10140-4 correction ([`phonometry.building.background_correction`](/phonometry/reference/api/building/laboratory-insulation/#background_correction)) only at
 exactly $\mathrm{margin} = 6$ dB.
 
 **Improvement (Formulae (3)/(4)).** The per-position difference is

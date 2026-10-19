@@ -38,11 +38,11 @@ import reference_data as ref
 
 from phonometry.environment.sources.cnossos_rail import (
     AERODYNAMIC_REFERENCE_SPEED_KMH,
-    RAILWAY_MINIMUM_SPEED_KMH,
+    RAILWAY_MIN_SPEED_KMH,
     RAILWAY_OCTAVE_BANDS_HZ,
     RAILWAY_THIRD_OCTAVE_BANDS_HZ,
     REFERENCE_JOINT_DENSITY_PER_M,
-    TRAM_MINIMUM_SPEED_KMH,
+    TRAM_MIN_SPEED_KMH,
     BrakeType,
     BridgeType,
     ContactFilter,
@@ -279,7 +279,7 @@ def _case_result(case: dict[str, str]) -> RailwayEmissionResult:
         reference_time=12.0,
         # The reference module applies no speed floor to the roughness, and the
         # caller is expected to impose the 50 km/h of 2.3.2 itself.
-        minimum_speed_kmh=0.0,
+        min_speed_kmh=0.0,
         directivity_edition=DirectivityEdition.ORIGINAL_2015,
     )
 
@@ -717,12 +717,12 @@ def test_minimum_speed_floor_and_impact_exclusion() -> None:
     )
     floored = railway_source_power(
         RailwayVehicle(
-            _reference_stock(), flow_rate=10.0, speed_kmh=RAILWAY_MINIMUM_SPEED_KMH
+            _reference_stock(), flow_rate=10.0, speed_kmh=RAILWAY_MIN_SPEED_KMH
         ),
         plain,
     )
     # the roughness is frozen at the floor, so only the flow term moves
-    shift = 10.0 * math.log10(RAILWAY_MINIMUM_SPEED_KMH / 20.0)
+    shift = 10.0 * math.log10(RAILWAY_MIN_SPEED_KMH / 20.0)
     np.testing.assert_allclose(
         slow.components["rolling"][0],
         floored.components["rolling"][0],
@@ -738,7 +738,7 @@ def test_minimum_speed_floor_and_impact_exclusion() -> None:
     for speed, expect_impact in (
         (20.0, False),
         (49.9, False),
-        (RAILWAY_MINIMUM_SPEED_KMH, True),
+        (RAILWAY_MIN_SPEED_KMH, True),
         (120.0, True),
     ):
         with_joints = railway_source_power(
@@ -759,7 +759,7 @@ def test_minimum_speed_floor_and_impact_exclusion() -> None:
         RailwayVehicle(
             _reference_stock(tram=True),
             flow_rate=10.0,
-            speed_kmh=TRAM_MINIMUM_SPEED_KMH,
+            speed_kmh=TRAM_MIN_SPEED_KMH,
         ),
         jointed,
     )
@@ -767,7 +767,7 @@ def test_minimum_speed_floor_and_impact_exclusion() -> None:
         RailwayVehicle(
             _reference_stock(tram=True),
             flow_rate=10.0,
-            speed_kmh=TRAM_MINIMUM_SPEED_KMH,
+            speed_kmh=TRAM_MIN_SPEED_KMH,
         ),
         plain,
     )

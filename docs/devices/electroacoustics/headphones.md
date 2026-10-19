@@ -159,7 +159,7 @@ z = 31.0 + 22.0 / (1.0 + ((f / 90.0 - 90.0 / f) / 0.9) ** 2) + 4.0 * (f / 20000.
 impedance = electroacoustics.verify_rated_impedance(
     f, z, rated_impedance_ohm=32.0, rated_frequency_range_hz=(15.0, 25000.0)
 )
-print(impedance.passes, round(impedance.minimum_ohm, 1), round(impedance.minimum_ratio, 3))
+print(impedance.passes, round(impedance.min_ohm, 1), round(impedance.min_ratio, 3))
 # True 31.3 0.979
 ```
 
@@ -337,7 +337,7 @@ response = electroacoustics.coupler_frequency_response(
 crosstalk = electroacoustics.crosstalk_attenuation(
     frequencies, np.full(frequencies.size, 100.0), 52.0 - 12.0 * np.log10(frequencies / 1000.0) ** 2
 )
-print(response.covers_rated_range, round(crosstalk.minimum_db, 1))  # True 48.0
+print(response.covers_rated_range, round(crosstalk.min_db, 1))  # True 48.0
 ```
 
 None of these responses has a tolerance: "It is not at present possible to set

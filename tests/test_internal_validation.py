@@ -252,7 +252,7 @@ def test_an_unknown_engine_is_refused_by_name() -> None:
     [
         (require_positive_array, ()),
         (require_finite_array, ()),
-        (require_per_band, (np.array([100.0, 200.0]),)),
+        (require_per_band, (np.array([100.0, 200.0]), "frequencies")),
         (require_1d_signal, ()),
     ],
 )
@@ -276,7 +276,7 @@ def test_garbage_input_is_refused_naming_the_parameter(
     [
         (require_positive_array, ()),
         (require_finite_array, ()),
-        (require_per_band, (np.array([100.0, 200.0]),)),
+        (require_per_band, (np.array([100.0, 200.0]), "frequencies")),
         (require_1d_signal, ()),
         (require_above_absolute_zero_array, ()),
     ],

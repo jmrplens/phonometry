@@ -231,7 +231,7 @@ def _microphone_example() -> tuple[object, ReportMetadata, str]:
         ),
         electrical=ph.electroacoustics.MicrophoneElectrical(
             rated_impedance_ohm=150.0,
-            minimum_load_impedance_ohm=1000.0,
+            min_load_impedance_ohm=1000.0,
             powering="Phantom P48 (IEC 61938)",
             supply_current_ma=3.1,
         ),

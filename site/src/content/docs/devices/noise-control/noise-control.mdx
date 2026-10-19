@@ -111,7 +111,7 @@ from phonometry.noise_control import hvac
 
 bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0]
 
-# One line for one duct: the HvacSpectrumResult of the 300 mm flush end.
+# One line for one duct: the HVACSpectrumResult of the 300 mm flush end.
 er = hvac.end_reflection_loss(bands, diameter_m=0.30, termination="flush")
 er.plot()
 plt.show()
@@ -153,7 +153,7 @@ import numpy as np                    # hvac: imported in the snippet above
 
 bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
 
-# One line for one element: the HvacSpectrumResult of the lined square bend.
+# One line for one element: the HVACSpectrumResult of the lined square bend.
 hvac.elbow_insertion_loss(bands, width_m=0.3, bend_type="square",
                           lined=True).plot()
 plt.show()
@@ -261,7 +261,7 @@ The end-reflection method interpolates its ASHRAE table (it passes exactly
 through the tabulated nodes) and the elbow method reads Table 8.11 by the band
 its $W/\lambda$ falls in; the plenum (Wells) and flow-noise (VDI
 2081) methods are closed forms. `end_reflection_loss`, `elbow_insertion_loss`,
-`flow_noise_straight_duct` and `flow_noise_bend` return an `HvacSpectrumResult`
+`flow_noise_straight_duct` and `flow_noise_bend` return an `HVACSpectrumResult`
 (attenuation or regenerated sound power level) with `.plot()`; `plenum_attenuation`
 returns the transmission loss directly. Rectangular ducts use the equivalent
 diameter $D = \sqrt{4S/\pi}$.
@@ -272,7 +272,7 @@ look-up; there is no closed form in that edition. This module reproduces and
 interpolates the table.
 :::
 
-An `HvacSpectrumResult` also files itself: `.report()` renders a one-page
+An `HVACSpectrumResult` also files itself: `.report()` renders a one-page
 duct-noise fiche with the per-band table beside the spectrum, the boxed
 single-number result (the A-weighted sound power level when the spectrum is
 regenerated noise, the mean attenuation when it is a loss), and, when a
@@ -305,7 +305,7 @@ repository; click the preview to open the PDF.
 	name="hvac_duct_noise_example"
 	title="HVAC duct noise spectrum example report (PDF)"
 	description="One-page HVAC duct-noise fiche: a metadata header naming the straight supply duct and the air-handling plant room, an octave-band table of the flow-generated sound power level falling from 42.5 dB at 63 Hz to 21.8 dB at 4 kHz, the same spectrum plotted beside it, the boxed A-weighted sound power level LWA = 38.8 dB(A) re 1 pW with the overall unweighted LW = 47.0 dB re 1 pW, and a PASS verdict against a declared maximum of 45.0 dB(A)."
-	caption="HVAC duct-noise fiche (HvacSpectrumResult.report), the flow-generated sound power of a straight duct at 12 m/s in a 0.04 m2 cross-section."
+	caption="HVAC duct-noise fiche (HVACSpectrumResult.report), the flow-generated sound power of a straight duct at 12 m/s in a 0.04 m2 cross-section."
 />
 
 ## 2. Machine enclosures

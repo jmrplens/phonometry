@@ -74,15 +74,17 @@ def test_floor_covering_background_leaves_15_db_alone(
 
 
 @pytest.mark.parametrize(("signal", "background"), _pairs(6.0))
-def test_lab_background_caps_at_6_db(signal: float, background: float) -> None:
+def test_laboratory_background_caps_at_6_db(signal: float, background: float) -> None:
     # ISO 10140-4 4.3: a margin of 6 dB or less takes the fixed 1,3 dB.
-    with pytest.warns(building.LabInsulationWarning, match="at or below 6 dB"):
+    with pytest.warns(building.LaboratoryInsulationWarning, match="at or below 6 dB"):
         corrected = building.background_correction([signal], [background])
     assert corrected[0] == pytest.approx(signal - 1.3, abs=1e-12)
 
 
 @pytest.mark.parametrize(("signal", "background"), _pairs(15.0))
-def test_lab_background_leaves_15_db_alone(signal: float, background: float) -> None:
+def test_laboratory_background_leaves_15_db_alone(
+    signal: float, background: float
+) -> None:
     corrected = building.background_correction([signal], [background])
     assert corrected[0] == signal
 
@@ -770,13 +772,13 @@ def test_positions_exactly_twice_the_mean_distance_apart_meet_9_1_1_c(
         (-offset, -offset),
     ]
     laid = emission.plant_measurement_contour(
-        plant, contour, characteristic_height_m=3.0, position_count=16
+        plant, contour, characteristic_height_m=3.0, n_positions=16
     )
     assert emission.check_plant_measurement(laid).requirement("position_spacing").holds
     smallest = emission.plant_measurement_contour(
         plant, contour, characteristic_height_m=3.0
     )
-    assert smallest.position_count == 16
+    assert smallest.n_positions == 16
 
 
 @pytest.mark.parametrize(("pressure", "intensity"), _pairs(10.0))
@@ -958,7 +960,7 @@ def test_an_operating_point_exactly_3_db_off_the_line_is_accepted(
     with warnings.catch_warnings():
         warnings.simplefilter("error", noise_control.SilencerMeasurementWarning)
         line = noise_control.fit_operating_line([1.0, 10.0, 100.0], levels)
-    assert line.maximum_deviation == pytest.approx(3.0, abs=1e-9)
+    assert line.max_deviation == pytest.approx(3.0, abs=1e-9)
 
 
 # ---------------------------------------------------------------------------

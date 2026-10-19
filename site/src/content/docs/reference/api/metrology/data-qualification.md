@@ -384,9 +384,9 @@ StationarityTestResult(
     segment_times: NDArray[np.float64],
     statistic: str,
     method: str,
-    count: int,
+    trend_statistic: int,
     mean: float,
-    std: float,
+    standard_deviation: float,
     p_value: float,
     *,
     alpha: float,
@@ -402,7 +402,7 @@ The record was divided into `n_segments` equal intervals, the
 per-segment `statistic` sequence was computed, and the sequence
 was tested for trends with [`trend_test`](/phonometry/reference/api/metrology/data-qualification/#trend_test) (the B&P Sec. 10.3.1.1
 procedure). The hypothesis of stationarity is accepted when
-`bounds[0] < count <= bounds[1]`.
+`bounds[0] < trend_statistic <= bounds[1]`.
 
 **Attributes**
 
@@ -412,9 +412,9 @@ procedure). The hypothesis of stationarity is accepted when
 | `segment_times` | Segment centre times, in seconds. |
 | `statistic` | The per-segment statistic: `"mean_square"`, `"rms"`, `"mean"` or `"variance"`. |
 | `method` | Trend test used: `"reverse_arrangements"` or `"runs"`. |
-| `count` | Observed test statistic (reverse arrangements or runs). |
+| `trend_statistic` | Observed statistic of the trend test, the count of reverse arrangements or of runs. |
 | `mean` | Null mean of the count. |
-| `std` | Null standard deviation of the count. |
+| `standard_deviation` | Null standard deviation of the count. |
 | `p_value` | Two-sided p-value of the observed count. |
 | `alpha` | Significance level (default 0.05). |
 | `n_segments` | Number of segments the record was divided into. |
@@ -454,7 +454,7 @@ Plot the segment-statistic sequence with the test verdict.
 
 *property*
 
-Whether the count falls inside the acceptance region, `lower < count <= upper`.
+Whether the count falls inside the acceptance region, `lower < trend_statistic <= upper`.
 
 ## trend_test
 
@@ -514,7 +514,7 @@ TrendTestResult(
     statistic: int,
     n: int,
     mean: float,
-    std: float,
+    standard_deviation: float,
     p_value: float,
     *,
     alpha: float,
@@ -539,7 +539,7 @@ two-sided tail probability of the observed count.
 | `statistic` | Observed count: reverse arrangements `A` or runs `r`. |
 | `n` | Number of observations used. |
 | `mean` | Null mean of the statistic (B&P Eq. (4.54) for `A`). |
-| `std` | Null standard deviation (B&P Eq. (4.55) for `A`). |
+| `standard_deviation` | Null standard deviation (B&P Eq. (4.55) for `A`). |
 | `p_value` | Two-sided p-value from the exact null distribution (normal approximation above $n = 100$ for reverse arrangements). |
 | `alpha` | Significance level of the region (default 0.05). |
 | `median` | For `"runs"`, the median of the *original* sequence against which each value was classified (before values equal to it were discarded); `None` for `"reverse_arrangements"`. |

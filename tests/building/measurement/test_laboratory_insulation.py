@@ -26,7 +26,9 @@ import pytest
 import reference_data as ref
 
 from phonometry import building
-from phonometry.building.measurement.lab_insulation import LabInsulationWarning
+from phonometry.building.measurement.laboratory_insulation import (
+    LaboratoryInsulationWarning,
+)
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Callable
@@ -51,7 +53,7 @@ def test_r_reduces_to_level_difference_when_s_equals_a() -> None:
     l1 = np.full(16, 90.0)
     l2 = np.full(16, 40.0)
     t2 = np.full(16, 0.8)
-    res = building.lab_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
+    res = building.laboratory_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
     assert np.allclose(res.absorption_area, 10.0)
     assert np.allclose(res.r, 50.0)
 
@@ -61,13 +63,13 @@ def test_r_adds_ten_lg_s_over_a() -> None:
     l1 = np.full(16, 90.0)
     l2 = np.full(16, 40.0)
     t2 = np.full(16, 0.8)
-    res = building.lab_airborne_insulation(l1, l2, t2, area=20.0, volume=50.0)
+    res = building.laboratory_airborne_insulation(l1, l2, t2, area=20.0, volume=50.0)
     assert np.allclose(res.r, 50.0 + 10.0 * np.log10(2.0))
 
 
 def test_r_absorption_follows_sabine_per_band() -> None:
     t2 = np.linspace(0.5, 1.5, 16)
-    res = building.lab_airborne_insulation(
+    res = building.laboratory_airborne_insulation(
         np.full(16, 80.0), np.full(16, 30.0), t2, area=12.0, volume=60.0
     )
     assert np.allclose(res.absorption_area, 0.16 * 60.0 / t2)
@@ -78,7 +80,7 @@ def test_r_energy_averages_positions() -> None:
     l1 = np.vstack([np.full(16, 90.0), np.full(16, 96.0)])
     l2 = np.full(16, 40.0)
     t2 = np.full(16, 0.8)
-    res = building.lab_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
+    res = building.laboratory_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
     expected_l1 = 10.0 * np.log10((10**9.0 + 10**9.6) / 2.0)
     assert np.allclose(res.r, expected_l1 - 40.0)
 
@@ -87,7 +89,7 @@ def test_airborne_rating_matches_direct_engine() -> None:
     l1 = np.full(16, 90.0)
     l2 = 90.0 - _REF_AIRBORNE  # R equals the reference curve (S = A).
     t2 = np.full(16, 0.8)
-    res = building.lab_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
+    res = building.laboratory_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
     assert res.rating is not None
     # R exactly equal to the ISO 717-1 reference curve shape => Rw = 54 dB: the
     # 32 dB unfavourable-deviation allowance permits a 2 dB upward shift of the
@@ -104,14 +106,14 @@ def test_airborne_octave_bands_rate() -> None:
     l1 = np.full(5, 80.0)
     l2 = np.full(5, 30.0)
     t2 = np.full(5, 0.8)
-    res = building.lab_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
+    res = building.laboratory_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
     assert res.rating is not None
     assert res.rating.rating == building.weighted_rating(res.r).rating
 
 
 def test_airborne_extended_range_has_no_rating() -> None:
     # 18 bands (100-5000 Hz) cannot be rated by ISO 717-1 directly.
-    res = building.lab_airborne_insulation(
+    res = building.laboratory_airborne_insulation(
         np.full(18, 80.0),
         np.full(18, 30.0),
         np.full(18, 0.8),
@@ -129,7 +131,7 @@ def test_ln_reduces_to_li_when_a_equals_a0() -> None:
     # A = 0,16 * 50 / 0,8 = 10 = A0 => Ln = Li.
     li = np.full(16, 60.0)
     t2 = np.full(16, 0.8)
-    res = building.lab_impact_insulation(li, t2, volume=50.0)
+    res = building.laboratory_impact_insulation(li, t2, volume=50.0)
     assert np.allclose(res.absorption_area, 10.0)
     assert np.allclose(res.l_n, 60.0)
 
@@ -138,7 +140,7 @@ def test_ln_adds_ten_lg_a_over_a0() -> None:
     # A = 0,16 * 100 / 0,8 = 20 => Ln = Li + 10 lg(20/10).
     li = np.full(16, 55.0)
     t2 = np.full(16, 0.8)
-    res = building.lab_impact_insulation(li, t2, volume=100.0)
+    res = building.laboratory_impact_insulation(li, t2, volume=100.0)
     assert np.allclose(res.l_n, 55.0 + 10.0 * np.log10(2.0))
 
 
@@ -146,7 +148,7 @@ def test_impact_rating_matches_direct_engine() -> None:
     # Ln equals the ISO 717-2 reference curve (A = A0 => Ln = Li).
     li = _REF_IMPACT.copy()
     t2 = np.full(16, 0.8)
-    res = building.lab_impact_insulation(li, t2, volume=50.0)
+    res = building.laboratory_impact_insulation(li, t2, volume=50.0)
     assert res.rating is not None
     # Ln exactly equal to the ISO 717-2 reference curve shape => Ln,w = 58 dB:
     # the 32 dB unfavourable-deviation allowance permits a 2 dB downward shift of
@@ -161,7 +163,9 @@ def test_impact_rating_matches_direct_engine() -> None:
 def test_impact_energy_averages_positions() -> None:
     li = np.vstack([np.full(16, 60.0), np.full(16, 66.0)])
     t2 = np.full(16, 0.8)
-    res = building.lab_impact_insulation(li, t2, volume=50.0)  # A = A0 => Ln = Li_avg
+    res = building.laboratory_impact_insulation(
+        li, t2, volume=50.0
+    )  # A = A0 => Ln = Li_avg
     expected = 10.0 * np.log10((10**6.0 + 10**6.6) / 2.0)
     assert np.allclose(res.l_n, expected)
 
@@ -190,13 +194,13 @@ def test_background_correction_exactly_15_unchanged() -> None:
 
 def test_background_correction_low_margin_capped_and_warns() -> None:
     # Margin 3 dB (<= 6): fixed 1,3 dB cap, warning.
-    with pytest.warns(LabInsulationWarning):
+    with pytest.warns(LaboratoryInsulationWarning):
         corrected = building.background_correction([53.0], [50.0])
     assert np.allclose(corrected, 53.0 - 1.3)
 
 
 def test_background_correction_exactly_6_capped() -> None:
-    with pytest.warns(LabInsulationWarning):
+    with pytest.warns(LaboratoryInsulationWarning):
         corrected = building.background_correction([56.0], [50.0])
     assert np.allclose(corrected, 56.0 - 1.3)
 
@@ -204,7 +208,7 @@ def test_background_correction_exactly_6_capped() -> None:
 def test_background_correction_per_band_mixed() -> None:
     lsb = np.array([70.0, 60.0, 53.0])  # margins 20, 10, 3 dB
     lb = np.array([50.0, 50.0, 50.0])
-    with pytest.warns(LabInsulationWarning):
+    with pytest.warns(LaboratoryInsulationWarning):
         corrected = building.background_correction(lsb, lb)
     assert np.allclose(corrected[0], 70.0)
     assert np.allclose(corrected[1], 10.0 * np.log10(10**6.0 - 10**5.0))
@@ -217,7 +221,7 @@ def test_background_correction_feeds_r() -> None:
     l2_raw = np.full(16, 41.0)  # combined signal+background
     lb = np.full(16, 31.0)  # margin 10 dB
     l2 = building.background_correction(l2_raw, lb)
-    res = building.lab_airborne_insulation(
+    res = building.laboratory_airborne_insulation(
         l1, l2, np.full(16, 0.8), area=10.0, volume=50.0
     )
     expected_l2 = 10.0 * np.log10(10**4.1 - 10**3.1)
@@ -231,29 +235,33 @@ def test_airborne_band_count_mismatch() -> None:
     l1, t2 = np.full(16, 80.0), np.full(16, 0.8)
     short_l2 = np.full(5, 30.0)
     with pytest.raises(
-        ValueError, match=r"lab_airborne_insulation: 'l1' .*'l2' .*same shape"
+        ValueError, match=r"laboratory_airborne_insulation: 'l1' .*'l2' .*same shape"
     ):
-        building.lab_airborne_insulation(l1, short_l2, t2, area=10.0, volume=50.0)
+        building.laboratory_airborne_insulation(
+            l1, short_l2, t2, area=10.0, volume=50.0
+        )
 
 
 def test_airborne_t2_band_mismatch() -> None:
     l1, l2 = np.full(16, 80.0), np.full(16, 30.0)
     short_t2 = np.full(5, 0.8)
     with pytest.raises(ValueError, match=r"'t2' must share the band count"):
-        building.lab_airborne_insulation(l1, l2, short_t2, area=10.0, volume=50.0)
+        building.laboratory_airborne_insulation(
+            l1, l2, short_t2, area=10.0, volume=50.0
+        )
 
 
 @pytest.mark.parametrize(("area", "volume"), [(0.0, 50.0), (-1.0, 50.0)])
 def test_airborne_bad_area(area: float, volume: float) -> None:
     l1, l2, t2 = np.full(16, 80.0), np.full(16, 30.0), np.full(16, 0.8)
     with pytest.raises(ValueError, match=r"'area' must be positive"):
-        building.lab_airborne_insulation(l1, l2, t2, area=area, volume=volume)
+        building.laboratory_airborne_insulation(l1, l2, t2, area=area, volume=volume)
 
 
 def test_airborne_bad_volume() -> None:
     l1, l2, t2 = np.full(16, 80.0), np.full(16, 30.0), np.full(16, 0.8)
     with pytest.raises(ValueError, match=r"'volume' must be positive"):
-        building.lab_airborne_insulation(l1, l2, t2, area=10.0, volume=-5.0)
+        building.laboratory_airborne_insulation(l1, l2, t2, area=10.0, volume=-5.0)
 
 
 def test_airborne_bad_t2() -> None:
@@ -261,20 +269,20 @@ def test_airborne_bad_t2() -> None:
     t2 = np.full(16, 0.8)
     t2[3] = 0.0
     with pytest.raises(ValueError, match=r"'t2' must contain positive, finite values"):
-        building.lab_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
+        building.laboratory_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
 
 
 def test_impact_t2_band_mismatch() -> None:
     li = np.full(16, 60.0)
     short_t2 = np.full(5, 0.8)
     with pytest.raises(ValueError, match=r"'t2' must share the band count"):
-        building.lab_impact_insulation(li, short_t2, volume=50.0)
+        building.laboratory_impact_insulation(li, short_t2, volume=50.0)
 
 
 def test_impact_bad_volume() -> None:
     li, t2 = np.full(16, 60.0), np.full(16, 0.8)
     with pytest.raises(ValueError, match=r"'volume' must be positive"):
-        building.lab_impact_insulation(li, t2, volume=0.0)
+        building.laboratory_impact_insulation(li, t2, volume=0.0)
 
 
 def test_background_shape_mismatch() -> None:
@@ -285,20 +293,22 @@ def test_background_shape_mismatch() -> None:
 
 
 def test_result_types() -> None:
-    a = building.lab_airborne_insulation(
+    a = building.laboratory_airborne_insulation(
         np.full(16, 80.0),
         np.full(16, 30.0),
         np.full(16, 0.8),
         area=10.0,
         volume=50.0,
     )
-    i = building.lab_impact_insulation(np.full(16, 60.0), np.full(16, 0.8), volume=50.0)
-    assert isinstance(a, building.LabAirborneInsulationResult)
-    assert isinstance(i, building.LabImpactInsulationResult)
+    i = building.laboratory_impact_insulation(
+        np.full(16, 60.0), np.full(16, 0.8), volume=50.0
+    )
+    assert isinstance(a, building.LaboratoryAirborneInsulationResult)
+    assert isinstance(i, building.LaboratoryImpactInsulationResult)
 
 
-def _airborne_result() -> building.LabAirborneInsulationResult:
-    return building.lab_airborne_insulation(
+def _airborne_result() -> building.LaboratoryAirborneInsulationResult:
+    return building.laboratory_airborne_insulation(
         np.linspace(90.0, 96.0, 16),
         np.linspace(50.0, 40.0, 16),
         np.full(16, 0.6),
@@ -307,8 +317,8 @@ def _airborne_result() -> building.LabAirborneInsulationResult:
     )
 
 
-def _impact_result() -> building.LabImpactInsulationResult:
-    return building.lab_impact_insulation(
+def _impact_result() -> building.LaboratoryImpactInsulationResult:
+    return building.laboratory_impact_insulation(
         np.linspace(70.0, 60.0, 16), np.full(16, 0.6), volume=50.0
     )
 
@@ -364,7 +374,7 @@ def test_absorption_with_an_extra_axis_is_refused(build: Callable[[], Any]) -> N
 def test_airborne_non_finite_band_is_refused(field: str) -> None:
     """A NaN band cannot exist on a result the fiche will print as measured.
 
-    ``lab_airborne_insulation`` only emits finite values (its levels are
+    ``laboratory_airborne_insulation`` only emits finite values (its levels are
     checked finite, ``A`` comes from a positive ``T`` and ``V``), so a NaN is
     always a construction mistake -- and the verbose fiche printed it as a
     measured ``A`` in the band table while the boxed ``Rw (C; Ctr)`` beside
@@ -375,7 +385,7 @@ def test_airborne_non_finite_band_is_refused(field: str) -> None:
     bad[3] = np.nan
     with pytest.raises(
         ValueError,
-        match=rf"LabAirborneInsulationResult: '{field}' must contain only finite",
+        match=rf"LaboratoryAirborneInsulationResult: '{field}' must contain only finite",
     ):
         dataclasses.replace(res, **{field: bad})
 
@@ -388,13 +398,13 @@ def test_impact_non_finite_band_is_refused(field: str) -> None:
     bad[3] = np.nan
     with pytest.raises(
         ValueError,
-        match=rf"LabImpactInsulationResult: '{field}' must contain only finite",
+        match=rf"LaboratoryImpactInsulationResult: '{field}' must contain only finite",
     ):
         dataclasses.replace(res, **{field: bad})
 
 
 def test_plot_without_rating_raises() -> None:
-    res = building.lab_airborne_insulation(
+    res = building.laboratory_airborne_insulation(
         np.full(18, 80.0),
         np.full(18, 30.0),
         np.full(18, 0.8),
@@ -425,7 +435,7 @@ def test_reference_element_airborne_end_to_end(element: str) -> None:
     core = [table[f] for f in ref.ISO717_2_REFERENCE_FLOOR_FREQ]
     r = np.asarray(core, dtype=float)
     printed = ref.ISO717_1_TABLE_E1_PRINTED[element]
-    res = building.lab_airborne_insulation(
+    res = building.laboratory_airborne_insulation(
         np.full(16, 90.0), 90.0 - r, np.full(16, 0.8), area=10.0, volume=50.0
     )
     np.testing.assert_allclose(res.r, r, atol=1e-9)
@@ -447,7 +457,7 @@ def test_reference_floor_impact_end_to_end(floor: str) -> None:
     """
     ln = np.asarray(list(building.IMPACT_REFERENCE_FLOORS[floor].values()))
     (lnw, _), (ci, _) = ref.ISO717_2_TABLE4_PRINTED[floor]
-    res = building.lab_impact_insulation(ln, np.full(16, 0.5), volume=31.25)
+    res = building.laboratory_impact_insulation(ln, np.full(16, 0.5), volume=31.25)
     np.testing.assert_allclose(res.l_n, ln, atol=1e-9)
     assert res.rating is not None
     assert (res.rating.rating, res.rating.ci) == (lnw, ci)
@@ -457,13 +467,13 @@ def test_reference_floor_impact_end_to_end(floor: str) -> None:
     ("call", "shape"),
     [
         (
-            lambda t2: building.lab_airborne_insulation(
+            lambda t2: building.laboratory_airborne_insulation(
                 [80.0, 80.0, 80.0], [50.0, 50.0, 50.0], t2, area=10.0, volume=50.0
             ),
             (1, 3),
         ),
         (
-            lambda t2: building.lab_impact_insulation(
+            lambda t2: building.laboratory_impact_insulation(
                 [80.0, 80.0, 80.0], t2, volume=50.0
             ),
             (3, 1),

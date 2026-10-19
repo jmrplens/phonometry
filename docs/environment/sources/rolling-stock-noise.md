@@ -64,7 +64,7 @@ rng = np.random.default_rng(3095)
 p = 0.25 * np.sqrt(angle / np.pi + 1e-4) * rng.standard_normal(t.size)
 
 passby = environment.pass_by_measurement(p, fs, start_s=front_s, end_s=front_s + tp)
-print(round(tp, 2), round(passby.equivalent_level_db, 1), round(passby.max_level_db, 1))
+print(round(tp, 2), round(passby.equivalent_level_db, 1), round(passby.maximum_level_db, 1))
 # 4.5 81.3 81.9
 whole = environment.pass_by_measurement(
     p, fs, start_s=0.0, end_s=14.0, pass_by_time_s=tp,

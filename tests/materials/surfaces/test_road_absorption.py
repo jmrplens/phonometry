@@ -43,7 +43,7 @@ from phonometry.materials.surfaces.road_absorption import (
     in_situ_absorption_from_reflection,
     in_situ_absorption_spectrum,
     in_situ_reflection_factor,
-    max_sampled_area_radius,
+    maximum_sampled_area_radius,
     msa_major_axis,
     one_third_octave_absorption,
     power_reflection_coefficient,
@@ -79,7 +79,7 @@ def test_module_exports_match_all() -> None:
         "in_situ_absorption_coefficient",
         "absorption_reference_corrected",
         "geometric_spreading_factor_angle",
-        "max_sampled_area_radius",
+        "maximum_sampled_area_radius",
         "spot_tube_upper_frequency",
         "spot_internal_loss_correction",
     ):
@@ -416,7 +416,7 @@ def test_insitu_absorption_spectrum_plot_returns_axes() -> None:
 # --------------------------------------------------------------------------- #
 def test_msa_radius_annex_a_oracle() -> None:
     # ds=1.25, dm=0.25, c=340, Tw=5 ms -> r ~ 1.34 m (Annex A worked example).
-    r = max_sampled_area_radius(
+    r = maximum_sampled_area_radius(
         5e-3,
         source_height_m=1.25,
         microphone_height_m=0.25,
@@ -436,7 +436,7 @@ def test_msa_major_axis_reduces_to_normal_at_zero_projection() -> None:
 
 def test_msa_guards() -> None:
     with pytest.raises(ValueError, match="'window_width' must be positive"):
-        max_sampled_area_radius(0.0)
+        maximum_sampled_area_radius(0.0)
     with pytest.raises(ValueError, match="'projected_distance' must be non-negative"):
         msa_major_axis(5e-3, -1.0)
 
@@ -525,7 +525,7 @@ def test_public_exports() -> None:
         "in_situ_absorption_coefficient",
         "absorption_reference_corrected",
         "one_third_octave_absorption",
-        "max_sampled_area_radius",
+        "maximum_sampled_area_radius",
         "msa_major_axis",
         "spot_tube_upper_frequency",
         "spot_microphone_spacing_bounds",

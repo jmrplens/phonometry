@@ -145,7 +145,7 @@ averages.
 ```python
 pass_by_regression(
     speeds_kmh: ArrayLike,
-    max_levels_db: ArrayLike,
+    maximum_levels_db: ArrayLike,
     *,
     vehicle_category: str,
     road_speed_category: str,
@@ -171,7 +171,7 @@ stay on the result.
 | Name | Description |
 | :--- | :--- |
 | `speeds_kmh` | The speed of each pass-by, in km/h, measured as the vehicle midpoint passes the microphone (8.4). |
-| `max_levels_db` | The maximum A-weighted sound pressure level of each pass-by, time weighting F, in decibels, in the same order. |
+| `maximum_levels_db` | The maximum A-weighted sound pressure level of each pass-by, time weighting F, in decibels, in the same order. |
 | `vehicle_category` | `"1"` (cars), `"2a"` (dual-axle heavy vehicles) or `"2b"` (multi-axle heavy vehicles). |
 | `road_speed_category` | `"low"`, `"medium"` or `"high"` (3.3), which picks the reference speed. |
 
@@ -190,7 +190,7 @@ PassByRegression(
     vehicle_category: str,
     road_speed_category: str,
     speeds_kmh: NDArray[np.float64],
-    max_levels_db: NDArray[np.float64],
+    maximum_levels_db: NDArray[np.float64],
     reference_speed_kmh: float,
     intercept_db: float,
     slope_db_per_decade: float,
@@ -221,7 +221,7 @@ spreads printed beside them (the errata registry has the arithmetic).
 | `vehicle_category` | `"1"`, `"2a"` or `"2b"`. |
 | `road_speed_category` | `"low"`, `"medium"` or `"high"`. |
 | `speeds_kmh` | The measured speed of each pass-by, in km/h, read-only. |
-| `max_levels_db` | The maximum A-weighted level of each pass-by, time weighting F, in decibels, read-only. |
+| `maximum_levels_db` | The maximum A-weighted level of each pass-by, time weighting F, in decibels, read-only. |
 | `reference_speed_kmh` | The Table 1 reference speed of the category, in km/h. |
 | `intercept_db` | $a$, the ordinate of the line at 1 km/h, in decibels. |
 | `slope_db_per_decade` | $b$, in decibels per decade of speed. |
@@ -260,11 +260,17 @@ The mean of the variable the line is fitted in, converted back, as
 Annex E prints it ("value converted from the logarithm of speed"). The
 line passes through it at `mean_level_db`.
 
-### PassByRegression.meets_minimum_count
+### PassByRegression.meets_min_count
 
 *property*
 
 Whether the category has the vehicles 7.3 asks for classification.
+
+### PassByRegression.n_vehicles
+
+*property*
+
+How many pass-bys the line was fitted through.
 
 ### PassByRegression.plot()
 
@@ -311,12 +317,6 @@ $10^{\overline{\lg v} \pm k s}$ with $s$ the standard
 deviation of $\lg v$ and $k$ 1,5 for cars and 1 for heavy
 vehicles ([`SPB_SPEED_WINDOW_STANDARD_DEVIATIONS`](/phonometry/reference/api/environment/statistical-pass-by/#spb_speed_window_standard_deviations)).
 
-### PassByRegression.vehicle_count
-
-*property*
-
-How many pass-bys the line was fitted through.
-
 ### PassByRegression.vehicle_sound_level_db
 
 *property*
@@ -339,12 +339,12 @@ SPB_ANNEX_D_SURFACES_DB = {'A1': {'1': 76.6, '2a': 81.1, '2b': 84.1}, 'A2': {'1'
 SPB_CONFIDENCE_INTERVALS_DB = {'1': 0.3, '2a': 0.7, '2b': 0.7}
 ```
 
-## SPB_MINIMUM_VEHICLE_COUNTS
+## SPB_MIN_VEHICLE_COUNTS
 
 *Constant* (`mapping`).
 
 ```python
-SPB_MINIMUM_VEHICLE_COUNTS = {'1': 100, '2a': 30, '2b': 30, '2': 80}
+SPB_MIN_VEHICLE_COUNTS = {'1': 100, '2a': 30, '2b': 30, '2': 80}
 ```
 
 ## SPB_NORMALIZED_REFERENCE_DB
@@ -417,7 +417,7 @@ SPB_WEIGHTING_FACTORS = {'low': {'1': 0.9, '2a': 0.075, '2b': 0.025}, 'medium': 
 statistical_pass_by(
     vehicle_categories: ArrayLike,
     speeds_kmh: ArrayLike,
-    max_levels_db: ArrayLike,
+    maximum_levels_db: ArrayLike,
     *,
     road_speed_category: str,
     corrected_vehicle_sound_levels_db: Mapping[str, float] | None = None,
@@ -447,9 +447,9 @@ speed windows are judged, kept on the result and emitted as
 | :--- | :--- |
 | `vehicle_categories` | The category of each pass-by, `"1"`, `"2a"` or `"2b"`. |
 | `speeds_kmh` | The speed of each pass-by, in km/h. |
-| `max_levels_db` | The maximum A-weighted level of each pass-by, time weighting F, in decibels. |
+| `maximum_levels_db` | The maximum A-weighted level of each pass-by, time weighting F, in decibels. |
 | `road_speed_category` | `"low"`, `"medium"` or `"high"` (3.3). |
-| `corrected_vehicle_sound_levels_db` | Vehicle sound levels corrected to [`SPB_REFERENCE_AIR_TEMPERATURE_C`](/phonometry/reference/api/environment/statistical-pass-by/#spb_reference_air_temperature_c) by a method of the caller's choosing, keyed by category, for which the index is also computed, from the levels rounded to one decimal. 9.4 gives no method. To correct each pass-by instead, which 9.4 prefers, correct `max_levels_db` and call this again. |
+| `corrected_vehicle_sound_levels_db` | Vehicle sound levels corrected to [`SPB_REFERENCE_AIR_TEMPERATURE_C`](/phonometry/reference/api/environment/statistical-pass-by/#spb_reference_air_temperature_c) by a method of the caller's choosing, keyed by category, for which the index is also computed, from the levels rounded to one decimal. 9.4 gives no method. To correct each pass-by instead, which 9.4 prefers, correct `maximum_levels_db` and call this again. |
 | `reference_db` | The reference surface of clause 10: either its SPBI in decibels, used as given, or its three vehicle sound levels keyed by category (for instance [`SPB_NORMALIZED_REFERENCE_DB`](/phonometry/reference/api/environment/statistical-pass-by/#spb_normalized_reference_db)), whose index is then computed from the levels rounded to one decimal, with the same weighting factors. |
 | `weighting_factors` | Other proportions of the three categories (9.5); Table 1 when omitted. |
 
@@ -566,12 +566,6 @@ but that can be enough to move the reported digit: for the lines Annex
 E prints, this is 79,985 dB, which would print 80,0 dB, where the annex
 prints 79,9 dB.
 
-### StatisticalPassByResult.heavy_vehicle_count
-
-*property*
-
-Dual-axle and multi-axle heavy vehicles together, as 7.3 counts them.
-
 ### StatisticalPassByResult.index_confidence_interval_db
 
 *property*
@@ -588,11 +582,17 @@ each category's [`PassByRegression.confidence_interval_db`](/phonometry/referenc
 three categories are measured on different vehicles and are taken as
 independent.
 
-### StatisticalPassByResult.meets_minimum_counts
+### StatisticalPassByResult.meets_min_counts
 
 *property*
 
 Whether every count of 7.3 is met, the heavy vehicles together included.
+
+### StatisticalPassByResult.n_heavy_vehicles
+
+*property*
+
+Dual-axle and multi-axle heavy vehicles together, as 7.3 counts them.
 
 ### StatisticalPassByResult.plot()
 

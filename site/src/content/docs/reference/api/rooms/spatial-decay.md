@@ -152,7 +152,7 @@ Does the source stand clear of the background? 5.1.4.
 
 The clause asks for 10 dB at every position and in every octave band the
 curve is measured over. Between 10 dB and 6 dB it asks for the background
-correction of ISO 3744 ([`phonometry.emission.background_correction`](/phonometry/reference/api/building/lab-insulation/#background_correction))
+correction of ISO 3744 ([`phonometry.emission.background_correction`](/phonometry/reference/api/building/laboratory-insulation/#background_correction))
 before the levels are used; at 6 dB or less it asks for neither, because
 there is no longer a source level to correct towards.
 

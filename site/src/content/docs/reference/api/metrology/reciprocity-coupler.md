@@ -148,7 +148,7 @@ values were computed with.
 ## CapillaryTube
 
 ```python
-CapillaryTube(length_m: float, radius_m: float, count: int = 1)
+CapillaryTube(length_m: float, radius_m: float, n_tubes: int = 1)
 ```
 
 Identical open capillary tubes that equalise the static pressure of a
@@ -160,7 +160,7 @@ coupler (IEC 61094-2:2009 5.6 and Annex B).
 | :--- | :--- |
 | `length_m` | $l_\mathrm{C}$, the length of each tube, in m. |
 | `radius_m` | $a_\mathrm{t}$, its radius, in m. B.1 notes the impedance goes as the fourth power of it, and that a flow calibration may be needed to know the effective radius of a tube that is not circular. |
-| `count` | $n$, the number of identical tubes. |
+| `n_tubes` | $n$, the number of identical tubes. |
 
 ## CapillaryTubeImpedance
 

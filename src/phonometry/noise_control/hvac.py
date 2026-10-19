@@ -583,11 +583,11 @@ def _octave_slots(
 
 #: What an HVAC spectrum holds: "attenuation" (insertion loss/attenuation, dB)
 #: or "sound_power_level" (regenerated noise, dB re 1e-12 W).
-HvacQuantity = Literal["attenuation", "sound_power_level"]
+HVACQuantity = Literal["attenuation", "sound_power_level"]
 
 
 @dataclass(frozen=True)
-class HvacSpectrumResult(OwnsArrays):
+class HVACSpectrumResult(OwnsArrays):
     """A per-frequency HVAC quantity (attenuation or regenerated power level).
 
     :ivar frequencies: Frequencies ``f``, Hz.
@@ -600,7 +600,7 @@ class HvacSpectrumResult(OwnsArrays):
 
     frequencies: np.ndarray
     values: np.ndarray
-    quantity: HvacQuantity
+    quantity: HVACQuantity
     label: str
 
     def __post_init__(self) -> None:
@@ -720,8 +720,8 @@ def end_reflection_loss(
     method: str = "bies",
     speed_of_sound: float = _C_AIR,
     aspect_ratio: float = 1.0,
-    maximum_reduction_db: float | None = _VDI2081_END_REFLECTION_CAP,
-) -> HvacSpectrumResult:
+    max_reduction_db: float | None = _VDI2081_END_REFLECTION_CAP,
+) -> HVACSpectrumResult:
     """Duct end reflection loss (Bies Table 8.14, ASHRAE; or Long's closed form).
 
     The low-frequency reflection of sound back up a duct at its open
@@ -747,14 +747,14 @@ def end_reflection_loss(
         or ``"vdi2081"`` (VDI 2081 Part 1 Figure 28).
     :param aspect_ratio: **VDI 2081 only.** Nozzle length over height ``m``
         (default 1, a square opening). Figure 28 is drawn from 1 to 30.
-    :param maximum_reduction_db: **VDI 2081 only.** Ceiling on the reduction,
+    :param max_reduction_db: **VDI 2081 only.** Ceiling on the reduction,
         dB (default 15). Section 6.6 says the theoretical value is not reached
         because the duct walls radiate what the nozzle reflects, and the
         guideline's own worked example applies exactly this cap. ``None``
         returns the uncapped closed form.
     :param speed_of_sound: Speed of sound ``c``, m/s (used by the closed form;
         the table is indexed by frequency directly).
-    :return: A :class:`HvacSpectrumResult` of the reflection loss, dB.
+    :return: A :class:`HVACSpectrumResult` of the reflection loss, dB.
     """
     if method == "vdi2081":
         bands = _frequencies(frequencies)
@@ -771,11 +771,11 @@ def end_reflection_loss(
             aspect_ratio=require_positive(aspect_ratio, "aspect_ratio"),
             speed_of_sound=require_positive(speed_of_sound, "speed_of_sound"),
         )
-        if maximum_reduction_db is not None:
+        if max_reduction_db is not None:
             values = np.minimum(
-                values, require_positive(maximum_reduction_db, "maximum_reduction_db")
+                values, require_positive(max_reduction_db, "max_reduction_db")
             )
-        return HvacSpectrumResult(
+        return HVACSpectrumResult(
             frequencies=bands,
             values=values,
             quantity="attenuation",
@@ -806,7 +806,7 @@ def end_reflection_loss(
         [np.interp(np.log(d_mm), log_d, table[:, j]) for j in range(table.shape[1])]
     )
     values = np.interp(np.log(f), log_f_band, per_band)
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=f,
         values=values,
         quantity="attenuation",
@@ -864,7 +864,7 @@ def _vdi2081_bend_result(
     lined: bool,
     lined_side: str,
     speed_of_sound: float,
-) -> HvacSpectrumResult:
+) -> HVACSpectrumResult:
     """Pick the Table 7 row the arguments describe and shift it into place."""
     side = require_choice(lined_side, "lined_side", ("both", "one"))
     size = require_positive(width, "width")
@@ -872,7 +872,7 @@ def _vdi2081_bend_result(
     shape, key = _vdi2081_bend_row(
         bend_type=bend_type, vanes=vanes, lined=lined, lined_side=side
     )
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=bands,
         values=_vdi2081_bend(
             bands, bend_type=key, shape=shape, size=size, speed_of_sound=c
@@ -892,7 +892,7 @@ def elbow_insertion_loss(
     speed_of_sound: float = _C_AIR,
     model: str = "ashrae",
     lined_side: str = "both",
-) -> HvacSpectrumResult:
+) -> HVACSpectrumResult:
     r"""Duct bend/elbow insertion loss per bend, by either method.
 
     Indexed by the frequency-to-width ratio :math:`W / \lambda`
@@ -927,7 +927,7 @@ def elbow_insertion_loss(
         which Table 7 tabulates separately. Ignored unless ``lined``.
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :param model: ``"ashrae"`` (default) or ``"vdi2081"``.
-    :return: A :class:`HvacSpectrumResult` of the insertion loss, dB per bend.
+    :return: A :class:`HVACSpectrumResult` of the insertion loss, dB per bend.
     """
     scheme = require_choice(model, "model", ("ashrae", "vdi2081"))
     if scheme == "vdi2081":
@@ -961,7 +961,7 @@ def elbow_insertion_loss(
     idx = np.searchsorted(_ELBOW_WL_UPPER, wl, side="right")
     idx = np.clip(idx, 0, col.size - 1)
     values = col[idx]
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=f,
         values=values,
         quantity="attenuation",
@@ -1030,7 +1030,7 @@ def flow_noise_straight_duct(
     frequencies: ArrayLike,
     flow_velocity: float,
     area: float,
-) -> HvacSpectrumResult:
+) -> HVACSpectrumResult:
     r"""Flow-generated octave-band sound power of a straight duct (VDI 2081-1, 5.2.1).
 
     .. math::
@@ -1048,7 +1048,7 @@ def flow_noise_straight_duct(
     :param frequencies: Octave-band centre frequencies ``f_m``, Hz (1-D array).
     :param flow_velocity: Mean flow speed ``v`` in the duct, m/s.
     :param area: Duct cross-sectional area ``S``, m2.
-    :return: A :class:`HvacSpectrumResult` of the band sound power level,
+    :return: A :class:`HVACSpectrumResult` of the band sound power level,
         dB re 1e-12 W.
     """
     f = _frequencies(frequencies)
@@ -1061,7 +1061,7 @@ def flow_noise_straight_duct(
         - 2.0
         - 26.0 * np.log10(1.14 + 0.02 * f / u)
     )
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=f,
         values=lw,
         quantity="sound_power_level",
@@ -1128,7 +1128,7 @@ def flow_noise_bend(
     branch_diameter_m: float | None = None,
     approach_velocity: float | None = None,
     rounding_ratio: float | None = None,
-) -> HvacSpectrumResult:
+) -> HVACSpectrumResult:
     r"""Flow-generated octave-band sound power of a bend or junction, by either method.
 
     .. math::
@@ -1187,7 +1187,7 @@ def flow_noise_bend(
         ``r / d_a = 0,15``, so passing 0 asks for a sharp-cornered junction and
         is worth over 6 dB rather than nothing. Figure 18 is drawn from 0
         to 0,20.
-    :return: A :class:`HvacSpectrumResult` of the band sound power level,
+    :return: A :class:`HVACSpectrumResult` of the band sound power level,
         dB re 1e-12 W.
     """
     f = _frequencies(frequencies)
@@ -1201,7 +1201,7 @@ def flow_noise_bend(
             )
             raise ValueError(msg)
         approach = u if approach_velocity is None else approach_velocity
-        return HvacSpectrumResult(
+        return HVACSpectrumResult(
             frequencies=f,
             values=_vdi2081_branch_flow_noise(
                 f,
@@ -1221,7 +1221,7 @@ def flow_noise_bend(
     lws = 30.0 * np.log10(u) + 10.0 * np.log10(s) + 10.0 * np.log10(rho) + 117.0
     ns = f * h / u
     lw = lws - 10.0 * np.log10(1.0 + 0.165 * ns**2) + 30.0 * np.log10(u) - 103.0
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=f,
         values=lw,
         quantity="sound_power_level",
@@ -1232,32 +1232,32 @@ def flow_noise_bend(
 # ---------------------------------------------------------------------------
 # Fan sound power (Long Chapter 13)
 # ---------------------------------------------------------------------------
-def blade_passing_frequency(rotational_speed_rpm: float, blades: int) -> float:
+def blade_passing_frequency(rotational_speed_rpm: float, n_blades: int) -> float:
     r"""Blade passing frequency (Long Eq. 13.4).
 
     :math:`f_{bp} = \mathrm{rpm} \times \mathrm{blades} / 60`.
 
     :param rotational_speed_rpm: Fan speed, revolutions per minute.
-    :param blades: Number of impeller blades.
+    :param n_blades: Number of impeller blades.
     :return: The blade passing frequency, Hz.
-    :raises ValueError: If ``blades`` is not a positive integer.
+    :raises ValueError: If ``n_blades`` is not a positive integer.
     """
     rpm = require_positive(rotational_speed_rpm, "rotational_speed_rpm")
-    require_scalar(blades, "blades")
-    if blades <= 0 or not float(blades).is_integer():
-        msg = "'blades' must be a positive integer."
+    require_scalar(n_blades, "n_blades")
+    if n_blades <= 0 or not float(n_blades).is_integer():
+        msg = "'n_blades' must be a positive integer."
         raise ValueError(msg)
-    return rpm * float(blades) / 60.0
+    return rpm * float(n_blades) / 60.0
 
 
-class HvacWarning(PhonometryWarning):
+class HVACWarning(PhonometryWarning):
     """An HVAC input outside the span the table it feeds was tabulated from."""
 
 
 #: The lowest relative efficiency Long Table 13.6 tabulates, in per cent.
 #: Below it the table has one catch-all row, which is also where a caller who
 #: passed a fraction rather than a percentage lands. That landing is what
-#: :class:`HvacWarning` announces, since the two cases are indistinguishable
+#: :class:`HVACWarning` announces, since the two cases are indistinguishable
 #: from the value alone.
 _TABLE_13_6_FLOOR_PERCENT = 50.0
 
@@ -1292,7 +1292,7 @@ def fan_efficiency_correction(*, relative_efficiency_percent: float) -> float:
             f"Table 13.6 is tabulated from, so the table's worst-case "
             f"correction is returned. A fraction such as 0,8 lands here; this "
             f"argument is a percentage.",
-            HvacWarning,
+            HVACWarning,
             stacklevel=2,
         )
     for lower, correction in _EFFICIENCY_CORRECTION:
@@ -1309,7 +1309,7 @@ def _vdi2081_fan_spectrum(
     fan_total_pressure_pa: float,
     fan_speed_rpm: float,
     specific_sound_power_level: float | None,
-    blade_count: int | None,
+    n_blades: int | None,
     relative_flow: float,
 ) -> NDArray[np.float64]:
     """The VDI 2081 Part 1 Section 4.3 octave spectrum, dB re 1e-12 W.
@@ -1353,8 +1353,8 @@ def _vdi2081_fan_spectrum(
     off_duty = a0 + a1 * ratio + a2 * ratio**2 + a3 * ratio**3
 
     spectrum = overall + shape + off_duty
-    if blade_count is not None:
-        blades = require_positive(blade_count, "blade_count")
+    if n_blades is not None:
+        blades = require_positive(n_blades, "n_blades")
         passing = speed * blades / 60.0
         nearest = int(np.argmin(np.abs(np.log2(passing / bands))))
         spectrum[nearest] += blade_allowance
@@ -1371,7 +1371,7 @@ def fan_sound_power(
     relative_efficiency_percent: float = ...,
     blade_frequency: float | None = ...,
     frequencies: ArrayLike | None = ...,
-) -> HvacSpectrumResult: ...
+) -> HVACSpectrumResult: ...
 
 
 @overload
@@ -1383,10 +1383,10 @@ def fan_sound_power(
     assembly: str,
     fan_speed_rpm: float,
     specific_sound_power_level: float | None = ...,
-    blade_count: int | None = ...,
+    n_blades: int | None = ...,
     relative_flow: float = ...,
     frequencies: ArrayLike | None = ...,
-) -> HvacSpectrumResult: ...
+) -> HVACSpectrumResult: ...
 
 
 # Two models with two argument groups, and the overloads above fix which
@@ -1403,10 +1403,10 @@ def fan_sound_power(  # noqa: PLR0913
     assembly: str | None = None,
     fan_speed_rpm: float | None = None,
     specific_sound_power_level: float | None = None,
-    blade_count: int | None = None,
+    n_blades: int | None = None,
     relative_flow: float = 1.0,
     frequencies: ArrayLike | None = None,
-) -> HvacSpectrumResult:
+) -> HVACSpectrumResult:
     r"""Octave-band fan sound power from the operating point, by either method.
 
     Two schools of calculation answer the same question and do not agree on
@@ -1485,7 +1485,7 @@ def fan_sound_power(  # noqa: PLR0913
         unknown). Table 13.6 is tabulated from 50 % up, so a fraction such as
         0,8 falls through to the table's bottom row and returns its worst-case
         16 dB correction instead of the 6 dB that 80 % earns. That is what
-        :class:`HvacWarning` says when it fires below the floor.
+        :class:`HVACWarning` says when it fires below the floor.
     :param blade_frequency: **ASHRAE only.** Blade passing frequency ``f_bp``,
         Hz (from
         :func:`blade_passing_frequency`). ``None`` (default) places the
@@ -1504,7 +1504,7 @@ def fan_sound_power(  # noqa: PLR0913
         representative value of the assembly, 34, 36 or 42 dB. Section 4.3.3
         says a fan can sit up to 7 dB above its assembly average at the
         optimum duty point, so a manufacturer's own value belongs here.
-    :param blade_count: **VDI 2081 only.** Number of impeller blades ``z``,
+    :param n_blades: **VDI 2081 only.** Number of impeller blades ``z``,
         which places the blade-frequency allowance of Section 4.3.4 in the
         octave holding ``n z / 60``. ``None`` (default) omits it. The
         allowance is nought for assemblies RR and T built to the state of the
@@ -1513,7 +1513,7 @@ def fan_sound_power(  # noqa: PLR0913
         efficiency point, ``\dot{V} / \dot{V}_\mathrm{opt}`` (default 1).
     :param frequencies: Octave-band centres, Hz; ``None`` (default) uses the
         63 Hz to 8 kHz bands of :data:`OCTAVE_BANDS`.
-    :return: An :class:`HvacSpectrumResult` of the band sound power level,
+    :return: An :class:`HVACSpectrumResult` of the band sound power level,
         dB re 1e-12 W.
     """
     scheme = require_choice(model, "model", ("ashrae", "vdi2081"))
@@ -1531,7 +1531,7 @@ def fan_sound_power(  # noqa: PLR0913
             raise ValueError(msg)
         group = require_choice(assembly, "assembly", tuple(_VDI2081_ASSEMBLY))
         dpt = require_positive(fan_total_pressure_pa, "fan_total_pressure_pa")
-        return HvacSpectrumResult(
+        return HVACSpectrumResult(
             frequencies=f,
             values=_vdi2081_fan_spectrum(
                 f,
@@ -1540,7 +1540,7 @@ def fan_sound_power(  # noqa: PLR0913
                 fan_total_pressure_pa=dpt,
                 fan_speed_rpm=fan_speed_rpm,
                 specific_sound_power_level=specific_sound_power_level,
-                blade_count=blade_count,
+                n_blades=n_blades,
                 relative_flow=relative_flow,
             ),
             quantity="sound_power_level",
@@ -1567,7 +1567,7 @@ def fan_sound_power(  # noqa: PLR0913
     )
 
     lw = _FAN_LEVEL_CORRECTION[kind][idx] + duty + c_eff + increment[idx]
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=f,
         values=lw,
         quantity="sound_power_level",
@@ -1578,7 +1578,7 @@ def fan_sound_power(  # noqa: PLR0913
 def octave_band_limits(
     a_weighted_limit_db: float,
     frequencies: ArrayLike | None = None,
-) -> HvacSpectrumResult:
+) -> HVACSpectrumResult:
     r"""Octave limits from an A-weighted room requirement (VDI 2081 Part 2 Eq. (1)).
 
     .. math::
@@ -1601,7 +1601,7 @@ def octave_band_limits(
         meet ``L_A``, dB.
     :param frequencies: Octave-band centres, Hz; ``None`` (default) uses the
         63 Hz to 8 kHz bands of :data:`OCTAVE_BANDS`.
-    :return: An :class:`HvacSpectrumResult` of the per-band limit, dB.
+    :return: An :class:`HVACSpectrumResult` of the per-band limit, dB.
     """
     f, idx = _octave_slots(frequencies)
     require_scalar(a_weighted_limit_db, "a_weighted_limit_db")
@@ -1609,7 +1609,7 @@ def octave_band_limits(
     if not math.isfinite(limit):
         msg = "'a_weighted_limit_db' must be finite."
         raise ValueError(msg)
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=f,
         values=limit + VDI2081_SPECTRAL_CORRECTION[idx],
         quantity="sound_power_level",
@@ -1619,7 +1619,7 @@ def octave_band_limits(
 
 def fan_casing_attenuation(
     frequencies: ArrayLike | None = None,
-) -> HvacSpectrumResult:
+) -> HVACSpectrumResult:
     """Fan-housing (casing) attenuation of the radiated power (Long Table 13.8).
 
     Subtracted from the sound power level of :func:`fan_sound_power` to
@@ -1633,10 +1633,10 @@ def fan_casing_attenuation(
 
     :param frequencies: Octave-band centres, Hz; ``None`` (default) uses
         :data:`OCTAVE_BANDS`.
-    :return: An :class:`HvacSpectrumResult` of the attenuation, dB.
+    :return: An :class:`HVACSpectrumResult` of the attenuation, dB.
     """
     f, idx = _octave_slots(frequencies)
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=f,
         values=_FAN_CASING_ATTENUATION[idx],
         quantity="attenuation",
@@ -1865,7 +1865,7 @@ def unlined_rectangular_duct_attenuation(
     *,
     wrapped: bool = False,
     model: str = "ashrae",
-) -> HvacSpectrumResult:
+) -> HVACSpectrumResult:
     r"""Attenuation of an unlined rectangular sheet-metal duct (Long Eqs. 14.9-14.11).
 
     Sound running down an unlined duct loses energy into the induced motion of
@@ -1895,7 +1895,7 @@ def unlined_rectangular_duct_attenuation(
         which doubles the 63 Hz to 250 Hz attenuation.
     :param model: ``"ashrae"`` (default, Reynolds) or ``"vdi2081"``
         (Table 5, the largest side length selecting the row).
-    :return: An :class:`HvacSpectrumResult` of the attenuation, dB.
+    :return: An :class:`HVACSpectrumResult` of the attenuation, dB.
     """
     scheme = require_choice(model, "model", ("ashrae", "vdi2081"))
     f = _frequencies(frequencies)
@@ -1909,7 +1909,7 @@ def unlined_rectangular_duct_attenuation(
         side = max(
             require_positive(width_m, "width_m"), require_positive(height_m, "height_m")
         )
-        return HvacSpectrumResult(
+        return HVACSpectrumResult(
             frequencies=f,
             values=_vdi2081_straight_run(
                 f,
@@ -1934,7 +1934,7 @@ def unlined_rectangular_duct_attenuation(
         low = 2.0 * low
     high = np.full_like(f, 0.02 * ps**0.8 * ell)
     values = np.where(f <= 250.0 * 1.05, low, high)
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=f,
         values=values,
         quantity="attenuation",
@@ -1951,7 +1951,7 @@ def unlined_circular_duct_attenuation(
     *,
     diameter_m: float | None = None,
     model: str = "ashrae",
-) -> HvacSpectrumResult:
+) -> HVACSpectrumResult:
     """Attenuation of an unlined circular sheet-metal duct (Long Table 14.1).
 
     A circular duct is far stiffer than a rectangular one in its breathing
@@ -1972,7 +1972,7 @@ def unlined_circular_duct_attenuation(
     :param diameter_m: **VDI 2081 only.** Internal diameter, m, which selects the
         Table 5 row. The table stops at 1,00 m.
     :param model: ``"ashrae"`` (default, Long Table 14.1) or ``"vdi2081"``.
-    :return: An :class:`HvacSpectrumResult` of the attenuation, dB.
+    :return: An :class:`HVACSpectrumResult` of the attenuation, dB.
     """
     scheme = require_choice(model, "model", ("ashrae", "vdi2081"))
     if scheme == "vdi2081":
@@ -1984,7 +1984,7 @@ def unlined_circular_duct_attenuation(
             raise ValueError(msg)
         bands = _frequencies(OCTAVE_BANDS if frequencies is None else frequencies)
         bore = require_positive(diameter_m, "diameter_m")
-        return HvacSpectrumResult(
+        return HVACSpectrumResult(
             frequencies=bands,
             values=_vdi2081_straight_run(
                 bands,
@@ -1999,7 +1999,7 @@ def unlined_circular_duct_attenuation(
         )
     f, idx = _octave_slots(frequencies)
     ell = require_positive(length, "length") / _M_PER_FT
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=f,
         values=_UNLINED_CIRCULAR_DB_PER_FT[idx] * ell,
         quantity="attenuation",
@@ -2015,7 +2015,7 @@ def lined_rectangular_duct_attenuation(
     lining_thickness_m: float,
     *,
     include_unlined: bool = False,
-) -> HvacSpectrumResult:
+) -> HVACSpectrumResult:
     r"""Insertion loss of a lined rectangular duct (Long Eq. 14.12, Table 14.2).
 
     The Reynolds (1990) regression :math:`R = B (P/S)^C t^D l`, with the duct
@@ -2037,7 +2037,7 @@ def lined_rectangular_duct_attenuation(
     :param include_unlined: Add the unlined-duct attenuation of
         :func:`unlined_rectangular_duct_attenuation`, the side-wall
         contribution the insertion-loss measurement subtracts out.
-    :return: An :class:`HvacSpectrumResult` of the attenuation, dB.
+    :return: An :class:`HVACSpectrumResult` of the attenuation, dB.
     """
     f, idx = _octave_slots(frequencies)
     ps = _perimeter_over_area(width_m, height_m)
@@ -2051,7 +2051,7 @@ def lined_rectangular_duct_attenuation(
             values
             + unlined_rectangular_duct_attenuation(f, width_m, height_m, length).values
         )
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=f,
         values=np.minimum(values, _LINED_DUCT_LIMIT),
         quantity="attenuation",
@@ -2067,7 +2067,7 @@ def lined_circular_duct_attenuation(
     diameter_m: float,
     length: float,
     lining_thickness_m: float,
-) -> HvacSpectrumResult:
+) -> HVACSpectrumResult:
     r"""Insertion loss of a lined circular duct (Long Eq. 14.13, Table 14.3).
 
     The Reynolds (1990) third-order regression
@@ -2085,7 +2085,7 @@ def lined_circular_duct_attenuation(
     :param diameter_m: Internal diameter ``d``, m.
     :param length: Duct run length ``l``, m.
     :param lining_thickness_m: Lining thickness ``t``, m.
-    :return: An :class:`HvacSpectrumResult` of the attenuation, dB.
+    :return: An :class:`HVACSpectrumResult` of the attenuation, dB.
     """
     f, idx = _octave_slots(frequencies)
     d_in = require_positive(diameter_m, "diameter_m") / _M_PER_IN
@@ -2094,7 +2094,7 @@ def lined_circular_duct_attenuation(
     a, b, c, d, e, g = (_LINED_ROUND_COEFFS[idx, j] for j in range(6))
     rate = a + b * t_in + c * t_in**2 + d * d_in + e * d_in**2 + g * d_in**3
     values = np.clip(rate * ell, 0.0, _LINED_DUCT_LIMIT)
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=f,
         values=values,
         quantity="attenuation",
@@ -2109,7 +2109,7 @@ def flexible_duct_insertion_loss(
     frequencies: ArrayLike | None,
     diameter_m: float,
     length: float,
-) -> HvacSpectrumResult:
+) -> HVACSpectrumResult:
     """Insertion loss of a lined round flexible duct (Long Table 14.4, ASHRAE 1995).
 
     The last run of a supply branch is usually flexible duct: a fabric liner
@@ -2126,7 +2126,7 @@ def flexible_duct_insertion_loss(
         ``None`` uses all seven tabulated bands.
     :param diameter_m: Internal diameter, m (100 mm to 406 mm tabulated).
     :param length: Duct run length, m (0.9 m to 3.7 m tabulated).
-    :return: An :class:`HvacSpectrumResult` of the insertion loss, dB.
+    :return: An :class:`HVACSpectrumResult` of the insertion loss, dB.
     """
     f, idx = _octave_slots(frequencies, _FLEX_BANDS)
     d_in = require_positive(diameter_m, "diameter_m") / _M_PER_IN
@@ -2145,7 +2145,7 @@ def flexible_duct_insertion_loss(
     values = np.array(
         [np.interp(np.log(d_in), log_d, per_diameter[:, j]) for j in range(idx.size)]
     )
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=f,
         values=values,
         quantity="attenuation",
@@ -2162,7 +2162,7 @@ def section_change_loss(
     upstream_size: float | None = None,
     speed_of_sound: float = _C_AIR,
     cap: float = _VDI2081_SECTION_CHANGE_CAP,
-) -> HvacSpectrumResult:
+) -> HVACSpectrumResult:
     r"""Reflection at a sudden change of duct section (VDI 2081 Part 1, 6.3).
 
     Figure 26 gives the reduction of the internal sound power level in closed
@@ -2207,7 +2207,7 @@ def section_change_loss(
         while the two agree.
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :param cap: The largest reduction to take, dB (default 5).
-    :return: An :class:`HvacSpectrumResult` of the reflection loss, dB.
+    :return: An :class:`HVACSpectrumResult` of the reflection loss, dB.
     :raises ValueError: If an area, a size, the speed of sound or the cap is
         not positive, the shape is unknown, a round duct's size contradicts
         its area, or a rectangular duct meeting a sudden increase is given no
@@ -2253,7 +2253,7 @@ def section_change_loss(
         size = given if given is not None else equivalent_diameter(s_1)
         values = np.where(f <= _vdi2081_limit_frequency(kind, size, c), reduction, 0.0)
     direction = "reduction" if ratio > 1.0 else "increase"
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=f,
         values=values,
         quantity="attenuation",
@@ -2341,7 +2341,7 @@ def end_reflection_loss_closed_form(
     *,
     termination: str = "flush",
     speed_of_sound: float = _C_AIR,
-) -> HvacSpectrumResult:
+) -> HVACSpectrumResult:
     r"""Duct end reflection loss in closed form (Long Eqs. 14.14-14.15, Reynolds).
 
     :math:`R = 10 \log_{10}[1 + (c / (\pi f d))^{1.88}]` for a duct terminated in
@@ -2363,7 +2363,7 @@ def end_reflection_loss_closed_form(
     :param termination: ``"flush"`` (flush with a wall or ceiling) or
         ``"free"`` (free space).
     :param speed_of_sound: Speed of sound ``c``, m/s.
-    :return: An :class:`HvacSpectrumResult` of the reflection loss, dB.
+    :return: An :class:`HVACSpectrumResult` of the reflection loss, dB.
     """
     f = _frequencies(frequencies)
     d = require_positive(diameter_m, "diameter_m")
@@ -2371,7 +2371,7 @@ def end_reflection_loss_closed_form(
     kind = require_choice(termination, "termination", ("flush", "free"))
     factor = 0.8 if kind == "flush" else 1.0
     values = 10.0 * np.log10(1.0 + (factor * c / (np.pi * f * d)) ** 1.88)
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=f,
         values=values,
         quantity="attenuation",
@@ -2397,7 +2397,7 @@ def splitter_silencer_insertion_loss(
     length: float,
     airway_widths: ArrayLike,
     splitter_thickness_m: float,
-) -> HvacSpectrumResult:
+) -> HVACSpectrumResult:
     r"""Insertion loss of a parallel-splitter (dissipative) silencer.
 
     A splitter silencer divides the duct into parallel airways separated by
@@ -2435,7 +2435,7 @@ def splitter_silencer_insertion_loss(
         they differ).
     :param splitter_thickness_m: Full thickness of a splitter baffle, m; the
         equivalent liner thickness of an airway is half of it.
-    :return: An :class:`HvacSpectrumResult` of the insertion loss, dB.
+    :return: An :class:`HVACSpectrumResult` of the insertion loss, dB.
     :raises ValueError: If any dimension is not positive, or if
         ``airway_widths`` is not a non-empty 1-D array.
     """
@@ -2458,7 +2458,7 @@ def splitter_silencer_insertion_loss(
     )
     values = -10.0 * np.log10(np.mean(10.0 ** (-per_airway / 10.0), axis=0))
     f, _ = _octave_slots(frequencies)
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=f,
         values=values,
         quantity="attenuation",
@@ -2479,7 +2479,7 @@ def silencer_self_noise(
     pressure_drop_pa: float | None = None,
     approach_area: float | None = None,
     airway_width: float | None = None,
-) -> HvacSpectrumResult:
+) -> HVACSpectrumResult:
     r"""Regenerated (self) noise of a splitter silencer (Long Eq. 14.31).
 
     Fry's (1988) estimate, for when manufacturer self-noise data is not
@@ -2509,7 +2509,7 @@ def silencer_self_noise(
     :param airway_velocity: Velocity ``V`` in the splitter airway, m/s.
     :param passages: Number of air passages ``N`` between the splitters.
     :param height_m: Silencer height ``H`` (or circumference, if round), m.
-    :return: An :class:`HvacSpectrumResult` of the band sound power level,
+    :return: An :class:`HVACSpectrumResult` of the band sound power level,
         dB re 1e-12 W.
     :raises ValueError: If ``passages`` is not a positive integer.
     :param model: ``"ashrae"`` (default, Long Eq. 14.31) or ``"vdi2081"``
@@ -2545,7 +2545,7 @@ def silencer_self_noise(
             raise ValueError(msg)
         bands = _frequencies(OCTAVE_BANDS if frequencies is None else frequencies)
         gap = require_positive(airway_width, "airway_width")
-        return HvacSpectrumResult(
+        return HVACSpectrumResult(
             frequencies=bands,
             values=_vdi2081_silencer_self_noise(
                 bands,
@@ -2570,7 +2570,7 @@ def silencer_self_noise(
         + 10.0 * np.log10(h_mm)
         - 45.0
     )
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=f,
         values=overall - _SILENCER_SELF_NOISE_CORRECTION[idx],
         quantity="sound_power_level",
@@ -2590,8 +2590,8 @@ def diffuser_sound_power(
     pressure_drop_pa: float,
     *,
     shape: str = "rectangular",
-    count: int = 1,
-) -> HvacSpectrumResult:
+    n_devices: int = 1,
+) -> HVACSpectrumResult:
     r"""Regenerated (self) noise of a grille, register or diffuser.
 
     Reynolds's estimate as Long Eqs. 13.27 to 13.33, for when the
@@ -2632,7 +2632,7 @@ def diffuser_sound_power(
     the mid and high bands.
 
     Several identical devices serving the same room add :math:`10 \log_{10} n`,
-    which is what ``count`` applies.
+    which is what ``n_devices`` applies.
 
     :param frequencies: Octave-band centres, Hz; ``None`` uses
         :data:`OCTAVE_BANDS`.
@@ -2641,10 +2641,10 @@ def diffuser_sound_power(
     :param pressure_drop_pa: Static pressure drop ``dP`` across the device, Pa.
     :param shape: ``"rectangular"`` (Eq. 13.31, includes slot diffusers) or
         ``"round"`` (Eq. 13.30).
-    :param count: Number of identical devices ``n`` in the room.
-    :return: An :class:`HvacSpectrumResult` of the band sound power level,
+    :param n_devices: Number of identical devices ``n`` in the room.
+    :return: An :class:`HVACSpectrumResult` of the band sound power level,
         dB re 1e-12 W.
-    :raises ValueError: If a dimension is not positive, ``count`` is not a
+    :raises ValueError: If a dimension is not positive, ``n_devices`` is not a
         positive integer or ``shape`` is unknown.
     """
     f = OCTAVE_BANDS if frequencies is None else _frequencies(frequencies)
@@ -2652,9 +2652,9 @@ def diffuser_sound_power(
     flow_cfm = require_positive(volume_flow, "volume_flow") / _M3S_PER_CFM
     drop_in_wg = require_positive(pressure_drop_pa, "pressure_drop_pa") / _PA_PER_IN_WG
     profile = require_choice(shape, "shape", ("rectangular", "round"))
-    require_scalar(count, "count")
-    if count <= 0 or not float(count).is_integer():
-        msg = "'count' must be a positive integer."
+    require_scalar(n_devices, "n_devices")
+    if n_devices <= 0 or not float(n_devices).is_integer():
+        msg = "'n_devices' must be a positive integer."
         raise ValueError(msg)
     # Eq. 13.28: Long prints "ft/min" under U_\mathrm{G} but defines it in the same
     # breath as Q / (60 S_\mathrm{G}), which is ft/s, the unit Eq. 13.27 declares and
@@ -2667,13 +2667,13 @@ def diffuser_sound_power(
         + 30.0 * np.log10(xi)
         + 60.0 * np.log10(velocity)
         - 31.3
-        + 10.0 * np.log10(float(count))
+        + 10.0 * np.log10(float(n_devices))
     )
     # Eqs. 13.32 and 13.33: the distance in octaves from the peak band.
     peak_band = float(np.round(np.log2(48.8 * velocity / 32.0)))
     a = peak_band - _octave_band_number(f)
     base = -5.82 if profile == "round" else -11.82
-    return HvacSpectrumResult(
+    return HVACSpectrumResult(
         frequencies=f,
         values=overall + base - 0.15 * a - 1.13 * a**2,
         quantity="sound_power_level",

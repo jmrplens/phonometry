@@ -37,7 +37,7 @@ import reference_data as ref
 
 from phonometry import ReportMetadata, building
 from phonometry.building.measurement.joint_insulation import (
-    LabJointInsulationResult,
+    LaboratoryJointInsulationResult,
 )
 
 if TYPE_CHECKING:
@@ -58,8 +58,10 @@ def _j2(measured: float, maximum: float) -> float:
 
 def _one_band(
     measured: float, maximum: float, **kwargs: bool
-) -> LabJointInsulationResult:
-    return building.lab_joint_insulation([measured], [maximum], [1000.0], **kwargs)
+) -> LaboratoryJointInsulationResult:
+    return building.laboratory_joint_insulation(
+        [measured], [maximum], [1000.0], **kwargs
+    )
 
 
 # --- Formula (J.1) -------------------------------------------------------------
@@ -149,11 +151,11 @@ def test_regimes_at_their_printed_bounds(margin: float, regime: str) -> None:
 def test_each_regime_gives_its_value() -> None:
     measured = np.array([45.0, 45.0, 45.0, 45.0])
     maximum = np.array([57.0, 52.0, 49.0, 46.5])
-    res = building.lab_joint_insulation(
+    res = building.laboratory_joint_insulation(
         measured, maximum, [500.0, 630.0, 800.0, 1000.0]
     )
     assert res.r_s_db == pytest.approx([45.0, _j2(45.0, 52.0), 46.3, 46.5], abs=1e-12)
-    assert res.minimum_value.tolist() == [False, False, True, True]
+    assert res.min_value.tolist() == [False, False, True, True]
 
 
 def test_six_decibels_reached_in_decimals_is_still_formula_j2() -> None:
@@ -189,7 +191,7 @@ def test_result_refuses_mismatched_columns() -> None:
     good = _one_band(45.0, 60.0)
     two_bands = np.array([500.0, 1000.0])
     with pytest.raises(ValueError, match="band"):
-        LabJointInsulationResult(
+        LaboratoryJointInsulationResult(
             frequencies=two_bands,
             r_s_measured_db=good.r_s_measured_db,
             r_s_max_db=good.r_s_max_db,
@@ -203,7 +205,7 @@ def test_result_refuses_mismatched_columns() -> None:
         )
 
 
-def _columns(good: LabJointInsulationResult) -> dict[str, object]:
+def _columns(good: LaboratoryJointInsulationResult) -> dict[str, object]:
     return {
         "frequencies": good.frequencies,
         "r_s_measured_db": good.r_s_measured_db,
@@ -222,7 +224,7 @@ def test_result_takes_no_regime() -> None:
     """The regime is read from the columns, so none can be handed in beside them."""
     columns = _columns(_one_band(45.0, 60.0))
     with pytest.raises(TypeError, match="regime"):
-        LabJointInsulationResult(**columns, regime=("maximum",))  # type: ignore[call-arg]
+        LaboratoryJointInsulationResult(**columns, regime=("maximum",))  # type: ignore[call-arg]
 
 
 @pytest.mark.parametrize(
@@ -240,7 +242,7 @@ def test_a_hand_built_result_reads_its_regime_from_its_columns(
 ) -> None:
     """The regime follows the measured and maximum indices and the J.1 rule."""
     columns = _columns(_one_band(45.0, maximum, limit_at_maximum=limit_at_maximum))
-    res = LabJointInsulationResult(**columns, limit_at_maximum=limit_at_maximum)  # type: ignore[arg-type]
+    res = LaboratoryJointInsulationResult(**columns, limit_at_maximum=limit_at_maximum)  # type: ignore[arg-type]
     assert res.regime == (regime,)
 
 
@@ -248,12 +250,12 @@ def test_a_hand_built_result_refuses_the_correction_of_another_rule() -> None:
     """Within 3 dB of the maximum, J.1 gives 1,3 dB or the maximum, not both."""
     columns = _columns(_one_band(45.0, 46.0, limit_at_maximum=True))
     with pytest.raises(ValueError, match="r_s_db"):
-        LabJointInsulationResult(**columns, limit_at_maximum=False)  # type: ignore[arg-type]
+        LaboratoryJointInsulationResult(**columns, limit_at_maximum=False)  # type: ignore[arg-type]
 
 
-def test_lab_joint_insulation_refuses_a_length_mismatch() -> None:
+def test_laboratory_joint_insulation_refuses_a_length_mismatch() -> None:
     with pytest.raises(ValueError, match="same shape"):
-        building.lab_joint_insulation([45.0, 46.0], [60.0], [500.0, 630.0])
+        building.laboratory_joint_insulation([45.0, 46.0], [60.0], [500.0, 630.0])
 
 
 # --- Single numbers ------------------------------------------------------------
@@ -262,7 +264,7 @@ def test_lab_joint_insulation_refuses_a_length_mismatch() -> None:
 def test_table_a1_of_iso_10140_2_rates_as_printed() -> None:
     """R'F of ISO 10140-2:2021 Table A.1 rates 59 (-2; -7) dB, uncorrected."""
     measured = np.asarray(ref.ISO10140_2_TABLE_A1_R_F)
-    res = building.lab_joint_insulation(measured, measured + 20.0, _BANDS)
+    res = building.laboratory_joint_insulation(measured, measured + 20.0, _BANDS)
     assert res.rating is not None
     got = (res.rating.rating, res.rating.c, res.rating.ctr)
     assert got == ref.ISO10140_2_TABLE_A1_RATING
@@ -273,8 +275,8 @@ def test_table_a1_of_iso_10140_2_rates_as_printed() -> None:
 
 def test_enlarged_range_terms_need_the_bands_to_5000_hz() -> None:
     measured = np.asarray(ref.ISO10140_2_TABLE_A1_R_F)
-    full = building.lab_joint_insulation(measured, measured + 20.0, _BANDS)
-    core = building.lab_joint_insulation(
+    full = building.laboratory_joint_insulation(measured, measured + 20.0, _BANDS)
+    core = building.laboratory_joint_insulation(
         measured[:16], measured[:16] + 20.0, _BANDS[:16]
     )
     extended = building.weighted_rating_extended(measured, _BANDS)
@@ -288,7 +290,9 @@ def test_enlarged_range_terms_need_the_bands_to_5000_hz() -> None:
 
 
 def test_no_rating_without_the_core_bands() -> None:
-    res = building.lab_joint_insulation([45.0] * 3, [60.0] * 3, [500.0, 630.0, 800.0])
+    res = building.laboratory_joint_insulation(
+        [45.0] * 3, [60.0] * 3, [500.0, 630.0, 800.0]
+    )
     assert res.rating is None
     assert res.r_s_w_db is None
     assert res.r_s_w_ctr_db is None
@@ -297,24 +301,24 @@ def test_no_rating_without_the_core_bands() -> None:
 
 def test_single_number_properties() -> None:
     measured = np.asarray(ref.ISO10140_2_TABLE_A1_R_F)
-    res = building.lab_joint_insulation(measured, measured + 20.0, _BANDS)
+    res = building.laboratory_joint_insulation(measured, measured + 20.0, _BANDS)
     assert (res.r_s_w_db, res.r_s_w_c_db, res.r_s_w_ctr_db) == (59, 57, 52)
 
 
 def test_maximum_of_the_arrangement_is_rated() -> None:
     maximum = np.asarray(ref.ISO10140_2_TABLE_A1_R_F)
-    res = building.lab_joint_insulation(maximum - 15.0, maximum, _BANDS)
+    res = building.laboratory_joint_insulation(maximum - 15.0, maximum, _BANDS)
     assert res.max_rating is not None
     assert res.max_rating.rating == ref.ISO10140_2_TABLE_A1_RATING[0]
 
 
-def _dip_case() -> LabJointInsulationResult:
+def _dip_case() -> LaboratoryJointInsulationResult:
     """A joint whose limiting bands 400 Hz to 800 Hz are indicative."""
     maximum = np.full(18, 70.0)
     maximum[6:10] = 44.0
     measured = maximum - 12.0
     measured[6:10] = 42.0
-    return building.lab_joint_insulation(measured, maximum, _BANDS)
+    return building.laboratory_joint_insulation(measured, maximum, _BANDS)
 
 
 def test_open_bands_rated_by_hand() -> None:
@@ -341,14 +345,16 @@ def test_open_bands_that_do_not_limit_leave_no_brackets() -> None:
     maximum = np.asarray(ref.ISO10140_2_TABLE_A1_R_F)
     measured = maximum - 15.0
     measured[-1] = maximum[-1] - 2.0
-    res = building.lab_joint_insulation(measured, maximum, _BANDS)
+    res = building.laboratory_joint_insulation(measured, maximum, _BANDS)
     assert res.open_band_rating is not None
     assert res.open_band_rating.open_frequencies_hz == (5000.0,)
     assert res.bracketed is False
 
 
 def test_every_band_open_is_unbounded() -> None:
-    res = building.lab_joint_insulation(np.full(18, 38.5), np.full(18, 40.0), _BANDS)
+    res = building.laboratory_joint_insulation(
+        np.full(18, 38.5), np.full(18, 40.0), _BANDS
+    )
     opened = res.open_band_rating
     assert opened is not None
     assert opened.r_s_w_db is None
@@ -366,7 +372,7 @@ def test_indicative_bands_are_read_on_the_measured_index() -> None:
     maximum = np.full(18, 60.0)
     measured = maximum - 12.0
     measured[7] = maximum[7] - 3.5
-    res = building.lab_joint_insulation(measured, maximum, _BANDS)
+    res = building.laboratory_joint_insulation(measured, maximum, _BANDS)
     assert res.regime[7] == "limit"
     assert res.r_s_max_db[7] - res.r_s_db[7] == pytest.approx(2.2)
     assert not res.indicative.any()
@@ -374,7 +380,7 @@ def test_indicative_bands_are_read_on_the_measured_index() -> None:
 
 
 def test_octave_bands_average_the_transmitted_power() -> None:
-    res = building.lab_joint_insulation(
+    res = building.laboratory_joint_insulation(
         [40.0, 43.0, 46.0], [80.0, 80.0, 80.0], [400.0, 500.0, 630.0]
     )
     centres, values = res.octave_bands()
@@ -468,10 +474,10 @@ def _series() -> building.JointGapSeries:
     widths = [8.0, 3.0, 5.0]
     drops = {3.0: 6.0, 5.0: 10.0, 8.0: 18.0}
     results = [
-        building.lab_joint_insulation(maximum - drops[w], maximum, _BANDS)
+        building.laboratory_joint_insulation(maximum - drops[w], maximum, _BANDS)
         for w in widths
     ]
-    return building.joint_gap_series(widths, results, minimum_gap_mm=3.0)
+    return building.joint_gap_series(widths, results, min_gap_mm=3.0)
 
 
 def test_series_is_sorted_by_width_and_defaults_to_five_millimetres() -> None:
@@ -501,7 +507,7 @@ def test_series_refuses_a_repeated_width() -> None:
 
 
 def test_series_refuses_a_result_without_rating() -> None:
-    bare = building.lab_joint_insulation([45.0], [60.0], [1000.0])
+    bare = building.laboratory_joint_insulation([45.0], [60.0], [1000.0])
     with pytest.raises(ValueError, match="rating"):
         building.joint_gap_series([5.0], [bare])
 
@@ -522,7 +528,7 @@ def test_series_measured_at_the_three_widths_of_j4_passes() -> None:
     check = building.check_joint_gap_series(_series())
     assert (
         check.nominal_measured,
-        check.minimum_measured,
+        check.min_measured,
         check.working_range_measured,
     ) == (True, True, True)
     assert check.passes is True
@@ -532,7 +538,7 @@ def test_series_without_the_working_range_end_fails() -> None:
     """J.4 c): the test "shall be repeated" at bn + 3, here 8 mm."""
     series = _series()
     short = building.joint_gap_series(
-        series.gap_widths_mm[:2], series.results[:2], minimum_gap_mm=3.0
+        series.gap_widths_mm[:2], series.results[:2], min_gap_mm=3.0
     )
     check = building.check_joint_gap_series(short)
     assert check.working_range_measured is False
@@ -545,8 +551,8 @@ def test_series_that_names_no_minimum_width_fails() -> None:
     series = _series()
     unnamed = building.joint_gap_series(series.gap_widths_mm, series.results)
     check = building.check_joint_gap_series(unnamed)
-    assert check.minimum_gap_mm is None
-    assert check.minimum_measured is False
+    assert check.min_gap_mm is None
+    assert check.min_measured is False
     assert check.passes is False
 
 
@@ -560,7 +566,7 @@ def test_series_width_within_the_reading_spread_counts(
         series.gap_widths_mm,
         series.results,
         nominal_gap_mm=nominal,
-        minimum_gap_mm=3.0,
+        min_gap_mm=3.0,
     )
     check = building.check_joint_gap_series(moved)
     assert check.nominal_measured is measured
@@ -576,7 +582,7 @@ def test_series_check_has_no_truth_value() -> None:
 # --- The form of Figure J.7 ------------------------------------------------------
 
 
-def _example_joint() -> LabJointInsulationResult:
+def _example_joint() -> LaboratoryJointInsulationResult:
     maximum = np.array(
         [40.2, 42.8, 45.1, 48.6, 51.9, 54.3, 56.8, 58.9, 60.7]
         + [62.4, 63.8, 65.1, 66.2, 67.0, 67.6, 68.1, 68.5, 69.0]
@@ -585,7 +591,9 @@ def _example_joint() -> LabJointInsulationResult:
         [33.4, 35.1, 37.9, 40.6, 43.0, 45.2, 46.1, 46.8, 47.0]
         + [46.2, 45.1, 46.9, 49.8, 52.6, 55.4, 58.9, 63.1, 66.2]
     )
-    return building.lab_joint_insulation(measured, maximum, _BANDS, joint_length_m=5.4)
+    return building.laboratory_joint_insulation(
+        measured, maximum, _BANDS, joint_length_m=5.4
+    )
 
 
 def _text(path: Path) -> str:
@@ -656,7 +664,7 @@ def test_joint_form_shows_the_enlarged_range_term_that_moved(
     maximum[-2:] = 30.0
     measured = maximum - 15.0
     measured[-2:] = 29.0
-    res = building.lab_joint_insulation(measured, maximum, _BANDS)
+    res = building.laboratory_joint_insulation(measured, maximum, _BANDS)
     assert res.bracketed is True
     out = tmp_path / "wide.pdf"
     res.report(str(out))
@@ -719,7 +727,9 @@ def test_joint_form_draws_the_printed_diagram_range(
 
     monkeypatch.setattr(iso10140_1, "compose_insulation_fiche", capture)
     _example_joint().report(str(tmp_path / "a.pdf"))
-    quiet = building.lab_joint_insulation(np.full(18, 22.0), np.full(18, 85.0), _BANDS)
+    quiet = building.laboratory_joint_insulation(
+        np.full(18, 22.0), np.full(18, 85.0), _BANDS
+    )
     quiet.report(str(tmp_path / "b.pdf"))
     assert drawn == [(30.0, 80.0), (20.0, 90.0)]
 
@@ -737,7 +747,7 @@ def test_joint_form_in_spanish_and_verbose(tmp_path: Path) -> None:
 
 
 def test_joint_form_needs_a_rating(tmp_path: Path) -> None:
-    bare = building.lab_joint_insulation([45.0], [60.0], [1000.0])
+    bare = building.laboratory_joint_insulation([45.0], [60.0], [1000.0])
     out = str(tmp_path / "x.pdf")
     with pytest.raises(ValueError, match="rating"):
         bare.report(out)
@@ -771,7 +781,7 @@ def test_joint_figure_marks_the_minimum_values() -> None:
     ax = res.plot()
     triangles = [line for line in ax.lines if line.get_marker() == "^"]
     assert len(triangles) == 1
-    assert len(triangles[0].get_xdata()) == int(np.sum(res.minimum_value))
+    assert len(triangles[0].get_xdata()) == int(np.sum(res.min_value))
     labels = ax.get_legend_handles_labels()[1]
     assert any("shifted reference" in label for label in labels)
     assert "49" in ax.get_title()

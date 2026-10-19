@@ -106,7 +106,7 @@ __all__ = [
     "AM_BLOCK_SAMPLES",
     "AM_EXCEEDANCE_THRESHOLDS_DB",
     "AM_FREQUENCY_BANDS_HZ",
-    "AM_MINIMUM_VALID_BLOCKS",
+    "AM_MIN_VALID_BLOCKS",
     "AM_MODULATION_FREQUENCY_LIMITS_HZ",
     "AM_PERIOD_BLOCKS",
     "AM_PROMINENCE_THRESHOLD",
@@ -133,7 +133,7 @@ AM_PERIOD_BLOCKS: int = 60
 
 #: Valid 10 s blocks a 10 min period needs to be rated, half of its sixty
 #: (13.6.2.2 "at least 50 %"; 13.6.3).
-AM_MINIMUM_VALID_BLOCKS: int = 30
+AM_MIN_VALID_BLOCKS: int = 30
 
 #: Prominence ratio below which a 10 s block is prominence-failed (13.6.2.3 e).
 AM_PROMINENCE_THRESHOLD: float = 4.0
@@ -691,7 +691,7 @@ class ModulationPeriod(OwnsArrays):
     @property
     def rated(self) -> bool:
         """Whether at least 30 blocks are valid (13.6.2.2)."""
-        return self.valid_blocks >= AM_MINIMUM_VALID_BLOCKS
+        return self.valid_blocks >= AM_MIN_VALID_BLOCKS
 
     @property
     def rating_db(self) -> float:

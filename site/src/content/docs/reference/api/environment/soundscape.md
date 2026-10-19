@@ -177,12 +177,12 @@ Median and range of the Method A scale values per site and item
 | :--- | :--- |
 | ValueError | for a part other than 1 to 4, a scale value that is not a whole number from 1 to 5, or sites that do not match the responses. |
 
-## METHOD_B_MAXIMUM_SOURCES
+## METHOD_B_MAX_SOURCES
 
 *Constant* (`int`).
 
 ```python
-METHOD_B_MAXIMUM_SOURCES = 8
+METHOD_B_MAX_SOURCES = 8
 ```
 
 ## method_b_scale_values

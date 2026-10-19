@@ -298,7 +298,7 @@ class TrackDecayRate(OwnsArrays):
             object.__setattr__(self, "responses", read_only(responses))
 
     @property
-    def minimum_measurable_db_per_m(self) -> float | None:
+    def min_measurable_db_per_m(self) -> float | None:
         r"""The floor :math:`4{,}343 / x_\mathrm{max}` of Formula 2, in dB/m; ``None`` without the grid."""
         if self.distances is None:
             return None
@@ -311,7 +311,7 @@ class TrackDecayRate(OwnsArrays):
         A band that is not is an upper bound on the true rate. Every band is
         taken as suitable when the grid is not known.
         """
-        floor = self.minimum_measurable_db_per_m
+        floor = self.min_measurable_db_per_m
         if floor is None:
             return np.ones(self.frequencies.size, dtype=bool)
         return np.asarray(

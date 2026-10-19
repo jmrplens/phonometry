@@ -72,7 +72,7 @@ from phonometry.noise_control import hvac
 
 bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0]
 
-# One line for one duct: the HvacSpectrumResult of the 300 mm flush end.
+# One line for one duct: the HVACSpectrumResult of the 300 mm flush end.
 er = hvac.end_reflection_loss(bands, diameter_m=0.30, termination="flush")
 er.plot()
 plt.show()
@@ -130,7 +130,7 @@ rise by 15.6 dB at 63 Hz and 21.6 dB at 4 kHz between 10 and 20 m/s. Hence the
 customary design velocities: roughly 7 to 10 m/s in plant-room mains, 4 to 5 m/s
 in branches and 2 to 3 m/s in the last run before an occupied room.
 
-**Test-report fiche.** `HvacSpectrumResult.report(path)` renders a one-page
+**Test-report fiche.** `HVACSpectrumResult.report(path)` renders a one-page
 duct-noise fiche: the octave-band table of the spectrum beside the same curve
 plotted against frequency, the boxed single-number result (the A-weighted sound
 power level when the spectrum is regenerated noise, the mean attenuation when it

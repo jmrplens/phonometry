@@ -133,9 +133,7 @@ def test_a_conflicting_rate_is_refused_a_matching_one_is_not(
 def test_a_bare_array_still_requires_fs(
     func: Callable[..., object], record: np.ndarray, kwargs: dict[str, float]
 ) -> None:
-    with pytest.raises(
-        ValueError, match=r"fs is required when 'signal' is a bare array"
-    ):
+    with pytest.raises(ValueError, match=r"fs is required when 'x' is a bare array"):
         func(record, **kwargs)
 
 
@@ -147,7 +145,7 @@ def test_a_multichannel_signal_is_refused_by_name(
 ) -> None:
     """These metrics are defined on one record, and say so."""
     block = Signal(np.stack([record, record]), FS)
-    with pytest.raises(ValueError, match=r"'signal' must be one-dimensional"):
+    with pytest.raises(ValueError, match=r"'x' must be one-dimensional"):
         func(block, **kwargs)
 
 

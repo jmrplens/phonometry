@@ -97,12 +97,12 @@ _BACKGROUND_LOW = 6.0
 _BACKGROUND_HIGH = 15.0
 
 
-class LabInsulationWarning(PhonometryWarning):
+class LaboratoryInsulationWarning(PhonometryWarning):
     """Warning for laboratory-insulation limit-of-measurement conditions."""
 
 
 @dataclass(frozen=True)
-class LabAirborneInsulationResult(OwnsArrays):
+class LaboratoryAirborneInsulationResult(OwnsArrays):
     r"""Per-band laboratory airborne sound insulation (ISO 10140-2:2010).
 
     :ivar r: Sound reduction index :math:`R = L_1 - L_2 + 10 \log_{10}(S/A)` per
@@ -136,7 +136,7 @@ class LabAirborneInsulationResult(OwnsArrays):
         number and answers with a ``TypeError`` about zero-dimensional
         arrays, naming neither the field nor the result.
 
-        Both fields must also be finite. :func:`lab_airborne_insulation` can
+        Both fields must also be finite. :func:`laboratory_airborne_insulation` can
         only emit finite values (its levels are checked finite and ``A``
         comes from a positive, finite ``T`` and ``V``), so a NaN here is
         always a construction mistake - and the fiche would have printed it
@@ -226,7 +226,7 @@ class LabAirborneInsulationResult(OwnsArrays):
 
 
 @dataclass(frozen=True)
-class LabImpactInsulationResult(OwnsArrays):
+class LaboratoryImpactInsulationResult(OwnsArrays):
     r"""Per-band laboratory impact sound insulation (ISO 10140-3:2010).
 
     :ivar l_n: Normalized impact sound pressure level
@@ -260,7 +260,7 @@ class LabImpactInsulationResult(OwnsArrays):
         number and answers with a ``TypeError`` about zero-dimensional
         arrays, naming neither the field nor the result.
 
-        Both fields must also be finite. :func:`lab_impact_insulation` can
+        Both fields must also be finite. :func:`laboratory_impact_insulation` can
         only emit finite values (its levels are checked finite and ``A``
         comes from a positive, finite ``T`` and ``V``), so a NaN here is
         always a construction mistake - and the fiche would have printed it
@@ -348,7 +348,7 @@ class LabImpactInsulationResult(OwnsArrays):
 
 
 def _render_iso10140(
-    result: LabAirborneInsulationResult | LabImpactInsulationResult,
+    result: LaboratoryAirborneInsulationResult | LaboratoryImpactInsulationResult,
     path: str,
     *,
     quantity: str,
@@ -359,8 +359,8 @@ def _render_iso10140(
 ) -> str:
     """Validate the laboratory-report request and delegate to the renderer.
 
-    Shared by :meth:`LabAirborneInsulationResult.report` and
-    :meth:`LabImpactInsulationResult.report`: it rejects unknown engines,
+    Shared by :meth:`LaboratoryAirborneInsulationResult.report` and
+    :meth:`LaboratoryImpactInsulationResult.report`: it rejects unknown engines,
     requires the single-number rating (16 one-third-octave or 5 octave bands,
     ISO 717-1/-2) so the fiche curve is defined, and calls the reportlab
     renderer (which raises a clear :class:`ImportError` when reportlab is
@@ -436,7 +436,7 @@ def background_correction(
       applied
       (:math:`L = L_\mathrm{sb} - 1.3`); such bands are the *limit of measurement*
       and a
-      :class:`LabInsulationWarning` is emitted (Clause 4.3). A *negative*
+      :class:`LaboratoryInsulationWarning` is emitted (Clause 4.3). A *negative*
       margin (:math:`L_\mathrm{b} > L_\mathrm{sb}`, i.e. background above the measured
       signal) falls
       in this branch and is likewise capped at :math:`L_\mathrm{sb} - 1.3`: the
@@ -487,20 +487,20 @@ def background_correction(
             "Signal-to-background margin at or below 6 dB in one or more "
             "bands; the fixed 1,3 dB correction was applied and those levels "
             "are the limit of measurement (ISO 10140-4:2010, Clause 4.3).",
-            LabInsulationWarning,
+            LaboratoryInsulationWarning,
             stacklevel=2,
         )
     return np.asarray(corrected, dtype=np.float64)
 
 
-def lab_airborne_insulation(
+def laboratory_airborne_insulation(
     l1: Sequence[float] | np.ndarray,
     l2: Sequence[float] | np.ndarray,
     t2: Sequence[float] | np.ndarray,
     *,
     area: float,
     volume: float,
-) -> LabAirborneInsulationResult:
+) -> LaboratoryAirborneInsulationResult:
     r"""Laboratory airborne sound reduction index per ISO 10140-2:2010.
 
     Computes, per frequency band, the sound reduction index
@@ -523,7 +523,7 @@ def lab_airborne_insulation(
     :param t2: Receiving-room reverberation time per band, in seconds.
     :param area: Area ``S`` of the free test opening, in m².
     :param volume: Receiving-room volume ``V``, in m³.
-    :return: :class:`LabAirborneInsulationResult` with ``r``,
+    :return: :class:`LaboratoryAirborneInsulationResult` with ``r``,
         ``absorption_area`` and ``rating``.
     :raises ValueError: If the band counts of ``l1``, ``l2`` and ``t2``
         differ, if ``area``/``volume``/``t2`` are not positive, or if inputs
@@ -532,7 +532,7 @@ def lab_airborne_insulation(
     l1_bands = _as_band_levels(l1, "l1")
     l2_bands = _as_band_levels(l2, "l2")
     require_equal_shapes(
-        "lab_airborne_insulation",
+        "laboratory_airborne_insulation",
         {"l1": l1_bands.shape, "l2": l2_bands.shape},
         "band",
     )
@@ -546,15 +546,17 @@ def lab_airborne_insulation(
     rating: WeightedRatingResult | None = None
     if r.size in (16, 5):
         rating = weighted_rating(r)
-    return LabAirborneInsulationResult(r=r, absorption_area=absorption, rating=rating)
+    return LaboratoryAirborneInsulationResult(
+        r=r, absorption_area=absorption, rating=rating
+    )
 
 
-def lab_impact_insulation(
+def laboratory_impact_insulation(
     li: Sequence[float] | np.ndarray,
     t2: Sequence[float] | np.ndarray,
     *,
     volume: float,
-) -> LabImpactInsulationResult:
+) -> LaboratoryImpactInsulationResult:
     r"""Laboratory impact sound pressure level per ISO 10140-3:2010.
 
     Computes, per frequency band, the normalized impact sound pressure level
@@ -576,7 +578,7 @@ def lab_impact_insulation(
     :param li: Energy-average impact sound pressure levels, in dB.
     :param t2: Receiving-room reverberation time per band, in seconds.
     :param volume: Receiving-room volume ``V``, in m³.
-    :return: :class:`LabImpactInsulationResult` with ``l_n``,
+    :return: :class:`LaboratoryImpactInsulationResult` with ``l_n``,
         ``absorption_area`` and ``rating``.
     :raises ValueError: If the band counts of ``li`` and ``t2`` differ, if
         ``volume``/``t2`` are not positive, or if inputs are non-finite.
@@ -588,4 +590,6 @@ def lab_impact_insulation(
     rating: ImpactRatingResult | None = None
     if l_n.size in (16, 5):
         rating = weighted_impact_rating(l_n)
-    return LabImpactInsulationResult(l_n=l_n, absorption_area=absorption, rating=rating)
+    return LaboratoryImpactInsulationResult(
+        l_n=l_n, absorption_area=absorption, rating=rating
+    )

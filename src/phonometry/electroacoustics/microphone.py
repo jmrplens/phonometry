@@ -363,7 +363,7 @@ class MicrophoneElectrical(RichDisplay):
     the rated power supply of Clause 9.
 
     :ivar rated_impedance_ohm: Rated (internal) impedance, in ohm (10.2).
-    :ivar minimum_load_impedance_ohm: Rated minimum permitted load impedance, in
+    :ivar min_load_impedance_ohm: Rated minimum permitted load impedance, in
         ohm (10.3).
     :ivar powering: Rated power supply description (9.1), e.g. the IEC 61938
         phantom-powering designation and voltage.
@@ -371,7 +371,7 @@ class MicrophoneElectrical(RichDisplay):
     """
 
     rated_impedance_ohm: float | None = None
-    minimum_load_impedance_ohm: float | None = None
+    min_load_impedance_ohm: float | None = None
     powering: str | None = None
     supply_current_ma: float | None = None
 
@@ -405,7 +405,7 @@ class MicrophoneCharacteristics(OwnsArrays):
         against the tolerance limits, in Hz (12.2).
     :ivar rated_impedance_ohm: Rated (internal) impedance, in ohm (10.2), or
         ``None``.
-    :ivar minimum_load_impedance_ohm: Rated minimum permitted load impedance, in
+    :ivar min_load_impedance_ohm: Rated minimum permitted load impedance, in
         ohm (10.3), or ``None``.
     :ivar equivalent_noise_level_db: Equivalent sound pressure level due to
         inherent noise, in dB SPL with :attr:`noise_weighting` weighting (17),
@@ -447,7 +447,7 @@ class MicrophoneCharacteristics(OwnsArrays):
     tolerance_db: float
     effective_range: tuple[float, float]
     rated_impedance_ohm: float | None
-    minimum_load_impedance_ohm: float | None
+    min_load_impedance_ohm: float | None
     equivalent_noise_level_db: float | None
     noise_weighting: str
     max_spl_db: float | None
@@ -552,7 +552,7 @@ class MicrophoneCharacteristics(OwnsArrays):
             "sensitivity_level_db",
             "tolerance_db",
             "rated_impedance_ohm",
-            "minimum_load_impedance_ohm",
+            "min_load_impedance_ohm",
             "equivalent_noise_level_db",
             "max_spl_db",
             "max_spl_thd_percent",
@@ -841,9 +841,9 @@ def microphone_characteristics(
         rated_impedance_ohm=_optional_positive(
             electrical.rated_impedance_ohm, "electrical.rated_impedance_ohm"
         ),
-        minimum_load_impedance_ohm=_optional_positive(
-            electrical.minimum_load_impedance_ohm,
-            "electrical.minimum_load_impedance_ohm",
+        min_load_impedance_ohm=_optional_positive(
+            electrical.min_load_impedance_ohm,
+            "electrical.min_load_impedance_ohm",
         ),
         equivalent_noise_level_db=noise_level,
         noise_weighting=str(noise.weighting),

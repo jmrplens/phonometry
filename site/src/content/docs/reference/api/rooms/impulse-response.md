@@ -370,7 +370,7 @@ autocorrelation is a near-perfect periodic delta
 
 ```python
 plot_excitation(
-    signal: ArrayLike,
+    x: ArrayLike,
     fs: int,
     *,
     kind: str = 'sweep',
@@ -393,7 +393,7 @@ bipolar sequence and its (flat) magnitude spectrum.
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | The excitation samples (1D array-like). |
+| `x` | The excitation samples (1D array-like). |
 | `fs` | Sample rate in Hz (for the time and frequency axes). |
 | `kind` | `"sweep"` (default) or `"mls"`. |
 | `ax` | Existing axes for the top (time-domain) panel, or `None` for a fresh two-panel figure. |

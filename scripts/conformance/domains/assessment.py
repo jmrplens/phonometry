@@ -655,9 +655,9 @@ def _chk_hpd_hml() -> Outcome:
     per_subject = max(
         float(np.max(np.abs(np.round(values, 1) - np.asarray(printed, dtype=float))))
         for values, printed in (
-            (rating.subject_h, ref.ISO4869_2_ANNEX_C_H),
-            (rating.subject_m, ref.ISO4869_2_ANNEX_C_M),
-            (rating.subject_l, ref.ISO4869_2_ANNEX_C_L),
+            (rating.subject_high, ref.ISO4869_2_ANNEX_C_H),
+            (rating.subject_medium, ref.ISO4869_2_ANNEX_C_M),
+            (rating.subject_low, ref.ISO4869_2_ANNEX_C_L),
             (rating.predicted_reduction[:, 5], ref.ISO4869_2_ANNEX_C_PNR_NOISE6),
         )
     )
@@ -740,7 +740,7 @@ def _anr_workbook_insertion_loss() -> ph.hearing.ActiveInsertionLossResult:
     )
 
 
-def _anr_workbook_total() -> ph.hearing.AnrTotalAttenuationResult:
+def _anr_workbook_total() -> ph.hearing.ANRTotalAttenuationResult:
     return ph.hearing.anr_total_attenuation(
         ref.ISO4869_6_WORKBOOK_REAT, _anr_workbook_insertion_loss()
     )

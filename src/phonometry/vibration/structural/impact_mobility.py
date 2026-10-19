@@ -2156,8 +2156,8 @@ class CoherenceCheck(OwnsArrays):
     :ivar judged: Per frequency, whether it enters the verdict (``False`` where
         excluded as an anti-resonance).
     :ivar impacts: Number of impacts averaged.
-    :ivar minimum_coherence: The coherence each judged frequency must exceed.
-    :ivar minimum_records: The fewest impacts the check accepts.
+    :ivar min_coherence: The coherence each judged frequency must exceed.
+    :ivar min_records: The fewest impacts the check accepts.
     """
 
     frequencies: np.ndarray
@@ -2165,8 +2165,8 @@ class CoherenceCheck(OwnsArrays):
     judged: np.ndarray
     _: KW_ONLY
     impacts: int
-    minimum_coherence: float = HIGH_COHERENCE
-    minimum_records: int = COHERENCE_RECORDS
+    min_coherence: float = HIGH_COHERENCE
+    min_records: int = COHERENCE_RECORDS
 
     def __post_init__(self) -> None:
         """Reject a check whose arrays disagree or whose limits are meaningless.
@@ -2185,12 +2185,12 @@ class CoherenceCheck(OwnsArrays):
         if np.any(~(gamma2 >= 0.0)) or np.any(gamma2 > 1.0):
             msg = f"{owner}: 'coherence' must lie in [0, 1]."
             raise ValueError(msg)
-        if not 0.0 < self.minimum_coherence < 1.0:
-            msg = f"{owner}: 'minimum_coherence' must lie in (0, 1)."
+        if not 0.0 < self.min_coherence < 1.0:
+            msg = f"{owner}: 'min_coherence' must lie in (0, 1)."
             raise ValueError(msg)
         # int() would read 5.9 as 5 and True as 1: a count is a whole number.
         require_count(self.impacts, "impacts")
-        require_count(self.minimum_records, "minimum_records")
+        require_count(self.min_records, "min_records")
         # With nothing judged, every judged frequency is high by default and
         # the verdict passes without having looked at the coherence.
         if not np.any(np.asarray(self.judged, dtype=bool)):
@@ -2203,12 +2203,12 @@ class CoherenceCheck(OwnsArrays):
     @property
     def high(self) -> np.ndarray:
         """Per frequency, whether the coherence exceeds the minimum."""
-        return np.asarray(self.coherence, dtype=np.float64) > self.minimum_coherence
+        return np.asarray(self.coherence, dtype=np.float64) > self.min_coherence
 
     @property
     def enough_records(self) -> bool:
         """Whether enough impacts were averaged for the coherence to be trusted."""
-        return int(self.impacts) >= int(self.minimum_records)
+        return int(self.impacts) >= int(self.min_records)
 
     @property
     def random_error_percent(self) -> np.ndarray:
@@ -2262,36 +2262,36 @@ def check_coherence(
     *,
     frequency_range_hz: tuple[float, float],
     exclude_hz: Sequence[tuple[float, float]] = (),
-    minimum_coherence: float = HIGH_COHERENCE,
-    minimum_records: int = COHERENCE_RECORDS,
+    min_coherence: float = HIGH_COHERENCE,
+    min_records: int = COHERENCE_RECORDS,
 ) -> CoherenceCheck:
     """Is the averaged estimate's coherence high over the range of interest? (9.1)
 
-    The check passes when the coherence exceeds ``minimum_coherence`` (0,9,
+    The check passes when the coherence exceeds ``min_coherence`` (0,9,
     what 9.1 calls high) at every frequency of the range that is not excluded,
-    and at least ``minimum_records`` impacts were averaged (five, the lower end
+    and at least ``min_records`` impacts were averaged (five, the lower end
     of the five to ten 9.1 says a high coherence needs). A single impact has a
     coherence of 1 by construction and fails the second condition.
 
     8.6 finds three to five impacts usually enough to verify data quality in a
     low-noise environment; the coherence estimate itself, 9.1 adds, needs five
     to ten records to be trusted. Averaging five impacts satisfies both, and a
-    lower ``minimum_records`` states that fewer were judged enough.
+    lower ``min_records`` states that fewer were judged enough.
 
     :param result: The averaged estimate, from :func:`impact_mobility`.
     :param frequency_range_hz: ``(f_low, f_high)``, in hertz.
     :param exclude_hz: Bands ``(f_low, f_high)`` to leave out of the verdict,
         such as anti-resonances (9.1, NOTE 1) (Default: none).
-    :param minimum_coherence: The coherence to exceed (Default: 0.9).
-    :param minimum_records: The fewest impacts to accept, a whole number of at
+    :param min_coherence: The coherence to exceed (Default: 0.9).
+    :param min_records: The fewest impacts to accept, a whole number of at
         least 1 (Default: 5).
     :return: A :class:`CoherenceCheck`.
     :raises ValueError: for an invalid range, exclusion or limit, a
-        ``minimum_records`` that is not a whole number of at least 1, or
+        ``min_records`` that is not a whole number of at least 1, or
         exclusions that leave no frequency of the range to judge.
     """
     low, high = _frequency_range(frequency_range_hz)
-    records = require_count(minimum_records, "minimum_records")
+    records = require_count(min_records, "min_records")
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     inside = (freqs >= low) & (freqs <= high)
     if not np.any(inside):
@@ -2311,8 +2311,8 @@ def check_coherence(
         coherence=np.asarray(result.coherence, dtype=np.float64)[inside],
         judged=judged,
         impacts=int(result.impacts),
-        minimum_coherence=float(require_finite(minimum_coherence, "minimum_coherence")),
-        minimum_records=records,
+        min_coherence=float(require_finite(min_coherence, "min_coherence")),
+        min_records=records,
     )
 
 

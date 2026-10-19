@@ -387,7 +387,7 @@ microphones for every specimen measurement and combine the two transfer
 functions (7.5.1, Eq. 8), or measure a calibration factor $H_\mathrm{c}$ once, as the
 geometric mean of the interchanged pair on an absorptive specimen, and divide it
 out of every subsequent measurement (7.5.2, Eqs. 10 and 13), which is the route
-`mic_calibration_factor` and `apply_mic_calibration` implement. It matters more
+`microphone_calibration_factor` and `apply_microphone_calibration` implement. It matters more
 than it looks: the method infers a complex reflection factor from the small phase
 difference between two positions a few centimetres apart, so at the
 low-frequency end that difference is itself small and a residual channel phase

@@ -378,7 +378,7 @@ hace el fabricante** y que el informe imprime; se aportan mediante
 `ratings=LoudspeakerRatings(frequency_range=..., noise_power=...,
 sinusoidal_power=..., resonance_frequency=...)`. El rango de frecuencias nominal
 no es decoración: el apartado 16.1 aplica el criterio de impedancia mínima sobre
-*esa* banda, así que omitirlo hace que `minimum_impedance_ohm` recorra toda la curva
+*esa* banda, así que omitirlo hace que `min_impedance_ohm` recorra toda la curva
 medida y dé un valor que la norma no daría. La potencia de ruido nominal y la
 potencia sinusoidal nominal salen de los ensayos de resistencia del apartado 17,
 y por eso aquí son entradas y no salidas.
@@ -389,7 +389,7 @@ y por eso aquí son entradas y no salidas.
 frecuencias nominal** no será menor del 80 % de ella, y cualquier caída por
 debajo de ese valor fuera del rango (la corriente continua incluida) se
 declarará en la especificación. Esa es la línea dibujada en el panel de
-impedancia, y `minimum_impedance_ohm` es exactamente la magnitud a la que se le
+impedancia, y `min_impedance_ohm` es exactamente la magnitud a la que se le
 aplica. Lo que le importa a quien compra el altavoz es el módulo mínimo, no el
 nominal: una caja de «8 Ω» que baja a 3,2 Ω solo es legal si esa caída queda
 fuera del rango nominal, y un amplificador elegido por la cifra de la placa de
@@ -429,7 +429,7 @@ result = electroacoustics.loudspeaker_characteristics(
 )
 print(round(result.sensitivity_level_db, 1))                 # 87.1 dB, 1 W / 1 m
 print(tuple(round(x) for x in result.effective_range))       # (37, 21361) Hz
-print(round(result.minimum_impedance_ohm, 1))                    # 6.6 ohmios
+print(round(result.min_impedance_ohm, 1))                    # 6.6 ohmios
 
 # La misma respuesta, pero medida de verdad a 2 m con 1 V en 8 ohmios.
 referred = electroacoustics.loudspeaker_characteristics(
@@ -457,7 +457,7 @@ construyen su eje con `np.geomspace`.
 
 `loudspeaker_characteristics` devuelve un `LoudspeakerCharacteristics` con el
 `sensitivity_level_db`, el `effective_range`, el `reference_level_db`, la
-`characteristic_sensitivity_pa` y la `minimum_impedance_ohm` calculados, y un
+`characteristic_sensitivity_pa` y la `min_impedance_ohm` calculados, y un
 `.report()` que escribe la ficha. La respuesta en el eje se dibuja con su banda
 de tolerancia y los marcadores del rango efectivo según la proporción de
 IEC 60263 (una década de frecuencia igual a 25 dB), y la directividad polar
@@ -694,11 +694,11 @@ from phonometry import electroacoustics as ea
 # Un auditorio con Zs = -6 dB, micrófono omnidireccional, uno abierto.
 res = ea.feedback_stability(-6.0, 76.0, 80.0)
 print(res.is_stable, round(res.headroom, 1))          # True 0.0 dB
-print(round(res.maximum_level_at_microphone, 1))      # 76.0 dB = L(H-L) - 4
+print(round(res.max_level_at_microphone, 1))      # 76.0 dB = L(H-L) - 4
 
 # Un cardioide recupera exactamente su índice de directividad relativo.
 card = ea.feedback_stability(-6.0, 78.0, 80.0, microphone_directivity=-2.0)
-print(round(card.maximum_level_at_microphone, 1))     # 78.0 dB = L(H-L) - 2
+print(round(card.max_level_at_microphone, 1))     # 78.0 dB = L(H-L) - 2
 
 # Cuatro micrófonos abiertos cuestan 10 lg 4 = 6 dB de ese margen.
 print(round(ea.open_microphone_correction(4), 1))     # 6.0 dB
@@ -817,7 +817,7 @@ Long. El defecto queda recogido en el
 
 Devuelve un `FeedbackStabilityResult` (`open_loop_gain`,
 `feedback_loop_gain`, `nom_correction`, `loop_gain`, `margin`, `headroom`,
-`is_stable`, `maximum_open_loop_gain`, `maximum_level_at_microphone`) con
+`is_stable`, `max_open_loop_gain`, `max_level_at_microphone`) con
 `.plot()`. `feedback_loop_gain` y `open_microphone_correction` son invocables
 directamente, y `plot_sound_reinforcement_geometry` dibuja el lazo de arriba.
 

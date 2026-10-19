@@ -28,8 +28,8 @@ if TYPE_CHECKING:
 
     from ..hearing.active_noise_reduction import (
         ActiveInsertionLossResult,
-        AnrLinearityResult,
-        AnrTotalAttenuationResult,
+        ANRLinearityResult,
+        ANRTotalAttenuationResult,
     )
     from ..hearing.hearing_protectors import (
         AssumedProtectionResult,
@@ -37,12 +37,12 @@ if TYPE_CHECKING:
         ProtectedLevelResult,
         SNRRatingResult,
     )
-    from ..hearing.noise_induced_hearing_loss import HtlanResult, NiptsResult
+    from ..hearing.noise_induced_hearing_loss import HTLANResult, NIPTSResult
     from ..hearing.occupational_exposure import ExposureResult
     from ..hearing.real_ear_attenuation import (
         AttenuationDifferenceResult,
         RealEarAttenuationResult,
-        ReatSoundFieldCheck,
+        REATSoundFieldCheck,
     )
     from ..hearing.threshold import AgeThresholdResult
 
@@ -226,7 +226,7 @@ def plot_age_threshold(
 
 
 def plot_nipts(
-    result: NiptsResult,
+    result: NIPTSResult,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -234,7 +234,7 @@ def plot_nipts(
 ) -> Axes:
     """Median NIPTS spectrum with the 10-90 % fractile band (ISO 1999).
 
-    :param result: A :class:`~phonometry.hearing.noise_induced_hearing_loss.NiptsResult`.
+    :param result: A :class:`~phonometry.hearing.noise_induced_hearing_loss.NIPTSResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the median line ``plot``.
@@ -293,7 +293,7 @@ def plot_nipts(
 
 
 def plot_htlan(
-    result: HtlanResult,
+    result: HTLANResult,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -301,7 +301,7 @@ def plot_htlan(
 ) -> Axes:
     """Age, noise and combined hearing threshold components (ISO 1999, 6.1).
 
-    :param result: A :class:`~phonometry.hearing.noise_induced_hearing_loss.HtlanResult`.
+    :param result: A :class:`~phonometry.hearing.noise_induced_hearing_loss.HTLANResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the combined-threshold line ``plot``.
@@ -840,7 +840,7 @@ def plot_attenuation_difference(
 
 
 def plot_reat_sound_field(
-    result: ReatSoundFieldCheck,
+    result: REATSoundFieldCheck,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -854,7 +854,7 @@ def plot_reat_sound_field(
     a rotated directional microphone saw against the limit Table 1 gives it.
     A check without the rotation is titled as meeting a) only, since b) was
     not judged. Works for
-    :class:`~phonometry.hearing.real_ear_attenuation.ReatSoundFieldCheck`.
+    :class:`~phonometry.hearing.real_ear_attenuation.REATSoundFieldCheck`.
 
     :param result: A sound-field check.
     :param ax: Existing axes, or ``None`` to create a figure.
@@ -999,7 +999,7 @@ def plot_active_insertion_loss(
 
 
 def plot_anr_total_attenuation(
-    result: AnrTotalAttenuationResult,
+    result: ANRTotalAttenuationResult,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -1011,7 +1011,7 @@ def plot_anr_total_attenuation(
     attenuation as interpolated in 5.5 a), the lower-ear active insertion loss
     of 5.5 b) and their sum; then the octave-band totals of Formula (1) and
     the assumed protection value at 84 % they reduce to. Works for
-    :class:`~phonometry.hearing.active_noise_reduction.AnrTotalAttenuationResult`.
+    :class:`~phonometry.hearing.active_noise_reduction.ANRTotalAttenuationResult`.
 
     :param result: A total attenuation result.
     :param ax: Existing axes, or ``None`` to create a figure.
@@ -1088,7 +1088,7 @@ def plot_anr_total_attenuation(
 
 
 def plot_anr_linearity(
-    result: AnrLinearityResult,
+    result: ANRLinearityResult,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -1099,7 +1099,7 @@ def plot_anr_linearity(
     Each ear's step is drawn at the external level it ends on, the median over
     the ears as a line, and the tolerance as a band; the highest level up to
     which every step stays inside it is marked. Works for
-    :class:`~phonometry.hearing.active_noise_reduction.AnrLinearityResult`.
+    :class:`~phonometry.hearing.active_noise_reduction.ANRLinearityResult`.
 
     :param result: A linearity result.
     :param ax: Existing axes, or ``None`` to create a figure.
@@ -1140,7 +1140,7 @@ def plot_anr_linearity(
         upper_ends, np.median(increments, axis=0), "-o", ms=4, zorder=3, **median_kwargs
     )
     ax.axvline(
-        result.maximum_linear_level_db,
+        result.max_linear_level_db,
         color=_C_REFERENCE,
         ls="--",
         lw=1.4,
@@ -1151,7 +1151,7 @@ def plot_anr_linearity(
     ax.set_ylabel(_t(_STEP_LABEL, language))
     ax.set_title(
         _t(_LINEARITY_TITLE, language).format(
-            level=decimal_comma(f"{result.maximum_linear_level_db:g}", language)
+            level=decimal_comma(f"{result.max_linear_level_db:g}", language)
         )
     )
     ax.legend(loc="best", fontsize="small")

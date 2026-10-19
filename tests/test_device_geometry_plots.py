@@ -354,7 +354,7 @@ def test_microphone_positions_hemisphere_and_sphere() -> None:
     pos = pm.emission.measurement_positions("hemisphere", radius=2.0)
     ax = pm.emission.plot_microphone_positions(pos, radius=2.0)
     assert ax.name == "3d"
-    sphere = pm.emission.precision_positions("sphere", radius=1.0, count=20)
+    sphere = pm.emission.precision_positions("sphere", radius=1.0, n_positions=20)
     ax = pm.emission.plot_microphone_positions(sphere)
     assert ax.name == "3d"
     bad = np.zeros((3, 2))

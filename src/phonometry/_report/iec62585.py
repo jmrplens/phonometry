@@ -157,7 +157,7 @@ def _rows(result: CorrectionUncertaintyVerification, language: str) -> list[list
             ),
             _cell(_column(result.coverage_factor, index), language, 2),
             format_number(
-                float(result.maximum_uncertainty_db[index]), language, decimals=2
+                float(result.max_uncertainty_db[index]), language, decimals=2
             ),
         ]
         if with_range:
@@ -205,7 +205,7 @@ def _statement(
     ratio = float(
         np.max(
             np.asarray(result.expanded_uncertainty_db)
-            / np.asarray(result.maximum_uncertainty_db)
+            / np.asarray(result.max_uncertainty_db)
         )
     )
     extended = [

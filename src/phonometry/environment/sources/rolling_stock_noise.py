@@ -492,7 +492,7 @@ class PassByMeasurement(OwnsArrays):
     :param equivalent_level_db: :math:`L_{p\mathrm{Aeq},T}` over
         :math:`T_1` to :math:`T_2`, in dB; the pass-by level
         :math:`L_{p\mathrm{Aeq},T_p}` when the interval is the pass-by time.
-    :param max_level_db: :math:`L_{p\mathrm{AFmax}}` within the interval, in dB.
+    :param maximum_level_db: :math:`L_{p\mathrm{AFmax}}` within the interval, in dB.
     :param front_level_db: :math:`L_{p\mathrm{AF}}` when the front of the
         train is opposite the microphone, in dB.
     :param rear_level_db: :math:`L_{p\mathrm{AF}}` when its rear is, in dB.
@@ -507,7 +507,7 @@ class PassByMeasurement(OwnsArrays):
     start_s: float
     end_s: float
     equivalent_level_db: float
-    max_level_db: float
+    maximum_level_db: float
     front_level_db: float
     rear_level_db: float
     record_start_level_db: float
@@ -596,7 +596,7 @@ def _index(time_s: float, fs: float, size: int, name: str) -> int:
 
 
 def pass_by_measurement(
-    signal: SignalInput,
+    x: SignalInput,
     fs: float | None = None,
     *,
     start_s: float,
@@ -631,7 +631,7 @@ def pass_by_measurement(
     front of the train is opposite the microphone and end 10 dB below the
     level at its rear; the result keeps both margins.
 
-    :param signal: The sound pressure record in pascals, unweighted, one
+    :param x: The sound pressure record in pascals, unweighted, one
         channel, or a mono :class:`phonometry.io.Signal`, whose calibration is
         applied.
     :param fs: The sampling rate, in hertz; a Signal brings its own.
@@ -650,11 +650,11 @@ def pass_by_measurement(
         record, an interval that is empty or runs past the record, or times
         that are negative.
     """
-    rate = resolve_fs(signal, fs, name="signal")
-    samples = require_1d_signal(resolve_samples(signal, name="signal"), "'signal'")
+    rate = resolve_fs(x, fs, name="x")
+    samples = require_1d_signal(resolve_samples(x, name="x"), "x")
     rate = require_positive(rate, "fs")
     if samples.size == 0:
-        msg = "'signal' holds no sample."
+        msg = "'x' holds no sample."
         raise ValueError(msg)
     first = _index(start_s, rate, samples.size, "start_s")
     last = _index(end_s, rate, samples.size, "end_s")
@@ -704,7 +704,7 @@ def pass_by_measurement(
         start_s=first / rate,
         end_s=last / rate,
         equivalent_level_db=level(float(np.mean(weighted[first:last] ** 2))),
-        max_level_db=level(float(np.max(mean_square[first:last]))),
+        maximum_level_db=level(float(np.max(mean_square[first:last]))),
         front_level_db=level(float(mean_square[min(front, mean_square.size - 1)])),
         rear_level_db=level(float(mean_square[min(rear, mean_square.size - 1)])),
         record_start_level_db=level(float(mean_square[0])),
@@ -2165,7 +2165,7 @@ def _decay_conditions(
         )
         for direction in TRACK_DECAY_DIRECTIONS
     ]
-    known = [d for d in decay_rates if d.minimum_measurable_db_per_m is not None]
+    known = [d for d in decay_rates if d.min_measurable_db_per_m is not None]
     if known:
         unsuitable = sum(int(np.sum(~d.suitable)) for d in known)
         conditions.append(

@@ -101,8 +101,8 @@ __all__ = [
     "ISO11820_BACKGROUND_CORRECTIONS_DB",
     "DOWNSTREAM_DISTANCE_COEFFICIENTS",
     "INSTALLATION_CASES",
-    "MAXIMUM_EXTRANEOUS_CORRECTION_DB",
-    "ISO11820_MINIMUM_BACKGROUND_MARGIN_DB",
+    "MAX_EXTRANEOUS_CORRECTION_DB",
+    "ISO11820_MIN_BACKGROUND_MARGIN_DB",
     "ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB",
     "ISO11820_OCTAVE_BAND_EXTENDED_RANGE_HZ",
     "ISO11820_OCTAVE_BAND_RANGE_HZ",
@@ -143,7 +143,7 @@ __all__ = [
 #: Table 1 (clause 4): the correction to subtract, in decibels, keyed by the
 #: difference between the level with the source running and the background
 #: alone, in decibels. The table is stepped and integer-indexed; below
-#: :data:`ISO11820_MINIMUM_BACKGROUND_MARGIN_DB` it prints "measurements invalid", and
+#: :data:`ISO11820_MIN_BACKGROUND_MARGIN_DB` it prints "measurements invalid", and
 #: above :data:`ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB` it prints zero.
 ISO11820_BACKGROUND_CORRECTIONS_DB: Mapping[int, float] = MappingProxyType(
     {
@@ -160,7 +160,7 @@ ISO11820_BACKGROUND_CORRECTIONS_DB: Mapping[int, float] = MappingProxyType(
 
 #: Clause 4: below this margin over the background the measurement does not
 #: stand, and only an inequality may be stated.
-ISO11820_MINIMUM_BACKGROUND_MARGIN_DB: float = 3.0
+ISO11820_MIN_BACKGROUND_MARGIN_DB: float = 3.0
 
 #: Table 1: above this margin the correction is zero.
 ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB: float = 10.0
@@ -170,7 +170,7 @@ ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB: float = 10.0
 #: energy subtraction writes unrounded as -10 lg(1 - 10^-0,3) = 3,0206 dB;
 #: ISO 3746:2010 8.3.3 prints the same number the same way, as 3 dB and "the
 #: value for" a 3 dB margin. The cap is therefore judged on the margin.
-MAXIMUM_EXTRANEOUS_CORRECTION_DB: float = 3.0
+MAX_EXTRANEOUS_CORRECTION_DB: float = 3.0
 
 #: 1.3 a): the octave range the standard asks for, and the wider one it would
 #: rather have where the equipment reaches it.
@@ -390,15 +390,15 @@ def silencer_background_correction(
         the source running and the background level alone, in decibels.
     :return: The correction to subtract, in decibels.
     :raises ValueError: For a margin under
-        :data:`ISO11820_MINIMUM_BACKGROUND_MARGIN_DB`, which Table 1 calls invalid.
+        :data:`ISO11820_MIN_BACKGROUND_MARGIN_DB`, which Table 1 calls invalid.
     """
     # Settled: a difference of two readings that is 10 dB in decimal can be
     # 9,999 999 999 999 996 in binary, which would floor to the 9 dB row.
     margin = settled(require_finite_array(level_difference_db, "level_difference_db"))
-    if float(np.min(margin)) < ISO11820_MINIMUM_BACKGROUND_MARGIN_DB:
+    if float(np.min(margin)) < ISO11820_MIN_BACKGROUND_MARGIN_DB:
         msg = (
             f"Table 1 of ISO 11820 calls a margin under "
-            f"{ISO11820_MINIMUM_BACKGROUND_MARGIN_DB:g} dB invalid; the smallest is "
+            f"{ISO11820_MIN_BACKGROUND_MARGIN_DB:g} dB invalid; the smallest is "
             f"{float(np.min(margin)):.1f} dB. Only the inequality of clause 4 "
             "may be stated."
         )
@@ -503,18 +503,18 @@ def extraneous_corrected_mean_level(
     # tolerance keeps a printed 3,0 dB margin, which the two means can land a
     # few parts in 10^14 under, on the side Table 1 accepts.
     margin = float(energy_mean(levels)) - float(energy_mean(extraneous))
-    capped = margin < ISO11820_MINIMUM_BACKGROUND_MARGIN_DB and not math.isclose(
+    capped = margin < ISO11820_MIN_BACKGROUND_MARGIN_DB and not math.isclose(
         margin,
-        ISO11820_MINIMUM_BACKGROUND_MARGIN_DB,
+        ISO11820_MIN_BACKGROUND_MARGIN_DB,
         rel_tol=0.0,
         abs_tol=_MARGIN_TOLERANCE_DB,
     )
     if capped:
         msg = (
             "ISO 11820 caps the extraneous correction at "
-            f"{MAXIMUM_EXTRANEOUS_CORRECTION_DB:g} dB (9.1.1 and 9.1.2), the "
+            f"{MAX_EXTRANEOUS_CORRECTION_DB:g} dB (9.1.1 and 9.1.2), the "
             "correction Table 1 applies at its "
-            f"{ISO11820_MINIMUM_BACKGROUND_MARGIN_DB:g} dB row; this measurement "
+            f"{ISO11820_MIN_BACKGROUND_MARGIN_DB:g} dB row; this measurement "
             f"stands {margin:.2f} dB over the extraneous sound, so the level is "
             "not determined and only the inequality of clause 4 may be stated."
         )

@@ -176,7 +176,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "CERTIFIED_RESULT_TOLERANCE_DB",
-    "MINIMUM_SAMPLE_SIZE",
+    "MIN_SAMPLE_SIZE",
     "RANKING_POSITIONS",
     "RECOMMENDED_SAMPLE_RATIO",
     "SAMPLE_CLEARANCE_M",
@@ -211,7 +211,7 @@ CERTIFIED_RESULT_TOLERANCE_DB: Final = 0.05
 
 #: C.2 and C.3: "The random sample size shall be at least 20." The first row
 #: of Table C.1, below which no ranking position is given.
-MINIMUM_SAMPLE_SIZE: Final = 20
+MIN_SAMPLE_SIZE: Final = 20
 
 #: C.2: "It is recommended to select a ratio of random samples to number of
 #: single points of at least 1:100." A sample of fewer than one point in a
@@ -317,13 +317,13 @@ def ranking_positions(sample_size: int) -> tuple[int, int]:
     function applies the print.
 
     :param sample_size: ``N``, the number of values in the sample, at least
-        :data:`MINIMUM_SAMPLE_SIZE`.
+        :data:`MIN_SAMPLE_SIZE`.
     :return: ``(R(q0,1), R(q0,9))``.
     :raises ValueError: for a sample smaller than 20, which C.2 does not
         allow and Table C.1 does not cover, or a count that is not a whole
         number.
     """
-    n = require_count(sample_size, "sample_size", minimum=MINIMUM_SAMPLE_SIZE)
+    n = require_count(sample_size, "sample_size", minimum=MIN_SAMPLE_SIZE)
     printed = RANKING_POSITIONS.get(n)
     if printed is not None:
         return printed
@@ -341,7 +341,7 @@ class LevelDifferenceQuantiles(OwnsArrays):
 
     :ivar sorted_differences_db: The sample of level differences, sorted in
         ascending order as C.4 sorts it, in dB. At least
-        :data:`MINIMUM_SAMPLE_SIZE` values.
+        :data:`MIN_SAMPLE_SIZE` values.
     """
 
     sorted_differences_db: NDArray[np.float64]
@@ -357,10 +357,10 @@ class LevelDifferenceQuantiles(OwnsArrays):
             require_finite_array(self.sorted_differences_db, "sorted_differences_db"),
             dtype=np.float64,
         )
-        if values.size < MINIMUM_SAMPLE_SIZE:
+        if values.size < MIN_SAMPLE_SIZE:
             msg = (
                 "LevelDifferenceQuantiles: C.2 requires a random sample of at "
-                f"least {MINIMUM_SAMPLE_SIZE} values; got {values.size}."
+                f"least {MIN_SAMPLE_SIZE} values; got {values.size}."
             )
             raise ValueError(msg)
         if np.any(np.diff(values) < 0.0):
@@ -469,16 +469,16 @@ def level_difference_quantiles(
     :math:`q_{0,1} = -1` dB and :math:`q_{0,9} = 3` dB.
 
     :param level_differences_db: The sample of level differences, in dB, in
-        any order; at least :data:`MINIMUM_SAMPLE_SIZE` values.
+        any order; at least :data:`MIN_SAMPLE_SIZE` values.
     :return: A :class:`LevelDifferenceQuantiles`.
     :raises ValueError: for fewer than 20 values, a non-finite value or an
         input that is not one-dimensional.
     """
     values = require_finite_array(level_differences_db, "level_differences_db")
-    if values.size < MINIMUM_SAMPLE_SIZE:
+    if values.size < MIN_SAMPLE_SIZE:
         msg = (
             "C.2 of ISO 17534-1 requires a random sample of at least "
-            f"{MINIMUM_SAMPLE_SIZE} level differences; got {values.size}."
+            f"{MIN_SAMPLE_SIZE} level differences; got {values.size}."
         )
         raise ValueError(msg)
     return LevelDifferenceQuantiles(sorted_differences_db=np.sort(values))
@@ -488,7 +488,7 @@ def level_difference_quantiles(
 # Annex C.2 and C.3: where the sample is taken
 # --------------------------------------------------------------------------- #
 def uniform_sample_indices(
-    point_count: int,
+    n_points: int,
     sample_size: int,
     *,
     horizontal_clearances_m: ArrayLike | None = None,
@@ -509,23 +509,23 @@ def uniform_sample_indices(
     than one point in a hundred is returned with a
     :class:`SoftwareQualityWarning`, the ratio C.2 recommends.
 
-    :param point_count: How many single points there are (grid receivers,
+    :param n_points: How many single points there are (grid receivers,
         points along a street), before any is left out.
     :param sample_size: ``M``, the random sample size, at least
-        :data:`MINIMUM_SAMPLE_SIZE` and at most the number of points that
+        :data:`MIN_SAMPLE_SIZE` and at most the number of points that
         remain.
     :param horizontal_clearances_m: Optional, one value per point: its
         horizontal distance to the nearest source or obstacle, in metres. The
         points at less than 2 m are left out before numbering; without it,
         every point takes part.
-    :return: The indices of the sampled points among the ``point_count``
+    :return: The indices of the sampled points among the ``n_points``
         points, in increasing order.
     :raises ValueError: for a sample smaller than 20 or larger than the
         points that remain, or clearances that are not one finite,
         non-negative value per point.
     """
-    count = require_count(point_count, "point_count")
-    size = require_count(sample_size, "sample_size", minimum=MINIMUM_SAMPLE_SIZE)
+    count = require_count(n_points, "n_points")
+    size = require_count(sample_size, "sample_size", minimum=MIN_SAMPLE_SIZE)
     if horizontal_clearances_m is None:
         eligible = np.arange(count, dtype=np.intp)
     else:
@@ -590,14 +590,14 @@ def contour_sample_chainages_m(
     :param total_length_m: ``L``, the length of the contours that remain, in
         metres, long enough that no two points share a whole metre, which is
         always so from ``sample_size`` metres on.
-    :param sample_size: ``M``, at least :data:`MINIMUM_SAMPLE_SIZE`.
+    :param sample_size: ``M``, at least :data:`MIN_SAMPLE_SIZE`.
     :return: The ``M`` chainages, in metres, in increasing order.
     :raises ValueError: for a sample smaller than 20, a length that is not a
         finite, positive number (a string or a bool included), or contours so
         short that two points would fall on the same whole metre, which
         happens only below ``M`` metres.
     """
-    size = require_count(sample_size, "sample_size", minimum=MINIMUM_SAMPLE_SIZE)
+    size = require_count(sample_size, "sample_size", minimum=MIN_SAMPLE_SIZE)
     # A string or a bool would convert through float() ("100" to 100.0, True
     # to 1.0) and be sampled as though it were a length.
     if isinstance(total_length_m, bool) or not isinstance(total_length_m, numbers.Real):
@@ -646,9 +646,9 @@ def _level_matrix(levels: ArrayLike) -> NDArray[np.float64]:
         )
         raise ValueError(msg)
     receivers, participants = matrix.shape
-    if receivers < MINIMUM_SAMPLE_SIZE or participants < _MIN_PARTICIPANTS:
+    if receivers < MIN_SAMPLE_SIZE or participants < _MIN_PARTICIPANTS:
         msg = (
-            f"RoundRobinPrecision: C.4 ranks at least {MINIMUM_SAMPLE_SIZE} "
+            f"RoundRobinPrecision: C.4 ranks at least {MIN_SAMPLE_SIZE} "
             f"receivers and a mean needs at least {_MIN_PARTICIPANTS} "
             f"participants; got {receivers} receivers and {participants} "
             "participants."

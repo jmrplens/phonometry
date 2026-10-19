@@ -67,7 +67,7 @@ def generate_lab_lining_improvement(output_dir: str) -> None:
         [-2.1, -5.4, -3.2, 1.5, 4.8, 7.9, 10.6, 12.9, 14.7, 16.2, 17.4]
         + [18.3, 19.1, 19.6, 19.9, 19.5, 18.2, 16.4, 15.8, 17.1, 18.0]
     )
-    res = building.lab_lining_improvement(
+    res = building.laboratory_lining_improvement(
         r_without, r_without + delta_r, _BANDS_50_5000
     )
     assert res.rating is not None
@@ -97,7 +97,7 @@ def generate_lab_floor_covering_improvement(output_dir: str) -> None:
         [0.4, 0.8, 1.5, 2.3, 3.4, 4.9, 6.8, 9.1, 11.6]
         + [14.2, 16.9, 19.8, 22.4, 25.1, 27.3, 29.4, 30.8, 31.9]
     )
-    res = building.lab_floor_covering_improvement(
+    res = building.laboratory_floor_covering_improvement(
         l_n0, l_n0 - delta_l, _BANDS_100_5000, reference_floor="lightweight_3"
     )
 
@@ -203,13 +203,13 @@ def generate_joint_insulation(output_dir: str) -> None:
     print("Generating joint_insulation...")
     from phonometry import building
 
-    seal = building.lab_joint_insulation(
+    seal = building.laboratory_joint_insulation(
         _JOINT_SEAL, _JOINT_MAXIMUM, _BANDS_100_5000, joint_length_m=5.4
     )
     slope = np.linspace(0.6, 1.4, len(_BANDS_100_5000))
     widths = list(_JOINT_GAP_LOSS_DB)
     results = [
-        building.lab_joint_insulation(
+        building.laboratory_joint_insulation(
             np.minimum(
                 _JOINT_SEAL - _JOINT_GAP_LOSS_DB[w] * slope, _JOINT_MAXIMUM - 0.5
             ),
@@ -218,7 +218,7 @@ def generate_joint_insulation(output_dir: str) -> None:
         )
         for w in widths
     ]
-    series = building.joint_gap_series(widths, results, minimum_gap_mm=3.0)
+    series = building.joint_gap_series(widths, results, min_gap_mm=3.0)
 
     _fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13.0, 5.6))
     seal.plot(ax=ax1, language=_LANG, color=COLOR_PRIMARY)

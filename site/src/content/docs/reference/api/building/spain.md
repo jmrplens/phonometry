@@ -87,8 +87,8 @@ reach the top-level [`phonometry`](/phonometry/reference/api/filters/phonometry/
 
 ```python
 assess_db_hr(
-    items: Sequence[tuple[float, DbHrRequirement]],
-) -> DbHrAssessment
+    items: Sequence[tuple[float, DBHRRequirement]],
+) -> DBHRAssessment
 ```
 
 Judge a set of achieved values against their DB-HR requirements.
@@ -99,7 +99,7 @@ Judge a set of achieved values against their DB-HR requirements.
 | :--- | :--- |
 | `items` | `(value, requirement)` pairs. |
 
-**Returns:** A [`DbHrAssessment`](/phonometry/reference/api/building/spain/#dbhrassessment).
+**Returns:** A [`DBHRAssessment`](/phonometry/reference/api/building/spain/#dbhrassessment).
 
 **Raises**
 
@@ -112,8 +112,8 @@ Judge a set of achieved values against their DB-HR requirements.
 ```python
 check_db_hr_requirement(
     value: float,
-    requirement: DbHrRequirement,
-) -> DbHrCheck
+    requirement: DBHRRequirement,
+) -> DBHRCheck
 ```
 
 Check an achieved value against a DB-HR requirement.
@@ -127,9 +127,9 @@ for a reverberation time), and the rounded value is compared with the limit.
 | Name | Description |
 | :--- | :--- |
 | `value` | The achieved value, in the requirement's unit. |
-| `requirement` | The [`DbHrRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement) to check against. |
+| `requirement` | The [`DBHRRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement) to check against. |
 
-**Returns:** A [`DbHrCheck`](/phonometry/reference/api/building/spain/#dbhrcheck).
+**Returns:** A [`DBHRCheck`](/phonometry/reference/api/building/spain/#dbhrcheck).
 
 **Raises**
 
@@ -145,7 +145,7 @@ d2m_nt_a(
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
     spectrum: str = 'pink',
-) -> DbHrGlobalIndexResult
+) -> DBHRGlobalIndexResult
 ```
 
 A-weighted facade level difference `D2m,nT,A` (Formula (A.5)).
@@ -167,7 +167,7 @@ For a road-traffic or aircraft dominant site the quantity is
 | `frequencies` | Band centre frequencies, in Hz (optional). |
 | `spectrum` | `"pink"` (default, Table A.5) or `"railway"` (Table A.4), per the dominant outdoor noise. |
 
-**Returns:** A [`DbHrGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `"D2m,nT,A"`.
+**Returns:** A [`DBHRGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `"D2m,nT,A"`.
 
 **Raises**
 
@@ -183,7 +183,7 @@ d2m_nt_atr(
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
     spectrum: str = 'traffic',
-) -> DbHrGlobalIndexResult
+) -> DBHRGlobalIndexResult
 ```
 
 A-weighted facade level difference `D2m,nT,Atr` (Formula (A.6)).
@@ -208,7 +208,7 @@ report are stated in is not the same.
 | `frequencies` | Band centre frequencies, in Hz (optional). |
 | `spectrum` | `"traffic"` (default, Table A.3) or `"aircraft"` (Table A.2), per the dominant outdoor noise. |
 
-**Returns:** A [`DbHrGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `_D2M_NT_ATR`.
+**Returns:** A [`DBHRGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `_D2M_NT_ATR`.
 
 **Raises**
 
@@ -224,7 +224,7 @@ db_hr_airborne_requirement(
     source_room: str,
     *,
     shared_opening: bool = False,
-) -> tuple[DbHrRequirement, ...]
+) -> tuple[DBHRRequirement, ...]
 ```
 
 Airborne insulation requirements between two rooms (DB-HR 2.1.1).
@@ -249,7 +249,7 @@ those instead.
 | `source_room` | `"same_unit"`, `"other_unit"`, `"installations"` or `"activity"`. |
 | `shared_opening` | The two rooms share a door or window. |
 
-**Returns:** A tuple of [`DbHrRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement), of length one in the general case and two when `shared_opening` applies.
+**Returns:** A tuple of [`DBHRRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement), of length one in the general case and two when `shared_opening` applies.
 
 **Raises**
 
@@ -267,7 +267,7 @@ db_hr_facade_requirement(
     *,
     dominant_noise: str = 'road',
     quiet_facade: bool = False,
-) -> DbHrRequirement
+) -> DBHRRequirement
 ```
 
 Required facade insulation `D2m,nT,Atr` (DB-HR Table 2.1).
@@ -291,7 +291,7 @@ residential acoustic areas.
 | `dominant_noise` | `"road"` (default), `"railway"` or `"aircraft"`. This selects the quantity the requirement is stated in as well as the aircraft increment: `"railway"` gives a `D2m,nT,A` requirement (Formula (A.5)) and the other two a `D2m,nT,Atr` one (Formula (A.6)), per clause 3.1.3.4 point 1. |
 | `quiet_facade` | Assess with `Ld` reduced by 10 dBA. |
 
-**Returns:** The [`DbHrRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement), on `D2m,nT,Atr` or, for a railway-dominant site, on `D2m,nT,A`.
+**Returns:** The [`DBHRRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement), on `D2m,nT,Atr` or, for a railway-dominant site, on `D2m,nT,A`.
 
 **Raises**
 
@@ -316,7 +316,7 @@ db_hr_global_index(
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
     name: str | None = None,
-) -> DbHrGlobalIndexResult
+) -> DBHRGlobalIndexResult
 ```
 
 A-weighted global insulation index per DB-HR Annex A.
@@ -333,7 +333,7 @@ one-third-octave bands 100 Hz to 5 kHz (Formulae (A.5) to (A.7)).
 | `frequencies` | Band centre frequencies, in Hz, one per value. `None` assumes exactly the eighteen DB-HR bands in order, so it is required for any other length. That condition is on the length of `band_values` at run time, which a signature cannot state, so it is checked here and raises rather than being caught by a type checker. |
 | `name` | Optional index name carried on the result (e.g. `"R'A"`). |
 
-**Returns:** A [`DbHrGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult).
+**Returns:** A [`DBHRGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult).
 
 **Raises**
 
@@ -347,7 +347,7 @@ one-third-octave bands 100 Hz to 5 kHz (Formulae (A.5) to (A.7)).
 db_hr_impact_requirement(
     receiving_room: str,
     source_room: str,
-) -> DbHrRequirement
+) -> DBHRRequirement
 ```
 
 Impact sound requirement `L'nT,w` (DB-HR 2.1.2).
@@ -365,7 +365,7 @@ horizontally adjacent to a staircase.
 | `receiving_room` | `"protected"` or `"habitable"`. |
 | `source_room` | `"other_unit"`, `"installations"` or `"activity"`. |
 
-**Returns:** The [`DbHrRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement) on `L'nT,w`.
+**Returns:** The [`DBHRRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement) on `L'nT,w`.
 
 **Raises**
 
@@ -386,7 +386,7 @@ DB_HR_NORMALIZED_SPECTRA = {'pink': (-30.1, -27.1, -24.4, -21.9, -19.6, -17.6, -
 ```python
 db_hr_party_wall_requirement(
     quantity: str = 'D2m,nT,Atr',
-) -> DbHrRequirement
+) -> DBHRRequirement
 ```
 
 Airborne requirement on a party wall between two buildings (DB-HR 2.1.1 c).
@@ -403,7 +403,7 @@ requirements, so this function returns the one route asked for.
 | :--- | :--- |
 | `quantity` | `_D2M_NT_ATR` (default, the per-leaf route) or `_DNT_A` (the combined route). |
 
-**Returns:** The [`DbHrRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement) of the chosen route.
+**Returns:** The [`DBHRRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement) of the chosen route.
 
 **Raises**
 
@@ -418,7 +418,7 @@ db_hr_reverberation_requirement(
     room_use: str,
     *,
     furnished: bool = False,
-) -> DbHrRequirement
+) -> DBHRRequirement
 ```
 
 Reverberation or absorption requirement (DB-HR 2.2).
@@ -436,7 +436,7 @@ area of at least 0,2 m2 per cubic metre of room volume.
 | `room_use` | `"classroom"` (or `"conference_hall"`), `"restaurant"` (or `"dining_room"`) or `"common_area"`. |
 | `furnished` | For a classroom or conference hall, include the seating (the 0,5 s limit). |
 
-**Returns:** The [`DbHrRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement).
+**Returns:** The [`DBHRRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement).
 
 **Raises**
 
@@ -444,10 +444,10 @@ area of at least 0,2 m2 per cubic metre of room volume.
 | :--- | :--- |
 | ValueError | For an unknown room use. |
 
-## DbHrAssessment
+## DBHRAssessment
 
 ```python
-DbHrAssessment(checks: tuple[DbHrCheck, ...])
+DBHRAssessment(checks: tuple[DBHRCheck, ...])
 ```
 
 A set of DB-HR requirement checks.
@@ -456,18 +456,18 @@ A set of DB-HR requirement checks.
 
 | Name | Description |
 | :--- | :--- |
-| `checks` | The individual [`DbHrCheck`](/phonometry/reference/api/building/spain/#dbhrcheck) results. |
+| `checks` | The individual [`DBHRCheck`](/phonometry/reference/api/building/spain/#dbhrcheck) results. |
 
-### DbHrAssessment.complies
+### DBHRAssessment.complies
 
 *property*
 
 Whether every check is met.
 
-### DbHrAssessment.plot()
+### DBHRAssessment.plot()
 
 ```python
-DbHrAssessment.plot(
+DBHRAssessment.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -477,10 +477,10 @@ DbHrAssessment.plot(
 
 Plot the achieved values against their DB-HR limits.
 
-## DbHrCheck
+## DBHRCheck
 
 ```python
-DbHrCheck(requirement: DbHrRequirement, value: float)
+DBHRCheck(requirement: DBHRRequirement, value: float)
 ```
 
 A DB-HR requirement checked against an achieved value.
@@ -493,10 +493,10 @@ comply with a value DB-HR fails.
 
 | Name | Description |
 | :--- | :--- |
-| `requirement` | The [`DbHrRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement) checked. |
+| `requirement` | The [`DBHRRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement) checked. |
 | `value` | The achieved value, unrounded. |
 
-### DbHrCheck.complies
+### DBHRCheck.complies
 
 *property*
 
@@ -506,7 +506,7 @@ The value exactly at the limit after the rounding complies, with a
 billionth of a decibel of slack so that binary representation error
 in the subtraction cannot turn it into a failure.
 
-### DbHrCheck.margin
+### DBHRCheck.margin
 
 *property*
 
@@ -515,16 +515,16 @@ How far the reported value clears the limit.
 `reported - limit` for a `"min"` requirement and
 `limit - reported` for a `"max"` one; non-negative when compliant.
 
-### DbHrCheck.reported
+### DBHRCheck.reported
 
 *property*
 
 The achieved value rounded half-up as DB-HR prescribes for the quantity.
 
-## DbHrGlobalIndexResult
+## DBHRGlobalIndexResult
 
 ```python
-DbHrGlobalIndexResult(
+DBHRGlobalIndexResult(
     value: float,
     intermediate: float,
     reported: int,
@@ -555,10 +555,10 @@ A DB-HR A-weighted global insulation index.
 | `band_contributions` | Per-band transmitted level `L_x,i - X_i`, in dBA; the index is minus their energy sum. |
 | `reference` | The DB-HR Annex A table the normalised spectrum was read from. |
 
-### DbHrGlobalIndexResult.plot()
+### DBHRGlobalIndexResult.plot()
 
 ```python
-DbHrGlobalIndexResult.plot(
+DBHRGlobalIndexResult.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -568,10 +568,10 @@ DbHrGlobalIndexResult.plot(
 
 Plot the band insulation with the weighted per-band contributions.
 
-## DbHrRequirement
+## DBHRRequirement
 
 ```python
-DbHrRequirement(
+DBHRRequirement(
     quantity: str,
     limit: float,
     direction: str,
@@ -603,7 +603,7 @@ dnt_a(
     level_difference: Sequence[float] | np.ndarray,
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
-) -> DbHrGlobalIndexResult
+) -> DBHRGlobalIndexResult
 ```
 
 A-weighted standardized level difference `DnT,A` (Formula (A.7)).
@@ -615,7 +615,7 @@ A-weighted standardized level difference `DnT,A` (Formula (A.7)).
 | `level_difference` | Band standardized level difference `DnT`, in dB. |
 | `frequencies` | Band centre frequencies, in Hz (optional). |
 
-**Returns:** A [`DbHrGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `_DNT_A`.
+**Returns:** A [`DBHRGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `_DNT_A`.
 
 ## ra
 
@@ -624,7 +624,7 @@ ra(
     reduction_index: Sequence[float] | np.ndarray,
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
-) -> DbHrGlobalIndexResult
+) -> DBHRGlobalIndexResult
 ```
 
 A-weighted global sound reduction index `RA` for pink noise.
@@ -636,7 +636,7 @@ A-weighted global sound reduction index `RA` for pink noise.
 | `reduction_index` | Band sound reduction index `R` (or `R'`), in dB. |
 | `frequencies` | Band centre frequencies, in Hz (optional). |
 
-**Returns:** A [`DbHrGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `"RA"`.
+**Returns:** A [`DBHRGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `"RA"`.
 
 ## ra_tr
 
@@ -645,7 +645,7 @@ ra_tr(
     reduction_index: Sequence[float] | np.ndarray,
     *,
     frequencies: Sequence[float] | np.ndarray | None = None,
-) -> DbHrGlobalIndexResult
+) -> DBHRGlobalIndexResult
 ```
 
 A-weighted global sound reduction index `RA,tr` for road-traffic noise.
@@ -657,7 +657,7 @@ A-weighted global sound reduction index `RA,tr` for road-traffic noise.
 | `reduction_index` | Band sound reduction index `R` (or `R'`), in dB. |
 | `frequencies` | Band centre frequencies, in Hz (optional). |
 
-**Returns:** A [`DbHrGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `"RA,tr"`.
+**Returns:** A [`DBHRGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `"RA,tr"`.
 
 ## window_size_correction
 

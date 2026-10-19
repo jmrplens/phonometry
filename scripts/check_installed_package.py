@@ -56,7 +56,8 @@ def problems(version: str, tracked: list[str]) -> tuple[list[str], int]:
         count += 1
         try:
             importlib.import_module(module.name)
-        except Exception as exc:  # noqa: BLE001 - every failure is reported, none is expected
+        # Every failure is reported, none is expected.
+        except Exception as exc:  # noqa: BLE001
             found.append(f"{module.name} does not import: {type(exc).__name__}: {exc}")
     package = importlib.resources.files("phonometry")
     for path in tracked:

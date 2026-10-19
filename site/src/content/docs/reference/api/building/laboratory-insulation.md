@@ -229,6 +229,8 @@ Per-band laboratory airborne sound insulation (ISO 10140-2:2010).
 ```python
 LaboratoryAirborneInsulationResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -313,6 +315,8 @@ Per-band laboratory impact sound insulation (ISO 10140-3:2010).
 ```python
 LaboratoryImpactInsulationResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

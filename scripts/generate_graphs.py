@@ -17,7 +17,8 @@ multi-threaded backend; that is what keeps the rendered bytes identical
 across machines, so nothing numerical may be imported above it.
 """
 
-import figures  # noqa: F401  (its __init__ pins the thread pools first)
+# Its __init__ pins the thread pools first
+import figures  # noqa: F401
 from figures.aircraft import (
     generate_aircraft_atmospheric_absorption,
     generate_airport_contour,

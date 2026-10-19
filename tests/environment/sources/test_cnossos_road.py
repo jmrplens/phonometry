@@ -872,7 +872,8 @@ def test_the_coefficients_survive_pickling_and_deep_copies() -> None:
     import pickle
 
     for clone in (
-        pickle.loads(pickle.dumps(ROAD_COEFFICIENTS)),  # noqa: S301 - own object
+        # Own object
+        pickle.loads(pickle.dumps(ROAD_COEFFICIENTS)),  # noqa: S301
         copy.deepcopy(ROAD_COEFFICIENTS),
     ):
         assert clone == ROAD_COEFFICIENTS

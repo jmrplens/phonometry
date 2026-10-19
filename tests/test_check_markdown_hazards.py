@@ -305,6 +305,26 @@ def test_a_formula_on_the_opening_display_fence_is_refused() -> None:
     assert "Nothing closes it" in problems[0]
 
 
+@pytest.mark.parametrize(
+    ("text", "consequence"),
+    [
+        ("- item\n\n  $$x = 1$$\n", "It closes on this line"),
+        ("- item\n\n  $$x = 1\n  $$\n", "Nothing closes it"),
+    ],
+)
+def test_a_formula_on_an_indented_display_fence_is_refused(
+    text: str, consequence: str
+) -> None:
+    """A list item indents its display block, and the fence is the same fence.
+
+    The errata registers carried six such one-line blocks inside list items
+    with every gate green, because the check read the fence at column 0 only.
+    """
+    problems = cmh.check_text(text, "p.md")
+    assert len(problems) == 1
+    assert consequence in problems[0]
+
+
 def test_a_hazard_in_a_tilde_fence_is_code() -> None:
     assert (
         cmh.check_text("~~~\nThe level is always\n> 5 dB above it.\n~~~\n", "p.md")

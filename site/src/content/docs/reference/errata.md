@@ -4560,7 +4560,7 @@ in the same order.
   (printed p. 611): the octave-band transmission loss of a 20 mm particle
   board panel.
 - **The print:** the statement gives the panel a structural loss factor of
-  "~1.5 × 10⁻²"; the answer gives 27 dB at 8 kHz and 38.6 dB at 16 kHz.
+  "~$1.5 \times 10^{-2}$"; the answer gives 27 dB at 8 kHz and 38.6 dB at 16 kHz.
 - **The problem:** those two values are above the panel's critical frequency
   (4885 Hz for Appendix 4 particle board, $f_c t = 97.7\ \text{m/s}$) and
   therefore follow Cremer's Eq. (3.110), which contains $10\log_{10}(\eta)$.
@@ -5627,8 +5627,8 @@ in the same order.
   appears in Annex C. The informative example is inconsistent with the
   normative annex it cites.
 - **Evidence:** recomputation of Eq. (C.2) and $C_2$ from the printed
-  constants ($a$ = 2,2560 × 10⁻⁵ m⁻¹, $b$ = 5,255 3, $p_{\mathrm{s},0}$ =
-  1,013 25 × 10⁵ Pa, $\theta_\mathrm{ref}$ = 296 K). Verified on PDF page 46
+  constants ($a = 2{,}2560 \times 10^{-5}$ m⁻¹, $b$ = 5,255 3, $p_{\mathrm{s},0}$ =
+  $1{,}013\,25 \times 10^{5}$ Pa, $\theta_\mathrm{ref}$ = 296 K). Verified on PDF page 46
   (printed p. 37) and PDF page 36 (printed p. 27) of BS EN ISO 3747:2010.
 - **Library behaviour:** implements Annex C as printed:
   [`static_pressure_from_altitude`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/emission/_sound_power_in_situ.py)
@@ -5807,7 +5807,7 @@ in the same order.
   prints $C_2$ alone. The divisor is right, $0{,}4/\sqrt{6} = 0{,}16$, which
   rounds to the 0,2 printed.
 - **Evidence:** recomputation of Equation (A.2) and of $C_2$ from the
-  constants Annex A prints ($a$ = 2,256 0 × 10⁻⁵ m⁻¹, $b$ = 5,255 3,
+  constants Annex A prints ($a = 2{,}256\,0 \times 10^{-5}$ m⁻¹, $b$ = 5,255 3,
   $p_{\mathrm{s},0}$ = 101,325 kPa, $\theta_1$ = 296 K), and of $C_1 + C_2$
   from ISO 3741:2010 clause 9.1.4. Verified on PDF page 41 (printed p. 32)
   and PDF page 31 (printed p. 22) of BS EN ISO 3743-1:2010.
@@ -7004,7 +7004,7 @@ in the same order.
   ends "for $x_\mathrm{Fzp1} < x_\mathrm{F} \le 1$".
 - **The problem:** the two conditions are written against two different
   thresholds. $x_\mathrm{Fz}$ is the characteristic pressure ratio at the
-  6 × 10⁵ Pa the estimate of Equation (3a) and the charts of Figures 4 to 9
+  $6 \times 10^{5}$ Pa the estimate of Equation (3a) and the charts of Figures 4 to 9
   are drawn at, and $x_\mathrm{Fzp1}$ is that same ratio moved to the working
   inlet pressure by Equation (3c), so the two are equal only at that one
   pressure. Above it $x_\mathrm{Fzp1} < x_\mathrm{Fz}$ and the interval
@@ -9891,7 +9891,11 @@ in the same order.
 - **The print:** Formula (A.1) is the sum of the squared sensitivity
   coefficients of Formula (17) of IEC 61260-1:2014 times the squared standard
   uncertainties, and Formula (A.2) is offered as its simplification,
-  $$u_{L_\mathrm{c}} = \left[u_{L_\mathrm{in}}^2 + \left(\frac{10}{\ln(10)}\right)^2\left(\frac{u_{T_\mathrm{sweep}}}{T_\mathrm{sweep}}\right)^2 + \left(\frac{10}{\ln(10)}\right)^2\left(\frac{u_{T_\mathrm{avg}}}{T_\mathrm{avg}}\right)^2 + \left(\frac{10}{\ln(f_\mathrm{end}/f_\mathrm{start})\times\ln(10)}\right)\times\left[\left(\frac{u_{f_\mathrm{end}}}{f_\mathrm{end}}\right)^2 + \left(\frac{u_{f_\mathrm{start}}}{f_\mathrm{start}}\right)^2\right]\right]^{1/2}\ \mathrm{dB},$$
+
+  $$
+  u_{L_\mathrm{c}} = \left[u_{L_\mathrm{in}}^2 + \left(\frac{10}{\ln(10)}\right)^2\left(\frac{u_{T_\mathrm{sweep}}}{T_\mathrm{sweep}}\right)^2 + \left(\frac{10}{\ln(10)}\right)^2\left(\frac{u_{T_\mathrm{avg}}}{T_\mathrm{avg}}\right)^2 + \left(\frac{10}{\ln(f_\mathrm{end}/f_\mathrm{start})\times\ln(10)}\right)\times\left[\left(\frac{u_{f_\mathrm{end}}}{f_\mathrm{end}}\right)^2 + \left(\frac{u_{f_\mathrm{start}}}{f_\mathrm{start}}\right)^2\right]\right]^{1/2}\ \mathrm{dB},
+  $$
+
   in which the first two coefficients carry the exponent 2 and the third does
   not. A.3.5 then works an example with $u_{L_\mathrm{in}} \approx 0{,}042$ dB,
   $T_\mathrm{sweep} = T_\mathrm{avg} = 20$ s with 0,05 s and 0,02 s,
@@ -9959,7 +9963,11 @@ in the same order.
 - **The print:** 7.2.4.3 defines $\Delta P_j(\Omega_i)$ as "the difference
   between the input signal level minus the reference attenuation and the
   level of the summed output signals" and gives
-  $$\Delta P_j(\Omega_i) = 10\lg\left[10^{-0{,}1\,\Delta A_{j-1}} + 10^{-0{,}1\,\Delta A_j} + 10^{-0{,}1\,\Delta A_{j+1}}\right]\ \mathrm{dB}.$$
+
+  $$
+  \Delta P_j(\Omega_i) = 10\lg\left[10^{-0{,}1\,\Delta A_{j-1}} + 10^{-0{,}1\,\Delta A_j} + 10^{-0{,}1\,\Delta A_{j+1}}\right]\ \mathrm{dB}.
+  $$
+
   5.16 of IEC 61260-1 sets the limits "for the difference between (a) the
   level of the input signal minus the reference attenuation and (b) the level
   of the sum of the time-mean-square output signals from adjacent filters":
@@ -10071,7 +10079,11 @@ in the same order.
   for classes 0, 1, and 2 instruments, respectively". 5.8.3 defines "the
   difference $\Delta P(f_i)$ between the level of the input signal minus the
   reference attenuation and the level of the summed output signals" by
-  $$\Delta P(f_i) = 10\lg\left[10^{-0{,}1\,\Delta A_{j-1}} + 10^{-0{,}1\,\Delta A_j} + 10^{-0{,}1\,\Delta A_{j+1}}\right]\ \mathrm{dB},$$
+
+  $$
+  \Delta P(f_i) = 10\lg\left[10^{-0{,}1\,\Delta A_{j-1}} + 10^{-0{,}1\,\Delta A_j} + 10^{-0{,}1\,\Delta A_{j+1}}\right]\ \mathrm{dB},
+  $$
+
   equation (19), and 5.8.5 holds "the difference $\Delta P(f_i)$ calculated
   according to equation (19)" within the tolerances of 4.9.
 - **The problem:** with $\Delta A = A - A_\mathrm{ref}$ (equation (8)) and the

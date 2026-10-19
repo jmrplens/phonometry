@@ -3095,8 +3095,7 @@ def generate_mpp_absorption_peak(output_dir: str) -> None:
             materials.AirLayer(0.06),
         ],
     )
-    ax = res.plot(language=_LANG)
-    format_frequency_axis(ax, 100.0, 4000.0, language=_LANG)
+    res.plot(language=_LANG)
     plt.gcf().set_size_inches(10, 6)
     plt.tight_layout()
     save_figure(output_dir, "mpp_absorption_peak.svg")

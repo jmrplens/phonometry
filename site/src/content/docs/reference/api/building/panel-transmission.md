@@ -885,7 +885,13 @@ requires the spectrum to be on the 16 one-third-octave bands (100 Hz to
 ### SoundReductionResult.report()
 
 ```python
-SoundReductionResult.report(path: str, **kwargs: Any) -> str
+SoundReductionResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    language: str = 'en',
+    **kwargs: Any,
+) -> str
 ```
 
 Render the ISO 717-1 Annex C rating fiche of `R(f)` to a PDF.
@@ -901,6 +907,8 @@ one-third-octave bands (100 Hz to 3150 Hz) or the 5 octave bands
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
+| `metadata` | The laboratory, client and specimen block, a [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` leaves it blank. |
+| `language` | `"en"` (default) or `"es"` for the fiche. |
 | `kwargs` | Forwarded to [`report`](/phonometry/reference/api/building/ratings/#weightedratingresultreport) (e.g. `engine`). |
 
 **Returns:** The written `path` as a `str`.

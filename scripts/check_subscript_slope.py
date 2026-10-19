@@ -6,7 +6,7 @@ ISO 80000-2 settles the slope of a subscript by what the subscript *is*: a
 quantity symbol stays italic (:math:`L_p`, pressure; :math:`L_W`, power), a
 word or an abbreviation is upright (:math:`R_\mathrm{w}`, weighted), a number
 is upright by definition, and an index that runs over a sum is italic. The
-corpus applies that rule, and CONTRIBUTING.md states it.
+corpus applies that rule, and docs/contributing/docstrings.md#d16 states it.
 
 What the rule does not settle is the glyph that takes both slopes honestly.
 :math:`D_z` is the ISO 9613-2 barrier screening, whose *z* is the difference

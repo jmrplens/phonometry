@@ -88,7 +88,8 @@ def _pick_backend() -> tuple[ModuleType, str]:
 
         cupy.cuda.runtime.getDeviceCount()  # raises without a GPU
         cupy.arange(1).sum()  # force a real kernel launch
-    except Exception:  # noqa: BLE001 - any CUDA/import failure means CPU
+    # Any CUDA/import failure means CPU
+    except Exception:  # noqa: BLE001
         return np, "numpy"
     return cupy, "cupy"
 

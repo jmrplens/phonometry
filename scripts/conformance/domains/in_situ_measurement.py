@@ -281,16 +281,21 @@ def _chk_iso11820_gas_density() -> Outcome:
 def _chk_iso11820_installation_cases() -> Outcome:
     matches = 0
     for number, case in INSTALLATION_CASES.items():
-        wanted_quantity = "transmission" if number <= 16 else "insertion"  # noqa: PLR2004 - Figure 1 splits there
+        # Figure 1 splits there
+        wanted_quantity = "transmission" if number <= 16 else "insertion"  # noqa: PLR2004
         if case.quantity != wanted_quantity:
             continue
-        if number <= 4:  # noqa: PLR2004 - the clause groups cases 1 to 4
+        # The clause groups cases 1 to 4
+        if number <= 4:  # noqa: PLR2004
             ok = "measurement surface" in case.source_area_rule
-        elif number <= 8:  # noqa: PLR2004 - and cases 5 to 8
+        # Cases 5 to 8
+        elif number <= 8:  # noqa: PLR2004
             ok = "one-quarter" in case.source_area_rule
-        elif number <= 16:  # noqa: PLR2004 - and cases 9 to 16
+        # Cases 9 to 16
+        elif number <= 16:  # noqa: PLR2004
             ok = "one-half" in case.source_area_rule
-        elif number <= 18:  # noqa: PLR2004 - 17 and 18 name their run
+        # 17 and 18 name their run
+        elif number <= 18:  # noqa: PLR2004
             ok = "without the silencer" in case.source_area_rule
         else:
             ok = "aperture" in case.source_area_rule and (

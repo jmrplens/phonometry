@@ -93,7 +93,8 @@ def test_prominence_threshold_is_the_clause_9_2_value() -> None:
     from reference_data import ECMA418_2_PROMINENT_FLUCTUATION_VACIL
 
     from phonometry.psychoacoustics import (
-        fluctuation_strength_ecma as _pkg_func,  # noqa: F401 - import guard
+        # Import guard
+        fluctuation_strength_ecma as _pkg_func,  # noqa: F401
     )
 
     assert (

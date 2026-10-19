@@ -171,7 +171,9 @@ class LaboratoryAirborneInsulationResult(OwnsArrays):
                 )
                 raise ValueError(msg)
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot ``R`` against the shifted ISO 717-1 reference curve.
 
         Delegates to the weighted-rating plot (measured ``R`` versus the
@@ -186,7 +188,7 @@ class LaboratoryAirborneInsulationResult(OwnsArrays):
                 "one-third-octave or 5 octave bands)."
             )
             raise ValueError(msg)
-        return self.rating.plot(ax=ax, **kwargs)
+        return self.rating.plot(ax=ax, language=language, **kwargs)
 
     def report(
         self,
@@ -295,7 +297,9 @@ class LaboratoryImpactInsulationResult(OwnsArrays):
                 )
                 raise ValueError(msg)
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot ``Ln`` against the shifted ISO 717-2 reference curve.
 
         Delegates to the weighted impact-rating plot. Requires the automatic
@@ -309,7 +313,7 @@ class LaboratoryImpactInsulationResult(OwnsArrays):
                 "one-third-octave or 5 octave bands)."
             )
             raise ValueError(msg)
-        return self.rating.plot(ax=ax, **kwargs)
+        return self.rating.plot(ax=ax, language=language, **kwargs)
 
     def report(
         self,

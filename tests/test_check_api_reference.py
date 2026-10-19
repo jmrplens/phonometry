@@ -167,21 +167,22 @@ _FAKE_DOMAIN = {
 }
 
 
-def _fake_domain(tmp_path: pathlib.Path, name: str) -> types.ModuleType:
+def _fake_domain(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, name: str
+) -> types.ModuleType:
     package = tmp_path / name
     package.mkdir()
     for filename, source in _FAKE_DOMAIN.items():
         (package / filename).write_text(source, encoding="utf-8")
-    sys.path.insert(0, str(tmp_path))
-    try:
-        import importlib
+    monkeypatch.syspath_prepend(tmp_path)
+    import importlib
 
-        return importlib.import_module(name)
-    finally:
-        sys.path.remove(str(tmp_path))
+    return importlib.import_module(name)
 
 
-def test_every_second_or_private_address_is_reported(tmp_path: pathlib.Path) -> None:
+def test_every_second_or_private_address_is_reported(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Underscore names, re-exports, aliases, second names and second listings.
 
     What is not reported is as much the point. ``leaf`` lists ``Hidden``, which
@@ -191,7 +192,7 @@ def test_every_second_or_private_address_is_reported(tmp_path: pathlib.Path) -> 
     And ``other`` lists the ``Shared`` it defines although ``leaf`` listed it
     first: a listing already reported does not make the owner the second one.
     """
-    domain = _fake_domain(tmp_path, "fake_surface_domain")
+    domain = _fake_domain(tmp_path, monkeypatch, "fake_surface_domain")
     problems = gate.surface_problems([domain])
     assert problems == [
         "fake_surface_domain.__all__ lists 'second', a second name for owned",
@@ -203,6 +204,41 @@ def test_every_second_or_private_address_is_reported(tmp_path: pathlib.Path) -> 
         "fake_surface_domain does not publish",
         "fake_surface_domain.twin.__all__ lists 'Hidden', which "
         "fake_surface_domain.leaf lists too",
+    ]
+
+
+def test_a_published_type_variable_or_protocol_is_reported(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A ``TypeVar`` or a ``Protocol`` in an ``__all__`` is refused like an alias.
+
+    Both only describe types, and the guard knew it for the names a module
+    leaves unlisted; a listed one passed as long as it was not an alias.
+    """
+    package = tmp_path / "fake_typing_domain"
+    package.mkdir()
+    (package / "__init__.py").write_text(
+        "from .leaf import Proto, T, made\n__all__ = ['Proto', 'T', 'made']\n",
+        encoding="utf-8",
+    )
+    (package / "leaf.py").write_text(
+        "from typing import Protocol, TypeVar\n"
+        "T = TypeVar('T')\n"
+        "class Proto(Protocol):\n    def size(self) -> int: ...\n"
+        "def made():\n    return 1\n"
+        "__all__ = ['Proto', 'T', 'made']\n",
+        encoding="utf-8",
+    )
+    monkeypatch.syspath_prepend(tmp_path)
+    import importlib
+
+    domain = importlib.import_module("fake_typing_domain")
+    assert gate.surface_problems([domain]) == [
+        "fake_typing_domain.__all__ lists 'Proto', a Protocol",
+        "fake_typing_domain.__all__ lists 'T', a TypeVar",
+        "fake_typing_domain.leaf.__all__ lists 'Proto', a Protocol",
+        "fake_typing_domain.leaf.__all__ lists 'T', a TypeVar",
     ]
 
 
@@ -281,24 +317,25 @@ _FAKE_MODULES = {
 
 
 def _fake_package(
-    tmp_path: pathlib.Path, name: str, files: dict[str, str]
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    name: str,
+    files: dict[str, str],
 ) -> types.ModuleType:
     package = tmp_path / name
     for filename, source in files.items():
         path = package / filename
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(source, encoding="utf-8")
-    sys.path.insert(0, str(tmp_path))
-    try:
-        import importlib
+    monkeypatch.syspath_prepend(tmp_path)
+    import importlib
 
-        return importlib.import_module(name)
-    finally:
-        sys.path.remove(str(tmp_path))
+    return importlib.import_module(name)
 
 
 def test_a_module_hidden_behind_a_name_of_its_package_is_reported(
     tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """A function, or a constant, that takes a module's name hides the module.
 
@@ -314,7 +351,7 @@ def test_a_module_hidden_behind_a_name_of_its_package_is_reported(
     defines, which is how such a module is written: private, with its names
     reached through the package.
     """
-    domain = _fake_package(tmp_path, "fake_module_domain", _FAKE_MODULES)
+    domain = _fake_package(tmp_path, monkeypatch, "fake_module_domain", _FAKE_MODULES)
     problems = gate.module_problems([domain])
     hidden = (
         "fake_module_domain.{leaf} is hidden behind fake_module_domain.{leaf}, "
@@ -341,13 +378,14 @@ def test_a_module_hidden_behind_a_name_of_its_package_is_reported(
 
 def test_a_package_without_all_is_reported_like_any_module(
     tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """The domain package is walked too: it is the first module a reader meets."""
     files = {
         "__init__.py": "from .leaf import thing\n",
         "leaf.py": "def thing():\n    return 1\n__all__ = ['thing']\n",
     }
-    domain = _fake_package(tmp_path, "fake_bare_domain", files)
+    domain = _fake_package(tmp_path, monkeypatch, "fake_bare_domain", files)
     assert gate.module_problems([domain]) == [
         "fake_bare_domain declares no __all__, so nothing says which of its "
         "names are public"
@@ -363,6 +401,7 @@ _STRAY_LEAF = {
 
 def test_a_leaf_its_package_never_imports_is_still_found_hidden(
     tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """The package attribute is read before the walk imports the leaf.
 
@@ -372,7 +411,7 @@ def test_a_leaf_its_package_never_imports_is_still_found_hidden(
     attribute afterwards saw a module and passed; and the walk would leave the
     library publishing the module instead of the function.
     """
-    domain = _fake_package(tmp_path, "fake_stray_domain", _STRAY_LEAF)
+    domain = _fake_package(tmp_path, monkeypatch, "fake_stray_domain", _STRAY_LEAF)
     published = domain.probe
     problems = gate.module_problems([domain])
     assert problems == [
@@ -386,6 +425,7 @@ def test_a_leaf_its_package_never_imports_is_still_found_hidden(
 
 def test_a_leaf_another_import_reached_first_is_found_in_the_package_source(
     tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Once something has imported the leaf, only the ``__init__`` source shows it.
 
@@ -395,7 +435,7 @@ def test_a_leaf_another_import_reached_first_is_found_in_the_package_source(
     """
     import importlib
 
-    domain = _fake_package(tmp_path, "fake_early_domain", _STRAY_LEAF)
+    domain = _fake_package(tmp_path, monkeypatch, "fake_early_domain", _STRAY_LEAF)
     importlib.import_module("fake_early_domain.probe")
     problems = gate.module_problems([domain])
     assert problems == [
@@ -455,7 +495,7 @@ def test_an_exemption_is_keyed_by_location_and_cannot_go_stale(
         "__init__.py": "from .leaf import thing\n__all__ = ['thing']\n",
         "leaf.py": "LIMIT = 3.0\ndef thing():\n    return LIMIT\n__all__ = ['thing']\n",
     }
-    domain = _fake_package(tmp_path, "fake_exempt_domain", files)
+    domain = _fake_package(tmp_path, monkeypatch, "fake_exempt_domain", files)
     monkeypatch.setattr(
         gate,
         "UNLISTED_EXEMPTIONS",

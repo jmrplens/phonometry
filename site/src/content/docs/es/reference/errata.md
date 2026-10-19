@@ -4904,7 +4904,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   (p. 611 impresa): la pérdida de transmisión por bandas de octava de un
   panel de aglomerado de 20 mm.
 - **El impreso:** el enunciado da al panel un factor de pérdida estructural
-  de «~1.5 × 10⁻²»; la respuesta da 27 dB a 8 kHz y 38.6 dB a 16 kHz.
+  de «~$1.5 \times 10^{-2}$»; la respuesta da 27 dB a 8 kHz y 38.6 dB a 16 kHz.
 - **El problema:** esos dos valores están por encima de la frecuencia crítica
   del panel (4885 Hz para el aglomerado del Appendix 4,
   $f_c t = 97.7\ \text{m/s}$) y siguen por tanto la Ec. (3.110) de Cremer,
@@ -6047,8 +6047,8 @@ dos ediciones con las mismas entradas y en el mismo orden.
   requiera corrección meteorológica». El ejemplo informativo es inconsistente
   con el anexo normativo que cita.
 - **Evidencia:** recálculo de la Ec. (C.2) y de $C_2$ a partir de las
-  constantes impresas ($a$ = 2,2560 × 10⁻⁵ m⁻¹, $b$ = 5,255 3,
-  $p_{\mathrm{s},0}$ = 1,013 25 × 10⁵ Pa, $\theta_\mathrm{ref}$ = 296 K).
+  constantes impresas ($a = 2{,}2560 \times 10^{-5}$ m⁻¹, $b$ = 5,255 3,
+  $p_{\mathrm{s},0}$ = $1{,}013\,25 \times 10^{5}$ Pa, $\theta_\mathrm{ref}$ = 296 K).
   Verificado en la página 46 del PDF (p. 37 impresa) y en la página 36 del
   PDF (p. 27 impresa) de BS EN ISO 3747:2010.
 - **Comportamiento de la biblioteca:** implementa el Anexo C tal como está
@@ -6237,7 +6237,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   imprime $C_2$ solo. El divisor es correcto, $0{,}4/\sqrt{6} = 0{,}16$, que
   redondea al 0,2 impreso.
 - **Evidencia:** recálculo de la Ecuación (A.2) y de $C_2$ a partir de las
-  constantes que imprime el Anexo A ($a$ = 2,256 0 × 10⁻⁵ m⁻¹, $b$ = 5,255 3,
+  constantes que imprime el Anexo A ($a = 2{,}256\,0 \times 10^{-5}$ m⁻¹, $b$ = 5,255 3,
   $p_{\mathrm{s},0}$ = 101,325 kPa, $\theta_1$ = 296 K), y de $C_1 + C_2$ a
   partir del apartado 9.1.4 de ISO 3741:2010. Verificado en la página 41 del
   PDF (p. 32 impresa) y en la página 31 del PDF (p. 22 impresa) de BS EN ISO
@@ -7469,7 +7469,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   (18b) termina «for $x_\mathrm{Fzp1} < x_\mathrm{F} \le 1$».
 - **El problema:** las dos condiciones están escritas contra dos umbrales
   distintos. $x_\mathrm{Fz}$ es el cociente característico de presiones a los
-  6 × 10⁵ Pa para los que están trazadas la estimación de la Ecuación (3a) y
+  $6 \times 10^{5}$ Pa para los que están trazadas la estimación de la Ecuación (3a) y
   las Figuras 4 a 9, y $x_\mathrm{Fzp1}$ es ese mismo cociente llevado a la
   presión de entrada real por la Ecuación (3c), así que solo coinciden a esa
   presión. Por encima, $x_\mathrm{Fzp1} < x_\mathrm{Fz}$ y el intervalo entre
@@ -10482,7 +10482,11 @@ dos ediciones con las mismas entradas y en el mismo orden.
   sensibilidad al cuadrado de la Fórmula (17) de la IEC 61260-1:2014 por las
   incertidumbres típicas al cuadrado, y la Fórmula (A.2) se ofrece como su
   simplificación,
-  $$u_{L_\mathrm{c}} = \left[u_{L_\mathrm{in}}^2 + \left(\frac{10}{\ln(10)}\right)^2\left(\frac{u_{T_\mathrm{sweep}}}{T_\mathrm{sweep}}\right)^2 + \left(\frac{10}{\ln(10)}\right)^2\left(\frac{u_{T_\mathrm{avg}}}{T_\mathrm{avg}}\right)^2 + \left(\frac{10}{\ln(f_\mathrm{end}/f_\mathrm{start})\times\ln(10)}\right)\times\left[\left(\frac{u_{f_\mathrm{end}}}{f_\mathrm{end}}\right)^2 + \left(\frac{u_{f_\mathrm{start}}}{f_\mathrm{start}}\right)^2\right]\right]^{1/2}\ \mathrm{dB},$$
+
+  $$
+  u_{L_\mathrm{c}} = \left[u_{L_\mathrm{in}}^2 + \left(\frac{10}{\ln(10)}\right)^2\left(\frac{u_{T_\mathrm{sweep}}}{T_\mathrm{sweep}}\right)^2 + \left(\frac{10}{\ln(10)}\right)^2\left(\frac{u_{T_\mathrm{avg}}}{T_\mathrm{avg}}\right)^2 + \left(\frac{10}{\ln(f_\mathrm{end}/f_\mathrm{start})\times\ln(10)}\right)\times\left[\left(\frac{u_{f_\mathrm{end}}}{f_\mathrm{end}}\right)^2 + \left(\frac{u_{f_\mathrm{start}}}{f_\mathrm{start}}\right)^2\right]\right]^{1/2}\ \mathrm{dB},
+  $$
+
   en la que los dos primeros coeficientes llevan el exponente 2 y el tercero
   no. El A.3.5 resuelve después un ejemplo con
   $u_{L_\mathrm{in}} \approx 0{,}042$ dB, $T_\mathrm{sweep} = T_\mathrm{avg} = 20$ s
@@ -10555,7 +10559,11 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Lo impreso:** el 7.2.4.3 define $\Delta P_j(\Omega_i)$ como "the difference
   between the input signal level minus the reference attenuation and the
   level of the summed output signals" y da
-  $$\Delta P_j(\Omega_i) = 10\lg\left[10^{-0{,}1\,\Delta A_{j-1}} + 10^{-0{,}1\,\Delta A_j} + 10^{-0{,}1\,\Delta A_{j+1}}\right]\ \mathrm{dB}.$$
+
+  $$
+  \Delta P_j(\Omega_i) = 10\lg\left[10^{-0{,}1\,\Delta A_{j-1}} + 10^{-0{,}1\,\Delta A_j} + 10^{-0{,}1\,\Delta A_{j+1}}\right]\ \mathrm{dB}.
+  $$
+
   El 5.16 de la IEC 61260-1 fija los límites "for the difference between (a)
   the level of the input signal minus the reference attenuation and (b) the
   level of the sum of the time-mean-square output signals from adjacent
@@ -10673,7 +10681,11 @@ dos ediciones con las mismas entradas y en el mismo orden.
   "the difference $\Delta P(f_i)$ between the level of the input signal minus
   the reference attenuation and the level of the summed output signals"
   mediante
-  $$\Delta P(f_i) = 10\lg\left[10^{-0{,}1\,\Delta A_{j-1}} + 10^{-0{,}1\,\Delta A_j} + 10^{-0{,}1\,\Delta A_{j+1}}\right]\ \mathrm{dB},$$
+
+  $$
+  \Delta P(f_i) = 10\lg\left[10^{-0{,}1\,\Delta A_{j-1}} + 10^{-0{,}1\,\Delta A_j} + 10^{-0{,}1\,\Delta A_{j+1}}\right]\ \mathrm{dB},
+  $$
+
   la ecuación (19), y el 5.8.5 exige que "the difference $\Delta P(f_i)$
   calculated according to equation (19)" quede dentro de las tolerancias del
   4.9.

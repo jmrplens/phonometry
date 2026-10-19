@@ -1028,7 +1028,9 @@ def test_every_plot_takes_ax_first_and_the_rest_by_name() -> None:
     axes to a frequency vector. Six took ``language`` by position, so
     ``plot(ax, "es")`` worked on those six and nowhere else. The rule is the
     one every other result keeps: the axes first, and every other
-    argument, ``language`` included, keyword-only.
+    argument, ``language`` included, keyword-only. Eight results that hand
+    the drawing to another took ``language`` only through ``**kwargs``, so
+    their signatures hid it: every plot names it.
     """
     methods = _public_plot_methods()
     assert len(methods) > 200, "the walk found too few plot methods to mean anything"
@@ -1045,7 +1047,9 @@ def test_every_plot_takes_ax_first_and_the_rest_by_name() -> None:
             if parameter.kind in _BY_POSITION and parameter.name != "language"
         )
         language = next((p for p in parameters if p.name == "language"), None)
-        if language is not None and language.kind is not inspect.Parameter.KEYWORD_ONLY:
+        if language is None:
+            offenders.append(f"{owner}.plot: takes no 'language'")
+        elif language.kind is not inspect.Parameter.KEYWORD_ONLY:
             offenders.append(f"{owner}.plot: 'language' is not keyword-only")
     assert not offenders, "\n".join(offenders)
 

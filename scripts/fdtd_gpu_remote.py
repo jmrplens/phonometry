@@ -230,7 +230,8 @@ def _validate_window(
     return out
 
 
-def _whole(value: Any, name: str) -> int:  # noqa: ANN401 - whatever the caller packed
+# Whatever the caller packed
+def _whole(value: Any, name: str) -> int:  # noqa: ANN401
     """The integer *value* stands for, refusing anything that is not one."""
     if isinstance(value, bool) or not isinstance(value, (int, np.integer)):
         msg = f"{name} must be an integer; got {value!r}"

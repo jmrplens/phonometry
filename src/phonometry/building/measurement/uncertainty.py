@@ -510,7 +510,7 @@ def band_uncertainty(
     *,
     upper_limit: bool = False,
 ) -> BandUncertainty:
-    """Return the one-third-octave standard uncertainties for a measurand.
+    """The one-third-octave standard uncertainties for a measurand.
 
     Airborne (Table 2) offers situations A/B/C; impact (Table 4) only B/C; the
     reduction ``ΔL`` (Table 6) only A. ``upper_limit=True`` selects the ``σR95``
@@ -555,7 +555,7 @@ def single_number_uncertainty(
     *,
     upper_limit: bool = False,
 ) -> float:
-    """Return the tabulated single-number standard uncertainty ``u``, in dB.
+    """The tabulated single-number standard uncertainty ``u``, in dB.
 
     Descriptors (case-insensitive, with aliases) cover the ISO 717 ratings:
     ``"r_w"`` (also ``rprime_w``/``dn_w``/``dnt_w``) and its spectrum-adaptation
@@ -595,7 +595,7 @@ def single_number_uncertainty(
 
 
 def max_repeatability_standard_deviation() -> BandUncertainty:
-    """Return Table 1, the maximum repeatability standard deviation per band (Clause 5.8).
+    """Table 1: the maximum repeatability standard deviation per band (Clause 5.8).
 
     A laboratory verifies its own procedure when the repeatability standard
     deviation of ``nx`` repeated measurements stays below these values.
@@ -614,7 +614,7 @@ def max_repeatability_standard_deviation() -> BandUncertainty:
 def insulation_coverage_factor(
     coverage: float = 0.95, *, one_sided: bool = False
 ) -> float:
-    """Return the coverage factor ``k`` for a coverage probability (Table 8).
+    """The coverage factor ``k`` for a coverage probability (Table 8).
 
     :param coverage: Coverage probability as a fraction. Two-sided values are
         ``0.68, 0.80, 0.90, 0.95, 0.99, 0.999``; one-sided values are
@@ -643,7 +643,7 @@ def insulation_expanded_uncertainty(
     *,
     one_sided: bool = False,
 ) -> float:
-    r"""Return the expanded uncertainty :math:`U = k\,u` (Formula 2, Clause 8).
+    r"""The expanded uncertainty :math:`U = k\,u` (Formula 2, Clause 8).
 
     The coverage factor ``k`` is taken from Table 8 for the requested coverage
     probability; a minimum of :math:`k = 1` is enforced (Clause 8).
@@ -707,7 +707,7 @@ def prediction_input_uncertainty(
     sigma_product: float,
     n: int,
 ) -> float:
-    r"""Return the prediction input uncertainty ``u_input`` (Formula A.1).
+    r"""The prediction input uncertainty ``u_input`` (Formula A.1).
 
     .. math::
 

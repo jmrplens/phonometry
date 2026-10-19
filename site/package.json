@@ -29,15 +29,15 @@
     "redirects": "node scripts/generate-redirects.mjs"
   },
   "dependencies": {
-    "@astrojs/markdown-remark": "^7.3.2",
+    "@astrojs/markdown-remark": "^7.3.3",
     "@astrojs/starlight": "^0.42.6",
-    "astro": "^7.3.8",
+    "astro": "^7.4.0",
     "katex": "catalog:",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
-    "satori": "^0.47.1",
+    "satori": "^0.60.1",
     "sharp": "^0.35.5",
-    "starlight-image-zoom": "^0.16.1",
+    "starlight-image-zoom": "^0.16.2",
     "starlight-links-validator": "^0.27.0",
     "starlight-sidebar-topics": "^0.9.0"
   },
@@ -46,7 +46,7 @@
     "html-validate": "^11.16.2",
     "lighthouse": "^13.5.0",
     "pa11y-ci": "^5.0.0",
-    "puppeteer": "25.13.0",
+    "puppeteer": "25.14.0",
     "typescript": "^6.0.3"
   }
 }

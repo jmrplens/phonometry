@@ -1121,7 +1121,7 @@ def flow_noise_bend(
     frequencies: ArrayLike,
     flow_velocity: float,
     area: float,
-    height: float,
+    height_m: float,
     *,
     density: float = 1.206,
     model: str = "ashrae",
@@ -1171,7 +1171,7 @@ def flow_noise_bend(
     :param frequencies: Octave-band centre frequencies ``f``, Hz (1-D array).
     :param flow_velocity: Mean flow speed ``U``, m/s.
     :param area: Duct cross-sectional area ``S``, m2.
-    :param height: Duct height ``H`` in the plane of the bend, m.
+    :param height_m: Duct height ``H`` in the plane of the bend, m.
     :param density: Air density ``rho``, kg/m3.
     :param model: ``"ashrae"`` (default, Bies) or ``"vdi2081"``.
     :param branch_diameter_m: **VDI 2081 only.** Diameter of the branch duct
@@ -1216,7 +1216,7 @@ def flow_noise_bend(
             label=f"Junction flow noise, VDI 2081 (v_a = {u:.1f} m/s)",
         )
     s = require_positive(area, "area")
-    h = require_positive(height, "height")
+    h = require_positive(height_m, "height_m")
     rho = require_positive(density, "density")
     lws = 30.0 * np.log10(u) + 10.0 * np.log10(s) + 10.0 * np.log10(rho) + 117.0
     ns = f * h / u
@@ -1775,7 +1775,9 @@ def _vdi2081_limit_frequency(shape: str, size: float, speed_of_sound: float) -> 
     mode across the largest one.
     """
     if shape == "rectangular":
-        return plane_wave_limit(width=size, height=size, speed_of_sound=speed_of_sound)
+        return plane_wave_limit(
+            width=size, height_m=size, speed_of_sound=speed_of_sound
+        )
     return plane_wave_limit(diameter_m=size, speed_of_sound=speed_of_sound)
 
 
@@ -1851,14 +1853,14 @@ def _vdi2081_straight_run(
 def _perimeter_over_area(width: float, height: float) -> float:
     """``P / S`` of a rectangular duct in ft^-1, from SI side lengths in m."""
     w = require_positive(width, "width") / _M_PER_FT
-    h = require_positive(height, "height") / _M_PER_FT
+    h = require_positive(height, "height_m") / _M_PER_FT
     return 2.0 * (w + h) / (w * h)
 
 
 def unlined_rectangular_duct_attenuation(
     frequencies: ArrayLike,
     width: float,
-    height: float,
+    height_m: float,
     length: float,
     *,
     wrapped: bool = False,
@@ -1887,7 +1889,7 @@ def unlined_rectangular_duct_attenuation(
 
     :param frequencies: Octave-band centre frequencies ``f``, Hz (1-D array).
     :param width: Duct width, m.
-    :param height: Duct height, m.
+    :param height_m: Duct height, m.
     :param length: Duct run length ``l``, m.
     :param wrapped: The duct is externally wrapped with a fibreglass blanket,
         which doubles the 63 Hz to 250 Hz attenuation.
@@ -1904,7 +1906,9 @@ def unlined_rectangular_duct_attenuation(
                 "tabulated for bare 1 mm steel sheet and prints no lagged row."
             )
             raise ValueError(msg)
-        side = max(require_positive(width, "width"), require_positive(height, "height"))
+        side = max(
+            require_positive(width, "width"), require_positive(height_m, "height_m")
+        )
         return HvacSpectrumResult(
             frequencies=f,
             values=_vdi2081_straight_run(
@@ -1916,10 +1920,10 @@ def unlined_rectangular_duct_attenuation(
             quantity="attenuation",
             label=(
                 f"Straight duct, VDI 2081 ({width * 1000:.0f} x "
-                f"{height * 1000:.0f} mm, {length:.2f} m)"
+                f"{height_m * 1000:.0f} mm, {length:.2f} m)"
             ),
         )
-    ps = _perimeter_over_area(width, height)
+    ps = _perimeter_over_area(width, height_m)
     ell = require_positive(length, "length") / _M_PER_FT
     low = (
         17.0 * ps**0.25 * f**-0.85 * ell
@@ -1935,7 +1939,7 @@ def unlined_rectangular_duct_attenuation(
         values=values,
         quantity="attenuation",
         label=(
-            f"Unlined rectangular duct ({width * 1000:.0f} x {height * 1000:.0f} mm, "
+            f"Unlined rectangular duct ({width * 1000:.0f} x {height_m * 1000:.0f} mm, "
             f"{length:.2f} m)"
         ),
     )
@@ -2006,9 +2010,9 @@ def unlined_circular_duct_attenuation(
 def lined_rectangular_duct_attenuation(
     frequencies: ArrayLike | None,
     width: float,
-    height: float,
+    height_m: float,
     length: float,
-    lining_thickness: float,
+    lining_thickness_m: float,
     *,
     include_unlined: bool = False,
 ) -> HvacSpectrumResult:
@@ -2027,33 +2031,33 @@ def lined_rectangular_duct_attenuation(
     :param frequencies: Octave-band centres, Hz; ``None`` uses
         :data:`OCTAVE_BANDS`.
     :param width: Duct width, m.
-    :param height: Duct height, m.
+    :param height_m: Duct height, m.
     :param length: Duct run length ``l``, m.
-    :param lining_thickness: Lining thickness ``t``, m.
+    :param lining_thickness_m: Lining thickness ``t``, m.
     :param include_unlined: Add the unlined-duct attenuation of
         :func:`unlined_rectangular_duct_attenuation`, the side-wall
         contribution the insertion-loss measurement subtracts out.
     :return: An :class:`HvacSpectrumResult` of the attenuation, dB.
     """
     f, idx = _octave_slots(frequencies)
-    ps = _perimeter_over_area(width, height)
+    ps = _perimeter_over_area(width, height_m)
     ell = require_positive(length, "length") / _M_PER_FT
-    t_in = require_positive(lining_thickness, "lining_thickness") / _M_PER_IN
+    t_in = require_positive(lining_thickness_m, "lining_thickness_m") / _M_PER_IN
     values = (
         _LINED_RECT_B[idx] * ps ** _LINED_RECT_C[idx] * t_in ** _LINED_RECT_D[idx] * ell
     )
     if include_unlined:
         values = (
             values
-            + unlined_rectangular_duct_attenuation(f, width, height, length).values
+            + unlined_rectangular_duct_attenuation(f, width, height_m, length).values
         )
     return HvacSpectrumResult(
         frequencies=f,
         values=np.minimum(values, _LINED_DUCT_LIMIT),
         quantity="attenuation",
         label=(
-            f"Lined rectangular duct ({width * 1000:.0f} x {height * 1000:.0f} mm, "
-            f"{length:.2f} m, {lining_thickness * 1000:.0f} mm lining)"
+            f"Lined rectangular duct ({width * 1000:.0f} x {height_m * 1000:.0f} mm, "
+            f"{length:.2f} m, {lining_thickness_m * 1000:.0f} mm lining)"
         ),
     )
 
@@ -2062,7 +2066,7 @@ def lined_circular_duct_attenuation(
     frequencies: ArrayLike | None,
     diameter_m: float,
     length: float,
-    lining_thickness: float,
+    lining_thickness_m: float,
 ) -> HvacSpectrumResult:
     r"""Insertion loss of a lined circular duct (Long Eq. 14.13, Table 14.3).
 
@@ -2080,13 +2084,13 @@ def lined_circular_duct_attenuation(
         :data:`OCTAVE_BANDS`.
     :param diameter_m: Internal diameter ``d``, m.
     :param length: Duct run length ``l``, m.
-    :param lining_thickness: Lining thickness ``t``, m.
+    :param lining_thickness_m: Lining thickness ``t``, m.
     :return: An :class:`HvacSpectrumResult` of the attenuation, dB.
     """
     f, idx = _octave_slots(frequencies)
     d_in = require_positive(diameter_m, "diameter_m") / _M_PER_IN
     ell = require_positive(length, "length") / _M_PER_FT
-    t_in = require_positive(lining_thickness, "lining_thickness") / _M_PER_IN
+    t_in = require_positive(lining_thickness_m, "lining_thickness_m") / _M_PER_IN
     a, b, c, d, e, g = (_LINED_ROUND_COEFFS[idx, j] for j in range(6))
     rate = a + b * t_in + c * t_in**2 + d * d_in + e * d_in**2 + g * d_in**3
     values = np.clip(rate * ell, 0.0, _LINED_DUCT_LIMIT)
@@ -2096,7 +2100,7 @@ def lined_circular_duct_attenuation(
         quantity="attenuation",
         label=(
             f"Lined circular duct (D = {diameter_m * 1000:.0f} mm, {length:.2f} m, "
-            f"{lining_thickness * 1000:.0f} mm lining)"
+            f"{lining_thickness_m * 1000:.0f} mm lining)"
         ),
     )
 
@@ -2389,10 +2393,10 @@ def equivalent_diameter(area: float) -> float:
 # ---------------------------------------------------------------------------
 def splitter_silencer_insertion_loss(
     frequencies: ArrayLike | None,
-    height: float,
+    height_m: float,
     length: float,
     airway_widths: ArrayLike,
-    splitter_thickness: float,
+    splitter_thickness_m: float,
 ) -> HvacSpectrumResult:
     r"""Insertion loss of a parallel-splitter (dissipative) silencer.
 
@@ -2423,13 +2427,13 @@ def splitter_silencer_insertion_loss(
 
     :param frequencies: Octave-band centres, Hz; ``None`` (default) uses
         :data:`OCTAVE_BANDS`.
-    :param height: Height of the silencer face, m (the airway dimension the
+    :param height_m: Height of the silencer face, m (the airway dimension the
         splitters do not divide).
     :param length: Length of the silencer in the flow direction, m.
     :param airway_widths: Free width of each airway between splitters, m
         (a scalar is taken as a single airway; give one value per airway when
         they differ).
-    :param splitter_thickness: Full thickness of a splitter baffle, m; the
+    :param splitter_thickness_m: Full thickness of a splitter baffle, m; the
         equivalent liner thickness of an airway is half of it.
     :return: An :class:`HvacSpectrumResult` of the insertion loss, dB.
     :raises ValueError: If any dimension is not positive, or if
@@ -2442,12 +2446,12 @@ def splitter_silencer_insertion_loss(
     if np.any(widths <= 0.0) or not np.all(np.isfinite(widths)):
         msg = "'airway_widths' must be positive and finite."
         raise ValueError(msg)
-    thickness = require_positive(splitter_thickness, "splitter_thickness")
+    thickness = require_positive(splitter_thickness_m, "splitter_thickness_m")
     liner = 0.5 * thickness
     per_airway = np.array(
         [
             lined_rectangular_duct_attenuation(
-                frequencies, float(width), height, length, liner
+                frequencies, float(width), height_m, length, liner
             ).values
             for width in widths
         ]
@@ -2469,7 +2473,7 @@ def silencer_self_noise(
     frequencies: ArrayLike | None,
     airway_velocity: float,
     passages: int,
-    height: float,
+    height_m: float,
     *,
     model: str = "ashrae",
     pressure_drop_pa: float | None = None,
@@ -2504,7 +2508,7 @@ def silencer_self_noise(
         :data:`OCTAVE_BANDS`.
     :param airway_velocity: Velocity ``V`` in the splitter airway, m/s.
     :param passages: Number of air passages ``N`` between the splitters.
-    :param height: Silencer height ``H`` (or circumference, if round), m.
+    :param height_m: Silencer height ``H`` (or circumference, if round), m.
     :return: An :class:`HvacSpectrumResult` of the band sound power level,
         dB re 1e-12 W.
     :raises ValueError: If ``passages`` is not a positive integer.
@@ -2559,7 +2563,7 @@ def silencer_self_noise(
     if passages <= 0 or not float(passages).is_integer():
         msg = "'passages' must be a positive integer."
         raise ValueError(msg)
-    h_mm = require_positive(height, "height") * 1000.0
+    h_mm = require_positive(height_m, "height_m") * 1000.0
     overall = (
         55.0 * np.log10(v)
         + 10.0 * np.log10(float(passages))

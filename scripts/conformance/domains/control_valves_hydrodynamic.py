@@ -60,7 +60,7 @@ _VALVE: dict[str, Any] = {
 }
 _PIPE: dict[str, Any] = {
     "internal_diameter_m": 0.1071,
-    "wall_thickness": 0.0036,
+    "wall_thickness_m": 0.0036,
     "density": 7800.0,
 }
 

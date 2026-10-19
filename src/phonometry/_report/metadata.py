@@ -86,7 +86,7 @@ class ReportMetadata(RichDisplay):
         maximum lateral dimension (rectangular tube), in metres. Printed by the
         impedance-tube fiche (ISO 10534-2), where it fixes the upper plane-wave
         cut-on frequency.
-    :ivar mic_spacing: Microphone spacing ``s`` between the two measurement
+    :ivar microphone_spacing_m: Microphone spacing ``s`` between the two measurement
         positions of the impedance tube, in metres. Printed by the
         impedance-tube fiche (ISO 10534-2), where it bounds the working
         frequency range.
@@ -94,7 +94,7 @@ class ReportMetadata(RichDisplay):
         ``"rectangular"`` or ``"square"``. Printed by the impedance-tube fiche
         (ISO 10534-2) next to the tube diameter, which it qualifies (inner
         diameter for a circular tube, maximum lateral dimension otherwise).
-    :ivar thickness: Specimen thickness under the applied static load, in
+    :ivar thickness_m: Specimen thickness under the applied static load, in
         metres. Printed by the dynamic-stiffness fiche (EN 29052-1 /
         ISO 9052-1), where EN 29052-1:1992 Clause 9 b) requires reporting the
         thickness of the resilient layer under load; it is shown in millimetres.
@@ -162,8 +162,8 @@ class ReportMetadata(RichDisplay):
     receiving_relative_humidity_percent: float | None = None
     static_pressure_kpa: float | None = None
     tube_diameter_m: float | None = None
-    mic_spacing: float | None = None
-    thickness: float | None = None
+    microphone_spacing_m: float | None = None
+    thickness_m: float | None = None
     test_room: str | None = None
     instrumentation: str | None = None
     calibration: str | None = None
@@ -190,8 +190,8 @@ class ReportMetadata(RichDisplay):
         "room_volume",
         "static_pressure_kpa",
         "tube_diameter_m",
-        "mic_spacing",
-        "thickness",
+        "microphone_spacing_m",
+        "thickness_m",
     )
     #: Count fields that must be finite, positive integers (numbers of source
     #: and receiver positions in a room-acoustics measurement).

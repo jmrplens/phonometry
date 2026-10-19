@@ -2020,14 +2020,14 @@ ceiling = [17.0, 21.0, 25.0, 29.0, 32.0, 30.0, 38.0]   # 9.5 mm plasterboard
 
 # Vigran's example geometry: LS = LR = 4.75 m, plenum 0.43 m, reflecting walls.
 res = building.plenum_flanking_reduction_index(
-    ceiling, ceiling, ceiling_length=4.75, plenum_height=0.43, frequencies=freqs
+    ceiling, ceiling, ceiling_length=4.75, plenum_height_m=0.43, frequencies=freqs
 )
 print(round(res.geometry_term, 1))    # 10.4 dB charged against RS + RR
 res.plot()                            # Rcl against the two ceilings
 
 # A lined plenum attenuates the sideways path (Eq. (9.18) instead of (9.20)):
 damped = building.plenum_flanking_reduction_index(
-    ceiling, ceiling, ceiling_length=4.75, plenum_height=0.43,
+    ceiling, ceiling, ceiling_length=4.75, plenum_height_m=0.43,
     attenuation_source=[0.5] * 7, attenuation_receiving=[0.5] * 7,
 )
 

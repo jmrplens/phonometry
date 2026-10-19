@@ -261,9 +261,9 @@ TABLE_D1_QUANTITIES: Mapping[str, tuple[str, ...]] = MappingProxyType(
     {
         "mass": ("mass",),
         "bar_end": ("density", "longitudinal_velocity", "area"),
-        "beam": ("density", "longitudinal_velocity", "thickness", "width"),
-        "plate": ("density", "longitudinal_velocity", "thickness"),
-        "pipe": ("density", "longitudinal_velocity", "thickness", "radius"),
+        "beam": ("density", "longitudinal_velocity", "thickness_m", "width"),
+        "plate": ("density", "longitudinal_velocity", "thickness_m"),
+        "pipe": ("density", "longitudinal_velocity", "thickness_m", "radius"),
         "mass_spring": ("mass", "stiffness", "loss_factor"),
     }
 )
@@ -344,7 +344,7 @@ def _beam_mobility(
     f = _positive_values(frequency, "frequency")
     rho = require_positive(density, "density")
     c_l = require_positive(longitudinal_velocity, "longitudinal_velocity")
-    t = require_positive(thickness, "thickness")
+    t = require_positive(thickness, "thickness_m")
     w = require_positive(width, "width")
     return np.asarray(
         1.0 / (7.6 * rho * t * w * np.sqrt(c_l * t * f)), dtype=np.float64
@@ -375,7 +375,7 @@ def _plate_mobility(
     """
     rho = require_positive(density, "density")
     c_l = require_positive(longitudinal_velocity, "longitudinal_velocity")
-    t = require_positive(thickness, "thickness")
+    t = require_positive(thickness, "thickness_m")
     return np.asarray(1.0 / (2.3 * c_l * rho * t**2), dtype=np.float64)
 
 
@@ -404,7 +404,7 @@ def _pipe_mobility(
     f = _positive_values(frequency, "frequency")
     rho = require_positive(density, "density")
     c_l = require_positive(longitudinal_velocity, "longitudinal_velocity")
-    t = require_positive(thickness, "thickness")
+    t = require_positive(thickness, "thickness_m")
     r = require_positive(radius, "radius")
     return np.asarray(
         1.0 / (63.0 * rho * t * r * np.sqrt(c_l * r * f)), dtype=np.float64
@@ -493,7 +493,7 @@ def typical_element_mobility(
     mass: float | None = None,
     density: float | None = None,
     longitudinal_velocity: float | None = None,
-    thickness: float | None = None,
+    thickness_m: float | None = None,
     width: float | None = None,
     area: float | None = None,
     radius: float | None = None,
@@ -510,7 +510,7 @@ def typical_element_mobility(
     - ``"bar_end"``, described by ``density`` :math:`\rho` [kg/m3],
       ``longitudinal_velocity`` :math:`c_\mathrm{L}` [m/s] and ``area`` :math:`S`
       [m2]: :math:`\lvert Y \rvert = \left[ \rho c_\mathrm{L} S \right]^{-1}`.
-    - ``"beam"``, described by :math:`\rho`, :math:`c_\mathrm{L}`, ``thickness``
+    - ``"beam"``, described by :math:`\rho`, :math:`c_\mathrm{L}`, ``thickness_m``
       :math:`t` [m] and ``width`` :math:`w` [m]:
       :math:`\lvert Y \rvert = \left[ 7{,}6\, \rho t w \sqrt{c_\mathrm{L} t f}
       \right]^{-1}`.
@@ -557,7 +557,7 @@ def typical_element_mobility(
     :param mass: Mass ``M``, in kilograms (rows ``"mass"``, ``"mass_spring"``).
     :param density: Density ``rho``, in kg/m^3.
     :param longitudinal_velocity: Quasi-longitudinal wave speed ``cL``, in m/s.
-    :param thickness: Thickness ``t``, in metres.
+    :param thickness_m: Thickness ``t``, in metres.
     :param width: Beam width ``w``, in metres (row ``"beam"``).
     :param area: Cross-sectional area ``S``, in m^2 (row ``"bar_end"``).
     :param radius: Pipe radius ``r``, in metres (row ``"pipe"``).
@@ -575,7 +575,7 @@ def typical_element_mobility(
             "mass": mass,
             "density": density,
             "longitudinal_velocity": longitudinal_velocity,
-            "thickness": thickness,
+            "thickness_m": thickness_m,
             "width": width,
             "area": area,
             "radius": radius,
@@ -595,19 +595,19 @@ def typical_element_mobility(
             frequency,  # type: ignore[arg-type]
             args["density"],
             args["longitudinal_velocity"],
-            args["thickness"],
+            args["thickness_m"],
             args["width"],
         )
     if row == "plate":
         return _plate_mobility(
-            args["density"], args["longitudinal_velocity"], args["thickness"]
+            args["density"], args["longitudinal_velocity"], args["thickness_m"]
         )
     if row == "pipe":
         return _pipe_mobility(
             frequency,  # type: ignore[arg-type]
             args["density"],
             args["longitudinal_velocity"],
-            args["thickness"],
+            args["thickness_m"],
             args["radius"],
         )
     return _mass_spring_mobility(

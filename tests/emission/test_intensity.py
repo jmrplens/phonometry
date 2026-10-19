@@ -46,7 +46,7 @@ def test_plane_progressive_wave_broadband() -> None:
     """I = p_rms^2/(rho*c) within 3 % in the valid band, F2 = 0,14 dB."""
     p1, p2 = _plane_wave_pair(delay_s=SPACING / C)
     res = emission.sound_intensity(
-        p1, p2, FS, spacing=SPACING, density=RHO, speed_of_sound=C
+        p1, p2, FS, spacing_m=SPACING, density=RHO, speed_of_sound=C
     )
     p_center = (p1 + p2) / 2.0
     expected = float(np.mean(p_center**2)) / (RHO * C)
@@ -75,10 +75,10 @@ def test_bias_correct_undoes_finite_difference_underread() -> None:
     p1 = np.sin(2 * np.pi * f0 * t)
     p2 = np.sin(2 * np.pi * f0 * (t - delay))
     raw = emission.sound_intensity(
-        p1, p2, FS, spacing=spacing, density=RHO, speed_of_sound=C
+        p1, p2, FS, spacing_m=spacing, density=RHO, speed_of_sound=C
     )
     corr = emission.sound_intensity(
-        p1, p2, FS, spacing=spacing, density=RHO, speed_of_sound=C, bias_correct=True
+        p1, p2, FS, spacing_m=spacing, density=RHO, speed_of_sound=C, bias_correct=True
     )
     k_dr = 2.0 * np.pi * f0 * spacing / C
     expected_ratio = k_dr / np.sin(k_dr)
@@ -89,10 +89,16 @@ def test_bias_correct_undoes_finite_difference_underread() -> None:
     lo1 = np.sin(2 * np.pi * 50.0 * t)
     lo2 = np.sin(2 * np.pi * 50.0 * (t - delay))
     r = emission.sound_intensity(
-        lo1, lo2, FS, spacing=spacing, density=RHO, speed_of_sound=C
+        lo1, lo2, FS, spacing_m=spacing, density=RHO, speed_of_sound=C
     )
     cc = emission.sound_intensity(
-        lo1, lo2, FS, spacing=spacing, density=RHO, speed_of_sound=C, bias_correct=True
+        lo1,
+        lo2,
+        FS,
+        spacing_m=spacing,
+        density=RHO,
+        speed_of_sound=C,
+        bias_correct=True,
     )
     assert cc.total_intensity == pytest.approx(r.total_intensity, rel=2e-3)
 
@@ -111,10 +117,10 @@ def test_bias_correct_near_null_does_not_explode() -> None:
     p1 = np.sin(2 * np.pi * f0 * t)
     p2 = np.sin(2 * np.pi * f0 * (t - delay))
     raw = emission.sound_intensity(
-        p1, p2, FS, spacing=spacing, density=RHO, speed_of_sound=C
+        p1, p2, FS, spacing_m=spacing, density=RHO, speed_of_sound=C
     )
     corr = emission.sound_intensity(
-        p1, p2, FS, spacing=spacing, density=RHO, speed_of_sound=C, bias_correct=True
+        p1, p2, FS, spacing_m=spacing, density=RHO, speed_of_sound=C, bias_correct=True
     )
     k_dr = 2.0 * np.pi * f0 * spacing / C
     assert k_dr > np.pi / 2.0  # the tone is past the cutoff
@@ -141,7 +147,7 @@ def test_bias_correct_below_cutoff_matches_analytic() -> None:
     p1 = amp * np.cos(2.0 * np.pi * f0 * t)
     p2 = amp * np.cos(2.0 * np.pi * f0 * t - phi)
     corr = emission.sound_intensity(
-        p1, p2, FS, spacing=spacing, density=RHO, speed_of_sound=C, bias_correct=True
+        p1, p2, FS, spacing_m=spacing, density=RHO, speed_of_sound=C, bias_correct=True
     )
     true_plane = amp**2 / (2.0 * RHO * C)
     assert corr.total_intensity == pytest.approx(true_plane, rel=0.02)
@@ -150,10 +156,10 @@ def test_bias_correct_below_cutoff_matches_analytic() -> None:
 def test_reversing_microphones_flips_the_sign() -> None:
     p1, p2 = _plane_wave_pair(delay_s=SPACING / C)
     fwd = emission.sound_intensity(
-        p1, p2, FS, spacing=SPACING, density=RHO, speed_of_sound=C
+        p1, p2, FS, spacing_m=SPACING, density=RHO, speed_of_sound=C
     )
     rev = emission.sound_intensity(
-        p2, p1, FS, spacing=SPACING, density=RHO, speed_of_sound=C
+        p2, p1, FS, spacing_m=SPACING, density=RHO, speed_of_sound=C
     )
     assert rev.total_direction == -1
     assert rev.total_intensity == pytest.approx(-fwd.total_intensity, rel=1e-6)
@@ -166,7 +172,7 @@ def test_plane_wave_third_octave_bands() -> None:
     """Per-band F2 = 0 dB and positive direction inside the excited band."""
     p1, p2 = _plane_wave_pair(delay_s=SPACING / C)
     res = emission.sound_intensity(
-        p1, p2, FS, spacing=SPACING, density=RHO, speed_of_sound=C, fraction=3
+        p1, p2, FS, spacing_m=SPACING, density=RHO, speed_of_sound=C, fraction=3
     )
     assert res.frequencies is not None
     assert res.intensity is not None
@@ -192,7 +198,7 @@ def test_standing_wave_high_pressure_intensity_index() -> None:
     p1 = 2.0 * np.cos(k * x1) * np.cos(2.0 * np.pi * f0 * t)
     p2 = 2.0 * np.cos(k * x2) * np.cos(2.0 * np.pi * f0 * t)
     res = emission.sound_intensity(
-        p1, p2, FS, spacing=SPACING, density=RHO, speed_of_sound=C
+        p1, p2, FS, spacing_m=SPACING, density=RHO, speed_of_sound=C
     )
     p_center = (p1 + p2) / 2.0
     plane_equivalent = float(np.mean(p_center**2)) / (RHO * C)
@@ -212,7 +218,7 @@ def test_1khz_tone_exact_analytic_intensity() -> None:
     p1 = amp * np.cos(2.0 * np.pi * f0 * t)
     p2 = amp * np.cos(2.0 * np.pi * f0 * t - phi)
     res = emission.sound_intensity(
-        p1, p2, FS, spacing=SPACING, density=RHO, speed_of_sound=C, fraction=3
+        p1, p2, FS, spacing_m=SPACING, density=RHO, speed_of_sound=C, fraction=3
     )
     true_plane = amp**2 / (2.0 * RHO * C)
     expected = true_plane * np.sin(phi) / phi
@@ -236,7 +242,7 @@ def test_band_integration_consistency() -> None:
     """Sum of band intensities and pressures matches the broadband totals."""
     p1, p2 = _plane_wave_pair(delay_s=SPACING / C, f_lo=100.0, f_hi=4000.0)
     res = emission.sound_intensity(
-        p1, p2, FS, spacing=SPACING, density=RHO, speed_of_sound=C, fraction=3
+        p1, p2, FS, spacing_m=SPACING, density=RHO, speed_of_sound=C, fraction=3
     )
     assert res.intensity is not None
     assert res.pressure_level is not None
@@ -251,7 +257,7 @@ def test_octave_fraction_and_limits() -> None:
         p1,
         p2,
         FS,
-        spacing=SPACING,
+        spacing_m=SPACING,
         density=RHO,
         speed_of_sound=C,
         fraction=1,
@@ -268,40 +274,42 @@ def test_validation_errors() -> None:
     with pytest.raises(
         ValueError, match=r"sound_intensity: 'p1'.*'p2'.*one value per sample"
     ):
-        emission.sound_intensity(good, good[:-1], FS, spacing=SPACING)
-    with pytest.raises(ValueError, match=r"Microphone 'spacing' must be positive"):
-        emission.sound_intensity(good, good, FS, spacing=0.0)
-    with pytest.raises(ValueError, match=r"Microphone 'spacing' must be positive"):
-        emission.sound_intensity(good, good, FS, spacing=-0.01)
+        emission.sound_intensity(good, good[:-1], FS, spacing_m=SPACING)
+    with pytest.raises(ValueError, match=r"Microphone 'spacing_m' must be positive"):
+        emission.sound_intensity(good, good, FS, spacing_m=0.0)
+    with pytest.raises(ValueError, match=r"Microphone 'spacing_m' must be positive"):
+        emission.sound_intensity(good, good, FS, spacing_m=-0.01)
     with pytest.raises(ValueError, match=r"Sample rate 'fs' must be positive"):
-        emission.sound_intensity(good, good, 0, spacing=SPACING)
+        emission.sound_intensity(good, good, 0, spacing_m=SPACING)
     with pytest.raises(ValueError, match=r"Sample rate 'fs' must be positive"):
-        emission.sound_intensity(good, good, -48000, spacing=SPACING)
+        emission.sound_intensity(good, good, -48000, spacing_m=SPACING)
     with pytest.raises(ValueError, match=r"Air 'density' must be positive"):
-        emission.sound_intensity(good, good, FS, spacing=SPACING, density=0.0)
+        emission.sound_intensity(good, good, FS, spacing_m=SPACING, density=0.0)
     with pytest.raises(ValueError, match=r"'speed_of_sound' must be positive"):
-        emission.sound_intensity(good, good, FS, spacing=SPACING, speed_of_sound=-1.0)
+        emission.sound_intensity(good, good, FS, spacing_m=SPACING, speed_of_sound=-1.0)
     with pytest.raises(ValueError, match=r"'fraction' must be"):
-        emission.sound_intensity(good, good, FS, spacing=SPACING, fraction=2)
+        emission.sound_intensity(good, good, FS, spacing_m=SPACING, fraction=2)
     with pytest.raises(ValueError, match=r"'limits' must be"):
-        emission.sound_intensity(good, good, FS, spacing=SPACING, limits=[100.0])
+        emission.sound_intensity(good, good, FS, spacing_m=SPACING, limits=[100.0])
     with pytest.raises(ValueError, match=r"'limits' must be"):
         emission.sound_intensity(
-            good, good, FS, spacing=SPACING, limits=[1000.0, 100.0]
+            good, good, FS, spacing_m=SPACING, limits=[1000.0, 100.0]
         )
     # A NaN limit fails every comparison and used to pass the guard, silently
     # selecting no band at all.
     with pytest.raises(ValueError, match="'limits' must be"):
         emission.sound_intensity(
-            good, good, FS, spacing=SPACING, limits=[float("nan"), 1000.0]
+            good, good, FS, spacing_m=SPACING, limits=[float("nan"), 1000.0]
         )
     two_dimensional = np.zeros((2, 100))
     with pytest.raises(
         ValueError, match=r"sound_intensity expects 1D pressure signals"
     ):
-        emission.sound_intensity(two_dimensional, two_dimensional, FS, spacing=SPACING)
+        emission.sound_intensity(
+            two_dimensional, two_dimensional, FS, spacing_m=SPACING
+        )
     with pytest.raises(ValueError, match=r"Signals too short for a spectral estimate"):
-        emission.sound_intensity(good[:8], good[:8], FS, spacing=SPACING)
+        emission.sound_intensity(good[:8], good[:8], FS, spacing_m=SPACING)
 
 
 def test_field_indicators_uniform_field() -> None:
@@ -704,7 +712,7 @@ def test_an_intensity_band_quantity_off_the_band_axis_is_refused(
 
     p1, p2 = _plane_wave_pair(delay_s=SPACING / C)
     result = emission.sound_intensity(
-        p1, p2, FS, spacing=SPACING, density=RHO, speed_of_sound=C, fraction=3
+        p1, p2, FS, spacing_m=SPACING, density=RHO, speed_of_sound=C, fraction=3
     )
     values = np.asarray(getattr(result, field_name))
     wrong = values[:-1] if trim else np.append(values, values[-1])
@@ -721,7 +729,7 @@ def _broadband_result() -> emission.IntensityResult:
         p1,
         p2,
         FS,
-        spacing=SPACING,
+        spacing_m=SPACING,
         density=RHO,
         speed_of_sound=C,
         fraction=3,
@@ -792,7 +800,7 @@ def test_a_nan_sample_is_refused_at_the_probe_instead_of_titling_the_figure() ->
     p1[10] = np.nan
     with pytest.raises(ValueError, match="'p1' must contain only finite samples"):
         emission.sound_intensity(
-            p1, p2, FS, spacing=SPACING, density=RHO, speed_of_sound=C, fraction=3
+            p1, p2, FS, spacing_m=SPACING, density=RHO, speed_of_sound=C, fraction=3
         )
 
 

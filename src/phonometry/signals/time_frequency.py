@@ -303,7 +303,7 @@ class ZoomFFTResult(OwnsArrays):
         (:math:`\text{amplitude}^2`
         at DC/Nyquist), consistent with the ``'spectrum'`` scaling of
         the Welch module: a tone reads its mean square :math:`A^2/2`.
-    :ivar bin_spacing: Grid spacing, in Hz - freely chosen, finer than
+    :ivar bin_spacing_hz: Grid spacing, in Hz - freely chosen, finer than
         :math:`f_\mathrm{s}/N` if requested (the zoom gain of Eq. 11.127).
     :ivar resolution_bandwidth: Effective noise bandwidth
         :math:`B_\mathrm{e} = f_\mathrm{s} \sum w^2 / \left( \sum w \right)^2` of the
@@ -318,7 +318,7 @@ class ZoomFFTResult(OwnsArrays):
     spectrum: NDArray[np.complex128]
     amplitude: NDArray[np.float64]
     power: NDArray[np.float64]
-    bin_spacing: float
+    bin_spacing_hz: float
     resolution_bandwidth: float
     window: str
     n_points: int
@@ -476,7 +476,7 @@ def zoom_fft(
         spectrum=spectrum,
         amplitude=amplitude,
         power=power,
-        bin_spacing=(hi - lo) / (m - 1),
+        bin_spacing_hz=(hi - lo) / (m - 1),
         resolution_bandwidth=fs_v * float(np.sum(w * w)) / float(np.sum(w)) ** 2,
         window=window,
         n_points=m,

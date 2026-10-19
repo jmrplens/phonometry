@@ -1010,7 +1010,7 @@ def _maybe_rating(values: np.ndarray, bands: str | None) -> WeightedRatingResult
 # --------------------------------------------------------------------------- #
 def critical_frequency(
     longitudinal_wave_speed: float,
-    thickness: float,
+    thickness_m: float,
     *,
     speed_of_sound: float = _DEFAULT_SPEED_OF_SOUND,
 ) -> float:
@@ -1034,14 +1034,14 @@ def critical_frequency(
         Hopkins Eq. 2.201 derives. See ``docs/ERRATA.md``.
 
     :param longitudinal_wave_speed: Longitudinal wave speed ``cL``, in m/s.
-    :param thickness: Element thickness ``h``, in m.
+    :param thickness_m: Element thickness ``h``, in m.
     :param speed_of_sound: Speed of sound in air ``c0``, in m/s.
     :return: Critical frequency ``fc``, in Hz.
     :raises ValueError: If any input is not positive/finite.
     """
     c0 = _positive(speed_of_sound, "speed_of_sound")
     c_l = _positive(longitudinal_wave_speed, "longitudinal_wave_speed")
-    h = _positive(thickness, "thickness")
+    h = _positive(thickness_m, "thickness_m")
     return c0**2 / (_CRITICAL_FREQUENCY_CONSTANT * c_l * h)
 
 

@@ -167,7 +167,7 @@ class HelmholtzResonator(RichDisplay):
 def slit_effective_properties(
     frequency: ArrayLike,
     *,
-    slit_height: float,
+    slit_height_m: float,
     fluid: Fluid = PUBLISHED_AIR,
 ) -> tuple[Complex, Complex]:
     r"""Effective density and bulk modulus of a narrow slit of height ``h``.
@@ -185,7 +185,7 @@ def slit_effective_properties(
     :math:`\kappa_0 = \gamma P_0`.
 
     :param frequency: Frequency ``f``, in hertz (scalar or array).
-    :param slit_height: Slit height ``h``, in metres.
+    :param slit_height_m: Slit height ``h``, in metres.
     :param fluid: State of the air in the slit
         (:class:`~phonometry.fluids.Fluid`); the
         density ``rho0``, viscosity ``eta``, Prandtl number ``Pr``, ratio of
@@ -193,7 +193,7 @@ def slit_effective_properties(
     :return: ``(rho_s, kappa_s)`` complex arrays shaped like ``frequency``.
     """
     f = require_positive_array(frequency, "frequency")
-    h = require_positive(slit_height, "slit_height")
+    h = require_positive(slit_height_m, "slit_height_m")
     rho0 = fluid.density
     eta = fluid.viscosity
     pr = fluid.prandtl_number
@@ -342,12 +342,14 @@ def _slit_resonator_ducts(
 ) -> tuple[Complex, Complex, Complex, Complex, Complex, Complex, float]:
     """Duct parameters of the 2-D resonator (Sci. Rep. Eqs. (8)-(12))."""
     if slit_height is None or lattice_step is None:
-        msg = "The 'slit' resonator geometry requires 'slit_height' and 'lattice_step'."
+        msg = (
+            "The 'slit' resonator geometry requires 'slit_height_m' and 'lattice_step'."
+        )
         raise ValueError(msg)
-    h = require_positive(slit_height, "slit_height")
+    h = require_positive(slit_height, "slit_height_m")
     a = require_positive(lattice_step, "lattice_step")
-    rho_n, kap_n = slit_effective_properties(f, slit_height=wn, fluid=fluid)
-    rho_c, kap_c = slit_effective_properties(f, slit_height=wc, fluid=fluid)
+    rho_n, kap_n = slit_effective_properties(f, slit_height_m=wn, fluid=fluid)
+    rho_c, kap_c = slit_effective_properties(f, slit_height_m=wc, fluid=fluid)
     z_n = np.asarray(np.sqrt(kap_n * rho_n) / (wn * a), dtype=np.complex128)
     z_c = np.asarray(np.sqrt(kap_c * rho_c) / (wc * a), dtype=np.complex128)
     dl = 0.0
@@ -392,7 +394,7 @@ def _square_resonator_ducts(
         if slit_height is not None and lattice_step is not None:
             dl += _neck_slit_correction(
                 wn,
-                require_positive(slit_height, "slit_height"),
+                require_positive(slit_height, "slit_height_m"),
                 require_positive(lattice_step, "lattice_step"),
             )
     return rho_n, kap_n, rho_c, kap_c, z_n, z_c, dl
@@ -402,7 +404,7 @@ def helmholtz_resonator_impedance(
     frequency: ArrayLike,
     resonator: HelmholtzResonator,
     *,
-    slit_height: float | None = None,
+    slit_height_m: float | None = None,
     lattice_step: float | None = None,
     end_correction: bool = True,
     geometry: str = "square",
@@ -415,7 +417,7 @@ def helmholtz_resonator_impedance(
     ducts using the effective parameters of
     :func:`rectangular_duct_properties`; the impedance is Appl. Phys. Lett. 2016
     Eq. (A23) with the neck-to-cavity radiation correction of Eq. (A24) and,
-    when ``slit_height`` and ``lattice_step`` are supplied, the neck-to-slit
+    when ``slit_height_m`` and ``lattice_step`` are supplied, the neck-to-slit
     correction of Eqs. (A25)-(A26) added to the total neck length correction:
 
     .. math::
@@ -436,11 +438,11 @@ def helmholtz_resonator_impedance(
     parameters come from :func:`slit_effective_properties` with the neck and
     cavity widths, the duct sections are ``w_n a`` and ``w_c a``, and the end
     corrections are the 2-D fits of Sci. Rep. 7:5389 Eqs. (11)-(12); both
-    ``slit_height`` and ``lattice_step`` are then required.
+    ``slit_height_m`` and ``lattice_step`` are then required.
 
     :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param resonator: The :class:`HelmholtzResonator` geometry.
-    :param slit_height: Slit height ``h`` for the neck-to-slit correction; if
+    :param slit_height_m: Slit height ``h`` for the neck-to-slit correction; if
         ``None`` that correction is omitted (``"square"`` only).
     :param lattice_step: Lattice step ``a`` for the neck-to-slit correction.
     :param end_correction: Include the radiation end corrections (default True).
@@ -468,7 +470,7 @@ def helmholtz_resonator_impedance(
             f=f,
             wn=wn,
             wc=wc,
-            slit_height=slit_height,
+            slit_height=slit_height_m,
             lattice_step=lattice_step,
             end_correction=end_correction,
             fluid=fluid,
@@ -478,7 +480,7 @@ def helmholtz_resonator_impedance(
             f=f,
             wn=wn,
             wc=wc,
-            slit_height=slit_height,
+            slit_height=slit_height_m,
             lattice_step=lattice_step,
             end_correction=end_correction,
             fluid=fluid,
@@ -513,7 +515,7 @@ class SlitResonatorAbsorberResult(OwnsArrays):
     matrix with shape ``(2, 2, len(frequency))``.
 
     The trailing fields retain the panel geometry the prediction was run
-    with (``resonators``, ``slit_height``, ``lattice_step``, ``period_m``) so
+    with (``resonators``, ``slit_height_m``, ``lattice_step``, ``period_m``) so
     :meth:`plot_geometry` can draw the cross-section; they are appended after
     the original fields and default to ``None`` for hand-built results.
     """
@@ -529,7 +531,7 @@ class SlitResonatorAbsorberResult(OwnsArrays):
     transfer_matrix: Complex
     _: KW_ONLY
     resonators: tuple[HelmholtzResonator, ...] | None = None
-    slit_height: float | None = None
+    slit_height_m: float | None = None
     lattice_step: float | None = None
     period_m: float | None = None
 
@@ -596,7 +598,7 @@ def _panel_transfer_matrix(
     area_slit = slit_height * lattice_step
     area_cell = period_m * lattice_step
     phit = slit_height / period_m
-    rho_s, kap_s = slit_effective_properties(f, slit_height=slit_height, fluid=fluid)
+    rho_s, kap_s = slit_effective_properties(f, slit_height_m=slit_height, fluid=fluid)
     k_s = omega * np.sqrt(rho_s / kap_s)
     z_s = np.sqrt(kap_s * rho_s) / area_slit
     nf = omega.size
@@ -617,7 +619,7 @@ def _panel_transfer_matrix(
         z_hr = helmholtz_resonator_impedance(
             f,
             res,
-            slit_height=slit_height,
+            slit_height_m=slit_height,
             lattice_step=lattice_step,
             end_correction=end_correction,
             geometry=resonator_geometry,
@@ -652,7 +654,7 @@ def slit_helmholtz_absorber(
     | list[HelmholtzResonator]
     | tuple[HelmholtzResonator, ...],
     *,
-    slit_height: float,
+    slit_height_m: float,
     lattice_step: float,
     period_m: float,
     angle_rad: float = 0.0,
@@ -680,7 +682,7 @@ def slit_helmholtz_absorber(
     :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param resonators: One :class:`HelmholtzResonator` or a sequence of them,
         ordered from the panel face towards the rigid backing.
-    :param slit_height: Slit height ``h``, in metres.
+    :param slit_height_m: Slit height ``h``, in metres.
     :param lattice_step: Resonator lattice step ``a`` along the slit, in metres;
         the slit depth is :math:`L = N a`.
     :param period_m: Slit array period ``d`` along the face, in metres
@@ -704,11 +706,11 @@ def slit_helmholtz_absorber(
     if not res:
         msg = "'resonators' must contain at least one resonator."
         raise ValueError(msg)
-    h = require_positive(slit_height, "slit_height")
+    h = require_positive(slit_height_m, "slit_height_m")
     a = require_positive(lattice_step, "lattice_step")
     d = require_positive(period_m, "period_m")
     if h > d:
-        msg = "'slit_height' must not exceed 'period_m'."
+        msg = "'slit_height_m' must not exceed 'period_m'."
         raise ValueError(msg)
     c0 = fluid.speed_of_sound
     rho0 = fluid.density
@@ -757,7 +759,7 @@ def slit_helmholtz_absorber(
         effective_impedance=np.asarray(z_eff, dtype=np.complex128),
         transfer_matrix=np.asarray(tm, dtype=np.complex128),
         resonators=res,
-        slit_height=slit_height,
+        slit_height_m=slit_height_m,
         lattice_step=lattice_step,
         period_m=period_m,
     )
@@ -770,7 +772,7 @@ def slit_helmholtz_absorber(
 class CriticalCouplingResult(RichDisplay):
     """Outcome of a critical-coupling (perfect-absorption) design.
 
-    ``resonator`` and ``slit_height`` are the solved geometry that places the
+    ``resonator`` and ``slit_height_m`` are the solved geometry that places the
     reflection zero on the real-frequency axis at ``target_frequency`` and
     ``angle_rad``; ``absorption`` is the modelled coefficient there (``~1``) and
     ``normalized_impedance`` the achieved ``Z cos(theta) / Z0`` (``~1``).
@@ -785,7 +787,7 @@ class CriticalCouplingResult(RichDisplay):
     target_frequency: float
     angle_rad: float
     resonator: HelmholtzResonator
-    slit_height: float
+    slit_height_m: float
     absorption: float
     normalized_impedance: complex
     _: KW_ONLY
@@ -845,7 +847,7 @@ def critical_coupling_design(
     lattice_step: float,
     period_m: float,
     angle_rad: float = 0.0,
-    slit_height_bounds: tuple[float, float] = (0.2e-3, 5.0e-3),
+    slit_height_bounds_m: tuple[float, float] = (0.2e-3, 5.0e-3),
     cavity_length_bounds: tuple[float, float] = (2.0e-3, 200.0e-3),
     end_correction: bool = True,
     slit_radiation: bool = True,
@@ -870,7 +872,7 @@ def critical_coupling_design(
     :param lattice_step: Resonator lattice step ``a``, in metres.
     :param period_m: Slit array period ``d``, in metres.
     :param angle_rad: Design angle of incidence ``theta``, in radians.
-    :param slit_height_bounds: Search bounds for the slit height, in metres.
+    :param slit_height_bounds_m: Search bounds for the slit height, in metres.
     :param cavity_length_bounds: Search bounds for the cavity length, in metres.
     :param end_correction: Include the resonator radiation end corrections.
     :param slit_radiation: Include the slit-to-free-air radiation correction.
@@ -893,7 +895,7 @@ def critical_coupling_design(
     if not 0.0 <= theta < np.pi / 2.0 - 1e-6:
         msg = "'angle_rad' must satisfy 0 <= angle < pi/2 - 1e-6."
         raise ValueError(msg)
-    h_lo, h_hi = slit_height_bounds
+    h_lo, h_hi = slit_height_bounds_m
     lc_lo, lc_hi = cavity_length_bounds
     cos_t = float(np.cos(theta))
     z0 = rho0 * c0 / (d * a)
@@ -956,7 +958,7 @@ def critical_coupling_design(
         target_frequency=f0,
         angle_rad=theta,
         resonator=designed,
-        slit_height=h_opt,
+        slit_height_m=h_opt,
         absorption=alpha,
         normalized_impedance=complex(z_final * cos_t / z0),
         converged=converged,

@@ -1,23 +1,31 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""The unit gate's two name rules: one spelling per unit, and constants with units.
+"""The unit gate: a unit in the name, one spelling per unit, constants with units.
 
-``scripts/check_parameter_units.py`` holds the public names of the package to
-two rules besides the one it was written for. A unit has one spelling, so a
-name that ends in ``_seconds``, ``_degrees``, ``_km_h``, ``_db_s``, ``_knots``
-or an ``_h`` that means hours is refused wherever it stands; and a published
-constant ends in its unit, as a parameter does, when it is a single number,
-whatever its name says, or a table whose name says a quantity. These tests
-pin the halves that decide both, then run the two rules over the real tree,
-where they have to be silent, and put an old name back, where they have to
-speak.
+``scripts/check_parameter_units.py`` walks the installed package, so its own
+run only says the tree is clean today. These tests fix what it must catch. A
+distance is held to the rule inside ``phonometry.aircraft`` and nowhere else,
+because only there do feet compete with metres; a numbered ``thickness1`` is
+the word ``thickness`` like any other; and a plural is the word it is the
+plural of. A unit has one spelling, so a name that ends in ``_seconds``,
+``_degrees``, ``_km_h``, ``_db_s``, ``_knots`` or an ``_h`` that means hours
+is refused wherever it stands; and a published constant ends in its unit, as
+a parameter does, when it is a single number, whatever its name says, or a
+table whose name says a quantity. The tests pin the halves that decide these
+rules, run them over the real tree, where they have to be silent, and put an
+old name back, where they have to speak. They also fix that the one
+exemption of a length word still names a parameter that exists, since an
+exemption that outlives its parameter would excuse the next one to take the
+name.
 """
 
 from __future__ import annotations
 
+import inspect
 import pathlib
 import sys
+import types
 from types import MappingProxyType
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 import numpy as np
 import pytest
@@ -31,6 +39,9 @@ import check_parameter_units as cpu
 import phonometry.aircraft
 import phonometry.building
 import phonometry.signals
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 @pytest.mark.parametrize(
@@ -292,3 +303,108 @@ def test_an_exemption_a_name_no_longer_needs_is_stale(
     assert stale == [
         ("phonometry.building.prediction.resilient_layers", "TAPPING_IMPACT_RATE_HZ")
     ]
+
+
+@pytest.mark.parametrize(
+    ("name", "module"),
+    [
+        ("distances", "phonometry.aircraft"),
+        ("distances", "phonometry.aircraft.airport_noise"),
+        ("query_distances", "phonometry.aircraft.airport_noise"),
+        ("distance", "phonometry.aircraft.rotorcraft_propagation"),
+    ],
+    ids=["aircraft", "aircraft-submodule", "aircraft-compound", "aircraft-singular"],
+)
+def test_distance_is_held_to_the_rule_inside_aircraft(name: str, module: str) -> None:
+    assert cpu.names_a_quantity(name, module)
+
+
+@pytest.mark.parametrize(
+    ("name", "module"),
+    [
+        ("distances", "phonometry.environment.propagation"),
+        ("distance", "phonometry.aircraftx"),
+        ("distances", ""),
+    ],
+    ids=["elsewhere", "sibling-prefix", "no-module"],
+)
+def test_distance_is_not_held_to_the_rule_outside_aircraft(
+    name: str, module: str
+) -> None:
+    assert not cpu.names_a_quantity(name, module)
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "thickness",
+        "thickness1",
+        "thickness2",
+        "plate_thickness",
+        "layer_thicknesses",
+        "spacing",
+        "spacings",
+        "line_spacing",
+        "height",
+        "heights",
+        "source_height2",
+        "diameters",
+        "gradients",
+    ],
+)
+def test_a_length_word_is_held_to_the_rule_everywhere(name: str) -> None:
+    assert cpu.names_a_quantity(name, "phonometry.materials")
+
+
+@pytest.mark.parametrize("name", ["triangles", "weights", "spacer", "f1", "n_layers"])
+def test_a_name_that_only_contains_the_letters_is_not(name: str) -> None:
+    assert not cpu.names_a_quantity(name, "phonometry.materials")
+
+
+def _npd(distances_m: float, distance: float, *, level_db: float = 0.0) -> float:
+    return distances_m + distance + level_db
+
+
+def _junction(distances: float, thickness1: float, spacing_m: float = 0.05) -> float:
+    return distances + thickness1 + spacing_m
+
+
+def test_the_walk_reports_what_the_rule_holds(monkeypatch: pytest.MonkeyPatch) -> None:
+    """An aircraft ``distance`` and a numbered ``thickness1`` are reported bare,
+    a ``spacing_m`` with a default that stays positional is reported loose, and
+    a ``distances`` outside aircraft is not reported at all.
+    """
+    monkeypatch.setattr(_npd, "__module__", "phonometry.aircraft.stub")
+    monkeypatch.setattr(_junction, "__module__", "phonometry.vibration.stub")
+    stub = types.ModuleType("phonometry.stub")
+    stub.__all__ = ["npd", "junction"]  # type: ignore[attr-defined]
+    stub.npd = _npd  # type: ignore[attr-defined]
+    stub.junction = _junction  # type: ignore[attr-defined]
+
+    def modules() -> Iterator[tuple[str, types.ModuleType]]:
+        yield "phonometry.stub", stub
+
+    monkeypatch.setattr(cpu, "public_modules", modules)
+    unnamed, loose, _ = cpu.offenders()
+    assert {(p.qualname, p.name) for p in unnamed} == {
+        ("npd", "distance"),
+        ("junction", "thickness1"),
+    }
+    assert {(p.qualname, p.name) for p in loose} == {("junction", "spacing_m")}
+
+
+def test_the_source_line_selector_is_exempt_and_still_exists() -> None:
+    """``vertical_directivity(height=)`` picks source line 1 or 2; its exemption
+    has to keep pointing at a parameter that is really there.
+    """
+    from phonometry.environment.sources import cnossos_rail
+
+    key = (
+        "phonometry.environment.sources.cnossos_rail",
+        "vertical_directivity",
+        "height",
+    )
+    assert key in cpu.EXEMPT
+    assert cnossos_rail.vertical_directivity.__module__ == key[0]
+    assert cpu.names_a_quantity(key[2], key[0])
+    assert key[2] in inspect.signature(cnossos_rail.vertical_directivity).parameters

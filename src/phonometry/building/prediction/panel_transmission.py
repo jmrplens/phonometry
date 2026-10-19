@@ -284,7 +284,7 @@ class SoundReductionResult(OwnsArrays):
         :meth:`plot_geometry` can draw the section; ``None`` otherwise.
     :ivar mass2: Second-leaf surface density, in kg/m2, or ``None``.
     :ivar gap: Cavity depth, in metres, or ``None``.
-    :ivar plateau_height: Height of the coincidence plateau, in dB, or
+    :ivar plateau_height_db: Height of the coincidence plateau, in dB, or
         ``None`` (only the plateau model sets these three).
     :ivar plateau_start: Frequency of point A, where the mass-law line meets
         the plateau, in hertz, or ``None``.
@@ -304,7 +304,7 @@ class SoundReductionResult(OwnsArrays):
     mass1: float | None = None
     mass2: float | None = None
     gap: float | None = None
-    plateau_height: float | None = None
+    plateau_height_db: float | None = None
     plateau_start: float | None = None
     plateau_end: float | None = None
     critical_frequency_upper: float | None = None
@@ -629,7 +629,7 @@ def _resolve_plateau_panel(
         )
     if mass_per_area is None or plateau_height is None or frequency_ratio is None:
         msg = (
-            "the plateau construction needs 'mass_per_area', 'plateau_height' "
+            "the plateau construction needs 'mass_per_area', 'plateau_height_db' "
             "and 'frequency_ratio'; give a tabulated 'material' (with "
             "'thickness_mm') or all three explicitly."
         )
@@ -640,7 +640,7 @@ def _resolve_plateau_panel(
         raise ValueError(msg)
     return (
         require_positive(mass_per_area, "mass_per_area"),
-        require_positive(plateau_height, "plateau_height"),
+        require_positive(plateau_height, "plateau_height_db"),
         ratio,
     )
 
@@ -651,7 +651,7 @@ def plateau_transmission_loss(
     *,
     material: str | PlateauMaterial,
     thickness_mm: float,
-    plateau_height: float | None = ...,
+    plateau_height_db: float | None = ...,
     frequency_ratio: float | None = ...,
     field_correction: float = ...,
     fluid: Fluid = ...,
@@ -665,7 +665,7 @@ def plateau_transmission_loss(
     material: str | PlateauMaterial,
     mass_per_area: float,
     thickness_mm: float | None = ...,
-    plateau_height: float | None = ...,
+    plateau_height_db: float | None = ...,
     frequency_ratio: float | None = ...,
     field_correction: float = ...,
     fluid: Fluid = ...,
@@ -677,7 +677,7 @@ def plateau_transmission_loss(
     frequency: ArrayLike,
     *,
     mass_per_area: float,
-    plateau_height: float,
+    plateau_height_db: float,
     frequency_ratio: float,
     field_correction: float = ...,
     fluid: Fluid = ...,
@@ -690,7 +690,7 @@ def plateau_transmission_loss(
     material: str | PlateauMaterial | None = None,
     thickness_mm: float | None = None,
     mass_per_area: float | None = None,
-    plateau_height: float | None = None,
+    plateau_height_db: float | None = None,
     frequency_ratio: float | None = None,
     field_correction: float = _NORTON_FIELD_CORRECTION,
     fluid: Fluid = PUBLISHED_AIR,
@@ -734,7 +734,7 @@ def plateau_transmission_loss(
     :param thickness_mm: Panel thickness, in **millimetres** (> 0), used with
         *material* to get the surface density.
     :param mass_per_area: Mass per unit area ``m''``, in kg/m^2 (> 0).
-    :param plateau_height: Coincidence plateau height, in dB (> 0).
+    :param plateau_height_db: Coincidence plateau height, in dB (> 0).
     :param frequency_ratio: Ratio :math:`B/A` locating the 10 dB/octave
         recovery (> 1).
     :param field_correction: Field-incidence correction of the mass-law line,
@@ -742,7 +742,7 @@ def plateau_transmission_loss(
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
         :data:`PUBLISHED_AIR`, the air these models are published with).
     :return: A :class:`SoundReductionResult` (model ``"plateau"``) carrying
-        :attr:`~SoundReductionResult.plateau_height`,
+        :attr:`~SoundReductionResult.plateau_height_db`,
         :attr:`~SoundReductionResult.plateau_start` (point A) and
         :attr:`~SoundReductionResult.plateau_end` (point B).
     :raises ValueError: for a non-positive input, an unknown material name, a
@@ -752,7 +752,7 @@ def plateau_transmission_loss(
         :class:`~phonometry.solids.PlateauMaterial`.
     """
     m2, height, ratio = _resolve_plateau_panel(
-        material, thickness_mm, mass_per_area, plateau_height, frequency_ratio
+        material, thickness_mm, mass_per_area, plateau_height_db, frequency_ratio
     )
     correction = _resolve_field_correction("third", field_correction)
     c0 = fluid.speed_of_sound
@@ -765,7 +765,7 @@ def plateau_transmission_loss(
     if target <= 0.0:
         msg = (
             "the plateau height sits below the mass law at every frequency; "
-            "check 'plateau_height' and 'field_correction'."
+            "check 'plateau_height_db' and 'field_correction'."
         )
         raise ValueError(msg)
     f_a = rho0 * c0 * math.sqrt(target) / (math.pi * m2)
@@ -787,7 +787,7 @@ def plateau_transmission_loss(
         frequencies=f,
         transmission_loss=np.asarray(tl, dtype=np.float64),
         model="plateau",
-        plateau_height=height,
+        plateau_height_db=height,
         plateau_start=float(f_a),
         plateau_end=float(f_b),
     )
@@ -832,7 +832,7 @@ def corrugated_plate_mass_factor(
 
 
 def corrugated_plate_stiffness(
-    thickness: float,
+    thickness_m: float,
     corrugation_amplitude: float,
     corrugation_wavelength: float,
     *,
@@ -868,7 +868,7 @@ def corrugated_plate_stiffness(
     the eigenfrequencies. Remember to scale the surface density by
     :func:`corrugated_plate_mass_factor`.
 
-    :param thickness: Sheet thickness ``h``, in m (> 0).
+    :param thickness_m: Sheet thickness ``h``, in m (> 0).
     :param corrugation_amplitude: Corrugation amplitude ``H``, in m (> 0).
     :param corrugation_wavelength: Corrugation wavelength ``L``, in m (> 0).
     :param youngs_modulus: Young's modulus ``E``, in Pa (> 0).
@@ -877,7 +877,7 @@ def corrugated_plate_stiffness(
     :raises ValueError: for a non-positive input or
         :math:`\lvert\nu\rvert \ge 1`.
     """
-    h = require_positive(thickness, "thickness")
+    h = require_positive(thickness_m, "thickness_m")
     amplitude = require_positive(corrugation_amplitude, "corrugation_amplitude")
     wavelength = require_positive(corrugation_wavelength, "corrugation_wavelength")
     e = require_positive(youngs_modulus, "youngs_modulus")

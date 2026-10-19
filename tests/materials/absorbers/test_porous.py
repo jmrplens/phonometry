@@ -541,7 +541,7 @@ class TestResonantSheets:
         d = 0.025
         f0 = helmholtz_resonance_frequency(
             cavity_depth=d,
-            plate_thickness=plate.thickness,
+            plate_thickness_m=plate.thickness_m,
             hole_radius=plate.hole_radius,
             open_area=plate.open_area,
         )
@@ -575,7 +575,7 @@ class TestResonantSheets:
         assert res.absorption[i] > 0.9
         f0 = helmholtz_resonance_frequency(
             cavity_depth=ref.MAA_FIG5_CAVITY,
-            plate_thickness=ref.MAA_FIG5_THICKNESS,
+            plate_thickness_m=ref.MAA_FIG5_THICKNESS,
             hole_radius=ref.MAA_FIG5_DIAMETER / 2.0,
             open_area=eps,
             end_correction=0.85,
@@ -604,7 +604,7 @@ class TestResonantSheets:
         z_exact = (
             microperforated_plate_impedance(
                 f,
-                thickness=t,
+                thickness_m=t,
                 hole_radius=a,
                 open_area=1.0,
                 end_correction=0.0,
@@ -634,7 +634,7 @@ class TestResonantSheets:
         z_sheet = (
             microperforated_plate_impedance(
                 f,
-                thickness=mpp.thickness,
+                thickness_m=mpp.thickness_m,
                 hole_radius=mpp.hole_radius,
                 open_area=mpp.open_area,
                 fluid=PUBLISHED_AIR,
@@ -666,7 +666,7 @@ class TestResonantSheets:
         xm = (
             microperforated_plate_impedance(
                 f,
-                thickness=mpp.thickness,
+                thickness_m=mpp.thickness_m,
                 hole_radius=mpp.hole_radius,
                 open_area=mpp.open_area,
                 fluid=PUBLISHED_AIR,
@@ -695,7 +695,7 @@ class TestResonantSheets:
     def test_microperforated_impedance_positive_resistance(self) -> None:
         f = _grid(50.0, 8000.0, 200)
         z = microperforated_plate_impedance(
-            f, thickness=0.2e-3, hole_radius=0.1e-3, open_area=0.005
+            f, thickness_m=0.2e-3, hole_radius=0.1e-3, open_area=0.005
         )
         assert np.all(z.real > 0.0)
         assert np.all(z.imag > 0.0)
@@ -797,7 +797,7 @@ class TestResonantSheets:
         """eps -> 1: only the small visco-thermal terms remain."""
         f = np.array([1000.0])
         z = perforated_plate_impedance(
-            f, thickness=1e-3, hole_radius=5e-3, open_area=1.0
+            f, thickness_m=1e-3, hole_radius=5e-3, open_area=1.0
         )
         assert np.abs(z)[0] < 0.05 * RC
 

@@ -143,25 +143,25 @@ def duration_correction(reference_speed: float, segment_speed: float) -> float:
     return float(10.0 * np.log10(vref / vseg))
 
 
-def noise_fraction(q: float, segment_length: float, scaled_distance: float) -> float:
+def noise_fraction(q: float, segment_length: float, scaled_distance_m: float) -> float:
     """Finite-segment correction (noise fraction) ``ΔF`` (Eq. 4-20, exposure only).
 
     :param q: Signed distance from the segment start ``S1`` to the perpendicular
         foot ``Sp``, in metres (negative behind the segment).
     :param segment_length: Segment length ``λ``, in metres (``> 0``).
-    :param scaled_distance: The scaled distance ``dλ`` (Appendix E), in metres
+    :param scaled_distance_m: The scaled distance ``dλ`` (Appendix E), in metres
         (``> 0``).
     :return: The finite-segment correction ``ΔF``, in dB (``<= 0``, floored at
         −150 dB).
-    :raises ValueError: If ``segment_length`` or ``scaled_distance`` is not
+    :raises ValueError: If ``segment_length`` or ``scaled_distance_m`` is not
         positive.
     """
     require_scalar(segment_length, "segment_length")
     lam = float(segment_length)
-    require_scalar(scaled_distance, "scaled_distance")
-    dl = float(scaled_distance)
+    require_scalar(scaled_distance_m, "scaled_distance_m")
+    dl = float(scaled_distance_m)
     if not (np.isfinite(lam) and lam > 0.0 and np.isfinite(dl) and dl > 0.0):
-        msg = "'segment_length' and 'scaled_distance' must be positive."
+        msg = "'segment_length' and 'scaled_distance_m' must be positive."
         raise ValueError(msg)
     # Relative distances from the perpendicular foot Sp to the segment ends,
     # scaled by dλ: to the start S1 (−q) and to the end S2 (λ−q). The full
@@ -316,31 +316,31 @@ def start_of_roll_directivity(
 
 def _clean_table(
     powers: NDArray[np.float64] | list[float],
-    distances: NDArray[np.float64] | list[float],
+    distances_m: NDArray[np.float64] | list[float],
     levels: NDArray[np.float64] | list[list[float]],
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     p = np.asarray(powers, dtype=np.float64).ravel()
-    d = np.asarray(distances, dtype=np.float64).ravel()
+    d = np.asarray(distances_m, dtype=np.float64).ravel()
     lv = np.asarray(levels, dtype=np.float64)
     if p.size < 2 or d.size < 2:  # noqa: PLR2004
-        msg = "'powers' and 'distances' must each have at least two values."
+        msg = "'powers' and 'distances_m' must each have at least two values."
         raise ValueError(msg)
     if lv.shape != (p.size, d.size):
-        msg = "'levels' must have shape (len(powers), len(distances))."
+        msg = "'levels' must have shape (len(powers), len(distances_m))."
         raise ValueError(msg)
     if not (
         np.all(np.isfinite(p)) and np.all(np.isfinite(d)) and np.all(np.isfinite(lv))
     ):
-        msg = "'powers', 'distances' and 'levels' must be finite."
+        msg = "'powers', 'distances_m' and 'levels' must be finite."
         raise ValueError(msg)
     if np.any(d <= 0.0):
-        msg = "'distances' must be strictly positive (slant range in m)."
+        msg = "'distances_m' must be strictly positive (slant range in m)."
         raise ValueError(msg)
     if np.any(np.diff(p) <= 0.0):
         msg = "'powers' must be strictly increasing."
         raise ValueError(msg)
     if np.any(np.diff(d) <= 0.0):
-        msg = "'distances' must be strictly increasing."
+        msg = "'distances_m' must be strictly increasing."
         raise ValueError(msg)
     return p, d, lv
 
@@ -361,17 +361,17 @@ def _interp_distance(
 class NpdLevelResult(OwnsArrays):
     """NPD event level over a distance sweep at one power (ECAC Doc 29).
 
-    :ivar distances: Slant distances, in metres.
+    :ivar distances_m: Slant distances, in metres.
     :ivar levels: Interpolated event level per distance, in dB.
     :ivar power: The engine power setting queried.
-    :ivar table_distances: The tabulated slant distances, in metres.
+    :ivar table_distances_m: The tabulated slant distances, in metres.
     :ivar table_levels: The tabulated levels at the queried power, in dB.
     """
 
-    distances: NDArray[np.float64]
+    distances_m: NDArray[np.float64]
     levels: NDArray[np.float64]
     power: float
-    table_distances: NDArray[np.float64]
+    table_distances_m: NDArray[np.float64]
     table_levels: NDArray[np.float64]
 
     def __post_init__(self) -> None:
@@ -388,10 +388,12 @@ class NpdLevelResult(OwnsArrays):
 
         :raises ValueError: if a level array disagrees with its own distances.
         """
-        require_ranks(self, distances=1, levels=1, table_distances=1, table_levels=1)
-        require_same_length(self, "distances", "levels", axis="query distance")
+        require_ranks(
+            self, distances_m=1, levels=1, table_distances_m=1, table_levels=1
+        )
+        require_same_length(self, "distances_m", "levels", axis="query distance")
         require_same_length(
-            self, "table_distances", "table_levels", axis="tabulated distance"
+            self, "table_distances_m", "table_levels", axis="tabulated distance"
         )
 
     def plot(
@@ -406,10 +408,10 @@ class NpdLevelResult(OwnsArrays):
 
 def npd_level(
     powers: NDArray[np.float64] | list[float],
-    distances: NDArray[np.float64] | list[float],
+    distances_m: NDArray[np.float64] | list[float],
     levels: NDArray[np.float64] | list[list[float]],
     power: float,
-    distance: NDArray[np.float64] | list[float] | float,
+    distance_m: NDArray[np.float64] | list[float] | float,
 ) -> NDArray[np.float64]:
     """Interpolated NPD event level ``L(P, d)`` (ECAC Doc 29 §4.2, Eqs. 4-3/4-4).
 
@@ -418,19 +420,19 @@ def npd_level(
     tabulated envelope are extrapolated from the terminal segments.
 
     :param powers: Tabulated engine power settings (1-D, strictly increasing).
-    :param distances: Tabulated slant distances, in metres (1-D, strictly
+    :param distances_m: Tabulated slant distances, in metres (1-D, strictly
         increasing, positive).
     :param levels: Tabulated event levels, shape ``(len(powers), len(distances))``,
         in dB.
     :param power: Query engine power setting ``P``.
-    :param distance: Query slant distance(s) ``d``, in metres.
+    :param distance_m: Query slant distance(s) ``d``, in metres.
     :return: The interpolated event level per query distance, in dB.
     :raises ValueError: If the table or inputs are invalid.
     """
-    p, d, lv = _clean_table(powers, distances, levels)
-    dq = np.atleast_1d(np.asarray(distance, dtype=np.float64))
+    p, d, lv = _clean_table(powers, distances_m, levels)
+    dq = np.atleast_1d(np.asarray(distance_m, dtype=np.float64))
     if dq.size == 0 or not np.all(np.isfinite(dq)) or np.any(dq <= 0.0):
-        msg = "'distance' must be finite and strictly positive."
+        msg = "'distance_m' must be finite and strictly positive."
         raise ValueError(msg)
     require_scalar(power, "power")
     pq = float(power)
@@ -450,34 +452,35 @@ def npd_level(
 
 def npd_curve(
     powers: NDArray[np.float64] | list[float],
-    distances: NDArray[np.float64] | list[float],
+    distances_m: NDArray[np.float64] | list[float],
     levels: NDArray[np.float64] | list[list[float]],
     power: float,
-    query_distances: NDArray[np.float64] | list[float] | None = None,
+    *,
+    query_distances_m: NDArray[np.float64] | list[float] | None = None,
 ) -> NpdLevelResult:
     """NPD event level over a distance sweep at one power setting.
 
     :param powers: Tabulated engine power settings.
-    :param distances: Tabulated slant distances, in metres.
+    :param distances_m: Tabulated slant distances, in metres.
     :param levels: Tabulated event levels, shape ``(len(powers), len(distances))``.
     :param power: Query engine power setting.
-    :param query_distances: Distances to evaluate, in metres; defaults to a log
+    :param query_distances_m: Distances to evaluate, in metres; defaults to a log
         sweep across the tabulated envelope.
     :return: An :class:`NpdLevelResult`.
     :raises ValueError: If the inputs are invalid.
     """
-    p, d, lv = _clean_table(powers, distances, levels)
-    if query_distances is None:
+    p, d, lv = _clean_table(powers, distances_m, levels)
+    if query_distances_m is None:
         dq = np.logspace(np.log10(d[0]), np.log10(d[-1]), 200)
     else:
-        dq = np.atleast_1d(np.asarray(query_distances, dtype=np.float64))
+        dq = np.atleast_1d(np.asarray(query_distances_m, dtype=np.float64))
     level = npd_level(p, d, lv, power, dq)
     row = npd_level(p, d, lv, power, d)  # tabulated levels at the queried power
     return NpdLevelResult(
-        distances=dq,
+        distances_m=dq,
         levels=level,
         power=float(power),
-        table_distances=d,
+        table_distances_m=d,
         table_levels=row,
     )
 
@@ -1358,7 +1361,7 @@ def event_level(
     path: NDArray[np.float64] | list[list[float]],
     observer: NDArray[np.float64] | list[float],
     powers: NDArray[np.float64] | list[float],
-    distances: NDArray[np.float64] | list[float],
+    distances_m: NDArray[np.float64] | list[float],
     exposure_levels: NDArray[np.float64] | list[list[float]],
     maximum_levels: NDArray[np.float64] | list[list[float]],
     *,
@@ -1380,7 +1383,7 @@ def event_level(
         engine power setting and speed (m/s). ``N-1`` segments are formed.
     :param observer: Receiver position ``(x, y, z)``, in metres.
     :param powers: NPD tabulated power settings.
-    :param distances: NPD tabulated slant distances, in metres.
+    :param distances_m: NPD tabulated slant distances, in metres.
     :param exposure_levels: NPD exposure (SEL) levels, shape ``(P, D)``.
     :param maximum_levels: NPD maximum levels, shape ``(P, D)``.
     :param reference_speed: NPD reference speed, in m/s (default 160 kt).
@@ -1406,8 +1409,8 @@ def event_level(
     gr = _validate_ground_roll(segments.ground_roll, pts.shape[0])
     lr = _validate_ground_roll(segments.landing_roll, pts.shape[0])
     bk = _validate_bank(segments.bank, pts.shape[0])
-    p, d, le = _clean_table(powers, distances, exposure_levels)
-    _, _, lm = _clean_table(powers, distances, maximum_levels)
+    p, d, le = _clean_table(powers, distances_m, exposure_levels)
+    _, _, lm = _clean_table(powers, distances_m, maximum_levels)
     imp = impedance_adjustment(
         temperature_c=atmosphere.temperature_c,
         atmospheric_pressure_kpa=atmosphere.atmospheric_pressure_kpa,
@@ -1473,7 +1476,7 @@ class NoiseContourResult(OwnsArrays):
 def noise_contour(
     path: NDArray[np.float64] | list[list[float]],
     powers: NDArray[np.float64] | list[float],
-    distances: NDArray[np.float64] | list[float],
+    distances_m: NDArray[np.float64] | list[float],
     exposure_levels: NDArray[np.float64] | list[list[float]],
     maximum_levels: NDArray[np.float64] | list[list[float]],
     *,
@@ -1491,7 +1494,7 @@ def noise_contour(
 
     :param path: Flight-path points, shape ``(N, 5)`` (see :func:`event_level`).
     :param powers: NPD tabulated power settings.
-    :param distances: NPD tabulated slant distances, in metres.
+    :param distances_m: NPD tabulated slant distances, in metres.
     :param exposure_levels: NPD exposure (SEL) levels, shape ``(P, D)``.
     :param maximum_levels: NPD maximum levels, shape ``(P, D)``.
     :param x: Grid x coordinates, in metres.
@@ -1517,8 +1520,8 @@ def noise_contour(
     gr = _validate_ground_roll(segments.ground_roll, pts.shape[0])
     lr = _validate_ground_roll(segments.landing_roll, pts.shape[0])
     bk = _validate_bank(segments.bank, pts.shape[0])
-    p, d, le = _clean_table(powers, distances, exposure_levels)
-    _, _, lm = _clean_table(powers, distances, maximum_levels)
+    p, d, le = _clean_table(powers, distances_m, exposure_levels)
+    _, _, lm = _clean_table(powers, distances_m, maximum_levels)
     vref = float(reference_speed)
     imp = impedance_adjustment(
         temperature_c=atmosphere.temperature_c,

@@ -62,7 +62,7 @@ hard-coded as if normative.
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -175,6 +175,7 @@ _SPEED_POSITIVE = "'speed_of_sound' must be positive."
 
 
 def geometric_spreading_factor(
+    *,
     source_height_m: float = DEFAULT_SOURCE_HEIGHT_M,
     microphone_height_m: float = DEFAULT_MICROPHONE_HEIGHT_M,
 ) -> float:
@@ -202,6 +203,7 @@ def geometric_spreading_factor(
 
 def geometric_spreading_factor_angle(
     incidence_angle_rad: float,
+    *,
     source_height_m: float = DEFAULT_SOURCE_HEIGHT_M,
     microphone_height_m: float = DEFAULT_MICROPHONE_HEIGHT_M,
 ) -> float:
@@ -217,7 +219,9 @@ def geometric_spreading_factor_angle(
     :param microphone_height_m: Microphone-to-reference-plane distance ``dm``, in metres.
     :return: Oblique factor ``Kr,theta`` (positive root, dimensionless).
     """
-    kr = geometric_spreading_factor(source_height_m, microphone_height_m)
+    kr = geometric_spreading_factor(
+        source_height_m=source_height_m, microphone_height_m=microphone_height_m
+    )
     cos_sq = float(np.cos(incidence_angle_rad)) ** 2
     return float(np.sqrt(1.0 - cos_sq * (1.0 - kr**2)))
 
@@ -433,7 +437,9 @@ def insitu_reflection_factor(
         without ``fs``.
     """
     kr = geometric_spreading_factor_angle(
-        incidence_angle_rad, source_height_m, microphone_height_m
+        incidence_angle_rad,
+        source_height_m=source_height_m,
+        microphone_height_m=microphone_height_m,
     )
     fs = resolve_optional_pair_fs(
         incident_ir, reflected_ir, fs, names=("incident_ir", "reflected_ir")
@@ -502,7 +508,9 @@ def power_reflection_coefficient(
     :return: Sound-power reflection factor ``QW(f)`` (real).
     """
     kr = geometric_spreading_factor_angle(
-        incidence_angle_rad, source_height_m, microphone_height_m
+        incidence_angle_rad,
+        source_height_m=source_height_m,
+        microphone_height_m=microphone_height_m,
     )
     hi, hr, _length = _transfer_functions(incident_ir, reflected_ir, n)
     ratio = np.abs(hr) / np.abs(hi)
@@ -660,6 +668,7 @@ class InsituAbsorptionResult(OwnsArrays):
 
     frequencies: Real
     absorption: Real
+    _: KW_ONLY
     source_height_m: float | None = None
     microphone_height_m: float | None = None
 

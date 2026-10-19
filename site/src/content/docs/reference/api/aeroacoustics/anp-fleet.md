@@ -184,7 +184,7 @@ Spectral class of this aircraft's NPD for an operation.
 AnpDatabase(
     aircraft: Mapping[str, dict[str, str]],
     npd: Mapping[tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]],
-    distances: NDArray[np.float64],
+    distances_m: NDArray[np.float64],
     profiles: Mapping[tuple[str, str, str, int], NDArray[np.float64]],
     spectral_classes: Mapping[str, SpectralClass] | None = None,
 )
@@ -581,7 +581,7 @@ AnpNpdCurves(
     operation: str,
     power_parameter: str,
     powers: NDArray[np.float64],
-    distances: NDArray[np.float64],
+    distances_m: NDArray[np.float64],
     levels: NDArray[np.float64],
 )
 ```
@@ -598,10 +598,10 @@ ANP Noise-Power-Distance curves for one aircraft, metric and operation.
 | `operation` | `"A"` (arrival) or `"D"` (departure). |
 | `power_parameter` | Name/unit of the power setting (e.g. corrected net thrust). |
 | `powers` | Tabulated engine power settings (1-D, strictly increasing). |
-| `distances` | Tabulated slant distances, in metres (1-D, strictly increasing). |
+| `distances_m` | Tabulated slant distances, in metres (1-D, strictly increasing). |
 | `levels` | Tabulated event levels, shape `(len(powers), len(distances))`, in dB. |
 
-The `powers`, `distances` and `levels` arrays are read-only views shared
+The `powers`, `distances_m` and `levels` arrays are read-only views shared
 with the parent database; copy them before mutating.
 
 ### AnpNpdCurves.level()
@@ -609,7 +609,7 @@ with the parent database; copy them before mutating.
 ```python
 AnpNpdCurves.level(
     power: float,
-    distance: NDArray[np.float64] | list[float] | float,
+    distance_m: NDArray[np.float64] | list[float] | float,
 ) -> NDArray[np.float64]
 ```
 
@@ -620,7 +620,7 @@ Interpolated NPD level `L(P, d)` (Doc 29 Eq. 4-3/4-4).
 | Name | Description |
 | :--- | :--- |
 | `power` | Query engine power setting. |
-| `distance` | Query slant distance(s), in metres. |
+| `distance_m` | Query slant distance(s), in metres. |
 
 **Returns:** The interpolated level per query distance, in dB.
 

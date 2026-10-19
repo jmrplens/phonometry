@@ -172,15 +172,15 @@ class PropagationGeometry(RichDisplay):
     meteorological correction of clause 8 are written in.
 
     :param distance: Straight-line source-to-receiver distance ``d``, in metres.
-    :param source_height: Source height ``hs`` above ground, in metres.
-    :param receiver_height: Receiver height ``hr`` above ground, in metres.
+    :param source_height_m: Source height ``hs`` above ground, in metres.
+    :param receiver_height_m: Receiver height ``hr`` above ground, in metres.
     :param projected_distance: Ground-plane projected distance ``dp``, in
         metres; ``None`` defaults to :math:`\sqrt{d^2 - (h_\mathrm{s} - h_\mathrm{r})^2}`.
     """
 
     distance: float
-    source_height: float
-    receiver_height: float
+    source_height_m: float
+    receiver_height_m: float
     projected_distance: float | None = None
 
 
@@ -571,8 +571,8 @@ def _region_attenuation(nominal: float, g: float, h: float, dp: float) -> float:
 
 def ground_attenuation(
     distance: float,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     frequencies: ArrayLike = DEFAULT_FREQUENCIES_HZ,
     ground_source: float = 0.0,
     ground_middle: float = 0.0,
@@ -599,8 +599,8 @@ def ground_attenuation(
     with :math:`A_\mathrm{m} = -3q` at 63 Hz and :math:`A_\mathrm{m} = -3q(1 - G_\mathrm{m})` above.
 
     :param distance: Straight-line source-to-receiver distance ``d``, in metres.
-    :param source_height: Source height ``hs`` above ground, in metres.
-    :param receiver_height: Receiver height ``hr`` above ground, in metres.
+    :param source_height_m: Source height ``hs`` above ground, in metres.
+    :param receiver_height_m: Receiver height ``hr`` above ground, in metres.
     :param frequencies: Octave-band midband frequencies, in hertz. Table 3 is
         defined for the eight nominal octave bands 63 Hz-8 kHz only; any other
         requested frequency is snapped to the nearest nominal octave band for
@@ -624,24 +624,24 @@ def ground_attenuation(
             raise ValueError(msg)
     if distance <= 0.0:
         raise ValueError(_DISTANCE_NOT_POSITIVE)
-    require_non_negative(source_height, "source_height")
-    require_non_negative(receiver_height, "receiver_height")
+    require_non_negative(source_height_m, "source_height_m")
+    require_non_negative(receiver_height_m, "receiver_height_m")
     freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     if np.any(freqs <= 0.0):
         msg = "'frequencies' must be positive."
         raise ValueError(msg)
     dp = _projected_distance(
-        distance, source_height, receiver_height, projected_distance
+        distance, source_height_m, receiver_height_m, projected_distance
     )
 
-    threshold = 30.0 * (source_height + receiver_height)
+    threshold = 30.0 * (source_height_m + receiver_height_m)
     q = 0.0 if dp <= threshold else 1.0 - threshold / dp
 
     out = np.empty_like(freqs)
     for i, f in enumerate(freqs):
         nominal = _nearest_nominal(float(f))
-        a_s = _region_attenuation(nominal, ground_source, source_height, dp)
-        a_r = _region_attenuation(nominal, ground_receiver, receiver_height, dp)
+        a_s = _region_attenuation(nominal, ground_source, source_height_m, dp)
+        a_r = _region_attenuation(nominal, ground_receiver, receiver_height_m, dp)
         a_m = (
             -3.0 * q
             if nominal <= _LOWEST_NOMINAL_BAND
@@ -653,7 +653,7 @@ def ground_attenuation(
 
 def ground_attenuation_alternative(
     distance: float,
-    mean_height: float,
+    mean_height_m: float,
 ) -> float:
     r"""Ground attenuation by the alternative A-weighted method (7.3.2, Eq. (10)).
 
@@ -670,20 +670,20 @@ def ground_attenuation_alternative(
     solid-angle index :func:`directivity_omega` (Eq. (11)) to ``Dc`` in Eq. (3).
 
     :param distance: Source-to-receiver distance ``d``, in metres.
-    :param mean_height: Mean height ``hm`` of the propagation path above the
+    :param mean_height_m: Mean height ``hm`` of the propagation path above the
         ground (:math:`h_\mathrm{m} = F/d`, figure 3), in metres.
     :return: ``Agr``, in decibels (>= 0).
     :raises ValueError: If ``distance`` is not positive.
     """
     if distance <= 0.0:
         raise ValueError(_DISTANCE_NOT_POSITIVE)
-    agr = 4.8 - (2.0 * mean_height / distance) * (17.0 + 300.0 / distance)
+    agr = 4.8 - (2.0 * mean_height_m / distance) * (17.0 + 300.0 / distance)
     return float(max(agr, 0.0))
 
 
 def directivity_omega(
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     projected_distance: float,
 ) -> float:
     r"""Solid-angle directivity index ``DOmega`` (ISO 9613-2:1996, Eq. (11)).
@@ -697,13 +697,13 @@ def directivity_omega(
        \frac{d_\mathrm{p}^2 + (h_\mathrm{s} - h_\mathrm{r})^2}{d_\mathrm{p}^2 + (h_\mathrm{s} + h_\mathrm{r})^2} \right\}
        ~\text{dB}
 
-    :param source_height: Source height ``hs``, in metres.
-    :param receiver_height: Receiver height ``hr``, in metres.
+    :param source_height_m: Source height ``hs``, in metres.
+    :param receiver_height_m: Receiver height ``hr``, in metres.
     :param projected_distance: Ground-plane projected distance ``dp``, in metres.
     :return: ``DOmega``, in decibels (0 to ~3 dB).
     """
-    num = projected_distance**2 + (source_height - receiver_height) ** 2
-    den = projected_distance**2 + (source_height + receiver_height) ** 2
+    num = projected_distance**2 + (source_height_m - receiver_height_m) ** 2
+    den = projected_distance**2 + (source_height_m + receiver_height_m) ** 2
     return float(10.0 * np.log10(1.0 + num / den))
 
 
@@ -737,8 +737,8 @@ def _mean_ground_factor(
 def region_ground_factors(
     segment_lengths: ArrayLike,
     segment_ground_factors: ArrayLike,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
 ) -> GroundFactors:
     r"""Ground factors of the three regions from a path crossing several grounds.
 
@@ -759,8 +759,8 @@ def region_ground_factors(
         metres, ordered from the source; each must be positive.
     :param segment_ground_factors: Ground factor ``G`` of each segment
         ([0, 1]), aligned with ``segment_lengths``.
-    :param source_height: Source height ``hs`` above ground, in metres.
-    :param receiver_height: Receiver height ``hr`` above ground, in metres.
+    :param source_height_m: Source height ``hs`` above ground, in metres.
+    :param receiver_height_m: Receiver height ``hr`` above ground, in metres.
     :return: The :class:`GroundFactors` of the source, middle and receiver
         regions.
     :raises ValueError: If the two sequences disagree in length or are empty, a
@@ -795,13 +795,13 @@ def region_ground_factors(
     if np.any(factors < 0.0) or np.any(factors > 1.0):
         msg = "'segment_ground_factors' must be within [0, 1]."
         raise ValueError(msg)
-    require_non_negative(source_height, "source_height")
-    require_non_negative(receiver_height, "receiver_height")
+    require_non_negative(source_height_m, "source_height_m")
+    require_non_negative(receiver_height_m, "receiver_height_m")
 
     edges = _segment_edges(lengths)
     dp = float(edges[-1])
-    source_end = min(30.0 * source_height, dp)
-    receiver_start = max(dp - 30.0 * receiver_height, 0.0)
+    source_end = min(30.0 * source_height_m, dp)
+    receiver_start = max(dp - 30.0 * receiver_height_m, 0.0)
     middle = (
         _mean_ground_factor(edges, factors, source_end, receiver_start)
         if receiver_start > source_end
@@ -816,9 +816,9 @@ def region_ground_factors(
 
 def mean_path_height(
     profile_distances: ArrayLike,
-    profile_heights: ArrayLike,
-    source_height: float,
-    receiver_height: float,
+    profile_heights_m: ArrayLike,
+    source_height_m: float,
+    receiver_height_m: float,
     distance: float | None = None,
 ) -> float:
     r"""Mean height ``hm`` of the propagation path above the ground (Figure 3).
@@ -837,18 +837,18 @@ def mean_path_height(
 
     :param profile_distances: Ground-projected distance of each profile point
         from the source, in metres, strictly increasing.
-    :param profile_heights: Ground height at each profile point, in metres, on
+    :param profile_heights_m: Ground height at each profile point, in metres, on
         any one datum (only differences are used).
-    :param source_height: Source height ``hs`` above the ground at the first
+    :param source_height_m: Source height ``hs`` above the ground at the first
         profile point, in metres.
-    :param receiver_height: Receiver height ``hr`` above the ground at the last
+    :param receiver_height_m: Receiver height ``hr`` above the ground at the last
         profile point, in metres.
     :param distance: Source-to-receiver distance ``d`` to divide the area by,
         in metres; ``None`` takes the slant distance the profile implies.
     :return: ``hm``, in metres.
     :raises ValueError: If the two sequences disagree in length, describe fewer
         than two points, the distances are not strictly increasing,
-        ``source_height`` or ``receiver_height`` is negative or not finite, or
+        ``source_height_m`` or ``receiver_height_m`` is negative or not finite, or
         ``distance`` is not positive and finite. The profile heights themselves
         are unrestricted: they are read on any datum, so a ground below it is a
         negative number rather than a mistake.
@@ -866,13 +866,13 @@ def mean_path_height(
         )
     )
     zs = np.atleast_1d(
-        require_finite_array(profile_heights, "profile_heights").astype(
+        require_finite_array(profile_heights_m, "profile_heights_m").astype(
             np.float64, copy=False
         )
     )
     if us.size != zs.size:
         msg = (
-            "'profile_distances' and 'profile_heights' must carry one value "
+            "'profile_distances' and 'profile_heights_m' must carry one value "
             f"per profile point; got {us.size} and {zs.size}."
         )
         raise ValueError(msg)
@@ -882,12 +882,12 @@ def mean_path_height(
     if np.any(np.diff(us) <= 0.0):
         msg = "'profile_distances' must be strictly increasing."
         raise ValueError(msg)
-    require_non_negative(source_height, "source_height")
-    require_non_negative(receiver_height, "receiver_height")
+    require_non_negative(source_height_m, "source_height_m")
+    require_non_negative(receiver_height_m, "receiver_height_m")
 
     dp = float(us[-1] - us[0])
-    rise = float(zs[-1] + receiver_height - zs[0] - source_height)
-    ray = zs[0] + source_height + rise * (us - us[0]) / dp
+    rise = float(zs[-1] + receiver_height_m - zs[0] - source_height_m)
+    ray = zs[0] + source_height_m + rise * (us - us[0]) / dp
     area = float(np.trapezoid(ray - zs, us))
     span = require_positive(
         float(np.hypot(dp, rise)) if distance is None else float(distance),
@@ -984,8 +984,8 @@ def barrier_attenuation(
 # --------------------------------------------------------------------------- #
 def meteorological_correction(
     projected_distance: float,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     c0: float,
 ) -> float:
     r"""Meteorological correction ``Cmet`` (ISO 9613-2:1996, Eq. (21)/(22)).
@@ -1002,12 +1002,12 @@ def meteorological_correction(
     long-term average level (Eq. (6)).
 
     :param projected_distance: Ground-plane projected distance ``dp``, in metres.
-    :param source_height: Source height ``hs``, in metres.
-    :param receiver_height: Receiver height ``hr``, in metres.
+    :param source_height_m: Source height ``hs``, in metres.
+    :param receiver_height_m: Receiver height ``hr``, in metres.
     :param c0: Meteorological factor ``C0``, in decibels.
     :return: ``Cmet``, in decibels (>= 0 for :math:`C_0 \ge 0`).
     """
-    threshold = 10.0 * (source_height + receiver_height)
+    threshold = 10.0 * (source_height_m + receiver_height_m)
     if projected_distance <= threshold:
         return 0.0
     return float(c0 * (1.0 - threshold / projected_distance))
@@ -1053,8 +1053,8 @@ def _compose_receiver_level(
 
 def outdoor_propagation_attenuation(
     distance: float,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     *,
     frequencies: ArrayLike = DEFAULT_FREQUENCIES_HZ,
     ground_source: float = 0.0,
@@ -1078,8 +1078,8 @@ def outdoor_propagation_attenuation(
     (Eq. (13)) and the ground term is retained.
 
     :param distance: Straight-line source-to-receiver distance ``d``, in metres.
-    :param source_height: Source height ``hs`` above ground, in metres.
-    :param receiver_height: Receiver height ``hr`` above ground, in metres.
+    :param source_height_m: Source height ``hs`` above ground, in metres.
+    :param receiver_height_m: Receiver height ``hr`` above ground, in metres.
     :param frequencies: Octave-band midband frequencies, in hertz. The ground
         term snaps each frequency to the nearest nominal octave band (Table 3
         is octave-band only) and the atmospheric term evaluates the exact
@@ -1114,8 +1114,8 @@ def outdoor_propagation_attenuation(
     )
     a_gr = ground_attenuation(
         distance,
-        source_height,
-        receiver_height,
+        source_height_m,
+        receiver_height_m,
         freqs,
         ground_source,
         ground_middle,
@@ -1196,8 +1196,8 @@ def predicted_receiver_level(
     lw = np.atleast_1d(np.asarray(sound_power_level, dtype=np.float64))
     attenuation = outdoor_propagation_attenuation(
         geometry.distance,
-        geometry.source_height,
-        geometry.receiver_height,
+        geometry.source_height_m,
+        geometry.receiver_height_m,
         frequencies=frequencies,
         ground_source=ground.source,
         ground_middle=ground.middle,
@@ -1212,12 +1212,12 @@ def predicted_receiver_level(
     if c0 is not None:
         dp = _projected_distance(
             geometry.distance,
-            geometry.source_height,
-            geometry.receiver_height,
+            geometry.source_height_m,
+            geometry.receiver_height_m,
             geometry.projected_distance,
         )
         cmet = meteorological_correction(
-            dp, geometry.source_height, geometry.receiver_height, c0
+            dp, geometry.source_height_m, geometry.receiver_height_m, c0
         )
     return _compose_receiver_level(
         lw, directivity.index, directivity.d_omega, attenuation.a_total, cmet

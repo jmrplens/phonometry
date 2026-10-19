@@ -115,7 +115,7 @@ def _intensity() -> ph.emission.IntensityResult:
     p1 = RNG.standard_normal(FS)
     p2 = np.roll(p1, 1)
     return ph.emission.sound_intensity(
-        p1, p2, FS, spacing=0.012, fraction=3, limits=[125, 4000]
+        p1, p2, FS, spacing_m=0.012, fraction=3, limits=[125, 4000]
     )
 
 
@@ -503,7 +503,7 @@ def _impedance_tube() -> ph.materials.ImpedanceTubeResult:
     return ph.materials.two_microphone_impedance(
         h12,
         frequency=f,
-        spacing=s,
+        spacing_m=s,
         x1=x1,
         speed_of_sound=343.2,
         characteristic_impedance=407.0,
@@ -1102,7 +1102,7 @@ def _stepped_sine_impulse_response() -> ph.metrology.SteppedSineImpulseResponse:
 def _static_airflow() -> ph.materials.StaticAirflowResult:
     u = np.array([0.2e-3, 0.4e-3, 0.6e-3, 0.8e-3, 1.0e-3])
     dp = 30000.0 * u + 4.0e6 * u**2
-    return ph.materials.static_airflow_resistance(u, dp, area=0.01, thickness=0.05)
+    return ph.materials.static_airflow_resistance(u, dp, area=0.01, thickness_m=0.05)
 
 
 def _airborne_prediction() -> ph.building.AirbornePredictionResult:

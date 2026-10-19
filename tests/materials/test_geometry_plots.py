@@ -62,20 +62,20 @@ def _geometry_axes() -> Iterator[Axes]:
     yield _resonator().plot()
     yield m.plot_slit_absorber_geometry(
         [_resonator()] * 3,
-        slit_height=0.002,
+        slit_height_m=0.002,
         lattice_step=0.015,
         period_m=0.02,
     )
     yield m.plot_qrd_geometry(m.qrd_well_depths(7, 500.0), 0.12, repetitions=2)
     yield m.plot_impedance_tube_geometry(
-        spacing=0.05, x1=0.15, diameter_m=0.1, shape="circular"
+        spacing_m=0.05, x1=0.15, diameter_m=0.1, shape="circular"
     )
     yield m.plot_transmission_tube_geometry(
         l1=0.1,
         s1=0.03,
         l2=0.15,
         s2=0.03,
-        thickness=0.05,
+        thickness_m=0.05,
         diameter_m=0.1,
         shape="square",
     )
@@ -134,12 +134,12 @@ def test_slit_result_retains_geometry_and_draws() -> None:
     res = m.slit_helmholtz_absorber(
         FREQ,
         [_resonator()] * 3,
-        slit_height=0.002,
+        slit_height_m=0.002,
         lattice_step=0.015,
         period_m=0.02,
     )
     assert res.resonators == (_resonator(),) * 3
-    assert res.slit_height == pytest.approx(0.002)
+    assert res.slit_height_m == pytest.approx(0.002)
     assert res.lattice_step == pytest.approx(0.015)
     assert res.period_m == pytest.approx(0.02)
     assert res.plot_geometry() is not None
@@ -168,7 +168,7 @@ def test_impedance_tube_result_draws_from_retained_geometry() -> None:
     res = m.two_microphone_impedance(
         np.array([0.5 + 0.1j, 0.4 - 0.2j]),
         frequency=f,
-        spacing=0.05,
+        spacing_m=0.05,
         x1=0.15,
         speed_of_sound=343.2,
         characteristic_impedance=413.0,
@@ -178,7 +178,7 @@ def test_impedance_tube_result_draws_from_retained_geometry() -> None:
     bare = m.two_microphone_impedance(
         np.array([0.5 + 0.1j, 0.4 - 0.2j]),
         frequency=f,
-        spacing=0.05,
+        spacing_m=0.05,
         x1=0.15,
         speed_of_sound=343.2,
         characteristic_impedance=413.0,
@@ -201,7 +201,7 @@ def test_transfer_matrix_geometry_paths() -> None:
 def test_impedance_tube_sample_patch_is_to_scale() -> None:
     thickness = 0.08
     ax = m.plot_impedance_tube_geometry(
-        spacing=0.05, x1=0.15, diameter_m=0.1, sample_thickness=thickness
+        spacing_m=0.05, x1=0.15, diameter_m=0.1, sample_thickness_m=thickness
     )
     from matplotlib.patches import Rectangle
 
@@ -236,18 +236,18 @@ def test_qrd_geometry_refuses_a_nan_well_depth() -> None:
 def test_transmission_tube_validation() -> None:
     with pytest.raises(
         ValueError,
-        match=r"'l2' is measured from the front face and must exceed 'thickness'",
+        match=r"'l2' is measured from the front face and must exceed 'thickness_m'",
     ):
         m.plot_transmission_tube_geometry(
-            l1=0.1, s1=0.03, l2=0.04, s2=0.03, thickness=0.05
+            l1=0.1, s1=0.03, l2=0.04, s2=0.03, thickness_m=0.05
         )
     with pytest.raises(ValueError, match="'s1' must be positive"):
         m.plot_transmission_tube_geometry(
-            l1=0.1, s1=0.0, l2=0.15, s2=0.03, thickness=0.05
+            l1=0.1, s1=0.0, l2=0.15, s2=0.03, thickness_m=0.05
         )
     with pytest.raises(ValueError, match=r"'diameter_m' must be positive"):
         m.plot_transmission_tube_geometry(
-            l1=0.1, s1=0.03, l2=0.15, s2=0.03, thickness=0.05, diameter_m=-1.0
+            l1=0.1, s1=0.03, l2=0.15, s2=0.03, thickness_m=0.05, diameter_m=-1.0
         )
 
 
@@ -256,19 +256,19 @@ def test_impedance_tube_geometry_refuses_a_nan_spacing() -> None:
     dimension line ('s = nan mm') and the working-range note
     ('Plane-wave range nan to nan Hz') of a drawing that still rendered.
     """
-    with pytest.raises(ValueError, match="'spacing' must be positive"):
-        m.plot_impedance_tube_geometry(spacing=float("nan"), x1=0.1)
+    with pytest.raises(ValueError, match="'spacing_m' must be positive"):
+        m.plot_impedance_tube_geometry(spacing_m=float("nan"), x1=0.1)
 
 
 def test_impedance_tube_geometry_refuses_a_nan_microphone_distance() -> None:
     with pytest.raises(ValueError, match="'x1' must be positive"):
-        m.plot_impedance_tube_geometry(spacing=0.05, x1=float("nan"))
+        m.plot_impedance_tube_geometry(spacing_m=0.05, x1=float("nan"))
 
 
 def test_transmission_tube_geometry_refuses_a_nan_section_length() -> None:
     with pytest.raises(ValueError, match="'l1' must be positive"):
         m.plot_transmission_tube_geometry(
-            l1=float("nan"), s1=0.03, l2=0.15, s2=0.03, thickness=0.05
+            l1=float("nan"), s1=0.03, l2=0.15, s2=0.03, thickness_m=0.05
         )
 
 
@@ -300,34 +300,34 @@ def test_slit_absorber_geometry_refuses_a_nan_lattice_step() -> None:
     with pytest.raises(ValueError, match="'lattice_step' must be positive"):
         m.plot_slit_absorber_geometry(
             resonator,
-            slit_height=0.002,
+            slit_height_m=0.002,
             lattice_step=float("nan"),
             period_m=0.02,
         )
 
 
 def test_impedance_tube_validation() -> None:
-    with pytest.raises(ValueError, match="'x1' must exceed 'spacing'"):
-        m.plot_impedance_tube_geometry(spacing=0.05, x1=0.04)
+    with pytest.raises(ValueError, match="'x1' must exceed 'spacing_m'"):
+        m.plot_impedance_tube_geometry(spacing_m=0.05, x1=0.04)
     with pytest.raises(ValueError, match=r"'diameter_m' must be positive"):
-        m.plot_impedance_tube_geometry(spacing=0.05, x1=0.15, diameter_m=-0.1)
-    with pytest.raises(ValueError, match=r"'sample_thickness' must be positive"):
-        m.plot_impedance_tube_geometry(spacing=0.05, x1=0.15, sample_thickness=0.0)
+        m.plot_impedance_tube_geometry(spacing_m=0.05, x1=0.15, diameter_m=-0.1)
+    with pytest.raises(ValueError, match=r"'sample_thickness_m' must be positive"):
+        m.plot_impedance_tube_geometry(spacing_m=0.05, x1=0.15, sample_thickness_m=0.0)
     with pytest.raises(ValueError, match="Unknown language"):
-        m.plot_impedance_tube_geometry(spacing=0.05, x1=0.15, language="de")
+        m.plot_impedance_tube_geometry(spacing_m=0.05, x1=0.15, language="de")
 
 
 def test_slit_geometry_validation() -> None:
     resonator = _resonator()
-    with pytest.raises(ValueError, match="'slit_height' must be positive"):
+    with pytest.raises(ValueError, match="'slit_height_m' must be positive"):
         m.plot_slit_absorber_geometry(
-            resonator, slit_height=0.0, lattice_step=0.015, period_m=0.02
+            resonator, slit_height_m=0.0, lattice_step=0.015, period_m=0.02
         )
     with pytest.raises(
         ValueError, match=r"'resonators' must contain at least one resonator"
     ):
         m.plot_slit_absorber_geometry(
-            [], slit_height=0.002, lattice_step=0.015, period_m=0.02
+            [], slit_height_m=0.002, lattice_step=0.015, period_m=0.02
         )
 
 
@@ -348,7 +348,7 @@ def _texts(ax: Axes) -> str:
 
 def test_spanish_strings_rendered() -> None:
     ax = m.plot_impedance_tube_geometry(
-        spacing=0.05, x1=0.15, diameter_m=0.1, language="es"
+        spacing_m=0.05, x1=0.15, diameter_m=0.1, language="es"
     )
     joined = _texts(ax)
     assert "Altavoz" in joined
@@ -356,3 +356,17 @@ def test_spanish_strings_rendered() -> None:
     assert "a escala" in ax.get_title()
     ax = m.plot_absorber_stack(_layers(), language="es")
     assert "Respaldo rígido" in _texts(ax)
+
+
+def test_absorber_stack_draws_each_layer_at_its_thickness() -> None:
+    """The drawing reads every layer's ``thickness_m``: the air gap and the
+    porous layer get their 30 mm and 50 mm dimension lines, the 1 mm plate
+    too thin for one carries it in its label, and the stack is drawn to its
+    total depth of 81 mm rather than to the fallback for a stack of no depth.
+    """
+    ax = m.plot_absorber_stack(_layers())
+    texts = {t.get_text(): t for t in ax.texts}
+    assert {"30 mm", "50 mm", "Microperforated plate, 1 mm"} <= set(texts)
+    # The backing label sits at 1.11 times the stack height, 0.9 x 81 mm.
+    _, y_backing = texts["Rigid backing"].get_position()
+    assert y_backing == pytest.approx(1.11 * 0.9 * 0.081)

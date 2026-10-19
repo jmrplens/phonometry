@@ -276,6 +276,38 @@ dan las dos alturas en metros, y dos temperaturas dicen en qué escala están:
 | `GasStream.inlet_temperature_k`, en kelvin | `inlet_temperature_c`, en grados Celsius: convierte el número, como enseña la sección de arriba |
 | `RoadEmissionCoefficients.temperature_k`, la $K_m$ de CNOSSOS-EU en dB por grado Celsius, cuyo `_k` se leía como kelvin | `temperature_coefficient_db_per_c` |
 
+Las longitudes llevan su unidad allí donde una segunda unidad se disputa la
+palabra. Un espesor va en metros en una capa y en milímetros en la fila del
+catálogo de la que se lee, una separación son metros entre dos micrófonos o
+hercios entre dos líneas espectrales, una altura son metros sobre el suelo y
+decibelios en una meseta de coincidencia, y el paquete de aeronaves lee sus
+tablas nivel-potencia-distancia (NPD) en pies y calcula en metros:
+
+| 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `thickness=` en `PorousLayer`, `AirLayer`, `PerforatedPlateLayer`, `MicroperforatedPlateLayer`, `PoroelasticLayer`, `TransferMatrix`, `BarrierInsertionLoss` y en toda función que lo recibía: las de Biot, de cuatro micrófonos, de placa perforada, de resistencia al flujo, de capas elásticas, de revestimientos de suelo, de paneles, de flancos, de transmisión estructural, de SEA y de movilidad puntual, y las funciones que dibujan la geometría; `thickness1=` y `thickness2=` en `junction_transmission`, `junction_wave_parameters`, `right_angle_transmission_coefficient`, `point_connection_coupling_loss_factor`, `JunctionTransmissionResult` y `plot_junction_geometry`; `wall_thickness=`, `lining_thickness=`, `plate_thickness=`, `splitter_thickness=`; `specimen_thickness=` en `plot_dynamic_stiffness_rig` y `sample_thickness=` en `plot_impedance_tube_geometry` | `thickness_m=`, `thickness1_m=`, `thickness2_m=`, `wall_thickness_m=`, `lining_thickness_m=`, `plate_thickness_m=`, `splitter_thickness_m=`, `specimen_thickness_m=`, `sample_thickness_m=` |
+| `spacing=` en `sound_intensity` e `IntensityResult`, en las funciones de la IEC 61043 e `IntensityInstrumentComplianceResult`, y en las funciones del tubo de impedancia e `ImpedanceTubeResult` | `spacing_m=` |
+| `line_spacing=` en las funciones de tonos de la ISO/PAS 20065 y `ToneAudibilityResult`; `ZoomFFTResult.bin_spacing` | `line_spacing_hz=`; `.bin_spacing_hz` |
+| `height=`, `heights=`, `source_height=`, `receiver_height=`, `barrier_height=`, `max_height=`, `height_step=`, `slit_height=`, `plenum_height=`, `drop_height=` y las demás alturas en metros, entre ellas `height_fundamental_frequency(height=)` | el mismo nombre terminado en `_m` |
+| `plateau_height=` en `plateau_transmission_loss` y `SoundReductionResult` | `plateau_height_db=` |
+| `distance=`, `distances=` y sus compuestos en `aircraft`: `npd_level`, `npd_curve`, `event_level`, `noise_contour`, `noise_fraction`, `AnpNpdCurves`, `AnpDatabase`, `RotorcraftHemisphere`, `hover_ring_hemisphere`, las funciones de propagación de helicópteros y sus resultados | `distance_m=`, `distances_m=`, `reference_distance_m=`, `horizontal_distance_m=`, `scaled_distance_m=`, `query_distances_m=`, `table_distances_m` |
+| `ReportMetadata(mic_spacing=, thickness=)` | `microphone_spacing_m=`, `thickness_m=` |
+
+Trece longitudes se escriben además por su nombre, porque llevan valor por
+defecto y el nombre es el único sitio donde se ve la unidad:
+`npd_curve(query_distances_m=)`, `static_airflow_resistance(thickness_m=)`, los
+campos `distance_m`, `spacing_m` y `source_height_m` de `RotorcraftHemisphere`,
+`IntensityResult` y `RoadEmissionResult`, los `thickness1_m` y `thickness2_m`
+que `JunctionTransmissionResult` guarda para su dibujo, y los `source_height_m`
+y `microphone_height_m` de la ISO 13472-1 en `geometric_spreading_factor`,
+`geometric_spreading_factor_angle` e `InsituAbsorptionResult`. La sección de
+conducto que lee `duct_path` es `{"width": a, "height_m": b}`, y
+`TABLE_D1_QUANTITIES` nombra `thickness_m` entre las magnitudes que describen
+una fila de la Tabla D.1. Las filas de los catálogos conservan `thickness_mm`,
+la unidad en la que el catálogo guarda todas sus filas, sea cual sea la que
+imprime su fuente, y `vertical_directivity(height=1)` conserva su nombre,
+porque 1 o 2 elige una línea de fuente y no es una longitud.
+
 Una constante publicada sigue la misma regla, y la necesita más, porque un
 número suelto no tiene más que su nombre para decir en qué está: `10.0` son
 hercios, decibelios o una cuenta. La constante que guarda un solo número
@@ -374,7 +406,7 @@ muestreo es `fs` en todas las funciones.
 | `frequency_hz=` con un array en `weighted_exposure` y `ocean_ambient_noise` | `frequencies_hz=`; la unidad se queda porque las fórmulas que evalúan están impresas en kHz |
 | `.time` en `ZwickerLoudness`, `EcmaLoudness`, `MooreGlasbergTimeVaryingLoudness`, los resultados de tonalidad, aspereza y fuerza de fluctuación de ECMA-418-2, `DecayCurve`, `QuasiPeakResult` | `.times` |
 | `.level` en `DecayCurve`, `NpdLevelResult`, `NoiseContourResult`, `RotorcraftNoiseContourResult`, `LowFrequencyResult`, `DuctPathStage`, `LateLateralResult`, `TransferStiffnessResult` | `.levels` |
-| `.distance` en `NpdLevelResult` y `RotorcraftEventResult` | `.distances` |
+| `.distance` en `NpdLevelResult` y `RotorcraftEventResult` | `.distances_m` |
 | `frequencies_hz` en las comprobaciones del instrumento de vibración humana (`WeightingVerification`, `PhaseVerification`, `characteristic_phase_deviation`, `verify_phase_response`), `levels_db=` en `operating_standard_deviation` y `subinterval_level` | `frequencies`, `levels` |
 | `sound_speeds` en `EffectiveSoundSpeedProfile` y `sound_speeds=` en `normal_modes`, `ray_trace`, `gaussian_beams` y `parabolic_equation` | `speeds_of_sound` |
 | `SoundSpeedProfile.sound_speed` y `.depth` | `.speeds_of_sound` y `.depths` |
@@ -823,7 +855,7 @@ indica en qué versión apareció cada veredicto.
 | `emission.ReferenceSoundSourceVerdict` | todos los `*_limit_db`, `adjacent_step_db`, `core_range_db`, `extended_range_db`, `frequency_range_met`, `not_judged` | las bandas, los niveles y las cifras medidas | después de 4.0.0rc1 |
 | `emission.ReferenceSourceDriftResult`, `emission.SpecialRoomSuitabilityCheck` | `limit_db` | las bandas | después de 4.0.0rc1 |
 | `emission.SpecialRoomReverberationCheck` | `lower_limit`, `upper_limit` | las bandas | después de 4.0.0rc1 |
-| `emission.IntensityInstrumentComplianceResult` | `limit_class1`, `limit_class2`, `spacing_offset_db` | `device`, `spacing`; las filas por banda se leen de ellos, véase la sección siguiente | 4.0.0rc1 |
+| `emission.IntensityInstrumentComplianceResult` | `limit_class1`, `limit_class2`, `spacing_offset_db` | `device`, `spacing_m`; las filas por banda se leen de ellos, véase la sección siguiente | 4.0.0rc1 |
 | `emission.InverseSquareLawResult`, `emission.SourceDirectionalityResult` | `tolerance_db` | lo selecciona `room`; los radios cualificados deben ser los que alcanzan los niveles | después de 4.0.0rc1 |
 | `hearing.AmbientNoiseCheck` | `limits_db`, `table_bands_hz` | gana `earphone_attenuation_db` y `allowed_threshold_shift_db` | después de 4.0.0rc1 |
 | `hearing.FixtureIsolationCheck` | `required_db` | las bandas | después de 4.0.0rc1 |
@@ -919,7 +951,7 @@ marca un campo que solo se pasa por nombre.
 | `electroacoustics.BackgroundNoiseAssessment` | `reference_signal_to_noise_ratio_db`, `category`, `report_required` | `noise_levels_db`, `noise_is_tonal` | después de 4.0.0rc1 |
 | `electroacoustics.FeedbackStabilityResult` | `is_stable` | `loop_gain`, `stability_margin` | 4.0.0rc1 |
 | `emission.FreeFieldCheck` | `room`, `frequencies`, `band_radius_m`, `maximum_qualified_radius_m`, todos los `*_met`, `full_frequency_range`, `conforming_range_hz`, `conforming_radius_m`, `not_judged` | los argumentos de `check_free_field`: gana `source_directionality`, `reflecting_plane_absorption_coefficient`, `reflecting_plane_margin_m`, `paths_in_working_area`, `speed_of_sound` | después de 4.0.0rc1 |
-| `emission.IntensityInstrumentComplianceResult` | `bands`, `overall_class`, `range_limited` | `frequencies`, `residual_index`, `device`, `spacing` | 4.0.0rc1 |
+| `emission.IntensityInstrumentComplianceResult` | `bands`, `overall_class`, `range_limited` | `frequencies`, `residual_index`, `device`, `spacing_m` | 4.0.0rc1 |
 | `emission.ReferenceSourceCalibration` | `sound_power_level_db`, `intensity_bands`, `intensity_agreement`, `room_qualified` | gana `intensity_sound_power_level_db` y `room_qualification` | después de 4.0.0rc1 |
 | `emission.HardWalledSoundPowerResult` | `background_requirement_met`, `upper_bound` | gana `background_margin_db`, `background_margin_ref_db` | después de 4.0.0rc1 |
 | `emission.InSituSoundPowerResult` | `background_requirement_met`, `upper_bound`, `grade`, `sigma_r0`, `sigma_tot`, `expanded_uncertainty` | gana `background_margin_db`, `background_margin_ref_db`, los menores de todas las posiciones, y `excess_levels_db`, `directivity_range_db`, los dos indicadores con los que la tabla 2 asigna el grado | 4.0.0rc1 |
@@ -1066,7 +1098,7 @@ lee `band_type` de `vibration_reduction_index` (véase debajo de la tabla).
 | `building.TappingForceResult` | `over_critical`, K m ≥ 4 Zdp² (Hopkins, ecuación 3.95) | `contact_stiffness`, `impedance`; gana `mass_kg`, solo por nombre | 4.0.0rc1 |
 | `noise_control.HydrodynamicValveNoise` | `regime`, con cavitación cuando Δp supera x_Fzp1 (p1 - pv) (IEC 60534-8-4, 5.1) | `differential`, `corrected_ratio`; gana `inlet_pressure_pa`, `vapour_pressure_pa` | 4.0.0rc1 |
 | `noise_control.AerodynamicValveNoise` | `regime`, los cinco intervalos de IEC 60534-8-3, 5.2 | `pressure_ratio`, `boundaries`; gana `specific_heat_ratio`, `pressure_recovery`, `efficiency_correction`, solo por nombre | 4.0.0rc1 |
-| `aircraft.TerrainScreeningResult` | `screened`, terreno estrictamente por encima de la línea de visión | `source`, `receiver`, `distances`, `heights` | 3.3.0 |
+| `aircraft.TerrainScreeningResult` | `screened`, terreno estrictamente por encima de la línea de visión | `source`, `receiver`, `distances_m`, `heights_m` | 3.3.0 |
 | `hearing.AutomaticThresholdResult` | `is_peak`, `retained` (ISO 8253-1, 6.3.5 a)) | `reversal_levels_db` | después de 4.0.0rc1 |
 | `hearing.SweepThresholdResult` | `is_peak` | `reversal_levels_db` | después de 4.0.0rc1 |
 | `metrology.WaveMotionCorrection` | `interpolated` | `frequencies`, `speed_of_sound_ratio` | después de 4.0.0rc1 |

@@ -71,11 +71,36 @@ _KHZ = (
     "functions, the Wenz wind-noise rule of fives), so the unit is named"
 )
 _FEET = "the NPD tables are defined at distances in feet, and distance_ft is public"
+_AIRCRAFT = (
+    "aircraft holds every distance to its unit, because the ANP database "
+    "prints its NPD tables in feet beside the metres the package computes in "
+    "(the aircraft rule of scripts/check_parameter_units.py)"
+)
 #: Where a minority spelling is kept on purpose, keyed by location, each with
 #: the reason. An entry that matches nothing any more fails the test too.
 _MINORITY_EXEMPT = {
     "phonometry.aircraft.npd_atmosphere.NpdAtmosphereIncrement.distances_m": _FEET,
     "phonometry.aircraft.npd_atmosphere.npd_atmosphere_increment(distances_m)": _FEET,
+    "phonometry.aircraft.airport_noise.NpdLevelResult.distances_m": _AIRCRAFT,
+    "phonometry.aircraft.airport_noise.event_level(distances_m)": _AIRCRAFT,
+    "phonometry.aircraft.airport_noise.noise_contour(distances_m)": _AIRCRAFT,
+    "phonometry.aircraft.airport_noise.npd_curve(distances_m)": _AIRCRAFT,
+    "phonometry.aircraft.airport_noise.npd_level(distances_m)": _AIRCRAFT,
+    "phonometry.aircraft.anp_fleet.AnpDatabase.__init__(distances_m)": _AIRCRAFT,
+    "phonometry.aircraft.anp_fleet.AnpNpdCurves.distances_m": _AIRCRAFT,
+    "phonometry.aircraft.rotorcraft_noise.RotorcraftEventResult.distances_m": _AIRCRAFT,
+    "phonometry.aircraft.rotorcraft_propagation.MeanGroundPlaneResult.distances_m": (
+        _AIRCRAFT
+    ),
+    "phonometry.aircraft.rotorcraft_propagation.TerrainScreeningResult.distances_m": (
+        _AIRCRAFT
+    ),
+    "phonometry.aircraft.rotorcraft_propagation.mean_ground_plane(distances_m)": (
+        _AIRCRAFT
+    ),
+    "phonometry.aircraft.rotorcraft_propagation.terrain_screening_adjustment(distances_m)": (
+        _AIRCRAFT
+    ),
     "phonometry.underwater.bioacoustics.weighting.weighted_exposure(frequencies_hz)": _KHZ,
     "phonometry.underwater.sources.ambient_noise.ocean_ambient_noise(frequencies_hz)": _KHZ,
     "phonometry.vibration.structural.transfer_stiffness.BandAveragedStiffness.center_frequencies": (

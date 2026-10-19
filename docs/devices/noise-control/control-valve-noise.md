@@ -138,7 +138,7 @@ result = noise_control.valve_aerodynamic_noise(
     ),
     noise_control.DownstreamPipe(
         internal_diameter_m=0.2031,      # m
-        wall_thickness=0.008,          # m
+        wall_thickness_m=0.008,          # m
         density=8000.0,                # kg/m3, steel
     ),
 )
@@ -216,7 +216,7 @@ bands = np.array([200.0, 1000.0, 2500.0])
 loss = noise_control.pipe_transmission_loss(
     bands,
     internal_diameter_m=0.200,
-    wall_thickness=0.008,
+    wall_thickness_m=0.008,
     valve_outlet_diameter_m=0.200,
     downstream_density=11.1,
     downstream_sound_speed=408.0,
@@ -260,7 +260,7 @@ case = dict(
         efficiency_correction=-3.8, strouhal_number=0.2,
     ),
     pipe=noise_control.DownstreamPipe(
-        internal_diameter_m=0.15, wall_thickness=0.008, density=8000.0
+        internal_diameter_m=0.15, wall_thickness_m=0.008, density=8000.0
     ),
 )
 both = noise_control.valve_aerodynamic_noise(

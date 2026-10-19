@@ -862,7 +862,7 @@ def pipe_ring_frequency(
 
 def reference_transmission_loss(  # noqa: PLR0913
     internal_diameter_m: float,
-    wall_thickness: float,
+    wall_thickness_m: float,
     *,
     pipe_density: float,
     pipe_sound_speed: float = PIPE_SPEED_OF_SOUND_M_S,
@@ -884,7 +884,7 @@ def reference_transmission_loss(  # noqa: PLR0913
     out at −44,7 dB.
 
     :param internal_diameter_m: :math:`D_i`, in m.
-    :param wall_thickness: :math:`t_p`, in m.
+    :param wall_thickness_m: :math:`t_p`, in m.
     :param pipe_density: :math:`\rho_p`, 7 800 kg/m³ for steel.
     :param pipe_sound_speed: :math:`c_p`, 5 000 m/s for steel, in m/s.
     :param air_density: :math:`\rho_o` outside the pipe, in kg/m³.
@@ -893,7 +893,7 @@ def reference_transmission_loss(  # noqa: PLR0913
     :raises ValueError: If a value is not positive and finite.
     """
     bore = require_positive(internal_diameter_m, "internal_diameter_m")
-    thickness = require_positive(wall_thickness, "wall_thickness")
+    thickness = require_positive(wall_thickness_m, "wall_thickness_m")
     rho_pipe = require_positive(pipe_density, "pipe_density")
     wall = require_positive(pipe_sound_speed, "pipe_sound_speed")
     rho_air = require_positive(air_density, "air_density")
@@ -1417,7 +1417,7 @@ class LiquidPipe(RichDisplay):
     r"""The pipe the noise comes out of, and the air around it.
 
     :ivar internal_diameter_m: :math:`D_i`, in m.
-    :ivar wall_thickness: :math:`t_p`, in m.
+    :ivar wall_thickness_m: :math:`t_p`, in m.
     :ivar density: :math:`\rho_p` of the pipe material, in kg/m³.
     :ivar speed_of_sound: :math:`c_p` in the pipe wall, in m/s.
     :ivar air_density: :math:`\rho_o` outside the pipe, in kg/m³.
@@ -1425,7 +1425,7 @@ class LiquidPipe(RichDisplay):
     """
 
     internal_diameter_m: float
-    wall_thickness: float
+    wall_thickness_m: float
     density: float
     speed_of_sound: float = PIPE_SPEED_OF_SOUND_M_S
     air_density: float = AIR_DENSITY_KG_M3
@@ -1485,7 +1485,7 @@ def valve_hydrodynamic_noise(
     seat_diameter_m = valve.seat_diameter_m
     coefficient = valve.coefficient
     internal_diameter_m = pipe.internal_diameter_m
-    wall_thickness = pipe.wall_thickness
+    wall_thickness = pipe.wall_thickness_m
     pipe_density = pipe.density
     pipe_sound_speed = pipe.speed_of_sound
     air_density = pipe.air_density
@@ -1498,7 +1498,7 @@ def valve_hydrodynamic_noise(
     recovery = _require_recovery(pressure_recovery)
     share = _require_share(power_ratio, "power_ratio")
     bore = require_positive(internal_diameter_m, "internal_diameter_m")
-    thickness = require_positive(wall_thickness, "wall_thickness")
+    thickness = require_positive(wall_thickness, "wall_thickness_m")
 
     ratio = differential_pressure_ratio(
         inlet_pressure_pa=p1, outlet_pressure_pa=p2, vapour_pressure_pa=pv

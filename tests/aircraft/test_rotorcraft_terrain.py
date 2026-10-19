@@ -63,10 +63,10 @@ def test_mean_ground_plane_equivalent_height_is_orthogonal() -> None:
 
 
 def test_mean_ground_plane_validation_and_plot() -> None:
-    with pytest.raises(ValueError, match=r"'distances' must be strictly increasing"):
+    with pytest.raises(ValueError, match=r"'distances_m' must be strictly increasing"):
         aircraft.mean_ground_plane([0.0, 0.0], [1.0, 2.0])
     with pytest.raises(
-        ValueError, match=r"'distances' and 'heights' must be 1-D of equal size"
+        ValueError, match=r"'distances_m' and 'heights_m' must be 1-D of equal size"
     ):
         aircraft.mean_ground_plane([0.0, 1.0, 2.0], [1.0, 2.0])
     assert (
@@ -90,20 +90,20 @@ def test_mean_flow_resistivity_log_average() -> None:
 
 def test_diffraction_grazing_and_classical_values() -> None:
     # delta = 0 (edge on the line of sight): 10 lg 3 = 4.771 dB.
-    assert aircraft.diffraction_attenuation([1000.0], 0.0, edge_height=10.0)[
+    assert aircraft.diffraction_attenuation([1000.0], 0.0, edge_height_m=10.0)[
         0
     ] == pytest.approx(10.0 * np.log10(3.0), abs=1e-9)
     # delta = lambda: 10 lg(3 + 40) = 16.335 dB.
     lam = 346.1 / 1000.0
-    assert aircraft.diffraction_attenuation([1000.0], lam, edge_height=10.0)[
+    assert aircraft.diffraction_attenuation([1000.0], lam, edge_height_m=10.0)[
         0
     ] == pytest.approx(10.0 * np.log10(43.0), abs=1e-9)
 
 
 def test_diffraction_low_edge_scales_with_ch() -> None:
     # Ch = min(f h0 / 250, 1) (Eq. 43): a 0.5 m edge at 100 Hz gives Ch = 0.2.
-    full = aircraft.diffraction_attenuation([100.0], 1.0, edge_height=1e6)[0]
-    low = aircraft.diffraction_attenuation([100.0], 1.0, edge_height=0.5)[0]
+    full = aircraft.diffraction_attenuation([100.0], 1.0, edge_height_m=1e6)[0]
+    low = aircraft.diffraction_attenuation([100.0], 1.0, edge_height_m=0.5)[0]
     assert low == pytest.approx(0.2 * full)
 
 
@@ -111,32 +111,34 @@ def test_diffraction_negative_path_difference_branch() -> None:
     # Slightly below the line of sight there is still some attenuation; at
     # (40/lambda) delta = -2 the argument reaches 1 and the attenuation is 0.
     lam = 346.1 / 1000.0
-    small = aircraft.diffraction_attenuation([1000.0], -lam / 40.0, edge_height=10.0)[0]
+    small = aircraft.diffraction_attenuation([1000.0], -lam / 40.0, edge_height_m=10.0)[
+        0
+    ]
     assert 0.0 < small < 10.0 * np.log10(3.0)
     assert (
-        aircraft.diffraction_attenuation([1000.0], -3.0 * lam / 40.0, edge_height=10.0)[
-            0
-        ]
+        aircraft.diffraction_attenuation(
+            [1000.0], -3.0 * lam / 40.0, edge_height_m=10.0
+        )[0]
         == 0.0
     )
 
 
 def test_diffraction_multiple_edges_and_cap() -> None:
     # e <= 0.3 m keeps C'' = 1; a wide edge span raises C'' towards 3 (Eq. 44).
-    single = aircraft.diffraction_attenuation([1000.0], 0.5, edge_height=10.0)
+    single = aircraft.diffraction_attenuation([1000.0], 0.5, edge_height_m=10.0)
     narrow = aircraft.diffraction_attenuation(
-        [1000.0], 0.5, edge_height=10.0, edge_span=0.3
+        [1000.0], 0.5, edge_height_m=10.0, edge_span=0.3
     )
     wide = aircraft.diffraction_attenuation(
-        [1000.0], 0.5, edge_height=10.0, edge_span=1e9
+        [1000.0], 0.5, edge_height_m=10.0, edge_span=1e9
     )
     assert narrow[0] == pytest.approx(single[0])
     lam = 346.1 / 1000.0
     assert wide[0] == pytest.approx(10.0 * np.log10(3.0 + 120.0 * 0.5 / lam), rel=1e-6)
     # The 25 dB bound applies to the direct term only when requested.
-    big = aircraft.diffraction_attenuation([4000.0], 50.0, edge_height=10.0)
+    big = aircraft.diffraction_attenuation([4000.0], 50.0, edge_height_m=10.0)
     unc = aircraft.diffraction_attenuation(
-        [4000.0], 50.0, edge_height=10.0, capped=False
+        [4000.0], 50.0, edge_height_m=10.0, capped=False
     )
     assert big[0] == 25.0
     assert unc[0] > 25.0
@@ -360,9 +362,9 @@ def test_event_terrain_sets_receiver_elevation() -> None:
         (300.0, 0.0),
         ground=aircraft.RotorcraftGround(terrain=dem, terrain_resolution=100.0),
     )
-    k = int(np.argmin(res.distances))
+    k = int(np.argmin(res.distances_m))
     # CPA slant: track (x=0, z=60) to mic (x=300, z=30+1.2).
-    assert res.distances[k] == pytest.approx(np.hypot(300.0, 60.0 - 31.2), abs=0.5)
+    assert res.distances_m[k] == pytest.approx(np.hypot(300.0, 60.0 - 31.2), abs=0.5)
 
 
 def test_event_and_contour_array_argument_validation() -> None:

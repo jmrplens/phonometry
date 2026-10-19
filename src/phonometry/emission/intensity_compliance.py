@@ -180,9 +180,9 @@ def _spacing_offset(spacing: float) -> float:
     r"""Table 2 Note 1 separation term :math:`10 \log_{10}(x/25)` in dB, ``x`` in
     mm.
     """
-    require_scalar(spacing, "spacing")
+    require_scalar(spacing, "spacing_m")
     if not np.isfinite(spacing) or spacing <= 0.0:
-        msg = "'spacing' must be a positive, finite distance in metres."
+        msg = "'spacing_m' must be a positive, finite distance in metres."
         raise ValueError(msg)
     return float(10.0 * np.log10(spacing / REFERENCE_SPACING))
 
@@ -202,7 +202,7 @@ def _check_device(device: str) -> tuple[int, int]:
 def residual_index_limits(
     device: str = "instrument",
     *,
-    spacing: float = REFERENCE_SPACING,
+    spacing_m: float = REFERENCE_SPACING,
     frequencies: list[float] | np.ndarray | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     r"""IEC 61043:1993 Table 2 minimum pressure-residual intensity index.
@@ -215,18 +215,18 @@ def residual_index_limits(
 
     :param device: ``"probe"``, ``"processor"`` or ``"instrument"`` (the three
         column groups of Table 2).
-    :param spacing: Microphone separation in metres (default 0.025, the
+    :param spacing_m: Microphone separation in metres (default 0.025, the
         nominal separation the table is printed for).
     :param frequencies: Band centre frequencies in Hz to report the limits at,
         as nominal labels or the exact base-ten centres behind them. ``None``
         (default) returns all 22 tabulated one-third-octave bands.
     :return: Tuple ``(frequencies, class1, class2)`` of the nominal band
         centres in Hz and the two minimum ``delta_pI0`` requirements in dB.
-    :raises ValueError: If ``device`` is unknown, ``spacing`` is not positive
+    :raises ValueError: If ``device`` is unknown, ``spacing_m`` is not positive
         or a frequency is not a tabulated band.
     """
     col1, col2 = _check_device(device)
-    offset = _spacing_offset(spacing)
+    offset = _spacing_offset(spacing_m)
     rows = {row[0]: row for row in _TABLE2}
     if frequencies is None:
         wanted = list(_THIRD_OCTAVE_BANDS)
@@ -301,7 +301,7 @@ def verify_intensity_class(
     frequencies: list[float] | np.ndarray,
     *,
     device: str = "instrument",
-    spacing: float = REFERENCE_SPACING,
+    spacing_m: float = REFERENCE_SPACING,
 ) -> IntensityInstrumentComplianceResult:
     r"""Verify a measured ``delta_pI0`` spectrum against IEC 61043:1993 Table 2.
 
@@ -332,13 +332,13 @@ def verify_intensity_class(
         ``residual_index``, as nominal Table 2 labels or the exact base-ten
         centres behind them.
     :param device: ``"probe"``, ``"processor"`` or ``"instrument"``.
-    :param spacing: Microphone separation in metres (default 0.025).
+    :param spacing_m: Microphone separation in metres (default 0.025).
     :return: An :class:`IntensityInstrumentComplianceResult`, which carries the
         verdict together with the measured spectrum and the two rescaled
         Table 2 masks, so it exposes ``.plot()`` and an accredited
         ``.report()`` fiche.
     :raises ValueError: If the inputs disagree in length, a frequency is not a
-        tabulated band, a band is repeated, or ``device``/``spacing`` are
+        tabulated band, a band is repeated, or ``device``/``spacing_m`` are
         invalid.
     """
     measured = np.atleast_1d(np.asarray(residual_index, dtype=np.float64))
@@ -370,7 +370,7 @@ def verify_intensity_class(
         frequencies=freqs,
         residual_index=measured,
         device=device,
-        spacing=float(spacing),
+        spacing_m=float(spacing_m),
     )
 
 
@@ -388,13 +388,13 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
     :ivar frequencies: Nominal band centre frequencies, in Hz.
     :ivar residual_index: Measured ``delta_pI0`` per band, in dB.
     :ivar device: ``"probe"``, ``"processor"`` or ``"instrument"``.
-    :ivar spacing: Microphone separation the verdict applies to, in metres.
+    :ivar spacing_m: Microphone separation the verdict applies to, in metres.
     """
 
     frequencies: np.ndarray
     residual_index: np.ndarray
     device: str
-    spacing: float
+    spacing_m: float
 
     def __post_init__(self) -> None:
         """Reject a spectrum the verdict cannot be read from.
@@ -422,9 +422,9 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
             if not np.all(np.isfinite(getattr(self, name))):
                 msg = f"'{name}' must be finite."
                 raise ValueError(msg)
-        require_scalar(self.spacing, "spacing")
-        if not math.isfinite(self.spacing):
-            msg = "'spacing' must be finite."
+        require_scalar(self.spacing_m, "spacing_m")
+        if not math.isfinite(self.spacing_m):
+            msg = "'spacing_m' must be finite."
             raise ValueError(msg)
         if np.size(self.frequencies) == 0:
             msg = "At least one measurement band is required."
@@ -486,22 +486,22 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
 
     @property
     def limit_class1(self) -> np.ndarray:
-        """Class 1 minimum ``delta_pI0`` per band, in dB, rescaled to ``spacing``.
+        """Class 1 minimum ``delta_pI0`` per band, in dB, rescaled to ``spacing_m``.
 
         :return: Table 2 for :attr:`device`, plus :attr:`spacing_offset_db`.
         """
         return residual_index_limits(
-            self.device, spacing=self.spacing, frequencies=self.frequencies
+            self.device, spacing_m=self.spacing_m, frequencies=self.frequencies
         )[1]
 
     @property
     def limit_class2(self) -> np.ndarray:
-        """Class 2 minimum ``delta_pI0`` per band, in dB, rescaled to ``spacing``.
+        """Class 2 minimum ``delta_pI0`` per band, in dB, rescaled to ``spacing_m``.
 
         :return: Table 2 for :attr:`device`, plus :attr:`spacing_offset_db`.
         """
         return residual_index_limits(
-            self.device, spacing=self.spacing, frequencies=self.frequencies
+            self.device, spacing_m=self.spacing_m, frequencies=self.frequencies
         )[2]
 
     @property
@@ -510,7 +510,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
 
         :return: What the separation adds to the printed 25 mm figures.
         """
-        return _spacing_offset(self.spacing)
+        return _spacing_offset(self.spacing_m)
 
     def reference_class(self) -> int:
         """The class whose mask the fiche and the plot read margins against.
@@ -559,7 +559,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         return phase_mismatch_from_residual_index(
             self.residual_index,
             self.frequencies,
-            self.spacing,
+            self.spacing_m,
             speed_of_sound=speed_of_sound,
         )
 
@@ -633,9 +633,9 @@ def _plane_wave_phase_deg(
     r"""Plane-wave phase difference :math:`k d` across the spacer, in
     degrees.
     """
-    require_scalar(spacing, "spacing")
+    require_scalar(spacing, "spacing_m")
     if not np.isfinite(spacing) or spacing <= 0.0:
-        msg = "'spacing' must be a positive, finite distance in metres."
+        msg = "'spacing_m' must be a positive, finite distance in metres."
         raise ValueError(msg)
     if not np.isfinite(c) or c <= 0.0:
         msg = "'speed_of_sound' must be a positive, finite speed of sound."
@@ -650,7 +650,7 @@ def _plane_wave_phase_deg(
 def phase_mismatch_from_residual_index(
     residual_index: float | list[float] | np.ndarray,
     frequency: float | list[float] | np.ndarray,
-    spacing: float,
+    spacing_m: float,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray:
     r"""Channel phase mismatch equivalent to a pressure-residual intensity index.
@@ -672,11 +672,11 @@ def phase_mismatch_from_residual_index(
     :param residual_index: ``delta_pI0`` in decibels (scalar or array).
     :param frequency: Frequency in Hz (scalar or array, broadcast against
         ``residual_index``).
-    :param spacing: Microphone separation in metres.
+    :param spacing_m: Microphone separation in metres.
     :param speed_of_sound: Speed of sound in m/s (default 343.0).
     :return: The equivalent phase mismatch in degrees, as a
         :class:`numpy.ndarray` (0-d for scalar inputs).
-    :raises ValueError: If ``spacing``, ``speed_of_sound`` or ``frequency`` are not positive
+    :raises ValueError: If ``spacing_m``, ``speed_of_sound`` or ``frequency`` are not positive
         and finite, or if ``residual_index`` is not finite.
     """
     index = np.asarray(residual_index, dtype=np.float64)
@@ -684,7 +684,7 @@ def phase_mismatch_from_residual_index(
         msg = "'residual_index' must be finite."
         raise ValueError(msg)
     kd_deg = _plane_wave_phase_deg(
-        np.asarray(frequency, dtype=np.float64), spacing, speed_of_sound
+        np.asarray(frequency, dtype=np.float64), spacing_m, speed_of_sound
     )
     return np.asarray(kd_deg * 10.0 ** (-index / 10.0), dtype=np.float64)
 
@@ -692,7 +692,7 @@ def phase_mismatch_from_residual_index(
 def residual_index_from_phase_mismatch(
     phase_mismatch: float | list[float] | np.ndarray,
     frequency: float | list[float] | np.ndarray,
-    spacing: float,
+    spacing_m: float,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray:
     r"""Pressure-residual intensity index of a given channel phase mismatch.
@@ -717,18 +717,18 @@ def residual_index_from_phase_mismatch(
     :param phase_mismatch: :math:`\phi_s` in degrees (scalar or array, > 0).
     :param frequency: Frequency in Hz (scalar or array, broadcast against
         ``phase_mismatch``).
-    :param spacing: Microphone separation in metres.
+    :param spacing_m: Microphone separation in metres.
     :param speed_of_sound: Speed of sound in m/s (default 343.0).
     :return: ``delta_pI0`` in decibels, as a :class:`numpy.ndarray` (0-d for
         scalar inputs).
     :raises ValueError: If ``phase_mismatch`` is not positive and finite, or
-        if ``spacing``, ``speed_of_sound`` or ``frequency`` are not positive and finite.
+        if ``spacing_m``, ``speed_of_sound`` or ``frequency`` are not positive and finite.
     """
     phi = np.asarray(phase_mismatch, dtype=np.float64)
     if np.any(~np.isfinite(phi)) or np.any(phi <= 0.0):
         msg = "'phase_mismatch' must be finite and positive, in degrees."
         raise ValueError(msg)
     kd_deg = _plane_wave_phase_deg(
-        np.asarray(frequency, dtype=np.float64), spacing, speed_of_sound
+        np.asarray(frequency, dtype=np.float64), spacing_m, speed_of_sound
     )
     return np.asarray(10.0 * np.log10(kd_deg / phi), dtype=np.float64)

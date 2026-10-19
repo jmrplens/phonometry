@@ -504,9 +504,11 @@ def _chk_doc32_retarded_time() -> Outcome:
         t,
         pos,
         (0.0, 0.0),
-        ground=ph.aircraft.RotorcraftGround(receiver_height=1.2, flow_resistivity="H"),
+        ground=ph.aircraft.RotorcraftGround(
+            receiver_height_m=1.2, flow_resistivity="H"
+        ),
     )
-    k = int(np.argmin(res.distances))
+    k = int(np.argmin(res.distances_m))
     return numeric(
         0.288934, float(res.times[k] - res.emission_times[k]), 1e-5, unit="s", places=6
     )
@@ -534,7 +536,9 @@ def _chk_doc32_event_sel() -> Outcome:
         t,
         pos,
         (0.0, 0.0),
-        ground=ph.aircraft.RotorcraftGround(receiver_height=0.1, flow_resistivity="H"),
+        ground=ph.aircraft.RotorcraftGround(
+            receiver_height_m=0.1, flow_resistivity="H"
+        ),
     )
     return numeric(7.982, res.sel - res.la_max, 0.1, unit="dB", places=3)
 
@@ -568,7 +572,9 @@ def _chk_doc32_mean_sigma() -> Outcome:
     "Pure diffraction with the edge on the line of sight, 10·lg 3, dB",
 )
 def _chk_doc32_diffraction_grazing() -> Outcome:
-    got = float(ph.aircraft.diffraction_attenuation([1000.0], 0.0, edge_height=10.0)[0])
+    got = float(
+        ph.aircraft.diffraction_attenuation([1000.0], 0.0, edge_height_m=10.0)[0]
+    )
     return numeric(4.7712, got, 1e-4, unit="dB", places=4)
 
 
@@ -1076,7 +1082,7 @@ def _appendix_d_revised(absorption: str) -> tuple[np.ndarray, np.ndarray]:
             operation=operation,
             power_parameter="CNT (lb)",
             powers=np.array([r[1] for r in rows]),
-            distances=distances,
+            distances_m=distances,
             levels=np.array([r[2] for r in rows]),
         )
         revised.append(

@@ -2159,7 +2159,7 @@ def plot_plenum_flanking(
         ylabel=_R_INDEX_LABEL,
         title=(
             f"{_t('Suspended-ceiling plenum path', language)} "
-            f"($h$ = {format_number(result.plenum_height, language, decimals=2)} m, "
+            f"($h$ = {format_number(result.plenum_height_m, language, decimals=2)} m, "
             f"$L_\\mathrm{{R}}$ = {format_number(result.ceiling_length, language, decimals=2)} m, "
             f"$\\varepsilon$ = {result.epsilon:.0f})"
         ),

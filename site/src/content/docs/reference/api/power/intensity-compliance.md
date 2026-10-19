@@ -107,7 +107,7 @@ IntensityInstrumentComplianceResult(
     frequencies: np.ndarray,
     residual_index: np.ndarray,
     device: str,
-    spacing: float,
+    spacing_m: float,
 )
 ```
 
@@ -127,7 +127,7 @@ index does not reach.
 | `frequencies` | Nominal band centre frequencies, in Hz. |
 | `residual_index` | Measured `delta_pI0` per band, in dB. |
 | `device` | `"probe"`, `"processor"` or `"instrument"`. |
-| `spacing` | Microphone separation the verdict applies to, in metres. |
+| `spacing_m` | Microphone separation the verdict applies to, in metres. |
 
 ### IntensityInstrumentComplianceResult.bands
 
@@ -182,7 +182,7 @@ Nominal centre frequencies of the bands that miss a class, in Hz.
 
 *property*
 
-Class 1 minimum `delta_pI0` per band, in dB, rescaled to `spacing`.
+Class 1 minimum `delta_pI0` per band, in dB, rescaled to `spacing_m`.
 
 **Returns:** Table 2 for `device`, plus `spacing_offset_db`.
 
@@ -190,7 +190,7 @@ Class 1 minimum `delta_pI0` per band, in dB, rescaled to `spacing`.
 
 *property*
 
-Class 2 minimum `delta_pI0` per band, in dB, rescaled to `spacing`.
+Class 2 minimum `delta_pI0` per band, in dB, rescaled to `spacing_m`.
 
 **Returns:** Table 2 for `device`, plus `spacing_offset_db`.
 
@@ -325,7 +325,7 @@ The Table 2 Note 1 term $10 \log_{10}(x/25)$, in dB.
 phase_mismatch_from_residual_index(
     residual_index: float | list[float] | np.ndarray,
     frequency: float | list[float] | np.ndarray,
-    spacing: float,
+    spacing_m: float,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray
 ```
@@ -352,7 +352,7 @@ angular unit $k d$ is expressed in; degrees are used here.
 | :--- | :--- |
 | `residual_index` | `delta_pI0` in decibels (scalar or array). |
 | `frequency` | Frequency in Hz (scalar or array, broadcast against `residual_index`). |
-| `spacing` | Microphone separation in metres. |
+| `spacing_m` | Microphone separation in metres. |
 | `speed_of_sound` | Speed of sound in m/s (default 343.0). |
 
 **Returns:** The equivalent phase mismatch in degrees, as a `numpy.ndarray` (0-d for scalar inputs).
@@ -361,7 +361,7 @@ angular unit $k d$ is expressed in; degrees are used here.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `spacing`, `speed_of_sound` or `frequency` are not positive and finite, or if `residual_index` is not finite. |
+| ValueError | If `spacing_m`, `speed_of_sound` or `frequency` are not positive and finite, or if `residual_index` is not finite. |
 
 ## residual_index_from_phase_mismatch
 
@@ -369,7 +369,7 @@ angular unit $k d$ is expressed in; degrees are used here.
 residual_index_from_phase_mismatch(
     phase_mismatch: float | list[float] | np.ndarray,
     frequency: float | list[float] | np.ndarray,
-    spacing: float,
+    spacing_m: float,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray
 ```
@@ -398,7 +398,7 @@ table requires.
 | :--- | :--- |
 | `phase_mismatch` | $\phi_s$ in degrees (scalar or array, > 0). |
 | `frequency` | Frequency in Hz (scalar or array, broadcast against `phase_mismatch`). |
-| `spacing` | Microphone separation in metres. |
+| `spacing_m` | Microphone separation in metres. |
 | `speed_of_sound` | Speed of sound in m/s (default 343.0). |
 
 **Returns:** `delta_pI0` in decibels, as a `numpy.ndarray` (0-d for scalar inputs).
@@ -407,7 +407,7 @@ table requires.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `phase_mismatch` is not positive and finite, or if `spacing`, `speed_of_sound` or `frequency` are not positive and finite. |
+| ValueError | If `phase_mismatch` is not positive and finite, or if `spacing_m`, `speed_of_sound` or `frequency` are not positive and finite. |
 
 ## residual_index_limits
 
@@ -415,7 +415,7 @@ table requires.
 residual_index_limits(
     device: str = 'instrument',
     *,
-    spacing: float = 0.025,
+    spacing_m: float = 0.025,
     frequencies: list[float] | np.ndarray | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]
 ```
@@ -433,7 +433,7 @@ for a spacing in metres).
 | Name | Description |
 | :--- | :--- |
 | `device` | `"probe"`, `"processor"` or `"instrument"` (the three column groups of Table 2). |
-| `spacing` | Microphone separation in metres (default 0.025, the nominal separation the table is printed for). |
+| `spacing_m` | Microphone separation in metres (default 0.025, the nominal separation the table is printed for). |
 | `frequencies` | Band centre frequencies in Hz to report the limits at, as nominal labels or the exact base-ten centres behind them. `None` (default) returns all 22 tabulated one-third-octave bands. |
 
 **Returns:** Tuple `(frequencies, class1, class2)` of the nominal band centres in Hz and the two minimum `delta_pI0` requirements in dB.
@@ -442,7 +442,7 @@ for a spacing in metres).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `device` is unknown, `spacing` is not positive or a frequency is not a tabulated band. |
+| ValueError | If `device` is unknown, `spacing_m` is not positive or a frequency is not a tabulated band. |
 
 ## verify_intensity_class
 
@@ -452,7 +452,7 @@ verify_intensity_class(
     frequencies: list[float] | np.ndarray,
     *,
     device: str = 'instrument',
-    spacing: float = 0.025,
+    spacing_m: float = 0.025,
 ) -> IntensityInstrumentComplianceResult
 ```
 
@@ -487,7 +487,7 @@ intervals across the whole 50 Hz to 6.3 kHz range.
 | `residual_index` | Measured `delta_pI0` per band, in decibels. |
 | `frequencies` | Band centre frequencies in Hz, one per entry of `residual_index`, as nominal Table 2 labels or the exact base-ten centres behind them. |
 | `device` | `"probe"`, `"processor"` or `"instrument"`. |
-| `spacing` | Microphone separation in metres (default 0.025). |
+| `spacing_m` | Microphone separation in metres (default 0.025). |
 
 **Returns:** An [`IntensityInstrumentComplianceResult`](/phonometry/reference/api/power/intensity-compliance/#intensityinstrumentcomplianceresult), which carries the verdict together with the measured spectrum and the two rescaled Table 2 masks, so it exposes `.plot()` and an accredited `.report()` fiche.
 
@@ -495,4 +495,4 @@ intervals across the whole 50 Hz to 6.3 kHz range.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the inputs disagree in length, a frequency is not a tabulated band, a band is repeated, or `device`/`spacing` are invalid. |
+| ValueError | If the inputs disagree in length, a frequency is not a tabulated band, a band is repeated, or `device`/`spacing_m` are invalid. |

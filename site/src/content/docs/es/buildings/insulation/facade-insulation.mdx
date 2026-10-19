@@ -547,7 +547,7 @@ print(round(seg.l_w[0], 1), round(seg.l_w[1], 1))     # 59.8 61.2  (LW a 63/125 
 # LWA = 62.9 dB(A) sobre el lado completo de 10 x 60 m; la Tabla G.9 lee
 # después el nivel a 5 m delante de su centro. (`seg.l_w_dba` vale 58.2 dB(A):
 # un segmento de ese lado, no el lado.)
-a_tot = building.outdoor_attenuation(width=60.0, height=10.0, distance=5.0)
+a_tot = building.outdoor_attenuation(width=60.0, height_m=10.0, distance=5.0)
 print(round(a_tot, 1), round(building.outdoor_level(62.9, a_tot), 1))   # 26.3 36.6
 
 seg.plot()   # LW radiada por octava con la línea de LWA ponderada A (requiere matplotlib)

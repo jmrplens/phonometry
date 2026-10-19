@@ -435,8 +435,8 @@ HeavyImpactSourceSpec(
     frequencies: tuple[float, ...],
     force_exposure_level: tuple[float, ...],
     tolerance: tuple[float, ...],
-    drop_height: float,
-    drop_height_tolerance: float,
+    drop_height_m: float,
+    drop_height_tolerance_m: float,
     effective_mass: float,
     effective_mass_tolerance: float,
     restitution: float,
@@ -467,8 +467,8 @@ spectrum by other means still conforms.
 | `frequencies` | Octave-band centre frequencies, in Hz. |
 | `force_exposure_level` | Nominal `LFE` per band, in dB re 1 N. |
 | `tolerance` | Tolerance on `LFE` per band, in dB. |
-| `drop_height` | Free-fall drop height, in m. |
-| `drop_height_tolerance` | Tolerance on the drop height, in m. |
+| `drop_height_m` | Free-fall drop height, in m. |
+| `drop_height_tolerance_m` | Tolerance on the drop height, in m. |
 | `effective_mass` | Effective (equivalent) mass of the source, in kg. |
 | `effective_mass_tolerance` | Tolerance on the effective mass, in kg. |
 | `restitution` | Coefficient of restitution. |

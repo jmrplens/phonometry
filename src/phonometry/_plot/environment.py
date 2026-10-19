@@ -781,7 +781,7 @@ def plot_sound_speed_profile(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    z = np.asarray(profile.heights, dtype=np.float64)
+    z = np.asarray(profile.heights_m, dtype=np.float64)
     c = np.asarray(profile.speeds_of_sound, dtype=np.float64)
     label = profile.description or r"$c_\mathrm{eff}(z)$"
     ax.plot(c, z, **styled(kwargs, color=_C_PRIMARY, lw=1.4, label=label))
@@ -814,12 +814,12 @@ def plot_atmospheric_rays(
 
     ax = ax if ax is not None else _new_axes()
     r = np.asarray(result.ranges, dtype=np.float64)
-    z = np.asarray(result.heights, dtype=np.float64)
+    z = np.asarray(result.heights_m, dtype=np.float64)
     for i in range(r.shape[0]):
         ax.plot(r[i], z[i], **styled(kwargs, color=_C_PRIMARY, lw=0.7, alpha=0.7))
     ax.plot(
         [0.0],
-        [result.source_height],
+        [result.source_height_m],
         "o",
         color=_C_REFERENCE,
         label=_t("Source", language),
@@ -862,7 +862,7 @@ def plot_atmospheric_pe(
 
     ax = ax if ax is not None else _new_axes()
     r = np.asarray(result.ranges, dtype=np.float64)
-    z = np.asarray(result.heights, dtype=np.float64)
+    z = np.asarray(result.heights_m, dtype=np.float64)
     dl = np.asarray(result.relative_level, dtype=np.float64)
     finite = dl[np.isfinite(dl)]
     vmax = float(np.percentile(finite, 99)) if finite.size else 6.0
@@ -885,7 +885,7 @@ def plot_atmospheric_pe(
     localize_axes(cbar.ax, language)
     ax.plot(
         [0.0],
-        [result.source_height],
+        [result.source_height_m],
         "o",
         color="k",
         ms=4.0,

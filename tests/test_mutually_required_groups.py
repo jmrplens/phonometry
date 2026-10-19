@@ -126,7 +126,7 @@ def test_plenum_attenuations_travel_together() -> None:
         match=r"'attenuation_source' and 'attenuation_receiving' must be given together",
     ):
         plenum_flanking_reduction_index(  # type: ignore[call-overload]
-            r, r, ceiling_length=3.0, plenum_height=1.0, attenuation_source=r
+            r, r, ceiling_length=3.0, plenum_height_m=1.0, attenuation_source=r
         )
 
 

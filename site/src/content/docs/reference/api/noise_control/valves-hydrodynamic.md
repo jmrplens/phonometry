@@ -803,7 +803,7 @@ metres, so divide by 1 000 before passing it on.
 ```python
 LiquidPipe(
     internal_diameter_m: float,
-    wall_thickness: float,
+    wall_thickness_m: float,
     density: float,
     speed_of_sound: float = 5000.0,
     air_density: float = 1.293,
@@ -818,7 +818,7 @@ The pipe the noise comes out of, and the air around it.
 | Name | Description |
 | :--- | :--- |
 | `internal_diameter_m` | $D_i$, in m. |
-| `wall_thickness` | $t_p$, in m. |
+| `wall_thickness_m` | $t_p$, in m. |
 | `density` | $\rho_p$ of the pipe material, in kg/m³. |
 | `speed_of_sound` | $c_p$ in the pipe wall, in m/s. |
 | `air_density` | $\rho_o$ outside the pipe, in kg/m³. |
@@ -1005,7 +1005,7 @@ REFERENCE_INLET_PRESSURE_PA = 600000.0
 ```python
 reference_transmission_loss(
     internal_diameter_m: float,
-    wall_thickness: float,
+    wall_thickness_m: float,
     *,
     pipe_density: float,
     pipe_sound_speed: float = 5000.0,
@@ -1032,7 +1032,7 @@ out at −44,7 dB.
 | Name | Description |
 | :--- | :--- |
 | `internal_diameter_m` | $D_i$, in m. |
-| `wall_thickness` | $t_p$, in m. |
+| `wall_thickness_m` | $t_p$, in m. |
 | `pipe_density` | $\rho_p$, 7 800 kg/m³ for steel. |
 | `pipe_sound_speed` | $c_p$, 5 000 m/s for steel, in m/s. |
 | `air_density` | $\rho_o$ outside the pipe, in kg/m³. |

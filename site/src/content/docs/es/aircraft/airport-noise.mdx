@@ -86,8 +86,8 @@ levels = [[98.5, 92.0, 88.2, 83.6, 76.8, 69.4, 63.9, 56.8],
 fig, ax = plt.subplots()
 for p in (20000.0, 12000.0):
     curve = aircraft.npd_curve(powers, distances, levels, power=p)
-    line, = ax.semilogx(curve.distances, curve.levels, label=f"P = {p:.0f} N")
-    ax.semilogx(curve.table_distances, curve.table_levels, "o", markersize=4,
+    line, = ax.semilogx(curve.distances_m, curve.levels, label=f"P = {p:.0f} N")
+    ax.semilogx(curve.table_distances_m, curve.table_levels, "o", markersize=4,
                 color=line.get_color())
 ax.set(xlabel="Distancia oblicua [m]", ylabel="Nivel de evento [dB]",
        title="Curvas nivel-potencia-distancia (ECAC Doc 29)")

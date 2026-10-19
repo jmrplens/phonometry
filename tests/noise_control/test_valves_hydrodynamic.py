@@ -46,7 +46,7 @@ VALVE: dict[str, Any] = {
 }
 PIPE: dict[str, Any] = {
     "internal_diameter_m": 0.1071,
-    "wall_thickness": 0.0036,
+    "wall_thickness_m": 0.0036,
     "density": 7800.0,
 }
 
@@ -736,7 +736,7 @@ class TestWholeChain:
         thick = hydro.valve_hydrodynamic_noise(
             hydro.LiquidStream(**LIQUID, mass_flow=30.0, outlet_pressure_pa=8.0e5),
             _valve(INCIPIENT),
-            hydro.LiquidPipe(**{**PIPE, "wall_thickness": 0.010}),
+            hydro.LiquidPipe(**{**PIPE, "wall_thickness_m": 0.010}),
         )
         assert thick.external_level < _run(1).external_level
 

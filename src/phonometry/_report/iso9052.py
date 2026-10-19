@@ -72,7 +72,7 @@ def _metadata_pairs(
     Only fields that are set are returned. The applicable fields are the generic
     identity fields plus the total mass per unit area ``m't`` used during the
     test (``mass_per_area``, kg/m2), the loaded specimen thickness ``d``
-    (``thickness``, stored in metres and printed in millimetres, Clause 9 b))
+    (``thickness_m``, stored in metres and printed in millimetres, Clause 9 b))
     and the environmental conditions (Clause 9 d)). The frequency-range/room
     fields of the other fiches do not apply here.
     """
@@ -88,8 +88,8 @@ def _metadata_pairs(
         ),
         (
             t("Thickness under load d [mm]", language),
-            fmt_meta(metadata.thickness * 1e3, language)
-            if metadata.thickness is not None
+            fmt_meta(metadata.thickness_m * 1e3, language)
+            if metadata.thickness_m is not None
             else None,
         ),
     ]

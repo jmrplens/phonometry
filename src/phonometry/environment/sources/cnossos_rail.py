@@ -2375,7 +2375,7 @@ class RailwayEmissionResult(OwnsArrays):
 
     :ivar third_octave_frequencies: The 24 1/3-octave midband frequencies, Hz.
     :ivar frequencies: The eight octave midband frequencies, Hz.
-    :ivar heights: Heights of the two equivalent source lines, in m.
+    :ivar heights_m: Heights of the two equivalent source lines, in m.
     :ivar third_octave_line_power: ``L'_W,eq,line,i(psi,phi)`` per source height
         and 1/3-octave band, in dB re 1 pW per metre.
     :ivar line_power: The same, energy-summed into octave bands.
@@ -2388,7 +2388,7 @@ class RailwayEmissionResult(OwnsArrays):
 
     third_octave_frequencies: NDArray[np.float64]
     frequencies: NDArray[np.float64]
-    heights: tuple[float, float]
+    heights_m: tuple[float, float]
     third_octave_line_power: NDArray[np.float64]
     line_power: NDArray[np.float64]
     total_line_power: NDArray[np.float64]
@@ -2418,7 +2418,7 @@ class RailwayEmissionResult(OwnsArrays):
             self,
             third_octave_frequencies=1,
             frequencies=1,
-            heights=1,
+            heights_m=1,
             third_octave_line_power=2,
             line_power=2,
             total_line_power=1,
@@ -2432,14 +2432,14 @@ class RailwayEmissionResult(OwnsArrays):
         )
         require_same_length(
             self,
-            "heights",
+            "heights_m",
             "line_power",
             "third_octave_line_power",
             axis=_SOURCE_HEIGHT_AXIS,
         )
         owner = type(self).__name__
         heights = require_axis_count(
-            self.heights, owner, "heights", _SOURCE_HEIGHT_AXIS, rank=None
+            self.heights_m, owner, "heights_m", _SOURCE_HEIGHT_AXIS, rank=None
         )
         bands = require_axis_count(
             self.third_octave_frequencies,
@@ -2453,7 +2453,7 @@ class RailwayEmissionResult(OwnsArrays):
             require_equal_counts(
                 owner,
                 {
-                    "heights": heights,
+                    "heights_m": heights,
                     label: require_axis_count(
                         pair, owner, label, _SOURCE_HEIGHT_AXIS, rank=None
                     ),
@@ -2745,7 +2745,7 @@ def railway_source_power(
             RAILWAY_THIRD_OCTAVE_BANDS_HZ, dtype=np.float64
         ),
         frequencies=np.asarray(RAILWAY_OCTAVE_BANDS_HZ, dtype=np.float64),
-        heights=RAILWAY_SOURCE_HEIGHTS_M,
+        heights_m=RAILWAY_SOURCE_HEIGHTS_M,
         third_octave_line_power=third,
         line_power=octaves,
         total_line_power=_energy_sum(*octaves),

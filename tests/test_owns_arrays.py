@@ -497,10 +497,10 @@ def _atmospheric_pe() -> object:
     return environment.atmospheric_parabolic_equation(
         500.0,
         environment.linear_sound_speed_profile(0.1),
-        source_height=2.0,
+        source_height_m=2.0,
         flow_resistivity=50e3,
         max_range=1000.0,
-        max_height=50.0,
+        max_height_m=50.0,
     )
 
 
@@ -648,10 +648,10 @@ def _built_by_hand() -> dict[str, tuple[Callable[[np.ndarray], object], str]]:
                 operation="D",
                 power_parameter="lbf",
                 powers=np.array([1.0, 2.0]),
-                distances=a,
+                distances_m=a,
                 levels=np.zeros((2, 3)),
             ),
-            "distances",
+            "distances_m",
         ),
         "EPNLResult": (
             lambda a: aircraft.EPNLResult(

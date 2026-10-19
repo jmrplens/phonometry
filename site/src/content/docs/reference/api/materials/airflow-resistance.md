@@ -89,12 +89,12 @@ specimen (Pa) and `volume_flow_rate` is the volumetric airflow rate
 ## airflow_resistivity
 
 ```python
-airflow_resistivity(specific_resistance: float, thickness: float) -> float
+airflow_resistivity(specific_resistance: float, thickness_m: float) -> float
 ```
 
 Airflow resistivity $\sigma = R_\mathrm{s} / d$ (ISO 9053-1:2018, 3.3).
 
-`specific_resistance` is `R_s` (Pa\*s/m) and `thickness` is `d` (m),
+`specific_resistance` is `R_s` (Pa\*s/m) and `thickness_m` is `d` (m),
 the specimen thickness in the flow direction. Returns `sigma` in Pa\*s/m2.
 
 ## AirflowResistanceWarning
@@ -248,8 +248,8 @@ static_airflow_resistance(
     velocities: ArrayLike,
     pressure_drops_pa: ArrayLike,
     area: float,
-    thickness: float | None = None,
     *,
+    thickness_m: float | None = None,
     evaluation_velocity: float = 0.0005,
 ) -> StaticAirflowResult
 ```
@@ -264,7 +264,7 @@ $\Delta p = a u + b u^2$, and evaluates the resistances at
 `velocities` are the linear airflow velocities `u` (m/s) and
 `pressure_drops_pa` the matching pressure differences $\Delta p$ (Pa)
 of at least two measurement steps; `area` is the cross-section `A` (m2)
-and `thickness` the specimen thickness `d` (m, optional, enabling
+and `thickness_m` the specimen thickness `d` (m, optional, enabling
 `sigma`).
 
 Because $R_\mathrm{s} = \Delta p / u = a + b u$, the returned
@@ -355,7 +355,7 @@ place (mm/s).
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `thickness` (the specimen thickness `d`, in metres, shown in millimetres), `test_room`, `test_date`, `temperature_c`, `relative_humidity_percent`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (ISO 9053-1 has no verdict). |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `thickness_m` (the specimen thickness `d`, in metres, shown in millimetres), `test_room`, `test_date`, `temperature_c`, `relative_humidity_percent`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (ISO 9053-1 has no verdict). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform `.report()` signature; the airflow-resistance fiche has a single body layout, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English, decimal point) or `"es"` (Spanish, decimal comma). |

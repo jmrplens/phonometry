@@ -85,8 +85,8 @@ def test_power_extrapolation() -> None:
 def test_npd_curve_result_and_plot() -> None:
     res = npd_curve(_P, _D, _L, 1500.0)
     assert isinstance(res, NpdLevelResult)
-    assert res.distances.shape == res.levels.shape
-    assert res.table_distances.shape == res.table_levels.shape
+    assert res.distances_m.shape == res.levels.shape
+    assert res.table_distances_m.shape == res.table_levels.shape
     # tabulated levels at P=1500 are the row means
     assert np.allclose(res.table_levels, [105.0, 99.0, 93.0, 87.0])
     assert res.plot() is not None
@@ -116,7 +116,7 @@ def test_invalid_table_rejected() -> None:
         npd_level(_P, _D, [[100.0, 94.0]], 1000.0, 200.0)  # wrong levels shape
     with pytest.raises(ValueError, match=r"'powers' must be strictly increasing"):
         npd_level([2000.0, 1000.0], _D, _L[::-1], 1500.0, 200.0)
-    with pytest.raises(ValueError, match=r"'distance' must be finite and strictly"):
+    with pytest.raises(ValueError, match=r"'distance_m' must be finite and strictly"):
         npd_level(_P, _D, _L, 1000.0, -100.0)
 
 

@@ -73,7 +73,7 @@ _MIN_WELLS = 2
 class MetadiffuserWell(RichDisplay):
     r"""One slit of a metadiffuser panel.
 
-    ``slit_height`` is the slit opening ``h_n`` along the panel face and
+    ``slit_height_m`` is the slit opening ``h_n`` along the panel face and
     ``resonators`` the Helmholtz resonators loading the slit, ordered from
     the panel face towards the rigid backing; the resonator lattice step is
     :math:`a = L / M` for a panel of depth ``L`` and ``M`` resonators. All
@@ -82,12 +82,12 @@ class MetadiffuserWell(RichDisplay):
     ternary-sequence designs.
     """
 
-    slit_height: float
+    slit_height_m: float
     resonators: tuple[HelmholtzResonator, ...]
 
     def __post_init__(self) -> None:
-        """Reject a non-positive ``slit_height`` and a well with no resonators."""
-        require_positive(self.slit_height, "slit_height")
+        """Reject a non-positive ``slit_height_m`` and a well with no resonators."""
+        require_positive(self.slit_height_m, "slit_height_m")
         if not self.resonators:
             msg = "'resonators' must contain at least one resonator."
             raise ValueError(msg)
@@ -167,8 +167,8 @@ def _check_panel(
                 f"got {type(well).__name__}."
             )
             raise TypeError(msg)
-        if well.slit_height >= period_m:
-            msg = f"wells[{i}].slit_height must be smaller than the period."
+        if well.slit_height_m >= period_m:
+            msg = f"wells[{i}].slit_height_m must be smaller than the period."
             raise ValueError(msg)
     return cells
 
@@ -222,7 +222,7 @@ def metadiffuser_reflection(
         prediction = slit_helmholtz_absorber(
             f,
             well.resonators,
-            slit_height=well.slit_height,
+            slit_height_m=well.slit_height_m,
             lattice_step=depth / len(well.resonators),
             period_m=period_m,
             angle_rad=angle_rad,

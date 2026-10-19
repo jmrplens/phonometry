@@ -591,7 +591,7 @@ def plot_weighted_rating(
             rf"($C$={format_number(result.c, language, decimals=0)}; "
             rf"$C_\mathrm{{tr}}$={format_number(result.ctr, language, decimals=0)}) = "
             rf"{result.rating} dB  ({_t(r'$\Sigma$ unfav.', language)} = "
-            rf"{format_number(result.unfavourable_sum, language, decimals=1)} dB)"
+            rf"{format_number(result.unfavorable_sum, language, decimals=1)} dB)"
         ),
         ylabel=_t(_REDUCTION_INDEX_LABEL, language),
         ax=ax,
@@ -640,7 +640,7 @@ def plot_impact_rating(
             rf"ISO 717-2 {_t('impact rating', language)} "
             rf"($C_\mathrm{{I}}$={format_number(result.ci, language, decimals=0)}) = "
             rf"{result.rating} dB  ({_t(r'$\Sigma$ unfav.', language)} = "
-            rf"{format_number(result.unfavourable_sum, language, decimals=1)} dB)"
+            rf"{format_number(result.unfavorable_sum, language, decimals=1)} dB)"
         ),
         ylabel=_t(_IMPACT_LEVEL_LABEL, language),
         ax=ax,

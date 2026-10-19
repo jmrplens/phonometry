@@ -301,7 +301,7 @@ def test_air_attenuation_draws_its_three_parts_and_the_total(ax: Axes) -> None:
 def test_acoustic_centre_draws_the_corrected_readings_and_the_centre(ax: Axes) -> None:
     distances = np.array([0.15, 0.2, 0.3, 0.4])
     alpha = 0.05
-    centre = metrology.acoustic_centre(
+    centre = metrology.acoustic_center(
         distances,
         np.exp(-alpha * distances) / (distances - 0.008),
         attenuation_np_per_m=alpha,

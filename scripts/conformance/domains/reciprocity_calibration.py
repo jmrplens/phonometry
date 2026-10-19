@@ -757,10 +757,10 @@ def _chk_step_1() -> Outcome:
     the latter the mole fraction is that of Annex F.
     """
     attenuation = metrology.reciprocity_air_attenuation([1000.0], **_CONDITIONS)
-    expected = float(_air().composition["water_vapour_mole_fraction"])
+    expected = float(_air().composition["water_vapor_mole_fraction"])
     return numeric(
         expected,
-        attenuation.water_vapour_mole_fraction,
+        attenuation.water_vapor_mole_fraction,
         1e-12,
         rel=True,
         places=8,
@@ -827,7 +827,7 @@ def _chk_formula_8_free_field() -> Outcome:
         _FF,
         _free_field_electrical(true),
         diaphragm_distances_m=_DISTANCES,
-        acoustic_centres_m=_CENTRES,
+        acoustic_centers_m=_CENTRES,
         dispersion=False,
         **_CONDITIONS,
     )
@@ -855,7 +855,7 @@ def _chk_formula_9_free_field() -> Outcome:
         _free_field_electrical(true)[0],
         true[0] / true[1],
         diaphragm_distance_m=_DISTANCES[0],
-        acoustic_centres_m=_CENTRES[:2],
+        acoustic_centers_m=_CENTRES[:2],
         dispersion=False,
         **_CONDITIONS,
     )
@@ -882,7 +882,7 @@ def _chk_acoustic_centre() -> Outcome:
     distances = np.array([0.15, 0.2, 0.3, 0.4, 0.5])
     alpha = 0.05
     pressures = np.exp(-alpha * distances) / (distances - 0.004)
-    centre = metrology.acoustic_centre(distances, pressures, attenuation_np_per_m=alpha)
+    centre = metrology.acoustic_center(distances, pressures, attenuation_np_per_m=alpha)
     return numeric(4.0, 1000.0 * centre.position_m, 1e-9, unit="mm", places=6)
 
 

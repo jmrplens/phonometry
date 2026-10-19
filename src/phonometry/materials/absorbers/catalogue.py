@@ -149,9 +149,9 @@ class PorousMaterial(CatalogueRow):
         micrometres. Metres at the model's ``thermal_length_m``, as above.
     :ivar thermal_permeability_m2: Static thermal permeability ``q'_0``, in
         m2, which two of the tables print beside the thermal length.
-    :ivar fibre_diameter_um: Fibre diameter ``d``, in micrometres, for the
+    :ivar fiber_diameter_um: Fibre diameter ``d``, in micrometres, for the
         materials a table describes by the fibre rather than by the pore.
-    :ivar fibre_diameter_distribution_parameter: The parameter of the Poisson
+    :ivar fiber_diameter_distribution_parameter: The parameter of the Poisson
         distribution Mechel fits to a measured spread of fibre diameters,
         referred to a diameter class one micrometre wide. Dimensionless: the
         micrometre in the column heading belongs to the class width, which is
@@ -183,8 +183,8 @@ class PorousMaterial(CatalogueRow):
     viscous_length_um: float | None = None
     thermal_length_um: float | None = None
     thermal_permeability_m2: float | None = None
-    fibre_diameter_um: float | None = None
-    fibre_diameter_distribution_parameter: float | None = None
+    fiber_diameter_um: float | None = None
+    fiber_diameter_distribution_parameter: float | None = None
     shot_content_percent: float | None = None
     binder_content_percent: float | None = None
     frame_density_kg_m3: float | None = None

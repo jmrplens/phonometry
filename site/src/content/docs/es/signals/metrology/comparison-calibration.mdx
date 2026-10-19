@@ -998,7 +998,7 @@ El soporte coincide con el acoplador en todas las frecuencias que comparten
 salvo 6,3 kHz, donde difieren en 0,247 dB frente a 0,128 dB, y por encima de
 10 kHz no queda validado en absoluto, porque el acoplador no llega: otra
 disposición tiene que validarlo ahí, como permite el 6.7.
-`check.normalised_difference` es la diferencia en unidades de su
+`check.normalized_difference` es la diferencia en unidades de su
 incertidumbre expandida, -1,93 a 6,3 kHz.
 
 ### Calibraciones que comparten una referencia
@@ -1030,7 +1030,7 @@ $$
 ```python
 shared = metrology.verify_jig_or_coupler(jig, coupler, shared_standard_uncertainty_db=0.025)
 print(shared.passes, shared.failing_frequencies_hz.round())                                # False [6310.]
-print(shared.expanded_uncertainty_db[8].round(3), shared.normalised_difference[8].round(2))   # 0.106 -2.32
+print(shared.expanded_uncertainty_db[8].round(3), shared.normalized_difference[8].round(2))   # 0.106 -2.32
 print(shared.correlation_coefficient[8].round(2))                                           # 0.31
 ```
 

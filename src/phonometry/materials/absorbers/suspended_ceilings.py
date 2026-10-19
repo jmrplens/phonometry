@@ -218,7 +218,7 @@ class CeilingSpecimenCheck(RichDisplay):
     :ivar support_width_mm: One side of the cross-section of the support
         units, in millimetres.
     :ivar support_height_mm: The other side, in millimetres.
-    :ivar support_centre_distance_m: The centre distance between support
+    :ivar support_center_distance_m: The centre distance between support
         units, in metres, or ``None``.
     :ivar lowest_relative_humidity_percent: The driest of the measurements,
         in percent, or ``None`` when no humidity was given.
@@ -233,7 +233,7 @@ class CeilingSpecimenCheck(RichDisplay):
     fixture_density_kg_m2: float
     support_width_mm: float
     support_height_mm: float
-    support_centre_distance_m: float | None
+    support_center_distance_m: float | None
     lowest_relative_humidity_percent: float | None
 
     @property
@@ -271,7 +271,7 @@ class CeilingSpecimenCheck(RichDisplay):
     @property
     def support_spacing_ok(self) -> bool:
         """Whether the support units stand at least 1,2 m apart, when the distance was given (4.1.1.2.3.6)."""
-        spacing = self.support_centre_distance_m
+        spacing = self.support_center_distance_m
         return spacing is None or spacing >= MIN_SUPPORT_SPACING_M
 
     @property
@@ -481,7 +481,7 @@ def _warn_about(*, check: CeilingSpecimenCheck) -> None:
         )
     if not check.support_spacing_ok:
         reasons.append(
-            f"the support units stand {check.support_centre_distance_m:g} m apart, "
+            f"the support units stand {check.support_center_distance_m:g} m apart, "
             f"closer than the {MIN_SUPPORT_SPACING_M:g} m of 4.1.1.2.3.6"
         )
     if check.humidity_ok is False:
@@ -516,7 +516,7 @@ def check_ceiling_specimen(
     fixture_density_kg_m2: float = MIN_FIXTURE_DENSITY_KG_M2,
     support_width_mm: float = 0.0,
     support_height_mm: float = 0.0,
-    support_centre_distance_m: float | None = None,
+    support_center_distance_m: float | None = None,
     relative_humidity_percent: ArrayLike | None = None,
 ) -> CeilingSpecimenCheck:
     """Does the test arrangement meet the printed limits of clause 4?
@@ -570,7 +570,7 @@ def check_ceiling_specimen(
     :param support_width_mm: One side of the cross-section of the support
         units, in millimetres; zero when the substructure has none.
     :param support_height_mm: The other side, in millimetres.
-    :param support_centre_distance_m: The centre distance between support
+    :param support_center_distance_m: The centre distance between support
         units, in metres, or ``None`` when there are none or it was not
         recorded.
     :param relative_humidity_percent: The relative humidity of the room in
@@ -604,8 +604,8 @@ def check_ceiling_specimen(
     support_height = require_non_negative(support_height_mm, "support_height_mm")
     spacing = (
         None
-        if support_centre_distance_m is None
-        else require_positive(support_centre_distance_m, "support_centre_distance_m")
+        if support_center_distance_m is None
+        else require_positive(support_center_distance_m, "support_center_distance_m")
     )
     check = CeilingSpecimenCheck(
         area=area,
@@ -617,7 +617,7 @@ def check_ceiling_specimen(
         fixture_density_kg_m2=fixture,
         support_width_mm=support_width,
         support_height_mm=support_height,
-        support_centre_distance_m=spacing,
+        support_center_distance_m=spacing,
         lowest_relative_humidity_percent=_lowest_humidity(relative_humidity_percent),
     )
     _warn_about(check=check)

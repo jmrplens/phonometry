@@ -90,11 +90,12 @@ def test_the_loaders_build_what_they_built_before_but_the_listed_cells() -> None
     derived texts of the nineteen Hopkins rows whose estimated Poisson ratio
     they rest on, the note of Cox Table 6.5's aerogel row, the credit of
     every row of Rossing's tables of B/A, now keyed by the row or the table,
-    the notes of the eight wetted sands of Cox Table 6.7, and the decay rate of
-    Harris's damping treatments, which spells its unit ``_db_per_s`` now,
-    wherever a row keys the cell by its field. Nothing else of any row moved;
-    the three catalogues renamed after their lookups are compared under the
-    names they carry now.
+    the notes of the eight wetted sands of Cox Table 6.7, the decay rate of
+    Harris's damping treatments, which spells its unit ``_db_per_s`` now, and
+    the fiber of the carpets and the fiber diameter of the porous materials,
+    spelled the American way, wherever a row keys the cell by its field.
+    Nothing else of any row moved; the three catalogues renamed after their
+    lookups are compared under the names they carry now.
     """
     fp = catalogue_fingerprint
     before = fp.catalogues_named_as_their_lookups(
@@ -128,6 +129,16 @@ def test_the_loaders_build_what_they_built_before_but_the_listed_cells() -> None
             for field, value in row.items()
             if isinstance(value, dict) and old_field in value
         }
+    for name, fields in fp.FIBER_FIELDS.items():
+        for key, row in before[name].items():
+            for old, new in fields:
+                if old in row:
+                    listed |= {(name, key, old), (name, key, new)}
+                listed |= {
+                    (name, key, field)
+                    for field, value in row.items()
+                    if isinstance(value, dict) and old in value
+                }
     assert moved == listed
     assert all(set(before[name]) == set(live[name]) for name in before)
 

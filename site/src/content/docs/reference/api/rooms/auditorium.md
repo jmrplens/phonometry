@@ -1139,7 +1139,7 @@ matplotlib (`pip install phonometry[plot]`); returns the
 ## source_directivity_limit
 
 ```python
-source_directivity_limit(centre: float) -> float
+source_directivity_limit(center: float) -> float
 ```
 
 The Table 1 limit for one octave band, in dB.
@@ -1148,7 +1148,7 @@ The Table 1 limit for one octave band, in dB.
 
 | Name | Description |
 | :--- | :--- |
-| `centre` | Nominal octave band centre frequency in Hz. |
+| `center` | Nominal octave band centre frequency in Hz. |
 
 **Returns:** The maximum deviation from omnidirectionality the table prints.
 

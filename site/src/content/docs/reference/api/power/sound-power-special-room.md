@@ -513,7 +513,7 @@ SpecialRoomReverberationCheck(
     reverberation_time: np.ndarray,
     reverberation_parameter: np.ndarray,
     nominal_reverberation_time_s: float,
-    centred: bool,
+    centered: bool,
     volume: float,
     method: str,
     climate_product_change: float = nan,
@@ -527,7 +527,7 @@ reverberation time, volume and climate (ISO 3743-2:2018, 6.2, 6.3, 6.6).
 `reverberation_time` is the measured $T$ per band and
 `reverberation_parameter` the $R$ of Formula (1) (or its NOTE);
 `nominal_reverberation_time_s` is $T_\mathrm{nom}$, supplied or,
-with `centred` `True`, found by centring the measured values within
+with `centered` `True`, found by centring the measured values within
 the limiting curves. `lower_limit` and `upper_limit` are the
 bounds on $T/(R\,T_\mathrm{nom})$, 0,9 and 1,1, or 0,8 and 1,2 above
 6,3 kHz, read from the bands: the standard's, not fields.

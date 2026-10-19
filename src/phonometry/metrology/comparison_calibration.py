@@ -2842,7 +2842,7 @@ class JigCouplerVerification(OwnsArrays):
         )
 
     @property
-    def normalised_difference(self) -> NDArray[np.float64]:
+    def normalized_difference(self) -> NDArray[np.float64]:
         r""":math:`\Delta/U_\Delta`, the difference in units of its expanded
         uncertainty: within :math:`\pm 1` where the two agree.
         """

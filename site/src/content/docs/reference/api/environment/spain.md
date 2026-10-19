@@ -598,7 +598,7 @@ The corrected level `LKeq,Ti` of the phase, in dB.
 outdoor_quality_objectives(
     area_type: str,
     *,
-    urbanisation: str = 'existing',
+    urbanization: str = 'existing',
 ) -> RegulationLimits
 ```
 
@@ -617,7 +617,7 @@ numeric objective: footnote (2) refers it to the adjoining areas.
 | Name | Description |
 | :--- | :--- |
 | `area_type` | Acoustic area type: the letter `"e"`, `"a"`, `"d"`, `"c"` or `"b"`, or an alias such as `"residential"`. |
-| `urbanisation` | `"existing"` (default) for areas already urbanised on 24 October 2007, or `"new"` for the rest (5 dB stricter). |
+| `urbanization` | `"existing"` (default) for areas already urbanised on 24 October 2007, or `"new"` for the rest (5 dB stricter). |
 
 **Returns:** The applicable [`RegulationLimits`](/phonometry/reference/api/environment/spain/#regulationlimits) for the index `Lx`.
 

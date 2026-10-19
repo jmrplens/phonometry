@@ -32,17 +32,17 @@ from phonometry.materials.surfaces.road_absorption import (
     PART1_FREQUENCY_RANGE_HZ,
     SPOT_FREQUENCY_RANGE_HZ,
     SPOT_NARROW_BAND_RANGE_HZ,
-    InsituAbsorptionResult,
+    InSituAbsorptionResult,
     RoadAbsorptionWarning,
     absorption_reference_corrected,
     adrienne_window,
     check_spot_frequency_range,
     geometric_spreading_factor,
     geometric_spreading_factor_angle,
-    insitu_absorption_coefficient,
-    insitu_absorption_from_reflection,
-    insitu_absorption_spectrum,
-    insitu_reflection_factor,
+    in_situ_absorption_coefficient,
+    in_situ_absorption_from_reflection,
+    in_situ_absorption_spectrum,
+    in_situ_reflection_factor,
     max_sampled_area_radius,
     msa_major_axis,
     one_third_octave_absorption,
@@ -75,8 +75,8 @@ def test_module_exports_match_all() -> None:
     # Every documented public callable/constant is exported.
     for name in (
         "adrienne_window",
-        "insitu_reflection_factor",
-        "insitu_absorption_coefficient",
+        "in_situ_reflection_factor",
+        "in_situ_absorption_coefficient",
         "absorption_reference_corrected",
         "geometric_spreading_factor_angle",
         "max_sampled_area_radius",
@@ -136,9 +136,9 @@ def test_perfect_reflector_gives_unit_reflection_zero_absorption() -> None:
     kr = geometric_spreading_factor()
     shift = 96
     hr = kr * np.roll(hi, shift)  # circular shift preserves |spectrum|
-    r = insitu_reflection_factor(hi, hr)
+    r = in_situ_reflection_factor(hi, hr)
     np.testing.assert_allclose(np.abs(r)[1:], 1.0, atol=1e-9)
-    alpha = insitu_absorption_coefficient(hi, hr)
+    alpha = in_situ_absorption_coefficient(hi, hr)
     np.testing.assert_allclose(alpha[1:], 0.0, atol=1e-9)
 
 
@@ -148,11 +148,11 @@ def test_synthetic_absorber_round_trip() -> None:
     r0 = 0.4
     hr = kr * r0 * np.roll(hi, 96)
     # Reflection-factor route.
-    r = insitu_reflection_factor(hi, hr)
+    r = in_situ_reflection_factor(hi, hr)
     np.testing.assert_allclose(np.abs(r)[1:], r0, atol=1e-9)
-    alpha_refl = insitu_absorption_from_reflection(r)
+    alpha_refl = in_situ_absorption_from_reflection(r)
     # Direct energy route.
-    alpha_energy = insitu_absorption_coefficient(hi, hr)
+    alpha_energy = in_situ_absorption_coefficient(hi, hr)
     np.testing.assert_allclose(alpha_refl, alpha_energy, atol=1e-12)
     np.testing.assert_allclose(alpha_energy[1:], 1.0 - r0**2, atol=1e-9)
 
@@ -162,7 +162,7 @@ def test_power_reflection_matches_reflection_magnitude() -> None:
     kr = geometric_spreading_factor()
     hr = kr * 0.5 * np.roll(hi, 80)
     qw = power_reflection_coefficient(hi, hr)
-    r = insitu_reflection_factor(hi, hr)
+    r = in_situ_reflection_factor(hi, hr)
     np.testing.assert_allclose(qw, np.abs(r) ** 2, atol=1e-12)
 
 
@@ -173,7 +173,7 @@ def test_phase_restoration_recovers_real_reflection() -> None:
     delay = shift / FS
     r0 = 0.6
     hr = kr * r0 * np.roll(hi, shift)
-    r = insitu_reflection_factor(hi, hr, fs=FS, delay=delay)
+    r = in_situ_reflection_factor(hi, hr, fs=FS, delay=delay)
     # After undoing exp(-j2pi f tau) the reflection factor is ~ real r0.
     np.testing.assert_allclose(r.real[1:], r0, atol=1e-6)
     np.testing.assert_allclose(r.imag[1:], 0.0, atol=1e-6)
@@ -188,7 +188,7 @@ def test_phase_restoration_recovers_real_reflection_odd_length() -> None:
     delay = shift / FS
     r0 = 0.6
     hr = kr * r0 * np.roll(hi, shift)
-    r = insitu_reflection_factor(hi, hr, fs=FS, delay=delay)
+    r = in_situ_reflection_factor(hi, hr, fs=FS, delay=delay)
     np.testing.assert_allclose(r.real[1:], r0, atol=1e-6)
     np.testing.assert_allclose(r.imag[1:], 0.0, atol=1e-6)
 
@@ -198,7 +198,7 @@ def test_oblique_incidence_uses_kr_theta() -> None:
     theta = np.pi / 4.0
     kr_theta = geometric_spreading_factor_angle(theta)
     hr = kr_theta * 0.3 * np.roll(hi, 64)
-    alpha = insitu_absorption_coefficient(hi, hr, incidence_angle_rad=theta)
+    alpha = in_situ_absorption_coefficient(hi, hr, incidence_angle_rad=theta)
     np.testing.assert_allclose(alpha[1:], 1.0 - 0.3**2, atol=1e-9)
 
 
@@ -218,9 +218,9 @@ def test_reference_correction_cancels_kr_and_chain(
 
 def test_reflection_input_guards() -> None:
     with pytest.raises(ValueError, match="Impulse responses must be non-empty"):
-        insitu_reflection_factor([], [1.0, 2.0])
+        in_situ_reflection_factor([], [1.0, 2.0])
     with pytest.raises(ValueError, match="'fs' is required to apply 'delay'"):
-        insitu_reflection_factor([1.0, 2.0], [1.0, 2.0], delay=1e-3)  # no fs
+        in_situ_reflection_factor([1.0, 2.0], [1.0, 2.0], delay=1e-3)  # no fs
 
 
 # --------------------------------------------------------------------------- #
@@ -354,7 +354,7 @@ def test_one_third_octave_guards() -> None:
 
 
 # --------------------------------------------------------------------------- #
-# Plottable end-to-end spectrum (insitu_absorption_spectrum)
+# Plottable end-to-end spectrum (in_situ_absorption_spectrum)
 # --------------------------------------------------------------------------- #
 def test_insitu_absorption_spectrum_mid_bands_are_one_minus_r0_sq() -> None:
     hi = _incident_ir()
@@ -363,9 +363,9 @@ def test_insitu_absorption_spectrum_mid_bands_are_one_minus_r0_sq() -> None:
     # hr = Kr * r0 * delayed(hi): a flat reflection of magnitude r0, so
     # |Hr/Hi| = Kr*r0 and alpha = 1 - (1/Kr^2)(Kr*r0)^2 = 1 - r0^2 in every band.
     hr = kr * r0 * np.roll(hi, 96)
-    result = insitu_absorption_spectrum(hi, hr, FS)
+    result = in_situ_absorption_spectrum(hi, hr, FS)
 
-    assert isinstance(result, InsituAbsorptionResult)
+    assert isinstance(result, InSituAbsorptionResult)
     assert result.frequencies.shape == (13,)  # 250..4000 Hz
     np.testing.assert_allclose(result.absorption, 1.0 - r0**2, atol=1e-6)
 
@@ -374,9 +374,9 @@ def test_insitu_absorption_spectrum_rejects_nonpositive_fs() -> None:
     hi = _incident_ir()
     hr = 0.4 * np.roll(hi, 96)
     with pytest.raises(ValueError, match="'fs' must be positive"):
-        insitu_absorption_spectrum(hi, hr, 0.0)
+        in_situ_absorption_spectrum(hi, hr, 0.0)
     with pytest.raises(ValueError, match="'fs' must be positive"):
-        insitu_absorption_spectrum(hi, hr, -48000.0)
+        in_situ_absorption_spectrum(hi, hr, -48000.0)
 
 
 def test_the_functions_that_took_a_deprecated_fs_alias_still_require_fs() -> None:
@@ -385,7 +385,7 @@ def test_the_functions_that_took_a_deprecated_fs_alias_still_require_fs() -> Non
     It reads as optional for two different reasons now. On
     :func:`adrienne_window` it is the leftover of the ``sample_rate`` alias
     that 4.0 removed, so leaving it out is a plain ``TypeError``. On
-    :func:`insitu_absorption_spectrum` it is the Signal contract: a pair of
+    :func:`in_situ_absorption_spectrum` it is the Signal contract: a pair of
     :class:`~phonometry.io.Signal` records would supply the rate, and a
     pair of bare arrays is refused by name instead.
     """
@@ -394,7 +394,7 @@ def test_the_functions_that_took_a_deprecated_fs_alias_still_require_fs() -> Non
     with pytest.raises(TypeError, match="missing 1 required positional argument"):
         adrienne_window(flat_duration=0.005)  # type: ignore[call-arg]
     with pytest.raises(ValueError, match="fs is required"):
-        insitu_absorption_spectrum(hi, hr)
+        in_situ_absorption_spectrum(hi, hr)
 
 
 def test_insitu_absorption_spectrum_plot_returns_axes() -> None:
@@ -405,7 +405,7 @@ def test_insitu_absorption_spectrum_plot_returns_axes() -> None:
 
     hi = _incident_ir()
     hr = geometric_spreading_factor() * 0.5 * np.roll(hi, 96)
-    result = insitu_absorption_spectrum(hi, hr, FS)
+    result = in_situ_absorption_spectrum(hi, hr, FS)
     ax = result.plot()
     assert isinstance(ax, plt.Axes)
     plt.close("all")
@@ -519,10 +519,10 @@ def test_public_exports() -> None:
         "geometric_spreading_factor",
         "geometric_spreading_factor_angle",
         "reflected_path_delay",
-        "insitu_reflection_factor",
-        "insitu_absorption_from_reflection",
+        "in_situ_reflection_factor",
+        "in_situ_absorption_from_reflection",
         "power_reflection_coefficient",
-        "insitu_absorption_coefficient",
+        "in_situ_absorption_coefficient",
         "absorption_reference_corrected",
         "one_third_octave_absorption",
         "max_sampled_area_radius",

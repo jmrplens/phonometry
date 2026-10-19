@@ -28,7 +28,7 @@ if TYPE_CHECKING:
         WaveMotionCorrection,
     )
     from ..metrology.reciprocity_free_field import (
-        AcousticCentre,
+        AcousticCenter,
         FreeFieldArrangementCheck,
         FreeFieldParameterUncertainty,
         ReciprocityAirAttenuation,
@@ -132,7 +132,7 @@ _COMPONENT_LABELS: Mapping[str, str] = MappingProxyType(
         "distance": "Distance",
         "standing_waves": "Standing waves",
         "air_attenuation": "Air attenuation",
-        "acoustic_centres": "Acoustic centres",
+        "acoustic_centers": "Acoustic centres",
         "front_cavity_depth": "Front cavity depth",
         "front_cavity_volume": "Front cavity volume",
         "equivalent_volume": "Equivalent volume",
@@ -850,7 +850,7 @@ def plot_air_attenuation(
 
 
 def plot_acoustic_centre(
-    result: AcousticCentre,
+    result: AcousticCenter,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -860,7 +860,7 @@ def plot_acoustic_centre(
     and the acoustic centre where it crosses the axis.
 
     :param result: An
-        :class:`~phonometry.metrology.reciprocity_free_field.AcousticCentre`.
+        :class:`~phonometry.metrology.reciprocity_free_field.AcousticCenter`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the fitted line.

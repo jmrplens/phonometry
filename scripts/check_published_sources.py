@@ -258,7 +258,7 @@ SOURCED: dict[tuple[str, str], str] = {
     ),
     (
         "simulation/elastic_fdtd.py",
-        "ALUMINIUM",
+        "ALUMINUM",
     ): (
         "Bies 5e Table C.1, the density of its aluminium sheet and the two "
         "bulk speeds its modulus and Poisson ratio give"

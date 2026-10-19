@@ -795,7 +795,7 @@ WeightedEnclosureInsulation(
     rating: int,
     c: int,
     ctr: int,
-    unfavourable_sum: float,
+    unfavorable_sum: float,
     frequencies: NDArray[np.float64],
     quantity: str,
 )
@@ -810,6 +810,6 @@ The single-number rating of an insertion loss spectrum, ISO 717-1.
 | `rating` | $D_{W,\mathrm{w}}$ or $D_{p\mathrm{r},\mathrm{w}}$, in decibels. |
 | `c` | The spectrum adaptation term $C$, in decibels. |
 | `ctr` | The spectrum adaptation term $C_{tr}$, in decibels. |
-| `unfavourable_sum` | The sum of unfavourable deviations the shift left, in decibels. |
+| `unfavorable_sum` | The sum of unfavourable deviations the shift left, in decibels. |
 | `frequencies` | The bands the rating was read over, in hertz. |
 | `quantity` | What was rated, `"sound_power"` or `"reciprocity"`. |

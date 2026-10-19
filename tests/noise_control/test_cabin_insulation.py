@@ -33,8 +33,8 @@ from phonometry.noise_control.cabin_insulation import (
     BAND_FLATNESS_LIMIT_DB,
     DEFAULT_BAND_FLATNESS_LIMIT_DB,
     IN_SITU_EXCESS_STANDARD_DEVIATION_DB,
-    INTERNAL_NOISE_CENTRE_HEIGHT_M,
-    INTERNAL_NOISE_CENTRE_TOLERANCE_M,
+    INTERNAL_NOISE_CENTER_HEIGHT_M,
+    INTERNAL_NOISE_CENTER_TOLERANCE_M,
     INTERNAL_NOISE_CORRECTION_WINDOW_DB,
     LOW_BAND_CLEARANCE_M,
     MAX_LEAK_RATIO,
@@ -517,8 +517,8 @@ def test_the_scope_and_geometry_constants_are_the_printed_ones() -> None:
     assert MIN_FIXED_MICROPHONE_POSITIONS == 6
     assert OPERATOR_SPHERE_RADIUS_M == 0.3
     assert OPERATOR_PATH_INCLINATION_DEG == 45.0
-    assert INTERNAL_NOISE_CENTRE_HEIGHT_M == 1.55
-    assert INTERNAL_NOISE_CENTRE_TOLERANCE_M == 0.075
+    assert INTERNAL_NOISE_CENTER_HEIGHT_M == 1.55
+    assert INTERNAL_NOISE_CENTER_TOLERANCE_M == 0.075
 
 
 def test_the_leak_ratio_is_shared_with_the_enclosure_module() -> None:
@@ -762,7 +762,7 @@ def test_clause_eight_rates_the_printed_example_of_iso_717_1() -> None:
     assert rating.rating == 30
     assert rating.c == -2
     assert rating.ctr == -3
-    assert rating.unfavourable_sum == pytest.approx(31.8, abs=0.05)
+    assert rating.unfavorable_sum == pytest.approx(31.8, abs=0.05)
     assert rating.apparent is False
 
 
@@ -777,7 +777,7 @@ def test_the_prime_changes_nothing_but_the_name() -> None:
         laboratory.c,
         laboratory.ctr,
     )
-    assert in_situ.unfavourable_sum == pytest.approx(laboratory.unfavourable_sum)
+    assert in_situ.unfavorable_sum == pytest.approx(laboratory.unfavorable_sum)
     assert in_situ.apparent is True
 
 
@@ -819,14 +819,14 @@ def test_the_sgs_meeting_pod_rates_as_its_laboratory_published_it() -> None:
     """
     rating = noise_control.weighted_cabin_insulation(list(oracle.SGS_POD_DP_DB))
     assert rating.rating == oracle.SGS_POD_RATING_DB
-    assert rating.unfavourable_sum <= 32.0
+    assert rating.unfavorable_sum <= 32.0
 
 
 def test_the_agh_acoustic_booth_rates_as_its_laboratory_published_it() -> None:
     """AGH report 5.5.130. of August 2023, PDF p. 10, folio "Strona 10 z 10"."""
     rating = noise_control.weighted_cabin_insulation(list(oracle.AGH_BOOTH_DP_DB))
     assert rating.rating == oracle.AGH_BOOTH_RATING_DB
-    assert rating.unfavourable_sum <= 32.0
+    assert rating.unfavorable_sum <= 32.0
 
 
 def test_the_euronova_telephone_booth_rates_as_its_laboratory_published_it() -> None:
@@ -839,7 +839,7 @@ def test_the_euronova_telephone_booth_rates_as_its_laboratory_published_it() -> 
     """
     rating = noise_control.weighted_cabin_insulation(list(oracle.EURONOVA_BOOTH_DP_DB))
     assert rating.rating == oracle.EURONOVA_BOOTH_RATING_DB
-    assert rating.unfavourable_sum <= 32.0
+    assert rating.unfavorable_sum <= 32.0
 
 
 def test_a_spectrum_outside_the_rating_bands_cannot_leak_into_the_rating() -> None:

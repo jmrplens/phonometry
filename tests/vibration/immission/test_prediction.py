@@ -146,15 +146,15 @@ def test_clause_4_3_the_building_on_its_ground() -> None:
     assert im.FOUNDATION_TRANSFER_ABOVE_RESONANCE == 0.5
     # Formula (4) is the storey estimate DIN 4150-3 6.4 prints too, and one
     # function answers for both.
-    assert vibration.storey_fundamental_frequency(5) == 2.0
-    assert vibration.storey_fundamental_frequency(10) == 1.0
+    assert vibration.story_fundamental_frequency(5) == 2.0
+    assert vibration.story_fundamental_frequency(10) == 1.0
     with pytest.warns(vibration.BuildingDamageWarning, match="from about 5 storeys"):
-        vibration.storey_fundamental_frequency(3)
-    with pytest.raises(ValueError, match="storeys"):
+        vibration.story_fundamental_frequency(3)
+    with pytest.raises(ValueError, match="stories"):
         im.soil_building_frequency_guide(0)
-    with pytest.raises(ValueError, match="storeys"):
+    with pytest.raises(ValueError, match="stories"):
         im.soil_building_frequency_guide(float("inf"))
-    with pytest.raises(ValueError, match="storeys"):
+    with pytest.raises(ValueError, match="stories"):
         im.soil_building_frequency_guide("3")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="harmonics"):
         im.track_excitation_frequency(20.0, spacing_m=0.6, harmonics=2.9)  # type: ignore[arg-type]

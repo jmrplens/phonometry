@@ -358,11 +358,11 @@ def test_annex_b_differences_and_sums() -> None:
 def test_t1_is_centred_on_the_largest_amplitude() -> None:
     record = np.zeros(20 * FS_HZ)
     record[10 * FS_HZ] = 1.0
-    assert im.centred_interval(record, FS_HZ) == pytest.approx((8.0, 12.0))
+    assert im.centered_interval(record, FS_HZ) == pytest.approx((8.0, 12.0))
     record[:] = 0.0
     record[FS_HZ] = 1.0
-    assert im.centred_interval(record, FS_HZ) == pytest.approx((0.0, 4.0))
-    assert im.centred_interval(record[: 2 * FS_HZ], FS_HZ) == pytest.approx((0.0, 2.0))
+    assert im.centered_interval(record, FS_HZ) == pytest.approx((0.0, 4.0))
+    assert im.centered_interval(record[: 2 * FS_HZ], FS_HZ) == pytest.approx((0.0, 2.0))
 
 
 def test_a_steady_passage_reduces_to_its_closed_forms() -> None:

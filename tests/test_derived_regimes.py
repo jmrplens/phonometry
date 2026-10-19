@@ -106,7 +106,7 @@ def _liquid(outlet_pressure_pa: float) -> noise_control.HydrodynamicValveNoise:
             mass_flow=30.0,
             inlet_pressure_pa=10.0e5,
             outlet_pressure_pa=outlet_pressure_pa,
-            vapour_pressure_pa=0.0317e5,
+            vapor_pressure_pa=0.0317e5,
             density=997.0,
             speed_of_sound=1400.0,
         ),
@@ -129,7 +129,7 @@ def _at_differential(
     point: noise_control.HydrodynamicValveNoise, differential: float
 ) -> dict[str, float]:
     """The differential and the x_F of Equation (1) that goes with it."""
-    span = point.inlet_pressure_pa - point.vapour_pressure_pa
+    span = point.inlet_pressure_pa - point.vapor_pressure_pa
     return {"differential": differential, "pressure_ratio": differential / span}
 
 
@@ -143,7 +143,7 @@ def test_a_differential_on_the_threshold_is_turbulent() -> None:
     # the threshold Equation (9) gives nought, so the point is turbulent.
     turbulent = _liquid(8.5e5)
     threshold = turbulent.corrected_ratio * (
-        turbulent.inlet_pressure_pa - turbulent.vapour_pressure_pa
+        turbulent.inlet_pressure_pa - turbulent.vapor_pressure_pa
     )
     on_it = dataclasses.replace(turbulent, **_at_differential(turbulent, threshold))
     assert on_it.regime == "turbulent"
@@ -164,7 +164,7 @@ def test_a_turbulent_point_cannot_carry_a_cavitation_transmission_loss() -> None
 def test_a_point_past_the_threshold_needs_its_cavitation_fields() -> None:
     turbulent = _liquid(8.5e5)
     threshold = turbulent.corrected_ratio * (
-        turbulent.inlet_pressure_pa - turbulent.vapour_pressure_pa
+        turbulent.inlet_pressure_pa - turbulent.vapor_pressure_pa
     )
     past = _at_differential(turbulent, math.nextafter(threshold, math.inf))
     with pytest.raises(ValueError, match="cavitation_efficiency"):
@@ -173,8 +173,8 @@ def test_a_point_past_the_threshold_needs_its_cavitation_fields() -> None:
 
 def test_a_valve_result_needs_the_liquid_below_its_inlet_pressure() -> None:
     turbulent = _liquid(8.5e5)
-    with pytest.raises(ValueError, match="vapour_pressure_pa"):
-        dataclasses.replace(turbulent, vapour_pressure_pa=11.0e5)
+    with pytest.raises(ValueError, match="vapor_pressure_pa"):
+        dataclasses.replace(turbulent, vapor_pressure_pa=11.0e5)
 
 
 def test_the_pressure_ratio_is_equation_1_of_the_pressures() -> None:
@@ -196,7 +196,7 @@ def test_a_valve_result_stops_below_flashing() -> None:
     # 5.1 calls a point cavitating only while x_F is not greater than 1, and
     # Equation (9) has no value at 1 itself.
     cavitating = _liquid(6.5e5)
-    span = cavitating.inlet_pressure_pa - cavitating.vapour_pressure_pa
+    span = cavitating.inlet_pressure_pa - cavitating.vapor_pressure_pa
     flashing = _at_differential(cavitating, span)
     with pytest.raises(ValueError, match="flashes"):
         dataclasses.replace(cavitating, **flashing)

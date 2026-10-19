@@ -140,7 +140,7 @@ _ROOMS: tuple[str, ...] = ("anechoic", "hemi-anechoic")
 _PATH_TARGETS: tuple[str, ...] = (
     "dihedral corner",
     "trihedral corner",
-    "boundary centre",
+    "boundary center",
     "closest boundary",
     "unique features",
 )
@@ -532,7 +532,7 @@ class MicrophoneTraverse(OwnsArrays):
         corner, the nearest wall, a door).
     :ivar targets: What the path is selected towards, among the five of the
         amended ISO 3745 A.3.3 a) to e): ``"dihedral corner"``,
-        ``"trihedral corner"``, ``"boundary centre"`` (the centre of the most
+        ``"trihedral corner"``, ``"boundary center"`` (the centre of the most
         uniform boundary surface), ``"closest boundary"`` and ``"unique
         features"`` (a door, a window, a ventilation opening). One path may
         serve more than one target, as A.3.3 NOTE 1 allows for c) and d); an

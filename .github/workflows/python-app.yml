@@ -403,6 +403,12 @@ jobs:
         pip install -e .
     - name: Check that no public name or constant hides its unit or misspells it
       run: python scripts/check_parameter_units.py
+    # The same walk holds every public identifier, and every value a caller
+    # types, to the American spelling the library is written in, and in situ
+    # to in_situ: a caller who wrote center_frequency on one function should
+    # not meet centre_frequency on the next.
+    - name: Check that every public identifier is spelled in American English
+      run: python scripts/check_identifier_spelling.py
 
   # A published table is shared by every caller in the process, so a dict
   # behind a `Mapping` annotation, or a writeable array, lets one caller change

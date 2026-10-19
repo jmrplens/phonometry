@@ -93,7 +93,7 @@ def test_band_set_is_the_eighteen_bands_of_annex_a() -> None:
 
 def test_normalised_spectra_match_annex_a_tables() -> None:
     """DB-HR Annex A Tables A.2 to A.5, transcribed value by value."""
-    assert hr.DB_HR_NORMALISED_SPECTRA["pink"] == (
+    assert hr.DB_HR_NORMALIZED_SPECTRA["pink"] == (
         -30.1,
         -27.1,
         -24.4,
@@ -113,7 +113,7 @@ def test_normalised_spectra_match_annex_a_tables() -> None:
         -10.0,
         -10.5,
     )
-    assert hr.DB_HR_NORMALISED_SPECTRA["traffic"] == (
+    assert hr.DB_HR_NORMALIZED_SPECTRA["traffic"] == (
         -20.0,
         -20.0,
         -18.0,
@@ -133,7 +133,7 @@ def test_normalised_spectra_match_annex_a_tables() -> None:
         -16.0,
         -18.0,
     )
-    assert hr.DB_HR_NORMALISED_SPECTRA["aircraft"] == (
+    assert hr.DB_HR_NORMALIZED_SPECTRA["aircraft"] == (
         -23.8,
         -20.2,
         -15.4,
@@ -153,14 +153,14 @@ def test_normalised_spectra_match_annex_a_tables() -> None:
         -23.3,
         -29.9,
     )
-    for spectrum in hr.DB_HR_NORMALISED_SPECTRA.values():
+    for spectrum in hr.DB_HR_NORMALIZED_SPECTRA.values():
         assert len(spectrum) == 18
 
 
 def test_railway_spectrum_equals_the_road_traffic_spectrum() -> None:
     """Table A.4 (LAef,i) is numerically identical to Table A.3 (LAtr,i)."""
     assert (
-        hr.DB_HR_NORMALISED_SPECTRA["railway"] == hr.DB_HR_NORMALISED_SPECTRA["traffic"]
+        hr.DB_HR_NORMALIZED_SPECTRA["railway"] == hr.DB_HR_NORMALIZED_SPECTRA["traffic"]
     )
 
 
@@ -190,7 +190,7 @@ def test_d2m_nt_atr_matches_ejercicio_7_1() -> None:
 def test_global_index_is_minus_the_energy_sum_of_the_band_contributions() -> None:
     """Formula (A.5): I_x = -10 lg sum_i 10^((L_x,i - X_i)/10), recomputed by hand."""
     index = hr.ra(_R_PRIME)
-    pink = np.asarray(hr.DB_HR_NORMALISED_SPECTRA["pink"])
+    pink = np.asarray(hr.DB_HR_NORMALIZED_SPECTRA["pink"])
     expected = -10.0 * np.log10(np.sum(10.0 ** ((pink - np.asarray(_R_PRIME)) / 10.0)))
     assert index.value == pytest.approx(float(expected), abs=1e-12)
     assert index.band_contributions == pytest.approx(pink - np.asarray(_R_PRIME))
@@ -807,7 +807,7 @@ def test_requirement_direction_is_validated() -> None:
 def test_published_spectra_are_read_only() -> None:
     """The Annex A tables are a published constant, not a mutable global."""
     with pytest.raises(TypeError):
-        hr.DB_HR_NORMALISED_SPECTRA["pink"] = (0.0,) * 18  # type: ignore[index]
+        hr.DB_HR_NORMALIZED_SPECTRA["pink"] = (0.0,) * 18  # type: ignore[index]
 
 
 def test_result_does_not_alias_the_caller_s_array() -> None:

@@ -84,12 +84,12 @@ close the gap. `porosity_from_bulk_density` is Hopkins Eq. (1.160),
 $\phi = 1 - \rho_\mathrm{bulk}/\rho_\mathrm{fibre}$;
 `airflow_resistivity_from_bulk_density` is his Eq. (1.165),
 $r = k_1\rho_\mathrm{bulk}^{1+k_2}/d_\mathrm{fibre}^2$, taking a
-`FibreResistivityFit` that carries the bulk-density range it was fitted over and
+`FiberResistivityFit` that carries the bulk-density range it was fitted over and
 warning outside it, with the rock wool of his Fig. 1.49 published both lateral
 and longitudinal because mineral wool is anisotropic;
 `viscous_characteristic_length` is Allard & Atalla Eq. (5.25),
 $\Lambda = (8\eta\alpha_\infty/(\sigma\phi))^{1/2}/c$; and
-`fibre_characteristic_lengths` their Eqs. (5.29) and (5.30) for a bundle of
+`fiber_characteristic_lengths` their Eqs. (5.29) and (5.30) for a bundle of
 cylinders, which gives both lengths from the fibre radius and the two densities.
 
 Each says what it is worth. Hopkins' two equations check each other: the ends of
@@ -109,7 +109,7 @@ sigma = materials.airflow_resistivity_from_bulk_density(
     60.0, fit=materials.ROCK_WOOL_LONGITUDINAL_FIT
 )
 phi = materials.porosity_from_bulk_density(
-    60.0, fibre_density_kg_m3=materials.ROCK_WOOL_FIBRE_DENSITY_KG_M3
+    60.0, fiber_density_kg_m3=materials.ROCK_WOOL_FIBER_DENSITY_KG_M3
 )
 print(round(sigma), round(phi, 3))                       # 23226 0.977
 print(round(materials.viscous_characteristic_length(

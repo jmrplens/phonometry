@@ -457,7 +457,7 @@ def _chk_overload_offset() -> Outcome:
 def _chk_overload_doubling() -> Outcome:
     resistance, inductance = 0.69, 109e-6
     result = ea.verify_amplifier_overload(
-        3.0, ea.loop_impedance(resistance, inductance), 20.0, programme="speech"
+        3.0, ea.loop_impedance(resistance, inductance), 20.0, program="speech"
     )
     w1 = 2.0 * math.pi * 1000.0 * inductance
     closed = math.sqrt(3.0 * resistance**2 + 4.0 * w1**2) / (2.0 * math.pi * inductance)
@@ -485,7 +485,7 @@ def _chk_overload_verdict() -> Outcome:
 
     def verdict(compliance: float) -> bool:
         return ea.verify_amplifier_overload(
-            1.0, impedance, compliance, programme="transient_speech"
+            1.0, impedance, compliance, program="transient_speech"
         ).passes
 
     return _window_row(
@@ -550,7 +550,7 @@ def _chk_centre_field() -> Outcome:
 )
 def _chk_centre_field_rectangle() -> Outcome:
     d1, d2, current = 10.0, 15.0, 3.0
-    computed = ea.loop_centre_field(current, d1, width_m=d2)
+    computed = ea.loop_center_field(current, d1, width_m=d2)
     return numeric(
         _e1_formula(current, math.sqrt(d1 * d2)),
         computed,

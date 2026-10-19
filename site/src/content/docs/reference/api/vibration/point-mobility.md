@@ -103,7 +103,7 @@ infinite_beam_impedance(
     bending_stiffness: float,
     mass_per_length: float,
     *,
-    location: str = 'centre',
+    location: str = 'center',
 ) -> NDArray[np.complex128]
 ```
 
@@ -121,7 +121,7 @@ bending wave speed $c_\mathrm{B} = (B \omega^2 / m')^{1/4}$
 | `frequency` | Frequency `f`, in hertz (scalar or array, > 0). |
 | `bending_stiffness` | Beam bending stiffness $B = E I$, in N.m^2. |
 | `mass_per_length` | Mass per unit length `m'`, in kg/m. |
-| `location` | `"centre"` or `"end"`. |
+| `location` | `"center"` or `"end"`. |
 
 **Returns:** The complex point impedance `Z`, in N.s/m.
 
@@ -139,7 +139,7 @@ infinite_beam_mobility(
     bending_stiffness: float,
     mass_per_length: float,
     *,
-    location: str = 'centre',
+    location: str = 'center',
 ) -> NDArray[np.complex128]
 ```
 
@@ -157,7 +157,7 @@ $\omega^{-1/2}$.
 | `frequency` | Frequency `f`, in hertz (scalar or array, > 0). |
 | `bending_stiffness` | Beam bending stiffness $B = E I$, in N.m^2. |
 | `mass_per_length` | Mass per unit length `m'`, in kg/m. |
-| `location` | `"centre"` or `"end"`. |
+| `location` | `"center"` or `"end"`. |
 
 **Returns:** The complex point mobility `Y`, in m/(N.s).
 
@@ -207,7 +207,7 @@ infinite_beam_point_mobility(
     bending_stiffness: float,
     mass_per_length: float,
     *,
-    location: str = 'centre',
+    location: str = 'center',
 ) -> MobilityResult
 ```
 
@@ -220,7 +220,7 @@ Infinite-beam point mobility bundled as a [`MobilityResult`](/phonometry/referen
 | `frequency` | Frequency `f`, in hertz (scalar or array, > 0). |
 | `bending_stiffness` | Beam bending stiffness $B = E I$, in N.m^2. |
 | `mass_per_length` | Mass per unit length `m'`, in kg/m. |
-| `location` | `"centre"` or `"end"`. |
+| `location` | `"center"` or `"end"`. |
 
 **Returns:** The [`MobilityResult`](/phonometry/reference/api/vibration/mechanical-mobility/#mobilityresult) (driving point).
 
@@ -231,7 +231,7 @@ infinite_plate_impedance(
     bending_stiffness: float,
     mass_per_area: float,
     *,
-    location: str = 'centre',
+    location: str = 'center',
 ) -> float
 ```
 
@@ -249,7 +249,7 @@ point force.
 | :--- | :--- |
 | `bending_stiffness` | Plate bending stiffness per unit width `B'`, in N.m (see [`plate_bending_stiffness`](/phonometry/reference/api/vibration/point-mobility/#plate_bending_stiffness)). |
 | `mass_per_area` | Mass per unit area `m''`, in kg/m^2. |
-| `location` | `"centre"` ($C = 8$) or `"edge"` ($C = 3.5$). |
+| `location` | `"center"` ($C = 8$) or `"edge"` ($C = 3.5$). |
 
 **Returns:** The point impedance `Z`, in N.s/m.
 
@@ -266,7 +266,7 @@ infinite_plate_mobility(
     bending_stiffness: float,
     mass_per_area: float,
     *,
-    location: str = 'centre',
+    location: str = 'center',
 ) -> float
 ```
 
@@ -282,7 +282,7 @@ independent).
 | :--- | :--- |
 | `bending_stiffness` | Plate bending stiffness per unit width `B'`, in N.m. |
 | `mass_per_area` | Mass per unit area `m''`, in kg/m^2. |
-| `location` | `"centre"` ($C = 8$) or `"edge"` ($C = 3.5$). |
+| `location` | `"center"` ($C = 8$) or `"edge"` ($C = 3.5$). |
 
 **Returns:** The point mobility `Y`, in m/(N.s).
 
@@ -300,7 +300,7 @@ infinite_plate_point_mobility(
     bending_stiffness: float,
     mass_per_area: float,
     *,
-    location: str = 'centre',
+    location: str = 'center',
 ) -> MobilityResult
 ```
 
@@ -317,7 +317,7 @@ with the ISO 7626 mobility machinery.
 | `frequency` | Frequency `f`, in hertz (scalar or array, > 0). |
 | `bending_stiffness` | Plate bending stiffness per unit width `B'`, in N.m. |
 | `mass_per_area` | Mass per unit area `m''`, in kg/m^2. |
-| `location` | `"centre"` or `"edge"`. |
+| `location` | `"center"` or `"edge"`. |
 
 **Returns:** The [`MobilityResult`](/phonometry/reference/api/vibration/mechanical-mobility/#mobilityresult) (driving point).
 

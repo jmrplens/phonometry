@@ -166,17 +166,17 @@ __all__ = [
     "LIMP_FRAME_CRITERIA",
     "MIKI_VALIDITY",
     "ABSORBER_AIR",
-    "ROCK_WOOL_FIBRE_DENSITY_KG_M3",
+    "ROCK_WOOL_FIBER_DENSITY_KG_M3",
     "ROCK_WOOL_LATERAL_FIT",
     "ROCK_WOOL_LONGITUDINAL_FIT",
-    "FibreCharacteristicLengths",
-    "FibreResistivityFit",
+    "FiberCharacteristicLengths",
+    "FiberResistivityFit",
     "PorousAbsorberWarning",
     "PorousMediumResult",
     "airflow_resistivity_from_bulk_density",
     "decoupling_frequency",
     "delany_bazley",
-    "fibre_characteristic_lengths",
+    "fiber_characteristic_lengths",
     "helmholtz_resonance_frequency",
     "johnson_champoux_allard",
     "limp_frame",
@@ -718,7 +718,7 @@ def limp_frame(
 # ---------------------------------------------------------------------------
 
 
-class FibreResistivityFit(NamedTuple):
+class FiberResistivityFit(NamedTuple):
     """A published ``k1``, ``k2`` pair of Hopkins Eq. (1.165), and its range.
 
     The pair is not a property of mineral wool in general: ``k1`` belongs to a
@@ -729,7 +729,7 @@ class FibreResistivityFit(NamedTuple):
 
     :ivar k1: The constant of the manufacture.
     :ivar k2: The exponent of the fibre orientation.
-    :ivar fibre_diameter_um: Average fibre diameter of the fitted material, in
+    :ivar fiber_diameter_um: Average fibre diameter of the fitted material, in
         micrometres, which is the unit Eq. (1.165) is written in.
     :ivar bulk_density_range_kg_m3: The ``(low, high)`` the fit was made over.
     :ivar direction: ``"lateral"`` in the plane of the sheet or
@@ -740,7 +740,7 @@ class FibreResistivityFit(NamedTuple):
 
     k1: float
     k2: float
-    fibre_diameter_um: float
+    fiber_diameter_um: float
     bulk_density_range_kg_m3: tuple[float, float]
     direction: str
     source: str
@@ -757,10 +757,10 @@ class FibreResistivityFit(NamedTuple):
 #: The rock wool of Hopkins Fig. 1.49, measured across two UK manufacturers at
 #: an average fibre diameter of 4,75 um, in the plane of the sheet. Hopkins
 #: (2007) Eq. (1.165), PDF page 108 (printed p. 81).
-ROCK_WOOL_LATERAL_FIT = FibreResistivityFit(
+ROCK_WOOL_LATERAL_FIT = FiberResistivityFit(
     k1=353.0,
     k2=0.63,
-    fibre_diameter_um=4.75,
+    fiber_diameter_um=4.75,
     bulk_density_range_kg_m3=(31.0, 155.0),
     direction="lateral",
     source="Hopkins (2007) Eq. (1.165), PDF page 108 (printed p. 81)",
@@ -768,10 +768,10 @@ ROCK_WOOL_LATERAL_FIT = FibreResistivityFit(
 
 #: The same rock wool through the sheet, which is the direction the literature
 #: usually quotes. Hopkins (2007) Eq. (1.165), PDF page 108 (printed p. 81).
-ROCK_WOOL_LONGITUDINAL_FIT = FibreResistivityFit(
+ROCK_WOOL_LONGITUDINAL_FIT = FiberResistivityFit(
     k1=780.0,
     k2=0.59,
-    fibre_diameter_um=4.75,
+    fiber_diameter_um=4.75,
     bulk_density_range_kg_m3=(38.0, 162.0),
     direction="longitudinal",
     source="Hopkins (2007) Eq. (1.165), PDF page 108 (printed p. 81)",
@@ -780,11 +780,11 @@ ROCK_WOOL_LONGITUDINAL_FIT = FibreResistivityFit(
 #: The density of the rock-wool fibre itself that Hopkins states beside the two
 #: fits, in kg/m3: Hopkins (2007) Eq. (1.165), PDF page 108 (printed p. 81). It
 #: is what turns their bulk densities into porosities.
-ROCK_WOOL_FIBRE_DENSITY_KG_M3 = 2600.0
+ROCK_WOOL_FIBER_DENSITY_KG_M3 = 2600.0
 
 
 def airflow_resistivity_from_bulk_density(
-    bulk_density_kg_m3: float, *, fit: FibreResistivityFit
+    bulk_density_kg_m3: float, *, fit: FiberResistivityFit
 ) -> float:
     r"""Airflow resistivity of a mineral wool from its bulk density (Eq. 1.165).
 
@@ -813,12 +813,12 @@ def airflow_resistivity_from_bulk_density(
             "beyond them"
         )
         warnings.warn(msg, PorousAbsorberWarning, stacklevel=2)
-    resistivity = fit.k1 * density ** (1.0 + fit.k2) / fit.fibre_diameter_um**2
+    resistivity = fit.k1 * density ** (1.0 + fit.k2) / fit.fiber_diameter_um**2
     return float(resistivity)
 
 
 def porosity_from_bulk_density(
-    bulk_density_kg_m3: float, *, fibre_density_kg_m3: float
+    bulk_density_kg_m3: float, *, fiber_density_kg_m3: float
 ) -> float:
     r"""Porosity of a fibrous material from its two densities (Eq. 1.160).
 
@@ -831,17 +831,17 @@ def porosity_from_bulk_density(
     0,99 and 0,94, which is the porosity range he prints beside them.
 
     :param bulk_density_kg_m3: Bulk density of the material, in kg/m3 (> 0).
-    :param fibre_density_kg_m3: Density of the fibre itself, in kg/m3, larger
+    :param fiber_density_kg_m3: Density of the fibre itself, in kg/m3, larger
         than the bulk density.
     :return: The open porosity ``phi``, between 0 and 1.
     :raises ValueError: for a non-positive density, or a bulk density at or
         above the fibre density, which is not a porous material.
     """
     bulk = require_positive(bulk_density_kg_m3, "bulk_density_kg_m3")
-    fibre = require_positive(fibre_density_kg_m3, "fibre_density_kg_m3")
+    fibre = require_positive(fiber_density_kg_m3, "fiber_density_kg_m3")
     if bulk >= fibre:
         msg = (
-            f"bulk_density_kg_m3 {bulk:g} is not below fibre_density_kg_m3 "
+            f"bulk_density_kg_m3 {bulk:g} is not below fiber_density_kg_m3 "
             f"{fibre:g}: a material at or above the density of its own fibre "
             "has no pore left to be porous in"
         )
@@ -897,7 +897,7 @@ def viscous_characteristic_length(
     return math.sqrt(8.0 * fluid.viscosity * alpha / (sigma * phi)) / shape
 
 
-class FibreCharacteristicLengths(NamedTuple):
+class FiberCharacteristicLengths(NamedTuple):
     """The two characteristic lengths of a fibrous layer, in metres."""
 
     viscous_length_m: float
@@ -912,12 +912,12 @@ class FibreCharacteristicLengths(NamedTuple):
         record_pretty(self, printer, cycle)
 
 
-def fibre_characteristic_lengths(
-    fibre_radius_m: float,
+def fiber_characteristic_lengths(
+    fiber_radius_m: float,
     *,
     bulk_density_kg_m3: float,
-    fibre_density_kg_m3: float,
-) -> FibreCharacteristicLengths:
+    fiber_density_kg_m3: float,
+) -> FiberCharacteristicLengths:
     r"""Both characteristic lengths of a fibrous layer, from its geometry.
 
     Allard & Atalla Eqs. (5.29) and (5.30), PDF page 91 (printed p. 81), model
@@ -943,30 +943,30 @@ def fibre_characteristic_lengths(
     a factor of 1,4 at 38 kg/m3 and 1,9 at 155 kg/m3. Which to prefer is a
     question about the material, and neither is a substitute for measuring it.
 
-    :param fibre_radius_m: Fibre radius ``R``, in metres (> 0). A table that
+    :param fiber_radius_m: Fibre radius ``R``, in metres (> 0). A table that
         prints a diameter in micrometres wants half of it, divided by a
         million.
     :param bulk_density_kg_m3: Bulk density of the layer, in kg/m3 (> 0), below
         the fibre density: the ratio of the two is the fibre volume fraction,
         and Eqs. (5.29) and (5.30) are stated for a porosity close to 1.
-    :param fibre_density_kg_m3: Density of the fibre itself, in kg/m3 (> 0).
+    :param fiber_density_kg_m3: Density of the fibre itself, in kg/m3 (> 0).
     :return: The viscous and thermal lengths, in metres.
     :raises ValueError: for a non-positive input, or a bulk density at or above
         the fibre density, which leaves no pore for a length to describe.
     """
-    radius = require_positive(fibre_radius_m, "fibre_radius_m")
+    radius = require_positive(fiber_radius_m, "fiber_radius_m")
     bulk = require_positive(bulk_density_kg_m3, "bulk_density_kg_m3")
-    fibre = require_positive(fibre_density_kg_m3, "fibre_density_kg_m3")
+    fibre = require_positive(fiber_density_kg_m3, "fiber_density_kg_m3")
     if bulk >= fibre:
         msg = (
-            f"bulk_density_kg_m3 {bulk:g} is not below fibre_density_kg_m3 "
+            f"bulk_density_kg_m3 {bulk:g} is not below fiber_density_kg_m3 "
             f"{fibre:g}: their ratio is the fibre volume fraction, so a layer "
             "at or above the density of its own fibre is solid and has no pore "
             "for a characteristic length to describe"
         )
         raise ValueError(msg)
     viscous = radius * fibre / (2.0 * bulk)
-    return FibreCharacteristicLengths(viscous, 2.0 * viscous)
+    return FiberCharacteristicLengths(viscous, 2.0 * viscous)
 
 
 # ---------------------------------------------------------------------------

@@ -857,7 +857,7 @@ The share of the layout left out, in percent (9.1.2.4).
 
 $S_\mathrm{p}$, the plant area, in square metres (3.3).
 
-### PlantMeasurementContour.plant_centre_m
+### PlantMeasurementContour.plant_center_m
 
 *property*
 

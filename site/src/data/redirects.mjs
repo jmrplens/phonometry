@@ -13,7 +13,7 @@
 // path, which is what Astro emits.
 import { basePath } from './site.mjs';
 
-/** Old address -> where its content is published today. 434 entries. */
+/** Old address -> where its content is published today. 436 entries. */
 const moved = {
 	'/about/': '/start/about/',
 	'/environment/environmental-levels/': '/environment/assessment/environmental-levels/',
@@ -168,6 +168,7 @@ const moved = {
 	'/es/reference/api/building/spanish-building-code/': '/es/reference/api/building/spain/',
 	'/es/reference/api/correlation/correlation/': '/es/reference/api/signals/correlation/',
 	'/es/reference/api/correlation/envelope/': '/es/reference/api/signals/envelope/',
+	'/es/reference/api/electroacoustics/programme-signal/': '/es/reference/api/electroacoustics/program-signal/',
 	'/es/reference/api/environment/atmospheric-refraction/': '/es/reference/api/environment/refraction/',
 	'/es/reference/api/environment/impulse-prominence/': '/es/reference/api/environment/impulsive-sound/',
 	'/es/reference/api/environment/road-devices/': '/es/reference/api/environment/noise-reducing-devices/',
@@ -382,6 +383,7 @@ const moved = {
 	'/reference/api/building/spanish-building-code/': '/reference/api/building/spain/',
 	'/reference/api/correlation/correlation/': '/reference/api/signals/correlation/',
 	'/reference/api/correlation/envelope/': '/reference/api/signals/envelope/',
+	'/reference/api/electroacoustics/programme-signal/': '/reference/api/electroacoustics/program-signal/',
 	'/reference/api/environment/atmospheric-refraction/': '/reference/api/environment/refraction/',
 	'/reference/api/environment/impulse-prominence/': '/reference/api/environment/impulsive-sound/',
 	'/reference/api/environment/road-devices/': '/reference/api/environment/noise-reducing-devices/',

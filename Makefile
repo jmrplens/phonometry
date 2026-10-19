@@ -355,6 +355,19 @@ record-display:
 parameter-units:
 	$(PYTHON) scripts/check_parameter_units.py
 
+# The library is written in American English, and an identifier is where the
+# spelling stops being style: a caller types it. This holds every public module
+# path, name, parameter, field and enum member, and every value a caller types
+# (a Literal choice, a default, an enum value, a key of a published table, a
+# string of a published tuple), to the American spelling (center, program,
+# fiber, story, vapor, modeling, normalized...), and in situ to in_situ. The
+# -ise, -yse, -our, -tre and -bre endings are read as whole families.
+# catalogue is the one British form kept, and a string a source prints is
+# exempt by location. Needs the package importable, for the same reason
+# parameter-units does.
+identifier-spelling:
+	$(PYTHON) scripts/check_identifier_spelling.py
+
 # A published table is shared by the whole process, and a dict behind a
 # `Mapping` annotation or a writeable array lets one caller change a printed
 # number for every caller after it. This holds every value reachable from a
@@ -724,5 +737,5 @@ check: lint security test
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks reference-values \
 	boundary-comparisons array-aliasing record-display \
-	conformance-rows conformance-vocabulary parameter-units frozen-constants published-sources \
+	conformance-rows conformance-vocabulary parameter-units identifier-spelling frozen-constants published-sources \
 	solid-agreement shared-sources catalogue-data catalogue-schema published-catalogues

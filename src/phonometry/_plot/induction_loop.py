@@ -919,14 +919,14 @@ def plot_amplifier_overload(
         label=_t("Compliance voltage", language),
     )
     ax.axvline(
-        result.programme.test_frequency_hz,
+        result.program.test_frequency_hz,
         color=_C_SECONDARY,
         lw=1.0,
         ls=":",
         label=_t("Table 4 frequency", language),
     )
     ax.plot(
-        [result.programme.test_frequency_hz],
+        [result.program.test_frequency_hz],
         [result.test_frequency_voltage_v],
         ls="none",
         marker="D",
@@ -956,7 +956,7 @@ def plot_amplifier_overload(
         _t(
             "Overload test, {freq} Hz programme limit",
             language,
-            freq=_num(result.programme.power_bandwidth_limit_hz, language, 0),
+            freq=_num(result.program.power_bandwidth_limit_hz, language, 0),
         )
         + f": {_verdict(passes=result.passes, language=language)}"
     )

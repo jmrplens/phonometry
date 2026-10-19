@@ -31,7 +31,7 @@ from scipy.optimize import brentq
 from phonometry.building.prediction.panel_transmission import mass_law_transmission_loss
 from phonometry.fluids import Fluid
 from phonometry.simulation.elastic_fdtd import (
-    ALUMINIUM,
+    ALUMINUM,
     CONCRETE,
     STEEL,
     ElasticBoundaries,
@@ -66,7 +66,7 @@ WATER_FLUID = Fluid(
 #: Each solver material and the catalogue row its banner cites.
 CITED_ROWS = (
     (STEEL, "bies-2017-table-c1/steel_mild"),
-    (ALUMINIUM, "bies-2017-table-c1/aluminum_sheet"),
+    (ALUMINUM, "bies-2017-table-c1/aluminum_sheet"),
     (CONCRETE, "bies-2017-table-c1/concrete_high_strength"),
 )
 

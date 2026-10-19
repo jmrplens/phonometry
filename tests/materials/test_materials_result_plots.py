@@ -159,9 +159,9 @@ def test_insitu_absorption_plot_renders_nan_band_as_em_dash() -> None:
     the em dash the value tables print for a missing entry marks its
     position instead.
     """
-    from phonometry.materials.surfaces.road_absorption import InsituAbsorptionResult
+    from phonometry.materials.surfaces.road_absorption import InSituAbsorptionResult
 
-    res = InsituAbsorptionResult(
+    res = InSituAbsorptionResult(
         frequencies=np.array([500.0, 630.0, 800.0, 1000.0]),
         absorption=np.array([0.2, np.nan, 0.6, 0.5]),
     )

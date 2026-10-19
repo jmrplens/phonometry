@@ -1006,10 +1006,10 @@ def _reciprocity_air_attenuation() -> ph.metrology.ReciprocityAirAttenuation:
     )
 
 
-def _acoustic_centre() -> ph.metrology.AcousticCentre:
+def _acoustic_centre() -> ph.metrology.AcousticCenter:
     """An acoustic centre 8 mm in front of the diaphragm."""
     distances = np.array([0.15, 0.2, 0.3, 0.4])
-    return ph.metrology.acoustic_centre(distances, 1.0 / (distances - 0.008))
+    return ph.metrology.acoustic_center(distances, 1.0 / (distances - 0.008))
 
 
 def _free_field_arrangement() -> ph.metrology.FreeFieldArrangementCheck:
@@ -1028,7 +1028,7 @@ def _free_field_parameter_uncertainty() -> ph.metrology.FreeFieldParameterUncert
     return ph.metrology.free_field_parameter_uncertainty(
         [1000.0, 4000.0, 16000.0],
         ph.metrology.FreeFieldInputUncertainties(
-            u_distance_m=1e-4, u_acoustic_centre_m=5e-4
+            u_distance_m=1e-4, u_acoustic_center_m=5e-4
         ),
         diaphragm_distances_m=(0.2, 0.25, 0.3),
         **_RECIPROCITY_CONDITIONS,
@@ -1637,7 +1637,7 @@ _FREE_FIELD_DIRECTIONS = (
 _FREE_FIELD_TARGETS: tuple[tuple[str, ...], ...] = (
     ("trihedral corner",),
     ("dihedral corner",),
-    ("boundary centre",),
+    ("boundary center",),
     ("closest boundary",),
     ("unique features",),
     (),
@@ -2146,17 +2146,17 @@ _HEADPHONE_BANDS = np.array(
 )
 
 
-def _programme_signal_check() -> ph.electroacoustics.ProgrammeSignalCheck:
+def _programme_signal_check() -> ph.electroacoustics.ProgramSignalCheck:
     """IEC 60268-1:1985 Table II itself, judged against itself."""
-    table = ph.electroacoustics.SIMULATED_PROGRAMME_SPECTRUM
-    return ph.electroacoustics.check_programme_signal(
+    table = ph.electroacoustics.SIMULATED_PROGRAM_SPECTRUM
+    return ph.electroacoustics.check_program_signal(
         list(table), [band.relative_level_db for band in table.values()]
     )
 
 
 def _limiting_test_signal() -> ph.electroacoustics.LimitingTestSignalCheck:
     """IEC 60268-7:2010 8.3.2.2 b): five seconds of the programme signal clipped to 2,0."""
-    x = ph.electroacoustics.simulated_programme_signal(FS, 5.0, peak_to_rms=2.0, seed=1)
+    x = ph.electroacoustics.simulated_program_signal(FS, 5.0, peak_to_rms=2.0, seed=1)
     return ph.electroacoustics.check_limiting_test_signal(x, FS)
 
 
@@ -2170,13 +2170,13 @@ def _rated_impedance() -> ph.electroacoustics.RatedImpedanceVerification:
 
 
 def _programme_characteristic_voltage() -> (
-    ph.electroacoustics.ProgrammeCharacteristicVoltage
+    ph.electroacoustics.ProgramCharacteristicVoltage
 ):
     """IEC 60268-7:2010 8.3.5: three fittings, A-weighted."""
     levels = np.array(
         [np.linspace(70.0, 84.0, _HEADPHONE_BANDS.size) + d for d in (0.0, 0.4, -0.3)]
     )
-    return ph.electroacoustics.programme_characteristic_voltage(
+    return ph.electroacoustics.program_characteristic_voltage(
         0.05, _HEADPHONE_BANDS, levels, a_weighted=True
     )
 

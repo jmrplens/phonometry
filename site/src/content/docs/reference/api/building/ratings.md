@@ -316,7 +316,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ImpactRatingResult(
     rating: int,
     ci: int,
-    unfavourable_sum: float,
+    unfavorable_sum: float,
     frequencies: np.ndarray | None = None,
     measured: np.ndarray | None = None,
     shifted_reference: np.ndarray | None = None,
@@ -332,7 +332,7 @@ Single-number weighted impact rating and CI (ISO 717-2).
 | :--- | :--- |
 | `rating` | Weighted impact rating (`Ln,w`, `L'n,w`, `L'nT,w`), the shifted reference read at 500 Hz, in dB (Clause 4.3; octave-band ratings include the -5 dB reduction of Clause 4.3.2). Integer. |
 | `ci` | Spectrum adaptation term `CI` (Clause A.2.1), in dB. Integer. |
-| `unfavourable_sum` | Sum of unfavourable deviations at the final shift, in dB (Clause 4.3); at most 32,0 (16 bands) or 10,0 (5 bands). Restates `measured` against `shifted_reference`, with the impact sign, and is checked against them when both are present. |
+| `unfavorable_sum` | Sum of unfavourable deviations at the final shift, in dB (Clause 4.3); at most 32,0 (16 bands) or 10,0 (5 bands). Restates `measured` against `shifted_reference`, with the impact sign, and is checked against them when both are present. |
 | `frequencies` | Band centre frequencies of the measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
 | `measured` | The measured impact levels used for the rating (after the one-decimal reduction of Clause 4.3.1), in dB. Defaults to `None`. |
 | `shifted_reference` | Table 3 impact reference curve after the final shift, in dB. Defaults to `None`. |
@@ -574,7 +574,7 @@ airborne problem, so no separate search is duplicated.
 | `values_by_band` | Measured impact levels (`Ln`, `L'n`, `L'nT`) in dB. 16 values are read as one-third-octave bands, 5 values as octave bands. A mapping of band centre frequency in hertz to level is read band by band, as [`weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating) reads one, and a rating band it lacks is refused rather than filled. |
 | `bands` | `"third-octave"`, `"octave"` or `None` to infer the band set from the number of values or the keys of the mapping. |
 
-**Returns:** [`ImpactRatingResult`](/phonometry/reference/api/building/ratings/#impactratingresult) with `rating`, `ci` and `unfavourable_sum`.
+**Returns:** [`ImpactRatingResult`](/phonometry/reference/api/building/ratings/#impactratingresult) with `rating`, `ci` and `unfavorable_sum`.
 
 **Raises**
 
@@ -651,7 +651,7 @@ No. 2. Input values are first reduced to one decimal place
 | `values_by_band` | Measured band quantities (`R`, `R'`, `Dn`, `DnT` ...) in dB. 16 values are read as one-third-octave bands, 5 values as octave bands. A mapping of band centre frequency in hertz to value, such as a catalogue row's [`spectrum`](/phonometry/reference/api/io/io/#bandedrowspectrum), is read band by band: one that holds any one-third-octave band that is not an octave centre as the 16 one-third octaves, any other as the 5 octaves, and a rating band it lacks is refused rather than filled. |
 | `bands` | `"third-octave"`, `"octave"` or `None` to infer the band set from the number of values or the keys of the mapping. |
 
-**Returns:** [`WeightedRatingResult`](/phonometry/reference/api/building/ratings/#weightedratingresult) with `rating`, `c`, `ctr` and `unfavourable_sum`.
+**Returns:** [`WeightedRatingResult`](/phonometry/reference/api/building/ratings/#weightedratingresult) with `rating`, `c`, `ctr` and `unfavorable_sum`.
 
 **Raises**
 
@@ -759,7 +759,7 @@ WeightedRatingResult(
     rating: int,
     c: int,
     ctr: int,
-    unfavourable_sum: float,
+    unfavorable_sum: float,
     frequencies: np.ndarray | None = None,
     measured: np.ndarray | None = None,
     shifted_reference: np.ndarray | None = None,
@@ -776,7 +776,7 @@ Single-number weighted rating and adaptation terms (ISO 717-1).
 | `rating` | Weighted rating (`Rw`, `R'w`, `DnT,w` ...), the shifted reference read at 500 Hz, in dB (Clause 4.4). Integer. |
 | `c` | Spectrum adaptation term `C` (spectrum No. 1), in dB (Clause 4.5). Integer. |
 | `ctr` | Spectrum adaptation term `Ctr` (spectrum No. 2), in dB (Clause 4.5). Integer. |
-| `unfavourable_sum` | Sum of unfavourable deviations at the final shift, in dB (Clause 4.4); at most 32,0 (16 bands) or 10,0 (5 bands). Restates `measured` against `shifted_reference` and is checked against them when both are present. |
+| `unfavorable_sum` | Sum of unfavourable deviations at the final shift, in dB (Clause 4.4); at most 32,0 (16 bands) or 10,0 (5 bands). Restates `measured` against `shifted_reference` and is checked against them when both are present. |
 | `frequencies` | Band centre frequencies of the measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
 | `measured` | The measured band quantities used for the rating (after the one-decimal reduction of Clause 4.4), in dB. Defaults to `None`. |
 | `shifted_reference` | Table 3 reference curve after the final shift, in dB. Defaults to `None`. |

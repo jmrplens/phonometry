@@ -414,7 +414,7 @@ def test_microphone_direction_does_not_depend_on_the_winding() -> None:
     backward = emission.plant_measurement_contour(
         PLANT, CONTOUR[::-1], characteristic_height_m=8.0, position_count=16
     )
-    inward = backward.plant_centre_m - backward.positions_m
+    inward = backward.plant_center_m - backward.positions_m
     dots = np.sum(inward * backward.microphone_directions, axis=1)
     assert np.all(dots > 0.0)
     assert forward.mean_distance_m > 0.0
@@ -577,7 +577,7 @@ def test_plant_centre_is_the_centroid() -> None:
         [[-10, -10], [50, -10], [50, 50], [-10, 50]],
         characteristic_height_m=5.0,
     )
-    np.testing.assert_allclose(square.plant_centre_m, [20.0, 20.0])
+    np.testing.assert_allclose(square.plant_center_m, [20.0, 20.0])
 
 
 def test_omitted_positions_leave_the_layout_and_the_mean() -> None:

@@ -42,7 +42,7 @@ import numpy as np
 import reference_data as ref
 
 from phonometry import electroacoustics as ea
-from phonometry.electroacoustics import programme_signal as ps
+from phonometry.electroacoustics import program_signal as ps
 from phonometry.filters import octave_filter
 
 from ..registry import Outcome, count, mask, numeric, record, register
@@ -85,7 +85,7 @@ def _table_ii() -> tuple[np.ndarray, np.ndarray]:
 )
 def _chk_table_ii() -> Outcome:
     frequencies, levels = _table_ii()
-    published = ea.SIMULATED_PROGRAMME_SPECTRUM
+    published = ea.SIMULATED_PROGRAM_SPECTRUM
     matching = sum(
         1
         for f, level, tol in ref.IEC60268_1_TABLE_II
@@ -103,7 +103,7 @@ def _chk_table_ii() -> Outcome:
 )
 def _chk_full_range() -> Outcome:
     levels = np.array(
-        [band.relative_level_db for band in ea.SIMULATED_PROGRAMME_SPECTRUM.values()]
+        [band.relative_level_db for band in ea.SIMULATED_PROGRAM_SPECTRUM.values()]
     )
     excess = 10.0 * math.log10(float(np.sum(10.0 ** (levels / 10.0))))
     return numeric(
@@ -124,7 +124,7 @@ def _figure_2_band_levels() -> np.ndarray:
     levels = []
     for centre in exact:
         f = np.geomspace(centre / edge, centre * edge, 4001)
-        power = np.abs(ea.programme_signal_filter(f)) ** 2 / f
+        power = np.abs(ea.program_signal_filter(f)) ** 2 / f
         levels.append(10.0 * np.log10(np.trapezoid(power, f) / math.log(edge**2)))
     return np.asarray(levels)
 
@@ -136,7 +136,7 @@ def _figure_2_band_levels() -> np.ndarray:
 )
 def _chk_figure_2() -> Outcome:
     frequencies, _ = _table_ii()
-    check = ea.check_programme_signal(frequencies, _figure_2_band_levels())
+    check = ea.check_program_signal(frequencies, _figure_2_band_levels())
     bands = " Hz and ".join(f"{f:g}" for f in check.binding_bands_hz)
     return mask(
         expected="one level puts all 31 bands inside Table II",
@@ -189,9 +189,9 @@ def _chk_generator_nodes() -> Outcome:
     "A 60 s record of the generator judged in one-third-octave bands",
 )
 def _chk_generator_record() -> Outcome:
-    x = ea.simulated_programme_signal(_FS, 60.0, seed=1)
+    x = ea.simulated_program_signal(_FS, 60.0, seed=1)
     bands = octave_filter(x, _FS, fraction=3, limits=[19.95, 19952.6])
-    check = ea.check_programme_signal(bands.frequencies, np.asarray(bands.levels))
+    check = ea.check_program_signal(bands.frequencies, np.asarray(bands.levels))
     return mask(
         expected="all 31 bands inside Table II",
         computed=f"smallest margin {check.margin_db:.3f} dB",
@@ -336,7 +336,7 @@ def _chk_a_weighting_coefficients() -> Outcome:
     matching = sum(
         1
         for f in frequencies
-        if round(ea.programme_signal_level([f], [0.0], a_weighted=True), 1) == table3[f]
+        if round(ea.program_signal_level([f], [0.0], a_weighted=True), 1) == table3[f]
     )
     return count(matching, frequencies.size, subject="bands matching Table 3")
 
@@ -347,9 +347,7 @@ def _chk_a_weighting_coefficients() -> Outcome:
     "Programme characteristic voltage of a flat headphone, 21 bands at 80 dB from 0,1 V",
 )
 def _chk_programme_voltage() -> Outcome:
-    result = ea.programme_characteristic_voltage(
-        0.1, _BANDS, np.full(_BANDS.size, 80.0)
-    )
+    result = ea.program_characteristic_voltage(0.1, _BANDS, np.full(_BANDS.size, 80.0))
     total = 80.0 + 10.0 * math.log10(_BANDS.size)
     expected = 0.1 * 10.0 ** ((94.0 - total) / 20.0)
     return numeric(expected, result.characteristic_voltage_v, 1e-12, unit="V", places=6)
@@ -363,7 +361,7 @@ def _chk_programme_voltage() -> Outcome:
 def _chk_fittings_mean() -> Outcome:
     offsets = np.array([0.0, 1.0, -1.0])
     levels = 80.0 + offsets[:, None] + np.zeros(_BANDS.size)
-    result = ea.programme_characteristic_voltage(0.1, _BANDS, levels)
+    result = ea.program_characteristic_voltage(0.1, _BANDS, levels)
     total = 80.0 + 10.0 * math.log10(_BANDS.size) + offsets
     expected = float(np.mean(0.1 * 10.0 ** ((94.0 - total) / 20.0)))
     return numeric(expected, result.characteristic_voltage_v, 1e-12, unit="V", places=6)
@@ -378,9 +376,9 @@ def _chk_limiting_signal() -> Outcome:
     verdicts = {}
     lower, upper = ref.IEC60268_7_LIMITING_PEAK_TO_RMS
     for ratio in (lower - 0.1, lower, upper, upper + 0.1):
-        x = ea.simulated_programme_signal(_FS, 20.0, peak_to_rms=ratio, seed=3)
+        x = ea.simulated_program_signal(_FS, 20.0, peak_to_rms=ratio, seed=3)
         verdicts[f"{ratio:g}"] = _flag(ea.check_limiting_test_signal(x, _FS).passes)
-    x = ea.simulated_programme_signal(_FS, 20.0, seed=3)
+    x = ea.simulated_program_signal(_FS, 20.0, seed=3)
     verdicts["unclipped"] = _flag(ea.check_limiting_test_signal(x, _FS).passes)
     return record(
         {"1.7": 0.0, "1.8": 1.0, "2.2": 1.0, "2.3": 0.0, "unclipped": 0.0},
@@ -627,7 +625,7 @@ def _chk_annex_b() -> Outcome:
         canal_section_area_mm2=limits["canal_area_ratio"]
         * limits["adult_canal_area_mm2"],
         volume_mm3=limits["volume_mm3"],
-        pink_noise_band_levels_db=[60.0, 60.0 + limits["neighbour_difference_db"]],
+        pink_noise_band_levels_db=[60.0, 60.0 + limits["neighbor_difference_db"]],
         open_levels_db=[60.0],
         sealed_levels_db=[60.0 - limits["sealed_attenuation_db"]],
     )

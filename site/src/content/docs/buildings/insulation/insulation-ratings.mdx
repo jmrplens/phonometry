@@ -238,7 +238,7 @@ measured spectrum touches 26.6 dB there, and $R_\mathrm{w}$ is 30 dB.*
 ```python
 # `building`, `R` and `w` come from the reference-curve block above.
 print(w.rating, w.c, w.ctr)                          # 30 -2 -3  ->  Rw(C;Ctr) = 30(-2;-3)
-print(w.unfavourable_sum)                            # 31.8  (cap 32.0 = 2.0 x 16)
+print(w.unfavorable_sum)                            # 31.8  (cap 32.0 = 2.0 x 16)
 
 w.plot()   # measured R vs shifted ISO 717-1 reference, deviations shaded (needs matplotlib)
 ```
@@ -283,7 +283,7 @@ plt.show()
 | `bands` | str or `None` | — | `'third-octave'` / `'octave'` / `None` | `None` infers from the count |
 
 `weighted_rating()` returns a `WeightedRatingResult` (`rating`, `c`, `ctr`,
-`unfavourable_sum`, all integers except the sum), plus the three fields the
+`unfavorable_sum`, all integers except the sum), plus the three fields the
 figures on this page are drawn from: `frequencies`, `measured` and
 `shifted_reference`, and `quantity` naming what was rated.
 
@@ -339,7 +339,7 @@ l_n = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
 
 # Weighted impact rating + spectrum adaptation term CI (ISO 717-2)
 res_imp = building.weighted_impact_rating(l_n)
-print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  ->  Ln,w(CI)=79(-11)
+print(res_imp.rating, res_imp.ci, res_imp.unfavorable_sum)   # 79 -11 28.0  ->  Ln,w(CI)=79(-11)
 
 # Octave-band data carry the extra -5 dB reduction (Clause 4.3.2)
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
@@ -401,7 +401,7 @@ sixteen bands in that cell and gives $-10$ instead; the registry entry is in
 | `bands` | str or `None` | — | `'third-octave'` / `'octave'` / `None` | `None` infers from the count |
 
 `weighted_impact_rating()` returns an `ImpactRatingResult` (`rating`,
-`ci` integers, `unfavourable_sum` in dB), with the same three plotting fields
+`ci` integers, `unfavorable_sum` in dB), with the same three plotting fields
 as the airborne result: `frequencies`, `measured` and `shifted_reference`.
 
 ## Enlarged frequency ranges and one-decimal ratings

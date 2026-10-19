@@ -299,7 +299,7 @@ result = materials.weighted_absorption(alpha_p)
 print(result.rating_label)          # 0.60(M)
 print(result.alpha_w)               # 0.6
 print(result.absorption_class)      # C
-print(round(result.unfavourable_sum, 2))  # 0.05
+print(round(result.unfavorable_sum, 2))  # 0.05
 result.plot()   # the figure above: practical curve vs shifted reference
 
 # A bare alpha_w also maps straight to its class (Table B.1)

@@ -30,7 +30,7 @@ import numpy as np
 from phonometry import electroacoustics
 from phonometry.filters import octave_filter
 
-table = electroacoustics.SIMULATED_PROGRAMME_SPECTRUM
+table = electroacoustics.SIMULATED_PROGRAM_SPECTRUM
 levels = np.array([band.relative_level_db for band in table.values()])
 print(len(table), table[20.0].relative_level_db, table[20000.0].relative_level_db)
 # 31 -13.5 -21.6
@@ -40,30 +40,30 @@ print(round(10 * np.log10(np.sum(10 ** (levels / 10))), 2))  # 12.56
 "Such a signal may be obtained from a pink-noise source by means of the
 filter circuit shown in Figure 2": a passive ladder of 430 Ω and 2.2 µF into
 3.3 kΩ and 91 nF, then 330 Ω and 2.2 µF into 3.3 kΩ and 68 nF, then 0.47 µF
-into 10 kΩ. `programme_signal_filter` is its exact transfer function, about
+into 10 kΩ. `program_signal_filter` is its exact transfer function, about
 −4 dB in the passband. Pink noise through it lands inside every tolerance of
 Table II, but closely: in ideal bands the smallest margin is 0.18 dB, at
 400 Hz on one side and 5 kHz on the other, so a short record can fall outside.
-`simulated_programme_signal` therefore offers two shapes. The default puts
+`simulated_program_signal` therefore offers two shapes. The default puts
 every band on its printed level: a spectrum straight in decibels between the
 band centres, with its nodes fitted so that each band, integrated in closed
 form, is exactly the table. `spectrum="figure_2"` is the circuit.
 
-`check_programme_signal` judges band levels against Table II. Since the table
+`check_program_signal` judges band levels against Table II. Since the table
 is relative, it looks for the level that places every band inside its window
 and passes when one exists; it reports the margin and the bands that bind.
 
 ```python
 fs = 48000
-x = electroacoustics.simulated_programme_signal(fs, 60.0, spectrum="figure_2", seed=2)
+x = electroacoustics.simulated_program_signal(fs, 60.0, spectrum="figure_2", seed=2)
 bands = octave_filter(x, fs, fraction=3, limits=[19.95, 19952.6])
-check = electroacoustics.check_programme_signal(bands.frequencies, bands.levels)
+check = electroacoustics.check_program_signal(bands.frequencies, bands.levels)
 print(check.passes, round(check.margin_db, 2), check.binding_bands_hz)
 # True 0.12 (315.0, 5000.0)
 
-y = electroacoustics.simulated_programme_signal(fs, 60.0, seed=2)
+y = electroacoustics.simulated_program_signal(fs, 60.0, seed=2)
 bands_y = octave_filter(y, fs, fraction=3, limits=[19.95, 19952.6])
-check_y = electroacoustics.check_programme_signal(bands_y.frequencies, bands_y.levels)
+check_y = electroacoustics.check_program_signal(bands_y.frequencies, bands_y.levels)
 print(check_y.passes, round(check_y.margin_db, 2))  # True 0.34
 ```
 
@@ -85,7 +85,7 @@ weak upper bands.*
 ```python
 import matplotlib.pyplot as plt
 
-clipped = electroacoustics.simulated_programme_signal(fs, 60.0, peak_to_rms=2.0, seed=2)
+clipped = electroacoustics.simulated_program_signal(fs, 60.0, peak_to_rms=2.0, seed=2)
 limiting = electroacoustics.check_limiting_test_signal(clipped, fs)
 fig, (ax_figure_2, ax_limiting) = plt.subplots(1, 2, figsize=(13.5, 5.6))
 check.plot(ax_figure_2)
@@ -229,8 +229,8 @@ frequencies = centres[in_range]
 resonance = 9.0 / (1.0 + ((frequencies / 3000.0 - 3000.0 / frequencies) / 0.8) ** 2)
 reading = 72.0 + levels[in_range] + resonance  # dB re 20 µPa at 0.1 V
 fittings = np.vstack([reading, reading + 0.6, reading - 0.4])
-plain = electroacoustics.programme_characteristic_voltage(0.1, frequencies, fittings)
-weighted = electroacoustics.programme_characteristic_voltage(
+plain = electroacoustics.program_characteristic_voltage(0.1, frequencies, fittings)
+weighted = electroacoustics.program_characteristic_voltage(
     0.1, frequencies, fittings, a_weighted=True
 )
 print(round(plain.characteristic_voltage_v, 3), round(weighted.characteristic_voltage_v, 3))
@@ -559,7 +559,7 @@ calibrated readings the response function is not given.
 - [Test signals and sample-rate tools](../../signals/spectra/test-signals.md):
   the tone bursts of IEC 60268-1 Annex A, the other part of that standard the
   library implements.
-- API reference: [`electroacoustics.programme_signal`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/programme-signal/)
+- API reference: [`electroacoustics.program_signal`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/program-signal/)
   and [`electroacoustics.headphones`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/headphones/).
 
 ## Standards

@@ -218,20 +218,20 @@ def test_floor_and_massive_constants_are_the_printed_ones() -> None:
 
 def test_the_storey_estimate_of_6_4() -> None:
     """``f_i ~ 10 / n``, offered from about five storeys up."""
-    assert bd.storey_fundamental_frequency(5) == pytest.approx(2.0)
-    assert bd.storey_fundamental_frequency(8) == pytest.approx(1.25)
-    assert bd.STOREY_FREQUENCY_MIN_STOREYS == 5
+    assert bd.story_fundamental_frequency(5) == pytest.approx(2.0)
+    assert bd.story_fundamental_frequency(8) == pytest.approx(1.25)
+    assert bd.STORY_FREQUENCY_MIN_STORIES == 5
 
 
 @pytest.mark.parametrize("bad", [0, -3])
 def test_a_building_with_no_storeys_is_refused(bad: int) -> None:
-    with pytest.raises(ValueError, match=r"'storeys' must be at least 1"):
-        bd.storey_fundamental_frequency(bad)
+    with pytest.raises(ValueError, match=r"'stories' must be at least 1"):
+        bd.story_fundamental_frequency(bad)
 
 
 def test_a_fractional_storey_count_is_refused() -> None:
-    with pytest.raises(ValueError, match=r"'storeys' must be an integer"):
-        bd.storey_fundamental_frequency(4.5)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match=r"'stories' must be an integer"):
+        bd.story_fundamental_frequency(4.5)  # type: ignore[arg-type]
 
 
 def test_bending_stress_is_formula_1() -> None:
@@ -387,13 +387,13 @@ def test_the_storey_estimate_warns_below_the_five_storeys_of_6_4() -> None:
     building is outside what it offers, and silence would say otherwise.
     """
     with pytest.warns(bd.BuildingDamageWarning, match=r"5 storeys up; got 3"):
-        got = bd.storey_fundamental_frequency(3)
+        got = bd.story_fundamental_frequency(3)
     assert got == pytest.approx(10.0 / 3.0)
 
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        assert bd.storey_fundamental_frequency(
-            bd.STOREY_FREQUENCY_MIN_STOREYS
+        assert bd.story_fundamental_frequency(
+            bd.STORY_FREQUENCY_MIN_STORIES
         ) == pytest.approx(2.0)
 
 

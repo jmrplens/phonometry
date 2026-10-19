@@ -75,7 +75,7 @@ van Vossen, Robertsson & Chapman, *Geophysics* 67(2), 618-624 (2002).
 
 *Constant* (`phonometry.simulation.elastic_fdtd.Material`).
 
-## ALUMINIUM
+## ALUMINUM
 
 *Constant* (`phonometry.simulation.elastic_fdtd.Material`).
 
@@ -561,7 +561,7 @@ Every material must satisfy $c_\mathrm{P}^2 \ge 2 c_\mathrm{S}^2$
 Lame parameter), the constructor bound of [`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d).
 
 The module constants [`AIR`](/phonometry/reference/api/simulation/elastic-fdtd/#air), [`WATER`](/phonometry/reference/api/simulation/elastic-fdtd/#water), [`STEEL`](/phonometry/reference/api/simulation/elastic-fdtd/#steel),
-[`ALUMINIUM`](/phonometry/reference/api/simulation/elastic-fdtd/#aluminium) and [`CONCRETE`](/phonometry/reference/api/simulation/elastic-fdtd/#concrete) carry the nominal round-number
+[`ALUMINUM`](/phonometry/reference/api/simulation/elastic-fdtd/#aluminum) and [`CONCRETE`](/phonometry/reference/api/simulation/elastic-fdtd/#concrete) carry the nominal round-number
 properties used throughout the documentation and the validation suite,
 mirroring the documented default media of the acoustic solver.
 

@@ -746,7 +746,7 @@ SoundscapeDataCollection(
     language: str,
     instrument_copy: str,
     rating_scale_construction: str | None = None,
-    behaviour_observation: str | None = None,
+    behavior_observation: str | None = None,
 )
 ```
 
@@ -761,7 +761,7 @@ How the perception data were collected (ISO/TS 12913-2 A.4 a) to e)).
 | `language` | A.4 d), the language of the study, with examples of the questions in the original language and in translation. |
 | `instrument_copy` | Where the copy of the data collection instrument (the questionnaire or the scales) that A.4 requires the report to include is found. |
 | `rating_scale_construction` | A.4 c), for a study based on rating scales: how the questions, the response alternatives and the response format were constructed and formulated; `None` for a study without. |
-| `behaviour_observation` | A.4 e), for observations of behaviour: how they were conducted and documented; `None` for a study without. |
+| `behavior_observation` | A.4 e), for observations of behaviour: how they were conducted and documented; `None` for a study without. |
 
 ## SoundscapeParticipants
 

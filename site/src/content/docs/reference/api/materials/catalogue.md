@@ -138,8 +138,8 @@ PorousMaterial(
     viscous_length_um: float | None = None,
     thermal_length_um: float | None = None,
     thermal_permeability_m2: float | None = None,
-    fibre_diameter_um: float | None = None,
-    fibre_diameter_distribution_parameter: float | None = None,
+    fiber_diameter_um: float | None = None,
+    fiber_diameter_distribution_parameter: float | None = None,
     shot_content_percent: float | None = None,
     binder_content_percent: float | None = None,
     frame_density_kg_m3: float | None = None,
@@ -175,8 +175,8 @@ instead of a number are the ones every catalogue row has.
 | `viscous_length_um` | Viscous characteristic length `Lambda`, in micrometres, the unit the tables print it in. The `viscous_length_m` parameter of [`johnson_champoux_allard`](/phonometry/reference/api/materials/porous/#johnson_champoux_allard) is in **metres**, so this field is not passed to it directly: `medium` makes the conversion, once, and a caller who assembles the argument list by hand divides by a million first. |
 | `thermal_length_um` | Thermal characteristic length `Lambda'`, in micrometres. Metres at the model's `thermal_length_m`, as above. |
 | `thermal_permeability_m2` | Static thermal permeability `q'_0`, in m2, which two of the tables print beside the thermal length. |
-| `fibre_diameter_um` | Fibre diameter `d`, in micrometres, for the materials a table describes by the fibre rather than by the pore. |
-| `fibre_diameter_distribution_parameter` | The parameter of the Poisson distribution Mechel fits to a measured spread of fibre diameters, referred to a diameter class one micrometre wide. Dimensionless: the micrometre in the column heading belongs to the class width, which is stated in the file's `about` because the value means nothing without it. |
+| `fiber_diameter_um` | Fibre diameter `d`, in micrometres, for the materials a table describes by the fibre rather than by the pore. |
+| `fiber_diameter_distribution_parameter` | The parameter of the Poisson distribution Mechel fits to a measured spread of fibre diameters, referred to a diameter class one micrometre wide. Dimensionless: the micrometre in the column heading belongs to the class width, which is stated in the file's `about` because the value means nothing without it. |
 | `shot_content_percent` | Shot content, per cent **by weight**, of particles above the diameter the table's own heading names. |
 | `binder_content_percent` | Organic binder content, per cent by weight. |
 | `frame_density_kg_m3` | Frame density `rho_1`, in kg/m3, the mass of the skeleton per unit volume of material and not the density of the material the skeleton is made of. |

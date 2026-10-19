@@ -53,7 +53,7 @@ def test_annex_c_formula_1_band_by_band() -> None:
     levels = im.predict_floor_spectrum(EMISSION, ground_db=GROUND, floor_db=FLOOR)
     assert np.all(np.abs(levels - PRINTED) <= 0.1 + 1e-9)
     assert np.count_nonzero(np.abs(levels - PRINTED) > 0.01) == 3
-    assert list(FREQS) == list(im.PREDICTION_BAND_CENTRES_HZ)
+    assert list(FREQS) == list(im.PREDICTION_BAND_CENTERS_HZ)
 
 
 def test_annex_c_the_chain_from_the_sum_level() -> None:

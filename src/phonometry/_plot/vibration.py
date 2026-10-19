@@ -374,7 +374,7 @@ _STRINGS: dict[str, str] = {
     r"$\pm$50 %, which D.2 calls not uncommon": r"$\pm$50 %, que D.2 llama nada raro",
     "{model} model: {f} Hz at {h} m": "modelo de {model}: {f} Hz a {h} m",
     "Empirical fundamental frequency of a building (ISO 4866 D.2)": "Frecuencia fundamental empírica de un edificio (ISO 4866, D.2)",
-    "storeys": "plantas",
+    "stories": "plantas",
     "height": "altura",
     "height_width": "altura y anchura",
     "slenderness": "esbeltez",

@@ -49,7 +49,7 @@ report are stated in is not the same. That is why `d2m_nt_a()` and
 spectra, rather than one function with a spectrum switch that would silently
 put the wrong name on the result.
 
-All four are in `DB_HR_NORMALISED_SPECTRA` under the keys `"pink"`,
+All four are in `DB_HR_NORMALIZED_SPECTRA` under the keys `"pink"`,
 `"traffic"`, `"railway"` and `"aircraft"`. The calculation below reproduces
 Ejemplo 7.2 of the *Manual*, the apparent sound reduction index $R'$ of a party
 wall taken from a real field test report:

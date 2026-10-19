@@ -57,7 +57,7 @@ dispersion effects").
 **Acoustic centres** (6.5 and Annex A). The distance :math:`d_{12}` is between
 the acoustic centres, each given as its position on the principal axis
 relative to the diaphragm, positive in front of it, a value or one per
-frequency; Annex A shows them only as a figure. :func:`acoustic_centre` finds
+frequency; Annex A shows them only as a figure. :func:`acoustic_center` finds
 one from the inverse-distance law, as 6.5 describes.
 
 **The arrangement** (6.4, 7.3). :func:`check_free_field_arrangement` holds the
@@ -95,12 +95,12 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
 __all__ = [
-    "AcousticCentre",
+    "AcousticCenter",
     "FreeFieldArrangementCheck",
     "FreeFieldInputUncertainties",
     "FreeFieldParameterUncertainty",
     "ReciprocityAirAttenuation",
-    "acoustic_centre",
+    "acoustic_center",
     "check_free_field_arrangement",
     "free_field_parameter_uncertainty",
     "free_field_reciprocity",
@@ -159,7 +159,7 @@ class ReciprocityAirAttenuation(OwnsArrays):
     :ivar temperature_c: :math:`t`, in °C.
     :ivar static_pressure_pa: :math:`p_\mathrm{s}`, in Pa.
     :ivar relative_humidity_percent: :math:`H`, in %.
-    :ivar water_vapour_mole_fraction: :math:`x_\mathrm{w}` (Step 2).
+    :ivar water_vapor_mole_fraction: :math:`x_\mathrm{w}` (Step 2).
     :ivar oxygen_relaxation_hz: :math:`f_\mathrm{rO}`, in Hz (Step 3).
     :ivar nitrogen_relaxation_hz: :math:`f_\mathrm{rN}`, in Hz (Step 3).
     :ivar speed_of_sound: :math:`c`, the zero-frequency speed of sound of
@@ -175,7 +175,7 @@ class ReciprocityAirAttenuation(OwnsArrays):
     temperature_c: float
     static_pressure_pa: float
     relative_humidity_percent: float
-    water_vapour_mole_fraction: float
+    water_vapor_mole_fraction: float
     oxygen_relaxation_hz: float
     nitrogen_relaxation_hz: float
     speed_of_sound: float
@@ -237,7 +237,7 @@ class ReciprocityAirAttenuation(OwnsArrays):
             <= _ACCURACY_TEMPERATURE_C[1]
             and self.static_pressure_pa < _ACCURACY_PRESSURE_PA
             and _ACCURACY_WATER_FRACTION[0]
-            <= self.water_vapour_mole_fraction
+            <= self.water_vapor_mole_fraction
             <= _ACCURACY_WATER_FRACTION[1]
         )
         # f/p_s of decimal readings is decimal: 40,8 Hz at 102 kPa is 0,4 Hz/kPa
@@ -364,7 +364,7 @@ def reciprocity_air_attenuation(
         temperature_c=t,
         static_pressure_pa=pressure,
         relative_humidity_percent=float(relative_humidity_percent),
-        water_vapour_mole_fraction=water,
+        water_vapor_mole_fraction=water,
         oxygen_relaxation_hz=oxygen_relaxation,
         nitrogen_relaxation_hz=nitrogen_relaxation,
         speed_of_sound=c,
@@ -416,17 +416,17 @@ def _medium(
 
 
 def _positions(
-    acoustic_centres_m: Sequence[ArrayLike], count: int, microphones: int
+    acoustic_centers_m: Sequence[ArrayLike], count: int, microphones: int
 ) -> list[NDArray[np.float64]]:
     """The acoustic centre of each microphone at each frequency."""
-    if len(acoustic_centres_m) != microphones:
+    if len(acoustic_centers_m) != microphones:
         msg = (
-            f"'acoustic_centres_m' must hold one entry per microphone ({microphones})."
+            f"'acoustic_centers_m' must hold one entry per microphone ({microphones})."
         )
         raise ValueError(msg)
     return [
-        _band_column(value, f"acoustic_centres_m[{index}]", count)
-        for index, value in enumerate(acoustic_centres_m)
+        _band_column(value, f"acoustic_centers_m[{index}]", count)
+        for index, value in enumerate(acoustic_centers_m)
     ]
 
 
@@ -477,7 +477,7 @@ def free_field_reciprocity(
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    acoustic_centres_m: Sequence[ArrayLike] = (0.0, 0.0, 0.0),
+    acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0, 0.0),
     dispersion: bool = True,
     corrections_db: Mapping[str, ArrayLike] | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
@@ -509,7 +509,7 @@ def free_field_reciprocity(
     :param temperature_c: The temperature of the air, in °C.
     :param static_pressure_pa: The static pressure, in Pa.
     :param relative_humidity_percent: The relative humidity, in %.
-    :param acoustic_centres_m: The acoustic centre of microphones 1, 2 and 3,
+    :param acoustic_centers_m: The acoustic centre of microphones 1, 2 and 3,
         each relative to its diaphragm on the principal axis, positive in
         front, in m, one value or one per frequency (Default: the centres of
         the diaphragms, which Annex A allows at sufficiently remote points).
@@ -529,7 +529,7 @@ def free_field_reciprocity(
         msg = "Three pairs are needed, in the order 12, 23, 31 (Formula (8))."
         raise ValueError(msg)
     distances = _distances(diaphragm_distances_m, len(_TRIAD_PAIRS))
-    x1, x2, x3 = _positions(acoustic_centres_m, count, 3)
+    x1, x2, x3 = _positions(acoustic_centers_m, count, 3)
     medium = _medium(
         frequencies,
         temperature_c,
@@ -575,7 +575,7 @@ def free_field_reciprocity_pair(
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    acoustic_centres_m: Sequence[ArrayLike] = (0.0, 0.0),
+    acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0),
     dispersion: bool = True,
     corrections_db: Mapping[str, ArrayLike] | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
@@ -603,7 +603,7 @@ def free_field_reciprocity_pair(
     :param temperature_c: The temperature of the air, in °C.
     :param static_pressure_pa: The static pressure, in Pa.
     :param relative_humidity_percent: The relative humidity, in %.
-    :param acoustic_centres_m: The acoustic centres of the two microphones,
+    :param acoustic_centers_m: The acoustic centres of the two microphones,
         positive in front of the diaphragm, in m (Default: the diaphragms).
     :param dispersion: Whether :math:`k` includes dispersion (Default:
         ``True``).
@@ -618,7 +618,7 @@ def free_field_reciprocity_pair(
     frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     distance = require_positive(diaphragm_distance_m, "diaphragm_distance_m")
-    x1, x2 = _positions(acoustic_centres_m, count, 2)
+    x1, x2 = _positions(acoustic_centers_m, count, 2)
     medium = _medium(
         frequencies,
         temperature_c,
@@ -656,7 +656,7 @@ def free_field_transfer_impedance(
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    acoustic_centres_m: Sequence[ArrayLike] = (0.0, 0.0),
+    acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0),
     dispersion: bool = True,
 ) -> NDArray[np.complex128]:
     r"""The electrical transfer impedance two microphones of known free-field
@@ -679,7 +679,7 @@ def free_field_transfer_impedance(
     :param temperature_c: The temperature of the air, in °C.
     :param static_pressure_pa: The static pressure, in Pa.
     :param relative_humidity_percent: The relative humidity, in %.
-    :param acoustic_centres_m: The two acoustic centres, in m (Default: the
+    :param acoustic_centers_m: The two acoustic centres, in m (Default: the
         diaphragms).
     :param dispersion: Whether :math:`k` includes dispersion (Default:
         ``True``).
@@ -690,7 +690,7 @@ def free_field_transfer_impedance(
     frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     distance = require_positive(diaphragm_distance_m, "diaphragm_distance_m")
-    x1, x2 = _positions(acoustic_centres_m, count, 2)
+    x1, x2 = _positions(acoustic_centers_m, count, 2)
     medium = _medium(
         frequencies,
         temperature_c,
@@ -719,7 +719,7 @@ _FEWEST_DISTANCES = 3
 
 
 @dataclass(frozen=True)
-class AcousticCentre(OwnsArrays):
+class AcousticCenter(OwnsArrays):
     r"""The position of the acoustic centre of a microphone from the
     inverse-distance law (IEC 61094-3:2016 6.5).
 
@@ -745,7 +745,7 @@ class AcousticCentre(OwnsArrays):
         distances = np.asarray(self.distances, dtype=np.float64).reshape(-1)
         inverse = np.asarray(self.inverse_readings, dtype=np.float64).reshape(-1)
         if distances.size != inverse.size:
-            msg = "AcousticCentre: one inverse pressure per distance."
+            msg = "AcousticCenter: one inverse pressure per distance."
             raise ValueError(msg)
         object.__setattr__(self, "distances", read_only(distances))
         object.__setattr__(self, "inverse_readings", read_only(inverse))
@@ -779,12 +779,12 @@ class AcousticCentre(OwnsArrays):
         )
 
 
-def acoustic_centre(
+def acoustic_center(
     distances: ArrayLike,
     sound_pressures_pa: ArrayLike,
     *,
     attenuation_np_per_m: float = 0.0,
-) -> AcousticCentre:
+) -> AcousticCenter:
     r"""The position of the acoustic centre of a microphone used as a source
     (IEC 61094-3:2016 6.5).
 
@@ -808,7 +808,7 @@ def acoustic_centre(
         or any proportional unit, positive.
     :param attenuation_np_per_m: :math:`\alpha` at the frequency, in Np/m
         (Default: 0), from :func:`reciprocity_air_attenuation`.
-    :return: The :class:`AcousticCentre`.
+    :return: The :class:`AcousticCenter`.
     :raises ValueError: for fewer than three distances, columns of different
         lengths, values that are not positive and finite, or distances that
         are all the same.
@@ -828,7 +828,7 @@ def acoustic_centre(
     alpha = require_non_negative(attenuation_np_per_m, "attenuation_np_per_m")
     inverse = 1.0 / (pressures * np.exp(alpha * distances))
     slope, intercept = np.polyfit(distances, inverse, 1)
-    return AcousticCentre(
+    return AcousticCenter(
         distances=distances,
         inverse_readings=inverse,
         slope=float(slope),
@@ -1136,7 +1136,7 @@ class FreeFieldInputUncertainties(OwnsArrays):
     Each one left at zero contributes no component.
 
     :param u_distance_m: Of each distance between the diaphragms, in m.
-    :param u_acoustic_centre_m: Of each acoustic centre, in m, one value or one
+    :param u_acoustic_center_m: Of each acoustic centre, in m, one value or one
         per frequency (Annex A puts it under 2 mm below the resonance
         frequency, as a bound). It is held as a read-only float64 copy.
     :param u_static_pressure_pa: Of the static pressure, in Pa.
@@ -1152,7 +1152,7 @@ class FreeFieldInputUncertainties(OwnsArrays):
 
     _: KW_ONLY
     u_distance_m: float = 0.0
-    u_acoustic_centre_m: ArrayLike = 0.0
+    u_acoustic_center_m: ArrayLike = 0.0
     u_static_pressure_pa: float = 0.0
     u_temperature_k: float = 0.0
     u_relative_humidity_percent: float = 0.0
@@ -1174,14 +1174,14 @@ class FreeFieldInputUncertainties(OwnsArrays):
             object.__setattr__(
                 self, name, require_non_negative(getattr(self, name), name)
             )
-        centre = np.asarray(self.u_acoustic_centre_m, dtype=np.float64)
+        centre = np.asarray(self.u_acoustic_center_m, dtype=np.float64)
         if centre.ndim > 1 or not np.all(np.isfinite(centre)) or np.any(centre < 0.0):
             msg = (
-                "'u_acoustic_centre_m' must be one finite, non-negative value or "
+                "'u_acoustic_center_m' must be one finite, non-negative value or "
                 "one per frequency."
             )
             raise ValueError(msg)
-        object.__setattr__(self, "u_acoustic_centre_m", read_only(centre))
+        object.__setattr__(self, "u_acoustic_center_m", read_only(centre))
 
 
 def free_field_parameter_uncertainty(
@@ -1192,7 +1192,7 @@ def free_field_parameter_uncertainty(
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    acoustic_centres_m: Sequence[ArrayLike] = (0.0, 0.0, 0.0),
+    acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0, 0.0),
     microphone: int = 1,
     dispersion: bool = True,
 ) -> FreeFieldParameterUncertainty:
@@ -1217,7 +1217,7 @@ def free_field_parameter_uncertainty(
     :param temperature_c: The temperature, in °C.
     :param static_pressure_pa: The static pressure, in Pa.
     :param relative_humidity_percent: The relative humidity, in %.
-    :param acoustic_centres_m: The three acoustic centres, in m.
+    :param acoustic_centers_m: The three acoustic centres, in m.
     :param microphone: The microphone whose level is analysed, 1, 2 or 3.
     :param dispersion: Whether :math:`k` includes dispersion (Default:
         ``True``).
@@ -1232,7 +1232,7 @@ def free_field_parameter_uncertainty(
         msg = "'microphone' must be 1, 2 or 3."
         raise ValueError(msg)
     distances = _distances(diaphragm_distances_m, len(_TRIAD_PAIRS))
-    centres = _positions(acoustic_centres_m, count, 3)
+    centres = _positions(acoustic_centers_m, count, 3)
     conditions = (
         float(temperature_c),
         float(static_pressure_pa),
@@ -1269,14 +1269,14 @@ def free_field_parameter_uncertainty(
             moved[index] += u.u_distance_m
             changes.append(level(new_distances=moved) - nominal)
         components["distance"] = np.sqrt(sum(c**2 for c in changes))
-    centre_u = _band_column(u.u_acoustic_centre_m, "u_acoustic_centre_m", count)
+    centre_u = _band_column(u.u_acoustic_center_m, "u_acoustic_center_m", count)
     if np.any(centre_u > 0.0):
         changes = []
         for index in range(3):
             moved_centres = list(centres)
             moved_centres[index] = centres[index] + centre_u
             changes.append(level(new_centres=moved_centres) - nominal)
-        components["acoustic_centres"] = np.sqrt(sum(c**2 for c in changes))
+        components["acoustic_centers"] = np.sqrt(sum(c**2 for c in changes))
     for key, index, step in (
         ("static_pressure", 1, u.u_static_pressure_pa),
         ("temperature", 0, u.u_temperature_k),

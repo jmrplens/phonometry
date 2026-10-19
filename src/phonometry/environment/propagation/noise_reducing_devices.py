@@ -115,7 +115,7 @@ TRAFFIC_NOISE_BANDS_HZ: tuple[float, ...] = (
 #: EN 1793-3:1997, Table 1. The normalised traffic noise spectrum itself:
 #: relative A-weighted one-third octave band levels, in dB, peaking at
 #: 1 kHz and falling by twelve decibels at either end of the range.
-NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB: tuple[float, ...] = (
+NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB: tuple[float, ...] = (
     -20.0,
     -20.0,
     -18.0,
@@ -139,7 +139,7 @@ NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB: tuple[float, ...] = (
 #: EN 16272-3-1:2012, Table 1. The normalised railway noise spectrum, over
 #: the same eighteen bands as the road one: relative A-weighted one-third
 #: octave band levels, in dB, flat within a decibel from 1,25 kHz to 2,5 kHz.
-NORMALISED_RAILWAY_NOISE_SPECTRUM_DB: tuple[float, ...] = (
+NORMALIZED_RAILWAY_NOISE_SPECTRUM_DB: tuple[float, ...] = (
     -27.0,
     -25.0,
     -23.0,
@@ -164,8 +164,8 @@ NORMALISED_RAILWAY_NOISE_SPECTRUM_DB: tuple[float, ...] = (
 #: prints each: ``"road"`` is EN 1793-3 and ``"railway"`` is EN 16272-3-1.
 SPECTRA: Mapping[str, tuple[float, ...]] = MappingProxyType(
     {
-        "road": NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB,
-        "railway": NORMALISED_RAILWAY_NOISE_SPECTRUM_DB,
+        "road": NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB,
+        "railway": NORMALIZED_RAILWAY_NOISE_SPECTRUM_DB,
     }
 )
 

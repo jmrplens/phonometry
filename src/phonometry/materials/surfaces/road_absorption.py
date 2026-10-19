@@ -140,17 +140,17 @@ __all__ = [
     "PART1_FREQUENCY_RANGE_HZ",
     "SPOT_FREQUENCY_RANGE_HZ",
     "SPOT_NARROW_BAND_RANGE_HZ",
-    "InsituAbsorptionResult",
+    "InSituAbsorptionResult",
     "RoadAbsorptionWarning",
     "absorption_reference_corrected",
     "adrienne_window",
     "check_spot_frequency_range",
     "geometric_spreading_factor",
     "geometric_spreading_factor_angle",
-    "insitu_absorption_coefficient",
-    "insitu_absorption_from_reflection",
-    "insitu_absorption_spectrum",
-    "insitu_reflection_factor",
+    "in_situ_absorption_coefficient",
+    "in_situ_absorption_from_reflection",
+    "in_situ_absorption_spectrum",
+    "in_situ_reflection_factor",
     "max_sampled_area_radius",
     "msa_major_axis",
     "one_third_octave_absorption",
@@ -235,7 +235,7 @@ def reflected_path_delay(
     :math:`\Delta\tau = 2 d_\mathrm{m} / c` is the time difference between the direct
     and the surface-reflected impulses for the normal-incidence geometry; it
     is the delay undone by the phase-restoration term of
-    :func:`insitu_reflection_factor`.
+    :func:`in_situ_reflection_factor`.
 
     :param microphone_height_m: Microphone-to-reference-plane distance ``dm``, in metres.
     :param speed_of_sound: Speed of sound ``c``, in metres per second.
@@ -387,7 +387,7 @@ def _transfer_functions(
     )
 
 
-def insitu_reflection_factor(
+def in_situ_reflection_factor(
     incident_ir: SignalInput,
     reflected_ir: SignalInput,
     *,
@@ -459,14 +459,14 @@ def insitu_reflection_factor(
     return np.asarray(r, dtype=np.complex128)
 
 
-def insitu_absorption_from_reflection(reflection: ArrayLike) -> Real:
+def in_situ_absorption_from_reflection(reflection: ArrayLike) -> Real:
     r"""Absorption coefficient from the reflection factor (ISO 13472-1, 4.1).
 
     :math:`\alpha = 1 - \lvert r \rvert^2`. With ``r`` already carrying the
     :math:`1 / K_\mathrm{r}` factor
-    (see :func:`insitu_reflection_factor`) this is the **reflection-factor route** to
+    (see :func:`in_situ_reflection_factor`) this is the **reflection-factor route** to
     ``alpha`` and equals the direct energy route of
-    :func:`insitu_absorption_coefficient`.
+    :func:`in_situ_absorption_coefficient`.
 
     :param reflection: Complex reflection factor ``r``.
     :return: Absorption coefficient ``alpha`` (real).
@@ -490,7 +490,7 @@ def power_reflection_coefficient(
     :math:`Q_W(f) = (1 / K_\mathrm{r}^2) \lvert H_\mathrm{r}(f) / H_\mathrm{i}(f) \rvert^2`
     (``Kr,theta`` for oblique incidence). It equals
     :math:`\lvert r \rvert^2` from
-    :func:`insitu_reflection_factor` but is formed from magnitudes only, so it is
+    :func:`in_situ_reflection_factor` but is formed from magnitudes only, so it is
     independent of any reflected-path time offset.
 
     :param incident_ir: Windowed incident impulse response ``hi(t)``, real.
@@ -517,7 +517,7 @@ def power_reflection_coefficient(
     return np.asarray((ratio / kr) ** 2, dtype=np.float64)
 
 
-def insitu_absorption_coefficient(
+def in_situ_absorption_coefficient(
     incident_ir: SignalInput,
     reflected_ir: SignalInput,
     *,
@@ -654,7 +654,7 @@ def one_third_octave_absorption(
 
 
 @dataclass(frozen=True)
-class InsituAbsorptionResult(OwnsArrays):
+class InSituAbsorptionResult(OwnsArrays):
     """An in-situ one-third-octave absorption spectrum (ISO 13472-1).
 
     :ivar frequencies: One-third-octave band centre frequencies, in hertz.
@@ -681,10 +681,10 @@ class InsituAbsorptionResult(OwnsArrays):
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
         from ..._i18n import check_language
-        from ..._plot.materials import plot_insitu_absorption
+        from ..._plot.materials import plot_in_situ_absorption
 
         check_language(language)
-        return plot_insitu_absorption(self, ax=ax, language=language, **kwargs)
+        return plot_in_situ_absorption(self, ax=ax, language=language, **kwargs)
 
     def plot_geometry(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -697,13 +697,13 @@ class InsituAbsorptionResult(OwnsArrays):
         :raises ValueError: If the result does not retain its geometry.
         """
         from ..._i18n import check_language
-        from ..._plot.geometry import plot_insitu_result_geometry
+        from ..._plot.geometry import plot_in_situ_result_geometry
 
         check_language(language)
-        return plot_insitu_result_geometry(self, ax=ax, language=language, **kwargs)
+        return plot_in_situ_result_geometry(self, ax=ax, language=language, **kwargs)
 
 
-def insitu_absorption_spectrum(
+def in_situ_absorption_spectrum(
     incident_ir: SignalInput,
     reflected_ir: SignalInput,
     fs: float | None = None,
@@ -715,14 +715,14 @@ def insitu_absorption_spectrum(
     f_min: float = PART1_FREQUENCY_RANGE_HZ[0],
     f_max: float = PART1_FREQUENCY_RANGE_HZ[1],
     clip_negative: bool = True,
-) -> InsituAbsorptionResult:
+) -> InSituAbsorptionResult:
     """In-situ one-third-octave absorption spectrum (ISO 13472-1, Clause 4.1).
 
     End-to-end convenience: the windowed incident and reflected impulse
     responses give the narrow-band absorption via
-    :func:`insitu_absorption_coefficient`, which is then reduced to
+    :func:`in_situ_absorption_coefficient`, which is then reduced to
     one-third-octave bands with :func:`one_third_octave_absorption` and wrapped
-    in a plottable :class:`InsituAbsorptionResult`.
+    in a plottable :class:`InSituAbsorptionResult`.
 
     :param incident_ir: Windowed incident (direct-path) impulse response
         ``hi``. Accepts a :class:`phonometry.io.Signal`, whose
@@ -744,7 +744,7 @@ def insitu_absorption_spectrum(
     :param f_min: Lowest band centre to report, in hertz (default 250 Hz).
     :param f_max: Highest band centre to report, in hertz (default 4000 Hz).
     :param clip_negative: Clip negative band results to zero (default ``True``).
-    :return: An :class:`InsituAbsorptionResult` with ``.plot()``.
+    :return: An :class:`InSituAbsorptionResult` with ``.plot()``.
     :raises ValueError: On empty inputs, invalid geometry, or a
         non-positive ``fs``.
     """
@@ -760,9 +760,9 @@ def insitu_absorption_spectrum(
         reflected_ir, np.atleast_1d(np.asarray(reflected_ir, dtype=np.float64))
     )
     # Fix the FFT length explicitly so ``rfftfreq`` matches the transform used
-    # inside ``insitu_absorption_coefficient`` for both even and odd inputs.
+    # inside ``in_situ_absorption_coefficient`` for both even and odd inputs.
     length = n if n is not None else max(hi_t.size, hr_t.size)
-    alpha = insitu_absorption_coefficient(
+    alpha = in_situ_absorption_coefficient(
         hi_t,
         hr_t,
         source_height_m=source_height_m,
@@ -774,7 +774,7 @@ def insitu_absorption_spectrum(
     centres, band = one_third_octave_absorption(
         freq, alpha, f_min=f_min, f_max=f_max, clip_negative=clip_negative
     )
-    return InsituAbsorptionResult(
+    return InSituAbsorptionResult(
         frequencies=centres,
         absorption=band,
         source_height_m=float(source_height_m),

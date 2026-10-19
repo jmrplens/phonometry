@@ -208,7 +208,7 @@ def test_supports_inside_the_printed_section_and_spacing_pass() -> None:
             depth_mm=200.0,
             support_width_mm=50.0,
             support_height_mm=50.0,
-            support_centre_distance_m=1.2,
+            support_center_distance_m=1.2,
         )
     assert check.supports_ok is True
     assert check.satisfied is True
@@ -243,7 +243,7 @@ def test_supports_closer_than_the_printed_spacing_fail() -> None:
             depth_mm=200.0,
             support_width_mm=40.0,
             support_height_mm=40.0,
-            support_centre_distance_m=1.0,
+            support_center_distance_m=1.0,
         )
     assert check.supports_ok is False
     assert check.satisfied is False
@@ -251,9 +251,9 @@ def test_supports_closer_than_the_printed_spacing_fail() -> None:
 
 @pytest.mark.parametrize("value", [0.0, -1.2, float("nan"), float("inf")])
 def test_a_non_positive_support_spacing_is_refused(value: float) -> None:
-    with pytest.raises(ValueError, match="support_centre_distance_m"):
+    with pytest.raises(ValueError, match="support_center_distance_m"):
         materials.check_ceiling_specimen(
-            area=10.8, depth_mm=200.0, support_centre_distance_m=value
+            area=10.8, depth_mm=200.0, support_center_distance_m=value
         )
 
 

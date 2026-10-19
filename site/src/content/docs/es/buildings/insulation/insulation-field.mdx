@@ -426,7 +426,7 @@ print(round(float(imp.l_n[0]), 1))            # 64.1  normalizado a A0 = 10 m^2
 
 # Índice de impactos ponderado + término de adaptación espectral CI (ISO 717-2)
 res_imp = building.weighted_impact_rating(imp.l_n_t)
-print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  ->  L'nT,w(CI)=79(-11)
+print(res_imp.rating, res_imp.ci, res_imp.unfavorable_sum)   # 79 -11 28.0  ->  L'nT,w(CI)=79(-11)
 
 # Los datos en banda de octava llevan la reducción extra de -5 dB (apartado 4.3.2)
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])

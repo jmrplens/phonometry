@@ -60,7 +60,7 @@ dispersion effects").
 **Acoustic centres** (6.5 and Annex A). The distance $d_{12}$ is between
 the acoustic centres, each given as its position on the principal axis
 relative to the diaphragm, positive in front of it, a value or one per
-frequency; Annex A shows them only as a figure. [`acoustic_centre`](/phonometry/reference/api/metrology/reciprocity-free-field/#acoustic_centre) finds
+frequency; Annex A shows them only as a figure. [`acoustic_center`](/phonometry/reference/api/metrology/reciprocity-free-field/#acoustic_center) finds
 one from the inverse-distance law, as 6.5 describes.
 
 **The arrangement** (6.4, 7.3). [`check_free_field_arrangement`](/phonometry/reference/api/metrology/reciprocity-free-field/#check_free_field_arrangement) holds the
@@ -71,15 +71,15 @@ attenuation: its verdict is whether the arrangement is the recommended one.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## acoustic_centre
+## acoustic_center
 
 ```python
-acoustic_centre(
+acoustic_center(
     distances: ArrayLike,
     sound_pressures_pa: ArrayLike,
     *,
     attenuation_np_per_m: float = 0.0,
-) -> AcousticCentre
+) -> AcousticCenter
 ```
 
 The position of the acoustic centre of a microphone used as a source
@@ -107,7 +107,7 @@ $\mathrm{e}^{\alpha r}$ before it is inverted.
 | `sound_pressures_pa` | The modulus of the sound pressure at each, in Pa or any proportional unit, positive. |
 | `attenuation_np_per_m` | $\alpha$ at the frequency, in Np/m (Default: 0), from [`reciprocity_air_attenuation`](/phonometry/reference/api/metrology/reciprocity-free-field/#reciprocity_air_attenuation). |
 
-**Returns:** The [`AcousticCentre`](/phonometry/reference/api/metrology/reciprocity-free-field/#acousticcentre).
+**Returns:** The [`AcousticCenter`](/phonometry/reference/api/metrology/reciprocity-free-field/#acousticcenter).
 
 **Raises**
 
@@ -115,10 +115,10 @@ $\mathrm{e}^{\alpha r}$ before it is inverted.
 | :--- | :--- |
 | ValueError | for fewer than three distances, columns of different lengths, values that are not positive and finite, or distances that are all the same. |
 
-## AcousticCentre
+## AcousticCenter
 
 ```python
-AcousticCentre(
+AcousticCenter(
     distances: NDArray[np.float64],
     inverse_readings: NDArray[np.float64],
     slope: float,
@@ -138,10 +138,10 @@ inverse-distance law (IEC 61094-3:2016 6.5).
 | `slope` | The slope of the straight line fitted by least squares. |
 | `intercept` | Its intercept at zero distance. |
 
-### AcousticCentre.plot()
+### AcousticCenter.plot()
 
 ```python
-AcousticCentre.plot(
+AcousticCenter.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -162,7 +162,7 @@ axis.
 
 **Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
 
-### AcousticCentre.position_m
+### AcousticCenter.position_m
 
 *property*
 
@@ -228,7 +228,7 @@ free_field_parameter_uncertainty(
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    acoustic_centres_m: Sequence[ArrayLike] = (0.0, 0.0, 0.0),
+    acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0, 0.0),
     microphone: int = 1,
     dispersion: bool = True,
 ) -> FreeFieldParameterUncertainty
@@ -257,7 +257,7 @@ is moved by a fraction of itself,
 | `temperature_c` | The temperature, in °C. |
 | `static_pressure_pa` | The static pressure, in Pa. |
 | `relative_humidity_percent` | The relative humidity, in %. |
-| `acoustic_centres_m` | The three acoustic centres, in m. |
+| `acoustic_centers_m` | The three acoustic centres, in m. |
 | `microphone` | The microphone whose level is analysed, 1, 2 or 3. |
 | `dispersion` | Whether $k$ includes dispersion (Default: `True`). |
 
@@ -280,7 +280,7 @@ free_field_reciprocity(
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    acoustic_centres_m: Sequence[ArrayLike] = (0.0, 0.0, 0.0),
+    acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0, 0.0),
     dispersion: bool = True,
     corrections_db: Mapping[str, ArrayLike] | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
@@ -312,7 +312,7 @@ printed Formula (8) drops (module docstring).
 | `temperature_c` | The temperature of the air, in °C. |
 | `static_pressure_pa` | The static pressure, in Pa. |
 | `relative_humidity_percent` | The relative humidity, in %. |
-| `acoustic_centres_m` | The acoustic centre of microphones 1, 2 and 3, each relative to its diaphragm on the principal axis, positive in front, in m, one value or one per frequency (Default: the centres of the diaphragms, which Annex A allows at sufficiently remote points). |
+| `acoustic_centers_m` | The acoustic centre of microphones 1, 2 and 3, each relative to its diaphragm on the principal axis, positive in front, in m, one value or one per frequency (Default: the centres of the diaphragms, which Annex A allows at sufficiently remote points). |
 | `dispersion` | Whether $k$ takes the speed of sound with the dispersion of IEC 61094-2 F.3 (Default: `True`). |
 | `corrections_db` | Corrections added to every level (Default: none). |
 | `expanded_uncertainty_db` | The expanded uncertainty, in dB (Default: `None`). |
@@ -337,7 +337,7 @@ free_field_reciprocity_pair(
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    acoustic_centres_m: Sequence[ArrayLike] = (0.0, 0.0),
+    acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0),
     dispersion: bool = True,
     corrections_db: Mapping[str, ArrayLike] | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
@@ -367,7 +367,7 @@ Formula (7), which the printed Formula (9) drops (module docstring).
 | `temperature_c` | The temperature of the air, in °C. |
 | `static_pressure_pa` | The static pressure, in Pa. |
 | `relative_humidity_percent` | The relative humidity, in %. |
-| `acoustic_centres_m` | The acoustic centres of the two microphones, positive in front of the diaphragm, in m (Default: the diaphragms). |
+| `acoustic_centers_m` | The acoustic centres of the two microphones, positive in front of the diaphragm, in m (Default: the diaphragms). |
 | `dispersion` | Whether $k$ includes dispersion (Default: `True`). |
 | `corrections_db` | Corrections added to both levels (Default: none). |
 | `expanded_uncertainty_db` | The expanded uncertainty, in dB (Default: `None`). |
@@ -392,7 +392,7 @@ free_field_transfer_impedance(
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    acoustic_centres_m: Sequence[ArrayLike] = (0.0, 0.0),
+    acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0),
     dispersion: bool = True,
 ) -> NDArray[np.complex128]
 ```
@@ -420,7 +420,7 @@ sensitivity and the scattering factor (Formula (4)).
 | `temperature_c` | The temperature of the air, in °C. |
 | `static_pressure_pa` | The static pressure, in Pa. |
 | `relative_humidity_percent` | The relative humidity, in %. |
-| `acoustic_centres_m` | The two acoustic centres, in m (Default: the diaphragms). |
+| `acoustic_centers_m` | The two acoustic centres, in m (Default: the diaphragms). |
 | `dispersion` | Whether $k$ includes dispersion (Default: `True`). |
 
 **Returns:** $U_2/i_1$, complex, in Ω, at each frequency.
@@ -531,7 +531,7 @@ The support is at least twenty diameters long, as 6.4 recommends, or `None`.
 FreeFieldInputUncertainties(
     *,
     u_distance_m: float = 0.0,
-    u_acoustic_centre_m: ArrayLike = 0.0,
+    u_acoustic_center_m: ArrayLike = 0.0,
     u_static_pressure_pa: float = 0.0,
     u_temperature_k: float = 0.0,
     u_relative_humidity_percent: float = 0.0,
@@ -552,7 +552,7 @@ Each one left at zero contributes no component.
 | Name | Description |
 | :--- | :--- |
 | `u_distance_m` | Of each distance between the diaphragms, in m. |
-| `u_acoustic_centre_m` | Of each acoustic centre, in m, one value or one per frequency (Annex A puts it under 2 mm below the resonance frequency, as a bound). It is held as a read-only float64 copy. |
+| `u_acoustic_center_m` | Of each acoustic centre, in m, one value or one per frequency (Annex A puts it under 2 mm below the resonance frequency, as a bound). It is held as a read-only float64 copy. |
 | `u_static_pressure_pa` | Of the static pressure, in Pa. |
 | `u_temperature_k` | Of the temperature, in K. |
 | `u_relative_humidity_percent` | Of the relative humidity, in percentage points. |
@@ -668,7 +668,7 @@ ReciprocityAirAttenuation(
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    water_vapour_mole_fraction: float,
+    water_vapor_mole_fraction: float,
     oxygen_relaxation_hz: float,
     nitrogen_relaxation_hz: float,
     speed_of_sound: float,
@@ -690,7 +690,7 @@ The attenuation of sound in air of a free-field reciprocity calibration
 | `temperature_c` | $t$, in °C. |
 | `static_pressure_pa` | $p_\mathrm{s}$, in Pa. |
 | `relative_humidity_percent` | $H$, in %. |
-| `water_vapour_mole_fraction` | $x_\mathrm{w}$ (Step 2). |
+| `water_vapor_mole_fraction` | $x_\mathrm{w}$ (Step 2). |
 | `oxygen_relaxation_hz` | $f_\mathrm{rO}$, in Hz (Step 3). |
 | `nitrogen_relaxation_hz` | $f_\mathrm{rN}$, in Hz (Step 3). |
 | `speed_of_sound` | $c$, the zero-frequency speed of sound of IEC 61094-2 Formula (F.2) at the conditions, in m/s; the one Step 4 divides by. |

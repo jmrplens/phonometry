@@ -1668,7 +1668,7 @@ class SoundscapeDataCollection(RichDisplay):
     :ivar rating_scale_construction: A.4 c), for a study based on rating
         scales: how the questions, the response alternatives and the response
         format were constructed and formulated; ``None`` for a study without.
-    :ivar behaviour_observation: A.4 e), for observations of behaviour: how
+    :ivar behavior_observation: A.4 e), for observations of behaviour: how
         they were conducted and documented; ``None`` for a study without.
     """
 
@@ -1677,7 +1677,7 @@ class SoundscapeDataCollection(RichDisplay):
     language: str
     instrument_copy: str
     rating_scale_construction: str | None = None
-    behaviour_observation: str | None = None
+    behavior_observation: str | None = None
 
     def __post_init__(self) -> None:
         """Refuse an item left empty, naming its clause.
@@ -1690,7 +1690,7 @@ class SoundscapeDataCollection(RichDisplay):
         _require_text(owner, "A.4 d)", self.language)
         _require_text(owner, "A.4 (copy of the instrument)", self.instrument_copy)
         _optional_text(owner, "A.4 c)", self.rating_scale_construction)
-        _optional_text(owner, "A.4 e)", self.behaviour_observation)
+        _optional_text(owner, "A.4 e)", self.behavior_observation)
 
 
 @dataclass(frozen=True)

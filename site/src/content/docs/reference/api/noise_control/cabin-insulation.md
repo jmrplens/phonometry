@@ -463,20 +463,20 @@ IN_SITU_EXCESS_STANDARD_DEVIATION_DB = 2.0
 INCREASED_UNCERTAINTY_BAND_RANGE_HZ = (50.0, 200.0)
 ```
 
-## INTERNAL_NOISE_CENTRE_HEIGHT_M
+## INTERNAL_NOISE_CENTER_HEIGHT_M
 
 *Constant* (`float`).
 
 ```python
-INTERNAL_NOISE_CENTRE_HEIGHT_M = 1.55
+INTERNAL_NOISE_CENTER_HEIGHT_M = 1.55
 ```
 
-## INTERNAL_NOISE_CENTRE_TOLERANCE_M
+## INTERNAL_NOISE_CENTER_TOLERANCE_M
 
 *Constant* (`float`).
 
 ```python
-INTERNAL_NOISE_CENTRE_TOLERANCE_M = 0.075
+INTERNAL_NOISE_CENTER_TOLERANCE_M = 0.075
 ```
 
 ## INTERNAL_NOISE_CORRECTION_WINDOW_DB
@@ -849,7 +849,7 @@ WeightedCabinInsulation(
     rating: int,
     c: int,
     ctr: int,
-    unfavourable_sum: float,
+    unfavorable_sum: float,
     frequencies: NDArray[np.float64],
     apparent: bool,
 )
@@ -864,6 +864,6 @@ The single-number rating of a cabin, clause 8 by way of ISO 717-1.
 | `rating` | $D_{p,\mathrm{w}}$ or $D'_{p,\mathrm{w}}$, in decibels. |
 | `c` | The spectrum adaptation term $C$, in decibels. |
 | `ctr` | The spectrum adaptation term $C_{tr}$, in decibels. |
-| `unfavourable_sum` | The sum of unfavourable deviations at the shift the rating was read at, in decibels. |
+| `unfavorable_sum` | The sum of unfavourable deviations at the shift the rating was read at, in decibels. |
 | `frequencies` | The bands the rating was read over, in hertz. |
 | `apparent` | Whether the rating carries the prime of 3.9. |

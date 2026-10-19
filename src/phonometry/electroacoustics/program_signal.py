@@ -17,7 +17,7 @@ defines a noise that stands in for that programme in a measurement, the
 Table II gives the relative level of each one-third-octave band from 20 Hz to
 20 kHz with its tolerance: 0 dB from 250 Hz to 800 Hz, falling to
 :math:`-13{,}5` dB at 20 Hz and :math:`-21{,}6` dB at 20 kHz
-(:data:`SIMULATED_PROGRAMME_SPECTRUM`). The Note under the clause adds that the
+(:data:`SIMULATED_PROGRAM_SPECTRUM`). The Note under the clause adds that the
 power of the whole signal is about 12,5 dB above the 0 dB of one band, which is
 the power sum of the 31 relative levels, 12,56 dB.
 
@@ -36,7 +36,7 @@ which includes the source's own output impedance:
   adjusting the value of the 10 kohm resistor", so the 10 kohm is the whole
   shunt the network sees.
 
-:func:`programme_signal_filter` is the exact transfer function of that ladder,
+:func:`program_signal_filter` is the exact transfer function of that ladder,
 the voltage across the 10 kohm over the source e.m.f., from its nodal
 equations. The two 2,2 µF capacitors with the resistors behind them make the
 low-frequency roll-off and the 91 nF and 68 nF shunts the high-frequency one;
@@ -52,7 +52,7 @@ realisation within tolerance, not the definition: the definition is Table II.
 The generator
 -------------
 
-:func:`simulated_programme_signal` synthesises the signal in the frequency
+:func:`simulated_program_signal` synthesises the signal in the frequency
 domain: a white Gaussian spectrum, shaped and transformed back to a record
 that is stationary and Gaussian, as the clause asks, at any sample rate and
 with no bilinear warping near the Nyquist frequency. It offers two shapes.
@@ -79,7 +79,7 @@ inside its tolerance of 3 dB.
 The verdict
 -----------
 
-:func:`check_programme_signal` judges one-third-octave band levels against
+:func:`check_program_signal` judges one-third-octave band levels against
 Table II. The table is a relative spectrum: its 0 dB is not a level the signal
 has to reach, it is where the bands are referred to. The check therefore looks
 for the level that places every band inside its tolerance. Each band allows a
@@ -115,17 +115,17 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
 __all__ = [
-    "SIMULATED_PROGRAMME_SPECTRUM",
-    "ProgrammeSignalCheck",
-    "ProgrammeSpectrumBand",
-    "check_programme_signal",
-    "programme_signal_filter",
-    "simulated_programme_signal",
+    "SIMULATED_PROGRAM_SPECTRUM",
+    "ProgramSignalCheck",
+    "ProgramSpectrumBand",
+    "check_program_signal",
+    "program_signal_filter",
+    "simulated_program_signal",
 ]
 
 
 @dataclass(frozen=True)
-class ProgrammeSpectrumBand(RichDisplay):
+class ProgramSpectrumBand(RichDisplay):
     """One row of IEC 60268-1:1985 Table II.
 
     :ivar relative_level_db: The relative level of the one-third-octave band,
@@ -145,9 +145,9 @@ class ProgrammeSpectrumBand(RichDisplay):
 #: (PDF page 23, printed page 21), keyed by the nominal one-third-octave
 #: frequency in hertz. The + and - tolerances are printed in separate columns
 #: and are equal in every row.
-SIMULATED_PROGRAMME_SPECTRUM: Mapping[float, ProgrammeSpectrumBand] = MappingProxyType(
+SIMULATED_PROGRAM_SPECTRUM: Mapping[float, ProgramSpectrumBand] = MappingProxyType(
     {
-        frequency: ProgrammeSpectrumBand(level, tolerance, tolerance)
+        frequency: ProgramSpectrumBand(level, tolerance, tolerance)
         for frequency, level, tolerance in (
             (20.0, -13.5, 3.0),
             (25.0, -10.2, 2.0),
@@ -217,7 +217,7 @@ _BINDING_SLACK_DB = 1e-9
 _LIMIT_SLACK_DB = 1e-9
 
 
-def programme_signal_filter(frequencies: ArrayLike) -> NDArray[np.complex128]:
+def program_signal_filter(frequencies: ArrayLike) -> NDArray[np.complex128]:
     r"""The transfer function of the filter of IEC 60268-1:1985 Figure 2.
 
     The voltage across the 10 kohm output resistor over the e.m.f. of the
@@ -306,7 +306,7 @@ def _band_levels_of_nodes(nodes_db: NDArray[np.float64]) -> NDArray[np.float64]:
 def _table_nodes_db() -> tuple[float, ...]:
     """The node levels that put every band of Table II on its printed level."""
     target = np.array(
-        [row.relative_level_db for row in SIMULATED_PROGRAMME_SPECTRUM.values()]
+        [row.relative_level_db for row in SIMULATED_PROGRAM_SPECTRUM.values()]
     )
     nodes = target.copy()
     for _ in range(_FIT_ITERATIONS):
@@ -333,7 +333,7 @@ def _table_density_db(frequencies: NDArray[np.float64]) -> NDArray[np.float64]:
     )
 
 
-def simulated_programme_signal(
+def simulated_program_signal(
     fs: int,
     seconds: float,
     *,
@@ -355,7 +355,7 @@ def simulated_programme_signal(
     and its nodes are set so that each band's power, integrated over the band
     in closed form, is the printed level. Every band then has its whole
     tolerance for the random fluctuation of a finite record. ``"figure_2"`` is
-    pink noise through the filter of Figure 2 (:func:`programme_signal_filter`),
+    pink noise through the filter of Figure 2 (:func:`program_signal_filter`),
     the circuit the clause offers: inside the tolerances, but only 0,18 dB
     inside at its worst band, so a short record can fall outside them.
 
@@ -404,9 +404,7 @@ def simulated_programme_signal(
             10.0 ** (_table_density_db(frequencies[1:]) / 10.0) / frequencies[1:]
         )
     else:
-        shaping[1:] = programme_signal_filter(frequencies[1:]) / np.sqrt(
-            frequencies[1:]
-        )
+        shaping[1:] = program_signal_filter(frequencies[1:]) / np.sqrt(frequencies[1:])
     x = np.fft.irfft(white * shaping, n)
     x -= float(np.mean(x))
     x /= float(np.sqrt(np.mean(x * x)))
@@ -448,7 +446,7 @@ def _clip_to_ratio(x: NDArray[np.float64], ratio: float) -> NDArray[np.float64]:
 
 def _nominal_band(frequency: float) -> float:
     """The Table II frequency an exact or nominal band centre belongs to."""
-    for nominal in SIMULATED_PROGRAMME_SPECTRUM:
+    for nominal in SIMULATED_PROGRAM_SPECTRUM:
         ratio = frequency / nominal
         if 1.0 / _BAND_MATCH_RATIO < ratio < _BAND_MATCH_RATIO:
             return nominal
@@ -460,7 +458,7 @@ def _nominal_band(frequency: float) -> float:
 
 
 @dataclass(frozen=True)
-class ProgrammeSignalCheck(OwnsArrays):
+class ProgramSignalCheck(OwnsArrays):
     r"""A one-third-octave spectrum judged against IEC 60268-1:1985 Table II.
 
     :ivar frequencies: The nominal frequencies of the bands judged, in Hz,
@@ -483,9 +481,9 @@ class ProgrammeSignalCheck(OwnsArrays):
             or the levels do not hold one finite value per band.
         """
         for value in np.atleast_1d(self.frequencies):
-            if float(value) not in SIMULATED_PROGRAMME_SPECTRUM:
+            if float(value) not in SIMULATED_PROGRAM_SPECTRUM:
                 msg = (
-                    f"ProgrammeSignalCheck: {float(value):g} Hz is not a nominal "
+                    f"ProgramSignalCheck: {float(value):g} Hz is not a nominal "
                     "band of IEC 60268-1 Table II."
                 )
                 raise ValueError(msg)
@@ -493,12 +491,12 @@ class ProgrammeSignalCheck(OwnsArrays):
         if levels.shape != np.shape(self.frequencies) or not np.all(
             np.isfinite(levels)
         ):
-            msg = "ProgrammeSignalCheck: one finite band level per band."
+            msg = "ProgramSignalCheck: one finite band level per band."
             raise ValueError(msg)
 
-    def _rows(self) -> list[ProgrammeSpectrumBand]:
+    def _rows(self) -> list[ProgramSpectrumBand]:
         return [
-            SIMULATED_PROGRAMME_SPECTRUM[float(value)]
+            SIMULATED_PROGRAM_SPECTRUM[float(value)]
             for value in np.atleast_1d(self.frequencies)
         ]
 
@@ -582,7 +580,7 @@ class ProgrammeSignalCheck(OwnsArrays):
 
         :raises TypeError: Always; the verdict is :attr:`passes`.
         """
-        msg = "a ProgrammeSignalCheck has no truth value; read its '.passes' for the verdict"
+        msg = "a ProgramSignalCheck has no truth value; read its '.passes' for the verdict"
         raise TypeError(msg)
 
     def plot(
@@ -604,9 +602,9 @@ class ProgrammeSignalCheck(OwnsArrays):
         return plot_programme_signal_check(self, ax, language=language, **kwargs)
 
 
-def check_programme_signal(
+def check_program_signal(
     frequencies: ArrayLike, band_levels_db: ArrayLike
-) -> ProgrammeSignalCheck:
+) -> ProgramSignalCheck:
     r"""Is this one-third-octave spectrum the programme signal of IEC 60268-1?
 
     Clause 7 asks for a weighted power spectrum "in accordance with Table II
@@ -623,7 +621,7 @@ def check_programme_signal(
     :param frequencies: Band centre frequencies, in Hz, nominal or exact,
         each a band of Table II (20 Hz to 20 kHz) and none repeated.
     :param band_levels_db: The band levels, in dB, on any reference.
-    :return: A :class:`ProgrammeSignalCheck`.
+    :return: A :class:`ProgramSignalCheck`.
     :raises ValueError: If the inputs differ in length, a frequency is not a
         band of Table II or appears twice, a level is not finite, or fewer than
         two bands are given.
@@ -647,7 +645,7 @@ def check_programme_signal(
         msg = "'frequencies' names a band of Table II more than once."
         raise ValueError(msg)
     order = np.argsort(nominal)
-    return ProgrammeSignalCheck(
+    return ProgramSignalCheck(
         frequencies=read_only(nominal[order]),
         band_levels_db=levels[order],
     )
